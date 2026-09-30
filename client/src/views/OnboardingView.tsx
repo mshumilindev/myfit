@@ -1,5 +1,10 @@
 /** Onboarding — design O-01…O-09. Steps end inside a live session. */
+import { Skeleton } from '../components/ui/Skeleton';
+import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Field } from '../components/ui/Field';
+import { SearchField } from '../components/ui/SearchField';
+import { Button } from '../components/ui/Button';
 import { callFn, signInWithPayload, currentUid, type AuthPayload } from '../api';
 import {
   addWeight,
@@ -26,6 +31,7 @@ import { GymThumb } from '../components/GymThumb';
 import { Avatar } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { InstallShortcut } from './InstallShortcut';
+import { Card } from '../components/ui/Card';
 
 interface InviteInfo {
   state: 'valid' | 'expired' | 'claimed' | 'revoked';
@@ -82,29 +88,29 @@ function OnbLandingSkeleton() {
         <LanguageSelector />
       </div>
       <div className="onb-card landing onb-skel" aria-hidden>
-        <div className="sk onb-skel-mark" />
+        <Skeleton className="onb-skel-mark" />
         <div className="onb-skel-title">
-          <span className="sk" />
-          <span className="sk" />
+          <span className="uisk" />
+          <span className="uisk" />
         </div>
         <div className="onb-skel-lead">
-          <span className="sk" />
-          <span className="sk" />
+          <span className="uisk" />
+          <span className="uisk" />
         </div>
         <div className="onb-rail">
           {Array.from({ length: 4 }, (_, i) => (
             <span key={i} className={`bar${i === 0 ? ' on' : ''}`} />
           ))}
         </div>
-        <div className="sk onb-skel-btn" />
+        <Skeleton className="onb-skel-btn" />
         <div className="onb-skel-foot">
-          <span className="sk" />
+          <span className="uisk" />
         </div>
         <div className="onb-inviter">
-          <span className="sk onb-skel-avatar" />
+          <span className="uisk onb-skel-avatar" />
           <span className="onb-skel-inviter">
-            <span className="sk" />
-            <span className="sk" />
+            <span className="uisk" />
+            <span className="uisk" />
           </span>
         </div>
       </div>
@@ -175,8 +181,9 @@ export function OnboardingView({
           <Icon name="warning-circle" className="onb-dead-icon" />
           <h2>{t.onbDead}</h2>
           <p className="lead">{t.onbDeadBody(when)}</p>
-          <button
-            className="btn btn-primary btn-big"
+          <Button
+            variant="primary"
+            size="lg"
             disabled={requested}
             onClick={() => {
               void callFn('requestNewInvite', { token }).catch(() => {});
@@ -184,10 +191,10 @@ export function OnboardingView({
             }}
           >
             {requested ? t.onbRequested : t.onbRequestNew}
-          </button>
-          <button className="footer-link" onClick={() => onDone()}>
+          </Button>
+          <Button variant="link" onClick={() => onDone()}>
             {t.onbHaveAccount}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -239,8 +246,7 @@ export function OnboardingView({
       <div className="onb-shell center">
         <div className="onb-card">
           <h2>{t.onbWho}</h2>
-          <input
-            className="input"
+          <Field
             type="password"
             placeholder={t.passwordMin}
             value={password}
@@ -252,15 +258,16 @@ export function OnboardingView({
               {error}
             </div>
           )}
-          <button
-            className="btn btn-primary btn-big"
+          <Button
+            variant="primary"
+            size="lg"
             disabled={busy || password.length < 6}
             onClick={async () => {
               if (await claim()) onDone();
             }}
           >
             {t.save}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -270,16 +277,13 @@ export function OnboardingView({
     <div className="onb-shell">
       <div className="onb-top">
         {step > 0 ? (
-          <button
-            className="back"
-            aria-label={t.onbBack}
+          <BackButton
+            label={t.onbBack}
             onClick={() => {
               setStep(step - 1);
               persist({ step: step - 1 });
             }}
-          >
-            <Icon name="caret-left" />
-          </button>
+          />
         ) : (
           <span />
         )}
@@ -292,15 +296,16 @@ export function OnboardingView({
           <h2 className="display">{t.onbTitle}</h2>
           <p className="lead">{t.onbBody}</p>
           {railBars(1)}
-          <button
-            className="btn btn-primary btn-big"
+          <Button
+            variant="primary"
+            size="lg"
             onClick={() => {
               setStep(1);
               persist({ step: 1 });
             }}
           >
             {t.onbStart} <Icon name="arrow-right" />
-          </button>
+          </Button>
           <InstallShortcut />
           <div className="footnote center">
             {t.onbLinkValid(fmtDayMonth(info.expiresAt, locale))}
@@ -327,48 +332,46 @@ export function OnboardingView({
         <div className="onb-card">
           {rail}
           <h2 className="display sm">{t.onbWhoLead}</h2>
-          <input
-            className="input"
+          <Field
             placeholder={t.firstName}
             value={firstName}
             onBlur={() => persist({})}
             onChange={(e) => setFirstName(e.target.value)}
           />
-          <input
-            className="input"
+          <Field
             placeholder={t.lastName}
             value={lastName}
             onBlur={() => persist({})}
             onChange={(e) => setLastName(e.target.value)}
           />
-          <input
-            className="input"
+          <Field
             placeholder={t.username}
             value={username}
             onBlur={() => persist({})}
             onChange={(e) => setUsername(e.target.value)}
           />
-          <input
-            className={`input${error ? ' error' : ''}`}
+          <Field
+            error={
+              error ? (
+                <>
+                  <Icon name="warning-circle" /> {error}
+                </>
+              ) : undefined
+            }
             type="password"
             placeholder={t.passwordMin}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {error && (
-            <div className="field-error">
-              <Icon name="warning-circle" />
-              {error}
-            </div>
-          )}
           {info.name && (
             <div className="note-ok">
               <Icon name="check-circle" weight="fill" />
               <span>{t.onbPrefilled}</span>
             </div>
           )}
-          <button
-            className="btn btn-primary btn-big"
+          <Button
+            variant="primary"
+            size="lg"
             disabled={
               busy ||
               firstName.trim().length < 2 ||
@@ -389,7 +392,7 @@ export function OnboardingView({
             }}
           >
             {t.onbContinue} <Icon name="arrow-right" />
-          </button>
+          </Button>
         </div>
       )}
 
@@ -472,8 +475,9 @@ export function OnboardingView({
             </div>
             <h2 className="display">{t.onbWow}</h2>
             <p className="lead">{gym?.gymName ? t.onbWowBody(gym.gymName) : t.onbWowBodyNoGym}</p>
-            <button
-              className="btn btn-primary btn-big"
+            <Button
+              variant="primary"
+              size="lg"
               onClick={() => {
                 localStorage.removeItem(resumeKey(token));
                 const w = startWorkout(gym?.gymId ?? null);
@@ -482,16 +486,17 @@ export function OnboardingView({
               }}
             >
               <Icon name="play" /> {t.onbStartTraining}
-            </button>
-            <button
-              className="footer-link"
+            </Button>
+            <Button
+              variant="link"
+
               onClick={() => {
                 localStorage.removeItem(resumeKey(token));
                 onDone();
               }}
             >
               {t.onbJustApp}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -514,12 +519,12 @@ function AvatarStep({ rail, onDone }: { rail: React.ReactNode; onDone: (had: boo
         idleFooter={
           <>
             <div className="footnote center">{t.onbFaceNote}</div>
-            <button className="btn btn-primary btn-big" onClick={() => onDone(false)}>
+            <Button variant="primary" size="lg" onClick={() => onDone(false)}>
               {t.onbContinue} <Icon name="arrow-right" />
-            </button>
-            <button className="footer-link" onClick={() => onDone(false)}>
+            </Button>
+            <Button variant="link" onClick={() => onDone(false)}>
               {t.onbSkipInitials}
-            </button>
+            </Button>
           </>
         }
       />
@@ -558,8 +563,7 @@ function BodyStep({ rail, onContinue }: { rail: ReactNode; onContinue: () => voi
         {req && <span className="onb-bm-req"> *</span>}
       </span>
       <span className="onb-bm-in">
-        <input
-          className="input"
+        <Field
           inputMode="decimal"
           placeholder="—"
           value={value}
@@ -584,8 +588,9 @@ function BodyStep({ rail, onContinue }: { rail: ReactNode; onContinue: () => voi
         {row(t.bmBodyFat, '%', bodyFat, setBodyFat)}
       </div>
       {row(t.bmMuscle, 'kg', muscle, setMuscle)}
-      <button
-        className="btn btn-primary btn-big"
+      <Button
+        variant="primary"
+        size="lg"
         disabled={!ready}
         onClick={() => {
           updateBodyMetrics({
@@ -599,7 +604,7 @@ function BodyStep({ rail, onContinue }: { rail: ReactNode; onContinue: () => voi
         }}
       >
         {t.onbContinue} <Icon name="arrow-right" />
-      </button>
+      </Button>
     </div>
   );
 }
@@ -610,10 +615,10 @@ function BodyStep({ rail, onContinue }: { rail: ReactNode; onContinue: () => voi
 function GymCardSkeleton() {
   return (
     <div className="onb-gym-card skeleton" aria-hidden>
-      <span className="sk photo" />
+      <span className="uisk photo" />
       <span className="body">
-        <span className="sk n" />
-        <span className="sk s" />
+        <span className="uisk n" />
+        <span className="uisk s" />
       </span>
     </div>
   );
@@ -709,14 +714,12 @@ function GymStep({
       {rail}
       <h2>{t.onbGymStep}</h2>
       <p className="lead">{t.onbGymLead}</p>
-      <div className="searchbar">
-        <Icon name="magnifying-glass" />
-        <input
-          value={q}
-          placeholder={t.searchGymPlaceholder}
-          onChange={(e) => setQ(e.target.value)}
-        />
-      </div>
+      <SearchField
+        value={q}
+        placeholder={t.searchGymPlaceholder}
+        clearLabel={t.laClearSearch}
+        onChange={setQ}
+      />
       {denied && (
         <div className="banner">
           <Icon name="map-pin-slash" />
@@ -735,7 +738,13 @@ function GymStep({
           : list.slice(0, 4).map((r) => {
               const d = coords ? haversineM(coords, r) : null;
               return (
-                <button key={r.key} className="onb-gym-card" onClick={() => onPick(r)}>
+                <Card
+                  as="button"
+                  pad="none"
+                  key={r.key}
+                  className="onb-gym-card"
+                  onClick={() => onPick(r)}
+                >
                   <span className="photo">
                     <GymThumb name={r.name} lat={r.lat} lng={r.lng} size={120} />
                   </span>
@@ -746,13 +755,13 @@ function GymStep({
                       {d !== null ? `${r.address ? ' · ' : ''}${fmtDistance(d)}` : ''}
                     </span>
                   </span>
-                </button>
+                </Card>
               );
             })}
       </div>
-      <button className="footer-link" onClick={() => onPick(null)}>
+      <Button variant="link" onClick={() => onPick(null)}>
         {t.onbSkipGym}
-      </button>
+      </Button>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
+import { Skeleton } from '../components/ui/Skeleton';
 import {
   dateInWeek,
   useWeekStartDay,
@@ -20,6 +21,8 @@ import {
 } from '../today/layout';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { ListRow } from '../components/ui/GroupedList';
+import type { Tone } from '../components/ui/tones';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { Notice } from '../components/ui/Notice';
 import { ProgressBar } from '../components/ui/ProgressBar';
@@ -96,6 +99,7 @@ import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
 import { ConfirmDialog, Icon, Sheet, useIsDesktop } from '../ui';
 import { REHAB_STAGES, stageIndex, inFullRest, nextStage } from '../injury';
 import { useGymStep } from '../components/useGymStep';
+import { Tag } from '../components/ui/Tag';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -133,6 +137,19 @@ function useNowTick(active: boolean): number {
  *  more than once every 1–2 weeks). Local, device-only — a transient nudge. */
 const SUGGEST_DISMISS_KEY = 'spotter.progSuggest.dismissedAt';
 const SUGGEST_COOLDOWN_MS = 12 * 24 * 60 * 60 * 1000;
+
+/** Program card colour family by the day's mode: brass while pending, green when
+ *  trained, blue for rest / vacation, amber for illness, warm red for injury. */
+const PROGRAM_MODE_TONE: Record<WeekMode, Tone> = {
+  train: 'accent',
+  done: 'ok',
+  rest: 'rest',
+  active: 'active',
+  off: 'rest',
+  illness: 'illness',
+  injury: 'injury',
+  none: 'neutral',
+};
 
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { withGym, gymPicker } = useGymStep();
@@ -392,20 +409,20 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   if (showSkeleton) {
     return (
-      <div className="screen" style={{ gap: 'var(--space-6)' }}>
-        <div style={{ paddingTop: 6, display: 'flex', flexDirection: 'column', gap: 9 }}>
-          <div className="sk" style={{ width: 120, height: 10 }} />
-          <div className="sk" style={{ width: 210, height: 26 }} />
+      <div className="screen ug-16">
+        <div className="ul-flex ul-col ug-10" style={{ paddingTop: 6 }}>
+          <Skeleton style={{ width: 120, height: 10 }} />
+          <Skeleton style={{ width: 210, height: 26 }} />
         </div>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div className="ul-flex ug-6">
           {Array.from({ length: 7 }, (_, i) => (
-            <div key={i} className="sk" style={{ flex: 1, height: 46 }} />
+            <Skeleton className="uf-1" key={i} style={{ height: 46 }} />
           ))}
         </div>
-        <div className="sk" style={{ height: 62, borderRadius: 14 }} />
-        <div style={{ display: 'flex', gap: 10 }}>
-          <div className="sk" style={{ flex: 1, height: 92 }} />
-          <div className="sk" style={{ flex: 1, height: 92 }} />
+        <Skeleton className="ur-lg" style={{ height: 62 }} />
+        <div className="ul-flex ug-10">
+          <Skeleton className="uf-1" style={{ height: 92 }} />
+          <Skeleton className="uf-1" style={{ height: 92 }} />
         </div>
       </div>
     );
@@ -516,8 +533,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           ? t.todayAnalysisBodyList(analysisNudge.labels.join(' · '))
           : t.todayAnalysisBody,
       actions: (close) => (
-        <button
-          className="prog-banner-cta"
+        <Button
+          variant="fill"
+          size="sm"
           onClick={() => {
             openTrends();
             close();
@@ -525,7 +543,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         >
           {t.todayAnalysisCta}
           <Icon name="arrow-right" weight="bold" />
-        </button>
+        </Button>
       ),
     });
   }
@@ -539,8 +557,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       title: suggest.variant === 'drifted' ? t.progSuggestDriftedTitle : t.progSuggestNewTitle,
       body: suggest.variant === 'drifted' ? t.progSuggestDriftedBody : t.progSuggestNewBody,
       actions: (close) => (
-        <button
-          className="prog-banner-cta"
+        <Button
+          variant="fill"
+          size="sm"
           onClick={() => {
             setProgSheetOpen(true);
             close();
@@ -548,7 +567,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         >
           {suggest.variant === 'drifted' ? t.progSuggestDriftedCta : t.progSuggestNewCta}
           <Icon name="arrow-right" weight="bold" />
-        </button>
+        </Button>
       ),
     });
   }
@@ -646,15 +665,16 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       title: t.weighBody(hhmm(weighReminder.usualMin)),
       body: null,
       actions: (close) => (
-        <button
-          className="prog-banner-cta"
+        <Button
+          variant="fill"
+          size="sm"
           onClick={() => {
             setAddWeightOpen(true);
             close();
           }}
         >
           {t.bmAddWeight}
-        </button>
+        </Button>
       ),
     });
   }
@@ -672,8 +692,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       ),
       body: null,
       actions: (close) => (
-        <button
-          className="prog-banner-cta"
+        <Button
+          variant="fill"
+          size="sm"
           onClick={() => {
             const w = logVisitAsWorkout(reminder);
             close();
@@ -681,7 +702,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           }}
         >
           {t.logIt}
-        </button>
+        </Button>
       ),
     });
   }
@@ -737,8 +758,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         </div>
       ),
       actions: (close) => (
-        <button
-          className="prog-banner-cta"
+        <Button
+          variant="fill"
+          size="sm"
           onClick={() => {
             close();
             shell.goPlaybook();
@@ -746,7 +768,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         >
           {t.playbookOpen}
           <Icon name="arrow-right" weight="bold" />
-        </button>
+        </Button>
       ),
     });
   }
@@ -936,6 +958,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         ) : null;
       return (
         <Card
+          tone={PROGRAM_MODE_TONE[mode]}
           emphasis="hero"
           className="today-program-card td-week"
           data-mode={mode}
@@ -1085,7 +1108,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     window.location.hash = '#/learn';
   };
   const learnBanner = (
-    <button type="button" className="learn-banner" onClick={openLearn}>
+    <Card as="button" pad="none" emphasis="glass" className="learn-banner" onClick={openLearn}>
       <span className="learn-banner-ic">
         <Icon name="graduation-cap" weight="fill" />
       </span>
@@ -1102,7 +1125,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         </span>
       </span>
       <Icon name="caret-right" className="learn-banner-go" />
-    </button>
+    </Card>
   );
   // Zero completed → full banner above the stack; otherwise a card in the stack.
   if (learnHasVideo && learnProgress.done > 0) {
@@ -1124,8 +1147,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         </div>
       ),
       actions: (close) => (
-        <button
-          className="prog-banner-cta"
+        <Button
+          variant="fill"
+          size="sm"
           onClick={() => {
             openLearn();
             close();
@@ -1133,7 +1157,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         >
           {t.learnBannerCta}
           <Icon name="arrow-right" weight="bold" />
-        </button>
+        </Button>
       ),
     });
   }
@@ -1197,7 +1221,14 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         <>
           {banners}
           {liveAct && (
-            <button
+            <Card
+              as="button"
+              pad="none"
+              tone={
+                ({ recovery: 'rest', sport: 'sport' }[
+                  activityTone(liveAct.type, activityCategory(liveAct)) as string
+                ] as 'rest' | 'sport' | undefined) ?? 'accent'
+              }
               className={`td-resume-activity cat-${activityTone(liveAct.type, activityCategory(liveAct))}`}
               onClick={() => shell.openOverlay({ screen: 'activity' })}
             >
@@ -1212,129 +1243,68 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 {t.actResume}
                 <Icon name="arrow-right" />
               </span>
-            </button>
+            </Card>
           )}
           {activeInj && injFullRest && activeInj.fullRestUntil != null && (
-            <div
-              className="prog-banner analysis-banner gem-rest tr-banner fade-in"
-              style={{
-                background:
-                  'linear-gradient(150deg,var(--color-rest-tint,#0e2a3b),var(--color-surface))',
-                borderColor: 'var(--color-rest-line,#134a68)',
-              }}
-            >
+            <div className="prog-banner analysis-banner gem-rest tr-banner tr-banner--rest fade-in">
               <span className="prog-sheen" aria-hidden />
               <div className="prog-banner-row">
-                <span
-                  className="prog-banner-icon"
-                  style={{
-                    background: 'rgba(51,168,224,.16)',
-                    color: 'var(--color-rest-400,#33a8e0)',
-                  }}
-                >
+                <span className="prog-banner-icon">
                   <Icon name="moon" weight="fill" />
                 </span>
                 <div className="prog-banner-main">
-                  <span
-                    className="prog-banner-kicker"
-                    style={{ color: 'var(--color-rest-300,#93d4f2)' }}
-                  >
-                    {t.injStage0}
-                  </span>
-                  <div
-                    className="prog-banner-title"
-                    style={{ color: 'var(--color-rest-200,#d3edfb)' }}
-                  >
+                  <span className="prog-banner-kicker">{t.injStage0}</span>
+                  <div className="prog-banner-title">
                     {t.injStage0Left(activeInj.fullRestUntil - injToday)}
                   </div>
                   <div className="prog-banner-body">{t.injStage0Note}</div>
                   <div className="tr-pills">
-                    <span className="tr-pill">
-                      <Icon name="pause" weight="bold" />
+                    <Tag tone="illness" icon={<Icon name="pause" weight="bold" />}>
                       {t.illnessProgramPill}
-                    </span>
+                    </Tag>
                   </div>
                   <div className="prog-banner-acts">
-                    <button
-                      className="prog-banner-cta"
+                    <Button
+                      variant="fill"
+                      size="sm"
                       onClick={() =>
                         shell.openOverlay({ screen: 'injury', injuryId: activeInj.id })
                       }
                     >
                       <Icon name="list-checks" weight="bold" />
                       {t.injViewPlan}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
             </div>
           )}
           {activeInj && !injFullRest && activeInj.stage === 'return' && (
-            <div
-              className="prog-banner analysis-banner gem-rest tr-banner fade-in"
-              style={{
-                background:
-                  'linear-gradient(150deg,var(--color-ok-tint,#16291f),var(--color-surface))',
-                borderColor: 'var(--color-ok-line,#2f6f52)',
-                textAlign: 'center',
-              }}
-            >
+            <div className="prog-banner analysis-banner gem-rest tr-banner tr-banner--ok fade-in utx-center">
               <span className="prog-sheen" aria-hidden />
               <div style={{ padding: '4px 2px' }}>
                 <div
-                  style={{
-                    width: 52,
-                    height: 52,
-                    borderRadius: '50%',
-                    margin: '0 auto',
-                    background: 'rgba(76,190,140,.16)',
-                    border: '1px solid var(--color-ok-line,#2f6f52)',
-                    display: 'grid',
-                    placeItems: 'center',
-                    color: 'var(--color-ok)',
-                    fontSize: 26,
-                  }}
+                  className="tr-done-ring ur-round ut-ok ut-3xl ul-grid"
+                  style={{ width: 52, height: 52, margin: '0 auto', placeItems: 'center' }}
                 >
                   <Icon name="confetti" weight="fill" />
                 </div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 800,
-                    marginTop: 12,
-                    color: 'var(--color-ok-text,#b7e8cf)',
-                  }}
-                >
-                  {t.injDoneTitle}
-                </div>
-                <div className="prog-banner-body" style={{ marginTop: 6 }}>
-                  {t.injDoneBody}
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 6,
-                    justifyContent: 'center',
-                    margin: '12px 0 4px',
-                  }}
-                >
+                <div className="tr-done-title ut-xl ut-w8 umt-12">{t.injDoneTitle}</div>
+                <div className="prog-banner-body umt-6">{t.injDoneBody}</div>
+                <div className="ul-flex ug-6 uj-center" style={{ margin: '12px 0 4px' }}>
                   {REHAB_STAGES.map((sid) => (
                     <span
                       key={sid}
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        background: 'var(--color-ok)',
-                      }}
+                      className="tr-done-dot ur-round"
+                      style={{ width: 8, height: 8 }}
                     />
                   ))}
                 </div>
-                <div className="prog-banner-acts" style={{ justifyContent: 'center' }}>
-                  <button className="prog-banner-cta" onClick={() => healInjury(activeInj.id)}>
+                <div className="prog-banner-acts uj-center">
+                  <Button variant="fill" size="sm" onClick={() => healInjury(activeInj.id)}>
                     <Icon name="check-circle" weight="bold" />
                     {t.injBackToProgram}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -1343,47 +1313,29 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             !injFullRest &&
             activeInj.stage !== 'return' &&
             activeInj.pendingAdvance && (
-              <div
-                className="prog-banner analysis-banner gem-rest tr-banner fade-in"
-                style={{
-                  background:
-                    'linear-gradient(150deg,var(--color-ok-tint,#16291f),var(--color-surface))',
-                  borderColor: 'var(--color-ok-line,#2f6f52)',
-                }}
-              >
+              <div className="prog-banner analysis-banner gem-rest tr-banner tr-banner--ok fade-in">
                 <span className="prog-sheen" aria-hidden />
                 <div className="prog-banner-row">
-                  <span
-                    className="prog-banner-icon"
-                    style={{ background: 'rgba(76,190,140,.16)', color: 'var(--color-ok)' }}
-                  >
+                  <span className="prog-banner-icon">
                     <Icon name="arrow-fat-up" weight="fill" />
                   </span>
                   <div className="prog-banner-main">
-                    <span className="prog-banner-kicker" style={{ color: 'var(--color-ok)' }}>
-                      {t.injReadyKicker}
-                    </span>
-                    <div
-                      className="prog-banner-title"
-                      style={{ color: 'var(--color-ok-text,#b7e8cf)' }}
-                    >
+                    <span className="prog-banner-kicker">{t.injReadyKicker}</span>
+                    <div className="prog-banner-title">
                       {t.injReadyTitle(t.injStage[nextStage(activeInj.stage)])}
                     </div>
                     <div className="prog-banner-body">{t.injReadyBody}</div>
                     <div className="prog-banner-acts">
-                      <button
-                        className="prog-banner-cta ghost"
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => dismissAdvance(activeInj.id)}
                       >
                         {t.injStayLonger}
-                      </button>
-                      <button
-                        className="prog-banner-cta"
-                        style={{ color: 'var(--color-ok)', borderColor: 'var(--color-ok)' }}
-                        onClick={() => advanceInjury(activeInj.id)}
-                      >
+                      </Button>
+                      <Button variant="ok" size="sm" onClick={() => advanceInjury(activeInj.id)}>
                         {t.injMoveUpShort} <Icon name="arrow-right" weight="bold" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -1414,14 +1366,14 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                           : t.injReason[activeInj.reason],
                       )}
                     </div>
-                    <div style={{ display: 'flex', gap: 6, margin: '8px 0 2px' }}>
+                    <div className="ul-flex ug-6" style={{ margin: '8px 0 2px' }}>
                       {REHAB_STAGES.map((sid, i) => (
                         <span
                           key={sid}
+                          className="ur-round"
                           style={{
                             width: 8,
                             height: 8,
-                            borderRadius: '50%',
                             background:
                               i < stageIndex(activeInj.stage)
                                 ? 'var(--color-ok)'
@@ -1435,24 +1387,27 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                     <div className="prog-banner-body">{t.injBannerBody}</div>
                     <div className="tr-pills">
                       {activeInj.muscles.slice(0, 4).map((m) => (
-                        <span key={m} className="tr-pill">
+                        <Tag key={m} tone="illness">
                           {t.muscleGroups[m] ?? m}
-                        </span>
+                        </Tag>
                       ))}
                     </div>
                     <div className="prog-banner-acts">
-                      <button
-                        className="prog-banner-cta"
+                      <Button
+                        variant="fill"
+                        size="sm"
                         onClick={() =>
                           shell.openOverlay({ screen: 'injury', injuryId: activeInj.id })
                         }
                       >
                         <Icon name="list-checks" weight="bold" />
                         {t.injViewPlan}
-                      </button>
+                      </Button>
                       {activeInj.stage !== 'protect' && (
-                        <button
-                          className="prog-banner-cta ghost"
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon="heartbeat"
                           onClick={() =>
                             shell.openOverlay({
                               screen: 'injury',
@@ -1461,9 +1416,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                             })
                           }
                         >
-                          <Icon name="heartbeat" weight="bold" />
                           {t.injBannerCheckin}
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -1493,23 +1447,22 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       </div>
                       <div className="prog-banner-body">{t.restCardIllnessNote}</div>
                       <div className="tr-pills">
-                        <span className="tr-pill">
-                          <Icon name="check-circle" weight="bold" />
+                        <Tag tone="illness" icon={<Icon name="check-circle" weight="bold" />}>
                           {t.illnessStreakPill}
-                        </span>
-                        <span className="tr-pill">
-                          <Icon name="pause" weight="bold" />
+                        </Tag>
+                        <Tag tone="illness" icon={<Icon name="pause" weight="bold" />}>
                           {t.illnessProgramPill}
-                        </span>
+                        </Tag>
                       </div>
                       <div className="prog-banner-acts">
-                        <button
-                          className="prog-banner-cta"
+                        <Button
+                          variant="fill"
+                          size="sm"
                           onClick={() => setConfirmEndRest(activeRest.id)}
                         >
                           <Icon name="check" weight="bold" />
                           {t.illnessRecovered}
-                        </button>
+                        </Button>
                       </div>
                     </>
                   ) : (
@@ -1545,28 +1498,26 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       <div className="prog-banner-acts">
                         {activeRest.mode === 'active' ? (
                           <>
-                            <button
-                              className="prog-banner-cta"
-                              onClick={startSession}
-                              disabled={busy}
-                            >
+                            <Button variant="fill" size="sm" onClick={startSession} disabled={busy}>
                               <Icon name="play" weight="bold" />
                               {t.restStartLight}
-                            </button>
-                            <button
-                              className="prog-banner-skip"
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => setConfirmEndRest(activeRest.id)}
                             >
                               {t.restEndNow}
-                            </button>
+                            </Button>
                           </>
                         ) : (
-                          <button
-                            className="prog-banner-cta"
+                          <Button
+                            variant="fill"
+                            size="sm"
                             onClick={() => setConfirmEndRest(activeRest.id)}
                           >
                             {t.restEndNow}
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </>
@@ -1586,13 +1537,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   <div className="prog-banner-title">{t.illnessReturnTitle}</div>
                   <div className="prog-banner-body">{t.illnessReturnBody(illReturn.daysOut)}</div>
                   <div className="prog-banner-acts">
-                    <button className="prog-banner-cta" onClick={startSession} disabled={busy}>
+                    <Button variant="fill" size="sm" onClick={startSession} disabled={busy}>
                       <Icon name="play" weight="bold" />
                       {t.restStartLight}
-                    </button>
-                    <button className="prog-banner-skip" onClick={() => setIllDismissed(true)}>
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setIllDismissed(true)}>
                       {t.illnessReturnDismiss}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -1686,13 +1637,19 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 </Button>
               </div>
               {store.gyms.length === 0 && (
-                <button className="gym-hint" onClick={() => shell.goTab('gyms')}>
+                <Card
+                  as="button"
+                  pad="none"
+                  emphasis="quiet"
+                  className="gym-hint"
+                  onClick={() => shell.goTab('gyms')}
+                >
                   <span className="gym-hint-icon">
                     <Icon name="map-pin" />
                   </span>
                   <span className="gym-hint-copy">{t.addGymHint}</span>
                   <span className="gym-hint-action">{t.add}</span>
-                </button>
+                </Card>
               )}
             </div>
           )}
@@ -1761,7 +1718,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           />
         )}
         {store.syncStatus === 'offline' && (
-          <div style={{ fontSize: 11, color: 'var(--color-neutral-600)', padding: '0 2px' }}>
+          <div className="ut-xs ut-faint" style={{ padding: '0 2px' }}>
             {t.servedFromCache}
           </div>
         )}
@@ -1811,6 +1768,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           confirmLabel={confirmEndIllness ? t.illnessRecoveredConfirm : t.restEndNow}
           cancelLabel={t.cancel}
           danger={!confirmEndIllness}
+          tone={confirmEndIllness ? 'ok' : undefined}
+          icon={confirmEndIllness ? 'check-circle' : undefined}
           onConfirm={() => {
             endRestPeriod(confirmEndRest);
             setConfirmEndRest(null);
@@ -1821,33 +1780,27 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       {progSheetOpen && (
         <Sheet onClose={() => setProgSheetOpen(false)} className="prog-suggest-sheet">
           <div className="ps-title">{t.progSuggestSheetTitle}</div>
-          <button
-            className={`ps-opt${progChoice === 'week' ? ' sel' : ''}`}
+          <ListRow
+            label={t.progSuggestOptWeek}
+            sub={t.progSuggestOptWeekBody}
+            selected={progChoice === 'week'}
+            check={progChoice === 'week'}
             onClick={() => setProgChoice('week')}
-          >
-            <div className="ps-opt-body">
-              <div className="ps-opt-title">{t.progSuggestOptWeek}</div>
-              <div className="ps-opt-sub">{t.progSuggestOptWeekBody}</div>
-            </div>
-            {progChoice === 'week' && <Icon name="check-circle" weight="fill" />}
-          </button>
-          <button
-            className={`ps-opt${progChoice === 'week-lifts' ? ' sel' : ''}`}
+          />
+          <ListRow
+            label={t.progSuggestOptLifts}
+            sub={t.progSuggestOptLiftsBody}
+            selected={progChoice === 'week-lifts'}
+            check={progChoice === 'week-lifts'}
             onClick={() => setProgChoice('week-lifts')}
-          >
-            <div className="ps-opt-body">
-              <div className="ps-opt-title">{t.progSuggestOptLifts}</div>
-              <div className="ps-opt-sub">{t.progSuggestOptLiftsBody}</div>
-            </div>
-            {progChoice === 'week-lifts' && <Icon name="check-circle" weight="fill" />}
-          </button>
+          />
           <div className="ps-acts">
-            <button className="btn btn-secondary" onClick={() => setProgSheetOpen(false)}>
+            <Button variant="secondary" onClick={() => setProgSheetOpen(false)}>
               {t.cancel}
-            </button>
-            <button className="btn btn-primary" onClick={createProgramFromHistory}>
+            </Button>
+            <Button variant="primary" onClick={createProgramFromHistory}>
               {t.progSuggestCreate}
-            </button>
+            </Button>
           </div>
         </Sheet>
       )}
@@ -1908,9 +1861,17 @@ function WeekPills({ cells }: { cells: WeekCell[] }) {
           </>
         );
         return c.onClick ? (
-          <button key={c.day} type="button" className={cls} onClick={c.onClick} aria-label={c.aria}>
+          <Card
+            as="button"
+            pad="none"
+            emphasis="quiet"
+            key={c.day}
+            className={cls}
+            onClick={c.onClick}
+            aria-label={c.aria}
+          >
             {inner}
-          </button>
+          </Card>
         ) : (
           <div key={c.day} className={cls} aria-label={c.aria}>
             {inner}

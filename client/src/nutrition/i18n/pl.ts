@@ -181,6 +181,7 @@ export const pl: Strings = {
   setYourGoalBody: 'Wybierz cel, aby Today pokazywał pozostałe kcal i makro.',
   set: 'Ustaw',
   searchProductsOrDishes: 'Szukaj produktów lub dań',
+  clearSearch: 'Wyczyść wyszukiwanie',
 
   typeDish: 'Danie',
   typeDishDesc: 'Jadłeś na mieście? Wpisz — oszacujemy',

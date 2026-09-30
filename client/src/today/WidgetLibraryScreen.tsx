@@ -1,9 +1,9 @@
 /** Dev-only screen at #/widgets: the widget library on the real account data. */
+import { BackButton } from '../components/ui/BackButton';
 import { useState } from 'react';
 import type { Shell } from '../App';
 import { useStore } from '../store';
 import { useT } from '../i18n';
-import { Icon } from '../ui';
 import { WeightSheet } from '../components/BodyMetrics';
 import { WidgetLibrary } from './WidgetLibrary';
 import { useTw } from './strings';
@@ -29,9 +29,7 @@ export function WidgetLibraryScreen({ shell, onClose }: { shell: Shell; onClose:
   return (
     <div className="screen wlib-screen">
       <div className="wlib-top">
-        <button className="icon-btn" aria-label={t.backAction} onClick={onClose}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton label={t.backAction} onClick={onClose} />
         <span className="wlib-title">Widget library</span>
       </div>
       <WidgetLibrary ctx={ctx} />

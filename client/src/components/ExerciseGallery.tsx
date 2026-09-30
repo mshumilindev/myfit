@@ -13,7 +13,15 @@
  * Two user additions layer on the design: Library/My-exercises tabs and custom
  * exercise CRUD (create / edit / delete), both URL-addressable.
  */
-import { useMemo, useRef, useState, type ReactNode } from 'react';
+import { Chip } from '../components/ui/Chip';
+import { Tag } from './ui/Tag';
+import { BackButton } from './ui/BackButton';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Field } from './ui/Field';
+import { Button, IconButton } from './ui/Button';
+import { Card } from './ui/Card';
+import { SearchField } from './ui/SearchField';
+import { Segmented } from './ui/Segmented';
 import {
   BUILT_IN_CATALOG,
   canonicalExerciseName,
@@ -77,25 +85,6 @@ const MECHANIC_IDS: ExerciseMechanic[] = ['compound', 'isolation'];
 const FORCE_IDS: ExerciseForce[] = ['push', 'pull', 'static'];
 const LEVEL_IDS: ExerciseLevel[] = ['beginner', 'intermediate', 'expert'];
 
-const ELLIPSIS = -1;
-/**
- * Page numbers to show (0-based), with ELLIPSIS gaps — always first + last,
- * the current page and its neighbours, capped so the control never grows past
- * ~7 slots however many pages exist (numbered-pagination best practice).
- */
-function pageWindow(cur: number, last: number): number[] {
-  const total = last + 1;
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i);
-  const out: number[] = [0];
-  const start = Math.max(1, cur - 1);
-  const end = Math.min(last - 1, cur + 1);
-  if (start > 1) out.push(ELLIPSIS);
-  for (let i = start; i <= end; i += 1) out.push(i);
-  if (end < last - 1) out.push(ELLIPSIS);
-  out.push(last);
-  return out;
-}
-
 /** Persisted filter state so the tab keeps it across switches (AC-LIBTAB-04). */
 export interface GalleryState {
   q: string;
@@ -135,7 +124,6 @@ export function ExerciseGallery({
     else setLocal(next);
     setPage(0);
   };
-  const searchRef = useRef<HTMLInputElement>(null);
   const [showFilters, setShowFilters] = useState(false);
 
   // Library (built-in catalogue) vs My exercises (user-created). The active tab
@@ -270,9 +258,22 @@ export function ExerciseGallery({
 
   const list = isMine ? mineMatches : matches;
   const PAGE = isDesktop ? 24 : 12;
-  const maxPage = Math.max(0, Math.ceil(list.length / PAGE) - 1);
-  const curPage = Math.min(page, maxPage);
-  const shown = list.slice(curPage * PAGE, curPage * PAGE + PAGE);
+  // Infinite scroll: `page` counts the extra chunks revealed so far.
+  const shown = list.slice(0, (page + 1) * PAGE);
+  const hasMore = shown.length < list.length;
+  const sentinel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el || !hasMore || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      (es) => {
+        if (es.some((e) => e.isIntersecting)) setPage((p) => p + 1);
+      },
+      { rootMargin: '400px 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore, shown.length]);
 
   const musclesText = (r: Row) =>
     [r.primary, ...r.secondary]
@@ -326,25 +327,18 @@ export function ExerciseGallery({
     active.length > 0 ? (
       <div className="exl-active">
         {active.map((a) => (
-          <button key={a.key} className="badge b-mus-pri" onClick={a.clear}>
+          <Button key={a.key} variant="secondary" size="sm" iconTrailing="x" onClick={a.clear}>
             {a.label}
-            <Icon name="x" />
-          </button>
+          </Button>
         ))}
       </div>
     ) : null;
 
   // --- filter groups (shared: desktop rail + mobile sheet) ------------------
-  const chip = (
-    isActive: boolean,
-    label: string,
-    onClick: () => void,
-    key: string,
-    base = 'b-mus',
-  ) => (
-    <button key={key} className={`badge ${base}${isActive ? ' is-active' : ''}`} onClick={onClick}>
+  const chip = (isActive: boolean, label: string, onClick: () => void, key: string) => (
+    <Chip key={key} selected={isActive} onClick={onClick}>
       {label}
-    </button>
+    </Chip>
   );
 
   const groups = (
@@ -418,7 +412,6 @@ export function ExerciseGallery({
               t.equipmentNames[id],
               () => set({ equip: s.equip === id ? undefined : id }),
               `eq-${id}`,
-              'b-eq',
             ),
           )}
         </div>
@@ -452,46 +445,16 @@ export function ExerciseGallery({
     );
   };
 
-  const pager =
-    maxPage > 0 ? (
-      <nav className="exl-pager" aria-label={t.pagination}>
-        <button
-          className="exl-pagebtn"
-          disabled={curPage === 0}
-          onClick={() => setPage(curPage - 1)}
-          aria-label={t.pagePrev}
-        >
-          <Icon name="caret-left" />
-        </button>
-        {pageWindow(curPage, maxPage).map((p, i) =>
-          p === ELLIPSIS ? (
-            <span key={`gap-${i}`} className="exl-pagegap">
-              …
-            </span>
-          ) : (
-            <button
-              key={p}
-              className={`exl-pagenum${p === curPage ? ' active' : ''}`}
-              aria-current={p === curPage ? 'page' : undefined}
-              onClick={() => setPage(p)}
-            >
-              {p + 1}
-            </button>
-          ),
-        )}
-        <button
-          className="exl-pagebtn"
-          disabled={curPage >= maxPage}
-          onClick={() => setPage(curPage + 1)}
-          aria-label={t.pageNext}
-        >
-          <Icon name="caret-left" className="flip" />
-        </button>
-      </nav>
-    ) : null;
+  const pager = hasMore ? (
+    <div ref={sentinel} className="exl-more">
+      <Button variant="secondary" onClick={() => setPage((p) => p + 1)}>
+        {t.showMore}
+      </Button>
+    </div>
+  ) : null;
 
   const card = (r: Row, i: number) => (
-    <button key={r.key} className="exl-card" onClick={() => open(r)}>
+    <Card as="button" pad="none" className="exl-card" key={r.key} onClick={() => open(r)}>
       {media(r, i, 'exl-media')}
       <div className="exl-cardbody">
         <div className="exl-cardname">
@@ -501,20 +464,19 @@ export function ExerciseGallery({
         {/* Always rendered, even when empty: it reserves its own row so a card
             without badges is exactly as tall as one with them. */}
         <div className="exl-cardbadges">
-          {r.mechanic && <span className="badge b-mech sm">{t.mechanicNames[r.mechanic]}</span>}
+          {r.mechanic && <Tag tone="neutral">{t.mechanicNames[r.mechanic]}</Tag>}
           {r.equipment && (
-            <span className="badge b-eq sm">
-              <Icon name={equipmentIconName(r.equipment)} />
+            <Tag tone="neutral" icon={<Icon name={equipmentIconName(r.equipment)} />}>
               {t.equipmentNames[r.equipment]}
-            </span>
+            </Tag>
           )}
         </div>
       </div>
-    </button>
+    </Card>
   );
 
   const listRow = (r: Row, i: number) => (
-    <button key={r.key} className="exl-mrow" onClick={() => open(r)}>
+    <Card as="button" pad="none" key={r.key} className="exl-mrow" onClick={() => open(r)}>
       {media(r, i, 'exl-mthumb')}
       <div className="exl-mbody">
         <div className="exl-mname">
@@ -522,59 +484,63 @@ export function ExerciseGallery({
         </div>
         <div className="exl-mmus">{musclesText(r)}</div>
         <div className="exl-mbadges">
-          {r.mechanic && <span className="badge b-mech sm">{t.mechanicNames[r.mechanic]}</span>}
-          {r.force && <span className="badge b-mus sm">{t.forceNames[r.force]}</span>}
+          {r.mechanic && <Tag tone="neutral">{t.mechanicNames[r.mechanic]}</Tag>}
+          {r.force && <Tag tone="neutral">{t.forceNames[r.force]}</Tag>}
           {r.equipment && (
-            <span className="badge b-eq sm">
-              <Icon name={equipmentIconName(r.equipment)} />
+            <Tag tone="neutral" icon={<Icon name={equipmentIconName(r.equipment)} />}>
               {t.equipmentNames[r.equipment]}
-            </span>
+            </Tag>
           )}
         </div>
       </div>
-    </button>
+    </Card>
   );
 
   // One "New exercise" button, same design + behaviour everywhere. Uses the
   // primary (brass-outlined) style so it reads identically to "New program".
   const newBtn = canEdit ? (
-    <button className="btn btn-primary exl-new" onClick={openCreate}>
+    <Button variant="primary" size="sm" className="exl-new" onClick={openCreate}>
       <Icon name="plus" />
       {t.libCreateExercise}
-    </button>
+    </Button>
   ) : null;
 
   const mineRow = (r: Row) => {
     const e = r.mineRef;
     return (
-      <div key={r.key} className="exl-mrow exg-mine-row">
-        <button className="exg-mine-open" onClick={() => open(r)}>
+      <Card key={r.key} pad="none" className="exl-mrow exg-mine-row">
+        <Card
+          as="button"
+          pad="none"
+          emphasis="quiet"
+          className="exg-mine-open"
+          onClick={() => open(r)}
+        >
           <div className="exl-mbody">
             <div className="exl-mname">{exName(r.name)}</div>
             <div className="exl-mmus">{musclesText(r) || t.libNoClassInline}</div>
             {r.equipment && (
               <div className="exl-mbadges">
-                <span className="badge b-eq sm">
-                  <Icon name={equipmentIconName(r.equipment)} />
+                <Tag tone="neutral" icon={<Icon name={equipmentIconName(r.equipment)} />}>
                   {t.equipmentNames[r.equipment]}
-                </span>
+                </Tag>
               </div>
             )}
           </div>
-        </button>
+        </Card>
         {canEdit && e && (
           <div className="exg-mine-acts">
-            <button
-              className="exg-mine-act"
-              aria-label={t.openHistory}
+            <IconButton
+              icon="clock-counter-clockwise"
+              size="sm"
+              label={t.openHistory}
               title={t.openHistory}
               onClick={() => shell.openOverlay({ screen: 'exercise-history', name: r.name })}
-            >
-              <Icon name="clock-counter-clockwise" />
-            </button>
-            <button
-              className="exg-mine-act"
-              aria-label={t.edit}
+            />
+            <IconButton
+              icon="pencil-simple"
+              size="sm"
+              label={t.edit}
               title={t.edit}
               onClick={() =>
                 setEditing({
@@ -587,22 +553,20 @@ export function ExerciseGallery({
                   equipment: e.equipment,
                 })
               }
-            >
-              <Icon name="pencil-simple" />
-            </button>
+            />
             {e.source === 'catalog' && (
-              <button
-                className="exg-mine-act danger"
-                aria-label={t.bmRemove}
+              <IconButton
+                icon="trash"
+                variant="danger"
+                size="sm"
+                label={t.bmRemove}
                 title={t.bmRemove}
                 onClick={() => setDeleting(e)}
-              >
-                <Icon name="trash" />
-              </button>
+              />
             )}
           </div>
         )}
-      </div>
+      </Card>
     );
   };
 
@@ -612,7 +576,7 @@ export function ExerciseGallery({
     !isMine && s.muscle !== undefined ? list.findIndex((r) => r.primary !== s.muscle) : -1;
   const renderPage = (renderFn: (r: Row, i: number) => ReactNode) =>
     shown.flatMap((r, i) => {
-      const gIdx = curPage * PAGE + i;
+      const gIdx = i;
       const out: ReactNode[] = [];
       if (secStart >= 0 && gIdx === secStart) {
         out.push(
@@ -639,37 +603,34 @@ export function ExerciseGallery({
   // Library / My-exercises subtabs. They live under the content heading (not in
   // the rail), mirroring how Programs stacks its title and switcher.
   const subTabs = (
-    <div className="exg-tabs" role="tablist">
-      <button
-        role="tab"
-        aria-selected={tab === 'library'}
-        className={tab === 'library' ? 'active' : ''}
-        onClick={() => setTab('library')}
-      >
-        {t.libTabLibrary}
-      </button>
-      <button
-        role="tab"
-        aria-selected={tab === 'mine'}
-        className={tab === 'mine' ? 'active' : ''}
-        onClick={() => setTab('mine')}
-      >
-        {t.libTabMine}
-        {mine.length > 0 && <span className="exg-tabcount">{mine.length}</span>}
-      </button>
-    </div>
+    <Segmented
+      className="exg-tabs"
+      label={t.exercisesTitle}
+      value={tab}
+      onChange={(v) => setTab(v)}
+      options={[
+        { value: 'library' as const, label: t.libTabLibrary },
+        {
+          value: 'mine' as const,
+          label: (
+            <>
+              {t.libTabMine}
+              {mine.length > 0 && <Tag tone="neutral">{mine.length}</Tag>}
+            </>
+          ),
+        },
+      ]}
+    />
   );
 
   const searchField = (
-    <label className="exl-search">
-      <Icon name="magnifying-glass" />
-      <input
-        ref={searchRef}
-        value={s.q}
-        placeholder={t.searchExercises}
-        onChange={(e) => set({ q: e.target.value })}
-      />
-    </label>
+    <SearchField
+      className="exl-search"
+      value={s.q}
+      onChange={(q) => set({ q })}
+      placeholder={t.searchExercises}
+      clearLabel={t.srClose}
+    />
   );
 
   // Shared shell for both tabs: filter rail (desktop) / filter sheet (phone),
@@ -698,13 +659,13 @@ export function ExerciseGallery({
         {!isDesktop && (
           <div className="exl-searchrow">
             {searchField}
-            <button
-              className={`exl-funnel${active.length > 0 ? ' on' : ''}`}
+            <IconButton
+              icon="funnel-simple"
+              className="exl-funnel"
+              variant={active.length > 0 ? 'primary' : 'secondary'}
               onClick={() => setShowFilters(true)}
-              aria-label={t.libFiltersLabel}
-            >
-              <Icon name="funnel-simple" />
-            </button>
+              label={t.libFiltersLabel}
+            />
           </div>
         )}
         {activeChips}
@@ -721,13 +682,11 @@ export function ExerciseGallery({
       {showFilters && (
         <Sheet onClose={() => setShowFilters(false)} className="new-exercise-sheet">
           <div className="sheet-head with-back">
-            <button
+            <BackButton
               className="sheet-back"
+              label={t.backAction}
               onClick={() => setShowFilters(false)}
-              aria-label={t.backAction}
-            >
-              <Icon name="caret-left" />
-            </button>
+            />
             <span className="t">{t.libFiltersLabel}</span>
           </div>
           <div className="exl-fsheet">{groups}</div>
@@ -805,17 +764,13 @@ export function CustomEditor(props: {
 
   return (
     <Sheet onClose={props.onClose} className="new-exercise-sheet">
-      <div className="sheet-head with-back">
-        <button className="sheet-back" onClick={props.onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+      <div className="sheet-head">
         <span className="t">{props.init.id ? t.libEditExercise : t.libCreateExercise}</span>
       </div>
 
       <label className="bm-field">
         <span className="bm-field-label">{t.exerciseNameLabel}</span>
-        <input
-          className="input"
+        <Field
           autoFocus
           value={name}
           placeholder={t.exerciseNamePlaceholder}
@@ -826,9 +781,10 @@ export function CustomEditor(props: {
       <div className="field-label">{t.primaryMuscleLabel}</div>
       <div className="filter-chips">
         {MUSCLE_IDS.map((m) => (
-          <button
+          <Chip
+            size="sm"
+            selected={primary === m}
             key={m}
-            className={`fchip${primary === m ? ' active' : ''}`}
             onClick={() => {
               setPrimary((x) => (x === m ? null : m));
               setSecondary((xs) => xs.filter((x) => x !== m));
@@ -836,16 +792,17 @@ export function CustomEditor(props: {
           >
             <MuscleIcon muscle={m} variant="chip" tone={primary === m ? 'onAccent' : 'secondary'} />
             {t.muscleGroups[m]}
-          </button>
+          </Chip>
         ))}
       </div>
 
       <div className="field-label">{t.secondaryMuscleLabel}</div>
       <div className="filter-chips">
         {MUSCLE_IDS.filter((m) => m !== primary).map((m) => (
-          <button
+          <Chip
+            size="sm"
+            selected={secondary.includes(m)}
             key={m}
-            className={`fchip${secondary.includes(m) ? ' active' : ''}`}
             onClick={() =>
               setSecondary((xs) => (xs.includes(m) ? xs.filter((x) => x !== m) : [...xs, m]))
             }
@@ -856,7 +813,7 @@ export function CustomEditor(props: {
               tone={secondary.includes(m) ? 'onAccent' : 'secondary'}
             />
             {t.muscleGroups[m]}
-          </button>
+          </Chip>
         ))}
       </div>
 
@@ -866,13 +823,14 @@ export function CustomEditor(props: {
           {primarySplit.length > 0 && (
             <div className="filter-chips">
               {primarySplit.map((f) => (
-                <button
+                <Chip
+                  size="sm"
+                  selected={subPrimary.includes(f)}
                   key={f}
-                  className={`fchip${subPrimary.includes(f) ? ' active' : ''}`}
                   onClick={() => toggle(setSubPrimary, f)}
                 >
                   {t.subMuscleNames[f]}
-                </button>
+                </Chip>
               ))}
             </div>
           )}
@@ -881,13 +839,14 @@ export function CustomEditor(props: {
               <div className="field-label">{t.subRegionsSecondaryLabel}</div>
               <div className="filter-chips">
                 {secondarySplit.map((f) => (
-                  <button
+                  <Chip
+                    size="sm"
+                    selected={subSecondary.includes(f)}
                     key={f}
-                    className={`fchip${subSecondary.includes(f) ? ' active' : ''}`}
                     onClick={() => toggle(setSubSecondary, f)}
                   >
                     {t.subMuscleNames[f]}
-                  </button>
+                  </Chip>
                 ))}
               </div>
             </>
@@ -898,22 +857,24 @@ export function CustomEditor(props: {
       <div className="field-label">{t.equipmentLabelField}</div>
       <div className="filter-chips">
         {EQUIPMENT_IDS.map((id) => (
-          <button
+          <Chip
+            size="sm"
+            selected={equipment.includes(id)}
             key={id}
-            className={`fchip${equipment.includes(id) ? ' active' : ''}`}
             onClick={() =>
               setEquipment((xs) => (xs.includes(id) ? xs.filter((x) => x !== id) : [id]))
             }
           >
             <Icon name={equipmentIconName(id)} />
             {t.equipmentNames[id]}
-          </button>
+          </Chip>
         ))}
       </div>
 
-      <button
-        className="btn btn-primary"
-        style={{ minHeight: 48, fontSize: 15, marginTop: 'var(--space-3)' }}
+      <Button
+        variant="primary"
+        className="ut-lg umt-8"
+        style={{ minHeight: 48 }}
         disabled={!ready}
         onClick={() => {
           const sp = subPrimary.filter((f) => primarySplit.includes(f));
@@ -926,7 +887,7 @@ export function CustomEditor(props: {
         }}
       >
         {props.init.id ? t.save : t.libCreateExercise}
-      </button>
+      </Button>
     </Sheet>
   );
 }

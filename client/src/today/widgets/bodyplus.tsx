@@ -301,7 +301,8 @@ function BedStrip({
       viewBox={`0 0 ${W} ${H}`}
       width="100%"
       aria-hidden="true"
-      style={{ display: 'block', overflow: 'visible' }}
+      className="ul-block"
+      style={{ overflow: 'visible' }}
     >
       <line x1={0} x2={W} y1={cy} y2={cy} stroke="var(--color-neutral-700)" strokeWidth={1} />
       <rect
@@ -1096,11 +1097,11 @@ const physiqueGoal: WidgetDef = {
           )
         }
       >
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <div className="ul-flex ug-16 ua-center">
           <WidgetRing value={progress ?? 0} size={96} tone="accent">
             {p != null ? `${p}%` : '—'}
           </WidgetRing>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+          <div className="ul-flex ul-col ug-4 umw-0">
             <span className="uiw-kicker">{s.overall}</span>
             <span className="uiw-sub">{paceLine}</span>
           </div>
@@ -1126,15 +1127,7 @@ const KIND_COLOR: Record<DayKind, string> = {
 function KindBar({ counts }: { counts: Record<DayKind, number> }) {
   const order: DayKind[] = ['train', 'rest', 'sick', 'off'];
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 2,
-        height: 10,
-        borderRadius: 'var(--radius-pill)',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="ur-pill ul-flex ug-2" style={{ height: 10, overflow: 'hidden' }}>
       {order
         .filter((k) => counts[k] > 0)
         .map((k) => (
@@ -1147,12 +1140,9 @@ function KindBar({ counts }: { counts: Record<DayKind, number> }) {
 /** 30 day cells, oldest first, coloured by kind. */
 function DayGrid({ kinds }: { kinds: DayKind[] }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(15, minmax(0, 1fr))', gap: 4 }}>
+    <div className="ul-grid ug-4" style={{ gridTemplateColumns: 'repeat(15, minmax(0, 1fr))' }}>
       {kinds.map((k, i) => (
-        <span
-          key={i}
-          style={{ height: 14, borderRadius: 'var(--radius-sm)', background: KIND_COLOR[k] }}
-        />
+        <span key={i} className="ur-sm" style={{ height: 14, background: KIND_COLOR[k] }} />
       ))}
     </div>
   );
@@ -1287,9 +1277,7 @@ const restLog: WidgetDef = {
         onClick={open}
         footer={
           <>
-            <span className="uiw-sub" style={{ flex: 1, minWidth: 0 }}>
-              {s.noneBroke}
-            </span>
+            <span className="uiw-sub uf-1 umw-0">{s.noneBroke}</span>
             <Button variant="primary" size="sm" icon="plus" onClick={logDay}>
               {s.logDay}
             </Button>

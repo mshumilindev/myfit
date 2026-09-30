@@ -1,5 +1,7 @@
 /** Auth — design S-01. Sign-in only; new accounts come via invite onboarding. */
 import { useEffect, useState, type FormEvent } from 'react';
+import { Field } from '../components/ui/Field';
+import { Button } from '../components/ui/Button';
 import { HttpError, callFn, signInWithPayload, type AuthPayload } from '../api';
 import { SpotterMark } from '../brand/SpotterMark';
 import { fmtSessionClock, useT } from '../i18n';
@@ -84,16 +86,21 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           </div>
         )}
 
-        <input
-          className="input"
+        <Field
           placeholder={t.username}
           value={identifier}
           autoComplete="username"
           disabled={unreachable || busy || locked}
           onChange={(e) => setIdentifier(e.target.value)}
         />
-        <input
-          className={`input${error ? ' error' : ''}`}
+        <Field
+          error={
+            !locked && error ? (
+              <>
+                <Icon name="warning-circle" /> {error}
+              </>
+            ) : undefined
+          }
           type="password"
           placeholder={t.password}
           value={password}
@@ -105,31 +112,25 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
         {locked ? (
           <div className="banner danger-ring">
             <Icon name="lock-simple" />
-            <span style={{ flex: 1 }}>{t.tooManyAttempts}</span>
+            <span className="uf-1">{t.tooManyAttempts}</span>
             <span className="num">{fmtSessionClock((lockUntil ?? now) - now)}</span>
           </div>
-        ) : (
-          error && (
-            <div className="field-error">
-              <Icon name="warning-circle" />
-              {error}
-            </div>
-          )
-        )}
+        ) : null}
 
-        <button
-          className="btn btn-primary"
-          style={{ minHeight: 48, fontSize: 15, marginTop: 'var(--space-3)', gap: 9 }}
+        <Button
+          variant="primary"
+          className="fx-fs-15 ug-10 umt-8"
+          style={{ minHeight: 48 }}
           disabled={busy || checking || unreachable || locked}
         >
           {busy ? t.signingIn : t.signIn}
-        </button>
+        </Button>
 
         {unreachable && (
-          <button
-            type="button"
-            className="btn btn-secondary"
-            style={{ minHeight: 44, fontSize: 13, gap: 7 }}
+          <Button
+            variant="secondary"
+            className="fx-fs-13 ug-8"
+            style={{ minHeight: 44 }}
             onClick={() => {
               setChecking(true);
               probe();
@@ -137,7 +138,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           >
             <Icon name="arrow-clockwise" />
             {t.retry}
-          </button>
+          </Button>
         )}
 
         <InstallShortcut />

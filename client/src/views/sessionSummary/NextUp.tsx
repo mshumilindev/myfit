@@ -53,6 +53,10 @@ import { nextUpOff, setNextUpOff, useNextUpOff } from '../../activityPrefs';
 import { useT } from '../../i18n';
 import type { Strings } from '../../i18n/en';
 import { Icon, Sheet } from '../../ui';
+import { Button, IconButton } from '../../components/ui/Button';
+import { Chip } from '../../components/ui/Chip';
+import { ListRow } from '../../components/ui/GroupedList';
+import { IconTile } from '../../components/ui/IconTile';
 import type { Activity, Workout } from '../../types';
 import { clock, fmtApprox, hhmm, nowMs, typeIcon, typeName, useNow } from '../logActivity/shared';
 import './NextUp.css';
@@ -311,15 +315,13 @@ export function NextUpLiveBanner({ m }: { m: NextUpModel }) {
           <div style={{ width: `${pct}%` }} />
         </div>
       ) : null}
-      <div className="nu-grid2" style={{ marginTop: 10 }}>
-        <button type="button" className="nu-ob on h44" onClick={m.pause}>
-          <Icon name={paused ? 'play' : 'pause'} weight="fill" />
+      <div className="nu-grid2 umt-10">
+        <Button variant="secondary" fullWidth icon={paused ? 'play' : 'pause'} onClick={m.pause}>
           {paused ? t.actResume : t.actPause}
-        </button>
-        <button type="button" className="nu-ob tone h44" onClick={m.finish}>
-          <Icon name="stop" weight="fill" />
+        </Button>
+        <Button variant="primary" fullWidth icon="stop" onClick={m.finish}>
           {t.actFinish}
-        </button>
+        </Button>
       </div>
     </section>
   );
@@ -341,14 +343,13 @@ export function NextUpCard({ m, web = false }: { m: NextUpModel; web?: boolean }
           </h2>
           <p className="nu-cs">{t.nuRunningSub}</p>
         </div>
-        <button
-          type="button"
+        <IconButton
+          icon="x"
+          size="sm"
+          label={t.nuCancelAria(name)}
           className="nu-x"
-          aria-label={t.nuCancelAria(name)}
           onClick={m.cancelLive}
-        >
-          <Icon name="x" />
-        </button>
+        />
       </section>
     );
   }
@@ -368,14 +369,15 @@ export function NextUpCard({ m, web = false }: { m: NextUpModel; web?: boolean }
             {a.category === 'recovery' ? t.laAddedToRecovery : t.laAddedToLoad}
           </p>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="link"
+          size="sm"
           className="nu-undo"
           aria-label={t.laUndoAria(name)}
           onClick={m.undoLogged}
         >
           {t.undo}
-        </button>
+        </Button>
       </section>
     );
   }
@@ -403,15 +405,14 @@ export function NextUpCard({ m, web = false }: { m: NextUpModel; web?: boolean }
             <Icon name="clock" />
             {web ? t.nuKickerWeb : t.nuKicker}
           </p>
-          <button
-            type="button"
+          <IconButton
+            icon="dots-three"
+            size="sm"
             className="nu-more"
-            aria-label={t.nuMoreAria}
+            label={t.nuMoreAria}
             aria-haspopup="dialog"
             onClick={() => m.setOptionsOpen(true)}
-          >
-            <Icon name="dots-three" weight="bold" />
-          </button>
+          />
         </div>
         <div className="nu-main">
           <span className="nu-ico n56">
@@ -444,24 +445,24 @@ export function NextUpCard({ m, web = false }: { m: NextUpModel; web?: boolean }
             </div>
           </div>
         )}
-        <div className="nu-grid2" style={{ marginTop: 12 }}>
-          <button
-            type="button"
-            className="nu-ob tone fill"
+        <div className="nu-grid2 umt-12">
+          <Button
+            variant="primary"
+            fullWidth
+            icon="play"
             disabled={m.startBlocked}
             onClick={() => m.start(top)}
           >
-            <Icon name="play" weight="fill" />
             {t.nuStart(name)}
-          </button>
-          <button
-            type="button"
-            className="nu-ob on"
+          </Button>
+          <Button
+            variant="secondary"
+            fullWidth
             aria-label={t.nuLogAria(name, dur)}
             onClick={() => m.log(top)}
           >
             {t.laLogDur(dur)}
-          </button>
+          </Button>
         </div>
         {m.alternatives.length > 0 && (
           <div className="nu-alts">
@@ -471,19 +472,15 @@ export function NextUpCard({ m, web = false }: { m: NextUpModel; web?: boolean }
                 const n = typeName(s.type, t);
                 const d = fmtApprox(s.minutes, t);
                 return (
-                  <button
+                  <Chip
                     key={s.type}
-                    type="button"
-                    className={`nu-chip ${toneOf(s.type)}`}
+                    icon={typeIcon(s.type)}
                     aria-label={t.nuChipAria(n, d)}
                     disabled={m.startBlocked}
                     onClick={() => m.start(s)}
                   >
-                    <span className="nu-ico n28">
-                      <Icon name={typeIcon(s.type)} />
-                    </span>
                     {n} <small>{d}</small>
-                  </button>
+                  </Chip>
                 );
               })}
             </div>
@@ -514,36 +511,25 @@ function NextUpOptions({ m, top }: { m: NextUpModel; top: NextUp }) {
         </div>
       </div>
       <div className="nu-opts">
-        <button type="button" className="nu-opt" onClick={m.notToday}>
-          <span className="nu-oi">
-            <Icon name="moon" />
-          </span>
-          <span className="nu-ot">
-            {t.nuNotToday}
-            <small>{t.nuNotTodaySub}</small>
-          </span>
-        </button>
-        <button type="button" className="nu-opt" onClick={m.changeTo}>
-          <span className="nu-oi">
-            <Icon name="swap" />
-          </span>
-          <span className="nu-ot">
-            {t.nuChangeTo}
-            <small>{t.nuChangeToSub}</small>
-          </span>
-          <span className="nu-chev">
-            <Icon name="caret-right" />
-          </span>
-        </button>
-        <button type="button" className="nu-opt" onClick={() => m.dontSuggest(top)}>
-          <span className="nu-oi danger">
-            <Icon name="eye-slash" />
-          </span>
-          <span className="nu-ot">
-            {t.nuDontSuggest(name)}
-            <small>{others.length ? t.nuDontSuggestSub(others) : t.nuDontSuggestSubNone}</small>
-          </span>
-        </button>
+        <ListRow
+          icon={<IconTile icon="moon" />}
+          label={t.nuNotToday}
+          sub={t.nuNotTodaySub}
+          onClick={m.notToday}
+        />
+        <ListRow
+          icon={<IconTile icon="swap" />}
+          label={t.nuChangeTo}
+          sub={t.nuChangeToSub}
+          chevron
+          onClick={m.changeTo}
+        />
+        <ListRow
+          icon={<IconTile tone="danger" icon="eye-slash" />}
+          label={t.nuDontSuggest(name)}
+          sub={others.length ? t.nuDontSuggestSub(others) : t.nuDontSuggestSubNone}
+          onClick={() => m.dontSuggest(top)}
+        />
       </div>
       <p className="nu-note">
         <Icon name="info" />
@@ -563,10 +549,15 @@ export function NextUpQuiet({ m }: { m: NextUpModel }) {
         <Icon name="plus" />
       </span>
       <span>{t.nuAnything}</span>
-      <button type="button" className="nu-quiet-a" onClick={m.openLogActivity}>
+      <Button
+        variant="link"
+        size="sm"
+        className="nu-quiet-a"
+        iconTrailing="caret-right"
+        onClick={m.openLogActivity}
+      >
         {t.nuLogActivity}
-        <Icon name="caret-right" />
-      </button>
+      </Button>
     </div>
   );
 }
@@ -633,10 +624,9 @@ export function NextUpPanel({ m }: { m: NextUpModel }) {
         </div>
       )}
       {(m.top || m.live || m.logged) && (
-        <button type="button" className="nu-else" onClick={m.openLogActivity}>
-          <Icon name="plus" />
+        <Button variant="secondary" fullWidth icon="plus" onClick={m.openLogActivity}>
           {t.nuLogElse}
-        </button>
+        </Button>
       )}
     </aside>
   );

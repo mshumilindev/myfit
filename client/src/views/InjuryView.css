@@ -1,0 +1,132 @@
+/* InjuryView — feature-local look for the Injury & Rehab flow.
+   Tokens only (legacy aliases from styles.css); no raw colours. */
+
+/* colour roles */
+.ij-dgr {
+  color: var(--dgr);
+}
+.ij-rose {
+  color: var(--dgrrose);
+}
+.ij-oktext {
+  color: var(--oktext);
+}
+.ij-amber {
+  color: var(--g500);
+}
+.ij-rest {
+  color: var(--rest);
+}
+.ij-rest2 {
+  color: var(--rest200);
+}
+.ij-rest3 {
+  color: var(--rest300);
+}
+.ij-n300 {
+  color: var(--color-neutral-300);
+}
+.ij-n400 {
+  color: var(--color-neutral-400);
+}
+.ij-n600 {
+  color: var(--color-neutral-600);
+}
+
+/* tinted secondary buttons (doubled class beats the kit variant) */
+.ij-btn-ok.ij-btn-ok {
+  color: var(--ok);
+  border-color: var(--okline);
+}
+.ij-btn-dgr.ij-btn-dgr {
+  color: var(--dgr);
+  border-color: var(--dgrline);
+}
+
+/* sheet body reuses .rx but sits inside the Sheet, not full-screen */
+.rx.ij-sheet-rx {
+  position: static;
+  padding: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+/* desktop hub */
+.ij-hub-ico {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  color: var(--dgr);
+  background: color-mix(in srgb, var(--dgr) 16%, transparent);
+}
+.ij-bar {
+  border-radius: var(--r-6) var(--r-6) var(--r-2) var(--r-2);
+  background: var(--n800);
+}
+.ij-dot {
+  width: 11px;
+  height: 11px;
+}
+.ij-badge {
+  color: var(--color-rest-900);
+  background: var(--rest);
+  padding: var(--s-2) var(--s-6);
+}
+
+/* rebuild ramp */
+.ij-ramp {
+  border-radius: var(--r-8) var(--r-8) var(--r-4) var(--r-4);
+}
+.ij-ramp--done {
+  background: var(--ok);
+}
+.ij-ramp--now {
+  background: var(--dgr);
+}
+.ij-ramp--lock {
+  background: var(--color-neutral-900);
+  border: 1px dashed var(--n700);
+}
+
+/* check-in result */
+.ij-result-ico {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border: 1px solid;
+}
+.ij-tone--ok {
+  color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 16%, transparent);
+  border-color: var(--okline);
+}
+.ij-tone--g {
+  color: var(--g500);
+  background: color-mix(in srgb, var(--g500) 14%, transparent);
+  border-color: var(--g700);
+}
+.ij-tone--dgr {
+  color: var(--dgr);
+  background: color-mix(in srgb, var(--dgr) 16%, transparent);
+  border-color: var(--dgrline);
+}
+.ij-result-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  padding: var(--s-14) var(--s-16);
+  border: 1px solid var(--color-divider);
+  background: var(--surface2);
+}
+.ij-result-row--regress {
+  background: var(--dgrt);
+  border-color: var(--dgrline);
+}
+.ij-result-hold {
+  padding: var(--s-14) var(--s-16);
+  background: var(--surface2);
+  border: 1px solid var(--color-divider);
+  color: var(--g300);
+}

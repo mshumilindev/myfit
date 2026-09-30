@@ -6,6 +6,7 @@
  * a screen lock or a hop to another screen doesn't lose it.
  */
 import { useEffect, useState } from 'react';
+import { Button, IconButton } from './ui/Button';
 import type { Exercise } from '../types';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
@@ -87,34 +88,30 @@ export function HoldWatchSet(props: {
         </div>
         <div className="gset-actions">
           {startedAt === null ? (
-            <button
-              className="gset-cfg"
-              aria-label={t.setOptions}
+            <IconButton
+              icon="sliders-horizontal"
+              label={t.setOptions}
               title={t.setOptions}
               onClick={props.onSettings}
-            >
-              <Icon name="sliders-horizontal" />
-            </button>
+            />
           ) : (
-            <button
-              className="gset-cfg"
-              aria-label={t.homeHoldCancel}
+            <IconButton
+              icon="x"
+              label={t.homeHoldCancel}
               title={t.homeHoldCancel}
               onClick={cancel}
-            >
-              <Icon name="x" />
-            </button>
+            />
           )}
           {startedAt === null ? (
-            <button className="btn btn-primary gset-log" onClick={start}>
+            <Button variant="primary" className="gset-log" onClick={start}>
               <Icon name="play" weight="fill" />
               {t.homeStartHold}
-            </button>
+            </Button>
           ) : (
-            <button className="btn btn-primary gset-log" onClick={release} disabled={whole < 1}>
+            <Button variant="primary" className="gset-log" onClick={release} disabled={whole < 1}>
               <Icon name="check" weight="bold" />
               {t.homeRelease(whole)}
-            </button>
+            </Button>
           )}
         </div>
       </div>

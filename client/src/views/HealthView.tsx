@@ -11,6 +11,7 @@
  * (overlays 'sleep' and 'injury'). Web (≥720px): lists left, History (timeline
  * by default) right; forms and edits open in the right panel.
  */
+import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
 import { useT } from '../i18n';
@@ -51,6 +52,7 @@ import {
   typeName,
 } from './health/parts';
 import './Health.css';
+import { Button } from '../components/ui/Button';
 
 export interface HealthViewProps {
   shell: Shell;
@@ -440,14 +442,7 @@ export function HealthView(props: HealthViewProps) {
       return (
         <div className="screen hl">
           <div className="hl-pbar">
-            <button
-              type="button"
-              className="hl-back"
-              aria-label={t.backAction}
-              onClick={props.onClose}
-            >
-              <Svg name="back" />
-            </button>
+            <BackButton label={t.backAction} onClick={props.onClose} />
             <h1 className="hl-pt">{t.hlHistory}</h1>
           </div>
           <div className="hl-scroll">
@@ -478,13 +473,14 @@ export function HealthView(props: HealthViewProps) {
           </div>
           {mode === 'list' && (
             <StickyActionBar>
-              <button
-                type="button"
-                className="hl-btn p-gold"
+              <Button
+                variant="primary"
+                fullWidth
+
                 onClick={() => openForm({ kind: 'new', ctx: 'past', type: 'illness' })}
               >
                 {t.hlLogPast}
-              </button>
+              </Button>
             </StickyActionBar>
           )}
         </div>
@@ -493,14 +489,7 @@ export function HealthView(props: HealthViewProps) {
     return (
       <div className="screen hl">
         <div className="hl-pbar">
-          <button
-            type="button"
-            className="hl-back"
-            aria-label={t.backAction}
-            onClick={props.onClose}
-          >
-            <Svg name="back" />
-          </button>
+          <BackButton label={t.backAction} onClick={props.onClose} />
           <h1 className="hl-pt">{t.startHealthTitle}</h1>
         </div>
         <div className="hl-scroll">
@@ -576,14 +565,14 @@ export function HealthView(props: HealthViewProps) {
       <div className="hl-wc tight">
         <div className="hl-phd">
           <h2 id="hl-hist-h">{t.hlHistory}</h2>
-          <button
-            type="button"
-            className="hl-link"
+          <Button
+            variant="link"
+
             onClick={() => go({ view: 'history', hist: 'list' })}
           >
             {t.hlOpenHistory}
             <Svg name="chev" className="hl-chev v-gold" />
-          </button>
+          </Button>
         </div>
         <HistControls
           mode={webHist}
@@ -601,9 +590,7 @@ export function HealthView(props: HealthViewProps) {
   return (
     <div className="screen hl hl-web">
       <header className="hl-top">
-        <button type="button" className="hl-back" aria-label={t.backAction} onClick={props.onClose}>
-          <Svg name="back" />
-        </button>
+        <BackButton label={t.backAction} onClick={props.onClose} />
         <h1 className="hl-pt">{history ? t.hlHistory : t.startHealthTitle}</h1>
         <div className="tsub">{history ? t.hlHistorySub : t.hlSub}</div>
         <span className="hl-val">{t.hlTodayIs(fd(today))}</span>
@@ -658,12 +645,12 @@ function RecoveredSheet(props: {
           />
         </GroupedList>
         <div className="hl-stk">
-          <button type="button" className="hl-btn p-ill" onClick={props.onConfirm}>
+          <Button variant="primary" fullWidth onClick={props.onConfirm}>
             {t.illnessRecoveredConfirm}
-          </button>
-          <button type="button" className="hl-btn" onClick={props.onStill}>
+          </Button>
+          <Button variant="secondary" fullWidth onClick={props.onStill}>
             {t.illnessStillUnwell}
-          </button>
+          </Button>
         </div>
       </div>
     </>

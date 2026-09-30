@@ -9,6 +9,11 @@
  * "available at your gym" filters use elsewhere.
  */
 import { useMemo, useState } from 'react';
+import { Button, IconButton } from './ui/Button';
+import { Card } from './ui/Card';
+import { Chip } from './ui/Chip';
+import { ListRow } from './ui/GroupedList';
+import { SearchField } from './ui/SearchField';
 import type { Gym } from '../types';
 import { setGymEquipment, useStore } from '../store';
 import { useT } from '../i18n';
@@ -21,6 +26,7 @@ import type { MuscleGroup } from '../data/exercises';
 import { focusLists } from '../goals';
 import { focusToGroup } from '../data/subregions';
 import type { Shell } from '../App';
+import { Tag } from './ui/Tag';
 
 const CATEGORY_ORDER: EquipCategory[] = [
   'barbell',
@@ -200,52 +206,47 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
           <Icon name="scales" /> {t.inventoryLabel}
         </span>
         {total > 0 && (
-          <button
-            className="eq-count-badge eq-count-btn"
+          <Chip
+            tone="accent"
+            size="sm"
             onClick={() => setManage(true)}
             aria-label={t.eqSelectedTitle}
           >
             {total}
-          </button>
+          </Chip>
         )}
       </div>
       <div className="detail-muted eq-hint">{t.inventoryNote}</div>
 
       <div className="eq-searchrow">
-        <div className="eq-search">
-          <Icon name="magnifying-glass" />
-          <input
-            type="search"
+        <div className="eq-search-wrap">
+          <SearchField
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={setQuery}
             placeholder={t.equipSearchPlaceholder}
-            aria-label={t.equipSearchPlaceholder}
+            clearLabel={t.srClose}
           />
-          {query && (
-            <button className="eq-search-clear" onClick={() => setQuery('')} aria-label={t.srClose}>
-              <Icon name="x" />
-            </button>
-          )}
         </div>
         {filterMuscles.length > 0 && (
-          <button
-            className={`eq-funnel${filtering ? ' on' : ''}`}
+          <Button
+            variant={filtering ? 'primary' : 'secondary'}
+            className="eq-funnel-btn"
+            icon="funnel-simple"
             onClick={() => setShowFilters((v) => !v)}
             aria-label={t.eqFilterByMuscle}
             aria-expanded={showFilters}
           >
-            <Icon name="funnel-simple" />
-            {filtering && <span className="eq-funnel-n">{mfilter.size}</span>}
-          </button>
+            {filtering ? <span className="eq-funnel-n">{mfilter.size}</span> : null}
+          </Button>
         )}
       </div>
 
       {showFilters && (
         <div className="eq-filter">
           {growGroups.length > 0 && (
-            <button className="eq-focus-pill" onClick={loadFocus}>
-              <Icon name="crosshair" weight="fill" /> {t.eqMyFocus}
-            </button>
+            <Button variant="secondary" size="sm" icon="crosshair" onClick={loadFocus}>
+              {t.eqMyFocus}
+            </Button>
           )}
           {filterMuscles.map((m) => (
             <span key={m} className={`eq-fchip${mfilter.has(m) ? ' on' : ''}`}>
@@ -257,9 +258,9 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
             </span>
           ))}
           {filtering && (
-            <button className="eq-clear" onClick={() => setMfilter(new Set())}>
+            <Button variant="link" size="sm" onClick={() => setMfilter(new Set())}>
               {t.eqClearFilter}
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -279,17 +280,15 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
             const expanded = active || open.has(cat);
             return (
               <div className={`eq-cat${expanded ? ' open' : ''}`} key={cat}>
-                <button
-                  className="eq-cat-head"
+                <ListRow
+                  dense
+                  strong
+                  icon={<Icon name={expanded ? 'caret-down' : 'arrow-right'} />}
+                  label={equipCategoryLabel(cat, locale)}
+                  value={sel > 0 ? `${sel}/${items.length}` : items.length}
                   onClick={() => toggleCat(cat)}
                   aria-expanded={expanded}
-                >
-                  <Icon name={expanded ? 'caret-down' : 'arrow-right'} />
-                  <span className="eq-cat-label">{equipCategoryLabel(cat, locale)}</span>
-                  <span className="eq-cat-count">
-                    {sel > 0 ? `${sel}/${items.length}` : items.length}
-                  </span>
-                </button>
+                />
                 {expanded && (
                   <div className="eq-grid">
                     {items.map((it) => {
@@ -297,7 +296,10 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
                       const info = localizedEquipInfo(it, locale);
                       return (
                         <div className={`eq-tile${on ? ' on' : ''}`} key={it.id}>
-                          <button
+                          <Card
+                            as="button"
+                            pad="none"
+                            emphasis="quiet"
                             className="eq-tile-main"
                             onClick={() => openDetail(it.id)}
                             title={info}
@@ -322,18 +324,19 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
                                 ))}
                               </span>
                             )}
-                          </button>
-                          <button
-                            className={`eq-tile-toggle${on ? ' on' : ''}`}
+                          </Card>
+                          <IconButton
+                            icon={on ? 'check' : 'plus'}
+                            variant={on ? 'primary' : 'secondary'}
+                            size="sm"
+                            className="eq-tile-toggle"
                             onClick={(e) => {
                               e.stopPropagation();
                               toggle(it.id);
                             }}
                             aria-pressed={on}
-                            aria-label={on ? t.eqInThisGym : t.add}
-                          >
-                            <Icon name={on ? 'check' : 'plus'} weight="bold" />
-                          </button>
+                            label={on ? t.eqInThisGym : t.add}
+                          />
                         </div>
                       );
                     })}
@@ -348,7 +351,7 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
       {manage && (
         <Sheet onClose={() => setManage(false)} className="eq-manage">
           <div className="ep-title">
-            {t.eqSelectedTitle} <span className="eq-manage-count">{total}</span>
+            {t.eqSelectedTitle} <Tag tone="neutral">{total}</Tag>
           </div>
           <div className="eq-manage-list">
             {[...picked]
@@ -372,22 +375,23 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
                     )}
                   </span>
                   <span className="eq-manage-name">{localizedEquipName(it, locale)}</span>
-                  <button
-                    className="eq-manage-x"
+                  <IconButton
+                    icon="x"
+                    size="sm"
+                    className="eq-manage-btn"
                     onClick={() => setConfirm({ kind: 'one', id: it.id })}
-                    aria-label={t.eqRemove}
-                  >
-                    <Icon name="x" weight="bold" />
-                  </button>
+                    label={t.eqRemove}
+                  />
                 </div>
               ))}
           </div>
-          <button
-            className="danger-outline eq-clear-all"
+          <Button
+            variant="danger"
+            className="eq-clear-all"
             onClick={() => setConfirm({ kind: 'all' })}
           >
             <Icon name="trash" /> {t.eqClearAll}
-          </button>
+          </Button>
         </Sheet>
       )}
 

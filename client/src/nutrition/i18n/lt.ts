@@ -181,6 +181,7 @@ export const lt: Strings = {
   setYourGoalBody: 'Pasirink tikslą, kad Today rodytų likusias kcal ir makro.',
   set: 'Nustatyti',
   searchProductsOrDishes: 'Ieškoti produktų ar patiekalų',
+  clearSearch: 'Išvalyti paiešką',
 
   typeDish: 'Patiekalas',
   typeDishDesc: 'Valgei ne namie? Įvesk — įvertinsime',

@@ -203,8 +203,8 @@ function unlockedFeats(res: FeatsResult): Ach[] {
 
 function progressLine(label: ReactNode, value: ReactNode, frac: number) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+    <div className="ul-flex ul-col ug-6">
+      <div className="ul-flex uj-between ug-8">
         <span className="uiw-sub">{label}</span>
         <span className="uiw-sub">{value}</span>
       </div>
@@ -317,7 +317,7 @@ const streak: WidgetDef = {
           </Button>
         }
       >
-        <div style={{ display: 'grid', placeItems: 'center', flex: 1 }}>
+        <div className="ul-grid uf-1" style={{ placeItems: 'center' }}>
           <WidgetRing value={Math.min(1, n / 30)} size={130} tone="apex">
             {n}
             <small>{tw.days}</small>
@@ -411,11 +411,11 @@ function ChallengeWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   if (size === 'L')
     return (
       <Widget size="L" tone="apex" kicker={s.challenge} badge={more} onClick={open}>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center', flex: 1 }}>
+        <div className="ul-flex ug-16 ua-center uf-1">
           <WidgetRing value={prog.pct} size={88} tone="apex">
             {p}%
           </WidgetRing>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+          <div className="ul-flex ul-col ug-4 umw-0">
             <div className="uiw-name">{title}</div>
             <div className="uiw-sub">{counts}</div>
             <div className="uiw-sub">{status}</div>
@@ -433,12 +433,12 @@ function ChallengeWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       onClick={open}
       footer={action(s.open, open)}
     >
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+      <div className="ul-flex ug-16 ua-center">
         <WidgetRing value={prog.pct} size={96} tone="apex">
           {val}
           <small>{s.ofN(target)}</small>
         </WidgetRing>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+        <div className="ul-flex ul-col ug-4 umw-0">
           <div className="uiw-name">{title}</div>
           <div className="uiw-sub">{tmpl.blurb(t)}</div>
           <div className="uiw-sub">{t.chDaysLeft(prog.daysLeft)}</div>
@@ -815,12 +815,12 @@ const mastery: WidgetDef = {
           badge={m.calibrating ? t.masteryProvisional : weekBadge(s, weekDelta)}
           onClick={open}
         >
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center', flex: 1 }}>
+          <div className="ul-flex ug-16 ua-center uf-1">
             <WidgetRing value={m.rankProgress} size={88} tone="apex">
               {m.rating}
               <small>{s.ofThousand}</small>
             </WidgetRing>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0, flex: 1 }}>
+            <div className="ul-flex ul-col ug-6 umw-0 uf-1">
               <div className="uiw-name">{label}</div>
               <WidgetDots values={ladderPips(m)} height={8} tone="apex" />
               <div className="uiw-sub">
@@ -844,11 +844,11 @@ const mastery: WidgetDef = {
         onClick={open}
         footer={action(s.openMastery, open)}
       >
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <div className="ul-flex ug-16 ua-center">
           <WidgetRing value={m.rankProgress} size={84} tone="apex">
             {m.rating}
           </WidgetRing>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+          <div className="ul-flex ul-col ug-4 umw-0">
             <div className="uiw-name">{label}</div>
             <div className="uiw-sub">{sub}</div>
           </div>
@@ -924,9 +924,9 @@ const levelUp: WidgetDef = {
         </Widget>
       );
     const scale = (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div className="ul-flex ul-col ug-6">
         <WidgetBar value={frac} tone="apex" />
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+        <div className="ul-flex uj-between ug-8">
           <span className="uiw-sub">{cur}</span>
           <span className="uiw-sub">{m.rating}</span>
           <span className="uiw-sub">{`${step.at} · ${step.label}`}</span>
@@ -961,12 +961,12 @@ const levelUp: WidgetDef = {
         onClick={open}
         footer={action(s.startWorkout, () => shell.openStart())}
       >
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <div className="ul-flex ug-16 ua-center">
           <WidgetRing value={frac} size={84} tone="apex">
             {left}
             <small>{s.pts}</small>
           </WidgetRing>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+          <div className="ul-flex ul-col ug-4 umw-0">
             <div className="uiw-name">{s.atRating(step.label, step.at)}</div>
             <div className="uiw-sub">{pace}</div>
             <div className="uiw-sub">{`${cur} · ${s.rankOf(m.rankIndex + 1, MASTERY_RANKS.length)}`}</div>
@@ -1055,7 +1055,7 @@ const nextFeat: WidgetDef = {
         >
           <WidgetBar value={a.progress} tone="apex" />
           {then && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+            <div className="ul-flex uj-between ug-8">
               <span className="uiw-sub">{s.then(featTitle(then))}</span>
               <span className="uiw-sub">{`${fmtAchValue(then.unit, then.value)} / ${fmtAchValue(then.unit, then.threshold)}`}</span>
             </div>
@@ -1071,7 +1071,7 @@ const nextFeat: WidgetDef = {
         onClick={open}
         footer={action(s.allFeats, open)}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div className="ul-flex ul-col ug-4">
           <div className="uiw-name">{`${a.emoji} ${title}`}</div>
           <div className="uiw-value">
             {valTxt}
@@ -1180,13 +1180,13 @@ const featsBoard: WidgetDef = {
         onClick={open}
         footer={action(s.allFeats, open)}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 16, rowGap: 6 }}>
+        <div
+          className="ul-grid"
+          style={{ gridTemplateColumns: '1fr 1fr', columnGap: 16, rowGap: 6 }}
+        >
           {axes.map((x) => (
-            <div
-              key={x.group}
-              style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 6 }}>
+            <div key={x.group} className="ul-flex ul-col ug-2 umw-0">
+              <div className="ul-flex uj-between ug-6">
                 <span className="uiw-sub">{featLabel(x.group)}</span>
                 <span className="uiw-sub">{x.got}</span>
               </div>

@@ -6,6 +6,8 @@
  * archetype silhouettes) and long-term goals land next.
  */
 import { useState } from 'react';
+import { Button, IconButton } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
 import { useT } from '../i18n';
 import { useStore, resetGoals } from '../store';
 import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
@@ -19,6 +21,7 @@ import { exercisesForSubRegions } from '../data/exercises';
 import type { MuscleGroup } from '../data/exercises';
 import type { Shell } from '../App';
 import { Icon, ConfirmDialog, useExerciseName } from '../ui';
+import { Chip, ChipGroup } from '../components/ui/Chip';
 
 export function GoalsView({
   onProgramsTab,
@@ -67,21 +70,20 @@ export function GoalsView({
         <p className="goals-intro">{t.goalsIntro}</p>
 
         {/* Physique target */}
-        <section className="goals-card">
+        <Card as="section" emphasis="hero" className="goals-card">
           <div className="goals-card-head">
             <span className="goals-card-kicker">{t.goalsPhysiqueTitle}</span>
             {physique ? (
-              <button className="goals-change" onClick={() => setEditingPhysique(true)}>
+              <Button variant="ghost" size="sm" onClick={() => setEditingPhysique(true)}>
                 {t.physChange}
-              </button>
+              </Button>
             ) : (
-              <button
-                className="goals-edit"
+              <IconButton
+                size="sm"
+                icon="plus"
                 onClick={() => setEditingPhysique(true)}
-                aria-label={t.goalsPhysiqueTitle}
-              >
-                <Icon name="plus" />
-              </button>
+                label={t.goalsPhysiqueTitle}
+              />
             )}
           </div>
           {physique ? (
@@ -97,27 +99,29 @@ export function GoalsView({
               </div>
             </div>
           ) : (
-            <button
+            <Card
+              as="button"
+              pad="none"
+              emphasis="quiet"
               className="goals-empty goals-empty-btn"
               onClick={() => setEditingPhysique(true)}
             >
               <Icon name="user" />
               <p>{t.goalsPhysiqueEmpty}</p>
-            </button>
+            </Card>
           )}
-        </section>
+        </Card>
 
         {/* Focus this block — live */}
-        <section className="goals-card">
+        <Card as="section" emphasis="glass" className="goals-card">
           <div className="goals-card-head">
             <span className="goals-card-kicker">{t.goalsFocusTitle}</span>
-            <button
-              className="goals-edit"
+            <IconButton
+              size="sm"
+              icon="pencil-simple"
               onClick={() => setEditingFocus(true)}
-              aria-label={t.focusTitle}
-            >
-              <Icon name="pencil-simple" />
-            </button>
+              label={t.focusTitle}
+            />
           </div>
           {hasFocus ? (
             <div className="goals-focus">
@@ -132,39 +136,45 @@ export function GoalsView({
                 {grow.length > 0 && (
                   <div>
                     <div className="goals-focus-lbl grow">{t.emphGrow}</div>
-                    <div className="goals-chips">
+                    <ChipGroup>
                       {grow.map((f) => (
-                        <span key={f} className="goals-chip grow">
+                        <Chip key={f} size="sm" tone="accent">
                           {label(f)}
-                        </span>
+                        </Chip>
                       ))}
-                    </div>
+                    </ChipGroup>
                   </div>
                 )}
                 {ease.length > 0 && (
                   <div>
                     <div className="goals-focus-lbl ease">{t.emphEase}</div>
-                    <div className="goals-chips">
+                    <ChipGroup>
                       {ease.map((f) => (
-                        <span key={f} className="goals-chip ease">
+                        <Chip key={f} size="sm" tone="danger">
                           {label(f)}
-                        </span>
+                        </Chip>
                       ))}
-                    </div>
+                    </ChipGroup>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <button className="goals-empty goals-empty-btn" onClick={() => setEditingFocus(true)}>
+            <Card
+              as="button"
+              pad="none"
+              emphasis="quiet"
+              className="goals-empty goals-empty-btn"
+              onClick={() => setEditingFocus(true)}
+            >
               <Icon name="crosshair" />
               <p>{t.goalsFocusEmpty}</p>
-            </button>
+            </Card>
           )}
-        </section>
+        </Card>
 
         {hasFocus && volDeltas.length > 0 && (
-          <section className="goals-card">
+          <Card as="section" className="goals-card">
             <div className="goals-card-head">
               <span className="goals-card-kicker">{t.goalsShapeTitle}</span>
             </div>
@@ -182,11 +192,11 @@ export function GoalsView({
                 </div>
               ))}
             </div>
-          </section>
+          </Card>
         )}
 
         {hasFocus && suggestedMoves.length > 0 && (
-          <section className="goals-card">
+          <Card as="section" className="goals-card">
             <div className="goals-card-head">
               <span className="goals-card-kicker">{t.goalsSuggestedTitle}</span>
             </div>
@@ -195,17 +205,24 @@ export function GoalsView({
                 <div className="goals-move" key={mv.name}>
                   <Icon name="chart-line-up" />
                   <span className="goals-move-name">{exName(mv.name)}</span>
-                  <span className="goals-chip grow">{label(mv.region)}</span>
+                  <Chip size="sm" tone="accent">
+                    {label(mv.region)}
+                  </Chip>
                 </div>
               ))}
             </div>
-          </section>
+          </Card>
         )}
 
         {(physique || hasFocus) && (
-          <button className="goals-reset" onClick={() => setConfirmReset(true)}>
+          <Button
+            variant="danger"
+            size="sm"
+            className="goals-reset"
+            onClick={() => setConfirmReset(true)}
+          >
             {t.goalsReset}
-          </button>
+          </Button>
         )}
       </div>
 

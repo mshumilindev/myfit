@@ -6,7 +6,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useT } from '../i18n';
-import { Icon } from '../ui';
+import { Button, IconButton } from './ui/Button';
+import { Segmented } from './ui/Segmented';
 
 export function PhotoSlider({
   images,
@@ -50,12 +51,10 @@ export function PhotoSlider({
 
   return createPortal(
     <div className="photo-slider" role="dialog" aria-modal="true" aria-label={title}>
-      <button type="button" className="ps-scrim" onClick={onClose} aria-label={t.srClose} />
+      <Button variant="ghost" className="ps-scrim" onClick={onClose} aria-label={t.srClose} />
       <div className="ps-top">
         <span className="ps-title">{title}</span>
-        <button type="button" className="ps-close" onClick={onClose} aria-label={t.srClose}>
-          <Icon name="x" weight="bold" />
-        </button>
+        <IconButton icon="x" label={t.srClose} className="ps-close" onClick={onClose} />
       </div>
       <div
         className="ps-track"
@@ -73,36 +72,25 @@ export function PhotoSlider({
       </div>
       {images.length > 1 && (
         <div className="ps-bottom">
-          <button
-            type="button"
-            className="ps-arrow"
+          <IconButton
+            icon="caret-left"
+            label={t.previousAction}
             onClick={() => go(idx - 1)}
             disabled={idx === 0}
-            aria-label={t.previousAction}
-          >
-            <Icon name="caret-left" weight="bold" />
-          </button>
-          <div className="ps-steps">
-            {images.map((_, i) => (
-              <button
-                type="button"
-                key={i}
-                className={`ps-step${i === idx ? ' on' : ''}`}
-                onClick={() => go(i)}
-              >
-                {label(i)}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            className="ps-arrow"
+          />
+          <Segmented
+            className="ps-steps"
+            size="sm"
+            value={idx}
+            onChange={go}
+            options={images.map((_, i) => ({ value: i, label: label(i) }))}
+          />
+          <IconButton
+            icon="caret-right"
+            label={t.nextAction}
             onClick={() => go(idx + 1)}
             disabled={idx === images.length - 1}
-            aria-label={t.nextAction}
-          >
-            <Icon name="caret-right" weight="bold" />
-          </button>
+          />
         </div>
       )}
     </div>,

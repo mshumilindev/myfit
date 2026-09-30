@@ -1,4 +1,7 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
+import { EmptyState } from '../components/ui/EmptyState';
+import { SwitchIndicator } from '../components/ui/Switch';
+import { BackButton } from '../components/ui/BackButton';
 import {
   type CSSProperties,
   Fragment,
@@ -8,10 +11,20 @@ import {
   useRef,
   useState,
 } from 'react';
+import { Field } from '../components/ui/Field';
 import { NumberStepper } from '../components/ui/NumberStepper';
 import { Button, IconButton } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Ring } from '../components/ui/Ring';
+import { SetRow } from '../components/ui/SetRow';
+import { Tag } from '../components/ui/Tag';
+import { StatTile } from '../components/ui/StatTile';
+import { Chip } from '../components/ui/Chip';
+import { IconTile } from '../components/ui/IconTile';
+import { Segmented } from '../components/ui/Segmented';
+import { SectionLabel } from '../components/ui/SectionLabel';
+import { GroupedList, ListRow } from '../components/ui/GroupedList';
+import { Switch as KitSwitch } from '../components/ui/Switch';
 import type { Shell } from '../App';
 import type {
   DropEntry,
@@ -237,12 +250,10 @@ import {
 import {
   ConfirmDialog,
   Dialog,
-  EmptyState,
   ExerciseName,
   useExerciseName,
   Icon,
   Sheet,
-  Switch,
   useIsDesktop,
 } from '../ui';
 import type { Strings } from '../i18n/en';
@@ -449,13 +460,17 @@ function ShareSheet(props: {
     <Sheet className="share-sheet" onClose={props.onClose}>
       <div className="share-head">
         <h3>{t.shareSheetTitle}</h3>
-        <div className="share-format" role="tablist">
-          <button className={format === 'story' ? 'on' : ''} onClick={() => setFormat('story')}>
-            {t.shareFormatStory}
-          </button>
-          <button className={format === 'square' ? 'on' : ''} onClick={() => setFormat('square')}>
-            {t.shareFormatSquare}
-          </button>
+        <div className="share-format">
+          <Segmented
+            tabs
+            size="sm"
+            options={[
+              { value: 'story', label: t.shareFormatStory },
+              { value: 'square', label: t.shareFormatSquare },
+            ]}
+            value={format}
+            onChange={setFormat}
+          />
         </div>
       </div>
       <div className={`share-preview ${format}`}>
@@ -463,44 +478,48 @@ function ShareSheet(props: {
       </div>
       <div className="share-actions">
         {props.isDesktop ? (
-          <button
-            className="btn btn-primary grow"
+          <Button
+            variant="primary"
+            className="grow"
             disabled={busy}
             onClick={() => withBlob(download)}
           >
             <Icon name="download-simple" />
             {t.shareDownload}
-          </button>
+          </Button>
         ) : (
-          <button
-            className="btn btn-primary grow"
+          <Button
+            variant="primary"
+            className="grow"
             disabled={busy}
             onClick={() => withBlob(nativeShare)}
           >
             <Icon name="export" />
             {t.shareToStories}
-          </button>
+          </Button>
         )}
         {!props.isDesktop && (
-          <button
-            className="btn btn-secondary share-icon-btn"
+          <Button
+            variant="secondary"
+            className="share-icon-btn"
             disabled={busy}
             onClick={() => withBlob(download)}
             aria-label={t.shareSaveImage}
             title={t.shareSaveImage}
           >
             <Icon name="download-simple" />
-          </button>
+          </Button>
         )}
-        <button
-          className="btn btn-secondary share-icon-btn"
+        <Button
+          variant="secondary"
+          className="share-icon-btn"
           disabled={busy}
           onClick={() => withBlob(copy)}
           aria-label={t.shareCopy}
           title={t.shareCopy}
         >
           <Icon name="copy" />
-        </button>
+        </Button>
       </div>
     </Sheet>
   );
@@ -1154,17 +1173,16 @@ export function SessionView(props: {
   /** Icon-only exercise-options button for a collapsed row — opens the menu
    * sheet WITHOUT expanding the card (the click stops here). */
   const cardCfg = (exId: string) => (
-    <button
-      type="button"
+    <IconButton
+      icon="gear"
+      size="sm"
       className="card-cfg"
-      aria-label={t.menuAction}
+      label={t.menuAction}
       onClick={(e) => {
         e.stopPropagation();
         setSheet({ kind: 'menu', exId });
       }}
-    >
-      <Icon name="gear" />
-    </button>
+    />
   );
   function rowKey(e: { key: string; preventDefault: () => void }, fn: () => void): void {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -1498,8 +1516,10 @@ export function SessionView(props: {
       <div className="tb-tiles">
         {picks.map((p, i) => (
           <div key={p.name} className={`tb-tile${i === 0 ? ' primary' : ''}`}>
-            <button
-              type="button"
+            <Card
+              as="button"
+              pad="none"
+              emphasis="quiet"
               className={`tb-tile-main${photoTintClass}${tintOf(p)}`}
               onClick={() => openPick(p)}
             >
@@ -1522,17 +1542,16 @@ export function SessionView(props: {
                 {p.kind === 'cooldown' || p.kind === 'warmup' ? p.name : exName(p.name)}
               </span>
               {p.sub && <span className="tb-tsub">{p.sub}</span>}
-            </button>
+            </Card>
             {p.kind === 'strength' && (
-              <button
-                type="button"
+              <IconButton
+                icon="info"
+                size="sm"
                 className="tb-info"
-                aria-label={t.detailsAction}
+                label={t.detailsAction}
                 title={t.detailsAction}
                 onClick={() => setTiredInfo(p.name)}
-              >
-                <Icon name="info" />
-              </button>
+              />
             )}
           </div>
         ))}
@@ -1714,9 +1733,9 @@ export function SessionView(props: {
               );
             })}
           </div>
-          <button
-            type="button"
-            className="btn btn-primary pbs-apply"
+          <Button
+            variant="primary"
+            className="pbs-apply"
             onClick={() => {
               applyPlay(play);
               setPlaySheet(null);
@@ -1724,11 +1743,11 @@ export function SessionView(props: {
           >
             <Icon name="book-open" />
             {t.pbApply}
-          </button>
+          </Button>
         </div>
-        <button
-          type="button"
-          className="btn btn-secondary pbs-custom"
+        <Button
+          variant="secondary"
+          className="pbs-custom"
           onClick={() => {
             setPlaySheet(null);
             openPick(hero);
@@ -1736,7 +1755,7 @@ export function SessionView(props: {
         >
           <Icon name="pencil-simple" />
           {t.pbCustom}
-        </button>
+        </Button>
       </Sheet>
     );
   }
@@ -1846,15 +1865,16 @@ export function SessionView(props: {
           : t.esAllFresh;
 
     const infoBtn = (name: string, cls: string) => (
-      <button
-        type="button"
+      <IconButton
+        icon="info"
+        size="sm"
+        variant="photo"
+        shape="round"
         className={cls}
-        aria-label={t.detailsAction}
+        label={t.detailsAction}
         title={t.detailsAction}
         onClick={() => setTiredInfo(name)}
-      >
-        <Icon name="info" />
-      </button>
+      />
     );
     return (
       <div className={`es${photoTintClass}`}>
@@ -1872,14 +1892,14 @@ export function SessionView(props: {
                   {t.atlasPlanCardMeta(todayPlan.built.estMinutes, todayPlan.built.main.length)}
                 </span>
               </span>
-              <button
-                type="button"
+              <Button
+                variant="primary"
+                icon="play"
                 className="atl-plancard-go"
                 onClick={() => addGeneratedDayTo(workout!.id, todayPlan.built)}
               >
-                <Icon name="play" weight="fill" />
                 {t.atlasPlanStart}
-              </button>
+              </Button>
             </div>
           )}
           <div className="es-ready">
@@ -1911,8 +1931,10 @@ export function SessionView(props: {
             <div className={`es-hero${hero.kind === 'strength' ? '' : ' warm'}${tintOf(hero)}`}>
               {hero.img ? <img src={hero.img} alt="" /> : <span className="es-hero-noimg" />}
               <span className="photo-tint-layer" aria-hidden />
-              <button
-                type="button"
+              <Card
+                as="button"
+                pad="none"
+                emphasis="hero"
                 className="es-hero-main"
                 onClick={() => {
                   // Enough history for this weekday → offer the whole day;
@@ -1933,7 +1955,7 @@ export function SessionView(props: {
                 <span className="es-play" aria-hidden>
                   <Icon name="play" weight="fill" />
                 </span>
-              </button>
+              </Card>
               {hero.kind === 'strength' && infoBtn(hero.name, 'es-info')}
             </div>
           )}
@@ -1945,7 +1967,13 @@ export function SessionView(props: {
                     key={p.name}
                     className={`es-tile${p.kind === 'strength' ? '' : ' warm'}${tintOf(p)}`}
                   >
-                    <button type="button" className="es-tile-main" onClick={() => openPick(p)}>
+                    <Card
+                      as="button"
+                      pad="none"
+                      emphasis="quiet"
+                      className="es-tile-main"
+                      onClick={() => openPick(p)}
+                    >
                       {p.img ? (
                         <img src={p.img} alt="" />
                       ) : (
@@ -1961,7 +1989,7 @@ export function SessionView(props: {
                         </span>
                         <span className="es-tile-sub">{p.sub || '\u00a0'}</span>
                       </span>
-                    </button>
+                    </Card>
                     {p.kind === 'strength' && infoBtn(p.name, 'es-info sm')}
                   </div>
                 ))}
@@ -1976,28 +2004,25 @@ export function SessionView(props: {
               <span className="es-circuit-title">{t.circuitLabel}</span>
               <span className="es-circuit-sub">{t.esCircuitSub}</span>
             </span>
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
+              icon="play"
               className="es-circuit-go"
               onClick={() => {
                 setCircuit((c) => ({ on: true, groupId: crypto.randomUUID(), rounds: c.rounds }));
                 setSheet({ kind: 'add' });
               }}
             >
-              <Icon name="play" weight="fill" />
               {t.esCircuitStart}
-            </button>
+            </Button>
           </div>
         </div>
         <div className="es-dock">
-          <button
-            type="button"
-            className="btn btn-primary es-add"
-            onClick={() => setSheet({ kind: 'add' })}
-          >
+          <Button variant="primary" className="es-add" onClick={() => setSheet({ kind: 'add' })}>
             <Icon name="plus" weight="bold" />
             {t.addExercise}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -2052,21 +2077,14 @@ export function SessionView(props: {
     const picks = collapsed ? [] : tiredPicks(ex, v);
     return (
       <div className={`tired-banner${collapsed ? ' collapsed' : ''}`}>
-        <button
-          type="button"
-          className="tb-head"
+        <ListRow
+          icon={<IconTile icon="barbell" />}
+          label={title}
+          sub={sub}
           aria-expanded={!collapsed}
+          trailing={<Icon name={collapsed ? 'caret-down' : 'caret-up'} />}
           onClick={() => setTiredCollapsed((m) => ({ ...m, [ex.id]: !collapsed }))}
-        >
-          <span className="tb-ic">
-            <Icon name="barbell" />
-          </span>
-          <span className="tb-text">
-            <span className="tb-title">{title}</span>
-            <span className="tb-sub">{sub}</span>
-          </span>
-          <Icon name={collapsed ? 'caret-down' : 'caret-up'} className="tb-chev" />
-        </button>
+        />
         {!collapsed && (
           <>
             <div className="tb-why">
@@ -2104,21 +2122,14 @@ export function SessionView(props: {
     if (!collapsed && picks.length === 0) return null;
     return (
       <div className={`tired-banner next-banner${collapsed ? ' collapsed' : ''}`}>
-        <button
-          type="button"
-          className="tb-head"
+        <ListRow
+          icon={<IconTile icon="arrow-right" tone="accent" />}
+          label={t.nextUpTitle}
+          sub={t.nextUpSub}
           aria-expanded={!collapsed}
+          trailing={<Icon name={collapsed ? 'caret-down' : 'caret-up'} />}
           onClick={() => setTiredCollapsed((m) => ({ ...m, [ex.id]: !collapsed }))}
-        >
-          <span className="tb-ic start">
-            <Icon name="arrow-right" />
-          </span>
-          <span className="tb-text">
-            <span className="tb-title">{t.nextUpTitle}</span>
-            <span className="tb-sub">{t.nextUpSub}</span>
-          </span>
-          <Icon name={collapsed ? 'caret-down' : 'caret-up'} className="tb-chev" />
-        </button>
+        />
         {!collapsed && renderPickTiles(picks)}
       </div>
     );
@@ -2353,28 +2364,28 @@ export function SessionView(props: {
     // empty focus (nothing to log yet) needs a door up here.
     const fmActions = !focusEx ? (
       <div className="fm-actions">
-        <button
+        <IconButton
+          icon="sliders-horizontal"
           className="fm-icon-btn"
           onClick={() =>
             setSheet({ kind: 'opts', tab: 'session', exId: null, set: null, ghost: null })
           }
-          aria-label={t.sessionSettings}
+          label={t.sessionSettings}
           title={t.sessionSettings}
-        >
-          <Icon name="sliders-horizontal" />
-        </button>
+        />
       </div>
     ) : null;
     const finishBtn = (
-      <button
-        className="btn focus-finish"
+      <Button
+        variant="ghost"
+        className="focus-finish"
         disabled={entries === 0}
         onClick={requestFinish}
         aria-label={t.finish}
         title={t.finish}
       >
         <Icon name="check" weight="bold" />
-      </button>
+      </Button>
     );
     if (!focusEx && live && workout!.exercises.length === 0) {
       return <div className="focus-view focus-view-empty">{renderEmptyStart()}</div>;
@@ -2390,19 +2401,28 @@ export function SessionView(props: {
               </span>
               <h3 className="fe-title">{t.noExercisesYet}</h3>
               <p className="fe-body">{t.noExercisesBody}</p>
-              <button className="btn btn-primary fe-add" onClick={() => setSheet({ kind: 'add' })}>
+              <Button
+                variant="primary"
+                className="fe-add"
+                onClick={() => setSheet({ kind: 'add' })}
+              >
                 <Icon name="plus" />
                 {t.addExercise}
-              </button>
+              </Button>
               {live &&
                 hasSessionStartCoach(
                   store.workouts.filter((w) => w.finishedAt !== null),
                   now,
                 ) && (
-                  <button className="fe-coach" onClick={() => setSheet({ kind: 'coach' })}>
-                    <Icon name="heartbeat" weight="fill" />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon="heartbeat"
+                    className="fe-coach"
+                    onClick={() => setSheet({ kind: 'coach' })}
+                  >
                     {t.sessionCoachButton}
-                  </button>
+                  </Button>
                 )}
             </div>
             {live && renderStartBanner()}
@@ -2425,11 +2445,12 @@ export function SessionView(props: {
         );
       }),
       // a dashed placeholder for the next exercise you can still add
-      <button
+      <IconButton
         key="__add"
-        type="button"
+        icon="plus"
         className="add"
-        aria-label={t.addExercise}
+        shape="pill"
+        label={t.addExercise}
         title={t.addExercise}
         onClick={() => setSheet({ kind: 'add' })}
       />,
@@ -2448,26 +2469,28 @@ export function SessionView(props: {
         </div>
         {renderKitTray()}
         <div className="focus-nav">
-          <button
-            type="button"
-            className="btn focus-discard"
+          <Button
+            variant="ghost"
+            className="focus-discard"
             onClick={() => setDialog({ kind: 'del-workout' })}
             aria-label={t.discardSession}
             title={t.discardSession}
           >
             <Icon name="trash" />
-          </button>
-          <button
-            className="btn btn-secondary focus-back"
+          </Button>
+          <Button
+            variant="secondary"
+            className="focus-back"
             disabled={focusPos === 0}
             onClick={() => setFocusIdx(focusPos - 1)}
             aria-label={t.focusBack}
           >
             <Icon name="caret-left" />
-          </button>
+          </Button>
           {focusHasNext ? (
-            <button
-              className="btn btn-secondary focus-next"
+            <Button
+              variant="secondary"
+              className="focus-next"
               onClick={() => setFocusIdx(focusPos + 1)}
             >
               {(() => {
@@ -2484,15 +2507,16 @@ export function SessionView(props: {
                   : t.focusNext(nx?.name ?? '')}
               </span>
               <Icon name="caret-right" />
-            </button>
+            </Button>
           ) : (
-            <button
-              className="btn btn-secondary focus-next"
+            <Button
+              variant="secondary"
+              className="focus-next"
               onClick={() => setSheet({ kind: 'add' })}
             >
               {t.focusNextExercise}
               <Icon name="caret-right" />
-            </button>
+            </Button>
           )}
           {finishBtn}
         </div>
@@ -2563,17 +2587,17 @@ export function SessionView(props: {
   function renderPrCard() {
     const pm = prMoment!;
     const tile = (label: string, val: string, delta: number) => (
-      <div className="pr-tile">
-        <span className="pr-tile-lab">{label}</span>
-        <span className="pr-tile-val">{val}</span>
-        <span className={`pr-tile-d${delta > 0 ? ' up' : ''}`}>
-          {delta > 0 ? `+${fmtWeightValue(Math.round(delta * 10) / 10)}` : '—'}
-        </span>
-      </div>
+      <StatTile
+        className="pr-tile"
+        tone={delta > 0 ? 'ok' : 'neutral'}
+        label={label}
+        value={val}
+        sub={delta > 0 ? `+${fmtWeightValue(Math.round(delta * 10) / 10)}` : '—'}
+      />
     );
     const setText = `${fmtWeightKg(pm.w)} × ${pm.reps}`;
     return (
-      <div className="pr-card" role="status">
+      <Card emphasis="hero" className="pr-card" role="status">
         <div className="pr-confetti" aria-hidden>
           {Array.from({ length: 14 }, (_, i) => (
             <span key={i} style={{ '--i': i } as CSSProperties} />
@@ -2590,8 +2614,9 @@ export function SessionView(props: {
           {tile(t.prSetVolume, fmtWeightValue(pm.vol), pm.volPrev > 0 ? pm.vol - pm.volPrev : 0)}
         </div>
         <div className="pr-actions">
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            icon="share-network"
             className="pr-share"
             onClick={() =>
               setPrShare({
@@ -2617,15 +2642,14 @@ export function SessionView(props: {
               })
             }
           >
-            <Icon name="share-network" />
             {t.prShare}
-          </button>
-          <button type="button" className="pr-ok" onClick={() => setPrMoment(null)}>
+          </Button>
+          <Button variant="fill" className="pr-ok" onClick={() => setPrMoment(null)}>
             {t.prNiceRest}
-          </button>
+          </Button>
         </div>
         <div className="pr-fold">{t.prFolds}</div>
-      </div>
+      </Card>
     );
   }
 
@@ -2675,14 +2699,15 @@ export function SessionView(props: {
                 (t.failWhy as Record<string, string>)[justSet.failureWhy ?? ''] ?? t.failShort,
               )}
             </span>
-            <button
-              type="button"
+            <Button
+              variant="link"
+              size="sm"
               onClick={() =>
                 upsertSet(workout!.id, lastEx.id, { ...justSet, failure: 'no', failureWhy: null })
               }
             >
               {t.failNotFailure}
-            </button>
+            </Button>
           </div>
         ) : null;
       return (
@@ -2701,8 +2726,10 @@ export function SessionView(props: {
               title={t.restNoteTitle}
               body={nextLine}
             />
-            <button
-              type="button"
+            <Card
+              as="button"
+              pad="none"
+              emphasis="quiet"
               className="rst-ring"
               aria-label={t.restSettingsAria}
               onClick={() => setSheet({ kind: 'rest', exName: lastEx.name })}
@@ -2728,7 +2755,7 @@ export function SessionView(props: {
                   )}
                 </span>
               </Ring>
-            </button>
+            </Card>
             <div className="rst-body">
               <div className="rst-lbl">
                 <Icon name="timer" />
@@ -2808,12 +2835,13 @@ export function SessionView(props: {
             {t.circuitSoFar(workout.exercises.filter((e) => e.groupId === circuit.groupId).length)}
           </div>
         </div>
-        <button
-          className="btn btn-secondary cb-done"
+        <Button
+          variant="secondary"
+          className="cb-done"
           onClick={() => setCircuit((c) => ({ ...c, on: false, groupId: null }))}
         >
           {t.circuitFinishSet}
-        </button>
+        </Button>
       </div>
     ) : null;
 
@@ -2848,35 +2876,30 @@ export function SessionView(props: {
       <>
         <div className="fss" key={g.groupId}>
           <div className="fss-head">
-            <span className="tag tag-accent">{t.supersetTag(g.letter)}</span>
+            <Tag tone="accent">{t.supersetTag(g.letter)}</Tag>
             <span className="fss-round">{t.roundOf(round, rounds)}</span>
-            <button
+            <IconButton
+              icon="dots-three-vertical"
+              size="sm"
               className="dots"
+              label={t.menuAction}
               onClick={() => setSheet({ kind: 'group-menu', groupId: g.groupId })}
-              aria-label={t.menuAction}
-            >
-              <Icon name="dots-three-vertical" />
-            </button>
+            />
           </div>
           <div className="fss-members">
             {g.exercises.map((e, i) => {
               const done = e.sets.length >= rounds;
               return (
-                <button
+                <Chip
                   key={e.id}
-                  type="button"
-                  className={`fss-m${e.id === cur.id ? ' on' : ''}${done ? ' done' : ''}`}
-                  aria-pressed={e.id === cur.id}
+                  className="fss-m"
+                  selected={e.id === cur.id}
+                  icon={done ? 'check' : undefined}
                   onClick={() => setFocusPick({ id: e.id, logged: focusGroupLogged })}
                 >
-                  <span className="fss-idx">
-                    {done ? <Icon name="check" weight="bold" /> : `${g.letter}${i + 1}`}
-                  </span>
-                  <span className="fss-name">{exName(e.name)}</span>
-                  <span className="fss-count">
-                    {e.sets.length}/{rounds}
-                  </span>
-                </button>
+                  {done ? '' : `${g.letter}${i + 1} `}
+                  {exName(e.name)} {e.sets.length}/{rounds}
+                </Chip>
               );
             })}
           </div>
@@ -2900,14 +2923,12 @@ export function SessionView(props: {
         ghost: isTimedExercise(ex) && !isMarkerExercise(ex) ? timedSheetGhost : null,
       });
     const cfgBtn = (
-      <button
-        className="gset-cfg"
-        aria-label={t.setOptions}
+      <IconButton
+        icon="sliders-horizontal"
+        label={t.setOptions}
         title={t.setOptions}
         onClick={openExOpts}
-      >
-        <Icon name="sliders-horizontal" />
-      </button>
+      />
     );
     // Cardio photo: the chosen machine, else the lift catalog's photo.
     const cardioImg =
@@ -2977,9 +2998,11 @@ export function SessionView(props: {
     const sortedSets = [...ex.sets].sort((a, b) => a.position - b.position);
     const meters = focusView && live && isStrengthExercise(ex) ? rowMeters(ex) : null;
     return (
-      <div
+      <Card
         key={ex.id}
         data-exid={ex.id}
+        emphasis={focusView ? 'quiet' : 'card'}
+        pad="sm"
         className={`exercise-card${completed ? ' completed' : ''}${
           !grp && focusedId === ex.id ? ' active' : ''
         }${grp ? ' ss-card' : ''}${grp?.active ? ' ss-active' : ''}${timed ? ' timed-card' : ''}${
@@ -3007,27 +3030,23 @@ export function SessionView(props: {
         <div className="head">
           {renaming === ex.id ? (
             <>
-              <input
-                className="input"
-                style={{
-                  minHeight: 40,
-                  fontSize: 15,
-                  borderColor: 'var(--color-accent)',
-                }}
+              <Field
+                className="fx-field-accent"
+                style={{ minHeight: 40 }}
                 value={renameVal}
                 autoFocus
                 onChange={(e) => setRenameVal(e.target.value)}
               />
-              <button
-                className="btn btn-primary"
-                style={{ height: 40, fontSize: 13 }}
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={() => {
                   if (renameVal.trim()) renameExercise(workout!.id, ex.id, renameVal.trim());
                   setRenaming(null);
                 }}
               >
                 {t.save}
-              </button>
+              </Button>
             </>
           ) : (
             <>
@@ -3052,7 +3071,8 @@ export function SessionView(props: {
                   <Icon name="dots-six" />
                 </span>
               )}
-              <button
+              <Button
+                variant="link"
                 className="name"
                 draggable={!grp}
                 onDragStart={(e) => {
@@ -3071,7 +3091,7 @@ export function SessionView(props: {
                 }
               >
                 <ExerciseName name={ex.name} />
-              </button>
+              </Button>
               {(timed || marker) && <span className="prev">{t.exerciseKindNames[kind]}</span>}
               {!grp && !timed && !marker && prev && !target && (
                 <span className="prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
@@ -3092,7 +3112,9 @@ export function SessionView(props: {
               {/* In focus mode strength sets reach options via the sliders next to
                   Log; markers and cardio have no set row, so they keep a door here. */}
               {!grp && !focusView && (
-                <button
+                <IconButton
+                  icon={focusView ? 'sliders-horizontal' : 'gear'}
+                  size="sm"
                   className="dots ex-settings"
                   onClick={() =>
                     setSheet(
@@ -3107,39 +3129,28 @@ export function SessionView(props: {
                         : { kind: 'menu', exId: ex.id },
                     )
                   }
-                  aria-label={t.menuAction}
-                >
-                  <Icon name={focusView ? 'sliders-horizontal' : 'gear'} />
-                </button>
+                  label={t.menuAction}
+                />
               )}
             </>
           )}
         </div>
-        {renaming === ex.id && (
-          <div
-            style={{
-              fontSize: 11,
-              color: 'var(--color-neutral-600)',
-              marginBottom: 8,
-            }}
-          >
-            {t.renameHint}
-          </div>
-        )}
+        {renaming === ex.id && <div className="ut-xs ut-faint umb-8">{t.renameHint}</div>}
         {showChips && (
           <div className="exercise-chips one-line">
-            <button
-              className={`eq-pick-btn${
+            <IconButton
+              icon="barbell"
+              size="sm"
+              shape="pill"
+              variant={
                 (ex.equipmentItems && ex.equipmentItems.length > 0) || equipment.length > 0
-                  ? ' on'
-                  : ''
-              }`}
+                  ? 'secondary'
+                  : 'ghost'
+              }
               onClick={() => setSheet({ kind: 'equip', exId: ex.id })}
-              aria-label={t.eqEquipment}
+              label={t.eqEquipment}
               title={t.eqEquipment}
-            >
-              <Icon name="barbell" />
-            </button>
+            />
             <SidesChip
               ex={ex}
               onClick={
@@ -3192,8 +3203,10 @@ export function SessionView(props: {
             const photos = (richExerciseByName(ex.name)?.images ?? []).slice(0, 4);
             if (photos.length === 0) return null;
             return (
-              <button
-                type="button"
+              <Card
+                as="button"
+                pad="none"
+                emphasis="quiet"
                 className={`ex-photos n${Math.min(photos.length, 2)}`}
                 onClick={() => setPhotoView({ images: photos, title: ex.name })}
                 aria-label={ex.name}
@@ -3209,7 +3222,7 @@ export function SessionView(props: {
                 <span className="ex-photos-zoom" aria-hidden>
                   <Icon name="corners-out" weight="bold" />
                 </span>
-              </button>
+              </Card>
             );
           })()}
         {marker ? (
@@ -3243,25 +3256,26 @@ export function SessionView(props: {
               <span className="cardio-photo">
                 <img src={cardioImg} alt="" />
                 {!props.past && (
-                  <button
+                  <Chip
+                    icon="swap"
+                    onPhoto
                     className="cardio-machine-chip on-photo"
                     onClick={() => setSheet({ kind: 'cardio-machine', exId: ex.id })}
                   >
-                    <Icon name="swap" />
                     {t.cardioChangeMachine}
-                  </button>
+                  </Chip>
                 )}
               </span>
             ) : (
               kind === 'cardio' &&
               !props.past && (
-                <button
+                <Chip
+                  icon="swap"
                   className="cardio-machine-chip"
                   onClick={() => setSheet({ kind: 'cardio-machine', exId: ex.id })}
                 >
-                  <Icon name="swap" />
                   {t.cardioChangeMachine}
-                </button>
+                </Chip>
               )
             )}
             {(ex.sets.length > 0 || !live) && (
@@ -3288,8 +3302,8 @@ export function SessionView(props: {
                 if (pace) extras.push(t.pace500(mmss(pace * 1000)));
                 return (
                   <Fragment key={s.id}>
-                    <button
-                      className="set-row timed"
+                    <SetRow
+                      timed
                       onClick={() =>
                         setSheet({ kind: 'edit', exId: ex.id, set: s, ghost: timedSheetGhost })
                       }
@@ -3300,7 +3314,7 @@ export function SessionView(props: {
                         {cardioCol ? (cardioFieldVal(s, cardioCol) ?? '—') : ''}
                       </span>
                       <span className="kind">{s.rpe ?? t.optionalMark}</span>
-                    </button>
+                    </SetRow>
                     {extras.length > 0 && <div className="timed-extra">{extras.join(' · ')}</div>}
                   </Fragment>
                 );
@@ -3309,28 +3323,33 @@ export function SessionView(props: {
               {!live && (
                 <div className="ghost-row timed">
                   <span className="idx">{ex.sets.length + 1}</span>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="gval"
                     onClick={() =>
                       setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: timedSheetGhost })
                     }
                   >
                     {timedGhost.durationMin}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="gval"
                     onClick={() =>
                       setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: timedSheetGhost })
                     }
                   >
                     {cardioCol ? (cardioFieldVal(timedGhost, cardioCol) ?? '—') : ''}
-                  </button>
-                  <button
-                    className="btn btn-primary log-btn"
+                  </Button>
+                  <Button
+                    variant="primary"
+                    className="log-btn"
                     onClick={() => logTimedGhost(ex, timedGhost)}
                   >
                     {props.past ? t.add : t.log}
-                  </button>
+                  </Button>
                 </div>
               )}
               {renderRest(ex)}
@@ -3341,32 +3360,35 @@ export function SessionView(props: {
                 (timing?.exId === ex.id ? (
                   <div className="timed-timer running">
                     <span className="tt-count num">{mmss(now - timing.startedAt)}</span>
-                    <button className="btn btn-primary tt-stop" onClick={() => stopTiming(ex)}>
+                    <Button variant="primary" className="tt-stop" onClick={() => stopTiming(ex)}>
                       <Icon name="stop" weight="fill" />
                       {t.timerStop}
-                    </button>
+                    </Button>
                   </div>
                 ) : (
                   <>
                     <div className="gset-actions timed-actions">
                       {focusView && cfgBtn}
-                      <button
-                        className="btn btn-primary timed-timer start"
+                      <Button
+                        variant="primary"
+                        className="timed-timer start"
                         disabled={!!timing}
                         onClick={() => startTiming(ex)}
                       >
                         <Icon name="play" weight="fill" />
                         {ex.sets.length > 0 ? t.timerStartN(ex.sets.length + 1) : t.timerStart}
-                      </button>
+                      </Button>
                     </div>
-                    <button
+                    <Button
+                      variant="link"
+                      size="sm"
                       className="timed-manual"
                       onClick={() =>
                         setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: timedSheetGhost })
                       }
                     >
                       {t.timedLogManual}
-                    </button>
+                    </Button>
                   </>
                 ))}
             </div>
@@ -3476,21 +3498,21 @@ export function SessionView(props: {
                     </div>
                   ) : null;
                 const delBtn = live ? (
-                  <button
-                    type="button"
+                  <IconButton
+                    icon="trash"
+                    size="sm"
                     className="set-del"
                     title={t.deleteSet}
-                    aria-label={t.deleteSet}
+                    label={t.deleteSet}
                     onClick={() => setDialog({ kind: 'del-set', exId: ex.id, setId: s.id })}
-                  >
-                    <Icon name="trash" />
-                  </button>
+                  />
                 ) : null;
                 const row = (
-                  <button
-                    className={`set-row${rowCls}${type === 'warmup' ? ' warm' : ''}${
-                      rec ? ' record' : ''
-                    }${meterStyle ? ' metered' : ''}`}
+                  <SetRow
+                    className={rowCls.trim()}
+                    warm={type === 'warmup'}
+                    record={!!rec}
+                    metered={!!meterStyle}
                     style={meterStyle}
                     onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: s, ghost })}
                   >
@@ -3515,27 +3537,40 @@ export function SessionView(props: {
                         <span className="kind set-tags">
                           {!rec && type !== 'working' ? setKindLabel(ex, s, grp) : null}
                           {rpeV !== null ? (
-                            <span className="tag-rpe">@{rpeV}</span>
+                            <Tag tone="neutral" className="tag-rpe">
+                              @{rpeV}
+                            </Tag>
                           ) : rpeEst !== null ? (
-                            <span className="tag-rpe est" title={t.rpeEstHint(String(rpeEst))}>
+                            <Tag
+                              tone="neutral"
+                              className="tag-rpe est"
+                              title={t.rpeEstHint(String(rpeEst))}
+                            >
                               ~{rpeEst}
-                            </span>
+                            </Tag>
                           ) : null}
                           {fail && (
-                            <span
+                            <Tag
+                              tone="injury"
+                              solid={s.failure !== 'auto'}
                               className={`tag-fail${s.failure === 'auto' ? ' auto' : ''}`}
                               title={s.failure === 'auto' ? t.failAutoShort : t.failShort}
                               aria-label={s.failure === 'auto' ? t.failAutoShort : t.failShort}
+                              icon={<Icon name="flame" weight="fill" />}
                             >
-                              <Icon name="flame" weight="fill" />
                               {s.failure === 'auto' ? 'F?' : 'F'}
-                            </span>
+                            </Tag>
                           )}
                           {rec && (
-                            <span className="tag-pr" aria-label={t.record}>
-                              <Icon name="trophy" weight="fill" />
+                            <Tag
+                              tone="accent"
+                              solid
+                              className="tag-pr"
+                              aria-label={t.record}
+                              icon={<Icon name="trophy" weight="fill" />}
+                            >
                               PR
-                            </span>
+                            </Tag>
                           )}
                         </span>
                       );
@@ -3547,7 +3582,7 @@ export function SessionView(props: {
                           : ''}
                       </span>
                     )}
-                  </button>
+                  </SetRow>
                 );
                 if (drops.length === 0) {
                   return (
@@ -3571,7 +3606,10 @@ export function SessionView(props: {
                       <div className="dbar" />
                       <div className="dlist">
                         {drops.map((d, di) => (
-                          <button
+                          <Card
+                            as="button"
+                            pad="none"
+                            emphasis="quiet"
                             key={di}
                             className="drop-row"
                             onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: s, ghost })}
@@ -3588,7 +3626,7 @@ export function SessionView(props: {
                               {isDesktop ? t.dropRowN(di + 1) : t.dropN(di + 1)}
                             </span>
                             {isDesktop && <span />}
-                          </button>
+                          </Card>
                         ))}
                       </div>
                     </div>
@@ -3608,26 +3646,31 @@ export function SessionView(props: {
                 (grp ? (
                   <div className={`ghost-row${rowCls}`}>
                     <span className="idx">{`R${ex.sets.length + 1}`}</span>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="gval"
                       onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
                     >
                       {ghost.reps}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="gval"
                       onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
                     >
                       {ghost.weight === null ? '—' : fmtWeightValue(ghost.weight)}
-                    </button>
+                    </Button>
                     {isDesktop && <span className="kind" />}
-                    <button
-                      className="btn btn-primary log-btn"
+                    <Button
+                      variant="primary"
+                      className="log-btn"
                       disabled={directLogBlocked}
                       onClick={() => logGhost(ex, ghost, ghostKind(ghost, ghost.weight), ghost)}
                     >
                       {props.past ? t.add : t.log}
-                    </button>
+                    </Button>
                   </div>
                 ) : isStopwatchExercise(ex) && live ? (
                   <HoldWatchSet
@@ -3709,8 +3752,9 @@ export function SessionView(props: {
         {live && !grp && focusedId === ex.id && nextEx && (
           <>
             <div className="start-next-divider" />
-            <button
-              className="btn btn-secondary start-next"
+            <Button
+              variant="secondary"
+              className="start-next"
               onClick={() => {
                 const nx = nextEx;
                 if (!nx) return;
@@ -3724,7 +3768,7 @@ export function SessionView(props: {
             >
               <Icon name="arrow-down" />
               {t.startNext(nextEx.name)}
-            </button>
+            </Button>
           </>
         )}
         {ex.sets.length === 0 && live && !marker && !timed && (
@@ -3740,7 +3784,7 @@ export function SessionView(props: {
                     : t.ghostHint}
           </div>
         )}
-      </div>
+      </Card>
     );
   }
 
@@ -3751,13 +3795,11 @@ export function SessionView(props: {
     <>
       {tabs && !isMarkerExercise(ex) && <div className="opts-group-label">{t.optsGroupChange}</div>}
       {tabs && isTimedExercise(ex) && exerciseKind(ex) === 'cardio' && !props.past && (
-        <button
-          className="menu-item"
+        <ListRow
+          icon={<IconTile icon="swap" />}
+          label={t.cardioChangeMachine}
           onClick={() => setSheet({ kind: 'cardio-machine', exId: ex.id })}
-        >
-          <Icon name="swap" />
-          {t.cardioChangeMachine}
-        </button>
+        />
       )}
       {sidesEligible(ex) &&
         loadTypeFor(ex) !== 'assist' &&
@@ -3766,24 +3808,24 @@ export function SessionView(props: {
           const sv = sidesFor(ex.name) ?? (perHandFactor(ex) === 2 ? 'one' : 'both');
           return (
             <div className="menu-sides sides-block">
-              <div className="toggle-row sides-row">
-                <Icon name="arrows-out-line-horizontal" />
-                <span className="lab">{t.sidesLabel}</span>
-                <div className="seg2 sides-seg">
-                  <button
-                    className={sv === 'both' ? 'active' : ''}
-                    onClick={() => setExerciseSides(ex.name, 'both')}
-                  >
-                    {t.sidesBoth}
-                  </button>
-                  <button
-                    className={sv === 'one' ? 'active' : ''}
-                    onClick={() => setExerciseSides(ex.name, 'one')}
-                  >
-                    {t.sidesOne}
-                  </button>
-                </div>
-              </div>
+              <ListRow
+                className="sides-row"
+                icon={<Icon name="arrows-out-line-horizontal" />}
+                label={t.sidesLabel}
+                trailing={
+                  <Segmented
+                    className="sides-seg"
+                    size="sm"
+                    label={t.sidesLabel}
+                    value={sv}
+                    onChange={(v) => setExerciseSides(ex.name, v)}
+                    options={[
+                      { value: 'both', label: t.sidesBoth },
+                      { value: 'one', label: t.sidesOne },
+                    ]}
+                  />
+                }
+              />
               {sv === 'one' && (
                 <div className="sides-note">
                   <Icon name="info" />
@@ -3796,108 +3838,116 @@ export function SessionView(props: {
       {/* Warm-up / cool-down markers only need removing; cardio keeps the
           set tools but has no catalog details or lift history. */}
       {isStrengthExercise(ex) && (
-        <button className="menu-item" onClick={() => setSheet({ kind: 'replace', exId: ex.id })}>
-          <Icon name="swap" />
-          {t.replaceExercise}
-        </button>
+        <ListRow
+          icon={<IconTile icon="swap" />}
+          label={t.replaceExercise}
+          onClick={() => setSheet({ kind: 'replace', exId: ex.id })}
+        />
       )}
       {isHome && tabs && !isMarkerExercise(ex) && (
         <div className="opts-move">
-          <button type="button" disabled={ex.position === 0} onClick={() => moveExercise(ex, -1)}>
-            <Icon name="arrow-up" />
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="arrow-up"
+            fullWidth
+            disabled={ex.position === 0}
+            onClick={() => moveExercise(ex, -1)}
+          >
             {t.homeMoveUp}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="arrow-down"
+            fullWidth
             disabled={ex.position >= workout!.exercises.length - 1}
             onClick={() => moveExercise(ex, 1)}
           >
-            <Icon name="arrow-down" />
             {t.homeMoveDown}
-          </button>
+          </Button>
         </div>
       )}
       {tabs && isStrengthExercise(ex) && !isHome && (
-        <button className="menu-item" onClick={() => setSheet({ kind: 'equip', exId: ex.id })}>
-          <Icon name="barbell" />
-          {t.eqEquipment}
-        </button>
+        <ListRow
+          icon={<IconTile icon="barbell" />}
+          label={t.eqEquipment}
+          onClick={() => setSheet({ kind: 'equip', exId: ex.id })}
+        />
       )}
       {!tabs && !isMarkerExercise(ex) && (
-        <button
-          className="menu-item"
+        <ListRow
+          icon={<IconTile icon="copy" />}
+          label={t.duplicateWithSets}
           onClick={() => {
             duplicateExercise(workout!.id, ex.id);
             setSheet(null);
           }}
-        >
-          <Icon name="copy" />
-          {t.duplicateWithSets}
-        </button>
+        />
       )}
       {isStrengthExercise(ex) &&
         !ex.groupId &&
         sortedExercises.filter((e) => isStrengthExercise(e) && !e.groupId).length > 1 && (
-          <button className="menu-item" onClick={() => setSheet({ kind: 'superset', exId: ex.id })}>
-            <Icon name="rows" />
-            {t.supersetWith}
-          </button>
+          <ListRow
+            icon={<IconTile icon="rows" />}
+            label={t.supersetWith}
+            onClick={() => setSheet({ kind: 'superset', exId: ex.id })}
+          />
         )}
       {ex.groupId && (
-        <button
-          className="menu-item"
+        <ListRow
+          icon={<IconTile icon="x" />}
+          label={t.ungroup}
           onClick={() => {
             ungroupSuperset(workout!.id, ex.groupId!);
             setSheet(null);
           }}
-        >
-          <Icon name="x" />
-          {t.ungroup}
-        </button>
+        />
       )}
       {isStrengthExercise(ex) && (
         <>
           {tabs && <div className="opts-group-label">{t.optsGroupLookUp}</div>}
           {/* Your own home moves aren't in the exercise base — no details. */}
           {!!richExerciseByName(ex.name) && (
-            <button
-              className="menu-item"
+            <ListRow
+              icon={<IconTile icon="info" />}
+              label={t.detailsAction}
               onClick={() => {
                 props.shell.openOverlay({ screen: 'exercise-detail', name: ex.name });
                 setSheet(null);
               }}
-            >
-              <Icon name="info" />
-              {t.detailsAction}
-            </button>
+            />
           )}
-          <button
-            className="menu-item"
+          <ListRow
+            icon={<IconTile icon="chart-line-up" />}
+            label={t.openHistory}
             onClick={() => {
               props.shell.openOverlay({ screen: 'exercise-history', name: ex.name });
               setSheet(null);
             }}
-          >
-            <Icon name="chart-line-up" />
-            {t.openHistory}
-          </button>
+          />
         </>
       )}
       {tabs && !isMarkerExercise(ex) && (
         <div className="opts-quick">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="copy"
+            fullWidth
             onClick={() => {
               duplicateExercise(workout!.id, ex.id);
               setSheet(null);
             }}
           >
-            <Icon name="copy" />
             {t.duplicateWithSets}
-          </button>
+          </Button>
           {ex.sets.length > 0 && (
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
+              icon="eraser"
+              fullWidth
               onClick={() => {
                 const removed = clearSets(workout!.id, ex.id);
                 setSheet(null);
@@ -3911,15 +3961,15 @@ export function SessionView(props: {
                 }
               }}
             >
-              <Icon name="eraser" />
               {t.clearAllSets}
-            </button>
+            </Button>
           )}
         </div>
       )}
       {!tabs && ex.sets.length > 0 && (
-        <button
-          className="menu-item"
+        <ListRow
+          icon={<IconTile icon="eraser" />}
+          label={t.clearAllSets}
           onClick={() => {
             const removed = clearSets(workout!.id, ex.id);
             setSheet(null);
@@ -3932,26 +3982,20 @@ export function SessionView(props: {
               });
             }
           }}
-        >
-          <Icon name="eraser" />
-          {t.clearAllSets}
-        </button>
+        />
       )}
-      <div className="sheet-rule" />
-      <button
-        className="menu-item danger"
-        onClick={() => {
-          if (ex.sets.length > 0) {
-            setDialog({ kind: 'del-ex', exId: ex.id });
-            setSheet(null);
-          } else {
-            removeExercise(ex);
-          }
-        }}
-      >
-        <Icon name="trash" />
-        {t.deleteExercise}
-      </button>
+      {/* In the tabbed options sheet, Delete exercise lives in the pinned footer. */}
+      {!tabs && (
+        <>
+          <div className="sheet-rule" />
+          <ListRow
+            icon={<IconTile icon="trash" tone="danger" />}
+            label={t.deleteExercise}
+            tone="danger"
+            onClick={() => requestDeleteExercise(ex)}
+          />
+        </>
+      )}
     </>
   );
 
@@ -3959,7 +4003,10 @@ export function SessionView(props: {
    *  options sheet's "Session" tab (which adds add / readiness / gym rows). */
   const renderSessionOptions = (tabs: boolean) => (
     <>
-      <button
+      <Card
+        as="button"
+        tone="accent"
+        emphasis="hero"
         className={`ss-circuit${circuit.on ? ' on' : ''}`}
         onClick={() =>
           setCircuit((c) =>
@@ -3977,29 +4024,29 @@ export function SessionView(props: {
             <span className="ss-circuit-title">{t.circuitLabel}</span>
             <span className="ss-circuit-hint">{t.circuitHint}</span>
           </span>
-          <Switch on={circuit.on} />
+          <SwitchIndicator on={circuit.on} size="sm" />
         </span>
         <span className="ss-desc">{t.circuitSettingDesc}</span>
-      </button>
+      </Card>
       {tabs && live && (
         <div className="opts-rows">
           {hasSessionStartCoach(
             store.workouts.filter((w) => w.finishedAt !== null),
             now,
           ) && (
-            <button className="menu-item" onClick={() => setSheet({ kind: 'coach' })}>
-              <Icon name="heartbeat" />
-              {t.sessionCoachButton}
-            </button>
+            <ListRow
+              icon={<IconTile icon="heartbeat" />}
+              label={t.sessionCoachButton}
+              onClick={() => setSheet({ kind: 'coach' })}
+            />
           )}
           {!isHome && (
-            <button className="menu-item" onClick={() => setSheet({ kind: 'gym' })}>
-              <Icon name="map-pin" />
-              <span className="mi-text">
-                {t.changeGym}
-                {gym ? <span className="mi-sub">{gym.name}</span> : null}
-              </span>
-            </button>
+            <ListRow
+              icon={<IconTile icon="map-pin" />}
+              label={t.changeGym}
+              sub={gym ? gym.name : undefined}
+              onClick={() => setSheet({ kind: 'gym' })}
+            />
           )}
         </div>
       )}
@@ -4182,6 +4229,15 @@ export function SessionView(props: {
     if (pos >= 0) setFocusIdx(Math.max(0, pos + d));
   }
 
+  function requestDeleteExercise(ex: Exercise): void {
+    if (ex.sets.length > 0) {
+      setDialog({ kind: 'del-ex', exId: ex.id });
+      setSheet(null);
+    } else {
+      removeExercise(ex);
+    }
+  }
+
   function removeExercise(ex: Exercise): void {
     const copy: Exercise = { ...ex, sets: [...ex.sets] };
     deleteExercise(workout!.id, ex.id);
@@ -4232,17 +4288,15 @@ export function SessionView(props: {
     const main = (
       <>
         {nextUp && !web && <NextUpLiveBanner m={nextUp} />}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="ul-flex ua-center uj-between">
           <div className="saved-mark">
             <Icon name="check-circle" weight="fill" />
             <span>{t.sessionSaved}</span>
           </div>
         </div>
         <div>
-          <h2 className="headline" style={{ fontSize: 32 }}>
-            {t.sessionDone}
-          </h2>
-          <div style={{ fontSize: 13, color: 'var(--color-neutral-500)', marginTop: 6 }}>
+          <h2 className="headline ut-hero">{t.sessionDone}</h2>
+          <div className="ut-base ut-dim umt-6">
             {fmtFullDate(workout.startedAt, locale)}
             {isHome ? ` · ${workout.dayName || t.homeSetTitle}` : gymName ? ` · ${gymName}` : ''}
           </div>
@@ -4371,44 +4425,45 @@ export function SessionView(props: {
         )}
         {nextUp?.live && !web ? (
           // p02: the timer runs — Done leads, Share folds to an icon.
-          <div className="summary-actions nu-running" style={{ marginTop: 'auto' }}>
+          <div className="summary-actions nu-running umt-auto">
             <NextUpKeepsTiming m={nextUp} />
             <div className="nu-bar">
-              <button
-                className="btn btn-secondary share-icon"
+              <Button
+                variant="secondary"
+                className="share-icon"
                 onClick={() => setShareOpen(true)}
                 aria-label={t.shareWorkout}
               >
                 <Icon name="export" />
-              </button>
-              <button className="btn btn-secondary grow" onClick={() => setSummary(false)}>
+              </Button>
+              <Button variant="secondary" className="grow" onClick={() => setSummary(false)}>
                 {t.editSession}
-              </button>
-              <button className="btn btn-primary grow" onClick={props.onClose}>
+              </Button>
+              <Button variant="primary" className="grow" onClick={props.onClose}>
                 {t.done}
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
-          <div className="summary-actions" style={{ marginTop: 'auto' }}>
-            <button className="btn btn-primary grow share-cta" onClick={() => setShareOpen(true)}>
+          <div className="summary-actions umt-auto">
+            <Button variant="primary" className="grow share-cta" onClick={() => setShareOpen(true)}>
               <Icon name="export" />
               {t.shareWorkout}
-            </button>
+            </Button>
             <div className="sheet-actions">
-              <button className="btn btn-secondary grow" onClick={() => setSummary(false)}>
+              <Button variant="secondary" className="grow" onClick={() => setSummary(false)}>
                 {t.editSession}
-              </button>
-              <button className="btn btn-secondary grow" onClick={props.onClose}>
+              </Button>
+              <Button variant="secondary" className="grow" onClick={props.onClose}>
                 {t.done}
-              </button>
+              </Button>
             </div>
           </div>
         )}
       </>
     );
     return (
-      <div className={`screen${web && nextUp ? ' sum-web' : ''}`} style={{ gap: 'var(--space-6)' }}>
+      <div className={`screen ug-16${web && nextUp ? ' sum-web' : ''}`}>
         {web && nextUp ? (
           <>
             <div className="sum-main">{main}</div>
@@ -4444,6 +4499,7 @@ export function SessionView(props: {
 
   return (
     <div
+      data-mood={focusView && prShowing ? 'ok' : undefined}
       className={`screen paned session-screen${live ? ' session-live' : ''}${props.past ? ' session-past' : ''}${workout.autoFinished ? ' session-auto' : ''}${showSessionSide ? ' session-has-side' : ''}${showRail ? ' session-has-rail' : ''}${focusView ? ' session-focus' : ''}`}
     >
       {live && !workout.autoFinished && !isDesktop && (
@@ -4480,11 +4536,14 @@ export function SessionView(props: {
             {sortedExercises.map((ex) => {
               const inView = ex.id === focusedId;
               return (
-                <button
+                <IconButton
                   key={ex.id}
-                  type="button"
-                  className={`srail-dot${exerciseDone(ex) ? ' done' : ''}`}
-                  aria-label={exName(ex.name)}
+                  icon={exerciseDone(ex) ? 'check-circle' : 'circle'}
+                  size="sm"
+                  shape="round"
+                  variant="photo"
+                  className={`srail-dot ${inView ? 'ut-accent' : exerciseDone(ex) ? 'ut-accent-lo done' : 'ut-dim'}`}
+                  label={exName(ex.name)}
                   aria-current={inView ? 'true' : undefined}
                   onClick={() => {
                     setExpandedId(ex.id);
@@ -4525,9 +4584,7 @@ export function SessionView(props: {
                 <span className="past-hero-scrim" />
               </div>
             )}
-            <button className="back" onClick={props.onClose} aria-label={t.backAction}>
-              <Icon name="caret-left" />
-            </button>
+            <BackButton onClick={props.onClose} label={t.backAction} />
             {!live && (
               <div className="mid">
                 {workout.finishedAt === null ? (
@@ -4549,37 +4606,42 @@ export function SessionView(props: {
                     <span>{t.homeSetTitle}</span>
                   </span>
                 ) : (
-                  <button className="past-gym-row" onClick={() => setSheet({ kind: 'gym' })}>
-                    <Icon name="map-pin" />
-                    <span>{gym ? gym.name : t.addGymToSession}</span>
-                    <Icon name="pencil-simple" className="edit" />
-                  </button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon="map-pin"
+                    className="past-gym-row"
+                    iconTrailing="pencil-simple"
+                    onClick={() => setSheet({ kind: 'gym' })}
+                  >
+                    {gym ? gym.name : t.addGymToSession}
+                  </Button>
                 )}
               </div>
             )}
             {live ? null : workout.autoFinished ? (
-              <button className="btn btn-secondary" onClick={() => reopenWorkout(workout.id)}>
+              <Button variant="secondary" onClick={() => reopenWorkout(workout.id)}>
                 {t.reopen}
-              </button>
+              </Button>
             ) : (
               <div className="past-actions">
-                <button
+                <IconButton
+                  icon="trash"
                   className="trash"
                   onClick={() => setDialog({ kind: 'del-workout' })}
-                  aria-label={t.deleteWorkout}
-                >
-                  <Icon name="trash" />
-                </button>
+                  label={t.deleteWorkout}
+                />
                 {props.past && (
-                  <button
-                    className="btn btn-primary past-save"
+                  <Button
+                    variant="primary"
+                    className="past-save"
                     onClick={() => {
                       savePastWorkout(workout.id);
                       props.onClose();
                     }}
                   >
                     {t.save}
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -4657,10 +4719,15 @@ export function SessionView(props: {
                 <div className="section-label mworked-head">
                   <span>{props.past ? t.muscleGroupsWorked : t.musclesWorkedLabel}</span>
                   {!muscleMapInPill && !props.past && (
-                    <button className="mm-open" onClick={() => setSheet({ kind: 'musclemap' })}>
-                      <Icon name="person" />
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon="person"
+                      className="mm-open"
+                      onClick={() => setSheet({ kind: 'musclemap' })}
+                    >
                       {t.muscleMapButton}
-                    </button>
+                    </Button>
                   )}
                 </div>
                 <div className="mworked-row">
@@ -4698,14 +4765,14 @@ export function SessionView(props: {
                   {targets.map((m) => {
                     const done = (worked.get(m) ?? 0) > 0;
                     return (
-                      <span
+                      <Tag
                         key={m}
-                        className={`ptarget ${done ? 'done' : 'skipped'}`}
+                        tone={done ? 'ok' : 'neutral'}
                         title={done ? t.targetWorked : t.targetSkipped}
+                        icon={<Icon name={done ? 'check-circle' : 'x-circle'} />}
                       >
-                        <Icon name={done ? 'check-circle' : 'x-circle'} />
                         {t.muscleGroups[m]}
-                      </span>
+                      </Tag>
                     );
                   })}
                 </div>
@@ -4758,31 +4825,34 @@ export function SessionView(props: {
                         store.workouts.filter((w) => w.finishedAt !== null),
                         now,
                       ) && (
-                        <button
-                          className="btn btn-secondary session-coach-btn"
-                          style={{ minHeight: 46, fontSize: 15, marginTop: 'var(--space-3)' }}
+                        <Button
+                          variant="secondary"
+                          className="session-coach-btn fx-fs-15 umt-8"
+                          style={{ minHeight: 46 }}
                           onClick={() => setSheet({ kind: 'coach' })}
                         >
                           <Icon name="heartbeat" weight="fill" />
                           {t.sessionCoachButton}
-                        </button>
+                        </Button>
                       )}
-                    <button
-                      className="btn btn-primary"
-                      style={{ minHeight: 46, fontSize: 15, marginTop: 'var(--space-3)' }}
+                    <Button
+                      variant="primary"
+                      className="fx-fs-15 umt-8"
+                      style={{ minHeight: 46 }}
                       onClick={() => setSheet({ kind: 'add' })}
                     >
                       <Icon name="plus" />
                       {t.addExercise}
-                    </button>
-                    <button
-                      className="btn session-discard-btn"
-                      style={{ marginTop: 'var(--space-3)' }}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="session-discard-btn umt-8"
+
                       onClick={() => setDialog({ kind: 'del-workout' })}
                     >
                       <Icon name="trash" />
                       {t.discardSession}
-                    </button>
+                    </Button>
                   </EmptyState>
                 </div>
               ) : (
@@ -4847,7 +4917,9 @@ export function SessionView(props: {
                         return (
                           <Fragment key={g.groupId}>
                             {header}
-                            <button
+                            <Card
+                              as="button"
+                              pad="none"
                               className="past-ex-card queued-ex-card queued-group"
                               onClick={() => setExpandedId(g.exercises[0]?.id ?? null)}
                             >
@@ -4855,7 +4927,7 @@ export function SessionView(props: {
                                 {g.exercises.map((e) => e.name).join(' · ')}
                               </span>
                               <span className="count">{t.supersetTag(g.letter)}</span>
-                            </button>
+                            </Card>
                           </Fragment>
                         );
                       }
@@ -4907,18 +4979,19 @@ export function SessionView(props: {
                             <div className="ss-bar" />
                             <div className="ss-body">
                               <div className="ss-head">
-                                <span className="tag tag-neutral">{t.supersetTag(g.letter)}</span>
+                                <Tag tone="neutral">{t.supersetTag(g.letter)}</Tag>
                                 {groupIsCurrent && !props.past && (
-                                  <span className="cur-tag">
-                                    <Icon name="barbell" />
+                                  <Tag tone="accent" icon={<Icon name="barbell" />}>
                                     {t.currentKicker}
-                                  </span>
+                                  </Tag>
                                 )}
                                 <span className="ss-rounds-meta">
                                   {t.roundsMeta(rounds, fmtKg(kg))}
                                 </span>
                               </div>
-                              <button
+                              <Card
+                                as="button"
+                                pad="none"
                                 className="past-ex-card"
                                 onClick={() =>
                                   props.past
@@ -4939,7 +5012,7 @@ export function SessionView(props: {
                                     <span className="v">{pastSummary(e)}</span>
                                   </span>
                                 ))}
-                              </button>
+                              </Card>
                             </div>
                           </div>
                         );
@@ -4952,19 +5025,19 @@ export function SessionView(props: {
                             <div className="ss-bar" />
                             <div className="ss-desktop-card">
                               <div className="ss-head">
-                                <span className="tag tag-accent">{t.supersetTag(g.letter)}</span>
+                                <Tag tone="accent">{t.supersetTag(g.letter)}</Tag>
                                 <span className="ss-round">
                                   {t.roundOf(round, rounds).split(' · ')[0]}
                                 </span>
-                                <button
+                                <IconButton
+                                  icon="dots-three"
+                                  size="sm"
                                   className="dots"
                                   onClick={() =>
                                     setSheet({ kind: 'group-menu', groupId: g.groupId })
                                   }
-                                  aria-label={t.menuAction}
-                                >
-                                  <Icon name="dots-three" />
-                                </button>
+                                  label={t.menuAction}
+                                />
                               </div>
                               <table className="table ss-table">
                                 <thead>
@@ -4990,7 +5063,7 @@ export function SessionView(props: {
                                         </td>
                                         <td>{exName(e.name)}</td>
                                         <td>
-                                          <span style={{ display: 'inline-flex', gap: 5 }}>
+                                          <span className="ul-iflex ug-6">
                                             {m.primary && (
                                               <span className="mchip">
                                                 {t.muscleGroups[m.primary]}
@@ -5037,15 +5110,15 @@ export function SessionView(props: {
                           <div className="ss-bar" />
                           <div className="ss-body">
                             <div className="ss-head">
-                              <span className="tag tag-accent">{t.supersetTag(g.letter)}</span>
+                              <Tag tone="accent">{t.supersetTag(g.letter)}</Tag>
                               <span className="ss-round">{t.roundOf(round, rounds)}</span>
-                              <button
+                              <IconButton
+                                icon="dots-three-vertical"
+                                size="sm"
                                 className="dots"
                                 onClick={() => setSheet({ kind: 'group-menu', groupId: g.groupId })}
-                                aria-label={t.menuAction}
-                              >
-                                <Icon name="dots-three-vertical" />
-                              </button>
+                                label={t.menuAction}
+                              />
                             </div>
                             {g.exercises.map((e, i) =>
                               renderCard(e, {
@@ -5085,10 +5158,9 @@ export function SessionView(props: {
                         >
                           <span className="past-ex-row">
                             {singleIsCurrent && (
-                              <span className="cur-tag">
-                                <Icon name="barbell" />
+                              <Tag tone="accent" icon={<Icon name="barbell" />}>
                                 {t.currentKicker}
-                              </span>
+                              </Tag>
                             )}
                             <span className="n">{exName(single.name)}</span>
                             {single.sets.length > 0 && (
@@ -5104,8 +5176,9 @@ export function SessionView(props: {
                   {live &&
                     !circuit.on &&
                     sessionBlocks(workout).some((b) => b.kind === 'group' && b.group.circuit) && (
-                      <button
-                        className="btn btn-secondary circuit-new"
+                      <Button
+                        variant="secondary"
+                        className="circuit-new"
                         onClick={() =>
                           setCircuit((c) => ({
                             ...c,
@@ -5123,79 +5196,86 @@ export function SessionView(props: {
                               ).length,
                           ),
                         )}
-                      </button>
+                      </Button>
                     )}
                   {/* Energy plaque sits under the exercises, matching their width. */}
                   {props.past && sessionKcal != null && <EnergyPlaque kcal={sessionKcal} />}
                   {props.past && workout.exercises.some((e) => e.groupId) && (
-                    <div className="muscle-note" style={{ boxShadow: 'none' }}>
+                    <div className="muscle-note muscle-note--flat">
                       <Icon name="chart-line-up" />
-                      <p style={{ color: 'var(--color-neutral-500)' }}>{t.supersetHistoryNote}</p>
+                      <p className="ut-dim">{t.supersetHistoryNote}</p>
                     </div>
                   )}
                   {!(live && !workout.autoFinished && !isDesktop) && (
-                    <button
-                      className="btn btn-secondary session-add-btn"
+                    <Button
+                      variant="secondary"
+                      className="session-add-btn"
                       onClick={() => setSheet({ kind: 'add' })}
                     >
                       <Icon name="plus" />
                       {props.past ? t.addToSession : t.addExercise}
-                    </button>
+                    </Button>
                   )}
                   {live && !workout.autoFinished && isDesktop && (
                     <>
-                      <button
-                        className="btn btn-secondary session-settings-btn"
+                      <Button
+                        variant="secondary"
+                        className="session-settings-btn"
                         onClick={() => setSheet({ kind: 'settings' })}
                       >
                         <Icon name="sliders-horizontal" />
                         {t.sessionSettings}
-                      </button>
-                      <button
-                        className="btn btn-secondary session-map-btn"
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        className="session-map-btn"
                         onClick={() => setSheet({ kind: 'musclemap' })}
                       >
                         <Icon name="person" />
                         {t.muscleMapButton}
-                      </button>
+                      </Button>
                     </>
                   )}
                   {props.past && muscleWorkSorted(workout).length > 0 && (
-                    <button
-                      className="btn btn-secondary session-map-btn"
+                    <Button
+                      variant="secondary"
+                      className="session-map-btn"
                       onClick={() => setSheet({ kind: 'musclemap' })}
                     >
                       <Icon name="person" />
                       {t.muscleMapButton}
-                    </button>
+                    </Button>
                   )}
                   {props.past && (
-                    <button
-                      className="btn btn-primary share-cta"
+                    <Button
+                      variant="primary"
+                      className="share-cta"
                       onClick={() => setShareOpen(true)}
                     >
                       <Icon name="export" />
                       {t.shareWorkout}
-                    </button>
+                    </Button>
                   )}
                   {live && !workout.autoFinished && isDesktop && (
                     <div className="session-discard-row">
-                      <button
-                        className="btn session-discard-btn icon-only"
+                      <Button
+                        variant="ghost"
+                        className="session-discard-btn icon-only"
                         onClick={() => setDialog({ kind: 'del-workout' })}
                         aria-label={t.discardSession}
                         title={t.discardSession}
                       >
                         <Icon name="trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary session-finish-docked"
+                      </Button>
+                      <Button
+                        variant="primary"
+                        className="session-finish-docked"
                         disabled={entries === 0}
                         onClick={requestFinish}
                       >
                         <Icon name="check" />
                         {t.finish}
-                      </button>
+                      </Button>
                     </div>
                   )}
                   {/* Live energy counter — quietly under all the session content. */}
@@ -5212,58 +5292,65 @@ export function SessionView(props: {
           {/* Three liquid-glass pills: discard isolated left, add dead-centre
               (pulsing) flanked by settings + muscle map, finish isolated right. */}
           <div className="glass-pill">
-            <button
+            <IconButton
+              icon="trash"
+              variant="ghost"
+              shape="round"
               className="sp-btn sp-discard"
               onClick={() => setDialog({ kind: 'del-workout' })}
-              aria-label={t.discardSession}
+              label={t.discardSession}
               title={t.discardSession}
-            >
-              <Icon name="trash" />
-            </button>
+            />
           </div>
           <div className="glass-pill sp-center">
-            <button
+            <IconButton
+              icon="sliders-horizontal"
+              variant="ghost"
+              shape="round"
               className="sp-btn sp-settings"
               onClick={() => setSheet({ kind: 'settings' })}
-              aria-label={t.sessionSettings}
+              label={t.sessionSettings}
               title={t.sessionSettings}
-            >
-              <Icon name="sliders-horizontal" />
-            </button>
-            <button
+            />
+            <IconButton
+              icon="plus"
+              variant="fill"
+              shape="round"
               className="sp-btn sp-plus plusfab"
               onClick={() => setSheet({ kind: 'add' })}
-              aria-label={t.addExercise}
+              label={t.addExercise}
               title={t.addExercise}
-            >
-              <Icon name="plus" weight="bold" />
-            </button>
-            <button
+            />
+            <IconButton
+              icon="person"
+              variant="ghost"
+              shape="round"
               className="sp-btn sp-map"
               onClick={() => setSheet({ kind: 'musclemap' })}
-              aria-label={t.muscleMapButton}
+              label={t.muscleMapButton}
               title={t.muscleMapButton}
-            >
-              <Icon name="person" />
-            </button>
+            />
           </div>
           <div className="glass-pill">
-            <button
+            <IconButton
+              icon="check"
+              variant="primary"
+              shape="round"
               className="sp-btn sp-finish"
               disabled={entries === 0}
               onClick={requestFinish}
-              aria-label={t.finish}
+              label={t.finish}
               title={t.finish}
-            >
-              <Icon name="check" weight="bold" />
-            </button>
+            />
           </div>
         </div>
       )}
       {atlasJab && !summary && (
-        <button
+        <Card
+          as="button"
+          pad="sm"
+          emphasis="glass"
           key={atlasJab.key}
-          type="button"
           className="atl-jab"
           style={{ ['--atl' as string]: TEMPER_COLOR[atlasJab.temper] }}
           onClick={() => setAtlasJab(null)}
@@ -5271,7 +5358,7 @@ export function SessionView(props: {
         >
           <AtlasFace temper={atlasJab.temper} size={36} />
           <span>{atlasJab.text}</span>
-        </button>
+        </Card>
       )}
       {shareOpen && !summary && (
         <ShareSheet
@@ -5319,12 +5406,10 @@ export function SessionView(props: {
             })()}
           </div>
           <p className="side-note">{t.workedNote}</p>
-          <div className="section-label" style={{ marginTop: 'var(--space-2)' }}>
-            {t.equipmentInUse}
-          </div>
+          <div className="section-label umt-6">{t.equipmentInUse}</div>
           <div className="echip-row">
             {workoutEquipment(workout).map((id) => (
-              <EquipChip key={id} id={id} style={{ padding: '4px 9px', fontSize: 11 }} />
+              <EquipChip key={id} id={id} style={{ padding: '4px 9px' }} />
             ))}
           </div>
         </aside>
@@ -5559,21 +5644,19 @@ export function SessionView(props: {
                   </span>
                 </div>
               </div>
-              <div className="opts-tabs" role="tablist">
-                {tabsDef.map((d) => (
-                  <button
-                    key={d.k}
-                    role="tab"
-                    aria-selected={tab === d.k}
-                    className={tab === d.k ? 'on' : ''}
-                    disabled={d.off}
-                    onClick={() => setSheet({ ...sheet, tab: d.k })}
-                  >
-                    <Icon name={d.icon} />
-                    {d.label}
-                  </button>
-                ))}
-              </div>
+              <Segmented
+                className="opts-tabs"
+                tabs
+                label={t.sessionSettings}
+                value={tab}
+                onChange={(k) => setSheet({ ...sheet, tab: k })}
+                options={tabsDef.map((d) => ({
+                  value: d.k,
+                  label: d.label,
+                  icon: d.icon,
+                  disabled: d.off,
+                }))}
+              />
               <div className="opts-body">
                 {tab === 'set' && ex && sheet.ghost ? (
                   <SetEditorSheet
@@ -5614,21 +5697,29 @@ export function SessionView(props: {
                 )}
               </div>
               <div className="opts-pinned">
-                <button type="button" onClick={() => setSheet({ kind: 'musclemap' })}>
-                  <Icon name="person" />
-                  {t.muscleMapButton}
-                </button>
-                <button
-                  type="button"
-                  className="danger"
-                  onClick={() => {
-                    setSheet(null);
-                    setDialog({ kind: 'del-workout' });
-                  }}
+                <Button
+                  variant="secondary"
+                  icon="person"
+                  onClick={() => setSheet({ kind: 'musclemap' })}
                 >
-                  <Icon name="trash" />
-                  {t.discardSession}
-                </button>
+                  {t.muscleMapButton}
+                </Button>
+                {ex && tab !== 'session' ? (
+                  <Button variant="danger" icon="trash" onClick={() => requestDeleteExercise(ex)}>
+                    {t.deleteExercise}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="danger"
+                    icon="trash"
+                    onClick={() => {
+                      setSheet(null);
+                      setDialog({ kind: 'del-workout' });
+                    }}
+                  >
+                    {t.discardSession}
+                  </Button>
+                )}
               </div>
             </Sheet>
           );
@@ -5663,33 +5754,27 @@ export function SessionView(props: {
           return (
             <Sheet padded={false} onClose={() => setSheet(null)}>
               <div className="sheet-label">{t.supersetTag(letter)}</div>
-              <button
-                className="menu-item"
+              <ListRow
+                icon={<IconTile icon="x" />}
+                label={t.ungroup}
                 onClick={() => {
                   ungroupSuperset(workout.id, sheet.groupId);
                   setSheet(null);
                 }}
-              >
-                <Icon name="x" />
-                {t.ungroup}
-              </button>
-              <button
-                className="menu-item"
+              />
+              <ListRow
+                icon={<IconTile icon="plus" />}
+                label={t.addExercise}
                 onClick={() => setSheet({ kind: 'add', intoGroupId: sheet.groupId })}
-              >
-                <Icon name="plus" />
-                {t.addExercise}
-              </button>
+              />
               <div className="sheet-rule" />
               {members.map((e) => (
-                <button
+                <ListRow
                   key={e.id}
-                  className="menu-item"
+                  icon={<IconTile icon="dots-three-vertical" />}
+                  label={exName(e.name)}
                   onClick={() => setSheet({ kind: 'menu', exId: e.id })}
-                >
-                  <Icon name="dots-three-vertical" />
-                  {exName(e.name)}
-                </button>
+                />
               ))}
             </Sheet>
           );
@@ -5848,12 +5933,12 @@ export function SessionView(props: {
               onClose={() => setDialog(null)}
               actions={
                 <>
-                  <button className="btn btn-secondary" onClick={() => setDialog(null)}>
+                  <Button variant="secondary" onClick={() => setDialog(null)}>
                     {t.keep}
-                  </button>
-                  <button className="danger-outline" onClick={() => removeExercise(ex)}>
+                  </Button>
+                  <Button variant="danger" onClick={() => removeExercise(ex)}>
                     {t.delete}
-                  </button>
+                  </Button>
                 </>
               }
             >
@@ -5877,18 +5962,18 @@ export function SessionView(props: {
               onClose={() => setDialog(null)}
               actions={
                 <>
-                  <button className="btn btn-secondary" onClick={() => setDialog(null)}>
+                  <Button variant="secondary" onClick={() => setDialog(null)}>
                     {t.keep}
-                  </button>
-                  <button
-                    className="danger-outline"
+                  </Button>
+                  <Button
+                    variant="danger"
                     onClick={() => {
                       setDialog(null);
                       removeSet(ex, set);
                     }}
                   >
                     {t.delete}
-                  </button>
+                  </Button>
                 </>
               }
             >
@@ -5906,12 +5991,12 @@ export function SessionView(props: {
           onClose={() => setDialog(null)}
           actions={
             <>
-              <button className="btn btn-secondary" onClick={() => setDialog(null)}>
+              <Button variant="secondary" onClick={() => setDialog(null)}>
                 {t.keepGoing}
-              </button>
-              <button className="btn btn-primary" onClick={doFinish}>
+              </Button>
+              <Button variant="primary" onClick={doFinish}>
                 {t.finish}
-              </button>
+              </Button>
             </>
           }
         >
@@ -6064,9 +6149,7 @@ function NewExerciseSheet(props: {
   return (
     <Sheet onClose={props.onBack} className="new-exercise-sheet">
       <div className="sheet-head with-back">
-        <button className="sheet-back" onClick={props.onBack} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton label={t.backAction} onClick={props.onBack} />
         <span className="t">{exName(props.name)}</span>
       </div>
       <p className="sheet-note">{props.canAuthor ? t.newExerciseAuthorNote : t.newExerciseNote}</p>
@@ -6074,9 +6157,10 @@ function NewExerciseSheet(props: {
       <div className="field-label">{t.primaryMuscleLabel}</div>
       <div className="filter-chips">
         {MUSCLE_IDS.map((m) => (
-          <button
+          <Chip
+            size="sm"
+            selected={primary === m}
             key={m}
-            className={`fchip${primary === m ? ' active' : ''}`}
             onClick={() => {
               setPrimary((x) => (x === m ? null : m));
               setSecondary((xs) => xs.filter((x) => x !== m));
@@ -6084,16 +6168,17 @@ function NewExerciseSheet(props: {
           >
             <MuscleIcon muscle={m} variant="chip" tone={primary === m ? 'onAccent' : 'secondary'} />
             {t.muscleGroups[m]}
-          </button>
+          </Chip>
         ))}
       </div>
 
       <div className="field-label">{t.secondaryMuscleLabel}</div>
       <div className="filter-chips">
         {MUSCLE_IDS.filter((m) => m !== primary).map((m) => (
-          <button
+          <Chip
+            size="sm"
+            selected={secondary.includes(m)}
             key={m}
-            className={`fchip${secondary.includes(m) ? ' active' : ''}`}
             onClick={() => toggleSecondary(m)}
           >
             <MuscleIcon
@@ -6102,34 +6187,36 @@ function NewExerciseSheet(props: {
               tone={secondary.includes(m) ? 'onAccent' : 'secondary'}
             />
             {t.muscleGroups[m]}
-          </button>
+          </Chip>
         ))}
       </div>
 
       <div className="field-label">{t.equipmentLabelField}</div>
       <div className="filter-chips">
         {EQUIPMENT_IDS.map((id) => (
-          <button
+          <Chip
+            size="sm"
+            selected={equipment.includes(id)}
             key={id}
-            className={`fchip${equipment.includes(id) ? ' active' : ''}`}
             onClick={() => toggleEquip(id)}
           >
             <Icon name={equipmentIconName(id)} />
             {t.equipmentNames[id]}
-          </button>
+          </Chip>
         ))}
       </div>
 
-      <button
-        className="btn btn-primary"
-        style={{ minHeight: 48, fontSize: 15, marginTop: 'var(--space-3)' }}
+      <Button
+        variant="primary"
+        className="fx-fs-15 umt-8"
+        style={{ minHeight: 48 }}
         onClick={() =>
           props.onCreate({ primaryMuscle: primary, secondaryMuscles: secondary, equipment })
         }
       >
         <Icon name="plus" />
         {t.createExercise(props.name)}
-      </button>
+      </Button>
     </Sheet>
   );
 }
@@ -6168,22 +6255,15 @@ function SupersetSheet(props: {
           const si = sel.indexOf(e.id);
           const on = si >= 0;
           return (
-            <button
+            <ListRow
               key={e.id}
-              className={`ss-pick-row${on ? '' : ' dim'}`}
+              dense
+              dim={!on}
+              time={on ? `${letter}${si + 2}` : undefined}
+              label={exName(e.name)}
+              check={on}
               onClick={() => toggle(e.id)}
-            >
-              {on ? (
-                <span className="idx">
-                  {letter}
-                  {si + 2}
-                </span>
-              ) : (
-                <span className="idx" />
-              )}
-              <span className="n">{exName(e.name)}</span>
-              <span className={`cbx${on ? ' on' : ''}`}>{on && <Icon name="check" />}</span>
-            </button>
+            />
           );
         })}
       </div>
@@ -6192,16 +6272,17 @@ function SupersetSheet(props: {
         <p>{t.supersetKeepNote}</p>
       </div>
       <div className="sheet-actions">
-        <button className="btn btn-secondary grow" onClick={props.onClose}>
+        <Button variant="secondary" className="grow" onClick={props.onClose}>
           {t.cancel}
-        </button>
-        <button
-          className="btn btn-primary grow"
+        </Button>
+        <Button
+          variant="primary"
+          className="grow"
           disabled={sel.length === 0}
           onClick={() => props.onGroup([props.base.id, ...sel])}
         >
           {t.groupAs(letter)}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );
@@ -6282,66 +6363,52 @@ function RestSheet(props: {
   const [prefs, setPrefs] = useState<RestPrefs>(st.restPrefs ?? REST_PREFS_DEFAULT);
   const [pushHint, setPushHint] = useState<string | null>(null);
   const row = (key: keyof RestPrefs, label: string, sub: string) => (
-    <button
-      type="button"
-      className="toggle-row rest-pref"
-      aria-pressed={prefs[key]}
-      onClick={async () => {
-        const on = !prefs[key];
-        if (key === 'notify' && on) {
-          const ps = pushState();
-          if (ps === 'needs-install') {
-            setPushHint(t.pushNeedsInstall);
-            return;
-          }
-          // Push where the device supports it (reaches a locked phone); the
-          // plain notification permission otherwise.
-          const ok =
-            ps === 'unsupported'
-              ? await requestRestNotifications()
-              : (await enablePush(locale)) === 'on';
-          if (!ok) {
-            setPushHint(t.pushDenied);
-            return;
-          }
-          setPushHint(null);
-        }
-        setPrefs((p) => ({ ...p, [key]: on }));
-      }}
-    >
-      <span className="rest-pref-text">
-        <span className="lab">{label}</span>
-        <span className="sub">{sub}</span>
-      </span>
-      <Switch on={prefs[key]} />
-    </button>
+    <ListRow
+      className="rest-pref"
+      label={label}
+      sub={sub}
+      trailing={
+        <KitSwitch checked={prefs[key]} aria-label={label} onChange={() => void toggle(key)} />
+      }
+    />
   );
+  const toggle = async (key: keyof RestPrefs) => {
+    const on = !prefs[key];
+    if (key === 'notify' && on) {
+      const ps = pushState();
+      if (ps === 'needs-install') {
+        setPushHint(t.pushNeedsInstall);
+        return;
+      }
+      // Push where the device supports it (reaches a locked phone); the
+      // plain notification permission otherwise.
+      const ok =
+        ps === 'unsupported'
+          ? await requestRestNotifications()
+          : (await enablePush(locale)) === 'on';
+      if (!ok) {
+        setPushHint(t.pushDenied);
+        return;
+      }
+      setPushHint(null);
+    }
+    setPrefs((p) => ({ ...p, [key]: on }));
+  };
   return (
     <Sheet onClose={props.onClose} className="rest-sheet">
       <div className="sheet-head">
         <h3>{t.restSheetTitle(props.displayName)}</h3>
       </div>
-      <div className="se-label se-label-first">{t.restTarget}</div>
+      <SectionLabel className="se-label se-label-first">{t.restTarget}</SectionLabel>
       <div className="rest-presets">
-        <button
-          type="button"
-          className={`rest-auto${target === 'auto' ? ' on' : ''}`}
-          aria-pressed={target === 'auto'}
-          onClick={() => setTarget('auto')}
-        >
+        <Chip className="rest-auto" selected={target === 'auto'} onClick={() => setTarget('auto')}>
           {t.restAuto}
           {props.auto && props.auto.sec > 0 ? ` · ${fmtCountdown(props.auto.sec)}` : ''}
-        </button>
+        </Chip>
         {REST_PRESETS.map((sec) => (
-          <button
-            key={sec}
-            type="button"
-            className={target === sec ? 'on' : ''}
-            aria-pressed={target === sec}
-            onClick={() => setTarget(sec)}
-          >
+          <Chip key={sec} selected={target === sec} onClick={() => setTarget(sec)}>
             {fmtCountdown(sec)}
-          </button>
+          </Chip>
         ))}
       </div>
       {target === 'auto' && props.auto && props.auto.sec > 0 ? (
@@ -6349,44 +6416,43 @@ function RestSheet(props: {
           <div className="se-hint">{t.restAutoHint(fmtCountdown(props.auto.sec))}</div>
           <div className="rest-why-chips">
             {props.auto.reasons.map((r) => (
-              <span
-                key={r.key}
-                className={`rest-why-chip${r.sec > 0 ? ' up' : r.sec < 0 ? ' down' : ''}`}
-              >
+              <Tag key={r.key} tone={r.sec > 0 ? 'rest' : 'neutral'}>
                 {t.restWhy[r.key]}
                 {r.sec !== 0 ? ` ${r.sec > 0 ? '+' : '−'}${Math.abs(r.sec)} s` : ''}
-              </span>
+              </Tag>
             ))}
           </div>
         </div>
       ) : (
         <div className="se-hint rest-hint">{t.restTargetHint}</div>
       )}
-      <div className="se-label">{t.restWhenEnds}</div>
-      <div className="se-group">
+      <SectionLabel className="se-label">{t.restWhenEnds}</SectionLabel>
+      <GroupedList className="se-group">
         {row('vibrate', t.restVibrate, isAppleTouch() ? t.restVibrateSubIos : t.restVibrateSub)}
         {row('sound', t.restSound, t.restSoundSub)}
         {row('keepAwake', t.restKeepAwake, t.restKeepAwakeSub)}
         {row('notify', t.restNotify, t.restNotifySub)}
-      </div>
+      </GroupedList>
       {pushHint && <div className="se-hint rest-push-hint">{pushHint}</div>}
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="sm"
+        icon="bell-ringing"
         className="rest-test"
         onClick={() => {
           primeRestAudio();
           restAlert(prefs);
         }}
       >
-        <Icon name="bell-ringing" />
         {t.restTestAlert}
-      </button>
+      </Button>
       <div className="sheet-actions">
-        <button className="btn btn-secondary grow" onClick={props.onClose}>
+        <Button variant="secondary" className="grow" onClick={props.onClose}>
           {t.cancel}
-        </button>
-        <button
-          className="btn btn-primary grow"
+        </Button>
+        <Button
+          variant="primary"
+          className="grow"
           onClick={() => {
             setExerciseRestSec(props.exName, target === 'auto' ? null : target);
             setRestPrefs(prefs);
@@ -6394,7 +6460,7 @@ function RestSheet(props: {
           }}
         >
           {t.save}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );
@@ -6888,29 +6954,22 @@ function SetEditorSheet(props: {
         <div className="sheet-head">
           <span className="t">{t.setN(idx, props.exercise.name)}</span>
         </div>
-        {SET_TYPE_ROWS.map((row, i) => (
-          <button
+        {SET_TYPE_ROWS.map((row) => (
+          <ListRow
             key={row.type}
-            className={`stype-row${i === SET_TYPE_ROWS.length - 1 ? ' last' : ''}`}
+            icon={<IconTile icon={row.icon} />}
+            label={typeMeta[row.type].name}
+            check={type === row.type}
+            value={type === row.type ? undefined : typeMeta[row.type].hint}
             onClick={() => {
               setType(row.type);
               setTypeTouched(true);
               if (row.type === 'warmup') setBw(false);
               setView('main');
             }}
-          >
-            <Icon name={row.icon} />
-            <span className="n">{typeMeta[row.type].name}</span>
-            {type === row.type ? (
-              <span className="stype-check">
-                <Icon name="check" />
-              </span>
-            ) : (
-              <span className="hint">{typeMeta[row.type].hint}</span>
-            )}
-          </button>
+          />
         ))}
-        <div className="sheet-note" style={{ marginTop: 'var(--space-3)' }}>
+        <div className="sheet-note umt-8">
           <Icon name="info" />
           <p>
             {t.dropNote1}
@@ -6929,24 +6988,17 @@ function SetEditorSheet(props: {
         <div className="sheet-head">
           <span className="t">{t.loadTypeLabel}</span>
         </div>
-        {LOAD_ROWS.map((row, i) => (
-          <button
+        {LOAD_ROWS.map((row) => (
+          <ListRow
             key={row.key}
-            className={`stype-row${i === LOAD_ROWS.length - 1 ? ' last' : ''}`}
+            icon={<IconTile icon={row.icon} />}
+            label={row.name}
+            check={loadType === row.key}
+            value={loadType === row.key ? undefined : row.hint}
             onClick={() => pickLoadType(row.key)}
-          >
-            <Icon name={row.icon} />
-            <span className="n">{row.name}</span>
-            {loadType === row.key ? (
-              <span className="stype-check">
-                <Icon name="check" />
-              </span>
-            ) : (
-              <span className="hint">{row.hint}</span>
-            )}
-          </button>
+          />
         ))}
-        <div className="sheet-note" style={{ marginTop: 'var(--space-3)' }}>
+        <div className="sheet-note umt-8">
           <Icon name="info" />
           <p>{t.loadTypeNote}</p>
         </div>
@@ -7057,19 +7109,15 @@ function SetEditorSheet(props: {
           {/* Load type first — it decides what the steppers below mean. Each
               block is a labelled card, like the Exercise tab's groups. */}
           <div className="se-label se-label-first">{t.loadTypeLabel}</div>
-          <div className="se-card se-card-load">
-            <div className="seg2 se-load">
-              {LOAD_ROWS.map((r) => (
-                <button
-                  key={r.key}
-                  type="button"
-                  className={loadType === r.key ? 'active' : ''}
-                  onClick={() => pickLoadType(r.key)}
-                >
-                  {r.name}
-                </button>
-              ))}
-            </div>
+          <div className={`se-card se-card-load se-kind-${type}`}>
+            <Segmented
+              className="se-load"
+              size="sm"
+              label={t.loadTypeLabel}
+              value={loadType}
+              onChange={(v) => pickLoadType(v)}
+              options={LOAD_ROWS.map((r) => ({ value: r.key, label: r.name }))}
+            />
             {isSD ? (
               <div className="steppers">
                 <NumberStepper
@@ -7110,14 +7158,13 @@ function SetEditorSheet(props: {
                   <div key={i} className="drop-part">
                     <div className="drop-part-lab">
                       <span>{t.dropRowN(i + 1)}</span>
-                      <button
-                        type="button"
+                      <IconButton
+                        icon="trash"
+                        size="sm"
                         className="drop-trash"
-                        aria-label={t.delete}
+                        label={t.delete}
                         onClick={() => setDropsState((list) => list.filter((_, xi) => xi !== i))}
-                      >
-                        <Icon name="trash" />
-                      </button>
+                      />
                     </div>
                     {strengthSteppers(
                       d.reps,
@@ -7128,11 +7175,12 @@ function SetEditorSheet(props: {
                     )}
                   </div>
                 ))}
-                <button type="button" className="dropedit-add" onClick={addDropPart}>
-                  <Icon name="plus" />
-                  <span className="n">{t.addAnotherDrop}</span>
-                  <span className="m">{t.dropTotals(dropRepsTotal, fmtKg(dropKgTotal))}</span>
-                </button>
+                <ListRow
+                  icon={<IconTile icon="plus" />}
+                  label={t.addAnotherDrop}
+                  value={t.dropTotals(dropRepsTotal, fmtKg(dropKgTotal))}
+                  onClick={addDropPart}
+                />
                 {type === 'reverse-drop' && (
                   <div className="sheet-note">
                     <Icon name="caret-line-up" />
@@ -7164,14 +7212,9 @@ function SetEditorSheet(props: {
                 </div>
                 <div className="load-chips assist-chips">
                   {assistStack(weight).map((v) => (
-                    <button
-                      key={v}
-                      type="button"
-                      className={`load-chip${weight === v ? ' on' : ''}`}
-                      onClick={() => setWeight(v)}
-                    >
+                    <Chip key={v} selected={weight === v} onClick={() => setWeight(v)}>
                       {fmtWeightValue(v)}
-                    </button>
+                    </Chip>
                   ))}
                 </div>
                 <div className="load-note">{t.assistNote}</div>
@@ -7211,26 +7254,30 @@ function SetEditorSheet(props: {
                 </div>
                 <div className="band-grid">
                   {bandLib.map((r) => (
-                    <button
+                    <Card
+                      as="button"
+                      pad="sm"
+                      emphasis="quiet"
                       key={r.color}
-                      type="button"
-                      className={`band-tile${currentBand?.color === r.color ? ' on' : ''}`}
+                      tone={currentBand?.color === r.color ? 'accent' : 'neutral'}
+                      className="band-tile"
                       onClick={() => setWeight(r.kg)}
                       aria-pressed={currentBand?.color === r.color}
                     >
                       <span className="band-swatch" style={{ background: BAND_HEX[r.color] }} />
                       <span className="band-name">{t.bandColor(r.color)}</span>
                       <span className="band-kg">~{fmtWeightValue(r.kg)}</span>
-                    </button>
+                    </Card>
                   ))}
                 </div>
                 <div className="load-note">{t.bandNote}</div>
                 {props.gym && (
-                  <button type="button" className="band-edit" onClick={() => setBandsOpen(true)}>
-                    <Icon name="sliders-horizontal" />
-                    <span className="lab">{t.bandEditLink(props.gym.name)}</span>
-                    <Icon name="caret-right" />
-                  </button>
+                  <ListRow
+                    icon={<IconTile icon="sliders-horizontal" />}
+                    label={t.bandEditLink(props.gym.name)}
+                    chevron
+                    onClick={() => setBandsOpen(true)}
+                  />
                 )}
               </>
             ) : (
@@ -7245,42 +7292,32 @@ function SetEditorSheet(props: {
           </div>
           {/* Set type · effort (design "One door"), rarer toggles grouped below. */}
           <div className="se-label">{t.setTypeLabel}</div>
-          <div className="se-card">
+          <div className={`se-card se-kind-${type}`}>
             <div className="se-types">
               {SET_TYPE_ROWS.map((row) => (
-                <button
+                <Chip
                   key={row.type}
-                  type="button"
-                  className={`se-type t-${row.type}${type === row.type ? ' on' : ''}`}
-                  aria-pressed={type === row.type}
+                  className={`se-kind-${row.type}`}
+                  selected={type === row.type}
                   onClick={() => {
                     setType(row.type);
                     setTypeTouched(true);
                     if (row.type === 'warmup') setBw(false);
                   }}
                 >
-                  <span className="se-dot" aria-hidden />
                   {typeMeta[row.type].name}
-                </button>
+                </Chip>
               ))}
             </div>
             {typeMeta[type].hint ? <div className="se-hint">{typeMeta[type].hint}</div> : null}
           </div>
           <div className="se-label">{t.rpeLabel}</div>
-          <div className="se-card">
+          <div className={`se-card se-kind-${type}`}>
             <div className="se-rpe">
               {[0, 6, 7, 8, 9, 10].map((v) => (
-                <button
+                <Chip
                   key={v}
-                  type="button"
-                  className={
-                    rpe === v && !failOn
-                      ? 'on'
-                      : rpe === 0 && !failOn && rpeEst !== null && v === Math.round(rpeEst)
-                        ? 'est'
-                        : ''
-                  }
-                  aria-pressed={rpe === v && !failOn}
+                  selected={rpe === v && !failOn}
                   onClick={() => {
                     setRpe(v);
                     // Picking an effort below 10 says "not to failure"; 10 or
@@ -7289,13 +7326,13 @@ function SetEditorSheet(props: {
                   }}
                 >
                   {v === 0 ? t.rpeNone : v}
-                </button>
+                </Chip>
               ))}
               {!isSD && (
-                <button
-                  type="button"
-                  className={`rpe-f${failOn ? ' on' : ''}${fail === 'auto' ? ' auto' : ''}`}
-                  aria-pressed={failOn}
+                <Chip
+                  tone="danger"
+                  className="rpe-f"
+                  selected={failOn}
                   aria-label={t.failToggle}
                   onClick={() => {
                     setFail('manual');
@@ -7303,7 +7340,7 @@ function SetEditorSheet(props: {
                   }}
                 >
                   F
-                </button>
+                </Chip>
               )}
             </div>
             <div className="se-hint">
@@ -7333,24 +7370,24 @@ function SetEditorSheet(props: {
           <div className="se-group">
             {sidesOk && !isAssist && !isBand && (
               <div className="sides-block">
-                <div className="toggle-row sides-row">
-                  <Icon name="arrows-out-line-horizontal" />
-                  <span className="lab">{t.sidesLabel}</span>
-                  <div className="seg2 sides-seg">
-                    <button
-                      className={sides === 'both' ? 'active' : ''}
-                      onClick={() => pickSides('both')}
-                    >
-                      {t.sidesBoth}
-                    </button>
-                    <button
-                      className={sides === 'one' ? 'active' : ''}
-                      onClick={() => pickSides('one')}
-                    >
-                      {t.sidesOne}
-                    </button>
-                  </div>
-                </div>
+                <ListRow
+                  className="sides-row"
+                  icon={<Icon name="arrows-out-line-horizontal" />}
+                  label={t.sidesLabel}
+                  trailing={
+                    <Segmented
+                      className="sides-seg"
+                      size="sm"
+                      label={t.sidesLabel}
+                      value={sides}
+                      onChange={(v) => pickSides(v)}
+                      options={[
+                        { value: 'both', label: t.sidesBoth },
+                        { value: 'one', label: t.sidesOne },
+                      ]}
+                    />
+                  }
+                />
                 {sides === 'one' && (
                   <div className="sides-note">
                     <Icon name="info" />
@@ -7360,64 +7397,67 @@ function SetEditorSheet(props: {
               </div>
             )}
             {unitEligible && !isAssist && !isBand && !bw && (
-              <div className="toggle-row unit-row">
-                <Icon name="scales" />
-                <span className="lab">{t.unitLabel}</span>
-                <div className="seg2 unit-seg">
-                  {(['kg', 'lb'] as DisplayUnit[]).map((u) => (
-                    <button
-                      key={u}
-                      className={unit === u ? 'active' : ''}
-                      onClick={() => setUnit(u)}
-                    >
-                      {u}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <ListRow
+                className="unit-row"
+                icon={<Icon name="scales" />}
+                label={t.unitLabel}
+                trailing={
+                  <Segmented
+                    size="sm"
+                    className="unit-seg"
+                    label={t.unitLabel}
+                    options={(['kg', 'lb'] as DisplayUnit[]).map((u) => ({ value: u, label: u }))}
+                    value={unit}
+                    onChange={setUnit}
+                  />
+                }
+              />
             )}
             {unitEligible && !isAssist && !isBand && unit === 'lb' && !bw && weight > 0 && (
               <div className="unit-equiv">{t.unitStoredKg(fmtWeightValue(weight))}</div>
             )}
             {isBarbell && !isAssist && !isBand && !bw && (
-              <button className="toggle-row" onClick={() => setPlateOpen(true)}>
-                <Icon name="barbell" />
-                <span className="lab">{t.plateTitle}</span>
-                <span className="toggle-value">
-                  {fmtWeightValue(weight)} {t.kgCol.toLowerCase()}
-                </span>
-              </button>
+              <ListRow
+                icon={<Icon name="barbell" />}
+                label={t.plateTitle}
+                value={`${fmtWeightValue(weight)} ${t.kgCol.toLowerCase()}`}
+                valueTone="accent"
+                chevron
+                onClick={() => setPlateOpen(true)}
+              />
             )}
             {!isAssist && !isBand && (
-              <button className="toggle-row" onClick={() => setBw((x) => !x)}>
-                <Icon name="barbell" />
-                <span className="lab">{t.bodyweightSet}</span>
-                <Switch on={bw} />
-              </button>
+              <ListRow
+                icon={<Icon name="barbell" />}
+                label={t.bodyweightSet}
+                trailing={<KitSwitch checked={bw} aria-label={t.bodyweightSet} onChange={setBw} />}
+              />
             )}
           </div>
         </>
       )}
       {props.onExerciseSettings && (
-        <button className="toggle-row se-exset" onClick={props.onExerciseSettings}>
-          <Icon name="gear" />
-          <span className="lab">{t.exerciseSettings}</span>
-          <Icon name="caret-right" />
-        </button>
+        <ListRow
+          className="se-exset"
+          icon={<Icon name="gear" />}
+          label={t.exerciseSettings}
+          chevron
+          onClick={props.onExerciseSettings}
+        />
       )}
       <div className="sheet-actions">
         {props.onDelete && (
-          <button className="danger-outline" style={{ minHeight: 44 }} onClick={props.onDelete}>
+          <Button variant="danger" style={{ minHeight: 44 }} onClick={props.onDelete}>
             <Icon name="trash" />
             {t.deleteSet}
-          </button>
+          </Button>
         )}
-        <button className="btn btn-secondary grow" onClick={props.onClose}>
+        <Button variant="secondary" className="grow" onClick={props.onClose}>
           {t.cancel}
-        </button>
-        <button className="btn btn-primary grow" onClick={save}>
+        </Button>
+        <Button variant="primary" className="grow" onClick={save}>
           {props.set ? t.save : t.log}
-        </button>
+        </Button>
       </div>
       {plateOpen && (
         <PlateSheet
@@ -7528,30 +7568,42 @@ function CircuitBlock(props: {
           <Icon name="arrows-clockwise" className="cbld-loopi" />
           <span className="cbld-rlabel">{t.circuitRounds}</span>
           <div className="cbld-stepper">
-            <button aria-label="-" onClick={() => props.onRounds?.(-1)}>
-              <Icon name="minus-circle" />
-            </button>
+            <IconButton
+              icon="minus-circle"
+              size="sm"
+              label="-"
+              onClick={() => props.onRounds?.(-1)}
+            />
             <span className="num">{buildRounds}</span>
-            <button aria-label="+" onClick={() => props.onRounds?.(1)}>
-              <Icon name="plus-circle" />
-            </button>
+            <IconButton
+              icon="plus-circle"
+              size="sm"
+              label="+"
+              onClick={() => props.onRounds?.(1)}
+            />
           </div>
         </div>
-        <button className="btn btn-secondary cbld-add" onClick={props.onAddAnother}>
+        <Button variant="secondary" className="cbld-add" onClick={props.onAddAnother}>
           <Icon name="plus" weight="bold" />
           {t.circuitAddAnother}
-        </button>
-        <button className="btn btn-primary cbld-done" onClick={props.onDoneBuilding}>
+        </Button>
+        <Button variant="primary" className="cbld-done" onClick={props.onDoneBuilding}>
           <Icon name="check-circle" />
           {t.circuitDoneStart(letter)}
-        </button>
+        </Button>
       </div>
     );
   }
 
   if (slim) {
     return (
-      <button className="circuit-block donebar" onClick={() => setExpanded(true)}>
+      <Card
+        as="button"
+        pad="sm"
+        emphasis="quiet"
+        className="circuit-block donebar"
+        onClick={() => setExpanded(true)}
+      >
         <span className="loop sm off">
           <Icon name="arrows-clockwise" />
         </span>
@@ -7566,7 +7618,7 @@ function CircuitBlock(props: {
           </div>
         </div>
         <Icon name="check-circle" weight="fill" className="cb-donecheck" />
-      </button>
+      </Card>
     );
   }
 
@@ -7591,22 +7643,22 @@ function CircuitBlock(props: {
             </div>
             {props.past && totalKg > 0 && <span className="cb-vol num">{fmtTonnes(totalKg)}</span>}
             {!props.past && !props.isLast && (
-              <button
+              <IconButton
+                icon="caret-up"
+                size="sm"
                 className="cb-collapse"
-                aria-label={t.navCollapse}
+                label={t.navCollapse}
                 onClick={() => setExpanded(false)}
-              >
-                <Icon name="caret-up" />
-              </button>
+              />
             )}
           </div>
           <div className="cb-didhead">
             <span className="section-label">{t.circuitWhatYouDid}</span>
             {!complete && (
-              <button className="btn btn-secondary cb-continue" onClick={props.onRun}>
+              <Button variant="secondary" className="cb-continue" onClick={props.onRun}>
                 <Icon name="arrow-counter-clockwise" />
                 {t.circuitContinueCircuit}
-              </button>
+              </Button>
             )}
           </div>
           <div className="cb-summary">
@@ -7688,10 +7740,10 @@ function CircuitBlock(props: {
             </div>
           ))}
         </div>
-        <button className="btn btn-primary cb-cta" onClick={props.onRun}>
+        <Button variant="primary" className="cb-cta" onClick={props.onRun}>
           <Icon name="play" />
           {doneRounds === 0 ? t.circuitStart : t.circuitContinueRound(doneRounds + 1)}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -7802,22 +7854,23 @@ function CircuitRunSheet(props: {
           </div>
         </div>
         <div className="crb-actions">
-          <button className="btn btn-primary cr-log" onClick={startNextRound}>
+          <Button variant="primary" className="cr-log" onClick={startNextRound}>
             <Icon name="play" />
             {t.circuitStartRound(roundDone + 1)}
-          </button>
+          </Button>
           <div className="crb-actions-row">
-            <button
-              className="btn btn-secondary cr-finish"
+            <Button
+              variant="secondary"
+              className="cr-finish"
               onClick={() => props.onSetRounds(rounds + 1)}
             >
               <Icon name="plus" weight="bold" />
               {t.circuitAddRound}
-            </button>
-            <button className="btn btn-secondary cr-finish" onClick={props.onClose}>
+            </Button>
+            <Button variant="secondary" className="cr-finish" onClick={props.onClose}>
               <Icon name="flag-checkered" />
               {t.circuitFinishAll}
-            </button>
+            </Button>
           </div>
         </div>
       </Sheet>
@@ -7845,14 +7898,16 @@ function CircuitRunSheet(props: {
       </div>
 
       <div className="cr-nav">
-        <button
+        <IconButton
+          icon="caret-left"
+          variant="secondary"
+          size="sm"
+          shape="round"
           className="cr-arrow"
           disabled={exIdx === 0}
-          aria-label={t.navPrev}
+          label={t.navPrev}
           onClick={() => setExIdx(Math.max(0, exIdx - 1))}
-        >
-          <Icon name="caret-left" />
-        </button>
+        />
         <div className="cr-nav-mid">
           <div className="cr-dots">
             {g.exercises.map((e, i) => (
@@ -7864,14 +7919,16 @@ function CircuitRunSheet(props: {
           </div>
           <div className="cr-nav-lbl">{t.circuitExerciseOf(exIdx + 1, n)}</div>
         </div>
-        <button
+        <IconButton
+          icon="caret-right"
+          variant="secondary"
+          size="sm"
+          shape="round"
           className="cr-arrow"
           disabled={exIdx >= n - 1}
-          aria-label={t.navNext}
+          label={t.navNext}
           onClick={() => setExIdx(Math.min(n - 1, exIdx + 1))}
-        >
-          <Icon name="caret-right" />
-        </button>
+        />
       </div>
 
       <div className="cr-stage">
@@ -7906,10 +7963,15 @@ function CircuitRunSheet(props: {
                 <span className="cr-next-name">
                   {t.circuitNext} · {nextEx.ex.name}
                 </span>
-                <button className="cr-next-go" onClick={() => setExIdx(nextEx.i)}>
-                  {t.circuitNext === 'Next' ? 'Go' : ''}
-                  <Icon name="arrow-right" />
-                </button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  iconTrailing="arrow-right"
+                  className="cr-next-go"
+                  onClick={() => setExIdx(nextEx.i)}
+                >
+                  {t.circuitNext === 'Next' ? 'Go' : undefined}
+                </Button>
               </div>
             )}
           </div>
@@ -7934,13 +7996,13 @@ function CircuitRunSheet(props: {
       </div>
 
       <div className="cr-foot">
-        <button className="btn btn-primary cr-complete" onClick={completeRound}>
+        <Button variant="primary" className="cr-complete" onClick={completeRound}>
           <Icon name="check-circle" />
           {t.circuitCompleteRound}
-        </button>
-        <button className="btn btn-secondary cr-finish" onClick={props.onClose}>
+        </Button>
+        <Button variant="secondary" className="cr-finish" onClick={props.onClose}>
           {t.circuitFinishAll}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );
@@ -7998,34 +8060,36 @@ function CircuitExerciseCard(props: {
         <div className="cr-step">
           <div className="lbl">{t.repsCol}</div>
           <div className="cr-step-ctl">
-            <button aria-label="-" onClick={() => setReps(Math.max(0, reps - 1))}>
-              <Icon name="minus" weight="bold" />
-            </button>
+            <IconButton
+              icon="minus"
+              size="sm"
+              label="-"
+              onClick={() => setReps(Math.max(0, reps - 1))}
+            />
             <span className="num">{reps}</span>
-            <button aria-label="+" onClick={() => setReps(reps + 1)}>
-              <Icon name="plus" weight="bold" />
-            </button>
+            <IconButton icon="plus" size="sm" label="+" onClick={() => setReps(reps + 1)} />
           </div>
         </div>
         {props.weighted && (
           <div className="cr-step">
             <div className="lbl">{t.kgCol}</div>
             <div className="cr-step-ctl">
-              <button aria-label="-" onClick={() => setWeight(Math.max(0, weight - 2.5))}>
-                <Icon name="minus" weight="bold" />
-              </button>
+              <IconButton
+                icon="minus"
+                size="sm"
+                label="-"
+                onClick={() => setWeight(Math.max(0, weight - 2.5))}
+              />
               <span className="num">{fmtWeightValue(weight)}</span>
-              <button aria-label="+" onClick={() => setWeight(weight + 2.5)}>
-                <Icon name="plus" weight="bold" />
-              </button>
+              <IconButton icon="plus" size="sm" label="+" onClick={() => setWeight(weight + 2.5)} />
             </div>
           </div>
         )}
       </div>
-      <button className="btn btn-primary cr-log" onClick={log}>
+      <Button variant="primary" className="cr-log" onClick={log}>
         <Icon name="check" />
         {t.circuitLogRound(props.slot, props.round)}
-      </button>
+      </Button>
       {props.weighted ? (
         <div className="cr-swipe">
           <Icon name="arrow-left" />

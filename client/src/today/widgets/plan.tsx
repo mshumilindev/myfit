@@ -156,7 +156,7 @@ function Para({ children, strong = false }: { children: ReactNode; strong?: bool
 /** A label / value line (L/XL footers). */
 function Line({ left, right }: { left: ReactNode; right?: ReactNode }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, width: '100%' }}>
+    <div className="ul-flex uj-between ug-8 uw-full">
       <span className="uiw-sub">{left}</span>
       {right != null && <span className="uiw-sub">{right}</span>}
     </div>
@@ -434,14 +434,14 @@ const nextWorkout: WidgetDef = {
           onClick={openSrc}
           footer={
             <>
-              <span className="uiw-sub" style={{ flex: 1 }}>
+              <span className="uiw-sub uf-1">
                 {[`~${np.minutes} min`, gym?.name ?? when].join(' · ')}
               </span>
               {startBtn()}
             </>
           }
         >
-          <div style={{ display: 'flex', gap: 6, overflow: 'hidden' }}>
+          <div className="ul-flex ug-6" style={{ overflow: 'hidden' }}>
             {np.items.slice(0, 3).map((i) => (
               <Chip key={i.name} size="sm">
                 {exName(i.name, locale)}
@@ -467,7 +467,7 @@ const nextWorkout: WidgetDef = {
         onClick={openSrc}
         footer={
           <>
-            <span className="uiw-sub" style={{ flex: 1 }}>
+            <span className="uiw-sub uf-1">
               {np.lastDone ? s.lastDone(whenLabel(np.lastDone, now, locale, true)) : when}
             </span>
             {startBtn()}
@@ -617,7 +617,7 @@ function QuickBuilder({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         onClick={open}
         footer={
           <>
-            <span className="uiw-sub" style={{ flex: 1 }}>
+            <span className="uiw-sub uf-1">
               {[focusLabel, gym?.name].filter(Boolean).join(' · ')}
             </span>
             <Button variant="primary" size="sm" onClick={() => build()}>
@@ -647,7 +647,7 @@ function QuickBuilder({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           >
             {s.regenerate}
           </Button>
-          <div style={{ flex: 1, display: 'flex' }}>
+          <div className="uf-1 ul-flex">
             <Button
               variant="primary"
               size="sm"
@@ -662,7 +662,7 @@ function QuickBuilder({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       }
     >
       {lenSeg}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      <div className="ul-flex ug-6 ul-wrap">
         {FOCI.map((f) => (
           <Chip key={f} size="sm" selected={f === prefs.focus} onClick={() => set({ focus: f })}>
             {s.focus[f]}
@@ -972,7 +972,7 @@ const programProgress: WidgetDef = {
         onClick={open}
         footer={
           <>
-            <span className="uiw-sub" style={{ flex: 1 }}>
+            <span className="uiw-sub uf-1">
               {ends
                 ? s.endsOn(`${fmtWeekdayShort(ends, locale)} ${fmtDayMonth(ends, locale)}`)
                 : ''}
@@ -983,11 +983,11 @@ const programProgress: WidgetDef = {
           </>
         }
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div className="ul-flex ua-center ug-16">
           <WidgetRing value={adh} size={72} tone="accent">
             {`${pct(adh)}%`}
           </WidgetRing>
-          <div style={{ minWidth: 0 }}>
+          <div className="umw-0">
             <div className="uiw-value">
               {a.done}
               {!openEnded && <span className="uiw-unit">{s.ofSessions(a.total)}</span>}
@@ -1123,18 +1123,9 @@ const weekPlan: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="accent" kicker={s.thisWeek} badge={badge} onClick={open}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, flex: 1 }}>
+          <div className="ul-grid ug-6 uf-1" style={{ gridTemplateColumns: 'repeat(7, 1fr)' }}>
             {days.map((d) => (
-              <div
-                key={d.k}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 6,
-                  minWidth: 0,
-                }}
-              >
+              <div key={d.k} className="ul-flex ul-col ua-center ug-6 umw-0">
                 <span className="uiw-sub">{fmtWeekdayShort(d.date, locale).slice(0, 2)}</span>
                 <IconTile
                   size={30}
@@ -1280,13 +1271,13 @@ const timeToTrain: WidgetDef = {
           badge={s.fromN(recent.length)}
           onClick={open}
         >
-          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end', flex: 1 }}>
-            <div style={{ minWidth: 0 }}>
+          <div className="ul-flex ug-16 ua-end uf-1">
+            <div className="umw-0">
               <div className="uiw-value">{hhmm(usual)}</div>
               <div className="uiw-sub">{status}</div>
               {sub && <div className="uiw-sub">{sub}</div>}
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="uf-1 umw-0">
               <WidgetBars
                 values={buckets.slice(2, 8)}
                 highlight={[hi - 2]}
@@ -1324,9 +1315,7 @@ const timeToTrain: WidgetDef = {
         onClick={open}
         footer={
           <>
-            <span className="uiw-sub" style={{ flex: 1 }}>
-              {s.fromN(recent.length)}
-            </span>
+            <span className="uiw-sub uf-1">{s.fromN(recent.length)}</span>
             <Button variant="primary" size="sm" icon="play" onClick={open}>
               {s.startNow}
             </Button>
@@ -1433,7 +1422,7 @@ function RestTimer({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
     ? () => shell.openOverlay({ screen: 'session', workoutId: open.id })
     : undefined;
   const presetRow = (full: boolean) => (
-    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+    <div className="ul-flex ug-6 ul-wrap">
       {(full ? PRESETS : PRESETS.slice(1, 3)).map((p) => (
         <Button key={p} variant="secondary" size="sm" onClick={() => startSolo(p)}>
           {fmtCountdown(p)}
@@ -1476,7 +1465,7 @@ function RestTimer({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         ) : size === 'L' ? (
           presetRow(true)
         ) : (
-          <div style={{ display: 'grid', placeItems: 'center', flex: 1 }}>
+          <div className="ul-grid uf-1" style={{ placeItems: 'center' }}>
             <WidgetRing value={0} size={120} tone="rest">
               0:00
             </WidgetRing>
@@ -1536,9 +1525,9 @@ function RestTimer({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           </>
         }
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="ul-flex ua-center ug-10">
           {ring(52)}
-          <div style={{ minWidth: 0 }}>
+          <div className="umw-0">
             <div className="uiw-sub">{ofTxt}</div>
             {setNo && <div className="uiw-sub">{s.setN(setNo)}</div>}
           </div>
@@ -1555,13 +1544,13 @@ function RestTimer({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   if (size === 'L')
     return (
       <Widget size="L" tone="rest" onClick={openSession}>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center', flex: 1 }}>
+        <div className="ul-flex ug-16 ua-center uf-1">
           {ring(96)}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, flex: 1 }}>
+          <div className="ul-flex ul-col ug-4 umw-0 uf-1">
             <span className="uiw-kicker">{kicker}</span>
             <div className="uiw-title">{[exTxt, setNo].filter(Boolean).join(' · ')}</div>
             {nextSet && <div className="uiw-sub">{nextSet}</div>}
-            <div style={{ display: 'flex', gap: 6 }}>{controls}</div>
+            <div className="ul-flex ug-6">{controls}</div>
           </div>
         </div>
       </Widget>
@@ -1583,9 +1572,9 @@ function RestTimer({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       onClick={openSession}
       footer={controls}
     >
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+      <div className="ul-flex ug-16 ua-center">
         {ring(120)}
-        <div style={{ minWidth: 0 }}>
+        <div className="umw-0">
           <div className="uiw-name">{exTxt}</div>
           {ex && (
             <WidgetDots
@@ -1749,7 +1738,7 @@ const lastSession: WidgetDef = {
         onClick={open}
         footer={
           <>
-            <span className="uiw-sub" style={{ flex: 1 }}>
+            <span className="uiw-sub uf-1">
               {[kcal ? `${kcal} kcal` : null, gym].filter(Boolean).join(' · ')}
             </span>
             <Button variant="secondary" size="sm" iconTrailing="caret-right" onClick={open}>
@@ -1824,9 +1813,9 @@ const lastMuscles: WidgetDef = {
     if (size === 'S')
       return (
         <Widget size="S" tone="accent" kicker={s.workedWhen(when)} onClick={open}>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flex: 1, minHeight: 0 }}>
+          <div className="ul-flex ug-10 ua-center uf-1" style={{ minHeight: 0 }}>
             <MuscleHeatmap colors={colors} width={64} />
-            <div style={{ minWidth: 0 }}>
+            <div className="umw-0">
               <div className="uiw-title">{name}</div>
               <div className="uiw-sub">{prim}</div>
               {secLine && <div className="uiw-sub">{secLine}</div>}
@@ -1838,9 +1827,9 @@ const lastMuscles: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="accent" onClick={open}>
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center', flex: 1, minHeight: 0 }}>
+          <div className="ul-flex ug-14 ua-center uf-1" style={{ minHeight: 0 }}>
             <MuscleHeatmap colors={colors} width={130} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+            <div className="ul-flex ul-col ug-4 umw-0">
               <div className="uiw-title">{`${name} · ${when}`}</div>
               <div className="uiw-sub">{`● ${primary.map((m) => muscleName(t, m.muscle)).join(', ')}`}</div>
               {secondary.length > 0 && (
@@ -1859,10 +1848,10 @@ const lastMuscles: WidgetDef = {
         badge={s.setsN(sets)}
         onClick={open}
       >
-        <div style={{ display: 'flex', justifyContent: 'center', flex: 1, minHeight: 0 }}>
+        <div className="ul-flex uj-center uf-1" style={{ minHeight: 0 }}>
           <MuscleHeatmap colors={colors} width={HEATMAP_XL_W} />
         </div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div className="ul-flex ug-6 ul-wrap">
           {work.slice(0, 5).map((m) => (
             <Chip key={m.muscle} size="sm" tone={m.primary ? 'accent' : 'neutral'}>
               {`${muscleName(t, m.muscle)} ${Math.round(m.sets)}`}
@@ -1957,8 +1946,8 @@ const sessionEnergy: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="kcal" kicker={s.energyK(name)} badge={when} onClick={open}>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end', flex: 1 }}>
-            <div style={{ minWidth: 0 }}>
+          <div className="ul-flex ug-16 ua-end uf-1">
+            <div className="umw-0">
               <div className="uiw-value">
                 {last.kcal}
                 <span className="uiw-unit">kcal</span>
@@ -1966,7 +1955,7 @@ const sessionEnergy: WidgetDef = {
               <div className="uiw-sub">{`${s.perMin(perMin)} · ${hm(mins)}`}</div>
               <WidgetDelta good={d >= 0}>{s.vsAvg(signed(d, 0))}</WidgetDelta>
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="uf-1 umw-0">
               {bars(44)}
               <div className="uiw-sub">{s.lastNAvg(series.length, avg)}</div>
             </div>
@@ -1986,7 +1975,7 @@ const sessionEnergy: WidgetDef = {
         onClick={open}
         footer={
           <>
-            <span className="uiw-sub" style={{ flex: 1 }}>
+            <span className="uiw-sub uf-1">
               {s.weekKcal(Math.round(weekKcal), weekRows.length)}
             </span>
             <Button variant="secondary" size="sm" iconTrailing="caret-right" onClick={open}>
@@ -2057,7 +2046,11 @@ const effortTrend: WidgetDef = {
           title={s.avgRpe(avgTxt)}
           sub={`${s.lastNSessions(rows.length)} · ${state}`}
           onClick={open}
-          trailing={<span style={{ width: 72, display: 'flex' }}>{spark(28)}</span>}
+          trailing={
+            <span className="ul-flex" style={{ width: 72 }}>
+              {spark(28)}
+            </span>
+          }
         />
       );
     if (size === 'S')
@@ -2103,9 +2096,7 @@ const effortTrend: WidgetDef = {
         onClick={open}
         footer={
           <>
-            <span className="uiw-sub" style={{ flex: 1 }}>
-              {advice}
-            </span>
+            <span className="uiw-sub uf-1">{advice}</span>
             <Button variant="secondary" size="sm" iconTrailing="caret-right" onClick={open}>
               {s.progress}
             </Button>
@@ -2339,10 +2330,10 @@ const homeSetsW: WidgetDef = {
       );
     }
     const list = (n: number) => (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div className="ul-flex ul-col ug-6">
         {ordered.slice(0, n).map((x) => (
-          <div key={x.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
+          <div key={x.id} className="ul-flex ua-center ug-8">
+            <div className="uf-1 umw-0">
               <div className="uiw-title">{x.name}</div>
               <div className="uiw-sub">{detail(x.id)}</div>
             </div>
@@ -2380,9 +2371,7 @@ const homeSetsW: WidgetDef = {
         onClick={newOne}
         footer={
           <>
-            <span className="uiw-sub" style={{ flex: 1 }}>
-              {s.noGym}
-            </span>
+            <span className="uiw-sub uf-1">{s.noGym}</span>
             <Button variant="ghost" size="sm" icon="plus" onClick={newOne}>
               {s.newTemplate}
             </Button>
@@ -2390,8 +2379,8 @@ const homeSetsW: WidgetDef = {
         }
       >
         {lastRun ? (
-          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end' }}>
-            <div style={{ minWidth: 0 }}>
+          <div className="ul-flex ug-16 ua-end">
+            <div className="umw-0">
               <div className="uiw-sub">{`${lastRun.dayName ?? ''} · ${s.lastX(whenLabel(lastRun.startedAt, now, locale))}`}</div>
               <div className="uiw-value">
                 {cur}
@@ -2401,7 +2390,7 @@ const homeSetsW: WidgetDef = {
                 <WidgetDelta good={cur >= prev}>{s.vsLast(signed(cur - prev, 0))}</WidgetDelta>
               )}
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="uf-1 umw-0">
               {reps.length > 1 && (
                 <WidgetBars values={reps} highlight={[reps.length - 1]} height={48} tone="active" />
               )}

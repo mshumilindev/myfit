@@ -9,6 +9,9 @@
  * Cached like the rest of the app: paints instantly from localStorage, skips the
  * network while the cache is fresh, and only re-renders on a real change (delta).
  */
+import { BackButton } from '../components/ui/BackButton';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
 import { useCallback, useEffect, useState } from 'react';
 import { cacheFresh, cachePeek, cacheSet, callFn } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtWeekday, useT } from '../i18n';
@@ -163,9 +166,7 @@ export function ClientPage({
   return (
     <div className="screen client-page">
       <div className="cp-head">
-        <button className="back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton onClick={onClose} label={t.backAction} />
         {data && (
           <div className="cp-id">
             <Avatar
@@ -233,7 +234,13 @@ export function ClientPage({
           return null;
         })()}
       {sameDay && (
-        <button className="cp-sameday" onClick={() => openSession(sameDay)}>
+        <Card
+          as="button"
+          pad="none"
+          emphasis="quiet"
+          className="cp-sameday"
+          onClick={() => openSession(sameDay)}
+        >
           <div className="cp-sameday-label">
             <Icon name="clock-counter-clockwise" />
             <span>
@@ -246,7 +253,7 @@ export function ClientPage({
             {t.setsStat.toLowerCase()}
           </div>
           <Icon name="caret-right" className="cp-sameday-go" />
-        </button>
+        </Card>
       )}
 
       {data && (
@@ -267,14 +274,15 @@ export function ClientPage({
       )}
 
       {data && (
-        <button
-          className="cp-profile-btn"
+        <Button
+          variant="secondary"
+          fullWidth
+          icon="user"
+          iconTrailing="arrow-up-right"
           onClick={() => shell.openOverlay({ screen: 'profile', userId: clientId })}
         >
-          <Icon name="user" />
-          <span>{t.clientOpenProfile}</span>
-          <Icon name="arrow-up-right" className="cp-profile-go" />
-        </button>
+          {t.clientOpenProfile}
+        </Button>
       )}
 
       <section className="cp-section">
@@ -318,7 +326,10 @@ export function ClientPage({
                     <span className="hist-tl-date">{fmtDayMonth(day.ts, locale)}</span>
                   </div>
                   {day.sessions.map((s) => (
-                    <button
+                    <Card
+                      as="button"
+                      pad="none"
+                      emphasis="quiet"
                       key={s.id}
                       className="hist-item hist-workout"
                       onClick={() => openSession(s)}
@@ -337,7 +348,7 @@ export function ClientPage({
                         )}
                       </span>
                       <Icon name="arrow-up-right" className="go" />
-                    </button>
+                    </Card>
                   ))}
                 </div>
               </div>

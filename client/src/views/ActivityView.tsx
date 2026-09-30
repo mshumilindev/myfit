@@ -5,7 +5,11 @@
  * timer that survives closing the page; only Discard removes it. Finish and
  * Discard both confirm.
  */
+import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useState } from 'react';
+import { Button } from '../components/ui/Button';
+import { Field } from '../components/ui/Field';
+import { Segmented } from '../components/ui/Segmented';
 import {
   useStore,
   latestWeight,
@@ -33,6 +37,7 @@ import {
   estimateCalories,
 } from '../activities';
 import type { Activity, ActivityEffort } from '../types';
+import { Tag } from '../components/ui/Tag';
 
 const EFFORTS: ActivityEffort[] = ['light', 'moderate', 'hard'];
 
@@ -131,22 +136,23 @@ function NewActivity({ typeKey, onClose }: { typeKey: string; onClose: () => voi
     <div className={`screen activity-screen cat-${activityTone(type.key, type.category)}`}>
       <ActivityHead type={type} isRecovery={isRecovery} onClose={onClose} t={t} />
 
-      <div className="seg2 act-mode-seg">
-        <button className={mode === 'ready' ? 'active' : ''} onClick={() => setMode('ready')}>
-          {t.actStartNow}
-        </button>
-        <button className={mode === 'past' ? 'active' : ''} onClick={() => setMode('past')}>
-          {t.actLogPast}
-        </button>
-      </div>
+      <Segmented
+        className="act-mode-seg"
+        value={mode}
+        onChange={setMode}
+        options={[
+          { value: 'ready', label: t.actStartNow },
+          { value: 'past', label: t.actLogPast },
+        ]}
+      />
 
       {mode === 'ready' ? (
         <div className="av-ready">
           <p className="act-cap">{t.actReadyCap}</p>
-          <button className="btn btn-primary av-start" onClick={start}>
+          <Button variant="primary" className="av-start" onClick={start}>
             <Icon name="play" weight="fill" />
             {t.actStart}
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="av-past">
@@ -175,10 +181,10 @@ function NewActivity({ typeKey, onClose }: { typeKey: string; onClose: () => voi
             ) : (
               <span className="act-noweight-inline">{t.actNoWeight}</span>
             )}
-            <button className="btn btn-primary" onClick={savePast}>
+            <Button variant="primary" onClick={savePast}>
               <Icon name="check" weight="bold" />
               {t.actSave}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -265,15 +271,15 @@ function EditActivity({ activity, onClose }: { activity: Activity; onClose: () =
           ) : (
             <span className="act-noweight-inline">{t.actNoWeight}</span>
           )}
-          <button className="btn btn-primary" onClick={save}>
+          <Button variant="primary" onClick={save}>
             <Icon name="check" weight="bold" />
             {t.actSave}
-          </button>
+          </Button>
         </div>
-        <button className="btn danger-outline av-discard-btn" onClick={() => setConfirmDel(true)}>
+        <Button variant="danger" className="av-discard-btn" onClick={() => setConfirmDel(true)}>
           <Icon name="trash" />
           {t.delete}
-        </button>
+        </Button>
       </div>
 
       {confirmDel && (
@@ -373,29 +379,33 @@ function RunningActivity({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="av-actions">
-        <button className="btn danger-outline av-discard-btn" onClick={() => setConfirm('discard')}>
+        <Button variant="danger" className="av-discard-btn" onClick={() => setConfirm('discard')}>
           <Icon name="trash" />
           {t.actDiscard}
-        </button>
-        <button
-          className="btn btn-secondary av-pause"
+        </Button>
+        <Button
+          variant="secondary"
+          className="av-pause"
           onClick={() => (paused ? resumeActivity(activity.id) : pauseActivity(activity.id))}
         >
           <Icon name={paused ? 'play' : 'timer'} weight="fill" />
           {paused ? t.actResume : t.actPause}
-        </button>
-        <button
-          className="btn btn-primary av-finish"
+        </Button>
+        <Button
+          variant="primary"
+          className="av-finish"
           disabled={minutes <= 0}
           onClick={() => setConfirm('finish')}
         >
           <Icon name="check" weight="bold" />
           {t.actFinish}
-        </button>
+        </Button>
       </div>
 
       {confirm === 'finish' && (
         <ConfirmDialog
+          tone="ok"
+          icon="check-circle"
           title={t.actFinishTitle}
           body={t.actFinishBody(Math.max(1, Math.round(minutes)))}
           confirmLabel={t.actFinish}
@@ -442,19 +452,17 @@ function ActivityHead({
 }) {
   return (
     <div className="av-head">
-      <button className="back" onClick={onClose} aria-label={t.backAction}>
-        <Icon name="caret-left" />
-      </button>
+      <BackButton onClick={onClose} label={t.backAction} />
       <span className="av-head-name">
         <Icon name={type?.icon ?? 'heartbeat'} />
         {type ? (t.actType[type.key] ?? type.key) : (fallbackName ?? '')}
       </span>
-      <span
-        className={`act-cat-badge cat-${isRecovery ? 'recovery' : type?.sport ? 'sport' : 'conditioning'}`}
+      <Tag
+        tone={isRecovery ? 'rest' : type?.sport ? 'sport' : 'accent'}
+        icon={<Icon name={isRecovery ? 'wave-sine' : 'lightning'} weight="fill" />}
       >
-        <Icon name={isRecovery ? 'wave-sine' : 'lightning'} weight="fill" />
         {isRecovery ? t.actCountsRecovery : t.actAddsConditioning}
-      </span>
+      </Tag>
     </div>
   );
 }
@@ -494,20 +502,17 @@ function DistanceField({
   className?: string;
 }) {
   return (
-    <label className={`act-field ${className ?? 'act-distance'}`}>
-      <span>{t.actDistance}</span>
-      <div className="act-min">
-        <input
-          type="number"
-          min={0}
-          step="0.1"
-          inputMode="decimal"
-          placeholder="0.0"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-        <em>{t.kmShort}</em>
-      </div>
-    </label>
+    <Field
+      className={className ?? 'act-distance'}
+      label={t.actDistance}
+      type="number"
+      min={0}
+      step="0.1"
+      inputMode="decimal"
+      placeholder="0.0"
+      trail={t.kmShort}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
   );
 }

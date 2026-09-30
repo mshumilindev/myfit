@@ -12,6 +12,7 @@ import { localizedEquipName } from '../data/equipmentI18n';
 import { CARDIO_PROFILES } from '../cardio';
 import { useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
+import { ListRow } from './ui/GroupedList';
 
 function machineIcon(id: string): string {
   const p = CARDIO_PROFILES[id];
@@ -40,19 +41,18 @@ export function CardioMachineList(props: {
     const name = localizedEquipName(e, locale);
     const on = props.current === e.id;
     return (
-      <button
+      <ListRow
         key={e.id}
-        className={`add-row cardio-machine-row${on ? ' suggested' : ''}`}
+        selected={on}
+        icon={
+          <span className="cm-ic" aria-hidden>
+            <Icon name={machineIcon(e.id)} />
+          </span>
+        }
+        label={name}
+        check={on}
         onClick={() => props.onPick(e.id, name)}
-      >
-        <span className="cm-ic" aria-hidden>
-          <Icon name={machineIcon(e.id)} />
-        </span>
-        <span className="add-main">
-          <span className="add-name">{name}</span>
-        </span>
-        {on && <Icon name="check" />}
-      </button>
+      />
     );
   };
 
@@ -67,18 +67,17 @@ export function CardioMachineList(props: {
       <div className="add-section">
         {inGym.length > 0 && <div className="section-label">{t.cardioOtherMachines}</div>}
         <div className="add-rows">
-          <button
-            className={`add-row cardio-machine-row${props.current === null ? ' suggested' : ''}`}
+          <ListRow
+            selected={props.current === null}
+            icon={
+              <span className="cm-ic" aria-hidden>
+                <Icon name="timer" />
+              </span>
+            }
+            label={t.cardioNoMachine}
+            sub={t.cardioNoMachineHint}
             onClick={() => props.onPick(null, t.defaultTimedExerciseNames.cardio)}
-          >
-            <span className="cm-ic" aria-hidden>
-              <Icon name="timer" />
-            </span>
-            <span className="add-main">
-              <span className="add-name">{t.cardioNoMachine}</span>
-              <span className="cm-hint">{t.cardioNoMachineHint}</span>
-            </span>
-          </button>
+          />
           {others.map(row)}
         </div>
       </div>

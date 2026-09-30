@@ -17,6 +17,7 @@ import {
   workoutVolumeKg,
 } from '../store';
 import { Card } from './ui/Card';
+import { DayTimelineDay as KitDay } from './ui/DayTimeline';
 import { ListRow } from './ui/GroupedList';
 import { IconTile } from './ui/IconTile';
 import { Tag } from './ui/Tag';
@@ -31,7 +32,6 @@ import {
   useT,
 } from '../i18n';
 import { dayReadoutLabel } from '../data/daySuggest';
-import { Icon } from '../ui';
 import {
   activityType,
   activityCategory,
@@ -54,6 +54,17 @@ type DayState = 'trained' | 'illness' | 'injury' | 'vacation' | 'rest' | 'missed
 
 // Milestone glyphs, shared with Today's week pills: full rest is a plane, a
 // rest / recovery day the lotus, never a "sleep" moon.
+/** Day state → colour family (tones.ts). */
+const STATE_TONE: Record<DayState, Tone> = {
+  trained: 'ok',
+  rest: 'rest',
+  vacation: 'illness',
+  illness: 'active',
+  injury: 'injury',
+  missed: 'danger',
+  logged: 'neutral',
+};
+
 const STATE_GLYPH: Record<Exclude<DayState, 'logged'>, string> = {
   trained: 'check',
   illness: 'pulse',
@@ -328,51 +339,37 @@ function TimelineDay({
       ? undefined
       : stateLabel[day.state as Exclude<DayState, 'trained' | 'logged'>];
   return (
-    <div
-      className={`hist-tl-day st-${day.state}${isLast ? ' is-last' : ''}${
-        isToday ? ' is-today' : ''
-      }`}
+    <KitDay
+      className={`hist-tl-day st-${day.state}`}
+      tone={STATE_TONE[day.state]}
+      icon={day.state === 'logged' ? undefined : STATE_GLYPH[day.state]}
+      nodeLabel={nodeLabel}
+      date={dateLine}
+      aside={aside}
+      isLast={isLast}
+      isToday={isToday}
     >
-      <div className="hist-tl-rail">
-        {day.state === 'logged' ? (
-          <span className="hist-tl-dot" />
-        ) : (
-          <span className="hist-tl-node" title={nodeLabel} aria-label={nodeLabel}>
-            <Icon name={STATE_GLYPH[day.state as Exclude<DayState, 'logged'>]} />
-          </span>
-        )}
-        <span className="hist-tl-line" />
-      </div>
-      <div className="hist-tl-body">
-        {/* Date + state share one line, centred on the node. */}
-        <div className="hist-tl-head">
-          <span className="hist-tl-date">{dateLine}</span>
-          {aside != null && <span className="hist-tl-aside">{aside}</span>}
-        </div>
-        {day.items.length > 0 && (
-          <Card pad="sm" className="hist-day-card">
-            {day.items.map((it) => {
-              if (it.kind === 's') return <SleepRow key={it.n.id} n={it.n} onOpen={onOpenSleep} />;
-              if (it.kind === 'a')
-                return (
-                  <ActivityRow key={it.a.id} a={it.a} bodyKg={bodyKg} onOpen={onOpenActivity} />
-                );
-              return (
-                <WorkoutRow
-                  key={it.w.id}
-                  w={it.w}
-                  allWorkouts={allWorkouts}
-                  bodyKg={bodyKg}
-                  showMuscles={showMuscles}
-                  onOpen={onOpenWorkout}
-                  openMuscleHistory={openMuscleHistory}
-                />
-              );
-            })}
-          </Card>
-        )}
-      </div>
-    </div>
+      {day.items.length > 0 && (
+        <Card pad="none" emphasis={isToday ? 'glass' : 'card'} className="hist-day-card">
+          {day.items.map((it) => {
+            if (it.kind === 's') return <SleepRow key={it.n.id} n={it.n} onOpen={onOpenSleep} />;
+            if (it.kind === 'a')
+              return <ActivityRow key={it.a.id} a={it.a} bodyKg={bodyKg} onOpen={onOpenActivity} />;
+            return (
+              <WorkoutRow
+                key={it.w.id}
+                w={it.w}
+                allWorkouts={allWorkouts}
+                bodyKg={bodyKg}
+                showMuscles={showMuscles}
+                onOpen={onOpenWorkout}
+                openMuscleHistory={openMuscleHistory}
+              />
+            );
+          })}
+        </Card>
+      )}
+    </KitDay>
   );
 }
 
@@ -447,6 +444,8 @@ export function WorkoutRow({
     return (
       <ListRow
         className="hist-item hist-workout hist-home"
+        dense
+        strong
         time={fmtClock(w.startedAt)}
         icon={<IconTile tone="accent" size={36} icon="house" />}
         label={w.dayName || t.homeSetTitle}
@@ -459,6 +458,8 @@ export function WorkoutRow({
   return (
     <ListRow
       className="hist-item hist-workout"
+      dense
+      strong
       time={fmtClock(w.startedAt)}
       icon={<IconTile tone="accent" size={36} icon="barbell" />}
       label={title}
@@ -487,6 +488,8 @@ export function ActivityRow({
   return (
     <ListRow
       className={`hist-item hist-activity is-minor cat-${cat}`}
+      dense
+      strong
       time={fmtClock(a.startedAt)}
       icon={<IconTile tone={tone} size={36} icon={activityType(a.type)?.icon ?? 'heartbeat'} />}
       label={
@@ -519,6 +522,8 @@ export function SleepRow({ n, onOpen }: { n: SleepNight; onOpen?: (id: string) =
   return (
     <ListRow
       className="hist-item hist-activity is-minor cat-sleep"
+      dense
+      strong
       time={clk(n.bedtime)}
       icon={<IconTile tone="sleep" size={36} icon={nap ? 'sun-horizon' : 'moon-stars'} />}
       label={

@@ -8,6 +8,7 @@
  * state) are also used by muscles.tsx.
  */
 import { useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { Field } from '../../components/ui/Field';
 import {
   Widget,
   WidgetBar,
@@ -169,12 +170,7 @@ export function Muted({ children }: { children: ReactNode }) {
 
 /** ↑ 5 / ↓ 2 / → 0 trend tag (green / red / muted). */
 export function Trend({ d, suffix = '' }: { d: number; suffix?: string }) {
-  if (Math.abs(d) < 0.05)
-    return (
-      <span className="uiw-delta" style={{ color: 'var(--color-text-muted)' }}>
-        → 0{suffix}
-      </span>
-    );
+  if (Math.abs(d) < 0.05) return <span className="uiw-delta ut-muted">→ 0{suffix}</span>;
   return (
     <WidgetDelta good={d > 0}>
       {d > 0 ? '↑' : '↓'} {fmtKg(Math.abs(d))}
@@ -185,19 +181,14 @@ export function Trend({ d, suffix = '' }: { d: number; suffix?: string }) {
 
 /** A delta tag that may be neutral (good = null → muted). */
 export function Tag({ text, good }: { text: string; good: boolean | null }) {
-  if (good === null)
-    return (
-      <span className="uiw-delta" style={{ color: 'var(--color-text-muted)' }}>
-        {text}
-      </span>
-    );
+  if (good === null) return <span className="uiw-delta ut-muted">{text}</span>;
   return <WidgetDelta good={good}>{text}</WidgetDelta>;
 }
 
 /** Two-line label for WidgetList rows (title + muted sub). */
 export function TwoLine({ title, sub }: { title: ReactNode; sub?: ReactNode }) {
   return (
-    <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+    <span className="ul-flex ul-col umw-0">
       <span>{title}</span>
       {sub != null && sub !== '' && <Muted>{sub}</Muted>}
     </span>
@@ -217,19 +208,18 @@ export function MarkerBar({
   height?: number;
 }) {
   return (
-    <span style={{ position: 'relative', display: 'block' }}>
+    <span className="ul-block" style={{ position: 'relative' }}>
       <WidgetBar value={value} tone={tone} height={height} />
       {marker != null && (
         <span
           aria-hidden
+          className="ur-sm tw-bg-text"
           style={{
             position: 'absolute',
             top: -3,
             left: `calc(${Math.max(0, Math.min(1, marker)) * 100}% - 1px)`,
             width: 2,
             height: height + 6,
-            background: 'var(--color-text)',
-            borderRadius: 'var(--radius-sm)',
           }}
         />
       )}
@@ -252,10 +242,10 @@ export function MeterRow({
   tone?: Tone;
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+    <div className="ul-flex ul-col ug-4">
+      <div className="ul-flex uj-between ug-8">
         <Muted>{label}</Muted>
-        <span style={{ fontSize: 12, fontWeight: 600 }}>{value}</span>
+        <span className="uiw-t-strong">{value}</span>
       </div>
       <MarkerBar value={bar} marker={marker} tone={tone} height={4} />
     </div>
@@ -272,15 +262,15 @@ export function StackBar({
 }) {
   const sum = parts.reduce((s, p) => s + p.value, 0) || 1;
   return (
-    <span style={{ display: 'flex', gap: 2, height, width: '100%', flex: 'none' }} aria-hidden>
+    <span className="ul-flex ug-2 uw-full uf-none" style={{ height }} aria-hidden>
       {parts.map((p, i) =>
         p.value > 0 ? (
           <span
             key={i}
+            className="ur-sm"
             style={{
               width: `${(p.value / sum) * 100}%`,
               background: p.color,
-              borderRadius: 'var(--radius-sm)',
             }}
           />
         ) : null,
@@ -292,16 +282,11 @@ export function StackBar({
 /** Legend swatch + label. */
 export function Swatch({ color, children }: { color: string; children: ReactNode }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+    <span className="ul-iflex ua-center ug-6">
       <span
         aria-hidden
-        style={{
-          width: 8,
-          height: 8,
-          borderRadius: 'var(--radius-sm)',
-          background: color,
-          flex: 'none',
-        }}
+        className="ur-sm uf-none"
+        style={{ width: 8, height: 8, background: color }}
       />
       {children}
     </span>
@@ -311,17 +296,8 @@ export function Swatch({ color, children }: { color: string; children: ReactNode
 /** Footer row: muted note on the left, one action on the right. */
 export function NoteAction({ note, action }: { note: ReactNode; action: ReactNode }) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: '100%',
-        gap: 8,
-        minWidth: 0,
-      }}
-    >
-      <span style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
+    <div className="ul-flex uj-between ua-center uw-full ug-8 umw-0">
+      <span className="umw-0 uf-1" style={{ overflow: 'hidden' }}>
         <Muted>{note}</Muted>
       </span>
       {action}
@@ -564,15 +540,11 @@ const topLifts: WidgetDef = {
           onClick={open}
         >
           <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-              gap: '4px 8px',
-              fontSize: 12,
-            }}
+            className="uiw-t-base ul-grid"
+            style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '4px 8px' }}
           >
             {rows.map((r) => (
-              <span key={r.k} style={{ display: 'flex', gap: 4, alignItems: 'baseline' }}>
+              <span key={r.k} className="ul-flex ug-4 ua-base">
                 <Muted>{s.liftShort[r.k]}</Muted>
                 <b>{fmtKg(r.cur)}</b>
                 <Tag
@@ -587,13 +559,13 @@ const topLifts: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="accent" kicker={s.topLiftsE1} badge={s.weeks(4)} onClick={open}>
-          <div style={{ marginTop: 'auto' }}>
+          <div className="umt-auto">
             <WidgetStats
               items={rows.map((r) => ({
                 label: s.liftName[r.k],
                 value: (
-                  <span style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: 19 }}>{fmtKg(r.cur)}</span>
+                  <span className="ul-flex ul-col">
+                    <span className="uiw-t-xl">{fmtKg(r.cur)}</span>
                     <Trend d={r.d} />
                   </span>
                 ),
@@ -626,11 +598,11 @@ const topLifts: WidgetDef = {
             const series = runningSeries(L[r.k].points, now, 12);
             return {
               label: (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ width: 80, flex: 'none' }}>
+                <span className="ul-flex ua-center ug-10">
+                  <span className="uf-none" style={{ width: 80 }}>
                     <TwoLine title={s.liftName[r.k]} sub="kg" />
                   </span>
-                  <span style={{ flex: 1, minWidth: 0 }}>
+                  <span className="uf-1 umw-0">
                     {series.length > 1 && (
                       <WidgetSpark points={series} height={30} tone={r.d > 0 ? 'ok' : 'neutral'} />
                     )}
@@ -638,17 +610,8 @@ const topLifts: WidgetDef = {
                 </span>
               ),
               value: (
-                <span
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-end',
-                    minWidth: 56,
-                  }}
-                >
-                  <span style={{ fontSize: 17, fontWeight: 600, color: 'var(--color-text)' }}>
-                    {fmtKg(r.cur)}
-                  </span>
+                <span className="ul-flex ul-col ua-end" style={{ minWidth: 56 }}>
+                  <span className="uiw-t-lg ut-text">{fmtKg(r.cur)}</span>
                   <Trend d={r.d} />
                 </span>
               ),
@@ -717,7 +680,7 @@ const nextTargetW: WidgetDef = {
           kicker={s.nextKicker(day)}
           value={loaded ? fmtKg(t.weight ?? 0) : t.reps}
           unit={loaded ? `× ${t.reps}` : s.reps}
-          title={<span style={{ fontSize: 12, fontWeight: 500 }}>{name}</span>}
+          title={<span className="uiw-t-base">{name}</span>}
           sub={<Tag text={d.text} good={d.good} />}
           onClick={start}
         />
@@ -768,11 +731,9 @@ const nextTargetW: WidgetDef = {
             return {
               label: exName(l.name, ctx.locale),
               value: (
-                <span style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                  <span style={{ color: 'var(--color-text)', fontWeight: 600, fontSize: 13.5 }}>
-                    {fmtSet(l.target.weight, l.target.reps)}
-                  </span>
-                  <span style={{ width: 56, textAlign: 'right' }}>
+                <span className="ul-flex ug-10 ua-center">
+                  <span className="uiw-t-md ut-text">{fmtSet(l.target.weight, l.target.reps)}</span>
+                  <span className="utx-right" style={{ width: 56 }}>
                     <Tag text={dd.text} good={dd.good} />
                   </span>
                 </span>
@@ -864,7 +825,8 @@ function ForecastChart({
       width="100%"
       height={height}
       aria-hidden
-      style={{ display: 'block', overflow: 'visible', flex: 'none' }}
+      className="uf-none ul-block"
+      style={{ overflow: 'visible' }}
     >
       <path d={`M0 ${yT} H${W}`} stroke="var(--color-border)" strokeDasharray="4 5" />
       <text x="0" y={yT - 4} fill="var(--color-text-faint)" fontSize="10">
@@ -947,24 +909,15 @@ function TargetsSheet({
   );
   return (
     <Sheet onClose={onClose}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '4px 0 12px' }}>
-        <strong style={{ fontSize: 17 }}>{s.targetsTitle}</strong>
+      <div className="ul-flex ul-col ug-12" style={{ padding: '4px 0 12px' }}>
+        <strong className="uiw-t-lg">{s.targetsTitle}</strong>
         <Muted>{s.targetsHint}</Muted>
         {lifts.map((k) => (
-          <label
-            key={k}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-            }}
-          >
+          <label key={k} className="ul-flex ua-center uj-between ug-12">
             <span>
               {s.liftName[k]} <Muted>· {s.now(fmtKg(stats[k].best))}</Muted>
             </span>
-            <input
-              className="input"
+            <Field
               inputMode="decimal"
               style={{ width: 96 }}
               value={draft[k] ?? ''}
@@ -1057,14 +1010,12 @@ function PrForecastWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         onClick={open}
         sub={`${lift} ${fmtKg(main.cur)} → ${fmtKg(main.target)} kg`}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 'auto' }}>
+        <div className="ul-flex ua-center ug-10 umt-auto">
           <WidgetRing value={main.cur / main.target} size={56} tone="ok">
-            <span style={{ fontSize: 12 }}>{Math.round((main.cur / main.target) * 100)}%</span>
+            <span className="uiw-t-base">{Math.round((main.cur / main.target) * 100)}%</span>
           </WidgetRing>
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-            <span style={{ fontSize: 14.5, fontWeight: 600 }}>
-              {main.reached ? s.reached : (date ?? s.noEta)}
-            </span>
+          <div className="ul-flex ul-col umw-0">
+            <span className="uiw-t-md">{main.reached ? s.reached : (date ?? s.noEta)}</span>
             {weeks != null && <Muted>{s.inWeeks(weeks)}</Muted>}
           </div>
         </div>
@@ -1077,9 +1028,7 @@ function PrForecastWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         tone="ok"
         kicker={s.prForecastOf(lift)}
         title={
-          <span style={{ fontSize: 14.5 }}>
-            {date ? s.atPace(fmtKg(main.target), date) : headline}
-          </span>
+          <span className="uiw-t-md">{date ? s.atPace(fmtKg(main.target), date) : headline}</span>
         }
         bodyLast
         onClick={open}
@@ -1102,12 +1051,12 @@ function PrForecastWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           </Button>
         }
       >
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+        <div className="ul-flex ua-base ug-8">
           <span className="uiw-value">
             {fmtKg(main.target)}
             <span className="uiw-unit">kg</span>
           </span>
-          <span style={{ fontSize: 14.5, fontWeight: 600 }}>
+          <span className="uiw-t-md">
             {main.reached ? s.reached : date ? s.byDate(date) : s.noEta}
           </span>
         </div>
@@ -1275,7 +1224,7 @@ const recentPrs: WidgetDef = {
           kicker={s.recentPrs}
           value={month}
           unit={s.thisMonthUnit}
-          title={<span style={{ fontSize: 12, fontWeight: 500 }}>{s.latest(what(latest))}</span>}
+          title={<span className="uiw-t-base">{s.latest(what(latest))}</span>}
           sub={<Tag text={`${dlt(latest)} · ${fmtDayMonth(latest.ts, locale)}`} good />}
           onClick={open}
         />
@@ -1283,7 +1232,7 @@ const recentPrs: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="ok" kicker={s.recentPrs} onClick={open}>
-          <div style={{ marginTop: 'auto' }}>
+          <div className="umt-auto">
             <WidgetList
               rows={prs.slice(0, 3).map((p) => ({
                 label: what(p),
@@ -1321,7 +1270,7 @@ const recentPrs: WidgetDef = {
               />
             ),
             value: (
-              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              <span className="ul-flex ul-col ua-end">
                 <Tag text={dlt(p)} good />
                 <span>{fmtDayMonth(p.ts, locale)}</span>
               </span>
@@ -1397,27 +1346,17 @@ function CalcSheet({
   const e1 = est1rm(wn, rn);
   return (
     <Sheet onClose={onClose}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '4px 0 12px' }}>
-        <strong style={{ fontSize: 17 }}>{s.oneRm}</strong>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-          <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div className="ul-flex ul-col ug-12" style={{ padding: '4px 0 12px' }}>
+        <strong className="uiw-t-lg">{s.oneRm}</strong>
+        <div className="ul-flex ug-8 ua-end">
+          <label className="uf-1 ul-flex ul-col ug-4">
             <Muted>{s.weight} (kg)</Muted>
-            <input
-              className="input"
-              inputMode="decimal"
-              value={w}
-              onChange={(e) => setW(e.target.value)}
-            />
+            <Field inputMode="decimal" value={w} onChange={(e) => setW(e.target.value)} />
           </label>
           <span style={{ paddingBottom: 10 }}>×</span>
-          <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <label className="uf-1 ul-flex ul-col ug-4">
             <Muted>{s.reps}</Muted>
-            <input
-              className="input"
-              inputMode="numeric"
-              value={r}
-              onChange={(e) => setR(e.target.value)}
-            />
+            <Field inputMode="numeric" value={r} onChange={(e) => setR(e.target.value)} />
           </label>
         </div>
         <WidgetStats items={[{ label: s.estimated, value: e1 > 0 ? `${e1} kg` : s.upTo10 }]} />
@@ -1520,7 +1459,7 @@ function OneRmWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   else if (size === 'L')
     body = (
       <Widget size="L" tone="neutral" kicker={s.oneRm} badge={s.epley} onClick={openSheet}>
-        <div style={{ marginTop: 'auto' }}>
+        <div className="umt-auto">
           <WidgetStats
             items={[
               { label: s.weight, value: `${fmtKg(set.weight)} kg` },
@@ -1541,7 +1480,7 @@ function OneRmWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         onClick={openSheet}
         footer={
           liftChips.length > 0 ? (
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <div className="ul-flex ug-6 ul-wrap">
               {liftChips.map((k) => (
                 <Chip key={k} size="sm" selected={set.lift === k} onClick={() => pick(k)}>
                   {s.liftName[k]}
@@ -1563,11 +1502,8 @@ function OneRmWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           ]}
         />
         <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-            gap: '0 18px',
-          }}
+          className="ul-grid"
+          style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '0 18px' }}
         >
           <WidgetList
             rows={PCTS.slice(0, 4).map(([p, n]) => ({ label: `${p}%`, value: `${at(p)} × ${n}` }))}
@@ -1615,49 +1551,29 @@ const PLATE_TOKEN: Record<number, string> = {
 function BarSide({ plates, h }: { plates: number[]; h: number }) {
   const sleeve = Math.max(6, Math.round(h * 0.1));
   return (
-    <div
-      style={{ display: 'flex', alignItems: 'center', height: h, gap: 2, flex: 'none' }}
-      aria-hidden
-    >
+    <div className="ul-flex ua-center ug-2 uf-none" style={{ height: h }} aria-hidden>
       <span
-        style={{
-          width: Math.round(h * 0.25),
-          height: sleeve,
-          background: 'var(--color-neutral-700)',
-          borderRadius: 'var(--radius-sm)',
-          flex: 'none',
-        }}
+        className="ur-sm tw-bg-n700 uf-none"
+        style={{ width: Math.round(h * 0.25), height: sleeve }}
       />
       <span
-        style={{
-          width: Math.max(4, Math.round(h * 0.06)),
-          height: Math.round(h * 0.3),
-          background: 'var(--color-neutral-400)',
-          borderRadius: 'var(--radius-sm)',
-          flex: 'none',
-        }}
+        className="ur-sm tw-bg-n400 uf-none"
+        style={{ width: Math.max(4, Math.round(h * 0.06)), height: Math.round(h * 0.3) }}
       />
       {plates.map((d, i) => (
         <span
           key={i}
+          className="ur-sm"
           style={{
             width: Math.max(3, Math.round(h * (d >= 15 ? 0.14 : d >= 5 ? 0.09 : 0.05))),
             minWidth: 2,
             flex: '0 1 auto',
             height: Math.round(h * (0.3 + (Math.min(d, 25) / 25) * 0.7)),
             background: PLATE_TOKEN[d] ?? 'var(--color-neutral-500)',
-            borderRadius: 'var(--radius-sm)',
           }}
         />
       ))}
-      <span
-        style={{
-          flex: 1,
-          height: sleeve,
-          background: 'var(--color-neutral-700)',
-          borderRadius: 'var(--radius-sm)',
-        }}
-      />
+      <span className="ur-sm tw-bg-n700 uf-1" style={{ height: sleeve }} />
     </div>
   );
 }
@@ -1717,7 +1633,7 @@ function PlateWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         sub={perSideTxt}
         onClick={show}
       >
-        <div style={{ marginTop: 'auto' }}>
+        <div className="umt-auto">
           <BarSide plates={sol.perSide} h={40} />
         </div>
       </Widget>
@@ -1725,18 +1641,16 @@ function PlateWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   else if (size === 'L')
     body = (
       <Widget size="L" tone="neutral" kicker={s.plates} onClick={show}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1 }}>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: 4, width: 110, flex: 'none' }}
-          >
+        <div className="ul-flex ua-center ug-14 uf-1">
+          <div className="ul-flex ul-col ug-4 uf-none" style={{ width: 110 }}>
             <span className="uiw-value">
               {value}
               <span className="uiw-unit">kg</span>
             </span>
             <Muted>{s.perSide(fmtKg(sol.perSideKg))}</Muted>
-            <span style={{ fontSize: 12 }}>{perSideTxt}</span>
+            <span className="uiw-t-base">{perSideTxt}</span>
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="uf-1 umw-0">
             <BarSide plates={sol.perSide} h={96} />
           </div>
         </div>
@@ -1766,14 +1680,7 @@ function PlateWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           />
         }
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 8,
-          }}
-        >
+        <div className="ul-flex ua-center uj-between ug-8">
           <Button variant="secondary" size="sm" onClick={() => setAdj(Math.max(20, target - 2.5))}>
             − 2.5
           </Button>
@@ -1786,7 +1693,7 @@ function PlateWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           </Button>
         </div>
         <BarSide plates={sol.perSide} h={110} />
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', fontSize: 12 }}>
+        <div className="uiw-t-base ul-flex ug-10 ul-wrap">
           {denoms.map((d) => (
             <Swatch key={d} color={PLATE_TOKEN[d] ?? 'var(--color-neutral-500)'}>
               {fmtKg(d)} × {sol.perSide.filter((x) => x === d).length}
@@ -1883,9 +1790,9 @@ const balance: WidgetDef = {
           onClick={open}
           bodyLast
         >
-          <div style={{ display: 'flex', gap: 3 }}>
+          <div className="ul-flex ug-4">
             {BIG3.map((k) => (
-              <span key={k} style={{ flex: 1 }}>
+              <span key={k} className="uf-1">
                 <WidgetBar value={1} tone={tone(k)} height={5} />
               </span>
             ))}
@@ -1901,7 +1808,7 @@ const balance: WidgetDef = {
           badge={`│ ${s.typical}`}
           onClick={open}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginTop: 'auto' }}>
+          <div className="ul-flex ul-col ug-10 umt-auto">
             {BIG3.map((k) => (
               <MeterRow
                 key={k}
@@ -1934,8 +1841,8 @@ const balance: WidgetDef = {
           </Button>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <span className="uiw-value" style={{ fontSize: 26 }}>
+        <div className="ul-flex ul-col ug-2">
+          <span className="uiw-value uiw-t-num">
             {`${(L.squat.best / b).toFixed(2)} : 1 : ${(dl / b).toFixed(2)}`}
           </span>
           <Muted>{s.ratioSub('1.31 : 1 : 1.54')}</Muted>
@@ -1947,7 +1854,7 @@ const balance: WidgetDef = {
           tone="accent"
           labels={BIG3.flatMap((k) => [`${s.liftShort[k]} ${fmtKg(L[k].best)}`, ''])}
         />
-        <div style={{ display: 'flex', gap: 12, fontSize: 12 }}>
+        <div className="uiw-t-base ul-flex ug-12">
           <Swatch color="var(--color-accent)">{s.you}</Swatch>
           <Swatch color="var(--color-neutral-800)">{s.typicalFor}</Swatch>
         </div>
@@ -2020,7 +1927,7 @@ const standards: WidgetDef = {
           size="S"
           tone="accent"
           kicker={s.classKicker(r.classLabel)}
-          value={<span style={{ color: 'var(--color-accent-400)' }}>{curShort}</span>}
+          value={<span className="tw-accent-deep">{curShort}</span>}
           sub={toGo}
           onClick={open}
           bodyLast
@@ -2037,22 +1944,13 @@ const standards: WidgetDef = {
           badge={`BW ${fmtKg(bw)}`}
           value={total}
           unit={r.nextIdx != null ? `/ ${fmtKg(r.thresholds[r.nextIdx])} kg` : 'kg'}
-          sub={<span style={{ color: 'var(--color-accent-400)' }}>{toGo}</span>}
+          sub={<span className="tw-accent-deep">{toGo}</span>}
           onClick={open}
         >
-          <div style={{ display: 'flex', gap: 4 }}>
+          <div className="ul-flex ug-4">
             {r.tierIds.map((id, i) => (
-              <div
-                key={id}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 5,
-                  alignItems: 'center',
-                }}
-              >
-                <span style={{ width: '100%' }}>
+              <div key={id} className="uf-1 ul-flex ul-col ug-6 ua-center">
+                <span className="uw-full">
                   <WidgetBar
                     height={8}
                     tone={i < r.achievedIdx ? 'ok' : 'accent'}
@@ -2083,10 +1981,8 @@ const standards: WidgetDef = {
           </Button>
         }
       >
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-          <span className="uiw-value" style={{ color: 'var(--color-accent-400)' }}>
-            {cur}
-          </span>
+        <div className="ul-flex ua-base ug-10">
+          <span className="uiw-value tw-accent-deep">{cur}</span>
           <Muted>{s.kgTotal(total)}</Muted>
         </div>
         <WidgetList
@@ -2180,14 +2076,7 @@ const plTotal: WidgetDef = {
           badge={<Tag text={s.days30(signedKg(d30))} good={good(d30)} />}
           onClick={open}
         >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              gap: 12,
-            }}
-          >
+          <div className="ul-flex uj-between ua-end ug-12">
             <span className="uiw-value">
               {fmtKg(total)}
               <span className="uiw-unit">kg</span>
@@ -2196,9 +2085,9 @@ const plTotal: WidgetDef = {
               {spark.length > 1 && <WidgetSpark points={spark} height={36} tone="ok" />}
             </span>
           </div>
-          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="ul-flex ul-col ug-6 umt-auto">
             {stack}
-            <div style={{ display: 'flex', gap: 14, fontSize: 12 }}>
+            <div className="uiw-t-base ul-flex ug-14">
               {BIG3.map((k) => (
                 <Swatch key={k} color={LIFT_COLOR[k]}>
                   {s.liftName[k]} {fmtKg(L[k].best)}
@@ -2238,7 +2127,7 @@ const plTotal: WidgetDef = {
           />
         }
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <div className="ul-flex uj-between ua-base">
           <span className="uiw-value">
             {fmtKg(total)}
             <span className="uiw-unit">kg</span>
@@ -2254,9 +2143,9 @@ const plTotal: WidgetDef = {
             return {
               label: <Swatch color={LIFT_COLOR[k]}>{s.liftName[k]}</Swatch>,
               value: (
-                <span style={{ display: 'flex', gap: 10 }}>
-                  <span style={{ color: 'var(--color-text)' }}>{fmtKg(L[k].best)}</span>
-                  <span style={{ width: 40, textAlign: 'right' }}>
+                <span className="ul-flex ug-10">
+                  <span className="ut-text">{fmtKg(L[k].best)}</span>
+                  <span className="utx-right" style={{ width: 40 }}>
                     <Tag text={signedKg(d)} good={good(d)} />
                   </span>
                 </span>
@@ -2345,7 +2234,7 @@ const relative: WidgetDef = {
           badge={s.scale(fmtKg(scale))}
           onClick={openWeight}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 'auto' }}>
+          <div className="ul-flex ul-col ug-8 umt-auto">
             {trained.slice(0, 3).map((k) => (
               <MeterRow
                 key={k}
@@ -2387,7 +2276,7 @@ const relative: WidgetDef = {
         }
       >
         {big3 > 0 && (
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <div className="ul-flex ua-base ug-8">
             <span className="uiw-value">
               {r2(big3 / bw)}
               <span className="uiw-unit">×</span>
@@ -2395,7 +2284,7 @@ const relative: WidgetDef = {
             <Muted>{s.totalBw(fmtKg(big3))}</Muted>
           </div>
         )}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+        <div className="ul-flex ul-col ug-10">
           {trained.map((k) => {
             const m = next(k);
             return (
@@ -2531,17 +2420,15 @@ function RepPrWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   if (size === 'L')
     return (
       <Widget size="L" tone="ok" kicker={s.repPrsOf(lift)} badge={s.bestReps} onClick={open}>
-        <div style={{ marginTop: 'auto' }}>
+        <div className="umt-auto">
           <WidgetStats
             items={four.map((c) => ({
               label: `${fmtKg(c.weight)} kg`,
               value: (
-                <span style={{ display: 'flex', flexDirection: 'column' }}>
+                <span className="ul-flex ul-col">
                   <span
-                    style={{
-                      fontSize: 19,
-                      color: c === latest ? 'var(--color-ok)' : 'var(--color-text)',
-                    }}
+                    className="uiw-t-xl"
+                    style={{ color: c === latest ? 'var(--color-ok)' : 'var(--color-text)' }}
                   >
                     {c.reps}
                   </span>
@@ -2564,7 +2451,7 @@ function RepPrWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       onClick={open}
       footer={
         options.length > 1 ? (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <div className="ul-flex ug-6 ul-wrap">
             {options.map((k) => (
               <Chip key={k} size="sm" selected={k === key} onClick={() => setSel(k)}>
                 {s.liftName[k]}
@@ -2722,12 +2609,12 @@ const stalledLifts: WidgetDef = {
           value={stalled.length}
           unit={s.lifts}
           title={
-            <span style={{ fontSize: 12, fontWeight: 500 }}>
+            <span className="uiw-t-base">
               {`${exName(first.name, locale)} · ${s.sessionsAt(first.n, set(first))}`}
             </span>
           }
           sub={
-            <span style={{ color: 'var(--color-accent-400)', fontWeight: 600 }}>
+            <span className="ut-w6 tw-accent-deep">
               {first.swap ? s.swapShort : s.deloadShort} ›
             </span>
           }
@@ -2737,7 +2624,7 @@ const stalledLifts: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="injury" kicker={s.stalled} onClick={open}>
-          <div style={{ marginTop: 'auto' }}>
+          <div className="umt-auto">
             <WidgetList
               rows={stalled.slice(0, 2).map((x) => ({
                 label: <TwoLine title={exName(x.name, locale)} sub={s.sessionsDot(x.n, set(x))} />,
@@ -2776,17 +2663,10 @@ const stalledLifts: WidgetDef = {
               {
                 label: s.stuckAt(x.n, set(x)),
                 value: (
-                  <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <span
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        gap: 8,
-                        alignItems: 'center',
-                      }}
-                    >
+                  <span className="ul-flex ul-col ug-4">
+                    <span className="ul-flex uj-between ug-8 ua-center">
                       <span>{exName(x.name, locale)}</span>
-                      <span style={{ width: 80, flex: 'none' }}>
+                      <span className="uf-none" style={{ width: 80 }}>
                         {x.spark.length > 1 && (
                           <WidgetSpark points={x.spark} width={80} height={24} tone="injury" />
                         )}
@@ -2872,7 +2752,7 @@ function SmartSwapWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const actLabel = live ? s.swap : s.view;
   const kick = s.swapKicker(gym?.name ?? s.anyGym);
   const chips = (
-    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+    <div className="ul-flex ug-6 ul-wrap">
       {muscles.map((m) => (
         <Chip key={m} size="sm">
           {m}
@@ -2902,14 +2782,14 @@ function SmartSwapWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         size="S"
         tone="apex"
         kicker={s.swapOf(srcName)}
-        title={<span style={{ fontSize: 13.5 }}>{exName(best.name, locale)}</span>}
+        title={<span className="uiw-t-md">{exName(best.name, locale)}</span>}
         sub={where}
         onClick={view}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="ul-flex ua-center ug-10">
           <WidgetRing value={best.match} size={44} tone="apex" />
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: 16, fontWeight: 600 }}>{pct(best.match)}%</span>
+          <div className="ul-flex ul-col">
+            <span className="uiw-t-lg">{pct(best.match)}%</span>
             <Muted>{s.match}</Muted>
           </div>
         </div>
@@ -2929,18 +2809,17 @@ function SmartSwapWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           </Button>
         }
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+        <div className="ul-flex ua-center ug-10 umw-0">
           <span
+            className="ut-muted ut-w6"
             style={{
-              color: 'var(--color-text-muted)',
               textDecoration: 'line-through',
-              fontWeight: 600,
             }}
           >
             {srcName}
           </span>
           <Muted>→</Muted>
-          <span style={{ fontSize: 16, fontWeight: 600 }}>{exName(best.name, locale)}</span>
+          <span className="uiw-t-lg">{exName(best.name, locale)}</span>
         </div>
         {chips}
       </Widget>

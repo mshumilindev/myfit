@@ -6,6 +6,7 @@
  * session" note when a program day was skipped.
  */
 import { useState, type ReactNode } from 'react';
+import { Button } from './ui/Button';
 import { Icon, Sheet } from '../ui';
 import {
   dayKey,
@@ -170,10 +171,10 @@ export function DayHistorySheet({
         <div className="hist-timeline day-sheet-items hist-day-card">{rows.map((r) => r.node)}</div>
       )}
       {onStart && (
-        <button type="button" className="btn btn-primary day-sheet-start" onClick={onStart}>
+        <Button variant="primary" className="day-sheet-start" onClick={onStart}>
           <Icon name="play" weight="fill" />
           {t.startSessionLabel}
-        </button>
+        </Button>
       )}
     </Sheet>
   );

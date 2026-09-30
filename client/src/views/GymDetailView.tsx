@@ -1,7 +1,9 @@
 /** Gym detail — design G-06. Works for a saved gym OR an unsaved search result
  *  (candidate): shows photo/hours/map for both, "Add this gym" when unsaved,
  *  edit/delete/stats when saved. Includes an OSM map + route from my location. */
+import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useMemo, useState } from 'react';
+import { Button, LinkButton } from '../components/ui/Button';
 import type { Shell } from '../App';
 import {
   useStore,
@@ -30,6 +32,7 @@ import { EquipmentBoard } from '../components/EquipmentBoard';
 import { GymKitCard } from '../components/GymKit';
 import { gymHasNoList } from '../gymEvidence';
 import { BandLibraryCard } from '../components/BandLibraryCard';
+import { Tag } from '../components/ui/Tag';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const hhmm = (min: number) => `${pad(Math.floor(min / 60) % 24)}:${pad(min % 60)}`;
@@ -142,9 +145,7 @@ export function GymDetailView({
     return (
       <div className="screen">
         <div className="hist-head">
-          <button className="back" onClick={onClose} aria-label={t.backAction}>
-            <Icon name="caret-left" />
-          </button>
+          <BackButton onClick={onClose} label={t.backAction} />
         </div>
       </div>
     );
@@ -180,9 +181,7 @@ export function GymDetailView({
       <div className="gym-detail-hero">
         <GymThumb name={name} lat={lat} lng={lng} size={320} />
         <div className="hero-scrim" />
-        <button className="hero-back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton className="hero-back" overlay label={t.backAction} onClick={onClose} />
         <div className="hero-top-right"></div>
         <div className="hero-text">
           <h2>{name}</h2>
@@ -194,22 +193,23 @@ export function GymDetailView({
             </span>
           </div>
           {inside && (
-            <span className="tag tag-accent" style={{ marginTop: 8, alignSelf: 'flex-start' }}>
+            <Tag tone="accent" className="umt-8 ua-start">
               {t.inside}
-            </span>
+            </Tag>
           )}
         </div>
       </div>
 
       <div className="gym-detail-body">
         {!isSaved && (
-          <button className="btn btn-primary btn-big" onClick={() => ensureSaved()}>
+          <Button variant="primary" size="lg" onClick={() => ensureSaved()}>
             <Icon name="plus" />
             {t.gymAdd}
-          </button>
+          </Button>
         )}
-        <button
-          className={isSaved ? 'btn btn-primary btn-big' : 'btn btn-secondary btn-big'}
+        <Button
+          variant={isSaved ? 'primary' : 'secondary'}
+          size="lg"
           onClick={() => {
             const g = ensureSaved();
             const w = startWorkout(g.id);
@@ -219,7 +219,7 @@ export function GymDetailView({
         >
           <Icon name="play" />
           {t.startSessionHere}
-        </button>
+        </Button>
 
         {/* Hours */}
         <div className="detail-card">
@@ -228,9 +228,7 @@ export function GymDetailView({
               <Icon name="clock" /> {t.gymHours}
             </span>
             {openNow !== null && (
-              <span className={`hours-badge ${openNow ? 'open' : 'closed'}`}>
-                {openNow ? t.gymOpenNow : t.gymClosedNow}
-              </span>
+              <Tag tone={openNow ? 'ok' : 'neutral'}>{openNow ? t.gymOpenNow : t.gymClosedNow}</Tag>
             )}
           </div>
           {!parsed ? (
@@ -243,10 +241,15 @@ export function GymDetailView({
                 <span>{weekdays[todayIdx]}</span>
                 <span>{fmtDay(parsed.week[todayIdx])}</span>
               </div>
-              <button className="hours-toggle" onClick={() => setShowWeek((x) => !x)}>
+              <Button
+                variant="link"
+                size="sm"
+                className="hours-toggle"
+                iconTrailing={showWeek ? 'caret-left' : 'arrow-right'}
+                onClick={() => setShowWeek((x) => !x)}
+              >
                 {t.gymAllWeek}
-                <Icon name={showWeek ? 'caret-left' : 'arrow-right'} />
-              </button>
+              </Button>
               {showWeek && (
                 <div className="hours-week">
                   {parsed.week.map((ranges, i) => (
@@ -269,31 +272,32 @@ export function GymDetailView({
             </span>
           </div>
           <RouteMap from={coords} to={{ lat, lng }} />
-          <a
-            className="btn btn-secondary map-directions"
+          <LinkButton
+            variant="secondary"
+            className="map-directions"
             href={directionsHref}
             target="_blank"
             rel="noreferrer"
           >
             <Icon name="crosshair" />
             {t.gymDirections}
-          </a>
+          </LinkButton>
         </div>
 
         {/* Contact */}
         {(meta?.website || meta?.phone) && (
           <div className="detail-links">
             {meta.website && (
-              <a className="btn btn-secondary" href={meta.website} target="_blank" rel="noreferrer">
+              <LinkButton variant="secondary" href={meta.website} target="_blank" rel="noreferrer">
                 <Icon name="globe" />
                 {t.gymWebsite}
-              </a>
+              </LinkButton>
             )}
             {meta.phone && (
-              <a className="btn btn-secondary" href={`tel:${meta.phone}`}>
+              <LinkButton variant="secondary" href={`tel:${meta.phone}`}>
                 <Icon name="phone" />
                 {t.gymCall}
-              </a>
+              </LinkButton>
             )}
           </div>
         )}
@@ -342,10 +346,10 @@ export function GymDetailView({
 
         {isSaved && (
           <>
-            <button className="danger-outline detail-delete" onClick={() => setConfirmDel(true)}>
+            <Button variant="danger" className="detail-delete" onClick={() => setConfirmDel(true)}>
               <Icon name="trash" />
               {t.delete}
-            </button>
+            </Button>
           </>
         )}
       </div>

@@ -10,7 +10,11 @@
  * today's session" makes the page a route into logging, not a dead end
  * (AC-DET-06).
  */
+import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useMemo, useState } from 'react';
+import { Button, IconButton } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Chip } from '../components/ui/Chip';
 import {
   canonicalExerciseName,
   customExercises,
@@ -43,6 +47,7 @@ import { useT } from '../i18n';
 import { getRole } from '../api';
 import { ExerciseName, Icon, useIsDesktop } from '../ui';
 import type { Shell } from '../App';
+import { Tag } from '../components/ui/Tag';
 
 const hideBroken = (e: { currentTarget: HTMLImageElement }) => {
   e.currentTarget.style.display = 'none';
@@ -164,15 +169,18 @@ export function ExerciseDetailView({
   // --- classification badges ------------------------------------------------
   const badgesRow = (
     <div className="exd-badges">
-      {category && <span className="badge b-cat">{t.categoryNames[category]}</span>}
-      {mechanic && <span className="badge b-mech">{t.mechanicNames[mechanic]}</span>}
-      {force && <span className="badge b-mech">{t.forceNames[force]}</span>}
-      {level && <span className="badge b-mech">{t.levelNames[level]}</span>}
+      {category && (
+        <Chip size="sm" tone="accent">
+          {t.categoryNames[category]}
+        </Chip>
+      )}
+      {mechanic && <Chip size="sm">{t.mechanicNames[mechanic]}</Chip>}
+      {force && <Chip size="sm">{t.forceNames[force]}</Chip>}
+      {level && <Chip size="sm">{t.levelNames[level]}</Chip>}
       {equipment && (
-        <span className="badge b-eq">
-          <Icon name={equipmentIconName(equipment)} />
+        <Chip size="sm" icon={equipmentIconName(equipment)}>
           {t.equipmentNames[equipment]}
-        </span>
+        </Chip>
       )}
     </div>
   );
@@ -190,42 +198,41 @@ export function ExerciseDetailView({
           {primaries.length > 0 && (
             <div className="exd-mrow-badges">
               {primaries.map((m) => (
-                <button
+                <Chip
                   key={m}
-                  type="button"
-                  className="badge b-mus-pri"
+                  tone="accent"
+                  size="sm"
                   onClick={() => shell.openOverlay({ screen: 'muscle-history', muscle: m })}
                 >
                   {t.muscleGroups[m]}
-                </button>
+                </Chip>
               ))}
             </div>
           )}
           {subR && (subR.primary.length > 0 || (subR.secondary?.length ?? 0) > 0) && (
             <div className="exd-subregions">
               {subR.primary.map((f) => (
-                <span key={f} className="exd-subchip">
+                <Tag key={f} tone="accent">
                   {t.subMuscleNames[f]}
-                </span>
+                </Tag>
               ))}
               {(subR.secondary ?? []).map((f) => (
-                <span key={f} className="exd-subchip minor">
+                <Tag key={f} tone="neutral">
                   {t.subMuscleNames[f]}
-                </span>
+                </Tag>
               ))}
             </div>
           )}
           {secondaries.length > 0 && (
             <div className="exd-mrow-badges">
               {secondaries.map((m) => (
-                <button
+                <Chip
                   key={m}
-                  type="button"
-                  className="badge b-mus"
+                  size="sm"
                   onClick={() => shell.openOverlay({ screen: 'muscle-history', muscle: m })}
                 >
                   {t.muscleGroups[m]}
-                </button>
+                </Chip>
               ))}
             </div>
           )}
@@ -254,7 +261,10 @@ export function ExerciseDetailView({
       <h6 className="exd-label">{t.formPhotosLabel}</h6>
       <div className={`exd-formphotos${rich.images.length === 1 ? ' single' : ''}`}>
         {rich.images.slice(0, 2).map((src, i) => (
-          <button
+          <Card
+            as="button"
+            pad="none"
+            emphasis="quiet"
             className="exd-formphoto"
             key={src}
             onClick={() => openPhoto({ src, label: i === 0 ? t.photoStart : t.photoEnd })}
@@ -262,7 +272,7 @@ export function ExerciseDetailView({
           >
             <img src={src} alt="" loading={i === 0 ? 'eager' : 'lazy'} onError={hideBroken} />
             <span className="exd-photo-label">{i === 0 ? t.photoStart : t.photoEnd}</span>
-          </button>
+          </Card>
         ))}
       </div>
     </div>
@@ -330,9 +340,11 @@ export function ExerciseDetailView({
                     text: t.fixMissing(s.missing.map((e) => equipmentLabel(e)).join(' · ')),
                   };
           return (
-            <button
-              key={s.name}
+            <Card
+              as="button"
+              pad="sm"
               className="swap-row"
+              key={s.name}
               onClick={() => shell.openOverlay({ screen: 'exercise-detail', name: s.name })}
             >
               <div className="swap-head">
@@ -354,7 +366,7 @@ export function ExerciseDetailView({
                 <Icon name={avail.icon} />
                 <span>{avail.text}</span>
               </div>
-            </button>
+            </Card>
           );
         })}
       </div>
@@ -365,13 +377,16 @@ export function ExerciseDetailView({
   const renderMedia = (ratio: '16-9' | 'phone') => {
     if (rich?.images[0]) {
       return (
-        <button
+        <Card
+          as="button"
+          pad="none"
+          emphasis="quiet"
           className={`exd-media photo ${ratio}`}
           onClick={() => openPhoto({ src: rich.images[0], label: canonical })}
           aria-label={`${t.openAction}: ${canonical}`}
         >
           <img src={rich.images[0]} alt="" onError={hideBroken} />
-        </button>
+        </Card>
       );
     }
     return (
@@ -396,12 +411,15 @@ export function ExerciseDetailView({
 
   const lightbox = photo && (
     <div className="exd-lightbox" role="dialog" aria-modal="true">
-      <button className="exd-lightbox-scrim" onClick={() => setPhoto(null)} aria-label={t.cancel} />
+      <Button
+        variant="ghost"
+        className="exd-lightbox-scrim"
+        onClick={() => setPhoto(null)}
+        aria-label={t.cancel}
+      />
       <div className="exd-lightbox-top">
         <div className="exd-lightbox-title">{photo.label}</div>
-        <button className="exd-lightbox-close" onClick={() => setPhoto(null)} aria-label={t.cancel}>
-          <Icon name="x" />
-        </button>
+        <IconButton icon="x" label={t.cancel} onClick={() => setPhoto(null)} />
       </div>
       <div className="exd-lightbox-stage">
         <img
@@ -417,21 +435,19 @@ export function ExerciseDetailView({
         />
       </div>
       <div className="exd-lightbox-controls">
-        <button
+        <IconButton
+          icon="minus"
           onClick={() => setPhotoZoom((z) => Math.max(1, Number((z - 0.5).toFixed(1))))}
-          aria-label={t.zoomOut}
+          label={t.zoomOut}
           disabled={photoZoom <= 1}
-        >
-          −
-        </button>
+        />
         <span>{Math.round(photoZoom * 100)}%</span>
-        <button
+        <IconButton
+          icon="plus"
           onClick={() => setPhotoZoom((z) => Math.min(3, Number((z + 0.5).toFixed(1))))}
-          aria-label={t.zoomIn}
+          label={t.zoomIn}
           disabled={photoZoom >= 3}
-        >
-          <Icon name="plus" />
-        </button>
+        />
       </div>
     </div>
   );
@@ -441,10 +457,10 @@ export function ExerciseDetailView({
   const canEdit = getRole() === 'admin' || getRole() === 'trainer';
   const editButton =
     custom && canEdit ? (
-      <button className="btn btn-secondary" onClick={() => setEditing(true)}>
+      <Button variant="secondary" onClick={() => setEditing(true)}>
         <Icon name="pencil-simple" />
         {t.libEditExercise}
-      </button>
+      </Button>
     ) : null;
   const editorSheet =
     editing && custom ? (
@@ -476,9 +492,7 @@ export function ExerciseDetailView({
       <div className="screen exd">
         <div className="exd-header">
           {renderMedia('phone')}
-          <button className="exd-back" onClick={onClose} aria-label={t.backAction}>
-            <Icon name="caret-left" />
-          </button>
+          <BackButton className="exd-back" overlay label={t.backAction} onClick={onClose} />
         </div>
         <div className="exd-body">
           {titleRow(false)}
@@ -488,10 +502,10 @@ export function ExerciseDetailView({
           {historySection}
           {alternativesSection}
           {editButton}
-          <button className="btn btn-primary exd-add" onClick={addToSession}>
+          <Button variant="primary" className="exd-add" onClick={addToSession}>
             <Icon name="plus" />
             {t.addToTodaySession}
-          </button>
+          </Button>
         </div>
         {lightbox}
         {editorSheet}
@@ -503,9 +517,7 @@ export function ExerciseDetailView({
   return (
     <div className="screen exd desktop">
       <div className="exd-top-row">
-        <button className="back exd-back-top" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton className="exd-back-top" onClick={onClose} label={t.backAction} />
         <div className="exd-crumb">
           {t.exercisesTabLabel} / {canonical}
         </div>
@@ -522,17 +534,17 @@ export function ExerciseDetailView({
           {historySection}
           {alternativesSection}
           <div className="exd-actions">
-            <button
-              className="btn btn-secondary"
+            <Button
+              variant="secondary"
               onClick={() => shell.openOverlay({ screen: 'exercise-history', name: canonical })}
             >
               {t.fullHistory}
-            </button>
+            </Button>
             {editButton}
-            <button className="btn btn-primary" onClick={addToSession}>
+            <Button variant="primary" onClick={addToSession}>
               <Icon name="plus" />
               {t.addToTodaySession}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

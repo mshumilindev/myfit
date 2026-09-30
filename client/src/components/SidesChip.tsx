@@ -6,6 +6,7 @@
 import { useT } from '../i18n';
 import { sidesMode } from '../store';
 import type { Exercise } from '../types';
+import { Chip } from './ui/Chip';
 
 export function SidesChip({
   ex,
@@ -26,15 +27,14 @@ export function SidesChip({
     </>
   );
   return onClick ? (
-    <button
-      type="button"
+    <Chip
       className={`sides-chip mode-${mode}`}
       title={note}
       aria-label={`${label} — ${note}`}
       onClick={onClick}
     >
       {inner}
-    </button>
+    </Chip>
   ) : (
     <span className={`sides-chip mode-${mode}`} title={note}>
       {inner}

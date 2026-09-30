@@ -1,4 +1,6 @@
 import type { ComponentType, CSSProperties, ReactNode } from 'react';
+import { Skeleton } from '../components/ui/Skeleton';
+import { Sheet as KitSheet } from '../components/ui/Overlays';
 import { useEffect, useState } from 'react';
 import { getBlob, ref } from 'firebase/storage';
 import { storage } from './firebase';
@@ -18,6 +20,8 @@ import type { IconProps } from '@phosphor-icons/react';
 import { pct, round } from './calc';
 import { LANGS, useT } from './i18n';
 import { store, useStore } from './store';
+import { Button, IconButton } from '../components/ui/Button';
+import { Chip } from '../components/ui/Chip';
 import type { Macros } from './types';
 
 // ---------------------------------------------------------------- icons
@@ -164,7 +168,7 @@ export function KbjuRing({ eaten, target }: { eaten: number; target: number }) {
       <div className="val tnum">
         {over ? (
           <>
-            <b style={{ color: 'var(--danger)' }}>{round(eaten - target)}</b>
+            <b className="ut-danger">{round(eaten - target)}</b>
             <span>
               {t('over')} · {t('kcal')}
             </span>
@@ -243,11 +247,12 @@ export function Plaque({
   onDismiss?: () => void;
   cta?: ReactNode;
 }) {
+  const { t } = useT();
   return (
     <div className="plaque">
       <div className="ov">
         <span>{overline}</span>
-        {onDismiss && <button onClick={onDismiss}>✕</button>}
+        {onDismiss && <IconButton size="sm" icon="x" label={t('close')} onClick={onDismiss} />}
       </div>
       <div>{children}</div>
       {cta}
@@ -265,20 +270,11 @@ export function Sheet({
   onClose: () => void;
   children: ReactNode;
 }) {
-  const { t } = useT();
   return (
-    <div className="scrim" onClick={onClose}>
-      <div className="sheet" role="dialog" onClick={(e) => e.stopPropagation()}>
-        <div className="sheet-chrome">
-          <span className="grabber" />
-          <button className="sheet-close" onClick={onClose} aria-label={t('close')}>
-            <Icon name="close" size={16} />
-          </button>
-        </div>
-        {title && <h2 className="sheet-title">{title}</h2>}
-        {children}
-      </div>
-    </div>
+    <KitSheet onClose={onClose}>
+      {title && <h2 className="sheet-title">{title}</h2>}
+      {children}
+    </KitSheet>
   );
 }
 
@@ -302,12 +298,12 @@ export function ConfirmDialog({
         <h2>{title}</h2>
         <p>{body}</p>
         <div className="rowflex">
-          <button className="btn grow" onClick={onCancel}>
+          <Button variant="secondary" className="grow" onClick={onCancel}>
             {t('cancel')}
-          </button>
-          <button className="btn danger grow" onClick={onConfirm}>
+          </Button>
+          <Button variant="danger" className="grow" onClick={onConfirm}>
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -338,27 +334,24 @@ export function LanguageChip({ compact }: { compact?: boolean }) {
       };
   return (
     <div style={{ position: 'relative' }}>
-      <button
-        className="chip"
-        style={compact ? { padding: '6px 8px' } : undefined}
-        onClick={() => setOpen((o) => !o)}
-      >
+      <Chip size={compact ? 'sm' : 'md'} onClick={() => setOpen((o) => !o)}>
         {compact ? cur.flag : `${cur.flag} ${cur.label}`}
-      </button>
+      </Chip>
       {open && (
         <div className="card" style={menuStyle}>
           {LANGS.map((l) => (
-            <button
+            <Button
               key={l.id}
-              className="btn ghost block"
-              style={{ justifyContent: 'flex-start' }}
+              variant="ghost"
+              fullWidth
+              className="uj-start"
               onClick={() => {
                 store.setLang(l.id);
                 setOpen(false);
               }}
             >
               {l.flag} {l.label}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -380,7 +373,7 @@ export function Empty({
   return (
     <div className="empty">
       <div className="emo">{emoji}</div>
-      <div style={{ color: 'var(--text)', fontWeight: 500 }}>{title}</div>
+      <div className="ut-text ut-w5">{title}</div>
       <div className="mt3">{body}</div>
       {cta && <div className="mt4">{cta}</div>}
     </div>
@@ -391,14 +384,12 @@ export function Failed({ onRetry }: { onRetry: () => void }) {
   const { t } = useT();
   return (
     <div className="failed">
-      <div className="emo" style={{ fontSize: 34, marginBottom: 12 }}>
-        ⚠️
-      </div>
-      <div style={{ color: 'var(--text)', fontWeight: 500 }}>{t('failedTitle')}</div>
+      <div className="emo ut-hero umb-12">⚠️</div>
+      <div className="ut-text ut-w5">{t('failedTitle')}</div>
       <div className="mt3 muted">{t('failedBody')}</div>
-      <button className="btn mt4" onClick={onRetry}>
+      <Button variant="secondary" className="mt4" onClick={onRetry}>
         {t('retry')}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -410,11 +401,15 @@ export function Sk({
   h,
   r = 8,
   style,
+  className,
 }: {
   w?: number | string;
   h: number;
   r?: number;
   style?: CSSProperties;
+  className?: string;
 }) {
-  return <div className="sk" style={{ width: w, height: h, borderRadius: r, ...style }} />;
+  return (
+    <Skeleton className={className} width={w} height={h} style={{ borderRadius: r, ...style }} />
+  );
 }

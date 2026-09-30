@@ -10,7 +10,8 @@ import { useEffect, useState, type ReactNode } from 'react';
 import type { Gym, Workout } from '../types';
 import { attachGymToWorkout, workoutSets, workoutVolumeKg } from '../store';
 import { fmtSessionClock, fmtTonnes, useT } from '../i18n';
-import { Icon } from '../ui';
+import { Card } from './ui/Card';
+import { IconButton } from './ui/Button';
 import { GymThumb } from './GymThumb';
 import { GymPicker } from './GymPicker';
 
@@ -109,32 +110,29 @@ export function LiveHero({
       </div>
       <div className="live-hero-scrim" />
       {interactive ? (
-        <button className="live-hero-body" onClick={onResume}>
+        <Card as="button" pad="none" emphasis="quiet" className="live-hero-body" onClick={onResume}>
           {body}
-        </button>
+        </Card>
       ) : (
         <div className="live-hero-body">{body}</div>
       )}
       <div className="live-hero-actions">
         {!closed && mode === 'session' && !home && (
-          <button
-            className="live-attach icon-only"
+          <IconButton
+            icon="map-pin"
             onClick={() => setPicker(true)}
-            aria-label={gym ? t.changeGym : t.liveAttach}
+            label={gym ? t.changeGym : t.liveAttach}
             title={gym ? t.changeGym : t.liveAttach}
-          >
-            <Icon name="map-pin" />
-          </button>
+          />
         )}
         {mode !== 'session' && (
-          <button
-            className="live-resume icon-only"
+          <IconButton
+            icon={closed ? 'arrow-clockwise' : 'play'}
+            variant="primary"
             onClick={onResume}
-            aria-label={closed ? t.liveReopen : t.liveResume}
+            label={closed ? t.liveReopen : t.liveResume}
             title={closed ? t.liveReopen : t.liveResume}
-          >
-            <Icon name={closed ? 'arrow-clockwise' : 'play'} weight="fill" />
-          </button>
+          />
         )}
         {actions}
       </div>

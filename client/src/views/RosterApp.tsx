@@ -9,9 +9,10 @@
  * Which tabs show depends on role, matching the old in-Gym menu: a trainer sees
  * Clients + Me, an admin sees Users + Me, a member just Me.
  */
+import { TabBar } from '../components/ui/TabBar';
+import { BrandBar, BellButton } from '../components/ui/BrandBar';
 import { useState } from 'react';
 import { useT } from '../i18n';
-import { Icon, LanguageSelector } from '../ui';
 import type { Shell } from '../App';
 import { AppRail } from '../components/AppRail';
 import { TrainerView } from './TrainerView';
@@ -83,27 +84,22 @@ export function RosterApp({
         notifUnread={notifUnread}
       />
       <div className="apex-col">
-        <header className="app-brand apex-head">
-          <div className="app-brand-lead">
-            <span className="app-brand-word">spotter</span>
-            <button className="app-brand-app" onClick={onOpenShell} aria-label={t.shellSwitch}>
-              {appLabel}
-            </button>
-          </div>
-          <div className="app-brand-actions">
-            <button className="app-bell" onClick={() => openTab('feed')} aria-label={t.feedTitle}>
-              <Icon
-                name="bell"
-                weight={tab === 'feed' ? 'fill' : undefined}
-                className="app-brand-icon"
+        <BrandBar
+          header
+          app={appLabel}
+          onApp={onOpenShell}
+          appLabel={t.shellSwitch}
+          actions={
+            <>
+              <BellButton
+                label={t.feedTitle}
+                onClick={() => openTab('feed')}
+                active={tab === 'feed'}
+                count={tab !== 'feed' ? notifUnread : 0}
               />
-              {notifUnread > 0 && tab !== 'feed' && (
-                <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
-              )}
-            </button>
-            <LanguageSelector />
-          </div>
-        </header>
+            </>
+          }
+        />
 
         <div className="apex-body">
           {profileId ? (
@@ -133,24 +129,13 @@ export function RosterApp({
           )}
         </div>
 
-        <nav className="apex-nav" role="tablist">
-          {nav.map((x) => (
-            <button
-              key={x.id}
-              role="tab"
-              aria-selected={tab === x.id}
-              className={tab === x.id ? 'active' : ''}
-              onClick={() => openTab(x.id)}
-            >
-              <Icon name={x.icon} weight={tab === x.id ? 'fill' : undefined} />
-              <span>{x.label}</span>
-            </button>
-          ))}
-          <button className="apex-nav-apps" onClick={onOpenShell} aria-label={t.shellSwitch}>
-            <Icon name="squares-four" />
-            <span>{t.appsTab}</span>
-          </button>
-        </nav>
+        <TabBar
+          tabs
+          activeFill
+          items={nav.map((x) => ({ ...x, active: tab === x.id }))}
+          onSelect={(id) => openTab(id)}
+          apps={{ label: t.appsTab, ariaLabel: t.shellSwitch, onClick: onOpenShell }}
+        />
       </div>
     </div>
   );

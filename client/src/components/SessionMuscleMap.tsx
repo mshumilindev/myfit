@@ -25,6 +25,7 @@ import {
 import { MuscleHeatmap } from './Muscle';
 import type { MuscleGroup } from '../data/exercises';
 import type { Workout } from '../types';
+import { ListRow } from './ui/GroupedList';
 
 type TodoHint = { muscle: MuscleGroup; sets: number | null; color: string };
 type EaseHint = { muscle: MuscleGroup; over: boolean; color: string };
@@ -119,16 +120,15 @@ export function SessionMuscleMap({
   const empty = todo.length === 0 && ease.length === 0;
 
   const row = (muscle: MuscleGroup, color: string, detail: string, key: string) => (
-    <button
+    <ListRow
       key={key}
-      className="mm-hint"
+      dense
+      icon={<span className="mm-dot" style={{ background: color }} />}
+      label={t.muscleGroups[muscle]}
+      value={detail}
       onClick={() => onOpenMuscle?.(muscle)}
       disabled={!onOpenMuscle}
-    >
-      <span className="mm-dot" style={{ background: color }} />
-      <span className="mm-hint-name">{t.muscleGroups[muscle]}</span>
-      <span className="mm-hint-detail">{detail}</span>
-    </button>
+    />
   );
 
   return (

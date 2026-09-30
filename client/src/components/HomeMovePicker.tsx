@@ -6,6 +6,9 @@
  * also joins that set, so next time it's already there.
  */
 import { useState } from 'react';
+import { Button } from './ui/Button';
+import { ListRow } from './ui/GroupedList';
+import { IconTile } from './ui/IconTile';
 import './HomeSet.css';
 import { saveHomeSet, useStore } from '../store';
 import { HOME_CATALOG, type HomeMove } from '../homeSets';
@@ -14,6 +17,7 @@ import { useT } from '../i18n';
 import { Icon, Sheet, useExerciseName } from '../ui';
 import { HomeMoveIcon } from './HomeMoveIcon';
 import { MoveForm } from './HomeSetSheet';
+import { Tag } from './ui/Tag';
 
 export function HomeMovePicker(props: {
   workout: Workout;
@@ -50,27 +54,22 @@ export function HomeMovePicker(props: {
   const row = (m: HomeMove) => {
     const on = picked?.id === m.id;
     return (
-      <button
-        type="button"
+      <ListRow
         key={m.id}
-        className={`hs-mrow tap${on ? ' on' : ''}`}
+        dense
+        strong
+        selected={on}
         aria-pressed={on}
+        icon={
+          <IconTile size={40}>
+            <HomeMoveIcon icon={m.icon} />
+          </IconTile>
+        }
+        label={m.custom ? m.name : exName(m.name)}
+        sub={`${(t.muscleGroups as Record<string, string>)[m.muscle] ?? m.muscle} · ${t.homeMeasureName[m.measure]}`}
+        trailing={<Icon name={on ? 'check' : 'plus'} />}
         onClick={() => setPicked(on ? null : m)}
-      >
-        <span className="hs-mic">
-          <HomeMoveIcon icon={m.icon} />
-        </span>
-        <span className="hs-mtext">
-          <span className="hs-mname">{m.custom ? m.name : exName(m.name)}</span>
-          <span className="hs-msub">
-            {(t.muscleGroups as Record<string, string>)[m.muscle] ?? m.muscle} ·{' '}
-            {t.homeMeasureName[m.measure]}
-          </span>
-        </span>
-        <span className="hs-add" aria-hidden>
-          <Icon name={on ? 'check' : 'plus'} />
-        </span>
-      </button>
+      />
     );
   };
 
@@ -79,10 +78,9 @@ export function HomeMovePicker(props: {
       <div className="hs-view">
         <div className="hs-head">
           <span className="hs-title">{props.replacing ? t.replaceExercise : t.homeAddMove}</span>
-          <span className="hs-badge">
-            <Icon name="house" />
+          <Tag tone="accent" icon={<Icon name="house" />}>
             {t.homeMovesOnly}
-          </span>
+          </Tag>
         </div>
         {own.length > 0 && (
           <>
@@ -96,25 +94,27 @@ export function HomeMovePicker(props: {
             <div className="hs-mlist">{catalog.map(row)}</div>
           </>
         )}
-        <button type="button" className="hs-create-row" onClick={() => setCreating(true)}>
-          <span className="hs-mic ghost">
-            <Icon name="plus" />
-          </span>
-          {t.homeCreateOwnMove}
-        </button>
+        <ListRow
+          dense
+          strong
+          icon={<IconTile outline size={40} icon="plus" />}
+          label={t.homeCreateOwnMove}
+          onClick={() => setCreating(true)}
+        />
         <div className="hs-note">
           {set && !props.replacing ? t.homeGymStaysAlso(set.name) : t.homeGymStays}
         </div>
-        <button
-          type="button"
-          className="btn btn-primary btn-big hs-wide"
+        <Button
+          variant="primary"
+          size="lg"
+          className="hs-wide"
           disabled={!picked}
           onClick={() => picked && commit(picked)}
         >
           {picked
             ? t.homeAddNamed(picked.custom ? picked.name : exName(picked.name))
             : t.homeAddMove}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

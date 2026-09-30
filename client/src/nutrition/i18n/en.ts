@@ -179,6 +179,7 @@ export const en = {
   setYourGoalBody: 'Pick a target so Today can show remaining kcal & macros.',
   set: 'Set',
   searchProductsOrDishes: 'Search products or dishes',
+  clearSearch: 'Clear search',
 
   typeDish: 'Dish',
   typeDishDesc: 'Ate out? Type it — we estimate',

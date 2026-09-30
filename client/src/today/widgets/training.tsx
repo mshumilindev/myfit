@@ -85,7 +85,7 @@ function thousands(n: number): string {
 /** A row of flex children (layout only). */
 function Row({ children, gap = 6 }: { children: ReactNode; gap?: number }) {
   return (
-    <div style={{ display: 'flex', gap, flexWrap: 'wrap', alignItems: 'center', minWidth: 0 }}>
+    <div className="ul-flex ul-wrap ua-center umw-0" style={{ gap }}>
       {children}
     </div>
   );
@@ -104,7 +104,7 @@ function StackBar({
 }) {
   const total = parts.reduce((s, p) => s + p.value, 0) || 1;
   return (
-    <span className="uiw-bar" style={{ height, gap: 2 }}>
+    <span className="uiw-bar ug-2" style={{ height }}>
       {parts.map((p, i) => (
         <span
           key={i}
@@ -708,7 +708,7 @@ const weeklyRecap: WidgetDef = {
         tone="accent"
         kicker={s.recapRange(range)}
         value={
-          <span style={{ display: 'block', lineHeight: 1.2 }}>
+          <span className="ul-block" style={{ lineHeight: 1.2 }}>
             {s.bigSessions(r.sessions)}
             <br />
             {s.bigTonnes(r.tonnes)}
@@ -983,7 +983,7 @@ function PlaybookWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         onClick={open}
         footer={
           <>
-            <div style={{ flex: 1, display: 'flex' }}>{startBtn(true)}</div>
+            <div className="uf-1 ul-flex">{startBtn(true)}</div>
             {allBtn}
           </>
         }
@@ -1078,7 +1078,7 @@ function WeakPointsWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const barRows = (n: number) =>
     weak.slice(0, n).map((w) => ({
       label: (
-        <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <span className="ul-flex ul-col ug-4">
           {mName(w.muscle)}
           <WidgetBar value={w.avgSets / w.mev} tone="injury" height={4} />
         </span>
@@ -1462,7 +1462,7 @@ function GymWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       onClick={open}
       footer={startBtn(true)}
     >
-      <div style={{ display: 'grid', placeItems: 'center', flex: 1 }}>
+      <div className="ul-grid uf-1" style={{ placeItems: 'center' }}>
         <IconTile tone="neutral" size={56} icon="map-pin" />
       </div>
       <Row>

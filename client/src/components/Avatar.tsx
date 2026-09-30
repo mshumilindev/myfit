@@ -15,15 +15,11 @@ import { useEffect, useState } from 'react';
 import { getBlob, ref } from 'firebase/storage';
 import { storage } from '../firebase';
 import { deleteAvatarBlob, readAvatarBlob, writeAvatarBlob } from '../avatarStore';
+import { Avatar as AvatarDisc, initialsOf } from './ui/Avatar';
+
+export { initialsOf };
 
 const urlCache = new Map<string, string>();
-
-export function initialsOf(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return '?';
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
 
 /** Drop cached object-URLs (all generations) and the persisted blob for a user. */
 export function invalidateAvatarCache(userId: string): void {
@@ -134,13 +130,6 @@ function AvatarFace({
     };
   }, [uid, cacheKey, rev]);
 
-  const style = { width: size, height: size, fontSize: Math.max(10, Math.round(size * 0.38)) };
-  if (src) {
-    return <img className="avatar lighten" style={style} src={src} alt="" />;
-  }
-  return (
-    <span className="avatar initials" style={style} aria-hidden>
-      {initialsOf(name)}
-    </span>
-  );
+  // The disc itself is the kit primitive; this component only finds the photo.
+  return <AvatarDisc src={src} name={name} size={size} className="avatar" aria-hidden />;
 }

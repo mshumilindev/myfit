@@ -8,6 +8,7 @@
 import { useRef } from 'react';
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 import { Icon } from '../ui';
+import { Segmented } from './ui/Segmented';
 
 export type GaugeOption<T extends string> = { value: T; label: string };
 
@@ -108,20 +109,14 @@ export function EffortGauge<T extends string>({
           <span>{current?.label}</span>
         </div>
 
-        <div className="eg-legend" role="radiogroup" aria-label={title}>
-          {options.map((o) => (
-            <button
-              key={o.value}
-              type="button"
-              role="radio"
-              aria-checked={value === o.value}
-              className={`eg-opt${value === o.value ? ' on' : ''}`}
-              onClick={() => onChange(o.value)}
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          className="eg-legend"
+          size="sm"
+          label={title}
+          value={value}
+          onChange={onChange}
+          options={options.map((o) => ({ value: o.value, label: o.label }))}
+        />
       </div>
     </div>
   );

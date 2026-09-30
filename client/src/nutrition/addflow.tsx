@@ -12,6 +12,14 @@ import {
 } from './data';
 import { lookupBarcodeOFF, searchProductsOFF } from './off';
 import { Sheet, Sk } from './components';
+import { Button, IconButton } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Field } from '../components/ui/Field';
+import { SearchField } from '../components/ui/SearchField';
+import { Checkbox } from '../components/ui/Checkbox';
+import { ChipGroup, Chip } from '../components/ui/Chip';
+import { ListRow } from '../components/ui/GroupedList';
+import { Segmented } from '../components/ui/Segmented';
 import { useT } from './i18n';
 import { store, useStore } from './store';
 import type { Basis, CookingMethod, Food, LoggedItem, Macros } from './types';
@@ -68,7 +76,7 @@ function QuantityStep({
   const item = makeItem(food, amount || 0, withMethod ? method : undefined);
   return (
     <div>
-      <div className="row" style={{ borderBottom: 'none' }}>
+      <div className="row row--flush">
         <FoodIc food={food} />
         <span className="body">
           <span className="name">{food.name}</span>
@@ -88,41 +96,37 @@ function QuantityStep({
         </span>
       </div>
 
-      <div className="field mt3">
-        <label>
-          {t('amount')} ({unit})
-        </label>
-        <input
-          className="input tnum"
-          type="number"
-          inputMode="decimal"
-          value={amount}
-          onChange={(e) => setAmount(parseFloat(e.target.value))}
-        />
-      </div>
+      <Field
+        className="mt3 tnum"
+        label={`${t('amount')} (${unit})`}
+        type="number"
+        inputMode="decimal"
+        value={amount}
+        onChange={(e) => setAmount(parseFloat(e.target.value))}
+      />
 
       {withMethod && (
         <div className="field">
           <label>{t('cookingMethod')}</label>
-          <div className="seg">
-            {COOKING_METHODS.map((m) => (
-              <button
-                key={m}
-                className={`chip ${method === m ? 'on' : ''}`}
-                onClick={() => setMethod(m)}
-              >
-                {t(m)}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            value={method}
+            onChange={setMethod}
+            options={COOKING_METHODS.map((m) => ({ value: m, label: t(m) }))}
+          />
         </div>
       )}
 
       <MacroPreview items={[item]} />
 
-      <button className="btn acc block mt4" disabled={!amount} onClick={() => onDone(item)}>
+      <Button
+        variant="primary"
+        fullWidth
+        className="mt4"
+        disabled={!amount}
+        onClick={() => onDone(item)}
+      >
         {t(ctaKey)}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -181,38 +185,33 @@ function SearchStep({ onPick }: { onPick: (food: Food) => void }) {
 
   return (
     <div>
-      <div className="seg" style={{ marginBottom: 12 }}>
-        <button
-          className={`chip ${scope === 'product' ? 'on' : ''}`}
-          onClick={() => setScope('product')}
-        >
-          {t('searchProducts')}
-        </button>
-        <button className={`chip ${scope === 'dish' ? 'on' : ''}`} onClick={() => setScope('dish')}>
-          {t('searchDishes')}
-        </button>
+      <div className="umb-12">
+        <Segmented
+          value={scope}
+          onChange={setScope}
+          options={[
+            { value: 'product' as const, label: t('searchProducts') },
+            { value: 'dish' as const, label: t('searchDishes') },
+          ]}
+        />
       </div>
-      <input
-        className="input"
+      <SearchField
         placeholder={t('searchProductsOrDishes')}
+        clearLabel={t('clearSearch')}
         value={q}
-        onChange={(e) => setQ(e.target.value)}
+        onChange={setQ}
         autoFocus
       />
-      {scope === 'dish' && (
-        <p className="muted mt3" style={{ fontSize: 12 }}>
-          {t('dishApproxNote')}
-        </p>
-      )}
+      {scope === 'dish' && <p className="muted mt3 ut-sm">{t('dishApproxNote')}</p>}
       {loading && (
         <div className="mt3">
-          <Sk h={44} r={12} style={{ marginBottom: 8 }} />
-          <Sk h={44} r={12} style={{ marginBottom: 8 }} />
+          <Sk h={44} r={12} className="umb-8" />
+          <Sk h={44} r={12} className="umb-8" />
           <Sk h={44} r={12} />
         </div>
       )}
       {err && (
-        <p className="muted center mt3" style={{ fontSize: 12 }}>
+        <p className="muted center mt3 ut-sm">
           {t('offline')} · {t('addManually')}
         </p>
       )}
@@ -222,41 +221,29 @@ function SearchStep({ onPick }: { onPick: (food: Food) => void }) {
           <p className="muted center mt4">{t('noResults')}</p>
         ) : (
           results.map((f) => (
-            <div key={f.id} className="row" style={{ gap: 8 }}>
-              <button
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                  display: 'flex',
-                  gap: 12,
-                  alignItems: 'center',
-                  background: 'none',
-                  border: 'none',
-                  textAlign: 'left',
-                  color: 'inherit',
-                  padding: 0,
-                }}
-                onClick={() => onPick(f)}
-              >
-                <FoodIc food={f} />
-                <span className="body">
-                  <span className="name">
-                    {f.name} {f.approx && <span className="tag approx">{t('approx')}</span>}{' '}
-                    {f.custom && <span className="tag">★</span>}
-                  </span>
-                  <span className="meta tnum">
-                    {f.per.kcal} {t('kcal')} {basisLabel(f, t)}
-                  </span>
-                </span>
-              </button>
+            <div key={f.id} className="row ug-8">
+              <div className="uf-1 umw-0">
+                <ListRow
+                  dense
+                  strong
+                  icon={<FoodIc food={f} />}
+                  label={
+                    <>
+                      {f.name} {f.approx && <span className="tag approx">{t('approx')}</span>}{' '}
+                      {f.custom && <span className="tag">★</span>}
+                    </>
+                  }
+                  sub={`${f.per.kcal} ${t('kcal')} ${basisLabel(f, t)}`}
+                  onClick={() => onPick(f)}
+                />
+              </div>
               {f.custom && (
-                <button
-                  className="btn ghost sm"
-                  aria-label={t('delete')}
+                <IconButton
+                  size="sm"
+                  icon="trash"
+                  label={t('delete')}
                   onClick={() => store.deleteCustomFood(f.id)}
-                >
-                  🗑
-                </button>
+                />
               )}
             </div>
           ))
@@ -283,38 +270,30 @@ function ManualStep({ onCreated }: { onCreated: (food: Food) => void }) {
     onCreated(food);
   }
   const num = (v: number, set: (n: number) => void, label: string) => (
-    <div className="field grow">
-      <label>{label}</label>
-      <input
-        className="input tnum"
-        type="number"
-        inputMode="decimal"
-        value={v}
-        onChange={(e) => set(parseFloat(e.target.value) || 0)}
-      />
-    </div>
+    <Field
+      className="grow tnum"
+      label={label}
+      type="number"
+      inputMode="decimal"
+      value={v}
+      onChange={(e) => set(parseFloat(e.target.value) || 0)}
+    />
   );
   return (
     <div>
-      <div className="field">
-        <label>{t('name')}</label>
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
-      </div>
+      <Field label={t('name')} value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       <div className="field">
         <label>
           {t('per100g')} / {t('per100ml')} / {t('perPortion')}
         </label>
-        <div className="seg">
-          {(['100g', '100ml', 'portion'] as Basis[]).map((b) => (
-            <button
-              key={b}
-              className={`chip ${basis === b ? 'on' : ''}`}
-              onClick={() => setBasis(b)}
-            >
-              {b === 'portion' ? t('perPortion') : b === '100ml' ? t('per100ml') : t('per100g')}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          value={basis}
+          onChange={setBasis}
+          options={(['100g', '100ml', 'portion'] as Basis[]).map((b) => ({
+            value: b,
+            label: b === 'portion' ? t('perPortion') : b === '100ml' ? t('per100ml') : t('per100g'),
+          }))}
+        />
       </div>
       <div className="rowflex">
         {num(kcal, setKcal, t('kcal'))}
@@ -324,13 +303,13 @@ function ManualStep({ onCreated }: { onCreated: (food: Food) => void }) {
         {num(fat, setFat, t('fat'))}
         {num(carbs, setCarbs, t('carbs'))}
       </div>
-      <label className="rowflex" style={{ alignItems: 'center', gap: 8, margin: '8px 0 16px' }}>
-        <input type="checkbox" checked={save} onChange={(e) => setSave(e.target.checked)} />
+      <label className="rowflex ua-center ug-8" style={{ margin: '8px 0 16px' }}>
+        <Checkbox checked={save} onChange={setSave} />
         <span>{t('saveAsProduct')}</span>
       </label>
-      <button className="btn acc block" disabled={!name} onClick={submit}>
+      <Button variant="primary" fullWidth disabled={!name} onClick={submit}>
         {t('save')}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -387,15 +366,10 @@ function CameraScan({ onCode, onError }: { onCode: (code: string) => void; onErr
   return (
     <video
       ref={videoRef}
+      className="scan-video uw-full"
       playsInline
       muted
-      style={{
-        width: '100%',
-        maxHeight: 320,
-        objectFit: 'cover',
-        borderRadius: 12,
-        background: '#000',
-      }}
+      style={{ maxHeight: 320, objectFit: 'cover' }}
     />
   );
 }
@@ -433,53 +407,51 @@ function ScanStep({ onFound, onManual }: { onFound: (food: Food) => void; onManu
             }}
             onError={() => setCam(false)}
           />
-          <button className="btn block mt3" onClick={() => setCam(false)}>
+          <Button variant="secondary" fullWidth className="mt3" onClick={() => setCam(false)}>
             {t('stopCamera')}
-          </button>
+          </Button>
         </>
       ) : (
         <div className="card center" style={{ padding: 28 }}>
-          <div style={{ fontSize: 40 }}>📷</div>
-          <p className="muted mt3" style={{ fontSize: 13 }}>
-            {t('cameraHint')}
-          </p>
+          <div className="ut-display">📷</div>
+          <p className="muted mt3 ut-base">{t('cameraHint')}</p>
           {hasCam && (
-            <button
-              className="btn acc mt3"
+            <Button
+              variant="primary"
+              className="mt3"
               onClick={() => {
                 setCam(true);
                 setState('idle');
               }}
             >
               {t('useCamera')}
-            </button>
+            </Button>
           )}
         </div>
       )}
-      <div className="field mt4">
-        <label>{t('scanTitle')}</label>
-        <input
-          className="input tnum"
-          inputMode="numeric"
-          placeholder="4820000000000"
-          value={code}
-          onChange={(e) => {
-            setCode(e.target.value);
-            setState('idle');
-          }}
-        />
-      </div>
+      <Field
+        className="mt4 tnum"
+        label={t('scanTitle')}
+        inputMode="numeric"
+        placeholder="4820000000000"
+        value={code}
+        onChange={(e) => {
+          setCode(e.target.value);
+          setState('idle');
+        }}
+      />
       {state === 'notfound' && <p className="field-error">{t('scanNotFound')}</p>}
-      <button
-        className="btn acc block"
+      <Button
+        variant="primary"
+        fullWidth
         disabled={!code.trim() || state === 'loading'}
         onClick={() => lookup(code)}
       >
         {state === 'loading' ? t('loadingLabel') : t('scanFound')}
-      </button>
-      <button className="btn block mt3" onClick={onManual}>
+      </Button>
+      <Button variant="secondary" fullWidth className="mt3" onClick={onManual}>
         {t('useManual')}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -535,38 +507,33 @@ function DishStep({ day, at, onClose }: { day: string; at: string; onClose: () =
   }
 
   const numField = (label: string, val: number, set: (n: number) => void) => (
-    <div className="field grow">
-      <label>{label}</label>
-      <input
-        className="input tnum"
-        type="number"
-        inputMode="decimal"
-        value={val}
-        onChange={(e) => set(parseFloat(e.target.value) || 0)}
-      />
-    </div>
+    <Field
+      className="grow tnum"
+      label={label}
+      type="number"
+      inputMode="decimal"
+      value={val}
+      onChange={(e) => set(parseFloat(e.target.value) || 0)}
+    />
   );
 
   return (
     <div>
-      <div className="field">
-        <label>{t('dishName')}</label>
-        <input
-          className="input"
-          placeholder={t('dishNamePlaceholder')}
-          value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-            setMacros(null);
-          }}
-          autoFocus
-        />
-      </div>
+      <Field
+        label={t('dishName')}
+        placeholder={t('dishNamePlaceholder')}
+        value={name}
+        onChange={(e) => {
+          setName(e.target.value);
+          setMacros(null);
+        }}
+        autoFocus
+      />
 
       {!macros ? (
-        <button className="btn acc block" disabled={!name.trim() || busy} onClick={estimate}>
+        <Button variant="primary" fullWidth disabled={!name.trim() || busy} onClick={estimate}>
           {busy ? t('estimating') : t('estimate')}
-        </button>
+        </Button>
       ) : (
         <>
           {noAi && <p className="field-error">{t('aiUnavailable')}</p>}
@@ -578,25 +545,21 @@ function DishStep({ day, at, onClose }: { day: string; at: string; onClose: () =
             {numField(t('fat'), macros.fat, (v) => setMacros({ ...macros, fat: v }))}
             {numField(t('carbs'), macros.carbs, (v) => setMacros({ ...macros, carbs: v }))}
           </div>
-          <div className="field">
-            <label>
-              {t('amount')} ({t('portions')})
-            </label>
-            <input
-              className="input tnum"
-              type="number"
-              inputMode="decimal"
-              value={portions}
-              onChange={(e) => setPortions(parseFloat(e.target.value) || 0)}
-            />
-          </div>
+          <Field
+            className="tnum"
+            label={`${t('amount')} (${t('portions')})`}
+            type="number"
+            inputMode="decimal"
+            value={portions}
+            onChange={(e) => setPortions(parseFloat(e.target.value) || 0)}
+          />
           <div className="card tnum">
             <span className="tag approx">{t('approx')}</span> · {round(macros.kcal * portions)}{' '}
             {t('kcal')}
           </div>
-          <button className="btn acc block mt3" disabled={!portions} onClick={log}>
+          <Button variant="primary" fullWidth className="mt3" disabled={!portions} onClick={log}>
             {t('log')}
-          </button>
+          </Button>
         </>
       )}
     </div>
@@ -615,60 +578,49 @@ function DrinkStep({ onLog }: { onLog: (item: LoggedItem, alcoholG: number) => v
   return (
     <div>
       <div className="section-title">{t('pickDrink')}</div>
-      <div className="seg">
+      <ChipGroup>
         {DRINKS.map((d) => (
-          <button
-            key={d.id}
-            className={`chip ${drink?.id === d.id ? 'on' : ''}`}
-            onClick={() => setDrink(d)}
-          >
+          <Chip key={d.id} selected={drink?.id === d.id} onClick={() => setDrink(d)}>
             {d.emoji} {d.name}
-          </button>
+          </Chip>
         ))}
-      </div>
+      </ChipGroup>
       {drink && (
         <>
           <div className="field mt4">
             <label>{t('volume')}</label>
-            <div className="seg">
+            <ChipGroup>
               {VOLUME_UNITS.map((u) => (
-                <button
-                  key={u.id}
-                  className={`chip ${unitId === u.id ? 'on' : ''}`}
-                  onClick={() => setUnitId(u.id)}
-                >
+                <Chip key={u.id} selected={unitId === u.id} onClick={() => setUnitId(u.id)}>
                   {t(u.labelKey)}
                   {u.ml > 1 ? ` · ${u.ml}${t('ml')}` : ''}
-                </button>
+                </Chip>
               ))}
-            </div>
+            </ChipGroup>
           </div>
-          <div className="field">
-            <label>
-              × {ml}
-              {t('ml')}
-            </label>
-            <input
-              className="input tnum"
-              type="number"
-              inputMode="decimal"
-              value={count}
-              onChange={(e) => setCount(parseFloat(e.target.value))}
-            />
-          </div>
+          <Field
+            className="tnum"
+            label={`× ${ml}${t('ml')}`}
+            type="number"
+            inputMode="decimal"
+            value={count}
+            onChange={(e) => setCount(parseFloat(e.target.value))}
+          />
           {item && <MacroPreview items={[item]} />}
           {alcG > 0 && (
-            <p className="muted mt3" style={{ fontSize: 12 }}>
+            <p className="muted mt3 ut-sm">
               {t('alcohol')}: {alcG} {t('grams')}
             </p>
           )}
-          <button
-            className="btn acc block mt4"
+          <Button
+            variant="primary"
+            fullWidth
+            className="mt4"
             disabled={!ml}
             onClick={() => item && onLog(item, alcG)}
           >
             {t('log')}
-          </button>
+          </Button>
         </>
       )}
     </div>
@@ -708,15 +660,12 @@ function MealStep({ day, at, onClose }: { day: string; at: string; onClose: () =
   }
   return (
     <div>
-      <div className="field">
-        <label>{t('dishName')}</label>
-        <input
-          className="input"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={t('mealConstructor')}
-        />
-      </div>
+      <Field
+        label={t('dishName')}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder={t('mealConstructor')}
+      />
       <div className="section-title">{t('ingredients')}</div>
       {items.length === 0 ? (
         <p className="muted">{t('addIngredient')}…</p>
@@ -738,9 +687,9 @@ function MealStep({ day, at, onClose }: { day: string; at: string; onClose: () =
           </div>
         ))
       )}
-      <button className="btn block mt3" onClick={() => setSearching(true)}>
+      <Button variant="secondary" fullWidth className="mt3" onClick={() => setSearching(true)}>
         + {t('addIngredient')}
-      </button>
+      </Button>
 
       {items.length > 0 && (
         <>
@@ -757,8 +706,10 @@ function MealStep({ day, at, onClose }: { day: string; at: string; onClose: () =
               </span>
             </div>
           </div>
-          <button
-            className="btn acc block mt4"
+          <Button
+            variant="primary"
+            fullWidth
+            className="mt4"
             onClick={() => {
               store.addEntry({
                 type: 'meal',
@@ -772,7 +723,7 @@ function MealStep({ day, at, onClose }: { day: string; at: string; onClose: () =
             }}
           >
             {t('log')}
-          </button>
+          </Button>
         </>
       )}
     </div>
@@ -843,10 +794,9 @@ export function AddFlow({ onClose }: { onClose: () => void }) {
 
   return (
     <Sheet title={titleMap[step]} onClose={onClose}>
-      <div className="field" style={{ marginBottom: 16 }}>
-        <label>{t('whenLabel')}</label>
-        <input
-          className="input"
+      <div className="umb-16">
+        <Field
+          label={t('whenLabel')}
           type="datetime-local"
           value={when}
           onChange={(e) => setWhen(e.target.value)}
@@ -855,38 +805,38 @@ export function AddFlow({ onClose }: { onClose: () => void }) {
 
       {step === 'type' && (
         <div className="type-grid">
-          <button className="big" onClick={() => setStep('drink')}>
+          <Card as="button" className="big" onClick={() => setStep('drink')}>
             <span className="emo">🥤</span>
             <span>
               <span className="t">{t('typeDrink')}</span>
               <br />
               <span className="d">{t('typeDrinkDesc')}</span>
             </span>
-          </button>
-          <button className="big" onClick={() => setStep('snackSearch')}>
+          </Card>
+          <Card as="button" className="big" onClick={() => setStep('snackSearch')}>
             <span className="emo">🍎</span>
             <span>
               <span className="t">{t('typeSnack')}</span>
               <br />
               <span className="d">{t('typeSnackDesc')}</span>
             </span>
-          </button>
-          <button className="big" onClick={() => setStep('meal')}>
+          </Card>
+          <Card as="button" className="big" onClick={() => setStep('meal')}>
             <span className="emo">🍽️</span>
             <span>
               <span className="t">{t('typeMeal')}</span>
               <br />
               <span className="d">{t('typeMealDesc')}</span>
             </span>
-          </button>
-          <button className="big" onClick={() => setStep('dish')}>
+          </Card>
+          <Card as="button" className="big" onClick={() => setStep('dish')}>
             <span className="emo">🍲</span>
             <span>
               <span className="t">{t('typeDish')}</span>
               <br />
               <span className="d">{t('typeDishDesc')}</span>
             </span>
-          </button>
+          </Card>
 
           {recents.length > 0 && (
             <>
@@ -905,13 +855,18 @@ export function AddFlow({ onClose }: { onClose: () => void }) {
 
       {step === 'snackSearch' && (
         <div>
-          <div className="rowflex" style={{ marginBottom: 12 }}>
-            <button className="btn sm grow" onClick={() => setStep('manual')}>
+          <div className="rowflex umb-12">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="grow"
+              onClick={() => setStep('manual')}
+            >
               ✏️ {t('manual')}
-            </button>
-            <button className="btn sm grow" onClick={() => setStep('scan')}>
+            </Button>
+            <Button variant="secondary" size="sm" className="grow" onClick={() => setStep('scan')}>
               📷 {t('scan')}
-            </button>
+            </Button>
           </div>
           <SearchStep
             onPick={(f) => {

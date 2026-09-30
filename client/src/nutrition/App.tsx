@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { TabBar } from '../components/ui/TabBar';
+import { Button } from '../components/ui/Button';
+import { Field } from '../components/ui/Field';
+import { BrandBar, BellButton } from '../components/ui/BrandBar';
 import { AddFlow } from './addflow';
 import { Sheet } from './components';
 import { round, sumMacros } from './calc';
@@ -6,7 +10,6 @@ import { useT } from './i18n';
 import { store, useStore } from './store';
 import { GoalView, HistoryView, TodayView } from './views';
 import type { Entry } from './types';
-import { Icon, LanguageSelector } from '../ui';
 import { AppRail } from '../components/AppRail';
 import { NotificationsView } from '../views/NotificationsView';
 import type { Notif, NotifState } from '../notifications';
@@ -74,26 +77,24 @@ function EntryDetail({
       </div>
 
       {single && (
-        <div className="field mt4">
-          <label>
-            {t('amount')} ({unit})
-          </label>
-          <input
-            className="input tnum"
+        <div className="mt4">
+          <Field
+            className="tnum"
+            label={`${t('amount')} (${unit})`}
             type="number"
             inputMode="decimal"
             value={amount}
             onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
           />
-          <button className="btn acc block mt3" disabled={!amount} onClick={save}>
+          <Button variant="primary" fullWidth className="mt3" disabled={!amount} onClick={save}>
             {t('save')}
-          </button>
+          </Button>
         </div>
       )}
 
-      <button className="btn danger block mt4" onClick={() => onDelete(entry)}>
+      <Button variant="danger" fullWidth className="mt4" onClick={() => onDelete(entry)}>
         {t('delete')}
-      </button>
+      </Button>
     </Sheet>
   );
 }
@@ -152,10 +153,7 @@ export function NutritionRoot({
     return (
       <div className="app-nutrition apex-app">
         <div className="apex-col">
-          <div
-            className="screen center"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}
-          >
+          <div className="screen center ul-flex ua-center uj-center uf-1">
             <span className="muted">{t('loadingLabel')}</span>
           </div>
         </div>
@@ -175,31 +173,22 @@ export function NutritionRoot({
         notifUnread={notifUnread}
       />
       <div className="apex-col">
-        <header className="app-brand apex-head">
-          <div className="app-brand-lead">
-            <span className="app-brand-word">spotter</span>
-            <button className="app-brand-app" onClick={onOpenShell} aria-label={t('apps')}>
-              {t('appName')}
-            </button>
-          </div>
-          <div className="app-brand-actions">
-            <button
-              className="app-bell"
-              onClick={() => setTab('feed')}
-              aria-label={t('notifications')}
-            >
-              <Icon
-                name="bell"
-                weight={tab === 'feed' ? 'fill' : undefined}
-                className="app-brand-icon"
+        <BrandBar
+          header
+          app={t('appName')}
+          onApp={onOpenShell}
+          appLabel={t('apps')}
+          actions={
+            <>
+              <BellButton
+                label={t('notifications')}
+                onClick={() => setTab('feed')}
+                active={tab === 'feed'}
+                count={tab !== 'feed' ? notifUnread : 0}
               />
-              {notifUnread > 0 && tab !== 'feed' && (
-                <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
-              )}
-            </button>
-            <LanguageSelector />
-          </div>
-        </header>
+            </>
+          }
+        />
 
         <div className="apex-body">
           {tab === 'feed' ? (
@@ -256,31 +245,24 @@ export function NutritionRoot({
                 />
               </filter>
             </svg>
-            <button className="n-addpill" onClick={() => setAdding(true)}>
-              <Icon name="plus" weight="bold" className="n-addpill-plus" />
-              <span>{t('addEntry')}</span>
-            </button>
+            <Button
+              variant="primary"
+              icon="plus"
+              className="n-addpill"
+              onClick={() => setAdding(true)}
+            >
+              {t('addEntry')}
+            </Button>
           </div>
         )}
 
-        <nav className="apex-nav" role="tablist">
-          {nav.map((x) => (
-            <button
-              key={x.id}
-              role="tab"
-              aria-selected={tab === x.id}
-              className={tab === x.id ? 'active' : ''}
-              onClick={() => setTab(x.id as Tab)}
-            >
-              <Icon name={x.icon} weight={tab === x.id ? 'fill' : undefined} />
-              <span>{x.label}</span>
-            </button>
-          ))}
-          <button className="apex-nav-apps" onClick={onOpenShell} aria-label={t('apps')}>
-            <Icon name="squares-four" />
-            <span>{t('apps')}</span>
-          </button>
-        </nav>
+        <TabBar
+          tabs
+          activeFill
+          items={nav.map((x) => ({ ...x, active: tab === x.id }))}
+          onSelect={(id) => setTab(id as Tab)}
+          apps={{ label: t('apps'), ariaLabel: t('apps'), onClick: onOpenShell }}
+        />
       </div>
 
       {adding && <AddFlow onClose={() => setAdding(false)} />}
@@ -290,8 +272,9 @@ export function NutritionRoot({
       {undo && (
         <div className="snack">
           <span>{t('deleted')}</span>
-          <button
-            className="u"
+          <Button
+            variant="link"
+            size="sm"
             onClick={() => {
               store.restoreEntry(undo);
               setUndo(null);
@@ -299,7 +282,7 @@ export function NutritionRoot({
             }}
           >
             {t('undo')}
-          </button>
+          </Button>
         </div>
       )}
     </div>

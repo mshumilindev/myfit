@@ -4,15 +4,26 @@ import { useState } from 'react';
 import { computeTrends, type Insight, type Level } from '../trends';
 import type { BodyMetrics, Workout } from '../types';
 import { useT } from '../i18n';
-import { EmptyState, Icon } from '../ui';
+import { Icon } from '../ui';
+import { EmptyState } from './ui/EmptyState';
+import { Card } from './ui/Card';
+import { Tag } from './ui/Tag';
+import type { Tone } from './ui/tones';
+
+/** Insight level → colour family. */
+const LEVEL_TONE: Record<Level, Tone> = {
+  risk: 'danger',
+  warn: 'illness',
+  info: 'rest',
+  good: 'ok',
+};
 
 function Badge({ level }: { level: Level }) {
   const { t } = useT();
   return (
-    <span className={`ai-badge lvl-${level}`}>
-      <span className="ai-badge-dot" />
+    <Tag tone={LEVEL_TONE[level]} className={`ai-badge lvl-${level}`}>
       {t.trends.levels[level]}
-    </span>
+    </Tag>
   );
 }
 
@@ -82,7 +93,11 @@ function BalanceCard({ i }: { i: Insight }) {
   const b = i.bVal ?? 0;
   const max = Math.max(a, b, 1);
   return (
-    <section className={`ai-card ai-balance lvl-${i.level}${i.attention ? ' attention' : ''}`}>
+    <Card
+      as="section"
+      tone={i.level === 'risk' ? 'danger' : 'neutral'}
+      className={`ai-card ai-balance lvl-${i.level}${i.attention ? ' attention' : ''}`}
+    >
       <CardTop i={i} />
       {i.headline && <div className="ai-headline">{i.headline}</div>}
       <div className="ai-pp">
@@ -96,13 +111,17 @@ function BalanceCard({ i }: { i: Insight }) {
         </div>
       </div>
       <p className="ai-detail">{i.detail}</p>
-    </section>
+    </Card>
   );
 }
 
 function MuscleListCard({ i }: { i: Insight }) {
   return (
-    <section className={`ai-card ai-mlist lvl-${i.level}`}>
+    <Card
+      as="section"
+      tone={i.level === 'risk' ? 'danger' : 'neutral'}
+      className={`ai-card ai-mlist lvl-${i.level}`}
+    >
       <CardTop i={i} />
       <div className="ai-rows">
         {(i.muscles ?? []).map((m) => (
@@ -113,7 +132,7 @@ function MuscleListCard({ i }: { i: Insight }) {
         ))}
       </div>
       <p className="ai-detail">{i.detail}</p>
-    </section>
+    </Card>
   );
 }
 
@@ -121,7 +140,11 @@ function HorizonCard({ i }: { i: Insight }) {
   const bars = i.bars ?? [];
   const max = Math.max(...bars.map((b) => b.raw), 1);
   return (
-    <section className={`ai-card ai-horizon lvl-${i.level}`}>
+    <Card
+      as="section"
+      tone={i.level === 'risk' ? 'danger' : 'neutral'}
+      className={`ai-card ai-horizon lvl-${i.level}`}
+    >
       <CardTop i={i} />
       {i.headline && <div className="ai-headline">{i.headline}</div>}
       <div className="ai-hz-cols">
@@ -139,13 +162,17 @@ function HorizonCard({ i }: { i: Insight }) {
         ))}
       </div>
       <p className="ai-detail">{i.detail}</p>
-    </section>
+    </Card>
   );
 }
 
 function TrendCard({ i }: { i: Insight }) {
   return (
-    <section className={`ai-card ai-trend lvl-${i.level}${i.attention ? ' attention' : ''}`}>
+    <Card
+      as="section"
+      tone={i.level === 'risk' ? 'danger' : 'neutral'}
+      className={`ai-card ai-trend lvl-${i.level}${i.attention ? ' attention' : ''}`}
+    >
       <CardTop i={i} />
       {i.headline && <div className="ai-headline">{i.headline}</div>}
       {i.hero && (
@@ -162,13 +189,17 @@ function TrendCard({ i }: { i: Insight }) {
       )}
       {i.spark && <Sparkline pts={i.spark} level={i.level} />}
       <p className="ai-detail">{i.detail}</p>
-    </section>
+    </Card>
   );
 }
 
 function StatCard({ i }: { i: Insight }) {
   return (
-    <section className={`ai-card ai-stat lvl-${i.level}`}>
+    <Card
+      as="section"
+      tone={i.level === 'risk' ? 'danger' : 'neutral'}
+      className={`ai-card ai-stat lvl-${i.level}`}
+    >
       <CardTop i={i} />
       <div className="ai-stat-hero">
         <span className="num">{i.hero}</span>
@@ -181,13 +212,17 @@ function StatCard({ i }: { i: Insight }) {
         )}
       </div>
       <p className="ai-detail">{i.detail}</p>
-    </section>
+    </Card>
   );
 }
 
 function TipCard({ i }: { i: Insight }) {
   return (
-    <section className={`ai-card ai-tip lvl-${i.level}${i.attention ? ' attention' : ''}`}>
+    <Card
+      as="section"
+      tone={i.level === 'risk' ? 'danger' : 'neutral'}
+      className={`ai-card ai-tip lvl-${i.level}${i.attention ? ' attention' : ''}`}
+    >
       <div className="ai-top">
         <div className="ai-tip-head">
           {i.icon && (
@@ -205,7 +240,7 @@ function TipCard({ i }: { i: Insight }) {
           {i.action}
         </a>
       )}
-    </section>
+    </Card>
   );
 }
 

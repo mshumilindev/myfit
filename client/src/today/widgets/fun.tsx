@@ -19,6 +19,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react';
+import { Field } from '../../components/ui/Field';
 import {
   Widget,
   WidgetBar,
@@ -73,6 +74,7 @@ import type { WidgetCtx, WidgetDef } from '../registry';
 import { DAY, clock, signed } from './format';
 import { prRecords } from '../calendarData';
 import { fs, type FunStrings } from './fun.strings';
+import { Textarea } from '../../components/ui/Textarea';
 
 /* ---------------------------------------------------------------------------
  * Tiny local stores (this device only)
@@ -128,7 +130,11 @@ function useLocal<T>(s: LocalStore<T>): T {
  * Shared helpers
  * ------------------------------------------------------------------------- */
 
-const muted: CSSProperties = { fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.4 };
+const muted: CSSProperties = {
+  fontSize: 'var(--fs-12)',
+  color: 'var(--color-text-muted)',
+  lineHeight: 1.4,
+};
 
 function finished(store: StoreState): Workout[] {
   return store.workouts.filter((w) => w.finishedAt !== null);
@@ -218,9 +224,7 @@ function FormSheet({
       <div className="sheet-head">
         <span className="t">{title}</span>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
-        {children}
-      </div>
+      <div className="ul-flex ul-col ug-12 umb-16">{children}</div>
       <div className="sheet-actions">
         {onRemove && (
           <Button variant="danger" onClick={onRemove}>
@@ -235,15 +239,6 @@ function FormSheet({
         </Button>
       </div>
     </Sheet>
-  );
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span style={muted}>{label}</span>
-      {children}
-    </label>
   );
 }
 
@@ -567,13 +562,13 @@ const milestones: WidgetDef = {
           </Button>
         }
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div className="ul-flex ua-center ug-16">
           <WidgetRing value={n / sTarget} size={96}>
             {n}
             <small>{s.ofN(sTarget)}</small>
           </WidgetRing>
-          <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <div style={{ fontSize: 16, fontWeight: 700 }}>{s.sessionsTo(sLeft, sTarget)}</div>
+          <div className="umw-0 ul-flex ul-col ug-4">
+            <div className="uiw-t-lg">{s.sessionsTo(sLeft, sTarget)}</div>
             {sEta && (
               <div style={muted}>
                 {s.atPace(perWeek.toFixed(perWeek % 1 ? 1 : 0), fmtWeekdayDayMonth(sEta, locale))}
@@ -637,31 +632,31 @@ function WeekCard({
   big?: boolean;
 }) {
   const stat = (v: ReactNode, l: string) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <span style={{ fontSize: big ? 30 : 22, fontWeight: 800, lineHeight: 1 }}>{v}</span>
-      <span style={{ fontSize: 11, color: 'var(--t-text)' }}>{l}</span>
+    <div className="ul-flex ul-col ug-2">
+      <span
+        className="ut-w8"
+        style={{ fontSize: big ? 'var(--fs-30)' : 'var(--fs-22)', lineHeight: 1 }}
+      >
+        {v}
+      </span>
+      <span className="uiw-t-sm tw-tone-text">{l}</span>
     </div>
   );
   return (
     <div
-      className={toneClass('accent')}
+      className={[[toneClass('accent'), 'ur-lg'].filter(Boolean).join(' '), 'tw-tint-card']
+        .filter(Boolean)
+        .join(' ')}
       style={{
         display: 'flex',
         flexDirection: 'column',
         gap: big ? 12 : 8,
         padding: big ? 14 : 10,
-        borderRadius: 'var(--radius-lg)',
-        background: 'var(--t-tint)',
-        border: '1px solid var(--t-line)',
         minWidth: 0,
       }}
     >
-      <span
-        style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: 'var(--t-base)' }}
-      >
-        SPOTTER · {s.weekN(week).toUpperCase()}
-      </span>
-      <div style={{ display: 'flex', gap: big ? 24 : 14 }}>
+      <span className="uiw-t-xs ut-tone tw-caps-wide">SPOTTER · {s.weekN(week).toUpperCase()}</span>
+      <div className="ul-flex" style={{ gap: big ? 24 : 14 }}>
         {stat(n, s.sessionsShort)}
         {stat(tons(kg), `t ${s.lifted}`)}
         {stat(prs, s.prs)}
@@ -829,23 +824,19 @@ function EventSheet({
           : undefined
       }
     >
-      <Field label={s.eventName}>
-        <input
-          className="input"
-          value={name}
-          maxLength={60}
-          placeholder={s.defaultEvent}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </Field>
-      <Field label={s.eventDate}>
-        <input
-          className="input"
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-      </Field>
+      <Field
+        label={s.eventName}
+        value={name}
+        maxLength={60}
+        placeholder={s.defaultEvent}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <Field
+        label={s.eventDate}
+        type="date"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+      />
       <Segmented
         options={[
           { value: 'meet', label: s.kindMeet },
@@ -927,9 +918,9 @@ function EventWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
     );
   else {
     const bar = (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div className="ul-flex ul-col ug-4">
         <WidgetBar value={frac} height={8} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', ...muted, fontSize: 10.5 }}>
+        <div className="uiw-t-xs ul-flex uj-between" style={{ ...muted }}>
           <span>{fmtDayMonth(timestampOfDay(ev.setDay), locale)}</span>
           <span>{s.todayWord}</span>
           <span>{short}</span>
@@ -1050,34 +1041,24 @@ function downscale(file: File): Promise<string> {
 
 function Thumb({ photo, label, h }: { photo: Photo | undefined; label?: string; h: number }) {
   return (
-    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div className="uf-1 umw-0 ul-flex ul-col ug-4">
       {photo ? (
         <img
           src={photo.url}
           alt={label ?? ''}
-          style={{
-            width: '100%',
-            height: h,
-            objectFit: 'cover',
-            borderRadius: 'var(--radius-md)',
-            background: 'var(--color-tile)',
-            display: 'block',
-          }}
+          className="ur-md tw-photo-fill uw-full ul-block"
+          style={{ height: h, objectFit: 'cover' }}
         />
       ) : (
-        <div
-          style={{
-            height: h,
-            borderRadius: 'var(--radius-md)',
-            border: '1px dashed var(--color-border)',
-            display: 'grid',
-            placeItems: 'center',
-          }}
-        >
+        <div className="ur-md tw-photo-empty ul-grid" style={{ height: h, placeItems: 'center' }}>
           <IconTile outline size={30} icon="camera" />
         </div>
       )}
-      {label && <span style={{ ...muted, fontSize: 11 }}>{label}</span>}
+      {label && (
+        <span className="uiw-t-sm" style={{ ...muted }}>
+          {label}
+        </span>
+      )}
     </div>
   );
 }
@@ -1106,6 +1087,7 @@ function PhotosWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   };
   const extra = (
     <>
+      {/* kit-ok: hidden file input */}
       <input
         ref={input}
         type="file"
@@ -1120,15 +1102,11 @@ function PhotosWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
             <span className="t">{s.photosTitle}</span>
           </div>
           <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-              gap: 8,
-              marginBottom: 16,
-            }}
+            className="ul-grid ug-8 umb-16"
+            style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}
           >
             {[...photos].reverse().map((p) => (
-              <div key={p.id} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div key={p.id} className="ul-flex ul-col ug-4">
                 <Thumb
                   photo={p}
                   h={120}
@@ -1191,7 +1169,7 @@ function PhotosWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         sub={two ? facts : fmtDayMonth(first.at, locale)}
         onClick={open}
       >
-        <div style={{ display: 'flex', gap: 6, flex: 1, minHeight: 0 }}>
+        <div className="ul-flex ug-6 uf-1" style={{ minHeight: 0 }}>
           <Thumb photo={first} h={70} />
           <Thumb photo={two ? last : undefined} h={70} />
         </div>
@@ -1212,8 +1190,8 @@ function PhotosWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   else if (size === 'L')
     out = (
       <Widget size="L" tone="neutral" onClick={open}>
-        <div style={{ display: 'flex', gap: 12, flex: 1, minHeight: 0 }}>
-          <div style={{ display: 'flex', gap: 6, width: '46%' }}>
+        <div className="ul-flex ug-12 uf-1" style={{ minHeight: 0 }}>
+          <div className="ul-flex ug-6" style={{ width: '46%' }}>
             <Thumb photo={first} h={96} label={fmtDayMonth(first.at, locale)} />
             <Thumb
               photo={two ? last : undefined}
@@ -1221,16 +1199,18 @@ function PhotosWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
               label={two ? fmtDayMonth(last.at, locale) : undefined}
             />
           </div>
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div className="uf-1 umw-0 ul-flex ul-col ug-4">
             <span className="uiw-kicker">{s.progress}</span>
-            <span style={{ fontSize: 22, fontWeight: 700 }}>{s.daysN(days)}</span>
+            <span className="uiw-t-xl">{s.daysN(days)}</span>
             {kgTxt && <WidgetDelta good={(dkg ?? 0) <= 0}>{kgTxt}</WidgetDelta>}
             {first.kg && last.kg && two && (
               <span style={muted}>
                 {first.kg} → {last.kg} kg
               </span>
             )}
-            <div style={{ marginTop: 'auto', pointerEvents: 'auto' }}>{addBtn}</div>
+            <div className="umt-auto" style={{ pointerEvents: 'auto' }}>
+              {addBtn}
+            </div>
           </div>
         </div>
       </Widget>
@@ -1247,8 +1227,8 @@ function PhotosWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         kicker={s.photosTitle}
         onClick={open}
         footer={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
-            <span style={{ ...muted, flex: 1 }}>
+          <div className="ul-flex ua-center ug-8 uw-full">
+            <span className="uf-1" style={{ ...muted }}>
               {s.nextReminder} {nextTxt}
             </span>
             <Button variant="primary" size="sm" icon="camera" onClick={pick}>
@@ -1257,7 +1237,7 @@ function PhotosWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           </div>
         }
       >
-        <div style={{ display: 'flex', gap: 8, flex: 1, minHeight: 0 }}>
+        <div className="ul-flex ug-8 uf-1" style={{ minHeight: 0 }}>
           <Thumb photo={first} h={150} label={cap(first)} />
           <Thumb photo={two ? last : undefined} h={150} label={two ? cap(last) : undefined} />
         </div>
@@ -1338,8 +1318,7 @@ function MottoSheet({
           : undefined
       }
     >
-      <textarea
-        className="input"
+      <Textarea
         rows={3}
         maxLength={140}
         value={text}
@@ -1352,22 +1331,20 @@ function MottoSheet({
 
 function Quote({ text, big }: { text: string; big?: boolean }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+    <div className="ul-flex ul-col ug-2 umw-0">
       <span
-        className={toneClass('accent')}
+        className={[toneClass('accent'), 'ut-tone ut-w7'].filter(Boolean).join(' ')}
         style={{
-          fontSize: big ? 40 : 30,
+          fontSize: big ? 'var(--fs-40)' : 'var(--fs-30)',
           lineHeight: 0.8,
-          color: 'var(--t-base)',
-          fontWeight: 700,
         }}
       >
         “
       </span>
       <span
+        className="ut-w7"
         style={{
-          fontSize: big ? 22 : 16,
-          fontWeight: 700,
+          fontSize: big ? 'var(--fs-22)' : 'var(--fs-16)',
           lineHeight: 1.25,
           overflow: 'hidden',
           display: '-webkit-box',
@@ -1442,14 +1419,12 @@ function MottoWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           </Button>
         }
       >
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+        <div className="uf-1 ul-flex ua-center">
           <Quote text={m.text} big />
         </div>
         {m.history.length > 0 && (
           <>
-            <span className="uiw-kicker" style={{ color: 'var(--color-text-muted)' }}>
-              {s.earlierMottos}
-            </span>
+            <span className="uiw-kicker ut-muted">{s.earlierMottos}</span>
             <WidgetList
               rows={m.history.slice(0, 2).map((h) => ({
                 label: h.text,
@@ -1517,41 +1492,19 @@ function ScoreRow({
   small?: boolean;
 }) {
   return (
-    <div
-      className={toneClass('ok')}
-      style={{ display: 'flex', gap: small ? 4 : 6, width: small ? undefined : '100%' }}
-    >
-      {[1, 2, 3, 4, 5].map((n) => {
-        const on = value === n;
-        return (
-          <button
-            key={n}
-            type="button"
-            aria-pressed={on}
-            aria-label={labels ? `${n} · ${labels[n - 1]}` : String(n)}
-            onClick={() => onPick(n)}
-            style={{
-              flex: small ? 'none' : 1,
-              width: small ? 26 : undefined,
-              height: small ? 26 : 36,
-              borderRadius: 'var(--radius-md)',
-              border: `1px solid ${on ? 'var(--t-line)' : 'var(--color-border)'}`,
-              background: on ? 'var(--t-tint)' : 'var(--color-tile)',
-              color: on ? 'var(--t-text)' : 'var(--color-text-muted)',
-              font: 'inherit',
-              fontSize: small ? 12 : 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-              padding: 0,
-              pointerEvents: 'auto',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {n}
-            {on && labels && !small ? ` · ${labels[n - 1]}` : ''}
-          </button>
-        );
-      })}
+    <div style={{ width: small ? undefined : '100%' }}>
+      <Segmented
+        variant="buttons"
+        tone="ok"
+        size={small ? 'sm' : 'md'}
+        value={value}
+        onChange={onPick}
+        options={[1, 2, 3, 4, 5].map((n) => ({
+          value: n,
+          ariaLabel: labels ? `${n} · ${labels[n - 1]}` : String(n),
+          label: `${n}${value === n && labels && !small ? ` · ${labels[n - 1]}` : ''}`,
+        }))}
+      />
     </div>
   );
 }
@@ -1580,8 +1533,7 @@ function NoteSheet({
       }}
     >
       <ScoreRow value={score} onPick={setScore} labels={s.scoreLabels} />
-      <textarea
-        className="input"
+      <Textarea
         rows={3}
         maxLength={200}
         value={note}
@@ -1647,7 +1599,9 @@ function CheckInWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   else {
     const row = <ScoreRow value={cur?.score ?? null} onPick={pick} labels={s.scoreLabels} />;
     const note = cur?.note ? (
-      <div style={{ ...muted, color: 'var(--color-text)', fontSize: 13 }}>{cur.note}</div>
+      <div className="uiw-t-md ut-text" style={{ ...muted }}>
+        {cur.note}
+      </div>
     ) : null;
     if (size === 'L')
       out = (
@@ -1863,11 +1817,11 @@ function TimerWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   if (size === 'L')
     return (
       <Widget size="L" tone="accent" kicker={kicker} footer={controls}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div className="ul-flex ua-center ug-14">
           <WidgetRing value={r.frac} size={64}>
-            <span style={{ fontSize: 14 }}>{r.big}</span>
+            <span className="uiw-t-md">{r.big}</span>
           </WidgetRing>
-          <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="umw-0 uf-1 ul-flex ul-col ug-6">
             {modes}
             <span style={muted}>{r.round}</span>
           </div>
@@ -1879,16 +1833,16 @@ function TimerWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   return (
     <Widget size="XL" tone="accent" kicker={kicker} footer={controls}>
       {modes}
-      <div style={{ display: 'grid', placeItems: 'center', flex: 1 }}>
+      <div className="ul-grid uf-1" style={{ placeItems: 'center' }}>
         <WidgetRing value={r.frac} size={150}>
-          <span style={{ fontSize: 34 }}>{r.big}</span>
+          <span className="uiw-t-hero">{r.big}</span>
           <small>
             {st.mode === 'emom' ? s.leftInMinute : st.mode === 'tabata' ? s.leftInPhase : ''}
           </small>
         </WidgetRing>
       </div>
-      <div style={{ textAlign: 'center', fontSize: 15, fontWeight: 600 }}>{r.round}</div>
-      <div style={{ ...muted, textAlign: 'center' }}>
+      <div className="uiw-t-lg utx-center">{r.round}</div>
+      <div className="utx-center" style={{ ...muted }}>
         {desc}
         {r.total ? ` · ${s.elapsedOf(mmss(Math.min(el, r.total)), mmss(r.total))}` : ''}
       </div>
@@ -2039,15 +1993,13 @@ const syncStatus: WidgetDef = {
           </>
         }
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="ul-flex ua-center ug-12">
           <IconTile tone={tone} size={48} icon={icon} />
           <span style={muted}>{note}</span>
         </div>
         {recent.length > 0 && (
           <>
-            <span className="uiw-kicker" style={{ color: 'var(--color-text-muted)' }}>
-              {s.latestOnPhone}
-            </span>
+            <span className="uiw-kicker ut-muted">{s.latestOnPhone}</span>
             <WidgetList rows={recent.map(({ label, value }) => ({ label, value }))} />
           </>
         )}
@@ -2195,7 +2147,7 @@ function RaceChart({
       )
       .join(' ');
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div className="ul-flex ul-col ug-4">
       <svg
         viewBox={`0 0 ${W} ${height}`}
         width="100%"
@@ -2222,14 +2174,7 @@ function RaceChart({
           />
         )}
       </svg>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          fontSize: 10.5,
-          color: 'var(--color-text-muted)',
-        }}
-      >
+      <div className="uiw-t-xs ut-muted ul-flex uj-between">
         {labels.map((l, i) => (
           <span key={i}>{l}</span>
         ))}
@@ -2310,10 +2255,10 @@ const beatLastWeek: WidgetDef = {
     if (size === 'L') {
       const max = Math.max(cur, lastBy, 1);
       const row = (label: string, v: number, tone: Tone) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5 }}>
-            <span style={{ color: 'var(--color-text-muted)' }}>{label}</span>
-            <span style={{ fontWeight: 600 }}>{tons(v)} t</span>
+        <div className="ul-flex ul-col ug-4">
+          <div className="uiw-t-base ul-flex uj-between">
+            <span className="ut-muted">{label}</span>
+            <span className="ut-w6">{tons(v)} t</span>
           </div>
           <WidgetBar value={v / max} tone={tone} />
         </div>

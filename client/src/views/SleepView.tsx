@@ -4,7 +4,13 @@
  * schedule editors. Night mode (token flip + Spotter Sky) is applied app-wide by
  * App while a live night runs.
  */
+import { BackButton } from '../components/ui/BackButton';
+import { GroupedList, ListRow } from '../components/ui/GroupedList';
+import { Switch as KitSwitch } from '../components/ui/Switch';
 import { useEffect, useMemo, useState } from 'react';
+import { Button } from '../components/ui/Button';
+import { TimeField as KitTimeField } from '../components/ui/TimeField';
+import { Segmented } from '../components/ui/Segmented';
 import {
   useStore,
   liveSleep,
@@ -20,7 +26,7 @@ import {
   latestWeight,
 } from '../store';
 import { useT, fmtDurationHuman } from '../i18n';
-import { ConfirmDialog, Icon, Switch } from '../ui';
+import { ConfirmDialog, Icon } from '../ui';
 import { MoonGlyph } from '../components/MoonGlyph';
 import { moonInfo, illumPct } from '../moon';
 import { TimeField } from '../components/PickerFields';
@@ -57,9 +63,7 @@ function SleepTopbar({ title, onBack }: { title: string; onBack: () => void }) {
   const { t } = useT();
   return (
     <div className="sleep-topbar">
-      <button className="sleep-back" onClick={onBack} aria-label={t.cancel}>
-        <Icon name="caret-left" />
-      </button>
+      <BackButton className="sleep-back" label={t.cancel} onClick={onBack} />
       <span className="sleep-topbar-title">{title}</span>
     </div>
   );
@@ -99,10 +103,12 @@ export function SleepView({
     const mins = nightDurationMin(live, tick);
     return (
       <div className="screen sleep-night">
-        <button className="sleep-night-back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-          <span>{t.sleepReturnToApp}</span>
-        </button>
+        <BackButton
+          className="sleep-night-back"
+          text={t.sleepReturnToApp}
+          label={t.backAction}
+          onClick={onClose}
+        />
         <div className="sleep-night-body">
           <div className="sleep-moonwrap">
             <span className="sleep-breathe" aria-hidden="true" />
@@ -122,13 +128,13 @@ export function SleepView({
         <div className="sleep-night-foot">
           {t.sleepMoonLine(t.moonPhase[moon.name] ?? moon.name, illumPct(moon), tzPlace())}
         </div>
-        <button className="btn-out-moon sleep-wide sleep-stop" onClick={() => setMode('wake')}>
+        <Button variant="sleep" className="sleep-wide sleep-stop" onClick={() => setMode('wake')}>
           <Icon name="sun-horizon" weight="bold" />
           {t.sleepStopAction}
-        </button>
-        <button className="sleep-discard" onClick={() => setDiscardOpen(true)}>
+        </Button>
+        <Button variant="link" className="sleep-discard" onClick={() => setDiscardOpen(true)}>
           {t.sleepDiscard}
-        </button>
+        </Button>
         {discardOpen && (
           <ConfirmDialog
             title={t.sleepDiscard}
@@ -206,21 +212,22 @@ export function SleepView({
               {t.sleepHowDidYouSleep} <span className="sleep-q-opt">{t.sleepOptional}</span>
             </div>
             <div className="sleep-q-row">
-              {(['restless', 'ok', 'good'] as SleepQuality[]).map((q) => (
-                <button
-                  key={q}
-                  className={`sleep-q-chip${night.quality === q ? ' on' : ''}`}
-                  onClick={() => setSleepQuality(night.id, night.quality === q ? null : q)}
-                >
-                  {t.sleepQuality[q]}
-                </button>
-              ))}
+              <Segmented<SleepQuality>
+                variant="buttons"
+                tone="sleep"
+                value={night.quality ?? null}
+                onChange={(q) => setSleepQuality(night.id, night.quality === q ? null : q)}
+                options={(['restless', 'ok', 'good'] as SleepQuality[]).map((q) => ({
+                  value: q,
+                  label: t.sleepQuality[q],
+                }))}
+              />
             </div>
           </div>
           {bmr && <div className="sleep-feeds">{t.sleepAlreadyFeeding}</div>}
-          <button className="btn-moon sleep-wide" onClick={onClose}>
+          <Button variant="sleep-fill" className="sleep-wide" onClick={onClose}>
             {t.done}
-          </button>
+          </Button>
         </div>
       );
     }
@@ -323,35 +330,37 @@ function SleepHub({
         </>
       )}
 
-      <div className="slh-toggles">
-        <button
-          className="slh-toggle"
-          onClick={() => setSleepSettings({ autoDim: !store.sleepSettings.autoDim })}
-        >
-          <div className="slh-toggle-txt">
-            <div className="slh-toggle-t">{t.sleepAutoDimLabel}</div>
-            <div className="slh-toggle-d">{t.sleepAutoDimDesc}</div>
-          </div>
-          <Switch on={store.sleepSettings.autoDim} />
-        </button>
-        <button
-          className="slh-toggle"
-          onClick={() => setSleepSettings({ autoLog: !store.sleepSettings.autoLog })}
-        >
-          <div className="slh-toggle-txt">
-            <div className="slh-toggle-t">{t.sleepAutoLogLabel}</div>
-            <div className="slh-toggle-d">{t.sleepAutoLogDesc}</div>
-          </div>
-          <Switch on={store.sleepSettings.autoLog} />
-        </button>
-      </div>
+      <GroupedList className="slh-toggles">
+        <ListRow
+          label={t.sleepAutoDimLabel}
+          sub={t.sleepAutoDimDesc}
+          trailing={
+            <KitSwitch
+              checked={store.sleepSettings.autoDim}
+              aria-label={t.sleepAutoDimLabel}
+              onChange={() => setSleepSettings({ autoDim: !store.sleepSettings.autoDim })}
+            />
+          }
+        />
+        <ListRow
+          label={t.sleepAutoLogLabel}
+          sub={t.sleepAutoLogDesc}
+          trailing={
+            <KitSwitch
+              checked={store.sleepSettings.autoLog}
+              aria-label={t.sleepAutoLogLabel}
+              onChange={() => setSleepSettings({ autoLog: !store.sleepSettings.autoLog })}
+            />
+          }
+        />
+      </GroupedList>
 
-      <button className="btn btn-secondary slh-btn" onClick={onBackfill}>
+      <Button variant="secondary" className="slh-btn" onClick={onBackfill}>
         <Icon name="plus" /> {t.sleepAddPastNight}
-      </button>
-      <button className="btn btn-secondary slh-btn" onClick={onSchedule}>
+      </Button>
+      <Button variant="secondary" className="slh-btn" onClick={onSchedule}>
         <Icon name="calendar-check" /> {t.sleepScheduleTitle}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -403,24 +412,28 @@ function SleepBackfill({ onDone, onBack }: { onDone: () => void; onBack: () => v
   };
 
   const dayRow = (sel: number, set: (n: number) => void) => (
-    <div className="sleep-daycards">
-      {days.map((d) => {
+    <Segmented<number>
+      variant="buttons"
+      tone="sleep"
+      className="sleep-dayseg"
+      value={sel}
+      onChange={set}
+      options={days.map((d) => {
         const dd = new Date();
         dd.setDate(dd.getDate() - d);
-        return (
-          <button
-            key={d}
-            className={`sleep-daycard${sel === d ? ' on' : ''}`}
-            onClick={() => set(d)}
-          >
-            <span className="dc-wd">
-              {d === 0 ? t.sleepTodayTag : dd.toLocaleDateString(locale, { weekday: 'short' })}
-            </span>
-            <span className="dc-day num">{dd.getDate()}</span>
-          </button>
-        );
+        return {
+          value: d,
+          label: (
+            <>
+              <span className="dc-wd">
+                {d === 0 ? t.sleepTodayTag : dd.toLocaleDateString(locale, { weekday: 'short' })}
+              </span>
+              <span className="dc-day num">{dd.getDate()}</span>
+            </>
+          ),
+        };
       })}
-    </div>
+    />
   );
 
   return (
@@ -430,40 +443,37 @@ function SleepBackfill({ onDone, onBack }: { onDone: () => void; onBack: () => v
 
       <div className="slh-sec-label">{t.sleepKindLabel}</div>
       <div className="sleep-q-row">
-        {(['sleep', 'nap'] as const).map((k) => (
-          <button
-            key={k}
-            className={`sleep-q-chip${kind === k ? ' on' : ''}`}
-            onClick={() => pickKind(k)}
-          >
-            {k === 'sleep' ? t.sleepKindSleep : t.sleepKindNap}
-          </button>
-        ))}
+        <Segmented
+          variant="buttons"
+          tone="sleep"
+          value={kind}
+          onChange={pickKind}
+          options={(['sleep', 'nap'] as const).map((k) => ({
+            value: k,
+            label: k === 'sleep' ? t.sleepKindSleep : t.sleepKindNap,
+          }))}
+        />
       </div>
 
       <div className="slh-sec-label">{t.sleepFellAsleep}</div>
       {dayRow(bedOffset, setBedOffset)}
-      <div className="sleep-field-box sleep-backfill-time">
-        <Icon name="moon" weight="fill" className="sleep-field-ic bed" />
-        <input
-          type="time"
-          className="sleep-time-input"
-          value={bed}
-          onChange={(e) => setBed(e.target.value)}
-        />
-      </div>
+      <KitTimeField
+        className="sleep-backfill-time"
+        aria-label={t.sleepFellAsleep}
+        lead={<Icon name="moon" weight="fill" className="sleep-field-ic bed" />}
+        value={bed}
+        onChange={(e) => setBed(e.target.value)}
+      />
 
       <div className="slh-sec-label">{t.sleepWokeUp}</div>
       {dayRow(wakeOffset, setWakeOffset)}
-      <div className="sleep-field-box sleep-backfill-time">
-        <Icon name="sun-horizon" weight="fill" className="sleep-field-ic woke" />
-        <input
-          type="time"
-          className="sleep-time-input"
-          value={woke}
-          onChange={(e) => setWoke(e.target.value)}
-        />
-      </div>
+      <KitTimeField
+        className="sleep-backfill-time"
+        aria-label={t.sleepWokeUp}
+        lead={<Icon name="sun-horizon" weight="fill" className="sleep-field-ic woke" />}
+        value={woke}
+        onChange={(e) => setWoke(e.target.value)}
+      />
 
       <div className="sleep-dur-card">
         <div className="slh-sec-label">{t.sleepDurationLabel}</div>
@@ -479,22 +489,23 @@ function SleepBackfill({ onDone, onBack }: { onDone: () => void; onBack: () => v
           {t.sleepHowDidYouSleep} <span className="sleep-q-opt">{t.sleepOptional}</span>
         </div>
         <div className="sleep-q-row">
-          {(['restless', 'ok', 'good'] as SleepQuality[]).map((q) => (
-            <button
-              key={q}
-              className={`sleep-q-chip${quality === q ? ' on' : ''}`}
-              onClick={() => setQuality(quality === q ? null : q)}
-            >
-              {t.sleepQuality[q]}
-            </button>
-          ))}
+          <Segmented<SleepQuality>
+            variant="buttons"
+            tone="sleep"
+            value={quality}
+            onChange={(q) => setQuality(quality === q ? null : q)}
+            options={(['restless', 'ok', 'good'] as SleepQuality[]).map((q) => ({
+              value: q,
+              label: t.sleepQuality[q],
+            }))}
+          />
         </div>
       </div>
 
-      <button className="btn btn-primary slh-btn" onClick={save} disabled={!valid}>
+      <Button variant="primary" className="slh-btn" onClick={save} disabled={!valid}>
         <Icon name="check" weight="bold" />
         {t.sleepSaveNight}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -538,30 +549,32 @@ function SleepScheduleEditor({ onDone, onBack }: { onDone: () => void; onBack: (
     <div className="screen sleep-hub">
       <SleepTopbar title={t.sleepScheduleTitle} onBack={onBack} />
       <p className="muted">{t.sleepScheduleCap}</p>
-      <button className="slh-toggle" onClick={() => setSame((v) => !v)}>
-        <div className="slh-toggle-t">{t.sleepSameMostNights}</div>
-        <Switch on={same} />
-      </button>
+      <GroupedList>
+        <ListRow
+          label={t.sleepSameMostNights}
+          trailing={
+            <KitSwitch
+              checked={same}
+              aria-label={t.sleepSameMostNights}
+              onChange={() => setSame((v) => !v)}
+            />
+          }
+        />
+      </GroupedList>
       {same ? (
         <div className="slh-timerow">
-          <label className="slh-timefield">
-            <span>{t.sleepBedtimeLabel}</span>
-            <input
-              type="time"
-              className="sleep-time-input"
-              value={minToHHMM(every.bedMin)}
-              onChange={(e) => setEvery((p) => ({ ...p, bedMin: hhmmToMin(e.target.value) }))}
-            />
-          </label>
-          <label className="slh-timefield">
-            <span>{t.sleepWokeLabel}</span>
-            <input
-              type="time"
-              className="sleep-time-input"
-              value={minToHHMM(every.wakeMin)}
-              onChange={(e) => setEvery((p) => ({ ...p, wakeMin: hhmmToMin(e.target.value) }))}
-            />
-          </label>
+          <KitTimeField
+            className="slh-timefield"
+            label={t.sleepBedtimeLabel}
+            value={minToHHMM(every.bedMin)}
+            onChange={(e) => setEvery((p) => ({ ...p, bedMin: hhmmToMin(e.target.value) }))}
+          />
+          <KitTimeField
+            className="slh-timefield"
+            label={t.sleepWokeLabel}
+            value={minToHHMM(every.wakeMin)}
+            onChange={(e) => setEvery((p) => ({ ...p, wakeMin: hhmmToMin(e.target.value) }))}
+          />
         </div>
       ) : (
         <div className="slh-sched-rows">
@@ -570,16 +583,18 @@ function SleepScheduleEditor({ onDone, onBack }: { onDone: () => void; onBack: (
             return (
               <div key={d} className="slh-sched-row">
                 <span className="slh-sched-wd">{t.weekDayLetters[i]}</span>
-                <input
-                  type="time"
-                  className="sleep-time-input sm"
+                <KitTimeField
+                  size="sm"
+                  className="slh-sched-t"
+                  aria-label={t.sleepBedtimeLabel}
                   value={minToHHMM(p.bedMin)}
                   onChange={(e) => setDay(d, { bedMin: hhmmToMin(e.target.value) })}
                 />
                 <span className="slh-sched-arrow">→</span>
-                <input
-                  type="time"
-                  className="sleep-time-input sm"
+                <KitTimeField
+                  size="sm"
+                  className="slh-sched-t"
+                  aria-label={t.sleepWokeLabel}
                   value={minToHHMM(p.wakeMin)}
                   onChange={(e) => setDay(d, { wakeMin: hhmmToMin(e.target.value) })}
                 />
@@ -589,9 +604,9 @@ function SleepScheduleEditor({ onDone, onBack }: { onDone: () => void; onBack: (
           })}
         </div>
       )}
-      <button className="btn btn-primary slh-btn" onClick={save}>
+      <Button variant="primary" className="slh-btn" onClick={save}>
         {t.sleepSaveSchedule}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -633,12 +648,12 @@ function WakeFlow({
         <span className="slh-sec-label">{t.sleepWokeAtLabel}</span>
         <TimeField value={wake} onChange={setWake} />
       </div>
-      <button className="btn-moon sleep-wide" onClick={() => onConfirm(wakeAt)}>
+      <Button variant="sleep-fill" className="sleep-wide" onClick={() => onConfirm(wakeAt)}>
         {t.sleepLogAndWake(dur(mins))}
-      </button>
-      <button className="sleep-link" onClick={onCancel}>
+      </Button>
+      <Button variant="link" className="sleep-link" onClick={onCancel}>
         {t.cancel}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -711,46 +726,34 @@ function SleepEditNight({ nightId, onClose }: { nightId: string; onClose: () => 
       <div className="sleep-quality">
         <div className="sleep-q-head">{t.sleepKindLabel}</div>
         <div className="sleep-q-row">
-          <button
-            className={`sleep-q-chip${kind === 'sleep' ? ' on' : ''}`}
-            onClick={() => setKind('sleep')}
-          >
-            {t.sleepKindSleep}
-          </button>
-          <button
-            className={`sleep-q-chip${kind === 'nap' ? ' on' : ''}`}
-            onClick={() => setKind('nap')}
-          >
-            {t.sleepKindNap}
-          </button>
+          <Segmented
+            variant="buttons"
+            tone="sleep"
+            value={kind}
+            onChange={setKind}
+            options={[
+              { value: 'sleep' as const, label: t.sleepKindSleep },
+              { value: 'nap' as const, label: t.sleepKindNap },
+            ]}
+          />
         </div>
       </div>
 
       <div className="slh-timerow">
-        <label className="slh-timefield">
-          <span className="slh-sec-label">{t.sleepBedtimeLabel}</span>
-          <div className="sleep-field-box">
-            <Icon name="moon" weight="fill" className="sleep-field-ic bed" />
-            <input
-              type="time"
-              className="sleep-time-input"
-              value={bed}
-              onChange={(e) => setBed(e.target.value)}
-            />
-          </div>
-        </label>
-        <label className="slh-timefield">
-          <span className="slh-sec-label">{t.sleepWokeLabel}</span>
-          <div className="sleep-field-box">
-            <Icon name="sun-horizon" weight="fill" className="sleep-field-ic woke" />
-            <input
-              type="time"
-              className="sleep-time-input"
-              value={woke}
-              onChange={(e) => setWoke(e.target.value)}
-            />
-          </div>
-        </label>
+        <KitTimeField
+          className="slh-timefield"
+          label={t.sleepBedtimeLabel}
+          lead={<Icon name="moon" weight="fill" className="sleep-field-ic bed" />}
+          value={bed}
+          onChange={(e) => setBed(e.target.value)}
+        />
+        <KitTimeField
+          className="slh-timefield"
+          label={t.sleepWokeLabel}
+          lead={<Icon name="sun-horizon" weight="fill" className="sleep-field-ic woke" />}
+          value={woke}
+          onChange={(e) => setWoke(e.target.value)}
+        />
       </div>
 
       <div className="sleep-dur-card">
@@ -763,26 +766,31 @@ function SleepEditNight({ nightId, onClose }: { nightId: string; onClose: () => 
           {t.sleepHowDidYouSleep} <span className="sleep-q-opt">{t.sleepOptional}</span>
         </div>
         <div className="sleep-q-row">
-          {(['restless', 'ok', 'good'] as SleepQuality[]).map((q) => (
-            <button
-              key={q}
-              className={`sleep-q-chip${quality === q ? ' on' : ''}`}
-              onClick={() => setQuality(quality === q ? null : q)}
-            >
-              {t.sleepQuality[q]}
-            </button>
-          ))}
+          <Segmented<SleepQuality>
+            variant="buttons"
+            tone="sleep"
+            value={quality}
+            onChange={(q) => setQuality(quality === q ? null : q)}
+            options={(['restless', 'ok', 'good'] as SleepQuality[]).map((q) => ({
+              value: q,
+              label: t.sleepQuality[q],
+            }))}
+          />
         </div>
       </div>
 
-      <button className="btn btn-primary slh-btn" onClick={save}>
+      <Button variant="primary" className="slh-btn" onClick={save}>
         <Icon name="check" weight="bold" />
         {t.sleepSaveNight}
-      </button>
-      <button className="sleep-delete-link" onClick={() => setConfirmDel(true)}>
-        <Icon name="trash" weight="bold" />
+      </Button>
+      <Button
+        variant="danger"
+        className="sleep-delete-link"
+        icon="trash"
+        onClick={() => setConfirmDel(true)}
+      >
         {t.sleepDeleteNight}
-      </button>
+      </Button>
       {confirmDel && (
         <ConfirmDialog
           title={t.sleepDeleteNight}

@@ -3,7 +3,12 @@
  * Reads computeMastery() and renders design MT-03…MT-08. Mastery is a live
  * measure of how well you train, never an achievements/points board.
  */
+import { BackButton } from '../components/ui/BackButton';
 import { useMemo, useState } from 'react';
+import { RailItem } from '../components/ui/Rail';
+import { Button, IconButton } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Segmented } from '../components/ui/Segmented';
 import { useStore, setMasteryHistory } from '../store';
 import {
   computeMastery,
@@ -42,7 +47,7 @@ const SIGNAL_ICON: Record<PracticeSignal['key'], string> = {
 function Seal({ size = 34, dim = false }: { size?: number; dim?: boolean }) {
   const stroke = dim ? 'var(--color-neutral-500)' : 'var(--color-accent)';
   return (
-    <svg viewBox="0 0 64 64" width={size} height={size} style={{ display: 'block' }} aria-hidden>
+    <svg viewBox="0 0 64 64" width={size} height={size} className="ul-block" aria-hidden>
       <polygon
         points="32,4 56,17 56,44 32,60 8,44 8,17"
         fill={dim ? 'none' : 'var(--color-accent-900)'}
@@ -182,7 +187,7 @@ function RankInsignia({
   }
 
   return (
-    <svg viewBox="0 0 64 64" width={size} height={size} style={{ display: 'block' }} aria-hidden>
+    <svg viewBox="0 0 64 64" width={size} height={size} className="ul-block" aria-hidden>
       <polygon
         points="32,4 56,17 56,44 32,60 8,44 8,17"
         fill={frameFill}
@@ -269,9 +274,7 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => v
   return (
     <div className="screen mst">
       <div className="mst-head">
-        <button className="icon-btn" aria-label={t.backAction} onClick={back}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton label={t.backAction} onClick={back} />
         <span className="mst-head-title">{t.masteryTitle}</span>
       </div>
 
@@ -327,8 +330,10 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => v
           </div>
 
           {(['strength', 'consistency', 'experience'] as AxisKey[]).map((k) => (
-            <button
+            <Card
+              as="button"
               key={k}
+              pad="md"
               className="mst-tile"
               onClick={() => (k === 'experience' ? setPage('calibrate') : undefined)}
             >
@@ -358,11 +363,17 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => v
                   </span>
                 )}
               </div>
-            </button>
+            </Card>
           ))}
 
           {/* practice — the new axis */}
-          <button className="mst-tile mst-practice" onClick={() => setPracticeOpen(true)}>
+          <Card
+            as="button"
+            pad="md"
+            tone="accent"
+            className="mst-tile mst-practice"
+            onClick={() => setPracticeOpen(true)}
+          >
             <div className="mst-tile-head">
               <Icon name="blueprint" />
               <span className="mst-tile-name">{t.masteryPractice}</span>
@@ -379,17 +390,20 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => v
               <span>{t.masteryPracticeSignals}</span>
               <Icon name="caret-right" />
             </div>
-          </button>
+          </Card>
 
-          <button className="btn btn-primary mst-cta" onClick={() => setPage('shortfall')}>
+          <Button variant="primary" className="mst-cta" onClick={() => setPage('shortfall')}>
             <Icon name="trend-up" />
             {t.masterySeeShortfall}
-          </button>
-          <button className="mst-ranks-link" onClick={() => setPage('ladder')}>
-            <Icon name="steps" />
+          </Button>
+          <Button
+            variant="link"
+            icon="steps"
+            iconTrailing="caret-right"
+            onClick={() => setPage('ladder')}
+          >
             {t.masterySeeRanks}
-            <Icon name="caret-right" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -474,9 +488,7 @@ function Shortfalls({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
   return (
     <div className="screen mst">
       <div className="mst-head">
-        <button className="icon-btn" aria-label={t.backAction} onClick={onBack}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton label={t.backAction} onClick={onBack} />
         <span className="mst-head-title">{t.masteryShortfall}</span>
       </div>
       <div className="mst-body mst-sf">
@@ -536,9 +548,7 @@ function Ladder({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
   return (
     <div className="screen mst">
       <div className="mst-head">
-        <button className="icon-btn" aria-label={t.backAction} onClick={onBack}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton label={t.backAction} onClick={onBack} />
         <span className="mst-head-title">{t.masteryLadder}</span>
         <span className="chip n mst-scale">{t.masteryScale}</span>
       </div>
@@ -600,9 +610,7 @@ function Calibration({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
   return (
     <div className="screen mst">
       <div className="mst-head">
-        <button className="icon-btn" aria-label={t.backAction} onClick={onBack}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton label={t.backAction} onClick={onBack} />
         <span className="mst-head-title">{t.masteryTitle}</span>
       </div>
       <div className="mst-body mst-calib">
@@ -644,43 +652,40 @@ function Calibration({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
           </div>
           <div className="mst-hist-body">{t.masteryHistoryBody}</div>
           <div className="mst-year">
-            <button
-              className="mst-year-btn"
-              aria-label="-"
+            <IconButton
+              variant="secondary"
+              icon="minus"
+              label="-"
               onClick={() => setSince((y) => Math.max(1960, y - 1))}
-            >
-              <Icon name="minus" weight="bold" />
-            </button>
+            />
             <span className="mst-year-val">
               <Icon name="calendar-blank" />
               {t.masteryTrainingSince(since)}
             </span>
-            <button
-              className="mst-year-btn"
-              aria-label="+"
+            <IconButton
+              variant="secondary"
+              icon="plus"
+              label="+"
               onClick={() => setSince((y) => Math.min(nowYear, y + 1))}
-            >
-              <Icon name="plus" weight="bold" />
-            </button>
+            />
           </div>
           <div className="mst-patq">{t.masteryPatternQ}</div>
-          <div className="mst-pat">
-            {PATTERNS.map((p) => (
-              <button key={p} className={pat === p ? 'on' : ''} onClick={() => setPat(p)}>
-                {t.masteryPattern[p]}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            variant="buttons"
+            options={PATTERNS.map((p) => ({ value: p, label: t.masteryPattern[p] }))}
+            value={pat}
+            onChange={setPat}
+          />
           <div className="mst-hist-floor">
             <Icon name="arrow-up-right" />
             {t.masteryHistoryFloor}
           </div>
         </div>
 
-        <button className="btn btn-primary mst-save" onClick={save}>
+        <Button variant="primary" className="mst-save" onClick={save}>
           <Icon name="check" />
           {t.masterySave}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -708,41 +713,47 @@ export function MasteryBadge({
   // Rail variant: a compact vertical badge that reads like a nav item — the
   // progress ring with the rank insignia, the rating tucked beneath.
   if (variant === 'rail') {
+    const label = m.calibrating ? t.masteryTitle : `${t.masteryTitle} · ${m.rating}`;
     return (
-      <button
-        className={`mst-railbadge${m.calibrating ? ' calib' : ''}`}
+      <RailItem
+        className="mst-railbadge"
+        ariaLabel={label}
         onClick={onOpen}
-        aria-label={t.masteryTitle}
-        title={t.masteryTitle}
-      >
-        {m.calibrating ? (
-          <span className="mst-railbadge-ring calib">
-            <span className="mst-railbadge-in">
-              <Seal size={18} dim />
+        glyph={
+          m.calibrating ? (
+            <span className="mst-railbadge-ring calib">
+              <span className="mst-railbadge-in">
+                <Seal size={18} dim />
+              </span>
             </span>
-          </span>
-        ) : (
-          <Ring frac={m.rankProgress} size={38} inner={30}>
-            <RankInsignia index={m.rankIndex} size={19} />
-          </Ring>
-        )}
-        <span className="mst-railbadge-num num">{m.calibrating ? '···' : m.rating}</span>
-      </button>
+          ) : (
+            <Ring frac={m.rankProgress} size={38} inner={30}>
+              <RankInsignia index={m.rankIndex} size={19} />
+            </Ring>
+          )
+        }
+      />
     );
   }
   if (m.calibrating) {
     return (
-      <button className="mst-badge calib" onClick={onOpen} aria-label={t.masteryTitle}>
+      <Button
+        variant="ghost"
+        className="mst-badge calib"
+        onClick={onOpen}
+        aria-label={t.masteryTitle}
+      >
         <span className="mst-badge-ring calib">
           <span className="mst-badge-in">
             <Seal size={11} dim />
           </span>
         </span>
-      </button>
+      </Button>
     );
   }
   return (
-    <button
+    <Button
+      variant="ghost"
       className="mst-badge"
       onClick={onOpen}
       aria-label={`${t.masteryTitle} · ${m.rating}`}
@@ -751,7 +762,7 @@ export function MasteryBadge({
       <Ring frac={m.rankProgress} size={26} inner={20}>
         <RankInsignia index={m.rankIndex} size={11} />
       </Ring>
-    </button>
+    </Button>
   );
 }
 
@@ -778,9 +789,7 @@ export function MasteryRankUp({
     <div className="mst-rankup-scrim" onClick={onClose}>
       <div className="mst-rankup-glow" />
       <div className="mst-rankup-card" onClick={(e) => e.stopPropagation()}>
-        <button className="mst-rankup-x" aria-label={t.cancel} onClick={onClose}>
-          <Icon name="x" />
-        </button>
+        <IconButton icon="x" label={t.cancel} className="mst-rankup-x" onClick={onClose} />
         <div className="section-label gold">{t.masteryRose}</div>
         <div className="mst-rankup-seal">
           <RankInsignia index={m.rankIndex} size={104} />
@@ -813,9 +822,9 @@ export function MasteryRankUp({
           </div>
         )}
 
-        <button className="btn btn-primary mst-rankup-cta" onClick={onSeeNext}>
+        <Button variant="primary" className="mst-rankup-cta" onClick={onSeeNext}>
           {t.masterySeeNext}
-        </button>
+        </Button>
       </div>
     </div>
   );

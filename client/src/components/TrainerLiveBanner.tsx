@@ -6,10 +6,13 @@
  */
 import { useEffect, useState } from 'react';
 import type { Shell } from '../App';
+import { Card } from './ui/Card';
+import { IconButton } from './ui/Button';
 import type { LiveSession } from '../types';
 import { activeTrainees, type LiveState, type TraineeCard } from '../trainerLive';
 import { useT, fmtSessionClock, fmtTonnes, fmtDayMonth } from '../i18n';
 import type { Strings } from '../i18n/en';
+import { Tag } from './ui/Tag';
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -75,14 +78,21 @@ function BigCard({
             <b className={state}>{stateLabel(t, state)}</b>
             {s.gymName ? ` · ${s.gymName}` : ''}
           </span>
-          <button className="trlive-prof" aria-label={t.trLiveProfile} onClick={() => onOpen(s.id)}>
-            <svg viewBox="0 0 24 24" className="ic">
-              <path d="M20 21a8 8 0 0 0-16 0" />
-              <circle cx="12" cy="8" r="4" />
-            </svg>
-          </button>
+          <IconButton
+            icon="user"
+            size="sm"
+            label={t.trLiveProfile}
+            className="trlive-prof"
+            onClick={() => onOpen(s.id)}
+          />
         </div>
-        <button className="trlive-row" onClick={() => onMain(card)}>
+        <Card
+          as="button"
+          pad="none"
+          emphasis="quiet"
+          className="trlive-row"
+          onClick={() => onMain(card)}
+        >
           <span className="trlive-ava-lg">{initials(s.athleteName)}</span>
           <span className="trlive-who">
             <span className="trlive-name">{s.athleteName}</span>
@@ -95,8 +105,14 @@ function BigCard({
           <span className={`trlive-timer${state === 'offline' ? ' muted' : ''}`}>
             {fmtSessionClock(elapsed(s, now))}
           </span>
-        </button>
-        <button className="trlive-last" onClick={() => onMain(card)}>
+        </Card>
+        <Card
+          as="button"
+          pad="none"
+          emphasis="quiet"
+          className="trlive-last"
+          onClick={() => onMain(card)}
+        >
           <LastLine s={s} t={t} />
           <span className={`trlive-go${state === 'finished' ? ' ok' : ''}`}>
             {action}
@@ -105,7 +121,7 @@ function BigCard({
               <path d="M13 6l6 6-6 6" />
             </svg>
           </span>
-        </button>
+        </Card>
       </div>
     </div>
   );
@@ -124,7 +140,13 @@ function CompactRow({
 }) {
   const { s, state } = card;
   return (
-    <button className={`trlive-crow ${state}`} onClick={() => onMain(card)}>
+    <Card
+      as="button"
+      pad="none"
+      emphasis="quiet"
+      className={`trlive-crow ${state}`}
+      onClick={() => onMain(card)}
+    >
       <span className="trlive-ava-sm">{initials(s.athleteName)}</span>
       <span className="trlive-cwho">
         <span className="trlive-cname">{s.athleteName}</span>
@@ -140,7 +162,7 @@ function CompactRow({
       <svg viewBox="0 0 24 24" className="ic-sm trlive-caret">
         <path d="M9 6l6 6-6 6" />
       </svg>
-    </button>
+    </Card>
   );
 }
 
@@ -174,10 +196,9 @@ export function TrainerLiveBanner({ trainees, shell }: { trainees: LiveSession[]
       <div className="trlive-sec">
         <span className="trlive-sec-l">{t.trLiveAthletes}</span>
         {liveCount > 0 && (
-          <span className="trlive-count">
-            <span className="trlive-cd" aria-hidden="true" />
+          <Tag tone="ok" icon={<span className="trlive-cd" aria-hidden="true" />}>
             {t.trLiveCount(liveCount)}
-          </span>
+          </Tag>
         )}
       </div>
       <BigCard card={big} now={now} onOpen={open} onMain={openMain} t={t} />

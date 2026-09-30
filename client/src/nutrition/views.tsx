@@ -1,4 +1,10 @@
 import { useState } from 'react';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Field } from '../components/ui/Field';
+import { ListRow } from '../components/ui/GroupedList';
+import { OptionCard, OptionCardGrid } from '../components/ui/OptionCard';
+import { Segmented } from '../components/ui/Segmented';
 import { signOut } from './auth';
 import {
   ageFromDob,
@@ -26,6 +32,7 @@ import {
 import { useT } from './i18n';
 import { entriesForDay, store, useStore } from './store';
 import type { Activity, Entry, GoalType, Lang, Macros, Sex } from './types';
+import { Select } from '../components/ui/Select';
 
 const GOAL_TYPES: { id: GoalType; arrow: string }[] = [
   { id: 'bulk', arrow: '↗' },
@@ -52,7 +59,7 @@ function portionLabel(entry: Entry, t: ReturnType<typeof useT>['t']): string {
 function EntryCard({ entry, onOpen }: { entry: Entry; onOpen: (e: Entry) => void }) {
   const { t } = useT();
   return (
-    <button className="entry" onClick={() => onOpen(entry)}>
+    <Card as="button" pad="sm" emphasis="quiet" className="entry" onClick={() => onOpen(entry)}>
       <span className="ic">{entry.emoji ?? '🍽️'}</span>
       <span className="body">
         <span className="name">
@@ -66,7 +73,7 @@ function EntryCard({ entry, onOpen }: { entry: Entry; onOpen: (e: Entry) => void
         <b>{round(entry.macros.kcal)}</b>
         <span>{t('kcal')}</span>
       </span>
-    </button>
+    </Card>
   );
 }
 
@@ -146,15 +153,13 @@ export function TodayView({
         <Plaque
           overline="GOAL"
           cta={
-            <button className="cta" onClick={onGoal}>
+            <Button variant="secondary" size="sm" onClick={onGoal}>
               {t('set')} →
-            </button>
+            </Button>
           }
         >
           <b>{t('setYourGoal')}</b>
-          <div className="muted" style={{ fontSize: 13 }}>
-            {t('setYourGoalBody')}
-          </div>
+          <div className="muted ut-base">{t('setYourGoalBody')}</div>
         </Plaque>
       )}
 
@@ -164,9 +169,9 @@ export function TodayView({
             overline="FUEL YOUR WORKOUT"
             onDismiss={() => setPlaque(false)}
             cta={
-              <button className="cta" onClick={onAdd}>
+              <Button variant="secondary" size="sm" onClick={onAdd}>
                 + {t('logPreWorkout')}
-              </button>
+              </Button>
             }
           >
             {t('preWorkout', { time: '18:30', eat: '16:45' })}
@@ -210,7 +215,7 @@ export function HistoryView({ onOpenEntry }: { onOpenEntry: (e: Entry) => void }
         <Header overline="HISTORY" title={t('last7')} />
         <div className="kbju">
           <Sk w={140} h={14} />
-          <Sk w={130} h={34} style={{ marginTop: 8 }} />
+          <Sk w={130} h={34} className="umt-8" />
         </div>
         <div className="section-title">{t('caloriesVsGoal')}</div>
         <div className="card">
@@ -258,14 +263,12 @@ export function HistoryView({ onOpenEntry }: { onOpenEntry: (e: Entry) => void }
       ) : (
         <>
           <div className="kbju">
-            <div className="overline" style={{ color: 'var(--acc-300)' }}>
-              {t('sevenDayAvg')}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <div className="overline ut-accent-lo">{t('sevenDayAvg')}</div>
+            <div className="ul-flex ua-base ug-8">
               <span className="hero-num tnum">{avg}</span>
               <span className="muted">{t('kcalPerDay')}</span>
             </div>
-            <div className="muted mt3 tnum" style={{ fontSize: 12 }}>
+            <div className="muted mt3 tnum ut-sm">
               {goalKcal ? (
                 <span style={{ color: delta <= 0 ? 'var(--ok)' : 'var(--muted)' }}>
                   {delta > 0 ? '+' : ''}
@@ -313,7 +316,14 @@ export function HistoryView({ onOpenEntry }: { onOpenEntry: (e: Entry) => void }
               .map((d) => {
                 const dd = goalKcal ? round(d.macros.kcal - goalKcal) : null;
                 return (
-                  <button key={d.day} className="entry" onClick={() => setOpenDay(d.day)}>
+                  <Card
+                    as="button"
+                    pad="sm"
+                    emphasis="quiet"
+                    key={d.day}
+                    className="entry"
+                    onClick={() => setOpenDay(d.day)}
+                  >
                     <span className="body">
                       <span className="name">
                         {dateLabel(d.day, lang, {
@@ -348,10 +358,10 @@ export function HistoryView({ onOpenEntry }: { onOpenEntry: (e: Entry) => void }
                             : `${dd > 0 ? '+' : ''}${dd}`}
                       </span>
                     </span>
-                    <span style={{ color: 'var(--dim)' }}>
+                    <span className="ut-faint">
                       <Icon name="chevron" size={16} />
                     </span>
-                  </button>
+                  </Card>
                 );
               })}
           </div>
@@ -428,8 +438,8 @@ export function GoalView() {
         </div>
         <div className="card mt4">
           <Sk h={18} />
-          <Sk h={30} style={{ marginTop: 14 }} />
-          <Sk h={56} style={{ marginTop: 14 }} />
+          <Sk h={30} className="umt-14" />
+          <Sk h={56} className="umt-14" />
         </div>
       </div>
     );
@@ -440,33 +450,26 @@ export function GoalView() {
       <Header overline="GOAL" title={t('yourTarget')} />
 
       <div className="section-title">{t('objective')}</div>
-      <div className="obj-grid">
+      <OptionCardGrid>
         {GOAL_TYPES.map((g) => (
-          <button
+          <OptionCard
             key={g.id}
-            className={`obj ${goalType === g.id ? 'on' : ''}`}
-            onClick={() => setGoalType(g.id)}
-          >
-            <span className="obj-ic">{g.arrow}</span>
-            <span className="obj-lbl">{t(g.id)}</span>
-          </button>
+            title={t(g.id)}
+            preview={g.arrow}
+            selected={goalType === g.id}
+            onSelect={() => setGoalType(g.id)}
+          />
         ))}
-      </div>
+      </OptionCardGrid>
 
       <div className="section-title">{t('activity')}</div>
-      <div className="field">
-        <select
-          className="select"
-          value={activity}
-          onChange={(e) => setActivity(e.target.value as Activity)}
-        >
-          {ACTIVITIES.map((a) => (
-            <option key={a} value={a}>
-              {t(a)}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Select value={activity} onChange={(e) => setActivity(e.target.value as Activity)}>
+        {ACTIVITIES.map((a) => (
+          <option key={a} value={a}>
+            {t(a)}
+          </option>
+        ))}
+      </Select>
 
       {!body ? (
         <div className="mt4">
@@ -489,11 +492,8 @@ export function GoalView() {
             <div className="section-title" style={{ margin: '16px 0 6px' }}>
               {t('targetRange')} · {t(goalType)}
             </div>
-            <div className="tnum" style={{ fontSize: 26, fontWeight: 600 }}>
-              {range(preview!.kcal, 0.03)}{' '}
-              <span className="muted" style={{ fontSize: 15 }}>
-                {t('kcal')}
-              </span>
+            <div className="tnum ut-3xl ut-w6">
+              {range(preview!.kcal, 0.03)} <span className="muted ut-lg">{t('kcal')}</span>
             </div>
             <div className="macro-boxes">
               <div>
@@ -510,12 +510,10 @@ export function GoalView() {
               </div>
             </div>
           </div>
-          <p className="muted mt3" style={{ fontSize: 12 }}>
-            ⓘ {t('estimateNote')}
-          </p>
-          <button className="btn acc block mt4" onClick={save}>
+          <p className="muted mt3 ut-sm">ⓘ {t('estimateNote')}</p>
+          <Button variant="primary" fullWidth className="mt4" onClick={save}>
             {t('useThisTarget')}
-          </button>
+          </Button>
         </>
       )}
     </div>
@@ -547,9 +545,9 @@ export function ProfileView() {
         <Header overline="PROFILE" title={name} />
         <div className="n-acct">
           <Sk w={40} h={40} r={20} />
-          <div style={{ flex: 1 }}>
+          <div className="uf-1">
             <Sk w={140} h={16} />
-            <Sk w={100} h={12} style={{ marginTop: 6 }} />
+            <Sk w={100} h={12} className="umt-6" />
           </div>
         </div>
         <div className="section-title">{t('bodyMetrics')}</div>
@@ -582,9 +580,7 @@ export function ProfileView() {
         <span className="section-title" style={{ margin: 0 }}>
           {t('bodyMetrics')}
         </span>
-        <span className="muted" style={{ fontSize: 11 }}>
-          ⟳ {t('fromSpotter')}
-        </span>
+        <span className="muted ut-xs">⟳ {t('fromSpotter')}</span>
       </div>
       <div className="tiles">
         <StatTile
@@ -604,40 +600,31 @@ export function ProfileView() {
         <div className="card mt3">
           <div className="field">
             <label>{t('sex')}</label>
-            <div className="seg">
-              {(['male', 'female'] as Sex[]).map((x) => (
-                <button
-                  key={x}
-                  className={`chip ${p?.sex === x ? 'on' : ''}`}
-                  onClick={() => store.setProfile({ sex: x })}
-                >
-                  {t(x)}
-                </button>
-              ))}
-            </div>
+            <Segmented<Sex>
+              value={p?.sex ?? null}
+              onChange={(x) => store.setProfile({ sex: x })}
+              options={(['male', 'female'] as Sex[]).map((x) => ({ value: x, label: t(x) }))}
+            />
           </div>
           <NumberField
             label={t('age')}
             value={p?.age}
             onCommit={(v) => store.setProfile({ age: v })}
           />
-          <div className="field">
-            <label>{t('activity')}</label>
-            <select
-              className="select"
-              value={p?.activity ?? ''}
-              onChange={(e) => store.setProfile({ activity: e.target.value as Activity })}
-            >
-              <option value="" disabled>
-                —
+          <Select
+            label={t('activity')}
+            value={p?.activity ?? ''}
+            onChange={(e) => store.setProfile({ activity: e.target.value as Activity })}
+          >
+            <option value="" disabled>
+              —
+            </option>
+            {ACTIVITIES.map((a) => (
+              <option key={a} value={a}>
+                {t(a)}
               </option>
-              {ACTIVITIES.map((a) => (
-                <option key={a} value={a}>
-                  {t(a)}
-                </option>
-              ))}
-            </select>
-          </div>
+            ))}
+          </Select>
           {spotterH == null && (
             <NumberField
               label={`${t('height')} (cm)`}
@@ -654,32 +641,15 @@ export function ProfileView() {
           )}
         </div>
       )}
-      <p className="muted mt3" style={{ fontSize: 12 }}>
-        {t('editInProfile')}
-      </p>
+      <p className="muted mt3 ut-sm">{t('editInProfile')}</p>
 
       <div className="section-title">{t('account')}</div>
       <div className="card" style={{ padding: '4px 16px' }}>
-        <div className="row" style={{ justifyContent: 'space-between' }}>
+        <div className="row uj-between">
           <span>{t('language')}</span>
           <LanguageChip />
         </div>
-        <button
-          className="row"
-          style={{
-            width: '100%',
-            background: 'none',
-            border: 'none',
-            borderTop: '1px solid var(--hairline)',
-            justifyContent: 'space-between',
-          }}
-          onClick={() => void signOut()}
-        >
-          <span>{t('signOut')}</span>
-          <span style={{ color: 'var(--dim)' }}>
-            <Icon name="chevron" size={16} />
-          </span>
-        </button>
+        <ListRow label={t('signOut')} chevron onClick={() => void signOut()} />
       </div>
     </div>
   );
@@ -695,19 +665,17 @@ function NumberField({
   onCommit: (v: number) => void;
 }) {
   return (
-    <div className="field">
-      <label>{label}</label>
-      <input
-        key={value ?? 'empty'}
-        className="input tnum"
-        type="number"
-        inputMode="numeric"
-        defaultValue={value ?? ''}
-        onBlur={(e) => {
-          const n = parseFloat(e.target.value);
-          if (!Number.isNaN(n)) onCommit(n);
-        }}
-      />
-    </div>
+    <Field
+      key={value ?? 'empty'}
+      className="tnum"
+      label={label}
+      type="number"
+      inputMode="numeric"
+      defaultValue={value ?? ''}
+      onBlur={(e) => {
+        const n = parseFloat(e.target.value);
+        if (!Number.isNaN(n)) onCommit(n);
+      }}
+    />
   );
 }

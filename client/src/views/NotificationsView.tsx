@@ -8,11 +8,15 @@
  * sentinel scrolls into view. Works full-screen on mobile and in the desktop
  * content column.
  */
+import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useRef, useState } from 'react';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
 import { RecapBlock } from '../components/RecapBlock';
 import { isSeen, notifTime, type Notif, type NotifKind, type NotifState } from '../notifications';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { SectionLabel } from '../components/ui/SectionLabel';
 
 const KIND_ICON: Record<NotifKind, string> = {
   standard: 'trophy',
@@ -127,18 +131,14 @@ export function NotificationsView({
     k === 'today' ? t.notifToday : k === 'week' ? t.notifThisWeek : t.notifEarlier;
 
   return (
-    <div className="screen notif-screen" style={{ gap: 'var(--space-4)' }}>
+    <div className="screen notif-screen">
       <div className={`notif-head${embedded ? ' embedded' : ''}`}>
-        {!embedded && (
-          <button className="back" onClick={onClose} aria-label={t.backAction}>
-            <Icon name="caret-left" />
-          </button>
-        )}
+        {!embedded && <BackButton onClick={onClose} label={t.backAction} />}
         <h2 className="title-26">{title ?? t.notifTitle}</h2>
         {hasUnread && (
-          <button className="notif-markall" onClick={onMarkAll}>
+          <Button variant="ghost" size="sm" onClick={onMarkAll}>
             {t.notifMarkAll}
-          </button>
+          </Button>
         )}
       </div>
 
@@ -156,7 +156,7 @@ export function NotificationsView({
         <div className="notif-feed" ref={feedRef}>
           {groups.map((g) => (
             <div className="notif-group" key={g.label}>
-              <div className="notif-group-label">{sectionLabel(g.label)}</div>
+              <SectionLabel>{sectionLabel(g.label)}</SectionLabel>
               <div className="notif-rows">
                 {g.items.map((n) => {
                   const unread = !isSeen(snapshot, n.id);
@@ -178,7 +178,10 @@ export function NotificationsView({
                     </>
                   );
                   return n.nav ? (
-                    <button
+                    <Card
+                      as="button"
+                      pad="none"
+                      emphasis="quiet"
                       key={n.id}
                       data-nid={n.id}
                       className={cls}
@@ -187,7 +190,7 @@ export function NotificationsView({
                       }}
                     >
                       {inner}
-                    </button>
+                    </Card>
                   ) : (
                     <div key={n.id} data-nid={n.id} className={cls}>
                       {inner}

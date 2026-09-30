@@ -5,6 +5,7 @@
  * of the most relevant muscles) whose "Full read" opens the Progress readiness
  * lens; `ReadinessLens` is that full body-map read.
  */
+import { Button } from '../components/ui/Button';
 import { Icon } from '../ui';
 import { useT } from '../i18n';
 import { MuscleHeatmap, MuscleIcon } from './Muscle';
@@ -151,8 +152,9 @@ export function buildReadinessNudge(finished: Workout[], now: number, t: T): Nud
     title: verdict(map, t).lead,
     body: <ReadinessNudgeBody finished={finished} now={now} />,
     actions: (close) => (
-      <button
-        className="prog-banner-cta"
+      <Button
+        variant="fill"
+        size="sm"
         onClick={() => {
           window.location.hash = READINESS_LENS_HASH;
           close();
@@ -160,7 +162,7 @@ export function buildReadinessNudge(finished: Workout[], now: number, t: T): Nud
       >
         {t.rdDetails}
         <Icon name="arrow-right" weight="bold" />
-      </button>
+      </Button>
     ),
   };
 }

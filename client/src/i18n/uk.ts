@@ -1544,9 +1544,6 @@ export const uk: Strings = {
     'Визначати відвідування залу за геолокацією і пропонувати залогувати тренування. Вимкнено за замовчуванням.',
   flagNutrition: 'Додаток Nutrition',
   flagNutritionDesc: 'Розблокувати додаток Nutrition (трекер КБЖУ) у перемикачі додатків.',
-  flagBrassGlass: 'Тема Brass Glass',
-  flagBrassGlassDesc:
-    'Перемкнути весь застосунок, для всіх користувачів, на дизайн Brass Glass. Вимкнено = поточний графітовий вигляд.',
   flagScopeGlobal: 'Для всіх користувачів',
   settingsTitle: 'Налаштування',
   settingsSub: 'Прапорці функцій для цього пристрою',
@@ -3953,6 +3950,7 @@ export const uk: Strings = {
   hlEnded: 'Закінчилося',
   hlStillOngoing: 'Ще триває',
   hlOngoingSubRest: 'Без дати кінця — заверши, коли повернешся',
+  hlOngoingBlocked: 'Недоступно, поки дати ще попереду',
   hlOngoingSubIll: 'Без дати кінця',
   hlEndsWhenRecovered: 'Коли натиснеш «Я одужав»',
   hlEndsWhenEnded: 'Коли завершиш',

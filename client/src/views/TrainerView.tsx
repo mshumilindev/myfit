@@ -1,10 +1,16 @@
 /** Trainer — design TR-01…TR-04. Assigned clients only, read-only. */
+import { EmptyState } from '../components/ui/EmptyState';
 import { useCallback, useEffect, useState } from 'react';
+import { Field } from '../components/ui/Field';
+import { Button } from '../components/ui/Button';
 import { cachePeek, cacheSet, callFn, currentUid, getUsername } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { fullPersonName } from '../name';
-import { Icon, RowListSkeleton, Sheet } from '../ui';
+import { Icon, Sheet } from '../ui';
+import { RowListSkeleton } from '../components/ui/Skeletons';
 import { Avatar } from '../components/Avatar';
+import { Card } from '../components/ui/Card';
+import { Tag } from '../components/ui/Tag';
 
 interface Client {
   id: string;
@@ -79,45 +85,46 @@ export function TrainerView({
 
   return (
     <div className="screen trainer-page">
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <div className="ul-flex ua-start uj-between">
         <div>
           <div className="kicker">{t.roleTrainer}</div>
           <h2 className="title-26">{t.trMyClients}</h2>
           {clients && <div className="sub">{t.trSummary(clients.length, liveCount)}</div>}
         </div>
-        <button className="btn btn-primary" onClick={() => setCreating(true)}>
+        <Button variant="primary" onClick={() => setCreating(true)}>
           <Icon name="plus" />
           {t.trAddClient}
-        </button>
+        </Button>
       </div>
 
       {clients === null && !failed && <RowListSkeleton rows={4} withMeta={false} />}
       {failed && (
-        <div className="empty">
-          <Icon name="warning-circle" />
-          <h4 className="t">{t.error}</h4>
-          <button className="btn btn-secondary" onClick={refresh}>
+        <EmptyState icon="warning-circle" title={t.error}>
+          <Button variant="secondary" onClick={refresh}>
             {t.retry}
-          </button>
-        </div>
+          </Button>
+        </EmptyState>
       )}
 
       {clients !== null && clients.length === 0 && (
-        <div className="empty">
-          <Icon name="barbell" />
-          <h4 className="t">{t.trEmptyTitle}</h4>
-          <p className="s">{t.trEmptyBody}</p>
-          <button className="btn btn-primary" onClick={() => setCreating(true)}>
+        <EmptyState icon="barbell" title={t.trEmptyTitle} body={t.trEmptyBody}>
+          <Button variant="primary" onClick={() => setCreating(true)}>
             <Icon name="plus" />
             {t.trAddClient}
-          </button>
-        </div>
+          </Button>
+        </EmptyState>
       )}
 
       {clients !== null && clients.length > 0 && (
         <div className="trainer-workspace">
           <div className="trainer-client-list">
-            <button className="tr-client-card trainer-self-card selected" onClick={onOpenMe}>
+            <Card
+              as="button"
+              pad="none"
+              emphasis="quiet"
+              className="tr-client-card trainer-self-card selected"
+              onClick={onOpenMe}
+            >
               <span className="tr-card-thumb">
                 <Avatar userId={selfUid} name={selfName} hasPhoto size={52} />
               </span>
@@ -126,9 +133,12 @@ export function TrainerView({
                 <span className="s">{t.roleTrainer}</span>
               </span>
               <Icon name="caret-right" className="go" />
-            </button>
+            </Card>
             {clients.map((c) => (
-              <button
+              <Card
+                as="button"
+                pad="none"
+                emphasis="quiet"
                 key={c.id}
                 className={`tr-client-card${c.dormantDays !== null ? ' dormant' : ''}${
                   c.live ? ' live' : ''
@@ -139,10 +149,9 @@ export function TrainerView({
               >
                 {c.live ? (
                   <span className="tr-card-photo" aria-hidden>
-                    <span className="tr-card-live">
-                      <span className="live-dot" />
+                    <Tag tone="ok" icon={<span className="live-dot" />}>
                       {t.stTrainingNow} · {fmtSessionClock(now - (c.liveStartedAt ?? now))}
-                    </span>
+                    </Tag>
                   </span>
                 ) : (
                   <span className="tr-card-thumb">
@@ -159,7 +168,7 @@ export function TrainerView({
                   <span className="s">{clientMeta(c, locale, t)}</span>
                 </span>
                 <Icon name="caret-right" className="go" />
-              </button>
+              </Card>
             ))}
           </div>
 
@@ -175,7 +184,10 @@ export function TrainerView({
                 <span>{t.trLastSeen}</span>
               </div>
               {clients.map((c, index) => (
-                <button
+                <Card
+                  as="button"
+                  pad="none"
+                  emphasis="quiet"
                   key={c.id}
                   className="trainer-table-row"
                   aria-label={`${t.trWeekAcrossClients} ${index + 1}`}
@@ -194,7 +206,7 @@ export function TrainerView({
                   <span className={c.live ? 'accent' : c.dormantDays !== null ? 'danger' : ''}>
                     {lastSeenText(c, locale, t)}
                   </span>
-                </button>
+                </Card>
               ))}
             </div>
           </section>
@@ -213,10 +225,9 @@ export function TrainerView({
                   <p>{clientMeta(selected, locale, t)}</p>
                 </div>
                 {selected.live && (
-                  <span className="tr-live-pill">
-                    <span className="live-dot" />
+                  <Tag tone="ok" icon={<span className="live-dot" />}>
                     {fmtSessionClock(now - (selected.liveStartedAt ?? now))}
-                  </span>
+                  </Tag>
                 )}
               </div>
 
@@ -268,10 +279,10 @@ export function TrainerView({
                 </section>
               )}
 
-              <button className="btn btn-secondary" onClick={() => onOpenProfile(selected.id)}>
+              <Button variant="secondary" onClick={() => onOpenProfile(selected.id)}>
                 <Icon name="list-checks" />
                 {t.trAssignProgram}
-              </button>
+              </Button>
             </aside>
           )}
         </div>
@@ -339,20 +350,17 @@ function TrainerClientDialog(props: {
       <div className="sheet-head">
         <span className="t">{t.trAddClient}</span>
       </div>
-      <input
-        className="input"
+      <Field
         placeholder={t.firstName}
         value={firstName}
         onChange={(e) => setFirstName(e.target.value)}
       />
-      <input
-        className="input"
+      <Field
         placeholder={t.lastName}
         value={lastName}
         onChange={(e) => setLastName(e.target.value)}
       />
-      <input
-        className="input"
+      <Field
         placeholder={t.username}
         value={username}
         onChange={(e) => setUsername(e.target.value)}
@@ -364,11 +372,12 @@ function TrainerClientDialog(props: {
         </div>
       )}
       <div className="sheet-actions">
-        <button className="btn btn-secondary grow" onClick={props.onClose}>
+        <Button variant="secondary" className="grow" onClick={props.onClose}>
           {t.cancel}
-        </button>
-        <button
-          className="btn btn-primary grow"
+        </Button>
+        <Button
+          variant="primary"
+          className="grow"
           disabled={busy || firstName.trim().length < 2 || username.trim().length < 2}
           onClick={async () => {
             setBusy(true);
@@ -392,7 +401,7 @@ function TrainerClientDialog(props: {
           }}
         >
           {t.save}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );
@@ -411,7 +420,7 @@ function TrainerInviteDialog(props: {
   return (
     <Sheet onClose={props.onClose}>
       <div className="sheet-head">
-        <span className="t" style={{ color: 'var(--color-ok)' }}>
+        <span className="t ut-ok">
           <Icon name="check-circle" weight="fill" /> {t.adminCreated}
         </span>
       </div>
@@ -423,14 +432,14 @@ function TrainerInviteDialog(props: {
           <Icon name="arrow-up-right" />
           <code>{url.replace(/^https?:\/\//, '')}</code>
         </div>
-        <button
-          className="btn btn-primary"
+        <Button
+          variant="primary"
           onClick={() => {
             void navigator.clipboard.writeText(url).then(() => setCopied(true));
           }}
         >
           <Icon name="copy" /> {copied ? t.adminCopied : t.adminCopy}
-        </button>
+        </Button>
       </div>
       <div className="invite-cells">
         <div className="cell">
@@ -443,9 +452,9 @@ function TrainerInviteDialog(props: {
         </div>
       </div>
       <div className="sheet-actions">
-        <button className="btn btn-primary grow" onClick={props.onClose}>
+        <Button variant="primary" className="grow" onClick={props.onClose}>
           {t.adminDone}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

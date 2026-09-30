@@ -5,7 +5,12 @@
  * author's own document); status changes, assign and delete go through the
  * callable functions.
  */
+import { BackButton } from '../../components/ui/BackButton';
 import { useMemo, useState } from 'react';
+import { Button } from '../../components/ui/Button';
+import { Chip } from '../../components/ui/Chip';
+import { Field } from '../../components/ui/Field';
+import { Switch } from '../../components/ui/Switch';
 import { doc, setDoc } from 'firebase/firestore';
 import { callFn, currentUid, getRole, trackMutation } from '../../api';
 import { db } from '../../firebase';
@@ -34,7 +39,10 @@ import {
   type Program,
   type ProgramItem,
 } from './model';
-import { ActionMenu, IconButton, Stepper, ToggleRow, type MenuItem } from './pieces';
+import { Card } from '../../components/ui/Card';
+import { GroupedList, ListRow } from '../../components/ui/GroupedList';
+import { ActionMenu, IconButton, ToggleRow, type MenuItem } from './pieces';
+import { NumberStepper } from '../../components/ui/NumberStepper';
 
 export type BuilderStep = 'basics' | 'week' | 'day' | 'review';
 
@@ -305,10 +313,9 @@ export function ProgramBuilder({
 
   const basicsFields = (
     <div className="pg-basics">
-      <label className="pg-field">
-        <span className="pg-label">{t.progName}</span>
-        <input
-          className="pg-name"
+      <div className="pg-field">
+        <Field
+          label={t.progName}
           value={draft.name}
           placeholder={t.pgNamePlaceholder}
           autoFocus={!isSaved && !draft.name}
@@ -316,7 +323,7 @@ export function ProgramBuilder({
           maxLength={80}
           onChange={(e) => update((p) => ({ ...p, name: e.target.value }))}
         />
-      </label>
+      </div>
       <div className="pg-field">
         <span className="pg-label">{t.progWeeks}</span>
         {draft.weeks === 0 ? (
@@ -325,23 +332,25 @@ export function ProgramBuilder({
             <span>{t.progOpenEnded}</span>
           </div>
         ) : (
-          <Stepper
-            big={!desktop}
+          <NumberStepper
+            size={desktop ? 'md' : 'xl'}
+            unit={desktop ? undefined : t.progWeeks.toLowerCase()}
+            label={t.progWeeks}
             value={draft.weeks}
-            label={desktop ? undefined : t.progWeeksWord(draft.weeks)}
-            decLabel={t.pgFewer(t.progWeeks)}
-            incLabel={t.pgMoreOf(t.progWeeks)}
+            min={1}
+            max={52}
             disabled={readOnly}
-            onDec={() => update((p) => ({ ...p, weeks: Math.max(1, p.weeks - 1) }))}
-            onInc={() => update((p) => ({ ...p, weeks: Math.min(52, p.weeks + 1) }))}
+            onChange={(n) => update((p) => ({ ...p, weeks: n }))}
           />
         )}
-        <ToggleRow
-          label={t.progNoEndDate}
-          on={draft.weeks === 0}
-          disabled={readOnly}
-          onToggle={() => update((p) => ({ ...p, weeks: p.weeks === 0 ? 8 : 0 }))}
-        />
+        <GroupedList>
+          <ToggleRow
+            label={t.progNoEndDate}
+            on={draft.weeks === 0}
+            disabled={readOnly}
+            onToggle={() => update((p) => ({ ...p, weeks: p.weeks === 0 ? 8 : 0 }))}
+          />
+        </GroupedList>
       </div>
     </div>
   );
@@ -350,26 +359,28 @@ export function ProgramBuilder({
     <div className="pg-week">
       {weekDays.map((d) => {
         const on = isTrainingDay(draft, d);
-        const complete = isDayComplete(draft, d);
         return (
-          <div key={d} className={`pg-wtile${on ? ' on' : ''}`}>
-            <button
-              type="button"
-              className="pg-wtile-toggle"
-              role="switch"
-              aria-checked={on}
-              aria-label={t.pgTrainOn(t.weekDayNames[d - 1] ?? '')}
-              disabled={readOnly}
-              onClick={() => toggleDay(d)}
-            >
-              <span className="pg-wd">{weekdayAbbr(d)}</span>
-              <span className={`pg-dot${on ? ' on' : ''}${on && !complete ? ' part' : ''}`}>
-                {on && <Icon name="check" />}
-              </span>
-            </button>
+          <Card
+            key={d}
+            pad="none"
+            tone={on ? 'accent' : 'neutral'}
+            emphasis={on ? 'hero' : 'card'}
+            className={`pg-wtile${on ? ' on' : ''}`}
+          >
+            <ListRow
+              as="label"
+              label={weekdayAbbr(d)}
+              trailing={
+                <Switch
+                  checked={on}
+                  disabled={readOnly}
+                  aria-label={t.pgTrainOn(t.weekDayNames[d - 1] ?? '')}
+                  onChange={() => toggleDay(d)}
+                />
+              }
+            />
             {on ? (
-              <input
-                className="pg-wtile-name"
+              <Field
                 value={draft.dayNames[String(d)] ?? ''}
                 placeholder={t.pgNameThisDay}
                 maxLength={40}
@@ -380,7 +391,7 @@ export function ProgramBuilder({
             ) : (
               <span className="pg-wtile-rest">{t.progRestShort}</span>
             )}
-          </div>
+          </Card>
         );
       })}
       <div className="pg-wcount">
@@ -394,26 +405,24 @@ export function ProgramBuilder({
     <div className="pg-review">
       {weekDays.map((d) =>
         isTrainingDay(draft, d) ? (
-          <button
+          <ListRow
             key={d}
-            type="button"
-            className="pg-rrow"
+            dense
+            time={weekdayAbbr(d)}
+            label={dayName(draft, d) || t.pgUnnamed}
+            sub={daySummary(d)}
+            trailing={
+              isDayComplete(draft, d) ? (
+                <Icon name="check" className="pg-ok" />
+              ) : (
+                <Icon name="warning-circle" className="pg-warn" />
+              )
+            }
             onClick={() => {
               setDay(d);
               setStep('day');
             }}
-          >
-            <span className="pg-wd on">{weekdayAbbr(d)}</span>
-            <span className="pg-rrow-txt">
-              <b>{dayName(draft, d) || t.pgUnnamed}</b>
-              <small>{daySummary(d)}</small>
-            </span>
-            {isDayComplete(draft, d) ? (
-              <Icon name="check" className="pg-ok" />
-            ) : (
-              <Icon name="warning-circle" className="pg-warn" />
-            )}
-          </button>
+          />
         ) : (
           <div key={d} className="pg-rrow rest">
             <span className="pg-wd">{weekdayAbbr(d)}</span>
@@ -442,19 +451,17 @@ export function ProgramBuilder({
   const rail = (
     <nav className="pg-rail" aria-label={t.pgTrainingDays}>
       {days.map((d) => (
-        <button
+        <Chip
           key={d}
-          type="button"
-          className={`pg-rp${d === day ? ' on' : ''}`}
+          className="pg-rp"
+          selected={d === day}
+          icon={d !== day && isDayComplete(draft, d) ? 'check' : undefined}
           aria-current={d === day ? 'step' : undefined}
           onClick={() => setDay(d)}
         >
-          <b>
-            {weekdayAbbr(d)}
-            {d !== day && isDayComplete(draft, d) && <Icon name="check" className="pg-ok" />}
-          </b>
+          <b>{weekdayAbbr(d)}</b>
           <span>{dayName(draft, d) || t.pgUnnamed}</span>
-        </button>
+        </Chip>
       ))}
     </nav>
   );
@@ -477,23 +484,18 @@ export function ProgramBuilder({
   const actions = !readOnly && (
     <div className="pg-actions">
       {draft.status !== 'active' && (
-        <button
-          type="button"
-          className="pg-quiet"
-          disabled={busy || !dirty}
-          onClick={() => void save()}
-        >
+        <Button variant="ghost" disabled={busy || !dirty} onClick={() => void save()}>
           {t.pgSaveDraft}
-        </button>
+        </Button>
       )}
-      <button
-        type="button"
-        className="btn btn-primary pg-cta"
+      <Button
+        variant="primary"
+        className="pg-cta"
         disabled={busy || !draft.name.trim() || (draft.status === 'active' && !dirty)}
         onClick={primaryAction}
       >
         {primaryLabel}
-      </button>
+      </Button>
     </div>
   );
 
@@ -529,6 +531,8 @@ export function ProgramBuilder({
       )}
       {confirmRest !== null && (
         <ConfirmDialog
+          tone="rest"
+          icon="moon"
           title={t.pgRestTitle(t.weekDayNames[confirmRest - 1] ?? '')}
           body={t.pgRestBody}
           confirmLabel={t.pgMakeRest}
@@ -542,6 +546,7 @@ export function ProgramBuilder({
       )}
       {confirmDiscard && (
         <ConfirmDialog
+          danger
           title={t.pgDiscardTitle}
           body={t.pgDiscardBody}
           confirmLabel={t.pgDiscard}
@@ -564,22 +569,17 @@ export function ProgramBuilder({
             <div className="pg-list">
               {library.length === 0 && <p className="pg-empty">{t.progEmpty}</p>}
               {library.map((p) => (
-                <button
+                <ListRow
                   key={p.id}
-                  type="button"
-                  className="pg-list-row"
+                  label={p.name}
+                  sub={`${p.weeks === 0 ? t.progOpenEnded : t.progWeeksCount(p.weeks)} · ${t.progDaysCount(trainingDays(p).length)}`}
+                  chevron
                   onClick={() => {
                     setDraft(duplicateOf(p, t.progDuplicateName(p.name)));
                     setDupOpen(false);
                     setStep('week');
                   }}
-                >
-                  <b>{p.name}</b>
-                  <span>
-                    {p.weeks === 0 ? t.progOpenEnded : t.progWeeksCount(p.weeks)} ·{' '}
-                    {t.progDaysCount(trainingDays(p).length)}
-                  </span>
-                </button>
+                />
               ))}
             </div>
           </div>
@@ -592,14 +592,22 @@ export function ProgramBuilder({
     <div className="pg-startfrom">
       <span className="pg-label">{t.pgOrStartFrom}</span>
       <div>
-        <button type="button" className="pg-tile-btn" onClick={() => setCsvOpen(true)}>
-          <Icon name="upload-simple" />
+        <Button
+          variant="secondary"
+          className="pg-tile-btn"
+          icon="upload-simple"
+          onClick={() => setCsvOpen(true)}
+        >
           {t.csvImport}
-        </button>
-        <button type="button" className="pg-tile-btn" onClick={() => setDupOpen(true)}>
-          <Icon name="copy" />
+        </Button>
+        <Button
+          variant="secondary"
+          className="pg-tile-btn"
+          icon="copy"
+          onClick={() => setDupOpen(true)}
+        >
           {t.progDuplicate}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -610,32 +618,23 @@ export function ProgramBuilder({
     return (
       <div className="screen pg-page pg-desk">
         <header className="pg-desk-top">
-          <button type="button" className="ov-back" onClick={leave}>
-            <Icon name="caret-left" />
-            {t.progTitle}
-          </button>
+          <BackButton className="ov-back" label={t.progTitle} text={t.progTitle} onClick={leave} />
           <span className="grow" />
           {discardButton}
           {!readOnly && draft.status !== 'active' && (
-            <button
-              type="button"
-              className="pg-quiet"
-              disabled={busy || !dirty}
-              onClick={() => void save()}
-            >
+            <Button variant="ghost" disabled={busy || !dirty} onClick={() => void save()}>
               {t.pgSaveDraft}
-            </button>
+            </Button>
           )}
           {menuButton}
           {!readOnly && (
-            <button
-              type="button"
-              className="btn btn-primary"
+            <Button
+              variant="primary"
               disabled={busy || !draft.name.trim() || (draft.status === 'active' && !dirty)}
               onClick={primaryAction}
             >
               {primaryLabel}
-            </button>
+            </Button>
           )}
         </header>
         <div className="pg-desk-grid">
@@ -651,52 +650,48 @@ export function ProgramBuilder({
                 const sel = step !== 'review' && on && d === day;
                 return (
                   <div key={d} className={`pg-wrow${on ? ' on' : ''}${sel ? ' sel' : ''}`}>
-                    <button
-                      type="button"
+                    <ListRow
+                      dense
                       className="pg-wrow-main"
+                      time={weekdayAbbr(d)}
+                      label={on ? dayName(draft, d) || t.pgUnnamed : t.progRestShort}
+                      trailing={
+                        on && isDayComplete(draft, d) ? (
+                          <Icon name="check" className="pg-ok" />
+                        ) : undefined
+                      }
                       disabled={!on}
                       onClick={() => {
                         setDay(d);
                         setStep('day');
                       }}
-                    >
-                      <span className="pg-wd">{weekdayAbbr(d)}</span>
-                      <span className="n">
-                        {on ? dayName(draft, d) || t.pgUnnamed : t.progRestShort}
-                      </span>
-                      {on && isDayComplete(draft, d) && <Icon name="check" className="pg-ok" />}
-                    </button>
+                    />
                     {!readOnly && (
-                      <button
-                        type="button"
-                        className={`pg-mini-switch${on ? ' on' : ''}`}
-                        role="switch"
-                        aria-checked={on}
+                      <Switch
+                        size="sm"
+                        checked={on}
                         aria-label={t.pgTrainOn(t.weekDayNames[d - 1] ?? '')}
-                        onClick={() => {
+                        onChange={() => {
                           toggleDay(d);
                           if (!on) {
                             setDay(d);
                             setStep('day');
                           }
                         }}
-                      >
-                        <span />
-                      </button>
+                      />
                     )}
                   </div>
                 );
               })}
             </div>
-            <button
-              type="button"
-              className={`pg-wrow-review${step === 'review' ? ' sel' : ''}`}
+            <ListRow
+              dense
+              icon={<Icon name="list-checks" />}
+              label={t.pgReview}
+              sub={readinessLine}
+              selected={step === 'review'}
               onClick={() => setStep('review')}
-            >
-              <Icon name="list-checks" />
-              {t.pgReview}
-              <small className={ready.ok ? 'pg-ok' : 'pg-warn'}>{readinessLine}</small>
-            </button>
+            />
           </aside>
           <main className="pg-desk-main">
             {step === 'review' || !dayEditor ? (
@@ -741,14 +736,14 @@ export function ProgramBuilder({
         {basicsFields}
         <div className="pg-foot">
           {startFrom}
-          <button
-            type="button"
-            className="btn btn-primary pg-cta"
+          <Button
+            variant="primary"
+            className="pg-cta"
             disabled={!draft.name.trim()}
             onClick={() => setStep('week')}
           >
             {t.pgNext}
-          </button>
+          </Button>
         </div>
         {dialogs}
       </div>
@@ -765,9 +760,9 @@ export function ProgramBuilder({
         </div>
         {weekTiles}
         <div className="pg-foot">
-          <button
-            type="button"
-            className="btn btn-primary pg-cta"
+          <Button
+            variant="primary"
+            className="pg-cta"
             disabled={days.length === 0}
             onClick={() => {
               setDay(days[0]);
@@ -775,7 +770,7 @@ export function ProgramBuilder({
             }}
           >
             {t.pgSetUpDays}
-          </button>
+          </Button>
         </div>
         {dialogs}
       </div>
@@ -796,8 +791,10 @@ export function ProgramBuilder({
   return (
     <div className="screen pg-page pg-step">
       {topBar(isSaved ? leave : () => setStep(days.length ? 'day' : 'week'), undefined, true)}
-      <button
-        type="button"
+      <Card
+        as="button"
+        pad="md"
+        emphasis="quiet"
         className="pg-review-head"
         disabled={readOnly}
         onClick={() => setStep('basics')}
@@ -808,13 +805,17 @@ export function ProgramBuilder({
           {t.progDaysCount(days.length)} ·{' '}
           <em className={`pg-status ${draft.status}`}>{statusLabel}</em>
         </span>
-      </button>
+      </Card>
       {reviewRows}
       {!readOnly && (
-        <button type="button" className="pg-link-btn" onClick={() => setStep('week')}>
-          <Icon name="calendar-blank" />
+        <Button
+          variant="link"
+          className="pg-link-btn"
+          icon="calendar-blank"
+          onClick={() => setStep('week')}
+        >
           {t.pgEditWeek}
-        </button>
+        </Button>
       )}
       <div className="pg-foot">
         <p className={ready.ok ? 'pg-ready ok' : 'pg-ready'}>

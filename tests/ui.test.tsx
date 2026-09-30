@@ -1225,11 +1225,13 @@ describe('F-03 session UI', () => {
     const members = container.querySelectorAll('.fss-m');
     expect(members).toHaveLength(2);
     // Bench has a set, the row doesn't — it's the row's turn.
-    expect(container.querySelector('.fss-m.on')!.textContent).toMatch(/Cable row/);
+    expect(container.querySelector('.fss-m[aria-pressed="true"]')!.textContent).toMatch(
+      /Cable row/,
+    );
     await userEvent.click(screen.getByRole('button', { name: 'Log' }));
     const w = __getStateForTests().workouts.find((x) => x.id === 'open')!;
     expect(w.exercises.find((e) => e.id === 'row')!.sets).toHaveLength(1);
-    expect(container.querySelector('.fss-m.on')!.textContent).toMatch(/Bench/);
+    expect(container.querySelector('.fss-m[aria-pressed="true"]')!.textContent).toMatch(/Bench/);
   });
 
   it('a set that falls 2+ reps short of the card is marked failure automatically', async () => {

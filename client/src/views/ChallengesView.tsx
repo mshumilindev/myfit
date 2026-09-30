@@ -7,7 +7,14 @@
  * (big ring + by-day strip + give up), and the completion celebration. Works
  * full-width on mobile and in the desktop content column.
  */
+import { Pager } from '../components/ui/Pager';
+import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useMemo, useState } from 'react';
+import { Button, IconButton } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Chip } from '../components/ui/Chip';
+import { SearchField } from '../components/ui/SearchField';
+import { Segmented } from '../components/ui/Segmented';
 import { tokenMatch } from '../search';
 import { createPortal } from 'react-dom';
 import { fmtDayMonth, useT } from '../i18n';
@@ -183,39 +190,28 @@ export function ChallengesView({ store }: { store: StoreState }) {
           <div className="ch-sect-label">{t.chStartSection}</div>
 
           <div className="ch-searchrow">
-            <div className="ch-search">
-              <Icon name="magnifying-glass" />
-              <input
+            <div className="uf-1 umw-0">
+              <SearchField
                 value={q}
-                onChange={(e) => applyQuery(e.target.value)}
+                onChange={applyQuery}
                 placeholder={t.chSearchPlaceholder}
-                aria-label={t.chSearchPlaceholder}
+                clearLabel={t.clearLabel}
               />
-              {q && (
-                <button
-                  className="ch-search-clear"
-                  onClick={() => applyQuery('')}
-                  aria-label={t.clearLabel}
-                >
-                  <Icon name="x" />
-                </button>
-              )}
             </div>
-            <button
-              className={`ch-funnel${cat !== 'all' ? ' on' : ''}`}
+            <IconButton
+              className="ch-funnel"
+              variant={cat !== 'all' ? 'secondary' : 'ghost'}
+              icon="funnel-simple"
+              label={t.libFiltersLabel}
               onClick={() => setShowFilters(true)}
-              aria-label={t.libFiltersLabel}
-            >
-              <Icon name="funnel-simple" />
-            </button>
+            />
           </div>
 
           {cat !== 'all' && (
             <div className="ch-active-filter">
-              <button className="ch-fchip" onClick={() => applyCat('all')}>
+              <Chip selected icon="x" onClick={() => applyCat('all')}>
                 {t.chCat[cat]}
-                <Icon name="x" />
-              </button>
+              </Chip>
             </div>
           )}
 
@@ -233,36 +229,7 @@ export function ChallengesView({ store }: { store: StoreState }) {
                   />
                 ))}
               </div>
-              {maxPage > 0 && (
-                <nav className="exl-pager" aria-label={t.pagination}>
-                  <button
-                    className="exl-pagebtn"
-                    disabled={curPage === 0}
-                    onClick={() => setPage(curPage - 1)}
-                    aria-label={t.pagePrev}
-                  >
-                    <Icon name="caret-left" />
-                  </button>
-                  {Array.from({ length: maxPage + 1 }, (_, p) => (
-                    <button
-                      key={p}
-                      className={`exl-pagenum${p === curPage ? ' active' : ''}`}
-                      aria-current={p === curPage ? 'page' : undefined}
-                      onClick={() => setPage(p)}
-                    >
-                      {p + 1}
-                    </button>
-                  ))}
-                  <button
-                    className="exl-pagebtn"
-                    disabled={curPage >= maxPage}
-                    onClick={() => setPage(curPage + 1)}
-                    aria-label={t.pageNext}
-                  >
-                    <Icon name="caret-left" className="flip" />
-                  </button>
-                </nav>
-              )}
+              {maxPage > 0 && <Pager page={curPage} maxPage={maxPage} onPage={setPage} />}
             </>
           )}
         </section>
@@ -271,36 +238,30 @@ export function ChallengesView({ store }: { store: StoreState }) {
       {showFilters && (
         <Sheet onClose={() => setShowFilters(false)} className="ch-filter-sheet">
           <div className="sheet-head with-back">
-            <button
-              className="sheet-back"
-              onClick={() => setShowFilters(false)}
-              aria-label={t.backAction}
-            >
-              <Icon name="caret-left" />
-            </button>
+            <BackButton label={t.backAction} onClick={() => setShowFilters(false)} />
             <span className="t">{t.libFiltersLabel}</span>
           </div>
           <div className="ch-filter-chips">
-            <button
-              className={cat === 'all' ? 'active' : ''}
+            <Chip
+              selected={cat === 'all'}
               onClick={() => {
                 applyCat('all');
                 setShowFilters(false);
               }}
             >
               {t.chFilterAll}
-            </button>
+            </Chip>
             {CHALLENGE_CATEGORIES.map((c) => (
-              <button
+              <Chip
                 key={c}
-                className={cat === c ? 'active' : ''}
+                selected={cat === c}
                 onClick={() => {
                   applyCat(c);
                   setShowFilters(false);
                 }}
               >
                 {t.chCat[c]}
-              </button>
+              </Chip>
             ))}
           </div>
         </Sheet>
@@ -350,7 +311,12 @@ function ActiveCard({ l, onOpen }: { l: LiveChallenge; onOpen: () => void }) {
   const endedUndone = prog.ended && !prog.done;
   const unit = t.chUnit[tmpl.unit] ?? tmpl.unit;
   return (
-    <button className={`ch-active ${ACCENT_CLASS[tmpl.accent]}`} onClick={onOpen}>
+    <Card
+      as="button"
+      pad="none"
+      className={`ch-active ${ACCENT_CLASS[tmpl.accent]}`}
+      onClick={onOpen}
+    >
       <Ring pct={prog.pct} size={58} stroke={5}>
         <Icon name={tmpl.icon} weight="bold" />
       </Ring>
@@ -366,7 +332,7 @@ function ActiveCard({ l, onOpen }: { l: LiveChallenge; onOpen: () => void }) {
       </div>
       <span className="ch-pct num">{Math.round(prog.pct * 100)}%</span>
       <Icon name="caret-right" className="ch-go" />
-    </button>
+    </Card>
   );
 }
 
@@ -411,14 +377,14 @@ function CatalogRow({
           <Icon name="check" weight="bold" />
         </span>
       ) : (
-        <button
-          className="ch-cat-chip ch-chip-start"
-          onClick={onStart}
-          aria-label={t.chStart}
+        <IconButton
+          variant="secondary"
+          size="sm"
+          icon="plus"
+          label={t.chStart}
           title={t.chStart}
-        >
-          <Icon name="plus" weight="bold" />
-        </button>
+          onClick={onStart}
+        />
       )}
     </div>
   );
@@ -464,18 +430,21 @@ function StartSheet({
             {t.chTarget} — {unit}
           </div>
           <div className="ch-stepper">
-            <button className="ch-step" onClick={dec} disabled={target <= tmpl.min} aria-label="−">
-              <Icon name="minus" />
-            </button>
+            <IconButton
+              variant="secondary"
+              icon="minus"
+              label="−"
+              onClick={dec}
+              disabled={target <= tmpl.min}
+            />
             <div className="ch-step-val num">{fmtChallengeValue(tmpl.unit, target, t)}</div>
-            <button
-              className="ch-step plus"
+            <IconButton
+              variant="secondary"
+              icon="plus"
+              label="+"
               onClick={inc}
               disabled={target >= tmpl.max}
-              aria-label="+"
-            >
-              <Icon name="plus" />
-            </button>
+            />
           </div>
         </>
       )}
@@ -483,19 +452,17 @@ function StartSheet({
       {tmpl.durations.length > 1 && (
         <>
           <div className="ch-field-label">{t.chDuration}</div>
-          <div className="ch-segmented">
-            {tmpl.durations.map((d) => (
-              <button key={d} className={d === days ? 'active' : ''} onClick={() => setDays(d)}>
-                {fmtChallengeDuration(d, t)}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            options={tmpl.durations.map((d) => ({ value: d, label: fmtChallengeDuration(d, t) }))}
+            value={days}
+            onChange={setDays}
+          />
         </>
       )}
 
-      <button className="btn btn-primary ch-start-cta" onClick={() => onStart(target, days)}>
+      <Button variant="primary" className="ch-start-cta" onClick={() => onStart(target, days)}>
         {t.chStartCta}
-      </button>
+      </Button>
     </Sheet>
   );
 }
@@ -526,9 +493,7 @@ function DetailSheet({
     <div className="ch-scrim ch-scrim-full" onClick={onClose}>
       <div className="ch-detail" onClick={(e) => e.stopPropagation()}>
         <div className="ch-detail-top">
-          <button className="back" onClick={onClose} aria-label={t.backAction}>
-            <Icon name="caret-left" />
-          </button>
+          <BackButton onClick={onClose} label={t.backAction} />
           <span className="ch-detail-kick">{t.chCat[tmpl.category]}</span>
           <span style={{ width: 22 }} />
         </div>
@@ -570,18 +535,18 @@ function DetailSheet({
             <div className="ch-confirm">
               <span>{t.chGiveUpConfirm}</span>
               <div className="ch-confirm-row">
-                <button className="ch-confirm-no" onClick={() => setConfirm(false)}>
+                <Button variant="secondary" onClick={() => setConfirm(false)}>
                   {t.cancel}
-                </button>
-                <button className="ch-confirm-yes" onClick={onGiveUp}>
+                </Button>
+                <Button variant="danger" onClick={onGiveUp}>
                   {t.chGiveUp}
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
-            <button className="ch-giveup" onClick={() => setConfirm(true)}>
+            <Button variant="danger" className="ch-giveup" onClick={() => setConfirm(true)}>
               {t.chGiveUp}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -636,9 +601,9 @@ function CompleteSheet({ l, onDone }: { l: LiveChallenge; onDone: () => void }) 
         <div className="ch-complete-title">{tmpl.title(t, prog.target)}</div>
         <div className="ch-complete-body">{t.chCompleteBody(valueLabel, days)}</div>
         <div className="ch-complete-actions">
-          <button className="btn btn-primary" onClick={onDone}>
+          <Button variant="primary" onClick={onDone}>
             {t.chDone}
-          </button>
+          </Button>
         </div>
         <div className="ch-complete-note">
           <Icon name="bell" />

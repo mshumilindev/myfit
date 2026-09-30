@@ -463,27 +463,16 @@ const lastRoute: WidgetDef = {
           </Button>
         }
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="ul-flex ua-center ug-12">
           <IconTile tone="sport" size={48} icon={icon} />
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1 }}>
+          <div className="umw-0">
+            <div className="uiw-t-num ut-tighter" style={{ lineHeight: 1 }}>
               {km}
-              <span
-                style={{
-                  fontSize: 13,
-                  fontWeight: 500,
-                  color: 'var(--color-text-muted)',
-                  marginLeft: 3,
-                }}
-              >
+              <span className="uiw-t-md ut-muted" style={{ marginLeft: 3 }}>
                 km
               </span>
             </div>
-            {a.note && (
-              <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 4 }}>
-                {a.note}
-              </div>
-            )}
+            {a.note && <div className="uiw-t-base ut-muted umt-4">{a.note}</div>}
           </div>
         </div>
         <WidgetStats
@@ -758,7 +747,7 @@ const cardioMachine: WidgetDef = {
           badge={pb ? s.pbPace : undefined}
           onClick={open}
         >
-          <div style={{ flex: 1 }} />
+          <div className="uf-1" />
           {stats}
         </Widget>
       );
@@ -785,14 +774,7 @@ const cardioMachine: WidgetDef = {
         {stats}
         {trend.length >= 2 && (
           <>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: 12,
-                color: 'var(--color-text-muted)',
-              }}
-            >
+            <div className="uiw-t-base ut-muted ul-flex uj-between">
               <span>{s.machineTrend(m.name, trend.length)}</span>
               <span>
                 {trend[0].metric.text} → {m.metric.text}
@@ -863,11 +845,11 @@ const activeMinutes: WidgetDef = {
     if (size === 'S')
       return (
         <Widget size="S" tone="active" kicker={s.activeWeek} onClick={log}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+          <div className="ul-flex ua-center ug-10 uf-1">
             <WidgetRing value={frac} size={72} tone="active">
               {mins}
             </WidgetRing>
-            <span style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.35 }}>
+            <span className="uiw-t-base ut-muted" style={{ lineHeight: 1.35 }}>
               {s.ofGoal(WHO_GOAL)}
             </span>
           </div>
@@ -880,10 +862,10 @@ const activeMinutes: WidgetDef = {
       </WidgetRing>
     );
     const side = (
-      <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <div style={{ fontSize: 16, fontWeight: 700 }}>{toGo}</div>
+      <div className="umw-0 ul-flex ul-col ug-4">
+        <div className="uiw-t-lg">{toGo}</div>
         {!reached && (
-          <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
+          <div className="uiw-t-base ut-muted">
             {s.daysLeft(daysLeft)} · {s.perDay(perDay)}
           </div>
         )}
@@ -892,7 +874,7 @@ const activeMinutes: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="active" kicker={s.activeWeek} onClick={log}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1 }}>
+          <div className="ul-flex ua-center ug-16 uf-1">
             {ring(96)}
             {side}
           </div>
@@ -912,7 +894,7 @@ const activeMinutes: WidgetDef = {
           </Button>
         }
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div className="ul-flex ua-center ug-16">
           {ring(96)}
           {side}
         </div>
@@ -1057,11 +1039,11 @@ const favouriteSport: WidgetDef = {
           </Button>
         }
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="ul-flex ua-center ug-12">
           <IconTile tone={tone} size={48} icon={icon} />
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{name}</div>
-            <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
+          <div className="umw-0">
+            <div className="uiw-t-xl">{name}</div>
+            <div className="uiw-t-base ut-muted">
               {[`${top.n}×`, fmtHM(top.min), top.kcal > 0 ? `${fmtInt(top.kcal)} kcal` : null]
                 .filter(Boolean)
                 .join(' · ')}
@@ -1070,9 +1052,7 @@ const favouriteSport: WidgetDef = {
         </div>
         <WidgetList rows={rows(4)} />
         {usual.length > 0 && (
-          <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
-            {s.usuallyOn(usual.join(' & '))}
-          </div>
+          <div className="uiw-t-base ut-muted">{s.usuallyOn(usual.join(' & '))}</div>
         )}
       </Widget>
     );
@@ -1193,7 +1173,7 @@ const recoveryRituals: WidgetDef = {
             value: `${v.n}× · ${fmtHM(v.min)}`,
           }))}
         />
-        <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{lastTxt}</div>
+        <div className="uiw-t-base ut-muted">{lastTxt}</div>
         <WidgetDelta good={diff >= 0}>
           {diff > 0
             ? s.moreThan(diff, prevName)

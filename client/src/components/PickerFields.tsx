@@ -6,6 +6,8 @@
  * pixel-parity with the boards). Design: docs/DESIGN.md.
  */
 import { isoWeekday, useWeekStartDay, weekOrder, weekPos, type IsoDay } from '../weekStart';
+import { Field } from './ui/Field';
+import { Button, IconButton } from './ui/Button';
 import {
   useEffect,
   useLayoutEffect,
@@ -18,7 +20,6 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useT } from '../i18n';
-import { Icon } from '../ui';
 
 /* --- shared popover shell ------------------------------------------------- */
 
@@ -193,42 +194,39 @@ export function DateField({
   return (
     <div className="picker">
       <div className="input-field" ref={anchorRef}>
-        <input
-          className="input"
+        <Field
           inputMode="numeric"
           placeholder={t.datePlaceholder}
           value={text}
           onChange={(e) => commitText(e.target.value)}
         />
-        <button
-          type="button"
+        <IconButton
+          variant="ghost"
+          size="sm"
           className="field-btn"
-          aria-label={t.backfillDate}
+          icon="calendar-blank"
+          label={t.backfillDate}
           aria-expanded={open}
           onClick={() => setOpen((x) => !x)}
-        >
-          <Icon name="calendar-blank" />
-        </button>
+        />
       </div>
       <Popover open={open} onClose={() => setOpen(false)} className="cal" anchorRef={anchorRef}>
         <div className="cal-head">
-          <button
-            type="button"
-            className="cal-nav"
-            aria-label={t.previousAction}
+          <IconButton
+            variant="ghost"
+            size="sm"
+            icon="caret-left"
+            label={t.previousAction}
             onClick={() => shiftMonth(-1)}
-          >
-            <Icon name="caret-left" />
-          </button>
+          />
           <span className="cal-title">{monthLabel}</span>
-          <button
-            type="button"
-            className="cal-nav flip"
-            aria-label={t.nextAction}
+          <IconButton
+            variant="ghost"
+            size="sm"
+            icon="caret-right"
+            label={t.nextAction}
             onClick={() => shiftMonth(1)}
-          >
-            <Icon name="caret-left" />
-          </button>
+          />
         </div>
         <div className="cal-dow">
           {dow.map((d, i) => (
@@ -239,8 +237,9 @@ export function DateField({
           {cells.map((c) => {
             const disabled = !!max && c.iso > max;
             return (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
                 key={c.iso}
                 className={`cal-day${c.iso === value ? ' sel' : ''}${
                   c.iso === todayIso() ? ' today' : ''
@@ -253,13 +252,13 @@ export function DateField({
                 }}
               >
                 {c.day}
-              </button>
+              </Button>
             );
           })}
         </div>
-        <button
-          type="button"
-          className="cal-today"
+        <Button
+          variant="link"
+
           onClick={() => {
             const iso = todayIso();
             onChange(iso);
@@ -268,7 +267,7 @@ export function DateField({
           }}
         >
           {t.today}
-        </button>
+        </Button>
       </Popover>
     </div>
   );
@@ -355,8 +354,7 @@ export function TimeField({
   return (
     <div className="picker up">
       <div className="input-field" ref={anchorRef}>
-        <input
-          className="input"
+        <Field
           inputMode="numeric"
           placeholder={t.timePlaceholder}
           value={text}
@@ -367,15 +365,15 @@ export function TimeField({
             else setText(value);
           }}
         />
-        <button
-          type="button"
+        <IconButton
+          variant="ghost"
+          size="sm"
           className="field-btn"
-          aria-label={t.backfillStart}
+          icon="clock"
+          label={t.backfillStart}
           aria-expanded={open}
           onClick={() => setOpen((x) => !x)}
-        >
-          <Icon name="clock" />
-        </button>
+        />
       </div>
       <Popover
         open={open}
@@ -387,27 +385,29 @@ export function TimeField({
         <div className="time-cols">
           <div className="time-col" role="listbox" aria-label={t.backfillStart}>
             {HOURS.map((h) => (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
                 key={h}
                 className={`time-opt${h === vh ? ' sel' : ''}`}
                 onClick={() => setPart(h, Number.isNaN(vm) ? 0 : vm)}
               >
                 {pad(h)}
-              </button>
+              </Button>
             ))}
           </div>
           <span className="time-sep">:</span>
           <div className="time-col" role="listbox">
             {MINUTES.map((mi) => (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
                 key={mi}
                 className={`time-opt${mi === vm ? ' sel' : ''}`}
                 onClick={() => setPart(Number.isNaN(vh) ? 0 : vh, mi)}
               >
                 {pad(mi)}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -452,10 +452,11 @@ export function DurationField({
 
   return (
     <div className="dur-hm">
-      <input
-        className="dur-in"
+      <Field
+        className="dur-f"
         inputMode="numeric"
         aria-label={t.hrShort}
+        trail={t.hrShort}
         value={hStr}
         onChange={(e) => {
           const v = e.target.value.replace(/\D/g, '');
@@ -463,11 +464,11 @@ export function DurationField({
           commit(v, mStr);
         }}
       />
-      <span className="dur-unit">{t.hrShort}</span>
-      <input
-        className="dur-in"
+      <Field
+        className="dur-f"
         inputMode="numeric"
         aria-label={t.minShort}
+        trail={t.minShort}
         value={mStr}
         onChange={(e) => {
           const v = e.target.value.replace(/\D/g, '');
@@ -475,7 +476,6 @@ export function DurationField({
           commit(hStr, v);
         }}
       />
-      <span className="dur-unit">{t.minShort}</span>
     </div>
   );
 }

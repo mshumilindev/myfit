@@ -1,5 +1,7 @@
 /** Exercise history — design S-32/S-33 + EQ-3 (muscles, equipment, gyms). */
+import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useState } from 'react';
+import { Button } from '../components/ui/Button';
 import { est1rm, exerciseNeeds, missingAtGym, topSet, useStore } from '../store';
 import { callFn } from '../api';
 import type { Workout } from '../types';
@@ -65,12 +67,10 @@ export function ExerciseHistoryView({
   const span = Math.max(record - min, 1);
 
   return (
-    <div className="screen" style={{ gap: 'var(--space-6)' }}>
+    <div className="screen ug-16">
       <div className="hist-head">
-        <button className="back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <BackButton onClick={onClose} label={t.backAction} />
+        <div className="uf-1 umw-0">
           <h2 className="title-26">
             <ExerciseName name={name} />
           </h2>
@@ -92,7 +92,6 @@ export function ExerciseHistoryView({
                     <MuscleChip
                       muscle={info.primary}
                       tone="primary"
-                      size="lg"
                       onClick={(muscle) => shell.openOverlay({ screen: 'muscle-history', muscle })}
                       detail
                     />
@@ -102,58 +101,52 @@ export function ExerciseHistoryView({
                       key={m}
                       muscle={m}
                       tone="secondary"
-                      size="lg"
                       onClick={(muscle) => shell.openOverlay({ screen: 'muscle-history', muscle })}
                       detail
                     />
                   ))}
                   {needs.map((id) => (
-                    <EquipChip key={id} id={id} style={{ padding: '4px 9px', fontSize: 11 }} />
+                    <EquipChip key={id} id={id} style={{ padding: '4px 9px' }} />
                   ))}
                 </div>
               </>
             );
           })()}
         </div>
-        <button
-          className="btn btn-secondary"
-          style={{ minHeight: 36, fontSize: 13, flex: 'none', padding: '0 14px', gap: 6 }}
+        <Button
+          variant="secondary"
+          className="fx-fs-13 uf-none ug-6"
+          style={{ minHeight: 36, padding: '0 14px' }}
           onClick={() => shell.openOverlay({ screen: 'exercise-detail', name })}
         >
           <Icon name="cards" />
           {t.detailsAction}
-        </button>
+        </Button>
       </div>
 
       <div className="stat-grid">
         <div className="cell">
-          <div className="v" style={{ fontSize: 20, color: 'var(--color-ok)' }}>
-            {record || '—'}
-          </div>
+          <div className="v ut-2xl ut-ok">{record || '—'}</div>
           <div className="l">{t.recordKg}</div>
         </div>
         <div className="cell">
           <div
-            className="v"
-            style={{ fontSize: 20, color: rm === null ? 'var(--color-neutral-700)' : undefined }}
+            className="v ut-2xl"
+            style={{ color: rm === null ? 'var(--color-neutral-700)' : undefined }}
           >
             {rm !== null ? rm : '—'}
           </div>
           <div className="l">{t.est1rm}</div>
         </div>
         <div className="cell">
-          <div className="v" style={{ fontSize: 20 }}>
-            {last ? (last.top.weight ?? 0) : '—'}
-          </div>
+          <div className="v ut-2xl">{last ? (last.top.weight ?? 0) : '—'}</div>
           <div className="l">{t.lastTopSet}</div>
         </div>
       </div>
 
       {!userId && store.gyms.length > 0 && exerciseNeeds(name).length > 0 && (
         <div>
-          <div className="section-label" style={{ marginBottom: 8 }}>
-            {t.whereYouCanDoIt}
-          </div>
+          <div className="section-label umb-8">{t.whereYouCanDoIt}</div>
           <div className="wcdi-rows">
             {store.gyms.map((g) => {
               const needs = exerciseNeeds(name);
@@ -168,9 +161,7 @@ export function ExerciseHistoryView({
                   ) : (
                     <Icon name="warning-circle" className="bad" />
                   )}
-                  <span className="n" style={{ fontSize: 13 }}>
-                    {g.name}
-                  </span>
+                  <span className="n ut-base">{g.name}</span>
                   {missing.length === 0 ? (
                     <span className="v">{needs.map(label).join(' · ')}</span>
                   ) : (
@@ -180,7 +171,7 @@ export function ExerciseHistoryView({
               );
             })}
           </div>
-          <div className="sheet-note" style={{ background: 'var(--color-surface)', marginTop: 8 }}>
+          <div className="sheet-note sheet-note--surface umt-8">
             <Icon name="info" />
             <p>{t.inventoryNote}</p>
           </div>
@@ -189,11 +180,9 @@ export function ExerciseHistoryView({
 
       {chartPts.length >= 3 ? (
         <div>
-          <div className="section-label" style={{ marginBottom: 8 }}>
-            {t.topSet12w}
-          </div>
+          <div className="section-label umb-8">{t.topSet12w}</div>
           <div className="chart-card">
-            <svg viewBox="0 0 300 96" style={{ width: '100%', height: 96, display: 'block' }}>
+            <svg viewBox="0 0 300 96" className="uw-full ul-block" style={{ height: 96 }}>
               <polyline
                 points={chartPts
                   .map(
@@ -218,17 +207,9 @@ export function ExerciseHistoryView({
                 fill="var(--color-ok)"
               />
             </svg>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: 10,
-                color: 'var(--color-neutral-600)',
-                marginTop: 4,
-              }}
-            >
+            <div className="ut-2xs ut-faint ul-flex uj-between umt-4">
               <span>{min} kg</span>
-              <span style={{ color: 'var(--color-ok)' }}>{t.recordSuffix(`${record} kg`)}</span>
+              <span className="ut-ok">{t.recordSuffix(`${record} kg`)}</span>
             </div>
           </div>
         </div>
@@ -241,9 +222,7 @@ export function ExerciseHistoryView({
       )}
 
       <div>
-        <div className="section-label" style={{ marginBottom: 4 }}>
-          {t.lastSessions}
-        </div>
+        <div className="section-label umb-4">{t.lastSessions}</div>
         <table className="table">
           <thead>
             <tr>

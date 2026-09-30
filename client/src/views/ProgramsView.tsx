@@ -8,6 +8,9 @@
  * New program. A program opens in the builder (./programs/ProgramBuilder).
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { ListRow } from '../components/ui/GroupedList';
 import { collection, documentId, getDocs, query, where } from 'firebase/firestore';
 import { callFn, currentUid, getRole, getUsername, trackMutation } from '../api';
 import { db } from '../firebase';
@@ -18,7 +21,8 @@ import { Avatar } from '../components/Avatar';
 import { clearProgramSeed, peekProgramSeed } from '../data/programSeed';
 import type { ProgramItemLike } from '../data/programCsv';
 import { knownExercises } from '../store';
-import { Icon, RowListSkeleton } from '../ui';
+import { Icon } from '../ui';
+import { RowListSkeleton } from '../components/ui/Skeletons';
 import { ProgramCsvDialog } from './ProgramCsvDialog';
 import { ProgramBuilder, useLibraryNames, type BuilderStep } from './programs/ProgramBuilder';
 import { AssigneesSheet, type MemberAssignment } from './programs/AssigneesSheet';
@@ -244,21 +248,23 @@ export function ProgramsView({
     `${p.weeks === 0 ? t.progOpenEnded : t.progWeeksCount(p.weeks)} · ${t.progDaysCount(trainingDays(p).length)}`;
 
   const myProgram = (() => {
-    if (!mineLoaded) return <div className="pg-card sk" aria-hidden />;
+    if (!mineLoaded) return <Card className="pg-card uisk" aria-hidden />;
     if (!mine) {
       return (
-        <div className="pg-card pg-mine-empty">
+        <Card className="pg-card pg-mine-empty">
           <b>{t.progNone}</b>
           <span>{t.progMemberEmpty}</span>
-        </div>
+        </Card>
       );
     }
     const p = mine.program;
     const byMe = p.authorId === currentUid() || mine.assignedBy === getUsername();
     const authored = (programs ?? []).find((x) => x.id === p.id);
     return (
-      <button
-        type="button"
+      <Card
+        as="button"
+        tone="accent"
+        emphasis="hero"
         className="pg-card pg-mine"
         onClick={() =>
           setOpen(
@@ -285,31 +291,27 @@ export function ProgramsView({
         </span>
         <span className="pg-card-name">{p.name}</span>
         <span className="pg-card-meta">{lengthText(p)}</span>
-      </button>
+      </Card>
     );
   })();
 
   return (
     <div className="screen pg-page pg-home">
-      <div className="pg-home-top">
-        <ProgramsTabs active="programs" onSelect={(peer) => onProgramsTab?.(peer)} />
-      </div>
       <div className="pg-home-head">
+        <ProgramsTabs active="programs" onSelect={(peer) => onProgramsTab?.(peer)} />
         <h2 className="pg-h1">{t.progTitle}</h2>
         <span className="grow" />
         <div className="pg-home-actions desk">
-          <button type="button" className="pg-sec" onClick={() => setCsvOpen(true)}>
-            <Icon name="upload-simple" />
+          <Button variant="secondary" icon="upload-simple" onClick={() => setCsvOpen(true)}>
             {t.csvImport}
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
+          </Button>
+          <Button
+            variant="primary"
             onClick={() => setOpen({ program: freshProgram(''), saved: false, step: 'basics' })}
           >
             <Icon name="plus" />
             {t.progNew}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -324,10 +326,10 @@ export function ProgramsView({
           {programs && <span className="pg-count">{visible.length}</span>}
         </div>
         {failed && (
-          <button type="button" className="pg-card pg-retry" onClick={loadPrograms}>
+          <Card as="button" className="pg-card pg-retry" onClick={loadPrograms}>
             <Icon name="warning-circle" />
             {t.retry}
-          </button>
+          </Card>
         )}
         {!failed && programs === null && <RowListSkeleton rows={3} withAvatar={false} />}
         {programs && programs.length === 0 && <p className="pg-empty">{t.progEmpty}</p>}
@@ -335,19 +337,18 @@ export function ProgramsView({
           {visible.map((p) => {
             const on = membersOn(p.id);
             return (
-              <div key={p.id} className={`pg-card pg-tile ${p.status}`}>
-                <button
-                  type="button"
-                  className="pg-tile-main"
+              <Card key={p.id} pad="none" emphasis="card" className={`pg-card pg-tile ${p.status}`}>
+                <ListRow
+                  strong
+                  label={p.name}
+                  sub={lengthText(p)}
+                  value={<span className={`pg-status ${p.status}`}>{statusText(p)}</span>}
                   onClick={() => setOpen({ program: p, saved: true, step: 'review' })}
-                >
-                  <span className={`pg-status ${p.status}`}>{statusText(p)}</span>
-                  <span className="pg-card-name">{p.name}</span>
-                  <span className="pg-card-meta">{lengthText(p)}</span>
-                </button>
+                />
                 {isCoach && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="pg-tile-members"
                     aria-label={t.pgMembersOn(p.name)}
                     onClick={() => setMembersOf(p)}
@@ -360,33 +361,30 @@ export function ProgramsView({
                         {t.progAssign}
                       </span>
                     )}
-                  </button>
+                  </Button>
                 )}
-              </div>
+              </Card>
             );
           })}
         </div>
         {archivedN > 0 && (
-          <button type="button" className="pg-link-btn" onClick={() => setShowArchived((x) => !x)}>
-            <Icon name="archive" />
+          <Button variant="link" icon="archive" onClick={() => setShowArchived((x) => !x)}>
             {showArchived ? t.pgHideArchived : t.pgArchivedN(archivedN)}
-          </button>
+          </Button>
         )}
       </section>
 
       <div className="pg-home-actions mob">
-        <button type="button" className="pg-sec" onClick={() => setCsvOpen(true)}>
-          <Icon name="upload-simple" />
+        <Button variant="secondary" icon="upload-simple" onClick={() => setCsvOpen(true)}>
           {t.csvImport}
-        </button>
-        <button
-          type="button"
-          className="btn btn-primary"
+        </Button>
+        <Button
+          variant="primary"
           onClick={() => setOpen({ program: freshProgram(''), saved: false, step: 'basics' })}
         >
           <Icon name="plus" />
           {t.progNew}
-        </button>
+        </Button>
       </div>
 
       {csvOpen && (

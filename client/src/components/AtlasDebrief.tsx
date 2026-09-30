@@ -2,6 +2,7 @@
  * Atlas's debrief on the session summary: what this session says about you,
  * in his temper — the same facts that land in his notes feed.
  */
+import { Chip } from './ui/Chip';
 import { useMemo } from 'react';
 import { useT } from '../i18n';
 import { setCoach, useStore } from '../store';
@@ -47,13 +48,13 @@ export function AtlasDebrief({ workout, onOpen }: { workout: Workout; onOpen: ()
       ))}
       <div className="atl-replies">
         {!muted && temper >= 4 && (
-          <button className="atl-chip" onClick={() => setCoach({ mutedUntil: endOfDay })}>
+          <Chip tone="atlas" onClick={() => setCoach({ mutedUntil: endOfDay })}>
             {t.atlasMuteToday}
-          </button>
+          </Chip>
         )}
-        <button className="atl-chip on" onClick={onOpen}>
+        <Chip tone="atlas" selected onClick={onOpen}>
           {t.atlasOpen}
-        </button>
+        </Chip>
       </div>
     </div>
   );

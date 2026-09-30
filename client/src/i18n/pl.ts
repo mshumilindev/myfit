@@ -1511,9 +1511,6 @@ export const pl: Strings = {
     'Wykrywaj wizyty na siłowni po lokalizacji i proponuj zapis sesji. Domyślnie wyłączone.',
   flagNutrition: 'Aplikacja Nutrition',
   flagNutritionDesc: 'Odblokuj aplikację Nutrition (licznik KBŻU) w przełączniku aplikacji.',
-  flagBrassGlass: 'Motyw Brass Glass',
-  flagBrassGlassDesc:
-    'Przełącz całą aplikację, dla wszystkich użytkowników, na projekt Brass Glass. Wyłączone = obecny grafitowy wygląd.',
   flagScopeGlobal: 'Dla wszystkich użytkowników',
   settingsTitle: 'Ustawienia',
   settingsSub: 'Flagi funkcji na tym urządzeniu',
@@ -3929,6 +3926,7 @@ export const pl: Strings = {
   hlEnded: 'Skończyło się',
   hlStillOngoing: 'Nadal trwa',
   hlOngoingSubRest: 'Bez daty końca — zakończ, gdy wrócisz',
+  hlOngoingBlocked: 'Niedostępne, dopóki daty są w przyszłości',
   hlOngoingSubIll: 'Bez daty końca',
   hlEndsWhenRecovered: 'Gdy stukniesz „Wyzdrowiałem”',
   hlEndsWhenEnded: 'Gdy go zakończysz',

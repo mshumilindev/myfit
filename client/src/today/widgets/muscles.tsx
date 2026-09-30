@@ -7,6 +7,7 @@
  * stimulus.ts, recovery.ts, weekStart.ts, the program cache and the store.
  */
 import { useState, type ReactNode } from 'react';
+import { Field } from '../../components/ui/Field';
 import {
   Widget,
   WidgetBar,
@@ -173,6 +174,7 @@ function Cell({
 }) {
   return (
     <span
+      className="uiw-t-xs ut-text"
       style={{
         display: 'grid',
         placeItems: 'center',
@@ -182,9 +184,6 @@ function Cell({
         background: bg,
         borderRadius: round ? 'var(--radius-pill)' : 'var(--radius-sm)',
         boxShadow: outline ? `inset 0 0 0 1.5px ${outline}` : undefined,
-        fontSize: 10,
-        fontWeight: 600,
-        color: 'var(--color-text)',
       }}
     >
       {children}
@@ -258,12 +257,12 @@ const muscleMap: WidgetDef = {
     if (size === 'S')
       return (
         <Widget size="S" tone="accent" kicker={s.last7} onClick={open}>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flex: 1, minHeight: 0 }}>
+          <div className="ul-flex ug-10 ua-center uf-1" style={{ minHeight: 0 }}>
             <MuscleHeatmap colors={colors} width={64} />
-            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <div className="ul-flex ul-col umw-0">
               <Muted>{s.most}</Muted>
-              <span style={{ fontSize: 14.5, fontWeight: 600 }}>{mName(t, most.m)}</span>
-              <span className="uiw-value" style={{ fontSize: 22 }}>
+              <span className="uiw-t-md">{mName(t, most.m)}</span>
+              <span className="uiw-value uiw-t-xl">
                 {most.n}
                 <span className="uiw-unit">{s.sets}</span>
               </span>
@@ -275,19 +274,16 @@ const muscleMap: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="accent" onClick={open}>
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center', flex: 1, minHeight: 0 }}>
+          <div className="ul-flex ug-14 ua-center uf-1" style={{ minHeight: 0 }}>
             <MuscleHeatmap colors={colors} width={140} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1, minWidth: 0 }}>
+            <div className="ul-flex ul-col ug-2 uf-1 umw-0">
               <span className="uiw-kicker">{s.volume7}</span>
               <span className="uiw-value">
                 {total}
                 <span className="uiw-unit">{s.sets}</span>
               </span>
               {[ranked[0], ranked[1], least].map((r) => (
-                <span
-                  key={r.m}
-                  style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}
-                >
+                <span key={r.m} className="uiw-t-base ul-flex uj-between">
                   <Muted>{mName(t, r.m)}</Muted>
                   <b>{r.n}</b>
                 </span>
@@ -314,10 +310,10 @@ const muscleMap: WidgetDef = {
           />
         }
       >
-        <div style={{ flex: 1, minHeight: 0, display: 'flex', justifyContent: 'center' }}>
+        <div className="uf-1 ul-flex uj-center" style={{ minHeight: 0 }}>
           <MuscleHeatmap colors={colors} width={HEATMAP_XL_W} />
         </div>
-        <div style={{ display: 'flex', gap: 10, fontSize: 11.5, flexWrap: 'wrap' }}>
+        <div className="uiw-t-sm ul-flex ug-10 ul-wrap">
           <Muted>{s.setsLegend}</Muted>
           <Swatch color="var(--color-accent-800)">&lt;5</Swatch>
           <Swatch color="var(--color-accent-600)">5–9</Swatch>
@@ -339,38 +335,32 @@ function LandmarkBar({ sets, lm, zone }: { sets: number; lm: Landmark; zone: Zon
   const pos = (v: number) => `${Math.min(100, (v / max) * 100)}%`;
   return (
     <span
-      style={{
-        position: 'relative',
-        display: 'block',
-        height: 8,
-        background: 'var(--color-neutral-800)',
-        borderRadius: 'var(--radius-sm)',
-      }}
+      className="ur-sm tw-bg-n800 ul-block"
+      style={{ position: 'relative', height: 8 }}
       aria-hidden
     >
       <span
+        className="ur-sm tw-bg-n700"
         style={{
           position: 'absolute',
           top: 0,
           bottom: 0,
           left: pos(lm.mev),
           width: `calc(${pos(lm.mrv)} - ${pos(lm.mev)})`,
-          background: 'var(--color-neutral-700)',
-          borderRadius: 'var(--radius-sm)',
         }}
       />
       <span
+        className="ur-sm tw-bg-ok-line"
         style={{
           position: 'absolute',
           top: 0,
           bottom: 0,
           left: pos(lm.mev),
           width: `calc(${pos(lm.mav)} - ${pos(lm.mev)})`,
-          background: 'var(--color-ok-line)',
-          borderRadius: 'var(--radius-sm)',
         }}
       />
       <span
+        className="ur-sm"
         style={{
           position: 'absolute',
           top: -3,
@@ -378,7 +368,6 @@ function LandmarkBar({ sets, lm, zone }: { sets: number; lm: Landmark; zone: Zon
           width: 4,
           height: 14,
           background: ZONE_COLOR[zone],
-          borderRadius: 'var(--radius-sm)',
         }}
       />
     </span>
@@ -442,16 +431,12 @@ const volumeLandmarks: WidgetDef = {
     const row = (r: LmRow) => (
       <div
         key={r.m}
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '78px 1fr 30px',
-          gap: 8,
-          alignItems: 'center',
-        }}
+        className="ul-grid ug-8 ua-center"
+        style={{ gridTemplateColumns: '78px 1fr 30px' }}
       >
         <Muted>{mName(t, r.m)}</Muted>
         <LandmarkBar sets={r.sets} lm={r.lm} zone={r.zone} />
-        <span style={{ fontSize: 12, fontWeight: 600, textAlign: 'right' }}>{fmtKg(r.sets)}</span>
+        <span className="uiw-t-strong utx-right">{fmtKg(r.sets)}</span>
       </div>
     );
     if (size === 'M')
@@ -486,7 +471,7 @@ const volumeLandmarks: WidgetDef = {
           onClick={open}
           bodyLast
         >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 3 }}>
+          <div className="ul-grid ug-4" style={{ gridTemplateColumns: 'repeat(8, 1fr)' }}>
             {rows.map((r) => (
               <Cell key={r.m} bg={ZONE_COLOR[r.zone]} size={12} />
             ))}
@@ -497,9 +482,7 @@ const volumeLandmarks: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="ok" kicker={s.landmarks} badge={s.setsWeek} onClick={open}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 'auto' }}>
-            {notable.map(row)}
-          </div>
+          <div className="ul-flex ul-col ug-8 umt-auto">{notable.map(row)}</div>
         </Widget>
       );
     const note = over[0]
@@ -529,8 +512,8 @@ const volumeLandmarks: WidgetDef = {
           />
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{rows.map(row)}</div>
-        <div style={{ display: 'flex', gap: 12, fontSize: 11.5 }}>
+        <div className="ul-flex ul-col ug-8">{rows.map(row)}</div>
+        <div className="uiw-t-sm ul-flex ug-12">
           <Swatch color="var(--color-ok-line)">{s.sweetSpot}</Swatch>
           <Swatch color="var(--color-neutral-700)">MEV–MRV</Swatch>
         </div>
@@ -620,16 +603,12 @@ const stimulusLeft: WidgetDef = {
     const bar = (r: StimRow) => (
       <div
         key={r.m}
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '84px 1fr 52px',
-          gap: 8,
-          alignItems: 'center',
-        }}
+        className="ul-grid ug-8 ua-center"
+        style={{ gridTemplateColumns: '84px 1fr 52px' }}
       >
         <Muted>{mName(t, r.m)}</Muted>
         <WidgetBar value={r.target ? r.done / r.target : 1} tone={r.left === 0 ? 'ok' : 'accent'} />
-        <span style={{ fontSize: 12, fontWeight: 600, textAlign: 'right' }}>
+        <span className="uiw-t-strong utx-right">
           {size === 'XL'
             ? `${fmtKg(r.done)} / ${r.target}${r.left === 0 ? ' ✓' : ''}`
             : r.left === 0
@@ -667,9 +646,7 @@ const stimulusLeft: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="accent" kicker={kick} badge={`${left} ${s.sets}`} onClick={go}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 'auto' }}>
-            {data.rows.slice(0, 4).map(bar)}
-          </div>
+          <div className="ul-flex ul-col ug-8 umt-auto">{data.rows.slice(0, 4).map(bar)}</div>
         </Widget>
       );
     const rd = muscleReadiness(finishedOf(store.workouts), now);
@@ -694,11 +671,11 @@ const stimulusLeft: WidgetDef = {
           />
         }
       >
-        <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+        <div className="ul-flex ug-14 ua-center">
           <WidgetRing value={pct} size={84}>
             {Math.round(pct * 100)}%
           </WidgetRing>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div className="ul-flex ul-col ug-2">
             <span className="uiw-value">
               {left}
               <span className="uiw-unit">{s.setsLeft}</span>
@@ -707,9 +684,7 @@ const stimulusLeft: WidgetDef = {
             {left > 0 && <Muted>{s.minutes(Math.round(left * 2.5))}</Muted>}
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-          {data.rows.slice(0, 5).map(bar)}
-        </div>
+        <div className="ul-flex ul-col ug-8">{data.rows.slice(0, 5).map(bar)}</div>
       </Widget>
     );
   },
@@ -759,23 +734,18 @@ function LrSheet({
   const l = est1rm(num(v.lw), Math.round(num(v.lr))) || num(v.lw);
   const r = est1rm(num(v.rw), Math.round(num(v.rr))) || num(v.rw);
   const field = (k: keyof typeof v, label: string, mode: 'decimal' | 'numeric') => (
-    <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <label className="uf-1 ul-flex ul-col ug-4">
       <Muted>{label}</Muted>
-      <input
-        className="input"
-        inputMode={mode}
-        value={v[k]}
-        onChange={(e) => setV({ ...v, [k]: e.target.value })}
-      />
+      <Field inputMode={mode} value={v[k]} onChange={(e) => setV({ ...v, [k]: e.target.value })} />
     </label>
   );
   return (
     <Sheet onClose={onClose}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '4px 0 12px' }}>
-        <strong style={{ fontSize: 17 }}>{s.lrTitle}</strong>
+      <div className="ul-flex ul-col ug-12" style={{ padding: '4px 0 12px' }}>
+        <strong className="uiw-t-lg">{s.lrTitle}</strong>
         <Muted>{s.lrHint}</Muted>
         {lifts.length > 0 && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <div className="ul-flex ug-6 ul-wrap">
             {lifts.slice(0, 6).map((n) => (
               <Chip key={n} size="sm" selected={n === name} onClick={() => setName(n)}>
                 {exName(n, locale)}
@@ -783,17 +753,12 @@ function LrSheet({
             ))}
           </div>
         )}
-        <input
-          className="input"
-          value={name}
-          placeholder={s.liftName}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <div style={{ display: 'flex', gap: 8 }}>
+        <Field value={name} placeholder={s.liftName} onChange={(e) => setName(e.target.value)} />
+        <div className="ul-flex ug-8">
           {field('lw', `${s.left} · kg`, 'decimal')}
           {field('lr', s.reps, 'numeric')}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="ul-flex ug-8">
           {field('rw', `${s.right} · kg`, 'decimal')}
           {field('rr', s.reps, 'numeric')}
         </div>
@@ -819,28 +784,21 @@ function LrRow({ x, locale, s }: { x: LrTest; locale: LocaleId; s: MusclesString
   const max = Math.max(x.l, x.r, 1);
   const even = Math.abs(d) < 2;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+    <div className="ul-flex ul-col ug-4">
+      <div className="ul-flex uj-between ug-8">
         <Muted>{exName(x.name, locale)}</Muted>
         <Tag
           text={even ? s.even : s.sideTag(d < 0 ? s.l : s.r, Math.round(Math.abs(d)))}
           good={even ? true : null}
         />
       </div>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '28px 1fr 1fr 28px',
-          gap: 4,
-          alignItems: 'center',
-        }}
-      >
+      <div className="ul-grid ug-4 ua-center" style={{ gridTemplateColumns: '28px 1fr 1fr 28px' }}>
         <Muted>{fmtKg(x.l)}</Muted>
         <span style={{ transform: 'scaleX(-1)' }}>
           <WidgetBar value={x.l / max} tone={!even && d < 0 ? 'injury' : 'accent'} />
         </span>
         <WidgetBar value={x.r / max} tone={!even && d > 0 ? 'injury' : 'accent'} />
-        <span style={{ textAlign: 'right' }}>
+        <span className="utx-right">
           <Muted>{fmtKg(x.r)}</Muted>
         </span>
       </div>
@@ -920,7 +878,7 @@ function LrWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
     else if (size === 'L')
       body = (
         <Widget size="L" tone="neutral" kicker={s.lrKicker} badge="L ← → R" onClick={add}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 'auto' }}>
+          <div className="ul-flex ul-col ug-8 umt-auto">
             {sorted.slice(0, 2).map((x) => (
               <LrRow key={x.name} x={x} locale={locale} s={s} />
             ))}
@@ -946,14 +904,14 @@ function LrWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
             />
           }
         >
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <div className="ul-flex ua-base ug-8">
             <span className="uiw-value">
               {even ? '±0' : `−${Math.round(Math.abs(d))}`}
               <span className="uiw-unit">%</span>
             </span>
             <Muted>{`${exName(w.name, locale)} · ${fmtDayMonth(w.at, locale)}`}</Muted>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+          <div className="ul-flex ul-col ug-10">
             {sorted.slice(0, 4).map((x) => (
               <LrRow key={x.name} x={x} locale={locale} s={s} />
             ))}
@@ -1081,11 +1039,11 @@ const muscleWeek: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="accent" onClick={open}>
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center', flex: 1 }}>
+          <div className="ul-flex ug-14 ua-center uf-1">
             {ring(96)}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+            <div className="ul-flex ul-col ug-4 umw-0">
               <span className="uiw-kicker">{s.muscleWeek}</span>
-              <span style={{ fontSize: 16, fontWeight: 600 }}>{name}</span>
+              <span className="uiw-t-lg">{name}</span>
               <Muted>{hint}</Muted>
             </div>
           </div>
@@ -1109,10 +1067,10 @@ const muscleWeek: WidgetDef = {
           />
         }
       >
-        <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+        <div className="ul-flex ug-14 ua-center">
           {ring(84)}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-            <span style={{ fontSize: 16, fontWeight: 600 }}>{name}</span>
+          <div className="ul-flex ul-col ug-2 umw-0">
+            <span className="uiw-t-lg">{name}</span>
             <Muted>{s.furthest}</Muted>
             <Muted>{toGo > 0 ? s.toGoBy(toGo, endDay) : s.goalHit}</Muted>
           </div>
@@ -1222,8 +1180,8 @@ function FreqGrid({
 }) {
   const cols = '84px repeat(7, 1fr) 26px';
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: cols, gap: 4, textAlign: 'center' }}>
+    <div className="ul-flex ul-col ug-6">
+      <div className="ul-grid ug-4 utx-center" style={{ gridTemplateColumns: cols }}>
         <span />
         {f.days.map((d) => (
           <Muted key={d}>{dayLabel(d, locale)}</Muted>
@@ -1233,15 +1191,10 @@ function FreqGrid({
       {rows.map((r, ri) => (
         <div
           key={r.key}
-          style={{
-            display: 'grid',
-            gridTemplateColumns: cols,
-            gap: 4,
-            alignItems: 'center',
-            justifyItems: 'center',
-          }}
+          className="ul-grid ug-4 ua-center"
+          style={{ gridTemplateColumns: cols, justifyItems: 'center' }}
         >
-          <span style={{ justifySelf: 'start', minWidth: 0, overflow: 'hidden' }}>
+          <span className="umw-0" style={{ justifySelf: 'start', overflow: 'hidden' }}>
             <Muted>{r.label}</Muted>
           </span>
           {f.grid[ri].map((mk, i) => (
@@ -1259,7 +1212,9 @@ function FreqGrid({
               outline={mk === 'plan' ? 'var(--color-accent-line)' : undefined}
             />
           ))}
-          <span style={{ fontSize: 12, fontWeight: 600, justifySelf: 'end' }}>{f.counts[ri]}×</span>
+          <span className="uiw-t-strong" style={{ justifySelf: 'end' }}>
+            {f.counts[ri]}×
+          </span>
         </div>
       ))}
     </div>
@@ -1352,7 +1307,7 @@ const frequencyW: WidgetDef = {
         }
       >
         <FreqGrid rows={rich} f={fr} locale={locale} />
-        <div style={{ display: 'flex', gap: 12, fontSize: 11.5 }}>
+        <div className="uiw-t-sm ul-flex ug-12">
           <Swatch color="var(--color-accent)">{s.trained}</Swatch>
           <Swatch color="var(--color-accent-line)">{s.planned}</Swatch>
         </div>
@@ -1466,7 +1421,7 @@ const pplSplit: WidgetDef = {
         items={PPL.map((k) => ({
           label: <Swatch color={PPL_COLOR[k]}>{s.pplName[k]}</Swatch>,
           value: withSets ? (
-            <span style={{ display: 'flex', flexDirection: 'column' }}>
+            <span className="ul-flex ul-col">
               <span>{pct[k]}%</span>
               <Muted>{s.setsTarget(tot[k], PPL_TARGET[k])}</Muted>
             </span>
@@ -1507,23 +1462,17 @@ const pplSplit: WidgetDef = {
       >
         {stack(tot)}
         {stats(true)}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div className="ul-flex ul-col ug-6">
           <span className="uiw-kicker">{s.byWeek}</span>
           {weeks.map((w) => (
             <div
               key={w.to}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '52px 1fr 32px',
-                gap: 8,
-                alignItems: 'center',
-              }}
+              className="ul-grid ug-8 ua-center"
+              style={{ gridTemplateColumns: '52px 1fr 32px' }}
             >
               <Muted>{fmtDayMonth(w.to - WEEK + DAY, locale)}</Muted>
               {stack(w.v, 8)}
-              <span style={{ fontSize: 12, textAlign: 'right' }}>
-                {w.v.push + w.v.pull + w.v.legs}
-              </span>
+              <span className="uiw-t-base utx-right">{w.v.push + w.v.pull + w.v.legs}</span>
             </div>
           ))}
         </div>
@@ -1617,13 +1566,12 @@ function HeatGrid({
     }
   return (
     <div
+      className="ul-grid uw-full"
       style={{
-        display: 'grid',
         gridTemplateRows: 'repeat(7, auto)',
         gridAutoFlow: 'column',
         gridAutoColumns: '1fr',
         gap: weeks > 20 ? 2 : 3,
-        width: '100%',
       }}
       aria-hidden
     >
@@ -1674,11 +1622,11 @@ const heatmap: WidgetDef = {
     if (size === 'S')
       return (
         <Widget size="S" tone="accent" kicker={s.consistency} onClick={open}>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flex: 1 }}>
-            <div style={{ width: 60, flex: 'none' }}>
+          <div className="ul-flex ug-10 ua-center uf-1">
+            <div className="uf-none" style={{ width: 60 }}>
               <HeatGrid heat={heat} now={now} weeks={4} />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className="ul-flex ul-col">
               <span className="uiw-value">{heat.weekStreak}</span>
               <Muted>{s.wkStreak}</Muted>
               <Muted>{s.perWeek(per)}</Muted>
@@ -1689,13 +1637,11 @@ const heatmap: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="accent" onClick={open}>
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center', flex: 1 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="ul-flex ug-14 ua-center uf-1">
+            <div className="uf-1 umw-0">
               <HeatGrid heat={heat} now={now} weeks={16} />
             </div>
-            <div
-              style={{ display: 'flex', flexDirection: 'column', gap: 2, width: 92, flex: 'none' }}
-            >
+            <div className="ul-flex ul-col ug-2 uf-none" style={{ width: 92 }}>
               <span className="uiw-kicker">{s.weeks16}</span>
               <span className="uiw-value">
                 {heat.weekStreak}
@@ -1728,15 +1674,15 @@ const heatmap: WidgetDef = {
           />
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div className="ul-flex ul-col ug-4">
           <Muted>{`${monthName(weekStartOf(now) - 51 * WEEK, locale, true)} – ${monthName(weekStartOf(now) - 26 * WEEK, locale, true)}`}</Muted>
           <HeatGrid heat={heat} now={now} weeks={26} endWeeksAgo={26} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div className="ul-flex ul-col ug-4">
           <Muted>{`${monthName(weekStartOf(now) - 25 * WEEK, locale, true)} – ${monthName(now, locale, true)}`}</Muted>
           <HeatGrid heat={heat} now={now} weeks={26} />
         </div>
-        <div style={{ display: 'flex', gap: 4, alignItems: 'center', fontSize: 11.5 }}>
+        <div className="uiw-t-sm ul-flex ug-4 ua-center">
           <Muted>{s.less}</Muted>
           {HEAT.map((c) => (
             <Cell key={c} bg={c} size={10} />
@@ -1766,10 +1712,10 @@ function GoalSheet({
   const [n, setN] = useState(value);
   return (
     <Sheet onClose={onClose}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '4px 0 12px' }}>
-        <strong style={{ fontSize: 17 }}>{s.goalTitle}</strong>
+      <div className="ul-flex ul-col ug-14" style={{ padding: '4px 0 12px' }}>
+        <strong className="uiw-t-lg">{s.goalTitle}</strong>
         <Muted>{s.goalHint}</Muted>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
+        <div className="ul-flex ua-center uj-center ug-20">
           <Button
             variant="secondary"
             icon="minus"
@@ -1874,12 +1820,10 @@ function WeeklyGoalWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   else if (size === 'S')
     body = (
       <Widget size="S" tone="accent" kicker={s.weeklyGoal} onClick={open}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 1 }}>
+        <div className="ul-flex ug-12 ua-center uf-1">
           {ring(64)}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: 14.5, fontWeight: 600 }}>
-              {toGo === 0 ? s.goalDone : s.nToGo(toGo)}
-            </span>
+          <div className="ul-flex ul-col">
+            <span className="uiw-t-md">{toGo === 0 ? s.goalDone : s.nToGo(toGo)}</span>
             <Muted>{toGo === 0 ? s.streakWeeks(streak + 1) : s.byDay(endDay)}</Muted>
           </div>
         </div>
@@ -1888,17 +1832,13 @@ function WeeklyGoalWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   else if (size === 'L')
     body = (
       <Widget size="L" tone="accent" onClick={open}>
-        <div style={{ display: 'flex', gap: 14, alignItems: 'center', flex: 1 }}>
+        <div className="ul-flex ug-14 ua-center uf-1">
           {ring(96)}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5, flex: 1, minWidth: 0 }}>
+          <div className="ul-flex ul-col ug-6 uf-1 umw-0">
             <span className="uiw-kicker">{s.goalKicker(goal)}</span>
             <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(7, 1fr)',
-                gap: 4,
-                textAlign: 'center',
-              }}
+              className="ul-grid ug-4 utx-center"
+              style={{ gridTemplateColumns: 'repeat(7, 1fr)' }}
             >
               {order.map((d) => (
                 <Muted key={d}>{dayLabel(d, locale)}</Muted>
@@ -1945,10 +1885,10 @@ function WeeklyGoalWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           />
         }
       >
-        <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+        <div className="ul-flex ug-14 ua-center">
           {ring(84)}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span style={{ fontSize: 16, fontWeight: 600 }}>{status}</span>
+          <div className="ul-flex ul-col ug-2">
+            <span className="uiw-t-lg">{status}</span>
             <Muted>{s.daysLeft(daysLeft)}</Muted>
             {streak > 0 && <Tag text={s.streakWeeks(streak)} good />}
           </div>
@@ -2074,12 +2014,12 @@ const sessionsMonth: WidgetDef = {
           badge={<Tag text={dTxt} good={good} />}
           onClick={open}
         >
-          <div style={{ display: 'flex', gap: 14, alignItems: 'flex-end', flex: 1 }}>
+          <div className="ul-flex ug-14 ua-end uf-1">
             <span className="uiw-value">
               {n}
               <span className="uiw-unit">{s.vsN(prev)}</span>
             </span>
-            <div style={{ flex: 1, minWidth: 0 }}>{bars(56)}</div>
+            <div className="uf-1 umw-0">{bars(56)}</div>
           </div>
         </Widget>
       );
@@ -2109,7 +2049,7 @@ const sessionsMonth: WidgetDef = {
           />
         }
       >
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+        <div className="ul-flex ua-base ug-10">
           <span className="uiw-value">
             {n}
             <span className="uiw-unit">{s.sessionsUnit}</span>
@@ -2253,7 +2193,7 @@ const bestTime: WidgetDef = {
         {header}
         {SLOTS.map((slot) => (
           <FragmentRow key={slot}>
-            <span style={{ textAlign: 'left' }}>
+            <span className="utx-left">
               {withVals ? (
                 <TwoLine title={<Muted>{s.slotName[slot]}</Muted>} sub={s.slotRange[slot]} />
               ) : (
@@ -2302,7 +2242,7 @@ const bestTime: WidgetDef = {
           sub={<Tag text={s.topSetsShort(sign(best.v))} good={best.v > 0 ? true : null} />}
           onClick={open}
         >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
+          <div className="ul-grid ug-4" style={{ gridTemplateColumns: 'repeat(7, 1fr)' }}>
             {[0, 1, 2, 3, 4, 5, 6].map((d) => (
               <Cell key={d} bg={timeColor(avg(best.slot, d))} />
             ))}
@@ -2312,13 +2252,11 @@ const bestTime: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="accent" onClick={open}>
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center', flex: 1 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>{grid(false)}</div>
-            <div
-              style={{ display: 'flex', flexDirection: 'column', gap: 3, width: 100, flex: 'none' }}
-            >
+          <div className="ul-flex ug-14 ua-center uf-1">
+            <div className="uf-1 umw-0">{grid(false)}</div>
+            <div className="ul-flex ul-col ug-4 uf-none" style={{ width: 100 }}>
               <span className="uiw-kicker">{s.bestTimeShort}</span>
-              <span style={{ fontSize: 14.5, fontWeight: 600 }}>{bestLabel}</span>
+              <span className="uiw-t-md">{bestLabel}</span>
               <Tag text={s.topSetsShort(sign(best.v))} good={best.v > 0 ? true : null} />
               <Muted>{s.fromN(g.sessions)}</Muted>
             </div>
@@ -2450,7 +2388,7 @@ const backOnTrack: WidgetDef = {
               />
             }
           >
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <div className="ul-flex ua-base ug-8">
               <span className="uiw-value">{s.onTrack}</span>
               <Muted>{line}</Muted>
             </div>
@@ -2543,7 +2481,7 @@ const backOnTrack: WidgetDef = {
           size="L"
           tone="active"
           kicker={s.botKicker(daysOff)}
-          title={<span style={{ fontSize: 14.5 }}>{s.ease}</span>}
+          title={<span className="uiw-t-md">{s.ease}</span>}
           onClick={start}
           footer={
             <NoteAction
@@ -2582,7 +2520,7 @@ const backOnTrack: WidgetDef = {
           />
         }
       >
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+        <div className="ul-flex ua-base ug-8">
           <span className="uiw-value">
             {daysOff}
             <span className="uiw-unit">{s.daysOffUnit}</span>

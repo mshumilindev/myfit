@@ -7,6 +7,10 @@
 import { isoWeekday, weekPos } from '../weekStart';
 import { useMemo } from 'react';
 import { fmtDayMonth, useT } from '../i18n';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { ListRow } from '../components/ui/GroupedList';
+import { IconTile } from '../components/ui/IconTile';
 import { Icon } from '../ui';
 import { consistencyStreak, latestWeight, restDayKeys, dayKey, type StoreState } from '../store';
 import {
@@ -165,7 +169,14 @@ export function ApexHome({
 
       <div className="apx-sec-label">{t.apexActiveChallenge}</div>
       {activeCard ? (
-        <button className="apx-card apx-active" onClick={() => onTab('challenges')}>
+        <Card
+          as="button"
+          pad="none"
+          tone="apex"
+          emphasis="hero"
+          className="apx-card apx-active"
+          onClick={() => onTab('challenges')}
+        >
           <Ring pct={activeCard.prog.pct} icon={activeCard.tmpl.icon} />
           <div className="apx-active-main">
             <div className="apx-active-title">
@@ -181,18 +192,23 @@ export function ApexHome({
             </div>
           </div>
           <Icon name="caret-right" className="apx-go" />
-        </button>
+        </Card>
       ) : (
-        <button className="apx-card apx-empty-card" onClick={() => onTab('challenges')}>
+        <Card
+          as="button"
+          pad="none"
+          className="apx-card apx-empty-card"
+          onClick={() => onTab('challenges')}
+        >
           <div className="apx-active-main">
             <div className="apx-active-title">{t.apexNoActive}</div>
             <div className="apx-active-sub">{t.apexStartOne}</div>
           </div>
           <Icon name="caret-right" className="apx-go" />
-        </button>
+        </Card>
       )}
 
-      <div className="apx-card apx-streak">
+      <Card pad="none" className="apx-card apx-streak">
         <span className="apx-streak-ic">
           <Icon name="fire" weight="fill" />
         </span>
@@ -205,12 +221,12 @@ export function ApexHome({
             <span key={i} className={`apx-dot st-${s}`} />
           ))}
         </div>
-      </div>
+      </Card>
 
       {nextRank && (
         <>
           <div className="apx-sec-label">{t.apexNextRank}</div>
-          <button className="apx-card apx-rank" onClick={() => onTab('ranks')}>
+          <Card as="button" pad="none" className="apx-card apx-rank" onClick={() => onTab('ranks')}>
             <span className="apx-rank-ic">
               <Icon name="trophy" weight="bold" />
             </span>
@@ -223,14 +239,20 @@ export function ApexHome({
               </div>
             </div>
             <span className="apx-accent num apx-rank-togo">+{nextRank.toGo} kg</span>
-          </button>
+          </Card>
         </>
       )}
 
       {latestAward && (
         <>
           <div className="apx-sec-label">{t.apexLatestAward}</div>
-          <button className="apx-card apx-award" onClick={() => onTab('awards')}>
+          <Card
+            as="button"
+            pad="none"
+            emphasis="hero"
+            className="apx-card apx-award"
+            onClick={() => onTab('awards')}
+          >
             <span className="apx-award-ic">
               {latestAward.emoji || <Icon name="medal" weight="fill" />}
             </span>
@@ -238,7 +260,7 @@ export function ApexHome({
               <div className="apx-award-title">{latestAward.title}</div>
               <div className="apx-award-sub">{fmtDayMonth(latestAward.at, locale)}</div>
             </div>
-          </button>
+          </Card>
         </>
       )}
 
@@ -246,21 +268,22 @@ export function ApexHome({
         <>
           <div className="apx-sec-head">
             <span className="apx-sec-label">{t.apexRecent}</span>
-            <button className="apx-seeall" onClick={() => onTab('feed')}>
+            <Button variant="link" size="sm" onClick={() => onTab('feed')}>
               {t.apexSeeAll}
-            </button>
+            </Button>
           </div>
-          <div className="apx-recent">
+          <Card pad="none" className="apx-recent">
             {recent.map((n) => (
-              <button key={n.id} className="apx-recent-row" onClick={() => onTab('feed')}>
-                <span className="apx-recent-ic">
-                  <Icon name={RECENT_ICON[n.kind] ?? 'star'} weight="fill" />
-                </span>
-                <span className="apx-recent-title">{n.title}</span>
-                <span className="apx-recent-time">{rel(n.ts)}</span>
-              </button>
+              <ListRow
+                key={n.id}
+                dense
+                icon={<IconTile size={30} icon={RECENT_ICON[n.kind] ?? 'star'} />}
+                label={n.title}
+                value={rel(n.ts)}
+                onClick={() => onTab('feed')}
+              />
             ))}
-          </div>
+          </Card>
         </>
       )}
     </div>

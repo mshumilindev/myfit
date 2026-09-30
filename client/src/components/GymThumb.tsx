@@ -4,7 +4,7 @@
  * graphic. Each level degrades on load error, so a slot is never blank. Used by
  * the gyms list, gym picker, gym detail header, and the live-session hero.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { resolvePhoto, staticMapThumb } from '../data/gymProviders';
 import { HouseGraphic } from './HouseGraphic';
 
@@ -17,6 +17,7 @@ export function GymThumb({
   lng,
   size = 64,
   eager = false,
+  boxed = false,
 }: {
   name: string;
   lat: number;
@@ -25,6 +26,9 @@ export function GymThumb({
   /** Heroes: load now at high priority. Lazy loading waits for layout/scroll
    *  and made the history-details hero photo appear seconds late. */
   eager?: boolean;
+  /** Render inside its own size×size rounded box (list-row icons); otherwise the
+   *  parent's CSS sizes the image (heroes, cards). */
+  boxed?: boolean;
 }) {
   const key = `${name}|${lat},${lng}`;
   // Resolved photos are remembered for the session, so a gym seen once (a live
@@ -57,11 +61,19 @@ export function GymThumb({
   const cached = RESOLVED.get(key);
   const photoUrl = photo?.key === key ? photo.url : cached;
 
-  if (unknown) return <HouseGraphic size={size} />;
+  const box = (node: ReactNode) =>
+    boxed ? (
+      <span className="gymthumb" style={{ width: size, height: size }}>
+        {node}
+      </span>
+    ) : (
+      node
+    );
+  if (unknown) return box(<HouseGraphic size={size} />);
   const map = staticMapThumb(lat, lng);
   const src = photoUrl && !failed.has(photoUrl) ? photoUrl : !failed.has(map) ? map : null;
-  if (!src) return <HouseGraphic size={size} />;
-  return (
+  if (!src) return box(<HouseGraphic size={size} />);
+  return box(
     <img
       className="lighten"
       src={src}
@@ -70,6 +82,6 @@ export function GymThumb({
       decoding={eager ? 'sync' : 'async'}
       {...(eager ? { fetchPriority: 'high' as const } : {})}
       onError={() => setFailed((f) => new Set(f).add(src))}
-    />
+    />,
   );
 }

@@ -80,11 +80,11 @@ const readiness: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="ok" kicker={tw.readiness} onClick={open}>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <div className="ul-flex ug-16 ua-center">
             <WidgetRing value={avg} size={96}>
               {pct(avg)}
             </WidgetRing>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="uf-1 umw-0">
               <WidgetList rows={rows.slice(0, 3)} />
             </div>
           </div>
@@ -555,11 +555,11 @@ function StageLadder({ idx, labels }: { idx: number; labels?: string[] }) {
       }}
     >
       {REHAB_STAGES.map((sid, i) => (
-        <div key={sid} style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+        <div key={sid} className="ul-flex ul-col ug-4 umw-0">
           <span
+            className="ur-pill"
             style={{
               height: 6,
-              borderRadius: 'var(--radius-pill)',
               background:
                 i < idx
                   ? 'var(--color-ok)'
@@ -570,8 +570,8 @@ function StageLadder({ idx, labels }: { idx: number; labels?: string[] }) {
           />
           {labels && (
             <span
+              className="uiw-t-sm"
               style={{
-                fontSize: 11,
                 color: i === idx ? 'var(--color-text)' : 'var(--color-text-muted)',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
@@ -690,9 +690,7 @@ const rehab: WidgetDef = {
           onClick={open}
           footer={
             <>
-              <span className="uiw-sub" style={{ flex: 1, minWidth: 0 }}>
-                {status}
-              </span>
+              <span className="uiw-sub uf-1 umw-0">{status}</span>
               {action}
             </>
           }

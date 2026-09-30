@@ -5,6 +5,9 @@
  * grid. Weigh-ins carry no notes. Read-only mode hides every edit control.
  */
 import { useState } from 'react';
+import { Field } from './ui/Field';
+import { Button, IconButton } from './ui/Button';
+import { Segmented } from './ui/Segmented';
 import {
   addWeight,
   bmiValue,
@@ -18,6 +21,7 @@ import type { BodyMetrics, WeightEntry } from '../types';
 import { fmtBodyWeightKg, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { DateField, TimeField } from './PickerFields';
+import { Tag } from './ui/Tag';
 
 function isoOf(ts: number): string {
   const d = new Date(ts);
@@ -68,8 +72,7 @@ function MetricInput(props: {
         {props.readOnly ? (
           <span className="bm-metric-val">{props.value != null ? props.value : '—'}</span>
         ) : (
-          <input
-            className="input"
+          <Field
             inputMode="decimal"
             value={text}
             placeholder="—"
@@ -171,10 +174,9 @@ export function BodyMetricsSection({
       <div className="bm-head">
         <div className="field-label">{t.bmTitle}</div>
         {readOnly && showReadOnlyBadge && (
-          <span className="bm-lock">
-            <Icon name="lock-simple" />
+          <Tag tone="neutral" icon={<Icon name="lock-simple" />}>
             {roleTag ?? t.bmReadOnly}
-          </span>
+          </Tag>
         )}
       </div>
 
@@ -201,10 +203,10 @@ export function BodyMetricsSection({
             )}
           </div>
           {!readOnly && (
-            <button className="btn btn-primary bm-add" onClick={() => setSheet({ kind: 'add' })}>
+            <Button variant="primary" className="bm-add" onClick={() => setSheet({ kind: 'add' })}>
               <Icon name="plus" />
               {t.bmAddWeight}
-            </button>
+            </Button>
           )}
         </div>
       ) : (
@@ -212,9 +214,9 @@ export function BodyMetricsSection({
           <div className="bm-empty-t">{t.bmNoEntries}</div>
           <div className="bm-empty-b">{t.bmNoEntriesBody}</div>
           {!readOnly && (
-            <button className="bm-empty-cta" onClick={() => setSheet({ kind: 'add' })}>
+            <Button variant="secondary" onClick={() => setSheet({ kind: 'add' })}>
               {t.bmAddWeight}
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -241,31 +243,23 @@ export function BodyMetricsSection({
       <div className="bm-about">
         <div className="bm-about-field">
           <div className="section-label">{t.sex}</div>
-          <div className="seg3 bm-sex-seg">
-            <button
-              className={bm.sex === 'male' ? 'active' : ''}
-              disabled={readOnly}
-              onClick={() => !readOnly && updateBodyMetrics({ sex: 'male' })}
-            >
-              {t.sexMale}
-            </button>
-            <button
-              className={bm.sex === 'female' ? 'active' : ''}
-              disabled={readOnly}
-              onClick={() => !readOnly && updateBodyMetrics({ sex: 'female' })}
-            >
-              {t.sexFemale}
-            </button>
-          </div>
+          <Segmented<'male' | 'female'>
+            className="bm-sex-seg"
+            value={bm.sex ?? null}
+            onChange={(v) => !readOnly && updateBodyMetrics({ sex: v })}
+            options={[
+              { value: 'male', label: t.sexMale, disabled: readOnly },
+              { value: 'female', label: t.sexFemale, disabled: readOnly },
+            ]}
+          />
         </div>
         <div className="bm-about-field">
           <div className="section-label">
             {t.birthday}
             {bmAge != null && <span className="bm-age">{t.ageYears(bmAge)}</span>}
           </div>
-          <input
+          <Field
             type="date"
-            className="bm-dob"
             value={bm.dob ?? ''}
             disabled={readOnly}
             max="2020-12-31"
@@ -304,13 +298,12 @@ export function BodyMetricsSection({
                   <span className="bm-entry-d muted">—</span>
                 )}
                 {!readOnly && (
-                  <button
-                    className="bm-entry-edit"
-                    aria-label={t.bmEditWeight}
+                  <IconButton
+                    icon="pencil-simple"
+                    label={t.bmEditWeight}
+                    size="sm"
                     onClick={() => setSheet({ kind: 'edit', entry: e })}
-                  >
-                    <Icon name="pencil-simple" />
-                  </button>
+                  />
                 )}
               </div>
             );
@@ -401,8 +394,7 @@ export function WeightSheet({
       <label className="bm-field">
         <span className="bm-field-label">{t.bmWeight}</span>
         <div className="bm-field-in">
-          <input
-            className="input"
+          <Field
             inputMode="decimal"
             autoFocus
             value={weight}
@@ -424,20 +416,20 @@ export function WeightSheet({
       </div>
       <div className="bm-sheet-actions">
         {editing && (
-          <button
-            className="bm-remove"
+          <Button
+            variant="danger"
+            icon="trash"
             onClick={() => {
               removeWeight(editing.id);
               onClose();
             }}
           >
-            <Icon name="trash" />
             {t.bmRemove}
-          </button>
+          </Button>
         )}
-        <button className="btn btn-primary grow" disabled={w == null || w <= 0} onClick={save}>
+        <Button variant="primary" className="grow" disabled={w == null || w <= 0} onClick={save}>
           {t.save}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );
@@ -481,8 +473,7 @@ export function ProfileCompletionGate() {
           <label className="bm-field">
             <span className="bm-field-label">{t.bmHeight}</span>
             <div className="bm-field-in">
-              <input
-                className="input"
+              <Field
                 inputMode="numeric"
                 autoFocus
                 value={height}
@@ -495,8 +486,7 @@ export function ProfileCompletionGate() {
           <label className="bm-field">
             <span className="bm-field-label">{t.bmGateWeight}</span>
             <div className="bm-field-in">
-              <input
-                className="input"
+              <Field
                 inputMode="decimal"
                 value={weight}
                 placeholder="84.0"
@@ -508,9 +498,9 @@ export function ProfileCompletionGate() {
         </div>
       </div>
       <div className="body-gate-foot">
-        <button className="btn btn-primary" disabled={!ready} onClick={finish}>
+        <Button variant="primary" disabled={!ready} onClick={finish}>
           {t.bmGateDone}
-        </button>
+        </Button>
         <p className="body-gate-note">{t.bmGateNote}</p>
       </div>
     </div>

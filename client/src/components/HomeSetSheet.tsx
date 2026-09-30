@@ -11,7 +11,15 @@
  *  • move     — create or edit your own move (name, measure, muscle, icon);
  *               hold your own move to edit it, and delete it from there.
  */
+import { Chip } from '../components/ui/Chip';
+import { BackButton } from './ui/BackButton';
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { Field } from './ui/Field';
+import { Button, IconButton } from './ui/Button';
+import { Card } from './ui/Card';
+import { ListRow } from './ui/GroupedList';
+import { IconTile } from './ui/IconTile';
+import { Segmented } from './ui/Segmented';
 import './HomeSet.css';
 import { deleteHomeMove, deleteHomeSet, saveHomeMove, saveHomeSet, useStore } from '../store';
 import {
@@ -31,6 +39,7 @@ import type { MuscleGroup } from '../data/exercises';
 import { fmtClock, fmtWeekdayShort, fmtDayMonth, useT } from '../i18n';
 import { ConfirmDialog, Icon, Sheet, useExerciseName } from '../ui';
 import { HomeMoveIcon } from './HomeMoveIcon';
+import { Tag } from './ui/Tag';
 
 type View =
   | { kind: 'list' }
@@ -197,10 +206,9 @@ function useLastLabel() {
 function MoveChip({ move }: { move: HomeMove }) {
   const exName = useExerciseName();
   return (
-    <span className="hs-chip">
-      <HomeMoveIcon icon={move.icon} />
+    <Tag tone="neutral" icon={<HomeMoveIcon icon={move.icon} />}>
       {move.custom ? move.name : exName(move.name)}
-    </span>
+    </Tag>
   );
 }
 
@@ -279,10 +287,10 @@ function ListView(props: {
           />
         ))}
       </div>
-      <button type="button" className="btn btn-secondary hs-wide" onClick={props.onNew}>
+      <Button variant="secondary" className="hs-wide" onClick={props.onNew}>
         <Icon name="plus" />
         {t.homeNewSet}
-      </button>
+      </Button>
       <div className="hs-hint">
         <Icon name="info" />
         {t.homeListHint}
@@ -301,9 +309,12 @@ function SelectTile(props: {
   const hold = useHold(props.onHold ?? (() => undefined), props.onToggle);
   const handlers = props.onHold ? hold : { onClick: props.onToggle };
   return (
-    <button
-      type="button"
-      className={`hs-tile${props.on ? ' on' : ''}`}
+    <Card
+      as="button"
+      pad="sm"
+      emphasis="quiet"
+      tone={props.on ? 'accent' : 'neutral'}
+      className="hs-tile"
       aria-pressed={props.on}
       {...handlers}
     >
@@ -316,7 +327,7 @@ function SelectTile(props: {
       <span className="hs-tile-name">
         {props.move.custom ? props.move.name : exName(props.move.name)}
       </span>
-    </button>
+    </Card>
   );
 }
 
@@ -344,14 +355,7 @@ function BuilderView(props: {
     <div className="hs-view">
       <div className="hs-head">
         {props.canGoBack && (
-          <button
-            type="button"
-            className="hs-back"
-            onClick={props.onBack}
-            aria-label={t.backAction}
-          >
-            <Icon name="caret-left" />
-          </button>
+          <BackButton className="hs-back" label={t.backAction} onClick={props.onBack} />
         )}
         <span className="hs-title">
           {!props.canGoBack && <Icon name="house" className="hs-title-ic" />}
@@ -359,16 +363,13 @@ function BuilderView(props: {
         </span>
       </div>
       <p className="hs-cap">{t.homeBuilderCap}</p>
-      <label className="field-block">
-        <span className="field-label">{t.homeNameLabel}</span>
-        <input
-          className="input"
-          value={draft.name}
-          maxLength={40}
-          placeholder={t.homeNamePlaceholder}
-          onChange={(e) => props.onDraft({ ...draft, name: e.target.value })}
-        />
-      </label>
+      <Field
+        label={t.homeNameLabel}
+        value={draft.name}
+        maxLength={40}
+        placeholder={t.homeNamePlaceholder}
+        onChange={(e) => props.onDraft({ ...draft, name: e.target.value })}
+      />
       <div className="hs-row-sp">
         <span className="section-label">{t.homeSpotterMoves}</span>
         {selectedCount > 0 && <span className="hs-count">{t.homeSelected(selectedCount)}</span>}
@@ -394,10 +395,16 @@ function BuilderView(props: {
             onHold={() => props.onEditMove(m)}
           />
         ))}
-        <button type="button" className="hs-tile new" onClick={props.onCreateMove}>
+        <Card
+          as="button"
+          pad="sm"
+          emphasis="quiet"
+          className="hs-tile"
+          onClick={props.onCreateMove}
+        >
           <Icon name="plus" className="hs-tile-ic" />
           <span className="hs-tile-name">{t.homeCreateOwn}</span>
-        </button>
+        </Card>
       </div>
       {store.home.moves.length > 0 && (
         <div className="hs-hint">
@@ -406,24 +413,20 @@ function BuilderView(props: {
         </div>
       )}
       <div className="hs-actions">
-        <button
-          type="button"
-          className="btn btn-secondary btn-big"
-          disabled={!canSave}
-          onClick={props.onSave}
-        >
+        <Button variant="secondary" size="lg" disabled={!canSave} onClick={props.onSave}>
           <Icon name="check" />
           {t.homeSave}
-        </button>
-        <button
-          type="button"
-          className="btn btn-primary btn-big hs-start"
+        </Button>
+        <Button
+          variant="primary"
+          size="lg"
+          className="hs-start"
           disabled={selectedCount === 0}
           onClick={props.onStart}
         >
           <Icon name="play" weight="fill" />
           {t.homeStart}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -457,13 +460,10 @@ function EditSetView(props: {
   return (
     <div className="hs-view">
       <div className="hs-head">
-        <button type="button" className="hs-back" onClick={props.onBack} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton className="hs-back" label={t.backAction} onClick={props.onBack} />
         <span className="hs-title">{t.homeEditSet}</span>
-        <button
-          type="button"
-          className="hs-link"
+        <Button
+          variant="link"
           disabled={!name.trim()}
           onClick={() => {
             save({ name: name.trim() });
@@ -471,17 +471,14 @@ function EditSetView(props: {
           }}
         >
           {t.homeSave}
-        </button>
+        </Button>
       </div>
-      <label className="field-block">
-        <span className="field-label">{t.homeNameLabel}</span>
-        <input
-          className="input"
-          value={name}
-          maxLength={40}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </label>
+      <Field
+        label={t.homeNameLabel}
+        value={name}
+        maxLength={40}
+        onChange={(e) => setName(e.target.value)}
+      />
       <div className="section-label">{t.homeMovesOrder}</div>
       <div className="hs-mlist">
         {moves.map((m, i) => (
@@ -493,49 +490,46 @@ function EditSetView(props: {
               <span className="hs-mname">{m.custom ? m.name : exName(m.name)}</span>
               <span className="hs-msub">{t.homeMeasureName[m.measure]}</span>
             </span>
-            <button
-              type="button"
+            <IconButton
+              size="sm"
               className="hs-mbtn"
+              icon="caret-up"
               disabled={i === 0}
-              aria-label={t.homeMoveUp}
+              label={t.homeMoveUp}
               onClick={() => move(i, -1)}
-            >
-              <Icon name="caret-up" />
-            </button>
-            <button
-              type="button"
+            />
+            <IconButton
+              size="sm"
               className="hs-mbtn"
+              icon="caret-down"
               disabled={i === moves.length - 1}
-              aria-label={t.homeMoveDown}
+              label={t.homeMoveDown}
               onClick={() => move(i, 1)}
-            >
-              <Icon name="caret-down" />
-            </button>
-            <button
-              type="button"
+            />
+            <IconButton
+              size="sm"
               className="hs-mbtn"
-              aria-label={t.homeRemoveMove}
+              icon="x"
+              label={t.homeRemoveMove}
               disabled={moves.length === 1}
               onClick={() => save({ moves: props.set.moves.filter((x) => x !== m.id) })}
-            >
-              <Icon name="x" />
-            </button>
+            />
           </div>
         ))}
       </div>
-      <button
-        type="button"
-        className="btn btn-secondary hs-wide"
+      <Button
+        variant="secondary"
+        className="hs-wide"
         onClick={() => props.onAddMove({ kind: 'editSet', id: props.set.id })}
       >
         <Icon name="plus" />
         {t.homeAddMove}
-      </button>
+      </Button>
       <div className="hs-spacer" />
-      <button type="button" className="btn danger-outline hs-wide" onClick={() => setConfirm(true)}>
+      <Button variant="danger" className="hs-wide" onClick={() => setConfirm(true)}>
         <Icon name="trash" />
         {t.homeDeleteSet}
-      </button>
+      </Button>
       <div className="hs-foot">{t.homeDeleteSetNote(props.set.name)}</div>
       {confirm && (
         <ConfirmDialog
@@ -566,26 +560,26 @@ function AddToSetView(props: { set: HomeSet; onBack: () => void; onCreate: () =>
     props.onBack();
   };
   const row = (m: HomeMove) => (
-    <button type="button" className="hs-mrow tap" key={m.id} onClick={() => add(m)}>
-      <span className="hs-mic">
-        <HomeMoveIcon icon={m.icon} />
-      </span>
-      <span className="hs-mtext">
-        <span className="hs-mname">{m.custom ? m.name : exName(m.name)}</span>
-        <span className="hs-msub">{t.homeMeasureName[m.measure]}</span>
-      </span>
-      <span className="hs-add" aria-hidden>
-        <Icon name="plus" />
-      </span>
-    </button>
+    <ListRow
+      key={m.id}
+      dense
+      strong
+      icon={
+        <IconTile size={40}>
+          <HomeMoveIcon icon={m.icon} />
+        </IconTile>
+      }
+      label={m.custom ? m.name : exName(m.name)}
+      sub={t.homeMeasureName[m.measure]}
+      trailing={<Icon name="plus" />}
+      onClick={() => add(m)}
+    />
   );
   const own = avail(store.home.moves);
   return (
     <div className="hs-view">
       <div className="hs-head">
-        <button type="button" className="hs-back" onClick={props.onBack} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton className="hs-back" label={t.backAction} onClick={props.onBack} />
         <span className="hs-title">{t.homeAddMove}</span>
       </div>
       {own.length > 0 && (
@@ -596,12 +590,13 @@ function AddToSetView(props: { set: HomeSet; onBack: () => void; onCreate: () =>
       )}
       <div className="section-label">{t.homeSpotterMoves}</div>
       <div className="hs-mlist">{avail(HOME_CATALOG).map(row)}</div>
-      <button type="button" className="hs-create-row" onClick={props.onCreate}>
-        <span className="hs-mic ghost">
-          <Icon name="plus" />
-        </span>
-        {t.homeCreateOwnMove}
-      </button>
+      <ListRow
+        dense
+        strong
+        icon={<IconTile outline size={40} icon="plus" />}
+        label={t.homeCreateOwnMove}
+        onClick={props.onCreate}
+      />
     </div>
   );
 }
@@ -626,15 +621,12 @@ export function MoveForm(props: {
   return (
     <div className="hs-view">
       <div className="hs-head">
-        <button type="button" className="hs-back" onClick={props.onBack} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton className="hs-back" label={t.backAction} onClick={props.onBack} />
         <span className="hs-title">{m ? t.homeEditMove : t.homeNewMove}</span>
       </div>
       <label className="field-block">
         <span className="field-label">{t.homeNameLabel}</span>
-        <input
-          className="input"
+        <Field
           value={name}
           maxLength={40}
           autoFocus={!m}
@@ -645,31 +637,23 @@ export function MoveForm(props: {
       </label>
       <div className="field-block">
         <span className="field-label">{t.homeMeasuredBy}</span>
-        <div className="seg2 hs-seg">
-          {(['reps', 'hold', 'time'] as const).map((k) => (
-            <button
-              key={k}
-              type="button"
-              className={measure === k ? 'active' : ''}
-              onClick={() => setMeasure(k)}
-            >
-              {t.homeMeasureName[k]}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          className="hs-seg"
+          value={measure}
+          onChange={setMeasure}
+          options={(['reps', 'hold', 'time'] as const).map((k) => ({
+            value: k,
+            label: t.homeMeasureName[k],
+          }))}
+        />
       </div>
       <div className="field-block">
         <span className="field-label">{t.homeMuscle}</span>
         <div className="hs-chips wrap">
           {HOME_MUSCLES.map((g) => (
-            <button
-              key={g}
-              type="button"
-              className={`hs-mchip${muscle === g ? ' on' : ''}`}
-              onClick={() => setMuscle(g)}
-            >
+            <Chip selected={muscle === g} key={g} onClick={() => setMuscle(g)}>
               {(t.muscleGroups as Record<string, string>)[g] ?? g}
-            </button>
+            </Chip>
           ))}
         </div>
       </div>
@@ -677,38 +661,34 @@ export function MoveForm(props: {
         <span className="field-label">{t.homeIcon}</span>
         <div className="hs-icons">
           {HOME_ICONS.map((k) => (
-            <button
+            <Chip
+              className="hs-icbtn"
               key={k}
-              type="button"
-              className={`hs-icbtn${icon === k ? ' on' : ''}`}
+              selected={icon === k}
               aria-label={k}
-              aria-pressed={icon === k}
               onClick={() => setIcon(k)}
             >
               <HomeMoveIcon icon={k} />
-            </button>
+            </Chip>
           ))}
         </div>
       </div>
       <div className="hs-spacer" />
-      <button
-        type="button"
-        className="btn btn-primary btn-big hs-wide"
+      <Button
+        variant="primary"
+        size="lg"
+        className="hs-wide"
         disabled={!!err}
         onClick={() => props.onSaved(saveHomeMove({ id: m?.id, name, measure, muscle, icon }))}
       >
         <Icon name="check" />
         {m ? t.homeSave : t.homeSaveMove}
-      </button>
+      </Button>
       {m && (
-        <button
-          type="button"
-          className="btn danger-outline hs-wide"
-          onClick={() => setConfirm(true)}
-        >
+        <Button variant="danger" className="hs-wide" onClick={() => setConfirm(true)}>
           <Icon name="trash" />
           {t.homeDeleteMove}
-        </button>
+        </Button>
       )}
       {confirm && m && (
         <ConfirmDialog

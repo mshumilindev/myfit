@@ -5,6 +5,11 @@
  * types. Advanced exercise options live behind "More".
  */
 import { useMemo, useState, type ReactNode } from 'react';
+import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
+import { Chip } from '../../components/ui/Chip';
+import { Field } from '../../components/ui/Field';
+import { ListRow } from '../../components/ui/GroupedList';
 import { MusclePickerMap, equipmentIconName } from '../../components/Muscle';
 import type { MuscleGroup } from '../../data/exercises';
 import { CardioMachineList } from '../../components/CardioMachineList';
@@ -37,7 +42,8 @@ import {
   type Program,
   type ProgramItem,
 } from './model';
-import { IconButton, ModeTabs, Stepper, ToggleRow } from './pieces';
+import { IconButton, ModeTabs, ToggleRow } from './pieces';
+import { NumberStepper } from '../../components/ui/NumberStepper';
 
 /** Target-muscle tiles grouped like the exercise picker's families. */
 const MUSCLE_BLOCKS: { id: string; muscles: MuscleGroup[] }[] = [
@@ -117,16 +123,19 @@ export function DayEditor({
               {b.muscles.map((m) => {
                 const on = target.includes(m);
                 return (
-                  <button
+                  <Card
+                    as="button"
                     key={m}
-                    type="button"
+                    pad="none"
+                    tone={on ? 'accent' : 'neutral'}
+                    emphasis={on ? 'hero' : 'card'}
                     className={`pg-mtile${on ? ' on' : ''}`}
                     aria-pressed={on}
                     disabled={readOnly}
                     onClick={() => update((p) => toggleMuscle(p, day, m))}
                   >
                     {t.muscleGroups[m]}
-                  </button>
+                  </Card>
                 );
               })}
             </div>
@@ -151,10 +160,9 @@ export function DayEditor({
       )}
       <ItemList items={items} readOnly={readOnly} update={update} shell={shell} />
       {!readOnly && (
-        <button type="button" className="pg-add" onClick={() => setPickerOpen(true)}>
-          <Icon name="plus" />
+        <Button variant="secondary" fullWidth icon="plus" onClick={() => setPickerOpen(true)}>
           {t.addExercise}
-        </button>
+        </Button>
       )}
       {items.length > 0 && (
         <p className="pg-note">
@@ -175,8 +183,7 @@ export function DayEditor({
       <div className="pg-day-head">
         <div className="pg-day-title">
           <span className="pg-kicker">{weekday}</span>
-          <input
-            className="pg-day-name"
+          <Field
             value={program.dayNames[String(day)] ?? ''}
             placeholder={t.pgNameThisDay}
             maxLength={40}
@@ -193,24 +200,31 @@ export function DayEditor({
       {mode === 'muscles' ? musclesBody : exercisesBody}
       <div className="pg-daynav">
         {prev ? (
-          <button type="button" className="pg-nav prev" onClick={prev.onClick}>
+          <Card as="button" pad="none" className="pg-nav prev" onClick={prev.onClick}>
             <Icon name="caret-left" />
             <span>
               {prev.sub && <small>{prev.sub}</small>}
               {prev.label}
             </span>
-          </button>
+          </Card>
         ) : (
           <span />
         )}
         {next && (
-          <button type="button" className="pg-nav next" onClick={next.onClick}>
+          <Card
+            as="button"
+            pad="none"
+            tone="accent"
+            emphasis="hero"
+            className="pg-nav next"
+            onClick={next.onClick}
+          >
             <span>
               {next.sub && <small>{next.sub}</small>}
               {next.label}
             </span>
             <Icon name="caret-right" />
-          </button>
+          </Card>
         )}
       </div>
     </div>
@@ -253,6 +267,8 @@ export function DayEditor({
       {side}
       {confirmMuscles && (
         <ConfirmDialog
+          tone="illness"
+          icon="warning"
           title={t.pgSwitchMusclesTitle}
           body={t.pgSwitchMusclesBody(items.length)}
           confirmLabel={t.pgSwitchAction}
@@ -274,22 +290,20 @@ export function DayEditor({
               {weekOrder(weekStart)
                 .filter((d) => d !== day)
                 .map((d) => (
-                  <button
+                  <ListRow
                     key={d}
-                    type="button"
-                    className="pg-list-row"
+                    label={t.weekDayNames[d - 1]}
+                    sub={
+                      isTrainingDay(program, d)
+                        ? dayName(program, d) || t.pgUnnamed
+                        : t.progRestShort
+                    }
+                    chevron
                     onClick={() => {
                       update((p) => copyDay(p, day, d));
                       setCopyOpen(false);
                     }}
-                  >
-                    <b>{t.weekDayNames[d - 1]}</b>
-                    <span>
-                      {isTrainingDay(program, d)
-                        ? dayName(program, d) || t.pgUnnamed
-                        : t.progRestShort}
-                    </span>
-                  </button>
+                  />
                 ))}
             </div>
           </div>
@@ -361,15 +375,16 @@ function ItemList({
             <div key={it.id} className="pg-row cardio">
               <Icon name="pulse" />
               <span className="n">{exName(it.name)}</span>
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 className="pg-sr"
                 disabled={readOnly}
                 aria-label={t.pgMinutesOf(exName(it.name))}
                 onClick={() => setEditing(it)}
               >
                 {it.durationMin ?? 10} {t.minShort}
-              </button>
+              </Button>
               {!readOnly && (
                 <IconButton
                   icon="x"
@@ -388,15 +403,16 @@ function ItemList({
             <div className="pg-row">
               {label && <span className="pg-ss">{label}</span>}
               <span className="n">{exName(it.name)}</span>
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 className="pg-sr"
                 disabled={readOnly}
                 aria-label={t.pgSetsRepsOf(exName(it.name))}
                 onClick={() => setEditing(it)}
               >
                 {it.sets} × {it.reps}
-              </button>
+              </Button>
               <IconButton
                 icon="info"
                 label={t.pgDetailsOf(exName(it.name))}
@@ -416,7 +432,12 @@ function ItemList({
               <div className="pg-more">
                 <div className="pg-more-row">
                   <span>{t.progEquipment}</span>
-                  <button type="button" className="pg-more-val" onClick={() => setEquipFor(it)}>
+                  <Button
+                    variant="link"
+                    className="pg-more-val"
+                    iconTrailing="plus"
+                    onClick={() => setEquipFor(it)}
+                  >
                     {it.equipment.length ? (
                       it.equipment.map((e) => (
                         <span key={e} className="pg-eq">
@@ -426,8 +447,7 @@ function ItemList({
                     ) : (
                       <span className="pg-link">{t.pgAddEquipment}</span>
                     )}
-                    <Icon name="plus" />
-                  </button>
+                  </Button>
                 </div>
                 <ToggleRow
                   label={t.pgDropLastSet}
@@ -437,63 +457,65 @@ function ItemList({
                 <div className="pg-more-row">
                   <span>{t.pgSupersetWith}</span>
                   {label ? (
-                    <button
-                      type="button"
-                      className="pg-more-val pg-link"
+                    <Button
+                      variant="link"
+                      className="pg-more-val"
                       onClick={() => update((p) => ungroup(p, it.id))}
                     >
                       {label} · {t.ungroup}
-                    </button>
+                    </Button>
                   ) : (
-                    <button
-                      type="button"
-                      className="pg-more-val pg-link"
+                    <Button
+                      variant="link"
+                      className="pg-more-val"
                       disabled={lifts.length < 2}
                       onClick={() => setPairFor(it)}
                     >
                       {t.pgChooseExercise}
-                    </button>
+                    </Button>
                   )}
                 </div>
                 <div className="pg-more-row">
                   <span>{t.pgHistory}</span>
-                  <button
-                    type="button"
-                    className="pg-more-val pg-link"
+                  <Button
+                    variant="link"
+                    className="pg-more-val"
+                    iconTrailing="caret-right"
                     onClick={() => shell.openOverlay({ screen: 'exercise-history', name: it.name })}
                   >
                     {t.openHistory}
-                    <Icon name="caret-right" />
-                  </button>
+                  </Button>
                 </div>
                 <div className="pg-more-actions">
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon="arrow-up"
                     disabled={idx === 0}
                     onClick={() => update((p) => moveItem(p, it.id, -1))}
                   >
-                    <Icon name="arrow-up" />
                     {t.pgMoveUp}
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon="arrow-fat-down"
                     disabled={idx === items.length - 1}
                     onClick={() => update((p) => moveItem(p, it.id, 1))}
                   >
-                    <Icon name="arrow-fat-down" />
                     {t.pgMoveDown}
-                  </button>
-                  <button
-                    type="button"
-                    className="danger"
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    icon="trash"
                     onClick={() => {
                       setOpen(null);
                       update((p) => removeItem(p, it.id));
                     }}
                   >
-                    <Icon name="trash" />
                     {t.pgRemove}
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -529,20 +551,16 @@ function ItemList({
               {lifts
                 .filter((x) => x.id !== pairFor.id)
                 .map((x) => (
-                  <button
+                  <ListRow
                     key={x.id}
-                    type="button"
-                    className="pg-list-row"
+                    label={exName(x.name)}
+                    sub={`${x.sets} × ${x.reps}`}
+                    chevron
                     onClick={() => {
                       update((p) => supersetWith(p, pairFor.id, x.id));
                       setPairFor(null);
                     }}
-                  >
-                    <b>{exName(x.name)}</b>
-                    <span>
-                      {x.sets} × {x.reps}
-                    </span>
-                  </button>
+                  />
                 ))}
             </div>
           </div>
@@ -569,49 +587,34 @@ function SetsSheet({
   const [sets, setSets] = useState(item.sets || 3);
   const [reps, setReps] = useState(item.reps || 10);
   const [mins, setMins] = useState(item.durationMin ?? 10);
-  const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
   return (
     <Sheet onClose={onClose}>
       <div className="pg-sheet">
         <h3>{exName(item.name)}</h3>
         {timed ? (
-          <Stepper
-            big
-            value={mins}
+          <NumberStepper
+            size="big"
             label={t.minShort}
-            decLabel={t.pgLess}
-            incLabel={t.pgMore}
-            onDec={() => setMins((v) => clamp(v - 5, 1, 240))}
-            onInc={() => setMins((v) => clamp(v + 5, 1, 240))}
+            value={mins}
+            step={5}
+            min={1}
+            max={240}
+            onChange={setMins}
           />
         ) : (
           <div className="pg-sets">
-            <Stepper
-              value={sets}
-              label={t.progSets}
-              decLabel={t.pgFewer(t.progSets)}
-              incLabel={t.pgMoreOf(t.progSets)}
-              onDec={() => setSets((v) => clamp(v - 1, 1, 20))}
-              onInc={() => setSets((v) => clamp(v + 1, 1, 20))}
-            />
+            <NumberStepper label={t.progSets} value={sets} min={1} max={20} onChange={setSets} />
             <span className="pg-x">×</span>
-            <Stepper
-              value={reps}
-              label={t.progReps}
-              decLabel={t.pgFewer(t.progReps)}
-              incLabel={t.pgMoreOf(t.progReps)}
-              onDec={() => setReps((v) => clamp(v - 1, 1, 100))}
-              onInc={() => setReps((v) => clamp(v + 1, 1, 100))}
-            />
+            <NumberStepper label={t.progReps} value={reps} min={1} max={100} onChange={setReps} />
           </div>
         )}
-        <button
-          type="button"
-          className="btn btn-primary pg-wide"
+        <Button
+          variant="primary"
+          className="pg-wide"
           onClick={() => onSave(timed ? { durationMin: mins } : { sets, reps })}
         >
           {t.pgDone}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );
@@ -636,22 +639,21 @@ function EquipmentSheet({
           {EQUIPMENT_IDS.map((id) => {
             const on = sel.includes(id);
             return (
-              <button
+              <Chip
                 key={id}
-                type="button"
-                className={`pg-eqtile${on ? ' on' : ''}`}
-                aria-pressed={on}
+                className="pg-eqtile"
+                selected={on}
+                icon={equipmentIconName(id)}
                 onClick={() => setSel((s) => (on ? s.filter((x) => x !== id) : [...s, id]))}
               >
-                <Icon name={equipmentIconName(id)} />
                 {t.equipmentNames[id]}
-              </button>
+              </Chip>
             );
           })}
         </div>
-        <button type="button" className="btn btn-primary pg-wide" onClick={() => onSave(sel)}>
+        <Button variant="primary" className="pg-wide" onClick={() => onSave(sel)}>
           {t.pgDone}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

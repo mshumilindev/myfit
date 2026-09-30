@@ -6,6 +6,7 @@
  * and the Exercises library. Each tile drills into that page, which carries a
  * "‹ Overview" back link.
  */
+import { Card } from '../components/ui/Card';
 import { dateInWeek, useWeekStartDay, weekOrder, weekStartOf } from '../weekStart';
 import { useMemo, useState } from 'react';
 import type { Shell } from '../App';
@@ -104,7 +105,12 @@ export function OverviewView({
     <div className="screen ov-page">
       <h2 className="visually-hidden">{t.overviewTab}</h2>
       <div className="ov-grid ov-top">
-        <button type="button" className="ov-tile ov-progress" onClick={() => onProgress('total')}>
+        <Card
+          as="button"
+          emphasis="hero"
+          className="ov-tile ov-progress"
+          onClick={() => onProgress('total')}
+        >
           <span className="ov-hd">
             <span className="ov-k">{t.progress}</span>
             <Icon name="chart-line-up" />
@@ -125,9 +131,10 @@ export function OverviewView({
               />
             ))}
           </span>
-        </button>
-        <button
-          type="button"
+        </Card>
+        <Card
+          as="button"
+          tone={hasRisk ? 'atlas' : 'neutral'}
           className={`ov-tile ov-trends${hasRisk ? ' is-risk' : ''}`}
           onClick={onTrends}
         >
@@ -151,8 +158,8 @@ export function OverviewView({
                   : (trends.insights[0]?.headline ?? '')}
             </span>
           </span>
-        </button>
-        <button type="button" className="ov-tile ov-records" onClick={() => onProgress('records')}>
+        </Card>
+        <Card as="button" className="ov-tile ov-records" onClick={() => onProgress('records')}>
           <span className="ov-hd">
             <span className="ov-k">{t.records}</span>
             <Icon name="trophy" />
@@ -163,7 +170,7 @@ export function OverviewView({
               {topLift ? `${exName(topLift.name)} ${Math.round(topLift.rm)} kg` : t.ovRecordsEmpty}
             </span>
           </span>
-        </button>
+        </Card>
       </div>
 
       <ProgramTile
@@ -176,7 +183,7 @@ export function OverviewView({
       />
 
       <div className="ov-grid">
-        <button type="button" className="ov-tile ov-sq" onClick={() => onPrograms('goals')}>
+        <Card as="button" className="ov-tile ov-sq" onClick={() => onPrograms('goals')}>
           <span className="ov-hd">
             <span className="ov-k">{t.goalsTab}</span>
             <Icon name="crosshair" />
@@ -187,8 +194,8 @@ export function OverviewView({
             </span>
             <span className="ov-ts">{focusN > 0 ? t.ovGoalsFocus(focusN) : t.ovGoalsNone}</span>
           </span>
-        </button>
-        <button type="button" className="ov-tile ov-sq" onClick={() => onPrograms('playbook')}>
+        </Card>
+        <Card as="button" className="ov-tile ov-sq" onClick={() => onPrograms('playbook')}>
           <span className="ov-hd">
             <span className="ov-k">{t.playbook}</span>
             <Icon name="cards" />
@@ -199,10 +206,10 @@ export function OverviewView({
             </span>
             <span className="ov-ts">{plays.length > 0 ? t.ovPlaybookSub : t.ovPlaybookEmpty}</span>
           </span>
-        </button>
+        </Card>
       </div>
 
-      <button type="button" className="ov-tile ov-row" onClick={() => onPrograms('exercises')}>
+      <Card as="button" className="ov-tile ov-row" onClick={() => onPrograms('exercises')}>
         <span className="ov-row-ic">
           <Icon name="barbell" />
         </span>
@@ -211,7 +218,7 @@ export function OverviewView({
           <span className="ov-ts">{t.ovExercisesSub(libCount, mineCount)}</span>
         </span>
         <Icon name="caret-right" className="ov-row-go" />
-      </button>
+      </Card>
     </div>
   );
 }
@@ -239,7 +246,7 @@ function ProgramTile({
 
   if (!program) {
     return (
-      <button type="button" className="ov-tile ov-program is-empty" onClick={onOpen}>
+      <Card as="button" className="ov-tile ov-program is-empty" onClick={onOpen}>
         <span className="ov-hd">
           <span className="ov-k">{t.progTitle}</span>
           <Icon name="list-checks" />
@@ -248,7 +255,7 @@ function ProgramTile({
           <span className="ov-tt">{t.ovProgramNone}</span>
           <span className="ov-ts">{t.ovProgramNoneSub}</span>
         </span>
-      </button>
+      </Card>
     );
   }
 
@@ -268,7 +275,7 @@ function ProgramTile({
   })();
 
   return (
-    <button type="button" className="ov-tile ov-program" onClick={onOpen}>
+    <Card as="button" className="ov-tile ov-program" onClick={onOpen}>
       <span className="ov-hd">
         <span className="ov-k">{t.ovProgramKicker(program.program.name)}</span>
         <Icon name="list-checks" />
@@ -288,6 +295,6 @@ function ProgramTile({
         })}
       </span>
       <span className="ov-ts">{footer}</span>
-    </button>
+    </Card>
   );
 }

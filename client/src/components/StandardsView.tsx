@@ -1,8 +1,10 @@
 /** Standards (Заліки) sub-tab: your lifts vs rank norms + strength levels. */
 import { computeStandards, type DiscResult, type Sex } from '../standards';
+import { LinkButton } from './ui/Button';
 import type { BodyMetrics, Workout } from '../types';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
+import { Tag } from './ui/Tag';
 
 function latestWeight(body: BodyMetrics): number {
   if (!body?.weights?.length) return 0;
@@ -24,9 +26,9 @@ export function StandardsView({ finished, body }: { finished: Workout[]; body: B
         <Icon name="user-focus" />
         <h4 className="std-gate-t">{t.stdNeedProfileTitle}</h4>
         <p className="std-gate-b">{t.stdNeedProfileBody(missing.join(t.stdAnd))}</p>
-        <a className="btn btn-primary std-gate-cta" href="#/profile/me">
+        <LinkButton variant="primary" className="std-gate-cta" href="#/profile/me">
           {t.stdOpenProfile}
-        </a>
+        </LinkButton>
       </div>
     );
   }
@@ -47,9 +49,9 @@ export function StandardsView({ finished, body }: { finished: Workout[]; body: B
             {t.standardNames[r.key as keyof typeof t.standardNames] ?? r.name}
           </span>
           <span className="std-class">
-            <span className={`std-tag ${r.system}`}>
+            <Tag tone={r.system === 'rank' ? 'accent' : 'neutral'}>
               {r.system === 'rank' ? t.stdRankTag : t.stdLevelTag}
-            </span>
+            </Tag>
             {r.system === 'rank' && r.classLabel ? ` · ${t.stdClassUpTo(r.classLabel)}` : ''}
           </span>
         </div>

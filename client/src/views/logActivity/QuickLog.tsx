@@ -4,6 +4,8 @@
  * calendar), distance + pace for distance types, effort, a live kcal estimate,
  * the pin toggle, and Start timer (Now only) / Log it.
  */
+import { Button, IconButton } from '../../components/ui/Button';
+import { Field } from '../../components/ui/Field';
 import { useMemo, useState } from 'react';
 import {
   latestWeight,
@@ -40,6 +42,7 @@ import {
   typeIcon,
   typeName,
 } from './shared';
+import { Tag } from '../../components/ui/Tag';
 
 const PRESETS = [15, 30, 45, 60, 90];
 const EFFORTS: ActivityEffort[] = ['light', 'moderate', 'hard'];
@@ -182,18 +185,17 @@ export function QuickLog(props: QuickLogProps) {
         ]}
       />
       {custom && (
-        <label className="la-fld la-fld-gap">
-          <span className="la-unit">{t.laMinutes}</span>
-          <input
-            type="number"
-            inputMode="numeric"
-            min={1}
-            max={1440}
-            value={minutes || ''}
-            onChange={(e) => setMinutes(Math.max(0, Math.min(1440, Number(e.target.value) || 0)))}
-          />
-          <span className="la-unit la-unit-end">{t.minShort}</span>
-        </label>
+        <Field
+          className="la-fld-gap"
+          lead={t.laMinutes}
+          trail={t.minShort}
+          type="number"
+          inputMode="numeric"
+          min={1}
+          max={1440}
+          value={minutes || ''}
+          onChange={(e) => setMinutes(Math.max(0, Math.min(1440, Number(e.target.value) || 0)))}
+        />
       )}
     </div>
   );
@@ -228,18 +230,13 @@ export function QuickLog(props: QuickLogProps) {
       {when !== 'now' &&
         (web ? (
           <div className="la-grid2 la-gap-t">
-            <div>
-              <label className="la-fl" htmlFor="ql-start">
-                {t.laStartTime}
-              </label>
-              <input
-                id="ql-start"
-                className="la-fld plain"
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value || '00:00')}
-              />
-            </div>
+            <Field
+              id="ql-start"
+              label={t.laStartTime}
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value || '00:00')}
+            />
             <div>
               <span className="la-fl">{t.laEnds}</span>
               <div className="la-fld plain ghost">
@@ -249,14 +246,12 @@ export function QuickLog(props: QuickLogProps) {
           </div>
         ) : (
           <div className="la-grid2 la-gap-t center">
-            <label className="la-fld">
-              <span className="la-unit">{t.laStartLbl}</span>
-              <input
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value || '00:00')}
-              />
-            </label>
+            <Field
+              lead={t.laStartLbl}
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value || '00:00')}
+            />
             <p className="la-when-sum">
               {when === 'earlier' ? t.today : dayLabel} · {time}
               <br />
@@ -273,19 +268,14 @@ export function QuickLog(props: QuickLogProps) {
   const distanceBlock = type.tracksDistance ? (
     web ? (
       <div className="la-blk la-grid2 end">
-        <div>
-          <label className="la-fl" htmlFor="ql-dist">
-            {t.laDistanceKm}
-          </label>
-          <input
-            id="ql-dist"
-            className="la-fld plain"
-            type="text"
-            inputMode="decimal"
-            value={distance}
-            onChange={(e) => setDistance(e.target.value)}
-          />
-        </div>
+        <Field
+          id="ql-dist"
+          label={t.laDistanceKm}
+          type="text"
+          inputMode="decimal"
+          value={distance}
+          onChange={(e) => setDistance(e.target.value)}
+        />
         <div className="la-pacebox" aria-live="polite">
           <span>{t.laPace}</span>
           <b>{pace ? `${pace} /${t.laKm}` : '—'}</b>
@@ -301,32 +291,30 @@ export function QuickLog(props: QuickLogProps) {
             {t.laPace} <span className="la-tc">{pace ? `${pace} /${t.laKm}` : '—'}</span>
           </p>
         </div>
-        <div className="la-fld">
-          <input
-            id="ql-dist"
-            type="text"
-            inputMode="decimal"
-            value={distance}
-            onChange={(e) => setDistance(e.target.value)}
-          />
-          <span className="la-unit la-unit-end">{t.laKm}</span>
-          <button
-            type="button"
-            className="la-stp"
-            aria-label={t.laDecDist}
-            onClick={() => setDistance(fmtKm(Math.max(0, (km ?? 0) - 0.5)))}
-          >
-            <Icon name="minus" />
-          </button>
-          <button
-            type="button"
-            className="la-stp"
-            aria-label={t.laIncDist}
-            onClick={() => setDistance(fmtKm((km ?? 0) + 0.5))}
-          >
-            <Icon name="plus" />
-          </button>
-        </div>
+        <Field
+          id="ql-dist"
+          type="text"
+          inputMode="decimal"
+          value={distance}
+          onChange={(e) => setDistance(e.target.value)}
+          trail={
+            <>
+              <span className="la-unit la-unit-end">{t.laKm}</span>
+              <IconButton
+                size="sm"
+                icon="minus"
+                label={t.laDecDist}
+                onClick={() => setDistance(fmtKm(Math.max(0, (km ?? 0) - 0.5)))}
+              />
+              <IconButton
+                size="sm"
+                icon="plus"
+                label={t.laIncDist}
+                onClick={() => setDistance(fmtKm((km ?? 0) + 0.5))}
+              />
+            </>
+          }
+        />
       </div>
     )
   ) : null;
@@ -401,27 +389,27 @@ export function QuickLog(props: QuickLogProps) {
   const actions =
     web && when !== 'now' ? (
       <>
-        <button type="button" className="la-ob fg wide" onClick={log} disabled={future || !minutes}>
+        <Button variant="primary" size="lg" fullWidth onClick={log} disabled={future || !minutes}>
           {t.laLogIt(range)}
-        </button>
+        </Button>
         <p className="la-note center">{t.laPastNoTimer}</p>
       </>
     ) : (
       <>
         <div className="la-grid2 la-acts">
-          <button
-            type="button"
-            className="la-ob og"
+          <Button
+            variant="secondary"
+            size="lg"
+            icon="play"
             disabled={props.locked || when !== 'now'}
             aria-describedby={when !== 'now' ? 'ql-tn' : undefined}
             onClick={start}
           >
-            <Icon name="play" weight="fill" />
             {t.laStartTimer}
-          </button>
-          <button type="button" className="la-ob fg" onClick={log} disabled={future || !minutes}>
+          </Button>
+          <Button variant="primary" size="lg" onClick={log} disabled={future || !minutes}>
             {logLabel}
-          </button>
+          </Button>
         </div>
         {when !== 'now' && (
           <p id="ql-tn" className="la-note">
@@ -440,20 +428,14 @@ export function QuickLog(props: QuickLogProps) {
         <div className="la-ql-title">
           <div className="la-ql-name">
             <h2 id="ql-t">{title}</h2>
-            <span className="la-badge">
+            <Tag tone={type.category === 'recovery' ? 'rest' : type.sport ? 'sport' : 'accent'}>
               {type.category === 'recovery' ? t.actCountsRecovery : t.actAddsConditioning}
-            </span>
+            </Tag>
           </div>
           {lastLine && <p className="la-ql-last">{lastLine}</p>}
         </div>
-        <button
-          type="button"
-          className="la-ib"
-          aria-label={web ? t.laCloseQuick : t.srClose}
-          onClick={props.onClose}
-        >
-          <Icon name="x" />
-        </button>
+        {/* The bottom sheet already carries its own ×; only the desktop panel needs one. */}
+        {web && <IconButton icon="x" label={t.laCloseQuick} onClick={props.onClose} />}
       </div>
       {web && pinToggle}
       {durationBlock}

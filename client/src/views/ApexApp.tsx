@@ -9,9 +9,11 @@
  * bell) and a bottom nav ending in Apps; on desktop the shared icon rail. The
  * Feed (notifications) is reached via the bell, not a nav tab.
  */
+import { IconButton } from '../components/ui/Button';
+import { TabBar } from '../components/ui/TabBar';
+import { BrandBar, BellButton } from '../components/ui/BrandBar';
 import { useMemo, useState } from 'react';
 import { fmtDayMonth, useT } from '../i18n';
-import { Icon, LanguageSelector } from '../ui';
 import type { StoreState } from '../store';
 import { AppRail } from '../components/AppRail';
 import { ChallengesView } from './ChallengesView';
@@ -149,27 +151,22 @@ export function ApexApp({
         notifUnread={notifUnread}
       />
       <div className="apex-col">
-        <header className="app-brand apex-head">
-          <div className="app-brand-lead">
-            <span className="app-brand-word">spotter</span>
-            <button className="app-brand-app" onClick={onOpenShell} aria-label={t.shellSwitch}>
-              {t.apexName}
-            </button>
-          </div>
-          <div className="app-brand-actions">
-            <button className="app-bell" onClick={() => onTab('feed')} aria-label={t.feedTitle}>
-              <Icon
-                name="bell"
-                weight={tab === 'feed' ? 'fill' : undefined}
-                className="app-brand-icon"
+        <BrandBar
+          header
+          app={t.apexName}
+          onApp={onOpenShell}
+          appLabel={t.shellSwitch}
+          actions={
+            <>
+              <BellButton
+                label={t.feedTitle}
+                onClick={() => onTab('feed')}
+                active={tab === 'feed'}
+                count={tab !== 'feed' ? notifUnread : 0}
               />
-              {notifUnread > 0 && tab !== 'feed' && (
-                <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
-              )}
-            </button>
-            <LanguageSelector />
-          </div>
-        </header>
+            </>
+          }
+        />
 
         <div className="apex-body">
           {tab === 'feed' ? (
@@ -194,9 +191,7 @@ export function ApexApp({
                       <h2 className="title-26">{t.ranksTitle}</h2>
                       <span className="apex-title-sub">{t.ranksSub}</span>
                     </div>
-                    <button className="apx-share" onClick={shareRanks} aria-label={t.rcShare}>
-                      <Icon name="export" />
-                    </button>
+                    <IconButton icon="export" onClick={shareRanks} label={t.rcShare} />
                   </div>
                   <StandardsView finished={finished} body={store.bodyMetrics} />
                 </div>
@@ -205,9 +200,7 @@ export function ApexApp({
                 <div className="apex-page">
                   <div className="apex-title">
                     <h2 className="title-26">{t.awardsTitle}</h2>
-                    <button className="apx-share" onClick={shareAwards} aria-label={t.rcShare}>
-                      <Icon name="export" />
-                    </button>
+                    <IconButton icon="export" onClick={shareAwards} label={t.rcShare} />
                   </div>
                   <FeatsView
                     finished={finished}
@@ -222,24 +215,13 @@ export function ApexApp({
           )}
         </div>
 
-        <nav className="apex-nav" role="tablist">
-          {nav.map((x) => (
-            <button
-              key={x.id}
-              role="tab"
-              aria-selected={tab === x.id}
-              className={tab === x.id ? 'active' : ''}
-              onClick={() => onTab(x.id)}
-            >
-              <Icon name={x.icon} weight={tab === x.id ? 'fill' : undefined} />
-              <span>{x.label}</span>
-            </button>
-          ))}
-          <button className="apex-nav-apps" onClick={onOpenShell} aria-label={t.shellSwitch}>
-            <Icon name="squares-four" />
-            <span>{t.appsTab}</span>
-          </button>
-        </nav>
+        <TabBar
+          tabs
+          activeFill
+          items={nav.map((x) => ({ ...x, active: tab === x.id }))}
+          onSelect={(id) => onTab(id)}
+          apps={{ label: t.appsTab, ariaLabel: t.shellSwitch, onClick: onOpenShell }}
+        />
       </div>
       {share && (
         <StatShareSheet

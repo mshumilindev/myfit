@@ -181,6 +181,7 @@ export const et: Strings = {
   setYourGoalBody: 'Vali eesmärk, et Today näitaks järelejäänud kcal ja makrosid.',
   set: 'Sea',
   searchProductsOrDishes: 'Otsi tooteid või roogasid',
+  clearSearch: 'Tühjenda otsing',
 
   typeDish: 'Roog',
   typeDishDesc: 'Sõid väljas? Kirjuta — hindame',

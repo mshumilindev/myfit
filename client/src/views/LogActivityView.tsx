@@ -14,6 +14,11 @@
  *
  * The per-activity page (ActivityView) still owns the live timer and editing.
  */
+import { BackButton } from '../components/ui/BackButton';
+import { Button, IconButton } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { ListRow } from '../components/ui/GroupedList';
+import { IconTile } from '../components/ui/IconTile';
 import { withFirst } from '../accountOverrides';
 import {
   Fragment,
@@ -94,6 +99,7 @@ import {
   type CatId,
 } from './logActivity/shared';
 import './LogActivity.css';
+import { SearchField } from '../components/ui/SearchField';
 
 const HIDE_KEY = 'spotter.la.hidden';
 const QUEUE_KEY = 'spotter.la.queued';
@@ -455,34 +461,16 @@ export function LogActivityView({
 
   const searchField = (
     <div className={`la-search${query ? ' on' : ''}`} role="search">
-      <label htmlFor="la-q" className="la-search-ic">
-        <Icon name="magnifying-glass" />
-        <span className="la-vh">{t.laSearch}</span>
-      </label>
-      <input
+      <SearchField
         id="la-q"
         ref={searchRef}
-        type="search"
         placeholder={t.laSearch}
         value={query}
         aria-controls="la-res"
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={setQuery}
+        clearLabel={t.laClearSearch}
+        hint={web ? t.laAllTypes(ACTIVITY_TYPES.length) : undefined}
       />
-      {query ? (
-        <button
-          type="button"
-          className="la-clr"
-          aria-label={t.laClearSearch}
-          onClick={() => {
-            setQuery('');
-            searchRef.current?.focus();
-          }}
-        >
-          <Icon name="x" />
-        </button>
-      ) : (
-        web && <span className="la-search-n">{t.laAllTypes(ACTIVITY_TYPES.length)}</span>
-      )}
     </div>
   );
 
@@ -513,21 +501,16 @@ export function LogActivityView({
           ))}
         </div>
       )}
-      <button
-        type="button"
+      <ListRow
+        strong
+        chevron
         className="la-fb"
         aria-label={t.laLogAsOther(query.trim())}
+        icon={<IconTile outline size={36} icon="plus" />}
+        label={t.laLogAsOther(query.trim())}
+        sub={t.laLogAsOtherSub}
         onClick={() => openQuick('sport', { note: query.trim() })}
-      >
-        <span className="la-ico n36 neutral">
-          <Icon name="plus" />
-        </span>
-        <span className="la-fb-t">
-          <span className="la-rn">{t.laLogAsOther(query.trim())}</span>
-          <span className="la-rm">{t.laLogAsOtherSub}</span>
-        </span>
-        <Icon name="caret-right" className="la-faint" />
-      </button>
+      />
     </>
   );
 
@@ -577,27 +560,22 @@ export function LogActivityView({
           .filter(Boolean)
           .join(' · ');
         return (
-          <button
+          <ListRow
             key={a.id}
-            type="button"
-            className={`la-trow item ${toneClass(a.type)}`}
+            strong
+            chevron
+            className={toneClass(a.type)}
             aria-label={t.laEditAria(`${name}, ${fmtDur(durationMin(a), t)}, ${sub}`)}
-            onClick={() => shell.openOverlay({ screen: 'activity', editId: a.id })}
-          >
-            <span className="la-ico n36">
-              <Icon name={typeIcon(a.type)} />
-            </span>
-            <span className="la-grow">
-              <span className="la-row-g8">
-                <span className="la-cn">
-                  {name} · {fmtDur(durationMin(a), t)}
-                </span>
+            icon={<IconTile tone="inherit" size={36} icon={typeIcon(a.type)} />}
+            label={
+              <>
+                {name} · {fmtDur(durationMin(a), t)}
                 {a.id === justLogged && <span className="la-new">{t.laJustNow}</span>}
-              </span>
-              <span className="la-cm">{sub}</span>
-            </span>
-            <Icon name="caret-right" className="la-faint" />
-          </button>
+              </>
+            }
+            sub={sub}
+            onClick={() => shell.openOverlay({ screen: 'activity', editId: a.id })}
+          />
         );
       })}
     </section>
@@ -630,9 +608,10 @@ export function LogActivityView({
                   ? relDay(last.startedAt, now, t, locale)
                   : t.laNotYet;
             return (
-              <button
+              <Card
+                as="button"
+                pad="none"
                 key={k}
-                type="button"
                 className={`la-pcard ${toneClass(k)}${isLive ? ' live-on' : locked ? ' dim' : ''}`}
                 aria-label={
                   isLive
@@ -653,7 +632,7 @@ export function LogActivityView({
                   <span className="la-cn">{typeName(k, t)}</span>
                   <span className={`la-cm${isLive ? ' la-tc-g' : ''}`}>{meta}</span>
                 </span>
-              </button>
+              </Card>
             );
           })}
         </div>
@@ -715,29 +694,25 @@ export function LogActivityView({
                 <span className="la-grip" title={t.laDragToReorder}>
                   <Icon name="dots-six" />
                 </span>
-                <button
-                  type="button"
+                <ListRow
+                  strong
+                  dense
                   className="la-pinb"
                   aria-label={t.laPinnedAria(
                     typeName(k, t),
                     last ? lastMeta(last, now, t, locale, { distanceFirst: true }) : '',
                   )}
+                  icon={<IconTile tone="inherit" size={34} icon={typeIcon(k)} />}
+                  label={typeName(k, t)}
+                  sub={
+                    isLive
+                      ? t.laLive(clock(activityElapsedMs(liveAct, now)))
+                      : last
+                        ? lastMeta(last, now, t, locale, { distanceFirst: true })
+                        : t.laNotYet
+                  }
                   onClick={() => (isLive ? resumeLive() : openQuick(k))}
-                >
-                  <span className="la-ico n34">
-                    <Icon name={typeIcon(k)} />
-                  </span>
-                  <span className="la-grow">
-                    <span className="la-cn sm">{typeName(k, t)}</span>
-                    <span className="la-cm xs">
-                      {isLive
-                        ? t.laLive(clock(activityElapsedMs(liveAct, now)))
-                        : last
-                          ? lastMeta(last, now, t, locale, { distanceFirst: true })
-                          : t.laNotYet}
-                    </span>
-                  </span>
-                </button>
+                />
                 <PinToggle
                   pinned
                   tone="accent"
@@ -831,15 +806,14 @@ export function LogActivityView({
           <div key={c} className={`la-cwrap ${catTone(c)}${open ? ' la-cexp' : ''}`}>
             <div className="la-crow-line">
               {row}
-              <button
-                type="button"
+              <IconButton
+                size="sm"
                 className="la-cexp-btn"
+                icon={open ? 'caret-down' : 'caret-right'}
                 aria-expanded={open}
-                aria-label={open ? t.laHideTypes : t.laShowTypes}
+                label={open ? t.laHideTypes : t.laShowTypes}
                 onClick={() => setExpanded(open ? null : c)}
-              >
-                <Icon name={open ? 'caret-down' : 'caret-right'} />
-              </button>
+              />
             </div>
             {open && (
               <>
@@ -885,9 +859,9 @@ export function LogActivityView({
                 </div>
                 <div className="la-cexp-foot">
                   <span>{t.laDragOrClick}</span>
-                  <button type="button" className="la-see" onClick={() => goCat(c)}>
+                  <Button variant="link" size="sm" onClick={() => goCat(c)}>
                     {t.laAllCatN(catTypes(c).length, catName(c, t))} ›
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
@@ -914,9 +888,10 @@ export function LogActivityView({
           const name = typeName(s.type, t);
           const dur = done ? fmtDur(durationMin(done), t) : fmtApprox(s.medianMin, t);
           return (
-            <button
+            <Card
+              as="button"
+              pad="none"
               key={s.type}
-              type="button"
               className={`la-sug ${toneClass(s.type)}${done ? ' done' : ''}`}
               aria-label={done ? t.laDoneAria(name) : t.laLogAria(name, dur)}
               onClick={() => (done ? undefined : oneTapLog(s.type, s.medianMin))}
@@ -943,7 +918,7 @@ export function LogActivityView({
               <span className="la-sm">
                 {done ? t.laLoggedAt(hhmm(done.finishedAt ?? done.startedAt)) : sugMeta(s)}
               </span>
-            </button>
+            </Card>
           );
         })}
       </div>
@@ -975,14 +950,14 @@ export function LogActivityView({
                 {t.laDone}
               </span>
             ) : (
-              <button
-                type="button"
-                className="la-ob sm tone"
+              <Button
+                variant="secondary"
+                size="sm"
                 aria-label={t.laLogAria(name, dur)}
                 onClick={() => oneTapLog(s.type, s.medianMin)}
               >
                 {t.laPlusLog}
-              </button>
+              </Button>
             )}
           </div>
         );
@@ -997,23 +972,16 @@ export function LogActivityView({
         <span className="la-hint">{t.laFromLastDays(suggest.weeks || follower.of, weekday)}</span>
       </div>
       <div className="la-sugs one">
-        <button
-          type="button"
-          className={`la-sug row ${toneClass(follower.type)}`}
+        <ListRow
+          strong
+          className={toneClass(follower.type)}
           aria-pressed={queued === follower.type}
+          icon={<IconTile tone="inherit" size={36} icon={typeIcon(follower.type)} />}
+          label={`${typeName(follower.type, t)} · ${fmtApprox(follower.medianMin, t)}`}
+          sub={t.laOfferedOnFinish(follower.count, follower.of)}
+          value={queued === follower.type ? t.laQueued : t.laQueue}
           onClick={() => toggleQueue(follower.type)}
-        >
-          <span className="la-ico n36">
-            <Icon name={typeIcon(follower.type)} />
-          </span>
-          <span className="la-grow">
-            <span className="la-sn">
-              {typeName(follower.type, t)} · {fmtApprox(follower.medianMin, t)}
-            </span>
-            <span className="la-sm">{t.laOfferedOnFinish(follower.count, follower.of)}</span>
-          </span>
-          <span className="la-sug-act">{queued === follower.type ? t.laQueued : t.laQueue}</span>
-        </button>
+        />
       </div>
     </>
   );
@@ -1027,8 +995,10 @@ export function LogActivityView({
       <div className={web ? 'la-also-col' : 'la-sugs gap8'}>
         {STARTERS.map((k) => (
           <div key={k} className={`la-st ${toneClass(k)}`}>
-            <button
-              type="button"
+            <Card
+              as="button"
+              pad="none"
+              emphasis="quiet"
               className="la-stb"
               aria-label={t.laQuickLogAria(typeName(k, t))}
               {...tapProps(k, () => openQuick(k))}
@@ -1040,7 +1010,7 @@ export function LogActivityView({
                 <span className="la-cn">{typeName(k, t)}</span>
                 <span className="la-cm">{t.laStarterSub[k]}</span>
               </span>
-            </button>
+            </Card>
             <PinBtn k={k} pinned={pins.includes(k)} t={t} onPin={() => pin(k)} />
           </div>
         ))}
@@ -1079,8 +1049,10 @@ export function LogActivityView({
       const meta = last ? lastMeta(last, now, t, locale) : k === 'sport' ? t.laNameIt : t.laNotYet;
       return (
         <div key={k} className={`la-tile ${toneClass(k)}${isPinned ? ' on' : ''}`}>
-          <button
-            type="button"
+          <Card
+            as="button"
+            pad="none"
+            emphasis="quiet"
             className="la-tb"
             aria-label={`${typeName(k, t)}${last ? `, ${lastMeta(last, now, t, locale)}` : ''}`}
             {...tapProps(k, () => openQuick(k))}
@@ -1092,36 +1064,21 @@ export function LogActivityView({
               <span className="la-tn">{typeName(k, t)}</span>
               <span className={`la-tm${last ? '' : ' none'}`}>{meta}</span>
             </span>
-          </button>
+          </Card>
           <PinBtn k={k} pinned={isPinned} t={t} onPin={() => pin(k)} boxed />
         </div>
       );
     };
     const catSearch = (
       <div className={`la-search cat ${catTone(cat)}${catQuery ? ' on' : ''}`} role="search">
-        <label htmlFor="la-cq" className="la-search-ic">
-          <Icon name="magnifying-glass" />
-          <span className="la-vh">{t.laSearchIn[cat]}</span>
-        </label>
-        <input
+        <SearchField
           id="la-cq"
-          type="search"
           placeholder={t.laSearchIn[cat]}
           value={catQuery}
-          onChange={(e) => setCatQuery(e.target.value)}
+          onChange={setCatQuery}
+          clearLabel={t.laClearSearch}
+          hint={web ? t.laTypes(types.length) : undefined}
         />
-        {catQuery ? (
-          <button
-            type="button"
-            className="la-clr"
-            aria-label={t.laClearSearch}
-            onClick={() => setCatQuery('')}
-          >
-            <Icon name="x" />
-          </button>
-        ) : (
-          web && <span className="la-search-n">{t.laTypes(types.length)}</span>
-        )}
       </div>
     );
 
@@ -1134,14 +1091,7 @@ export function LogActivityView({
       return (
         <div className={`screen la ${catTone(cat)}`}>
           <div className="la-band">
-            <button
-              type="button"
-              className="la-ib tone"
-              aria-label={t.laBackToLog}
-              onClick={() => goCat(null)}
-            >
-              <Icon name="caret-left" />
-            </button>
+            <BackButton label={t.laBackToLog} onClick={() => goCat(null)} />
             <h1 className="la-ptitle">
               <span className="la-crumb">{t.logActivity}</span>
               <span className="la-row-g10">
@@ -1163,9 +1113,10 @@ export function LogActivityView({
               </div>
               <div className="la-row">
                 {recent.slice(0, 6).map((k) => (
-                  <button
+                  <Card
+                    as="button"
+                    pad="none"
                     key={k}
-                    type="button"
                     className={`la-pcard wide ${toneClass(k)}`}
                     aria-label={`${typeName(k, t)}, ${lastMeta(lastBy.get(k), now, t, locale)}`}
                     {...tapProps(k, () => openQuick(k))}
@@ -1177,7 +1128,7 @@ export function LogActivityView({
                       <span className="la-cn">{typeName(k, t)}</span>
                       <span className="la-cm">{lastMeta(lastBy.get(k), now, t, locale)}</span>
                     </span>
-                  </button>
+                  </Card>
                 ))}
               </div>
             </>
@@ -1232,9 +1183,7 @@ export function LogActivityView({
     return (
       <div className={`screen la la-web ${catTone(cat)}`}>
         <header className="la-wbar">
-          <button type="button" className="la-ib" aria-label={t.backAction} onClick={onClose}>
-            <Icon name="caret-left" />
-          </button>
+          <BackButton label={t.backAction} onClick={onClose} />
           <div className="la-grow">
             <div className="la-muted12">{t.logActivity}</div>
             <h1 className="la-wtitle">
@@ -1249,14 +1198,7 @@ export function LogActivityView({
         <div className="la-cols">
           <div className="la-left">
             <div className="la-cathead">
-              <button
-                type="button"
-                className="la-ib tone"
-                aria-label={t.laBackToCats}
-                onClick={() => goCat(null)}
-              >
-                <Icon name="caret-left" />
-              </button>
+              <BackButton label={t.laBackToCats} onClick={() => goCat(null)} />
               <div className="la-grow">
                 <div className="la-muted12">{t.laCatKicker}</div>
                 <div className="la-row-g10 la-mt2">
@@ -1274,15 +1216,16 @@ export function LogActivityView({
                     ? t.laPinnedToast(typeName(pinNote.key, t), pins.indexOf(pinNote.key) + 1)
                     : t.laUnpinnedToast(typeName(pinNote.key, t))}
                 </span>
-                <button
-                  type="button"
+                <Button
+                  variant="link"
+                  size="sm"
                   onClick={() => {
                     setActivityPins(pinNote.prev);
                     setPinNote(null);
                   }}
                 >
                   {t.undo}
-                </button>
+                </Button>
               </div>
             )}
             {yours.length > 0 && (
@@ -1321,9 +1264,7 @@ export function LogActivityView({
     return (
       <div className="screen la">
         <div className="la-pbar">
-          <button type="button" className="la-ib" aria-label={t.backAction} onClick={onClose}>
-            <Icon name="caret-left" />
-          </button>
+          <BackButton label={t.backAction} onClick={onClose} />
           <h1 className="la-ptitle">{t.logActivity}</h1>
         </div>
         <div className="la-sticky">
@@ -1375,9 +1316,7 @@ export function LogActivityView({
   return (
     <div className="screen la la-web">
       <header className="la-wbar">
-        <button type="button" className="la-ib" aria-label={t.backAction} onClick={onClose}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton label={t.backAction} onClick={onClose} />
         <div className="la-grow">
           <h1 className="la-wtitle">{t.logActivity}</h1>
           <div className="la-muted13">{t.actPickCap}</div>
@@ -1444,29 +1383,22 @@ export function LogActivityView({
           </div>
         ))}
         {todayActs.map((a) => (
-          <button
+          <ListRow
             key={a.id}
-            type="button"
-            className={`la-tl ${toneClass(a.type)}`}
-            onClick={() => shell.openOverlay({ screen: 'activity', editId: a.id })}
-          >
-            <span className="la-ico n32">
-              <Icon name={typeIcon(a.type)} />
-            </span>
-            <span className="la-grow">
-              <span className="la-row-g8">
-                <span className="la-cn sm">
-                  {a.note && a.type === 'sport' ? a.note : typeName(a.type, t)}
-                </span>
+            strong
+            dense
+            className={toneClass(a.type)}
+            icon={<IconTile tone="inherit" size={32} icon={typeIcon(a.type)} />}
+            label={
+              <>
+                {a.note && a.type === 'sport' ? a.note : typeName(a.type, t)}
                 {a.id === justLogged && <span className="la-new">{t.laJustNow}</span>}
-              </span>
-              <span className="la-cm">
-                {fmtDur(durationMin(a), t)}
-                {a.distanceKm ? ` · ${fmtKm(a.distanceKm)} ${t.laKm}` : ''}
-              </span>
-            </span>
-            <span className="la-muted12">{hhmm(a.startedAt)}</span>
-          </button>
+              </>
+            }
+            sub={`${fmtDur(durationMin(a), t)}${a.distanceKm ? ` · ${fmtKm(a.distanceKm)} ${t.laKm}` : ''}`}
+            value={hhmm(a.startedAt)}
+            onClick={() => shell.openOverlay({ screen: 'activity', editId: a.id })}
+          />
         ))}
       </>
     );
@@ -1495,14 +1427,14 @@ export function LogActivityView({
                     <span className="la-lbl">
                       {t.today} <span className="la-cnt">{t.laLoggedSum(entries, minutes)}</span>
                     </span>
-                    <button
-                      type="button"
-                      className="la-see muted"
+                    <Button
+                      variant="link"
+                      size="sm"
                       aria-expanded={todayOpen}
                       onClick={() => setTodayOpen(!todayOpen)}
                     >
                       {todayOpen ? t.laHideList : t.laShow} ›
-                    </button>
+                    </Button>
                   </div>
                   {todayOpen && todayList}
                 </div>
@@ -1646,8 +1578,10 @@ function ResultRow(props: {
       <span className="la-ico n36">
         <Icon name={typeIcon(hit.key)} />
       </span>
-      <button
-        type="button"
+      <Card
+        as="button"
+        pad="none"
+        emphasis="quiet"
         className="la-rr-b"
         aria-label={`${name}${hit.via ? `, ${hit.via}` : ''}, ${catName(c, t)}, ${meta}`}
         {...(props.drag ?? {})}
@@ -1660,7 +1594,7 @@ function ResultRow(props: {
         <span className="la-rm">
           <span className={`la-tc ${catTone(c)}`}>{catName(c, t)}</span> · {meta}
         </span>
-      </button>
+      </Card>
       <PinBtn k={hit.key} pinned={props.pinned} t={t} onPin={props.onPin} />
     </div>
   );
@@ -1696,15 +1630,13 @@ function LiveBanner(props: {
         </div>
       </div>
       <div className={`la-grid2 la-mt3${props.onFinish ? '' : ' one'}`}>
-        <button type="button" className="la-ob og h44" onClick={props.onResume}>
-          <Icon name="play" weight="fill" />
+        <Button variant="secondary" size="lg" className="h44" icon="play" onClick={props.onResume}>
           {t.actResume}
-        </button>
+        </Button>
         {props.onFinish && (
-          <button type="button" className="la-ob fg h44" onClick={props.onFinish}>
-            <Icon name="stop" weight="fill" />
+          <Button variant="primary" size="lg" className="h44" icon="stop" onClick={props.onFinish}>
             {t.actFinish}
-          </button>
+          </Button>
         )}
       </div>
     </section>
@@ -1778,18 +1710,12 @@ function HeroCard(props: {
   );
   const buttons = (
     <>
-      <button type="button" className="la-ob og" disabled={props.locked} onClick={props.onStart}>
-        <Icon name="play" weight="fill" />
+      <Button variant="secondary" icon="play" disabled={props.locked} onClick={props.onStart}>
         {t.actStart}
-      </button>
-      <button
-        type="button"
-        className="la-ob fg"
-        aria-label={t.laLogAria(name, dur)}
-        onClick={props.onLog}
-      >
+      </Button>
+      <Button variant="primary" aria-label={t.laLogAria(name, dur)} onClick={props.onLog}>
         {t.laLogDur(dur)}
-      </button>
+      </Button>
     </>
   );
   return (
@@ -1799,9 +1725,13 @@ function HeroCard(props: {
           <Icon name={likely ? 'sparkle' : 'arrow-right'} />
           {kicker}
         </span>
-        <button type="button" className="la-hide" aria-label={t.laHide} onClick={props.onHide}>
-          <Icon name="x" />
-        </button>
+        <IconButton
+          size="sm"
+          className="la-hide"
+          icon="x"
+          label={t.laHide}
+          onClick={props.onHide}
+        />
       </div>
       <div className="la-hero-main">
         <div className="la-ico n56">

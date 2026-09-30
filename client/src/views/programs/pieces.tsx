@@ -2,10 +2,13 @@
 import { useEffect, type ReactNode } from 'react';
 import { Avatar } from '../../components/Avatar';
 import { useT } from '../../i18n';
-import { Icon, Switch } from '../../ui';
+import { Button, IconButton as KitIconButton } from '../../components/ui/Button';
+import { ListRow } from '../../components/ui/GroupedList';
+import { Segmented } from '../../components/ui/Segmented';
+import { Switch as KitSwitch } from '../../components/ui/Switch';
 import type { DayMode, Person } from './model';
 
-/** Muscles | Exercises — two identical tiles, one selected. */
+/** Muscles | Exercises — kit Segmented (buttons) with icons. */
 export function ModeTabs({
   mode,
   onChange,
@@ -16,59 +19,28 @@ export function ModeTabs({
   disabled?: boolean;
 }) {
   const { t } = useT();
-  const tab = (m: DayMode, icon: string, label: string) => (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={mode === m}
-      className={`pg-mode${mode === m ? ' on' : ''}`}
-      disabled={disabled && mode !== m}
-      onClick={() => mode !== m && onChange(m)}
-    >
-      <Icon name={icon} />
-      {label}
-    </button>
-  );
   return (
-    <div className="pg-modes" role="radiogroup" aria-label={t.pgDefineBy}>
-      {tab('muscles', 'person-simple', t.pgMuscles)}
-      {tab('exercises', 'barbell', t.pgExercises)}
-    </div>
-  );
-}
-
-export function Stepper({
-  value,
-  label,
-  onDec,
-  onInc,
-  decLabel,
-  incLabel,
-  big,
-  disabled,
-}: {
-  value: ReactNode;
-  label?: ReactNode;
-  onDec: () => void;
-  onInc: () => void;
-  decLabel: string;
-  incLabel: string;
-  big?: boolean;
-  disabled?: boolean;
-}) {
-  return (
-    <div className={`pg-stepper${big ? ' big' : ''}`}>
-      <button type="button" aria-label={decLabel} onClick={onDec} disabled={disabled}>
-        <Icon name="minus" />
-      </button>
-      <span className="pg-stepper-v">
-        <b>{value}</b>
-        {label && <small>{label}</small>}
-      </span>
-      <button type="button" aria-label={incLabel} onClick={onInc} disabled={disabled}>
-        <Icon name="plus" />
-      </button>
-    </div>
+    <Segmented
+      className="pg-modes"
+      variant="buttons"
+      label={t.pgDefineBy}
+      value={mode}
+      onChange={(m) => m !== mode && onChange(m)}
+      options={[
+        {
+          value: 'muscles',
+          label: t.pgMuscles,
+          icon: 'person-simple',
+          disabled: disabled && mode !== 'muscles',
+        },
+        {
+          value: 'exercises',
+          label: t.pgExercises,
+          icon: 'barbell',
+          disabled: disabled && mode !== 'exercises',
+        },
+      ]}
+    />
   );
 }
 
@@ -86,20 +58,20 @@ export function ToggleRow({
   disabled?: boolean;
 }) {
   return (
-    <button
-      type="button"
+    <ListRow
       className="pg-toggle"
-      role="switch"
-      aria-checked={on}
-      onClick={onToggle}
-      disabled={disabled}
-    >
-      <span>
-        {label}
-        {hint && <small>{hint}</small>}
-      </span>
-      <Switch on={on} />
-    </button>
+      label={label}
+      sub={hint}
+      dim={disabled}
+      trailing={
+        <KitSwitch
+          checked={on}
+          disabled={disabled}
+          aria-label={typeof label === 'string' ? label : undefined}
+          onChange={() => onToggle()}
+        />
+      }
+    />
   );
 }
 
@@ -145,23 +117,22 @@ export function ActionMenu({ items, onClose }: { items: MenuItem[]; onClose: () 
       <div className="pg-menu-scrim" onClick={onClose} />
       <div className="pg-menu" role="menu">
         {items.map((it) => (
-          <button
+          <Button
             key={it.label}
-            type="button"
             role="menuitem"
-            className={`pg-menu-item${it.danger ? ' danger' : ''}`}
+            variant={it.danger ? 'danger' : 'ghost'}
+            fullWidth
+            className="pg-menu-item"
+            icon={it.icon}
             disabled={it.disabled}
             onClick={() => {
               onClose();
               it.onClick();
             }}
           >
-            <Icon name={it.icon} />
-            <span>
-              {it.label}
-              {it.hint && <small>{it.hint}</small>}
-            </span>
-          </button>
+            {it.label}
+            {it.hint && <small>{it.hint}</small>}
+          </Button>
         ))}
       </div>
     </>
@@ -182,15 +153,15 @@ export function IconButton({
   expanded?: boolean;
 }) {
   return (
-    <button
-      type="button"
+    <KitIconButton
+      variant="ghost"
+      size="sm"
       className={['pg-ib', className].filter(Boolean).join(' ')}
-      aria-label={label}
+      label={label}
       title={label}
+      icon={icon}
       aria-expanded={expanded}
       onClick={onClick}
-    >
-      <Icon name={icon} />
-    </button>
+    />
   );
 }

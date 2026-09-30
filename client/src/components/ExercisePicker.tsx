@@ -7,7 +7,14 @@
  * this session are marked, never blocked. On desktop the same pieces sit in one
  * modal: family rail · suggestions + grid · live preview.
  */
+import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Switch as KitSwitch } from './ui/Switch';
+import { ListRow } from './ui/GroupedList';
+import { Button, IconButton } from './ui/Button';
+import { Card } from './ui/Card';
+import { Chip } from './ui/Chip';
+import { Segmented } from './ui/Segmented';
 import { createPortal } from 'react-dom';
 import type { Gym, Workout } from '../types';
 import type { EquipmentId } from '../data/equipment';
@@ -22,7 +29,7 @@ import { canonicalExerciseName } from '../data/exercises';
 import { recordWeight, useStore } from '../store';
 import { fmtSet, useT } from '../i18n';
 import type { Strings } from '../i18n/en';
-import { ExerciseName, Icon, Sheet, Switch, useExerciseName, useIsDesktop } from '../ui';
+import { ExerciseName, Icon, Sheet, useExerciseName, useIsDesktop } from '../ui';
 import { FamilyFigure, equipmentIconName } from './Muscle';
 import {
   FAMILIES,
@@ -48,6 +55,7 @@ import {
   type Suggestion,
 } from '../picker';
 import './ExercisePicker.css';
+import { SearchField } from './ui/SearchField';
 
 export interface ExercisePickerProps {
   workout: Workout;
@@ -129,18 +137,17 @@ function Img({ src, alt, className }: { src: string | null; alt: string; classNa
 
 function InfoButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
-    <button
-      type="button"
+    <IconButton
+      icon="info"
+      size="sm"
       className="xp-info"
-      aria-label={label}
+      label={label}
       title={label}
       onClick={(e) => {
         e.stopPropagation();
         onClick();
       }}
-    >
-      <Icon name="info" />
-    </button>
+    />
   );
 }
 
@@ -334,20 +341,21 @@ export function ExercisePicker(props: ExercisePickerProps) {
   // Strength is where you are; the other three act straight away (a marker, or
   // the cardio machine list) — so they're plain buttons, not tabs.
   const kindTabs = (
-    <div className="xp-kinds" role="group" aria-label={t.pgItemType}>
-      <button type="button" className="on" aria-current="true">
-        {t.exerciseKindNames.strength}
-      </button>
-      <button type="button" onClick={() => props.onMarker('warmup')}>
-        {t.exerciseKindNames.warmup}
-      </button>
-      <button type="button" onClick={props.onCardio}>
-        {t.exerciseKindNames.cardio}
-      </button>
-      <button type="button" onClick={() => props.onMarker('cooldown')}>
-        {t.exerciseKindNames.cooldown}
-      </button>
-    </div>
+    <Segmented<'strength' | 'warmup' | 'cardio' | 'cooldown'>
+      className="xp-kinds"
+      label={t.pgItemType}
+      value="strength"
+      onChange={(k) => {
+        if (k === 'cardio') props.onCardio();
+        else if (k === 'warmup' || k === 'cooldown') props.onMarker(k);
+      }}
+      options={[
+        { value: 'strength', label: t.exerciseKindNames.strength },
+        { value: 'warmup', label: t.exerciseKindNames.warmup },
+        { value: 'cardio', label: t.exerciseKindNames.cardio },
+        { value: 'cooldown', label: t.exerciseKindNames.cooldown },
+      ]}
+    />
   );
 
   const inSearch = searching || !!needle;
@@ -356,28 +364,22 @@ export function ExercisePicker(props: ExercisePickerProps) {
     setSearching(false);
   };
   const searchInput = (
-    <label className="xp-search">
-      <Icon name="magnifying-glass" />
-      <input
-        ref={searchRef}
-        value={q}
-        placeholder={t.pickSearch}
-        aria-label={t.pickSearchShort}
-        onChange={(e) => setQ(e.target.value)}
-        onFocus={() => setSearching(true)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && needle) {
-            if (results[0]) pick(results[0]);
-            else props.onCreate(q.trim());
-          }
-        }}
-      />
-      {q && (
-        <button type="button" className="xp-clear" aria-label={t.cancel} onClick={() => setQ('')}>
-          <Icon name="x" />
-        </button>
-      )}
-    </label>
+    <SearchField
+      className="xp-search"
+      ref={searchRef}
+      value={q}
+      placeholder={t.pickSearch}
+      aria-label={t.pickSearchShort}
+      clearLabel={t.cancel}
+      onChange={setQ}
+      onFocus={() => setSearching(true)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && needle) {
+          if (results[0]) pick(results[0]);
+          else props.onCreate(q.trim());
+        }
+      }}
+    />
   );
   const searchBar = isDesktop ? (
     searchInput
@@ -385,19 +387,23 @@ export function ExercisePicker(props: ExercisePickerProps) {
     <div className="xp-searchrow">
       {searchInput}
       {inSearch && (
-        <button type="button" className="xp-cancel" onClick={cancelSearch}>
+        <Button variant="link" size="sm" className="xp-cancel" onClick={cancelSearch}>
           {t.cancel}
-        </button>
+        </Button>
       )}
     </div>
   );
 
   const equipChip = (
-    <button type="button" className="xp-eqchip" onClick={() => setEquipOpen(true)}>
-      <Icon name={equipmentIconName('dumbbell')} />
+    <Button
+      variant="secondary"
+      size="sm"
+      icon={equipmentIconName('dumbbell')}
+      iconTrailing="caret-down"
+      onClick={() => setEquipOpen(true)}
+    >
       {equip.length ? t.pickEquipN(equip.length) : t.pickEquipAll}
-      <Icon name="caret-down" />
-    </button>
+    </Button>
   );
 
   const doneStrip =
@@ -431,13 +437,19 @@ export function ExercisePicker(props: ExercisePickerProps) {
       className={`xp-card${i.available ? '' : ' na'}${isDesktop && previewItem?.key === i.key ? ' sel' : ''}`}
       onMouseEnter={isDesktop ? () => setPreview(i) : undefined}
     >
-      <button type="button" className="xp-card-main" onClick={() => pick(i)}>
+      <Card
+        as="button"
+        pad="none"
+        emphasis="quiet"
+        className="xp-card-main"
+        onClick={() => pick(i)}
+      >
         <Img src={i.image} alt="" className="xp-card-img" />
         <span className="xp-card-body">
           <ExerciseName name={i.name} className="xp-card-name" secondary={false} />
           <span className="xp-card-meta">{itemMeta(t, i, plain)}</span>
         </span>
-      </button>
+      </Card>
       {plain ? <AddedBadge on={addedKeys.has(i.key)} t={t} /> : <Badge item={i} t={t} />}
       <InfoButton onClick={() => openInfo(i)} label={t.detailsAction} />
     </div>
@@ -449,7 +461,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
       className={`xp-row${i.available ? '' : ' na'}`}
       onMouseEnter={isDesktop ? () => setPreview(i) : undefined}
     >
-      <button type="button" className="xp-row-main" onClick={() => pick(i)}>
+      <Card as="button" pad="none" emphasis="quiet" className="xp-row-main" onClick={() => pick(i)}>
         <Img src={i.image} alt="" className="xp-row-img" />
         <span className="xp-row-body">
           <ExerciseName name={i.name} className="xp-row-name" secondary={false} />
@@ -462,7 +474,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
         ) : (
           <Badge item={i} t={t} />
         )}
-      </button>
+      </Card>
       <InfoButton onClick={() => openInfo(i)} label={t.detailsAction} />
     </div>
   );
@@ -472,10 +484,12 @@ export function ExercisePicker(props: ExercisePickerProps) {
     const color = plain ? 'var(--color-accent)' : readinessColor(r);
     const today = !plain && todayFamilies.has(f.id);
     return (
-      <button
+      <Card
+        as="button"
+        pad="sm"
+        tone={today ? 'accent' : 'neutral'}
+        className="xp-fam"
         key={f.id}
-        type="button"
-        className={`xp-fam${today ? ' today' : ''}`}
         onClick={() => openFamily(f.id)}
       >
         {today && <span className="xp-today corner">{t.pickToday}</span>}
@@ -492,7 +506,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
             {f.subs.length ? f.subs.map((s) => subLabel(t, s)).join(' · ') : t.muscleGroups.core}
           </span>
         </span>
-      </button>
+      </Card>
     );
   };
 
@@ -502,9 +516,12 @@ export function ExercisePicker(props: ExercisePickerProps) {
     const open = activeFamily === f.id;
     return (
       <div key={f.id} className="xp-rail-group">
-        <button
-          type="button"
-          className={`xp-rail-fam${open ? ' open' : ''}`}
+        <Card
+          as="button"
+          pad="sm"
+          emphasis="quiet"
+          className="xp-rail-fam"
+          tone={open ? 'accent' : 'neutral'}
           onClick={() => openFamily(f.id)}
         >
           <FamilyFigure groups={f.groups} color={color} view={f.view} width={28} height={54} />
@@ -526,16 +543,17 @@ export function ExercisePicker(props: ExercisePickerProps) {
               </span>
             )}
           </span>
-        </button>
+        </Card>
         {open && f.subs.length > 0 && (
           <div className="xp-rail-subs">
             {[null, ...f.subs].map((s) => {
               const sr = s && !plain ? subReadiness(s, readiness) : null;
               return (
-                <button
+                <Chip
                   key={s ?? 'all'}
-                  type="button"
-                  className={`xp-rail-sub${sub === s ? ' on' : ''}`}
+                  size="sm"
+                  className="xp-rail-sub"
+                  selected={sub === s}
                   onClick={() => setSub(s)}
                 >
                   <span
@@ -543,7 +561,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
                     style={{ background: sr ? readinessColor(sr) : 'transparent' }}
                   />
                   {s ? subLabel(t, s) : t.pickAll}
-                </button>
+                </Chip>
               );
             })}
           </div>
@@ -557,15 +575,10 @@ export function ExercisePicker(props: ExercisePickerProps) {
       {[null, ...fam.subs].map((s) => {
         const sr = s && !plain ? subReadiness(s, readiness) : null;
         return (
-          <button
-            key={s ?? 'all'}
-            type="button"
-            className={`xp-chip${sub === s ? ' on' : ''}`}
-            onClick={() => setSub(s)}
-          >
+          <Chip key={s ?? 'all'} className="xp-chip" selected={sub === s} onClick={() => setSub(s)}>
             {sr && <span className="dot" style={{ background: readinessColor(sr) }} />}
             {s ? subLabel(t, s) : t.pickAll}
-          </button>
+          </Chip>
         );
       })}
     </div>
@@ -576,28 +589,30 @@ export function ExercisePicker(props: ExercisePickerProps) {
   const eqValue = equip.length === 1 ? equip[0] : equip.length === 0 ? 'any' : null;
   const equipRow = fam && groupEquip.length > 1 && (
     <div className="xp-eqrow" role="radiogroup" aria-label={t.pickEquipAll}>
-      <button
-        type="button"
+      <Chip
+        className="xp-eq"
         role="radio"
         aria-checked={eqValue === 'any'}
-        className={`xp-eq${eqValue === 'any' ? ' on' : ''}`}
+        aria-pressed={undefined}
+        selected={eqValue === 'any'}
         onClick={() => setEquip([])}
       >
         {t.pickAny}
         <span className="n">{groupItems.length}</span>
-      </button>
+      </Chip>
       {groupEquip.map(({ id, n }) => (
-        <button
+        <Chip
           key={id}
-          type="button"
+          className="xp-eq"
           role="radio"
           aria-checked={eqValue === id}
-          className={`xp-eq${eqValue === id ? ' on' : ''}`}
+          aria-pressed={undefined}
+          selected={eqValue === id}
           onClick={() => setEquip(eqValue === id ? [] : [id])}
         >
           {t.equipmentNames[id]}
           <span className="n">{n}</span>
-        </button>
+        </Chip>
       ))}
     </div>
   );
@@ -610,9 +625,14 @@ export function ExercisePicker(props: ExercisePickerProps) {
         <div className="xp-grid">{list.slice(0, limit).map(card)}</div>
       )}
       {list.length > limit && (
-        <button type="button" className="xp-more" onClick={() => setLimit((n) => n + PAGE)}>
+        <Button
+          variant="secondary"
+          fullWidth
+          className="xp-more"
+          onClick={() => setLimit((n) => n + PAGE)}
+        >
           {t.pickShowMore(Math.min(PAGE, list.length - limit))}
-        </button>
+        </Button>
       )}
     </>
   );
@@ -638,14 +658,21 @@ export function ExercisePicker(props: ExercisePickerProps) {
       )}
       {(needle ? results.slice(0, limit) : plain ? [] : suggestions.map((x) => x.item)).map(row)}
       {results.length > limit && (
-        <button type="button" className="xp-more" onClick={() => setLimit((n) => n + PAGE)}>
+        <Button
+          variant="secondary"
+          fullWidth
+          className="xp-more"
+          onClick={() => setLimit((n) => n + PAGE)}
+        >
           {t.pickShowMore(Math.min(PAGE, results.length - limit))}
-        </button>
+        </Button>
       )}
       {browseFamily && (
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          fullWidth
           className="xp-browse"
+          iconTrailing="caret-right"
           onClick={() => {
             openFamily(browseFamily.id);
             if (browseSub) setSub(browseSub);
@@ -659,14 +686,12 @@ export function ExercisePicker(props: ExercisePickerProps) {
                 : t.pickFamilies[browseFamily.id],
             )}
           </span>
-          <Icon name="caret-right" />
-        </button>
+        </Button>
       )}
       {!exact && needle && (
-        <button type="button" className="xp-create" onClick={() => props.onCreate(q.trim())}>
-          <Icon name="plus" />
+        <Button variant="secondary" fullWidth icon="plus" onClick={() => props.onCreate(q.trim())}>
           {t.createExercise(q.trim())}
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -683,7 +708,13 @@ export function ExercisePicker(props: ExercisePickerProps) {
       className={`xp-best${extra}`}
       onMouseEnter={isDesktop ? () => setPreview(x.item) : undefined}
     >
-      <button type="button" className="xp-best-main" onClick={() => pick(x.item)}>
+      <Card
+        as="button"
+        pad="none"
+        emphasis="quiet"
+        className="xp-best-main"
+        onClick={() => pick(x.item)}
+      >
         <Img src={x.item.image} alt="" className="xp-best-img" />
         <span className="xp-best-body">
           <span className="xp-label accent">{kicker}</span>
@@ -691,7 +722,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
           {why && <span className="xp-sug-why">{why}</span>}
           <span className="xp-sug-target">{targetLine(x)}</span>
         </span>
-      </button>
+      </Card>
       <InfoButton onClick={() => openInfo(x.item)} label={t.detailsAction} />
     </div>
   );
@@ -756,14 +787,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
             </span>
             {searchBar}
             {kindTabs}
-            <button
-              type="button"
-              className="xp-close"
-              aria-label={t.cancel}
-              onClick={props.onClose}
-            >
-              <Icon name="x" />
-            </button>
+            <IconButton icon="x" label={t.cancel} className="xp-close" onClick={props.onClose} />
           </header>
           <div className="xp-mbody">
             <nav className="xp-rail" aria-label={t.pickMuscleGroups}>
@@ -852,17 +876,13 @@ export function ExercisePicker(props: ExercisePickerProps) {
     body = (
       <>
         <div className="xp-ghead m">
-          <button
-            type="button"
-            className="xp-back"
-            aria-label={t.pickBackToGroups}
+          <BackButton
+            label={t.pickBackToGroups}
             onClick={() => {
               setFamily(null);
               setSub(null);
             }}
-          >
-            <Icon name="caret-left" />
-          </button>
+          />
           <span className="xp-ghead-txt">
             <b>{t.pickFamilies[fam.id]}</b>
             {plain ? (
@@ -877,17 +897,14 @@ export function ExercisePicker(props: ExercisePickerProps) {
               </span>
             )}
           </span>
-          <button
-            type="button"
-            className="xp-back"
-            aria-label={t.pickSearchShort}
+          <IconButton
+            icon="magnifying-glass"
+            label={t.pickSearchShort}
             onClick={() => {
               setSearching(true);
               window.setTimeout(() => searchRef.current?.focus(), 0);
             }}
-          >
-            <Icon name="magnifying-glass" />
-          </button>
+          />
         </div>
         {subChips}
         {equipRow}
@@ -1078,13 +1095,14 @@ export function ExerciseDetail(props: {
           <div className="xp-label">{t.pickSwaps}</div>
           <div className="xp-swaps">
             {swaps.map((s) => (
-              <button key={s.key} type="button" onClick={() => props.onSwap(s)}>
-                <Img src={s.image} alt="" />
-                <span>
-                  <ExerciseName name={s.name} className="n" secondary={false} />
-                  <small>{s.equipment ? t.equipmentNames[s.equipment] : ''}</small>
-                </span>
-              </button>
+              <ListRow
+                key={s.key}
+                dense
+                icon={<Img src={s.image} alt="" />}
+                label={<ExerciseName name={s.name} className="n" secondary={false} />}
+                sub={s.equipment ? t.equipmentNames[s.equipment] : ''}
+                onClick={() => props.onSwap(s)}
+              />
             ))}
           </div>
         </div>
@@ -1101,22 +1119,27 @@ export function ExerciseDetail(props: {
             ))}
           </ol>
           {steps.length > cues.length || allSteps ? (
-            <button type="button" className="xp-link" onClick={() => setAllSteps((x) => !x)}>
+            <Button
+              variant="link"
+              size="sm"
+              className="xp-link"
+              onClick={() => setAllSteps((x) => !x)}
+            >
               {allSteps ? t.pickFewerSteps : t.pickAllSteps(steps.length)}
-            </button>
+            </Button>
           ) : null}
         </div>
       )}
       <div className="xp-detail-actions">
         {props.onBack && (
-          <button type="button" className="btn btn-secondary" onClick={props.onBack}>
+          <Button variant="secondary" onClick={props.onBack}>
             {t.backAction}
-          </button>
+          </Button>
         )}
-        <button type="button" className="btn btn-primary xp-add" onClick={() => props.onPick(item)}>
+        <Button variant="primary" className="xp-add" onClick={() => props.onPick(item)}>
           {props.addLabel ?? t.pickAddToSession}
           {props.compact && <kbd>↵</kbd>}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -1148,10 +1171,12 @@ function EquipmentFilterSheet(props: {
             const on = sel.includes(id);
             const missing = inv.length > 0 && !inv.includes(id) && id !== 'body';
             return (
-              <button
+              <Card
+                as="button"
+                pad="sm"
+                tone={on ? 'accent' : 'neutral'}
+                className={`xp-equip-tile${missing ? ' na' : ''}`}
                 key={id}
-                type="button"
-                className={`xp-equip-tile${on ? ' on' : ''}${missing ? ' na' : ''}`}
                 aria-pressed={on}
                 onClick={() => setSel((cur) => (on ? cur.filter((x) => x !== id) : [...cur, id]))}
               >
@@ -1167,30 +1192,25 @@ function EquipmentFilterSheet(props: {
                     {id === 'body' ? t.pickAlways : missing ? t.pickNotInGym : t.pickInGym}
                   </small>
                 )}
-              </button>
+              </Card>
             );
           })}
         </div>
         {inv.length > 0 && (
-          <button type="button" className="toggle-row xp-only" onClick={() => setOnly((x) => !x)}>
-            <span>
-              <b>{t.pickOnlyGym}</b>
-              <small>{t.pickOnlyGymSub}</small>
-            </span>
-            <Switch on={only} />
-          </button>
+          <ListRow
+            className="xp-only"
+            label={t.pickOnlyGym}
+            sub={t.pickOnlyGymSub}
+            trailing={<KitSwitch checked={only} aria-label={t.pickOnlyGym} onChange={setOnly} />}
+          />
         )}
         <div className="xp-detail-actions">
-          <button type="button" className="btn btn-secondary" onClick={() => setSel([])}>
+          <Button variant="secondary" onClick={() => setSel([])}>
             {t.pickReset}
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary xp-add"
-            onClick={() => props.onApply(sel, only)}
-          >
+          </Button>
+          <Button variant="primary" className="xp-add" onClick={() => props.onApply(sel, only)}>
             {t.pickShowN(n)}
-          </button>
+          </Button>
         </div>
       </div>
     </Sheet>

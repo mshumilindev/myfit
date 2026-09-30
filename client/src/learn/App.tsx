@@ -12,9 +12,19 @@
  *   revealed progressively (lightweight virtualization).
  * - Localised UI via useLearnT.
  */
+import { TabBar } from '../components/ui/TabBar';
+import { BackButton } from '../components/ui/BackButton';
+import { Button } from '../components/ui/Button';
+import { SearchField } from '../components/ui/SearchField';
+import { Card } from '../components/ui/Card';
+import { Chip } from '../components/ui/Chip';
+import { ListRow } from '../components/ui/GroupedList';
+import { IconTile } from '../components/ui/IconTile';
+import { Segmented } from '../components/ui/Segmented';
+import { BrandBar, BellButton } from '../components/ui/BrandBar';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { tokenMatch } from '../search';
-import { Icon, LanguageSelector } from '../ui';
+import { Icon } from '../ui';
 import { AppRail } from '../components/AppRail';
 import { NotificationsView } from '../views/NotificationsView';
 import type { Notif, NotifState } from '../notifications';
@@ -93,10 +103,16 @@ function Thumb({ cut, variant }: { cut: Cut; variant: 'tile' | 'row' | 'lead' })
 
 function Tile({ lesson, cut, onPlay }: { lesson: Lesson; cut: Cut; onPlay: (l: Lesson) => void }) {
   return (
-    <button className="ln-card" onClick={() => onPlay(lesson)}>
+    <Card
+      as="button"
+      pad="none"
+      emphasis="quiet"
+      className="ln-card"
+      onClick={() => onPlay(lesson)}
+    >
       <Thumb cut={cut} variant="tile" />
       <div className="ln-card-title">{lesson.title}</div>
-    </button>
+    </Card>
   );
 }
 
@@ -145,38 +161,38 @@ function Toolbar({
   return (
     <div className="ln-toolbar">
       <div className="ln-toolrow">
-        <label className="ln-search">
-          <Icon name="magnifying-glass" />
-          <input value={q} placeholder={L.search} onChange={(e) => onQ(e.target.value)} />
-        </label>
-        <button
-          className={`ln-filter-btn${open || count ? ' on' : ''}`}
+        <SearchField
+          className="ln-search"
+          value={q}
+          placeholder={L.search}
+          clearLabel={L.clear}
+          onChange={onQ}
+        />
+        <Button
+          variant={open || count ? 'secondary' : 'ghost'}
+          icon="funnel-simple"
+          className="ln-filter-btn"
           onClick={() => setOpen((o) => !o)}
           aria-label={L.filters}
         >
-          <Icon name="funnel-simple" weight={count ? 'fill' : undefined} />
-          {count > 0 && <span className="ln-filter-count">{count}</span>}
-        </button>
+          {count > 0 ? <span className="ln-filter-count">{count}</span> : undefined}
+        </Button>
       </div>
       {open && (
         <div className="ln-filters">
           <div className="ln-filter-head">
             <span>{L.filters}</span>
             {count > 0 && (
-              <button className="ln-filter-clear" onClick={onClear}>
+              <Button variant="link" size="sm" onClick={onClear}>
                 {L.clear}
-              </button>
+              </Button>
             )}
           </div>
           <div className="ln-filter-chips">
             {topics.map((t) => (
-              <button
-                key={t.id}
-                className={`ln-chip${active.has(t.id) ? ' on' : ''}`}
-                onClick={() => onToggle(t.id)}
-              >
+              <Chip key={t.id} selected={active.has(t.id)} onClick={() => onToggle(t.id)}>
                 {t.title}
-              </button>
+              </Chip>
             ))}
           </div>
         </div>
@@ -255,7 +271,13 @@ function HomeScreen({
           {first && (
             <>
               <div className="ln-kicker">{L.continueLabel}</div>
-              <button className="ln-continue" onClick={() => onPlay(first)}>
+              <Card
+                as="button"
+                pad="none"
+                emphasis="glass"
+                className="ln-continue"
+                onClick={() => onPlay(first)}
+              >
                 <Thumb cut={cut} variant="lead" />
                 <div className="ln-continue-main">
                   <div className="ln-lesson-tag">{localTopicTitle(first.topic, locale)}</div>
@@ -264,7 +286,7 @@ function HomeScreen({
                     <Icon name="clock" /> {L.videoComingSoon}
                   </div>
                 </div>
-              </button>
+              </Card>
             </>
           )}
           {topics.map((t) => (
@@ -296,19 +318,15 @@ function TopicsScreen({
       </div>
       <div className="ln-topics">
         {topics.map((t) => (
-          <button key={t.id} className="ln-topic-row" onClick={() => onOpenTopic(t)}>
-            <span className="ln-topic-ic">
-              <Icon name={t.icon} weight="fill" />
-            </span>
-            <span className="ln-topic-text">
-              <span className="ln-topic-name">{t.title}</span>
-              <span className="ln-topic-desc">{t.blurb}</span>
-              <span className="ln-topic-bar">
-                <span style={{ width: '0%' }} />
-              </span>
-            </span>
-            <span className="ln-topic-count">0/{t.lessons.length}</span>
-          </button>
+          <ListRow
+            key={t.id}
+            strong
+            icon={<IconTile tone="learn" size={40} icon={t.icon} />}
+            label={t.title}
+            sub={t.blurb}
+            value={`0/${t.lessons.length}`}
+            onClick={() => onOpenTopic(t)}
+          />
         ))}
       </div>
     </div>
@@ -329,9 +347,7 @@ function TopicDetail({
   const { L } = useLearnT();
   return (
     <div className="ln-screen">
-      <button className="ln-back" onClick={onBack}>
-        <Icon name="caret-left" /> {L.topics}
-      </button>
+      <BackButton className="ln-back" label={L.topics} text={L.topics} onClick={onBack} />
       <div className="ln-head">
         <h1>{topic.title}</h1>
         <span className="ln-count">{L.lessons(topic.lessons.length)}</span>
@@ -370,23 +386,22 @@ function SavedScreen({
           </span>
           <div className="ln-empty-title">{L.nothingSaved}</div>
           <div className="ln-empty-sub">{L.savedHint}</div>
-          <button className="ln-pill" onClick={onBrowse}>
-            <Icon name="compass" /> {L.browse}
-          </button>
+          <Button variant="secondary" className="ln-pill" icon="compass" onClick={onBrowse}>
+            {L.browse}
+          </Button>
         </div>
       ) : (
         <div className="ln-saved-list">
           {items.map((l) => (
-            <button key={l.id} className="ln-saved-row" onClick={() => onPlay(l)}>
-              <Thumb cut={cut} variant="row" />
-              <span className="ln-saved-text">
-                <span className="ln-saved-title">{l.title}</span>
-                <span className="ln-saved-meta">
-                  {localTopicTitle(l.topic, locale)} · {L.videoComingSoon.toLowerCase()}
-                </span>
-              </span>
-              <Icon name="bookmark-simple" weight="fill" className="ln-saved-mark" />
-            </button>
+            <ListRow
+              key={l.id}
+              strong
+              icon={<Thumb cut={cut} variant="row" />}
+              label={l.title}
+              sub={`${localTopicTitle(l.topic, locale)} · ${L.videoComingSoon.toLowerCase()}`}
+              trailing={<Icon name="bookmark-simple" weight="fill" className="ln-saved-mark" />}
+              onClick={() => onPlay(l)}
+            />
           ))}
         </div>
       )}
@@ -422,9 +437,7 @@ function Player({
 
   return (
     <div className="ln-player">
-      <button className="ln-back" onClick={onBack}>
-        <Icon name="caret-left" /> {topicName}
-      </button>
+      <BackButton className="ln-back" label={topicName} text={topicName} onClick={onBack} />
 
       <div className={`ln-stage cut-${watch === 'phone' ? 'p' : 'w'}`}>
         <div className="ln-stage-inner">
@@ -442,25 +455,22 @@ function Player({
         <div className="ln-meta-desc">{lesson.blurb}</div>
 
         <div className="ln-cutrow">
-          <div className="ln-switch">
-            <button
-              className={`ln-switch-opt${watch === 'phone' ? ' on' : ''}`}
-              onClick={() => setWatch('phone')}
-            >
-              <Icon name="device-mobile" weight={watch === 'phone' ? 'fill' : undefined} />{' '}
-              {L.phone}
-            </button>
-            <button
-              className={`ln-switch-opt${watch === 'web' ? ' on' : ''}`}
-              onClick={() => setWatch('web')}
-            >
-              <Icon name="monitor" weight={watch === 'web' ? 'fill' : undefined} /> {L.web}
-            </button>
-          </div>
-          <button className={`ln-pill sm${saved ? ' on' : ''}`} onClick={onToggleSave}>
-            <Icon name="bookmark-simple" weight={saved ? 'fill' : undefined} />
+          <Segmented
+            value={watch}
+            onChange={setWatch}
+            options={[
+              { value: 'phone' as const, label: L.phone, icon: 'device-mobile' },
+              { value: 'web' as const, label: L.web, icon: 'monitor' },
+            ]}
+          />
+          <Button
+            variant={saved ? 'primary' : 'secondary'}
+            size="sm"
+            icon="bookmark-simple"
+            onClick={onToggleSave}
+          >
             {saved ? L.savedDone : L.save}
-          </button>
+          </Button>
         </div>
 
         {upNext.length > 0 && (
@@ -468,13 +478,14 @@ function Player({
             <div className="ln-kicker">{L.upNext}</div>
             <div className="ln-saved-list">
               {upNext.map((l) => (
-                <button key={l.id} className="ln-saved-row" onClick={() => onPlay(l)}>
-                  <Thumb cut={watch} variant="row" />
-                  <span className="ln-saved-text">
-                    <span className="ln-saved-title">{l.title}</span>
-                    <span className="ln-saved-meta">{L.videoComingSoon.toLowerCase()}</span>
-                  </span>
-                </button>
+                <ListRow
+                  key={l.id}
+                  strong
+                  icon={<Thumb cut={watch} variant="row" />}
+                  label={l.title}
+                  sub={L.videoComingSoon.toLowerCase()}
+                  onClick={() => onPlay(l)}
+                />
               ))}
             </div>
           </div>
@@ -571,34 +582,25 @@ export function LearnRoot({
         notifUnread={notifUnread}
       />
       <div className="apex-col">
-        <header className="app-brand apex-head">
-          <div className="app-brand-lead">
-            <span className="app-brand-word">spotter</span>
-            <button className="app-brand-app" onClick={onOpenShell} aria-label={L.apps}>
-              {L.app}
-            </button>
-          </div>
-          <div className="app-brand-actions">
-            <button
-              className="app-bell"
-              onClick={() => {
-                setPlaying(null);
-                setTab('feed');
-              }}
-              aria-label={L.notifications}
-            >
-              <Icon
-                name="bell"
-                weight={tab === 'feed' ? 'fill' : undefined}
-                className="app-brand-icon"
+        <BrandBar
+          header
+          app={L.app}
+          onApp={onOpenShell}
+          appLabel={L.apps}
+          actions={
+            <>
+              <BellButton
+                label={L.notifications}
+                onClick={() => {
+                  setPlaying(null);
+                  setTab('feed');
+                }}
+                active={tab === 'feed'}
+                count={tab !== 'feed' ? notifUnread : 0}
               />
-              {notifUnread > 0 && tab !== 'feed' && (
-                <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
-              )}
-            </button>
-            <LanguageSelector />
-          </div>
-        </header>
+            </>
+          }
+        />
 
         <div className="apex-body">
           {playingLive ? (
@@ -653,24 +655,13 @@ export function LearnRoot({
           )}
         </div>
 
-        <nav className="apex-nav" role="tablist">
-          {nav.map((x) => (
-            <button
-              key={x.id}
-              role="tab"
-              aria-selected={!playing && tab === x.id}
-              className={!playing && tab === x.id ? 'active' : ''}
-              onClick={() => goTab(x.id as Tab)}
-            >
-              <Icon name={x.icon} weight={!playing && tab === x.id ? 'fill' : undefined} />
-              <span>{x.label}</span>
-            </button>
-          ))}
-          <button className="apex-nav-apps" onClick={onOpenShell} aria-label={L.apps}>
-            <Icon name="squares-four" />
-            <span>{L.apps}</span>
-          </button>
-        </nav>
+        <TabBar
+          tabs
+          activeFill
+          items={nav.map((x) => ({ ...x, active: !playing && tab === x.id }))}
+          onSelect={(id) => goTab(id as Tab)}
+          apps={{ label: L.apps, ariaLabel: L.apps, onClick: onOpenShell }}
+        />
       </div>
     </div>
   );

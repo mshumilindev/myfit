@@ -1,4 +1,6 @@
 /** Muscle history — direct drilldown from muscle chips across the app. */
+import { BackButton } from '../components/ui/BackButton';
+import { ListRow } from '../components/ui/GroupedList';
 import { weekStartOf as trainingWeekStart } from '../weekStart';
 import { useState } from 'react';
 import { exerciseVolumeKg, resolveMuscles, topSet, useStore } from '../store';
@@ -90,9 +92,7 @@ export function MuscleHistoryView({
   return (
     <div className="screen muscle-history-screen">
       <div className="hist-head">
-        <button className="back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton onClick={onClose} label={t.backAction} />
         <div className="mh-title">
           <MuscleIcon muscle={muscle} variant="row" tone="primary" />
           <div>
@@ -147,15 +147,14 @@ export function MuscleHistoryView({
           <div className="section-label">{t.topExercises}</div>
           <div className="record-group">
             {topExercises.map(([name, row]) => (
-              <button
+              <ListRow
                 key={name}
-                className="record-row"
+                dense
+                label={exName(name)}
+                value={fmtKg(row.volume)}
+                trailing={<span className="when num">{row.sets}</span>}
                 onClick={() => shell.openOverlay({ screen: 'exercise-history', name })}
-              >
-                <span className="n">{exName(name)}</span>
-                <span className="v">{fmtKg(row.volume)}</span>
-                <span className="when num">{row.sets}</span>
-              </button>
+              />
             ))}
           </div>
         </div>
@@ -165,20 +164,15 @@ export function MuscleHistoryView({
         <div className="section-label">{t.lastSessions}</div>
         <div className="mh-session-list">
           {sessions.slice(0, 8).map((s) => (
-            <button
+            <ListRow
               key={s.workout.id}
-              className="recent-row"
+              dense
+              time={fmtDayMonth(s.workout.startedAt, locale)}
+              label={s.exercises.map((ex) => ex.name).join(' · ')}
+              sub={`${s.sets} ${t.sets} · ${fmtKg(s.volume)}`}
+              trailing={<Icon name="arrow-up-right" className="go" />}
               onClick={() => shell.openOverlay({ screen: 'past-workout', workoutId: s.workout.id })}
-            >
-              <span className="d">{fmtDayMonth(s.workout.startedAt, locale)}</span>
-              <span style={{ flex: 1 }}>
-                <span className="name">{s.exercises.map((ex) => ex.name).join(' · ')}</span>
-                <div className="stats">
-                  {s.sets} {t.sets} · {fmtKg(s.volume)}
-                </div>
-              </span>
-              <Icon name="arrow-up-right" className="go" />
-            </button>
+            />
           ))}
         </div>
       </div>

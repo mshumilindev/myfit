@@ -1,5 +1,10 @@
 /** Gyms — design S-41…S-48. */
+import { Skeleton } from '../components/ui/Skeleton';
+import { EmptyState } from '../components/ui/EmptyState';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { SearchField } from '../components/ui/SearchField';
 import type { Shell } from '../App';
 import {
   getCurrentPositionOnce,
@@ -186,33 +191,24 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
 
           {denied && (
             <div className="error-card">
-              <div style={{ display: 'flex', gap: 10 }}>
+              <div className="ul-flex ug-10">
                 <Icon name="map-pin-slash" className="" />
                 <div>
-                  <div style={{ fontSize: 14, color: 'var(--color-danger-text)' }}>
-                    {t.locationBlocked}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 12,
-                      lineHeight: 1.5,
-                      color: 'var(--color-danger-text)',
-                      opacity: 0.8,
-                      marginTop: 5,
-                    }}
-                  >
+                  <div className="ut-md ut-danger">{t.locationBlocked}</div>
+                  <div className="ut-sm ut-danger gym-loc-note umt-6" style={{ lineHeight: 1.5 }}>
                     {t.locationBlockedBody}
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 9, marginTop: 12 }}>
-                <button
-                  className="btn btn-secondary"
-                  style={{ minHeight: 36, fontSize: 13 }}
+              <div className="ul-flex ug-10 umt-12">
+                <Button
+                  variant="secondary"
+                  className="fx-fs-13"
+                  style={{ minHeight: 36 }}
                   onClick={() => locateFor(pendingName)}
                 >
                   {t.tryAgain}
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -223,22 +219,24 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
                 <Icon name="warning-circle" />
                 <span>{t.gpsCoarse(Math.round(add.accuracy))}</span>
               </div>
-              <div style={{ display: 'flex', gap: 9 }}>
-                <button
-                  className="btn btn-secondary"
-                  style={{ minHeight: 38, fontSize: 13 }}
+              <div className="ul-flex ug-10">
+                <Button
+                  variant="secondary"
+                  className="fx-fs-13"
+                  style={{ minHeight: 38 }}
                   onClick={() => saveGym(pendingName, add.lat, add.lng, add.accuracy, 250)}
                 >
                   {t.saveAnyway}
-                </button>
-                <button
-                  className="btn btn-secondary"
-                  style={{ minHeight: 38, fontSize: 13, gap: 6 }}
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="fx-fs-13 ug-6"
+                  style={{ minHeight: 38 }}
                   onClick={() => locateFor(pendingName)}
                 >
                   <Icon name="arrow-clockwise" />
                   {t.retry}
-                </button>
+                </Button>
               </div>
             </>
           )}
@@ -248,8 +246,13 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
             store.gyms.map((g) => {
               const selected = selectedGym?.id === g.id;
               return (
-                <div
+                <Card
                   key={g.id}
+                  pad="none"
+                  tone={
+                    selected && showDesktopDetail ? 'accent' : justAdded === g.id ? 'ok' : 'neutral'
+                  }
+                  emphasis={selected && showDesktopDetail ? 'hero' : 'card'}
                   className={`gym-card tappable${justAdded === g.id ? ' just-added' : ''}${
                     selected ? ' selected' : ''
                   }`}
@@ -282,7 +285,8 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
                       </span>
                     </div>
                   </div>
-                </div>
+                  <Icon name="caret-right" className="gym-card-chev" />
+                </Card>
               );
             })}
 
@@ -309,29 +313,23 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
             <div className="locating-card">
               <div className="row">
                 <Icon name="crosshair" />
-                <span style={{ flex: 1 }}>{t.readingPosition}</span>
+                <span className="uf-1">{t.readingPosition}</span>
               </div>
-              <div className="sk" style={{ height: 10, width: '70%' }} />
-              <div className="sk" style={{ height: 10, width: '45%' }} />
+              <Skeleton style={{ height: 10, width: '70%' }} />
+              <Skeleton style={{ height: 10, width: '45%' }} />
               <div className="footnote">{t.locatingNote}</div>
             </div>
           )}
 
           {store.gyms.length === 0 && add.phase === 'idle' && !denied && (
             <>
-              <div className="empty">
-                <Icon name="map-pin" />
-                <h4 className="t">{t.noGymsYet}</h4>
-                <p className="s">{t.noGymsBody}</p>
-              </div>
-              <div className="footnote" style={{ marginTop: 'auto' }}>
-                {t.gymsFootnote}
-              </div>
+              <EmptyState icon="map-pin" title={t.noGymsYet} body={t.noGymsBody} />
+              <div className="footnote umt-auto">{t.gymsFootnote}</div>
             </>
           )}
 
           {denied && (
-            <div style={{ fontSize: 12, lineHeight: 1.55, color: 'var(--color-neutral-500)' }}>
+            <div className="ut-sm ut-dim" style={{ lineHeight: 1.55 }}>
               {t.locationBlockedFootnote}
             </div>
           )}
@@ -358,18 +356,14 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
 
             <div className="gyms-detail-body">
               <div className="gyms-actions">
-                <button
-                  className="btn btn-primary"
-                  onClick={startAtSelectedGym}
-                  disabled={sessionBusy}
-                >
+                <Button variant="primary" onClick={startAtSelectedGym} disabled={sessionBusy}>
                   <Icon name="play" />
                   {t.startSessionHere}
-                </button>
-                <button className="btn btn-secondary" onClick={() => openGym(selectedGym)}>
+                </Button>
+                <Button variant="secondary" onClick={() => openGym(selectedGym)}>
                   <Icon name="pencil-simple" />
                   {t.edit}
-                </button>
+                </Button>
               </div>
 
               {selectedSessions.length > 0 ? (
@@ -398,7 +392,10 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
                 {selectedSessions.length > 0 ? (
                   <div className="gyms-session-table">
                     {selectedSessions.slice(0, 5).map((workout) => (
-                      <button
+                      <Card
+                        as="button"
+                        pad="none"
+                        emphasis="quiet"
                         key={workout.id}
                         className="gyms-session-row"
                         onClick={() =>
@@ -448,7 +445,7 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
                               : '—'}
                           </small>
                         </span>
-                      </button>
+                      </Card>
                     ))}
                   </div>
                 ) : (
@@ -628,24 +625,28 @@ function GymSearch({
 
   return (
     <div className="gym-search">
-      <div className="searchbar">
-        <Icon name="magnifying-glass" />
-        <input
-          value={q}
-          placeholder={t.searchGymPlaceholder}
-          onChange={(e) => setQ(e.target.value)}
-        />
-      </div>
+      <SearchField
+        value={q}
+        onChange={setQ}
+        placeholder={t.searchGymPlaceholder}
+        clearLabel={t.todayClear}
+      />
 
       {needle.length < 2 && nearbySorted.length > 0 && (
         <>
-          <div className="section-label" style={{ marginTop: 4 }}>
-            {t.nearbyGyms}
-          </div>
+          <div className="section-label umt-4">{t.nearbyGyms}</div>
           {nearbySorted.map((r) => {
             const dist = coords ? haversineM(coords, r) : null;
             return (
-              <button key={r.key} className="gym-result" onClick={() => onPick(r)} lang={li}>
+              <Card
+                as="button"
+                pad="sm"
+                emphasis="quiet"
+                key={r.key}
+                className="gym-result"
+                onClick={() => onPick(r)}
+                lang={li}
+              >
                 <span className="thumb">
                   <ResultThumb photo={r.photoUrl ?? photos[r.key]} lat={r.lat} lng={r.lng} />
                 </span>
@@ -658,7 +659,7 @@ function GymSearch({
                     </span>
                   )}
                 </span>
-              </button>
+              </Card>
             );
           })}
         </>
@@ -687,10 +688,10 @@ function GymSearch({
       {showSkeleton &&
         [0, 1, 2].map((i) => (
           <div key={i} className="gym-result skeleton">
-            <div className="sk thumb" />
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <div className="sk" style={{ width: '55%', height: 13 }} />
-              <div className="sk" style={{ width: '75%', height: 9 }} />
+            <Skeleton className="thumb" />
+            <div className="uf-1 ul-flex ul-col ug-6">
+              <Skeleton style={{ width: '55%', height: 13 }} />
+              <Skeleton style={{ width: '75%', height: 9 }} />
             </div>
           </div>
         ))}
@@ -699,7 +700,15 @@ function GymSearch({
         sorted.map((r) => {
           const dist = coords ? haversineM(coords, r) : null;
           return (
-            <button key={r.key} className="gym-result" onClick={() => onPick(r)} lang={li}>
+            <Card
+              as="button"
+              pad="sm"
+              emphasis="quiet"
+              key={r.key}
+              className="gym-result"
+              onClick={() => onPick(r)}
+              lang={li}
+            >
               <span className="thumb">
                 <ResultThumb photo={r.photoUrl ?? photos[r.key]} lat={r.lat} lng={r.lng} />
               </span>
@@ -712,7 +721,7 @@ function GymSearch({
                   </span>
                 )}
               </span>
-            </button>
+            </Card>
           );
         })}
 
@@ -725,17 +734,22 @@ function GymSearch({
         }) && <div className="footnote">{t.searchGymEmpty}</div>}
 
       {needle.length >= 2 && (
-        <button className="gym-result manual" disabled={busy} onClick={() => onManualHere(needle)}>
+        <Card
+          as="button"
+          pad="sm"
+          emphasis="quiet"
+          className="gym-result manual"
+          disabled={busy}
+          onClick={() => onManualHere(needle)}
+        >
           <span className="thumb">
             {busy ? <span className="sk-dot" /> : <Icon name="crosshair" />}
           </span>
           <span className="body">
-            <span className="name" style={{ color: 'var(--color-accent-300)' }}>
-              «{needle}»
-            </span>
+            <span className="name ut-accent-lo">«{needle}»</span>
             <span className="addr">{busy ? t.locating : t.imHere}</span>
           </span>
-        </button>
+        </Card>
       )}
     </div>
   );

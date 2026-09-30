@@ -1,8 +1,13 @@
 /** Assign a program to members (PG-03): searchable multi-select, start point, replace warning. */
 import { useMemo, useState } from 'react';
+import { Button } from '../components/ui/Button';
+import { SearchField } from '../components/ui/SearchField';
+import { Chip } from '../components/ui/Chip';
+import { ListRow } from '../components/ui/GroupedList';
 import { Sheet, Icon } from '../ui';
 import { fmtWeekday, useT } from '../i18n';
 import { Avatar } from '../components/Avatar';
+import { Select } from '../components/ui/Select';
 
 interface ClientOption {
   id: string;
@@ -65,59 +70,45 @@ export function ProgramAssignDialog({
           {selected.length > 0 && (
             <div className="equipment-chips">
               {selected.map((c) => (
-                <button
-                  key={c.id}
-                  className="equipment-chip assign-chip"
-                  onClick={() => onToggle(c.id)}
-                >
+                <Chip key={c.id} selected icon="x" onClick={() => onToggle(c.id)}>
                   <Avatar userId={c.id} name={c.name} hasPhoto={false} size={20} />
                   {c.name}
-                  <Icon name="x" />
-                </button>
+                </Chip>
               ))}
             </div>
           )}
-          <div className="searchbar">
-            <Icon name="magnifying-glass" />
-            <input
-              value={query}
-              placeholder={t.assignSearchMembers}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
+          <SearchField
+            value={query}
+            placeholder={t.assignSearchMembers}
+            clearLabel={t.clearLabel}
+            onChange={setQuery}
+          />
           <div className="client-picks assign-client-list">
             {matches.map((c) => (
-              <button
+              <ListRow
                 key={c.id}
-                className={`client-pick assign-client-row${selectedIds.includes(c.id) ? ' selected' : ''}`}
+                icon={<Avatar userId={c.id} name={c.name} hasPhoto={false} size={30} />}
+                label={c.name}
+                sub={t.assignClientHint}
+                selected={selectedIds.includes(c.id)}
+                check={selectedIds.includes(c.id)}
                 onClick={() => onToggle(c.id)}
-              >
-                <Avatar userId={c.id} name={c.name} hasPhoto={false} size={30} />
-                <span className="assign-client-copy">
-                  <span className="n">{c.name}</span>
-                  <span className="s">{t.assignClientHint}</span>
-                </span>
-                <span className="assign-client-check" aria-hidden>
-                  {selectedIds.includes(c.id) ? <Icon name="check-circle" weight="fill" /> : null}
-                </span>
-              </button>
+              />
             ))}
           </div>
 
-          <label className="field-block assign-week">
-            <span className="field-label">{t.assignStartWeek}</span>
-            <select
-              className="input"
-              value={startWeek}
-              onChange={(e) => setStartWeek(Number(e.target.value) || 1)}
-            >
-              {Array.from({ length: Math.max(1, weeks) }, (_, i) => i + 1).map((w) => (
-                <option key={w} value={w}>
-                  {t.progWeekN(w)}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+            className="assign-week"
+            label={t.assignStartWeek}
+            value={startWeek}
+            onChange={(e) => setStartWeek(Number(e.target.value) || 1)}
+          >
+            {Array.from({ length: Math.max(1, weeks) }, (_, i) => i + 1).map((w) => (
+              <option key={w} value={w}>
+                {t.progWeekN(w)}
+              </option>
+            ))}
+          </Select>
 
           <div className="assign-startpoint">{t.assignStartPoint(startWeek, weekday)}</div>
           <div className="assign-warn">
@@ -128,16 +119,12 @@ export function ProgramAssignDialog({
       )}
 
       <div className="sheet-actions assign-actions">
-        <button className="btn btn-secondary" onClick={onClose}>
+        <Button variant="secondary" onClick={onClose}>
           {t.cancel}
-        </button>
-        <button
-          className="btn btn-primary"
-          disabled={busy || selectedIds.length === 0}
-          onClick={confirm}
-        >
+        </Button>
+        <Button variant="primary" disabled={busy || selectedIds.length === 0} onClick={confirm}>
           {busy ? t.saving : t.assignConfirmN(selectedIds.length)}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

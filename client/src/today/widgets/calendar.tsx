@@ -7,6 +7,7 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { Widget } from '../../components/ui/Widget';
 import { Button, IconButton } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
 import { toneClass, type Tone } from '../../components/ui/tones';
 import {
   addMonths,
@@ -60,7 +61,7 @@ function Marks({ info, compact }: { info: DayInfo | undefined; compact?: boolean
   if (!info) return <span style={{ height: 5 }} />;
   const hasW = info.workouts.length > 0;
   return (
-    <span style={{ display: 'flex', gap: 2, alignItems: 'center', height: 5 }}>
+    <span className="ul-flex ug-2 ua-center" style={{ height: 5 }}>
       {hasW && (
         <span
           className={toneClass('accent')}
@@ -104,7 +105,7 @@ function cellStyle({ info, day, today, planned }: CellOpts): CSSProperties {
     outlineOffset: -1.5,
     color: future ? 'var(--color-text-faint)' : 'var(--color-text)',
     font: 'inherit',
-    fontSize: 11.5,
+    fontSize: 'var(--fs-12)',
     fontWeight: 600,
     fontVariantNumeric: 'tabular-nums',
     lineHeight: 1,
@@ -119,8 +120,8 @@ function CellBody({ info, day, star }: { info: DayInfo | undefined; day: number;
         {ymdOf(day).d}
         {star && info?.pr && (
           <span
-            className={toneClass('accent')}
-            style={{ color: 'var(--t-base)', fontSize: 8, marginLeft: 1, verticalAlign: 'top' }}
+            className={[toneClass('accent'), 'ut-tone ut-2xs'].filter(Boolean).join(' ')}
+            style={{ marginLeft: 1, verticalAlign: 'top' }}
           >
             ★
           </span>
@@ -136,15 +137,17 @@ function DayCell(props: CellOpts & { onPick?: (day: number) => void; label?: str
   const cls = info?.health ? toneClass(HEALTH_TONE[info.health]) : undefined;
   if (onPick)
     return (
-      <button
-        type="button"
+      <Card
+        as="button"
+        pad="none"
+        emphasis="quiet"
         className={cls}
         style={{ ...cellStyle(props), cursor: 'pointer' }}
         onClick={() => onPick(day)}
         aria-label={props.label}
       >
         <CellBody info={info} day={day} star />
-      </button>
+      </Card>
     );
   return (
     <span className={cls} style={cellStyle(props)}>
@@ -155,21 +158,9 @@ function DayCell(props: CellOpts & { onPick?: (day: number) => void; label?: str
 
 function Legend({ items }: { items: { tone: Tone; label: string; dash?: boolean }[] }) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '4px 10px',
-        fontSize: 10.5,
-        color: 'var(--color-text-muted)',
-      }}
-    >
+    <div className="uiw-t-xs ut-muted ul-flex ul-wrap" style={{ gap: '4px 10px' }}>
       {items.map((it) => (
-        <span
-          key={it.label}
-          className={toneClass(it.tone)}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}
-        >
+        <span key={it.label} className={`${toneClass(it.tone)} ul-iflex ua-center ug-4`}>
           <span style={{ ...dotBase, width: it.dash ? 9 : 6, height: it.dash ? 3 : 6 }} />
           {it.label}
         </span>
@@ -186,7 +177,7 @@ const grid7: CSSProperties = {
 
 function HeadRow({ letters }: { letters: string[] }) {
   return (
-    <div style={{ ...grid7, fontSize: 10, color: 'var(--color-text-faint)', textAlign: 'center' }}>
+    <div className="uiw-t-xs ut-faint utx-center" style={{ ...grid7 }}>
       {letters.map((l, i) => (
         <span key={i}>{l}</span>
       ))}
@@ -229,17 +220,10 @@ function MonthCalendar({ ctx }: { ctx: WidgetCtx }) {
       kicker={s.calendar}
       onClick={open}
       footer={
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+        <div className="ul-flex ua-center ug-8 uw-full">
           <span
-            style={{
-              flex: 1,
-              minWidth: 0,
-              fontSize: 12,
-              color: 'var(--color-text-muted)',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
+            className="uiw-t-base ut-muted uf-1 umw-0"
+            style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
           >
             {s.monthSummary(shortMonth, sum.trained, (sum.volumeKg / 1000).toFixed(1))}
           </span>
@@ -249,10 +233,8 @@ function MonthCalendar({ ctx }: { ctx: WidgetCtx }) {
         </div>
       }
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        <span style={{ flex: 1, fontSize: 16, fontWeight: 700 }}>
-          {fmtCalendarMonth(mStart, locale)}
-        </span>
+      <div className="ul-flex ua-center ug-4">
+        <span className="uiw-t-lg uf-1">{fmtCalendarMonth(mStart, locale)}</span>
         <IconButton
           size="sm"
           icon="caret-left"
@@ -357,7 +339,7 @@ const calendar: WidgetDef = {
           tone="accent"
           icon="calendar-blank"
           title={
-            <div style={{ ...grid7, gap: 2, maxWidth: 240 }}>
+            <div className="ug-2" style={{ ...grid7, maxWidth: 240 }}>
               {weekDays.map((d, i) => (
                 <DayCell
                   key={d}
@@ -395,7 +377,7 @@ const calendar: WidgetDef = {
         onClick={open}
       >
         <HeadRow letters={letters} />
-        <div style={{ ...grid7, flex: 1, gridTemplateRows: 'repeat(2, minmax(0, 1fr))' }}>
+        <div className="uf-1" style={{ ...grid7, gridTemplateRows: 'repeat(2, minmax(0, 1fr))' }}>
           {days.map((d) => (
             <DayCell key={d} day={d} today={today} info={map.get(d)} planned={isPlanned(d)} />
           ))}
@@ -504,10 +486,10 @@ function PixelGrid({
   }
   const tmpl = `repeat(${cols}, minmax(0, 1fr))`;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div className="ul-flex ul-col ug-4">
       <div
+        className="ul-grid"
         style={{
-          display: 'grid',
           gridTemplateColumns: tmpl,
           gridTemplateRows: 'repeat(7, auto)',
           gridAutoFlow: 'column',
@@ -531,14 +513,7 @@ function PixelGrid({
         )}
       </div>
       {labels.length > 0 && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: tmpl,
-            fontSize: 9.5,
-            color: 'var(--color-text-faint)',
-          }}
-        >
+        <div className="uiw-t-xs ut-faint ul-grid" style={{ gridTemplateColumns: tmpl }}>
           {labels.map((l) => (
             <span key={l.col} style={{ gridColumn: `${l.col + 1} / span 6`, whiteSpace: 'nowrap' }}>
               {l.text}
@@ -567,13 +542,8 @@ function breakdown(
 function Swatch({ kind }: { kind: PixelKind }) {
   return (
     <span
-      style={{
-        width: 8,
-        height: 8,
-        flex: 'none',
-        borderRadius: 'var(--radius-sm)',
-        background: PIXEL_COLOR[kind],
-      }}
+      className="ur-sm uf-none"
+      style={{ width: 8, height: 8, background: PIXEL_COLOR[kind] }}
     />
   );
 }
@@ -636,20 +606,14 @@ const yearPixels: WidgetDef = {
           onClick={open}
         >
           {grid}
-          <div
-            style={{ display: 'flex', gap: 10, fontSize: 10.5, color: 'var(--color-text-muted)' }}
-          >
+          <div className="uiw-t-xs ut-muted ul-flex ug-10">
             {breakdown(st, s)
               .filter((b) => b.kind !== 'off')
               .map((b) => (
                 <span
                   key={b.kind}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    whiteSpace: 'nowrap',
-                  }}
+                  className="ul-iflex ua-center ug-4"
+                  style={{ whiteSpace: 'nowrap' }}
                 >
                   <Swatch kind={b.kind} />
                   {b.label}
@@ -678,23 +642,16 @@ const yearPixels: WidgetDef = {
       >
         {grid}
         <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-            gap: '6px 16px',
-            fontSize: 12.5,
-          }}
+          className="uiw-t-base ul-grid"
+          style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '6px 16px' }}
         >
           {breakdown(st, s).map((b) => (
-            <span
-              key={b.kind}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}
-            >
+            <span key={b.kind} className="ul-flex ua-center ug-8 umw-0">
               <Swatch kind={b.kind} />
-              <span style={{ flex: 1, minWidth: 0, color: 'var(--color-text-muted)' }}>
-                {b.label}
+              <span className="ut-muted uf-1 umw-0">{b.label}</span>
+              <span className="ut-w6" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {b.n}
               </span>
-              <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{b.n}</span>
             </span>
           ))}
         </div>

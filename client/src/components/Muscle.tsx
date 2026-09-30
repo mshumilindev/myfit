@@ -15,6 +15,7 @@
  * sizes and the geometric mark at chip/chipLg sizes — same public API.
  */
 import { weekBounds as trainingWeekBounds } from '../weekStart';
+import { Button } from './ui/Button';
 import { landmarkFor } from '../personalize';
 import {
   createContext,
@@ -25,8 +26,6 @@ import {
   useState,
   type CSSProperties,
   type ReactNode,
-  type MouseEvent as ReactMouseEvent,
-  type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { FRONT_MUSCLES, BACK_MUSCLES } from 'body-muscles';
@@ -37,6 +36,8 @@ import { t as strings } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { useStore, muscleSetsInWorkout } from '../store';
 import { classifyZone, ZONE_COLOR } from '../volume';
+import { Chip } from './ui/Chip';
+import { Tag } from './ui/Tag';
 
 /** Muscles in the vocabulary order of the filter bar (MG-5). */
 export const MUSCLE_IDS: Exclude<MuscleGroup, 'cardio'>[] = [
@@ -486,8 +487,9 @@ const REGION_IDS: Record<BView, Record<Region, string[]>> = {
   },
 };
 
-const DIM = 'var(--color-neutral-800)';
-const DIM_STROKE = 'var(--color-neutral-900)';
+const DIM = 'var(--body-dim, var(--color-neutral-800))';
+const DIM_STROKE = 'var(--body-dim-stroke, var(--color-neutral-900))';
+const SEC = 'var(--body-sec, var(--color-neutral-500))';
 
 /** Highlight colour for a tone (primary = brass, secondary = grey …). */
 function highlightColor(tone: Tone): string {
@@ -528,10 +530,9 @@ function BodySvg({
       viewBox={VIEWBOX[view][region]}
       width={width}
       height={height}
+      className="umw-0 ul-block"
       style={{
-        display: 'block',
         flex: region === 'full' ? 1 : 'none',
-        minWidth: 0,
         width: width === undefined ? '100%' : undefined,
         height: 'auto',
       }}
@@ -543,7 +544,7 @@ function BodySvg({
         if (drawSet && !drawSet.has(id)) return null;
         const on = full || prim.has(id);
         const se = !on && sec.has(id);
-        const fill = on ? hl : se ? 'var(--color-neutral-500)' : DIM;
+        const fill = on ? hl : se ? SEC : DIM;
         const active = on || se;
         return (
           <path
@@ -623,7 +624,8 @@ export function MuscleHeatmap({
         <svg
           key={view}
           viewBox={VIEWBOX[view].full}
-          style={{ display: 'block', flex: 1, minWidth: 0, width: '100%', height: 'auto' }}
+          className="uf-1 umw-0 uw-full ul-block"
+          style={{ height: 'auto' }}
           aria-hidden
         >
           {VIEW_PATHS[view].map(({ id, path }) => {
@@ -741,7 +743,8 @@ export function FocusBodyMap({
         <svg
           key={v}
           viewBox={VIEWBOX[v].full}
-          style={{ display: 'block', flex: 1, minWidth: 0, width: '100%', height: 'auto' }}
+          className="uf-1 umw-0 uw-full ul-block"
+          style={{ height: 'auto' }}
           aria-hidden
         >
           {VIEW_PATHS[v].map(({ id, path }) => {
@@ -1079,15 +1082,16 @@ function MuscleInfoDrawer({
       </div>
       {extra}
       {onAction && actionLabel && (
-        <button
-          className="btn btn-primary mi-action"
+        <Button
+          variant="primary"
+          className="mi-action"
           onClick={() => {
             onAction();
             onClose();
           }}
         >
           {actionLabel}
-        </button>
+        </Button>
       )}
     </Sheet>
   );
@@ -1132,7 +1136,6 @@ function useMuscleChipTap(
 export function MuscleChip({
   muscle,
   tone = 'primary',
-  size = 'sm',
   variant = 'fig',
   icon = false,
   onClick,
@@ -1140,7 +1143,6 @@ export function MuscleChip({
 }: {
   muscle: MuscleGroup;
   tone?: Tone;
-  size?: 'sm' | 'lg';
   /** 'fig' = the muscle-figure chip (default); 'pill' = the compact circuit
    *  pill (design .mus / .mus2). */
   variant?: 'fig' | 'pill';
@@ -1153,46 +1155,35 @@ export function MuscleChip({
   const { fire, node } = useMuscleChipTap(muscle, tone, onClick, detail);
   if (muscle === 'cardio') return null;
   const interactive = !!onClick;
-  const handlers = {
-    role: interactive ? ('button' as const) : undefined,
-    tabIndex: interactive ? 0 : undefined,
-    onClick: interactive
-      ? (event: ReactMouseEvent) => {
-          event.stopPropagation();
-          fire();
-        }
-      : undefined,
-    onKeyDown: interactive
-      ? (event: ReactKeyboardEvent) => {
-          if (event.key !== 'Enter' && event.key !== ' ') return;
-          event.preventDefault();
-          event.stopPropagation();
-          fire();
-        }
-      : undefined,
-  };
+  const figure = <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />;
+  const label = strings().muscleGroups[muscle];
   if (variant === 'pill') {
     return (
       <>
-        <span className={`c-mus${tone === 'primary' ? '' : '2'}`} {...handlers}>
-          {icon && tone === 'primary' && (
-            <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
-          )}
-          {strings().muscleGroups[muscle]}
-        </span>
+        <Chip
+          size="sm"
+          tone={tone === 'primary' ? 'accent' : 'neutral'}
+          nested={interactive}
+          onClick={interactive ? fire : undefined}
+        >
+          {icon && tone === 'primary' && figure}
+          {label}
+        </Chip>
         {node}
       </>
     );
   }
   return (
     <>
-      <span
-        className={`mchip mchip-fig${size === 'lg' ? ' lg' : ''}${tone === 'primary' ? ' primary' : ''}`}
-        {...handlers}
+      <Chip
+        size="sm"
+        muted={tone !== 'primary'}
+        nested={interactive}
+        onClick={interactive ? fire : undefined}
       >
-        <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
-        {strings().muscleGroups[muscle]}
-      </span>
+        {figure}
+        {label}
+      </Chip>
       {node}
     </>
   );
@@ -1487,33 +1478,16 @@ export function MuscleSetChip({
   const interactive = !!onClick;
   return (
     <>
-      <span
-        className={`mworked-chip mworked-chip-fig${tone === 'secondary' ? ' secondary' : ''}`}
-        role={interactive ? 'button' : undefined}
-        tabIndex={interactive ? 0 : undefined}
-        onClick={
-          interactive
-            ? (event) => {
-                event.stopPropagation();
-                fire();
-              }
-            : undefined
-        }
-        onKeyDown={
-          interactive
-            ? (event) => {
-                if (event.key !== 'Enter' && event.key !== ' ') return;
-                event.preventDefault();
-                event.stopPropagation();
-                fire();
-              }
-            : undefined
-        }
+      <Chip
+        size="sm"
+        muted={tone === 'secondary'}
+        nested={interactive}
+        onClick={interactive ? fire : undefined}
       >
         <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
-        <span className="mworked-name">{strings().muscleGroups[muscle]}</span>
+        {strings().muscleGroups[muscle]}
         {count !== undefined && <span className="mworked-count">{fmtSetCount(count)}</span>}
-      </span>
+      </Chip>
       {node}
     </>
   );
@@ -1550,10 +1524,9 @@ export function equipmentLabel(id: string): string {
 /** Graphite equipment chip (icon + word, EQ-1). */
 export function EquipChip({ id, style }: { id: string; style?: CSSProperties }) {
   return (
-    <span className="echip" style={style}>
-      <Icon name={equipmentIconName(id)} />
+    <Tag tone="neutral" style={style} icon={<Icon name={equipmentIconName(id)} />}>
       {equipmentLabel(id)}
-    </span>
+    </Tag>
   );
 }
 
@@ -1592,7 +1565,8 @@ export function MusclePickerMap({
             <svg
               viewBox={VIEWBOX[view].full}
               aria-hidden
-              style={{ display: 'block', width: '100%', height: 'auto' }}
+              className="uw-full ul-block"
+              style={{ height: 'auto' }}
             >
               {VIEW_PATHS[view].map(({ id, path }) => {
                 const g = ID_TO_GROUP[view][id];

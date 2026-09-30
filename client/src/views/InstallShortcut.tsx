@@ -1,5 +1,6 @@
 /** Login-page “Create a shortcut” — OS-branded install / Add to Home Screen. */
 import { useState } from 'react';
+import { Button } from '../components/ui/Button';
 import { useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { usePwaInstall, type PwaInstallMode } from '../usePwaInstall';
@@ -22,14 +23,10 @@ export function InstallShortcut() {
 
   return (
     <>
-      <button
-        type="button"
-        className="btn btn-secondary auth-install-btn"
-        onClick={() => void onClick()}
-      >
+      <Button variant="secondary" className="auth-install-btn" onClick={() => void onClick()}>
         <Icon name={brand === 'apple' ? 'apple-logo' : 'android-logo'} weight="fill" />
         {t.createShortcut}
-      </button>
+      </Button>
 
       {guideOpen && <InstallGuideSheet mode={guideMode} onClose={() => setGuideOpen(false)} />}
     </>
@@ -83,9 +80,9 @@ function InstallGuideSheet({ mode, onClose }: { mode: PwaInstallMode; onClose: (
             </li>
           ))}
         </ol>
-        <button type="button" className="btn btn-primary" onClick={onClose}>
+        <Button variant="primary" onClick={onClose}>
           {t.installGotIt}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

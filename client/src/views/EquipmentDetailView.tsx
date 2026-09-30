@@ -8,7 +8,11 @@
  * each flagged for whether *this* gym has it. Pulls straight from the equipment
  * catalog and the exercise DB; no new data.
  */
+import { BackButton } from '../components/ui/BackButton';
 import { useMemo } from 'react';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { ListRow } from '../components/ui/GroupedList';
 import { equipmentById, enrichedCatalog, type EquipmentItem } from '../data/equipmentCatalog';
 import { localizedEquipName, localizedEquipInfo, equipCategoryLabel } from '../data/equipmentI18n';
 import { MuscleChip } from '../components/Muscle';
@@ -119,9 +123,7 @@ export function EquipmentDetailView({
     return (
       <div className="screen exd eqd">
         <div className="eqd-body">
-          <button className="eqd-back" onClick={onClose} aria-label={t.backAction}>
-            <Icon name="caret-left" />
-          </button>
+          <BackButton className="eqd-back" label={t.backAction} onClick={onClose} />
           <div className="detail-muted eqd-empty">—</div>
         </div>
       </div>
@@ -153,9 +155,7 @@ export function EquipmentDetailView({
     <div className="screen exd eqd">
       <div className="eqd-body">
         <div className="eqd-head">
-          <button className="eqd-back" onClick={onClose} aria-label={t.backAction}>
-            <Icon name="caret-left" />
-          </button>
+          <BackButton className="eqd-back" label={t.backAction} onClick={onClose} />
           <div className="eqd-headtext">
             <div className="eqd-cat lbl">{equipCategoryLabel(item.category, locale)}</div>
             <h1 className="eqd-title">{name}</h1>
@@ -173,13 +173,14 @@ export function EquipmentDetailView({
         {info && <p className="eqd-info">{info}</p>}
 
         {gym && (
-          <button
-            className={`btn ${here ? 'btn-secondary' : 'btn-primary'} eqd-gym-btn`}
+          <Button
+            variant={here ? 'secondary' : 'primary'}
+            className="eqd-gym-btn"
             onClick={toggleGym}
           >
             <Icon name={here ? 'check' : 'plus'} weight="bold" />
             {here ? t.eqInThisGym : t.eqAddToGym}
-          </button>
+          </Button>
         )}
 
         {(item.muscles.length > 0 || secondary.length > 0) && (
@@ -226,23 +227,22 @@ export function EquipmentDetailView({
             <div className="detail-muted eqd-note">{t.eqFromDb}</div>
             <div className="eqd-exs">
               {exercises.map((ex) => (
-                <button
+                <ListRow
                   key={ex.id}
-                  className="eqd-ex"
+                  dense
+                  icon={<span className={`eqd-dot m-${ex.muscle}`} aria-hidden />}
+                  label={ex.names[li] || ex.names[0]}
+                  value={t.muscleGroups[ex.muscle]}
+                  chevron
                   onClick={() =>
                     shell.openOverlay({ screen: 'exercise-detail', name: ex.names[0] })
                   }
-                >
-                  <span className={`eqd-dot m-${ex.muscle}`} aria-hidden />
-                  <span className="eqd-ex-name">{ex.names[li] || ex.names[0]}</span>
-                  <span className="eqd-ex-mus">{t.muscleGroups[ex.muscle]}</span>
-                  <Icon name="caret-right" />
-                </button>
+                />
               ))}
             </div>
-            <button className="btn btn-primary eqd-log" onClick={logASet}>
+            <Button variant="primary" className="eqd-log" onClick={logASet}>
               <Icon name="plus" weight="bold" /> {t.eqLogSet}
-            </button>
+            </Button>
           </section>
         )}
 
@@ -279,7 +279,10 @@ export function EquipmentDetailView({
             <div className="lbl eqd-lbl">{t.eqTrainsSame}</div>
             <div className="eqd-alts">
               {alternatives.map((alt) => (
-                <button
+                <Card
+                  as="button"
+                  pad="none"
+                  emphasis="quiet"
                   key={alt.id}
                   className="eqd-alt"
                   onClick={() => shell.openOverlay({ screen: 'equipment', itemId: alt.id, gymId })}
@@ -303,7 +306,7 @@ export function EquipmentDetailView({
                       )}
                     </span>
                   )}
-                </button>
+                </Card>
               ))}
             </div>
           </section>

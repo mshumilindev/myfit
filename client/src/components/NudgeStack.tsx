@@ -14,6 +14,10 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
+import { IconButton } from './ui/Button';
+import { Card } from './ui/Card';
+import { IconTile } from './ui/IconTile';
+import type { Tone } from './ui/tones';
 
 export interface Nudge {
   id: string;
@@ -36,6 +40,19 @@ export interface Nudge {
   /** Expanded-view actions; `close` collapses the overlay. */
   actions?: (close: () => void) => ReactNode;
 }
+
+/** Advisory type → colour family (tones.ts). */
+const NUDGE_TONE: Record<Nudge['tone'], Tone> = {
+  readiness: 'kcal',
+  recovery: 'accent',
+  analysis: 'injury',
+  suggest: 'active',
+  plan: 'accent',
+  body: 'neutral',
+  rest: 'rest',
+  learn: 'learn',
+  energy: 'kcal',
+};
 
 const ROTATE_MS = 15000; // advance the deck every 15s
 const MAX_PEEK = 3; // cards drawn in the collapsed deck (front + 2 behind)
@@ -123,53 +140,64 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
 
   return (
     <div className="nudge-wrap" ref={wrapRef}>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         className="nudge-deck"
         onClick={openStack}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openStack();
+          }
+        }}
         aria-label={typeof front.title === 'string' ? front.title : front.kicker}
       >
         {order.map((n, i) => {
           // The dealt card is drawn by the flyer, not the deck, until it lands.
           if (i >= MAX_PEEK || n.id === flying?.id) return null;
           return (
-            <span
+            <Card
               key={n.id}
-              className={`nudge-mini tone-${n.tone}`}
+              tone={NUDGE_TONE[n.tone]}
+              opaque
+              className="nudge-mini"
               style={{
                 zIndex: order.length - i,
                 transform: `translateY(${i * 8}px) scale(${1 - i * 0.04})`,
                 opacity: i === 0 ? 1 : i === 1 ? 0.7 : 0.4,
               }}
             >
-              <span className="nudge-ic">
+              <IconTile tone={NUDGE_TONE[n.tone]} size={34}>
                 <Icon name={n.icon} weight="fill" />
-              </span>
+              </IconTile>
               <span className="nudge-mini-text">
                 <span className="nudge-kicker">{n.kicker}</span>
                 <span className="nudge-title">{n.title}</span>
               </span>
               {i === 0 && <Icon name="caret-right" className="nudge-chev" />}
-            </span>
+            </Card>
           );
         })}
         {flying && (
-          <span
+          <Card
             key={flyKey}
-            className={`nudge-mini fly tone-${flying.tone}`}
+            tone={NUDGE_TONE[flying.tone]}
+            opaque
+            className="nudge-mini fly"
             style={{ zIndex: 40 }}
             onAnimationEnd={() => setFlying(null)}
           >
-            <span className="nudge-ic">
+            <IconTile tone={NUDGE_TONE[flying.tone]} size={34}>
               <Icon name={flying.icon} weight="fill" />
-            </span>
+            </IconTile>
             <span className="nudge-mini-text">
               <span className="nudge-kicker">{flying.kicker}</span>
               <span className="nudge-title">{flying.title}</span>
             </span>
-          </span>
+          </Card>
         )}
-      </button>
+      </div>
 
       {count > 1 && (
         <div className="nudge-rail" aria-hidden>
@@ -202,34 +230,28 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
             <div className="nudge-scrim" onClick={close} />
             <div className="nudge-sheet" role="dialog">
               <div className="nudge-sheet-head">
-                <button
-                  type="button"
-                  className="nudge-close"
-                  onClick={close}
-                  aria-label={t.srClose}
-                >
-                  <Icon name="x-circle" weight="fill" />
-                </button>
+                <IconButton icon="x-circle" onClick={close} label={t.srClose} />
               </div>
               <div className="nudge-sheet-scroll">
                 {/* Fixed importance order in the overlay — independent of the
                     deck's current rotation. */}
                 {items.map((n, i) => (
-                  <div
+                  <Card
                     key={n.id}
-                    className={`nudge-full tone-${n.tone}`}
+                    tone={NUDGE_TONE[n.tone]}
+                    className="nudge-full"
                     style={{ animationDelay: `${i * 55}ms` }}
                   >
                     <div className="nudge-card-head">
-                      <span className="nudge-ic lg">
+                      <IconTile tone={NUDGE_TONE[n.tone]} size={30}>
                         <Icon name={n.icon} weight="fill" />
-                      </span>
+                      </IconTile>
                       <span className="nudge-kicker">{n.kicker}</span>
                     </div>
                     <div className="nudge-card-title">{n.title}</div>
                     {n.body && <div className="nudge-card-body">{n.body}</div>}
                     {n.actions && <div className="nudge-card-acts">{n.actions(close)}</div>}
-                  </div>
+                  </Card>
                 ))}
               </div>
             </div>

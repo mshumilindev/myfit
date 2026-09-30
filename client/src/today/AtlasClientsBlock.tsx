@@ -51,6 +51,7 @@ import { Icon } from '../ui';
 import { atlasStarterChips, topNote } from './widgets/learnatlas';
 import { useClientRoster, type RosterClient } from './clientRoster';
 import type { AtlasOpts, AtlasView } from './layout';
+import { Card } from '../components/ui/Card';
 
 const DAY = 86_400_000;
 const INACTIVE_MS = 30 * DAY;
@@ -167,8 +168,10 @@ function AtlasSolo({ a, onOpen }: { a: AtlasToday; onOpen: () => void }) {
   const { t } = useT();
   return (
     <div className="tac-band">
-      <button
-        type="button"
+      <Card
+        as="button"
+        pad="none"
+        emphasis="quiet"
         className="tac-solo"
         onClick={onOpen}
         aria-label={a.on ? (a.unread ? t.atlasStoryUnread(a.unread) : t.atlasName) : t.atlasInvite}
@@ -194,7 +197,7 @@ function AtlasSolo({ a, onOpen }: { a: AtlasToday; onOpen: () => void }) {
         ) : (
           <Icon name="caret-right" className="tac-go" />
         )}
-      </button>
+      </Card>
     </div>
   );
 }
@@ -223,7 +226,7 @@ function AtlasCard({
 function AtlasCompact({ a, onOpen, cls }: { a: AtlasToday; onOpen: () => void; cls: string }) {
   const { t } = useT();
   return (
-    <button type="button" className={`${cls} tac-compact`} onClick={onOpen}>
+    <Card as="button" pad="none" emphasis="quiet" className={`${cls} tac-compact`} onClick={onOpen}>
       <StoryBubble size="xs" ring="atlas" media={face(a.temper, 'xs')} />
       <span className="tac-compact-line">
         <b>{t.atlasName}</b>
@@ -232,7 +235,7 @@ function AtlasCompact({ a, onOpen, cls }: { a: AtlasToday; onOpen: () => void; c
       </span>
       <Count n={a.unread} />
       <Icon name="caret-right" className="tac-go" />
-    </button>
+    </Card>
   );
 }
 
@@ -380,7 +383,7 @@ function ReplyChips({
 function AskField({ onOpen }: { onOpen: () => void }) {
   const { t } = useT();
   return (
-    <button type="button" className="tac-ask" onClick={onOpen}>
+    <Card as="button" pad="none" emphasis="quiet" className="tac-ask" onClick={onOpen}>
       <span className="tac-ask-text">{t.todayAtlasAsk}</span>
       <span className="tac-ask-mic" aria-hidden>
         <Icon name="microphone" />
@@ -388,7 +391,7 @@ function AskField({ onOpen }: { onOpen: () => void }) {
       <span className="tac-ask-send" aria-hidden>
         <Icon name="arrow-up" />
       </span>
-    </button>
+    </Card>
   );
 }
 
@@ -427,10 +430,10 @@ function AtlasChat({ a, onOpen, cls }: { a: AtlasToday; onOpen: () => void; cls:
           />
         }
       />
-      <button type="button" className="tac-bubble-wrap" onClick={onOpen}>
+      <Card as="button" pad="none" emphasis="quiet" className="tac-bubble-wrap" onClick={onOpen}>
         <span className="tac-bubble">{msg.text}</span>
         {msg.at !== null && <span className="tac-bubble-time">{fmtClock(msg.at)}</span>}
-      </button>
+      </Card>
       <ReplyChips chips={chips} onOpen={onOpen} />
       <AskField onOpen={onOpen} />
     </section>
@@ -626,9 +629,9 @@ function Clients(p: AtlasClientsProps & { roster: RosterClient[]; wide: boolean 
   const alertN = clients.filter((v) => v.ring === 'alert').length;
 
   const all = (label: string) => (
-    <button type="button" className="tac-all" onClick={p.onAllClients}>
-      {label} <Icon name="caret-right" />
-    </button>
+    <Button variant="link" iconTrailing="caret-right" onClick={p.onAllClients}>
+      {label}
+    </Button>
   );
 
   let body: ReactNode;
@@ -640,9 +643,10 @@ function Clients(p: AtlasClientsProps & { roster: RosterClient[]; wide: boolean 
         {tiles.map((v) => {
           const st = status(v, now, t);
           return (
-            <button
+            <Card
+              as="button"
+              pad="none"
               key={v.c.id}
-              type="button"
               className={`tac-tile${v.ring === 'alert' ? ' is-alert' : ''}`}
               onClick={() => (v.live ? p.onWatch(v.live) : p.onOpenClient(v.c.id))}
             >
@@ -658,13 +662,13 @@ function Clients(p: AtlasClientsProps & { roster: RosterClient[]; wide: boolean 
                   {st.tone ? <ToneText tone={st.tone}>{st.text}</ToneText> : st.text}
                 </span>
               </span>
-            </button>
+            </Card>
           );
         })}
         {more > 0 && (
-          <button type="button" className="tac-tile is-more" onClick={p.onAllClients}>
-            {t.todayMoreN(more)} <Icon name="caret-right" />
-          </button>
+          <Button variant="secondary" size="sm" iconTrailing="caret-right" onClick={p.onAllClients}>
+            {t.todayMoreN(more)}
+          </Button>
         )}
       </div>
     );

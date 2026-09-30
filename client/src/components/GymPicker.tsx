@@ -20,8 +20,12 @@ import {
   type PlaceResult,
 } from '../data/gymProviders';
 import { useT } from '../i18n';
-import { Icon, Sheet } from '../ui';
+import { Sheet } from '../ui';
 import { GymThumb } from './GymThumb';
+import { ListRow } from './ui/GroupedList';
+import { IconTile } from './ui/IconTile';
+import { SearchField } from './ui/SearchField';
+import { Tag } from './ui/Tag';
 
 /** "You're here" is only honest when you're basically at the door — the gym's
  *  own radiusM is a wider presence geofence (100m+), so 50m away shouldn't read
@@ -157,41 +161,37 @@ export function GymPicker({
         <span className="t">{title}</span>
       </div>
       {(gyms.length > 4 || (nearby?.length ?? 0) > 0) && (
-        <div className="searchbar sm">
-          <Icon name="magnifying-glass" />
-          <input
-            value={q}
-            placeholder={t.searchGymPlaceholder}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </div>
+        <SearchField
+          value={q}
+          onChange={setQ}
+          placeholder={t.searchGymPlaceholder}
+          clearLabel={t.todayClear}
+        />
       )}
       <div className="gym-pick-list">
         {filtered.map((g) => {
           const d = coords ? haversineM(coords, g) : null;
           const isSug = g.id === suggested && !needle;
           return (
-            <button
+            <ListRow
               key={g.id}
-              className={`gym-pick-row${isSug ? ' suggested' : ''}`}
-              onClick={() => onPick(g.id)}
-            >
-              <span className="thumb">
-                <GymThumb name={g.name} lat={g.lat} lng={g.lng} size={44} />
-              </span>
-              <span className="body">
-                <span className="n">{g.name}</span>
-                <span className="s">
+              strong
+              selected={isSug}
+              icon={<GymThumb name={g.name} lat={g.lat} lng={g.lng} size={44} boxed />}
+              label={g.name}
+              sub={
+                <>
                   {isSug && d !== null && d <= Math.min(g.radiusM, HERE_LABEL_M)
                     ? t.pickGymHere
                     : d !== null
                       ? fmtDistance(d)
                       : ''}
                   <RowHours name={g.name} lat={g.lat} lng={g.lng} />
-                </span>
-              </span>
-              {isSug && <span className="tag tag-accent">{t.pickGymSuggested}</span>}
-            </button>
+                </>
+              }
+              trailing={isSug ? <Tag tone="accent">{t.pickGymSuggested}</Tag> : undefined}
+              onClick={() => onPick(g.id)}
+            />
           );
         })}
         {variant === 'sheet' && (
@@ -207,31 +207,25 @@ export function GymPicker({
               nearby
                 .filter((r) => tokenMatch(r.name, needle))
                 .map((r) => (
-                  <button key={r.key} className="gym-pick-row new" onClick={() => pickNew(r)}>
-                    <span className="thumb">
-                      <GymThumb name={r.name} lat={r.lat} lng={r.lng} size={44} />
-                    </span>
-                    <span className="body">
-                      <span className="n">{r.name}</span>
-                      <span className="s">
-                        {coords ? fmtDistance(haversineM(coords, r)) : ''}
-                        {r.address ? ` · ${r.address}` : ''}
-                      </span>
-                    </span>
-                    <span className="tag">{t.pickGymAdd}</span>
-                  </button>
+                  <ListRow
+                    key={r.key}
+                    strong
+                    icon={<GymThumb name={r.name} lat={r.lat} lng={r.lng} size={44} boxed />}
+                    label={r.name}
+                    sub={`${coords ? fmtDistance(haversineM(coords, r)) : ''}${r.address ? ` · ${r.address}` : ''}`}
+                    trailing={<Tag tone="neutral">{t.pickGymAdd}</Tag>}
+                    onClick={() => pickNew(r)}
+                  />
                 ))
             )}
           </>
         )}
-        <button className="gym-pick-row none" onClick={() => onPick(null)}>
-          <span className="thumb">
-            <Icon name="map-pin-slash" />
-          </span>
-          <span className="body">
-            <span className="n">{t.pickGymSkip}</span>
-          </span>
-        </button>
+        <ListRow
+          strong
+          icon={<IconTile outline size={44} icon="map-pin-slash" />}
+          label={t.pickGymSkip}
+          onClick={() => onPick(null)}
+        />
       </div>
     </>
   );

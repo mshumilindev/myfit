@@ -5,6 +5,7 @@
  * way the athlete sees their own past session — sets, types, rest, drop sets,
  * supersets and circuits — but without any editing affordances.
  */
+import { BackButton } from '../components/ui/BackButton';
 import { SidesChip } from '../components/SidesChip';
 import { useEffect, useState } from 'react';
 import type { Shell } from '../App';
@@ -23,6 +24,7 @@ import {
 import { useT, fmtTonnes, fmtKg, fmtDurationHM, fmtDayMonth } from '../i18n';
 import type { Strings } from '../i18n/en';
 import { Icon, useExerciseName } from '../ui';
+import { Tag } from '../components/ui/Tag';
 
 function mmss(sec: number): string {
   const s = Math.max(0, Math.round(sec));
@@ -229,12 +231,10 @@ export function TraineeSessionView({
   const durationMs = w && w.finishedAt ? w.finishedAt - w.startedAt : null;
 
   return (
-    <div className="screen" style={{ gap: 'var(--space-5)' }}>
+    <div className="screen ug-14">
       <div className="hist-head">
-        <button className="back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <BackButton onClick={onClose} label={t.backAction} />
+        <div className="uf-1 umw-0">
           <h2 className="title-26">{athleteName ?? t.trLiveViewRecap}</h2>
           {w && (
             <div className="sub">
@@ -252,7 +252,7 @@ export function TraineeSessionView({
       {errMsg && <div className="detail-muted">{errMsg}</div>}
 
       {w && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+        <div className="ul-flex ul-col ug-8">
           {sessionBlocks(w).map((block) => {
             if (block.kind === 'single')
               return <ExerciseCard key={block.exercise.id} ex={block.exercise} w={w} t={t} />;
@@ -263,7 +263,7 @@ export function TraineeSessionView({
                 <div className="ss-bar" />
                 <div className="ss-body">
                   <div className="ss-head">
-                    <span className="tag tag-accent">{t.supersetTag(g.letter)}</span>
+                    <Tag tone="accent">{t.supersetTag(g.letter)}</Tag>
                     <span className="ss-round">{t.circuitNRounds(groupRounds(g))}</span>
                   </div>
                   {g.exercises.map((e) => (

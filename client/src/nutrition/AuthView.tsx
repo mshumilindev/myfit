@@ -1,4 +1,6 @@
 import { useState, type FormEvent } from 'react';
+import { Button } from '../components/ui/Button';
+import { Field } from '../components/ui/Field';
 import { AuthError, login } from './auth';
 import { LanguageChip } from './components';
 import { useT } from './i18n';
@@ -30,22 +32,21 @@ export function AuthView() {
   return (
     <div className="auth">
       <form className="auth-card" onSubmit={submit}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+        <div className="ul-flex uj-center umb-16">
           <LanguageChip />
         </div>
         <div className="mark">🥗</div>
         <h2>{t('appName')}</h2>
         <p className="sub">{t('authSub')}</p>
-        <input
-          className="input"
+        <Field
           placeholder={t('emailOrUsername')}
           autoComplete="username"
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
           disabled={busy}
         />
-        <input
-          className={`input${error ? ' error' : ''}`}
+        <Field
+          error={error || undefined}
           type="password"
           placeholder={t('password')}
           autoComplete="current-password"
@@ -53,13 +54,15 @@ export function AuthView() {
           onChange={(e) => setPassword(e.target.value)}
           disabled={busy}
         />
-        {error && <div className="field-error">{error}</div>}
-        <button className="btn acc block" type="submit" disabled={busy || !identifier || !password}>
+        <Button
+          variant="primary"
+          fullWidth
+          type="submit"
+          disabled={busy || !identifier || !password}
+        >
           {busy ? t('loadingLabel') : t('signIn')}
-        </button>
-        <p className="muted mt4" style={{ fontSize: 12 }}>
-          🔗 {t('oneAccount')}
-        </p>
+        </Button>
+        <p className="muted mt4 ut-sm">🔗 {t('oneAccount')}</p>
       </form>
     </div>
   );

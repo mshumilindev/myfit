@@ -4,6 +4,8 @@
  * native-share / save / copy. Drawing is offline (data/shareCard).
  */
 import { useEffect, useRef, useState } from 'react';
+import { Button } from './ui/Button';
+import { Segmented } from './ui/Segmented';
 import { useT } from '../i18n';
 import { Icon, Sheet, useIsDesktop } from '../ui';
 import {
@@ -81,58 +83,64 @@ export function StatShareSheet({
     <Sheet className="share-sheet" onClose={onClose}>
       <div className="share-head">
         <h3>{model.kicker}</h3>
-        <div className="share-format" role="tablist">
-          <button className={format === 'story' ? 'on' : ''} onClick={() => setFormat('story')}>
-            {t.shareFormatStory}
-          </button>
-          <button className={format === 'square' ? 'on' : ''} onClick={() => setFormat('square')}>
-            {t.shareFormatSquare}
-          </button>
-        </div>
+        <Segmented
+          tabs
+          className="share-format"
+          value={format}
+          onChange={setFormat}
+          options={[
+            { value: 'story', label: t.shareFormatStory },
+            { value: 'square', label: t.shareFormatSquare },
+          ]}
+        />
       </div>
       <div className={`share-preview ${format}`}>
         <canvas ref={canvasRef} className="share-canvas" />
       </div>
       <div className="share-actions">
         {isDesktop ? (
-          <button
-            className="btn btn-primary grow"
+          <Button
+            variant="primary"
+            className="grow"
             disabled={busy}
             onClick={() => withBlob(download)}
           >
             <Icon name="download-simple" />
             {t.shareDownload}
-          </button>
+          </Button>
         ) : (
-          <button
-            className="btn btn-primary grow"
+          <Button
+            variant="primary"
+            className="grow"
             disabled={busy}
             onClick={() => withBlob(nativeShare)}
           >
             <Icon name="export" />
             {t.shareToStories}
-          </button>
+          </Button>
         )}
         {!isDesktop && (
-          <button
-            className="btn btn-secondary share-icon-btn"
+          <Button
+            variant="secondary"
+            className="share-icon-btn"
             disabled={busy}
             onClick={() => withBlob(download)}
             aria-label={t.shareSaveImage}
             title={t.shareSaveImage}
           >
             <Icon name="download-simple" />
-          </button>
+          </Button>
         )}
-        <button
-          className="btn btn-secondary share-icon-btn"
+        <Button
+          variant="secondary"
+          className="share-icon-btn"
           disabled={busy}
           onClick={() => withBlob(copy)}
           aria-label={copied ? t.shareCopied : t.shareCopy}
           title={copied ? t.shareCopied : t.shareCopy}
         >
           <Icon name={copied ? 'check' : 'copy'} />
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

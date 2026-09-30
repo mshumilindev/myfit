@@ -6,6 +6,7 @@
  * pinned Cancel / primary bar. Injuries swap the dates for body part + side,
  * the day it happened and "Healed on …" / "Still healing → rehab plan".
  */
+import { BackButton } from '../../components/ui/BackButton';
 import { Fragment, useMemo, useState, type ReactNode } from 'react';
 import { useT } from '../../i18n';
 import {
@@ -34,7 +35,9 @@ import {
 import { BODY_PARTS, bodyPart as findBodyPart } from '../../injury';
 import { useWeekStartDay } from '../../weekStart';
 import type { InjurySide, RestMode } from '../../types';
+import { Button, IconButton } from '../../components/ui/Button';
 import { Calendar } from '../../components/ui/Calendar';
+import { Field } from '../../components/ui/Field';
 import { GroupedList, ListPanel, ListRow } from '../../components/ui/GroupedList';
 import { PresetChips } from '../../components/ui/PresetChips';
 import { Segmented } from '../../components/ui/Segmented';
@@ -44,7 +47,6 @@ import type { Tone as KitTone } from '../../components/ui/tones';
 import {
   Ic,
   KIT_TONE,
-  Svg,
   fmtDay,
   fmtDM,
   fmtRange,
@@ -347,9 +349,10 @@ export function HealthForm(props: {
     <GroupedList header={t.hlPeriod}>
       {typeRow}
       {typeChoices}
-      <ListRow as="label" label={t.hlName} labelFixed>
-        <input
-          className="hl-tin"
+      <ListRow label={t.hlName} labelFixed>
+        <Field
+          bare
+          aria-label={t.hlName}
           type="text"
           value={name}
           maxLength={60}
@@ -436,13 +439,23 @@ export function HealthForm(props: {
         as="label"
         label={t.hlStillOngoing}
         sub={
-          ctx === 'start' || open
-            ? type === 'illness'
-              ? t.hlOngoingSubIll
-              : t.hlOngoingSubRest
-            : undefined
+          !open && (end > today || start > today)
+            ? t.hlOngoingBlocked
+            : ctx === 'start' || open
+              ? type === 'illness'
+                ? t.hlOngoingSubIll
+                : t.hlOngoingSubRest
+              : undefined
         }
-        trailing={<Switch checked={open} onChange={toggleOpen} tone={kt} />}
+        trailing={
+          <Switch
+            checked={open}
+            onChange={toggleOpen}
+            tone={kt}
+            // A period can't be "still ongoing" while its dates are still ahead.
+            disabled={!open && (end > today || start > today)}
+          />
+        }
       />
     </GroupedList>
   );
@@ -796,12 +809,12 @@ export function HealthForm(props: {
                   : t.hlDeleteBody(delName, delRange, delDays)}
             </p>
             <div className="row2">
-              <button type="button" className="hl-btn" onClick={() => setDelOpen(false)}>
+              <Button variant="secondary" fullWidth onClick={() => setDelOpen(false)}>
                 {t.hlKeepIt}
-              </button>
-              <button type="button" className="hl-btn o-dst" onClick={doDelete}>
+              </Button>
+              <Button variant="danger" fullWidth onClick={doDelete}>
                 {t.delete}
-              </button>
+              </Button>
             </div>
           </ListPanel>
         )}
@@ -818,12 +831,12 @@ export function HealthForm(props: {
 
   const bar = (
     <StickyActionBar variant={props.web ? 'panel' : 'page'} surface={props.web ? 'surface' : 'bg'}>
-      <button type="button" className="hl-btn" onClick={props.onCancel}>
+      <Button variant="secondary" fullWidth onClick={props.onCancel}>
         {t.cancel}
-      </button>
-      <button type="button" className={`hl-btn p-${tone}`} disabled={blocked} onClick={save}>
+      </Button>
+      <Button variant="primary" fullWidth disabled={blocked} onClick={save}>
         {primary}
-      </button>
+      </Button>
     </StickyActionBar>
   );
 
@@ -852,9 +865,7 @@ export function HealthForm(props: {
             <b id="hl-p-t">{title}</b>
             <span>{sub}</span>
           </div>
-          <button type="button" className="hl-ib" aria-label={t.close} onClick={props.onCancel}>
-            <Svg name="close" />
-          </button>
+          <IconButton icon="x" label={t.close} onClick={props.onCancel} />
         </div>
         <div className="hl-pcols">
           <div className="hl-pcol">{withKeys(left)}</div>
@@ -870,14 +881,7 @@ export function HealthForm(props: {
   return (
     <div className="screen hl">
       <div className="hl-pbar">
-        <button
-          type="button"
-          className="hl-back"
-          aria-label={t.backAction}
-          onClick={props.onCancel}
-        >
-          <Svg name="back" />
-        </button>
+        <BackButton label={t.backAction} onClick={props.onCancel} />
         <h1 className="hl-pt">{title}</h1>
       </div>
       <div className="hl-scroll">

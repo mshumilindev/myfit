@@ -24,6 +24,7 @@ import { resolveMuscles, workoutDayReadout } from '../store';
 import { dayReadoutLabel } from '../data/daySuggest';
 import type { Workout, Exercise } from '../types';
 import type { MuscleGroup } from '../data/exercises';
+import { Tag } from './ui/Tag';
 
 type T = ReturnType<typeof useT>['t'];
 const round = (n: number): number => Math.round(n);
@@ -95,15 +96,15 @@ function ExerciseTargetRow({
   });
   const chip =
     target.state === 'progress' && target.deltaKg > 0 ? (
-      <span className="ssc-chip up">
-        <Icon name="arrow-up-right" weight="bold" />+{fmtW(target.deltaKg)}
-      </span>
+      <Tag tone="ok" icon={<Icon name="arrow-up-right" weight="bold" />}>
+        +{fmtW(target.deltaKg)}
+      </Tag>
     ) : target.state === 'stall' ? (
-      <span className="ssc-chip warn">{t.progDeload}</span>
+      <Tag tone="illness">{t.progDeload}</Tag>
     ) : target.state === 'first' ? (
-      <span className="ssc-chip">{t.progFirst}</span>
+      <Tag tone="accent">{t.progFirst}</Tag>
     ) : (
-      <span className="ssc-chip hold">{t.progHold}</span>
+      <Tag tone="neutral">{t.progHold}</Tag>
     );
   return (
     <div className="ssc-ex">

@@ -292,9 +292,9 @@ const learnNext: WidgetDef = {
           </Button>
         }
       >
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div className="ul-flex ug-12 ua-center">
           <IconTile tone="learn" size={56} icon="play-circle" />
-          <div style={{ minWidth: 0, flex: 1 }}>
+          <div className="umw-0 uf-1">
             <Para strong lines={2}>
               {next.title}
             </Para>
@@ -404,9 +404,9 @@ const lessonOfDay: WidgetDef = {
           </Button>
         }
       >
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div className="ul-flex ug-12 ua-center">
           <IconTile tone="learn" size={56} icon="play-circle" />
-          <div style={{ minWidth: 0, flex: 1 }}>
+          <div className="umw-0 uf-1">
             <Para strong lines={2}>
               {lesson.title}
             </Para>
@@ -515,9 +515,9 @@ const savedLessons: WidgetDef = {
           </Button>
         }
       >
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div className="ul-flex ug-12 ua-center">
           <IconTile tone="learn" size={56} icon="play-circle" />
-          <div style={{ minWidth: 0, flex: 1 }}>
+          <div className="umw-0 uf-1">
             <div className="uiw-sub">{s.upNext}</div>
             <Para strong lines={2}>
               {first.title}
@@ -535,8 +535,8 @@ const savedLessons: WidgetDef = {
 function TopicCell({ tp, s }: { tp: TopicProgress; s: S }) {
   const full = tp.done >= tp.total;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-      <div style={{ display: 'flex', gap: 4, justifyContent: 'space-between', minWidth: 0 }}>
+    <div className="ul-flex ul-col ug-4 umw-0">
+      <div className="ul-flex ug-4 uj-between umw-0">
         <span className="uiw-sub">{tp.topic.title}</span>
         <span className="uiw-sub">{full ? '✓' : `${tp.done}/${tp.total}`}</span>
       </div>
@@ -600,11 +600,8 @@ const topicProgress: WidgetDef = {
           onClick={openLearn}
         >
           <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-              gap: '6px 12px',
-            }}
+            className="ul-grid"
+            style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '6px 12px' }}
           >
             {st.topics.slice(0, 9).map((tp) => (
               <TopicCell key={tp.topic.id} tp={tp} s={s} />
@@ -632,11 +629,11 @@ const topicProgress: WidgetDef = {
           </Button>
         }
       >
-        <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+        <div className="ul-flex ug-14 ua-center">
           <WidgetRing value={frac} size={84} tone="learn">
             {pct(frac)}%
           </WidgetRing>
-          <div style={{ minWidth: 0, flex: 1 }}>
+          <div className="umw-0 uf-1">
             <div className="uiw-name">{s.watchedOf(st.doneCount, st.total)}</div>
             <div className="uiw-sub">{s.topicsDone(topicsDone, st.topics.length)}</div>
           </div>
@@ -704,7 +701,7 @@ const didYouKnow: WidgetDef = {
           </Button>
         }
       >
-        <div style={{ display: 'grid', placeItems: 'center', padding: '8px 0' }}>
+        <div className="ul-grid" style={{ placeItems: 'center', padding: '8px 0' }}>
           <IconTile tone="learn" size={56} icon="book-open" />
         </div>
         <Para strong lines={2}>
@@ -918,13 +915,13 @@ function InsightWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       </Para>
       <Para lines={4}>{note.text}</Para>
       {f.kind === 'imbalance' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="ul-flex ul-col ug-8">
           {[
             { m: f.high, n: f.highSets, tone: 'neutral' as Tone },
             { m: f.low, n: f.lowSets, tone: 'atlas' as Tone },
           ].map((r) => (
-            <div key={r.m} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+            <div key={r.m} className="ul-flex ul-col ug-4">
+              <div className="ul-flex uj-between ug-8">
                 <span className="uiw-sub">{s.setsOf(fmt.muscle(r.m))}</span>
                 <span className="uiw-sub">{r.n}</span>
               </div>
@@ -1046,7 +1043,7 @@ function AskWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
     >
       {chipRow}
       {last ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="ul-flex ul-col ug-8">
           <Para strong lines={2}>
             {`“${last.q}”`}
           </Para>
@@ -1095,7 +1092,7 @@ function QuickAskWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   if (size === 'S')
     return (
       <Widget size="S" tone="atlas" kicker={s.atlas} title={s.tapToAsk} onClick={open}>
-        <div style={{ display: 'grid', placeItems: 'center', flex: 1 }}>
+        <div className="ul-grid uf-1" style={{ placeItems: 'center' }}>
           <IconTile tone="atlas" size={48} icon="hand-tap" />
         </div>
       </Widget>
@@ -1103,9 +1100,9 @@ function QuickAskWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   if (size === 'L')
     return (
       <Widget size="L" tone="atlas" kicker={s.askAtlas} onClick={open}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div className="ul-flex ug-12 ua-center">
           <IconTile tone="atlas" size={56} icon="hand-tap" />
-          <div style={{ minWidth: 0, flex: 1 }}>
+          <div className="umw-0 uf-1">
             <div className="uiw-name">{s.tapToAsk}</div>
             <div className="uiw-sub">{`“${chips[0]}”`}</div>
             <div className="uiw-sub">{`“${chips[1]}”`}</div>
@@ -1125,15 +1122,7 @@ function QuickAskWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         </Button>
       }
     >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 8,
-          padding: '8px 0',
-        }}
-      >
+      <div className="ul-flex ul-col ua-center ug-8" style={{ padding: '8px 0' }}>
         <IconTile tone="atlas" size={56} icon="hand-tap" />
         <div className="uiw-sub">{s.betweenSets}</div>
       </div>

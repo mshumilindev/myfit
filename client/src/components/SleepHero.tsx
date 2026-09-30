@@ -9,7 +9,8 @@
 import { useEffect, useState } from 'react';
 import type { SleepNight } from '../types';
 import { useT, fmtDurationHuman } from '../i18n';
-import { Icon } from '../ui';
+import { Card } from './ui/Card';
+import { IconButton, Button } from './ui/Button';
 import { MoonGlyph } from './MoonGlyph';
 import { nightDurationMin, SLEEP_IDLE_MS } from '../sleep';
 
@@ -47,7 +48,7 @@ export function SleepHero({
         <MoonGlyph size={132} date={night.bedtime} halo={false} />
       </div>
       <div className="live-hero-scrim sleep-hero-scrim" />
-      <button className="live-hero-body" onClick={onResume}>
+      <Card as="button" pad="none" emphasis="quiet" className="live-hero-body" onClick={onResume}>
         <div className="live-hero-line">
           <span className="live-dot" aria-hidden="true" />
           <span className="live-label">{paused ? t.sleepPausedLabel : t.sleepAsleepLabel}</span>
@@ -58,19 +59,18 @@ export function SleepHero({
             {paused ? t.sleepPausedMeta : t.sleepSinceClock(hhmm(night.bedtime))}
           </span>
         </div>
-      </button>
+      </Card>
       <div className="live-hero-actions">
-        <button
-          className="live-resume icon-only sleep-hero-resume"
-          onClick={onResume}
-          aria-label={t.sleepReturnToNight}
+        <IconButton
+          variant="sleep-fill"
+          icon="moon-stars"
+          label={t.sleepReturnToNight}
           title={t.sleepReturnToNight}
-        >
-          <Icon name="moon-stars" weight="fill" />
-        </button>
-        <button className="sleep-hero-stop" onClick={onStop}>
+          onClick={onResume}
+        />
+        <Button variant="sleep" size="sm" onClick={onStop}>
           {t.sleepStopAction}
-        </button>
+        </Button>
       </div>
     </div>
   );

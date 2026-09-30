@@ -5,6 +5,14 @@
  * into a live session; the gym is auto-chosen (nearest, else the usual one).
  */
 import { weekOrder } from '../weekStart';
+import { Button, IconButton } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Chip } from '../components/ui/Chip';
+import { Field } from '../components/ui/Field';
+import { ListRow } from '../components/ui/GroupedList';
+import { IconTile } from '../components/ui/IconTile';
+import { Segmented } from '../components/ui/Segmented';
+import { SwitchIndicator } from '../components/ui/Switch';
 import { useMemo, useState, useRef, type ReactNode } from 'react';
 import type { Shell } from '../App';
 import { Icon, useExerciseName } from '../ui';
@@ -289,7 +297,8 @@ export function SessionBuilderView({
       <h2 className="sbw-q">{t.sbGoalQ}</h2>
       <div className="sbw-arche">
         {ARCHETYPES_BY_SEX(store.bodyMetrics.sex ?? 'male').map((id) => (
-          <button
+          <Card
+            as="button"
             key={id}
             className="sbw-arche-c"
             onClick={() => {
@@ -306,7 +315,7 @@ export function SessionBuilderView({
             </span>
             <b>{t.archetypes[id]?.name ?? id}</b>
             <span className="sbw-arche-b">{t.archetypes[id]?.blurb ?? ''}</span>
-          </button>
+          </Card>
         ))}
       </div>
     </div>
@@ -320,15 +329,15 @@ export function SessionBuilderView({
           const sp = intentSpec(i);
           const on = i === intent;
           return (
-            <button key={i} className={`sbw-opt${on ? ' on' : ''}`} onClick={() => setIntent(i)}>
-              <span className="sbw-opt-txt">
-                <b>{intentName[i]}</b>
-                <span>
-                  {sp.repLow}–{sp.repHigh} {t.sbReps}
-                </span>
-              </span>
-              {on && <Icon name="check" className="sbw-opt-ck" />}
-            </button>
+            <ListRow
+              key={i}
+              strong
+              selected={on}
+              check={on}
+              label={intentName[i]}
+              sub={`${sp.repLow}–${sp.repHigh} ${t.sbReps}`}
+              onClick={() => setIntent(i)}
+            />
           );
         })}
       </div>
@@ -339,12 +348,9 @@ export function SessionBuilderView({
     <div className="sbw-body">
       <div className="sbw-q-row">
         <h2 className="sbw-q">{t.sbMusclesQ}</h2>
-        <button
-          className={`sbw-auto${muscles === null ? ' on' : ''}`}
-          onClick={() => setMuscles(null)}
-        >
-          <Icon name="robot" /> {t.sbAutoPick}
-        </button>
+        <Chip icon="robot" selected={muscles === null} onClick={() => setMuscles(null)}>
+          {t.sbAutoPick}
+        </Chip>
       </div>
       {[UPPER, LOWER].map((group, gi) => (
         <div key={gi} className="sbw-mgroup">
@@ -353,15 +359,10 @@ export function SessionBuilderView({
             const col = r ? READINESS_COLOR[r.state] : 'var(--color-neutral-600)';
             const on = selected.includes(m);
             return (
-              <button
-                key={m}
-                className={`sbw-mchip${on ? ' on' : ''}`}
-                style={on ? { boxShadow: `inset 0 0 0 1.5px ${col}` } : undefined}
-                onClick={() => toggleMuscle(m)}
-              >
+              <Chip key={m} selected={on} onClick={() => toggleMuscle(m)}>
                 <span className="sbw-mdot" style={{ background: col }} />
                 {t.muscleGroups[m]}
-              </button>
+              </Chip>
             );
           })}
         </div>
@@ -370,22 +371,15 @@ export function SessionBuilderView({
   );
 
   const seg = (val: number, opts: number[], set: (n: number) => void) => (
-    <div className="sbw-seg">
-      {opts.map((o) => (
-        <button key={o} className={o === val ? 'on' : ''} onClick={() => set(o)}>
-          {o}
-        </button>
-      ))}
-    </div>
+    <Segmented options={opts.map((o) => ({ value: o, label: o }))} value={val} onChange={set} />
   );
   const toggle = (label: string, on: boolean, set: (b: boolean) => void, ic: string) => (
-    <button className={`sbw-toggle${on ? ' on' : ''}`} onClick={() => set(!on)}>
-      <Icon name={ic} />
-      <span>{label}</span>
-      <span className={`sbw-sw${on ? ' on' : ''}`}>
-        <span className="sbw-knob" />
-      </span>
-    </button>
+    <ListRow
+      icon={<IconTile icon={ic} />}
+      label={label}
+      trailing={<SwitchIndicator on={on} size="sm" />}
+      onClick={() => set(!on)}
+    />
   );
 
   const dayBody = (
@@ -431,7 +425,7 @@ export function SessionBuilderView({
       >
         {editable ? (
           <span
-            className="sbw-ex-drag"
+            className="sbw-ex-drag ut-dim ul-iflex uf-none"
             title={t.reorder}
             aria-label={t.reorder}
             onPointerDown={(e) => {
@@ -448,14 +442,7 @@ export function SessionBuilderView({
               }
               setDrag(null);
             }}
-            style={{
-              touchAction: 'none',
-              cursor: 'grab',
-              display: 'inline-flex',
-              color: 'var(--color-neutral-500)',
-              padding: '2px 4px',
-              flex: 'none',
-            }}
+            style={{ touchAction: 'none', cursor: 'grab', padding: '2px 4px' }}
           >
             <Icon name="dots-six" />
           </span>
@@ -483,27 +470,14 @@ export function SessionBuilderView({
           {w && <b>{w}</b>}
         </span>
         {editable && (
-          <button
-            className="sbw-ex-swap"
+          <IconButton
+            variant="secondary"
+            size="sm"
+            icon="arrows-clockwise"
             title={t.replaceExercise}
-            aria-label={t.replaceExercise}
+            label={t.replaceExercise}
             onClick={() => swapMain(index)}
-            style={{
-              flex: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 34,
-              height: 34,
-              borderRadius: 8,
-              border: '1px solid var(--color-divider)',
-              background: 'transparent',
-              color: 'var(--color-neutral-300)',
-              cursor: 'pointer',
-            }}
-          >
-            <Icon name="arrows-clockwise" />
-          </button>
+          />
         )}
       </div>
     );
@@ -550,8 +524,8 @@ export function SessionBuilderView({
       {programMode !== 'other' && (
         <div className="sbw-block">
           <span className="section-title">{t.sbDayNameLabel}</span>
-          <input
-            className="sbw-name"
+          <Field
+            aria-label={t.sbDayNameLabel}
             type="text"
             value={nameInput}
             placeholder={derivedName}
@@ -560,13 +534,15 @@ export function SessionBuilderView({
           <span className="section-title">{t.sbSaveOn}</span>
           <div className="sbw-wdrow">
             {weekOrder().map((n) => (
-              <button
+              <Chip
                 key={n}
-                className={`sbw-wd${n === selWd ? ' on' : ''}${filled.includes(n) ? ' filled' : ''}`}
+                className="sbw-wd"
+                tone={filled.includes(n) ? 'ok' : 'neutral'}
+                selected={n === selWd}
                 onClick={() => setSelWd(n)}
               >
                 {wdShort(n)}
-              </button>
+              </Chip>
             ))}
           </div>
         </div>
@@ -585,25 +561,23 @@ export function SessionBuilderView({
   return (
     <div className="screen sbw">
       <div className="sbw-head">
-        <button className="sbw-x" onClick={onClose} aria-label="Close">
-          <Icon name="x" />
-        </button>
+        <IconButton className="sbw-x" icon="x" label="Close" onClick={onClose} />
         <span className="sbw-title">{t.sbwTitle}</span>
       </div>
 
       <div className="sbw-steps">
         {steps.map((s, i) => (
-          <button
+          <Chip
             key={s}
-            className={`sbw-st${i <= step ? ' reached' : ''}`}
+            className="sbw-st"
+            size="sm"
+            icon={i < step ? 'check' : undefined}
+            selected={i === step}
             onClick={() => setStep(i)}
             aria-current={i === step}
           >
-            <span className={`sbw-cir${i === step ? ' on' : i < step ? ' done' : ''}`}>
-              {i < step ? <Icon name="check" /> : i + 1}
-            </span>
-            <span className={`sbw-cap${i === step ? ' on' : ''}`}>{stepLabel[s]}</span>
-          </button>
+            {stepLabel[s]}
+          </Chip>
         ))}
       </div>
 
@@ -611,26 +585,26 @@ export function SessionBuilderView({
 
       <div className="sbw-foot">
         {step > 0 ? (
-          <button className="btn btn-secondary sbw-back" onClick={() => setStep(step - 1)}>
+          <Button variant="secondary" className="sbw-back" onClick={() => setStep(step - 1)}>
             <Icon name="caret-left" />
-          </button>
+          </Button>
         ) : null}
         {cur === 'review' ? (
           <>
             {programMode !== 'other' && (
-              <button className="btn btn-secondary sbw-save" onClick={saveDay} disabled={saving}>
+              <Button variant="secondary" className="sbw-save" onClick={saveDay} disabled={saving}>
                 {savedWd === selWd ? t.sbSaved : t.sbSaveDay}
-              </button>
+              </Button>
             )}
-            <button className="btn btn-primary sbw-go" onClick={start}>
+            <Button variant="primary" className="sbw-go" onClick={start}>
               {t.sbStartNow}
-            </button>
+            </Button>
           </>
         ) : (
-          <button className="btn btn-primary sbw-go" onClick={() => setStep(step + 1)}>
+          <Button variant="primary" className="sbw-go" onClick={() => setStep(step + 1)}>
             {stepLabel[steps[Math.min(step + 1, steps.length - 1)]]}
             <Icon name="caret-right" />
-          </button>
+          </Button>
         )}
       </div>
     </div>

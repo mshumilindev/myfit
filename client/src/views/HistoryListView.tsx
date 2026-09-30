@@ -3,31 +3,15 @@
  * timeline, newest day first, one week (7 days) per page with numbered
  * pagination. Reached from the "See all history" link under the Today preview.
  */
+import { Pager } from '../components/ui/Pager';
+import { BackButton } from '../components/ui/BackButton';
 import { useState } from 'react';
 import type { Shell } from '../App';
 import { latestWeight, useStore } from '../store';
 import { useT } from '../i18n';
 import { HistoryTimeline, buildHistoryDays } from '../components/HistoryTimeline';
-import { Icon } from '../ui';
 
 const PAGE_DAYS = 7; // one week per page
-
-const ELLIPSIS = -1;
-/** Page numbers to show (0-based) with ELLIPSIS gaps — always first + last, the
- *  current page and its neighbours, capped so the control never grows past ~7
- *  slots. Mirrors the exercise list's pager. */
-function pageWindow(cur: number, last: number): number[] {
-  const total = last + 1;
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i);
-  const out: number[] = [0];
-  const start = Math.max(1, cur - 1);
-  const end = Math.min(last - 1, cur + 1);
-  if (start > 1) out.push(ELLIPSIS);
-  for (let i = start; i <= end; i += 1) out.push(i);
-  if (end < last - 1) out.push(ELLIPSIS);
-  out.push(last);
-  return out;
-}
 
 export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () => void }) {
   const { t } = useT();
@@ -42,12 +26,10 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
   const curPage = Math.min(page, maxPage);
 
   return (
-    <div className="screen hist-list" style={{ gap: 'var(--space-5)' }}>
+    <div className="screen hist-list">
       <div className="hist-head">
-        <button className="back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <BackButton onClick={onClose} label={t.backAction} />
+        <div className="uf-1 umw-0">
           <h2 className="title-26">{t.tdHistory}</h2>
           <div className="hist-list-sub">{t.historyCount(workoutCount)}</div>
         </div>
@@ -69,42 +51,7 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
             onOpenActivity={(id) => shell.openOverlay({ screen: 'activity', editId: id })}
             onOpenSleep={(id) => shell.openOverlay({ screen: 'sleep', mode: 'edit', nightId: id })}
           />
-          {maxPage > 0 && (
-            <nav className="exl-pager" aria-label={t.pagination}>
-              <button
-                className="exl-pagebtn"
-                disabled={curPage === 0}
-                onClick={() => setPage(curPage - 1)}
-                aria-label={t.pagePrev}
-              >
-                <Icon name="caret-left" />
-              </button>
-              {pageWindow(curPage, maxPage).map((p, i) =>
-                p === ELLIPSIS ? (
-                  <span key={`gap-${i}`} className="exl-pagegap">
-                    …
-                  </span>
-                ) : (
-                  <button
-                    key={p}
-                    className={`exl-pagenum${p === curPage ? ' active' : ''}`}
-                    aria-current={p === curPage ? 'page' : undefined}
-                    onClick={() => setPage(p)}
-                  >
-                    {p + 1}
-                  </button>
-                ),
-              )}
-              <button
-                className="exl-pagebtn"
-                disabled={curPage >= maxPage}
-                onClick={() => setPage(curPage + 1)}
-                aria-label={t.pageNext}
-              >
-                <Icon name="caret-left" className="flip" />
-              </button>
-            </nav>
-          )}
+          {maxPage > 0 && <Pager page={curPage} maxPage={maxPage} onPage={setPage} />}
         </>
       )}
     </div>

@@ -8,9 +8,11 @@
  */
 import { currentUid, getUsername } from '../api';
 import { useT } from '../i18n';
-import { Icon, LanguageSelector } from '../ui';
+import { LanguageSelector } from '../ui';
 import { SpotterMark } from '../brand/SpotterMark';
 import { Avatar } from './Avatar';
+import { Rail, RailItem } from './ui/Rail';
+import { Button } from './ui/Button';
 
 export type RailNavItem = { id: string; icon: string; label: string };
 
@@ -34,59 +36,52 @@ export function AppRail({
   const { t } = useT();
   const username = getUsername() ?? '';
   return (
-    <aside className="rail">
-      {/* Brand mark — the same across every app's rail. */}
-      <div className="rail-brand">
-        <SpotterMark size={40} variant="sidebar" />
-      </div>
+    <Rail
+      brand={<SpotterMark size={40} variant="sidebar" />}
+      foot={
+        <>
+          {/* Notifications — reachable from every app. */}
+          <RailItem
+            icon="bell"
+            fill
+            ariaLabel={t.notifTitle}
+            badge={notifUnread > 0 ? (notifUnread > 9 ? '9+' : notifUnread) : null}
+            onClick={onOpenNotifications}
+          />
+          {/* Apps — switch between Gym / Apex / People / Nutrition. */}
+          <RailItem
+            icon="squares-four"
+            className="rail-switch"
+            ariaLabel={t.shellSwitch}
+            onClick={onOpenShell}
+          />
+          <div className="rail-lang">
+            <LanguageSelector compact />
+          </div>
+          <Button
+            variant="ghost"
+            className="account-chip"
+            onClick={onOpenProfile}
+            aria-label={username}
+            title={username}
+          >
+            <span className="account-avatar">
+              <Avatar userId={currentUid() ?? undefined} name={username} hasPhoto size={34} />
+            </span>
+          </Button>
+        </>
+      }
+    >
       {nav.map((x) => (
-        <button
+        <RailItem
           key={x.id}
-          className={`rail-item${activeId === x.id ? ' active' : ''}`}
-          aria-label={x.label}
-          title={x.label}
+          icon={x.icon}
+          label={x.label}
+          active={activeId === x.id}
+          fillWhenActive
           onClick={() => onNav(x.id)}
-        >
-          <Icon name={x.icon} weight={activeId === x.id ? 'fill' : undefined} />
-          <span className="rail-label">{x.label}</span>
-        </button>
+        />
       ))}
-      <div className="rail-foot">
-        {/* Notifications — reachable from every app. */}
-        <button
-          className="rail-item"
-          onClick={onOpenNotifications}
-          aria-label={t.notifTitle}
-          title={t.notifTitle}
-        >
-          <Icon name="bell" weight="fill" />
-          {notifUnread > 0 && (
-            <span className="rail-notif-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
-          )}
-        </button>
-        {/* Apps — switch between Gym / Apex / People / Nutrition. */}
-        <button
-          className="rail-item rail-switch"
-          onClick={onOpenShell}
-          aria-label={t.shellSwitch}
-          title={t.shellSwitch}
-        >
-          <Icon name="squares-four" />
-        </button>
-        <div className="rail-lang">
-          <LanguageSelector compact />
-        </div>
-        <button
-          className="account-chip"
-          onClick={onOpenProfile}
-          aria-label={username}
-          title={username}
-        >
-          <span className="account-avatar">
-            <Avatar userId={currentUid() ?? undefined} name={username} hasPhoto size={34} />
-          </span>
-        </button>
-      </div>
-    </aside>
+    </Rail>
   );
 }

@@ -5,6 +5,7 @@
  */
 import { useState } from 'react';
 import { Icon, Sheet } from '../ui';
+import { Button } from './ui/Button';
 import { useStore, addExercise, startWorkout } from '../store';
 import { useT } from '../i18n';
 import { MuscleSetChip, equipmentLabel } from './Muscle';
@@ -66,16 +67,17 @@ export function FixSheet({ muscle, onClose }: { muscle: MuscleGroup; onClose: ()
           return (
             <div key={c.name} className={`fix-card${added ? ' done' : ''}`}>
               <div className="fix-card-head">
-                <button
-                  className="fix-name"
+                <Button
+                  variant="link"
+                  className="fix-title"
+                  iconTrailing="arrow-right"
                   onClick={() => {
                     window.location.hash = `#/exercise-detail/${encodeURIComponent(c.name)}`;
                     onClose();
                   }}
                 >
                   {c.name}
-                  <Icon name="arrow-right" />
-                </button>
+                </Button>
                 <span className="fix-scheme">{c.scheme.label}</span>
               </div>
               {c.primary && (
@@ -90,16 +92,15 @@ export function FixSheet({ muscle, onClose }: { muscle: MuscleGroup; onClose: ()
                 <Icon name={avail.icon} />
                 <span>{avail.text}</span>
               </div>
-              <button className="fix-add" onClick={() => add(c)} disabled={added}>
-                {added ? (
-                  <>
-                    <Icon name="check" weight="bold" />
-                    {open ? t.fixAdded : t.fixAddedNew}
-                  </>
-                ) : (
-                  addLabel
-                )}
-              </button>
+              <Button
+                variant="secondary"
+                className="fix-add-btn"
+                icon={added ? 'check' : undefined}
+                onClick={() => add(c)}
+                disabled={added}
+              >
+                {added ? (open ? t.fixAdded : t.fixAddedNew) : addLabel}
+              </Button>
             </div>
           );
         })}

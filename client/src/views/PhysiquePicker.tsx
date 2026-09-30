@@ -6,6 +6,9 @@
  * stylised silhouettes swap in here once available.
  */
 import { useState, useEffect } from 'react';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Segmented } from '../components/ui/Segmented';
 import { useT } from '../i18n';
 import { useStore, setPhysiqueTarget, setBlockFocus } from '../store';
 import { Sheet, Icon } from '../ui';
@@ -54,43 +57,42 @@ export function PhysiquePicker({ onClose }: { onClose: () => void }) {
 
   return (
     <Sheet onClose={onClose} className="phys-sheet">
-      <div className="sheet-head with-back">
-        <button className="sheet-back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+      <div className="sheet-head">
         <span className="t">{t.goalsPhysiqueTitle}</span>
         {cur && (
-          <button
-            className="phys-remove"
+          <Button
+            variant="danger"
+            size="sm"
             onClick={() => {
               setPhysiqueTarget(undefined);
               onClose();
             }}
           >
             {t.physRemove}
-          </button>
+          </Button>
         )}
       </div>
 
       <p className="phys-intro">{t.physIntro}</p>
 
       {!accountSex && (
-        <div className="phys-sex seg3">
-          <button className={sex === 'male' ? 'active' : ''} onClick={() => setSexState('male')}>
-            {t.sexMale}
-          </button>
-          <button
-            className={sex === 'female' ? 'active' : ''}
-            onClick={() => setSexState('female')}
-          >
-            {t.sexFemale}
-          </button>
-        </div>
+        <Segmented
+          className="phys-sex"
+          value={sex}
+          onChange={setSexState}
+          options={[
+            { value: 'male', label: t.sexMale },
+            { value: 'female', label: t.sexFemale },
+          ]}
+        />
       )}
 
       <div className="phys-grid">
         {ids.map((id) => (
-          <button
+          <Card
+            as="button"
+            pad="none"
+            emphasis="quiet"
             key={id}
             className={`phys-card${picked === id ? ' active' : ''}`}
             onClick={() => setPicked(id)}
@@ -105,13 +107,13 @@ export function PhysiquePicker({ onClose }: { onClose: () => void }) {
             />
             <div className="phys-name">{t.archetypes[id].name}</div>
             <div className="phys-blurb">{t.archetypes[id].blurb}</div>
-          </button>
+          </Card>
         ))}
       </div>
 
-      <button className="btn btn-primary phys-use" disabled={!picked} onClick={use}>
+      <Button variant="primary" className="phys-use" disabled={!picked} onClick={use}>
         {t.physUseThis}
-      </button>
+      </Button>
     </Sheet>
   );
 }

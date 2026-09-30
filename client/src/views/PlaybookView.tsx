@@ -7,7 +7,10 @@
  * lift worth varying). Below the plays, a deduped "repeat a past session" strip
  * keeps exact one-tap replay one reach away.
  */
+import { Card } from '../components/ui/Card';
+import { Tag } from '../components/ui/Tag';
 import { useMemo, useState } from 'react';
+import { Button } from '../components/ui/Button';
 import type { Shell } from '../App';
 import type { Workout } from '../types';
 import { programDayNameFor, repeatWorkout, useStore, workoutDayReadout } from '../store';
@@ -19,6 +22,17 @@ import { MuscleSetChip, withMuscleBreak } from '../components/Muscle';
 import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
 import { Icon, useExerciseName } from '../ui';
 import { useGymStep } from '../components/useGymStep';
+import { ListRow } from '../components/ui/GroupedList';
+import { Chip } from '../components/ui/Chip';
+
+/** Day-type colour coding: push gold · pull blue · legs green · core violet · full gold. */
+const DAY_TONE: Record<string, 'accent' | 'rest' | 'ok' | 'sleep' | 'neutral'> = {
+  push: 'accent',
+  pull: 'rest',
+  legs: 'ok',
+  core: 'sleep',
+  full: 'accent',
+};
 
 export function PlaybookView({
   shell,
@@ -79,7 +93,13 @@ export function PlaybookView({
           <div className="pb-sub">{t.playbookSubtitle(plays.length)}</div>
           <div className="pb-plays">
             {plays.map((p) => (
-              <article className="pb-play" key={p.id} data-day={p.dayType ?? 'other'}>
+              <Card
+                as="section"
+                className="pb-play"
+                key={p.id}
+                tone={DAY_TONE[p.dayType ?? 'other'] ?? 'neutral'}
+                data-day={p.dayType ?? 'other'}
+              >
                 <div className="pb-play-head">
                   <div className="pb-play-id">
                     <span className="pb-play-name">{playName(p)}</span>
@@ -87,10 +107,15 @@ export function PlaybookView({
                       {t.playFromSessions(p.sessions)} · {fmtShortDate(p.lastTrainedAt, locale)}
                     </span>
                   </div>
-                  <button className="btn btn-primary pb-start" onClick={() => startPlay(p)}>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="pb-start"
+                    onClick={() => startPlay(p)}
+                  >
                     <Icon name="barbell" />
                     {t.playStart}
-                  </button>
+                  </Button>
                 </div>
 
                 <div className="pb-ex-list">
@@ -105,10 +130,10 @@ export function PlaybookView({
                           </span>
                         )}
                       </span>
-                      <span className="pb-ex-scheme">
+                      <Tag tone="accent" className="pb-ex-scheme">
                         {ex.sets} ×{' '}
                         {ex.repLow === ex.repHigh ? ex.repLow : `${ex.repLow}–${ex.repHigh}`}
-                      </span>
+                      </Tag>
                       <span className="pb-ex-wt">
                         {ex.topWeight != null ? fmtKg(ex.topWeight) : '—'}
                       </span>
@@ -138,14 +163,18 @@ export function PlaybookView({
                   <div className="pb-ideas">
                     <span className="pb-ideas-label">{t.playIdeas}</span>
                     {p.suggestions.map((s, i) => (
-                      <span className={`pb-idea ${s.kind === 'swap' ? 'warn' : ''}`} key={i}>
-                        <Icon name={ideaIcon(s)} />
+                      <Chip
+                        key={i}
+                        size="sm"
+                        tone={s.kind === 'swap' ? 'accent' : 'neutral'}
+                        icon={ideaIcon(s)}
+                      >
                         {ideaText(s, t)}
-                      </span>
+                      </Chip>
                     ))}
                   </div>
                 )}
-              </article>
+              </Card>
             ))}
           </div>
         </>
@@ -162,14 +191,15 @@ export function PlaybookView({
                 .slice(0, 4)
                 .join(' · ');
               return (
-                <button className="pb-recent-row" key={w.id} onClick={() => repeat(w.id)}>
-                  <span className="pb-recent-body">
-                    <span className="pb-recent-name">{recentTitle(w)}</span>
-                    {names && <span className="pb-recent-ex">{names}</span>}
-                  </span>
-                  <span className="pb-recent-date">{fmtShortDate(w.startedAt, locale)}</span>
-                  <Icon name="arrow-counter-clockwise" className="go" />
-                </button>
+                <ListRow
+                  key={w.id}
+                  dense
+                  label={recentTitle(w)}
+                  sub={names || undefined}
+                  value={fmtShortDate(w.startedAt, locale)}
+                  trailing={<Icon name="arrow-counter-clockwise" />}
+                  onClick={() => repeat(w.id)}
+                />
               );
             })}
           </div>

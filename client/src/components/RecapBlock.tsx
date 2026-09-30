@@ -5,12 +5,16 @@
  * is too thin. "See all" opens a sheet with Monthly / Quarterly / Yearly.
  */
 import { useMemo, useState } from 'react';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
+import { ListRow } from './ui/GroupedList';
 import { useT } from '../i18n';
 import { useStore, latestWeight } from '../store';
 import { Icon, Sheet } from '../ui';
 import { FocusBodyMap } from './Muscle';
 import { availableRecaps, buildRecap, MONTH_UNLOCK, type RecapEntry } from '../recaps';
 import { periodShort, periodTitle } from '../views/RecapView';
+import { SectionLabel } from './ui/SectionLabel';
 
 export function RecapBlock({ onOpen }: { onOpen: (period: string, story: boolean) => void }) {
   const { t, locale } = useT();
@@ -35,96 +39,69 @@ export function RecapBlock({ onOpen }: { onOpen: (period: string, story: boolean
 
   const compact = (e: RecapEntry, building: boolean) => {
     return (
-      <button
+      <ListRow
         key={e.ref.id}
-        className={`rc-compact${building ? ' building' : ''}`}
+        dim={building}
+        icon={
+          <div
+            className="rc-compact-ic"
+            style={{
+              background: building ? 'var(--color-neutral-900)' : 'var(--color-accent-900)',
+              color: building ? 'var(--color-neutral-500)' : 'var(--color-accent)',
+            }}
+          >
+            <Icon
+              name={
+                building ? 'hourglass-medium' : e.ref.kind === 'year' ? 'star' : 'calendar-check'
+              }
+              weight={building ? 'bold' : 'fill'}
+              className="ut-xl"
+            />
+          </div>
+        }
+        label={periodShort(e.ref, locale)}
+        sub={
+          building
+            ? t.rcBuildingSoFar(e.sessions)
+            : `${e.sessions} ${t.rcSessions.toLowerCase()} · ${Math.round(quick(e).volumeKg / 1000)} t`
+        }
+        trailing={
+          !building && <Icon name="play-circle" weight="fill" className="ut-3xl ut-accent" />
+        }
         onClick={building ? undefined : () => onOpen(e.ref.id, true)}
-      >
-        <div
-          className="rc-compact-ic"
-          style={{
-            background: building ? 'var(--color-neutral-900)' : 'var(--color-accent-900)',
-            color: building ? 'var(--color-neutral-500)' : 'var(--color-accent)',
-          }}
-        >
-          <Icon
-            name={building ? 'hourglass-medium' : e.ref.kind === 'year' ? 'star' : 'calendar-check'}
-            weight={building ? 'bold' : 'fill'}
-            style={{ fontSize: 17 }}
-          />
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15, color: building ? 'var(--color-neutral-300)' : undefined }}>
-            {periodShort(e.ref, locale)}
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--color-neutral-500)', marginTop: 2 }}>
-            {building
-              ? t.rcBuildingSoFar(e.sessions)
-              : `${e.sessions} ${t.rcSessions.toLowerCase()} · ${Math.round(quick(e).volumeKg / 1000)} t`}
-          </div>
-        </div>
-        {!building && (
-          <Icon
-            name="play-circle"
-            weight="fill"
-            style={{ fontSize: 24, color: 'var(--color-accent)' }}
-          />
-        )}
-      </button>
+      />
     );
   };
 
   return (
     <div className="rc-block">
-      <div className="rc-block-head">
-        <Icon name="sparkle" weight="fill" style={{ color: 'var(--color-accent)', fontSize: 13 }} />
-        <span className="rc-lbl" style={{ color: 'var(--color-accent-300)', flex: 1 }}>
-          {t.rcYourRecaps}
-        </span>
-        {entries.length > 1 && (
-          <button
-            className="rc-seeall"
-            onClick={() => setSheet(true)}
-            style={{
-              background: 'none',
-              border: 0,
-              color: 'var(--color-accent-300)',
-              fontSize: 11,
-              cursor: 'pointer',
-            }}
-          >
-            {t.rcSeeAll}
-          </button>
-        )}
-      </div>
+      <SectionLabel
+        tone="accent"
+        action={
+          entries.length > 1 ? (
+            <Button variant="link" size="sm" onClick={() => setSheet(true)}>
+              {t.rcSeeAll}
+            </Button>
+          ) : undefined
+        }
+      >
+        <Icon name="sparkle" weight="fill" /> {t.rcYourRecaps}
+      </SectionLabel>
 
       {readyMonth ? (
-        <div className="rc-hero">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Icon
-              name="barbell"
-              weight="fill"
-              style={{ color: 'var(--color-accent)', fontSize: 15 }}
-            />
-            <span className="rc-lbl" style={{ color: 'var(--color-accent-300)' }}>
+        <Card emphasis="hero" className="rc-hero">
+          <div className="ul-flex ua-center ug-8">
+            <Icon name="barbell" weight="fill" className="ut-accent ut-lg" />
+            <span className="rc-lbl ut-accent-lo">
               {t.rcKindMonth} · {t.rcReady}
             </span>
-            <span style={{ flex: 1 }} />
+            <span className="uf-1" />
             <span className="rc-hero-live" />
           </div>
-          <div style={{ fontSize: 30, letterSpacing: '-0.025em', marginTop: 14, lineHeight: 1.05 }}>
+          <div className="ut-hero ut-tight umt-14 rc-hero-title">
             {periodTitle(readyMonth.ref, locale)}
           </div>
-          <div
-            style={{
-              fontSize: 15,
-              color: 'var(--color-accent-100)',
-              marginTop: 8,
-              lineHeight: 1.4,
-            }}
-          >
-            {heroLine(readyMonth)}
-          </div>
+          <div className="ut-lg ut-accent-hi umt-8 rc-hero-line">{heroLine(readyMonth)}</div>
           <div className="rc-hero-stats">
             {(() => {
               const r = quick(readyMonth);
@@ -137,81 +114,50 @@ export function RecapBlock({ onOpen }: { onOpen: (period: string, story: boolean
               );
             })()}
           </div>
-          <button
-            className="btn btn-primary"
-            style={{ minHeight: 46, fontSize: 15, gap: 8, marginTop: 18, width: '100%' }}
+          <Button
+            variant="primary"
+            fullWidth
+            className="ut-lg ug-8 umt-18"
             onClick={() => onOpen(readyMonth.ref.id, true)}
           >
             <Icon name="play" weight="fill" />
             {t.rcPlayYours(periodShort(readyMonth.ref, locale))}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="link"
+            size="sm"
+            fullWidth
+            className="umt-10"
             onClick={() => onOpen(readyMonth.ref.id, false)}
-            style={{
-              display: 'block',
-              width: '100%',
-              textAlign: 'center',
-              fontSize: 11,
-              color: 'var(--color-accent-300)',
-              marginTop: 9,
-              background: 'none',
-              border: 0,
-              cursor: 'pointer',
-            }}
           >
             {t.rcReadFull}
-          </button>
-        </div>
+          </Button>
+        </Card>
       ) : pendingMonth ? (
-        <div
-          className="rc-hero"
-          style={{
-            background: 'var(--color-surface)',
-            boxShadow: 'inset 0 0 0 1px var(--color-neutral-800)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-            <div
-              style={{
-                width: 42,
-                height: 42,
-                borderRadius: 12,
-                background: 'var(--color-neutral-900)',
-                display: 'grid',
-                placeItems: 'center',
-                color: 'var(--color-neutral-500)',
-              }}
-            >
-              <Icon name="hourglass-medium" weight="bold" style={{ fontSize: 19 }} />
+        <Card className="rc-hero rc-hero--pending">
+          <div className="ul-flex ua-center ug-12">
+            <div className="ut-dim rc-pending-icon">
+              <Icon name="hourglass-medium" weight="bold" className="ut-2xl" />
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 18 }}>{periodTitle(pendingMonth.ref, locale)}</div>
-              <span className="rc-lbl" style={{ color: 'var(--color-neutral-600)' }}>
-                {t.rcNotReady}
-              </span>
+            <div className="uf-1">
+              <div className="ut-xl">{periodTitle(pendingMonth.ref, locale)}</div>
+              <span className="rc-lbl rc-lbl--dim">{t.rcNotReady}</span>
             </div>
           </div>
-          <div
-            style={{
-              fontSize: 13,
-              color: 'var(--color-neutral-400)',
-              lineHeight: 1.55,
-              marginTop: 14,
-            }}
-          >
+          <div className="ut-base rc-unlock-body umt-14">
             {t.rcUnlockBody(MONTH_UNLOCK, pendingMonth.sessions)}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
+          <div className="ul-flex ua-center ug-10 umt-14">
             <div className="rc-rank">
               <i
                 style={{ width: `${Math.min(100, (pendingMonth.sessions / MONTH_UNLOCK) * 100)}%` }}
               />
             </div>
-            <span className="rc-num" style={{ fontSize: 12, color: 'var(--color-neutral-500)' }}>
+            <span className="rc-num ut-sm ut-dim">
               {pendingMonth.sessions} / {MONTH_UNLOCK}
             </span>
           </div>
-        </div>
+        </Card>
       ) : null}
 
       {quarterReady && compact(quarterReady, false)}
@@ -260,19 +206,15 @@ function Stat({
   return (
     <div>
       <div
-        className="rc-num"
+        className="rc-num ut-2xl ut-tight"
         style={{
-          fontSize: 22,
-          letterSpacing: '-0.02em',
           color: gold ? 'var(--color-accent-300)' : undefined,
         }}
       >
         {n}
-        {unit && <span style={{ fontSize: 12, color: 'var(--color-accent-300)' }}>{unit}</span>}
+        {unit && <span className="ut-sm ut-accent-lo">{unit}</span>}
       </div>
-      <div className="rc-lbl" style={{ marginTop: 4, color: 'var(--color-accent-300)' }}>
-        {label}
-      </div>
+      <div className="rc-lbl ut-accent-lo umt-4">{label}</div>
     </div>
   );
 }
@@ -297,54 +239,49 @@ export function AllRecapsSheet({
     const building = e.status !== 'ready';
     const r = building ? null : buildRecap(e.ref, ws, store.activities, store.goals, bodyKg);
     return (
-      <button
-        key={e.ref.id}
-        className={`rc-compact${building ? ' building' : ''}`}
-        style={{ marginTop: 10 }}
-        onClick={building ? undefined : () => onOpen(e.ref.id, true)}
-      >
-        <div
-          className="rc-compact-ic"
-          style={{
-            background: building ? 'var(--color-neutral-900)' : 'var(--color-accent-900)',
-            color: building ? 'var(--color-neutral-500)' : 'var(--color-accent)',
-          }}
-        >
-          <Icon
-            name={building ? 'hourglass-medium' : e.ref.kind === 'year' ? 'star' : 'calendar-check'}
-            weight={building ? 'bold' : 'fill'}
-            style={{ fontSize: 17 }}
-          />
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15 }}>{periodShort(e.ref, locale)}</div>
-          <div style={{ fontSize: 12, color: 'var(--color-neutral-500)', marginTop: 2 }}>
-            {building
+      <div key={e.ref.id} className="umt-10">
+        <ListRow
+          dim={building}
+          icon={
+            <div
+              className="rc-compact-ic"
+              style={{
+                background: building ? 'var(--color-neutral-900)' : 'var(--color-accent-900)',
+                color: building ? 'var(--color-neutral-500)' : 'var(--color-accent)',
+              }}
+            >
+              <Icon
+                name={
+                  building ? 'hourglass-medium' : e.ref.kind === 'year' ? 'star' : 'calendar-check'
+                }
+                weight={building ? 'bold' : 'fill'}
+                className="ut-xl"
+              />
+            </div>
+          }
+          label={periodShort(e.ref, locale)}
+          sub={
+            building
               ? t.rcBuildingSoFar(e.sessions)
-              : `${e.sessions} ${t.rcSessions.toLowerCase()} · ${Math.round((r?.volumeKg ?? 0) / 1000)} t`}
-          </div>
-        </div>
-        {!building && (
-          <Icon
-            name="play-circle"
-            weight="fill"
-            style={{ fontSize: 24, color: 'var(--color-accent)' }}
-          />
-        )}
-      </button>
+              : `${e.sessions} ${t.rcSessions.toLowerCase()} · ${Math.round((r?.volumeKg ?? 0) / 1000)} t`
+          }
+          trailing={
+            !building && <Icon name="play-circle" weight="fill" className="ut-3xl ut-accent" />
+          }
+          onClick={building ? undefined : () => onOpen(e.ref.id, true)}
+        />
+      </div>
     );
   };
 
   return (
     <Sheet onClose={onClose} className="rc-sheet">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '2px 2px 14px' }}>
-        <span style={{ flex: 1, fontSize: 20, letterSpacing: '-0.02em' }}>{t.rcYourRecaps}</span>
+      <div className="ul-flex ua-center ug-10" style={{ padding: '2px 2px 14px' }}>
+        <span className="ut-2xl ut-tight uf-1">{t.rcYourRecaps}</span>
       </div>
       {months.length > 0 && (
         <div className="rc-shelf">
-          <div className="rc-lbl" style={{ marginBottom: 10 }}>
-            {t.rcMonthly}
-          </div>
+          <div className="rc-lbl umb-10">{t.rcMonthly}</div>
           <div className="rc-month-row">
             {months.slice(0, 3).map((e) => {
               const building = e.status !== 'ready';
@@ -352,31 +289,33 @@ export function AllRecapsSheet({
                 ? null
                 : buildRecap(e.ref, ws, store.activities, store.goals, bodyKg);
               return (
-                <button
+                <Card
+                  as="button"
+                  pad="sm"
+                  className="rc-month-card"
+                  tone={e.status === 'ready' && r && r.volumeIsPeak ? 'accent' : 'neutral'}
                   key={e.ref.id}
-                  className={`rc-month-card${e.status === 'ready' && r && r.volumeIsPeak ? ' gold' : ''}`}
                   onClick={building ? undefined : () => onOpen(e.ref.id, true)}
                 >
                   <div style={{ width: 40 }}>
                     <FocusBodyMap grow={r?.growMuscles ?? []} ease={[]} view="front" width={40} />
                   </div>
-                  <div style={{ fontSize: 15, marginTop: 8 }}>
+                  <div className="ut-lg umt-8">
                     {new Date(e.ref.year, e.ref.index, 1).toLocaleDateString(locale, {
                       month: 'long',
                     })}
                   </div>
                   <div
+                    className="ut-xs umt-4"
                     style={{
-                      fontSize: 11,
                       color: building ? 'var(--color-neutral-500)' : 'var(--color-accent-300)',
-                      marginTop: 3,
                     }}
                   >
                     {building
                       ? t.rcBuildingSoFar(e.sessions)
                       : `${Math.round((r?.volumeKg ?? 0) / 1000)} t · ${r?.prCount ?? 0} PR`}
                   </div>
-                </button>
+                </Card>
               );
             })}
           </div>
@@ -384,17 +323,13 @@ export function AllRecapsSheet({
       )}
       {quarters.length > 0 && (
         <div className="rc-shelf">
-          <div className="rc-lbl" style={{ marginBottom: 10 }}>
-            {t.rcQuarterly}
-          </div>
+          <div className="rc-lbl umb-10">{t.rcQuarterly}</div>
           {quarters.map(row)}
         </div>
       )}
       {years.length > 0 && (
         <div className="rc-shelf">
-          <div className="rc-lbl" style={{ marginBottom: 10 }}>
-            {t.rcYearly}
-          </div>
+          <div className="rc-lbl umb-10">{t.rcYearly}</div>
           {years.map(row)}
         </div>
       )}

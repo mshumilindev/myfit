@@ -18,8 +18,12 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { Button } from '../components/ui/Button';
+import { Button, IconButton } from '../components/ui/Button';
+import { Tag } from '../components/ui/Tag';
+import { Field } from '../components/ui/Field';
+import { EmptyState } from '../components/ui/EmptyState';
 import { Chip } from '../components/ui/Chip';
+import { Card } from '../components/ui/Card';
 import { SearchField } from '../components/ui/SearchField';
 import { DragHandle } from '../components/ui/DragHandle';
 import { Segmented } from '../components/ui/Segmented';
@@ -369,9 +373,11 @@ export function TodayCustomize({
     const dnd = slotDnd(s, i);
     if (!it || !known || isPicking)
       return (
-        <button
+        <Card
+          as="button"
+          pad="none"
+          emphasis="quiet"
           key={`empty-${i}`}
-          type="button"
           className={`${cls} is-empty${isPicking ? ' is-picking' : ''}${isDrop ? ' is-drop' : ''}`}
           onClick={() => pick({ sectionId: s.id, slot: i, size })}
           {...dnd}
@@ -384,7 +390,7 @@ export function TodayCustomize({
               <span>{size === 'XS' ? t.todayAdd : t.todayAddWidget}</span>
             </>
           )}
-        </button>
+        </Card>
       );
     const isSel = selected?.widgetId === it.id;
     const sc = it.size === 'XS' ? shortcutById(it.widget) : undefined;
@@ -425,40 +431,42 @@ export function TodayCustomize({
       );
     }
     return (
-      <button
+      <Card
+        as="button"
+        pad="none"
+        emphasis="quiet"
         key={it.id}
-        type="button"
         className={`${cls}${isSel ? ' is-selected' : ''}`}
         aria-pressed={isSel}
         onClick={toggle}
       >
         {node}
-      </button>
+      </Card>
     );
   };
 
   const renderSection = (s: TodayLayout['sections'][number], idx: number) => {
     const up = (
-      <button
-        type="button"
+      <IconButton
+        variant="ghost"
+        size="sm"
         className="tdc-ib"
-        aria-label={t.todayMoveUp}
+        label={t.todayMoveUp}
+        icon="caret-up"
         disabled={idx <= 1}
         onClick={() => setDraft(moveSection(draft, s.id, -1))}
-      >
-        <Icon name="caret-up" />
-      </button>
+      />
     );
     const down = (
-      <button
-        type="button"
+      <IconButton
+        variant="ghost"
+        size="sm"
         className="tdc-ib"
-        aria-label={t.todayMoveDown}
+        label={t.todayMoveDown}
+        icon="caret-down"
         disabled={idx === 0 || idx >= n - 1}
         onClick={() => setDraft(moveSection(draft, s.id, 1))}
-      >
-        <Icon name="caret-down" />
-      </button>
+      />
     );
     const name = s.kind === 'core' ? t.todayCore[s.id] : s.title;
     const handle = desk && (
@@ -482,13 +490,13 @@ export function TodayCustomize({
             {handle}
             <div className="tdc-name">
               <span>{t.todayCore[s.id]}</span>
-              <span className="tdc-tag">
+              <Tag tone="neutral" className="tdc-tag">
                 {s.id === 'status'
                   ? t.todayPinnedTag
                   : isConfigurable(s.id)
                     ? `${t.todayCoreTag} · ${summary(s.id)}`
                     : t.todayCoreTag}
-              </span>
+              </Tag>
             </div>
             {s.id !== 'status' && up}
             {s.id !== 'status' && down}
@@ -503,14 +511,14 @@ export function TodayCustomize({
               </Button>
             )}
             {isConfigurable(s.id) && !desk && (
-              <button
-                type="button"
+              <IconButton
+                variant="ghost"
+                size="sm"
                 className="tdc-ib"
-                aria-label={`${t.todayConfigure} · ${t.todayCore[s.id]}`}
+                label={`${t.todayConfigure} · ${t.todayCore[s.id]}`}
+                icon="sliders-horizontal"
                 onClick={() => setConfiguring(s.id as ConfigurableCore)}
-              >
-                <Icon name="sliders-horizontal" />
-              </button>
+              />
             )}
           </div>
           {s.id === 'status' ? (
@@ -535,28 +543,28 @@ export function TodayCustomize({
           {handle}
           <div className="tdc-name">
             <span>{s.title}</span>
-            <span className="tdc-tag is-custom">
+            <Tag tone="accent" className="tdc-tag is-custom">
               {SECTION_LAYOUTS.find((l) => l.id === s.layout)?.sizes}
-            </span>
+            </Tag>
           </div>
           {up}
           {down}
-          <button
-            type="button"
+          <IconButton
+            variant="ghost"
+            size="sm"
             className="tdc-ib"
-            aria-label={t.todayEditSectionTitle}
+            label={t.todayEditSectionTitle}
+            icon="sliders-horizontal"
             onClick={() => setEditing(s)}
-          >
-            <Icon name="sliders-horizontal" />
-          </button>
-          <button
-            type="button"
-            className="tdc-ib is-danger"
-            aria-label={t.todayRemoveSection}
+          />
+          <IconButton
+            variant="danger"
+            size="sm"
+            className="tdc-ib"
+            label={t.todayRemoveSection}
+            icon="trash"
             onClick={() => setConfirmRemove(s)}
-          >
-            <Icon name="trash" />
-          </button>
+          />
         </div>
         <WidgetGrid layout={s.layout}>
           {Array.from({ length: shown }, (_, i) => (
@@ -570,43 +578,43 @@ export function TodayCustomize({
                 ? shortcutById(sel.widget)?.label(ctx)
                 : widgetById(sel.widget)?.name(tw)}
             </span>
-            <button
-              type="button"
+            <IconButton
+              variant="ghost"
+              size="sm"
               className="tdc-ib"
-              aria-label={t.todayMoveUp}
+              label={t.todayMoveUp}
+              icon="caret-left"
               disabled={selIdx <= 0}
               onClick={() => setDraft(moveWidget(draft, s.id, sel.id, -1))}
-            >
-              <Icon name="caret-left" />
-            </button>
-            <button
-              type="button"
+            />
+            <IconButton
+              variant="ghost"
+              size="sm"
               className="tdc-ib"
-              aria-label={t.todayMoveDown}
+              label={t.todayMoveDown}
+              icon="caret-right"
               disabled={selIdx >= s.items.length - 1}
               onClick={() => setDraft(moveWidget(draft, s.id, sel.id, 1))}
-            >
-              <Icon name="caret-right" />
-            </button>
-            <button
-              type="button"
+            />
+            <IconButton
+              variant="ghost"
+              size="sm"
               className="tdc-ib"
-              aria-label={t.todayAddWidget}
+              label={t.todayAddWidget}
+              icon="swap"
               onClick={() => pick({ sectionId: s.id, slot: selIdx, size: sel.size })}
-            >
-              <Icon name="swap" />
-            </button>
-            <button
-              type="button"
-              className="tdc-ib is-danger"
-              aria-label={t.todayRemove}
+            />
+            <IconButton
+              variant="danger"
+              size="sm"
+              className="tdc-ib"
+              label={t.todayRemove}
+              icon="trash"
               onClick={() => {
                 setDraft(removeWidget(draft, s.id, sel.id));
                 setSelected(null);
               }}
-            >
-              <Icon name="trash" />
-            </button>
+            />
           </div>
         )}
       </div>
@@ -653,11 +661,16 @@ export function TodayCustomize({
           {desk && secDrop === idx && dropLine}
           {renderSection(s, idx)}
           {!desk && idx < n - 1 && (
-            <button type="button" className="tdc-insert" onClick={() => setInsertAfter(s.id)}>
-              <span>
-                <Icon name="plus" /> {t.todayAddSectionHere}
-              </span>
-            </button>
+            <Button
+              variant="ghost"
+              size="sm"
+              fullWidth
+              className="tdc-insert"
+              icon="plus"
+              onClick={() => setInsertAfter(s.id)}
+            >
+              {t.todayAddSectionHere}
+            </Button>
           )}
         </Fragment>
       ))}
@@ -670,13 +683,12 @@ export function TodayCustomize({
       )}
       <div className="tdc-foot">
         <span />
-        <button
-          type="button"
-          className="tdc-link"
+        <Button
+          variant="link"
           onClick={() => setDraft({ ...DEFAULT_LAYOUT, updatedAt: Date.now() })}
         >
           {t.todayResetLayout}
-        </button>
+        </Button>
       </div>
 
       {configuring && (
@@ -973,7 +985,7 @@ function AddPanel({
               ))}
             </div>
           )}
-          {wHits.length === 0 && <div className="tdc-empty">{t.todayNoResults}</div>}
+          {wHits.length === 0 && <EmptyState icon="magnifying-glass" title={t.todayNoResults} />}
           {widgetGroups
             .filter(
               (g) =>
@@ -1006,7 +1018,9 @@ function AddPanel({
       {tab === 'shortcuts' && (
         <>
           {search(t.todaySearchShortcuts)}
-          {!SHORTCUTS.some(scHit) && <div className="tdc-empty">{t.todayNoResults}</div>}
+          {!SHORTCUTS.some(scHit) && (
+            <EmptyState icon="magnifying-glass" title={t.todayNoResults} />
+          )}
           {(['train', 'activity', 'health'] as const).map((g) => {
             const list =
               g === 'activity'
@@ -1019,10 +1033,15 @@ function AddPanel({
                 <div className="tdc-ap-scgrid">
                   {list.map(scTile)}
                   {g === 'activity' && !allActs && !searching && acts.length > actsShown.length && (
-                    <button type="button" className="tdc-sc-more" onClick={() => setAllActs(true)}>
-                      <Icon name="magnifying-glass" />
-                      <span>{t.todayScAll(acts.length)}</span>
-                    </button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="tdc-sc-more"
+                      icon="magnifying-glass"
+                      onClick={() => setAllActs(true)}
+                    >
+                      {t.todayScAll(acts.length)}
+                    </Button>
                   )}
                 </div>
               </Fragment>
@@ -1077,19 +1096,20 @@ function SectionSheet({
           <b>{afterName}</b>
         </div>
       )}
-      <div className="tdc-sheet-lab">{t.todaySectionTitle}</div>
-      <input
+      <Field
+        label={t.todaySectionTitle}
         className="tdc-input"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        aria-label={t.todaySectionTitle}
       />
       <div className="tdc-sheet-lab">{t.todaySectionLayout}</div>
       <div className="tdc-layouts">
         {SECTION_LAYOUTS.map((l) => (
-          <button
+          <Card
+            as="button"
+            pad="none"
+            emphasis="quiet"
             key={l.id}
-            type="button"
             className={`tdc-lay${layout === l.id ? ' is-on' : ''}`}
             aria-pressed={layout === l.id}
             onClick={() => setLayout(l.id)}
@@ -1099,7 +1119,7 @@ function SectionSheet({
               {t.todayLayouts[l.id]}
               <small>{l.sizes}</small>
             </span>
-          </button>
+          </Card>
         ))}
       </div>
       {(() => {
@@ -1216,7 +1236,7 @@ function PickerSheet({
           ))}
         </div>
       )}
-      {shown.length === 0 && <div className="tdc-empty">{t.todayNoResults}</div>}
+      {shown.length === 0 && <EmptyState icon="magnifying-glass" title={t.todayNoResults} />}
       {shown.map((g) => (
         <Fragment key={g}>
           {(searching || group === 'all') && <div className="tdc-pick-group">{groupName(g)}</div>}
@@ -1224,9 +1244,11 @@ function PickerSheet({
             {hits
               .filter((i) => i.group === g)
               .map((i) => (
-                <button
+                <Card
+                  as="button"
+                  pad="none"
+                  emphasis="quiet"
                   key={i.id}
-                  type="button"
                   className={`${cls}${chosen === i.id ? ' is-chosen' : ''}`}
                   aria-pressed={chosen === i.id}
                   aria-label={i.name}
@@ -1234,7 +1256,7 @@ function PickerSheet({
                 >
                   <span className="tdc-pick-tile">{i.node}</span>
                   {size !== 'XS' && <span className="tdc-pick-name">{i.name}</span>}
-                </button>
+                </Card>
               ))}
           </div>
         </Fragment>
@@ -1329,7 +1351,7 @@ function ShortcutsSheet({
         clearLabel={t.todayClear}
       />
       {groups.every((g) => !SHORTCUTS.some((s) => s.group === g.key && hit(s))) && (
-        <div className="tdc-empty">{t.todayNoResults}</div>
+        <EmptyState icon="magnifying-glass" title={t.todayNoResults} />
       )}
       {groups
         .filter((g) => searching || group === 'all' || group === g.key)
@@ -1342,10 +1364,15 @@ function ShortcutsSheet({
                 ? actsShown.filter(hit).map(tile)
                 : SHORTCUTS.filter((s) => s.group === g.key && hit(s)).map(tile)}
               {g.key === 'activity' && collapsed && acts.length > 7 && (
-                <button type="button" className="tdc-sc-more" onClick={() => setAllActs(true)}>
-                  <Icon name="magnifying-glass" />
-                  <span>{t.todayScAll(acts.length)}</span>
-                </button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="tdc-sc-more"
+                  icon="magnifying-glass"
+                  onClick={() => setAllActs(true)}
+                >
+                  {t.todayScAll(acts.length)}
+                </Button>
               )}
             </div>
           </Fragment>

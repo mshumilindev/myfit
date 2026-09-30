@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { Button, IconButton } from './ui/Button';
 import { setGymBandLibrary, bandLibraryFor } from '../store';
 import { BAND_HEX, BAND_COLORS, type BandRung, type BandColor } from '../loads';
 import type { Gym } from '../types';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
+import { Field } from './ui/Field';
 
 /**
  * Band library editor (Load-entry C-5): a colour → estimated-kg map, set once
@@ -67,57 +69,55 @@ export function BandLibraryCard({
         {rungs.map((r, i) => (
           <div className="band-lib-row" key={i}>
             <div className="band-pick">
-              <button
-                type="button"
-                className="band-dot-btn"
+              <Button
+                variant="ghost"
+                size="sm"
                 aria-label={t.bandColor(r.color)}
                 onClick={() => setPick((p) => (p === i ? null : i))}
               >
                 <span className="band-dot" style={{ background: BAND_HEX[r.color] }} />
-              </button>
+              </Button>
               {pick === i && (
                 <div className="band-swatches">
                   {BAND_COLORS.map((c) => (
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       key={c}
-                      className={`band-swatch${c === r.color ? ' on' : ''}`}
-                      style={{ background: BAND_HEX[c] }}
+                      aria-pressed={c === r.color}
                       aria-label={t.bandColor(c)}
                       title={t.bandColor(c)}
                       onClick={() => setColor(i, c)}
-                    />
+                    >
+                      <span className="band-dot" style={{ background: BAND_HEX[c] }} />
+                    </Button>
                   ))}
                 </div>
               )}
             </div>
             <span className="band-lib-name">{t.bandColor(r.color)}</span>
-            <input
+            <Field
+              className="band-lib-kg"
               type="number"
               inputMode="decimal"
               min={0}
               step={0.5}
+              aria-label={t.bandColor(r.color)}
+              trail={t.kgCol.toLowerCase()}
               value={r.kg}
               onChange={(e) => setKg(i, Math.max(0, Number(e.target.value) || 0))}
             />
-            <span className="band-lib-unit">{t.kgCol.toLowerCase()}</span>
-            <button
-              type="button"
-              className="band-remove"
-              aria-label={t.delete}
-              onClick={() => removeRow(i)}
-            >
-              <Icon name="x" />
-            </button>
+            <IconButton icon="x" label={t.delete} size="sm" onClick={() => removeRow(i)} />
           </div>
         ))}
       </div>
       <div className="band-lib-actions">
-        <button type="button" className="btn btn-secondary band-add" onClick={addRow}>
+        <Button variant="secondary" className="band-add" onClick={addRow}>
           <Icon name="plus" /> {t.bandAdd}
-        </button>
-        <button
-          className="btn btn-secondary band-lib-save"
+        </Button>
+        <Button
+          variant="secondary"
+          className="band-lib-save"
           disabled={!dirty}
           onClick={() => {
             setGymBandLibrary(
@@ -130,7 +130,7 @@ export function BandLibraryCard({
         >
           <Icon name="check" />
           {saved && !dirty ? t.bandLibSaved : t.bandLibSave}
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -60,7 +60,7 @@
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  font-size: 15px;
+  font-size: var(--fs-15);
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
 }
@@ -78,11 +78,6 @@
 }
 .app-nutrition svg {
   display: block;
-}
-.app-nutrition .root-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
 }
 .app-nutrition .main {
   position: relative;
@@ -103,9 +98,6 @@
   display: none;
 }
 @media (min-width: 720px) {
-  .app-nutrition .root-layout {
-    flex-direction: row;
-  }
   .app-nutrition .rail {
     display: flex;
     flex-direction: column;
@@ -126,7 +118,7 @@
     flex: 1;
   }
   .app-nutrition .screen {
-    padding: 26px 40px 44px;
+    padding: var(--s-28) var(--s-40) var(--s-44);
     max-width: none;
     margin: 0;
     width: 100%;
@@ -143,7 +135,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: var(--fs-20);
   margin-bottom: var(--space-2);
 }
 .app-nutrition .rail-item {
@@ -162,12 +154,12 @@
   color: var(--acc-200);
 }
 .app-nutrition .rail-item:not(.active):hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--c-ffffff) 4%, transparent);
   color: var(--muted);
 }
 .app-nutrition .rail-item.add {
   background: var(--acc);
-  color: #fff;
+  color: var(--c-ffffff);
   margin: var(--space-2) 0;
 }
 .app-nutrition .rail-item.add:hover {
@@ -180,16 +172,8 @@
   align-items: center;
   gap: var(--space-3);
 }
-.app-nutrition .rail-account {
-  position: relative;
-  display: inline-flex;
-  padding: 0;
-  border: none;
-  background: none;
-  border-radius: 50%;
-}
 .app-nutrition .avatar {
-  border-radius: 50%;
+  border-radius: var(--r-round);
   object-fit: cover;
   display: block;
 }
@@ -200,19 +184,6 @@
   place-items: center;
   font-weight: 600;
 }
-.app-nutrition .rail-account .dot {
-  position: absolute;
-  right: -1px;
-  bottom: -1px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  border: 2px solid var(--surface);
-  background: var(--ok);
-}
-.app-nutrition .rail-account .dot.off {
-  background: var(--danger);
-}
 .app-nutrition .hdr {
   display: flex;
   align-items: flex-start;
@@ -220,34 +191,34 @@
   margin-bottom: var(--space-4);
 }
 .app-nutrition .hdr .overline {
-  font-size: 10px;
+  font-size: var(--fs-10);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--acc-300);
-  margin-bottom: 2px;
+  margin-bottom: var(--s-2);
 }
 .app-nutrition .hdr h1 {
-  font-size: 26px;
+  font-size: var(--fs-26);
   font-weight: 600;
   display: inline;
 }
 .app-nutrition .hdr .day {
   color: var(--muted);
-  font-size: 14px;
-  margin-left: 8px;
+  font-size: var(--fs-14);
+  margin-left: var(--s-8);
 }
 .app-nutrition .sync {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--muted);
   white-space: nowrap;
 }
 .app-nutrition .sync .dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--r-round);
   background: var(--ok);
 }
 .app-nutrition .sync.off .dot {
@@ -267,7 +238,7 @@
 }
 .app-nutrition .section-title {
   color: var(--dim);
-  font-size: 11px;
+  font-size: var(--fs-11);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin: var(--space-5) var(--space-1) var(--space-2);
@@ -283,50 +254,8 @@
   margin-top: var(--space-4);
   padding-top: var(--space-3);
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
   text-align: center;
-}
-.app-nutrition .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  min-height: 44px;
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-m);
-  border: 1px solid var(--hairline);
-  background: transparent;
-  color: var(--text);
-  font-weight: 500;
-}
-.app-nutrition .btn:active {
-  transform: scale(0.99);
-}
-.app-nutrition .btn:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-.app-nutrition .btn.acc {
-  border-color: var(--acc);
-  color: var(--acc-200);
-}
-.app-nutrition .btn.acc:hover:not(:disabled) {
-  background: var(--acc-900);
-}
-.app-nutrition .btn.ghost {
-  border-color: transparent;
-  color: var(--muted);
-}
-.app-nutrition .btn.danger {
-  border-color: var(--danger);
-  color: var(--danger);
-}
-.app-nutrition .btn.block {
-  width: 100%;
-}
-.app-nutrition .btn.sm {
-  min-height: 36px;
-  font-size: 13px;
 }
 .app-nutrition .tabbar {
   flex: none;
@@ -343,13 +272,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: var(--s-4);
   min-width: 0;
-  padding: 6px 0;
+  padding: var(--s-6) 0;
   background: none;
   border: none;
   color: var(--dim);
-  font-size: 10px;
+  font-size: var(--fs-10);
 }
 .app-nutrition .tabbar .tab svg {
   width: 22px;
@@ -358,23 +287,18 @@
 .app-nutrition .tabbar .tab.active {
   color: var(--acc-200);
 }
-.app-nutrition .tabbar .fab-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 .app-nutrition .fab {
   width: 54px;
   height: 54px;
-  border-radius: 50%;
+  border-radius: var(--r-round);
   border: none;
   background: var(--acc);
-  color: #fff;
+  color: var(--c-ffffff);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: -22px;
-  box-shadow: 0 6px 18px rgba(61, 132, 201, 0.45);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--color-kcal) 45%, transparent);
 }
 .app-nutrition .ring-wrap {
   display: flex;
@@ -396,11 +320,11 @@
   justify-content: center;
 }
 .app-nutrition .ring .val b {
-  font-size: 28px;
+  font-size: var(--fs-28);
   font-weight: 600;
 }
 .app-nutrition .ring .val span {
-  font-size: 10px;
+  font-size: var(--fs-10);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
@@ -415,13 +339,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
-  margin-bottom: 5px;
+  font-size: var(--fs-13);
+  margin-bottom: var(--s-6);
 }
 .app-nutrition .bar .top .lbl {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--s-6);
   color: var(--muted);
 }
 .app-nutrition .bar .top .lbl svg {
@@ -434,13 +358,13 @@
 }
 .app-nutrition .bar .track {
   height: 7px;
-  border-radius: 6px;
+  border-radius: var(--r-6);
   background: var(--surface-2);
   overflow: hidden;
 }
 .app-nutrition .bar .fill {
   height: 100%;
-  border-radius: 6px;
+  border-radius: var(--r-6);
   transition: width 0.3s ease;
 }
 .app-nutrition .bar.p .fill {
@@ -479,7 +403,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: var(--fs-18);
   flex: none;
 }
 .app-nutrition .entry .body {
@@ -493,7 +417,7 @@
 .app-nutrition .entry .body .meta {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
   margin-top: 1px;
 }
 .app-nutrition .entry .kcal {
@@ -501,13 +425,13 @@
   flex: none;
 }
 .app-nutrition .entry .kcal b {
-  font-size: 17px;
+  font-size: var(--fs-17);
   font-weight: 600;
 }
 .app-nutrition .entry .kcal span {
   display: block;
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--fs-10);
 }
 .app-nutrition .row {
   display: flex;
@@ -527,7 +451,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: var(--fs-18);
   flex: none;
 }
 .app-nutrition .row .body {
@@ -539,18 +463,18 @@
 }
 .app-nutrition .row .body .meta {
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 .app-nutrition .row .kcal {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 .app-nutrition .tag {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11px;
+  padding: var(--s-2) var(--s-8);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-11);
   border: 1px solid var(--hairline);
   color: var(--muted);
 }
@@ -569,14 +493,13 @@
 .app-nutrition .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--s-6);
   margin-bottom: var(--space-3);
 }
 .app-nutrition .field label {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--muted);
 }
-.app-nutrition .input,
 .app-nutrition .select {
   min-height: 44px;
   border-radius: var(--radius-m);
@@ -587,13 +510,9 @@
   font: inherit;
   width: 100%;
 }
-.app-nutrition .input:focus,
 .app-nutrition .select:focus {
   outline: none;
   border-color: var(--acc);
-}
-.app-nutrition .input.error {
-  border-color: var(--danger);
 }
 .app-nutrition .seg {
   display: flex;
@@ -601,12 +520,12 @@
   flex-wrap: wrap;
 }
 .app-nutrition .chip {
-  padding: 8px 14px;
-  border-radius: 999px;
+  padding: var(--s-8) var(--s-14);
+  border-radius: var(--r-pill);
   border: 1px solid var(--hairline);
   background: transparent;
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 .app-nutrition .chip.on {
   border-color: var(--acc);
@@ -628,31 +547,31 @@
   text-align: left;
 }
 .app-nutrition .type-grid .big .emo {
-  font-size: 28px;
+  font-size: var(--fs-28);
 }
 .app-nutrition .type-grid .big .t {
   font-weight: 600;
 }
 .app-nutrition .type-grid .big .d {
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 .app-nutrition .plaque {
   background: var(--acc-900);
   border: 1px solid var(--acc-800);
   border-radius: var(--radius-m);
   padding: var(--space-3) var(--space-4);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 .app-nutrition .plaque .ov {
   display: flex;
   align-items: center;
   justify-content: space-between;
   color: var(--acc-300);
-  font-size: 10px;
+  font-size: var(--fs-10);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  margin-bottom: var(--s-4);
 }
 .app-nutrition .plaque .ov button {
   background: none;
@@ -663,17 +582,17 @@
   color: var(--acc-200);
   background: none;
   border: none;
-  padding: 6px 0 0;
+  padding: var(--s-6) 0 0;
   font-weight: 500;
 }
 .app-nutrition .scrim {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: color-mix(in srgb, var(--c-000000) 55%, transparent);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  z-index: 20;
+  z-index: var(--z-20);
 }
 .app-nutrition .scrim.center {
   align-items: center;
@@ -720,19 +639,9 @@
 .app-nutrition .sheet .grab {
   width: 40px;
   height: 4px;
-  border-radius: 2px;
+  border-radius: var(--r-2);
   background: var(--hairline);
   margin: 2px auto var(--space-4);
-}
-.app-nutrition .sheet-hdr {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-4);
-}
-.app-nutrition .sheet-hdr h2 {
-  font-size: 18px;
-  font-weight: 600;
 }
 .app-nutrition .dialog {
   width: calc(100% - 32px);
@@ -744,12 +653,12 @@
   padding: var(--space-5);
 }
 .app-nutrition .dialog h2 {
-  font-size: 17px;
+  font-size: var(--fs-17);
   margin-bottom: var(--space-2);
 }
 .app-nutrition .dialog p {
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--fs-14);
   margin-bottom: var(--space-4);
 }
 .app-nutrition .snack {
@@ -764,8 +673,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  z-index: 30;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  z-index: var(--z-30);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--c-000000) 40%, transparent);
 }
 .app-nutrition .snack .u {
   color: var(--acc-200);
@@ -780,13 +689,13 @@
   color: var(--muted);
 }
 .app-nutrition .empty .emo {
-  font-size: 40px;
+  font-size: var(--fs-40);
   margin-bottom: var(--space-3);
 }
 .app-nutrition .failed {
   color: var(--danger);
 }
-.app-nutrition .sk {
+.app-nutrition .uisk {
   background: var(--skeleton);
   border-radius: var(--radius-s);
   animation: pulse 1.2s ease-in-out infinite;
@@ -801,7 +710,7 @@
   }
 }
 .app-nutrition .hero-num {
-  font-size: 34px;
+  font-size: var(--fs-34);
   font-weight: 600;
 }
 .app-nutrition .list-head {
@@ -829,11 +738,11 @@
   flex: 1;
 }
 .app-nutrition .overline {
-  font-size: 10px;
+  font-size: var(--fs-10);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--acc-300);
-  margin-bottom: 4px;
+  margin-bottom: var(--s-4);
 }
 .app-nutrition .offline-banner {
   display: flex;
@@ -844,7 +753,7 @@
   border-radius: var(--radius-m);
   padding: 10px var(--space-3);
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
   margin-bottom: var(--space-3);
 }
 .app-nutrition .obj-grid {
@@ -863,19 +772,9 @@
   background: var(--surface);
   min-height: 84px;
 }
-.app-nutrition .obj .obj-ic {
-  font-size: 18px;
-  color: var(--muted);
-}
-.app-nutrition .obj .obj-lbl {
-  font-weight: 600;
-}
 .app-nutrition .obj.on {
   border-color: var(--acc);
   background: var(--acc-900);
-}
-.app-nutrition .obj.on .obj-ic {
-  color: var(--acc-200);
 }
 .app-nutrition .macro-boxes {
   display: grid;
@@ -890,16 +789,16 @@
 }
 .app-nutrition .macro-boxes b {
   display: block;
-  font-size: 16px;
+  font-size: var(--fs-16);
   font-weight: 600;
 }
 .app-nutrition .macro-boxes span {
   display: block;
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--fs-10);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-top: 2px;
+  margin-top: var(--s-2);
 }
 .app-nutrition .chart {
   display: flex;
@@ -914,7 +813,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: var(--s-6);
   height: 100%;
 }
 .app-nutrition .chart .colbar {
@@ -926,7 +825,7 @@
 }
 .app-nutrition .chart .colfill {
   width: 100%;
-  border-radius: 4px 4px 2px 2px;
+  border-radius: var(--r-4) var(--r-4) var(--r-2) var(--r-2);
   background: var(--acc);
 }
 .app-nutrition .chart .colfill.over {
@@ -936,21 +835,21 @@
   background: var(--surface-2);
 }
 .app-nutrition .chart .collbl {
-  font-size: 10px;
+  font-size: var(--fs-10);
   color: var(--dim);
 }
 .app-nutrition .legend {
   display: flex;
   gap: var(--space-4);
-  font-size: 11px;
+  font-size: var(--fs-11);
   color: var(--muted);
 }
 .app-nutrition .legend .sw {
   display: inline-block;
   width: 10px;
   height: 10px;
-  border-radius: 3px;
-  margin-right: 6px;
+  border-radius: var(--r-4);
+  margin-right: var(--s-6);
   vertical-align: middle;
 }
 .app-nutrition .legend .sw.acc {
@@ -977,7 +876,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--fs-14);
 }
 .app-nutrition .n-acct .nm {
   display: block;
@@ -986,7 +885,7 @@
 .app-nutrition .n-acct .sub {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 .app-nutrition .tiles {
   display: grid;
@@ -1001,16 +900,16 @@
 }
 .app-nutrition .tile b {
   display: block;
-  font-size: 18px;
+  font-size: var(--fs-18);
   font-weight: 600;
 }
 .app-nutrition .tile span {
   display: block;
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--fs-10);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-top: 2px;
+  margin-top: var(--s-2);
 }
 .app-nutrition .auth {
   min-height: 100%;
@@ -1032,24 +931,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
+  font-size: var(--fs-30);
   margin: 0 auto var(--space-4);
 }
 .app-nutrition .auth-card h2 {
-  font-size: 22px;
+  font-size: var(--fs-22);
   margin-bottom: var(--space-2);
 }
 .app-nutrition .auth-card .sub {
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--fs-14);
   margin-bottom: var(--space-5);
 }
-.app-nutrition .auth-card .input {
+.app-nutrition .uifield {
   margin-bottom: var(--space-3);
 }
 .app-nutrition .field-error {
   color: var(--danger);
-  font-size: 13px;
+  font-size: var(--fs-13);
   margin-bottom: var(--space-3);
 }
 .app-nutrition {
@@ -1100,7 +999,7 @@
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  font-size: 15px;
+  font-size: var(--fs-15);
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
 }
@@ -1132,28 +1031,28 @@
   align-items: flex-start;
   justify-content: space-between;
   padding: 0;
-  margin-bottom: 14px;
+  margin-bottom: var(--s-14);
   background: none;
 }
 .app-nutrition .hdr h1 {
-  font-size: 22px;
+  font-size: var(--fs-22);
   font-weight: 600;
 }
 .app-nutrition .hdr .sub {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 .app-nutrition .sync {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--muted);
 }
 .app-nutrition .sync .dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--r-round);
   background: var(--ok);
 }
 .app-nutrition .sync.off .dot {
@@ -1173,48 +1072,10 @@
 }
 .app-nutrition .section-title {
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin: var(--space-5) var(--space-1) var(--space-2);
-}
-.app-nutrition .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  min-height: 44px;
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-m);
-  border: 1px solid var(--hairline);
-  background: transparent;
-  color: var(--text);
-  font-weight: 500;
-}
-.app-nutrition .btn:active {
-  transform: scale(0.99);
-}
-.app-nutrition .btn.acc {
-  border-color: var(--acc);
-  color: var(--acc-200);
-}
-.app-nutrition .btn.acc:hover {
-  background: var(--acc-900);
-}
-.app-nutrition .btn.ghost {
-  border-color: transparent;
-  color: var(--muted);
-}
-.app-nutrition .btn.danger {
-  border-color: var(--danger);
-  color: var(--danger);
-}
-.app-nutrition .btn.block {
-  width: 100%;
-}
-.app-nutrition .btn.sm {
-  min-height: 36px;
-  font-size: 13px;
 }
 .app-nutrition .fab {
   position: absolute;
@@ -1222,15 +1083,15 @@
   bottom: 88px;
   width: 56px;
   height: 56px;
-  border-radius: 50%;
+  border-radius: var(--r-round);
   border: 1px solid var(--acc);
   background: var(--acc-900);
   color: var(--acc-100);
-  font-size: 26px;
+  font-size: var(--fs-26);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--c-000000) 40%, transparent);
   z-index: 6;
 }
 .app-nutrition .tabbar {
@@ -1247,15 +1108,15 @@
   background: none;
   border: none;
   color: var(--dim);
-  font-size: 11px;
+  font-size: var(--fs-11);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: var(--s-4);
 }
 .app-nutrition .tabbar button .ic {
-  font-size: 18px;
+  font-size: var(--fs-18);
 }
 .app-nutrition .tabbar button.on {
   color: var(--acc-200);
@@ -1280,11 +1141,11 @@
   justify-content: center;
 }
 .app-nutrition .ring .val b {
-  font-size: 26px;
+  font-size: var(--fs-26);
   font-weight: 600;
 }
 .app-nutrition .ring .val span {
-  font-size: 11px;
+  font-size: var(--fs-11);
   color: var(--muted);
 }
 .app-nutrition .bars {
@@ -1296,23 +1157,23 @@
 .app-nutrition .bar .top {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
-  margin-bottom: 5px;
+  font-size: var(--fs-13);
+  margin-bottom: var(--s-6);
 }
 .app-nutrition .bar .top .lbl {
   display: inline-flex;
-  gap: 6px;
+  gap: var(--s-6);
   color: var(--muted);
 }
 .app-nutrition .bar .track {
   height: 8px;
-  border-radius: 6px;
+  border-radius: var(--r-6);
   background: var(--surface-2);
   overflow: hidden;
 }
 .app-nutrition .bar .fill {
   height: 100%;
-  border-radius: 6px;
+  border-radius: var(--r-6);
 }
 .app-nutrition .bar.p .fill {
   background: var(--acc);
@@ -1344,7 +1205,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: var(--fs-18);
   flex: none;
 }
 .app-nutrition .row .body {
@@ -1356,18 +1217,18 @@
 }
 .app-nutrition .row .body .meta {
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 .app-nutrition .row .kcal {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 .app-nutrition .tag {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11px;
+  padding: var(--s-2) var(--s-8);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-11);
   border: 1px solid var(--hairline);
   color: var(--muted);
 }
@@ -1386,14 +1247,13 @@
 .app-nutrition .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--s-6);
   margin-bottom: var(--space-3);
 }
 .app-nutrition .field label {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--muted);
 }
-.app-nutrition .input,
 .app-nutrition .select {
   min-height: 44px;
   border-radius: var(--radius-m);
@@ -1403,7 +1263,6 @@
   padding: 0 var(--space-3);
   font: inherit;
 }
-.app-nutrition .input:focus,
 .app-nutrition .select:focus {
   outline: none;
   border-color: var(--acc);
@@ -1414,12 +1273,12 @@
   flex-wrap: wrap;
 }
 .app-nutrition .chip {
-  padding: 8px 14px;
-  border-radius: 999px;
+  padding: var(--s-8) var(--s-14);
+  border-radius: var(--r-pill);
   border: 1px solid var(--hairline);
   background: transparent;
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 .app-nutrition .chip.on {
   border-color: var(--acc);
@@ -1439,23 +1298,23 @@
   background: var(--surface);
 }
 .app-nutrition .type-grid .big .emo {
-  font-size: 28px;
+  font-size: var(--fs-28);
 }
 .app-nutrition .type-grid .big .t {
   font-weight: 600;
 }
 .app-nutrition .type-grid .big .d {
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 .app-nutrition .scrim {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: color-mix(in srgb, var(--c-000000) 55%, transparent);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  z-index: 20;
+  z-index: var(--z-20);
 }
 .app-nutrition .sheet {
   width: 100%;
@@ -1471,19 +1330,9 @@
 .app-nutrition .sheet .grab {
   width: 40px;
   height: 4px;
-  border-radius: 2px;
+  border-radius: var(--r-2);
   background: var(--hairline);
   margin: 2px auto var(--space-4);
-}
-.app-nutrition .sheet-hdr {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-4);
-}
-.app-nutrition .sheet-hdr h2 {
-  font-size: 18px;
-  font-weight: 600;
 }
 .app-nutrition .dialog {
   width: calc(100% - 32px);
@@ -1495,12 +1344,12 @@
   padding: var(--space-5);
 }
 .app-nutrition .dialog h2 {
-  font-size: 17px;
+  font-size: var(--fs-17);
   margin-bottom: var(--space-2);
 }
 .app-nutrition .dialog p {
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--fs-14);
   margin-bottom: var(--space-4);
 }
 .app-nutrition .scrim.center {
@@ -1518,8 +1367,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  z-index: 30;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  z-index: var(--z-30);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--c-000000) 40%, transparent);
 }
 .app-nutrition .snack .u {
   color: var(--acc-200);
@@ -1532,13 +1381,13 @@
   color: var(--muted);
 }
 .app-nutrition .empty .emo {
-  font-size: 40px;
+  font-size: var(--fs-40);
   margin-bottom: var(--space-3);
 }
 .app-nutrition .failed {
   color: var(--danger);
 }
-.app-nutrition .sk {
+.app-nutrition .uisk {
   background: var(--skeleton);
   border-radius: var(--radius-s);
   animation: pulse 1.2s ease-in-out infinite;
@@ -1560,10 +1409,10 @@
   border: 1px solid var(--acc-800);
   border-radius: var(--radius-m);
   padding: var(--space-3) var(--space-4);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 .app-nutrition .hero-num {
-  font-size: 34px;
+  font-size: var(--fs-34);
   font-weight: 600;
 }
 .app-nutrition .list-head {
@@ -1595,17 +1444,17 @@
 .app-nutrition .n-appbar {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  padding: 10px 16px 6px;
+  gap: var(--s-10);
+  padding: var(--s-10) var(--s-16) var(--s-6);
 }
 .app-nutrition .n-brand {
   font-family: 'Kaushan Script', cursive;
-  font-size: 22px;
+  font-size: var(--fs-22);
   line-height: 1;
   color: var(--text);
 }
 .app-nutrition .n-app {
-  font-size: 11px;
+  font-size: var(--fs-11);
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -1654,7 +1503,7 @@
 }
 @media (min-width: 720px) {
   .app-nutrition .apex-scroll {
-    padding: 20px 40px 110px;
+    padding: var(--s-20) var(--s-40) 110px;
   }
 }
 
@@ -1668,9 +1517,9 @@
   bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 8px);
   display: flex;
   justify-content: center;
-  padding: 0 16px;
+  padding: 0 var(--s-16);
   pointer-events: none;
-  z-index: 20;
+  z-index: var(--z-20);
 }
 .app-nutrition .n-addpill-wrap .glass-defs {
   position: absolute;
@@ -1685,20 +1534,20 @@
   isolation: isolate;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--s-8);
   height: 46px;
-  padding: 0 22px;
+  padding: 0 var(--s-24);
   border: none;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: transparent;
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--fs-14);
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   box-shadow:
-    0 20px 46px rgba(0, 0, 0, 0.6),
-    0 3px 10px rgba(0, 0, 0, 0.4);
+    0 20px 46px color-mix(in srgb, var(--c-000000) 60%, transparent),
+    0 3px 10px color-mix(in srgb, var(--c-000000) 40%, transparent);
 }
 .app-nutrition .n-addpill::before {
   content: '';
@@ -1716,15 +1565,19 @@
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: linear-gradient(135deg, rgba(52, 54, 60, 0.42), rgba(22, 23, 26, 0.6) 62%);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--c-34363c) 42%, transparent),
+    color-mix(in srgb, var(--color-bg) 60%, transparent) 62%
+  );
   box-shadow:
-    inset 0 1.2px 0.5px rgba(255, 255, 255, 0.5),
-    inset 0 -10px 14px -10px rgba(0, 0, 0, 0.65),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    inset 0 1.2px 0.5px color-mix(in srgb, var(--c-ffffff) 50%, transparent),
+    inset 0 -10px 14px -10px color-mix(in srgb, var(--c-000000) 65%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--c-ffffff) 10%, transparent);
 }
 .app-nutrition .n-addpill-plus {
   color: var(--color-accent);
-  font-size: 17px;
+  font-size: var(--fs-17);
 }
 .app-nutrition .n-addpill:active {
   transform: scale(0.98);
@@ -1746,11 +1599,11 @@
 .app-nutrition .scrim {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: color-mix(in srgb, var(--c-000000) 55%, transparent);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  z-index: 51;
+  z-index: var(--z-51);
 }
 .app-nutrition .scrim.center {
   align-items: center;
@@ -1779,43 +1632,8 @@
     transform: translateY(0);
   }
 }
-.app-nutrition .sheet-chrome {
-  position: relative;
-  min-height: 4px;
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 0 6px;
-  margin: -4px 0 2px;
-}
-.app-nutrition .sheet-chrome .grabber {
-  display: block;
-  width: 34px;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--color-neutral-700);
-}
-.app-nutrition .sheet-close {
-  position: absolute;
-  top: 2px;
-  right: 0;
-  display: grid;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-divider);
-  background: rgba(233, 234, 236, 0.03);
-  color: var(--color-neutral-500);
-  place-items: center;
-  cursor: pointer;
-}
-.app-nutrition .sheet-close:hover {
-  color: var(--color-text);
-  background: rgba(233, 234, 236, 0.07);
-}
 .app-nutrition .sheet-title {
-  font-size: 18px;
+  font-size: var(--fs-18);
   font-weight: 600;
   margin: 0;
 }
@@ -1856,7 +1674,7 @@
   min-width: 0;
 }
 .app-nutrition .bar .top {
-  gap: 10px;
+  gap: var(--s-10);
 }
 .app-nutrition .bar .top .lbl {
   min-width: 0;
@@ -1881,7 +1699,7 @@
 
 /* ============================================================================
    Gym design-system leak guard. Several nutrition class names (.bars, .seg,
-   .screen, .input, .empty, .dialog, .field-error, .auth-card) also exist as
+   .screen, .empty, .dialog, .field-error, .auth-card) also exist as
    gym GLOBAL classes. Gym's unscoped rules (specificity 0,1,0) leak every
    property nutrition's scoped rule (0,2,0) does not itself set. `revert` on
    exactly those leaked properties removes gym's contribution and restores
@@ -1910,10 +1728,6 @@
   overscroll-behavior: revert;
   -webkit-overflow-scrolling: revert;
 }
-.app-nutrition .input {
-  opacity: revert;
-  outline-offset: revert;
-}
 .app-nutrition .empty {
   display: revert;
   flex-direction: revert;
@@ -1941,12 +1755,6 @@
 
 /* Bottom nav: nutrition has exactly 4 items (Today/History/Goal/Apps), so use
    4 even columns like gym's tabbar — no empty gap before Apps. */
-.app-nutrition .apex-nav {
-  grid-template-columns: repeat(4, 1fr);
-}
-.app-nutrition .apex-nav-apps {
-  grid-column: auto;
-}
 
 /* Plaque/banner: gym-surface card (not a heavy accent block); accent stays on
    the overline + CTA only. */
@@ -1987,13 +1795,6 @@
   min-height: revert;
   padding: revert;
   position: revert;
-}
-.app-nutrition .btn {
-  border-color: revert;
-  flex: revert;
-  margin: revert;
-  position: revert;
-  width: revert;
 }
 .app-nutrition .center {
   justify-content: revert;
@@ -2050,7 +1851,7 @@
   text-align: revert;
   width: revert;
 }
-.app-nutrition .sk {
+.app-nutrition .uisk {
   height: revert;
   width: revert;
 }
@@ -2076,4 +1877,16 @@
   padding: revert;
   text-align: revert;
   width: revert;
+}
+
+/* Feature-local modifiers (moved off inline styles) */
+.row.row--flush {
+  border-bottom: none;
+}
+.scan-video {
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+}
+.app-nutrition .overline.ut-accent-lo {
+  color: var(--color-accent-300);
 }

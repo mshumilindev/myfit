@@ -6,7 +6,11 @@
  * Health (sleep, rest, illness, injury — the full Health page) and Log past.
  * The backfill sub-sheet lives here too so Today can reuse it.
  */
+import { Chip } from '../components/ui/Chip';
 import { useMemo, useState, type ReactNode } from 'react';
+import { Button } from './ui/Button';
+import { ListRow } from './ui/GroupedList';
+import { Segmented } from './ui/Segmented';
 import { Card } from './ui/Card';
 import { IconTile } from './ui/IconTile';
 import type { Shell } from '../App';
@@ -266,10 +270,14 @@ export function StartSheet({
         </span>
       </Card>
       {offerScratch && (
-        <button type="button" className="ss-scratch" onClick={() => void startScratch()}>
-          <Icon name="plus" />
+        <Button
+          variant="link"
+          className="ss-scratch"
+          icon="plus"
+          onClick={() => void startScratch()}
+        >
           {t.startOrScratch}
-        </button>
+        </Button>
       )}
       <div className="ss-grid">
         <Card
@@ -395,50 +403,33 @@ export function BackfillSheet(props: {
         <span className="t">{t.logPastSession}</span>
       </div>
       {props.onCreateHome && (
-        <div className="seg2 backfill-kind" role="tablist">
-          <button
-            type="button"
-            className={kind === 'gym' ? 'active' : ''}
-            onClick={() => {
-              setKind('gym');
-              if (duration === HOME_BACKFILL_MIN) setDuration(60);
-            }}
-          >
-            {t.backfillKindGym}
-          </button>
-          <button
-            type="button"
-            className={kind === 'home' ? 'active' : ''}
-            onClick={() => {
-              setKind('home');
-              if (duration === 60) setDuration(HOME_BACKFILL_MIN);
-            }}
-          >
-            {t.backfillKindHome}
-          </button>
-        </div>
+        <Segmented
+          tabs
+          className="backfill-kind"
+          options={[
+            { value: 'gym', label: t.backfillKindGym },
+            { value: 'home', label: t.backfillKindHome },
+          ]}
+          value={kind}
+          onChange={(k) => {
+            setKind(k);
+            if (k === 'gym' && duration === HOME_BACKFILL_MIN) setDuration(60);
+            if (k === 'home' && duration === 60) setDuration(HOME_BACKFILL_MIN);
+          }}
+        />
       )}
       {kind === 'home' && (
         <div className="field-block">
           <span className="field-label">{t.backfillWhichHomeSet}</span>
           <div className="backfill-sets">
             {homeSets.map((hs) => (
-              <button
-                key={hs.id}
-                type="button"
-                className={`hs-mchip${homeSetId === hs.id ? ' on' : ''}`}
-                onClick={() => setHomeSetId(hs.id)}
-              >
+              <Chip selected={homeSetId === hs.id} key={hs.id} onClick={() => setHomeSetId(hs.id)}>
                 {hs.name}
-              </button>
+              </Chip>
             ))}
-            <button
-              type="button"
-              className={`hs-mchip${homeSetId === null ? ' on' : ''}`}
-              onClick={() => setHomeSetId(null)}
-            >
+            <Chip selected={homeSetId === null} onClick={() => setHomeSetId(null)}>
               {t.backfillHomeEmpty}
-            </button>
+            </Chip>
           </div>
         </div>
       )}
@@ -462,28 +453,22 @@ export function BackfillSheet(props: {
       {kind === 'gym' && props.gyms.length > 0 && (
         <label className="field-block">
           <span className="field-label">{t.backfillGym}</span>
-          <button
-            type="button"
-            className="input gym-select"
+          <ListRow
             onClick={() => setGymPicker((x) => !x)}
-          >
-            {chosenGym ? (
-              <span className="gym-select-chosen">
-                <span className="thumb">
-                  <GymThumb
-                    name={chosenGym.name}
-                    lat={chosenGym.lat}
-                    lng={chosenGym.lng}
-                    size={28}
-                  />
-                </span>
-                {chosenGym.name}
-              </span>
-            ) : (
-              <span className="gym-select-placeholder">{t.backfillGymChoose}</span>
-            )}
-            <Icon name={gymPicker ? 'caret-left' : 'arrow-right'} className="go" />
-          </button>
+            icon={
+              chosenGym ? (
+                <GymThumb
+                  name={chosenGym.name}
+                  lat={chosenGym.lat}
+                  lng={chosenGym.lng}
+                  size={28}
+                  boxed
+                />
+              ) : undefined
+            }
+            label={chosenGym ? chosenGym.name : t.backfillGymChoose}
+            trailing={<Icon name={gymPicker ? 'caret-left' : 'arrow-right'} className="go" />}
+          />
           {gymPicker && (
             <GymPicker
               gyms={props.gyms}
@@ -505,11 +490,12 @@ export function BackfillSheet(props: {
         </div>
       )}
       <div className="sheet-actions">
-        <button className="btn btn-secondary grow" onClick={props.onClose}>
+        <Button variant="secondary" className="grow" onClick={props.onClose}>
           {t.cancel}
-        </button>
-        <button
-          className="btn btn-primary grow"
+        </Button>
+        <Button
+          variant="primary"
+          className="grow"
           disabled={invalid}
           onClick={() =>
             kind === 'home' && props.onCreateHome
@@ -522,7 +508,7 @@ export function BackfillSheet(props: {
           }
         >
           {t.backfillContinue}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

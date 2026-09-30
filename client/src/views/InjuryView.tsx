@@ -5,7 +5,15 @@
  * Return, advanced by a green/amber/red check-in. An optional clinician no-load
  * window is a date-bound Stage 0 · Full rest (rest-blue) before it.
  */
+import { BackButton } from '../components/ui/BackButton';
 import { useState } from 'react';
+import { Button, IconButton } from '../components/ui/Button';
+import { Chip } from '../components/ui/Chip';
+import { ListRow } from '../components/ui/GroupedList';
+import { IconTile } from '../components/ui/IconTile';
+import { NumberStepper } from '../components/ui/NumberStepper';
+import { Segmented } from '../components/ui/Segmented';
+import './InjuryView.css';
 import {
   useStore,
   startInjury,
@@ -161,9 +169,7 @@ function InjurySetup({
   return (
     <div className="rx">
       <div className="topbar">
-        <button className="bk" aria-label={t.backAction} onClick={back}>
-          <Icon name={step === 'where' ? 'x' : 'arrow-left'} />
-        </button>
+        <BackButton label={t.backAction} onClick={back} />
         <span className="tt">
           {step === 'general'
             ? t.injGeneralTitle
@@ -176,48 +182,40 @@ function InjurySetup({
       {step === 'where' && (
         <>
           <SetupStepper active={1} />
-          <div className="sub" style={{ marginTop: 18 }}>
-            {t.injWhereHint}
-          </div>
-          <div className="chips" style={{ marginTop: 14 }}>
+          <div className="sub umt-18">{t.injWhereHint}</div>
+          <div className="chips umt-14">
             {BODY_PARTS.map((b) => (
-              <button
+              <Chip
                 key={b.id}
-                className={`chip${part === b.id ? ' on' : ''}`}
+                selected={part === b.id}
+                icon={part === b.id ? 'target' : undefined}
                 onClick={() => setPart(b.id)}
               >
-                {part === b.id && <Icon name="target" weight="fill" />}
                 {t.injBodyParts[b.id] ?? b.id}
-              </button>
+              </Chip>
             ))}
           </div>
           {part && (
             <>
-              <div className="seg" style={{ marginTop: 16 }}>
-                {(['left', 'right', 'both'] as const).map((sd) => (
-                  <button
-                    key={sd}
-                    className={`chip${side === sd ? ' on' : ''}`}
-                    style={{ flex: 1, justifyContent: 'center' }}
-                    onClick={() => setSide(sd)}
-                  >
-                    {t.injSide[sd]}
-                  </button>
-                ))}
+              <div className="umt-16">
+                <Segmented
+                  options={(['left', 'right', 'both'] as const).map((sd) => ({
+                    value: sd,
+                    label: t.injSide[sd],
+                  }))}
+                  value={side}
+                  onChange={setSide}
+                />
               </div>
-              <div className="card r" style={{ marginTop: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--dgrtext)' }}>
-                  {t.injGoodToKnow}
-                </div>
-                <div
-                  style={{ fontSize: 12.5, color: 'var(--dgrrose)', marginTop: 6, lineHeight: 1.5 }}
-                >
+              <div className="card r umt-16">
+                <div className="ut-base ut-w7 ut-danger">{t.injGoodToKnow}</div>
+                <div className="ut-sm ij-rose umt-6" style={{ lineHeight: 1.5 }}>
                   {t.injMuscleDeriveHint}
                 </div>
-                <div className="chips" style={{ marginTop: 11 }}>
+                <div className="chips umt-12">
                   {muscles.map((m) => (
                     <span key={m} className="chip mus">
-                      <Icon name="check" style={{ color: 'var(--dgr)' }} />
+                      <Icon name="check" className="ij-dgr" />
                       {t.muscleGroups[m] ?? m}
                     </span>
                   ))}
@@ -225,92 +223,55 @@ function InjurySetup({
               </div>
             </>
           )}
-          <button
-            className="hatch"
-            style={{ marginTop: 12 }}
+          <Button
+            variant="ghost"
+            fullWidth
+            icon="dots-three-circle"
+            className="umt-12"
             onClick={() => {
               setReason('surgery');
               setStep('general');
             }}
           >
-            <Icon name="dots-three-circle" />
             {t.injGeneralHatch}
-          </button>
+          </Button>
           <div className="spacer" />
-          <button className="btn p cta" disabled={!part} onClick={() => setStep('feel')}>
+          <Button
+            variant="ghost"
+            className="p cta"
+            disabled={!part}
+            onClick={() => setStep('feel')}
+          >
             {t.injNextFeel} <Icon name="arrow-right" weight="bold" />
-          </button>
+          </Button>
         </>
       )}
 
       {step === 'general' && (
         <>
           <SetupStepper active={1} />
-          <div className="sub" style={{ marginTop: 18 }}>
-            {t.injGeneralHint}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginTop: 16 }}>
+          <div className="sub umt-18">{t.injGeneralHint}</div>
+          <div className="ul-flex ul-col ug-10 umt-16">
             {GENERAL_REASONS.map((r) => {
               const on = reason === r;
               return (
-                <button
+                <ListRow
                   key={r}
-                  className="rest-mode"
-                  style={
-                    on
-                      ? {
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 12,
-                          background: 'var(--color-danger-tint)',
-                          borderColor: 'var(--color-danger)',
-                          boxShadow: 'inset 0 0 0 1px var(--color-danger)',
-                        }
-                      : { flexDirection: 'row', alignItems: 'center', gap: 12 }
-                  }
+                  icon={<IconTile icon={REASON_ICON[r]} tone={on ? 'danger' : 'neutral'} />}
+                  label={t.injReason[r]}
+                  sub={t.injReasonDesc[r]}
+                  selected={on}
+                  check={on}
+                  checkTone="danger"
                   onClick={() => setReason(r)}
-                >
-                  <span
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 9,
-                      display: 'grid',
-                      placeItems: 'center',
-                      flex: 'none',
-                      fontSize: 17,
-                      background: on ? 'rgba(226,86,79,.16)' : 'var(--color-neutral-900)',
-                      color: on ? 'var(--color-danger)' : 'var(--color-neutral-400)',
-                    }}
-                  >
-                    <Icon name={REASON_ICON[r]} weight="bold" />
-                  </span>
-                  <span style={{ flex: 1, textAlign: 'left' }}>
-                    <span
-                      className="rm-name"
-                      style={on ? { color: 'var(--color-danger-text)' } : undefined}
-                    >
-                      {t.injReason[r]}
-                    </span>
-                    <span className="rm-desc" style={{ display: 'block' }}>
-                      {t.injReasonDesc[r]}
-                    </span>
-                  </span>
-                  {on && (
-                    <Icon
-                      name="check-circle"
-                      weight="bold"
-                      style={{ color: 'var(--color-danger)', fontSize: 18 }}
-                    />
-                  )}
-                </button>
+                />
               );
             })}
           </div>
           <div className="spacer" />
-          <button className="btn p cta" onClick={() => setStep('clinician')}>
+          <Button variant="primary" className="cta" onClick={() => setStep('clinician')}>
             {t.injContinue} <Icon name="arrow-right" weight="bold" />
-          </button>
+          </Button>
         </>
       )}
 
@@ -319,233 +280,89 @@ function InjurySetup({
           <SetupStepper active={2} />
           <div className="pgt">{t.injFeelTitle}</div>
           <div className="sub">{t.injFeelHint}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginTop: 16 }}>
+          <div className="ul-flex ul-col ug-12 umt-16">
             {(['cant', 'sore', 'almost'] as const).map((id) => {
               const on = feel === id;
               const stg = feelToStage(id);
               const okTone = id === 'almost';
               return (
-                <button
+                <ListRow
                   key={id}
+                  icon={<IconTile icon={FEEL_ICON[id]} tone={okTone ? 'ok' : 'danger'} />}
+                  label={t.injFeel[id]}
+                  sub={t.injFeelSub[id]}
+                  value={t.injStage[stg]}
+                  valueTone={okTone ? 'ok' : 'danger'}
+                  valueStrong
+                  selected={on}
                   onClick={() => setFeel(id)}
-                  style={{
-                    textAlign: 'left',
-                    padding: 14,
-                    borderRadius: 14,
-                    fontFamily: 'inherit',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    gap: 13,
-                    alignItems: 'center',
-                    color: 'var(--color-text)',
-                    background: on ? 'var(--dgrt)' : 'var(--color-surface)',
-                    border: `1px solid ${on ? 'var(--dgr)' : 'var(--color-divider)'}`,
-                    boxShadow: on ? 'inset 0 0 0 1px var(--dgr)' : 'none',
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: 10,
-                      display: 'grid',
-                      placeItems: 'center',
-                      flex: 'none',
-                      fontSize: 19,
-                      background: okTone
-                        ? 'var(--okt)'
-                        : on
-                          ? 'rgba(226,86,79,.16)'
-                          : 'var(--dgrt)',
-                      border: `1px solid ${okTone ? 'var(--okline)' : 'var(--dgrline)'}`,
-                      color: okTone ? 'var(--ok)' : 'var(--dgr)',
-                    }}
-                  >
-                    <Icon name={FEEL_ICON[id]} weight="bold" />
-                  </span>
-                  <span style={{ flex: 1 }}>
-                    <span
-                      style={{
-                        fontSize: 14.5,
-                        fontWeight: 700,
-                        color: on ? 'var(--dgrtext)' : 'var(--color-text)',
-                      }}
-                    >
-                      {t.injFeel[id]}
-                    </span>
-                    <span
-                      style={{
-                        display: 'block',
-                        fontSize: 12,
-                        color: on ? 'var(--dgrrose)' : 'var(--color-neutral-500)',
-                        marginTop: 2,
-                      }}
-                    >
-                      {t.injFeelSub[id]}
-                    </span>
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 800,
-                      borderRadius: 6,
-                      padding: '4px 7px',
-                      color: on ? '#fff' : okTone ? 'var(--ok)' : 'var(--dgr)',
-                      background: on ? 'var(--dgr)' : 'transparent',
-                      border: on
-                        ? 'none'
-                        : `1px solid ${okTone ? 'var(--okline)' : 'var(--dgrline)'}`,
-                    }}
-                  >
-                    {t.injStage[stg]}
-                  </span>
-                </button>
+                />
               );
             })}
           </div>
           <div className="spacer" />
-          <button className="btn p hot cta" onClick={() => setStep('clinician')}>
+          <Button variant="primary" className="hot cta" onClick={() => setStep('clinician')}>
             {t.injNext} <Icon name="arrow-right" weight="bold" />
-          </button>
+          </Button>
         </>
       )}
 
       {step === 'clinician' && (
         <>
-          <div className="sub" style={{ marginTop: 16 }}>
-            {t.injClinicianHint}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginTop: 16 }}>
-            <button
-              className="rest-mode"
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 11 }}
+          <div className="sub umt-16">{t.injClinicianHint}</div>
+          <div className="ul-flex ul-col ug-10 umt-16">
+            <ListRow
+              label={t.injTfNo}
+              sub={t.injTfNoDesc}
+              selected={!hasTimeframe}
+              check={!hasTimeframe}
+              checkTone="rest"
               onClick={() => setHasTimeframe(false)}
-            >
-              <span
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: '50%',
-                  border: `2px solid ${hasTimeframe ? 'var(--color-neutral-600)' : 'var(--rest)'}`,
-                  flex: 'none',
-                  display: 'grid',
-                  placeItems: 'center',
-                }}
-              >
-                {!hasTimeframe && (
-                  <span
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: '50%',
-                      background: 'var(--rest)',
-                    }}
-                  />
-                )}
-              </span>
-              <span style={{ flex: 1, textAlign: 'left' }}>
-                <span className="rm-name">{t.injTfNo}</span>
-                <span className="rm-desc" style={{ display: 'block' }}>
-                  {t.injTfNoDesc}
-                </span>
-              </span>
-            </button>
-            <button
-              className="rest-mode"
-              style={
-                hasTimeframe
-                  ? {
-                      flexDirection: 'row',
-                      alignItems: 'flex-start',
-                      gap: 11,
-                      background: 'var(--restt)',
-                      borderColor: 'var(--rest)',
-                      boxShadow: 'inset 0 0 0 1px var(--rest)',
-                    }
-                  : { flexDirection: 'row', alignItems: 'flex-start', gap: 11 }
-              }
+            />
+            <ListRow
+              label={t.injTfYes}
+              sub={t.injTfYesDesc}
+              selected={hasTimeframe}
+              check={hasTimeframe}
+              checkTone="rest"
               onClick={() => setHasTimeframe(true)}
-            >
-              <span
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: '50%',
-                  border: '2px solid var(--rest)',
-                  display: 'grid',
-                  placeItems: 'center',
-                  flex: 'none',
-                  marginTop: 1,
-                }}
-              >
-                {hasTimeframe && (
-                  <span
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: '50%',
-                      background: 'var(--rest)',
-                    }}
-                  />
-                )}
-              </span>
-              <span style={{ flex: 1, textAlign: 'left' }}>
-                <span
-                  className="rm-name"
-                  style={hasTimeframe ? { color: 'var(--rest200)' } : undefined}
-                >
-                  {t.injTfYes}
-                </span>
-                <span
-                  className="rm-desc"
-                  style={{ display: 'block', color: hasTimeframe ? 'var(--rest300)' : undefined }}
-                >
-                  {t.injTfYesDesc}
-                </span>
-              </span>
-            </button>
+            />
           </div>
           {hasTimeframe && (
             <>
-              <div className="sec" style={{ color: 'var(--rest300)' }}>
-                {t.injTfHowLong}
+              <div className="sec ij-rest3">{t.injTfHowLong}</div>
+              <NumberStepper
+                className="umt-10"
+                label={t.injUnit[unit]}
+                value={amount}
+                min={1}
+                onChange={setAmount}
+                unit={t.injUnit[unit]}
+              />
+              <div className="umt-10">
+                <Segmented
+                  options={(['days', 'weeks', 'months'] as const).map((u) => ({
+                    value: u,
+                    label: t.injUnit[u],
+                  }))}
+                  value={unit}
+                  onChange={setUnit}
+                />
               </div>
-              <div className="stepper" style={{ marginTop: 10 }}>
-                <button className="pm" onClick={() => setAmount((a) => Math.max(1, a - 1))}>
-                  <Icon name="minus" weight="bold" />
-                </button>
-                <div className="val">
-                  <div className="num" style={{ color: 'var(--rest200)' }}>
-                    {amount}
-                  </div>
-                  <div className="u">{t.injUnit[unit]}</div>
-                </div>
-                <button className="pm" onClick={() => setAmount((a) => a + 1)}>
-                  <Icon name="plus" weight="bold" />
-                </button>
-              </div>
-              <div className="seg" style={{ marginTop: 10 }}>
-                {(['days', 'weeks', 'months'] as const).map((u) => (
-                  <button
-                    key={u}
-                    className={`chip${unit === u ? ' onb' : ''}`}
-                    style={{ flex: 1, justifyContent: 'center' }}
-                    onClick={() => setUnit(u)}
-                  >
-                    {t.injUnit[u]}
-                  </button>
-                ))}
-              </div>
-              <div className="rulebox" style={{ marginTop: 12 }}>
-                <Icon name="warning" style={{ marginTop: 1, flex: 'none', color: 'var(--g500)' }} />
+              <div className="rulebox umt-12">
+                <Icon name="warning" className="ij-amber uf-none" style={{ marginTop: 1 }} />
                 <span>{t.injClinicianRule}</span>
               </div>
             </>
           )}
           <div className="spacer" />
-          <button className={`btn ${hasTimeframe ? 'b' : 'p hot'} cta`} onClick={commit}>
+          <Button
+            variant={hasTimeframe ? 'rest' : 'primary'}
+            className={hasTimeframe ? 'cta' : 'hot cta'}
+            onClick={commit}
+          >
             {t.injSeePlan} <Icon name="arrow-right" weight="bold" />
-          </button>
+          </Button>
         </>
       )}
     </div>
@@ -586,18 +403,7 @@ function InjuryPlan({
       <div className="rx hub">
         <div className="rx-top">
           <div className="rx-top-l">
-            <span
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 10,
-                background: 'rgba(226,86,79,.16)',
-                display: 'grid',
-                placeItems: 'center',
-                color: 'var(--dgr)',
-                fontSize: 19,
-              }}
-            >
+            <span className="ij-hub-ico ur-md ut-2xl">
               <Icon name="bandaids" weight="bold" />
             </span>
             <div>
@@ -608,26 +414,24 @@ function InjuryPlan({
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button
-              className="btn s sm"
+          <div className="ul-flex ug-10">
+            <Button
+              variant="secondary"
+              size="sm"
               style={{ width: 'auto', padding: '0 14px' }}
               onClick={() => setManage(true)}
             >
               {t.injManage}
-            </button>
-            <button
-              className="btn s sm"
-              style={{
-                width: 'auto',
-                padding: '0 14px',
-                color: 'var(--ok)',
-                borderColor: 'var(--okline)',
-              }}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="ij-btn-ok"
+              style={{ width: 'auto', padding: '0 14px' }}
               onClick={() => setManage(true)}
             >
               {t.injMarkHealed}
-            </button>
+            </Button>
           </div>
         </div>
         <div className="rx-body2">
@@ -657,89 +461,44 @@ function InjuryPlan({
               <div className="rk">
                 {t.injRightNow} · {t.injStage[inj.stage]}
               </div>
-              <div
-                style={{
-                  fontSize: 15,
-                  color: 'var(--dgrrose)',
-                  marginTop: 9,
-                  lineHeight: 1.55,
-                  display: 'flex',
-                  gap: 9,
-                }}
-              >
-                <Icon
-                  name="shield-check"
-                  weight="fill"
-                  style={{ marginTop: 2, flex: 'none', color: 'var(--dgr)' }}
-                />
+              <div className="ut-lg ij-rose umt-10 ul-flex ug-10" style={{ lineHeight: 1.55 }}>
+                <Icon name="shield-check" weight="fill" className="ij-dgr umt-2 uf-none" />
                 <span>{t.injFeelDriven}</span>
               </div>
             </div>
             <div className="card">
-              <div
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-              >
-                <div style={{ fontSize: 13, fontWeight: 700 }}>{t.injRebuildPreview}</div>
+              <div className="ul-flex ua-center uj-between">
+                <div className="ut-base ut-w7">{t.injRebuildPreview}</div>
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-end',
-                  gap: 12,
-                  height: 96,
-                  marginTop: 14,
-                }}
-              >
+              <div className="ul-flex ua-end ug-12 umt-14" style={{ height: 96 }}>
                 {[60, 75, 90, 100].map((pct) => (
                   <div
                     key={pct}
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: 6,
-                      height: '100%',
-                      justifyContent: 'flex-end',
-                    }}
+                    className="uf-1 ul-flex ul-col ua-center ug-6 uj-end"
+                    style={{ height: '100%' }}
                   >
-                    <div
-                      style={{
-                        width: '100%',
-                        height: `${pct}%`,
-                        borderRadius: '6px 6px 2px 2px',
-                        background: 'var(--n800)',
-                      }}
-                    />
-                    <div style={{ fontSize: 11, color: 'var(--n500)', fontWeight: 700 }}>
-                      {pct}%
-                    </div>
+                    <div className="ij-bar" style={{ width: '100%', height: `${pct}%` }} />
+                    <div className="ut-xs ut-dim ut-w7">{pct}%</div>
                   </div>
                 ))}
               </div>
-              <div style={{ fontSize: 12, color: 'var(--n500)', marginTop: 12, lineHeight: 1.5 }}>
+              <div className="ut-sm ut-dim umt-12" style={{ lineHeight: 1.5 }}>
                 {t.injRebuildPreviewNote}
               </div>
             </div>
             {inj.stage !== 'protect' && (
-              <button className="btn p hot" onClick={() => setCi(true)}>
+              <Button variant="primary" className="hot" onClick={() => setCi(true)}>
                 <Icon name="heartbeat" weight="bold" /> {t.injLogCheckin}
-              </button>
+              </Button>
             )}
           </div>
           <div className="rx-side2">
             <div className="card bl">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                <Icon
-                  name="calendar-check"
-                  weight="fill"
-                  style={{ color: 'var(--rest)', fontSize: 16 }}
-                />
-                <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--rest200)', flex: 1 }}>
-                  {t.injTimeframeNone}
-                </span>
+              <div className="ul-flex ua-center ug-10">
+                <Icon name="calendar-check" weight="fill" className="ij-rest ut-lg" />
+                <span className="ut-sm ut-w7 ij-rest2 uf-1">{t.injTimeframeNone}</span>
               </div>
-              <div style={{ fontSize: 12, color: 'var(--rest300)', marginTop: 9, lineHeight: 1.5 }}>
+              <div className="ut-sm ij-rest3 umt-10" style={{ lineHeight: 1.5 }}>
                 {t.injTimeframeNoneHint}
               </div>
             </div>
@@ -748,16 +507,9 @@ function InjuryPlan({
                 <div className="h">{t.injRecentCheckins}</div>
                 {recent.map((c) => (
                   <div className="li" key={c.id}>
-                    <span
-                      style={{
-                        width: 11,
-                        height: 11,
-                        borderRadius: '50%',
-                        background: feelColor(c.feel),
-                      }}
-                    />
-                    <span style={{ flex: 1 }}>{new Date(c.at).toLocaleDateString()}</span>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: feelColor(c.feel) }}>
+                    <span className="ij-dot ur-round" style={{ background: feelColor(c.feel) }} />
+                    <span className="uf-1">{new Date(c.at).toLocaleDateString()}</span>
+                    <span className="ut-xs ut-w7" style={{ color: feelColor(c.feel) }}>
                       {t.injFeelWord[c.feel]}
                     </span>
                   </div>
@@ -769,10 +521,8 @@ function InjuryPlan({
                 <div className="h">{t.injProtectedThisWeek}</div>
                 {inj.muscles.map((m) => (
                   <div className="li" key={m}>
-                    <Icon name="shield-check" style={{ color: 'var(--dgr)', fontSize: 15 }} />
-                    <span style={{ flex: 1, color: 'var(--dgrtext)' }}>
-                      {t.muscleGroups[m] ?? m}
-                    </span>
+                    <Icon name="shield-check" className="ij-dgr ut-lg" />
+                    <span className="ut-danger uf-1">{t.muscleGroups[m] ?? m}</span>
                   </div>
                 ))}
               </div>
@@ -787,56 +537,37 @@ function InjuryPlan({
   return (
     <div className="rx">
       <div className="topbar">
-        <button className="bk" aria-label={t.backAction} onClick={onClose}>
-          <Icon name="arrow-left" />
-        </button>
+        <BackButton label={t.backAction} onClick={onClose} />
         <span className="tt">{t.injPlanTitle(partName)}</span>
-        <button className="edit" aria-label={t.injManage} onClick={() => setManage(true)}>
-          <Icon name="dots-three-vertical" />
-        </button>
+        <IconButton
+          label={t.injManage}
+          icon="dots-three-vertical"
+          onClick={() => setManage(true)}
+        />
       </div>
 
-      <div className="rulebox" style={{ marginTop: 16 }}>
+      <div className="rulebox umt-16">
         <Icon
           name={fullRest ? 'info' : 'shield-check'}
-          style={{ marginTop: 1, flex: 'none', color: fullRest ? 'var(--rest)' : 'var(--dgr)' }}
+          className={fullRest ? 'ij-rest' : 'ij-dgr'}
+          style={{ marginTop: 1, flex: 'none' }}
         />
         <span>{fullRest ? t.injStage0Note : t.injFeelDriven}</span>
       </div>
 
       <div className="sec">{t.injYourStages}</div>
-      <div className="slist" style={{ marginTop: 8 }}>
+      <div className="slist umt-8">
         {fullRest && inj.fullRestUntil != null && (
-          <div className="r rest" style={{ alignItems: 'flex-start' }}>
+          <div className="r rest ua-start">
             <span className="kn">
               <Icon name="moon" weight="bold" />
             </span>
-            <div style={{ flex: 1 }}>
-              <div
-                style={{
-                  fontSize: 14,
-                  fontWeight: 800,
-                  color: 'var(--rest200)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                }}
-              >
+            <div className="uf-1">
+              <div className="ut-md ut-w8 ij-rest2 ul-flex ua-center ug-8">
                 {t.injStage0}
-                <span
-                  style={{
-                    fontSize: 9,
-                    fontWeight: 800,
-                    color: '#052231',
-                    background: 'var(--rest)',
-                    borderRadius: 5,
-                    padding: '2px 6px',
-                  }}
-                >
-                  {t.injNow}
-                </span>
+                <span className="ij-badge ut-2xs ut-w8 ur-sm">{t.injNow}</span>
               </div>
-              <div style={{ fontSize: 11.5, color: 'var(--rest300)', marginTop: 3 }}>
+              <div className="ut-xs ij-rest3 umt-4">
                 {t.injStage0Left(inj.fullRestUntil - today)}
               </div>
             </div>
@@ -850,21 +581,14 @@ function InjuryPlan({
                 {state === 'done' ? <Icon name="check" weight="bold" /> : i + 1}
               </span>
               <span
-                style={{
-                  flex: 1,
-                  fontSize: 13.5,
-                  fontWeight: 700,
-                  color:
-                    state === 'now'
-                      ? 'var(--dgrtext)'
-                      : state === 'done'
-                        ? 'var(--color-text)'
-                        : 'var(--color-neutral-400)',
-                }}
+                className={`ut-base ut-w7 ${
+                  state === 'now' ? 'ut-danger' : state === 'done' ? 'ut-text' : 'ij-n400'
+                }`}
+                style={{ flex: 1 }}
               >
                 {t.injStage[sid]}
               </span>
-              <span style={{ fontSize: 11, color: 'var(--color-neutral-600)' }}>
+              <span className="ut-xs ij-n600">
                 {state === 'now' ? t.injNow : state === 'done' ? t.injCleared : t.injByFeel}
               </span>
             </div>
@@ -876,13 +600,13 @@ function InjuryPlan({
 
       <div className="spacer" />
       {!fullRest && inj.stage !== 'protect' && (
-        <button className="btn p hot cta" onClick={() => setCi(true)}>
+        <Button variant="primary" className="hot cta" onClick={() => setCi(true)}>
           <Icon name="heartbeat" weight="bold" /> {t.injLogCheckin}
-        </button>
+        </Button>
       )}
-      <button className="btn s" style={{ marginTop: 10 }} onClick={() => setManage(true)}>
+      <Button variant="secondary" className="umt-10" onClick={() => setManage(true)}>
         <Icon name="dots-three-vertical" /> {t.injManage}
-      </button>
+      </Button>
 
       {ci && <CheckinSheet inj={inj} onClose={() => setCi(false)} />}
     </div>
@@ -900,31 +624,17 @@ function RebuildRamp() {
   return (
     <>
       <div className="sec">{t.injRebuildRampLabel}</div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height: 130, marginTop: 12 }}>
+      <div className="ul-flex ua-end ug-10 umt-12" style={{ height: 130 }}>
         {steps.map((s) => (
           <div
             key={s.pct}
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 6,
-              height: '100%',
-              justifyContent: 'flex-end',
-            }}
+            className="uf-1 ul-flex ul-col ua-center ug-6 uj-end"
+            style={{ height: '100%' }}
           >
             <div
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color:
-                  s.state === 'done'
-                    ? 'var(--ok)'
-                    : s.state === 'now'
-                      ? 'var(--dgr)'
-                      : 'var(--color-neutral-600)',
-              }}
+              className={`ut-xs ut-w7 ${
+                s.state === 'done' ? 'ut-ok' : s.state === 'now' ? 'ij-dgr' : 'ij-n600'
+              }`}
             >
               {s.state === 'done' ? (
                 <Icon name="check" weight="bold" />
@@ -935,46 +645,22 @@ function RebuildRamp() {
               )}
             </div>
             <div
-              style={{
-                width: '100%',
-                height: `${s.pct}%`,
-                borderRadius: '7px 7px 3px 3px',
-                background:
-                  s.state === 'done'
-                    ? 'var(--ok)'
-                    : s.state === 'now'
-                      ? 'var(--dgr)'
-                      : 'var(--color-neutral-900)',
-                border: s.state === 'lock' ? '1px dashed var(--n700)' : 'none',
-              }}
+              className={`ij-ramp ij-ramp--${s.state}`}
+              style={{ width: '100%', height: `${s.pct}%` }}
             />
             <div
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color:
-                  s.state === 'lock'
-                    ? 'var(--color-neutral-500)'
-                    : s.state === 'now'
-                      ? 'var(--dgrtext)'
-                      : 'var(--color-neutral-400)',
-              }}
+              className={`ut-xs ut-w7 ${
+                s.state === 'lock' ? 'ut-dim' : s.state === 'now' ? 'ut-danger' : 'ij-n400'
+              }`}
             >
               {s.pct}%
             </div>
           </div>
         ))}
       </div>
-      <div
-        className="card"
-        style={{ marginTop: 16, display: 'flex', gap: 11, alignItems: 'flex-start' }}
-      >
-        <Icon
-          name="arrow-fat-up"
-          weight="fill"
-          style={{ color: 'var(--dgr)', fontSize: 16, marginTop: 1 }}
-        />
-        <div style={{ fontSize: 12.5, color: 'var(--color-neutral-300)', lineHeight: 1.45 }}>
+      <div className="card umt-16 ul-flex ug-12 ua-start">
+        <Icon name="arrow-fat-up" weight="fill" className="ij-dgr ut-lg" style={{ marginTop: 1 }} />
+        <div className="ut-sm ij-n300" style={{ lineHeight: 1.45 }}>
           {t.injRebuildRampNote}
         </div>
       </div>
@@ -1003,48 +689,43 @@ function InjuryManage({
   return (
     <div className="rx">
       <div className="topbar">
-        <button className="bk" aria-label={t.backAction} onClick={onClose}>
-          <Icon name="arrow-left" />
-        </button>
+        <BackButton label={t.backAction} onClick={onClose} />
         <span className="tt">{t.injManageTitle}</span>
       </div>
 
       <div className="sec">{t.injInjury}</div>
-      <div className="slist" style={{ marginTop: 8 }}>
+      <div className="slist umt-8">
         <div className="r">
-          <Icon name="target" style={{ color: 'var(--dgr)', fontSize: 17 }} />
-          <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{t.injArea}</span>
-          <span style={{ fontSize: 13, color: 'var(--color-neutral-400)' }}>
+          <Icon name="target" className="ij-dgr ut-xl" />
+          <span className="ut-base ut-w6 uf-1">{t.injArea}</span>
+          <span className="ut-base ij-n400">
             {sideLabel ? `${sideLabel} ${partName}` : partName}
           </span>
         </div>
         <div className="r">
-          <Icon name="arrows-down-up" style={{ color: 'var(--color-neutral-400)', fontSize: 17 }} />
-          <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{t.injCurrentStage}</span>
-          <span style={{ fontSize: 13, color: 'var(--color-neutral-400)' }}>
-            {t.injStage[inj.stage]}
-          </span>
+          <Icon name="arrows-down-up" className="ij-n400 ut-xl" />
+          <span className="ut-base ut-w6 uf-1">{t.injCurrentStage}</span>
+          <span className="ut-base ij-n400">{t.injStage[inj.stage]}</span>
         </div>
       </div>
 
       <div className="spacer" />
-      <button
-        className="btn s"
-        style={{ color: 'var(--ok)', borderColor: 'var(--okline)' }}
-        onClick={() => setConfirmHeal(true)}
-      >
+      <Button variant="secondary" className="ij-btn-ok" onClick={() => setConfirmHeal(true)}>
         <Icon name="check-circle" weight="bold" /> {t.injMarkHealed}
-      </button>
-      <button
-        className="btn s"
-        style={{ marginTop: 10, color: 'var(--dgr)', borderColor: 'var(--dgrline)' }}
+      </Button>
+      <Button
+        variant="secondary"
+        className="ij-btn-dgr umt-10"
+
         onClick={() => setConfirmCancel(true)}
       >
         <Icon name="x-circle" /> {t.injCancelPlan}
-      </button>
+      </Button>
 
       {confirmHeal && (
         <ConfirmDialog
+          tone="ok"
+          icon="check-circle"
           title={t.injHealedTitle(partName)}
           body={t.injHealedBody}
           confirmLabel={t.injHealedConfirm}
@@ -1095,47 +776,43 @@ function CheckinSheet({ inj, onClose }: { inj: Injury; onClose: () => void }) {
 
   return (
     <Sheet onClose={onClose} className="rehab-ci-sheet">
-      <div
-        className="rx"
-        style={{ position: 'static', padding: 0, background: 'transparent', overflow: 'visible' }}
-      >
+      <div className="rx ij-sheet-rx">
         <div className="rk">
           <Icon name="heartbeat" weight="fill" /> {t.injCheckinKicker}
         </div>
-        <div style={{ fontSize: 19, fontWeight: 700, letterSpacing: '-.01em', marginTop: 8 }}>
-          {t.injCheckinTitle}
+        <div className="ut-2xl ut-w7 ut-tight umt-8">{t.injCheckinTitle}</div>
+        <div className="sub umt-4">{t.injCheckinHint}</div>
+        <div className="tl umt-14">
+          <ListRow
+            icon={<IconTile icon="check-circle" tone="ok" />}
+            label={t.injCiFine}
+            sub={t.injCiFineSub}
+            value={<>↑ {t.injConsProgress}</>}
+            valueTone="ok"
+            valueStrong
+            onClick={() => pick('fine')}
+          />
+          <ListRow
+            icon={<IconTile icon="minus-circle" tone="illness" />}
+            label={t.injCiSore}
+            sub={t.injCiSoreSub}
+            value={<>→ {t.injConsHold}</>}
+            valueTone="illness"
+            valueStrong
+            onClick={() => pick('sore')}
+          />
+          <ListRow
+            icon={<IconTile icon="warning-circle" tone="danger" />}
+            label={t.injCiPain}
+            sub={t.injCiPainSub}
+            value={<>↓ {t.injConsBack}</>}
+            valueTone="danger"
+            valueStrong
+            onClick={() => pick('pain')}
+          />
         </div>
-        <div className="sub" style={{ marginTop: 4 }}>
-          {t.injCheckinHint}
-        </div>
-        <div className="tl" style={{ marginTop: 14 }}>
-          <button className="tlc green" onClick={() => pick('fine')}>
-            <span className="lt" />
-            <span>
-              <span className="tt">{t.injCiFine}</span>
-              <div className="ts">{t.injCiFineSub}</div>
-            </span>
-            <span className="cons">↑ {t.injConsProgress}</span>
-          </button>
-          <button className="tlc amber" onClick={() => pick('sore')}>
-            <span className="lt" />
-            <span>
-              <span className="tt">{t.injCiSore}</span>
-              <div className="ts">{t.injCiSoreSub}</div>
-            </span>
-            <span className="cons">→ {t.injConsHold}</span>
-          </button>
-          <button className="tlc red" onClick={() => pick('pain')}>
-            <span className="lt" />
-            <span>
-              <span className="tt">{t.injCiPain}</span>
-              <div className="ts">{t.injCiPainSub}</div>
-            </span>
-            <span className="cons">↓ {t.injConsBack}</span>
-          </button>
-        </div>
-        <div className="rulebox" style={{ marginTop: 14 }}>
-          <Icon name="info" style={{ marginTop: 1, flex: 'none' }} />
+        <div className="rulebox umt-14">
+          <Icon name="info" className="uf-none" style={{ marginTop: 1 }} />
           <span>{t.injCheckinRule}</span>
         </div>
       </div>
@@ -1160,15 +837,6 @@ function CheckinResult({
       : res.outcome === 'hold'
         ? 'hand-palm'
         : 'arrow-fat-down';
-  const iconColor = tone === 'ok' ? 'var(--ok)' : tone === 'g' ? 'var(--g500)' : 'var(--dgr)';
-  const iconBg =
-    tone === 'ok'
-      ? 'rgba(76,190,140,.16)'
-      : tone === 'g'
-        ? 'rgba(217,162,79,.14)'
-        : 'rgba(226,86,79,.16)';
-  const iconBorder =
-    tone === 'ok' ? 'var(--okline)' : tone === 'g' ? 'var(--g700)' : 'var(--dgrline)';
   const title =
     res.outcome === 'ready'
       ? t.injResAdvTitle
@@ -1186,122 +854,66 @@ function CheckinResult({
 
   return (
     <Sheet onClose={onClose} className="rehab-ci-sheet">
-      <div
-        className="rx"
-        style={{
-          position: 'static',
-          padding: 0,
-          background: 'transparent',
-          overflow: 'visible',
-          alignItems: 'center',
-          textAlign: 'center',
-        }}
-      >
-        <div
-          style={{
-            width: 60,
-            height: 60,
-            borderRadius: '50%',
-            background: iconBg,
-            border: `1px solid ${iconBorder}`,
-            display: 'grid',
-            placeItems: 'center',
-            color: iconColor,
-            fontSize: 30,
-            marginTop: 8,
-          }}
-        >
+      <div className="rx ij-sheet-rx ua-center utx-center">
+        <div className={`ij-result-ico ij-tone--${tone} ur-round ut-hero umt-8`}>
           <Icon name={icon} weight="fill" />
         </div>
-        <div style={{ fontSize: 19, fontWeight: 700, marginTop: 16 }}>{title}</div>
-        <div className="sub" style={{ marginTop: 8, maxWidth: 290 }}>
+        <div className="ut-2xl ut-w7 umt-16">{title}</div>
+        <div className="sub umt-8" style={{ maxWidth: 290 }}>
           {body}
         </div>
         {res.outcome !== 'hold' ? (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              marginTop: 20,
-              padding: '13px 16px',
-              borderRadius: 12,
-              background: res.outcome === 'ready' ? 'var(--surface2)' : 'var(--dgrt)',
-              border: `1px solid ${res.outcome === 'ready' ? 'var(--color-divider)' : 'var(--dgrline)'}`,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                color: res.outcome === 'ready' ? 'var(--color-neutral-500)' : 'var(--dgrrose)',
-              }}
-            >
+          <div className={`ij-result-row ij-result-row--${res.outcome} ur-lg umt-20`}>
+            <span className={`ut-base ut-w7 ${res.outcome === 'ready' ? 'ut-dim' : 'ij-rose'}`}>
               {t.injStage[res.from]}
             </span>
             <Icon
               name={res.outcome === 'ready' ? 'arrow-right' : 'arrow-left'}
               weight="bold"
-              style={{ color: res.outcome === 'ready' ? 'var(--ok)' : 'var(--dgr)' }}
+              className={res.outcome === 'ready' ? 'ut-ok' : 'ij-dgr'}
             />
-            <span
-              style={{
-                fontSize: 14,
-                fontWeight: 800,
-                color: res.outcome === 'ready' ? 'var(--oktext)' : 'var(--dgrtext)',
-              }}
-            >
+            <span className={`ut-md ut-w8 ${res.outcome === 'ready' ? 'ij-oktext' : 'ut-danger'}`}>
               {t.injStage[res.stage]}
             </span>
           </div>
         ) : (
-          <div
-            style={{
-              marginTop: 20,
-              padding: '13px 16px',
-              borderRadius: 12,
-              background: 'var(--surface2)',
-              border: '1px solid var(--color-divider)',
-              fontSize: 13,
-              fontWeight: 700,
-              color: 'var(--g300)',
-            }}
-          >
+          <div className="ij-result-hold ut-base ut-w7 ur-lg umt-20">
             {t.injResStaying(t.injStage[res.stage])}
           </div>
         )}
-        <div className="dots" style={{ marginTop: 16, justifyContent: 'center' }}>
+        <div className="dots umt-16 uj-center">
           {REHAB_STAGES.map((sid, i) => (
             <span key={sid} className={`dot${i < dotIdx ? ' done' : i === dotIdx ? ' on' : ''}`} />
           ))}
         </div>
         {res.outcome === 'ready' ? (
           <>
-            <button
-              className="btn p hot"
-              style={{ marginTop: 22 }}
+            <Button
+              variant="ghost"
+              className="p hot umt-24"
+
               onClick={() => {
                 advanceInjury(injId);
                 onClose();
               }}
             >
               {t.injMoveUp(t.injStage[res.stage])} <Icon name="arrow-right" weight="bold" />
-            </button>
-            <button
-              className="btn s"
-              style={{ marginTop: 10 }}
+            </Button>
+            <Button
+              variant="secondary"
+              className="umt-10"
               onClick={() => {
                 dismissAdvance(injId);
                 onClose();
               }}
             >
               {t.injStayLonger}
-            </button>
+            </Button>
           </>
         ) : (
-          <button className="btn p hot" style={{ marginTop: 22 }} onClick={onClose}>
+          <Button variant="primary" className="hot umt-24" onClick={onClose}>
             {t.done}
-          </button>
+          </Button>
         )}
       </div>
     </Sheet>

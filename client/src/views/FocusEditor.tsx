@@ -5,9 +5,11 @@
  * the three delt heads, upper/lower chest — is the whole point.
  */
 import { useState } from 'react';
+import { Button } from '../components/ui/Button';
+import { Segmented } from '../components/ui/Segmented';
 import { useT } from '../i18n';
 import { useStore, setBlockFocus } from '../store';
-import { Sheet, Icon } from '../ui';
+import { Sheet } from '../ui';
 import { FocusBodyMap } from '../components/Muscle';
 import { FOCUS_MUSCLES, focusToGroup, type FocusMuscle } from '../data/subregions';
 import type { Emphasis } from '../goals';
@@ -63,14 +65,11 @@ export function FocusEditor({ onClose }: { onClose: () => void }) {
 
   return (
     <Sheet onClose={onClose} className="focus-sheet">
-      <div className="sheet-head with-back">
-        <button className="sheet-back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+      <div className="sheet-head">
         <span className="t">{t.focusTitle}</span>
-        <button className="focus-reset" onClick={() => setEmphasis({})}>
+        <Button variant="link" size="sm" onClick={() => setEmphasis({})}>
           {t.focusReset}
-        </button>
+        </Button>
       </div>
 
       <div className="focus-map-row">
@@ -88,17 +87,14 @@ export function FocusEditor({ onClose }: { onClose: () => void }) {
                 <div className="focus-row" key={f}>
                   <span className={`focus-dot ${e}`} />
                   <span className="focus-name">{muscleLabel(f)}</span>
-                  <div className="focus-seg">
-                    {segs.map((s) => (
-                      <button
-                        key={s}
-                        className={e === s ? `on-${s}` : ''}
-                        onClick={() => set(f, s)}
-                      >
-                        {segLabel(s)}
-                      </button>
-                    ))}
-                  </div>
+                  <Segmented
+                    size="sm"
+                    label={muscleLabel(f)}
+                    tone={e === 'grow' ? 'accent' : e === 'ease' ? 'danger' : 'neutral'}
+                    options={segs.map((s) => ({ value: s, label: segLabel(s) }))}
+                    value={e}
+                    onChange={(s) => set(f, s)}
+                  />
                 </div>
               );
             })}
@@ -108,9 +104,9 @@ export function FocusEditor({ onClose }: { onClose: () => void }) {
 
       <div className="focus-foot">
         <span className="focus-count">{t.focusSummary(grow.length, ease.length, held)}</span>
-        <button className="btn btn-primary" onClick={save}>
+        <Button variant="primary" onClick={save}>
           {t.focusSaveBtn}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

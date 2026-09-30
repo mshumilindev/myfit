@@ -8,6 +8,8 @@
  * a review sheet with a switch per item; items seen at least twice are on.
  */
 import { useEffect, useState } from 'react';
+import { Button, IconButton } from './ui/Button';
+import { Switch } from './ui/Switch';
 import { Icon, Sheet } from '../ui';
 import { useT } from '../i18n';
 import { addGymKit, markGymKitNotHere, restoreGymKit } from '../store';
@@ -77,8 +79,9 @@ export function GymKitUndo(props: {
           {props.count > 1 ? t.gkUpdated(props.gym.name, props.count) : t.gkAdded(props.gym.name)}
         </b>
       </span>
-      <button
-        type="button"
+      <Button
+        variant="link"
+        size="sm"
         className="gk-link"
         onClick={() => {
           restoreGymKit(props.gym.id, props.prev);
@@ -86,7 +89,7 @@ export function GymKitUndo(props: {
         }}
       >
         {t.undo}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -108,17 +111,17 @@ export function GymKitTray(props: {
         <b>{t.gkNotOnList(name(props.ev.itemId), props.gym.name)}</b>
         <span>{t.gkSeen(props.ev.sessions)}</span>
       </span>
-      <button
-        type="button"
+      <IconButton
+        size="sm"
+        icon="x"
         className="gk-x"
-        aria-label={t.gkDismiss}
+        label={t.gkDismiss}
         title={t.gkDismiss}
         onClick={props.onDismiss}
-      >
-        <Icon name="x" />
-      </button>
-      <button
-        type="button"
+      />
+      <Button
+        variant="primary"
+        size="sm"
         className="gk-add"
         onClick={() => {
           const prev = addGymKit(props.gym.id, [props.ev.itemId]);
@@ -126,7 +129,7 @@ export function GymKitTray(props: {
         }}
       >
         {t.add}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -161,8 +164,9 @@ export function GymKitReviewSheet(props: {
                 <KitDots used={e.used} />
                 {e.lifts.slice(0, 2).join(', ')}
               </span>
-              <button
-                type="button"
+              <Button
+                variant="link"
+                size="sm"
                 className="gk-link small"
                 onClick={() => {
                   markGymKitNotHere(props.gym.id, e.itemId);
@@ -170,14 +174,13 @@ export function GymKitReviewSheet(props: {
                 }}
               >
                 {t.gkNotHere}
-              </button>
+              </Button>
             </span>
-            <button
-              type="button"
-              className={`gk-switch${on.has(e.itemId) ? ' on' : ''}`}
-              aria-pressed={on.has(e.itemId)}
+            <Switch
+              className="gk-switch"
+              checked={on.has(e.itemId)}
               aria-label={name(e.itemId)}
-              onClick={() =>
+              onChange={() =>
                 setOn((s) => {
                   const n = new Set(s);
                   if (n.has(e.itemId)) n.delete(e.itemId);
@@ -185,16 +188,14 @@ export function GymKitReviewSheet(props: {
                   return n;
                 })
               }
-            >
-              <span />
-            </button>
+            />
           </div>
         ))}
       </div>
       <p className="gk-shared">{t.gkShared(props.gym.name)}</p>
-      <button
-        type="button"
-        className="btn btn-primary gk-primary"
+      <Button
+        variant="primary"
+        className="gk-primary"
         disabled={picked.length === 0}
         onClick={() => {
           const prev = addGymKit(props.gym.id, picked);
@@ -203,7 +204,7 @@ export function GymKitReviewSheet(props: {
         }}
       >
         {t.gkAddN(picked.length)}
-      </button>
+      </Button>
     </Sheet>
   );
 }
@@ -237,9 +238,9 @@ export function GymKitCard(props: { gym: Gym; items: KitEvidence[]; title: strin
           </span>
         </div>
       ))}
-      <button type="button" className="btn btn-primary gk-primary" onClick={() => setOpen(true)}>
+      <Button variant="primary" className="gk-primary" onClick={() => setOpen(true)}>
         {t.gkReview(props.items.length)}
-      </button>
+      </Button>
       {open && (
         <GymKitReviewSheet
           gym={props.gym}

@@ -46,6 +46,7 @@ import {
   itemTone,
   typeName,
 } from './parts';
+import { Button } from '../../components/ui/Button';
 
 export type HistFilter = 'all' | HealthKind;
 
@@ -253,8 +254,9 @@ function SwipeRow(props: {
       onPointerUp={up}
     >
       {props.children}
-      <button
-        type="button"
+      <Button
+        variant="secondary"
+        size="sm"
         className="hl-swb edit"
         aria-label={t.hlEditAria(props.label)}
         tabIndex={props.open ? 0 : -1}
@@ -262,9 +264,10 @@ function SwipeRow(props: {
       >
         <Svg name="pencil" />
         {t.edit}
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        variant="danger"
+        size="sm"
         className="hl-swb del"
         aria-label={t.hlDeleteAria(props.label)}
         tabIndex={props.open ? 0 : -1}
@@ -272,7 +275,7 @@ function SwipeRow(props: {
       >
         <Svg name="trash" />
         {t.delete}
-      </button>
+      </Button>
     </div>
   );
 }

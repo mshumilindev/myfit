@@ -1,5 +1,7 @@
 /** Two-stage CSV import for program authoring: map columns → validating preview (AC-CSV, PG-02). */
 import { useMemo, useState } from 'react';
+import { Field } from '../components/ui/Field';
+import { Button } from '../components/ui/Button';
 import { Sheet, Icon } from '../ui';
 import { useT } from '../i18n';
 import {
@@ -16,6 +18,8 @@ import {
   type ParsedRow,
   type ProgramItemLike,
 } from '../data/programCsv';
+import { Select } from '../components/ui/Select';
+import { Textarea } from '../components/ui/Textarea';
 
 const FIELD_ORDER: CsvField[] = [
   'ignore',
@@ -98,14 +102,15 @@ export function ProgramCsvDialog({
       {stage === 'pick' && (
         <div className="csv-pick">
           <p className="s">{t.csvColumns}</p>
-          <label className="btn btn-secondary csv-file">
+          <label className="uibtn uibtn--secondary uibtn--md csv-file">
             <Icon name="list-plus" />
             {t.csvChooseFile}
+            {/* kit-ok: hidden file input */}
             <input type="file" accept=".csv,text/csv" onChange={onFile} hidden />
           </label>
           <div className="field-label">{t.csvOrPaste}</div>
-          <textarea
-            className="input csv-paste"
+          <Textarea
+            className="csv-paste"
             rows={5}
             value={paste}
             onChange={(e) => setPaste(e.target.value)}
@@ -113,17 +118,12 @@ export function ProgramCsvDialog({
           />
           {error && <div className="csv-problem">{t.csvNoRows}</div>}
           <div className="sheet-actions">
-            <button className="link" onClick={downloadTemplate}>
-              <Icon name="arrow-clockwise" />
+            <Button variant="link" icon="arrow-clockwise" onClick={downloadTemplate}>
               {t.csvTemplate}
-            </button>
-            <button
-              className="btn btn-primary"
-              disabled={!paste.trim()}
-              onClick={() => ingest(paste)}
-            >
+            </Button>
+            <Button variant="primary" disabled={!paste.trim()} onClick={() => ingest(paste)}>
               {t.csvContinue}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -135,27 +135,23 @@ export function ProgramCsvDialog({
             {columns.map((c, i) => (
               <div key={i} className="csv-map-row">
                 <span className="csv-map-header">{c.header || `#${i + 1}`}</span>
-                <select
-                  className="input"
-                  value={c.field}
-                  onChange={(e) => setField(i, e.target.value as CsvField)}
-                >
+                <Select value={c.field} onChange={(e) => setField(i, e.target.value as CsvField)}>
                   {FIELD_ORDER.map((f) => (
                     <option key={f} value={f}>
                       {t.csvFields[f]}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             ))}
           </div>
           <div className="sheet-actions">
-            <button className="btn btn-secondary" onClick={() => setStage('pick')}>
+            <Button variant="secondary" onClick={() => setStage('pick')}>
               {t.csvBack}
-            </button>
-            <button className="btn btn-primary" onClick={toPreview}>
+            </Button>
+            <Button variant="primary" onClick={toPreview}>
               {t.csvContinue}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -170,8 +166,8 @@ export function ProgramCsvDialog({
           <div className="csv-rows">
             {rows.map((r) => (
               <div key={r.index} className={`csv-row${r.problems.length ? ' problem' : ''}`}>
-                <input
-                  className="input csv-day"
+                <Field
+                  className="csv-day"
                   type="number"
                   min={1}
                   max={7}
@@ -179,24 +175,24 @@ export function ProgramCsvDialog({
                   aria-label={t.csvFields.day}
                   onChange={(e) => patchRow(r.index, { day: Number(e.target.value) || 0 })}
                 />
-                <input
-                  className="input csv-name"
+                <Field
+                  className="csv-name"
                   value={r.name}
                   aria-label={t.csvFields.name}
                   onChange={(e) => patchRow(r.index, { name: e.target.value })}
                 />
                 {r.kind === 'strength' ? (
                   <>
-                    <input
-                      className="input csv-num"
+                    <Field
+                      className="csv-num"
                       type="number"
                       min={1}
                       value={r.sets}
                       aria-label={t.csvFields.sets}
                       onChange={(e) => patchRow(r.index, { sets: Number(e.target.value) || 1 })}
                     />
-                    <input
-                      className="input csv-num"
+                    <Field
+                      className="csv-num"
                       type="number"
                       min={0}
                       value={r.reps}
@@ -215,12 +211,13 @@ export function ProgramCsvDialog({
                       </span>
                     ))}
                     {r.suggestion && (
-                      <button
-                        className="link"
+                      <Button
+                        variant="link"
+                        size="sm"
                         onClick={() => patchRow(r.index, { name: r.suggestion ?? r.name })}
                       >
                         {t.csvUseSuggestion(r.suggestion)}
-                      </button>
+                      </Button>
                     )}
                   </div>
                 )}
@@ -228,11 +225,11 @@ export function ProgramCsvDialog({
             ))}
           </div>
           <div className="sheet-actions">
-            <button className="btn btn-secondary" onClick={() => setStage('map')}>
+            <Button variant="secondary" onClick={() => setStage('map')}>
               {t.csvBack}
-            </button>
-            <button
-              className="btn btn-primary"
+            </Button>
+            <Button
+              variant="primary"
               disabled={rows.length === 0}
               onClick={() => {
                 onImport(rowsToItems(rows));
@@ -240,7 +237,7 @@ export function ProgramCsvDialog({
               }}
             >
               {t.csvImportN(rowsToItems(rows).length)}
-            </button>
+            </Button>
           </div>
         </div>
       )}

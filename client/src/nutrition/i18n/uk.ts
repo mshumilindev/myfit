@@ -181,6 +181,7 @@ export const uk: Strings = {
   setYourGoalBody: 'Обери ціль, щоб Today показував залишок ккал і макроси.',
   set: 'Задати',
   searchProductsOrDishes: 'Пошук продуктів або страв',
+  clearSearch: 'Очистити пошук',
 
   typeDish: 'Страва',
   typeDishDesc: 'Поїв не вдома? Впиши — оцінимо',

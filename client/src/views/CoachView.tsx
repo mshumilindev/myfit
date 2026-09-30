@@ -3,9 +3,16 @@
  * the Merciless fine print → role → only the data that's missing → push).
  * After that: his notes as a chat thread, newest at the bottom, plus settings.
  */
+import { Chip } from '../components/ui/Chip';
+import { Field } from '../components/ui/Field';
+import { BackButton } from '../components/ui/BackButton';
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Switch as KitSwitch } from '../components/ui/Switch';
+import { ListRow } from '../components/ui/GroupedList';
+import { Button, IconButton } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
 import { FLAGS, LOCALES, setLocale, useT } from '../i18n';
-import { Icon, Sheet, Switch } from '../ui';
+import { Icon, Sheet } from '../ui';
 import { latestWeight, setCoach, updateBodyMetrics, useSelfTrainerId, useStore } from '../store';
 import { AtlasFace, TemperHeat } from '../components/AtlasFace';
 import { useAtlasFmt, useAtlasNotes, useMinuteClock } from '../atlas/notes';
@@ -127,9 +134,7 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
   return (
     <div className="screen atl-screen" style={{ ['--atl' as string]: color }}>
       <div className="atl-top">
-        <button className="back" onClick={back} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton onClick={back} label={t.backAction} />
       </div>
 
       {step === 'meet' && (
@@ -143,12 +148,12 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
             ))}
           </div>
           <div className="atl-actions">
-            <button className="btn btn-primary atl-cta" onClick={() => setStep('temper')}>
+            <Button variant="primary" className="atl-cta" onClick={() => setStep('temper')}>
               {t.atlasChooseTemper}
-            </button>
-            <button className="btn btn-secondary atl-cta" onClick={onClose}>
+            </Button>
+            <Button variant="secondary" className="atl-cta" onClick={onClose}>
               {t.atlasNotNow}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -159,9 +164,11 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
           <p className="atl-sub">{t.atlasTemperSub}</p>
           <div className="atl-tempers" role="radiogroup" aria-label={t.atlasTemperTitle}>
             {TEMPERS.map((i) => (
-              <button
+              <Card
+                as="button"
                 key={i}
-                type="button"
+                pad="sm"
+                tone={temper === i ? 'accent' : 'neutral'}
                 role="radio"
                 aria-checked={temper === i}
                 className={`atl-temper${temper === i ? ' on' : ''}`}
@@ -183,15 +190,16 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
                   <span className="atl-temper-tag">{t.atlasTemperTag[temperIndex(i)]}</span>
                   <span className="atl-temper-quote">{t.atlasTemperQuote[temperIndex(i)]}</span>
                 </span>
-              </button>
+              </Card>
             ))}
           </div>
-          <button
-            className="btn btn-primary atl-cta"
+          <Button
+            variant="primary"
+            className="atl-cta"
             onClick={() => setStep(temper === 5 ? 'fine' : 'role')}
           >
             {t.atlasTrainWith(name)}
-          </button>
+          </Button>
         </div>
       )}
 
@@ -217,12 +225,12 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
             />
           </div>
           <div className="atl-actions">
-            <button className="btn btn-primary atl-cta" onClick={() => setStep('role')}>
+            <Button variant="primary" className="atl-cta" onClick={() => setStep('role')}>
               {t.atlasTakeIt}
-            </button>
-            <button className="btn btn-secondary atl-cta" onClick={() => setStep('temper')}>
+            </Button>
+            <Button variant="secondary" className="atl-cta" onClick={() => setStep('temper')}>
               {t.atlasSofter}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -231,9 +239,11 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
         <div className="atl-body atl-chat">
           <Bubble temper={temper}>{t.atlasRoleAsk}</Bubble>
           {(['main', 'extra'] as CoachRole[]).map((r) => (
-            <button
+            <Card
+              as="button"
               key={r}
-              type="button"
+              pad="md"
+              tone={role === r ? 'accent' : 'neutral'}
               className={`atl-card${role === r ? ' on' : ''}`}
               aria-pressed={role === r}
               disabled={human && r === 'main'}
@@ -247,11 +257,11 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
                     : t.atlasRoleMainSub
                   : t.atlasRoleExtraSub}
               </span>
-            </button>
+            </Card>
           ))}
-          <button className="btn btn-primary atl-cta" onClick={() => setStep('data')}>
+          <Button variant="primary" className="atl-cta" onClick={() => setStep('data')}>
             {t.atlasNext}
-          </button>
+          </Button>
         </div>
       )}
 
@@ -266,8 +276,9 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
           {pushHint && <p className="atl-hint">{pushHint}</p>}
           <div className="atl-actions">
             {pushState() !== 'needs-install' && (
-              <button
-                className="btn btn-primary atl-cta"
+              <Button
+                variant="primary"
+                className="atl-cta"
                 onClick={async () => {
                   const st = await enablePush(locale);
                   if (st === 'on') finish();
@@ -275,11 +286,11 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
                 }}
               >
                 {t.atlasPushOn}
-              </button>
+              </Button>
             )}
-            <button className="btn btn-secondary atl-cta" onClick={finish}>
+            <Button variant="secondary" className="atl-cta" onClick={finish}>
               {t.atlasNotNow}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -295,20 +306,23 @@ function RuleRow(props: {
   onToggle?: () => void;
 }) {
   return (
-    <button
-      type="button"
-      className="toggle-row atl-rule"
-      aria-pressed={props.on}
-      aria-disabled={props.locked || undefined}
-      onClick={props.locked ? undefined : props.onToggle}
-    >
-      <span className="rest-pref-text">
-        <span className="lab">{props.label}</span>
-        <span className="sub">{props.sub}</span>
-      </span>
-      {props.locked && <Icon name="lock" />}
-      <Switch on={props.on} />
-    </button>
+    <ListRow
+      className="atl-rule"
+      label={props.label}
+      sub={props.sub}
+      dim={props.locked}
+      trailing={
+        <>
+          {props.locked && <Icon name="lock" />}
+          <KitSwitch
+            checked={props.on}
+            disabled={props.locked}
+            aria-label={props.label}
+            onChange={() => props.onToggle?.()}
+          />
+        </>
+      }
+    />
   );
 }
 
@@ -373,27 +387,27 @@ function DataStep({ temper, onDone }: { temper: Temper; onDone: () => void }) {
         <>
           <Bubble temper={temper}>{t.atlasAskSex}</Bubble>
           <div className="atl-replies">
-            <button
-              className="atl-chip"
+            <Chip
+              tone="atlas"
               onClick={() => {
                 updateBodyMetrics({ sex: 'male' });
                 setAsked((a) => ({ ...a, sex: false }));
               }}
             >
               {t.atlasMale}
-            </button>
-            <button
-              className="atl-chip"
+            </Chip>
+            <Chip
+              tone="atlas"
               onClick={() => {
                 updateBodyMetrics({ sex: 'female' });
                 setAsked((a) => ({ ...a, sex: false }));
               }}
             >
               {t.atlasFemale}
-            </button>
-            <button className="atl-chip" onClick={() => setAsked((a) => ({ ...a, sex: false }))}>
+            </Chip>
+            <Chip tone="atlas" onClick={() => setAsked((a) => ({ ...a, sex: false }))}>
               {t.atlasSkip}
-            </button>
+            </Chip>
           </div>
         </>
       )}
@@ -401,29 +415,29 @@ function DataStep({ temper, onDone }: { temper: Temper; onDone: () => void }) {
         <>
           <Bubble temper={temper}>{t.atlasAskBirth}</Bubble>
           <div className="atl-years">
-            <button className="atl-chip" aria-label="−" onClick={() => setYear((y) => y - 5)}>
+            <Chip tone="atlas" aria-label="−" onClick={() => setYear((y) => y - 5)}>
               <Icon name="caret-left" />
-            </button>
+            </Chip>
             {years.map((y) => (
-              <button
+              <Chip
+                tone="atlas"
                 key={y}
-                className="atl-chip"
                 onClick={() => {
                   updateBodyMetrics({ dob: `${y}-07-01` });
                   setAsked((a) => ({ ...a, dob: false }));
                 }}
               >
                 {y}
-              </button>
+              </Chip>
             ))}
-            <button className="atl-chip" aria-label="+" onClick={() => setYear((y) => y + 5)}>
+            <Chip tone="atlas" aria-label="+" onClick={() => setYear((y) => y + 5)}>
               <Icon name="caret-right" />
-            </button>
+            </Chip>
           </div>
           <div className="atl-replies">
-            <button className="atl-chip" onClick={() => setAsked((a) => ({ ...a, dob: false }))}>
+            <Chip tone="atlas" onClick={() => setAsked((a) => ({ ...a, dob: false }))}>
               {t.atlasSkip}
-            </button>
+            </Chip>
           </div>
         </>
       )}
@@ -431,34 +445,34 @@ function DataStep({ temper, onDone }: { temper: Temper; onDone: () => void }) {
         <>
           <Bubble temper={temper}>{t.atlasAskHeight}</Bubble>
           <div className="atl-stepper">
-            <button className="atl-chip" aria-label="−" onClick={() => setHeight((h) => h - 1)}>
+            <Chip tone="atlas" aria-label="−" onClick={() => setHeight((h) => h - 1)}>
               −
-            </button>
+            </Chip>
             <b className="tnum">{height} cm</b>
-            <button className="atl-chip" aria-label="+" onClick={() => setHeight((h) => h + 1)}>
+            <Chip tone="atlas" aria-label="+" onClick={() => setHeight((h) => h + 1)}>
               +
-            </button>
+            </Chip>
           </div>
           <div className="atl-replies">
-            <button
-              className="atl-chip on"
+            <Chip
+              tone="atlas"
               onClick={() => {
                 updateBodyMetrics({ heightCm: height });
                 setAsked((a) => ({ ...a, height: false }));
               }}
             >
               {t.atlasSave}
-            </button>
-            <button className="atl-chip" onClick={() => setAsked((a) => ({ ...a, height: false }))}>
+            </Chip>
+            <Chip tone="atlas" onClick={() => setAsked((a) => ({ ...a, height: false }))}>
               {t.atlasSkip}
-            </button>
+            </Chip>
           </div>
         </>
       )}
       <p className="atl-hint">{t.atlasSkipHint}</p>
-      <button className="btn btn-primary atl-cta" onClick={onDone}>
+      <Button variant="primary" className="atl-cta" onClick={onDone}>
         {t.atlasNext}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -1064,17 +1078,16 @@ function CoachThread({
       style={{ ['--atl' as string]: TEMPER_COLOR[temper] }}
     >
       <div className="atl-head">
-        <button className="back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
-        <button
-          type="button"
+        <BackButton onClick={onClose} label={t.backAction} />
+        <Button
+          variant="ghost"
+          size="sm"
           className="atl-face-btn"
           onClick={() => setPortrait(true)}
           aria-label={t.atlasName}
         >
           <AtlasFace temper={temper} size={38} />
-        </button>
+        </Button>
         <span className="atl-head-text">
           <b>
             {t.atlasName}{' '}
@@ -1086,13 +1099,11 @@ function CoachThread({
           </span>
         </span>
         <TemperHeat temper={temper} />
-        <button
-          className="atl-icon-btn"
+        <IconButton
+          icon="sliders-horizontal"
+          label={t.atlasSettings}
           onClick={() => setSettings(true)}
-          aria-label={t.atlasSettings}
-        >
-          <Icon name="sliders-horizontal" />
-        </button>
+        />
       </div>
       <div className="atl-feed" ref={feedRef}>
         {store.coach.role === 'main' && <PlanCard temper={temper} now={now} />}
@@ -1135,9 +1146,9 @@ function CoachThread({
                     </Bubble>
                     {n.action && !busy && (
                       <div className="atl-suggest">
-                        <button
-                          type="button"
-                          className="atl-chip atl-chip-do"
+                        <Chip
+                          tone="atlas"
+                          selected
                           onClick={() => {
                             const act = n.action!;
                             updateChat(n.id, { action: undefined });
@@ -1150,58 +1161,49 @@ function CoachThread({
                           }}
                         >
                           {t.atlasDoIt}
-                        </button>
-                        <button
-                          type="button"
-                          className="atl-chip"
+                        </Chip>
+                        <Chip
+                          tone="atlas"
                           onClick={() => {
                             updateChat(n.id, { action: undefined });
                             track({ kind: 'action', done: false });
                           }}
                         >
                           {t.atlasCancel}
-                        </button>
+                        </Chip>
                       </div>
                     )}
                     {n.id === rateId && !busy && (
                       <div className="atl-rate">
-                        <button
-                          type="button"
-                          aria-label={t.atlasRateUp}
+                        <IconButton
+                          size="sm"
+                          icon="thumbs-up"
+                          label={t.atlasRateUp}
                           title={t.atlasRateUp}
                           onClick={() => rate(n, true)}
-                        >
-                          <Icon name="thumbs-up" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={t.atlasRateDown}
+                        />
+                        <IconButton
+                          size="sm"
+                          icon="thumbs-down"
+                          label={t.atlasRateDown}
                           title={t.atlasRateDown}
                           onClick={() => rate(n, false)}
-                        >
-                          <Icon name="thumbs-down" />
-                        </button>
+                        />
                       </div>
                     )}
                     {n.chips && n.id === chipsId && !busy && (
                       <div className="atl-suggest">
                         {n.chips.map((ch) => (
-                          <button
-                            key={ch}
-                            type="button"
-                            className="atl-chip"
-                            onClick={() => void send(ch, false, false)}
-                          >
+                          <Chip tone="atlas" key={ch} onClick={() => void send(ch, false, false)}>
                             {ch}
-                          </button>
+                          </Chip>
                         ))}
                       </div>
                     )}
                     {n.puterFor && !busy && (
                       <div className="atl-suggest">
-                        <button
-                          type="button"
-                          className="atl-chip on"
+                        <Chip
+                          tone="atlas"
                           onClick={() => {
                             const q = n.puterFor!;
                             // The sign-in window has to open straight from this tap.
@@ -1213,23 +1215,21 @@ function CoachThread({
                           }}
                         >
                           {t.atlasPuterEnable}
-                        </button>
-                        <button
-                          type="button"
-                          className="atl-chip"
+                        </Chip>
+                        <Chip
+                          tone="atlas"
                           onClick={() =>
                             updateChat(n.id, { puterFor: undefined, text: t.atlasLocalUnknown })
                           }
                         >
                           {t.atlasPuterNo}
-                        </button>
+                        </Chip>
                       </div>
                     )}
                     {n.langOffer && !busy && (
                       <div className="atl-suggest">
-                        <button
-                          type="button"
-                          className="atl-chip"
+                        <Chip
+                          tone="atlas"
                           onClick={() => {
                             const to = n.langOffer!;
                             updateChat(n.id, { langOffer: undefined });
@@ -1244,14 +1244,13 @@ function CoachThread({
                           }}
                         >
                           {FLAGS[n.langOffer]} {LOCALES[n.langOffer].locale}
-                        </button>
-                        <button
-                          type="button"
-                          className="atl-chip"
+                        </Chip>
+                        <Chip
+                          tone="atlas"
                           onClick={() => updateChat(n.id, { langOffer: undefined })}
                         >
                           {t.atlasLangKeep}
-                        </button>
+                        </Chip>
                       </div>
                     )}
                   </div>
@@ -1268,14 +1267,9 @@ function CoachThread({
             {!busy && (
               <div className="atl-suggest">
                 {hello.chips.map((ch) => (
-                  <button
-                    key={ch}
-                    type="button"
-                    className="atl-chip"
-                    onClick={() => void send(ch, false, false)}
-                  >
+                  <Chip tone="atlas" key={ch} onClick={() => void send(ch, false, false)}>
                     {ch}
-                  </button>
+                  </Chip>
                 ))}
               </div>
             )}
@@ -1290,11 +1284,9 @@ function CoachThread({
           void send(draft);
         }}
       >
-        <label className="sr-only" htmlFor="atl-input">
-          {t.atlasAsk}
-        </label>
-        <input
+        <Field
           id="atl-input"
+          aria-label={t.atlasAsk}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder={quietTill ? t.atlasBlockedPlaceholder(clock(quietTill)) : t.atlasAsk}
@@ -1302,9 +1294,13 @@ function CoachThread({
           autoComplete="off"
           enterKeyHint="send"
         />
-        <button type="submit" aria-label={t.atlasSend} disabled={!draft.trim() || busy}>
-          <Icon name="arrow-up" />
-        </button>
+        <IconButton
+          type="submit"
+          variant="primary"
+          icon="arrow-up"
+          label={t.atlasSend}
+          disabled={!draft.trim() || busy}
+        />
       </form>
       {consent !== null && (
         <Sheet onClose={() => setConsent(null)} className="atl-sheet">
@@ -1313,11 +1309,12 @@ function CoachThread({
           </div>
           <p className="atl-consent">{t.atlasConsentBody}</p>
           <div className="sheet-actions">
-            <button className="btn btn-secondary grow" onClick={() => setConsent(null)}>
+            <Button variant="secondary" className="grow" onClick={() => setConsent(null)}>
               {t.atlasNotNow}
-            </button>
-            <button
-              className="btn btn-primary grow"
+            </Button>
+            <Button
+              variant="primary"
+              className="grow"
               onClick={() => {
                 const q = consent;
                 setCoach({ chatConsent: true });
@@ -1326,7 +1323,7 @@ function CoachThread({
               }}
             >
               {t.atlasConsentOk}
-            </button>
+            </Button>
           </div>
         </Sheet>
       )}
@@ -1342,9 +1339,7 @@ function CoachThread({
             {t.atlasName}{' '}
             <span className="atl-temper-inline">· {t.atlasTemper[temperIndex(temper)]}</span>
           </span>
-          <button type="button" className="atl-portrait-close" aria-label={t.backAction}>
-            <Icon name="x" />
-          </button>
+          <IconButton icon="x" label={t.backAction} className="atl-portrait-close" />
         </div>
       )}
       {settings && <CoachSettingsSheet onClose={() => setSettings(false)} />}
@@ -1371,9 +1366,9 @@ function PlanCard({ temper, now }: { temper: Temper; now: number }) {
       <div className="atl-group">
         <Bubble temper={temper}>{t.atlasPlanOffer}</Bubble>
         <div className="atl-replies">
-          <button className="atl-chip on" onClick={write}>
+          <Chip tone="atlas" onClick={write}>
             {t.atlasPlanWrite}
-          </button>
+          </Chip>
         </div>
       </div>
     );
@@ -1406,9 +1401,9 @@ function PlanCard({ temper, now }: { temper: Temper; now: number }) {
       ))}
       <div className="atl-plan-meta">
         {t.atlasPlanMeta(plan.lengthMin, plan.warmup)}
-        <button className="atl-link" onClick={write}>
+        <Button variant="link" size="sm" onClick={write}>
           {done ? t.atlasPlanNewBlock : t.atlasPlanRewrite}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -1444,11 +1439,12 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
           {confirm === 'off' ? t.atlasTurnOffBody : t.atlasClearBody}
         </p>
         <div className="sheet-actions">
-          <button className="btn btn-secondary grow" onClick={() => setConfirm(null)}>
+          <Button variant="secondary" className="grow" onClick={() => setConfirm(null)}>
             {t.atlasCancel}
-          </button>
-          <button
-            className="btn btn-danger grow"
+          </Button>
+          <Button
+            variant="danger"
+            className="grow"
             onClick={() => {
               if (confirm === 'off') setCoach({ enabled: false });
               else {
@@ -1463,7 +1459,7 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
             }}
           >
             {confirm === 'off' ? t.atlasTurnOff : t.atlasClear}
-          </button>
+          </Button>
         </div>
       </Sheet>
     );
@@ -1475,9 +1471,11 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
       </div>
       <div className="atl-temper-pick" role="radiogroup" aria-label={t.atlasTemperLabel}>
         {TEMPERS.map((i) => (
-          <button
+          <Card
+            as="button"
             key={i}
-            type="button"
+            pad="sm"
+            tone={draft.temper === i ? 'accent' : 'neutral'}
             role="radio"
             aria-checked={draft.temper === i}
             className={draft.temper === i ? 'on' : ''}
@@ -1492,7 +1490,7 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
             <span className="atl-tp-radio" aria-hidden>
               {draft.temper === i && <Icon name="check" />}
             </span>
-          </button>
+          </Card>
         ))}
       </div>
       <div className="se-group">
@@ -1522,18 +1520,17 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
       </div>
       {/* Two quiet actions side by side — both ask to confirm first. */}
       <div className="atl-act-pair">
-        <button type="button" className="atl-act-btn" onClick={() => setConfirm('clear')}>
-          <Icon name="trash" />
-          <span>{t.atlasClear}</span>
-        </button>
-        <button type="button" className="atl-act-btn danger" onClick={() => setConfirm('off')}>
-          <Icon name="sign-out" />
-          <span>{t.atlasTurnOff}</span>
-        </button>
+        <Button variant="secondary" icon="trash" onClick={() => setConfirm('clear')}>
+          {t.atlasClear}
+        </Button>
+        <Button variant="danger" icon="sign-out" onClick={() => setConfirm('off')}>
+          {t.atlasTurnOff}
+        </Button>
       </div>
       <div className="sheet-actions">
-        <button
-          className="btn btn-primary grow"
+        <Button
+          variant="primary"
+          className="grow"
           disabled={!dirty}
           onClick={() => {
             setCoach({
@@ -1545,7 +1542,7 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
           }}
         >
           {t.atlasSave}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

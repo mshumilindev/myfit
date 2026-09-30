@@ -12,6 +12,7 @@
  * (SL-11 forgot-to-log lives in Today via SleepForgotBanner / sleepForgotNudge.)
  */
 import { useEffect, useState } from 'react';
+import { Button, IconButton } from './ui/Button';
 import { useT, fmtDurationHuman } from '../i18n';
 import {
   useStore,
@@ -39,6 +40,7 @@ import { Icon } from '../ui';
 import { MoonGlyph } from './MoonGlyph';
 import { moonInfo, illumPct } from '../moon';
 import type { SleepDayPlan, SleepNight } from '../types';
+import { Tag } from './ui/Tag';
 
 const DAY = 86400000;
 const MIN = 60000;
@@ -246,17 +248,17 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
             <div className="sad-body">{t.sleepBedtimeBody(clock(plan.bedMin))}</div>
           </div>
           <div className="sad-actions">
-            <button className="btn-moon" onClick={startNow}>
+            <Button variant="sleep-fill" onClick={startNow}>
               <Icon name="moon-stars" weight="fill" />
               {t.sleepStart}
-            </button>
+            </Button>
             <div className="sad-row">
-              <button className="btn-out-moon" onClick={snooze}>
+              <Button variant="sleep" className="sad-quiet" onClick={snooze}>
                 {t.sleepNotYet15}
-              </button>
-              <button className="sad-quiet" onClick={keepLit}>
+              </Button>
+              <Button variant="ghost" className="sad-quiet" onClick={keepLit}>
                 {t.sleepKeepLit}
-              </button>
+              </Button>
             </div>
           </div>
           <div className="sad-foot">{t.sleepAutoDimFoot}</div>
@@ -319,27 +321,27 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
           <div className="sao-note">
             <Icon name="pencil-simple-line" weight="bold" />
             <span>
-              {t.sleepAutoEditableNote} <span className="sao-badge">{t.sleepAutoBadge}</span>
+              {t.sleepAutoEditableNote} <Tag tone="sleep">{t.sleepAutoBadge}</Tag>
             </span>
           </div>
           <div className="sao-actions">
-            <button className="btn-secondary sao-ghost" onClick={decline}>
+            <Button variant="secondary" className="sao-ghost" onClick={decline}>
               {t.sleepNotNow}
-            </button>
-            <button className="btn-primary" onClick={accept}>
+            </Button>
+            <Button variant="primary" onClick={accept}>
               <Icon name="sparkle" weight="bold" />
               {t.sleepTurnOnAutoLog}
-            </button>
+            </Button>
           </div>
-          <button
-            className="sao-manage"
+          <Button
+            variant="link"
             onClick={() => {
               setOfferDismissed(true);
               onOpenSchedule();
             }}
           >
             {t.sleepManage}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -405,15 +407,15 @@ export function SleepForgotBanner({ onOpenBackfill }: { onOpenBackfill: () => vo
             <div className="sfg-t">{t.sleepMissingTitle}</div>
             <div className="sfg-d">{t.sleepMissingBody(last14.length, 14)}</div>
           </div>
-          <button className="sfg-x" aria-label={t.done} onClick={() => setDismissed(true)}>
-            <Icon name="x" weight="bold" />
-          </button>
+          <IconButton size="sm" icon="x" label={t.done} onClick={() => setDismissed(true)} />
         </div>
         <div className="sfg-actions">
-          <button className="sfg-use" onClick={useUsual}>
+          <Button variant="sleep-fill" size="sm" className="sfg-use" onClick={useUsual}>
             {t.sleepUseUsual(dur(usualDur))}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="sleep"
+            size="sm"
             className="sfg-enter"
             onClick={() => {
               setDismissed(true);
@@ -421,7 +423,7 @@ export function SleepForgotBanner({ onOpenBackfill }: { onOpenBackfill: () => vo
             }}
           >
             {t.sleepEnterManually}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -471,22 +473,26 @@ export function SleepAutoFilledCard({ onOpenBackfill }: { onOpenBackfill: () => 
           <div className="saf-txt">
             <div className="saf-head">
               <span className="saf-line num">{t.sleepLastNight(dur(durMin), range)}</span>
-              <span className="sao-badge">
-                <Icon name="sparkle" weight="bold" />
+              <Tag tone="sleep" icon={<Icon name="sparkle" weight="bold" />}>
                 {t.sleepAutoBadge}
-              </span>
+              </Tag>
             </div>
             <div className="saf-note">{t.sleepAutoFilledFrom(wdName)}</div>
           </div>
         </div>
         <div className="saf-actions">
-          <button className="saf-adjust" onClick={onOpenBackfill}>
-            <Icon name="pencil-simple" weight="bold" />
+          <Button
+            variant="sleep"
+            size="sm"
+            className="saf-adjust"
+            icon="pencil-simple"
+            onClick={onOpenBackfill}
+          >
             {t.sleepAdjustTimes}
-          </button>
-          <button className="saf-ok" onClick={looksRight}>
+          </Button>
+          <Button variant="sleep-fill" size="sm" className="saf-ok" onClick={looksRight}>
             {t.sleepLooksRight}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

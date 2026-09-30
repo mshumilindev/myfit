@@ -4,7 +4,10 @@
  * tick to add, untick to remove, one Save. Adding replaces a member's active
  * program (server rule: one active per member); removing unassigns.
  */
+import { Card } from '../../components/ui/Card';
 import { useMemo, useState } from 'react';
+import { Button } from '../../components/ui/Button';
+import { SearchField } from '../../components/ui/SearchField';
 import { Avatar } from '../../components/Avatar';
 import { tokenMatch } from '../../search';
 import { useT } from '../../i18n';
@@ -82,9 +85,11 @@ export function AssigneesSheet({
           : t.pgOnOther(programNames.get(a.programId) ?? t.pgAnotherProgram)
         : t.pgNoProgram;
     return (
-      <button
+      <Card
+        as="button"
+        pad="none"
+        emphasis="quiet"
         key={p.id}
-        type="button"
         role="checkbox"
         aria-checked={on}
         className={`pg-member${onProgram && !on ? ' leaving' : ''}`}
@@ -104,7 +109,7 @@ export function AssigneesSheet({
         <span className={`pg-check${on ? ' on' : ''}`} aria-hidden>
           {on && <Icon name="check" />}
         </span>
-      </button>
+      </Card>
     );
   };
 
@@ -142,15 +147,12 @@ export function AssigneesSheet({
           <p className="pg-empty">{t.progNoClients}</p>
         ) : (
           <>
-            <label className="pg-search">
-              <Icon name="magnifying-glass" />
-              <input
-                value={q}
-                placeholder={t.pgSearchClients}
-                aria-label={t.pgSearchClients}
-                onChange={(e) => setQ(e.target.value)}
-              />
-            </label>
+            <SearchField
+              value={q}
+              placeholder={t.pgSearchClients}
+              clearLabel={t.clearLabel}
+              onChange={setQ}
+            />
             {current.length > 0 && (
               <>
                 <div className="pg-label">{t.pgOnThisProgram(onNow.size)}</div>
@@ -166,16 +168,16 @@ export function AssigneesSheet({
           </>
         )}
         {failed && <p className="pg-error">{t.pgSaveFailed}</p>}
-        <button
-          type="button"
-          className="btn btn-primary pg-wide pg-save-delta"
+        <Button
+          variant="primary"
+          className="pg-wide pg-save-delta"
           disabled={busy || (add.length === 0 && remove.length === 0)}
           onClick={() => void save()}
         >
           {busy ? t.saving : t.save}
           {add.length > 0 && <span className="plus">+{add.length}</span>}
           {remove.length > 0 && <span className="minus">−{remove.length}</span>}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

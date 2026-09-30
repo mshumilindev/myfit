@@ -168,14 +168,8 @@ function Photo({ src, h, w }: { src: string; h: number | string; w?: number | st
       src={src}
       alt=""
       loading="lazy"
-      style={{
-        display: 'block',
-        width: w ?? '100%',
-        height: h,
-        objectFit: 'cover',
-        borderRadius: 'var(--radius-lg)',
-        flex: 'none',
-      }}
+      className="ur-lg uf-none ul-block"
+      style={{ width: w ?? '100%', height: h, objectFit: 'cover' }}
     />
   );
 }
@@ -316,12 +310,12 @@ function ExerciseOfDay({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   if (size === 'L')
     return (
       <Widget size="L" tone="accent" kicker={s.names.exercise} onClick={open}>
-        <div style={{ display: 'flex', gap: 14, flex: 1, minHeight: 0 }}>
+        <div className="ul-flex ug-14 uf-1" style={{ minHeight: 0 }}>
           <Photo src={img} h="100%" w={110} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 0 }}>
+          <div className="ul-flex ul-col ug-4 uf-1 umw-0">
             <div className="uiw-name">{disp}</div>
             <div className="uiw-sub">{muscles.join(' · ')}</div>
-            <div style={{ display: 'flex', gap: 6, marginTop: 'auto' }}>
+            <div className="ul-flex ug-6 umt-auto">
               <Button variant="primary" size="sm" onClick={add}>
                 {s.plusToday}
               </Button>
@@ -342,7 +336,7 @@ function ExerciseOfDay({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       onClick={open}
       footer={
         <>
-          <div style={{ flex: 1, display: 'flex' }}>
+          <div className="uf-1 ul-flex">
             <Button variant="primary" size="sm" fullWidth onClick={add}>
               {s.addToday}
             </Button>
@@ -355,7 +349,7 @@ function ExerciseOfDay({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
     >
       <Photo src={img} h={120} />
       <div className="uiw-name">{disp}</div>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      <div className="ul-flex ug-6 ul-wrap">
         {muscles.map((m) => (
           <Chip key={m} size="sm">
             {m}
@@ -443,7 +437,7 @@ const tip: WidgetDef = {
     if (size === 'S')
       return (
         <Widget size="S" tone="neutral" kicker={s.tipKicker} onClick={open}>
-          <div style={{ marginTop: 'auto' }}>
+          <div className="umt-auto">
             <Para strong>{tp.short}</Para>
             <div className="uiw-sub">{forLift}</div>
           </div>
@@ -469,7 +463,7 @@ const tip: WidgetDef = {
         }
       >
         <Para strong>{tp.text}</Para>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div className="ul-flex ug-12 ua-center">
           <IconTile tone="ok" icon="info" size={36} />
           <Para>{tp.why}</Para>
         </div>
@@ -649,12 +643,12 @@ const kit: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="neutral" kicker={s.kitKicker(gym.name)} onClick={open}>
-          <div style={{ display: 'flex', gap: 14, flex: 1, minHeight: 0 }}>
+          <div className="ul-flex ug-14 uf-1" style={{ minHeight: 0 }}>
             {pic('100%', 110)}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 0 }}>
+            <div className="ul-flex ul-col ug-4 uf-1 umw-0">
               <div className="uiw-name">{name}</div>
               <div className="uiw-sub">{localizedEquipInfo(item, locale) ?? s.kitBlurb}</div>
-              <div style={{ marginTop: 'auto' }}>
+              <div className="umt-auto">
                 <Button variant="primary" size="sm" onClick={open}>
                   {s.seeMoves(moves.length)}
                 </Button>
@@ -957,7 +951,7 @@ const lifetime: WidgetDef = {
     const nextBlock =
       next >= 0 ? (
         <>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+          <div className="ul-flex uj-between ug-8">
             <span className="uiw-sub">{s.nextObj(s.objects[next])}</span>
             <span className="uiw-sub">{nextTxt}</span>
           </div>
@@ -1106,9 +1100,9 @@ const nightSky: WidgetDef = {
     if (size === 'L')
       return (
         <Widget size="L" tone="sleep" onClick={openSched}>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center', flex: 1 }}>
+          <div className="ul-flex ug-16 ua-center uf-1">
             <MoonGlyph size={84} date={now} halo={false} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+            <div className="ul-flex ul-col ug-4 umw-0">
               <span className="uiw-kicker">{s.tonight}</span>
               <div className="uiw-name">{bedLine}</div>
               <div className="uiw-sub">{[phaseLine, bedIn].filter(Boolean).join(' · ')}</div>
@@ -1138,10 +1132,10 @@ const nightSky: WidgetDef = {
           )
         }
       >
-        <div style={{ display: 'grid', placeItems: 'center', flex: 1 }}>
+        <div className="ul-grid uf-1" style={{ placeItems: 'center' }}>
           <MoonGlyph size={130} date={now} />
         </div>
-        <div style={{ textAlign: 'center' }}>
+        <div className="utx-center">
           <div className="uiw-name">{phaseLine}</div>
           <Para>{fullLine}</Para>
         </div>
@@ -1295,7 +1289,7 @@ function ChallengeToTry({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       onClick={openList}
       footer={
         <>
-          <div style={{ flex: 1, display: 'flex' }}>
+          <div className="uf-1 ul-flex">
             <Button variant="primary" size="sm" fullWidth onClick={start}>
               {s.startChallenge}
             </Button>
@@ -1306,7 +1300,7 @@ function ChallengeToTry({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         </>
       }
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div className="ul-flex ua-center ug-14">
         {progress ? (
           <WidgetRing value={progress.pct} size={64} tone="apex">
             {pct(progress.pct)}
@@ -1315,7 +1309,7 @@ function ChallengeToTry({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         ) : (
           <IconTile tone="apex" icon={tmpl.icon} size={56} />
         )}
-        <div style={{ minWidth: 0 }}>
+        <div className="umw-0">
           <Para strong>{title}</Para>
           <div className="uiw-sub">{now1 ?? s.fitsYou(dur)}</div>
         </div>
@@ -1414,20 +1408,20 @@ const restIdea: WidgetDef = {
           <div className="uiw-sub">{s.readyK}</div>
           {bars.length > 0 ? (
             bars.map((m) => (
-              <div key={m.muscle} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div key={m.muscle} className="ul-flex ua-center ug-10">
                 <span className="uiw-sub" style={{ width: 72 }}>
                   {muscleName(t, m.muscle)}
                 </span>
-                <span style={{ flex: 1, display: 'flex' }}>
+                <span className="uf-1 ul-flex">
                   <WidgetBar value={m.readiness} tone={readinessTone(m.readiness)} />
                 </span>
-                <span className="uiw-sub" style={{ width: 36, textAlign: 'right' }}>
+                <span className="uiw-sub utx-right" style={{ width: 36 }}>
                   {`${pct(m.readiness)}%`}
                 </span>
               </div>
             ))
           ) : (
-            <div style={{ display: 'grid', placeItems: 'center', flex: 1 }}>
+            <div className="ul-grid uf-1" style={{ placeItems: 'center' }}>
               <IconTile tone="rest" icon="flower-lotus" size={56} />
             </div>
           )}
@@ -1517,7 +1511,7 @@ const restIdea: WidgetDef = {
             </Button>
           }
         >
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <div className="ul-flex ug-6 ul-wrap">
             {ideas.map((i) => (
               <Chip key={i.key} size="sm">
                 {`${i.name} · ${s.minN(i.min)}`}
@@ -1542,14 +1536,14 @@ const restIdea: WidgetDef = {
       >
         <div className="uiw-sub">{tired ? s.recoveryK : s.allFresh}</div>
         {ready.slice(0, 3).map((m) => (
-          <div key={m.muscle} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div key={m.muscle} className="ul-flex ua-center ug-10">
             <span className="uiw-sub" style={{ width: 72 }}>
               {muscleName(t, m.muscle)}
             </span>
-            <span style={{ flex: 1, display: 'flex' }}>
+            <span className="uf-1 ul-flex">
               <WidgetBar value={m.readiness} tone={readinessTone(m.readiness)} />
             </span>
-            <span className="uiw-sub" style={{ width: 36, textAlign: 'right' }}>
+            <span className="uiw-sub utx-right" style={{ width: 36 }}>
               {`${pct(m.readiness)}%`}
             </span>
           </div>

@@ -6,6 +6,7 @@
  */
 import { useState } from 'react';
 import { useT } from '../i18n';
+import { Card } from './ui/Card';
 import { ConfirmDialog, Icon, Sheet } from '../ui';
 import { consistencyStreak, type StoreState } from '../store';
 
@@ -55,7 +56,11 @@ export function ShellLauncher({
     <Sheet onClose={onClose} className="shell-sheet">
       <div className="shell-head">{t.shellSwitch}</div>
       <div className="shell-tiles">
-        <button
+        <Card
+          as="button"
+          pad="none"
+          tone={current === 'gym' ? 'accent' : 'neutral'}
+          emphasis={current === 'gym' ? 'hero' : 'card'}
           className={`shell-tile${current === 'gym' ? ' current' : ''}`}
           onClick={onGym}
           disabled={current === 'gym'}
@@ -74,9 +79,13 @@ export function ShellLauncher({
           ) : (
             <Icon name="caret-right" className="shell-go" />
           )}
-        </button>
+        </Card>
 
-        <button
+        <Card
+          as="button"
+          pad="none"
+          tone={current === 'apex' ? 'accent' : 'neutral'}
+          emphasis={current === 'apex' ? 'hero' : 'card'}
           className={`shell-tile${current === 'apex' ? ' current' : ''}`}
           onClick={onApex}
           disabled={current === 'apex'}
@@ -98,9 +107,13 @@ export function ShellLauncher({
           ) : (
             <Icon name="caret-right" className="shell-go" />
           )}
-        </button>
+        </Card>
 
-        <button
+        <Card
+          as="button"
+          pad="none"
+          tone={current === 'nutrition' ? 'accent' : 'neutral'}
+          emphasis={current === 'nutrition' ? 'hero' : 'card'}
           className={`shell-tile${current === 'nutrition' ? ' current' : ''}${
             nutritionEnabled ? '' : ' locked'
           }`}
@@ -127,9 +140,13 @@ export function ShellLauncher({
               <Icon name="caret-right" className="shell-go" />
             )
           ) : null}
-        </button>
+        </Card>
 
-        <button
+        <Card
+          as="button"
+          pad="none"
+          tone={current === 'roster' ? 'accent' : 'neutral'}
+          emphasis={current === 'roster' ? 'hero' : 'card'}
           className={`shell-tile${current === 'roster' ? ' current' : ''}`}
           onClick={onRoster}
           disabled={current === 'roster'}
@@ -146,9 +163,13 @@ export function ShellLauncher({
           ) : (
             <Icon name="caret-right" className="shell-go" />
           )}
-        </button>
+        </Card>
 
-        <button
+        <Card
+          as="button"
+          pad="none"
+          tone={current === 'learn' ? 'accent' : 'neutral'}
+          emphasis={current === 'learn' ? 'hero' : 'card'}
           className={`shell-tile${current === 'learn' ? ' current' : ''}`}
           onClick={onLearn}
           disabled={current === 'learn'}
@@ -165,12 +186,18 @@ export function ShellLauncher({
           ) : (
             <Icon name="caret-right" className="shell-go" />
           )}
-        </button>
+        </Card>
       </div>
-      <button className="shell-signout" onClick={() => setConfirmSignOut(true)}>
+      <Card
+        as="button"
+        pad="none"
+        tone="danger"
+        className="shell-signout"
+        onClick={() => setConfirmSignOut(true)}
+      >
         <Icon name="sign-out" />
         <span>{t.signOut}</span>
-      </button>
+      </Card>
       <div className="shell-note">{t.shellNote}</div>
       {confirmSignOut && (
         <ConfirmDialog

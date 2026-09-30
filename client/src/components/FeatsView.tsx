@@ -1,5 +1,8 @@
 /** Feats tab (in Progress): achievements across many axes, derived from history. */
 import { useEffect, useRef, useState } from 'react';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
+import { Segmented } from './ui/Segmented';
 import {
   CATEGORIES,
   computeFeats,
@@ -11,8 +14,9 @@ import {
 } from '../feats';
 import type { BodyMetrics, Workout } from '../types';
 import { fmtDayMonth, useT } from '../i18n';
-import { EmptyState } from '../ui';
+import { EmptyState } from './ui/EmptyState';
 import { StandardsView } from './StandardsView';
+import { Tag } from './ui/Tag';
 
 const TILE = 150; // target tile width (px)
 const GAP = 12;
@@ -80,9 +84,13 @@ export function FeatsView({
   const openTile = (a: Ach) => setOpenKey(a.key);
 
   const Tile = ({ a, current }: { a: Ach; current?: boolean }) => (
-    <button
+    <Card
+      as="button"
       id={`feat-${a.key}`}
-      className={`feat-cell${a.unlocked ? ' on' : ' ghost'}${current ? ' current' : ''}`}
+      className="feat-cell"
+      pad="sm"
+      tone={a.unlocked ? 'accent' : 'neutral'}
+      emphasis={current ? 'glass' : 'card'}
       onClick={() => openTile(a)}
     >
       <span className="feat-emoji">{a.emoji}</span>
@@ -92,28 +100,20 @@ export function FeatsView({
           <span className="feat-prog-fill" style={{ width: `${Math.round(a.progress * 100)}%` }} />
         </span>
       )}
-    </button>
+    </Card>
   );
 
   const subTabs = (
-    <div className="exg-tabs feat-subtabs" role="tablist">
-      <button
-        role="tab"
-        aria-selected={sub === 'achievements'}
-        className={sub === 'achievements' ? 'active' : ''}
-        onClick={() => onSub('achievements')}
-      >
-        {t.featsAchievements}
-      </button>
-      <button
-        role="tab"
-        aria-selected={sub === 'standards'}
-        className={sub === 'standards' ? 'active' : ''}
-        onClick={() => onSub('standards')}
-      >
-        {t.featsStandards}
-      </button>
-    </div>
+    <Segmented
+      tabs
+      className="feat-subtabs"
+      value={sub}
+      onChange={onSub}
+      options={[
+        { value: 'achievements', label: t.featsAchievements },
+        { value: 'standards', label: t.featsStandards },
+      ]}
+    />
   );
 
   if (sub === 'standards' && !hideSubtabs) {
@@ -187,25 +187,30 @@ export function FeatsView({
               </div>
               <div className="feats-row" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
                 {hasPrev && (
-                  <button
-                    className="feat-block earned"
+                  <Card
+                    as="button"
+                    className="feat-block"
+                    pad="sm"
+                    tone="accent"
                     onClick={() => setPopup({ group: cat.group, kind: 'prev' })}
                   >
                     <span className="fb-num num">{prevCount}</span>
                     <span className="fb-lab">{allUnlocked ? t.featsAllDone : t.featsEarned}</span>
-                  </button>
+                  </Card>
                 )}
                 {middle.map((a, i) => (
                   <Tile key={a.key} a={a} current={i === 0} />
                 ))}
                 {hasUpcoming && (
-                  <button
-                    className="feat-block upcoming"
+                  <Card
+                    as="button"
+                    className="feat-block"
+                    pad="sm"
                     onClick={() => setPopup({ group: cat.group, kind: 'up' })}
                   >
                     <span className="fb-num num">+{upCount}</span>
                     <span className="fb-lab">{t.featsUpcoming}</span>
-                  </button>
+                  </Card>
                 )}
               </div>
             </section>
@@ -225,19 +230,22 @@ export function FeatsView({
               </div>
               <div className="flp-grid">
                 {popList.map((a) => (
-                  <button
+                  <Card
+                    as="button"
                     key={a.key}
-                    className={`feat-cell${a.unlocked ? ' on' : ' ghost'}`}
+                    className="feat-cell"
+                    pad="sm"
+                    tone={a.unlocked ? 'accent' : 'neutral'}
                     onClick={() => openTile(a)}
                   >
                     <span className="feat-emoji">{a.emoji}</span>
                     <span className="feat-name">{a.title}</span>
-                  </button>
+                  </Card>
                 ))}
               </div>
-              <button className="btn btn-secondary" onClick={() => setPopup(null)}>
+              <Button variant="secondary" onClick={() => setPopup(null)}>
                 {t.featsClose}
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -251,14 +259,12 @@ export function FeatsView({
               {featDesc(open.group) && <p className="fd-explain">{featDesc(open.group)}</p>}
               {open.unlocked ? (
                 open.unlockAt && (
-                  <span className="feat-badge ok">
-                    {t.featsUnlocked(fmtDayMonth(open.unlockAt, locale))}
-                  </span>
+                  <Tag tone="ok">{t.featsUnlocked(fmtDayMonth(open.unlockAt, locale))}</Tag>
                 )
               ) : (
-                <span className="feat-badge todo">
+                <Tag tone="neutral">
                   {t.featsToGo(fmtAchValue(open.unit, Math.max(0, open.threshold - open.value)))}
-                </span>
+                </Tag>
               )}
               <div className="fd-rows">
                 <div className="fd-row">
@@ -270,9 +276,9 @@ export function FeatsView({
                   <b className="num">{fmtAchValue(open.unit, open.threshold)}</b>
                 </div>
               </div>
-              <button className="btn btn-secondary" onClick={() => setOpenKey(null)}>
+              <Button variant="secondary" onClick={() => setOpenKey(null)}>
                 {t.featsClose}
-              </button>
+              </Button>
             </div>
           </div>
         )}

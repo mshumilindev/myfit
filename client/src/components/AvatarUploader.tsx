@@ -4,6 +4,7 @@
  * surface instead of inventing separate photo controls.
  */
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { Button } from './ui/Button';
 import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes } from 'firebase/storage';
 import { currentUid, trackMutation } from '../api';
@@ -12,6 +13,7 @@ import { useT } from '../i18n';
 import { Icon } from '../ui';
 import { Avatar, invalidateAvatarCache } from './Avatar';
 import { writeAvatarBlob } from '../avatarStore';
+import { Card } from './ui/Card';
 
 export function AvatarUploader({
   userId,
@@ -259,18 +261,20 @@ export function AvatarUploader({
             </div>
           )}
           <div className="onb-two avatar-uploader-actions">
-            <button className="btn btn-secondary" type="button" onClick={closeCamera}>
+            <Button variant="secondary" onClick={closeCamera}>
               {t.cancel}
-            </button>
-            <button className="btn btn-primary" type="button" onClick={() => void captureCamera()}>
+            </Button>
+            <Button variant="primary" onClick={() => void captureCamera()}>
               <Icon name="camera" /> {t.onbTakePhoto}
-            </button>
+            </Button>
           </div>
         </>
       ) : !imgUrl ? (
         <>
-          <button
-            type="button"
+          <Card
+            as="button"
+            pad="none"
+            emphasis="quiet"
             className="onb-avatar-ring avatar-uploader-ring"
             aria-label={t.profileChangeAvatar}
             onClick={openLibrary}
@@ -290,35 +294,36 @@ export function AvatarUploader({
             <span className="cam-badge">
               <Icon name="camera" />
             </span>
-          </button>
+          </Card>
           <div className="onb-two avatar-uploader-actions">
-            <button
-              className="btn btn-secondary"
-              type="button"
+            <Button
+              variant="secondary"
+
               onClick={() => void openCamera()}
               disabled={busy || cameraBusy}
             >
               <Icon name="camera" /> {t.onbCamera}
-            </button>
-            <button
-              className="btn btn-secondary"
-              type="button"
+            </Button>
+            <Button
+              variant="secondary"
+
               onClick={openLibrary}
               disabled={busy}
             >
               <Icon name="image-square" /> {t.onbLibrary}
-            </button>
+            </Button>
             {hasPhoto && onRemoved && (
-              <button
-                className="btn btn-secondary danger-outline"
-                type="button"
+              <Button
+                variant="danger"
+
                 onClick={remove}
                 disabled={busy}
               >
                 <Icon name="trash" /> {t.profileRemoveAvatar}
-              </button>
+              </Button>
             )}
           </div>
+          {/* kit-ok: hidden file input */}
           <input
             ref={cameraInputRef}
             id={cameraInputId}
@@ -332,6 +337,7 @@ export function AvatarUploader({
               e.currentTarget.value = '';
             }}
           />
+          {/* kit-ok: hidden file input */}
           <input
             ref={libraryInputRef}
             id={libraryInputId}
@@ -413,6 +419,7 @@ export function AvatarUploader({
           <div className="detail-muted">{t.onbCropHelp}</div>
           <label className="avatar-zoom">
             <span>{t.onbZoom}</span>
+            {/* kit-ok: range slider */}
             <input
               type="range"
               min={1}
@@ -433,22 +440,22 @@ export function AvatarUploader({
             </div>
           )}
           <div className="onb-two avatar-uploader-actions">
-            <button
-              className="btn btn-secondary"
-              type="button"
+            <Button
+              variant="secondary"
+
               onClick={clearPicked}
               disabled={busy}
             >
               {t.cancel}
-            </button>
-            <button
-              className="btn btn-primary"
-              type="button"
+            </Button>
+            <Button
+              variant="primary"
+
               disabled={busy || !imageSize}
               onClick={() => void upload()}
             >
               {t.onbUsePhoto}
-            </button>
+            </Button>
           </div>
         </>
       )}

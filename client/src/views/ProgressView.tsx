@@ -1,5 +1,10 @@
 /** Progress — design S-34…S-36 + MG-3/MG-4 (by muscle, enriched detail). */
 import { weekStartOf as trainingWeekStart } from '../weekStart';
+import { Button, IconButton } from '../components/ui/Button';
+import { Chip } from '../components/ui/Chip';
+import { Card } from '../components/ui/Card';
+import { Segmented } from '../components/ui/Segmented';
+import { Tag } from '../components/ui/Tag';
 import { useEffect, useMemo, useState } from 'react';
 import {
   estimatedOneRepMaxSet,
@@ -14,7 +19,8 @@ import {
   type useStore,
 } from '../store';
 import { fmtDayMonth, fmtKg, fmtTonnes, useT } from '../i18n';
-import { EmptyState, Icon, Sheet, useExerciseName } from '../ui';
+import { Icon, Sheet, useExerciseName } from '../ui';
+import { EmptyState } from '../components/ui/EmptyState';
 import { EquipChip, MuscleChip, MuscleHeatmap, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
 import { muscleInfoByName, type MuscleGroup } from '../data/exercises';
 import type { Shell } from '../App';
@@ -377,9 +383,13 @@ export function ProgressView({
             );
           }
           return (
-            <button
+            <Card
+              as="button"
+              pad="none"
+              emphasis="quiet"
+              tone={sel ? 'accent' : 'neutral'}
               key={m}
-              className={`muscle-row${v === 0 ? ' dim' : ''}${sel ? ' sel' : ''}`}
+              className={`muscle-row${v === 0 ? ' dim' : ''}`}
               onClick={() => {
                 setSelMuscle(m);
                 const candidate = ranked.find(([name]) => muscleInfoByName(name)?.primary === m);
@@ -388,7 +398,7 @@ export function ProgressView({
               }}
             >
               {row}
-            </button>
+            </Card>
           );
         })}
       </div>
@@ -409,20 +419,20 @@ export function ProgressView({
   );
 
   const segControl = (
-    <div className="seg3 seg4 pv-chips">
-      <button className={seg === 'total' ? 'active' : ''} onClick={() => setSeg('total')}>
-        {t.totalLabel}
-      </button>
-      <button className={seg === 'muscle' ? 'active' : ''} onClick={() => setSeg('muscle')}>
-        {t.byMuscle}
-      </button>
-      <button className={seg === 'volume' ? 'active' : ''} onClick={() => setSeg('volume')}>
-        {t.volumeTab}
-      </button>
-      <button className={seg === 'records' ? 'active' : ''} onClick={() => setSeg('records')}>
-        {t.records}
-      </button>
-    </div>
+    <Segmented
+      className="pv-chips"
+      variant="buttons"
+      size="sm"
+      label={t.progress}
+      value={seg}
+      onChange={setSeg}
+      options={[
+        { value: 'total', label: t.totalLabel },
+        { value: 'muscle', label: t.byMuscle },
+        { value: 'volume', label: t.volumeTab },
+        { value: 'records', label: t.records },
+      ]}
+    />
   );
 
   // Drill-in chrome (design "Overview › Progress"): back to Overview, the
@@ -434,25 +444,26 @@ export function ProgressView({
   const topBar = (
     <div className="pv-top">
       <OverviewBack />
+      <h2 className="pv-title">
+        {ptab === 'trends' ? (store.coach.enabled ? t.atlasName : t.trendsTab) : t.progress}
+      </h2>
       {ptab === 'progress' && finished.length >= 3 && (
-        <button type="button" className="pv-range" onClick={() => setRangeSheet(true)}>
-          <Icon name="calendar-blank" />
+        <Button
+          variant="secondary"
+          size="sm"
+          icon="calendar-blank"
+          onClick={() => setRangeSheet(true)}
+        >
           {rangeLabel}
-        </button>
+        </Button>
       )}
     </div>
-  );
-  const pageTitle = (
-    <h2 className="pv-title">
-      {ptab === 'trends' ? (store.coach.enabled ? t.atlasName : t.trendsTab) : t.progress}
-    </h2>
   );
 
   if (ptab === 'trends') {
     return (
       <div className="screen progress-page progress-alt">
         {topBar}
-        {pageTitle}
         <div className="progress-alt-body">
           {store.coach.enabled && <AtlasNotesPanel />}
           <TrendsView finished={finished} body={store.bodyMetrics} />
@@ -465,7 +476,6 @@ export function ProgressView({
     return (
       <div className="screen progress-page progress-locked">
         {topBar}
-        {pageTitle}
         <div className="progress-locked-body">
           {weeks.some((v) => v > 0) ? (
             <div className="progress-locked-layout">
@@ -502,17 +512,30 @@ export function ProgressView({
   return (
     <div className="screen progress-page progress-filled">
       {topBar}
-      {pageTitle}
       <section className="progress-summary-pane">
-        <ProgressKpi
-          cur={cur}
-          deltaPct={deltaPct}
-          label={range.key === 'week' ? t.volumeThisWeek : rangeLabel}
-        />
+        <Card emphasis="hero" className="pv-hero">
+          <ProgressKpi
+            cur={cur}
+            deltaPct={deltaPct}
+            label={range.key === 'week' ? t.volumeThisWeek : rangeLabel}
+          />
+          {seg === 'total' && (
+            <Bars
+              weeks={rangeBars}
+              maxWeek={Math.max(...rangeBars, 1)}
+              colors={rangeBarColors ?? barColors}
+            />
+          )}
+        </Card>
         {segControl}
         {seg === 'volume' && (
-          <button type="button" className="vol-view-btn" onClick={() => setCtrlSheet(true)}>
-            <Icon name="sliders-horizontal" />
+          <Button
+            variant="secondary"
+            fullWidth
+            icon="sliders-horizontal"
+            iconTrailing="caret-down"
+            onClick={() => setCtrlSheet(true)}
+          >
             <span className="vvb-text">
               {lens === 'fatigue'
                 ? t.fatigueTab
@@ -521,8 +544,7 @@ export function ProgressView({
                   : t.volumeTab}{' '}
               · {mapView ? t.volMap : t.volList} · {volGrain === 'zones' ? t.volZones : t.volFine}
             </span>
-            <Icon name="caret-down" className="vvb-caret" />
-          </button>
+          </Button>
         )}
         {seg === 'muscle' && renderMuscleRows(showDesktopDetail)}
         {seg === 'muscle' && range.key === 'week' && muscleNote}
@@ -546,21 +568,11 @@ export function ProgressView({
             onMapView={setMapView}
           />
         )}
-        {seg === 'total' && (
-          <Bars
-            weeks={rangeBars}
-            maxWeek={Math.max(...rangeBars, 1)}
-            colors={rangeBarColors ?? barColors}
-          />
-        )}
-
         {seg === 'total' && lines.length > 0 && lines[0].pts.length >= 2 && (
           <div>
-            <div className="section-label" style={{ marginBottom: 8 }}>
-              {t.estimated1rm}
-            </div>
-            <div className="chart-card">
-              <svg viewBox="0 0 300 100" style={{ width: '100%', height: 100, display: 'block' }}>
+            <div className="section-label umb-8">{t.estimated1rm}</div>
+            <Card className="chart-card">
+              <svg viewBox="0 0 300 100" className="uw-full ul-block" style={{ height: 100 }}>
                 <polyline
                   points={polyline(lines[0].pts, 300, 100)}
                   fill="none"
@@ -581,29 +593,26 @@ export function ProgressView({
               </svg>
               <div className="chart-legend">
                 <span>
-                  <span className="sw" style={{ background: 'var(--color-accent)' }} />
+                  <span className="sw sw--accent" />
                   {exName(lines[0].name)} {lines[0].pts[lines[0].pts.length - 1].rm} kg
                 </span>
                 {lines[1] && lines[1].pts.length >= 2 && (
                   <span>
-                    <span className="sw" style={{ background: 'var(--color-neutral-700)' }} />
+                    <span className="sw sw--muted" />
                     {exName(lines[1].name)} {lines[1].pts[lines[1].pts.length - 1].rm} kg
                   </span>
                 )}
               </div>
-            </div>
+            </Card>
           </div>
         )}
 
         {seg === 'records' && (
           <div>
-            <div
-              className="section-label"
-              style={{ marginBottom: 4, display: 'flex', alignItems: 'center' }}
-            >
-              <span style={{ flex: 1 }}>{t.records}</span>
+            <div className="section-label umb-4 ul-flex ua-center">
+              <span className="uf-1">{t.records}</span>
               {showDesktopDetail && (
-                <a href="#/exercises" className="link" style={{ fontSize: 12 }}>
+                <a href="#/exercises" className="link ut-sm">
                   {t.exercisesTitle}
                 </a>
               )}
@@ -613,30 +622,33 @@ export function ProgressView({
                 <div key={group.muscle ?? 'other'} className="record-group">
                   <div className="record-group-head">
                     {group.muscle ? (
-                      <button
-                        className="record-group-muscle"
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => openMuscleHistory(group.muscle as MuscleGroup)}
                       >
                         <MuscleIcon muscle={group.muscle} variant="row" tone="primary" />
-                      </button>
+                      </Button>
                     ) : (
                       <Icon name="barbell" />
                     )}
-                    <button
-                      className="record-group-title"
+                    <Button
+                      variant="link"
                       onClick={() => group.muscle && openMuscleHistory(group.muscle)}
                     >
                       {group.muscle ? t.muscleGroups[group.muscle] : t.recordsOther}
-                    </button>
+                    </Button>
                   </div>
                   {group.rows.map(([name, r]) => {
                     const wksAgo = Math.floor((nowTs - r.recTs) / WEEK_MS);
                     return (
-                      <button
+                      <Card
+                        as="button"
+                        pad="sm"
+                        emphasis="quiet"
+                        tone={showDesktopDetail && selected?.[0] === name ? 'accent' : 'neutral'}
+                        className="record-row"
                         key={name}
-                        className={`record-row${
-                          showDesktopDetail && selected?.[0] === name ? ' selected' : ''
-                        }`}
                         onClick={() => {
                           if (showDesktopDetail) setSelectedName(name);
                           else shell.openOverlay({ screen: 'exercise-history', name });
@@ -645,11 +657,11 @@ export function ProgressView({
                         <span className="n">{exName(name)}</span>
                         <span className="v">{r.recW} kg</span>
                         {wksAgo < 2 ? (
-                          <span className="tag tag-ok">{t.record}</span>
+                          <Tag tone="ok">{t.record}</Tag>
                         ) : (
                           <span className="when num">{t.wksAgo(wksAgo)}</span>
                         )}
-                      </button>
+                      </Card>
                     );
                   })}
                 </div>
@@ -669,26 +681,17 @@ export function ProgressView({
                   ? t.readinessKicker
                   : t.volumeTab}
             </h3>
-            <div className="seg2 seg3 lens-seg">
-              <button
-                className={lens === 'volume' ? 'active' : ''}
-                onClick={() => setLens('volume')}
-              >
-                {t.volumeTab}
-              </button>
-              <button
-                className={lens === 'fatigue' ? 'active' : ''}
-                onClick={() => setLens('fatigue')}
-              >
-                {t.fatigueTab}
-              </button>
-              <button
-                className={lens === 'readiness' ? 'active' : ''}
-                onClick={() => setLens('readiness')}
-              >
-                {t.readinessKicker}
-              </button>
-            </div>
+            <Segmented
+              className="lens-seg"
+              size="sm"
+              value={lens}
+              onChange={setLens}
+              options={[
+                { value: 'volume', label: t.volumeTab },
+                { value: 'fatigue', label: t.fatigueTab },
+                { value: 'readiness', label: t.readinessKicker },
+              ]}
+            />
           </div>
           {lens === 'readiness' ? (
             <ReadinessLens finished={mapWorkouts} now={nowTs} view="map" />
@@ -736,12 +739,12 @@ export function ProgressView({
           <div>
             <div className="progress-detail-title">
               <h3>{exName(selected[0])}</h3>
-              <button
-                className="link"
+              <Button
+                variant="link"
                 onClick={() => shell.openOverlay({ screen: 'exercise-history', name: selected[0] })}
               >
                 {t.fullHistory}
-              </button>
+              </Button>
             </div>
             {(() => {
               const info = muscleInfoByName(selected[0]);
@@ -749,12 +752,11 @@ export function ProgressView({
               if (!info && needs.length === 0)
                 return <p>{t.nSessionsSince(selectedSessions.length, selectedSince)}</p>;
               return (
-                <div className="hist-chips" style={{ alignItems: 'center' }}>
+                <div className="hist-chips ua-center">
                   {info && info.primary !== 'cardio' && (
                     <MuscleChip
                       muscle={info.primary}
                       tone="primary"
-                      size="lg"
                       onClick={openMuscleHistory}
                       detail
                     />
@@ -764,13 +766,12 @@ export function ProgressView({
                       key={m}
                       muscle={m}
                       tone="secondary"
-                      size="lg"
                       onClick={openMuscleHistory}
                       detail
                     />
                   ))}
                   {needs.map((id) => (
-                    <EquipChip key={id} id={id} style={{ padding: '4px 9px', fontSize: 11 }} />
+                    <EquipChip key={id} id={id} style={{ padding: '4px 9px' }} />
                   ))}
                 </div>
               );
@@ -839,16 +840,14 @@ export function ProgressView({
                     return (
                       <tr key={g.id}>
                         <td>{g.name}</td>
-                        <td style={{ color: 'var(--color-neutral-400)' }}>
+                        <td className="ut-muted">
                           {needs.map((id) => equipLabel(id, t)).join(' · ') || '—'}
                         </td>
                         <td>
                           {missing.length === 0 ? (
-                            <span style={{ color: 'var(--color-ok-text)' }}>
-                              {t.allHere(needs.length)}
-                            </span>
+                            <span className="ut-ok">{t.allHere(needs.length)}</span>
                           ) : (
-                            <span style={{ color: 'var(--color-danger-text)' }}>
+                            <span className="ut-danger">
                               {t.noItemShort(equipLabel(missing[0], t))}
                             </span>
                           )}
@@ -875,9 +874,9 @@ export function ProgressView({
         <Sheet onClose={() => setCtrlSheet(false)} className="prog-ctrl-sheet vol-view-sheet">
           <div className="vvs-head">
             <span className="vvs-title">{t.volViewTitle}</span>
-            <button
-              type="button"
-              className="vvs-reset"
+            <Button
+              variant="link"
+              size="sm"
               onClick={() => {
                 setLens('volume');
                 setMapView(false);
@@ -885,7 +884,7 @@ export function ProgressView({
               }}
             >
               {t.viewReset}
-            </button>
+            </Button>
           </div>
           <div className="vvs-lbl">{t.progLens}</div>
           <div className="vvs-lenses">
@@ -896,45 +895,43 @@ export function ProgressView({
                 ['readiness', t.readinessKicker, t.lensReadinessSub],
               ] as const
             ).map(([id, name, sub]) => (
-              <button
+              <Card
+                as="button"
+                pad="sm"
+                tone={lens === id ? 'accent' : 'neutral'}
+                className="vvs-lens"
                 key={id}
-                type="button"
-                className={`vvs-lens${lens === id ? ' on' : ''}`}
                 onClick={() => setLens(id)}
               >
                 <span className="vvs-lens-t">{name}</span>
                 <span className="vvs-lens-s">{sub}</span>
-              </button>
+              </Card>
             ))}
           </div>
           <div className="vvs-row2">
             <div className="vvs-group">
               <div className="vvs-lbl">{t.progShowAs}</div>
-              <div className="vvs-seg">
-                <button className={!mapView ? 'on' : ''} onClick={() => setMapView(false)}>
-                  {t.volList}
-                </button>
-                <button className={mapView ? 'on' : ''} onClick={() => setMapView(true)}>
-                  {t.volMap}
-                </button>
-              </div>
+              <Segmented
+                size="sm"
+                value={mapView ? 'map' : 'list'}
+                onChange={(v) => setMapView(v === 'map')}
+                options={[
+                  { value: 'list', label: t.volList },
+                  { value: 'map', label: t.volMap },
+                ]}
+              />
             </div>
             <div className="vvs-group">
               <div className="vvs-lbl">{t.progDetail}</div>
-              <div className="vvs-seg">
-                <button
-                  className={volGrain === 'fine' ? 'on' : ''}
-                  onClick={() => setVolGrain('fine')}
-                >
-                  {t.volFine}
-                </button>
-                <button
-                  className={volGrain === 'zones' ? 'on' : ''}
-                  onClick={() => setVolGrain('zones')}
-                >
-                  {t.volZones}
-                </button>
-              </div>
+              <Segmented
+                size="sm"
+                value={volGrain}
+                onChange={setVolGrain}
+                options={[
+                  { value: 'fine', label: t.volFine },
+                  { value: 'zones', label: t.volZones },
+                ]}
+              />
             </div>
           </div>
         </Sheet>
@@ -1059,17 +1056,16 @@ function RangeSheet({
       </div>
       <div className="vvs-range">
         {presets.map((k) => (
-          <button
+          <Chip
             key={k}
-            type="button"
-            className={`vvs-rc${range.key === k ? ' on' : ''}`}
+            selected={range.key === k}
             onClick={() => {
               onPick({ key: k });
               onClose();
             }}
           >
             {rangeName(k, t)}
-          </button>
+          </Chip>
         ))}
       </div>
       <div className="vvs-lbl">{t.rangeCustom}</div>
@@ -1083,16 +1079,16 @@ function RangeSheet({
           <DateField value={to} onChange={setTo} max={iso(today0)} />
         </label>
       </div>
-      <button
-        type="button"
-        className={`btn btn-primary${range.key === 'custom' ? ' on' : ''}`}
+      <Button
+        variant="primary"
+        className={range.key === 'custom' ? 'on' : undefined}
         onClick={() => {
           onPick({ key: 'custom', from: parse(from), to: parse(to) });
           onClose();
         }}
       >
         {t.rangeApply}
-      </button>
+      </Button>
     </Sheet>
   );
 }
@@ -1108,22 +1104,19 @@ function ProgressKpi({
 }) {
   return (
     <div className="kpi">
-      <div>
-        <div className="big num">
-          {(cur / 1000).toFixed(1)}
-          <span className="unit"> t</span>
-        </div>
-        <div className="lab">{label}</div>
+      <div className="big num">
+        {(cur / 1000).toFixed(1)}
+        <span className="unit"> t</span>
       </div>
-      {deltaPct !== null && (
-        <span
-          className={`tag ${deltaPct >= 0 ? 'tag-accent' : 'tag-neutral'}`}
-          style={{ marginBottom: 22 }}
-        >
-          {deltaPct >= 0 ? '+' : '−'}
-          {Math.abs(deltaPct)}%
-        </span>
-      )}
+      <div className="kpi-sub">
+        <span className="lab">{label}</span>
+        {deltaPct !== null && (
+          <Tag tone={deltaPct >= 0 ? 'accent' : 'neutral'}>
+            {deltaPct >= 0 ? '+' : '−'}
+            {Math.abs(deltaPct)}%
+          </Tag>
+        )}
+      </div>
     </div>
   );
 }
@@ -1148,7 +1141,7 @@ function Bars({ weeks, maxWeek, colors }: { weeks: number[]; maxWeek: number; co
 function UnlockDots({ finishedCount, label }: { finishedCount: number; label: string }) {
   return (
     <div className="unlock">
-      <span style={{ flex: 1 }}>{label}</span>
+      <span className="uf-1">{label}</span>
       <span className="dots">
         {[0, 1, 2].map((i) => (
           <span key={i} className={i < finishedCount ? 'on' : ''} />
@@ -1310,33 +1303,34 @@ function VolumePanel({
   return (
     <div className="vol-panel">
       <div className="vol-controls">
-        <div className="seg2">
-          <button className={grain === 'fine' ? 'active' : ''} onClick={() => onGrain('fine')}>
-            {t.volFine}
-          </button>
-          <button className={grain === 'zones' ? 'active' : ''} onClick={() => onGrain('zones')}>
-            {t.volZones}
-          </button>
-        </div>
+        <Segmented
+          size="sm"
+          value={grain}
+          onChange={onGrain}
+          options={[
+            { value: 'fine', label: t.volFine },
+            { value: 'zones', label: t.volZones },
+          ]}
+        />
         {!desktop && (
-          <div className="seg2">
-            <button className={!mapView ? 'active' : ''} onClick={() => setMapView(false)}>
-              {t.volList}
-            </button>
-            <button className={mapView ? 'active' : ''} onClick={() => setMapView(true)}>
-              {t.volMap}
-            </button>
-          </div>
+          <Segmented
+            size="sm"
+            value={mapView ? 'map' : 'list'}
+            onChange={(v) => setMapView(v === 'map')}
+            options={[
+              { value: 'list', label: t.volList },
+              { value: 'map', label: t.volMap },
+            ]}
+          />
         )}
         {!(mapView && !desktop) && (
-          <button
+          <IconButton
             className={`vol-sort${sortDesc ? '' : ' asc'}`}
+            icon={sortDesc ? 'caret-line-down' : 'caret-line-up'}
             onClick={() => setSortDesc((s) => !s)}
-            aria-label={t.volSort}
+            label={t.volSort}
             title={t.volSort}
-          >
-            <Icon name="caret-line-down" />
-          </button>
+          />
         )}
       </div>
 
@@ -1350,20 +1344,17 @@ function VolumePanel({
         />
       ) : mapView && !desktop ? (
         <div className="vol-map">
-          <div className="seg2 seg3 lens-seg-m">
-            <button className={lens === 'volume' ? 'active' : ''} onClick={() => onLens('volume')}>
-              {t.volumeTab}
-            </button>
-            <button
-              className={lens === 'fatigue' ? 'active' : ''}
-              onClick={() => onLens('fatigue')}
-            >
-              {t.fatigueTab}
-            </button>
-            <button className="" onClick={() => onLens('readiness')}>
-              {t.readinessKicker}
-            </button>
-          </div>
+          <Segmented
+            className="lens-seg-m"
+            size="sm"
+            value={lens}
+            onChange={onLens}
+            options={[
+              { value: 'volume', label: t.volumeTab },
+              { value: 'fatigue', label: t.fatigueTab },
+              { value: 'readiness', label: t.readinessKicker },
+            ]}
+          />
           <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : heatColors} />
           {lens === 'fatigue' ? (
             <div className="vol-legend">
@@ -1468,10 +1459,15 @@ function WeakPointsCard({
             <span className="weak-dot" style={{ opacity: 0.35 + w.severity * 0.65 }} />
             <span className="weak-metric">{t.weakUnder(w.weeksUnder, w.weeksTracked)}</span>
             <span className="weak-sets">{t.weakAvg(w.avgSets, w.mev)}</span>
-            <button className="vol-fix" onClick={() => onFix(w.muscle)}>
-              <Icon name="plus" weight="bold" />
+            <Button
+              variant="secondary"
+              size="sm"
+              className="vol-fix"
+              icon="plus"
+              onClick={() => onFix(w.muscle)}
+            >
               {t.fixCta}
-            </button>
+            </Button>
           </div>
         ))}
       </div>
@@ -1493,16 +1489,34 @@ function VolumeRow({ row, t, onFix }: { row: VolRow; t: T; onFix: (m: MuscleGrou
         )}
         <span className="vol-name">{row.label}</span>
         {canFix && (
-          <button className="vol-fix" onClick={() => onFix(row.muscle as MuscleGroup)}>
-            <Icon name="plus" weight="bold" />
+          <Button
+            variant="secondary"
+            size="sm"
+            className="vol-fix"
+            icon="plus"
+            onClick={() => onFix(row.muscle as MuscleGroup)}
+          >
             {t.fixCta}
-          </button>
+          </Button>
         )}
         <span className="vol-sets">
           {fmtSets(sets)}
           <em>{t.volSetsUnit}</em>
         </span>
-        <span className={`vol-tag z-${zone}`}>{t.volZone[zone]}</span>
+        <Tag
+          tone={
+            zone === 'productive'
+              ? 'ok'
+              : zone === 'high'
+                ? 'accent'
+                : zone === 'over'
+                  ? 'danger'
+                  : 'neutral'
+          }
+          className="vol-tag"
+        >
+          {t.volZone[zone]}
+        </Tag>
       </div>
       <div className="vol-bar">
         <span className="vz vz-under" style={{ width: pct(lm.mev) }} />

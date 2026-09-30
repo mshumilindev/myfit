@@ -1,11 +1,20 @@
 /** Admin — design AD-01…AD-06. People table, invites, assignments. */
+import { Skeleton } from '../components/ui/Skeleton';
+import { EmptyState } from '../components/ui/EmptyState';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Field } from '../components/ui/Field';
+import { SearchField } from '../components/ui/SearchField';
+import { Button, IconButton } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { ListRow } from '../components/ui/GroupedList';
+import { Segmented } from '../components/ui/Segmented';
 import { tokenMatch } from '../search';
 import { cachePeek, cacheSet, callFn, getUsername } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { fullPersonName } from '../name';
 import { Dialog, Icon, Sheet } from '../ui';
 import { Avatar } from '../components/Avatar';
+import { Tag } from '../components/ui/Tag';
 
 interface Person {
   id: string;
@@ -167,16 +176,16 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
 
   return (
     <div className="screen admin">
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <div className="ul-flex ua-start uj-between">
         <div>
           <div className="kicker">{t.roleAdmin}</div>
           <h2 className="title-26">{t.adminPeople}</h2>
           <div className="sub">{t.adminSummary(members, trainers.length, pending)}</div>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button className="btn btn-primary" onClick={() => setCreating('member')}>
+        <div className="ul-flex ug-8 ua-center">
+          <Button variant="primary" onClick={() => setCreating('member')}>
             <Icon name="plus" /> {t.adminNewMember}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -195,64 +204,61 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
       )}
 
       <div className="admin-toolbar">
-        <div className="searchbar sm">
-          <Icon name="magnifying-glass" />
-          <input value={q} placeholder={t.adminSearch} onChange={(e) => setQ(e.target.value)} />
-        </div>
-        <div className="seg">
-          {(
+        <SearchField
+          value={q}
+          placeholder={t.adminSearch}
+          clearLabel={t.laClearSearch}
+          onChange={setQ}
+        />
+        <Segmented
+          options={(
             [
               ['all', t.adminFilterAll],
               ['members', t.adminFilterMembers],
               ['trainers', t.adminFilterTrainers],
               ['pending', t.adminFilterPending],
             ] as Array<[Filter, string]>
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              className={`seg-opt${filter === id ? ' active' : ''}`}
-              onClick={() => setFilter(id)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+          ).map(([value, label]) => ({ value, label }))}
+          value={filter}
+          onChange={setFilter}
+        />
       </div>
 
       {load === 'loading' &&
         [0, 1, 2].map((i) => (
           <div key={i} className="admin-row skeleton">
-            <div className="sk" style={{ width: 34, height: 34, borderRadius: '50%' }} />
-            <div style={{ flex: 1 }}>
-              <div className="sk" style={{ width: '40%', height: 12, marginBottom: 6 }} />
-              <div className="sk" style={{ width: '60%', height: 9 }} />
+            <Skeleton className="ur-round" style={{ width: 34, height: 34 }} />
+            <div className="uf-1">
+              <Skeleton className="umb-6" style={{ width: '40%', height: 12 }} />
+              <Skeleton style={{ width: '60%', height: 9 }} />
             </div>
           </div>
         ))}
 
       {load === 'failed' && (
-        <div className="empty">
-          <Icon name="warning-circle" />
-          <h4 className="t">{t.error}</h4>
-          <button className="btn btn-secondary" onClick={() => refresh()}>
+        <EmptyState icon="warning-circle" title={t.error}>
+          <Button variant="secondary" onClick={() => refresh()}>
             {t.retry}
-          </button>
-        </div>
+          </Button>
+        </EmptyState>
       )}
 
       {load === 'ready' && people.length <= 1 && (
-        <div className="empty">
-          <Icon name="users-three" />
-          <h4 className="t">{t.adminEmptyTitle}</h4>
-          <p className="s">{t.adminEmptyBody}</p>
-          <button className="btn btn-primary" onClick={() => setCreating('member')}>
+        <EmptyState icon="users-three" title={t.adminEmptyTitle} body={t.adminEmptyBody}>
+          <Button variant="primary" onClick={() => setCreating('member')}>
             <Icon name="plus" /> {t.adminNewMember}
-          </button>
-        </div>
+          </Button>
+        </EmptyState>
       )}
 
       {load === 'ready' && me && (
-        <button className="admin-me-card" onClick={() => onOpenProfile(me.id)} aria-label={me.name}>
+        <Card
+          as="button"
+          pad="none"
+          className="admin-me-card"
+          onClick={() => onOpenProfile(me.id)}
+          aria-label={me.name}
+        >
           <div className="who">
             <Avatar userId={me.id} name={me.name} hasPhoto={me.avatar} size={40} />
             <div className="who-text">
@@ -277,7 +283,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
             {statusOf(me).text}
           </span>
           <span className="col-dots" />
-        </button>
+        </Card>
       )}
 
       {load === 'ready' && others.length > 0 && (
@@ -315,8 +321,9 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                     {p.invite?.reRequestedAt && p.status === 'invited' && (
                       <div className="rerequest">
                         {t.adminAskedNewLink(fmtDayMonth(p.invite.reRequestedAt, locale))}{' '}
-                        <button
-                          className="linklike"
+                        <Button
+                          variant="link"
+                          size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             void act(async () => {
@@ -332,21 +339,19 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                           }}
                         >
                           {t.adminSend}
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
                 </div>
                 <span>
-                  <span
-                    className={`tag ${p.role === 'trainer' || p.role === 'admin' ? 'tag-accent' : 'tag-neutral'}`}
-                  >
+                  <Tag tone={p.role === 'trainer' || p.role === 'admin' ? 'accent' : 'neutral'}>
                     {p.role === 'trainer'
                       ? t.roleTrainer
                       : p.role === 'admin'
                         ? t.roleAdmin
                         : t.roleMember}
-                  </span>
+                  </Tag>
                 </span>
                 <div className="meta">
                   {p.role === 'trainer' ? t.adminClients(p.clientCount) : (p.trainerName ?? '—')}
@@ -364,16 +369,14 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                   {st.text}
                   {p.live && p.liveStartedAt ? ` · ${fmtSessionClock(now - p.liveStartedAt)}` : ''}
                 </div>
-                <button
-                  className="dots"
-                  aria-label={t.menuAction}
+                <IconButton
+                  label={t.menuAction}
+                  icon="dots-three-vertical"
                   onClick={(e) => {
                     e.stopPropagation();
                     setMenuFor(p);
                   }}
-                >
-                  <Icon name="dots-three-vertical" />
-                </button>
+                />
               </div>
             );
           })}
@@ -412,36 +415,34 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
       {menuFor && (
         <Sheet padded={false} onClose={() => setMenuFor(null)}>
           <div className="sheet-label">{menuFor.name}</div>
-          <button
-            className="menu-item"
+          <ListRow
+            icon={<Icon name="arrow-up-right" />}
+            label={t.adminOpenProfile}
             onClick={() => {
               onOpenProfile(menuFor.id);
               setMenuFor(null);
             }}
-          >
-            <Icon name="arrow-up-right" /> {t.adminOpenProfile}
-          </button>
-          <button
-            className="menu-item"
+          />
+          <ListRow
+            icon={<Icon name="arrows-clockwise" />}
+            label={t.adminChangeTrainer}
             onClick={() => {
               setAssignFor(menuFor);
               setMenuFor(null);
             }}
-          >
-            <Icon name="arrows-clockwise" /> {t.adminChangeTrainer}
-          </button>
-          <button
-            className="menu-item"
+          />
+          <ListRow
+            icon={<Icon name="pencil-simple" />}
+            label={t.adminEditUserDetails}
             onClick={() => {
               setEditFor(menuFor);
               setMenuFor(null);
             }}
-          >
-            <Icon name="pencil-simple" /> {t.adminEditUserDetails}
-          </button>
+          />
           {menuFor.status !== 'invited' && (
-            <button
-              className="menu-item"
+            <ListRow
+              icon={<Icon name="arrow-clockwise" />}
+              label={t.adminSendReset}
               onClick={() => {
                 const p = menuFor;
                 setMenuFor(null);
@@ -453,14 +454,13 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                   setLinkFor({ person: p, token: r.invite.token, expiresAt: r.invite.expiresAt });
                 });
               }}
-            >
-              <Icon name="arrow-clockwise" /> {t.adminSendReset}
-            </button>
+            />
           )}
           {menuFor.status === 'invited' && menuFor.invite && (
             <>
-              <button
-                className="menu-item"
+              <ListRow
+                icon={<Icon name="arrow-clockwise" />}
+                label={t.adminNewLink}
                 onClick={() => {
                   const p = menuFor;
                   setMenuFor(null);
@@ -476,23 +476,21 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                     });
                   });
                 }}
-              >
-                <Icon name="arrow-clockwise" /> {t.adminNewLink}
-              </button>
-              <button
-                className="menu-item"
+              />
+              <ListRow
+                icon={<Icon name="eraser" />}
+                label={t.adminRevoke}
                 onClick={() => {
                   const p = menuFor;
                   setMenuFor(null);
                   void act(() => callFn('adminRevokeInvite', { token: p.invite!.token }));
                 }}
-              >
-                <Icon name="eraser" /> {t.adminRevoke}
-              </button>
+              />
             </>
           )}
-          <button
-            className="menu-item"
+          <ListRow
+            icon={<Icon name="copy" />}
+            label={t.adminExportData}
             onClick={() => {
               const p = menuFor;
               setMenuFor(null);
@@ -507,12 +505,12 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                 a.click();
               })();
             }}
-          >
-            <Icon name="copy" /> {t.adminExportData}
-          </button>
+          />
           <div className="sheet-rule" />
-          <button
-            className="menu-item danger"
+          <ListRow
+            tone="danger"
+            icon={<Icon name="cloud-slash" />}
+            label={menuFor.status === 'suspended' ? t.adminUnsuspend : t.adminSuspend}
             onClick={() => {
               const p = menuFor;
               setMenuFor(null);
@@ -526,19 +524,16 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                 );
               });
             }}
-          >
-            <Icon name="cloud-slash" />
-            {menuFor.status === 'suspended' ? t.adminUnsuspend : t.adminSuspend}
-          </button>
-          <button
-            className="menu-item danger"
+          />
+          <ListRow
+            tone="danger"
+            icon={<Icon name="trash" />}
+            label={t.adminDeleteMember}
             onClick={() => {
               setDeleteFor(menuFor);
               setMenuFor(null);
             }}
-          >
-            <Icon name="trash" /> {t.adminDeleteMember}
-          </button>
+          />
         </Sheet>
       )}
 
@@ -602,20 +597,17 @@ function NewPersonDialog(props: {
       <div className="sheet-head">
         <span className="t">{t.adminNewMember}</span>
       </div>
-      <input
-        className="input"
+      <Field
         placeholder={t.firstName}
         value={firstName}
         onChange={(e) => setFirstName(e.target.value)}
       />
-      <input
-        className="input"
+      <Field
         placeholder={t.lastName}
         value={lastName}
         onChange={(e) => setLastName(e.target.value)}
       />
-      <input
-        className="input"
+      <Field
         placeholder={t.username}
         value={username}
         onChange={(e) => setUsername(e.target.value)}
@@ -630,46 +622,38 @@ function NewPersonDialog(props: {
               ['admin', t.roleAdmin, t.adminAdminRoleHint, 'shield-check'],
             ] as Array<[Person['role'], string, string, Parameters<typeof Icon>[0]['name']]>
           ).map(([id, label, hint, icon]) => (
-            <button
+            <ListRow
               key={id}
-              className={`admin-role-card${role === id ? ' selected' : ''}`}
-              type="button"
+              icon={<Icon name={icon} />}
+              label={label}
+              sub={hint}
+              selected={role === id}
+              check={role === id}
               onClick={() => setRole(id)}
-            >
-              <Icon name={icon} />
-              <span className="body">
-                <span className="n">{label}</span>
-                <span className="s">{hint}</span>
-              </span>
-              {role === id && <Icon name="check-circle" weight="fill" />}
-            </button>
+            />
           ))}
         </div>
       </div>
       {props.trainers.length > 0 && (
         <div className="assign-list">
           <div className="field-label">{t.adminAssignedTrainer}</div>
-          <button
-            className={`gym-pick-row${trainerId === null ? ' suggested' : ''}`}
+          <ListRow
+            label={t.adminNoTrainer}
+            sub={t.adminNoTrainerNote}
+            selected={trainerId === null}
+            check={trainerId === null}
             onClick={() => setTrainerId(null)}
-          >
-            <span className="body">
-              <span className="n">{t.adminNoTrainer}</span>
-              <span className="s">{t.adminNoTrainerNote}</span>
-            </span>
-          </button>
+          />
           {props.trainers.map((tr) => (
-            <button
+            <ListRow
               key={tr.id}
-              className={`gym-pick-row${trainerId === tr.id ? ' suggested' : ''}`}
+              icon={<Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />}
+              label={tr.name}
+              sub={t.adminClients(tr.clientCount)}
+              selected={trainerId === tr.id}
+              check={trainerId === tr.id}
               onClick={() => setTrainerId(tr.id)}
-            >
-              <Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />
-              <span className="body">
-                <span className="n">{tr.name}</span>
-                <span className="s">{t.adminClients(tr.clientCount)}</span>
-              </span>
-            </button>
+            />
           ))}
         </div>
       )}
@@ -680,11 +664,12 @@ function NewPersonDialog(props: {
         </div>
       )}
       <div className="sheet-actions">
-        <button className="btn btn-secondary grow" onClick={props.onClose}>
+        <Button variant="secondary" className="grow" onClick={props.onClose}>
           {t.cancel}
-        </button>
-        <button
-          className="btn btn-primary grow"
+        </Button>
+        <Button
+          variant="primary"
+          className="grow"
           disabled={busy || firstName.trim().length < 2 || username.trim().length < 2}
           onClick={async () => {
             setBusy(true);
@@ -710,7 +695,7 @@ function NewPersonDialog(props: {
           }}
         >
           {t.save}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );
@@ -730,7 +715,7 @@ function LinkDialog(props: {
   return (
     <Sheet onClose={props.onClose}>
       <div className="sheet-head">
-        <span className="t" style={{ color: 'var(--color-ok)' }}>
+        <span className="t ut-ok">
           <Icon name="check-circle" weight="fill" /> {t.adminCreated}
         </span>
       </div>
@@ -742,18 +727,18 @@ function LinkDialog(props: {
           <Icon name="arrow-up-right" />
           <code>{url.replace(/^https?:\/\//, '')}</code>
         </div>
-        <button
-          className="btn btn-primary"
+        <Button
+          variant="primary"
           onClick={() => {
             void navigator.clipboard.writeText(url).then(() => setCopied(true));
           }}
         >
           <Icon name="copy" /> {copied ? t.adminCopied : t.adminCopy}
-        </button>
-        <button className="btn btn-secondary" onClick={() => setShowQr((x) => !x)}>
+        </Button>
+        <Button variant="secondary" onClick={() => setShowQr((x) => !x)}>
           <Icon name="qr-code" />
           {t.adminQr}
-        </button>
+        </Button>
       </div>
       {showQr && (
         <img
@@ -781,12 +766,12 @@ function LinkDialog(props: {
         <span>{t.adminLinkNote}</span>
       </div>
       <div className="sheet-actions">
-        <button className="btn btn-secondary grow" onClick={props.onClose}>
+        <Button variant="secondary" className="grow" onClick={props.onClose}>
           {t.adminCreateAnother}
-        </button>
-        <button className="btn btn-primary grow" onClick={props.onClose}>
+        </Button>
+        <Button variant="primary" className="grow" onClick={props.onClose}>
           {t.adminDone}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );
@@ -813,34 +798,31 @@ function AssignTrainerDialog(props: {
         {props.trainers
           .filter((tr) => tr.id !== props.person.id)
           .map((tr) => (
-            <button
+            <ListRow
               key={tr.id}
-              className={`gym-pick-row${sel === tr.id ? ' suggested' : ''}`}
+              icon={<Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />}
+              label={tr.name}
+              sub={t.adminClients(tr.clientCount)}
+              selected={sel === tr.id}
+              check={sel === tr.id}
               onClick={() => setSel(tr.id)}
-            >
-              <Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />
-              <span className="body">
-                <span className="n">{tr.name}</span>
-                <span className="s">{t.adminClients(tr.clientCount)}</span>
-              </span>
-            </button>
+            />
           ))}
-        <button
-          className={`gym-pick-row${sel === null ? ' suggested' : ''}`}
+        <ListRow
+          label={t.adminNoTrainer}
+          sub={t.adminNoTrainerNote}
+          selected={sel === null}
+          check={sel === null}
           onClick={() => setSel(null)}
-        >
-          <span className="body">
-            <span className="n">{t.adminNoTrainer}</span>
-            <span className="s">{t.adminNoTrainerNote}</span>
-          </span>
-        </button>
+        />
       </div>
       <div className="sheet-actions">
-        <button className="btn btn-secondary grow" onClick={props.onClose}>
+        <Button variant="secondary" className="grow" onClick={props.onClose}>
           {t.cancel}
-        </button>
-        <button
-          className="btn btn-primary grow"
+        </Button>
+        <Button
+          variant="primary"
+          className="grow"
           disabled={busy}
           onClick={async () => {
             setBusy(true);
@@ -853,7 +835,7 @@ function AssignTrainerDialog(props: {
           }}
         >
           {t.adminAssign}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );
@@ -873,20 +855,17 @@ function EditDialog(props: { person: Person; onClose: () => void; onDone: () => 
       <div className="sheet-head">
         <span className="t">{t.adminEditUserDetails}</span>
       </div>
-      <input
-        className="input"
+      <Field
         placeholder={t.firstName}
         value={firstName}
         onChange={(e) => setFirstName(e.target.value)}
       />
-      <input
-        className="input"
+      <Field
         placeholder={t.lastName}
         value={lastName}
         onChange={(e) => setLastName(e.target.value)}
       />
-      <input
-        className="input"
+      <Field
         placeholder={t.username}
         value={username}
         onChange={(e) => setUsername(e.target.value)}
@@ -898,11 +877,12 @@ function EditDialog(props: { person: Person; onClose: () => void; onDone: () => 
         </div>
       )}
       <div className="sheet-actions">
-        <button className="btn btn-secondary grow" onClick={props.onClose}>
+        <Button variant="secondary" className="grow" onClick={props.onClose}>
           {t.cancel}
-        </button>
-        <button
-          className="btn btn-primary grow"
+        </Button>
+        <Button
+          variant="primary"
+          className="grow"
           disabled={busy || firstName.trim().length < 2 || username.trim().length < 2}
           onClick={async () => {
             setBusy(true);
@@ -924,7 +904,7 @@ function EditDialog(props: { person: Person; onClose: () => void; onDone: () => 
           }}
         >
           {t.save}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );
@@ -949,11 +929,11 @@ function DeleteDialog(props: {
       onClose={props.onClose}
       actions={
         <>
-          <button className="btn btn-secondary" onClick={props.onClose}>
+          <Button variant="secondary" onClick={props.onClose}>
             {t.keep}
-          </button>
-          <button
-            className="danger-outline"
+          </Button>
+          <Button
+            variant="danger"
             disabled={typed !== p.name || busy}
             onClick={async () => {
               setBusy(true);
@@ -969,14 +949,13 @@ function DeleteDialog(props: {
             }}
           >
             {t.delete}
-          </button>
+          </Button>
         </>
       }
     >
       {t.adminDeleteBody(0, fmtTonnes(p.volume30), p.trainerName ?? '')}
-      <input
-        className="input"
-        style={{ marginTop: 12 }}
+      <Field
+        className="umt-12"
         placeholder={t.adminDeleteType(p.name)}
         value={typed}
         onChange={(e) => setTyped(e.target.value)}

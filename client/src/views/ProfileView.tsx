@@ -1,5 +1,14 @@
 /** Full user profile page: direct-link safe, data-rich, role-aware. */
+import { ProfileSkeleton } from '../components/ui/Skeletons';
+import { EmptyState } from '../components/ui/EmptyState';
+import { BackButton } from '../components/ui/BackButton';
 import { setWeekStartDay, useWeekStartDay, type IsoDay } from '../weekStart';
+import { Switch as KitSwitch, SwitchIndicator } from '../components/ui/Switch';
+import { SectionLabel } from '../components/ui/SectionLabel';
+import { ListRow } from '../components/ui/GroupedList';
+import { Field } from '../components/ui/Field';
+import { Button } from '../components/ui/Button';
+import { Segmented } from '../components/ui/Segmented';
 import { temperIndex } from '../atlas/types';
 import { useEffect, useState, type ReactNode } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -17,15 +26,7 @@ import {
 } from '../api';
 import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
-import {
-  ConfirmDialog,
-  Icon,
-  LanguageSelector,
-  Sheet,
-  Switch,
-  ProfileSkeleton,
-  useExerciseName,
-} from '../ui';
+import { ConfirmDialog, Icon, LanguageSelector, Sheet, useExerciseName } from '../ui';
 import { Avatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { BodyMetricsSection } from '../components/BodyMetrics';
@@ -33,6 +34,8 @@ import { useStore, setGlobalWeightUnit } from '../store';
 import type { BodyMetrics } from '../types';
 import { GymThumb } from '../components/GymThumb';
 import type { Shell } from '../App';
+import { Select } from '../components/ui/Select';
+import { Tag } from '../components/ui/Tag';
 
 interface ProfileData {
   viewer: { id: string; relation: 'self' | 'admin' | 'trainer'; role: string };
@@ -180,7 +183,25 @@ export function ProfileView({
     // The render already shows the cached copy (see `load` above). Serve it and
     // skip the call when it's still fresh — a navigate-away-and-back within the
     // window costs nothing (AC: fewer reads).
-    if (cacheFresh(cached, PROFILE_TTL_MS)) return;
+    if (cacheFresh(cached, PROFILE_TTL_MS)) {
+      // Seed the edit fields from the cached copy too — otherwise a fresh cache
+      // left the name / username inputs empty. Deferred a tick (same as the
+      // network path) so the effect itself never sets state synchronously.
+      const data = cached!.data;
+      if (data.viewer.relation === 'self' || data.viewer.relation === 'admin') {
+        const id = window.setTimeout(() => {
+          if (!alive) return;
+          setEditFirstName(data.person.firstName);
+          setEditLastName(data.person.lastName ?? '');
+          setEditUsername(data.person.username);
+        }, 0);
+        return () => {
+          alive = false;
+          window.clearTimeout(id);
+        };
+      }
+      return;
+    }
     callFn<ProfileData>('profileUser', { id: userId })
       .then((data) => {
         cacheSet(cacheKey, data);
@@ -365,11 +386,7 @@ export function ProfileView({
   return (
     <div className={pageClass}>
       <div className="profile-top">
-        {!embedded && (
-          <button className="profile-back" onClick={onClose} aria-label={t.backAction}>
-            <Icon name="caret-left" />
-          </button>
-        )}
+        {!embedded && <BackButton label={t.backAction} onClick={onClose} />}
         <div>
           <div className="kicker">{t.profileTitle}</div>
           <h2 className="title-26">{load === 'loading' ? t.profileTitle : profileName(load, t)}</h2>
@@ -378,19 +395,17 @@ export function ProfileView({
 
       {load === 'loading' && <ProfileSkeleton />}
       {(load === 'denied' || load === 'missing' || load === 'failed') && (
-        <div className="empty">
-          <Icon name="warning-circle" />
-          <h4 className="t">
-            {load === 'denied'
+        <EmptyState
+          icon="warning-circle"
+          title={
+            load === 'denied'
               ? t.profileAccessDenied
               : load === 'missing'
                 ? t.profileMissing
-                : t.error}
-          </h4>
-          <p className="s">
-            {load === 'denied' ? t.profileAccessDeniedBody : `GET /api/profile/users/${userId}`}
-          </p>
-        </div>
+                : t.error
+          }
+          body={load === 'denied' ? t.profileAccessDeniedBody : `GET /api/profile/users/${userId}`}
+        />
       )}
 
       {typeof load === 'object' && (
@@ -418,22 +433,23 @@ export function ProfileView({
             <div className="profile-identity">
               <div className="profile-name-line">
                 <span>{load.person.name}</span>
-                <span className="tag tag-accent">
+                <Tag tone="accent">
                   {load.viewer.relation === 'self' ? t.profileSelf : roleLabel(load.person.role)}
-                </span>
+                </Tag>
                 {isTrainerView && load.summary.liveSessions > 0 && (
-                  <span className="profile-live-pill">
-                    <span className="live-dot" />
+                  <Tag tone="ok" icon={<span className="live-dot" />}>
                     {t.stTrainingNow}
-                  </span>
+                  </Tag>
                 )}
                 {embedded && isSelf && canEditDetails && (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="profile-mobile-edit"
                     onClick={() => setProfileEditing((x) => !x)}
                   >
                     {profileEditing ? t.done : t.edit}
-                  </button>
+                  </Button>
                 )}
               </div>
               {embedded && isSelf && (
@@ -443,43 +459,34 @@ export function ProfileView({
               )}
               {canEditDetails ? (
                 <div className="profile-detail-fields" aria-label={t.profileEditTitle}>
-                  <label className="input-field">
-                    <span>{t.firstName}</span>
-                    <input
-                      className="input"
-                      value={editFirstName}
-                      onChange={(e) => setEditFirstName(e.currentTarget.value)}
-                      autoComplete="given-name"
-                    />
-                  </label>
-                  <label className="input-field">
-                    <span>{t.lastName}</span>
-                    <input
-                      className="input"
-                      value={editLastName}
-                      onChange={(e) => setEditLastName(e.currentTarget.value)}
-                      autoComplete="family-name"
-                    />
-                  </label>
-                  <label className="input-field">
-                    <span>{t.username}</span>
-                    <input
-                      className="input"
-                      value={editUsername}
-                      onChange={(e) => setEditUsername(e.currentTarget.value)}
-                      autoComplete="username"
-                    />
-                  </label>
+                  <Field
+                    label={t.firstName}
+                    value={editFirstName}
+                    onChange={(e) => setEditFirstName(e.currentTarget.value)}
+                    autoComplete="given-name"
+                  />
+                  <Field
+                    label={t.lastName}
+                    value={editLastName}
+                    onChange={(e) => setEditLastName(e.currentTarget.value)}
+                    autoComplete="family-name"
+                  />
+                  <Field
+                    label={t.username}
+                    value={editUsername}
+                    onChange={(e) => setEditUsername(e.currentTarget.value)}
+                    autoComplete="username"
+                  />
                   <div className="profile-edit-actions inline">
-                    <button
-                      className="btn btn-secondary"
+                    <Button
+                      variant="secondary"
                       onClick={() => resetProfileFields(load)}
                       disabled={savingProfile || !profileDirty}
                     >
                       {t.cancel}
-                    </button>
-                    <button
-                      className="btn btn-primary"
+                    </Button>
+                    <Button
+                      variant="primary"
                       onClick={saveProfile}
                       disabled={
                         savingProfile ||
@@ -489,7 +496,7 @@ export function ProfileView({
                       }
                     >
                       {t.save}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -524,23 +531,16 @@ export function ProfileView({
             </div>
           </section>
 
-          <div className="seg3 profile-subtabs">
-            <button
-              className={ptab === 'overview' ? 'active' : ''}
-              onClick={() => setPtab('overview')}
-            >
-              {t.profTabOverview}
-            </button>
-            <button className={ptab === 'body' ? 'active' : ''} onClick={() => setPtab('body')}>
-              {t.profTabBody}
-            </button>
-            <button
-              className={ptab === 'settings' ? 'active' : ''}
-              onClick={() => setPtab('settings')}
-            >
-              {t.profileSettings}
-            </button>
-          </div>
+          <Segmented
+            className="profile-subtabs"
+            options={[
+              { value: 'overview', label: t.profTabOverview },
+              { value: 'body', label: t.profTabBody },
+              { value: 'settings', label: t.profileSettings },
+            ]}
+            value={ptab}
+            onChange={setPtab}
+          />
 
           {ptab === 'body' &&
             (isSelf ? (
@@ -580,23 +580,18 @@ export function ProfileView({
                 <div className="profile-setting-row static">
                   <Icon name="scales" />
                   <span>{t.profileUnits}</span>
-                  <div className="seg2 unit-seg profile-unit-seg">
-                    {(['kg', 'lb'] as const).map((u) => (
-                      <button
-                        key={u}
-                        type="button"
-                        className={weightUnit === u ? 'active' : ''}
-                        onClick={() => setGlobalWeightUnit(u)}
-                      >
-                        {u}
-                      </button>
-                    ))}
-                  </div>
+                  <Segmented
+                    size="sm"
+                    className="profile-unit-seg"
+                    options={(['kg', 'lb'] as const).map((u) => ({ value: u, label: u }))}
+                    value={weightUnit}
+                    onChange={setGlobalWeightUnit}
+                  />
                 </div>
-                <label className="profile-setting-row static">
+                <div className="profile-setting-row static">
                   <Icon name="calendar-blank" />
                   <span>{t.weekStartsOn}</span>
-                  <select
+                  <Select
                     className="profile-week-start"
                     value={weekStart}
                     aria-label={t.weekStartsOn}
@@ -607,40 +602,38 @@ export function ProfileView({
                         {t.weekDayNames[d - 1]}
                       </option>
                     ))}
-                  </select>
-                </label>
-                <button
-                  className="profile-setting-row"
+                  </Select>
+                </div>
+                <ListRow
+                  icon={<Icon name="robot" />}
+                  label={`${t.atlasName}${coach.enabled ? ` · ${t.atlasTemper[temperIndex(coach.temper)]}` : ''}`}
+                  chevron
                   onClick={() => shell.openOverlay({ screen: 'coach' })}
-                >
-                  <Icon name="robot" />
-                  <span>
-                    {t.atlasName}
-                    {coach.enabled ? ` · ${t.atlasTemper[temperIndex(coach.temper)]}` : ''}
-                  </span>
-                  <Icon name="arrow-right" className="profile-setting-caret" />
-                </button>
-                <button className="profile-setting-row" onClick={() => setPasswordEditing(true)}>
-                  <Icon name="key" />
-                  <span>{t.password}</span>
-                  <Icon name="arrow-right" className="profile-setting-caret" />
-                </button>
+                />
+                <ListRow
+                  icon={<Icon name="key" />}
+                  label={t.password}
+                  chevron
+                  onClick={() => setPasswordEditing(true)}
+                />
               </section>
-              <button
-                className="profile-setting-row profile-signout"
+              <ListRow
+                tone="danger"
+                icon={<Icon name="sign-out" />}
+                label={t.signOut}
                 onClick={() => setConfirmSignOut(true)}
-              >
-                <Icon name="sign-out" />
-                <span>{t.signOut}</span>
-              </button>
+              />
             </>
           )}
 
           {ptab === 'settings' && canAdminManage && (
             <section className="profile-section profile-admin-actions">
-              <div className="field-label">{t.adminAssignedTrainer}</div>
-              <button
-                className="toggle-row"
+              <SectionLabel>{t.adminAssignedTrainer}</SectionLabel>
+              <ListRow
+                icon={<Icon name="users-three" />}
+                label={t.profileAssignTrainerAction}
+                sub={load.person.trainerName ?? t.adminNoTrainer}
+                chevron
                 onClick={async () => {
                   try {
                     await ensureAdminPeople();
@@ -653,19 +646,13 @@ export function ProfileView({
                     });
                   }
                 }}
-              >
-                <Icon name="users-three" />
-                <span className="lab">
-                  <div>{t.profileAssignTrainerAction}</div>
-                  <div style={{ fontSize: 12, color: 'var(--color-neutral-500)', marginTop: 2 }}>
-                    {load.person.trainerName ?? t.adminNoTrainer}
-                  </div>
-                </span>
-                <Icon name="arrow-right" className="profile-setting-caret" />
-              </button>
+              />
               {load.person.role === 'trainer' && (
-                <button
-                  className="toggle-row"
+                <ListRow
+                  icon={<Icon name="user-plus" />}
+                  label={t.profileAssignClientsAction}
+                  sub={t.adminClients(load.person.clientCount)}
+                  chevron
                   onClick={async () => {
                     try {
                       await ensureAdminPeople();
@@ -678,16 +665,7 @@ export function ProfileView({
                       });
                     }
                   }}
-                >
-                  <Icon name="user-plus" />
-                  <span className="lab">
-                    <div>{t.profileAssignClientsAction}</div>
-                    <div style={{ fontSize: 12, color: 'var(--color-neutral-500)', marginTop: 2 }}>
-                      {t.adminClients(load.person.clientCount)}
-                    </div>
-                  </span>
-                  <Icon name="arrow-right" className="profile-setting-caret" />
-                </button>
+                />
               )}
             </section>
           )}
@@ -696,16 +674,18 @@ export function ProfileView({
             canAdminManage &&
             load.person.id !== load.viewer.id &&
             load.person.role !== 'admin' && (
-              <button className="toggle-row" onClick={() => void toggleTrainer()}>
-                <Icon name="barbell" />
-                <span className="lab">
-                  <div>{t.profileTrainerPriv}</div>
-                  <div style={{ fontSize: 12, color: 'var(--color-neutral-500)', marginTop: 2 }}>
-                    {t.profileTrainerPrivHint}
-                  </div>
-                </span>
-                <Switch on={load.person.role === 'trainer'} />
-              </button>
+              <ListRow
+                icon={<Icon name="barbell" />}
+                label={t.profileTrainerPriv}
+                sub={t.profileTrainerPrivHint}
+                trailing={
+                  <KitSwitch
+                    checked={load.person.role === 'trainer'}
+                    aria-label={t.profileTrainerPriv}
+                    onChange={() => void toggleTrainer()}
+                  />
+                }
+              />
             )}
 
           {profileError && (
@@ -725,39 +705,30 @@ export function ProfileView({
                 <div className="detail-muted">{t.profilePasswordBody}</div>
               </div>
               <div className="profile-password-fields">
-                <label className="input-field">
-                  <span>{t.profilePasswordCurrent}</span>
-                  <input
-                    className="input"
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.currentTarget.value)}
-                    autoComplete="current-password"
-                  />
-                </label>
-                <label className="input-field">
-                  <span>{t.profilePasswordNew}</span>
-                  <input
-                    className="input"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.currentTarget.value)}
-                    autoComplete="new-password"
-                  />
-                </label>
-                <label className="input-field">
-                  <span>{t.profilePasswordConfirm}</span>
-                  <input
-                    className="input"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.currentTarget.value)}
-                    autoComplete="new-password"
-                  />
-                </label>
-                <button
-                  className="btn btn-secondary"
-                  type="button"
+                <Field
+                  label={t.profilePasswordCurrent}
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.currentTarget.value)}
+                  autoComplete="current-password"
+                />
+                <Field
+                  label={t.profilePasswordNew}
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.currentTarget.value)}
+                  autoComplete="new-password"
+                />
+                <Field
+                  label={t.profilePasswordConfirm}
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.currentTarget.value)}
+                  autoComplete="new-password"
+                />
+                <Button
+                  variant="secondary"
+
                   onClick={() => {
                     setCurrentPassword('');
                     setNewPassword('');
@@ -768,14 +739,10 @@ export function ProfileView({
                   }}
                 >
                   {t.cancel}
-                </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={savePassword}
-                  disabled={!passwordReady}
-                >
+                </Button>
+                <Button variant="primary" onClick={savePassword} disabled={!passwordReady}>
                   {t.profilePasswordSave}
-                </button>
+                </Button>
               </div>
               {passwordError && (
                 <div className="field-error">
@@ -859,9 +826,19 @@ export function ProfileView({
                   ) : (
                     <div className="profile-list">
                       {load.topExercises.map((ex) => (
-                        <button
+                        <ListRow
                           key={ex.name}
-                          className="profile-row"
+                          dense
+                          label={exName(ex.name)}
+                          sub={`${ex.sessions} · ${ex.sets} ${t.sets}`}
+                          value={
+                            <span className="profile-row-metric">
+                              <span className="n">{fmtTonnes(ex.volumeKg)}</span>
+                              {ex.bestE1rm !== null && ex.bestE1rm > 0 ? (
+                                <span className="s">{Math.round(ex.bestE1rm)} kg e1RM</span>
+                              ) : null}
+                            </span>
+                          }
                           onClick={() =>
                             shell.openOverlay(
                               load.viewer.relation === 'self'
@@ -874,20 +851,7 @@ export function ProfileView({
                                   },
                             )
                           }
-                        >
-                          <span>
-                            <span className="n">{exName(ex.name)}</span>
-                            <span className="s">
-                              {ex.sessions} · {ex.sets} {t.sets}
-                            </span>
-                          </span>
-                          <span className="profile-row-metric">
-                            <span className="n">{fmtTonnes(ex.volumeKg)}</span>
-                            {ex.bestE1rm !== null && ex.bestE1rm > 0 ? (
-                              <span className="s">{Math.round(ex.bestE1rm)} kg e1RM</span>
-                            ) : null}
-                          </span>
-                        </button>
+                        />
                       ))}
                     </div>
                   )}
@@ -932,9 +896,7 @@ export function ProfileView({
                           <div className="gym-card-body">
                             <div className="head">
                               <span className="n">{g.name}</span>
-                              {g.favorite ? (
-                                <span className="tag tag-accent">{t.pickGymFavourite}</span>
-                              ) : null}
+                              {g.favorite ? <Tag tone="accent">{t.pickGymFavourite}</Tag> : null}
                             </div>
                             <div className="meta">
                               <span>
@@ -960,9 +922,25 @@ export function ProfileView({
                 ) : (
                   <div className="detail-sessions profile-sessions">
                     {load.sessions.slice(0, 12).map((s) => (
-                      <button
+                      <ListRow
                         key={s.id}
-                        className="row"
+                        dense
+                        label={fmtDayMonth(s.startedAt, locale)}
+                        sub={
+                          <>
+                            {s.gymName ?? '—'}
+                            {' · '}
+                            {s.live
+                              ? t.stTrainingNow
+                              : s.durationMs
+                                ? fmtDurationHM(s.durationMs)
+                                : s.autoFinished
+                                  ? t.autoClosed
+                                  : ''}
+                            {s.exerciseNames.length > 0 ? ` · ${s.exerciseNames.join(', ')}` : ''}
+                          </>
+                        }
+                        value={`${s.sets} · ${fmtTonnes(s.volumeKg)}`}
                         onClick={() => {
                           if (load.viewer.relation === 'self')
                             shell.openOverlay({
@@ -977,23 +955,7 @@ export function ProfileView({
                               athleteName: load.person.name,
                             });
                         }}
-                      >
-                        <span>{fmtDayMonth(s.startedAt, locale)}</span>
-                        <span>{s.gymName ?? '—'}</span>
-                        <span>
-                          {s.sets} · {fmtTonnes(s.volumeKg)}
-                        </span>
-                        <span className="profile-session-ex">
-                          {s.live
-                            ? t.stTrainingNow
-                            : s.durationMs
-                              ? fmtDurationHM(s.durationMs)
-                              : s.autoFinished
-                                ? t.autoClosed
-                                : ''}
-                          {s.exerciseNames.length > 0 ? ` · ${s.exerciseNames.join(', ')}` : ''}
-                        </span>
-                      </button>
+                      />
                     ))}
                   </div>
                 )}
@@ -1099,27 +1061,23 @@ function ProfileAssignTrainerSheet(props: {
       <p className="detail-muted">{t.adminTrainerNote}</p>
       <div className="assign-list">
         {trainers.map((tr) => (
-          <button
+          <ListRow
             key={tr.id}
-            className={`gym-pick-row${sel === tr.id ? ' suggested' : ''}`}
+            icon={<Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />}
+            label={tr.name}
+            sub={t.adminClients(tr.clientCount)}
+            selected={sel === tr.id}
+            check={sel === tr.id}
             onClick={() => setSel(tr.id)}
-          >
-            <Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />
-            <span className="body">
-              <span className="n">{tr.name}</span>
-              <span className="s">{t.adminClients(tr.clientCount)}</span>
-            </span>
-          </button>
+          />
         ))}
-        <button
-          className={`gym-pick-row${sel === null ? ' suggested' : ''}`}
+        <ListRow
+          label={t.adminNoTrainer}
+          sub={t.adminNoTrainerNote}
+          selected={sel === null}
+          check={sel === null}
           onClick={() => setSel(null)}
-        >
-          <span className="body">
-            <span className="n">{t.adminNoTrainer}</span>
-            <span className="s">{t.adminNoTrainerNote}</span>
-          </span>
-        </button>
+        />
       </div>
       {error && (
         <div className="field-error">
@@ -1128,11 +1086,12 @@ function ProfileAssignTrainerSheet(props: {
         </div>
       )}
       <div className="sheet-actions">
-        <button className="btn btn-secondary grow" onClick={props.onClose}>
+        <Button variant="secondary" className="grow" onClick={props.onClose}>
           {t.cancel}
-        </button>
-        <button
-          className="btn btn-primary grow"
+        </Button>
+        <Button
+          variant="primary"
+          className="grow"
           disabled={busy}
           onClick={async () => {
             setBusy(true);
@@ -1148,7 +1107,7 @@ function ProfileAssignTrainerSheet(props: {
           }}
         >
           {t.adminAssign}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );
@@ -1178,9 +1137,13 @@ function ProfileAssignClientsSheet(props: {
         {candidates.map((p) => {
           const on = selected.has(p.id);
           return (
-            <button
+            <ListRow
               key={p.id}
-              className={`gym-pick-row${on ? ' suggested' : ''}`}
+              icon={<Avatar userId={p.id} name={p.name} hasPhoto={p.avatar} size={34} />}
+              label={p.name}
+              sub={p.trainerName ?? t.adminNoTrainer}
+              selected={on}
+              trailing={<SwitchIndicator on={on} size="sm" />}
               onClick={() =>
                 setSelected((prev) => {
                   const next = new Set(prev);
@@ -1189,14 +1152,7 @@ function ProfileAssignClientsSheet(props: {
                   return next;
                 })
               }
-            >
-              <Avatar userId={p.id} name={p.name} hasPhoto={p.avatar} size={34} />
-              <span className="body">
-                <span className="n">{p.name}</span>
-                <span className="s">{p.trainerName ?? t.adminNoTrainer}</span>
-              </span>
-              <Switch on={on} />
-            </button>
+            />
           );
         })}
       </div>
@@ -1207,11 +1163,12 @@ function ProfileAssignClientsSheet(props: {
         </div>
       )}
       <div className="sheet-actions">
-        <button className="btn btn-secondary grow" onClick={props.onClose}>
+        <Button variant="secondary" className="grow" onClick={props.onClose}>
           {t.cancel}
-        </button>
-        <button
-          className="btn btn-primary grow"
+        </Button>
+        <Button
+          variant="primary"
+          className="grow"
           disabled={busy}
           onClick={async () => {
             setBusy(true);
@@ -1235,7 +1192,7 @@ function ProfileAssignClientsSheet(props: {
           }}
         >
           {t.adminAssign}
-        </button>
+        </Button>
       </div>
     </Sheet>
   );

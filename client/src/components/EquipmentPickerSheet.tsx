@@ -22,6 +22,10 @@ import { equipmentFor, resolveMuscles, setExerciseEquipmentItems } from '../stor
 import { useT } from '../i18n';
 import { tokenMatch } from '../search';
 import { Icon, Sheet } from '../ui';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
+import { ListRow } from './ui/GroupedList';
+import { SearchField } from './ui/SearchField';
 
 export function EquipmentPickerSheet({
   workoutId,
@@ -112,30 +116,27 @@ export function EquipmentPickerSheet({
           {[...selected].map((id) => {
             const it = byId.get(id);
             return (
-              <button key={id} className="ep-sel" onClick={() => toggle(id)}>
+              <Button
+                key={id}
+                variant="secondary"
+                size="sm"
+                iconTrailing="x"
+                onClick={() => toggle(id)}
+              >
                 {it ? localizedEquipName(it, locale) : id}
-                <Icon name="x" />
-              </button>
+              </Button>
             );
           })}
         </div>
       )}
 
-      <div className="eq-search ep-search">
-        <Icon name="magnifying-glass" />
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t.equipSearchPlaceholder}
-          aria-label={t.equipSearchPlaceholder}
-        />
-        {query && (
-          <button className="eq-search-clear" onClick={() => setQuery('')} aria-label={t.srClose}>
-            <Icon name="x" />
-          </button>
-        )}
-      </div>
+      <SearchField
+        className="ep-search"
+        value={query}
+        onChange={setQuery}
+        placeholder={t.equipSearchPlaceholder}
+        clearLabel={t.srClose}
+      />
 
       <div className="ep-scroll eq-cats">
         {visible.length === 0 ? (
@@ -146,26 +147,27 @@ export function EquipmentPickerSheet({
             const expanded = searching || open === cat;
             return (
               <div className={`eq-cat${expanded ? ' open' : ''}`} key={cat}>
-                <button
-                  className="eq-cat-head"
+                <ListRow
+                  dense
+                  strong
+                  icon={<Icon name={expanded ? 'caret-down' : 'arrow-right'} />}
+                  label={equipCategoryLabel(cat, locale)}
+                  value={sel > 0 ? `${sel}/${items.length}` : items.length}
                   onClick={() => toggleCat(cat)}
                   aria-expanded={expanded}
-                >
-                  <Icon name={expanded ? 'caret-down' : 'arrow-right'} />
-                  <span className="eq-cat-label">{equipCategoryLabel(cat, locale)}</span>
-                  <span className="eq-cat-count">
-                    {sel > 0 ? `${sel}/${items.length}` : items.length}
-                  </span>
-                </button>
+                />
                 {expanded && (
                   <div className="eq-grid">
                     {items.map((it) => {
                       const on = selected.has(it.id);
                       const inGym = gymItems.includes(it.id);
                       return (
-                        <button
-                          key={it.id}
+                        <Card
+                          as="button"
+                          pad="none"
+                          emphasis="quiet"
                           className={`eq-tile eq-pick-tile${on ? ' on' : ''}`}
+                          key={it.id}
                           onClick={() => toggle(it.id)}
                           aria-pressed={on}
                           title={localizedEquipName(it, locale)}
@@ -189,7 +191,7 @@ export function EquipmentPickerSheet({
                             {!inGym && !on && <span className="eq-tile-add">＋</span>}
                           </span>
                           <span className="eq-tile-name">{localizedEquipName(it, locale)}</span>
-                        </button>
+                        </Card>
                       );
                     })}
                   </div>
