@@ -3092,7 +3092,15 @@ export function SessionView(props: {
               >
                 <ExerciseName name={ex.name} />
               </Button>
-              {(timed || marker) && <span className="prev">{t.exerciseKindNames[kind]}</span>}
+              {marker && !live ? (
+                // Past session: the marker is just a record that it happened — no
+                // "ready when you are" prompt, no duplicated kind label.
+                ex.plannedDurationMin ? (
+                  <span className="prev">{`~${ex.plannedDurationMin} ${t.minShort}`}</span>
+                ) : null
+              ) : (
+                (timed || marker) && <span className="prev">{t.exerciseKindNames[kind]}</span>
+              )}
               {!grp && !timed && !marker && prev && !target && (
                 <span className="prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
               )}
@@ -3225,7 +3233,7 @@ export function SessionView(props: {
               </Card>
             );
           })()}
-        {marker ? (
+        {marker && live ? (
           <div className="warmup-marker-body">
             <span className={`warmup-marker-photo-wrap`}>
               <img
@@ -3441,16 +3449,20 @@ export function SessionView(props: {
                 // K1 · a bar per set: height = how much it built, colour
                 // intensity = how far performance had dropped.
                 const meter = meters ? meters.stim.get(s.id) : undefined;
+                const isWarm = setTypeOf(s) === 'warmup';
                 const meterStyle =
                   meter !== undefined
                     ? ({
-                        // Linear, same scale as the "Muscle gain from this set"
-                        // meter on the set card (warm-ups get a min-height nub).
-                        '--stim': meter.toFixed(2),
+                        // Working sets: linear, same scale as the "Muscle gain from
+                        // this set" meter. Warm-ups: the muscle's energy still in the
+                        // tank, so the bar shrinks as the session loads it.
+                        '--stim': isWarm
+                          ? (1 - (meters!.load.get(s.id) ?? 0)).toFixed(2)
+                          : meter.toFixed(2),
                         // Colour = the worse of: how far performance dropped, and how
                         // little this set still built (diminishing returns).
                         // Warm-ups: the muscle's load so far (they barely build).
-                        '--fat': (setTypeOf(s) === 'warmup'
+                        '--fat': (isWarm
                           ? (meters!.load.get(s.id) ?? 0)
                           : Math.min(1, Math.max((meters!.drop.get(s.id) ?? 0) / 0.1, 1 - meter))
                         ).toFixed(2),

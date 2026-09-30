@@ -24867,8 +24867,8 @@ body {
   font-size: var(--fs-28);
 }
 
-/* Warm-ups: a short bar (they build little) coloured by how loaded the muscle
-   already is — the same scale as the working sets. */
+/* Warm-ups: the bar is the muscle's remaining energy (it shrinks as the muscle
+   gets loaded), coloured by how loaded it already is. */
 .focus-view .set-row.metered.warm::before {
   opacity: 0.85;
 }
