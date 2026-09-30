@@ -201,10 +201,10 @@ html.theme-glass .app-nutrition {
     transform: translate3d(0, 0, 0) scale(1);
   }
   33% {
-    transform: translate3d(14vw, 16vh, 0) scale(1.12);
+    transform: translate3d(26vw, 24vh, 0) scale(1.18);
   }
   66% {
-    transform: translate3d(-8vw, 8vh, 0) scale(0.94);
+    transform: translate3d(-14vw, 12vh, 0) scale(0.92);
   }
 }
 @keyframes lava-drift-b {
@@ -213,10 +213,10 @@ html.theme-glass .app-nutrition {
     transform: translate3d(0, 0, 0) scale(1);
   }
   30% {
-    transform: translate3d(-18vw, 14vh, 0) scale(1.1);
+    transform: translate3d(-30vw, 22vh, 0) scale(1.16);
   }
   65% {
-    transform: translate3d(-6vw, -12vh, 0) scale(0.92);
+    transform: translate3d(-10vw, -20vh, 0) scale(0.9);
   }
 }
 @keyframes lava-drift-c {
@@ -225,24 +225,24 @@ html.theme-glass .app-nutrition {
     transform: translate3d(0, 0, 0) scale(1);
   }
   35% {
-    transform: translate3d(20vw, -14vh, 0) scale(1.08);
+    transform: translate3d(30vw, -22vh, 0) scale(1.14);
   }
   70% {
-    transform: translate3d(-14vw, -6vh, 0) scale(1.14);
+    transform: translate3d(-24vw, -10vh, 0) scale(1.2);
   }
 }
 /* Animate only on a device that proved it can (probe = measuring, full = passed). */
 html[data-motion='probe'] .lava-a,
 html[data-motion='full'] .lava-a {
-  animation: lava-drift-a 58s ease-in-out infinite;
+  animation: lava-drift-a 44s ease-in-out infinite;
 }
 html[data-motion='probe'] .lava-b,
 html[data-motion='full'] .lava-b {
-  animation: lava-drift-b 71s ease-in-out infinite;
+  animation: lava-drift-b 53s ease-in-out infinite;
 }
 html[data-motion='probe'] .lava-c,
 html[data-motion='full'] .lava-c {
-  animation: lava-drift-c 83s ease-in-out infinite;
+  animation: lava-drift-c 62s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .lava-blob {

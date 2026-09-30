@@ -19,9 +19,13 @@ import { useSyncExternalStore } from 'react';
 
 export type MotionTier = 'pending' | 'full' | 'static';
 
-const KEY = 'spotter.motion.v1';
-const TTL_MS = 3 * 24 * 3600 * 1000;
-const PROBE_MS = 1600;
+const KEY = 'spotter.motion.v2';
+/** A pass is remembered for days; a probe FAIL only for a while — a busy start-up
+ *  (first paint, sync) must not lock a fast machine out of animation. */
+const TTL_FULL_MS = 3 * 24 * 3600 * 1000;
+const TTL_STATIC_PROBE_MS = 20 * 60 * 1000;
+const PROBE_MS = 1400;
+const PROBE_TRIES = 3;
 const SKIP_FRAMES = 6;
 /** Median frame gap (ms) that still counts as smooth (≈ 40 fps). */
 export const SMOOTH_MS = 25;
@@ -66,6 +70,8 @@ export function hardNo(env: {
 }
 
 let tier: MotionTier = 'pending';
+/** Last probe reading, kept in the stored verdict so a "why is it static?" is answerable. */
+let lastProbe: FrameStats | null = null;
 const listeners = new Set<() => void>();
 let started = false;
 
@@ -78,9 +84,9 @@ function set(next: MotionTier): void {
   for (const l of listeners) l();
 }
 
-function remember(t: 'full' | 'static'): void {
+function remember(t: 'full' | 'static', ttl: number = TTL_FULL_MS): void {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ t, at: Date.now() }));
+    localStorage.setItem(KEY, JSON.stringify({ t, at: Date.now(), ttl, probe: lastProbe }));
   } catch {
     /* private mode: decide again next launch */
   }
@@ -88,8 +94,13 @@ function remember(t: 'full' | 'static'): void {
 
 function recall(): 'full' | 'static' | null {
   try {
-    const v = JSON.parse(localStorage.getItem(KEY) ?? 'null') as { t: string; at: number } | null;
-    if (v && Date.now() - v.at < TTL_MS && (v.t === 'full' || v.t === 'static')) return v.t;
+    const v = JSON.parse(localStorage.getItem(KEY) ?? 'null') as {
+      t: string;
+      at: number;
+      ttl?: number;
+    } | null;
+    if (v && Date.now() - v.at < (v.ttl ?? TTL_FULL_MS) && (v.t === 'full' || v.t === 'static'))
+      return v.t;
   } catch {
     /* ignore */
   }
@@ -130,7 +141,7 @@ function watchdog(): void {
     if (frameStats(gaps).median > 45) strikes++;
     else strikes = 0;
     if (strikes >= 2) {
-      remember('static');
+      remember('static', TTL_STATIC_PROBE_MS);
       set('static');
       return;
     }
@@ -158,6 +169,10 @@ export function initMotion(): void {
     })
   )
     return set('static');
+  // ?motion=on|off forces the verdict (handy for checking a device by hand).
+  const forced = new URLSearchParams(location.search).get('motion');
+  if (forced === 'on') return set('full');
+  if (forced === 'off') return set('static');
   const known = recall();
   if (known === 'static') return set('static');
   if (known === 'full') {
@@ -168,9 +183,15 @@ export function initMotion(): void {
   // Unknown device: probe with the real animation once the app has settled.
   const probe = async () => {
     document.documentElement.dataset.motion = 'probe';
-    const gaps = await sampleFrames(PROBE_MS);
-    const ok = isSmooth(gaps);
-    remember(ok ? 'full' : 'static');
+    // Best of a few tries, spaced out: the first seconds of an app are busy.
+    let ok = false;
+    for (let i = 0; i < PROBE_TRIES && !ok; i++) {
+      if (i > 0) await new Promise((r) => window.setTimeout(r, 2500));
+      const gaps = await sampleFrames(PROBE_MS);
+      lastProbe = frameStats(gaps);
+      ok = isSmooth(gaps);
+    }
+    remember(ok ? 'full' : 'static', ok ? TTL_FULL_MS : TTL_STATIC_PROBE_MS);
     set(ok ? 'full' : 'static');
     if (ok) watchdog();
   };
@@ -187,7 +208,7 @@ export function initMotion(): void {
 /** Give up on animation from now on (a component measured it can't keep up). */
 export function downgradeMotion(): void {
   if (tier === 'static') return;
-  remember('static');
+  remember('static', TTL_STATIC_PROBE_MS);
   set('static');
 }
 
