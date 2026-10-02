@@ -21,6 +21,9 @@ import {
   workoutVolumeKg,
 } from '../store';
 import { computeTrends } from '../trends';
+import { activityTrends } from '../activityTrends';
+import { kitTone } from './logActivity/shared';
+import { IconTile } from '../components/ui/IconTile';
 import { computePlaybook } from '../playbook';
 import { focusCounts } from '../goals';
 import { BUILT_IN_CATALOG } from '../data/exercises';
@@ -42,11 +45,13 @@ const BAR_TONES = ['n', 'n', 'n', 'n', 'a1', 'a2', 'a2', 'a3'];
 export function OverviewView({
   onProgress,
   onTrends,
+  onActivity,
   onPrograms,
 }: {
   shell: Shell;
   onProgress: (seg: ProgSeg) => void;
   onTrends: () => void;
+  onActivity: () => void;
   onPrograms: (peer: ProgramsPeer) => void;
 }) {
   const { t, locale } = useT();
@@ -91,6 +96,21 @@ export function OverviewView({
     }
     return best;
   }, [finished]);
+
+  // Activity — the same 8-week rollup the Activity screen opens on.
+  const act = useMemo(() => activityTrends(store.activities, now, null), [store.activities, now]);
+
+  // The families of what was done lately (several → the tile blends them).
+  const actBlend = useMemo(() => {
+    const since = now - 28 * DAY_MS;
+    const seen: Array<'conditioning' | 'sport' | 'rest'> = [];
+    for (const a of store.activities) {
+      if (a.finishedAt === null || a.startedAt < since) continue;
+      const tn = kitTone(a.type) as 'conditioning' | 'sport' | 'rest';
+      if (!seen.includes(tn)) seen.push(tn);
+    }
+    return seen.length ? seen : (['conditioning'] as Array<'conditioning'>);
+  }, [store.activities, now]);
 
   const plays = useMemo(() => computePlaybook(finished, now).plays, [finished, now]);
   const focus = focusCounts(store.goals);
@@ -182,6 +202,36 @@ export function OverviewView({
         weekdayLong={(ts) => fmtWeekday(ts, locale)}
       />
 
+      {act && (
+        <Card as="button" blend={actBlend} className="ov-tile ov-row ov-act" onClick={onActivity}>
+          <IconTile tone={actBlend[0]} size={44} icon="heartbeat" />
+          <span className="ov-row-text">
+            <span className="ov-k">{t.atrTitle}</span>
+            <span className="ov-tt">
+              {(() => {
+                const w = act.weeks[act.weeks.length - 1];
+                const m = Math.round(w.conditioningMin + w.recoveryMin);
+                return m > 0 ? t.ovActivityWeek(m) : t.ovActivityNone;
+              })()}
+            </span>
+          </span>
+          <span className="ov-bars ov-act-bars" aria-hidden>
+            {act.weeks.map((w, i) => {
+              const v = w.conditioningMin + w.recoveryMin;
+              const max = Math.max(1, ...act.weeks.map((x) => x.conditioningMin + x.recoveryMin));
+              return (
+                <span
+                  key={w.start}
+                  className={`ov-bar${i === act.weeks.length - 1 ? ' cur' : ''}`}
+                  style={{ height: `${Math.max((v / max) * 100, 6)}%` }}
+                />
+              );
+            })}
+          </span>
+          <Icon name="caret-right" className="ov-row-go" />
+        </Card>
+      )}
+
       <div className="ov-grid">
         <Card as="button" className="ov-tile ov-sq" onClick={() => onPrograms('goals')}>
           <span className="ov-hd">
@@ -262,17 +312,24 @@ function ProgramTile({
   const trainedToday = finishedDays.some((ts) => dayKey(ts) === dayKey(now));
   const todayPlan = programDayHasPlan(program, todayWeekday);
   const nameOf = (day: number) => programDayName(program, day, t.progDay);
-  const footer = (() => {
-    if (trainedToday) return t.ovProgramDone;
-    if (todayPlan) return t.ovProgramToday(nameOf(todayWeekday));
-    for (let k = 1; k <= 7; k++) {
-      const day = ((todayWeekday - 1 + k) % 7) + 1;
-      if (programDayHasPlan(program, day)) {
-        return t.ovProgramRestNext(nameOf(day), weekdayLong(dateInWeek(first, day, weekStart)));
+  // Planned activities for today ride along the footer ("Today: Legs 2 · Run 20 min").
+  const todayActs = (program.program.activities ?? [])
+    .filter((a) => a.day === todayWeekday)
+    .map((a) => `${t.actType[a.type] ?? a.type} ${a.minutes} ${t.minShort}`);
+  const withActs = (s: string) => (todayActs.length ? `${s} · ${todayActs.join(' · ')}` : s);
+  const footer = withActs(
+    (() => {
+      if (trainedToday) return t.ovProgramDone;
+      if (todayPlan) return t.ovProgramToday(nameOf(todayWeekday));
+      for (let k = 1; k <= 7; k++) {
+        const day = ((todayWeekday - 1 + k) % 7) + 1;
+        if (programDayHasPlan(program, day)) {
+          return t.ovProgramRestNext(nameOf(day), weekdayLong(dateInWeek(first, day, weekStart)));
+        }
       }
-    }
-    return t.progRestDay;
-  })();
+      return t.progRestDay;
+    })(),
+  );
 
   return (
     <Card as="button" className="ov-tile ov-program" onClick={onOpen}>

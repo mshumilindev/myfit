@@ -536,7 +536,7 @@ export function HealthView(props: HealthViewProps) {
         <div className="screen hl">
           <div className="hl-pbar">
             <BackButton label={t.backAction} onClick={props.onClose} />
-            <h1 className="hl-pt">{t.hlHistory}</h1>
+            <h1 className="hl-pt">{t.hlHistoryTitle}</h1>
           </div>
           <div className="hl-scroll">
             <div className="hl-cnt">

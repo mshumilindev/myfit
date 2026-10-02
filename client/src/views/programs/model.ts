@@ -9,7 +9,9 @@
  * markers (nothing to log), cardio is a timed item — both sit beside the
  * exercises, not among them.
  */
-import type { ExerciseKind } from '../../types';
+import type { ActivityEffort, ExerciseKind } from '../../types';
+import { activityType } from '../../activities';
+import type { VaultEnvelope } from '../../vaultCrypto';
 import type { EquipmentId } from '../../data/equipment';
 import type { MuscleGroup } from '../../data/exercises';
 import { resolveMuscles } from '../../store';
@@ -49,6 +51,25 @@ export interface ProgramItem {
   warmupItems?: ProgramWarmupItem[];
 }
 
+/** When in the day a planned activity sits relative to the lifting. */
+export type ProgramActivityWhen = 'any' | 'before' | 'after';
+
+/**
+ * A planned activity (run, yoga, padel …) on a weekday. Kept apart from the
+ * lifting `items` on purpose: trainer assignment, CSV, the session builder and
+ * workout start only ever read `items`, so activities can't change them. Only
+ * catalog keys and numbers — nothing a person types.
+ */
+export interface ProgramActivity {
+  id: string;
+  day: number;
+  /** Key in ACTIVITY_TYPES. */
+  type: string;
+  minutes: number;
+  effort: ActivityEffort;
+  when: ProgramActivityWhen;
+}
+
 export type ProgramStatus = 'draft' | 'active' | 'archived';
 
 export interface Program {
@@ -63,6 +84,10 @@ export interface Program {
    *  WITHOUT exercises keeps them — an exercises day derives its muscles. */
   targetMuscles: Record<string, MuscleGroup[]>;
   items: ProgramItem[];
+  /** Planned activities beside the lifting (absent on programs without any). */
+  activities?: ProgramActivity[];
+  /** The stored (sealed) form of `activities`; present when the list is encrypted. */
+  activitiesEnc?: VaultEnvelope;
   updatedAt?: number;
 }
 
@@ -165,9 +190,63 @@ export function sanitizeTargetMuscles(tm: unknown): Record<string, MuscleGroup[]
   return out;
 }
 
+const EFFORTS: ActivityEffort[] = ['light', 'moderate', 'hard'];
+const WHENS: ProgramActivityWhen[] = ['any', 'before', 'after'];
+const MAX_ACTIVITIES = 28;
+
+/** Coerce stored (or absent / malformed) planned activities to a clean list. */
+export function sanitizeActivities(raw: unknown): ProgramActivity[] {
+  if (!Array.isArray(raw)) return [];
+  const out: ProgramActivity[] = [];
+  for (const it of raw) {
+    if (!it || typeof it !== 'object') continue;
+    const r = it as Record<string, unknown>;
+    const type = typeof r.type === 'string' ? r.type : '';
+    const day = Number(r.day);
+    const minutes = positive(r.minutes);
+    if (!activityType(type) || !Number.isInteger(day) || day < 1 || day > 7 || !minutes) continue;
+    out.push({
+      id: typeof r.id === 'string' && r.id ? r.id : crypto.randomUUID(),
+      day,
+      type,
+      minutes: Math.min(600, minutes),
+      effort: EFFORTS.includes(r.effort as ActivityEffort)
+        ? (r.effort as ActivityEffort)
+        : 'moderate',
+      when: WHENS.includes(r.when as ProgramActivityWhen) ? (r.when as ProgramActivityWhen) : 'any',
+    });
+    if (out.length >= MAX_ACTIVITIES) break;
+  }
+  return out;
+}
+
+/** A day's planned activities, in stored order. */
+export function dayActivities(p: Program, day: number): ProgramActivity[] {
+  return (p.activities ?? []).filter((a) => a.day === day);
+}
+
+export function addActivity(p: Program, a: Omit<ProgramActivity, 'id'>): Program {
+  const next = sanitizeActivities([...(p.activities ?? []), { ...a, id: crypto.randomUUID() }]);
+  return { ...p, activities: next };
+}
+
+export function patchActivity(p: Program, id: string, patch: Partial<ProgramActivity>): Program {
+  return {
+    ...p,
+    activities: sanitizeActivities(
+      (p.activities ?? []).map((a) => (a.id === id ? { ...a, ...patch } : a)),
+    ),
+  };
+}
+
+export function removeActivity(p: Program, id: string): Program {
+  return { ...p, activities: (p.activities ?? []).filter((a) => a.id !== id) };
+}
+
 export function normalizeProgram<T extends Program>(p: T): T {
   return {
     ...p,
+    ...(p.activities ? { activities: sanitizeActivities(p.activities) } : {}),
     dayNames: p.dayNames ?? {},
     targetMuscles: sanitizeTargetMuscles(p.targetMuscles),
     items: normalizeItems(p.items ?? []),
@@ -299,6 +378,15 @@ export function toSaved(p: Program, uid: string, fallbackName: string): Program 
     dayNames,
     targetMuscles,
     items,
+    // Sealing happens at write time (activitiesVault.ts); a list this device can't
+    // open (`activities` undefined) keeps its stored envelope.
+    ...(p.activities !== undefined
+      ? sanitizeActivities(p.activities).length
+        ? { activities: sanitizeActivities(p.activities) }
+        : {}
+      : p.activitiesEnc
+        ? { activitiesEnc: p.activitiesEnc }
+        : {}),
     updatedAt: Date.now(),
   };
   next.daysPerWeek = Math.max(1, trainingDays(next).length);
@@ -547,7 +635,19 @@ export function copyDay(p: Program, from: number, to: number): Program {
   const targetMuscles = { ...base.targetMuscles };
   const tm = p.targetMuscles[String(from)];
   if (tm?.length) targetMuscles[String(to)] = [...tm];
-  return { ...base, dayNames, targetMuscles, items: normalizeItems([...base.items, ...copied]) };
+  const acts = (base.activities ?? []).filter((a) => a.day !== to);
+  const copiedActs = dayActivities(p, from).map((a) => ({
+    ...a,
+    id: crypto.randomUUID(),
+    day: to,
+  }));
+  return {
+    ...base,
+    dayNames,
+    targetMuscles,
+    items: normalizeItems([...base.items, ...copied]),
+    ...(acts.length + copiedActs.length ? { activities: [...acts, ...copiedActs] } : {}),
+  };
 }
 
 export function duplicateOf(p: Program, name: string): Program {
@@ -557,6 +657,9 @@ export function duplicateOf(p: Program, name: string): Program {
     id: crypto.randomUUID(),
     name,
     status: 'draft',
+    ...(p.activities?.length
+      ? { activities: p.activities.map((a) => ({ ...a, id: crypto.randomUUID() })) }
+      : {}),
     items: p.items.map((it) => {
       let groupId = it.groupId ?? null;
       if (groupId) {

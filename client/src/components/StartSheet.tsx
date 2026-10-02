@@ -27,12 +27,10 @@ import {
   backfillWorkout,
   dayKey,
   gymAtCurrentPosition,
-  liveSleep,
   programDayNameFor,
   workoutDayReadout,
   workoutSets,
   workoutVolumeKg,
-  startHomeSet,
   startWorkout,
   useStore,
 } from '../store';
@@ -48,13 +46,13 @@ import {
 } from '../data/programMine';
 import { fmtDayMonth, fmtDurationHM, fmtKg, fmtWeekday, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
-import { HomeSetSheet } from './HomeSetSheet';
 import './HomeSet.css';
+import { useLiveLock } from '../views/home/homeHooks';
 import { DateField, TimeField, DurationField } from './PickerFields';
 import { GymPicker } from './GymPicker';
 import { GymThumb } from './GymThumb';
 
-type Sub = null | 'gym' | 'past' | 'home';
+type Sub = null | 'gym' | 'past';
 
 export function StartSheet({
   shell,
@@ -76,14 +74,10 @@ export function StartSheet({
   const onClose = inline ? () => setSub(null) : closeProp;
   const [now] = useState(() => Date.now());
 
-  const open = store.workouts.find((w) => w.finishedAt === null) ?? null;
-  const liveAct = store.activities.find((a) => a.finishedAt === null) ?? null;
-  const sleepLive = liveSleep(store.sleeps);
-  const busy = !!open || !!liveAct || !!sleepLive;
   // One live thing at a time: while a session (with an exercise), an activity
   // or a sleep runs, the other starters are locked — only Resume, Health and
   // Log past (it doesn't start anything) stay open.
-  const locked = (!!open && open.exercises.length > 0) || !!liveAct || !!sleepLive;
+  const { open, liveAct, sleepLive, busy, locked, liveName } = useLiveLock();
   const activeRest = activeRestPeriod(now);
   const illSt = illnessState(store.restPeriods, store.workouts, now);
 
@@ -193,6 +187,16 @@ export function StartSheet({
     onClose();
     shell.openOverlay({ screen: 'log-activity' });
   }
+  function openHome() {
+    // The Home set screen (sets, my moves, the set page) is a full overlay.
+    onClose();
+    shell.openOverlay({ screen: 'home-set' });
+  }
+  function openPrograms() {
+    // Programs is a tab, not an overlay; nothing starts, so it stays open while something is live.
+    onClose();
+    shell.goTab('programs');
+  }
   function openHealth() {
     // The full Health page (design docs/design/health) replaced the old
     // "Rest & recovery" drawer.
@@ -208,16 +212,6 @@ export function StartSheet({
         title={t.pickGymTitle}
         onClose={onClose}
         onPick={gymFor === 'hero' ? beginHero : beginScratch}
-      />
-    );
-  else if (sub === 'home')
-    subEl = (
-      <HomeSetSheet
-        onClose={onClose}
-        onStart={(input) => {
-          const w = startHomeSet(input);
-          done(w ? w.id : null);
-        }}
       />
     );
   else if (sub === 'past')
@@ -240,13 +234,6 @@ export function StartSheet({
 
   if (subEl && !inline) return subEl;
 
-  const liveName = open
-    ? open.dayName || t.startSessionLabel
-    : liveAct
-      ? (t.actType[liveAct.type] ?? liveAct.type)
-      : sleepLive
-        ? t.sleepTitle
-        : '';
   const hero = busy
     ? { kicker: t.startInProgress, title: liveName, sub: t.startResume, icon: 'arrow-right' }
     : programToday && program
@@ -363,13 +350,21 @@ export function StartSheet({
             <span className="ss-ts">{locked ? t.startFinishFirst(liveName) : t.startAutoSub}</span>
           </span>
         </Card>
-        <Card as="button" className="ss-tile" onClick={openActivity}>
+        <Card
+          as="button"
+          className={`ss-tile${locked ? ' locked' : ''}`}
+          aria-disabled={locked}
+          onClick={locked ? undefined : openActivity}
+        >
           <span className="ss-tile-top">
-            <IconTile tone="ok" size={40} icon="heartbeat" className="ss-ic" />
+            <IconTile tone="conditioning" size={40} icon="heartbeat" className="ss-ic" />
+            {locked && <Icon name="lock-simple" className="ss-lock" />}
           </span>
           <span className="ss-tile-text">
             <span className="ss-tt">{t.startActivityTitle}</span>
-            <span className="ss-ts">{locked ? t.laLogPast : t.startActivitySub}</span>
+            <span className="ss-ts">
+              {locked ? t.startFinishFirst(liveName) : t.startActivitySub}
+            </span>
           </span>
         </Card>
         <Card as="button" className="ss-tile" onClick={openHealth}>
@@ -386,18 +381,27 @@ export function StartSheet({
             <span className="ss-ts">{t.startPastSub}</span>
           </span>
         </Card>
+        <Card as="button" className="ss-tile" onClick={openPrograms}>
+          <IconTile tone="accent" size={40} icon="list-checks" className="ss-ic" />
+          <span className="ss-tile-text">
+            <span className="ss-tt">{t.startProgramsTitle}</span>
+            <span className="ss-ts">{t.startProgramsSub}</span>
+          </span>
+        </Card>
         <Card
           as="button"
-          className={`ss-tile ss-home${locked ? ' locked' : ''}`}
+          className={`ss-tile${locked ? ' locked' : ''}`}
           aria-disabled={locked}
-          onClick={locked ? undefined : () => setSub('home')}
+          onClick={locked ? undefined : openHome}
         >
-          <IconTile tone="accent" size={40} icon="house" className="ss-ic" />
+          <span className="ss-tile-top">
+            <IconTile tone="home" size={40} icon="house" className="ss-ic" />
+            {locked && <Icon name="lock-simple" className="ss-lock" />}
+          </span>
           <span className="ss-tile-text">
             <span className="ss-tt">{t.startHomeTitle}</span>
             <span className="ss-ts">{locked ? t.startFinishFirst(liveName) : t.startHomeSub}</span>
           </span>
-          {locked && <Icon name="lock-simple" className="ss-lock" />}
         </Card>
       </div>
     </StartFrame>

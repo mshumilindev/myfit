@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
 
 import { toneClass, type Tone } from './tones';
 import './Card.css';
@@ -22,6 +22,9 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   /** Render as a <button> (a tappable card) or a <section>; default <div>. */
   as?: 'div' | 'button' | 'section';
   tone?: CardTone;
+  /** Two or three families flowing into each other on a diagonal (equal shares);
+   *  the first sets the tone. Activity families only. */
+  blend?: Array<'sport' | 'conditioning' | 'rest'>;
   pad?: CardPad;
   emphasis?: CardEmphasis;
   /** Solid surface instead of glass — for cards that stack over each other (decks). */
@@ -33,6 +36,13 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   children?: ReactNode;
 }
 
+/** Diagonal gradient across the families' tints (equal shares, flowing). */
+function blendStyle(mix: string[]): CSSProperties {
+  return {
+    backgroundImage: `linear-gradient(135deg, ${mix.map((m) => `var(--color-${m}-tint)`).join(', ')})`,
+  };
+}
+
 /**
  * The canonical surface container. Compose content inside it instead of
  * hand-rolling `.card`/`.rx .card` look-alikes. Tones map to token families;
@@ -42,14 +52,18 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
 export function Card({
   as: Tag = 'div',
   tone = 'neutral',
+  blend,
   pad = 'md',
   emphasis = 'card',
   opaque = false,
   header,
   children,
   className,
+  style,
   ...rest
 }: CardProps) {
+  const mix = blend && blend.length > 1 ? blend.slice(0, 3) : null;
+  if (blend?.length) tone = blend[0];
   const cls = [
     'uicard',
     `uicard--${tone}`,
@@ -57,12 +71,18 @@ export function Card({
     `uicard--pad-${pad}`,
     emphasis !== 'card' ? `uicard--e-${emphasis}` : '',
     opaque ? 'uicard--opaque' : '',
+    mix ? 'uicard--blend' : '',
     className,
   ]
     .filter(Boolean)
     .join(' ');
   return (
-    <Tag className={cls} type={Tag === 'button' ? 'button' : undefined} {...rest}>
+    <Tag
+      className={cls}
+      type={Tag === 'button' ? 'button' : undefined}
+      style={mix ? { ...blendStyle(mix), ...style } : style}
+      {...rest}
+    >
       {header != null && <div className="uicard-header">{header}</div>}
       {children}
     </Tag>

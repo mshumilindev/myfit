@@ -219,6 +219,7 @@ import type { GeneratedDay } from './sessionBuilder';
 import {
   listPrefFromDoc,
   nextUpOffPref,
+  programSuggestOffPref,
   pinsPref,
   reconcileListPref,
   type ListPrefStore,
@@ -1573,6 +1574,8 @@ let selfProfile: {
   firstName?: string;
   lastName?: string;
   avatarExt?: string | null;
+  /** The own profile doc has been read at least once. */
+  loaded?: boolean;
 } = { trainerId: null };
 const trainerListeners = new Set<() => void>();
 /** The athlete's human coach (uid), if they have one — reactive. */
@@ -1583,6 +1586,20 @@ export function useSelfTrainerId(): string | null {
       return () => trainerListeners.delete(l);
     },
     () => selfProfile.trainerId,
+  );
+}
+/**
+ * Atlas's role follows the athlete's setup, never a switch: with a human coach
+ * Atlas is always the extra coach; without one he is the main coach. null until
+ * the own profile has loaded (so a slow load never flips the role by mistake).
+ */
+export function useSelfCoachRole(): 'main' | 'extra' | null {
+  return useSyncExternalStore(
+    (l) => {
+      trainerListeners.add(l);
+      return () => trainerListeners.delete(l);
+    },
+    () => (!selfProfile.loaded ? null : selfProfile.trainerId ? 'extra' : 'main'),
   );
 }
 const LIVE_HEARTBEAT_MS = 45000;
@@ -4827,6 +4844,7 @@ function markSynced(fromCache: boolean, hasPending: boolean): void {
 //   weekStart + updatedAt                 — first day of the training week
 //   activityPins + activityPinsUpdatedAt  — Log activity › Pinned (ordered)
 //   nextUpOff + nextUpOffUpdatedAt        — types not to suggest after workouts
+//   programSuggestOff + …UpdatedAt        — "add to program" suggestions muted / snoozed
 //   todayLayout + todayLayoutUpdatedAt    — the Today layout (today/layoutSync.ts)
 // Every write merges only its own fields, so a device with a stale copy of one
 // setting can't clobber a newer value of another.
@@ -4845,6 +4863,7 @@ function writePrefsDoc(): void {
 const LIST_PREFS: Array<[string, ListPrefStore]> = [
   ['activityPins', pinsPref],
   ['nextUpOff', nextUpOffPref],
+  ['programSuggestOff', programSuggestOffPref],
 ];
 function writeListPref(name: string, pref: ListPrefStore): void {
   const cur = pref.snapshot();
@@ -5037,6 +5056,7 @@ export function startSyncLoop(): () => void {
           firstName: d.firstName as string | undefined,
           lastName: d.lastName as string | undefined,
           avatarExt: (d.avatarExt as string) ?? null,
+          loaded: true,
         };
         trainerListeners.forEach((l) => l());
         // Key exchange is automatic: a coach publishes a key, an athlete grants theirs.
@@ -6027,6 +6047,7 @@ export function resetLocalData(): void {
     resetWeekStart();
     pinsPref.reset();
     nextUpOffPref.reset();
+    programSuggestOffPref.reset();
     resetTodayLayout();
   } finally {
     applyingRemotePrefs = false;

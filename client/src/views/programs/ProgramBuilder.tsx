@@ -8,8 +8,9 @@
 import { BackButton } from '../../components/ui/BackButton';
 import { useMemo, useState } from 'react';
 import { Button } from '../../components/ui/Button';
-import { Chip } from '../../components/ui/Chip';
 import { Field } from '../../components/ui/Field';
+import { Checkbox } from '../../components/ui/Checkbox';
+import { IconButton as KitIconButton } from '../../components/ui/Button';
 import { Switch } from '../../components/ui/Switch';
 import { doc, setDoc } from 'firebase/firestore';
 import { callFn, currentUid, getRole, trackMutation } from '../../api';
@@ -22,8 +23,11 @@ import { ConfirmDialog, Icon, Sheet, useIsDesktop } from '../../ui';
 import { ProgramCsvDialog } from '../ProgramCsvDialog';
 import { useWeekStartDay, weekOrder } from '../../weekStart';
 import { DayEditor, type DayNav } from './DayEditor';
+import { ActivityChips } from './ProgramActivities';
+import { sealActivitiesInDoc } from './activitiesVault';
 import {
   clearDay,
+  dayActivities,
   dayItems,
   dayMode,
   dayMuscles,
@@ -110,7 +114,9 @@ export function ProgramBuilder({
     setError(null);
     try {
       const doc0 = toSaved(draft, uid, t.progNew);
-      await trackMutation(setDoc(doc(db, 'programs', doc0.id), doc0));
+      await trackMutation(
+        sealActivitiesInDoc(doc0).then((stored) => setDoc(doc(db, 'programs', doc0.id), stored)),
+      );
       let next = doc0;
       if (status && status !== doc0.status) {
         await callFn('setProgramStatus', { id: doc0.id, status });
@@ -359,35 +365,46 @@ export function ProgramBuilder({
     <div className="pg-week">
       {weekDays.map((d) => {
         const on = isTrainingDay(draft, d);
+        const label = t.pgTrainOn(t.weekDayNames[d - 1] ?? '');
+        const toggle = () => {
+          if (!readOnly) toggleDay(d);
+        };
         return (
           <Card
             key={d}
             pad="none"
             tone={on ? 'accent' : 'neutral'}
-            emphasis={on ? 'hero' : 'card'}
+            emphasis={on ? 'glass' : 'card'}
             className={`pg-wtile${on ? ' on' : ''}`}
+            onClick={toggle}
           >
-            <ListRow
-              as="label"
-              label={weekdayAbbr(d)}
-              trailing={
-                <Switch
-                  checked={on}
+            <div className="pg-wtile-top">
+              <span className="pg-wd">{weekdayAbbr(d)}</span>
+              {on ? (
+                <KitIconButton
+                  icon="check"
+                  label={label}
+                  variant="primary"
+                  size="sm"
+                  shape="round"
                   disabled={readOnly}
-                  aria-label={t.pgTrainOn(t.weekDayNames[d - 1] ?? '')}
-                  onChange={() => toggleDay(d)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggle();
+                  }}
                 />
-              }
-            />
+              ) : (
+                <Checkbox
+                  checked={false}
+                  aria-label={label}
+                  disabled={readOnly}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={toggle}
+                />
+              )}
+            </div>
             {on ? (
-              <Field
-                value={draft.dayNames[String(d)] ?? ''}
-                placeholder={t.pgNameThisDay}
-                maxLength={40}
-                readOnly={readOnly}
-                aria-label={t.pgDayName(t.weekDayNames[d - 1] ?? '')}
-                onChange={(e) => update((p) => setDayName(p, d, e.target.value))}
-              />
+              <span className="pg-wname">{dayName(draft, d) || t.pgUnnamed}</span>
             ) : (
               <span className="pg-wtile-rest">{t.progRestShort}</span>
             )}
@@ -410,7 +427,12 @@ export function ProgramBuilder({
             dense
             time={weekdayAbbr(d)}
             label={dayName(draft, d) || t.pgUnnamed}
-            sub={daySummary(d)}
+            sub={
+              <>
+                {daySummary(d)}
+                <ActivityChips list={dayActivities(draft, d)} />
+              </>
+            }
             trailing={
               isDayComplete(draft, d) ? (
                 <Icon name="check" className="pg-ok" />
@@ -426,7 +448,10 @@ export function ProgramBuilder({
         ) : (
           <div key={d} className="pg-rrow rest">
             <span className="pg-wd">{weekdayAbbr(d)}</span>
-            <span className="pg-rrow-txt">{t.progRestShort}</span>
+            <span className="pg-rrow-txt">
+              {t.progRestShort}
+              <ActivityChips list={dayActivities(draft, d)} />
+            </span>
           </div>
         ),
       )}
@@ -451,17 +476,22 @@ export function ProgramBuilder({
   const rail = (
     <nav className="pg-rail" aria-label={t.pgTrainingDays}>
       {days.map((d) => (
-        <Chip
+        <Card
           key={d}
-          className="pg-rp"
-          selected={d === day}
-          icon={d !== day && isDayComplete(draft, d) ? 'check' : undefined}
+          as="button"
+          pad="none"
+          tone={d === day ? 'accent' : 'neutral'}
+          emphasis={d === day ? 'glass' : 'card'}
+          className={`pg-rp${d === day ? ' on' : ''}`}
           aria-current={d === day ? 'step' : undefined}
           onClick={() => setDay(d)}
         >
-          <b>{weekdayAbbr(d)}</b>
-          <span>{dayName(draft, d) || t.pgUnnamed}</span>
-        </Chip>
+          <span className="pg-rp-top">
+            <span className="pg-wd">{weekdayAbbr(d)}</span>
+            {d !== day && isDayComplete(draft, d) && <Icon name="check" className="pg-ok" />}
+          </span>
+          <span className="pg-rp-name">{dayName(draft, d) || t.pgUnnamed}</span>
+        </Card>
       ))}
     </nav>
   );
@@ -865,5 +895,8 @@ function snapshot(p: Program): string {
         i.groupId ? `${i.groupOrder ?? 0}` : null,
         !!i.dropLast,
       ]),
+    activities: [...(p.activities ?? [])]
+      .sort((a, b) => a.day - b.day || a.id.localeCompare(b.id))
+      .map((a) => [a.day, a.type, a.minutes, a.effort, a.when]),
   });
 }

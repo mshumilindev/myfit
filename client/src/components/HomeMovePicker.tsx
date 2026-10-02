@@ -16,7 +16,8 @@ import type { Workout } from '../types';
 import { useT } from '../i18n';
 import { Icon, Sheet, useExerciseName } from '../ui';
 import { HomeMoveIcon } from './HomeMoveIcon';
-import { MoveForm } from './HomeSetSheet';
+import { BackButton } from './ui/BackButton';
+import { useOwnMoveForm } from './HomeMoveForm';
 import { Tag } from './ui/Tag';
 
 export function HomeMovePicker(props: {
@@ -47,7 +48,7 @@ export function HomeMovePicker(props: {
   if (creating)
     return (
       <Sheet onClose={props.onClose} className="home-sheet">
-        <MoveForm move={null} onBack={() => setCreating(false)} onSaved={commit} />
+        <CreateMove onBack={() => setCreating(false)} onSaved={commit} />
       </Sheet>
     );
 
@@ -78,7 +79,7 @@ export function HomeMovePicker(props: {
       <div className="hs-view">
         <div className="hs-head">
           <span className="hs-title">{props.replacing ? t.replaceExercise : t.homeAddMove}</span>
-          <Tag tone="accent" icon={<Icon name="house" />}>
+          <Tag tone="home" icon={<Icon name="house" />}>
             {t.homeMovesOnly}
           </Tag>
         </div>
@@ -117,5 +118,30 @@ export function HomeMovePicker(props: {
         </Button>
       </div>
     </Sheet>
+  );
+}
+
+/** Create your own move from the picker — the same form as the Home set screen's. */
+function CreateMove(props: { onBack: () => void; onSaved: (m: HomeMove) => void }) {
+  const { t } = useT();
+  const form = useOwnMoveForm(null, { onSaved: props.onSaved });
+  return (
+    <div className="hs-view">
+      <div className="hs-head">
+        <BackButton className="hs-back" label={t.backAction} onClick={props.onBack} />
+        <span className="hs-title">{t.homeNewMove}</span>
+      </div>
+      {form.fields}
+      <Button
+        variant="primary"
+        size="lg"
+        icon="check"
+        className="hs-wide"
+        disabled={!form.canSave}
+        onClick={form.save}
+      >
+        {t.homeSaveMove}
+      </Button>
+    </div>
   );
 }

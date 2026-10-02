@@ -1,6 +1,6 @@
 /* ==========================================================================
    Log activity page (design docs/design/log-activity: m01–m08, w01–w04).
-   Colour families: conditioning gold, sports green, recovery blue — every
+   Colour families: conditioning orchid, sports green, recovery blue — every
    toned element reads --tc (ink), --tt (tint) and --tb (border) from its
    nearest .la-g / .la-s / .la-r ancestor.
    ========================================================================== */
@@ -15,10 +15,10 @@
   font-variant-numeric: tabular-nums;
 }
 .la-g {
-  --t-base: var(--color-accent);
-  --t-tint: var(--color-accent-tint);
-  --t-text: var(--color-accent-text);
-  --t-line: var(--color-accent-line);
+  --t-base: var(--color-conditioning);
+  --t-tint: var(--color-conditioning-tint);
+  --t-text: var(--color-conditioning-text);
+  --t-line: var(--color-conditioning-line);
   --t-on: var(--color-bg);
 }
 .la-s {

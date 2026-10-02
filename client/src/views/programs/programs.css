@@ -67,8 +67,8 @@
 }
 .pg-title {
   margin: 0;
-  font-size: var(--fs-30);
-  font-weight: 700;
+  font-size: var(--fs-34);
+  font-weight: 600;
   letter-spacing: -0.02em;
 }
 .pg-meta {
@@ -360,9 +360,24 @@ html.theme-glass .pg-mine .pg-card-name {
 .pg-wtile {
   display: flex;
   flex-direction: column;
-  gap: var(--s-6);
+  gap: var(--s-10);
+  cursor: pointer;
   min-height: 108px;
   padding: var(--s-12) var(--s-14) var(--s-14);
+}
+.pg-wtile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-10);
+  min-height: 30px;
+}
+.pg-wname {
+  font-size: var(--fs-20);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 .pg-wd {
   font-size: var(--fs-13);
@@ -377,7 +392,7 @@ html.theme-glass .pg-mine .pg-card-name {
 }
 .pg-wtile-rest {
   font-size: var(--fs-20);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-neutral-600);
 }
 .pg-wcount {
@@ -525,23 +540,37 @@ html.theme-glass .pg-mine .pg-card-name {
 .pg-rp {
   flex: none;
   width: 88px;
-  min-height: 56px;
-  justify-content: flex-start;
-  gap: var(--s-6);
-  padding: var(--s-8) var(--s-10);
-}
-.pg-rp .uichip-l {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: var(--s-2);
-  min-width: 0;
+  padding: var(--s-8) var(--s-10);
+  text-align: left;
 }
-.pg-rp .uichip-l span {
-  max-width: 100%;
+.pg-rp-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+.pg-rp.on .pg-wd {
+  color: var(--color-accent-400);
+}
+.pg-rp-name {
+  font-size: var(--fs-13);
+  color: var(--color-neutral-400);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.pg-day-name {
+  flex: none;
+}
+.pg-day-name.uifield--bare .uifield-in {
+  text-align: left;
+  font-size: var(--fs-34);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
 }
 .pg-rail {
   display: flex;
@@ -565,7 +594,22 @@ html.theme-glass .pg-mine .pg-card-name {
 
 /* the two identical tabs */
 .pg-modes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-10);
   width: 100%;
+}
+.pg-mode {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-8);
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+.pg-mode .ui-icon {
+  font-size: var(--fs-20);
 }
 
 /* muscles */
@@ -1083,5 +1127,50 @@ html.theme-glass .pg-top .pg-ib {
   box-shadow: inset 0 0 0 1px var(--glass-well-ring);
 }
 html.theme-glass .pg-top .pg-top-title {
+  font-size: var(--fs-14);
+}
+
+/* Planned activities (day editor section + week overview chips). */
+.pg-acts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-10);
+}
+.pg-acttypes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.pg-actchips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-6);
+  margin-top: var(--s-6);
+}
+
+/* The warm-up's own "Add exercise" sits inside the list, off its edges. */
+.pg-ex > .uibtn {
+  margin: var(--s-4) var(--s-14) var(--s-12);
+}
+.pg-ex > .uigl {
+  margin: 0 var(--s-8) var(--s-8);
+}
+.pg-wtile-top .uibtn--icon {
+  width: 28px;
+  min-height: 28px;
+  height: 28px;
+}
+
+/* Review rows: brass caps weekday, semibold day name (design Builder-Review). */
+.pg-review {
+  --row-time-weight: 700;
+  --row-time-ls: 0.1em;
+  --row-time-case: uppercase;
+  --row-time-color: var(--color-accent-300);
+}
+.pg-review .uirow-l {
+  font-weight: 600;
+}
+.pg-actchips .uichip .ui-icon {
   font-size: var(--fs-14);
 }

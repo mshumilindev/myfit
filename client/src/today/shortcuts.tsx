@@ -29,8 +29,8 @@ export interface ShortcutDef {
 const catTone = (type: string): Tone => {
   const a = activityType(type);
   if (a?.sport) return 'sport';
-  // Same colour families as History: sport green, recovery blue, conditioning teal.
-  return a?.category === 'recovery' ? 'rest' : 'active';
+  // Same colour families as History: sport green, recovery blue, conditioning orchid.
+  return a?.category === 'recovery' ? 'rest' : 'conditioning';
 };
 
 const BASE: ShortcutDef[] = [

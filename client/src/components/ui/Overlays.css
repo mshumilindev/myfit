@@ -90,6 +90,7 @@
   background: color-mix(in srgb, var(--c-0a0b0d) 60%, transparent);
   z-index: var(--z-50);
   animation: scrimIn 0.22s ease both;
+  will-change: opacity;
 }
 .scrim.scrim-closing {
   animation: scrimOut 0.22s ease forwards;

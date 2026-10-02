@@ -556,7 +556,7 @@ export function WorkoutRow({
         dense
         strong
         time={fmtClock(w.startedAt)}
-        icon={<IconTile tone="accent" size={36} icon="house" />}
+        icon={<IconTile tone="home" size={36} icon="house" />}
         label={w.dayName || t.homeSetTitle}
         sub={`${w.finishedAt ? `${fmtDurationHM(w.finishedAt - w.startedAt)} · ` : ''}${workoutSets(w)} ${t.sets}`}
         chevron
@@ -593,7 +593,7 @@ export function ActivityRow({
   const { t } = useT();
   const cat = activityTone(a.type, activityCategory(a));
   const min = Math.round(activityDurationMin(a));
-  const tone: Tone = cat === 'sport' ? 'sport' : cat === 'recovery' ? 'rest' : 'accent';
+  const tone: Tone = cat === 'sport' ? 'sport' : cat === 'recovery' ? 'rest' : 'conditioning';
   return (
     <ListRow
       className={`hist-item hist-activity is-minor cat-${cat}`}

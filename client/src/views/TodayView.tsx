@@ -22,6 +22,7 @@ import {
   type TodayLayout,
 } from '../today/layout';
 import { Button } from '../components/ui/Button';
+import { captureToday } from '../data/todaySnapshot';
 import { Card } from '../components/ui/Card';
 import { ListRow } from '../components/ui/GroupedList';
 import { toneClass, type Tone } from '../components/ui/tones';
@@ -86,19 +87,14 @@ import { BackfillSheet, StartSheet } from '../components/StartSheet';
 import { WeightSheet } from '../components/BodyMetrics';
 import { AtlasClientsBlock } from '../today/AtlasClientsBlock';
 import { hasCachedClients } from '../today/clientRoster';
-import {
-  activityType,
-  activityCategory,
-  activityTone,
-  activityWeek,
-  workoutCalories,
-} from '../activities';
+import { activityWeek, workoutCalories } from '../activities';
 import { restingForDay } from '../dayEnergy';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
 import { AlcoholCheckinCard } from '../components/AlcoholCheckinCard';
 import { SupplementCheckinCard } from '../components/SupplementCheckinCard';
 import { SleepForgotBanner, SleepAutoFilledCard } from '../components/SleepAutomation';
+import { ProgramActivitySuggest } from '../components/ProgramActivitySuggest';
 import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
 import { ConfirmDialog, Icon, Sheet, useIsDesktop } from '../ui';
 import { REHAB_STAGES, stageIndex, inFullRest, nextStage } from '../injury';
@@ -1227,31 +1223,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       status: (
         <>
           {banners}
-          {liveAct && (
-            <Card
-              as="button"
-              pad="none"
-              tone={
-                ({ recovery: 'rest', sport: 'sport' }[
-                  activityTone(liveAct.type, activityCategory(liveAct)) as string
-                ] as 'rest' | 'sport' | undefined) ?? 'accent'
-              }
-              className={`td-resume-activity cat-${activityTone(liveAct.type, activityCategory(liveAct))}`}
-              onClick={() => shell.openOverlay({ screen: 'activity' })}
-            >
-              <span className="tra-icon">
-                <Icon name={activityType(liveAct.type)?.icon ?? 'heartbeat'} weight="fill" />
-              </span>
-              <span className="tra-main">
-                <span className="tra-kicker">{t.actInProgress}</span>
-                <span className="tra-name">{t.actType[liveAct.type] ?? liveAct.type}</span>
-              </span>
-              <span className="tra-cta">
-                {t.actResume}
-                <Icon name="arrow-right" />
-              </span>
-            </Card>
-          )}
           {activeInj && injFullRest && activeInj.fullRestUntil != null && (
             <div className="prog-banner analysis-banner gem-rest tr-banner tr-banner--rest fade-in">
               <span className="prog-sheen" aria-hidden />
@@ -1602,6 +1573,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           <NudgeStack nudges={nudges.filter((n) => shows(n.id as NudgeKind))} />
           <AlcoholCheckinCard />
           <SupplementCheckinCard />
+          <ProgramActivitySuggest />
           {shows('sleep') && (
             <>
               <SleepForgotBanner
@@ -1726,6 +1698,19 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               onClick={() => setEditing(true)}
             >
               {t.todayCustomize}
+            </Button>
+            <Button
+              variant="ghost"
+              fullWidth
+              icon="palette"
+              className="td-themes"
+              onClick={(e) => {
+                // Freeze Today as it looks now: the Themes page previews it.
+                captureToday(e.currentTarget.closest('.today-page'));
+                shell.openOverlay({ screen: 'themes' });
+              }}
+            >
+              {t.todayThemes}
             </Button>
           </>
         )}

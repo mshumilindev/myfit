@@ -18,6 +18,7 @@ import {
   useSyncExternalStore,
   type RefObject,
 } from 'react';
+import { flushSync } from 'react-dom';
 import { collection, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import {
   getRole,
@@ -39,6 +40,8 @@ import {
   discardPastWorkout,
   setMasterySeenRating,
   liveSleep,
+  setCoach,
+  useSelfCoachRole,
 } from './store';
 import { SpotterSky } from './components/SpotterSky';
 import { SleepAutomation, SleepPauseController } from './components/SleepAutomation';
@@ -68,10 +71,14 @@ import { ShellLauncher } from './components/ShellLauncher';
 import { SpotterMark } from './brand/SpotterMark';
 import type { ApexTab } from './views/ApexApp';
 import type { RosterTab } from './views/RosterApp';
+import type { HomeSetRoute } from './views/home/HomeSetView';
+import { pruneHomeSetDrafts } from './views/home/homeSetDraft';
 import { AuthView } from './views/AuthView';
 import { TraineeSessionView } from './views/TraineeSessionView';
 import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
+import { ActivityHero } from './components/ActivityHero';
+import { isActivityLive } from './activities';
 import type { SyncError, Notice, InjurySide } from './types';
 import type { HealthFormSpec } from './health';
 import type { MuscleGroup } from './data/exercises';
@@ -148,6 +155,9 @@ const NotificationsView = lazy(() =>
     default: module.NotificationsView,
   })),
 );
+const ThemesView = lazy(() =>
+  import('./views/ThemesView').then((module) => ({ default: module.ThemesView })),
+);
 const HistoryListView = lazy(() =>
   import('./views/HistoryListView').then((module) => ({
     default: module.HistoryListView,
@@ -218,6 +228,9 @@ const ClientPage = lazy(() =>
 const OverviewView = lazy(() =>
   import('./views/OverviewView').then((module) => ({ default: module.OverviewView })),
 );
+const HomeSetView = lazy(() =>
+  import('./views/home/HomeSetView').then((module) => ({ default: module.HomeSetView })),
+);
 const StartSheet = lazy(() =>
   import('./components/StartSheet').then((module) => ({ default: module.StartSheet })),
 );
@@ -238,6 +251,7 @@ export type Overlay =
   | { screen: 'muscle-history'; muscle: MuscleGroup }
   | { screen: 'settings' }
   | { screen: 'history' }
+  | { screen: 'themes' }
   | { screen: 'notifications' }
   | { screen: 'recap'; period: string }
   | { screen: 'recap-story'; period: string }
@@ -282,6 +296,7 @@ export type Overlay =
       /** Health › Privacy and sharing. */
       priv?: boolean;
     }
+  | ({ screen: 'home-set' } & HomeSetRoute)
   | { screen: 'uikit' }
   | { screen: 'widget-library' }
   | { screen: 'library'; libTab?: 'mine' }
@@ -371,13 +386,16 @@ function navActive(item: Tab, tab: Tab): boolean {
   return item === 'overview' ? OVERVIEW_TABS.includes(tab) : item === tab;
 }
 
+/** Progress sub-screens: the main tabs, Trends, and the Activity trends page. */
+export type ProgressSub = 'progress' | 'trends' | 'activity';
+
 /** Serialize the current screen to a URL hash so a refresh restores it. */
 export function toHash(
   tab: Tab,
   overlay: Overlay,
   programsPeer: ProgramsPeer,
   libMine: boolean,
-  progressSub: 'progress' | 'trends',
+  progressSub: ProgressSub,
   progressSeg: ProgSeg,
   volumeLens: VolLens,
 ): string {
@@ -388,6 +406,7 @@ export function toHash(
   }
   if (!overlay && tab === 'progress') {
     if (progressSub === 'trends') return '#/trends';
+    if (progressSub === 'activity') return '#/trends/activity';
     if (progressSeg === 'muscle') return '#/progress/muscle';
     if (progressSeg === 'records') return '#/progress/records';
     if (progressSeg === 'volume')
@@ -420,9 +439,11 @@ export function toHash(
     return overlay.libTab === 'mine' ? '#/exercises/mine' : '#/exercises';
   if (overlay?.screen === 'settings') return '#/settings';
   if (overlay?.screen === 'history') return '#/history';
+  if (overlay?.screen === 'themes') return '#/themes';
   if (overlay?.screen === 'builder') return '#/builder';
   if (overlay?.screen === 'injury') return '#/injury';
   if (overlay?.screen === 'health') return healthHash(overlay);
+  if (overlay?.screen === 'home-set') return homeSetHash(overlay);
   if (overlay?.screen === 'uikit') return '#/uikit';
   if (overlay?.screen === 'widget-library') return '#/widgets';
   if (overlay?.screen === 'notifications') return '#/notifications';
@@ -464,6 +485,22 @@ function healthHash(o: Extract<Overlay, { screen: 'health' }>): string {
   }
   if (o.priv) parts.push('privacy');
   return parts.join('/');
+}
+
+/** Home set hash: #/home[/moves] for the home page, then /set/{id|new}, /add/{id|new} or
+ *  /move/{id|new} for its pages. */
+function homeSetHash(o: Extract<Overlay, { screen: 'home-set' }>): string {
+  const sub = o.id ? encodeURIComponent(o.id) : 'new';
+  if (o.page) return `#/home/${o.page}/${sub}`;
+  return o.tab === 'moves' ? '#/home/moves' : '#/home';
+}
+
+function homeSetFromHash(rest: string[]): Extract<Overlay, { screen: 'home-set' }> {
+  const [k, a] = rest;
+  const id = a && a !== 'new' ? decodeURIComponent(a) : undefined;
+  if (k === 'set' || k === 'add' || k === 'move')
+    return id ? { screen: 'home-set', page: k, id } : { screen: 'home-set', page: k };
+  return k === 'moves' ? { screen: 'home-set', tab: 'moves' } : { screen: 'home-set' };
 }
 
 function healthFromHash(rest: string[]): Extract<Overlay, { screen: 'health' }> {
@@ -524,6 +561,8 @@ export function overlayBack(n: { cur: Overlay; stack: Overlay[] }): {
     (n.cur.view || n.cur.form || n.cur.cond || n.cur.nic || n.cur.alc || n.cur.sup || n.cur.priv)
   )
     return { cur: { screen: 'health' }, stack: [] };
+  // A Home set page reached by a link or a refresh goes up to the Home set page.
+  if (n.cur?.screen === 'home-set' && n.cur.page) return { cur: { screen: 'home-set' }, stack: [] };
   return { cur: null, stack: [] };
 }
 
@@ -595,11 +634,13 @@ export function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'coach') return { tab: 'today', overlay: { screen: 'coach' } };
   if (head === 'injury') return { tab: 'today', overlay: { screen: 'injury' } };
   if (head === 'health') return { tab: 'today', overlay: healthFromHash(parts.slice(1)) };
+  if (head === 'home') return { tab: 'today', overlay: homeSetFromHash(parts.slice(1)) };
   if (head === 'widgets' && import.meta.env.DEV)
     return { tab: 'today', overlay: { screen: 'widget-library' } };
   if (head === 'uikit' && import.meta.env.DEV)
     return { tab: 'today', overlay: { screen: 'uikit' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
+  if (head === 'themes') return { tab: 'today', overlay: { screen: 'themes' } };
   if (head === 'builder') return { tab: 'today', overlay: { screen: 'builder' } };
   if (head === 'notifications') return { tab: 'today', overlay: { screen: 'notifications' } };
   if (head === 'recap' && parts[1])
@@ -637,13 +678,14 @@ export type VolLens = 'volume' | 'fatigue' | 'readiness';
 
 /** Read the Progress sub-tab + volume seg/lens from the hash:
  *  #/trends, #/feats[/standards], #/progress[/muscle|/volume[/fatigue|/readiness]|/records]. */
-function progressFromHash(hash: string): {
-  sub: 'progress' | 'trends';
+export function progressFromHash(hash: string): {
+  sub: ProgressSub;
   seg: ProgSeg;
   lens: VolLens;
 } {
   const parts = hash.split('?')[0].replace(/^#\/?/, '').split('/');
   const base = { seg: 'total' as ProgSeg, lens: 'volume' as VolLens };
+  if (parts[0] === 'trends' && parts[1] === 'activity') return { sub: 'activity', ...base };
   if (parts[0] === 'trends') return { sub: 'trends', ...base };
   if (parts[0] === 'progress') {
     const seg: ProgSeg = (['muscle', 'volume', 'records'] as string[]).includes(parts[1])
@@ -708,6 +750,12 @@ export function App() {
   const conditionLimits = useConditionLimits();
   useEffect(() => setProgressionEffects(conditionLimits.effects), [conditionLimits]);
   const [authed, setAuthed] = useState<boolean>(() => !!currentUid());
+  const wantCoachRole = useSelfCoachRole();
+  useEffect(() => {
+    if (authed && wantCoachRole && store.coach.role !== wantCoachRole) {
+      setCoach({ role: wantCoachRole });
+    }
+  }, [authed, wantCoachRole, store.coach.role]);
   const [notices, setNotices] = useState<Notice[]>([]);
 
   // Firebase restores the session asynchronously; track it and keep the cached
@@ -914,7 +962,7 @@ export function App() {
   // Progress sub-tabs (Progress · Trends · Feats · Challenges) + the Feats
   // sub-tab, kept in App so each has its own URL (#/trends, #/feats,
   // #/feats/standards, #/challenges).
-  const [progressSub, setProgressSub] = useState<'progress' | 'trends'>(
+  const [progressSub, setProgressSub] = useState<ProgressSub>(
     () => progressFromHash(window.location.hash).sub,
   );
   // Progress volume seg + lens live here too, so #/progress/volume/readiness
@@ -945,6 +993,10 @@ export function App() {
   useEffect(() => {
     pruneEmptyLiveWorkouts(draftKeepId);
   }, [draftKeepId]);
+  // Home set drafts (an unsaved set, the picker's ticks) live only while the screen is open.
+  useEffect(() => {
+    pruneHomeSetDrafts([overlayNav.cur, ...overlayNav.stack]);
+  }, [overlayNav]);
   /** Open an overlay, remembering the current one as its logical parent.
    * Passing null resets the whole overlay stack (used when switching tabs). */
   const setOverlay = useCallback((o: Overlay) => {
@@ -954,7 +1006,8 @@ export function App() {
       // replaces the current overlay instead of stacking a new parent.
       // Health is the exception: its pages (history, a form, a condition) are real
       // steps, so Back returns to the Health overview, not past it.
-      if (n.cur && n.cur.screen === o.screen && o.screen !== 'health')
+      // Home set is the same: its pages (a set, the picker, a move) are real steps.
+      if (n.cur && n.cur.screen === o.screen && o.screen !== 'health' && o.screen !== 'home-set')
         return { cur: o, stack: n.stack };
       return { cur: o, stack: n.cur === null ? n.stack : [...n.stack, n.cur] };
     });
@@ -977,6 +1030,7 @@ export function App() {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const overLayerRef = useRef<HTMLDivElement | null>(null);
   const underLayerRef = useRef<HTMLDivElement | null>(null);
+  const scrimRef = useRef<HTMLDivElement | null>(null);
   const snackSeq = useRef(0);
   const toastSeq = useRef(0);
 
@@ -1053,6 +1107,7 @@ export function App() {
     setToasts((list) => list.filter((x) => x.id !== id));
   }, []);
   const open = store.workouts.find((w) => w.finishedAt === null);
+  const liveAct = store.activities.find(isActivityLive) ?? null;
   const trainedToday = useMemo(() => {
     const d0 = new Date();
     d0.setHours(0, 0, 0, 0);
@@ -1097,6 +1152,7 @@ export function App() {
     stageRef,
     overRef: overLayerRef,
     underRef: underLayerRef,
+    scrimRef,
     onSwipeStart: () => setBackSwipe(true),
     onSwipeEnd: () => setBackSwipe(false),
   });
@@ -1488,7 +1544,7 @@ export function App() {
     );
   }
 
-  const overlayContent = activeOverlay ? (
+  const renderOverlay = (activeOverlay: NonNullable<Overlay>) => (
     <Suspense fallback={<ScreenFallback />}>
       {activeOverlay?.screen === 'session' && (
         <SessionView workoutId={activeOverlay.workoutId} shell={shell} onClose={closeOverlay} />
@@ -1565,6 +1621,7 @@ export function App() {
       {activeOverlay?.screen === 'settings' && role === 'admin' && (
         <SettingsView onClose={closeOverlay} />
       )}
+      {activeOverlay?.screen === 'themes' && <ThemesView onClose={closeOverlay} />}
       {activeOverlay?.screen === 'history' && (
         <HistoryListView shell={shell} onClose={closeOverlay} />
       )}
@@ -1649,12 +1706,25 @@ export function App() {
           onClose={closeOverlay}
         />
       )}
+      {activeOverlay?.screen === 'home-set' && (
+        <HomeSetView
+          shell={shell}
+          page={activeOverlay.page}
+          id={activeOverlay.id}
+          tab={activeOverlay.tab}
+          pick={activeOverlay.pick}
+          onClose={closeOverlay}
+        />
+      )}
       {Gallery && activeOverlay?.screen === 'uikit' && <Gallery onClose={closeOverlay} />}
       {WidgetLibraryScreen && activeOverlay?.screen === 'widget-library' && (
         <WidgetLibraryScreen shell={shell} onClose={closeOverlay} />
       )}
     </Suspense>
-  ) : null;
+  );
+  const overlayContent = activeOverlay ? renderOverlay(activeOverlay) : null;
+  // What a back-swipe reveals: the parent overlay when there is one, else the tab.
+  const parentOverlay = activeOverlay ? overlayBack(overlayNav).cur : null;
   const tabContent = (
     <Suspense fallback={<ScreenFallback />}>
       {effectiveTab === 'today' && <TodayView shell={shell} store={store} />}
@@ -1669,6 +1739,10 @@ export function App() {
           }}
           onTrends={() => {
             setProgressSub('trends');
+            setTab('progress');
+          }}
+          onActivity={() => {
+            setProgressSub('activity');
             setTab('progress');
           }}
           onPrograms={goProgramsPeer}
@@ -1759,6 +1833,9 @@ export function App() {
             onStop={() => setOverlay({ screen: 'sleep', wake: true })}
           />
         )}
+        {liveAct && activeOverlay?.screen !== 'activity' && (
+          <ActivityHero activity={liveAct} onOpen={() => setOverlay({ screen: 'activity' })} />
+        )}
         {open && activeOverlay?.screen !== 'session' && (
           <LiveHero
             workout={open}
@@ -1773,7 +1850,9 @@ export function App() {
         <div className="screen-stage" ref={stageRef} data-back-swipe={backSwipe ? '' : undefined}>
           {(!activeOverlay || backSwipe) && (
             <div className="stage-layer under-layer" ref={underLayerRef}>
-              {tabContent}
+              {parentOverlay && parentOverlay.screen !== 'session'
+                ? renderOverlay(parentOverlay)
+                : tabContent}
             </div>
           )}
           {activeOverlay && (
@@ -1781,6 +1860,7 @@ export function App() {
               {overlayContent}
             </div>
           )}
+          {backSwipe && <div className="stage-scrim" ref={scrimRef} aria-hidden />}
         </div>
         {showTabbar && (
           <TabBar
@@ -1899,22 +1979,30 @@ interface EdgeBackOpts {
   stageRef: RefObject<HTMLDivElement | null>;
   overRef: RefObject<HTMLDivElement | null>;
   underRef: RefObject<HTMLDivElement | null>;
+  scrimRef: RefObject<HTMLDivElement | null>;
   onSwipeStart: () => void;
   onSwipeEnd: () => void;
 }
 
 const BACK_PARALLAX = 0.25; // how far the revealed screen sits behind, as a fraction of width
 const BACK_SCRIM = 0.12; // dim over the revealed screen at rest
+const BACK_EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
 
 /**
  * Interactive iOS-style edge-back. From the left edge, the current overlay
  * follows the finger to the right while the destination (rendered underneath)
  * eases in from a slight left parallax with a fading scrim; release past the
- * halfway point (or a quick flick) completes the pop, otherwise it springs back.
+ * halfway point (or a flick) completes the pop, otherwise it springs back.
  * When no overlay is open (e.g. a Programs sub-tab) it falls back to a plain
  * threshold trigger with no visual.
+ *
+ * Smoothness: the destination is mounted on touch-start (before the finger has
+ * moved), only transforms/opacity are written per frame (no CSS-variable
+ * invalidation), the release duration follows the finger's velocity, the pop is
+ * committed with flushSync so the old screen never flashes back for a frame, and
+ * the non-passive touchmove listener exists only while an edge gesture runs.
  */
-function useEdgeSwipeBack(opts: EdgeBackOpts): void {
+export function useEdgeSwipeBack(opts: EdgeBackOpts): void {
   const ref = useRef(opts);
   useEffect(() => {
     ref.current = opts;
@@ -1929,68 +2017,149 @@ function useEdgeSwipeBack(opts: EdgeBackOpts): void {
     let tracking = false;
     let locked = false;
     let cancelled = false;
+    let armed = false; // destination mounted (touch-start on the edge)
     let active = false; // interactive reveal engaged
     let dx = 0;
     let width = 1;
     let raf = 0;
+    let moving = false; // touchmove listener attached
+    let samples: Array<{ x: number; t: number }> = [];
 
     const layers = () => ({
       over: ref.current.overRef.current,
       under: ref.current.underRef.current,
       stage: ref.current.stageRef.current,
+      scrim: ref.current.scrimRef.current,
     });
+    const frame = (x: number) => {
+      const { over, under, scrim } = layers();
+      const p = Math.max(0, Math.min(1, x / width));
+      if (over) over.style.transform = `translate3d(${Math.max(0, x)}px,0,0)`;
+      if (under) under.style.transform = `translate3d(${-(1 - p) * width * BACK_PARALLAX}px,0,0)`;
+      if (scrim) scrim.style.opacity = String((1 - p) * BACK_SCRIM);
+    };
     const paint = () => {
       raf = 0;
-      const { over, under, stage } = layers();
-      const p = Math.max(0, Math.min(1, dx / width));
-      if (over) over.style.transform = `translateX(${Math.max(0, dx)}px)`;
-      if (under) under.style.transform = `translateX(${-(1 - p) * width * BACK_PARALLAX}px)`;
-      if (stage) stage.style.setProperty('--back-scrim', String((1 - p) * BACK_SCRIM));
+      frame(dx);
     };
     const schedule = () => {
       if (!raf) raf = requestAnimationFrame(paint);
     };
-    const setTransition = (on: boolean) => {
-      const { over, under } = layers();
-      const v = on ? 'transform 0.26s cubic-bezier(0.22, 0.61, 0.36, 1)' : 'none';
-      if (over) {
-        over.style.transition = v;
-        void over.offsetWidth; // flush so the release animates from the current spot
-      }
-      if (under) under.style.transition = v;
-    };
     const clearStyles = () => {
-      const { over, under, stage } = layers();
+      const { over, under, scrim } = layers();
       for (const el of [over, under]) {
         if (!el) continue;
         el.style.transition = '';
         el.style.transform = '';
+        el.style.willChange = '';
       }
-      if (stage) stage.style.removeProperty('--back-scrim');
+      if (scrim) {
+        scrim.style.transition = '';
+        scrim.style.opacity = '';
+      }
     };
-    const reset = () => {
+    const track = (x: number) => {
+      const t = performance.now();
+      samples.push({ x, t });
+      while (samples.length > 2 && t - samples[0].t > 100) samples.shift();
+    };
+    /** px per ms over the last ~100 ms (0 when unknown). */
+    const velocity = () => {
+      if (samples.length < 2) return 0;
+      const a = samples[0];
+      const b = samples[samples.length - 1];
+      return b.t > a.t ? (b.x - a.x) / (b.t - a.t) : 0;
+    };
+    const onMove = (event: TouchEvent) => {
+      if (!tracking || cancelled || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      if (!touch) return;
+      dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+      if (dx < -8) {
+        release();
+        return;
+      }
+      if (!locked) {
+        if (absY > 10 && absY > absX) {
+          cancelled = true;
+          tracking = false;
+          release();
+          return;
+        }
+        if (dx > EDGE_BACK_LOCK_PX && absX > absY * EDGE_BACK_DOMINANCE) {
+          locked = true;
+          if (armed) {
+            active = true;
+            width = window.innerWidth || 1;
+            const { over, under } = layers();
+            for (const el of [over, under]) if (el) el.style.willChange = 'transform';
+          }
+        }
+      }
+      if (locked && event.cancelable) event.preventDefault();
+      if (active) {
+        track(touch.clientX);
+        schedule();
+      }
+    };
+    const attachMove = () => {
+      if (moving) return;
+      moving = true;
+      window.addEventListener('touchmove', onMove, { passive: false });
+    };
+    const detachMove = () => {
+      if (!moving) return;
+      moving = false;
+      window.removeEventListener('touchmove', onMove);
+    };
+    /** Gesture over without an interactive reveal: drop the pre-mounted destination. */
+    const release = () => {
+      detachMove();
       tracking = false;
       locked = false;
       cancelled = false;
+      if (armed && !active) {
+        armed = false;
+        ref.current.onSwipeEnd();
+      }
     };
-    const endInteractive = (commit: boolean) => {
-      const { over, under, stage } = layers();
-      setTransition(true);
-      const p1 = commit ? 1 : 0;
-      if (over) over.style.transform = `translateX(${commit ? width : 0}px)`;
-      if (under) under.style.transform = `translateX(${-(1 - p1) * width * BACK_PARALLAX}px)`;
-      if (stage) stage.style.setProperty('--back-scrim', String((1 - p1) * BACK_SCRIM));
+    const endInteractive = (commit: boolean, v: number) => {
+      const { over, under, scrim } = layers();
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+      // Duration follows the remaining distance and the flick speed.
+      const remaining = commit ? Math.max(0, width - dx) : Math.max(0, dx);
+      const speed = Math.max(Math.abs(v), 0.9); // px/ms
+      const ms = Math.round(Math.max(140, Math.min(320, remaining / speed)));
+      const tr = `transform ${ms}ms ${BACK_EASE}`;
+      if (over) {
+        over.style.transition = tr;
+        void over.offsetWidth; // flush so the release animates from the current spot
+      }
+      if (under) under.style.transition = tr;
+      if (scrim) scrim.style.transition = `opacity ${ms}ms ${BACK_EASE}`;
+      frame(commit ? width : 0);
       let done = false;
       const finish = () => {
         if (done) return;
         done = true;
+        // Commit the pop (and unmount the layers) in one synchronous render, so
+        // the screen that just slid away never reappears for a frame.
+        flushSync(() => {
+          if (commit) ref.current.onBack();
+          ref.current.onSwipeEnd();
+        });
         clearStyles();
         active = false;
-        if (commit) ref.current.onBack();
-        ref.current.onSwipeEnd();
+        armed = false;
       };
       if (over) over.addEventListener('transitionend', finish, { once: true });
-      window.setTimeout(finish, 340);
+      window.setTimeout(finish, ms + 80);
     };
 
     const onTouchStart = (event: TouchEvent) => {
@@ -2004,45 +2173,22 @@ function useEdgeSwipeBack(opts: EdgeBackOpts): void {
       tracking = true;
       locked = false;
       cancelled = false;
-    };
-    const onTouchMove = (event: TouchEvent) => {
-      if (!tracking || cancelled || event.touches.length !== 1) return;
-      const touch = event.touches[0];
-      if (!touch) return;
-      dx = touch.clientX - startX;
-      const dy = touch.clientY - startY;
-      const absX = Math.abs(dx);
-      const absY = Math.abs(dy);
-      if (dx < -8) {
-        reset();
-        return;
+      dx = 0;
+      samples = [{ x: touch.clientX, t: performance.now() }];
+      attachMove();
+      if (ref.current.interactive && !armed) {
+        armed = true;
+        ref.current.onSwipeStart(); // mount the destination before the finger moves
       }
-      if (!locked) {
-        if (absY > 10 && absY > absX) {
-          cancelled = true;
-          tracking = false;
-          return;
-        }
-        if (dx > EDGE_BACK_LOCK_PX && absX > absY * EDGE_BACK_DOMINANCE) {
-          locked = true;
-          if (ref.current.interactive) {
-            active = true;
-            width = window.innerWidth || 1;
-            ref.current.onSwipeStart(); // mount the destination layer
-          }
-        }
-      }
-      if (locked && event.cancelable) event.preventDefault();
-      if (active) schedule();
     };
     const onTouchEnd = (event: TouchEvent) => {
       if (!tracking || cancelled) {
-        reset();
+        release();
         return;
       }
       const touch = event.changedTouches[0];
       if (!touch) {
-        reset();
+        release();
         return;
       }
       dx = touch.clientX - startX;
@@ -2055,25 +2201,34 @@ function useEdgeSwipeBack(opts: EdgeBackOpts): void {
         dx > absY * EDGE_BACK_DOMINANCE;
       const fast = dx >= 52 && elapsed < 280 && dx > absY * 2;
       if (active) {
-        endInteractive(dx >= width * 0.5 || fast || intentional);
-      } else if (intentional || fast) {
-        ref.current.onBack();
+        track(touch.clientX);
+        const v = velocity();
+        detachMove();
+        tracking = false;
+        locked = false;
+        endInteractive(dx >= width * 0.5 || fast || intentional || v > 0.5, v);
+        return;
       }
-      reset();
+      const go = intentional || fast;
+      release();
+      if (go) ref.current.onBack();
     };
     const onCancel = () => {
-      if (active) endInteractive(false);
-      reset();
+      if (active) {
+        detachMove();
+        tracking = false;
+        locked = false;
+        endInteractive(false, 0);
+      } else release();
     };
 
     window.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchmove', onTouchMove, { passive: false });
     window.addEventListener('touchend', onTouchEnd, { passive: true });
     window.addEventListener('touchcancel', onCancel, { passive: true });
     return () => {
       if (raf) cancelAnimationFrame(raf);
+      detachMove();
       window.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
       window.removeEventListener('touchcancel', onCancel);
     };

@@ -1,12 +1,12 @@
 /* ==========================================================================
    Session summary · Next up (design docs/design/log-activity p01–p05).
-   Colour families as on the Log activity page: conditioning gold, sports
+   Colour families as on the Log activity page: conditioning orchid, sports
    green, recovery blue — toned parts read --tc / --tt / --ta from the nearest
    .nu-g / .nu-s / .nu-r.
    ========================================================================== */
 .nu-g {
-  --t-base: var(--color-accent);
-  --t-tint: var(--color-accent-tint);
+  --t-base: var(--color-conditioning);
+  --t-tint: var(--color-conditioning-tint);
 }
 .nu-s {
   --t-base: var(--color-sport);

@@ -70,6 +70,20 @@
   --t-line: var(--color-sport-line);
   --t-on: var(--color-sport-tint);
 }
+.uit--home {
+  --t-base: var(--color-home);
+  --t-tint: var(--color-home-tint);
+  --t-text: var(--color-home-text);
+  --t-line: var(--color-home-line);
+  --t-on: var(--color-home-tint);
+}
+.uit--conditioning {
+  --t-base: var(--color-conditioning);
+  --t-tint: var(--color-conditioning-tint);
+  --t-text: var(--color-conditioning-text);
+  --t-line: var(--color-conditioning-line);
+  --t-on: var(--color-conditioning-tint);
+}
 .uit--ok {
   --t-base: var(--color-ok);
   --t-tint: var(--color-ok-tint);

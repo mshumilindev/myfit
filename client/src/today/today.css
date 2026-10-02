@@ -5,6 +5,13 @@
   margin-top: var(--s-4);
   margin-bottom: var(--s-28);
 }
+/* Themes sits right under Customize Today: pull it up under it. */
+.td-customize:has(+ .td-themes) {
+  margin-bottom: 0;
+}
+.td-themes {
+  margin-bottom: var(--s-28);
+}
 
 .tdc {
   /* the bar starts flush with the top of the screen (sticky can't leave its box) */
@@ -1225,7 +1232,8 @@ body.td-editing .today-page .td-topbar {
 /* ---------- Desktop edit (D2): drag & drop + "Add to Today" panel — tokens only ---------- */
 /* D1: a compact dashed entry at the bottom-left of the main column */
 @media (min-width: 720px) {
-  .pane-main > .td-customize {
+  .pane-main > .td-customize,
+  .pane-main > .td-themes {
     align-self: flex-start;
 
     margin-top: 0;

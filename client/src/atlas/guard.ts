@@ -48,7 +48,7 @@ export function softenReason(ctx: GuardContext): SoftenReason | null {
 export function effectiveTemper(settings: CoachSettings, ctx: GuardContext): Temper {
   if (settings.mutedUntil && settings.mutedUntil > ctx.now) return 1;
   const reason = softenReason(ctx);
-  if (reason && settings.temper > SOFT_TEMPER) return SOFT_TEMPER;
+  if (reason && !settings.keepTemper && settings.temper > SOFT_TEMPER) return SOFT_TEMPER;
   return settings.temper;
 }
 

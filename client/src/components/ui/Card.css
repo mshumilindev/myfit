@@ -63,6 +63,7 @@ button.uicard[aria-disabled='true'] {
 .uicard--injury,
 .uicard--sleep,
 .uicard--sport,
+.uicard--conditioning,
 .uicard--kcal,
 .uicard--apex,
 .uicard--learn,
@@ -105,4 +106,10 @@ button.uicard[aria-disabled='true'] {
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--color-text);
+}
+
+/* Blend: the inline gradient (Card.tsx) replaces the flat tint; the tone class
+   still supplies border and text colours. */
+.uicard--blend {
+  background-color: var(--t-tint);
 }

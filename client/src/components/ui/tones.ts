@@ -13,6 +13,8 @@
  *   warmup   warm-up blue — warm-up exercises (their drawer, Log / Save)
  *   sleep    violet
  *   sport    court green — sports activities
+ *   conditioning  orchid — conditioning activities (cardio, classes)
+ *   home     khaki — Home set (no-gym sessions, their moves)
  *   ok / danger / kcal — status families
  *   apex / learn / atlas — sub-app families (Today widgets)
  *   gym / people — fixed identity of the Gym and People apps (app switcher); unlike
@@ -35,6 +37,8 @@ export type Tone =
   | 'warmup'
   | 'sleep'
   | 'sport'
+  | 'conditioning'
+  | 'home'
   | 'ok'
   | 'danger'
   | 'kcal'
@@ -55,6 +59,8 @@ export const TONES: Tone[] = [
   'warmup',
   'sleep',
   'sport',
+  'conditioning',
+  'home',
   'ok',
   'danger',
   'kcal',

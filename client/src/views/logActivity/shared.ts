@@ -37,7 +37,7 @@ export function catName(cat: CatId, t: Strings): string {
   return cat === 'sport' ? t.actSports : cat === 'recovery' ? t.actRecovery : t.actConditioning;
 }
 
-/** Colour family class: gold conditioning, green sports, blue recovery. */
+/** Colour family class: orchid conditioning, green sports, blue recovery. */
 export function toneClass(key: string): string {
   const t = activityType(key);
   const tone = t ? activityTone(key, t.category) : 'sport';
@@ -54,7 +54,11 @@ export function kitTone(key: string): Tone {
 export function catKitTone(cat: CatId): Tone {
   return KIT_OF[catTone(cat)];
 }
-export const KIT_OF: Record<string, Tone> = { 'la-g': 'accent', 'la-s': 'sport', 'la-r': 'rest' };
+export const KIT_OF: Record<string, Tone> = {
+  'la-g': 'conditioning',
+  'la-s': 'sport',
+  'la-r': 'rest',
+};
 
 export function typeName(key: string, t: Strings): string {
   return t.actType[key] ?? key;

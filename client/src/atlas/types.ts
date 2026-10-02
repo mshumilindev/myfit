@@ -50,6 +50,8 @@ export interface CoachSettings {
   yoMama: boolean;
   /** Swearing (red only). */
   swearing: boolean;
+  /** Never soften the temper on a rough day (injury, illness, short sleep…). */
+  keepTemper?: boolean;
   /** Muted for today from a debrief ("Mute for today"): until this ms. */
   mutedUntil?: number | null;
   /** Agreed to send a training summary to Gemini for chat (one-time consent). */

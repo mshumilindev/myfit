@@ -4,11 +4,12 @@ import { Avatar } from '../../components/Avatar';
 import { useT } from '../../i18n';
 import { Button, IconButton as KitIconButton } from '../../components/ui/Button';
 import { ListRow } from '../../components/ui/GroupedList';
-import { Segmented } from '../../components/ui/Segmented';
+import { Card } from '../../components/ui/Card';
+import { Icon } from '../../ui';
 import { Switch as KitSwitch } from '../../components/ui/Switch';
 import type { DayMode, Person } from './model';
 
-/** Muscles | Exercises — kit Segmented (buttons) with icons. */
+/** Muscles | Exercises — two big tiles; the active one is glass (design Builder-Day). */
 export function ModeTabs({
   mode,
   onChange,
@@ -19,28 +20,32 @@ export function ModeTabs({
   disabled?: boolean;
 }) {
   const { t } = useT();
+  const opts: { value: DayMode; label: string; icon: string }[] = [
+    { value: 'muscles', label: t.pgMuscles, icon: 'person-simple' },
+    { value: 'exercises', label: t.pgExercises, icon: 'barbell' },
+  ];
   return (
-    <Segmented
-      className="pg-modes"
-      variant="buttons"
-      label={t.pgDefineBy}
-      value={mode}
-      onChange={(m) => m !== mode && onChange(m)}
-      options={[
-        {
-          value: 'muscles',
-          label: t.pgMuscles,
-          icon: 'person-simple',
-          disabled: disabled && mode !== 'muscles',
-        },
-        {
-          value: 'exercises',
-          label: t.pgExercises,
-          icon: 'barbell',
-          disabled: disabled && mode !== 'exercises',
-        },
-      ]}
-    />
+    <div className="pg-modes" role="group" aria-label={t.pgDefineBy}>
+      {opts.map((o) => {
+        const on = o.value === mode;
+        return (
+          <Card
+            key={o.value}
+            as="button"
+            pad="none"
+            tone={on ? 'accent' : 'neutral'}
+            emphasis={on ? 'glass' : 'card'}
+            className="pg-mode"
+            aria-pressed={on}
+            disabled={disabled && !on}
+            onClick={() => !on && onChange(o.value)}
+          >
+            <Icon name={o.icon} />
+            <span>{o.label}</span>
+          </Card>
+        );
+      })}
+    </div>
   );
 }
 

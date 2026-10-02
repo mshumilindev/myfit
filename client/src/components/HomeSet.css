@@ -1,6 +1,6 @@
 /* ==========================================================================
-   Home set (design "Spotter — Home set"): the Home set sheet (saved sets,
-   builder, own moves), the home-move picker in a session and the stopwatch.
+   Home set (design "Spotter — Home set"): the home-move picker sheet in a
+   session and the stopwatch. (The Home set screen itself is kit-only.)
    Home moves wear a quiet khaki chip so they read apart from gym sessions
    (brass) and activities (green / blue).
    ========================================================================== */
@@ -9,7 +9,6 @@
   --home-ink: #e8dc9a;
   --home-line: #4a4526;
 }
-
 .sheet.home-sheet {
   gap: 0;
 }
@@ -35,10 +34,6 @@
   font-weight: 600;
   color: var(--color-text);
 }
-.hs-title-ic {
-  font-size: var(--fs-22);
-  color: var(--home-ink);
-}
 .hs-back {
   flex: none;
   width: 34px;
@@ -52,28 +47,8 @@
   place-items: center;
   cursor: pointer;
 }
-.hs-cap {
-  margin: -6px 0 0;
-  font-size: var(--fs-14);
-  line-height: 1.45;
-  color: var(--color-neutral-400);
-}
-.hs-row-sp {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-}
-.hs-count {
-  font-size: var(--fs-12);
-  font-weight: 600;
-  color: var(--home-ink);
-}
 .hs-wide {
   width: 100%;
-}
-.hs-spacer {
-  flex: 1;
-  min-height: 4px;
 }
 .hs-hint {
   display: flex;
@@ -87,224 +62,14 @@
   flex: none;
   margin-top: 1px;
 }
-.hs-foot {
-  margin-top: -6px;
-  text-align: center;
-  font-size: var(--fs-12);
-  color: var(--color-neutral-500);
-}
-.hs-err {
-  font-size: var(--fs-12);
-  color: var(--color-danger-text);
-}
 
-/* --- saved home sets -------------------------------------------------------- */
-.hs-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-10);
-}
-.hs-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-10);
-  padding: var(--s-14);
-  border-radius: var(--r-16);
-  background: var(--color-control);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-text) 6%, transparent);
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  touch-action: manipulation;
-  transition:
-    transform 0.14s ease,
-    background 0.14s ease;
-}
-.hs-card.pressed {
-  background: var(--c-2a2b2e);
-  transform: scale(0.985);
-}
-.hs-card-top {
-  display: flex;
-  align-items: center;
-  gap: var(--s-12);
-}
-.hs-card-text {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
-}
-.hs-card-name {
-  font-size: var(--fs-16);
-  font-weight: 600;
-}
-.hs-card-last {
-  font-size: var(--fs-12);
-  color: var(--color-neutral-500);
-}
-.hs-go {
-  flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--r-round);
-  box-shadow: inset 0 0 0 1px var(--color-accent);
-  color: var(--color-accent);
-  display: grid;
-  place-items: center;
-  font-size: var(--fs-15);
-}
-.hs-chips {
-  display: flex;
-  gap: var(--s-6);
-  flex-wrap: wrap;
-}
-
-/* --- builder: selectable move tiles ---------------------------------------- */
-.hs-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--s-8);
-}
-.hs-tile {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-8);
-  min-height: 84px;
-  padding: var(--s-12) var(--s-6);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-neutral-800);
-  background: var(--color-neutral-900);
-  color: var(--color-text);
-  font: inherit;
-  font-size: var(--fs-13);
-  line-height: 1.2;
-  text-align: center;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
-.hs-tile-ic {
-  font-size: var(--fs-22);
-  color: var(--color-neutral-400);
-}
-.hs-tile.on {
-  background: var(--home-tint);
-  border-color: transparent;
-  box-shadow: inset 0 0 0 1.5px var(--home-ink);
-}
-.hs-tile.on .hs-tile-ic {
-  color: var(--home-ink);
-}
-.hs-tile.new {
-  border: 1px dashed var(--color-accent-800);
-  background: transparent;
-  color: var(--color-accent);
-}
-.hs-tile.new .hs-tile-ic {
-  color: var(--color-accent);
-}
-.hs-check {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 18px;
-  height: 18px;
-  border-radius: var(--r-round);
-  background: var(--home-ink);
-  color: var(--c-1e1c0f);
-  display: grid;
-  place-items: center;
-  font-size: var(--fs-11);
-}
-.hs-actions {
-  display: flex;
-  gap: var(--s-10);
-  margin-top: var(--s-4);
-}
-
-/* --- move lists (edit set, add move) ---------------------------------------- */
+/* --- move list (in-session move picker) -------------------------------------- */
 .hs-mlist {
   display: flex;
   flex-direction: column;
   border-radius: var(--r-12);
   background: var(--color-control);
   padding: var(--s-2) var(--s-12);
-}
-.hs-mrow {
-  display: flex;
-  align-items: center;
-  gap: var(--s-10);
-  padding: var(--s-10) 0;
-  border: none;
-  border-top: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent);
-  background: none;
-  color: var(--color-text);
-  font: inherit;
-  text-align: left;
-  width: 100%;
-}
-.hs-mlist .hs-mrow:first-child {
-  border-top: 0;
-}
-.hs-mrow.tap {
-  cursor: pointer;
-}
-.hs-mrow.on {
-  background: var(--home-tint);
-  margin: 0 -12px;
-  padding-left: var(--s-12);
-  padding-right: var(--s-12);
-  width: calc(100% + 24px);
-}
-.hs-mic {
-  flex: none;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--r-10);
-  background: var(--home-tint);
-  color: var(--home-ink);
-  display: grid;
-  place-items: center;
-  font-size: var(--fs-20);
-}
-.hs-mrow.on .hs-mic {
-  background: var(--c-3d3a22);
-}
-.hs-mic.ghost {
-  background: transparent;
-  box-shadow: inset 0 0 0 1px var(--color-accent-800);
-  color: var(--color-accent);
-}
-.hs-mtext {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-.hs-mname {
-  font-size: var(--fs-15);
-  font-weight: 600;
-}
-.hs-msub {
-  font-size: var(--fs-12);
-  color: var(--color-neutral-500);
-}
-
-/* --- own move form ----------------------------------------------------------- */
-.hs-chips.wrap {
-  gap: var(--s-8);
-}
-.hs-icons {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: var(--s-8);
 }
 
 /* --- home move picker (Add move in a home session) -------------------------- */
@@ -359,10 +124,6 @@
 }
 
 /* --- history row --------------------------------------------------------------- */
-.hist-item.hist-home .hist-ic {
-  background: var(--home-tint);
-  color: var(--home-ink);
-}
 
 /* --- Start sheet: locked tiles while something is live ------------------------ */
 .ss-tile.locked {
@@ -373,21 +134,6 @@
   margin-left: auto;
   font-size: var(--fs-14);
   color: var(--color-neutral-400);
-}
-.ss-tile.ss-home {
-  grid-column: 1 / -1;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--s-14);
-  padding: var(--s-14) var(--s-16);
-}
-.ss-tile.ss-home .ss-tile-text {
-  flex: 1;
-  min-width: 0;
-}
-.ss-ic.tone-home {
-  background: var(--home-tint);
-  color: var(--home-ink);
 }
 
 /* --- Log past: Gym session | Home set ----------------------------------------- */
@@ -461,26 +207,4 @@
 }
 .rail-foot .rail-mastery {
   padding: 0 0 var(--s-4);
-}
-
-/* Layout hooks for kit primitives (positional only) */
-.hs-actions > .uibtn {
-  flex: 1;
-}
-.hs-head > .uibtn--link {
-  flex: none;
-}
-.hs-mbtn {
-  flex: none;
-  width: 32px;
-  height: 32px;
-  min-height: 32px;
-  padding: 0;
-  border-radius: var(--r-round);
-}
-.hs-icons .hs-icbtn {
-  height: 46px;
-  justify-content: center;
-  padding: 0;
-  font-size: var(--fs-22);
 }

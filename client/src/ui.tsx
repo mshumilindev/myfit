@@ -30,6 +30,7 @@ import { AndroidLogo } from '@phosphor-icons/react/AndroidLogo';
 import { AppleLogo } from '@phosphor-icons/react/AppleLogo';
 import { ArrowClockwise } from '@phosphor-icons/react/ArrowClockwise';
 import { Moon } from '@phosphor-icons/react/Moon';
+import { Palette } from '@phosphor-icons/react/Palette';
 import { Confetti } from '@phosphor-icons/react/Confetti';
 import { Pause } from '@phosphor-icons/react/Pause';
 import { Stop } from '@phosphor-icons/react/Stop';
@@ -364,6 +365,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'arrows-down-up': ArrowsDownUp,
   warning: Warning,
   moon: Moon,
+  palette: Palette,
   sparkle: Sparkle,
   'sun-horizon': SunHorizon,
   lightning: Lightning,

@@ -1449,15 +1449,24 @@ function MoodWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       streak: consistencyStreak(now),
       readiness: avg,
       week: finished.filter((w) => w.startedAt >= since).length,
-      soften: softenReason({
-        injuries: store.injuries,
-        restPeriods: store.restPeriods,
-        sleeps: store.sleeps,
-        finished,
-        now,
-      }),
+      soften: store.coach.keepTemper
+        ? null
+        : softenReason({
+            injuries: store.injuries,
+            restPeriods: store.restPeriods,
+            sleeps: store.sleeps,
+            finished,
+            now,
+          }),
     };
-  }, [store.workouts, store.injuries, store.restPeriods, store.sleeps, now]);
+  }, [
+    store.workouts,
+    store.injuries,
+    store.restPeriods,
+    store.sleeps,
+    store.coach.keepTemper,
+    now,
+  ]);
   const ti = temperIndex(temper);
   const name = t.atlasTemper[ti];
   const tone = TEMPER_TONE[temper];

@@ -435,7 +435,7 @@ const liftRecord: WidgetDef = {
 
 function actTone(a: Activity): Tone {
   const c = activityTone(a.type, activityCategory(a));
-  return c === 'sport' ? 'sport' : c === 'recovery' ? 'rest' : 'active';
+  return c === 'sport' ? 'sport' : c === 'recovery' ? 'rest' : 'conditioning';
 }
 
 const activities: WidgetDef = {

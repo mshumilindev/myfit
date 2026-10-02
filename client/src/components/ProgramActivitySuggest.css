@@ -1,0 +1,20 @@
+.psg-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-14);
+}
+.psg-sheet h3 {
+  margin: 0;
+  font-size: var(--fs-22);
+  font-weight: 700;
+}
+.psg-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.psg-note {
+  margin: 0;
+  font-size: var(--fs-13);
+  color: var(--color-neutral-500);
+}

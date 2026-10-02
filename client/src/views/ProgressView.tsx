@@ -11,6 +11,7 @@ import {
   setBestE1rm,
   exerciseNeeds,
   exerciseVolumeKg,
+  latestWeight,
   missingAtGym,
   muscleVolumeKg,
   resolveMuscles,
@@ -40,6 +41,9 @@ import {
   type Landmark,
   type Zone,
 } from '../volume';
+import { ActivityTrends } from '../components/ActivityTrends';
+import { AddToProgramSheet, useEditableProgram } from '../components/ProgramActivitySuggest';
+import { activityTrends } from '../activityTrends';
 import { TrendsView } from '../components/TrendsView';
 import { OverviewBack } from '../components/OverviewBack';
 import { AtlasNotesPanel } from '../components/AtlasNotesPanel';
@@ -85,7 +89,7 @@ export function ProgressView({
 }: {
   store: Store;
   shell: Shell;
-  sub: 'progress' | 'trends';
+  sub: 'progress' | 'trends' | 'activity';
   seg: 'total' | 'muscle' | 'volume' | 'records';
   onSeg: (s: 'total' | 'muscle' | 'volume' | 'records') => void;
   lens: 'volume' | 'fatigue' | 'readiness';
@@ -106,6 +110,16 @@ export function ProgressView({
   const [mapView, setMapView] = useState(false);
   const [ctrlSheet, setCtrlSheet] = useState(false);
   const ptab = sub;
+  const editableProgram = useEditableProgram();
+  const [addType, setAddType] = useState<string | null>(null);
+  const addDefaults = useMemo(
+    () =>
+      addType
+        ? (activityTrends(store.activities, nowTs, null)?.top.find((x) => x.type === addType) ??
+          null)
+        : null,
+    [addType, store.activities, nowTs],
+  );
   const showDesktopDetail = useDesktopDetail();
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   // The muscle you're training RIGHT NOW should already show on the fatigue /
@@ -453,7 +467,13 @@ export function ProgressView({
     <div className="pv-top">
       <OverviewBack />
       <h2 className="pv-title">
-        {ptab === 'trends' ? (store.coach.enabled ? t.atlasName : t.trendsTab) : t.progress}
+        {ptab === 'activity'
+          ? t.atrTitle
+          : ptab === 'trends'
+            ? store.coach.enabled
+              ? t.atlasName
+              : t.trendsTab
+            : t.progress}
       </h2>
       {ptab === 'progress' && finished.length >= 3 && (
         <Button
@@ -475,11 +495,34 @@ export function ProgressView({
     </div>
   );
 
-  if (ptab === 'trends') {
+  if (ptab === 'activity') {
     return (
       <div className="screen progress-page progress-alt">
         {topBar}
         <div className="progress-alt-body">
+          <ActivityTrends
+            activities={store.activities}
+            bodyKg={latestWeight(store.bodyMetrics)?.weight ?? null}
+            onAddToProgram={editableProgram.own ? (type) => setAddType(type) : undefined}
+          />
+          {addType && (
+            <AddToProgramSheet
+              type={addType}
+              weekday={addDefaults?.usualDay ?? 1}
+              minutes={addDefaults?.medianMin ?? 30}
+              onClose={() => setAddType(null)}
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (ptab === 'trends') {
+    return (
+      <div className="screen progress-page progress-alt">
+        {topBar}
+        <div className="progress-alt-body is-trends">
           {store.coach.enabled && <AtlasNotesPanel />}
           {store.coach.enabled && (
             <Button

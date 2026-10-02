@@ -101,6 +101,10 @@
   --color-sport-300: #a8dc7c;
   --color-sport-800: #34511f;
   --color-sport-900: #1f2f14;
+  /* Conditioning — orchid: the one hue no other family uses (gold = lifting). */
+  --color-conditioning-300: #dda0ea;
+  --color-conditioning-800: #55305f;
+  --color-conditioning-900: #2d1a33;
   --color-rest-400: #33a8e0;
   --color-rest-700: #1c6f9a;
   --color-rest-800: #134a68;
@@ -177,6 +181,15 @@
   --color-sport-tint: var(--color-sport-900);
   --color-sport-text: #d7f0c1;
   --color-sport-line: #3d5a2a;
+  /* Home set — khaki, apart from gym gold and the sport / recovery greens and blues. */
+  --color-home: #d8c978;
+  --color-home-tint: #2b2a1a;
+  --color-home-text: #e8dc9a;
+  --color-home-line: #4a4526;
+  --color-conditioning: var(--color-conditioning-300);
+  --color-conditioning-tint: var(--color-conditioning-900);
+  --color-conditioning-text: #f1d4f5;
+  --color-conditioning-line: #6a3a73;
   /* Sub-app families for Today widgets and the app switcher: Gym (gold), People (silver),
      Apex (violet), Learn (rubellite), Atlas (coral). Fixed values: the per-app themes
      re-skin --color-accent, so a family that must not follow the active app cannot use it. */
@@ -3885,23 +3898,23 @@ html.theme-glass .gym-card .head .n {
 }
 .screen-stage[data-back-swipe] .under-layer {
   z-index: 1;
+  contain: layout paint;
 }
 .screen-stage[data-back-swipe] .over-layer {
-  z-index: 2;
+  z-index: 3;
   background: var(--color-bg);
   box-shadow: -14px 0 34px color-mix(in srgb, var(--c-000000) 40%, transparent);
-  will-change: transform;
 }
-/* Dim over the revealed screen, fading out as it eases forward (--back-scrim
-   is driven from 0.12 → 0 by the gesture). */
-.screen-stage[data-back-swipe] .under-layer::after {
-  content: '';
+/* Dim over the revealed screen, fading out as it eases forward. A real element
+   whose opacity the gesture writes directly (a CSS variable on the stage would
+   re-resolve styles for the whole subtree every frame). */
+.stage-scrim {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 2;
   pointer-events: none;
   background: var(--c-000000);
-  opacity: var(--back-scrim, 0);
+  opacity: 0;
 }
 @media (prefers-reduced-motion: reduce) {
   .screen-stage[data-back-swipe] .over-layer {
@@ -4709,6 +4722,7 @@ html.theme-glass .gym-card .head .n {
 }
 .live-label {
   font-size: var(--fs-10);
+  line-height: 1;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-neutral-300);
@@ -13452,10 +13466,8 @@ button.badge {
   font-weight: 600;
 }
 .eg-legend {
-  display: flex;
-  justify-content: space-between;
-  width: 210px;
-  max-width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-self: stretch;
   margin-top: var(--s-8);
 }
 
@@ -15411,10 +15423,14 @@ button.badge {
   display: flex;
   gap: var(--s-12);
   padding: var(--s-12) 0;
-  box-shadow: 0 1px 0 var(--color-divider);
+  border-bottom: 1px solid var(--color-divider);
+  /* Long history: rows off-screen skip layout and paint (paint containment would
+     clip a box-shadow hairline, hence the border). */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 96px;
 }
 .hist-day:last-child {
-  box-shadow: none;
+  border-bottom: none;
 }
 .hist-day-date {
   flex: none;
@@ -15476,6 +15492,9 @@ button.badge {
   font-size: var(--fs-16);
   color: var(--color-accent);
 }
+.hist-activity.cat-conditioning .hist-act-icon {
+  color: var(--color-conditioning-300);
+}
 .hist-activity.cat-recovery .hist-act-icon {
   color: var(--color-rest-300);
 }
@@ -15512,68 +15531,6 @@ button.badge {
 .act-noweight-inline {
   font-size: var(--fs-12);
   color: var(--color-neutral-500);
-}
-
-/* Resume-activity banner on Today */
-.td-resume-activity {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: var(--s-12);
-  padding: var(--s-14) var(--s-16);
-  color: var(--color-text);
-  cursor: pointer;
-  text-align: left;
-  margin-bottom: var(--s-14);
-}
-.td-resume-activity.cat-recovery {
-  border-color: var(--color-rest-800, var(--color-neutral-700));
-}
-.td-resume-activity .tra-icon {
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--r-round);
-  display: grid;
-  place-items: center;
-  background: var(--color-accent-800, color-mix(in srgb, var(--c-ffffff) 8%, transparent));
-  color: var(--color-accent);
-}
-.td-resume-activity.cat-recovery .tra-icon {
-  background: var(--color-rest-800, color-mix(in srgb, var(--c-ffffff) 8%, transparent));
-  color: var(--color-rest-300);
-}
-.tra-icon i {
-  font-size: var(--fs-20);
-}
-.tra-main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
-}
-.tra-kicker {
-  font-size: var(--fs-11);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-neutral-400);
-}
-.tra-name {
-  font-size: var(--fs-15);
-  font-weight: 600;
-}
-.tra-cta {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-6);
-  font-size: var(--fs-13);
-  font-weight: 600;
-  color: var(--color-accent);
-}
-.td-resume-activity.cat-recovery .tra-cta {
-  color: var(--color-rest-300);
 }
 
 /* The page itself */
@@ -15614,24 +15571,8 @@ button.badge {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--s-14);
-  padding: var(--s-24) 0 var(--s-8);
-}
-.av-clock {
-  font-size: var(--fs-52);
-  line-height: 1;
-  font-weight: 300;
-  letter-spacing: -0.02em;
-}
-.av-clock.paused {
-  color: var(--color-neutral-500);
-}
-.av-paused {
-  font-size: var(--fs-12);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-neutral-500);
-  margin-top: -8px;
+  gap: var(--s-20);
+  padding: 0;
 }
 /* Live-session energy: an activity-style flame counter, but shorter so it sits
    quietly under the session content rather than competing with it. */
@@ -15664,7 +15605,12 @@ button.badge {
   display: inline-flex;
   align-items: center;
   gap: var(--s-8);
+  padding: var(--s-10) var(--s-20);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--color-kcal) 10%, var(--color-surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-kcal) 26%, transparent);
   font-size: var(--fs-30);
+  line-height: 1;
   color: var(--color-kcal-text);
 }
 .av-kcal i {
@@ -15698,7 +15644,6 @@ button.badge {
   display: flex;
   flex-direction: column;
   gap: var(--s-8);
-  margin-top: var(--s-6);
 }
 .av-actions {
   display: flex;
@@ -18422,19 +18367,13 @@ html.theme-glass .apx-streak-n {
 /* Pulsing gold + in the session dock (design fabPulse / fabBreathe) */
 @keyframes fabPulse {
   0% {
-    box-shadow:
-      0 0 0 0 color-mix(in srgb, var(--color-accent) 32%, transparent),
-      0 2px 8px color-mix(in srgb, var(--c-000000) 40%, transparent);
+    transform: scale(1);
+    opacity: 0.45;
   }
-  70% {
-    box-shadow:
-      0 0 0 15px color-mix(in srgb, var(--color-accent) 0%, transparent),
-      0 2px 8px color-mix(in srgb, var(--c-000000) 40%, transparent);
-  }
+  70%,
   100% {
-    box-shadow:
-      0 0 0 0 color-mix(in srgb, var(--color-accent) 0%, transparent),
-      0 2px 8px color-mix(in srgb, var(--c-000000) 40%, transparent);
+    transform: scale(1.7);
+    opacity: 0;
   }
 }
 @keyframes fabBreathe {
@@ -20349,6 +20288,59 @@ body {
   cursor: pointer;
 }
 
+/* ── Activity hero — the same band for a running activity, in its category colour ── */
+.live-hero.activity-live-hero {
+  --ah: var(--color-conditioning-300);
+  --ah-img: url('/activity-conditioning-hero.webp');
+  background: var(--ah-img) center / cover no-repeat;
+  box-shadow: inset 0 -1px 0 var(--ah);
+}
+.activity-live-hero.cat-recovery {
+  --ah: var(--color-rest-300);
+  --ah-img: url('/activity-recovery-hero.webp');
+}
+.activity-live-hero.cat-sport {
+  --ah: var(--color-sport-300);
+  --ah-img: url('/activity-sport-hero.webp');
+}
+.activity-hero-scrim {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-bg) 88%, transparent) 30%,
+    color-mix(in srgb, var(--color-bg) 66%, transparent) 62%,
+    color-mix(in srgb, var(--color-bg) 78%, transparent)
+  );
+}
+.activity-live-hero .live-dot {
+  background: var(--ah);
+}
+.activity-live-hero.paused .live-dot {
+  animation: none;
+  opacity: 0.5;
+}
+.activity-live-hero .live-meta {
+  color: var(--ah);
+}
+
+/* Running activity screen — the same band, full-bleed, with a back button */
+.live-hero.activity-live-hero.is-screen {
+  margin: calc(var(--s-18) * -1) calc(var(--s-20) * -1) 0;
+}
+.is-screen .av-hero-back {
+  position: absolute;
+  z-index: 3;
+  left: var(--s-12);
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+}
+.is-screen .live-hero-body {
+  left: var(--s-48);
+  right: 0;
+  cursor: default;
+}
+
 /* Leave the night screen while sleep keeps running (walk the app). */
 .sleep-night {
   position: relative;
@@ -21105,7 +21097,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: var(--r-12);
-  background: var(--color-accent-900);
+  background: var(--s-surface2);
   display: grid;
   place-items: center;
   flex: none;
@@ -22333,15 +22325,29 @@ body {
   height: 10px;
   border-radius: var(--r-round);
   background: var(--color-ok);
+  position: relative;
+}
+/* The pulse ring is a scaled, fading copy behind the dot: transform + opacity
+   run on the compositor (animating box-shadow repaints every frame). */
+.cp-live-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-ok);
+  opacity: 0;
+  pointer-events: none;
   animation: cpLivePulse 2s ease-in-out infinite;
 }
 @keyframes cpLivePulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-ok) 55%, transparent);
+    transform: scale(1);
+    opacity: 0.55;
   }
   55% {
-    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-ok) 0%, transparent);
+    transform: scale(2.2);
+    opacity: 0;
   }
 }
 .cp-live-title {
@@ -22355,7 +22361,7 @@ body {
   margin-top: var(--s-2);
 }
 @media (prefers-reduced-motion: reduce) {
-  .cp-live-dot {
+  .cp-live-dot::after {
     animation: none;
   }
 }
@@ -23563,6 +23569,14 @@ body {
   object-fit: cover;
   border-radius: var(--r-6);
   flex: none;
+}
+.focus-nav .focus-next {
+  overflow: hidden;
+}
+.focus-nav .focus-next .uibtn-label {
+  min-width: 0;
+  max-width: 100%;
+  gap: var(--s-6);
 }
 .focus-nav .focus-next .fn-label {
   min-width: 0;
@@ -26963,15 +26977,8 @@ html.theme-glass .atl-bubble {
 .hist-activity.cat-sport .hist-act-icon {
   color: var(--color-sport-300);
 }
-.td-resume-activity.cat-sport {
-  border-color: var(--color-sport-800, var(--color-neutral-700));
-}
-.td-resume-activity.cat-sport .tra-icon {
-  background: var(--color-sport-800, color-mix(in srgb, var(--c-ffffff) 8%, transparent));
-  color: var(--color-sport-300);
-}
-.td-resume-activity.cat-sport .tra-cta {
-  color: var(--color-sport-300);
+.activity-screen.cat-conditioning .av-head-name i {
+  color: var(--color-conditioning-300);
 }
 .activity-screen.cat-sport .av-head-name i {
   color: var(--color-sport-300);
@@ -27384,11 +27391,24 @@ html.theme-glass .apx-recent {
     color: var(--color-ok);
   }
   .session-pill-wrap .sp-plus {
+    position: relative;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--c-000000) 40%, transparent);
+  }
+  /* The attention ring: a scaled, fading outline (compositor-only; animating
+     box-shadow would repaint the dock every frame). */
+  .session-pill-wrap .sp-plus::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 3px solid var(--color-accent);
+    opacity: 0;
+    pointer-events: none;
     animation: fabPulse 3.6s ease-in-out infinite;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .session-pill-wrap .sp-plus {
+  .session-pill-wrap .sp-plus::after {
     animation: none;
   }
 }

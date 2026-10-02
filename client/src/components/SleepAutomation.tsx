@@ -446,7 +446,7 @@ function sleepAvg(finished: SleepNight[]): number {
  * SL-10 — the auto-filled morning card. With auto-log on, last night's record
  * is simply there when you wake, flagged `auto`; this surfaces it on Today so
  * you can confirm ("Looks right") or fix it ("Adjust times") — and the fix
- * teaches the pattern. Confirming clears the flag so it stops nudging.
+ * teaches the pattern. Confirming keeps the `auto` mark (history) but stops the nudge.
  */
 export function SleepAutoFilledCard({ onOpenBackfill }: { onOpenBackfill: () => void }) {
   const { t } = useT();
@@ -458,13 +458,13 @@ export function SleepAutoFilledCard({ onOpenBackfill }: { onOpenBackfill: () => 
 
   const todayId = sleepDayId(startOfDay(now));
   const night = store.sleeps.find((n) => n.wake !== null && n.date === todayId);
-  if (!night || night.source !== 'auto') return null;
+  if (!night || night.source !== 'auto' || night.autoConfirmed) return null;
 
   const durMin = night.wake ? Math.round((night.wake - night.bedtime) / MIN) : 0;
   const range = `${hhmm(night.bedtime)}→${hhmm(night.wake as number)}`;
   const wdName = t.weekDayNames[(new Date(night.bedtime).getDay() + 6) % 7];
   const looksRight = () => {
-    queueMicrotask(() => updateSleepNight(night.id, { source: 'backfill' }));
+    queueMicrotask(() => updateSleepNight(night.id, { autoConfirmed: true }));
     setDismissed(true);
   };
   return (

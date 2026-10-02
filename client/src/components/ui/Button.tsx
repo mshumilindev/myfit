@@ -15,7 +15,8 @@ export type ButtonVariant =
   | 'sleep-fill'
   | 'link'
   | 'ok'
-  | 'photo';
+  | 'photo'
+  | 'dashed';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 /** Corner shape override: `pill` (fully rounded) or `round` (a true circle for square buttons). */
 export type ButtonShape = 'pill' | 'round';

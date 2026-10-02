@@ -1,10 +1,13 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 import { Icon } from '../../ui';
 
 import './Banner.css';
 
-export type BannerTone = 'accent' | 'rest' | 'danger' | 'ok';
+export type BannerTone = 'accent' | 'rest' | 'danger' | 'ok' | 'sport' | 'conditioning';
+
+/** Colour families a banner can blend across (activity categories). */
+export type BannerBlendTone = 'sport' | 'conditioning' | 'rest';
 
 export interface BannerAction {
   label: string;
@@ -15,6 +18,9 @@ export interface BannerAction {
 
 export interface BannerProps {
   tone?: BannerTone;
+  /** Two or three families flowing into each other on a diagonal (equal shares);
+   *  the first one sets the text colours. Overrides `tone`. */
+  blend?: BannerBlendTone[];
   icon?: string;
   kicker?: string;
   title: ReactNode;
@@ -28,12 +34,24 @@ export interface BannerProps {
   children?: ReactNode;
 }
 
+/** Diagonal gradient of the gems, each family's `--color-<tone>` token, equal shares. */
+function blendStyle(blend: BannerBlendTone[]): CSSProperties {
+  const gems = blend
+    .slice(0, 3)
+    .map(
+      (g) =>
+        `color-mix(in srgb, var(--color-${g}) 20%, color-mix(in srgb, var(--c-18181c) 42%, transparent))`,
+    );
+  return { backgroundImage: `linear-gradient(135deg, ${gems.join(', ')})` };
+}
+
 /**
  * The frosted-gem banner. One `tone` sets the whole gem (glass gradient, rim,
  * icon and text shades) from token families. Absorbs the .prog-banner family.
  */
 export function Banner({
   tone = 'accent',
+  blend,
   icon,
   kicker,
   title,
@@ -45,7 +63,10 @@ export function Banner({
   children,
 }: BannerProps) {
   return (
-    <div className={`uibanner uibanner--${tone}`}>
+    <div
+      className={`uibanner uibanner--${blend?.length ? blend[0] : tone}${blend && blend.length > 1 ? ' uibanner--blend' : ''}`}
+      style={blend && blend.length > 1 ? blendStyle(blend) : undefined}
+    >
       {sheen && <span className="uibanner-sheen" aria-hidden />}
       <div className="uibanner-row">
         {icon && (

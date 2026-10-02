@@ -97,7 +97,7 @@ function actIcon(key: string): string {
 
 function actTone(a: Pick<Activity, 'type' | 'category'>): Tone {
   const k = activityTone(a.type, a.category);
-  return k === 'sport' ? 'sport' : k === 'recovery' ? 'rest' : 'active';
+  return k === 'sport' ? 'sport' : k === 'recovery' ? 'rest' : 'conditioning';
 }
 
 function done(store: StoreState): Activity[] {
@@ -673,7 +673,7 @@ const cardioMachine: WidgetDef = {
   id: 'cardio-machine',
   group: 'cardio',
   icon: 'wave-sine',
-  tone: 'accent',
+  tone: 'conditioning',
   name: () => cds(getLocale()).cardioMachine,
   render: (size, ctx) => {
     const { store, now, locale, shell } = ctx;
@@ -684,7 +684,7 @@ const cardioMachine: WidgetDef = {
       return (
         <Empty
           size={size}
-          tone="accent"
+          tone="conditioning"
           icon="wave-sine"
           kicker={s.cardioMachine}
           title={s.noMachine}
@@ -709,7 +709,7 @@ const cardioMachine: WidgetDef = {
       return (
         <Widget
           size="S"
-          tone="accent"
+          tone="conditioning"
           kicker={`${m.name} · ${whenTxt}`}
           value={m.metric.text}
           unit={m.metric.unit || undefined}
@@ -721,7 +721,7 @@ const cardioMachine: WidgetDef = {
       return (
         <Widget
           size="M"
-          tone="accent"
+          tone="conditioning"
           icon="wave-sine"
           title={`${m.name} · ${mt}`}
           sub={[whenTxt, dist, fmtDur(m.min), kcal].filter(Boolean).join(' · ')}
@@ -742,7 +742,7 @@ const cardioMachine: WidgetDef = {
       return (
         <Widget
           size="L"
-          tone="accent"
+          tone="conditioning"
           kicker={kicker}
           badge={pb ? s.pbPace : undefined}
           onClick={open}
@@ -761,7 +761,7 @@ const cardioMachine: WidgetDef = {
     return (
       <Widget
         size="XL"
-        tone="accent"
+        tone="conditioning"
         kicker={kicker}
         badge={pb ? s.pbPace : undefined}
         onClick={open}
@@ -781,7 +781,7 @@ const cardioMachine: WidgetDef = {
               </span>
             </div>
             <WidgetSpark
-              tone="accent"
+              tone="conditioning"
               points={trend.map((x) => (x.metric.lowerBetter ? -x.metric.raw : x.metric.raw))}
               height={48}
             />

@@ -96,6 +96,13 @@
   color: var(--color-sleep-tint);
   border-color: transparent;
 }
+.uibtn--dashed {
+  /* An "add another" row: no fill, a dashed outline, brass text. */
+  background: transparent;
+  box-shadow: none;
+  border: 1px dashed var(--color-neutral-700);
+  color: var(--color-accent-300);
+}
 .uibtn--fill {
   /* Takes the colour family of an enclosing tone (banner / card / dialog), brass otherwise. */
   background: var(--t-base, var(--color-accent));

@@ -60,6 +60,26 @@
   --gem-cta-text: var(--color-ok-tint);
 }
 
+/* Activity families (tones.css families). */
+.uibanner--sport {
+  --gem: var(--color-sport);
+  --gem-kicker: var(--color-sport-text);
+  --gem-title: var(--color-sport-text);
+  --gem-body: var(--color-sport-text);
+  --gem-line: var(--color-sport-line);
+  --gem-icon: var(--color-sport);
+  --gem-cta-text: var(--color-sport-tint);
+}
+.uibanner--conditioning {
+  --gem: var(--color-conditioning);
+  --gem-kicker: var(--color-conditioning-text);
+  --gem-title: var(--color-conditioning-text);
+  --gem-body: var(--color-conditioning-text);
+  --gem-line: var(--color-conditioning-line);
+  --gem-icon: var(--color-conditioning);
+  --gem-cta-text: var(--color-conditioning-tint);
+}
+
 .uibanner-sheen {
   position: absolute;
   inset: 0;

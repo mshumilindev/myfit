@@ -13,6 +13,7 @@ const TONES: CardTone[] = [
   'injury',
   'sleep',
   'sport',
+  'home',
   'kcal',
   'apex',
   'learn',

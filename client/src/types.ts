@@ -211,6 +211,8 @@ export interface SleepNight {
   wake: number | null;
   quality?: SleepQuality | null;
   source: SleepSource;
+  /** An auto-filled night you confirmed ("Looks right"): stays marked `auto`, stops nudging. */
+  autoConfirmed?: boolean;
   /** Sleep vs a daytime nap. Absent on older data → derived by
    *  classifySleepKind (a nap is a short ≤3h daytime sleep and stays out of the
    *  nightly averages/streak/graph). A manual choice in the editor sets this

@@ -428,7 +428,9 @@ export function QuickLog(props: QuickLogProps) {
         <div className="la-ql-title">
           <div className="la-ql-name">
             <h2 id="ql-t">{title}</h2>
-            <Tag tone={type.category === 'recovery' ? 'rest' : type.sport ? 'sport' : 'accent'}>
+            <Tag
+              tone={type.category === 'recovery' ? 'rest' : type.sport ? 'sport' : 'conditioning'}
+            >
               {type.category === 'recovery' ? t.actCountsRecovery : t.actAddsConditioning}
             </Tag>
           </div>
@@ -499,7 +501,7 @@ function MonthCalendar(props: {
         footer={
           <CalendarLegend
             items={[
-              { tone: 'accent', label: t.actConditioning },
+              { tone: 'conditioning', label: t.actConditioning },
               { tone: 'sport', label: t.actSports },
               { tone: 'rest', label: t.actRecovery },
             ]}

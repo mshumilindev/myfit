@@ -1,6 +1,6 @@
 /**
  * Atlas — the coach screen (#/coach). First visit: a short setup (temper →
- * the Merciless fine print → role → only the data that's missing → push).
+ * the Merciless fine print → only the data that's missing → push).
  * After that: his notes as a chat thread, newest at the bottom, plus settings.
  */
 import { Chip } from '../components/ui/Chip';
@@ -14,7 +14,7 @@ import { Notice } from '../components/ui/Notice';
 import { Card } from '../components/ui/Card';
 import { FLAGS, LOCALES, setLocale, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
-import { latestWeight, setCoach, updateBodyMetrics, useSelfTrainerId, useStore } from '../store';
+import { latestWeight, setCoach, updateBodyMetrics, useSelfCoachRole, useStore } from '../store';
 import { AtlasFace, TemperHeat } from '../components/AtlasFace';
 import { useAtlasFmt, useAtlasNotes, useMinuteClock, useSoftenReason } from '../atlas/notes';
 import {
@@ -71,7 +71,7 @@ const UNRATED = new Set(['did_you_mean', 'emoji', 'memory_note']);
 /** Wall clock for event handlers (kept out of render). */
 const wallClock = (): number => Date.now();
 
-type Step = 'meet' | 'temper' | 'fine' | 'role' | 'data' | 'push';
+type Step = 'meet' | 'temper' | 'fine' | 'data' | 'push';
 
 export function CoachView({
   onClose,
@@ -97,9 +97,8 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
   const store = useStore();
   const [step, setStep] = useState<Step>('meet');
   const [temper, setTemper] = useState<Temper>(store.coach.temper);
-  // With a human coach, Atlas can only be the extra coach.
-  const human = !!useSelfTrainerId();
-  const [role, setRole] = useState<CoachRole>(human ? 'extra' : store.coach.role);
+  // With a human coach Atlas is the extra coach, otherwise the main one.
+  const role: CoachRole = useSelfCoachRole() ?? store.coach.role;
   const [yoMama, setYoMama] = useState(store.coach.yoMama);
   const [swearing, setSwearing] = useState(store.coach.swearing);
   const [pushHint, setPushHint] = useState<string | null>(null);
@@ -124,7 +123,7 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
   };
 
   const back = () => {
-    const order: Step[] = ['meet', 'temper', 'fine', 'role', 'data', 'push'];
+    const order: Step[] = ['meet', 'temper', 'fine', 'data', 'push'];
     const i = order.indexOf(step);
     if (i <= 0) return onClose();
     let prev = order[i - 1];
@@ -197,7 +196,7 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
           <Button
             variant="primary"
             className="atl-cta"
-            onClick={() => setStep(temper === 5 ? 'fine' : 'role')}
+            onClick={() => setStep(temper === 5 ? 'fine' : 'data')}
           >
             {t.atlasTrainWith(name)}
           </Button>
@@ -226,43 +225,13 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
             />
           </div>
           <div className="atl-actions">
-            <Button variant="primary" className="atl-cta" onClick={() => setStep('role')}>
+            <Button variant="primary" className="atl-cta" onClick={() => setStep('data')}>
               {t.atlasTakeIt}
             </Button>
             <Button variant="secondary" className="atl-cta" onClick={() => setStep('temper')}>
               {t.atlasSofter}
             </Button>
           </div>
-        </div>
-      )}
-
-      {step === 'role' && (
-        <div className="atl-body atl-chat">
-          <Bubble temper={temper}>{t.atlasRoleAsk}</Bubble>
-          {(['main', 'extra'] as CoachRole[]).map((r) => (
-            <Card
-              as="button"
-              key={r}
-              pad="md"
-              tone={role === r ? 'accent' : 'neutral'}
-              className={`atl-card${role === r ? ' on' : ''}`}
-              aria-pressed={role === r}
-              disabled={human && r === 'main'}
-              onClick={() => setRole(r)}
-            >
-              <b>{r === 'main' ? t.atlasRoleMain : t.atlasRoleExtra}</b>
-              <span>
-                {r === 'main'
-                  ? human
-                    ? t.atlasRoleHumanCoach
-                    : t.atlasRoleMainSub
-                  : t.atlasRoleExtraSub}
-              </span>
-            </Card>
-          ))}
-          <Button variant="primary" className="atl-cta" onClick={() => setStep('data')}>
-            {t.atlasNext}
-          </Button>
         </div>
       )}
 
@@ -550,12 +519,6 @@ function CoachThread({
     },
     [],
   );
-
-  // A human coach owns the programme — Atlas steps back to extra coach.
-  const human = !!useSelfTrainerId();
-  useEffect(() => {
-    if (human && store.coach.role === 'main') setCoach({ role: 'extra' });
-  }, [human, store.coach.role]);
 
   const canChat = useChatAccess();
   const fmt = useAtlasFmt();
@@ -1416,20 +1379,19 @@ function PlanCard({ temper, now }: { temper: Temper; now: number }) {
 function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
   const { t } = useT();
   const { coach } = useStore();
-  const human = !!useSelfTrainerId();
   const soft = useSoftenReason();
   // A draft: nothing changes (and nothing is rebuilt) until Save.
   const [draft, setDraft] = useState(() => ({
     temper: coach.temper,
-    role: human ? ('extra' as CoachRole) : coach.role,
     yoMama: coach.yoMama && momAllowed(coach.temper),
     swearing: coach.swearing && swearAllowed(coach.temper),
+    keepTemper: !!coach.keepTemper,
   }));
   const dirty =
     draft.temper !== coach.temper ||
-    draft.role !== coach.role ||
     draft.yoMama !== (coach.yoMama && momAllowed(coach.temper)) ||
-    draft.swearing !== (coach.swearing && swearAllowed(coach.temper));
+    draft.swearing !== (coach.swearing && swearAllowed(coach.temper)) ||
+    draft.keepTemper !== !!coach.keepTemper;
   const edit = (patch: Partial<typeof draft>) => setDraft((d) => ({ ...d, ...patch }));
   const [confirm, setConfirm] = useState<'off' | 'clear' | null>(null);
   const hard = momAllowed(draft.temper);
@@ -1474,7 +1436,7 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
       <div className="sheet-head">
         <h3>{t.atlasSettings}</h3>
       </div>
-      {soft && coach.temper > 1 && (
+      {soft && !draft.keepTemper && draft.temper > 1 && (
         <Notice tone="rest" icon="info">
           {t.atlasSoftNote(t.atlasSoftReason[soft])}
         </Notice>
@@ -1504,13 +1466,11 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
         ))}
       </div>
       <div className="se-group">
-        {/* Main coach on/off; locked when a human coach runs the programme. */}
         <RuleRow
-          label={t.atlasRoleMain}
-          sub={human ? t.atlasRoleMainLocked : t.atlasRoleMainSub}
-          on={!human && draft.role === 'main'}
-          locked={human}
-          onToggle={() => edit({ role: draft.role === 'main' ? 'extra' : 'main' })}
+          label={t.atlasKeepTemper}
+          sub={t.atlasKeepTemperSub}
+          on={draft.keepTemper}
+          onToggle={() => edit({ keepTemper: !draft.keepTemper })}
         />
         {/* Locked off for tempers that don't do it. */}
         <RuleRow
@@ -1547,6 +1507,7 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
               ...draft,
               yoMama: draft.yoMama && momAllowed(draft.temper),
               swearing: draft.swearing && swearAllowed(draft.temper),
+              keepTemper: draft.keepTemper,
             });
             onClose();
           }}

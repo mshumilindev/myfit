@@ -32,6 +32,7 @@ const SEMANTIC = [
   'injury',
   'sleep',
   'sport',
+  'home',
 ] as const;
 const REST = ['200', '300', '400', '700', '800', '900'];
 const CORE = [
@@ -47,12 +48,14 @@ const RADII = ['--radius-sm', '--radius-md', '--radius-lg', '--radius-sheet'];
 const BTN_VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'ghost', 'danger', 'rest', 'fill'];
 const CARD_TONES: CardTone[] = ['neutral', 'danger', 'ok', 'rest', 'accent'];
 const CHIP_TONES: ChipTone[] = ['neutral', 'accent', 'danger', 'ok', 'rest'];
-const BANNER_TONES: BannerTone[] = ['accent', 'rest', 'danger', 'ok'];
+const BANNER_TONES: BannerTone[] = ['accent', 'rest', 'danger', 'ok', 'sport', 'conditioning'];
 const BANNER_ICON: Record<BannerTone, string> = {
   accent: 'target',
   rest: 'moon-stars',
   danger: 'heartbeat',
   ok: 'check-circle',
+  sport: 'soccer-ball',
+  conditioning: 'heartbeat',
 };
 
 function Swatch({ token, label }: { token: string; label?: string }) {

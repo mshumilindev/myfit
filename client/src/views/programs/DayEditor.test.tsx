@@ -124,3 +124,23 @@ describe('DayEditor warm-up', () => {
     expect(warmItems()).toBeUndefined();
   });
 });
+
+describe('DayEditor activities', () => {
+  it('adds a planned activity through the sheet (Save needs a type) and removes it with a confirm', () => {
+    render(<Harness initial={program(true)} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Add activity' }));
+    const save = screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement;
+    expect(save.disabled).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Run' }));
+    expect(save.disabled).toBe(false);
+    fireEvent.click(save);
+    expect(latest.activities).toHaveLength(1);
+    expect(latest.activities![0]).toMatchObject({ day: 1, type: 'run', minutes: 30 });
+    // lifting is untouched
+    expect(latest.items).toHaveLength(2);
+    fireEvent.click(screen.getByText(/Run · 30 min/));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete' }).at(-1)!);
+    expect(latest.activities).toEqual([]);
+  });
+});

@@ -7,6 +7,7 @@
  * avatars of who is on each — tap them to open the members drawer), Import CSV,
  * New program. A program opens in the builder (./programs/ProgramBuilder).
  */
+import { openActivities } from './programs/activitiesVault';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -86,9 +87,10 @@ export function ProgramsView({
     const uid = currentUid();
     if (!uid) return;
     getDocs(query(collection(db, 'programs'), where('authorId', '==', uid)))
-      .then((snap) => {
-        const list = snap.docs
-          .map((d) => normalizeProgram(d.data() as Program))
+      .then(async (snap) => {
+        const opened = await Promise.all(snap.docs.map((d) => openActivities(d.data() as Program)));
+        const list = opened
+          .map((p) => normalizeProgram(p))
           .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
         setFailed(false);
         setPrograms(list);
@@ -98,10 +100,13 @@ export function ProgramsView({
 
   const loadMine = useCallback(() => {
     callFn<{ assignment: ProgramAssignment | null }>('programMine')
-      .then((data) => {
+      .then(async (data) => {
         setMine(
           data.assignment
-            ? { ...data.assignment, program: normalizeProgram(data.assignment.program) }
+            ? {
+                ...data.assignment,
+                program: normalizeProgram(await openActivities(data.assignment.program)),
+              }
             : null,
         );
       })

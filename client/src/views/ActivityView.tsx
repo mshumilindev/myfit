@@ -5,6 +5,7 @@
  * timer that survives closing the page; only Discard removes it. Finish and
  * Discard both confirm.
  */
+import { ActivityHero } from '../components/ActivityHero';
 import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
@@ -40,16 +41,6 @@ import type { Activity, ActivityEffort } from '../types';
 import { Tag } from '../components/ui/Tag';
 
 const EFFORTS: ActivityEffort[] = ['light', 'moderate', 'hard'];
-
-function clock(ms: number): string {
-  const s = Math.max(0, Math.floor(ms / 1000));
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const r = s % 60;
-  const mm = String(m).padStart(2, '0');
-  const ss = String(r).padStart(2, '0');
-  return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
-}
 
 export function ActivityView({
   newType,
@@ -324,7 +315,6 @@ function RunningActivity({ onClose }: { onClose: () => void }) {
   if (!activity) return null;
 
   const type = activityType(activity.type);
-  const isRecovery = activity.category === 'recovery';
   const paused = isActivityPaused(activity);
   const elapsedMs = activityElapsedMs(activity, now);
   const minutes = elapsedMs / 60000;
@@ -334,18 +324,9 @@ function RunningActivity({ onClose }: { onClose: () => void }) {
 
   return (
     <div className={`screen activity-screen cat-${activityTone(activity.type, activity.category)}`}>
-      <ActivityHead
-        type={type}
-        isRecovery={isRecovery}
-        onClose={onClose}
-        t={t}
-        fallbackName={activity.type}
-      />
+      <ActivityHero activity={activity} onBack={onClose} />
 
       <div className="av-body">
-        <div className={`av-clock tnum${paused ? ' paused' : ''}`}>{clock(elapsedMs)}</div>
-        {paused && <div className="av-paused">{t.actPaused}</div>}
-
         {kcal != null ? (
           <div className="av-kcal">
             <Icon name="flame" weight="fill" />
@@ -458,7 +439,7 @@ function ActivityHead({
         {type ? (t.actType[type.key] ?? type.key) : (fallbackName ?? '')}
       </span>
       <Tag
-        tone={isRecovery ? 'rest' : type?.sport ? 'sport' : 'accent'}
+        tone={isRecovery ? 'rest' : type?.sport ? 'sport' : 'conditioning'}
         icon={<Icon name={isRecovery ? 'wave-sine' : 'lightning'} weight="fill" />}
       >
         {isRecovery ? t.actCountsRecovery : t.actAddsConditioning}

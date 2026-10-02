@@ -116,9 +116,11 @@ label.uirow {
   flex: none;
   width: 40px;
   font-size: var(--fs-12);
-  font-weight: 600;
+  font-weight: var(--row-time-weight, 600);
+  letter-spacing: var(--row-time-ls, normal);
+  text-transform: var(--row-time-case, none);
   font-variant-numeric: tabular-nums;
-  color: var(--color-neutral-500);
+  color: var(--row-time-color, var(--color-neutral-500));
 }
 .uirow-l {
   display: block;

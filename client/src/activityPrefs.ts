@@ -133,6 +133,8 @@ export function createListPref(storageKey: string): ListPrefStore {
 
 export const pinsPref = createListPref('spotter.activityPins');
 export const nextUpOffPref = createListPref('spotter.nextUpOff');
+/** "Add it to your program" suggestions turned off / snoozed (see programSuggest.ts). */
+export const programSuggestOffPref = createListPref('spotter.programSuggestOff');
 
 /** Pinned activity type keys, in display order. */
 export function activityPins(): string[] {
@@ -181,4 +183,18 @@ export function toggleNextUpOff(key: string): boolean {
 }
 export function useNextUpOff(): string[] {
   return useSyncExternalStore(nextUpOffPref.subscribe, nextUpOffPref.get, nextUpOffPref.get);
+}
+
+export function programSuggestOff(): string[] {
+  return programSuggestOffPref.get();
+}
+export function setProgramSuggestOff(list: string[]): void {
+  programSuggestOffPref.set(list);
+}
+export function useProgramSuggestOff(): string[] {
+  return useSyncExternalStore(
+    programSuggestOffPref.subscribe,
+    programSuggestOffPref.get,
+    programSuggestOffPref.get,
+  );
 }

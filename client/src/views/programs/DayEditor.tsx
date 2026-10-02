@@ -5,7 +5,7 @@
  * types. Advanced exercise options live behind "More".
  */
 import { useMemo, useState, type ReactNode } from 'react';
-import { Button } from '../../components/ui/Button';
+import { Button, IconButton as KitIconButton } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Chip } from '../../components/ui/Chip';
 import { Field } from '../../components/ui/Field';
@@ -26,8 +26,12 @@ import type { Shell } from '../../App';
 import type { ExerciseKind, Workout } from '../../types';
 import { ConfirmDialog, Icon, Sheet, useExerciseName } from '../../ui';
 import {
+  addActivity,
   addItem,
   addWarmupExercise,
+  dayActivities,
+  patchActivity,
+  removeActivity,
   copyDay,
   dayItems,
   dayMode,
@@ -51,6 +55,8 @@ import {
   type ProgramItem,
 } from './model';
 import { IconButton, ModeTabs, ToggleRow } from './pieces';
+import { DayActivities } from './ProgramActivities';
+import { activitiesLocked } from './activitiesVault';
 import { NumberStepper } from '../../components/ui/NumberStepper';
 
 /** Target-muscle tiles grouped like the exercise picker's families. */
@@ -168,7 +174,7 @@ export function DayEditor({
       )}
       <ItemList items={items} readOnly={readOnly} update={update} shell={shell} />
       {!readOnly && (
-        <Button variant="secondary" fullWidth icon="plus" onClick={() => setPickerOpen(true)}>
+        <Button variant="dashed" fullWidth icon="plus" onClick={() => setPickerOpen(true)}>
           {t.addExercise}
         </Button>
       )}
@@ -192,6 +198,8 @@ export function DayEditor({
         <div className="pg-day-title">
           <span className="pg-kicker">{weekday}</span>
           <Field
+            bare
+            className="pg-day-name"
             value={program.dayNames[String(day)] ?? ''}
             placeholder={t.pgNameThisDay}
             maxLength={40}
@@ -201,11 +209,25 @@ export function DayEditor({
           />
         </div>
         {!readOnly && (
-          <IconButton icon="copy" label={t.progCopyDay} onClick={() => setCopyOpen(true)} />
+          <KitIconButton
+            icon="stack"
+            variant="fill"
+            label={t.progCopyDay}
+            title={t.progCopyDay}
+            onClick={() => setCopyOpen(true)}
+          />
         )}
       </div>
       <ModeTabs mode={mode} onChange={switchMode} disabled={readOnly} />
       {mode === 'muscles' ? musclesBody : exercisesBody}
+      <DayActivities
+        day={day}
+        list={dayActivities(program, day)}
+        readOnly={readOnly || activitiesLocked(program)}
+        onAdd={(a) => update((p) => addActivity(p, a))}
+        onPatch={(id, patch) => update((p) => patchActivity(p, id, patch))}
+        onRemove={(id) => update((p) => removeActivity(p, id))}
+      />
       <div className="pg-daynav">
         {prev ? (
           <Card as="button" pad="none" className="pg-nav prev" onClick={prev.onClick}>

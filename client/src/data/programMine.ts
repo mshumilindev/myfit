@@ -9,13 +9,14 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { callFn } from '../api';
 import { addExercise, startWorkout } from '../store';
+import { openActivities } from '../views/programs/activitiesVault';
 import { nicMid } from '../nicotineApply';
 import type { ExerciseKind } from '../types';
 import type { EquipmentId } from './equipment';
 import { muscleInfoByName, type MuscleGroup } from './exercises';
 import { exerciseDay, type TrainingDay } from './daySuggest';
 import type { Play } from '../playbook';
-import type { ProgramWarmupItem } from '../views/programs/model';
+import type { ProgramActivity, ProgramWarmupItem } from '../views/programs/model';
 
 export interface ProgramItem {
   id: string;
@@ -45,6 +46,10 @@ export interface ProgramAssignment {
     /** Per-day target muscle groups (muscle-only or mixed days). */
     targetMuscles?: Record<string, MuscleGroup[]>;
     items: ProgramItem[];
+    /** Planned activities beside the lifting (absent when none). */
+    activities?: ProgramActivity[];
+    /** Sealed form of `activities`, present while the list is encrypted. */
+    activitiesEnc?: unknown;
   };
   assignedBy: string | null;
   week: number;
@@ -63,6 +68,13 @@ export function readProgramCache(): ProgramAssignment | null {
   } catch {
     return null;
   }
+}
+
+function stripActivities(a: ProgramAssignment): ProgramAssignment {
+  const { activities: _a, activitiesEnc: _e, ...program } = a.program;
+  void _a;
+  void _e;
+  return { ...a, program };
 }
 
 function writeProgramCache(a: ProgramAssignment | null): void {
@@ -117,11 +129,16 @@ function checkStatus(a: ProgramAssignment | null): void {
 /** Re-fetch the assignment (keeps the cached one on a transient error). */
 export function refreshProgramMine(): void {
   callFn<{ assignment: ProgramAssignment | null }>('programMine')
-    .then((data) => {
-      writeProgramCache(data.assignment);
-      if (data.assignment?.program.id !== snapshot.assignment?.program.id) statusFor = null;
-      emit({ ...snapshot, assignment: data.assignment });
-      checkStatus(data.assignment);
+    .then(async (data) => {
+      // The planned activities are sealed user data: opened in memory only, never
+      // written to the localStorage cache.
+      const opened = data.assignment
+        ? { ...data.assignment, program: await openActivities(data.assignment.program) }
+        : null;
+      writeProgramCache(opened ? stripActivities(opened) : null);
+      if (opened?.program.id !== snapshot.assignment?.program.id) statusFor = null;
+      emit({ ...snapshot, assignment: opened });
+      checkStatus(opened);
     })
     .catch(() => {
       /* keep whatever was cached — don't blank the card on a transient error */

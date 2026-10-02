@@ -101,7 +101,7 @@ const HEALTH_TONE: Record<HealthKind, Tone> = {
 
 const ACTIVITY_TONE: Record<ReturnType<typeof activityTone>, Tone> = {
   sport: 'sport',
-  conditioning: 'active',
+  conditioning: 'conditioning',
   recovery: 'rest',
 };
 

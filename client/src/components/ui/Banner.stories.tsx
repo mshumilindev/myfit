@@ -2,12 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Banner, type BannerTone } from './Banner';
 import { LocaleMatrix, Stack } from '../../stories/LocaleMatrix';
 
-const TONES: BannerTone[] = ['accent', 'rest', 'danger', 'ok'];
+const TONES: BannerTone[] = ['accent', 'rest', 'danger', 'ok', 'sport', 'conditioning'];
 const ICON: Record<BannerTone, string> = {
   accent: 'target',
   rest: 'moon-stars',
   danger: 'heartbeat',
   ok: 'check-circle',
+  sport: 'soccer-ball',
+  conditioning: 'heartbeat',
 };
 
 const meta = {
