@@ -1,5 +1,6 @@
+import { setLocale } from '../i18n';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Shell } from '../App';
 import { StartSheet } from './StartSheet';
 
@@ -14,6 +15,8 @@ const shell = (): Shell => ({
   signOut: vi.fn(),
   queueLength: 0,
 });
+
+beforeEach(() => setLocale('en'));
 
 afterEach(cleanup);
 

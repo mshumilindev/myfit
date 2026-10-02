@@ -1,7 +1,10 @@
+import { setLocale } from '../i18n';
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { captureToday, clearTodaySnapshot, todaySnapshot } from '../data/todaySnapshot';
 import { ThemesView } from './ThemesView';
+
+beforeEach(() => setLocale('en'));
 
 afterEach(() => {
   cleanup();
