@@ -33,6 +33,13 @@ import { AvatarUploader } from '../components/AvatarUploader';
 import { InstallShortcut } from './InstallShortcut';
 import { Card } from '../components/ui/Card';
 import { ConditionPage, ConditionsOnboardingRow } from './health/Conditions';
+import { NicotineOnboardingRow } from './health/nicotine/NicotineSection';
+import { NicotineProductsView } from './health/nicotine/NicotineProductsView';
+import { AlcoholOnboardingRow } from './health/alcohol/AlcoholSection';
+import { AlcoholProductsView } from './health/alcohol/AlcoholProductsView';
+import { SupplementOnboardingRow } from './health/supplements/SupplementSection';
+import { SupplementProductsView } from './health/supplements/SupplementProductsView';
+import { SupplementQuickStartSheet } from './health/supplements/SupplementQuickStartSheet';
 
 interface InviteInfo {
   state: 'valid' | 'expired' | 'claimed' | 'revoked';
@@ -145,6 +152,10 @@ export function OnboardingView({
   const name = fullPersonName(firstName, lastName);
   const [requested, setRequested] = useState(false);
   const [condOpen, setCondOpen] = useState(false);
+  const [nicOpen, setNicOpen] = useState(false);
+  const [alcOpen, setAlcOpen] = useState(false);
+  const [supQuick, setSupQuick] = useState(false);
+  const [supOpen, setSupOpen] = useState(false);
   const [condKey, setCondKey] = useState<string | undefined>();
 
   // AC-ONB-06: persist on every meaningful change.
@@ -465,7 +476,13 @@ export function OnboardingView({
         />
       )}
 
-      {step === 5 && !condOpen && (
+      {step === 5 && nicOpen && <NicotineProductsView onBack={() => setNicOpen(false)} />}
+
+      {step === 5 && alcOpen && <AlcoholProductsView onBack={() => setAlcOpen(false)} />}
+
+      {step === 5 && supOpen && <SupplementProductsView onBack={() => setSupOpen(false)} />}
+
+      {step === 5 && !condOpen && !nicOpen && !alcOpen && !supOpen && (
         <div className="onb-final">
           {gym?.gymName && gym.gymLat !== undefined && gym.gymLng !== undefined && (
             <div className="onb-final-bg">
@@ -492,6 +509,9 @@ export function OnboardingView({
             <h2 className="display">{t.onbWow}</h2>
             <p className="lead">{gym?.gymName ? t.onbWowBody(gym.gymName) : t.onbWowBodyNoGym}</p>
             <ConditionsOnboardingRow onOpen={() => setCondOpen(true)} />
+            <NicotineOnboardingRow onOpen={() => setNicOpen(true)} />
+            <AlcoholOnboardingRow onOpen={() => setAlcOpen(true)} />
+            <SupplementOnboardingRow onOpen={() => setSupQuick(true)} />
             <Button
               variant="primary"
               size="lg"
@@ -516,6 +536,16 @@ export function OnboardingView({
             </Button>
           </div>
         </div>
+      )}
+
+      {step === 5 && supQuick && (
+        <SupplementQuickStartSheet
+          onClose={() => setSupQuick(false)}
+          onMore={() => {
+            setSupQuick(false);
+            setSupOpen(true);
+          }}
+        />
       )}
     </div>
   );

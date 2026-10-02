@@ -14,6 +14,23 @@ import type { EquipmentId } from '../../data/equipment';
 import type { MuscleGroup } from '../../data/exercises';
 import { resolveMuscles } from '../../store';
 import { weekOrder } from '../../weekStart';
+import { positiveWeight } from '../../warmupLog';
+
+/**
+ * An exercise of a program day's warm-up: a reference to an exercise the app
+ * already has (its canonical catalog name + id) with an optional target — reps
+ * OR seconds. No free text: program items are stored like the lifts already are
+ * (catalog names), nothing new that a person types.
+ */
+export interface ProgramWarmupItem {
+  id: string;
+  name: string;
+  exerciseId?: string;
+  reps?: number;
+  durationSec?: number;
+  /** Target load in kg (weighted moves only; optional, old data has none). */
+  weight?: number;
+}
 
 export interface ProgramItem {
   id: string;
@@ -28,6 +45,8 @@ export interface ProgramItem {
   groupId?: string | null;
   groupOrder?: number | null;
   dropLast?: boolean;
+  /** Warm-up marker only: the exercises it holds (absent = a generic warm-up). */
+  warmupItems?: ProgramWarmupItem[];
 }
 
 export type ProgramStatus = 'draft' | 'active' | 'archived';
@@ -83,6 +102,37 @@ export function freshProgram(name: string): Program {
   };
 }
 
+const MAX_WARMUP_ITEMS = 12;
+
+function positive(n: unknown): number | undefined {
+  return typeof n === 'number' && Number.isFinite(n) && n > 0 ? Math.round(n) : undefined;
+}
+
+/** Coerce stored (or absent / malformed) warm-up exercises to a clean list. */
+export function sanitizeWarmupItems(raw: unknown): ProgramWarmupItem[] {
+  if (!Array.isArray(raw)) return [];
+  const out: ProgramWarmupItem[] = [];
+  for (const it of raw) {
+    if (!it || typeof it !== 'object') continue;
+    const r = it as Record<string, unknown>;
+    const name = typeof r.name === 'string' ? r.name.trim().slice(0, 120) : '';
+    if (!name) continue;
+    const reps = positive(r.reps);
+    const durationSec = positive(r.durationSec);
+    const weight = positiveWeight(r.weight);
+    out.push({
+      id: typeof r.id === 'string' && r.id ? r.id : crypto.randomUUID(),
+      name,
+      ...(typeof r.exerciseId === 'string' && r.exerciseId ? { exerciseId: r.exerciseId } : {}),
+      // One value only: seconds when both slipped in.
+      ...(durationSec ? { durationSec } : reps ? { reps } : {}),
+      ...(weight && !durationSec ? { weight } : {}),
+    });
+    if (out.length >= MAX_WARMUP_ITEMS) break;
+  }
+  return out;
+}
+
 export function normalizeItems(items: ProgramItem[]): ProgramItem[] {
   const seen = new Map<number, number>();
   return [...items]
@@ -90,7 +140,14 @@ export function normalizeItems(items: ProgramItem[]): ProgramItem[] {
     .map((item) => {
       const next = seen.get(item.day) ?? 0;
       seen.set(item.day, next + 1);
-      return { ...item, position: next, equipment: item.equipment ?? [] };
+      const { warmupItems: rawWarm, ...rest } = item;
+      const warm = item.kind === 'warmup' ? sanitizeWarmupItems(rawWarm) : [];
+      return {
+        ...rest,
+        position: next,
+        equipment: item.equipment ?? [],
+        ...(warm.length ? { warmupItems: warm } : {}),
+      };
     });
 }
 
@@ -218,6 +275,9 @@ export function toSaved(p: Program, uid: string, fallbackName: string): Program 
       groupId: i.groupId ?? null,
       groupOrder: i.groupOrder ?? null,
       dropLast: !!i.dropLast,
+      ...(i.kind === 'warmup' && sanitizeWarmupItems(i.warmupItems).length
+        ? { warmupItems: sanitizeWarmupItems(i.warmupItems) }
+        : {}),
     }));
   const withItems = new Set(items.map((i) => String(i.day)));
   const targetMuscles: Record<string, MuscleGroup[]> = {};
@@ -339,6 +399,63 @@ export function addItem(p: Program, item: Omit<ProgramItem, 'id' | 'position'>):
 
 export function patchItem(p: Program, id: string, patch: Partial<ProgramItem>): Program {
   return { ...p, items: p.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) };
+}
+
+/** Add an exercise (a catalog reference) to a day's warm-up marker. */
+export function addWarmupExercise(
+  p: Program,
+  itemId: string,
+  ex: Omit<ProgramWarmupItem, 'id'>,
+): Program {
+  return {
+    ...p,
+    items: p.items.map((i) => {
+      if (i.id !== itemId || i.kind !== 'warmup') return i;
+      const cur = sanitizeWarmupItems(i.warmupItems);
+      if (cur.length >= MAX_WARMUP_ITEMS) return i;
+      const [added] = sanitizeWarmupItems([{ ...ex, id: crypto.randomUUID() }]);
+      return added ? { ...i, warmupItems: [...cur, added] } : i;
+    }),
+  };
+}
+
+/** Set the target of a warm-up exercise: reps (+ weight) OR seconds (0 clears it). */
+export function patchWarmupExercise(
+  p: Program,
+  itemId: string,
+  exId: string,
+  patch: { reps?: number; durationSec?: number; weight?: number },
+): Program {
+  return {
+    ...p,
+    items: p.items.map((i) => {
+      if (i.id !== itemId || i.kind !== 'warmup') return i;
+      return {
+        ...i,
+        warmupItems: sanitizeWarmupItems(
+          (i.warmupItems ?? []).map((w) => {
+            if (w.id !== exId) return w;
+            const next: ProgramWarmupItem = { ...w, ...patch };
+            if (patch.reps !== undefined) delete next.durationSec;
+            if (patch.durationSec !== undefined) delete next.reps;
+            return next;
+          }),
+        ),
+      };
+    }),
+  };
+}
+
+export function removeWarmupExercise(p: Program, itemId: string, exId: string): Program {
+  return {
+    ...p,
+    items: p.items.map((i) => {
+      if (i.id !== itemId || i.kind !== 'warmup') return i;
+      const { warmupItems, ...rest } = i;
+      const next = (warmupItems ?? []).filter((w) => w.id !== exId);
+      return next.length ? { ...rest, warmupItems: next } : rest;
+    }),
+  };
 }
 
 export function removeItem(p: Program, id: string): Program {

@@ -4,10 +4,15 @@ import {
   applyFilter,
   buildPickItems,
   dayReference,
+  familyFatigueLevel,
   familyReadiness,
+  fatigueByGroup,
+  fatigueColors,
   sortForBrowse,
   suggest,
 } from './picker';
+import { FATIGUE_COLOR, muscleFatigue } from './fatigue';
+import { personalLandmarks } from './personalize';
 import type { Exercise, SetEntry, Workout } from './types';
 
 const DAY = 86400000;
@@ -100,5 +105,53 @@ describe('pick items', () => {
     expect(s.some((x) => x.item.doneToday)).toBe(false);
     expect(s[0].reason).toBe('usual');
     expect(s[0].item.name).toBe('Wide-Grip Lat Pulldown');
+  });
+});
+
+describe('picker fatigue colours (the Progress fatigue map scale)', () => {
+  const bench = 'Barbell Bench Press - Medium Grip';
+  const heavy = wk('h', NOW - DAY, [
+    ex(
+      bench,
+      Array.from({ length: 30 }, () => set()),
+    ),
+  ]);
+  const light = wk('l', NOW - 2 * DAY, [ex(bench, [set(), set()])]);
+  const chest = FAMILIES.find((f) => f.id === 'chest')!;
+  const legs = FAMILIES.find((f) => f.id === 'legs')!;
+
+  it('fatigueByGroup is exactly muscleFatigue with the personal landmarks', () => {
+    const fin = [heavy, light];
+    const a = fatigueByGroup(fin, NOW);
+    const b = muscleFatigue(fin, NOW, personalLandmarks(fin, NOW));
+    for (const [m, f] of b) expect(a.get(m)).toEqual(f);
+  });
+
+  it('colours each muscle with FATIGUE_COLOR of its own level: fresh / fatigued / recovering', () => {
+    const fresh = fatigueByGroup([], NOW);
+    expect(fatigueColors(chest.groups, fresh).chest).toBe(FATIGUE_COLOR.fresh);
+    expect(familyFatigueLevel(chest.groups, fresh)).toBe('fresh');
+
+    const fat = fatigueByGroup([heavy], NOW);
+    const lvl = fat.get('chest')!.level;
+    expect(lvl).not.toBe('fresh');
+    expect(fatigueColors(chest.groups, fat).chest).toBe(FATIGUE_COLOR[lvl]);
+    expect(familyFatigueLevel(chest.groups, fat)).toBe(lvl);
+
+    // a lightly worked (recovering) muscle reads from its own level, and an
+    // untouched family stays fresh next to it
+    const mild = fatigueByGroup([light], NOW);
+    expect(fatigueColors(chest.groups, mild).chest).toBe(FATIGUE_COLOR[mild.get('chest')!.level]);
+    const legsC = fatigueColors(legs.groups, fat);
+    for (const g of legs.groups) if (g !== 'cardio') expect(legsC[g]).toBe(FATIGUE_COLOR.fresh);
+  });
+
+  it('a family headline is its most fatigued muscle', () => {
+    const arms = FAMILIES.find((f) => f.id === 'arms')!;
+    const fat = fatigueByGroup([heavy], NOW);
+    const levels = arms.groups.map((g) => fat.get(g)?.level ?? 'fresh');
+    const rank = ['fresh', 'moderate', 'high', 'fried'];
+    const worst = levels.reduce((a, b) => (rank.indexOf(b) > rank.indexOf(a) ? b : a));
+    expect(familyFatigueLevel(arms.groups, fat)).toBe(worst);
   });
 });

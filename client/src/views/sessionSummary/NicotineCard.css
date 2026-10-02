@@ -1,0 +1,10 @@
+/* Session summary · "Without nicotine". Same layout as the Recovery fuel card (FuelCard.css);
+   the kit Card, IconTile, GroupedList and Sheet carry the look. */
+.nic-fx-link {
+  align-self: flex-start;
+}
+.nic-fx-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}

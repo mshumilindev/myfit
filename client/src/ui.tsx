@@ -219,6 +219,22 @@ import { X } from '@phosphor-icons/react/X';
 import { CaretUp } from '@phosphor-icons/react/CaretUp';
 import { CaretDown } from '@phosphor-icons/react/CaretDown';
 import { Wind } from '@phosphor-icons/react/Wind';
+import { BeerBottle } from '@phosphor-icons/react/BeerBottle';
+import { BeerStein } from '@phosphor-icons/react/BeerStein';
+import { Wine } from '@phosphor-icons/react/Wine';
+import { Martini } from '@phosphor-icons/react/Martini';
+import { DropHalf } from '@phosphor-icons/react/DropHalf';
+import { Cheers } from '@phosphor-icons/react/Cheers';
+import { CalendarDots } from '@phosphor-icons/react/CalendarDots';
+import { Leaf } from '@phosphor-icons/react/Leaf';
+import { Pill } from '@phosphor-icons/react/Pill';
+import { Flask } from '@phosphor-icons/react/Flask';
+import { TestTube } from '@phosphor-icons/react/TestTube';
+import { Coffee } from '@phosphor-icons/react/Coffee';
+import { Fish } from '@phosphor-icons/react/Fish';
+import { Egg } from '@phosphor-icons/react/Egg';
+import { Orange } from '@phosphor-icons/react/Orange';
+import { Grains } from '@phosphor-icons/react/Grains';
 import { HourglassMedium } from '@phosphor-icons/react/HourglassMedium';
 import type { IconProps } from '@phosphor-icons/react/dist/lib/types';
 import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from './i18n';
@@ -425,6 +441,22 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'caret-up': CaretUp,
   'caret-down': CaretDown,
   wind: Wind,
+  'beer-bottle': BeerBottle,
+  'beer-stein': BeerStein,
+  wine: Wine,
+  martini: Martini,
+  'drop-half': DropHalf,
+  cheers: Cheers,
+  'calendar-dots': CalendarDots,
+  leaf: Leaf,
+  pill: Pill,
+  flask: Flask,
+  'test-tube': TestTube,
+  coffee: Coffee,
+  fish: Fish,
+  egg: Egg,
+  orange: Orange,
+  grains: Grains,
   'hourglass-medium': HourglassMedium,
 };
 

@@ -273,6 +273,14 @@ export type Overlay =
       /** A long-term condition page: 'new' or a condition id; `condKey` = the picked catalogue entry. */
       cond?: string;
       condKey?: string;
+      /** Nicotine pages (hub, What I use, Use in calculations). */
+      nic?: 'hub' | 'products' | 'calc';
+      /** Alcohol pages (hub, What I drink, Usual days, Use in calculations). */
+      alc?: 'hub' | 'products' | 'days' | 'calc';
+      /** Supplements pages (hub, What I take, Use in calculations). */
+      sup?: 'hub' | 'products' | 'calc';
+      /** Health › Privacy and sharing. */
+      priv?: boolean;
     }
   | { screen: 'uikit' }
   | { screen: 'widget-library' }
@@ -364,7 +372,7 @@ function navActive(item: Tab, tab: Tab): boolean {
 }
 
 /** Serialize the current screen to a URL hash so a refresh restores it. */
-function toHash(
+export function toHash(
   tab: Tab,
   overlay: Overlay,
   programsPeer: ProgramsPeer,
@@ -442,6 +450,19 @@ function healthHash(o: Extract<Overlay, { screen: 'health' }>): string {
     parts.push('cond', encodeURIComponent(o.cond));
     if (o.condKey) parts.push(encodeURIComponent(o.condKey));
   }
+  if (o.nic) {
+    parts.push('nicotine');
+    if (o.nic !== 'hub') parts.push(o.nic);
+  }
+  if (o.alc) {
+    parts.push('alcohol');
+    if (o.alc !== 'hub') parts.push(o.alc);
+  }
+  if (o.sup) {
+    parts.push('supplements');
+    if (o.sup !== 'hub') parts.push(o.sup);
+  }
+  if (o.priv) parts.push('privacy');
   return parts.join('/');
 }
 
@@ -465,12 +486,49 @@ function healthFromHash(rest: string[]): Extract<Overlay, { screen: 'health' }> 
   else if (k === 'cond' && a) {
     o.cond = decodeURIComponent(a);
     if (b) o.condKey = decodeURIComponent(b);
+  } else if (k === 'nicotine') {
+    // The old #/health/nicotine/privacy page now lives in Health › Privacy and sharing.
+    if (a === 'privacy') o.priv = true;
+    else o.nic = a === 'products' || a === 'calc' ? a : 'hub';
+  } else if (k === 'alcohol') {
+    o.alc = a === 'products' || a === 'days' || a === 'calc' ? a : 'hub';
+  } else if (k === 'supplements') {
+    o.sup = a === 'products' || a === 'calc' ? a : 'hub';
+  } else if (k === 'privacy') {
+    o.priv = true;
   }
   return o;
 }
 
+/**
+ * One step back from an overlay: the remembered parent if there is one; else, for a Health
+ * page reached by a link, a refresh or a shortcut, up one level (a Nicotine page goes to
+ * the Nicotine hub, the hub and every other Health page to the Health overview), never
+ * straight past Health to Today.
+ */
+export function overlayBack(n: { cur: Overlay; stack: Overlay[] }): {
+  cur: Overlay;
+  stack: Overlay[];
+} {
+  if (n.stack.length > 0) {
+    return { cur: n.stack[n.stack.length - 1], stack: n.stack.slice(0, -1) };
+  }
+  if (n.cur?.screen === 'health' && n.cur.nic && n.cur.nic !== 'hub')
+    return { cur: { screen: 'health', nic: 'hub' }, stack: [] };
+  if (n.cur?.screen === 'health' && n.cur.alc && n.cur.alc !== 'hub')
+    return { cur: { screen: 'health', alc: 'hub' }, stack: [] };
+  if (n.cur?.screen === 'health' && n.cur.sup && n.cur.sup !== 'hub')
+    return { cur: { screen: 'health', sup: 'hub' }, stack: [] };
+  if (
+    n.cur?.screen === 'health' &&
+    (n.cur.view || n.cur.form || n.cur.cond || n.cur.nic || n.cur.alc || n.cur.sup || n.cur.priv)
+  )
+    return { cur: { screen: 'health' }, stack: [] };
+  return { cur: null, stack: [] };
+}
+
 /** Parse a URL hash back into {tab, overlay}. Unknown → Today. */
-function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
+export function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   const parts = hash.split('?')[0].replace(/^#\/?/, '').split('/');
   const head = parts[0] ?? '';
   if (head === 'session') return { tab: 'today', overlay: { screen: 'session', workoutId: '' } };
@@ -989,16 +1047,7 @@ export function App() {
    *  returns there because that peer-tab state lives in App and is preserved
    *  while the overlay is open. */
   const closeOverlay = useCallback(() => {
-    setOverlayNav((n) => {
-      if (n.stack.length > 0) {
-        return { cur: n.stack[n.stack.length - 1], stack: n.stack.slice(0, -1) };
-      }
-      // A Health page reached by a link, a refresh or a shortcut: up one level is the
-      // Health overview (never straight past it to Today).
-      if (n.cur?.screen === 'health' && (n.cur.view || n.cur.form || n.cur.cond))
-        return { cur: { screen: 'health' }, stack: [] };
-      return { cur: null, stack: [] };
-    });
+    setOverlayNav(overlayBack);
   }, []);
   const removeToast = useCallback((id: number) => {
     setToasts((list) => list.filter((x) => x.id !== id));
@@ -1593,6 +1642,10 @@ export function App() {
           form={activeOverlay.form}
           cond={activeOverlay.cond}
           condKey={activeOverlay.condKey}
+          nic={activeOverlay.nic}
+          alc={activeOverlay.alc}
+          sup={activeOverlay.sup}
+          priv={activeOverlay.priv}
           onClose={closeOverlay}
         />
       )}

@@ -1,0 +1,37 @@
+/* Warm-up exercises: the cut-down logger (photo + name head, steppers, one
+   action) and the one-line logged row. Layout only — colour, radius and type
+   come from the kit; the warm-up blue is the set-type token of warm-up sets. */
+.wu-thumb {
+  width: 2.5rem;
+  height: 2rem;
+  object-fit: cover;
+  border-radius: var(--r-6);
+  flex: none;
+}
+.wu-log.wu-log {
+  margin-top: 0;
+  gap: var(--s-12);
+}
+.wu-log--plain.wu-log--plain {
+  margin-top: var(--s-12);
+}
+.wu-log-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+.wu-log-name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-16);
+  font-weight: 600;
+  color: var(--set-warmup);
+}
+.wu-log .gset-log,
+.focus-view .wu-log.gset .gset-log {
+  background: var(--set-warmup);
+  color: var(--c-0c1826);
+  border: none;
+  box-shadow: none;
+  font-weight: 700;
+}

@@ -37,13 +37,7 @@ import {
 import { toneClass } from '../../components/ui/tones';
 import { useT } from '../../i18n';
 import { useConditionName, useConditionSearch } from '../../useConditionName';
-import {
-  addCondition,
-  deleteCondition,
-  setConditionsShare,
-  updateCondition,
-  useStore,
-} from '../../store';
+import { addCondition, deleteCondition, updateCondition, useStore } from '../../store';
 import type { ChronicCondition, ConditionShare } from '../../types';
 
 const ymd = (ms: number): string => {
@@ -292,11 +286,11 @@ function dayText(
 export function ConditionsSection({ onOpen }: { onOpen: (cond: string) => void }) {
   const { t } = useT();
   const condName = useConditionName();
-  const { conditions, conditionsShare } = useStore();
+  const { conditions } = useStore();
   const [now] = useState(() => Date.now());
   return (
     <div className="ul-flex ul-col ug-8">
-      <GroupedList header={t.cndTitle} footer={conditions.length ? t.cndFooter : undefined}>
+      <GroupedList header={t.cndTitle}>
         {conditions.map((c) => {
           const cat = catalogCondition(c.key);
           if (!cat) return null;
@@ -324,23 +318,6 @@ export function ConditionsSection({ onOpen }: { onOpen: (cond: string) => void }
           onClick={() => onOpen('new')}
         />
       </GroupedList>
-      {conditions.length > 0 && (
-        <div className="ul-flex ul-col ug-6">
-          <span className="ut-sm ut-w6">{t.cndShareDefault}</span>
-          <Segmented
-            label={t.cndShareDefault}
-            variant="track"
-            tone="chronic"
-            value={conditionsShare}
-            onChange={setConditionsShare}
-            options={[
-              { value: 'off', label: t.cndShareOff },
-              { value: 'effects', label: t.cndShareEffects },
-              { value: 'full', label: t.cndShareFull },
-            ]}
-          />
-        </div>
-      )}
       {conditions.length === 0 && (
         <Notice tone="chronic" icon="shield-check" aligned>
           {t.cndEmpty}

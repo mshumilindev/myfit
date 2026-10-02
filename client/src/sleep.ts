@@ -242,14 +242,18 @@ export function sleepReadinessBias(
   sleeps: SleepNight[] | null | undefined,
   now: number = Date.now(),
   goalMin = 480,
+  /** Extra minutes of sleep the body is taken to need (nicotine; 0 = none). The user's
+   *  own goal is not changed, only what a night counts for here. */
+  extraNeedMin = 0,
 ): number {
+  const need = goalMin + Math.max(0, extraNeedMin);
   const all = finishedNights(sleeps, now);
   if (all.length === 0) return 0;
   const last = nightDurationMin(all[0], now);
   const recent = all.filter((n) => n.bedtime >= now - 7 * DAY).map((n) => nightDurationMin(n, now));
   const avg7 = recent.length ? recent.reduce((s, x) => s + x, 0) / recent.length : last;
-  const lastTerm = clamp((last - goalMin) / 120, -1, 1);
-  const avgTerm = clamp((avg7 - goalMin) / 120, -1, 1);
+  const lastTerm = clamp((last - need) / 120, -1, 1);
+  const avgTerm = clamp((avg7 - need) / 120, -1, 1);
   const cons = sleepStats(sleeps, now, goalMin, 14).consistencyPct / 100;
   const consTerm = clamp((cons - 0.6) / 0.4, -1, 1);
   return clamp(0.5 * lastTerm + 0.3 * avgTerm + 0.2 * consTerm, -1, 1);

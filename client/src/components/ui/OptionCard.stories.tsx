@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { IconTile } from './IconTile';
 import { OptionCard, OptionCardGrid } from './OptionCard';
 import { LocaleMatrix, Stack } from '../../stories/LocaleMatrix';
 
@@ -111,6 +112,35 @@ export const TonesAndLongText: Story = {
         <OptionCard title="Short" sub="Sub" selected={false} onSelect={() => undefined} />
       </OptionCardGrid>
     </Stack>
+  ),
+};
+
+/** Leading icon: the ListRow layout, check centred at the end, one column of named choices. */
+export const WithIcon: Story = {
+  render: () => (
+    <OptionCardGrid label="Coach sharing" columns={1}>
+      <OptionCard
+        icon={<IconTile tone="accent" size={30} icon="eye-slash" />}
+        title="Off"
+        sub="Nothing"
+        selected={false}
+        onSelect={() => undefined}
+      />
+      <OptionCard
+        icon={<IconTile tone="accent" size={30} icon="sliders-horizontal" />}
+        title="Effects only"
+        sub="“Sleep need +10 min, readiness −3%.” No products or amounts."
+        selected
+        onSelect={() => undefined}
+      />
+      <OptionCard
+        icon={<IconTile tone="accent" size={30} icon="eye" />}
+        title="Full"
+        sub="Products and your usual amounts."
+        selected={false}
+        onSelect={() => undefined}
+      />
+    </OptionCardGrid>
   ),
 };
 

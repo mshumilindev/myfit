@@ -71,6 +71,7 @@ import { workoutCalories } from '../../activities';
 import { defaultRestSec, fmtCountdown, restAlert } from '../../restTimer';
 import { homeSetMoves, homeTotals, lastRunOf } from '../../homeSets';
 import { dateInWeek, weekOrder, weekStartDay, weekStartOf } from '../../weekStart';
+import { nicMid, nicRpeShift } from '../../nicotineApply';
 import type { WidgetCtx, WidgetDef } from '../registry';
 import { ps } from './plan.strings';
 import { DAY, hm, pct, signed } from './format';
@@ -1381,11 +1382,14 @@ function RestTimer({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   if (last) {
     const target =
       exerciseRestSec(last.ex.name) ??
-      defaultRestSec({
-        compound: richExerciseByName(last.ex.name)?.mechanic === 'compound',
-        lastType: setTypeOf(last.set),
-        midRound: false,
-      });
+      nicotineRest(
+        defaultRestSec({
+          compound: richExerciseByName(last.ex.name)?.mechanic === 'compound',
+          lastType: setTypeOf(last.set),
+          midRound: false,
+        }),
+        setTypeOf(last.set),
+      );
     const adj = loc.at === last.at ? loc : { ...loc, delta: 0, skip: false };
     goal = Math.max(0, target + adj.delta);
     left = goal - (tick - last.at) / 1000;
@@ -1998,8 +2002,18 @@ const sessionEnergy: WidgetDef = {
 
 /* ------------------------------------------------------------ effort trend */
 
-const ZONE_LO = 7;
-const ZONE_HI = 8.5;
+/** Nicotine stretches a working-set rest a little (x1 when off); warm-up rests stay as they are. */
+export function nicotineRest(sec: number, lastType: string): number {
+  return lastType === 'warmup' ? sec : Math.round(sec * nicMid('restPct'));
+}
+
+const ZONE_BASE_LO = 7;
+const ZONE_BASE_HI = 8.5;
+/** The effort zone, nudged down by nicotine's RPE offset (no shift when it is off). */
+function effortZone(): { lo: number; hi: number } {
+  const shift = nicRpeShift();
+  return { lo: ZONE_BASE_LO + shift, hi: ZONE_BASE_HI + shift };
+}
 
 const effortTrend: WidgetDef = {
   id: 'effort-trend',
@@ -2010,6 +2024,7 @@ const effortTrend: WidgetDef = {
   render: (size, ctx) => {
     const { store, t, locale, shell } = ctx;
     const s = ps(locale);
+    const { lo: ZONE_LO, hi: ZONE_HI } = effortZone();
     const rows = finishedOf(ctx)
       .map((w) => ({ w, rpe: sessionRpe(w) }))
       .filter((r): r is { w: Workout; rpe: number } => r.rpe !== null)

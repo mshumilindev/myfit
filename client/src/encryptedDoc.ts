@@ -32,6 +32,12 @@ export const OPEN_FIELDS = {
   coachShare: ['updatedAt'],
   // users/{uid}/meta/conditionPrefs — the general conditions sharing default (off|effects|full).
   conditionPrefs: ['updatedAt'],
+  // users/{uid}/meta/nicotine — products, amounts, switches and sharing: all inside, only the stamp open.
+  nicotine: ['updatedAt'],
+  // users/{uid}/meta/alcohol — drinks, servings, switches, weekdays and sharing: all inside, only the stamp open.
+  alcohol: ['updatedAt'],
+  // users/{uid}/meta/supplements — entries, doses, schedules, check-ins, switches and sharing: all inside, only the stamp open.
+  supplements: ['updatedAt'],
 } as const satisfies Record<string, readonly string[]>;
 
 export type SealedCollection = keyof typeof OPEN_FIELDS;

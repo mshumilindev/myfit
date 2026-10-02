@@ -185,7 +185,8 @@ npm run build-storybook    # static catalog → client/storybook-static/
   background = `--color-bg`, viewports **Phone 390×844** and **Web 1280×800**,
   a **Locale** toolbar en / uk / pl / lt / et driving the app's own i18n).
 - Stories: `Kit/<Primitive>` next to the component; composed page sections under
-  `Pages/…` (`views/health/Health.stories.tsx`, `views/logActivity/LogActivity.stories.tsx`)
+  `Pages/…` (`views/health/Health.stories.tsx`, `views/logActivity/LogActivity.stories.tsx`,
+  `views/sessionSummary/NicotineCard.stories.tsx`)
   seed the store through `src/stories/fixtures.ts`. `LocaleMatrix` renders a
   primitive with each locale's real strings for the long-text check.
 - Screenshot check: open `iframe.html?id=<story-id>` at 390 and 1280 (Playwright)
@@ -209,7 +210,7 @@ npm run build-storybook    # static catalog → client/storybook-static/
 | `GroupedList` + `ListRow` + `ListPanel`                       | settings-style groups: icon, label + sub, value, chevron, check, switch, action rows, expansion panel                                              |
 | `Segmented`                                                   | one-of-N: iOS `track` or toned `buttons`                                                                                                           |
 | `Switch`                                                      | role="switch" checkbox, toned                                                                                                                      |
-| `PresetChips`                                                 | toggle chips (date presets, body parts, filters), wrap or scroll                                                                                   |
+| `PresetChips`                                                 | toggle chips (date presets, body parts, filters), wrap, scroll or equal-column grid (weekdays)                                                     |
 | `PinToggle`                                                   | pin / unpin: icon, boxed, row-with-switch                                                                                                          |
 | `IconTile`                                                    | rounded icon square in a family, 22–56px                                                                                                           |
 | `CategoryRow`                                                 | browse-by-category card (tile, title, count, meta, minis)                                                                                          |
@@ -315,6 +316,10 @@ Update: Overview drill-ins now use the round icon back button + title in ONE 36p
 ## Sheet `tone` (кольорове кодування шторок)
 
 `<Sheet tone="ok|rest|active|illness|danger">` фарбує всю шторку (фон, край, грабер, заголовок `.ss-title` / `.day-sheet-head .t`) через `--t-*` сім'ї; стилі — `glass.css` (`.sheet--toned`). Використання: Start (зелена, коли вже тренувався сьогодні), DayHistorySheet (done=ok, missed=danger, rest=rest, vacation=active, illness=illness).
+
+## The `warmup` tone (warm-up blue)
+
+`Tone` `warmup` — the blue of warm-up sets (`--color-warmup` / `-tint` / `-text` / `-line`; `--set-warmup` is an alias). Colour-codes the warm-up exercise Edit drawer: `<Sheet tone="warmup">` tints plate, edge, grabber and title, and its filled Save button takes the same blue. Use it only for warm-up things, so the colour keeps its meaning (the `rest` blue stays for full rest). It shows up in every tone story (`TONES`).
 
 ## The `chronic` tone (long-term health conditions)
 

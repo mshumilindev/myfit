@@ -28,7 +28,6 @@ export function AtlasNotesPanel() {
           </div>
         ))
       )}
-      <span className="atl-panel-label">{t.atlasNumbers}</span>
     </section>
   );
 }

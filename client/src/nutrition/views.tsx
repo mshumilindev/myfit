@@ -30,6 +30,7 @@ import {
   Sk,
 } from './components';
 import { useT } from './i18n';
+import { SupplementProteinHint, useSupplementProtein } from './supplementProtein';
 import { entriesForDay, store, useStore } from './store';
 import type { Activity, Entry, GoalType, Lang, Macros, Sex } from './types';
 import { Select } from '../components/ui/Select';
@@ -93,6 +94,10 @@ export function TodayView({
   const day = localDay();
   const entries = entriesForDay(s, day);
   const eaten: Macros = entries.length ? sumMacros(entries) : { ...ZERO };
+  // Protein from supplements counts toward the protein TARGET progress only (not calories).
+  const supProtein = useSupplementProtein(day);
+  const eatenBars: Macros =
+    supProtein > 0 ? { ...eaten, protein: eaten.protein + supProtein } : eaten;
   const target = s.goal?.target ?? null;
   const dayStr = dateLabel(day, lang, { weekday: 'short', day: 'numeric', month: 'short' });
 
@@ -143,11 +148,12 @@ export function TodayView({
         <div className="kbju">
           <div className="ring-wrap">
             <KbjuRing eaten={eaten.kcal} target={target.kcal} />
-            <MacroBars eaten={eaten} target={target} />
+            <MacroBars eaten={eatenBars} target={target} />
           </div>
           <div className="foot">
             {round(eaten.kcal)} of {target.kcal} {t('kcal')}
           </div>
+          <SupplementProteinHint grams={supProtein} />
         </div>
       ) : (
         <Plaque

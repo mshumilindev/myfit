@@ -96,6 +96,8 @@ import {
 import { restingForDay } from '../dayEnergy';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
+import { AlcoholCheckinCard } from '../components/AlcoholCheckinCard';
+import { SupplementCheckinCard } from '../components/SupplementCheckinCard';
 import { SleepForgotBanner, SleepAutoFilledCard } from '../components/SleepAutomation';
 import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
 import { ConfirmDialog, Icon, Sheet, useIsDesktop } from '../ui';
@@ -1598,6 +1600,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         <>
           {shows('learn') && learnHasVideo && learnProgress.done === 0 && learnBanner}
           <NudgeStack nudges={nudges.filter((n) => shows(n.id as NudgeKind))} />
+          <AlcoholCheckinCard />
+          <SupplementCheckinCard />
           {shows('sleep') && (
             <>
               <SleepForgotBanner

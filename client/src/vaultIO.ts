@@ -226,7 +226,14 @@ export function migratePorts(
   };
   return {
     async list(c) {
-      if (c === 'body' || c === 'coachShare' || c === 'conditionPrefs') {
+      if (
+        c === 'body' ||
+        c === 'coachShare' ||
+        c === 'conditionPrefs' ||
+        c === 'nicotine' ||
+        c === 'alcohol' ||
+        c === 'supplements'
+      ) {
         const s = await getDoc(doc(db, 'users', uid(), 'meta', c));
         return s.exists() ? [{ id: c, data: s.data() }] : [];
       }
@@ -235,7 +242,12 @@ export function migratePorts(
     },
     async write(c, id, data) {
       const ref =
-        c === 'body' || c === 'coachShare' || c === 'conditionPrefs'
+        c === 'body' ||
+        c === 'coachShare' ||
+        c === 'conditionPrefs' ||
+        c === 'nicotine' ||
+        c === 'alcohol' ||
+        c === 'supplements'
           ? doc(db, 'users', uid(), 'meta', c)
           : doc(db, 'users', uid(), c, id);
       await setDoc(ref, data);

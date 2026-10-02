@@ -13,6 +13,7 @@ import type { Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 import type { LoadType } from './loads';
 import type { ConditionEffects } from './data/conditionCatalog';
+import { progressionMult } from './calcMods';
 
 export interface TopPoint {
   ts: number;
@@ -216,7 +217,23 @@ export function setProgressionEffects(e: ConditionEffects): void {
 
 /** `nextTarget` with the person's conditions applied (every caller gets them for free). */
 export function nextTarget(history: TopPoint[], opts: ProgOpts = {}): Target {
-  return applyConditionEffects(baseTarget(history, opts), activeEffects);
+  return applyNicotineStep(applyConditionEffects(baseTarget(history, opts), activeEffects));
+}
+
+/**
+ * Nicotine makes the next load jump a little smaller (midpoint of its range; x1 = no
+ * change when off). Halves of a kilo, rounded up (so the cap always holds), at least 0.5.
+ * A 2.5 kg step stays 2.5 at the current caps (it rounds back up); a 5 kg step can become 4.5.
+ */
+export function applyNicotineStep(t: Target): Target {
+  if (t.state !== 'progress' || t.weight == null || t.prevWeight == null) return t;
+  if (t.deltaKg <= 0) return t;
+  const k = progressionMult();
+  if (k >= 1) return t;
+  // Rounded UP to the half kilo, so rounding can never push the step past the cap.
+  const delta = Math.max(0.5, Math.ceil((t.deltaKg * k) / 0.5) * 0.5);
+  if (delta >= t.deltaKg) return t;
+  return { ...t, weight: t.prevWeight + delta, deltaKg: delta };
 }
 
 export function applyConditionEffects(t: Target, e: ConditionEffects): Target {

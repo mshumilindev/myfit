@@ -193,4 +193,5 @@ export const pl: Strings = {
   stopCamera: 'Stop',
   cameraDenied: 'Kamera niedostępna — wpisz numer',
   whenLabel: 'Kiedy',
+  supFxProteinHint: 'Obejmuje {g} g z suplementów, liczone osobno od dziennika jedzenia.',
 };

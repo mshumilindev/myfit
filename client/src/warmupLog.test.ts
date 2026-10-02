@@ -1,18 +1,25 @@
 import { describe, expect, it } from 'vitest';
-import { findLastWarmup, isDetailedWarmup, warmupItemsOf, warmupSummary } from './warmupLog';
+import {
+  defaultWarmupValue,
+  findLastWarmup,
+  isTimedWarmupName,
+  lastWarmupValues,
+  warmupUsesWeight,
+  warmupItemsOf,
+  warmupSummary,
+} from './warmupLog';
 import {
   __getStateForTests,
+  __replaceStateForTests,
   addExercise,
   addWarmupItem,
   duplicateExercise,
   finishWorkoutClean,
-  moveWarmupItem,
   removeWarmupItem,
-  setWarmupDetailed,
   setWarmupItems,
   setWarmupMinutes,
   startWorkout,
-  toggleWarmupItem,
+  logWarmupItem,
   updateWarmupItem,
   upsertSet,
   workoutSets,
@@ -36,17 +43,26 @@ const find = (wid: string, id: string) =>
     .exercises.find((e) => e.id === id)!;
 
 describe('old warm-up markers (backward compat)', () => {
-  it('a marker without the new fields is a single warm-up', () => {
+  it('a marker without items is a generic warm-up', () => {
     const ex = marker({ plannedDurationMin: 5 });
     expect(isMarkerExercise(ex)).toBe(true);
-    expect(isDetailedWarmup(ex)).toBe(false);
     expect(warmupItemsOf(ex)).toEqual([]);
-    expect(warmupSummary(ex)).toEqual({ detailed: false, count: 0, total: 0, minutes: 5 });
+    expect(warmupSummary(ex)).toEqual({ count: 0, total: 0, minutes: 5 });
     expect(warmupSummary(marker()).minutes).toBeNull();
+  });
+  it('items present show, whatever the retired warmupDetailed flag says', () => {
+    const items = [{ id: 'a', name: 'Cat Stretch', durationSec: 60, done: true }];
+    for (const flag of [true, false, undefined]) {
+      const ex = marker({
+        warmupItems: items,
+        ...(flag === undefined ? {} : { warmupDetailed: flag }),
+      } as never);
+      expect(warmupItemsOf(ex)).toHaveLength(1);
+      expect(warmupSummary(ex)).toEqual({ count: 1, total: 1, minutes: 1 });
+    }
   });
   it('ignores malformed items in storage', () => {
     const ex = marker({
-      warmupDetailed: true,
       warmupItems: [
         null,
         { id: 1 },
@@ -58,15 +74,23 @@ describe('old warm-up markers (backward compat)', () => {
   });
 });
 
+describe('defaultWarmupValue', () => {
+  it('logs stretches, holds and cardio in seconds, the rest in reps', () => {
+    expect(defaultWarmupValue('Cat Stretch')).toEqual({ durationSec: 30 });
+    expect(defaultWarmupValue('Plank')).toEqual({ durationSec: 30 });
+    expect(defaultWarmupValue('Walking, Treadmill')).toHaveProperty('durationSec');
+    expect(defaultWarmupValue('Band Pull Apart')).toEqual({ reps: 12 });
+    expect(isTimedWarmupName('Band Pull Apart')).toBe(false);
+  });
+});
+
 describe('warm-up store actions', () => {
-  it('toggles into detailed mode, edits items and keeps the marker minutes in step', () => {
+  it('adds exercises, edits the one value and keeps the marker minutes in step', () => {
     const w = startWorkout(null)!;
     const ex = addExercise(w.id, 'Warm-up', 'warmup');
     setWarmupMinutes(w.id, ex.id, 7);
     expect(find(w.id, ex.id).plannedDurationMin).toBe(7);
 
-    setWarmupDetailed(w.id, ex.id, true);
-    expect(isDetailedWarmup(find(w.id, ex.id))).toBe(true);
     const a = addWarmupItem(w.id, ex.id, { name: 'Arm Circles', reps: 10 })!;
     const b = addWarmupItem(w.id, ex.id, { name: 'Cat Stretch', durationSec: 90 })!;
     expect(addWarmupItem(w.id, ex.id, { name: '  ' })).toBeNull();
@@ -77,32 +101,72 @@ describe('warm-up store actions', () => {
     // nothing done yet → no minutes from items
     expect(find(w.id, ex.id).plannedDurationMin).toBeNull();
 
-    toggleWarmupItem(w.id, ex.id, b.id);
+    // pending until Log is pressed: editing values never logs
+    updateWarmupItem(w.id, ex.id, a.id, { reps: 12, weight: 10 });
+    expect(warmupItemsOf(find(w.id, ex.id))[0]).toMatchObject({
+      done: false,
+      reps: 12,
+      weight: 10,
+    });
+
+    logWarmupItem(w.id, ex.id, b.id, { durationSec: 90 });
     let cur = find(w.id, ex.id);
     expect(warmupItemsOf(cur).find((i) => i.id === b.id)).toMatchObject({ done: true });
     expect(warmupItemsOf(cur).find((i) => i.id === b.id)?.at).toBeTypeOf('number');
     expect(cur.plannedDurationMin).toBe(2); // 90 s → 2 min (rounded)
-    updateWarmupItem(w.id, ex.id, a.id, { done: true, durationSec: 30 });
-    expect(find(w.id, ex.id).plannedDurationMin).toBe(2); // 120 s
-    toggleWarmupItem(w.id, ex.id, b.id, false);
+    logWarmupItem(w.id, ex.id, a.id, { reps: 15, weight: 0 });
     cur = find(w.id, ex.id);
-    expect(warmupItemsOf(cur).find((i) => i.id === b.id)?.at).toBeUndefined();
+    expect(warmupItemsOf(cur)[0]).toMatchObject({ done: true, reps: 15 });
+    expect(warmupItemsOf(cur)[0].weight).toBeUndefined(); // 0 clears
+    expect(cur.plannedDurationMin).toBe(2);
+    // editing a logged item keeps it logged
+    updateWarmupItem(w.id, ex.id, b.id, { durationSec: 30 });
+    cur = find(w.id, ex.id);
+    expect(warmupItemsOf(cur).find((i) => i.id === b.id)).toMatchObject({
+      done: true,
+      durationSec: 30,
+    });
     expect(cur.plannedDurationMin).toBe(1); // 30 s → min 1
 
-    moveWarmupItem(w.id, ex.id, b.id, -1);
-    expect(warmupItemsOf(find(w.id, ex.id)).map((i) => i.id)).toEqual([b.id, a.id]);
-    moveWarmupItem(w.id, ex.id, b.id, -1); // already first: no-op
-    expect(warmupItemsOf(find(w.id, ex.id)).map((i) => i.id)).toEqual([b.id, a.id]);
     removeWarmupItem(w.id, ex.id, a.id);
     expect(warmupItemsOf(find(w.id, ex.id))).toHaveLength(1);
-
-    // back to "one warm-up": items are kept, the mode is single again
-    setWarmupDetailed(w.id, ex.id, false);
+    // the last one goes: back to a plain generic warm-up
+    removeWarmupItem(w.id, ex.id, b.id);
     cur = find(w.id, ex.id);
-    expect(isDetailedWarmup(cur)).toBe(false);
-    expect(warmupItemsOf(cur)).toHaveLength(1);
-    expect(warmupSummary(cur).detailed).toBe(false);
+    expect(cur.warmupItems).toBeUndefined();
+    expect(warmupSummary(cur).total).toBe(0);
     expect(cur.sets).toEqual([]);
+  });
+
+  it('strips the retired warmupDetailed flag on the next write', () => {
+    const w = startWorkout(null)!;
+    const ex = addExercise(w.id, 'Warm-up', 'warmup');
+    const state = __getStateForTests();
+    __replaceStateForTests({
+      ...state,
+      workouts: state.workouts.map((x) =>
+        x.id === w.id
+          ? {
+              ...x,
+              exercises: x.exercises.map((e) =>
+                e.id === ex.id ? ({ ...e, warmupDetailed: true, warmupItems: [] } as typeof e) : e,
+              ),
+            }
+          : x,
+      ),
+    });
+    addWarmupItem(w.id, ex.id, { name: 'Arm Circles', reps: 10 });
+    expect('warmupDetailed' in find(w.id, ex.id)).toBe(false);
+  });
+
+  it('a block can start with exercises (program day / auto proposal)', () => {
+    const w = startWorkout(null)!;
+    const ex = addExercise(w.id, 'Warm-up', 'warmup', {
+      warmupItems: [{ name: 'Band Pull Apart', exerciseId: 'Band_Pull_Apart', reps: 15 }],
+    });
+    const items = warmupItemsOf(find(w.id, ex.id));
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({ name: 'Band Pull Apart', reps: 15, done: false });
   });
 
   it('only acts on warm-up markers', () => {
@@ -111,8 +175,6 @@ describe('warm-up store actions', () => {
     const cd = addExercise(w.id, 'Cool-down', 'cooldown');
     expect(addWarmupItem(w.id, lift.id, { name: 'Cat Stretch' })).toBeNull();
     expect(addWarmupItem(w.id, cd.id, { name: 'Cat Stretch' })).toBeNull();
-    setWarmupDetailed(w.id, lift.id, true);
-    expect(find(w.id, lift.id).warmupDetailed).toBeUndefined();
   });
 
   it('repeat replaces the list with fresh ids, nothing done', () => {
@@ -138,7 +200,7 @@ describe('warm-up store actions', () => {
 });
 
 describe('stats stay clear of warm-up items', () => {
-  it('a detailed warm-up adds no sets and no volume; ramp sets still count as warm-up', () => {
+  it('a warm-up with exercises adds no sets and no volume; ramp sets still count as warm-up', () => {
     const w = startWorkout(null)!;
     const ex = addExercise(w.id, 'Warm-up', 'warmup');
     addWarmupItem(w.id, ex.id, { name: 'Arm Circles', reps: 10, done: true });
@@ -168,7 +230,6 @@ describe('findLastWarmup', () => {
     exercises: ex ? [ex] : [],
   });
   const detailed = marker({
-    warmupDetailed: true,
     warmupItems: [{ id: 'a', name: 'Cat Stretch', done: true, durationSec: 60 }],
   });
   const single = marker({ plannedDurationMin: 5 });
@@ -179,17 +240,69 @@ describe('findLastWarmup', () => {
       wk('pull', day(8), single, 'Pull'),
       wk('x', day(22), single, 'Legs'),
     ];
-    expect(findLastWarmup(list, { dayName: 'push' })?.detailed).toBe(true);
+    expect(findLastWarmup(list, { dayName: 'push' })?.items).toHaveLength(1);
     expect(findLastWarmup(list, { dayName: 'Nope', weekday: 1 })?.startedAt).toBe(day(22)); // Tue 22nd
     expect(findLastWarmup(list, {})?.startedAt).toBe(day(22));
   });
   it('skips unfinished sessions, the excluded one and empty warm-ups', () => {
     const live = { ...wk('live', day(29), single), finishedAt: null };
     const empty = wk('e', day(28), marker());
-    const emptyDetailed = wk('d', day(27), marker({ warmupDetailed: true, warmupItems: [] }));
+    const emptyDetailed = wk('d', day(27), marker({ warmupItems: [] }));
     expect(findLastWarmup([live, empty, emptyDetailed], {})).toBeNull();
     const one = wk('one', day(3), single);
     expect(findLastWarmup([one], { excludeId: 'one' })).toBeNull();
-    expect(findLastWarmup([one], {})).toMatchObject({ detailed: false, minutes: 5, items: [] });
+    expect(findLastWarmup([one], {})).toMatchObject({ minutes: 5, items: [] });
+  });
+});
+
+describe('weight and history', () => {
+  it('weights only for loaded equipment, never for timed or bodyweight moves', () => {
+    expect(warmupUsesWeight('Band Pull Apart')).toBe(false);
+    expect(warmupUsesWeight('Cat Stretch')).toBe(false);
+    expect(warmupUsesWeight('Dumbbell Bicep Curl')).toBe(true);
+    expect(warmupUsesWeight('Barbell Squat')).toBe(true);
+  });
+  it('keeps a stored weight and drops junk; old done items stay logged', () => {
+    const ex = marker({
+      warmupItems: [
+        { id: 'a', name: 'Dumbbell Bicep Curl', reps: 10, weight: 7.5, done: true },
+        { id: 'b', name: 'Arm Circles', reps: 10, weight: -2 as never, done: false },
+      ],
+    });
+    const items = warmupItemsOf(ex);
+    expect(items[0]).toMatchObject({ weight: 7.5, done: true });
+    expect(items[1].weight).toBeUndefined();
+    expect(items[1].done).toBe(false);
+  });
+  it('pre-fills from the last logged set of that exercise (pending ones do not count)', () => {
+    const mk = (id: string, t: number, items: never[]): Workout =>
+      ({
+        id,
+        startedAt: t,
+        finishedAt: t + 1,
+        autoFinished: false,
+        exercises: [marker({ warmupItems: items })],
+      }) as Workout;
+    const hist = [
+      mk('o', 1, [
+        { id: 'x', name: 'Dumbbell Bicep Curl', reps: 8, weight: 5, done: true },
+      ] as never),
+      mk('n', 2, [
+        { id: 'y', name: 'Dumbbell Bicep Curl', reps: 12, weight: 7.5, done: true },
+        { id: 'z', name: 'Arm Circles', reps: 20, done: false },
+      ] as never),
+    ];
+    expect(lastWarmupValues(hist, 'dumbbell bicep curl')).toEqual({ reps: 12, weight: 7.5 });
+    expect(lastWarmupValues(hist, 'Arm Circles')).toBeNull();
+    expect(lastWarmupValues(hist, 'Dumbbell Bicep Curl', 'n')).toEqual({ reps: 8, weight: 5 });
+  });
+  it('summary counts only logged items', () => {
+    const ex = marker({
+      warmupItems: [
+        { id: 'a', name: 'Arm Circles', reps: 10, done: true },
+        { id: 'b', name: 'Cat Stretch', durationSec: 30, done: false },
+      ],
+    });
+    expect(warmupSummary(ex).count).toBe(1);
   });
 });

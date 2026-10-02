@@ -7,7 +7,7 @@
  * workouts, the gym, "now"), so it unit-tests without React.
  */
 import { isAutoExcluded, type Limits } from './conditions';
-import { landmarkFor } from './personalize';
+import { landmarkFor, personalLandmarks } from './personalize';
 import type { Gym, Workout } from './types';
 import {
   BUILT_IN_CATALOG,
@@ -29,6 +29,7 @@ import { volumeWeakPoints } from './weakpoints';
 import { nextTarget, topHistory, type Target } from './progression';
 import { isStrengthExercise, resolveMuscles, topSet } from './store';
 import { fatigueSetCount } from './stimulus';
+import { FATIGUE_COLOR, muscleFatigue, type FatigueLevel, type MuscleFatigue } from './fatigue';
 
 // --- Families & sub-muscles -------------------------------------------------
 
@@ -147,6 +148,8 @@ export function directReadiness(
     hit?.dose ?? 0,
     RECOVERY_DAYS[main] ?? 2,
     landmarkFor(main, finished, now)?.mav || 12,
+    0,
+    now,
   );
   return { state: r.state, days: hit ? Math.floor(hit.days) : null };
 }
@@ -160,6 +163,56 @@ export function readinessByGroup(finished: Workout[], now: number): Map<MuscleGr
 
 export function familyReadiness(f: Family, finished: Workout[], now: number): Readiness {
   return directReadiness(f.groups, MAIN[f.id], finished, now);
+}
+
+// --- Fatigue (the Progress fatigue map's scale, shared by the picker tiles) ----
+
+const LEVEL_RANK: Record<FatigueLevel, number> = { fresh: 0, moderate: 1, high: 2, fried: 3 };
+
+/** Per-muscle fatigue exactly as the Progress fatigue map computes it. */
+export function fatigueByGroup(finished: Workout[], now: number): Map<MuscleGroup, MuscleFatigue> {
+  return muscleFatigue(finished, now, personalLandmarks(finished, now));
+}
+
+/** A muscle's fatigue level; muscles with no volume read fresh. */
+export function groupFatigueLevel(
+  g: MuscleGroup,
+  map: ReadonlyMap<MuscleGroup, MuscleFatigue>,
+): FatigueLevel {
+  return map.get(g)?.level ?? 'fresh';
+}
+
+/** The fatigue-map colour of every muscle in `groups` (each its own level). */
+export function fatigueColors(
+  groups: readonly MuscleGroup[],
+  map: ReadonlyMap<MuscleGroup, MuscleFatigue>,
+): Partial<Record<MuscleGroup, string>> {
+  const out: Partial<Record<MuscleGroup, string>> = {};
+  for (const g of groups) if (g !== 'cardio') out[g] = FATIGUE_COLOR[groupFatigueLevel(g, map)];
+  return out;
+}
+
+/** A family's headline level: its most fatigued muscle. */
+export function familyFatigueLevel(
+  groups: readonly MuscleGroup[],
+  map: ReadonlyMap<MuscleGroup, MuscleFatigue>,
+): FatigueLevel {
+  let worst: FatigueLevel = 'fresh';
+  for (const g of groups) {
+    if (g === 'cardio') continue;
+    const l = groupFatigueLevel(g, map);
+    if (LEVEL_RANK[l] > LEVEL_RANK[worst]) worst = l;
+  }
+  return worst;
+}
+
+/** A sub chip's level (fine regions read their coarse group, like subReadiness). */
+export function subFatigueLevel(
+  s: SubId,
+  map: ReadonlyMap<MuscleGroup, MuscleFatigue>,
+): FatigueLevel {
+  if (isFocusSub(s)) return groupFatigueLevel(s.startsWith('delt') ? 'shoulders' : 'chest', map);
+  return groupFatigueLevel(s, map);
 }
 
 export function subReadiness(s: SubId, map: Map<MuscleGroup, Readiness>): Readiness | null {
@@ -211,6 +264,11 @@ function orderedGroups(w: Workout, requireSet: boolean): [MuscleGroup, number][]
     counts.set(p, (counts.get(p) ?? 0) + Math.max(1, e.sets.length));
   }
   return order.map((m) => [m, counts.get(m) as number]);
+}
+
+/** Primary muscles of every exercise the session holds (planned or logged), in order. */
+export function plannedGroups(w: Workout): MuscleGroup[] {
+  return orderedGroups(w, false).map(([m]) => m);
 }
 
 /**
@@ -308,7 +366,14 @@ export function gymHas(gym: Gym | null | undefined, equipment: EquipmentId | nul
  * Every pickable strength exercise: the built-in catalog plus anything only in
  * your history (custom names), each annotated with history, today and gym.
  */
-export function buildPickItems(workout: Workout, all: Workout[], gym: Gym | null): PickItem[] {
+export function buildPickItems(
+  workout: Workout,
+  all: Workout[],
+  gym: Gym | null,
+  /** Warm-up block: stretching and mobility moves are pickable too (cardio
+   *  machines stay out — a warm-up's cardio is its minutes). */
+  opts: { stretching?: boolean } = {},
+): PickItem[] {
   // History by canonical key.
   const hist = new Map<
     string,
@@ -356,7 +421,8 @@ export function buildPickItems(workout: Workout, all: Workout[], gym: Gym | null
     const key = name.toLowerCase();
     if (seen.has(key)) continue;
     const rich = richExerciseById(c.id);
-    if (rich?.category === 'cardio' || rich?.category === 'stretching') continue;
+    if (rich?.category === 'cardio') continue;
+    if (rich?.category === 'stretching' && !opts.stretching) continue;
     seen.add(key);
     const equipment = (rich?.equipment ?? c.equipment ?? null) as EquipmentId | null;
     const h = hist.get(key);

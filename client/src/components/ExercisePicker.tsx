@@ -2,13 +2,14 @@
  * ExercisePicker — "Add exercise", v2 (design: Spotter — Exercise Picker
  * Concepts, frames A–F). One exercise per pick: tapping a card adds it, the ⓘ
  * opens its details. Home = search + day suggestions + muscle-family tiles
- * (colour = readiness); a family drills into sub-muscles and an equipment row
+ * (colour = the fatigue map's); a family drills into sub-muscles and an equipment row
  * over a photo grid; typing switches to search results. Exercises already done
  * this session are marked, never blocked. On desktop the same pieces sit in one
  * modal: family rail · suggestions + grid · live preview.
  */
 import { exerciseFlag, type ExerciseFlag } from '../conditions';
-import { useConditionLimits } from '../healthBuild';
+import { healthBuildCtx, useConditionLimits } from '../healthBuild';
+import { warmupProposal } from '../warmupFor';
 import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Switch as KitSwitch } from './ui/Switch';
@@ -23,7 +24,7 @@ import type { EquipmentId } from '../data/equipment';
 import { EQUIPMENT_IDS } from '../data/equipment';
 import { exerciseSearchText, loadExerciseInstructions, type MuscleGroup } from '../data/exercises';
 import { dayReadoutLabel } from '../data/daySuggest';
-import { READINESS_COLOR } from '../recovery';
+import { FATIGUE_COLOR, type FatigueLevel } from '../fatigue';
 import { swapCandidates } from '../swaps';
 import { topHistory } from '../progression';
 import { tokenMatch } from '../search';
@@ -41,18 +42,20 @@ import {
   equipmentCounts,
   familyMain,
   familyOf,
-  familyReadiness,
+  familyFatigueLevel,
+  fatigueByGroup,
+  fatigueColors,
   weekSets,
   fitsDay,
   isFocusSub,
+  plannedGroups,
   readinessByGroup,
   sortForBrowse,
-  subReadiness,
+  subFatigueLevel,
   suggest,
   type Family,
   type FamilyId,
   type PickItem,
-  type Readiness,
   type SubId,
   type Suggestion,
 } from '../picker';
@@ -64,16 +67,23 @@ export interface ExercisePickerProps {
   gym: Gym | null;
   replacing?: boolean;
   onPick: (item: PickItem) => void;
-  onMarker: (kind: 'warmup' | 'cooldown') => void;
-  onCardio: () => void;
-  onCreate: (name: string) => void;
+  /** The three below are unused in `warmup` mode. */
+  onMarker?: (kind: 'warmup' | 'cooldown') => void;
+  onCardio?: () => void;
+  onCreate?: (name: string) => void;
   onClose: () => void;
   /** Program authoring: the same picker without recommendations — no
    *  suggestions, readiness, "done today", targets or last-session loads. */
   plain?: boolean;
+  /** Warm-up block: the same picker over the whole exercise database, reduced —
+   *  implies `plain` (no readiness / targets) but keeps the "today" muscle-group
+   *  highlight and suggests the auto session's warm-up (warmupFor), no Warm-up / Cardio / Cool-down kind
+   *  switch and no "create your own" (only exercises the app already has). */
+  warmup?: boolean;
   /** Header subtitle override (e.g. "Mon · Upper A"). */
   subtitle?: string;
-  /** Names already on the day — marked "Added" (a tap still adds; no selected state). */
+  /** Names already on the day — marked "Added" in the plain program picker (a tap still adds;
+   *  no selected state). Ignored by the warm-up picker: the same exercise may be added again. */
   added?: string[];
   /** Label of the add button in the details sheet / preview. */
   addLabel?: string;
@@ -83,17 +93,9 @@ const PAGE = 24;
 
 // --- small helpers ------------------------------------------------------------
 
-function readinessColor(r: Readiness): string {
-  if (r.state === 'stale' && r.days === null) return 'var(--color-neutral-600)';
-  return READINESS_COLOR[r.state];
-}
-
-function readinessLabel(t: Strings, r: Readiness): string {
-  if (r.state === 'recovering') return t.pickRecovering;
-  if (r.state === 'nearly') return t.pickAlmost;
-  if (r.days === null) return t.pickFresh;
-  return r.state === 'stale' ? t.pickDueAgo(r.days) : t.pickReadyAgo(r.days);
-}
+/** Fatigue-map colour + label of a level (the Progress fatigue map's scale). */
+const levelColor = (l: FatigueLevel): string => FATIGUE_COLOR[l];
+const levelLabel = (t: Strings, l: FatigueLevel): string => t.fatLevel[l];
 
 function subLabel(t: Strings, s: SubId): string {
   return isFocusSub(s) ? t.subMuscleNames[s] : t.muscleGroups[s];
@@ -213,16 +215,18 @@ export function ExercisePicker(props: ExercisePickerProps) {
     [store.workouts, props.workout.id],
   );
   const items = useMemo(
-    () => buildPickItems(props.workout, store.workouts, props.gym),
-    [props.workout, store.workouts, props.gym],
+    () => buildPickItems(props.workout, store.workouts, props.gym, { stretching: !!props.warmup }),
+    [props.workout, store.workouts, props.gym, props.warmup],
   );
   // Readiness counts TODAY's session too: 20 chest sets an hour ago means
   // chest is recovering now, not "almost ready" from last week.
   const withToday = useMemo(() => [...finished, props.workout], [finished, props.workout]);
   const readiness = useMemo(() => readinessByGroup(withToday, now), [withToday, now]);
-  const famReady = useMemo(
-    () => new Map(FAMILIES.map((f) => [f.id, familyReadiness(f, withToday, now)])),
-    [withToday, now],
+  // Tile colours come from the Progress fatigue map (same per-muscle levels).
+  const fatigue = useMemo(() => fatigueByGroup(withToday, now), [withToday, now]);
+  const famLevel = useMemo(
+    () => new Map(FAMILIES.map((f) => [f.id, familyFatigueLevel(f.groups, fatigue)])),
+    [fatigue],
   );
   const day = useMemo(() => dayReference(props.workout, finished), [props.workout, finished]);
   const dayLabel = day.readout ? dayReadoutLabel(day.readout, t) : '';
@@ -230,12 +234,31 @@ export function ExercisePicker(props: ExercisePickerProps) {
     () => new Set(FAMILIES.filter((f) => f.groups.some((g) => fitsDay(day, g))).map((f) => f.id)),
     [day],
   );
+  // Warm-up mode keeps the regular picker's "today" highlight, fed by the muscles
+  // the session plans or holds (else the day reference).
+  const showToday = !props.plain;
+  const warmupMuscles = useMemo(() => {
+    if (!props.warmup) return [];
+    const planned = plannedGroups(props.workout);
+    return day.from === 'program' || planned.length === 0 ? day.groups : planned;
+  }, [props.warmup, props.workout, day]);
+  const warmupToday = useMemo(
+    () =>
+      new Set(
+        FAMILIES.filter((f) => f.groups.some((g) => warmupMuscles.includes(g))).map((f) => f.id),
+      ),
+    [warmupMuscles],
+  );
+  const todayIds = props.warmup ? warmupToday : todayFamilies;
   const gymOnly = onlyGym && hasInventory;
   const eqFiltered = useMemo(
     () => applyFilter(items, { equipment: equip, onlyGym: gymOnly }),
     [items, equip, gymOnly],
   );
-  const plain = !!props.plain;
+  const plain = !!props.plain || !!props.warmup;
+  // Fatigue colours/levels show everywhere (warm-up included); only the program-authoring picker,
+  // which plans a day rather than the one in progress, leaves them out.
+  const noFatigue = !!props.plain;
   const suggestions = useMemo(
     () =>
       plain
@@ -250,6 +273,22 @@ export function ExercisePicker(props: ExercisePickerProps) {
     () => new Set((props.added ?? []).map((n) => canonicalExerciseName(n).toLowerCase())),
     [props.added],
   );
+  // Warm-up suggestions: the auto session's own proposal (one light station,
+  // gym- and condition-aware, matched to today's muscles). Already-added ones
+  // stay: the same exercise can be added again.
+  const warmupSugs = useMemo(() => {
+    if (!props.warmup) return [];
+    const proposal = warmupProposal({
+      muscles: warmupMuscles,
+      gym: props.gym,
+      limits,
+      protect: healthBuildCtx(store).protectedMuscles,
+    });
+    if (!proposal) return [];
+    return proposal.items
+      .map((x) => items.find((i) => i.key === x.name.toLowerCase()))
+      .filter((i): i is PickItem => !!i);
+  }, [props.warmup, warmupMuscles, props.gym, limits, store, items]);
   const suggestedKeys = useMemo(() => new Set(suggestions.map((x) => x.item.key)), [suggestions]);
   const doneToday = props.workout.exercises.filter(
     (e) => e.sets.length > 0 && (e.kind ?? 'strength') === 'strength',
@@ -257,7 +296,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
 
   // Desktop always shows a family: today's first, else chest.
   const activeFamily: FamilyId | null =
-    family ?? (isDesktop ? ([...todayFamilies][0] ?? 'chest') : null);
+    family ?? (isDesktop ? ([...todayIds][0] ?? 'chest') : null);
   const fam = activeFamily ? (FAMILIES.find((f) => f.id === activeFamily) ?? null) : null;
 
   const groupItems = useMemo(() => {
@@ -321,7 +360,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
   const setLimit = (f: (n: number) => number) => setPage({ key: pageKey, n: f(limit) });
 
   // Desktop keys: "/" focuses search, Enter adds the previewed exercise.
-  const previewItem = preview ?? suggestions[0]?.item ?? groupShown[0] ?? null;
+  const previewItem = preview ?? warmupSugs[0] ?? suggestions[0]?.item ?? groupShown[0] ?? null;
   const titleSub = plain
     ? (props.subtitle ?? '')
     : [dayLabel, doneToday.length ? t.pickNDone(doneToday.length) : ''].filter(Boolean).join(' · ');
@@ -361,8 +400,8 @@ export function ExercisePicker(props: ExercisePickerProps) {
       label={t.pgItemType}
       value="strength"
       onChange={(k) => {
-        if (k === 'cardio') props.onCardio();
-        else if (k === 'warmup' || k === 'cooldown') props.onMarker(k);
+        if (k === 'cardio') props.onCardio?.();
+        else if (k === 'warmup' || k === 'cooldown') props.onMarker?.(k);
       }}
       options={[
         { value: 'strength', label: t.exerciseKindNames.strength },
@@ -391,7 +430,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' && needle) {
           if (results[0]) pick(results[0]);
-          else props.onCreate(q.trim());
+          else props.onCreate?.(q.trim());
         }
       }}
     />
@@ -446,6 +485,19 @@ export function ExercisePicker(props: ExercisePickerProps) {
     return t.pickNeverDone;
   };
 
+  // The plain program picker marks what is already added; a warm-up has no
+  // Added badge (add the same one again, or several in a row) but keeps the
+  // Careful / Not advised flag of the person's conditions.
+  const plainBadges = (i: PickItem) => {
+    const f = props.warmup ? flagOf(i.name) : 'ok';
+    return (
+      <>
+        {(f === 'avoid' || f === 'caution') && <Badge item={i} t={t} flag={f} />}
+        {!props.warmup && <AddedBadge on={addedKeys.has(i.key)} t={t} />}
+      </>
+    );
+  };
+
   const card = (i: PickItem) => (
     <div
       key={i.key}
@@ -465,11 +517,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
           <span className="xp-card-meta">{itemMeta(t, i, plain)}</span>
         </span>
       </Card>
-      {plain ? (
-        <AddedBadge on={addedKeys.has(i.key)} t={t} />
-      ) : (
-        <Badge item={i} t={t} flag={flagOf(i.name)} />
-      )}
+      {plain ? plainBadges(i) : <Badge item={i} t={t} flag={flagOf(i.name)} />}
       <InfoButton onClick={() => openInfo(i)} label={t.detailsAction} />
     </div>
   );
@@ -487,7 +535,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
           <span className="xp-row-meta">{itemMeta(t, i, plain)}</span>
         </span>
         {plain ? (
-          <AddedBadge on={addedKeys.has(i.key)} t={t} />
+          plainBadges(i)
         ) : suggestedKeys.has(i.key) && !i.doneToday ? (
           <span className="xp-badge sug">{t.pickSuggestedTag}</span>
         ) : (
@@ -499,9 +547,9 @@ export function ExercisePicker(props: ExercisePickerProps) {
   );
 
   const familyTile = (f: Family) => {
-    const r = famReady.get(f.id)!;
-    const color = plain ? 'var(--color-accent)' : readinessColor(r);
-    const today = !plain && todayFamilies.has(f.id);
+    const lvl = famLevel.get(f.id)!;
+    const color = noFatigue ? 'var(--color-accent)' : levelColor(lvl);
+    const today = showToday && todayIds.has(f.id);
     return (
       <Card
         as="button"
@@ -512,13 +560,21 @@ export function ExercisePicker(props: ExercisePickerProps) {
         onClick={() => openFamily(f.id)}
       >
         {today && <span className="xp-today corner">{t.pickToday}</span>}
-        <FamilyFigure groups={f.groups} color={color} view={f.view} width={38} height={72} />
+        <FamilyFigure
+          groups={f.groups}
+          color={color}
+          colors={noFatigue ? undefined : fatigueColors(f.groups, fatigue)}
+          view={f.view}
+          width={56}
+          height={76}
+          zoom
+        />
         <span className="xp-fam-body">
           <span className="xp-fam-name">{t.pickFamilies[f.id]}</span>
-          {!plain && (
+          {!noFatigue && (
             <span className="xp-fam-state">
               <span className="dot" style={{ background: color }} />
-              {readinessLabel(t, r)}
+              {levelLabel(t, lvl)}
             </span>
           )}
           <span className="xp-fam-subs">
@@ -530,8 +586,8 @@ export function ExercisePicker(props: ExercisePickerProps) {
   };
 
   const railItem = (f: Family) => {
-    const r = famReady.get(f.id)!;
-    const color = plain ? 'var(--color-accent)' : readinessColor(r);
+    const lvl = famLevel.get(f.id)!;
+    const color = noFatigue ? 'var(--color-accent)' : levelColor(lvl);
     const open = activeFamily === f.id;
     return (
       <div key={f.id} className="xp-rail-group">
@@ -543,13 +599,21 @@ export function ExercisePicker(props: ExercisePickerProps) {
           tone={open ? 'accent' : 'neutral'}
           onClick={() => openFamily(f.id)}
         >
-          <FamilyFigure groups={f.groups} color={color} view={f.view} width={28} height={54} />
+          <FamilyFigure
+            groups={f.groups}
+            color={color}
+            colors={noFatigue ? undefined : fatigueColors(f.groups, fatigue)}
+            view={f.view}
+            width={28}
+            height={54}
+            zoom
+          />
           <span className="xp-fam-body">
             <span className="xp-fam-name">
               {t.pickFamilies[f.id]}
-              {!plain && todayFamilies.has(f.id) && <span className="xp-today">{t.pickToday}</span>}
+              {showToday && todayIds.has(f.id) && <span className="xp-today">{t.pickToday}</span>}
             </span>
-            {plain ? (
+            {noFatigue ? (
               <span className="xp-fam-state">
                 {f.subs.length
                   ? f.subs.map((s) => subLabel(t, s)).join(' · ')
@@ -558,7 +622,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
             ) : (
               <span className="xp-fam-state">
                 <span className="dot" style={{ background: color }} />
-                {readinessLabel(t, r)}
+                {levelLabel(t, lvl)}
               </span>
             )}
           </span>
@@ -566,7 +630,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
         {open && f.subs.length > 0 && (
           <div className="xp-rail-subs">
             {[null, ...f.subs].map((s) => {
-              const sr = s && !plain ? subReadiness(s, readiness) : null;
+              const sr = s && !noFatigue ? subFatigueLevel(s, fatigue) : null;
               return (
                 <Chip
                   key={s ?? 'all'}
@@ -577,7 +641,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
                 >
                   <span
                     className="dot"
-                    style={{ background: sr ? readinessColor(sr) : 'transparent' }}
+                    style={{ background: sr ? levelColor(sr) : 'transparent' }}
                   />
                   {s ? subLabel(t, s) : t.pickAll}
                 </Chip>
@@ -592,10 +656,10 @@ export function ExercisePicker(props: ExercisePickerProps) {
   const subChips = fam && fam.subs.length > 0 && (
     <div className="xp-chips">
       {[null, ...fam.subs].map((s) => {
-        const sr = s && !plain ? subReadiness(s, readiness) : null;
+        const sr = s && !noFatigue ? subFatigueLevel(s, fatigue) : null;
         return (
           <Chip key={s ?? 'all'} className="xp-chip" selected={sub === s} onClick={() => setSub(s)}>
-            {sr && <span className="dot" style={{ background: readinessColor(sr) }} />}
+            {sr && <span className="dot" style={{ background: levelColor(sr) }} />}
             {s ? subLabel(t, s) : t.pickAll}
           </Chip>
         );
@@ -707,8 +771,13 @@ export function ExercisePicker(props: ExercisePickerProps) {
           </span>
         </Button>
       )}
-      {!exact && needle && (
-        <Button variant="secondary" fullWidth icon="plus" onClick={() => props.onCreate(q.trim())}>
+      {!exact && needle && !props.warmup && (
+        <Button
+          variant="secondary"
+          fullWidth
+          icon="plus"
+          onClick={() => props.onCreate?.(q.trim())}
+        >
           {t.createExercise(q.trim())}
         </Button>
       )}
@@ -746,7 +815,21 @@ export function ExercisePicker(props: ExercisePickerProps) {
     </div>
   );
 
-  const suggestionsBlock = suggestions.length > 0 && (
+  const warmupBlock = warmupSugs.length > 0 && (
+    <section className="xp-sugs-wrap">
+      <div className="xp-head">
+        <span className="xp-label accent">
+          {dayLabel ? t.pickSuggestedFor(dayLabel) : t.pickSuggestedYou}
+        </span>
+        <span className="xp-hint">{isDesktop ? t.pickClickHint : t.pickTapHint}</span>
+      </div>
+      <div className="xp-sugs-list">{warmupSugs.map(row)}</div>
+    </section>
+  );
+
+  const suggestionsBlock = props.warmup ? (
+    warmupBlock
+  ) : suggestions.length > 0 ? (
     <section className="xp-sugs-wrap">
       <div className="xp-head">
         <span className="xp-label accent">
@@ -758,7 +841,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
         {suggestions.map((x) => wideCard(x, reasonTag(x), reasonWhy(x)))}
       </div>
     </section>
-  );
+  ) : null;
 
   const nextUpBlock =
     nextUp &&
@@ -771,7 +854,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
       t.pickBestFor((sub ? subLabel(t, sub) : t.pickFamilies[fam!.id]).toLowerCase()),
     );
 
-  const famHeaderState = fam ? famReady.get(fam.id)! : null;
+  const famHeaderState = fam ? famLevel.get(fam.id)! : null;
 
   const equipSheet = equipOpen && (
     <EquipmentFilterSheet
@@ -798,14 +881,21 @@ export function ExercisePicker(props: ExercisePickerProps) {
         className="xp-modal-back"
         onMouseDown={(e) => e.target === e.currentTarget && props.onClose()}
       >
-        <div className="xp-modal" role="dialog" aria-modal aria-label={t.addExercise}>
+        <div
+          className="xp-modal"
+          role="dialog"
+          aria-modal
+          aria-label={props.warmup ? t.wuPickTitle : t.addExercise}
+        >
           <header className="xp-mhead">
             <span className="xp-title">
-              <b>{props.replacing ? t.replaceExercise : t.addExercise}</b>
+              <b>
+                {props.replacing ? t.replaceExercise : props.warmup ? t.wuPickTitle : t.addExercise}
+              </b>
               {titleSub && <small>{titleSub}</small>}
             </span>
             {searchBar}
-            {kindTabs}
+            {props.warmup ? null : kindTabs}
             <IconButton icon="x" label={t.cancel} className="xp-close" onClick={props.onClose} />
           </header>
           <div className="xp-mbody">
@@ -836,9 +926,9 @@ export function ExercisePicker(props: ExercisePickerProps) {
                           <span className="xp-fam-state">
                             <span
                               className="dot"
-                              style={{ background: readinessColor(famHeaderState) }}
+                              style={{ background: levelColor(famHeaderState) }}
                             />
-                            {readinessLabel(t, famHeaderState)}
+                            {levelLabel(t, famHeaderState)}
                           </span>
                         )}
                         <span className="grow" />
@@ -889,7 +979,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
   if (inSearch) {
     body = searchResults;
   } else if (fam && famHeaderState) {
-    const subState = sub ? subReadiness(sub, readiness) : null;
+    const subState = sub ? subFatigueLevel(sub, fatigue) : null;
     const st = subState ?? famHeaderState;
     const mainG: MuscleGroup = sub && !isFocusSub(sub) ? sub : familyMain(fam.id);
     body = (
@@ -904,15 +994,19 @@ export function ExercisePicker(props: ExercisePickerProps) {
           />
           <span className="xp-ghead-txt">
             <b>{t.pickFamilies[fam.id]}</b>
-            {plain ? (
+            {noFatigue ? (
               props.subtitle && <span className="xp-ghead-sub">{props.subtitle}</span>
             ) : (
               <span className="xp-ghead-sub">
-                <span className="st" style={{ color: readinessColor(st) }}>
-                  {readinessLabel(t, st)}
+                <span className="st" style={{ color: levelColor(st) }}>
+                  {levelLabel(t, st)}
                 </span>
-                {' · '}
-                {weekLine(mainG)}
+                {!plain && (
+                  <>
+                    {' · '}
+                    {weekLine(mainG)}
+                  </>
+                )}
               </span>
             )}
           </span>
@@ -941,7 +1035,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
   } else {
     body = (
       <>
-        {kindTabs}
+        {props.warmup ? null : kindTabs}
         {doneStrip}
         {suggestionsBlock}
         <div className="xp-head fh">
@@ -961,7 +1055,9 @@ export function ExercisePicker(props: ExercisePickerProps) {
         <div className="xp">
           {!inSearch && !groupView && (
             <div className="xp-title-row">
-              <b>{props.replacing ? t.replaceExercise : t.addExercise}</b>
+              <b>
+                {props.replacing ? t.replaceExercise : props.warmup ? t.wuPickTitle : t.addExercise}
+              </b>
               {headSub && <span>{headSub}</span>}
             </div>
           )}

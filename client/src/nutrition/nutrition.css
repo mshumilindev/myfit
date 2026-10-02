@@ -257,6 +257,10 @@
   font-size: var(--fs-13);
   text-align: center;
 }
+/* Protein from supplements: a quiet note under the macro bars. */
+.app-nutrition .kbju .sup-hint {
+  margin-top: var(--space-3);
+}
 .app-nutrition .tabbar {
   flex: none;
   display: grid;

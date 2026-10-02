@@ -10,6 +10,7 @@ import { topHistory } from './progression';
 import { resolveMuscles, isStrengthExercise } from './store';
 import type { Workout } from './types';
 import { fatigueSetCount } from './stimulus';
+import { deloadMult } from './calcMods';
 import type { MuscleGroup } from './data/exercises';
 
 const DAY = 24 * 3600 * 1000;
@@ -76,8 +77,11 @@ export interface MuscleFatigue {
 const clamp = (n: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, n));
 
 function levelOf(score: number): FatigueLevel {
-  if (score >= 0.7) return 'fried';
-  if (score >= 0.4) return 'high';
+  // Nicotine lowers the levels that trigger a lighter week ('high' and 'fried') by the
+  // midpoint of its range (x1 when off). 'moderate' and 'fresh' are left alone.
+  const k = deloadMult();
+  if (score >= 0.7 * k) return 'fried';
+  if (score >= 0.4 * k) return 'high';
   if (score >= 0.15) return 'moderate';
   return 'fresh';
 }

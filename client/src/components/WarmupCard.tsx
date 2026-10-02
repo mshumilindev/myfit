@@ -1,73 +1,45 @@
 /**
- * WarmupCard — the controls of a warm-up marker in the session. One switch
- * picks how the warm-up is logged:
- *   • "One warm-up"  — the classic single marker, optionally with minutes;
- *   • "By exercises" — a checklist of the specific moves (tick each off, add its
- *     time or reps, add from the library / a custom name / today's suggestions,
- *     reorder, remove).
- * Both modes live on the same `kind:'warmup'` marker (no sets), and "Repeat last
- * warm-up" comes from the user's own finished sessions.
+ * WarmupCard — the controls of a warm-up block in the session. A warm-up is just
+ * a block: add exercises to it from the exercise library (any exercise), or add
+ * none and it is logged as a plain, generic warm-up (optionally with minutes).
+ * Each exercise first shows as a cut-down standard logger and is only recorded
+ * when Log is pressed (ONE set); then it collapses into a one-line row with an
+ * Edit drawer. The block lives on the `kind:'warmup'` marker (no sets); "Repeat last warm-up" comes from the
+ * user's own finished sessions.
  */
-import { useMemo, useState } from 'react';
-import { useConditionLimits } from '../healthBuild';
+import { Fragment, useMemo, useState } from 'react';
 import { useT } from '../i18n';
 import {
   addWarmupItem,
-  moveWarmupItem,
   removeWarmupItem,
-  setWarmupDetailed,
   setWarmupItems,
   setWarmupMinutes,
-  toggleWarmupItem,
+  logWarmupItem,
   updateWarmupItem,
   useStore,
 } from '../store';
-import { Sheet, useExerciseName } from '../ui';
-import type { MuscleGroup } from '../data/exercises';
 import type { Exercise, WarmupItem, Workout } from '../types';
-import { findLastWarmup, isDetailedWarmup, warmupItemsOf, warmupSummary } from '../warmupLog';
-import { warmupSuggestions, type WarmupSuggestion, type WarmupTarget } from '../warmupFor';
-import { Button, IconButton } from './ui/Button';
-import { Checkbox } from './ui/Checkbox';
-import { Chip, ChipGroup } from './ui/Chip';
-import { GroupedList, ListRow } from './ui/GroupedList';
-import { NumberStepper } from './ui/NumberStepper';
-import { SectionLabel } from './ui/SectionLabel';
-import { Segmented } from './ui/Segmented';
-import { WarmupPickerSheet, type WarmupPick } from './WarmupPickerSheet';
+import {
+  defaultWarmupValue,
+  findLastWarmup,
+  fmtWarmupClock,
+  lastWarmupValues,
+  warmupItemsOf,
+  warmupMeasuredSec,
+} from '../warmupLog';
+import type { PickItem } from '../picker';
+import { Button } from './ui/Button';
+import { GroupedList } from './ui/GroupedList';
+import { ExercisePicker } from './ExercisePicker';
+import { WarmupItemRow } from './WarmupItemRow';
 
-type Mode = 'single' | 'items';
-
-function itemDetail(t: { minShort: string; wuSecUnit: string; reps: string }, i: WarmupItem) {
-  const parts: string[] = [];
-  if (i.reps) parts.push(`${i.reps} × ${t.reps.toLowerCase()}`);
-  if (i.durationSec)
-    parts.push(
-      i.durationSec >= 120 && i.durationSec % 60 === 0
-        ? `${i.durationSec / 60} ${t.minShort}`
-        : `${i.durationSec} ${t.wuSecUnit}`,
-    );
-  return parts.join(' · ');
-}
-
-export function WarmupCard(props: {
-  workout: Workout;
-  exercise: Exercise;
-  /** Primary muscles of the day's first lifts — steers the suggestions. */
-  muscles: readonly MuscleGroup[];
-}) {
-  const { t, locale } = useT();
-  const exName = useExerciseName();
-  const limits = useConditionLimits();
-  const { workouts, injuries } = useStore();
+export function WarmupCard(props: { workout: Workout; exercise: Exercise }) {
+  const { t } = useT();
+  const { workouts, gyms } = useStore();
   const { workout, exercise: ex } = props;
-  const mKey = props.muscles.join(',');
-  const muscles = useMemo(() => (mKey ? (mKey.split(',') as MuscleGroup[]) : []), [mKey]);
-  const mode: Mode = isDetailedWarmup(ex) ? 'items' : 'single';
   const items = useMemo(() => warmupItemsOf(ex), [ex]);
-  const summary = warmupSummary(ex);
   const [picking, setPicking] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
+  const gym = gyms.find((g) => g.id === workout.gymId) ?? null;
 
   const last = useMemo(
     () =>
@@ -78,215 +50,108 @@ export function WarmupCard(props: {
       }),
     [workouts, workout.id, workout.dayName, workout.startedAt],
   );
-  const fresh = mode === 'items' ? items.length === 0 : !ex.plannedDurationMin;
-  const sug = useMemo(
-    () =>
-      warmupSuggestions({
-        muscles,
-        limits,
-        injuries,
-        locale,
-        exclude: items.map((i) => i.name),
-        perTarget: 4,
-      }),
-    [muscles, limits, injuries, locale, items],
-  );
+  const fresh = items.length === 0 && !ex.plannedDurationMin;
 
-  const add = (p: WarmupPick) => addWarmupItem(workout.id, ex.id, p);
   const repeat = () => {
     if (!last) return;
-    if (last.detailed) setWarmupItems(workout.id, ex.id, last.items);
-    else {
-      setWarmupDetailed(workout.id, ex.id, false);
-      setWarmupMinutes(workout.id, ex.id, last.minutes);
-    }
+    if (last.items.length) setWarmupItems(workout.id, ex.id, last.items);
+    else setWarmupMinutes(workout.id, ex.id, last.minutes);
   };
   const lastSub = last
     ? [
-        last.detailed ? t.nExercises(last.items.length) : null,
+        last.items.length ? t.nExercises(last.items.length) : null,
         last.minutes ? `${last.minutes} ${t.minShort}` : null,
       ]
         .filter(Boolean)
         .join(' · ')
     : '';
 
-  const editing = editId ? items.find((i) => i.id === editId) : undefined;
-  const targets: [WarmupTarget, string][] = [
-    ['mobility', t.wuTargetMobility],
-    ['activation', t.wuTargetActivation],
-    ['cardio', t.wuTargetCardio],
-  ];
+  const row = (i: WarmupItem) => (
+    <WarmupItemRow
+      key={i.id}
+      item={i}
+      status={i.done ? 'logged' : 'pending'}
+      suggestWeightKg={lastWarmupValues(workouts, i.name, workout.id)?.weight}
+      onSubmit={(v) =>
+        i.done
+          ? updateWarmupItem(workout.id, ex.id, i.id, v)
+          : logWarmupItem(workout.id, ex.id, i.id, v)
+      }
+      onRemove={() => removeWarmupItem(workout.id, ex.id, i.id)}
+    />
+  );
+
+  /** Runs of logged rows share one list; each pending logger is its own card. */
+  const groups = useMemo(() => {
+    const out: { logged: boolean; items: WarmupItem[] }[] = [];
+    for (const i of items) {
+      const last = out[out.length - 1];
+      if (last && last.logged && i.done) last.items.push(i);
+      else out.push({ logged: i.done, items: [i] });
+    }
+    return out;
+  }, [items]);
+
+  const add = (i: PickItem) =>
+    addWarmupItem(workout.id, ex.id, {
+      name: i.name,
+      ...(i.catalogId ? { exerciseId: i.catalogId } : {}),
+      // A pending logger pre-filled with what was logged last time (or defaults).
+      ...(lastWarmupValues(workouts, i.name, workout.id) ?? defaultWarmupValue(i.name)),
+    });
 
   return (
     <div className="ul-flex ul-col ug-12 umt-12">
-      <Segmented<Mode>
-        label={t.wuModeLabel}
-        value={mode}
-        onChange={(m) => setWarmupDetailed(workout.id, ex.id, m === 'items')}
-        options={[
-          { value: 'single', label: t.wuModeSingle },
-          { value: 'items', label: t.wuModeItems },
-        ]}
-      />
-
       {last && fresh && (
         <Button variant="secondary" size="sm" icon="arrow-counter-clockwise" onClick={repeat}>
           {lastSub ? `${t.wuRepeatLast} · ${lastSub}` : t.wuRepeatLast}
         </Button>
       )}
 
-      {mode === 'single' ? (
-        <NumberStepper
-          label={t.wuMinutes}
-          unit={t.minShort}
-          value={ex.plannedDurationMin ?? 0}
-          min={0}
-          max={120}
-          step={1}
-          onChange={(m) => setWarmupMinutes(workout.id, ex.id, m || null)}
-        />
-      ) : (
-        <>
-          {items.length === 0 ? (
-            <p className="ut-muted ut-sm">{t.wuItemsEmpty}</p>
-          ) : (
-            <GroupedList
-              surface="raised"
-              header={t.wuProgress(summary.count, summary.total)}
-              label={t.exerciseKindNames.warmup}
-            >
-              {items.map((i) => (
-                <ListRow
-                  key={i.id}
-                  as="label"
-                  dense
-                  icon={
-                    <Checkbox
-                      tone="ok"
-                      checked={i.done}
-                      aria-label={t.wuTick(exName(i.name))}
-                      onChange={(v) => toggleWarmupItem(workout.id, ex.id, i.id, v)}
-                    />
-                  }
-                  label={exName(i.name)}
-                  sub={itemDetail(t, i) || undefined}
-                  dim={i.done}
-                  trailing={
-                    <IconButton
-                      icon="sliders-horizontal"
-                      label={t.wuEditItem(exName(i.name))}
-                      onClick={() => setEditId(i.id)}
-                    />
-                  }
-                />
-              ))}
-            </GroupedList>
-          )}
-
-          <Button variant="secondary" size="sm" icon="plus" onClick={() => setPicking(true)}>
-            {t.wuAddExercise}
-          </Button>
-
-          {targets.some(([k]) => sug[k].length > 0) && (
-            <div className="ul-flex ul-col ug-8">
-              <SectionLabel>{t.wuSuggested}</SectionLabel>
-              {targets.map(([k, label]) =>
-                sug[k].length === 0 ? null : (
-                  <div key={k} className="ul-flex ul-col ug-8">
-                    <span className="ut-muted ut-xs">{label}</span>
-                    <ChipGroup>
-                      {sug[k].map((s: WarmupSuggestion) => (
-                        <Chip
-                          key={s.key}
-                          size="sm"
-                          icon="plus"
-                          onClick={() =>
-                            add({
-                              name: s.name,
-                              ...(s.exerciseId ? { exerciseId: s.exerciseId } : {}),
-                              ...(s.reps ? { reps: s.reps } : {}),
-                              ...(s.durationSec ? { durationSec: s.durationSec } : {}),
-                            })
-                          }
-                        >
-                          {exName(s.name)}
-                        </Chip>
-                      ))}
-                    </ChipGroup>
-                  </div>
-                ),
-              )}
-            </div>
-          )}
-        </>
+      {groups.map((g) =>
+        g.logged ? (
+          <GroupedList key={g.items[0].id} surface="raised">
+            {g.items.map((i) => row(i))}
+          </GroupedList>
+        ) : (
+          <Fragment key={g.items[0].id}>{g.items.map((i) => row(i))}</Fragment>
+        ),
       )}
 
+      <Button variant="secondary" size="sm" icon="plus" onClick={() => setPicking(true)}>
+        {t.wuAddExercise}
+      </Button>
+
       {picking && (
-        <WarmupPickerSheet
-          muscles={muscles}
-          added={items.map((i) => i.name)}
-          onPick={add}
+        <ExercisePicker
+          warmup
+          workout={workout}
+          gym={gym}
+          addLabel={t.wuAddExercise}
+          onPick={(i) => {
+            add(i);
+            setPicking(false);
+          }}
           onClose={() => setPicking(false)}
         />
       )}
-      {editing && (
-        <Sheet onClose={() => setEditId(null)}>
-          <div className="sheet-label">{exName(editing.name)}</div>
-          <div className="ul-flex ul-col ug-12">
-            <NumberStepper
-              label={t.wuSeconds}
-              unit={t.wuSecUnit}
-              value={editing.durationSec ?? 0}
-              min={0}
-              max={1800}
-              step={15}
-              onChange={(v) =>
-                updateWarmupItem(workout.id, ex.id, editing.id, { durationSec: v || undefined })
-              }
-            />
-            <NumberStepper
-              label={t.reps}
-              value={editing.reps ?? 0}
-              min={0}
-              max={100}
-              step={1}
-              onChange={(v) =>
-                updateWarmupItem(workout.id, ex.id, editing.id, { reps: v || undefined })
-              }
-            />
-            <div className="ul-flex ug-8">
-              <Button
-                variant="secondary"
-                size="sm"
-                icon="arrow-up"
-                disabled={items[0]?.id === editing.id}
-                onClick={() => moveWarmupItem(workout.id, ex.id, editing.id, -1)}
-              >
-                {t.wuMoveUp}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                icon="arrow-down"
-                disabled={items[items.length - 1]?.id === editing.id}
-                onClick={() => moveWarmupItem(workout.id, ex.id, editing.id, 1)}
-              >
-                {t.wuMoveDown}
-              </Button>
-            </div>
-            <Button
-              variant="danger"
-              icon="trash"
-              onClick={() => {
-                removeWarmupItem(workout.id, ex.id, editing.id);
-                setEditId(null);
-              }}
-            >
-              {t.wuRemoveItem}
-            </Button>
-          </div>
-        </Sheet>
-      )}
     </div>
+  );
+}
+
+/**
+ * The warm-up marker's title line: «Ready when you are · 1:05». The time is the
+ * REAL measured one — ticking (from `now`) until the first strength set, then
+ * frozen; nothing when it was never measured. The word "warm-up" lives only in
+ * the card header name, never here.
+ */
+export function WarmupMarkerTitle(props: { workout: Workout; exercise: Exercise; now: number }) {
+  const { t } = useT();
+  const sec = warmupMeasuredSec(props.exercise, props.workout, props.now);
+  return (
+    <>
+      {t.warmupMarkerTitle}
+      {sec !== null ? ` · ${fmtWarmupClock(sec)}` : ''}
+    </>
   );
 }

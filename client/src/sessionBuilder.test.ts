@@ -10,6 +10,7 @@ import {
   type BuildContext,
 } from './sessionBuilder';
 import { LANDMARKS } from './volume';
+import { richExerciseById } from './data/exercises';
 import type { BodyMetrics, Workout } from './types';
 
 const DAY = 24 * 3600 * 1000;
@@ -145,6 +146,30 @@ describe('buildDay', () => {
     // The benched lift has history → a concrete target with a warm-up ramp.
     const chestLift = day.main.find((e) => e.primary === 'chest');
     expect(chestLift).toBeTruthy();
+  });
+
+  it('the warm-up proposes exercises of ONE light station, or stays generic', () => {
+    const bands = buildDay({
+      ...ctx,
+      gym: { id: 'g', name: 'G', inventory: ['bands', 'barbell', 'machine'] } as never,
+    });
+    const wu = bands.warmup[0];
+    expect(wu.kind).toBe('warmup');
+    expect(wu.warmupItems?.length).toBeGreaterThanOrEqual(2);
+    const kit = new Set(wu.warmupItems!.map((i) => richExerciseById(i.exerciseId)?.equipment));
+    expect([...kit]).toEqual(['bands']);
+    // No gym kit known → bodyweight only, still one station.
+    const body = buildDay(ctx).warmup[0];
+    const bodyKit = new Set(
+      (body.warmupItems ?? []).map((i) => richExerciseById(i.exerciseId)?.equipment),
+    );
+    expect(bodyKit.size).toBeLessThanOrEqual(1);
+    for (const k of bodyKit) expect(k).toBe('body');
+    // Warm-up off → no block at all; no muscles known → a generic block.
+    expect(buildDay({ ...ctx, warmup: false }).warmup).toEqual([]);
+    expect(
+      buildDay({ ...ctx, targetMuscles: ['fullbody'], warmup: true }).warmup[0].warmupItems,
+    ).toBeUndefined();
   });
 
   it('never picks a lift the athlete banned, and puts a requested swap first', () => {

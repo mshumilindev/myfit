@@ -26,6 +26,13 @@ function SheetDemo(args: React.ComponentProps<typeof Sheet>) {
   );
 }
 
+/** Colour-coded drawer: the whole sheet takes a tone family (here warm-up blue). */
+export const SheetWarmupTone: Story = {
+  name: 'Sheet · warm-up tone',
+  args: { onClose: () => undefined, padded: true, tone: 'warmup', children: 'Sheet content' },
+  render: (args) => <SheetDemo {...args} />,
+};
+
 /** Bottom sheet with grabber; drag to resize / dismiss. */
 export const SheetStory: Story = {
   name: 'Sheet',

@@ -6,6 +6,16 @@
 .uipc--wrap {
   flex-wrap: wrap;
 }
+.uipc--grid {
+  display: grid;
+  grid-template-columns: repeat(var(--uipc-cols, 7), minmax(0, 1fr));
+}
+.uipc--grid .uipc-chip {
+  flex-shrink: 1;
+  min-width: 0;
+  padding: 0;
+  justify-content: center;
+}
 .uipc--scroll {
   overflow-x: auto;
   scrollbar-width: none;

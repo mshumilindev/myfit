@@ -193,4 +193,5 @@ export const lt: Strings = {
   stopCamera: 'Stop',
   cameraDenied: 'Kamera nepasiekiama — įvesk numerį',
   whenLabel: 'Kada',
+  supFxProteinHint: 'Įskaičiuota {g} g iš papildų, atskirai nuo maisto žurnalo.',
 };

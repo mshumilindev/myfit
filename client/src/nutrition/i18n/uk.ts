@@ -193,4 +193,5 @@ export const uk: Strings = {
   stopCamera: 'Стоп',
   cameraDenied: 'Камера недоступна — введи номер',
   whenLabel: 'Коли',
+  supFxProteinHint: 'Враховує {g} г із добавок, окремо від журналу їжі.',
 };

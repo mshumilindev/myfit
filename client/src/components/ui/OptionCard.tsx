@@ -8,6 +8,12 @@ export interface OptionCardProps {
   sub?: ReactNode;
   /** A small sketch of what the option looks like, drawn above the text. */
   preview?: ReactNode;
+  /**
+   * Leading glyph (an <IconTile size={30}>). Switches the card to the ListRow layout: icon ·
+   * title + description column (description under the title's left edge) · the selected check
+   * vertically centred at the end. Use for pickers of named choices; use `preview` for sketches.
+   */
+  icon?: ReactNode;
   selected: boolean;
   onSelect: () => void;
   disabled?: boolean;
@@ -25,6 +31,7 @@ export function OptionCard({
   title,
   sub,
   preview,
+  icon,
   selected,
   onSelect,
   disabled,
@@ -34,7 +41,13 @@ export function OptionCard({
   return (
     <button
       type="button"
-      className={['uiopt', toneClass(tone), selected ? 'is-on' : '', className]
+      className={[
+        'uiopt',
+        icon != null ? 'uiopt--row' : '',
+        toneClass(tone),
+        selected ? 'is-on' : '',
+        className,
+      ]
         .filter(Boolean)
         .join(' ')}
       aria-pressed={selected}
@@ -46,8 +59,22 @@ export function OptionCard({
           {preview}
         </span>
       )}
-      <span className="uiopt-t">{title}</span>
-      {sub != null && <span className="uiopt-s">{sub}</span>}
+      {icon != null && (
+        <span className="uiopt-ic" aria-hidden="true">
+          {icon}
+        </span>
+      )}
+      {icon != null ? (
+        <span className="uiopt-tx">
+          <span className="uiopt-t">{title}</span>
+          {sub != null && <span className="uiopt-s">{sub}</span>}
+        </span>
+      ) : (
+        <>
+          <span className="uiopt-t">{title}</span>
+          {sub != null && <span className="uiopt-s">{sub}</span>}
+        </>
+      )}
       {selected && (
         <span className="uiopt-check" aria-hidden="true">
           <Icon name="check" weight="bold" />

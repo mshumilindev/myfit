@@ -9,11 +9,13 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { callFn } from '../api';
 import { addExercise, startWorkout } from '../store';
+import { nicMid } from '../nicotineApply';
 import type { ExerciseKind } from '../types';
 import type { EquipmentId } from './equipment';
 import { muscleInfoByName, type MuscleGroup } from './exercises';
 import { exerciseDay, type TrainingDay } from './daySuggest';
 import type { Play } from '../playbook';
+import type { ProgramWarmupItem } from '../views/programs/model';
 
 export interface ProgramItem {
   id: string;
@@ -28,6 +30,8 @@ export interface ProgramItem {
   groupId?: string | null;
   groupOrder?: number | null;
   dropLast?: boolean;
+  /** Warm-up marker only: exercises it holds (absent = a generic warm-up). */
+  warmupItems?: ProgramWarmupItem[];
 }
 
 export interface ProgramAssignment {
@@ -198,8 +202,25 @@ export function startProgramDaySession(
     addExercise(w.id, item.name, item.kind, {
       plannedSets: item.kind === 'strength' ? item.sets : 1,
       plannedReps: item.kind === 'strength' ? item.reps : null,
-      plannedDurationMin: item.kind === 'strength' ? null : (item.durationMin ?? 10),
+      plannedDurationMin:
+        item.kind === 'strength' || (item.kind === 'warmup' && item.warmupItems?.length)
+          ? null
+          : (item.durationMin ?? 10) +
+            // Nicotine: a generic warm-up runs a little longer (whole minutes; +0 when off).
+            (item.kind === 'warmup' ? Math.round(nicMid('warmupMin')) : 0),
       equipment: item.equipment,
+      // A warm-up prescribed with exercises arrives holding them (copied, not linked).
+      ...(item.kind === 'warmup' && item.warmupItems?.length
+        ? {
+            warmupItems: item.warmupItems.map((w) => ({
+              name: w.name,
+              ...(w.exerciseId ? { exerciseId: w.exerciseId } : {}),
+              ...(w.reps ? { reps: w.reps } : {}),
+              ...(w.weight ? { weight: w.weight } : {}),
+              ...(w.durationSec ? { durationSec: w.durationSec } : {}),
+            })),
+          }
+        : {}),
       // A prescribed superset arrives grouped (EQ-2 → SS-1).
       groupId: item.groupId ?? null,
       groupOrder: item.groupOrder ?? null,

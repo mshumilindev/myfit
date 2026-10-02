@@ -27,6 +27,10 @@ import { HistoryTimeline } from '../components/HistoryTimeline';
 import type { Activity, RestPeriod, SleepNight, Workout } from '../types';
 import type { Shell } from '../App';
 import type { CoachView } from '../conditions';
+import { CoachAlcohol } from './CoachAlcohol';
+import { CoachSupplements } from './CoachSupplements';
+import { CoachNicotine } from './CoachNicotine';
+import { FEATURE_ICON } from '../coachEffectIcons';
 import { CoachConditions } from './health/Conditions';
 
 const NO_DAYS = new Set<number>();
@@ -365,8 +369,41 @@ export function ClientPage({
 
       {data?.conditionsShare && (
         <section className="cp-section">
-          <div className="section-label">{t.cndCoachTitle}</div>
+          <div className="section-label cp-feature-label">
+            <Icon name={FEATURE_ICON.conditions} />
+            {t.cndCoachTitle}
+          </div>
           <CoachConditions view={data.conditionsShare} />
+        </section>
+      )}
+
+      {data?.conditionsShare?.nicotine && (
+        <section className="cp-section">
+          <div className="section-label cp-feature-label">
+            <Icon name={FEATURE_ICON.nicotine} />
+            {t.nicFxCoachTitle}
+          </div>
+          <CoachNicotine view={data.conditionsShare.nicotine} />
+        </section>
+      )}
+
+      {data?.conditionsShare?.alcohol && (
+        <section className="cp-section">
+          <div className="section-label cp-feature-label">
+            <Icon name={FEATURE_ICON.alcohol} />
+            {t.alcFxCoachTitle}
+          </div>
+          <CoachAlcohol view={data.conditionsShare.alcohol} />
+        </section>
+      )}
+
+      {data?.conditionsShare?.supplements && (
+        <section className="cp-section">
+          <div className="section-label cp-feature-label">
+            <Icon name={FEATURE_ICON.supplements} />
+            {t.supFxCoachTitle}
+          </div>
+          <CoachSupplements view={data.conditionsShare.supplements} />
         </section>
       )}
 

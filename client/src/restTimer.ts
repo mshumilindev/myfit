@@ -59,6 +59,9 @@ export interface RestInputs {
   midRound: boolean;
   /** Long-term condition rest multiplier (>=1), from the stacked condition effects. */
   restScale?: number;
+  /** Nicotine rest multiplier (>=1), the midpoint of its range; passed in so this file
+   *  stays free of the store. Silent: it adds no "why" line. */
+  nicotineRestScale?: number;
 }
 
 export type RestReason =
@@ -157,6 +160,7 @@ export function planRest(i: RestInputs): {
   if (i.shortSleep) sec += add('sleep', 15);
   if (i.restScale != null && i.restScale > 1)
     sec += add('condition', Math.round(sec * (Math.min(2, i.restScale) - 1)));
+  if (i.nicotineRestScale != null && i.nicotineRestScale > 1) sec *= i.nicotineRestScale;
   const out = Math.min(300, Math.max(30, Math.round(sec / 15) * 15));
   return { sec: out, reasons };
 }

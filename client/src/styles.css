@@ -154,6 +154,11 @@
   --color-chronic-tint: #141d3a;
   --color-chronic-text: #d3ddf3;
   --color-chronic-line: #34498f;
+  /* Warm-up — the blue of warm-up sets (--set-warmup). */
+  --color-warmup: #6aa7e8;
+  --color-warmup-tint: #0f2238;
+  --color-warmup-text: #d3e6fa;
+  --color-warmup-line: #2f5a8c;
   /* Solid fills on imagery (body map): deeper than the UI accent so it reads midnight blue. */
   --color-chronic-deep: #3a55b5;
   /* Active recovery — teal in the rest family, darker than full-rest blue
@@ -22295,6 +22300,12 @@ body {
   color: var(--color-neutral-500);
 }
 /* Secondary route into the person's full profile in the users app. */
+.cp-feature-label {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+}
+
 .cp-section {
   display: flex;
   flex-direction: column;
@@ -23374,7 +23385,7 @@ body {
 /* Set-type colours (design "One door"): warm-up blue, working brass, drop purple,
    reverse teal, static-dynamic pink — same hue on the entry card and logged rows. */
 :root {
-  --set-warmup: #6aa7e8;
+  --set-warmup: var(--color-warmup);
   --set-working: var(--color-accent);
   --set-drop: #b58cf0;
   --set-reverse: #4fc1c9;
@@ -26518,14 +26529,6 @@ body {
   flex-direction: column;
   gap: var(--s-8);
   margin-bottom: 0;
-}
-.atl-panel-label {
-  margin-top: var(--s-10);
-  font-size: var(--fs-11);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-neutral-500);
 }
 
 /* Atlas chat: my messages, typing, composer */

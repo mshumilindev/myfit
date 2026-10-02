@@ -72,20 +72,26 @@ export interface SetEntry {
 export type ExerciseKind = 'strength' | 'cardio' | 'warmup' | 'cooldown';
 
 /**
- * One specific move inside a detailed warm-up (the `kind:'warmup'` marker with
- * `warmupDetailed`). Deliberately NOT a SetEntry: a marker keeps zero sets, so
- * volume / PR / set-type stats never see warm-up items.
+ * One exercise inside a warm-up block (the `kind:'warmup'` marker). Pure
+ * logging: a name, ONE set (reps + optional weight, or seconds) and `done`,
+ * which means "logged" (set only by the Log action; pending otherwise).
+ * Deliberately NOT
+ * a SetEntry: a marker keeps zero sets, so volume / PR / set-type stats never
+ * see warm-up items.
  */
 export interface WarmupItem {
   id: string;
-  /** Canonical English catalog name, or the free text the user typed. */
+  /** Canonical English name from the exercise catalog. */
   name: string;
-  /** Catalog id when picked from the library (absent for custom names). */
+  /** Catalog id of the exercise. */
   exerciseId?: string;
   durationSec?: number;
   reps?: number;
+  /** Load in kg (display unit is applied on screen), for weighted moves. */
+  weight?: number;
+  /** Logged (true) or still a pending logger (false / absent in old data). */
   done: boolean;
-  /** When it was ticked off (ms epoch). */
+  /** When it was logged (ms epoch). */
   at?: number;
 }
 
@@ -112,11 +118,12 @@ export interface Exercise {
   /** Cool-down marker: when the athlete started it (ms). Rest stops from here
    *  until a set is logged again. */
   markerAt?: number | null;
-  /** Warm-up marker only: the warm-up is logged by exercises (`warmupItems`)
-   *  instead of as one single block. Absent = the classic single warm-up. */
-  warmupDetailed?: boolean;
-  /** Warm-up marker only: the specific moves, in order. Kept when the user
-   *  flips back to the single mode; only counted while `warmupDetailed`. */
+  /** Warm-up marker: real measured time (seconds) from the warm-up start until
+   *  the first working set (or finish). Frozen once known. Absent on older data
+   *  = nothing was measured, nothing is shown. */
+  warmupMeasuredSec?: number | null;
+  /** Warm-up marker only: the exercises of the warm-up, in order. Absent or
+   *  empty = a plain, generic warm-up (optionally with minutes). */
   warmupItems?: WarmupItem[];
   /** Muscle groups (design MG-1): one primary, any number of secondaries. */
   primaryMuscle?: string | null;
@@ -503,4 +510,288 @@ export interface ChronicCondition {
   startedAt?: number;
   /** Expected end (ms). Auto-filled from the condition's typical length; user-editable. */
   endsAt?: number;
+}
+
+// --- Nicotine (private, sealed; see nicotine.ts) ----------------------------------------
+
+/** The 10 product tiles of the "What I use" grid. */
+export type NicotineKind =
+  | 'cigarettes'
+  | 'cigars'
+  | 'pipe'
+  | 'heated'
+  | 'vape'
+  | 'pouches'
+  | 'snus'
+  | 'chew'
+  | 'hookah'
+  | 'other';
+
+/** What the usual amount is counted in. Which units a kind offers: `NICOTINE_KINDS`. */
+export type NicotineUnit =
+  | 'pieces'
+  | 'packs'
+  | 'sticks'
+  | 'bowls'
+  | 'pouches'
+  | 'portions'
+  | 'sessions'
+  | 'puffs'
+  | 'pods'
+  | 'ml'
+  | 'uses';
+
+/** One product the user uses. Amounts are approximate, per ordinary day. No logging. */
+export interface NicotineProduct {
+  id: string;
+  kind: NicotineKind;
+  unit: NicotineUnit;
+  /** Approximate usual amount per day, in `unit`. Ignored while `occasional`. */
+  amount: number;
+  /** From time to time: used now and then, no amount known. Only the strength counts. */
+  occasional?: true;
+  /** Nicotine per base unit: mg per cigarette / stick / pouch / portion / bowl / use, or mg per ml (vape). */
+  strengthMg: number;
+  /** Vape pods only: how many ml one pod holds. */
+  mlPerPod?: number;
+  /** Inactive products stay saved but are left out of every number. */
+  active: boolean;
+}
+
+/** Every place nicotine may quietly adjust a number; each has its own switch. */
+export type NicotineSurface =
+  | 'readiness'
+  | 'fatigue'
+  | 'sleep'
+  | 'warmup'
+  | 'rest'
+  | 'progression'
+  | 'rpe'
+  | 'trends'
+  | 'afterWorkoutHints';
+
+export type NicotineSharing = 'off' | 'effects' | 'full';
+
+export interface NicotineSettings {
+  /**
+   * Schema version of these settings (current 2). Below 2 (or absent) the experimental
+   * surfaces are reset to off once when the document is read; from 2 on explicit choices stay.
+   */
+  version: number;
+  /** Master switch: "Use nicotine in my numbers". */
+  useInCalculations: boolean;
+  /** "Advanced": per-surface switches (all on by default). */
+  surfaces: Record<NicotineSurface, boolean>;
+  /** What a coach may see. Off by default. */
+  sharing: NicotineSharing;
+}
+
+/** The whole sealed user document (users/{uid}/meta/nicotine). */
+export interface NicotineState {
+  products: NicotineProduct[];
+  settings: NicotineSettings;
+  /** Last-write-wins stamp (ms); 0 = never saved. */
+  updatedAt: number;
+}
+
+// --- Alcohol (private, sealed; see alcohol.ts) ------------------------------------------
+
+/** Where the user is, for the standard-drink size and the measures shown (see alcoholRegion.ts). */
+export type AlcoholRegion = 'eu' | 'us' | 'uk' | 'au' | 'ca';
+
+/** The 25 bundled drinks (the user cannot create their own; see alcoholCatalog.ts). */
+export type AlcoholItemId =
+  | 'beerLight'
+  | 'beerRegular'
+  | 'beerStrong'
+  | 'beerCraft'
+  | 'ciderRegular'
+  | 'ciderStrong'
+  | 'wineRed'
+  | 'wineWhite'
+  | 'wineRose'
+  | 'wineSparkling'
+  | 'fortPort'
+  | 'fortSherry'
+  | 'fortVermouth'
+  | 'spVodka'
+  | 'spWhisky'
+  | 'spRum'
+  | 'spGin'
+  | 'spBrandy'
+  | 'spTequila'
+  | 'spLiqueur'
+  | 'cocktail'
+  | 'longDrink'
+  | 'hardSeltzer'
+  | 'rtd'
+  | 'lowAlcohol';
+
+/** One drink the user has. Approximate, per ordinary week. No logging by day. */
+export interface AlcoholEntry {
+  id: string;
+  itemId: AlcoholItemId;
+  /** One serving, in ml (a preset or close to it). */
+  servingMl: number;
+  /** Approximate servings in an ordinary week. Ignored while `occasional`. */
+  servingsPerWeek: number;
+  /** From time to time: a small fixed background amount, whatever the count holds. */
+  occasional?: true;
+  /** Inactive entries stay saved but are left out of every number. */
+  active: boolean;
+}
+
+/** Every place alcohol may quietly adjust a number; each has its own switch. */
+export type AlcoholSurface =
+  'readiness' | 'sleep' | 'fatigue' | 'progression' | 'trends' | 'afterWorkoutHints';
+
+/** Alcohol is shared as effects only: never the amounts or the drinks. */
+export type AlcoholSharing = 'off' | 'effects';
+
+export interface AlcoholSettings {
+  /** Schema version of these settings (current 1). */
+  version: number;
+  /** Master switch: "Use alcohol in my numbers". */
+  useInCalculations: boolean;
+  /** Per-surface switches; the ones with no research behind them start off. */
+  surfaces: Record<AlcoholSurface, boolean>;
+  /** What a coach may see. Off by default. */
+  sharing: AlcoholSharing;
+  /**
+   * "Usually drink on": weekdays, 0 = Monday ... 6 = Sunday (ISO weekday - 1). Empty = no
+   * pattern, the weekly amount is spread evenly. Otherwise the readiness / sleep effect
+   * lands on the day AFTER a listed day.
+   */
+  usualDays: number[];
+  /** "Ask me on Today": the optional "did you drink?" check-in. Off by default. */
+  checkinsOn: boolean;
+  /** Manual region; absent = detect (position, then time zone, then language). */
+  regionOverride?: AlcoholRegion;
+}
+
+/**
+ * The answer to "did you drink on this day?" (asked on Today after a usual drinking day).
+ * No answer = the usual-days assumption. Kept for the last 60 days only.
+ */
+export interface AlcoholCheckin {
+  /** False = no alcohol that day. */
+  drank: boolean;
+  /** Grams of pure alcohol that evening (the usual amount, or what the user typed). */
+  grams?: number;
+  /** The active entries behind a "usual" answer (ids only). */
+  entryIds?: string[];
+}
+
+/** The whole sealed user document (users/{uid}/meta/alcohol). */
+export interface AlcoholState {
+  entries: AlcoholEntry[];
+  /** 'YYYY-MM-DD' (the local drinking day) -> answer. Same sealed doc; last 60 days. */
+  checkins: Record<string, AlcoholCheckin>;
+  settings: AlcoholSettings;
+  /** Last-write-wins stamp (ms); 0 = never saved. */
+  updatedAt: number;
+}
+
+// --- Supplements (private, sealed; see supplements.ts) ----------------------------------
+
+/** The four groups of the bundled catalog (see supplementCatalog.ts). */
+export type SupplementGroup = 'performance' | 'protein' | 'recovery' | 'health';
+
+/** The 31 bundled supplements (the user cannot create their own; see supplementCatalog.ts). */
+export type SupplementId =
+  | 'creatine'
+  | 'caffeine'
+  | 'preWorkout'
+  | 'betaAlanine'
+  | 'citrulline'
+  | 'nitrate'
+  | 'bicarbonate'
+  | 'whey'
+  | 'casein'
+  | 'plantProtein'
+  | 'eaa'
+  | 'bcaa'
+  | 'glutamine'
+  | 'hmb'
+  | 'collagen'
+  | 'magnesium'
+  | 'melatonin'
+  | 'glycine'
+  | 'ashwagandha'
+  | 'omega3'
+  | 'tartCherry'
+  | 'curcumin'
+  | 'vitaminD'
+  | 'multivitamin'
+  | 'zinc'
+  | 'iron'
+  | 'vitaminC'
+  | 'vitaminE'
+  | 'probiotics'
+  | 'vitaminB12'
+  | 'calcium';
+
+/** The unit a dose is counted in ('serving' = one tablet / capsule / label serving). */
+export type SupplementUnit = 'g' | 'mg' | 'µg' | 'ml' | 'scoop' | 'serving';
+
+/** How often an entry counts: every day, or only on the user's training days (plan / actual). */
+export type SupplementSchedule = 'daily' | 'trainingDays';
+
+/** When in the day it is taken (the label the user picks). */
+export type SupplementTiming =
+  'anytime' | 'morning' | 'preWorkout' | 'withMeal' | 'postWorkout' | 'evening';
+
+/** One supplement the user takes. Approximate; nothing is logged by time. */
+export interface SupplementEntry {
+  id: string;
+  itemId: SupplementId;
+  /** One serving, in the item's unit (a preset or a stepper value). */
+  dose: number;
+  schedule: SupplementSchedule;
+  timing: SupplementTiming;
+  /** When the entry was first saved (ms). Effects and their ramp are measured from here. */
+  startedAt: number;
+  /** Inactive entries stay saved but are left out of every number. */
+  active: boolean;
+}
+
+/** Every place supplements may quietly show or adjust a number; each has its own switch. */
+export type SupplementSurface =
+  'strength' | 'sleep' | 'rpe' | 'protein' | 'trends' | 'afterWorkoutHints';
+
+/** What a coach may see: nothing, the effect ranges only, or also names and doses. */
+export type SupplementSharing = 'off' | 'effects' | 'full';
+
+export interface SupplementSettings {
+  /** Schema version of these settings (current 1). */
+  version: number;
+  /** Master switch: "Use supplements in my numbers". */
+  useInCalculations: boolean;
+  /** Per-surface switches. */
+  surfaces: Record<SupplementSurface, boolean>;
+  /** What a coach may see. Off by default. */
+  sharing: SupplementSharing;
+  /** "Ask on Today": the optional day check-in. Off by default. */
+  checkinsOn: boolean;
+}
+
+/**
+ * The answer to "did you take your supplements on this day?" (asked on Today). No answer =
+ * the assumption that everything due that day was taken. Kept for the last 60 days only.
+ */
+export interface SupplementCheckin {
+  /** False = nothing taken that day. */
+  taken: boolean;
+  /** The due entries that were taken (ids only); absent = every entry that was due. */
+  entryIds?: string[];
+}
+
+/** The whole sealed user document (users/{uid}/meta/supplements). */
+export interface SupplementState {
+  entries: SupplementEntry[];
+  /** 'YYYY-MM-DD' (the local day) -> answer. Same sealed doc; last 60 days. */
+  checkins: Record<string, SupplementCheckin>;
+  settings: SupplementSettings;
+  /** Last-write-wins stamp (ms); 0 = never saved. */
+  updatedAt: number;
 }

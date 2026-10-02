@@ -9,7 +9,9 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Chip } from '../../components/ui/Chip';
 import { Field } from '../../components/ui/Field';
-import { ListRow } from '../../components/ui/GroupedList';
+import { GroupedList, ListRow } from '../../components/ui/GroupedList';
+import { WarmupItemRow } from '../../components/WarmupItemRow';
+import { defaultWarmupValue } from '../../warmupLog';
 import { MusclePickerMap, equipmentIconName } from '../../components/Muscle';
 import type { MuscleGroup } from '../../data/exercises';
 import { CardioMachineList } from '../../components/CardioMachineList';
@@ -25,6 +27,7 @@ import type { ExerciseKind, Workout } from '../../types';
 import { ConfirmDialog, Icon, Sheet, useExerciseName } from '../../ui';
 import {
   addItem,
+  addWarmupExercise,
   copyDay,
   dayItems,
   dayMode,
@@ -33,7 +36,9 @@ import {
   isTrainingDay,
   moveItem,
   patchItem,
+  patchWarmupExercise,
   removeItem,
+  removeWarmupExercise,
   setCount,
   setDayName,
   supersetLabels,
@@ -352,6 +357,7 @@ function ItemList({
   const [editing, setEditing] = useState<ProgramItem | null>(null);
   const [equipFor, setEquipFor] = useState<ProgramItem | null>(null);
   const [pairFor, setPairFor] = useState<ProgramItem | null>(null);
+  const [warmFor, setWarmFor] = useState<string | null>(null);
   const labels = supersetLabels(items);
   if (items.length === 0) {
     return <p className="pg-empty">{t.pgNoExercisesYet}</p>;
@@ -362,17 +368,41 @@ function ItemList({
     <div className="pg-items">
       {items.map((it) => {
         if (it.kind === 'warmup' || it.kind === 'cooldown') {
+          const wu = it.kind === 'warmup' ? (it.warmupItems ?? []) : [];
           return (
-            <div key={it.id} className="pg-marker">
-              <Icon name={it.kind === 'warmup' ? 'flame' : 'snowflake'} />
-              <span className="n">{t.exerciseKindNames[it.kind]}</span>
-              <small>{t.pgMarker}</small>
-              {!readOnly && (
-                <IconButton
-                  icon="x"
-                  label={t.pgRemoveItem(t.exerciseKindNames[it.kind])}
-                  onClick={() => update((p) => removeItem(p, it.id))}
-                />
+            <div key={it.id} className="pg-ex">
+              <div className="pg-marker">
+                <Icon name={it.kind === 'warmup' ? 'flame' : 'snowflake'} />
+                <span className="n">{t.exerciseKindNames[it.kind]}</span>
+                {wu.length === 0 && <small>{t.pgMarker}</small>}
+                {!readOnly && (
+                  <IconButton
+                    icon="x"
+                    label={t.pgRemoveItem(t.exerciseKindNames[it.kind])}
+                    onClick={() => update((p) => removeItem(p, it.id))}
+                  />
+                )}
+              </div>
+              {it.kind === 'warmup' && wu.length > 0 && (
+                <GroupedList surface="raised" label={t.exerciseKindNames.warmup}>
+                  {wu.map((w) => (
+                    <WarmupItemRow
+                      key={w.id}
+                      item={w}
+                      status="target"
+                      readOnly={readOnly}
+                      onSubmit={(patch) =>
+                        update((p) => patchWarmupExercise(p, it.id, w.id, patch))
+                      }
+                      onRemove={() => update((p) => removeWarmupExercise(p, it.id, w.id))}
+                    />
+                  ))}
+                </GroupedList>
+              )}
+              {it.kind === 'warmup' && !readOnly && (
+                <Button variant="secondary" size="sm" icon="plus" onClick={() => setWarmFor(it.id)}>
+                  {t.wuAddExercise}
+                </Button>
               )}
             </div>
           );
@@ -537,6 +567,25 @@ function ItemList({
           </div>
         );
       })}
+      {warmFor && (
+        <ExercisePicker
+          warmup
+          workout={PLAIN_WORKOUT}
+          gym={null}
+          addLabel={t.wuAddExercise}
+          onPick={(i) => {
+            update((p) =>
+              addWarmupExercise(p, warmFor, {
+                name: i.name,
+                ...(i.catalogId ? { exerciseId: i.catalogId } : {}),
+                ...defaultWarmupValue(i.name),
+              }),
+            );
+            setWarmFor(null);
+          }}
+          onClose={() => setWarmFor(null)}
+        />
+      )}
       {editing && (
         <SetsSheet
           item={editing}

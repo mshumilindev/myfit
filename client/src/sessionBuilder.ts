@@ -31,6 +31,8 @@ import { computePlaybook, type Play } from './playbook';
 import { deriveLoadType, type LoadType } from './loads';
 import { pickCardioMachine } from './cardio';
 import { equipmentById } from './data/equipmentCatalog';
+import { warmupProposal, type WarmupPlanItem } from './warmupFor';
+import { nicMid } from './nicotineApply';
 
 const clamp = (n: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, n));
 const roundToStep = (n: number, step: number): number => Math.round(n / step) * step;
@@ -323,6 +325,9 @@ export interface PlannedExercise {
   durationMin?: number | null;
   /** Fine equipment — for the cardio block, the machine to use. */
   equipmentItems?: string[];
+  /** Warm-up block only: a few exercises at ONE light station (bands, light
+   *  dumbbells or bodyweight) — absent = a plain, generic warm-up. */
+  warmupItems?: WarmupPlanItem[];
 }
 
 export interface GeneratedDay {
@@ -608,6 +613,17 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
   // hardcoded list. Stable sort keeps insertion order within ties.
   main.sort((a, b) => b.priority - a.priority);
 
+  // Warm-up: a generic block, plus (when the kit and the day allow) 2–4
+  // exercises of one light station — see warmupFor.
+  const proposal = ctx.warmup
+    ? warmupProposal({
+        muscles,
+        gym: ctx.gym,
+        ...(ctx.conditions ? { limits: ctx.conditions } : {}),
+        protect: ctx.protectedMuscles,
+        exclude: main.map((e) => e.name),
+      })
+    : null;
   const warmup: PlannedExercise[] = ctx.warmup
     ? [
         {
@@ -626,7 +642,9 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
           warmup: [],
           whyKey: 'warmup',
           priority: 0,
-          durationMin: 5,
+          // Nicotine: a little longer (midpoint of its range, whole minutes; +0 when off).
+          durationMin: 5 + Math.round(nicMid('warmupMin')),
+          ...(proposal ? { warmupItems: proposal.items } : {}),
         },
       ]
     : [];

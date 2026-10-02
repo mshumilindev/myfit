@@ -33,6 +33,7 @@ import {
   type HistFilter,
 } from './health/HealthHistory';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
+import { IconTile } from '../components/ui/IconTile';
 import { StickyActionBar } from '../components/ui/StickyActionBar';
 import { ToneText } from '../components/ui/ToneText';
 import {
@@ -53,6 +54,15 @@ import {
   typeName,
 } from './health/parts';
 import { ConditionPage, ConditionsSection } from './health/Conditions';
+import { NicotineHealthGroup } from './health/nicotine/NicotineSection';
+import { NicotineScreens } from './health/nicotine/NicotineScreens';
+import { AlcoholHealthRow } from './health/alcohol/AlcoholSection';
+import { AlcoholScreens } from './health/alcohol/AlcoholScreens';
+import { SupplementHealthRow } from './health/supplements/SupplementSection';
+import { SupplementScreens } from './health/supplements/SupplementScreens';
+import { SupplementQuickStartSheet } from './health/supplements/SupplementQuickStartSheet';
+import { hasSupplementData } from '../supplements';
+import { HealthPrivacyView } from './health/HealthPrivacyView';
 import { isFlagOn } from '../data/flags';
 import './Health.css';
 import { Button } from '../components/ui/Button';
@@ -64,6 +74,14 @@ export interface HealthViewProps {
   form?: HealthFormSpec;
   cond?: string;
   condKey?: string;
+  /** A Nicotine page: the hub, What I use, Use in calculations. */
+  nic?: 'hub' | 'products' | 'calc';
+  /** An Alcohol page: the hub, What I drink, Usual days, Use in calculations. */
+  alc?: 'hub' | 'products' | 'days' | 'calc';
+  /** A Supplements page: the hub, What I take, Use in calculations. */
+  sup?: 'hub' | 'products' | 'calc';
+  /** Health › Privacy and sharing (all health privacy in one place). */
+  priv?: boolean;
   onClose: () => void;
 }
 
@@ -84,6 +102,7 @@ export function HealthView(props: HealthViewProps) {
   );
   const [recover, setRecover] = useState<RestPeriod | null>(null);
   const [endRest, setEndRest] = useState<RestPeriod | null>(null);
+  const [supQuick, setSupQuick] = useState(false);
 
   const go = (o: Omit<HealthViewProps, 'shell' | 'onClose'>, replace = false) => {
     const next = { screen: 'health' as const, ...o };
@@ -356,6 +375,39 @@ export function HealthView(props: HealthViewProps) {
   const conditionsGroup = isFlagOn('conditions') ? (
     <ConditionsSection key="cond" onOpen={(cond) => go({ cond })} />
   ) : null;
+  const lifestyleGroup = (
+    <NicotineHealthGroup key="life" onOpen={() => go({ nic: 'hub' })}>
+      <AlcoholHealthRow onOpen={() => go({ alc: 'hub' })} />
+      <SupplementHealthRow
+        onOpen={() =>
+          hasSupplementData(store.supplements) ? go({ sup: 'hub' }) : setSupQuick(true)
+        }
+      />
+    </NicotineHealthGroup>
+  );
+  const sharingLabel = (l: 'off' | 'effects' | 'full') =>
+    ({ off: t.nicPrivOff, effects: t.nicPrivEffects, full: t.nicPrivFull })[l];
+  const levels = [
+    ...(isFlagOn('conditions') ? [store.conditionsShare] : []),
+    store.nicotine.settings.sharing,
+    store.alcohol.settings.sharing,
+    store.supplements?.settings.sharing ?? 'off',
+  ];
+  const privacyGroup = (
+    <GroupedList key="priv" header={t.hlPrivacy}>
+      <ListRow
+        icon={<IconTile tone="neutral" size={30} icon="lock" />}
+        label={t.hlPrivRow}
+        value={
+          levels.every((l) => l === levels[0])
+            ? t.hlPrivCoach(sharingLabel(levels[0]))
+            : t.hlPrivMixed
+        }
+        chevron
+        onClick={() => go({ priv: true })}
+      />
+    </GroupedList>
+  );
   const historyGroup = (
     <GroupedList key="hist" header={t.hlHistory}>
       {recent.map((it) => (
@@ -390,6 +442,15 @@ export function HealthView(props: HealthViewProps) {
   // --- sheets / dialogs ------------------------------------------------------------------
   const overlays = (
     <>
+      {supQuick && (
+        <SupplementQuickStartSheet
+          onClose={() => setSupQuick(false)}
+          onMore={() => {
+            setSupQuick(false);
+            go({ sup: 'products' });
+          }}
+        />
+      )}
       {recover && (
         <RecoveredSheet
           period={recover}
@@ -449,6 +510,21 @@ export function HealthView(props: HealthViewProps) {
         onPickKey={(key) => go({ cond: 'new', condKey: key }, true)}
       />
     ) : null;
+
+  // Privacy and Nicotine pages replace the whole Health overview (mobile and web).
+  if (props.priv) return <HealthPrivacyView onBack={props.onClose} />;
+  if (props.nic)
+    return (
+      <NicotineScreens screen={props.nic} onOpen={(nic) => go({ nic })} onBack={props.onClose} />
+    );
+  if (props.alc)
+    return (
+      <AlcoholScreens screen={props.alc} onOpen={(alc) => go({ alc })} onBack={props.onClose} />
+    );
+  if (props.sup)
+    return (
+      <SupplementScreens screen={props.sup} onOpen={(sup) => go({ sup })} onBack={props.onClose} />
+    );
 
   // ============================ mobile ============================
   if (!web) {
@@ -516,7 +592,9 @@ export function HealthView(props: HealthViewProps) {
             {startGroup}
             {pastGroup}
             {conditionsGroup}
+            {lifestyleGroup}
             {historyGroup}
+            {privacyGroup}
           </div>
         </div>
         {overlays}
@@ -537,6 +615,8 @@ export function HealthView(props: HealthViewProps) {
             {startGroup}
             {pastGroup}
             {conditionsGroup}
+            {lifestyleGroup}
+            {privacyGroup}
           </>
         ) : (
           <div className="hl-cols">
@@ -548,6 +628,8 @@ export function HealthView(props: HealthViewProps) {
               {startGroup}
               {pastGroup}
               {conditionsGroup}
+              {lifestyleGroup}
+              {privacyGroup}
             </div>
           </div>
         )}

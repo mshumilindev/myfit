@@ -51,6 +51,7 @@ import {
   durationMin,
 } from '../../activities';
 import { sleepReadinessBias } from '../../sleep';
+import { deloadMult, sleepNeedExtraMin } from '../../calcMods';
 import { personalLandmarks } from '../../personalize';
 import { FOCUS_MAV_DELTA, focusLists, groupEmphasis } from '../../goals';
 import { LANDMARKS } from '../../volume';
@@ -1160,9 +1161,11 @@ const weakPoints: WidgetDef = {
 /* ---------- Fatigue & deload ---------- */
 
 /** Same bands as fatigue.ts levelOf, on the 0–100 load index. */
-function levelOfIdx(idx: number): FatigueLevel {
-  if (idx >= 70) return 'fried';
-  if (idx >= 40) return 'high';
+export function levelOfIdx(idx: number): FatigueLevel {
+  // Nicotine lowers the 'high' / 'fried' lines exactly as fatigue.ts does (x1 when off).
+  const k = deloadMult();
+  if (idx >= 70 * k) return 'fried';
+  if (idx >= 40 * k) return 'high';
   if (idx >= 15) return 'moderate';
   return 'fresh';
 }
@@ -1199,7 +1202,13 @@ function FatigueWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
     const deload = deloadSuggestion(
       cur.fat,
       activityRecoveryBias(store.activities, at) +
-        0.6 * sleepReadinessBias(store.sleeps, at, store.sleepSettings?.goalMin ?? 480),
+        0.6 *
+          sleepReadinessBias(
+            store.sleeps,
+            at,
+            store.sleepSettings?.goalMin ?? 480,
+            sleepNeedExtraMin(at),
+          ),
     );
     const vol = (a: number, b: number) =>
       finished

@@ -221,8 +221,8 @@ span.xp-noimg {
   position: relative;
   display: flex;
   align-items: center;
-  gap: var(--s-10);
-  min-height: 88px;
+  gap: var(--s-8);
+  min-height: 92px; /* 76 px zoomed figure + padding */
   padding: var(--s-8) var(--s-10) var(--s-8) var(--s-8);
   border: 0;
   border-radius: var(--r-12);
@@ -277,6 +277,11 @@ span.xp-noimg {
   font-size: var(--fs-12);
   color: var(--color-neutral-300);
   white-space: nowrap;
+}
+/* 2-col grid at 390 px leaves ~93 px for the text beside the 56 px figure:
+   a long readiness label wraps instead of clipping. */
+.xp-fam .xp-fam-state {
+  white-space: normal;
 }
 .xp-fam-subs {
   font-size: var(--fs-12);

@@ -19,6 +19,7 @@ import {
   type useStore,
 } from '../store';
 import { fmtDayMonth, fmtKg, fmtTonnes, useT } from '../i18n';
+import { NicotineTrendNote } from './NicotineTrendNote';
 import { Icon, Sheet, useExerciseName } from '../ui';
 import { EmptyState } from '../components/ui/EmptyState';
 import { EquipChip, MuscleChip, MuscleHeatmap, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
@@ -54,6 +55,7 @@ import {
 } from '../fatigue';
 import { activityRecoveryBias } from '../activities';
 import { sleepReadinessBias } from '../sleep';
+import { sleepNeedExtraMin } from '../calcMods';
 import {
   personalLandmarks,
   tuneSummary,
@@ -339,7 +341,13 @@ export function ProgressView({
   const deload = deloadSuggestion(
     fatMap,
     activityRecoveryBias(store.activities, nowTs) +
-      0.6 * sleepReadinessBias(store.sleeps, nowTs, store.sleepSettings?.goalMin ?? 480),
+      0.6 *
+        sleepReadinessBias(
+          store.sleeps,
+          nowTs,
+          store.sleepSettings?.goalMin ?? 480,
+          sleepNeedExtraMin(nowTs),
+        ),
   );
   const weekTotal = [...volThisWeek.values()].reduce((a, b) => a + b, 0);
   const emptyMuscles = muscleRows.filter((r) => r.v === 0).map((r) => t.muscleGroups[r.m]);
@@ -734,8 +742,10 @@ export function ProgressView({
                   ))}
                 </div>
               )}
+              {lens === 'fatigue' && <NicotineTrendNote />}
             </>
           )}
+          {lens === 'readiness' && <NicotineTrendNote />}
         </section>
       )}
 

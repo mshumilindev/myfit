@@ -30,6 +30,7 @@ import {
 import { createPortal } from 'react-dom';
 import { FRONT_MUSCLES, BACK_MUSCLES } from 'body-muscles';
 import type { MuscleGroup } from '../data/exercises';
+import { zoomViewBox } from '../data/familyWindows';
 import { FOCUS_LIB_IDS, focusToGroup, type FocusMuscle } from '../data/subregions';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import { t as strings } from '../i18n';
@@ -648,35 +649,53 @@ export function MuscleHeatmap({
   );
 }
 
+/** Library muscle ids lit for a set of app groups in one view. */
+export function litLibIds(groups: readonly MuscleGroup[], view: BView): string[] {
+  const ids: string[] = [];
+  for (const g of groups) if (g !== 'cardio') ids.push(...LIB[g][view]);
+  return ids;
+}
+
+/** Library path data per view (for the zoom-window test). */
+export const LIB_VIEW_PATHS = VIEW_PATHS;
+
 /**
  * One silhouette (front or back) with a set of groups painted one colour and
  * the rest dimmed — the exercise picker's muscle-family tiles, where the colour
- * is the family's readiness. Fine regions (FOCUS_LIB_IDS) are accepted too.
+ * is the fatigue map's colour (per muscle). Fine regions (FOCUS_LIB_IDS) are accepted too.
  */
 export function FamilyFigure({
   groups,
   focus = [],
   color,
+  colors,
   view,
   width,
   height,
   className,
+  zoom = false,
 }: {
   groups: MuscleGroup[];
   focus?: FocusMuscle[];
+  /** Fill for every lit path (the fallback when `colors` has no entry). */
   color: string;
+  /** Per-muscle fill (the fatigue map's colour of each group); lit paths of a group take its entry. */
+  colors?: Partial<Record<MuscleGroup, string>>;
   view: BView;
   width?: number;
   height?: number;
   className?: string;
+  /** Crop to the lit muscles (+padding, slot aspect) — the picker tiles. Ignored with `focus`. */
+  zoom?: boolean;
 }) {
-  const lit = new Set<string>();
-  for (const g of groups) if (g !== 'cardio') for (const id of LIB[g][view]) lit.add(id);
+  const lit = new Set<string>(litLibIds(groups, view));
   for (const f of focus) for (const id of FOCUS_LIB_IDS[f]?.[view] ?? []) lit.add(id);
+  const zoomed =
+    zoom && !focus.length && width && height ? zoomViewBox(groups, view, width, height) : null;
   return (
     <svg
       className={className}
-      viewBox={VIEWBOX[view].full}
+      viewBox={zoomed ?? VIEWBOX[view].full}
       width={width}
       height={height}
       aria-hidden
@@ -686,7 +705,7 @@ export function FamilyFigure({
         <path
           key={id}
           d={path}
-          fill={lit.has(id) ? color : DIM}
+          fill={lit.has(id) ? ((colors && colors[ID_TO_GROUP[view][id]]) ?? color) : DIM}
           stroke={lit.has(id) ? 'none' : DIM_STROKE}
           strokeWidth={0.12}
         />

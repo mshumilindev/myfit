@@ -60,6 +60,9 @@ import { IconTile } from '../../components/ui/IconTile';
 import type { Activity, Workout } from '../../types';
 import { clock, fmtApprox, hhmm, nowMs, typeIcon, typeName, useNow } from '../logActivity/shared';
 import { FuelCard } from './FuelCard';
+import { AlcoholCard } from './AlcoholCard';
+import { SupplementsCard } from './SupplementsCard';
+import { NicotineCard } from './NicotineCard';
 import './NextUp.css';
 
 const MIN = 60_000;
@@ -125,6 +128,11 @@ export interface NextUpModel {
   changeTo: () => void;
   dontSuggest: (s: NextUp) => void;
   openLogActivity: () => void;
+  /** Summary › Without nicotine › How is this estimated? › Open Use in calculations. */
+  openNicotineSettings: () => void;
+  /** The same for Summary › Without alcohol. */
+  openAlcoholSettings: () => void;
+  openSupplementsSettings: () => void;
   pause: () => void;
   finish: () => void;
   cancelLive: () => void;
@@ -245,6 +253,18 @@ export function useNextUp(
     openLogActivity() {
       markSummaryReturn(workout.id);
       shell.openOverlay({ screen: 'log-activity' });
+    },
+    openNicotineSettings() {
+      markSummaryReturn(workout.id);
+      shell.openOverlay({ screen: 'health', nic: 'calc' });
+    },
+    openAlcoholSettings() {
+      markSummaryReturn(workout.id);
+      shell.openOverlay({ screen: 'health', alc: 'calc' });
+    },
+    openSupplementsSettings() {
+      markSummaryReturn(workout.id);
+      shell.openOverlay({ screen: 'health', sup: 'calc' });
     },
     pause() {
       if (!live) return;
@@ -614,6 +634,9 @@ export function NextUpPanel({ m }: { m: NextUpModel }) {
       <NextUpCard m={m} web />
       <NextUpQuiet m={m} />
       <FuelCard workout={m.workout} />
+      <NicotineCard workout={m.workout} onOpenSettings={m.openNicotineSettings} />
+      <AlcoholCard workout={m.workout} onOpenSettings={m.openAlcoholSettings} />
+      <SupplementsCard workout={m.workout} onOpenSettings={m.openSupplementsSettings} />
       {rows.length > 0 && (
         <div className="nu-today">
           <p className="nu-today-h">{t.today}</p>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
   ConditionPage,
   ConditionsOnboardingRow,
@@ -29,18 +29,12 @@ function Flow() {
 }
 
 describe('conditions pages', () => {
-  it('general share default: hidden with no conditions, sets the store when present', () => {
-    const empty = render(<ConditionsSection onOpen={() => undefined} />);
-    expect(
-      screen.queryByText(/^(Share with my coach by default|Ділитися з тренером за замовчуванням)$/),
-    ).toBeNull();
-    empty.unmount();
+  it('the list no longer carries the share-default control or the conditions-only footer', () => {
     addCondition({ key: 'asthma', severity: 2, share: 'inherit' });
     render(<ConditionsSection onOpen={() => undefined} />);
-    expect(screen.getByText('Share with my coach by default')).toBeTruthy();
-    const group = screen.getByLabelText('Share with my coach by default');
-    fireEvent.click(within(group).getByText('Full'));
-    expect(__getStateForTests().conditionsShare).toBe('full');
+    expect(screen.queryByText('Share with my coach by default')).toBeNull();
+    expect(screen.queryByText(/Private and encrypted\. Adjusts your plans/)).toBeNull();
+    expect(__getStateForTests().conditionsShare).toBeDefined();
     setConditionsShare('effects');
   });
 

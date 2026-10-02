@@ -191,6 +191,7 @@ export const en = {
   stopCamera: 'Stop',
   cameraDenied: 'Camera unavailable — enter the number',
   whenLabel: 'When',
+  supFxProteinHint: 'Includes {g} g from supplements, counted apart from your food log.',
 } as const;
 
 export type Strings = Record<keyof typeof en, string>;

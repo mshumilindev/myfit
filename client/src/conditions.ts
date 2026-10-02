@@ -17,6 +17,9 @@ import {
 } from './data/conditionCatalog';
 import { richExerciseByName, type MuscleGroup, type RichExercise } from './data/exercises';
 import type { ChronicCondition, ConditionShare } from './types';
+import type { CoachAlcoholView } from './alcoholShare';
+import type { CoachSupplementsView } from './supplementsShare';
+import type { CoachNicotineView } from './nicotineShare';
 
 // ---------------------------------------------------------------------------
 // Exercise risk tagging (heuristic, by name, category and muscles)
@@ -405,6 +408,12 @@ export interface CoachView {
   full: CoachConditionView[];
   /** Merged de-identified effects of everything shared as Effects-only. */
   effects: EffectLine[];
+  /** Nicotine, only when the athlete shares it (Effects or Full); see nicotineShare.ts. */
+  nicotine?: CoachNicotineView;
+  /** Alcohol, only when the athlete shares it (effects only, never amounts); see alcoholShare.ts. */
+  alcohol?: CoachAlcoholView;
+  /** Supplements, only when the athlete shares them (effects, or full: names and doses; never check-ins); see supplementsShare.ts. */
+  supplements?: CoachSupplementsView;
 }
 
 /**

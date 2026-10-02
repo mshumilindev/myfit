@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { toneClass, type Tone } from './tones';
 import './PresetChips.css';
 
@@ -14,8 +14,11 @@ export interface PresetChipsProps {
   items: PresetChip[];
   /** Colour family of the selected chip. */
   tone?: Tone;
-  /** `wrap` (default) never clips; `scroll` keeps one line and scrolls. */
-  layout?: 'wrap' | 'scroll';
+  /**
+   * `wrap` (default) never clips; `scroll` keeps one line and scrolls; `grid` lays the chips
+   * out as equal columns on one line (a row of weekdays), the label centred.
+   */
+  layout?: 'wrap' | 'scroll' | 'grid';
   /** Accessible name of the group. */
   label?: string;
   size?: 'sm' | 'md';
@@ -38,6 +41,7 @@ export function PresetChips({
       className={`uipc uipc--${layout} uipc--${size} ${toneClass(tone)}`}
       role="group"
       aria-label={label}
+      style={layout === 'grid' ? ({ '--uipc-cols': items.length } as CSSProperties) : undefined}
     >
       {items.map((it) => (
         <button

@@ -20,9 +20,15 @@ describe('sealed documents', () => {
     expect(isSealed(s)).toBe(true);
     expect(s.startedAt).toBe(1000);
     expect(s.finishedAt).toBeNull();
-    const text = JSON.stringify(s);
+    // The envelope is random base64: a 2-3 character secret ('g1', '140') shows up in it by
+    // chance (about 7 % of runs), so short values are checked against the open fields only
+    // and the long ones against everything.
+    const { enc, ...open } = s as Record<string, unknown>;
+    expect(enc).toBeDefined();
     for (const secret of ['Barbell Squat', 'Push day', 'g1', '140'])
-      expect(text).not.toContain(secret);
+      expect(JSON.stringify(open)).not.toContain(secret);
+    for (const secret of ['Barbell Squat', 'Push day'])
+      expect(JSON.stringify(s)).not.toContain(secret);
     expect(await unsealDoc(s, key)).toEqual(w);
   });
 
@@ -40,8 +46,9 @@ describe('sealed documents', () => {
           name: 'Warm-up',
           kind: 'warmup',
           sets: [],
-          warmupDetailed: true,
-          warmupItems: [{ id: 'i1', name: 'Band Pull Apart', reps: 15, done: true, at: 1500 }],
+          warmupItems: [
+            { id: 'i1', name: 'Band Pull Apart', reps: 15, weight: 7.25, done: true, at: 1500 },
+          ],
         },
       ],
     };
@@ -100,6 +107,9 @@ describe('conditions collections expose only their open fields', () => {
   it('lists exactly the open fields', () => {
     expect([...OPEN_FIELDS.coachShare]).toEqual(['updatedAt']);
     expect([...OPEN_FIELDS.conditionPrefs]).toEqual(['updatedAt']);
+    expect([...OPEN_FIELDS.nicotine]).toEqual(['updatedAt']);
+    expect([...OPEN_FIELDS.alcohol]).toEqual(['updatedAt']);
+    expect([...OPEN_FIELDS.supplements]).toEqual(['updatedAt']);
     expect([...OPEN_FIELDS.conditions]).toEqual(['id', 'updatedAt']);
   });
 
@@ -112,6 +122,57 @@ describe('conditions collections expose only their open fields', () => {
       },
     ],
     ['conditionPrefs', { conditionsShare: 'full', updatedAt: 9 }],
+    [
+      'nicotine',
+      {
+        products: [
+          { id: 'n1', kind: 'vape', unit: 'ml', amount: 1.5, strengthMg: 20, active: true },
+        ],
+        settings: { useInCalculations: true, surfaces: { sleep: false }, sharing: 'full' },
+        updatedAt: 9,
+      },
+    ],
+    [
+      'alcohol',
+      {
+        entries: [
+          { id: 'a1', itemId: 'beerRegular', servingMl: 500, servingsPerWeek: 4, active: true },
+        ],
+        settings: {
+          useInCalculations: true,
+          surfaces: { sleep: false },
+          sharing: 'effects',
+          usualDays: [4],
+        },
+        checkins: { '2026-10-02': { drank: true, grams: 40, entryIds: ['a1'] } },
+        updatedAt: 9,
+      },
+    ],
+    [
+      'supplements',
+      {
+        entries: [
+          {
+            id: 's1',
+            itemId: 'creatine',
+            dose: 5,
+            schedule: 'daily',
+            timing: 'anytime',
+            startedAt: 5,
+            active: true,
+          },
+        ],
+        settings: {
+          version: 1,
+          useInCalculations: true,
+          surfaces: { strength: true },
+          sharing: 'effects',
+          checkinsOn: true,
+        },
+        checkins: { '2026-10-02': { taken: true } },
+        updatedAt: 9,
+      },
+    ],
     [
       'conditions',
       {
@@ -134,7 +195,18 @@ describe('conditions collections expose only their open fields', () => {
     expect(enc).toBeDefined();
     for (const k of Object.keys(plain)) expect(open.has(k)).toBe(true);
     const text = JSON.stringify(plain);
-    for (const secret of ['asthma', 'secret note', 'full', 'severity'])
+    for (const secret of [
+      'asthma',
+      'secret note',
+      'full',
+      'severity',
+      'vape',
+      'strengthMg',
+      'beerRegular',
+      'servingMl',
+      'creatine',
+      'checkinsOn',
+    ])
       expect(text).not.toContain(secret);
     expect(JSON.stringify(s)).not.toContain('secret note');
     expect(await unsealDoc(s, key)).toEqual(doc);

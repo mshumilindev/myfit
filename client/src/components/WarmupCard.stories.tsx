@@ -7,13 +7,7 @@ function Preview() {
   const { workouts } = useStore();
   const workout = workouts.find((w) => w.id === 'warmup-story');
   if (!workout) return null;
-  return (
-    <WarmupCard
-      workout={workout}
-      exercise={workout.exercises[0]}
-      muscles={['chest', 'shoulders']}
-    />
-  );
+  return <WarmupCard workout={workout} exercise={workout.exercises[0]} />;
 }
 
 const meta = {
@@ -30,12 +24,34 @@ const meta = {
           position: 0,
           kind: 'warmup',
           sets: [],
-          warmupDetailed: parameters.detailed === true,
-          plannedDurationMin: 5,
-          warmupItems: [
-            { id: 'walk', name: 'Walking', durationSec: 180, done: true },
-            { id: 'circles', name: 'Arm circles', reps: 10, done: false },
-          ],
+          plannedDurationMin: parameters.withExercises === true ? null : 5,
+          ...(parameters.withExercises === true
+            ? {
+                warmupItems: [
+                  {
+                    id: 'pull-apart',
+                    name: 'Band Pull Apart',
+                    exerciseId: 'Band_Pull_Apart',
+                    reps: 15,
+                    done: true,
+                  },
+                  {
+                    id: 'curl',
+                    name: 'Dumbbell Bicep Curl',
+                    reps: 12,
+                    weight: 7.5,
+                    done: false,
+                  },
+                  {
+                    id: 'raise',
+                    name: 'Lateral Raise - With Bands',
+                    exerciseId: 'Lateral_Raise_-_With_Bands',
+                    reps: 15,
+                    done: false,
+                  },
+                ],
+              }
+            : {}),
         },
       ];
       seedStore({ workouts: [workout] });
@@ -46,5 +62,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Single: Story = {};
-export const Detailed: Story = { parameters: { detailed: true } };
+/** No exercises: a plain, generic warm-up with optional minutes. */
+export const Generic: Story = {};
+/** Exercises from the library: pending loggers (Log) and one-line logged rows (Edit). */
+export const WithExercises: Story = { parameters: { withExercises: true } };

@@ -67,6 +67,20 @@ import {
   type SleepSchedule,
   type SleepSettings,
   type SleepQuality,
+  type AlcoholCheckin,
+  type AlcoholEntry,
+  type AlcoholRegion,
+  type AlcoholSettings,
+  type AlcoholState,
+  type AlcoholSurface,
+  type SupplementEntry,
+  type SupplementSettings,
+  type SupplementState,
+  type SupplementSurface,
+  type NicotineProduct,
+  type NicotineSettings,
+  type NicotineState,
+  type NicotineSurface,
 } from './types';
 import {
   canonicalExerciseName,
@@ -98,7 +112,14 @@ import { REST_PREFS_DEFAULT, type RestPrefs } from './restTimer';
 import { isFlagOn } from './data/flags';
 import { describeDay, dayReadoutLabel, type DayReadout } from './data/daySuggest';
 import { t, getLocale, type LocaleId } from './i18n';
-import { secToMinutes, warmupDoneSeconds, warmupItemsOf } from './warmupLog';
+import {
+  firstStrengthSetAt,
+  positiveWeight,
+  secToMinutes,
+  warmupDoneSeconds,
+  warmupItemsOf,
+  warmupMeasuredSec,
+} from './warmupLog';
 import { localizedEquipName } from './data/equipmentI18n';
 import {
   applyCheckin,
@@ -124,6 +145,60 @@ import {
 } from './sleep';
 import { currentUid, getRole, callFn } from './api';
 import { CONDITIONS_KEY, CONDITIONS_SHARE_KEY, createConditionsCache } from './conditionsCache';
+import { createAlcoholCache } from './alcoholCache';
+import { alcoholCoachView } from './alcoholShare';
+import {
+  alcoholEffects,
+  alcoholEffectsFor,
+  alcoholLoad,
+  alcoholWeekActual,
+  dayKey as alcoholDayKey,
+  normalizeCheckins,
+  pendingAlcoholCheckin,
+  usualOccasionGrams,
+  type PendingCheckin,
+  type WeekActual,
+  emptyAlcoholState,
+  isAlcoholSharing,
+  cleanUsualDays,
+  normalizeAlcohol,
+  normalizeAlcoholEntry,
+  type AlcoholEffects,
+  type AlcoholLoad,
+  type DayInput,
+} from './alcohol';
+import { isAlcoholRegion, resolveAlcoholRegion } from './alcoholRegion';
+import { createSupplementsCache } from './supplementsCache';
+import { supplementsCoachView } from './supplementsShare';
+import {
+  dayKey as supplementDayKey,
+  emptySupplementState,
+  isSupplementSharing,
+  normalizeSupplementCheckins,
+  normalizeSupplementEntry,
+  normalizeSupplements,
+  pendingSupplementCheckin,
+  supplementEffectsFor,
+  supplementProteinGramsFor,
+  supplementWarnings,
+  usualTrainingStartMin,
+  type PendingSupplementCheckin,
+  type SupplementContext,
+  type SupplementEffects,
+  type SupplementWarning,
+} from './supplements';
+import { createNicotineCache } from './nicotineCache';
+import { nicotineCoachView } from './nicotineShare';
+import {
+  emptyNicotineState,
+  isNicotineSharing,
+  nicotineEffects,
+  nicotineLoad,
+  normalizeNicotine,
+  normalizeNicotineProduct,
+  type NicotineEffects,
+  type NicotineLoad,
+} from './nicotine';
 import {
   vault,
   initVault,
@@ -179,6 +254,9 @@ const conditionsCache = createConditionsCache<ChronicCondition, GeneralShare>({
   vault,
   isShare: isGeneralShare,
 });
+const nicotineCache = createNicotineCache({ vault });
+const alcoholCache = createAlcoholCache({ vault });
+const supplementsCache = createSupplementsCache({ vault });
 function loadShare(): GeneralShare {
   try {
     const v = localStorage.getItem(CONDITIONS_SHARE_KEY);
@@ -284,6 +362,12 @@ export interface StoreState {
   conditions: ChronicCondition[];
   /** General default for sharing conditions (per-condition 'inherit' follows it). */
   conditionsShare: GeneralShare;
+  /** Private nicotine products + switches (sealed in the vault; see nicotine.ts). */
+  nicotine: NicotineState;
+  /** Private alcohol entries + switches (sealed in the vault; see alcohol.ts). */
+  alcohol: AlcoholState;
+  /** Private supplement entries, switches and check-ins (sealed in the vault; see supplements.ts). */
+  supplements: SupplementState;
   /** Logged non-lifting activities (cardio & recovery). */
   activities: Activity[];
   /** Account-wide weight unit (Load-entry B): the default everything is shown
@@ -350,6 +434,9 @@ let state: StoreState = {
   injuries: load<Injury[]>(INJURY_KEY, []),
   conditions: stripLegacyConditions(load<ChronicCondition[]>(CONDITIONS_KEY, [])),
   conditionsShare: loadShare(),
+  nicotine: nicotineCache.load(),
+  alcohol: alcoholCache.load(),
+  supplements: supplementsCache.load(),
   activities: load<Activity[]>(ACTIVITIES_KEY, []),
   weightUnit: load<DisplayUnit>(WEIGHT_UNIT_KEY, 'kg'),
   exerciseUnits: load<Record<string, DisplayUnit>>(EX_UNIT_KEY, {}),
@@ -417,6 +504,55 @@ function hydrateConditions(): void {
 vault.subscribe(hydrateConditions);
 if (vault.materialOrNull()) hydrateConditions();
 
+nicotineCache.boot(state.nicotine);
+alcoholCache.boot(state.alcohol);
+supplementsCache.boot(state.supplements);
+/** When the vault key becomes available: open the sealed on-device nicotine copy. */
+function hydrateNicotine(): void {
+  void nicotineCache
+    .hydrate(state.nicotine)
+    .then((next) => {
+      if (!next) return;
+      state = { ...state, nicotine: next };
+      emit();
+      const uid = currentUid();
+      if (uid) publishCoachShare(uid, state.conditions);
+    })
+    .catch(() => undefined);
+}
+vault.subscribe(hydrateNicotine);
+if (vault.materialOrNull()) hydrateNicotine();
+/** When the vault key becomes available: open the sealed on-device alcohol copy. */
+function hydrateAlcohol(): void {
+  void alcoholCache
+    .hydrate(state.alcohol)
+    .then((next) => {
+      if (!next) return;
+      state = { ...state, alcohol: next };
+      emit();
+      const uid = currentUid();
+      if (uid) publishCoachShare(uid, state.conditions);
+    })
+    .catch(() => undefined);
+}
+vault.subscribe(hydrateAlcohol);
+if (vault.materialOrNull()) hydrateAlcohol();
+/** When the vault key becomes available: open the sealed on-device supplements copy. */
+function hydrateSupplements(): void {
+  void supplementsCache
+    .hydrate(state.supplements)
+    .then((next) => {
+      if (!next) return;
+      state = { ...state, supplements: next };
+      emit();
+      const uid = currentUid();
+      if (uid) publishCoachShare(uid, state.conditions);
+    })
+    .catch(() => undefined);
+}
+vault.subscribe(hydrateSupplements);
+if (vault.materialOrNull()) hydrateSupplements();
+
 function persist(): void {
   try {
     localStorage.setItem(STATE_KEY, JSON.stringify(state.workouts));
@@ -428,6 +564,9 @@ function persist(): void {
     localStorage.setItem(INJURY_KEY, JSON.stringify(state.injuries));
     // Sealed on device once the vault key is here; plaintext only as the no-key fallback.
     conditionsCache.persist({ conditions: state.conditions, share: state.conditionsShare });
+    nicotineCache.persist(state.nicotine);
+    alcoholCache.persist(state.alcohol);
+    supplementsCache.persist(state.supplements);
     localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(state.activities));
     localStorage.setItem(WEIGHT_UNIT_KEY, JSON.stringify(state.weightUnit));
     localStorage.setItem(EX_UNIT_KEY, JSON.stringify(state.exerciseUnits));
@@ -456,6 +595,166 @@ function setState(patch: Partial<StoreState>): void {
 /** The current state, outside React (for chained actions). */
 export function getStoreState(): StoreState {
   return state;
+}
+
+/** Nicotine products + switches (a stable object until something changes). */
+export function useNicotine(): NicotineState {
+  return useSyncExternalStore(subscribeStore, () => state.nicotine);
+}
+
+let nicotineMemo: { n: NicotineState; load: NicotineLoad } | null = null;
+/** The combined load of the active products (mg and cigarette-equivalents per day). */
+export function getNicotineLoad(): NicotineLoad {
+  // `state.nicotine` can be missing in an old seeded / not yet migrated state: count it as empty.
+  if (nicotineMemo === null || nicotineMemo.n !== state.nicotine)
+    nicotineMemo = { n: state.nicotine, load: nicotineLoad(state.nicotine?.products ?? []) };
+  return nicotineMemo.load;
+}
+export function useNicotineLoad(): NicotineLoad {
+  return useSyncExternalStore(subscribeStore, getNicotineLoad);
+}
+
+let effectsMemo: { n: NicotineState; e: NicotineEffects | null } | null = null;
+/** What the engines should apply now; null = master off or no product (change nothing). */
+export function getNicotineEffects(): NicotineEffects | null {
+  if (effectsMemo === null || effectsMemo.n !== state.nicotine)
+    effectsMemo = {
+      n: state.nicotine,
+      e: state.nicotine ? nicotineEffects(state.nicotine) : null,
+    };
+  return effectsMemo.e;
+}
+export function useNicotineEffects(): NicotineEffects | null {
+  return useSyncExternalStore(subscribeStore, getNicotineEffects);
+}
+
+/** Alcohol entries + switches (a stable object until something changes). */
+export function useAlcohol(): AlcoholState {
+  return useSyncExternalStore(subscribeStore, () => state.alcohol);
+}
+
+let alcoholMemo: { a: AlcoholState; load: AlcoholLoad } | null = null;
+/** Weekly grams of pure alcohol, memoised on the state object (an old / missing state counts as empty). */
+export function getAlcoholLoad(): AlcoholLoad {
+  if (alcoholMemo === null || alcoholMemo.a !== state.alcohol)
+    alcoholMemo = { a: state.alcohol, load: alcoholLoad(state.alcohol?.entries ?? []) };
+  return alcoholMemo.load;
+}
+export function useAlcoholLoad(): AlcoholLoad {
+  return useSyncExternalStore(subscribeStore, getAlcoholLoad);
+}
+
+let alcoholEffectsMemo: { a: AlcoholState; e: AlcoholEffects | null } | null = null;
+/** Flat weekly effects (null = nothing to apply), memoised; guarded against a missing state. */
+export function getAlcoholEffects(): AlcoholEffects | null {
+  if (alcoholEffectsMemo === null || alcoholEffectsMemo.a !== state.alcohol)
+    alcoholEffectsMemo = {
+      a: state.alcohol,
+      e: state.alcohol ? alcoholEffects(state.alcohol) : null,
+    };
+  return alcoholEffectsMemo.e;
+}
+export function useAlcoholEffects(): AlcoholEffects | null {
+  return useSyncExternalStore(subscribeStore, getAlcoholEffects);
+}
+/** Effects for one calendar day, honouring "usually drink on" (null = nothing to apply). */
+export function getAlcoholEffectsFor(day: DayInput): AlcoholEffects | null {
+  return alcoholEffectsFor(state.alcohol, day);
+}
+
+let pendingMemo: { a: AlcoholState; hour: number; p: PendingCheckin | null } | null = null;
+/** The check-in to ask on Today (see `pendingAlcoholCheckin`), or null. Stable between calls within an hour. */
+export function getPendingAlcoholCheckin(now: number = Date.now()): PendingCheckin | null {
+  const hour = Math.floor(now / 3_600_000);
+  if (pendingMemo === null || pendingMemo.a !== state.alcohol || pendingMemo.hour !== hour)
+    pendingMemo = { a: state.alcohol, hour, p: pendingAlcoholCheckin(now, state.alcohol) };
+  return pendingMemo.p;
+}
+export function usePendingAlcoholCheckin(): PendingCheckin | null {
+  return useSyncExternalStore(subscribeStore, () => getPendingAlcoholCheckin());
+}
+/** The week so far from the check-ins; `weekStart` = ISO weekday the week begins on (default Monday). */
+export function getAlcoholWeekActual(now: number = Date.now(), weekStart = 1): WeekActual | null {
+  return alcoholWeekActual(state.alcohol, now, weekStart);
+}
+
+/** The region in force: the manual choice, else detected from position / time zone / language. */
+export function getAlcoholRegion(): AlcoholRegion {
+  return resolveAlcoholRegion(state.alcohol?.settings?.regionOverride);
+}
+export function useAlcoholRegion(): AlcoholRegion {
+  return useSyncExternalStore(subscribeStore, getAlcoholRegion);
+}
+
+/** Supplement entries + switches + check-ins (a stable object until something changes). */
+export function useSupplements(): SupplementState {
+  return useSyncExternalStore(subscribeStore, () => state.supplements);
+}
+/** The current supplements document, outside React (an old / missing state counts as empty). */
+export const getSupplements = (): SupplementState => state.supplements ?? emptySupplementState();
+
+/**
+ * What the model needs from the rest of the store to tell a training day: today, the days with
+ * a finished workout or conditioning activity, the start times of finished workouts and the
+ * latest body weight. The training PLAN is added by `supplementsApply.supplementContext`
+ * (the plan cache lives outside the store).
+ */
+export function getSupplementTrainingFacts(now: number = Date.now()): {
+  todayKey: string;
+  trainedDays: string[];
+  workoutStarts: number[];
+  bodyWeightKg: number | null;
+} {
+  const days = new Set<string>();
+  const starts: number[] = [];
+  for (const w of state.workouts ?? []) {
+    if (w.finishedAt === null || w.finishedAt === undefined) continue;
+    const k = supplementDayKey(w.startedAt);
+    if (k) days.add(k);
+    starts.push(w.startedAt);
+  }
+  for (const a of state.activities ?? []) {
+    if (a.category !== 'conditioning' || a.finishedAt === null) continue;
+    const k = supplementDayKey(a.startedAt);
+    if (k) days.add(k);
+  }
+  const kg = latestWeight(state.bodyMetrics)?.weight;
+  return {
+    todayKey: supplementDayKey(now) ?? '',
+    trainedDays: [...days],
+    workoutStarts: starts,
+    bodyWeightKg: typeof kg === 'number' && kg > 0 ? kg : null,
+  };
+}
+
+/** The effects of one calendar day (null = master off or nothing counts). Pass `supplementContext()`. */
+export function getSupplementEffectsFor(
+  day: DayInput,
+  ctx: SupplementContext,
+): SupplementEffects | null {
+  return supplementEffectsFor(state.supplements, day, ctx);
+}
+export function getSupplementProteinGramsFor(day: DayInput, ctx: SupplementContext): number {
+  return supplementProteinGramsFor(state.supplements, day, ctx);
+}
+export function getSupplementWarnings(ctx: SupplementContext): SupplementWarning[] {
+  return supplementWarnings(state.supplements, ctx);
+}
+
+/**
+ * The check-in to ask on Today (see `pendingSupplementCheckin`), or null. Not memoised here: it
+ * depends on the training context, which lives outside the store (memoise in the component).
+ */
+export function getPendingSupplementCheckin(
+  ctx: SupplementContext,
+  now: number = Date.now(),
+): PendingSupplementCheckin | null {
+  return pendingSupplementCheckin(now, state.supplements, ctx);
+}
+
+function subscribeStore(cb: () => void): () => void {
+  listeners.add(cb);
+  return () => listeners.delete(cb);
 }
 
 export function useStore(): StoreState {
@@ -970,6 +1269,9 @@ interface ExercisePlan {
   secondaryMuscles?: string[];
   /** Fine equipment (catalog ids) — e.g. the cardio machine picked. */
   equipmentItems?: string[];
+  /** Warm-up marker only: exercises the block starts with (a program day's
+   *  warm-up, or the auto session's proposal). */
+  warmupItems?: WarmupItemDraft[];
 }
 
 // --- Firestore writes -------------------------------------------------------
@@ -1447,7 +1749,9 @@ export function addGeneratedDayTo(workoutId: string, day: GeneratedDay): void {
   // the active language.
   const storedName = (ex: GeneratedDay['warmup'][number]): string =>
     ex.kind === 'warmup'
-      ? tt.sbWarmupName
+      ? ex.warmupItems?.length
+        ? tt.exerciseKindNames.warmup
+        : tt.sbWarmupName
       : ex.kind === 'cardio'
         ? cardioBlockName(ex.equipmentItems?.[0] ?? null, tt.sbCardioName, getLocale())
         : ex.kind === 'cooldown'
@@ -1462,6 +1766,7 @@ export function addGeneratedDayTo(workoutId: string, day: GeneratedDay): void {
       primaryMuscle: ex.primary && ex.primary !== 'cardio' ? ex.primary : null,
       secondaryMuscles: ex.secondary,
       ...(ex.equipmentItems?.length ? { equipmentItems: ex.equipmentItems } : {}),
+      ...(ex.kind === 'warmup' && ex.warmupItems?.length ? { warmupItems: ex.warmupItems } : {}),
     });
   }
 }
@@ -1581,6 +1886,7 @@ export function finishWorkout(id: string, at = Date.now()): void {
   draftWorkouts.delete(id);
   patchWorkout(id, { finishedAt: at, autoFinished: false });
   saveWorkout(id);
+  freezeWarmupMeasure(id);
   const done = state.workouts.find((x) => x.id === id);
   if (done) finishLiveSession();
 }
@@ -1746,9 +2052,18 @@ export function addExercise(
     ...(plan.equipmentItems?.length ? { equipmentItems: plan.equipmentItems } : {}),
     // Adding a cool-down during a live session starts it: the rest clock
     // stops on its own (no separate "Start cool-down" step).
-    ...(kind === 'cooldown' && w?.finishedAt === null ? { markerAt: Date.now() } : {}),
+    ...((kind === 'cooldown' || kind === 'warmup') && w?.finishedAt === null
+      ? { markerAt: Date.now() }
+      : {}),
     sets: [],
   };
+  if (kind === 'warmup' && plan.warmupItems?.length) {
+    const now = Date.now();
+    const items = plan.warmupItems
+      .map((d) => newWarmupItem({ ...d, done: false }, now))
+      .filter((i): i is WarmupItem => i !== null);
+    if (items.length) exercise.warmupItems = items;
+  }
   patchWorkout(workoutId, { exercises: [...(w?.exercises ?? []), exercise] });
   saveWorkout(workoutId);
   if (starting) {
@@ -1908,6 +2223,23 @@ export function upsertSet(
     exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, sets } : e)),
   });
   saveWorkout(workoutId);
+  freezeWarmupMeasure(workoutId);
+}
+
+/** Store the measured warm-up time on the marker once it is known (first
+ *  strength set logged, or the workout finished). Lives in the sealed workout. */
+export function freezeWarmupMeasure(workoutId: string): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (!w) return;
+  const ex = w.exercises.find((e) => e.kind === 'warmup' && e.sets.length === 0);
+  if (!ex || typeof ex.warmupMeasuredSec === 'number') return;
+  if (firstStrengthSetAt(w) === null && w.finishedAt === null) return;
+  const sec = warmupMeasuredSec(ex, w, Date.now());
+  if (sec === null) return;
+  patchWorkout(workoutId, {
+    exercises: w.exercises.map((e) => (e.id === ex.id ? { ...e, warmupMeasuredSec: sec } : e)),
+  });
+  saveWorkout(workoutId);
 }
 
 export function addDropToSet(
@@ -2032,12 +2364,13 @@ export function setMarkerStarted(workoutId: string, exerciseId: string, at: numb
   saveWorkout(workoutId);
 }
 
-// --- Warm-up: one block or split into specific moves -------------------------
-// The marker stays a marker (no sets). `warmupDetailed` + `warmupItems` are
-// optional extras on it; everything old keeps reading as the single warm-up.
+// --- Warm-up: a block, optionally holding exercises from the library ----------
+// The marker stays a marker (no sets). `warmupItems` is an optional extra on it;
+// everything without items reads as a plain generic warm-up. The retired
+// `warmupDetailed` flag of earlier builds is stripped on the next write.
 
 /** Apply `fn` to a warm-up marker of a workout; the marker's minutes follow the
- *  done items while it is detailed (so summary / history have one number). */
+ *  done items while it holds exercises (so summary / history have one number). */
 function patchWarmup(
   workoutId: string,
   exerciseId: string,
@@ -2046,10 +2379,14 @@ function patchWarmup(
   const w = state.workouts.find((x) => x.id === workoutId);
   const cur = w?.exercises.find((e) => e.id === exerciseId);
   if (!w || !cur || cur.kind !== 'warmup' || cur.sets.length > 0) return null;
-  let out = fn(cur);
-  if (out.warmupDetailed === true) {
-    const min = secToMinutes(warmupDoneSeconds(warmupItemsOf(out)));
+  let out: Exercise = { ...fn(cur) };
+  delete (out as { warmupDetailed?: boolean }).warmupDetailed;
+  const items = warmupItemsOf(out);
+  if (items.length > 0) {
+    const min = secToMinutes(warmupDoneSeconds(items));
     out = { ...out, plannedDurationMin: min > 0 ? min : null };
+  } else {
+    delete out.warmupItems;
   }
   const next = out;
   patchWorkout(workoutId, {
@@ -2059,16 +2396,7 @@ function patchWarmup(
   return next;
 }
 
-/** Switch a warm-up marker between "One warm-up" (false) and "By exercises". */
-export function setWarmupDetailed(workoutId: string, exerciseId: string, on: boolean): void {
-  patchWarmup(workoutId, exerciseId, (e) =>
-    on
-      ? { ...e, warmupDetailed: true, warmupItems: warmupItemsOf(e) }
-      : { ...e, warmupDetailed: false },
-  );
-}
-
-/** Minutes of the single warm-up (null clears it). */
+/** Minutes of a generic warm-up (null clears it). */
 export function setWarmupMinutes(
   workoutId: string,
   exerciseId: string,
@@ -2085,6 +2413,8 @@ export interface WarmupItemDraft {
   exerciseId?: string;
   durationSec?: number;
   reps?: number;
+  /** kg */
+  weight?: number;
   done?: boolean;
 }
 
@@ -2098,12 +2428,13 @@ function newWarmupItem(d: WarmupItemDraft, now: number): WarmupItem | null {
     ...(d.exerciseId ? { exerciseId: d.exerciseId } : {}),
     ...(d.durationSec && d.durationSec > 0 ? { durationSec: Math.round(d.durationSec) } : {}),
     ...(d.reps && d.reps > 0 ? { reps: Math.round(d.reps) } : {}),
+    ...(positiveWeight(d.weight) ? { weight: positiveWeight(d.weight)! } : {}),
     done,
     ...(done ? { at: now } : {}),
   };
 }
 
-/** Add a move to a detailed warm-up (switches the marker to detailed if needed). */
+/** Add an exercise to the warm-up block. */
 export function addWarmupItem(
   workoutId: string,
   exerciseId: string,
@@ -2113,7 +2444,6 @@ export function addWarmupItem(
   if (!item) return null;
   const r = patchWarmup(workoutId, exerciseId, (e) => ({
     ...e,
-    warmupDetailed: true,
     warmupItems: [...warmupItemsOf(e), item],
   }));
   return r ? item : null;
@@ -2129,43 +2459,47 @@ export function setWarmupItems(
   const items = drafts
     .map((d) => newWarmupItem({ ...d, done: false }, now))
     .filter((i): i is WarmupItem => i !== null);
-  patchWarmup(workoutId, exerciseId, (e) => ({ ...e, warmupDetailed: true, warmupItems: items }));
+  patchWarmup(workoutId, exerciseId, (e) => ({ ...e, warmupItems: items }));
 }
 
+/** Edit an item's one set: reps (+ weight) or seconds (0 / null clears a value).
+ *  `done` is not set here — only {@link logWarmupItem} logs an item. */
 export function updateWarmupItem(
   workoutId: string,
   exerciseId: string,
   itemId: string,
-  patch: Partial<Pick<WarmupItem, 'name' | 'durationSec' | 'reps'>> & { done?: boolean },
+  patch: Partial<Pick<WarmupItem, 'durationSec' | 'reps' | 'weight'>>,
 ): void {
   patchWarmup(workoutId, exerciseId, (e) => ({
     ...e,
     warmupItems: warmupItemsOf(e).map((i) => {
       if (i.id !== itemId) return i;
       const m = { ...i, ...patch };
-      const next: WarmupItem = { id: i.id, name: m.name.trim() || i.name, done: m.done };
+      const next: WarmupItem = { id: i.id, name: i.name, done: i.done };
       if (i.exerciseId) next.exerciseId = i.exerciseId;
       if (m.durationSec && m.durationSec > 0) next.durationSec = Math.round(m.durationSec);
       if (m.reps && m.reps > 0) next.reps = Math.round(m.reps);
-      if (m.done) next.at = i.done && i.at ? i.at : Date.now();
+      if (positiveWeight(m.weight)) next.weight = positiveWeight(m.weight)!;
+      if (i.at) next.at = i.at;
       return next;
     }),
   }));
 }
 
-/** Tick a move off (or back on); `done` omitted flips it. */
-export function toggleWarmupItem(
+/** Log an item: records its one set and marks it done (the Log button). */
+export function logWarmupItem(
   workoutId: string,
   exerciseId: string,
   itemId: string,
-  done?: boolean,
+  values: Partial<Pick<WarmupItem, 'durationSec' | 'reps' | 'weight'>>,
 ): void {
-  const ex = state.workouts
-    .find((x) => x.id === workoutId)
-    ?.exercises.find((e) => e.id === exerciseId);
-  const cur = ex ? warmupItemsOf(ex).find((i) => i.id === itemId) : undefined;
-  if (!cur) return;
-  updateWarmupItem(workoutId, exerciseId, itemId, { done: done ?? !cur.done });
+  updateWarmupItem(workoutId, exerciseId, itemId, values);
+  patchWarmup(workoutId, exerciseId, (e) => ({
+    ...e,
+    warmupItems: warmupItemsOf(e).map((i) =>
+      i.id === itemId ? { ...i, done: true, at: i.at ?? Date.now() } : i,
+    ),
+  }));
 }
 
 export function removeWarmupItem(workoutId: string, exerciseId: string, itemId: string): void {
@@ -2173,24 +2507,6 @@ export function removeWarmupItem(workoutId: string, exerciseId: string, itemId: 
     ...e,
     warmupItems: warmupItemsOf(e).filter((i) => i.id !== itemId),
   }));
-}
-
-/** Move a move one place up (-1) or down (+1). */
-export function moveWarmupItem(
-  workoutId: string,
-  exerciseId: string,
-  itemId: string,
-  dir: -1 | 1,
-): void {
-  patchWarmup(workoutId, exerciseId, (e) => {
-    const items = warmupItemsOf(e);
-    const i = items.findIndex((x) => x.id === itemId);
-    const j = i + dir;
-    if (i < 0 || j < 0 || j >= items.length) return e;
-    const next = [...items];
-    [next[i], next[j]] = [next[j], next[i]];
-    return { ...e, warmupItems: next };
-  });
 }
 
 /**
@@ -2593,7 +2909,24 @@ let lastCoachShare = '';
 
 /** What the coach may see of the conditions (per-condition share), sealed like everything else. */
 function publishCoachShare(uid: string, items: readonly ChronicCondition[]): void {
-  const view = coachView(items, state.conditionsShare);
+  const nic = nicotineCoachView(state.nicotine);
+  const alc = alcoholCoachView(state.alcohol);
+  const facts = getSupplementTrainingFacts();
+  const sup = supplementsCoachView(
+    state.supplements,
+    {
+      isTrainingDay: () => true,
+      bodyWeightKg: facts.bodyWeightKg,
+      usualTrainingStartMin: usualTrainingStartMin(facts.workoutStarts, Date.now()),
+    },
+    Date.now(),
+  );
+  const view = {
+    ...coachView(items, state.conditionsShare),
+    ...(nic ? { nicotine: nic } : {}),
+    ...(alc ? { alcohol: alc } : {}),
+    ...(sup ? { supplements: sup } : {}),
+  };
   const json = JSON.stringify(view);
   if (json === lastCoachShare) return;
   lastCoachShare = json;
@@ -2649,6 +2982,387 @@ export function deleteCondition(id: string): void {
   setState({ conditions: state.conditions.filter((c) => c.id !== id), syncStatus: bumpPending() });
   const uid = currentUid();
   if (uid) deleteDoc(doc(db, 'users', uid, 'conditions', id)).catch(onWriteError);
+}
+
+// --- Nicotine ---------------------------------------------------------------
+// One sealed document, users/{uid}/meta/nicotine: { products, settings, updatedAt }.
+// No counters or logging: only the approximate usual amounts the user entered.
+
+function writeNicotineDoc(n: NicotineState): void {
+  const uid = currentUid();
+  if (!uid) return;
+  prepareWrite('nicotine', { ...n })
+    .then((d) => setDoc(doc(db, 'users', uid, 'meta', 'nicotine'), d))
+    .catch(onWriteError);
+}
+
+function commitNicotine(patch: Partial<Pick<NicotineState, 'products' | 'settings'>>): void {
+  const next: NicotineState = {
+    ...state.nicotine,
+    ...patch,
+    updatedAt: Math.max(Date.now(), state.nicotine.updatedAt + 1),
+  };
+  setState({ nicotine: next, syncStatus: bumpPending() });
+  writeNicotineDoc(next);
+  const uid = currentUid();
+  if (uid) publishCoachShare(uid, state.conditions);
+}
+
+/** The current nicotine document, outside React. */
+export const getNicotine = (): NicotineState => state.nicotine;
+
+/**
+ * Adds a product, or replaces the one with the same id (Save in the product sheet).
+ * Returns the cleaned product, or null if it was not valid.
+ */
+export function saveNicotineProduct(input: NicotineProduct): NicotineProduct | null {
+  const p = normalizeNicotineProduct(input);
+  if (!p) return null;
+  const has = state.nicotine.products.some((x) => x.id === p.id);
+  commitNicotine({
+    products: has
+      ? state.nicotine.products.map((x) => (x.id === p.id ? p : x))
+      : [...state.nicotine.products, p],
+  });
+  return p;
+}
+
+/** Changes some fields of one product (amount, strength, unit, active...). */
+export function updateNicotineProduct(
+  id: string,
+  patch: Partial<Omit<NicotineProduct, 'id'>>,
+): void {
+  const cur = state.nicotine.products.find((x) => x.id === id);
+  if (!cur) return;
+  const next = normalizeNicotineProduct({ ...cur, ...patch });
+  if (!next || JSON.stringify(next) === JSON.stringify(cur)) return;
+  commitNicotine({ products: state.nicotine.products.map((x) => (x.id === id ? next : x)) });
+}
+
+/** Removes one product (the UI confirms first). */
+export function removeNicotineProduct(id: string): void {
+  if (!state.nicotine.products.some((x) => x.id === id)) return;
+  commitNicotine({ products: state.nicotine.products.filter((x) => x.id !== id) });
+}
+
+function updateNicotineSettings(patch: Partial<NicotineSettings>): void {
+  const cur = state.nicotine.settings;
+  const settings = { ...cur, ...patch };
+  if (JSON.stringify(settings) === JSON.stringify(cur)) return;
+  commitNicotine({ settings });
+}
+
+/** Master switch: "Use nicotine in my numbers". */
+export function setNicotineUseInCalculations(v: boolean): void {
+  updateNicotineSettings({ useInCalculations: v });
+}
+
+/** One Advanced switch. */
+export function setNicotineSurface(surface: NicotineSurface, on: boolean): void {
+  updateNicotineSettings({ surfaces: { ...state.nicotine.settings.surfaces, [surface]: on } });
+}
+
+/** What a coach may see: off (default), effects or full. */
+export function setNicotineSharing(v: NicotineSettings['sharing']): void {
+  if (!isNicotineSharing(v)) return;
+  updateNicotineSettings({ sharing: v });
+}
+
+/** Full wipe: products, settings, the sealed Firestore document and the on-device copy. */
+export function deleteNicotineData(): void {
+  nicotineCache.clear();
+  state = { ...state, nicotine: emptyNicotineState(), syncStatus: bumpPending() };
+  persist();
+  emit();
+  const uid = currentUid();
+  if (uid) {
+    deleteDoc(doc(db, 'users', uid, 'meta', 'nicotine')).catch(onWriteError);
+    publishCoachShare(uid, state.conditions);
+  }
+}
+
+// --- Alcohol ----------------------------------------------------------------
+// One sealed document, users/{uid}/meta/alcohol: { entries, settings, updatedAt }.
+// No logging by day: only the approximate usual servings a week the user entered.
+
+function writeAlcoholDoc(a: AlcoholState): void {
+  const uid = currentUid();
+  if (!uid) return;
+  prepareWrite('alcohol', { ...a })
+    .then((d) => setDoc(doc(db, 'users', uid, 'meta', 'alcohol'), d))
+    .catch(onWriteError);
+}
+
+function commitAlcohol(
+  patch: Partial<Pick<AlcoholState, 'entries' | 'settings' | 'checkins'>>,
+): void {
+  const cur = state.alcohol ?? emptyAlcoholState();
+  const next: AlcoholState = {
+    ...cur,
+    ...patch,
+    updatedAt: Math.max(Date.now(), cur.updatedAt + 1),
+  };
+  setState({ alcohol: next, syncStatus: bumpPending() });
+  writeAlcoholDoc(next);
+  const uid = currentUid();
+  if (uid) publishCoachShare(uid, state.conditions);
+}
+
+/** The current alcohol document, outside React. */
+export const getAlcohol = (): AlcoholState => state.alcohol;
+
+/**
+ * Adds an entry, or replaces the one with the same id (Save in the drink sheet). Returns the
+ * cleaned entry, or null if it was not valid (unknown drink: the user cannot create drinks).
+ */
+export function saveAlcoholEntry(input: AlcoholEntry): AlcoholEntry | null {
+  const e = normalizeAlcoholEntry(input);
+  if (!e) return null;
+  const cur = (state.alcohol ?? emptyAlcoholState()).entries;
+  const has = cur.some((x) => x.id === e.id);
+  commitAlcohol({ entries: has ? cur.map((x) => (x.id === e.id ? e : x)) : [...cur, e] });
+  return e;
+}
+
+/** Removes one entry (the UI confirms first). */
+export function removeAlcoholEntry(id: string): void {
+  const cur = state.alcohol?.entries ?? [];
+  if (!cur.some((x) => x.id === id)) return;
+  commitAlcohol({ entries: cur.filter((x) => x.id !== id) });
+}
+
+function updateAlcoholSettings(patch: Partial<AlcoholSettings>): void {
+  const cur = (state.alcohol ?? emptyAlcoholState()).settings;
+  const settings = { ...cur, ...patch };
+  if (JSON.stringify(settings) === JSON.stringify(cur)) return;
+  commitAlcohol({ settings });
+}
+
+/** Master switch: "Use alcohol in my numbers". */
+export function setAlcoholUseInCalculations(v: boolean): void {
+  updateAlcoholSettings({ useInCalculations: v });
+}
+
+/** One per-surface switch. */
+export function setAlcoholSurface(surface: AlcoholSurface, on: boolean): void {
+  updateAlcoholSettings({
+    surfaces: { ...(state.alcohol ?? emptyAlcoholState()).settings.surfaces, [surface]: on },
+  });
+}
+
+/** What a coach may see: off (default) or effects only. */
+export function setAlcoholSharing(v: AlcoholSettings['sharing']): void {
+  if (!isAlcoholSharing(v)) return;
+  updateAlcoholSettings({ sharing: v });
+}
+
+/** "Ask me on Today": the optional "did you drink?" check-in (off by default). */
+export function setAlcoholCheckinsOn(v: boolean): void {
+  updateAlcoholSettings({ checkinsOn: v });
+}
+
+/** "Usually drink on": weekdays 0 = Monday ... 6 = Sunday; empty = no pattern. */
+export function setAlcoholUsualDays(days: readonly number[]): void {
+  updateAlcoholSettings({ usualDays: cleanUsualDays(days) });
+}
+
+/** Manual region; null / undefined = detect again. */
+export function setAlcoholRegionOverride(r: AlcoholRegion | null | undefined): void {
+  const settings = { ...(state.alcohol ?? emptyAlcoholState()).settings };
+  if (isAlcoholRegion(r)) settings.regionOverride = r;
+  else delete settings.regionOverride;
+  if (JSON.stringify(settings) === JSON.stringify(state.alcohol?.settings)) return;
+  commitAlcohol({ settings });
+}
+
+export type AlcoholDayAnswer =
+  { kind: 'none' } | { kind: 'usual' } | { kind: 'custom'; grams: number };
+
+/**
+ * "Did you drink on this day?": stores the answer for a drinking day ('YYYY-MM-DD', or any
+ * day input). 'none' = no alcohol, 'usual' = the usual evening (weekly grams over the usual
+ * days), 'custom' = a typed amount (0 or less counts as none). Keeps the last 60 days.
+ * Returns false when nothing was stored (bad day, or 'usual' with no usual days / entries).
+ */
+export function answerAlcoholDay(day: string | number | Date, answer: AlcoholDayAnswer): boolean {
+  const key = alcoholDayKey(day);
+  const cur = state.alcohol ?? emptyAlcoholState();
+  if (!key) return false;
+  let c: AlcoholCheckin;
+  if (answer.kind === 'none') c = { drank: false };
+  else if (answer.kind === 'custom') {
+    if (!Number.isFinite(answer.grams)) return false;
+    c = answer.grams > 0 ? { drank: true, grams: answer.grams } : { drank: false };
+  } else {
+    const grams = usualOccasionGrams(cur.entries, cur.settings.usualDays);
+    if (grams <= 0) return false;
+    c = {
+      drank: true,
+      grams,
+      entryIds: cur.entries.filter((e) => e.active).map((e) => e.id),
+    };
+  }
+  const next = normalizeCheckins({ ...cur.checkins, [key]: c });
+  if (JSON.stringify(next) === JSON.stringify(cur.checkins ?? {})) return true;
+  commitAlcohol({ checkins: next });
+  return true;
+}
+
+/** Takes an answer back (the day becomes unanswered again). */
+export function clearAlcoholDay(day: string | number | Date): void {
+  const key = alcoholDayKey(day);
+  const cur = state.alcohol?.checkins ?? {};
+  if (!key || !(key in cur)) return;
+  const next = { ...cur };
+  delete next[key];
+  commitAlcohol({ checkins: next });
+}
+
+/** Full wipe: entries, settings, the sealed Firestore document and the on-device copy. */
+export function deleteAlcoholData(): void {
+  alcoholCache.clear();
+  state = { ...state, alcohol: emptyAlcoholState(), syncStatus: bumpPending() };
+  persist();
+  emit();
+  const uid = currentUid();
+  if (uid) {
+    deleteDoc(doc(db, 'users', uid, 'meta', 'alcohol')).catch(onWriteError);
+    publishCoachShare(uid, state.conditions);
+  }
+}
+
+// --- Supplements ------------------------------------------------------------
+// One sealed document, users/{uid}/meta/supplements: { entries, settings, checkins, updatedAt }.
+// No logging by time: the dose, timing and schedule the user picked, plus an optional day check-in.
+
+function writeSupplementsDoc(a: SupplementState): void {
+  const uid = currentUid();
+  if (!uid) return;
+  prepareWrite('supplements', { ...a })
+    .then((d) => setDoc(doc(db, 'users', uid, 'meta', 'supplements'), d))
+    .catch(onWriteError);
+}
+
+function commitSupplements(
+  patch: Partial<Pick<SupplementState, 'entries' | 'settings' | 'checkins'>>,
+): void {
+  const cur = state.supplements ?? emptySupplementState();
+  const next: SupplementState = {
+    ...cur,
+    ...patch,
+    updatedAt: Math.max(Date.now(), cur.updatedAt + 1),
+  };
+  setState({ supplements: next, syncStatus: bumpPending() });
+  writeSupplementsDoc(next);
+  const uid = currentUid();
+  if (uid) publishCoachShare(uid, state.conditions);
+}
+
+/**
+ * Adds an entry, or replaces the one with the same id (Save in the supplement sheet). Returns
+ * the cleaned entry, or null if it was not valid (unknown item: the user cannot create items).
+ * `startedAt` is set once, when the entry is first saved, and kept on every later edit (the
+ * caller's value is ignored for an id that already exists).
+ */
+export function saveSupplementEntry(input: SupplementEntry): SupplementEntry | null {
+  const e = normalizeSupplementEntry(input, Date.now());
+  if (!e) return null;
+  const cur = (state.supplements ?? emptySupplementState()).entries;
+  const old = cur.find((x) => x.id === e.id);
+  const saved: SupplementEntry = old ? { ...e, startedAt: old.startedAt } : e;
+  commitSupplements({
+    entries: old ? cur.map((x) => (x.id === saved.id ? saved : x)) : [...cur, saved],
+  });
+  return saved;
+}
+
+/** Removes one entry (the UI confirms first). */
+export function removeSupplementEntry(id: string): void {
+  const cur = state.supplements?.entries ?? [];
+  if (!cur.some((x) => x.id === id)) return;
+  commitSupplements({ entries: cur.filter((x) => x.id !== id) });
+}
+
+function updateSupplementSettings(patch: Partial<SupplementSettings>): void {
+  const cur = (state.supplements ?? emptySupplementState()).settings;
+  const settings = { ...cur, ...patch };
+  if (JSON.stringify(settings) === JSON.stringify(cur)) return;
+  commitSupplements({ settings });
+}
+
+/** Master switch: "Use supplements in my numbers". */
+export function setSupplementUseInCalculations(v: boolean): void {
+  updateSupplementSettings({ useInCalculations: v });
+}
+
+/** One per-surface switch. */
+export function setSupplementSurface(surface: SupplementSurface, on: boolean): void {
+  updateSupplementSettings({
+    surfaces: { ...(state.supplements ?? emptySupplementState()).settings.surfaces, [surface]: on },
+  });
+}
+
+/** What a coach may see: off (default), effects only, or full (names and doses). */
+export function setSupplementSharing(v: SupplementSettings['sharing']): void {
+  if (!isSupplementSharing(v)) return;
+  updateSupplementSettings({ sharing: v });
+}
+
+/** "Ask on Today": the optional day check-in (off by default). */
+export function setSupplementCheckinsOn(v: boolean): void {
+  updateSupplementSettings({ checkinsOn: v });
+}
+
+export type SupplementDayAnswer =
+  { kind: 'none' } | { kind: 'all' } | { kind: 'some'; entryIds: readonly string[] };
+
+/**
+ * "Did you take your supplements on this day?": stores the answer for a day ('YYYY-MM-DD', or
+ * any day input). 'none' = nothing taken, 'all' = everything due that day (no ids kept: new
+ * entries count too), 'some' = only those entries (ids of unknown entries are dropped; none
+ * left = nothing taken). Keeps the last 60 days. Returns false when nothing was stored (bad day).
+ */
+export function answerSupplementDay(
+  day: string | number | Date,
+  answer: SupplementDayAnswer,
+): boolean {
+  const key = supplementDayKey(day);
+  const cur = state.supplements ?? emptySupplementState();
+  if (!key) return false;
+  let raw: Record<string, unknown>;
+  if (answer.kind === 'none') raw = { taken: false };
+  else if (answer.kind === 'all') raw = { taken: true };
+  else {
+    const known = new Set(cur.entries.map((e) => e.id));
+    raw = { taken: true, entryIds: answer.entryIds.filter((id) => known.has(id)) };
+  }
+  const next = normalizeSupplementCheckins({ ...cur.checkins, [key]: raw });
+  if (JSON.stringify(next) === JSON.stringify(cur.checkins ?? {})) return true;
+  commitSupplements({ checkins: next });
+  return true;
+}
+
+/** Takes an answer back (the day becomes unanswered again). */
+export function clearSupplementDay(day: string | number | Date): void {
+  const key = supplementDayKey(day);
+  const cur = state.supplements?.checkins ?? {};
+  if (!key || !(key in cur)) return;
+  const next = { ...cur };
+  delete next[key];
+  commitSupplements({ checkins: next });
+}
+
+/** Full wipe: entries, settings, check-ins, the sealed Firestore document and the on-device copy. */
+export function deleteSupplementData(): void {
+  supplementsCache.clear();
+  state = { ...state, supplements: emptySupplementState(), syncStatus: bumpPending() };
+  persist();
+  emit();
+  const uid = currentUid();
+  if (uid) {
+    deleteDoc(doc(db, 'users', uid, 'meta', 'supplements')).catch(onWriteError);
+    publishCoachShare(uid, state.conditions);
+  }
 }
 
 // --- Injuries & rehab -------------------------------------------------------
@@ -4364,6 +5078,66 @@ export function startSyncLoop(): () => void {
       () => undefined,
     ),
   );
+  const nicotineMirror = mirrorCollection<Record<string, unknown>>((items) => {
+    if (!items.length) return; // locked, absent or wiped: keep what is on screen
+    nicotineCache.markRemote();
+    const remote = normalizeNicotine(items[0]);
+    // Last-write-wins: a newer local edit (not yet echoed back) beats the snapshot.
+    if (remote.updatedAt < state.nicotine.updatedAt) return;
+    if (JSON.stringify(remote) === JSON.stringify(state.nicotine)) return;
+    state = { ...state, nicotine: remote };
+    persist();
+    emit();
+  });
+  unsubs.push(nicotineMirror.dispose);
+  unsubs.push(
+    onSnapshot(
+      doc(db, 'users', uid, 'meta', 'nicotine'),
+      (snap) => nicotineMirror.push(snap.exists() ? [snap.data()] : []),
+      // Soft: a missing rule must not block the rest of the sync.
+      () => undefined,
+    ),
+  );
+  const alcoholMirror = mirrorCollection<Record<string, unknown>>((items) => {
+    if (!items.length) return; // locked, absent or wiped: keep what is on screen
+    alcoholCache.markRemote();
+    const remote = normalizeAlcohol(items[0]);
+    // Last-write-wins: a newer local edit (not yet echoed back) beats the snapshot.
+    if (remote.updatedAt < (state.alcohol?.updatedAt ?? 0)) return;
+    if (JSON.stringify(remote) === JSON.stringify(state.alcohol)) return;
+    state = { ...state, alcohol: remote };
+    persist();
+    emit();
+  });
+  unsubs.push(alcoholMirror.dispose);
+  const supplementsMirror = mirrorCollection<Record<string, unknown>>((items) => {
+    if (!items.length) return; // locked, absent or wiped: keep what is on screen
+    supplementsCache.markRemote();
+    const remote = normalizeSupplements(items[0]);
+    // Last-write-wins: a newer local edit (not yet echoed back) beats the snapshot.
+    if (remote.updatedAt < (state.supplements?.updatedAt ?? 0)) return;
+    if (JSON.stringify(remote) === JSON.stringify(state.supplements)) return;
+    state = { ...state, supplements: remote };
+    persist();
+    emit();
+  });
+  unsubs.push(supplementsMirror.dispose);
+  unsubs.push(
+    onSnapshot(
+      doc(db, 'users', uid, 'meta', 'supplements'),
+      (snap) => supplementsMirror.push(snap.exists() ? [snap.data()] : []),
+      // Soft: a missing rule must not block the rest of the sync.
+      () => undefined,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
+      doc(db, 'users', uid, 'meta', 'alcohol'),
+      (snap) => alcoholMirror.push(snap.exists() ? [snap.data()] : []),
+      // Soft: a missing rule must not block the rest of the sync.
+      () => undefined,
+    ),
+  );
   const bodyMirror = mirrorCollection<BodyMetrics & Record<string, unknown>>((items, info) => {
     // Locked and sealed: keep what is on screen rather than flashing an empty profile.
     if (!items.length && info.locked) return;
@@ -4988,7 +5762,6 @@ export function duplicateExercise(workoutId: string, exerciseId: string): void {
     equipment: ex.equipment ?? [],
     primaryMuscle: ex.primaryMuscle ?? null,
     secondaryMuscles: ex.secondaryMuscles ?? [],
-    ...(ex.warmupDetailed !== undefined ? { warmupDetailed: ex.warmupDetailed } : {}),
     ...(ex.warmupItems
       ? { warmupItems: warmupItemsOf(ex).map((i) => ({ ...i, id: uuid() })) }
       : {}),
@@ -5241,6 +6014,9 @@ export function resetLocalData(): void {
   localStorage.removeItem(HOME_KEY);
   localStorage.removeItem(INJURY_KEY);
   conditionsCache.clear();
+  nicotineCache.clear();
+  alcoholCache.clear();
+  supplementsCache.clear();
   localStorage.removeItem(ACTIVITIES_KEY);
   localStorage.removeItem(SLEEP_KEY);
   localStorage.removeItem(SLEEP_SCHED_KEY);
@@ -5271,6 +6047,9 @@ export function resetLocalData(): void {
     injuries: [],
     conditions: [],
     conditionsShare: 'effects',
+    nicotine: emptyNicotineState(),
+    alcohol: emptyAlcoholState(),
+    supplements: emptySupplementState(),
     activities: [],
     weightUnit: 'kg',
     exerciseUnits: {},

@@ -21,8 +21,8 @@ import { Card } from '../components/ui/Card';
 import { Ring } from '../components/ui/Ring';
 import { SetRow } from '../components/ui/SetRow';
 import { Tag } from '../components/ui/Tag';
-import { WarmupCard } from '../components/WarmupCard';
-import { dayMuscles, warmupSummary } from '../warmupLog';
+import { WarmupCard, WarmupMarkerTitle } from '../components/WarmupCard';
+import { fmtWarmupClock, warmupMeasuredSec, warmupSummary } from '../warmupLog';
 import { StatTile } from '../components/ui/StatTile';
 import { Chip } from '../components/ui/Chip';
 import { IconTile } from '../components/ui/IconTile';
@@ -81,6 +81,7 @@ import {
   type RestPrefs,
 } from '../restTimer';
 import { haptic, isAppleTouch } from '../haptics';
+import { nicMid } from '../nicotineApply';
 import { cancelRestPush, enablePush, pushState, scheduleRestPush } from '../push';
 import { useTodayPlan } from '../atlas/useTodayPlan';
 import { AtlasFace } from '../components/AtlasFace';
@@ -97,6 +98,10 @@ import {
   useNextUp,
 } from './sessionSummary/NextUp';
 import { FuelCard } from './sessionSummary/FuelCard';
+import { AlcoholCard } from './sessionSummary/AlcoholCard';
+import { SupplementsCard } from './sessionSummary/SupplementsCard';
+import { SupplementRpeNote } from './SupplementNotes';
+import { NicotineCard } from './sessionSummary/NicotineCard';
 import { TEMPER_COLOR, type Temper } from '../atlas/types';
 import { setFact } from '../atlas/facts';
 import { useAtlasFmt, voiceNow } from '../atlas/notes';
@@ -2285,14 +2290,14 @@ export function SessionView(props: {
   /** One-line reading of a finished exercise (SS-3): «3 × 8 · 75 kg». */
   function pastSummary(ex: Exercise): string {
     if (isMarkerExercise(ex)) {
-      const wu = exerciseKind(ex) === 'warmup' ? warmupSummary(ex) : null;
-      if (wu?.detailed)
-        return [
-          wu.count > 0 ? t.nExercises(wu.count) : null,
-          wu.minutes ? `${wu.minutes} ${t.minShort}` : null,
-        ]
+      if (exerciseKind(ex) === 'warmup') {
+        // Real measured time only — never the planned estimate (legacy = nothing).
+        const wu = warmupSummary(ex);
+        const sec = workout ? warmupMeasuredSec(ex, workout, now) : null;
+        return [wu.count > 0 ? t.nExercises(wu.count) : null, sec ? fmtWarmupClock(sec) : null]
           .filter(Boolean)
           .join(' · ');
+      }
       return ex.plannedDurationMin ? `~${ex.plannedDurationMin} ${t.minShort}` : '';
     }
     if (isTimedExercise(ex)) {
@@ -2612,6 +2617,7 @@ export function SessionView(props: {
       blk?.kind === 'group' &&
       !blk.group.circuit &&
       blk.group.exercises.some((e) => e.sets.length < ex.sets.length);
+    const nicotineRest = nicMid('restPct');
     const key = [
       s.id,
       s.weight,
@@ -2622,6 +2628,7 @@ export function SessionView(props: {
       s.rpeAuto,
       midRound,
       conditionLimits.effects.restScale,
+      nicotineRest,
     ].join('|');
     const hit = restPlanCache.get(key);
     if (hit) return hit;
@@ -2647,6 +2654,7 @@ export function SessionView(props: {
       shortSleep: ctx.sleepShortH >= 1.5,
       midRound,
       restScale: conditionLimits.effects.restScale,
+      nicotineRestScale: nicotineRest,
     });
     restPlanCache.set(key, plan);
     return plan;
@@ -3021,6 +3029,8 @@ export function SessionView(props: {
     const prev = prevLift(ex.name, workout!.id);
     const kind = exerciseKind(ex);
     const marker = isMarkerExercise(ex);
+    const wuSec =
+      marker && kind === 'warmup' && workout ? warmupMeasuredSec(ex, workout, now) : null;
     const timed = isTimedExercise(ex) && !marker;
     // Cardio: the machine decides which console readings the entry carries.
     const cardioFields = timed ? cardioProfile(ex).fields : [];
@@ -3160,14 +3170,17 @@ export function SessionView(props: {
               >
                 <ExerciseName name={ex.name} />
               </Button>
-              {marker && !live ? (
-                // Past session: the marker is just a record that it happened — no
-                // "ready when you are" prompt, no duplicated kind label.
-                ex.plannedDurationMin ? (
+              {marker ? (
+                // The header name already says warm-up / cool-down: no repeated
+                // kind label. A past cool-down keeps its minutes, a past warm-up
+                // its measured time (nothing for legacy data).
+                !live && kind === 'cooldown' && ex.plannedDurationMin ? (
                   <span className="prev">{`~${ex.plannedDurationMin} ${t.minShort}`}</span>
+                ) : !live && kind === 'warmup' && wuSec ? (
+                  <span className="prev">{fmtWarmupClock(wuSec)}</span>
                 ) : null
               ) : (
-                (timed || marker) && <span className="prev">{t.exerciseKindNames[kind]}</span>
+                timed && <span className="prev">{t.exerciseKindNames[kind]}</span>
               )}
               {!grp && !timed && !marker && prev && !target && (
                 <span className="prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
@@ -3329,8 +3342,14 @@ export function SessionView(props: {
             </span>
             <div className="warmup-marker-copy">
               <span className="warmup-marker-title">
-                {kind === 'cooldown' ? t.cooldownMarkerTitle : t.warmupMarkerTitle}
-                {ex.plannedDurationMin ? ` · ~${ex.plannedDurationMin} ${t.minShort}` : ''}
+                {kind === 'cooldown' ? (
+                  <>
+                    {t.cooldownMarkerTitle}
+                    {ex.plannedDurationMin ? ` · ~${ex.plannedDurationMin} ${t.minShort}` : ''}
+                  </>
+                ) : (
+                  <WarmupMarkerTitle workout={workout!} exercise={ex} now={now} />
+                )}
               </span>
               <span className="warmup-marker-sub">
                 {kind === 'cooldown' ? t.cooldownMarkerBody : t.wuBody}
@@ -3340,7 +3359,7 @@ export function SessionView(props: {
           </div>
         ) : null}
         {marker && kind === 'warmup' && (live || props.past) ? (
-          <WarmupCard workout={workout!} exercise={ex} muscles={dayMuscles(workout!)} />
+          <WarmupCard workout={workout!} exercise={ex} />
         ) : null}
         {marker ? null : timed ? (
           <>
@@ -4417,7 +4436,29 @@ export function SessionView(props: {
           onOpen={fromSummary(() => props.shell.openOverlay({ screen: 'coach' }))}
         />
         {nextUp && !web && <NextUpCard m={nextUp} />}
-        {!props.past && !(web && nextUp) && <FuelCard workout={workout} />}
+        {!props.past && !(web && nextUp) && (
+          <>
+            <FuelCard workout={workout} />
+            <NicotineCard
+              workout={workout}
+              onOpenSettings={fromSummary(() =>
+                props.shell.openOverlay({ screen: 'health', nic: 'calc' }),
+              )}
+            />
+            <AlcoholCard
+              workout={workout}
+              onOpenSettings={fromSummary(() =>
+                props.shell.openOverlay({ screen: 'health', alc: 'calc' }),
+              )}
+            />
+            <SupplementsCard
+              workout={workout}
+              onOpenSettings={fromSummary(() =>
+                props.shell.openOverlay({ screen: 'health', sup: 'calc' }),
+              )}
+            />
+          </>
+        )}
         <div className="stat-grid">
           <div className="cell">
             <div className="v">
@@ -7493,6 +7534,7 @@ function SetEditorSheet(props: {
                   ? t.rpeEstHint(String(rpeEst))
                   : t.rpeHint(rpe)}
             </div>
+            {type !== 'warmup' && <SupplementRpeNote />}
             {failOn && (
               <div className="se-partials">
                 <span className="lab">{t.partialsLabel}</span>

@@ -1,20 +1,21 @@
 /**
- * warmupFor — concrete warm-up suggestions for the day (pure, deterministic).
+ * warmupFor — the auto session's warm-up proposal (pure, deterministic).
  *
- * Three targets, up to MAX_PER_TARGET items each:
- *  • mobility   — stretching / mobility drills from the exercise catalog for the
- *                 muscles the day's first lifts train (dynamic drills first);
- *  • activation — a small curated list of catalog ids (band pull-apart, glute
- *                 bridge, dead bug …) picked by muscle;
- *  • cardio     — a few light catalog cardio ids, leg-friendly ones first on a
- *                 lower day.
- * Everything is checked against the person's condition limits (exerciseFlag:
- * 'avoid' / 'caution' / a zero load cap drop an item) and active injuries (a
- * muscle still in Protect is left out). When a target ends up empty, mobility
- * falls back to the Plan widget's mobUpper / mobLower lines.
+ * An auto-built session may open with a few warm-up exercises. They must all sit
+ * at ONE station so the athlete never runs around the gym: every proposed
+ * exercise uses the same light equipment class —
  *
- * Names are the canonical English catalog names (localised on display through
- * the exercise-name system), so no new name strings are needed.
+ *   resistance bands  >  light dumbbells  >  bodyweight
+ *
+ * — the first class the gym's known kit allows (bodyweight needs no kit) that can
+ * give at least MIN_ITEMS exercises for the day's muscles. Nothing heavy is ever
+ * proposed (no barbell, machine, cable or kettlebell; dumbbells only for beginner
+ * isolation moves). Every exercise comes from the app's own exercise catalog.
+ *
+ * Conditions and injuries are honoured like everywhere else: an 'avoid' or
+ * 'caution' flag, a zero load cap or a muscle still in Protect drops a move. When
+ * the day's muscles are unknown or no station can give MIN_ITEMS, the result is
+ * null and the warm-up stays a plain, generic block (no exercises).
  */
 import { exerciseFlag, NO_LIMITS, type Limits } from './conditions';
 import {
@@ -23,224 +24,197 @@ import {
   type MuscleGroup,
   type RichExercise,
 } from './data/exercises';
-import { protectedMuscles } from './injury';
-import { ps } from './today/widgets/plan.strings';
-import type { LocaleId } from './i18n';
-import type { Injury } from './types';
+import { equipmentById } from './data/equipmentCatalog';
+import { defaultWarmupValue } from './warmupLog';
+import type { Gym } from './types';
 
-export const MAX_PER_TARGET = 6;
+export const MIN_ITEMS = 2;
+export const MAX_ITEMS = 4;
 
-export type WarmupTarget = 'mobility' | 'activation' | 'cardio';
-export type WarmupDayType = 'upper' | 'lower' | 'full';
+/** The three light stations, in order of preference. */
+export type WarmupStation = 'bands' | 'dumbbell' | 'body';
+export const WARMUP_STATIONS: readonly WarmupStation[] = ['bands', 'dumbbell', 'body'];
 
-export interface WarmupSuggestion {
-  /** Stable key: catalog id, or `text:<line>` for a fallback line. */
-  key: string;
-  /** Canonical English catalog name (or the fallback line). */
+export interface WarmupPlanItem {
+  /** Canonical English catalog name. */
   name: string;
-  target: WarmupTarget;
-  exerciseId: string | null;
-  muscle: MuscleGroup | null;
-  durationSec?: number;
+  exerciseId: string;
   reps?: number;
+  durationSec?: number;
 }
 
-export type WarmupSuggestions = Record<WarmupTarget, WarmupSuggestion[]>;
+export interface WarmupProposal {
+  station: WarmupStation;
+  items: WarmupPlanItem[];
+}
 
-export interface WarmupInput {
-  /** Primary muscles of the day's first lifts (most important first). */
-  muscles?: readonly MuscleGroup[];
-  /** Used when `muscles` is empty (or to say whether the day is lower-body). */
-  dayType?: WarmupDayType | null;
+export interface WarmupProposalInput {
+  /** Primary muscles of the day (most important first). */
+  muscles: readonly MuscleGroup[];
+  /** The gym the session is for; null/unknown kit = bodyweight only. */
+  gym?: Gym | null;
   limits?: Limits;
-  injuries?: readonly Injury[];
-  /** Names (any case) already on the list — never suggested again. */
+  /** Muscles fully protected by an active injury. */
+  protect?: readonly MuscleGroup[];
+  /** Exercise names (any case) the day already holds — never proposed again. */
   exclude?: readonly string[];
-  /** Locale of the fallback mobility lines. */
-  locale?: LocaleId;
-  perTarget?: number;
+  /** How many to propose (clamped to MIN_ITEMS…MAX_ITEMS). Default 3. */
+  count?: number;
 }
 
-const UPPER: MuscleGroup[] = ['shoulders', 'chest', 'lats', 'traps', 'triceps', 'biceps'];
-const LOWER: MuscleGroup[] = ['hamstrings', 'quads', 'glutes', 'calves', 'adductors', 'abductors'];
-const FULL: MuscleGroup[] = ['shoulders', 'hamstrings', 'glutes', 'lower_back', 'quads', 'chest'];
-const LOWER_SET = new Set<MuscleGroup>([...LOWER, 'lower_back']);
-
-/** Curated activation drills (catalog ids), by the muscles they wake up. */
-const ACTIVATION: { id: string; muscles: MuscleGroup[]; reps?: number; durationSec?: number }[] = [
-  { id: 'Band_Pull_Apart', muscles: ['shoulders', 'traps', 'lats', 'back', 'chest'], reps: 15 },
-  { id: 'External_Rotation_with_Band', muscles: ['shoulders', 'chest'], reps: 12 },
-  { id: 'Scapular_Pull-Up', muscles: ['lats', 'traps', 'back', 'biceps'], reps: 8 },
+/** Curated light bodyweight drills (catalog ids), by the muscles they warm up. */
+const BODY_DRILLS: { id: string; muscles: MuscleGroup[]; reps?: number; durationSec?: number }[] = [
+  { id: 'Scapular_Pull-Up', muscles: ['lats', 'traps', 'back', 'biceps', 'shoulders'], reps: 8 },
+  { id: 'Incline_Push-Up', muscles: ['chest', 'shoulders', 'triceps'], reps: 10 },
+  { id: 'Bodyweight_Squat', muscles: ['quads', 'glutes', 'hamstrings', 'adductors'], reps: 12 },
   { id: 'Butt_Lift_Bridge', muscles: ['glutes', 'hamstrings', 'lower_back', 'quads'], reps: 12 },
   { id: 'Single_Leg_Glute_Bridge', muscles: ['glutes', 'hamstrings', 'quads'], reps: 8 },
-  { id: 'Monster_Walk', muscles: ['abductors', 'glutes', 'quads', 'adductors'], reps: 10 },
-  { id: 'Glute_Kickback', muscles: ['glutes', 'hamstrings'], reps: 10 },
+  { id: 'Glute_Kickback', muscles: ['glutes', 'hamstrings', 'abductors'], reps: 10 },
   { id: 'Dead_Bug', muscles: ['core', 'lower_back', 'chest', 'shoulders'], reps: 8 },
   { id: 'Side_Bridge', muscles: ['core', 'lower_back', 'abductors'], durationSec: 20 },
   { id: 'Plank', muscles: ['core', 'chest', 'shoulders', 'triceps'], durationSec: 30 },
 ];
 
-/** Light cardio (catalog ids) — the leg-friendly ones lead on a lower day. */
-const CARDIO: { id: string; durationSec: number; legs: boolean }[] = [
-  { id: 'Walking_Treadmill', durationSec: 300, legs: true },
-  { id: 'Bicycling_Stationary', durationSec: 300, legs: true },
-  { id: 'Elliptical_Trainer', durationSec: 300, legs: false },
-  { id: 'Rowing_Stationary', durationSec: 240, legs: false },
-  { id: 'Fast_Skipping', durationSec: 60, legs: false },
-  { id: 'Rope_Jumping', durationSec: 90, legs: false },
-];
+/** Extra muscles a move warms up besides its catalog primary (any station). */
+const ALSO_SERVES: Record<string, MuscleGroup[]> = {
+  Band_Pull_Apart: ['traps', 'lats', 'back', 'chest'],
+  External_Rotation_with_Band: ['chest'],
+  Internal_Rotation_with_Band: ['chest'],
+};
 
-/** Moving drills read as a warm-up; static holds and foam-rolling come after. */
+/** Moving drills read as a warm-up; static holds come after. */
 const DYNAMIC =
   /circle|dynamic|world|inchworm|windmill|rotation|cat stretch|groiner|pelvic tilt|hop|raise|walk|swing|lunge|squat|curl|superman|locust/i;
-function mobilityRank(r: RichExercise): number {
-  if (/-smr$/i.test(r.name) || r.equipment === 'foamRoll') return 3;
-  return DYNAMIC.test(r.name) ? 0 : 1;
+
+/** Warm-up reps by station (light work, well short of fatigue). */
+const REPS: Record<WarmupStation, number> = { bands: 15, dumbbell: 12, body: 10 };
+
+const SKIP =
+  /wrist|forearm|pronation|supination|one-arm|alternat|lying|preacher|decline|on a dumbbell/i;
+
+/** The kit the gym is known to have (coarse class), or false when unknown. */
+function gymHas(gym: Gym | null | undefined, cls: 'bands' | 'dumbbell'): boolean {
+  if (!gym) return false;
+  if (gym.inventory?.includes(cls)) return true;
+  if (cls === 'bands' && (gym.bandLibrary?.length ?? 0) > 0) return true;
+  return (gym.equipmentItems ?? []).some((id) => equipmentById(id)?.cls === cls);
 }
 
-function musclesFor(input: WarmupInput): MuscleGroup[] {
-  const given = [...(input.muscles ?? [])].filter((m) => m !== 'cardio' && m !== 'fullbody');
+function stationAllowed(station: WarmupStation, gym: Gym | null | undefined): boolean {
+  return station === 'body' ? true : gymHas(gym, station);
+}
+
+/** Which muscles of the day a catalog move may serve (back = the back family). */
+function wanted(muscles: readonly MuscleGroup[]): MuscleGroup[] {
   const out: MuscleGroup[] = [];
-  for (const m of given) {
-    const g: MuscleGroup = m === 'back' ? 'lats' : m;
-    if (!out.includes(g)) out.push(g);
+  const add = (m: MuscleGroup) => {
+    if (!out.includes(m)) out.push(m);
+  };
+  for (const m of muscles) {
+    if (m === 'cardio' || m === 'fullbody') continue;
+    if (m === 'back') for (const x of ['lats', 'traps', 'lower_back', 'back'] as const) add(x);
+    else add(m);
   }
-  if (out.length) return out;
-  return input.dayType === 'lower' ? LOWER : input.dayType === 'upper' ? UPPER : FULL;
+  return out;
 }
 
-function isLowerDay(muscles: readonly MuscleGroup[], dayType?: WarmupDayType | null): boolean {
-  if (dayType) return dayType === 'lower';
-  const low = muscles.filter((m) => LOWER_SET.has(m)).length;
-  return muscles.length > 0 && low * 2 > muscles.length;
+interface Move {
+  r: RichExercise;
+  /** Day muscles this move may stand in for. */
+  serves: MuscleGroup[];
+  reps?: number;
+  durationSec?: number;
 }
 
-/** Stretching drills by primary muscle, best first, stable on ties. */
-function mobilityFor(muscle: MuscleGroup): RichExercise[] {
+/** All catalog moves of a station, in a stable order (curated first, then by name). */
+function pool(station: WarmupStation): Move[] {
+  const out: Move[] = [];
   const seen = new Set<string>();
-  const out: RichExercise[] = [];
+  const push = (r: RichExercise | null, extra: Partial<Move> = {}) => {
+    if (!r || r.equipment !== station || seen.has(r.name)) return;
+    seen.add(r.name);
+    out.push({
+      r,
+      serves: [
+        ...new Set([
+          ...(extra.serves ?? []),
+          ...r.primaryMuscles.slice(0, 1),
+          ...(ALSO_SERVES[r.id] ?? []),
+        ]),
+      ],
+      ...(extra.reps ? { reps: extra.reps } : {}),
+      ...(extra.durationSec ? { durationSec: extra.durationSec } : {}),
+    });
+  };
+  if (station === 'body') {
+    for (const d of BODY_DRILLS)
+      push(richExerciseById(d.id), { serves: d.muscles, reps: d.reps, durationSec: d.durationSec });
+  }
+  const rest: RichExercise[] = [];
   for (const c of BUILT_IN_CATALOG) {
     const r = richExerciseById(c.id);
-    if (!r || r.category !== 'stretching' || r.primaryMuscles[0] !== muscle) continue;
-    if (seen.has(r.name)) continue;
-    seen.add(r.name);
-    out.push(r);
+    if (!r || r.equipment !== station) continue;
+    if (station === 'bands') {
+      if (r.category === 'strength') rest.push(r);
+    } else if (station === 'dumbbell') {
+      if (r.category === 'strength' && r.mechanic === 'isolation' && r.level === 'beginner')
+        if (!SKIP.test(r.name)) rest.push(r);
+    } else if (r.category === 'stretching' && DYNAMIC.test(r.name)) {
+      rest.push(r);
+    }
   }
-  return out.sort((a, b) => mobilityRank(a) - mobilityRank(b) || a.name.localeCompare(b.name));
+  rest.sort((a, b) => a.name.localeCompare(b.name));
+  for (const r of rest) push(r);
+  return out;
 }
 
-export function warmupSuggestions(input: WarmupInput = {}): WarmupSuggestions {
+/**
+ * The day's warm-up exercises at one light station, or null (a generic warm-up).
+ * Deterministic: same input, same proposal.
+ */
+export function warmupProposal(input: WarmupProposalInput): WarmupProposal | null {
+  const muscles = wanted(input.muscles);
+  if (muscles.length === 0) return null;
   const limits = input.limits ?? NO_LIMITS;
-  const protect = protectedMuscles([...(input.injuries ?? [])]);
-  const cap = Math.max(1, Math.min(MAX_PER_TARGET, input.perTarget ?? MAX_PER_TARGET));
+  const protect = new Set(input.protect ?? []);
   const taken = new Set((input.exclude ?? []).map((n) => n.trim().toLowerCase()));
-  const muscles = musclesFor(input);
-  const lower = isLowerDay(muscles, input.dayType);
+  const count = Math.max(MIN_ITEMS, Math.min(MAX_ITEMS, input.count ?? 3));
 
-  /** Is this catalog move fine for this person right now? */
   const allowed = (r: RichExercise): boolean => {
     if (taken.has(r.name.toLowerCase())) return false;
     if (r.primaryMuscles.some((m) => protect.has(m))) return false;
     const f = exerciseFlag(r.name, limits, r);
     return f.level !== 'avoid' && f.level !== 'caution' && f.cap > 0;
   };
-  const used = new Set<string>();
-  const take = (r: RichExercise): boolean => {
-    if (used.has(r.id) || !allowed(r)) return false;
-    used.add(r.id);
-    return true;
-  };
 
-  // Mobility: round-robin over the day's muscles so one muscle can't hog the list.
-  const mobility: WarmupSuggestion[] = [];
-  const pools = muscles.map((m) => ({ m, list: mobilityFor(m) }));
-  for (let round = 0; round < cap && mobility.length < cap; round++) {
-    for (const { m, list } of pools) {
-      if (mobility.length >= cap) break;
-      const r = list.find((x) => !used.has(x.id) && allowed(x));
-      if (!r || !take(r)) continue;
-      const moving = mobilityRank(r) === 0;
-      mobility.push({
-        key: r.id,
-        name: r.name,
-        target: 'mobility',
-        exerciseId: r.id,
-        muscle: m,
-        ...(moving ? { reps: 10 } : { durationSec: mobilityRank(r) === 3 ? 45 : 30 }),
-      });
+  for (const station of WARMUP_STATIONS) {
+    if (!stationAllowed(station, input.gym)) continue;
+    const moves = pool(station).filter((p) => allowed(p.r));
+    const items: WarmupPlanItem[] = [];
+    const used = new Set<string>();
+    // Round-robin over the day's muscles so one muscle can't take every slot.
+    for (let round = 0; round < count && items.length < count; round++) {
+      let progressed = false;
+      for (const m of muscles) {
+        if (items.length >= count) break;
+        const hit = moves.find((p) => !used.has(p.r.id) && p.serves.includes(m));
+        if (!hit) continue;
+        used.add(hit.r.id);
+        progressed = true;
+        const value =
+          hit.reps || hit.durationSec
+            ? {
+                ...(hit.reps ? { reps: hit.reps } : {}),
+                ...(hit.durationSec ? { durationSec: hit.durationSec } : {}),
+              }
+            : 'durationSec' in defaultWarmupValue(hit.r.name)
+              ? defaultWarmupValue(hit.r.name)
+              : { reps: REPS[station] };
+        items.push({ name: hit.r.name, exerciseId: hit.r.id, ...value });
+      }
+      if (!progressed) break;
     }
-    if (pools.every(({ list }) => !list.some((x) => !used.has(x.id) && allowed(x)))) break;
+    if (items.length >= MIN_ITEMS) return { station, items };
   }
-  if (mobility.length === 0) {
-    const lines = ps(input.locale ?? 'en')[lower ? 'mobLower' : 'mobUpper'];
-    for (const line of lines.slice(0, cap)) {
-      if (taken.has(line.toLowerCase())) continue;
-      mobility.push({
-        key: `text:${line}`,
-        name: line,
-        target: 'mobility',
-        exerciseId: null,
-        muscle: null,
-      });
-    }
-  }
-
-  // Activation: drills that wake the day's muscles, in the order of those muscles.
-  const activation: WarmupSuggestion[] = [];
-  for (const m of muscles) {
-    for (const a of ACTIVATION) {
-      if (activation.length >= cap) break;
-      if (!a.muscles.includes(m)) continue;
-      const r = richExerciseById(a.id);
-      if (!r || !take(r)) continue;
-      activation.push({
-        key: r.id,
-        name: r.name,
-        target: 'activation',
-        exerciseId: r.id,
-        muscle: m,
-        ...(a.reps ? { reps: a.reps } : {}),
-        ...(a.durationSec ? { durationSec: a.durationSec } : {}),
-      });
-    }
-  }
-
-  // Light cardio: leg-friendly first on a lower day, the rest first otherwise.
-  const cardio: WarmupSuggestion[] = [];
-  const ordered = [...CARDIO].sort(
-    (a, b) => Number(lower ? b.legs : a.legs) - Number(lower ? a.legs : b.legs),
-  );
-  for (const c of ordered) {
-    if (cardio.length >= cap) break;
-    const r = richExerciseById(c.id);
-    if (!r || !take(r)) continue;
-    cardio.push({
-      key: r.id,
-      name: r.name,
-      target: 'cardio',
-      exerciseId: r.id,
-      muscle: null,
-      durationSec: c.durationSec,
-    });
-  }
-  return { mobility, activation, cardio };
-}
-
-/**
- * Everything the warm-up picker may browse: the stretching / mobility catalog
- * plus the curated activation and light-cardio ids. Stable order (by name).
- */
-export function warmupCatalog(): RichExercise[] {
-  const extra = new Set([...ACTIVATION.map((a) => a.id), ...CARDIO.map((c) => c.id)]);
-  const seen = new Set<string>();
-  const out: RichExercise[] = [];
-  for (const c of BUILT_IN_CATALOG) {
-    const r = richExerciseById(c.id);
-    if (!r || seen.has(r.id)) continue;
-    if (r.category === 'stretching' || extra.has(r.id)) {
-      seen.add(r.id);
-      out.push(r);
-    }
-  }
-  return out.sort((a, b) => a.name.localeCompare(b.name));
+  return null;
 }

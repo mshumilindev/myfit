@@ -39,6 +39,26 @@ export const Wrap: Story = { render: () => <Live tone="illness" layout="wrap" />
 /** One scrolling line. */
 export const Scroll: Story = { render: () => <Live tone="rest" layout="scroll" /> };
 
+function GridLive() {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const [on, setOn] = useState<string[]>(['Fri', 'Sat']);
+  return (
+    <PresetChips
+      layout="grid"
+      label="Days"
+      items={days.map((d) => ({
+        id: d,
+        label: d,
+        selected: on.includes(d),
+        onClick: () => setOn((c) => (c.includes(d) ? c.filter((x) => x !== d) : [...c, d])),
+      }))}
+    />
+  );
+}
+
+/** Equal columns on one line: a row of weekdays, several on at once. */
+export const Grid: Story = { render: () => <GridLive /> };
+
 /** Selected per family, a disabled chip, the small size. */
 export const States: Story = {
   render: () => (

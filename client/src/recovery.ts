@@ -12,6 +12,7 @@
 import { muscleSetsInWorkout } from './store';
 import { LANDMARKS, VOLUME_MUSCLES, type Landmark } from './volume';
 import { landmarkFor } from './personalize';
+import { readinessMult } from './calcMods';
 import type { Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 
@@ -74,6 +75,8 @@ export function computeReadiness(
   base: number,
   mav: number,
   boost = 0,
+  /** The moment the readiness is for (ms): alcohol is day-aware. Defaults to now. */
+  at?: number,
 ): { recoveryDays: number; readiness: number; state: ReadyState } {
   if (daysSince === null) {
     return { recoveryDays: base, readiness: 1, state: 'stale' };
@@ -81,7 +84,9 @@ export function computeReadiness(
   // A session near half the weekly MAV is a "normal" dose (factor 1); lighter
   // recovers quicker, a big one stretches the window.
   const doseFactor = clamp(dose / ((mav || 12) * 0.5), 0.7, 1.6);
-  const effDays = base * doseFactor;
+  // Nicotine and alcohol (midpoints of their ranges, product <= 1; exactly 1 when off): the window stretches by
+  // 1 / factor, which is the same as readiness being `factor` times lower at any moment.
+  const effDays = (base * doseFactor) / readinessMult(at);
   const readiness = clamp(daysSince / effDays + clamp(boost, 0, 1) * 0.12, 0, 1);
   return { recoveryDays: effDays, readiness, state: stateOf(readiness, daysSince, effDays) };
 }
@@ -126,6 +131,7 @@ export function muscleReadiness(
       base,
       mav,
       recoveryBoost,
+      now,
     );
     out.set(m, {
       muscle: m,
@@ -167,7 +173,7 @@ export function carryOverSets(
       const base = RECOVERY_DAYS[m] ?? 2;
       const mav =
         mavOf?.(m) ?? (LANDMARKS[m as keyof typeof LANDMARKS] as Landmark | undefined)?.mav ?? 12;
-      const eff = base * clamp(sets / ((mav || 12) * 0.5), 0.7, 1.6);
+      const eff = (base * clamp(sets / ((mav || 12) * 0.5), 0.7, 1.6)) / readinessMult(at);
       const left = 1 - clamp(days / eff, 0, 1);
       if (left > 0) out.set(m, (out.get(m) ?? 0) + sets * left * CARRY_WEIGHT);
     }

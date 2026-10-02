@@ -193,4 +193,5 @@ export const et: Strings = {
   stopCamera: 'Stopp',
   cameraDenied: 'Kaamera pole saadaval — sisesta number',
   whenLabel: 'Millal',
+  supFxProteinHint: 'Sisaldab {g} g toidulisanditest, arvestatud toidupäevikust eraldi.',
 };

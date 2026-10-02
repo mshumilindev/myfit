@@ -13,7 +13,8 @@ import { ListRow } from '../components/ui/GroupedList';
 import { IconTile } from '../components/ui/IconTile';
 import { Segmented } from '../components/ui/Segmented';
 import { SwitchIndicator } from '../components/ui/Switch';
-import { useMemo, useState, useRef, type ReactNode } from 'react';
+import { Fragment, useMemo, useState, useRef, type ReactNode } from 'react';
+import '../components/WarmupCard.css';
 import type { Shell } from '../App';
 import { Icon, useExerciseName } from '../ui';
 import { useT } from '../i18n';
@@ -42,7 +43,7 @@ import { nextTarget, topHistory } from '../progression';
 import { deriveLoadType } from '../loads';
 import { muscleReadiness, READINESS_COLOR } from '../recovery';
 import { ARCHETYPES_BY_SEX, ARCHETYPES, type ArchetypeId } from '../goals';
-import type { MuscleGroup } from '../data/exercises';
+import { exerciseImage, type MuscleGroup } from '../data/exercises';
 import { describeDay, dayReadoutLabel } from '../data/daySuggest';
 
 const INTENTS: SessionIntent[] = ['strength', 'muscle', 'endurance', 'power', 'conditioning'];
@@ -460,7 +461,9 @@ export function SessionBuilderView({
               ? exName(ex.name)
               : ex.kind === 'cardio'
                 ? cardioBlockName(ex.equipmentItems?.[0] ?? null, blockName.cardio, locale)
-                : blockName[ex.kind]}
+                : ex.kind === 'warmup' && ex.warmupItems?.length
+                  ? t.exerciseKindNames.warmup
+                  : blockName[ex.kind]}
           </b>
           <span className="sbw-ex-why">{whyLabel[ex.whyKey]}</span>
         </span>
@@ -482,11 +485,37 @@ export function SessionBuilderView({
     );
   };
 
+  /** The warm-up's exercises (one light station) under its row: name + one value. */
+  const warmupRows = (ex: PlannedExercise) =>
+    (ex.warmupItems ?? []).map((it) => {
+      const img = exerciseImage(it.name, 'strength');
+      return (
+        <div key={it.exerciseId} className="sbw-ex">
+          <span className="sbw-ex-ic">
+            {img ? <img className="wu-thumb" src={img} alt="" /> : <Icon name="flame" />}
+          </span>
+          <span className="sbw-ex-txt">
+            <b>{exName(it.name)}</b>
+          </span>
+          <span className="sbw-ex-meta">
+            <span>
+              {it.reps ? `${it.reps} ${t.reps.toLowerCase()}` : `${it.durationSec} ${t.wuSecUnit}`}
+            </span>
+          </span>
+        </div>
+      );
+    });
+
   const block = (label: string, list: PlannedExercise[], editable = false) =>
     list.length > 0 ? (
       <div className="sbw-block">
         <span className="section-title">{label}</span>
-        {list.map((ex, i) => exRow(ex, editable, i))}
+        {list.map((ex, i) => (
+          <Fragment key={`${ex.name}:${i}`}>
+            {exRow(ex, editable, i)}
+            {warmupRows(ex)}
+          </Fragment>
+        ))}
       </div>
     ) : null;
 

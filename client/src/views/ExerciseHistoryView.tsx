@@ -10,6 +10,7 @@ import { fmtDayMonth, fmtKg, useT } from '../i18n';
 import { ExerciseName, Icon } from '../ui';
 import { EquipChip, MuscleChip } from '../components/Muscle';
 import type { Shell } from '../App';
+import { SupplementStrengthNote } from './SupplementNotes';
 
 export function ExerciseHistoryView({
   name,
@@ -143,6 +144,7 @@ export function ExerciseHistoryView({
           <div className="l">{t.lastTopSet}</div>
         </div>
       </div>
+      {record > 0 && <SupplementStrengthNote />}
 
       {!userId && store.gyms.length > 0 && exerciseNeeds(name).length > 0 && (
         <div>

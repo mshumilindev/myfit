@@ -42,6 +42,13 @@
   --t-line: var(--color-injury-line);
   --t-on: var(--color-injury-tint);
 }
+.uit--warmup {
+  --t-base: var(--color-warmup);
+  --t-tint: var(--color-warmup-tint);
+  --t-text: var(--color-warmup-text);
+  --t-line: var(--color-warmup-line);
+  --t-on: var(--color-warmup-tint);
+}
 .uit--chronic {
   --t-base: var(--color-chronic);
   --t-tint: var(--color-chronic-tint);

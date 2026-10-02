@@ -1335,8 +1335,7 @@ html.theme-glass .wlib-top .wlib-title {
   .pb-cover-label,
   .pb-ideas-label,
   .section-label,
-  .slh-sec-label,
-  .atl-panel-label
+  .slh-sec-label
 ) {
   font-size: var(--fs-11) !important;
   font-weight: 600 !important;
