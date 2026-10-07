@@ -2,7 +2,19 @@
 import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
-import { est1rm, exerciseNeeds, missingAtGym, topSet, useStore } from '../store';
+import {
+  est1rm,
+  exerciseNeeds,
+  missingAtGym,
+  topSet,
+  useStore,
+  recordsByVariant,
+  normalizedProgress,
+} from '../store';
+import { equipmentById } from '../data/equipmentCatalog';
+import { GroupedList, ListRow } from '../components/ui/GroupedList';
+import { Notice } from '../components/ui/Notice';
+import { Chip } from '../components/ui/Chip';
 import { callFn } from '../api';
 import type { Workout } from '../types';
 import { muscleInfoByName } from '../data/exercises';
@@ -53,7 +65,7 @@ export function ExerciseHistoryView({
       const ex = w.exercises.find((e) => e.name.trim().toLowerCase() === needle);
       const top = ex && topSet(ex.sets);
       const vol = ex ? ex.sets.reduce((s, x) => s + (x.weight ?? 0) * x.reps, 0) : 0;
-      return ex && top ? { ts: w.startedAt, top, vol } : null;
+      return ex && top ? { ts: w.startedAt, top, vol, gymId: w.gymId ?? null } : null;
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);
 
@@ -62,6 +74,14 @@ export function ExerciseHistoryView({
   const rm =
     last && (last.top.weight ?? 0) > 0 ? est1rm(last.top.weight ?? 0, last.top.reps) : null;
   const since = sessions.length ? fmtDayMonth(sessions[sessions.length - 1].ts, locale) : '';
+
+  // Weight differs per machine/gym: records by machine, one normalized curve,
+  // and a Gym column — only for your own log, and only when it matters.
+  const byMachine = userId ? [] : recordsByVariant(name);
+  const multi = byMachine.length >= 2;
+  const norm = multi ? normalizedProgress(name).slice(-12) : [];
+  const gymName = (id: string | null) => store.gyms.find((g) => g.id === id)?.name ?? null;
+  const showGym = !userId && new Set(sessions.map((s) => s.gymId)).size >= 2;
 
   const chartPts = [...sessions].reverse().slice(-12);
   const min = Math.min(...chartPts.map((p) => p.top.weight ?? 0), record);
@@ -146,6 +166,24 @@ export function ExerciseHistoryView({
       </div>
       {record > 0 && <SupplementStrengthNote />}
 
+      {multi && (
+        <GroupedList header={t.exRecByMachine} footer={t.exRecByMachineFoot}>
+          {byMachine.map((r) => {
+            const item = r.equipmentItems.length ? equipmentById(r.equipmentItems[0])?.name : null;
+            const gn = gymName(r.gymId);
+            return (
+              <ListRow
+                key={r.variant}
+                label={item ?? t.exNoMachine}
+                sub={gn ? (r.isMain ? `${gn} · ${t.exMainSuffix}` : gn) : t.exNoGym}
+                value={`${fmtKg(r.weight)} × ${r.reps}`}
+                valueStrong={r.isMain}
+              />
+            );
+          })}
+        </GroupedList>
+      )}
+
       {!userId && store.gyms.length > 0 && exerciseNeeds(name).length > 0 && (
         <div>
           <div className="section-label umb-8">{t.whereYouCanDoIt}</div>
@@ -180,7 +218,60 @@ export function ExerciseHistoryView({
         </div>
       )}
 
-      {chartPts.length >= 3 ? (
+      {multi && norm.length >= 3 ? (
+        <div>
+          <div className="section-label umb-8">{t.topSet12w}</div>
+          <div className="chart-card">
+            {(() => {
+              const vals = norm.map((p) => p.value);
+              const lo = Math.min(...vals);
+              const hi = Math.max(...vals);
+              const sp = Math.max(hi - lo, 1);
+              const X = (i: number) => (i / (norm.length - 1)) * 292 + 4;
+              const Y = (v: number) => 88 - ((v - lo) / sp) * 80 + 4;
+              return (
+                <svg viewBox="0 0 300 96" className="uw-full ul-block" style={{ height: 96 }}>
+                  {norm.map((p, i) =>
+                    p.switched ? (
+                      <line
+                        key={`sw${i}`}
+                        x1={X(i)}
+                        x2={X(i)}
+                        y1={4}
+                        y2={92}
+                        stroke="var(--color-neutral-600)"
+                        strokeDasharray="3 4"
+                      />
+                    ) : null,
+                  )}
+                  <polyline
+                    points={norm
+                      .map((p, i) => `${X(i).toFixed(1)},${Y(p.value).toFixed(1)}`)
+                      .join(' ')}
+                    fill="none"
+                    stroke="var(--color-accent)"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                  <circle
+                    cx={X(norm.length - 1)}
+                    cy={Y(vals[vals.length - 1])}
+                    r="4"
+                    fill="var(--color-ok)"
+                  />
+                </svg>
+              );
+            })()}
+            <div className="ul-flex ua-center ug-8 umt-4">
+              <Chip size="sm">{t.exProgressSwitch}</Chip>
+            </div>
+          </div>
+          <Notice tone="neutral" icon="info">
+            {t.exProgressNote}
+          </Notice>
+        </div>
+      ) : chartPts.length >= 3 ? (
         <div>
           <div className="section-label umb-8">{t.topSet12w}</div>
           <div className="chart-card">
@@ -229,6 +320,7 @@ export function ExerciseHistoryView({
           <thead>
             <tr>
               <th>{t.dateCol}</th>
+              {showGym && <th>{t.exHistGym}</th>}
               <th>{t.topSetCol}</th>
               <th>{t.volumeCol}</th>
             </tr>
@@ -237,6 +329,7 @@ export function ExerciseHistoryView({
             {sessions.slice(0, 6).map((s, i) => (
               <tr key={i}>
                 <td>{fmtDayMonth(s.ts, locale)}</td>
+                {showGym && <td>{gymName(s.gymId) ?? '—'}</td>}
                 <td>
                   {s.top.weight ?? 0} × {s.top.reps}
                 </td>

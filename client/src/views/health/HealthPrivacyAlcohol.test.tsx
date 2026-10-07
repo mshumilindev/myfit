@@ -130,7 +130,7 @@ describe('Health overview: Alcohol', () => {
     expect(heads).toContain('Lifestyle');
     const group = screen.getByText('Lifestyle').closest('section') as HTMLElement;
     const labels = [...group.querySelectorAll('.uirow-l')].map((e) => e.textContent);
-    expect(labels).toEqual(['Nicotine', 'Alcohol', 'Supplements']);
+    expect(labels).toEqual(['Nicotine', 'Alcohol', 'Supplements', 'Cycle']);
     fireEvent.click(within(group).getByText('Beer · ≈ 59 g a week'));
     expect(shell.openOverlay).toHaveBeenCalledWith({ screen: 'health', alc: 'hub' });
   });

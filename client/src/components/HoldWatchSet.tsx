@@ -7,6 +7,7 @@
  */
 import { useEffect, useState } from 'react';
 import { Button, IconButton } from './ui/Button';
+import { Card } from './ui/Card';
 import type { Exercise } from '../types';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
@@ -78,7 +79,7 @@ export function HoldWatchSet(props: {
   return (
     <>
       {lastLine && startedAt === null && <div className="hold-last">{lastLine}</div>}
-      <div className="gset kind-hold">
+      <Card emphasis="hero" pad="md" className="gset kind-static-dynamic">
         <div className="gset-title">
           {startedAt === null ? t.enterThisSet : t.homeHolding(props.setNo)}
         </div>
@@ -89,6 +90,8 @@ export function HoldWatchSet(props: {
         <div className="gset-actions">
           {startedAt === null ? (
             <IconButton
+              variant="secondary"
+              className="gset-cfg"
               icon="sliders-horizontal"
               label={t.setOptions}
               title={t.setOptions}
@@ -96,6 +99,8 @@ export function HoldWatchSet(props: {
             />
           ) : (
             <IconButton
+              variant="secondary"
+              className="gset-cfg"
               icon="x"
               label={t.homeHoldCancel}
               title={t.homeHoldCancel}
@@ -103,18 +108,18 @@ export function HoldWatchSet(props: {
             />
           )}
           {startedAt === null ? (
-            <Button variant="primary" className="gset-log" onClick={start}>
+            <Button variant="fill" className="gset-log" onClick={start}>
               <Icon name="play" weight="fill" />
               {t.homeStartHold}
             </Button>
           ) : (
-            <Button variant="primary" className="gset-log" onClick={release} disabled={whole < 1}>
+            <Button variant="fill" className="gset-log" onClick={release} disabled={whole < 1}>
               <Icon name="check" weight="bold" />
               {t.homeRelease(whole)}
             </Button>
           )}
         </div>
-      </div>
+      </Card>
     </>
   );
 }

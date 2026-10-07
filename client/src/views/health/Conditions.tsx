@@ -387,26 +387,6 @@ export function ConditionPage(props: {
   return frame(null);
 }
 
-/** Today: one quiet row saying plans are adapted; opens Health. Hidden with no active conditions. */
-export function ConditionsToday({ onOpen }: { onOpen: () => void }) {
-  const { t } = useT();
-  const { conditions } = useStore();
-  const [now] = useState(() => Date.now());
-  const n = conditions.filter((c) => isActive(c, now)).length;
-  if (n === 0) return null;
-  return (
-    <GroupedList>
-      <ListRow
-        icon={<IconTile tone="chronic" size={30} icon="shield-check" />}
-        label={t.cndTodayTitle(n)}
-        sub={t.cndTodaySub}
-        chevron
-        onClick={onOpen}
-      />
-    </GroupedList>
-  );
-}
-
 /** Profile: one row with the active count; opens Health on the conditions. Needs the `conditions` flag. */
 export function ConditionsProfileRow({ onOpen }: { onOpen: () => void }) {
   const { t } = useT();

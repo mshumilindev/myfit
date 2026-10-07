@@ -16,6 +16,7 @@ import {
 } from 'react';
 import { Field } from '../components/ui/Field';
 import { NumberStepper } from '../components/ui/NumberStepper';
+import { Notice } from '../components/ui/Notice';
 import { Button, IconButton } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Ring } from '../components/ui/Ring';
@@ -101,6 +102,7 @@ import { FuelCard } from './sessionSummary/FuelCard';
 import { AlcoholCard } from './sessionSummary/AlcoholCard';
 import { SupplementsCard } from './sessionSummary/SupplementsCard';
 import { SupplementRpeNote } from './SupplementNotes';
+import { CycleSessionNote } from './health/cycle/CycleSessionNote';
 import { NicotineCard } from './sessionSummary/NicotineCard';
 import { TEMPER_COLOR, type Temper } from '../atlas/types';
 import { setFact } from '../atlas/facts';
@@ -140,6 +142,8 @@ import {
   prevLift,
   recordWeight,
   recordE1rm,
+  liftVariant,
+  crossGymHint,
   recentSessionsOf,
   exerciseRestSec,
   setExerciseRestSec,
@@ -272,6 +276,8 @@ import type { Strings } from '../i18n/en';
 import { getRole } from '../api';
 import { HomeMovePicker } from '../components/HomeMovePicker';
 import { HoldWatchSet, fmtHoldClock } from '../components/HoldWatchSet';
+import { exerciseProfile } from '../data/exerciseProfile';
+import { HoldDurationInput } from '../components/HoldDurationInput';
 import { homeTotals, isHomeWorkout, isStopwatchExercise, lastSetsOf } from '../homeSets';
 
 const PICKER_TARGET_MUSCLES = new Set<string>(MUSCLE_IDS);
@@ -558,6 +564,8 @@ export function SessionView(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [sheet, setSheet] = useState<SheetState>(null);
+  // Weight taken from the cross-gym estimate, per exercise (this session only).
+  const [takenKg, setTakenKg] = useState<Record<string, number>>({});
   // Full-screen exercise photos (start → end frames) from the focus card.
   const [photoView, setPhotoView] = useState<{ images: string[]; title: string } | null>(null);
   const [circuit, setCircuit] = useState<{ on: boolean; groupId: string | null; rounds: number }>({
@@ -734,7 +742,11 @@ export function SessionView(props: {
     for (const e of workout?.exercises ?? []) {
       if (!isStrengthExercise(e)) continue;
       const key = e.name.toLowerCase();
-      if (!m.has(key)) m.set(key, recordWeight(e.name, props.workoutId));
+      if (!m.has(key))
+        m.set(
+          key,
+          recordWeight(e.name, props.workoutId, workout ? liftVariant(workout, e) : undefined),
+        );
     }
     return m;
     // Depend on the whole history, not just this workout's exercise count:
@@ -908,7 +920,7 @@ export function SessionView(props: {
   };
   const lastTimeRows = sortedExercises
     .filter((e) => isStrengthExercise(e))
-    .map((e) => ({ name: e.name, prev: prevLift(e.name, workout.id) }))
+    .map((e) => ({ name: e.name, prev: prevLift(e.name, workout.id, liftVariant(workout, e)) }))
     .filter((r) => r.prev);
   const showSessionSide =
     !!(live || props.past) &&
@@ -971,11 +983,12 @@ export function SessionView(props: {
     // No working set yet — sequence the ramp, then the working target.
     if (isStrengthExercise(ex)) {
       const loadType = loadTypeFor(ex);
-      const target = nextTarget(
+      const nt = nextTarget(
         topHistory(
           store.workouts.filter((w) => w.finishedAt !== null),
           ex.name,
           workout!.startedAt,
+          liftVariant(workout!, ex),
         ),
         {
           plannedReps: ex.plannedReps,
@@ -984,6 +997,8 @@ export function SessionView(props: {
           loadType,
         },
       );
+      const taken = takenKg[ex.id];
+      const target = taken ? { ...nt, weight: taken } : nt;
       if (loadType === 'weight' && target.weight != null && target.weight > 0) {
         const compound = richExerciseByName(ex.name)?.mechanic === 'compound';
         const ramp = warmupRamp(target.weight, { loadType, compound });
@@ -1007,7 +1022,7 @@ export function SessionView(props: {
       if (target.weight != null) return { reps: target.reps, weight: target.weight };
     }
     // Fallbacks: previous session, then the last set, then the plan.
-    const prev = prevLift(ex.name, workout!.id);
+    const prev = prevLift(ex.name, workout!.id, liftVariant(workout!, ex));
     if (prev) return { reps: ex.plannedReps ?? prev.reps, weight: prev.weight };
     const last = sets[sets.length - 1];
     if (last) return { reps: last.reps, weight: last.weight ?? null };
@@ -1089,7 +1104,10 @@ export function SessionView(props: {
       baseline.get(ex.name.toLowerCase()) ?? 0,
       ...ex.sets.filter((s) => setTypeOf(s) !== 'warmup').map((s) => s.weight ?? 0),
     );
-    const e1Base = Math.max(recordE1rm(ex.name, workout!.id), ...ex.sets.map(setBestE1rm));
+    const e1Base = Math.max(
+      recordE1rm(ex.name, workout!.id, liftVariant(workout!, ex)),
+      ...ex.sets.map(setBestE1rm),
+    );
     const type: SetType = vals.type ?? (vals.isWarmup ? 'warmup' : 'working');
     // Nobody rated the effort → estimate it from history + today's state.
     const priorWorking = ex.sets.filter((s) => setTypeOf(s) !== 'warmup').length;
@@ -3026,7 +3044,7 @@ export function SessionView(props: {
             .map((id) => equipmentById(id)?.image?.thumbUrl)
             .find(Boolean) ?? exerciseImage(ex.name, 'strength'))
         : undefined;
-    const prev = prevLift(ex.name, workout!.id);
+    const prev = prevLift(ex.name, workout!.id, liftVariant(workout!, ex));
     const kind = exerciseKind(ex);
     const marker = isMarkerExercise(ex);
     const wuSec =
@@ -3072,6 +3090,7 @@ export function SessionView(props: {
               store.workouts.filter((w) => w.finishedAt !== null),
               ex.name,
               workout!.startedAt,
+              liftVariant(workout!, ex),
             ),
             {
               plannedReps: ex.plannedReps,
@@ -3082,10 +3101,38 @@ export function SessionView(props: {
             },
           )
         : null;
+    // Weight differs per machine/gym: what the main gym says about this lift.
+    const xg =
+      live && !grp && !timed && !marker && isStrengthExercise(ex) && workout
+        ? crossGymHint(workout.id, ex)
+        : undefined;
+    const workingLogged = ex.sets.some((x) => setTypeOf(x) !== 'warmup');
+    const xgText = xg
+      ? workingLogged
+        ? xg.hasLocal
+          ? null
+          : t.xgFirstNoPr
+        : xg.hasLocal
+          ? prev
+            ? t.xgBoth(fmtSet(prev.weight, prev.reps), fmtSet(xg.weight, xg.reps))
+            : null
+          : xg.estimate !== null
+            ? t.xgEstimate(
+                xg.gym.name,
+                fmtSet(xg.weight, xg.reps),
+                `${fmtWeightValue(xg.estimate)} ${t.kgCol.toLowerCase()}`,
+              )
+            : t.xgMainOnly(xg.gym.name, fmtSet(xg.weight, xg.reps))
+      : null;
     const groupDone = grp !== null && ex.sets.length >= grp.round;
     // While the record card is up it owns the space — the next set waits.
     const showGhost = (!grp || grp.active) && !(focusView && prShowing && ex.id === focusedId);
     const rowCls = grp ? ' rrow' : '';
+    // A stopwatch move whose sets are all plain holds with no added weight: the table is
+    // just # · time · tags — no KG column and no "S-D" label on every row.
+    const holdNoLoad =
+      isStopwatchExercise(ex) &&
+      ex.sets.every((x) => setTypeOf(x) === 'static-dynamic' && x.weight === null);
     const sortedSets = [...ex.sets].sort((a, b) => a.position - b.position);
     const meters = focusView && live && isStrengthExercise(ex) ? rowMeters(ex) : null;
     return (
@@ -3538,13 +3585,35 @@ export function SessionView(props: {
                 )}
               </div>
             )}
+            {xg && xgText && (
+              <Notice
+                tone={xg.hasLocal || workingLogged ? 'neutral' : 'rest'}
+                icon="info"
+                trail={
+                  !workingLogged &&
+                  !xg.hasLocal &&
+                  xg.estimate !== null &&
+                  takenKg[ex.id] !== xg.estimate ? (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={() => setTakenKg((m) => ({ ...m, [ex.id]: xg.estimate! }))}
+                    >
+                      {t.xgTake(`${fmtWeightValue(xg.estimate)} ${t.kgCol.toLowerCase()}`)}
+                    </Button>
+                  ) : undefined
+                }
+              >
+                {xgText}
+              </Notice>
+            )}
             {!grp && ex.sets.length > 0 && (
-              <div className="set-grid header">
+              <div className={`set-grid header${holdNoLoad ? ' compact' : ''}`}>
                 <span>#</span>
                 <span>{isStopwatchExercise(ex) ? t.homeHoldCol : t.repsCol}</span>
-                <span>{loadColHead ?? (isDesktop ? t.weightCol : t.kgCol)}</span>
-                <span>{isDesktop ? t.typeCol : ''}</span>
-                {isDesktop && <span />}
+                {!holdNoLoad && <span>{loadColHead ?? (isDesktop ? t.weightCol : t.kgCol)}</span>}
+                <span>{isDesktop && !holdNoLoad ? t.typeCol : ''}</span>
+                {isDesktop && !holdNoLoad && <span />}
               </div>
             )}
             <div style={renaming === ex.id ? { opacity: 0.6 } : undefined}>
@@ -3628,6 +3697,7 @@ export function SessionView(props: {
                     warm={type === 'warmup'}
                     record={!!rec}
                     metered={!!meterStyle}
+                    compact={holdNoLoad}
                     style={meterStyle}
                     onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: s, ghost })}
                   >
@@ -3636,9 +3706,11 @@ export function SessionView(props: {
                       {type === 'static-dynamic' ? fmtHold(s.durationMin) : s.reps}
                       {s.partials ? <span className="partials">+{s.partials}p</span> : null}
                     </span>
-                    <span className={`val${loadType === 'assist' ? ' assist-val' : ''}`}>
-                      {loadCell(s.weight)}
-                    </span>
+                    {!holdNoLoad && (
+                      <span className={`val${loadType === 'assist' ? ' assist-val' : ''}`}>
+                        {loadCell(s.weight)}
+                      </span>
+                    )}
                     {(() => {
                       // Tags cell: effort, failure and record as small pills
                       // (the plain "working" word only when there's nothing else).
@@ -3647,10 +3719,12 @@ export function SessionView(props: {
                       // F already says RPE 10 — no separate estimate next to it.
                       const rpeEst = type === 'warmup' || rpeV || fail ? null : (s.rpeAuto ?? null);
                       if (!rec && !fail && rpeV === null && rpeEst === null)
-                        return setKindLabel(ex, s, grp);
+                        return holdNoLoad ? <span className="kind" /> : setKindLabel(ex, s, grp);
                       return (
                         <span className="kind set-tags">
-                          {!rec && type !== 'working' ? setKindLabel(ex, s, grp) : null}
+                          {!rec && type !== 'working' && !holdNoLoad
+                            ? setKindLabel(ex, s, grp)
+                            : null}
                           {rpeV !== null ? (
                             <Tag tone="neutral" className="tag-rpe">
                               @{rpeV}
@@ -3690,7 +3764,7 @@ export function SessionView(props: {
                         </span>
                       );
                     })()}
-                    {isDesktop && (
+                    {isDesktop && !holdNoLoad && (
                       <span className="cell5">
                         {drops.length > 0
                           ? t.inOneSet(fmtKg(setVolumeKg(s) * perHandFactor(ex))).split(' in ')[0]
@@ -5209,7 +5283,11 @@ export function SessionView(props: {
                                   {g.exercises.map((e, i) => {
                                     const m = resolveMuscles(e);
                                     const eq = equipmentFor(e);
-                                    const prevL = prevLift(e.name, workout.id);
+                                    const prevL = prevLift(
+                                      e.name,
+                                      workout.id,
+                                      liftVariant(workout, e),
+                                    );
                                     return (
                                       <tr key={e.id}>
                                         <td className="ss-td-idx">
@@ -6777,6 +6855,7 @@ function GhostSetRow(props: {
             <NumberStepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />
           )}
           <NumberStepper
+            className={isSd ? 'hold-w' : undefined}
             label={unit === 'lb' ? t.weightLb : t.weightKg}
             value={toDisp(weightKg ?? 0)}
             step={unit === 'lb' ? 5 : 2.5}
@@ -6786,15 +6865,7 @@ function GhostSetRow(props: {
             placeholder={t.bodyweightShort}
             onChange={(x) => setWeightKg(fromDisp(x))}
           />
-          {isSd && (
-            <NumberStepper
-              label={t.holdSecLabel}
-              value={holdSec}
-              step={5}
-              min={5}
-              onChange={setHoldSec}
-            />
-          )}
+          {isSd && <HoldDurationInput seconds={holdSec} onChange={setHoldSec} />}
         </div>
       )}
       {props.note && !isDrop && <div className="gset-note">{props.note}</div>}
@@ -6910,8 +6981,19 @@ function SetEditorSheet(props: {
   const isAssist = loadType === 'assist';
   const isBand = loadType === 'band';
   const [view, setView] = useState<'main' | 'type' | 'load'>('main');
+  // A stopwatch move (plank…) logs only a hold: no reps, load type, set type or drops. A set
+  // that was saved some other way keeps the full editor, so nothing already logged is lost.
+  const holdOnly =
+    isStopwatchExercise(props.exercise) &&
+    (!props.set || setTypeOf(props.set) === 'static-dynamic');
+  // …and a pure bodyweight hold has no weight at all.
+  const holdNoLoad = holdOnly && exerciseProfile(props.exercise.name).l === 'none';
   const [type, setType] = useState<SetType>(
-    props.set ? setTypeOf(props.set) : (props.ghost.type ?? 'working'),
+    holdOnly
+      ? 'static-dynamic'
+      : props.set
+        ? setTypeOf(props.set)
+        : (props.ghost.type ?? 'working'),
   );
   // The athlete opened the type picker and chose — pin the warm-up/working
   // state so auto-detection won't override it.
@@ -7290,35 +7372,38 @@ function SetEditorSheet(props: {
         <>
           {/* Load type first — it decides what the steppers below mean. Each
               block is a labelled card, like the Exercise tab's groups. */}
-          <div className="se-label se-label-first">{t.loadTypeLabel}</div>
+          <div className="se-label se-label-first">
+            {holdOnly ? t.holdSecLabel : t.loadTypeLabel}
+          </div>
           <div className={`se-card se-card-load se-kind-${type}`}>
-            <Segmented
-              className="se-load"
-              size="sm"
-              label={t.loadTypeLabel}
-              value={loadType}
-              onChange={(v) => pickLoadType(v)}
-              options={LOAD_ROWS.map((r) => ({ value: r.key, label: r.name }))}
-            />
+            {!holdOnly && (
+              <Segmented
+                className="se-load"
+                size="sm"
+                label={t.loadTypeLabel}
+                value={loadType}
+                onChange={(v) => pickLoadType(v)}
+                options={LOAD_ROWS.map((r) => ({ value: r.key, label: r.name }))}
+              />
+            )}
             {isSD ? (
-              <div className="steppers">
-                <NumberStepper
-                  label={unit === 'lb' ? t.weightLb : t.weightKg}
-                  value={toDisp(weight)}
-                  step={unit === 'lb' ? 5 : 2.5}
-                  min={0}
-                  decimals={unit === 'lb' ? 1 : 2}
-                  focused={focused === 'weight'}
-                  disabled={bw}
-                  placeholder={t.bodyweightShort}
-                  onFocus={() => setFocused('weight')}
-                  onChange={(v) => setWeight(fromDisp(v))}
-                />
-                <NumberStepper
-                  label={t.holdSecLabel}
-                  value={holdSec}
-                  step={5}
-                  min={5}
+              <div className="steppers hold-steppers">
+                {!holdNoLoad && (
+                  <NumberStepper
+                    label={unit === 'lb' ? t.weightLb : t.weightKg}
+                    value={toDisp(weight)}
+                    step={unit === 'lb' ? 5 : 2.5}
+                    min={0}
+                    decimals={unit === 'lb' ? 1 : 2}
+                    focused={focused === 'weight'}
+                    disabled={bw}
+                    placeholder={t.bodyweightShort}
+                    onFocus={() => setFocused('weight')}
+                    onChange={(v) => setWeight(fromDisp(v))}
+                  />
+                )}
+                <HoldDurationInput
+                  seconds={holdSec}
                   focused={focused === 'duration'}
                   onFocus={() => setFocused('duration')}
                   onChange={setHoldSec}
@@ -7473,26 +7558,30 @@ function SetEditorSheet(props: {
             )}
           </div>
           {/* Set type · effort (design "One door"), rarer toggles grouped below. */}
-          <div className="se-label">{t.setTypeLabel}</div>
-          <div className={`se-card se-kind-${type}`}>
-            <div className="se-types">
-              {SET_TYPE_ROWS.map((row) => (
-                <Chip
-                  key={row.type}
-                  className={`se-kind-${row.type}`}
-                  selected={type === row.type}
-                  onClick={() => {
-                    setType(row.type);
-                    setTypeTouched(true);
-                    if (row.type === 'warmup') setBw(false);
-                  }}
-                >
-                  {typeMeta[row.type].name}
-                </Chip>
-              ))}
-            </div>
-            {typeMeta[type].hint ? <div className="se-hint">{typeMeta[type].hint}</div> : null}
-          </div>
+          {!holdOnly && (
+            <>
+              <div className="se-label">{t.setTypeLabel}</div>
+              <div className={`se-card se-kind-${type}`}>
+                <div className="se-types">
+                  {SET_TYPE_ROWS.map((row) => (
+                    <Chip
+                      key={row.type}
+                      className={`se-kind-${row.type}`}
+                      selected={type === row.type}
+                      onClick={() => {
+                        setType(row.type);
+                        setTypeTouched(true);
+                        if (row.type === 'warmup') setBw(false);
+                      }}
+                    >
+                      {typeMeta[row.type].name}
+                    </Chip>
+                  ))}
+                </div>
+                {typeMeta[type].hint ? <div className="se-hint">{typeMeta[type].hint}</div> : null}
+              </div>
+            </>
+          )}
           <div className="se-label">{t.rpeLabel}</div>
           <div className={`se-card se-kind-${type}`}>
             <div className="se-rpe">
@@ -7535,6 +7624,7 @@ function SetEditorSheet(props: {
                   : t.rpeHint(rpe)}
             </div>
             {type !== 'warmup' && <SupplementRpeNote />}
+            {type !== 'warmup' && <CycleSessionNote />}
             {failOn && (
               <div className="se-partials">
                 <span className="lab">{t.partialsLabel}</span>
@@ -7549,74 +7639,89 @@ function SetEditorSheet(props: {
               </div>
             )}
           </div>
-          <div className="se-label se-label-more">{t.seGroupMore}</div>
-          <div className="se-group">
-            {sidesOk && !isAssist && !isBand && (
-              <div className="sides-block">
-                <ListRow
-                  className="sides-row"
-                  icon={<Icon name="arrows-out-line-horizontal" />}
-                  label={t.sidesLabel}
-                  trailing={
-                    <Segmented
-                      className="sides-seg"
-                      size="sm"
+          {!(holdOnly && (holdNoLoad || !unitEligible)) && (
+            <>
+              <div className="se-label se-label-more">{t.seGroupMore}</div>
+              <div className="se-group">
+                {sidesOk && !holdOnly && !isAssist && !isBand && (
+                  <div className="sides-block">
+                    <ListRow
+                      className="sides-row"
+                      icon={<Icon name="arrows-out-line-horizontal" />}
                       label={t.sidesLabel}
-                      value={sides}
-                      onChange={(v) => pickSides(v)}
-                      options={[
-                        { value: 'both', label: t.sidesBoth },
-                        { value: 'one', label: t.sidesOne },
-                      ]}
+                      trailing={
+                        <Segmented
+                          className="sides-seg"
+                          size="sm"
+                          label={t.sidesLabel}
+                          value={sides}
+                          onChange={(v) => pickSides(v)}
+                          options={[
+                            { value: 'both', label: t.sidesBoth },
+                            { value: 'one', label: t.sidesOne },
+                          ]}
+                        />
+                      }
                     />
-                  }
-                />
-                {sides === 'one' && (
-                  <div className="sides-note">
-                    <Icon name="info" />
-                    {t.sidesNote}
+                    {sides === 'one' && (
+                      <div className="sides-note">
+                        <Icon name="info" />
+                        {t.sidesNote}
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
-            {unitEligible && !isAssist && !isBand && !bw && (
-              <ListRow
-                className="unit-row"
-                icon={<Icon name="scales" />}
-                label={t.unitLabel}
-                trailing={
-                  <Segmented
-                    size="sm"
-                    className="unit-seg"
+                {unitEligible && !holdNoLoad && !isAssist && !isBand && !bw && (
+                  <ListRow
+                    className="unit-row"
+                    icon={<Icon name="scales" />}
                     label={t.unitLabel}
-                    options={(['kg', 'lb'] as DisplayUnit[]).map((u) => ({ value: u, label: u }))}
-                    value={unit}
-                    onChange={setUnit}
+                    trailing={
+                      <Segmented
+                        size="sm"
+                        className="unit-seg"
+                        label={t.unitLabel}
+                        options={(['kg', 'lb'] as DisplayUnit[]).map((u) => ({
+                          value: u,
+                          label: u,
+                        }))}
+                        value={unit}
+                        onChange={setUnit}
+                      />
+                    }
                   />
-                }
-              />
-            )}
-            {unitEligible && !isAssist && !isBand && unit === 'lb' && !bw && weight > 0 && (
-              <div className="unit-equiv">{t.unitStoredKg(fmtWeightValue(weight))}</div>
-            )}
-            {isBarbell && !isAssist && !isBand && !bw && (
-              <ListRow
-                icon={<Icon name="barbell" />}
-                label={t.plateTitle}
-                value={`${fmtWeightValue(weight)} ${t.kgCol.toLowerCase()}`}
-                valueTone="accent"
-                chevron
-                onClick={() => setPlateOpen(true)}
-              />
-            )}
-            {!isAssist && !isBand && (
-              <ListRow
-                icon={<Icon name="barbell" />}
-                label={t.bodyweightSet}
-                trailing={<KitSwitch checked={bw} aria-label={t.bodyweightSet} onChange={setBw} />}
-              />
-            )}
-          </div>
+                )}
+                {unitEligible &&
+                  !holdNoLoad &&
+                  !isAssist &&
+                  !isBand &&
+                  unit === 'lb' &&
+                  !bw &&
+                  weight > 0 && (
+                    <div className="unit-equiv">{t.unitStoredKg(fmtWeightValue(weight))}</div>
+                  )}
+                {isBarbell && !holdOnly && !isAssist && !isBand && !bw && (
+                  <ListRow
+                    icon={<Icon name="barbell" />}
+                    label={t.plateTitle}
+                    value={`${fmtWeightValue(weight)} ${t.kgCol.toLowerCase()}`}
+                    valueTone="accent"
+                    chevron
+                    onClick={() => setPlateOpen(true)}
+                  />
+                )}
+                {!holdOnly && !isAssist && !isBand && (
+                  <ListRow
+                    icon={<Icon name="barbell" />}
+                    label={t.bodyweightSet}
+                    trailing={
+                      <KitSwitch checked={bw} aria-label={t.bodyweightSet} onChange={setBw} />
+                    }
+                  />
+                )}
+              </div>
+            </>
+          )}
         </>
       )}
       {props.onExerciseSettings && (

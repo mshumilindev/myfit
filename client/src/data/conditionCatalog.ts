@@ -333,6 +333,8 @@ const T = {
     rpeMax: 9,
     stepScale: 0.8,
   },
+  /** A state that only switches other features (the Cycle); no training limits. */
+  none: {},
 } as const satisfies Record<string, ConditionEffects>;
 export type EffectTemplate = keyof typeof T;
 
@@ -1321,6 +1323,16 @@ const ROWS: Row[] = [
     'postpartum',
     'hand-heart',
     ['incontinence', 'prolapse'],
+  ],
+  // Menopause limits nothing in training; it only switches the Cycle feature off.
+  [
+    'preg_menopause',
+    'pregnancy',
+    'whole',
+    'Menopause',
+    'none',
+    'sun-horizon',
+    ['perimenopause', 'climacteric'],
   ],
   // --- Other systems --------------------------------------------------------
   [

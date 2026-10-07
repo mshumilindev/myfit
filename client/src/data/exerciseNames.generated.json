@@ -1,4 +1,16 @@
 {
+  "3/4 Sit-Up": {
+    "et": "Kõhulihaste tõus ¾ ulatuses",
+    "lt": "Pilvo prispaudimai 3/4 amplitudės",
+    "pl": "Brzuszki 3/4",
+    "uk": "Підйом корпусу 3/4"
+  },
+  "90/90 Hamstring": {
+    "et": "90/90 reie tagakülje venitus",
+    "lt": "Šlaunies užpakalinės dalies tempimas 90/90",
+    "pl": "Rozciąganie tylnej strony uda 90/90",
+    "uk": "Розтяжка задньої поверхні стегна 90/90"
+  },
   "Ab Crunch Machine": {
     "et": "Kõhulihaste kõverdused masinal",
     "lt": "Atsilenkimai treniruokliu",
@@ -11,11 +23,47 @@
     "pl": "Rollout na kółku do brzucha",
     "uk": "Розкатування на ролику для преса"
   },
+  "Adductor": {
+    "et": "Reie lähendajate venitus",
+    "lt": "Šlaunies pritraukiamųjų raumenų tempimas",
+    "pl": "Rozciąganie przywodzicieli",
+    "uk": "Розтяжка привідних м’язів"
+  },
+  "Adductor/Groin": {
+    "et": "Lähendajate ja kubeme venitus",
+    "lt": "Pritraukiamųjų raumenų ir kirkšnies tempimas",
+    "pl": "Rozciąganie przywodzicieli i pachwin",
+    "uk": "Розтяжка привідних м’язів і паху"
+  },
+  "Advanced Kettlebell Windmill": {
+    "et": "Kettlebelli veski edasijõudnutele",
+    "lt": "Svarsčio malūnas (pažengusiems)",
+    "pl": "Wiatrak z kettlebellem zaawansowany",
+    "uk": "Вітряк з гирею (просунутий)"
+  },
+  "Air Bike": {
+    "et": "Air Bike",
+    "lt": "Oro dviratis",
+    "pl": "Air bike",
+    "uk": "Велотренажер з рухомими рукоятками"
+  },
+  "All Fours Quad Stretch": {
+    "et": "Nelipea venitus neljakäpukil",
+    "lt": "Keturgalvio šlaunies raumens tempimas atsiklaupus",
+    "pl": "Rozciąganie czworogłowych w podporze klęcznym",
+    "uk": "Розтяжка квадріцепса на четвереньках"
+  },
   "Alternate Hammer Curl": {
     "et": "Biitsepsi kõverdus haamerhaardega vaheldumisi",
     "lt": "Bicepso lenkimas neutraliu griebimu pakaitomis",
     "pl": "Uginanie ramion chwytem młotkowym naprzemiennie",
     "uk": "Згинання рук на біцепс нейтральним хватом поперемінно"
+  },
+  "Alternate Heel Touchers": {
+    "et": "Vahelduvad kandade puudutused",
+    "lt": "Pakaitiniai kulnų lietimai",
+    "pl": "Naprzemienne dotykanie pięt",
+    "uk": "Дотики до п’ят поперемінно"
   },
   "Alternate Incline Dumbbell Curl": {
     "et": "Hantlite biitsepsi kõverdus kaldpingil vaheldumisi",
@@ -23,17 +71,35 @@
     "pl": "Uginanie ramion z hantlami na ławce skośnej naprzemiennie",
     "uk": "Підйом гантелей на біцепс на похилій лаві поперемінно"
   },
+  "Alternate Leg Diagonal Bound": {
+    "et": "Vahelduvad diagonaalhüpped",
+    "lt": "Pakaitiniai įstrižiniai šuoliai",
+    "pl": "Naprzemienne skoki diagonalne",
+    "uk": "Діагональні стрибки з ноги на ногу"
+  },
   "Alternating Cable Shoulder Press": {
     "et": "Surumine kaabliga pea kohal vaheldumisi",
     "lt": "Spaudimas prie bloko virš galvos pakaitomis",
     "pl": "Wyciskanie na wyciągu nad głowę naprzemiennie",
     "uk": "Жим на блоці над головою поперемінно"
   },
+  "Alternating Deltoid Raise": {
+    "et": "Õlatõsted vaheldumisi",
+    "lt": "Rankų kėlimas pakaitomis",
+    "pl": "Wznosy ramion naprzemiennie",
+    "uk": "Підйом рук перед собою поперемінно"
+  },
   "Alternating Floor Press": {
     "et": "Surumine põrandalt vaheldumisi",
     "lt": "Spaudimas nuo grindų pakaitomis",
     "pl": "Wyciskanie z podłogi naprzemiennie",
     "uk": "Жим з підлоги поперемінно"
+  },
+  "Alternating Hang Clean": {
+    "et": "Rinnalevõte rippasendist vaheldumisi",
+    "lt": "Vertimas į krūtinę nuo kabančios padėties pakaitomis",
+    "pl": "Zarzut z zawieszenia naprzemiennie",
+    "uk": "Взяття на груди з виса поперемінно"
   },
   "Alternating Kettlebell Press": {
     "et": "Kettlebelli surumine vaheldumisi",
@@ -47,11 +113,137 @@
     "pl": "Wiosłowanie z kettlebellem naprzemiennie",
     "uk": "Тяга гирі поперемінно"
   },
+  "Alternating Renegade Row": {
+    "et": "Renegade-tõmme vaheldumisi",
+    "lt": "Renegato trauka pakaitomis",
+    "pl": "Wiosłowanie renegade naprzemiennie",
+    "uk": "Тяга «ренегат» поперемінно"
+  },
+  "Ankle Circles": {
+    "et": "Hüppeliigese ringid",
+    "lt": "Čiurnų sukimas",
+    "pl": "Krążenia kostek",
+    "uk": "Обертання стопами"
+  },
+  "Ankle On The Knee": {
+    "et": "Pahkluu põlvel venitus",
+    "lt": "Čiurna ant kelio",
+    "pl": "Rozciąganie z kostką na kolanie",
+    "uk": "Розтяжка «щиколотка на коліні»"
+  },
+  "Anterior Tibialis-SMR": {
+    "et": "Eesmise sääreluulihase massaaž rulliga",
+    "lt": "Blauzdos priekinio raumens masažas volu",
+    "pl": "Rolowanie mięśnia piszczelowego przedniego",
+    "uk": "МФР переднього великогомілкового м’яза"
+  },
+  "Anti-Gravity Press": {
+    "et": "Antigravitatsioonisurumine",
+    "lt": "Antigravitacinis spaudimas",
+    "pl": "Wyciskanie antygrawitacyjne",
+    "uk": "Жим «антигравітація»"
+  },
+  "Arm Circles": {
+    "et": "Käeringid",
+    "lt": "Rankų sukimas",
+    "pl": "Krążenia ramion",
+    "uk": "Обертання руками"
+  },
+  "Arnold Dumbbell Press": {
+    "et": "Arnoldi hantlisurumine",
+    "lt": "Arnoldo hantelių spaudimas",
+    "pl": "Wyciskanie hantli Arnolda",
+    "uk": "Жим Арнольда"
+  },
+  "Around The Worlds": {
+    "et": "Ringid ümber maailma",
+    "lt": "Rankų apsukimai aplink pasaulį",
+    "pl": "Around the world z hantlami",
+    "uk": "Махи гантелями по колу «навколо світу»"
+  },
+  "Atlas Stone Trainer": {
+    "et": "Atlase kivi trenažöör",
+    "lt": "Atlaso akmenų treniruoklis",
+    "pl": "Trener kamieni Atlas",
+    "uk": "Тренажер для каменів Атласа"
+  },
+  "Atlas Stones": {
+    "et": "Atlase kivid",
+    "lt": "Atlaso akmenys",
+    "pl": "Kamienie Atlas",
+    "uk": "Камені Атласа"
+  },
+  "Axle Deadlift": {
+    "et": "Jõutõmme paksu kangiga",
+    "lt": "Mirties trauka su ašimi",
+    "pl": "Martwy ciąg ze sztangą axle",
+    "uk": "Станова тяга з осі"
+  },
   "Back Flyes - With Bands": {
     "et": "Lengud kummiga",
     "lt": "Rankų skėtimas su guma",
     "pl": "Rozpiętki z gumą",
     "uk": "Розведення з еспандером"
+  },
+  "Backward Drag": {
+    "et": "Tagurpidi lohistamine",
+    "lt": "Vilkimas atbulomis",
+    "pl": "Ciągnięcie w tył",
+    "uk": "Тягнення назад"
+  },
+  "Backward Medicine Ball Throw": {
+    "et": "Tagurpidi topispalli vise",
+    "lt": "Medicininio kamuolio metimas atgal",
+    "pl": "Rzut piłką lekarską do tyłu",
+    "uk": "Кидок медболу назад"
+  },
+  "Balance Board": {
+    "et": "Tasakaalulaud",
+    "lt": "Pusiausvyros lenta",
+    "pl": "Deska równoważna",
+    "uk": "Балансувальна дошка"
+  },
+  "Ball Leg Curl": {
+    "et": "Jalgade painutus pallil",
+    "lt": "Kojų lenkimas su kamuoliu",
+    "pl": "Uginanie nóg na piłce",
+    "uk": "Згинання ніг на фітболі"
+  },
+  "Band Assisted Pull-Up": {
+    "et": "Lõuatõmbed kummiabiga",
+    "lt": "Prisitraukimai su gumos pagalba",
+    "pl": "Podciąganie z gumą wspomagającą",
+    "uk": "Підтягування з допомогою еспандера"
+  },
+  "Band Good Morning": {
+    "et": "Good morning kummiga",
+    "lt": "Labas rytas su guma",
+    "pl": "Skłony „dzień dobry” z gumą",
+    "uk": "Гуд морнінг з еспандером"
+  },
+  "Band Good Morning (Pull Through)": {
+    "et": "Good morning kummiga (pull through)",
+    "lt": "Labas rytas su guma (pratraukimas)",
+    "pl": "Skłony „dzień dobry” z gumą (pull through)",
+    "uk": "Гуд морнінг з еспандером (протяжка)"
+  },
+  "Band Hip Adductions": {
+    "et": "Puusa lähendamine kummiga",
+    "lt": "Klubų pritraukimas su guma",
+    "pl": "Przywodzenie bioder z gumą",
+    "uk": "Зведення стегон з еспандером"
+  },
+  "Band Pull Apart": {
+    "et": "Kummi lahtitõmme",
+    "lt": "Gumos tempimas į šonus",
+    "pl": "Rozciąganie gumy w poziomie",
+    "uk": "Розведення еспандера перед собою"
+  },
+  "Band Skull Crusher": {
+    "et": "Triitsepsi sirutus kummiga lamades",
+    "lt": "Tricepso tiesimas gulint su guma",
+    "pl": "Francuskie wyciskanie z gumą",
+    "uk": "Французький жим з еспандером лежачи"
   },
   "Barbell Ab Rollout": {
     "et": "Rollout kangiga",
@@ -77,17 +269,41 @@
     "pl": "Uginanie ramion ze sztangą",
     "uk": "Підйом штанги на біцепс"
   },
+  "Barbell Curls Lying Against An Incline": {
+    "et": "Kangi biitsepsi kõverdus kaldpingil rinnaga vastu",
+    "lt": "Štangos bicepso lenkimas gulint ant pakrypusio suolo",
+    "pl": "Uginanie ramion ze sztangą leżąc na ławce skośnej",
+    "uk": "Підйом штанги на біцепс лежачи на похилій лаві"
+  },
   "Barbell Deadlift": {
     "et": "Kangi jõutõmme",
     "lt": "Štangos mirties trauka",
     "pl": "Martwy ciąg ze sztangą",
     "uk": "Станова тяга зі штангою"
   },
+  "Barbell Full Squat": {
+    "et": "Kangi sügavkükk",
+    "lt": "Pilni štangos pritūpimai",
+    "pl": "Pełny przysiad ze sztangą",
+    "uk": "Повний присід зі штангою"
+  },
   "Barbell Glute Bridge": {
     "et": "Kangi sild",
     "lt": "Štangos tiltas",
     "pl": "Mostek biodrowy ze sztangą",
     "uk": "Ягодичний міст зі штангою"
+  },
+  "Barbell Guillotine Bench Press": {
+    "et": "Kangi giljotiinsurumine lamades",
+    "lt": "Giljotininis štangos spaudimas gulint",
+    "pl": "Wyciskanie gilotynowe ze sztangą",
+    "uk": "Жим штанги «гільйотина»"
+  },
+  "Barbell Hack Squat": {
+    "et": "Kangi hack-kükk",
+    "lt": "Štangos hakenšmito pritūpimai",
+    "pl": "Przysiad hack ze sztangą",
+    "uk": "Гак-присідання зі штангою"
   },
   "Barbell Hip Thrust": {
     "et": "Puusatõuge kangiga",
@@ -119,6 +335,12 @@
     "pl": "Wiosłowanie ze sztangą w opadzie",
     "uk": "Тяга штанги в нахилі"
   },
+  "Barbell Rollout from Bench": {
+    "et": "Rollout kangiga pingilt",
+    "lt": "Rollout su štanga nuo suolo",
+    "pl": "Rollout ze sztangą z ławki",
+    "uk": "Розкатування зі штангою від лави"
+  },
   "Barbell Seated Calf Raise": {
     "et": "Kangi sääretõsted istudes",
     "lt": "Stotis ant pirštų galų sėdint",
@@ -137,17 +359,83 @@
     "pl": "Wzruszanie ramion ze sztangą",
     "uk": "Шраги зі штангою"
   },
+  "Barbell Shrug Behind The Back": {
+    "et": "Kangi õlakehitused selja taga",
+    "lt": "Štangos pečių gūžčiojimas už nugaros",
+    "pl": "Wzruszanie ramion ze sztangą za plecami",
+    "uk": "Шраги зі штангою за спиною"
+  },
+  "Barbell Side Bend": {
+    "et": "Kangi külgkõverdus",
+    "lt": "Šoniniai lenkimai su štanga",
+    "pl": "Skłony boczne ze sztangą",
+    "uk": "Нахили в сторони зі штангою"
+  },
+  "Barbell Side Split Squat": {
+    "et": "Kangi külgkükk",
+    "lt": "Šoniniai skėstiniai pritūpimai su štanga",
+    "pl": "Boczny przysiad split ze sztangą",
+    "uk": "Бічні присідання зі штангою"
+  },
   "Barbell Squat": {
     "et": "Kangi kükk",
     "lt": "Štangos pritūpimai",
     "pl": "Przysiad ze sztangą",
     "uk": "Присідання зі штангою"
   },
+  "Barbell Squat To A Bench": {
+    "et": "Kangi kükk pingile",
+    "lt": "Štangos pritūpimai ant suolo",
+    "pl": "Przysiad ze sztangą na ławkę",
+    "uk": "Присідання зі штангою на лаву"
+  },
+  "Barbell Step Ups": {
+    "et": "Kangiga pingile astumine",
+    "lt": "Įlipimai ant pakylos su štanga",
+    "pl": "Wejścia na podwyższenie ze sztangą",
+    "uk": "Зашагування на лаву зі штангою"
+  },
+  "Barbell Walking Lunge": {
+    "et": "Kangi kõnniväljaasted",
+    "lt": "Einamieji išpuoliai su štanga",
+    "pl": "Wykroki chodzone ze sztangą",
+    "uk": "Випади зі штангою в ходьбі"
+  },
+  "Battling Ropes": {
+    "et": "Lahingköied",
+    "lt": "Kovos virvės",
+    "pl": "Liny bojowe",
+    "uk": "Бойові канати"
+  },
+  "Bear Crawl Sled Drags": {
+    "et": "Karukõnd kelgu lohistamisega",
+    "lt": "Lokio ropojimas stumiant roges",
+    "pl": "Ciągnięcie sań w czworakowaniu",
+    "uk": "Тягнення саней повзком «ведмідь»"
+  },
+  "Behind Head Chest Stretch": {
+    "et": "Rinnalihaste venitus käed pea taga",
+    "lt": "Krūtinės tempimas rankomis už galvos",
+    "pl": "Rozciąganie klatki piersiowej z rękami za głową",
+    "uk": "Розтяжка грудей за головою"
+  },
   "Bench Dips": {
     "et": "Kätekõverdused pingilt",
     "lt": "Atsispaudimai nuo suoliuko",
     "pl": "Pompki na ławce",
     "uk": "Віджимання від лави"
+  },
+  "Bench Jump": {
+    "et": "Hüpe pingile",
+    "lt": "Šuoliai ant suolo",
+    "pl": "Skoki na ławkę",
+    "uk": "Стрибки на лаву"
+  },
+  "Bench Press - Powerlifting": {
+    "et": "Surumine lamades (jõutõstmine)",
+    "lt": "Spaudimas gulint (jėgos trikovė)",
+    "pl": "Wyciskanie leżąc - trójbój siłowy",
+    "uk": "Жим лежачи (пауерліфтинг)"
   },
   "Bench Press - With Bands": {
     "et": "Surumine kummiga lamades",
@@ -161,11 +449,41 @@
     "pl": "Wyciskanie leżąc",
     "uk": "Жим лежачи"
   },
+  "Bench Sprint": {
+    "et": "Pingisprint",
+    "lt": "Sprintas aplink suolą",
+    "pl": "Sprint nad ławką",
+    "uk": "Спринт з лави"
+  },
   "Bent Over Barbell Row": {
     "et": "Kangi tõmme kummardudes",
     "lt": "Štangos traukimas pasilenkus",
     "pl": "Wiosłowanie ze sztangą w opadzie",
     "uk": "Тяга штанги в нахилі"
+  },
+  "Bent Over Dumbbell Rear Delt Raise With Head On Bench": {
+    "et": "Tagatõsted hantlitega kummardudes pea pingil",
+    "lt": "Galinių deltų kėlimas hantelėmis pasilenkus galva ant suolo",
+    "pl": "Odwodzenie hantli w opadzie z głową na ławce",
+    "uk": "Розведення гантелей в нахилі з опорою голови на лаву"
+  },
+  "Bent Over Low-Pulley Side Lateral": {
+    "et": "Külgtõsted alumise kaabliga kummardudes",
+    "lt": "Rankų kėlimas į šonus prie apatinio bloko pasilenkus",
+    "pl": "Wznosy bokiem na dolnym wyciągu w opadzie",
+    "uk": "Розведення на нижньому блоці в нахилі"
+  },
+  "Bent Over One-Arm Long Bar Row": {
+    "et": "Pika kangi tõmme kummardudes ühe käega",
+    "lt": "Ilgo grifo traukimas viena ranka pasilenkus",
+    "pl": "Wiosłowanie jednorącz długą sztangą w opadzie",
+    "uk": "Тяга довгого грифа в нахилі однією рукою"
+  },
+  "Bent Over Two-Arm Long Bar Row": {
+    "et": "Pika kangi tõmme kummardudes kahe käega",
+    "lt": "Ilgo grifo traukimas abiem rankomis pasilenkus",
+    "pl": "Wiosłowanie oburącz długą sztangą w opadzie",
+    "uk": "Тяга довгого грифа в нахилі двома руками"
   },
   "Bent Over Two-Dumbbell Row": {
     "et": "Tõmme kummardudes kahe käega",
@@ -173,11 +491,65 @@
     "pl": "Wiosłowanie w opadzie oburącz",
     "uk": "Тяга в нахилі двома руками"
   },
+  "Bent Over Two-Dumbbell Row With Palms In": {
+    "et": "Tõmme kahe hantliga kummardudes neutraalse haardega",
+    "lt": "Traukimas dviem hantelėmis pasilenkus neutraliu griebimu",
+    "pl": "Wiosłowanie hantlami w opadzie chwytem neutralnym",
+    "uk": "Тяга двох гантелей в нахилі нейтральним хватом"
+  },
   "Bent Press": {
     "et": "Surumine kummardudes",
     "lt": "Spaudimas pasilenkus",
     "pl": "Wyciskanie w opadzie",
     "uk": "Жим в нахилі"
+  },
+  "Bent-Arm Barbell Pullover": {
+    "et": "Kangi pullover painutatud kätega",
+    "lt": "Štangos pullover sulenktomis rankomis",
+    "pl": "Pullover ze sztangą ze zgiętymi ramionami",
+    "uk": "Пуловер зі штангою на зігнутих руках"
+  },
+  "Bent-Arm Dumbbell Pullover": {
+    "et": "Hantli pullover painutatud kätega",
+    "lt": "Hantelio pullover sulenktomis rankomis",
+    "pl": "Pullover z hantlem ze zgiętymi ramionami",
+    "uk": "Пуловер з гантеллю на зігнутих руках"
+  },
+  "Bent-Knee Hip Raise": {
+    "et": "Puusatõste painutatud põlvedega",
+    "lt": "Klubų kėlimas sulenktais keliais",
+    "pl": "Unoszenie bioder ze zgiętymi kolanami",
+    "uk": "Підйом таза зі зігнутими колінами"
+  },
+  "Bicycling": {
+    "et": "Jalgrattasõit",
+    "lt": "Važiavimas dviračiu",
+    "pl": "Jazda na rowerze",
+    "uk": "Велосипед"
+  },
+  "Bicycling, Stationary": {
+    "et": "Velotrenažöör",
+    "lt": "Stacionarus dviratis",
+    "pl": "Rower stacjonarny",
+    "uk": "Велотренажер"
+  },
+  "Board Press": {
+    "et": "Board press",
+    "lt": "Spaudimas su lentomis",
+    "pl": "Wyciskanie z deskami",
+    "uk": "Жим з дошкою"
+  },
+  "Body Tricep Press": {
+    "et": "Triitsepsi surumine keharaskusega",
+    "lt": "Tricepso spaudimas savo svoriu",
+    "pl": "Prostowanie ramion z ciężarem ciała",
+    "uk": "Французький жим з власною вагою"
+  },
+  "Body-Up": {
+    "et": "Body-up",
+    "lt": "Kėlimas ant dilbių",
+    "pl": "Body-up",
+    "uk": "Віджимання на передпліччях з розгинанням"
   },
   "Bodyweight Flyes": {
     "et": "Lengud",
@@ -185,17 +557,101 @@
     "pl": "Rozpiętki",
     "uk": "Розведення"
   },
+  "Bodyweight Mid Row": {
+    "et": "Tõmme keharaskusega",
+    "lt": "Traukimas savo svoriu vidutiniame aukštyje",
+    "pl": "Wiosłowanie z ciężarem ciała",
+    "uk": "Тяга з власною вагою"
+  },
   "Bodyweight Squat": {
     "et": "Kükk",
     "lt": "Pritūpimai",
     "pl": "Przysiad",
     "uk": "Присідання"
   },
+  "Bodyweight Walking Lunge": {
+    "et": "Kõnniväljaasted keharaskusega",
+    "lt": "Einamieji išpuoliai",
+    "pl": "Wykroki chodzone z ciężarem ciała",
+    "uk": "Випади в ходьбі"
+  },
+  "Bosu Ball Cable Crunch With Side Bends": {
+    "et": "Kõhulihaste kõverdused kaabliga Bosu pallil külgkõverdustega",
+    "lt": "Atsilenkimai prie bloko ant Bosu su šoniniais lenkimais",
+    "pl": "Spięcia brzucha na wyciągu na piłce Bosu ze skłonami bocznymi",
+    "uk": "Скручування на блоці на Bosu з нахилами"
+  },
+  "Bottoms Up": {
+    "et": "Bottoms up",
+    "lt": "Dugnu į viršų",
+    "pl": "Bottoms up",
+    "uk": "Гиря «догори дном»"
+  },
+  "Bottoms-Up Clean From The Hang Position": {
+    "et": "Bottoms-up rinnalevõte rippasendist",
+    "lt": "Svarsčio vertimas į krūtinę dugnu į viršų nuo kabančios padėties",
+    "pl": "Zarzut bottoms-up z zawieszenia",
+    "uk": "Взяття гирі «догори дном» з виса"
+  },
+  "Box Jump (Multiple Response)": {
+    "et": "Hüpe kastile (järjestikused)",
+    "lt": "Šuoliai ant dėžės (serija)",
+    "pl": "Wskok na skrzynię (seria)",
+    "uk": "Стрибки на тумбу (серійні)"
+  },
+  "Box Skip": {
+    "et": "Hüplemine kastile",
+    "lt": "Šuoliai ant dėžės praleidžiant",
+    "pl": "Skip na skrzynię",
+    "uk": "Скіпінг на тумбу"
+  },
   "Box Squat": {
     "et": "Kükk kastile",
     "lt": "Pritūpimai ant dėžės",
     "pl": "Przysiad na skrzynię",
     "uk": "Присідання в ящик"
+  },
+  "Box Squat with Bands": {
+    "et": "Kükk kastile kummidega",
+    "lt": "Pritūpimai ant dėžės su guma",
+    "pl": "Przysiad na skrzynię z gumami",
+    "uk": "Присідання на тумбу з еспандерами"
+  },
+  "Box Squat with Chains": {
+    "et": "Kükk kastile ketidega",
+    "lt": "Pritūpimai ant dėžės su grandinėmis",
+    "pl": "Przysiad na skrzynię z łańcuchami",
+    "uk": "Присідання на тумбу з ланцюгами"
+  },
+  "Brachialis-SMR": {
+    "et": "Õlavarrelihase massaaž rulliga",
+    "lt": "Žasto raumens masažas volu",
+    "pl": "Rolowanie mięśnia ramiennego",
+    "uk": "МФР плечового м’яза"
+  },
+  "Bradford/Rocky Presses": {
+    "et": "Bradfordi/Rocky surumine",
+    "lt": "Bradfordo spaudimas",
+    "pl": "Wyciskanie Bradford/Rocky",
+    "uk": "Жим Бредфорда/Рокі"
+  },
+  "Butt Lift (Bridge)": {
+    "et": "Tuharate tõste (sild)",
+    "lt": "Sėdmenų tiltas",
+    "pl": "Unoszenie pośladków (mostek)",
+    "uk": "Ягодичний міст"
+  },
+  "Butt-Ups": {
+    "et": "Butt-up",
+    "lt": "Sėdmenų kėlimas",
+    "pl": "Unoszenie pośladków",
+    "uk": "Підйом сідниць"
+  },
+  "Butterfly": {
+    "et": "Liblikas",
+    "lt": "Drugelis",
+    "pl": "Rozpiętki na maszynie (butterfly)",
+    "uk": "Метелик"
   },
   "Cable Chest Press": {
     "et": "Surumine kaabliga",
@@ -215,11 +671,23 @@
     "pl": "Spięcia brzucha na wyciągu",
     "uk": "Скручування на блоці"
   },
+  "Cable Deadlifts": {
+    "et": "Jõutõmme kaabliga",
+    "lt": "Mirties trauka prie bloko",
+    "pl": "Martwy ciąg na wyciągu",
+    "uk": "Станова тяга на блоці"
+  },
   "Cable Hammer Curls - Rope Attachment": {
     "et": "Biitsepsi kõverdus kaabliga haamerhaardega",
     "lt": "Bicepso lenkimas prie bloko neutraliu griebimu",
     "pl": "Uginanie ramion na wyciągu chwytem młotkowym",
     "uk": "Підйом блоку на біцепс нейтральним хватом"
+  },
+  "Cable Hip Adduction": {
+    "et": "Puusa lähendamine kaabliga",
+    "lt": "Klubo pritraukimas prie bloko",
+    "pl": "Przywodzenie biodra na wyciągu",
+    "uk": "Зведення стегна на блоці"
   },
   "Cable Incline Pushdown": {
     "et": "Triitsepsi allasurumine",
@@ -232,6 +700,24 @@
     "lt": "Tricepso tiesimas prie bloko ant pakrypusio suolo",
     "pl": "Prostowanie ramion na wyciągu na ławce skośnej",
     "uk": "Розгинання рук на трицепс на блоці на похилій лаві"
+  },
+  "Cable Internal Rotation": {
+    "et": "Sisemine rotatsioon kaabliga",
+    "lt": "Vidinė rotacija prie bloko",
+    "pl": "Rotacja wewnętrzna na wyciągu",
+    "uk": "Внутрішня ротація на блоці"
+  },
+  "Cable Iron Cross": {
+    "et": "Raudrist kaabliga",
+    "lt": "Geležinis kryžius prie blokų",
+    "pl": "Iron Cross na wyciągu",
+    "uk": "Залізний хрест на блоках"
+  },
+  "Cable Judo Flip": {
+    "et": "Judo-pööre kaabliga",
+    "lt": "Dziudo posūkis prie bloko",
+    "pl": "Judo flip na wyciągu",
+    "uk": "Дзюдо-кидок на блоці"
   },
   "Cable Lying Triceps Extension": {
     "et": "Triitsepsi sirutus kaabliga lamades",
@@ -275,6 +761,12 @@
     "pl": "Wiosłowanie na wyciągu",
     "uk": "Тяга блоку"
   },
+  "Cable Russian Twists": {
+    "et": "Vene väänded kaabliga",
+    "lt": "Rusiški sukimai prie bloko",
+    "pl": "Rosyjskie skręty na wyciągu",
+    "uk": "Російські скручування на блоці"
+  },
   "Cable Seated Crunch": {
     "et": "Kõhulihaste kõverdused kaabliga istudes",
     "lt": "Atsilenkimai prie bloko sėdint",
@@ -311,11 +803,77 @@
     "pl": "Wyciskanie",
     "uk": "Жим"
   },
+  "Calf Press On The Leg Press Machine": {
+    "et": "Sääresurumine jalgade surumise masinal",
+    "lt": "Blauzdų spaudimas kojų spaudimo treniruokliu",
+    "pl": "Wypychanie łydek na suwnicy",
+    "uk": "Жим носками в тренажері для жиму ногами"
+  },
+  "Calf Raise On A Dumbbell": {
+    "et": "Sääretõste hantlil",
+    "lt": "Stotis ant pirštų galų ant hantelio",
+    "pl": "Wspięcia na palce na hantlu",
+    "uk": "Підйом на носки на гантелі"
+  },
   "Calf Raises - With Bands": {
     "et": "Sääretõsted kummiga",
     "lt": "Stotis ant pirštų galų",
     "pl": "Wspięcia na palce z gumą",
     "uk": "Підйом на носки з еспандером"
+  },
+  "Calf Stretch Elbows Against Wall": {
+    "et": "Säärelihaste venitus küünarnukid vastu seina",
+    "lt": "Blauzdų tempimas alkūnėmis į sieną",
+    "pl": "Rozciąganie łydek z łokciami o ścianę",
+    "uk": "Розтяжка литок з упором ліктів у стіну"
+  },
+  "Calf Stretch Hands Against Wall": {
+    "et": "Säärelihaste venitus käed vastu seina",
+    "lt": "Blauzdų tempimas rankomis į sieną",
+    "pl": "Rozciąganie łydek z dłońmi o ścianę",
+    "uk": "Розтяжка литок з упором рук у стіну"
+  },
+  "Calf-Machine Shoulder Shrug": {
+    "et": "Õlakehitused sääremasinal",
+    "lt": "Pečių gūžčiojimas blauzdų treniruokliu",
+    "pl": "Wzruszanie ramion na maszynie do łydek",
+    "uk": "Шраги в тренажері для литок"
+  },
+  "Calves-SMR": {
+    "et": "Säärelihaste massaaž rulliga",
+    "lt": "Blauzdų masažas volu",
+    "pl": "Rolowanie łydek",
+    "uk": "МФР литок"
+  },
+  "Car Deadlift": {
+    "et": "Auto jõutõmme",
+    "lt": "Automobilio mirties trauka",
+    "pl": "Martwy ciąg samochodu",
+    "uk": "Станова тяга автомобіля"
+  },
+  "Car Drivers": {
+    "et": "Car drivers",
+    "lt": "Vairuotojai",
+    "pl": "Kierowca (obroty talerzem)",
+    "uk": "Водій"
+  },
+  "Carioca Quick Step": {
+    "et": "Carioca kiirsammud",
+    "lt": "Karioka greitas žingsnis",
+    "pl": "Carioca szybki krok",
+    "uk": "Каріока швидкими кроками"
+  },
+  "Cat Stretch": {
+    "et": "Kassivenitus",
+    "lt": "Katės tempimas",
+    "pl": "Kot (rozciąganie)",
+    "uk": "Розтяжка «кішка»"
+  },
+  "Catch and Overhead Throw": {
+    "et": "Püüd ja vise üle pea",
+    "lt": "Pagavimas ir metimas virš galvos",
+    "pl": "Chwyt i rzut znad głowy",
+    "uk": "Ловля і кидок м’яча над головою"
   },
   "Chain Handle Extension": {
     "et": "Triitsepsi sirutus",
@@ -329,11 +887,89 @@
     "pl": "Wyciskanie",
     "uk": "Жим"
   },
+  "Chair Leg Extended Stretch": {
+    "et": "Jala sirutusvenitus toolil",
+    "lt": "Kojos tempimas ant kėdės",
+    "pl": "Rozciąganie z wyprostowaną nogą na krześle",
+    "uk": "Розтяжка ноги на стільці"
+  },
+  "Chair Lower Back Stretch": {
+    "et": "Alaselja venitus toolil",
+    "lt": "Apatinės nugaros tempimas ant kėdės",
+    "pl": "Rozciąganie dolnego odcinka pleców na krześle",
+    "uk": "Розтяжка попереку на стільці"
+  },
+  "Chair Squat": {
+    "et": "Kükk toolile",
+    "lt": "Pritūpimai prie kėdės",
+    "pl": "Przysiad na krzesło",
+    "uk": "Присідання на стілець"
+  },
+  "Chair Upper Body Stretch": {
+    "et": "Ülakeha venitus toolil",
+    "lt": "Viršutinės kūno dalies tempimas ant kėdės",
+    "pl": "Rozciąganie górnej części ciała na krześle",
+    "uk": "Розтяжка верху тіла на стільці"
+  },
+  "Chest And Front Of Shoulder Stretch": {
+    "et": "Rinna ja õla eesosa venitus",
+    "lt": "Krūtinės ir priekinių deltų tempimas",
+    "pl": "Rozciąganie klatki piersiowej i przodu barku",
+    "uk": "Розтяжка грудей і передньої дельти"
+  },
+  "Chest Push (multiple response)": {
+    "et": "Rinnatõuge (järjestikused)",
+    "lt": "Krūtinės stūmimas (serija)",
+    "pl": "Wypychanie od klatki (seria)",
+    "uk": "Поштовх грудьми (серійний)"
+  },
+  "Chest Push (single response)": {
+    "et": "Rinnatõuge (üksik)",
+    "lt": "Krūtinės stūmimas (vienas)",
+    "pl": "Wypychanie od klatki (pojedyncze)",
+    "uk": "Поштовх грудьми (одиночний)"
+  },
+  "Chest Push from 3 point stance": {
+    "et": "Rinnatõuge kolmepunktiasendist",
+    "lt": "Krūtinės stūmimas iš trijų taškų padėties",
+    "pl": "Wypychanie od klatki z postawy trzypunktowej",
+    "uk": "Поштовх грудьми з триточкової стійки"
+  },
+  "Chest Push with Run Release": {
+    "et": "Rinnatõuge joostes",
+    "lt": "Krūtinės stūmimas su bėgimu",
+    "pl": "Wypychanie od klatki z wybiegiem",
+    "uk": "Поштовх грудьми з бігом"
+  },
+  "Chest Stretch on Stability Ball": {
+    "et": "Rinnalihaste venitus tasakaalupallil",
+    "lt": "Krūtinės tempimas ant kamuolio",
+    "pl": "Rozciąganie klatki piersiowej na piłce gimnastycznej",
+    "uk": "Розтяжка грудей на фітболі"
+  },
+  "Child's Pose": {
+    "et": "Lapse poos",
+    "lt": "Vaiko poza",
+    "pl": "Pozycja dziecka",
+    "uk": "Поза дитини"
+  },
+  "Chin To Chest Stretch": {
+    "et": "Lõua rinnale venitus",
+    "lt": "Smakro prie krūtinės tempimas",
+    "pl": "Rozciąganie z brodą do klatki piersiowej",
+    "uk": "Розтяжка «підборіддя до грудей»"
+  },
   "Chin-Up": {
     "et": "Lõuatõmbed althaardega",
     "lt": "Prisitraukimai apatiniu griebimu",
     "pl": "Podciąganie podchwytem",
     "uk": "Підтягування зворотним хватом"
+  },
+  "Circus Bell": {
+    "et": "Circus bell",
+    "lt": "Cirko svarmuo",
+    "pl": "Circus bell",
+    "uk": "Цирковий дзвін"
   },
   "Clean": {
     "et": "Rinnalevõte",
@@ -341,7 +977,45 @@
     "pl": "Zarzut",
     "uk": "Взяття на груди"
   },
+  "Clean Deadlift": {
+    "et": "Rinnalevõtu jõutõmme",
+    "lt": "Mirties trauka vertimui į krūtinę",
+    "pl": "Martwy ciąg do zarzutu",
+    "uk": "Станова тяга для взяття на груди"
+  },
+  "Clean Pull": {
+    "et": "Rinnalevõtu tõmme",
+    "lt": "Trauka vertimui į krūtinę",
+    "pl": "Przyciąganie do zarzutu",
+    "uk": "Тяга для взяття на груди"
+  },
+  "Clean Shrug": {
+    "et": "Rinnalevõtu õlakehitus",
+    "lt": "Pečių gūžčiojimas vertimui į krūtinę",
+    "pl": "Wzruszanie ramion do zarzutu",
+    "uk": "Шраги для взяття на груди"
+  },
+  "Clean and Jerk": {
+    "et": "Rinnalevõte ja tõuge",
+    "lt": "Stūmimas",
+    "pl": "Zarzut i podrzut",
+    "uk": "Поштовх штанги"
+  },
+  "Clean and Press": {
+    "et": "Rinnalevõte ja surumine",
+    "lt": "Vertimas į krūtinę ir spaudimas",
+    "pl": "Zarzut i wyciskanie",
+    "uk": "Взяття на груди і жим"
+  },
+  "Clean from Blocks": {
+    "et": "Rinnalevõte klotsidelt",
+    "lt": "Vertimas į krūtinę nuo kaladėlių",
+    "pl": "Zarzut z podstawek",
+    "uk": "Взяття на груди з підставок"
+  },
   "Clock Push-Up": {
+    "et": "Kätekõverdused „kell“",
+    "lt": "Atsispaudimai „laikrodis“",
     "pl": "Pompki zegarowe",
     "uk": "Віджимання «годинник»"
   },
@@ -381,11 +1055,29 @@
     "pl": "Ściąganie drążka wyciągu górnego wąskim chwytem",
     "uk": "Тяга верхнього блоку вузьким хватом"
   },
+  "Close-Grip Push-Up off of a Dumbbell": {
+    "et": "Kätekõverdused kitsa haardega hantlil",
+    "lt": "Atsispaudimai siauru griebimu nuo hantelio",
+    "pl": "Pompki wąskim chwytem na hantlu",
+    "uk": "Віджимання вузьким хватом від гантелі"
+  },
   "Close-Grip Standing Barbell Curl": {
     "et": "Kangi biitsepsi kõverdus kitsa haardega seistes",
     "lt": "Štangos bicepso lenkimas siauru griebimu stovint",
     "pl": "Uginanie ramion ze sztangą wąskim chwytem stojąc",
     "uk": "Підйом штанги на біцепс вузьким хватом стоячи"
+  },
+  "Cocoons": {
+    "et": "Kookonid",
+    "lt": "Kokonai",
+    "pl": "Kokony",
+    "uk": "Кокони"
+  },
+  "Conan's Wheel": {
+    "et": "Conani ratas",
+    "lt": "Konano ratas",
+    "pl": "Koło Conana",
+    "uk": "Колесо Конана"
   },
   "Concentration Curls": {
     "et": "Biitsepsi kõverdus",
@@ -393,11 +1085,71 @@
     "pl": "Uginanie ramion (koncentr.)",
     "uk": "Згинання рук на біцепс"
   },
+  "Cross Body Hammer Curl": {
+    "et": "Haamerkõverdus risti keha ees",
+    "lt": "Plaktuko lenkimas skersai kūno",
+    "pl": "Uginanie młotkowe w poprzek ciała",
+    "uk": "Молот через груди"
+  },
+  "Cross Over - With Bands": {
+    "et": "Kaabli ristamine kummiga",
+    "lt": "Rankų suvedimas su guma",
+    "pl": "Krzyżowanie z gumami",
+    "uk": "Зведення рук з еспандерами"
+  },
+  "Cross-Body Crunch": {
+    "et": "Ristkõverdus",
+    "lt": "Pilvo prispaudimai įstrižai",
+    "pl": "Spięcia brzucha na skos",
+    "uk": "Перехресні скручування"
+  },
+  "Crossover Reverse Lunge": {
+    "et": "Ristatud tagasiastumisega väljaaste",
+    "lt": "Atvirkštiniai išpuoliai su kryžiavimu",
+    "pl": "Wykroki w tył ze skrzyżowaniem",
+    "uk": "Зворотні перехресні випади"
+  },
+  "Crucifix": {
+    "et": "Krutsifiks",
+    "lt": "Nukryžiavimas",
+    "pl": "Krucyfiks",
+    "uk": "Розп’яття"
+  },
+  "Crunch - Hands Overhead": {
+    "et": "Kõhulihaste kõverdused käed pea kohal",
+    "lt": "Pilvo prispaudimai rankomis virš galvos",
+    "pl": "Spięcia brzucha z rękami nad głową",
+    "uk": "Скручування з руками над головою"
+  },
+  "Crunch - Legs On Exercise Ball": {
+    "et": "Kõhulihaste kõverdused jalad pallil",
+    "lt": "Pilvo prispaudimai kojomis ant kamuolio",
+    "pl": "Spięcia brzucha z nogami na piłce",
+    "uk": "Скручування з ногами на фітболі"
+  },
   "Crunches": {
     "et": "Kõhulihaste kõverdused",
     "lt": "Atsilenkimai",
     "pl": "Spięcia brzucha",
     "uk": "Скручування"
+  },
+  "Cuban Press": {
+    "et": "Kuuba surumine",
+    "lt": "Kubietiškas spaudimas",
+    "pl": "Wyciskanie kubańskie",
+    "uk": "Кубинський жим"
+  },
+  "Dancer's Stretch": {
+    "et": "Tantsija venitus",
+    "lt": "Šokėjo tempimas",
+    "pl": "Rozciąganie tancerza",
+    "uk": "Розтяжка «танцівник»"
+  },
+  "Dead Bug": {
+    "et": "Surnud mardikas",
+    "lt": "Negyvas vabalas",
+    "pl": "Martwy żuk",
+    "uk": "Мертвий жук"
   },
   "Deadlift with Bands": {
     "et": "Jõutõmme kummiga",
@@ -416,6 +1168,12 @@
     "lt": "Štangos spaudimas ant nuožulnaus suolo",
     "pl": "Wyciskanie sztangi na ławce ujemnej",
     "uk": "Жим штанги на негативній лаві"
+  },
+  "Decline Close-Grip Bench To Skull Crusher": {
+    "et": "Kitsa haardega surumine kaldpingil allapoole triitsepsi sirutuseks",
+    "lt": "Siauras spaudimas nuožulniu suolu ir tricepso tiesimas",
+    "pl": "Wyciskanie wąsko na ławce ujemnej do francuskiego",
+    "uk": "Жим вузьким хватом на зворотному схилі з переходом у французький жим"
   },
   "Decline Crunch": {
     "et": "Kõhulihaste kõverdused langpingil",
@@ -471,11 +1229,95 @@
     "pl": "Wyciskanie w suwnicy Smitha na ławce ujemnej",
     "uk": "Жим у Сміті на негативній лаві"
   },
+  "Deficit Deadlift": {
+    "et": "Jõutõmme kõrgendikult",
+    "lt": "Mirties trauka iš pakylos",
+    "pl": "Martwy ciąg z deficytu",
+    "uk": "Станова тяга з дефіциту"
+  },
+  "Depth Jump Leap": {
+    "et": "Sügavhüpe ja kaugushüpe",
+    "lt": "Šuolis iš aukščio su šuoliu",
+    "pl": "Skok zeskokowy z wyskokiem",
+    "uk": "Стрибок із зістрибуванням"
+  },
+  "Dip Machine": {
+    "et": "Kätekõverdused masinal",
+    "lt": "Atsispaudimų ant lygiagrečių treniruoklis",
+    "pl": "Maszyna do dipsów",
+    "uk": "Тренажер для віджимань на брусах"
+  },
+  "Dips - Chest Version": {
+    "et": "Kätekõverdused rööbaspuudel (rinnaversioon)",
+    "lt": "Atsispaudimai ant lygiagrečių (krūtinei)",
+    "pl": "Dipsy na klatkę",
+    "uk": "Віджимання на брусах (груди)"
+  },
+  "Dips - Triceps Version": {
+    "et": "Kätekõverdused rööbaspuudel (triitsepsi versioon)",
+    "lt": "Atsispaudimai ant lygiagrečių (tricepsui)",
+    "pl": "Dipsy na triceps",
+    "uk": "Віджимання на брусах (трицепс)"
+  },
+  "Donkey Calf Raises": {
+    "et": "Eeslisääretõsted",
+    "lt": "Asiliuko stotis ant pirštų galų",
+    "pl": "Wspięcia na palce osła",
+    "uk": "Підйом на носки «віслюк»"
+  },
+  "Double Kettlebell Alternating Hang Clean": {
+    "et": "Kahe kettlebelli rinnalevõte rippasendist vaheldumisi",
+    "lt": "Vertimas į krūtinę dviem svarsčiais nuo kabančios padėties pakaitomis",
+    "pl": "Zarzut z zawieszenia z dwoma kettlebellami naprzemiennie",
+    "uk": "Взяття двох гир на груди з виса поперемінно"
+  },
+  "Double Kettlebell Jerk": {
+    "et": "Kahe kettlebelli tõuge",
+    "lt": "Dviejų svarsčių stūmimas",
+    "pl": "Podrzut z dwoma kettlebellami",
+    "uk": "Поштовх двох гир"
+  },
+  "Double Kettlebell Push Press": {
+    "et": "Kahe kettlebelli push press",
+    "lt": "Dviejų svarsčių stūmimo spaudimas",
+    "pl": "Push press z dwoma kettlebellami",
+    "uk": "Швунг двох гир"
+  },
+  "Double Kettlebell Snatch": {
+    "et": "Kahe kettlebelli rebimine",
+    "lt": "Dviejų svarsčių rovimas",
+    "pl": "Rwanie dwóch kettlebelli",
+    "uk": "Ривок двох гир"
+  },
+  "Double Kettlebell Windmill": {
+    "et": "Kahe kettlebelli veski",
+    "lt": "Dviejų svarsčių malūnas",
+    "pl": "Wiatrak z dwoma kettlebellami",
+    "uk": "Вітряк з двома гирями"
+  },
+  "Double Leg Butt Kick": {
+    "et": "Kandade löögid vastu tuharat kahel jalal",
+    "lt": "Smūgiai kulnais į sėdmenis abiem kojomis",
+    "pl": "Zakładanie pięt do pośladków obunóż",
+    "uk": "Закидання п’ят до сідниць на двох ногах"
+  },
+  "Downward Facing Balance": {
+    "et": "Tasakaal näoga alla",
+    "lt": "Pusiausvyra veidu žemyn",
+    "pl": "Równowaga twarzą w dół",
+    "uk": "Баланс обличчям вниз"
+  },
   "Drag Curl": {
     "et": "Biitsepsi kõverdus (drag)",
     "lt": "Bicepso lenkimas (drag)",
     "pl": "Uginanie ramion (drag)",
     "uk": "Драг-згинання на біцепс"
+  },
+  "Drop Push": {
+    "et": "Drop push",
+    "lt": "Stūmimas su kritimu",
+    "pl": "Drop push",
+    "uk": "Поштовх із падінням"
   },
   "Dumbbell Alternate Bicep Curl": {
     "et": "Hantlite biitsepsi kõverdus vaheldumisi",
@@ -489,11 +1331,23 @@
     "pl": "Wyciskanie hantli na ławce",
     "uk": "Жим гантелей лежачи"
   },
+  "Dumbbell Bench Press with Neutral Grip": {
+    "et": "Hantlisurumine lamades neutraalse haardega",
+    "lt": "Hantelių spaudimas gulint neutraliu griebimu",
+    "pl": "Wyciskanie hantli leżąc chwytem neutralnym",
+    "uk": "Жим гантелей лежачи нейтральним хватом"
+  },
   "Dumbbell Bicep Curl": {
     "et": "Hantlite biitsepsi kõverdus",
     "lt": "Hantelių bicepso lenkimas",
     "pl": "Uginanie ramion z hantlami",
     "uk": "Підйом гантелей на біцепс"
+  },
+  "Dumbbell Clean": {
+    "et": "Hantli rinnalevõte",
+    "lt": "Hantelių vertimas į krūtinę",
+    "pl": "Zarzut z hantlami",
+    "uk": "Взяття гантелей на груди"
   },
   "Dumbbell Floor Press": {
     "et": "Hantlite surumine põrandalt",
@@ -531,11 +1385,23 @@
     "pl": "Rozpiętki hantlą w opadzie jednorącz",
     "uk": "Розведення гантелі в нахилі однією рукою"
   },
+  "Dumbbell Lying Pronation": {
+    "et": "Hantli pronatsioon lamades",
+    "lt": "Dilbio pronacija su hanteliu gulint",
+    "pl": "Pronacja z hantlem leżąc",
+    "uk": "Пронація з гантеллю лежачи"
+  },
   "Dumbbell Lying Rear Lateral Raise": {
     "et": "Hantlite tagatõsted kummardudes",
     "lt": "Hantelių rankų skėtimas pasilenkus",
     "pl": "Rozpiętki z hantlami w opadzie",
     "uk": "Розведення гантелей в нахилі"
+  },
+  "Dumbbell Lying Supination": {
+    "et": "Hantli supinatsioon lamades",
+    "lt": "Dilbio supinacija su hanteliu gulint",
+    "pl": "Supinacja z hantlem leżąc",
+    "uk": "Супінація з гантеллю лежачи"
   },
   "Dumbbell One-Arm Shoulder Press": {
     "et": "Hantli surumine pea kohal ühe käega",
@@ -573,6 +1439,18 @@
     "pl": "Wykroki z hantlami",
     "uk": "Випади з гантелями"
   },
+  "Dumbbell Scaption": {
+    "et": "Hantli skaptsioon",
+    "lt": "Hantelių skapcija",
+    "pl": "Scaption z hantlami",
+    "uk": "Скепшен з гантелями"
+  },
+  "Dumbbell Seated Box Jump": {
+    "et": "Hüpe kastile istudes hantlitega",
+    "lt": "Šuoliai ant dėžės iš sėdėjimo su hantelėmis",
+    "pl": "Wskok na skrzynię z hantlami z siadu",
+    "uk": "Стрибок на тумбу з гантелями з положення сидячи"
+  },
   "Dumbbell Seated One-Leg Calf Raise": {
     "et": "Hantlite sääretõsted istudes ühel jalal",
     "lt": "Stotis ant pirštų galų sėdint ant vienos kojos",
@@ -591,11 +1469,47 @@
     "pl": "Wzruszanie ramion z hantlami",
     "uk": "Шраги з гантелями"
   },
+  "Dumbbell Side Bend": {
+    "et": "Hantli külgkõverdus",
+    "lt": "Šoniniai lenkimai su hanteliu",
+    "pl": "Skłony boczne z hantlem",
+    "uk": "Нахили в сторони з гантеллю"
+  },
   "Dumbbell Squat": {
     "et": "Hantlite kükk",
     "lt": "Hantelių pritūpimai",
     "pl": "Przysiad z hantlami",
     "uk": "Присідання з гантелями"
+  },
+  "Dumbbell Squat To A Bench": {
+    "et": "Hantlikükk pingile",
+    "lt": "Pritūpimai su hantelėmis ant suolo",
+    "pl": "Przysiad z hantlami na ławkę",
+    "uk": "Присідання з гантелями на лаву"
+  },
+  "Dumbbell Step Ups": {
+    "et": "Hantlitega pingile astumine",
+    "lt": "Įlipimai ant pakylos su hantelėmis",
+    "pl": "Wejścia na podwyższenie z hantlami",
+    "uk": "Зашагування на лаву з гантелями"
+  },
+  "Dumbbell Tricep Extension -Pronated Grip": {
+    "et": "Hantli triitsepsi sirutus pealthaardega",
+    "lt": "Hantelių tricepso tiesimas viršutiniu griebimu",
+    "pl": "Prostowanie ramion z hantlem nachwytem",
+    "uk": "Розгинання рук з гантеллю прямим хватом"
+  },
+  "Dynamic Back Stretch": {
+    "et": "Dünaamiline selja venitus",
+    "lt": "Dinaminis nugaros tempimas",
+    "pl": "Dynamiczne rozciąganie pleców",
+    "uk": "Динамічна розтяжка спини"
+  },
+  "Dynamic Chest Stretch": {
+    "et": "Dünaamiline rinna venitus",
+    "lt": "Dinaminis krūtinės tempimas",
+    "pl": "Dynamiczne rozciąganie klatki piersiowej",
+    "uk": "Динамічна розтяжка грудей"
   },
   "EZ-Bar Curl": {
     "et": "Kõverkangi biitsepsi kõverdus",
@@ -603,11 +1517,107 @@
     "pl": "Uginanie ramion ze sztangą łamaną",
     "uk": "Підйом EZ-штанги на біцепс"
   },
+  "EZ-Bar Skullcrusher": {
+    "et": "Triitsepsi sirutus EZ-kangiga lamades",
+    "lt": "Tricepso tiesimas gulint su EZ grifu",
+    "pl": "Francuskie wyciskanie ze sztangą łamaną",
+    "uk": "Французький жим з EZ-грифом лежачи"
+  },
+  "Elbow Circles": {
+    "et": "Küünarnukiringid",
+    "lt": "Alkūnių sukimas",
+    "pl": "Krążenia łokci",
+    "uk": "Обертання ліктями"
+  },
+  "Elbow to Knee": {
+    "et": "Küünarnukk põlvele",
+    "lt": "Alkūnė prie kelio",
+    "pl": "Łokieć do kolana",
+    "uk": "Лікоть до коліна"
+  },
+  "Elbows Back": {
+    "et": "Küünarnukid taha",
+    "lt": "Alkūnės atgal",
+    "pl": "Łokcie do tyłu",
+    "uk": "Лікті назад"
+  },
+  "Elevated Back Lunge": {
+    "et": "Tagasiastumisega väljaaste kõrgendikult",
+    "lt": "Atvirkštiniai išpuoliai iš pakylos",
+    "pl": "Wykrok w tył z podwyższenia",
+    "uk": "Зворотні випади з підвищення"
+  },
+  "Elevated Cable Rows": {
+    "et": "Tõmme kaabliga kõrgendikult",
+    "lt": "Traukimas prie bloko iš pakylos",
+    "pl": "Wiosłowanie na wyciągu z podwyższenia",
+    "uk": "Тяга блоку з підвищення"
+  },
+  "Elliptical Trainer": {
+    "et": "Ellipstrenažöör",
+    "lt": "Elipsinis treniruoklis",
+    "pl": "Orbitrek",
+    "uk": "Еліптичний тренажер"
+  },
+  "Exercise Ball Crunch": {
+    "et": "Kõhulihaste kõverdused pallil",
+    "lt": "Pilvo prispaudimai ant kamuolio",
+    "pl": "Spięcia brzucha na piłce",
+    "uk": "Скручування на фітболі"
+  },
+  "Exercise Ball Pull-In": {
+    "et": "Jalgade tõmme pallil",
+    "lt": "Kojų pritraukimas su kamuoliu",
+    "pl": "Przyciąganie kolan na piłce",
+    "uk": "Підтягування колін на фітболі"
+  },
+  "Extended Range One-Arm Kettlebell Floor Press": {
+    "et": "Kettlebelli surumine põrandalt ühe käega suurendatud ulatusega",
+    "lt": "Svarsčio spaudimas nuo grindų viena ranka (padidinta amplitudė)",
+    "pl": "Wyciskanie kettlebella z podłogi jednorącz w pełnym zakresie",
+    "uk": "Жим гирі з підлоги однією рукою з великою амплітудою"
+  },
+  "External Rotation": {
+    "et": "Väline rotatsioon",
+    "lt": "Išorinė rotacija",
+    "pl": "Rotacja zewnętrzna",
+    "uk": "Зовнішня ротація"
+  },
+  "External Rotation with Band": {
+    "et": "Väline rotatsioon kummiga",
+    "lt": "Išorinė rotacija su guma",
+    "pl": "Rotacja zewnętrzna z gumą",
+    "uk": "Зовнішня ротація з еспандером"
+  },
+  "External Rotation with Cable": {
+    "et": "Väline rotatsioon kaabliga",
+    "lt": "Išorinė rotacija prie bloko",
+    "pl": "Rotacja zewnętrzna na wyciągu",
+    "uk": "Зовнішня ротація на блоці"
+  },
   "Face Pull": {
     "et": "Tõmme näo poole",
     "lt": "Traukimas prie veido",
     "pl": "Przyciąganie do twarzy",
     "uk": "Тяга до обличчя"
+  },
+  "Farmer's Walk": {
+    "et": "Talupoja kõnd",
+    "lt": "Ūkininko ėjimas",
+    "pl": "Spacer farmera",
+    "uk": "Прогулянка фермера"
+  },
+  "Fast Skipping": {
+    "et": "Kiire skipping",
+    "lt": "Greitas šokinėjimas",
+    "pl": "Szybki skipping",
+    "uk": "Швидкий скіпінг"
+  },
+  "Finger Curls": {
+    "et": "Sõrmede painutus",
+    "lt": "Pirštų lenkimas",
+    "pl": "Uginanie palców",
+    "uk": "Згинання пальців зі штангою"
   },
   "Flat Bench Cable Flyes": {
     "et": "Kaabli ristamine sirgel pingil",
@@ -615,11 +1625,29 @@
     "pl": "Krzyżowanie linek wyciągu na ławce płaskiej",
     "uk": "Зведення рук у кросовері на горизонтальній лаві"
   },
+  "Flat Bench Leg Pull-In": {
+    "et": "Jalgade tõmme pingil",
+    "lt": "Kojų pritraukimas ant suolo",
+    "pl": "Przyciąganie nóg na ławce płaskiej",
+    "uk": "Підтягування колін на лаві"
+  },
   "Flat Bench Lying Leg Raise": {
     "et": "Tõsted sirgel pingil",
     "lt": "Kėlimas ant horizontalaus suolo",
     "pl": "Wznosy na ławce płaskiej",
     "uk": "Підйом на горизонтальній лаві"
+  },
+  "Flexor Incline Dumbbell Curls": {
+    "et": "Hantlite kõverdus kaldpingil painutajatele",
+    "lt": "Hantelių lenkimas ant pakrypusio suolo lenkiamiesiems raumenims",
+    "pl": "Uginanie ramion z hantlami na ławce skośnej (zginacze)",
+    "uk": "Підйом гантелей на біцепс на похилій лаві (флексор)"
+  },
+  "Floor Glute-Ham Raise": {
+    "et": "Reie tagakülje tõste põrandal",
+    "lt": "Šlaunų ir sėdmenų kėlimas ant grindų",
+    "pl": "Glute-ham raise na podłodze",
+    "uk": "Підйом ГГР на підлозі"
   },
   "Floor Press": {
     "et": "Surumine põrandalt",
@@ -633,17 +1661,77 @@
     "pl": "Wyciskanie z podłogi",
     "uk": "Жим з підлоги"
   },
+  "Flutter Kicks": {
+    "et": "Jalalöögid lamades",
+    "lt": "Plasnojimas kojomis",
+    "pl": "Nożyce pionowe",
+    "uk": "Махи ногами «ножиці вертикальні»"
+  },
+  "Foot-SMR": {
+    "et": "Jalalaba massaaž rulliga",
+    "lt": "Pėdos masažas volu",
+    "pl": "Rolowanie stóp",
+    "uk": "МФР стопи"
+  },
+  "Forward Drag with Press": {
+    "et": "Edasi lohistamine surumisega",
+    "lt": "Vilkimas pirmyn su spaudimu",
+    "pl": "Ciągnięcie w przód z wyciskaniem",
+    "uk": "Тягнення вперед з жимом"
+  },
+  "Frankenstein Squat": {
+    "et": "Frankensteini kükk",
+    "lt": "Franeknšteino pritūpimai",
+    "pl": "Przysiad Frankensteina",
+    "uk": "Присідання «Франкенштейн»"
+  },
+  "Freehand Jump Squat": {
+    "et": "Hüppekükk ilma raskuseta",
+    "lt": "Šuoliai iš pritūpimo be svorio",
+    "pl": "Przysiad z wyskokiem",
+    "uk": "Присід зі стрибком без обтяження"
+  },
+  "Frog Hops": {
+    "et": "Konnahüpped",
+    "lt": "Varlės šuoliai",
+    "pl": "Żabie skoki",
+    "uk": "Стрибки «жаба»"
+  },
+  "Frog Sit-Ups": {
+    "et": "Konna kõhulihaste tõusud",
+    "lt": "Varlės pilvo prispaudimai",
+    "pl": "Brzuszki żabki",
+    "uk": "Підйоми корпусу «жаба»"
+  },
   "Front Barbell Squat": {
     "et": "Kangi kükk",
     "lt": "Štangos pritūpimai",
     "pl": "Przysiad ze sztangą",
     "uk": "Присідання зі штангою"
   },
+  "Front Barbell Squat To A Bench": {
+    "et": "Esikükk kangiga pingile",
+    "lt": "Priekiniai štangos pritūpimai ant suolo",
+    "pl": "Przysiad przedni ze sztangą na ławkę",
+    "uk": "Фронтальні присідання на лаву"
+  },
+  "Front Box Jump": {
+    "et": "Hüpe kastile ettepoole",
+    "lt": "Šuolis pirmyn ant dėžės",
+    "pl": "Wskok na skrzynię",
+    "uk": "Стрибки на тумбу вперед"
+  },
   "Front Cable Raise": {
     "et": "Esitõsted kaabliga",
     "lt": "Rankų kėlimas į priekį prie bloko",
     "pl": "Wznosy na wyciągu w przód",
     "uk": "Махи на блоці перед собою"
+  },
+  "Front Cone Hops (or hurdle hops)": {
+    "et": "Hüpped koonuste kohal ettepoole (tõkkehüpped)",
+    "lt": "Šuoliai per kūgius pirmyn (arba barjerus)",
+    "pl": "Skoki przez pachołki w przód (lub przez płotki)",
+    "uk": "Стрибки через конуси вперед (або бар’єри)"
   },
   "Front Dumbbell Raise": {
     "et": "Esitõsted hantlitega",
@@ -669,11 +1757,47 @@
     "pl": "Wznosy z talerzem w przód",
     "uk": "Махи з диском перед собою"
   },
+  "Front Raise And Pullover": {
+    "et": "Eestõste ja pullover",
+    "lt": "Rankų kėlimas pirmyn ir pullover",
+    "pl": "Wznosy przed siebie i pullover",
+    "uk": "Підйом рук перед собою і пуловер"
+  },
+  "Front Squat (Clean Grip)": {
+    "et": "Esikükk (rinnalevõtu haardega)",
+    "lt": "Priekiniai pritūpimai (krūtinės griebimas)",
+    "pl": "Przysiad przedni (chwyt zarzutowy)",
+    "uk": "Фронтальні присідання (хват для взяття)"
+  },
+  "Front Squats With Two Kettlebells": {
+    "et": "Esikükk kahe kettlebelliga",
+    "lt": "Priekiniai pritūpimai su dviem svarsčiais",
+    "pl": "Przysiady przednie z dwoma kettlebellami",
+    "uk": "Фронтальні присідання з двома гирями"
+  },
   "Front Two-Dumbbell Raise": {
     "et": "Esitõsted kahe käega",
     "lt": "Rankų kėlimas į priekį abiem rankomis",
     "pl": "Wznosy w przód oburącz",
     "uk": "Махи перед собою двома руками"
+  },
+  "Full Range-Of-Motion Lat Pulldown": {
+    "et": "Ülatõmme täisamplituudiga",
+    "lt": "Viršutinio bloko traukimas visa amplitude",
+    "pl": "Ściąganie drążka wyciągu górnego w pełnym zakresie",
+    "uk": "Тяга верхнього блока з повною амплітудою"
+  },
+  "Gironda Sternum Chins": {
+    "et": "Girondi rinnaluu lõuatõmbed",
+    "lt": "Girondos prisitraukimai krūtinkauliui",
+    "pl": "Podciąganie Gironda do mostka",
+    "uk": "Підтягування до грудини за Гірондою"
+  },
+  "Glute Ham Raise": {
+    "et": "Glute-ham raise",
+    "lt": "Šlaunų ir sėdmenų kėlimas",
+    "pl": "Glute-ham raise",
+    "uk": "Підйом на ГГР"
   },
   "Glute Kickback": {
     "et": "Triitsepsi tahatõmme",
@@ -693,6 +1817,30 @@
     "pl": "Skłony „dzień dobry”",
     "uk": "Нахили зі штангою («гуд монінг»)"
   },
+  "Good Morning off Pins": {
+    "et": "Good morning toenditelt",
+    "lt": "Labas rytas nuo atramų",
+    "pl": "Skłony „dzień dobry” z kołków",
+    "uk": "Гуд морнінг з упорів"
+  },
+  "Gorilla Chin/Crunch": {
+    "et": "Gorilla lõuatõmme/kõverdus",
+    "lt": "Gorilos prisitraukimai",
+    "pl": "Gorilla chin/crunch",
+    "uk": "Підтягування/скручування «горила»"
+  },
+  "Groin and Back Stretch": {
+    "et": "Kubeme ja selja venitus",
+    "lt": "Kirkšnies ir nugaros tempimas",
+    "pl": "Rozciąganie pachwin i pleców",
+    "uk": "Розтяжка паху і спини"
+  },
+  "Groiners": {
+    "et": "Groiners",
+    "lt": "Kirkšnies tempimai",
+    "pl": "Groiners",
+    "uk": "Груйнери"
+  },
   "Hack Squat": {
     "et": "Hack-kükk",
     "lt": "Hack pritūpimai",
@@ -705,11 +1853,23 @@
     "pl": "Uginanie ramion chwytem młotkowym",
     "uk": "Згинання рук на біцепс нейтральним хватом"
   },
+  "Hammer Grip Incline DB Bench Press": {
+    "et": "Hantlisurumine kaldpingil haamerhaardega",
+    "lt": "Hantelių spaudimas ant pakrypusio suolo neutraliu griebimu",
+    "pl": "Wyciskanie hantli na ławce skośnej chwytem młotkowym",
+    "uk": "Жим гантелей на похилій лаві нейтральним хватом"
+  },
   "Hamstring Stretch": {
     "et": "Reie tagakülje venitus",
     "lt": "Užpakalinių šlaunies raumenų tempimas",
     "pl": "Rozciąganie mięśni dwugłowych uda",
     "uk": "Розтяжка задньої поверхні стегна"
+  },
+  "Hamstring-SMR": {
+    "et": "Reie tagakülje massaaž rulliga",
+    "lt": "Šlaunies užpakalinės dalies masažas volu",
+    "pl": "Rolowanie tylnej strony uda",
+    "uk": "МФР задньої поверхні стегна"
   },
   "Handstand Push-Ups": {
     "et": "Kätekõverdused käteseisus",
@@ -723,11 +1883,53 @@
     "pl": "Zarzut z zawieszenia",
     "uk": "Взяття на груди з вису"
   },
+  "Hang Clean - Below the Knees": {
+    "et": "Rinnalevõte rippasendist põlvedest allpool",
+    "lt": "Vertimas į krūtinę nuo kabančios padėties žemiau kelių",
+    "pl": "Zarzut z zawieszenia poniżej kolan",
+    "uk": "Взяття на груди з виса нижче колін"
+  },
+  "Hang Snatch": {
+    "et": "Rebimine rippasendist",
+    "lt": "Rovimas nuo kabančios padėties",
+    "pl": "Rwanie z zawieszenia",
+    "uk": "Ривок з виса"
+  },
+  "Hang Snatch - Below Knees": {
+    "et": "Rebimine rippasendist põlvedest allpool",
+    "lt": "Rovimas nuo kabančios padėties žemiau kelių",
+    "pl": "Rwanie z zawieszenia poniżej kolan",
+    "uk": "Ривок з виса нижче колін"
+  },
+  "Hanging Bar Good Morning": {
+    "et": "Good morning rippuva kangiga",
+    "lt": "Labas rytas su kabančia štanga",
+    "pl": "Skłony „dzień dobry” ze sztangą zawieszoną",
+    "uk": "Гуд морнінг з підвішеним грифом"
+  },
   "Hanging Leg Raise": {
     "et": "Jalgade tõste rippes",
     "lt": "Kojų kėlimas kabant",
     "pl": "Unoszenie nóg w zwisie",
     "uk": "Підйом ніг у висі"
+  },
+  "Hanging Pike": {
+    "et": "Jalgade tõsted ripuvas pike-asendis",
+    "lt": "Kabančios kojų kėlimas lenkiant (kampas)",
+    "pl": "Scyzoryk w zwisie",
+    "uk": "Підйом прямих ніг у висі «щука»"
+  },
+  "Heaving Snatch Balance": {
+    "et": "Heaving snatch balance",
+    "lt": "Rovimo pusiausvyra su stūmimu",
+    "pl": "Heaving snatch balance",
+    "uk": "Баланс ривка з поштовхом"
+  },
+  "Heavy Bag Thrust": {
+    "et": "Tõuge poksikotti",
+    "lt": "Smūgis į sunkų maišą",
+    "pl": "Pchnięcie worka treningowego",
+    "uk": "Удар по важкому мішку"
   },
   "High Cable Curls": {
     "et": "Biitsepsi kõverdus ülemiselt plokilt",
@@ -735,17 +1937,89 @@
     "pl": "Uginanie ramion na górnym wyciągu",
     "uk": "Згинання на біцепс на верхньому блоці"
   },
+  "Hip Circles (prone)": {
+    "et": "Puusaringid (kõhuli)",
+    "lt": "Klubų sukimas gulint ant pilvo",
+    "pl": "Krążenia bioder leżąc na brzuchu",
+    "uk": "Обертання стегном лежачи на животі"
+  },
   "Hip Extension with Bands": {
     "et": "Sirutus kummiga",
     "lt": "Tiesimas su guma",
     "pl": "Prostowanie z gumą",
     "uk": "Розгинання з еспандером"
   },
+  "Hip Flexion with Band": {
+    "et": "Puusa painutus kummiga",
+    "lt": "Klubo lenkimas su guma",
+    "pl": "Zginanie biodra z gumą",
+    "uk": "Згинання стегна з еспандером"
+  },
+  "Hip Lift with Band": {
+    "et": "Puusatõste kummiga",
+    "lt": "Klubų kėlimas su guma",
+    "pl": "Unoszenie bioder z gumą",
+    "uk": "Підйом таза з еспандером"
+  },
+  "Hug A Ball": {
+    "et": "Palli kallistamine",
+    "lt": "Kamuolio apkabinimas",
+    "pl": "Objęcie piłki",
+    "uk": "Обійми м’яча"
+  },
+  "Hug Knees To Chest": {
+    "et": "Põlvede kallistamine rinnale",
+    "lt": "Kelių apkabinimas prie krūtinės",
+    "pl": "Przyciąganie kolan do klatki piersiowej",
+    "uk": "Притискання колін до грудей"
+  },
+  "Hurdle Hops": {
+    "et": "Tõkkehüpped",
+    "lt": "Šuoliai per barjerus",
+    "pl": "Skoki przez płotki",
+    "uk": "Стрибки через бар’єри"
+  },
+  "Hyperextensions (Back Extensions)": {
+    "et": "Selgitõsted (hüperekstensioon)",
+    "lt": "Nugaros tiesimas (hiperekstenzija)",
+    "pl": "Wyprosty tułowia (hiperekstensje)",
+    "uk": "Гіперекстензія"
+  },
+  "Hyperextensions With No Hyperextension Bench": {
+    "et": "Selgitõsted ilma hüperekstensioonipingita",
+    "lt": "Nugaros tiesimas be hiperekstenzijos suolo",
+    "pl": "Wyprosty tułowia bez ławki rzymskiej",
+    "uk": "Гіперекстензія без тренажера"
+  },
+  "IT Band and Glute Stretch": {
+    "et": "Niude-sääreluu traktuse ja tuhara venitus",
+    "lt": "Šlaunies šoninės juostos ir sėdmenų tempimas",
+    "pl": "Rozciąganie pasma biodrowo-piszczelowego i pośladków",
+    "uk": "Розтяжка клубово-великогомілкового тракту і сідниць"
+  },
+  "Iliotibial Tract-SMR": {
+    "et": "Niude-sääreluu traktuse massaaž rulliga",
+    "lt": "Šlaunies šoninės juostos masažas volu",
+    "pl": "Rolowanie pasma biodrowo-piszczelowego",
+    "uk": "МФР клубово-великогомілкового тракту"
+  },
+  "Inchworm": {
+    "et": "Röövik",
+    "lt": "Sliekas",
+    "pl": "Gąsienica",
+    "uk": "Гусениця"
+  },
   "Incline Barbell Triceps Extension": {
     "et": "Kangi triitsepsi sirutus kaldpingil",
     "lt": "Štangos tricepso tiesimas ant pakrypusio suolo",
     "pl": "Prostowanie ramion ze sztangą na ławce skośnej",
     "uk": "Розгинання рук на трицепс зі штангою на похилій лаві"
+  },
+  "Incline Bench Pull": {
+    "et": "Tõmme kaldpingil",
+    "lt": "Traukimas gulint ant pakrypusio suolo",
+    "pl": "Wiosłowanie na ławce skośnej leżąc przodem",
+    "uk": "Тяга лежачи на похилій лаві"
   },
   "Incline Cable Chest Press": {
     "et": "Surumine kaabliga kaldpingil",
@@ -759,6 +2033,12 @@
     "pl": "Krzyżowanie linek wyciągu na ławce skośnej",
     "uk": "Зведення рук у кросовері на похилій лаві"
   },
+  "Incline Dumbbell Bench With Palms Facing In": {
+    "et": "Hantlisurumine kaldpingil neutraalse haardega",
+    "lt": "Hantelių spaudimas ant pakrypusio suolo neutraliu griebimu",
+    "pl": "Wyciskanie hantli na ławce skośnej chwytem neutralnym",
+    "uk": "Жим гантелей на похилій лаві нейтральним хватом"
+  },
   "Incline Dumbbell Curl": {
     "et": "Hantlite biitsepsi kõverdus kaldpingil",
     "lt": "Hantelių bicepso lenkimas ant pakrypusio suolo",
@@ -770,6 +2050,12 @@
     "lt": "Hantelių rankų skėtimas ant pakrypusio suolo",
     "pl": "Rozpiętki z hantlami na ławce skośnej",
     "uk": "Розведення гантелей на похилій лаві"
+  },
+  "Incline Dumbbell Flyes - With A Twist": {
+    "et": "Hantlilengud kaldpingil väänega",
+    "lt": "Hantelių skėtimas ant pakrypusio suolo su pasukimu",
+    "pl": "Rozpiętki z hantlami na ławce skośnej z rotacją",
+    "uk": "Розведення гантелей на похилій лаві з розворотом"
   },
   "Incline Dumbbell Press": {
     "et": "Hantlite surumine kaldpingil",
@@ -783,11 +2069,65 @@
     "pl": "Uginanie ramion chwytem młotkowym na ławce skośnej",
     "uk": "Згинання рук на біцепс нейтральним хватом на похилій лаві"
   },
+  "Incline Inner Biceps Curl": {
+    "et": "Biitsepsi kõverdus kaldpingil sisehaardega",
+    "lt": "Vidinė bicepso lenkimas ant pakrypusio suolo",
+    "pl": "Uginanie ramion na ławce skośnej (wewnętrzna głowa bicepsa)",
+    "uk": "Підйом гантелей на біцепс на похилій лаві хватом усередину"
+  },
   "Incline Push-Up": {
     "et": "Kätekõverdused kõrgemalt toelt",
     "lt": "Atsispaudimai nuo paaukštinimo",
     "pl": "Pompki z rękami na podwyższeniu",
     "uk": "Віджимання від піднятої опори"
+  },
+  "Incline Push-Up Close-Grip": {
+    "et": "Kätekõverdused kaldpinnalt kitsa haardega",
+    "lt": "Atsispaudimai nuo pakylos siauru griebimu",
+    "pl": "Pompki z rękami na podwyższeniu wąskim chwytem",
+    "uk": "Віджимання з опорою на підвищення вузьким хватом"
+  },
+  "Incline Push-Up Depth Jump": {
+    "et": "Kätekõverdused kaldpinnalt sügavhüppega",
+    "lt": "Atsispaudimai nuo pakylos su šuoliu",
+    "pl": "Pompki z rękami na podwyższeniu ze zeskokiem",
+    "uk": "Віджимання з опорою на підвищення зі стрибком"
+  },
+  "Incline Push-Up Medium": {
+    "et": "Kätekõverdused kaldpinnalt keskmise haardega",
+    "lt": "Atsispaudimai nuo pakylos vidutiniu griebimu",
+    "pl": "Pompki z rękami na podwyższeniu średnim chwytem",
+    "uk": "Віджимання з опорою на підвищення середнім хватом"
+  },
+  "Incline Push-Up Reverse Grip": {
+    "et": "Kätekõverdused kaldpinnalt vastupidise haardega",
+    "lt": "Atsispaudimai nuo pakylos atvirkščiu griebimu",
+    "pl": "Pompki z rękami na podwyższeniu podchwytem",
+    "uk": "Віджимання з опорою на підвищення зворотним хватом"
+  },
+  "Incline Push-Up Wide": {
+    "et": "Kätekõverdused kaldpinnalt laia haardega",
+    "lt": "Atsispaudimai nuo pakylos plačiu griebimu",
+    "pl": "Pompki z rękami na podwyższeniu szerokim chwytem",
+    "uk": "Віджимання з опорою на підвищення широким хватом"
+  },
+  "Intermediate Groin Stretch": {
+    "et": "Kubeme venitus (keskmine tase)",
+    "lt": "Kirkšnies tempimas (vidutinio sunkumo)",
+    "pl": "Rozciąganie pachwin (poziom średni)",
+    "uk": "Розтяжка паху (середній рівень)"
+  },
+  "Intermediate Hip Flexor and Quad Stretch": {
+    "et": "Puusa painutajate ja nelipea venitus (keskmine tase)",
+    "lt": "Klubo lenkiamųjų ir keturgalvio tempimas (vidutinio sunkumo)",
+    "pl": "Rozciąganie zginaczy bioder i czworogłowych (poziom średni)",
+    "uk": "Розтяжка згиначів стегна і квадріцепса (середній рівень)"
+  },
+  "Internal Rotation with Band": {
+    "et": "Sisemine rotatsioon kummiga",
+    "lt": "Vidinė rotacija su guma",
+    "pl": "Rotacja wewnętrzna z gumą",
+    "uk": "Внутрішня ротація з еспандером"
   },
   "Inverted Row": {
     "et": "Horisontaalsed lõuatõmbed",
@@ -795,17 +2135,227 @@
     "pl": "Wiosłowanie australijskie",
     "uk": "Австралійські підтягування"
   },
+  "Inverted Row with Straps": {
+    "et": "Tõmme lamades rihmadega",
+    "lt": "Atvirkštinė trauka su dirželiais",
+    "pl": "Wiosłowanie australijskie na pasach",
+    "uk": "Австралійські підтягування на петлях"
+  },
+  "Iron Cross": {
+    "et": "Raudrist",
+    "lt": "Geležinis kryžius",
+    "pl": "Iron Cross",
+    "uk": "Залізний хрест"
+  },
+  "Iron Crosses (stretch)": {
+    "et": "Raudristid (venitus)",
+    "lt": "Geležiniai kryžiai (tempimas)",
+    "pl": "Iron Cross (rozciąganie)",
+    "uk": "Залізний хрест (розтяжка)"
+  },
+  "Isometric Chest Squeezes": {
+    "et": "Isomeetriline rinnalihaste pigistamine",
+    "lt": "Izometrinis krūtinės spaudimas",
+    "pl": "Izometryczne ściskanie klatki piersiowej",
+    "uk": "Ізометричне стискання грудей"
+  },
+  "Isometric Neck Exercise - Front And Back": {
+    "et": "Isomeetriline kaelaharjutus - ees ja taga",
+    "lt": "Izometrinis kaklo pratimas (priekis ir galas)",
+    "pl": "Izometryczne ćwiczenie szyi - przód i tył",
+    "uk": "Ізометрична вправа для шиї (спереду і ззаду)"
+  },
+  "Isometric Neck Exercise - Sides": {
+    "et": "Isomeetriline kaelaharjutus - küljed",
+    "lt": "Izometrinis kaklo pratimas (šonai)",
+    "pl": "Izometryczne ćwiczenie szyi - boki",
+    "uk": "Ізометрична вправа для шиї (збоку)"
+  },
+  "Isometric Wipers": {
+    "et": "Isomeetrilised vihmapuhurid",
+    "lt": "Izometriniai valytuvai",
+    "pl": "Izometryczne wycieraczki",
+    "uk": "Ізометричні двірники"
+  },
+  "JM Press": {
+    "et": "JM Press",
+    "lt": "JM Press",
+    "pl": "JM Press",
+    "uk": "JM-жим"
+  },
+  "Jackknife Sit-Up": {
+    "et": "Jackknife kõhulihaste tõus",
+    "lt": "Peilio pilvo prispaudimai",
+    "pl": "Brzuszki scyzoryk",
+    "uk": "Складання «складний ніж»"
+  },
+  "Janda Sit-Up": {
+    "et": "Janda kõhulihaste tõus",
+    "lt": "Jandos pilvo prispaudimai",
+    "pl": "Brzuszki Jandy",
+    "uk": "Підйом корпусу за Яндою"
+  },
+  "Jefferson Squats": {
+    "et": "Jeffersoni kükk",
+    "lt": "Džefersono pritūpimai",
+    "pl": "Przysiady Jeffersona",
+    "uk": "Присідання Джефферсона"
+  },
+  "Jerk Balance": {
+    "et": "Jerk balance",
+    "lt": "Stūmimo pusiausvyra",
+    "pl": "Jerk balance",
+    "uk": "Баланс поштовху"
+  },
+  "Jerk Dip Squat": {
+    "et": "Jerk dip kükk",
+    "lt": "Stūmimo pritūpimas su pasilenkimu",
+    "pl": "Półprzysiad do podrzutu",
+    "uk": "Підсід для поштовху"
+  },
+  "Jogging, Treadmill": {
+    "et": "Sörkjooks jooksulindil",
+    "lt": "Risčia bėgimo taku",
+    "pl": "Jogging na bieżni",
+    "uk": "Біг підтюпцем на доріжці"
+  },
+  "Keg Load": {
+    "et": "Tünni laadimine",
+    "lt": "Statinės kėlimas",
+    "pl": "Załadunek beczki",
+    "uk": "Завантаження бочки"
+  },
+  "Kettlebell Arnold Press": {
+    "et": "Kettlebelli Arnoldi surumine",
+    "lt": "Arnoldo spaudimas su svarsčiu",
+    "pl": "Wyciskanie Arnolda z kettlebellem",
+    "uk": "Жим Арнольда з гирями"
+  },
+  "Kettlebell Dead Clean": {
+    "et": "Kettlebelli rinnalevõte põrandalt",
+    "lt": "Svarsčio vertimas į krūtinę nuo grindų",
+    "pl": "Zarzut kettlebella z podłogi",
+    "uk": "Взяття гирі з підлоги без розгойдування"
+  },
+  "Kettlebell Figure 8": {
+    "et": "Kettlebelli kaheksa",
+    "lt": "Svarsčio aštuntukas",
+    "pl": "Ósemki z kettlebellem",
+    "uk": "Вісімка з гирею"
+  },
+  "Kettlebell Hang Clean": {
+    "et": "Kettlebelli rinnalevõte rippasendist",
+    "lt": "Svarsčio vertimas į krūtinę nuo kabančios padėties",
+    "pl": "Zarzut kettlebella z zawieszenia",
+    "uk": "Взяття гирі на груди з виса"
+  },
   "Kettlebell One-Legged Deadlift": {
     "et": "Kettlebelli jõutõmme ühel jalal",
     "lt": "Svarsčio mirties trauka ant vienos kojos",
     "pl": "Martwy ciąg z kettlebellem na jednej nodze",
     "uk": "Станова тяга з гирею на одній нозі"
   },
+  "Kettlebell Pass Between The Legs": {
+    "et": "Kettlebelli üleandmine jalgade vahelt",
+    "lt": "Svarsčio perdavimas tarp kojų",
+    "pl": "Przekładanie kettlebella między nogami",
+    "uk": "Передача гирі між ногами"
+  },
+  "Kettlebell Pirate Ships": {
+    "et": "Kettlebelli piraadilaevad",
+    "lt": "Svarsčio piratų laivai",
+    "pl": "Pirate ships z kettlebellem",
+    "uk": "Піратський корабель з гирею"
+  },
+  "Kettlebell Pistol Squat": {
+    "et": "Kettlebelli püstolkükk",
+    "lt": "Pistoletiniai pritūpimai su svarsčiu",
+    "pl": "Przysiad na jednej nodze (pistolet) z kettlebellem",
+    "uk": "Присідання «пістолетик» з гирею"
+  },
   "Kettlebell Seated Press": {
     "et": "Kettlebelli surumine istudes",
     "lt": "Svarsčio spaudimas sėdint",
     "pl": "Wyciskanie kettlebella siedząc",
     "uk": "Жим гирі сидячи"
+  },
+  "Kettlebell Seesaw Press": {
+    "et": "Kettlebelli kiigesurumine",
+    "lt": "Svarsčio sūpynių spaudimas",
+    "pl": "Wyciskanie kettlebelli huśtawka",
+    "uk": "Жим гир «гойдалка»"
+  },
+  "Kettlebell Sumo High Pull": {
+    "et": "Kettlebelli sumo-ülatõmme",
+    "lt": "Svarsčio sumo trauka iki smakro",
+    "pl": "Sumo high pull z kettlebellem",
+    "uk": "Сумо-тяга гирі до підборіддя"
+  },
+  "Kettlebell Thruster": {
+    "et": "Kettlebelli thruster",
+    "lt": "Svarsčio trasteris",
+    "pl": "Thruster z kettlebellem",
+    "uk": "Трастер з гирею"
+  },
+  "Kettlebell Turkish Get-Up (Lunge style)": {
+    "et": "Kettlebelli türgi tõus (väljaastega)",
+    "lt": "Turkiškas atsikėlimas su svarsčiu (išpuolio stilius)",
+    "pl": "Turecka wstawanka z kettlebellem (przez wykrok)",
+    "uk": "Турецький підйом з гирею (через випад)"
+  },
+  "Kettlebell Turkish Get-Up (Squat style)": {
+    "et": "Kettlebelli türgi tõus (küki stiilis)",
+    "lt": "Turkiškas atsikėlimas su svarsčiu (pritūpimo stilius)",
+    "pl": "Turecka wstawanka z kettlebellem (przez przysiad)",
+    "uk": "Турецький підйом з гирею (через присід)"
+  },
+  "Kettlebell Windmill": {
+    "et": "Kettlebelli veski",
+    "lt": "Svarsčio malūnas",
+    "pl": "Wiatrak z kettlebellem",
+    "uk": "Вітряк з гирею"
+  },
+  "Kipping Muscle Up": {
+    "et": "Kipping muscle up",
+    "lt": "Muscle up su siūbavimu",
+    "pl": "Muscle-up kipping",
+    "uk": "Підйом переворотом з розгойдуванням"
+  },
+  "Knee Across The Body": {
+    "et": "Põlv üle keha",
+    "lt": "Kelio perkėlimas per kūną",
+    "pl": "Kolano w poprzek ciała",
+    "uk": "Коліно через тіло"
+  },
+  "Knee Circles": {
+    "et": "Põlveringid",
+    "lt": "Kelių sukimas",
+    "pl": "Krążenia kolan",
+    "uk": "Обертання колінами"
+  },
+  "Knee Tuck Jump": {
+    "et": "Hüpe põlvede tõmbega rinnale",
+    "lt": "Šuolis pritraukiant kelius",
+    "pl": "Wyskok z przyciągnięciem kolan",
+    "uk": "Стрибок з підтягуванням колін"
+  },
+  "Knee/Hip Raise On Parallel Bars": {
+    "et": "Põlvede/puusa tõste rööbaspuudel",
+    "lt": "Kelių ir klubų kėlimas ant lygiagrečių",
+    "pl": "Unoszenie kolan/bioder na poręczach",
+    "uk": "Підйом колін на брусах"
+  },
+  "Kneeling Arm Drill": {
+    "et": "Käte harjutus põlvitades",
+    "lt": "Rankų pratimas klūpant",
+    "pl": "Ćwiczenie ramion w klęku",
+    "uk": "Вправа для рук стоячи на колінах"
+  },
+  "Kneeling Cable Crunch With Alternating Oblique Twists": {
+    "et": "Kõhulihaste kõverdused kaabliga põlvitades vahelduvate väänetega",
+    "lt": "Atsilenkimai prie bloko klūpant su pakaitiniais sukimais",
+    "pl": "Spięcia brzucha na wyciągu klęcząc z naprzemiennymi skrętami",
+    "uk": "Скручування на блоці на колінах з поворотами на косі м’язи"
   },
   "Kneeling Cable Triceps Extension": {
     "et": "Triitsepsi sirutus kaabliga põlvitades",
@@ -819,11 +2369,65 @@
     "pl": "Rozciąganie przedramion klęcząc",
     "uk": "Розтяжка передпліч стоячи на колінах"
   },
+  "Kneeling High Pulley Row": {
+    "et": "Tõmme ülemise kaabliga põlvitades",
+    "lt": "Traukimas prie viršutinio bloko klūpant",
+    "pl": "Wiosłowanie na wyciągu górnym klęcząc",
+    "uk": "Тяга верхнього блока стоячи на колінах"
+  },
+  "Kneeling Hip Flexor": {
+    "et": "Puusa painutajate venitus põlvitades",
+    "lt": "Klubo lenkiamųjų tempimas klūpant",
+    "pl": "Rozciąganie zginaczy bioder klęcząc",
+    "uk": "Розтяжка згиначів стегна на колінах"
+  },
+  "Kneeling Jump Squat": {
+    "et": "Hüpe põlvilt kükki",
+    "lt": "Šuoliai iš pritūpimo klūpant",
+    "pl": "Przysiad z wyskokiem z klęku",
+    "uk": "Присід зі стрибком з колін"
+  },
+  "Kneeling Single-Arm High Pulley Row": {
+    "et": "Tõmme ülemise kaabliga põlvitades ühe käega",
+    "lt": "Traukimas prie viršutinio bloko viena ranka klūpant",
+    "pl": "Wiosłowanie na wyciągu górnym jednorącz klęcząc",
+    "uk": "Тяга верхнього блока однією рукою стоячи на колінах"
+  },
   "Kneeling Squat": {
     "et": "Kükk põlvitades",
     "lt": "Pritūpimai klūpint",
     "pl": "Przysiad klęcząc",
     "uk": "Присідання стоячи на колінах"
+  },
+  "Landmine 180's": {
+    "et": "Landmine 180-kraadised pöörded",
+    "lt": "Landmine 180 laipsnių sukimai",
+    "pl": "Landmine 180",
+    "uk": "Ландмайн 180°"
+  },
+  "Landmine Linear Jammer": {
+    "et": "Landmine lineaarne jammer",
+    "lt": "Landmine tiesus stūmimas",
+    "pl": "Linear jammer z landmine",
+    "uk": "Лінійний джамер з ландмайном"
+  },
+  "Lateral Bound": {
+    "et": "Külghüpe",
+    "lt": "Šoninis šuolis",
+    "pl": "Skok boczny",
+    "uk": "Бічні стрибки"
+  },
+  "Lateral Box Jump": {
+    "et": "Külghüpe kastile",
+    "lt": "Šoninis šuolis ant dėžės",
+    "pl": "Wskok boczny na skrzynię",
+    "uk": "Бічні стрибки на тумбу"
+  },
+  "Lateral Cone Hops": {
+    "et": "Külghüpped koonuste kohal",
+    "lt": "Šoniniai šuoliai per kūgius",
+    "pl": "Skoki boczne przez pachołki",
+    "uk": "Бічні стрибки через конуси"
   },
   "Lateral Raise - With Bands": {
     "et": "Külgtõsted kummiga",
@@ -831,17 +2435,47 @@
     "pl": "Wznosy z gumą bokiem",
     "uk": "Махи з еспандером в сторони"
   },
+  "Latissimus Dorsi-SMR": {
+    "et": "Selja laia lihase massaaž rulliga",
+    "lt": "Plačiojo nugaros raumens masažas volu",
+    "pl": "Rolowanie najszerszych grzbietu",
+    "uk": "МФР найширшого м’яза спини"
+  },
   "Leg Extensions": {
     "et": "Jalgade sirutus",
     "lt": "Kojų tiesimas",
     "pl": "Prostowanie nóg",
     "uk": "Розгинання ніг"
   },
+  "Leg Lift": {
+    "et": "Jalatõste",
+    "lt": "Kojų kėlimas",
+    "pl": "Unoszenie nóg",
+    "uk": "Підйом ніг"
+  },
   "Leg Press": {
     "et": "Jalgade surumine",
     "lt": "Kojų spaudimas",
     "pl": "Wyciskanie nogami",
     "uk": "Жим ногами"
+  },
+  "Leg Pull-In": {
+    "et": "Jalgade tõmme rinnale",
+    "lt": "Kojų pritraukimas",
+    "pl": "Przyciąganie nóg",
+    "uk": "Підтягування колін"
+  },
+  "Leg-Over Floor Press": {
+    "et": "Surumine põrandalt jalg üle keha",
+    "lt": "Spaudimas nuo grindų perkėlus koją",
+    "pl": "Wyciskanie z podłogi z nogą przełożoną",
+    "uk": "Жим з підлоги з перекинутою ногою"
+  },
+  "Leg-Up Hamstring Stretch": {
+    "et": "Reie tagakülje venitus jalg üleval",
+    "lt": "Šlaunies užpakalinės dalies tempimas pakėlus koją",
+    "pl": "Rozciąganie tylnej strony uda z nogą uniesioną",
+    "uk": "Розтяжка задньої поверхні стегна з піднятою ногою"
   },
   "Leverage Chest Press": {
     "et": "Surumine masinal",
@@ -861,11 +2495,23 @@
     "pl": "Wyciskanie na maszynie na ławce ujemnej",
     "uk": "Жим у тренажері на негативній лаві"
   },
+  "Leverage High Row": {
+    "et": "Tõmme ülalt hoobmasinal",
+    "lt": "Aukštas traukimas svertiniu treniruokliu",
+    "pl": "Wiosłowanie wysokie na maszynie dźwigniowej",
+    "uk": "Тяга верхнього блока в важільному тренажері"
+  },
   "Leverage Incline Chest Press": {
     "et": "Surumine masinal kaldpingil",
     "lt": "Spaudimas treniruokliu ant pakrypusio suolo",
     "pl": "Wyciskanie na maszynie na ławce skośnej",
     "uk": "Жим у тренажері на похилій лаві"
+  },
+  "Leverage Iso Row": {
+    "et": "Iso-tõmme hoobmasinal",
+    "lt": "Izoliuotas traukimas svertiniu treniruokliu",
+    "pl": "Wiosłowanie izolowane na maszynie dźwigniowej",
+    "uk": "Ізолована тяга в важільному тренажері"
   },
   "Leverage Shoulder Press": {
     "et": "Surumine masinal pea kohal",
@@ -879,11 +2525,119 @@
     "pl": "Wzruszanie ramion na maszynie",
     "uk": "Шраги у тренажері"
   },
+  "Linear 3-Part Start Technique": {
+    "et": "Lineaarne kolmeosaline starditehnika",
+    "lt": "Linijinė trijų dalių starto technika",
+    "pl": "Technika startu liniowego w trzech fazach",
+    "uk": "Лінійна техніка старту в три фази"
+  },
+  "Linear Acceleration Wall Drill": {
+    "et": "Lineaarse kiirenduse harjutus vastu seina",
+    "lt": "Linijinio pagreitėjimo pratimas prie sienos",
+    "pl": "Ćwiczenie przyspieszenia liniowego przy ścianie",
+    "uk": "Лінійне прискорення від стіни"
+  },
+  "Linear Depth Jump": {
+    "et": "Lineaarne sügavhüpe",
+    "lt": "Linijinis šuolis iš aukščio",
+    "pl": "Liniowy skok zeskokowy",
+    "uk": "Лінійний стрибок із зістрибуванням"
+  },
+  "Log Lift": {
+    "et": "Palgi tõstmine",
+    "lt": "Rąsto kėlimas",
+    "pl": "Podnoszenie kłody",
+    "uk": "Підйом колоди"
+  },
+  "London Bridges": {
+    "et": "Londoni sillad",
+    "lt": "Londono tiltai",
+    "pl": "London bridges",
+    "uk": "Лондонські мости"
+  },
+  "Looking At Ceiling": {
+    "et": "Lakke vaatamine",
+    "lt": "Žvilgsnis į lubas",
+    "pl": "Patrzenie w sufit",
+    "uk": "Погляд на стелю"
+  },
+  "Low Cable Crossover": {
+    "et": "Kaabli ristamine altpoolt",
+    "lt": "Rankų suvedimas apatiniuose blokuose",
+    "pl": "Krzyżowanie linek dolnego wyciągu",
+    "uk": "Зведення рук на нижніх блоках"
+  },
+  "Low Cable Triceps Extension": {
+    "et": "Triitsepsi sirutus alumise kaabliga",
+    "lt": "Tricepso tiesimas prie apatinio bloko",
+    "pl": "Prostowanie ramion na dolnym wyciągu",
+    "uk": "Розгинання рук на нижньому блоці"
+  },
+  "Low Pulley Row To Neck": {
+    "et": "Tõmme alumise kaabliga kaelani",
+    "lt": "Traukimas prie apatinio bloko iki kaklo",
+    "pl": "Wiosłowanie na dolnym wyciągu do szyi",
+    "uk": "Тяга нижнього блока до шиї"
+  },
+  "Lower Back Curl": {
+    "et": "Alaselja kõverdus",
+    "lt": "Apatinės nugaros lenkimas",
+    "pl": "Podwijanie miednicy leżąc",
+    "uk": "Скручування для попереку"
+  },
+  "Lower Back-SMR": {
+    "et": "Alaselja massaaž rulliga",
+    "lt": "Apatinės nugaros masažas volu",
+    "pl": "Rolowanie dolnego odcinka pleców",
+    "uk": "МФР попереку"
+  },
+  "Lunge Pass Through": {
+    "et": "Väljaaste läbiviiguga",
+    "lt": "Išpuoliai su perdavimu tarp kojų",
+    "pl": "Wykrok z przekładaniem pod nogą",
+    "uk": "Випад з передачею"
+  },
+  "Lunge Sprint": {
+    "et": "Väljaastete sprint",
+    "lt": "Išpuolių sprintas",
+    "pl": "Sprint z wykroków",
+    "uk": "Спринт з випадів"
+  },
+  "Lying Bent Leg Groin": {
+    "et": "Kubeme venitus lamades painutatud jalaga",
+    "lt": "Kirkšnies tempimas gulint sulenkta koja",
+    "pl": "Rozciąganie pachwin leżąc ze zgiętą nogą",
+    "uk": "Розтяжка паху лежачи зі зігнутою ногою"
+  },
   "Lying Cable Curl": {
     "et": "Biitsepsi kõverdus kaabliga lamades",
     "lt": "Bicepso lenkimas prie bloko gulint",
     "pl": "Uginanie ramion na wyciągu leżąc",
     "uk": "Підйом блоку на біцепс лежачи"
+  },
+  "Lying Cambered Barbell Row": {
+    "et": "Tõmme kõvera kangiga lamades",
+    "lt": "Lenktos štangos traukimas gulint",
+    "pl": "Wiosłowanie leżąc łamaną sztangą",
+    "uk": "Тяга зігнутого грифа лежачи"
+  },
+  "Lying Close-Grip Bar Curl On High Pulley": {
+    "et": "Biitsepsi kõverdus kitsa haardega ülemise kaabliga lamades",
+    "lt": "Bicepso lenkimas gulint prie viršutinio bloko siauru griebimu",
+    "pl": "Uginanie ramion leżąc wąskim chwytem na górnym wyciągu",
+    "uk": "Підйом грифа на біцепс лежачи на верхньому блоці вузьким хватом"
+  },
+  "Lying Close-Grip Barbell Triceps Extension Behind The Head": {
+    "et": "Triitsepsi sirutus kangiga kitsa haardega lamades pea taha",
+    "lt": "Tricepso tiesimas su štanga gulint už galvos siauru griebimu",
+    "pl": "Prostowanie ramion ze sztangą leżąc wąskim chwytem za głową",
+    "uk": "Французький жим лежачи вузьким хватом за голову"
+  },
+  "Lying Close-Grip Barbell Triceps Press To Chin": {
+    "et": "Triitsepsi surumine kangiga kitsa haardega lamades lõuani",
+    "lt": "Tricepso spaudimas su štanga gulint iki smakro siauru griebimu",
+    "pl": "Wyciskanie wąskim chwytem leżąc do podbródka",
+    "uk": "Жим штанги вузьким хватом лежачи до підборіддя"
   },
   "Lying Crossover": {
     "et": "Kaabli ristamine lamades",
@@ -896,6 +2650,36 @@
     "lt": "Hantelių tricepso tiesimas gulint",
     "pl": "Prostowanie ramion z hantlami leżąc",
     "uk": "Розгинання рук на трицепс з гантелями лежачи"
+  },
+  "Lying Face Down Plate Neck Resistance": {
+    "et": "Kaela vastupanu plaadiga kõhuli",
+    "lt": "Kaklo pasipriešinimas su blynu gulint veidu žemyn",
+    "pl": "Opór talerza na szyję leżąc przodem",
+    "uk": "Опір для шиї з млинцем лежачи на животі"
+  },
+  "Lying Face Up Plate Neck Resistance": {
+    "et": "Kaela vastupanu plaadiga selili",
+    "lt": "Kaklo pasipriešinimas su blynu gulint veidu aukštyn",
+    "pl": "Opór talerza na szyję leżąc tyłem",
+    "uk": "Опір для шиї з млинцем лежачи на спині"
+  },
+  "Lying Glute": {
+    "et": "Tuhara venitus lamades",
+    "lt": "Sėdmenų tempimas gulint",
+    "pl": "Rozciąganie pośladków leżąc",
+    "uk": "Розтяжка сідниць лежачи"
+  },
+  "Lying Hamstring": {
+    "et": "Reie tagakülje venitus lamades",
+    "lt": "Šlaunies užpakalinės dalies tempimas gulint",
+    "pl": "Rozciąganie tylnej strony uda leżąc",
+    "uk": "Розтяжка задньої поверхні стегна лежачи"
+  },
+  "Lying High Bench Barbell Curl": {
+    "et": "Kangi biitsepsi kõverdus kõrgel pingil lamades",
+    "lt": "Štangos bicepso lenkimas gulint ant aukšto suolo",
+    "pl": "Uginanie ramion ze sztangą leżąc na wysokiej ławce",
+    "uk": "Підйом штанги на біцепс лежачи на високій лаві"
   },
   "Lying Leg Curls": {
     "et": "Jalgade painutus lamades",
@@ -914,6 +2698,12 @@
     "lt": "Rankų kėlimas į šonus gulint viena ranka",
     "pl": "Wznosy bokiem leżąc jednorącz",
     "uk": "Махи в сторони лежачи однією рукою"
+  },
+  "Lying Prone Quadriceps": {
+    "et": "Nelipea venitus kõhuli",
+    "lt": "Keturgalvio tempimas gulint ant pilvo",
+    "pl": "Rozciąganie czworogłowych leżąc przodem",
+    "uk": "Розтяжка квадріцепса лежачи на животі"
   },
   "Lying Rear Delt Raise": {
     "et": "Tagatõsted kummardudes",
@@ -957,11 +2747,59 @@
     "pl": "Uginanie ramion na modlitewniku na maszynie",
     "uk": "Згинання рук у тренажері на біцепс на лаві Скотта"
   },
+  "Machine Shoulder (Military) Press": {
+    "et": "Õlasurumine masinal",
+    "lt": "Spaudimas virš galvos treniruokliu",
+    "pl": "Wyciskanie nad głowę na maszynie",
+    "uk": "Жим у тренажері над головою"
+  },
   "Machine Triceps Extension": {
     "et": "Triitsepsi sirutus masinal",
     "lt": "Tricepso tiesimas treniruokliu",
     "pl": "Prostowanie ramion na maszynie",
     "uk": "Розгинання рук на трицепс у тренажері"
+  },
+  "Medicine Ball Chest Pass": {
+    "et": "Topispalli rinnasööt",
+    "lt": "Medicininio kamuolio perdavimas nuo krūtinės",
+    "pl": "Podanie piłki lekarskiej od klatki",
+    "uk": "Передача медболу від грудей"
+  },
+  "Medicine Ball Full Twist": {
+    "et": "Topispalli täisväänd",
+    "lt": "Pilnas sukimas su medicininiu kamuoliu",
+    "pl": "Pełny skręt z piłką lekarską",
+    "uk": "Повний поворот з медболом"
+  },
+  "Medicine Ball Scoop Throw": {
+    "et": "Topispalli kühvelvise",
+    "lt": "Medicininio kamuolio metimas iš apačios",
+    "pl": "Rzut piłką lekarską spod nóg",
+    "uk": "Кидок медболу знизу"
+  },
+  "Middle Back Shrug": {
+    "et": "Keskselja õlakehitus",
+    "lt": "Vidurinės nugaros gūžčiojimas",
+    "pl": "Ściąganie łopatek (środek pleców)",
+    "uk": "Шраги для середини спини"
+  },
+  "Middle Back Stretch": {
+    "et": "Keskselja venitus",
+    "lt": "Vidurinės nugaros tempimas",
+    "pl": "Rozciąganie środkowego odcinka pleców",
+    "uk": "Розтяжка середини спини"
+  },
+  "Mixed Grip Chin": {
+    "et": "Lõuatõmbed segahaardega",
+    "lt": "Prisitraukimai mišriu griebimu",
+    "pl": "Podciąganie chwytem mieszanym",
+    "uk": "Підтягування різним хватом"
+  },
+  "Monster Walk": {
+    "et": "Koletisekõnd",
+    "lt": "Pabaisos ėjimas",
+    "pl": "Monster walk",
+    "uk": "Ходьба «монстр»"
   },
   "Mountain Climbers": {
     "et": "Mägironija",
@@ -969,11 +2807,47 @@
     "pl": "Wspinaczka",
     "uk": "Скелелаз"
   },
+  "Moving Claw Series": {
+    "et": "Liikuva küünise seeria",
+    "lt": "Judančio nagų serija",
+    "pl": "Moving claw series",
+    "uk": "Серія «рухомий кіготь»"
+  },
+  "Muscle Snatch": {
+    "et": "Muscle snatch",
+    "lt": "Raumenų rovimas",
+    "pl": "Rwanie mięśniowe",
+    "uk": "М’язовий ривок"
+  },
   "Muscle Up": {
     "et": "Muscle up",
     "lt": "Muscle up",
     "pl": "Muscle up",
     "uk": "Вихід силою"
+  },
+  "Narrow Stance Hack Squats": {
+    "et": "Hack-kükk kitsa asendiga",
+    "lt": "Hakenšmito pritūpimai siaura pozicija",
+    "pl": "Hack przysiad wąskim rozstawem",
+    "uk": "Гак-присідання з вузькою постановкою ніг"
+  },
+  "Narrow Stance Leg Press": {
+    "et": "Jalgade surumine kitsa asendiga",
+    "lt": "Kojų spaudimas siaura pozicija",
+    "pl": "Wypychanie na suwnicy wąskim rozstawem",
+    "uk": "Жим ногами з вузькою постановкою"
+  },
+  "Narrow Stance Squats": {
+    "et": "Kükk kitsa asendiga",
+    "lt": "Pritūpimai siaura pozicija",
+    "pl": "Przysiady wąskim rozstawem",
+    "uk": "Присідання з вузькою постановкою ніг"
+  },
+  "Natural Glute Ham Raise": {
+    "et": "Loomulik glute-ham raise",
+    "lt": "Natūralus šlaunų ir sėdmenų kėlimas",
+    "pl": "Naturalny glute-ham raise",
+    "uk": "Природний підйом на ГГР"
   },
   "Neck Press": {
     "et": "Surumine",
@@ -981,11 +2855,53 @@
     "pl": "Wyciskanie",
     "uk": "Жим"
   },
+  "Neck-SMR": {
+    "et": "Kaela massaaž rulliga",
+    "lt": "Kaklo masažas volu",
+    "pl": "Rolowanie szyi",
+    "uk": "МФР шиї"
+  },
   "Oblique Crunches": {
     "et": "Kõhulihaste kõverdused",
     "lt": "Atsilenkimai",
     "pl": "Spięcia brzucha",
     "uk": "Скручування"
+  },
+  "Oblique Crunches - On The Floor": {
+    "et": "Kõhulihaste külgkõverdused põrandal",
+    "lt": "Įstrižieji pilvo prispaudimai ant grindų",
+    "pl": "Skośne spięcia brzucha na podłodze",
+    "uk": "Скручування на косі м’язи на підлозі"
+  },
+  "Olympic Squat": {
+    "et": "Olümpiakükk",
+    "lt": "Olimpiniai pritūpimai",
+    "pl": "Przysiad olimpijski",
+    "uk": "Олімпійський присід"
+  },
+  "On Your Side Quad Stretch": {
+    "et": "Nelipea venitus külili",
+    "lt": "Keturgalvio tempimas gulint ant šono",
+    "pl": "Rozciąganie czworogłowych leżąc na boku",
+    "uk": "Розтяжка квадріцепса лежачи на боці"
+  },
+  "On-Your-Back Quad Stretch": {
+    "et": "Nelipea venitus selili",
+    "lt": "Keturgalvio tempimas gulint ant nugaros",
+    "pl": "Rozciąganie czworogłowych leżąc na plecach",
+    "uk": "Розтяжка квадріцепса лежачи на спині"
+  },
+  "One Arm Against Wall": {
+    "et": "Venitus ühe käega vastu seina",
+    "lt": "Viena ranka prie sienos",
+    "pl": "Rozciąganie ręki przy ścianie",
+    "uk": "Розтяжка руки об стіну"
+  },
+  "One Arm Chin-Up": {
+    "et": "Lõuatõmme ühe käega",
+    "lt": "Prisitraukimai viena ranka",
+    "pl": "Podciąganie podchwytem jednorącz",
+    "uk": "Підтягування на одній руці"
   },
   "One Arm Dumbbell Bench Press": {
     "et": "Hantli surumine lamades ühe käega",
@@ -1023,6 +2939,24 @@
     "pl": "Prostowanie ramion hantlą podchwytem jednorącz",
     "uk": "Розгинання рук на трицепс з гантеллю зворотним хватом однією рукою"
   },
+  "One Half Locust": {
+    "et": "Poolritsikas",
+    "lt": "Pusė skėrio",
+    "pl": "Pół szarańczy",
+    "uk": "Півсаранча"
+  },
+  "One Handed Hang": {
+    "et": "Ripe ühe käega",
+    "lt": "Kabėjimas viena ranka",
+    "pl": "Zwis jednorącz",
+    "uk": "Вис на одній руці"
+  },
+  "One Knee To Chest": {
+    "et": "Üks põlv rinnale",
+    "lt": "Vienas kelias prie krūtinės",
+    "pl": "Jedno kolano do klatki piersiowej",
+    "uk": "Коліно до грудей"
+  },
   "One Leg Barbell Squat": {
     "et": "Kangi kükk ühel jalal",
     "lt": "Štangos pritūpimai ant vienos kojos",
@@ -1041,11 +2975,29 @@
     "pl": "Rozpiętki hantlą na ławce płaskiej jednorącz",
     "uk": "Розведення гантелі на горизонтальній лаві однією рукою"
   },
+  "One-Arm High-Pulley Cable Side Bends": {
+    "et": "Külgkõverdus ülemise kaabliga ühe käega",
+    "lt": "Šoniniai lenkimai prie viršutinio bloko viena ranka",
+    "pl": "Skłony boczne na górnym wyciągu jednorącz",
+    "uk": "Нахили в сторони на верхньому блоці однією рукою"
+  },
   "One-Arm Incline Lateral Raise": {
     "et": "Külgtõsted kaldpingil ühe käega",
     "lt": "Rankų kėlimas į šonus ant pakrypusio suolo viena ranka",
     "pl": "Wznosy bokiem na ławce skośnej jednorącz",
     "uk": "Махи в сторони на похилій лаві однією рукою"
+  },
+  "One-Arm Kettlebell Clean": {
+    "et": "Kettlebelli rinnalevõte ühe käega",
+    "lt": "Svarsčio vertimas į krūtinę viena ranka",
+    "pl": "Zarzut kettlebella jednorącz",
+    "uk": "Взяття гирі на груди однією рукою"
+  },
+  "One-Arm Kettlebell Clean and Jerk": {
+    "et": "Kettlebelli rinnalevõte ja tõuge ühe käega",
+    "lt": "Svarsčio vertimas į krūtinę ir stūmimas viena ranka",
+    "pl": "Zarzut i podrzut kettlebella jednorącz",
+    "uk": "Поштовх гирі однією рукою"
   },
   "One-Arm Kettlebell Floor Press": {
     "et": "Kettlebelli surumine põrandalt ühe käega",
@@ -1053,11 +3005,77 @@
     "pl": "Wyciskanie kettlebella z podłogi jednorącz",
     "uk": "Жим гирі з підлоги однією рукою"
   },
+  "One-Arm Kettlebell Jerk": {
+    "et": "Kettlebelli tõuge ühe käega",
+    "lt": "Svarsčio stūmimas viena ranka",
+    "pl": "Podrzut kettlebella jednorącz",
+    "uk": "Поштовх гирі від плеча однією рукою"
+  },
+  "One-Arm Kettlebell Military Press To The Side": {
+    "et": "Kettlebelli sõjaväesurumine küljele ühe käega",
+    "lt": "Svarsčio spaudimas į šoną viena ranka",
+    "pl": "Wyciskanie kettlebella jednorącz w bok",
+    "uk": "Жим гирі однією рукою в сторону"
+  },
+  "One-Arm Kettlebell Para Press": {
+    "et": "Kettlebelli para press ühe käega",
+    "lt": "Svarsčio para spaudimas viena ranka",
+    "pl": "Para press z kettlebellem jednorącz",
+    "uk": "Пара-жим гирі однією рукою"
+  },
+  "One-Arm Kettlebell Push Press": {
+    "et": "Kettlebelli push press ühe käega",
+    "lt": "Svarsčio stūmimo spaudimas viena ranka",
+    "pl": "Push press z kettlebellem jednorącz",
+    "uk": "Швунг гирі однією рукою"
+  },
   "One-Arm Kettlebell Row": {
     "et": "Kettlebelli tõmme ühe käega",
     "lt": "Svarsčio traukimas viena ranka",
     "pl": "Wiosłowanie z kettlebellem jednorącz",
     "uk": "Тяга гирі однією рукою"
+  },
+  "One-Arm Kettlebell Snatch": {
+    "et": "Kettlebelli rebimine ühe käega",
+    "lt": "Svarsčio rovimas viena ranka",
+    "pl": "Rwanie kettlebella jednorącz",
+    "uk": "Ривок гирі однією рукою"
+  },
+  "One-Arm Kettlebell Split Jerk": {
+    "et": "Kettlebelli split jerk ühe käega",
+    "lt": "Svarsčio stūmimas išpuoliu viena ranka",
+    "pl": "Podrzut nożycowy kettlebella jednorącz",
+    "uk": "Поштовх гирі однією рукою в розножку"
+  },
+  "One-Arm Kettlebell Split Snatch": {
+    "et": "Kettlebelli split snatch ühe käega",
+    "lt": "Svarsčio rovimas išpuoliu viena ranka",
+    "pl": "Rwanie nożycowe kettlebella jednorącz",
+    "uk": "Ривок гирі однією рукою в розножку"
+  },
+  "One-Arm Kettlebell Swings": {
+    "et": "Kettlebelli hoog ühe käega",
+    "lt": "Svarsčio švytavimai viena ranka",
+    "pl": "Wymachy kettlebella jednorącz",
+    "uk": "Махи гирі однією рукою"
+  },
+  "One-Arm Long Bar Row": {
+    "et": "Pika kangi tõmme ühe käega",
+    "lt": "Ilgo grifo traukimas viena ranka",
+    "pl": "Wiosłowanie długą sztangą jednorącz",
+    "uk": "Тяга довгого грифа однією рукою"
+  },
+  "One-Arm Medicine Ball Slam": {
+    "et": "Topispalli löök vastu maad ühe käega",
+    "lt": "Medicininio kamuolio trenkimas viena ranka",
+    "pl": "Uderzenie piłką lekarską o ziemię jednorącz",
+    "uk": "Удар медболом об підлогу однією рукою"
+  },
+  "One-Arm Open Palm Kettlebell Clean": {
+    "et": "Kettlebelli rinnalevõte avatud peopesaga ühe käega",
+    "lt": "Svarsčio vertimas į krūtinę viena ranka atvira delnu",
+    "pl": "Zarzut kettlebella otwartą dłonią jednorącz",
+    "uk": "Взяття гирі на груди відкритою долонею однією рукою"
   },
   "One-Arm Overhead Kettlebell Squats": {
     "et": "Kettlebelli kükk pea kohal ühe käega",
@@ -1071,11 +3089,29 @@
     "pl": "Martwy ciąg jednorącz",
     "uk": "Станова тяга однією рукою"
   },
+  "One-Arm Side Laterals": {
+    "et": "Külgtõsted ühe käega",
+    "lt": "Rankos kėlimas į šoną viena ranka",
+    "pl": "Wznosy bokiem jednorącz",
+    "uk": "Махи гантелі в сторону однією рукою"
+  },
   "One-Legged Cable Kickback": {
     "et": "Triitsepsi tahatõmme ühel jalal",
     "lt": "Tricepso atmetimas pasilenkus ant vienos kojos",
     "pl": "Prostowanie ramienia w opadzie na wyciągu na jednej nodze",
     "uk": "Розгинання руки в нахилі на блоці на одній нозі"
+  },
+  "Open Palm Kettlebell Clean": {
+    "et": "Kettlebelli rinnalevõte avatud peopesaga",
+    "lt": "Svarsčio vertimas į krūtinę atviru delnu",
+    "pl": "Zarzut kettlebella otwartą dłonią",
+    "uk": "Взяття гирі на груди відкритою долонею"
+  },
+  "Otis-Up": {
+    "et": "Otis-up",
+    "lt": "Otiso kėlimas",
+    "pl": "Otis-up",
+    "uk": "Підйом Отіса"
   },
   "Overhead Cable Curl": {
     "et": "Biitsepsi kõverdus kaabliga pea kohal",
@@ -1083,16 +3119,149 @@
     "pl": "Uginanie ramion na wyciągu nad głową",
     "uk": "Підйом блоку на біцепс над головою"
   },
+  "Overhead Lat": {
+    "et": "Lati venitus pea kohal",
+    "lt": "Platusis nugaros raumuo virš galvos",
+    "pl": "Rozciąganie najszerszych nad głową",
+    "uk": "Розтяжка найширших над головою"
+  },
+  "Overhead Slam": {
+    "et": "Löök vastu maad pea kohalt",
+    "lt": "Trenkimas iš viršaus",
+    "pl": "Uderzenie piłką o ziemię znad głowy",
+    "uk": "Удар медболом об підлогу з-над голови"
+  },
   "Overhead Squat": {
     "et": "Kükk kangiga pea kohal",
     "lt": "Pritūpimai su štanga virš galvos",
     "pl": "Przysiad ze sztangą nad głową",
     "uk": "Присідання зі штангою над головою"
   },
+  "Overhead Stretch": {
+    "et": "Venitus pea kohal",
+    "lt": "Tempimas virš galvos",
+    "pl": "Rozciąganie nad głową",
+    "uk": "Розтяжка над головою"
+  },
+  "Overhead Triceps": {
+    "et": "Triitsepsi venitus pea kohal",
+    "lt": "Tricepso tempimas virš galvos",
+    "pl": "Rozciąganie tricepsa nad głową",
+    "uk": "Розтяжка трицепса над головою"
+  },
+  "Pallof Press": {
+    "et": "Pallof press",
+    "lt": "Pallof Press",
+    "pl": "Pallof press",
+    "uk": "Жим Палофа"
+  },
+  "Pallof Press With Rotation": {
+    "et": "Pallof press rotatsiooniga",
+    "lt": "Pallof Press su rotacija",
+    "pl": "Pallof press z rotacją",
+    "uk": "Жим Палофа з ротацією"
+  },
+  "Palms-Down Dumbbell Wrist Curl Over A Bench": {
+    "et": "Randmete painutus hantlitega pealthaardega üle pingi",
+    "lt": "Riešų lenkimas su hantelėmis delnais žemyn ant suolo",
+    "pl": "Uginanie nadgarstków z hantlami nachwytem na ławce",
+    "uk": "Згинання зап’ясть з гантелями прямим хватом над лавою"
+  },
+  "Palms-Down Wrist Curl Over A Bench": {
+    "et": "Randmete painutus pealthaardega üle pingi",
+    "lt": "Riešų lenkimas delnais žemyn ant suolo",
+    "pl": "Uginanie nadgarstków nachwytem na ławce",
+    "uk": "Згинання зап’ясть прямим хватом над лавою"
+  },
+  "Palms-Up Barbell Wrist Curl Over A Bench": {
+    "et": "Randmete painutus kangiga althaardega üle pingi",
+    "lt": "Riešų lenkimas su štanga delnais aukštyn ant suolo",
+    "pl": "Uginanie nadgarstków ze sztangą podchwytem na ławce",
+    "uk": "Згинання зап’ясть зі штангою зворотним хватом над лавою"
+  },
+  "Palms-Up Dumbbell Wrist Curl Over A Bench": {
+    "et": "Randmete painutus hantlitega althaardega üle pingi",
+    "lt": "Riešų lenkimas su hantelėmis delnais aukštyn ant suolo",
+    "pl": "Uginanie nadgarstków z hantlami podchwytem na ławce",
+    "uk": "Згинання зап’ясть з гантелями зворотним хватом над лавою"
+  },
+  "Parallel Bar Dip": {
+    "et": "Kätekõverdused rööbaspuudel",
+    "lt": "Atsispaudimai ant lygiagrečių",
+    "pl": "Dipsy na poręczach",
+    "uk": "Віджимання на брусах"
+  },
+  "Pelvic Tilt Into Bridge": {
+    "et": "Vaagnakallutus sillasse",
+    "lt": "Dubens pakreipimas į tiltą",
+    "pl": "Przechył miednicy do mostka",
+    "uk": "Нахил таза з переходом у міст"
+  },
+  "Peroneals Stretch": {
+    "et": "Pindluulihaste venitus",
+    "lt": "Šeivikaulio raumenų tempimas",
+    "pl": "Rozciąganie mięśni strzałkowych",
+    "uk": "Розтяжка малогомілкових м’язів"
+  },
+  "Peroneals-SMR": {
+    "et": "Pindluulihaste massaaž rulliga",
+    "lt": "Šeivikaulio raumenų masažas volu",
+    "pl": "Rolowanie mięśni strzałkowych",
+    "uk": "МФР малогомілкових м’язів"
+  },
+  "Physioball Hip Bridge": {
+    "et": "Puusasild füsioballil",
+    "lt": "Klubų tiltas ant fitbolo",
+    "pl": "Mostek biodrowy na piłce",
+    "uk": "Ягодичний міст на фітболі"
+  },
+  "Pin Presses": {
+    "et": "Surumine toenditelt",
+    "lt": "Spaudimas nuo atramų",
+    "pl": "Wyciskanie z zatrzasków",
+    "uk": "Жим з упорів"
+  },
+  "Piriformis-SMR": {
+    "et": "Pirnlihase massaaž rulliga",
+    "lt": "Kriaušinio raumens masažas volu",
+    "pl": "Rolowanie mięśnia gruszkowatego",
+    "uk": "МФР грушоподібного м’яза"
+  },
   "Plank": {
+    "et": "Plank",
     "lt": "Lenta",
     "pl": "Deska",
     "uk": "Планка"
+  },
+  "Plate Pinch": {
+    "et": "Plaadi näpistus",
+    "lt": "Blynų gniaužimas pirštais",
+    "pl": "Chwyt szczypcowy talerzy",
+    "uk": "Утримання млинців щипком"
+  },
+  "Plate Twist": {
+    "et": "Plaadiväänd",
+    "lt": "Sukimai su blynu",
+    "pl": "Skręty z talerzem",
+    "uk": "Повороти з млинцем"
+  },
+  "Platform Hamstring Slides": {
+    "et": "Reie tagakülje libistused platvormil",
+    "lt": "Šlaunies užpakalinės dalies slydimas ant platformos",
+    "pl": "Ślizgi tylnej strony uda na platformie",
+    "uk": "Ковзання для задньої поверхні стегна на платформі"
+  },
+  "Plie Dumbbell Squat": {
+    "et": "Plié-hantlikükk",
+    "lt": "Pli pritūpimai su hanteliu",
+    "pl": "Przysiad plié z hantlem",
+    "uk": "Присідання плі з гантеллю"
+  },
+  "Plyo Kettlebell Pushups": {
+    "et": "Plyo-kätekõverdused kettlebellidel",
+    "lt": "Plijometriniai atsispaudimai ant svarsčių",
+    "pl": "Pompki plyo z kettlebellami",
+    "uk": "Плиометричні віджимання на гирях"
   },
   "Plyo Push-up": {
     "et": "Plüomeetrilised kätekõverdused",
@@ -1100,11 +3269,53 @@
     "pl": "Pompki pliometryczne",
     "uk": "Пліометричні віджимання"
   },
+  "Posterior Tibialis Stretch": {
+    "et": "Tagumise sääreluulihase venitus",
+    "lt": "Blauzdos užpakalinio raumens tempimas",
+    "pl": "Rozciąganie mięśnia piszczelowego tylnego",
+    "uk": "Розтяжка заднього великогомілкового м’яза"
+  },
   "Power Clean": {
     "et": "Jõurinnalevõte",
     "lt": "Galios vertimas",
     "pl": "Zarzut siłowy",
     "uk": "Силове взяття на груди"
+  },
+  "Power Clean from Blocks": {
+    "et": "Power clean klotsidelt",
+    "lt": "Galingas vertimas į krūtinę nuo kaladėlių",
+    "pl": "Zarzut siłowy z podstawek",
+    "uk": "Взяття на груди в стійку з підставок"
+  },
+  "Power Jerk": {
+    "et": "Power jerk",
+    "lt": "Galingas stūmimas",
+    "pl": "Podrzut siłowy",
+    "uk": "Силовий поштовх"
+  },
+  "Power Partials": {
+    "et": "Power partials",
+    "lt": "Dalinė amplitudė su svoriu",
+    "pl": "Power partials",
+    "uk": "Силові часткові повторення"
+  },
+  "Power Snatch": {
+    "et": "Power snatch",
+    "lt": "Galingas rovimas",
+    "pl": "Rwanie siłowe",
+    "uk": "Силовий ривок"
+  },
+  "Power Snatch from Blocks": {
+    "et": "Power snatch klotsidelt",
+    "lt": "Galingas rovimas nuo kaladėlių",
+    "pl": "Rwanie siłowe z podstawek",
+    "uk": "Силовий ривок з підставок"
+  },
+  "Power Stairs": {
+    "et": "Power stairs",
+    "lt": "Galingi laiptai",
+    "pl": "Power stairs",
+    "uk": "Силові сходи"
   },
   "Preacher Curl": {
     "et": "Biitsepsi kõverdus Scotti pingil",
@@ -1118,11 +3329,53 @@
     "pl": "Uginanie ramion na modlitewniku z hantlami chwytem młotkowym",
     "uk": "Підйом гантелей на біцепс на лаві Скотта нейтральним хватом"
   },
+  "Press Sit-Up": {
+    "et": "Surumisega kõhulihaste tõus",
+    "lt": "Pilvo prispaudimai su spaudimu",
+    "pl": "Brzuszki z wyciskaniem",
+    "uk": "Підйом корпусу з жимом"
+  },
+  "Prone Manual Hamstring": {
+    "et": "Reie tagakülje käsitsi vastupanu kõhuli",
+    "lt": "Šlaunies užpakalinės dalies pasipriešinimas su partneriu gulint ant pilvo",
+    "pl": "Ręczny opór tylnej strony uda leżąc przodem",
+    "uk": "Згинання ніг з опором партнера лежачи на животі"
+  },
+  "Prowler Sprint": {
+    "et": "Prowleri sprint",
+    "lt": "Prowler sprintas",
+    "pl": "Sprint z Prowlerem",
+    "uk": "Спринт з Prowler"
+  },
+  "Pull Through": {
+    "et": "Pull through",
+    "lt": "Pratraukimas",
+    "pl": "Pull through",
+    "uk": "Протяжка на блоці"
+  },
   "Pullups": {
     "et": "Lõuatõmbed",
     "lt": "Prisitraukimai",
     "pl": "Podciąganie",
     "uk": "Підтягування"
+  },
+  "Push Press": {
+    "et": "Push press",
+    "lt": "Stūmimo spaudimas",
+    "pl": "Push press",
+    "uk": "Швунг"
+  },
+  "Push Press - Behind the Neck": {
+    "et": "Push press kuklatagant",
+    "lt": "Stūmimo spaudimas už kaklo",
+    "pl": "Push press zza głowy",
+    "uk": "Швунг із-за голови"
+  },
+  "Push Up to Side Plank": {
+    "et": "Kätekõverdus külgtoeni",
+    "lt": "Atsispaudimas su perėjimu į šoninę lentą",
+    "pl": "Pompka z przejściem do deski bocznej",
+    "uk": "Віджимання з переходом у бічну планку"
   },
   "Push-Up Wide": {
     "et": "Laia haardega kätekõverdused",
@@ -1130,11 +3383,41 @@
     "pl": "Pompki szerokim rozstawem rąk",
     "uk": "Віджимання широким хватом"
   },
+  "Push-Ups - Close Triceps Position": {
+    "et": "Kätekõverdused kitsa haardega",
+    "lt": "Atsispaudimai siauru tricepso griebimu",
+    "pl": "Pompki wąskim rozstawem rąk (triceps)",
+    "uk": "Віджимання вузьким хватом (трицепс)"
+  },
+  "Push-Ups With Feet Elevated": {
+    "et": "Kätekõverdused jalad kõrgemal",
+    "lt": "Atsispaudimai kojomis ant pakylos",
+    "pl": "Pompki z nogami na podwyższeniu",
+    "uk": "Віджимання з піднятими ногами"
+  },
+  "Push-Ups With Feet On An Exercise Ball": {
+    "et": "Kätekõverdused jalad pallil",
+    "lt": "Atsispaudimai kojomis ant kamuolio",
+    "pl": "Pompki z nogami na piłce",
+    "uk": "Віджимання з ногами на фітболі"
+  },
   "Pushups": {
     "et": "Kätekõverdused",
     "lt": "Atsispaudimai",
     "pl": "Pompki",
     "uk": "Віджимання"
+  },
+  "Pushups (Close and Wide Hand Positions)": {
+    "et": "Kätekõverdused (kitsa ja laia haardega)",
+    "lt": "Atsispaudimai (siauras ir platus griebimas)",
+    "pl": "Pompki (wąski i szeroki rozstaw rąk)",
+    "uk": "Віджимання (вузький і широкий хват)"
+  },
+  "Pyramid": {
+    "et": "Püramiid",
+    "lt": "Piramidė",
+    "pl": "Piramida",
+    "uk": "Піраміда"
   },
   "Quad Stretch": {
     "et": "Reie nelipealihase venitus",
@@ -1142,11 +3425,53 @@
     "pl": "Rozciąganie mięśnia czworogłowego uda",
     "uk": "Розтяжка квадрицепса"
   },
+  "Quadriceps-SMR": {
+    "et": "Nelipea massaaž rulliga",
+    "lt": "Keturgalvio masažas volu",
+    "pl": "Rolowanie czworogłowych",
+    "uk": "МФР квадріцепса"
+  },
+  "Quick Leap": {
+    "et": "Kiirhüpe",
+    "lt": "Greitas šuolis",
+    "pl": "Szybki skok",
+    "uk": "Швидкий стрибок"
+  },
+  "Rack Delivery": {
+    "et": "Rack delivery",
+    "lt": "Štangos perdavimas nuo stovo",
+    "pl": "Rack delivery",
+    "uk": "Подача зі стійки"
+  },
+  "Rack Pull with Bands": {
+    "et": "Rack pull kummidega",
+    "lt": "Trauka nuo stovo su guma",
+    "pl": "Martwy ciąg z podstawek z gumami",
+    "uk": "Тяга зі стійки з еспандерами"
+  },
+  "Rack Pulls": {
+    "et": "Rack pull",
+    "lt": "Trauka nuo stovo",
+    "pl": "Martwy ciąg z podstawek",
+    "uk": "Тяга зі стійки"
+  },
   "Rear Leg Raises": {
     "et": "Tõsted",
     "lt": "Kėlimas",
     "pl": "Wznosy",
     "uk": "Підйом"
+  },
+  "Recumbent Bike": {
+    "et": "Lamav velotrenažöör",
+    "lt": "Gulimas dviratis",
+    "pl": "Rower poziomy",
+    "uk": "Горизонтальний велотренажер"
+  },
+  "Return Push from Stance": {
+    "et": "Tagasitõuge asendist",
+    "lt": "Grįžtamasis stūmimas iš pozicijos",
+    "pl": "Wypychanie powrotne z postawy",
+    "uk": "Зворотний поштовх зі стійки"
   },
   "Reverse Band Bench Press": {
     "et": "Surumine kummiga lamades pöördhaardega",
@@ -1154,11 +3479,23 @@
     "pl": "Wyciskanie z gumą leżąc nachwytem",
     "uk": "Жим з еспандером лежачи зворотним хватом"
   },
+  "Reverse Band Box Squat": {
+    "et": "Kükk kastile pöördkummiga",
+    "lt": "Pritūpimai ant dėžės su atvirkštine guma",
+    "pl": "Przysiad na skrzynię z odwróconymi gumami",
+    "uk": "Присідання на тумбу зі зворотним еспандером"
+  },
   "Reverse Band Deadlift": {
     "et": "Jõutõmme kummiga",
     "lt": "Mirties trauka su guma",
     "pl": "Martwy ciąg z gumą",
     "uk": "Станова тяга з еспандером"
+  },
+  "Reverse Band Power Squat": {
+    "et": "Power-kükk pöördkummiga",
+    "lt": "Galingi pritūpimai su atvirkštine guma",
+    "pl": "Power squat z odwróconymi gumami",
+    "uk": "Силовий присід зі зворотним еспандером"
   },
   "Reverse Band Sumo Deadlift": {
     "et": "Sumo jõutõmme kummiga",
@@ -1196,6 +3533,12 @@
     "pl": "Rozpiętki w opadzie",
     "uk": "Розведення в нахилі"
   },
+  "Reverse Flyes With External Rotation": {
+    "et": "Tagalengud välise rotatsiooniga",
+    "lt": "Atvirkštinis rankų skėtimas su išorine rotacija",
+    "pl": "Rozpiętki w opadzie z rotacją zewnętrzną",
+    "uk": "Зворотні розведення із зовнішньою ротацією"
+  },
   "Reverse Grip Bent-Over Rows": {
     "et": "Tõmme kummardudes pöördhaardega",
     "lt": "Traukimas pasilenkus viršutiniu griebimu",
@@ -1207,6 +3550,12 @@
     "lt": "Rankų tiesimas prie bloko viršutiniu griebimu",
     "pl": "Prostowanie ramion na wyciągu nachwytem",
     "uk": "Розгинання рук на блоці зворотним хватом"
+  },
+  "Reverse Hyperextension": {
+    "et": "Pöördhüperekstensioon",
+    "lt": "Atvirkštinė hiperekstenzija",
+    "pl": "Odwrotne wyprosty tułowia",
+    "uk": "Зворотна гіперекстензія"
   },
   "Reverse Machine Flyes": {
     "et": "Tagalengud masinal kummardudes",
@@ -1226,11 +3575,47 @@
     "pl": "Wyciskanie leżąc nachwytem",
     "uk": "Жим лежачи зворотним хватом"
   },
+  "Rhomboids-SMR": {
+    "et": "Rombilihaste massaaž rulliga",
+    "lt": "Rombinių raumenų masažas volu",
+    "pl": "Rolowanie mięśni równoległobocznych",
+    "uk": "МФР ромбоподібних м’язів"
+  },
+  "Rickshaw Carry": {
+    "et": "Rickshaw-kandmine",
+    "lt": "Rikšos nešimas",
+    "pl": "Spacer z rikszą",
+    "uk": "Перенесення рикші"
+  },
+  "Rickshaw Deadlift": {
+    "et": "Rickshaw jõutõmme",
+    "lt": "Mirties trauka su rikša",
+    "pl": "Martwy ciąg z rikszą",
+    "uk": "Станова тяга з рикші"
+  },
   "Ring Dips": {
     "et": "Rõngastel kätekõverdused",
     "lt": "Atsispaudimai ant žiedų",
     "pl": "Pompki na kółkach gimnastycznych",
     "uk": "Віджимання на кільцях"
+  },
+  "Rocket Jump": {
+    "et": "Raketihüpe",
+    "lt": "Raketos šuolis",
+    "pl": "Rocket jump",
+    "uk": "Стрибок «ракета»"
+  },
+  "Rocking Standing Calf Raise": {
+    "et": "Kiikuvad sääretõsted seistes",
+    "lt": "Stotis ant pirštų galų stovint su supimu",
+    "pl": "Wspięcia na palce stojąc z bujaniem",
+    "uk": "Підйом на носки стоячи з перекатом"
+  },
+  "Rocky Pull-Ups/Pulldowns": {
+    "et": "Rocky lõuatõmbed/ülatõmbed",
+    "lt": "Roky prisitraukimai",
+    "pl": "Podciąganie/ściąganie Rocky",
+    "uk": "Підтягування/тяга за Рокі"
   },
   "Romanian Deadlift": {
     "et": "Rumeenia jõutõmme",
@@ -1238,11 +3623,29 @@
     "pl": "Rumuński martwy ciąg",
     "uk": "Румунська станова тяга"
   },
+  "Romanian Deadlift from Deficit": {
+    "et": "Rumeenia jõutõmme kõrgendikult",
+    "lt": "Rumuniška mirties trauka iš pakylos",
+    "pl": "Rumuński martwy ciąg z deficytu",
+    "uk": "Румунська тяга з дефіциту"
+  },
+  "Rope Climb": {
+    "et": "Köieronimine",
+    "lt": "Lipimas virve",
+    "pl": "Wspinanie po linie",
+    "uk": "Лазіння по канату"
+  },
   "Rope Crunch": {
     "et": "Kõhulihaste kõverdused",
     "lt": "Atsilenkimai",
     "pl": "Spięcia brzucha",
     "uk": "Скручування"
+  },
+  "Rope Jumping": {
+    "et": "Hüppenööriga hüppamine",
+    "lt": "Šokinėjimas per virvutę",
+    "pl": "Skakanka",
+    "uk": "Стрибки на скакалці"
   },
   "Rope Straight-Arm Pulldown": {
     "et": "Ülatõmme sirgete kätega",
@@ -1250,17 +3653,59 @@
     "pl": "Ściąganie drążka wyciągu górnego z wyprostowanymi ramionami",
     "uk": "Тяга верхнього блоку прямими руками"
   },
+  "Round The World Shoulder Stretch": {
+    "et": "Õla venitus ringiga ümber keha",
+    "lt": "Pečių tempimas aplink pasaulį",
+    "pl": "Rozciąganie barków - okrążenia",
+    "uk": "Розтяжка плечей «навколо світу»"
+  },
+  "Rowing, Stationary": {
+    "et": "Sõudmine trenažööril",
+    "lt": "Irklavimas treniruokliu",
+    "pl": "Ergometr wioślarski",
+    "uk": "Гребний тренажер"
+  },
+  "Runner's Stretch": {
+    "et": "Jooksja venitus",
+    "lt": "Bėgiko tempimas",
+    "pl": "Rozciąganie biegacza",
+    "uk": "Розтяжка бігуна"
+  },
+  "Running, Treadmill": {
+    "et": "Jooksmine jooksulindil",
+    "lt": "Bėgimas bėgimo taku",
+    "pl": "Bieg na bieżni",
+    "uk": "Біг на доріжці"
+  },
   "Russian Twist": {
     "et": "Vene keerutus",
     "lt": "Rusiški sukimai",
     "pl": "Rosyjski skręt",
     "uk": "Російські скручування"
   },
+  "Sandbag Load": {
+    "et": "Liivakoti laadimine",
+    "lt": "Smėlio maišo kėlimas",
+    "pl": "Załadunek worka z piaskiem",
+    "uk": "Завантаження мішка з піском"
+  },
   "Scapular Pull-Up": {
     "et": "Abaluu lõuatõmbed",
     "lt": "Menčių prisitraukimai",
     "pl": "Podciąganie łopatkowe",
     "uk": "Лопаткові підтягування"
+  },
+  "Scissor Kick": {
+    "et": "Käärid",
+    "lt": "Žirklės",
+    "pl": "Nożyce poziome",
+    "uk": "Ножиці"
+  },
+  "Scissors Jump": {
+    "et": "Käärhüpe",
+    "lt": "Žirklių šuolis",
+    "pl": "Skok nożycowy",
+    "uk": "Стрибки «ножиці»"
   },
   "Seated Band Hamstring Curl": {
     "et": "Biitsepsi kõverdus kummiga istudes",
@@ -1273,6 +3718,12 @@
     "lt": "Štangos kariškas spaudimas sėdint",
     "pl": "Wyciskanie żołnierskie sztangi siedząc",
     "uk": "Армійський жим штанги сидячи"
+  },
+  "Seated Barbell Twist": {
+    "et": "Kangiväänd istudes",
+    "lt": "Sukimai su štanga sėdint",
+    "pl": "Skręty tułowia ze sztangą siedząc",
+    "uk": "Повороти зі штангою сидячи"
   },
   "Seated Bent-Over One-Arm Dumbbell Triceps Extension": {
     "et": "Hantli triitsepsi sirutus istudes ühe käega",
@@ -1291,6 +3742,12 @@
     "lt": "Hantelių tricepso tiesimas sėdint abiem rankomis",
     "pl": "Prostowanie ramion z hantlami siedząc oburącz",
     "uk": "Розгинання рук на трицепс з гантелями сидячи двома руками"
+  },
+  "Seated Biceps": {
+    "et": "Biitsepsi venitus istudes",
+    "lt": "Bicepso tempimas sėdint",
+    "pl": "Rozciąganie bicepsa siedząc",
+    "uk": "Розтяжка біцепса сидячи"
   },
   "Seated Cable Rows": {
     "et": "Tõmme kaabliga istudes",
@@ -1328,6 +3785,12 @@
     "pl": "Uginanie ramion z hantlami siedząc",
     "uk": "Підйом гантелей на біцепс сидячи"
   },
+  "Seated Dumbbell Inner Biceps Curl": {
+    "et": "Hantlite biitsepsi kõverdus sisehaardega istudes",
+    "lt": "Vidinė bicepso lenkimas su hantelėmis sėdint",
+    "pl": "Uginanie ramion z hantlami siedząc (wewnętrzna głowa bicepsa)",
+    "uk": "Підйом гантелей на біцепс сидячи хватом усередину"
+  },
   "Seated Dumbbell Palms-Down Wrist Curl": {
     "et": "Hantlite randmete painutus istudes",
     "lt": "Hantelių riešų lenkimas sėdint",
@@ -1346,11 +3809,65 @@
     "pl": "Wyciskanie hantli siedząc",
     "uk": "Жим гантелей сидячи"
   },
+  "Seated Flat Bench Leg Pull-In": {
+    "et": "Jalgade tõmme pingil istudes",
+    "lt": "Kojų pritraukimas sėdint ant suolo",
+    "pl": "Przyciąganie nóg siedząc na ławce płaskiej",
+    "uk": "Підтягування колін сидячи на лаві"
+  },
+  "Seated Floor Hamstring Stretch": {
+    "et": "Reie tagakülje venitus istudes põrandal",
+    "lt": "Šlaunies užpakalinės dalies tempimas sėdint ant grindų",
+    "pl": "Rozciąganie tylnej strony uda siedząc na podłodze",
+    "uk": "Розтяжка задньої поверхні стегна сидячи на підлозі"
+  },
+  "Seated Front Deltoid": {
+    "et": "Õla eesosa venitus istudes",
+    "lt": "Priekinių deltų tempimas sėdint",
+    "pl": "Rozciąganie przedniego aktonu barku siedząc",
+    "uk": "Розтяжка передньої дельти сидячи"
+  },
+  "Seated Glute": {
+    "et": "Tuhara venitus istudes",
+    "lt": "Sėdmenų tempimas sėdint",
+    "pl": "Rozciąganie pośladków siedząc",
+    "uk": "Розтяжка сідниць сидячи"
+  },
+  "Seated Good Mornings": {
+    "et": "Good morning istudes",
+    "lt": "Labas rytas sėdint",
+    "pl": "Skłony „dzień dobry” siedząc",
+    "uk": "Гуд морнінг сидячи"
+  },
+  "Seated Hamstring": {
+    "et": "Reie tagakülje venitus istudes",
+    "lt": "Šlaunies užpakalinės dalies tempimas sėdint",
+    "pl": "Rozciąganie tylnej strony uda siedząc",
+    "uk": "Розтяжка задньої поверхні стегна сидячи"
+  },
+  "Seated Hamstring and Calf Stretch": {
+    "et": "Reie tagakülje ja säärelihaste venitus istudes",
+    "lt": "Šlaunies užpakalinės dalies ir blauzdų tempimas sėdint",
+    "pl": "Rozciąganie tylnej strony uda i łydek siedząc",
+    "uk": "Розтяжка задньої поверхні стегна і литки сидячи"
+  },
+  "Seated Head Harness Neck Resistance": {
+    "et": "Kaela vastupanu peakinnitusega istudes",
+    "lt": "Kaklo pasipriešinimas su galvos diržu sėdint",
+    "pl": "Ćwiczenie szyi z uprzężą siedząc",
+    "uk": "Опір для шиї з упряжжю сидячи"
+  },
   "Seated Leg Curl": {
     "et": "Jalgade painutus istudes",
     "lt": "Kojų lenkimas sėdint",
     "pl": "Uginanie nóg siedząc",
     "uk": "Згинання ніг сидячи"
+  },
+  "Seated Leg Tucks": {
+    "et": "Jalgade tõmme rinnale istudes",
+    "lt": "Kojų pritraukimas sėdint",
+    "pl": "Przyciąganie nóg siedząc",
+    "uk": "Підтягування колін сидячи"
   },
   "Seated One-Arm Dumbbell Palms-Down Wrist Curl": {
     "et": "Hantli randmete painutus istudes ühe käega",
@@ -1363,6 +3880,24 @@
     "lt": "Hantelio riešų lenkimas sėdint viena ranka",
     "pl": "Uginanie nadgarstków hantlą siedząc jednorącz",
     "uk": "Згинання зап’ясть з гантеллю сидячи однією рукою"
+  },
+  "Seated One-arm Cable Pulley Rows": {
+    "et": "Tõmme kaabliga istudes ühe käega",
+    "lt": "Traukimas prie bloko viena ranka sėdint",
+    "pl": "Wiosłowanie na wyciągu siedząc jednorącz",
+    "uk": "Тяга блоку однією рукою сидячи"
+  },
+  "Seated Overhead Stretch": {
+    "et": "Venitus pea kohal istudes",
+    "lt": "Tempimas virš galvos sėdint",
+    "pl": "Rozciąganie nad głową siedząc",
+    "uk": "Розтяжка над головою сидячи"
+  },
+  "Seated Palm-Up Barbell Wrist Curl": {
+    "et": "Randmete painutus kangiga althaardega istudes",
+    "lt": "Riešų lenkimas su štanga delnais aukštyn sėdint",
+    "pl": "Uginanie nadgarstków ze sztangą podchwytem siedząc",
+    "uk": "Згинання зап’ясть зі штангою зворотним хватом сидячи"
   },
   "Seated Palms-Down Barbell Wrist Curl": {
     "et": "Kangi randmete painutus istudes",
@@ -1381,6 +3916,30 @@
     "lt": "Spaudimas sėdint",
     "pl": "Wyciskanie siedząc",
     "uk": "Жим сидячи"
+  },
+  "Seated Two-Arm Palms-Up Low-Pulley Wrist Curl": {
+    "et": "Randmete painutus alumise kaabliga althaardega istudes",
+    "lt": "Riešų lenkimas prie apatinio bloko delnais aukštyn sėdint",
+    "pl": "Uginanie nadgarstków na dolnym wyciągu podchwytem siedząc",
+    "uk": "Згинання зап’ясть на нижньому блоці зворотним хватом сидячи"
+  },
+  "See-Saw Press (Alternating Side Press)": {
+    "et": "Kiigesurumine (külgsurumine vaheldumisi)",
+    "lt": "Sūpynių spaudimas (šoninis spaudimas pakaitomis)",
+    "pl": "Wyciskanie huśtawka (naprzemienne boczne)",
+    "uk": "Жим «гойдалка» (бічний жим поперемінно)"
+  },
+  "Shotgun Row": {
+    "et": "Shotgun-tõmme",
+    "lt": "Šratinio traukimas",
+    "pl": "Shotgun row",
+    "uk": "Тяга «рушниця»"
+  },
+  "Shoulder Circles": {
+    "et": "Õlaringid",
+    "lt": "Pečių sukimas",
+    "pl": "Krążenia barków",
+    "uk": "Обертання плечима"
   },
   "Shoulder Press - With Bands": {
     "et": "Surumine kummiga pea kohal",
@@ -1406,11 +3965,29 @@
     "pl": "Mostek biodrowy",
     "uk": "Ягодичний міст"
   },
+  "Side Hop-Sprint": {
+    "et": "Külghüpe ja sprint",
+    "lt": "Šoninis šuolis ir sprintas",
+    "pl": "Skok boczny ze sprintem",
+    "uk": "Бічний стрибок зі спринтом"
+  },
+  "Side Jackknife": {
+    "et": "Külgmine jackknife",
+    "lt": "Šoninis peilis",
+    "pl": "Scyzoryk boczny",
+    "uk": "Бічне складання"
+  },
   "Side Lateral Raise": {
     "et": "Külgtõsted",
     "lt": "Rankų kėlimas į šonus",
     "pl": "Wznosy bokiem",
     "uk": "Махи в сторони"
+  },
+  "Side Laterals to Front Raise": {
+    "et": "Külgtõsted ja eestõsted",
+    "lt": "Rankų kėlimas į šonus ir pirmyn",
+    "pl": "Wznosy bokiem do wzniosów przodem",
+    "uk": "Махи в сторони з переходом на підйом перед собою"
   },
   "Side Leg Raises": {
     "et": "Külgtõsted",
@@ -1430,11 +4007,59 @@
     "pl": "Rozciąganie szyi w bok",
     "uk": "Розтяжка шиї вбік"
   },
+  "Side Standing Long Jump": {
+    "et": "Kaugushüpe külgsuunas",
+    "lt": "Šoninis šuolis į tolį iš vietos",
+    "pl": "Skok w dal z miejsca bokiem",
+    "uk": "Стрибок у довжину боком з місця"
+  },
+  "Side To Side Chins": {
+    "et": "Lõuatõmbed küljelt küljele",
+    "lt": "Prisitraukimai iš šono į šoną",
+    "pl": "Podciąganie z przenoszeniem z boku na bok",
+    "uk": "Підтягування зі зміщенням з боку в бік"
+  },
+  "Side Wrist Pull": {
+    "et": "Randme külgtõmme",
+    "lt": "Šoninis riešų traukimas",
+    "pl": "Boczne przyciąganie nadgarstka",
+    "uk": "Бічне тягнення зап’ястя"
+  },
+  "Side to Side Box Shuffle": {
+    "et": "Külgsammud üle kasti",
+    "lt": "Šoniniai žingsniai per dėžę",
+    "pl": "Przemieszczanie na skrzyniach w bok",
+    "uk": "Перестрибування через тумбу з боку в бік"
+  },
+  "Side-Lying Floor Stretch": {
+    "et": "Venitus külili põrandal",
+    "lt": "Tempimas gulint ant šono",
+    "pl": "Rozciąganie leżąc na boku na podłodze",
+    "uk": "Розтяжка лежачи на боці"
+  },
+  "Single Dumbbell Raise": {
+    "et": "Hantli tõste ühe hantliga",
+    "lt": "Hantelio kėlimas",
+    "pl": "Wznos hantla",
+    "uk": "Підйом однієї гантелі"
+  },
+  "Single Leg Butt Kick": {
+    "et": "Kandade löögid vastu tuharat ühel jalal",
+    "lt": "Smūgiai kulnu į sėdmenis viena koja",
+    "pl": "Zakładanie pięty do pośladka na jednej nodze",
+    "uk": "Закидання п’яти до сідниці на одній нозі"
+  },
   "Single Leg Glute Bridge": {
     "et": "Sild ühel jalal",
     "lt": "Tiltas ant vienos kojos",
     "pl": "Mostek biodrowy na jednej nodze",
     "uk": "Ягодичний міст на одній нозі"
+  },
+  "Single Leg Push-off": {
+    "et": "Äratõuge ühel jalal",
+    "lt": "Atsispyrimas viena koja",
+    "pl": "Odbicie jednonóż",
+    "uk": "Відштовхування однією ногою"
   },
   "Single-Arm Cable Crossover": {
     "et": "Kaabli ristamine ühe käega",
@@ -1442,11 +4067,59 @@
     "pl": "Krzyżowanie linek wyciągu jednorącz",
     "uk": "Зведення рук у кросовері однією рукою"
   },
+  "Single-Arm Linear Jammer": {
+    "et": "Lineaarne jammer ühe käega",
+    "lt": "Linijinis stūmimas viena ranka",
+    "pl": "Linear jammer jednorącz",
+    "uk": "Лінійний джамер однією рукою"
+  },
+  "Single-Arm Push-Up": {
+    "et": "Kätekõverdus ühe käega",
+    "lt": "Atsispaudimai viena ranka",
+    "pl": "Pompka jednorącz",
+    "uk": "Віджимання на одній руці"
+  },
+  "Single-Cone Sprint Drill": {
+    "et": "Sprindiharjutus ühe koonusega",
+    "lt": "Sprinto pratimas aplink kūgį",
+    "pl": "Sprint wokół pachołka",
+    "uk": "Спринт навколо одного конуса"
+  },
+  "Single-Leg High Box Squat": {
+    "et": "Kükk kõrgele kastile ühel jalal",
+    "lt": "Pritūpimai ant aukštos dėžės viena koja",
+    "pl": "Przysiad na wysoką skrzynię na jednej nodze",
+    "uk": "Присідання на високу тумбу на одній нозі"
+  },
+  "Single-Leg Hop Progression": {
+    "et": "Hüpete progressioon ühel jalal",
+    "lt": "Šuolių viena koja progresija",
+    "pl": "Progresja skoków na jednej nodze",
+    "uk": "Прогресія стрибків на одній нозі"
+  },
+  "Single-Leg Lateral Hop": {
+    "et": "Külghüpe ühel jalal",
+    "lt": "Šoniniai šuoliai viena koja",
+    "pl": "Skok boczny na jednej nodze",
+    "uk": "Бічні стрибки на одній нозі"
+  },
   "Single-Leg Leg Extension": {
     "et": "Jalgade sirutus ühel jalal",
     "lt": "Kojų tiesimas ant vienos kojos",
     "pl": "Prostowanie nóg na jednej nodze",
     "uk": "Розгинання ніг на одній нозі"
+  },
+  "Single-Leg Stride Jump": {
+    "et": "Sammhüpe ühel jalal",
+    "lt": "Šuolių žingsniai viena koja",
+    "pl": "Skok krokowy na jednej nodze",
+    "uk": "Стрибки кроком на одній нозі"
+  },
+  "Sit Squats": {
+    "et": "Küki istumine",
+    "lt": "Pritūpimai ant suolo",
+    "pl": "Przysiady z siadem",
+    "uk": "Присідання сидячи"
   },
   "Sit-Up": {
     "et": "Kõhutõus",
@@ -1454,11 +4127,65 @@
     "pl": "Brzuszki (unoszenie tułowia)",
     "uk": "Підйом тулуба"
   },
+  "Skating": {
+    "et": "Uisutamine",
+    "lt": "Čiuožimas",
+    "pl": "Łyżwiarstwo",
+    "uk": "Катання на ковзанах"
+  },
+  "Sled Drag - Harness": {
+    "et": "Kelgu lohistamine rakmetega",
+    "lt": "Rogių vilkimas su diržu",
+    "pl": "Ciągnięcie sań w uprzęży",
+    "uk": "Тягнення саней з упряжжю"
+  },
+  "Sled Overhead Backward Walk": {
+    "et": "Tagurpidi kõnd kelguga käed pea kohal",
+    "lt": "Ėjimas atbulomis su rogėmis virš galvos",
+    "pl": "Marsz tyłem z sankami nad głową",
+    "uk": "Ходьба назад з санями над головою"
+  },
+  "Sled Overhead Triceps Extension": {
+    "et": "Triitsepsi sirutus pea kohal kelgul",
+    "lt": "Tricepso tiesimas virš galvos su rogėmis",
+    "pl": "Prostowanie ramion nad głową z sankami",
+    "uk": "Розгинання рук над головою з санями"
+  },
+  "Sled Push": {
+    "et": "Kelgu lükkamine",
+    "lt": "Rogių stūmimas",
+    "pl": "Pchanie sań",
+    "uk": "Штовхання саней"
+  },
+  "Sled Reverse Flye": {
+    "et": "Tagalengud kelgul",
+    "lt": "Atvirkštinis rankų skėtimas su rogėmis",
+    "pl": "Odwrotne rozpiętki z sankami",
+    "uk": "Зворотні розведення з санями"
+  },
+  "Sled Row": {
+    "et": "Tõmme kelguga",
+    "lt": "Traukimas su rogėmis",
+    "pl": "Wiosłowanie z sankami",
+    "uk": "Тяга з санями"
+  },
+  "Sledgehammer Swings": {
+    "et": "Vasaralöögid",
+    "lt": "Kūjo švytavimai",
+    "pl": "Uderzenia młotem",
+    "uk": "Удари кувалдою"
+  },
   "Smith Incline Shoulder Raise": {
     "et": "Tõsted Smithi masinas kaldpingil",
     "lt": "Kėlimas Smito treniruoklyje ant pakrypusio suolo",
     "pl": "Wznosy w suwnicy Smitha na ławce skośnej",
     "uk": "Підйом у Сміті на похилій лаві"
+  },
+  "Smith Machine Behind the Back Shrug": {
+    "et": "Õlakehitused Smithi masinal selja taga",
+    "lt": "Pečių gūžčiojimas Smitho treniruokliu už nugaros",
+    "pl": "Wzruszanie ramion w suwnicy Smitha za plecami",
+    "uk": "Шраги за спиною в Смітті"
   },
   "Smith Machine Bench Press": {
     "et": "Surumine Smithi masinas lamades",
@@ -1490,6 +4217,12 @@
     "pl": "Wyciskanie w suwnicy Smitha na ławce ujemnej",
     "uk": "Жим у Сміті на негативній лаві"
   },
+  "Smith Machine Hang Power Clean": {
+    "et": "Power clean rippasendist Smithi masinal",
+    "lt": "Galingas vertimas į krūtinę Smitho treniruokliu nuo kabančios padėties",
+    "pl": "Zarzut siłowy z zawieszenia w suwnicy Smitha",
+    "uk": "Силове взяття на груди з виса в Смітті"
+  },
   "Smith Machine Hip Raise": {
     "et": "Tõsted Smithi masinas",
     "lt": "Kėlimas Smito treniruoklyje",
@@ -1520,6 +4253,12 @@
     "pl": "Wyciskanie w suwnicy Smitha nad głowę",
     "uk": "Жим у Сміті над головою"
   },
+  "Smith Machine Pistol Squat": {
+    "et": "Püstolkükk Smithi masinal",
+    "lt": "Pistoletiniai pritūpimai Smitho treniruokliu",
+    "pl": "Przysiad pistolet w suwnicy Smitha",
+    "uk": "Присідання «пістолетик» у Смітті"
+  },
   "Smith Machine Reverse Calf Raises": {
     "et": "Sääretõsted Smithi masinas",
     "lt": "Stotis ant pirštų galų",
@@ -1532,11 +4271,23 @@
     "pl": "Przysiad w suwnicy Smitha",
     "uk": "Присідання у Сміті"
   },
+  "Smith Machine Stiff-Legged Deadlift": {
+    "et": "Sirgete jalgadega jõutõmme Smithi masinal",
+    "lt": "Mirties trauka tiesiomis kojomis Smitho treniruokliu",
+    "pl": "Martwy ciąg na prostych nogach w suwnicy Smitha",
+    "uk": "Тяга на прямих ногах у Смітті"
+  },
   "Smith Machine Upright Row": {
     "et": "Püsttõmme Smithi masinas",
     "lt": "Traukimas Smito treniruoklyje prie smakro",
     "pl": "Podciąganie w suwnicy Smitha wzdłuż tułowia",
     "uk": "Тяга у Сміті до підборіддя"
+  },
+  "Smith Single-Leg Split Squat": {
+    "et": "Split-kükk ühel jalal Smithi masinal",
+    "lt": "Skėstiniai pritūpimai viena koja Smitho treniruokliu",
+    "pl": "Przysiad split na jednej nodze w suwnicy Smitha",
+    "uk": "Болгарські присідання у Смітті"
   },
   "Snatch": {
     "et": "Rebimine",
@@ -1544,11 +4295,119 @@
     "pl": "Rwanie",
     "uk": "Ривок"
   },
+  "Snatch Balance": {
+    "et": "Snatch balance",
+    "lt": "Rovimo pusiausvyra",
+    "pl": "Snatch balance",
+    "uk": "Баланс ривка"
+  },
+  "Snatch Deadlift": {
+    "et": "Rebimise jõutõmme",
+    "lt": "Mirties trauka rovimui",
+    "pl": "Martwy ciąg do rwania",
+    "uk": "Станова тяга для ривка"
+  },
+  "Snatch Pull": {
+    "et": "Rebimise tõmme",
+    "lt": "Trauka rovimui",
+    "pl": "Przyciąganie do rwania",
+    "uk": "Тяга для ривка"
+  },
+  "Snatch Shrug": {
+    "et": "Rebimise õlakehitus",
+    "lt": "Pečių gūžčiojimas rovimui",
+    "pl": "Wzruszanie ramion do rwania",
+    "uk": "Шраги для ривка"
+  },
+  "Snatch from Blocks": {
+    "et": "Rebimine klotsidelt",
+    "lt": "Rovimas nuo kaladėlių",
+    "pl": "Rwanie z podstawek",
+    "uk": "Ривок з підставок"
+  },
+  "Speed Band Overhead Triceps": {
+    "et": "Triitsepsi sirutus pea kohal kummiga kiirelt",
+    "lt": "Greitas tricepso tiesimas virš galvos su guma",
+    "pl": "Prostowanie ramion nad głową z gumą (szybkie)",
+    "uk": "Швидке розгинання над головою з еспандером"
+  },
+  "Speed Box Squat": {
+    "et": "Kiire kükk kastile",
+    "lt": "Greiti pritūpimai ant dėžės",
+    "pl": "Szybki przysiad na skrzynię",
+    "uk": "Швидкі присідання на тумбу"
+  },
+  "Speed Squats": {
+    "et": "Kiired kükid",
+    "lt": "Greiti pritūpimai",
+    "pl": "Szybkie przysiady",
+    "uk": "Швидкі присідання"
+  },
+  "Spell Caster": {
+    "et": "Loitsija",
+    "lt": "Burtininkas",
+    "pl": "Spell caster",
+    "uk": "Заклинач"
+  },
+  "Spider Crawl": {
+    "et": "Ämblikukõnd",
+    "lt": "Voro ropojimas",
+    "pl": "Pełzanie pająka",
+    "uk": "Повзання «павук»"
+  },
   "Spider Curl": {
     "et": "Biitsepsi kõverdus (spider)",
     "lt": "Bicepso lenkimas (spider)",
     "pl": "Uginanie ramion (spider)",
     "uk": "Спайдер-згинання на біцепс"
+  },
+  "Spinal Stretch": {
+    "et": "Selgroo venitus",
+    "lt": "Stuburo tempimas",
+    "pl": "Rozciąganie kręgosłupa",
+    "uk": "Розтяжка хребта"
+  },
+  "Split Clean": {
+    "et": "Split clean",
+    "lt": "Vertimas į krūtinę išpuoliu",
+    "pl": "Zarzut nożycowy",
+    "uk": "Взяття на груди в розножку"
+  },
+  "Split Jerk": {
+    "et": "Split jerk",
+    "lt": "Stūmimas išpuoliu",
+    "pl": "Podrzut nożycowy",
+    "uk": "Поштовх у розножку"
+  },
+  "Split Jump": {
+    "et": "Split-hüpe",
+    "lt": "Šuolis su išpuoliu",
+    "pl": "Wyskok w wykroku",
+    "uk": "Стрибки в розножку"
+  },
+  "Split Snatch": {
+    "et": "Split snatch",
+    "lt": "Rovimas išpuoliu",
+    "pl": "Rwanie nożycowe",
+    "uk": "Ривок у розножку"
+  },
+  "Split Squat with Dumbbells": {
+    "et": "Split-kükk hantlitega",
+    "lt": "Skėstiniai pritūpimai su hantelėmis",
+    "pl": "Przysiad split z hantlami",
+    "uk": "Спліт-присідання з гантелями"
+  },
+  "Split Squats": {
+    "et": "Split-kükk",
+    "lt": "Skėstiniai pritūpimai",
+    "pl": "Przysiad split",
+    "uk": "Спліт-присідання"
+  },
+  "Squat Jerk": {
+    "et": "Squat jerk",
+    "lt": "Stūmimas pritūpus",
+    "pl": "Podrzut z przysiadem",
+    "uk": "Поштовх у присід"
   },
   "Squat with Bands": {
     "et": "Kükk kummiga",
@@ -1562,11 +4421,23 @@
     "pl": "Przysiad",
     "uk": "Присідання"
   },
+  "Squat with Plate Movers": {
+    "et": "Kükk plaadiliigutajatega",
+    "lt": "Pritūpimai su blynų pakėlimu",
+    "pl": "Przysiad z przenoszeniem talerzy",
+    "uk": "Присідання з переміщенням млинців"
+  },
   "Squats - With Bands": {
     "et": "Kükk kummiga",
     "lt": "Pritūpimai su guma",
     "pl": "Przysiad z gumą",
     "uk": "Присідання з еспандером"
+  },
+  "Stairmaster": {
+    "et": "Stairmaster",
+    "lt": "Laiptų treniruoklis",
+    "pl": "Stairmaster",
+    "uk": "Степпер-драбина"
   },
   "Standing Alternating Dumbbell Press": {
     "et": "Hantlite surumine seistes vaheldumisi",
@@ -1579,6 +4450,12 @@
     "lt": "Stotis ant pirštų galų stovint",
     "pl": "Wspięcia na palce ze sztangą stojąc",
     "uk": "Підйом на носки зі штангою стоячи"
+  },
+  "Standing Barbell Press Behind Neck": {
+    "et": "Kangi surumine seistes kukla tagant",
+    "lt": "Štangos spaudimas už kaklo stovint",
+    "pl": "Wyciskanie sztangi zza głowy stojąc",
+    "uk": "Жим штанги із-за голови стоячи"
   },
   "Standing Bent-Over One-Arm Dumbbell Triceps Extension": {
     "et": "Hantli triitsepsi sirutus seistes ühe käega",
@@ -1604,11 +4481,29 @@
     "pl": "Rozciąganie bicepsa stojąc",
     "uk": "Розтяжка біцепса стоячи"
   },
+  "Standing Bradford Press": {
+    "et": "Bradfordi surumine seistes",
+    "lt": "Bradfordo spaudimas stovint",
+    "pl": "Wyciskanie Bradford stojąc",
+    "uk": "Жим Бредфорда стоячи"
+  },
   "Standing Cable Chest Press": {
     "et": "Surumine kaabliga seistes",
     "lt": "Spaudimas prie bloko stovint",
     "pl": "Wyciskanie na wyciągu stojąc",
     "uk": "Жим на блоці стоячи"
+  },
+  "Standing Cable Lift": {
+    "et": "Kaablitõste seistes",
+    "lt": "Kėlimas prie bloko stovint",
+    "pl": "Unoszenie na wyciągu stojąc",
+    "uk": "Підйом на блоці стоячи"
+  },
+  "Standing Cable Wood Chop": {
+    "et": "Puuhakkimine kaabliga seistes",
+    "lt": "Malkų skaldymas prie bloko stovint",
+    "pl": "Rąbanie drewna na wyciągu stojąc",
+    "uk": "Рубка дров на блоці стоячи"
   },
   "Standing Calf Raises": {
     "et": "Sääretõsted seistes",
@@ -1640,6 +4535,12 @@
     "pl": "Uginanie ramion z hantlami nachwytem stojąc",
     "uk": "Підйом гантелей на біцепс зворотним хватом стоячи"
   },
+  "Standing Dumbbell Straight-Arm Front Delt Raise Above Head": {
+    "et": "Hantlite eestõste sirgete kätega üle pea seistes",
+    "lt": "Hantelių kėlimas tiesiomis rankomis pirmyn virš galvos stovint",
+    "pl": "Wznosy hantli przed siebie nad głowę stojąc",
+    "uk": "Підйом гантелі прямою рукою перед собою над головою стоячи"
+  },
   "Standing Dumbbell Triceps Extension": {
     "et": "Hantlite triitsepsi sirutus seistes",
     "lt": "Hantelių tricepso tiesimas stovint",
@@ -1652,11 +4553,77 @@
     "pl": "Podciąganie hantli wzdłuż tułowia",
     "uk": "Тяга гантелей до підборіддя"
   },
+  "Standing Elevated Quad Stretch": {
+    "et": "Nelipea venitus seistes kõrgendikul",
+    "lt": "Keturgalvio tempimas stovint ant pakylos",
+    "pl": "Rozciąganie czworogłowych stojąc z podparciem",
+    "uk": "Розтяжка квадріцепса стоячи з опорою"
+  },
+  "Standing Front Barbell Raise Over Head": {
+    "et": "Kangi eestõste üle pea seistes",
+    "lt": "Štangos kėlimas pirmyn virš galvos stovint",
+    "pl": "Wznosy sztangi przed siebie nad głowę stojąc",
+    "uk": "Підйом штанги перед собою над голову стоячи"
+  },
+  "Standing Gastrocnemius Calf Stretch": {
+    "et": "Säärelihase venitus seistes",
+    "lt": "Blauzdos dvigalvio tempimas stovint",
+    "pl": "Rozciąganie łydki (brzuchaty) stojąc",
+    "uk": "Розтяжка литкового м’яза стоячи"
+  },
+  "Standing Hamstring and Calf Stretch": {
+    "et": "Reie tagakülje ja säärelihaste venitus seistes",
+    "lt": "Šlaunies užpakalinės dalies ir blauzdų tempimas stovint",
+    "pl": "Rozciąganie tylnej strony uda i łydek stojąc",
+    "uk": "Розтяжка задньої поверхні стегна і литки стоячи"
+  },
+  "Standing Hip Circles": {
+    "et": "Puusaringid seistes",
+    "lt": "Klubų sukimas stovint",
+    "pl": "Krążenia bioder stojąc",
+    "uk": "Обертання стегном стоячи"
+  },
+  "Standing Hip Flexors": {
+    "et": "Puusa painutajate venitus seistes",
+    "lt": "Klubo lenkiamųjų tempimas stovint",
+    "pl": "Rozciąganie zginaczy bioder stojąc",
+    "uk": "Розтяжка згиначів стегна стоячи"
+  },
+  "Standing Inner-Biceps Curl": {
+    "et": "Biitsepsi kõverdus sisehaardega seistes",
+    "lt": "Vidinė bicepso lenkimas stovint",
+    "pl": "Uginanie ramion stojąc (wewnętrzna głowa bicepsa)",
+    "uk": "Підйом гантелей на біцепс стоячи хватом усередину"
+  },
+  "Standing Lateral Stretch": {
+    "et": "Külgvenitus seistes",
+    "lt": "Šoninis tempimas stovint",
+    "pl": "Rozciąganie boczne stojąc",
+    "uk": "Бічна розтяжка стоячи"
+  },
   "Standing Leg Curl": {
     "et": "Jalgade painutus seistes",
     "lt": "Kojų lenkimas stovint",
     "pl": "Uginanie nóg stojąc",
     "uk": "Згинання ніг стоячи"
+  },
+  "Standing Long Jump": {
+    "et": "Kaugushüpe kohalt",
+    "lt": "Šuolis į tolį iš vietos",
+    "pl": "Skok w dal z miejsca",
+    "uk": "Стрибок у довжину з місця"
+  },
+  "Standing Low-Pulley Deltoid Raise": {
+    "et": "Õlatõste alumise kaabliga seistes",
+    "lt": "Deltų kėlimas prie apatinio bloko stovint",
+    "pl": "Wznosy na dolnym wyciągu stojąc",
+    "uk": "Підйом рук на нижньому блоці стоячи"
+  },
+  "Standing Low-Pulley One-Arm Triceps Extension": {
+    "et": "Triitsepsi sirutus alumise kaabliga ühe käega seistes",
+    "lt": "Tricepso tiesimas prie apatinio bloko viena ranka stovint",
+    "pl": "Prostowanie ramion na dolnym wyciągu stojąc jednorącz",
+    "uk": "Розгинання руки на нижньому блоці стоячи"
   },
   "Standing Military Press": {
     "et": "Püstisurumine seistes",
@@ -1664,11 +4631,23 @@
     "pl": "Wyciskanie żołnierskie stojąc",
     "uk": "Армійський жим стоячи"
   },
+  "Standing Olympic Plate Hand Squeeze": {
+    "et": "Olümpiaplaadi pigistamine käega seistes",
+    "lt": "Olimpinio blyno gniaužimas rankomis stovint",
+    "pl": "Ściskanie talerza olimpijskiego dłońmi stojąc",
+    "uk": "Стискання олімпійського млинця рукою стоячи"
+  },
   "Standing One-Arm Cable Curl": {
     "et": "Biitsepsi kõverdus kaabliga seistes ühe käega",
     "lt": "Bicepso lenkimas prie bloko stovint viena ranka",
     "pl": "Uginanie ramion na wyciągu stojąc jednorącz",
     "uk": "Підйом блоку на біцепс стоячи однією рукою"
+  },
+  "Standing One-Arm Dumbbell Curl Over Incline Bench": {
+    "et": "Hantli biitsepsi kõverdus ühe käega seistes üle kaldpingi",
+    "lt": "Bicepso lenkimas hanteliu viena ranka stovint prie pakrypusio suolo",
+    "pl": "Uginanie ramion z hantlem jednorącz stojąc nad ławką skośną",
+    "uk": "Підйом гантелі на біцепс однією рукою стоячи над похилою лавою"
   },
   "Standing One-Arm Dumbbell Triceps Extension": {
     "et": "Hantli triitsepsi sirutus seistes ühe käega",
@@ -1682,11 +4661,113 @@
     "pl": "Prostowanie ramion ze sztangą stojąc",
     "uk": "Розгинання рук на трицепс зі штангою стоячи"
   },
+  "Standing Palm-In One-Arm Dumbbell Press": {
+    "et": "Hantlisurumine neutraalse haardega ühe käega seistes",
+    "lt": "Hantelio spaudimas viena ranka stovint neutraliu griebimu",
+    "pl": "Wyciskanie hantla jednorącz stojąc chwytem neutralnym",
+    "uk": "Жим гантелі однією рукою нейтральним хватом стоячи"
+  },
+  "Standing Palms-In Dumbbell Press": {
+    "et": "Hantlisurumine neutraalse haardega seistes",
+    "lt": "Hantelių spaudimas stovint neutraliu griebimu",
+    "pl": "Wyciskanie hantli stojąc chwytem neutralnym",
+    "uk": "Жим гантелей нейтральним хватом стоячи"
+  },
+  "Standing Palms-Up Barbell Behind The Back Wrist Curl": {
+    "et": "Randmete painutus kangiga althaardega selja taga seistes",
+    "lt": "Riešų lenkimas su štanga už nugaros delnais aukštyn stovint",
+    "pl": "Uginanie nadgarstków ze sztangą za plecami podchwytem stojąc",
+    "uk": "Згинання зап’ясть зі штангою за спиною зворотним хватом стоячи"
+  },
+  "Standing Pelvic Tilt": {
+    "et": "Vaagnakallutus seistes",
+    "lt": "Dubens pakreipimas stovint",
+    "pl": "Przechył miednicy stojąc",
+    "uk": "Нахил таза стоячи"
+  },
   "Standing Rope Crunch": {
     "et": "Kõhulihaste kõverdused seistes",
     "lt": "Atsilenkimai stovint",
     "pl": "Spięcia brzucha stojąc",
     "uk": "Скручування стоячи"
+  },
+  "Standing Soleus And Achilles Stretch": {
+    "et": "Lestlihase ja Achilleuse kõõluse venitus seistes",
+    "lt": "Plekšninio raumens ir Achilo sausgyslės tempimas stovint",
+    "pl": "Rozciąganie płaszczkowatego i ścięgna Achillesa stojąc",
+    "uk": "Розтяжка камбалоподібного м’яза і ахілла стоячи"
+  },
+  "Standing Toe Touches": {
+    "et": "Varvaste puudutus seistes",
+    "lt": "Pirštų siekimas stovint",
+    "pl": "Dotykanie palców stóp stojąc",
+    "uk": "Дотики до носків стоячи"
+  },
+  "Standing Towel Triceps Extension": {
+    "et": "Triitsepsi sirutus rätikuga seistes",
+    "lt": "Tricepso tiesimas su rankšluosčiu stovint",
+    "pl": "Prostowanie ramion z ręcznikiem stojąc",
+    "uk": "Розгинання рук з рушником стоячи"
+  },
+  "Standing Two-Arm Overhead Throw": {
+    "et": "Vise üle pea kahe käega seistes",
+    "lt": "Metimas virš galvos abiem rankomis stovint",
+    "pl": "Rzut oburącz znad głowy stojąc",
+    "uk": "Кидок над головою двома руками стоячи"
+  },
+  "Star Jump": {
+    "et": "Tähthüpe",
+    "lt": "Žvaigždės šuolis",
+    "pl": "Skok gwiazdy",
+    "uk": "Стрибки «зірка»"
+  },
+  "Step Mill": {
+    "et": "Treppmasin",
+    "lt": "Laiptų ratas",
+    "pl": "Step mill",
+    "uk": "Степ-міл"
+  },
+  "Step-up with Knee Raise": {
+    "et": "Pingile astumine põlvetõstega",
+    "lt": "Įlipimas ant pakylos su kelio kėlimu",
+    "pl": "Wejście na podwyższenie z unoszeniem kolana",
+    "uk": "Зашагування з підйомом коліна"
+  },
+  "Stiff Leg Barbell Good Morning": {
+    "et": "Good morning kangiga sirgete jalgadega",
+    "lt": "Labas rytas su štanga tiesiomis kojomis",
+    "pl": "Skłony „dzień dobry” na prostych nogach ze sztangą",
+    "uk": "Гуд морнінг зі штангою на прямих ногах"
+  },
+  "Stiff-Legged Barbell Deadlift": {
+    "et": "Kangi sirgete jalgadega jõutõmme",
+    "lt": "Štangos mirties trauka tiesiomis kojomis",
+    "pl": "Martwy ciąg na prostych nogach ze sztangą",
+    "uk": "Станова тяга зі штангою на прямих ногах"
+  },
+  "Stiff-Legged Dumbbell Deadlift": {
+    "et": "Hantlite sirgete jalgadega jõutõmme",
+    "lt": "Hantelių mirties trauka tiesiomis kojomis",
+    "pl": "Martwy ciąg na prostych nogach z hantlami",
+    "uk": "Станова тяга з гантелями на прямих ногах"
+  },
+  "Stomach Vacuum": {
+    "et": "Kõhu vaakum",
+    "lt": "Pilvo vakuumas",
+    "pl": "Próżnia brzuszna",
+    "uk": "Вакуум живота"
+  },
+  "Straight Bar Bench Mid Rows": {
+    "et": "Tõmme sirge kangiga pingil",
+    "lt": "Traukimas tiesiu grifu ant suolo",
+    "pl": "Wiosłowanie prostą sztangą leżąc na ławce",
+    "uk": "Тяга прямого грифа лежачи на лаві"
+  },
+  "Straight Raises on Incline Bench": {
+    "et": "Sirged tõsted kaldpingil",
+    "lt": "Tiesių rankų kėlimas ant pakrypusio suolo",
+    "pl": "Wznosy prostych ramion na ławce skośnej",
+    "uk": "Підйоми прямих рук на похилій лаві"
   },
   "Straight-Arm Dumbbell Pullover": {
     "et": "Hantlite pullover",
@@ -1699,6 +4780,12 @@
     "lt": "Viršutinio bloko traukimas tiesiomis rankomis",
     "pl": "Ściąganie drążka wyciągu górnego z wyprostowanymi ramionami",
     "uk": "Тяга верхнього блоку прямими руками"
+  },
+  "Stride Jump Crossover": {
+    "et": "Sammhüpe ristamisega",
+    "lt": "Šuolis žingsniu su kryžiavimu",
+    "pl": "Skok krokowy ze skrzyżowaniem",
+    "uk": "Перехресні стрибки кроком"
   },
   "Sumo Deadlift": {
     "et": "Sumo jõutõmme",
@@ -1718,11 +4805,125 @@
     "pl": "Martwy ciąg sumo",
     "uk": "Станова тяга сумо"
   },
+  "Superman": {
+    "et": "Superman",
+    "lt": "Supermenas",
+    "pl": "Superman",
+    "uk": "Супермен"
+  },
+  "Supine Chest Throw": {
+    "et": "Rinnavise lamades",
+    "lt": "Metimas nuo krūtinės gulint",
+    "pl": "Rzut od klatki leżąc na plecach",
+    "uk": "Кидок від грудей лежачи на спині"
+  },
+  "Supine One-Arm Overhead Throw": {
+    "et": "Vise üle pea ühe käega lamades",
+    "lt": "Metimas virš galvos viena ranka gulint",
+    "pl": "Rzut jednorącz znad głowy leżąc na plecach",
+    "uk": "Кидок над головою однією рукою лежачи на спині"
+  },
+  "Supine Two-Arm Overhead Throw": {
+    "et": "Vise üle pea kahe käega lamades",
+    "lt": "Metimas virš galvos abiem rankomis gulint",
+    "pl": "Rzut oburącz znad głowy leżąc na plecach",
+    "uk": "Кидок над головою двома руками лежачи на спині"
+  },
+  "Suspended Fallout": {
+    "et": "Fallout rihmadel",
+    "lt": "Atsilenkimai su kilpomis",
+    "pl": "Fallout w zawieszeniu",
+    "uk": "Фолаут на петлях"
+  },
+  "Suspended Push-Up": {
+    "et": "Kätekõverdus rihmadel",
+    "lt": "Atsispaudimai su kilpomis",
+    "pl": "Pompki na pasach",
+    "uk": "Віджимання на петлях"
+  },
+  "Suspended Reverse Crunch": {
+    "et": "Pöördkõverdus rihmadel",
+    "lt": "Atvirkštiniai pilvo prispaudimai su kilpomis",
+    "pl": "Odwrotne spięcia brzucha na pasach",
+    "uk": "Зворотні скручування на петлях"
+  },
+  "Suspended Row": {
+    "et": "Tõmme rihmadel",
+    "lt": "Traukimas su kilpomis",
+    "pl": "Wiosłowanie na pasach",
+    "uk": "Тяга на петлях"
+  },
+  "Suspended Split Squat": {
+    "et": "Split-kükk rihmadel",
+    "lt": "Skėstiniai pritūpimai su kilpomis",
+    "pl": "Przysiad split na pasach",
+    "uk": "Спліт-присідання на петлях"
+  },
+  "Svend Press": {
+    "et": "Svend press",
+    "lt": "Svend Press",
+    "pl": "Svend press",
+    "uk": "Жим Свенда"
+  },
   "T-Bar Row with Handle": {
     "et": "Tõmme T-kangiga",
     "lt": "Traukimas su T grifu",
     "pl": "Wiosłowanie na drążku T",
     "uk": "Тяга на Т-грифі"
+  },
+  "Tate Press": {
+    "et": "Tate press",
+    "lt": "Tate Press",
+    "pl": "Tate press",
+    "uk": "Жим Тейта"
+  },
+  "The Straddle": {
+    "et": "Harkis venitus",
+    "lt": "Skėstinė poza",
+    "pl": "Rozkrok",
+    "uk": "Шпагат"
+  },
+  "Thigh Abductor": {
+    "et": "Reie röövamine masinal",
+    "lt": "Šlaunų atitraukimas treniruokliu",
+    "pl": "Odwodzenie ud na maszynie",
+    "uk": "Відведення стегон у тренажері"
+  },
+  "Thigh Adductor": {
+    "et": "Reie lähendamine masinal",
+    "lt": "Šlaunų pritraukimas treniruokliu",
+    "pl": "Przywodzenie ud na maszynie",
+    "uk": "Зведення стегон у тренажері"
+  },
+  "Tire Flip": {
+    "et": "Rehvi pööramine",
+    "lt": "Padangos vartymas",
+    "pl": "Przewracanie opony",
+    "uk": "Перевертання шини"
+  },
+  "Toe Touchers": {
+    "et": "Varvaste puudutused",
+    "lt": "Pirštų lietimas",
+    "pl": "Dotykanie palców stóp",
+    "uk": "Дотики до носків"
+  },
+  "Torso Rotation": {
+    "et": "Torso rotatsioon",
+    "lt": "Liemens sukimas",
+    "pl": "Rotacje tułowia",
+    "uk": "Ротація корпусу"
+  },
+  "Trail Running/Walking": {
+    "et": "Metsa- ja radadel jooksmine/kõndimine",
+    "lt": "Bėgimas ar ėjimas takais",
+    "pl": "Bieg/marsz w terenie",
+    "uk": "Біг/ходьба по пересіченій місцевості"
+  },
+  "Trap Bar Deadlift": {
+    "et": "Jõutõmme trap-kangiga",
+    "lt": "Mirties trauka su šešiakampiu grifu",
+    "pl": "Martwy ciąg ze sztangą trap bar",
+    "uk": "Станова тяга з трап-грифом"
   },
   "Tricep Dumbbell Kickback": {
     "et": "Triitsepsi tahatõmme",
@@ -1754,17 +4955,41 @@
     "pl": "Prostowanie ramion na wyciągu",
     "uk": "Розгинання рук на блоці"
   },
+  "Triceps Pushdown - V-Bar Attachment": {
+    "et": "Triitsepsi allasurumine V-käepidemega",
+    "lt": "Tricepso tiesimas prie bloko su V rankena",
+    "pl": "Prostowanie ramion na wyciągu z uchwytem V",
+    "uk": "Розгинання рук на блоці з V-рукояткою"
+  },
   "Triceps Stretch": {
     "et": "Triitsepsi venitus",
     "lt": "Tricepso tempimas",
     "pl": "Rozciąganie tricepsa",
     "uk": "Розтяжка трицепса"
   },
+  "Tuck Crunch": {
+    "et": "Kõverdus põlvede tõmbega",
+    "lt": "Pilvo prispaudimai pritraukiant kelius",
+    "pl": "Spięcia brzucha z podkurczonymi nogami",
+    "uk": "Скручування з підтягуванням колін"
+  },
   "Two-Arm Dumbbell Preacher Curl": {
     "et": "Hantlite biitsepsi kõverdus Scotti pingil kahe käega",
     "lt": "Hantelių bicepso lenkimas ant Skoto suolo abiem rankomis",
     "pl": "Uginanie ramion na modlitewniku z hantlami oburącz",
     "uk": "Підйом гантелей на біцепс на лаві Скотта двома руками"
+  },
+  "Two-Arm Kettlebell Clean": {
+    "et": "Kettlebelli rinnalevõte kahe käega",
+    "lt": "Svarsčio vertimas į krūtinę abiem rankomis",
+    "pl": "Zarzut kettlebella oburącz",
+    "uk": "Взяття гирі на груди двома руками"
+  },
+  "Two-Arm Kettlebell Jerk": {
+    "et": "Kettlebelli tõuge kahe käega",
+    "lt": "Svarsčio stūmimas abiem rankomis",
+    "pl": "Podrzut kettlebella oburącz",
+    "uk": "Поштовх гирі двома руками"
   },
   "Two-Arm Kettlebell Military Press": {
     "et": "Kettlebelli püstisurumine kahe käega",
@@ -1777,6 +5002,24 @@
     "lt": "Svarsčio traukimas abiem rankomis",
     "pl": "Wiosłowanie z kettlebellem oburącz",
     "uk": "Тяга гирі двома руками"
+  },
+  "Underhand Cable Pulldowns": {
+    "et": "Ülatõmme kaabliga althaardega",
+    "lt": "Bloko traukimas žemyn apatiniu griebimu",
+    "pl": "Ściąganie wyciągu podchwytem",
+    "uk": "Тяга верхнього блока зворотним хватом"
+  },
+  "Upper Back Stretch": {
+    "et": "Ülaselja venitus",
+    "lt": "Viršutinės nugaros tempimas",
+    "pl": "Rozciąganie górnej części pleców",
+    "uk": "Розтяжка верху спини"
+  },
+  "Upper Back-Leg Grab": {
+    "et": "Ülaselja venitus jalast haarates",
+    "lt": "Viršutinės nugaros tempimas griebiant koją",
+    "pl": "Rozciąganie górnej części pleców z chwytem za nogi",
+    "uk": "Розтяжка верху спини з захопленням ноги"
   },
   "Upright Barbell Row": {
     "et": "Kangi püsttõmme",
@@ -1796,11 +5039,101 @@
     "pl": "Podciąganie z gumą wzdłuż tułowia",
     "uk": "Тяга з еспандером до підборіддя"
   },
+  "Upward Stretch": {
+    "et": "Venitus ülespoole",
+    "lt": "Tempimas į viršų",
+    "pl": "Rozciąganie w górę",
+    "uk": "Розтяжка вгору"
+  },
+  "V-Bar Pulldown": {
+    "et": "Ülatõmme V-käepidemega",
+    "lt": "Viršutinio bloko traukimas su V rankena",
+    "pl": "Ściąganie drążka wyciągu górnego z uchwytem V",
+    "uk": "Тяга верхнього блока V-рукояткою"
+  },
+  "V-Bar Pullup": {
+    "et": "Lõuatõmme V-käepidemega",
+    "lt": "Prisitraukimai su V rankena",
+    "pl": "Podciąganie na uchwycie V",
+    "uk": "Підтягування V-рукояткою"
+  },
+  "Vertical Swing": {
+    "et": "Vertikaalne hoog",
+    "lt": "Vertikalus švytavimas",
+    "pl": "Wymach pionowy",
+    "uk": "Вертикальний мах"
+  },
+  "Walking, Treadmill": {
+    "et": "Kõndimine jooksulindil",
+    "lt": "Ėjimas bėgimo taku",
+    "pl": "Marsz na bieżni",
+    "uk": "Ходьба на доріжці"
+  },
+  "Weighted Ball Hyperextension": {
+    "et": "Selgitõsted raskuspalliga",
+    "lt": "Nugaros tiesimas su kamuoliu su svoriu",
+    "pl": "Wyprosty tułowia z piłką obciążeniową",
+    "uk": "Гіперекстензія з м’ячем"
+  },
+  "Weighted Ball Side Bend": {
+    "et": "Külgkõverdus raskuspalliga",
+    "lt": "Šoniniai lenkimai su svorio kamuoliu",
+    "pl": "Skłony boczne z piłką obciążeniową",
+    "uk": "Нахили в сторони з м’ячем"
+  },
+  "Weighted Bench Dip": {
+    "et": "Kätekõverdused pingilt lisaraskusega",
+    "lt": "Atsispaudimai nuo suoliuko su svoriu",
+    "pl": "Pompki na ławce z obciążeniem",
+    "uk": "Віджимання від лави з обтяженням"
+  },
+  "Weighted Crunches": {
+    "et": "Kõhulihaste kõverdused lisaraskusega",
+    "lt": "Pilvo prispaudimai su svoriu",
+    "pl": "Spięcia brzucha z obciążeniem",
+    "uk": "Скручування з обтяженням"
+  },
+  "Weighted Jump Squat": {
+    "et": "Hüppekükk lisaraskusega",
+    "lt": "Šuoliai iš pritūpimo su svoriu",
+    "pl": "Przysiad z wyskokiem z obciążeniem",
+    "uk": "Присід зі стрибком з обтяженням"
+  },
   "Weighted Pull Ups": {
     "et": "Lõuatõmbed lisaraskusega",
     "lt": "Prisitraukimai su svoriu",
     "pl": "Podciąganie z obciążeniem",
     "uk": "Підтягування з обтяженням"
+  },
+  "Weighted Sissy Squat": {
+    "et": "Sissy-kükk lisaraskusega",
+    "lt": "Sisi pritūpimai su svoriu",
+    "pl": "Przysiad sissy z obciążeniem",
+    "uk": "Сісі-присідання з обтяженням"
+  },
+  "Weighted Sit-Ups - With Bands": {
+    "et": "Kõhulihaste tõusud lisaraskuse ja kummiga",
+    "lt": "Pilvo prispaudimai su svoriu ir guma",
+    "pl": "Brzuszki z obciążeniem i gumami",
+    "uk": "Підйоми корпусу з обтяженням і еспандерами"
+  },
+  "Weighted Squat": {
+    "et": "Kükk lisaraskusega",
+    "lt": "Pritūpimai su svoriu",
+    "pl": "Przysiad z obciążeniem",
+    "uk": "Присідання з обтяженням"
+  },
+  "Wide Stance Barbell Squat": {
+    "et": "Kangi kükk laia asendiga",
+    "lt": "Štangos pritūpimai plačia pozicija",
+    "pl": "Przysiad ze sztangą szerokim rozstawem",
+    "uk": "Присідання зі штангою з широкою постановкою ніг"
+  },
+  "Wide Stance Stiff Legs": {
+    "et": "Jõutõmme sirgete jalgadega laia asendiga",
+    "lt": "Mirties trauka tiesiomis kojomis plačia pozicija",
+    "pl": "Martwy ciąg na prostych nogach szerokim rozstawem",
+    "uk": "Тяга на прямих ногах з широкою постановкою"
   },
   "Wide-Grip Barbell Bench Press": {
     "et": "Kangi surumine lamades laia haardega",
@@ -1826,16 +5159,82 @@
     "pl": "Ściąganie drążka wyciągu górnego szerokim chwytem",
     "uk": "Тяга верхнього блоку широким хватом"
   },
+  "Wide-Grip Pulldown Behind The Neck": {
+    "et": "Ülatõmme laia haardega kukla taha",
+    "lt": "Viršutinio bloko traukimas už kaklo plačiu griebimu",
+    "pl": "Ściąganie drążka wyciągu górnego zza głowy szerokim chwytem",
+    "uk": "Тяга верхнього блока широким хватом за голову"
+  },
+  "Wide-Grip Rear Pull-Up": {
+    "et": "Lõuatõmbed laia haardega kukla taha",
+    "lt": "Prisitraukimai už galvos plačiu griebimu",
+    "pl": "Podciąganie szerokim chwytem zza głowy",
+    "uk": "Підтягування широким хватом за голову"
+  },
   "Wide-Grip Standing Barbell Curl": {
     "et": "Kangi biitsepsi kõverdus laia haardega seistes",
     "lt": "Štangos bicepso lenkimas plačiu griebimu stovint",
     "pl": "Uginanie ramion ze sztangą szerokim chwytem stojąc",
     "uk": "Підйом штанги на біцепс широким хватом стоячи"
   },
+  "Wind Sprints": {
+    "et": "Tuulesprindid",
+    "lt": "Sprinto atkarpos",
+    "pl": "Sprinty interwałowe",
+    "uk": "Спринтерські пробіжки"
+  },
+  "Windmills": {
+    "et": "Veskid",
+    "lt": "Malūnai",
+    "pl": "Wiatraki",
+    "uk": "Вітряк"
+  },
+  "World's Greatest Stretch": {
+    "et": "Maailma parim venitus",
+    "lt": "Geriausias pasaulio tempimas",
+    "pl": "Najlepsze rozciąganie świata",
+    "uk": "Найкраща розтяжка у світі"
+  },
+  "Wrist Circles": {
+    "et": "Randmeringid",
+    "lt": "Riešų sukimas",
+    "pl": "Krążenia nadgarstków",
+    "uk": "Обертання зап’ястями"
+  },
+  "Wrist Roller": {
+    "et": "Randmerull",
+    "lt": "Riešų ritinys",
+    "pl": "Zwijanie ciężaru na drążku (wrist roller)",
+    "uk": "Ролик для зап’ясть"
+  },
+  "Wrist Rotations with Straight Bar": {
+    "et": "Randmete rotatsioon sirge kangiga",
+    "lt": "Riešų sukimas su tiesiu grifu",
+    "pl": "Rotacje nadgarstków z prostym gryfem",
+    "uk": "Обертання зап’ястями з прямим грифом"
+  },
+  "Yoke Walk": {
+    "et": "Ikekõnd",
+    "lt": "Jungo nešimas",
+    "pl": "Spacer z jarzmem",
+    "uk": "Ходьба з йоком"
+  },
+  "Zercher Squats": {
+    "et": "Zercheri kükk",
+    "lt": "Zercher pritūpimai",
+    "pl": "Przysiady Zerchera",
+    "uk": "Присідання Зерчера"
+  },
   "Zottman Curl": {
     "et": "Zottmani kõverdus",
     "lt": "Zottmano lenkimas",
     "pl": "Uginanie Zottmana",
     "uk": "Згинання Зоттмана"
+  },
+  "Zottman Preacher Curl": {
+    "et": "Zottmani kõverdus Scotti pingil",
+    "lt": "Zottman lenkimas ant Skoto suolo",
+    "pl": "Uginanie Zottmana na modlitewniku",
+    "uk": "Підйом Зоттмана на лаві Скотта"
   }
 }

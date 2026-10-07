@@ -367,6 +367,7 @@ async function fullProfilePayload(
 export const profileMe = onCall(async (req) => {
   const uid = requireAuth(req);
   const u = await loadUser(uid);
+  const tr = u.trainerId ? await usersById(u.trainerId) : null;
   return {
     id: u.id,
     name: displayName(u),
@@ -376,6 +377,15 @@ export const profileMe = onCall(async (req) => {
     role: u.role,
     avatar: !!u.avatarExt,
     access: await accessList(u),
+    /** The member's own trainer (name + photo only) — Today shows who it is. */
+    trainer: tr
+      ? {
+          id: tr.id,
+          name: displayName(tr),
+          avatar: !!tr.avatarExt,
+          avatarRev: tr.avatarExt ? (tr.updatedAt ?? 0) : 0,
+        }
+      : null,
   };
 });
 

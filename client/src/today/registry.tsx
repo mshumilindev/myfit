@@ -26,6 +26,7 @@ import { MUSCLES_WIDGETS } from './widgets/muscles';
 import { CARDIO_WIDGETS } from './widgets/cardio';
 import { FUN_WIDGETS } from './widgets/fun';
 import { CALENDAR_WIDGETS } from './widgets/calendar';
+import { CYCLE_WIDGETS } from './widgets/cycle';
 
 export interface WidgetCtx {
   store: StoreState;
@@ -91,6 +92,7 @@ const ALL: WidgetDef[] = [
   ...DISCOVER_WIDGETS,
   ...FUN_WIDGETS,
   ...CALENDAR_WIDGETS,
+  ...CYCLE_WIDGETS,
 ];
 /** Every widget, ordered by group (stable within a group). */
 export const WIDGETS: WidgetDef[] = WIDGET_GROUPS.flatMap((g) => ALL.filter((w) => w.group === g));

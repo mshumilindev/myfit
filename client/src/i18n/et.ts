@@ -1,5 +1,6 @@
 import type { Strings } from './en';
 import { supEt } from './sup.et';
+import { cycEt } from './cyc.et';
 
 /** Estonian. Plural helper: 1 muudatus / 5 muudatust. */
 const muudatust = (n: number): string => (n === 1 ? 'muudatus' : 'muudatust');
@@ -62,6 +63,7 @@ const etPaeva = (n: number): string => (n === 1 ? 'päev' : 'päeva');
 export const et: Strings = {
   locale: 'Eesti',
   ...supEt,
+  ...cycEt,
 
   appName: 'Spotter',
   backAction: 'Tagasi',
@@ -1627,7 +1629,6 @@ export const et: Strings = {
   cndStarted: 'Algus',
   cndEnds: 'Oodatav lõpp',
   cndTodayTitle: (n: number) => `Plaanid arvestavad seisundeid: ${n}`,
-  cndTodaySub: 'Privaatne. Puuduta ülevaatamiseks.',
   cndCoachTitle: 'Sportlase terviseandmed',
   cndCoachEffects: 'Treeningupiirangud',
   cndCoachFoot: 'Jagas sportlane.',
@@ -3076,7 +3077,32 @@ export const et: Strings = {
   pickGymNone: 'Salvestatud jõusaale veel pole — lisa vahekaardil „Saalid“.',
   pickGymHere: 'Sa oled siin',
   pickGymNearest: (d) => `Lähim · ${d}`,
-  pickGymFavourite: 'Lemmik',
+  pickGymFavourite: 'Põhisaal',
+  gymMainLabel: 'Põhisaal',
+  gymMainSub: 'Siin treenid kõige sagedamini',
+  gymMainStat: (here, all, none) =>
+    `${here} / ${all} saaliga treeningut 180 päeva jooksul${none > 0 ? ` · ${none} ilma saalita` : ''}`,
+  gymMainFooter:
+    'Teiste saalide vihjeid ja rekordeid võrreldakse selle saaliga. Põhisaale võib olla mitu.',
+  deleteMainGymBody: (n) =>
+    `See on põhisaal. Koos sellega kaovad ${n} salvestatud külastust ja märge „Põhisaal“. Treeningud jäävad ajalukku.`,
+  xgBoth: (here, main) => `Siin viimati: ${here}. Põhisaalis: ${main}.`,
+  xgMainOnly: (gym, main) =>
+    `Põhisaalis (${gym}) tegid ${main}. Seda trenažööri pole sa siin veel kasutanud.`,
+  xgEstimate: (gym, main, kg) =>
+    `Põhisaalis (${gym}) tegid ${main}. Siin tuleb ilmselt umbes ${kg}.`,
+  xgTake: (kg) => `Võta ${kg}`,
+  xgFirstNoPr: 'Seda trenažööri pole sa siin varem kasutanud. See on esimene kirje, mitte rekord.',
+  exRecByMachine: 'Trenažööride kaupa',
+  exRecByMachineFoot:
+    'Rekordid on iga trenažööri kohta eraldi, nii et kergemale üleminek ei anna valerekordit.',
+  exNoMachine: 'Trenažöörita',
+  exNoGym: 'Saal määramata',
+  exMainSuffix: 'põhisaal',
+  exProgressNote:
+    'Üks joon. Trenažööri vahetus ei paista languse ega kasvuna: võrreldakse vaid sama trenažööri sessioone.',
+  exProgressSwitch: 'katkendjoon — teine trenažöör',
+  exHistGym: 'Saal',
   pickGymSuggested: 'Soovitus',
   pickGymSkip: 'Ilma saalita',
   pickGymNearby: 'Jõusaalid lähedal',

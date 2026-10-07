@@ -85,6 +85,7 @@ import type { MuscleGroup } from './data/exercises';
 import { useFlag, isFlagOn, startGlobalFlags } from './data/flags';
 import { TabBar } from './components/ui/TabBar';
 import { BrandBar, BellButton } from './components/ui/BrandBar';
+import { ConditionsShield } from './views/health/ConditionsShield';
 import { Rail as KitRail, RailItem } from './components/ui/Rail';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 
@@ -293,6 +294,8 @@ export type Overlay =
       alc?: 'hub' | 'products' | 'days' | 'calc';
       /** Supplements pages (hub, What I take, Use in calculations). */
       sup?: 'hub' | 'products' | 'calc';
+      /** Cycle pages (hub, settings). */
+      cyc?: 'hub' | 'settings' | 'patterns';
       /** Health › Privacy and sharing. */
       priv?: boolean;
     }
@@ -475,6 +478,10 @@ function healthHash(o: Extract<Overlay, { screen: 'health' }>): string {
     parts.push('nicotine');
     if (o.nic !== 'hub') parts.push(o.nic);
   }
+  if (o.cyc) {
+    parts.push('cycle');
+    if (o.cyc !== 'hub') parts.push(o.cyc);
+  }
   if (o.alc) {
     parts.push('alcohol');
     if (o.alc !== 'hub') parts.push(o.alc);
@@ -527,6 +534,8 @@ function healthFromHash(rest: string[]): Extract<Overlay, { screen: 'health' }> 
     // The old #/health/nicotine/privacy page now lives in Health › Privacy and sharing.
     if (a === 'privacy') o.priv = true;
     else o.nic = a === 'products' || a === 'calc' ? a : 'hub';
+  } else if (k === 'cycle') {
+    o.cyc = a === 'settings' || a === 'patterns' ? a : 'hub';
   } else if (k === 'alcohol') {
     o.alc = a === 'products' || a === 'days' || a === 'calc' ? a : 'hub';
   } else if (k === 'supplements') {
@@ -552,13 +561,22 @@ export function overlayBack(n: { cur: Overlay; stack: Overlay[] }): {
   }
   if (n.cur?.screen === 'health' && n.cur.nic && n.cur.nic !== 'hub')
     return { cur: { screen: 'health', nic: 'hub' }, stack: [] };
+  if (n.cur?.screen === 'health' && n.cur.cyc && n.cur.cyc !== 'hub')
+    return { cur: { screen: 'health', cyc: 'hub' }, stack: [] };
   if (n.cur?.screen === 'health' && n.cur.alc && n.cur.alc !== 'hub')
     return { cur: { screen: 'health', alc: 'hub' }, stack: [] };
   if (n.cur?.screen === 'health' && n.cur.sup && n.cur.sup !== 'hub')
     return { cur: { screen: 'health', sup: 'hub' }, stack: [] };
   if (
     n.cur?.screen === 'health' &&
-    (n.cur.view || n.cur.form || n.cur.cond || n.cur.nic || n.cur.alc || n.cur.sup || n.cur.priv)
+    (n.cur.view ||
+      n.cur.form ||
+      n.cur.cond ||
+      n.cur.nic ||
+      n.cur.alc ||
+      n.cur.sup ||
+      n.cur.cyc ||
+      n.cur.priv)
   )
     return { cur: { screen: 'health' }, stack: [] };
   // A Home set page reached by a link or a refresh goes up to the Home set page.
@@ -1702,6 +1720,7 @@ export function App() {
           nic={activeOverlay.nic}
           alc={activeOverlay.alc}
           sup={activeOverlay.sup}
+          cyc={activeOverlay.cyc}
           priv={activeOverlay.priv}
           onClose={closeOverlay}
         />
@@ -1797,6 +1816,7 @@ export function App() {
           onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
           onOpenSettings={() => setOverlay({ screen: 'settings' })}
           onOpenMastery={() => setOverlay({ screen: 'mastery' })}
+          onOpenHealth={() => setOverlay({ screen: 'health' })}
         />
       )}
       <div className="main-col">
@@ -1807,6 +1827,7 @@ export function App() {
             appLabel={t.shellSwitch}
             actions={
               <>
+                <ConditionsShield onOpen={() => setOverlay({ screen: 'health' })} />
                 <Suspense fallback={null}>
                   <MasteryBadge onOpen={() => setOverlay({ screen: 'mastery' })} />
                 </Suspense>
@@ -2253,6 +2274,7 @@ function Rail(props: {
   onOpenProfile: () => void;
   onOpenSettings: () => void;
   onOpenMastery: () => void;
+  onOpenHealth: () => void;
 }) {
   const { t } = useT();
   const live = props.openWorkoutStartedAt !== undefined;
@@ -2274,6 +2296,7 @@ function Rail(props: {
       foot={
         <>
           {/* Mastery sits at the bottom of the rail, above notifications. */}
+          <ConditionsShield variant="rail" onOpen={props.onOpenHealth} />
           <div className="rail-mastery">
             <Suspense fallback={null}>
               <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />

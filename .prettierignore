@@ -19,5 +19,10 @@ _feature-programs-week/
 _sync/
 _to_delete/
 
+# Локальні згенеровані макети
+_wctx2/
+client/.chronic-out/
+client/.chronic-real/
+
 # Зовнішні конфіги, чутливі до форматування
 cloudflare/config.example.yml

@@ -1,4 +1,5 @@
 import { supEn } from './sup.en';
+import { cycEn } from './cyc.en';
 /**
  * Base dictionary — copy taken VERBATIM from the design boards
  * (Spotter — All States, S-01…S-50). Other locales must match this shape;
@@ -46,6 +47,7 @@ const enNuLead = (type: string, name: string): string =>
 export const en = {
   locale: 'English',
   ...supEn,
+  ...cycEn,
 
   // Auth (S-01…S-06)
   appName: 'Spotter',
@@ -1626,7 +1628,6 @@ export const en = {
   cndStarted: 'Started',
   cndEnds: 'Expected end',
   cndTodayTitle: (n: number) => `Plans adapted to ${n} ${n === 1 ? 'condition' : 'conditions'}`,
-  cndTodaySub: 'Private. Tap to review.',
   cndCoachTitle: 'Health notes from the athlete',
   cndCoachEffects: 'Training adjustments',
   cndCoachFoot: 'Shared by the athlete.',
@@ -3122,7 +3123,32 @@ export const en = {
   pickGymNone: 'No saved gyms yet — add one from the Gyms tab.',
   pickGymHere: "You're here",
   pickGymNearest: (d: string) => `Nearest · ${d}`,
-  pickGymFavourite: 'Favourite',
+  pickGymFavourite: 'Main',
+  gymMainLabel: 'Main gym',
+  gymMainSub: 'Where you train most',
+  gymMainStat: (here: number, all: number, none: number) =>
+    `${here} of ${all} sessions with a gym in 180 days${none > 0 ? ` · ${none} without a gym` : ''}`,
+  gymMainFooter:
+    'Hints and records at other gyms are compared with this one. You can mark several gyms as main.',
+  deleteMainGymBody: (n: number) =>
+    `This is a main gym. ${n} recorded visits go with it and the Main mark disappears. Your workouts stay in history.`,
+  xgBoth: (here: string, main: string) => `Last time here: ${here}. At your main gym: ${main}.`,
+  xgMainOnly: (gym: string, main: string) =>
+    `At your main gym (${gym}) you did ${main}. You haven’t used this machine here yet.`,
+  xgEstimate: (gym: string, main: string, kg: string) =>
+    `At your main gym (${gym}) you did ${main}. Here it will probably be around ${kg}.`,
+  xgTake: (kg: string) => `Use ${kg}`,
+  xgFirstNoPr: 'You haven’t used this machine here before. This is a first entry, not a record.',
+  exRecByMachine: 'By machine',
+  exRecByMachineFoot:
+    'Records are kept per machine, so moving to a lighter one never gives a false record.',
+  exNoMachine: 'No machine',
+  exNoGym: 'Gym not set',
+  exMainSuffix: 'main',
+  exProgressNote:
+    'One line. Switching machines never shows up as a drop or a gain — only sessions on the same machine are compared.',
+  exProgressSwitch: 'dashed — another machine',
+  exHistGym: 'Gym',
   pickGymSuggested: 'Suggested',
   pickGymSkip: 'Without a gym',
   pickGymNearby: 'Gyms nearby',

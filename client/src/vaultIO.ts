@@ -231,6 +231,7 @@ export function migratePorts(
         c === 'coachShare' ||
         c === 'conditionPrefs' ||
         c === 'nicotine' ||
+        c === 'cycle' ||
         c === 'alcohol' ||
         c === 'supplements'
       ) {
@@ -246,6 +247,7 @@ export function migratePorts(
         c === 'coachShare' ||
         c === 'conditionPrefs' ||
         c === 'nicotine' ||
+        c === 'cycle' ||
         c === 'alcohol' ||
         c === 'supplements'
           ? doc(db, 'users', uid(), 'meta', c)

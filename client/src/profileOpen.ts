@@ -13,6 +13,7 @@ import type { CoachKeyRecord } from './vaultShare';
 import type { Exercise, Gym, Workout } from './types';
 
 import type { CoachView } from './conditions';
+import { autoMainGymIds, isMainGym } from './mainGym';
 type Raw = Record<string, unknown>;
 
 interface Payload {
@@ -70,13 +71,14 @@ export function deriveSessions(workouts: Workout[], gyms: Gym[], d: DeriveDeps) 
 }
 
 export function deriveGyms(workouts: Workout[], gyms: Gym[], d: DeriveDeps) {
+  const auto = autoMainGymIds(workouts);
   return gyms
     .map((g) => {
       const mine = workouts.filter((w) => w.gymId === g.id);
       return {
         id: g.id,
         name: g.name,
-        favorite: g.favorite ? 1 : 0,
+        favorite: isMainGym(g, auto) ? 1 : 0,
         lat: g.lat,
         lng: g.lng,
         radiusM: g.radiusM,

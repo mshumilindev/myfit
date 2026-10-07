@@ -181,6 +181,7 @@ const NAMES: Record<string, { name: string; aka?: string[] }> = {
   preg_postpartum: { name: 'Sünnitusjärgne taastumine', aka: ['pärast sünnitust'] },
   preg_diastasis: { name: 'Sirglihaste hajumine', aka: ['diastaas', 'kõhulihaste lahknemine'] },
   preg_pelvic_floor: { name: 'Vaagnapõhja düsfunktsioon', aka: ['kusepidamatus', 'prolaps'] },
+  preg_menopause: { name: 'Menopaus', aka: ['perimenopaus', 'kliimakter'] },
   other_ibd: { name: 'Crohni tõbi või koliit', aka: ['IBD', 'haavandiline koliit'] },
   other_ibs: { name: 'Ärritatud soole sündroom', aka: ['IBS'] },
   other_reflux: { name: 'Krooniline refluks', aka: ['GERD', 'kõrvetised'] },

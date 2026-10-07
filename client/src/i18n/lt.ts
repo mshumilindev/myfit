@@ -1,5 +1,6 @@
 import type { Strings } from './en';
 import { supLt } from './sup.lt';
+import { cycLt } from './cyc.lt';
 
 /** Lithuanian. Plural helper: 1 pakeitimas / 2 pakeitimai / 10 pakeitimų. */
 const pakeitimai = (n: number): string => {
@@ -81,6 +82,7 @@ const ltTren = (n: number): string => ltPick(n, 'treniruotė', 'treniruotės', '
 export const lt: Strings = {
   locale: 'Lietuvių',
   ...supLt,
+  ...cycLt,
 
   appName: 'Spotter',
   backAction: 'Atgal',
@@ -1657,7 +1659,6 @@ export const lt: Strings = {
   cndStarted: 'Pradžia',
   cndEnds: 'Numatoma pabaiga',
   cndTodayTitle: (n: number) => `Planai pritaikyti būklėms: ${n}`,
-  cndTodaySub: 'Privatu. Palieskite, kad peržiūrėtumėte.',
   cndCoachTitle: 'Sportininko sveikatos pastabos',
   cndCoachEffects: 'Treniruočių apribojimai',
   cndCoachFoot: 'Pasidalijo sportininkas.',
@@ -3113,7 +3114,32 @@ export const lt: Strings = {
   pickGymNone: 'Išsaugotų salių dar nėra — pridėk skiltyje „Salės“.',
   pickGymHere: 'Tu esi čia',
   pickGymNearest: (d) => `Artimiausia · ${d}`,
-  pickGymFavourite: 'Mėgstamiausia',
+  pickGymFavourite: 'Pagrindinė',
+  gymMainLabel: 'Pagrindinė sporto salė',
+  gymMainSub: 'Čia treniruojiesi dažniausiai',
+  gymMainStat: (here, all, none) =>
+    `${here} iš ${all} treniruočių su sale per 180 dienų${none > 0 ? ` · ${none} be salės` : ''}`,
+  gymMainFooter:
+    'Kitų salių patarimai ir rekordai lyginami su šia. Pagrindinėmis gali būti kelios salės.',
+  deleteMainGymBody: (n) =>
+    `Tai pagrindinė salė. Kartu dings ${n} užfiksuotų apsilankymų ir žyma „Pagrindinė“. Treniruotės liks istorijoje.`,
+  xgBoth: (here, main) => `Čia praėjusį kartą: ${here}. Pagrindinėje salėje: ${main}.`,
+  xgMainOnly: (gym, main) =>
+    `Pagrindinėje salėje (${gym}) darei ${main}. Šio treniruoklio čia dar nenaudojai.`,
+  xgEstimate: (gym, main, kg) =>
+    `Pagrindinėje salėje (${gym}) darei ${main}. Čia tikriausiai išeis apie ${kg}.`,
+  xgTake: (kg) => `Imti ${kg}`,
+  xgFirstNoPr: 'Šio treniruoklio čia dar nenaudojai. Tai pirmas įrašas, o ne rekordas.',
+  exRecByMachine: 'Pagal treniruoklį',
+  exRecByMachineFoot:
+    'Rekordai skaičiuojami kiekvienam treniruokliui atskirai, todėl perėjimas prie lengvesnio neduoda netikro rekordo.',
+  exNoMachine: 'Be treniruoklio',
+  exNoGym: 'Salė nenurodyta',
+  exMainSuffix: 'pagrindinė',
+  exProgressNote:
+    'Viena linija. Treniruoklio pakeitimas neatrodo kaip kritimas ar augimas: lyginamos tik to paties treniruoklio sesijos.',
+  exProgressSwitch: 'punktyras — kitas treniruoklis',
+  exHistGym: 'Salė',
   pickGymSuggested: 'Siūloma',
   pickGymSkip: 'Be salės',
   pickGymNearby: 'Sporto salės netoliese',

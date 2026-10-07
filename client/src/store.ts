@@ -11,8 +11,11 @@
  * All the pure/derived helpers (volume, per-hand, supersets, muscles, records)
  * are unchanged — they operate on the in-memory workouts array.
  */
+import { autoMainGymIds, isMainGym } from './mainGym';
 import {
   coachView,
+  pregnancyKeyAt,
+  suggestedEnd,
   stripLegacyCondition,
   stripLegacyConditions,
   type GeneralShare,
@@ -93,6 +96,7 @@ import {
   type MuscleGroup,
   isCardioExerciseName,
 } from './data/exercises';
+import { defaultMeasure } from './data/exerciseProfile';
 import { kitEvidence, type KitEvidence } from './gymEvidence';
 import type { ExerciseSubRegions } from './data/subregions';
 import { EMPTY_GOALS, type FitGoals, type PhysiqueTarget, type BlockFocus } from './goals';
@@ -188,6 +192,15 @@ import {
   type SupplementWarning,
 } from './supplements';
 import { createNicotineCache } from './nicotineCache';
+import { createCycleCache } from './cycleCache';
+import {
+  emptyCycleState,
+  normalizeCycle,
+  withStart,
+  type CycleState,
+  type CycleSurface,
+} from './cycle/cycleState';
+import { MENOPAUSE_KEY, normalizeSettings, type CycleSettings } from './cycle/cycleCore';
 import { nicotineCoachView } from './nicotineShare';
 import {
   emptyNicotineState,
@@ -256,6 +269,7 @@ const conditionsCache = createConditionsCache<ChronicCondition, GeneralShare>({
   isShare: isGeneralShare,
 });
 const nicotineCache = createNicotineCache({ vault });
+const cycleCache = createCycleCache({ vault });
 const alcoholCache = createAlcoholCache({ vault });
 const supplementsCache = createSupplementsCache({ vault });
 function loadShare(): GeneralShare {
@@ -365,6 +379,8 @@ export interface StoreState {
   conditionsShare: GeneralShare;
   /** Private nicotine products + switches (sealed in the vault; see nicotine.ts). */
   nicotine: NicotineState;
+  /** Private cycle settings + switches (sealed in the vault; see cycle/cycleState.ts). Never shared. */
+  cycle: CycleState;
   /** Private alcohol entries + switches (sealed in the vault; see alcohol.ts). */
   alcohol: AlcoholState;
   /** Private supplement entries, switches and check-ins (sealed in the vault; see supplements.ts). */
@@ -436,6 +452,7 @@ let state: StoreState = {
   conditions: stripLegacyConditions(load<ChronicCondition[]>(CONDITIONS_KEY, [])),
   conditionsShare: loadShare(),
   nicotine: nicotineCache.load(),
+  cycle: cycleCache.load(),
   alcohol: alcoholCache.load(),
   supplements: supplementsCache.load(),
   activities: load<Activity[]>(ACTIVITIES_KEY, []),
@@ -506,6 +523,7 @@ vault.subscribe(hydrateConditions);
 if (vault.materialOrNull()) hydrateConditions();
 
 nicotineCache.boot(state.nicotine);
+cycleCache.boot(state.cycle);
 alcoholCache.boot(state.alcohol);
 supplementsCache.boot(state.supplements);
 /** When the vault key becomes available: open the sealed on-device nicotine copy. */
@@ -523,6 +541,19 @@ function hydrateNicotine(): void {
 }
 vault.subscribe(hydrateNicotine);
 if (vault.materialOrNull()) hydrateNicotine();
+/** When the vault key becomes available: open the sealed on-device cycle copy. */
+function hydrateCycle(): void {
+  void cycleCache
+    .hydrate(state.cycle)
+    .then((next) => {
+      if (!next) return;
+      state = { ...state, cycle: next };
+      emit();
+    })
+    .catch(() => undefined);
+}
+vault.subscribe(hydrateCycle);
+if (vault.materialOrNull()) hydrateCycle();
 /** When the vault key becomes available: open the sealed on-device alcohol copy. */
 function hydrateAlcohol(): void {
   void alcoholCache
@@ -566,6 +597,7 @@ function persist(): void {
     // Sealed on device once the vault key is here; plaintext only as the no-key fallback.
     conditionsCache.persist({ conditions: state.conditions, share: state.conditionsShare });
     nicotineCache.persist(state.nicotine);
+    cycleCache.persist(state.cycle);
     alcoholCache.persist(state.alcohol);
     supplementsCache.persist(state.supplements);
     localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(state.activities));
@@ -596,6 +628,11 @@ function setState(patch: Partial<StoreState>): void {
 /** The current state, outside React (for chained actions). */
 export function getStoreState(): StoreState {
   return state;
+}
+
+/** Cycle settings + switches (a stable object until something changes). */
+export function useCycle(): CycleState {
+  return useSyncExternalStore(subscribeStore, () => state.cycle);
 }
 
 /** Nicotine products + switches (a stable object until something changes). */
@@ -1273,6 +1310,8 @@ interface ExercisePlan {
   /** Warm-up marker only: exercises the block starts with (a program day's
    *  warm-up, or the auto session's proposal). */
   warmupItems?: WarmupItemDraft[];
+  /** How the exercise is logged; omitted = the catalog default (exerciseProfile). */
+  measure?: 'reps' | 'hold' | 'time';
 }
 
 // --- Firestore writes -------------------------------------------------------
@@ -2067,6 +2106,11 @@ export function addExercise(
     primaryMuscle: plan.primaryMuscle ?? (info && info.primary !== 'cardio' ? info.primary : null),
     secondaryMuscles: plan.secondaryMuscles ?? (info ? info.secondary : []),
     ...(plan.equipmentItems?.length ? { equipmentItems: plan.equipmentItems } : {}),
+    // A timed hold (plank, side bridge…) starts on the stopwatch. Only NEW exercises get
+    // this default — what is already logged keeps the way it was saved.
+    ...(kind === 'strength' && (plan.measure ?? defaultMeasure(name)) !== 'reps'
+      ? { measure: plan.measure ?? defaultMeasure(name) }
+      : {}),
     // Adding a cool-down during a live session starts it: the rest clock
     // stops on its own (no separate "Start cool-down" step).
     ...((kind === 'cooldown' || kind === 'warmup') && w?.finishedAt === null
@@ -2235,7 +2279,11 @@ export function upsertSet(
   // Auto-tag leading light sets as warm-ups (respecting manual choices). Seed the
   // reference with last session's working weight so a light opener is flagged as
   // a warm-up straight away, not only once a heavier set follows it.
-  const sets = autoWarmupSets(next, loadTypeFor(ex), historicalWorkingKg(ex.name, workoutId));
+  const sets = autoWarmupSets(
+    next,
+    loadTypeFor(ex),
+    historicalWorkingKg(ex.name, workoutId, liftVariant(w, ex)),
+  );
   patchWorkout(workoutId, {
     exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, sets } : e)),
   });
@@ -2618,7 +2666,13 @@ export function upsertGym(gym: Omit<Gym, 'id'> & { id?: string }): Gym {
 export function toggleFavorite(id: string): void {
   const g = state.gyms.find((x) => x.id === id);
   if (!g) return;
-  upsertGym({ ...g, favorite: !g.favorite });
+  // An explicit choice only exists where it differs from what the log says; ticking
+  // back to the automatic answer returns the gym to automatic.
+  const auto = autoMainGymIds(state.workouts);
+  const next = !isMainGym(g, auto);
+  const { favorite: _old, ...rest } = g;
+  void _old;
+  upsertGym(next === auto.has(g.id) ? rest : { ...rest, favorite: next });
 }
 
 export function deleteGym(id: string): void {
@@ -2999,6 +3053,94 @@ export function deleteCondition(id: string): void {
   setState({ conditions: state.conditions.filter((c) => c.id !== id), syncStatus: bumpPending() });
   const uid = currentUid();
   if (uid) deleteDoc(doc(db, 'users', uid, 'conditions', id)).catch(onWriteError);
+}
+
+// --- Cycle ------------------------------------------------------------------
+// One sealed document, users/{uid}/meta/cycle: { enabled, settings, surfaces, updatedAt }.
+// Typical values only. Deliberately NOT published to coachShare and not part of any Atlas facts.
+
+function writeCycleDoc(c: CycleState): void {
+  const uid = currentUid();
+  if (!uid) return;
+  prepareWrite('cycle', { ...c })
+    .then((d) => setDoc(doc(db, 'users', uid, 'meta', 'cycle'), d))
+    .catch(onWriteError);
+}
+
+function commitCycle(
+  patch: Partial<Pick<CycleState, 'enabled' | 'settings' | 'surfaces' | 'pendingDate' | 'starts'>>,
+): void {
+  const next: CycleState = {
+    ...state.cycle,
+    ...patch,
+    updatedAt: Math.max(Date.now(), state.cycle.updatedAt + 1),
+  };
+  setState({ cycle: next, syncStatus: bumpPending() });
+  writeCycleDoc(next);
+}
+
+/** The current cycle document, outside React. */
+export const getCycle = (): CycleState => state.cycle;
+
+/** First setup / Save in settings: turns the feature on with these typical values. */
+export function saveCycleSettings(input: CycleSettings): void {
+  const settings = normalizeSettings(input);
+  commitCycle({
+    enabled: true,
+    settings,
+    pendingDate: false,
+    starts: withStart(state.cycle.starts, settings.anchor),
+  });
+}
+
+/** "Update the date": only the anchor moves, the typical values stay. */
+export function updateCycleAnchor(day: number): void {
+  const cur = state.cycle.settings;
+  if (!cur) return;
+  commitCycle({
+    settings: normalizeSettings({ ...cur, anchor: day }),
+    pendingDate: false,
+    starts: withStart(state.cycle.starts, day),
+  });
+}
+
+/** The Cycle was paused by a condition: remember to ask for a new start date on resume. */
+export function setCyclePendingDate(v: boolean): void {
+  if (state.cycle.pendingDate !== v) commitCycle({ pendingDate: v });
+}
+
+export function setCycleSurface(surface: CycleSurface, on: boolean): void {
+  commitCycle({ surfaces: { ...state.cycle.surfaces, [surface]: on } });
+}
+
+/**
+ * Marks a pregnancy from the Cycle screen: creates the chronic condition right away (the
+ * conditions store is the one source of truth; it switches the Cycle off). Private by default.
+ */
+export function markPregnancyFromCycle(startedAt: number): ChronicCondition {
+  const now = Date.now();
+  return addCondition({
+    key: pregnancyKeyAt(startedAt, now),
+    severity: 2,
+    share: 'off',
+    startedAt,
+    endsAt: suggestedEnd('preg_first', startedAt),
+  });
+}
+
+/** Marks menopause from the Cycle screen: a permanent chronic condition, private by default. */
+export function markMenopauseFromCycle(): ChronicCondition {
+  return addCondition({ key: MENOPAUSE_KEY, severity: 2, share: 'off' });
+}
+
+/** Full wipe: settings, the sealed Firestore document and the on-device copy. */
+export function deleteCycleData(): void {
+  cycleCache.clear();
+  state = { ...state, cycle: emptyCycleState(), syncStatus: bumpPending() };
+  persist();
+  emit();
+  const uid = currentUid();
+  if (uid) deleteDoc(doc(db, 'users', uid, 'meta', 'cycle')).catch(onWriteError);
 }
 
 // --- Nicotine ---------------------------------------------------------------
@@ -5098,6 +5240,24 @@ export function startSyncLoop(): () => void {
       () => undefined,
     ),
   );
+  const cycleMirror = mirrorCollection<Record<string, unknown>>((items) => {
+    if (!items.length) return; // locked, absent or wiped: keep what is on screen
+    cycleCache.markRemote();
+    const remote = normalizeCycle(items[0]);
+    if (remote.updatedAt < state.cycle.updatedAt) return;
+    if (JSON.stringify(remote) === JSON.stringify(state.cycle)) return;
+    state = { ...state, cycle: remote };
+    persist();
+    emit();
+  });
+  unsubs.push(cycleMirror.dispose);
+  unsubs.push(
+    onSnapshot(
+      doc(db, 'users', uid, 'meta', 'cycle'),
+      (snap) => cycleMirror.push(snap.exists() ? [snap.data()] : []),
+      () => undefined,
+    ),
+  );
   const nicotineMirror = mirrorCollection<Record<string, unknown>>((items) => {
     if (!items.length) return; // locked, absent or wiped: keep what is on screen
     nicotineCache.markRemote();
@@ -5480,8 +5640,12 @@ export const WARMUP_FRAC = 0.85;
  * session): the most common working weight of the last session, heavier one on
  * ties. A single heavy top set or a PR doesn't move it. 0 = no history.
  */
-export function historicalWorkingKg(name: string, currentWorkoutId?: string): number {
-  const found = lastSessionWith(name, currentWorkoutId);
+export function historicalWorkingKg(
+  name: string,
+  currentWorkoutId?: string,
+  variant?: string,
+): number {
+  const found = lastSessionWith(name, currentWorkoutId, variant);
   if (!found) return 0;
   const counts = new Map<number, number>();
   for (const s of found.exercise.sets) {
@@ -5523,33 +5687,63 @@ export function autoWarmupSets(sets: SetEntry[], loadType: LoadType, histRef = 0
   }
   return sets.map((s) => byId.get(s.id) ?? s);
 }
+/**
+ * Weight differs per machine, not per exercise name. A "variant" tells which
+ * physical setup a lift was done on: the picked equipment item, else the gym —
+ * but only for machine/cable lifts. Free weights are absolute (variant ''), so
+ * they match everywhere. Derived at read time: old data is never rewritten.
+ */
+export function isMachineLift(e: Pick<Exercise, 'name' | 'equipment'>): boolean {
+  const eq = equipmentFor(e);
+  return eq.includes('machine') || eq.includes('cable');
+}
+export function liftVariant(w: Pick<Workout, 'gymId'>, e: Exercise): string {
+  if (!isMachineLift(e)) return '';
+  const items = [...(e.equipmentItems ?? [])].sort();
+  if (items.length > 0) return 'eq:' + items.join('+');
+  return w.gymId ? 'gym:' + w.gymId : '';
+}
+function sameVariant(w: Workout, e: Exercise, variant?: string): boolean {
+  return variant === undefined || liftVariant(w, e) === variant;
+}
+
 export function lastSessionWith(
   name: string,
   beforeWorkoutId?: string,
+  variant?: string,
 ): { workout: Workout; exercise: Exercise } | undefined {
   const needle = name.trim().toLowerCase();
   for (const w of state.workouts) {
     if (w.id === beforeWorkoutId || w.finishedAt === null) continue;
     const ex = w.exercises.find(
-      (e) => isStrengthExercise(e) && e.name.trim().toLowerCase() === needle,
+      (e) =>
+        isStrengthExercise(e) &&
+        e.name.trim().toLowerCase() === needle &&
+        e.sets.length > 0 &&
+        sameVariant(w, e, variant),
     );
-    if (ex && ex.sets.length > 0) return { workout: w, exercise: ex };
+    if (ex) return { workout: w, exercise: ex };
   }
   return undefined;
 }
-export function prevLift(name: string, currentWorkoutId?: string): PrevLift | undefined {
-  const found = lastSessionWith(name, currentWorkoutId);
+export function prevLift(
+  name: string,
+  currentWorkoutId?: string,
+  variant?: string,
+): PrevLift | undefined {
+  const found = lastSessionWith(name, currentWorkoutId, variant);
   if (!found) return undefined;
   const top = topSet(found.exercise.sets) ?? found.exercise.sets[found.exercise.sets.length - 1];
   return top ? { reps: top.reps, weight: top.weight } : undefined;
 }
-export function recordWeight(name: string, excludeWorkoutId?: string): number {
+export function recordWeight(name: string, excludeWorkoutId?: string, variant?: string): number {
   const needle = name.trim().toLowerCase();
   let max = 0;
   for (const w of state.workouts) {
     if (w.id === excludeWorkoutId) continue;
     for (const e of w.exercises) {
       if (!isStrengthExercise(e) || e.name.trim().toLowerCase() !== needle) continue;
+      if (!sameVariant(w, e, variant)) continue;
       // AC-DS-07: records consider the parent entry only — a drop (even a
       // heavier reverse-drop) can never set or break a record.
       for (const s of e.sets) {
@@ -5561,17 +5755,177 @@ export function recordWeight(name: string, excludeWorkoutId?: string): number {
   return max;
 }
 /** Best e1RM of a lift before a workout (warm-ups excluded, drops included). */
-export function recordE1rm(name: string, excludeWorkoutId?: string): number {
+export function recordE1rm(name: string, excludeWorkoutId?: string, variant?: string): number {
   const needle = name.trim().toLowerCase();
   let max = 0;
   for (const w of state.workouts) {
     if (w.id === excludeWorkoutId) continue;
     for (const e of w.exercises) {
       if (!isStrengthExercise(e) || e.name.trim().toLowerCase() !== needle) continue;
+      if (!sameVariant(w, e, variant)) continue;
       for (const s of e.sets) max = Math.max(max, setBestE1rm(s));
     }
   }
   return max;
+}
+
+// --- Main gym & cross-gym weight -------------------------------------------
+
+/** Gyms that are main (several allowed). */
+export function mainGyms(): Gym[] {
+  const auto = autoMainGymIds(state.workouts);
+  return state.gyms.filter((g) => isMainGym(g, auto));
+}
+
+function topOf(e: Exercise): { weight: number; reps: number } | null {
+  const t = topSet(e.sets);
+  return t && (t.weight ?? 0) > 0 ? { weight: t.weight ?? 0, reps: t.reps } : null;
+}
+
+/** Last top set of every machine lift per gym (name → top), newest session wins. */
+function lastTopsInGym(gymId: string): Map<string, { weight: number; reps: number }> {
+  const out = new Map<string, { weight: number; reps: number }>();
+  for (const w of state.workouts) {
+    if (w.finishedAt === null || w.gymId !== gymId) continue;
+    for (const e of w.exercises) {
+      if (!isStrengthExercise(e) || !isMachineLift(e)) continue;
+      const key = e.name.trim().toLowerCase();
+      if (out.has(key)) continue;
+      const t = topOf(e);
+      if (t) out.set(key, t);
+    }
+  }
+  return out;
+}
+
+/** Minimum number of machine lifts done in both gyms before we dare an estimate. */
+export const TRANSFER_MIN_SHARED = 3;
+
+/**
+ * How heavy this gym's machines feel compared with another gym: the median of
+ * to/from over lifts done in both. null = too little to say (never guess).
+ */
+export function gymTransferRatio(fromGymId: string, toGymId: string): number | null {
+  const a = lastTopsInGym(fromGymId);
+  const b = lastTopsInGym(toGymId);
+  const ratios: number[] = [];
+  for (const [k, from] of a) {
+    const to = b.get(k);
+    if (to) ratios.push(to.weight / from.weight);
+  }
+  if (ratios.length < TRANSFER_MIN_SHARED) return null;
+  ratios.sort((x, y) => x - y);
+  const m = ratios[Math.floor(ratios.length / 2)];
+  return m >= 0.4 && m <= 1.6 ? m : null;
+}
+
+export interface CrossGymHint {
+  /** The main gym the figure comes from. */
+  gym: Gym;
+  weight: number;
+  reps: number;
+  /** Estimated working weight here (null = not enough shared lifts). */
+  estimate: number | null;
+  /** This machine already has its own history here. */
+  hasLocal: boolean;
+}
+
+/**
+ * For a machine lift in a non-main gym: what you did on it in your main gym and
+ * (only without history here) an estimate for this one. Never written to history.
+ */
+export function crossGymHint(workoutId: string, ex: Exercise): CrossGymHint | undefined {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (!w || !w.gymId || !isStrengthExercise(ex) || !isMachineLift(ex)) return undefined;
+  const mains = mainGyms();
+  if (mains.length === 0 || mains.some((g) => g.id === w.gymId)) return undefined;
+  const needle = ex.name.trim().toLowerCase();
+  for (const mw of state.workouts) {
+    if (mw.finishedAt === null || !mw.gymId || !mains.some((g) => g.id === mw.gymId)) continue;
+    const me = mw.exercises.find(
+      (e) => isStrengthExercise(e) && e.name.trim().toLowerCase() === needle,
+    );
+    const top = me ? topOf(me) : null;
+    if (!me || !top) continue;
+    const gym = mains.find((g) => g.id === mw.gymId)!;
+    const hasLocal = !!lastSessionWith(ex.name, workoutId, liftVariant(w, ex));
+    const ratio = hasLocal ? null : gymTransferRatio(gym.id, w.gymId);
+    const estimate = ratio ? Math.round((top.weight * ratio) / 2.5) * 2.5 : null;
+    return { gym, weight: top.weight, reps: top.reps, estimate, hasLocal };
+  }
+  return undefined;
+}
+
+/** Best working weight of a lift per variant (machine/gym) — for the records block. */
+export interface VariantRecord {
+  variant: string;
+  gymId: string | null;
+  equipmentItems: string[];
+  weight: number;
+  reps: number;
+  isMain: boolean;
+}
+export function recordsByVariant(name: string): VariantRecord[] {
+  const needle = name.trim().toLowerCase();
+  const m = new Map<string, VariantRecord>();
+  const mains = mainGyms();
+  for (const w of state.workouts) {
+    if (w.finishedAt === null) continue;
+    for (const e of w.exercises) {
+      if (!isStrengthExercise(e) || e.name.trim().toLowerCase() !== needle) continue;
+      const v = liftVariant(w, e);
+      for (const s of e.sets) {
+        if (setTypeOf(s) === 'warmup') continue;
+        const wt = s.weight ?? 0;
+        const cur = m.get(v);
+        if (wt > 0 && (!cur || wt > cur.weight)) {
+          m.set(v, {
+            variant: v,
+            gymId: w.gymId ?? null,
+            equipmentItems: e.equipmentItems ?? [],
+            weight: wt,
+            reps: s.reps,
+            isMain: !!w.gymId && mains.some((g) => g.id === w.gymId),
+          });
+        }
+      }
+    }
+  }
+  return [...m.values()].sort((a, b) => Number(b.isMain) - Number(a.isMain) || b.weight - a.weight);
+}
+
+/**
+ * One progress curve across machines: an index starting at 100. Between two
+ * sessions on the same variant it moves by their weight ratio; a switch of
+ * variant moves nothing (flagged), so a lighter machine never looks like a loss.
+ */
+export interface ProgressPoint {
+  ts: number;
+  value: number;
+  switched: boolean;
+}
+export function normalizedProgress(name: string): ProgressPoint[] {
+  const needle = name.trim().toLowerCase();
+  const pts: { ts: number; v: string; w: number }[] = [];
+  for (const w of state.workouts) {
+    if (w.finishedAt === null) continue;
+    const e = w.exercises.find(
+      (x) => isStrengthExercise(x) && x.name.trim().toLowerCase() === needle,
+    );
+    const t = e ? topOf(e) : null;
+    if (e && t) pts.push({ ts: w.startedAt, v: liftVariant(w, e), w: t.weight });
+  }
+  pts.sort((a, b) => a.ts - b.ts);
+  const out: ProgressPoint[] = [];
+  let value = 100;
+  pts.forEach((p, i) => {
+    if (i === 0) return void out.push({ ts: p.ts, value, switched: false });
+    const prev = pts[i - 1];
+    const switched = prev.v !== p.v;
+    if (!switched) value = value * (p.w / prev.w);
+    out.push({ ts: p.ts, value, switched });
+  });
+  return out;
 }
 /** The lift's sets in its most recent finished sessions, newest first. */
 export function recentSessionsOf(
@@ -6035,6 +6389,7 @@ export function resetLocalData(): void {
   localStorage.removeItem(INJURY_KEY);
   conditionsCache.clear();
   nicotineCache.clear();
+  cycleCache.clear();
   alcoholCache.clear();
   supplementsCache.clear();
   localStorage.removeItem(ACTIVITIES_KEY);
@@ -6069,6 +6424,7 @@ export function resetLocalData(): void {
     conditions: [],
     conditionsShare: 'effects',
     nicotine: emptyNicotineState(),
+    cycle: emptyCycleState(),
     alcohol: emptyAlcoholState(),
     supplements: emptySupplementState(),
     activities: [],

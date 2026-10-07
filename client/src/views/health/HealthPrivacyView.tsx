@@ -24,7 +24,9 @@ import { FEATURE_ICON } from '../../coachEffectIcons';
 import { SupplementCoachPreview } from './supplements/SupplementCoachPreview';
 import {
   deleteAlcoholData,
+  deleteCycleData,
   deleteNicotineData,
+  useCycle,
   deleteSupplementData,
   setAlcoholSharing,
   setConditionsShare,
@@ -100,6 +102,8 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
   const { settings } = useNicotine();
   const { settings: alcSettings } = useAlcohol();
   const { settings: supSettings } = useSupplements();
+  const cycleOn = useCycle().enabled;
+  const [confirmCycle, setConfirmCycle] = useState(false);
   const [confirm, setConfirm] = useState<'nicotine' | 'alcohol' | 'supplements' | null>(null);
   const [open, setOpen] = useState<Category['id'] | null>(null);
 
@@ -227,6 +231,14 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
               label={t.supPrivDelete}
               onClick={() => setConfirm('supplements')}
             />
+            {cycleOn && (
+              <ListRow
+                action
+                tone="danger"
+                label={t.cycDelete}
+                onClick={() => setConfirmCycle(true)}
+              />
+            )}
           </GroupedList>
         </div>
       </div>
@@ -258,6 +270,20 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
             </Button>
           </div>
         </Sheet>
+      )}
+      {confirmCycle && (
+        <ConfirmDialog
+          title={t.cycDeleteTitle}
+          body={t.cycDeleteBody}
+          confirmLabel={t.cycDeleteConfirm}
+          cancelLabel={t.cancel}
+          danger
+          onCancel={() => setConfirmCycle(false)}
+          onConfirm={() => {
+            deleteCycleData();
+            setConfirmCycle(false);
+          }}
+        />
       )}
       {confirm && (
         <ConfirmDialog

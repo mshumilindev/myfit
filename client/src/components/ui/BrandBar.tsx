@@ -65,3 +65,26 @@ export function BellButton({ label, onClick, count = 0, active }: BellButtonProp
     </button>
   );
 }
+
+export interface BrandIconButtonProps {
+  label: string;
+  icon: string;
+  onClick: () => void;
+  /** Icon colour family; `chronic` is the blue of the health-conditions shield. */
+  tone?: 'chronic';
+}
+
+/** Icon control for the BrandBar cluster. With a `tone` the glyph takes that colour family. */
+export function BrandIconButton({ label, icon, onClick, tone }: BrandIconButtonProps) {
+  return (
+    <button
+      type="button"
+      className={`uibrand-ctl uibell app-bell${tone ? ` is-${tone}` : ''}`}
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+    >
+      <Icon name={icon} className="app-brand-icon" />
+    </button>
+  );
+}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { exerciseDisplay, exerciseNameVariants } from './exerciseNames';
+import { exerciseDisplay, exerciseNameVariants, localizedExerciseName } from './exerciseNames';
 import { setLocale } from '../i18n';
 import { searchCatalog } from './exercises';
 
@@ -16,8 +16,8 @@ describe('localized exercise names', () => {
     expect(d.secondary).toBe('Barbell Squat');
   });
   it('falls back to the plain name when no localization exists', () => {
-    expect(exerciseDisplay('Atlas Stones', 'uk')).toEqual({
-      primary: 'Atlas Stones',
+    expect(exerciseDisplay('My Custom Move', 'uk')).toEqual({
+      primary: 'My Custom Move',
       secondary: null,
     });
   });
@@ -37,5 +37,14 @@ describe('cross-language catalog search', () => {
   });
   it('matches by a muscle name in another language', () => {
     expect(searchCatalog('біцепс', 8).length).toBeGreaterThan(0);
+  });
+});
+
+describe('catalog coverage', () => {
+  it('has uk/pl/lt/et names for every catalog exercise', async () => {
+    const db = (await import('./exercises.db.json')).default as unknown as string[][];
+    for (const row of db)
+      for (const l of ['uk', 'pl', 'lt', 'et'] as const)
+        expect(localizedExerciseName(row[0], l), `${row[0]} · ${l}`).toBeTruthy();
   });
 });

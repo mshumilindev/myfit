@@ -2210,6 +2210,10 @@ i > svg {
   width: 100%;
 }
 
+.set-grid.compact {
+  grid-template-columns: 18px minmax(0, 1fr) 62px;
+}
+
 .set-grid.timed,
 .set-row.timed,
 .ghost-row.timed {
@@ -7104,6 +7108,13 @@ html.theme-glass .gym-card .head .n {
   .session-past .ghost-row {
     grid-template-columns: 44px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 90px;
     width: 100%;
+  }
+
+  .session-live .set-grid.compact,
+  .session-live .set-row.compact,
+  .session-past .set-grid.compact,
+  .session-past .set-row.compact {
+    grid-template-columns: 44px minmax(0, 1fr) 90px;
   }
 
   .session-live .set-grid.header span:last-child,

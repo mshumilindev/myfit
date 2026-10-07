@@ -88,13 +88,6 @@
 }
 
 /* --- stopwatch set card (hold / time moves) ---------------------------------- */
-.gset.kind-hold::after {
-  background: color-mix(in srgb, var(--set-sd, var(--c-e98bb8)) 9%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--set-sd, var(--c-e98bb8)) 45%, transparent);
-}
-.gset.kind-hold .gset-title {
-  color: var(--set-sd, var(--c-e98bb8));
-}
 .hold-watch {
   display: flex;
   flex-direction: column;
@@ -108,6 +101,22 @@
   line-height: 1;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+}
+/* hand-entered hold: min | s side by side under a full-width weight */
+.hold-w {
+  grid-column: 1 / -1;
+}
+.hold-input {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-10);
+}
+.hold-steppers {
+  flex-wrap: wrap;
+}
+.hold-steppers > * {
+  flex: 1 1 100%;
 }
 .hold-watch.idle .hw-time {
   color: var(--color-neutral-600);

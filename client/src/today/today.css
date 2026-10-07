@@ -624,6 +624,48 @@ body.td-editing .today-page .td-topbar {
   color: var(--color-text-faint);
 }
 
+/* Member with a trainer: Atlas | Trainer, two half tiles (a lone trainer tile is full width). */
+.tac-duo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-12);
+}
+.tac-duo-tile {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-10);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+}
+.tac-duo-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.tac-duo-name,
+.tac-duo-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tac-duo-name {
+  font-size: var(--fs-15);
+  font-weight: 700;
+}
+.tac-duo-sub {
+  font-size: var(--fs-13);
+  color: var(--color-text-muted);
+}
+
+/* The clients strip right under the duo: one gap, not two bands' worth. */
+.tac-duo + .tac-band {
+  padding-top: 0;
+}
+
 /* T5 A: Atlas alone — one full-width row. */
 .tac-solo {
   width: 100%;

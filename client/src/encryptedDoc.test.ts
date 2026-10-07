@@ -108,6 +108,7 @@ describe('conditions collections expose only their open fields', () => {
     expect([...OPEN_FIELDS.coachShare]).toEqual(['updatedAt']);
     expect([...OPEN_FIELDS.conditionPrefs]).toEqual(['updatedAt']);
     expect([...OPEN_FIELDS.nicotine]).toEqual(['updatedAt']);
+    expect([...OPEN_FIELDS.cycle]).toEqual(['updatedAt']);
     expect([...OPEN_FIELDS.alcohol]).toEqual(['updatedAt']);
     expect([...OPEN_FIELDS.supplements]).toEqual(['updatedAt']);
     expect([...OPEN_FIELDS.conditions]).toEqual(['id', 'updatedAt']);

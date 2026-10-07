@@ -51,6 +51,7 @@ import {
 import { Icon } from '../ui';
 import { atlasStarterChips, topNote } from './widgets/learnatlas';
 import { useClientRoster, type RosterClient } from './clientRoster';
+import { useMyTrainer, type MyTrainer } from './myTrainer';
 import type { AtlasOpts, AtlasView } from './layout';
 import { Card } from '../components/ui/Card';
 
@@ -79,10 +80,14 @@ export interface AtlasClientsProps {
 
 export function AtlasClientsBlock(p: AtlasClientsProps) {
   const roster = useClientRoster(p.withClients);
+  // Who my trainer is (null for anyone without one). Without one this is exactly the old block.
+  const trainer = useMyTrainer(true);
   const hasClients = (roster?.length ?? 0) > 0;
+  if (!hasClients && trainer)
+    return <AtlasWithTrainer view={p.opts.atlasView} trainer={trainer} onOpen={p.onOpenCoach} />;
   if (!hasClients) return <AtlasAlone view={p.opts.atlasView} onOpen={p.onOpenCoach} />;
-  if (p.opts.layout === 'together') return <Together {...p} roster={roster!} />;
-  return <Split {...p} roster={roster!} />;
+  if (p.opts.layout === 'together') return <Together {...p} roster={roster!} trainer={trainer} />;
+  return <Split {...p} roster={roster!} trainer={trainer} />;
 }
 
 /* ───────────────────────── Atlas data ───────────────────────── */
@@ -167,6 +172,100 @@ function AtlasAlone({ view, onOpen }: { view: AtlasView; onOpen: () => void }) {
   if (view === 'auto' && !(a.on && a.unread > 0)) return null;
   if (!a.on || view === 'compact' || view === 'auto') return <AtlasSolo a={a} onOpen={onOpen} />;
   return <AtlasCard view={view} a={a} onOpen={onOpen} wide={false} />;
+}
+
+/** Member with a trainer: "Atlas | Trainer" as two half tiles. Atlas as a note/chat
+ *  card keeps its card with a full-width trainer tile below; Atlas hidden (auto, nothing
+ *  unread) leaves the trainer tile alone. The trainer tile only informs (no screen to open). */
+function AtlasWithTrainer({
+  view,
+  trainer,
+  onOpen,
+}: {
+  view: AtlasView;
+  trainer: MyTrainer;
+  onOpen: () => void;
+}) {
+  const a = useAtlasToday();
+  const hidden = view === 'auto' && !(a.on && a.unread > 0);
+  const card = a.on && (view === 'note' || view === 'chat');
+  if (hidden)
+    return (
+      <div className="tac-band">
+        <TrainerTile trainer={trainer} />
+      </div>
+    );
+  if (card)
+    return (
+      <>
+        <AtlasCard view={view} a={a} onOpen={onOpen} wide={false} />
+        <div className="tac-band">
+          <TrainerTile trainer={trainer} />
+        </div>
+      </>
+    );
+  return (
+    <div className="tac-band tac-duo">
+      <AtlasTile a={a} onOpen={onOpen} />
+      <TrainerTile trainer={trainer} />
+    </div>
+  );
+}
+
+/** Left half: Atlas — face, name, temper (or the invite while he is off), unread count. */
+function AtlasTile({ a, onOpen }: { a: AtlasToday; onOpen: () => void }) {
+  const { t } = useT();
+  return (
+    <Card
+      as="button"
+      pad="md"
+      emphasis="card"
+      className="tac-duo-tile"
+      onClick={onOpen}
+      aria-label={a.on ? (a.unread ? t.atlasStoryUnread(a.unread) : t.atlasName) : t.atlasInvite}
+    >
+      <StoryBubble
+        size="md"
+        ring={a.on && a.unread ? 'atlas' : 'default'}
+        tone={a.tone}
+        media={face(a.temper, 'md')}
+      />
+      <span className="tac-duo-text">
+        <span className="tac-duo-name">{t.atlasName}</span>
+        <span className="tac-duo-sub">
+          {a.on ? t.atlasTemper[temperIndex(a.temper)] : t.atlasInvite}
+        </span>
+      </span>
+      {a.on && <Count n={a.unread} />}
+    </Card>
+  );
+}
+
+/** Right half: my trainer — photo, name, "Trainer". Information only. */
+function TrainerTile({ trainer }: { trainer: MyTrainer }) {
+  const { t } = useT();
+  return (
+    <Card pad="md" emphasis="card" className="tac-duo-tile tac-trainer">
+      <StoryBubble
+        size="md"
+        ring="default"
+        tone="people"
+        media={
+          <Avatar
+            userId={trainer.id}
+            name={trainer.name}
+            hasPhoto={trainer.avatar}
+            rev={trainer.avatarRev ?? 0}
+            size={STORY_FACE_PX.md}
+          />
+        }
+      />
+      <span className="tac-duo-text">
+        <span className="tac-duo-name">{trainer.name}</span>
+        <span className="tac-duo-sub">{t.profileTrainer}</span>
+      </span>
+    </Card>
+  );
 }
 
 /** T5 A: the full-width solo row — face, name + temper, the latest note in
@@ -553,31 +652,47 @@ function bubble(v: ClientVM, size: StorySize, onOpen: (id: string) => void) {
 }
 
 /** A: one strip — Atlas, hairline, clients, "+N more". */
-function Together(p: AtlasClientsProps & { roster: RosterClient[] }) {
+function Together(p: AtlasClientsProps & { roster: RosterClient[]; trainer: MyTrainer | null }) {
   const { t } = useT();
   const a = useAtlasToday();
   const now = useNow(30_000);
   const clients = useClients(p.roster, p.opts, now);
   const shown = clients.slice(0, MAX_STRIP);
   const rest = clients.length - shown.length;
-  return (
+  const strip = (
     <div className="tac-band">
       <StoryRow className="tac-strip">
-        <StoryBubble
-          size="lg"
-          ring={a.on ? 'atlas' : 'default'}
-          tone={a.tone}
-          media={face(a.temper, 'lg')}
-          badge={a.unread}
-          label={t.atlasName}
-          onClick={p.onOpenCoach}
-          aria-label={!a.on ? t.atlasInvite : a.unread ? t.atlasStoryUnread(a.unread) : t.atlasName}
-        />
-        <StoryDivider />
+        {!p.trainer && (
+          <>
+            <StoryBubble
+              size="lg"
+              ring={a.on ? 'atlas' : 'default'}
+              tone={a.tone}
+              media={face(a.temper, 'lg')}
+              badge={a.unread}
+              label={t.atlasName}
+              onClick={p.onOpenCoach}
+              aria-label={
+                !a.on ? t.atlasInvite : a.unread ? t.atlasStoryUnread(a.unread) : t.atlasName
+              }
+            />
+            <StoryDivider />
+          </>
+        )}
         {shown.map((v) => bubble(v, 'lg', p.onOpenClient))}
         {rest > 0 && <StoryBubble more={rest} label={t.todayMore} onClick={p.onAllClients} />}
       </StoryRow>
     </div>
+  );
+  if (!p.trainer) return strip;
+  return (
+    <>
+      <div className="tac-band tac-duo">
+        <AtlasTile a={a} onOpen={p.onOpenCoach} />
+        <TrainerTile trainer={p.trainer} />
+      </div>
+      {strip}
+    </>
   );
 }
 
@@ -599,11 +714,15 @@ function useWide(ref: RefObject<HTMLElement | null>): boolean {
 }
 
 /** B: Atlas block and Clients block, stacked (phone) or side by side (wide). */
-function Split(p: AtlasClientsProps & { roster: RosterClient[] }) {
+function Split(p: AtlasClientsProps & { roster: RosterClient[]; trainer: MyTrainer | null }) {
   const ref = useRef<HTMLDivElement>(null);
   const wide = useWide(ref);
   const a = useAtlasToday();
-  const atlas = <AtlasCard view={p.opts.atlasView} a={a} onOpen={p.onOpenCoach} wide={wide} />;
+  const atlas = p.trainer ? (
+    <AtlasWithTrainer view={p.opts.atlasView} trainer={p.trainer} onOpen={p.onOpenCoach} />
+  ) : (
+    <AtlasCard view={p.opts.atlasView} a={a} onOpen={p.onOpenCoach} wide={wide} />
+  );
   const clients = <Clients {...p} wide={wide} />;
   const clientsFirst = p.opts.order === 'clients';
   return (

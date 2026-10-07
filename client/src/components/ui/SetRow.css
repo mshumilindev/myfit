@@ -53,3 +53,8 @@
 .uisetrow.timed {
   grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1fr) 44px;
 }
+
+/* A timed hold with no load: index · time · tags. */
+.uisetrow.compact {
+  grid-template-columns: 18px minmax(0, 1fr) 62px;
+}

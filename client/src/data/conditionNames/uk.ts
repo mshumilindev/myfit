@@ -181,6 +181,7 @@ const NAMES: Record<string, { name: string; aka?: string[] }> = {
   preg_postpartum: { name: 'Відновлення після пологів', aka: ['після пологів'] },
   preg_diastasis: { name: "Діастаз прямих м'язів живота", aka: ["розходження м'язів живота"] },
   preg_pelvic_floor: { name: 'Дисфункція тазового дна', aka: ['нетримання', 'пролапс'] },
+  preg_menopause: { name: 'Менопауза', aka: ['перименопауза', 'клімакс'] },
   other_ibd: { name: 'Хвороба Крона або коліт', aka: ['ВЗК', 'виразковий коліт'] },
   other_ibs: { name: 'Синдром подразненого кишечника', aka: ['СПК'] },
   other_reflux: { name: 'Хронічний рефлюкс', aka: ['ГЕРХ', 'печія'] },

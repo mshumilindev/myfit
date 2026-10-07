@@ -16,6 +16,7 @@ import {
   type MonthGridDay,
   type MonthMarker,
 } from '../components/ui/MonthGrid';
+import { useCycleTint } from '../cycle/useCycleTint';
 import { Segmented } from '../components/ui/Segmented';
 import type { Tone } from '../components/ui/tones';
 import { fmtCalendarMonth } from '../components/ui/Calendar';
@@ -227,11 +228,13 @@ function HistoryCalendar({
   const healthLabel = (k: HealthKind) =>
     k === 'rest' ? s.rest : k === 'sick' ? s.sick : k === 'off' ? s.off : s.injury;
 
+  const cycleTint = useCycleTint();
   const cell = (d: number): MonthGridDay | undefined => {
     const info = map.get(d);
     const pTrain = plannedTrain(d, info);
     const pRest = plannedRest(d);
-    if (!info && !pTrain && !pRest) return undefined;
+    const cyc = cycleTint?.(d);
+    if (!info && !pTrain && !pRest && !cyc) return undefined;
     const markers: MonthMarker[] = [];
     const chips: MonthGridChip[] = [];
     const notes: { label: string; tone?: Tone }[] = [];
@@ -268,7 +271,7 @@ function HistoryCalendar({
         </>
       ) : undefined;
     return {
-      tint: info?.health ? HEALTH_TONE[info.health] : undefined,
+      tint: info?.health ? HEALTH_TONE[info.health] : cyc,
       plan: pTrain ? 'train' : pRest ? 'rest' : undefined,
       markers,
       chips,

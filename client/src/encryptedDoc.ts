@@ -34,6 +34,8 @@ export const OPEN_FIELDS = {
   conditionPrefs: ['updatedAt'],
   // users/{uid}/meta/nicotine — products, amounts, switches and sharing: all inside, only the stamp open.
   nicotine: ['updatedAt'],
+  // users/{uid}/meta/cycle — typical dates, mode and switches: all inside, only the stamp open. Never shared.
+  cycle: ['updatedAt'],
   // users/{uid}/meta/alcohol — drinks, servings, switches, weekdays and sharing: all inside, only the stamp open.
   alcohol: ['updatedAt'],
   // users/{uid}/meta/supplements — entries, doses, schedules, check-ins, switches and sharing: all inside, only the stamp open.

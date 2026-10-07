@@ -56,6 +56,8 @@ import {
 import { ConditionPage, ConditionsSection } from './health/Conditions';
 import { NicotineHealthGroup } from './health/nicotine/NicotineSection';
 import { NicotineScreens } from './health/nicotine/NicotineScreens';
+import { CycleHealthRow } from './health/cycle/CycleSection';
+import { CycleScreens, type CycleScreen } from './health/cycle/CycleScreens';
 import { AlcoholHealthRow } from './health/alcohol/AlcoholSection';
 import { AlcoholScreens } from './health/alcohol/AlcoholScreens';
 import { SupplementHealthRow } from './health/supplements/SupplementSection';
@@ -80,6 +82,8 @@ export interface HealthViewProps {
   alc?: 'hub' | 'products' | 'days' | 'calc';
   /** A Supplements page: the hub, What I take, Use in calculations. */
   sup?: 'hub' | 'products' | 'calc';
+  /** A Cycle page: the hub or its settings. */
+  cyc?: CycleScreen;
   /** Health › Privacy and sharing (all health privacy in one place). */
   priv?: boolean;
   onClose: () => void;
@@ -383,6 +387,7 @@ export function HealthView(props: HealthViewProps) {
           hasSupplementData(store.supplements) ? go({ sup: 'hub' }) : setSupQuick(true)
         }
       />
+      <CycleHealthRow onOpen={() => go({ cyc: 'hub' })} />
     </NicotineHealthGroup>
   );
   const sharingLabel = (l: 'off' | 'effects' | 'full') =>
@@ -516,6 +521,15 @@ export function HealthView(props: HealthViewProps) {
   if (props.nic)
     return (
       <NicotineScreens screen={props.nic} onOpen={(nic) => go({ nic })} onBack={props.onClose} />
+    );
+  if (props.cyc)
+    return (
+      <CycleScreens
+        screen={props.cyc}
+        onOpen={(cyc) => go({ cyc })}
+        onBack={props.onClose}
+        onOpenStates={() => go({ cond: undefined })}
+      />
     );
   if (props.alc)
     return (

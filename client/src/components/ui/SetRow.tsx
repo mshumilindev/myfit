@@ -8,6 +8,8 @@ export interface SetRowProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   record?: boolean;
   /** Timed / cardio grid (index · value · value · tags). */
   timed?: boolean;
+  /** Two-value row (index · value · tags): a timed hold with no load, so no weight cell. */
+  compact?: boolean;
   /** Row carries a load meter (its gauge is set through `style`). */
   metered?: boolean;
 }
@@ -23,6 +25,7 @@ export function SetRow({
   record = false,
   timed = false,
   metered = false,
+  compact = false,
   className,
   type = 'button',
   ...rest
@@ -34,6 +37,7 @@ export function SetRow({
     warm ? 'warm' : '',
     record ? 'record' : '',
     metered ? 'metered' : '',
+    compact ? 'compact' : '',
     className,
   ]
     .filter(Boolean)

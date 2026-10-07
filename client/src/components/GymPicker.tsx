@@ -8,7 +8,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { tokenMatch } from '../search';
 import type { Gym } from '../types';
-import { getCurrentPositionOnce, upsertGym } from '../store';
+import { getCurrentPositionOnce, upsertGym, useStore } from '../store';
+import { autoMainGymIds, isMainGym } from '../mainGym';
 import { DEFAULT_GYM_RADIUS_M } from '../types';
 import {
   haversineM,
@@ -147,11 +148,13 @@ export function GymPicker({
     onPick(g.id);
   };
 
+  const { workouts } = useStore();
+  const autoMain = useMemo(() => autoMainGymIds(workouts), [workouts]);
   const sorted = useMemo(() => {
     const list = [...gyms];
     if (coords) list.sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
-    return list;
-  }, [gyms, coords]);
+    return list.sort((a, b) => Number(isMainGym(b, autoMain)) - Number(isMainGym(a, autoMain))); // main gyms first
+  }, [gyms, coords, autoMain]);
   const suggested = useMemo(() => suggestGymId(gyms, coords), [gyms, coords]);
   const needle = q.trim().toLowerCase();
   const filtered = sorted.filter((g) => tokenMatch(g.name, needle));
@@ -190,7 +193,14 @@ export function GymPicker({
                   <RowHours name={g.name} lat={g.lat} lng={g.lng} />
                 </>
               }
-              trailing={isSug ? <Tag tone="accent">{t.pickGymSuggested}</Tag> : undefined}
+              trailing={
+                isSug || isMainGym(g, autoMain) ? (
+                  <span className="ul-flex ua-center ug-4">
+                    {isMainGym(g, autoMain) ? <Tag tone="accent">{t.pickGymFavourite}</Tag> : null}
+                    {isSug ? <Tag tone="accent">{t.pickGymSuggested}</Tag> : null}
+                  </span>
+                ) : undefined
+              }
               onClick={() => onPick(g.id)}
             />
           );

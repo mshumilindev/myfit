@@ -23,6 +23,8 @@ import { classifyTrainee } from '../trainerLive';
 import { Icon, useExerciseName } from '../ui';
 import { Avatar } from '../components/Avatar';
 import { Banner } from '../components/ui/Banner';
+import { Notice } from '../components/ui/Notice';
+import { SkeletonRows } from '../components/ui/Skeleton';
 import { HistoryTimeline } from '../components/HistoryTimeline';
 import type { Activity, RestPeriod, SleepNight, Workout } from '../types';
 import type { Shell } from '../App';
@@ -140,9 +142,14 @@ export function ClientPage({
     cachePeek<ClientData>(cacheKey)?.data ?? null,
   );
 
+  const [refreshing, setRefreshing] = useState(
+    () => !cacheFresh(cachePeek<ClientData>(cacheKey), PROFILE_TTL_MS),
+  );
+
   const refresh = useCallback(() => {
     if (cacheFresh(cachePeek<ClientData>(cacheKey), PROFILE_TTL_MS)) return;
     fetchProfile<ClientData>(clientId)
+      .finally(() => setRefreshing(false))
       .then((d) => {
         const prev = cachePeek<ClientData>(cacheKey)?.data;
         cacheSet(cacheKey, d);
@@ -193,6 +200,13 @@ export function ClientPage({
           </div>
         )}
       </div>
+
+      {refreshing && data && (
+        <Notice tone="neutral" icon="arrows-clockwise">
+          {t.syncing}…
+        </Notice>
+      )}
+      {!data && refreshing && <SkeletonRows rows={5} label={t.syncing} />}
 
       {isLive && (
         <div className="cp-live">

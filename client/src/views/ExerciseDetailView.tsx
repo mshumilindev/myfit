@@ -38,6 +38,7 @@ import {
   estimatedOneRepMaxSet,
   est1rm,
   recordWeight,
+  recordsByVariant,
   startWorkout,
   topSet,
   updateCatalogExercise,
@@ -48,6 +49,8 @@ import { getRole } from '../api';
 import { ExerciseName, Icon, useIsDesktop } from '../ui';
 import type { Shell } from '../App';
 import { Tag } from '../components/ui/Tag';
+import { GroupedList, ListRow } from '../components/ui/GroupedList';
+import { equipmentById } from '../data/equipmentCatalog';
 
 const hideBroken = (e: { currentTarget: HTMLImageElement }) => {
   e.currentTarget.style.display = 'none';
@@ -123,6 +126,7 @@ export function ExerciseDetailView({
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);
   const record = recordWeight(canonical);
+  const byMachine = recordsByVariant(canonical);
   const lastTop = sessions[0]?.top.weight ?? 0;
   const est = sessions.reduce((max, s) => Math.max(max, est1rm(s.top.weight ?? 0, s.top.reps)), 0);
 
@@ -303,6 +307,23 @@ export function ExerciseDetailView({
           </div>
         )}
       </div>
+      {byMachine.length >= 2 && (
+        <GroupedList header={t.exRecByMachine} footer={t.exRecByMachineFoot}>
+          {byMachine.map((r) => {
+            const item = r.equipmentItems.length ? equipmentById(r.equipmentItems[0])?.name : null;
+            const gn = store.gyms.find((g) => g.id === r.gymId)?.name ?? null;
+            return (
+              <ListRow
+                key={r.variant}
+                label={item ?? t.exNoMachine}
+                sub={gn ? (r.isMain ? `${gn} · ${t.exMainSuffix}` : gn) : t.exNoGym}
+                value={`${r.weight} × ${r.reps}`}
+                valueStrong={r.isMain}
+              />
+            );
+          })}
+        </GroupedList>
+      )}
       {available && equipment && (
         <div className="exd-avail">
           <Icon name="check-circle" weight="bold" />

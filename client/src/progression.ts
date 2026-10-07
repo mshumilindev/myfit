@@ -8,7 +8,7 @@
  * We already prefill last weight and log RPE; this turns that into an actual
  * target instead of "repeat last time".
  */
-import { topSet, isStrengthExercise } from './store';
+import { topSet, isStrengthExercise, liftVariant } from './store';
 import type { Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 import type { LoadType } from './loads';
@@ -23,13 +23,21 @@ export interface TopPoint {
 
 /** Top working set per past session for `name`, newest first (optionally only
  *  sessions before `beforeTs`, so the live session excludes itself). */
-export function topHistory(finished: Workout[], name: string, beforeTs?: number): TopPoint[] {
+export function topHistory(
+  finished: Workout[],
+  name: string,
+  beforeTs?: number,
+  variant?: string,
+): TopPoint[] {
   const needle = name.trim().toLowerCase();
   const pts: TopPoint[] = [];
   for (const w of finished) {
     if (beforeTs !== undefined && w.startedAt >= beforeTs) continue;
     const ex = w.exercises.find(
-      (e) => e.name.trim().toLowerCase() === needle && isStrengthExercise(e),
+      (e) =>
+        e.name.trim().toLowerCase() === needle &&
+        isStrengthExercise(e) &&
+        (variant === undefined || liftVariant(w, e) === variant),
     );
     if (!ex) continue;
     const top = topSet(ex.sets);

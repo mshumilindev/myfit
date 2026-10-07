@@ -25,6 +25,7 @@ import { useT, fmtTonnes, fmtKg, fmtDurationHM, fmtDayMonth } from '../i18n';
 import type { Strings } from '../i18n/en';
 import { Icon, useExerciseName } from '../ui';
 import { Tag } from '../components/ui/Tag';
+import { SetRow } from '../components/ui/SetRow';
 
 function mmss(sec: number): string {
   const s = Math.max(0, Math.round(sec));
@@ -60,12 +61,12 @@ function SetRows({ ex, w, t, round }: { ex: Exercise; w: Workout; t: Strings; ro
         const drops = typeOf(s) === 'drop' || typeOf(s) === 'reverse-drop' ? (s.drops ?? []) : [];
         const idx = round ? `R${i + 1}` : `${i + 1}`;
         const row = (
-          <div className="set-row">
+          <SetRow warm={typeOf(s) === 'warmup'} tabIndex={-1} style={{ cursor: 'default' }}>
             <span className="idx">{idx}</span>
             <span className="val">{s.reps}</span>
             <span className="val">{loadCell(t, s.weight)}</span>
             <KindLabel t={t} s={s} />
-          </div>
+          </SetRow>
         );
         return (
           <div key={s.id} className="set-line">

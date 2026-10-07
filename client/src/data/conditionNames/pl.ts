@@ -202,6 +202,7 @@ const NAMES: Record<string, { name: string; aka?: string[] }> = {
     name: 'Dysfunkcja dna miednicy',
     aka: ['nietrzymanie moczu', 'wypadanie narządów'],
   },
+  preg_menopause: { name: 'Menopauza', aka: ['perimenopauza', 'klimakterium'] },
   other_ibd: {
     name: 'Choroba Leśniowskiego-Crohna lub wrzodziejące zapalenie jelita',
     aka: ['nieswoiste zapalenie jelit', 'colitis'],

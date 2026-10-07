@@ -29,7 +29,7 @@ import { swapCandidates } from '../swaps';
 import { topHistory } from '../progression';
 import { tokenMatch } from '../search';
 import { canonicalExerciseName } from '../data/exercises';
-import { recordWeight, useStore } from '../store';
+import { isMachineLift, recordWeight, useStore } from '../store';
 import { fmtSet, useT } from '../i18n';
 import type { Strings } from '../i18n/en';
 import { ExerciseName, Icon, Sheet, useExerciseName, useIsDesktop } from '../ui';
@@ -1143,11 +1143,16 @@ export function ExerciseDetail(props: {
         .slice(0, 2),
     [item, props.gym, byKey, limits],
   );
+  // Weight differs per machine/gym: for a machine lift show this gym's figures.
+  const variant =
+    props.gym && isMachineLift({ name: item.name, equipment: undefined })
+      ? `gym:${props.gym.id}`
+      : undefined;
   const hist = useMemo(
-    () => topHistory(props.finished, item.name).map((p) => p.weight ?? p.reps),
-    [props.finished, item.name],
+    () => topHistory(props.finished, item.name, undefined, variant).map((p) => p.weight ?? p.reps),
+    [props.finished, item.name, variant],
   );
-  const best = item.timesDone > 0 ? recordWeight(item.name) : 0;
+  const best = item.timesDone > 0 ? recordWeight(item.name, undefined, variant) : 0;
   const cues = allSteps ? steps : steps.slice(0, props.compact ? 1 : 2);
   const [a, b] = item.images;
 

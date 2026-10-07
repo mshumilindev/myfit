@@ -1475,3 +1475,125 @@ html.theme-glass .wlib-top .wlib-title {
   flex-direction: column;
   gap: var(--s-12);
 }
+
+/* Banner study: composition-only layout for existing kit primitives. */
+.bs-study {
+  padding: var(--sp-6);
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  height: 100dvh;
+  overflow-y: auto;
+}
+.bs-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.bs-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.bs-between {
+  justify-content: space-between;
+}
+.bs-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+}
+.bs-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
+  gap: var(--sp-8);
+}
+.bs-concept {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+  padding-bottom: var(--sp-6);
+}
+.bs-widget {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin: var(--sp-2) 0;
+}
+.bs-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+.bs-scroll {
+  display: flex;
+  gap: var(--sp-2);
+  overflow-x: auto;
+  flex-shrink: 0;
+  padding-bottom: var(--sp-2);
+}
+.bs-scroll > * {
+  flex-shrink: 0;
+}
+.bs-carousel > div {
+  width: 88%;
+}
+.bs-triptych {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-6);
+  align-items: start;
+}
+.bs-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2);
+  max-height: 260px;
+  overflow-y: auto;
+}
+.bs-inset {
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.bs-icons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--sp-2);
+}
+.bs-deck {
+  display: grid;
+  padding-bottom: var(--sp-3);
+}
+.bs-deck > * {
+  grid-area: 1 / 1;
+  position: relative;
+}
+.bs-deck-back {
+  transform: translateY(12px) scale(0.94);
+}
+.bs-baseline {
+  max-width: 390px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+@media (max-width: 900px) {
+  .bs-triptych {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 480px) {
+  .bs-study {
+    padding: var(--sp-4);
+  }
+  .bs-gallery {
+    grid-template-columns: 1fr;
+  }
+}

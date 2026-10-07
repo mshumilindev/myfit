@@ -53,6 +53,7 @@ import {
   programDayNameFor,
   programDayNameForWeekday,
   recordE1rm,
+  liftVariant,
   restDayKeys,
   setBestE1rm,
   setTypeOf,
@@ -1636,7 +1637,7 @@ function sessionLifts(w: Workout): { ex: Exercise; pr: boolean; top: SetEntry | 
     .sort((a, b) => a.position - b.position)
     .map((ex) => {
       const best = Math.max(0, ...ex.sets.map(setBestE1rm));
-      const before = recordE1rm(ex.name, w.id);
+      const before = recordE1rm(ex.name, w.id, liftVariant(w, ex));
       return { ex, pr: best > 0 && before > 0 && best > before, top: topSet(ex.sets) };
     });
 }

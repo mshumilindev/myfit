@@ -18,6 +18,7 @@ import { TrainerView } from '../client/src/views/TrainerView';
 import { ProgramsView } from '../client/src/views/ProgramsView';
 import { addExercise, __getStateForTests, __replaceStateForTests } from '../client/src/store';
 import { setRole } from '../client/src/api';
+import { emptyCycleState } from '../client/src/cycle/cycleState';
 
 // Test shim standing in for the removed setAuth: mark a signed-in user so
 // role/uid gates pass. (Data now comes from Firestore/callables, mocked in
@@ -48,6 +49,7 @@ function store(patch: Partial<StoreState> = {}): StoreState {
     syncStatus: 'synced',
     lastSyncAt: Date.now(),
     coach: { ...COACH_DEFAULT },
+    cycle: emptyCycleState(),
     ...patch,
   };
 }
@@ -1196,9 +1198,10 @@ describe('F-03 session UI', () => {
     const card = container.querySelector('.gset.kind-static-dynamic')!;
     expect(card).toBeTruthy();
     const steppers = within(card as HTMLElement).getAllByRole('group');
-    expect(steppers).toHaveLength(2);
-    expect(steppers[1].textContent).toMatch(/Hold/);
-    const plus = steppers[1].querySelectorAll('button');
+    expect(steppers).toHaveLength(3);
+    expect(steppers[1].textContent).toMatch(/min/i);
+    expect(steppers[2].textContent).toContain('s');
+    const plus = steppers[2].querySelectorAll('button');
     await userEvent.click(plus[plus.length - 1]);
     await userEvent.click(screen.getByRole('button', { name: 'Log' }));
     const logged = __getStateForTests().workouts.find((w) => w.id === 'open')!.exercises[0].sets[1];

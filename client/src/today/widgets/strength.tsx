@@ -46,6 +46,7 @@ import {
   loadTypeFor,
   pickSessionGym,
   prevLift,
+  isMachineLift,
   replaceExercise,
   setBestE1rm,
   setTypeOf,
@@ -2736,7 +2737,11 @@ function SmartSwapWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
     .slice(0, 3)
     .map((m) => t.muscleGroups[m] ?? m);
   const hint = (name: string) => {
-    const p = prevLift(name);
+    const p = prevLift(
+      name,
+      undefined,
+      gymId && isMachineLift({ name, equipment: undefined }) ? `gym:${gymId}` : undefined,
+    );
     return p && p.weight ? `${fmtKg(p.weight)} × ${p.reps}` : null;
   };
   const doSwap = (name: string) => {

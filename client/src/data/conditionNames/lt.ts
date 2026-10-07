@@ -187,6 +187,7 @@ const NAMES: Record<string, { name: string; aka?: string[] }> = {
     name: 'Dubens dugno disfunkcija',
     aka: ['šlapimo nelaikymas', 'nusileidimas'],
   },
+  preg_menopause: { name: 'Menopauzė', aka: ['perimenopauzė', 'klimaksas'] },
   other_ibd: { name: 'Krono liga arba kolitas', aka: ['UŽL', 'opinis kolitas'] },
   other_ibs: { name: 'Dirgliosios žarnos sindromas', aka: ['DŽS'] },
   other_reflux: { name: 'Lėtinis refliuksas', aka: ['GERL', 'rėmuo'] },

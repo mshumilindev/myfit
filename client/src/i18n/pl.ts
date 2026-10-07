@@ -1,5 +1,6 @@
 import type { Strings } from './en';
 import { supPl } from './sup.pl';
+import { cycPl } from './cyc.pl';
 
 /** Log activity: dzień tygodnia ISO (1 = pn) → nazwa / l.mn. (mianownik 2–4, dopełniacz 5+). */
 const PL_DAY = ['', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota', 'niedziela'];
@@ -73,6 +74,7 @@ const plTren = (n: number): string => plPick(n, 'trening', 'treningi', 'trening�
 export const pl: Strings = {
   locale: 'Polski',
   ...supPl,
+  ...cycPl,
 
   appName: 'Spotter',
   backAction: 'Wstecz',
@@ -1639,7 +1641,6 @@ export const pl: Strings = {
   cndStarted: 'Początek',
   cndEnds: 'Oczekiwany koniec',
   cndTodayTitle: (n: number) => `Plany uwzględniają stany: ${n}`,
-  cndTodaySub: 'Prywatne. Dotknij, aby zobaczyć.',
   cndCoachTitle: 'Stan zdrowia od sportowca',
   cndCoachEffects: 'Ograniczenia w treningu',
   cndCoachFoot: 'Udostępnione przez sportowca.',
@@ -3088,7 +3089,32 @@ export const pl: Strings = {
   pickGymNone: 'Brak zapisanych siłowni — dodaj w zakładce „Siłownie”.',
   pickGymHere: 'Jesteś tu',
   pickGymNearest: (d) => `Najbliższa · ${d}`,
-  pickGymFavourite: 'Ulubiona',
+  pickGymFavourite: 'Główna',
+  gymMainLabel: 'Główna siłownia',
+  gymMainSub: 'Tu trenujesz najczęściej',
+  gymMainStat: (here, all, none) =>
+    `${here} z ${all} treningów z siłownią w 180 dni${none > 0 ? ` · ${none} bez siłowni` : ''}`,
+  gymMainFooter:
+    'Podpowiedzi i rekordy na innych siłowniach porównujemy z tą. Główną może być kilka siłowni.',
+  deleteMainGymBody: (n) =>
+    `To główna siłownia. Razem z nią zniknie ${n} zapisanych wizyt i oznaczenie „Główna”. Treningi zostają w historii.`,
+  xgBoth: (here, main) => `Tu ostatnio: ${here}. W głównej siłowni: ${main}.`,
+  xgMainOnly: (gym, main) =>
+    `W głównej siłowni (${gym}) zrobiłeś ${main}. Tej maszyny tu jeszcze nie używałeś.`,
+  xgEstimate: (gym, main, kg) =>
+    `W głównej siłowni (${gym}) zrobiłeś ${main}. Tutaj wyjdzie pewnie około ${kg}.`,
+  xgTake: (kg) => `Użyj ${kg}`,
+  xgFirstNoPr: 'Tej maszyny tu jeszcze nie używałeś. To pierwszy zapis, nie rekord.',
+  exRecByMachine: 'Według maszyny',
+  exRecByMachineFoot:
+    'Rekordy są osobne dla każdej maszyny, więc przejście na lżejszą nie daje fałszywego rekordu.',
+  exNoMachine: 'Bez maszyny',
+  exNoGym: 'Nie podano siłowni',
+  exMainSuffix: 'główna',
+  exProgressNote:
+    'Jedna linia. Zmiana maszyny nie wygląda jak spadek ani wzrost: porównujemy tylko sesje na tej samej maszynie.',
+  exProgressSwitch: 'przerywana — inna maszyna',
+  exHistGym: 'Siłownia',
   pickGymSuggested: 'Sugestia',
   pickGymSkip: 'Bez siłowni',
   pickGymNearby: 'Siłownie w pobliżu',

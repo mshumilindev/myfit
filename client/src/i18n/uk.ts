@@ -1,5 +1,6 @@
 import type { Strings } from './en';
 import { supUk } from './sup.uk';
+import { cycUk } from './cyc.uk';
 
 /** Log activity: ISO weekday (1 = пн) → назва / множина (наз. 2–4, род. 5+, місц.). */
 const UK_DAY = ['', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота', 'неділя'];
@@ -107,6 +108,7 @@ const ukTren = (n: number): string => {
 export const uk: Strings = {
   locale: 'Українська',
   ...supUk,
+  ...cycUk,
 
   appName: 'Spotter',
   backAction: 'Назад',
@@ -1674,7 +1676,6 @@ export const uk: Strings = {
   cndStarted: 'Початок',
   cndEnds: 'Очікуваний кінець',
   cndTodayTitle: (n: number) => `Плани враховують станів: ${n}`,
-  cndTodaySub: 'Приватно. Натисніть, щоб переглянути.',
   cndCoachTitle: 'Стан здоров’я від атлета',
   cndCoachEffects: 'Обмеження в тренуваннях',
   cndCoachFoot: 'Поділено атлетом.',
@@ -3121,7 +3122,32 @@ export const uk: Strings = {
   pickGymNone: 'Збережених залів ще немає — додай у вкладці «Зали».',
   pickGymHere: 'Ти тут',
   pickGymNearest: (d) => `Найближчий · ${d}`,
-  pickGymFavourite: 'Улюблений',
+  pickGymFavourite: 'Основний',
+  gymMainLabel: 'Основний зал',
+  gymMainSub: 'Тут ти тренуєшся найчастіше',
+  gymMainStat: (here, all, none) =>
+    `${here} з ${all} тренувань із залом за 180 днів${none > 0 ? ` · ${none} без залу` : ''}`,
+  gymMainFooter:
+    'В інших залах підказки й рекорди порівнюються з цим. Основними можна зробити кілька залів.',
+  deleteMainGymBody: (n) =>
+    `Це основний зал. Разом з ним зникнуть ${n} записаних візитів і позначка «Основний». Тренування лишаться в історії.`,
+  xgBoth: (here, main) => `Тут минулого разу: ${here}. В основному залі: ${main}.`,
+  xgMainOnly: (gym, main) =>
+    `В основному залі (${gym}) ти робив ${main}. Цей тренажер тут ти ще не брав.`,
+  xgEstimate: (gym, main, kg) =>
+    `В основному залі (${gym}) ти робив ${main}. Тут, мабуть, вийде близько ${kg}.`,
+  xgTake: (kg) => `Взяти ${kg}`,
+  xgFirstNoPr: 'Тут ти цей тренажер ще не брав. Це перший запис, не рекорд.',
+  exRecByMachine: 'За тренажерами',
+  exRecByMachineFoot:
+    'Рекорди окремі для кожного тренажера, тому перехід на легший не дає фальшивих рекордів.',
+  exNoMachine: 'Без тренажера',
+  exNoGym: 'Зал не вказано',
+  exMainSuffix: 'основний',
+  exProgressNote:
+    'Лінія одна. Перехід на інший тренажер не виглядає як спад чи ріст: порівнюються лише сесії на одному тренажері.',
+  exProgressSwitch: 'пунктир — інший тренажер',
+  exHistGym: 'Зал',
   pickGymSuggested: 'Пропозиція',
   pickGymSkip: 'Без залу',
   pickGymNearby: 'Зали поруч',

@@ -10,10 +10,12 @@ import {
   startWorkout,
   deleteGym,
   upsertGym,
+  toggleFavorite,
   getCurrentPositionOnce,
   workoutVolumeKg,
   gymKitEvidence,
 } from '../store';
+import { autoMainGymIds, isMainGym } from '../mainGym';
 import { DEFAULT_GYM_RADIUS_M, INSIDE_RADIUS_M } from '../types';
 import {
   resolveAddress,
@@ -34,6 +36,8 @@ import { gymHasNoList } from '../gymEvidence';
 import { BandLibraryCard } from '../components/BandLibraryCard';
 import { AmenitiesCard } from '../components/AmenitiesCard';
 import { Tag } from '../components/ui/Tag';
+import { GroupedList, ListRow } from '../components/ui/GroupedList';
+import { Checkbox } from '../components/ui/Checkbox';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const hhmm = (min: number) => `${pad(Math.floor(min / 60) % 24)}:${pad(min % 60)}`;
@@ -64,6 +68,7 @@ export function GymDetailView({
 }) {
   const { t, locale } = useT();
   const store = useStore();
+  const autoMain = useMemo(() => autoMainGymIds(store.workouts), [store.workouts]);
 
   // Resolve the underlying gym: by id, or by matching a candidate's coords to a
   // saved gym (so opening a search result that's already saved shows it saved).
@@ -172,6 +177,16 @@ export function GymDetailView({
   const avgMs = sessions.length
     ? sessions.reduce((s, w) => s + ((w.finishedAt ?? 0) - w.startedAt), 0) / sessions.length
     : 0;
+  const mainStat = (() => {
+    const since = wallClock() - 180 * 86400000;
+    const recent = store.workouts.filter((w) => w.finishedAt !== null && w.startedAt >= since);
+    const withGym = recent.filter((w) => w.gymId);
+    return {
+      here: withGym.filter((w) => gym && w.gymId === gym.id).length,
+      all: withGym.length,
+      none: recent.length - withGym.length,
+    };
+  })();
   const dist = coords ? haversineM(coords, { lat, lng }) : null;
   const inside =
     dist !== null && dist <= Math.min(gym?.radiusM ?? DEFAULT_GYM_RADIUS_M, INSIDE_RADIUS_M);
@@ -224,6 +239,27 @@ export function GymDetailView({
           <Icon name="play" />
           {t.startSessionHere}
         </Button>
+
+        {isSaved && gym && (
+          <GroupedList footer={t.gymMainFooter}>
+            <ListRow
+              as="label"
+              label={t.gymMainLabel}
+              sub={
+                mainStat.all > 0
+                  ? t.gymMainStat(mainStat.here, mainStat.all, mainStat.none)
+                  : t.gymMainSub
+              }
+              trailing={
+                <Checkbox
+                  checked={isMainGym(gym, autoMain)}
+                  onChange={() => toggleFavorite(gym.id)}
+                  aria-label={t.gymMainLabel}
+                />
+              }
+            />
+          </GroupedList>
+        )}
 
         {/* Hours */}
         <div className="detail-card">
@@ -363,7 +399,11 @@ export function GymDetailView({
       {confirmDel && gym && (
         <ConfirmDialog
           title={t.deleteGymTitle(gym.name)}
-          body={t.deleteGymBody(sessions.length)}
+          body={
+            isMainGym(gym, autoMain)
+              ? t.deleteMainGymBody(sessions.length)
+              : t.deleteGymBody(sessions.length)
+          }
           confirmLabel={t.delete}
           cancelLabel={t.keep}
           danger

@@ -32,6 +32,8 @@ import { HouseGraphic } from '../components/HouseGraphic';
 import { GymThumb } from '../components/GymThumb';
 import { RouteMap } from '../components/RouteMap';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
+import { autoMainGymIds, isMainGym } from '../mainGym';
+import { Tag } from '../components/ui/Tag';
 import { Icon, useExerciseName } from '../ui';
 
 // Optional place-provider keys, read from Vite env at build time. Absent keys
@@ -53,6 +55,7 @@ type AddState =
   | { phase: 'coarse'; lat: number; lng: number; accuracy: number };
 
 export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
+  const autoMain = useMemo(() => autoMainGymIds(store.workouts), [store.workouts]);
   const { t, locale } = useT();
   const exName = useExerciseName();
   const [pendingName, setPendingName] = useState('');
@@ -277,6 +280,9 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
                   <div className="gym-card-body">
                     <div className="head">
                       <span className="n">{g.name}</span>
+                      {isMainGym(g, autoMain) ? (
+                        <Tag tone="accent">{t.pickGymFavourite}</Tag>
+                      ) : null}
                     </div>
                     <div className="meta">
                       <span>
