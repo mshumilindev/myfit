@@ -1,7 +1,7 @@
 /**
  * Long-term conditions inside Health: the list, the add / edit sheet (search or browse
  * the catalogue, severity, coach sharing, dates for temporary ones) and
- * delete with confirmation. Kit primitives only. Shown while the `conditions` flag is on.
+ * delete with confirmation. Kit primitives only.
  */
 import { useMemo, useState, type ReactNode } from 'react';
 import { effectText } from '../../conditionText';
@@ -17,7 +17,6 @@ import { Button } from '../../components/ui/Button';
 import { Notice } from '../../components/ui/Notice';
 import { StickyActionBar } from '../../components/ui/StickyActionBar';
 import { Tag } from '../../components/ui/Tag';
-import { useFlag } from '../../data/flags';
 import { ConfirmDialog } from '../../components/ui/Overlays';
 import {
   CONDITION_CATEGORIES,
@@ -387,13 +386,11 @@ export function ConditionPage(props: {
   return frame(null);
 }
 
-/** Profile: one row with the active count; opens Health on the conditions. Needs the `conditions` flag. */
+/** Profile: one row with the active count; opens Health on the conditions. */
 export function ConditionsProfileRow({ onOpen }: { onOpen: () => void }) {
   const { t } = useT();
-  const on = useFlag('conditions');
   const { conditions } = useStore();
   const [now] = useState(() => Date.now());
-  if (!on) return null;
   const n = conditions.filter((c) => isActive(c, now)).length;
   return (
     <ListRow
@@ -406,11 +403,9 @@ export function ConditionsProfileRow({ onOpen }: { onOpen: () => void }) {
   );
 }
 
-/** Onboarding: an optional, skippable prompt that opens the add flow. Needs the `conditions` flag. */
+/** Onboarding: an optional, skippable prompt that opens the add flow. */
 export function ConditionsOnboardingRow({ onOpen }: { onOpen: () => void }) {
   const { t } = useT();
-  const on = useFlag('conditions');
-  if (!on) return null;
   return (
     <GroupedList footer={t.cndOnbHint}>
       <ListRow

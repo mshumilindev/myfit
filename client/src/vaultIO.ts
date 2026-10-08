@@ -12,7 +12,6 @@ import type { MigratePorts } from './vaultMigrate';
 import { db } from './firebase';
 import { createAutoVault, idbKeyCache, type Vault } from './autoVault';
 import { callFn } from './api';
-import { isFlagOn } from './data/flags';
 import { migrateAll } from './vaultMigrate';
 import { sealDoc, unsealDoc, isSealed, type SealedCollection } from './encryptedDoc';
 import { ensureCoachKey, ensureGrant, type GrantPorts, type StoredGrant } from './vaultGrants';
@@ -66,7 +65,7 @@ async function autoMigrate(): Promise<void> {
   }
 }
 
-/** Call after sign-in (and on sign-out with null). Off unless the feature flag is on. */
+/** Call after sign-in (and on sign-out with null). Initializes encryption for every signed-in user. */
 export async function initVault(uid: string | null): Promise<void> {
   if (!uid) {
     uidNow = null;
@@ -74,7 +73,6 @@ export async function initVault(uid: string | null): Promise<void> {
     return;
   }
   uidNow = uid;
-  if (!isFlagOn('conditions')) return;
   await vault.init();
   // Let the first sync settle before rewriting documents in place.
   setTimeout(() => void autoMigrate(), 8000);
@@ -83,7 +81,7 @@ export async function initVault(uid: string | null): Promise<void> {
 if (typeof window !== 'undefined') {
   // Came back online / returned to the tab without a key: ask again.
   const retry = () => {
-    if (uidNow && isFlagOn('conditions') && vault.status() !== 'ready') void vault.init();
+    if (uidNow && vault.status() !== 'ready') void vault.init();
   };
   window.addEventListener('online', retry);
   document.addEventListener('visibilitychange', () => {

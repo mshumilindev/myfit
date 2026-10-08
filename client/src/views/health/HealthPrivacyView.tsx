@@ -18,7 +18,6 @@ import { OptionCard, OptionCardGrid } from '../../components/ui/OptionCard';
 import { ConfirmDialog, Sheet } from '../../components/ui/Overlays';
 import { ToneText } from '../../components/ui/ToneText';
 import type { Tone } from '../../components/ui/tones';
-import { isFlagOn } from '../../data/flags';
 import { useT } from '../../i18n';
 import { FEATURE_ICON } from '../../coachEffectIcons';
 import { SupplementCoachPreview } from './supplements/SupplementCoachPreview';
@@ -108,24 +107,20 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
   const [open, setOpen] = useState<Category['id'] | null>(null);
 
   const categories: Category[] = [
-    ...(isFlagOn('conditions')
-      ? [
-          {
-            id: 'conditions' as const,
-            title: t.cndTitle,
-            icon: FEATURE_ICON.conditions,
-            tone: 'chronic' as Tone,
-            level: conditionsShare,
-            levels: LEVELS,
-            set: setConditionsShare,
-            sees: {
-              off: t.cndShareHintOff,
-              effects: t.cndShareHintEffects,
-              full: t.cndShareHintFull,
-            },
-          },
-        ]
-      : []),
+    {
+      id: 'conditions' as const,
+      title: t.cndTitle,
+      icon: FEATURE_ICON.conditions,
+      tone: 'chronic' as Tone,
+      level: conditionsShare,
+      levels: LEVELS,
+      set: setConditionsShare,
+      sees: {
+        off: t.cndShareHintOff,
+        effects: t.cndShareHintEffects,
+        full: t.cndShareHintFull,
+      },
+    },
     {
       id: 'nicotine',
       title: t.nicTitle,

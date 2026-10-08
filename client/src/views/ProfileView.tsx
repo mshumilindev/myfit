@@ -27,7 +27,6 @@ import {
 import { fetchProfile } from '../profileFetch';
 import { PrivacyVault } from '../components/PrivacyVault';
 import { ConditionsProfileRow } from './health/Conditions';
-import { isFlagOn } from '../data/flags';
 import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
 import { ConfirmDialog, Icon, LanguageSelector, Sheet, useExerciseName } from '../ui';
@@ -580,7 +579,7 @@ export function ProfileView({
               <div className="profile-lang">
                 <LanguageSelector />
               </div>
-              {isFlagOn('conditions') && <PrivacyVault />}
+              <PrivacyVault />
               <ConditionsProfileRow onOpen={() => shell.openOverlay({ screen: 'health' })} />
               <section className="profile-mobile-settings">
                 <div className="profile-setting-row static">

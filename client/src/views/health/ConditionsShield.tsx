@@ -2,16 +2,14 @@ import { useState } from 'react';
 import { isActive } from '../../conditions';
 import { BrandIconButton } from '../../components/ui/BrandBar';
 import { RailItem } from '../../components/ui/Rail';
-import { useFlag } from '../../data/flags';
 import { useT } from '../../i18n';
 import { useStore } from '../../store';
 
-/** Count of active health conditions; 0 while the `conditions` flag is off. */
+/** Count of active health conditions. */
 export function useActiveConditions(): number {
-  const on = useFlag('conditions');
   const { conditions } = useStore();
   const [now] = useState(() => Date.now());
-  return on ? conditions.filter((c) => isActive(c, now)).length : 0;
+  return conditions.filter((c) => isActive(c, now)).length;
 }
 
 /** Header / rail shield: plans are adapted to active conditions; opens Health. Hidden with none. */

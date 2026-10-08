@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { HealthPrivacyView } from './HealthPrivacyView';
 import { HealthView } from '../HealthView';
-import { setFlag } from '../../data/flags';
 import { setLocale } from '../../i18n';
 import type { Shell } from '../../App';
 import { newAlcoholEntry } from '../../alcohol';
@@ -21,7 +20,6 @@ import { newNicotineProduct } from '../../nicotine';
 
 beforeEach(() => {
   setLocale('en');
-  setFlag('conditions', true);
   deleteNicotineData();
   deleteAlcoholData();
   setConditionsShare('off');

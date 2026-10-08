@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { HealthPrivacyView } from './HealthPrivacyView';
 import { HealthView } from '../HealthView';
-import { setFlag } from '../../data/flags';
 import { setLocale } from '../../i18n';
 import type { Shell } from '../../App';
 import {
@@ -19,7 +18,6 @@ import { newNicotineProduct } from '../../nicotine';
 
 beforeEach(() => {
   setLocale('en');
-  setFlag('conditions', true);
   deleteNicotineData();
   deleteAlcoholData();
   setConditionsShare('off');
@@ -97,12 +95,11 @@ describe('HealthPrivacyView', () => {
     expect(rowOf('Nicotine').textContent).toContain('Off');
   });
 
-  it('the conditions row is hidden when the conditions flag is off', () => {
-    setFlag('conditions', false);
+  it('the conditions row remains available with a legacy disabled flag', () => {
+    localStorage.setItem('gym.flags', JSON.stringify({ conditions: false }));
     render(<HealthPrivacyView onBack={() => undefined} />);
-    expect(screen.queryByText('Long-term conditions')).toBeNull();
+    expect(screen.getByText('Long-term conditions')).toBeTruthy();
     expect(screen.getByText('Nicotine')).toBeTruthy();
-    setFlag('conditions', true);
   });
 
   it('a category opens a sheet; choosing a level applies at once and Done closes it', () => {

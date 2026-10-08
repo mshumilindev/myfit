@@ -65,7 +65,6 @@ import { SupplementScreens } from './health/supplements/SupplementScreens';
 import { SupplementQuickStartSheet } from './health/supplements/SupplementQuickStartSheet';
 import { hasSupplementData } from '../supplements';
 import { HealthPrivacyView } from './health/HealthPrivacyView';
-import { isFlagOn } from '../data/flags';
 import './Health.css';
 import { Button } from '../components/ui/Button';
 
@@ -376,9 +375,7 @@ export function HealthView(props: HealthViewProps) {
       {startRow({ kind: 'new', ctx: 'past', type: 'injury' }, t.hlGotHurt, '')}
     </GroupedList>
   );
-  const conditionsGroup = isFlagOn('conditions') ? (
-    <ConditionsSection key="cond" onOpen={(cond) => go({ cond })} />
-  ) : null;
+  const conditionsGroup = <ConditionsSection key="cond" onOpen={(cond) => go({ cond })} />;
   const lifestyleGroup = (
     <NicotineHealthGroup key="life" onOpen={() => go({ nic: 'hub' })}>
       <AlcoholHealthRow onOpen={() => go({ alc: 'hub' })} />
@@ -393,7 +390,7 @@ export function HealthView(props: HealthViewProps) {
   const sharingLabel = (l: 'off' | 'effects' | 'full') =>
     ({ off: t.nicPrivOff, effects: t.nicPrivEffects, full: t.nicPrivFull })[l];
   const levels = [
-    ...(isFlagOn('conditions') ? [store.conditionsShare] : []),
+    store.conditionsShare,
     store.nicotine.settings.sharing,
     store.alcohol.settings.sharing,
     store.supplements?.settings.sharing ?? 'off',
@@ -506,7 +503,7 @@ export function HealthView(props: HealthViewProps) {
       />
     ) : null;
   const condPage =
-    !form && props.cond && isFlagOn('conditions') ? (
+    !form && props.cond ? (
       <ConditionPage
         cond={props.cond}
         condKey={props.condKey}
