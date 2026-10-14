@@ -19,6 +19,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # the Coach server tests import the Cloud Functions sources, which have their own lockfile
+      - run: npm ci --prefix functions
       - name: ESLint
         run: npm run lint
       - name: Prettier
