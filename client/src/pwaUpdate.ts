@@ -89,6 +89,51 @@ export async function startAutoUpdate(deps: PwaUpdateDeps): Promise<void> {
   });
 }
 
+// --- Build check: independent of the service worker ------------------------------------------------------------
+
+declare const __BUILD_ID__: string | undefined;
+const RUNNING_BUILD = typeof __BUILD_ID__ === 'string' ? __BUILD_ID__ : null;
+
+/**
+ * Ask the server which build is live (`/version.json`, never cached) and raise the update plate when it is not the one
+ * this page runs. The worker's `controllerchange` is a one-shot event that a suspended iOS page can miss or that never
+ * fires when the worker cannot install; this check does not depend on the worker at all.
+ */
+export async function checkBuild(
+  fetchFn: typeof fetch = (...a) => fetch(...a),
+  running: string | null = RUNNING_BUILD,
+  onNewer: () => void = markUpdateReady,
+): Promise<boolean> {
+  if (!running) return false;
+  try {
+    const res = await fetchFn(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) return false;
+    const body = (await res.json()) as { build?: unknown };
+    if (typeof body.build === 'string' && body.build !== running) {
+      onNewer();
+      return true;
+    }
+  } catch {
+    /* offline — try again later */
+  }
+  return false;
+}
+
+/** Check at start, whenever the app comes back to the foreground and every few minutes while it stays open. */
+export function startBuildWatch(
+  doc: Pick<Document, 'addEventListener' | 'visibilityState'> = document,
+): void {
+  if (!RUNNING_BUILD) return;
+  const run = () => void checkBuild();
+  run();
+  doc.addEventListener('visibilitychange', () => {
+    if (doc.visibilityState === 'visible') run();
+  });
+  window.addEventListener('pageshow', run);
+  window.addEventListener('online', run);
+  setInterval(run, 5 * 60_000);
+}
+
 // --- Recovery: look for a new version and switch to it right now ------------------------------------------------
 
 export type UpdateResult = 'updated' | 'current' | 'failed';

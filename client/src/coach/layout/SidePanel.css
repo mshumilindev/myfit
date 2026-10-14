@@ -8,9 +8,10 @@
 .sdp-foot {
   position: sticky;
   z-index: 1;
-  bottom: calc(var(--s-4) * -1);
-  margin: 0 calc(var(--s-4) * -1);
-  padding: var(--s-12) var(--s-4) calc(var(--s-8) + var(--safe-bottom));
+  /* the sheet pads its bottom by --space-8 + the safe area: cancel exactly that so nothing shows under the footer */
+  bottom: calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)));
+  margin: 0 calc(-1 * var(--gutter, 18px)) calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)));
+  padding: var(--s-12) var(--gutter, 18px) calc(var(--s-8) + var(--safe-bottom, 0px));
   border-top: var(--co-hair) solid var(--t-line, var(--color-divider));
   /* the plate is a hair translucent: sit it on the page colour so nothing shows through from below */
   background:

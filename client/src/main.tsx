@@ -7,7 +7,7 @@ import './redesign.css';
 import './glass.css';
 import { App } from './App';
 import { getLocale } from './i18n';
-import { startAutoUpdate, markUpdateReady } from './pwaUpdate';
+import { startAutoUpdate, startBuildWatch, markUpdateReady } from './pwaUpdate';
 import { lockShellHeight } from './viewportFit';
 import { SyncStatusHost } from './components/SyncStatusHost';
 import { LavaBackground } from './components/LavaBackground';
@@ -29,17 +29,21 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+startBuildWatch();
+
 /* A pending wipe of Firestore's offline cache (sign-out, relationship end) runs before the SDK opens its database. */
-void runPendingWipe()
-  .catch(() => false)
-  .then(() =>
-    createRoot(document.getElementById('root')!).render(
-      <StrictMode>
-        <AppCrashBoundary>
-          <LavaBackground />
-          <App />
-          <SyncStatusHost />
-        </AppCrashBoundary>
-      </StrictMode>,
-    ),
-  );
+/* The wipe must never keep the app from drawing: a hung IndexedDB call would leave a blank screen for good. */
+void Promise.race([
+  runPendingWipe().catch(() => false),
+  new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 4000)),
+]).then(() =>
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <AppCrashBoundary>
+        <LavaBackground />
+        <App />
+        <SyncStatusHost />
+      </AppCrashBoundary>
+    </StrictMode>,
+  ),
+);

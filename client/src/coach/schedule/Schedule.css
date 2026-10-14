@@ -868,20 +868,36 @@ html.theme-glass .sc-block.sc-st.sc-block--inprogress {
 }
 
 @media (max-width: 767px) {
-  .sc-toolbar-filters > .sc-filters-btn {
-    flex: 0 0 auto;
-    max-width: none;
-  }
   .sc-toolbar {
     flex-direction: column;
     align-items: stretch;
   }
-  .sc-toolbar-filters > * {
-    max-width: none;
+  /* a tidy 2 x 2 grid: Gym | Client on top, the Gyms chip | settings underneath — every control the same height and width */
+  .sc-toolbar-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ctl-gap);
   }
-  /* two selects per row so each keeps room for its value ("Gym: All gyms"); the Gyms chip and settings button follow */
-  .sc-toolbar-filters > :not(.sc-gyms-chip):not(.sc-filters-btn) {
-    flex: 1 1 calc(var(--s-48) * 3);
+  .sc-toolbar-filters > * {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
+  .sc-toolbar-filters > .sc-gyms-chip,
+  .sc-toolbar-filters > .sc-filters-btn {
+    justify-content: center;
+    border-radius: var(--r-pill, 999px);
+    height: 100%;
+    aspect-ratio: auto;
+  }
+  .sc-toolbar-filters > .sc-gyms-chip {
+    order: 3;
+  }
+  .sc-toolbar-filters > .sc-filters-btn {
+    order: 4;
+  }
+  .sc-toolbar-filters .uifield-pre {
+    white-space: nowrap;
   }
   .sc-toolbar-step {
     justify-content: space-between;

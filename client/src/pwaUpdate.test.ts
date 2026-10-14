@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { FOREGROUND_CHECK_MS, startAutoUpdate, type PwaUpdateDeps } from './pwaUpdate';
+import { FOREGROUND_CHECK_MS, checkBuild, startAutoUpdate, type PwaUpdateDeps } from './pwaUpdate';
 
 interface Harness {
   deps: PwaUpdateDeps;
@@ -126,5 +126,31 @@ describe('startAutoUpdate', () => {
     // Control changes still signal — the old worker may hand over at any time.
     h.fireControllerChange();
     expect(h.onUpdateReady).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('checkBuild', () => {
+  const reply = (body: unknown, ok = true) =>
+    vi.fn(() => Promise.resolve({ ok, json: () => Promise.resolve(body) } as Response));
+
+  it('raises the update signal when the live build differs from the running one', async () => {
+    const onNewer = vi.fn();
+    expect(await checkBuild(reply({ build: 'b2' }), 'b1', onNewer)).toBe(true);
+    expect(onNewer).toHaveBeenCalledOnce();
+  });
+
+  it('stays quiet on the same build, a failed request, offline or a dev build', async () => {
+    const onNewer = vi.fn();
+    expect(await checkBuild(reply({ build: 'b1' }), 'b1', onNewer)).toBe(false);
+    expect(await checkBuild(reply({}, false), 'b1', onNewer)).toBe(false);
+    expect(
+      await checkBuild(
+        vi.fn(() => Promise.reject(new Error('offline'))),
+        'b1',
+        onNewer,
+      ),
+    ).toBe(false);
+    expect(await checkBuild(reply({ build: 'b2' }), null, onNewer)).toBe(false);
+    expect(onNewer).not.toHaveBeenCalled();
   });
 });
