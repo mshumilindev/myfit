@@ -378,7 +378,9 @@ html.theme-glass .tabbar-notched {
     pointer-events: auto;
   }
   html.theme-glass .main-col:has(.tabbar-wrap--fab) .stage-layer > .screen {
-    padding-bottom: 76px;
+    /* the strip the screen keeps free for the tab bar; a pinned bottom bar reads it to sit in that strip */
+    --screen-pad-b: 76px;
+    padding-bottom: var(--screen-pad-b);
   }
 }
 @media (max-width: 719px) {

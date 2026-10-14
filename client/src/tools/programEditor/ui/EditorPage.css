@@ -68,28 +68,19 @@
   .pe-page-cluster {
     flex: none;
   }
-  /* The bar pins to the bottom of the scroller's content box, 20 px above the tab bar (the app keeps that strip free for
-     the tab bar). The page scrolls under the bar, so without a fill the text shows through that strip between the bar
-     and the tab bar. The bar paints its own background down to the tab bar. */
+  /* The bar fills the strip the screen keeps free for the tab bar (--screen-pad-b): it is pinned to the very bottom of
+     the scroller and at the end of the page it takes that strip's place (negative margin), so it is in the same spot
+     scrolling and at the end, flush on the tab bar, edge to edge like the hub's blocks (the page's 20 px given back
+     as its own inline padding). Its buttons keep clear of the tab bar through the bar's bottom padding. */
   .pe-page-bar {
+    --pe-strip: var(--screen-pad-b, var(--s-20));
     position: sticky;
-    bottom: 0;
+    bottom: calc(-1 * var(--pe-strip));
     z-index: var(--z-20);
-    /* it is not at the screen's edge: the tab bar below has the home-indicator padding */
-    padding-bottom: var(--sp-3);
-    /* edge to edge: it sits on the tab bar like the hub's own block, no gutter left or right (the page's 20 px is
-       given back as the bar's own inline padding) */
     margin-inline: calc(-1 * var(--s-20));
+    margin-bottom: calc(-1 * var(--pe-strip));
     padding-inline: var(--s-20);
-  }
-  .pe-page-bar::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    right: 0;
-    left: 0;
-    height: var(--s-24);
-    background: inherit;
+    padding-bottom: calc(var(--pe-strip) - var(--s-4));
   }
 }
 

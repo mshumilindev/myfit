@@ -49,6 +49,45 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Blank-screen watchdog. A home-screen app can be left with a worker whose cached shell no longer matches the
+         files on the server (the page then never mounts and shows nothing, so no in-app recovery can run). If the app
+         has not drawn anything after 20 s, drop every worker and cache and load fresh from the network, once a
+         minute at most. Plain script on purpose: it must run when the app bundle does not. -->
+    <script>
+      (function () {
+        setTimeout(function () {
+          var root = document.getElementById('root');
+          if (!root || root.childElementCount > 0) return;
+          try {
+            var last = Number(sessionStorage.getItem('spotter.blankRecovery') || 0);
+            if (Date.now() - last < 60000) return;
+            sessionStorage.setItem('spotter.blankRecovery', String(Date.now()));
+          } catch (e) {}
+          var done = function () {
+            location.reload();
+          };
+          var regs = navigator.serviceWorker
+            ? navigator.serviceWorker.getRegistrations().then(function (list) {
+                return Promise.all(
+                  list.map(function (r) {
+                    return r.unregister();
+                  }),
+                );
+              })
+            : Promise.resolve();
+          var wipe = window.caches
+            ? caches.keys().then(function (keys) {
+                return Promise.all(
+                  keys.map(function (k) {
+                    return caches.delete(k);
+                  }),
+                );
+              })
+            : Promise.resolve();
+          Promise.all([regs, wipe]).then(done, done);
+        }, 20000);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

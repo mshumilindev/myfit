@@ -7,6 +7,10 @@
 .pg-page {
   gap: var(--s-16);
 }
+/* The editor's action bar fills that strip itself (EditorPage.css), flush on the tab bar. */
+.pg-page:has(> .pe-page > .pe-page-bar)::after {
+  display: none;
+}
 .pg-page::after {
   /* bottom breathing room above the tab bar's raised + button (padding-bottom
      is not honoured at the end of a scrolling flex column) */
