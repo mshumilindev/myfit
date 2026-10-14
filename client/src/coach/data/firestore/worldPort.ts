@@ -240,7 +240,10 @@ export function createFirestoreWorldPort(d: FirestoreWorldDeps): CoachWorldPort 
         const roster = await fs.call<Roster>('coachClients', {});
         if (signal.aborted) throw new PortError('timeout', 'aborted');
         const now = roster.serverTime;
-        const book = await loadBook();
+        // the book and the schedule do not depend on the client reads: start them now, await them after
+        const bookP = loadBook();
+        const schedP = (d.schedule?.() ?? Promise.resolve(null)).catch(() => null);
+        bookP.catch(() => undefined);
         const active = roster.clients.filter((c) => c.status === 'active');
         const inputs: WorldData['inputs'] = [];
         const history: Record<string, ClientHistory> = {};
@@ -276,7 +279,7 @@ export function createFirestoreWorldPort(d: FirestoreWorldDeps): CoachWorldPort 
           }
         }
         for (const inv of roster.invites) clients.push(pendingClient(inv));
-        const sched = await (d.schedule?.() ?? Promise.resolve(null)).catch(() => null);
+        const [book, sched] = await Promise.all([bookP, schedP]);
         const withPlan = await withAssignedPrograms(clients, active, now);
         const joined = joinSchedule({ clients: withPlan, inputs, now }, sched);
         const data: WorldData = {
