@@ -43,9 +43,7 @@ export function createScheduleThreadExtras(opts: ScheduleThreadExtrasOpts = {}) 
           />
         ) : undefined,
       chips: (
-        <Chip icon="swap" aria-label={t.rcChipAria} onClick={() => setForm({})}>
-          {t.rcChip}
-        </Chip>
+        <Chip icon="swap" aria-label={t.rcChipAria} title={t.rcChip} onClick={() => setForm({})} />
       ),
       overlay: form ? (
         <Sheet onClose={() => setForm(null)} label={t.rfTitle} padded className="sc-sheet">

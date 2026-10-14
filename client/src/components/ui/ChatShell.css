@@ -33,7 +33,9 @@
 /* Phone: the chat is the page. Edge to edge, no card, the bar flush at the top with a hairline, the composer clear
    of the home indicator. */
 @media (max-width: 719px) {
-  .chs {
+  .chs,
+  .chs.uicard,
+  html.theme-glass .chs.uicard {
     border: 0;
     border-radius: 0;
     background: transparent;

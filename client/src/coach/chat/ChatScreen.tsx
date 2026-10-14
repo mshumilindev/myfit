@@ -193,7 +193,6 @@ export function ChatScreen({
   if (!desktop && fromHash && thread) {
     return (
       <Page className="ch-page ch-page--thread">
-        <Header title={ch.chTitle} />
         {notices}
         {thread}
       </Page>

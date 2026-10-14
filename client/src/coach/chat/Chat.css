@@ -97,3 +97,14 @@
   justify-content: center;
   padding-bottom: var(--s-12);
 }
+
+/* Phone, a thread open: the chat is the whole screen — the shell's gutter goes, like in every other chat */
+@media (max-width: 719px) {
+  .co-main:has(.ch-page--thread) {
+    padding: 0;
+  }
+  .ch-page--thread {
+    max-width: none;
+    margin: 0;
+  }
+}

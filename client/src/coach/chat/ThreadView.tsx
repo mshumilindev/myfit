@@ -297,8 +297,17 @@ export function ThreadView({
           }}
           allowEmpty={!!x.body || !!x.allowEmpty}
           placeholder={x.placeholder ?? ch.chWriteTo(first)}
-          lead={x.lead ?? composerLead}
-          chips={x.chips ?? composerChips}
+          lead={
+            desktop ? (
+              (x.lead ?? composerLead)
+            ) : (
+              <>
+                {x.lead ?? composerLead}
+                {x.chips ?? composerChips}
+              </>
+            )
+          }
+          chips={desktop ? (x.chips ?? composerChips) : undefined}
         />
       }
       overlays={

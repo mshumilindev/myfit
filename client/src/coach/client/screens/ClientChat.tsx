@@ -357,9 +357,12 @@ export function ClientChat(p: ClientChatProps) {
                     </div>
                   )}
                   {my && my.upcoming.length > 0 && (
-                    <Chip icon="swap" aria-label={sc.rcChipAria} onClick={() => setForm(true)}>
-                      {sc.rcChip}
-                    </Chip>
+                    <Chip
+                      icon="swap"
+                      aria-label={sc.rcChipAria}
+                      title={sc.rcChip}
+                      onClick={() => setForm(true)}
+                    />
                   )}
                 </>
               ) : undefined

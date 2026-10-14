@@ -6,10 +6,8 @@
  * chat port, notes through the notes port (both fixtures until the real adapters, see their port.ts files).
  */
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Badge } from '../components/ui/Badge';
-import { Button, IconButton } from '../components/ui/Button';
+import { IconButton } from '../components/ui/Button';
 import { ChatBubble } from '../components/ui/ChatBubble';
-import { Chip } from '../components/ui/Chip';
 import { Snackbar } from '../components/ui/Snackbar';
 import { useNotesT } from '../i18n/coachNotes';
 import type { ThreadExtras, ThreadExtrasCtx } from './chat/ThreadView';
@@ -76,7 +74,7 @@ export function createCoachThreadExtras(opts: CoachThreadExtrasOpts = {}) {
     const [pickerOpen, setPickerOpen] = useState(!!opts.initial?.picker);
     const [pending, setPending] = useState<ShareRef | null>(opts.initial?.pending ?? null);
     const [peek, setPeek] = useState<ShareRef | null>(opts.initial?.peek ?? null);
-    const [noteMode, setNoteMode] = useState(!!opts.initial?.noteMode);
+    const [noteMode] = useState(!!opts.initial?.noteMode);
     const [notesOpen, setNotesOpen] = useState(!!opts.initial?.notesOpen);
     const [hl, setHl] = useState<string | undefined>(opts.initial?.highlightNote);
     const [confirmNote, setConfirmNote] = useState<Note | null>(null);
@@ -286,15 +284,6 @@ export function createCoachThreadExtras(opts: CoachThreadExtrasOpts = {}) {
               <IconButton icon="x" label={sh.pendingRemove} onClick={() => setPending(null)} />
             </div>
           )}
-          <Chip
-            icon="lock-simple"
-            selected={noteMode}
-            aria-pressed={noteMode}
-            onClick={() => setNoteMode(!noteMode)}
-          >
-            {noteMode ? nt.nModeOn : nt.nModeOff}
-          </Chip>
-          {noteMode && <small className="shx-hint">{nt.nModeHint(ctx.first)}</small>}
         </>
       ),
       body,
@@ -304,22 +293,6 @@ export function createCoachThreadExtras(opts: CoachThreadExtrasOpts = {}) {
         if (pending) rememberShare(pending);
         setPending(null);
       },
-      barActions: (
-        <Button
-          variant="ghost"
-          size="sm"
-          icon="pencil-simple"
-          aria-expanded={notesOpen}
-          aria-label={nt.nButtonAria(notes.length)}
-          onClick={(e) => {
-            anchor.current = e.currentTarget;
-            setNotesOpen(true);
-          }}
-        >
-          {nt.nButton}
-          <Badge n={notes.length} tone="neutral" anchor="none" />
-        </Button>
-      ),
       noteItems,
       card,
       shareDelete,
