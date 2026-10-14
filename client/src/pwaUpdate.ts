@@ -72,6 +72,8 @@ export async function startAutoUpdate(deps: PwaUpdateDeps): Promise<void> {
       updateViaCache: 'none',
     });
   } catch (err) {
+    // The dev server has no sw.js (it answers with index.html), so a failed registration there is expected.
+    if (import.meta.env.MODE === 'development') return;
     console.error('service worker registration failed', err);
     return;
   }
