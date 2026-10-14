@@ -88,3 +88,58 @@ export async function startAutoUpdate(deps: PwaUpdateDeps): Promise<void> {
     });
   });
 }
+
+// --- Recovery: look for a new version and switch to it right now ------------------------------------------------
+
+export type UpdateResult = 'updated' | 'current' | 'failed';
+
+/**
+ * Ask the server for a newer build and, if there is one, switch to it AT ONCE (the page reloads when the new worker
+ * takes control). Used where waiting is pointless: the app crashed or a chunk of the old build is gone. Resolves
+ * `current` when this already is the newest build, `failed` when the check could not run (offline, no worker).
+ */
+export async function updateNow(
+  container:
+    | Pick<ServiceWorkerContainer, 'getRegistration' | 'addEventListener'>
+    | undefined = typeof navigator === 'undefined' ? undefined : navigator.serviceWorker,
+  reload: () => void = () => window.location.reload(),
+  timeoutMs = 15_000,
+): Promise<UpdateResult> {
+  if (!container) return 'failed';
+  try {
+    const reg = await container.getRegistration();
+    if (!reg) return 'failed';
+    const takeover = new Promise<UpdateResult>((resolve) => {
+      container.addEventListener('controllerchange', () => resolve('updated'), { once: true });
+    });
+    await reg.update();
+    const next = reg.waiting ?? reg.installing;
+    if (!next) return 'current';
+    if (next.state === 'installed') next.postMessage({ type: 'SKIP_WAITING' });
+    const result = await Promise.race([
+      takeover,
+      new Promise<UpdateResult>((resolve) => setTimeout(() => resolve('failed'), timeoutMs)),
+    ]);
+    if (result === 'updated') reload();
+    return result;
+  } catch {
+    return 'failed';
+  }
+}
+
+/** The last resort: drop every worker and every cache, then load the app fresh from the network. */
+export async function resetApp(): Promise<void> {
+  try {
+    const regs = (await navigator.serviceWorker?.getRegistrations()) ?? [];
+    await Promise.all(regs.map((r) => r.unregister()));
+  } catch {
+    /* nothing to drop */
+  }
+  try {
+    const keys = typeof caches === 'undefined' ? [] : await caches.keys();
+    await Promise.all(keys.map((k) => caches.delete(k)));
+  } catch {
+    /* nothing to drop */
+  }
+  window.location.reload();
+}

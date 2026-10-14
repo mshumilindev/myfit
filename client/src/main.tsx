@@ -13,10 +13,12 @@ import { SyncStatusHost } from './components/SyncStatusHost';
 import { LavaBackground } from './components/LavaBackground';
 import { initMotion } from './motion';
 import { runPendingWipe } from './deviceWipe';
+import { AppCrashBoundary, installCrashRecovery } from './appCrash';
 
 document.documentElement.lang = getLocale();
 lockShellHeight();
 initMotion();
+installCrashRecovery();
 
 if ('serviceWorker' in navigator) {
   void startAutoUpdate({
@@ -33,9 +35,11 @@ void runPendingWipe()
   .then(() =>
     createRoot(document.getElementById('root')!).render(
       <StrictMode>
-        <LavaBackground />
-        <App />
-        <SyncStatusHost />
+        <AppCrashBoundary>
+          <LavaBackground />
+          <App />
+          <SyncStatusHost />
+        </AppCrashBoundary>
       </StrictMode>,
     ),
   );
