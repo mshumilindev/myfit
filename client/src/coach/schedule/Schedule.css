@@ -1,0 +1,954 @@
+/* Coach Schedule + Week. Layout only: surfaces, colours and radii of kit pieces stay with the kit. Tokens only. */
+.sc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ctl-gap);
+}
+.sc-toolbar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ctl-gap);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.sc-toolbar-filters > * {
+  flex: 1 1 var(--s-48);
+  min-width: 0;
+  max-width: calc(var(--s-48) * 5);
+}
+.sc-toolbar-filters > .sc-gyms-chip {
+  flex: 0 0 auto;
+}
+.sc-toolbar-step {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+}
+/* week / day / month paging: the arrows, the range in words, and Today */
+.sc-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  min-width: 0;
+}
+.sc-nav-label {
+  min-width: calc(var(--s-48) * 3);
+  padding: 0 var(--s-4);
+  text-align: center;
+  font-size: var(--fs-15);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.sc-overlap-pill {
+  cursor: pointer;
+}
+.sc-notices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.sc-notices:empty {
+  display: none;
+}
+.sc-loading,
+.sc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  min-width: 0;
+}
+.sc-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-8) var(--s-16);
+  padding: 0 var(--s-4);
+}
+.sc-view {
+  min-width: 0;
+  overflow: hidden;
+}
+.sc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-8);
+  padding: var(--s-12) var(--s-16);
+}
+.sc-legend-hint {
+  color: var(--color-text-muted);
+  font-size: var(--fs-min);
+  margin-right: var(--s-4);
+}
+.sc-legend .sc-legend-off {
+  background: transparent;
+  border-style: dashed;
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+.sc-legend-create {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: var(--fs-min);
+}
+.sc-legend-n {
+  font-variant-numeric: tabular-nums;
+  opacity: var(--op-past);
+  margin-left: var(--s-6);
+}
+
+/* The calendar is a wide grid: it may outgrow the standard frame on large monitors (1440 is unchanged, 1920 gets 1760). */
+.co-page.sc-page {
+  max-width: var(--co-frame-wide);
+}
+
+/* ---- week / day grid ---- */
+.sc-grid {
+  --sc-hour: calc(var(--s-48) + var(--s-16));
+  /* wide enough for "07:00" with a gap before the first column line */
+  --sc-gutter: calc(var(--s-48) + var(--s-8));
+  min-width: 0;
+}
+.sc-grid-head,
+.sc-grid-body {
+  display: grid;
+  grid-template-columns: var(--sc-gutter) repeat(var(--sc-cols), minmax(0, 1fr));
+}
+.sc-grid-head {
+  border-bottom: var(--co-hair) solid var(--color-divider);
+}
+.sc-colhead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-12) var(--s-4);
+  min-width: 0;
+}
+.sc-colhead-w,
+.sc-colhead-s {
+  color: var(--color-text-muted);
+  font-size: var(--fs-min);
+}
+.sc-colhead-s {
+  text-align: center;
+  text-wrap: balance;
+  line-height: 1.25;
+}
+.sc-colhead.is-today .sc-colhead-s {
+  color: var(--color-accent-text);
+}
+.sc-colhead-today {
+  font-weight: 600;
+}
+/* a narrow column puts "Today" above the count instead of breaking the line after the dot */
+.sc-colhead {
+  container-type: inline-size;
+}
+@container (max-width: 136px) {
+  .sc-colhead-s {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .sc-colhead-sep {
+    display: none;
+  }
+}
+.sc-colhead-n {
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+.sc-colhead.is-today .sc-colhead-n {
+  color: var(--color-accent);
+}
+/* The labels sit IN the gutter, right-aligned with a gap before the column line, and each one is centred on its hour line
+   (the stack is lifted by half a label; the body leaves room above the first line so "07:00" is never clipped). */
+.sc-grid-body {
+  padding-top: var(--s-12);
+}
+.sc-hours {
+  display: flex;
+  flex-direction: column;
+  margin-top: calc(var(--fs-min) * -0.5);
+}
+.sc-hour {
+  height: var(--sc-hour);
+  padding: 0 var(--s-12) 0 var(--s-4);
+  color: var(--color-text-muted);
+  font-size: var(--fs-min);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-align: right;
+}
+.sc-hour.is-under-now {
+  visibility: hidden; /* the now chip takes its place (day view) */
+}
+.sc-col.is-creatable {
+  cursor: cell;
+}
+/* the keyboard way into create-by-click: one button per day, hidden until it has focus */
+.sc-col-add {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.sc-col-add:focus-visible {
+  top: var(--s-4);
+  left: var(--s-4);
+  right: var(--s-4);
+  z-index: var(--z-30);
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: var(--s-6) var(--s-8);
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--fs-min);
+  outline: var(--co-ring) solid var(--color-accent);
+}
+/* the ghost of the session that a click would create (follows the pointer, stretches while dragging) */
+.sc-newslot {
+  position: absolute;
+  top: calc(var(--sc-top) * 100%);
+  height: calc(var(--sc-h) * 100%);
+  left: var(--s-2);
+  right: var(--s-2);
+  box-sizing: border-box;
+  padding: var(--s-4) var(--s-6);
+  border: var(--co-hair) dashed var(--color-accent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  color: var(--color-accent-text);
+  font-size: var(--fs-min);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  overflow: hidden;
+}
+.sc-col {
+  position: relative;
+  height: calc(var(--sc-hour) * var(--sc-hours));
+  border-left: var(--co-hair) solid var(--color-divider);
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-divider) var(--co-hair),
+    transparent var(--co-hair)
+  );
+  background-size: 100% var(--sc-hour);
+}
+/* A block is placed by CSS variables from the packing in view.ts: its column(s) of the cluster, its span, its time range.
+   The 2px inset on each side leaves a 4px gap between neighbours, so touching sessions never merge. */
+.sc-block {
+  position: absolute;
+  top: calc(var(--sc-top) * 100% + var(--s-2));
+  height: calc(var(--sc-h) * 100% - var(--s-4));
+  left: calc(var(--sc-lane) / var(--sc-lanes) * 100% + var(--s-2));
+  width: calc(var(--sc-span) / var(--sc-lanes) * 100% - var(--s-4));
+  box-sizing: border-box;
+  min-width: 0;
+  /* the status bar is an inset pill INSIDE the padding box: its geometry never meets the card's corner radius */
+  --sc-bar-in: var(--s-6);
+  --sc-bar-w: var(--s-4);
+  --sc-pad-y: var(--s-4);
+  --sc-pad-x: var(--s-10);
+  padding: var(--sc-pad-y) var(--sc-pad-x) var(--sc-pad-y)
+    calc(var(--sc-bar-in) + var(--sc-bar-w) + var(--sc-pad-x));
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  text-align: left;
+  /* the block answers its own size: content tiers below follow the width and height it really got */
+  container-type: size;
+}
+/* ---- status: ONE look per state, shared by the cards, the legend chips and the agenda (StateMark / status.ts) ---- */
+.sc-st--planned {
+  --sc-state: var(--color-accent-600);
+}
+.sc-st--inprogress {
+  --sc-state: var(--color-accent);
+}
+.sc-st--done {
+  --sc-state: var(--color-ok);
+}
+.sc-st--missed {
+  --sc-state: var(--color-danger);
+}
+.sc-st--proposed {
+  --sc-state: var(--color-accent-text);
+}
+.sc-st--overlap {
+  --sc-state: var(--color-illness);
+}
+/* the small swatch: glyph in the state colour (a dot for Planned, which has no glyph) */
+.sc-mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--sc-state);
+  font-size: var(--fs-14);
+  line-height: 1;
+}
+.sc-mark--dot::before {
+  content: '';
+  width: var(--s-8);
+  height: var(--s-8);
+  border-radius: var(--radius-pill);
+  background: var(--sc-state);
+}
+.sc-legend .uichip-l {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-6);
+}
+/* a card: one calm plate, the state is the inset bar + one small glyph in the top-right slot. No outline, glow or coloured border. */
+html.theme-glass .sc-block.sc-st,
+.sc-block {
+  background: color-mix(in srgb, var(--sc-state) 12%, var(--color-surface));
+  box-shadow: none;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+}
+.sc-block::before {
+  content: '';
+  position: absolute;
+  top: var(--sc-bar-in);
+  bottom: var(--sc-bar-in);
+  left: var(--sc-bar-in);
+  width: var(--sc-bar-w);
+  border-radius: var(--radius-pill);
+  background: var(--sc-state);
+}
+html.theme-glass .sc-block.sc-st.sc-block--done {
+  background: color-mix(in srgb, var(--sc-state) 9%, var(--color-surface));
+  color: var(--color-text-muted);
+}
+html.theme-glass .sc-block.sc-st.sc-block--missed {
+  background: color-mix(in srgb, var(--sc-state) 10%, var(--color-surface));
+}
+/* proposed move / "Moved to": a dashed ghost, no fill, no bar; the padding is the same as every card */
+html.theme-glass .sc-block.sc-st.sc-block--proposed {
+  background: transparent;
+  box-shadow: inset 0 0 0 var(--co-hair) var(--sc-state);
+  border: 0;
+  color: var(--color-accent-text);
+  outline: var(--co-hair) dashed var(--sc-state);
+  outline-offset: calc(var(--co-hair) * -1);
+}
+.sc-block--proposed::before {
+  background: transparent;
+}
+.sc-block--proposed .sc-block-moved {
+  text-decoration: line-through;
+}
+/* running now: solid accent, the thin bar at the foot is the elapsed share */
+html.theme-glass .sc-block.sc-st.sc-block--inprogress {
+  background: var(--sc-state);
+  box-shadow: none;
+  color: var(--color-bg);
+}
+.sc-block--inprogress::before {
+  background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+}
+.sc-block--inprogress::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: var(--s-4);
+  width: calc(var(--sc-progress, 0) * 100%);
+  background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+}
+.sc-block--inprogress .sc-mark,
+.sc-block--inprogress .sc-block-now {
+  color: var(--color-bg);
+}
+.sc-block-now {
+  font-size: var(--fs-min);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+/* the chosen card: a ring in the text colour, outside the plate */
+.sc-block.is-selected {
+  outline: var(--co-ring) solid var(--color-accent-text);
+  outline-offset: var(--s-2);
+}
+.sc-block-in {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--s-2);
+  height: 100%;
+  min-width: 0;
+}
+.sc-block-top,
+.sc-block-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  min-width: 0;
+}
+/* the name row is one fixed-height line (avatar, name, state slot): the glyph sits on the name's centre line on every card */
+.sc-block-top {
+  min-height: var(--s-20);
+}
+.sc-block-foot {
+  justify-content: flex-start;
+}
+.sc-avatars {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+}
+.sc-avatars > * + * {
+  margin-left: calc(var(--s-4) * -1);
+}
+.sc-more {
+  flex: none;
+  padding-left: var(--s-6);
+  font-size: var(--fs-min);
+  line-height: 1;
+}
+.sc-block-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  /* a line box taller than the glyphs: overflow:hidden (ellipsis) must not cut descenders */
+  line-height: var(--ctl-lh);
+}
+.sc-block-state {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-4);
+  margin-left: auto;
+  min-width: var(--s-16);
+  height: var(--s-20);
+}
+/* the time is never truncated: when the full range does not fit, the start alone is shown */
+.sc-block-time {
+  flex: none;
+  white-space: nowrap;
+  font-size: var(--fs-min);
+  line-height: var(--ctl-lh);
+}
+.sc-block-moved {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-min);
+}
+.sc-t-start {
+  display: none;
+}
+
+/* Tier B (narrow, about three columns in a day): the group avatars collapse to one, the start time replaces the range. */
+@container (max-width: 116px) {
+  .sc-t-full {
+    display: none;
+  }
+  .sc-t-start {
+    display: inline;
+  }
+  /* the name matters more than the face: the avatar steps aside so the name keeps its room beside the state slot */
+  .sc-avatars {
+    display: none;
+  }
+}
+/* Tier C (very narrow): avatar and time only; the name is in the tooltip and the aria label. */
+@container (max-width: 52px) {
+  .sc-avatars {
+    display: inline-flex;
+  }
+  .sc-avatars > :not(:first-child),
+  .sc-more {
+    display: none;
+  }
+  .sc-block-title {
+    display: none;
+  }
+  .sc-block-foot {
+    gap: var(--s-2);
+  }
+}
+/* Short block (45 minutes or less, under two text lines tall): one row, avatar + name + time, one avatar. */
+@container (max-height: 52px) {
+  .sc-block-in {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--s-6);
+  }
+  .sc-block-top {
+    display: contents;
+  }
+  .sc-block-foot {
+    flex: none;
+    order: 2;
+  }
+  .sc-block-state {
+    order: 3;
+    margin-left: 0;
+  }
+  .sc-avatars > :not(:first-child),
+  .sc-more {
+    display: none;
+  }
+}
+@container (max-height: 52px) and (max-width: 116px) {
+  .sc-avatars {
+    display: inline-flex;
+  }
+  .sc-block-title {
+    display: none;
+  }
+}
+/* Short and very narrow (an overlap lane): the time and state fit, the face does not; the name stays in the tooltip. */
+@container (max-height: 52px) and (max-width: 76px) {
+  .sc-avatars {
+    display: none;
+  }
+}
+
+/* ---- phone agenda ---- */
+.sc-agenda {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  padding: var(--s-16);
+}
+
+/* ---- session panel (drawer / bottom sheet) ---- */
+.sc-insp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-width: 0;
+}
+.sc-insp-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  min-width: 0;
+}
+.sc-insp-avatars {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+}
+.sc-insp-avatars > * + * {
+  margin-left: calc(var(--s-8) * -1);
+}
+.sc-insp-id {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+  min-width: 0;
+}
+.sc-insp-title {
+  margin: 0;
+  font-size: var(--fs-20);
+  overflow-wrap: anywhere;
+}
+.sc-insp-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-6);
+}
+.sc-insp-when {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-12) var(--s-16);
+  border: var(--co-hair) solid var(--color-divider);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+.sc-insp-time {
+  font-size: var(--fs-28);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+.sc-insp-date {
+  font-size: var(--fs-15);
+}
+.sc-insp-rel {
+  color: var(--color-accent-text);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+.sc-insp-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sc-insp-meta li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  font-size: var(--fs-15);
+}
+.sc-insp-meta li > :first-child,
+.sc-insp-note > :first-child,
+.sc-insp-clash li > :first-child {
+  flex: none;
+  color: var(--color-text-muted);
+}
+.sc-insp-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+  padding: var(--s-12);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+}
+.sc-insp-note p {
+  margin: 0;
+  font-size: var(--fs-15);
+  overflow-wrap: anywhere;
+}
+.sc-insp-req,
+.sc-insp-clash {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  padding: var(--s-12);
+  border: var(--co-hair) solid var(--color-divider);
+  border-radius: var(--radius-lg);
+}
+.sc-insp-clash {
+  border-color: var(--color-danger-line);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+}
+.sc-insp-clash ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sc-insp-clash li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+}
+.sc-insp-clash li > :first-child {
+  color: var(--color-danger);
+}
+.sc-insp-clash-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+.sc-insp-clash-text small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-min);
+}
+.sc-insp-req-head,
+.sc-insp-req-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-8) var(--s-12);
+}
+.sc-insp-req-move {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  font-variant-numeric: tabular-nums;
+}
+.sc-insp-req-at {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fs-15);
+  font-weight: 600;
+}
+.sc-insp-req-at small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-min);
+  font-weight: 400;
+}
+.sc-insp-req-at.is-old {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+.sc-insp-who {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.sc-insp-people {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.sc-insp-quick {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.sc-insp-reqtext,
+.sc-insp-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+/* ---- group move summary ---- */
+.sc-gm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  padding: var(--s-16);
+  border: var(--co-hair) solid var(--color-divider);
+}
+.sc-gm-head,
+.sc-gm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-12);
+}
+.sc-gm-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sc-gm-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+
+/* ---- forms (sheet content) ---- */
+.sc-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-width: 0;
+  padding-bottom: var(--s-16);
+}
+.sc-form-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.sc-form-title {
+  margin: 0;
+  font-size: var(--fs-20);
+}
+.sc-form-sub,
+.sc-form-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.sc-form-err {
+  margin: 0;
+  color: var(--color-danger-text);
+  font-size: var(--fs-13);
+}
+.sc-form-now {
+  margin: 0;
+}
+.sc-form-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  min-width: 0;
+}
+.sc-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(calc(var(--s-48) * 3), 1fr));
+  gap: var(--s-12);
+  align-items: end;
+}
+.sc-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--s-8);
+}
+.sc-free {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.sc-clashes {
+  margin: var(--s-8) 0;
+  padding-left: var(--s-16);
+}
+
+/* ---- create from an empty slot ---- */
+.sc-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+  max-height: calc(var(--s-48) * 3);
+  overflow-y: auto;
+}
+.sc-quick-repeat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-12);
+}
+.sc-quick-repeat span {
+  display: flex;
+  flex-direction: column;
+}
+.sc-quick-repeat small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-min);
+}
+.sc-agenda-add {
+  align-self: flex-start;
+}
+
+/* ---- chat card ---- */
+.sc-chatrow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  align-items: flex-start;
+  max-width: 100%;
+}
+.sc-chatrow.is-mine {
+  align-items: flex-end;
+}
+
+/* ---- Week page ---- */
+.sc-weeksummary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-12);
+}
+.sc-weeksummary-text {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.sc-today-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 767px) {
+  .sc-toolbar-filters > .sc-filters-btn {
+    flex: 0 0 auto;
+    max-width: none;
+  }
+  .sc-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .sc-toolbar-filters > * {
+    max-width: none;
+  }
+  /* two selects per row so each keeps room for its value ("Gym: All gyms"); the Gyms chip and settings button follow */
+  .sc-toolbar-filters > :not(.sc-gyms-chip):not(.sc-filters-btn) {
+    flex: 1 1 calc(var(--s-48) * 3);
+  }
+  .sc-toolbar-step {
+    justify-content: space-between;
+  }
+  .sc-nav {
+    justify-content: space-between;
+  }
+  .sc-nav-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* ---- calendar settings: one compact row per weekday (day, from - to, switch) and a checkbox list of gyms ---- */
+.sc-set {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  min-width: 0;
+}
+.sc-set-meta {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.sc-hrs .sc-hrs-row {
+  gap: var(--s-8);
+}
+.sc-hrs .sc-hrs-row .uirow-lb {
+  /* the day label: wide enough for the longest short weekday in any locale */
+  flex: 0 0 var(--s-40);
+}
+.sc-hrs-times {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-6);
+  margin-left: auto;
+  color: var(--color-text-muted);
+}
+.sc-hrs-times .uitime {
+  width: calc(var(--s-48) * 2);
+}
+.sc-hrs-times .uitime .uifield-box {
+  padding: 0 var(--s-8);
+}
+/* compact table: the native picker glyph would push "AM/PM" out of the well; the segments stay editable */
+.sc-hrs-times .uitime input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+.sc-hrs-off {
+  margin-left: auto;
+  color: var(--color-text-faint);
+  font-size: var(--fs-13);
+}
+.sc-gyms .uirow {
+  cursor: pointer;
+}
+/* ---- grid: the hours outside the working hours / gym hours, shaded under the sessions ---- */
+.sc-off {
+  position: absolute;
+  top: calc(var(--sc-top) * 100%);
+  height: calc(var(--sc-h) * 100%);
+  left: 0;
+  right: 0;
+  background: color-mix(in srgb, var(--color-bg) 38%, transparent);
+  pointer-events: none;
+}

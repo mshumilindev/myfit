@@ -334,3 +334,116 @@ Where it is used, always through the kit and never with feature CSS:
 - `AnatomyMap` — condition marks on the body map (Bones / Muscles / Organs / Other layers).
 
 Use the tone only for things that come from the person's conditions, so the colour keeps its meaning.
+
+## Coach in the kit (iteration 7)
+
+### The kit reset rule
+
+Coach is a sibling app of Gym, not a second design. Every Coach surface is drawn by the existing kit (`components/ui`) and the Brass Glass recipes in `glass.css`. Only the accent ramp differs per app (Coach is tourmaline, tinted by `--t-base`). So:
+
+- Grep `components/ui` before writing any element. Feature CSS under `coach/**` is layout only (flex / grid / gap / size / alignment / overflow). No colours, surfaces, radii or fonts on kit elements, no raw hex, no raw `px` outside tokens (`--s-*`, `--fs-*`, `--r-*`; 360 px style widths are layout variables in `coach/layout/frame.css`), no raw `<button>` / `<input>` (kit-guard enforces the first and the colours).
+- Inner padding comes from tokens: at least `--s-12` horizontal for pills and segments, `--s-16` for cards and rows.
+- A new primitive is allowed only when nothing fits. It lives in `components/ui` with a story under `Coach/<Name>` (full pages: `Pages/Coach/<Name>`), is app-agnostic, and any new glass surface class gets its rule in `glass.css`.
+- All new user data is sealed (`sealOrThrow` / `NEW_COLLECTIONS`; chat uses Part C envelopes with AAD and a sender signature). Nothing readable in logs or browser storage.
+- Strings live in per-feature dictionaries `i18n/coach<Feature>.{en,uk,pl,lt,et}.ts`. `src/i18n/coachParity.test.ts` (run alone: `npm run i18n:coach`) finds every `coach*` dictionary by glob and checks keys, kinds, function arity, placeholders and sample output in all five locales.
+
+### Coach/ pieces that live in the kit
+
+| Piece                               | For                                                                                                                                |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `ChatBubble`, `ChatComposer`        | message bubbles (day dividers, status, retry) and the composer (grows, send, lead / chips slots); reused by the client chat        |
+| `ConfirmEffectsDialog`, `UndoToast` | destructive confirms that list their effects; the Undo toast                                                                       |
+| `ExportMenu`                        | CSV / print menu; `extra` slot for an extra option (for example the per-set switch)                                                |
+| `ResponsivePanel`                   | a Popover on desktop and a Sheet on phone with one content                                                                         |
+| `DecisionRecord`                    | the decision card (what, why, who, result)                                                                                         |
+| `StageBoard`                        | columns of cards by stage; `foldLabel` + `defaultFolded` fold a column to a narrow track (desktop), phone stacks                   |
+| `LiveWidget`                        | the rail foot pill: counts by state, popover list; each entry has `onOpen` and `ariaLabel`, so a row opens that person's live view |
+| `SidePanel` (coach layout)          | a drawer from 768 px, a sheet below                                                                                                |
+
+Story groups: pieces in the Storybook tree `Coach/<Name>`; screens `Pages/Coach/<Name>` (Today, Clients, Client 360, Decisions, Chat, Live, Programs, Schedule). The Chat stories also carry the desktop dock (`DockClosed`, `DockList`, `DockThread`).
+
+### Coach group inventory and where the code lives (iteration 14)
+
+Storybook titles (one per kit piece, `Coach/<Name>`): AccountPanel, AccountPopover, Action menu, Chat bubbles, Chat composer, ChoiceList,
+Confirm dialog, Consent, DataTable, Decision record, DecisionCard, ErrorBoundary, EvidenceChart, Exercise row, Exercise thumb, Export menu,
+Finding row, Invite, Layout, LiveWidget, Message menu, MoreMenu, Note card, Now line, Rail Active, Rail overflow, Range bar, RequestCard,
+Reschedule card, Responsive panel, RhythmChart, Roster rows, Scroll tabs, Security code, Session exercise, SeverityDot, Share card,
+StageBoard, StepList, SuiteLauncherRow, Undo toast, Weekday toggle. Pages (`Pages/Coach/<Name>`): Chat, Chat share, Check before sending,
+Client, Client 360, Decisions, Identity, Library peek, Live, Notes, Program editor, Program tab, Programs, Roster, Schedule, Share cards,
+Shell, Signals, Today.
+
+The program editor is a standalone tool, not Coach code: `client/src/tools/programEditor/` (guide `docs/PROGRAM-EDITOR-TOOL.md`, folder
+README `client/src/tools/programEditor/README.md`, page differences `docs/PROGRAM-EDITOR-PAGE-DIFF.md`). Its inspector panes are one
+module per pane family under `ui/panes/` (`PaneShared`, `RowPane`, `ExerciseAsClient`, `WarmupPane`, `SwapPairPanes`, `AddPane`,
+`ActivityPanes`, `LibraryPanes`, `DayPanes`); `ui/Panes.tsx` keeps only `paneTitle` / `PaneBody` and re-exports the public names. Host
+contract types: `host.ts`; the catalog types live in `host.catalog.ts` so `check/engine.ts` and `host.ts` do not import each other.
+
+Status of the whole dashboard (real vs fixtures, how to run every check, known gaps): `docs/COACH-STATUS.md`.
+
+### Accessibility rules the kit follows (iteration 8)
+
+- A `role="listbox"` holds only `role="option"` rows. `GroupedList` takes `rowsRole` / `rowsId`, so the rows container itself is the listbox (hairlines keep working); a search field controls several listboxes with `aria-controls="id id"` (SharePicker). Filter chips that are radios must not carry `aria-pressed` (the picker passes `aria-pressed={undefined}`).
+- Toggle state (`aria-pressed`) only on a real button: `ExerciseRow` drops it when there is no `onClick`. No `aria-readonly` on a `div` (`SessionExercise` uses `data-readonly`).
+- No interactive element inside another one: a row that is a button never holds a chip button (the bare-row "Add sets and reps" chip sits beside the row, `.pg-xrow`).
+- `columnheader` cells carry real text (`MonthGrid`, `Calendar`: visible short name `aria-hidden`, full name `sr-only`).
+- Every dialog and sheet has a name: `Dialog` is `aria-labelledby` its title; pass `label` to `Sheet`. A menu holds only menu items (`Notice role="none"` inside `ActionMenu`).
+- Heading levels: kit panels use `h2` (`ResponsivePanel`, `RequestCard`, `StageBoard`); `EmptyState` takes `titleAs` (default `h4` for Gym, Coach screens pass `h2`).
+- `role="log"` goes on a `div` that contains the `ol` (chat thread, trainer and client).
+- The Coach shell puts its skip link in its own `nav` landmark; the client trainer pages (`#/trainer…`, `#/invite…`) sit in a `main` (`display: contents`).
+- `ScrollTabs` sets `aria-controls` only on the selected tab (its panel is the only one rendered).
+
+### Shared suite navigation
+
+One navigation pattern for every app of the suite (Gym, Coach, Apex, Nutrition, Learn):
+
+- Phone: `SuiteTabBar` (the app's own tabs + a trailing More tab). More opens a sheet: the app's secondary destinations, then the `Apps` row (`SuiteLauncherRow`, last row, opens the suite launcher), then the account block (`useSuiteAccount`: avatar, name, role, mode switch for trainer / admin, privacy note, Profile). Coach uses `TabBar` + `MoreMenu` with the same parts.
+- Desktop: `Rail` with `SuiteRailFoot` (app switch to Gym, Profile, Shell) and the Coach foot widgets (Live, bell).
+- App tone for the shell comes from `SUITE_TONE` (`components/suite/suiteTone.ts`); do not hard-code a hue in an app.
+- Help texts (Atlas) name the control "More" then "Apps", not an "Apps" button on the bar.
+
+### Chat dock (desktop only)
+
+`coach/chat/ChatDock.tsx`: from 1280 px, hidden on the Chat screen. A round button with the total unread (same number as the nav badge) and a 360 px glass panel (list, then one thread with the same ThreadView, composer and Share / Notes / reschedule extras). Session-only state (`dockStore`), the panel chunk loads on first open. The button sits at `--z-30`, below dialogs and sheets, so any open overlay covers it.
+
+## Switch controls: Segmented / Tabs / Chip (iteration 21)
+
+One family, styled only by tokens defined in `client/src/styles.css` (`--seg-*`, `--segb-*`, `--segs-*`, `--chip-*`, `--tab-*`). Brass Glass no longer overrides the family; to re-theme change the tokens (see `docs/THEME-SWAP.md`).
+
+- Geometry: `--seg-r-outer = --seg-r-inner + --seg-pad` (concentric radii), no double border, heights `--seg-h-md` (= `--tap-min`) and `--seg-h-sm`; `--chip-h = --seg-h-sm`. Focus ring is a box-shadow ring.
+- `Segmented`: `size`, `fill`, `stack`, `hug`, and `scroll` (horizontal overflow for many options). Counts go in the option label.
+- `Chip` / `ChipGroup`: `count` prop (rendered inside the label, accessible name "Declined 4"); `ChipGroup` has `scroll` and `fill`. Use `ChipGroup` instead of local wrapper CSS (`.sc-chips`, `.shp-chips`, `.lpk-chips` were removed).
+- `ScrollTabs` uses `--tab-*` tokens.
+- `IconTile` radius is a step of the `--r-*` scale chosen by size (`--tile-r`).
+- Selected segment colour: `color-mix(in srgb, var(--t-base) var(--seg-on-mix), var(--seg-on-base))`.
+- Guard: `tests/kit-guard.test.ts` forbids raw px radii/font sizes/hex and token-step px literals (also inside calc/max/clamp/shorthands) in the switch-control CSS.
+- Known non-migrated: legacy app classes in `styles.css` (`act-effort-seg`, `lens-seg`, `ch-filter-chips`, `eq-chip`, ...) outside coach; coach `Drawer` (`coach/layout/Layout.tsx`) is a coach-local dialog (candidate for kit `ResponsivePanel`); the program-editor `DayStrip` day-card tabs are deliberate.
+
+## One control-height scale (iteration 22)
+
+Every interactive control of the kit has ONE height, taken from one scale in `client/src/styles.css`. Rows that mix control types (a settings icon button, a text button, a Segmented, a Select, a SearchField) line up because they read the same token, not because someone matched pixels.
+
+| Step | Token        | px  | Use                                                                                                                 |
+| ---- | ------------ | --- | ------------------------------------------------------------------------------------------------------------------- |
+| `xs` | `--ctl-h-xs` | 28  | dense inline controls: small chips, `PresetChips size="xs"`, icon buttons inside list rows (`IconButton size="xs"`) |
+| `sm` | `--ctl-h-sm` | 36  | secondary tools, header wells (BackButton, bell), **default of Chip / PresetChips**                                 |
+| `md` | `--ctl-h-md` | 44  | **default of everything else** (= `--tap-min`, the touch target)                                                    |
+| `lg` | `--ctl-h-lg` | 52  | prominent actions, the sleep day picker (two-line cells)                                                            |
+
+Per step there are also `--ctl-px-*` (side padding), `--ctl-gap-*` (icon to label), `--ctl-fs-*` (font), `--ctl-icon-*` (icon size); `--ctl-gap` is the gap between sibling controls in a row.
+
+- **Same prop everywhere:** `size: 'sm' | 'md' | 'lg'` (plus `'xs'` on Button, Chip, PresetChips). Button (all variants, `IconButton` is square: width = height), Select / Field / TimeField, SearchField, Segmented, BackButton, ExportMenu, PresetChips, Chip. `ScrollTabs` is the `md` step (`--tab-h`).
+- **Geometry is the kit's, never a feature's.** Height is an explicit `height: var(--ctl-h)` (+ `min-height` so a column flex never squeezes it, `box-sizing: border-box`, `line-height: 1`): line-height and padding never change it. A size class (`.uibtn--sm`, `.uiseg--lg`, `.uichip--xs`) only sets the `--ctl-*` variables for that control; the component CSS reads them.
+- **Segmented:** the OUTER track is `--ctl-h`; the selected plate is `--ctl-h - 2 * --seg-pad`. The separate-button variant is `--ctl-h` per button.
+- **A row picks one step.** `ControlRow` (`size`, `alignEnd`) and the scope class `.ctl-row--{xs|sm|md|lg}` (works on any container, no layout) force every control inside to that step, whatever size prop a member has. The coach `Toolbar` and `Header` actions are `md` rows, so a toolbar cannot mix heights. For a bespoke container add `ctl-row--md` to its class list (done for `.programs-top` / `.pg-home-head`).
+- **Touch targets:** `md` (44) is the default; do not shrink controls on a phone, do not stack `xs`/`sm` icon buttons as the only target of an action on a phone.
+- **Exempt (not row controls):** the Switch toggle track, NumberStepper tiles, calendar day cells, the tab bar / rail items, cards and list rows, `Button variant="link"` (a text run, `min-height: --ctl-h-xs`), the milestone dots on the session rail, textarea / `Textarea`.
+- **`flush`:** `Button flush` removes the side padding for a value or name set into a dense row; the height still comes from the scale.
+- **Guards:** `client/src/components/ui/controlScale.test.ts` (tokens resolve to px, steps ascend, every kit control reads `--ctl-h`, every size class and row scope exists; no browser) and `tests/kit-guard.test.ts` "control-height guard" (feature CSS may not set `height` / `min-height` / `max-height` / `line-height` / `padding` on a `.ui*` control; the short allow-list there names each exception and why). Storybook: `Kit/ControlHeights` (every control at sm / md / lg in one row), `Kit/ControlRow`.
+- Migration done in iteration 22: `Chip size="sm"` (old 28) became `size="xs"`, the Chip default (old md 36) is now `sm`; Button heights were 36 / 46 / 60, now 36 / 44 / 52 (`xs` 28 added); Segmented md outer height was 52, now 44; Field was 50, now 44; SearchField 44, TimeField sm 38 became 36.
+- **Iteration 24.** Coach has no overlay of its own: every coach panel is the kit `Sheet` (via `SidePanel`), coach differs only through theme tokens. New kit pieces only where nothing fitted: `useFitCount` (measured "+N" strips), `Select labelInline` (inline field name), `--ctl-lh` (line-height that never clips descenders in Segmented / Chip), `WeekdayToggle` static tiles, `InfoTable` row `className`. Read-only facts are always `InfoTable`.
+
+## Iteration 25 notes
+
+- **LiveWidget ("Training now" popover)** is a kit `Popover` (400 px) with a flat `GroupedList` per group (no card inside the card), `ListRow` per person (avatar, one-line name, one-line meta "place · since HH:MM", no chevron: the whole row is the hover/press target and only exists as a button when it navigates) and a `SeverityDot` with the elapsed time on the right (live = ok, offline = illness, finished = neutral). Group heads are `SectionLabel`s; the privacy footer is `--fs-12`, muted.
+- **Agenda** is the new name of the trainer's Today (`#/c/agenda`; `#/c/today` still opens it). Icon `calendar-check` from the kit registry. The member app's Today is unchanged.
+- **No sample data in runtime code.** `tests/kit-guard.test.ts` fails if a runtime file imports a `__fixtures__` module or a fixture file, or mentions the removed demo switches. See `docs/COACH-BACKEND.md` section 8.

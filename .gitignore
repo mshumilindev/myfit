@@ -52,3 +52,34 @@ assets/exercise-images/*.log
 # Storybook static build
 storybook-static/
 client/storybook-static/
+
+# --- Local scratch / generated output (iter14 hygiene): `git add -A` must never stage these ---
+# Design-lab renders (multi-GB PNG/tgz output). Sources under client/design-lab/ stay trackable.
+client/design-lab/out/
+client/design-lab/**/*.tgz
+# Screenshot / render dumps
+/_shots/
+/_vb_m89/
+/_wctx2/
+/_audit_tmp/
+/.scratch/
+/Claude outputs/
+# Storybook scratch builds and packed archives
+/sb-*/
+/sb-*.tgz
+sb-*.log
+*.tgz
+*.tar.gz
+# Parked files awaiting manual deletion (no delete permission in agent sandboxes)
+_to_delete/
+**/_to_delete/
+# Chronic-conditions / dist-slim scratch
+client/.chronic-out/
+client/.chronic-real/
+client/.dist-slim.tgz
+# Python caches
+__pycache__/
+*.pyc
+# Playwright scratch
+tests/e2e/.artifacts/
+client/dist-e2e*/

@@ -1484,7 +1484,7 @@ function OneRmWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           liftChips.length > 0 ? (
             <div className="ul-flex ug-6 ul-wrap">
               {liftChips.map((k) => (
-                <Chip key={k} size="sm" selected={set.lift === k} onClick={() => pick(k)}>
+                <Chip key={k} size="xs" selected={set.lift === k} onClick={() => pick(k)}>
                   {s.liftName[k]}
                 </Chip>
               ))}
@@ -2455,7 +2455,7 @@ function RepPrWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         options.length > 1 ? (
           <div className="ul-flex ug-6 ul-wrap">
             {options.map((k) => (
-              <Chip key={k} size="sm" selected={k === key} onClick={() => setSel(k)}>
+              <Chip key={k} size="xs" selected={k === key} onClick={() => setSel(k)}>
                 {s.liftName[k]}
               </Chip>
             ))}
@@ -2630,7 +2630,7 @@ const stalledLifts: WidgetDef = {
             <WidgetList
               rows={stalled.slice(0, 2).map((x) => ({
                 label: <TwoLine title={exName(x.name, locale)} sub={s.sessionsDot(x.n, set(x))} />,
-                value: <Chip size="sm">{x.swap ? s.swapShort : s.deloadShort}</Chip>,
+                value: <Chip size="xs">{x.swap ? s.swapShort : s.deloadShort}</Chip>,
               }))}
             />
           </div>
@@ -2761,7 +2761,7 @@ function SmartSwapWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const chips = (
     <div className="ul-flex ug-6 ul-wrap">
       {muscles.map((m) => (
-        <Chip key={m} size="sm">
+        <Chip key={m} size="xs">
           {m}
         </Chip>
       ))}

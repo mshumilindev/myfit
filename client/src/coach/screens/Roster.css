@@ -1,0 +1,66 @@
+/* Roster screen. Layout widths come from the layout kit; tokens only. */
+.ro-list,
+.ro-detail,
+.ro-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-width: 0;
+}
+.ro-detail {
+  position: sticky;
+  top: var(--co-gut);
+}
+.ro-grow {
+  flex: 1 1 auto;
+}
+.ro-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-8);
+}
+.ro-btns {
+  display: flex;
+  padding-bottom: var(--s-16);
+}
+.ro-det-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-12) var(--s-16);
+  margin-bottom: var(--s-16);
+}
+.ro-det-id {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 var(--co-basis-s);
+  min-width: 0;
+}
+.ro-det-id b {
+  font-size: var(--fs-20);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.ro-det-id small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+}
+.ro-det-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.ro-sig {
+  margin: var(--s-16) 0 0;
+  font-size: var(--fs-15);
+}
+.ro-how {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+
+/* The strip with a "+N" bubble spreads its bubbles over the whole row: no empty gap before the edge. */
+.ro-strip--full {
+  justify-content: space-between;
+}

@@ -1,0 +1,104 @@
+.uicfx-dialog {
+  max-width: 460px;
+  padding: var(--s-24);
+}
+.uicfx {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-width: 0;
+}
+.uicfx-title {
+  display: flex;
+  align-items: center;
+  gap: var(--s-10);
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-20);
+  font-weight: 600;
+  line-height: 1.25;
+}
+.uicfx-title .ui-icon {
+  flex: none;
+  color: var(--color-danger);
+}
+.uicfx--calm .uicfx-title .ui-icon {
+  color: var(--color-accent-text);
+}
+.uicfx-body {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-15);
+  line-height: 1.5;
+}
+.uicfx-quote {
+  margin: 0;
+  padding: var(--s-12) var(--s-16);
+  border-left: 3px solid var(--color-divider);
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  overflow-wrap: anywhere;
+}
+/* Two lines; the clamp sits on an unpadded inner box so a third line never peeks through the padding. */
+.uicfx-quote-t {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.uicfx-fx {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.uicfx-fx li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-10);
+  color: var(--color-text);
+  font-size: var(--fs-14);
+  line-height: 1.4;
+}
+.uicfx-fx .ui-icon {
+  flex: none;
+  margin-top: var(--s-2);
+  color: var(--color-text-muted);
+}
+.uicfx-check {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  min-height: var(--tap-min);
+  font-size: var(--fs-15);
+}
+.uicfx-small {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.4;
+}
+.uicfx-small .ui-icon {
+  flex: none;
+  margin-top: var(--s-2);
+}
+.uicfx-act {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--s-12);
+}
+.uicfx-sheet .uicfx {
+  padding: var(--s-4) var(--s-16) var(--s-16);
+}
+.uicfx-sheet .uicfx-act {
+  flex-direction: column-reverse;
+}
+.uicfx-sheet .uicfx-act .uibtn {
+  width: 100%;
+}

@@ -1,0 +1,284 @@
+/* Client 360 shell. Tokens only. */
+.c3-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-8);
+  min-width: 0;
+}
+.c3-sub span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.c3-panel {
+  min-width: 0;
+}
+.c3-main,
+.c3-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-width: 0;
+}
+.c3-t {
+  display: block;
+  font-size: var(--fs-16);
+}
+.c3-m {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  line-height: 1.4;
+}
+.c3-h {
+  margin: var(--s-8) 0;
+  font-size: var(--fs-22);
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.c3-needs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-8);
+}
+.c3-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+  margin-top: var(--s-12);
+}
+.c3-none {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-8);
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+}
+/* ---- Overview (S-03): today row, needs card, side column ---------------------------------------------------- */
+.c3-meta {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.c3-body {
+  max-width: 62ch;
+  font-size: var(--fs-15);
+  line-height: 1.45;
+}
+.c3-att .c3-h {
+  font-size: var(--fs-24);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.c3-att .c3-btns {
+  padding-top: var(--s-16);
+  margin-top: var(--s-16);
+  border-top: var(--co-hair) solid var(--color-divider);
+}
+.c3-metric {
+  display: grid;
+  grid-template-columns: minmax(0, var(--co-basis-m)) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--s-24);
+  margin-top: var(--s-16);
+  padding-top: var(--s-16);
+  border-top: var(--co-hair) solid var(--color-divider);
+}
+@media (max-width: 767px) {
+  .c3-metric {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-12);
+  }
+}
+.c3-aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-width: 0;
+}
+.c3-days-n {
+  margin-top: var(--s-12);
+}
+.c3-group {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  margin-top: var(--s-8);
+}
+.c3-reqs {
+  display: grid;
+  gap: var(--s-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Width of the trend cell; the sparkline itself is the kit's WidgetSpark. */
+.c3-spark {
+  display: block;
+  width: var(--co-thumb);
+}
+
+/* ---- Workouts / Strength / Decisions tabs (layout only) ---------------------------------------------------- */
+.c3t {
+  max-width: 100%;
+}
+.c3t-grp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.c3t-grp + .c3t-grp {
+  margin-top: var(--s-16);
+}
+.c3t-grp-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4) var(--s-12);
+  margin: 0;
+  font-size: var(--fs-15);
+  font-weight: 600;
+}
+.c3t-grp-h small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  font-weight: 400;
+}
+.c3t-dt {
+  display: flex;
+  flex-direction: column;
+  min-width: var(--co-chip-min);
+  padding-inline-end: var(--s-8);
+  line-height: 1.25;
+}
+.c3t-dt small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.c3t-sub {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-4) var(--s-8);
+}
+.c3t-trail {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+.c3t-adh {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+.c3t-adh small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-min);
+}
+.c3t-pend {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-6);
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+}
+.c3t-hist-a {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-8) var(--s-12);
+}
+.c3t-more {
+  display: flex;
+  justify-content: flex-start;
+}
+.c3t-recap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+.c3t-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--co-thumb), 1fr));
+  gap: var(--s-12);
+  margin: 0;
+}
+.c3t-facts dt {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.c3t-facts dd {
+  margin: 0;
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+.c3t-ro {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+}
+.c3t-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.c3t-tools > :first-child {
+  flex: 1 1 var(--co-basis-l);
+  min-width: 0;
+}
+.c3t-spark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+.c3t-chg {
+  min-width: var(--co-chip-min);
+  text-align: end;
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+.c3t-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+}
+
+/* Per-session table: dates stay on one line; tighter cells so five columns fit a phone without a sideways scroll. */
+.c3t-nw {
+  white-space: nowrap;
+}
+.c3t-recap .uidt-table th,
+.c3t-recap .uidt-table td {
+  padding-inline: var(--s-8);
+}
+.c3t-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--s-16);
+}
+.c3t-grid-x {
+  min-width: 0;
+}
+.c3t-grid .uidt-table th,
+.c3t-grid .uidt-table td {
+  padding-inline: var(--s-8);
+}
+
+/* the second line of an InfoTable label (an injury's note): muted, under the name */
+.c3-info-sub {
+  display: block;
+  color: var(--color-text-faint);
+  font-size: var(--fs-13);
+}
+
+/* Training days: read-only day marks (kit Tag), the trainer's days solid, the rest quiet. Layout only. */
+.c3-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-6);
+}

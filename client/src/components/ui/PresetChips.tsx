@@ -7,7 +7,9 @@ export interface PresetChip {
   label: ReactNode;
   selected?: boolean;
   disabled?: boolean;
-  onClick: () => void;
+  /** Spoken name of a read-only chip ("Tue, session with the trainer"). */
+  ariaLabel?: string;
+  onClick?: () => void;
 }
 
 export interface PresetChipsProps {
@@ -21,7 +23,13 @@ export interface PresetChipsProps {
   layout?: 'wrap' | 'scroll' | 'grid';
   /** Accessible name of the group. */
   label?: string;
-  size?: 'sm' | 'md';
+  /** Control scale step (styles.css --ctl-h-*): xs 28 / sm 36 (default) / md 44 / lg 52. */
+  size?: 'xs' | 'sm' | 'md' | 'lg';
+  /**
+   * Show-only: the chips are list items, not buttons (a week with its training days marked, nothing
+   * to press). `selected` marks the on ones; give each an `ariaLabel` to say what "on" means.
+   */
+  readOnly?: boolean;
 }
 
 /**
@@ -34,8 +42,28 @@ export function PresetChips({
   tone = 'accent',
   layout = 'wrap',
   label,
-  size = 'md',
+  size = 'sm',
+  readOnly = false,
 }: PresetChipsProps) {
+  if (readOnly) {
+    return (
+      <ul
+        className={`uipc uipc--${layout} uipc--${size} uipc--static ${toneClass(tone)}`}
+        aria-label={label}
+        style={layout === 'grid' ? ({ '--uipc-cols': items.length } as CSSProperties) : undefined}
+      >
+        {items.map((it) => (
+          <li
+            key={it.id}
+            className={`uipc-chip${it.selected ? ' is-on' : ''}`}
+            aria-label={it.ariaLabel}
+          >
+            {it.label}
+          </li>
+        ))}
+      </ul>
+    );
+  }
   return (
     <div
       className={`uipc uipc--${layout} uipc--${size} ${toneClass(tone)}`}

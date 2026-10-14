@@ -1,0 +1,26 @@
+/* ResponsivePanel: layout only (the Popover / Sheet own the glass surface). Tokens only. */
+.rpanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  padding: var(--s-16);
+  min-width: 0;
+}
+.rpanel-t {
+  margin: 0;
+  font-size: var(--fs-16);
+  font-weight: 600;
+}
+.rpanel-b {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  min-width: 0;
+}
+.rpanel-f {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-8);
+}

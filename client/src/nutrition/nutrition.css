@@ -46,8 +46,7 @@
    dialogs) — NOT the shared suite chrome (app-brand header, apex-nav, AppRail,
    sheet grabber/close), which must keep gym's padding. */
 .app-nutrition .apex-scroll *,
-.app-nutrition .scrim *,
-.app-nutrition .snack * {
+.app-nutrition .scrim * {
   margin: 0;
   padding: 0;
 }
@@ -92,25 +91,18 @@
 .app-nutrition .screen {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-4) var(--space-4) 24px;
+  padding: var(--space-4) var(--space-4) var(--s-24);
 }
 .app-nutrition .rail {
   display: none;
 }
 @media (min-width: 720px) {
+  /* Rail geometry (display aside) is the shared kit/styles.css one: identical in every app, so
+     switching apps never moves the buttons. Only the skin differs here. */
   .app-nutrition .rail {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 74px;
-    flex: none;
-    padding: var(--space-6) 0;
-    gap: var(--space-2);
     background: var(--surface);
     box-shadow: 1px 0 0 var(--hairline);
-    position: sticky;
-    top: 0;
-    height: 100vh;
   }
   .app-nutrition .main {
     max-width: none;
@@ -127,27 +119,9 @@
     display: none !important;
   }
 }
-.app-nutrition .rail-brand {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-m);
-  border: 1px solid var(--acc);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--fs-20);
-  margin-bottom: var(--space-2);
-}
 .app-nutrition .rail-item {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  border-radius: var(--radius-m);
+  /* Skin only; size, radius and layout come from the shared rail (labelled 72x64 / compact 44). */
   color: var(--dim);
-  background: none;
-  border: none;
 }
 .app-nutrition .rail-item.active {
   background: var(--acc-900);
@@ -156,21 +130,6 @@
 .app-nutrition .rail-item:not(.active):hover {
   background: color-mix(in srgb, var(--c-ffffff) 4%, transparent);
   color: var(--muted);
-}
-.app-nutrition .rail-item.add {
-  background: var(--acc);
-  color: var(--c-ffffff);
-  margin: var(--space-2) 0;
-}
-.app-nutrition .rail-item.add:hover {
-  background: var(--acc-600);
-}
-.app-nutrition .rail-foot {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
 }
 .app-nutrition .avatar {
   border-radius: var(--r-round);
@@ -269,7 +228,7 @@
   align-items: center;
   background: var(--surface);
   box-shadow: 0 -1px 0 var(--hairline);
-  padding: 8px 8px max(8px, env(safe-area-inset-bottom));
+  padding: var(--s-8) var(--s-8) max(var(--s-8), env(safe-area-inset-bottom));
   z-index: 8;
 }
 .app-nutrition .tabbar .tab {
@@ -645,7 +604,7 @@
   height: 4px;
   border-radius: var(--r-2);
   background: var(--hairline);
-  margin: 2px auto var(--space-4);
+  margin: var(--s-2) auto var(--space-4);
 }
 .app-nutrition .dialog {
   width: calc(100% - 32px);
@@ -664,27 +623,6 @@
   color: var(--muted);
   font-size: var(--fs-14);
   margin-bottom: var(--space-4);
-}
-.app-nutrition .snack {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 96px;
-  background: var(--surface-2);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-m);
-  padding: var(--space-3) var(--space-4);
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  z-index: var(--z-30);
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--c-000000) 40%, transparent);
-}
-.app-nutrition .snack .u {
-  color: var(--acc-200);
-  font-weight: 600;
-  background: none;
-  border: none;
 }
 .app-nutrition .empty,
 .app-nutrition .failed {
@@ -755,7 +693,7 @@
   background: var(--surface-2);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-m);
-  padding: 10px var(--space-3);
+  padding: var(--s-10) var(--space-3);
   color: var(--muted);
   font-size: var(--fs-13);
   margin-bottom: var(--space-3);
@@ -1336,7 +1274,7 @@
   height: 4px;
   border-radius: var(--r-2);
   background: var(--hairline);
-  margin: 2px auto var(--space-4);
+  margin: var(--s-2) auto var(--space-4);
 }
 .app-nutrition .dialog {
   width: calc(100% - 32px);
@@ -1358,25 +1296,6 @@
 }
 .app-nutrition .scrim.center {
   align-items: center;
-}
-.app-nutrition .snack {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 88px;
-  background: var(--surface-2);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-m);
-  padding: var(--space-3) var(--space-4);
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  z-index: var(--z-30);
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--c-000000) 40%, transparent);
-}
-.app-nutrition .snack .u {
-  color: var(--acc-200);
-  font-weight: 600;
 }
 .app-nutrition .empty,
 .app-nutrition .failed {
@@ -1503,7 +1422,7 @@
   width: 100%;
 }
 .app-nutrition .apex-scroll {
-  padding: 12px 16px calc(96px + env(safe-area-inset-bottom, 0px));
+  padding: var(--s-12) var(--s-16) calc(96px + env(safe-area-inset-bottom, 0px));
 }
 @media (min-width: 720px) {
   .app-nutrition .apex-scroll {
@@ -1539,7 +1458,6 @@
   display: inline-flex;
   align-items: center;
   gap: var(--s-8);
-  height: 46px;
   padding: 0 var(--s-24);
   border: none;
   border-radius: var(--r-pill);
@@ -1592,8 +1510,8 @@
   }
 }
 
-/* Snack toast clears the pill + nav. */
-.app-nutrition .snack {
+/* The undo toast (kit UndoToast) clears the pill + nav. */
+.app-nutrition .uiundo--fixed {
   bottom: calc(120px + env(safe-area-inset-bottom, 0px));
 }
 
@@ -1622,7 +1540,7 @@
   background: var(--color-surface);
   border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   box-shadow: var(--shadow-lg);
-  padding: var(--space-4) 18px calc(22px + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-4) var(--s-18) calc(22px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: var(--space-4);

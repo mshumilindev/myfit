@@ -36,8 +36,8 @@ export const APP_TOPICS_MORE: AppTopic[] = [
     id: 'app_tour',
     ask: ['How do I use this app?', 'Як користуватися цим додатком?'],
     answer: [
-      'Spotter in a nutshell: the bottom bar has Today (your plan, your history and me), Overview (progress, records, programs, goals, playbook, exercises), the “+” in the middle (start a session, an auto session, an activity, sleep and health, or log a past workout), Gyms (your gyms and their equipment) and Apps (Apex, Nutrition, Learn and your profile). Log your sets as you train and I track every lift from them — ask me anything, or ask me for tips.',
-      'Spotter коротко: у нижній панелі — «Сьогодні» (план, історія і я), «Огляд» (прогрес, рекорди, програми, цілі, плейбук, вправи), «+» посередині (почати тренування, авто-тренування, активність, сон і здоров’я або записати минуле), «Зали» (твої зали та їхнє обладнання) і «Застосунки» (Apex, «Харчування», «Навчання» і твій профіль). Записуй підходи під час тренування — і я відстежуватиму кожну вправу; питай мене що завгодно або попроси поради.',
+      'Spotter in a nutshell: the bottom bar has Today (your plan, your history and me), Overview (progress, records, programs, goals, playbook, exercises), the “+” in the middle (start a session, an auto session, an activity, sleep and health, or log a past workout), Gyms (your gyms and their equipment) and More (the Apps — Apex, Nutrition, Learn — and your profile). Log your sets as you train and I track every lift from them — ask me anything, or ask me for tips.',
+      'Spotter коротко: у нижній панелі — «Сьогодні» (план, історія і я), «Огляд» (прогрес, рекорди, програми, цілі, плейбук, вправи), «+» посередині (почати тренування, авто-тренування, активність, сон і здоров’я або записати минуле), «Зали» (твої зали та їхнє обладнання) і «Ще» («Застосунки» — Apex, «Харчування», «Навчання» — і твій профіль). Записуй підходи під час тренування — і я відстежуватиму кожну вправу; питай мене що завгодно або попроси поради.',
     ],
     chips: ['app_tips', 'app_start_session', 'app_log_set'],
   },
@@ -147,8 +147,8 @@ export const APP_TOPICS_MORE: AppTopic[] = [
     id: 'app_switch_apps',
     ask: ['How do I switch between the apps?', 'Як перемикатися між застосунками?'],
     answer: [
-      'Tap “Apps” at the right end of the bottom bar (or “Gym” next to the Spotter logo at the top) to open “Switch app”: Gym (your training), Apex (challenges, ranks, awards), Nutrition, Learn and your profile. It’s one account and one training history across all of them.',
-      'Натисни «Застосунки» праворуч у нижній панелі (або «Зал» біля логотипа Spotter угорі) — відкриється «Змінити додаток»: «Зал» (тренування), Apex (челенджі, розряди, нагороди), «Харчування», «Навчання» і твій профіль. Один акаунт і одна історія тренувань для всіх.',
+      'Tap “More” at the right end of the bottom bar, then “Apps” (or “Gym” next to the Spotter logo at the top) to open “Switch app”: Gym (your training), Apex (challenges, ranks, awards), Nutrition, Learn and your profile. It’s one account and one training history across all of them.',
+      'Натисни «Ще» праворуч у нижній панелі, потім «Застосунки» (або «Зал» біля логотипа Spotter угорі) — відкриється «Змінити додаток»: «Зал» (тренування), Apex (челенджі, розряди, нагороди), «Харчування», «Навчання» і твій профіль. Один акаунт і одна історія тренувань для всіх.',
     ],
     chips: ['app_apex', 'app_nutrition', 'app_learn'],
   },
@@ -363,8 +363,8 @@ export const APP_TIPS: AppTip[] = [
   },
   {
     text: [
-      'The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.',
-      'Кнопка «Застосунки» внизу перемикає між «Зал», Apex, «Харчування», «Навчання» і твоїм профілем.',
+      '“More” → “Apps” at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.',
+      '«Ще» → «Застосунки» внизу перемикає між «Зал», Apex, «Харчування», «Навчання» і твоїм профілем.',
     ],
     about: 'app_switch_apps',
   },

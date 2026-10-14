@@ -1,0 +1,21 @@
+/* ExportMenu: layout only. Tokens only. */
+.exm {
+  display: inline-flex;
+}
+.exm-p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.exm-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+}
+.exm-note > svg,
+.exm-note .ph {
+  flex: none;
+  margin-top: var(--s-2);
+}

@@ -5305,8 +5305,8 @@ export const DICT: Record<string, string> = {
     'U wielu trenujących to normalny ślad wzrostu, a nie problem zdrowotny.',
   'Any tips for using the app?': 'Masz wskazówki, jak korzystać z aplikacji?',
   'How do I use this app?': 'Jak korzystać z tej aplikacji?',
-  'Spotter in a nutshell: the bottom bar has Today (your plan, your history and me), Overview (progress, records, programs, goals, playbook, exercises), the “+” in the middle (start a session, an auto session, an activity, sleep and health, or log a past workout), Gyms (your gyms and their equipment) and Apps (Apex, Nutrition, Learn and your profile).':
-    'Spotter w pigułce: na dolnym pasku jest Dziś (twój plan, historia i ja), Przegląd (postępy, rekordy, programy, cele, playbook, ćwiczenia), „+” pośrodku (rozpocznij trening, auto trening, aktywność, sen i zdrowie albo zapisz przeszły trening), Siłownie (twoje siłownie i ich sprzęt) i Aplikacje (Apex, Odżywianie, Nauka i twój profil).',
+  'Spotter in a nutshell: the bottom bar has Today (your plan, your history and me), Overview (progress, records, programs, goals, playbook, exercises), the “+” in the middle (start a session, an auto session, an activity, sleep and health, or log a past workout), Gyms (your gyms and their equipment) and More (the Apps — Apex, Nutrition, Learn — and your profile).':
+    'Spotter w pigułce: na dolnym pasku jest Dziś (twój plan, historia i ja), Przegląd (postępy, rekordy, programy, cele, playbook, ćwiczenia), „+” pośrodku (rozpocznij trening, auto trening, aktywność, sen i zdrowie albo zapisz przeszły trening), Siłownie (twoje siłownie i ich sprzęt) i Więcej (Aplikacje — Apex, Odżywianie, Nauka — i twój profil).',
   'Log your sets as you train and I track every lift from them — ask me anything, or ask me for tips.':
     'Zapisuj serie w trakcie treningu, a ja będę śledzić każde ćwiczenie — pytaj mnie o cokolwiek albo poproś o wskazówki.',
   'How do I start a session?': 'Jak rozpocząć trening?',
@@ -5386,8 +5386,8 @@ export const DICT: Record<string, string> = {
   'Trainers add clients with “Add client” — the client opens the invite link to join — and see their training read-only.':
     'Trenerzy dodają klientów przez „Dodaj klienta” — klient otwiera link z zaproszeniem, by dołączyć — i widzą ich treningi tylko do odczytu.',
   'How do I switch between the apps?': 'Jak przełączać się między aplikacjami?',
-  'Tap “Apps” at the right end of the bottom bar (or “Gym” next to the Spotter logo at the top) to open “Switch app”: Gym (your training), Apex (challenges, ranks, awards), Nutrition, Learn and your profile.':
-    'Stuknij „Aplikacje” na prawym końcu dolnego paska (albo „Siłownia” obok logo Spotter u góry), żeby otworzyć „Zmień aplikację”: Siłownia (twoje treningi), Apex (wyzwania, rangi, odznaki), Odżywianie, Nauka i twój profil.',
+  'Tap “More” at the right end of the bottom bar, then “Apps” (or “Gym” next to the Spotter logo at the top) to open “Switch app”: Gym (your training), Apex (challenges, ranks, awards), Nutrition, Learn and your profile.':
+    'Stuknij „Więcej” na prawym końcu dolnego paska, potem „Aplikacje” (albo „Siłownia” obok logo Spotter u góry), żeby otworzyć „Zmień aplikację”: Siłownia (twoje treningi), Apex (wyzwania, rangi, odznaki), Odżywianie, Nauka i twój profil.',
   'It’s one account and one training history across all of them.':
     'To jedno konto i jedna historia treningów we wszystkich.',
   'Where do I see my progress and records?': 'Gdzie zobaczę swoje postępy i rekordy?',
@@ -5453,8 +5453,8 @@ export const DICT: Record<string, string> = {
     'Dzwonek u góry zbiera twoje rekordy, serie i podsumowania; włącz powiadomienia push, gdy zapytam, żeby sygnały odpoczynku docierały też w tle.',
   'After a session, “Share workout” turns it into a Story or Square image.':
     'Po treningu „Udostępnij trening” zrobi z niego obrazek w formacie Story albo kwadrat.',
-  'The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
-    'Przycisk „Aplikacje” na dole przełącza między Siłownia, Apex, Odżywianie, Nauka i twoim profilem.',
+  '“More” → “Apps” at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
+    '„Więcej” → „Aplikacje” na dole przełącza między Siłownia, Apex, Odżywianie, Nauka i twoim profilem.',
   'Open Apps → Apex for challenges, strength ranks and awards.':
     'Otwórz Aplikacje → Apex — tam są wyzwania, rangi siłowe i odznaki.',
   'Apps → Learn lists how-to lessons for every part of Spotter (the videos are on their way).':
@@ -5508,8 +5508,8 @@ export const DICT: Record<string, string> = {
     '• Dzwonek u góry zbiera twoje rekordy, serie i podsumowania; włącz powiadomienia push, gdy zapytam, żeby sygnały odpoczynku docierały też w tle.',
   '• After a session, “Share workout” turns it into a Story or Square image.':
     '• Po treningu „Udostępnij trening” zrobi z niego obrazek w formacie Story albo kwadrat.',
-  '• The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
-    '• Przycisk „Aplikacje” na dole przełącza między Siłownia, Apex, Odżywianie, Nauka i twoim profilem.',
+  '• “More” → “Apps” at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
+    '• „Więcej” → „Aplikacje” na dole przełącza między Siłownia, Apex, Odżywianie, Nauka i twoim profilem.',
   '• Open Apps → Apex for challenges, strength ranks and awards.':
     '• Otwórz Aplikacje → Apex — tam są wyzwania, rangi siłowe i odznaki.',
   '• Apps → Learn lists how-to lessons for every part of Spotter (the videos are on their way).':

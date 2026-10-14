@@ -264,7 +264,7 @@ export function ExerciseHistoryView({
               );
             })()}
             <div className="ul-flex ua-center ug-8 umt-4">
-              <Chip size="sm">{t.exProgressSwitch}</Chip>
+              <Chip size="xs">{t.exProgressSwitch}</Chip>
             </div>
           </div>
           <Notice tone="neutral" icon="info">

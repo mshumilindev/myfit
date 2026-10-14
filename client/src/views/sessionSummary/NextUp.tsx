@@ -366,13 +366,7 @@ export function NextUpCard({ m, web = false }: { m: NextUpModel; web?: boolean }
           </h2>
           <p className="nu-cs">{t.nuRunningSub}</p>
         </div>
-        <IconButton
-          icon="x"
-          size="sm"
-          label={t.nuCancelAria(name)}
-          className="nu-x"
-          onClick={m.cancelLive}
-        />
+        <IconButton icon="x" label={t.nuCancelAria(name)} className="nu-x" onClick={m.cancelLive} />
       </section>
     );
   }
@@ -432,7 +426,6 @@ export function NextUpCard({ m, web = false }: { m: NextUpModel; web?: boolean }
           </p>
           <IconButton
             icon="dots-three"
-            size="sm"
             className="nu-more"
             label={t.nuMoreAria}
             aria-haspopup="dialog"

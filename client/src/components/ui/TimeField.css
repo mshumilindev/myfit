@@ -3,12 +3,6 @@
   font-variant-numeric: tabular-nums;
   color-scheme: dark;
 }
-.uitime--sm .uifield-box {
-  min-height: 38px;
-  padding: 0 var(--s-10);
+.uitime.uifield--sm .uifield-box {
   border-radius: var(--radius-md);
-}
-.uitime--sm .uifield-in {
-  height: 36px;
-  font-size: var(--fs-13);
 }

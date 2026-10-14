@@ -13,7 +13,6 @@
 }
 
 .toast,
-.snackbar,
 .notice {
   display: flex;
   align-items: center;
@@ -29,7 +28,6 @@
   pointer-events: auto;
 }
 .toast > i,
-.snackbar > i,
 .notice > i {
   font-size: var(--fs-17);
   flex: none;
@@ -56,12 +54,6 @@
 .toast.update > i {
   color: var(--color-accent);
 }
-.snackbar {
-  border-left-color: var(--color-accent);
-}
-.snackbar > i {
-  color: var(--color-accent);
-}
 .notice {
   border-left-color: var(--color-accent);
 }
@@ -73,14 +65,6 @@
 .toast .update-text {
   flex: 1;
 }
-.snackbar .snack-text {
-  flex: 1;
-}
-.snackbar .snack-count {
-  font-size: var(--fs-11);
-  color: var(--color-neutral-600);
-  font-variant-numeric: tabular-nums;
-}
 
 /* --- Sheets & dialogs ----------------------------------------------------- */
 
@@ -91,6 +75,9 @@
   z-index: var(--z-50);
   animation: scrimIn 0.22s ease both;
   will-change: opacity;
+}
+.scrim.scrim--light {
+  background: color-mix(in srgb, var(--c-0a0b0d) 22%, transparent);
 }
 .scrim.scrim-closing {
   animation: scrimOut 0.22s ease forwards;
@@ -399,4 +386,25 @@
   height: var(--s-28);
   background: inherit;
   pointer-events: none;
+}
+
+/* The drawer itself takes focus when it opens (modal focus move-in); it is not a control, so no ring. */
+.sheet:focus {
+  outline: none;
+}
+
+/* Reduced motion: no slides, fades or loops; state changes are instant. */
+@media (prefers-reduced-motion: reduce) {
+  .scrim,
+  .scrim.scrim-closing,
+  .sheet,
+  .sheet.sheet-dragging,
+  .sheet.sheet-closing,
+  .sheet :is(div, header):has(> .uiback) {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
 }

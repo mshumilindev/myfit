@@ -1,0 +1,72 @@
+/* Chat dock (desktop only): layout only. Surfaces and type come from Card / IconButton / Badge. */
+.cd-dock {
+  position: fixed;
+  right: var(--co-dock-inset);
+  bottom: var(--co-dock-inset);
+  z-index: var(--z-30);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--s-12);
+  pointer-events: none;
+}
+.cd-dock > * {
+  pointer-events: auto;
+}
+.cd-fab {
+  position: relative;
+  display: inline-flex;
+}
+.cd-panel {
+  width: var(--co-dock-w);
+  height: min(var(--co-dock-h), calc(100dvh - var(--co-dock-clear) - var(--s-48)));
+  display: flex;
+}
+/* Not see-through in any theme: a near-opaque surface with a strong blur (glass.css adds the family tint). */
+.cd-panel .cd-card {
+  background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+  backdrop-filter: blur(32px) saturate(1.4);
+  -webkit-backdrop-filter: blur(32px) saturate(1.4);
+}
+.cd-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.cd-card .ch-card {
+  height: 100%;
+  border: 0;
+}
+.cd-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  padding: var(--s-16);
+  min-height: 0;
+  overflow-y: auto;
+}
+.cd-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-12);
+}
+.cd-title {
+  margin: 0;
+  font-size: var(--fs-18);
+}
+/* The thread bar is narrow here: name first, the buttons wrap to a second row. */
+.cd-card .ch-bar {
+  flex-wrap: wrap;
+  row-gap: var(--s-4);
+}
+.cd-card .ch-bar-id {
+  flex: 1 1 var(--co-basis-s);
+  min-width: var(--co-chip-min);
+}
+.cd-card .ch-bar .uibtn {
+  flex: none;
+}

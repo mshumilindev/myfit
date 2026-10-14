@@ -1,0 +1,18 @@
+/* ExerciseRow — layout only: the row is the kit ListRow, the picture the kit ExerciseThumb. */
+.uiex-badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--s-32);
+  padding: var(--s-4) var(--s-8);
+  border: 1px solid var(--color-accent-line, var(--color-border));
+  border-radius: var(--r-pill);
+  color: var(--color-accent);
+  font-size: var(--fs-12);
+  font-weight: 700;
+}
+.uiex-sub,
+.uiex-rx {
+  display: block;
+}

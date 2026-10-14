@@ -8,6 +8,9 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { resolvePhoto, staticMapThumb } from '../data/gymProviders';
 import { HouseGraphic } from './HouseGraphic';
 
+/** Bundled with the app (public/gyms): the last step of the chain when `neutral` is set. */
+export const NEUTRAL_GYM = '/gyms/neutral-gym.svg';
+
 /** name|lat,lng → resolved photo url, for this page session. */
 const RESOLVED = new Map<string, string>();
 
@@ -18,6 +21,7 @@ export function GymThumb({
   size = 64,
   eager = false,
   boxed = false,
+  neutral = false,
 }: {
   name: string;
   lat: number;
@@ -29,6 +33,9 @@ export function GymThumb({
   /** Render inside its own size×size rounded box (list-row icons); otherwise the
    *  parent's CSS sizes the image (heroes, cards). */
   boxed?: boolean;
+  /** Offline-safe fallback (R-KIT-07): when no photo resolves, show the bundled neutral gym picture instead of an
+   *  OSM map tile (network) or the house graphic. Default false: the real app is unchanged. */
+  neutral?: boolean;
 }) {
   const key = `${name}|${lat},${lng}`;
   // Resolved photos are remembered for the session, so a gym seen once (a live
@@ -69,9 +76,13 @@ export function GymThumb({
     ) : (
       node
     );
+  if (unknown && neutral)
+    return box(<img className="lighten" src={NEUTRAL_GYM} alt="" loading="lazy" />);
   if (unknown) return box(<HouseGraphic size={size} />);
-  const map = staticMapThumb(lat, lng);
-  const src = photoUrl && !failed.has(photoUrl) ? photoUrl : !failed.has(map) ? map : null;
+  const map = neutral ? '' : staticMapThumb(lat, lng);
+  const src = photoUrl && !failed.has(photoUrl) ? photoUrl : map && !failed.has(map) ? map : null;
+  if (!src && neutral)
+    return box(<img className="lighten" src={NEUTRAL_GYM} alt="" loading="lazy" />);
   if (!src) return box(<HouseGraphic size={size} />);
   return box(
     <img

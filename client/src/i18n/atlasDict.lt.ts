@@ -5293,8 +5293,8 @@ export const DICT: Record<string, string> = {
     'Daugeliui sportuojančių tai normalus augimo ženklas, o ne sveikatos problema.',
   'Any tips for using the app?': 'Gal turi patarimų, kaip naudotis programėle?',
   'How do I use this app?': 'Kaip naudotis šia programėle?',
-  'Spotter in a nutshell: the bottom bar has Today (your plan, your history and me), Overview (progress, records, programs, goals, playbook, exercises), the “+” in the middle (start a session, an auto session, an activity, sleep and health, or log a past workout), Gyms (your gyms and their equipment) and Apps (Apex, Nutrition, Learn and your profile).':
-    'Spotter trumpai: apatinėje juostoje yra Šiandien (tavo planas, istorija ir aš), Apžvalga (progresas, rekordai, programos, tikslai, playbook, pratimai), „+“ viduryje (pradėti treniruotę, auto treniruotę, veiklą, miegą ir sveikatą ar įrašyti praeitą treniruotę), Salės (tavo salės ir jų įranga) ir Programos (Apex, Mityba, Mokymasis ir tavo profilis).',
+  'Spotter in a nutshell: the bottom bar has Today (your plan, your history and me), Overview (progress, records, programs, goals, playbook, exercises), the “+” in the middle (start a session, an auto session, an activity, sleep and health, or log a past workout), Gyms (your gyms and their equipment) and More (the Apps — Apex, Nutrition, Learn — and your profile).':
+    'Spotter trumpai: apatinėje juostoje yra Šiandien (tavo planas, istorija ir aš), Apžvalga (progresas, rekordai, programos, tikslai, playbook, pratimai), „+“ viduryje (pradėti treniruotę, auto treniruotę, veiklą, miegą ir sveikatą ar įrašyti praeitą treniruotę), Salės (tavo salės ir jų įranga) ir Daugiau (Programos — Apex, Mityba, Mokymasis — ir tavo profilis).',
   'Log your sets as you train and I track every lift from them — ask me anything, or ask me for tips.':
     'Užrašyk serijas treniruodamasis, o aš seksiu kiekvieną pratimą — klausk manęs ko nori arba paprašyk patarimų.',
   'How do I start a session?': 'Kaip pradėti treniruotę?',
@@ -5374,8 +5374,8 @@ export const DICT: Record<string, string> = {
   'Trainers add clients with “Add client” — the client opens the invite link to join — and see their training read-only.':
     'Treneriai prideda klientus per „Pridėti klientą“ — klientas atidaro kvietimo nuorodą ir prisijungia — ir mato jų treniruotes tik skaitymui.',
   'How do I switch between the apps?': 'Kaip perjungti programėles?',
-  'Tap “Apps” at the right end of the bottom bar (or “Gym” next to the Spotter logo at the top) to open “Switch app”: Gym (your training), Apex (challenges, ranks, awards), Nutrition, Learn and your profile.':
-    'Bakstelėk „Programos“ dešiniajame apatinės juostos gale (arba „Salė“ šalia Spotter logotipo viršuje), kad atidarytum „Keisti programą“: Salė (tavo treniruotės), Apex (iššūkiai, rangai, apdovanojimai), Mityba, Mokymasis ir tavo profilis.',
+  'Tap “More” at the right end of the bottom bar, then “Apps” (or “Gym” next to the Spotter logo at the top) to open “Switch app”: Gym (your training), Apex (challenges, ranks, awards), Nutrition, Learn and your profile.':
+    'Bakstelėk „Daugiau“ dešiniajame apatinės juostos gale, tada „Programos“ (arba „Salė“ šalia Spotter logotipo viršuje), kad atidarytum „Keisti programą“: Salė (tavo treniruotės), Apex (iššūkiai, rangai, apdovanojimai), Mityba, Mokymasis ir tavo profilis.',
   'It’s one account and one training history across all of them.':
     'Tai viena paskyra ir viena treniruočių istorija visose.',
   'Where do I see my progress and records?': 'Kur matyti mano progresą ir rekordus?',
@@ -5442,8 +5442,8 @@ export const DICT: Record<string, string> = {
     'Varpelis viršuje renka tavo rekordus, serijas ir suvestines; įjunk pranešimus, kai paklausiu, kad poilsio signalai pasiektų tave ir fone.',
   'After a session, “Share workout” turns it into a Story or Square image.':
     'Po treniruotės „Dalytis treniruote“ padarys iš jos Story ar kvadratinį paveikslėlį.',
-  'The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
-    'Mygtukas „Programos“ apačioje perjungia tarp Salė, Apex, Mityba, Mokymasis ir tavo profilio.',
+  '“More” → “Apps” at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
+    '„Daugiau“ → „Programos“ apačioje perjungia tarp Salė, Apex, Mityba, Mokymasis ir tavo profilio.',
   'Open Apps → Apex for challenges, strength ranks and awards.':
     'Atidaryk Programos → Apex — ten iššūkiai, jėgos rangai ir apdovanojimai.',
   'Apps → Learn lists how-to lessons for every part of Spotter (the videos are on their way).':
@@ -5497,8 +5497,8 @@ export const DICT: Record<string, string> = {
     '• Varpelis viršuje renka tavo rekordus, serijas ir suvestines; įjunk pranešimus, kai paklausiu, kad poilsio signalai pasiektų tave ir fone.',
   '• After a session, “Share workout” turns it into a Story or Square image.':
     '• Po treniruotės „Dalytis treniruote“ padarys iš jos Story ar kvadratinį paveikslėlį.',
-  '• The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
-    '• Mygtukas „Programos“ apačioje perjungia tarp Salė, Apex, Mityba, Mokymasis ir tavo profilio.',
+  '• “More” → “Apps” at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
+    '• „Daugiau“ → „Programos“ apačioje perjungia tarp Salė, Apex, Mityba, Mokymasis ir tavo profilio.',
   '• Open Apps → Apex for challenges, strength ranks and awards.':
     '• Atidaryk Programos → Apex — ten iššūkiai, jėgos rangai ir apdovanojimai.',
   '• Apps → Learn lists how-to lessons for every part of Spotter (the videos are on their way).':

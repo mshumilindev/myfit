@@ -5,6 +5,35 @@
  * Every push shows a notification — iOS revokes silent push subscriptions.
  */
 
+/* Q-17 quiet hours: the page keeps the setting in IndexedDB `spotter.prefs`. A Coach chat push inside the window still
+   shows (iOS revokes silent subscriptions) but without sound or vibration. */
+function readQuiet() {
+  return new Promise((resolve) => {
+    try {
+      const r = self.indexedDB.open('spotter.prefs', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('kv');
+      r.onerror = () => resolve(null);
+      r.onsuccess = () => {
+        try {
+          const g = r.result.transaction('kv', 'readonly').objectStore('kv').get('quiet');
+          g.onsuccess = () => resolve(g.result || null);
+          g.onerror = () => resolve(null);
+        } catch {
+          resolve(null);
+        }
+      };
+    } catch {
+      resolve(null);
+    }
+  });
+}
+function inQuiet(q, now) {
+  const c = q || { on: true, from: 1320, to: 420 };
+  if (!c.on || c.from === c.to) return false;
+  const m = now.getHours() * 60 + now.getMinutes();
+  return c.from < c.to ? m >= c.from && m < c.to : m >= c.from || m < c.to;
+}
+
 self.addEventListener('push', (event) => {
   let d = {};
   try {
@@ -15,9 +44,12 @@ self.addEventListener('push', (event) => {
   }
   event.waitUntil(
     (async () => {
+      const chat = typeof d.tag === 'string' && d.tag.indexOf('coach-chat') === 0;
+      const quiet = chat ? inQuiet(await readQuiet(), new Date()) : false;
       await self.registration.showNotification(d.title || 'Spotter', {
         body: d.body || '',
         tag: d.tag || undefined,
+        silent: quiet || undefined,
         icon: '/brand/v2/icon-192.png',
         badge: '/brand/v2/icon-192.png',
         data: { url: d.url || '/' },

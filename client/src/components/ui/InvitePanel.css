@@ -1,0 +1,66 @@
+/* InvitePanel. Tokens only. */
+.inv {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-14);
+  min-width: 0;
+}
+.inv-h {
+  margin: 0;
+  font-size: var(--fs-18);
+  font-weight: 600;
+}
+.inv--hero .inv-h {
+  font-size: var(--fs-24);
+}
+.inv-intro {
+  margin: 0;
+  max-width: 560px;
+  color: var(--color-text-muted);
+  font-size: var(--fs-15);
+  line-height: 1.45;
+}
+.inv-form,
+.inv-sent,
+.inv-link,
+.inv-consent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  min-width: 0;
+}
+.inv-hint {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-15);
+  line-height: 1.45;
+}
+.inv-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.4;
+}
+.inv-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.inv-consent > .uibtn {
+  align-self: flex-start;
+}
+
+.inv-msg {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+
+/* The mode switch hugs its labels (lab) instead of stretching across the panel. */
+.inv-form > .uiseg {
+  align-self: flex-start;
+  max-width: 100%;
+}

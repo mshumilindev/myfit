@@ -48,3 +48,15 @@
 .uiradio-in:disabled + .uiradio-ring {
   opacity: 0.4;
 }
+
+/* Reduced motion: no slides, fades or loops; state changes are instant. */
+@media (prefers-reduced-motion: reduce) {
+  .uiradio-ring,
+  .uiradio-ring::after {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
+}

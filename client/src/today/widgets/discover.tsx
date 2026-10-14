@@ -351,7 +351,7 @@ function ExerciseOfDay({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       <div className="uiw-name">{disp}</div>
       <div className="ul-flex ug-6 ul-wrap">
         {muscles.map((m) => (
-          <Chip key={m} size="sm">
+          <Chip key={m} size="xs">
             {m}
           </Chip>
         ))}
@@ -1076,7 +1076,7 @@ const nightSky: WidgetDef = {
           onClick={openSched}
           trailing={
             leftShort ? (
-              <Chip size="sm">{s.inX(inText)}</Chip>
+              <Chip size="xs">{s.inX(inText)}</Chip>
             ) : plan ? undefined : (
               <Button variant="secondary" size="sm" onClick={openSched}>
                 +
@@ -1513,7 +1513,7 @@ const restIdea: WidgetDef = {
         >
           <div className="ul-flex ug-6 ul-wrap">
             {ideas.map((i) => (
-              <Chip key={i.key} size="sm">
+              <Chip key={i.key} size="xs">
                 {`${i.name} · ${s.minN(i.min)}`}
               </Chip>
             ))}

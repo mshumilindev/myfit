@@ -589,7 +589,7 @@ export function SessionBuilderView({
   return (
     <div className="screen sbw">
       <div className="sbw-head">
-        <IconButton className="sbw-x" icon="x" label="Close" onClick={onClose} />
+        <IconButton className="sbw-x" size="sm" icon="x" label="Close" onClick={onClose} />
         <span className="sbw-title">{t.sbwTitle}</span>
       </div>
 
@@ -598,7 +598,7 @@ export function SessionBuilderView({
           <Chip
             key={s}
             className="sbw-st"
-            size="sm"
+            size="xs"
             icon={i < step ? 'check' : undefined}
             selected={i === step}
             onClick={() => setStep(i)}

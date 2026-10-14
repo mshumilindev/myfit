@@ -1,6 +1,6 @@
 import { cleanup, render } from '@testing-library/react';
 import { writeFileSync, mkdirSync } from 'node:fs';
-import { test, vi } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import type { ReactElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Tag } from '../../components/ui/Tag';
@@ -378,7 +378,7 @@ test('real', async () => {
       );
     },
   );
-  const { ProgramBuilder } = await import('../../views/programs/ProgramBuilder');
+  const { ProgramPage } = await import('../../views/programs/ProgramPage');
   const item = (i: number, name: string, sets: number, reps: number) => ({
     id: `i${i}`,
     day: 1,
@@ -406,43 +406,36 @@ test('real', async () => {
       item(3, 'Romanian Deadlift', 3, 8),
     ],
   };
-  const progFlags: Record<string, string> = {
-    'Barbell Squat': flag('careful', 'back'),
-    'Box Jump': flag('avoid', 'knee'),
-    'Romanian Deadlift': flag('careful', 'back'),
-    'Leg Press': flag('ok'),
-  };
-  for (const step of ['week', 'day'] as const)
-    await grab(
-      `r_program_${step}`,
-      <ProgramBuilder
-        initial={program as never}
-        saved
-        startStep={step}
-        library={[]}
-        shell={sh()}
-        onClose={() => undefined}
-        onSaved={() => undefined}
-        onDeleted={() => undefined}
-        onAssign={() => undefined}
-      />,
-      100,
-      (c) => {
-        if (step !== 'day') return;
-        c.querySelectorAll<HTMLElement>('.pg-row .n').forEach((n) => {
-          const f = Object.entries(progFlags).find(([k]) =>
-            (n.textContent ?? '').startsWith(k),
-          )?.[1];
-          if (f) n.insertAdjacentHTML('beforeend', `<span class="ul-flex umt-4">${f}</span>`);
-        });
-        c.querySelector('.pg-ex')?.insertAdjacentHTML(
-          'beforebegin',
-          H(
-            <Notice tone="chronic" icon="shield-check">
-              3 exercises are flagged for you. Nothing is removed.
-            </Notice>,
-          ),
-        );
-      },
-    );
-});
+  // The program editor is the tool now: it draws the condition flags itself (no DOM patching of the page).
+  // The person's conditions drive the flags the program editor draws (a member's own limits).
+  __replaceStateForTests({
+    ...__getStateForTests(),
+    conditions: [
+      { id: 'c1', key: 'pain_lower_back', severity: 2, share: 'effects', createdAt: 0 },
+      { id: 'c2', key: 'pain_knee', severity: 2, share: 'effects', createdAt: 0 },
+    ] as never,
+  });
+  let programText = '';
+  await grab(
+    'r_program',
+    <ProgramPage
+      initial={program as never}
+      saved
+      library={[]}
+      shell={sh()}
+      onClose={() => undefined}
+      onSaved={() => undefined}
+      onDeleted={() => undefined}
+      onAssign={() => undefined}
+    />,
+    100,
+    (c) => {
+      programText = c.textContent ?? '';
+    },
+  );
+  // Restored contract (the old DOM-patching grab asserted nothing either; the tool now owns the flags):
+  // the program renders its exercises, and the ones that do not suit the person's conditions carry a flag.
+  expect(programText).toContain('Barbell Squat');
+  expect(programText).toContain('Romanian Deadlift');
+  expect(programText).toMatch(/Careful|Not advised/);
+}, 60_000); // a heavy real-screen render: stays green when the machine is busy

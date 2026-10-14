@@ -5,7 +5,8 @@ import { Icon } from '../../ui';
 import './Chip.css';
 
 export type ChipTone = 'neutral' | 'accent' | 'danger' | 'ok' | 'rest' | 'atlas';
-export type ChipSize = 'sm' | 'md';
+/** Control scale: xs 28 (dense inline), sm 36 (default for chips), md 44, lg 52 — styles.css --ctl-h-*. */
+export type ChipSize = 'xs' | 'sm' | 'md' | 'lg';
 
 export interface ChipProps extends HTMLAttributes<HTMLElement> {
   tone?: ChipTone;
@@ -18,6 +19,8 @@ export interface ChipProps extends HTMLAttributes<HTMLElement> {
   /** Frosted look for a chip that sits on top of imagery. */
   onPhoto?: boolean;
   disabled?: boolean;
+  /** A figure after the label ("All 14"): tabular, dimmed, announced as part of the name. */
+  count?: number | string;
   /** Interactive chip that lives inside another clickable element (a card /
    *  button): renders a span[role=button] instead of a nested <button>. */
   nested?: boolean;
@@ -30,7 +33,7 @@ export interface ChipProps extends HTMLAttributes<HTMLElement> {
  */
 export function Chip({
   tone = 'neutral',
-  size = 'md',
+  size = 'sm',
   selected = false,
   icon,
   onPhoto = false,
@@ -39,13 +42,14 @@ export function Chip({
   className,
   onClick,
   disabled,
+  count,
   nested = false,
   ...rest
 }: ChipProps) {
   const cls = [
     'uichip',
     tone !== 'neutral' ? `uichip--${tone}` : '',
-    size === 'sm' ? 'uichip--sm' : '',
+    `uichip--${size}`,
     selected ? 'is-selected' : '',
     onPhoto ? 'uichip--photo' : '',
     muted ? 'uichip--muted' : '',
@@ -56,7 +60,17 @@ export function Chip({
   const inner = (
     <>
       {icon && <Icon name={icon} />}
-      {children != null && <span className="uichip-l">{children}</span>}
+      {(children != null || count != null) && (
+        <span className="uichip-l">
+          {children}
+          {count != null && (
+            <>
+              {children != null && ' '}
+              <span className="uichip-n">{count}</span>
+            </>
+          )}
+        </span>
+      )}
     </>
   );
   if (onClick && nested) {
@@ -102,10 +116,27 @@ export function Chip({
   );
 }
 
-/** Wrapping row of chips (flex-wrap + gap). */
-export function ChipGroup({ children, className, ...rest }: HTMLAttributes<HTMLDivElement>) {
+export interface ChipGroupProps extends HTMLAttributes<HTMLDivElement> {
+  /** One row that scrolls sideways instead of wrapping (many filters on a phone). */
+  scroll?: boolean;
+  /** Equal-width chips across the row. */
+  fill?: boolean;
+}
+
+/** Row of chips: wraps by default; `scroll` = one sideways-scrolling row; `fill` = equal columns. The only chip layout. */
+export function ChipGroup({ children, className, scroll, fill, ...rest }: ChipGroupProps) {
   return (
-    <div className={['uichip-group', className].filter(Boolean).join(' ')} {...rest}>
+    <div
+      className={[
+        'uichip-group',
+        scroll ? 'uichip-group--scroll' : '',
+        fill ? 'uichip-group--fill' : '',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      {...rest}
+    >
       {children}
     </div>
   );

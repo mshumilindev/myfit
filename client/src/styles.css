@@ -115,7 +115,7 @@
   --color-neutral-300: #d0d3d6;
   --color-neutral-400: #b0b4b8;
   --color-neutral-500: #9a9fa4;
-  --color-neutral-600: #80858a;
+  --color-neutral-600: #8c9196;
   --color-neutral-700: #55595e;
   --color-neutral-800: #3b3f43;
   --color-neutral-900: #262a2d;
@@ -201,6 +201,29 @@
   --color-people-tint: #26282c;
   --color-people-text: #d7dae0;
   --color-people-line: #4a4d53;
+
+  /* Coach chat families (R-FE-070). `share` = blue (a shared program / workout /
+     exercise bubble), `note` = brass tint (a trainer note). Fixed hues: they do
+     not follow the active app's accent re-skin. Text on tint is >= 4.5:1
+     (components/ui/tones.test.ts). */
+  --color-share: #6aa7e8;
+  --color-share-tint: #1d2a39;
+  --color-share-text: #d3e6fa;
+  --color-share-line: #2f5a8c;
+  --color-note: #d9a24f;
+  --color-note-tint: #2c2316;
+  --color-note-text: #f6e6cb;
+  --color-note-line: #5b4420;
+  /* Count badge (R-FE-010): solid red + white ink, >= 4.5:1. */
+  --color-danger-solid: #b8322b;
+  --color-on-solid: #ffffff;
+  /* Current-time marker (kit NowLine): Teams-style red, own token so it can move without touching danger.
+     --color-now is the line / dot (>= 3:1 on the Coach grid, see components/ui/NowLine.test.tsx); the chip is
+     --color-now-solid with white ink (>= 4.5:1). */
+  --color-now: #ff6b60;
+  --color-now-solid: #b8322b;
+  /* Past sessions of today in a time grid (kit NowLine users): slightly dimmed, text stays >= 4.5:1. */
+  --op-past: 0.9;
   --color-apex: #9d6ff0;
   --color-apex-tint: #221a38;
   --color-apex-text: #d9c9fb;
@@ -213,6 +236,13 @@
   --color-atlas-tint: #2e1a18;
   --color-atlas-text: #f3c1bb;
   --color-atlas-line: #6b322c;
+  /* Coach — tourmaline (cyan-teal, Lab hue ~209deg). Fixed identity of the Coach app; the
+     accent ramp below re-skins the shell. Distinct from gold/amethyst/silver/lazurite/rubellite,
+     ok green, danger red, share blue, note brass (dE00 >= 19 on the base swatch). */
+  --color-coach: #32bbc8;
+  --color-coach-tint: #0f2729;
+  --color-coach-text: #ace6ec;
+  --color-coach-line: #1f6a72;
   /* Conditioning / gym — the gold accent as a family. */
   --color-accent-tint: var(--color-accent-900);
   --color-accent-text: var(--color-accent-300);
@@ -226,6 +256,10 @@
   --color-text-faint: var(--color-neutral-600);
   --color-text-disabled: var(--color-neutral-700);
   --color-scrim: rgba(10, 11, 12, 0.68);
+  /* ink-on-dark steps used by the kit: secondary button plate, desktop rail plate, hairline ring */
+  --color-btn-2: rgba(233, 234, 236, 0.08);
+  --color-rail: rgba(16, 17, 19, 0.92);
+  --color-ink-ring: rgba(233, 234, 236, 0.08);
 
   /* 8-pt spacing scale (4-pt half steps) for the kit and new screens. The
      older --space-* (2.8px unit) stays for legacy screens only. */
@@ -235,6 +269,8 @@
   --fs-11: 11px;
   --fs-12: 12px;
   --fs-13: 13px;
+  /* The smallest text the product shows (decision G10: 13px). Use this, never a smaller step, for readable text. */
+  --fs-min: var(--fs-13);
   --fs-14: 14px;
   --fs-15: 15px;
   --fs-16: 16px;
@@ -555,6 +591,83 @@
   --radius-hero: 20px;
 
   --tap-min: 44px;
+
+  /* ONE control-height scale (iter22). Every interactive kit control — Button, IconButton, Select / Field /
+     TimeField, SearchField, Segmented (outer track), Tabs, Chip, PresetChips, menu triggers — is exactly
+     --ctl-h tall, and a control row mixes them freely: same size prop = same height. Change these tokens and
+     the whole app rescales (docs/THEME-SWAP.md). xs is the dense step (inline chips); md is the default. */
+  --ctl-h-xs: var(--s-28);
+  --ctl-h-sm: var(--s-36);
+  --ctl-h-md: var(--tap-min);
+  --ctl-h-lg: 52px;
+  --ctl-px-xs: var(--s-10);
+  --ctl-px-sm: var(--s-12);
+  --ctl-px-md: var(--s-16);
+  --ctl-px-lg: var(--s-20);
+  --ctl-gap-xs: var(--s-4);
+  --ctl-gap-sm: var(--s-6);
+  --ctl-gap-md: var(--s-8);
+  --ctl-gap-lg: var(--s-10);
+  --ctl-fs-xs: var(--fs-min);
+  --ctl-fs-sm: var(--fs-13);
+  --ctl-fs-md: var(--fs-15);
+  --ctl-fs-lg: var(--fs-16);
+  --ctl-icon-xs: var(--fs-14);
+  --ctl-icon-sm: var(--fs-16);
+  --ctl-icon-md: var(--fs-18);
+  --ctl-icon-lg: var(--fs-20);
+  /* Gap between sibling controls in one row (toolbars, footers, composers). */
+  --ctl-gap: var(--s-8);
+  /* Label line box inside a control: tall enough for descenders (y, g, ą, ę) so an overflow:hidden label never clips them. */
+  --ctl-lh: 1.3;
+
+  /* Switch controls (Segmented, ScrollTabs, Chip rows): ONE token set re-themes every tab / segmented / pill in the app.
+     Concentric radii: the track's radius is the segment's radius plus the track padding (never typed twice). */
+  --seg-pad: var(--s-4);
+  --seg-gap: var(--s-4);
+  --seg-px: var(--s-12);
+  --seg-h-md: var(--ctl-h-md);
+  --seg-h-sm: var(--ctl-h-sm);
+  --seg-h-lg: var(--ctl-h-lg);
+  --seg-r-inner: var(--r-12);
+  --seg-r-outer: calc(var(--seg-r-inner) + var(--seg-pad));
+  --seg-bg: var(--glass-field, var(--color-tile));
+  --seg-ring: var(--glass-field-ring, transparent);
+  /* selected segment = tone tint over the base: mix 0% = the plain base, 100% = the tone colour itself */
+  --seg-on-mix: 20%;
+  --seg-on-base: transparent;
+  --seg-fg: var(--color-text-muted);
+  --seg-on-weight: 600;
+  /* "buttons" variant: separate outlined pills; "stack": icon-over-label tiles */
+  --segb-r: var(--r-pill);
+  --segb-bg: var(--glass-well, var(--color-tile));
+  --segb-ring: var(--glass-well-ring, var(--color-border));
+  --segb-on-mix: 16%;
+  --segb-on-base: rgba(16, 15, 13, 0.6);
+  --segb-on-ring-mix: 55%;
+  --segs-r: var(--r-14);
+  --segs-bg: var(--glass-surface, var(--color-tile));
+
+  /* Chip / pill rows (Chip, ChipGroup): the same family, one height scale with Segmented (md = --seg-h-sm) */
+  --chip-h: var(--ctl-h-sm);
+  --chip-h-sm: var(--ctl-h-xs);
+  --chip-px: var(--s-14);
+  --chip-px-sm: var(--s-12);
+  --chip-gap: var(--s-8);
+  --chip-r: var(--r-pill);
+  --chip-bg: rgba(233, 234, 236, 0.07);
+  --chip-line: transparent;
+  --chip-fg: var(--color-neutral-300);
+  --chip-on-mix: 22%;
+  --chip-on-ring-mix: 70%;
+  --chip-on-fg: var(--color-accent-300);
+
+  /* Tabs (ScrollTabs): underline tabs of a page */
+  --tab-h: var(--ctl-h-md);
+  --tab-px: var(--s-12);
+  --tab-gap: var(--s-4);
+  --tab-ind: 2px;
+  --tab-fade: var(--s-40);
   --gutter-phone: 18px;
   --gutter: 18px;
 
@@ -941,25 +1054,6 @@ i > svg {
 }
 
 /* --- Skeleton placeholders (S-50: never spinners for data load) ----------- */
-
-/* Mutation busy overlay (create/update/delete) — design .sp spinner */
-.server-busy-scrim {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-200);
-  display: grid;
-  place-items: center;
-  background: color-mix(in srgb, var(--c-0a0b0d) 55%, transparent);
-}
-
-.sp {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--r-round);
-  border: 2px solid var(--color-neutral-800);
-  border-top-color: var(--color-accent);
-  animation: spin 0.85s linear infinite;
-}
 
 @keyframes spin {
   to {
@@ -2038,7 +2132,6 @@ i > svg {
 
 .session-top .trash {
   width: 36px;
-  height: 36px;
   text-align: center;
   background: none;
   border: none;
@@ -2128,7 +2221,7 @@ i > svg {
 }
 
 .session-empty {
-  margin: clamp(18px, 4vh, 36px) 8px 0;
+  margin: clamp(var(--s-18), 4vh, var(--s-36)) var(--s-8) 0;
 }
 
 .session-empty .empty {
@@ -2199,7 +2292,6 @@ i > svg {
   color: var(--color-neutral-600);
   font-size: var(--fs-16);
   cursor: pointer;
-  padding: var(--s-4);
 }
 
 .set-grid {
@@ -2233,7 +2325,6 @@ i > svg {
   align-items: center;
   gap: var(--s-6);
   margin: var(--s-2) 0 var(--s-10);
-  padding: var(--s-6) var(--s-10);
   border: 1px solid var(--color-neutral-800);
   border-radius: var(--r-pill);
   background: transparent;
@@ -2468,7 +2559,7 @@ i > svg {
 .session-live .session-top.live-toolbar {
   min-height: 118px;
   align-items: flex-end;
-  padding: 14px var(--gutter) var(--space-3);
+  padding: var(--s-14) var(--gutter) var(--space-3);
 }
 
 .session-live .session-top .back {
@@ -4320,7 +4411,6 @@ html.theme-glass .gym-card .head .n {
   align-items: center;
   justify-content: center;
   width: 34px;
-  height: 34px;
   font-size: var(--fs-17);
   border: none;
   border-radius: var(--radius-sm);
@@ -4556,7 +4646,7 @@ html.theme-glass .gym-card .head .n {
   display: flex;
   flex-direction: column;
   gap: var(--s-14);
-  padding: 16px 20px calc(28px + var(--safe-bottom));
+  padding: var(--s-16) var(--s-20) calc(var(--s-28) + var(--safe-bottom));
 }
 
 .detail-card {
@@ -4875,7 +4965,6 @@ html.theme-glass .gym-card .head .n {
 }
 .map-directions {
   width: 100%;
-  min-height: 42px;
   margin-top: var(--s-10);
 }
 
@@ -7006,11 +7095,11 @@ html.theme-glass .gym-card .head .n {
   }
 
   .session-past .past-datebar {
-    padding: var(--space-3) 20px 0;
+    padding: var(--space-3) var(--s-20) 0;
   }
 
   .session-past .session-body {
-    padding: var(--space-4) 20px 20px;
+    padding: var(--space-4) var(--s-20) var(--s-20);
   }
 
   .session-past .session-top .title {
@@ -8155,7 +8244,6 @@ h6 {
 }
 .assign-actions .uibtn {
   flex: 1;
-  min-height: 44px;
 }
 
 /* --- Sync blocked card (AC-SYNC-05/07) ---------------------------------- */
@@ -8339,7 +8427,6 @@ h6 {
   border: none;
   color: var(--color-neutral-600);
   font-size: var(--fs-15);
-  padding: var(--s-2);
   cursor: pointer;
 }
 
@@ -9333,14 +9420,12 @@ button.exd-media {
   flex: none;
   align-self: flex-start;
   width: 34px;
-  height: 34px;
   background: none;
   border: none;
   border-radius: var(--radius-md);
   color: var(--color-neutral-300);
   font-size: var(--fs-20);
   cursor: pointer;
-  padding: var(--s-4);
   margin-left: -6px;
 }
 .exd-top-row .exd-crumb {
@@ -9485,7 +9570,7 @@ button.exd-media {
   display: flex;
   flex-direction: column;
   gap: var(--s-14);
-  padding: 18px 20px calc(24px + env(safe-area-inset-bottom));
+  padding: var(--s-18) var(--s-20) calc(var(--s-24) + env(safe-area-inset-bottom));
 }
 @media (min-width: 720px) {
   .programs-author-page .goals-body {
@@ -10162,7 +10247,7 @@ button.exd-media {
   gap: var(--s-10);
   min-height: 44px;
   box-sizing: border-box;
-  padding: 8px var(--gutter);
+  padding: var(--s-8) var(--gutter);
 }
 .current-strip {
   background: var(--color-neutral-900);
@@ -10262,7 +10347,6 @@ button.exd-media {
   gap: var(--s-2);
   background: var(--color-neutral-200);
   border-radius: var(--r-pill);
-  padding: var(--s-4);
 }
 .share-format button {
   border: none;
@@ -10363,7 +10447,7 @@ button.exd-media {
 @media (max-width: 719.98px) {
   /* Room so the last card clears the floating pill, with breathing space. */
   .session-live .session-body {
-    padding-bottom: calc(92px + max(6px, var(--safe-bottom, 0px)));
+    padding-bottom: calc(92px + max(var(--s-6), var(--safe-bottom, 0px)));
   }
   .session-pill-wrap {
     position: fixed;
@@ -10453,7 +10537,7 @@ button.exd-media {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  padding: calc(30px + var(--safe-top)) 22px calc(24px + var(--safe-bottom));
+  padding: calc(30px + var(--safe-top)) 22px calc(var(--s-24) + var(--safe-bottom));
   background: var(--color-bg);
 }
 .body-gate-brand {
@@ -11654,7 +11738,7 @@ button.badge {
     /* Programs spaces its head from the search by 16px (8px margin + the 8px
        list gap). The rail's column gap already contributes --space-5, so take
        that off to land the search field on exactly the same y on both tabs. */
-    margin-bottom: calc(16px - var(--space-5));
+    margin-bottom: calc(var(--s-16) - var(--space-5));
     font-size: var(--fs-24);
     line-height: 1.15;
     letter-spacing: -0.6px;
@@ -13067,7 +13151,6 @@ button.badge {
 }
 .timed-timer.start {
   justify-content: center;
-  padding: var(--s-12);
   border: 1px dashed color-mix(in srgb, var(--color-accent) 55%, var(--color-divider));
   border-radius: var(--radius-md);
   background: transparent;
@@ -13796,11 +13879,6 @@ button.badge {
 .lens-seg {
   flex: none;
   width: auto;
-}
-.lens-seg button {
-  flex: none;
-  padding: var(--s-6) var(--s-12);
-  font-size: var(--fs-11);
 }
 /* Same toggle above the mobile inline map. */
 .lens-seg-m {
@@ -15079,7 +15157,6 @@ button.badge {
 .gset-cfg {
   flex: none;
   width: 46px;
-  min-height: 46px;
   border: none;
   border-radius: var(--radius-md);
   background: var(--color-bg);
@@ -15116,7 +15193,7 @@ button.badge {
   /* Room so the last list row clears the floating pill. */
   .progress-summary-pane,
   .progress-alt-body {
-    padding-bottom: calc(64px + max(6px, var(--safe-bottom, 0px)));
+    padding-bottom: calc(64px + max(var(--s-6), var(--safe-bottom, 0px)));
   }
   /* The Volume/Fatigue lens toggle now lives in the pill's sheet. */
   .lens-seg-m {
@@ -15270,12 +15347,6 @@ button.badge {
   display: flex;
   flex-direction: column;
   gap: var(--s-8);
-}
-.act-effort-seg {
-  width: 100%;
-}
-.act-effort-seg button {
-  flex: 1;
 }
 
 .act-run-actions {
@@ -15549,7 +15620,7 @@ button.badge {
   display: flex;
   flex-direction: column;
   gap: var(--s-20);
-  padding: 18px 20px calc(28px + var(--safe-bottom, 0px));
+  padding: var(--s-18) var(--s-20) calc(var(--s-28) + var(--safe-bottom, 0px));
   max-width: 560px;
   margin: 0 auto;
   width: 100%;
@@ -16390,7 +16461,7 @@ button.badge {
   background: color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
 .ch-detail-foot {
-  padding: 10px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  padding: var(--s-10) var(--s-20) calc(var(--s-20) + env(safe-area-inset-bottom, 0px));
   text-align: center;
 }
 .ch-confirm {
@@ -16523,9 +16594,7 @@ button.badge {
 }
 .ch-funnel {
   flex: none;
-  align-self: stretch;
-  width: 44px;
-  height: auto;
+  align-self: center;
 }
 .ch-giveup {
   margin: 0 auto;
@@ -16536,23 +16605,6 @@ button.badge {
   flex-wrap: wrap;
   gap: var(--s-10);
   padding: var(--s-4) var(--s-4) var(--s-8);
-}
-.ch-filter-chips button {
-  border: none;
-  border-radius: var(--r-pill);
-  font: inherit;
-  font-size: var(--fs-14);
-  font-weight: 500;
-  padding: var(--s-10) var(--s-16);
-  cursor: pointer;
-  background: var(--color-control);
-  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
-  color: var(--color-neutral-300);
-}
-.ch-filter-chips button.active {
-  color: var(--color-accent-200);
-  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent);
 }
 .ch-start-cta {
   width: 100%;
@@ -16620,6 +16672,29 @@ button.badge {
   --color-accent-900: #3a1420;
   --gem-glow: rgba(229, 83, 126, 0.5);
   --gem-deep: #a12f52;
+}
+
+/* Coach — graphite + tourmaline. Same re-skin trick: override the accent ramp on the Coach
+   wrapper (and on the document root, for portaled sheets/popovers) so the rail, tab bar, kit
+   primitives and every screen follow the Coach colour. The tint/text/line aliases are set here
+   too: `:root` resolves them once against the gold ramp, so a wrapper (unlike the root) would
+   otherwise keep brass borders. */
+.app-coach,
+.theme-coach {
+  --color-accent: #32bbc8;
+  --color-accent-100: #def5f7;
+  --color-accent-200: #ace6ec;
+  --color-accent-300: #7bd8e0;
+  --color-accent-400: #49c9d4;
+  --color-accent-500: #32bbc8;
+  --color-accent-600: #289fa9;
+  --color-accent-700: #227e87;
+  --color-accent-800: #195257;
+  --color-accent-900: #0f2729;
+  --color-accent-tint: #0f2729;
+  --color-accent-text: #7bd8e0;
+  --color-accent-line: #1f6a72;
+  --coach-glow: rgba(50, 187, 200, 0.5);
 }
 
 .app-nutrition,
@@ -16704,7 +16779,7 @@ button.badge {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: 4px 20px calc(72px + env(safe-area-inset-bottom, 0px));
+  padding: var(--s-4) var(--s-20) calc(72px + env(safe-area-inset-bottom, 0px));
 }
 .apex-page {
   display: flex;
@@ -16930,16 +17005,28 @@ html.theme-glass .apx-streak-n {
 }
 
 /* --- The Shell launcher (silver) ------------------------------------------ */
+.shell-sheet,
+.uimore {
+  --shell-sheet-base: color-mix(in srgb, var(--color-bg) 30%, black);
+}
 .shell-sheet {
   --silver: #c3c9d2;
   --silver-bright: #e8ebf0;
   --silver-dim: #8b929c;
+  /* Darker than the page, so the tiles (lighter, own borders) stand out from the sheet. */
+}
+/* Colour-coded to the CURRENT app (Sheet tone = its family -> --t-*): a subtle accent-tinted dark
+   plate with a 1px accent-line border. Glass restyles it in glass.css with the same recipe. */
+.shell-sheet.sheet--toned,
+.uimore.sheet--toned {
+  background: color-mix(in srgb, var(--t-base) 7%, var(--shell-sheet-base));
+  border: 1px solid var(--t-line);
 }
 .shell-head {
   font-size: var(--fs-11);
   letter-spacing: 0.2em;
   font-weight: 600;
-  color: var(--silver-dim);
+  color: var(--t-text, var(--silver-dim));
   text-transform: uppercase;
   padding: var(--s-2) var(--s-2) var(--s-4);
 }
@@ -16962,9 +17049,6 @@ html.theme-glass .apx-streak-n {
 }
 .shell-tile.uicard {
   padding: var(--s-16) var(--s-16);
-}
-.shell-signout.uicard {
-  padding: var(--s-14);
 }
 .shell-tile:disabled {
   cursor: default;
@@ -17014,42 +17098,25 @@ html.theme-glass .apx-streak-n {
 }
 .shell-current {
   flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-6);
   font-size: var(--fs-12);
   font-weight: 600;
-  color: var(--silver);
+  color: var(--t-text, var(--silver));
   padding: var(--s-6) var(--s-12);
   border-radius: var(--r-pill);
-  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  box-shadow: inset 0 0 0 1px var(--t-base, var(--color-neutral-800));
 }
 .shell-go {
   flex: none;
-  color: var(--color-neutral-600);
+  color: var(--t-base, var(--color-neutral-600));
   font-size: var(--fs-16);
 }
-/* Sign out — a distinct danger action in the suite hub. */
-.shell-signout {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-10);
-  width: 100%;
-  margin-top: var(--s-14);
-  padding: var(--s-14);
-  color: var(--color-danger);
-  font: inherit;
-  font-size: var(--fs-14);
-  font-weight: 500;
-  cursor: pointer;
-}
-.shell-signout i {
-  font-size: var(--fs-20);
-}
-.shell-note {
-  text-align: center;
-  font-size: var(--fs-12);
-  color: var(--color-neutral-600);
-  padding: var(--s-20) 0 var(--s-4);
-  letter-spacing: 0.02em;
+/* Colour-coded launcher: each tile carries its app's family (--t-* from the uit--<app> class).
+   The current tile is the selected one (Card `selected`: tint + 2px outline in the app's colour) with a check. */
+.shell-sheet .shell-tile.current .shell-tile-sub {
+  color: var(--t-text);
 }
 
 /* --- Header / rail app-switch entry --------------------------------------- */
@@ -17099,7 +17166,7 @@ html.theme-glass .apx-streak-n {
     display: none;
   }
   .apex-scroll {
-    padding: 24px 30px calc(24px + env(safe-area-inset-bottom, 0px));
+    padding: var(--s-24) 30px calc(var(--s-24) + env(safe-area-inset-bottom, 0px));
     max-width: 900px;
     margin-inline: auto;
     width: 100%;
@@ -17277,7 +17344,7 @@ html.theme-glass .apx-streak-n {
   border-radius: var(--r-20);
 }
 .rc-body {
-  padding: 18px 2px calc(56px + env(safe-area-inset-bottom, 0px));
+  padding: var(--s-18) var(--s-2) calc(56px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: var(--s-16);
@@ -17479,7 +17546,7 @@ html.theme-glass .apx-streak-n {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 22px 26px calc(28px + env(safe-area-inset-bottom, 0px));
+  padding: 22px 26px calc(var(--s-28) + env(safe-area-inset-bottom, 0px));
   min-height: min-content;
 }
 .rc-story-close {
@@ -17586,40 +17653,6 @@ html.theme-glass .apx-streak-n {
 }
 .eq-cat.open .eq-cat-count {
   color: var(--color-accent-400);
-}
-.eq-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-6);
-  padding: var(--s-2) var(--s-12) var(--s-12);
-}
-.eq-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-6);
-  padding: var(--s-8) var(--s-12);
-  border-radius: var(--r-pill);
-  border: none;
-  background: var(--color-control);
-  box-shadow: inset 0 0 0 1px var(--color-neutral-700);
-  color: var(--color-neutral-300);
-  font: inherit;
-  font-size: var(--fs-13);
-  line-height: 1.15;
-  cursor: pointer;
-  transition:
-    background 0.12s ease,
-    color 0.12s ease,
-    box-shadow 0.12s ease;
-}
-.eq-chip svg {
-  font-size: var(--fs-13);
-  flex: none;
-}
-.eq-chip.on {
-  background: var(--color-accent-900);
-  color: var(--color-accent-200);
-  box-shadow: inset 0 0 0 1px var(--color-accent-600);
 }
 .eq-empty {
   text-align: center;
@@ -18096,7 +18129,6 @@ html.theme-glass .apx-streak-n {
   top: 6px;
   right: 6px;
   width: 26px;
-  height: 26px;
   border: none;
   border-radius: var(--r-pill);
   display: grid;
@@ -18570,8 +18602,6 @@ html.theme-glass .apx-streak-n {
   font-size: var(--fs-11);
   color: var(--color-accent-300);
   margin-top: var(--s-2);
-}
-.circuit-banner .cb-done {
 }
 
 /* --- CR-02 · building the circuit (mode active) -------------------------- */
@@ -19094,8 +19124,6 @@ html.theme-glass .apx-streak-n {
   flex: 1;
 
   gap: var(--s-8);
-}
-.circuit-run .cr-finish {
 }
 
 @media (hover: hover) {
@@ -20817,7 +20845,7 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: max(48px, 9vh) 32px 32px;
+  padding: max(var(--s-48), 9vh) var(--s-32) var(--s-32);
   max-width: 480px;
   margin: 0 auto;
   width: 100%;
@@ -21036,10 +21064,6 @@ body {
 .sao-actions {
   display: flex;
   gap: var(--s-10);
-}
-.sao-actions .uibtn--secondary,
-.sao-actions .uibtn--primary {
-  min-height: 50px;
 }
 .sao-actions .uibtn--primary {
   flex: 1;
@@ -21590,7 +21614,6 @@ body {
   margin-left: auto;
   flex: none;
   width: 32px;
-  height: 32px;
 }
 .trlive-lbl b {
   font-weight: 600;
@@ -22107,7 +22130,7 @@ body {
   /* break out to the container edges so the divider spans full width, keep the
      buttons inside the 18px gutter, and leave a comfortable bottom margin */
   margin: 0 -18px;
-  padding: 16px 18px calc(22px + var(--safe-bottom));
+  padding: var(--s-16) var(--s-18) calc(22px + var(--safe-bottom));
   border-top: 1px solid var(--color-divider);
   background: var(--color-bg);
 }
@@ -22177,7 +22200,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px 4px calc(40px + var(--safe-bottom));
+  padding: var(--s-24) var(--s-4) calc(var(--s-40) + var(--safe-bottom));
 }
 .focus-empty .fe-inner {
   width: 100%;
@@ -22253,7 +22276,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--s-18);
-  padding: 16px var(--gutter) calc(24px + var(--safe-bottom));
+  padding: var(--s-16) var(--gutter) calc(var(--s-24) + var(--safe-bottom));
 }
 .client-page .cp-head {
   display: flex;
@@ -22673,7 +22696,7 @@ body {
   flex: none;
   display: flex;
   gap: var(--s-10);
-  padding: 12px 18px calc(16px + var(--safe-bottom));
+  padding: var(--s-12) var(--s-18) calc(var(--s-16) + var(--safe-bottom));
   border-top: 1px solid var(--color-divider);
   background: var(--color-bg);
 }
@@ -22704,8 +22727,6 @@ body {
 .sbw-x {
   flex: none;
   width: 36px;
-  height: 36px;
-  min-height: 36px;
   padding: 0;
 }
 /* ============================================================================
@@ -22755,7 +22776,7 @@ body {
   flex-direction: column;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: max(12px, env(safe-area-inset-top)) var(--page-x)
+  padding: max(var(--s-12), env(safe-area-inset-top)) var(--page-x)
     calc(26px + env(safe-area-inset-bottom));
   font-family: var(--font, 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif);
   gap: 0;
@@ -23088,8 +23109,8 @@ body {
    main content sits at reading width, not stretched across the window). */
 @media (min-width: 720px) {
   .rx {
-    padding-left: max(28px, calc((100% - 620px) / 2));
-    padding-right: max(28px, calc((100% - 620px) / 2));
+    padding-left: max(var(--s-28), calc((100% - 620px) / 2));
+    padding-right: max(var(--s-28), calc((100% - 620px) / 2));
     padding-top: var(--s-28);
   }
 }
@@ -23238,7 +23259,8 @@ body {
 /* ===== UI Kit gallery (dev-only, #/uikit) ================================= */
 .uik {
   gap: 0;
-  padding: max(14px, env(safe-area-inset-top)) 18px calc(40px + env(safe-area-inset-bottom));
+  padding: max(var(--s-14), env(safe-area-inset-top)) var(--s-18)
+    calc(var(--s-40) + env(safe-area-inset-bottom));
   overflow-y: auto;
 }
 .uik-top {
@@ -23657,8 +23679,6 @@ body {
 .plate-sheet .pl-ctl-row {
   justify-content: space-between;
 }
-.plate-sheet .pl-apply {
-}
 .opts-sheet .opts-quick:has(> :only-child) {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -24055,7 +24075,6 @@ body {
   display: flex;
   align-items: center;
   gap: var(--s-10);
-  min-height: 42px;
   padding: 0 var(--s-12) 0 var(--s-8);
   border: 1px solid transparent;
   border-radius: var(--r-10);
@@ -24073,7 +24092,6 @@ body {
 }
 .fss .dots {
   width: 32px;
-  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -24186,7 +24204,7 @@ body {
   overflow-y: auto;
   overscroll-behavior: contain;
   margin: 0 calc(-1 * var(--gutter));
-  padding: 0 var(--gutter) 4px;
+  padding: 0 var(--gutter) var(--s-4);
 }
 .opts-sheet > .opts-pinned {
   margin-top: 0;
@@ -24303,7 +24321,6 @@ body {
 }
 /* Presets are kit <Chip>s; stretch them to the grid cells. */
 .rest-presets .uichip {
-  height: 46px;
   justify-content: center;
   font-variant-numeric: tabular-nums;
 }
@@ -25284,7 +25301,7 @@ body {
 .es-dock {
   flex: none;
   /* same bottom breathing room as the focus nav's buttons */
-  padding: 12px 0 calc(22px + var(--safe-bottom));
+  padding: var(--s-12) 0 calc(22px + var(--safe-bottom));
 }
 .es-add {
   width: 100%;
@@ -25815,10 +25832,8 @@ body {
 }
 .gset-actions.timed-actions .timed-timer.start {
   margin-top: 0;
-  min-height: 52px;
 }
 .gset-actions.timed-actions .gset-cfg {
-  min-height: 52px;
   width: 52px;
 }
 
@@ -25956,8 +25971,6 @@ body {
 }
 .pbs-custom {
   margin-top: var(--s-12);
-}
-.pb-sheet .pbs-apply {
 }
 
 /* numbers centred under the Playbook icon; photos start where its text does */
@@ -26307,7 +26320,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--s-14);
-  padding: 14px 0 calc(24px + var(--safe-bottom));
+  padding: var(--s-14) 0 calc(var(--s-24) + var(--safe-bottom));
 }
 .atl-group {
   display: flex;
@@ -26637,7 +26650,7 @@ body {
   display: flex;
   gap: var(--s-8);
   align-items: center;
-  padding: 10px 0 calc(12px + var(--safe-bottom));
+  padding: var(--s-10) 0 calc(var(--s-12) + var(--safe-bottom));
   background: linear-gradient(0deg, var(--color-bg) 70%, transparent);
 }
 .atl-composer .uifield {
@@ -26647,10 +26660,7 @@ body {
 .atl-composer {
   --field-radius: var(--r-pill);
 }
-.atl-composer .uifield-box {
-  min-height: 46px;
-  padding: 0 var(--s-16);
-}
+
 .atl-composer .uifield-in {
   font-size: var(--fs-16);
 }
@@ -26870,7 +26880,8 @@ html.theme-glass .atl-bubble {
   align-items: center;
   justify-content: center;
   gap: var(--s-14);
-  padding: calc(24px + var(--safe-top, 0px)) 16px calc(24px + var(--safe-bottom, 0px));
+  padding: calc(var(--s-24) + var(--safe-top, 0px)) var(--s-16)
+    calc(var(--s-24) + var(--safe-bottom, 0px));
   background: color-mix(in srgb, var(--c-08090b) 94%, transparent);
   animation: atlPortraitIn 0.18s ease-out;
   cursor: zoom-out;
@@ -26897,8 +26908,6 @@ html.theme-glass .atl-bubble {
   top: calc(12px + var(--safe-top, 0px));
   right: 12px;
   width: 44px;
-  height: 44px;
-  min-height: 44px;
 }
 @keyframes atlPortraitIn {
   from {
@@ -26943,10 +26952,10 @@ html.theme-glass .atl-bubble {
 .app-brand-actions .mst-badge,
 .app-brand-actions .app-bell,
 .app-brand-actions .lang-chip {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  min-height: 0;
+  width: var(--ctl-h-sm);
+  height: var(--ctl-h-sm);
+  min-width: var(--ctl-h-sm);
+  min-height: var(--ctl-h-sm);
   padding: 0;
   gap: 0;
   display: inline-flex;
@@ -27195,12 +27204,9 @@ html.theme-glass .apx-recent {
 .eq-manage-btn {
   flex: none;
   width: 34px;
-  height: 34px;
-  min-height: 34px;
   padding: 0;
 }
 .eq-tile-toggle {
-  min-height: 26px;
   padding: 0;
 }
 
@@ -27223,34 +27229,17 @@ html.theme-glass .apx-recent {
   top: 12px;
   right: 12px;
   z-index: 2;
-  width: 30px;
-  min-height: 30px;
-  padding: 0;
   border-radius: var(--r-round);
   background: color-mix(in srgb, var(--color-bg) 70%, transparent);
   color: var(--color-text);
   font-size: var(--fs-17);
 }
-.uibtn.es-info {
-  min-height: 32px;
-  padding: 0;
-}
-.uibtn.es-info.sm {
-  min-height: 28px;
-}
+
 /* Compact collapsed-row gear, group / exercise kebab, fixed-size round pickers. */
 .card-cfg {
   flex: none;
-  width: 32px;
-  min-height: 32px;
 }
-:where(.uibtn.dots) {
-  width: 32px;
-}
-.uibtn.dots {
-  min-height: 28px;
-  padding: 0;
-}
+
 .exercise-card .head .uibtn.name {
   justify-content: flex-start;
   min-height: 0;
@@ -27263,16 +27252,8 @@ html.theme-glass .apx-recent {
 }
 .uibtn.eq-pick-btn {
   flex: none;
-  width: 26px;
-  height: 26px;
-  min-height: 26px;
-  padding: 0;
-  font-size: var(--fs-13);
 }
-.uibtn.fm-icon-btn {
-  width: 42px;
-  min-height: 42px;
-}
+
 /* Pill CTAs that sit beside a text block in a flex row. */
 .atl-plancard > .atl-plancard-go,
 .es-circuit > .es-circuit-go {
@@ -27301,15 +27282,10 @@ html.theme-glass .apx-recent {
   bottom: 10px;
   z-index: 2;
   margin: 0;
-  height: 36px;
-  padding: 0 var(--s-14) 0 var(--s-12);
 }
 /* Ghost (unfilled) row values: left-aligned in their column like the logged rows. */
 .ghost-row .uibtn.gval {
   justify-self: start;
-  min-height: 34px;
-  padding: 0;
-  font-size: var(--fs-16);
   font-variant-numeric: tabular-nums;
 }
 .uibtn.timed-manual {
@@ -27324,17 +27300,6 @@ html.theme-glass .apx-recent {
   right: 2px;
   z-index: 1;
   transform: translateY(-50%);
-  width: 30px;
-  height: 30px;
-  min-height: 30px;
-  padding: 0;
-  font-size: var(--fs-15);
-}
-.se-card .drop-part-lab .uibtn.drop-trash {
-  width: 32px;
-  height: 28px;
-  min-height: 28px;
-  padding: 0;
 }
 .se-rpe .uichip.rpe-f {
   font-weight: 700;
@@ -27349,9 +27314,7 @@ html.theme-glass .apx-recent {
 .uibtn.past-gym-row {
   min-height: 0;
 }
-.session-top .uibtn.trash {
-  min-height: 36px;
-}
+
 .mm-open {
   flex: none;
 }
@@ -27361,9 +27324,6 @@ html.theme-glass .apx-recent {
 }
 .circuit-run .uibtn.cr-arrow {
   flex: none;
-  width: 38px;
-  height: 38px;
-  min-height: 38px;
 }
 .circuit-run .cr-next .cr-next-go {
   flex: none;
@@ -27387,10 +27347,6 @@ html.theme-glass .apx-recent {
   }
   .session-pill-wrap .uibtn.sp-btn {
     flex: none;
-    width: 46px;
-    height: 46px;
-    min-height: 46px;
-    padding: 0;
   }
   .session-pill-wrap .sp-btn .ui-icon {
     font-size: var(--fs-20);
@@ -27456,4 +27412,138 @@ html.theme-glass .apx-recent {
 .hist-head,
 .stat-grid {
   flex-shrink: 0;
+}
+
+/* --- Control scale scopes (iter22): each kit control reads its geometry from --ctl-* set here, per size ---------
+   The size classes (.uibtn--sm, .uiseg--lg, .uichip--xs …) only pick a step of the scale; the geometry itself
+   (height, padding, gap, font, icon) lives in the --ctl-* tokens above, never in a component or feature rule. */
+.uibtn,
+.uiseg,
+.uifield,
+.uisearch,
+.stab {
+  --ctl-h: var(--ctl-h-md);
+  --ctl-px: var(--ctl-px-md);
+  --ctl-gap-in: var(--ctl-gap-md);
+  --ctl-fs: var(--ctl-fs-md);
+  --ctl-icon: var(--ctl-icon-md);
+}
+.uichip,
+.uipc,
+.uiback {
+  --ctl-h: var(--ctl-h-sm);
+  --ctl-px: var(--ctl-px-sm);
+  --ctl-gap-in: var(--ctl-gap-sm);
+  --ctl-fs: var(--ctl-fs-sm);
+  --ctl-icon: var(--ctl-icon-sm);
+}
+.uibtn--xs,
+.uiseg--xs,
+.uifield--xs,
+.uisearch--xs,
+.stab--xs,
+.uichip--xs,
+.uipc--xs,
+.uiback--xs,
+.ctl-xs {
+  --ctl-h: var(--ctl-h-xs);
+  --ctl-px: var(--ctl-px-xs);
+  --ctl-gap-in: var(--ctl-gap-xs);
+  --ctl-fs: var(--ctl-fs-xs);
+  --ctl-icon: var(--ctl-icon-xs);
+}
+.uibtn--sm,
+.uiseg--sm,
+.uifield--sm,
+.uisearch--sm,
+.stab--sm,
+.uichip--sm,
+.uipc--sm,
+.uiback--sm,
+.ctl-sm {
+  --ctl-h: var(--ctl-h-sm);
+  --ctl-px: var(--ctl-px-sm);
+  --ctl-gap-in: var(--ctl-gap-sm);
+  --ctl-fs: var(--ctl-fs-sm);
+  --ctl-icon: var(--ctl-icon-sm);
+}
+.uibtn--md,
+.uiseg--md,
+.uifield--md,
+.uisearch--md,
+.stab--md,
+.uichip--md,
+.uipc--md,
+.uiback--md,
+.ctl-md {
+  --ctl-h: var(--ctl-h-md);
+  --ctl-px: var(--ctl-px-md);
+  --ctl-gap-in: var(--ctl-gap-md);
+  --ctl-fs: var(--ctl-fs-md);
+  --ctl-icon: var(--ctl-icon-md);
+}
+.uibtn--lg,
+.uiseg--lg,
+.uifield--lg,
+.uisearch--lg,
+.stab--lg,
+.uichip--lg,
+.uipc--lg,
+.uiback--lg,
+.ctl-lg {
+  --ctl-h: var(--ctl-h-lg);
+  --ctl-px: var(--ctl-px-lg);
+  --ctl-gap-in: var(--ctl-gap-lg);
+  --ctl-fs: var(--ctl-fs-lg);
+  --ctl-icon: var(--ctl-icon-lg);
+}
+
+/* A control ROW (ControlRow, coach Toolbar, Header actions, drawer footers) picks ONE step for every control inside it —
+   whatever size prop a member was given — so a row can never mix heights. The row rule is one class deeper than the
+   per-control scopes above, so it wins; a row without a size class changes nothing. */
+.ctl-row--xs :is(.uibtn, .uiseg, .uifield, .uisearch, .stab, .uichip, .uipc, .uiback) {
+  --ctl-h: var(--ctl-h-xs);
+  --ctl-px: var(--ctl-px-xs);
+  --ctl-gap-in: var(--ctl-gap-xs);
+  --ctl-fs: var(--ctl-fs-xs);
+  --ctl-icon: var(--ctl-icon-xs);
+}
+.ctl-row--sm :is(.uibtn, .uiseg, .uifield, .uisearch, .stab, .uichip, .uipc, .uiback) {
+  --ctl-h: var(--ctl-h-sm);
+  --ctl-px: var(--ctl-px-sm);
+  --ctl-gap-in: var(--ctl-gap-sm);
+  --ctl-fs: var(--ctl-fs-sm);
+  --ctl-icon: var(--ctl-icon-sm);
+}
+.ctl-row--md :is(.uibtn, .uiseg, .uifield, .uisearch, .stab, .uichip, .uipc, .uiback) {
+  --ctl-h: var(--ctl-h-md);
+  --ctl-px: var(--ctl-px-md);
+  --ctl-gap-in: var(--ctl-gap-md);
+  --ctl-fs: var(--ctl-fs-md);
+  --ctl-icon: var(--ctl-icon-md);
+}
+.ctl-row--lg :is(.uibtn, .uiseg, .uifield, .uisearch, .stab, .uichip, .uipc, .uiback) {
+  --ctl-h: var(--ctl-h-lg);
+  --ctl-px: var(--ctl-px-lg);
+  --ctl-gap-in: var(--ctl-gap-lg);
+  --ctl-fs: var(--ctl-fs-lg);
+  --ctl-icon: var(--ctl-icon-lg);
+}
+/* A link-variant button is a text run on its own, but inside a control row it is a row member: full row height. */
+.ctl-row--xs .uibtn--link:not(.uibtn--inline),
+.ctl-row--sm .uibtn--link:not(.uibtn--inline),
+.ctl-row--md .uibtn--link:not(.uibtn--inline),
+.ctl-row--lg .uibtn--link:not(.uibtn--inline) {
+  height: var(--ctl-h);
+}
+:where(.ctl-row) {
+  /* layout of a stand-alone ControlRow; the .ctl-row--{size} scope classes above work on any container without it */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ctl-gap);
+  min-width: 0;
+}
+:where(.ctl-row--end) {
+  align-items: flex-end;
 }

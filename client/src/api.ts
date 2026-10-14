@@ -25,6 +25,7 @@ import { auth, functions } from './firebase';
 const USERNAME_KEY = 'spotter.username';
 const ROLE_KEY = 'spotter.role';
 const UID_KEY = 'spotter.uid';
+const LOGIN_ID_KEY = 'spotter.loginId';
 
 export type Role = 'member' | 'trainer' | 'admin';
 
@@ -100,11 +101,18 @@ export interface AuthPayload {
 export async function signInWithPayload(payload: AuthPayload): Promise<void> {
   await signInWithCustomToken(auth, payload.token);
   localStorage.setItem(UID_KEY, payload.userId);
+  if (payload.username) localStorage.setItem(LOGIN_ID_KEY, payload.username);
   setUsername(payload.name || payload.username);
   setRole(payload.role ?? 'member');
 }
 
+/** The identifier the person signed in with (username), kept so a re-authentication asks only for the password. */
+export function getLoginId(): string | null {
+  return localStorage.getItem(LOGIN_ID_KEY);
+}
+
 export function clearAuth(): void {
+  localStorage.removeItem(LOGIN_ID_KEY);
   localStorage.removeItem(USERNAME_KEY);
   localStorage.removeItem(ROLE_KEY);
   localStorage.removeItem(UID_KEY);
@@ -113,6 +121,13 @@ export function clearAuth(): void {
 export async function signOut(): Promise<void> {
   clearAuth();
   await firebaseSignOut(auth).catch(() => undefined);
+  /* The account's data leaves the device: sealed coach stores, caches and Firestore's offline cache (deviceWipe.ts). */
+  try {
+    const { wipeAfterSignOut } = await import('./deviceWipe');
+    await wipeAfterSignOut();
+  } catch {
+    /* best effort: the flag it sets is honoured at the next start */
+  }
 }
 
 /** Subscribe to sign-in / sign-out. Fires with the current user (or null). */
@@ -167,14 +182,17 @@ function codeToStatus(code: string): number {
       return 429;
     case 'unavailable':
       return 503;
+    case 'deadline-exceeded':
+      return 504;
     default:
       return 500;
   }
 }
 
 /**
- * Full-page busy overlay for in-flight mutations (create/update/delete).
- * Read-only callables stay quiet so lists/profiles don't flash a scrim on load.
+ * Mutations (create/update/delete) raise the small "Saving…" sync chip while in
+ * flight (never a blocking scrim). Read-only callables stay quiet so lists and
+ * profiles don't flash an indicator on load.
  */
 const QUIET_CALLABLES = new Set([
   'authStatus',
@@ -185,7 +203,16 @@ const QUIET_CALLABLES = new Set([
   'trainerClients',
   'trainerClientDetail',
   'programMine',
+  'profileMe',
+  'athleteExerciseHistory',
+  'athleteWorkout',
 ]);
+
+/** A callable that has not answered by then fails (504), so a dead network never hangs a screen. */
+export const READ_TIMEOUT_MS = 15_000;
+export const WRITE_TIMEOUT_MS = 30_000;
+/** The "Saving…" chip never stays up longer than this for a request that cannot finish (offline). */
+export const SAVING_CHIP_MAX_MS = 15_000;
 
 let mutationPending = 0;
 const mutationListeners = new Set<() => void>();
@@ -215,19 +242,34 @@ export function subscribeMutation(cb: () => void): () => void {
   };
 }
 
-/** Wrap a direct Firestore/Storage write so it shares the global busy overlay. */
+/**
+ * Wrap a direct Firestore/Storage write so it shares the "Saving…" sync chip.
+ * A Firestore write only settles once the server acks it, so offline it can stay
+ * pending for a long time: the chip is dropped after SAVING_CHIP_MAX_MS while the
+ * write itself stays queued (and is flushed by the SDK when the network is back).
+ */
 export async function trackMutation<T>(promise: Promise<T>): Promise<T> {
   beginMutation();
+  let ended = false;
+  const end = () => {
+    if (ended) return;
+    ended = true;
+    endMutation();
+  };
+  const timer = setTimeout(end, SAVING_CHIP_MAX_MS);
   try {
     return await promise;
   } finally {
-    endMutation();
+    clearTimeout(timer);
+    end();
   }
 }
 
 export type CallFnOptions = {
-  /** Skip the global busy overlay (default for known read callables). */
+  /** Skip the "Saving…" chip (default for known read callables). */
   quiet?: boolean;
+  /** Override the request timeout (default: 15 s for quiet reads, 30 s for mutations). */
+  timeoutMs?: number;
 };
 
 /** Call a Cloud Function by name. Throws HttpError (status + details) on failure. */
@@ -237,9 +279,14 @@ export async function callFn<T = unknown>(
   opts?: CallFnOptions,
 ): Promise<T> {
   const quiet = opts?.quiet ?? QUIET_CALLABLES.has(name);
+  // Offline: fail at once instead of waiting for the SDK's long network timeout.
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    throw new HttpError(503, 'offline');
+  }
+  const timeout = opts?.timeoutMs ?? (quiet ? READ_TIMEOUT_MS : WRITE_TIMEOUT_MS);
   if (!quiet) beginMutation();
   try {
-    const fn = httpsCallable(functions, name);
+    const fn = httpsCallable(functions, name, { timeout });
     const res = (await fn(data ?? {})) as HttpsCallableResult<T>;
     return res.data;
   } catch (err) {

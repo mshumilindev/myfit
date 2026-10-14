@@ -1180,7 +1180,7 @@ export function MuscleChip({
     return (
       <>
         <Chip
-          size="sm"
+          size="xs"
           tone={tone === 'primary' ? 'accent' : 'neutral'}
           nested={interactive}
           onClick={interactive ? fire : undefined}
@@ -1195,7 +1195,7 @@ export function MuscleChip({
   return (
     <>
       <Chip
-        size="sm"
+        size="xs"
         muted={tone !== 'primary'}
         nested={interactive}
         onClick={interactive ? fire : undefined}
@@ -1498,7 +1498,7 @@ export function MuscleSetChip({
   return (
     <>
       <Chip
-        size="sm"
+        size="xs"
         muted={tone === 'secondary'}
         nested={interactive}
         onClick={interactive ? fire : undefined}

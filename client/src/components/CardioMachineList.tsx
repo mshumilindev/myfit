@@ -14,7 +14,7 @@ import { useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { ListRow } from './ui/GroupedList';
 
-function machineIcon(id: string): string {
+export function machineIcon(id: string): string {
   const p = CARDIO_PROFILES[id];
   if (p?.formula === 'treadmill') return 'person-simple-run';
   if (/rower|ski-erg|rope/.test(id)) return 'wave-sine';

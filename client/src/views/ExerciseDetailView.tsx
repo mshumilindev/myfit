@@ -174,15 +174,15 @@ export function ExerciseDetailView({
   const badgesRow = (
     <div className="exd-badges">
       {category && (
-        <Chip size="sm" tone="accent">
+        <Chip size="xs" tone="accent">
           {t.categoryNames[category]}
         </Chip>
       )}
-      {mechanic && <Chip size="sm">{t.mechanicNames[mechanic]}</Chip>}
-      {force && <Chip size="sm">{t.forceNames[force]}</Chip>}
-      {level && <Chip size="sm">{t.levelNames[level]}</Chip>}
+      {mechanic && <Chip size="xs">{t.mechanicNames[mechanic]}</Chip>}
+      {force && <Chip size="xs">{t.forceNames[force]}</Chip>}
+      {level && <Chip size="xs">{t.levelNames[level]}</Chip>}
       {equipment && (
-        <Chip size="sm" icon={equipmentIconName(equipment)}>
+        <Chip size="xs" icon={equipmentIconName(equipment)}>
           {t.equipmentNames[equipment]}
         </Chip>
       )}
@@ -205,7 +205,7 @@ export function ExerciseDetailView({
                 <Chip
                   key={m}
                   tone="accent"
-                  size="sm"
+                  size="xs"
                   onClick={() => shell.openOverlay({ screen: 'muscle-history', muscle: m })}
                 >
                   {t.muscleGroups[m]}
@@ -232,7 +232,7 @@ export function ExerciseDetailView({
               {secondaries.map((m) => (
                 <Chip
                   key={m}
-                  size="sm"
+                  size="xs"
                   onClick={() => shell.openOverlay({ screen: 'muscle-history', muscle: m })}
                 >
                   {t.muscleGroups[m]}

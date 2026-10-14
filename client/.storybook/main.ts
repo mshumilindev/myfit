@@ -35,6 +35,8 @@ const config: StorybookConfig = {
   async viteFinal(cfg) {
     return {
       ...cfg,
+      // Storybook always runs Coach on its sample world (`src/coach/__fixtures__/register.ts`)
+      define: { ...cfg.define, 'import.meta.env.VITE_COACH_TEST_HOOKS': JSON.stringify('1') },
       plugins: [stubFirebase(), ...withoutPwa(cfg.plugins)],
       build: { ...cfg.build, rollupOptions: { ...cfg.build?.rollupOptions, output: undefined } },
     };

@@ -807,7 +807,6 @@ export function LogActivityView({
             <div className="la-crow-line">
               {row}
               <IconButton
-                size="sm"
                 className="la-cexp-btn"
                 icon={open ? 'caret-down' : 'caret-right'}
                 aria-expanded={open}
@@ -1091,7 +1090,7 @@ export function LogActivityView({
       return (
         <div className={`screen la ${catTone(cat)}`}>
           <div className="la-band">
-            <BackButton label={t.laBackToLog} onClick={() => goCat(null)} />
+            <BackButton size="md" label={t.laBackToLog} onClick={() => goCat(null)} />
             <h1 className="la-ptitle">
               <span className="la-crumb">{t.logActivity}</span>
               <span className="la-row-g10">
@@ -1198,7 +1197,7 @@ export function LogActivityView({
         <div className="la-cols">
           <div className="la-left">
             <div className="la-cathead">
-              <BackButton label={t.laBackToCats} onClick={() => goCat(null)} />
+              <BackButton size="md" label={t.laBackToCats} onClick={() => goCat(null)} />
               <div className="la-grow">
                 <div className="la-muted12">{t.laCatKicker}</div>
                 <div className="la-row-g10 la-mt2">
@@ -1630,11 +1629,11 @@ function LiveBanner(props: {
         </div>
       </div>
       <div className={`la-grid2 la-mt3${props.onFinish ? '' : ' one'}`}>
-        <Button variant="secondary" size="lg" className="h44" icon="play" onClick={props.onResume}>
+        <Button variant="secondary" icon="play" onClick={props.onResume}>
           {t.actResume}
         </Button>
         {props.onFinish && (
-          <Button variant="primary" size="lg" className="h44" icon="stop" onClick={props.onFinish}>
+          <Button variant="primary" icon="stop" onClick={props.onFinish}>
             {t.actFinish}
           </Button>
         )}
@@ -1726,7 +1725,7 @@ function HeroCard(props: {
           {kicker}
         </span>
         <IconButton
-          size="sm"
+          size={web ? 'sm' : 'md'}
           className="la-hide"
           icon="x"
           label={t.laHide}

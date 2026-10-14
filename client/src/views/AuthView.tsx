@@ -8,10 +8,15 @@ import { fmtSessionClock, useT } from '../i18n';
 import { Icon, LanguageSelector } from '../ui';
 import { InstallShortcut } from './InstallShortcut';
 
+/** The reachability probe gives up after this long; sign-in is never held back by it. */
+const PROBE_TIMEOUT_MS = 6_000;
+
 export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
   const { t } = useT();
   const [unreachable, setUnreachable] = useState(false);
-  const [checking, setChecking] = useState(true);
+  // The server answered slowly or not at all, but the browser is online: the
+  // form stays usable (the reachability probe never gates sign-in), with a hint.
+  const [slow, setSlow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lockUntil, setLockUntil] = useState<number | null>(null);
@@ -20,19 +25,31 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
 
-  function probe() {
-    callFn<{ registered: boolean }>('authStatus')
+  function check() {
+    callFn<{ registered: boolean }>('authStatus', undefined, { timeoutMs: PROBE_TIMEOUT_MS })
       .then(() => setUnreachable(false))
       .catch((err) => {
-        // Only a genuine connectivity problem blocks auth; a function error
-        // (project reachable) leaves the form usable.
+        // Only a genuine lack of connection blocks auth (the first sign-in needs
+        // one); a slow or erroring server leaves the form usable with a hint.
         const status = err instanceof HttpError ? err.status : 0;
-        setUnreachable(!navigator.onLine || status === 503);
-      })
-      .finally(() => setChecking(false));
+        const offline = !navigator.onLine;
+        setUnreachable(offline);
+        setSlow(!offline && (status === 503 || status === 504));
+      });
+  }
+  function probe() {
+    setSlow(false);
+    check();
   }
   useEffect(() => {
-    probe();
+    check();
+    // Coming back online re-checks on its own.
+    const onOnline = () => {
+      setSlow(false);
+      check();
+    };
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
   }, []);
 
   useEffect(() => {
@@ -80,9 +97,23 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
         <p className="auth-sub">{t.authTagline}</p>
 
         {unreachable && (
-          <div className="banner danger-ring" style={{ margin: 'var(--space-2) 0 var(--space-4)' }}>
+          <div
+            className="banner danger-ring"
+            role="status"
+            style={{ margin: 'var(--space-2) 0 var(--space-4)' }}
+          >
             <Icon name="cloud-slash" />
             <span>{t.serverUnreachable}</span>
+          </div>
+        )}
+        {slow && !unreachable && (
+          <div
+            className="banner"
+            role="status"
+            style={{ margin: 'var(--space-2) 0 var(--space-4)' }}
+          >
+            <Icon name="cloud-slash" />
+            <span className="uf-1">{t.authSlowHint}</span>
           </div>
         )}
 
@@ -122,20 +153,17 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           variant="primary"
           className="fx-fs-15 ug-10 umt-8"
           style={{ minHeight: 48 }}
-          disabled={busy || checking || unreachable || locked}
+          disabled={busy || unreachable || locked}
         >
           {busy ? t.signingIn : t.signIn}
         </Button>
 
-        {unreachable && (
+        {(unreachable || slow) && (
           <Button
             variant="secondary"
             className="fx-fs-13 ug-8"
             style={{ minHeight: 44 }}
-            onClick={() => {
-              setChecking(true);
-              probe();
-            }}
+            onClick={probe}
           >
             <Icon name="arrow-clockwise" />
             {t.retry}

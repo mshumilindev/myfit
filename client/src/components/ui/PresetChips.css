@@ -13,8 +13,13 @@
 .uipc--grid .uipc-chip {
   flex-shrink: 1;
   min-width: 0;
-  padding: 0;
+  /* Equal columns leave little room: a token inner padding keeps the label off the edge, the
+     chip itself never wraps or clips (labels are short: weekday abbreviations). */
+  padding: 0 var(--s-4);
   justify-content: center;
+}
+.uipc--grid {
+  gap: var(--s-4);
 }
 .uipc--scroll {
   overflow-x: auto;
@@ -28,24 +33,30 @@
 }
 .uipc-chip {
   flex-shrink: 0;
-  height: 36px;
-  padding: 0 var(--sp-3);
+  box-sizing: border-box;
+  height: var(--ctl-h);
+  padding: 0 var(--ctl-px);
   border-radius: var(--radius-pill);
   border: 1px solid var(--color-border);
   background: transparent;
   color: var(--color-text);
-  font: 500 var(--fs-13) var(--font);
+  font: 500 var(--ctl-fs) / 1 var(--font);
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: var(--s-6);
+  gap: var(--ctl-gap-in);
   cursor: pointer;
 }
-.uipc--sm .uipc-chip {
-  height: 32px;
-  font-size: var(--fs-12);
+/* Read-only (list items): no press affordance. */
+.uipc--static {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.uipc-chip:hover:not(:disabled):not(.is-on) {
+.uipc--static .uipc-chip {
+  cursor: default;
+}
+.uipc-chip:hover:not(:disabled):not(.is-on):not(li) {
   background: var(--color-tile);
 }
 .uipc-chip.is-on {

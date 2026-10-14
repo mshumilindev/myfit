@@ -1,0 +1,23 @@
+/* ActionMenu. Tokens only. */
+.amenu-anchor {
+  position: relative;
+  display: inline-flex;
+}
+.amenu-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--r-round);
+  background: var(--color-danger-solid);
+  pointer-events: none;
+}
+.amenu {
+  display: flex;
+  flex-direction: column;
+  padding: var(--s-6);
+}
+.amenu-note {
+  margin-top: var(--s-6);
+}

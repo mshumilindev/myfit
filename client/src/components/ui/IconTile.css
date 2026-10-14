@@ -1,9 +1,11 @@
 .uitile {
   --tile: 30px;
+  --tile-r: var(--r-8);
   width: var(--tile);
   height: var(--tile);
   flex-shrink: 0;
-  border-radius: calc(var(--tile) * 0.29);
+  /* a step of the radius scale picked by the tile's size (IconTile.tsx): a re-themed --r-* scale reshapes every tile */
+  border-radius: var(--tile-r);
   display: inline-flex;
   align-items: center;
   justify-content: center;

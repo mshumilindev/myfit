@@ -1,0 +1,478 @@
+/* Program editor tool: LAYOUT ONLY. Surfaces, colours, radii and fonts come from the kit elements it is built of.
+   A host sets --pe-gut and --pe-insp on any ancestor; without them the defaults below apply. */
+.pe-root {
+  min-width: 0;
+}
+.pe-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--pe-gut, var(--s-24));
+}
+/* Above 1100 the inspector sits beside the canvas; at or below it stacks under it (and the phone uses a sheet). */
+@media (min-width: 1101px) {
+  .pe-split {
+    grid-template-columns: minmax(0, 1fr) var(--pe-insp, 24rem);
+  }
+}
+.pe-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-width: 0;
+}
+.pe-inspector {
+  box-sizing: border-box;
+  min-width: 0;
+}
+@media (min-width: 1101px) {
+  .pe-inspector {
+    position: sticky;
+    top: var(--pe-gut, var(--s-24));
+    align-self: start;
+    max-height: calc(100vh - 2 * var(--pe-gut, var(--s-24)));
+    overflow-y: auto;
+  }
+}
+.pe-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-8) var(--s-16);
+  min-height: var(--s-40);
+}
+.pe-hist {
+  display: inline-flex;
+  gap: var(--s-4);
+}
+.pe-summary {
+  margin-inline-start: auto;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+/* Read-only pane: a disabled fieldset must not draw the browser's group frame. */
+.pe-ro {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Coach program tab, editor and check: LAYOUT ONLY. Surfaces, colours, radii and fonts come from the kit elements. */
+.pe-note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.45;
+}
+/* ---- editor + check: layout only ----------------------------------------------------------------------------- */
+.pe-grow {
+  flex: 1 1 auto;
+}
+.pe-hint,
+.pe-p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  line-height: 1.45;
+}
+.pe-p.is-note {
+  font-size: var(--fs-13);
+}
+.pe-newdays {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s-8);
+}
+/* assignment card */
+/* day strip */
+.pe-days-sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.pe-days {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(10rem, 1fr);
+  gap: var(--s-8);
+  overflow-x: auto;
+  padding-bottom: var(--s-4);
+  scroll-snap-type: x proximity;
+}
+.pe-day {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-4);
+  padding: var(--s-12) var(--s-16);
+  text-align: start;
+  scroll-snap-align: start;
+  min-width: 0;
+}
+.pe-day-wd {
+  color: var(--color-text-muted);
+  font-size: var(--fs-12);
+  text-transform: uppercase;
+}
+.pe-day-name {
+  overflow-wrap: anywhere;
+}
+.pe-day-sum,
+.pe-day-mu,
+.pe-day-solo {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  overflow-wrap: anywhere;
+}
+.pe-day-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4);
+  align-items: center;
+}
+/* day card */
+.pe-dc {
+  display: flex;
+  flex-direction: column;
+}
+.pe-dc-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-8) var(--s-12);
+  padding: var(--s-16);
+}
+.pe-dc-t {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-inline-end: auto;
+}
+.pe-dc-t small,
+.pe-dc-s {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.pe-dc-t h2 {
+  margin: 0;
+  font-size: var(--fs-20);
+  overflow-wrap: anywhere;
+}
+.pe-dc-s {
+  flex-basis: 100%;
+}
+.pe-dc-m {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  padding: 0 var(--s-16) var(--s-12);
+}
+.pe-derived {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-8);
+}
+.pe-derived-l {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-8);
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.pe-mbody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  padding: var(--s-4) var(--s-16) var(--s-16);
+}
+.pe-map {
+  align-self: center;
+  max-width: 100%;
+}
+.pe-map-cap {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  text-align: center;
+}
+.pe-mchosen,
+.pe-mgroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.pe-mgroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+.pe-mtiles {
+  flex-wrap: wrap;
+}
+.pe-xl {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0 var(--s-8);
+  list-style: none;
+}
+.pe-xrow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+}
+.pe-xrow > .uirow {
+  flex: 1;
+  min-width: 0;
+}
+.pe-xrow > .pe-addsets {
+  flex: none;
+}
+@media (max-width: 767px) {
+  /* phone: the action sits under the row instead of squeezing the exercise name */
+  .pe-xrow {
+    flex-wrap: wrap;
+    row-gap: var(--s-4);
+    padding-bottom: var(--s-8);
+  }
+  .pe-xrow > .uirow {
+    flex-basis: 100%;
+  }
+  .pe-xrow > .pe-addsets {
+    margin-inline-start: var(--s-16);
+  }
+}
+.pe-xh {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-12);
+  padding: var(--s-4) var(--s-16);
+  color: var(--color-text-muted);
+  font-size: var(--fs-12);
+  text-transform: uppercase;
+}
+.pe-xsub {
+  padding: var(--s-12) var(--s-8) var(--s-4);
+  color: var(--color-text-muted);
+  font-size: var(--fs-12);
+  text-transform: uppercase;
+}
+.pe-xcols {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-16);
+}
+.pe-xs {
+  min-width: 4rem;
+  text-align: end;
+}
+.pe-xt {
+  min-width: 6rem;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  text-align: end;
+}
+.pe-dc-f {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-8);
+  padding: var(--s-12) var(--s-16) var(--s-16);
+}
+@media (max-width: 767px) {
+  .pe-xh,
+  .pe-xt {
+    display: none;
+  }
+  .pe-days {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+}
+/* inspector panes */
+.pe-insp {
+  display: flex;
+  flex-direction: column;
+}
+.pe-insp-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4) var(--s-12);
+  padding: var(--s-16) var(--s-16) var(--s-8);
+}
+.pe-insp-h h2,
+.pe-sheet-t {
+  margin: 0;
+  font-size: var(--fs-18);
+}
+.pe-insp-h span {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.pe-insp-b {
+  padding: 0 var(--s-16) var(--s-16);
+}
+.pe-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+.pe-pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+.pe-ph {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-8);
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.pe-ed-h {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.pe-ed-h > span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.pe-ed-h h3,
+.pe-ed-h h2 {
+  margin: 0;
+  font-size: var(--fs-16);
+}
+.pe-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.pe-acts.is-four {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.pe-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-8);
+}
+.pe-opt {
+  display: flex;
+  flex-direction: column;
+}
+.pe-opt-b {
+  padding: var(--s-8) var(--s-16) var(--s-12);
+}
+.pe-more {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.pe-more-l {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.pe-pick {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pe-cv {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.pe-cv-day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* check */
+.pe-counts {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--s-12) var(--s-16);
+  margin-bottom: var(--s-12);
+}
+.pe-count {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.pe-count b {
+  color: var(--t-text);
+  font-size: var(--fs-28);
+  line-height: 1.1;
+}
+.pe-finds,
+.pe-vols,
+.pe-acts-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pe-finds {
+  gap: var(--s-8);
+}
+.pe-vols {
+  gap: var(--s-12);
+  margin-bottom: var(--s-12);
+}
+.pe-vol {
+  display: grid;
+  grid-template-columns: minmax(6rem, 9rem) 1fr auto;
+  align-items: center;
+  gap: var(--s-4) var(--s-12);
+}
+.pe-vol-n {
+  display: flex;
+  flex-direction: column;
+  overflow-wrap: anywhere;
+}
+.pe-vol-v {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-8);
+}
+.pe-vol-r {
+  grid-column: 2 / -1;
+}
+
+/* Week setup, day name, warm-up exercise editor (athlete / self mode) */
+.pe-weekset {
+  padding-block-end: var(--s-8);
+}
+.pe-dc-t:has(.pe-dc-name) {
+  flex: 1;
+}
+.pe-dc-name {
+  min-width: 0;
+}
+.pe-warm {
+  min-width: 0;
+}
+.pe-warm-btns {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-4);
+}

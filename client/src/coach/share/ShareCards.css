@@ -1,0 +1,12 @@
+.shc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: var(--s-16);
+  align-items: start;
+}
+.shc-states {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: var(--s-16);
+  align-items: start;
+}

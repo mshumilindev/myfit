@@ -1,0 +1,10 @@
+/* ExerciseThumb — Spotter UI kit primitive. Tokens only. */
+.uithumb {
+  --uithumb: 40px;
+  flex: none;
+  width: var(--uithumb);
+  height: var(--uithumb);
+  border-radius: var(--r-8);
+  background: var(--color-tile);
+  object-fit: cover;
+}

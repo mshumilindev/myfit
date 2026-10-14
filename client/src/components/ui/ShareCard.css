@@ -1,0 +1,192 @@
+/* Share card (kit): one panel, one width. Tokens only; surfaces come from Card. */
+.uishc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  text-align: left;
+}
+.uishc--bubble,
+.uishc--dock {
+  max-width: 21.25rem;
+}
+.uishc--dock {
+  gap: var(--s-8);
+}
+.uishc--peek {
+  max-width: none;
+}
+.uishc.is-removed,
+.uishc.is-locked {
+  border-style: dashed;
+}
+.uishc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-8);
+  min-height: var(--s-24);
+}
+.uishc-type {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-6);
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+.uishc-main {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  min-width: 0;
+}
+.uishc-th {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  overflow: hidden;
+  border-radius: var(--r-8);
+  box-sizing: border-box;
+}
+.uishc-th.is-img {
+  object-fit: cover;
+}
+.uishc-th.is-icon {
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+  color: var(--color-text-muted);
+  font-size: var(--fs-20);
+}
+.uishc-th.is-node {
+  place-items: start center;
+  height: 4.5rem;
+}
+.uishc-b {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.uishc-title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--fs-15);
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.uishc-b small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.35;
+}
+.uishc-b small.uishc-reason {
+  color: var(--color-text);
+}
+.uishc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-6);
+  margin-top: var(--s-6);
+}
+.uishc-trend {
+  flex: none;
+  width: 5.5rem;
+}
+.uishc-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.uishc-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  min-height: var(--s-32);
+}
+.uishc-row .uishc-th {
+  width: var(--s-32);
+  height: var(--s-32);
+  font-size: var(--fs-16);
+}
+.uishc-rn {
+  display: -webkit-box;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--fs-14);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.uishc-rm {
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  font-variant-numeric: tabular-nums;
+}
+.uishc-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8) var(--s-24);
+}
+.uishc-facts > span {
+  display: flex;
+  flex-direction: column;
+}
+.uishc-facts small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.uishc-facts b {
+  font-size: var(--fs-14);
+  font-variant-numeric: tabular-nums;
+}
+.uishc-lim {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.35;
+}
+.uishc-lim .ph,
+.uishc-lim svg {
+  flex: none;
+  margin-top: var(--s-2);
+}
+.uishc-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-12);
+  min-height: var(--s-28);
+  padding-top: var(--s-8);
+  border-top: 1px solid var(--color-divider);
+}
+.uishc-foot small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.uishc-open {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-6);
+  margin-left: auto;
+  color: var(--color-accent-text, var(--color-accent));
+  font-size: var(--fs-13);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.uishc.is-loading .uishc-b {
+  gap: var(--s-8);
+}

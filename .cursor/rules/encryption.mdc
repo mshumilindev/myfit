@@ -18,3 +18,4 @@ alwaysApply: true
 - Локальний кеш (localStorage): стани й налаштування доступу зберігаються запечатаними
   (`conditionsCache.ts`), відкритий текст лишається лише як запасний варіант, поки немає ключа.
   Нові чутливі дані в localStorage — лише через цей самий механізм.
+- Колекції коучингу (`NEW_COLLECTIONS`, `client/src/coachCrypto`): лише `sealOrThrow` / `openSealed` (кидає `vault-locked`, без plaintext-запасного варіанта), ніколи `prepareWrite`.

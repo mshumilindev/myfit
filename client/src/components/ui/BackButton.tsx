@@ -12,6 +12,8 @@ export interface BackButtonProps extends Omit<
   text?: ReactNode;
   /** Over a photo / hero image: dark translucent well instead of the surface one. */
   overlay?: boolean;
+  /** Control scale step (styles.css --ctl-h-*): sm 36 (default — header well) / md 44 / lg 52. */
+  size?: 'sm' | 'md' | 'lg';
 }
 
 /**
@@ -23,6 +25,7 @@ export function BackButton({
   label,
   text,
   overlay,
+  size = 'sm',
   className,
   type = 'button',
   ...rest
@@ -33,6 +36,7 @@ export function BackButton({
       className={[
         'uiback',
         'back',
+        `uiback--${size}`,
         text ? 'uiback--text' : '',
         overlay ? 'uiback--overlay' : '',
         className,

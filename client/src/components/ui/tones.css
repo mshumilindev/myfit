@@ -142,3 +142,28 @@
   --t-line: var(--color-people-line);
   --t-on: var(--color-bg);
 }
+
+/* Coach chat families — fixed hues (see styles.css :root). */
+.uit--share {
+  --t-base: var(--color-share);
+  --t-tint: var(--color-share-tint);
+  --t-text: var(--color-share-text);
+  --t-line: var(--color-share-line);
+  --t-on: var(--color-bg);
+}
+.uit--note {
+  --t-base: var(--color-note);
+  --t-tint: var(--color-note-tint);
+  --t-text: var(--color-note-text);
+  --t-line: var(--color-note-line);
+  --t-on: var(--color-bg);
+}
+
+/* Coach app identity — fixed tourmaline, never follows the active app's accent re-skin. */
+.uit--coach {
+  --t-base: var(--color-coach);
+  --t-tint: var(--color-coach-tint);
+  --t-text: var(--color-coach-text);
+  --t-line: var(--color-coach-line);
+  --t-on: var(--color-bg);
+}

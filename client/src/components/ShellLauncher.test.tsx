@@ -27,7 +27,6 @@ function tileClasses(current: Current): string[] {
       onNutrition={noop}
       nutritionEnabled
       onLearn={noop}
-      onSignOut={noop}
       onClose={noop}
     />,
   );

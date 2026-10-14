@@ -5,3 +5,188 @@
 .rail-item {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Tooltip (compact rail, or any item given `tooltip`): hover + focus-visible,
+   Esc dismisses (.is-tip-off). Purely visual — the button carries aria-label. */
+.rail-tip {
+  position: absolute;
+  left: calc(100% + var(--s-8));
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: var(--z-60);
+  padding: var(--s-6) var(--s-12);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-md);
+  font-family: var(--font);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.12s ease,
+    visibility 0.12s ease;
+}
+@media (hover: hover) {
+  .rail-item:hover .rail-tip {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+.rail-item:focus-visible .rail-tip {
+  opacity: 1;
+  visibility: visible;
+}
+.rail-item.is-tip-off .rail-tip {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Coach rails (R-KIT-20). Both only matter at the desktop swap width. */
+.rail.rail--labelled {
+  width: 88px;
+}
+.rail--labelled .rail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-4);
+  box-sizing: border-box;
+  width: 72px;
+  height: 64px;
+  padding: 0 var(--s-4);
+}
+.rail--labelled .rail-item--icon {
+  width: 44px;
+  height: 44px;
+}
+.rail--labelled .rail-label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-13);
+  font-weight: 500;
+  line-height: 1.2;
+}
+.rail.rail--compact {
+  width: 60px;
+}
+.rail--compact .rail-item {
+  width: 44px;
+  height: 44px;
+}
+.rail--compact .rail-item i {
+  font-size: var(--fs-20);
+}
+.rail--compact .rail-label {
+  display: none;
+}
+.rail--compact .account-chip {
+  width: 44px;
+}
+.rail--labelled .rail-item:focus-visible,
+.rail--compact .rail-item:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Coach swap is 768, the real app's is 720: in the 720–767 band a Coach rail
+   stays hidden (the Coach tab bar shows instead — TabBar.css). The literal
+   767.98 is pinned to COACH_BREAKPOINT by breakpoints.test.ts. */
+@media (min-width: 720px) and (max-width: 767.98px) {
+  .rail.rail--coach {
+    display: none;
+  }
+}
+
+/* Height-aware nav (Rail `overflow`): the column takes the space between brand and foot and its
+   height never depends on its content, so the measured height is the room the items have. */
+.rail-nav {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 0;
+}
+/* Fixed tiles: the rail's own sizes (labelled 72x64, compact 44, default 46) at the rail's own
+   5.6px gap, top aligned. Nothing squeezes or stretches; the rail may only drop trailing entries
+   into More (see railOverflow.ts, which holds the same numbers). */
+.rail--overflow .rail-item {
+  flex: none;
+}
+/* The rail's tooltips reach into the content column: keep the rail above it in every app
+   (a flex item honours z-index without being positioned; the sticky Nutrition rail too). */
+.rail.rail--overflow {
+  z-index: var(--z-39);
+}
+.rail-more {
+  display: flex;
+  justify-content: center;
+}
+
+/* Active item (design): ONLY the tinted rounded tile with its accent ring, from the shared
+   `.rail-item.active` (styles.css / glass.css, same in every app: no size change). There is no
+   bar or notch at the rail's edge. */
+
+/* The avatar button's wrapper in the foot (anchor of the account popover): the button stays
+   centred in the rail, the wrapper adds no size of its own. */
+.rail-account {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* The avatar trigger is ONE fixed 44px slot in every app, Coach included (SuiteRailFoot renders it
+   for all six): neither the kit Button's density (the compact Coach density gives it 36px height and
+   padding) nor the app theme may change its box, so the avatar sits at the same offset from the
+   rail bottom everywhere. Specificity beats Button's `.btn--ghost` / density rules. */
+.rail-foot .rail-account .account-chip {
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  margin: var(--space-2) 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Foot extras (shield, mastery, bell, settings): one fixed-height slot each, so the rail can count
+   how many fit (railOverflow.ts RAIL_EXTRA_TILE holds the same numbers). */
+.rail-extra {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 46px;
+}
+.rail--labelled .rail-extra,
+.rail--compact .rail-extra {
+  height: 44px;
+}
+.rail-extra > .rail-mastery {
+  padding: 0;
+}
+
+/* Reduced motion: no slides, fades or loops; state changes are instant. */
+@media (prefers-reduced-motion: reduce) {
+  .rail-tip {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
+}

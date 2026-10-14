@@ -1,17 +1,81 @@
 /**
  * Shell — the suite launcher. A bottom sheet, opened from the header app icon,
- * that switches between the Spotter apps: Gym (the tracker), Apex (gamification)
- * and Nutrition (coming soon). Silver, neutral chrome — the apps supply the
- * colour. One account, one training history.
+ * that switches between the Spotter apps: Gym (the tracker), Apex (gamification),
+ * Nutrition, People, Learn and Coach. Silver, neutral chrome — the apps supply the
+ * colour: every tile wears its own app's accent (IconTile, caret, and the outline + tint + check
+ * of the current tile).
  */
-import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { useT } from '../i18n';
+import { useCoachT } from '../i18n/coach';
+import { coachEntryHash } from '../coach/routes';
+import { useCoachAccess } from '../coach/useCoachAccess';
 import { Card } from './ui/Card';
 import { IconTile } from './ui/IconTile';
-import { ConfirmDialog, Icon, Sheet } from '../ui';
+import { SUITE_TONE } from './suite/suiteTone';
+import { toneClass, type Tone } from './ui/tones';
+import { Icon, Sheet } from '../ui';
 import { consistencyStreak, type StoreState } from '../store';
 
 const DAY = 24 * 3600 * 1000;
+
+/** One launcher row. `tone` is the app's fixed identity family (gold, amethyst, lazurite,
+ *  silver, tourmaline, rubellite); it colours the IconTile, the caret and the current tile. */
+function AppTile({
+  tone,
+  icon,
+  name,
+  badge,
+  sub,
+  current,
+  locked,
+  onSelect,
+  currentLabel,
+  soon,
+}: {
+  tone: Tone;
+  icon: string;
+  name: ReactNode;
+  badge?: ReactNode;
+  sub: ReactNode;
+  current: boolean;
+  locked?: boolean;
+  onSelect?: () => void;
+  currentLabel: string;
+  /** Locked tiles show no caret and no current mark. */
+  soon?: boolean;
+}) {
+  return (
+    <Card
+      as="button"
+      pad="none"
+      className={['shell-tile', toneClass(tone), current ? 'current' : '', locked ? 'locked' : '']
+        .filter(Boolean)
+        .join(' ')}
+      selected={current}
+      aria-current={current ? 'true' : undefined}
+      onClick={locked ? undefined : onSelect}
+      disabled={locked || current}
+    >
+      <IconTile tone={tone} size={48} icon={icon} />
+      <div className="shell-tile-main">
+        <div className="shell-tile-name">
+          {name}
+          {badge}
+        </div>
+        <div className={`shell-tile-sub${soon ? ' soon' : ''}`}>{sub}</div>
+      </div>
+      {locked ? null : current ? (
+        <span className="shell-current">
+          <Icon name="check-circle" />
+          {currentLabel}
+        </span>
+      ) : (
+        <Icon name="caret-right" className="shell-go" />
+      )}
+    </Card>
+  );
+}
 
 export function ShellLauncher({
   store,
@@ -27,12 +91,11 @@ export function ShellLauncher({
   onNutrition,
   nutritionEnabled,
   onLearn,
-  onSignOut,
   onClose,
 }: {
   store: StoreState;
   now: number;
-  current: 'gym' | 'apex' | 'roster' | 'nutrition' | 'learn';
+  current: 'gym' | 'apex' | 'roster' | 'nutrition' | 'learn' | 'coach';
   peopleLabel: string;
   peopleDesc: string;
   activeChallenges: number;
@@ -43,169 +106,101 @@ export function ShellLauncher({
   onNutrition: () => void;
   nutritionEnabled: boolean;
   onLearn: () => void;
-  onSignOut: () => void;
   onClose: () => void;
 }) {
   const { t } = useT();
-  const [confirmSignOut, setConfirmSignOut] = useState(false);
+  const { c } = useCoachT();
+  // Coach dashboard entry: trainer or admin, flag on (coach/access.ts). Hidden otherwise.
+  const coachEnabled = useCoachAccess();
   const sessionsWeek = store.workouts.filter(
     (w) => w.finishedAt !== null && w.startedAt >= now - 7 * DAY,
   ).length;
   const streak = consistencyStreak(now);
 
   return (
-    <Sheet onClose={onClose} className="shell-sheet">
+    <Sheet
+      onClose={onClose}
+      className="shell-sheet"
+      tone={SUITE_TONE[current]}
+      label={t.shellSwitch}
+    >
       <div className="shell-head">{t.shellSwitch}</div>
       <div className="shell-tiles">
-        <Card
-          as="button"
-          pad="none"
-          tone={current === 'gym' ? 'accent' : 'neutral'}
-          emphasis={current === 'gym' ? 'hero' : 'card'}
-          className={`shell-tile${current === 'gym' ? ' current' : ''}`}
-          onClick={onGym}
-          disabled={current === 'gym'}
-        >
-          <IconTile tone="gym" size={48} icon="barbell" />
-          <div className="shell-tile-main">
-            <div className="shell-tile-name">{t.shellGym}</div>
-            <div className="shell-tile-sub">
-              {t.shellSessionsWeek(sessionsWeek)} · {t.shellDayStreak(streak)}
-            </div>
-          </div>
-          {current === 'gym' ? (
-            <span className="shell-current">{t.shellCurrent}</span>
-          ) : (
-            <Icon name="caret-right" className="shell-go" />
-          )}
-        </Card>
-
-        <Card
-          as="button"
-          pad="none"
-          tone={current === 'apex' ? 'accent' : 'neutral'}
-          emphasis={current === 'apex' ? 'hero' : 'card'}
-          className={`shell-tile${current === 'apex' ? ' current' : ''}`}
-          onClick={onApex}
-          disabled={current === 'apex'}
-        >
-          <IconTile tone="apex" size={48} icon="trophy" />
-          <div className="shell-tile-main">
-            <div className="shell-tile-name">
-              {t.apexName}
-              {notifUnread > 0 && (
-                <span className="shell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
-              )}
-            </div>
-            <div className="shell-tile-sub">{t.shellActiveNew(activeChallenges, notifUnread)}</div>
-          </div>
-          {current === 'apex' ? (
-            <span className="shell-current">{t.shellCurrent}</span>
-          ) : (
-            <Icon name="caret-right" className="shell-go" />
-          )}
-        </Card>
-
-        <Card
-          as="button"
-          pad="none"
-          tone={current === 'nutrition' ? 'accent' : 'neutral'}
-          emphasis={current === 'nutrition' ? 'hero' : 'card'}
-          className={`shell-tile${current === 'nutrition' ? ' current' : ''}${
-            nutritionEnabled ? '' : ' locked'
-          }`}
-          onClick={nutritionEnabled ? onNutrition : undefined}
-          disabled={!nutritionEnabled || current === 'nutrition'}
-        >
-          <IconTile tone="kcal" size={48} icon="fork-knife" />
-          <div className="shell-tile-main">
-            <div className="shell-tile-name">{t.shellNutrition}</div>
-            {nutritionEnabled ? (
-              <div className="shell-tile-sub">{t.shellNutritionDesc}</div>
-            ) : (
-              <div className="shell-tile-sub soon">
-                <Icon name="clock" /> {t.shellComingSoon}
-              </div>
-            )}
-          </div>
-          {nutritionEnabled ? (
-            current === 'nutrition' ? (
-              <span className="shell-current">{t.shellCurrent}</span>
-            ) : (
-              <Icon name="caret-right" className="shell-go" />
-            )
-          ) : null}
-        </Card>
-
-        <Card
-          as="button"
-          pad="none"
-          tone={current === 'roster' ? 'accent' : 'neutral'}
-          emphasis={current === 'roster' ? 'hero' : 'card'}
-          className={`shell-tile${current === 'roster' ? ' current' : ''}`}
-          onClick={onRoster}
-          disabled={current === 'roster'}
-        >
-          <IconTile tone="people" size={48} icon="user-focus" />
-          <div className="shell-tile-main">
-            <div className="shell-tile-name">{peopleLabel}</div>
-            <div className="shell-tile-sub">{peopleDesc}</div>
-          </div>
-          {current === 'roster' ? (
-            <span className="shell-current">{t.shellCurrent}</span>
-          ) : (
-            <Icon name="caret-right" className="shell-go" />
-          )}
-        </Card>
-
-        <Card
-          as="button"
-          pad="none"
-          tone={current === 'learn' ? 'accent' : 'neutral'}
-          emphasis={current === 'learn' ? 'hero' : 'card'}
-          className={`shell-tile${current === 'learn' ? ' current' : ''}`}
-          onClick={onLearn}
-          disabled={current === 'learn'}
-        >
-          <IconTile tone="learn" size={48} icon="graduation-cap" />
-          <div className="shell-tile-main">
-            <div className="shell-tile-name">{t.shellLearn}</div>
-            <div className="shell-tile-sub">{t.shellLearnDesc}</div>
-          </div>
-          {current === 'learn' ? (
-            <span className="shell-current">{t.shellCurrent}</span>
-          ) : (
-            <Icon name="caret-right" className="shell-go" />
-          )}
-        </Card>
-      </div>
-      <Card
-        as="button"
-        pad="none"
-        tone="danger"
-        className="shell-signout"
-        onClick={() => setConfirmSignOut(true)}
-      >
-        <Icon name="sign-out" />
-        <span>{t.signOut}</span>
-      </Card>
-      <div className="shell-note">{t.shellNote}</div>
-      {confirmSignOut && (
-        <ConfirmDialog
-          title={t.signOutTitle}
-          body={
-            store.queue.length > 0 ? t.signOutQueueBody(store.queue.length) : t.signOutCleanBody
-          }
-          confirmLabel={t.signOut}
-          cancelLabel={t.cancel}
-          danger
-          onCancel={() => setConfirmSignOut(false)}
-          onConfirm={() => {
-            setConfirmSignOut(false);
-            onSignOut();
-          }}
+        <AppTile
+          tone="gym"
+          icon="barbell"
+          name={t.shellGym}
+          sub={`${t.shellSessionsWeek(sessionsWeek)} · ${t.shellDayStreak(streak)}`}
+          current={current === 'gym'}
+          onSelect={onGym}
+          currentLabel={t.shellCurrent}
         />
-      )}
+        <AppTile
+          tone="apex"
+          icon="trophy"
+          name={t.apexName}
+          badge={
+            notifUnread > 0 ? (
+              <span className="shell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
+            ) : undefined
+          }
+          sub={t.shellActiveNew(activeChallenges, notifUnread)}
+          current={current === 'apex'}
+          onSelect={onApex}
+          currentLabel={t.shellCurrent}
+        />
+        <AppTile
+          tone="kcal"
+          icon="fork-knife"
+          name={t.shellNutrition}
+          sub={
+            nutritionEnabled ? (
+              t.shellNutritionDesc
+            ) : (
+              <>
+                <Icon name="clock" /> {t.shellComingSoon}
+              </>
+            )
+          }
+          soon={!nutritionEnabled}
+          locked={!nutritionEnabled}
+          current={current === 'nutrition'}
+          onSelect={onNutrition}
+          currentLabel={t.shellCurrent}
+        />
+        <AppTile
+          tone="people"
+          icon="user-focus"
+          name={peopleLabel}
+          sub={peopleDesc}
+          current={current === 'roster'}
+          onSelect={onRoster}
+          currentLabel={t.shellCurrent}
+        />
+        {(coachEnabled || current === 'coach') && (
+          <AppTile
+            tone="coach"
+            icon="chalkboard-teacher"
+            name={c.modeCoach}
+            sub={c.shellDesc}
+            current={current === 'coach'}
+            onSelect={() => {
+              window.location.hash = coachEntryHash();
+              onClose();
+            }}
+            currentLabel={t.shellCurrent}
+          />
+        )}
+        <AppTile
+          tone="learn"
+          icon="graduation-cap"
+          name={t.shellLearn}
+          sub={t.shellLearnDesc}
+          current={current === 'learn'}
+          onSelect={onLearn}
+          currentLabel={t.shellCurrent}
+        />
+      </div>
     </Sheet>
   );
 }

@@ -36,13 +36,18 @@ const subtle = (): SubtleCrypto => {
   if (!s) throw new Error('WebCrypto is not available');
   return s;
 };
-const INFO = new TextEncoder().encode('spotter.vault-grant.v1');
+const GRANT_INFO = 'spotter.vault-grant.v1';
 
-async function wrapKey(priv: CryptoKey, pub: CryptoKey): Promise<CryptoKey> {
+async function wrapKey(priv: CryptoKey, pub: CryptoKey, info: string): Promise<CryptoKey> {
   const bits = await subtle().deriveBits({ name: 'ECDH', public: pub }, priv, 256);
   const base = await subtle().importKey('raw', bits, 'HKDF', false, ['deriveKey']);
   return subtle().deriveKey(
-    { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: INFO },
+    {
+      name: 'HKDF',
+      hash: 'SHA-256',
+      salt: new Uint8Array(0),
+      info: new TextEncoder().encode(info),
+    },
     base,
     { name: 'AES-GCM', length: 256 },
     false,
@@ -63,26 +68,107 @@ export async function createCoachKey(ownKey: CryptoKey, ownSalt: string): Promis
   return { v: 1, pub, priv: await encryptJson(ownKey, ownSalt, priv) };
 }
 
+/** What a wrap is bound to. `info` separates purposes; `aad` binds the wrap to its context. */
+export interface WrapOptions {
+  info: string;
+  aad?: Uint8Array;
+}
+
+/** A raw key encrypted for one recipient (ephemeral-static ECDH P-256 + HKDF + AES-GCM). */
+export interface Wrap {
+  v: 1;
+  /** Sender-side ephemeral public key, JWK. */
+  epk: JsonWebKey;
+  iv: string;
+  ct: string;
+}
+
+async function wrapBytes(raw: Uint8Array, recipientPub: JsonWebKey, o: WrapOptions): Promise<Wrap> {
+  const eph = await subtle().generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, [
+    'deriveBits',
+  ]);
+  const wrap = await wrapKey(eph.privateKey, await importPub(recipientPub), o.info);
+  const iv = globalThis.crypto.getRandomValues(new Uint8Array(12));
+  const params: AesGcmParams = { name: 'AES-GCM', iv: iv as BufferSource };
+  if (o.aad) params.additionalData = o.aad as BufferSource;
+  const ct = await subtle().encrypt(params, wrap, raw as BufferSource);
+  return {
+    v: 1,
+    epk: await subtle().exportKey('jwk', eph.publicKey),
+    iv: b64(iv),
+    ct: b64(new Uint8Array(ct)),
+  };
+}
+
+async function unwrapBytes(
+  w: Wrap,
+  recipient: CoachKeyRecord,
+  ownKey: CryptoKey,
+  o: WrapOptions,
+): Promise<ArrayBuffer> {
+  if (w.v !== 1) throw new Error('Unsupported grant version');
+  const privJwk = await decryptJson<JsonWebKey>(ownKey, recipient.priv);
+  const priv = await subtle().importKey(
+    'jwk',
+    privJwk,
+    { name: 'ECDH', namedCurve: 'P-256' },
+    false,
+    ['deriveBits'],
+  );
+  const wrap = await wrapKey(priv, await importPub(w.epk), o.info);
+  const params: AesGcmParams = { name: 'AES-GCM', iv: unb64(w.iv) as BufferSource };
+  if (o.aad) params.additionalData = o.aad as BufferSource;
+  return subtle().decrypt(params, wrap, unb64(w.ct) as BufferSource);
+}
+
+/**
+ * Generic wrap: encrypt any raw key (a CryptoKey that is extractable, or the bytes) for a
+ * recipient's public key. `createGrant` is this with the vault-grant context.
+ */
+export async function createWrap(
+  key: CryptoKey | Uint8Array,
+  recipientPub: JsonWebKey,
+  o: WrapOptions,
+): Promise<Wrap> {
+  const raw =
+    key instanceof Uint8Array ? key : new Uint8Array(await subtle().exportKey('raw', key));
+  return wrapBytes(raw, recipientPub, o);
+}
+
+/**
+ * Generic unwrap: the recipient recovers the key (non-extractable) with the `usages` and
+ * algorithm they choose. Throws on a wrong recipient, a wrong context (`aad`) or a tampered wrap.
+ */
+export async function openWrap(
+  w: Wrap,
+  recipient: CoachKeyRecord,
+  ownKey: CryptoKey,
+  usages: KeyUsage[],
+  o: WrapOptions,
+  algorithm: 'AES-GCM' | 'HKDF' = 'AES-GCM',
+): Promise<CryptoKey> {
+  const raw = await unwrapBytes(w, recipient, ownKey, o);
+  try {
+    return await subtle().importKey(
+      'raw',
+      raw,
+      algorithm === 'HKDF' ? 'HKDF' : { name: 'AES-GCM' },
+      false,
+      usages,
+    );
+  } finally {
+    new Uint8Array(raw).fill(0);
+  }
+}
+
 /** Athlete: encrypt the vault key for a coach. */
 export async function createGrant(
   dek: CryptoKey,
   salt: string,
   coachPub: JsonWebKey,
 ): Promise<Grant> {
-  const eph = await subtle().generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, [
-    'deriveBits',
-  ]);
-  const wrap = await wrapKey(eph.privateKey, await importPub(coachPub));
-  const raw = new Uint8Array(await subtle().exportKey('raw', dek));
-  const iv = globalThis.crypto.getRandomValues(new Uint8Array(12));
-  const ct = await subtle().encrypt({ name: 'AES-GCM', iv: iv as BufferSource }, wrap, raw);
-  return {
-    v: 1,
-    epk: await subtle().exportKey('jwk', eph.publicKey),
-    salt,
-    iv: b64(iv),
-    ct: b64(new Uint8Array(ct)),
-  };
+  const w = await createWrap(dek, coachPub, { info: GRANT_INFO });
+  return { v: 1, epk: w.epk, salt, iv: w.iv, ct: w.ct };
 }
 
 /** Coach: recover the athlete's data key (non-extractable) using their own vault key. */
@@ -91,22 +177,8 @@ export async function openGrant(
   coach: CoachKeyRecord,
   ownKey: CryptoKey,
 ): Promise<{ key: CryptoKey; salt: string }> {
-  if (grant.v !== 1) throw new Error('Unsupported grant version');
-  const privJwk = await decryptJson<JsonWebKey>(ownKey, coach.priv);
-  const priv = await subtle().importKey(
-    'jwk',
-    privJwk,
-    { name: 'ECDH', namedCurve: 'P-256' },
-    false,
-    ['deriveBits'],
-  );
-  const wrap = await wrapKey(priv, await importPub(grant.epk));
-  const raw = await subtle().decrypt(
-    { name: 'AES-GCM', iv: unb64(grant.iv) as BufferSource },
-    wrap,
-    unb64(grant.ct) as BufferSource,
-  );
-  const key = await subtle().importKey('raw', raw, { name: 'AES-GCM' }, false, ['decrypt']);
+  // decrypt only: a coach must not be able to write under an athlete's key
+  const key = await openWrap(grant, coach, ownKey, ['decrypt'], { info: GRANT_INFO });
   return { key, salt: grant.salt };
 }
 

@@ -334,7 +334,7 @@ export function LanguageChip({ compact }: { compact?: boolean }) {
       };
   return (
     <div style={{ position: 'relative' }}>
-      <Chip size={compact ? 'sm' : 'md'} onClick={() => setOpen((o) => !o)}>
+      <Chip size={compact ? 'xs' : 'sm'} onClick={() => setOpen((o) => !o)}>
         {compact ? cur.flag : `${cur.flag} ${cur.label}`}
       </Chip>
       {open && (

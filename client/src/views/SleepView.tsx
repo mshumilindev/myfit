@@ -416,6 +416,7 @@ function SleepBackfill({ onDone, onBack }: { onDone: () => void; onBack: () => v
     <Segmented<number>
       variant="buttons"
       tone="sleep"
+      size="lg"
       className="sleep-dayseg"
       value={sel}
       onChange={set}

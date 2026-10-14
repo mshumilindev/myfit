@@ -29,6 +29,14 @@ import {
   estimatedOneRepMaxKg,
   type StoredWorkout,
 } from './aggregates';
+import {
+  aggregateWorkouts,
+  canSeeFull,
+  cutWorkouts,
+  legacyCut,
+  type LegacyCut,
+} from './coach/legacy';
+import { coachKv } from './coach/runtime';
 
 const DAY = 24 * 60 * 60 * 1000;
 const USERNAME_MAX = 64;
@@ -295,51 +303,69 @@ async function auditFor(userId: string) {
     }));
 }
 
+/**
+ * `cut` is the consent cut for a NON-self viewer (see coach/legacy.ts): the same relationship and per-category levels as
+ * `coachRead`. Data a level does not grant is not fetched at all; `null` = the viewer is the subject.
+ */
 async function fullProfilePayload(
   viewer: UserDoc,
   target: UserDoc,
   relation: 'self' | 'admin' | 'trainer',
+  cut: LegacyCut | null = null,
 ) {
-  const workouts = await listUserWorkouts(target.id);
+  const all = await listUserWorkouts(target.id);
+  const workouts = aggregateWorkouts(cut, all); // totals/effects: open fields only; sets: full documents
+  const sessionList = cutWorkouts(cut, all); // per-session detail needs totals `full`
   const gymsSnap = await db.collection('users').doc(target.id).collection('gyms').get();
   const gyms = gymsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GymDoc, 'id'>) }));
   const gymMap = new Map(gyms.filter((g) => typeof g.name === 'string').map((g) => [g.id, g]));
-  // Body metrics (§6a.4): the target's own doc, read via Admin SDK so an
-  // authorized admin/trainer can view it read-only despite client rules.
-  const bodySnap = await db.collection('users').doc(target.id).collection('meta').doc('body').get();
-  const bodyRaw = bodySnap.exists ? (bodySnap.data() as Record<string, unknown>) : null;
+  // Body metrics (§6a.4): the target's own doc; only with body `full` (or for the owner).
+  const bodyRaw = canSeeFull(cut, 'body')
+    ? await db
+        .collection('users')
+        .doc(target.id)
+        .collection('meta')
+        .doc('body')
+        .get()
+        .then((s) => (s.exists ? (s.data() as Record<string, unknown>) : null))
+    : null;
   const bodyMetrics = bodyRaw
     ? { ...bodyRaw, weights: Array.isArray(bodyRaw.weights) ? bodyRaw.weights : [] }
     : null;
-  // Full logged history so a trainer's client page renders the same timeline as
-  // "My history": workouts (full), activities, sleeps and rest/illness periods.
-  const [actsSnap, sleepsSnap, restSnap] = await Promise.all([
-    db
-      .collection('users')
-      .doc(target.id)
-      .collection('activities')
-      .orderBy('startedAt', 'desc')
-      .limit(120)
-      .get(),
-    db.collection('users').doc(target.id).collection('sleeps').limit(120).get(),
-    db.collection('users').doc(target.id).collection('restPeriods').get(),
-  ]);
-  const history = {
-    workouts: workouts.slice(0, 80),
-    activities: actsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) })),
-    sleeps: sleepsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) })),
-    restPeriods: restSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) })),
+  // Full logged history so a trainer's client page renders the same timeline as "My history": each stream only at the
+  // level that earns it (activities/sessions: totals full, sleeps: sleep full, rest and illness: injury full).
+  const rows = async (coll: string, order?: string, lim?: number) => {
+    let q: FirebaseFirestore.Query = db.collection('users').doc(target.id).collection(coll);
+    if (order) q = q.orderBy(order, 'desc');
+    if (lim) q = q.limit(lim);
+    return (await q.get()).docs.map((d) => ({
+      id: d.id,
+      ...(d.data() as Record<string, unknown>),
+    }));
   };
-  // Vault grant: the athlete's data key encrypted for THIS viewer (ciphertext only). The
-  // viewer's device decrypts the sealed documents above; the server holds no readable key.
+  const [activities, sleeps, restPeriods] = await Promise.all([
+    canSeeFull(cut, 'totals') ? rows('activities', 'startedAt', 120) : [],
+    canSeeFull(cut, 'sleep') ? rows('sleeps', undefined, 120) : [],
+    canSeeFull(cut, 'injury') ? rows('restPeriods') : [],
+  ]);
+  const history = { workouts: sessionList.slice(0, 80), activities, sleeps, restPeriods };
+  // Vault grant: the athlete's data key encrypted for THIS viewer (ciphertext only), handed over only while a sealed
+  // category is actually readable (same rule as `coachRead`).
+  const sealedReadable =
+    cut === null ||
+    cut.sets === 'full' ||
+    cut.body === 'full' ||
+    cut.sleep === 'full' ||
+    cut.injury === 'full' ||
+    cut.nutrition === 'full';
   const grantSnap =
-    relation === 'self'
+    relation === 'self' || !sealedReadable
       ? null
       : await db.collection('users').doc(target.id).collection('grants').doc(viewer.id).get();
   const grant = grantSnap?.exists ? (grantSnap.data() as Record<string, unknown>) : null;
-  // Condition share: ciphertext the athlete prepared for coaches (only what they allowed).
+  // Condition share: ciphertext the athlete prepared for coaches (only what they allowed); coach of record only.
   const shareSnap =
-    relation === 'self'
+    relation === 'self' || !cut?.coach
       ? null
       : await db.collection('users').doc(target.id).collection('meta').doc('coachShare').get();
   const coachShare = shareSnap?.exists ? (shareSnap.data() as Record<string, unknown>) : null;
@@ -349,14 +375,18 @@ async function fullProfilePayload(
     grant,
     person: await personJson(target),
     access: await accessList(target),
+    /** the levels this viewer holds (null for the owner): the UI shows locked sections instead of empty ones */
+    consent: cut
+      ? { totals: cut.totals, sets: cut.sets, body: cut.body, sleep: cut.sleep, injury: cut.injury }
+      : null,
     summary: trainingSummary(workouts),
-    sessions: recentSessions(workouts, gymMap),
-    gyms: gymStats(workouts, gyms),
+    sessions: recentSessions(sessionList, gymMap),
+    gyms: canSeeFull(cut, 'totals') ? gymStats(workouts, gyms) : [],
     // Ciphertext of vault-sealed gyms, for the viewer's device to open with the grant.
-    sealedGyms: gyms.filter((g) => (g as { enc?: unknown }).enc),
+    sealedGyms: sealedReadable ? gyms.filter((g) => (g as { enc?: unknown }).enc) : [],
     topExercises: topExercises(workouts),
     history,
-    notes: await notesFor(target.id),
+    notes: relation === 'self' || cut?.coach ? await notesFor(target.id) : [],
     audit: relation === 'self' ? await auditFor(target.id) : [],
     bodyMetrics,
   };
@@ -456,8 +486,16 @@ export const profileUser = onCall(async (req) => {
   const relation = canReadProfile(viewer, target);
   if (!relation) throw new HttpsError('permission-denied', 'forbidden');
   await recordAudit(viewer.id, target.id, 'profile');
-  return fullProfilePayload(viewer, target, relation);
+  const cut = relation === 'self' ? null : await legacyCut(coachKv, viewer.id, target.id);
+  return fullProfilePayload(viewer, target, relation, cut);
 });
+
+/** Set-level detail is the `sets: full` category: the owner always, a coach only with that consent (not an admin by role). */
+async function requireSetsConsent(viewerId: string, targetId: string): Promise<void> {
+  const cut = await legacyCut(coachKv, viewerId, targetId);
+  if (cut && !canSeeFull(cut, 'sets'))
+    throw new HttpsError('permission-denied', 'consent-required', { reason: 'consent-required' });
+}
 
 // --- Athlete drill-downs (trainer/admin, read-only, audited) ---------------
 // Client rules forbid cross-user workout reads, so a trainer's per-session and
@@ -478,6 +516,7 @@ export const athleteWorkout = onCall(async (req) => {
   if (!target) throw new HttpsError('not-found', 'not found');
   const relation = canReadProfile(viewer, target);
   if (!relation) throw new HttpsError('permission-denied', 'forbidden');
+  await requireSetsConsent(viewer.id, target.id);
   const snap = await db
     .collection('users')
     .doc(target.id)
@@ -502,6 +541,7 @@ export const athleteExerciseHistory = onCall(async (req) => {
   if (!target) throw new HttpsError('not-found', 'not found');
   const relation = canReadProfile(viewer, target);
   if (!relation) throw new HttpsError('permission-denied', 'forbidden');
+  await requireSetsConsent(viewer.id, target.id);
   const needle = name.trim().toLowerCase();
   const workouts = await listUserWorkouts(target.id);
   const rows = workouts

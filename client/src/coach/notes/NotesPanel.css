@@ -1,0 +1,97 @@
+/* Layout only: Card, Tag, Chip, Segmented, SearchField, Notice, Button are the kit's. */
+.nts {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  min-height: 0;
+  min-width: 0;
+}
+.nts-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-8);
+}
+.nts-t {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  margin: 0;
+  min-width: 0;
+  font-size: var(--fs-17);
+}
+.nts-t > span:first-of-type {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.nts-b {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  min-height: 0;
+  overflow-y: auto;
+}
+.nts.is-page .nts-b {
+  overflow: visible;
+}
+.nts-add {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.nts-ctx {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.nts-addr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-12);
+}
+.nts-enc {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-6);
+  min-width: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.nts-found {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.nts-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nts-edit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.nts-editr {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s-8);
+}
+.nts-dock {
+  position: sticky;
+  bottom: 0;
+  padding-top: var(--s-8);
+}
+.nts-flash {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  padding: var(--s-12) var(--s-16);
+}
+.nts.is-sheet .nts-h {
+  display: none;
+}

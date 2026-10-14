@@ -1,0 +1,80 @@
+/* Decisions (receipts) list. Tokens only. */
+.dc-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--co-gut);
+  min-width: 0;
+}
+.dc-insight {
+  margin: var(--s-12) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  line-height: 1.45;
+}
+.dc-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.dc-tools > :first-child {
+  flex: 1 1 var(--co-basis-m);
+  min-width: 0;
+}
+.dc-fbtn {
+  display: inline-flex;
+}
+.dc-more {
+  display: flex;
+  justify-content: flex-start;
+}
+.dc-rec-t {
+  margin: 0 0 var(--s-16);
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+.dc-big {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-16);
+}
+.dc-big b {
+  color: var(--color-text);
+  font-size: var(--fs-32);
+  font-weight: 700;
+}
+.dc-bar {
+  margin: var(--s-12) 0;
+}
+.dc-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-8) var(--s-16);
+}
+.dc-legend b {
+  margin-left: var(--s-4);
+  color: var(--color-text);
+}
+.dc-hist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+.dc-hist-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.dc-h2-n {
+  margin-left: auto;
+  margin-right: var(--s-8);
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.dc-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.dc-group + .dc-group {
+  margin-top: var(--s-8);
+}

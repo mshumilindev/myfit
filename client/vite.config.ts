@@ -122,6 +122,10 @@ export default defineConfig({
       },
     }),
   ],
+  // Pre-bundle at server start, not on first visit: `body-muscles` is only reached through lazy Coach/Programs
+  // chunks, and a dependency discovered late re-optimises the cache while open tabs still hold the old hash
+  // (the stale `504 Outdated Optimize Dep` that left lazy screens blank).
+  optimizeDeps: { include: ['body-muscles'] },
   server: {
     port: 5173,
     proxy: {

@@ -49,3 +49,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.uiss--wrap .uiss-lab {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  text-align: center;
+}

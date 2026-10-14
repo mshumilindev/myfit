@@ -450,7 +450,7 @@ const volumeLandmarks: WidgetDef = {
           onClick={open}
           trailing={
             worst ? (
-              <Chip size="sm">
+              <Chip size="xs">
                 {worst.zone === 'over'
                   ? `MRV ${fmtKg(worst.lm.mrv)}`
                   : `MEV ${fmtKg(worst.lm.mev)}`}
@@ -747,7 +747,7 @@ function LrSheet({
         {lifts.length > 0 && (
           <div className="ul-flex ug-6 ul-wrap">
             {lifts.slice(0, 6).map((n) => (
-              <Chip key={n} size="sm" selected={n === name} onClick={() => setName(n)}>
+              <Chip key={n} size="xs" selected={n === name} onClick={() => setName(n)}>
                 {exName(n, locale)}
               </Chip>
             ))}
@@ -854,7 +854,7 @@ function LrWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           sub={`${exName(w.name, locale)} · ${pair}`}
           onClick={add}
           trailing={
-            <Chip size="sm">
+            <Chip size="xs">
               {even ? s.even : s.sideTag(d < 0 ? s.l : s.r, Math.round(Math.abs(d)))}
             </Chip>
           }
@@ -1011,7 +1011,7 @@ const muscleWeek: WidgetDef = {
           title={s.focus(name)}
           sub={s.mwSub(fmtKg(done), goal, toGo, endDay)}
           onClick={open}
-          trailing={<Chip size="sm">{Math.round(pct * 100)}%</Chip>}
+          trailing={<Chip size="xs">{Math.round(pct * 100)}%</Chip>}
         />
       );
     if (size === 'S')
@@ -1261,7 +1261,7 @@ const frequencyW: WidgetDef = {
           title={s.hitTwice(hit, rich.length)}
           sub={lowLine}
           onClick={open}
-          trailing={<Chip size="sm">{`${low.label} ${fr.counts[lowI]}×`}</Chip>}
+          trailing={<Chip size="xs">{`${low.label} ${fr.counts[lowI]}×`}</Chip>}
         />
       );
     if (size === 'S')
@@ -1396,7 +1396,7 @@ const pplSplit: WidgetDef = {
           }
           sub={`${devLine} · ${s.weeks4}`}
           onClick={open}
-          trailing={<Chip size="sm">{`${s.pplName[dev.k]} ${pct[dev.k]}%`}</Chip>}
+          trailing={<Chip size="xs">{`${s.pplName[dev.k]} ${pct[dev.k]}%`}</Chip>}
         />
       );
     if (size === 'S')
@@ -1616,7 +1616,7 @@ const heatmap: WidgetDef = {
           title={s.weekStreak(heat.weekStreak)}
           sub={s.sessions16(n16, per)}
           onClick={open}
-          trailing={<Chip size="sm">{s.bestN(heat.bestWeekStreak)}</Chip>}
+          trailing={<Chip size="xs">{s.bestN(heat.bestWeekStreak)}</Chip>}
         />
       );
     if (size === 'S')
@@ -2229,7 +2229,7 @@ const bestTime: WidgetDef = {
           title={s.strongest(dayL(best.d), s.slotName[best.slot].toLowerCase())}
           sub={s.topSets(sign(best.v))}
           onClick={open}
-          trailing={<Chip size="sm">{s.slotRange[best.slot]}</Chip>}
+          trailing={<Chip size="xs">{s.slotRange[best.slot]}</Chip>}
         />
       );
     if (size === 'S')

@@ -27,6 +27,12 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   blend?: Array<'sport' | 'conditioning' | 'rest'>;
   pad?: CardPad;
   emphasis?: CardEmphasis;
+  /** The chosen one of a set (current app in the launcher): the tone's tint, a 2px outline in its
+   *  colour: pass a `tone`, or put a `uit--<tone>` class on the card (the launcher does, so its
+   *  unselected tiles stay neutral). */
+  selected?: boolean;
+  /** A card inside another card: flat (no plate, no border, no shadow), so panels never stack. R-KIT-25. */
+  nested?: boolean;
   /** Solid surface instead of glass — for cards that stack over each other (decks). */
   opaque?: boolean;
   /** Only meaningful with `as="button"`. */
@@ -56,6 +62,8 @@ export function Card({
   pad = 'md',
   emphasis = 'card',
   opaque = false,
+  nested = false,
+  selected = false,
   header,
   children,
   className,
@@ -67,10 +75,12 @@ export function Card({
   const cls = [
     'uicard',
     `uicard--${tone}`,
-    tone !== 'neutral' ? toneClass(tone) : '',
+    tone !== 'neutral' || selected ? toneClass(tone) : '',
     `uicard--pad-${pad}`,
     emphasis !== 'card' ? `uicard--e-${emphasis}` : '',
     opaque ? 'uicard--opaque' : '',
+    nested ? 'uicard--nested' : '',
+    selected ? 'uicard--selected' : '',
     mix ? 'uicard--blend' : '',
     className,
   ]

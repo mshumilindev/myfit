@@ -58,7 +58,7 @@ export function GoalsView({
 
   return (
     <div className="screen programs-page programs-author-page programs-has-tabs goals-tab">
-      <div className="programs-top">
+      <div className="programs-top ctl-row--md">
         <div>
           <div className="kicker">{t.training}</div>
           <h2 className="title-26">{t.goalsTab}</h2>
@@ -138,7 +138,7 @@ export function GoalsView({
                     <div className="goals-focus-lbl grow">{t.emphGrow}</div>
                     <ChipGroup>
                       {grow.map((f) => (
-                        <Chip key={f} size="sm" tone="accent">
+                        <Chip key={f} size="xs" tone="accent">
                           {label(f)}
                         </Chip>
                       ))}
@@ -150,7 +150,7 @@ export function GoalsView({
                     <div className="goals-focus-lbl ease">{t.emphEase}</div>
                     <ChipGroup>
                       {ease.map((f) => (
-                        <Chip key={f} size="sm" tone="danger">
+                        <Chip key={f} size="xs" tone="danger">
                           {label(f)}
                         </Chip>
                       ))}
@@ -205,7 +205,7 @@ export function GoalsView({
                 <div className="goals-move" key={mv.name}>
                   <Icon name="chart-line-up" />
                   <span className="goals-move-name">{exName(mv.name)}</span>
-                  <Chip size="sm" tone="accent">
+                  <Chip size="xs" tone="accent">
                     {label(mv.region)}
                   </Chip>
                 </div>

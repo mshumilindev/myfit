@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { toneClass } from './tones';
 import { Card, type CardEmphasis, type CardTone } from './Card';
 import { Stack } from '../../stories/LocaleMatrix';
 
@@ -55,6 +56,24 @@ export const Tones: Story = {
   ),
 };
 
+/** `selected`: the chosen card of a set — the tone's tint and a 2px outline (launcher's current app). */
+export const Selected: Story = {
+  render: () => (
+    <Stack>
+      {(['gym', 'apex', 'kcal', 'people', 'coach', 'learn'] as const).map((tone) => (
+        <Card key={tone} as="button" tone="neutral" className={toneClass(tone)} header={tone}>
+          Not selected, neutral surface.
+        </Card>
+      ))}
+      {(['gym', 'apex', 'kcal', 'people', 'coach', 'learn'] as const).map((tone) => (
+        <Card key={`s-${tone}`} as="button" tone={tone} selected header={`${tone} selected`}>
+          Selected: tint plus outline in the family colour.
+        </Card>
+      ))}
+    </Stack>
+  ),
+};
+
 /** Emphasis levels: one hero per screen, a glass or two, ordinary cards, quiet rows. */
 export const Emphasis: Story = {
   render: () => (
@@ -84,5 +103,16 @@ export const PaddingAndContent: Story = {
         intensywności.
       </Card>
     </Stack>
+  ),
+};
+
+/** `nested`: a card inside a card is flat (no plate, border or shadow), so panels never stack (R-KIT-25). */
+export const Nested: Story = {
+  render: () => (
+    <Card header="Parent card">
+      <Card nested pad="sm" header="Nested card">
+        Reads as part of the parent: the parent surface shows through.
+      </Card>
+    </Card>
   ),
 };

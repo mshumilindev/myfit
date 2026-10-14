@@ -10,9 +10,6 @@
 .uiwk .uiwk-pick {
   flex: 1;
   min-width: 0;
-  height: auto;
-  min-height: 46px;
-  padding-block: var(--s-6);
   border-radius: var(--radius-pill);
 }
 .uiwk-text {

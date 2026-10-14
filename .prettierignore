@@ -1,6 +1,7 @@
 # Збірки й залежності
 node_modules/
 dist/
+dist-e2e*/
 dev-dist/
 coverage/
 storybook-static/
@@ -23,6 +24,7 @@ _to_delete/
 _wctx2/
 client/.chronic-out/
 client/.chronic-real/
+client/design-lab/
 
 # Зовнішні конфіги, чутливі до форматування
 cloudflare/config.example.yml

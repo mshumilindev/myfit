@@ -326,8 +326,8 @@ export function Gallery({ onClose }: { onClose: () => void }) {
           <Chip icon="target" selected>
             with icon
           </Chip>
-          <Chip size="sm">small</Chip>
-          <Chip tone="rest" size="sm" icon="clock">
+          <Chip size="xs">small</Chip>
+          <Chip tone="rest" size="xs" icon="clock">
             rest sm
           </Chip>
         </ChipGroup>

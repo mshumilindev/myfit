@@ -979,7 +979,7 @@ function AddPanel({
           {!searching && (
             <div className="tdc-chips tdc-ap-chips">
               {['all', ...widgetGroups].map((g) => (
-                <Chip key={g} size="sm" selected={group === g} onClick={() => setGroup(g)}>
+                <Chip key={g} size="xs" selected={group === g} onClick={() => setGroup(g)}>
                   {g === 'all' ? t.todayAll : tw.groups[g]}
                 </Chip>
               ))}
@@ -1230,7 +1230,7 @@ function PickerSheet({
       {!searching && (
         <div className="tdc-chips">
           {['all', ...groupIds].map((g) => (
-            <Chip key={g} size="sm" selected={group === g} onClick={() => setGroup(g)}>
+            <Chip key={g} size="xs" selected={group === g} onClick={() => setGroup(g)}>
               {g === 'all' ? t.todayAll : groupName(g)}
             </Chip>
           ))}
@@ -1337,7 +1337,7 @@ function ShortcutsSheet({
       {!searching && (
         <div className="tdc-chips">
           {(['all', 'train', 'activity', 'health'] as const).map((g) => (
-            <Chip key={g} size="sm" selected={group === g} onClick={() => setGroup(g)}>
+            <Chip key={g} size="xs" selected={group === g} onClick={() => setGroup(g)}>
               {g === 'all' ? t.todayAll : tw.groups[g]}
             </Chip>
           ))}

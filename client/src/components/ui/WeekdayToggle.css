@@ -1,0 +1,71 @@
+/* WeekdayToggle — Spotter UI kit primitive. Layout + tokens only; each tile is the kit Card. */
+.uiwd {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--s-8);
+}
+.uiwd-d {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-width: 0;
+  min-height: var(--ctl-h-lg);
+  padding: var(--s-6) var(--s-8);
+  font-family: var(--font);
+  font-size: var(--fs-14);
+  font-weight: 600;
+  text-align: center;
+}
+.uiwd-d:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.uiwd-l {
+  line-height: 1.2;
+}
+.uiwd-s {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--fs-12);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* A phone has no room for the second line: the day word and the state in the group's summary stay. */
+@media (max-width: 520px) {
+  .uiwd {
+    gap: var(--s-4);
+  }
+  .uiwd-s {
+    display: none;
+  }
+  .uiwd-d {
+    padding-inline: var(--s-4);
+  }
+}
+
+/* Static tile (read-only, or a rest day): information, not a control. No plate, no outline, no pointer; the day the
+   trainer is there is told by the accent ink and a dot under the word, never by something that looks pressable. */
+.uiwd-d.is-static {
+  cursor: default;
+  min-height: 0;
+  color: var(--color-text-faint);
+}
+.uiwd-d.is-static .uiwd-s {
+  color: inherit;
+}
+.uiwd-d.is-static.is-on {
+  color: var(--t-text);
+}
+.uiwd-d.is-static.is-on .uiwd-l::after {
+  content: '';
+  display: block;
+  width: var(--s-4);
+  height: var(--s-4);
+  margin: var(--s-2) auto 0;
+  border-radius: var(--radius-pill);
+  background: var(--t-base);
+}

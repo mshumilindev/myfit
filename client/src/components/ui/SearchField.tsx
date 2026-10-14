@@ -4,7 +4,7 @@ import './SearchField.css';
 
 export interface SearchFieldProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,
-  'value' | 'onChange' | 'type' | 'placeholder'
+  'value' | 'onChange' | 'type' | 'placeholder' | 'size'
 > {
   value: string;
   onChange: (value: string) => void;
@@ -13,6 +13,8 @@ export interface SearchFieldProps extends Omit<
   clearLabel: string;
   /** Shown at the end while the field is empty (e.g. "All types · 24"). */
   hint?: ReactNode;
+  /** Control scale step (styles.css --ctl-h-*): sm 36 / md 44 (default) / lg 52. */
+  size?: 'sm' | 'md' | 'lg';
 }
 
 /**
@@ -21,11 +23,11 @@ export interface SearchFieldProps extends Omit<
  * is this one component — pass `className` only for layout (margins/flex).
  */
 export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(function SearchField(
-  { value, onChange, placeholder, clearLabel, hint, className, ...rest },
+  { value, onChange, placeholder, clearLabel, hint, size = 'md', className, ...rest },
   ref,
 ) {
   return (
-    <label className={['uisearch', className ?? ''].filter(Boolean).join(' ')}>
+    <label className={['uisearch', `uisearch--${size}`, className ?? ''].filter(Boolean).join(' ')}>
       <Icon name="magnifying-glass" className="uisearch-ic" />
       <input
         {...rest}

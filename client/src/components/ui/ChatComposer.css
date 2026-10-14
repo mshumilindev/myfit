@@ -1,0 +1,45 @@
+.uicomp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  min-width: 0;
+}
+.uicomp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.uicomp-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s-8);
+  min-width: 0;
+}
+.uicomp-lead {
+  display: flex;
+  flex: none;
+  gap: var(--s-8);
+}
+.uicomp-field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.uicomp-field .uifield-area {
+  min-height: 0;
+  max-height: 128px;
+  resize: none;
+}
+/* Drawn only when there is a real reason (too long, blocked); otherwise it is visually hidden but still spoken. */
+.uicomp-why {
+  margin: 0;
+  color: var(--color-danger-text);
+  font-size: var(--fs-13);
+}
+.uicomp-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}

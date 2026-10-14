@@ -25,3 +25,7 @@ const opts = (
 
 export const Default: Story = { args: { children: opts } };
 export const WithError: Story = { args: { children: opts, error: 'Pick a day' } };
+/** Label inside the well ("Gym: All gyms"): a toolbar filter as tall as the buttons next to it. */
+export const InlineLabel: Story = {
+  args: { label: 'Gym', labelInline: true, children: opts },
+};

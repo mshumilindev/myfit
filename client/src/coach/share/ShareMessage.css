@@ -1,0 +1,6 @@
+.shx-cap {
+  display: block;
+  margin-top: var(--s-8);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}

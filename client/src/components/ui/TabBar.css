@@ -14,7 +14,7 @@
   /* MFTabs: 8 12 22 in mockups where 22 === home indicator. On a real PWA the
      full safe-area under the labels reads as a dead band, so trim it (keeping a
      small floor for home-indicator clearance) — never 22px + safe-area. */
-  padding: 8px 12px max(8px, calc(var(--safe-bottom) - 16px));
+  padding: var(--s-8) var(--s-12) max(var(--s-8), calc(var(--safe-bottom) - var(--s-16)));
   background: var(--color-tabbar);
   border-top: 1px solid var(--color-divider);
   z-index: var(--z-30);
@@ -107,6 +107,36 @@
 @media (min-width: 720px) {
   .tabbar-wrap,
   .tabbar {
+    display: none;
+  }
+}
+
+/* Item badge (R-KIT-21): the icon gets a relative wrapper only when a badge is
+   shown, so a bar without badges renders exactly as before. */
+.tabbar-ico {
+  position: relative;
+  display: inline-flex;
+}
+.tabbar-ico .uibadge.uibadge--corner {
+  top: -8px;
+  right: -16px;
+  box-shadow: 0 0 0 2px var(--color-tabbar);
+}
+
+/* Coach swap is 768, the real app's is 720 (R-KIT-31): in the 720–767 band a
+   Coach bar stays up. The literal 767.98 is pinned to COACH_BREAKPOINT by
+   breakpoints.test.ts. */
+@media (min-width: 720px) and (max-width: 767.98px) {
+  .tabbar-wrap.tabbar-wrap--coach {
+    display: block;
+  }
+  .tabbar.tabbar--coach {
+    display: grid;
+  }
+}
+@media (min-width: 768px) {
+  .tabbar-wrap.tabbar-wrap--coach,
+  .tabbar.tabbar--coach {
     display: none;
   }
 }

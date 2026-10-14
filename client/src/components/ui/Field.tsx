@@ -2,6 +2,8 @@ import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
 import './Field.css';
 
 export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
+  /** Control scale step (styles.css --ctl-h-*): sm 36 / md 44 (default) / lg 52. */
+  size?: 'sm' | 'md' | 'lg';
   /** Label above the input. */
   label?: ReactNode;
   /** Error text under the input; also paints the error ring. */
@@ -23,10 +25,16 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  * NumberStepper; typed times in TimeInput.
  */
 export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
-  { label, error, hint, lead, trail, bare, className, id, ...rest },
+  { label, error, hint, lead, trail, bare, size = 'md', className, id, ...rest },
   ref,
 ) {
-  const cls = ['uifield', error ? 'uifield--err' : '', bare ? 'uifield--bare' : '', className]
+  const cls = [
+    'uifield',
+    `uifield--${size}`,
+    error ? 'uifield--err' : '',
+    bare ? 'uifield--bare' : '',
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
   return (

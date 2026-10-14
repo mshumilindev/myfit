@@ -38,6 +38,7 @@ import type { BodyMetrics } from '../types';
 import { GymThumb } from '../components/GymThumb';
 import type { Shell } from '../App';
 import { Select } from '../components/ui/Select';
+import { QuietHoursRows } from './QuietHoursRows';
 import { Tag } from '../components/ui/Tag';
 
 interface ProfileData {
@@ -609,6 +610,7 @@ export function ProfileView({
                     ))}
                   </Select>
                 </div>
+                <QuietHoursRows />
                 <ListRow
                   icon={<Icon name="robot" />}
                   label={`${t.atlasName}${coach.enabled ? ` · ${t.atlasTemper[temperIndex(coach.temper)]}` : ''}`}

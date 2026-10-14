@@ -1,0 +1,36 @@
+/* RangeBar — Spotter UI kit primitive. Tokens only. */
+.uirange {
+  position: relative;
+  width: 100%;
+  height: var(--s-8);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+  overflow: hidden;
+}
+.uirange-band {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: var(--uirange-b0);
+  width: var(--uirange-bw);
+  background: color-mix(in srgb, var(--color-text) 14%, transparent);
+}
+.uirange-fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: var(--uirange-v);
+  border-radius: var(--r-pill);
+  background: var(--t-base);
+  transition: width 240ms ease;
+}
+
+/* Reduced motion: no slides, fades or loops; state changes are instant. */
+@media (prefers-reduced-motion: reduce) {
+  .uirange-fill {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
+}

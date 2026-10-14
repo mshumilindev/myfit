@@ -38,7 +38,7 @@ body.td-editing .today-page .td-topbar {
   gap: var(--s-8);
   min-height: 60px;
   margin: 0 calc(-1 * var(--page-x, 20px));
-  padding: calc(8px + var(--safe-top, 0px)) var(--page-x, 20px) 8px;
+  padding: calc(var(--s-8) + var(--safe-top, 0px)) var(--page-x, 20px) var(--s-8);
   background: var(--color-bg);
   border-bottom: 1px solid var(--color-divider);
 }
@@ -380,8 +380,8 @@ body.td-editing .today-page .td-topbar {
   display: flex;
   gap: var(--s-8);
   overflow-x: auto;
-  margin: 0 calc(-1 * var(--gutter, 18px)) 4px;
-  padding: 2px var(--gutter, 18px) 6px;
+  margin: 0 calc(-1 * var(--gutter, 18px)) var(--s-4);
+  padding: var(--s-2) var(--gutter, 18px) var(--s-6);
   scrollbar-width: none;
 }
 .tdc-chips > * {
@@ -428,8 +428,8 @@ body.td-editing .today-page .td-topbar {
   bottom: calc(-1 * var(--sheet-pb));
   display: flex;
   gap: var(--s-10);
-  margin: 18px calc(-1 * var(--gutter, 18px)) calc(-1 * var(--sheet-pb));
-  padding: 12px var(--gutter, 18px) calc(12px + var(--safe-bottom, 0px));
+  margin: var(--s-18) calc(-1 * var(--gutter, 18px)) calc(-1 * var(--sheet-pb));
+  padding: var(--s-12) var(--gutter, 18px) calc(var(--s-12) + var(--safe-bottom, 0px));
   background: var(--color-bg);
   border-top: 1px solid var(--color-divider);
 }
@@ -598,7 +598,7 @@ body.td-editing .today-page .td-topbar {
 /* Full-bleed band: the together strip and Atlas alone. */
 .tac-band {
   margin-inline: calc(-1 * var(--page-x));
-  padding: 14px var(--page-x);
+  padding: var(--s-14) var(--page-x);
 }
 /* Only when the band is the last thing on Today does it need its own bottom edge;
    otherwise the next block's edge would double it. */
@@ -724,7 +724,7 @@ body.td-editing .today-page .td-topbar {
   flex-direction: column;
   gap: var(--sp-3);
   margin-inline: calc(-1 * var(--page-x));
-  padding: 14px var(--page-x);
+  padding: var(--s-14) var(--page-x);
   color: var(--color-text);
 }
 .tac-atlas.tac-note {
@@ -933,7 +933,7 @@ body.td-editing .today-page .td-topbar {
   width: calc(100% + 2 * var(--page-x));
 }
 .tac-compact.is-card {
-  padding: 10px var(--sp-3);
+  padding: var(--s-10) var(--sp-3);
 }
 .tac-compact-line {
   flex: 1;
@@ -1321,7 +1321,6 @@ body.td-editing .today-page .td-topbar {
 }
 .tdc.is-desk .tdc-ib {
   width: 36px;
-  height: 36px;
   border-radius: var(--r-10);
   font-size: var(--fs-15);
 }
@@ -1499,7 +1498,7 @@ body.td-editing .today-page .td-topbar {
 /* Clients leading the block (clients first, or Atlas hidden): framed like the band. */
 .tac-split > .tac-clients:first-child {
   margin-inline: calc(-1 * var(--page-x));
-  padding: 14px var(--page-x) 0;
+  padding: var(--s-14) var(--page-x) 0;
 }
 .tdc-search {
   margin-bottom: var(--s-10);

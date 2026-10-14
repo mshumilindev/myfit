@@ -10,13 +10,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--s-8);
-  min-height: 46px;
-  padding: 0 var(--s-16);
+  gap: var(--ctl-gap-in);
+  box-sizing: border-box;
+  /* Explicit height from the control scale (styles.css --ctl-h-*); the line-height never sets it. */
+  height: var(--ctl-h);
+  /* never squeezed below its height inside a column flex / grid */
+  min-height: var(--ctl-h);
+  padding: 0 var(--ctl-px);
   font-family: var(--font);
-  font-size: var(--fs-15);
+  font-size: var(--ctl-fs);
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1;
   color: var(--color-text);
   background: transparent;
   border: 1px solid transparent;
@@ -41,18 +45,9 @@
   width: 100%;
 }
 
-/* Sizes */
-:where(.uibtn--sm) {
-  min-height: 36px;
-  font-size: var(--fs-13);
-  padding: 0 var(--s-12);
-  gap: var(--s-6);
-}
+/* Sizes: sm / md / lg pick a step of the control scale (styles.css) — nothing else changes per size. */
 :where(.uibtn--lg) {
-  min-height: 60px;
-  font-size: var(--fs-16);
   border-radius: var(--radius-lg);
-  gap: var(--s-10);
 }
 
 /* Variants — colours from token families only */
@@ -69,12 +64,20 @@
   color: var(--color-text);
 }
 .uibtn--link {
-  min-height: 0;
-  padding: var(--s-2) var(--s-4);
+  /* A tap target, not a text run: >= 28 high and 12 from the edge (R-KIT-05). Inside a sentence use `inline`. */
+  height: auto;
+  min-height: var(--ctl-h-xs);
+  padding: var(--s-4) var(--s-12);
   border-color: transparent;
   color: var(--color-accent);
   font-size: var(--fs-13);
   font-weight: 500;
+}
+.uibtn--link.uibtn--inline {
+  /* Inline-text variant: sits in a line of text; still a 24 x 24 target (WCAG 2.5.8). */
+  min-height: var(--s-24);
+  min-width: var(--s-24);
+  padding: 0 var(--s-4);
 }
 .uibtn--link:not(:disabled):hover {
   text-decoration: underline;
@@ -146,22 +149,22 @@
   background: var(--color-accent-600);
 }
 
+/* flush: no side padding (a value / name set into a dense row); height still comes from the scale. */
+.uibtn.uibtn--flush {
+  padding-inline: 0;
+}
+
 /* Icons scale with the label */
 .uibtn .ui-icon {
-  font-size: 1.15em;
+  font-size: var(--ctl-icon);
   flex: none;
 }
 
 /* Icon-only */
 :where(.uibtn--icon) {
+  /* Square: exactly as wide as the control is tall. */
   padding: 0;
-  width: 46px;
-}
-:where(.uibtn--icon.uibtn--sm) {
-  width: 36px;
-}
-:where(.uibtn--icon.uibtn--lg) {
-  width: 60px;
+  width: var(--ctl-h);
 }
 
 /* Loading: hide content, show a spinner in the current variant colour */
@@ -170,7 +173,8 @@
 }
 .uibtn.is-loading .uibtn-label,
 .uibtn.is-loading .ui-icon {
-  visibility: hidden;
+  /* opacity, not visibility: the label stays in the accessibility tree, so a busy button keeps its name */
+  opacity: 0;
 }
 .uibtn-spin {
   position: absolute;
@@ -219,4 +223,16 @@ a.uibtn:hover {
 .uibtn--photo {
   background: color-mix(in srgb, var(--color-bg) 70%, transparent);
   color: var(--color-text);
+}
+
+/* Reduced motion: no slides, fades or loops; state changes are instant. */
+@media (prefers-reduced-motion: reduce) {
+  :where(.uibtn),
+  .uibtn-spin {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
 }

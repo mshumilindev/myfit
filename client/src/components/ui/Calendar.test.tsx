@@ -25,7 +25,7 @@ describe('Calendar', () => {
     const grid = screen.getByRole('grid');
     const heads = within(grid).getAllByRole('columnheader');
     expect(heads).toHaveLength(7);
-    expect(heads[0].getAttribute('aria-label')).toBe('Sunday');
+    expect(heads[0].textContent).toContain('Sunday');
     expect(screen.getByRole('heading', { name: 'September 2026' })).toBeTruthy();
   });
 

@@ -67,9 +67,18 @@ button.uicard[aria-disabled='true'] {
 .uicard--kcal,
 .uicard--apex,
 .uicard--learn,
-.uicard--atlas {
+.uicard--atlas,
+.uicard--people {
   background: var(--t-tint);
   border-color: var(--t-line);
+}
+
+/* Selected: the chosen card of a set. Reads the tone's --t-* family (tones.css), so it is
+   gold on a gym tone, amethyst on apex… and never changes a card that does not set it. */
+.uicard--selected {
+  background: color-mix(in srgb, var(--t-base) 14%, var(--t-tint));
+  border-color: var(--t-base);
+  box-shadow: inset 0 0 0 1px var(--t-base);
 }
 
 /* Emphasis (design rule 0b). Graphite keeps its current looks: hero = the
@@ -112,4 +121,14 @@ button.uicard[aria-disabled='true'] {
    still supplies border and text colours. */
 .uicard--blend {
   background-color: var(--t-tint);
+}
+
+/* Nested: a card inside a card. Flat, no plate, no border, no shadow; the parent's surface shows through (R-KIT-25). */
+:where(.uicard--nested) {
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }

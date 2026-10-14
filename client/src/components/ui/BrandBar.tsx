@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Icon, LanguageSelector } from '../../ui';
+import { badgeText } from './Badge';
 import './BrandBar.css';
 
 export interface BrandBarProps {
@@ -53,6 +54,7 @@ export interface BellButtonProps {
 
 /** Notifications bell with unread badge — a BrandBar control. */
 export function BellButton({ label, onClick, count = 0, active }: BellButtonProps) {
+  const countText = badgeText(count);
   return (
     <button
       type="button"
@@ -61,7 +63,7 @@ export function BellButton({ label, onClick, count = 0, active }: BellButtonProp
       aria-label={label}
     >
       <Icon name="bell" weight={active ? 'fill' : undefined} className="app-brand-icon" />
-      {count > 0 && <span className="uibell-badge app-bell-badge">{count > 9 ? '9+' : count}</span>}
+      {countText && <span className="uibell-badge app-bell-badge">{countText}</span>}
     </button>
   );
 }

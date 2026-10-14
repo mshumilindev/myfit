@@ -31,3 +31,6 @@ export * from './scheduled';
 export * from './push';
 // Notices, mark-read, reminders and reminder-dismissals are plain Firestore
 // reads/writes on the client (guarded by rules) — no functions needed.
+
+// Coaching (invites, consent-gated reads, audit, conversations, sweeps). Needs secrets COACH_PEPPER, COACH_SIGNING_KEY.
+export * from './coach/handlers';

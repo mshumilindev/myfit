@@ -1,0 +1,107 @@
+/* DecisionRecord: layout only; colours and surfaces come from the kit primitives inside. Tokens only. */
+.drec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-width: 0;
+}
+.drec-h {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  min-width: 0;
+}
+.drec-who {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+}
+.drec-who.is-link {
+  cursor: pointer;
+}
+.drec-n {
+  font-size: var(--fs-16);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.drec-s {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  overflow-wrap: anywhere;
+}
+.drec-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.drec-step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-12);
+}
+.drec-st {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.drec-sk {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+.drec-sb {
+  font-size: var(--fs-15);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.drec-fu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  padding-top: var(--s-12);
+  border-top: 1px solid var(--color-divider);
+}
+.drec-fu-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-12);
+  font-size: var(--fs-14);
+}
+.drec-note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.4;
+}
+.drec-a {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.drec-foot {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.4;
+}
+.drec-foot > i {
+  flex: none;
+  margin-top: var(--s-2);
+}

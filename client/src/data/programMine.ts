@@ -33,6 +33,12 @@ export interface ProgramItem {
   dropLast?: boolean;
   /** Warm-up marker only: exercises it holds (absent = a generic warm-up). */
   warmupItems?: ProgramWarmupItem[];
+  /** Trainer layer: "just the exercise" (sets 0 / reps 0), optional targets (see views/programs/model). */
+  bare?: boolean;
+  targetWeight?: number;
+  targetRpe?: number;
+  restSec?: number;
+  note?: string;
 }
 
 export interface ProgramAssignment {
@@ -61,10 +67,21 @@ export interface ProgramAssignment {
 
 const PROGRAM_CACHE_KEY = 'spotter.programMine';
 
+/**
+ * A trainer layer put over the assigned program in memory (sealed targets, RPE, rest, cues, warm-up weights, planned
+ * activities of the coach plan): the plaintext program document holds only the template, so the Coach client sets this
+ * from the plan it opened on this device. Never persisted.
+ */
+export type ProgramOverlay = (p: ProgramAssignment['program']) => ProgramAssignment['program'];
+let overlay: ProgramOverlay | null = null;
+let rawAssignment: ProgramAssignment | null = null;
+const withOverlay = (a: ProgramAssignment | null): ProgramAssignment | null =>
+  a && overlay ? { ...a, program: overlay(a.program) } : a;
+
 export function readProgramCache(): ProgramAssignment | null {
   try {
     const raw = localStorage.getItem(PROGRAM_CACHE_KEY);
-    return raw ? (JSON.parse(raw) as ProgramAssignment) : null;
+    return withOverlay(raw ? (JSON.parse(raw) as ProgramAssignment) : null);
   } catch {
     return null;
   }
@@ -93,12 +110,19 @@ interface ProgramMineState {
 }
 
 let snapshot: ProgramMineState = { assignment: readProgramCache(), active: true };
+rawAssignment = snapshot.assignment;
 const listeners = new Set<() => void>();
 let statusFor: string | null = null;
 
 function emit(next: ProgramMineState): void {
   snapshot = next;
   listeners.forEach((l) => l());
+}
+
+/** Set (or clear with null) the trainer layer; every consumer of the assignment re-renders with it. */
+export function setProgramOverlay(next: ProgramOverlay | null): void {
+  overlay = next;
+  emit({ ...snapshot, assignment: withOverlay(rawAssignment) });
 }
 
 function subscribe(l: () => void): () => void {
@@ -137,7 +161,8 @@ export function refreshProgramMine(): void {
         : null;
       writeProgramCache(opened ? stripActivities(opened) : null);
       if (opened?.program.id !== snapshot.assignment?.program.id) statusFor = null;
-      emit({ ...snapshot, assignment: opened });
+      rawAssignment = opened;
+      emit({ ...snapshot, assignment: withOverlay(opened) });
       checkStatus(opened);
     })
     .catch(() => {
@@ -226,6 +251,7 @@ export function startProgramDaySession(
             // Nicotine: a generic warm-up runs a little longer (whole minutes; +0 when off).
             (item.kind === 'warmup' ? Math.round(nicMid('warmupMin')) : 0),
       equipment: item.equipment,
+      planItemId: item.id,
       // A warm-up prescribed with exercises arrives holding them (copied, not linked).
       ...(item.kind === 'warmup' && item.warmupItems?.length
         ? {

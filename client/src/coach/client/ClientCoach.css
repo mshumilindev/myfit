@@ -1,0 +1,177 @@
+/* Client-side trainer screens (M7): LAYOUT ONLY. Surfaces, type and colour come from the kit pieces; tokens only. */
+.cc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+.cc-h2 {
+  margin: 0;
+}
+.cc-muted {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+.cc-err {
+  margin: 0;
+  color: var(--color-danger);
+}
+.cc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s-8);
+}
+.cc-strip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  margin-top: var(--s-12);
+}
+.cc-strip .cc-tags {
+  justify-content: flex-start;
+}
+.cc-actions {
+  display: flex;
+  gap: var(--s-8);
+}
+.cc-note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-6);
+}
+.cc-daychips {
+  padding: var(--s-12) var(--s-16);
+}
+
+/* invite loading skeleton */
+.cc-skel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  align-items: stretch;
+}
+.cc-skel-mark {
+  width: var(--s-48);
+  height: var(--s-48);
+}
+.cc-skel-line {
+  height: var(--s-24);
+}
+.cc-skel-btn {
+  height: var(--s-48);
+}
+
+/* My trainer hero */
+.cc-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+}
+.cc-hero-t {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+.cc-hero-b {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+
+/* Today next-session tile */
+.cc-next {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+.cc-next-h {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-12);
+}
+.cc-next-t {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+.cc-next-h > .uitag {
+  flex: none;
+}
+.cc-next-body {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.45;
+}
+.cc-next-k,
+.cc-next-s {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-4);
+  color: var(--color-text-muted);
+}
+.cc-next-p {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-8);
+}
+.cc-reqbtn {
+  align-self: flex-start;
+}
+
+/* chat with the trainer: the card fills the pushed page */
+.cc-chat-page {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--s-16);
+}
+.cc-chat-page .ch-card {
+  height: calc(100dvh - var(--s-32));
+}
+.cc-notebtn {
+  position: relative;
+  display: inline-flex;
+}
+.cc-dot {
+  position: absolute;
+  top: var(--s-8);
+  right: var(--s-8);
+  width: var(--s-8);
+  height: var(--s-8);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+}
+
+/* Client chat: the share card waiting in the composer (same layout as the trainer's .shx-pend). */
+.cc-pend {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+  /* the card takes its own row; the reschedule chip wraps under it instead of stretching beside it */
+  flex: 1 0 100%;
+  min-width: 0;
+}
+
+.cc-main {
+  display: contents;
+}
+
+/* A long trainer name wraps to a second line in the chat bar instead of being cut (390 px: 3 icon buttons beside it). */
+.cc-chat-page .ch-bar-id b,
+.cc-chat-page .ch-bar-id small {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* the tag sits in a row's sub-line, after the summary text */
+.cc-daytag {
+  display: inline-flex;
+  margin-inline-start: var(--s-8);
+  vertical-align: middle;
+}

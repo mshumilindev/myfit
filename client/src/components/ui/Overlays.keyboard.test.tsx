@@ -55,3 +55,45 @@ describe('Sheet keyboard mode', () => {
     expect(sheet().className).not.toContain('sheet-keyboard-expanded');
   });
 });
+
+describe('Sheet modal behaviour', () => {
+  it('is a labelled modal dialog, takes focus, closes on Escape and gives focus back', () => {
+    vi.useFakeTimers();
+    const onClose = vi.fn();
+    const opener = document.createElement('button');
+    document.body.appendChild(opener);
+    opener.focus();
+    const { unmount } = render(
+      <Sheet onClose={onClose} label="Filters">
+        <button type="button">Inside</button>
+      </Sheet>,
+    );
+    const el = sheet();
+    expect(el.getAttribute('role')).toBe('dialog');
+    expect(el.getAttribute('aria-modal')).toBe('true');
+    expect(el.getAttribute('aria-label')).toBe('Filters');
+    expect(document.activeElement).toBe(el);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    act(() => void vi.advanceTimersByTime(300));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    unmount();
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+  });
+
+  it('leaves Escape to a confirm dialog opened over it', () => {
+    vi.useFakeTimers();
+    const onClose = vi.fn();
+    render(
+      <>
+        <Sheet onClose={onClose}>
+          <span>x</span>
+        </Sheet>
+        <div className="dialog-scrim" />
+      </>,
+    );
+    fireEvent.keyDown(document, { key: 'Escape' });
+    act(() => void vi.advanceTimersByTime(300));
+    expect(onClose).not.toHaveBeenCalled();
+  });
+});

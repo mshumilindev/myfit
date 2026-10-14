@@ -59,6 +59,24 @@ function GridLive() {
 /** Equal columns on one line: a row of weekdays, several on at once. */
 export const Grid: Story = { render: () => <GridLive /> };
 
+/** Show-only (Coach Client 360 training days): list items, no press state, spoken names. */
+export const ReadOnly: Story = {
+  render: () => (
+    <PresetChips
+      readOnly
+      layout="grid"
+      size="xs"
+      label="Training days"
+      items={['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => ({
+        id: d,
+        label: d,
+        selected: d === 'Tue' || d === 'Fri',
+        ariaLabel: d === 'Tue' || d === 'Fri' ? `${d}, session with the trainer` : d,
+      }))}
+    />
+  ),
+};
+
 /** Selected per family, a disabled chip, the small size. */
 export const States: Story = {
   render: () => (
@@ -75,7 +93,7 @@ export const States: Story = {
         />
       ))}
       <PresetChips
-        size="sm"
+        size="xs"
         items={[
           { id: 'a', label: 'Small', selected: true, onClick: () => undefined },
           { id: 'b', label: 'Chips', onClick: () => undefined },

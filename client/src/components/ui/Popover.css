@@ -1,0 +1,69 @@
+/* Popover — Spotter UI kit primitive (R-KIT-28). Position comes from
+   popoverPosition.ts (inline left/top/max-height); this file owns the look.
+   Tokens only. */
+.uipop-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-60);
+  background: transparent;
+}
+.uipop-scrim--dim {
+  background: color-mix(in srgb, var(--c-0a0b0d) 45%, transparent);
+}
+.uipop {
+  position: fixed;
+  z-index: var(--z-61);
+  box-sizing: border-box;
+  max-width: calc(100vw - 16px);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  outline: none;
+  animation: uipop-in 0.12s ease both;
+}
+@keyframes uipop-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .uipop {
+    animation: none;
+  }
+}
+
+/* The body scrolls when the height is capped; the panel itself stays visible so
+   the arrow can sit outside its edge. */
+.uipop-body {
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-radius: inherit;
+}
+
+/* Arrow: a rotated square on the edge facing the anchor (decorative). */
+.uipop--arrow::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--color-surface);
+  transform: rotate(45deg);
+  border-radius: var(--r-2);
+}
+.uipop--arrow.uipop--bottom::before {
+  top: -6px;
+  left: calc(var(--pop-arrow) - 6px);
+}
+.uipop--arrow.uipop--top::before {
+  bottom: -6px;
+  left: calc(var(--pop-arrow) - 6px);
+}
+.uipop--arrow.uipop--right::before {
+  left: -6px;
+  top: calc(var(--pop-arrow) - 6px);
+}
+.uipop--arrow.uipop--left::before {
+  right: -6px;
+  top: calc(var(--pop-arrow) - 6px);
+}

@@ -1,5 +1,6 @@
 /**
- * Inline map with a walking route from the user's location to the gym.
+ * Inline map with a walking route from the user's location to the gym. With a stored `track` (the points of a
+ * logged activity) it draws that polyline instead, offline: no Leaflet, no tiles, no network (R-KIT-06).
  * Leaflet is loaded once from CDN (no npm dep, offline-tolerant), tiles from
  * OSM, the route line from the keyless OSRM demo. Everything degrades: no route
  * → just the two markers; no Leaflet → nothing (the caller keeps a text link).
@@ -27,7 +28,79 @@ function loadLeaflet(): Promise<any> {
   return leafletPromise;
 }
 
-export function RouteMap({ from, to }: { from: Coords | null; to: Coords }) {
+export type RouteMapProps =
+  | { from: Coords | null; to: Coords; track?: undefined; chip?: undefined; label?: undefined }
+  | {
+      /** Stored GPS points [lat, lng], in order. */
+      track: readonly (readonly [number, number])[];
+      /** Optional small chip over the map ("5.1 km"). */
+      chip?: string;
+      /** Spoken name of the trace. */
+      label?: string;
+      from?: undefined;
+      to?: undefined;
+    };
+
+export function RouteMap(props: RouteMapProps) {
+  return props.track ? (
+    <TrackMap track={props.track} chip={props.chip} label={props.label} />
+  ) : (
+    <LiveRouteMap from={props.from} to={props.to} />
+  );
+}
+
+/** A stored polyline on the static map background: start dot, accent line, end dot. Pure SVG, no network. */
+function TrackMap({
+  track,
+  chip,
+  label,
+}: {
+  track: readonly (readonly [number, number])[];
+  chip?: string;
+  label?: string;
+}) {
+  const w = 340;
+  const h = 160;
+  const pad = 14;
+  const pts = track.filter((p) => Number.isFinite(p[0]) && Number.isFinite(p[1]));
+  if (pts.length < 2) return null;
+  const lats = pts.map((p) => p[0]);
+  const lngs = pts.map((p) => p[1]);
+  const minLa = Math.min(...lats);
+  const maxLa = Math.max(...lats);
+  const minLn = Math.min(...lngs);
+  const maxLn = Math.max(...lngs);
+  // longitude degrees are shorter than latitude degrees away from the equator
+  const cosLat = Math.cos((((minLa + maxLa) / 2) * Math.PI) / 180);
+  const spanX = (maxLn - minLn) * cosLat || 1e-6;
+  const spanY = maxLa - minLa || 1e-6;
+  const k = Math.min((w - 2 * pad) / spanX, (h - 2 * pad) / spanY);
+  const ox = (w - spanX * k) / 2;
+  const oy = (h - spanY * k) / 2;
+  const xy = pts.map(([la, ln]) => [ox + (ln - minLn) * cosLat * k, h - oy - (la - minLa) * k]);
+  const d = xy.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
+  const a = xy[0];
+  const z = xy[xy.length - 1];
+  return (
+    <div className="gym-map route-map" role="img" aria-label={label}>
+      <div className="route-map-fallback">
+        <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <path className="map-route" d={d} />
+          <circle className="map-dot start" cx={a[0]} cy={a[1]} r="6" />
+          <circle className="map-dot end" cx={z[0]} cy={z[1]} r="8" />
+        </svg>
+        {chip && (
+          <div className="route-map-chip">
+            <span className="map-dot-inline" />
+            {chip}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LiveRouteMap({ from, to }: { from: Coords | null; to: Coords }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const routeKey = `${from?.lat ?? 'none'}:${from?.lng ?? 'none'}:${to.lat}:${to.lng}`;
   const [readyKey, setReadyKey] = useState<string | null>(null);

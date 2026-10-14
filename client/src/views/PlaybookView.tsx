@@ -175,7 +175,7 @@ export function PlaybookView({
                     {p.suggestions.map((s, i) => (
                       <Chip
                         key={i}
-                        size="sm"
+                        size="xs"
                         tone={s.kind === 'swap' ? 'accent' : 'neutral'}
                         icon={ideaIcon(s)}
                       >
@@ -222,7 +222,7 @@ export function PlaybookView({
 
   return (
     <div className="screen programs-page programs-author-page programs-has-tabs playbook-tab">
-      <div className="programs-top">
+      <div className="programs-top ctl-row--md">
         <div>
           <div className="kicker">{t.training}</div>
           <h2 className="title-26">{t.playbook}</h2>

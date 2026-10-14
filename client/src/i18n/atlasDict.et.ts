@@ -5272,8 +5272,8 @@ export const DICT: Record<string, string> = {
     'Paljudele tõstjatele on need normaalne kasvumärk, mitte terviseprobleem.',
   'Any tips for using the app?': 'On sul nõuandeid äpi kasutamiseks?',
   'How do I use this app?': 'Kuidas seda äppi kasutada?',
-  'Spotter in a nutshell: the bottom bar has Today (your plan, your history and me), Overview (progress, records, programs, goals, playbook, exercises), the “+” in the middle (start a session, an auto session, an activity, sleep and health, or log a past workout), Gyms (your gyms and their equipment) and Apps (Apex, Nutrition, Learn and your profile).':
-    'Spotter lühidalt: alumisel ribal on Täna (sinu plaan, ajalugu ja mina), Ülevaade (progress, rekordid, programmid, eesmärgid, playbook, harjutused), „+“ keskel (alusta treeningut, automaatset treeningut, tegevust, und ja tervist või logi möödunud treening), Saalid (sinu saalid ja nende varustus) ja Rakendused (Apex, Toitumine, Õppimine ja sinu profiil).',
+  'Spotter in a nutshell: the bottom bar has Today (your plan, your history and me), Overview (progress, records, programs, goals, playbook, exercises), the “+” in the middle (start a session, an auto session, an activity, sleep and health, or log a past workout), Gyms (your gyms and their equipment) and More (the Apps — Apex, Nutrition, Learn — and your profile).':
+    'Spotter lühidalt: alumisel ribal on Täna (sinu plaan, ajalugu ja mina), Ülevaade (progress, rekordid, programmid, eesmärgid, playbook, harjutused), „+“ keskel (alusta treeningut, automaatset treeningut, tegevust, und ja tervist või logi möödunud treening), Saalid (sinu saalid ja nende varustus) ja Rohkem (Rakendused — Apex, Toitumine, Õppimine — ja sinu profiil).',
   'Log your sets as you train and I track every lift from them — ask me anything, or ask me for tips.':
     'Logi seeriad treeningu ajal ja ma jälgin nende põhjal iga harjutust — küsi minult ükskõik mida või palu nõuandeid.',
   'How do I start a session?': 'Kuidas treeningut alustada?',
@@ -5352,8 +5352,8 @@ export const DICT: Record<string, string> = {
   'Trainers add clients with “Add client” — the client opens the invite link to join — and see their training read-only.':
     'Treenerid lisavad kliente nupuga „Lisa klient“ — klient avab liitumiseks kutselingi — ja näevad nende treeninguid ainult lugemiseks.',
   'How do I switch between the apps?': 'Kuidas rakenduste vahel vahetada?',
-  'Tap “Apps” at the right end of the bottom bar (or “Gym” next to the Spotter logo at the top) to open “Switch app”: Gym (your training), Apex (challenges, ranks, awards), Nutrition, Learn and your profile.':
-    'Puuduta „Rakendused“ alumise riba paremas otsas (või „Jõusaal“ ülal Spotteri logo kõrval), et avada „Vaheta rakendust“: Jõusaal (sinu treeningud), Apex (väljakutsed, järgud, autasud), Toitumine, Õppimine ja sinu profiil.',
+  'Tap “More” at the right end of the bottom bar, then “Apps” (or “Gym” next to the Spotter logo at the top) to open “Switch app”: Gym (your training), Apex (challenges, ranks, awards), Nutrition, Learn and your profile.':
+    'Puuduta „Rohkem“ alumise riba paremas otsas, siis „Rakendused“ (või „Jõusaal“ ülal Spotteri logo kõrval), et avada „Vaheta rakendust“: Jõusaal (sinu treeningud), Apex (väljakutsed, järgud, autasud), Toitumine, Õppimine ja sinu profiil.',
   'It’s one account and one training history across all of them.':
     'Kõigis on üks konto ja üks treeninguajalugu.',
   'Where do I see my progress and records?': 'Kus näen oma progressi ja rekordeid?',
@@ -5420,8 +5420,8 @@ export const DICT: Record<string, string> = {
     'Ülal olev kell kogub sinu rekordid, seeriad ja kokkuvõtted; lülita teavitused sisse, kui ma küsin, et puhkemärguanded jõuaksid sinuni ka taustal.',
   'After a session, “Share workout” turns it into a Story or Square image.':
     'Pärast treeningut teeb „Jaga treeningut“ sellest Story- või ruudukujulise pildi.',
-  'The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
-    'Nupp „Rakendused“ all vahetab Jõusaali, Apexi, Toitumise, Õppimise ja sinu profiili vahel.',
+  '“More” → “Apps” at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
+    '„Rohkem“ → „Rakendused“ all vahetab Jõusaali, Apexi, Toitumise, Õppimise ja sinu profiili vahel.',
   'Open Apps → Apex for challenges, strength ranks and awards.':
     'Ava Rakendused → Apex — seal on väljakutsed, jõujärgud ja autasud.',
   'Apps → Learn lists how-to lessons for every part of Spotter (the videos are on their way).':
@@ -5475,8 +5475,8 @@ export const DICT: Record<string, string> = {
     '• Ülal olev kell kogub sinu rekordid, seeriad ja kokkuvõtted; lülita teavitused sisse, kui ma küsin, et puhkemärguanded jõuaksid sinuni ka taustal.',
   '• After a session, “Share workout” turns it into a Story or Square image.':
     '• Pärast treeningut teeb „Jaga treeningut“ sellest Story- või ruudukujulise pildi.',
-  '• The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
-    '• Nupp „Rakendused“ all vahetab Jõusaali, Apexi, Toitumise, Õppimise ja sinu profiili vahel.',
+  '• “More” → “Apps” at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
+    '• „Rohkem“ → „Rakendused“ all vahetab Jõusaali, Apexi, Toitumise, Õppimise ja sinu profiili vahel.',
   '• Open Apps → Apex for challenges, strength ranks and awards.':
     '• Ava Rakendused → Apex — seal on väljakutsed, jõujärgud ja autasud.',
   '• Apps → Learn lists how-to lessons for every part of Spotter (the videos are on their way).':

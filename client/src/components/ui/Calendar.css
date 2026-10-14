@@ -54,7 +54,7 @@
 .uical-nav,
 .uical-navsp {
   width: var(--tap-min);
-  height: var(--tap-min);
+  height: var(--ctl-h-md);
 }
 .uical-nav {
   display: inline-flex;

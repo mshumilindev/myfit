@@ -1,0 +1,29 @@
+.uistep-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.uistep-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-16);
+  padding: var(--s-16) var(--s-20);
+}
+.uistep-row + .uistep-row {
+  border-top: 1px solid var(--color-divider);
+}
+.uistep-t {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.uistep-title {
+  font-size: var(--fs-15);
+  font-weight: 600;
+}
+.uistep-body {
+  margin-top: var(--s-4);
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}

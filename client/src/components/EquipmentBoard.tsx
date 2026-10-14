@@ -208,7 +208,7 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
         {total > 0 && (
           <Chip
             tone="accent"
-            size="sm"
+            size="xs"
             onClick={() => setManage(true)}
             aria-label={t.eqSelectedTitle}
           >
@@ -328,7 +328,7 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
                           <IconButton
                             icon={on ? 'check' : 'plus'}
                             variant={on ? 'primary' : 'secondary'}
-                            size="sm"
+                            size="xs"
                             className="eq-tile-toggle"
                             onClick={(e) => {
                               e.stopPropagation();

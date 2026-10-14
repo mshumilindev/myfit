@@ -1,6 +1,6 @@
 .uipin {
   width: var(--tap-min);
-  height: var(--tap-min);
+  height: var(--ctl-h-md);
   flex-shrink: 0;
   padding: 0;
   border: 0;
@@ -48,7 +48,7 @@
 
 .uipin-row {
   width: 100%;
-  min-height: var(--tap-min);
+  min-height: var(--ctl-h-md);
   display: flex;
   align-items: center;
   gap: var(--sp-3);

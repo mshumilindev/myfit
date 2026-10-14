@@ -1,0 +1,6 @@
+/* Layout only: the strip is a kit Card + StatStrip. */
+.sc-digest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}

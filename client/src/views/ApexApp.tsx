@@ -10,7 +10,8 @@
  * Feed (notifications) is reached via the bell, not a nav tab.
  */
 import { IconButton } from '../components/ui/Button';
-import { TabBar } from '../components/ui/TabBar';
+import { SuiteTabBar } from '../components/SuiteTabBar';
+import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
 import { BrandBar, BellButton } from '../components/ui/BrandBar';
 import { useMemo, useState } from 'react';
 import { fmtDayMonth, useT } from '../i18n';
@@ -63,6 +64,7 @@ export function ApexApp({
   onNotifMarkAll: () => void;
 }) {
   const { t, locale } = useT();
+  const desktop = useMinWidth(APP_BREAKPOINT);
   const finished = useMemo(
     () => store.workouts.filter((w) => w.finishedAt !== null),
     [store.workouts],
@@ -141,15 +143,18 @@ export function ApexApp({
 
   return (
     <div className="app-apex apex-app">
-      <AppRail
-        nav={nav}
-        activeId={tab === 'feed' ? null : tab}
-        onNav={(id) => onTab(id as ApexTab)}
-        onOpenShell={onOpenShell}
-        onOpenNotifications={() => onTab('feed')}
-        onOpenProfile={onOpenProfile}
-        notifUnread={notifUnread}
-      />
+      {desktop && (
+        <AppRail
+          app="apex"
+          nav={nav}
+          activeId={tab === 'feed' ? null : tab}
+          onNav={(id) => onTab(id as ApexTab)}
+          onOpenShell={onOpenShell}
+          onOpenNotifications={() => onTab('feed')}
+          onOpenProfile={onOpenProfile}
+          notifUnread={notifUnread}
+        />
+      )}
       <div className="apex-col">
         <BrandBar
           header
@@ -215,13 +220,17 @@ export function ApexApp({
           )}
         </div>
 
-        <TabBar
-          tabs
-          activeFill
-          items={nav.map((x) => ({ ...x, active: tab === x.id }))}
-          onSelect={(id) => onTab(id)}
-          apps={{ label: t.appsTab, ariaLabel: t.shellSwitch, onClick: onOpenShell }}
-        />
+        {!desktop && (
+          <SuiteTabBar
+            app="apex"
+            tabs
+            activeFill
+            items={nav.map((x) => ({ ...x, active: tab === x.id }))}
+            onSelect={(id) => onTab(id)}
+            onOpenShell={onOpenShell}
+            onOpenProfile={onOpenProfile}
+          />
+        )}
       </div>
       {share && (
         <StatShareSheet

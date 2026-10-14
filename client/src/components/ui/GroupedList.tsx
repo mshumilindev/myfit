@@ -24,6 +24,15 @@ export interface GroupedListProps {
   className?: string;
   /** Accessible name for the group (defaults to nothing — the header is visual). */
   label?: string;
+  /**
+   * The rows are a real list: `ul[aria-label=label]` whose children are `<li>` (each holding a
+   * ListRow). Hairlines and the surface are the same; use it where the list is read as a list.
+   */
+  list?: boolean;
+  /** The rows container is itself a widget (e.g. `listbox` whose children are `role=option` rows). */
+  rowsRole?: string;
+  /** DOM id of the rows container (aria-controls / aria-owns targets). */
+  rowsId?: string;
 }
 
 export function GroupedList({
@@ -35,6 +44,9 @@ export function GroupedList({
   children,
   className,
   label,
+  list = false,
+  rowsRole,
+  rowsId,
 }: GroupedListProps) {
   return (
     <section
@@ -46,10 +58,23 @@ export function GroupedList({
       ]
         .filter(Boolean)
         .join(' ')}
-      aria-label={label}
+      aria-label={list || rowsRole ? undefined : label}
     >
       {header != null && <div className="uigl-h">{header}</div>}
-      <div className="uigl-rows">{children}</div>
+      {list ? (
+        <ul className="uigl-rows" aria-label={label}>
+          {children}
+        </ul>
+      ) : (
+        <div
+          className="uigl-rows"
+          id={rowsId}
+          role={rowsRole}
+          aria-label={rowsRole ? label : undefined}
+        >
+          {children}
+        </div>
+      )}
       {footer != null && (
         <div
           className={`uigl-f${footerError ? ' is-error' : ''}`}
@@ -69,7 +94,13 @@ export function GroupedList({
 
 type RowAria = Pick<
   AriaAttributes,
-  'aria-expanded' | 'aria-pressed' | 'aria-current' | 'aria-label' | 'aria-describedby'
+  | 'aria-expanded'
+  | 'aria-pressed'
+  | 'aria-current'
+  | 'aria-label'
+  | 'aria-describedby'
+  | 'aria-controls'
+  | 'aria-selected'
 >;
 
 export interface ListRowProps extends RowAria {
@@ -105,6 +136,12 @@ export interface ListRowProps extends RowAria {
   disabled?: boolean;
   /** Label keeps its width instead of flexing (label + input rows). */
   labelFixed?: boolean;
+  /** Long values wrap (right-aligned, several lines) instead of staying on one line. */
+  wrap?: boolean;
+  /** ARIA role of the row element (`menuitem` inside a menu popover). */
+  role?: string;
+  /** DOM id (aria-activedescendant targets, label references). */
+  id?: string;
   /** Compact row (Brass Glass list cards): tighter padding. */
   dense?: boolean;
   /** Bold label (Brass Glass): the row's name outweighs its sub-line. */
@@ -134,6 +171,9 @@ export function ListRow(props: ListRowProps) {
     dim,
     disabled,
     labelFixed,
+    wrap,
+    role,
+    id,
     dense,
     strong,
     className,
@@ -170,6 +210,7 @@ export function ListRow(props: ListRowProps) {
             'uirow-v',
             valueTone ? `${toneClass(valueTone)} is-toned` : '',
             valueStrong ? 'is-strong' : '',
+            wrap ? 'is-wrap' : '',
           ]
             .filter(Boolean)
             .join(' ')}
@@ -188,18 +229,26 @@ export function ListRow(props: ListRowProps) {
   );
   if (onClick)
     return (
-      <button type="button" className={cls} onClick={onClick} disabled={disabled} {...aria}>
+      <button
+        type="button"
+        id={id}
+        role={role}
+        className={cls}
+        onClick={onClick}
+        disabled={disabled}
+        {...aria}
+      >
         {inner}
       </button>
     );
   if (as === 'label')
     return (
-      <label className={cls} {...aria}>
+      <label className={cls} id={id} role={role} {...aria}>
         {inner}
       </label>
     );
   return (
-    <div className={cls} {...aria}>
+    <div className={cls} id={id} role={role} {...aria}>
       {inner}
     </div>
   );

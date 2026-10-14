@@ -1,0 +1,135 @@
+/* Reschedule message card (kit): layout only, surfaces from Card, colours from tone tokens. */
+.uirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  text-align: left;
+}
+.uirm-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-8);
+}
+.uirm-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-6);
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+.uirm-t {
+  margin: 0;
+  font-size: var(--fs-15);
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.uirm-s {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.4;
+}
+.uirm-s b {
+  color: var(--color-text);
+  font-weight: 600;
+}
+.uirm-mv {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: var(--s-8);
+}
+.uirm-d {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+  padding: var(--s-8) var(--s-12);
+  border-radius: var(--r-12);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  font-size: var(--fs-14);
+}
+.uirm-d small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-min);
+}
+.uirm-d b {
+  font-size: var(--fs-15);
+  font-weight: 700;
+}
+.uirm-d.is-struck b,
+.uirm-d.is-struck span {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.uirm-d.is-new {
+  box-shadow: inset 0 0 0 1px var(--color-accent-line, var(--color-border));
+}
+.uirm-ar {
+  align-self: center;
+  color: var(--color-text-muted);
+}
+.uirm-n {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+  margin: 0;
+  padding: var(--s-8) var(--s-12);
+  border-radius: var(--r-12);
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  font-size: var(--fs-14);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.uirm-a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-8) var(--s-12);
+}
+.uirm-w {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-8) var(--s-12);
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  line-height: 1.4;
+}
+.uirm-o {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  line-height: 1.4;
+}
+.uirm-o small {
+  font-size: var(--fs-min);
+}
+.uirm-err {
+  margin: 0;
+  color: var(--color-danger-text);
+  font-size: var(--fs-14);
+}
+@media (max-width: 767px) {
+  .uirm-mv {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .uirm-ar {
+    justify-self: start;
+    transform: rotate(90deg);
+  }
+}

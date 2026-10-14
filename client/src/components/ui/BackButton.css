@@ -1,9 +1,10 @@
-/* BackButton — kit primitive, the only back button. Round 36 px well in both
+/* BackButton — kit primitive, the only back button. Round control-scale (--ctl-h-sm) well in both
    themes; glass.css only swaps the surface tokens. */
 .uiback {
   flex: none;
-  width: 36px;
-  height: 36px;
+  box-sizing: border-box;
+  width: var(--ctl-h);
+  height: var(--ctl-h);
   padding: 0;
   border: 0;
   border-radius: var(--r-round);

@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { TabBar } from '../components/ui/TabBar';
+import { SuiteTabBar } from '../components/SuiteTabBar';
+import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
 import { Button } from '../components/ui/Button';
 import { Field } from '../components/ui/Field';
+import { UndoToast } from '../components/ui/UndoToast';
+import { UNDO_MS } from '../coach/domain/signalConfig';
 import { BrandBar, BellButton } from '../components/ui/BrandBar';
 import { AddFlow } from './addflow';
 import { Sheet } from './components';
@@ -120,6 +123,7 @@ export function NutritionRoot({
 }) {
   const s = useStore();
   const { t } = useT();
+  const desktop = useMinWidth(APP_BREAKPOINT);
   const [tab, setTab] = useState<Tab>('today');
   const [adding, setAdding] = useState(false);
   const [detail, setDetail] = useState<Entry | null>(null);
@@ -138,7 +142,7 @@ export function NutritionRoot({
     store.deleteEntry(entry.id);
     setUndo(entry);
     if (undoTimer.current) clearTimeout(undoTimer.current);
-    undoTimer.current = setTimeout(() => setUndo(null), 5000);
+    undoTimer.current = setTimeout(() => setUndo(null), UNDO_MS);
   }
 
   // Primary nav mirrors the other sub-apps: icon rail on desktop, bottom nav on
@@ -149,7 +153,8 @@ export function NutritionRoot({
     { id: 'goal', icon: 'crosshair', label: t('goal') },
   ];
 
-  if (!s.authReady || !s.uid) {
+  /* The shell renders as soon as there is a uid (the cached session); only a device with no session at all waits. */
+  if (!s.uid) {
     return (
       <div className="app-nutrition apex-app">
         <div className="apex-col">
@@ -163,15 +168,18 @@ export function NutritionRoot({
 
   return (
     <div className="app-nutrition apex-app">
-      <AppRail
-        nav={nav}
-        activeId={tab === 'feed' ? null : tab}
-        onNav={(id) => setTab(id as Tab)}
-        onOpenShell={onOpenShell}
-        onOpenNotifications={() => setTab('feed')}
-        onOpenProfile={onOpenProfile}
-        notifUnread={notifUnread}
-      />
+      {desktop && (
+        <AppRail
+          app="nutrition"
+          nav={nav}
+          activeId={tab === 'feed' ? null : tab}
+          onNav={(id) => setTab(id as Tab)}
+          onOpenShell={onOpenShell}
+          onOpenNotifications={() => setTab('feed')}
+          onOpenProfile={onOpenProfile}
+          notifUnread={notifUnread}
+        />
+      )}
       <div className="apex-col">
         <BrandBar
           header
@@ -256,13 +264,17 @@ export function NutritionRoot({
           </div>
         )}
 
-        <TabBar
-          tabs
-          activeFill
-          items={nav.map((x) => ({ ...x, active: tab === x.id }))}
-          onSelect={(id) => setTab(id as Tab)}
-          apps={{ label: t('apps'), ariaLabel: t('apps'), onClick: onOpenShell }}
-        />
+        {!desktop && (
+          <SuiteTabBar
+            app="nutrition"
+            tabs
+            activeFill
+            items={nav.map((x) => ({ ...x, active: tab === x.id }))}
+            onSelect={(id) => setTab(id as Tab)}
+            onOpenShell={onOpenShell}
+            onOpenProfile={onOpenProfile}
+          />
+        )}
       </div>
 
       {adding && <AddFlow onClose={() => setAdding(false)} />}
@@ -270,20 +282,18 @@ export function NutritionRoot({
       {detail && <EntryDetail entry={detail} onClose={() => setDetail(null)} onDelete={del} />}
 
       {undo && (
-        <div className="snack">
-          <span>{t('deleted')}</span>
-          <Button
-            variant="link"
-            size="sm"
-            onClick={() => {
-              store.restoreEntry(undo);
-              setUndo(null);
-              if (undoTimer.current) clearTimeout(undoTimer.current);
-            }}
-          >
-            {t('undo')}
-          </Button>
-        </div>
+        <UndoToast
+          position="fixed"
+          text={t('deleted')}
+          undoLabel={t('undo')}
+          countdownLabel={t('undoCountdown')}
+          durationMs={UNDO_MS}
+          onUndo={() => {
+            store.restoreEntry(undo);
+            setUndo(null);
+            if (undoTimer.current) clearTimeout(undoTimer.current);
+          }}
+        />
       )}
     </div>
   );

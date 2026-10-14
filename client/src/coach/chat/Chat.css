@@ -1,0 +1,117 @@
+/* Chat screen (M4): layout only. Surfaces, type and colour come from the kit pieces. Tokens only. */
+.ch-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-width: 0;
+}
+.ch-pv {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ch-pv.is-new {
+  color: var(--color-text);
+  font-weight: 600;
+}
+.ch-bd {
+  display: inline-flex;
+  flex: none;
+}
+
+/* The thread card fills the viewport under the header: bar, scrolling messages, composer. */
+.ch-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: clamp(var(--co-chat-min), calc(100dvh - var(--co-chat-off)), var(--co-chat-max));
+  overflow: hidden;
+}
+.ch-page--thread .ch-card {
+  height: clamp(var(--co-chat-min), calc(100dvh - var(--co-chat-off-thread)), var(--co-chat-max));
+}
+/* Phone: the tab bar and header take less than the desktop frame, so the card runs closer to the bar. */
+@media (max-width: 47.99rem) {
+  .ch-card,
+  .ch-page--thread .ch-card {
+    height: clamp(var(--co-chat-min), calc(100dvh - var(--co-chat-off-phone)), var(--co-chat-max));
+  }
+}
+.ch-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  flex: none;
+  padding: var(--s-12) var(--s-16);
+  border-bottom: var(--co-hair) solid var(--color-divider);
+}
+.ch-bar-id {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.ch-bar-id b {
+  overflow: hidden;
+  font-size: var(--fs-16);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ch-bar-id small {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ch-note {
+  flex: none;
+  margin: var(--s-12) var(--s-16) 0;
+}
+.ch-body {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+.ch-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--s-16);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.ch-scroll.has-dock {
+  padding-bottom: calc(var(--s-48) + var(--s-24));
+}
+.ch-list-m {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  margin: 0;
+  padding: 0;
+}
+/* Undo / copy toast: docked at the bottom-left of the message area, above the composer, never over it. */
+.ch-dock {
+  position: absolute;
+  left: var(--s-16);
+  right: var(--s-16);
+  bottom: var(--s-12);
+  max-width: 26rem;
+  pointer-events: none;
+}
+.ch-dock > * {
+  pointer-events: auto;
+}
+.ch-comp {
+  flex: none;
+  padding: var(--s-12) var(--s-16) var(--s-16);
+  border-top: var(--co-hair) solid var(--color-divider);
+}
+.ch-earlier {
+  display: flex;
+  justify-content: center;
+  padding-bottom: var(--s-12);
+}

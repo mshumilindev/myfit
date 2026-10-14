@@ -34,3 +34,19 @@ export const Tones: Story = {
     </Stack>
   ),
 };
+
+/** Stacked: an outcome split in one bar (Coach Decisions summary). */
+export const Stacked: Story = {
+  render: () => (
+    <ProgressBar
+      value={0}
+      height={8}
+      segments={[
+        { value: 5, tone: 'ok' },
+        { value: 2, tone: 'neutral' },
+        { value: 1, tone: 'danger' },
+        { value: 3, tone: 'rest' },
+      ]}
+    />
+  ),
+};

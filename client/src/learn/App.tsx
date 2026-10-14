@@ -12,7 +12,8 @@
  *   revealed progressively (lightweight virtualization).
  * - Localised UI via useLearnT.
  */
-import { TabBar } from '../components/ui/TabBar';
+import { SuiteTabBar } from '../components/SuiteTabBar';
+import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
 import { BackButton } from '../components/ui/BackButton';
 import { Button } from '../components/ui/Button';
 import { SearchField } from '../components/ui/SearchField';
@@ -517,6 +518,7 @@ export function LearnRoot({
   onNotifMarkAll: () => void;
 }) {
   const { L, locale } = useLearnT();
+  const desktop = useMinWidth(APP_BREAKPOINT);
   const [tab, setTab] = useState<Tab>('home');
   const [topic, setTopic] = useState<Topic | null>(null);
   const [playing, setPlaying] = useState<Lesson | null>(null);
@@ -569,18 +571,21 @@ export function LearnRoot({
 
   return (
     <div className="app-learn apex-app">
-      <AppRail
-        nav={nav}
-        activeId={playing || tab === 'feed' ? null : tab}
-        onNav={(id) => goTab(id as Tab)}
-        onOpenShell={onOpenShell}
-        onOpenNotifications={() => {
-          setPlaying(null);
-          setTab('feed');
-        }}
-        onOpenProfile={onOpenProfile}
-        notifUnread={notifUnread}
-      />
+      {desktop && (
+        <AppRail
+          app="learn"
+          nav={nav}
+          activeId={playing || tab === 'feed' ? null : tab}
+          onNav={(id) => goTab(id as Tab)}
+          onOpenShell={onOpenShell}
+          onOpenNotifications={() => {
+            setPlaying(null);
+            setTab('feed');
+          }}
+          onOpenProfile={onOpenProfile}
+          notifUnread={notifUnread}
+        />
+      )}
       <div className="apex-col">
         <BrandBar
           header
@@ -655,13 +660,17 @@ export function LearnRoot({
           )}
         </div>
 
-        <TabBar
-          tabs
-          activeFill
-          items={nav.map((x) => ({ ...x, active: !playing && tab === x.id }))}
-          onSelect={(id) => goTab(id as Tab)}
-          apps={{ label: L.apps, ariaLabel: L.apps, onClick: onOpenShell }}
-        />
+        {!desktop && (
+          <SuiteTabBar
+            app="learn"
+            tabs
+            activeFill
+            items={nav.map((x) => ({ ...x, active: !playing && tab === x.id }))}
+            onSelect={(id) => goTab(id as Tab)}
+            onOpenShell={onOpenShell}
+            onOpenProfile={onOpenProfile}
+          />
+        )}
       </div>
     </div>
   );

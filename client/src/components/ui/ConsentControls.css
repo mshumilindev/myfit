@@ -1,0 +1,79 @@
+/* Consent controls (Coach). Tokens only. */
+.cc-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+.cc-t {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cc-t b {
+  font-size: var(--fs-14);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.cc-t small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.35;
+}
+.cc-pick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.cc-legend {
+  padding: 0;
+  margin-bottom: var(--s-4);
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.cc-pick-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-8) var(--s-16);
+}
+.cc-pick-row .uiseg {
+  flex: 0 1 280px;
+  min-width: 240px;
+}
+@media (max-width: 480px) {
+  .cc-pick-row .uiseg {
+    flex-basis: 100%;
+  }
+}
+
+/* ConsentChips facts: a small static mark before the name; the dimmed row is a category that is not shared. */
+.cc-fact {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+  min-width: 0;
+}
+.cc-mark {
+  flex: none;
+  margin-top: var(--s-2);
+  font-size: var(--fs-16);
+}
+.cc-mark--off {
+  color: var(--color-text-faint);
+}
+.cc-mark--effects,
+.cc-mark--full {
+  color: var(--color-ok);
+}
+.cc-row--off .cc-t b,
+.cc-row--off .uiinfo-v {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}

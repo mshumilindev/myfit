@@ -32,7 +32,9 @@ describe('firestore rules for the vault', () => {
       /match \/grants\/\{coachId\}\s*\{\s*allow read, write: if isSelf\(userId\);/,
     );
     const block = rules.slice(rules.indexOf('match /coachKeys/'));
-    expect(block).toContain("hasOnly(['pub', 'updatedAt'])");
+    expect(block).toContain("hasOnly(['pub', 'updatedAt', 'sig', 'kid', 'signedAt'])");
+    expect(block).toContain("hasAll(['pub', 'updatedAt'])");
+    expect(block).toContain('request.resource.data.pub == resource.data.pub'); // a signature only travels with its key
     expect(block).toContain("hasOnly(['kty', 'crv', 'x', 'y', 'ext', 'key_ops'])"); // no private scalar "d"
     expect(block).not.toMatch(/'d'/);
   });

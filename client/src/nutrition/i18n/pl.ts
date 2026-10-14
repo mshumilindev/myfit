@@ -101,6 +101,7 @@ export const pl: Strings = {
   edit: 'Edytuj',
   delete: 'Usuń',
   undo: 'Cofnij',
+  undoCountdown: 'Cofnięcie możliwe przez 8 sekund',
   deleted: 'Wpis usunięty',
   deleteTitle: 'Usunąć ten wpis?',
   deleteBody: 'Zostanie usunięty z dziś. Po synchronizacji nieodwracalne.',

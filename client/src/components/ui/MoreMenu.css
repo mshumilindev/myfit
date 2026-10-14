@@ -1,0 +1,32 @@
+/* MoreMenu: Apps + destinations + account block, in a Popover or a Sheet. Tokens only. */
+.uimore-title {
+  margin: 0;
+  padding: 0 var(--s-16) var(--s-8);
+  font-size: var(--fs-18);
+  font-weight: 600;
+}
+.uimore-body {
+  display: flex;
+  flex-direction: column;
+}
+.uimore-list {
+  padding: var(--s-8);
+}
+/* Stacked lists share one gap, and a list above the account block leaves the spacing to the
+   block's own padding; a list that ends the body (popover / sheet) keeps the full s-8 inset. */
+.uimore-list + .uimore-list {
+  padding-top: 0;
+}
+.uimore-list:has(+ .uiacct) {
+  padding-bottom: 0;
+}
+
+/* Phone sheet: the account block is its own section, clearly apart from the destinations: a
+   --s-24 gap, then a hairline in the app's accent line (neutral border without a tone). The sheet
+   itself ends with --safe-bottom (Overlays.css .sheet). */
+.uimore .uimore-list:has(+ .uiacct) {
+  padding-bottom: var(--s-24);
+}
+.uimore .uiacct {
+  border-top: 1px solid var(--t-line, var(--color-border));
+}

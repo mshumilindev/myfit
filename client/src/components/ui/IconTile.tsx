@@ -5,6 +5,19 @@ import './IconTile.css';
 
 export type IconTileSize = 22 | 30 | 32 | 34 | 36 | 40 | 44 | 48 | 56;
 
+/** The corner of a tile is a step of the radius scale (so a re-themed `--r-*` scale reshapes every tile), picked by its size. */
+const TILE_RADIUS: Record<IconTileSize, string> = {
+  22: 'var(--r-6)',
+  30: 'var(--r-8)',
+  32: 'var(--r-10)',
+  34: 'var(--r-10)',
+  36: 'var(--r-10)',
+  40: 'var(--r-12)',
+  44: 'var(--r-12)',
+  48: 'var(--r-14)',
+  56: 'var(--r-16)',
+};
+
 export interface IconTileProps {
   /** Colour family; `inherit` reads --t-* from the nearest toned ancestor. */
   tone?: Tone | 'inherit';
@@ -40,7 +53,11 @@ export function IconTile({
     .filter(Boolean)
     .join(' ');
   return (
-    <span className={cls} style={{ '--tile': `${size}px` } as CSSProperties} aria-hidden="true">
+    <span
+      className={cls}
+      style={{ '--tile': `${size}px`, '--tile-r': TILE_RADIUS[size] } as CSSProperties}
+      aria-hidden="true"
+    >
       {icon ? <Icon name={icon} /> : children}
     </span>
   );

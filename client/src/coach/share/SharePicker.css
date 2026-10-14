@@ -1,0 +1,35 @@
+/* Layout only: the surfaces are the kit's (ResponsivePanel, GroupedList, Chip, SearchField). */
+.shp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  min-height: 0;
+}
+.shp-b {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-height: 0;
+  overflow-y: auto;
+  max-height: min(60dvh, 34rem);
+}
+.shp-g {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.shp-gh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.shp-date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-8);
+}
+.shp-foot {
+  display: block;
+  padding-inline: var(--s-4);
+}

@@ -1,0 +1,47 @@
+.uiundo {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+.uiundo--fixed {
+  position: fixed;
+  left: calc(var(--co-rail, 0px) + var(--s-16));
+  bottom: calc(var(--s-24) + var(--safe-bottom));
+  z-index: var(--z-60);
+  width: min(420px, calc(100vw - 2 * var(--s-16)));
+}
+@media (max-width: 767px) {
+  .uiundo--fixed {
+    left: var(--s-16);
+    bottom: calc(var(--tabbar-clear, 88px) + var(--safe-bottom));
+  }
+}
+.uiundo-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: var(--s-4);
+  width: 100%;
+  transform-origin: left center;
+  background: var(--color-accent);
+  animation: uiundo-run var(--undo-ms, 8000ms) linear var(--undo-delay, 0s) forwards;
+}
+.uiundo-bar.is-frozen {
+  animation-play-state: paused;
+}
+@keyframes uiundo-run {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .uiundo-bar {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+    transform: scaleX(1);
+    animation: none;
+  }
+}

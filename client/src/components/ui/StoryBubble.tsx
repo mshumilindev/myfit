@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { badgeText } from './Badge';
+import type { ReactNode, Ref } from 'react';
 
 import { toneClass, type Tone } from './tones';
 
@@ -70,8 +71,7 @@ export function StoryBubble({
       {media ?? (initial ? initial.trim().charAt(0).toUpperCase() : '')}
     </span>
   );
-  const count =
-    typeof badge === 'number' ? (badge > 9 ? '9+' : badge > 0 ? String(badge) : '') : '';
+  const count = typeof badge === 'number' ? badgeText(badge) : '';
   const inner = (
     <>
       <span className="uistory-ring">
@@ -105,8 +105,21 @@ export function StoryBubble({
 }
 
 /** Horizontally scrolling row of bubbles (no scrollbar). */
-export function StoryRow({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={['uistory-row', className].filter(Boolean).join(' ')}>{children}</div>;
+export function StoryRow({
+  children,
+  className,
+  innerRef,
+}: {
+  children: ReactNode;
+  className?: string;
+  /** For `useFitCount`: the row element, to measure how many bubbles fit. */
+  innerRef?: Ref<HTMLDivElement>;
+}) {
+  return (
+    <div ref={innerRef} className={['uistory-row', className].filter(Boolean).join(' ')}>
+      {children}
+    </div>
+  );
 }
 
 /** Hairline between groups in a row (Atlas | clients). */

@@ -1,0 +1,16 @@
+.uisevdot {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--s-6);
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.uisevdot-d {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--t-base, var(--color-text-faint));
+}

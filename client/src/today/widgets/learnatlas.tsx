@@ -990,7 +990,7 @@ function AskWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const chipRow = (
     <ChipGroup>
       {chips.map((c) => (
-        <Chip key={c} size="sm" onClick={open}>
+        <Chip key={c} size="xs" onClick={open}>
           {c}
         </Chip>
       ))}
@@ -1523,7 +1523,7 @@ function MoodWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       </Para>
       <ChipGroup>
         {[1, 3, 5].map((tp, i) => (
-          <Chip key={tp} size="sm" selected={tp === temper}>
+          <Chip key={tp} size="xs" selected={tp === temper}>
             {t.atlasTemper[i]}
           </Chip>
         ))}

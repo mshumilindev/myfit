@@ -12,11 +12,13 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
 import { Button, IconButton } from '../components/ui/Button';
 import {
   MonthGrid,
+  MonthGridLegend,
   type MonthGridChip,
   type MonthGridDay,
   type MonthMarker,
 } from '../components/ui/MonthGrid';
 import { useCycleTint } from '../cycle/useCycleTint';
+import { useClientShared } from '../coach/client/shared';
 import { Segmented } from '../components/ui/Segmented';
 import type { Tone } from '../components/ui/tones';
 import { fmtCalendarMonth } from '../components/ui/Calendar';
@@ -229,12 +231,14 @@ function HistoryCalendar({
     k === 'rest' ? s.rest : k === 'sick' ? s.sick : k === 'off' ? s.off : s.injury;
 
   const cycleTint = useCycleTint();
+  const { trainerDays, markerDay, markerLegend } = useClientShared();
   const cell = (d: number): MonthGridDay | undefined => {
     const info = map.get(d);
     const pTrain = plannedTrain(d, info);
     const pRest = plannedRest(d);
     const cyc = cycleTint?.(d);
-    if (!info && !pTrain && !pRest && !cyc) return undefined;
+    const withTrainer = trainerDays.has(d);
+    if (!info && !pTrain && !pRest && !cyc && !withTrainer) return undefined;
     const markers: MonthMarker[] = [];
     const chips: MonthGridChip[] = [];
     const notes: { label: string; tone?: Tone }[] = [];
@@ -256,6 +260,7 @@ function HistoryCalendar({
           tone: ACTIVITY_TONE[activityTone(a.type, activityCategory(a))],
         });
     }
+    if (withTrainer) markers.push('trainer');
     if (show('sleep') && info?.sleep) markers.push('sleep');
     if (show('prs') && info?.pr) markers.push('pr');
     if (show('weight') && info?.weight != null) markers.push('weight');
@@ -278,7 +283,10 @@ function HistoryCalendar({
       notes,
       meta,
       pr: show('prs') && !!info?.pr,
-      label: [...chips.map((c) => c.label), ...notes.map((n) => n.label)].join(', ') || undefined,
+      label:
+        [...chips.map((c) => c.label), ...notes.map((n) => n.label), withTrainer ? markerDay : '']
+          .filter(Boolean)
+          .join(', ') || undefined,
     };
   };
 
@@ -394,6 +402,9 @@ function HistoryCalendar({
         todayLabel={t.today}
         label={fmtCalendarMonth(month, locale)}
       />
+      {trainerDays.size > 0 && (
+        <MonthGridLegend items={[{ kind: 'trainer', label: markerLegend }]} />
+      )}
       <div className="td-hcal-foot">
         {selectedDay}
         <Button

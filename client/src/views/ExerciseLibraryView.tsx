@@ -28,7 +28,7 @@ export function ExerciseLibraryView({
   const role = getRole();
   return (
     <div className="screen programs-page programs-author-page programs-has-tabs show-exercises exlib-tab">
-      <div className="programs-top">
+      <div className="programs-top ctl-row--md">
         <div>
           <div className="kicker">
             {role === 'admin' ? t.roleAdmin : role === 'trainer' ? t.roleTrainer : t.training}

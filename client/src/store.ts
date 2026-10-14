@@ -790,7 +790,7 @@ export function getPendingSupplementCheckin(
   return pendingSupplementCheckin(now, state.supplements, ctx);
 }
 
-function subscribeStore(cb: () => void): () => void {
+export function subscribeStore(cb: () => void): () => void {
   listeners.add(cb);
   return () => listeners.delete(cb);
 }
@@ -1299,6 +1299,8 @@ interface ExercisePlan {
   plannedSets?: number | null;
   plannedReps?: number | null;
   plannedDurationMin?: number | null;
+  /** Program item id the exercise was started from (the trainer's target is looked up by it). */
+  planItemId?: string;
   equipment?: string[];
   groupId?: string | null;
   groupOrder?: number | null;
@@ -1643,9 +1645,21 @@ export function useSelfCoachRole(): 'main' | 'extra' | null {
 }
 const LIVE_HEARTBEAT_MS = 45000;
 let lastLiveBeat = 0;
+/**
+ * ONE live-session writer. While the Coach backend is installed for this member, `coach/data/firestore/liveWriter.ts`
+ * owns `liveSessions/{me}` (sealed shape, finished state, consent). This legacy presence-only writer (`startedAt`,
+ * `updatedAt`, delete at finish) then stays silent, so the two never fight over the same document. Without the Coach
+ * backend (flag off, signed out) it is the only writer, exactly as before.
+ */
+let legacyLiveWriter = true;
+export function setLegacyLiveWriter(on: boolean): void {
+  legacyLiveWriter = on;
+}
+export const legacyLiveWriterOn = (): boolean => legacyLiveWriter;
 
 /** Mirror an open workout to the athlete's coach-visible liveSessions doc. */
 export function writeLiveSession(w: Workout): void {
+  if (!legacyLiveWriter) return;
   const uid = currentUid();
   if (!uid) return;
   const trainerId = selfProfile.trainerId;
@@ -1668,6 +1682,7 @@ export function writeLiveSession(w: Workout): void {
 /** Mark the live session finished — kept briefly for the coach's "just
  *  finished" state, overwritten on the next start. */
 export function finishLiveSession(): void {
+  if (!legacyLiveWriter) return;
   const uid = currentUid();
   if (!uid) return;
   // Session ended — remove the active-session doc entirely.
@@ -1675,6 +1690,7 @@ export function finishLiveSession(): void {
 }
 /** Heartbeat while a workout is open, so the coach can tell live from stale. */
 function heartbeatLiveSession(): void {
+  if (!legacyLiveWriter) return;
   const uid = currentUid();
   if (!uid || !selfProfile.trainerId) return;
   const open = state.workouts.find((w) => w.finishedAt === null);
@@ -2099,6 +2115,7 @@ export function addExercise(
     plannedSets: plan.plannedSets ?? null,
     plannedReps: plan.plannedReps ?? null,
     plannedDurationMin: plan.plannedDurationMin ?? null,
+    ...(plan.planItemId ? { planItemId: plan.planItemId } : {}),
     equipment: plan.equipment ?? (info?.equipment ? [info.equipment] : []),
     groupId: plan.groupId ?? null,
     groupOrder: plan.groupOrder ?? null,
@@ -5479,9 +5496,16 @@ export async function sync(): Promise<void> {
   /* writes flush automatically; nothing to drain */
 }
 
-/** No-ops kept for API/UI compatibility — Firestore retries writes itself. */
+/**
+ * Manual / scheduled retry of the background sync (the "Retry" on the sync chip).
+ * Firestore retries queued writes by itself; this clears a stale failed/pending
+ * status and re-attaches the live listeners, which makes the SDK re-open its
+ * server stream. Local state stays untouched: the next snapshot replaces the
+ * cache (server is the source of truth), so it is safe to call repeatedly.
+ */
 export function retrySync(): void {
   setState({ syncStatus: navigator.onLine ? 'pending' : 'offline', syncError: null });
+  if (navigator.onLine && currentUid()) startSyncLoop();
 }
 export function discardBlockingChange(): void {
   setState({ syncStatus: navigator.onLine ? 'pending' : 'offline', syncError: null });
@@ -6133,6 +6157,7 @@ export function duplicateExercise(workoutId: string, exerciseId: string): void {
     plannedSets: ex.plannedSets ?? null,
     plannedReps: ex.plannedReps ?? null,
     plannedDurationMin: ex.plannedDurationMin ?? null,
+    ...(ex.planItemId ? { planItemId: ex.planItemId } : {}),
     equipment: ex.equipment ?? [],
     primaryMuscle: ex.primaryMuscle ?? null,
     secondaryMuscles: ex.secondaryMuscles ?? [],

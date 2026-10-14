@@ -27,20 +27,186 @@ service cloud.firestore {
         ? request.auth.token.role
         : 'member';
     }
+    // The role claim is baked into the custom token and can be stale (demotion, suspension): every coach/admin
+    // privilege below ALSO requires the live users/{uid} document to agree (one cached get per request). The functions
+    // that change a role or suspend an account additionally revoke refresh tokens and end the relationships
+    // (plan-security B-02), so a stale claim reaches nothing in the meantime.
+    function liveUser() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function notSuspended() {
+      return liveUser().get('status', 'active') != 'suspended';
+    }
     function isAdmin() {
-      return role() == 'admin';
+      return role() == 'admin' && liveUser().get('role', 'member') == 'admin' && notSuspended();
     }
     function isTrainerOrAdmin() {
-      return role() == 'trainer' || role() == 'admin';
+      return (role() == 'trainer' || role() == 'admin')
+        && liveUser().get('role', 'member') in ['trainer', 'admin']
+        && notSuspended();
     }
+    // --- Coaching helpers (conversation = one client + one trainer; cid is an OPAQUE id,
+    // so the parties come from the conversation document, never from the path) ----------
+    function coachingOf(clientId) {
+      return get(/databases/$(database)/documents/coaching/$(clientId)).data;
+    }
+    // Coach access is a role (trainer OR admin: an admin has the same rights as a trainer, for
+    // the clients they coach themselves) AND an active relationship. Consent applies identically.
+    function isCoachRole() {
+      return isTrainerOrAdmin();
+    }
+    // The coach reads/writes a client's coaching data only while the relationship is active.
+    function isActiveCoachOf(clientId) {
+      return isSignedIn()
+        && isCoachRole()
+        && coachingOf(clientId).trainerId == request.auth.uid
+        && coachingOf(clientId).status == 'active';
+    }
+    function convOf(cid) {
+      return get(/databases/$(database)/documents/conversations/$(cid)).data;
+    }
+    // d = conversation DOCUMENT data (resource.data). Query-safe: no get() on document-derived
+    // paths, so `where('trainerId','==',uid).where('active','==',true)` is a legal list query.
+    // `active` is maintained by functions in the same transaction as coaching.status.
+    function inConvData(d) {
+      return isSignedIn() && (
+        request.auth.uid == d.clientId
+        || (request.auth.uid == d.trainerId && isCoachRole() && d.get('active', false) == true)
+      );
+    }
+    // Sub-collections (cid known from the path): the AUTHORITATIVE coaching.status decides.
+    function inConv(cid) {
+      return isSignedIn() && (
+        request.auth.uid == convOf(cid).clientId
+        || (request.auth.uid == convOf(cid).trainerId && isActiveCoachOf(convOf(cid).clientId)) /* isActiveCoachOf includes isCoachRole() */
+      );
+    }
+    // Writes need an ACTIVE relationship for both sides.
+    function activeConv(cid) {
+      return inConv(cid)
+        && coachingOf(convOf(cid).clientId).status == 'active'
+        && coachingOf(convOf(cid).clientId).trainerId == convOf(cid).trainerId;
+    }
+    function isConvTrainer(cid) {
+      return isCoachRole() && request.auth.uid == convOf(cid).trainerId;
+    }
+    // A document must use the epoch of the published chat key. The client may write epoch 1
+    // before its first wrap is published; the trainer never can (no key, no write).
+    function epochOk(cid, e) {
+      return convOf(cid).get('keyEpoch', 0) == e
+        || (convOf(cid).get('keyEpoch', 0) == 0 && request.auth.uid == convOf(cid).clientId && e == 1);
+    }
+    // Envelope sealed with a conversation sub-key: { v, iv, ct } only (no salt), 96-bit IV,
+    // ciphertext padded to 64-byte buckets, capped at ~8 KB of plaintext (<11000 base64 chars).
+    function sealedCk(d) {
+      return d.keys().hasAll(['enc', 'keyEpoch'])
+        && d.enc is map
+        && d.enc.keys().hasOnly(['v', 'iv', 'ct'])
+        && d.enc.v == 1
+        && d.enc.iv is string && d.enc.iv.size() == 16
+        && d.enc.ct is string && d.enc.ct.size() >= 100 && d.enc.ct.size() < 11000
+        && d.keyEpoch is int && d.keyEpoch >= 1 && d.keyEpoch <= 10000;
+    }
+    // Plan documents hold a whole program (plan-backend R-BE-DB-4: < 200 KB). The client seals at most 180000
+    // bytes (PLAN_MAX_BYTES in newCollections.ts) = 240000 base64 characters plus padding.
+    function sealedCkPlan(d) {
+      return d.keys().hasAll(['enc', 'keyEpoch'])
+        && d.enc is map
+        && d.enc.keys().hasOnly(['v', 'iv', 'ct'])
+        && d.enc.v == 1
+        && d.enc.iv is string && d.enc.iv.size() == 16
+        && d.enc.ct is string && d.enc.ct.size() >= 100 && d.enc.ct.size() < 250000
+        && d.keyEpoch is int && d.keyEpoch >= 1 && d.keyEpoch <= 10000;
+    }
+    // Schedule documents: SCHEDULE_MAX_BYTES (120000) of plaintext = 160000 base64 characters plus padding and tag.
+    function sealedCkSchedule(d) {
+      return d.keys().hasAll(['enc', 'keyEpoch'])
+        && d.enc is map
+        && d.enc.keys().hasOnly(['v', 'iv', 'ct'])
+        && d.enc.v == 1
+        && d.enc.iv is string && d.enc.iv.size() == 16
+        && d.enc.ct is string && d.enc.ct.size() >= 100 && d.enc.ct.size() < 165000
+        && d.keyEpoch is int && d.keyEpoch >= 1 && d.keyEpoch <= 10000;
+    }
+    // conversations/{cid}.ck: the conversation key wrapped for the trainer public key.
+    function validCk(ck) {
+      return ck is map
+        && ck.keys().hasOnly(['v', 'epoch', 'epk', 'iv', 'ct', 'fp'])
+        && ck.v == 1 && ck.epoch is int && ck.epoch >= 1
+        && ck.epk is map && ck.epk.keys().hasOnly(['kty', 'crv', 'x', 'y', 'ext', 'key_ops'])
+        && ck.iv is string && ck.iv.size() == 16
+        && ck.ct is string && ck.ct.size() == 64
+        && ck.fp is string && ck.fp.size() == 16;
+    }
+    // A published wrap may (a) start the next epoch (one step, or up to the relationship's epoch + 1 after an end), or
+    // (b) re-wrap the SAME epoch for a different trainer key (different fingerprint, e.g. after a key change). The same
+    // epoch with the same fingerprint cannot be replaced, and an epoch cannot be made up far ahead (plan-security B-20).
+    function ckStep(conv, ck) {
+      return ck.epoch == conv.get('keyEpoch', 0) + 1
+        || (ck.epoch > conv.get('keyEpoch', 0)
+            && ck.epoch <= coachingOf(conv.clientId).get('keyEpoch', 0) + 1)
+        || (ck.epoch == conv.get('keyEpoch', 0)
+            && conv.get('ck', null) != null
+            && ck.fp != conv.ck.fp);
+    }
+    // One side moves ONLY its own entry in a pointer map, and only forward.
+    function ownPointerOk(field) {
+      return !(field in request.resource.data.diff(resource.data).affectedKeys())
+        || (request.resource.data[field].diff(resource.data[field]).affectedKeys().hasOnly([request.auth.uid])
+            && request.resource.data[field][request.auth.uid] is int
+            && request.resource.data[field][request.auth.uid] >= resource.data[field].get(request.auth.uid, 0));
+    }
+    // `clearedBefore` is the user's OWN view marker: it may also move back (Undo of "Clear chat").
+    function ownMarkerOk(field) {
+      return !(field in request.resource.data.diff(resource.data).affectedKeys())
+        || (request.resource.data[field].diff(resource.data[field]).affectedKeys().hasOnly([request.auth.uid])
+            && request.resource.data[field][request.auth.uid] is int
+            && request.resource.data[field][request.auth.uid] >= 0);
+    }
+    function validDel(d) {
+      return d is map && d.keys().hasOnly(['state', 'at']) && d.state == 'pending' && d.at is int;
+    }
+    // Envelope sealed with the OWNER'S vault key (DEK): { v, salt, iv, ct } only, 96-bit IV (16 base64 chars), bounded.
+    // Every trainer-private or client-private document below must carry exactly this; plaintext siblings are refused.
+    function dekEnc(d, maxCt) {
+      return d.keys().hasAll(['enc'])
+        && d.enc is map
+        && d.enc.keys().hasOnly(['v', 'salt', 'iv', 'ct'])
+        && d.enc.v == 1
+        && d.enc.salt is string && d.enc.salt.size() <= 64
+        && d.enc.iv is string && d.enc.iv.size() == 16
+        && d.enc.ct is string && d.enc.ct.size() >= 24 && d.enc.ct.size() < maxCt;
+    }
+    // programs/prg-{clientUid}-{n} are the runnable programs a trainer writes for ONE client: only the active coach of
+    // THAT client may create, change or delete one (a squatted or orphaned id cannot block Send or outlive the link).
+    function prgClient(pid) {
+      let p = pid.split('-');
+      return p.size() == 3 ? p[1]
+        : p.size() == 4 ? p[1] + '-' + p[2]
+        : p.size() == 5 ? p[1] + '-' + p[2] + '-' + p[3]
+        : p.size() == 6 ? p[1] + '-' + p[2] + '-' + p[3] + '-' + p[4]
+        : p.size() == 7 ? p[1] + '-' + p[2] + '-' + p[3] + '-' + p[4] + '-' + p[5]
+        : p.size() == 8 ? p[1] + '-' + p[2] + '-' + p[3] + '-' + p[4] + '-' + p[5] + '-' + p[6]
+        : '';
+    }
+    function prgOk(pid) {
+      return !pid.matches('prg-.*')
+        || (prgClient(pid) != '' && isActiveCoachOf(prgClient(pid)));
+    }
+    // Live presence: the original five fields stay valid for current clients; the
+    // sealed extension (name/gym/counts inside `enc`, sub-key "live") is additive.
     function validLiveSession(athleteId) {
-      return request.resource.data.keys().hasOnly(['id', 'trainerId', 'startedAt', 'updatedAt'])
-        && request.resource.data.keys().hasAll(['id', 'trainerId', 'startedAt', 'updatedAt'])
-        && request.resource.data.id == athleteId
-        && request.resource.data.trainerId is string
-        && request.resource.data.trainerId == get(/databases/$(database)/documents/users/$(athleteId)).data.trainerId
-        && request.resource.data.startedAt is int
-        && request.resource.data.updatedAt is int;
+      let d = request.resource.data;
+      return d.keys().hasOnly(['id', 'trainerId', 'startedAt', 'updatedAt', 'finishedAt', 'expireAt', 'keyEpoch', 'enc'])
+        && d.keys().hasAll(['id', 'trainerId', 'startedAt', 'updatedAt'])
+        && d.id == athleteId
+        && d.trainerId is string
+        && d.trainerId == get(/databases/$(database)/documents/users/$(athleteId)).data.trainerId
+        && d.startedAt is int
+        && d.updatedAt is int
+        && (!('finishedAt' in d) || d.finishedAt is int)
+        && (!('expireAt' in d) || d.expireAt is int)
+        && (!('enc' in d) || sealedCk(d));
     }
 
     // --- Users: public-ish profile document ---------------------------------
@@ -93,7 +259,44 @@ service cloud.firestore {
       // — all covered here. Own read/write only; admin/trainer cross-user reads
       // go through functions (Admin SDK).
       match /meta/{docId} {
-        allow read, write: if isSelf(userId);
+        allow read: if isSelf(userId);
+        // the sealed coaching documents have their own shape rules below
+        allow write: if isSelf(userId) && !(docId in ['chatKeys', 'signalState', 'selfCoach', 'calendarSettings']);
+      }
+      // Chat key store: every conversation key of this user, sealed under their DEK (written with encryptJson).
+      match /meta/chatKeys {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['v', 'enc'])
+          && request.resource.data.keys().hasAll(['v', 'enc'])
+          && request.resource.data.v == 1
+          && dekEnc(request.resource.data, 200000);
+        allow delete: if isSelf(userId);
+      }
+      match /meta/signalState {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 300000);
+        allow delete: if isSelf(userId);
+      }
+      match /meta/selfCoach {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 100000);
+        allow delete: if isSelf(userId);
+      }
+      // The trainer's calendar settings (working hours, gyms, range), sealed under their DEK.
+      match /meta/calendarSettings {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 20000);
+        allow delete: if isSelf(userId);
       }
       match /pings/{pingId} {
         allow read, write: if isSelf(userId);
@@ -144,6 +347,262 @@ service cloud.firestore {
         allow read: if isSelf(userId);
         allow write: if false;
       }
+
+      // Trainer-private data (sealed with the trainer's own vault key): own read/write only.
+      match /clientNotes/{noteId} {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['id', 'clientId', 'at', 'updatedAt', 'del', 'enc'])
+          && request.resource.data.keys().hasAll(['id', 'clientId', 'at', 'updatedAt', 'enc'])
+          && request.resource.data.id == noteId
+          && request.resource.data.clientId is string && request.resource.data.clientId.size() <= 128
+          && request.resource.data.at is int
+          && request.resource.data.updatedAt is int
+          && (!('del' in request.resource.data)
+              || request.resource.data.del is bool || validDel(request.resource.data.del))
+          && dekEnc(request.resource.data, 120000);
+        allow delete: if isSelf(userId);
+      }
+      match /decisions/{decisionId} {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['id', 'clientId', 'kind', 'status', 'decidedAt', 'windowEndsAt', 'enc'])
+          && request.resource.data.keys().hasAll(['id', 'clientId', 'kind', 'status', 'enc'])
+          && request.resource.data.id == decisionId
+          && request.resource.data.clientId is string && request.resource.data.clientId.size() <= 128
+          && request.resource.data.kind is string && request.resource.data.kind.size() <= 64
+          && request.resource.data.status is string && request.resource.data.status.size() <= 32
+          && dekEnc(request.resource.data, 200000);
+        allow delete: if isSelf(userId);
+        match /evidence/{cat} {
+          allow read: if isSelf(userId);
+          allow create, update: if isSelf(userId)
+            && request.resource.data.keys().hasOnly(['category', 'enc'])
+            && request.resource.data.keys().hasAll(['category', 'enc'])
+            && request.resource.data.category == cat
+            && dekEnc(request.resource.data, 700000);
+          allow delete: if isSelf(userId);
+        }
+      }
+      // Client-side consent snapshots (derived views for the trainer, sealed with the client's vault key).
+      match /shares/{category} {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['category', 'level', 'asOf', 'v', 'enc'])
+          && request.resource.data.keys().hasAll(['category', 'level', 'asOf', 'v', 'enc'])
+          && request.resource.data.category == category
+          && request.resource.data.level in ['effects', 'full']
+          && request.resource.data.asOf is int
+          && request.resource.data.v is int
+          && dekEnc(request.resource.data, 400000);
+        allow delete: if isSelf(userId);
+      }
+      // Consent history: written by functions only.
+      match /consentLog/{entryId} {
+        allow read: if isSelf(userId);
+        allow write: if false;
+      }
+    }
+
+    // --- Coaching ------------------------------------------------------------------
+    // coaching/{clientId}: the relationship (trainer, mode, status, consent). Functions only.
+    match /coaching/{clientId} {
+      // The trainer branch ends with the relationship (status) and with the coach role (live user document).
+      allow read: if isSelf(clientId)
+        || (isSignedIn() && isCoachRole()
+            && resource.data.trainerId == request.auth.uid
+            && resource.data.get('status', '') == 'active');
+      allow write: if false;
+      match /summary/{docId} {
+        allow read: if isSelf(clientId) || isActiveCoachOf(clientId);
+        allow write: if false;
+      }
+    }
+
+    // conversations/{cid}: created by functions. Everything user-written below it is sealed
+    // with the conversation key (see client/src/coachCrypto). Strict key lists everywhere.
+    match /conversations/{cid} {
+      allow read: if inConvData(resource.data);
+      allow create, delete: if false;
+      allow update: if inConvData(resource.data) && (
+        // the client publishes the wrapped conversation key (never the trainer)
+        (request.auth.uid == resource.data.clientId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ck', 'keyEpoch'])
+          && request.resource.data.keys().hasAll(['ck', 'keyEpoch'])
+          && validCk(request.resource.data.ck)
+          && request.resource.data.keyEpoch == request.resource.data.ck.epoch
+          && ckStep(resource.data, request.resource.data.ck))
+        // each side moves ONLY its own pointers
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readUpTo', 'clearedBefore'])
+          && ownPointerOk('readUpTo')
+          && ownMarkerOk('clearedBefore'))
+      );
+
+      match /messages/{mid} {
+        allow read: if inConv(cid);
+        allow create: if activeConv(cid)
+          && request.resource.data.keys().hasOnly(['id', 'from', 'at', 'v', 'keyEpoch', 'enc', 'sig', 'sigKid'])
+          && request.resource.data.keys().hasAll(['id', 'from', 'at', 'v', 'keyEpoch', 'enc', 'sig', 'sigKid'])
+          // sender signature (C.2 no. 7) is REQUIRED: the receiver verifies it, the rules bound the size
+          && request.resource.data.sig is string && request.resource.data.sig.size() <= 100
+          && request.resource.data.sigKid is string && request.resource.data.sigKid.size() <= 32
+          && request.resource.data.id == mid
+          && request.resource.data.from == request.auth.uid
+          && request.resource.data.v == 1
+          && request.resource.data.at is int
+          && request.resource.data.at > request.time.toMillis() - 120000
+          && request.resource.data.at < request.time.toMillis() + 120000
+          && sealedCk(request.resource.data)
+          && epochOk(cid, request.resource.data.keyEpoch);
+        allow update: if inConv(cid)
+          && resource.data.from == request.auth.uid
+          && !('deleted' in resource.data)
+          && (
+            // start the undo window / cancel it: only `del` changes, ciphertext untouched
+            (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['del'])
+              && (!('del' in request.resource.data) || validDel(request.resource.data.del)))
+            // commit: the ciphertext is physically dropped, a stub stays for "Message deleted"
+            || (request.resource.data.keys().hasOnly(['id', 'from', 'at', 'v', 'keyEpoch', 'deleted', 'deletedAt'])
+              && request.resource.data.keys().hasAll(['id', 'from', 'at', 'v', 'keyEpoch', 'deleted', 'deletedAt'])
+              && request.resource.data.deleted == true
+              && request.resource.data.deletedAt is int
+              && ('del' in resource.data)
+              && resource.data.del.state == 'pending'
+              && request.resource.data.id == resource.data.id
+              && request.resource.data.from == resource.data.from
+              && request.resource.data.at == resource.data.at
+              && request.resource.data.v == resource.data.v
+              && request.resource.data.keyEpoch == resource.data.keyEpoch)
+          );
+        allow delete: if false;
+      }
+
+      // Shared notes: written by the trainer only, sealed with the conversation key.
+      match /notes/{nid} {
+        allow read: if inConv(cid);
+        allow create: if activeConv(cid) && isConvTrainer(cid)
+          && request.resource.data.keys().hasOnly(['id', 'by', 'at', 'updatedAt', 'keyEpoch', 'enc', 'del'])
+          && request.resource.data.keys().hasAll(['id', 'by', 'at', 'updatedAt', 'keyEpoch', 'enc'])
+          && request.resource.data.id == nid
+          && request.resource.data.by == request.auth.uid
+          && request.resource.data.at is int
+          && request.resource.data.updatedAt is int
+          && (!('del' in request.resource.data) || validDel(request.resource.data.del))
+          && sealedCk(request.resource.data)
+          && epochOk(cid, request.resource.data.keyEpoch);
+        allow update: if activeConv(cid) && isConvTrainer(cid)
+          && request.resource.data.keys().hasOnly(['id', 'by', 'at', 'updatedAt', 'keyEpoch', 'enc', 'del'])
+          && request.resource.data.keys().hasAll(['id', 'by', 'at', 'updatedAt', 'keyEpoch', 'enc'])
+          && request.resource.data.id == resource.data.id
+          && request.resource.data.by == resource.data.by
+          && request.resource.data.at == resource.data.at
+          && request.resource.data.updatedAt is int
+          && (!('del' in request.resource.data) || validDel(request.resource.data.del))
+          && sealedCk(request.resource.data)
+          && epochOk(cid, request.resource.data.keyEpoch);
+        allow delete: if activeConv(cid) && isConvTrainer(cid);
+      }
+
+      // Reschedule requests: the state machine lives in functions (`coachRescheduleCreate` /
+      // `coachRescheduleRespond`, Admin SDK). The REQUESTER seals the content with the conversation key and
+      // sends it through the callable, which validates the open fields only (it never holds a key): active
+      // relationship, requester side, +-5 min creation window, ttl <= 14 d and ONE pending request per slotKey
+      // (not expressible in rules). The other party changes only `status`/`decidedAt`, also through the callable.
+      // Clients and trainers can read, never write.
+      match /requests/{rid} {
+        allow read: if inConv(cid);
+        allow create, update, delete: if false;
+      }
+
+      // Key ring of PAST epochs (plan-security C.2): the CLIENT device wraps each earlier epoch of the current link
+      // period for the trainer's signed key, so the trainer keeps the history they legitimately held after a rotation.
+      // Same wrap shape and AAD as `conversations/{cid}.ck`. Only the client writes (active relationship, strictly an
+      // epoch below the published one); both active parties read; nobody deletes (the end function removes the whole
+      // ring, so a removed trainer who is linked again holds nothing of the earlier period).
+      match /keyring/{epoch} {
+        allow read: if inConv(cid);
+        allow create, update: if activeConv(cid)
+          && request.auth.uid == convOf(cid).clientId
+          && request.resource.data.keys().hasOnly(['epoch', 'ck', 'at'])
+          && request.resource.data.keys().hasAll(['epoch', 'ck', 'at'])
+          && request.resource.data.epoch is int
+          && request.resource.data.epoch == int(epoch)
+          && epoch == string(request.resource.data.epoch)
+          && request.resource.data.at is int
+          && validCk(request.resource.data.ck)
+          && request.resource.data.ck.epoch == request.resource.data.epoch
+          && request.resource.data.epoch < convOf(cid).get('keyEpoch', 0);
+        allow delete: if false;
+      }
+    }
+
+    // Weekly schedule, sealed with the conversation key. The trainer writes while active.
+    match /schedules/{clientId} {
+      allow read: if isSelf(clientId) || isActiveCoachOf(clientId);
+      allow create: if isActiveCoachOf(clientId)
+        && request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
+        && request.resource.data.keys().hasAll(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
+        && request.resource.data.clientId == clientId
+        && request.resource.data.trainerId == request.auth.uid
+        && request.resource.data.updatedAt is int
+        && request.resource.data.rev == 1
+        && sealedCkSchedule(request.resource.data);
+      allow update: if isActiveCoachOf(clientId)
+        && request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
+        && request.resource.data.keys().hasAll(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
+        && request.resource.data.clientId == clientId
+        && request.resource.data.trainerId == request.auth.uid
+        && request.resource.data.updatedAt is int
+        && request.resource.data.rev == resource.data.rev + 1
+        && sealedCkSchedule(request.resource.data);
+      allow delete: if false;
+    }
+
+    // Per-client program overlay. `liveVersion` moves only through publishPlanVersion (functions).
+    match /plans/{clientId} {
+      allow read: if isSelf(clientId) || isActiveCoachOf(clientId);
+      allow create: if isActiveCoachOf(clientId)
+        && request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'programId', 'liveVersion', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
+        && request.resource.data.keys().hasAll(['clientId', 'trainerId', 'programId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
+        && request.resource.data.clientId == clientId
+        && request.resource.data.trainerId == request.auth.uid
+        && request.resource.data.programId is string
+        && request.resource.data.get('liveVersion', 0) == 0
+        && request.resource.data.updatedAt is int
+        && request.resource.data.rev == 1
+        && sealedCkPlan(request.resource.data);
+      allow update: if isActiveCoachOf(clientId)
+        && request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'programId', 'liveVersion', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
+        && request.resource.data.keys().hasAll(['clientId', 'trainerId', 'programId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
+        && request.resource.data.clientId == clientId
+        && request.resource.data.trainerId == request.auth.uid
+        && request.resource.data.programId is string
+        && request.resource.data.get('liveVersion', 0) == resource.data.get('liveVersion', 0)
+        && request.resource.data.updatedAt is int
+        && request.resource.data.rev == resource.data.rev + 1
+        && sealedCkPlan(request.resource.data);
+      allow delete: if false;
+
+      match /versions/{n} {
+        allow read: if isActiveCoachOf(clientId)
+          || (isSelf(clientId) && resource.data.state != 'draft');
+        allow create: if isActiveCoachOf(clientId)
+          && request.resource.data.keys().hasOnly(['n', 'programId', 'state', 'createdAt', 'publishedAt', 'keyEpoch', 'enc'])
+          && request.resource.data.keys().hasAll(['n', 'programId', 'state', 'createdAt', 'keyEpoch', 'enc'])
+          && request.resource.data.n == int(n)
+          && request.resource.data.state == 'draft'
+          && request.resource.data.createdAt is int
+          && sealedCkPlan(request.resource.data);
+        allow update: if isActiveCoachOf(clientId)
+          && resource.data.state == 'draft'
+          && request.resource.data.state == 'draft'
+          && request.resource.data.keys().hasOnly(['n', 'programId', 'state', 'createdAt', 'publishedAt', 'keyEpoch', 'enc'])
+          && request.resource.data.keys().hasAll(['n', 'programId', 'state', 'createdAt', 'keyEpoch', 'enc'])
+          && request.resource.data.n == resource.data.n
+          && request.resource.data.createdAt == resource.data.createdAt
+          && sealedCkPlan(request.resource.data);
+        allow delete: if isActiveCoachOf(clientId) && resource.data.state == 'draft';
+      }
     }
 
     // --- Coached-athlete live sessions -------------------------------------
@@ -170,12 +629,34 @@ service cloud.firestore {
     // athlete needs it to create a grant); only its owner writes it, and only a public JWK.
     match /coachKeys/{userId} {
       allow read: if isSignedIn();
-      allow create, update: if isSelf(userId)
-        && request.resource.data.keys().hasOnly(['pub', 'updatedAt'])
+      // `sig`, `kid`, `signedAt` are written by the `coachKeySignCall` function (Admin SDK) and bind uid, key
+      // fingerprint and `updatedAt`. The owner may keep them untouched (e.g. a merge write) but never set or change
+      // them; a new `pub` without a fresh signature is simply refused by clients (key pinning, plan-security C.2 no. 5).
+      allow create, update: if isSelf(userId) && isCoachRole()
+        && request.resource.data.keys().hasOnly(['pub', 'updatedAt', 'sig', 'kid', 'signedAt'])
+        && request.resource.data.keys().hasAll(['pub', 'updatedAt'])
         && request.resource.data.pub is map
         && request.resource.data.pub.keys().hasOnly(['kty', 'crv', 'x', 'y', 'ext', 'key_ops'])
-        && request.resource.data.updatedAt is int;
+        && request.resource.data.pub.get('kty', '') == 'EC'
+        && request.resource.data.pub.get('crv', '') == 'P-256'
+        && request.resource.data.pub.get('x', 0) is string && request.resource.data.pub.x.size() <= 64
+        && request.resource.data.pub.get('y', 0) is string && request.resource.data.pub.y.size() <= 64
+        && request.resource.data.updatedAt is int
+        // a signature may only be carried over UNCHANGED together with the very same key it was made for
+        && (!('sig' in request.resource.data)
+            || (resource != null
+                && request.resource.data.pub == resource.data.pub
+                && request.resource.data.get('sig', null) == resource.data.get('sig', null)
+                && request.resource.data.get('kid', null) == resource.data.get('kid', null)
+                && request.resource.data.get('signedAt', null) == resource.data.get('signedAt', null)));
       allow delete: if false;
+    }
+
+    // Device signing keys (public halves) for chat sender authenticity (plan-security C.2 no. 7). Written by
+    // `coachPublishSignKey` under a server signature only; any signed-in user may read a counterpart's key.
+    match /signKeys/{userId}/keys/{kid} {
+      allow read: if isSignedIn();
+      allow write: if false;
     }
 
     // --- Credentials & uniqueness indexes: functions only -------------------
@@ -226,11 +707,12 @@ service cloud.firestore {
           && get(/databases/$(database)/documents/assignments/$(uid())).data.programId == programId
         )
       );
-      allow create: if isSignedIn() && request.resource.data.authorId == uid();
+      allow create: if isSignedIn() && request.resource.data.authorId == uid() && prgOk(programId);
       allow update: if isSignedIn()
         && resource.data.authorId == uid()
-        && request.resource.data.authorId == uid();
-      allow delete: if isSignedIn() && resource.data.authorId == uid();
+        && request.resource.data.authorId == uid()
+        && prgOk(programId);
+      allow delete: if isSignedIn() && resource.data.authorId == uid() && prgOk(programId);
     }
 
     // Program assignments: readable by the member and by trainers/admins;

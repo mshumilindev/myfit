@@ -779,12 +779,12 @@ const goals: WidgetDef = {
     const chips = (list: FocusMuscle[], tone: ChipTone, mark: string, max: number) => (
       <Row>
         {list.slice(0, max).map((f) => (
-          <Chip key={f} size="sm" tone={tone}>
+          <Chip key={f} size="xs" tone={tone}>
             {`${fl(f)} ${mark}`}
           </Chip>
         ))}
         {list.length > max && (
-          <Chip size="sm" tone="neutral">
+          <Chip size="xs" tone="neutral">
             {`+${list.length - max}`}
           </Chip>
         )}
@@ -1478,18 +1478,18 @@ function GymWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         {kit.length ? (
           <>
             {kit.slice(0, 5).map((id) => (
-              <Chip key={id} size="sm" tone="neutral">
+              <Chip key={id} size="xs" tone="neutral">
                 {equipmentLabel(id)}
               </Chip>
             ))}
             {kit.length > 5 && (
-              <Chip size="sm" tone="neutral">
+              <Chip size="xs" tone="neutral">
                 {`+${kit.length - 5}`}
               </Chip>
             )}
           </>
         ) : (
-          <Chip size="sm" tone="neutral">
+          <Chip size="xs" tone="neutral">
             {s.noInventory}
           </Chip>
         )}

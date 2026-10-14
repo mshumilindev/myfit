@@ -7,7 +7,6 @@ import {
   useEffect,
   useRef,
   useState,
-  useSyncExternalStore,
   type ComponentType,
   type CSSProperties,
 } from 'react';
@@ -25,7 +24,6 @@ export {
 } from './components/ui/Overlays';
 import { Portal, useFixedPanelPosition } from './components/ui/Overlays';
 import { Button } from './components/ui/Button';
-import { getMutationPending, subscribeMutation } from './api';
 import { AndroidLogo } from '@phosphor-icons/react/AndroidLogo';
 import { AppleLogo } from '@phosphor-icons/react/AppleLogo';
 import { ArrowClockwise } from '@phosphor-icons/react/ArrowClockwise';
@@ -47,6 +45,14 @@ import { Check } from '@phosphor-icons/react/Check';
 import { SkipForward } from '@phosphor-icons/react/SkipForward';
 import { Vibrate } from '@phosphor-icons/react/Vibrate';
 import { ShareNetwork } from '@phosphor-icons/react/ShareNetwork';
+import { Users } from '@phosphor-icons/react/Users';
+import { ChatCircle } from '@phosphor-icons/react/ChatCircle';
+import { Note } from '@phosphor-icons/react/Note';
+import { Repeat } from '@phosphor-icons/react/Repeat';
+import { CircleNotch } from '@phosphor-icons/react/CircleNotch';
+import { ClipboardText } from '@phosphor-icons/react/ClipboardText';
+import { PaperPlaneRight } from '@phosphor-icons/react/PaperPlaneRight';
+import { UserCircle } from '@phosphor-icons/react/UserCircle';
 import { Target } from '@phosphor-icons/react/Target';
 import { Heartbeat } from '@phosphor-icons/react/Heartbeat';
 import { Minus } from '@phosphor-icons/react/Minus';
@@ -90,6 +96,7 @@ import { Carrot } from '@phosphor-icons/react/Carrot';
 import { ChartBar } from '@phosphor-icons/react/ChartBar';
 import { ChartLine } from '@phosphor-icons/react/ChartLine';
 import { ChartLineUp } from '@phosphor-icons/react/ChartLineUp';
+import { ChalkboardTeacher } from '@phosphor-icons/react/ChalkboardTeacher';
 import { CheckCircle } from '@phosphor-icons/react/CheckCircle';
 import { XCircle } from '@phosphor-icons/react/XCircle';
 import { ClockCountdown } from '@phosphor-icons/react/ClockCountdown';
@@ -152,6 +159,8 @@ import { WaveSine } from '@phosphor-icons/react/WaveSine';
 import { Scales } from '@phosphor-icons/react/Scales';
 import { Ruler } from '@phosphor-icons/react/Ruler';
 import { ShieldCheck } from '@phosphor-icons/react/ShieldCheck';
+import { ShieldWarning } from '@phosphor-icons/react/ShieldWarning';
+import { LinkBreak } from '@phosphor-icons/react/LinkBreak';
 import { Sparkle } from '@phosphor-icons/react/Sparkle';
 import { SunHorizon } from '@phosphor-icons/react/SunHorizon';
 import { SignOut } from '@phosphor-icons/react/SignOut';
@@ -278,6 +287,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'chart-line': ChartLine,
   'chart-bar': ChartBar,
   'chart-line-up': ChartLineUp,
+  'chalkboard-teacher': ChalkboardTeacher,
   'check-circle': CheckCircle,
   clock: Clock,
   'clock-countdown': ClockCountdown,
@@ -297,6 +307,14 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'skip-forward': SkipForward,
   vibrate: Vibrate,
   'share-network': ShareNetwork,
+  users: Users,
+  'chat-circle': ChatCircle,
+  note: Note,
+  repeat: Repeat,
+  'circle-notch': CircleNotch,
+  'clipboard-text': ClipboardText,
+  'paper-plane-right': PaperPlaneRight,
+  'user-circle': UserCircle,
   gauge: Gauge,
   globe: Globe,
   gear: Gear,
@@ -346,6 +364,8 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   scales: Scales,
   ruler: Ruler,
   'shield-check': ShieldCheck,
+  'shield-warning': ShieldWarning,
+  'link-break': LinkBreak,
   confetti: Confetti,
   pause: Pause,
   bandaids: Bandaids,
@@ -557,24 +577,6 @@ export function LanguageSelector({ compact }: { compact?: boolean } = {}) {
         </Portal>
       )}
     </div>
-  );
-}
-
-/** Full-page scrim + spinner while a mutation (callable / tracked write) is in flight. */
-export function ServerBusyOverlay() {
-  const { t } = useT();
-  const busy = useSyncExternalStore(
-    subscribeMutation,
-    () => getMutationPending() > 0,
-    () => false,
-  );
-  if (!busy) return null;
-  return (
-    <Portal>
-      <div className="server-busy-scrim" role="alert" aria-busy="true" aria-live="assertive">
-        <div className="sp" aria-label={t.saving} />
-      </div>
-    </Portal>
   );
 }
 

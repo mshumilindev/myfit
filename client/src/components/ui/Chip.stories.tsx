@@ -25,7 +25,7 @@ export const Tones: Story = {
         </Chip>
       ))}
       {TONES.map((t) => (
-        <Chip key={`s${t}`} tone={t} size="sm" icon="clock">
+        <Chip key={`s${t}`} tone={t} size="xs" icon="clock">
           {t} sm
         </Chip>
       ))}
@@ -51,3 +51,41 @@ function Selectable() {
 
 /** Selectable chips (buttons with aria-pressed) + disabled. */
 export const SelectableGroup: Story = { render: () => <Selectable /> };
+
+/** Filter chips with a count (`count` prop: tabular, dimmed, announced as part of the name) in a `ChipGroup`. `scroll` keeps ONE row on a phone, `fill` makes equal columns. */
+export const WithCounts: Story = {
+  render: () => {
+    const items: [string, number][] = [
+      ['All', 14],
+      ['Needs attention', 4],
+      ['Improved', 6],
+      ['Declined', 2],
+      ['No change', 2],
+    ];
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: 358 }}>
+        <ChipGroup role="group" aria-label="Filter">
+          {items.map(([l, n], i) => (
+            <Chip key={l} selected={i === 0} count={n} onClick={() => undefined}>
+              {l}
+            </Chip>
+          ))}
+        </ChipGroup>
+        <ChipGroup scroll role="group" aria-label="Filter (scrolls)">
+          {items.map(([l, n], i) => (
+            <Chip key={l} selected={i === 1} count={n} onClick={() => undefined}>
+              {l}
+            </Chip>
+          ))}
+        </ChipGroup>
+        <ChipGroup fill role="group" aria-label="Filter (equal columns)">
+          {items.slice(0, 3).map(([l, n], i) => (
+            <Chip key={l} size="xs" selected={i === 2} count={n} onClick={() => undefined}>
+              {l}
+            </Chip>
+          ))}
+        </ChipGroup>
+      </div>
+    );
+  },
+};

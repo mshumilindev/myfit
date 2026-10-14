@@ -12,9 +12,11 @@
 .uifield-box {
   display: flex;
   align-items: center;
-  gap: var(--s-10);
-  min-height: 50px;
-  padding: 0 var(--s-14);
+  gap: var(--ctl-gap-in);
+  box-sizing: border-box;
+  height: var(--ctl-h);
+  min-height: var(--ctl-h);
+  padding: 0 var(--ctl-px);
   border-radius: var(--field-radius, var(--radius-lg));
   background: var(--field-bg, var(--color-surface));
   box-shadow: inset 0 0 0 1px var(--field-ring, var(--color-divider));
@@ -34,13 +36,13 @@
 .uifield-in {
   flex: 1;
   min-width: 0;
-  height: 48px;
+  height: 100%;
   padding: 0;
   border: 0;
   outline: 0;
   background: none;
   font: inherit;
-  font-size: var(--fs-15);
+  font-size: var(--ctl-fs);
   color: var(--color-text);
   caret-color: var(--color-accent);
 }
@@ -69,6 +71,16 @@
 
 /* Skin hooks (custom properties a feature may set on a Field or its wrapper):
    --field-radius, --field-bg, --field-ring, --field-ph, --field-lead. */
+/* Inline label: the name sits in the well before the value, so the control is one ctl-h tall like its neighbours. */
+.uifield-pre {
+  flex: none;
+  font-size: var(--ctl-fs);
+  line-height: var(--ctl-lh);
+  color: var(--color-neutral-400);
+}
+.uifield-pre::after {
+  content: ':';
+}
 /* Select / Textarea share the Field well. */
 .uifield-select {
   appearance: none;
@@ -77,11 +89,12 @@
 }
 .uifield-caret {
   flex: none;
-  font-size: var(--fs-14);
+  font-size: var(--ctl-icon);
   color: var(--color-neutral-400);
   pointer-events: none;
 }
 .uifield-box--area {
+  height: auto;
   align-items: stretch;
   padding: var(--s-10) var(--s-14);
 }
@@ -98,6 +111,7 @@
 }
 .uifield--bare .uifield-box,
 .uifield--bare .uifield-box:focus-within {
+  height: auto;
   min-height: 0;
   padding: 0;
   border-radius: 0;
@@ -107,4 +121,23 @@
 .uifield--bare .uifield-in {
   height: auto;
   text-align: right;
+}
+
+/* iOS zooms the page on focus of a text control under 16px; the viewport no longer blocks zoom
+   (WCAG 1.4.4), so touch devices get 16px inputs. Desktop is unchanged. */
+@media (pointer: coarse) {
+  .uifield-in {
+    font-size: var(--fs-16);
+  }
+}
+
+/* Reduced motion: no slides, fades or loops; state changes are instant. */
+@media (prefers-reduced-motion: reduce) {
+  .uifield-box {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
 }

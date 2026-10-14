@@ -36,6 +36,13 @@ export const Variants: Story = {
       />
       <FailedState title="Gym search is unavailable" body="The provider did not answer." />
       <FailedState title="Something went wrong" />
+      <FailedState
+        icon="cloud-slash"
+        title="You are offline"
+        body="Showing what is saved on this device."
+        retryLabel="Try again"
+        onRetry={() => undefined}
+      />
     </Stack>
   ),
 };

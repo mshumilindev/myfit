@@ -1,0 +1,30 @@
+/* Layout only: the surface, the scroll and the close button belong to the kit Sheet. */
+.sdp-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+/* The footer stays at the bottom of the scrolling sheet, on the sheet's own plate (no box of its own). */
+.sdp-foot {
+  position: sticky;
+  z-index: 1;
+  bottom: calc(var(--s-4) * -1);
+  margin: 0 calc(var(--s-4) * -1);
+  padding: var(--s-12) var(--s-4) calc(var(--s-8) + var(--safe-bottom));
+  border-top: var(--co-hair) solid var(--t-line, var(--color-divider));
+  /* the plate is a hair translucent: sit it on the page colour so nothing shows through from below */
+  background:
+    linear-gradient(var(--plate-bot, var(--color-surface)), var(--plate-bot, var(--color-surface))),
+    var(--color-bg);
+}
+@media (min-width: 720px) {
+  /* the desktop panel has its own padding (Overlays.css): the footer reaches its edges */
+  .sdp-foot {
+    bottom: calc(var(--s-24) * -1);
+    margin: 0 calc(var(--s-20) * -1);
+    padding: var(--s-12) var(--s-20) var(--s-16);
+  }
+}
+.sdp-foot:empty {
+  display: none;
+}

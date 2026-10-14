@@ -7,6 +7,7 @@ export default tseslint.config(
   {
     ignores: [
       '**/dist/',
+      '**/dist-e2e*/',
       '**/dev-dist/',
       '**/.vite/',
       '**/node_modules/',
@@ -17,6 +18,14 @@ export default tseslint.config(
       'functions/lib/',
       'cloudflare/',
       'docs/design/boards/',
+      'client/design-lab/',
+      '_shots/',
+      '_vb_m89/',
+      '_wctx2/',
+      '_audit_tmp/',
+      '.scratch/',
+      'Claude outputs/',
+      'sb-*/',
     ],
   },
   js.configs.recommended,

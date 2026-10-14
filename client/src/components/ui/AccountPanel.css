@@ -1,0 +1,58 @@
+/* AccountPanel: identity, mode switch, note, profile row. Tokens only. */
+.uiacct {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  padding: var(--s-16);
+}
+.uiacct-id {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+.uiacct-who {
+  min-width: 0;
+}
+.uiacct-name {
+  overflow: hidden;
+  font-size: var(--fs-16);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.uiacct-role {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.uiacct-note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.4;
+}
+
+/* Profile + Sign out: a matching pair of glass pills (Card tone = the family colours the fill,
+   border and label). Layout only here; the look is the kit Card's. */
+.uiacct-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.uiacct-action.uicard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-10);
+  width: 100%;
+  min-height: 48px;
+  padding: var(--s-12) var(--s-14);
+  border-radius: var(--r-pill);
+  color: var(--t-text);
+  font: inherit;
+  font-size: var(--fs-14);
+  font-weight: 500;
+  cursor: pointer;
+}
+.uiacct-action i {
+  font-size: var(--fs-20);
+}

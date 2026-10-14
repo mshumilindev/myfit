@@ -13,6 +13,8 @@ export interface NoticeProps extends HTMLAttributes<HTMLDivElement> {
    * list of rows (an empty state); leave off for a free-standing strip.
    */
   aligned?: boolean;
+  /** Inside a card: flat, keeps the accent rule, drops the tinted plate (R-KIT-25). */
+  nested?: boolean;
   children: ReactNode;
   /** A small trailing action (a text Button) or value. */
   trail?: ReactNode;
@@ -29,13 +31,20 @@ export function Notice({
   tone = 'neutral',
   icon,
   aligned = false,
+  nested = false,
   children,
   trail,
   below,
   className,
   ...rest
 }: NoticeProps) {
-  const cls = ['uinotice', aligned ? 'uinotice--row' : '', toneClass(tone), className]
+  const cls = [
+    'uinotice',
+    aligned ? 'uinotice--row' : '',
+    nested ? 'uinotice--nested' : '',
+    toneClass(tone),
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
   return (

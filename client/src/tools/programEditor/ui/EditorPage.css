@@ -1,0 +1,194 @@
+/* The program editor PAGE: layout only. Surfaces, colours, radii and fonts come from the kit elements. One layout for
+   every host: a host fills the slots and never adds page CSS. */
+.pe-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: var(--pe-page-max, 80rem);
+  margin-inline: auto;
+}
+.pe-page-back {
+  display: flex;
+}
+.pe-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-12) var(--s-16);
+}
+.pe-page-title {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+.pe-page-h1 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-28);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.pe-page-sub {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  margin: var(--s-4) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.pe-page-sub > span {
+  min-width: 0;
+}
+.pe-page-cluster {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-8);
+}
+.pe-page-state {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.pe-page-state:empty {
+  display: none;
+}
+@media (max-width: 767px) {
+  .pe-page-title {
+    flex-basis: 0;
+  }
+  .pe-page-cluster {
+    flex: none;
+  }
+  .pe-page-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: var(--z-20);
+  }
+}
+
+.pe-page-foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+
+/* info band */
+.pe-band {
+  display: flex;
+  flex-direction: column;
+}
+.pe-band-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-8);
+  padding: var(--s-16) var(--s-16) 0;
+}
+.pe-band-body {
+  display: flex;
+  flex-direction: column;
+}
+.pe-band-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  padding: var(--s-16);
+}
+.pe-band-row + .pe-band-row {
+  padding-top: 0;
+}
+.pe-band-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-12);
+}
+.pe-band-row--stack > .pe-band-line {
+  justify-content: space-between;
+}
+.pe-band-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.pe-band-text small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.pe-band-grow {
+  flex: 1 1 14rem;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--fs-14);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.pe-band-trail {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.pe-band-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--s-16);
+  align-items: start;
+  padding: var(--s-12) var(--s-16) var(--s-16);
+}
+.pe-band-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  min-width: 0;
+}
+.pe-band-p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.45;
+}
+.pe-band-note {
+  padding: 0 var(--s-16) var(--s-16);
+}
+.pe-diff {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  margin: 0;
+  padding: var(--s-8) var(--s-16) var(--s-16);
+  list-style: none;
+  font-size: var(--fs-13);
+}
+.pe-diff li {
+  display: flex;
+  gap: var(--s-8);
+}
+.pe-diff-m {
+  flex: none;
+  width: var(--s-16);
+  font-weight: 700;
+  text-align: center;
+}
+.pe-diff-note {
+  color: var(--color-text-muted);
+}
+
+/* The issues behind "Send unlocks when these are fixed": a plain list of links under the note. */
+.pe-band-issues {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-2);
+  margin: var(--s-8) 0 0;
+  padding: 0 var(--s-12);
+  list-style: none;
+}

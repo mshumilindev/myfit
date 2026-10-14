@@ -5,7 +5,7 @@
    Rules (docs/design/brass-glass/PLAN.md):
    1. Only tokens (`html.theme-glass { --… }`), kit primitives (components/ui/,
       `.ui*` classes) and the shell (.app-brand, .tabbar*, .rail*, .sheet,
-      .dialog, .snackbar) may appear here. A page-prefixed selector is a lint
+      .dialog) may appear here. A page-prefixed selector is a lint
       error — pages get the theme by rendering kit primitives.
    2. Source of the values: docs/design/brass-glass/src/kit.py (tokens, CSS)
       and the P00 Foundations boards.
@@ -150,6 +150,20 @@ html.theme-glass.theme-nutrition {
   --lava-2: rgba(36, 72, 107, 0.7);
   --lava-3: rgba(20, 34, 47, 0.9);
 }
+/* Coach: the same three-glow recipe as every sub-app. lava-1 is the one universal violet spot
+   (not overridden, exactly as in Gym / Apex / Learn); only the right-hand gem and the bottom
+   shade take the app colour, at the same alpha (.7 / .9) and the same ~47% / ~23% ramp depth as
+   Apex and Nutrition. The gem is a notch darker than a pure ramp step so muted text keeps
+   >= 4.5:1 at its peak (coach/coachColour.test.ts). */
+html.theme-glass {
+  /* the base of a raised list inside a sheet: graphite-brown on the brass apps, graphite-teal on Coach (below) */
+  --glass-raised-base: rgba(24, 22, 19, 0.92);
+}
+html.theme-glass.theme-coach {
+  --glass-raised-base: color-mix(in srgb, var(--color-accent) 5%, rgba(19, 23, 24, 0.92));
+  --lava-2: rgba(6, 67, 78, 0.7);
+  --lava-3: rgba(16, 56, 60, 0.9);
+}
 html.theme-glass body {
   background: var(--color-bg);
 }
@@ -281,10 +295,10 @@ html.theme-glass .uibrand-actions {
 html.theme-glass .uibrand-actions .mst-badge,
 html.theme-glass .uibrand-actions .uibell,
 html.theme-glass .uibrand-actions .lang-chip {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 0;
+  width: var(--ctl-h-sm);
+  height: var(--ctl-h-sm);
+  min-width: var(--ctl-h-sm);
+  min-height: var(--ctl-h-sm);
   border: 0;
   border-radius: var(--r-pill);
   background: var(--glass-well);
@@ -406,7 +420,7 @@ html.theme-glass .tabbar-fab {
 /* --- Shell: desktop rail --------------------------------------------------- */
 @media (min-width: 720px) {
   html.theme-glass .rail {
-    background: rgba(16, 17, 19, 0.92);
+    background: var(--color-rail);
     box-shadow: 1px 0 0 var(--color-divider);
   }
   html.theme-glass .rail-item.active {
@@ -418,21 +432,42 @@ html.theme-glass .tabbar-fab {
 }
 
 /* --- Shell: sheets, dialogs, snackbar (brass glass) ------------------------- */
+/* One plate recipe for EVERY overlay (sheet, drawer, dialog, popover, toast, chat dock). The overlays are portaled to
+   <body>, outside any app wrapper, so they read the app identity from the document root: `html.theme-coach` re-defines
+   the plate (graphite, not brass brown) and the family aliases (--t-base ... = the Coach accent) below. A new overlay
+   only has to use these tokens to follow the app colour. */
+html.theme-glass {
+  --plate-top: rgba(40, 34, 26, 0.96);
+  --plate-bot: rgba(18, 17, 16, 0.98);
+  --plate-rim: rgba(238, 211, 165, 0.45);
+  --plate-edge: rgba(217, 162, 79, 0.22);
+}
+html.theme-glass.theme-coach {
+  --plate-top: color-mix(in srgb, var(--color-accent) 7%, rgba(30, 36, 38, 0.97));
+  --plate-bot: color-mix(in srgb, var(--color-accent) 3%, rgba(15, 18, 19, 0.985));
+  --plate-rim: color-mix(in srgb, var(--color-accent) 45%, transparent);
+  --plate-edge: var(--color-accent-line);
+  --t-base: var(--color-accent);
+  --t-tint: var(--color-accent-tint);
+  --t-text: var(--color-accent-text);
+  --t-line: var(--color-accent-line);
+  --t-on: var(--color-bg);
+}
 html.theme-glass .sheet {
-  background: linear-gradient(180deg, rgba(40, 34, 26, 0.94), rgba(18, 17, 16, 0.98));
+  background: linear-gradient(180deg, var(--plate-top), var(--plate-bot));
   backdrop-filter: blur(24px) saturate(1.35);
   -webkit-backdrop-filter: blur(24px) saturate(1.35);
   box-shadow:
-    inset 0 1.2px 0.5px rgba(238, 211, 165, 0.45),
-    inset 0 0 0 1px rgba(217, 162, 79, 0.22);
+    inset 0 1.2px 0.5px var(--plate-rim),
+    inset 0 0 0 1px var(--plate-edge);
 }
 /* Toned drawer (kit <Sheet tone>): the family colours the plate, its edge, the
    grabber and the title. */
 html.theme-glass .sheet.sheet--toned {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base) 20%, rgba(40, 34, 26, 0.94)),
-    color-mix(in srgb, var(--t-base) 6%, rgba(18, 17, 16, 0.98))
+    color-mix(in srgb, var(--t-base) 20%, var(--plate-top)),
+    color-mix(in srgb, var(--t-base) 6%, var(--plate-bot))
   );
   box-shadow:
     inset 0 1.2px 0.5px color-mix(in srgb, var(--t-base) 60%, white),
@@ -445,16 +480,63 @@ html.theme-glass .sheet.sheet--toned .ss-title,
 html.theme-glass .sheet.sheet--toned .day-sheet-head .t {
   color: var(--t-text);
 }
+/* Popovers (account, action menus, pickers): the same frosted plate as the sheets, tinted by the
+   current app's family colour (--t-base), so the Coach popovers are tourmaline and others keep theirs. */
+html.theme-glass .uipop {
+  /* Near-opaque base: text of the page behind (a chat) must not read through a picker. */
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--t-base, var(--color-accent)) 14%, var(--plate-top)),
+    color-mix(in srgb, var(--t-base, var(--color-accent)) 6%, var(--plate-bot))
+  );
+  backdrop-filter: blur(24px) saturate(1.35);
+  -webkit-backdrop-filter: blur(24px) saturate(1.35);
+  box-shadow:
+    var(--shadow-md),
+    inset 0 1.2px 0.5px color-mix(in srgb, var(--t-base, var(--color-accent)) 45%, transparent),
+    inset 0 0 0 1px var(--t-line, var(--color-border));
+}
+/* Coach chat popover (the dock panel): a solid frosted family-tinted plate (about 96% opaque, strong blur), so the
+   calendar or list behind it never reads through the conversation list. Same recipe as the popovers above. */
+html.theme-glass .uicard.cd-card {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--t-base, var(--color-accent)) 14%, var(--plate-top)),
+    color-mix(in srgb, var(--t-base, var(--color-accent)) 6%, var(--plate-bot))
+  );
+  backdrop-filter: blur(32px) saturate(1.4);
+  -webkit-backdrop-filter: blur(32px) saturate(1.4);
+  border-color: transparent;
+  box-shadow:
+    var(--shadow-lg),
+    inset 0 1.2px 0.5px color-mix(in srgb, var(--t-base, var(--color-accent)) 45%, transparent),
+    inset 0 0 0 1px var(--t-line, var(--color-border));
+}
+/* App launcher: the plate is the current app's accent at 6-8% over a dark base, with a 1px
+   accent-line edge; the tiles on it (lighter glass, own rims) stay clearly separate. Contrast is
+   pinned numerically in ShellLauncher.colour.test.tsx. */
+html.theme-glass .sheet.sheet--toned.shell-sheet,
+html.theme-glass .sheet.sheet--toned.uimore {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--t-base) 8%, var(--shell-sheet-base)),
+    color-mix(in srgb, var(--t-base) 6%, var(--shell-sheet-base))
+  );
+  border: 0;
+  box-shadow:
+    inset 0 1.2px 0.5px color-mix(in srgb, var(--t-base) 45%, transparent),
+    inset 0 0 0 1px var(--t-line);
+}
 html.theme-glass .dialog {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base) 14%, rgba(40, 34, 26, 0.96)),
-    rgba(18, 17, 16, 0.98)
+    color-mix(in srgb, var(--t-base, var(--color-accent)) 14%, var(--plate-top)),
+    var(--plate-bot)
   );
   border-radius: var(--radius-hero);
   box-shadow:
-    inset 0 1.2px 0.5px rgba(238, 211, 165, 0.35),
-    inset 0 0 0 1px color-mix(in srgb, var(--t-base) 42%, transparent);
+    inset 0 1.2px 0.5px var(--plate-rim),
+    inset 0 0 0 1px color-mix(in srgb, var(--t-base, var(--color-accent)) 42%, transparent);
 }
 html.theme-glass .dialog-title i {
   color: var(--t-base);
@@ -462,20 +544,18 @@ html.theme-glass .dialog-title i {
 html.theme-glass .dialog-scrim {
   background: rgba(6, 6, 8, 0.62);
 }
-html.theme-glass .snackbar,
 html.theme-glass .toast {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base) 14%, rgba(50, 42, 30, 0.95)),
-    rgba(24, 22, 18, 0.97)
+    color-mix(in srgb, var(--t-base, var(--color-accent)) 14%, var(--plate-top)),
+    var(--plate-bot)
   );
   border: 0;
   border-radius: var(--r-pill);
   box-shadow:
-    inset 0 1.2px 0.5px rgba(238, 211, 165, 0.3),
-    inset 0 0 0 1px color-mix(in srgb, var(--t-base) 40%, transparent);
+    inset 0 1.2px 0.5px var(--plate-rim),
+    inset 0 0 0 1px color-mix(in srgb, var(--t-base, var(--color-accent)) 40%, transparent);
 }
-html.theme-glass .snackbar > i,
 html.theme-glass .toast > i {
   color: var(--t-base);
 }
@@ -507,7 +587,8 @@ html.theme-glass .uicard--conditioning,
 html.theme-glass .uicard--kcal,
 html.theme-glass .uicard--apex,
 html.theme-glass .uicard--learn,
-html.theme-glass .uicard--atlas {
+html.theme-glass .uicard--atlas,
+html.theme-glass .uicard--people {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--t-base) 22%, rgba(20, 18, 14, 0.4)),
@@ -517,6 +598,11 @@ html.theme-glass .uicard--atlas {
   box-shadow:
     inset 0 1.2px 0.5px color-mix(in srgb, var(--t-text) 40%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--t-base) 32%, transparent);
+}
+html.theme-glass .uicard.uicard--selected {
+  background: color-mix(in srgb, var(--t-base) 14%, var(--t-tint));
+  border-color: var(--t-base);
+  box-shadow: inset 0 0 0 1px var(--t-base);
 }
 html.theme-glass .uicard--e-hero {
   background: var(--glass-hero-tint);
@@ -543,6 +629,14 @@ html.theme-glass .uicard--e-glass {
 html.theme-glass .uicard--e-quiet {
   background: transparent;
   box-shadow: none;
+}
+/* Nested card: flat inside its parent (R-KIT-25); after the card rules above so it wins. */
+html.theme-glass .uicard.uicard--nested {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 html.theme-glass .uicard--accent {
   background: var(--glass-brass-tint);
@@ -579,36 +673,16 @@ html.theme-glass .uibtn--fill:not(:disabled):active {
   background: color-mix(in srgb, var(--b-base) 26%, var(--btn-under, transparent));
 }
 html.theme-glass .uibtn--secondary {
-  background: rgba(233, 234, 236, 0.08);
+  background: var(--color-btn-2);
   border-color: transparent;
   font-weight: 500;
 }
 
 /* --- Kit primitives: chips, segmented ------------------------------------- */
-html.theme-glass .uichip {
-  border-radius: var(--r-pill);
-  background: rgba(233, 234, 236, 0.07);
-  border-color: transparent;
+/* Weekday tiles: off = a plain plate (it reads as a button), on = accent fill + a 2px ring. */
+html.theme-glass .uiwd-d.is-on {
+  box-shadow: inset 0 0 0 var(--co-ring, 2px) var(--t-base);
 }
-html.theme-glass .uichip--accent {
-  background: color-mix(in srgb, var(--color-accent) 20%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 60%, transparent);
-  color: var(--color-accent-300);
-}
-html.theme-glass .uiseg--track {
-  background: var(--glass-field);
-  box-shadow: inset 0 0 0 1px var(--glass-field-ring);
-  border-radius: var(--r-14);
-  padding: var(--s-4);
-}
-html.theme-glass .uiseg--track .uiseg-opt.is-on {
-  background: color-mix(in srgb, var(--t-base) 20%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t-base) 55%, transparent);
-  color: var(--t-text);
-  font-weight: 600;
-  border-radius: var(--r-12);
-}
-
 /* --- Kit primitives: labels, tags, checks ---------------------------------- */
 html.theme-glass .uisec-l {
   font-size: var(--fs-11);
@@ -689,7 +763,12 @@ html.theme-glass .uinotice {
 }
 html.theme-glass .uit--neutral.uinotice {
   background: rgba(10, 10, 12, 0.35);
-  box-shadow: inset 0 0 0 1px rgba(233, 234, 236, 0.08);
+  box-shadow: inset 0 0 0 1px var(--color-ink-ring);
+}
+html.theme-glass .uinotice.uinotice--nested,
+html.theme-glass .uit--neutral.uinotice.uinotice--nested {
+  background: transparent;
+  box-shadow: inset 3px 0 0 var(--t-base, var(--color-divider));
 }
 
 /* --- Kit primitives: avatar (initials on brass) ---------------------------- */
@@ -789,36 +868,6 @@ html.theme-glass .title-26 {
   letter-spacing: -0.02em;
 }
 
-/* Segmented, buttons variant — pill chips on glass. */
-html.theme-glass .uiseg--buttons .uiseg-opt {
-  border-radius: var(--r-pill);
-  background: var(--glass-well);
-  box-shadow: inset 0 0 0 1px var(--glass-well-ring);
-  border-color: transparent;
-}
-html.theme-glass .uiseg--buttons .uiseg-opt.is-on {
-  background: color-mix(in srgb, var(--t-base) 16%, rgba(16, 15, 13, 0.6));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t-base) 55%, transparent);
-  color: var(--t-text);
-}
-
-/* Segmented, stacked — small rounded tiles (icon over label), not pills. */
-html.theme-glass .uiseg--stack .uiseg-opt {
-  border-radius: var(--r-14);
-  background: var(--glass-surface);
-  box-shadow: inset 0 0 0 1px var(--color-divider);
-  color: var(--color-text-muted);
-}
-html.theme-glass .uiseg--stack .uiseg-opt.is-on {
-  background: var(--t-tint);
-  box-shadow: inset 0 0 0 1.5px var(--t-base);
-  color: var(--t-text);
-  font-weight: 700;
-}
-html.theme-glass .uiseg--stack .uiseg-opt.is-on .ui-icon {
-  color: var(--t-base);
-}
-
 /* Kit list / tile surfaces on glass. */
 html.theme-glass .uigl-rows,
 html.theme-glass .uiw,
@@ -836,7 +885,14 @@ html.theme-glass .uigl--flat .uigl-rows {
   border: 0;
 }
 html.theme-glass .uigl--raised .uigl-rows {
-  background: color-mix(in srgb, var(--color-text) 7%, rgba(24, 22, 19, 0.92));
+  background: color-mix(in srgb, var(--color-text) 7%, var(--glass-raised-base));
+}
+/* A list nested in a glass card or popover is a light wash in the family colour, not a second
+   opaque plate stacked on the first. */
+html.theme-glass .uicard .uigl:not(.uigl--flat) .uigl-rows,
+html.theme-glass .uipop .uigl:not(.uigl--flat) .uigl-rows {
+  background: color-mix(in srgb, var(--t-base, var(--color-accent)) 6%, rgba(255, 255, 255, 0.035));
+  border-color: color-mix(in srgb, var(--t-base, var(--color-accent)) 18%, var(--color-divider));
 }
 html.theme-glass .uiopt {
   background: var(--glass-surface);
@@ -907,7 +963,7 @@ html.theme-glass
 /* Set-type chips: the selected one wears its set-type hue (--kc from .se-kind-*). */
 html.theme-glass .se-types .uichip.is-selected {
   background: color-mix(in srgb, var(--kc) 16%, transparent);
-  border-color: color-mix(in srgb, var(--kc) 55%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kc) 55%, transparent);
   color: var(--kc);
 }
 
@@ -922,4 +978,20 @@ html.theme-glass .uit--chronic.uinotice {
   display: inline-flex;
   align-items: center;
   color: var(--color-chronic-text);
+}
+
+/* Coach Today (phone): the sticky action row above the tab bar is a frosted bar. Surface recipe lives here, not in coach/today. */
+@media (max-width: 767px) {
+  html.theme-glass .td-actions {
+    background: color-mix(in srgb, var(--color-bg) 72%, transparent);
+    backdrop-filter: blur(18px) saturate(1.35);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35);
+    box-shadow: inset 0 1px 0 var(--t-line);
+  }
+}
+
+/* Kit NowLine (current-time marker): the rule and dot glow softly so the line stays readable over glass cards. */
+html.theme-glass .uinow-rule,
+html.theme-glass .uinow-dot {
+  box-shadow: 0 0 var(--s-6) color-mix(in srgb, var(--color-now) 55%, transparent);
 }

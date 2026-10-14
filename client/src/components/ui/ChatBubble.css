@@ -1,0 +1,189 @@
+/* Chat bubbles. Tokens only; the bubble tints are translucent so they never stack opaque plates on glass. */
+.uimsg {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+  list-style: none;
+}
+.uimsg--me {
+  align-items: flex-end;
+}
+.uimsg--them {
+  align-items: flex-start;
+}
+.uimsg--center {
+  align-items: center;
+}
+.uimsg-who {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-8);
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+.uimsg-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-4);
+  max-width: min(100%, 560px);
+  min-width: 0;
+}
+.uimsg--me .uimsg-row {
+  flex-direction: row-reverse;
+}
+.uimsg--center .uimsg-row {
+  max-width: 100%;
+}
+.uimsg-time {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+/* The "..." trigger: hidden until hover / focus on pointer devices, always there on touch. */
+.uimsg-act {
+  flex: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.uimsg:hover .uimsg-act,
+.uimsg:focus-within .uimsg-act,
+.uimsg.is-hl .uimsg-act {
+  opacity: 1;
+}
+@media (hover: none) {
+  .uimsg-act {
+    opacity: 1;
+  }
+}
+.uimsg.is-hl .uibub {
+  outline: 2px solid var(--t-base, var(--color-accent));
+  outline-offset: 2px;
+}
+
+.uibub {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+  padding: var(--s-12) var(--s-16);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  font-size: var(--fs-15);
+  line-height: 1.45;
+}
+.uibub--me {
+  border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  border-bottom-right-radius: var(--s-4);
+}
+.uibub--them {
+  border-color: var(--color-divider);
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  border-bottom-left-radius: var(--s-4);
+}
+.uibub--toned {
+  border-color: var(--t-line);
+  background: color-mix(in srgb, var(--t-base) 14%, transparent);
+  box-shadow: inset 3px 0 0 var(--t-base);
+  color: var(--color-text);
+}
+.uibub--muted {
+  border-style: dashed;
+  border-color: var(--color-divider);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+}
+.uibub--system {
+  border-style: dashed;
+  border-color: var(--color-divider);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  text-align: center;
+}
+.uibub.is-sending {
+  border-style: dashed;
+}
+.uibub.is-sending .uibub-t {
+  opacity: 0.8;
+}
+.uibub.is-failed {
+  border-color: var(--color-danger);
+}
+.uibub-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-6);
+  color: var(--t-text, var(--color-text-muted));
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+.uibub-body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+  min-width: 0;
+}
+.uibub-ic {
+  flex: none;
+  margin-top: var(--s-2);
+}
+.uibub-t {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.uibub-state {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-6);
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.uibub.is-failed .uibub-state {
+  color: var(--color-danger-text);
+}
+
+.uichat-day,
+.uichat-new {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  list-style: none;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+.uichat-day::before,
+.uichat-day::after,
+.uichat-new::before,
+.uichat-new::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--color-divider);
+}
+.uichat-new {
+  color: var(--color-accent);
+}
+.uichat-new::before,
+.uichat-new::after {
+  background: var(--color-accent);
+  opacity: 0.5;
+}
+
+/* Reduced motion: no slides, fades or loops; state changes are instant. */
+@media (prefers-reduced-motion: reduce) {
+  .uimsg-act {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
+}

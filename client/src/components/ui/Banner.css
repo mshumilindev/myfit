@@ -164,7 +164,7 @@
   margin-top: var(--s-12);
 }
 .uibanner-cta {
-  min-height: 38px;
+  min-height: var(--ctl-h-sm);
   padding: 0 var(--s-16);
   border-radius: var(--r-pill);
   background: var(--gem);
@@ -186,7 +186,7 @@
   cursor: not-allowed;
 }
 .uibanner-skip {
-  min-height: 38px;
+  min-height: var(--ctl-h-sm);
   padding: 0 var(--s-10);
   background: none;
   border: none;

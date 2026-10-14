@@ -99,6 +99,7 @@ export const en = {
   edit: 'Edit',
   delete: 'Delete',
   undo: 'Undo',
+  undoCountdown: 'Undo is available for 8 seconds',
   deleted: 'Entry deleted',
   deleteTitle: 'Delete this entry?',
   deleteBody: 'It will be removed from today. This cannot be undone after it syncs.',

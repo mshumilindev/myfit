@@ -4,176 +4,31 @@
  * (+ glass.css). Re-exported from `ui.tsx` so existing imports keep working.
  */
 import {
-  useCallback,
   useEffect,
-  useLayoutEffect,
+  useId,
   useRef,
-  useState,
   type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
   type RefObject,
   type ReactNode,
 } from 'react';
-import { createPortal } from 'react-dom';
-
 import { Icon } from '../../ui';
 import { useT } from '../../i18n';
-import { Button, IconButton } from './Button';
+import { IconButton } from './Button';
+import { ConfirmEffectsDialog } from './ConfirmEffectsDialog';
+import { activeAnchor } from './overlays/focus';
+import { Portal } from './overlays/Portal';
+import { useFixedPanelPosition } from './overlays/position';
+import { useMobileSheetKeyboardMode } from './overlays/useSheetKeyboard';
+import { useSheetGesture } from './overlays/useSheetGesture';
 import { toneClass, type Tone } from './tones';
 
 import './Overlays.css';
 
-export function Portal(props: { children: ReactNode }) {
-  if (typeof document === 'undefined') return <>{props.children}</>;
-  // React bubbles portal events through the COMPONENT tree, not the DOM: a tap
-  // on a sheet's scrim (or anything inside it) would otherwise reach whatever
-  // row/button rendered the sheet and trigger it "under" the drawer. The
-  // wrapper is layout-neutral and stops clicks at the portal boundary.
-  return createPortal(
-    <div className="portal-layer" onClick={(e) => e.stopPropagation()}>
-      {props.children}
-    </div>,
-    document.body,
-  );
-}
-
-function clamp(n: number, min: number, max: number): number {
-  return Math.min(Math.max(n, min), max);
-}
-
-function activeAnchor(): HTMLElement | null {
-  if (typeof document === 'undefined') return null;
-  return document.activeElement instanceof HTMLElement ? document.activeElement : null;
-}
-
-function isTextEditableElement(el: Element | null): boolean {
-  if (!(el instanceof HTMLElement)) return false;
-  if (el.isContentEditable) return true;
-  // A <select> opens a native picker, not a text keyboard, so it must NOT put
-  // the sheet into keyboard mode (that's what made the Range picker jump).
-  return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
-}
-
-function useMobileSheetKeyboardMode(sheetRef: RefObject<HTMLElement | null>): boolean {
-  const [expanded, setExpanded] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || typeof document === 'undefined') return;
-
-    const isPhone = () => !window.matchMedia || !window.matchMedia('(min-width: 720px)').matches;
-    const focusedInsideSheet = () => {
-      const active = document.activeElement;
-      return !!sheetRef.current?.contains(active) && isTextEditableElement(active);
-    };
-    // While a finger / mouse button is down the layout must not move: tapping Save right
-    // after typing blurs the field, the sheet collapses, the button slides away from under
-    // the finger and the tap lands on nothing (the first Save tap was lost). The collapse
-    // waits until the tap is over; pointerup fires before the click, so the click is kept.
-    let pointerDown = false;
-    const update = () => {
-      const vv = window.visualViewport;
-      const top = vv?.offsetTop ?? 0;
-      const height = vv?.height ?? window.innerHeight;
-      sheetRef.current?.style.setProperty('--sheet-keyboard-top', `${Math.max(0, top)}px`);
-      sheetRef.current?.style.setProperty('--sheet-keyboard-height', `${Math.round(height)}px`);
-      const next = isPhone() && focusedInsideSheet();
-      if (!next && pointerDown) return;
-      setExpanded(next);
-    };
-    const updateAfterFocusSettles = () => window.setTimeout(update, 160);
-    const onPointerDown = () => {
-      pointerDown = true;
-    };
-    const onPointerEnd = () => {
-      if (!pointerDown) return;
-      pointerDown = false;
-      window.setTimeout(update, 0);
-    };
-
-    update();
-    const frame = window.requestAnimationFrame(update);
-    window.addEventListener('focusin', update);
-    window.addEventListener('focusout', updateAfterFocusSettles);
-    window.addEventListener('pointerdown', onPointerDown, true);
-    window.addEventListener('pointerup', onPointerEnd, true);
-    window.addEventListener('pointercancel', onPointerEnd, true);
-    window.addEventListener('resize', update);
-    window.visualViewport?.addEventListener('scroll', update);
-    window.visualViewport?.addEventListener('resize', update);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener('focusin', update);
-      window.removeEventListener('focusout', updateAfterFocusSettles);
-      window.removeEventListener('pointerdown', onPointerDown, true);
-      window.removeEventListener('pointerup', onPointerEnd, true);
-      window.removeEventListener('pointercancel', onPointerEnd, true);
-      window.removeEventListener('resize', update);
-      window.visualViewport?.removeEventListener('scroll', update);
-      window.visualViewport?.removeEventListener('resize', update);
-    };
-  }, [sheetRef]);
-
-  return expanded;
-}
-
-export function useFixedPanelPosition(
-  kind: 'sheet' | 'popover',
-  anchorRef?: RefObject<HTMLElement | null>,
-  preferredWidth?: number,
-): CSSProperties {
-  const [anchor] = useState(activeAnchor);
-  const [style, setStyle] = useState<CSSProperties>({});
-
-  useLayoutEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const place = () => {
-      const isDesktop = !!window.matchMedia && window.matchMedia('(min-width: 720px)').matches;
-      if (kind === 'sheet' && !isDesktop) {
-        setStyle({});
-        return;
-      }
-
-      const viewportW = window.innerWidth;
-      const viewportH = window.innerHeight;
-      const gutter = kind === 'sheet' ? 0 : 8;
-      const preferredW = preferredWidth ?? (kind === 'sheet' ? 430 : 176);
-      const width = Math.min(preferredW, viewportW - Math.max(gutter * 2, 36));
-      const minPanelH = kind === 'sheet' ? 320 : 220;
-      const target = anchorRef?.current ?? anchor;
-      const rect = target && document.body.contains(target) ? target.getBoundingClientRect() : null;
-
-      let left = viewportW - width - gutter;
-      let top = gutter;
-
-      if (kind === 'sheet') {
-        top = 0;
-      } else if (rect && rect.width > 0 && rect.height > 0) {
-        if (kind === 'popover') {
-          left = clamp(rect.right - width, gutter, viewportW - width - gutter);
-          top = clamp(rect.bottom + 6, gutter, viewportH - minPanelH - gutter);
-        }
-      }
-
-      setStyle({
-        '--overlay-left': `${Math.round(left)}px`,
-        '--overlay-top': `${Math.round(top)}px`,
-        '--overlay-width': `${Math.round(width)}px`,
-        '--overlay-max-height': `${Math.round(viewportH - top - gutter)}px`,
-      } as CSSProperties);
-    };
-
-    place();
-    window.addEventListener('resize', place);
-    window.addEventListener('scroll', place, true);
-    return () => {
-      window.removeEventListener('resize', place);
-      window.removeEventListener('scroll', place, true);
-    };
-  }, [anchor, anchorRef, kind, preferredWidth]);
-
-  return style;
-}
+// Public surface unchanged: everything below is re-exported from here.
+export { Portal, useFixedPanelPosition };
+export { Toast, UndoSnackbar, UpdatePlate } from './overlays/Toasts';
+export type { SnackState, ToastState } from './overlays/Toasts';
 
 export function Dialog(props: {
   title: ReactNode;
@@ -188,19 +43,24 @@ export function Dialog(props: {
 }) {
   const tone: Tone = props.tone ?? (props.danger ? 'danger' : 'accent');
   const icon = props.icon ?? (props.danger ? 'trash' : undefined);
+  const uid = useId();
   return (
     <Portal>
       <div className="dialog-scrim" onClick={props.onClose}>
         <div
           className={`dialog ${toneClass(tone)}`}
           role="alertdialog"
+          aria-labelledby={`${uid}-t`}
+          aria-describedby={`${uid}-b`}
           onClick={(e) => e.stopPropagation()}
         >
-          <h2 className="dialog-title">
+          <h2 className="dialog-title" id={`${uid}-t`}>
             {icon && <Icon name={icon} />}
             {props.title}
           </h2>
-          <p className="dialog-body">{props.children}</p>
+          <p className="dialog-body" id={`${uid}-b`}>
+            {props.children}
+          </p>
           <div className="dialog-actions">{props.actions}</div>
         </div>
       </div>
@@ -209,9 +69,11 @@ export function Dialog(props: {
 }
 
 /**
- * Reusable confirm prompt for every destructive action (discard, delete of any
- * kind). One component so wording/behaviour stay consistent: esc / scrim / the
- * cancel button all dismiss; the confirm is a ruby outline when danger.
+ * Reusable confirm prompt for every destructive action (discard, delete of any kind). One component so wording and
+ * behaviour stay consistent: a centred dialog from the Coach breakpoint up, a bottom sheet on a phone; Esc, the scrim
+ * and Cancel dismiss; the confirm is the kit `danger` button when `danger`. Optional: a checkbox ("Also delete my
+ * notes"), a line of fine print under it, and `loading` (the confirm shows the kit spinner and ignores a second tap).
+ * Built on `ConfirmEffectsDialog`, which owns the presentation switch.
  */
 export function ConfirmDialog(props: {
   title: ReactNode;
@@ -221,39 +83,34 @@ export function ConfirmDialog(props: {
   danger?: boolean;
   tone?: Tone;
   icon?: string;
+  /** An extra choice, unchecked by default (R-KIT-02). */
+  checkbox?: { label: string; checked: boolean; onChange: (v: boolean) => void };
+  /** Small print under the choice, without an icon. */
+  fineprint?: ReactNode;
+  /** The confirm shows the loading state and a second tap does nothing. */
+  loading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') props.onCancel();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [props]);
+  const danger = props.danger || props.tone === 'danger';
   return (
-    <Dialog
+    <ConfirmEffectsDialog
       title={props.title}
-      danger={props.danger}
-      tone={props.tone}
-      icon={props.icon}
-      onClose={props.onCancel}
-      actions={
-        <>
-          <Button variant="secondary" onClick={props.onCancel}>
-            {props.cancelLabel}
-          </Button>
-          <Button
-            variant={props.danger || props.tone === 'danger' ? 'danger' : 'primary'}
-            onClick={props.onConfirm}
-          >
-            {props.confirmLabel}
-          </Button>
-        </>
-      }
-    >
-      {props.body}
-    </Dialog>
+      body={props.body}
+      icon={props.icon ?? (props.danger ? 'trash' : 'question')}
+      iconTone={danger ? 'danger' : 'accent'}
+      tone={props.tone ?? (props.danger ? 'danger' : 'accent')}
+      confirmVariant={danger ? 'danger' : 'primary'}
+      cancelVariant="secondary"
+      check={props.checkbox}
+      small={props.fineprint}
+      smallIcon={false}
+      loading={props.loading}
+      confirmLabel={props.confirmLabel}
+      cancelLabel={props.cancelLabel}
+      onConfirm={props.onConfirm}
+      onCancel={props.onCancel}
+    />
   );
 }
 
@@ -265,6 +122,18 @@ export function Sheet(props: {
   /** Colour family for the whole drawer (background, grabber, border, title) —
    *  e.g. the day-state colour in the calendar drawers. */
   tone?: Tone;
+  /** Accessible name of the drawer (aria-label). */
+  label?: string;
+  /** Where focus goes back to on close (defaults to the element focused when the sheet opened). */
+  returnFocusRef?: RefObject<HTMLElement | null>;
+  /** `alertdialog` for a sheet that asks for a decision (the phone form of a confirm). Default `dialog`. */
+  role?: 'dialog' | 'alertdialog';
+  /** Name of the corner close button (default "Cancel"; "Close" where the content has its own Cancel). */
+  closeLabel?: string;
+  /** `light`: a faint scrim, for a panel over content that stays readable (the calendar behind a session panel). */
+  scrim?: 'default' | 'light';
+  /** A click on the scrim (default: close). A screen may pass the click on to what is under it. */
+  onScrimClick?: (e: ReactMouseEvent<HTMLElement>) => void;
 }) {
   const { t } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -275,102 +144,32 @@ export function Sheet(props: {
     props.className?.split(/\s+/).includes('assign-sheet') ? 760 : undefined,
   );
 
-  // The sheet is bottom-anchored, so dragging the grabber UP grows its HEIGHT
-  // (top edge rises, bottom stays put); dragging DOWN first shrinks the height
-  // back toward the default, and only once it's below the default does the whole
-  // drawer translate down into the dismiss zone. `heightPx` is the committed
-  // snap height (set after the first drag so height transitions can animate),
-  // `liveH` the height while a finger is down, `drag` the dismiss-zone offset.
-  const [mode, setMode] = useState<'default' | 'full'>('default');
-  const [heightPx, setHeightPx] = useState<number | null>(null);
-  const [liveH, setLiveH] = useState<number | null>(null);
-  const [drag, setDrag] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [closing, setClosing] = useState(false);
-  const defaultHRef = useRef(0);
-  const g = useRef({
-    startY: 0,
-    lastY: 0,
-    lastT: 0,
-    vel: 0,
-    active: false,
-    startH: 0,
-    defaultH: 0,
-    fullH: 0,
-  });
+  const g = useSheetGesture(sheetRef, props.onClose);
+  const { mode, heightPx, liveH, drag, dragging, closing, requestClose } = g;
+  const { onGrabStart, onGrabMove, onGrabEnd } = g;
 
-  const requestClose = useCallback(() => {
-    setClosing((c) => {
-      if (c) return c;
-      window.setTimeout(props.onClose, 240);
-      return true;
-    });
-  }, [props.onClose]);
-
-  const onGrabStart = (clientY: number) => {
+  // Modal behaviour: focus moves into the drawer (to the drawer itself, so a phone keyboard is not
+  // raised by accident; a field with autoFocus keeps it), Escape closes it, focus returns to the
+  // opener when it unmounts.
+  const returnFocusRef = props.returnFocusRef;
+  useEffect(() => {
+    const target = returnFocusRef;
+    const opener = target?.current ?? activeAnchor();
     const el = sheetRef.current;
-    if (!el) return;
-    const startH = el.getBoundingClientRect().height;
-    if (mode === 'default') defaultHRef.current = startH;
-    const defaultH = defaultHRef.current || startH;
-    const fullH = Math.max(defaultH, window.innerHeight - 46);
-    g.current = {
-      startY: clientY,
-      lastY: clientY,
-      lastT: Date.now(),
-      vel: 0,
-      active: true,
-      startH,
-      defaultH,
-      fullH,
+    if (el && !el.contains(document.activeElement)) el.focus({ preventScroll: true });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      // A confirm dialog opened over the sheet owns Escape.
+      if (document.querySelector('.dialog-scrim')) return;
+      requestClose();
     };
-    setDragging(true);
-  };
-  const onGrabMove = (clientY: number) => {
-    const s = g.current;
-    if (!s.active) return;
-    const now = Date.now();
-    const dt = now - s.lastT;
-    if (dt > 0) s.vel = (clientY - s.lastY) / dt; // px/ms, +down
-    s.lastY = clientY;
-    s.lastT = now;
-    const dy = clientY - s.startY;
-    const rawH = s.startH - dy; // up (dy<0) grows, down (dy>0) shrinks
-    if (rawH >= s.defaultH) {
-      // Height zone: grow toward full, with a little rubber-band past it.
-      setLiveH(rawH > s.fullH ? s.fullH + (rawH - s.fullH) * 0.3 : rawH);
-      setDrag(0);
-    } else {
-      // Dismiss zone: height pinned at default, whole sheet slides down.
-      setLiveH(s.defaultH);
-      setDrag(s.defaultH - rawH);
-    }
-  };
-  const onGrabEnd = () => {
-    const s = g.current;
-    if (!s.active) return;
-    s.active = false;
-    setDragging(false);
-    setLiveH(null);
-    const dy = s.lastY - s.startY;
-    const rawH = s.startH - dy;
-    const flickDown = s.vel > 0.7;
-    const flickUp = s.vel < -0.7;
-    if (rawH < s.defaultH) {
-      // Ended in the dismiss zone: close on a big pull or a downward flick.
-      const dismiss = s.defaultH - rawH;
-      if (dismiss > 100 || flickDown) return requestClose();
-      setMode('default');
-      setHeightPx(s.defaultH);
-      setDrag(0);
-      return;
-    }
-    // Height zone: snap to full or default by where it crossed the midpoint.
-    const toFull = rawH > (s.defaultH + s.fullH) / 2 || flickUp;
-    setMode(toFull ? 'full' : 'default');
-    setHeightPx(toFull ? s.fullH : s.defaultH);
-    setDrag(0);
-  };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      const back = target?.current ?? opener;
+      if (back && back.isConnected) back.focus({ preventScroll: true });
+    };
+  }, [requestClose, returnFocusRef]);
 
   const classes = [
     'sheet',
@@ -398,8 +197,19 @@ export function Sheet(props: {
 
   return (
     <Portal>
-      <div className={`scrim${closing ? ' scrim-closing' : ''}`} onClick={requestClose} />
-      <div ref={sheetRef} className={classes} role="dialog" style={baseStyle}>
+      <div
+        className={`scrim${closing ? ' scrim-closing' : ''}${props.scrim === 'light' ? ' scrim--light' : ''}`}
+        onClick={props.onScrimClick ?? requestClose}
+      />
+      <div
+        ref={sheetRef}
+        className={classes}
+        role={props.role ?? 'dialog'}
+        aria-modal="true"
+        aria-label={props.label}
+        tabIndex={-1}
+        style={baseStyle}
+      >
         <div
           className="sheet-grip"
           onTouchStart={(e) => onGrabStart(e.touches[0].clientY)}
@@ -422,94 +232,12 @@ export function Sheet(props: {
             variant="fill"
             shape="round"
             size="sm"
-            label={t.cancel}
+            label={props.closeLabel ?? t.cancel}
             onClick={requestClose}
           />
         </div>
         {props.children}
       </div>
     </Portal>
-  );
-}
-
-export interface SnackState {
-  id?: number;
-  text: string;
-  onUndo: () => void;
-}
-
-/** Undo snackbar: 5 s countdown, then commits (design S-22/S-26). */
-export function UndoSnackbar({ snack, onDone }: { snack: SnackState; onDone: () => void }) {
-  const { t } = useT();
-  const [left, setLeft] = useState(5);
-  useEffect(() => {
-    const iv = setInterval(() => setLeft((s) => s - 1), 1000);
-    return () => clearInterval(iv);
-  }, []);
-  useEffect(() => {
-    if (left <= 0) onDone();
-  }, [left, onDone]);
-  return (
-    <div className={`snackbar ${toneClass('danger')}`}>
-      <Icon name="trash" />
-      <span className="snack-text">{snack.text}</span>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => {
-          snack.onUndo();
-          onDone();
-        }}
-      >
-        {t.undo}
-      </Button>
-      <span className="snack-count">{Math.max(left, 0)}s</span>
-    </div>
-  );
-}
-
-export interface ToastState {
-  kind: 'ok' | 'danger';
-  icon: string;
-  text: string;
-}
-
-/** Auto-dismissing toast (3.2 s). Multiple stack bottom-right as a queue. */
-export function Toast({
-  toast,
-  id,
-  onExpire,
-}: {
-  toast: ToastState;
-  id: number;
-  onExpire: (id: number) => void;
-}) {
-  useEffect(() => {
-    const to = setTimeout(() => onExpire(id), 3200);
-    return () => clearTimeout(to);
-  }, [id, onExpire]);
-  return (
-    <div className={`toast ${toast.kind} ${toneClass(toast.kind)}`}>
-      <Icon name={toast.icon} />
-      <span>{toast.text}</span>
-    </div>
-  );
-}
-
-/**
- * "New build is live" plate — persists (no auto-dismiss) until the user taps
- * Reload. Raised by the service-worker update signal (see pwaUpdate); the app
- * renders it in the toast holder when a replacement worker has taken control.
- */
-export function UpdatePlate() {
-  const { t } = useT();
-  return (
-    <div className={`toast update ${toneClass('accent')}`} role="alert">
-      <Icon name="arrows-clockwise" />
-      <span className="update-text">{t.updateReady}</span>
-      <Button variant="secondary" size="sm" onClick={() => window.location.reload()}>
-        {t.reload}
-      </Button>
-    </div>
   );
 }

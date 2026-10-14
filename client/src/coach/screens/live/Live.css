@@ -1,0 +1,27 @@
+/* Live screens: layout only (the colours, faces and type are the kit's). */
+.lv-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-width: 0;
+}
+.lv-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+}
+.lv-rowv {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--s-4);
+}
+.lv-client {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  margin-bottom: var(--s-12);
+}
+.lv-last {
+  margin: var(--s-8) 0 0;
+}

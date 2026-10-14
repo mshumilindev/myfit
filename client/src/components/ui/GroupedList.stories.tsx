@@ -198,3 +198,17 @@ export const LongText: Story = {
     />
   ),
 };
+
+/** A real list (`ul`/`li`) with wrapping values, for rosters and key-value details. */
+export const AsList: Story = {
+  render: () => (
+    <GroupedList list label="Details" surface="raised">
+      <li>
+        <ListRow label="Goal" value="Strength, two sessions a week and one long walk" wrap />
+      </li>
+      <li>
+        <ListRow label="Gym" value="Riverside" wrap />
+      </li>
+    </GroupedList>
+  ),
+};

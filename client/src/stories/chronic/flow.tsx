@@ -34,7 +34,7 @@ const flagTag = (kind: 'avoid' | 'careful' | 'ok', why?: string) =>
 const chips = (labels: string[], sel?: string) => (
   <PresetChips
     tone="chronic"
-    size="sm"
+    size="xs"
     items={labels.map((l) => ({ id: l, label: l, selected: l === sel, onClick: noop }))}
   />
 );

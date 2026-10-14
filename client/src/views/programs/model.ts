@@ -14,9 +14,8 @@ import { activityType } from '../../activities';
 import type { VaultEnvelope } from '../../vaultCrypto';
 import type { EquipmentId } from '../../data/equipment';
 import type { MuscleGroup } from '../../data/exercises';
-import { resolveMuscles } from '../../store';
 import { weekOrder } from '../../weekStart';
-import { positiveWeight } from '../../warmupLog';
+import { sanitizeWarmupItems } from '../../tools/programEditor';
 
 /**
  * An exercise of a program day's warm-up: a reference to an exercise the app
@@ -49,6 +48,45 @@ export interface ProgramItem {
   dropLast?: boolean;
   /** Warm-up marker only: the exercises it holds (absent = a generic warm-up). */
   warmupItems?: ProgramWarmupItem[];
+  /**
+   * Trainer layer (Coach editor). "Just the exercise": no sets, reps or targets; stored as sets 0 / reps 0.
+   * A bare row is valid to save, assign and send; the client picks the numbers in the session.
+   */
+  bare?: boolean;
+  /** Optional targets shown to the client above the set (absent = no target). */
+  targetWeight?: number;
+  targetRpe?: number;
+  /** Rest between sets, seconds. */
+  restSec?: number;
+  /** A cue shown above the set. */
+  note?: string;
+}
+
+/** A bare row asks for no sets (R-FE-051). */
+export const isBare = (i: Pick<ProgramItem, 'kind' | 'sets'> & { bare?: boolean }): boolean =>
+  i.kind === 'strength' && (i.bare === true || i.sets <= 0);
+
+/** Sets a row asks for: a bare row asks for none. */
+export const effectiveSets = (
+  i: Pick<ProgramItem, 'kind' | 'sets'> & { bare?: boolean },
+): number => (i.kind === 'strength' && !isBare(i) ? i.sets : 0);
+
+/**
+ * Compact day summary ("3 × 5", "16", "20 min"). Prints nothing for a bare row / a day with no sets
+ * (R-KIT-08: it used to print "0 x 0").
+ */
+export function compactProgramDaySummary(
+  items: (Pick<ProgramItem, 'kind' | 'sets' | 'reps' | 'durationMin'> & { bare?: boolean })[],
+): string {
+  const strength = items.filter((item) => item.kind === 'strength');
+  if (strength.length === 0) {
+    const totalMin = items.reduce((sum, item) => sum + (item.durationMin ?? 10), 0);
+    return `${totalMin} min`;
+  }
+  const sets = strength.reduce((sum, item) => sum + effectiveSets(item), 0);
+  if (sets === 0) return '';
+  const reps = strength.length === 1 ? strength[0].reps : null;
+  return reps ? `${sets} × ${reps}` : String(sets);
 }
 
 /** When in the day a planned activity sits relative to the lifting. */
@@ -127,36 +165,8 @@ export function freshProgram(name: string): Program {
   };
 }
 
-const MAX_WARMUP_ITEMS = 12;
-
-function positive(n: unknown): number | undefined {
-  return typeof n === 'number' && Number.isFinite(n) && n > 0 ? Math.round(n) : undefined;
-}
-
-/** Coerce stored (or absent / malformed) warm-up exercises to a clean list. */
-export function sanitizeWarmupItems(raw: unknown): ProgramWarmupItem[] {
-  if (!Array.isArray(raw)) return [];
-  const out: ProgramWarmupItem[] = [];
-  for (const it of raw) {
-    if (!it || typeof it !== 'object') continue;
-    const r = it as Record<string, unknown>;
-    const name = typeof r.name === 'string' ? r.name.trim().slice(0, 120) : '';
-    if (!name) continue;
-    const reps = positive(r.reps);
-    const durationSec = positive(r.durationSec);
-    const weight = positiveWeight(r.weight);
-    out.push({
-      id: typeof r.id === 'string' && r.id ? r.id : crypto.randomUUID(),
-      name,
-      ...(typeof r.exerciseId === 'string' && r.exerciseId ? { exerciseId: r.exerciseId } : {}),
-      // One value only: seconds when both slipped in.
-      ...(durationSec ? { durationSec } : reps ? { reps } : {}),
-      ...(weight && !durationSec ? { weight } : {}),
-    });
-    if (out.length >= MAX_WARMUP_ITEMS) break;
-  }
-  return out;
-}
+/** Coerce stored (or absent / malformed) warm-up exercises to a clean list (the editor tool owns the rule). */
+export { sanitizeWarmupItems };
 
 export function normalizeItems(items: ProgramItem[]): ProgramItem[] {
   const seen = new Map<number, number>();
@@ -194,6 +204,10 @@ const EFFORTS: ActivityEffort[] = ['light', 'moderate', 'hard'];
 const WHENS: ProgramActivityWhen[] = ['any', 'before', 'after'];
 const MAX_ACTIVITIES = 28;
 
+function positive(n: unknown): number | undefined {
+  return typeof n === 'number' && Number.isFinite(n) && n > 0 ? Math.round(n) : undefined;
+}
+
 /** Coerce stored (or absent / malformed) planned activities to a clean list. */
 export function sanitizeActivities(raw: unknown): ProgramActivity[] {
   if (!Array.isArray(raw)) return [];
@@ -223,24 +237,6 @@ export function sanitizeActivities(raw: unknown): ProgramActivity[] {
 /** A day's planned activities, in stored order. */
 export function dayActivities(p: Program, day: number): ProgramActivity[] {
   return (p.activities ?? []).filter((a) => a.day === day);
-}
-
-export function addActivity(p: Program, a: Omit<ProgramActivity, 'id'>): Program {
-  const next = sanitizeActivities([...(p.activities ?? []), { ...a, id: crypto.randomUUID() }]);
-  return { ...p, activities: next };
-}
-
-export function patchActivity(p: Program, id: string, patch: Partial<ProgramActivity>): Program {
-  return {
-    ...p,
-    activities: sanitizeActivities(
-      (p.activities ?? []).map((a) => (a.id === id ? { ...a, ...patch } : a)),
-    ),
-  };
-}
-
-export function removeActivity(p: Program, id: string): Program {
-  return { ...p, activities: (p.activities ?? []).filter((a) => a.id !== id) };
 }
 
 export function normalizeProgram<T extends Program>(p: T): T {
@@ -285,32 +281,8 @@ export function dayMode(p: Program, day: number): DayMode {
   return p.items.some((i) => i.day === day) ? 'exercises' : 'muscles';
 }
 
-/** Muscles an exercises day works — primaries first, then secondaries. */
-export function derivedMuscles(items: ProgramItem[]): MuscleGroup[] {
-  const out: MuscleGroup[] = [];
-  const add = (m: MuscleGroup | null | undefined) => {
-    if (m && m !== 'cardio' && !out.includes(m)) out.push(m);
-  };
-  for (const it of items) {
-    if (it.kind !== 'strength') continue;
-    add(resolveMuscles({ name: it.name, kind: it.kind }).primary);
-  }
-  for (const it of items) {
-    if (it.kind !== 'strength') continue;
-    for (const s of resolveMuscles({ name: it.name, kind: it.kind }).secondary) add(s);
-  }
-  return out;
-}
-
-/** The muscles a day trains, whichever way it is defined. */
-export function dayMuscles(p: Program, day: number): MuscleGroup[] {
-  return dayMode(p, day) === 'exercises'
-    ? derivedMuscles(dayItems(p, day))
-    : (p.targetMuscles?.[String(day)] ?? []);
-}
-
 export function setCount(items: ProgramItem[]): number {
-  return items.reduce((n, it) => n + (it.kind === 'strength' ? it.sets : 0), 0);
+  return items.reduce((n, it) => n + effectiveSets(it), 0);
 }
 
 /** A training day is complete when it is named and has muscles or items. */
@@ -354,6 +326,11 @@ export function toSaved(p: Program, uid: string, fallbackName: string): Program 
       groupId: i.groupId ?? null,
       groupOrder: i.groupOrder ?? null,
       dropLast: !!i.dropLast,
+      ...(i.bare ? { bare: true } : {}),
+      ...(i.targetWeight ? { targetWeight: i.targetWeight } : {}),
+      ...(i.targetRpe ? { targetRpe: i.targetRpe } : {}),
+      ...(i.restSec ? { restSec: i.restSec } : {}),
+      ...(i.note?.trim() ? { note: i.note.trim().slice(0, 120) } : {}),
       ...(i.kind === 'warmup' && sanitizeWarmupItems(i.warmupItems).length
         ? { warmupItems: sanitizeWarmupItems(i.warmupItems) }
         : {}),
@@ -395,13 +372,6 @@ export function toSaved(p: Program, uid: string, fallbackName: string): Program 
 
 // --- mutations (pure: Program → Program) ----------------------------------------
 
-export function setDayName(p: Program, day: number, name: string): Program {
-  const dayNames = { ...p.dayNames };
-  if (name.trim()) dayNames[String(day)] = name;
-  else delete dayNames[String(day)];
-  return { ...p, dayNames };
-}
-
 /** Every target muscle — what "Full body" switches on. */
 export const ALL_MUSCLES: MuscleGroup[] = [
   'quads',
@@ -423,232 +393,6 @@ export const ALL_MUSCLES: MuscleGroup[] = [
   'neck',
   'fullbody',
 ];
-
-/** Toggle one target muscle. "Full body" switches every muscle on (or all
- *  off); picking the last missing muscle turns "Full body" on, dropping any
- *  one turns it off. */
-export function toggleMuscle(p: Program, day: number, muscle: MuscleGroup): Program {
-  const key = String(day);
-  const cur = p.targetMuscles[key] ?? [];
-  let next: MuscleGroup[];
-  if (muscle === 'fullbody') {
-    next = cur.includes('fullbody') ? [] : [...ALL_MUSCLES];
-  } else {
-    next = cur.includes(muscle)
-      ? cur.filter((m) => m !== muscle && m !== 'fullbody')
-      : [...cur, muscle];
-    const parts = ALL_MUSCLES.filter((m) => m !== 'fullbody');
-    if (!next.includes('fullbody') && parts.every((m) => next.includes(m))) next.push('fullbody');
-  }
-  const targetMuscles = { ...p.targetMuscles };
-  if (next.length) targetMuscles[key] = next;
-  else delete targetMuscles[key];
-  return { ...p, targetMuscles };
-}
-
-/** Turn a weekday into rest: drops its name, muscles and items. */
-export function clearDay(p: Program, day: number): Program {
-  const key = String(day);
-  const dayNames = { ...p.dayNames };
-  delete dayNames[key];
-  const targetMuscles = { ...p.targetMuscles };
-  delete targetMuscles[key];
-  return { ...p, dayNames, targetMuscles, items: p.items.filter((i) => i.day !== day) };
-}
-
-/** Switch a day to muscles: its items go (the caller confirms first). */
-export function toMusclesMode(p: Program, day: number): Program {
-  const muscles = derivedMuscles(dayItems(p, day)).slice(0, 6);
-  const targetMuscles = { ...p.targetMuscles };
-  if (!targetMuscles[String(day)]?.length && muscles.length) targetMuscles[String(day)] = muscles;
-  return { ...p, targetMuscles, items: p.items.filter((i) => i.day !== day) };
-}
-
-export function addItem(p: Program, item: Omit<ProgramItem, 'id' | 'position'>): Program {
-  const existing = dayItems(p, item.day);
-  // Warm-up opens a day; cool-down closes it; cardio sits before the cool-down;
-  // lifts go after the last lift (before cardio/cool-down).
-  const rank = (k: ExerciseKind) =>
-    k === 'warmup' ? 0 : k === 'strength' ? 1 : k === 'cardio' ? 2 : 3;
-  const insertAt = existing.findIndex((x) => rank(x.kind) > rank(item.kind));
-  const next = [...existing];
-  const created: ProgramItem = { ...item, id: crypto.randomUUID(), position: 0 };
-  if (insertAt < 0) next.push(created);
-  else next.splice(insertAt, 0, created);
-  const others = p.items.filter((i) => i.day !== item.day);
-  const targetMuscles = { ...p.targetMuscles };
-  delete targetMuscles[String(item.day)];
-  return {
-    ...p,
-    targetMuscles,
-    items: [...others, ...next.map((x, i) => ({ ...x, position: i }))],
-  };
-}
-
-export function patchItem(p: Program, id: string, patch: Partial<ProgramItem>): Program {
-  return { ...p, items: p.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) };
-}
-
-/** Add an exercise (a catalog reference) to a day's warm-up marker. */
-export function addWarmupExercise(
-  p: Program,
-  itemId: string,
-  ex: Omit<ProgramWarmupItem, 'id'>,
-): Program {
-  return {
-    ...p,
-    items: p.items.map((i) => {
-      if (i.id !== itemId || i.kind !== 'warmup') return i;
-      const cur = sanitizeWarmupItems(i.warmupItems);
-      if (cur.length >= MAX_WARMUP_ITEMS) return i;
-      const [added] = sanitizeWarmupItems([{ ...ex, id: crypto.randomUUID() }]);
-      return added ? { ...i, warmupItems: [...cur, added] } : i;
-    }),
-  };
-}
-
-/** Set the target of a warm-up exercise: reps (+ weight) OR seconds (0 clears it). */
-export function patchWarmupExercise(
-  p: Program,
-  itemId: string,
-  exId: string,
-  patch: { reps?: number; durationSec?: number; weight?: number },
-): Program {
-  return {
-    ...p,
-    items: p.items.map((i) => {
-      if (i.id !== itemId || i.kind !== 'warmup') return i;
-      return {
-        ...i,
-        warmupItems: sanitizeWarmupItems(
-          (i.warmupItems ?? []).map((w) => {
-            if (w.id !== exId) return w;
-            const next: ProgramWarmupItem = { ...w, ...patch };
-            if (patch.reps !== undefined) delete next.durationSec;
-            if (patch.durationSec !== undefined) delete next.reps;
-            return next;
-          }),
-        ),
-      };
-    }),
-  };
-}
-
-export function removeWarmupExercise(p: Program, itemId: string, exId: string): Program {
-  return {
-    ...p,
-    items: p.items.map((i) => {
-      if (i.id !== itemId || i.kind !== 'warmup') return i;
-      const { warmupItems, ...rest } = i;
-      const next = (warmupItems ?? []).filter((w) => w.id !== exId);
-      return next.length ? { ...rest, warmupItems: next } : rest;
-    }),
-  };
-}
-
-export function removeItem(p: Program, id: string): Program {
-  const gone = p.items.find((i) => i.id === id);
-  let items = p.items.filter((i) => i.id !== id);
-  // A superset of one is no superset.
-  if (gone?.groupId) {
-    const rest = items.filter((i) => i.groupId === gone.groupId);
-    if (rest.length < 2)
-      items = items.map((i) =>
-        i.groupId === gone.groupId ? { ...i, groupId: null, groupOrder: null } : i,
-      );
-  }
-  return { ...p, items: normalizeItems(items) };
-}
-
-export function moveItem(p: Program, id: string, dir: -1 | 1): Program {
-  const it = p.items.find((i) => i.id === id);
-  if (!it) return p;
-  const list = dayItems(p, it.day);
-  const idx = list.findIndex((i) => i.id === id);
-  const j = idx + dir;
-  if (j < 0 || j >= list.length) return p;
-  const next = [...list];
-  [next[idx], next[j]] = [next[j], next[idx]];
-  const others = p.items.filter((i) => i.day !== it.day);
-  return { ...p, items: [...others, ...next.map((x, i) => ({ ...x, position: i }))] };
-}
-
-/** Pair (or join) `id` with `withId` as one superset; labels follow order. */
-export function supersetWith(p: Program, id: string, withId: string): Program {
-  const a = p.items.find((i) => i.id === id);
-  const b = p.items.find((i) => i.id === withId);
-  if (!a || !b || a.day !== b.day) return p;
-  const gid = b.groupId ?? a.groupId ?? crypto.randomUUID();
-  const members = dayItems(p, a.day).filter(
-    (i) => i.id === a.id || i.id === b.id || (i.groupId && i.groupId === gid),
-  );
-  return {
-    ...p,
-    items: p.items.map((i) => {
-      const k = members.findIndex((m) => m.id === i.id);
-      return k >= 0 ? { ...i, groupId: gid, groupOrder: k } : i;
-    }),
-  };
-}
-
-export function ungroup(p: Program, id: string): Program {
-  const gid = p.items.find((i) => i.id === id)?.groupId;
-  if (!gid) return p;
-  return {
-    ...p,
-    items: p.items.map((i) => (i.groupId === gid ? { ...i, groupId: null, groupOrder: null } : i)),
-  };
-}
-
-/** "A1", "B2"… per day, in order of first appearance. */
-export function supersetLabels(items: ProgramItem[]): Map<string, string> {
-  const letters = new Map<string, number>();
-  const out = new Map<string, string>();
-  for (const it of items) {
-    if (!it.groupId) continue;
-    if (!letters.has(it.groupId)) letters.set(it.groupId, letters.size);
-    out.set(
-      it.id,
-      `${String.fromCharCode(65 + letters.get(it.groupId)!)}${(it.groupOrder ?? 0) + 1}`,
-    );
-  }
-  return out;
-}
-
-/** Copy a day onto another weekday (replacing it): name, muscles, items. */
-export function copyDay(p: Program, from: number, to: number): Program {
-  if (from === to) return p;
-  const src = dayItems(p, from);
-  const groupMap = new Map<string, string>();
-  const copied = src.map((it) => {
-    let groupId = it.groupId ?? null;
-    if (groupId) {
-      if (!groupMap.has(groupId)) groupMap.set(groupId, crypto.randomUUID());
-      groupId = groupMap.get(groupId)!;
-    }
-    return { ...it, id: crypto.randomUUID(), day: to, groupId };
-  });
-  const base = clearDay(p, to);
-  const dayNames = { ...base.dayNames };
-  const n = dayName(p, from);
-  if (n) dayNames[String(to)] = n;
-  const targetMuscles = { ...base.targetMuscles };
-  const tm = p.targetMuscles[String(from)];
-  if (tm?.length) targetMuscles[String(to)] = [...tm];
-  const acts = (base.activities ?? []).filter((a) => a.day !== to);
-  const copiedActs = dayActivities(p, from).map((a) => ({
-    ...a,
-    id: crypto.randomUUID(),
-    day: to,
-  }));
-  return {
-    ...base,
-    dayNames,
-    targetMuscles,
-    items: normalizeItems([...base.items, ...copied]),
-    ...(acts.length + copiedActs.length ? { activities: [...acts, ...copiedActs] } : {}),
-  };
-}
 
 export function duplicateOf(p: Program, name: string): Program {
   const groupMap = new Map<string, string>();

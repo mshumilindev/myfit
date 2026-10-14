@@ -52,6 +52,8 @@ import { Icon } from '../ui';
 import { atlasStarterChips, topNote } from './widgets/learnatlas';
 import { useClientRoster, type RosterClient } from './clientRoster';
 import { useMyTrainer, type MyTrainer } from './myTrainer';
+import { useClientCoachEnabled } from '../coach/client/gate';
+import { useClientShared } from '../coach/client/shared';
 import type { AtlasOpts, AtlasView } from './layout';
 import { Card } from '../components/ui/Card';
 
@@ -241,11 +243,27 @@ function AtlasTile({ a, onOpen }: { a: AtlasToday; onOpen: () => void }) {
   );
 }
 
-/** Right half: my trainer — photo, name, "Trainer". Information only. */
+/** Right half: my trainer — photo, name, "Trainer". With the `coach` flag on it opens the chat at the unread divider and
+ *  carries the unread count (the one number of the nav badge and the divider, R-KIT-23); otherwise information only. */
 function TrainerTile({ trainer }: { trainer: MyTrainer }) {
   const { t } = useT();
+  const on = useClientCoachEnabled();
+  const { unread } = useClientShared();
   return (
-    <Card pad="md" emphasis="card" className="tac-duo-tile tac-trainer">
+    <Card
+      pad="md"
+      emphasis="card"
+      className="tac-duo-tile tac-trainer"
+      {...(on
+        ? {
+            as: 'button' as const,
+            onClick: () => {
+              window.location.hash = '#/trainer/chat';
+            },
+            'aria-label': `${trainer.name}, ${t.profileTrainer}${unread > 0 ? `, ${unread}` : ''}`,
+          }
+        : {})}
+    >
       <StoryBubble
         size="md"
         ring="default"
@@ -264,6 +282,7 @@ function TrainerTile({ trainer }: { trainer: MyTrainer }) {
         <span className="tac-duo-name">{trainer.name}</span>
         <span className="tac-duo-sub">{t.profileTrainer}</span>
       </span>
+      {on && <Count n={unread} />}
     </Card>
   );
 }
@@ -421,7 +440,7 @@ function AtlasNoteCard({
       {tags.length > 0 && (
         <ChipGroup className="tac-tags">
           {tags.map((g) => (
-            <Chip key={g.text} size="sm" tone={g.tone} icon={g.icon}>
+            <Chip key={g.text} size="xs" tone={g.tone} icon={g.icon}>
               {g.text}
             </Chip>
           ))}

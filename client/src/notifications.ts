@@ -30,7 +30,16 @@ import { templateById, type ActiveChallenge } from './challenges';
 type T = ReturnType<typeof useT>['t'];
 
 export type NotifKind =
-  'standard' | 'pr' | 'feat' | 'trend' | 'streak' | 'volume' | 'challenge' | 'atlas';
+  | 'standard'
+  | 'pr'
+  | 'feat'
+  | 'trend'
+  | 'streak'
+  | 'volume'
+  | 'challenge'
+  | 'atlas'
+  /** From my trainer (M7): message, program updated, reschedule asked / answered. */
+  | 'trainer';
 
 export interface Notif {
   id: string;

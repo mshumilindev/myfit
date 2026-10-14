@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   addWarmupExercise,
-  normalizeProgram,
   patchWarmupExercise,
   removeWarmupExercise,
+} from '../../tools/programEditor';
+import {
+  normalizeProgram,
   sanitizeWarmupItems,
   toSaved,
   type Program,
@@ -195,5 +197,35 @@ describe('program warm-up exercises', () => {
     const m = __getStateForTests().workouts.find((x) => x.id === id)!.exercises[0];
     expect(m.plannedDurationMin).toBe(10);
     expect(m.warmupItems).toBeUndefined();
+  });
+});
+
+describe('a session started from a program day remembers the row it came from', () => {
+  it('each exercise carries the program item id, so two rows of one lift stay apart', () => {
+    const lift = (id: string, day: number): ProgramItem => ({
+      id,
+      day,
+      position: 0,
+      name: 'Barbell Squat',
+      kind: 'strength',
+      sets: 4,
+      reps: 5,
+      durationMin: null,
+      equipment: [],
+    });
+    const a = {
+      program: prog([lift('mon', 1), lift('thu', 4)]),
+      assignedBy: null,
+      week: 1,
+      done: 0,
+      total: 1,
+      expectedSoFar: 0,
+      adherence: null,
+    } as never;
+    const id = startProgramDaySession(a, 4, 'Lower')!;
+    const ex = __getStateForTests()
+      .workouts.find((x) => x.id === id)!
+      .exercises.find((e) => e.name === 'Barbell Squat')!;
+    expect(ex.planItemId).toBe('thu');
   });
 });

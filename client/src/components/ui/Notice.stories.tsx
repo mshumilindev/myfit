@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Notice } from './Notice';
+import { Card } from './Card';
 import { ProgressBar } from './ProgressBar';
 import { GroupedList, ListRow } from './GroupedList';
 import { IconTile } from './IconTile';
@@ -62,5 +63,16 @@ export const Variants: Story = {
         Saved on this device.
       </Notice>
     </Stack>
+  ),
+};
+
+/** `nested`: inside a card the notice drops its plate and keeps only the accent rule (R-KIT-25). */
+export const Nested: Story = {
+  render: () => (
+    <Card header="Parent card">
+      <Notice nested tone="accent" icon="info">
+        A hint inside a card: no second plate.
+      </Notice>
+    </Card>
   ),
 };

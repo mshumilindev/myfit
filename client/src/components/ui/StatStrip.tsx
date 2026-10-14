@@ -19,14 +19,21 @@ export function StatStrip({
   items,
   label,
   className,
+  wrapLabels = false,
 }: {
   items: StatStripItem[];
+  /** Let a long label (uk, pl) wrap onto a second line instead of ending in an ellipsis. Default off: Gym is unchanged. */
+  wrapLabels?: boolean;
   /** Accessible name of the group. */
   label?: string;
   className?: string;
 }) {
   return (
-    <div className={['uiss', className].filter(Boolean).join(' ')} role="group" aria-label={label}>
+    <div
+      className={['uiss', wrapLabels ? 'uiss--wrap' : '', className].filter(Boolean).join(' ')}
+      role="group"
+      aria-label={label}
+    >
       {items.map((it) => (
         <div key={it.label} className="uiss-cell">
           <span className={`uiss-val${it.tone ? ` is-toned ${toneClass(it.tone)}` : ''}`}>

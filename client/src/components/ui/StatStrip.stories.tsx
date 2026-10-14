@@ -57,3 +57,15 @@ export const Locales: Story = {
     />
   ),
 };
+
+/** `wrapLabels`: a long label wraps onto a second line instead of ending in an ellipsis (the Coach Week digest). */
+export const WrapLabels: Story = {
+  args: {
+    wrapLabels: true,
+    items: [
+      { value: '3/14', label: 'Sessions done' },
+      { value: 2, label: 'Waiting for an answer', tone: 'accent' },
+      { value: 2, label: 'Decisions open', tone: 'accent' },
+    ],
+  },
+};

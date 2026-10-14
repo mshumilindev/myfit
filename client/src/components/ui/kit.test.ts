@@ -38,7 +38,7 @@ describe('UI kit: every primitive has stories', () => {
     const story = f.replace(/\.tsx$/, '.stories.tsx');
     expect(Object.keys(TSX), `add ${story} (CSF3, all variants and states)`).toContain(story);
     expect(TSX[story]).toMatch(/export default meta/);
-    expect(TSX[story]).toMatch(/title: 'Kit\//);
+    expect(TSX[story]).toMatch(/title: '(Kit|Coach)\//);
   });
 });
 

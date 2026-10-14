@@ -17,7 +17,8 @@ export type ButtonVariant =
   | 'ok'
   | 'photo'
   | 'dashed';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+/** Control scale (styles.css --ctl-h-*): xs 28 (dense icon / inline), sm 36, md 44 (default), lg 52. */
+export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 /** Corner shape override: `pill` (fully rounded) or `round` (a true circle for square buttons). */
 export type ButtonShape = 'pill' | 'round';
 
@@ -31,6 +32,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: string;
   /** Phosphor icon name rendered after the label. */
   iconTrailing?: string;
+  /** No horizontal padding: a value / name set flush in a dense row (the height still comes from the scale). */
+  flush?: boolean;
+  /** `link` variant only: the button sits inside a line of text (24 x 24 target instead of 28 high). */
+  inline?: boolean;
   children?: ReactNode;
 }
 
@@ -86,6 +91,8 @@ export function Button({
   shape,
   fullWidth = false,
   loading = false,
+  inline = false,
+  flush = false,
   icon,
   iconTrailing,
   disabled,
@@ -102,6 +109,8 @@ export function Button({
     shape ? `uibtn--${shape}` : '',
     fullWidth ? 'uibtn--full' : '',
     loading ? 'is-loading' : '',
+    inline ? 'uibtn--inline' : '',
+    flush ? 'uibtn--flush' : '',
     className ?? '',
   ]
     .filter(Boolean)

@@ -66,6 +66,60 @@ export const Confirm: Story = {
   ),
 };
 
+/** R-KIT-02: an extra choice under the body (unchecked by default). A phone shows every confirm as a bottom sheet. */
+export const ConfirmWithCheckbox: Story = {
+  args: { onClose: () => undefined, children: null },
+  render: function Render() {
+    const [on, setOn] = useState(false);
+    return (
+      <ConfirmDialog
+        title="Delete thread?"
+        body="The messages leave this device."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        danger
+        checkbox={{ label: 'Also delete my notes', checked: on, onChange: setOn }}
+        onConfirm={() => undefined}
+        onCancel={() => undefined}
+      />
+    );
+  },
+};
+
+/** R-KIT-02: fine print (13px) under the choice. */
+export const ConfirmFineprint: Story = {
+  args: { onClose: () => undefined, children: null },
+  render: () => (
+    <ConfirmDialog
+      title="Stop sharing?"
+      body="Your trainer stops seeing new sessions."
+      confirmLabel="Stop sharing"
+      cancelLabel="Keep sharing"
+      danger
+      fineprint="Past sessions stay with your trainer until you end coaching."
+      onConfirm={() => undefined}
+      onCancel={() => undefined}
+    />
+  ),
+};
+
+/** R-KIT-02: the confirm shows the kit spinner and ignores a second tap. */
+export const ConfirmLoading: Story = {
+  args: { onClose: () => undefined, children: null },
+  render: () => (
+    <ConfirmDialog
+      title="Delete workout?"
+      body="This cannot be undone."
+      confirmLabel="Delete"
+      cancelLabel="Cancel"
+      danger
+      loading
+      onConfirm={() => undefined}
+      onCancel={() => undefined}
+    />
+  ),
+};
+
 export const Undo: Story = {
   args: { onClose: () => undefined, children: null },
   render: () => (

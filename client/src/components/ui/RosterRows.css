@@ -1,0 +1,54 @@
+/* Roster rows (Coach). Layout only: the row is a kit ListRow (surface, hover, selected, focus). */
+.ros-row {
+  --row-icon: 40px;
+  min-height: 66px;
+}
+.ros-row .uirow-s {
+  display: block;
+}
+.ros-row-s {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-4) var(--s-8);
+}
+.ros-row-r {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--s-2);
+  flex: none;
+  color: var(--color-text-muted);
+}
+.ros-row-c {
+  flex: none;
+  display: inline-flex;
+}
+
+.ros-sig .uirow-l {
+  line-height: 1.3;
+}
+.ros-sig-m {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-4) var(--s-8);
+}
+
+.ros-locked {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-10);
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  line-height: 1.4;
+}
+.ros-locked-i {
+  flex: none;
+  margin-top: var(--s-2);
+  font-size: var(--fs-16);
+}
+.ros-locked-t {
+  flex: 1 1 auto;
+  min-width: 0;
+}

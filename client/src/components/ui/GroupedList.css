@@ -32,6 +32,11 @@
 .uigl-rows > * {
   position: relative;
 }
+ul.uigl-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 /* Hairlines between rows, inset to the text column. */
 .uigl-rows > * + *::before {
   content: '';
@@ -77,7 +82,8 @@
   border-radius: 0;
 }
 .uirow.has-icon {
-  --row-inset: calc(var(--sp-4) + 30px + var(--sp-3));
+  /* --row-icon: the leading node's width (30px IconTile by default; a list of avatars sets 40px). */
+  --row-inset: calc(var(--sp-4) + var(--row-icon, 30px) + var(--sp-3));
 }
 button.uirow {
   cursor: pointer;
@@ -99,7 +105,7 @@ label.uirow {
   background: var(--color-border);
 }
 .uirow.is-dim {
-  opacity: 0.55;
+  opacity: 0.9;
 }
 .uirow:focus-visible {
   outline: 2px solid var(--color-accent);
@@ -136,6 +142,11 @@ label.uirow {
   color: var(--color-text-muted);
   white-space: nowrap;
   text-align: right;
+}
+.uirow-v.is-wrap {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .uirow-v.is-toned {
   color: var(--t-base);

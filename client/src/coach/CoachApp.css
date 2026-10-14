@@ -1,0 +1,61 @@
+/* Coach shell. Layout only; colours/type come from tokens and the kit. */
+.co-shell.apex-app {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+  overflow: hidden;
+  color: var(--color-text);
+  font-family: var(--font);
+}
+@media (min-width: 768px) {
+  /* Same top inset as every app (--safe-top), so the rail's buttons sit at the same y. */
+  .co-shell.apex-app {
+    flex-direction: row;
+  }
+}
+/* The ambient background (accent bloom + rhombus weave) is the shared sub-app chrome: the shell
+   wears the `apex-app` class like Apex / Nutrition / Learn / People (styles.css), so under
+   .app-coach it re-tints to tourmaline with no copy of those rules here. `.co-shell.apex-app`
+   only decides the frame (fixed, column on a phone, row with the rail). */
+/* The rail's tooltips reach into the main column: keep the rail above it. */
+.co-shell > .rail {
+  z-index: 2;
+}
+
+.co-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: var(--co-gut) var(--co-pad);
+  outline: none;
+}
+
+.co-shell > .co-skip-nav {
+  /* the skip link sits in its own landmark; the nav itself takes no room and makes no stacking context */
+  position: static;
+  z-index: auto;
+}
+.co-shell .co-skip {
+  /* beats the shared `.apex-app > *` (relative, z 1) so the link stays out of the flow */
+  position: absolute;
+  top: var(--s-8);
+  left: var(--s-8);
+  z-index: var(--z-120);
+  padding: var(--s-8) var(--s-16);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--fs-14);
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-200%);
+}
+.co-shell .co-skip:focus {
+  transform: none;
+  outline: var(--co-ring) solid var(--color-accent);
+  outline-offset: var(--co-ring);
+}

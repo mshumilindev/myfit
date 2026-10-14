@@ -1,0 +1,11 @@
+/* Header right-hand slots (polish F3). Tokens only. */
+.co-slots {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--s-8);
+}
+.co-bell {
+  position: relative;
+  display: inline-flex;
+}

@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { currentUid, getUsername } from '../api';
 import { onAuthChange, watchRole } from './auth';
 import { sumMacros } from './calc';
 import { db } from './firebase';
@@ -115,10 +116,22 @@ function startStreams(u: string) {
 }
 
 // --- auth wiring (module singleton) ---------------------------------------
+/**
+ * Non-blocking start: the suite already has a signed-in session cached on this device (`spotter.uid`), so the app
+ * adopts it at once and the shell renders from the Firestore local cache. Firebase Auth's restore (which can hang
+ * on a dead network) only CONFIRMS it later: same uid keeps the running streams, no uid signs out.
+ */
+const cachedUid = currentUid();
+if (cachedUid) {
+  state = { ...state, uid: cachedUid, username: getUsername() };
+  startStreams(cachedUid);
+}
+
 onAuthChange((user) => {
   if (user) {
-    set({ authReady: true, uid: user.uid, username: user.displayName ?? null });
-    startStreams(user.uid);
+    const same = state.uid === user.uid && unsubs.length > 0;
+    set({ authReady: true, uid: user.uid, username: user.displayName ?? state.username ?? null });
+    if (!same) startStreams(user.uid);
   } else {
     stopStreams();
     state = { ...SIGNED_OUT, authReady: true, lang: state.lang };

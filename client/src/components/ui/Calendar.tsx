@@ -295,8 +295,9 @@ export function Calendar(props: CalendarProps) {
         <div className="uical-grid" role="grid" aria-labelledby={titleId}>
           <div className="uical-row uical-heads" role="row">
             {heads.map(([n, l]) => (
-              <span key={l} className="uical-dw" role="columnheader" aria-label={l}>
+              <span key={l} className="uical-dw" role="columnheader">
                 <span aria-hidden="true">{n}</span>
+                <span className="sr-only">{l}</span>
               </span>
             ))}
           </div>

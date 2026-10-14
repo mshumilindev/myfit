@@ -54,6 +54,7 @@ import {
   useProgramMine,
   type ProgramItem,
 } from '../data/programMine';
+import { compactProgramDaySummary, effectiveSets } from './programs/model';
 import type { MuscleGroup } from '../data/exercises';
 import {
   activeRestPeriod,
@@ -85,6 +86,7 @@ import { DayHistorySheet } from '../components/DayHistorySheet';
 import { BackfillSheet, StartSheet } from '../components/StartSheet';
 import { WeightSheet } from '../components/BodyMetrics';
 import { AtlasClientsBlock } from '../today/AtlasClientsBlock';
+import { ClientTodayExtrasLazy } from '../coach/client/lazy';
 import { hasCachedClients } from '../today/clientRoster';
 import { activityWeek, workoutCalories } from '../activities';
 import { restingForDay } from '../dayEnergy';
@@ -109,17 +111,6 @@ const WEEK_MS = 7 * DAY_MS;
 function hhmm(min: number): string {
   const m = ((min % 1440) + 1440) % 1440;
   return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
-}
-
-function compactProgramDaySummary(items: ProgramItem[]): string {
-  const strength = items.filter((item) => item.kind === 'strength');
-  if (strength.length === 0) {
-    const totalMin = items.reduce((sum, item) => sum + (item.durationMin ?? 10), 0);
-    return `${totalMin} min`;
-  }
-  const sets = strength.reduce((sum, item) => sum + item.sets, 0);
-  const reps = strength.length === 1 ? strength[0].reps : null;
-  return reps ? `${sets} × ${reps}` : String(sets);
 }
 
 function useNowTick(active: boolean): number {
@@ -873,7 +864,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             ? compactProgramDaySummary(todayItems)
             : t.progDayWorkoutSummary(
                 todayItems.length,
-                todayItems.reduce((n, it) => n + (it.kind === 'strength' ? it.sets : 1), 0),
+                todayItems.reduce(
+                  (n, it) => n + (it.kind === 'strength' ? effectiveSets(it) : 1),
+                  0,
+                ),
               );
       const status =
         mode === 'rest' && programRestDay
@@ -1548,6 +1542,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       program: (
         <>
           {renderProgramCard(po)} {hasHistory && renderWeekCard(po)}
+          <ClientTodayExtrasLazy />
           {po.logPast &&
             !(assignment && assignedActive && programDayHasPlan(assignment, todayWeekday)) && (
               <Button

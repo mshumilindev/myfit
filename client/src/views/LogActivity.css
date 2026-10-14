@@ -453,7 +453,6 @@
 .la-hide {
   flex: none;
   width: 44px;
-  height: 44px;
   margin: -12px -12px -12px 0;
 }
 .la-hero-main {
@@ -1408,7 +1407,6 @@
   font-size: var(--fs-13);
 }
 .la-hero.web .la-hide {
-  height: 32px;
   margin: -6px -12px -6px 0;
 }
 .la-wbars {
@@ -1450,8 +1448,6 @@
 }
 .la-hero-actions .uibtn {
   width: 132px;
-  min-height: 44px;
-  font-size: var(--fs-14);
 }
 .la-hero-actions > span {
   flex: 1;
@@ -1600,11 +1596,8 @@
   gap: var(--s-6);
 }
 .la-cexp-btn {
-  width: 44px;
-  height: auto;
-  min-height: 0;
   flex-shrink: 0;
-  align-self: stretch;
+  align-self: center;
 }
 .la-cexp {
   border: 1px solid var(--tb);
@@ -1786,8 +1779,4 @@
 }
 .la-panel-today {
   margin-top: var(--sp-5);
-}
-
-.la-grid2 > .uibtn.h44 {
-  min-height: 44px;
 }

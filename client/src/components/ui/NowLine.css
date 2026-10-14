@@ -1,0 +1,69 @@
+/* Kit NowLine — tokens only. The colour is --color-now (Teams-style red, own token); glass.css adds the glow. */
+.uinow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  z-index: var(--z-20); /* above session blocks, below popovers / sheets (--z-40+) */
+  pointer-events: none;
+  color: var(--color-now);
+}
+.uinow-rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--s-2) / -2);
+  height: var(--s-2);
+  background: var(--color-now);
+}
+.uinow-dot {
+  position: absolute;
+  left: calc(var(--s-4) * -1);
+  top: calc(var(--s-4) * -1);
+  width: var(--s-8);
+  height: var(--s-8);
+  border-radius: var(--r-pill);
+  background: var(--color-now);
+}
+/* Day view: the time chip sits in the hour gutter, left of the line, centred on it. */
+.uinow-chip {
+  position: absolute;
+  right: 100%;
+  top: 0;
+  transform: translateY(-50%);
+  margin-right: var(--s-4);
+  padding: var(--s-2) var(--s-6);
+  border-radius: var(--r-8);
+  background: var(--color-now-solid);
+  color: var(--color-on-solid);
+  font-size: var(--fs-min);
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Phone agenda: a row in the list, text between a dot and a rule. */
+.uinow-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  padding: var(--s-8) var(--s-16);
+  color: var(--color-now);
+  font-size: var(--fs-min);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.uinow-divider .uinow-dot,
+.uinow-divider .uinow-rule {
+  position: static;
+  flex: none;
+}
+.uinow-divider .uinow-rule {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.uinow-divider-text {
+  flex: none;
+}

@@ -101,7 +101,7 @@ function Widget({
   );
   const full = (x: Item) => <Full n={x} act={open} detail={detail} />;
   const count = (
-    <Chip size="sm">
+    <Chip size="xs">
       {list.length} {c.count}
     </Chip>
   );
@@ -327,7 +327,7 @@ function Widget({
             </p>
             <ChipGroup>
               {list.slice(1, 4).map((x) => (
-                <Chip key={x.id} size="sm" onClick={open}>
+                <Chip key={x.id} size="xs" onClick={open}>
                   {x.category}
                 </Chip>
               ))}
@@ -362,7 +362,7 @@ function Widget({
           {rows(list.slice(0, 2))}
           <ChipGroup>
             {list.slice(2).map((x) => (
-              <Chip key={x.id} onClick={open} size="sm">
+              <Chip key={x.id} onClick={open} size="xs">
                 {x.category}
               </Chip>
             ))}
@@ -613,7 +613,7 @@ export function BannerStudy() {
         <SectionLabel>SPOTTER / DESIGN STUDY 01</SectionLabel>
         <h1>{c.title}</h1>
         <p className="ut-muted">{c.intro}</p>
-        <div className="bs-toolbar">
+        <div className="bs-toolbar ctl-row--md">
           <Segmented
             value={view}
             onChange={setView}
@@ -634,7 +634,6 @@ export function BannerStudy() {
             ]}
           />
           <Button
-            size="sm"
             variant="ghost"
             onClick={() => {
               setDone([]);
@@ -678,7 +677,7 @@ export function BannerStudy() {
                   {String(x.id).padStart(2, '0')} / {x.family}
                 </SectionLabel>
                 {x.recommended && (
-                  <Chip size="sm" tone="accent">
+                  <Chip size="xs" tone="accent">
                     {c.recommend}
                   </Chip>
                 )}

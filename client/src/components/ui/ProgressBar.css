@@ -12,3 +12,23 @@
   background: var(--t-base);
   transition: width 240ms ease;
 }
+.uibar--stack {
+  display: flex;
+  gap: var(--s-2);
+}
+.uibar-seg {
+  flex-basis: 0;
+  min-width: 4px;
+  background: var(--t-base);
+}
+
+/* Reduced motion: no slides, fades or loops; state changes are instant. */
+@media (prefers-reduced-motion: reduce) {
+  .uibar-fill {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
+}

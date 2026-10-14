@@ -6,17 +6,22 @@
 .uichip {
   display: inline-flex;
   align-items: center;
-  gap: var(--s-6);
-  padding: var(--s-10) var(--s-14);
-  border-radius: var(--r-pill);
+  justify-content: center;
+  gap: var(--ctl-gap-in);
+  box-sizing: border-box;
+  height: var(--ctl-h);
+  min-height: var(--ctl-h);
+  padding: 0 var(--ctl-px);
+  border-radius: var(--chip-r);
   font-family: var(--font);
-  font-size: var(--fs-13);
+  font-size: var(--ctl-fs);
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-divider);
-  color: var(--color-neutral-300);
+  background: var(--chip-bg);
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--chip-line);
+  color: var(--chip-fg);
 }
 
 button.uichip {
@@ -27,36 +32,30 @@ button.uichip {
   cursor: not-allowed;
 }
 
-.uichip--sm {
-  padding: var(--s-6) var(--s-10);
-  font-size: var(--fs-12);
-  gap: var(--s-6);
-}
-
 /* Static tones */
 .uichip--accent {
-  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-  border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
-  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) var(--chip-on-mix), transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 60%, transparent);
+  color: var(--color-accent-300);
 }
 .uichip--danger {
   background: var(--color-danger-tint);
-  border-color: var(--color-danger-line);
+  box-shadow: inset 0 0 0 1px var(--color-danger-line);
   color: var(--color-danger-text);
 }
 .uichip--ok {
   background: var(--color-ok-tint);
-  border-color: var(--color-ok-line);
+  box-shadow: inset 0 0 0 1px var(--color-ok-line);
   color: var(--color-ok-text);
 }
 .uichip--atlas {
   background: color-mix(in srgb, var(--color-atlas) 6%, transparent);
-  border-color: color-mix(in srgb, var(--color-atlas) 45%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-atlas) 45%, transparent);
   color: var(--color-atlas-text);
 }
 .uichip--rest {
   background: var(--color-rest-900);
-  border-color: var(--color-rest-700);
+  box-shadow: inset 0 0 0 1px var(--color-rest-700);
   color: var(--color-rest-200);
 }
 
@@ -75,6 +74,8 @@ button.uichip {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: var(--ctl-lh);
+  padding-block: 0.1em;
 }
 
 /* Dimmed ink (secondary information) */
@@ -84,9 +85,10 @@ button.uichip {
 
 /* Selected (the common selectable-chip active look) */
 .uichip.is-selected {
-  background: var(--color-accent-900);
-  border-color: var(--color-accent-600);
-  color: var(--color-accent-300);
+  background: color-mix(in srgb, var(--color-accent) var(--chip-on-mix), transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--color-accent) var(--chip-on-ring-mix), transparent);
+  color: var(--chip-on-fg);
 }
 
 .uichip .ui-icon {
@@ -94,11 +96,35 @@ button.uichip {
   flex: none;
 }
 
-/* Wrapping group */
+/* Count after the label (a figure, tabular so a changing number never shifts the row) */
+.uichip-n {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+/* Wrapping group; `--scroll` = one row that scrolls sideways (fades at the end), `--fill` = equal columns */
 .uichip-group {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s-8);
+  gap: var(--chip-gap);
+}
+.uichip-group--scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-block: var(--s-4);
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - var(--s-24)), transparent);
+  mask-image: linear-gradient(to right, black calc(100% - var(--s-24)), transparent);
+}
+.uichip-group--scroll::-webkit-scrollbar {
+  display: none;
+}
+.uichip-group--scroll > * {
+  flex: none;
+}
+.uichip-group--fill > * {
+  flex: 1 1 0;
 }
 
 /* photo: a frosted chip that sits on top of imagery. */

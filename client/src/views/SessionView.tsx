@@ -1,4 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
+import { ClientTargetStripLazy } from '../coach/client/lazy';
 import { useConditionLimits } from '../healthBuild';
 import { EmptyState } from '../components/ui/EmptyState';
 import { SwitchIndicator } from '../components/ui/Switch';
@@ -1597,7 +1598,7 @@ export function SessionView(props: {
             {p.kind === 'strength' && (
               <IconButton
                 icon="info"
-                size="sm"
+                size="xs"
                 className="tb-info"
                 label={t.detailsAction}
                 title={t.detailsAction}
@@ -1918,7 +1919,7 @@ export function SessionView(props: {
     const infoBtn = (name: string, cls: string) => (
       <IconButton
         icon="info"
-        size="sm"
+        size="xs"
         variant="photo"
         shape="round"
         className={cls}
@@ -2459,7 +2460,6 @@ export function SessionView(props: {
       <div className="fm-actions">
         <IconButton
           icon="sliders-horizontal"
-          className="fm-icon-btn"
           onClick={() =>
             setSheet({ kind: 'opts', tab: 'session', exId: null, set: null, ghost: null })
           }
@@ -2987,7 +2987,7 @@ export function SessionView(props: {
             <span className="fss-round">{t.roundOf(round, rounds)}</span>
             <IconButton
               icon="dots-three-vertical"
-              size="sm"
+              size="xs"
               className="dots"
               label={t.menuAction}
               onClick={() => setSheet({ kind: 'group-menu', groupId: g.groupId })}
@@ -2999,6 +2999,7 @@ export function SessionView(props: {
               return (
                 <Chip
                   key={e.id}
+                  size="md"
                   className="fss-m"
                   selected={e.id === cur.id}
                   icon={done ? 'check' : undefined}
@@ -3284,6 +3285,7 @@ export function SessionView(props: {
           )}
         </div>
         {renaming === ex.id && <div className="ut-xs ut-faint umb-8">{t.renameHint}</div>}
+        {!marker && <ClientTargetStripLazy exName={ex.name} planItemId={ex.planItemId} />}
         {showChips && (
           <div className="exercise-chips one-line">
             <IconButton
@@ -3484,6 +3486,7 @@ export function SessionView(props: {
                   <Button
                     variant="ghost"
                     size="sm"
+                    flush
                     className="gval"
                     onClick={() =>
                       setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: timedSheetGhost })
@@ -3494,6 +3497,7 @@ export function SessionView(props: {
                   <Button
                     variant="ghost"
                     size="sm"
+                    flush
                     className="gval"
                     onClick={() =>
                       setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: timedSheetGhost })
@@ -3684,7 +3688,7 @@ export function SessionView(props: {
                 const delBtn = live ? (
                   <IconButton
                     icon="trash"
-                    size="sm"
+                    size="xs"
                     className="set-del"
                     title={t.deleteSet}
                     label={t.deleteSet}
@@ -4854,6 +4858,7 @@ export function SessionView(props: {
               <div className="past-actions">
                 <IconButton
                   icon="trash"
+                  size="sm"
                   className="trash"
                   onClick={() => setDialog({ kind: 'del-workout' })}
                   label={t.deleteWorkout}
@@ -6418,7 +6423,7 @@ function NewExerciseSheet(props: {
       <div className="filter-chips">
         {MUSCLE_IDS.map((m) => (
           <Chip
-            size="sm"
+            size="xs"
             selected={primary === m}
             key={m}
             onClick={() => {
@@ -6436,7 +6441,7 @@ function NewExerciseSheet(props: {
       <div className="filter-chips">
         {MUSCLE_IDS.filter((m) => m !== primary).map((m) => (
           <Chip
-            size="sm"
+            size="xs"
             selected={secondary.includes(m)}
             key={m}
             onClick={() => toggleSecondary(m)}
@@ -6455,7 +6460,7 @@ function NewExerciseSheet(props: {
       <div className="filter-chips">
         {EQUIPMENT_IDS.map((id) => (
           <Chip
-            size="sm"
+            size="xs"
             selected={equipment.includes(id)}
             key={id}
             onClick={() => toggleEquip(id)}
@@ -6661,12 +6666,17 @@ function RestSheet(props: {
       </div>
       <SectionLabel className="se-label se-label-first">{t.restTarget}</SectionLabel>
       <div className="rest-presets">
-        <Chip className="rest-auto" selected={target === 'auto'} onClick={() => setTarget('auto')}>
+        <Chip
+          size="md"
+          className="rest-auto"
+          selected={target === 'auto'}
+          onClick={() => setTarget('auto')}
+        >
           {t.restAuto}
           {props.auto && props.auto.sec > 0 ? ` · ${fmtCountdown(props.auto.sec)}` : ''}
         </Chip>
         {REST_PRESETS.map((sec) => (
-          <Chip key={sec} selected={target === sec} onClick={() => setTarget(sec)}>
+          <Chip size="md" key={sec} selected={target === sec} onClick={() => setTarget(sec)}>
             {fmtCountdown(sec)}
           </Chip>
         ))}
@@ -7427,7 +7437,7 @@ function SetEditorSheet(props: {
                       <span>{t.dropRowN(i + 1)}</span>
                       <IconButton
                         icon="trash"
-                        size="sm"
+                        size="xs"
                         className="drop-trash"
                         label={t.delete}
                         onClick={() => setDropsState((list) => list.filter((_, xi) => xi !== i))}
@@ -7588,6 +7598,7 @@ function SetEditorSheet(props: {
               {[0, 6, 7, 8, 9, 10].map((v) => (
                 <Chip
                   key={v}
+                  size="md"
                   selected={rpe === v && !failOn}
                   onClick={() => {
                     setRpe(v);

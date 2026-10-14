@@ -86,6 +86,11 @@ export const en = {
   serverUnreachable:
     "Can't reach the server. The first sign-in needs a connection — offline logging works after that.",
   retry: 'Retry',
+  syncSlow: 'Slow connection — using saved data',
+  syncOfflineWork: 'Offline — your changes will sync later',
+  syncProblem: 'Sync problem',
+  authSlowHint: 'The server is slow to answer. You can still try to sign in.',
+  loadingApp: 'Loading',
   createYourAccount: 'Create your account',
   signupNote: 'Your log is private to your account. Free while Spotter is in beta.',
   username: 'Username',
@@ -1562,6 +1567,9 @@ export const en = {
     'Use location to detect gym visits and suggest logging a session. Off by default.',
   flagNutrition: 'Nutrition app',
   flagNutritionDesc: 'Unlock the Nutrition app (КБЖУ tracker) in the app switcher.',
+  flagCoach: 'Coach dashboard',
+  flagCoachDesc:
+    'Unlock the Coach dashboard for trainers and admins: clients, schedule, programs, chat.',
   flagConditions: 'Long-term conditions',
   flagConditionsDesc:
     'Permanent private health profile that adapts plans and suggestions. Hidden until enabled.',
@@ -3899,7 +3907,6 @@ export const en = {
   apxRanksShareLine: 'My strength standards',
   feedTitle: 'Milestones',
   shellTitle: 'Your apps',
-  shellNote: 'One account · one training history',
   shellSwitch: 'Switch app',
   shellCurrent: 'Current',
   shellComingSoon: 'Coming soon',

@@ -507,8 +507,9 @@ span.xp-noimg {
 .sheet.xp-equip-sheet .xp-detail-actions {
   position: sticky;
   bottom: calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)));
-  margin: 4px calc(-1 * var(--gutter, 18px)) calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)));
-  padding: 12px var(--gutter, 18px) calc(var(--space-8) + var(--safe-bottom, 0px));
+  margin: var(--s-4) calc(-1 * var(--gutter, 18px))
+    calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)));
+  padding: var(--s-12) var(--gutter, 18px) calc(var(--space-8) + var(--safe-bottom, 0px));
   background: var(--color-surface);
   border-top: 1px solid var(--color-divider);
 }
@@ -1003,10 +1004,6 @@ span.xp-noimg {
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 32px;
-  height: 32px;
-  min-height: 32px;
-  padding: 0;
   border-radius: var(--r-round);
   background: color-mix(in srgb, var(--color-bg) 70%, transparent);
   color: var(--color-text);
@@ -1015,7 +1012,7 @@ span.xp-noimg {
 .xp-best .xp-info,
 .xp-row .xp-info {
   top: 50%;
-  margin-top: -16px;
+  margin-top: calc(var(--ctl-h-sm) / -2);
   background: transparent;
   color: var(--color-neutral-500);
 }

@@ -163,7 +163,14 @@ const grantPorts = (uid: string): GrantPorts => ({
     return s.exists() ? (s.data() as CoachKeyRecord) : null;
   },
   saveOwnCoachKey: (rec) => setDoc(doc(db, 'users', uid, 'meta', 'coachKey'), rec),
-  publishCoachPub: (pub) => setDoc(doc(db, 'coachKeys', uid), { pub, updatedAt: Date.now() }),
+  // Written only when the key changed: a rewrite would drop the server signature (key pinning) for nothing.
+  async publishCoachPub(pub) {
+    const ref = doc(db, 'coachKeys', uid);
+    const cur = await getDoc(ref);
+    const have = cur.exists() ? (cur.data() as { pub?: JsonWebKey }).pub : undefined;
+    if (have && have.x === pub.x && have.y === pub.y && have.crv === pub.crv) return;
+    await setDoc(ref, { pub, updatedAt: Date.now() });
+  },
   async loadCoachPub(coachId) {
     const s = await getDoc(doc(db, 'coachKeys', coachId));
     return s.exists() ? ((s.data() as { pub?: JsonWebKey }).pub ?? null) : null;

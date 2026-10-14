@@ -2,8 +2,10 @@
 .uisearch {
   display: flex;
   align-items: center;
-  gap: var(--s-8);
-  height: 44px;
+  gap: var(--ctl-gap-in);
+  box-sizing: border-box;
+  height: var(--ctl-h);
+  min-height: var(--ctl-h);
   padding: 0 var(--s-6) 0 var(--s-14);
   border-radius: var(--r-12);
   border: 1px solid var(--color-border);
@@ -15,16 +17,17 @@
 }
 .uisearch-ic {
   flex: none;
-  font-size: var(--fs-16);
+  font-size: var(--ctl-icon);
 }
 .uisearch-input {
   flex: 1;
+  padding: 0;
   min-width: 0;
   height: 100%;
   border: 0;
   background: transparent;
   color: var(--color-text);
-  font: 500 var(--fs-15) var(--font);
+  font: 500 var(--ctl-fs) var(--font);
   outline: none;
 }
 .uisearch-input::-webkit-search-cancel-button {
@@ -32,8 +35,9 @@
 }
 .uisearch-clear {
   flex: none;
-  width: 32px;
-  height: 32px;
+  padding: 0;
+  width: calc(var(--ctl-h) - var(--s-12));
+  height: calc(var(--ctl-h) - var(--s-12));
   border: 0;
   border-radius: var(--r-10);
   background: var(--color-surface);
@@ -48,4 +52,10 @@
   font-size: var(--fs-12);
   color: var(--color-text-faint);
   white-space: nowrap;
+}
+
+@media (pointer: coarse) {
+  .uisearch-input {
+    font-size: var(--fs-16);
+  }
 }

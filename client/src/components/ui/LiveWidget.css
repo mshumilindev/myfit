@@ -1,0 +1,54 @@
+/* LiveWidget. Layout only: rows are kit ListRows in a flat GroupedList, group heads are SectionLabels, the status is a kit SeverityDot. */
+.uilivew {
+  display: inline-flex;
+}
+.uilivew-panel {
+  padding-block: var(--s-16);
+  min-width: 0;
+}
+/* Headings and notes sit on the same left edge as the avatars of the rows (the rows carry their own side padding). */
+.uilivew-title,
+.uilivew-sum,
+.uilivew-none,
+.uilivew-priv,
+.uilivew-hd {
+  padding-inline: var(--s-16);
+}
+.uilivew-title {
+  margin: 0;
+  font-size: var(--fs-18);
+  font-weight: 600;
+}
+.uilivew-sum,
+.uilivew-none {
+  margin: var(--s-4) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.uilivew-grp {
+  margin-top: var(--s-16);
+}
+.uilivew-hd {
+  margin-bottom: var(--s-4);
+}
+.uilivew-grp .uigl {
+  --row-icon: 40px;
+}
+/* One line each: the name and the meta truncate instead of wrapping. */
+.uilivew-grp .uirow-l,
+.uilivew-grp .uirow-s {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.uilivew-m {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  font-weight: 600;
+}
+.uilivew-priv {
+  margin: var(--s-16) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-12);
+  line-height: 1.4;
+}

@@ -967,7 +967,7 @@ div.hist-item {
   display: flex;
   flex-direction: column;
   background: color-mix(in srgb, var(--c-08090a) 94%, transparent);
-  padding: max(12px, var(--safe-top, 0px)) 0 max(16px, var(--safe-bottom, 0px));
+  padding: max(var(--s-12), var(--safe-top, 0px)) 0 max(var(--s-16), var(--safe-bottom, 0px));
 }
 .ps-scrim {
   position: absolute;
@@ -981,7 +981,7 @@ div.hist-item {
   align-items: center;
   justify-content: space-between;
   gap: var(--s-12);
-  padding: 8px var(--page-x, 20px);
+  padding: var(--s-8) var(--page-x, 20px);
 }
 .ps-title {
   min-width: 0;
@@ -995,7 +995,6 @@ div.hist-item {
 .ps-close {
   flex: none;
   width: 40px;
-  height: 40px;
   border-radius: var(--r-round);
   border: none;
   background: color-mix(in srgb, var(--color-text) 10%, transparent);
@@ -1025,7 +1024,7 @@ div.hist-item {
   scroll-snap-align: center;
   display: grid;
   place-items: center;
-  padding: 12px var(--page-x, 20px);
+  padding: var(--s-12) var(--page-x, 20px);
   box-sizing: border-box;
 }
 .ps-slide img {
@@ -1041,12 +1040,11 @@ div.hist-item {
   align-items: center;
   justify-content: center;
   gap: var(--s-12);
-  padding: 8px var(--page-x, 20px) 0;
+  padding: var(--s-8) var(--page-x, 20px) 0;
 }
 .ps-steps {
   display: flex;
   gap: var(--s-6);
-  padding: var(--s-4);
   border-radius: var(--r-14);
   background: color-mix(in srgb, var(--color-text) 8%, transparent);
 }
@@ -1393,11 +1391,6 @@ html.theme-glass .wlib-top .wlib-title {
 }
 
 /* Sleep day picker: weekday over date, one cell per day (labels never truncate). */
-.sleep-dayseg .uiseg-opt {
-  height: auto;
-  min-height: var(--s-48);
-  padding: var(--s-6) 0;
-}
 .sleep-dayseg .uiseg-l {
   display: flex;
   flex-direction: column;
@@ -1419,9 +1412,7 @@ html.theme-glass .wlib-top .wlib-title {
 .se-rpe .uichip {
   width: 100%;
   min-width: 0;
-  min-height: 40px;
   justify-content: center;
-  padding-inline: 0;
   font-size: var(--fs-14);
   font-variant-numeric: tabular-nums;
 }

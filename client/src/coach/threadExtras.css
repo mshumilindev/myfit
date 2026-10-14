@@ -1,0 +1,30 @@
+/* Layout only. */
+.shx-pend {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+}
+.shx-hint {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: var(--ctl-lh);
+}
+/* The helper line owns its own row under the chips: the chips (Private note, Request reschedule) never shift when it appears. */
+.uicomp-chips > .shx-hint {
+  order: 1;
+  flex: 1 0 100%;
+}
+.shx-note-act {
+  display: flex;
+  gap: var(--s-4);
+  margin-top: var(--s-4);
+}
+.shx-flash {
+  position: fixed;
+  inset-inline: var(--s-16);
+  bottom: var(--s-16);
+  z-index: var(--z-50);
+}
+.shx-anchor {
+  display: inline-flex;
+}

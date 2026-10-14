@@ -1,0 +1,26 @@
+/* Layout only. Colours and type come from the kit. */
+.co-notcfg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-16);
+  max-width: 40rem;
+  margin-inline: auto;
+  padding-block: var(--s-24);
+}
+/* Inside a page: the page shell already gives the width and paddings */
+.co-pb {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-16);
+}
+.co-pb-hint {
+  display: block;
+  margin-block-start: var(--s-8);
+}
+.co-pb-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}

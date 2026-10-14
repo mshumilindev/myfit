@@ -20,6 +20,7 @@ import { ToneText } from '../../components/ui/ToneText';
 import type { Tone } from '../../components/ui/tones';
 import { useT } from '../../i18n';
 import { FEATURE_ICON } from '../../coachEffectIcons';
+import { ClientTrainerSharing } from '../../coach/client/lazy';
 import { SupplementCoachPreview } from './supplements/SupplementCoachPreview';
 import {
   deleteAlcoholData,
@@ -171,6 +172,14 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
       </div>
       <div className="hl-scroll">
         <div className="hl-cnt">
+          <ClientTrainerSharing
+            onOpenLog={() => {
+              window.location.hash = '#/trainer/log';
+            }}
+            onOpenTrainer={() => {
+              window.location.hash = '#/trainer';
+            }}
+          />
           <Card emphasis="glass" pad="md" aria-live="polite">
             <div className="ul-flex ua-start ug-12">
               <IconTile tone="accent" size={30} icon="eye" />

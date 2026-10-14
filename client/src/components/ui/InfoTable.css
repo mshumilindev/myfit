@@ -1,0 +1,27 @@
+.uiinfo {
+  margin: 0;
+  padding: 0;
+}
+.uiinfo-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  align-items: baseline;
+  gap: var(--s-12);
+  padding: var(--s-8) 0;
+  border-top: 1px solid var(--color-divider);
+  font-size: var(--fs-14);
+}
+.uiinfo-row:first-child {
+  border-top: 0;
+}
+.uiinfo-k {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+.uiinfo-v {
+  margin: 0;
+  text-align: right;
+  font-weight: 400;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}

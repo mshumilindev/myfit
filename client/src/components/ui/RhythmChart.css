@@ -1,0 +1,115 @@
+/* RhythmChart — Coach kit. Tokens only. */
+.uirh {
+  margin: 0;
+  display: grid;
+  gap: var(--s-12);
+}
+.uirh-plot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 var(--s-8);
+  /* room for the value above the tallest bar */
+  padding-top: var(--s-24);
+}
+.uirh-y {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: var(--fs-13);
+  line-height: 16px;
+  color: var(--color-text-muted);
+}
+.uirh-p {
+  position: relative;
+  min-width: 0;
+}
+.uirh-g {
+  position: absolute;
+  inset: 0 0 auto 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.uirh-g i {
+  height: 1px;
+  background: var(--color-divider);
+}
+.uirh-c {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--s-8);
+  align-items: end;
+  margin: 0;
+  padding: 0 var(--s-8);
+  list-style: none;
+}
+.uirh-bar {
+  position: relative;
+  display: flex;
+  height: 100%;
+  align-items: flex-end;
+  justify-content: center;
+}
+.uirh-s {
+  position: relative;
+  display: block;
+  width: min(100%, 40px);
+  min-height: 2px;
+  border-radius: var(--r-6) var(--r-6) 0 0;
+  background: color-mix(in srgb, var(--color-text) 38%, transparent);
+}
+.uirh-s.is-now {
+  background: color-mix(in srgb, var(--color-text) 22%, transparent);
+  outline: 1px dashed var(--color-text-muted);
+}
+.uirh-v {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(-1 * var(--s-20));
+  text-align: center;
+  font-size: var(--fs-13);
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.uirh-plan {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  border-top: 2px dashed var(--color-text-muted);
+  text-decoration: none;
+}
+.uirh-x {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--s-8);
+  padding: 0 var(--s-8);
+  margin-top: var(--s-8);
+  text-align: center;
+  font-size: var(--fs-13);
+  color: var(--color-text-muted);
+}
+.uirh-leg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-16);
+  font-size: var(--fs-13);
+  color: var(--color-text-muted);
+}
+.uirh-leg span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-6);
+}
+.uirh-leg i {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--r-4);
+  background: color-mix(in srgb, var(--color-text) 38%, transparent);
+}

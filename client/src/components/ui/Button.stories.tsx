@@ -95,3 +95,24 @@ export const LongText: Story = {
     />
   ),
 };
+
+/** The link variant is a tap target (28 high, 12 from the edge); `inline` is the in-sentence form (24 x 24 minimum). */
+export const LinkTargets: Story = {
+  render: () => (
+    <Stack>
+      <Row>
+        <Button variant="link">Link button</Button>
+        <Button variant="link" iconTrailing="caret-right">
+          With icon
+        </Button>
+      </Row>
+      <p>
+        Inside a sentence use{' '}
+        <Button variant="link" inline>
+          inline
+        </Button>{' '}
+        so the line height holds.
+      </p>
+    </Stack>
+  ),
+};

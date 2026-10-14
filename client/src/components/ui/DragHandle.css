@@ -2,7 +2,7 @@
 .uidrag {
   flex: none;
   width: 28px;
-  height: 36px;
+  height: var(--ctl-h-sm);
   border-radius: var(--radius-md);
   display: inline-grid;
   place-items: center;

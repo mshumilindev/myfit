@@ -1,16 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
-  addActivity,
-  copyDay,
   dayActivities,
   duplicateOf,
   freshProgram,
   normalizeProgram,
-  patchActivity,
-  removeActivity,
   sanitizeActivities,
   toSaved,
 } from './model';
+// The operations now live in the editor tool (one implementation); the app model keeps storage and validation.
+import { addActivity, copyDay, patchActivity, removeActivity } from '../../tools/programEditor';
 
 const base = () => ({ ...freshProgram('P'), dayNames: { '6': 'Sat' } });
 const run = {

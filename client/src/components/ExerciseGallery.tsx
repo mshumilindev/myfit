@@ -782,7 +782,7 @@ export function CustomEditor(props: {
       <div className="filter-chips">
         {MUSCLE_IDS.map((m) => (
           <Chip
-            size="sm"
+            size="xs"
             selected={primary === m}
             key={m}
             onClick={() => {
@@ -800,7 +800,7 @@ export function CustomEditor(props: {
       <div className="filter-chips">
         {MUSCLE_IDS.filter((m) => m !== primary).map((m) => (
           <Chip
-            size="sm"
+            size="xs"
             selected={secondary.includes(m)}
             key={m}
             onClick={() =>
@@ -824,7 +824,7 @@ export function CustomEditor(props: {
             <div className="filter-chips">
               {primarySplit.map((f) => (
                 <Chip
-                  size="sm"
+                  size="xs"
                   selected={subPrimary.includes(f)}
                   key={f}
                   onClick={() => toggle(setSubPrimary, f)}
@@ -840,7 +840,7 @@ export function CustomEditor(props: {
               <div className="filter-chips">
                 {secondarySplit.map((f) => (
                   <Chip
-                    size="sm"
+                    size="xs"
                     selected={subSecondary.includes(f)}
                     key={f}
                     onClick={() => toggle(setSubSecondary, f)}
@@ -858,7 +858,7 @@ export function CustomEditor(props: {
       <div className="filter-chips">
         {EQUIPMENT_IDS.map((id) => (
           <Chip
-            size="sm"
+            size="xs"
             selected={equipment.includes(id)}
             key={id}
             onClick={() =>

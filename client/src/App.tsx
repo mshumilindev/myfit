@@ -1,3 +1,4 @@
+import { isProgramsEditorHash } from './views/programs/programsRoute';
 import { pushState, refreshPush, setAppBadge } from './push';
 import { useConditionLimits } from './healthBuild';
 import { setProgressionEffects } from './progression';
@@ -48,15 +49,7 @@ import { SleepAutomation, SleepPauseController } from './components/SleepAutomat
 import { SleepHero } from './components/SleepHero';
 import { useT } from './i18n';
 import { computeMastery, rankIndexForRating, type MasteryResult } from './mastery';
-import {
-  Icon,
-  LanguageSelector,
-  UndoSnackbar,
-  Toast,
-  UpdatePlate,
-  type SnackState,
-  type ToastState,
-} from './ui';
+import { Icon, UndoSnackbar, Toast, UpdatePlate, type SnackState, type ToastState } from './ui';
 import { isUpdateReady, subscribeUpdateReady } from './pwaUpdate';
 import {
   computeNotifs,
@@ -68,14 +61,14 @@ import {
 } from './notifications';
 import { useChallenges } from './challenges';
 import { ShellLauncher } from './components/ShellLauncher';
-import { SpotterMark } from './brand/SpotterMark';
+import { setSuiteSession } from './components/suite/suiteSession';
 import type { ApexTab } from './views/ApexApp';
 import type { RosterTab } from './views/RosterApp';
+import { canUseCoach, coachScreenOpen } from './coach/access';
 import type { HomeSetRoute } from './views/home/HomeSetView';
 import { pruneHomeSetDrafts } from './views/home/homeSetDraft';
 import { AuthView } from './views/AuthView';
 import { TraineeSessionView } from './views/TraineeSessionView';
-import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
 import { ActivityHero } from './components/ActivityHero';
 import { isActivityLive } from './activities';
@@ -83,10 +76,13 @@ import type { SyncError, Notice, InjurySide } from './types';
 import type { HealthFormSpec } from './health';
 import type { MuscleGroup } from './data/exercises';
 import { useFlag, isFlagOn, startGlobalFlags } from './data/flags';
-import { TabBar } from './components/ui/TabBar';
+import { isClientHead } from './coach/client/routes';
+import { useClientShared } from './coach/client/shared';
+import { ClientBridgeLazy, ClientRoutesLazy } from './coach/client/lazy';
 import { BrandBar, BellButton } from './components/ui/BrandBar';
-import { ConditionsShield } from './views/health/ConditionsShield';
-import { Rail as KitRail, RailItem } from './components/ui/Rail';
+import { ConditionsShield, useActiveConditions } from './views/health/ConditionsShield';
+import { AppRail } from './components/AppRail';
+import { SuiteTabBar } from './components/SuiteTabBar';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 
 const OnboardingView = lazy(() =>
@@ -216,6 +212,10 @@ const ApexApp = lazy(() =>
 const RosterApp = lazy(() =>
   import('./views/RosterApp').then((module) => ({ default: module.RosterApp })),
 );
+// Coach dashboard (flag `coach`, trainer or admin): code-split, own prefix #/c/… (not #/coach, the advice view).
+const CoachApp = lazy(() =>
+  import('./coach/CoachApp').then((module) => ({ default: module.CoachApp })),
+);
 const NutritionApp = lazy(() =>
   import('./NutritionApp').then((module) => ({ default: module.NutritionApp })),
 );
@@ -273,6 +273,8 @@ export type Overlay =
   | { screen: 'builder'; programMode?: 'none' | 'own' | 'other'; programDays?: number[] }
   | { screen: 'mastery' }
   | { screen: 'coach' }
+  /** Client-side trainer screens (M7): invite, My trainer, chat, access log. `route` = hash path ("trainer/chat"). */
+  | { screen: 'client-coach'; route: string }
   | {
       screen: 'injury';
       injuryId?: string;
@@ -325,7 +327,7 @@ const TABS: Tab[] = ['today', 'overview', 'progress', 'gyms', 'programs'];
 const OVERVIEW_TABS: Tab[] = ['overview', 'progress', 'programs'];
 type NavRole = ReturnType<typeof getRole>;
 type NavLabels = Pick<ReturnType<typeof useT>['t'], 'today' | 'overviewTab' | 'gyms'>;
-type NavItem = { id: Tab; icon: string; label: string };
+type NavItem = { id: Tab; icon: string; label: string; badge?: number; ariaLabel?: string };
 
 /** The People sub-app's label follows the role, matching the old in-Gym menu. */
 function peopleLabelFor(role: NavRole, t: ReturnType<typeof useT>['t']): string {
@@ -451,6 +453,7 @@ export function toHash(
   if (overlay?.screen === 'widget-library') return '#/widgets';
   if (overlay?.screen === 'notifications') return '#/notifications';
   if (overlay?.screen === 'coach') return '#/coach';
+  if (overlay?.screen === 'client-coach') return `#/${overlay.route}`;
   if (overlay?.screen === 'recap') return `#/recap/${encodeURIComponent(overlay.period)}`;
   if (overlay?.screen === 'recap-story')
     return `#/recap-story/${encodeURIComponent(overlay.period)}`;
@@ -650,6 +653,8 @@ export function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'mastery') return { tab: 'today', overlay: { screen: 'mastery' } };
   if (head === 'coach') return { tab: 'today', overlay: { screen: 'coach' } };
+  if (isClientHead(head))
+    return { tab: 'today', overlay: { screen: 'client-coach', route: parts.join('/') } };
   if (head === 'injury') return { tab: 'today', overlay: { screen: 'injury' } };
   if (head === 'health') return { tab: 'today', overlay: healthFromHash(parts.slice(1)) };
   if (head === 'home') return { tab: 'today', overlay: homeSetFromHash(parts.slice(1)) };
@@ -871,9 +876,11 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [store.workouts, store.bodyMetrics, store.exerciseLoadTypes, challenges, notifNow, t],
   );
+  // Rows from my trainer (M7) come from the lazy client bridge; empty unless the `coach` flag is on and I have a trainer.
+  const clientShared = useClientShared();
   useEffect(() => {
-    syncNotifs(rawNotifs);
-  }, [rawNotifs]);
+    syncNotifs(clientShared.notifs.length ? [...rawNotifs, ...clientShared.notifs] : rawNotifs);
+  }, [rawNotifs, clientShared.notifs]);
   const { notifs, state: notifState } = useNotifs();
   const notifUnread = unreadCount(notifState, notifs);
   // Home Screen icon badge mirrors the bell.
@@ -930,6 +937,10 @@ export function App() {
     () => isNutritionHash(window.location.hash) && isFlagOn('nutrition'),
   );
   const [learnOpen, setLearnOpen] = useState<boolean>(() => isLearnHash(window.location.hash));
+  const coachFlag = useFlag('coach');
+  const [coachWanted, setCoachWanted] = useState<boolean>(() =>
+    coachScreenOpen(window.location.hash, getRole(), isFlagOn('coach')),
+  );
   // Nutrition is behind a feature flag (admin-only toggle in Settings); default
   // OFF → the Shell shows it as "coming soon" and it cannot be opened.
   const nutritionEnabled = useFlag('nutrition');
@@ -1045,7 +1056,7 @@ export function App() {
   // Interactive back-swipe: while a drag is live we render the destination
   // (the tab) beneath the overlay and translate the two layers by hand.
   const [backSwipe, setBackSwipe] = useState(false);
-  const stageRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLElement | null>(null);
   const overLayerRef = useRef<HTMLDivElement | null>(null);
   const underLayerRef = useRef<HTMLDivElement | null>(null);
   const scrimRef = useRef<HTMLDivElement | null>(null);
@@ -1113,6 +1124,17 @@ export function App() {
     queueLength: store.queue.length,
   };
 
+  // Every app's account block (rail avatar popover, phone More sheet) signs out through here.
+  const signOutRef = useRef(shell.signOut);
+  useEffect(() => {
+    signOutRef.current = shell.signOut;
+  });
+  const queueLen = store.queue.length;
+  useEffect(
+    () => setSuiteSession({ signOut: () => signOutRef.current(), queueLength: queueLen }),
+    [queueLen],
+  );
+
   /** Back from an overlay: pop to the logical parent screen, not history. When
    *  there's no remembered parent (deep link / refreshed URL), fall back to the
    *  tab behind the overlay. An exercise detail opened from the Exercises tab
@@ -1133,6 +1155,8 @@ export function App() {
   }, [store.workouts]);
   const role = getRole();
   const tabs = tabsForRole(role, t);
+  // Coach dashboard: trainer OR admin, only while the flag is on (access.ts).
+  const coachOpen = coachWanted && canUseCoach(role, coachFlag);
   const tabAllowed = TABS.includes(tab);
   const effectiveTab = tabAllowed ? tab : defaultTab();
   // Role guards, applied in render (no setState-in-effect): an overlay the
@@ -1177,7 +1201,7 @@ export function App() {
 
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
-    if (!authed || joinToken) return;
+    if (!authed || joinToken || coachOpen) return;
     const next = learnOpen
       ? '#/learn'
       : nutritionOpen
@@ -1195,10 +1219,17 @@ export function App() {
                 progressSeg,
                 volumeLens,
               );
-    if (window.location.hash !== next) window.history.replaceState(null, '', next);
+    // The program editor owns its address under programs (`#/programs/<id>/edit`, `#/programs/new`).
+    const keep =
+      effectiveTab === 'programs' &&
+      !activeOverlay &&
+      programsPeer === 'programs' &&
+      isProgramsEditorHash(window.location.hash);
+    if (!keep && window.location.hash !== next) window.history.replaceState(null, '', next);
   }, [
     authed,
     joinToken,
+    coachOpen,
     apexOpen,
     apexTab,
     rosterOpen,
@@ -1224,6 +1255,7 @@ export function App() {
       setRosterTab(rosterTabFromHash(window.location.hash));
       setNutritionOpen(isNutritionHash(window.location.hash) && isFlagOn('nutrition'));
       setLearnOpen(isLearnHash(window.location.hash));
+      setCoachWanted(coachScreenOpen(window.location.hash, getRole(), isFlagOn('coach')));
       const { tab: ht, overlay: ho } = fromHash(window.location.hash);
       const pk = peerFromHash(window.location.hash);
       const ps = progressFromHash(window.location.hash);
@@ -1360,6 +1392,7 @@ export function App() {
   // overlay you left behind. (Apex/Learn/Nutrition also reset their entry tab.)
   const openGym = () => {
     setShellOpen(false);
+    setCoachWanted(false);
     setApexOpen(false);
     setRosterOpen(false);
     setNutritionOpen(false);
@@ -1369,6 +1402,7 @@ export function App() {
   };
   const openApex = () => {
     setShellOpen(false);
+    setCoachWanted(false);
     setRosterOpen(false);
     setNutritionOpen(false);
     setLearnOpen(false);
@@ -1377,6 +1411,7 @@ export function App() {
   };
   const openRoster = (rtab: RosterTab) => {
     setShellOpen(false);
+    setCoachWanted(false);
     setApexOpen(false);
     setNutritionOpen(false);
     setLearnOpen(false);
@@ -1386,6 +1421,7 @@ export function App() {
   const openNutrition = () => {
     if (!nutritionEnabled) return;
     setShellOpen(false);
+    setCoachWanted(false);
     setApexOpen(false);
     setRosterOpen(false);
     setLearnOpen(false);
@@ -1393,11 +1429,48 @@ export function App() {
   };
   const openLearn = () => {
     setShellOpen(false);
+    setCoachWanted(false);
     setApexOpen(false);
     setRosterOpen(false);
     setNutritionOpen(false);
     setLearnOpen(true);
   };
+
+  // Coach dashboard takes over the whole screen (flag `coach`; trainer or admin).
+  if (coachOpen) {
+    return (
+      <>
+        <Suspense fallback={<ScreenFallback />}>
+          <CoachApp
+            role={role === 'admin' ? 'admin' : 'trainer'}
+            name={getUsername() ?? ''}
+            userId={currentUid() ?? undefined}
+            onExitToWorkouts={openGym}
+            onOpenProfile={() => openRoster('me')}
+            onOpenShell={() => setShellOpen(true)}
+          />
+        </Suspense>
+        {shellOpen && (
+          <ShellLauncher
+            store={store}
+            now={notifNow}
+            current="coach"
+            peopleLabel={peopleLabel}
+            peopleDesc={peopleDesc}
+            activeChallenges={activeChallengeCount}
+            notifUnread={notifUnread}
+            onGym={openGym}
+            onApex={openApex}
+            onRoster={() => openRoster(rosterHomeFor(role))}
+            onNutrition={openNutrition}
+            nutritionEnabled={nutritionEnabled}
+            onLearn={openLearn}
+            onClose={() => setShellOpen(false)}
+          />
+        )}
+      </>
+    );
+  }
 
   // Nutrition takes over the whole screen — its own lazurite skin & store.
   if (nutritionOpen && nutritionEnabled) {
@@ -1430,7 +1503,6 @@ export function App() {
             onNutrition={() => setShellOpen(false)}
             nutritionEnabled={nutritionEnabled}
             onLearn={openLearn}
-            onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
         )}
@@ -1470,7 +1542,6 @@ export function App() {
             onNutrition={openNutrition}
             nutritionEnabled={nutritionEnabled}
             onLearn={() => setShellOpen(false)}
-            onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
         )}
@@ -1512,7 +1583,6 @@ export function App() {
             onNutrition={openNutrition}
             nutritionEnabled={nutritionEnabled}
             onLearn={openLearn}
-            onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
         )}
@@ -1554,7 +1624,6 @@ export function App() {
             onNutrition={openNutrition}
             nutritionEnabled={nutritionEnabled}
             onLearn={openLearn}
-            onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
         )}
@@ -1694,6 +1763,11 @@ export function App() {
       {activeOverlay?.screen === 'client-page' && (
         <ClientPage clientId={activeOverlay.clientId} shell={shell} onClose={closeOverlay} />
       )}
+      {activeOverlay?.screen === 'client-coach' && (
+        <Suspense fallback={null}>
+          <ClientRoutesLazy route={activeOverlay.route} onClose={closeOverlay} />
+        </Suspense>
+      )}
       {activeOverlay?.screen === 'mastery' && <MasteryView shell={shell} onClose={closeOverlay} />}
       {activeOverlay?.screen === 'coach' && (
         <CoachView
@@ -1803,7 +1877,7 @@ export function App() {
       <SleepAutomation onOpenSchedule={() => setOverlay({ screen: 'sleep', mode: 'schedule' })} />
       <SleepPauseController onSleepScreen={!!nightLive && activeOverlay?.screen === 'sleep'} />
       {desktopRail && (
-        <Rail
+        <GymRail
           tab={effectiveTab}
           overlayOpen={activeOverlay !== null}
           goTab={goTab}
@@ -1868,7 +1942,8 @@ export function App() {
             mode="compact"
           />
         )}
-        <div className="screen-stage" ref={stageRef} data-back-swipe={backSwipe ? '' : undefined}>
+        {/* the one <main> landmark of the Gym shell (WCAG 1.3.1 / axe region); no visual change */}
+        <main className="screen-stage" ref={stageRef} data-back-swipe={backSwipe ? '' : undefined}>
           {(!activeOverlay || backSwipe) && (
             <div className="stage-layer under-layer" ref={underLayerRef}>
               {parentOverlay && parentOverlay.screen !== 'session'
@@ -1882,12 +1957,24 @@ export function App() {
             </div>
           )}
           {backSwipe && <div className="stage-scrim" ref={scrimRef} aria-hidden />}
-        </div>
+        </main>
         {showTabbar && (
-          <TabBar
-            items={tabs.map((x) => ({ ...x, active: navActive(x.id, effectiveTab) }))}
+          <SuiteTabBar
+            app="gym"
+            items={tabs.map((x) => ({
+              ...x,
+              active: navActive(x.id, effectiveTab),
+              // unread messages from my trainer sit on Today (R-KIT-21); nothing without a trainer
+              ...(x.id === 'today' && clientShared.unread > 0
+                ? {
+                    badge: clientShared.unread,
+                    ariaLabel: `${x.label}, ${clientShared.unreadLabel || clientShared.unread}`,
+                  }
+                : {}),
+            }))}
             onSelect={goTab}
-            apps={{ label: t.appsTab, ariaLabel: t.shellSwitch, onClick: () => setShellOpen(true) }}
+            onOpenShell={() => setShellOpen(true)}
+            onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
             fab={{
               ariaLabel: t.startNew,
               onClick: () => setStartOpen(true),
@@ -1895,6 +1982,7 @@ export function App() {
             }}
           />
         )}
+        {authed && <ClientBridgeLazy />}
         <div className="toast-holder">
           {authed && notices.some((n) => !n.read) && (
             <NoticeStrip notices={notices.filter((n) => !n.read)} onDismiss={dismissNotice} />
@@ -1941,7 +2029,6 @@ export function App() {
           onNutrition={openNutrition}
           nutritionEnabled={nutritionEnabled}
           onLearn={openLearn}
-          onSignOut={() => shell.signOut()}
           onClose={() => setShellOpen(false)}
         />
       )}
@@ -1949,10 +2036,15 @@ export function App() {
   );
 }
 
-/** Page-load placeholder: a skeleton of a typical screen, never a spinner. */
+/**
+ * Code-split screen placeholder: a skeleton of a typical screen, never a spinner
+ * and never a "Syncing" screen. It only shows while a lazy chunk loads (the app
+ * shell is precached, so this is instant after the first visit, also offline);
+ * app data is not awaited here — screens render from the local cache.
+ */
 function ScreenFallback() {
   const { t } = useT();
-  return <ScreenSkeleton label={t.syncing} />;
+  return <ScreenSkeleton label={t.loadingApp} />;
 }
 
 function getDesktopRailMatch(): boolean {
@@ -1997,7 +2089,7 @@ interface EdgeBackOpts {
   /** Do the interactive reveal (an overlay is open). Off = plain threshold back. */
   interactive: boolean;
   onBack: () => void;
-  stageRef: RefObject<HTMLDivElement | null>;
+  stageRef: RefObject<HTMLElement | null>;
   overRef: RefObject<HTMLDivElement | null>;
   underRef: RefObject<HTMLDivElement | null>;
   scrimRef: RefObject<HTMLDivElement | null>;
@@ -2261,7 +2353,7 @@ export function useEdgeSwipeBack(opts: EdgeBackOpts): void {
  * foot. During a live session the foot also carries the in-session chip (W-06).
  * Hidden under 720px.
  */
-function Rail(props: {
+export function GymRail(props: {
   tab: Tab;
   overlayOpen: boolean;
   goTab: (t: Tab) => void;
@@ -2278,80 +2370,77 @@ function Rail(props: {
 }) {
   const { t } = useT();
   const live = props.openWorkoutStartedAt !== undefined;
-
   const role = getRole();
   const nav = tabsForRole(role, t);
+  const { unread: trainerUnread, unreadLabel: clientSharedLabel } = useClientShared();
 
-  const dotColor =
-    props.syncStatus === 'synced'
-      ? 'var(--color-ok)'
-      : props.syncStatus === 'offline' || props.syncStatus === 'failed'
-        ? 'var(--color-danger)'
-        : 'var(--color-neutral-600)';
-  const username = getUsername() ?? '';
+  // A warning dot on the avatar only while offline / sync failed: presence ("online") is implied
+  // by the app being open, so no green dot.
+  const warnColor =
+    props.syncStatus === 'offline' || props.syncStatus === 'failed'
+      ? 'var(--color-danger)'
+      : undefined;
+  const conditions = useActiveConditions();
 
   return (
-    <KitRail
-      brand={<SpotterMark size={40} variant="sidebar" />}
-      foot={
-        <>
-          {/* Mastery sits at the bottom of the rail, above notifications. */}
-          <ConditionsShield variant="rail" onOpen={props.onOpenHealth} />
-          <div className="rail-mastery">
-            <Suspense fallback={null}>
-              <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />
-            </Suspense>
-          </div>
-          {/* Notifications — the milestone feed, reachable from every app. */}
-          <RailItem
-            icon="bell"
-            fill
-            ariaLabel={t.notifTitle}
-            badge={
-              props.notifUnread > 0 ? (props.notifUnread > 9 ? '9+' : props.notifUnread) : null
-            }
-            onClick={props.onOpenNotifications}
-          />
-          {/* Apps — switch between Gym / Apex / Nutrition. */}
-          <RailItem
-            icon="squares-four"
-            className="rail-switch"
-            ariaLabel={t.shellSwitch}
-            onClick={props.onOpenShell}
-          />
-          {role === 'admin' && (
-            <RailItem icon="gear" label={t.settingsTitle} onClick={props.onOpenSettings} />
-          )}
-          <div className="rail-lang">
-            <LanguageSelector />
-          </div>
-          <Button
-            className="account-chip"
-            variant="ghost"
-            onClick={props.onOpenProfile}
-            aria-label={username}
-            title={username}
-          >
-            <span className="account-avatar">
-              <Avatar userId={currentUid() ?? undefined} name={username} hasPhoto size={34} />
-              <span className="dot" style={{ background: dotColor }} />
-            </span>
-          </Button>
-        </>
+    <AppRail
+      app="gym"
+      nav={nav.map((x) => ({
+        ...x,
+        live: x.id === 'today' && live,
+        ...(x.id === 'today' && trainerUnread > 0
+          ? { count: trainerUnread, countLabel: clientSharedLabel || String(trainerUnread) }
+          : {}),
+      }))}
+      activeId={
+        props.overlayOpen ? null : (nav.find((x) => navActive(x.id, props.tab))?.id ?? null)
       }
-    >
-      {nav.map((x) => (
-        <RailItem
-          key={x.id}
-          icon={x.icon}
-          label={x.label}
-          active={navActive(x.id, props.tab) && !props.overlayOpen}
-          live={x.id === 'today' && live}
-          onClick={() => props.goTab(x.id)}
-        />
-      ))}
-      {/* Start lives in Today's side panel on desktop — no rail button. */}
-    </KitRail>
+      onNav={(id) => props.goTab(id as Tab)}
+      onOpenShell={props.onOpenShell}
+      onOpenNotifications={props.onOpenNotifications}
+      onOpenProfile={props.onOpenProfile}
+      notifUnread={props.notifUnread}
+      syncColor={warnColor}
+      // Foot extras, top to bottom; the bottom-most collapse into More first.
+      extrasBefore={[
+        ...(conditions > 0
+          ? [
+              {
+                id: 'conditions',
+                label: t.cndTodayTitle(conditions),
+                icon: 'shield-check',
+                onSelect: props.onOpenHealth,
+                node: <ConditionsShield variant="rail" onOpen={props.onOpenHealth} />,
+              },
+            ]
+          : []),
+        {
+          id: 'mastery',
+          label: t.masteryTitle,
+          icon: 'medal',
+          onSelect: props.onOpenMastery,
+          node: (
+            <div className="rail-mastery">
+              <Suspense fallback={null}>
+                <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />
+              </Suspense>
+            </div>
+          ),
+        },
+      ]}
+      extrasAfter={
+        role === 'admin'
+          ? [
+              {
+                id: 'settings',
+                label: t.settingsTitle,
+                icon: 'gear',
+                onSelect: props.onOpenSettings,
+              },
+            ]
+          : []
+      }
+    />
   );
 }
 

@@ -45,12 +45,12 @@
 }
 .uisnack-s {
   display: block;
-  font-size: var(--fs-12);
+  font-size: var(--fs-min);
   font-weight: 400;
   color: var(--color-text-muted);
 }
 .uisnack-act {
-  height: var(--tap-min);
+  height: var(--ctl-h-md);
   padding: 0 var(--sp-4);
   border: 0;
   border-radius: var(--r-10);

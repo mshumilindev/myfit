@@ -1,0 +1,236 @@
+/* Coach Today + Decision. Widths come from the layout kit (frame variables); tokens only. */
+.td {
+  min-width: 0;
+}
+.td-notices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.td-notices:empty {
+  display: none;
+}
+.td-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-12);
+  min-height: var(--co-row-min);
+}
+@media (max-width: 767px) {
+  .td-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+.td-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+@media (max-width: 767px) {
+  /* phone: the two pills sit at the bottom of the list in the lab; here they stay under the switch */
+  .td-pills {
+    order: 2;
+  }
+}
+
+.td-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-24);
+  min-width: 0;
+}
+.td-detail {
+  min-width: 0;
+  position: sticky;
+  top: var(--co-gut);
+}
+.td-sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  min-width: 0;
+}
+.td-rows,
+.td-reqs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.td-reqs {
+  gap: var(--s-12);
+}
+.td-digest {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-8);
+}
+.td-digest .td-rows {
+  align-self: stretch;
+}
+.td-note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  line-height: 1.4;
+}
+.td-clear-acts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-12);
+}
+.td-others {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.td-others li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-4);
+}
+.td-others-d {
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+}
+
+/* loading skeleton: same shape as the final layout */
+.td-loading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--co-gut);
+}
+@media (min-width: 768px) {
+  .td-loading {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: start;
+  }
+}
+.td-loading-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+
+/* Decision screen */
+.td-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-24);
+  min-width: 0;
+}
+.td-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+  margin: 0 0 var(--s-12);
+  padding: 0;
+  list-style: none;
+}
+.td-dec-title {
+  margin: 0;
+  font-size: var(--fs-26);
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.td-dec-body {
+  margin: var(--s-12) 0 0;
+  max-width: 62ch;
+  color: var(--color-text-muted);
+  font-size: var(--fs-15);
+  line-height: 1.5;
+}
+.td-msg-note {
+  margin-top: var(--s-8);
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.td-edit {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-8);
+}
+.td-note-h,
+.td-note-s {
+  display: block;
+}
+.td-note-h {
+  font-size: var(--fs-14);
+}
+.td-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  padding-top: var(--s-16);
+  border-top: var(--co-hair) solid var(--color-divider);
+}
+.td-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-12);
+}
+@media (max-width: 767px) {
+  /* phone: the action row stays reachable above the tab bar */
+  .td-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: var(--z-20);
+    margin: 0 calc(-1 * var(--co-pad));
+    padding: var(--s-12) var(--co-pad);
+    background: var(--color-bg);
+  }
+}
+.td-dismiss-q {
+  margin: 0 0 var(--s-12);
+  font-size: var(--fs-15);
+}
+.td-dismiss-act {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-12);
+  margin-top: var(--s-16);
+}
+.td-hint {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.td-ev-h {
+  margin: 0 0 var(--s-4);
+  font-size: var(--fs-20);
+  font-weight: 600;
+}
+.td-ev-sub {
+  margin: 0 0 var(--s-12);
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+}
+.td-ev-note {
+  margin: var(--s-12) 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.45;
+}
+.td-facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  margin-top: var(--s-16);
+}
+.td-similar {
+  margin-top: var(--s-16);
+}

@@ -9,7 +9,8 @@
  * Which tabs show depends on role, matching the old in-Gym menu: a trainer sees
  * Clients + Me, an admin sees Users + Me, a member just Me.
  */
-import { TabBar } from '../components/ui/TabBar';
+import { SuiteTabBar } from '../components/SuiteTabBar';
+import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
 import { BrandBar, BellButton } from '../components/ui/BrandBar';
 import { useState } from 'react';
 import { useT } from '../i18n';
@@ -57,6 +58,7 @@ export function RosterApp({
   onNotifMarkAll: () => void;
 }) {
   const { t } = useT();
+  const desktop = useMinWidth(APP_BREAKPOINT);
   // A specific person's profile, opened from the Clients / Users list.
   const [profileId, setProfileId] = useState<string | null>(null);
 
@@ -74,15 +76,18 @@ export function RosterApp({
 
   return (
     <div className="app-roster apex-app">
-      <AppRail
-        nav={nav}
-        activeId={tab === 'feed' ? null : tab}
-        onNav={(id) => openTab(id as RosterTab)}
-        onOpenShell={onOpenShell}
-        onOpenNotifications={() => openTab('feed')}
-        onOpenProfile={() => openTab('me')}
-        notifUnread={notifUnread}
-      />
+      {desktop && (
+        <AppRail
+          app="roster"
+          nav={nav}
+          activeId={tab === 'feed' ? null : tab}
+          onNav={(id) => openTab(id as RosterTab)}
+          onOpenShell={onOpenShell}
+          onOpenNotifications={() => openTab('feed')}
+          onOpenProfile={() => openTab('me')}
+          notifUnread={notifUnread}
+        />
+      )}
       <div className="apex-col">
         <BrandBar
           header
@@ -129,13 +134,17 @@ export function RosterApp({
           )}
         </div>
 
-        <TabBar
-          tabs
-          activeFill
-          items={nav.map((x) => ({ ...x, active: tab === x.id }))}
-          onSelect={(id) => openTab(id)}
-          apps={{ label: t.appsTab, ariaLabel: t.shellSwitch, onClick: onOpenShell }}
-        />
+        {!desktop && (
+          <SuiteTabBar
+            app="roster"
+            tabs
+            activeFill
+            items={nav.map((x) => ({ ...x, active: tab === x.id }))}
+            onSelect={(id) => openTab(id)}
+            onOpenShell={onOpenShell}
+            onOpenProfile={() => openTab('me')}
+          />
+        )}
       </div>
     </div>
   );

@@ -19,6 +19,9 @@
  *   apex / learn / atlas — sub-app families (Today widgets)
  *   gym / people — fixed identity of the Gym and People apps (app switcher); unlike
  *   `accent` they do not follow the active app's accent re-skin
+ *   coach    tourmaline — fixed identity of the Coach app (launcher tile, chips); not the accent re-skin
+ *   share    blue — a shared item in the Coach chat (program, workout, exercise)
+ *   note     brass tint — a trainer note in the Coach chat
  *   neutral  greys
  */
 import './tones.css';
@@ -46,7 +49,10 @@ export type Tone =
   | 'learn'
   | 'atlas'
   | 'gym'
-  | 'people';
+  | 'people'
+  | 'share'
+  | 'note'
+  | 'coach';
 
 export const TONES: Tone[] = [
   'neutral',
@@ -69,6 +75,9 @@ export const TONES: Tone[] = [
   'atlas',
   'gym',
   'people',
+  'share',
+  'note',
+  'coach',
 ];
 
 /** The class that binds --t-* to a family. */

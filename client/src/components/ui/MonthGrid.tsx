@@ -19,7 +19,15 @@ import { toneClass, type Tone } from './tones';
 import './MonthGrid.css';
 
 /** Small markers under a day (sm size). */
-export type MonthMarker = 'workout' | 'planned' | 'activity' | 'sleep' | 'weight' | 'pr';
+export type MonthMarker =
+  | 'workout'
+  | 'planned'
+  | 'activity'
+  | 'sleep'
+  | 'weight'
+  | 'pr'
+  /** A session with the member's trainer (tone people). */
+  | 'trainer';
 
 export interface MonthGridChip {
   label: string;
@@ -173,8 +181,9 @@ export function MonthGrid({
     >
       <div className="uimg-row uimg-heads" role="row">
         {heads.map((h) => (
-          <span key={h.long} className="uimg-wd" role="columnheader" aria-label={h.long}>
+          <span key={h.long} className="uimg-wd" role="columnheader">
             <span aria-hidden="true">{h.short}</span>
+            <span className="sr-only">{h.long}</span>
           </span>
         ))}
       </div>

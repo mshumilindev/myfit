@@ -68,7 +68,7 @@
   gap: var(--s-10);
 }
 .wlib-screen {
-  padding: 16px var(--gutter, 20px);
+  padding: var(--s-16) var(--gutter, 20px);
 }
 .wlib-top {
   display: flex;

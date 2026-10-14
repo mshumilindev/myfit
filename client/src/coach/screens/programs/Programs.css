@@ -1,0 +1,24 @@
+/* Programs list: layout only. */
+.pgm-search {
+  margin-bottom: var(--s-16);
+}
+.pgm-col {
+  min-width: 0;
+}
+.pgm-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+}
+.pgm-name {
+  margin: 0;
+  font-size: var(--fs-20);
+}
+.pgm-follow {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+.pgm-hint {
+  margin: 0 0 var(--s-12);
+  color: var(--color-text-muted);
+}

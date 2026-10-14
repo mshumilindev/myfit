@@ -1,26 +1,40 @@
+/* Segmented — the one switch control. Every value comes from the `--seg-*` / `--segb-*` / `--segs-*` tokens (styles.css),
+   so a re-theme is a token edit, never a rule edit. Concentric radii: track radius = segment radius + track padding. */
 .uiseg {
+  /* --ctl-h (styles.css, per size) is the OUTER height: a track is --ctl-h tall, its selected plate
+     --ctl-h minus the track padding on both sides; the separate-button variant is --ctl-h per button. */
+  --seg-h: var(--ctl-h);
   display: grid;
   min-width: 0;
 }
 .uiseg-opt {
+  box-sizing: border-box;
   min-width: 0;
-  height: var(--tap-min);
-  padding: 0 var(--sp-1);
+  height: var(--seg-h);
+  padding: 0 var(--seg-px);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--s-6);
-  font: 500 var(--fs-14) var(--font);
+  border: 0;
+  border-radius: var(--seg-r-inner);
+  font: 500 var(--ctl-fs) / 1 var(--font);
   cursor: pointer;
+}
+.uiseg.is-dense .uiseg-opt {
+  font-size: var(--ctl-fs-sm);
 }
 .uiseg-l {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* A line box taller than the glyphs: overflow:hidden (for the ellipsis) must not cut descenders (y, g, p). */
+  line-height: var(--ctl-lh);
+  padding-block: 0.1em;
 }
 .uiseg .uiseg-opt .ui-icon {
-  font-size: var(--fs-16);
+  font-size: var(--ctl-icon);
   flex-shrink: 0;
 }
 .uiseg-opt:disabled {
@@ -32,61 +46,60 @@
   outline-offset: -2px;
 }
 .uiseg-opt.is-compact {
-  font-size: var(--fs-12);
+  font-size: var(--fs-min);
 }
-.uiseg--sm .uiseg-opt {
-  height: 36px;
-  font-size: var(--fs-13);
+/* Count chip: after the label, never shrinks away, centred on the label's line. */
+.uiseg-opt .uiseg-badge {
+  flex: none;
+  align-self: center;
 }
 
-/* track: one grey trough, the selected segment raised */
+/* track: one recessed track, the selected segment a tinted plate with the SAME inset on every side */
 .uiseg--track {
-  background: var(--color-tile);
-  border-radius: var(--radius-xl);
-  padding: var(--s-4);
-  gap: var(--s-4);
+  background: var(--seg-bg);
+  box-shadow: inset 0 0 0 1px var(--seg-ring);
+  border-radius: var(--seg-r-outer);
+  box-sizing: border-box;
+  height: var(--seg-h);
+  min-height: var(--seg-h);
+  padding: var(--seg-pad);
+  gap: var(--seg-gap);
 }
 .uiseg--track .uiseg-opt {
-  border: 0;
-  border-radius: var(--r-10);
+  height: calc(var(--seg-h) - 2 * var(--seg-pad));
   background: transparent;
-  color: var(--color-text-muted);
+  color: var(--seg-fg);
 }
 .uiseg--track .uiseg-opt.is-on {
-  background: var(--color-border);
-  color: var(--color-text);
-  font-weight: 600;
+  background: color-mix(in srgb, var(--t-base) var(--seg-on-mix), var(--seg-on-base));
+  color: var(--t-text);
+  font-weight: var(--seg-on-weight);
 }
 
-/* buttons: separate outlined buttons, the selected one toned */
+/* buttons: separate outlined pills, the selected one toned */
 .uiseg--buttons {
   gap: var(--sp-2);
-}
-.uiseg--buttons .uiseg-opt {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-tile);
-  color: var(--color-text);
 }
 .uiseg--buttons.is-dense {
   gap: var(--s-6);
 }
-.uiseg.is-dense .uiseg-opt {
-  padding: 0 var(--s-2);
+.uiseg--buttons .uiseg-opt {
+  border-radius: var(--segb-r);
+  background: var(--segb-bg);
+  box-shadow: inset 0 0 0 1px var(--segb-ring);
+  color: var(--color-text);
 }
 .uiseg--buttons .uiseg-opt:hover:not(:disabled):not(.is-on) {
-  border-color: var(--color-text-faint);
+  box-shadow: inset 0 0 0 1px var(--color-text-faint);
 }
 .uiseg--buttons .uiseg-opt.is-on {
-  border-color: var(--t-base);
-  background: var(--t-tint);
-  color: var(--t-base);
-  font-weight: 600;
+  background: color-mix(in srgb, var(--t-base) var(--segb-on-mix), var(--segb-on-base));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t-base) var(--segb-on-ring-mix), transparent);
+  color: var(--t-text);
+  font-weight: var(--seg-on-weight);
 }
-@media (min-width: 720px) and (pointer: fine) {
-  .uiseg--buttons .uiseg-opt {
-    height: 40px;
-  }
+.uiseg.is-dense .uiseg-opt {
+  padding: 0 var(--s-2);
 }
 
 /* stacked: icon above a short label (a row of small tiles) */
@@ -95,10 +108,23 @@
   flex-direction: column;
   gap: var(--s-6);
   padding: var(--s-12) var(--s-2);
-  font-size: var(--fs-11);
+  font-size: var(--fs-min);
+  border-radius: var(--segs-r);
+  background: var(--segs-bg);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+  color: var(--color-text-muted);
 }
 .uiseg.uiseg--stack .uiseg-opt .ui-icon {
   font-size: var(--fs-22);
+}
+.uiseg.uiseg--stack .uiseg-opt.is-on {
+  background: var(--t-tint);
+  box-shadow: inset 0 0 0 1.5px var(--t-base);
+  color: var(--t-text);
+  font-weight: 700;
+}
+.uiseg.uiseg--stack .uiseg-opt.is-on .ui-icon {
+  color: var(--t-base);
 }
 
 /* hug: chip-like row — each option is as wide as its label plus even padding. */
@@ -108,5 +134,34 @@
   justify-content: start;
 }
 .uiseg--hug .uiseg-opt {
+  padding: 0 var(--s-16);
+}
+
+/* fill: equal-width segments across the container, hug or not. */
+.uiseg--fill {
+  width: 100%;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  justify-content: stretch;
+}
+.uiseg--fill .uiseg-opt,
+.uiseg--fill.uiseg--hug .uiseg-opt {
+  padding: 0 var(--seg-px);
+}
+
+/* scroll: more options than the width allows — one row that scrolls sideways (no wrapping, no squashing). */
+.uiseg--scroll {
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  justify-content: start;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  max-width: 100%;
+}
+.uiseg--scroll::-webkit-scrollbar {
+  display: none;
+}
+.uiseg--scroll .uiseg-opt {
   padding: 0 var(--s-16);
 }

@@ -15,6 +15,7 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { db } from './lib';
+import { CHAT_PUSH_TAG, isQuietNow } from './coach/pushPolicy';
 
 export interface PushMessage {
   title: string;
@@ -39,7 +40,13 @@ function clip(v: unknown, max: number): string {
 export async function sendToUser(uid: string, msg: PushMessage): Promise<number> {
   const devices = await db.collection('users').doc(uid).collection('push').get();
   if (devices.empty) return 0;
-  const tokens = devices.docs.map((d) => String(d.get('token') ?? '')).filter(Boolean);
+  // Quiet hours (Q-17): a trainer-chat push is held back on a device inside its own window (the message stays unread)
+  const held = msg.tag?.startsWith(CHAT_PUSH_TAG) === true;
+  const now = Date.now();
+  const tokens = devices.docs
+    .filter((d) => !held || !isQuietNow(d.get('quiet'), d.get('tz'), now))
+    .map((d) => String(d.get('token') ?? ''))
+    .filter(Boolean);
   if (tokens.length === 0) return 0;
   const data: Record<string, string> = { title: clip(msg.title, 120), body: clip(msg.body, 400) };
   if (msg.tag) data.tag = clip(msg.tag, 60);

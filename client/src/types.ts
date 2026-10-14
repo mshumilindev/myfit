@@ -103,6 +103,8 @@ export interface Exercise {
   plannedSets?: number | null;
   plannedReps?: number | null;
   plannedDurationMin?: number | null;
+  /** The coach plan row this exercise was started from (program item id): its sealed target is shown above the sets. */
+  planItemId?: string;
   equipment?: string[];
   /** Fine equipment picked for this exercise instance (equipmentCatalog ids) —
    *  a combination is allowed (straps + bar + belt, a band, etc.). Absent =

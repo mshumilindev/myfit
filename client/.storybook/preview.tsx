@@ -5,6 +5,7 @@ import '../src/styles.css';
 import '../src/redesign.css';
 import '../src/glass.css';
 import { LOCALE_IDS, setLocale, type LocaleId } from '../src/i18n';
+import '../src/coach/__fixtures__/register';
 
 /** Toolbar locale (en/uk/pl/lt/et) → the app's own i18n switch. */
 const withLocale: Decorator = (Story, ctx) => {

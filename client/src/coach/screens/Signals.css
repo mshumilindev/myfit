@@ -1,0 +1,84 @@
+/* Signals screen. Tokens only. */
+.sg-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-8);
+  max-width: 32em;
+}
+@media (max-width: 767px) {
+  .sg-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.sg-list {
+  min-width: 0;
+}
+.sg-det {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  min-width: 0;
+}
+.sg-det-who {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+.sg-det-who:hover b {
+  text-decoration: underline;
+}
+.sg-det-who span {
+  display: flex;
+  flex-direction: column;
+}
+.sg-det-who small,
+.sg-det-tags small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.sg-det-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-8);
+}
+.sg-det-t {
+  margin: 0;
+  font-size: var(--fs-22);
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.sg-det-b {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-15);
+  line-height: 1.45;
+}
+.sg-det-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.sg-ev {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  padding-top: var(--s-12);
+  border-top: var(--co-hair) solid var(--color-divider);
+}
+.sg-ev--chart {
+  padding-top: 0;
+  border-top: 0;
+}
+.sg-ev-h {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+.sg-ev-none {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}

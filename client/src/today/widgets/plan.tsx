@@ -351,6 +351,7 @@ function nextPlan(ctx: WidgetCtx): NextPlan | null {
 function presc(i: PlanItem, locale: LocaleId): string {
   const s = ps(locale);
   if (i.kind !== 'strength') return s.minN(10);
+  if (i.sets <= 0) return '';
   const base = `${i.sets}×${i.reps || '—'}`;
   return i.lastKg ? `${base} · ${s.lastKg(i.lastKg)}` : base;
 }
@@ -445,11 +446,11 @@ const nextWorkout: WidgetDef = {
         >
           <div className="ul-flex ug-6" style={{ overflow: 'hidden' }}>
             {np.items.slice(0, 3).map((i) => (
-              <Chip key={i.name} size="sm">
+              <Chip key={i.name} size="xs">
                 {exName(i.name, locale)}
               </Chip>
             ))}
-            {nEx > 3 && <Chip size="sm">{`+${nEx - 3}`}</Chip>}
+            {nEx > 3 && <Chip size="xs">{`+${nEx - 3}`}</Chip>}
           </div>
         </Widget>
       );
@@ -665,7 +666,7 @@ function QuickBuilder({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       {lenSeg}
       <div className="ul-flex ug-6 ul-wrap">
         {FOCI.map((f) => (
-          <Chip key={f} size="sm" selected={f === prefs.focus} onClick={() => set({ focus: f })}>
+          <Chip key={f} size="xs" selected={f === prefs.focus} onClick={() => set({ focus: f })}>
             {s.focus[f]}
           </Chip>
         ))}
@@ -1684,7 +1685,7 @@ const lastSession: WidgetDef = {
           onClick={open}
           trailing={
             prs > 0 ? (
-              <Chip size="sm" tone="accent">
+              <Chip size="xs" tone="accent">
                 {s.prN(prs)}
               </Chip>
             ) : undefined
@@ -1857,7 +1858,7 @@ const lastMuscles: WidgetDef = {
         </div>
         <div className="ul-flex ug-6 ul-wrap">
           {work.slice(0, 5).map((m) => (
-            <Chip key={m.muscle} size="sm" tone={m.primary ? 'accent' : 'neutral'}>
+            <Chip key={m.muscle} size="xs" tone={m.primary ? 'accent' : 'neutral'}>
               {`${muscleName(t, m.muscle)} ${Math.round(m.sets)}`}
             </Chip>
           ))}

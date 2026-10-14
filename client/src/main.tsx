@@ -9,9 +9,10 @@ import { App } from './App';
 import { getLocale } from './i18n';
 import { startAutoUpdate, markUpdateReady } from './pwaUpdate';
 import { lockShellHeight } from './viewportFit';
-import { ServerBusyOverlay } from './ui';
+import { SyncStatusHost } from './components/SyncStatusHost';
 import { LavaBackground } from './components/LavaBackground';
 import { initMotion } from './motion';
+import { runPendingWipe } from './deviceWipe';
 
 document.documentElement.lang = getLocale();
 lockShellHeight();
@@ -26,10 +27,15 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <LavaBackground />
-    <App />
-    <ServerBusyOverlay />
-  </StrictMode>,
-);
+/* A pending wipe of Firestore's offline cache (sign-out, relationship end) runs before the SDK opens its database. */
+void runPendingWipe()
+  .catch(() => false)
+  .then(() =>
+    createRoot(document.getElementById('root')!).render(
+      <StrictMode>
+        <LavaBackground />
+        <App />
+        <SyncStatusHost />
+      </StrictMode>,
+    ),
+  );

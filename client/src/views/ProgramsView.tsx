@@ -5,10 +5,11 @@
  *
  * Home: "‹ Overview", My program (the one I'm on), programs I created (with the
  * avatars of who is on each — tap them to open the members drawer), Import CSV,
- * New program. A program opens in the builder (./programs/ProgramBuilder).
+ * New program. A program opens in the editor page (./programs/ProgramPage).
  */
+import { ClientProgramExtrasLazy } from '../coach/client/lazy';
 import { openActivities } from './programs/activitiesVault';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { ListRow } from '../components/ui/GroupedList';
@@ -25,9 +26,15 @@ import { knownExercises } from '../store';
 import { Icon } from '../ui';
 import { RowListSkeleton } from '../components/ui/Skeletons';
 import { ProgramCsvDialog } from './ProgramCsvDialog';
-import { ProgramBuilder, useLibraryNames, type BuilderStep } from './programs/ProgramBuilder';
+import { ProgramPage, useLibraryNames } from './programs/ProgramPage';
 import { AssigneesSheet, type MemberAssignment } from './programs/AssigneesSheet';
 import { AvatarStack } from './programs/pieces';
+import {
+  PROGRAM_NEW_HASH,
+  parseProgramsHash,
+  programEditHash,
+  programsHash,
+} from './programs/programsRoute';
 import {
   freshProgram,
   normalizeItems,
@@ -41,7 +48,7 @@ import {
 } from './programs/model';
 import './programs/programs.css';
 
-type Open = { program: Program; saved: boolean; step: BuilderStep; readOnly?: boolean };
+type Open = { program: Program; saved: boolean; readOnly?: boolean };
 
 export function ProgramsView({
   shell,
@@ -63,25 +70,60 @@ export function ProgramsView({
   const [showArchived, setShowArchived] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
   const [membersOf, setMembersOf] = useState<Program | null>(null);
-  const [open, setOpen] = useState<Open | null>(() => {
-    // "Suggest a program" (Today) hands over a prefilled draft, taken once.
+  // The editor lives under the URL: `#/programs/<id>/edit` (a saved program) or `#/programs/new` (not saved yet). The hash
+  // is the source of truth, so Back, reload and shared links all land on the same page.
+  const [hash, setHash] = useState(() => window.location.hash);
+  useEffect(() => {
+    const on = () => setHash(window.location.hash);
+    window.addEventListener('hashchange', on);
+    return () => window.removeEventListener('hashchange', on);
+  }, []);
+  /** The unsaved program behind `#/programs/new`: blank, an import, or "Suggest a program" (taken once). */
+  const [newDraft, setNewDraft] = useState<Program>(() => {
     const seed = peekProgramSeed();
-    if (!seed) return null;
+    if (!seed) return freshProgram('');
     return {
-      saved: false,
-      step: 'week',
-      program: {
-        ...freshProgram(seed.name),
-        weeks: seed.weeks,
-        dayNames: seed.dayNames,
-        targetMuscles: sanitizeTargetMuscles(seed.targetMuscles),
-        items: normalizeItems(seed.items as unknown as ProgramItem[]),
-      },
+      ...freshProgram(seed.name),
+      weeks: seed.weeks,
+      dayNames: seed.dayNames,
+      targetMuscles: sanitizeTargetMuscles(seed.targetMuscles),
+      items: normalizeItems(seed.items as unknown as ProgramItem[]),
     };
   });
+  /** The program just saved from `#/programs/new`: the page keeps running while the list reloads. */
+  const [justSaved, setJustSaved] = useState<Program | null>(null);
+  const seeded = useRef(false);
+  /** True when this view pushed the editor's history entry (Back pops it; otherwise Back replaces it with the list). */
+  const pushed = useRef(false);
   useEffect(() => {
-    clearProgramSeed(peekProgramSeed());
+    const seed = peekProgramSeed();
+    if (seed && !seeded.current) {
+      seeded.current = true;
+      pushed.current = true;
+      window.location.hash = PROGRAM_NEW_HASH;
+    }
+    clearProgramSeed(seed);
   }, []);
+
+  const parsedRoute = parseProgramsHash(hash);
+
+  function goEditor(r: Parameters<typeof programsHash>[0]) {
+    pushed.current = true;
+    window.location.hash = programsHash(r);
+  }
+  function openNew(draft: Program) {
+    setNewDraft(draft);
+    goEditor({ kind: 'new' });
+  }
+  function closeEditor() {
+    if (pushed.current) {
+      pushed.current = false;
+      window.history.back();
+    } else {
+      window.history.replaceState(null, '', '#/programs');
+      setHash('#/programs');
+    }
+  }
 
   const loadPrograms = useCallback(() => {
     const uid = currentUid();
@@ -194,7 +236,7 @@ export function ProgramsView({
       draft.dayNames[String(d)] = t.weekDayNames[d - 1] ?? t.progDay(d);
     draft.items = normalizeItems(incoming);
     setCsvOpen(false);
-    setOpen({ program: draft, saved: false, step: 'basics' });
+    openNew(draft);
   }
 
   const membersDrawer = membersOf && (
@@ -208,28 +250,59 @@ export function ProgramsView({
     />
   );
 
-  // --- builder ----------------------------------------------------------------------
+  // --- editor page -------------------------------------------------------------------
+  const loaded = programs !== null && mineLoaded;
+  let open: Open | null = null;
+  if (parsedRoute?.kind === 'new') open = { program: newDraft, saved: false };
+  else if (parsedRoute?.kind === 'edit') {
+    const own =
+      (programs ?? []).find((p) => p.id === parsedRoute.id) ??
+      (justSaved?.id === parsedRoute.id ? justSaved : undefined);
+    if (own) open = { program: own, saved: true };
+    else if (mine?.program.id === parsedRoute.id)
+      open = { program: mine.program, saved: true, readOnly: true };
+  }
+  // A link to a program that is not there (deleted, someone else's) goes back to the list instead of a blank page.
+  const missing = !!parsedRoute && !open && loaded;
+  useEffect(() => {
+    if (!missing) return;
+    window.history.replaceState(null, '', '#/programs');
+  }, [missing]);
+
+  if (parsedRoute && !open && !missing) {
+    return (
+      <div className="screen pg-page" aria-busy>
+        <RowListSkeleton rows={3} withAvatar={false} />
+      </div>
+    );
+  }
+
   if (open) {
     return (
       <>
-        <ProgramBuilder
+        <ProgramPage
           key={open.program.id}
           initial={open.program}
           saved={open.saved}
-          startStep={open.step}
           readOnly={open.readOnly}
           library={programs ?? []}
           shell={shell}
           onClose={() => {
-            setOpen(null);
+            closeEditor();
             loadPrograms();
           }}
-          onSaved={() => {
+          onSaved={(p) => {
+            // The first save of a new program turns `#/programs/new` into its own address.
+            if (parsedRoute?.kind === 'new') {
+              setJustSaved(p);
+              window.history.replaceState(null, '', programEditHash(p.id));
+              setHash(window.location.hash);
+            }
             loadPrograms();
             loadMine();
           }}
           onDeleted={() => {
-            setOpen(null);
+            closeEditor();
             loadPrograms();
             loadAssignments();
           }}
@@ -271,13 +344,7 @@ export function ProgramsView({
         tone="accent"
         emphasis="hero"
         className="pg-card pg-mine"
-        onClick={() =>
-          setOpen(
-            authored
-              ? { program: authored, saved: true, step: 'review' }
-              : { program: p, saved: true, step: 'review', readOnly: true },
-          )
-        }
+        onClick={() => goEditor({ kind: 'edit', id: (authored ?? p).id })}
       >
         <span className="pg-mine-top">
           <span className="pg-status active">
@@ -302,7 +369,7 @@ export function ProgramsView({
 
   return (
     <div className="screen pg-page pg-home">
-      <div className="pg-home-head">
+      <div className="pg-home-head ctl-row--md">
         <ProgramsTabs active="programs" onSelect={(peer) => onProgramsTab?.(peer)} />
         <h2 className="pg-h1">{t.progTitle}</h2>
         <span className="grow" />
@@ -310,10 +377,7 @@ export function ProgramsView({
           <Button variant="secondary" icon="upload-simple" onClick={() => setCsvOpen(true)}>
             {t.csvImport}
           </Button>
-          <Button
-            variant="primary"
-            onClick={() => setOpen({ program: freshProgram(''), saved: false, step: 'basics' })}
-          >
+          <Button variant="primary" onClick={() => openNew(freshProgram(''))}>
             <Icon name="plus" />
             {t.progNew}
           </Button>
@@ -323,6 +387,7 @@ export function ProgramsView({
       <section>
         <div className="pg-label">{t.pgMyProgram}</div>
         {myProgram}
+        <ClientProgramExtrasLazy />
       </section>
 
       <section>
@@ -348,7 +413,7 @@ export function ProgramsView({
                   label={p.name}
                   sub={lengthText(p)}
                   value={<span className={`pg-status ${p.status}`}>{statusText(p)}</span>}
-                  onClick={() => setOpen({ program: p, saved: true, step: 'review' })}
+                  onClick={() => goEditor({ kind: 'edit', id: p.id })}
                 />
                 {isCoach && (
                   <Button
@@ -383,10 +448,7 @@ export function ProgramsView({
         <Button variant="secondary" icon="upload-simple" onClick={() => setCsvOpen(true)}>
           {t.csvImport}
         </Button>
-        <Button
-          variant="primary"
-          onClick={() => setOpen({ program: freshProgram(''), saved: false, step: 'basics' })}
-        >
+        <Button variant="primary" onClick={() => openNew(freshProgram(''))}>
           <Icon name="plus" />
           {t.progNew}
         </Button>

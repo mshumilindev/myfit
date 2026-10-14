@@ -5,7 +5,7 @@
   background: var(--t-tint);
   box-shadow: inset 3px 0 0 var(--t-base);
   color: var(--t-text);
-  font-size: var(--fs-12);
+  font-size: var(--fs-min);
   line-height: 1.45;
 }
 /* Aligned with ListRow: same inset, tile column and tile-to-text gap as a row with an icon. */
@@ -47,4 +47,11 @@
 }
 .uinotice-b {
   margin-top: var(--s-10);
+}
+
+/* Nested in a card: no plate (R-KIT-25); the accent rule stays so the tone still reads. */
+.uinotice.uinotice--nested {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }

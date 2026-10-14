@@ -59,7 +59,7 @@ export function WeekPickerSheet(p: {
   const shownPage = Math.min(page, lastPage);
   const from = shownPage * size;
   return (
-    <Sheet onClose={p.onClose} className="uiwps">
+    <Sheet onClose={p.onClose} className="uiwps" label={p.title}>
       <div className="uiwps-head">
         <div className="uiwps-title">{p.title}</div>
         {p.hint && <div className="uiwps-hint">{p.hint}</div>}

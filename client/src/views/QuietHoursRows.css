@@ -1,0 +1,27 @@
+.qh-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  padding: var(--s-12) 0 var(--s-16);
+  box-shadow: inset 0 -1px 0 var(--color-divider);
+}
+.qh-sub {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.4;
+}
+.qh-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-12);
+}
+.qh-field {
+  display: flex;
+  flex: 1 1 140px;
+  flex-direction: column;
+  gap: var(--s-6);
+  min-width: 0;
+  font-size: var(--fs-13);
+  color: var(--color-text-muted);
+}

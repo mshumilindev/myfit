@@ -1,0 +1,51 @@
+/* Coach frame variables (R-FE-004). One definition, used by every Coach screen
+   through the layout kit (Page / Split / Inspector / Drawer): they are the only
+   width authority. Values are pinned to frame.ts by frame.test.ts.
+
+   >= 1280   rail 88, labelled      768..1279  rail 60, icons only     < 768  no rail
+   frame = viewport - rail - 2 * pad, capped at 1360:
+   1440 -> 1288, 1280 -> 1128, 1024 -> 900, 390 -> 358. */
+:root {
+  --co-rail: 0px;
+  --co-pad: 16px;
+  --co-gut: 16px;
+  --co-insp: 0px;
+  /* layout constants shared by Coach feature CSS (no raw px in feature files) */
+  --co-hair: 1px;
+  --co-ring: 2px;
+  --co-row-min: var(--s-48);
+  --co-basis-s: 160px;
+  --co-basis-m: 200px;
+  --co-basis-l: 220px;
+  --co-thumb: 96px;
+  --co-chip-min: 56px;
+  --co-chat-min: 420px;
+  --co-chat-max: 880px;
+  --co-chat-off: 220px;
+  --co-chat-off-thread: 200px;
+  --co-chat-off-phone: 160px;
+  --co-dock-h: 640px;
+  --co-dock-w: 0px;
+  --co-dock-inset: 0px;
+  --co-dock-clear: 0px;
+  --co-frame: min(1360px, calc(100vw - var(--co-rail) - 2 * var(--co-pad)));
+  /* screens made of a wide grid (Schedule week) may use more than --co-frame on large monitors */
+  --co-frame-wide: min(1760px, calc(100vw - var(--co-rail) - 2 * var(--co-pad)));
+}
+@media (min-width: 768px) {
+  :root {
+    --co-rail: 60px;
+    --co-pad: 32px;
+    --co-gut: 24px;
+    --co-insp: 340px;
+  }
+}
+@media (min-width: 1280px) {
+  :root {
+    --co-rail: 88px;
+    --co-insp: 416px;
+    --co-dock-w: 440px;
+    --co-dock-inset: 16px;
+    --co-dock-clear: 96px;
+  }
+}

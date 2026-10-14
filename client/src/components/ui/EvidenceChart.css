@@ -1,0 +1,80 @@
+.uievc {
+  margin: 0;
+  min-width: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+}
+.uievc--empty {
+  padding: var(--s-12) 0;
+}
+.uievc-plot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--s-12);
+}
+.uievc-y {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 28px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-align: right;
+}
+.uievc-area {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+}
+.uievc-svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.uievc-grid {
+  stroke: var(--color-divider);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.uievc-plan {
+  stroke: var(--color-text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  vector-effect: non-scaling-stroke;
+}
+.uievc-line {
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.uievc--flag .uievc-line {
+  stroke: var(--color-danger);
+}
+.uievc-last {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+}
+.uievc--flag .uievc-last {
+  background: var(--color-danger);
+}
+.uievc-x {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-12);
+  /* aligns with the plot: y gutter (28) + gap */
+  margin: var(--s-8) 0 0 calc(var(--s-28) + var(--s-12));
+}
+.uievc-unit {
+  margin: var(--s-4) 0 0 calc(var(--s-28) + var(--s-12));
+}
+.uievc-table {
+  margin-top: var(--s-16);
+}

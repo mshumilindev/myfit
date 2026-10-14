@@ -17,10 +17,15 @@ import {
   usernameRef,
   createNotice,
   recordAudit,
+  authAdmin,
   type UserDoc,
   type Role,
 } from './lib';
 import { listUserWorkouts, volume30d, lastSession, workoutStrengthStats } from './aggregates';
+import { aggregateWorkouts, cutWorkouts, legacyCut, type LegacyCut } from './coach/legacy';
+import { coachCallOptions, coachCtx, coachKv } from './coach/runtime';
+import * as lifecycle from './coach/lifecycle';
+import { CoachError } from './coach/service';
 
 const DAY = 24 * 60 * 60 * 1000;
 const INVITE_TTL = 7 * DAY;
@@ -358,38 +363,51 @@ export const adminEditUser = onCall(async (req) => {
 
 // --- trainer assignment -----------------------------------------------------
 
-export const adminAssignTrainer = onCall(async (req) => {
-  const { user: admin } = await requireRole(req, ['admin']);
+/**
+ * Rewired to the coachAccept relationship model (plan-security B-01, Q-19): no `users.trainerId` write, no relationship
+ * without the client's say. `trainerId: null` ends the active relationship; otherwise any previous relationship ends and
+ * the client receives a TARGETED invitation (`pending: true`, `inviteId`) that they accept and shape with their consent.
+ */
+export const adminAssignTrainer = onCall(coachCallOptions, async (req) => {
+  const { uid, user: admin } = await requireRole(req, ['admin']);
   const body = (req.data ?? {}) as Record<string, unknown>;
   const id = body.id;
-  const trainerId = (body.trainerId ?? null) as string | null;
   if (!isId(id)) throw new HttpsError('invalid-argument', 'id required');
   const u = await usersById(id);
   if (!u) throw new HttpsError('not-found', 'not found');
-  const assignedTrainerId = await validateTrainerAssignment(u.id, trainerId);
   const prevTrainer = u.trainerId;
-  await db
-    .collection('users')
-    .doc(u.id)
-    .update({ trainerId: assignedTrainerId, updatedAt: Date.now() });
+  let res;
+  try {
+    res = await lifecycle.adminAssignTrainer(
+      coachCtx(),
+      { uid, role: 'admin' },
+      { id, trainerId: body.trainerId ?? null },
+    );
+  } catch (e) {
+    if (e instanceof CoachError) throw new HttpsError(e.code, e.reason, { reason: e.reason });
+    throw e;
+  }
   const adminName = displayName(admin);
   const memberName = displayName(u);
-  if (assignedTrainerId !== null) {
-    const trRow = (await usersById(assignedTrainerId))!;
-    await createNotice(u.id, 'trainer-assigned', adminName, displayName(trRow));
-    await createNotice(assignedTrainerId, 'client-assigned', adminName, memberName);
-  } else {
+  if (res.ended && prevTrainer) {
     await createNotice(u.id, 'trainer-removed', adminName, null);
-  }
-  if (prevTrainer && prevTrainer !== assignedTrainerId) {
     await createNotice(prevTrainer, 'client-removed', adminName, memberName);
   }
-  return { ok: true };
+  return res;
 });
 
 // --- role / suspension ------------------------------------------------------
 
-export const adminChangeRole = onCall(async (req) => {
+/** Ends the user's refresh tokens; a user who never signed in has no auth record, which is fine. */
+async function revokeSessions(id: string): Promise<void> {
+  try {
+    await authAdmin.revokeRefreshTokens(id);
+  } catch (e) {
+    if ((e as { code?: string })?.code !== 'auth/user-not-found') throw e;
+  }
+}
+
+export const adminChangeRole = onCall(coachCallOptions, async (req) => {
   const { uid, user: admin } = await requireRole(req, ['admin']);
   const body = (req.data ?? {}) as Record<string, unknown>;
   const id = body.id;
@@ -399,8 +417,12 @@ export const adminChangeRole = onCall(async (req) => {
   if (!isId(id)) throw new HttpsError('invalid-argument', 'id required');
   if (id === uid) throw new HttpsError('invalid-argument', 'cannot change own role');
   const patch: Record<string, unknown> = { role, updatedAt: Date.now() };
-  // Demoting away from trainer leaves their clients; keep parity (no cascade).
   await db.collection('users').doc(id).update(patch);
+  // The role is baked into the custom token (rules read `request.auth.token.role`): drop every session so the old claim
+  // dies now, and a demoted trainer's relationships end in the same call (plan-security B-02). The rules also
+  // re-read the user document, so a token that survives anyway reaches nothing.
+  await revokeSessions(id);
+  if (role === 'member') await lifecycle.endTrainerRelationships(coachCtx(), id, 'admin');
   // If we just created the first admin ever via this path, remember it.
   if (role === 'admin')
     await db.collection('meta').doc('app').set({ hasAdmin: true }, { merge: true });
@@ -414,6 +436,9 @@ export const adminSuspend = onCall(async (req) => {
   if (!isId(id)) throw new HttpsError('invalid-argument', 'id required');
   if (id === uid) throw new HttpsError('invalid-argument', 'cannot suspend yourself');
   await db.collection('users').doc(id).update({ status: 'suspended', updatedAt: Date.now() });
+  // Sessions end now. Relationships are PAUSED, not ended: `requireRole`, coachRead and the rules (`freshCoach()`) refuse
+  // a suspended trainer at once, and everything resumes when an admin lifts the suspension.
+  await revokeSessions(id);
   return { ok: true };
 });
 
@@ -430,13 +455,18 @@ export const adminUnsuspend = onCall(async (req) => {
 
 // --- delete (cascade) -------------------------------------------------------
 
-export const adminDeleteUser = onCall(async (req) => {
+export const adminDeleteUser = onCall(coachCallOptions, async (req) => {
   const { uid } = await requireRole(req, ['admin']);
   const id = (req.data ?? {}).id as unknown;
   if (!isId(id)) throw new HttpsError('invalid-argument', 'id required');
   if (id === uid) throw new HttpsError('invalid-argument', 'cannot delete yourself');
   const u = await usersById(id);
   if (!u) throw new HttpsError('not-found', 'not found');
+
+  // Coaching first (plan-security B-08): relationships end with notices, then conversations, schedules, plans,
+  // `prg-*` programs, live docs, keys, keyring, requests, invites and the trainer's private notes about the user go.
+  await lifecycle.purgeAccountCoaching(coachCtx(), id);
+  await revokeSessions(id);
 
   let state = { batch: db.batch(), writes: 0 };
   // Detach trainees.
@@ -462,30 +492,40 @@ export const adminDeleteUser = onCall(async (req) => {
   await commitBatch(state.batch, state.writes);
   // Nuke the user doc + all subcollections (workouts/gyms/notices/audit/...).
   await db.recursiveDelete(db.collection('users').doc(id));
+  try {
+    await authAdmin.deleteUser(id); // the Auth record would otherwise outlive the account
+  } catch (e) {
+    if ((e as { code?: string })?.code !== 'auth/user-not-found') throw e;
+  }
   return { ok: true };
 });
 
 // --- audited detail + export ------------------------------------------------
 
-export async function memberDetail(u: UserDoc) {
-  const workouts = await listUserWorkouts(u.id, 40);
+export async function memberDetail(u: UserDoc, cut: LegacyCut | null = null) {
+  // Consent cut (coach/legacy.ts): totals `full` lists sessions, any totals level gives the aggregates, nothing else.
+  const everything = await listUserWorkouts(u.id, 40);
+  const workouts = aggregateWorkouts(cut, everything);
+  const listed = new Set(cutWorkouts(cut, everything).map((w) => w.id));
   const gymNames = new Map<string, string>();
   const gymsSnap = await db.collection('users').doc(u.id).collection('gyms').get();
   for (const g of gymsSnap.docs) gymNames.set(g.id, (g.data() as { name: string }).name);
 
-  const sessions = workouts.map((w) => {
-    const stats = workoutStrengthStats(w);
-    return {
-      id: w.id,
-      startedAt: w.startedAt,
-      finishedAt: w.finishedAt,
-      live: w.finishedAt === null,
-      sets: stats.sets,
-      volumeKg: stats.volumeKg,
-      gymName: w.gymId ? (gymNames.get(w.gymId) ?? null) : null,
-    };
-  });
-  const count30 = sessions.filter((s) => s.startedAt >= Date.now() - 30 * DAY);
+  const sessions = workouts
+    .filter((w) => listed.has(w.id))
+    .map((w) => {
+      const stats = workoutStrengthStats(w);
+      return {
+        id: w.id,
+        startedAt: w.startedAt,
+        finishedAt: w.finishedAt,
+        live: w.finishedAt === null,
+        sets: stats.sets,
+        volumeKg: stats.volumeKg,
+        gymName: w.gymId ? (gymNames.get(w.gymId) ?? null) : null,
+      };
+    });
+  const count30 = workouts.filter((w) => w.startedAt >= Date.now() - 30 * DAY);
 
   const notesSnap = await db.collection('users').doc(u.id).collection('trainerNotes').get();
   const notes = await Promise.all(
@@ -520,7 +560,7 @@ export const adminUserDetail = onCall(async (req) => {
   const u = await usersById(id);
   if (!u) throw new HttpsError('not-found', 'not found');
   await recordAudit(uid, u.id, 'detail');
-  return memberDetail(u);
+  return memberDetail(u, await legacyCut(coachKv, uid, u.id));
 });
 
 export const adminExportUser = onCall(async (req) => {
@@ -530,7 +570,11 @@ export const adminExportUser = onCall(async (req) => {
   const u = await usersById(id);
   if (!u) throw new HttpsError('not-found', 'not found');
   await recordAudit(uid, u.id, 'export');
-  const workouts = (await listUserWorkouts(u.id)).sort((a, b) => a.startedAt - b.startedAt);
+  // an admin exports a coached person's workouts only as their coach with the matching consent (coach/legacy.ts)
+  const cut = await legacyCut(coachKv, uid, u.id);
+  const workouts = cutWorkouts(cut, await listUserWorkouts(u.id)).sort(
+    (a, b) => a.startedAt - b.startedAt,
+  );
   const gyms = (await db.collection('users').doc(u.id).collection('gyms').get()).docs.map((d) => ({
     id: d.id,
     ...(d.data() as object),

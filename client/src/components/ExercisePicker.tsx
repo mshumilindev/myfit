@@ -634,7 +634,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
               return (
                 <Chip
                   key={s ?? 'all'}
-                  size="sm"
+                  size="xs"
                   className="xp-rail-sub"
                   selected={sub === s}
                   onClick={() => setSub(s)}
@@ -903,7 +903,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
               <div className="xp-label">{t.pickMuscleGroups}</div>
               {FAMILIES.map(railItem)}
             </nav>
-            <main className="xp-main">
+            <div className="xp-main">
               {doneStrip}
               {needle ? (
                 searchResults
@@ -940,7 +940,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
                   {grid(groupShown)}
                 </>
               )}
-            </main>
+            </div>
             <aside className="xp-preview">
               <div className="xp-label">{t.pickPreview}</div>
               {previewItem && (

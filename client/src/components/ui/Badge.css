@@ -1,0 +1,47 @@
+/* Badge — Spotter UI kit primitive (R-FE-010). Count pill: min 18px, 12px bold
+   (the only place 12px type is allowed), tabular figures, never clipped.
+   Doubled class = specificity 0,2,0 so a host's `span { font-size }` rule
+   (the tab bar's labels) cannot shrink it. Tokens only. */
+.uibadge.uibadge {
+  --badge-bg: var(--color-danger-solid);
+  --badge-ink: var(--color-on-solid);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--s-4);
+  border-radius: var(--r-pill);
+  background: var(--badge-bg);
+  color: var(--badge-ink);
+  font-family: var(--font);
+  font-size: var(--fs-12);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.uibadge.uibadge--md {
+  min-width: 20px;
+  height: 20px;
+}
+.uibadge.uibadge--accent {
+  --badge-bg: var(--color-accent);
+  --badge-ink: var(--c-201a0e);
+}
+.uibadge.uibadge--neutral {
+  --badge-bg: var(--color-neutral-700);
+  --badge-ink: var(--color-on-solid);
+}
+.uibadge.uibadge--corner {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  box-shadow: 0 0 0 2px var(--color-bg-elevated, var(--color-bg));
+}
+.uibadge.uibadge--inline {
+  margin-left: auto;
+}
