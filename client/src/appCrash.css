@@ -1,0 +1,27 @@
+/* The crash screen: theme tokens only (the stylesheet ships in the main bundle with the app). */
+.app-crash {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-16);
+  padding: var(--s-24);
+  text-align: center;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+.app-crash-title {
+  margin: 0;
+  font-size: var(--fs-20);
+}
+.app-crash-note {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+.app-crash-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-10);
+  min-width: 240px;
+}

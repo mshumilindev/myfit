@@ -886,9 +886,6 @@ html.theme-glass .sc-block.sc-st.sc-block--inprogress {
   .sc-toolbar-filters > .sc-gyms-chip,
   .sc-toolbar-filters > .sc-filters-btn {
     justify-content: center;
-    border-radius: var(--r-pill, 999px);
-    height: 100%;
-    aspect-ratio: auto;
   }
   .sc-toolbar-filters > .sc-gyms-chip {
     order: 3;

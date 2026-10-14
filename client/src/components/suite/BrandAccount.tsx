@@ -1,3 +1,4 @@
+import { Button } from '../ui/Button';
 import { useSuiteAccount, type SuiteApp, type SuiteIdentity } from './useSuiteAccount';
 import { requestOpenMore } from './openMore';
 
@@ -9,14 +10,14 @@ import { requestOpenMore } from './openMore';
 export function BrandAccount({ app, identity }: { app: SuiteApp; identity?: SuiteIdentity }) {
   const { title, avatar } = useSuiteAccount({ app, identity });
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
       className="uibrand-ctl uibrand-avatar"
       aria-label={title}
       aria-haspopup="dialog"
       onClick={requestOpenMore}
     >
       {avatar(34)}
-    </button>
+    </Button>
   );
 }

@@ -1,5 +1,7 @@
 import { Component, useEffect, useState, type ErrorInfo, type ReactNode } from 'react';
 import { resetApp, updateNow, type UpdateResult } from './pwaUpdate';
+import './appCrash.css';
+import { Button } from './components/ui/Button';
 
 /**
  * The app-wide safety net. It must work when the app itself is broken, so it does not use the i18n store, the kit or
@@ -112,46 +114,22 @@ function CrashScreen() {
     };
   }, []);
   return (
-    <div
-      role="alert"
-      style={{
-        minHeight: '100dvh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 16,
-        padding: 24,
-        textAlign: 'center',
-        color: '#f2f2f2',
-        background: '#121316',
-        font: '16px/1.4 system-ui, sans-serif',
-      }}
-    >
-      <h1 style={{ margin: 0, fontSize: 22 }}>{w.title}</h1>
-      <p style={{ margin: 0, opacity: 0.7 }}>
+    <div role="alert" className="app-crash">
+      <h1 className="app-crash-title">{w.title}</h1>
+      <p className="app-crash-note">
         {state === 'looking' ? w.looking : state === 'current' ? w.current : w.failed}
       </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 240 }}>
-        <button type="button" onClick={() => window.location.reload()} style={BTN}>
+      <div className="app-crash-actions">
+        <Button variant="secondary" onClick={() => window.location.reload()}>
           {w.reload}
-        </button>
-        <button type="button" onClick={() => void resetApp()} style={BTN}>
+        </Button>
+        <Button variant="secondary" onClick={() => void resetApp()}>
           {w.reset}
-        </button>
+        </Button>
       </div>
     </div>
   );
 }
-
-const BTN = {
-  padding: '12px 16px',
-  borderRadius: 12,
-  border: '1px solid rgba(255,255,255,0.2)',
-  background: 'rgba(255,255,255,0.08)',
-  color: 'inherit',
-  font: 'inherit',
-} as const;
 
 export class AppCrashBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
