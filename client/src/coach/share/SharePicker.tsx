@@ -154,6 +154,9 @@ function PickerBody({
   const setActiveId = (id: string | null) => setAct({ key: viewKey, id });
 
   useEffect(() => {
+    // On a phone, focusing the field opens the keyboard and the drawer jumps to full height before the user asked
+    // for it; there the drawer opens at its own height and the field is focused by a tap. Desktop focuses at once.
+    if (window.matchMedia?.('(max-width: 719px)').matches) return;
     field.current?.focus({ preventScroll: true });
   }, []);
 
