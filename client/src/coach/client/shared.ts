@@ -47,7 +47,12 @@ const sameNotifs = (a: readonly Notif[], b: readonly Notif[]): boolean => {
     const m = b[i] as unknown as Record<string, unknown>;
     const o = n as unknown as Record<string, unknown>;
     const keys = Object.keys(o);
-    return keys.length === Object.keys(m).length && keys.every((k) => Object.is(o[k], m[k]));
+    // `ts` is ignored: a row is identified by its id (it encodes the content), and rows stamped "now" (the unread
+    // message row) differ on every publish, which re-woke every subscriber forever ("Maximum update depth exceeded")
+    return (
+      keys.length === Object.keys(m).length &&
+      keys.every((k) => k === 'ts' || Object.is(o[k], m[k]))
+    );
   });
 };
 /** Structural equality: a publish that changes nothing must not wake the subscribers (it fed a render loop). */

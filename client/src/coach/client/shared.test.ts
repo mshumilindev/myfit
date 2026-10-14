@@ -39,9 +39,27 @@ describe('publishClientShared', () => {
     publishClientShared({
       ...base,
       trainerDays: new Set(),
-      notifs: [{ ...(n as object), ts: 2 } as never],
+      notifs: [{ ...(n as object), title: 'changed' } as never],
     });
     expect(getClientShared()).not.toBe(first);
+    publishClientShared(null);
+  });
+
+  it('a row that only differs by its timestamp is the same row (the "now"-stamped unread row looped forever)', () => {
+    publishClientShared(null);
+    const row = (ts: number) =>
+      ({
+        id: 'trainer:msg:1',
+        kind: 'trainer',
+        ts,
+        title: 't',
+        subtitle: 's',
+        nav: '#/x',
+      }) as never;
+    publishClientShared({ ...base, trainerDays: new Set(), notifs: [row(1)] });
+    const first = getClientShared();
+    publishClientShared({ ...base, trainerDays: new Set(), notifs: [row(2)] });
+    expect(getClientShared()).toBe(first);
     publishClientShared(null);
   });
 });
