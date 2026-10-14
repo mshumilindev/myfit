@@ -138,6 +138,30 @@
   height: calc(var(--cc-avail, 100dvh) - var(--s-32) - env(safe-area-inset-bottom, 0px));
   min-height: 0;
 }
+/* Phone: the same shape as the Atlas thread (a page, not a card inside a page): edge to edge, no frame, the bar flush at
+   the top with a hairline under it, the composer at the bottom with the safe-area padding. Desktop keeps the card. */
+@media (max-width: 719px) {
+  .cc-chat-page {
+    padding: 0;
+  }
+  .cc-chat-page .ch-card {
+    height: var(--cc-avail, 100dvh);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .cc-chat-page .ch-bar {
+    background: color-mix(in srgb, var(--c-121316, var(--color-bg)) 90%, transparent);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+  .cc-chat-page .ch-card > :last-child {
+    padding-bottom: calc(var(--s-12) + env(safe-area-inset-bottom, 0px));
+  }
+}
 .cc-notebtn {
   position: relative;
   display: inline-flex;
