@@ -15,6 +15,9 @@
   gap: var(--s-8);
   min-width: 0;
 }
+.uicomp-row > .uibtn {
+  flex: none;
+}
 .uicomp-lead {
   display: flex;
   flex: none;

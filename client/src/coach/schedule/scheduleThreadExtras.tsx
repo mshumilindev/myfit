@@ -4,7 +4,7 @@
  * ThreadView calls; `ChatWithExtras` composes it with the share / notes extras (M5).
  */
 import { useState } from 'react';
-import { Chip } from '../../components/ui/Chip';
+import { IconButton } from '../../components/ui/Button';
 import { Sheet } from '../../components/ui/Overlays';
 import { useScheduleT } from '../../i18n/coachSchedule';
 import type { ThreadExtras, ThreadExtrasCtx } from '../chat/ThreadView';
@@ -43,7 +43,14 @@ export function createScheduleThreadExtras(opts: ScheduleThreadExtrasOpts = {}) 
           />
         ) : undefined,
       chips: (
-        <Chip icon="swap" aria-label={t.rcChipAria} title={t.rcChip} onClick={() => setForm({})} />
+        <IconButton
+          icon="swap"
+          variant="secondary"
+          shape="round"
+          label={t.rcChipAria}
+          title={t.rcChip}
+          onClick={() => setForm({})}
+        />
       ),
       overlay: form ? (
         <Sheet onClose={() => setForm(null)} label={t.rfTitle} padded className="sc-sheet">

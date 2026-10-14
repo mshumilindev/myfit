@@ -5,7 +5,6 @@ import { useSecurity } from '../../security/useSecurity';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { IconButton } from '../../../components/ui/Button';
 import { ChatShell } from '../../../components/ui/ChatShell';
-import { Chip } from '../../../components/ui/Chip';
 import { type MessageMenuItem } from '../../../components/ui/MessageMenu';
 import { NoteCard } from '../../../components/ui/NoteCard';
 import { Notice } from '../../../components/ui/Notice';
@@ -357,9 +356,11 @@ export function ClientChat(p: ClientChatProps) {
                     </div>
                   )}
                   {my && my.upcoming.length > 0 && (
-                    <Chip
+                    <IconButton
                       icon="swap"
-                      aria-label={sc.rcChipAria}
+                      variant="secondary"
+                      shape="round"
+                      label={sc.rcChipAria}
                       title={sc.rcChip}
                       onClick={() => setForm(true)}
                     />
