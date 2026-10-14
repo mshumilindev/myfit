@@ -13,6 +13,7 @@ import { IconButton } from '../components/ui/Button';
 import { SuiteTabBar } from '../components/SuiteTabBar';
 import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
 import { BrandBar, BellButton } from '../components/ui/BrandBar';
+import { BrandAccount } from '../components/suite/BrandAccount';
 import { useMemo, useState } from 'react';
 import { fmtDayMonth, useT } from '../i18n';
 import type { StoreState } from '../store';
@@ -157,6 +158,7 @@ export function ApexApp({
       )}
       <div className="apex-col">
         <BrandBar
+          avatar={<BrandAccount app="apex" />}
           header
           app={t.apexName}
           onApp={onOpenShell}

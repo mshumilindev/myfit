@@ -18,9 +18,13 @@ import type { RailEntry } from '../components/ui/railOverflow';
 import { SkeletonRows } from '../components/ui/Skeleton';
 import { TabBar } from '../components/ui/TabBar';
 import { COACH_BREAKPOINT, COACH_WIDE_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
+import { useT } from '../i18n';
 import { useCoachT } from '../i18n/coach';
 import { useRosterT } from '../i18n/coachRoster';
-import { AccountButton, CoachChromeProvider, type CoachChrome } from './layout/chrome';
+import { BrandBar, BellButton } from '../components/ui/BrandBar';
+import { OPEN_MORE_EVENT } from '../components/suite/openMore';
+import { BrandAccount } from '../components/suite/BrandAccount';
+import { CoachChromeProvider, type CoachChrome } from './layout/chrome';
 import { Page } from './layout/Layout';
 import { CoachScreen, CoachScreenBoundary } from './CoachScreens';
 import { SCREEN_ICON, screenLabel } from './nav';
@@ -70,6 +74,7 @@ export function CoachShell({
   onOpenShell,
 }: CoachShellProps) {
   const { c } = useCoachT();
+  const { t } = useT();
   const desktop = useMinWidth(COACH_BREAKPOINT);
   const wide = useMinWidth(COACH_WIDE_BREAKPOINT);
   const unread = useCoachUnread();
@@ -78,17 +83,18 @@ export function CoachShell({
   // Phone: the More tab opens a bottom sheet. Desktop: the rail collapses its trailing entries
   // into its own More item when too short (Rail `overflow`); the avatar opens ONLY the account.
   const [moreOpen, setMoreOpen] = useState(false);
-  const {
-    account,
-    dialog,
-    avatar,
-    title: accountTitle,
-  } = useSuiteAccount({
+  const { account, dialog } = useSuiteAccount({
     app: 'coach',
     identity: { name, userId, role },
     onOpenGym: onExitToWorkouts,
     onOpenProfile,
   });
+
+  useEffect(() => {
+    const on = () => setMoreOpen(true);
+    window.addEventListener(OPEN_MORE_EVENT, on);
+    return () => window.removeEventListener(OPEN_MORE_EVENT, on);
+  }, []);
 
   // Tourmaline accent on the document root while Coach is open, so portaled sheets, popovers
   // and the app launcher re-skin with the shell (same as .theme-apex / .theme-nutrition).
@@ -119,15 +125,10 @@ export function CoachShell({
       bellCount: unread,
       onBell: () => onNavigate({ screen: 'chat' }),
       live: liveWidget,
-      avatar: (
-        <AccountButton label={accountTitle} onOpen={() => setMoreOpen(true)}>
-          {avatar(34)}
-        </AccountButton>
-      ),
     }),
     // onNavigate identity changes with the route hook; the chrome only needs the latest
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [desktop, r, c, unread, liveWidget, avatar, accountTitle],
+    [desktop, r, c, unread, liveWidget],
   );
 
   const go = (screen: ScreenId) => {
@@ -213,6 +214,23 @@ export function CoachShell({
               onOpenShell={onOpenShell}
             />
           }
+        />
+      )}
+
+      {!desktop && (
+        <BrandBar
+          header
+          app={c.modeCoach}
+          onApp={onOpenShell}
+          appLabel={t.shellSwitch}
+          actions={
+            <BellButton
+              label={c.railNotifications}
+              count={unread}
+              onClick={() => onNavigate({ screen: 'chat' })}
+            />
+          }
+          avatar={<BrandAccount app="coach" identity={{ name, userId, role }} />}
         />
       )}
 

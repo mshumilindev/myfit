@@ -13,6 +13,7 @@ import {
 import {
   adminAssignTrainer,
   adoptMyLegacyTrainer,
+  adoptLegacyClientsOf,
   endTrainerRelationships,
   migrateLegacyRelationships,
   purgeAccountCoaching,
@@ -294,6 +295,19 @@ describe('legacy relationship backfill (item 12, Q-19)', () => {
     expect(again.counts.created).toBe(0);
     expect(again.counts['already-linked']).toBe(1);
     expect(kv.dump()).toBe(after);
+  });
+  it("the trainer's roster read adopts only THEIR legacy clients, never ends up twice, never revives an ended one", async () => {
+    expect((await adoptLegacyClientsOf(ctx(), 't1')).created).toBe(1);
+    expect(await kv.get('coaching/c1')).toMatchObject({
+      trainerId: 't1',
+      status: 'active',
+      mode: 'app',
+    });
+    expect(kv.has('coaching/c2')).toBe(false); // c2 points at someone else
+    expect((await adoptLegacyClientsOf(ctx(), 't1')).created).toBe(0);
+    await kv.merge('coaching/c1', { status: 'ended' });
+    expect((await adoptLegacyClientsOf(ctx(), 't1')).created).toBe(0);
+    expect(await kv.get('coaching/c1')).toMatchObject({ status: 'ended' });
   });
   it('self-service adoption: a member adopts ONLY their own legacy pointer (consent off, idempotent, never someone else)', async () => {
     const r = await adoptMyLegacyTrainer(ctx(), client);

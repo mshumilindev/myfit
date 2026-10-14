@@ -14,7 +14,11 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { db, HttpsError, requireRole, type Role } from '../lib';
 import * as svc from './service';
 import { CoachError, type Actor, type Signer } from './service';
-import { adoptMyLegacyTrainer, migrateLegacyRelationships } from './lifecycle';
+import {
+  adoptLegacyClientsOf,
+  adoptMyLegacyTrainer,
+  migrateLegacyRelationships,
+} from './lifecycle';
 import {
   COACH_PEPPER,
   COACH_SIGNING_KEY,
@@ -97,7 +101,11 @@ export const coachLogRead = onCall(opts, (req) =>
   run(req, COACH, (a) => svc.logRead(ctx(), a, body(req))),
 );
 export const coachClients = onCall(opts, (req) =>
-  run(req, COACH, (a) => svc.coachRoster(ctx(), a)),
+  run(req, COACH, async (a) => {
+    // people already assigned to this trainer the old way (users.trainerId) join the roster the first time it is read
+    const legacy = await adoptLegacyClientsOf(ctx(), a.uid);
+    return { ...(await svc.coachRoster(ctx(), a)), legacy };
+  }),
 );
 export const coachChatReset = onCall(opts, (req) =>
   run(req, ANY, (a) => svc.chatResetKey(ctx(), a, body(req))),

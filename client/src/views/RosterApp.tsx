@@ -12,6 +12,7 @@
 import { SuiteTabBar } from '../components/SuiteTabBar';
 import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
 import { BrandBar, BellButton } from '../components/ui/BrandBar';
+import { BrandAccount } from '../components/suite/BrandAccount';
 import { useState } from 'react';
 import { useT } from '../i18n';
 import type { Shell } from '../App';
@@ -90,6 +91,7 @@ export function RosterApp({
       )}
       <div className="apex-col">
         <BrandBar
+          avatar={<BrandAccount app="roster" />}
           header
           app={appLabel}
           onApp={onOpenShell}

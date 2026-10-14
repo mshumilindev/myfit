@@ -23,6 +23,7 @@ import { ListRow } from '../components/ui/GroupedList';
 import { IconTile } from '../components/ui/IconTile';
 import { Segmented } from '../components/ui/Segmented';
 import { BrandBar, BellButton } from '../components/ui/BrandBar';
+import { BrandAccount } from '../components/suite/BrandAccount';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { tokenMatch } from '../search';
 import { Icon } from '../ui';
@@ -588,6 +589,7 @@ export function LearnRoot({
       )}
       <div className="apex-col">
         <BrandBar
+          avatar={<BrandAccount app="learn" />}
           header
           app={L.app}
           onApp={onOpenShell}

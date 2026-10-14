@@ -6,6 +6,7 @@ import { Field } from '../components/ui/Field';
 import { UndoToast } from '../components/ui/UndoToast';
 import { UNDO_MS } from '../coach/domain/signalConfig';
 import { BrandBar, BellButton } from '../components/ui/BrandBar';
+import { BrandAccount } from '../components/suite/BrandAccount';
 import { AddFlow } from './addflow';
 import { Sheet } from './components';
 import { round, sumMacros } from './calc';
@@ -182,6 +183,7 @@ export function NutritionRoot({
       )}
       <div className="apex-col">
         <BrandBar
+          avatar={<BrandAccount app="nutrition" />}
           header
           app={t('appName')}
           onApp={onOpenShell}

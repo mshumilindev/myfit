@@ -331,6 +331,43 @@ export async function adoptMyLegacyTrainer(
 }
 
 /**
+ * The trainer's own legacy clients (`users.trainerId == me`) that have no coaching document yet become relationships the
+ * way the admin backfill makes them (mode `app`, every consent off), so the Clients screen and Today's strip list the
+ * SAME people. A client whose relationship already exists in ANY state (an ended one included) is left alone. Idempotent;
+ * never throws (the roster must still load).
+ */
+export async function adoptLegacyClientsOf(
+  ctx: Ctx,
+  trainerUid: string,
+): Promise<{ found: number; created: number; outcomes: string[]; error: string | null }> {
+  const res = { found: 0, created: 0, outcomes: [] as string[], error: null as string | null };
+  if (!isUid(trainerUid) || trainerUid.includes(':')) return res;
+  try {
+    const rows = await ctx.kv.list('users', {
+      where: [['trainerId', '==', trainerUid]],
+      limit: 100,
+    });
+    res.found = rows.length;
+    for (const r of rows) {
+      if (r.id === trainerUid || r.id.includes(':')) continue;
+      if (await ctx.kv.get(`coaching/${r.id}`)) {
+        res.outcomes.push('has-relationship');
+        continue;
+      }
+      const out = await ctx.kv.tx((kv) =>
+        migrateOne(ctx, kv, r.id, r.data as UserRec, trainerUid, false),
+      );
+      res.outcomes.push(out);
+      if (out === 'created') res.created++;
+    }
+  } catch (e) {
+    res.error = `${(e as Error)?.name}: ${String((e as Error)?.message).slice(0, 160)}`;
+    console.error('[coach] legacy adoption failed', (e as Error)?.name);
+  }
+  return res;
+}
+
+/**
  * Creates the new-model relationship (`coaching/{client}`, conversation, `users.trainerId`) for every legacy
  * `users.trainerId` that has none. The migrated relationship is mode `app` with EVERY consent level off: a legacy trainer
  * could read everything before, and the new model gives that choice back to the client (who gets the usual

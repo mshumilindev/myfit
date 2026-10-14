@@ -80,6 +80,7 @@ import { isClientHead } from './coach/client/routes';
 import { useClientShared } from './coach/client/shared';
 import { ClientBridgeLazy, ClientRoutesLazy } from './coach/client/lazy';
 import { BrandBar, BellButton } from './components/ui/BrandBar';
+import { BrandAccount } from './components/suite/BrandAccount';
 import { ConditionsShield, useActiveConditions } from './views/health/ConditionsShield';
 import { AppRail } from './components/AppRail';
 import { SuiteTabBar } from './components/SuiteTabBar';
@@ -1883,6 +1884,7 @@ export function App() {
       <div className="main-col">
         {!desktopRail && (
           <BrandBar
+            avatar={<BrandAccount app="gym" />}
             app={t.shellGym}
             onApp={() => setShellOpen(true)}
             appLabel={t.shellSwitch}

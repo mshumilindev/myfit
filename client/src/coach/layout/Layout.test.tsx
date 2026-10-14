@@ -53,7 +53,7 @@ describe('Header slots (F3)', () => {
     render(<Header title="Today" />);
     expect(screen.queryByRole('button', { name: 'Search' })).toBeNull();
   });
-  it('desktop: no search (parked); phone: bell with unread badge + avatar', () => {
+  it('no search (parked); the bell and avatar live in the app top bar, not in the page header', () => {
     const chrome = {
       desktop: true,
       searchLabel: 'Search',
@@ -77,8 +77,7 @@ describe('Header slots (F3)', () => {
         <Header title="Today" />
       </CoachChromeProvider>,
     );
-    expect(screen.getByRole('button', { name: 'Notifications (12)' })).toBeTruthy();
-    expect(screen.getByText('9+')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Me' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Notifications/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Me' })).toBeNull();
   });
 });

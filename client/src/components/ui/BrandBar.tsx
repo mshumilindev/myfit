@@ -11,13 +11,23 @@ export interface BrandBarProps {
   appLabel: string;
   /** Right-side controls — BellButton, MasteryBadge… (the language flag is always last, added by the bar). */
   actions?: ReactNode;
+  /** The account avatar at the very end of the bar (see components/suite/BrandAccount). */
+  avatar?: ReactNode;
   /** Render as <header> (sub-apps) instead of <div>. */
   header?: boolean;
   className?: string;
 }
 
 /** Top brand bar of every phone screen: "spotter" wordmark + app name + round control cluster. */
-export function BrandBar({ app, onApp, appLabel, actions, header, className }: BrandBarProps) {
+export function BrandBar({
+  app,
+  onApp,
+  appLabel,
+  actions,
+  avatar,
+  header,
+  className,
+}: BrandBarProps) {
   const Tag = header ? 'header' : 'div';
   return (
     <Tag
@@ -38,6 +48,7 @@ export function BrandBar({ app, onApp, appLabel, actions, header, className }: B
       <div className="uibrand-actions app-brand-actions">
         {actions}
         <LanguageSelector compact />
+        {avatar}
       </div>
     </Tag>
   );

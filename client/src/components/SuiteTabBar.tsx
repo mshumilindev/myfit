@@ -8,11 +8,12 @@
  * No extra tab is added anywhere: More takes the slot Apps had, so every tab bar has the same
  * number of buttons as before.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCoachT } from '../i18n/coach';
 import { MoreMenu, type MoreMenuItem } from './ui/MoreMenu';
 import { TabBar, type TabBarProps } from './ui/TabBar';
 import { SUITE_TONE } from './suite/suiteTone';
+import { OPEN_MORE_EVENT } from './suite/openMore';
 import { useSuiteAccount, type SuiteApp, type SuiteMode } from './suite/useSuiteAccount';
 
 export function SuiteTabBar<Id extends string = string>({
@@ -31,6 +32,11 @@ export function SuiteTabBar<Id extends string = string>({
   const { c } = useCoachT();
   const { account, dialog } = useSuiteAccount({ app, onOpenProfile });
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const on = () => setOpen(true);
+    window.addEventListener(OPEN_MORE_EVENT, on);
+    return () => window.removeEventListener(OPEN_MORE_EVENT, on);
+  }, []);
   return (
     <>
       <TabBar<Id>

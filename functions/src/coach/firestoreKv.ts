@@ -19,8 +19,11 @@ type Write =
 function applyQuery(base: FsQuery, q?: Query): FsQuery {
   let out = base;
   for (const [f, op, v] of q?.where ?? []) out = out.where(f, op === 'in' ? 'in' : op, v);
-  if (q?.after !== undefined) out = out.orderBy(FieldPath.documentId()).startAfter(q.after);
-  else if (q?.orderBy) out = out.orderBy(q.orderBy[0], q.orderBy[1]);
+  // '' = from the start: Firestore rejects an empty document id as a cursor
+  if (q?.after !== undefined) {
+    out = out.orderBy(FieldPath.documentId());
+    if (q.after !== '') out = out.startAfter(q.after);
+  } else if (q?.orderBy) out = out.orderBy(q.orderBy[0], q.orderBy[1]);
   if (q?.limit) out = out.limit(q.limit);
   return out;
 }
