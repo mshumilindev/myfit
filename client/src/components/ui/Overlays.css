@@ -11,6 +11,16 @@
   gap: var(--s-8);
   pointer-events: none;
 }
+/* Desktop: top-right card clear of the side rail. Lives HERE (not only in styles.css) because this file loads later
+   and its unconditional left/right above would otherwise win and park the toast under the rail. */
+@media (min-width: 720px) {
+  .toast-holder {
+    left: auto;
+    right: 24px;
+    top: calc(24px + var(--safe-top));
+    width: 400px;
+  }
+}
 
 .toast,
 .notice {

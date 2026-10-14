@@ -34,8 +34,40 @@ const EMPTY: ClientShared = Object.freeze({
 let state: ClientShared = EMPTY;
 const subs = new Set<() => void>();
 
+const sameSet = (a: ReadonlySet<number>, b: ReadonlySet<number>): boolean => {
+  if (a === b) return true;
+  if (a.size !== b.size) return false;
+  for (const v of a) if (!b.has(v)) return false;
+  return true;
+};
+const sameNotifs = (a: readonly Notif[], b: readonly Notif[]): boolean => {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  return a.every((n, i) => {
+    const m = b[i] as unknown as Record<string, unknown>;
+    const o = n as unknown as Record<string, unknown>;
+    const keys = Object.keys(o);
+    return keys.length === Object.keys(m).length && keys.every((k) => Object.is(o[k], m[k]));
+  });
+};
+/** Structural equality: a publish that changes nothing must not wake the subscribers (it fed a render loop). */
+function sameShared(a: ClientShared, b: ClientShared): boolean {
+  return (
+    a.hasTrainer === b.hasTrainer &&
+    a.trainerFirst === b.trainerFirst &&
+    a.unread === b.unread &&
+    a.unreadLabel === b.unreadLabel &&
+    a.markerLegend === b.markerLegend &&
+    a.markerDay === b.markerDay &&
+    sameSet(a.trainerDays, b.trainerDays) &&
+    sameNotifs(a.notifs, b.notifs)
+  );
+}
+
 export function publishClientShared(next: Partial<ClientShared> | null): void {
-  state = next ? { ...state, ...next } : EMPTY;
+  const merged = next ? { ...state, ...next } : EMPTY;
+  if (sameShared(state, merged)) return;
+  state = merged;
   subs.forEach((f) => f());
 }
 export const getClientShared = (): ClientShared => state;

@@ -9,6 +9,9 @@ export interface ResponsivePanelProps {
   onClose: () => void;
   /** The button the desktop popover points at (focus returns to it). */
   anchorRef: RefObject<HTMLElement | null>;
+  /** `auto` (default): a bottom sheet on a phone, a popover pointing at the anchor on desktop. `sheet`: the kit drawer
+   *  (the same one the Gym screens use) at every width, for panels that are drawers, not menus. */
+  mode?: 'auto' | 'sheet';
   /** Accessible name of the panel. */
   label: string;
   /** Visible heading inside the panel. */
@@ -28,6 +31,7 @@ export function ResponsivePanel({
   open,
   onClose,
   anchorRef,
+  mode = 'auto',
   label,
   title,
   width = 360,
@@ -43,7 +47,7 @@ export function ResponsivePanel({
       {footer && <div className="rpanel-f">{footer}</div>}
     </div>
   );
-  if (!desktop) {
+  if (!desktop || mode === 'sheet') {
     return (
       <Sheet onClose={onClose} padded label={label} returnFocusRef={anchorRef}>
         {body}

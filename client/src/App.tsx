@@ -223,9 +223,6 @@ const LearnApp = lazy(() => import('./LearnApp').then((module) => ({ default: mo
 const ProfileView = lazy(() =>
   import('./views/ProfileView').then((module) => ({ default: module.ProfileView })),
 );
-const ClientPage = lazy(() =>
-  import('./views/ClientPage').then((module) => ({ default: module.ClientPage })),
-);
 const OverviewView = lazy(() =>
   import('./views/OverviewView').then((module) => ({ default: module.OverviewView })),
 );
@@ -257,7 +254,6 @@ export type Overlay =
   | { screen: 'recap'; period: string }
   | { screen: 'recap-story'; period: string }
   | { screen: 'profile'; userId: string }
-  | { screen: 'client-page'; clientId: string }
   | { screen: 'trainee-session'; athleteId: string; workoutId: string; athleteName?: string }
   | {
       screen: 'gym';
@@ -428,7 +424,6 @@ export function toHash(
     return overlay.userId
       ? `#/exercise/${encodeURIComponent(overlay.name)}/${encodeURIComponent(overlay.userId)}`
       : `#/exercise/${encodeURIComponent(overlay.name)}`;
-  if (overlay?.screen === 'client-page') return `#/client/${encodeURIComponent(overlay.clientId)}`;
   if (overlay?.screen === 'trainee-session')
     return `#/trainee/${encodeURIComponent(overlay.athleteId)}/${encodeURIComponent(overlay.workoutId)}`;
   if (overlay?.screen === 'exercise-detail')
@@ -614,11 +609,6 @@ export function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
         name: decodeURIComponent(parts[1]),
         ...(parts[2] ? { userId: decodeURIComponent(parts[2]) } : {}),
       },
-    };
-  if (head === 'client' && parts[1])
-    return {
-      tab: 'today',
-      overlay: { screen: 'client-page', clientId: decodeURIComponent(parts[1]) },
     };
   if (head === 'trainee' && parts[1] && parts[2])
     return {
@@ -1759,9 +1749,6 @@ export function App() {
       )}
       {activeOverlay?.screen === 'profile' && (
         <ProfileView userId={activeOverlay.userId} shell={shell} onClose={closeOverlay} />
-      )}
-      {activeOverlay?.screen === 'client-page' && (
-        <ClientPage clientId={activeOverlay.clientId} shell={shell} onClose={closeOverlay} />
       )}
       {activeOverlay?.screen === 'client-coach' && (
         <Suspense fallback={null}>

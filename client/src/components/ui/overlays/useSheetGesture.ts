@@ -44,7 +44,15 @@ export function useSheetGesture(sheetRef: RefObject<HTMLElement | null>, onClose
     const startH = el.getBoundingClientRect().height;
     if (mode === 'default') defaultHRef.current = startH;
     const defaultH = defaultHRef.current || startH;
-    const fullH = Math.max(defaultH, window.innerHeight - 46);
+    // the same height `.sheet.sheet-full` has in CSS (100dvh - safe-top - 8px): the old `innerHeight - 46` left a 46px
+    // gap under the status bar and, set inline, overrode the CSS, so a drawer never reached the full height
+    const probe = document.createElement('div');
+    probe.style.cssText =
+      'position:fixed;visibility:hidden;pointer-events:none;height:var(--safe-top, 0px)';
+    document.body.appendChild(probe);
+    const safeTop = probe.getBoundingClientRect().height;
+    probe.remove();
+    const fullH = Math.max(defaultH, window.innerHeight - safeTop - 8);
     g.current = {
       startY: clientY,
       lastY: clientY,

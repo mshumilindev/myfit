@@ -1,6 +1,5 @@
 import type { MouseEvent, ReactNode } from 'react';
 import { Sheet } from '../../components/ui/Overlays';
-import { useCoachOverlayTheme } from './coachTheme';
 import { FooterHostProvider, usePanelFooterHost } from './footerSlot';
 import './SidePanel.css';
 
@@ -20,7 +19,8 @@ export interface SidePanelProps {
 /**
  * The detail panels of Coach (session, forms, library peek, notes) are the app's own kit `Sheet`: the same drawer the
  * other apps use (right panel on a wide screen, bottom sheet on a phone, grabber, swipe, Esc, scrim, focus return).
- * Coach differs only by colour, which comes from the theme tokens (`html.theme-coach`). This wrapper adds the two
+ * Coach differs only by colour, which comes from the theme tokens (`html.theme-coach`, set by the trainer app itself;
+ * opened from the client's own app the same drawer wears that app's colours, never the Coach tint). This wrapper adds the two
  * things a Coach form needs on top: a title line like the other sheets', and a pinned footer for `<PanelFooter>`.
  */
 export function SidePanel({
@@ -33,7 +33,6 @@ export function SidePanel({
   onScrimClick,
 }: SidePanelProps) {
   const { host, setHost } = usePanelFooterHost();
-  useCoachOverlayTheme(open);
   if (!open) return null;
   return (
     <Sheet

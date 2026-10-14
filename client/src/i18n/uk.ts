@@ -3518,13 +3518,13 @@ export const uk: Strings = {
       case 'role-changed':
         return `Вашу роль змінено на ${detail}.`;
       case 'trainer-assigned':
-        return `${detail} тепер ваш тренер.`;
+        return detail ? `${detail} тепер ваш тренер.` : 'У вас новий тренер.';
       case 'trainer-removed':
         return 'Вашого тренера відкріплено.';
       case 'client-assigned':
-        return `${detail} призначено вам як клієнта.`;
+        return detail ? `${detail} призначено вам як клієнта.` : 'Вам призначено нового клієнта.';
       case 'client-removed':
-        return `${detail} більше не ваш клієнт.`;
+        return detail ? `${detail} більше не ваш клієнт.` : 'Клієнта відкріплено.';
       default:
         return 'У вас нове сповіщення.';
     }

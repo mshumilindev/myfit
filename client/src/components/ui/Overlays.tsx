@@ -191,7 +191,9 @@ export function Sheet(props: {
     cssStyle.transform = 'translateY(100%)';
   } else {
     const h = liveH ?? heightPx;
-    if (h != null) cssStyle.height = `${h}px`;
+    // At rest in `full` the class (`.sheet-full`: 100dvh - safe-top - 8px) owns the height; an inline pixel height from
+    // the gesture would override it and stop the drawer short of the screen edge
+    if (h != null && !(mode === 'full' && liveH == null)) cssStyle.height = `${h}px`;
     if (drag !== 0) cssStyle.transform = `translateY(${drag}px)`;
   }
 

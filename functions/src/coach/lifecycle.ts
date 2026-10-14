@@ -294,8 +294,8 @@ async function migrateOne(
   });
   await kv.merge(`coaching/${clientId}`, { migratedFrom: 'legacy-trainerId' });
   // one notice each side, stable ids so a re-run never duplicates them
-  await notice(kv, clientId, 'trainer-assigned', tid, now, `mg-${clientId}`);
-  await notice(kv, tid, 'client-assigned', clientId, now, `mg-${clientId}`);
+  await notice(kv, clientId, 'trainer-assigned', tid, now, `mg-${clientId}`, nameOf(t) || null);
+  await notice(kv, tid, 'client-assigned', clientId, now, `mg-${clientId}`, nameOf(u) || null);
   return 'created';
 }
 

@@ -373,8 +373,26 @@ export async function coachAccept(ctx: Ctx, actor: Actor, body: Record<string, u
         by: 'client',
       });
     }
-    await notice(kv, inv.trainerId, 'client-assigned', actor.uid, now, `ca-${token}`);
-    await notice(kv, actor.uid, 'trainer-assigned', inv.trainerId, now, `ta-${token}`);
+    // the notice text reads `detail` (the other side's name), same as the "removed" notices below
+    const clientName = (await userName(kv, actor.uid)).name;
+    await notice(
+      kv,
+      inv.trainerId,
+      'client-assigned',
+      actor.uid,
+      now,
+      `ca-${token}`,
+      clientName || null,
+    );
+    await notice(
+      kv,
+      actor.uid,
+      'trainer-assigned',
+      inv.trainerId,
+      now,
+      `ta-${token}`,
+      trainer.name || null,
+    );
     return {
       cid,
       trainerId: inv.trainerId,

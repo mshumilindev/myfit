@@ -27,9 +27,11 @@ export function ClientBridge() {
   const first = firstName(link?.trainer?.name ?? '');
   const myId = link?.clientId ?? '';
   const prog = snapshot?.program;
-  const now = store.port.now();
 
   useEffect(() => {
+    // read the clock INSIDE the effect: as a render-time value it changed on every render, re-ran this effect each
+    // time and republished, which (with the subscribers re-rendering) ended in "Maximum update depth exceeded"
+    const now = store.port.now();
     if (!on || !has) {
       publishClientShared(null);
       return;
@@ -92,7 +94,7 @@ export function ClientBridge() {
       markerDay: cc.calMarkerDay(first),
       notifs,
     });
-  }, [on, has, first, myId, unread, prog, sch.slots, sch.requests, now, cc]);
+  }, [on, has, first, myId, unread, prog, sch.slots, sch.requests, store, cc]);
 
   // the sealed trainer layer over the runnable program: the workout screen, the program review and the Today plan read
   // targets, RPE, rest, cues, warm-up weights and activities from it (the plaintext program document holds none)

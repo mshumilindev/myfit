@@ -3521,13 +3521,15 @@ export const en = {
       case 'role-changed':
         return `Your role was changed to ${detail}.`;
       case 'trainer-assigned':
-        return `${detail} is now your trainer.`;
+        return detail ? `${detail} is now your trainer.` : 'You have a new trainer.';
       case 'trainer-removed':
         return 'Your trainer was removed.';
       case 'client-assigned':
-        return `${detail} was assigned to you as a client.`;
+        return detail
+          ? `${detail} was assigned to you as a client.`
+          : 'A new client was assigned to you.';
       case 'client-removed':
-        return `${detail} is no longer your client.`;
+        return detail ? `${detail} is no longer your client.` : 'A client was removed.';
       default:
         return 'You have a new notice.';
     }

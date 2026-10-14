@@ -40,6 +40,9 @@ import type { LiveSession } from '../types';
 import { computeTrends } from '../trends';
 import { computePlaybook, type Play } from '../playbook';
 import { getRole } from '../api';
+import { canUseCoach } from '../coach/access';
+import { coachHash } from '../coach/routes';
+import { isFlagOn } from '../data/flags';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
 import { useFlag } from '../data/flags';
 import { HistoryTimeline, buildHistoryDays } from '../components/HistoryTimeline';
@@ -1160,7 +1163,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // Atlas & clients block (settings A2, designs A1 / T5): Atlas is always
   // here — alone for members, beside the clients of anyone who coaches.
   const openCoach = () => shell.openOverlay({ screen: 'coach' });
-  const openClient = (id: string) => shell.openOverlay({ screen: 'client-page', clientId: id });
+  // a client opens in the Coach Dashboard (their profile there), not in a Gym screen of its own; without Coach access
+  // (role or flag) the old Coach screen is the nearest place
+  const openClient = (id: string) =>
+    canUseCoach(getRole(), isFlagOn('coach'))
+      ? window.location.assign(coachHash({ screen: 'client', cid: id }))
+      : openCoach();
   const watchClient = (s: LiveSession) =>
     s.workoutId
       ? shell.openOverlay({

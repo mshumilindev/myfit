@@ -178,6 +178,9 @@ describe('invite -> preview -> accept (R-BE-REL-1..4)', () => {
     });
     expect(kv.has('users/t1/notices/ca-tok000000000001')).toBe(true);
     expect(kv.has('users/c1/notices/ta-tok000000000001')).toBe(true);
+    // the notice texts read `detail` (the OTHER side's name): it must never be null ("null is now your trainer")
+    expect((await kv.get('users/c1/notices/ta-tok000000000001'))?.detail).toBeTruthy();
+    expect((await kv.get('users/t1/notices/ca-tok000000000001'))?.detail).toBeTruthy();
     expect(await kv.list('users/c1/consentLog')).toHaveLength(0);
   });
   it('accept applies the client own choice and logs each change', async () => {

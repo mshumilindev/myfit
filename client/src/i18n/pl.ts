@@ -3486,13 +3486,15 @@ export const pl: Strings = {
       case 'role-changed':
         return `Twoja rola została zmieniona na ${detail}.`;
       case 'trainer-assigned':
-        return `${detail} jest teraz twoim trenerem.`;
+        return detail ? `${detail} jest teraz twoim trenerem.` : 'Masz nowego trenera.';
       case 'trainer-removed':
         return 'Twój trener został odłączony.';
       case 'client-assigned':
-        return `${detail} został przypisany do ciebie jako klient.`;
+        return detail
+          ? `${detail} został przypisany do ciebie jako klient.`
+          : 'Przypisano ci nowego klienta.';
       case 'client-removed':
-        return `${detail} nie jest już twoim klientem.`;
+        return detail ? `${detail} nie jest już twoim klientem.` : 'Klient został odłączony.';
       default:
         return 'Masz nowe powiadomienie.';
     }

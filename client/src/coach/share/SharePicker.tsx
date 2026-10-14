@@ -37,7 +37,6 @@ import {
 import type { ShareKind, ShareRef, ShareView, Viewer } from './types';
 import { resolveShare } from './resolve';
 import { useShareSource } from './useShare';
-import { useCoachOverlayTheme } from '../layout/coachTheme';
 import type { ShareSourcePort } from './port';
 import './SharePicker.css';
 
@@ -136,7 +135,6 @@ function PickerBody({
 }: SharePickerProps) {
   const w = useWords();
   const { sh } = w;
-  useCoachOverlayTheme();
   const { source, status, retry } = useShareSource(viewer.clientId, port);
   const [q, setQ] = useState(initialQuery ?? '');
   const [filter, setFilter] = useState<Filter>(initialFilter ?? 'all');
@@ -507,6 +505,7 @@ function PickerBody({
       open
       onClose={onClose}
       anchorRef={anchorRef}
+      mode="sheet"
       label={sh.pickAria}
       title={sh.pickTitle(who)}
       width={440}

@@ -3508,13 +3508,15 @@ export const lt: Strings = {
       case 'role-changed':
         return `Tavo vaidmuo pakeistas į ${detail}.`;
       case 'trainer-assigned':
-        return `${detail} dabar yra tavo treneris.`;
+        return detail ? `${detail} dabar yra tavo treneris.` : 'Turi naują trenerį.';
       case 'trainer-removed':
         return 'Tavo treneris pašalintas.';
       case 'client-assigned':
-        return `${detail} priskirtas tau kaip klientas.`;
+        return detail
+          ? `${detail} priskirtas tau kaip klientas.`
+          : 'Tau priskirtas naujas klientas.';
       case 'client-removed':
-        return `${detail} nebėra tavo klientas.`;
+        return detail ? `${detail} nebėra tavo klientas.` : 'Klientas pašalintas.';
       default:
         return 'Turite naują pranešimą.';
     }

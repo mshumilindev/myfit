@@ -3474,13 +3474,13 @@ export const et: Strings = {
       case 'role-changed':
         return `Sinu roll muudeti: ${detail}.`;
       case 'trainer-assigned':
-        return `${detail} on nüüd sinu treener.`;
+        return detail ? `${detail} on nüüd sinu treener.` : 'Sul on uus treener.';
       case 'trainer-removed':
         return 'Sinu treener eemaldati.';
       case 'client-assigned':
-        return `${detail} määrati sulle kliendiks.`;
+        return detail ? `${detail} määrati sulle kliendiks.` : 'Sulle määrati uus klient.';
       case 'client-removed':
-        return `${detail} ei ole enam sinu klient.`;
+        return detail ? `${detail} ei ole enam sinu klient.` : 'Klient eemaldati.';
       default:
         return 'Sul on uus teade.';
     }

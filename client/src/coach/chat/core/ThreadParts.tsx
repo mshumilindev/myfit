@@ -29,7 +29,6 @@ export function ThreadComposer(p: {
         emptyReason={ch.chSendNeedsText}
         maxLength={MAX_TEXT}
         tooLongText={ch.chTooLong(MAX_TEXT)}
-        footnote={ch.chEncNote}
         lead={p.lead}
         chips={p.chips}
       />

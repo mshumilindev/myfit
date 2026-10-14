@@ -3,6 +3,7 @@ import { KeyChangeBanner } from '../../security/KeyChangeBanner';
 import { SecurityCodeDialog } from '../../security/SecurityCodeDialog';
 import { useSecurity } from '../../security/useSecurity';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useViewportTop } from './useViewportTop';
 import { IconButton } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Chip } from '../../../components/ui/Chip';
@@ -83,6 +84,8 @@ export interface ClientChatProps {
  * The "New messages" line is fixed when the thread opens and its count equals the Today tile badge (one source).
  */
 export function ClientChat(p: ClientChatProps) {
+  const pageRef = useRef<HTMLDivElement>(null);
+  useViewportTop(pageRef);
   const { cc } = useClientT();
   const shw = useShareWords();
   const { ch, locale } = useChatT();
@@ -291,7 +294,7 @@ export function ClientChat(p: ClientChatProps) {
     );
 
   return (
-    <div className="cc-chat-page">
+    <div className="cc-chat-page" ref={pageRef}>
       <Card pad="none" className="ch-card">
         <ClientChatBar
           cc={cc}

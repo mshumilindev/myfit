@@ -38,8 +38,9 @@ export function ClientChatBar({
       <BackButton label={cc.ccBack} onClick={onBack} />
       <ClientAvatar id={trainer.id} name={trainer.name} size={36} hasPhoto={trainer.hasPhoto} />
       <div className="ch-bar-id">
-        <b>{trainer.name}</b>
-        <small>{cc.chRole(lastSeenAt ? cc.chSeen(clock(lastSeenAt)) : cc.ccTrainer)}</small>
+        <b title={trainer.name}>{trainer.name}</b>
+        {/* "Trainer · seen 12:40", or just "Trainer" (never "Trainer · Trainer") while there is no last-seen time */}
+        <small>{lastSeenAt ? cc.chRole(cc.chSeen(clock(lastSeenAt))) : cc.ccTrainer}</small>
       </div>
       <IconButton icon="eye" label={cc.chSeesBtn(first)} onClick={onOpenSharing} />
       <span className="cc-notebtn">

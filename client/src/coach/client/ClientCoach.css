@@ -132,7 +132,11 @@
   padding: var(--s-16);
 }
 .cc-chat-page .ch-card {
-  height: calc(100dvh - var(--s-32));
+  /* fills what is left below the bars the host app puts above this page and above the bottom of the frame that
+     clips it (--cc-avail, measured in useViewportTop), minus the page padding and the bottom safe area; the old
+     `100dvh - 32px` trusted the window, which is taller than the app frame on desktop, and pushed the composer out */
+  height: calc(var(--cc-avail, 100dvh) - var(--s-32) - env(safe-area-inset-bottom, 0px));
+  min-height: 0;
 }
 .cc-notebtn {
   position: relative;
@@ -162,11 +166,13 @@
   display: contents;
 }
 
-/* A long trainer name wraps to a second line in the chat bar instead of being cut (390 px: 3 icon buttons beside it). */
+/* The trainer name and the sub-line each stay on ONE line in the chat bar (3 icon buttons beside them at 390 px): a
+   long name is cut with an ellipsis and the full name is on the element's title. */
 .cc-chat-page .ch-bar-id b,
 .cc-chat-page .ch-bar-id small {
-  white-space: normal;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* the tag sits in a row's sub-line, after the summary text */
