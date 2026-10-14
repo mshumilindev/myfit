@@ -78,6 +78,11 @@ export async function startAutoUpdate(deps: PwaUpdateDeps): Promise<void> {
     return;
   }
 
+  // An open, focused tab never fires `visibilitychange`: look for a new worker on a timer as well.
+  setInterval(() => {
+    registration.update().catch(() => undefined);
+  }, 5 * 60_000);
+
   let lastCheck = now();
   doc.addEventListener('visibilitychange', () => {
     if (doc.visibilityState !== 'visible') return;

@@ -121,7 +121,20 @@ export default defineConfig({
         // offline queue in localStorage, so we must never serve stale API data).
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,webmanifest}'],
+        // Only the app SHELL is precached (~5 MB: index.html, the entry chunks, fonts, install icons). The whole build was
+        // 22 MB in ~490 requests; installing it on a phone could be cut short (the OS suspends the app), the new worker
+        // then never took over and the device sat on an old build for days. Everything else is cached the first time it
+        // is used (runtimeCaching below), so a screen opened once works offline afterwards.
+        globPatterns: [
+          'index.html',
+          'manifest.webmanifest',
+          'assets/index-*.{js,css}',
+          'assets/vendor-*.js',
+          'assets/*.woff2',
+          'icon-*.png',
+          'favicon*',
+          'apple-touch-icon.png',
+        ],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => /\/assets\/(atlasDict\.|atlas-kb-)/.test(url.pathname),
@@ -131,6 +144,34 @@ export default defineConfig({
           {
             urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
             handler: 'NetworkOnly',
+          },
+          // Hashed build files never change under their name: the first copy is the right one forever.
+          {
+            urlPattern: ({ url, sameOrigin }) =>
+              sameOrigin && /^\/assets\/.+\.(js|css|woff2)$/.test(url.pathname),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'spotter-assets',
+              expiration: {
+                maxEntries: 400,
+                maxAgeSeconds: 60 * 24 * 3600,
+                purgeOnQuotaError: true,
+              },
+            },
+          },
+          // Pictures keep their names across deploys: show the saved one, refresh it in the background.
+          {
+            urlPattern: ({ url, sameOrigin }) =>
+              sameOrigin && /\.(png|webp|jpe?g|svg|gif|ico)$/.test(url.pathname),
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'spotter-img',
+              expiration: {
+                maxEntries: 300,
+                maxAgeSeconds: 30 * 24 * 3600,
+                purgeOnQuotaError: true,
+              },
+            },
           },
         ],
       },
