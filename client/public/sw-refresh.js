@@ -27,15 +27,22 @@ self.addEventListener('activate', (event) => {
       if (!replacing) return;
       await cache.delete(UPDATE_MARK_KEY);
       await self.clients.claim();
-      for (const client of await self.clients.matchAll({ type: 'window' })) {
-        try {
-          await client.navigate(client.url);
-        } catch (err) {
-          // Safari < 16 and some webviews: the page reloads itself on
-          // controllerchange instead (src/pwaUpdate.ts).
-          console.warn('sw-refresh: could not navigate client', err);
+      // NEVER wait for the navigations: for a hidden tab or a suspended home-screen app `client.navigate` can stay
+      // pending, and a worker that never finishes `activating` blocks every later update on that device.
+      void self.clients.matchAll({ type: 'window' }).then((all) => {
+        for (const client of all) {
+          // a page that is not on screen keeps running until it is opened again; the plate / build check (src/pwaUpdate.ts)
+          // offers the reload then, instead of reloading something nobody is looking at
+          if (client.visibilityState && client.visibilityState !== 'visible') continue;
+          try {
+            Promise.resolve(client.navigate(client.url)).catch((err) => {
+              console.warn('sw-refresh: could not navigate client', err);
+            });
+          } catch (err) {
+            console.warn('sw-refresh: could not navigate client', err);
+          }
         }
-      }
+      });
     })(),
   );
 });
