@@ -84,8 +84,7 @@ export interface ClientChatProps {
  * The "New messages" line is fixed when the thread opens and its count equals the Today tile badge (one source).
  */
 export function ClientChat(p: ClientChatProps) {
-  const pageRef = useRef<HTMLDivElement>(null);
-  useViewportTop(pageRef);
+  const pageRef = useViewportTop();
   const { cc } = useClientT();
   const shw = useShareWords();
   const { ch, locale } = useChatT();

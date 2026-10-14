@@ -1,4 +1,4 @@
-import { useLayoutEffect, type RefObject } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
 /**
  * Publishes the room an element has below its top edge as `--cc-avail` (px): from the element's top to the lowest
@@ -7,9 +7,11 @@ import { useLayoutEffect, type RefObject } from 'react';
  * reads it instead of guessing the height of the bars above it or trusting `100dvh`. Kept current on resize and when
  * the frame or the page changes size.
  */
-export function useViewportTop(ref: RefObject<HTMLElement | null>): void {
+export function useViewportTop(): (el: HTMLElement | null) => void {
+  // A callback ref kept in state: the page can mount AFTER the host (a skeleton shows first on a refresh), so the
+  // element must be picked up whenever it appears, not once.
+  const [el, setEl] = useState<HTMLElement | null>(null);
   useLayoutEffect(() => {
-    const el = ref.current;
     if (!el) return;
     const apply = () => {
       let bottom = window.visualViewport?.height ?? window.innerHeight;
@@ -32,5 +34,6 @@ export function useViewportTop(ref: RefObject<HTMLElement | null>): void {
       window.visualViewport?.removeEventListener('resize', apply);
       ro?.disconnect();
     };
-  }, [ref]);
+  }, [el]);
+  return setEl;
 }
