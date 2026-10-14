@@ -28,6 +28,20 @@
   padding: var(--s-12) var(--s-16);
   border-bottom: var(--co-hair) solid var(--color-divider);
 }
+.ch-bar-who {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--s-12);
+  min-width: 0;
+}
+.ch-bar-who--link {
+  cursor: pointer;
+}
+.ch-bar-who--link:focus-visible {
+  outline: 2px solid var(--color-focus, currentColor);
+  outline-offset: 2px;
+}
 .ch-bar-id {
   display: flex;
   flex-direction: column;
@@ -106,5 +120,9 @@
   .ch-page--thread {
     max-width: none;
     margin: 0;
+  }
+  /* the divider runs edge to edge; the same gap above the row, below it and at the sides */
+  .ch-page--thread .ch-comp {
+    padding: var(--s-8) var(--s-8) calc(var(--s-8) + env(safe-area-inset-bottom, 0px));
   }
 }

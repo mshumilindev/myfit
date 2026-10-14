@@ -1,6 +1,6 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { BackButton } from '../../components/ui/BackButton';
-import { Button, IconButton } from '../../components/ui/Button';
+import { IconButton } from '../../components/ui/Button';
 import { ChatShell } from '../../components/ui/ChatShell';
 import { ChatBubble } from '../../components/ui/ChatBubble';
 import { ConfirmEffectsDialog } from '../../components/ui/ConfirmEffectsDialog';
@@ -257,19 +257,29 @@ export function ThreadView({
       head={
         <div className="ch-bar ctl-row--md">
           {onBack && <BackButton label={ch.chBack} onClick={onBack} />}
-          <ClientAvatar id={clientId} name={name} size={36} hasPhoto={client?.hasPhoto} />
-          <div className="ch-bar-id">
-            <b>{name}</b>
-            {client && <small>{client.program}</small>}
+          <div
+            className={`ch-bar-who${onOpenClient ? ' ch-bar-who--link' : ''}`}
+            {...(onOpenClient
+              ? {
+                  role: 'link',
+                  tabIndex: 0,
+                  'aria-label': `${ch.chOpenClient}: ${name}`,
+                  onClick: onOpenClient,
+                  onKeyDown: (e: KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onOpenClient();
+                    }
+                  },
+                }
+              : {})}
+          >
+            <ClientAvatar id={clientId} name={name} size={36} hasPhoto={client?.hasPhoto} />
+            <div className="ch-bar-id">
+              <b>{name}</b>
+              {client && <small>{client.program}</small>}
+            </div>
           </div>
-          {onOpenClient &&
-            (desktop ? (
-              <Button variant="ghost" icon="user-focus" onClick={onOpenClient}>
-                {ch.chOpenClient}
-              </Button>
-            ) : (
-              <IconButton icon="user-focus" label={ch.chOpenClient} onClick={onOpenClient} />
-            ))}
           {x.barActions}
           <IconButton
             icon="dots-three"

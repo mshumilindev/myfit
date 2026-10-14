@@ -1,6 +1,7 @@
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react';
 
 import { Icon } from '../../ui';
+import { Badge } from './Badge';
 
 import './Button.css';
 
@@ -141,6 +142,8 @@ export interface IconButtonProps extends Omit<
   variant?: ButtonVariant;
   size?: ButtonSize;
   shape?: ButtonShape;
+  /** Unread count drawn on the corner (0 / undefined = none). */
+  badge?: number;
 }
 
 /** Square, icon-only button. Defaults to the ghost variant. */
@@ -150,6 +153,7 @@ export function IconButton({
   variant = 'ghost',
   size = 'md',
   shape,
+  badge,
   disabled,
   type = 'button',
   className,
@@ -168,6 +172,7 @@ export function IconButton({
   return (
     <button type={type} className={cls} aria-label={label} disabled={disabled} {...rest}>
       <Icon name={icon} />
+      {badge ? <Badge n={badge} anchor="corner" /> : null}
     </button>
   );
 }

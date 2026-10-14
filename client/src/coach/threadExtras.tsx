@@ -293,6 +293,18 @@ export function createCoachThreadExtras(opts: CoachThreadExtrasOpts = {}) {
         if (pending) rememberShare(pending);
         setPending(null);
       },
+      barActions: (
+        <IconButton
+          icon="pencil-simple"
+          variant="ghost"
+          label={nt.nButtonAria(notes.length)}
+          aria-expanded={notesOpen}
+          onClick={(e) => {
+            anchor.current = e.currentTarget;
+            setNotesOpen(true);
+          }}
+        />
+      ),
       noteItems,
       card,
       shareDelete,

@@ -282,6 +282,7 @@ export function Client360Screen({
       <IconButton
         icon="envelope"
         label={spoken ?? `${r.c3Message} ${first}`}
+        badge={unread}
         onClick={() => onNavigate(chatRoute(client.id))}
       />
       <IconButton

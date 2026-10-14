@@ -43,6 +43,7 @@ import {
   type SortKey,
   rosterCsvRows,
 } from './roster/rosterLogic';
+import { useCoachUnreadState } from '../data/useCoachUnread';
 import { WorldFailed } from '../today/WorldNotices';
 
 /** Kept here: the public home of the invite labels. */
@@ -69,10 +70,12 @@ export function RosterScreen({
   onNavigate,
   port,
   invitePort,
-  unreadByClient = {},
+  unreadByClient: unreadProp,
   initialInvite = null,
   now: nowProp,
 }: RosterScreenProps) {
+  const liveUnread = useCoachUnreadState({ uid: unreadProp ? null : undefined });
+  const unreadByClient = unreadProp ?? liveUnread.byClient;
   const { r, locale } = useRosterT();
   const { c: c360 } = useC360T();
   const { sf } = useSafeT();
@@ -300,6 +303,7 @@ export function RosterScreen({
           <RosterStrip
             clients={clients}
             max={STRIP_MAX}
+            unread={unreadByClient}
             r={r}
             onOpen={goClient}
             onAll={() => {

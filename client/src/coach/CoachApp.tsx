@@ -79,7 +79,7 @@ export function CoachShell({
   const wide = useMinWidth(COACH_WIDE_BREAKPOINT);
   const unread = useCoachUnread();
   const active = navScreenOf(route);
-  // A phone thread is the whole screen (like every other chat): no top bar, no page title, no bottom navigation.
+  // A phone thread is the whole screen (like every other chat): the app header stays (like every app), no page title, no bottom navigation.
   const threadOpen = !desktop && route.screen === 'chat' && 'with' in route && !!route.with;
   const mainRef = useRef<HTMLElement>(null);
   // Phone: the More tab opens a bottom sheet. Desktop: the rail collapses its trailing entries
@@ -219,7 +219,7 @@ export function CoachShell({
         />
       )}
 
-      {!desktop && !threadOpen && (
+      {!desktop && (
         <BrandBar
           header
           app={c.modeCoach}

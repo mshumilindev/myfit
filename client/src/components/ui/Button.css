@@ -236,3 +236,7 @@ a.uibtn:hover {
     transition-delay: 0s;
   }
 }
+
+.uibtn--icon {
+  position: relative;
+}

@@ -49,6 +49,6 @@
     backdrop-filter: blur(14px);
   }
   .chs-foot {
-    padding-bottom: calc(var(--s-12) + env(safe-area-inset-bottom, 0px));
+    padding: 0;
   }
 }

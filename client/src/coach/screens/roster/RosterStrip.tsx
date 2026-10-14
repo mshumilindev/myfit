@@ -15,6 +15,7 @@ export function RosterStrip(p: {
   clients: readonly RosterRow[];
   max: number;
   r: RosterStrings;
+  unread?: Readonly<Record<string, number>>;
   onOpen: (id: string) => void;
   onAll: () => void;
 }) {
@@ -34,7 +35,12 @@ export function RosterStrip(p: {
             ring={ring}
             label={firstName(c.name)}
             media={<ClientAvatar id={c.id} name={c.name} hasPhoto={c.hasPhoto} size={42} />}
-            aria-label={`${c.name}, ${statusLabel(p.r, status)}`}
+            badge={p.unread?.[c.id] || undefined}
+            aria-label={
+              p.unread?.[c.id]
+                ? p.r.c3MessageUnread(firstName(c.name), p.unread[c.id])
+                : `${c.name}, ${statusLabel(p.r, status)}`
+            }
             onClick={() => p.onOpen(c.id)}
           />
         );

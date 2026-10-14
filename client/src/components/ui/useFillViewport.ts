@@ -27,11 +27,20 @@ export function useFillViewport(): (el: HTMLElement | null) => void {
     apply();
     const raf = requestAnimationFrame(apply); // after the host's layout settles (bars above, fonts)
     window.addEventListener('resize', apply);
+    window.addEventListener('hashchange', apply); // the bars above come and go with the route (a thread opens)
+    const raf2 = requestAnimationFrame(() => requestAnimationFrame(apply));
     window.visualViewport?.addEventListener('resize', apply);
     const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(apply);
     ro?.observe(document.body);
+    if (el.parentElement) ro?.observe(el.parentElement);
+    // Everything above the element moves its top when it resizes (a bar whose avatar photo loads, a banner): watch it.
+    for (let p: Element | null = el; p && p !== document.body; p = p.parentElement)
+      for (let sib = p.previousElementSibling; sib; sib = sib.previousElementSibling)
+        ro?.observe(sib);
     return () => {
       cancelAnimationFrame(raf);
+      cancelAnimationFrame(raf2);
+      window.removeEventListener('hashchange', apply);
       window.removeEventListener('resize', apply);
       window.visualViewport?.removeEventListener('resize', apply);
       ro?.disconnect();
