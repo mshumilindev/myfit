@@ -4,7 +4,6 @@
  * After that: his notes as a chat thread, newest at the bottom, plus settings.
  */
 import { Chip } from '../components/ui/Chip';
-import { Field } from '../components/ui/Field';
 import { BackButton } from '../components/ui/BackButton';
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Switch as KitSwitch } from '../components/ui/Switch';
@@ -12,6 +11,9 @@ import { ListRow } from '../components/ui/GroupedList';
 import { Button, IconButton } from '../components/ui/Button';
 import { Notice } from '../components/ui/Notice';
 import { Card } from '../components/ui/Card';
+import { ChatShell } from '../components/ui/ChatShell';
+import { ChatComposer } from '../components/ui/ChatComposer';
+import { ChatBubble, ChatDay, ChatMessage, ChatNewDivider } from '../components/ui/ChatBubble';
 import { FLAGS, LOCALES, setLocale, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { latestWeight, setCoach, updateBodyMetrics, useSelfCoachRole, useStore } from '../store';
@@ -460,6 +462,8 @@ function dayLabel(at: number, now: number, t: ReturnType<typeof useT>['t'], loca
     month: 'short',
   }).format(at);
 }
+
+const ATLAS_MAX_TEXT = 400;
 
 function CoachThread({
   onClose,
@@ -1037,280 +1041,310 @@ function CoachThread({
   }, [shown, now, t, locale]);
 
   return (
-    <div
-      ref={screenRef}
-      className="screen atl-screen atl-thread"
+    <ChatShell
+      className="atl-thread"
       style={{ ['--atl' as string]: TEMPER_COLOR[temper] }}
-    >
-      <div className="atl-head">
-        <BackButton onClick={onClose} label={t.backAction} />
-        <Button
-          variant="ghost"
-          size="sm"
-          className="atl-face-btn"
-          onClick={() => setPortrait(true)}
-          aria-label={t.atlasName}
-        >
-          <AtlasFace temper={temper} size={38} />
-        </Button>
-        <span className="atl-head-text">
-          <b>
-            {t.atlasName}{' '}
-            <span className="atl-temper-inline">· {t.atlasTemper[temperIndex(temper)]}</span>
-          </b>
-          <span>
-            {store.coach.role === 'main' ? t.atlasRoleMainShort : t.atlasRoleExtraShort}
-            {temper < chosen
-              ? ` · ${t.atlasSoftened}${soft ? `: ${t.atlasSoftReason[soft]}` : ''}`
-              : ''}
+      head={
+        <div className="ch-bar atl-head">
+          <BackButton onClick={onClose} label={t.backAction} />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="atl-face-btn"
+            onClick={() => setPortrait(true)}
+            aria-label={t.atlasName}
+          >
+            <AtlasFace temper={temper} size={38} />
+          </Button>
+          <span className="atl-head-text">
+            <b>
+              {t.atlasName}{' '}
+              <span className="atl-temper-inline">· {t.atlasTemper[temperIndex(temper)]}</span>
+            </b>
+            <span>
+              {store.coach.role === 'main' ? t.atlasRoleMainShort : t.atlasRoleExtraShort}
+              {temper < chosen
+                ? ` · ${t.atlasSoftened}${soft ? `: ${t.atlasSoftReason[soft]}` : ''}`
+                : ''}
+            </span>
           </span>
-        </span>
-        <TemperHeat temper={temper} />
-        <IconButton
-          icon="sliders-horizontal"
-          label={t.atlasSettings}
-          onClick={() => setSettings(true)}
-        />
-      </div>
-      <div className="atl-feed" ref={feedRef}>
-        {store.coach.role === 'main' && <PlanCard temper={temper} now={now} />}
-        {hasOlder && <div ref={topRef} className="atl-older" aria-hidden />}
-        {groups.map((g) => (
-          <div key={g.label} className="atl-group">
-            <span className="atl-day">{g.label}</span>
-            {g.items.map((n) =>
-              n.notice ? (
-                <div key={n.id} className="atl-notice" role="status">
-                  {n.text}
-                </div>
-              ) : n.from === 'me' ? (
-                <div key={n.id} className="atl-me">
-                  {n.text}
-                  <time className="atl-time">{hm(n.at)}</time>
-                </div>
-              ) : (
-                <Fragment key={n.id}>
-                  {n.id === firstUnreadId && (
-                    <div className="atl-new" role="status">
-                      <span>{t.atlasNewNotes(unreadCount)}</span>
-                    </div>
-                  )}
-                  <div
-                    className={`atl-msg${(noteAt.get(n.id) ?? 0) > readSnap ? ' unread' : ''}`}
-                    data-note-at={noteAt.get(n.id)}
-                  >
-                    <Bubble temper={temper} time={n.pending ? undefined : hm(n.at)}>
-                      {n.pending && n.text === '…' ? (
-                        <span className="atl-dots" role="status" aria-label="…">
-                          <i />
-                          <i />
-                          <i />
-                        </span>
-                      ) : (
-                        <span className={n.pending ? 'atl-caret' : undefined}>{n.text}</span>
-                      )}
-                      {n.chart && !n.pending && <ChatChart chart={n.chart} locale={locale} />}
-                    </Bubble>
-                    {n.action && !busy && (
-                      <div className="atl-suggest">
-                        <Chip
-                          tone="atlas"
-                          selected
-                          onClick={() => {
-                            const act = n.action!;
-                            updateChat(n.id, { action: undefined });
-                            track({ kind: 'action', done: true });
-                            const L = (en: string, uk: string) => (locale === 'uk' ? uk : en);
-                            const res = runAction(act, store, wallClock(), L, fmt.exercise);
-                            const at = wallClock();
-                            pushChat({ id: `act-${at}`, at, from: 'atlas', text: res.text });
-                            if (res.openWorkoutId) onOpenSession?.(res.openWorkoutId);
-                          }}
-                        >
-                          {t.atlasDoIt}
-                        </Chip>
-                        <Chip
-                          tone="atlas"
-                          onClick={() => {
-                            updateChat(n.id, { action: undefined });
-                            track({ kind: 'action', done: false });
-                          }}
-                        >
-                          {t.atlasCancel}
-                        </Chip>
-                      </div>
-                    )}
-                    {n.id === rateId && !busy && (
-                      <div className="atl-rate">
-                        <IconButton
-                          size="sm"
-                          icon="thumbs-up"
-                          label={t.atlasRateUp}
-                          title={t.atlasRateUp}
-                          onClick={() => rate(n, true)}
-                        />
-                        <IconButton
-                          size="sm"
-                          icon="thumbs-down"
-                          label={t.atlasRateDown}
-                          title={t.atlasRateDown}
-                          onClick={() => rate(n, false)}
-                        />
-                      </div>
-                    )}
-                    {n.chips && n.id === chipsId && !busy && (
-                      <div className="atl-suggest">
-                        {n.chips.map((ch) => (
-                          <Chip tone="atlas" key={ch} onClick={() => void send(ch, false, false)}>
-                            {ch}
-                          </Chip>
-                        ))}
-                      </div>
-                    )}
-                    {n.puterFor && !busy && (
-                      <div className="atl-suggest">
-                        <Chip
-                          tone="atlas"
-                          onClick={() => {
-                            const q = n.puterFor!;
-                            // The sign-in window has to open straight from this tap.
-                            void puterSignIn().then((ok) => {
-                              if (ok) void sendPuter(q, undefined, n.id);
-                              else
-                                updateChat(n.id, { puterFor: undefined, text: t.atlasPuterFail });
-                            });
-                          }}
-                        >
-                          {t.atlasPuterEnable}
-                        </Chip>
-                        <Chip
-                          tone="atlas"
-                          onClick={() =>
-                            updateChat(n.id, { puterFor: undefined, text: t.atlasLocalUnknown })
-                          }
-                        >
-                          {t.atlasPuterNo}
-                        </Chip>
-                      </div>
-                    )}
-                    {n.langOffer && !busy && (
-                      <div className="atl-suggest">
-                        <Chip
-                          tone="atlas"
-                          onClick={() => {
-                            const to = n.langOffer!;
-                            updateChat(n.id, { langOffer: undefined });
-                            setLocale(to);
-                            const at = wallClock();
-                            pushChat({
-                              id: `lang-ok-${at}`,
-                              at,
-                              from: 'atlas',
-                              text: LOCALES[to].atlasLangDone,
-                            });
-                          }}
-                        >
-                          {FLAGS[n.langOffer]} {LOCALES[n.langOffer].locale}
-                        </Chip>
-                        <Chip
-                          tone="atlas"
-                          onClick={() => updateChat(n.id, { langOffer: undefined })}
-                        >
-                          {t.atlasLangKeep}
-                        </Chip>
-                      </div>
-                    )}
-                  </div>
-                </Fragment>
-              ),
-            )}
-          </div>
-        ))}
-        {hello && (
-          <div className="atl-msg atl-welcome">
-            <Bubble temper={temper}>
-              <span>{hello.text}</span>
-            </Bubble>
-            {!busy && (
-              <div className="atl-suggest">
-                {hello.chips.map((ch) => (
-                  <Chip tone="atlas" key={ch} onClick={() => void send(ch, false, false)}>
-                    {ch}
-                  </Chip>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        <div ref={endRef} className="atl-end" />
-      </div>
-      <form
-        className="atl-composer"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void send(draft);
-        }}
-      >
-        <Field
-          id="atl-input"
-          aria-label={t.atlasAsk}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder={quietTill ? t.atlasBlockedPlaceholder(clock(quietTill)) : t.atlasAsk}
-          maxLength={400}
-          autoComplete="off"
-          enterKeyHint="send"
-        />
-        <IconButton
-          type="submit"
-          variant="primary"
-          icon="arrow-up"
-          label={t.atlasSend}
-          disabled={!draft.trim() || busy}
-        />
-      </form>
-      {consent !== null && (
-        <Sheet onClose={() => setConsent(null)} className="atl-sheet">
-          <div className="sheet-head">
-            <h3>{t.atlasConsentTitle}</h3>
-          </div>
-          <p className="atl-consent">{t.atlasConsentBody}</p>
-          <div className="sheet-actions">
-            <Button variant="secondary" className="grow" onClick={() => setConsent(null)}>
-              {t.atlasNotNow}
-            </Button>
-            <Button
-              variant="primary"
-              className="grow"
-              onClick={() => {
-                const q = consent;
-                setCoach({ chatConsent: true });
-                setConsent(null);
-                void sendGemini(q);
-              }}
-            >
-              {t.atlasConsentOk}
-            </Button>
-          </div>
-        </Sheet>
-      )}
-      {portrait && (
-        <div
-          className="atl-portrait"
-          role="dialog"
-          aria-label={`${t.atlasName} · ${t.atlasTemper[temperIndex(temper)]}`}
-          onClick={() => setPortrait(false)}
-        >
-          <img src={`/atlas/atlas-${temper}-full.webp`} alt="" />
-          <span className="atl-portrait-name">
-            {t.atlasName}{' '}
-            <span className="atl-temper-inline">· {t.atlasTemper[temperIndex(temper)]}</span>
-          </span>
-          <IconButton icon="x" label={t.backAction} className="atl-portrait-close" />
+          <TemperHeat temper={temper} />
+          <IconButton
+            icon="sliders-horizontal"
+            label={t.atlasSettings}
+            onClick={() => setSettings(true)}
+          />
         </div>
-      )}
-      {settings && <CoachSettingsSheet onClose={() => setSettings(false)} />}
-    </div>
+      }
+      foot={
+        <ChatComposer
+          value={draft}
+          onChange={setDraft}
+          onSend={() => {
+            if (!busy) void send(draft);
+          }}
+          placeholder={quietTill ? t.atlasBlockedPlaceholder(clock(quietTill)) : t.atlasAsk}
+          sendLabel={t.atlasSend}
+          emptyReason={t.atlasAsk}
+          maxLength={ATLAS_MAX_TEXT}
+          tooLongText={`${draft.length} / ${ATLAS_MAX_TEXT}`}
+        />
+      }
+      overlays={
+        <>
+          {consent !== null && (
+            <Sheet onClose={() => setConsent(null)} className="atl-sheet">
+              <div className="sheet-head">
+                <h3>{t.atlasConsentTitle}</h3>
+              </div>
+              <p className="atl-consent">{t.atlasConsentBody}</p>
+              <div className="sheet-actions">
+                <Button variant="secondary" className="grow" onClick={() => setConsent(null)}>
+                  {t.atlasNotNow}
+                </Button>
+                <Button
+                  variant="primary"
+                  className="grow"
+                  onClick={() => {
+                    const q = consent;
+                    setCoach({ chatConsent: true });
+                    setConsent(null);
+                    void sendGemini(q);
+                  }}
+                >
+                  {t.atlasConsentOk}
+                </Button>
+              </div>
+            </Sheet>
+          )}
+          {portrait && (
+            <div
+              className="atl-portrait"
+              role="dialog"
+              aria-label={`${t.atlasName} · ${t.atlasTemper[temperIndex(temper)]}`}
+              onClick={() => setPortrait(false)}
+            >
+              <img src={`/atlas/atlas-${temper}-full.webp`} alt="" />
+              <span className="atl-portrait-name">
+                {t.atlasName}{' '}
+                <span className="atl-temper-inline">· {t.atlasTemper[temperIndex(temper)]}</span>
+              </span>
+              <IconButton icon="x" label={t.backAction} className="atl-portrait-close" />
+            </div>
+          )}
+          {settings && <CoachSettingsSheet onClose={() => setSettings(false)} />}
+        </>
+      }
+    >
+      <div className="ch-scroll" ref={screenRef}>
+        <div className="atl-feed" ref={feedRef}>
+          {store.coach.role === 'main' && <PlanCard temper={temper} now={now} />}
+          {hasOlder && <div ref={topRef} className="atl-older" aria-hidden />}
+          <ol className="ch-list-m">
+            {groups.map((g) => (
+              <Fragment key={g.label}>
+                <ChatDay>{g.label}</ChatDay>
+                {g.items.map((n, i) => {
+                  if (n.notice)
+                    return (
+                      <ChatMessage key={n.id} side="center">
+                        <ChatBubble system>{n.text}</ChatBubble>
+                      </ChatMessage>
+                    );
+                  if (n.from === 'me')
+                    return (
+                      <ChatMessage key={n.id} side="me" time={hm(n.at)}>
+                        <ChatBubble side="me">{n.text}</ChatBubble>
+                      </ChatMessage>
+                    );
+                  return (
+                    <Fragment key={n.id}>
+                      {n.id === firstUnreadId && (
+                        <ChatNewDivider>{t.atlasNewNotes(unreadCount)}</ChatNewDivider>
+                      )}
+                      <ChatMessage
+                        side="them"
+                        time={n.pending ? undefined : hm(n.at)}
+                        sender={
+                          g.items[i - 1]?.from === 'atlas' &&
+                          !g.items[i - 1]?.notice ? undefined : (
+                            <>
+                              <AtlasFace temper={temper} size={20} />
+                              {t.atlasName}
+                            </>
+                          )
+                        }
+                        className={(noteAt.get(n.id) ?? 0) > readSnap ? 'atl-unread' : undefined}
+                        attrs={{ 'data-note-at': noteAt.get(n.id) }}
+                        below={
+                          <>
+                            {n.action && !busy && (
+                              <div className="atl-suggest">
+                                <Chip
+                                  tone="atlas"
+                                  selected
+                                  onClick={() => {
+                                    const act = n.action!;
+                                    updateChat(n.id, { action: undefined });
+                                    track({ kind: 'action', done: true });
+                                    const L = (en: string, uk: string) =>
+                                      locale === 'uk' ? uk : en;
+                                    const res = runAction(act, store, wallClock(), L, fmt.exercise);
+                                    const at = wallClock();
+                                    pushChat({
+                                      id: `act-${at}`,
+                                      at,
+                                      from: 'atlas',
+                                      text: res.text,
+                                    });
+                                    if (res.openWorkoutId) onOpenSession?.(res.openWorkoutId);
+                                  }}
+                                >
+                                  {t.atlasDoIt}
+                                </Chip>
+                                <Chip
+                                  tone="atlas"
+                                  onClick={() => {
+                                    updateChat(n.id, { action: undefined });
+                                    track({ kind: 'action', done: false });
+                                  }}
+                                >
+                                  {t.atlasCancel}
+                                </Chip>
+                              </div>
+                            )}
+                            {n.id === rateId && !busy && (
+                              <div className="atl-rate">
+                                <IconButton
+                                  size="sm"
+                                  icon="thumbs-up"
+                                  label={t.atlasRateUp}
+                                  title={t.atlasRateUp}
+                                  onClick={() => rate(n, true)}
+                                />
+                                <IconButton
+                                  size="sm"
+                                  icon="thumbs-down"
+                                  label={t.atlasRateDown}
+                                  title={t.atlasRateDown}
+                                  onClick={() => rate(n, false)}
+                                />
+                              </div>
+                            )}
+                            {n.chips && n.id === chipsId && !busy && (
+                              <div className="atl-suggest">
+                                {n.chips.map((ch) => (
+                                  <Chip
+                                    tone="atlas"
+                                    key={ch}
+                                    onClick={() => void send(ch, false, false)}
+                                  >
+                                    {ch}
+                                  </Chip>
+                                ))}
+                              </div>
+                            )}
+                            {n.puterFor && !busy && (
+                              <div className="atl-suggest">
+                                <Chip
+                                  tone="atlas"
+                                  onClick={() => {
+                                    const q = n.puterFor!;
+                                    // The sign-in window has to open straight from this tap.
+                                    void puterSignIn().then((ok) => {
+                                      if (ok) void sendPuter(q, undefined, n.id);
+                                      else
+                                        updateChat(n.id, {
+                                          puterFor: undefined,
+                                          text: t.atlasPuterFail,
+                                        });
+                                    });
+                                  }}
+                                >
+                                  {t.atlasPuterEnable}
+                                </Chip>
+                                <Chip
+                                  tone="atlas"
+                                  onClick={() =>
+                                    updateChat(n.id, {
+                                      puterFor: undefined,
+                                      text: t.atlasLocalUnknown,
+                                    })
+                                  }
+                                >
+                                  {t.atlasPuterNo}
+                                </Chip>
+                              </div>
+                            )}
+                            {n.langOffer && !busy && (
+                              <div className="atl-suggest">
+                                <Chip
+                                  tone="atlas"
+                                  onClick={() => {
+                                    const to = n.langOffer!;
+                                    updateChat(n.id, { langOffer: undefined });
+                                    setLocale(to);
+                                    const at = wallClock();
+                                    pushChat({
+                                      id: `lang-ok-${at}`,
+                                      at,
+                                      from: 'atlas',
+                                      text: LOCALES[to].atlasLangDone,
+                                    });
+                                  }}
+                                >
+                                  {FLAGS[n.langOffer]} {LOCALES[n.langOffer].locale}
+                                </Chip>
+                                <Chip
+                                  tone="atlas"
+                                  onClick={() => updateChat(n.id, { langOffer: undefined })}
+                                >
+                                  {t.atlasLangKeep}
+                                </Chip>
+                              </div>
+                            )}
+                          </>
+                        }
+                      >
+                        <ChatBubble side="them">
+                          {n.pending && n.text === '…' ? (
+                            <span className="atl-dots" role="status" aria-label="…">
+                              <i />
+                              <i />
+                              <i />
+                            </span>
+                          ) : (
+                            <span className={n.pending ? 'atl-caret' : undefined}>{n.text}</span>
+                          )}
+                          {n.chart && !n.pending && <ChatChart chart={n.chart} locale={locale} />}
+                        </ChatBubble>
+                      </ChatMessage>
+                    </Fragment>
+                  );
+                })}
+              </Fragment>
+            ))}
+            {hello && (
+              <ChatMessage side="them">
+                <ChatBubble side="them">
+                  <span>{hello.text}</span>
+                </ChatBubble>
+                {!busy && (
+                  <div className="atl-suggest">
+                    {hello.chips.map((ch) => (
+                      <Chip tone="atlas" key={ch} onClick={() => void send(ch, false, false)}>
+                        {ch}
+                      </Chip>
+                    ))}
+                  </div>
+                )}
+              </ChatMessage>
+            )}
+          </ol>
+          <div ref={endRef} className="atl-end" />
+        </div>
+      </div>
+    </ChatShell>
   );
 }
 

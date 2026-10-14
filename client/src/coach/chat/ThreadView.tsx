@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { BackButton } from '../../components/ui/BackButton';
 import { Button, IconButton } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
+import { ChatShell } from '../../components/ui/ChatShell';
 import { ChatBubble } from '../../components/ui/ChatBubble';
 import { ConfirmEffectsDialog } from '../../components/ui/ConfirmEffectsDialog';
 import { Notice } from '../../components/ui/Notice';
@@ -253,32 +253,118 @@ export function ThreadView({
   const toast = pending && pending.cid === cid ? pending : null;
 
   return (
-    <Card pad="none" className="ch-card">
-      <div className="ch-bar ctl-row--md">
-        {onBack && <BackButton label={ch.chBack} onClick={onBack} />}
-        <ClientAvatar id={clientId} name={name} size={36} hasPhoto={client?.hasPhoto} />
-        <div className="ch-bar-id">
-          <b>{name}</b>
-          {client && <small>{client.program}</small>}
+    <ChatShell
+      head={
+        <div className="ch-bar ctl-row--md">
+          {onBack && <BackButton label={ch.chBack} onClick={onBack} />}
+          <ClientAvatar id={clientId} name={name} size={36} hasPhoto={client?.hasPhoto} />
+          <div className="ch-bar-id">
+            <b>{name}</b>
+            {client && <small>{client.program}</small>}
+          </div>
+          {onOpenClient &&
+            (desktop ? (
+              <Button variant="ghost" icon="user-focus" onClick={onOpenClient}>
+                {ch.chOpenClient}
+              </Button>
+            ) : (
+              <IconButton icon="user-focus" label={ch.chOpenClient} onClick={onOpenClient} />
+            ))}
+          {x.barActions}
+          <IconButton
+            icon="dots-three"
+            label={ch.chMenuChat}
+            aria-haspopup="menu"
+            aria-expanded={menu === 'head'}
+            onClick={(e) => openMenu('head', e.currentTarget)}
+          />
         </div>
-        {onOpenClient &&
-          (desktop ? (
-            <Button variant="ghost" icon="user-focus" onClick={onOpenClient}>
-              {ch.chOpenClient}
-            </Button>
-          ) : (
-            <IconButton icon="user-focus" label={ch.chOpenClient} onClick={onOpenClient} />
-          ))}
-        {x.barActions}
-        <IconButton
-          icon="dots-three"
-          label={ch.chMenuChat}
-          aria-haspopup="menu"
-          aria-expanded={menu === 'head'}
-          onClick={(e) => openMenu('head', e.currentTarget)}
+      }
+      foot={
+        <ThreadComposer
+          ch={ch}
+          value={draft}
+          onChange={onDraft}
+          onSend={() => {
+            if (x.intercept?.(draft)) {
+              onDraft('');
+              return;
+            }
+            if (!draft.trim() && !x.body) return;
+            store.send(cid, draft, x.body);
+            x.sent?.();
+            onDraft('');
+          }}
+          allowEmpty={!!x.body || !!x.allowEmpty}
+          placeholder={x.placeholder ?? ch.chWriteTo(first)}
+          lead={x.lead ?? composerLead}
+          chips={x.chips ?? composerChips}
         />
-      </div>
+      }
+      overlays={
+        <>
+          <ThreadMenu
+            ch={ch}
+            menu={menu}
+            anchor={anchor}
+            onClose={() => setMenu(null)}
+            msg={menuMsg}
+            data={menuData}
+            headItems={[
+              {
+                id: 'clear',
+                icon: 'trash',
+                label: ch.chClear,
+                danger: true,
+                hint: ch.chClearHint,
+                onSelect: () => setConfirm({ kind: 'chat' }),
+              },
+            ]}
+          />
 
+          {confirm?.kind === 'msg' && delTarget && delTarget.body.kind === 'text' && (
+            <DeleteMessageDialog
+              ch={ch}
+              first={first}
+              quote={delTarget.body.text}
+              onCancel={() => setConfirm(null)}
+              onConfirm={() => {
+                store.deleteMessage(cid, delTarget.id);
+                setConfirm(null);
+              }}
+            />
+          )}
+          {confirm?.kind === 'msg' &&
+            delTarget &&
+            delTarget.body.kind === 'share' &&
+            x.shareDelete?.(delTarget) && (
+              <ConfirmEffectsDialog
+                {...x.shareDelete(delTarget)!}
+                small={ch.chUndoSmall}
+                cancelLabel={ch.chCancel}
+                onCancel={() => setConfirm(null)}
+                onConfirm={() => {
+                  store.deleteMessage(cid, delTarget.id);
+                  setConfirm(null);
+                }}
+              />
+            )}
+          {x.overlay}
+          {confirm?.kind === 'chat' && (
+            <ClearChatDialog
+              ch={ch}
+              first={first}
+              count={messages.filter((m) => !m.deleted).length}
+              onCancel={() => setConfirm(null)}
+              onConfirm={() => {
+                store.clearChat(cid);
+                setConfirm(null);
+              }}
+            />
+          )}
+        </>
+      }
+    >
       {!online && (
         <Notice tone="note" icon="cloud-slash" className="ch-note">
           {ch.chOffline}
@@ -304,86 +390,6 @@ export function ThreadView({
         flash={flash}
         onUndo={() => store.undo()}
       />
-
-      <ThreadComposer
-        ch={ch}
-        value={draft}
-        onChange={onDraft}
-        onSend={() => {
-          if (x.intercept?.(draft)) {
-            onDraft('');
-            return;
-          }
-          if (!draft.trim() && !x.body) return;
-          store.send(cid, draft, x.body);
-          x.sent?.();
-          onDraft('');
-        }}
-        allowEmpty={!!x.body || !!x.allowEmpty}
-        placeholder={x.placeholder ?? ch.chWriteTo(first)}
-        lead={x.lead ?? composerLead}
-        chips={x.chips ?? composerChips}
-      />
-
-      <ThreadMenu
-        ch={ch}
-        menu={menu}
-        anchor={anchor}
-        onClose={() => setMenu(null)}
-        msg={menuMsg}
-        data={menuData}
-        headItems={[
-          {
-            id: 'clear',
-            icon: 'trash',
-            label: ch.chClear,
-            danger: true,
-            hint: ch.chClearHint,
-            onSelect: () => setConfirm({ kind: 'chat' }),
-          },
-        ]}
-      />
-
-      {confirm?.kind === 'msg' && delTarget && delTarget.body.kind === 'text' && (
-        <DeleteMessageDialog
-          ch={ch}
-          first={first}
-          quote={delTarget.body.text}
-          onCancel={() => setConfirm(null)}
-          onConfirm={() => {
-            store.deleteMessage(cid, delTarget.id);
-            setConfirm(null);
-          }}
-        />
-      )}
-      {confirm?.kind === 'msg' &&
-        delTarget &&
-        delTarget.body.kind === 'share' &&
-        x.shareDelete?.(delTarget) && (
-          <ConfirmEffectsDialog
-            {...x.shareDelete(delTarget)!}
-            small={ch.chUndoSmall}
-            cancelLabel={ch.chCancel}
-            onCancel={() => setConfirm(null)}
-            onConfirm={() => {
-              store.deleteMessage(cid, delTarget.id);
-              setConfirm(null);
-            }}
-          />
-        )}
-      {x.overlay}
-      {confirm?.kind === 'chat' && (
-        <ClearChatDialog
-          ch={ch}
-          first={first}
-          count={messages.filter((m) => !m.deleted).length}
-          onCancel={() => setConfirm(null)}
-          onConfirm={() => {
-            store.clearChat(cid);
-            setConfirm(null);
-          }}
-        />
-      )}
-    </Card>
+    </ChatShell>
   );
 }

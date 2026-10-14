@@ -36,8 +36,7 @@
   min-height: 0;
   overflow: hidden;
 }
-.cd-card .ch-card {
-  height: 100%;
+.cd-card .chs {
   border: 0;
 }
 .cd-list {
@@ -69,4 +68,13 @@
 }
 .cd-card .ch-bar .uibtn {
   flex: none;
+}
+/* The dock panel is its own frame: the chat fills it instead of measuring the screen. */
+.cd-card .chs-wrap {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+}
+.cd-card .chs {
+  height: 100%;
 }

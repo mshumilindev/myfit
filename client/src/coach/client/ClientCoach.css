@@ -124,44 +124,19 @@
   align-self: flex-start;
 }
 
-/* chat with the trainer: the card fills the pushed page */
+/* chat with the trainer: the frame (ChatShell) fills the pushed page; from 720 px it sits in a gutter */
 .cc-chat-page {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: var(--s-16);
 }
-.cc-chat-page .ch-card {
-  /* fills what is left below the bars the host app puts above this page and above the bottom of the frame that
-     clips it (--cc-avail, measured in useViewportTop), minus the page padding and the bottom safe area; the old
-     `100dvh - 32px` trusted the window, which is taller than the app frame on desktop, and pushed the composer out */
-  height: calc(var(--cc-avail, 100dvh) - var(--s-32) - env(safe-area-inset-bottom, 0px));
-  min-height: 0;
-}
-/* Phone: the same shape as the Atlas thread (a page, not a card inside a page): edge to edge, no frame, the bar flush at
-   the top with a hairline under it, the composer at the bottom with the safe-area padding. Desktop keeps the card. */
-@media (max-width: 719px) {
+@media (min-width: 720px) {
   .cc-chat-page {
-    padding: 0;
-  }
-  .cc-chat-page .ch-card {
-    height: var(--cc-avail, 100dvh);
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-  .cc-chat-page .ch-bar {
-    background: color-mix(in srgb, var(--c-121316, var(--color-bg)) 90%, transparent);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-  }
-  .cc-chat-page .ch-card > :last-child {
-    padding-bottom: calc(var(--s-12) + env(safe-area-inset-bottom, 0px));
+    padding: var(--s-16);
+    --chs-gap: var(--s-16);
   }
 }
+
 .cc-notebtn {
   position: relative;
   display: inline-flex;

@@ -1297,10 +1297,6 @@ html.theme-glass .kpi .lab {
   padding: var(--s-12) var(--page-x) 0;
   min-height: calc(var(--s-36) + var(--s-12));
 }
-.atl-screen .atl-head {
-  padding: var(--s-12) var(--page-x) var(--s-10);
-  min-height: calc(var(--s-36) + var(--s-12) + var(--s-10));
-}
 .screen.wlib-screen {
   padding: var(--s-12) var(--page-x) var(--s-20);
 }

@@ -105,6 +105,11 @@ export interface ChatMessageProps {
   children: ReactNode;
   onLongPress?: () => void;
   id?: string;
+  /** Under the bubble, inside the row: answer chips, a rating, a "do it" offer. */
+  below?: ReactNode;
+  className?: string;
+  /** `data-*` hooks a host reads back (the unread mark). */
+  attrs?: Record<`data-${string}`, string | number | undefined>;
 }
 
 /** One list row of the thread: sender line, bubble + actions, time. */
@@ -118,13 +123,19 @@ export function ChatMessage({
   children,
   onLongPress,
   id,
+  below,
+  className,
+  attrs,
 }: ChatMessageProps) {
   const press = useLongPress(onLongPress);
   return (
     <li
       id={id}
-      className={['uimsg', `uimsg--${side}`, highlight ? 'is-hl' : ''].filter(Boolean).join(' ')}
+      className={['uimsg', `uimsg--${side}`, highlight ? 'is-hl' : '', className]
+        .filter(Boolean)
+        .join(' ')}
       aria-label={label}
+      {...attrs}
       {...press}
     >
       {sender && <span className="uimsg-who">{sender}</span>}
@@ -133,6 +144,7 @@ export function ChatMessage({
         {actions && <span className="uimsg-act">{actions}</span>}
       </div>
       {time && <small className="uimsg-time">{time}</small>}
+      {below}
     </li>
   );
 }

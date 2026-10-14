@@ -26280,25 +26280,6 @@ body {
   color: var(--color-neutral-400);
   text-align: center;
 }
-.atl-thread {
-  gap: 0;
-  padding-bottom: 0;
-}
-.atl-head {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: var(--s-10);
-  padding: var(--s-8) 0 var(--s-10);
-  border-bottom: 1px solid var(--color-divider);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--atl) 14%, var(--color-bg)),
-    var(--color-bg)
-  );
-}
 .atl-head-text {
   flex: 1;
   min-width: 0;
@@ -26321,19 +26302,6 @@ body {
   flex-direction: column;
   gap: var(--s-14);
   padding: var(--s-14) 0 calc(var(--s-24) + var(--safe-bottom));
-}
-.atl-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-8);
-}
-.atl-day {
-  align-self: center;
-  font-size: var(--fs-11);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-neutral-500);
 }
 /* Temper picker (settings): full-width rows — face, name + one-line
    description, a radio on the right. One column reads faster than a row of
@@ -26570,15 +26538,6 @@ body {
 }
 
 /* Atlas chat: my messages, typing, composer */
-.atl-me {
-  align-self: flex-end;
-  max-width: 260px;
-  padding: var(--s-10) var(--s-14);
-  border-radius: var(--r-16) var(--r-16) var(--r-4) var(--r-16);
-  background: var(--color-neutral-800);
-  font-size: var(--fs-15);
-  line-height: 20px;
-}
 /* Send time under every message, messenger-style: small, quiet, bottom-right. */
 .atl-time {
   display: block;
@@ -26641,29 +26600,6 @@ body {
     animation: none;
   }
 }
-.atl-thread .atl-feed {
-  padding-bottom: var(--s-12);
-}
-.atl-composer {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  gap: var(--s-8);
-  align-items: center;
-  padding: var(--s-10) 0 calc(var(--s-12) + var(--safe-bottom));
-  background: linear-gradient(0deg, var(--color-bg) 70%, transparent);
-}
-.atl-composer .uifield {
-  flex: 1;
-  min-width: 0;
-}
-.atl-composer {
-  --field-radius: var(--r-pill);
-}
-
-.atl-composer .uifield-in {
-  font-size: var(--fs-16);
-}
 .atl-consent {
   margin: 0 0 var(--s-12);
   font-size: var(--fs-14);
@@ -26674,24 +26610,7 @@ body {
   scroll-margin-bottom: calc(84px + var(--safe-bottom));
 }
 
-.atl-notice {
-  align-self: center;
-  max-width: 320px;
-  padding: var(--s-8) var(--s-14);
-  border-radius: var(--r-pill);
-  background: var(--color-neutral-800);
-  color: var(--color-neutral-300);
-  font-size: var(--fs-13);
-  line-height: 17px;
-  text-align: center;
-}
-
 /* Atlas chat: follow-up chips under the latest answer */
-.atl-msg {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-8);
-}
 .atl-suggest {
   display: flex;
   flex-wrap: wrap;
@@ -26725,29 +26644,34 @@ body {
 .atl-rule {
   text-align: left;
 }
-/* Coach thread header runs edge to edge. */
-.atl-head {
-  margin-inline: -20px;
-  padding-inline: var(--s-16) var(--s-20);
-}
-@media (min-width: 720px) {
-  .atl-head {
-    margin-inline: -30px;
-    padding-inline: var(--s-28) var(--s-32);
-  }
-}
-/* The thread header sits flush at the top — no gutter above it. */
-.screen.atl-thread {
-  padding-top: 0;
-  /* The chosen temper is the screen's tone: kit buttons, chips and the mood
-     glow all read these, so nothing here hard-codes a colour. */
+/* Atlas theme of the shared chat (ChatShell / ChatBubble / ChatComposer): only colour lives here. The chosen temper
+   is the chat's tone: kit buttons, chips and the bubbles read these, so nothing hard-codes a colour. */
+.chs.atl-thread {
+  --chat-accent: var(--atl);
   --t-base: var(--atl);
   --t-tint: color-mix(in srgb, var(--atl) 16%, transparent);
   --t-text: color-mix(in srgb, var(--atl) 70%, white);
   --t-line: color-mix(in srgb, var(--atl) 50%, transparent);
   --t-on: var(--color-bg);
 }
-html.theme-glass .screen.atl-thread {
+.atl-thread .uibub--them {
+  box-shadow: inset 2px 0 0 var(--atl);
+  background: color-mix(in srgb, var(--atl) 9%, var(--color-control));
+}
+.atl-thread .uimsg.atl-unread .uibub--them {
+  box-shadow:
+    inset 2px 0 0 var(--atl),
+    0 0 0 1px color-mix(in srgb, var(--atl) 35%, transparent);
+}
+.atl-thread .chs-head {
+  background: color-mix(
+    in srgb,
+    var(--atl) 9%,
+    color-mix(in srgb, var(--c-121316) 90%, transparent)
+  );
+  border-bottom: 1px solid color-mix(in srgb, var(--atl) 26%, transparent);
+}
+html.theme-glass .chs.atl-thread {
   background:
     radial-gradient(
       90% 45% at 82% 22%,
@@ -26760,51 +26684,8 @@ html.theme-glass .screen.atl-thread {
       transparent 70%
     );
 }
-/* Glass: the header melts into the page (no opaque band, no gap under the app bar). */
-html.theme-glass .atl-head {
-  margin-top: -12px;
-  background: color-mix(
-    in srgb,
-    var(--atl) 9%,
-    color-mix(in srgb, var(--c-121316) 90%, transparent)
-  );
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  border-bottom-color: color-mix(in srgb, var(--atl) 26%, transparent);
-}
-html.theme-glass .atl-composer {
-  background: none;
-  /* The thread scrolls under the composer: the input itself is opaque. */
-  --field-bg: var(--c-191712);
-  --btn-under: var(--c-191712);
-}
-/* Unread notes: a divider above the first one and a soft tint until seen. */
-.atl-new {
-  display: flex;
-  align-items: center;
-  gap: var(--s-10);
-  margin: var(--s-10) 0 var(--s-6);
-  color: var(--atl);
-  font-size: var(--fs-12);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  scroll-margin-top: 90px;
-}
-.atl-new::before,
-.atl-new::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: color-mix(in srgb, var(--atl) 45%, transparent);
-}
-html.theme-glass .atl-bubble {
-  border-radius: var(--r-20) var(--r-20) var(--r-20) var(--r-6);
-  background: color-mix(in srgb, var(--atl) 9%, var(--color-control));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--atl) 30%, transparent);
-}
-.atl-msg.unread .atl-bubble {
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--atl) 35%, transparent);
+.atl-thread .uicomp {
+  --field-radius: var(--r-pill);
 }
 /* Charts inside Atlas's answers. */
 .atl-chart {
@@ -26849,13 +26730,13 @@ html.theme-glass .atl-bubble {
   color: var(--color-neutral-500);
 }
 /* "Do it" on Atlas's offers. */
-/* The composer sits at the bottom even when the thread is short. */
-.atl-thread .atl-feed {
-  flex: 1 0 auto;
-  padding-bottom: var(--s-12);
+/* The thread keeps its last message above the composer even when the list is short. */
+.atl-thread .atl-suggest {
+  margin-left: 0;
 }
-.atl-thread .atl-composer {
-  margin-top: auto;
+.atl-thread .atl-feed {
+  min-height: 100%;
+  padding: var(--s-4) 0 var(--s-12);
 }
 .atl-card:disabled {
   opacity: 0.4;

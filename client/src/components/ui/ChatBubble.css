@@ -75,8 +75,8 @@
   line-height: 1.45;
 }
 .uibub--me {
-  border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
-  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  border-color: color-mix(in srgb, var(--chat-accent, var(--color-accent)) 40%, transparent);
+  background: color-mix(in srgb, var(--chat-accent, var(--color-accent)) 16%, transparent);
   border-bottom-right-radius: var(--s-4);
 }
 .uibub--them {

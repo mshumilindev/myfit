@@ -3,9 +3,8 @@ import { KeyChangeBanner } from '../../security/KeyChangeBanner';
 import { SecurityCodeDialog } from '../../security/SecurityCodeDialog';
 import { useSecurity } from '../../security/useSecurity';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useViewportTop } from './useViewportTop';
 import { IconButton } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
+import { ChatShell } from '../../../components/ui/ChatShell';
 import { Chip } from '../../../components/ui/Chip';
 import { type MessageMenuItem } from '../../../components/ui/MessageMenu';
 import { NoteCard } from '../../../components/ui/NoteCard';
@@ -84,7 +83,6 @@ export interface ClientChatProps {
  * The "New messages" line is fixed when the thread opens and its count equals the Today tile badge (one source).
  */
 export function ClientChat(p: ClientChatProps) {
-  const pageRef = useViewportTop();
   const { cc } = useClientT();
   const shw = useShareWords();
   const { ch, locale } = useChatT();
@@ -293,23 +291,183 @@ export function ClientChat(p: ClientChatProps) {
     );
 
   return (
-    <div className="cc-chat-page" ref={pageRef}>
-      <Card pad="none" className="ch-card">
-        <ClientChatBar
-          cc={cc}
-          ch={ch}
-          trainer={trainer}
-          lastSeenAt={link.lastSeenAt}
-          first={first}
-          notesCount={sharedNotes.length}
-          notesOpen={notesOpen}
-          menuOpen={menu === 'head'}
-          onBack={p.onBack}
-          onOpenSharing={p.onOpenSharing}
-          onOpenNotes={() => setNotesOpen(true)}
-          onOpenMenu={(el) => openMenu('head', el)}
-        />
+    <div className="cc-chat-page">
+      <ChatShell
+        head={
+          <ClientChatBar
+            cc={cc}
+            ch={ch}
+            trainer={trainer}
+            lastSeenAt={link.lastSeenAt}
+            first={first}
+            notesCount={sharedNotes.length}
+            notesOpen={notesOpen}
+            menuOpen={menu === 'head'}
+            onBack={p.onBack}
+            onOpenSharing={p.onOpenSharing}
+            onOpenNotes={() => setNotesOpen(true)}
+            onOpenMenu={(el) => openMenu('head', el)}
+          />
+        }
+        foot={
+          <ThreadComposer
+            ch={ch}
+            value={draft}
+            onChange={setDraft}
+            onSend={() => {
+              if ((!draft.trim() && !queued) || !cid) return;
+              store.send(
+                cid,
+                draft,
+                queued
+                  ? { kind: 'share', share: queued, text: draft.trim() || undefined }
+                  : undefined,
+              );
+              if (queued) rememberShare(queued);
+              setQueued(null);
+              setDraft('');
+            }}
+            allowEmpty={!!queued}
+            lead={
+              <IconButton
+                icon="share-network"
+                variant="secondary"
+                shape="round"
+                label={shw.sh.pickAria}
+                aria-haspopup="dialog"
+                aria-expanded={pickerOpen}
+                onClick={(e) => {
+                  shareAnchor.current = e.currentTarget;
+                  setPickerOpen(true);
+                }}
+              />
+            }
+            placeholder={queued ? shw.sh.pendingPlaceholder : cc.chPlaceholder(first)}
+            chips={
+              pendingView || (my && my.upcoming.length > 0) ? (
+                <>
+                  {pendingView && (
+                    <div className="cc-pend">
+                      <ShareCardView view={pendingView} who={first} density="dock" />
+                      <IconButton
+                        icon="x"
+                        label={shw.sh.pendingRemove}
+                        onClick={() => setQueued(null)}
+                      />
+                    </div>
+                  )}
+                  {my && my.upcoming.length > 0 && (
+                    <Chip icon="swap" aria-label={sc.rcChipAria} onClick={() => setForm(true)}>
+                      {sc.rcChip}
+                    </Chip>
+                  )}
+                </>
+              ) : undefined
+            }
+          />
+        }
+        overlays={
+          <>
+            <SharePicker
+              open={pickerOpen}
+              onClose={() => setPickerOpen(false)}
+              anchorRef={shareAnchor}
+              viewer={viewer}
+              who={first}
+              inChat={inChat}
+              port={p.sharePort}
+              initialQuery={p.initial?.picker?.q}
+              initialFilter={p.initial?.picker?.filter}
+              onPick={(r) => {
+                setQueued(r);
+                setPickerOpen(false);
+              }}
+            />
 
+            <ThreadMenu
+              ch={ch}
+              menu={menu}
+              anchor={anchor}
+              onClose={() => setMenu(null)}
+              msg={menuMsg}
+              data={menuData}
+              headItems={[
+                ...(p.onOpenTrainer
+                  ? [
+                      {
+                        id: 'trainer',
+                        icon: 'user',
+                        label: cc.chMenuTrainer,
+                        onSelect: () => p.onOpenTrainer?.(),
+                      } as MessageMenuItem,
+                    ]
+                  : []),
+                {
+                  id: 'code',
+                  icon: 'shield-check',
+                  label: sf.scMenu,
+                  onSelect: () => setCodeOpen(true),
+                } as MessageMenuItem,
+                {
+                  id: 'clear',
+                  icon: 'trash',
+                  label: ch.chClear,
+                  danger: true,
+                  hint: ch.chClearHint,
+                  onSelect: () => setConfirm({ kind: 'chat' }),
+                },
+              ]}
+            />
+
+            {confirm?.kind === 'msg' && delTarget && delTarget.body.kind === 'text' && cid && (
+              <DeleteMessageDialog
+                ch={ch}
+                first={first}
+                quote={delTarget.body.text}
+                onCancel={() => setConfirm(null)}
+                onConfirm={() => {
+                  store.deleteMessage(cid, delTarget.id);
+                  setConfirm(null);
+                }}
+              />
+            )}
+            {confirm?.kind === 'chat' && cid && (
+              <ClearChatDialog
+                ch={ch}
+                first={first}
+                count={messages.filter((m) => !m.deleted).length}
+                onCancel={() => setConfirm(null)}
+                onConfirm={() => {
+                  store.clearChat(cid);
+                  setConfirm(null);
+                }}
+              />
+            )}
+            <NotesHost
+              open={notesOpen}
+              onClose={() => setNotesOpen(false)}
+              clientId={link.clientId}
+              first=""
+              coachFirst={first}
+              side="client"
+            />
+            {my && form && (
+              <ClientRescheduleSheet
+                my={my}
+                counterOf={counterId ? my.requests.find((r) => r.id === counterId) : undefined}
+                onClose={() => {
+                  setForm(false);
+                  setCounterId(null);
+                }}
+                onOpenChat={() => {
+                  setForm(false);
+                  setCounterId(null);
+                }}
+              />
+            )}
+          </>
+        }
+      >
         {!online && (
           <Notice tone="note" icon="cloud-slash" className="ch-note">
             {ch.chOffline}
@@ -351,161 +509,7 @@ export function ClientChat(p: ClientChatProps) {
           flash={flash}
           onUndo={() => store.undo()}
         />
-
-        <ThreadComposer
-          ch={ch}
-          value={draft}
-          onChange={setDraft}
-          onSend={() => {
-            if ((!draft.trim() && !queued) || !cid) return;
-            store.send(
-              cid,
-              draft,
-              queued
-                ? { kind: 'share', share: queued, text: draft.trim() || undefined }
-                : undefined,
-            );
-            if (queued) rememberShare(queued);
-            setQueued(null);
-            setDraft('');
-          }}
-          allowEmpty={!!queued}
-          lead={
-            <IconButton
-              icon="share-network"
-              variant="secondary"
-              shape="round"
-              label={shw.sh.pickAria}
-              aria-haspopup="dialog"
-              aria-expanded={pickerOpen}
-              onClick={(e) => {
-                shareAnchor.current = e.currentTarget;
-                setPickerOpen(true);
-              }}
-            />
-          }
-          placeholder={queued ? shw.sh.pendingPlaceholder : cc.chPlaceholder(first)}
-          chips={
-            pendingView || (my && my.upcoming.length > 0) ? (
-              <>
-                {pendingView && (
-                  <div className="cc-pend">
-                    <ShareCardView view={pendingView} who={first} density="dock" />
-                    <IconButton
-                      icon="x"
-                      label={shw.sh.pendingRemove}
-                      onClick={() => setQueued(null)}
-                    />
-                  </div>
-                )}
-                {my && my.upcoming.length > 0 && (
-                  <Chip icon="swap" aria-label={sc.rcChipAria} onClick={() => setForm(true)}>
-                    {sc.rcChip}
-                  </Chip>
-                )}
-              </>
-            ) : undefined
-          }
-        />
-
-        <SharePicker
-          open={pickerOpen}
-          onClose={() => setPickerOpen(false)}
-          anchorRef={shareAnchor}
-          viewer={viewer}
-          who={first}
-          inChat={inChat}
-          port={p.sharePort}
-          initialQuery={p.initial?.picker?.q}
-          initialFilter={p.initial?.picker?.filter}
-          onPick={(r) => {
-            setQueued(r);
-            setPickerOpen(false);
-          }}
-        />
-
-        <ThreadMenu
-          ch={ch}
-          menu={menu}
-          anchor={anchor}
-          onClose={() => setMenu(null)}
-          msg={menuMsg}
-          data={menuData}
-          headItems={[
-            ...(p.onOpenTrainer
-              ? [
-                  {
-                    id: 'trainer',
-                    icon: 'user',
-                    label: cc.chMenuTrainer,
-                    onSelect: () => p.onOpenTrainer?.(),
-                  } as MessageMenuItem,
-                ]
-              : []),
-            {
-              id: 'code',
-              icon: 'shield-check',
-              label: sf.scMenu,
-              onSelect: () => setCodeOpen(true),
-            } as MessageMenuItem,
-            {
-              id: 'clear',
-              icon: 'trash',
-              label: ch.chClear,
-              danger: true,
-              hint: ch.chClearHint,
-              onSelect: () => setConfirm({ kind: 'chat' }),
-            },
-          ]}
-        />
-
-        {confirm?.kind === 'msg' && delTarget && delTarget.body.kind === 'text' && cid && (
-          <DeleteMessageDialog
-            ch={ch}
-            first={first}
-            quote={delTarget.body.text}
-            onCancel={() => setConfirm(null)}
-            onConfirm={() => {
-              store.deleteMessage(cid, delTarget.id);
-              setConfirm(null);
-            }}
-          />
-        )}
-        {confirm?.kind === 'chat' && cid && (
-          <ClearChatDialog
-            ch={ch}
-            first={first}
-            count={messages.filter((m) => !m.deleted).length}
-            onCancel={() => setConfirm(null)}
-            onConfirm={() => {
-              store.clearChat(cid);
-              setConfirm(null);
-            }}
-          />
-        )}
-        <NotesHost
-          open={notesOpen}
-          onClose={() => setNotesOpen(false)}
-          clientId={link.clientId}
-          first=""
-          coachFirst={first}
-          side="client"
-        />
-        {my && form && (
-          <ClientRescheduleSheet
-            my={my}
-            counterOf={counterId ? my.requests.find((r) => r.id === counterId) : undefined}
-            onClose={() => {
-              setForm(false);
-              setCounterId(null);
-            }}
-            onOpenChat={() => {
-              setForm(false);
-              setCounterId(null);
-            }}
-          />
-        )}
-      </Card>
+      </ChatShell>
     </div>
   );
 }

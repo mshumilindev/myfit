@@ -20,24 +20,6 @@
   flex: none;
 }
 
-/* The thread card fills the viewport under the header: bar, scrolling messages, composer. */
-.ch-card {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  height: clamp(var(--co-chat-min), calc(100dvh - var(--co-chat-off)), var(--co-chat-max));
-  overflow: hidden;
-}
-.ch-page--thread .ch-card {
-  height: clamp(var(--co-chat-min), calc(100dvh - var(--co-chat-off-thread)), var(--co-chat-max));
-}
-/* Phone: the tab bar and header take less than the desktop frame, so the card runs closer to the bar. */
-@media (max-width: 47.99rem) {
-  .ch-card,
-  .ch-page--thread .ch-card {
-    height: clamp(var(--co-chat-min), calc(100dvh - var(--co-chat-off-phone)), var(--co-chat-max));
-  }
-}
 .ch-bar {
   display: flex;
   align-items: center;

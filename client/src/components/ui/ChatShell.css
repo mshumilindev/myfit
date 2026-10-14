@@ -1,0 +1,52 @@
+/* The chat frame. Tokens only. The one place to change how a conversation is laid out. */
+.chs-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* the room left for the frame below the wrapper's top; --chs-gap is the wrapper's own bottom padding */
+  --chs-gap: 0px;
+}
+.chs {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  height: calc(var(--chs-avail, 100dvh) - var(--chs-gap));
+}
+.chs-head {
+  flex: none;
+  min-width: 0;
+}
+.chs-body {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+.chs-foot {
+  flex: none;
+  padding: var(--s-12) var(--s-16);
+}
+
+/* Phone: the chat is the page. Edge to edge, no card, the bar flush at the top with a hairline, the composer clear
+   of the home indicator. */
+@media (max-width: 719px) {
+  .chs {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .chs-head {
+    background: color-mix(in srgb, var(--color-bg) 82%, transparent);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+  .chs-foot {
+    padding-bottom: calc(var(--s-12) + env(safe-area-inset-bottom, 0px));
+  }
+}
