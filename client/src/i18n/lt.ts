@@ -496,7 +496,7 @@ export const lt: Strings = {
     upperBody: 'Viršutinė dalis',
     lowerBody: 'Apatinė dalis',
     addRows: 'yrimai ar prisitraukimai',
-    addPress: 'spaudimai ar atsispaudimai ant lygiagrečių',
+    addPress: 'spaudimai ar dipai',
     addSquats: 'pritūpimai ar mirties traukos',
     addRowsUpper: 'spaudimai ar yrimai',
     balLow: (low: string) => `${low} — per mažai apimties`,
@@ -1346,7 +1346,8 @@ export const lt: Strings = {
   notifVolumeSub: 'Visi raumenys produktyviame ruože',
   muscleMapButton: 'Raumenų žemėlapis',
   muscleMapTitle: 'Šiandienos raumenų žemėlapis',
-  muscleMapWeekNote: 'Spalvos — savaitės apimtis, įskaitant šiandien',
+  muscleMapWeekNote:
+    'Spalvos — neseniai patirtas krūvis, įskaitant šiandien; po treniruotės jis mažėja palaipsniui',
   muscleMapTodo: 'Dar verta padaryti šiandien',
   muscleMapEase: 'Pristabdyk',
   muscleMapDone: 'Padaryta šiandien',

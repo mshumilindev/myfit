@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Icon } from '../../ui';
 import { Ring } from './Ring';
 import { TONES } from './tones';
 import { Row } from '../../stories/LocaleMatrix';
@@ -27,6 +28,19 @@ export const Tones: Story = {
       <Ring value={100} size={104} width={8} tone="rest" label="rest">
         1:12
       </Ring>
+    </Row>
+  ),
+};
+
+/** A glyph in the middle is centred and is a fixed 24px ("trained today" check). */
+export const WithGlyph: Story = {
+  render: () => (
+    <Row>
+      {[48, 60, 104].map((d) => (
+        <Ring key={d} value={100} size={d} width={d > 48 ? 4 : 3} tone="ok" label="done">
+          <Icon name="check" />
+        </Ring>
+      ))}
     </Row>
   ),
 };

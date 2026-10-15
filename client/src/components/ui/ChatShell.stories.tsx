@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IconButton } from './Button';
 import { ChatBubble, ChatDay, ChatMessage } from './ChatBubble';
 import { ChatComposer } from './ChatComposer';
-import { ChatShell } from './ChatShell';
+import { ChatPage, ChatShell } from './ChatShell';
 
 const meta = {
   title: 'Coach/Chat shell',
@@ -48,4 +48,14 @@ export const Default: Story = {
       </div>
     ),
   },
+};
+
+/** A screen chat (client, Atlas) in `ChatPage`: desktop gutter around the card, composer room set by the shell alone. */
+export const InPage: Story = {
+  args: Default.args,
+  render: (args) => (
+    <ChatPage>
+      <ChatShell {...args} />
+    </ChatPage>
+  ),
 };

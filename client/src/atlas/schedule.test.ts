@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { Workout } from '../types';
-import { planOutbox } from './schedule';
+import { chatBacked, planOutbox } from './schedule';
+import { buildNotes } from './notes';
+import { setWeekStartDay } from '../weekStart';
 import { proposePlan } from './plan';
 import { COACH_DEFAULT } from './types';
 import type { Fmt } from './voice';
@@ -73,5 +75,46 @@ describe('planOutbox', () => {
     }).find((x) => x.id.startsWith('skipped-'))!;
     expect(new Date(m.dueAt).getHours()).toBe(21);
     expect(m.dueAt - WED_NOON).toBeLessThan(DAY);
+  });
+});
+
+// SPO-21: every notification from Atlas has its message in the chat.
+describe('pushes are backed by chat notes', () => {
+  const hist = [1, 2, 3].map((w) => session(new Date(2026, 9, 7 - 7 * w, 18).getTime()));
+  const plan = proposePlan({ finished: hist, plays: [], now: WED_NOON, weekdays: [3] });
+  const coach = { ...COACH_DEFAULT, enabled: true, plan, startedAt: WED_NOON - 40 * DAY };
+  const store = (workouts: Workout[]) =>
+    ({
+      workouts,
+      sleeps: [],
+      bodyMetrics: null,
+      injuries: [],
+      restPeriods: [],
+      coach,
+    }) as unknown as Parameters<typeof buildNotes>[0];
+  const notesFor = (workouts: Workout[]) => (t: number) =>
+    buildNotes(store(workouts), t, 'en', fmt).notes;
+
+  it('a planned-day nudge (no playbook play) has its "skipped" note at the push time', () => {
+    const msgs = planOutbox({ ...base, finished: hist, coach });
+    const skipped = msgs.find((m) => m.id.startsWith('skipped-'))!;
+    expect(skipped.noteId).toBeDefined();
+    expect(chatBacked(msgs, notesFor(hist)).some((m) => m.id === skipped.id)).toBe(true);
+  });
+
+  it('the review goes out on the last day of the training week, and only when its note will exist', () => {
+    const review = (finished: Workout[]) =>
+      chatBacked(planOutbox({ ...base, finished, coach }), notesFor(finished)).find((m) =>
+        m.id.startsWith('review-'),
+      );
+    // Monday start: week ends Sunday. Nothing logged and nothing usual: no note, no push.
+    expect(review([])).toBeUndefined();
+    expect(new Date(review(hist)!.dueAt).getDay()).toBe(0);
+    setWeekStartDay(7); // Sunday start: the week ends on Saturday
+    try {
+      expect(new Date(review(hist)!.dueAt).getDay()).toBe(6);
+    } finally {
+      setWeekStartDay(1);
+    }
   });
 });

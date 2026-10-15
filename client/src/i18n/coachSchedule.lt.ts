@@ -322,7 +322,6 @@ export const scheduleLt: typeof scheduleEn = {
   scOverlapOpen: (names: string) => `Rodyti sutampančias treniruotes: ${names}`,
   scLeftMin: (n: number) => `liko ${n} min.`,
   scClosePanel: 'Uždaryti',
-  hsOpen: 'Kalendoriaus nustatymai',
   hsTitle: 'Kalendoriaus nustatymai',
   hsSub: 'Darbo valandos ir salės nustato, kurias valandas rodo kalendorius.',
   hsRange: 'Matomos valandos',
@@ -340,7 +339,7 @@ export const scheduleLt: typeof scheduleEn = {
   hsGyms: 'Mano salės',
   hsGymsHint:
     'Pažymėkite sales, kuriose dirbate. Naujos treniruotės pradedamos pirmoje pažymėtoje, o kalendoriaus filtre rodomos būtent jos.',
-  hsGymsChip: (n: number) => (n > 0 ? `Salės · ${n}` : 'Salės'),
+  hsOpen: 'Darbo valandos',
   hsGymsAdd: 'Pridėti salę',
   hsGymsCount: (n: number, total: number) => `Pasirinkta ${n} iš ${total}`,
   hsGymsNone: 'Nieko nepažymėta: kalendoriuje rodomos visos salės.',

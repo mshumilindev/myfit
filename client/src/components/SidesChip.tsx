@@ -20,24 +20,17 @@ export function SidesChip({
   if (mode === 'single') return null;
   const label = mode === 'pair' ? t.sidesPairLabel : t.sidesUniLabel;
   const note = mode === 'pair' ? t.perHandNote : t.sidesUniNote;
-  const inner = (
-    <>
-      <b className="sc-x">×2</b>
-      <span className="sc-l">{label}</span>
-    </>
-  );
-  return onClick ? (
+  const tone = mode === 'pair' ? 'accent' : 'rest';
+  return (
     <Chip
-      className={`sides-chip mode-${mode}`}
+      tone={tone}
+      lead="×2"
+      className="sides-chip"
       title={note}
-      aria-label={`${label} — ${note}`}
+      aria-label={onClick ? `${label} — ${note}` : undefined}
       onClick={onClick}
     >
-      {inner}
+      {label}
     </Chip>
-  ) : (
-    <span className={`sides-chip mode-${mode}`} title={note}>
-      {inner}
-    </span>
   );
 }

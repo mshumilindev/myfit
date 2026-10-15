@@ -4,7 +4,7 @@ import { SecurityCodeDialog } from '../../security/SecurityCodeDialog';
 import { useSecurity } from '../../security/useSecurity';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { IconButton } from '../../../components/ui/Button';
-import { ChatShell } from '../../../components/ui/ChatShell';
+import { ChatPage, ChatShell } from '../../../components/ui/ChatShell';
 import { type MessageMenuItem } from '../../../components/ui/MessageMenu';
 import { NoteCard } from '../../../components/ui/NoteCard';
 import { Notice } from '../../../components/ui/Notice';
@@ -290,7 +290,7 @@ export function ClientChat(p: ClientChatProps) {
     );
 
   return (
-    <div className="cc-chat-page">
+    <ChatPage className="cc-chat-page">
       <ChatShell
         head={
           <ClientChatBar
@@ -514,6 +514,6 @@ export function ClientChat(p: ClientChatProps) {
           onUndo={() => store.undo()}
         />
       </ChatShell>
-    </div>
+    </ChatPage>
   );
 }

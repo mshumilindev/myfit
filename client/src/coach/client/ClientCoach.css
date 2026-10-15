@@ -125,17 +125,7 @@
 }
 
 /* chat with the trainer: the frame (ChatShell) fills the pushed page; from 720 px it sits in a gutter */
-.cc-chat-page {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-@media (min-width: 720px) {
-  .cc-chat-page {
-    padding: var(--s-16);
-    --chs-gap: var(--s-16);
-  }
-}
+/* the page gutter is the kit's ChatPage */
 
 .cc-notebtn {
   position: relative;

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { InfoTable } from './InfoTable';
 import { ClientRow, LockedRow, LogModeBadge, SignalListRow, StatusLabel } from './RosterRows';
 
 const meta = {
@@ -147,6 +148,25 @@ export const Locked: Story = {
     <div style={{ maxWidth: 420, display: 'grid', gap: 12 }}>
       <LockedRow>Viktoriia has not shared injuries</LockedRow>
       <StatusLabel status="watch">Watch</StatusLabel>
+    </div>
+  ),
+};
+
+/** In an InfoTable value cell: lock and text are one element at the end of the row. */
+export const LockedInTable: Story = {
+  render: () => (
+    <div style={{ maxWidth: 420 }}>
+      <InfoTable
+        label="Client"
+        rows={[
+          { id: 'logging', label: 'Logging', value: 'Hybrid' },
+          {
+            id: 'restriction',
+            label: 'Restriction',
+            value: <LockedRow inline>Not shared</LockedRow>,
+          },
+        ]}
+      />
     </div>
   ),
 };

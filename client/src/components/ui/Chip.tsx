@@ -21,6 +21,8 @@ export interface ChipProps extends HTMLAttributes<HTMLElement> {
   disabled?: boolean;
   /** A figure after the label ("All 14"): tabular, dimmed, announced as part of the name. */
   count?: number | string;
+  /** A solid tab at the start of the chip ("×2"), in the chip's tone colour. */
+  lead?: ReactNode;
   /** Interactive chip that lives inside another clickable element (a card /
    *  button): renders a span[role=button] instead of a nested <button>. */
   nested?: boolean;
@@ -43,6 +45,7 @@ export function Chip({
   onClick,
   disabled,
   count,
+  lead,
   nested = false,
   ...rest
 }: ChipProps) {
@@ -53,12 +56,14 @@ export function Chip({
     selected ? 'is-selected' : '',
     onPhoto ? 'uichip--photo' : '',
     muted ? 'uichip--muted' : '',
+    lead != null ? 'uichip--has-lead' : '',
     className,
   ]
     .filter(Boolean)
     .join(' ');
   const inner = (
     <>
+      {lead != null && <b className="uichip-lead">{lead}</b>}
       {icon && <Icon name={icon} />}
       {(children != null || count != null) && (
         <span className="uichip-l">

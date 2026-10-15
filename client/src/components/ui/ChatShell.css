@@ -27,7 +27,23 @@
 }
 .chs-foot {
   flex: none;
-  padding: var(--s-12) var(--s-16);
+  /* The ONE place the composer's room is set (sides, bottom, safe area). A chat passes the bare ChatComposer. */
+  padding: var(--s-12) var(--s-16) var(--s-16);
+  border-top: var(--co-hair) solid var(--color-divider);
+}
+
+/* Desktop gutter around the frame, owned by the kit so no chat re-implements it, bottom included (the host may have
+   no bottom padding of its own; useFillViewport keeps the card above this gutter). A phone has no gutter: the chat is
+   the page. */
+.chs-page {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+@media (min-width: 720px) {
+  .chs-page {
+    padding: var(--s-16);
+  }
 }
 
 /* Phone: the chat is the page. Edge to edge, no card, the bar flush at the top with a hairline, the composer clear
@@ -49,6 +65,29 @@
     backdrop-filter: blur(14px);
   }
   .chs-foot {
-    padding: 0;
+    padding: var(--s-8) var(--s-8) calc(var(--s-8) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* The Coach shell is a phone up to 767 (tab bar, pushed thread), one band wider than the app's 720: there the chat is
+   still the page. Same phone look, opted into with breakpoint="coach". */
+@media (min-width: 720px) and (max-width: 767px) {
+  .chs--coach,
+  .chs--coach.uicard,
+  html.theme-glass .chs--coach.uicard {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .chs--coach .chs-head {
+    background: color-mix(in srgb, var(--color-bg) 82%, transparent);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+  .chs--coach .chs-foot {
+    padding: var(--s-8) var(--s-8) calc(var(--s-8) + env(safe-area-inset-bottom, 0px));
   }
 }

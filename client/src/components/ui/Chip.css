@@ -132,3 +132,31 @@ button.uichip {
   background: color-mix(in srgb, var(--color-bg) 70%, transparent);
   color: var(--color-text);
 }
+
+/* lead: a solid tab at the start of the chip ("×2"), filled with the tone's colour. */
+.uichip--has-lead {
+  padding-inline-start: var(--s-4);
+}
+.uichip-lead {
+  flex: none;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  height: calc(var(--ctl-h) - var(--s-8));
+  min-width: calc(var(--ctl-h) - var(--s-8));
+  padding: 0 var(--s-6);
+  border-radius: var(--chip-r);
+  background: var(--chip-fg);
+  color: var(--color-bg);
+  font-size: var(--ctl-fs);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.uichip--accent .uichip-lead {
+  background: var(--color-accent);
+  color: var(--color-accent-950);
+}
+.uichip--rest .uichip-lead {
+  background: var(--color-rest-300);
+  color: var(--color-rest-900);
+}

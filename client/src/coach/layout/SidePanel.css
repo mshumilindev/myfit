@@ -5,13 +5,21 @@
   gap: var(--s-12);
 }
 /* The footer stays at the bottom of the scrolling sheet, on the sheet's own plate (no box of its own). */
+/* The glass sheet draws its 1px edge ring as an inset shadow, which paints UNDER its children: a footer that reaches the
+   sheet's very edge covers the ring and, with square corners, the rounded corner. So the footer stops one ring-width
+   short of every edge (--sdp-edge) and follows the sheet's own corner radius. */
+.sdp-sheet {
+  --sdp-edge: 1px;
+}
 .sdp-foot {
   position: sticky;
   z-index: 1;
   /* the sheet pads its bottom by --space-8 + the safe area: cancel exactly that so nothing shows under the footer */
-  bottom: calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)));
-  margin: 0 calc(-1 * var(--gutter, 18px)) calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)));
-  padding: var(--s-12) var(--gutter, 18px) calc(var(--s-8) + var(--safe-bottom, 0px));
+  bottom: calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)) + var(--sdp-edge));
+  margin: 0 calc(-1 * var(--gutter, 18px) + var(--sdp-edge))
+    calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)));
+  padding: var(--s-12) calc(var(--gutter, 18px) - var(--sdp-edge))
+    calc(var(--s-8) + var(--safe-bottom, 0px));
   border-top: var(--co-hair) solid var(--t-line, var(--color-divider));
   /* the plate is a hair translucent: sit it on the page colour so nothing shows through from below */
   background:
@@ -21,9 +29,11 @@
 @media (min-width: 720px) {
   /* the desktop panel has its own padding (Overlays.css): the footer reaches its edges */
   .sdp-foot {
-    bottom: calc(var(--s-24) * -1);
-    margin: 0 calc(var(--s-20) * -1);
-    padding: var(--s-12) var(--s-20) var(--s-16);
+    bottom: calc(var(--s-24) * -1 + var(--sdp-edge));
+    margin: 0 calc(var(--s-20) * -1 + var(--sdp-edge));
+    padding: var(--s-12) calc(var(--s-20) - var(--sdp-edge)) var(--s-16);
+    /* the drawer is round on its left side (Overlays.css): the plate follows that corner, one ring-width inside it */
+    border-bottom-left-radius: calc(var(--radius-sheet) - var(--sdp-edge));
   }
 }
 .sdp-foot:empty {

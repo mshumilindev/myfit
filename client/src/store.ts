@@ -147,6 +147,7 @@ import {
   sleepKindOf,
   duplicateSleepIds,
 } from './sleep';
+import { computeStreak } from './streak';
 import { currentUid, getRole, callFn } from './api';
 import { readProgramMemory } from './data/programMemory';
 import { CONDITIONS_KEY, CONDITIONS_SHARE_KEY, createConditionsCache } from './conditionsCache';
@@ -4670,32 +4671,55 @@ export function activitiesOnDay(day: number, list: Activity[] = state.activities
   return list.filter((a) => dayKey(a.startedAt) === day);
 }
 
+const STREAK_DAY_MS = 86_400_000;
+
+/** ISO weekday (1=Mon…7=Sun) of a day key (day keys are UTC-midnight buckets of the local date). */
+function isoWeekdayOfDay(day: number): number {
+  const w = new Date(day * STREAK_DAY_MS).getUTCDay();
+  return w === 0 ? 7 : w;
+}
+
+/** Days that keep a streak alive without a workout: rest periods (rest / active rest /
+ *  illness), active injury or surgery rehab, and weekdays the assigned program leaves free. */
+export function streakProtectedPredicate(now: number = Date.now()): (day: number) => boolean {
+  const today = dayKey(now);
+  const rests = restDayKeys(state.restPeriods, now);
+  const rehab = state.injuries.filter(
+    (i) => (i.reason === 'injury' || i.reason === 'surgery') && i.startDay <= today,
+  );
+  const program = prescribedTrainingDays();
+  return (d) => {
+    if (rests.has(d)) return true;
+    for (const i of rehab) if (d >= i.startDay && d <= (i.healedDay ?? today)) return true;
+    return program.size > 0 && !program.has(isoWeekdayOfDay(d));
+  };
+}
+
+/** Day keys with a finished workout or activity. */
+export function trainedDayKeys(
+  workouts: Workout[] = state.workouts,
+  activities: Activity[] = state.activities,
+): Set<number> {
+  const days = new Set<number>();
+  for (const w of workouts) if (w.finishedAt !== null) days.add(dayKey(w.startedAt));
+  for (const a of activities) if (a.finishedAt !== null) days.add(dayKey(a.startedAt));
+  return days;
+}
+
 /**
- * Consistency streak in days: the unbroken run of days back from today where
- * each day was trained OR counts as rest. Unlogged past days always count as
- * rest (an ordinary gap never resets the streak), as do explicit rest periods;
- * today with nothing logged yet doesn't break the chain.
+ * Consistency streak in days — the single value shown everywhere. Rule and
+ * constants live in `streak.ts` (trained or protected days count; a gap of more
+ * than STREAK_MAX_GAP uncovered days resets it).
  */
 export function consistencyStreak(now: number = Date.now()): number {
-  const finished = state.workouts.filter((w) => w.finishedAt !== null);
-  if (finished.length === 0) return 0;
-  const trained = new Set(finished.map((w) => dayKey(w.startedAt)));
-  const rests = restDayKeys();
-  const today = dayKey(now);
-  const firstDay = Math.min(...finished.map((w) => dayKey(w.startedAt)));
-  let streak = 0;
-  for (let d = today; d >= firstDay; d--) {
-    // A past day always counts (skipped days are rest); today counts only once
-    // something is logged or it falls within a rest period.
-    if (trained.has(d) || rests.has(d) || d < today) {
-      streak += 1;
-    } else if (d === today) {
-      continue;
-    } else {
-      break;
-    }
-  }
-  return streak;
+  const trained = trainedDayKeys();
+  if (trained.size === 0) return 0;
+  return computeStreak({
+    trained,
+    isProtected: streakProtectedPredicate(now),
+    today: dayKey(now),
+    floorDay: Math.min(...trained),
+  });
 }
 
 /** Latest weigh-in (by time), or null. */

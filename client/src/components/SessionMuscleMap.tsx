@@ -5,7 +5,8 @@
  *
  * Grading combines two references (design confirmed with the user):
  *   • the science-based weekly landmarks (MEV/MAV/MRV), personalised to history,
- *     drive the body-map colours — so "too much" is honest across the week; and
+ *     measured against recent load that fades smoothly (recentLoadSets), drive
+ *     the body-map colours — so "too much" is honest and never a cliff; and
  *   • this training day's own history (median sets per muscle on the same
  *     program day) drives the "still worth doing today" targets.
  */
@@ -14,14 +15,8 @@ import { Sheet, Icon } from '../ui';
 import { useT } from '../i18n';
 import { useStore, muscleSetsInWorkout, programDayNameFor } from '../store';
 import { personalLandmarks } from '../personalize';
-import {
-  LANDMARKS,
-  VOLUME_MUSCLES,
-  ZONE_COLOR,
-  classifyZone,
-  weeklyMuscleSets,
-  type Zone,
-} from '../volume';
+import { LANDMARKS, VOLUME_MUSCLES, ZONE_COLOR, classifyZone, type Zone } from '../volume';
+import { recentLoadSets } from '../recovery';
 import { MuscleHeatmap } from './Muscle';
 import type { MuscleGroup } from '../data/exercises';
 import type { Workout } from '../types';
@@ -51,16 +46,18 @@ export function SessionMuscleMap({
   const { colors, todo, ease, done } = useMemo(() => {
     const finished = store.workouts.filter((w) => w.finishedAt !== null);
     const landmarks = personalLandmarks(finished, now);
-    const weekly = weeklyMuscleSets(finished, now, 7);
+    // Smoothly fading load (today's sets included), not a hard 7-day sum: a
+    // session a week ago is mostly gone, and one big day can't read "over".
+    const load = recentLoadSets([...finished, workout], now);
     const today = muscleSetsInWorkout(workout);
 
-    // Body-map colours: this week's sets (today included) vs each muscle's range.
+    // Body-map colours: each muscle's recent load vs its weekly range.
     const colorMap: Partial<Record<MuscleGroup, string>> = {};
     const zoneOf = new Map<MuscleGroup, Zone>();
     for (const m of VOLUME_MUSCLES) {
       const lm = landmarks.get(m) ?? LANDMARKS[m];
       if (!lm) continue;
-      const sets = (weekly.get(m) ?? 0) + (today.get(m) ?? 0);
+      const sets = load.get(m) ?? 0;
       const zone = classifyZone(sets, lm);
       zoneOf.set(m, zone);
       if (zone !== 'none') colorMap[m] = ZONE_COLOR[zone];

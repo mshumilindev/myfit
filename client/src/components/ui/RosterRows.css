@@ -52,3 +52,13 @@
   flex: 1 1 auto;
   min-width: 0;
 }
+/* Inside an InfoTable value cell: shrink-wrap, so the lock sits right next to the text (which wraps under itself). */
+.ros-locked-inline {
+  display: inline-flex;
+  max-width: 100%;
+  gap: var(--s-6);
+  text-align: left;
+}
+.ros-locked-inline .ros-locked-t {
+  flex: 0 1 auto;
+}

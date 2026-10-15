@@ -42,7 +42,7 @@ describe('Schedule screen: trainer gyms (B)', () => {
       mount();
       const sel = await screen.findByLabelText(new RegExp(t.scGymLabel));
       await waitFor(() => expect(within(sel).getAllByRole('option')).toHaveLength(2));
-      const chip = screen.getByRole('button', { name: t.hsGymsChip(1) });
+      const chip = screen.getByRole('button', { name: t.hsOpen });
       fireEvent.click(chip);
       expect(await screen.findByRole('dialog', { name: t.hsTitle })).toBeTruthy();
     } finally {
@@ -117,9 +117,12 @@ describe('Schedule screen', () => {
     expect(within(form).getByText(t.bdNoClient, { selector: 'p' })).toBeTruthy();
   });
 
-  it('empty schedule: empty state with Add sessions', async () => {
+  it('empty schedule: the calendar grid still shows, with a hint and Add sessions in the header (no empty state instead)', async () => {
     mount(createFixturesSchedulePort({ empty: true }));
-    expect(await screen.findByText(t.scEmptyH)).toBeTruthy();
+    expect(await screen.findByText(t.scEmptyB)).toBeTruthy();
+    expect(screen.getByRole('group', { name: t.scGridLabel })).toBeTruthy();
+    expect(screen.getByRole('button', { name: t.scAddSessions })).toBeTruthy();
+    expect(screen.getByRole('button', { name: t.hsOpen })).toBeTruthy();
   });
 
   it('error with nothing cached: failed state with Retry', async () => {

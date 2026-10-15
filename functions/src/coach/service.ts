@@ -97,12 +97,23 @@ interface UserRec {
   lastName?: string | null;
   username?: string;
   trainerId?: string | null;
+  /** set by the client when it uploaded a photo to Storage (avatars/{uid}/photo) */
+  avatarExt?: string | null;
+  updatedAt?: number;
 }
+const displayOf = (u: UserRec | null): string =>
+  u ? [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || '' : '';
 async function userName(kv: Kv, uid: string): Promise<{ name: string; role: Role | null }> {
   const u = (await kv.get(`users/${uid}`)) as UserRec | null;
   if (!u) return { name: '', role: null };
-  const name = [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || '';
-  return { name, role: (u.role as Role) ?? 'member' };
+  return { name: displayOf(u), role: (u.role as Role) ?? 'member' };
+}
+/** Whether a user has a profile photo and its revision (the profile's updatedAt — the same rule the
+ *  trainer's client list and the profile functions use); the photo itself is read from Storage under
+ *  storage.rules (the assigned trainer may read it). Nothing but this flag and the revision is exposed. */
+export function avatarOf(u: UserRec | null): { avatar: boolean; avatarRev: number } {
+  const avatar = !!u?.avatarExt;
+  return { avatar, avatarRev: avatar ? (u?.updatedAt ?? 0) : 0 };
 }
 export async function notice(
   kv: Kv,
@@ -983,10 +994,13 @@ export async function coachRoster(ctx: Ctx, actor: Actor) {
     .map((r) => r.data as unknown as CoachingDoc)
     .filter((c) => c.status !== 'ended');
   // the names are independent reads: ask for all of them at once
-  const names = await Promise.all(live.map((c) => userName(ctx.kv, c.clientId)));
+  const users = await Promise.all(
+    live.map((c) => ctx.kv.get(`users/${c.clientId}`) as Promise<UserRec | null>),
+  );
   const clients = live.map((c, i) => ({
     clientId: c.clientId,
-    name: names[i].name,
+    name: displayOf(users[i]),
+    ...avatarOf(users[i]),
     status: c.status,
     mode: c.mode,
     consent: c.consent,

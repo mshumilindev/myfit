@@ -21,4 +21,17 @@ describe('sleepBlockedBy', () => {
   it('ignores finished home sets', () => {
     expect(sleepBlockedBy({ workouts: [{ finishedAt: 3, kind: 'home' }] })).toBeNull();
   });
+  it('ignores a workout or activity forgotten open for over 8 h (it must not block every night)', () => {
+    const now = 100 * 3_600_000;
+    const old = now - 9 * 3_600_000;
+    const fresh = now - 2 * 3_600_000;
+    expect(sleepBlockedBy({ activities: [{ finishedAt: null, startedAt: old }] }, now)).toBeNull();
+    expect(sleepBlockedBy({ workouts: [{ finishedAt: null, startedAt: old }] }, now)).toBeNull();
+    expect(sleepBlockedBy({ activities: [{ finishedAt: null, startedAt: fresh }] }, now)).toBe(
+      'activity',
+    );
+    expect(sleepBlockedBy({ workouts: [{ finishedAt: null, startedAt: fresh }] }, now)).toBe(
+      'workout',
+    );
+  });
 });

@@ -15,11 +15,29 @@ export function useFillViewport(): (el: HTMLElement | null) => void {
     if (!el) return;
     const apply = () => {
       let bottom = window.visualViewport?.height ?? window.innerHeight;
+      const wide = window.matchMedia?.('(min-width: 720px)').matches ?? false;
+      // Bottom padding of the wrappers between the element and the frame (a page gutter such as `.chs-page`): the
+      // element must stop above it, or the gutter would push the card past the frame.
+      let below = 0;
       for (let p = el.parentElement; p && p !== document.documentElement; p = p.parentElement) {
         // a frame is whatever clips (overflow) or is a positioned layer (the host's screen stage)
         const cs = getComputedStyle(p);
-        if (cs.overflowY !== 'visible' || (cs.position !== 'static' && p !== document.body))
-          bottom = Math.min(bottom, p.getBoundingClientRect().bottom);
+        const isFrame =
+          cs.overflowY !== 'visible' || (cs.position !== 'static' && p !== document.body);
+        if (!isFrame) {
+          if (wide)
+            below += (parseFloat(cs.paddingBottom) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+          continue;
+        }
+        if (cs.overflowY !== 'visible' || (cs.position !== 'static' && p !== document.body)) {
+          // From 720 px the frame stops at the frame's content edge, so the page's own bottom padding stays
+          // clear under it, like under every other desktop page. A phone keeps the chat edge to edge.
+          const inset = wide
+            ? (parseFloat(cs.paddingBottom) || 0) + (parseFloat(cs.borderBottomWidth) || 0)
+            : 0;
+          bottom = Math.min(bottom, p.getBoundingClientRect().bottom - inset - below);
+          below = 0;
+        }
       }
       const top = el.getBoundingClientRect().top;
       el.style.setProperty('--chs-avail', `${Math.max(0, Math.round(bottom - top))}px`);

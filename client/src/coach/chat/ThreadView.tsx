@@ -254,6 +254,7 @@ export function ThreadView({
 
   return (
     <ChatShell
+      breakpoint="coach"
       head={
         <div className="ch-bar ctl-row--md">
           {onBack && <BackButton label={ch.chBack} onClick={onBack} />}

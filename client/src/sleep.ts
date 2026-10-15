@@ -35,6 +35,30 @@ export function lastBedtimeAt(now: number, bedMin: number): number {
   return ts;
 }
 
+/**
+ * The scheduled bedtime that is due right now: one that started at most `windowMs` ago.
+ * A plan belongs to the weekday of its BEDTIME (same keying as `computeUpcomingNights` and the
+ * server queue), so just after midnight the evening that started yesterday is checked against
+ * yesterday's plan, not today's. Null when no bedtime is due.
+ */
+export function dueBedtime(
+  now: number,
+  planOf: (weekday: number) => SleepDayPlan | null,
+  windowMs: number = AUTO_START_WINDOW_MS,
+): { bedTs: number; plan: SleepDayPlan } | null {
+  for (let back = 0; back <= 1; back++) {
+    const day = new Date(now);
+    day.setHours(0, 0, 0, 0);
+    day.setDate(day.getDate() - back);
+    const plan = planOf(day.getDay());
+    if (!plan) continue;
+    const bedTs = day.getTime() + plan.bedMin * 60000;
+    const since = now - bedTs;
+    if (since >= 0 && since <= windowMs) return { bedTs, plan };
+  }
+  return null;
+}
+
 /** Awake (non-sleep) ms for a night as of `now`: banked intervals plus the
  *  open one, if any. An open interval that has gone idle past SLEEP_IDLE_MS is
  *  capped at the last activity — the idle tail counts as sleep, not awake. */

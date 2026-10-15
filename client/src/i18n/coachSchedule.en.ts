@@ -332,7 +332,6 @@ export const scheduleEn = {
   scOverlapOpen: (names: string) => `Show the overlapping sessions: ${names}`,
   scLeftMin: (n: number) => `${n} min left`,
   scClosePanel: 'Close',
-  hsOpen: 'Calendar settings',
   hsTitle: 'Calendar settings',
   hsSub: 'Your working hours and gyms decide which hours the calendar shows.',
   hsRange: 'Visible hours',
@@ -350,7 +349,7 @@ export const scheduleEn = {
   hsGyms: 'My gyms',
   hsGymsHint:
     'Tick the gyms you work at. New sessions start in the first ticked gym, and the calendar filter lists them.',
-  hsGymsChip: (n: number) => (n > 0 ? `Gyms · ${n}` : 'Gyms'),
+  hsOpen: 'Working hours',
   hsGymsAdd: 'Add a gym',
   hsGymsCount: (n: number, total: number) => `${n} of ${total} chosen`,
   hsGymsNone: 'None ticked: the calendar offers every gym.',

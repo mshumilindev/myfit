@@ -6,7 +6,7 @@ import { createCoachThreadExtras, getThreadExtrasOpts } from './threadExtras';
 
 /**
  * The thread extras of the Coach chat: Share and Notes (M5) and reschedule requests (M6) composed: cards by kind
- * (share / request), chips side by side, overlays together. Used by the Chat screen and the desktop chat dock.
+ * (share / request), lead buttons and chips side by side, overlays together. Used by the Chat screen and the desktop chat dock.
  */
 export function composeThreadExtras(onNavigate: (r: CoachRoute) => void) {
   const share = createCoachThreadExtras({ ...getThreadExtrasOpts(), onNavigate });
@@ -16,6 +16,12 @@ export function composeThreadExtras(onNavigate: (r: CoachRoute) => void) {
     const b = resched(ctx);
     return {
       ...a,
+      lead: (
+        <>
+          {a.lead}
+          {b.lead}
+        </>
+      ),
       chips: (
         <>
           {a.chips}

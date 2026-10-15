@@ -21,6 +21,7 @@ import { Portal } from './overlays/Portal';
 import { useFixedPanelPosition } from './overlays/position';
 import { useMobileSheetKeyboardMode } from './overlays/useSheetKeyboard';
 import { useSheetGesture } from './overlays/useSheetGesture';
+import { useSheetOverflowGuard } from './overlays/sheetOverflow';
 import { toneClass, type Tone } from './tones';
 
 import './Overlays.css';
@@ -138,6 +139,7 @@ export function Sheet(props: {
   const { t } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const keyboardMode = useMobileSheetKeyboardMode(sheetRef);
+  useSheetOverflowGuard(sheetRef);
   const style = useFixedPanelPosition(
     'sheet',
     undefined,

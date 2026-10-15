@@ -42,7 +42,9 @@ export function createScheduleThreadExtras(opts: ScheduleThreadExtrasOpts = {}) 
             }}
           />
         ) : undefined,
-      chips: (
+      // An action button, so it sits in the composer row with Share (`lead`), on a phone and on a desktop alike;
+      // `chips` is the row above the field for wide things (a pending card).
+      lead: (
         <IconButton
           icon="swap"
           variant="secondary"

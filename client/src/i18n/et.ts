@@ -475,7 +475,7 @@ export const et: Strings = {
     upperBody: 'Ülakeha',
     lowerBody: 'Alakeha',
     addRows: 'sõudmised või lõuatõmbed',
-    addPress: 'surumised või rööbaskätekõverdused',
+    addPress: 'surumised või dipid',
     addSquats: 'kükid või jõutõmbed',
     addRowsUpper: 'surumised või sõudmised',
     balLow: (low: string) => `${low} — liiga vähe mahtu`,
@@ -1323,7 +1323,8 @@ export const et: Strings = {
   notifVolumeSub: 'Iga lihas produktiivses vahemikus',
   muscleMapButton: 'Lihaste kaart',
   muscleMapTitle: 'Tänane lihaste kaart',
-  muscleMapWeekNote: 'Värvid — selle nädala maht, tänane kaasas',
+  muscleMapWeekNote:
+    'Värvid — hiljutine koormus, tänane kaasas; pärast treeningut see vaheneb järk-järgult',
   muscleMapTodo: 'Täna tasub veel teha',
   muscleMapEase: 'Võta hoogu maha',
   muscleMapDone: 'Täna tehtud',

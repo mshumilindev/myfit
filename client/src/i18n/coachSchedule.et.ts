@@ -314,7 +314,6 @@ export const scheduleEt: typeof scheduleEn = {
   scOverlapOpen: (names: string) => `Näita kattuvaid treeninguid: ${names}`,
   scLeftMin: (n: number) => `${n} min jäänud`,
   scClosePanel: 'Sulge',
-  hsOpen: 'Kalendri seaded',
   hsTitle: 'Kalendri seaded',
   hsSub: 'Töötunnid ja jõusaalid määravad, millised tunnid kalendris näha on.',
   hsRange: 'Nähtavad tunnid',
@@ -332,7 +331,7 @@ export const scheduleEt: typeof scheduleEn = {
   hsGyms: 'Minu jõusaalid',
   hsGymsHint:
     'Märkige jõusaalid, kus töötate. Uued treeningud algavad esimeses märgitud saalis ja kalendri filter näitab just neid.',
-  hsGymsChip: (n: number) => (n > 0 ? `Jõusaalid · ${n}` : 'Jõusaalid'),
+  hsOpen: 'Tööaeg',
   hsGymsAdd: 'Lisa jõusaal',
   hsGymsCount: (n: number, total: number) => `Valitud ${n} / ${total}`,
   hsGymsNone: 'Midagi pole märgitud: kalender näitab kõiki saale.',

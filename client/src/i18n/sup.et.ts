@@ -53,7 +53,7 @@ export const supEt: typeof supEn = {
     betaAlanine: 'Beeta-alaniin',
     citrulline: 'Tsitrulliin',
     nitrate: 'Nitraadid (peet)',
-    bicarbonate: 'Naatriumvesinikkarbonaat (sooda)',
+    bicarbonate: 'Naatriumbikarbonaat (sooda)',
     whey: 'Vadakuvalk',
     casein: 'Kaseiin',
     plantProtein: 'Taimne valk',

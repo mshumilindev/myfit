@@ -33,6 +33,9 @@ export interface RosterClient {
   consentVersion: number;
   keyEpoch: number;
   cid: string;
+  /** The client has a profile photo (server flag; the image itself comes from Storage). */
+  avatar?: boolean;
+  avatarRev?: number;
 }
 export interface RosterInvite {
   inviteId: string;
@@ -395,7 +398,8 @@ export function toCoachClient(
     done,
     lastSessionAt,
     trainerDays: [],
-    hasPhoto: false,
+    hasPhoto: c.avatar === true,
+    ...(c.avatar === true ? { photoRev: c.avatarRev ?? 0 } : {}),
     ...(extra.injuries ? { injuries: extra.injuries } : {}),
   };
 }

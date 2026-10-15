@@ -9,6 +9,8 @@ export interface ChatMsg {
   pending?: boolean;
   /** A system line (e.g. Gemini's quota ran out), shown as a centred pill. */
   notice?: boolean;
+  /** Atlas's opening hello (said once per conversation); not part of the history a reply reads. */
+  hello?: boolean;
   /** Follow-up suggestions under this message (tap = send). */
   chips?: string[];
   /** Offer to switch the app to this language (buttons under the message). */

@@ -1976,10 +1976,13 @@ i > svg {
 .session-top.past-hero {
   position: relative;
   overflow: hidden;
-  /* Same slim, centred bar as the live-session hero. */
+  /* Same slim bar as the live-session hero, but it GROWS with its content (title + gym row): a fixed height left the
+     title on the top edge and the gym row on the bottom one. Back | title block | actions are one flex row, so the
+     three share one axis and cannot overlap (SPO-96). */
   min-height: 72px;
   align-items: center;
-  padding: 0 var(--s-16);
+  gap: var(--s-12);
+  padding: var(--s-12) var(--s-16);
   border-bottom: 1px solid var(--color-divider);
 }
 .past-hero-bg {
@@ -2010,28 +2013,16 @@ i > svg {
   );
 }
 .session-top.past-hero .back {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  margin: auto 0;
-  left: 14px;
-  z-index: 3;
-}
-.session-top.past-hero > .trash {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  margin: auto 0;
-  right: 14px;
+  position: relative;
+  flex: none;
   z-index: 3;
 }
 .session-top.past-hero .mid {
   position: relative;
   z-index: 2;
   align-self: center;
-  width: 100%;
-  /* Clear the centred back button (left) and trash (right), like the live hero. */
-  padding: 0 var(--s-40);
+  flex: 1;
+  min-width: 0;
   text-shadow: 0 1px 10px color-mix(in srgb, var(--c-000000) 55%, transparent);
 }
 /* The date/time line now sits just below the banner (not over the photo) as a
@@ -7027,6 +7018,10 @@ html.theme-glass .gym-card .head .n {
   .session-screen .session-top {
     padding-top: 0;
   }
+  /* The reset above is for the live toolbar; the past hero keeps its own inner padding (same as phone). */
+  .session-screen .session-top.past-hero {
+    padding: var(--s-12) var(--s-16);
+  }
 }
 .lasttime-row {
   display: flex;
@@ -7090,7 +7085,7 @@ html.theme-glass .gym-card .head .n {
   }
 
   .session-past .session-top {
-    padding: 0 var(--s-20);
+    padding: var(--s-12) var(--s-20);
     box-shadow: 0 1px 0 var(--color-divider);
   }
 
@@ -21912,8 +21907,12 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  /* breathing room between the set-entry panel and the nav divider below */
-  padding-bottom: var(--s-20);
+  /* Breathing room between the set-entry panel and the nav divider below, and
+     room for its accent glow (hero shadow reaches ~60px down / ~38px sideways):
+     overflow-y:auto clips at the padding box, so without this the glow was cut
+     off in a hard line (SPO-11). The negative margins keep the layout size. */
+  padding: 0 var(--s-40) calc(var(--s-40) + var(--s-20));
+  margin: 0 calc(-1 * var(--s-40)) calc(-1 * var(--s-40));
 }
 .focus-scroll::-webkit-scrollbar {
   display: none;
@@ -22249,22 +22248,14 @@ body {
    border wraps the whole row and the inner button + icon go transparent. */
 
 /* Exercise-details drawer opens at full height straight away */
-/* Past-session editor header actions (trash + Save) — the past-hero positions
-   its right action absolutely, so position the wrapper the same way and give the
-   centred title room to clear both buttons. */
+/* Past-session editor header actions (trash + Save): the right end of the past-hero row. */
 .session-top.past-hero > .past-actions {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  margin: auto 0;
-  right: 14px;
+  position: relative;
+  flex: none;
   z-index: 3;
   display: flex;
   align-items: center;
   gap: var(--space-2);
-}
-.session-top.past-hero:has(.past-actions) .mid {
-  padding-right: 150px;
 }
 
 /* Program calendar: a sick day (rest period, illness) overrides "missed" —
@@ -25169,27 +25160,20 @@ body {
   color: var(--c-1c1406);
   font-size: var(--fs-20);
 }
+/* Info (i) on the exercise cards: one corner, one inset, on hero and tiles.
+   Layout only — look comes from the kit IconButton (photo variant). The kit's
+   `.uibtn--icon` must not set `position`, or it beats this absolute and the
+   button falls into the card's flow (SPO-113). 28px glyph, 44px touch area. */
 .es-info {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--r-round);
-  border: none;
-  display: grid;
-  place-items: center;
-  background: color-mix(in srgb, var(--c-0f1012) 72%, transparent);
-  color: var(--c-ffffff);
-  font-size: var(--fs-17);
-  cursor: pointer;
+  top: var(--s-8);
+  right: var(--s-8);
+  z-index: 1;
 }
-.es-info.sm {
-  top: 5px;
-  right: 5px;
-  width: 28px;
-  height: 28px;
-  font-size: var(--fs-15);
+.es-info::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 /* four more ways to start */
 .es-more {

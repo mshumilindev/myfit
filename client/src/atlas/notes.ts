@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { useT, fmtBodyWeightKg } from '../i18n';
 import { computePlaybook } from '../playbook';
+import { planDayFor } from './plan';
 import { fmtCountdown } from '../restTimer';
 import { localizedExerciseName } from '../data/exerciseNames';
 import type { StoreState } from '../store';
@@ -63,6 +64,10 @@ export function buildNotes(
       sleeps: s.sleeps,
       body: s.bodyMetrics,
       now,
+      plannedDay:
+        s.coach.enabled && s.coach.role === 'main' && s.coach.plan
+          ? planDayFor(s.coach.plan, now)
+          : null,
     }),
   );
   if (isWeekEnd(now) && finished.length > 0) {

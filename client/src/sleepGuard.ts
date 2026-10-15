@@ -5,17 +5,31 @@
  */
 export type SleepBlock = 'workout' | 'activity' | 'homeSet';
 
+/** An open workout / activity older than this is forgotten, not running: workouts close themselves
+ *  at 8 h, but a live activity timer never does, and a forgotten one must not stop every night
+ *  from starting by itself. */
+export const STALE_OPEN_MS = 8 * 60 * 60 * 1000;
+
 export interface SleepGuardState {
-  workouts?: ReadonlyArray<{ finishedAt: number | null; kind?: 'home' | null }> | null;
-  activities?: ReadonlyArray<{ finishedAt: number | null }> | null;
+  workouts?: ReadonlyArray<{
+    finishedAt: number | null;
+    startedAt?: number;
+    kind?: 'home' | null;
+  }> | null;
+  activities?: ReadonlyArray<{ finishedAt: number | null; startedAt?: number }> | null;
 }
 
 /** What blocks starting a sleep right now, or null when it is free to start. */
-export function sleepBlockedBy(state: SleepGuardState): SleepBlock | null {
-  const open = (state.workouts ?? []).filter((w) => w.finishedAt === null);
+export function sleepBlockedBy(
+  state: SleepGuardState,
+  now: number = Date.now(),
+): SleepBlock | null {
+  const live = (x: { finishedAt: number | null; startedAt?: number }) =>
+    x.finishedAt === null && (x.startedAt === undefined || now - x.startedAt <= STALE_OPEN_MS);
+  const open = (state.workouts ?? []).filter(live);
   if (open.some((w) => w.kind === 'home')) return 'homeSet';
   if (open.length > 0) return 'workout';
-  if ((state.activities ?? []).some((a) => a.finishedAt === null)) return 'activity';
+  if ((state.activities ?? []).some(live)) return 'activity';
   return null;
 }
 

@@ -35,6 +35,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   iconTrailing?: string;
   /** No horizontal padding: a value / name set flush in a dense row (the height still comes from the scale). */
   flush?: boolean;
+  /** Hug the content: no control box, the button is exactly its child (a portrait / avatar as the face), so hover and focus follow the child's shape with `shape="round"`. */
+  hug?: boolean;
   /** `link` variant only: the button sits inside a line of text (24 x 24 target instead of 28 high). */
   inline?: boolean;
   children?: ReactNode;
@@ -94,6 +96,7 @@ export function Button({
   loading = false,
   inline = false,
   flush = false,
+  hug = false,
   icon,
   iconTrailing,
   disabled,
@@ -112,6 +115,7 @@ export function Button({
     loading ? 'is-loading' : '',
     inline ? 'uibtn--inline' : '',
     flush ? 'uibtn--flush' : '',
+    hug ? 'uibtn--hug' : '',
     className ?? '',
   ]
     .filter(Boolean)

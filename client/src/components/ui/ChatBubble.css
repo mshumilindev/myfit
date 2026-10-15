@@ -27,7 +27,8 @@
   display: flex;
   align-items: flex-start;
   gap: var(--s-4);
-  max-width: min(100%, 560px);
+  /* 88% leaves a gutter on the opposite edge so mine/theirs read apart on a phone. */
+  max-width: min(88%, 560px);
   min-width: 0;
 }
 .uimsg--me .uimsg-row {

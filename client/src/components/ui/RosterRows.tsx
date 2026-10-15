@@ -187,10 +187,22 @@ export function SignalListRow({
   );
 }
 
-/** A row-sized note for a category the client does not share: lock + sentence. Never shows data. */
-export function LockedRow({ children, action }: { children: ReactNode; action?: ReactNode }) {
+/**
+ * A row-sized note for a category the client does not share: lock + sentence. Never shows data.
+ * `inline` is for a value cell (InfoTable `dd`): lock and text hug each other as one element at the end of the
+ * cell, instead of the lock sitting at the left edge of the cell and the text flushed to the far right.
+ */
+export function LockedRow({
+  children,
+  action,
+  inline,
+}: {
+  children: ReactNode;
+  action?: ReactNode;
+  inline?: boolean;
+}) {
   return (
-    <div className="ros-locked">
+    <div className={['ros-locked', inline && 'ros-locked-inline'].filter(Boolean).join(' ')}>
       <Icon name="lock-simple" className="ros-locked-i" />
       <span className="ros-locked-t">{children}</span>
       {action}

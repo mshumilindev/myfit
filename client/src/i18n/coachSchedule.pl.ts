@@ -323,7 +323,6 @@ export const schedulePl: typeof scheduleEn = {
   scOverlapOpen: (names: string) => `Pokaż nakładki: ${names}`,
   scLeftMin: (n: number) => `jeszcze ${n} min`,
   scClosePanel: 'Zamknij',
-  hsOpen: 'Ustawienia kalendarza',
   hsTitle: 'Ustawienia kalendarza',
   hsSub: 'Godziny pracy i siłownie decydują, które godziny pokazuje kalendarz.',
   hsRange: 'Widoczne godziny',
@@ -341,7 +340,7 @@ export const schedulePl: typeof scheduleEn = {
   hsGyms: 'Moje siłownie',
   hsGymsHint:
     'Zaznacz siłownie, w których pracujesz. Nowe sesje zaczynają się w pierwszej zaznaczonej, a filtr kalendarza pokazuje właśnie je.',
-  hsGymsChip: (n: number) => (n > 0 ? `Siłownie · ${n}` : 'Siłownie'),
+  hsOpen: 'Godziny pracy',
   hsGymsAdd: 'Dodaj siłownię',
   hsGymsCount: (n: number, total: number) => `Wybrano ${n} z ${total}`,
   hsGymsNone: 'Nic nie zaznaczono: kalendarz pokazuje wszystkie siłownie.',

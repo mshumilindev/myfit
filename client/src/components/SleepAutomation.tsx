@@ -33,8 +33,7 @@ import {
   planDurationMin,
   sameSleep,
   finishedNights,
-  lastBedtimeAt,
-  AUTO_START_WINDOW_MS,
+  dueBedtime,
   nightEndingOn,
 } from '../sleep';
 import { Icon } from '../ui';
@@ -161,11 +160,9 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
   // you're still using the app it stays paused and doesn't count.
   useEffect(() => {
     if (!s.autoLog || live) return;
-    const plan = planFor(store, new Date(tick).getDay(), tick);
-    if (!plan) return;
-    const bedTs = lastBedtimeAt(tick, plan.bedMin);
-    const sinceBedMs = tick - bedTs;
-    if (sinceBedMs < 0 || sinceBedMs > AUTO_START_WINDOW_MS) return;
+    const due = dueBedtime(tick, (wd) => planFor(store, wd, tick));
+    if (!due) return;
+    const { bedTs, plan } = due;
     const bedDayKey = sleepDayId(bedTs + 12 * 60 * MIN); // stable per-evening key
     if (s.lastAutoNight === bedDayKey) return;
     const autoWakeAt = bedTs + planDurationMin(plan) * MIN;

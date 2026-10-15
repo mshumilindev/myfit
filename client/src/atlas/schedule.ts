@@ -12,16 +12,15 @@ import type { Workout } from '../types';
 import type { LocaleId } from '../i18n';
 import type { Play } from '../playbook';
 import { playForWeekday } from '../playbook';
-import { usualStartHour } from './facts';
+import { isWeekEnd, skipNudgeHour, usualStartHour, weekNoteId } from './facts';
 import { planDayFor } from './plan';
 import { say, type Fmt } from './voice';
 import type { CoachSettings, Temper } from './types';
 
 const DAY = 86_400_000;
-/** "Skipped" goes out this long after your usual start. */
-export const SKIP_NUDGE_AFTER_H = 2;
-/** Never later than this local hour. */
-export const LATEST_NUDGE_H = 21;
+// "Skipped" goes out SKIP_NUDGE_AFTER_H after your usual start, never later than LATEST_NUDGE_H (facts.ts: the
+// same rule shows the note in the chat).
+export { SKIP_NUDGE_AFTER_H, LATEST_NUDGE_H } from './facts';
 /** The Sunday review goes out at this local hour. */
 export const REVIEW_H = 19;
 
@@ -32,6 +31,8 @@ export interface OutboxMessage {
   body: string;
   tag: string;
   url: string;
+  /** The chat note this push announces; `chatBacked` drops the push when that note would not exist. */
+  noteId?: string;
 }
 
 export interface OutboxInput {
@@ -66,8 +67,7 @@ export function planOutbox(p: OutboxInput): OutboxMessage[] {
     const planned = p.coach.plan && p.coach.role === 'main' ? planDayFor(p.coach.plan, ts) : null;
     const play = playForWeekday(p.plays, dow);
     if (!planned && !play) continue;
-    const usual = usualStartHour(p.finished, dow) ?? 18;
-    const dueAt = atHour(ts, Math.min(LATEST_NUDGE_H, usual + SKIP_NUDGE_AFTER_H));
+    const dueAt = atHour(ts, skipNudgeHour(usualStartHour(p.finished, dow)));
     if (dueAt <= p.now) continue;
     const key = dayKey(ts);
     out.push({
@@ -86,22 +86,41 @@ export function planOutbox(p: OutboxInput): OutboxMessage[] {
       ),
       tag: 'atlas-skipped',
       url: '/#/coach',
+      noteId: `skipped:${key}`,
     });
   }
-  // Next Sunday evening: the weekly review.
-  const sun = new Date(p.now);
-  sun.setDate(sun.getDate() + ((7 - sun.getDay()) % 7));
-  let review = atHour(sun.getTime(), REVIEW_H);
-  if (review <= p.now) review += 7 * DAY;
-  out.push({
-    id: `review-${dayKey(review)}`,
-    dueAt: review,
-    title: p.title,
-    body: p.reviewBody,
-    tag: 'atlas-review',
-    url: '/#/coach',
-  });
+  // The weekly review: the evening of the last day of the training week (the "week" note appears that day),
+  // not a fixed Sunday: the first day of the week is a setting.
+  for (let i = 0; i < 8; i++) {
+    const day = new Date(p.now + i * DAY);
+    day.setHours(12, 0, 0, 0);
+    if (!isWeekEnd(day.getTime())) continue;
+    const review = atHour(day.getTime(), REVIEW_H);
+    if (review <= p.now) continue;
+    out.push({
+      id: `review-${dayKey(review)}`,
+      dueAt: review,
+      title: p.title,
+      body: p.reviewBody,
+      tag: 'atlas-review',
+      url: '/#/coach',
+      noteId: weekNoteId(review),
+    });
+    break;
+  }
   return out;
+}
+
+/**
+ * A notification must have its message in the chat (SPO-21): keep a planned push only when the note it announces
+ * is in the feed as it will be at the push's moment (`notesAt(t)`). A skipped day you did train, a review of a
+ * week with nothing planned or logged: no note, so no push.
+ */
+export function chatBacked(
+  msgs: OutboxMessage[],
+  notesAt: (t: number) => readonly { id: string }[],
+): OutboxMessage[] {
+  return msgs.filter((m) => !m.noteId || notesAt(m.dueAt).some((n) => n.id === m.noteId));
 }
 
 /** Make the server outbox match the plan: write new/changed, drop the rest. */

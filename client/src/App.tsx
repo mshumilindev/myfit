@@ -6,7 +6,7 @@ import { ScreenSkeleton } from './components/ui/Skeletons';
 import { Button, IconButton } from './components/ui/Button';
 import { buildNotes, useAtlasFmt, useAtlasNotes } from './atlas/notes';
 import { setOverrideUid } from './accountOverrides';
-import { planNotePushes, planOutbox, syncOutbox } from './atlas/schedule';
+import { chatBacked, planNotePushes, planOutbox, syncOutbox } from './atlas/schedule';
 import { computePlaybook } from './playbook';
 import {
   lazy,
@@ -886,17 +886,20 @@ export function App() {
       const finished = store.workouts.filter((w) => w.finishedAt !== null);
       const now = Date.now();
       const msgs = store.coach.enabled
-        ? planOutbox({
-            coach: store.coach,
-            temper: atlas.temper,
-            finished,
-            plays: computePlaybook(finished, now).plays,
-            now,
-            locale,
-            fmt: atlasFmt,
-            title: t.atlasName,
-            reviewBody: t.atlasPushReview,
-          }).concat(
+        ? chatBacked(
+            planOutbox({
+              coach: store.coach,
+              temper: atlas.temper,
+              finished,
+              plays: computePlaybook(finished, now).plays,
+              now,
+              locale,
+              fmt: atlasFmt,
+              title: t.atlasName,
+              reviewBody: t.atlasPushReview,
+            }),
+            (at) => buildNotes(store, at, locale, atlasFmt).notes,
+          ).concat(
             // New notes that will appear while the app is closed → pushes.
             planNotePushes({
               coach: store.coach,

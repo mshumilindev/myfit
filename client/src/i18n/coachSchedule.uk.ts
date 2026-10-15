@@ -322,7 +322,6 @@ export const scheduleUk: typeof scheduleEn = {
   scOverlapOpen: (names: string) => `Показати накладки: ${names}`,
   scLeftMin: (n: number) => `ще ${n} хв`,
   scClosePanel: 'Закрити',
-  hsOpen: 'Налаштування календаря',
   hsTitle: 'Налаштування календаря',
   hsSub: 'Робочі години та зали визначають, які години показує календар.',
   hsRange: 'Видимі години',
@@ -340,7 +339,7 @@ export const scheduleUk: typeof scheduleEn = {
   hsGyms: 'Мої зали',
   hsGymsHint:
     'Позначте зали, де ви працюєте. Нові тренування починаються в першому позначеному, а фільтр календаря показує саме їх.',
-  hsGymsChip: (n: number) => (n > 0 ? `Зали · ${n}` : 'Зали'),
+  hsOpen: 'Робочі години',
   hsGymsAdd: 'Додати зал',
   hsGymsCount: (n: number, total: number) => `Обрано ${n} з ${total}`,
   hsGymsNone: 'Нічого не позначено: календар пропонує всі зали.',

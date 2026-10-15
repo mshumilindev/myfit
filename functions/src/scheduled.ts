@@ -13,16 +13,9 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { db } from './lib';
 import { sendDueOutbox } from './push';
 import * as crypto from 'node:crypto';
+import { takeDueSlot, wakeToCloseAt, type UpcomingNight } from './sleepAuto';
 
 const AUTO_FINISH_AFTER_MS = 8 * 60 * 60 * 1000;
-const AUTO_START_STALE_MS = 6 * 60 * 60 * 1000; // don't resurrect very old slots
-
-interface UpcomingNight {
-  startAt: number;
-  wakeAt: number;
-  date: string;
-}
-
 /** Close any workout still open more than 8h after it started. */
 async function finishStaleWorkouts(): Promise<number> {
   const cutoff = Date.now() - AUTO_FINISH_AFTER_MS;
@@ -61,9 +54,9 @@ async function endDueSleeps(): Promise<number> {
   let batch = db.batch();
   let ops = 0;
   for (const docSnap of openNights.docs) {
-    const n = docSnap.data() as { bedtime: number; autoWakeAt?: number };
-    if (typeof n.autoWakeAt !== 'number' || n.autoWakeAt > now) continue;
-    const wake = Math.max(n.autoWakeAt, (n.bedtime ?? 0) + 60000);
+    const n = docSnap.data() as { bedtime?: number; autoWakeAt?: number };
+    const wake = wakeToCloseAt(n, now);
+    if (wake === null) continue;
     batch.update(docSnap.ref, { wake, source: 'auto', kind: 'sleep', updatedAt: now });
     ended++;
     if (++ops >= 400) {
@@ -74,6 +67,37 @@ async function endDueSleeps(): Promise<number> {
   }
   if (ops > 0) await batch.commit();
   return ended;
+}
+
+async function startOneDueSleep(
+  docSnap: FirebaseFirestore.QueryDocumentSnapshot,
+  now: number,
+): Promise<boolean> {
+  const uid = docSnap.id;
+  const data = docSnap.data() as { upcoming?: UpcomingNight[] };
+  const { slot, rest } = takeDueSlot(Array.isArray(data.upcoming) ? data.upcoming : [], now);
+  // Advance the queue first: a slot is consumed once, even if opening the night fails below.
+  if (rest.length)
+    await docSnap.ref.update({ nextStartAt: rest[0].startAt, upcoming: rest, updatedAt: now });
+  else await docSnap.ref.delete();
+  if (!slot) return false;
+  const sleeps = db.collection('users').doc(uid).collection('sleeps');
+  // Only if no night is open, and not when this night is already logged (the app started or
+  // filled it itself) — that's how the same night got recorded twice.
+  const openSnap = await sleeps.where('wake', '==', null).limit(1).get();
+  const sameDay = await sleeps.where('date', '==', slot.date).limit(1).get();
+  if (!openSnap.empty || !sameDay.empty) return false;
+  const id = crypto.randomUUID();
+  await sleeps.doc(id).set({
+    id,
+    date: slot.date,
+    bedtime: slot.startAt,
+    wake: null,
+    autoWakeAt: slot.wakeAt,
+    source: 'auto',
+    updatedAt: now,
+  });
+  return true;
 }
 
 /**
@@ -88,50 +112,12 @@ async function startDueSleeps(): Promise<number> {
   const due = await db.collection('sleepSchedules').where('nextStartAt', '<=', now).get();
   let started = 0;
   for (const docSnap of due.docs) {
-    const uid = docSnap.id;
-    const data = docSnap.data() as { upcoming?: UpcomingNight[] };
-    const upcoming = Array.isArray(data.upcoming) ? [...data.upcoming] : [];
-    // Drop slots already in the past; act only on the most recent due one.
-    let slot: UpcomingNight | undefined;
-    while (upcoming.length && upcoming[0].startAt <= now) slot = upcoming.shift();
-    const next = upcoming[0];
-    const advance = next
-      ? docSnap.ref.update({ nextStartAt: next.startAt, upcoming, updatedAt: now })
-      : docSnap.ref.delete();
-
-    // Only open a night for a fresh slot, and only if none is already open.
-    if (slot && now - slot.startAt <= AUTO_START_STALE_MS) {
-      const openSnap = await db
-        .collection('users')
-        .doc(uid)
-        .collection('sleeps')
-        .where('wake', '==', null)
-        .limit(1)
-        .get();
-      // …and not when this night is already logged (the app started or filled
-      // it itself) — that's how the same night got recorded twice.
-      const sameDay = await db
-        .collection('users')
-        .doc(uid)
-        .collection('sleeps')
-        .where('date', '==', slot.date)
-        .limit(1)
-        .get();
-      if (openSnap.empty && sameDay.empty) {
-        const id = crypto.randomUUID();
-        await db.collection('users').doc(uid).collection('sleeps').doc(id).set({
-          id,
-          date: slot.date,
-          bedtime: slot.startAt,
-          wake: null,
-          autoWakeAt: slot.wakeAt,
-          source: 'auto',
-          updatedAt: now,
-        });
-        started++;
-      }
+    // One user's failure must not stop the others from getting their night.
+    try {
+      if (await startOneDueSleep(docSnap, now)) started++;
+    } catch (e) {
+      console.error('[maintenance] sleep auto-start failed for', docSnap.id, e);
     }
-    await advance;
   }
   return started;
 }

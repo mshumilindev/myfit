@@ -279,6 +279,21 @@ describe('invite -> preview -> accept (R-BE-REL-1..4)', () => {
       consent: ALL_OFF,
     });
   });
+  it('the roster tells whether a client has a photo (and its revision), and exposes nothing else', async () => {
+    await link();
+    let r = await coachRoster(ctx(), trainer);
+    expect(r.clients[0]).toMatchObject({ clientId: 'c1', avatar: false, avatarRev: 0 });
+    // the client uploaded a photo: the app records avatarExt on its profile (updatedAt = revision)
+    await kv.merge('users/c1', { avatarExt: 'jpg', updatedAt: 1234 });
+    r = await coachRoster(ctx(), trainer);
+    expect(r.clients[0]).toMatchObject({ avatar: true, avatarRev: 1234 });
+    // the Storage rule lets the trainer read avatars/{uid}/photo through users.trainerId: linking must set it
+    expect(await kv.get('users/c1')).toMatchObject({ trainerId: 't1' });
+    // photo removed again
+    await kv.merge('users/c1', { avatarExt: null, updatedAt: 1300 });
+    r = await coachRoster(ctx(), trainer);
+    expect(r.clients[0]).toMatchObject({ avatar: false, avatarRev: 0 });
+  });
   it('the roster lists clients and pending invites for the trainer only', async () => {
     await link();
     const pend = await coachInvite(ctx(), trainer, { name: 'Maria', mode: 'hybrid' });

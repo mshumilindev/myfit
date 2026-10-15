@@ -82,6 +82,14 @@ describe('StatusLabel / LogModeBadge / LockedRow / SignalListRow', () => {
     expect(screen.getByText('Viktoriia has not shared injuries')).toBeTruthy();
   });
 
+  it('inline locked row keeps the lock and the text in one element', () => {
+    const { container } = render(<LockedRow inline>Not shared</LockedRow>);
+    const el = container.querySelector('.ros-locked.ros-locked-inline');
+    expect(el).not.toBeNull();
+    expect(el?.querySelector('.ros-locked-i')).not.toBeNull();
+    expect(el?.textContent).toBe('Not shared');
+  });
+
   it('signal row: title, meta, Decided pill, click', () => {
     const onClick = vi.fn();
     render(

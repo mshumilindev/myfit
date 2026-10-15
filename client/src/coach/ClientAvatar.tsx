@@ -1,4 +1,5 @@
 import { Avatar } from '../components/Avatar';
+import { photoRevOf } from './photoRev';
 
 /**
  * A client's face in the Coach UI: the app Avatar (the photo from Storage by user id, with the
@@ -16,5 +17,5 @@ export function ClientAvatar({
   size: number;
   hasPhoto?: boolean;
 }) {
-  return <Avatar userId={id} name={name} hasPhoto={hasPhoto} size={size} />;
+  return <Avatar userId={id} name={name} hasPhoto={hasPhoto} rev={photoRevOf(id)} size={size} />;
 }

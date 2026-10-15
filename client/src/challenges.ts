@@ -26,11 +26,13 @@ import {
   dayKey,
   latestWeight,
   restDayKeys,
+  streakProtectedPredicate,
   topSet,
   setTopWeight,
   uuid,
 } from './store';
 import { computeStandards } from './standards';
+import { computeStreak } from './streak';
 import {
   VOLUME_ZONES,
   VOLUME_MUSCLES,
@@ -616,6 +618,8 @@ interface Ctx {
   bodyKg: number;
   sex: 'M' | 'F';
   restDays: Set<number>;
+  /** Shared streak rule's protected days (rest periods, rehab, program rest). */
+  protectedDay: (day: number) => boolean;
   now: number;
 }
 
@@ -771,17 +775,14 @@ function activeDays(ctx: Ctx, from: number, to: number): Set<number> {
   return days;
 }
 
-/** Streak (consecutive active-or-rest days) ending today, bounded to the window.
- *  Day-keys are consecutive integers (one per local calendar day), so the walk
- *  never needs to reconstruct timestamps. */
+/** Streak ending today, bounded to the window — same rule as the app-wide streak (`streak.ts`). */
 function streakInWindow(ctx: Ctx, startDay: number, todayDay: number): number {
-  const active = activeDays(ctx, 0, ctx.now + DAY);
-  let count = 0;
-  for (let d = todayDay; d >= startDay; d--) {
-    if (active.has(d) || ctx.restDays.has(d)) count++;
-    else break;
-  }
-  return count;
+  return computeStreak({
+    trained: activeDays(ctx, 0, ctx.now + DAY),
+    isProtected: (d) => ctx.restDays.has(d) || ctx.protectedDay(d),
+    today: todayDay,
+    floorDay: startDay,
+  });
 }
 
 /** Count of completed 7-day blocks (since start) with every muscle productive+. */
@@ -892,6 +893,7 @@ export function challengeCtx(store: ReturnType<typeof useStore>, now: number): C
     bodyKg: latestWeight(store.bodyMetrics)?.weight ?? 0,
     sex: store.bodyMetrics.sex === 'female' ? 'F' : 'M',
     restDays: restDayKeys(store.restPeriods),
+    protectedDay: streakProtectedPredicate(now),
     now,
   };
 }

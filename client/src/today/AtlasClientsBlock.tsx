@@ -479,7 +479,9 @@ function useQuickReplies(): string[] {
   const { locale } = useT();
   const log = useChatLog();
   return useMemo(() => {
-    const last = [...log].reverse().find((m) => m.from === 'atlas' && !m.notice && !m.pending);
+    const last = [...log]
+      .reverse()
+      .find((m) => m.from === 'atlas' && !m.notice && !m.hello && !m.pending);
     if (last?.chips?.length) return last.chips.slice(0, 3);
     return atlasStarterChips(workouts, locale).slice(0, 3);
   }, [log, workouts, locale]);
@@ -528,7 +530,9 @@ function AtlasChat({ a, onOpen, cls }: { a: AtlasToday; onOpen: () => void; cls:
   const log = useChatLog();
   const chips = useQuickReplies();
   const msg = useMemo(() => {
-    const m = [...log].reverse().find((x) => x.from === 'atlas' && !x.notice && !x.pending);
+    const m = [...log]
+      .reverse()
+      .find((x) => x.from === 'atlas' && !x.notice && !x.hello && !x.pending);
     if (m) return { text: m.text, at: m.at as number | null };
     // No chat yet: what he last wrote in his notes.
     if (a.latest) return { text: a.latest.text, at: a.latest.at as number | null };

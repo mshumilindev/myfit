@@ -33,6 +33,23 @@ export const Tones: Story = {
   ),
 };
 
+/** `lead`: a solid tab before the label (e.g. the "×2 per hand" sides badge). */
+export const WithLead: Story = {
+  render: () => (
+    <ChipGroup>
+      <Chip tone="accent" lead="×2">
+        per hand
+      </Chip>
+      <Chip tone="rest" lead="×2">
+        one side at a time
+      </Chip>
+      <Chip tone="accent" lead="×2" onClick={() => undefined}>
+        per hand
+      </Chip>
+    </ChipGroup>
+  ),
+};
+
 function Selectable() {
   const [on, setOn] = useState<string | null>('Back');
   return (

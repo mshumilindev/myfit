@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button, IconButton, type ButtonVariant } from './Button';
+import { AtlasFace } from '../AtlasFace';
 import { LocaleMatrix, Row, Stack } from '../../stories/LocaleMatrix';
 
 const VARIANTS: ButtonVariant[] = [
@@ -78,6 +79,17 @@ export const IconButtons: Story = {
       <IconButton label="Add" icon="plus" variant="primary" />
       <IconButton label="Confirm" icon="check" variant="fill" />
       <IconButton label="Disabled" icon="x" disabled />
+    </Row>
+  ),
+};
+
+/** `hug` + `round`: a portrait as the button face; hover and focus are the circle, nothing wider. */
+export const AvatarFace: Story = {
+  render: () => (
+    <Row>
+      <Button variant="ghost" shape="round" hug aria-label="Portrait">
+        <AtlasFace temper={3} size={38} />
+      </Button>
     </Row>
   ),
 };

@@ -18,21 +18,19 @@ export function ThreadComposer(p: {
 }) {
   const { ch } = p;
   return (
-    <div className="ch-comp">
-      <ChatComposer
-        value={p.value}
-        onChange={p.onChange}
-        onSend={p.onSend}
-        allowEmpty={p.allowEmpty}
-        placeholder={p.placeholder}
-        sendLabel={ch.chSend}
-        emptyReason={ch.chSendNeedsText}
-        maxLength={MAX_TEXT}
-        tooLongText={ch.chTooLong(MAX_TEXT)}
-        lead={p.lead}
-        chips={p.chips}
-      />
-    </div>
+    <ChatComposer
+      value={p.value}
+      onChange={p.onChange}
+      onSend={p.onSend}
+      allowEmpty={p.allowEmpty}
+      placeholder={p.placeholder}
+      sendLabel={ch.chSend}
+      emptyReason={ch.chSendNeedsText}
+      maxLength={MAX_TEXT}
+      tooLongText={ch.chTooLong(MAX_TEXT)}
+      lead={p.lead}
+      chips={p.chips}
+    />
   );
 }
 

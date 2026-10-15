@@ -1315,7 +1315,8 @@ export const en = {
   notifVolumeSub: 'Every muscle in its productive range',
   muscleMapButton: 'Muscle map',
   muscleMapTitle: 'Today’s muscle map',
-  muscleMapWeekNote: 'Colours show this week’s volume, today included',
+  muscleMapWeekNote:
+    'Colours show your recent load, today included — it fades gradually after a session',
   muscleMapTodo: 'Still worth doing today',
   muscleMapEase: 'Ease off',
   muscleMapDone: 'Done today',

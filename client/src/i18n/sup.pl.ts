@@ -76,7 +76,7 @@ export const supPl: typeof supEn = {
     glycine: 'Glicyna',
     ashwagandha: 'Ashwagandha',
     omega3: 'Omega-3',
-    tartCherry: 'Wiśnia (sok z wiśni Montmorency)',
+    tartCherry: 'Wiśnia Montmorency (sok)',
     curcumin: 'Kurkumina',
     vitaminD: 'Witamina D',
     multivitamin: 'Multiwitamina',

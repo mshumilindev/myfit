@@ -9,6 +9,7 @@
 import { emptyBook, type DecisionBook } from '../domain/decisions';
 import { measureDecision } from '../domain/outcome';
 import { applyOp, type BookOp } from './bookOps';
+import { rememberPhotoRevs } from '../photoRev';
 import { deriveWorld, type DerivedWorld } from './deriveWorld';
 import type { ScheduleData } from '../schedule/port';
 import { PortError, type CoachWorldPort, type PortErrorCode, type WorldData } from './port';
@@ -152,6 +153,7 @@ export function createWorldStore(port: CoachWorldPort, opts: WorldStoreOptions =
         }),
       ]);
       data = fresh;
+      rememberPhotoRevs(fresh.clients);
       remoteBook = fresh.book;
       rebuildBook();
       fetchedAt = now();
@@ -192,6 +194,7 @@ export function createWorldStore(port: CoachWorldPort, opts: WorldStoreOptions =
       started = true;
       const adopt = (cached: { data: WorldData; fetchedAt: number }) => {
         data = cached.data;
+        rememberPhotoRevs(cached.data.clients);
         remoteBook = cached.data.book;
         rebuildBook();
         fetchedAt = cached.fetchedAt;

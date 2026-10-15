@@ -1360,7 +1360,8 @@ export const uk: Strings = {
   notifVolumeSub: 'Усі мʼязи в продуктивній зоні',
   muscleMapButton: 'Мапа мʼязів',
   muscleMapTitle: 'Мапа мʼязів на сьогодні',
-  muscleMapWeekNote: 'Кольори — обсяг за тиждень, з урахуванням сьогодні',
+  muscleMapWeekNote:
+    'Кольори — недавнє навантаження з урахуванням сьогодні; після тренування воно спадає поступово',
   muscleMapTodo: 'Ще варто зробити сьогодні',
   muscleMapEase: 'Пригальмувати',
   muscleMapDone: 'Готово сьогодні',

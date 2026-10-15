@@ -101,28 +101,20 @@
 .ch-dock > * {
   pointer-events: auto;
 }
-.ch-comp {
-  flex: none;
-  padding: var(--s-12) var(--s-16) var(--s-16);
-  border-top: var(--co-hair) solid var(--color-divider);
-}
 .ch-earlier {
   display: flex;
   justify-content: center;
   padding-bottom: var(--s-12);
 }
 
-/* Phone, a thread open: the chat is the whole screen — the shell's gutter goes, like in every other chat */
-@media (max-width: 719px) {
+/* Phone, a thread open: the chat is the whole screen — the shell's gutter goes, like in every other chat. The Coach
+   shell is a phone up to 767 (COACH_BREAKPOINT), so the page gutter goes there, not at 719. */
+@media (max-width: 767px) {
   .co-main:has(.ch-page--thread) {
     padding: 0;
   }
   .ch-page--thread {
     max-width: none;
     margin: 0;
-  }
-  /* the divider runs edge to edge; the same gap above the row, below it and at the sides */
-  .ch-page--thread .ch-comp {
-    padding: var(--s-8) var(--s-8) calc(var(--s-8) + env(safe-area-inset-bottom, 0px));
   }
 }

@@ -65,6 +65,8 @@ export interface CoachClient {
   live?: boolean;
   /** The client has a profile photo in Storage (the app Avatar fetches it by `id`). */
   hasPhoto?: boolean;
+  /** Revision of that photo (server `avatarRev`): a change refetches it, the same value serves the on-device copy. */
+  photoRev?: number;
   /** `pending` = invite sent, not accepted yet. */
   invite?: { sentAt: number; expiresAt: number };
 }

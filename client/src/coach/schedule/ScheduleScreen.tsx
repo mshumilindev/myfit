@@ -5,7 +5,6 @@ import { useGymWeeks } from './gymHours';
 import { Button, IconButton } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Chip } from '../../components/ui/Chip';
-import { EmptyState } from '../../components/ui/EmptyState';
 import { Notice } from '../../components/ui/Notice';
 import { Segmented } from '../../components/ui/Segmented';
 import { Select } from '../../components/ui/Select';
@@ -85,7 +84,6 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
      filtered on stays listed so the select never shows a value it has no option for. */
   const allGyms = scheduleGyms();
   const chosenIds = cal.settings.gymIds.filter((id) => allGyms.some((g) => g.id === id));
-  const chosenGymCount = chosenIds.length;
   const filterGyms = allGyms.filter(
     (g) => chosenIds.length === 0 || chosenIds.includes(g.id) || g.id === prm.gym,
   );
@@ -201,6 +199,7 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
 
   const loadingFirst = sch.loading && state.docs.length === 0;
   const failedFirst = state.status === 'error' && state.docs.length === 0;
+  /* no sessions yet: the calendar still shows (an empty grid), with a short hint above it instead of an empty state */
   const empty = state.status !== 'loading' && state.docs.length === 0 && !failedFirst;
 
   const inspector = selected && (
@@ -427,14 +426,6 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
               </option>
             ))}
           </Select>
-          <Button
-            variant="secondary"
-            icon="map-pin"
-            className="sc-gyms-chip"
-            onClick={() => prm.set({ form: 'settings' })}
-          >
-            {t.hsGymsChip(chosenGymCount)}
-          </Button>
           <Select
             labelInline
             label={t.scClientLabel}
@@ -494,20 +485,13 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
         </div>
       ) : failedFirst ? (
         <CoachProblemState inline problem={offlineOrUnknown()} onRetry={store.retry} />
-      ) : empty ? (
-        <EmptyState
-          titleAs="h2"
-          centered
-          icon="calendar-blank"
-          title={t.scEmptyH}
-          body={t.scEmptyB}
-        >
-          <Button icon="calendar-plus" onClick={() => prm.set({ form: 'plan' })}>
-            {t.scAddSessions}
-          </Button>
-        </EmptyState>
       ) : (
         <>
+          {empty && (
+            <Notice tone="neutral" icon="calendar-blank" role="status">
+              <strong>{t.scEmptyH}.</strong> {t.scEmptyB}
+            </Notice>
+          )}
           <div className="sc-summary" role="status">
             <strong>{t.scSummary(inRange.length)}</strong>
             {open > 0 && <span>{t.scRequestsN(open)}</span>}

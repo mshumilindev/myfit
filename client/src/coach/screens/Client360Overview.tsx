@@ -225,7 +225,7 @@ export function Overview({
                   id: 'restriction',
                   label: r.c3Restriction,
                   value: injuryOff ? (
-                    <LockedRow>{r.c3RestrictionLocked(first)}</LockedRow>
+                    <LockedRow inline>{r.c3RestrictionLocked(first)}</LockedRow>
                   ) : (
                     (restrictionLine(app, client.injuries) ??
                     client.restriction ??

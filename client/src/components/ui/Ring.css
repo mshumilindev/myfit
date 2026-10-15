@@ -19,11 +19,22 @@
   stroke-linecap: round;
   transition: stroke-dashoffset 320ms ease;
 }
+/* The middle fills the ring and centres its content itself, so a glyph or number
+   sits on the exact centre whatever the parent's text-align / flex does (SPO-5:
+   the check in the "trained today" ring sat off-centre and tiny). */
 .uiring-c {
-  position: relative;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--color-text);
+}
+/* A glyph in the middle: a clear 24px (the 60px "trained today" ring), not the inherited 15. */
+.uiring-c > .ui-icon {
+  font-size: var(--fs-24);
 }
 
 /* Reduced motion: no slides, fades or loops; state changes are instant. */

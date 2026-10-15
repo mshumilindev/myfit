@@ -191,6 +191,45 @@
   }
 }
 
+/* A drawer never scrolls sideways (kit rule, SPO-103). The fix is layout, not `overflow-x: hidden` (that only hides it):
+   - containers may shrink below their content (flex/grid children default to min-width: auto and push the drawer wide);
+   - long names, emails, URLs and long pl/lt/et words wrap instead of stretching the row;
+   - media and form controls never exceed the drawer.
+   :where() keeps specificity at zero, so a feature that needs a width still wins. A deliberate sideways row (chips,
+   tabs) is its own scroll container with overflow-x: auto and carries data-hscroll-ok. useSheetOverflowGuard reports
+   whatever still sticks out (data-hscroll on the sheet, console warning in dev). */
+.sheet {
+  overflow-wrap: anywhere;
+}
+.sheet
+  :where(
+    div,
+    section,
+    article,
+    header,
+    footer,
+    nav,
+    form,
+    fieldset,
+    ul,
+    ol,
+    li,
+    label,
+    p,
+    h1,
+    h2,
+    h3,
+    h4
+  ) {
+  min-width: 0;
+}
+.sheet :where(img, video, canvas, iframe, input, select, textarea) {
+  max-width: 100%;
+}
+.sheet :where(input, select, textarea) {
+  min-width: 0;
+}
+
 .sheet.backfill-sheet {
   width: auto;
   gap: var(--space-4);

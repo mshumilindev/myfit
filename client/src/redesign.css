@@ -1140,47 +1140,9 @@ div.hist-item {
   --pc: #6f7479;
 }
 
-/* Session: ×2 sides badge — a solid "×2" tab + what it means. */
+/* Session: ×2 sides badge is the kit Chip with a `lead` tab (SidesChip). */
 .sides-chip {
   flex: none;
-  display: inline-flex;
-  align-items: center;
-  height: 30px;
-  padding: 0 var(--s-10) 0 var(--s-4);
-  gap: var(--s-8);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
-  border-radius: var(--r-16);
-  background: var(--c-2a2216);
-  color: var(--c-e9c07a);
-  font: inherit;
-  font-size: var(--fs-12);
-  font-weight: 500;
-  white-space: nowrap;
-}
-button.sides-chip {
-  cursor: pointer;
-}
-.sides-chip .sc-x {
-  display: grid;
-  place-items: center;
-  height: 22px;
-  min-width: 30px;
-  padding: 0 var(--s-6);
-  border-radius: var(--r-12);
-  background: var(--color-accent);
-  color: var(--color-accent-950);
-  font-size: var(--fs-12);
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-.sides-chip.mode-unilateral {
-  border-color: color-mix(in srgb, var(--c-6fa8c9) 45%, transparent);
-  background: var(--c-172430);
-  color: var(--c-a9d0e8);
-}
-.sides-chip.mode-unilateral .sc-x {
-  background: var(--c-6fa8c9);
-  color: var(--c-0e1a22);
 }
 
 /* --- Today: the nudge stack sits in an even band ---------------------------
@@ -1189,8 +1151,11 @@ button.sides-chip {
 .pane-main {
   --td-stack-band: 24px;
 }
-.pane-main > .today-program-card.td-week:has(+ .nudge-wrap),
-.pane-main > .today-program-card.td-week:has(+ * + .nudge-wrap) {
+/* The gap under the week card must not depend on what sits next to the stack. It used to: a margin reset keyed on
+   adjacency (:has(+ .nudge-wrap)) held the card's bottom margin at 0 only while the stack followed it directly; when a
+   late block (coach extras, banner, log-past button) mounted in between, the margin came back and the stack jumped
+   down (SPO-102). The band above the stack is the pane gap + the stack's top margin, the same in every state. */
+.pane-main > .today-program-card.td-week {
   margin-bottom: 0;
 }
 .pane-main > .nudge-wrap {

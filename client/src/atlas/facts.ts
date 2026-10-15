@@ -171,7 +171,16 @@ export interface DayContext {
   sleeps: SleepNight[];
   body: BodyMetrics | null | undefined;
   now: number;
+  /** Today's day of Atlas's own programme, when he runs one (a planned day counts like a usual one). */
+  plannedDay?: { name?: string | null } | null;
 }
+
+/** "Skipped" is said this long after your usual start (18:00 when there is no history), never later than 21:00. */
+export const SKIP_NUDGE_AFTER_H = 2;
+export const LATEST_NUDGE_H = 21;
+/** Local hour the "skipped" note appears and its push goes out: one rule for the chat and the notification. */
+export const skipNudgeHour = (usual: number | null): number =>
+  Math.min(LATEST_NUDGE_H, (usual ?? 18) + SKIP_NUDGE_AFTER_H);
 
 /** Hour of day (local) the athlete usually starts on a weekday, from history. */
 export function usualStartHour(finished: Workout[], dow: number): number | null {
@@ -197,18 +206,21 @@ export function dayFacts(ctx: DayContext): CoachFact[] {
   const today = dayKey(now);
   const dow = new Date(now).getDay();
 
-  // Skipped: a day you reliably train, well past your usual start, nothing logged.
+  // Skipped: a day you reliably train (or Atlas planned), well past your usual start, nothing logged.
+  // The same rule books the push (atlas/schedule.ts): a notification always has this note in the chat.
   const play = playForWeekday(plays, dow);
+  const planned = ctx.plannedDay ?? null;
   const trainedToday = finished.some((w) => dayKey(w.startedAt) === today);
   const usual = usualStartHour(finished, dow);
   const hourNow = new Date(now).getHours() + new Date(now).getMinutes() / 60;
-  if (play && !trainedToday && usual !== null && hourNow >= usual + 2)
+  const nudgeH = skipNudgeHour(usual);
+  if ((play || planned) && !trainedToday && hourNow >= nudgeH)
     out.push({
       kind: 'skipped',
       id: `skipped:${today}`,
-      // A fixed moment (usual start + 2 h), not "now" — so it can be read.
-      at: dayStart(now) + Math.round((usual + 2) * 3_600_000),
-      dayName: play.name,
+      // A fixed moment (the nudge hour), not "now" — so it can be read.
+      at: dayStart(now) + Math.round(nudgeH * 3_600_000),
+      dayName: planned?.name ?? play?.name ?? null,
     });
 
   // Imbalance over the last week, among muscles you actually train.
@@ -295,12 +307,16 @@ export function weekFact(
   const sessions = finished.filter((w) => w.startedAt >= since && w.startedAt <= now).length;
   return {
     kind: 'week',
-    id: `week:${dayKey(since)}`,
+    id: weekNoteId(now, start),
     at: dayStart(now),
     sessions,
     planned: planned ?? usualSessionsPerWeek(finished, since),
   };
 }
+
+/** Id of the weekly-review note of the training week holding `ts`. */
+export const weekNoteId = (ts: number, start: IsoDay = weekStartDay()): string =>
+  `week:${dayKey(weekStartOf(ts, start))}`;
 
 /** Is `now` on the last day of the training week (the day for the weekly review)? */
 export function isWeekEnd(now: number, start: IsoDay = weekStartDay()): boolean {

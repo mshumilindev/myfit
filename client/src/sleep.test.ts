@@ -10,6 +10,7 @@ import {
   awakeMsAt,
   SLEEP_IDLE_MS,
   lastBedtimeAt,
+  dueBedtime,
   AUTO_START_WINDOW_MS,
   resolvePlan,
   computeUpcomingNights,
@@ -275,5 +276,39 @@ describe('auto-fill: the night that ends on a given morning (nightEndingOn)', ()
   it('returns null with no plan and no history', () => {
     const empty: SleepSchedule = { sameEveryNight: false, every: null, byDay: {} };
     expect(nightEndingOn(empty, [], sat0, noon)).toBeNull();
+  });
+});
+
+describe('dueBedtime (auto-start moment)', () => {
+  const at = (d: number, h: number, m = 0) => new Date(2026, 9, d, h, m).getTime(); // Oct 2026
+  // Friday 16 Oct bedtime 23:30, Saturday 17 Oct bedtime 01:30 (late weekend).
+  const plans: Record<number, { bedMin: number; wakeMin: number }> = {
+    5: { bedMin: 23 * 60 + 30, wakeMin: 7 * 60 },
+    6: { bedMin: 90, wakeMin: 9 * 60 },
+  };
+  const planOf = (wd: number) => plans[wd] ?? null;
+
+  it('is due inside the window after bedtime and not before or after it', () => {
+    expect(dueBedtime(at(16, 23, 20), planOf)).toBeNull();
+    expect(dueBedtime(at(16, 23, 30), planOf)?.bedTs).toBe(at(16, 23, 30));
+    expect(dueBedtime(at(16, 23, 59), planOf)?.bedTs).toBe(at(16, 23, 30));
+    expect(dueBedtime(at(17, 0, 30), planOf)).toBeNull();
+  });
+
+  it('keys the plan by the weekday of the bedtime, also after midnight', () => {
+    // 00:10 on Saturday: Friday evening bedtime 23:30 is 40 min ago -> Friday plan, not Saturday 01:30.
+    const due = dueBedtime(at(17, 0, 10), planOf);
+    expect(due?.bedTs).toBe(at(16, 23, 30));
+    expect(due?.plan.wakeMin).toBe(7 * 60);
+  });
+
+  it('a late weekend bedtime is due after midnight on its own day', () => {
+    const due = dueBedtime(at(17, 1, 40), planOf);
+    expect(due?.bedTs).toBe(at(17, 1, 30));
+    expect(due?.plan.wakeMin).toBe(9 * 60);
+  });
+
+  it('is null with no plan', () => {
+    expect(dueBedtime(at(14, 23, 40), planOf)).toBeNull();
   });
 });

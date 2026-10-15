@@ -154,6 +154,15 @@
   padding-inline: 0;
 }
 
+/* hug: the button is exactly its child (an avatar / portrait face); pair with shape="round". */
+.uibtn.uibtn--hug {
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  line-height: 0;
+}
+
 /* Icons scale with the label */
 .uibtn .ui-icon {
   font-size: var(--ctl-icon);
@@ -235,8 +244,4 @@ a.uibtn:hover {
     transition-duration: 0.01ms;
     transition-delay: 0s;
   }
-}
-
-.uibtn--icon {
-  position: relative;
 }

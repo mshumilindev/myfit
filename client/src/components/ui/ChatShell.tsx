@@ -16,21 +16,46 @@ export interface ChatShellProps {
   /** Theme hook: a class that sets the `--chat-*` variables (accent, glow). The only thing that differs between chats. */
   className?: string;
   style?: CSSProperties;
+  /** Where the host swaps phone for desktop: `coach` is 768 (the Coach shell), default 720 like the rest of the app. */
+  breakpoint?: 'app' | 'coach';
+}
+
+/**
+ * The page a chat sits on (kit group `Coach/Chat`): from 720 px the gutter around the card (left, right, top), none on
+ * a phone. Every chat that is a screen of its own (client, Atlas) wraps its ChatShell in it; the trainer's chat sits in
+ * the layout's own page and the dock panel is its own frame.
+ */
+export function ChatPage({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={['chs-page', className].filter(Boolean).join(' ')}>{children}</div>;
 }
 
 /**
  * THE chat frame (kit group `Coach/Chat`): the one layout every conversation uses (the trainer's, the client's and
  * Atlas's). Bar on top, a body that takes the rest and scrolls inside, the composer at the bottom. On a phone it is
- * the page itself: edge to edge, no card, safe-area padding under the composer. From 720 px it is a card. It fills
+ * the page itself: edge to edge, no card. The composer's room (sides, bottom, safe area) is set by `.chs-foot` alone. From 720 px it is a card. It fills
  * what is left of the screen (`--chs-avail`, measured), so nothing is clipped by a frame shorter than the window.
  *
  * Designs change here (ChatShell.css, ChatBubble.css, ChatComposer.css); a chat only sets the `--chat-*` colours.
  */
-export function ChatShell({ head, children, foot, overlays, className, style }: ChatShellProps) {
+export function ChatShell({
+  head,
+  children,
+  foot,
+  overlays,
+  className,
+  style,
+  breakpoint,
+}: ChatShellProps) {
   const ref = useFillViewport();
   return (
     <div className="chs-wrap" ref={ref}>
-      <Card pad="none" className={['chs', className].filter(Boolean).join(' ')} style={style}>
+      <Card
+        pad="none"
+        className={['chs', breakpoint === 'coach' && 'chs--coach', className]
+          .filter(Boolean)
+          .join(' ')}
+        style={style}
+      >
         <div className="chs-head">{head}</div>
         <div className="chs-body">{children}</div>
         {foot && <div className="chs-foot">{foot}</div>}

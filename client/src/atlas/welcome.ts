@@ -1,7 +1,7 @@
 /**
  * The first thing you see in an empty chat: Atlas says hello in its temper's
  * voice, tells you what it can do (from your own log when there is one), and
- * offers three ways in. Not stored — it's there until you write.
+ * offers three ways in. Said once per conversation (stored as the first message, see helloPlan.ts).
  */
 import * as N from './num';
 import type { AskCtx, Tr } from './intentKit';

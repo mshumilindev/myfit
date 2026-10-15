@@ -95,7 +95,7 @@ export function RosterDetailBody({
             id: 'restriction',
             label: r.roDetailRestriction,
             value: injuryOff ? (
-              <LockedRow>{r.roNotShared}</LockedRow>
+              <LockedRow inline>{r.roNotShared}</LockedRow>
             ) : (
               (restrictionLine(app, c.injuries) ?? c.restriction ?? r.roNoneDeclared)
             ),
