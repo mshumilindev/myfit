@@ -35,7 +35,11 @@ const probe = () => {
     const rr = row.getBoundingClientRect();
     const br = back.getBoundingClientRect();
     const kids = [...row.children].filter((k) => k !== back && vis(k));
-    const title = kids.find((k) => /\S/.test(k.textContent)) ?? null;
+    // A header block that spans the whole row is the hero itself (back is overlaid on it by design);
+    // a wrapper of title + sub line is measured by its heading, so the sub line doesn't skew the axis.
+    const first = kids.find((k) => /\S/.test(k.textContent)) ?? null;
+    const spans = first && first.getBoundingClientRect().width >= rr.width * 0.95;
+    const title = spans ? null : (first?.querySelector('h1, h2, h3, .title-26') ?? first);
     const f = [];
     if (title) {
       const tr = title.getBoundingClientRect();
@@ -46,7 +50,9 @@ const probe = () => {
         tr.bottom > br.top
       )
         f.push(['overlap', 'back and title overlap']);
-      const dc = Math.abs(br.top + br.height / 2 - (tr.top + tr.height / 2));
+      // A wrapped title is centred on its first line (the back button stays level with it).
+      const lh = parseFloat(getComputedStyle(title).lineHeight) || tr.height;
+      const dc = Math.abs(br.top + br.height / 2 - (tr.top + Math.min(tr.height, lh) / 2));
       if (dc > 3) f.push(['axis', `back and title centres differ by ${Math.round(dc)}px`]);
     }
     const all = [back, ...kids].map((k) => k.getBoundingClientRect());
@@ -67,7 +73,7 @@ const probe = () => {
     }
     const left = br.left - rr.left;
     const right = rr.right - Math.max(...all.map((r) => r.right));
-    if (painted && Math.abs(left - right) > 4 && kids.length)
+    if (painted && !spans && Math.abs(left - right) > 4 && kids.length)
       f.push(['hgap', `room left ${Math.round(left)}px, right ${Math.round(right)}px`]);
     if (document.documentElement.scrollWidth > innerWidth + 1)
       f.push(['hscroll', 'page scrolls sideways']);

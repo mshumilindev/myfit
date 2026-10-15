@@ -1,0 +1,16 @@
+/* PageHead — kit page header row. Tokens only; the row itself is the shared `.hist-head` (redesign.css:
+   min-height --s-36, gap --s-10, padding 0). Actions sit on the title's first line (centred on --s-36). */
+:where(.uipagehead) {
+  display: flex;
+  gap: var(--s-10);
+}
+.uipagehead-t {
+  min-width: 0;
+}
+.uipagehead-a {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  min-height: var(--s-36);
+}

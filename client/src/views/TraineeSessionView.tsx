@@ -5,7 +5,7 @@
  * way the athlete sees their own past session — sets, types, rest, drop sets,
  * supersets and circuits — but without any editing affordances.
  */
-import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { SidesChip } from '../components/SidesChip';
 import { useEffect, useState } from 'react';
 import type { Shell } from '../App';
@@ -238,21 +238,21 @@ export function TraineeSessionView({
 
   return (
     <div className="screen ug-14">
-      <div className="hist-head">
-        <BackButton onClick={onClose} label={t.backAction} />
-        <div className="uf-1 umw-0">
-          <h2 className="title-26">{athleteName ?? t.trLiveViewRecap}</h2>
-          {w && (
-            <div className="sub">
+      <PageHead
+        back={{ label: t.backAction, onClick: onClose }}
+        title={athleteName ?? t.trLiveViewRecap}
+        sub={
+          w ? (
+            <>
               {fmtDayMonth(w.startedAt, locale)}
               {' · '}
               {workoutSets(w)} {t.sets} · {fmtTonnes(workoutVolumeKg(w))} · {w.exercises.length}{' '}
               {t.exercises}
               {durationMs != null ? ` · ${fmtDurationHM(durationMs)}` : ''}
-            </div>
-          )}
-        </div>
-      </div>
+            </>
+          ) : undefined
+        }
+      />
 
       {loading && <div className="detail-muted">…</div>}
       {errMsg && <div className="detail-muted">{errMsg}</div>}

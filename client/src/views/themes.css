@@ -1,5 +1,5 @@
 /* Themes page. Tokens only; the kit draws every control. */
-.themes-screen .notif-head {
+.themes-screen .uipagehead {
   margin-bottom: var(--s-4);
 }
 .thm-row {

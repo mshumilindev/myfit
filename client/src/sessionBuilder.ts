@@ -24,7 +24,8 @@ import {
 import { exerciseDay, type TrainingDay } from './data/daySuggest';
 import { nextTarget, topHistory } from './progression';
 import { muscleReadiness, type ReadyState } from './recovery';
-import { LANDMARKS, VOLUME_MUSCLES, weeklyMuscleSets, type Landmark } from './volume';
+import { LANDMARKS, VOLUME_MUSCLES, type Landmark } from './volume';
+import { recentLoadSets } from './loadWindow';
 import { personalLandmarks } from './personalize';
 import { focusAdjustLandmarks, groupEmphasis, type Emphasis, type FitGoals } from './goals';
 import { computePlaybook, type Play } from './playbook';
@@ -273,7 +274,7 @@ export interface BuildContext {
 export function pickMuscles(ctx: BuildContext): MuscleGroup[] {
   const ready = muscleReadiness(ctx.finished, ctx.now);
   const lms = focusAdjustLandmarks(personalLandmarks(ctx.finished, ctx.now), ctx.goals);
-  const week = weeklyMuscleSets(ctx.finished, ctx.now);
+  const week = recentLoadSets(ctx.finished, ctx.now);
   const emph = groupEmphasis(ctx.goals);
 
   const scored: { m: MuscleGroup; score: number; state: ReadyState }[] = [];
@@ -463,7 +464,7 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
     ctx.targetMuscles && ctx.targetMuscles.length > 0 ? ctx.targetMuscles : pickMuscles(ctx)
   ).filter((m) => !protectedSet.has(m));
   const lms = focusAdjustLandmarks(personalLandmarks(ctx.finished, ctx.now), ctx.goals);
-  const week = weeklyMuscleSets(ctx.finished, ctx.now);
+  const week = recentLoadSets(ctx.finished, ctx.now);
   const ready = muscleReadiness(ctx.finished, ctx.now);
   const emph = groupEmphasis(ctx.goals);
   const play = playForMuscles(ctx.finished, ctx.now, muscles);

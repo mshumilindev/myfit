@@ -6,7 +6,7 @@
  * of the live Today screen (data/todaySnapshot).
  */
 import { useLayoutEffect, useRef, useState } from 'react';
-import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { IconTile } from '../components/ui/IconTile';
@@ -54,10 +54,7 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
   const { t } = useT();
   return (
     <div className="screen themes-screen">
-      <div className="notif-head">
-        <BackButton onClick={onClose} label={t.backAction} />
-        <h2 className="title-26">{t.themesTitle}</h2>
-      </div>
+      <PageHead back={{ label: t.backAction, onClick: onClose }} title={t.themesTitle} />
       <SectionLabel>{t.themesSection}</SectionLabel>
       <Card pad="md">
         <div className="thm-row">

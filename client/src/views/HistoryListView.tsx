@@ -11,7 +11,7 @@ import { dayKey, latestWeight, useStore } from '../store';
 import { useT } from '../i18n';
 import { useMinuteClock } from '../atlas/notes';
 import { HistoryTimeline, buildHistoryDays, useDayBars } from '../components/HistoryTimeline';
-import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { WeekPickerSheet, type WeekOption } from '../components/ui/WeekPickerSheet';
 import type { WeekBar } from '../components/ui/WeekBars';
 import { WeekStepper } from '../components/ui/WeekStepper';
@@ -108,13 +108,11 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
 
   return (
     <div className="screen hist-list">
-      <div className="hist-head">
-        <BackButton onClick={onClose} label={t.backAction} />
-        <div className="uf-1 umw-0">
-          <h2 className="title-26">{t.tdHistory}</h2>
-          <div className="hist-list-sub">{t.historyCount(workoutCount)}</div>
-        </div>
-      </div>
+      <PageHead
+        back={{ label: t.backAction, onClick: onClose }}
+        title={t.tdHistory}
+        sub={t.historyCount(workoutCount)}
+      />
 
       {days.length === 0 ? (
         <div className="detail-muted">{t.noHistoryYet}</div>

@@ -11,6 +11,7 @@
  *   MRV  maximum recoverable volume -- above this is junk / overreaching
  */
 import { muscleSetsInWorkout } from './store';
+import { recentLoadSets } from './loadWindow';
 import type { Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 
@@ -171,7 +172,8 @@ export function volumeHeatColors(
   days = 7,
   landmarks?: ReadonlyMap<MuscleGroup, Landmark>,
 ): Partial<Record<MuscleGroup, string>> {
-  const per = weeklyMuscleSets(finished, now, days);
+  // The current-week read uses the shared fading load; longer ranges are historical period counts.
+  const per = days === 7 ? recentLoadSets(finished, now) : weeklyMuscleSets(finished, now, days);
   const weeks = days / 7;
   const lmFor = (m: MuscleGroup): Landmark => landmarks?.get(m) ?? (LANDMARKS[m] as Landmark);
   const zoneLm = (members: MuscleGroup[]): Landmark => {

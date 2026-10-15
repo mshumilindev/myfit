@@ -394,7 +394,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
   }, [isDesktop, q, previewItem, props, needle, results, groupShown]);
   useEffect(() => {
     if (isDesktop)
-      document.querySelector('.xp-card.sel, .xp-row.sel')?.scrollIntoView({ block: 'nearest' });
+      document.querySelector('.xp-card.sel, .xp-row.sel')?.scrollIntoView?.({ block: 'nearest' });
   }, [isDesktop, previewItem?.key]);
 
   const pick = (i: PickItem) => props.onPick(i);
@@ -630,7 +630,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
               {showToday && todayIds.has(f.id) && <span className="xp-today">{t.pickToday}</span>}
             </span>
             {noFatigue ? (
-              <span className="xp-fam-state">
+              <span className="xp-fam-state xp-fam-state-subs">
                 {f.subs.length
                   ? f.subs.map((s) => subLabel(t, s)).join(' · ')
                   : t.muscleGroups.core}

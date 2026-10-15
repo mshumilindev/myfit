@@ -13,6 +13,7 @@
 | `quality-gate.mdc`   | Lint / format / typecheck / тести перед push                    |
 | `test-integrity.mdc` | Тести — контракти; заборонені шляхи до зеленого                 |
 | `ui-kit.mdc`         | UI-кіт + Storybook: спершу кіт і сторіз, тільки токени, 8-pt    |
+| `fast-workflow.mdc`  | Швидкий і безпечний процес: паралель, цільові перевірки, докази |
 
 ## Швидкі команди
 

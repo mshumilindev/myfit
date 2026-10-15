@@ -971,6 +971,12 @@ span.xp-noimg {
   min-height: 64px;
   width: 100%;
 }
+.xp-rail-fam .xp-fam-state-subs {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .xp-equip-tile {
   position: relative;
   display: flex;

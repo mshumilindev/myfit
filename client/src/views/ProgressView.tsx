@@ -41,6 +41,7 @@ import {
   type Landmark,
   type Zone,
 } from '../volume';
+import { recentLoadSets } from '../loadWindow';
 import { ActivityTrends } from '../components/ActivityTrends';
 import { AddToProgramSheet, useEditableProgram } from '../components/ProgramActivitySuggest';
 import { activityTrends } from '../activityTrends';
@@ -1295,7 +1296,10 @@ function VolumePanel({
   // Default: most-loaded first (Over -> ... -> None), toggleable.
   const [sortDesc, setSortDesc] = useState(true);
 
-  const perMuscle = weeklyMuscleSets(finished, nowTs, rangeDays);
+  const perMuscle =
+    rangeDays === 7
+      ? recentLoadSets(finished, nowTs)
+      : weeklyMuscleSets(finished, nowTs, rangeDays);
   const weeks = rangeDays / 7;
   const cold = historyAgeDays(finished, nowTs) < 21;
   // Chronic weak points: muscles under MEV across most of the last 6 weeks.

@@ -224,6 +224,7 @@ npm run build-storybook    # static catalog → client/storybook-static/
 | `BrandBar` (+ `BellButton`)                                   | THE app header in every sub-app: wordmark, app label, actions slot, language chip                                                                  |
 | `TabBar`                                                      | THE bottom bar (generic items; optional centre `fab` with attention pulse; `tabs` + `activeFill` for sub-apps)                                     |
 | `BackButton`                                                  | every back control (round well; `text` pill; `overlay`)                                                                                            |
+| `PageHead`                                                    | THE page header row: back, title (+ sub), actions slot on one axis; edges = page edges, `--s-36` row (SPO-96, `docs/hero-audit-table.md`)          |
 | `Field` / `TimeField` / `Select` / `Textarea` / `SearchField` | every text, time, select, multi-line and search input (label, hint, error, lead / trail; `bare` for in-row values)                                 |
 | `Widget` + `uiw-t-*`                                          | Today widgets; typography only through the `uiw-t-*` scale, never inline styles                                                                    |
 

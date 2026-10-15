@@ -14,7 +14,8 @@ import type { MuscleGroup } from '../data/exercises';
 import { directReadiness } from '../picker';
 import { READINESS_COLOR } from '../recovery';
 import { marginalStimulus } from '../stimulus';
-import { weeklyMuscleSets, LANDMARKS } from '../volume';
+import { LANDMARKS } from '../volume';
+import { recentLoadSets } from '../loadWindow';
 import { cachedPersonalLandmarks } from '../personalize';
 import { muscleFatigue, FATIGUE_COLOR } from '../fatigue';
 
@@ -44,7 +45,7 @@ export function MuscleStatePanel({
     const withToday = [...finished, workout];
     const state = directReadiness([muscle], muscle, withToday, now);
     const before = directReadiness([muscle], muscle, finished, now);
-    const week = weeklyMuscleSets(withToday, now, 7).get(muscle) ?? 0;
+    const week = recentLoadSets(withToday, now).get(muscle) ?? 0;
     const lm = cachedPersonalLandmarks(store.workouts, now).get(muscle) ?? LANDMARKS[muscle];
     const fat = muscleFatigue(withToday, now).get(muscle) ?? null;
     return { state, before, week, lm, fat };

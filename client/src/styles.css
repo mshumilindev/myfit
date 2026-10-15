@@ -9891,16 +9891,6 @@ button.exd-media {
 /* ==========================================================================
    App settings (admin, web) — feature flags
    ========================================================================== */
-.settings-view .hist-head {
-  display: flex;
-  align-items: center;
-  gap: var(--s-10);
-}
-.settings-sub {
-  font-size: var(--fs-12);
-  color: var(--color-neutral-500);
-  margin-top: var(--s-2);
-}
 .settings-group-label {
   margin: 0 0 var(--space-2);
   font-size: var(--fs-10);
@@ -9915,16 +9905,6 @@ button.exd-media {
 .td-history-all {
   margin-top: var(--s-16);
   margin-bottom: var(--s-16);
-}
-.hist-list .hist-head {
-  display: flex;
-  align-items: center;
-  gap: var(--s-10);
-}
-.hist-list-sub {
-  font-size: var(--fs-12);
-  color: var(--color-neutral-500);
-  margin-top: var(--s-2);
 }
 .hist-month {
   display: flex;
@@ -10305,6 +10285,20 @@ button.exd-media {
 .session-screen .muscles-worked {
   padding-left: var(--gutter);
   padding-right: var(--gutter);
+}
+/* SPO-96: "Muscle groups worked" must share the inset of the hero and the cards under it. Phone past
+   session = --s-20 (header, date bar, body); desktop = 0 (the pane already supplies --s-32, the
+   hero draws its own box). The 18px gutter above is for live / summary on the phone only. */
+.session-screen.session-past .muscles-worked {
+  padding-left: var(--s-20);
+  padding-right: var(--s-20);
+}
+@media (min-width: 720px) {
+  .session-screen .muscles-worked,
+  .session-screen.session-past .muscles-worked {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 /* Summary: primary Share CTA + Edit/Done row. */
@@ -21910,9 +21904,12 @@ body {
   /* Breathing room between the set-entry panel and the nav divider below, and
      room for its accent glow (hero shadow reaches ~60px down / ~38px sideways):
      overflow-y:auto clips at the padding box, so without this the glow was cut
-     off in a hard line (SPO-11). The negative margins keep the layout size. */
+     off in a hard line (SPO-11). Sideways the negative margins keep the layout
+     size. NOT at the bottom: the opaque .focus-nav is painted over anything
+     that reaches under it, so a bottom overlap sawed the glow off at the nav
+     divider (SPO-11) -- the room below must sit fully above the nav. */
   padding: 0 var(--s-40) calc(var(--s-40) + var(--s-20));
-  margin: 0 calc(-1 * var(--s-40)) calc(-1 * var(--s-40));
+  margin: 0 calc(-1 * var(--s-40));
 }
 .focus-scroll::-webkit-scrollbar {
   display: none;
@@ -22133,9 +22130,9 @@ body {
   padding: var(--s-16) var(--s-18) max(var(--s-12), var(--safe-bottom));
   border-top: 1px solid var(--color-divider);
   background: var(--color-bg);
-  /* The scroll area above reaches 40px under the nav (negative margin for the Log glow, SPO-11) and holds positioned
-     cards (.gset is relative + isolated). Without its own stacking level the nav is painted UNDER them: its fill looks
-     transparent and the step line / notes show through the buttons. */
+  /* The scroll area above holds positioned cards (.gset is relative + isolated). Without its own stacking level the
+     nav is painted UNDER them: its fill looks transparent and the step line / notes show through the buttons. The
+     scroll area ends at the nav's top edge, so the nav never covers the Log glow (SPO-11). */
   position: relative;
   z-index: 1;
 }

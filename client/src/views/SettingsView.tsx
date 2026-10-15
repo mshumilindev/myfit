@@ -2,7 +2,7 @@
  * App settings — admin only, web only. Toggles for feature flags; everything
  * defaults off. Reached from the desktop rail's Settings item.
  */
-import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { Switch } from '../components/ui/Switch';
 import { FEATURE_FLAGS, isFlagOn, setFlag, useFlagsVersion, type FlagId } from '../data/flags';
@@ -19,13 +19,11 @@ export function SettingsView({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="screen settings-view ug-16">
-      <div className="hist-head">
-        <BackButton onClick={onClose} label={t.backAction} />
-        <div className="uf-1 umw-0">
-          <h2 className="title-26">{t.settingsTitle}</h2>
-          <div className="settings-sub">{t.settingsSub}</div>
-        </div>
-      </div>
+      <PageHead
+        back={{ label: t.backAction, onClick: onClose }}
+        title={t.settingsTitle}
+        sub={t.settingsSub}
+      />
 
       <GroupedList header={t.settingsFeaturesLabel}>
         {FEATURE_FLAGS.map((f) => {
