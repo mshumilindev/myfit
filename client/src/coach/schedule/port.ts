@@ -38,6 +38,11 @@ export interface SchedulePort {
   now(): number;
   /** The last good snapshot from the local (sealed) cache, or null. Never blocks. */
   peek(): ScheduleData | null;
+  /**
+   * Resolves once the on-device snapshot has been read (so `peek()` may now return it). Never rejects, never blocks the
+   * screen: the store shows what it has and adopts the snapshot when it lands, unless live data got there first.
+   */
+  hydrate?(): Promise<void>;
   /** Live data; calls `on` at once with the cached snapshot when there is one. */
   subscribe(on: (d: ScheduleData) => void, onError: (e: unknown) => void): Unsubscribe;
   /** Write one client's doc when its stored `rev` equals `doc.rev`; resolves with the stored doc (rev + 1), rejects `conflict`. */

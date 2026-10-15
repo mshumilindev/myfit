@@ -18,6 +18,12 @@ import {
 } from './types';
 import { coachTimeZone, setCoachTimeZone } from '../format';
 
+/** The on-device snapshot of the schedule (sealed; `data/firestore/scheduleCache.ts`). Never rejects. */
+export interface ScheduleCache {
+  get(): Promise<ScheduleData | null>;
+  set(d: ScheduleData): Promise<void>;
+}
+
 export interface SealedScheduleDeps {
   store: ScheduleDocStore;
   vault: SealSource['vault'];
@@ -33,6 +39,11 @@ export interface SealedScheduleDeps {
    * 18:00 session is 18:00 at the gym on a phone in any zone. The trainer's device keeps its own zone.
    */
   adoptZone?: boolean;
+  /**
+   * Stale-while-revalidate: the last COMPLETE answer is kept on this device (sealed) and shown at once on the next start,
+   * before the key rings arrive. A live answer always wins over it.
+   */
+  cache?: ScheduleCache;
 }
 
 /**
@@ -46,6 +57,28 @@ export function createSealedSchedulePort(d: SealedScheduleDeps): SchedulePort {
   let last: ScheduleData | null = null;
   const raws = new Map<string, Record<string, unknown>>(); // request id -> raw (kept for status patches)
 
+  /** What an adopted answer changes outside the data itself: the gym names and (member side) the schedule's zone. */
+  function settle(docs: ScheduleDoc[]) {
+    rememberGymNames(docs);
+    if (d.adoptZone) {
+      const tz = docs.find((x) => x.tz)?.tz;
+      if (tz) setCoachTimeZone(tz);
+    }
+  }
+
+  // the on-device snapshot: read once, in the background; `hydrate` lets the store adopt it when it lands
+  const hydrated: Promise<void> = d.cache
+    ? d.cache
+        .get()
+        .then((c) => {
+          if (c && !last) {
+            last = c;
+            settle(c.docs);
+          }
+        })
+        .catch(() => undefined)
+    : Promise.resolve();
+
   /** The ring that opens a document sealed in `epoch`: the current one, or a past one when this device holds it. */
   const ringAt = (clientId: string, epoch: unknown): ChatKeyRing | null => {
     const cur = d.ringFor(clientId);
@@ -53,12 +86,18 @@ export function createSealedSchedulePort(d: SealedScheduleDeps): SchedulePort {
     return d.ringForEpoch?.(clientId, epoch as number) ?? null;
   };
 
-  async function open(raw: RawSchedule): Promise<ScheduleData> {
+  async function open(raw: RawSchedule): Promise<{ data: ScheduleData; complete: boolean }> {
+    // `complete` = every document had its key ring. An answer that skipped one only because the ring has not arrived yet
+    // must not replace a good snapshot on disk (the rings arrive late).
+    let complete = true;
     const docs: ScheduleDoc[] = [];
     const requests: RescheduleRequest[] = [];
     for (const s of raw.schedules) {
       const ring = ringAt(String(s.clientId), s.keyEpoch);
-      if (!ring) continue;
+      if (!ring) {
+        complete = false;
+        continue;
+      }
       try {
         docs.push(await openSchedule({ vault: d.vault, ring }, String(s.clientId), s));
       } catch {
@@ -67,7 +106,10 @@ export function createSealedSchedulePort(d: SealedScheduleDeps): SchedulePort {
     }
     for (const r of raw.requests) {
       const ring = ringAt(r.clientId, r.raw.keyEpoch);
-      if (!ring) continue;
+      if (!ring) {
+        complete = false;
+        continue;
+      }
       try {
         const req = await openRequest({ vault: d.vault, ring }, String(r.raw.id), r.raw);
         requests.push({ ...req, clientId: r.clientId });
@@ -76,23 +118,21 @@ export function createSealedSchedulePort(d: SealedScheduleDeps): SchedulePort {
         /* does not open: never shown */
       }
     }
-    rememberGymNames(docs);
-    if (d.adoptZone) {
-      const tz = docs.find((x) => x.tz)?.tz;
-      if (tz) setCoachTimeZone(tz);
-    }
-    return { docs, requests, asOf: now() };
+    settle(docs);
+    return { data: { docs, requests, asOf: now() }, complete };
   }
 
   return {
     now,
     peek: () => last,
+    hydrate: () => hydrated,
     subscribe(on, onError): Unsubscribe {
       let stop = false;
       const off = d.store.subscribe((raw) => {
-        void open(raw).then((data) => {
+        void open(raw).then(({ data, complete }) => {
           if (stop) return;
           last = data;
+          if (complete) void d.cache?.set(data).catch(() => undefined);
           on(data);
         }, onError);
       }, onError);

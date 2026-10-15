@@ -204,7 +204,19 @@ export function createScheduleStore(
       started = true;
       const cached = port.peek();
       if (cached) apply(cached, online ? 'stale' : 'offline');
-      else set({ status: online ? 'loading' : 'offline' });
+      else {
+        set({ status: online ? 'loading' : 'offline' });
+        // the on-device snapshot may still be on its way (the vault key arrives late): show it the moment it lands, but
+        // only while this store has no data at all (live data, or an edit, got there first = it wins)
+        void port
+          .hydrate?.()
+          .then(() => {
+            const c = port.peek();
+            if (started && c && state.asOf === null && !state.docs.length && !state.requests.length)
+              apply(c, online ? 'stale' : 'offline');
+          })
+          .catch(() => undefined);
+      }
       off = port.subscribe(
         (d) => apply(d, 'ready'),
         () =>
