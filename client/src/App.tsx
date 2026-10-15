@@ -928,9 +928,8 @@ export function App() {
     () => isNutritionHash(window.location.hash) && isFlagOn('nutrition'),
   );
   const [learnOpen, setLearnOpen] = useState<boolean>(() => isLearnHash(window.location.hash));
-  const coachFlag = useFlag('coach');
   const [coachWanted, setCoachWanted] = useState<boolean>(() =>
-    coachScreenOpen(window.location.hash, getRole(), isFlagOn('coach')),
+    coachScreenOpen(window.location.hash, getRole()),
   );
   // Nutrition is behind a feature flag (admin-only toggle in Settings); default
   // OFF → the Shell shows it as "coming soon" and it cannot be opened.
@@ -1147,7 +1146,7 @@ export function App() {
   const role = getRole();
   const tabs = tabsForRole(role, t);
   // Coach dashboard: trainer OR admin, only while the flag is on (access.ts).
-  const coachOpen = coachWanted && canUseCoach(role, coachFlag);
+  const coachOpen = coachWanted && canUseCoach(role);
   const tabAllowed = TABS.includes(tab);
   const effectiveTab = tabAllowed ? tab : defaultTab();
   // Role guards, applied in render (no setState-in-effect): an overlay the
@@ -1246,7 +1245,7 @@ export function App() {
       setRosterTab(rosterTabFromHash(window.location.hash));
       setNutritionOpen(isNutritionHash(window.location.hash) && isFlagOn('nutrition'));
       setLearnOpen(isLearnHash(window.location.hash));
-      setCoachWanted(coachScreenOpen(window.location.hash, getRole(), isFlagOn('coach')));
+      setCoachWanted(coachScreenOpen(window.location.hash, getRole()));
       const { tab: ht, overlay: ho } = fromHash(window.location.hash);
       const pk = peerFromHash(window.location.hash);
       const ps = progressFromHash(window.location.hash);

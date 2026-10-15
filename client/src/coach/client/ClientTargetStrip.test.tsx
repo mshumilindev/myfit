@@ -1,6 +1,5 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { setFlag } from '../../data/flags';
 import { clientEn as t } from '../../i18n/coachClient.en';
 import type { ProgramAssignment } from '../../data/programMine';
 import { setExerciseUnit } from '../../store';
@@ -13,7 +12,6 @@ import { createFixturesClientPort } from './data/__fixtures__/fixtures';
 
 beforeEach(() => {
   setViewport(1440);
-  setFlag('coach', true);
   configureClientCoach({
     port: createFixturesClientPort({ scenario: 'active' }),
     chat: createFixturesClientChatPort({ unread: 0 }),

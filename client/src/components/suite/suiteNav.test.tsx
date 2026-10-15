@@ -30,7 +30,6 @@ const c = coachEn;
 
 const session = vi.hoisted(() => ({
   role: 'member' as 'member' | 'trainer' | 'admin',
-  coach: false,
   conditions: 0,
 }));
 vi.mock('../../api', async (orig) => ({
@@ -38,11 +37,6 @@ vi.mock('../../api', async (orig) => ({
   getRole: () => session.role,
   getUsername: () => 'Iryna Koval',
   currentUid: () => 'u-1',
-}));
-vi.mock('../../data/flags', async (orig) => ({
-  ...(await orig<typeof import('../../data/flags')>()),
-  useFlag: (name: string) => (name === 'coach' ? session.coach : false),
-  isFlagOn: (name: string) => (name === 'coach' ? session.coach : false),
 }));
 vi.mock('../Avatar', () => ({
   Avatar: (p: { userId?: string; name: string; size?: number }) => (
@@ -235,7 +229,6 @@ beforeEach(() => {
     disconnect() {}
   };
   session.role = 'member';
-  session.coach = false;
   window.location.hash = '';
   localStorage.clear();
   installRailMeasure(900);
@@ -337,7 +330,7 @@ describe.each(CASES)('$name: desktop rail', (k) => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('mode switch by role: trainer / admin with the coach flag, nobody else', () => {
+  it('mode switch by role: trainer / admin, nobody else', () => {
     setViewport(1440);
     const open = () => {
       cleanup();
@@ -345,9 +338,8 @@ describe.each(CASES)('$name: desktop rail', (k) => {
       fireEvent.click(within(rail()).getByRole('button', { name: c.railProfile }));
       return screen.getByRole('dialog', { name: c.railProfile });
     };
-    // trainer, flag on: switch with the current side "My workouts", the privacy note, role label.
+    // trainer: switch with the current side "My workouts", the privacy note, role label.
     session.role = 'trainer';
-    session.coach = true;
     let acct = open();
     expect(within(acct).getByRole('button', { name: c.modeCoach })).toBeTruthy();
     const pressed = (name: string) =>
@@ -369,21 +361,14 @@ describe.each(CASES)('$name: desktop rail', (k) => {
       expect(window.location.hash).toBe('#/today');
       expect(screen.queryByRole('dialog')).toBeNull();
     }
-    // admin, flag on
+    // admin
     window.location.hash = '';
     session.role = 'admin';
     acct = open();
     expect(within(acct).getByRole('button', { name: c.modeCoach })).toBeTruthy();
     expect(within(acct).getByText(t.roleAdmin)).toBeTruthy();
-    // trainer, flag off: nothing to switch to
-    session.role = 'trainer';
-    session.coach = false;
-    acct = open();
-    expect(within(acct).queryByRole('button', { name: c.modeCoach })).toBeNull();
-    expect(within(acct).queryByText(c.modeNote)).toBeNull();
-    // member, flag on: still nothing
+    // member: nothing to switch to
     session.role = 'member';
-    session.coach = true;
     acct = open();
     expect(within(acct).queryByRole('button', { name: c.modeCoach })).toBeNull();
   });
@@ -418,7 +403,6 @@ describe.each(CASES)('$name: phone (< 720)', (k) => {
   it('More sheet: Apps last in the list, then the account block (avatar 40, Profile)', () => {
     setViewport(390);
     session.role = 'trainer';
-    session.coach = true;
     const h = { onShell: vi.fn(), onProfile: vi.fn() };
     render(k.phone(h));
     fireEvent.click(screen.getByRole('button', { name: c.navMore }));
@@ -441,7 +425,7 @@ describe.each(CASES)('$name: phone (< 720)', (k) => {
       idx(within(body).getByRole('button', { name: c.navApps })),
     );
     expect(within(body).getByTestId('real-avatar').dataset.size).toBe('40');
-    // trainer + flag: the mode switch and its note are in the account block
+    // trainer: the mode switch and its note are in the account block
     expect(
       within(body).getByRole('button', { name: c.modeMyWorkouts }).getAttribute('aria-pressed'),
     ).toBe(k.name === 'Gym' ? 'true' : 'false');

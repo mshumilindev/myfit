@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { getRole } from '../../api';
-import { useFlag } from '../../data/flags';
 import { coachIsUnconfigured } from '../data/backend';
 import { NotConfigured } from '../BackendNotice';
 import { SkeletonRows } from '../../components/ui/Skeleton';
@@ -38,11 +37,10 @@ export default function ClientRoutes(p: { route: string; onClose: () => void }) 
 function Routes({ route, onClose }: { route: string; onClose: () => void }) {
   const { on: enabled, status, retry, problem } = useClientCoachBackend();
   const on = enabled && status === 'ready';
-  const flag = useFlag('coach');
   const { cc } = useClientT();
   const r = parseClientRoute(route);
-  // the flag is off (or the link is not ours): behave like an unknown route
-  const unconfigured = flag && getRole() !== 'trainer' && coachIsUnconfigured() && !!r;
+  // (a trainer's own account, or a link that is not ours: behave like an unknown route)
+  const unconfigured = getRole() !== 'trainer' && coachIsUnconfigured() && !!r;
   // the real backend could not be installed: say so with Retry, never the sample trainer
   const failed = enabled && status === 'failed' && !!r;
   // loading is NOT blocked: the real adapters install in milliseconds, the page waits instead of bouncing to Today
@@ -50,7 +48,7 @@ function Routes({ route, onClose }: { route: string; onClose: () => void }) {
   useEffect(() => {
     if (blocked) onClose();
   }, [blocked, onClose]);
-  // Flag on, but this production build has no Coach backend: explain instead of bouncing to Today.
+  // This production build has no Coach backend: explain instead of bouncing to Today.
   if (unconfigured)
     return (
       <PushedPage title={cc.mtTitle} backLabel={cc.ccBack} onBack={onClose}>

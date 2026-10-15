@@ -1,6 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { setFlag } from '../../data/flags';
 import { clientEn as t } from '../../i18n/coachClient.en';
 import { setViewport } from '../testViewport';
 import { SharePicker } from '../share/SharePicker';
@@ -12,7 +11,6 @@ import { ClientChat } from './screens/ClientChat';
 
 beforeEach(() => {
   setViewport(1440);
-  setFlag('coach', true);
 });
 afterEach(() => {
   cleanup();

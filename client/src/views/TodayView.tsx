@@ -42,7 +42,6 @@ import { computePlaybook, type Play } from '../playbook';
 import { getRole } from '../api';
 import { canUseCoach } from '../coach/access';
 import { coachHash } from '../coach/routes';
-import { isFlagOn } from '../data/flags';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
 import { useFlag } from '../data/flags';
 import { HistoryTimeline, buildHistoryDays } from '../components/HistoryTimeline';
@@ -1166,7 +1165,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // a client opens in the Coach Dashboard (their profile there), not in a Gym screen of its own; without Coach access
   // (role or flag) the old Coach screen is the nearest place
   const openClient = (id: string) =>
-    canUseCoach(getRole(), isFlagOn('coach'))
+    canUseCoach(getRole())
       ? window.location.assign(coachHash({ screen: 'client', cid: id }))
       : openCoach();
   const watchClient = (s: LiveSession) =>

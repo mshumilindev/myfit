@@ -51,7 +51,7 @@ describe('ShellLauncher Coach tile', () => {
     expect(document.querySelectorAll('.shell-tile.current')).toHaveLength(1);
   });
 
-  it('is still listed inside Coach if the flag flips off under it (never an empty current slot)', () => {
+  it('is still listed inside Coach if access is lost under it (never an empty current slot)', () => {
     access.value = false;
     open('coach');
     expect(coachTile()).not.toBeNull();

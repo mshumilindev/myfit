@@ -1569,9 +1569,6 @@ export const et: Strings = {
     'Tuvasta jõusaali külastusi asukoha järgi ja paku seansi salvestamist. Vaikimisi väljas.',
   flagNutrition: 'Nutrition rakendus',
   flagNutritionDesc: 'Ava Nutrition rakendus (KBRÜ jälgija) rakenduste vahetajas.',
-  flagCoach: 'Treeneri töölaud',
-  flagCoachDesc:
-    'Ava treeneri töölaud treeneritele ja administraatoritele: kliendid, ajakava, programmid, vestlus.',
   flagConditions: 'Krooniline tervis',
   flagConditionsDesc: 'Püsiv privaatne terviseprofiil, mis kohandab plaane ja soovitusi.',
   cndTitle: 'Pikaajalised seisundid',

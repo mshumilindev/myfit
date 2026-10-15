@@ -1,6 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { setFlag } from '../../data/flags';
 import { scheduleEn } from '../../i18n/coachSchedule.en';
 import { setViewport } from '../testViewport';
 import { configureClientCoach } from './data/config';
@@ -12,7 +11,6 @@ import { createFixturesSchedulePort, scheduleSeed } from '../schedule/__fixtures
 
 beforeEach(() => {
   setViewport(1440);
-  setFlag('coach', true);
 });
 afterEach(() => {
   cleanup();

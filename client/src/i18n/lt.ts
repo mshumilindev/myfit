@@ -1599,9 +1599,6 @@ export const lt: Strings = {
     'Nustatyti apsilankymus salėje pagal vietą ir siūlyti įrašyti treniruotę. Numatytai išjungta.',
   flagNutrition: 'Nutrition programa',
   flagNutritionDesc: 'Atrakinti Nutrition programą (KBRA sekiklį) programų perjungiklyje.',
-  flagCoach: 'Trenerio skydelis',
-  flagCoachDesc:
-    'Atrakinti trenerio skydelį treneriams ir administratoriams: klientai, tvarkaraštis, programos, pokalbiai.',
   flagConditions: 'Ilgalaikės būklės',
   flagConditionsDesc: 'Nuolatinis privatus sveikatos profilis, pritaikantis planus ir patarimus.',
   cndTitle: 'Ilgalaikės būklės',

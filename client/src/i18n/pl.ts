@@ -1581,9 +1581,6 @@ export const pl: Strings = {
     'Wykrywaj wizyty na siłowni po lokalizacji i proponuj zapis sesji. Domyślnie wyłączone.',
   flagNutrition: 'Aplikacja Nutrition',
   flagNutritionDesc: 'Odblokuj aplikację Nutrition (licznik KBŻU) w przełączniku aplikacji.',
-  flagCoach: 'Panel trenera',
-  flagCoachDesc:
-    'Odblokuj panel trenera dla trenerów i administratorów: klienci, harmonogram, programy, czat.',
   flagConditions: 'Przewlekłe schorzenia',
   flagConditionsDesc: 'Stały, prywatny profil zdrowia dostosowujący plany i podpowiedzi.',
   cndTitle: 'Długotrwałe schorzenia',

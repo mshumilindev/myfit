@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useEffect, useState, type ReactNode } from 'react';
-import { setFlag } from '../../data/flags';
 import { clientEn as t } from '../../i18n/coachClient.en';
 import { configureClientCoach } from './data/config';
 import { createFixturesClientChatPort } from './data/__fixtures__/chat';
@@ -57,7 +56,6 @@ function World({
   children: ReactNode;
 }) {
   useState(() => {
-    setFlag('coach', true);
     configureClientCoach({
       port: createFixturesClientPort({ scenario, fail }),
       chat: createFixturesClientChatPort({ unread: scenario === 'none' ? 0 : 3 }),
@@ -273,7 +271,6 @@ export const InviteConnected: Story = {
 };
 function ConnectedWorld({ children }: { children: ReactNode }) {
   useState(() => {
-    setFlag('coach', true);
     connectedPort = createFixturesClientPort({ scenario: 'none' });
     configureClientCoach({
       port: connectedPort,

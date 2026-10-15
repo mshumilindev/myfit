@@ -1567,9 +1567,6 @@ export const en = {
     'Use location to detect gym visits and suggest logging a session. Off by default.',
   flagNutrition: 'Nutrition app',
   flagNutritionDesc: 'Unlock the Nutrition app (КБЖУ tracker) in the app switcher.',
-  flagCoach: 'Coach dashboard',
-  flagCoachDesc:
-    'Unlock the Coach dashboard for trainers and admins: clients, schedule, programs, chat.',
   flagConditions: 'Long-term conditions',
   flagConditionsDesc:
     'Permanent private health profile that adapts plans and suggestions. Hidden until enabled.',

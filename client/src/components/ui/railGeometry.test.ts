@@ -115,6 +115,7 @@ describe('one shared rail foot (Apps + avatar) for all six apps', () => {
     expect(users(/\buseSuiteAccount\(/)).toEqual([
       'coach/CoachApp.tsx',
       'components/SuiteTabBar.tsx',
+      'components/suite/BrandAccount.tsx',
       'components/suite/SuiteRailFoot.tsx',
       'components/suite/useSuiteAccount.tsx',
     ]);

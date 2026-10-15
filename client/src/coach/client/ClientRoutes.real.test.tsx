@@ -2,7 +2,6 @@ import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { clientEn as cc } from '../../i18n/coachClient.en';
 import { safeEn as sf } from '../../i18n/coachSafe.en';
-import { setFlag } from '../../data/flags';
 import { setCoachBackendMode } from '../__fixtures__/register';
 import ClientRoutes from './ClientRoutes';
 
@@ -21,7 +20,6 @@ vi.mock('../data/firestore/bootstrap', () => ({
 }));
 
 beforeEach(() => {
-  setFlag('coach', true);
   setCoachBackendMode('firestore');
   window.localStorage.setItem('spotter.uid', 'u1');
 });
