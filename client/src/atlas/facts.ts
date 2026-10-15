@@ -14,6 +14,7 @@ import {
   topSet,
 } from '../store';
 import { VOLUME_MUSCLES, weeklyMuscleSets } from '../volume';
+import { recentLoadSets } from '../loadWindow';
 import { finishedNights, nightDurationMin } from '../sleep';
 import { playForWeekday, type Play } from '../playbook';
 import { isoWeekday, weekStartDay, weekStartOf, type IsoDay } from '../weekStart';
@@ -225,7 +226,7 @@ export function dayFacts(ctx: DayContext): CoachFact[] {
 
   // Imbalance over the last week, among muscles you actually train.
   const trainedRecently = weeklyMuscleSets(finished, now, 28);
-  const week = weeklyMuscleSets(finished, now, 7);
+  const week = recentLoadSets(finished, now);
   const pool = VOLUME_MUSCLES.filter((m) => (trainedRecently.get(m) ?? 0) > 0);
   if (pool.length >= 2) {
     const ranked = pool

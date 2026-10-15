@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { markSeen, placeNote } from './noteSeen';
 import { outOfQuiet, planNotePushes, type NoteLike } from './schedule';
 import { COACH_DEFAULT } from './types';
+import { noteUrl } from './noteLink';
 
 const H = 3_600_000;
 const at = (h: number, m = 0) => new Date(2026, 8, 26, h, m).getTime();
@@ -41,7 +42,7 @@ describe('note pushes', () => {
       title: 'Atlas',
     });
     expect(out).toHaveLength(1);
-    expect(out[0]).toMatchObject({ dueAt: at(14), body: 'Streak!', url: '/#/coach' });
+    expect(out[0]).toMatchObject({ dueAt: at(14), body: 'Streak!', url: noteUrl('streak:1') });
   });
   it('nothing while Atlas is off or muted', () => {
     const feed = (t: number): NoteLike[] =>

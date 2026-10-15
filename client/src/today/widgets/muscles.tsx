@@ -24,14 +24,7 @@ import { Chip } from '../../components/ui/Chip';
 import type { Tone } from '../../components/ui/tones';
 import { MuscleHeatmap } from '../../components/Muscle';
 import { Sheet } from '../../ui';
-import {
-  LANDMARKS,
-  ZONE_COLOR,
-  classifyZone,
-  weeklyMuscleSets,
-  type Landmark,
-  type Zone,
-} from '../../volume';
+import { LANDMARKS, ZONE_COLOR, classifyZone, type Landmark, type Zone } from '../../volume';
 import { cachedPersonalLandmarks, weeklyMuscleSeries } from '../../personalize';
 import { focusAdjustLandmarks } from '../../goals';
 import { sessionPlateau } from '../../stimulus';
@@ -217,7 +210,8 @@ const muscleMap: WidgetDef = {
     const s = ms(locale);
     const open = goHash('#/progress/volume');
     const fin = finishedOf(store.workouts);
-    const per = weeklyMuscleSets(fin, now, 7);
+    // Current weekly load: the shared fading read (recentLoadSets), same zone as every other screen.
+    const per = recentLoadSets(fin, now);
     const total = fin
       .filter((w) => w.startedAt >= now - 7 * DAY)
       .reduce((n, w) => n + workingSets(w), 0);

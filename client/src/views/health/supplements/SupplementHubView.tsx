@@ -4,7 +4,7 @@
  * Sharing and delete live in Health › Privacy and sharing. Kit primitives only.
  */
 import { useMemo } from 'react';
-import { BackButton } from '../../../components/ui/BackButton';
+import { PageHead } from '../../../components/ui/PageHead';
 import { GroupedList, ListRow } from '../../../components/ui/GroupedList';
 import { IconTile } from '../../../components/ui/IconTile';
 import { Switch } from '../../../components/ui/Switch';
@@ -31,10 +31,11 @@ export function SupplementHubView({
   const any = activeSupplementEntries(entries).length > 0;
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <h1 className="hl-pt">{t.supTitle}</h1>
-      </div>
+      <PageHead
+        className="hl-pbar"
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.supTitle}
+      />
       <div className="hl-scroll">
         <div className="hl-cnt">
           <GroupedList footer={t.supHubFoot}>

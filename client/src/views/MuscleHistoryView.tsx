@@ -1,5 +1,5 @@
 /** Muscle history — direct drilldown from muscle chips across the app. */
-import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { ListRow } from '../components/ui/GroupedList';
 import { weekStartOf as trainingWeekStart } from '../weekStart';
 import { useState } from 'react';
@@ -91,25 +91,25 @@ export function MuscleHistoryView({
 
   return (
     <div className="screen muscle-history-screen">
-      <div className="hist-head">
-        <BackButton onClick={onClose} label={t.backAction} />
-        <div className="mh-title">
-          <MuscleIcon muscle={muscle} variant="row" tone="primary" />
-          <div>
-            <h2 className="title-26">{t.muscleHistoryTitle(t.muscleGroups[muscle])}</h2>
-            <div className="sub">
-              {sessions.length === 1
-                ? t.oneSession
-                : t.nSessionsSince(
-                    sessions.length,
-                    sessions.length
-                      ? fmtDayMonth(sessions[sessions.length - 1].workout.startedAt, locale)
-                      : '',
-                  )}
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHead
+        back={{ label: t.backAction, onClick: onClose }}
+        title={
+          <span className="mh-title">
+            <MuscleIcon muscle={muscle} variant="row" tone="primary" />
+            {t.muscleHistoryTitle(t.muscleGroups[muscle])}
+          </span>
+        }
+        sub={
+          sessions.length === 1
+            ? t.oneSession
+            : t.nSessionsSince(
+                sessions.length,
+                sessions.length
+                  ? fmtDayMonth(sessions[sessions.length - 1].workout.startedAt, locale)
+                  : '',
+              )
+        }
+      />
 
       <div className="stat-grid">
         <div className="cell">

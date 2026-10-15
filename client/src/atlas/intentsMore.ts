@@ -11,7 +11,8 @@ import { muscleSetsInWorkout, setTopWeight, setTypeOf, topSet } from '../store';
 import { activeInjuries } from '../injury';
 import { finishedNights, nightDurationMin } from '../sleep';
 import { topHistory } from '../progression';
-import { LANDMARKS, VOLUME_MUSCLES, weeklyMuscleSets } from '../volume';
+import { LANDMARKS, VOLUME_MUSCLES } from '../volume';
+import { recentLoadSets } from '../loadWindow';
 import type { MuscleGroup } from '../data/exercises';
 import { STALL_SESSIONS } from './facts';
 import {
@@ -399,7 +400,7 @@ export const INTENTS_MORE: Intent[] = [
       ],
     ],
     answer: (c, _p, L) => {
-      const week = weeklyMuscleSets(finishedOf(c), c.now);
+      const week = recentLoadSets(finishedOf(c), c.now);
       const over = VOLUME_MUSCLES.filter((m) => {
         const lm = LANDMARKS[m];
         return lm && (week.get(m) ?? 0) > lm.mrv;

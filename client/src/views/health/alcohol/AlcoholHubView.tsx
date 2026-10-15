@@ -4,7 +4,7 @@
  * live in Health › Privacy and sharing. Kit primitives only.
  */
 import { useState } from 'react';
-import { BackButton } from '../../../components/ui/BackButton';
+import { PageHead } from '../../../components/ui/PageHead';
 import { GroupedList, ListRow } from '../../../components/ui/GroupedList';
 import { IconTile } from '../../../components/ui/IconTile';
 import { Switch } from '../../../components/ui/Switch';
@@ -35,10 +35,11 @@ export function AlcoholHubView({
     : `${t.alcRegionAuto} · ${regionShort(region)}`;
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <h1 className="hl-pt">{t.alcTitle}</h1>
-      </div>
+      <PageHead
+        className="hl-pbar"
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.alcTitle}
+      />
       <div className="hl-scroll">
         <div className="hl-cnt">
           <GroupedList footer={t.nicHubFoot}>

@@ -5,7 +5,7 @@
  * the sheet. No counters, no logging. Kit primitives only.
  */
 import { useState } from 'react';
-import { BackButton } from '../../../components/ui/BackButton';
+import { PageHead } from '../../../components/ui/PageHead';
 import { GroupedList, ListRow } from '../../../components/ui/GroupedList';
 import { IconTile } from '../../../components/ui/IconTile';
 import { NICOTINE_KINDS, newNicotineProduct } from '../../../nicotine';
@@ -31,10 +31,11 @@ export function NicotineProductsView({ onBack }: NicotineProductsViewProps) {
 
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <h1 className="hl-pt">{t.nicHubUse}</h1>
-      </div>
+      <PageHead
+        className="hl-pbar"
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.nicHubUse}
+      />
       <div className="hl-scroll">
         <div className="hl-cnt">
           <span className="ut-md ut-muted">{t.nicProdIntroList}</span>

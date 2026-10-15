@@ -5,7 +5,7 @@
  * is spread evenly. Kit primitives only.
  */
 import { useState } from 'react';
-import { BackButton } from '../../../components/ui/BackButton';
+import { PageHead } from '../../../components/ui/PageHead';
 import { Button } from '../../../components/ui/Button';
 import { PresetChips } from '../../../components/ui/PresetChips';
 import { SectionLabel } from '../../../components/ui/SectionLabel';
@@ -28,10 +28,11 @@ export function AlcoholDaysView({ onBack }: { onBack: () => void }) {
   };
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <h1 className="hl-pt">{t.alcHubDays}</h1>
-      </div>
+      <PageHead
+        className="hl-pbar"
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.alcHubDays}
+      />
       <div className="hl-scroll">
         <div className="hl-cnt">
           <span className="ut-md ut-muted">{t.alcDaysIntro}</span>

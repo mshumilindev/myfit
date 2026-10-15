@@ -6,6 +6,7 @@ import { consistencyStreak, latestWeight, setTypeOf } from '../store';
 import { muscleReadiness } from '../recovery';
 import { nextTarget, topHistory } from '../progression';
 import { LANDMARKS, VOLUME_MUSCLES, weeklyMuscleSets } from '../volume';
+import { recentLoadSets } from '../loadWindow';
 import { finishedNights, nightDurationMin } from '../sleep';
 import { activeInjuries } from '../injury';
 import { blockWeek, isDeloadWeek, planDayFor } from './plan';
@@ -328,7 +329,7 @@ export const INTENTS: Intent[] = [
     answer: (c, _p, L) => {
       const f = finishedOf(c);
       const recent = weeklyMuscleSets(f, c.now, 28);
-      const week = weeklyMuscleSets(f, c.now, 7);
+      const week = recentLoadSets(f, c.now);
       const pool = VOLUME_MUSCLES.filter((m) => (recent.get(m) ?? 0) > 0);
       if (pool.length < 2)
         return L(

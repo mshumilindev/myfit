@@ -5,7 +5,7 @@
  * sits under the estimate. Switches apply immediately (like the other settings screens), so
  * there is no Save; Done just leaves the page. Kit primitives only.
  */
-import { BackButton } from '../../../components/ui/BackButton';
+import { PageHead } from '../../../components/ui/PageHead';
 import { Button } from '../../../components/ui/Button';
 import { GroupedList, ListRow } from '../../../components/ui/GroupedList';
 import { IconTile } from '../../../components/ui/IconTile';
@@ -65,10 +65,11 @@ export function AlcoholCalcView({ onBack }: AlcoholCalcViewProps) {
   );
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <h1 className="hl-pt">{t.nicCalcTitle}</h1>
-      </div>
+      <PageHead
+        className="hl-pbar"
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.nicCalcTitle}
+      />
       <div className="hl-scroll">
         <div className="hl-cnt">
           <GroupedList footer={t.nicCalcMasterFoot}>

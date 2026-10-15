@@ -1,6 +1,6 @@
 /** First setup and Settings: mode, typical dates, where hints show, delete. One form, dirty-checked Save. */
 import { useState } from 'react';
-import { BackButton } from '../../../components/ui/BackButton';
+import { PageHead } from '../../../components/ui/PageHead';
 import { Button } from '../../../components/ui/Button';
 import { Calendar } from '../../../components/ui/Calendar';
 import { Card } from '../../../components/ui/Card';
@@ -55,10 +55,11 @@ export function CycleSetupView({ onBack }: { onBack: () => void }) {
   }[draft.mode];
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <h1 className="hl-pt">{t.cycTitle}</h1>
-      </div>
+      <PageHead
+        className="hl-pbar"
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.cycTitle}
+      />
       <div className="hl-scroll">
         <div className="hl-cnt">
           {first && (

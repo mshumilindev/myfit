@@ -9,7 +9,7 @@
  * `categories`. Kit primitives only.
  */
 import { Fragment, useState, type ReactNode } from 'react';
-import { BackButton } from '../../components/ui/BackButton';
+import { PageHead } from '../../components/ui/PageHead';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { GroupedList, ListRow } from '../../components/ui/GroupedList';
@@ -166,10 +166,11 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
 
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <h1 className="hl-pt">{t.hlPrivRow}</h1>
-      </div>
+      <PageHead
+        className="hl-pbar"
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.hlPrivRow}
+      />
       <div className="hl-scroll">
         <div className="hl-cnt">
           <ClientTrainerSharing

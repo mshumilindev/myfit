@@ -2,7 +2,7 @@
  * Nicotine hub (board 1B): two rows, "What I use" and "Use in calculations". Each opens its
  * own page. Sharing and delete live in Health › Privacy and sharing. Kit primitives only.
  */
-import { BackButton } from '../../../components/ui/BackButton';
+import { PageHead } from '../../../components/ui/PageHead';
 import { GroupedList, ListRow } from '../../../components/ui/GroupedList';
 import { IconTile } from '../../../components/ui/IconTile';
 import { useNicotine } from '../../../store';
@@ -21,10 +21,11 @@ export function NicotineHubView({
   const { products, settings } = useNicotine();
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <h1 className="hl-pt">{t.nicTitle}</h1>
-      </div>
+      <PageHead
+        className="hl-pbar"
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.nicTitle}
+      />
       <div className="hl-scroll">
         <div className="hl-cnt">
           <GroupedList footer={t.nicHubFoot}>

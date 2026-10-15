@@ -8,7 +8,7 @@
  * sentinel scrolls into view. Works full-screen on mobile and in the desktop
  * content column.
  */
-import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { useEffect, useRef, useState } from 'react';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
@@ -133,15 +133,18 @@ export function NotificationsView({
 
   return (
     <div className="screen notif-screen">
-      <div className={`notif-head${embedded ? ' embedded' : ''}`}>
-        {!embedded && <BackButton onClick={onClose} label={t.backAction} />}
-        <h2 className="title-26">{title ?? t.notifTitle}</h2>
-        {hasUnread && (
-          <Button variant="ghost" size="sm" onClick={onMarkAll}>
-            {t.notifMarkAll}
-          </Button>
-        )}
-      </div>
+      <PageHead
+        className={`notif-head${embedded ? ' embedded' : ''}`}
+        back={embedded ? undefined : { label: t.backAction, onClick: onClose }}
+        title={title ?? t.notifTitle}
+        actions={
+          hasUnread ? (
+            <Button variant="ghost" size="sm" onClick={onMarkAll}>
+              {t.notifMarkAll}
+            </Button>
+          ) : undefined
+        }
+      />
 
       {onOpenRecap && <RecapBlock onOpen={onOpenRecap} />}
 
