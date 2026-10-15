@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* global document, getComputedStyle, innerWidth */
+/* global document, getComputedStyle, innerWidth, innerHeight */
 /**
  * Chat layout contract (SPO-115 / SPO-120): the trainer's, the client's and Atlas's chat are ONE frame, so at every width
  * they must have the same composer room, the composer and its send button fully inside the frame, messages that are not
@@ -54,6 +54,8 @@ const probe = () => {
     shellGutter: [Math.round(r(shell).left), Math.round(innerWidth - r(shell).right)],
     widest: Math.round(Math.max(0, ...bubbles)),
     bodyW: Math.round(bodyW),
+    // room under the chat frame to the window bottom (SPO-110): the page gutter, the same in every chat
+    roomB: Math.round(innerHeight - f.bottom),
     // action buttons (share, reschedule...) live in the composer row, never in a row of their own above the field
     actionAbove: comp.querySelectorAll('.uicomp-chips > .uibtn').length,
     rowTops: [...comp.querySelectorAll('.uicomp-row .uibtn, .uicomp-row .uicomp-field')].map((e) =>
@@ -101,7 +103,32 @@ for (const w of widths) {
       await page.waitForTimeout(500);
       const m = await page.evaluate(probe);
       results[id] = m;
+      // SPO-95: hovering / focusing Atlas's face keeps a circle the size of the avatar (no capsule around it)
+      if (id.startsWith('pages-atlas') && loc === 'en') {
+        const face = page.locator('.atl-face-btn').first();
+        if (await face.count()) {
+          await face.hover();
+          await face.focus();
+          const g = await face.evaluate((e) => {
+            const r = e.getBoundingClientRect();
+            const c = getComputedStyle(e);
+            const a = e.querySelector('.atl-face').getBoundingClientRect();
+            return {
+              w: r.width,
+              h: r.height,
+              br: c.borderRadius,
+              pad: Math.round((r.width - a.width) / 2),
+            };
+          });
+          if (Math.abs(g.w - g.h) > 1 || g.br !== '50%' || g.pad > 3)
+            problems.push(
+              `${id} @${w}px: Atlas face hover is not a tight circle (${g.w}x${g.h}, radius ${g.br}, ${g.pad}px around the avatar)`,
+            );
+        }
+      }
       const at = `${id} @${w}px ${loc}`;
+      if (w >= 1024 && m.roomB < 16)
+        problems.push(`${at}: the chat touches the window bottom (${m.roomB}px under the frame)`);
       if (m.actionAbove)
         problems.push(
           `${at}: an action button sits in a row above the field, not in the composer row`,
@@ -131,6 +158,10 @@ for (const w of widths) {
     for (const id of STORIES) {
       const m = results[id];
       if (m.missing || ref.missing) continue;
+      if (w >= 1024 && !id.startsWith('pages-coach-chat--') && m.roomB !== ref.roomB)
+        problems.push(
+          `${id} @${w}px ${loc}: room under the frame ${m.roomB}px differs from the client chat ${ref.roomB}px`,
+        );
       if (JSON.stringify(m.pad) !== JSON.stringify(ref.pad))
         problems.push(
           `${id} @${w}px ${loc}: composer padding ${m.pad} differs from the client chat ${ref.pad}`,

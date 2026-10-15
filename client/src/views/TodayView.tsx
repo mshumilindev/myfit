@@ -155,6 +155,21 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const presenceOn = useFlag('gymPresence');
   const suggestOn = true; // muscle readouts are always on (not flagged)
   const [backfill, setBackfill] = useState(false);
+  // The program card arrives after the first paint (the assignment is opened from the sealed cache and revalidated), so
+  // until it does, the stand-in week card keeps the height the real one had last time: nothing below may jump
+  // (SPO-102). Per-viewer convenience only.
+  const [weekHint] = useState(() => {
+    try {
+      return Number(localStorage.getItem(`spotter.todayWeekH.${isDesktop ? 'd' : 'm'}`)) || 0;
+    } catch {
+      return 0;
+    }
+  });
+  const [weekTimedOut, setWeekTimedOut] = useState(false);
+  useEffect(() => {
+    const id = window.setTimeout(() => setWeekTimedOut(true), 2500);
+    return () => window.clearTimeout(id);
+  }, []);
   // "Log for <date>" on the History calendar prefills the past-session date.
   const [backfillDate, setBackfillDate] = useState<string | undefined>(undefined);
   const [addWeightOpen, setAddWeightOpen] = useState(false);
@@ -171,6 +186,30 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // The assigned program (cached; a draft program stays hidden until it's
   // activated — see data/programMine).
   const { assignment, active: assignedActive } = useProgramMine();
+  useEffect(() => {
+    if (!assignment) {
+      if (weekTimedOut) {
+        try {
+          localStorage.removeItem(`spotter.todayWeekH.${isDesktop ? 'd' : 'm'}`);
+        } catch {
+          /* private mode */
+        }
+      }
+      return;
+    }
+    const id = window.requestAnimationFrame(() => {
+      const h = document
+        .querySelector<HTMLElement>('.td-week:not([data-mode="none"])')
+        ?.getBoundingClientRect().height;
+      if (!h) return;
+      try {
+        localStorage.setItem(`spotter.todayWeekH.${isDesktop ? 'd' : 'm'}`, String(Math.round(h)));
+      } catch {
+        /* private mode: the stand-in card just keeps its natural height */
+      }
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [assignment, isDesktop, locale, weekTimedOut]);
 
   // A live activity is mutually exclusive with a live workout: while one runs,
   // the other can't be started (design feature 6).
@@ -1055,7 +1094,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       };
     });
     return (
-      <Card emphasis="card" className="today-program-card td-week" data-mode="none">
+      <Card
+        emphasis="card"
+        className="today-program-card td-week"
+        data-mode="none"
+        style={!assignment && !weekTimedOut && weekHint ? { minHeight: weekHint } : undefined}
+      >
         <WeekPills cells={cells} />
       </Card>
     );
@@ -1194,6 +1238,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   // A trainer's Today is just Atlas and their clients — nothing else, to avoid
   // clutter (the block with its defaults).
+
   if (getRole() === 'trainer') {
     return (
       <div className="screen paned today-page">

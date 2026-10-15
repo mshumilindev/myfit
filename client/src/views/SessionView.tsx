@@ -10,6 +10,7 @@ import {
   type KeyboardEvent,
   Fragment,
   type ReactNode,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -66,6 +67,7 @@ import {
 import { muscleFatigue, stalledMuscles } from '../fatigue';
 import { PhotoSlider } from '../components/PhotoSlider';
 import { SidesChip } from '../components/SidesChip';
+import { prCardDue, usePrMomentExpiry } from './prMoment';
 import { MuscleStatePanel } from '../components/MuscleStatePanel';
 import { cachedPersonalLandmarks } from '../personalize';
 import { SPLIT_GROUPS } from '../data/subregions';
@@ -357,8 +359,6 @@ type OptsTab = 'set' | 'exercise' | 'session';
 
 /** Wall-clock ms for event handlers (kept out of render purity checks). */
 const wallClock = (): number => Date.now();
-/** How long the record card stays up before it folds into the rest timer. */
-const PR_CARD_MS = 15000;
 
 /** autoRestFor results by set state (see there). */
 const restPlanCache = new Map<
@@ -662,6 +662,7 @@ export function SessionView(props: {
     vol: number;
     volPrev: number;
   } | null>(null);
+  const clearPrMoment = useCallback(() => setPrMoment(null), []);
   /** The single card the user has explicitly expanded (queued row tap, or
    * start/add-next). Overrides the derived active card while it points at a
    * still-present exercise. */
@@ -714,15 +715,7 @@ export function SessionView(props: {
     return () => clearInterval(iv);
   }, [live]);
 
-  // The record card is cleared by its own timer, not only hidden by the ticking
-  // clock: the moment is dropped from state, so it can never come back (e.g.
-  // when the tick is throttled in a background tab). A new record replaces it.
-  useEffect(() => {
-    if (!prMoment) return;
-    const left = Math.max(0, prMoment.at + PR_CARD_MS - Date.now());
-    const id = setTimeout(() => setPrMoment(null), left);
-    return () => clearTimeout(id);
-  }, [prMoment]);
+  usePrMomentExpiry(prMoment, clearPrMoment);
 
   // Adding an exercise scrolls the content down to it (and the live energy
   // counter beneath), so the new card doesn't stay hidden below the fold.
@@ -2705,7 +2698,7 @@ export function SessionView(props: {
   }
 
   /** The record card stays up for PR_CARD_MS (or until dismissed). */
-  const prShowing = !!prMoment && live && now - prMoment.at < PR_CARD_MS;
+  const prShowing = live && prCardDue(prMoment, now);
 
   /** B · the record moment: a celebration card that folds into the rest timer. */
   function renderPrCard() {

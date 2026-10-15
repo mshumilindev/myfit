@@ -78,5 +78,9 @@ jobs:
         run: |
           npx --yes http-server client/storybook-static -p 6006 -s >/dev/null 2>&1 &
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:6006/index.json >/dev/null && break; sleep 1; done
-      - name: Chat frame geometry (trainer / client / Atlas; 320-1440; 5 locales)
+      - name: Chat frame geometry (trainer / client / Atlas; 320-1920; 5 locales)
         run: npm run audit:chat -- --url http://127.0.0.1:6006
+      - name: Page hero / top bar spacing (back, title, actions on one axis; 390-1920)
+        run: npm run audit:hero -- --url http://127.0.0.1:6006
+      - name: Story audit (no sideways scroll, no clipped text or shadow; 5 locales, 320 / 390, normal and large font)
+        run: npm run audit:stories -- --url http://127.0.0.1:6006 --locales en,uk,pl,lt,et --widths 320,390 --fonts 1,1.5

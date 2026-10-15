@@ -119,6 +119,7 @@
   margin-left: var(--s-4);
 }
 .uiw-name {
+  overflow-wrap: anywhere;
   font-size: var(--fs-16);
   font-weight: 600;
   line-height: 1.3;

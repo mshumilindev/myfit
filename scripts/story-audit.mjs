@@ -5,7 +5,8 @@
  * phone widths and a large system font, and reports layout that breaks:
  *   page-hscroll    the page scrolls sideways (document wider than the viewport)
  *   drawer-overflow a drawer / dialog scrolls sideways or a child sticks out of it (outside a deliberate scroller)
- *   text-clipped    text cut off by overflow:hidden without an ellipsis (a label that does not fit its component)
+ *   text-clipped    text cut off by overflow:hidden without an ellipsis or a line clamp (a label that does not fit)
+ *   shadow-clipped  a box-shadow cut off by an ancestor with overflow (SPO-11: the edge of the shadow looks sawn off)
  * Exit code 1 when anything is found, so CI can gate on it.
  *
  *   npm run build-storybook && npx http-server client/storybook-static -p 6006 &
@@ -73,6 +74,7 @@ const probe = () => {
     if (
       ['hidden', 'clip'].includes(cs.overflowX) &&
       cs.textOverflow !== 'ellipsis' &&
+      (cs.webkitLineClamp ?? 'none') === 'none' &&
       el.scrollWidth > el.clientWidth + 1 &&
       el.clientWidth > 1
     )
@@ -81,7 +83,53 @@ const probe = () => {
         `${String(el.className).slice(0, 40)} "${el.textContent.trim().slice(0, 40)}"`,
       ]);
   }
-  return found.slice(0, 6);
+  // A shadow reaches `blur + spread` beyond the box; an ancestor that clips (overflow) closer than that saws it off.
+  const layers = (v) =>
+    v === 'none'
+      ? []
+      : v
+          .split(/,(?![^(]*\))/)
+          .filter((l) => !/inset/.test(l))
+          .map((l) =>
+            (l.replace(/(rgba?|color)\([^)]*\)/g, '').match(/-?[\d.]+px/g) ?? []).map(parseFloat),
+          )
+          .filter((n) => n.length >= 3);
+  const shadowSeen = new Set();
+  for (const el of document.querySelectorAll('body *')) {
+    const cs = getComputedStyle(el);
+    if (cs.boxShadow === 'none' || cs.display === 'none') continue;
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height) continue;
+    const ext = { l: 0, r: 0, t: 0, b: 0 };
+    for (const [ox, oy, blur, spread = 0] of layers(cs.boxShadow)) {
+      const e = blur / 2 + spread; // the visible part of a blur is about half of it
+      ext.l = Math.max(ext.l, e - ox);
+      ext.r = Math.max(ext.r, e + ox);
+      ext.t = Math.max(ext.t, e - oy);
+      ext.b = Math.max(ext.b, e + oy);
+    }
+    for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+      const ac = getComputedStyle(a);
+      const ar = a.getBoundingClientRect();
+      const clipX = ac.overflowX !== 'visible';
+      const clipY = ac.overflowY !== 'visible';
+      const cut = [];
+      if (clipX && r.left - ar.left >= -1 && r.left - ar.left < ext.l - 3) cut.push('left');
+      if (clipX && ar.right - r.right >= -1 && ar.right - r.right < ext.r - 3) cut.push('right');
+      if (clipY && r.top - ar.top >= -1 && r.top - ar.top < ext.t - 3) cut.push('top');
+      if (clipY && ar.bottom - r.bottom >= -1 && ar.bottom - r.bottom < ext.b - 3)
+        cut.push('bottom');
+      if (cut.length) {
+        const key = `${String(el.className).slice(0, 40)}>${String(a.className).slice(0, 30)}`;
+        if (!shadowSeen.has(key)) {
+          shadowSeen.add(key);
+          found.push(['shadow-clipped', `${key} (${cut.join('+')})`]);
+        }
+        break;
+      }
+    }
+  }
+  return found.slice(0, 8);
 };
 
 const browser = await chromium.launch(
