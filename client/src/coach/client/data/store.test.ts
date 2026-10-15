@@ -16,6 +16,50 @@ describe('client store', () => {
     store.release();
   });
 
+  it('a snapshot that lands later (it waits for the vault key) is shown at once, unless the live answer was first', async () => {
+    const base = createFixturesClientPort({ scenario: 'active' });
+    const snap = base.state();
+    let held: typeof snap | null = null;
+    let release: () => void = () => undefined;
+    let live: (s: typeof snap) => void = () => undefined;
+    const port: ClientCoachPort = {
+      ...base,
+      peek: () => held,
+      hydrate: () =>
+        new Promise<void>((r) => {
+          release = () => {
+            held = snap;
+            r();
+          };
+        }),
+      subscribe: (on) => {
+        live = on;
+        return () => undefined;
+      },
+    };
+    const store = createClientStore(port);
+    store.retain();
+    expect(store.getState()).toMatchObject({ status: 'loading', snapshot: null });
+    release();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(store.getState()).toMatchObject({ status: 'ready' });
+    expect(store.getState().snapshot).toBe(snap);
+    store.release();
+
+    // live first: the late snapshot never replaces it
+    const fresh = { ...snap, asOf: snap.asOf + 1 };
+    held = null;
+    const store2 = createClientStore(port);
+    store2.retain();
+    live(fresh);
+    release();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(store2.getState().snapshot).toBe(fresh);
+    store2.release();
+  });
+
   it('setLevel is optimistic and rolls back when the port fails', async () => {
     const port = createFixturesClientPort({ scenario: 'active' });
     const store = createClientStore(port);

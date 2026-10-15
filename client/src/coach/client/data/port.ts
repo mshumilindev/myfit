@@ -23,6 +23,8 @@ export interface ClientCoachPort {
   now(): number;
   /** Last good snapshot from the local sealed cache, or null. Never blocks. */
   peek(): ClientSnapshot | null;
+  /** Optional: finish reading the on-device snapshot (it can wait for the vault key); `peek()` returns it afterwards. */
+  hydrate?(): Promise<void>;
   subscribe(on: (s: ClientSnapshot) => void, onError: (e: unknown) => void): Unsubscribe;
   getInvite(token: string): Promise<InviteInfo>;
   /** Writes the grants; nothing is written before this call (S-25 AC). */

@@ -118,12 +118,15 @@ export function createFirestoreClientPort(d: ClientPortDeps): ClientCoachPort {
   let selfDays: readonly Dow[] = [];
   const subs = new Set<(s: ClientSnapshot) => void>();
 
-  void d.cache
-    ?.get()
-    .then((c) => {
-      if (c && !last) last = c;
-    })
-    .catch(() => undefined);
+  // the on-device snapshot (sealed): read once, in the background; `hydrate` lets the store adopt it when it lands
+  const hydrated: Promise<void> = d.cache
+    ? d.cache
+        .get()
+        .then((c) => {
+          if (c && !last) last = c;
+        })
+        .catch(() => undefined)
+    : Promise.resolve();
 
   const selfPath = `users/${uid}/meta/selfCoach`;
 
@@ -247,6 +250,7 @@ export function createFirestoreClientPort(d: ClientPortDeps): ClientCoachPort {
   return {
     now: () => fs.now(),
     peek: () => last,
+    hydrate: () => hydrated,
 
     subscribe(on, onError) {
       let stop = false;

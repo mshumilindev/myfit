@@ -57,6 +57,7 @@ import type { ExtrasCatalog } from './shareExtras';
 import { createServerSigningLoader, createSignerDirectory } from './trust';
 import { createFirestoreWorldPort } from './worldPort';
 import { worldCacheOver } from './worldCache';
+import { clientCacheOver } from './clientCache';
 
 type Signer = () => Promise<Pick<SigningKey, 'kid' | 'privateKey'> | null>;
 
@@ -80,7 +81,11 @@ export interface InstallDeps {
  */
 export const defaultWipe = async (cid: string) => {
   try {
-    await (await getSealedLocal()).wipeCid(cid);
+    const local = await getSealedLocal();
+    await local.wipeCid(cid);
+    // the snapshots hold the other side's data (a client's numbers, a trainer's name): they go with the relationship
+    for (const k of [...(await local.keys('world:')), ...(await local.keys('client:'))])
+      await local.remove(k);
   } catch {
     /* nothing cached */
   }
@@ -315,6 +320,7 @@ export function installFirestoreClient(d: ClientInstallDeps): () => void {
     fs: d.fs,
     vault: d.vault,
     uid: d.uid,
+    cache: clientCacheOver(getSealedLocal(), d.uid),
     afterLink: async (tid) => {
       await d.afterLink?.(tid);
       await book.refresh();

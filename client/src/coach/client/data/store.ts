@@ -79,6 +79,19 @@ export function createClientStore(
         if (!state.snapshot && state.status === 'loading')
           set({ status: 'error', problem: 'timeout' });
       }, firstLoadMs);
+    // the on-device snapshot may still be on its way (it waits for the vault key): show it the moment it lands,
+    // unless the live answer got there first
+    if (!state.snapshot)
+      void port
+        .hydrate?.()
+        .then(() => {
+          const c = port.peek();
+          if (off && !state.snapshot && c) {
+            stopFirstTimer();
+            set({ snapshot: c, status: 'ready', problem: null });
+          }
+        })
+        .catch(() => undefined);
     off = port.subscribe(
       (snapshot) => {
         stopFirstTimer();
