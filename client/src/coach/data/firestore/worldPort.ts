@@ -73,12 +73,15 @@ export function createFirestoreWorldPort(d: FirestoreWorldDeps): CoachWorldPort 
   let bookCache: DecisionBook | null = null;
   const listeners = new Set<() => void>();
 
-  void d.cache
-    ?.get()
-    .then((c) => {
-      if (c && !last) last = c;
-    })
-    .catch(() => undefined);
+  // the on-device snapshot (sealed): read once, in the background; `hydrate` lets the store adopt it when it lands
+  const hydrated: Promise<void> = d.cache
+    ? d.cache
+        .get()
+        .then((c) => {
+          if (c && !last) last = c;
+        })
+        .catch(() => undefined)
+    : Promise.resolve();
 
   const unlocked = () => {
     if (!d.vault.materialOrNull()) throw new VaultLockedError();
@@ -234,6 +237,7 @@ export function createFirestoreWorldPort(d: FirestoreWorldDeps): CoachWorldPort 
   const world: CoachWorldPort = {
     now: () => fs.now(),
     peek: () => last,
+    hydrate: () => hydrated,
 
     async load({ signal }: LoadOptions) {
       try {

@@ -52,6 +52,11 @@ export class PortError extends Error {
 export interface CoachWorldPort {
   /** Synchronous read of the last good snapshot from the local (sealed) cache, or null. Never blocks. */
   peek(): { data: WorldData; fetchedAt: number } | null;
+  /**
+   * Optional: finish reading the on-device snapshot (it can wait for the vault key). After it settles `peek()` returns
+   * the snapshot. Never rejects and never blocks the screen: the store shows what it has and adopts this when it lands.
+   */
+  hydrate?(): Promise<void>;
   /** Read from the server. May be slow or fail; the store never waits for it on screen. */
   load(opts: LoadOptions): Promise<WorldData>;
   /** Persist one change (sealed with sealOrThrow by the real adapter). Throws -> the store keeps it queued. */

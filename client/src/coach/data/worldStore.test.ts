@@ -40,6 +40,49 @@ describe('never blocking', () => {
     expect(m.pending).toHaveLength(1);
   });
 
+  it('a snapshot that lands later (it waits for the vault key) is shown at once, unless the network was faster', async () => {
+    const m = manualPort();
+    let release: () => void = () => undefined;
+    const snap = { data: buildFixtureWorld(), fetchedAt: FIXTURE_NOW - 60_000 };
+    let held: typeof snap | null = null;
+    m.port.peek = () => held;
+    m.port.hydrate = () =>
+      new Promise<void>((r) => {
+        release = () => {
+          held = snap;
+          r();
+        };
+      });
+    const s = createWorldStore(m.port);
+    s.start();
+    expect(s.getState()).toMatchObject({ status: 'loading', world: null });
+    release();
+    await flush();
+    expect(s.getState()).toMatchObject({ status: 'stale', updatedAt: FIXTURE_NOW - 60_000 });
+    expect(s.getState().world?.counts.clients).toBe(14);
+
+    // network first: the late snapshot must not replace fresher data
+    const m2 = manualPort();
+    let held2: typeof snap | null = null;
+    let release2: () => void = () => undefined;
+    m2.port.peek = () => held2;
+    m2.port.hydrate = () =>
+      new Promise<void>((r) => {
+        release2 = () => {
+          held2 = snap;
+          r();
+        };
+      });
+    const s2 = createWorldStore(m2.port);
+    s2.start();
+    m2.pending[0].res(buildFixtureWorld());
+    await flush();
+    expect(s2.getState().status).toBe('ready');
+    release2();
+    await flush();
+    expect(s2.getState()).toMatchObject({ status: 'ready', updatedAt: FIXTURE_NOW });
+  });
+
   it('with a warm cache the app paints at once, `stale`, and refreshes behind it', async () => {
     const m = manualPort({ data: buildFixtureWorld(), fetchedAt: FIXTURE_NOW - 14 * 60_000 });
     const s = createWorldStore(m.port);

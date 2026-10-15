@@ -190,15 +190,27 @@ export function createWorldStore(port: CoachWorldPort, opts: WorldStoreOptions =
     start() {
       if (started) return;
       started = true;
-      const cached = port.peek();
-      if (cached) {
+      const adopt = (cached: { data: WorldData; fetchedAt: number }) => {
         data = cached.data;
         remoteBook = cached.data.book;
         rebuildBook();
         fetchedAt = cached.fetchedAt;
         publish({ status: online ? 'stale' : 'offline', updatedAt: fetchedAt });
+      };
+      const cached = port.peek();
+      if (cached) {
+        adopt(cached);
       } else {
         publish({ status: online ? 'loading' : 'offline' });
+        // the on-device snapshot may still be on its way (it waits for the vault key): show it the moment it lands,
+        // unless the network answer got there first
+        void port
+          .hydrate?.()
+          .then(() => {
+            const c = port.peek();
+            if (started && !data && c) adopt(c);
+          })
+          .catch(() => undefined);
       }
       void refresh();
       if (every > 0) timer = setInterval(() => void refresh(), every);
