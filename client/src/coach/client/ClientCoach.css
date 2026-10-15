@@ -27,6 +27,11 @@
   gap: var(--s-12);
   margin-top: var(--s-12);
 }
+.cc-strip:empty {
+  /* The strip mounts before its content is known (the next session loads later). An empty one used to add its margin
+     and the pane gap, so the stack below slid down ~36px a moment after the page was ready (SPO-102). */
+  display: none;
+}
 .cc-strip .cc-tags {
   justify-content: flex-start;
 }
