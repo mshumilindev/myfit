@@ -911,22 +911,21 @@ export async function coachRoster(ctx: Ctx, actor: Actor) {
   if (!isCoach(actor)) fail('permission-denied', 'not-a-coach');
   const now = ctx.now();
   const rows = await ctx.kv.list('coaching', { where: [['trainerId', '==', actor.uid]] });
-  const clients = [];
-  for (const r of rows) {
-    const c = r.data as unknown as CoachingDoc;
-    if (c.status === 'ended') continue;
-    const n = await userName(ctx.kv, c.clientId);
-    clients.push({
-      clientId: c.clientId,
-      name: n.name,
-      status: c.status,
-      mode: c.mode,
-      consent: c.consent,
-      consentVersion: c.consentVersion,
-      keyEpoch: c.keyEpoch,
-      cid: conversationId(ctx.pepper, c.clientId, c.trainerId),
-    });
-  }
+  const live = rows
+    .map((r) => r.data as unknown as CoachingDoc)
+    .filter((c) => c.status !== 'ended');
+  // the names are independent reads: ask for all of them at once
+  const names = await Promise.all(live.map((c) => userName(ctx.kv, c.clientId)));
+  const clients = live.map((c, i) => ({
+    clientId: c.clientId,
+    name: names[i].name,
+    status: c.status,
+    mode: c.mode,
+    consent: c.consent,
+    consentVersion: c.consentVersion,
+    keyEpoch: c.keyEpoch,
+    cid: conversationId(ctx.pepper, c.clientId, c.trainerId),
+  }));
   const invites = (await ctx.kv.list('invites', { where: [['trainerId', '==', actor.uid]] }))
     .map((r) => r.data as unknown as CoachInviteDoc)
     .filter((i) => i.kind === 'coach-link' && !i.claimedAt && !i.revokedAt && i.expiresAt > now)

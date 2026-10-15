@@ -10,7 +10,7 @@ import { createFixturesNotesPort } from './notes/__fixtures__/fixtures';
 import { createFixturesShareSource } from './share/__fixtures__/fixtures';
 import { clearRecentShares } from './share/search';
 import { setViewport } from './testViewport';
-import { createCoachThreadExtras } from './threadExtras';
+import { createCoachThreadExtras, type ThreadExtrasInitial } from './threadExtras';
 
 let chat: FixturesChatPort;
 beforeEach(() => {
@@ -21,11 +21,11 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
-function mount() {
+function mount(initial?: ThreadExtrasInitial) {
   const onNavigate = vi.fn();
   const notesPort = createFixturesNotesPort();
   const sharePort = createFixturesShareSource({ warm: true });
-  const ext = createCoachThreadExtras({ onNavigate, notesPort, sharePort });
+  const ext = createCoachThreadExtras({ onNavigate, notesPort, sharePort, initial });
   render(
     <ChatScreen
       onNavigate={onNavigate}
@@ -170,11 +170,9 @@ describe('Notes in the thread', () => {
   });
 
   it('adding a shared note shows it; the Private note mode saves a note, not a message', async () => {
-    const { notesPort } = mount();
-    const chip = await screen.findByRole('button', { name: nt.nModeOff });
-    fireEvent.click(chip);
-    expect(screen.getByText(nt.nModeHint('Oleh'))).toBeTruthy();
-    const field = screen.getByRole('textbox', { name: nt.nModePlaceholder });
+    // the mode is opened by the thread (the chip is gone from the phone bar): start in it
+    const { notesPort } = mount({ noteMode: true });
+    const field = await screen.findByRole('textbox', { name: nt.nModePlaceholder });
     fireEvent.change(field, { target: { value: 'remember the band warm-up' } });
     fireEvent.click(screen.getByRole('button', { name: ch.chSend }));
     await waitFor(() =>

@@ -348,9 +348,12 @@ export async function adoptLegacyClientsOf(
       limit: 100,
     });
     res.found = rows.length;
-    for (const r of rows) {
-      if (r.id === trainerUid || r.id.includes(':')) continue;
-      if (await ctx.kv.get(`coaching/${r.id}`)) {
+    // who already has a relationship: one parallel round of reads, only the rest go through the transaction
+    const cand = rows.filter((r) => r.id !== trainerUid && !r.id.includes(':'));
+    const have = await Promise.all(cand.map((r) => ctx.kv.get(`coaching/${r.id}`)));
+    for (let i = 0; i < cand.length; i++) {
+      const r = cand[i];
+      if (have[i]) {
         res.outcomes.push('has-relationship');
         continue;
       }

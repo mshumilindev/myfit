@@ -42,7 +42,13 @@ function build(coll: string, q: FsQuery): Query {
   return out;
 }
 
+/** The shared `coachClients` answer: in flight, then reused this long (ms). */
+const ROSTER_SHARE_MS = 5000;
+const READS = new Set(['coachClients', 'coachRead', 'coachMyLink', 'coachLogRead']);
+
 export function createFirebaseFs(): FsApi {
+  // per instance (= per signed-in session): another account never sees this one's answer
+  const roster = new Map<string, { p: Promise<unknown>; at: number; pending: boolean }>();
   return {
     async get(path) {
       const s = await getDoc(doc(db, path));
@@ -90,7 +96,29 @@ export function createFirebaseFs(): FsApi {
       const snap = await getDocs(build(coll, q));
       return snap.docs.map((d): FsRow => ({ id: d.id, data: d.data() as Raw }));
     },
-    call: <T>(name: string, data: Raw) => callFn<T>(name, data, { quiet: true }),
+    call: <T>(name: string, data: Raw): Promise<T> => {
+      // Anything that changes who is on the roster drops the shared answer.
+      if (name !== 'coachClients') {
+        if (/^(coach|admin)/.test(name) && !READS.has(name)) roster.clear();
+        return callFn<T>(name, data, { quiet: true });
+      }
+      // The roster is asked for by several parts at once (world, share picker, live, schedule): one request, and its
+      // answer for a few seconds, serve them all.
+      const key = JSON.stringify(data);
+      const hit = roster.get(key);
+      if (hit && (hit.pending || Date.now() - hit.at < ROSTER_SHARE_MS)) return hit.p as Promise<T>;
+      const p = callFn<T>(name, data, { quiet: true });
+      const entry = { p: p as Promise<unknown>, at: Date.now(), pending: true };
+      roster.set(key, entry);
+      p.then(
+        () => {
+          entry.pending = false;
+          entry.at = Date.now();
+        },
+        () => roster.delete(key),
+      );
+      return p;
+    },
     now: () => Date.now(),
   };
 }

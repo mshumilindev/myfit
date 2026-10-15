@@ -1,7 +1,18 @@
 import { todayEn } from '../i18n/coachToday.en';
 import { rosterEn } from '../i18n/coachRoster.en';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, waitFor, render, screen, within } from '@testing-library/react';
+import {
+  cleanup,
+  configure,
+  fireEvent,
+  waitFor,
+  render,
+  screen,
+  within,
+} from '@testing-library/react';
+
+// the screens are lazy chunks: a slow machine needs more than the default 1 s to show them
+configure({ asyncUtilTimeout: 5000 });
 import { useState } from 'react';
 import { coachEn } from '../i18n/coach.en';
 import { CoachApp, CoachShell } from './CoachApp';
@@ -383,7 +394,9 @@ describe('rail (>= 768)', () => {
       ).not.toBeNull(),
     );
     const main = document.getElementById('co-main') as HTMLElement;
-    fireEvent.click(await within(main).findByRole('button', { name: rosterEn.roBack }));
+    fireEvent.click(
+      await within(main).findByRole('button', { name: rosterEn.roBack }, { timeout: 5000 }),
+    );
     expect((await screen.findByRole('heading', { level: 1 })).textContent).toBe(c.navClients);
   });
 

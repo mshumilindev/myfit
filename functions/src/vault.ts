@@ -96,7 +96,7 @@ export async function vaultKeyHandler(
 }
 
 export const vaultKey = onCall(
-  { secrets: [VAULT_MASTER], enforceAppCheck: ENFORCE_APPCHECK },
+  { secrets: [VAULT_MASTER], enforceAppCheck: ENFORCE_APPCHECK, minInstances: 1 },
   async (req) => {
     const uid = requireAuth(req);
     const requested = (req.data as { kv?: unknown } | undefined)?.kv;
