@@ -294,6 +294,14 @@ describe('invite -> preview -> accept (R-BE-REL-1..4)', () => {
     r = await coachRoster(ctx(), trainer);
     expect(r.clients[0]).toMatchObject({ avatar: false, avatarRev: 0 });
   });
+  it('a client without the app (program-only, no user record) never has a photo', async () => {
+    await link();
+    const made = await coachInvite(ctx(), trainer, { name: 'Denys', mode: 'program' });
+    expect(made.url).toBeNull();
+    const r = await coachRoster(ctx(), trainer);
+    const denys = r.clients.find((c) => c.clientId === made.clientId);
+    expect(denys).toMatchObject({ avatar: false, avatarRev: 0 });
+  });
   it('the roster lists clients and pending invites for the trainer only', async () => {
     await link();
     const pend = await coachInvite(ctx(), trainer, { name: 'Maria', mode: 'hybrid' });

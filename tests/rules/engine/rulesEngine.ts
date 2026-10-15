@@ -508,6 +508,8 @@ export interface Ctx {
   db: Record<string, Doc>;
   /** request.resource.data (the document AFTER the write); undefined for reads and deletes */
   data?: Doc;
+  /** Cloud Storage: request.resource for an upload (size, contentType) */
+  object?: Doc;
   /** request.time in ms */
   time?: number;
   /** request.method ('get' | 'list' | 'create' | 'update' | 'delete'); set by `decide` */
@@ -538,13 +540,14 @@ function evalNode(n: Node, e: Env): unknown {
         const c = e.ctx;
         return {
           auth: c.auth ? { uid: c.auth.uid, token: c.auth.token ?? {} } : null,
-          resource: c.data ? { data: c.data } : null,
+          resource: c.object ?? (c.data ? { data: c.data } : null),
           time: new Ts(c.time ?? Date.now()),
           method: c.method ?? 'get',
         };
       }
       if (n.n === 'resource') return e.resource;
-      if (n.n === 'duration' || n.n === 'timestamp') return new Namespace(n.n);
+      if (n.n === 'duration' || n.n === 'timestamp' || n.n === 'firestore')
+        return new Namespace(n.n);
       return fail(`unbound ${n.n}`);
     }
     case 'path': {
@@ -776,6 +779,19 @@ function call(n: Node & { t: 'call' }, e: Env): unknown {
   const args = n.args.map((a) => evalNode(a, e));
   const m = f.n;
   if (recv instanceof Namespace) {
+    // Storage rules read Firestore through `firestore.get(path)` / `firestore.exists(path)`
+    if (
+      recv.name === 'firestore' &&
+      (m === 'get' || m === 'exists') &&
+      args[0] instanceof PathVal
+    ) {
+      const d = lookupDoc(e, args[0]);
+      return m === 'exists'
+        ? d !== null
+        : d
+          ? { data: d }
+          : fail(`get: no document ${args[0].path}`);
+    }
     if (recv.name === 'duration' && m === 'value' && typeof args[0] === 'number') {
       const unit: Record<string, number> = {
         w: 6.048e8,
@@ -891,8 +907,15 @@ export interface Decision {
 }
 
 /** Would `op` on document `path` be allowed? */
-export function decide(rules: Rules, op: Op, path: string, ctx: Ctx): Decision {
-  const parts = ['databases', '(default)', 'documents', ...path.split('/').filter(Boolean)];
+export function decide(
+  rules: Rules,
+  op: Op,
+  path: string,
+  ctx: Ctx,
+  /** where the path starts: Firestore documents by default; Cloud Storage objects pass ['b', bucket, 'o'] */
+  root: string[] = ['databases', '(default)', 'documents'],
+): Decision {
+  const parts = [...root, ...path.split('/').filter(Boolean)];
   const tried: Decision['tried'] = [];
   const touched = new Set<string>(); // one get()/exists() budget for the whole request
   const walk = (m: MatchDef, rest: string[], vars: Map<string, string>) => {
