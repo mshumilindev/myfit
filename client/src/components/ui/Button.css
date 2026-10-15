@@ -72,6 +72,15 @@
   color: var(--color-accent);
   font-size: var(--fs-13);
   font-weight: 500;
+  /* A link is text: a long (translated) one wraps inside its container instead of pushing the page wide (SPO-28). */
+  white-space: normal;
+  text-align: left;
+  line-height: 1.25;
+  max-width: 100%;
+}
+.uibtn--link .uibtn-label {
+  min-width: 0;
+  justify-content: flex-start;
 }
 .uibtn--link.uibtn--inline {
   /* Inline-text variant: sits in a line of text; still a 24 x 24 target (WCAG 2.5.8). */

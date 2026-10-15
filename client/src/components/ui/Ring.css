@@ -5,7 +5,7 @@
   place-items: center;
   flex: none;
 }
-.uiring svg {
+.uiring > svg {
   position: absolute;
   inset: 0;
 }
