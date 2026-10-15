@@ -1,5 +1,5 @@
 /** Exercise history — design S-32/S-33 + EQ-3 (muscles, equipment, gyms). */
-import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import {
@@ -93,61 +93,69 @@ export function ExerciseHistoryView({
 
   return (
     <div className="screen ug-16">
-      <div className="hist-head">
-        <BackButton onClick={onClose} label={t.backAction} />
-        <div className="uf-1 umw-0">
-          <h2 className="title-26">
-            <ExerciseName name={name} />
-          </h2>
-          {userName ? <div className="sub">{userName}</div> : null}
-          {(() => {
-            const info = muscleInfoByName(name);
-            const needs = exerciseNeeds(name);
-            if (!info && needs.length === 0) {
+      <PageHead
+        back={{ label: t.backAction, onClick: onClose }}
+        title={<ExerciseName name={name} />}
+        sub={
+          <>
+            {userName ? <div>{userName}</div> : null}
+            {(() => {
+              const info = muscleInfoByName(name);
+              const needs = exerciseNeeds(name);
+              if (!info && needs.length === 0) {
+                return (
+                  <div>
+                    {sessions.length === 1
+                      ? t.oneSession
+                      : t.nSessionsSince(sessions.length, since)}
+                  </div>
+                );
+              }
               return (
-                <div className="sub">
-                  {sessions.length === 1 ? t.oneSession : t.nSessionsSince(sessions.length, since)}
-                </div>
+                <>
+                  <div className="hist-chips">
+                    {info && info.primary !== 'cardio' && (
+                      <MuscleChip
+                        muscle={info.primary}
+                        tone="primary"
+                        onClick={(muscle) =>
+                          shell.openOverlay({ screen: 'muscle-history', muscle })
+                        }
+                        detail
+                      />
+                    )}
+                    {info?.secondary.map((m) => (
+                      <MuscleChip
+                        key={m}
+                        muscle={m}
+                        tone="secondary"
+                        onClick={(muscle) =>
+                          shell.openOverlay({ screen: 'muscle-history', muscle })
+                        }
+                        detail
+                      />
+                    ))}
+                    {needs.map((id) => (
+                      <EquipChip key={id} id={id} style={{ padding: '4px 9px' }} />
+                    ))}
+                  </div>
+                </>
               );
-            }
-            return (
-              <>
-                <div className="hist-chips">
-                  {info && info.primary !== 'cardio' && (
-                    <MuscleChip
-                      muscle={info.primary}
-                      tone="primary"
-                      onClick={(muscle) => shell.openOverlay({ screen: 'muscle-history', muscle })}
-                      detail
-                    />
-                  )}
-                  {info?.secondary.map((m) => (
-                    <MuscleChip
-                      key={m}
-                      muscle={m}
-                      tone="secondary"
-                      onClick={(muscle) => shell.openOverlay({ screen: 'muscle-history', muscle })}
-                      detail
-                    />
-                  ))}
-                  {needs.map((id) => (
-                    <EquipChip key={id} id={id} style={{ padding: '4px 9px' }} />
-                  ))}
-                </div>
-              </>
-            );
-          })()}
-        </div>
-        <Button
-          variant="secondary"
-          className="fx-fs-13 uf-none ug-6"
-          style={{ minHeight: 36, padding: '0 14px' }}
-          onClick={() => shell.openOverlay({ screen: 'exercise-detail', name })}
-        >
-          <Icon name="cards" />
-          {t.detailsAction}
-        </Button>
-      </div>
+            })()}
+          </>
+        }
+        actions={
+          <Button
+            variant="secondary"
+            className="fx-fs-13 uf-none ug-6"
+            style={{ minHeight: 36, padding: '0 14px' }}
+            onClick={() => shell.openOverlay({ screen: 'exercise-detail', name })}
+          >
+            <Icon name="cards" />
+            {t.detailsAction}
+          </Button>
+        }
+      />
 
       <div className="stat-grid">
         <div className="cell">

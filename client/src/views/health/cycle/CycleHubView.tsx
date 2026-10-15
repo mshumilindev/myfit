@@ -1,6 +1,6 @@
 /** The Cycle hub (docs mockups): today card, calendar tinted by phase, actions, states. */
 import { useState } from 'react';
-import { BackButton } from '../../../components/ui/BackButton';
+import { PageHead } from '../../../components/ui/PageHead';
 import { Button } from '../../../components/ui/Button';
 import { Calendar } from '../../../components/ui/Calendar';
 import { Card } from '../../../components/ui/Card';
@@ -65,10 +65,11 @@ export function CycleHubView({
   const legend: CyclePhase[] = logOnly ? ['menses'] : ['menses', 'early', 'mid', 'late'];
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <h1 className="hl-pt">{t.cycTitle}</h1>
-      </div>
+      <PageHead
+        className="hl-pbar"
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.cycTitle}
+      />
       <div className="hl-scroll">
         <div className="hl-cnt">
           {stale ? (
@@ -267,10 +268,11 @@ function Suppressed({
   const { t } = useCycleText();
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <h1 className="hl-pt">{t.cycTitle}</h1>
-      </div>
+      <PageHead
+        className="hl-pbar"
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.cycTitle}
+      />
       <div className="hl-scroll">
         <div className="hl-cnt">
           <EmptyState

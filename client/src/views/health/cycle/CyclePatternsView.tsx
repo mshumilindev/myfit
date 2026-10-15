@@ -1,6 +1,6 @@
 /** Patterns: the person's own rated effort by phase, with honest intervals (docs: «Закономірності»). */
 import { useMemo } from 'react';
-import { BackButton } from '../../../components/ui/BackButton';
+import { PageHead } from '../../../components/ui/PageHead';
 import { Card } from '../../../components/ui/Card';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { Notice } from '../../../components/ui/Notice';
@@ -28,10 +28,11 @@ export function CyclePatternsView({ onBack }: { onBack: () => void }) {
   );
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <h1 className="hl-pt">{t.cycPatterns}</h1>
-      </div>
+      <PageHead
+        className="hl-pbar"
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.cycPatterns}
+      />
       <div className="hl-scroll">
         <div className="hl-cnt">
           {!res?.enough ? (

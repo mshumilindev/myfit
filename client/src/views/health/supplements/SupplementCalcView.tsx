@@ -4,7 +4,7 @@
  * after-workout hints), each with its evidence tag; then the disclaimer and the sources.
  * Switches apply immediately, so there is no Save; Done just leaves the page. Kit only.
  */
-import { BackButton } from '../../../components/ui/BackButton';
+import { PageHead } from '../../../components/ui/PageHead';
 import { Button } from '../../../components/ui/Button';
 import { GroupedList, ListRow } from '../../../components/ui/GroupedList';
 import { IconTile } from '../../../components/ui/IconTile';
@@ -86,10 +86,11 @@ export function SupplementCalcView({ onBack }: { onBack: () => void }) {
   };
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <h1 className="hl-pt">{t.supCalcTitle}</h1>
-      </div>
+      <PageHead
+        className="hl-pbar"
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.supCalcTitle}
+      />
       <div className="hl-scroll">
         <div className="hl-cnt">
           <GroupedList footer={t.nicCalcMasterFoot}>

@@ -3,6 +3,9 @@ import { LANDMARKS, classifyZone, volumeHeatColors, weeklyMuscleSets } from './v
 import { recentLoadSets, RECOVERY_DAYS, LOAD_HALF_LIFE_RECOVERY } from './loadWindow';
 import * as recovery from './recovery';
 import type { Workout } from './types';
+import { answerLocally, type AskCtx } from './atlas/intents';
+import { dayFacts } from './atlas/facts';
+import { COACH_DEFAULT } from './atlas/types';
 
 const DAY = 24 * 3600 * 1000;
 const now = Date.UTC(2026, 9, 15, 12);
@@ -107,5 +110,49 @@ describe('spike: rolling window vs smooth decay', () => {
     const z = zones([chestDay(now - 30 * DAY, 12)]);
     expect(['none', 'under']).toContain(z.smooth);
     expect(z.rolling).toBe('none');
+  });
+});
+
+// Atlas answers and notification facts read the same fading load as the maps (SPO-114).
+describe('Atlas + imbalance note use the shared load window', () => {
+  const squatDay = (startedAt: number, n: number) => {
+    const w = chestDay(startedAt, n);
+    w.exercises[0].name = 'Barbell Full Squat';
+    return w;
+  };
+  const askCtx = (workouts: Workout[]): AskCtx => ({
+    s: {
+      workouts,
+      coach: { ...COACH_DEFAULT, enabled: true, temper: 1 },
+      injuries: [],
+      sleeps: [],
+      bodyMetrics: { weights: [] },
+      restPeriods: [],
+      exerciseRest: {},
+    },
+    now,
+    locale: 'en',
+    temper: 1,
+    fmt: { kg: (k) => `${k} kg`, mmss: (s) => `${s}s`, muscle: (m) => m, exercise: (e) => e },
+  });
+
+  it('overtraining: one 24-set chest day a week ago is not "over the limit" (raw sum said so)', () => {
+    const ws = [chestDay(now - 6.9 * DAY, 24)];
+    expect(classifyZone(weeklyMuscleSets(ws, now, 7).get('chest') ?? 0, LANDMARKS.chest!)).toBe(
+      'over',
+    );
+    const text = answerLocally('am I overtraining', askCtx(ws))?.text ?? '';
+    expect(text).not.toMatch(/Over the recoverable limit[^.]*chest/);
+  });
+
+  it('imbalance note quotes the shared load, not the raw 7-day count', () => {
+    const ws = [chestDay(now - 1 * DAY, 20), squatDay(now - 20 * DAY, 3)];
+    const note = dayFacts({ finished: ws, plays: [], sleeps: [], body: null, now }).find(
+      (f) => f.kind === 'imbalance',
+    ) as { high: string; highSets: number } | undefined;
+    const load = recentLoadSets(ws, now).get('chest')!;
+    expect(note?.high).toBe('chest');
+    expect(note!.highSets).toBe(Math.round(load * 10) / 10);
+    expect(note!.highSets).toBeLessThan(20);
   });
 });

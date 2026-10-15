@@ -3624,37 +3624,24 @@ i > svg {
 }
 
 .muscle-history-screen {
-  gap: var(--space-6);
+  gap: var(--s-16);
 }
 
-.muscle-history-screen .hist-head {
-  align-items: center;
-}
-
+/* Title row = muscle icon + name (PageHead title); the sub line aligns with the name, not the icon. */
 .mh-title {
-  display: flex;
-  align-items: flex-start;
+  display: inline-flex;
+  align-items: center;
   gap: var(--s-12);
-  flex: 1;
-  min-width: 0;
 }
 
 .mh-title > svg {
-  width: 30px;
-  height: 30px;
+  width: var(--s-32);
+  height: var(--s-32);
   flex: none;
 }
 
-.mh-title > div {
-  min-width: 0;
-}
-
-.mh-title .title-26 {
-  line-height: 1.08;
-}
-
-.mh-title .sub {
-  line-height: 1.35;
+.muscle-history-screen .uipagehead-t .sub {
+  padding-left: calc(var(--s-32) + var(--s-12));
 }
 
 .table {
@@ -17319,12 +17306,6 @@ html.theme-glass .apx-streak-n {
 }
 .rc-view > * {
   flex-shrink: 0;
-}
-.rc-topbar {
-  display: flex;
-  align-items: center;
-  gap: var(--s-10);
-  padding: 0;
 }
 .rc-hero-band {
   background: var(--rc-wash);
