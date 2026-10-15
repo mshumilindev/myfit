@@ -22129,7 +22129,8 @@ body {
   /* break out to the container edges so the divider spans full width, keep the
      buttons inside the 18px gutter, and leave a comfortable bottom margin */
   margin: 0 -18px;
-  padding: var(--s-16) var(--s-18) calc(22px + var(--safe-bottom));
+  /* The home-indicator inset already is the breathing room under the buttons: do not stack 22px on top of it */
+  padding: var(--s-16) var(--s-18) max(var(--s-12), var(--safe-bottom));
   border-top: 1px solid var(--color-divider);
   background: var(--color-bg);
   /* The scroll area above reaches 40px under the nav (negative margin for the Log glow, SPO-11) and holds positioned
