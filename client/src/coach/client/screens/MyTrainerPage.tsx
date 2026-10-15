@@ -56,7 +56,7 @@ export function MyTrainerPage(p: MyTrainerPageProps) {
   const [move, setMove] = useState<{ slot?: ScheduleSlot } | null>(null);
 
   const trainer = link?.trainer;
-  // Three different answers, never one eternal skeleton (architecture.mdc: loading / empty / error):
+  // Three different answers, never one eternal skeleton (.claude/rules/client-architecture.md: loading / empty / error):
   //   no snapshot yet  -> skeleton, or a FailedState with Retry when the subscription failed
   //   snapshot, no trainer link  -> the "no trainer" empty state with a way out
   if (!snapshot || !link)
