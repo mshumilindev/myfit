@@ -7,6 +7,7 @@ import * as N from './num';
 import type { AskCtx, Tr } from './intentKit';
 import { finishedOf, loggedLifts } from './intentKit';
 import { startChips } from './intents';
+import { greet } from './smalltalk';
 
 export interface Welcome {
   text: string;
@@ -80,4 +81,13 @@ export function welcome(c: AskCtx): Welcome {
     'Я не лікар — щодо болю, ліків чи хвороб останнє слово за лікарем.',
   );
   return { text: `${hello} ${can} ${care} ${notDoctor}`, chips: startChips(c, L) };
+}
+
+/**
+ * Every conversation after the first: a short hello in the temper's voice (time of day, a gap since the last workout),
+ * not the long introduction again. The introduction is said once, ever (see introSeen in chatLog.ts).
+ */
+export function welcomeBack(c: AskCtx): Welcome {
+  const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
+  return { text: greet(c, L), chips: startChips(c, L) };
 }

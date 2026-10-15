@@ -157,7 +157,7 @@ const HELLO: Record<'morning' | 'day' | 'evening' | 'night', Toned> = {
   },
 };
 
-function greet(c: AskCtx, L: Tr): string {
+export function greet(c: AskCtx, L: Tr): string {
   const hello = say(c, 'hello', HELLO[partOfDay(c)], L);
   const d = daysSinceLast(c);
   const s = d === null ? '' : N.spanDaysOf(c, d);

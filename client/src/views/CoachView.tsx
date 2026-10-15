@@ -51,7 +51,7 @@ import {
 import { clearSaid, loadSaid, mergeMemory, rememberSaid } from '../atlas/memory';
 import { teach, unteach } from '../atlas/teach';
 import { runAction } from '../atlas/actions';
-import { welcome } from '../atlas/welcome';
+import { welcome, welcomeBack } from '../atlas/welcome';
 import { countEvent, type AtlasEvent } from '../atlas/metrics';
 import { isOther, loadDict, markFmt, translateOut } from '../atlas/translate';
 import { ChatChart } from '../components/ChatChart';
@@ -60,11 +60,13 @@ import {
   clearChat,
   pushChat,
   removeChat,
+  introSeen,
+  markIntroSeen,
   updateChat,
   useChatLog,
   type ChatMsg,
 } from '../atlas/chatLog';
-import { HELLO_ID, helloStep, inHistory } from '../atlas/helloPlan';
+import { HELLO_ID, helloStep, helloIsIntro, inHistory } from '../atlas/helloPlan';
 import { useChatAccess } from '../atlas/chatAccess';
 import { langOffer, loadOfferState, saveOfferState } from '../atlas/langOffer';
 import { fmtBodyWeightKg } from '../i18n';
@@ -935,10 +937,12 @@ function CoachThread({
     if (!isOther(locale)) return;
     void loadDict(locale).then(() => setDictFor(locale));
   }, [locale]);
+  const intro = helloIsIntro(chat, introSeen());
   const helloFor = () => {
+    const say = intro ? welcome : welcomeBack;
     if (!isOther(locale))
-      return welcome({ s: store, now, locale, temper, fmt, mem: store.coach.memory });
-    const w = welcome({
+      return say({ s: store, now, locale, temper, fmt, mem: store.coach.memory });
+    const w = say({
       s: store,
       now,
       locale: 'en',
@@ -957,22 +961,24 @@ function CoachThread({
   const helloNext = useMemo(
     () => (dictReady ? helloFor() : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [temper, locale, workoutCount, dictReady],
+    [temper, locale, workoutCount, dictReady, intro],
   );
   useEffect(() => {
     const step = helloStep(chat, helloNext);
     if (!helloNext || step.kind === 'none') return;
-    if (step.kind === 'push')
+    if (step.kind === 'push') {
+      if (intro) markIntroSeen();
       pushChat({
         id: HELLO_ID,
         at: wallClock(),
         from: 'atlas',
         hello: true,
+        ...(intro ? { intro: true } : {}),
         text: helloNext.text,
         chips: helloNext.chips,
       });
-    else updateChat(HELLO_ID, { text: helloNext.text, chips: helloNext.chips });
-  }, [chat, helloNext]);
+    } else updateChat(HELLO_ID, { text: helloNext.text, chips: helloNext.chips });
+  }, [chat, helloNext, intro]);
   const lastText = items[items.length - 1]?.text;
   // Follow-up chips live on the newest answer until you write again
   // (a language offer after it doesn't hide them).

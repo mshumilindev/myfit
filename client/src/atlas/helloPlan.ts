@@ -25,3 +25,10 @@ export function helloStep(
 
 /** The messages a reply may read as conversation: no system lines, no greeting. */
 export const inHistory = (m: ChatMsg): boolean => !m.notice && !m.hello;
+
+/**
+ * Which hello a new / re-voiced greeting should be: the long introduction the first time ever (and while it is still the
+ * only message, so picking a temper re-voices it), a short greeting in the temper's voice in every later conversation.
+ */
+export const helloIsIntro = (chat: readonly ChatMsg[], seen: boolean): boolean =>
+  !seen || (chat.length === 1 && chat[0].id === HELLO_ID && chat[0].intro === true);

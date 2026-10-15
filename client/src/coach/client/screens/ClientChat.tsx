@@ -328,44 +328,42 @@ export function ClientChat(p: ClientChatProps) {
             }}
             allowEmpty={!!queued}
             lead={
-              <IconButton
-                icon="share-network"
-                variant="secondary"
-                shape="round"
-                label={shw.sh.pickAria}
-                aria-haspopup="dialog"
-                aria-expanded={pickerOpen}
-                onClick={(e) => {
-                  shareAnchor.current = e.currentTarget;
-                  setPickerOpen(true);
-                }}
-              />
+              <>
+                <IconButton
+                  icon="share-network"
+                  variant="secondary"
+                  shape="round"
+                  label={shw.sh.pickAria}
+                  aria-haspopup="dialog"
+                  aria-expanded={pickerOpen}
+                  onClick={(e) => {
+                    shareAnchor.current = e.currentTarget;
+                    setPickerOpen(true);
+                  }}
+                />
+                {my && my.upcoming.length > 0 && (
+                  <IconButton
+                    icon="swap"
+                    variant="secondary"
+                    shape="round"
+                    label={sc.rcChipAria}
+                    title={sc.rcChip}
+                    onClick={() => setForm(true)}
+                  />
+                )}
+              </>
             }
             placeholder={queued ? shw.sh.pendingPlaceholder : cc.chPlaceholder(first)}
             chips={
-              pendingView || (my && my.upcoming.length > 0) ? (
-                <>
-                  {pendingView && (
-                    <div className="cc-pend">
-                      <ShareCardView view={pendingView} who={first} density="dock" />
-                      <IconButton
-                        icon="x"
-                        label={shw.sh.pendingRemove}
-                        onClick={() => setQueued(null)}
-                      />
-                    </div>
-                  )}
-                  {my && my.upcoming.length > 0 && (
-                    <IconButton
-                      icon="swap"
-                      variant="secondary"
-                      shape="round"
-                      label={sc.rcChipAria}
-                      title={sc.rcChip}
-                      onClick={() => setForm(true)}
-                    />
-                  )}
-                </>
+              pendingView ? (
+                <div className="cc-pend">
+                  <ShareCardView view={pendingView} who={first} density="dock" />
+                  <IconButton
+                    icon="x"
+                    label={shw.sh.pendingRemove}
+                    onClick={() => setQueued(null)}
+                  />
+                </div>
               ) : undefined
             }
           />

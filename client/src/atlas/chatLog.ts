@@ -11,6 +11,8 @@ export interface ChatMsg {
   notice?: boolean;
   /** Atlas's opening hello (said once per conversation); not part of the history a reply reads. */
   hello?: boolean;
+  /** The hello is the long first introduction (said once, ever), not a short greeting. */
+  intro?: boolean;
   /** Follow-up suggestions under this message (tap = send). */
   chips?: string[];
   /** Offer to switch the app to this language (buttons under the message). */
@@ -38,6 +40,24 @@ let log: ChatMsg[] = (() => {
     return [];
   }
 })();
+
+const INTRO_KEY = 'spotter.atlasIntroSeen';
+/** The long introduction was already shown on this device — also true for chats that began before this flag existed. */
+export function introSeen(): boolean {
+  try {
+    if (localStorage.getItem(INTRO_KEY)) return true;
+  } catch {
+    /* private mode */
+  }
+  return log.some((m) => m.hello);
+}
+export function markIntroSeen(): void {
+  try {
+    localStorage.setItem(INTRO_KEY, '1');
+  } catch {
+    /* private mode — remembered for this tab only through the log */
+  }
+}
 
 function commit(next: ChatMsg[]): void {
   log = next.slice(-MAX);

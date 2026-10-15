@@ -119,8 +119,8 @@
 }
 .uishc-rn {
   display: -webkit-box;
-  flex: 1 1 auto;
-  min-width: 0;
+  flex: 1 1 7rem;
+  min-width: 5rem;
   overflow: hidden;
   font-size: var(--fs-14);
   line-height: 1.35;
@@ -129,7 +129,10 @@
   -webkit-line-clamp: 2;
 }
 .uishc-rm {
-  flex: none;
+  flex: 0 1 auto;
+  max-width: 50%;
+  overflow-wrap: anywhere;
+  text-align: right;
   color: var(--color-text-muted);
   font-size: var(--fs-13);
   font-variant-numeric: tabular-nums;

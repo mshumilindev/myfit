@@ -16,7 +16,7 @@ const arg = (k, d) => {
   return i > -1 ? process.argv[i + 1] : d;
 };
 const url = arg('url', 'http://127.0.0.1:6006');
-const widths = arg('widths', '320,390,768,1440').split(',').map(Number);
+const widths = arg('widths', '320,360,390,768,1024,1440,1920').split(',').map(Number);
 const locales = arg('locales', 'en,uk,pl,lt,et').split(',');
 const STORIES = [
   'pages-coach-chat--thread-phone', // trainer (thread open at every width)
@@ -54,6 +54,11 @@ const probe = () => {
     shellGutter: [Math.round(r(shell).left), Math.round(innerWidth - r(shell).right)],
     widest: Math.round(Math.max(0, ...bubbles)),
     bodyW: Math.round(bodyW),
+    // action buttons (share, reschedule...) live in the composer row, never in a row of their own above the field
+    actionAbove: comp.querySelectorAll('.uicomp-chips > .uibtn').length,
+    rowTops: [...comp.querySelectorAll('.uicomp-row .uibtn, .uicomp-row .uicomp-field')].map((e) =>
+      Math.round(r(e).bottom),
+    ),
     // the long first message keeps a real bubble width (chips beside it used to squeeze it to a quarter)
     firstW: (() => {
       const b = document.querySelector('.uimsg .uibub');
@@ -97,6 +102,12 @@ for (const w of widths) {
       const m = await page.evaluate(probe);
       results[id] = m;
       const at = `${id} @${w}px ${loc}`;
+      if (m.actionAbove)
+        problems.push(
+          `${at}: an action button sits in a row above the field, not in the composer row`,
+        );
+      if (m.rowTops && Math.max(...m.rowTops) - Math.min(...m.rowTops) > 2)
+        problems.push(`${at}: composer buttons and field are not on one line (${m.rowTops})`);
       if (m.belowBeside) problems.push(`${at}: chips / extras sit beside the bubble, not under it`);
       if (m.firstW !== null && m.firstW < Math.min(0.5 * m.bodyW, 200))
         problems.push(`${at}: first message squeezed to ${m.firstW}px in a ${m.bodyW}px list`);
