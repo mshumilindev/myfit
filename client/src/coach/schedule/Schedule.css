@@ -880,9 +880,6 @@ html.theme-glass .sc-block.sc-st.sc-block--inprogress {
     max-width: none;
     width: 100%;
   }
-  .sc-toolbar-filters > .sc-filters-btn {
-    justify-content: center;
-  }
   .sc-toolbar-filters .uifield-pre {
     white-space: nowrap;
   }

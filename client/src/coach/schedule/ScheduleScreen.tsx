@@ -395,11 +395,18 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
             {t.scToday}
           </Button>
           {!wide && (
-            <IconButton
-              icon="calendar-plus"
-              label={t.scAddSessions}
-              onClick={() => prm.set({ form: 'plan' })}
-            />
+            <>
+              <IconButton
+                icon="sliders-horizontal"
+                label={t.hsOpen}
+                onClick={() => prm.set({ form: 'settings' })}
+              />
+              <IconButton
+                icon="calendar-plus"
+                label={t.scAddSessions}
+                onClick={() => prm.set({ form: 'plan' })}
+              />
+            </>
           )}
         </div>
         <Segmented
@@ -414,7 +421,7 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
         />
         <div className="sc-toolbar-filters">
           <Select
-            labelInline
+            labelInline={wide}
             label={t.scGymLabel}
             value={prm.gym ?? ''}
             onChange={(e) => prm.set({ gym: e.target.value || null, open: null })}
@@ -427,7 +434,7 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
             ))}
           </Select>
           <Select
-            labelInline
+            labelInline={wide}
             label={t.scClientLabel}
             value={prm.who ?? ''}
             onChange={(e) => prm.set({ who: e.target.value || null, open: null })}
@@ -439,15 +446,6 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
               </option>
             ))}
           </Select>
-          {!wide && (
-            <IconButton
-              icon="sliders-horizontal"
-              variant="secondary"
-              className="sc-filters-btn"
-              label={t.hsOpen}
-              onClick={() => prm.set({ form: 'settings' })}
-            />
-          )}
         </div>
       </Toolbar>
 

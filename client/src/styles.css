@@ -22132,6 +22132,11 @@ body {
   padding: var(--s-16) var(--s-18) calc(22px + var(--safe-bottom));
   border-top: 1px solid var(--color-divider);
   background: var(--color-bg);
+  /* The scroll area above reaches 40px under the nav (negative margin for the Log glow, SPO-11) and holds positioned
+     cards (.gset is relative + isolated). Without its own stacking level the nav is painted UNDER them: its fill looks
+     transparent and the step line / notes show through the buttons. */
+  position: relative;
+  z-index: 1;
 }
 .focus-nav .focus-back,
 .focus-nav .focus-discard {
@@ -25173,7 +25178,7 @@ body {
 .es-info::after {
   content: '';
   position: absolute;
-  inset: -8px;
+  inset: -9px; /* 26px padding box + 2x9 = 44px touch target */
 }
 /* four more ways to start */
 .es-more {

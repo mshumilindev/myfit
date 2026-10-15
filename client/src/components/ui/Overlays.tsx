@@ -154,6 +154,13 @@ export function Sheet(props: {
   // raised by accident; a field with autoFocus keeps it), Escape closes it, focus returns to the
   // opener when it unmounts.
   const returnFocusRef = props.returnFocusRef;
+  // requestClose changes identity whenever the parent passes a fresh onClose (an inline arrow re-created on every
+  // keystroke in a search field). The effect below must NOT re-run for that: its cleanup returns focus to the opener,
+  // which blurred the field after each character. So the effect reads the latest callback through a ref.
+  const requestCloseRef = useRef(requestClose);
+  useEffect(() => {
+    requestCloseRef.current = requestClose;
+  });
   useEffect(() => {
     const target = returnFocusRef;
     const opener = target?.current ?? activeAnchor();
@@ -163,7 +170,7 @@ export function Sheet(props: {
       if (e.key !== 'Escape' || e.defaultPrevented) return;
       // A confirm dialog opened over the sheet owns Escape.
       if (document.querySelector('.dialog-scrim')) return;
-      requestClose();
+      requestCloseRef.current();
     };
     document.addEventListener('keydown', onKey);
     return () => {
@@ -171,7 +178,7 @@ export function Sheet(props: {
       const back = target?.current ?? opener;
       if (back && back.isConnected) back.focus({ preventScroll: true });
     };
-  }, [requestClose, returnFocusRef]);
+  }, [returnFocusRef]);
 
   const classes = [
     'sheet',

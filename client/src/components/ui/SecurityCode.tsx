@@ -53,15 +53,15 @@ export function SecurityCode({
     }
   };
   return (
-    <div className="uisc">
-      <ol className="uisc-groups" aria-label={labels.groupsAria(groups.join(', '))}>
+    <div className="uiseccode">
+      <ol className="uiseccode-groups" aria-label={labels.groupsAria(groups.join(', '))}>
         {groups.map((g, i) => (
-          <li key={i} className="uisc-g" aria-hidden="true">
+          <li key={i} className="uiseccode-g" aria-hidden="true">
             {g}
           </li>
         ))}
       </ol>
-      <div className="uisc-row">
+      <div className="uiseccode-row">
         <Tag tone={verified ? 'ok' : 'neutral'} icon={undefined}>
           {verified ? labels.verified : labels.notVerified}
         </Tag>

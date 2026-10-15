@@ -1374,8 +1374,14 @@ html.theme-glass .wlib-top .wlib-title {
   width: 100%;
   min-width: 0;
   justify-content: center;
+  /* Seven equal cells on a phone: the chip padding must not eat the label ("Skip" was cut to "Ski"). */
+  padding-inline: var(--s-2);
   font-size: var(--fs-14);
   font-variant-numeric: tabular-nums;
+}
+.se-rpe .uichip .uichip-l {
+  overflow: visible;
+  text-overflow: clip;
 }
 
 /* Set type chips wear the set-type colour when selected (same hues as the entry card and logged rows). */

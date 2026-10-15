@@ -18,14 +18,14 @@ export interface StepItem {
  */
 export function StepList({ items, label }: { items: StepItem[]; label: string }) {
   return (
-    <Card pad="none" className="uistep">
-      <ul className="uistep-list" aria-label={label}>
+    <Card pad="none" className="uisteplist">
+      <ul className="uisteplist-list" aria-label={label}>
         {items.map((it) => (
-          <li key={it.id} className="uistep-row">
+          <li key={it.id} className="uisteplist-row">
             <IconTile icon={it.icon} size={30} />
-            <div className="uistep-t">
-              <div className="uistep-title">{it.title}</div>
-              <div className="uistep-body">{it.body}</div>
+            <div className="uisteplist-t">
+              <div className="uisteplist-title">{it.title}</div>
+              <div className="uisteplist-body">{it.body}</div>
             </div>
           </li>
         ))}

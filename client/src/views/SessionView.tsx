@@ -2161,18 +2161,23 @@ export function SessionView(props: {
     );
   }
 
-  /** Near the end of any lift (its planned sets done, or 3+ working sets with
-   *  no plan) the next move is suggested even when the muscle isn't tired —
+  /** Near the end of any lift (its planned sets done, or 4+ working sets with
+   *  no plan and half the muscle's session volume) the next move is suggested even when the muscle isn't tired —
    *  the same picks the tired banner offers. */
   function renderNextBanner(ex: Exercise) {
     if (!isStrengthExercise(ex) || isMarkerExercise(ex)) return null;
     const working = ex.sets.filter((x) => setTypeOf(x) !== 'warmup').length;
     const planned = Math.max(0, ex.plannedSets ?? 0);
-    const atEnd = planned > 0 ? working >= planned : working >= 3;
-    if (!atEnd) return null;
     const primary = resolveMuscles(ex).primary;
     if (!primary) return null;
     const tally = sessionTally();
+    // With a plan: when its sets are done. Without one: 4+ working sets AND the muscle has done at least half of
+    // today's useful volume — 3 sets of the first lift must not already point at other muscle groups.
+    const atEnd =
+      planned > 0
+        ? working >= planned
+        : working >= 4 && (tally.get(primary) ?? 0) >= plateauFor(primary) * 0.5;
+    if (!atEnd) return null;
     const collapsed = tiredCollapsed[ex.id] ?? false;
     const picks = collapsed
       ? []
@@ -7624,6 +7629,7 @@ function SetEditorSheet(props: {
               ))}
               {!isSD && (
                 <Chip
+                  size="md"
                   tone="danger"
                   className="rpe-f"
                   selected={failOn}
