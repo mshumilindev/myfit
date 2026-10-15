@@ -94,15 +94,13 @@ export const setConsent = onCall(opts, (req) =>
   run(req, ANY, (a) => svc.setConsent(ctx(), a, body(req))),
 );
 export const coachMyLink = onCall(opts, (req) => run(req, ANY, (a) => svc.coachMyLink(ctx(), a)));
-// the dashboard waits on these two at every start: one warm instance each, so no cold start (~5 s) on the first open
-const warm = { ...opts, minInstances: 1 };
-export const coachRead = onCall(warm, (req) =>
+export const coachRead = onCall(opts, (req) =>
   run(req, COACH, (a) => svc.coachRead(ctx(), a, body(req))),
 );
 export const coachLogRead = onCall(opts, (req) =>
   run(req, COACH, (a) => svc.logRead(ctx(), a, body(req))),
 );
-export const coachClients = onCall(warm, (req) =>
+export const coachClients = onCall(opts, (req) =>
   run(req, COACH, async (a) => {
     // people already assigned to this trainer the old way (users.trainerId) join the roster the first time it is read
     const legacy = await adoptLegacyClientsOf(ctx(), a.uid);
