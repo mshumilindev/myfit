@@ -58,6 +58,7 @@ import { createServerSigningLoader, createSignerDirectory } from './trust';
 import { createFirestoreWorldPort } from './worldPort';
 import { worldCacheOver } from './worldCache';
 import { clientCacheOver } from './clientCache';
+import { scheduleCacheOver } from './scheduleCache';
 
 type Signer = () => Promise<Pick<SigningKey, 'kid' | 'privateKey'> | null>;
 
@@ -84,7 +85,11 @@ export const defaultWipe = async (cid: string) => {
     const local = await getSealedLocal();
     await local.wipeCid(cid);
     // the snapshots hold the other side's data (a client's numbers, a trainer's name): they go with the relationship
-    for (const k of [...(await local.keys('world:')), ...(await local.keys('client:'))])
+    for (const k of [
+      ...(await local.keys('world:')),
+      ...(await local.keys('client:')),
+      ...(await local.keys('schedule:')),
+    ])
       await local.remove(k);
   } catch {
     /* nothing cached */
@@ -96,6 +101,24 @@ export const defaultWipe = async (cid: string) => {
     /* best effort */
   }
 };
+
+/** The schedule as the port holds it after its on-device snapshot had up to `ms` to load (the read waits for the vault key). Never rejects. */
+async function snapshotWithin(port: SchedulePort, ms = 1500): Promise<ScheduleData | null> {
+  let t: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([
+      port.hydrate?.(),
+      new Promise<void>((res) => {
+        t = setTimeout(res, ms);
+      }),
+    ]);
+  } catch {
+    /* no snapshot */
+  } finally {
+    clearTimeout(t);
+  }
+  return port.peek();
+}
 
 /** First schedule snapshot (or the last good one), but never longer than `ms`: the world loads without it otherwise. */
 function firstSchedule(port: SchedulePort, ms = 4000): Promise<ScheduleData | null> {
@@ -151,6 +174,7 @@ export function installFirestoreCoach(d: InstallDeps): () => void {
     ringForEpoch: book.ringForEpoch,
     uid: d.trainer.id,
     now: () => d.fs.now(),
+    cache: scheduleCacheOver(getSealedLocal(), d.trainer.id),
   });
   const notes = createSealedNotesPort({
     store: createFirestoreNotesStore({ fs: d.fs, book, uid: d.trainer.id }),
@@ -181,6 +205,10 @@ export function installFirestoreCoach(d: InstallDeps): () => void {
     loadOwnCoachKey: d.loadOwnCoachKey,
     cache: worldCacheOver(getSealedLocal(), d.trainer.id),
     schedule: async () => {
+      // an on-device snapshot answers at once (the live schedule replaces it through the feed); only without one the world
+      // waits for the key rings, and then at most `firstSchedule`'s limit
+      const snap = await snapshotWithin(schedule);
+      if (snap) return snap;
       await book.ready();
       return firstSchedule(schedule);
     },
