@@ -57,6 +57,7 @@ import type { ExtrasCatalog } from './shareExtras';
 import { createServerSigningLoader, createSignerDirectory } from './trust';
 import { createFirestoreWorldPort } from './worldPort';
 import { worldCacheOver } from './worldCache';
+import { deltaCacheOver } from './deltaCache';
 import { clientCacheOver } from './clientCache';
 import { scheduleCacheOver } from './scheduleCache';
 
@@ -207,6 +208,7 @@ export function installFirestoreCoach(d: InstallDeps): () => void {
     trainer: d.trainer,
     loadOwnCoachKey: d.loadOwnCoachKey,
     cache: worldCacheOver(getSealedLocal(), d.trainer.id),
+    deltaCache: (clientId) => deltaCacheOver(getSealedLocal(), d.trainer.id, clientId),
     schedule: async () => {
       // an on-device snapshot answers at once (the live schedule replaces it through the feed); only without one the world
       // waits for the key rings, and then at most `firstSchedule`'s limit

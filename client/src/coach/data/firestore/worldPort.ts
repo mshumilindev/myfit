@@ -21,6 +21,14 @@ import type { Category, SharedInjury } from '../../domain/types';
 import { PortError, type CoachWorldPort, type LoadOptions, type WorldData } from '../port';
 import { toPortError } from './errors';
 import { joinHistory, joinSchedule } from './scheduleJoin';
+import {
+  INVALID_ENTRY,
+  changedSinceFor,
+  deltaCats,
+  settleDelta,
+  type DeltaEntry,
+} from './deltaSync';
+import type { SnapshotCache } from './snapshotCache';
 import { WEEK } from '../../domain/time';
 import type { ScheduleData } from '../../schedule/port';
 import type { FsApi, FsOp, Raw } from './fsApi';
@@ -55,11 +63,18 @@ export interface FirestoreWorldDeps {
   schedule?: () => Promise<ScheduleData | null>;
   /** how many clients are read at once */
   concurrency?: number;
+  /**
+   * Delta reads (`deltaSync.ts`): the sealed per-client cache of the previous raw answer. Without it every refresh is a
+   * full read, exactly as before.
+   */
+  deltaCache?: (clientId: string) => SnapshotCache<DeltaEntry>;
 }
 
 interface ReadResponse {
   results: Partial<Record<Category, ReadCategory>>;
   grant: unknown;
+  consentVersion?: number;
+  serverTime?: number;
 }
 
 const WANT: Category[] = ['totals', 'sets', 'injury'];
@@ -126,6 +141,60 @@ export function createFirestoreWorldPort(d: FirestoreWorldDeps): CoachWorldPort 
     return bookCache;
   }
 
+  /**
+   * `coachRead` for one client. For the workout-based categories at `full` it asks for a delta against the cached previous
+   * answer and hands on exactly what a full read would have returned; anything unverifiable is read in full again. The
+   * server audits every call, delta or not.
+   */
+  async function readWorkouts(
+    c: RosterClient,
+    cats: Category[],
+    now: number,
+  ): Promise<ReadResponse> {
+    const plain = (categories: Category[]) =>
+      fs.call<ReadResponse>('coachRead', { clientId: c.clientId, categories, via: 'queue' });
+    const dc = d.deltaCache?.(c.clientId);
+    const dcats = dc ? deltaCats(c.consent, cats) : [];
+    if (!dc || !dcats.length) return plain(cats);
+    const entry = (await dc.get())?.value ?? null;
+    const changedSince = changedSinceFor(entry, now, c, dcats);
+    const res = await fs.call<ReadResponse>('coachRead', {
+      clientId: c.clientId,
+      categories: cats,
+      via: 'queue',
+      changedSince,
+    });
+    let settled;
+    try {
+      settled = settleDelta({
+        results: res.results,
+        cats: dcats,
+        entry,
+        changedSince,
+        serverTime: Number.isFinite(res.serverTime) ? (res.serverTime as number) : now,
+        resConsentVersion: Number(res.consentVersion),
+        keyEpoch: c.keyEpoch,
+      });
+    } catch {
+      settled = { results: {}, failed: [...dcats], entry: null as DeltaEntry | null };
+    }
+    let out: ReadResponse = { ...res, results: settled.results };
+    if (settled.failed.length) {
+      // any doubt: read those categories in full, as before the cache existed
+      const again = await plain(settled.failed);
+      out = {
+        ...out,
+        results: { ...out.results, ...again.results },
+        grant: again.grant ?? res.grant,
+      };
+    }
+    // best effort and never awaited: the cache must not slow the load
+    void dc
+      .set(settled.entry ?? INVALID_ENTRY, settled.entry?.lastAt ?? now)
+      .catch(() => undefined);
+    return out;
+  }
+
   async function readClient(
     c: RosterClient,
     now: number,
@@ -140,11 +209,7 @@ export function createFirestoreWorldPort(d: FirestoreWorldDeps): CoachWorldPort 
     const cats = WANT.filter((k) => c.consent[k] !== 'off');
     if (c.mode === 'program' || cats.length === 0)
       return { input: toSignalInput(c, {}, {}, now), lastSessionAt: null, done: 0, streak: 0 };
-    const res = await fs.call<ReadResponse>('coachRead', {
-      clientId: c.clientId,
-      categories: cats,
-      via: 'queue',
-    });
+    const res = await readWorkouts(c, cats, now);
     const opened: { workouts?: Workout[]; setsView?: unknown } = {};
     // the member's key (from the grant on this device) opens the sealed parts: sets and injuries
     let athleteKey: Awaited<ReturnType<typeof openAthleteKey>> | undefined;
@@ -350,6 +415,7 @@ export function createFirestoreWorldPort(d: FirestoreWorldDeps): CoachWorldPort 
     },
 
     async endCoaching(clientId: string) {
+      void d.deltaCache?.(clientId).set(INVALID_ENTRY, fs.now());
       try {
         await fs.call('coachEnd', { clientId });
       } catch (e) {

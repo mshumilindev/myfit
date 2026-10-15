@@ -75,6 +75,16 @@ export function createMemoryKv(): MemoryKv {
         if (parent(p) === coll) rows.push({ id: idOf(p), path: p, data: clone(d) });
       return applyQuery(rows, q);
     },
+    async aggregate(coll, q, sumField) {
+      const rows = await kv.list(coll, { where: q?.where });
+      const sum = sumField
+        ? rows.reduce((a, r) => {
+            const x = getPath(r.data, sumField);
+            return typeof x === 'number' && Number.isFinite(x) ? a + x : a;
+          }, 0)
+        : 0;
+      return { count: rows.length, sum };
+    },
     async group(id, q) {
       const rows: Row[] = [];
       for (const [p, d] of docs)
