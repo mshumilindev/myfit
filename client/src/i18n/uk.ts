@@ -1370,6 +1370,7 @@ export const uk: Strings = {
   muscleMapPlanned: 'заплановано',
   muscleMapOver: 'забагато на тиждень',
   muscleMapNearLimit: 'на межі тижня',
+  muscleMapSettles: (d: number) => `спаде за ~${d} дн`,
   sessionCoachButton: 'Готовність на сьогодні',
   sessionCoachTitle: 'Погляд на сьогодні',
   moreLabel: 'ще',

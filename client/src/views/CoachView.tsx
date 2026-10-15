@@ -19,6 +19,7 @@ import { Icon, Sheet } from '../ui';
 import { latestWeight, setCoach, updateBodyMetrics, useSelfCoachRole, useStore } from '../store';
 import { AtlasFace, TemperHeat } from '../components/AtlasFace';
 import { useAtlasFmt, useAtlasNotes, useMinuteClock, useSoftenReason } from '../atlas/notes';
+import { noteFromHash } from '../atlas/noteLink';
 import {
   extrasFor,
   momAllowed,
@@ -993,6 +994,17 @@ function CoachThread({
   useEffect(() => {
     if (!opened.current) {
       opened.current = true;
+      // A notification tap lands on ITS message (#/coach?note=<id>), before the "first unread" rule (SPO-21).
+      const wanted = noteFromHash(window.location.hash);
+      const target = wanted
+        ? Array.from(feedRef.current?.querySelectorAll<HTMLElement>('[data-note-id]') ?? []).find(
+            (el) => el.dataset.noteId === wanted,
+          )
+        : undefined;
+      if (target) {
+        target.scrollIntoView({ block: 'center' });
+        return;
+      }
       const mark = feedRef.current?.querySelector('.atl-new');
       if (mark) {
         mark.scrollIntoView({ block: 'start' });
@@ -1193,7 +1205,7 @@ function CoachThread({
                             )
                           }
                           className={(noteAt.get(n.id) ?? 0) > readSnap ? 'atl-unread' : undefined}
-                          attrs={{ 'data-note-at': noteAt.get(n.id) }}
+                          attrs={{ 'data-note-at': noteAt.get(n.id), 'data-note-id': n.id }}
                           below={
                             <>
                               {n.action && !busy && (

@@ -16,14 +16,14 @@ import { useT } from '../i18n';
 import { useStore, muscleSetsInWorkout, programDayNameFor } from '../store';
 import { personalLandmarks } from '../personalize';
 import { LANDMARKS, VOLUME_MUSCLES, ZONE_COLOR, classifyZone, type Zone } from '../volume';
-import { recentLoadSets } from '../recovery';
+import { recentLoadSets, RECOVERY_DAYS, LOAD_HALF_LIFE_RECOVERY } from '../recovery';
 import { MuscleHeatmap } from './Muscle';
 import type { MuscleGroup } from '../data/exercises';
 import type { Workout } from '../types';
 import { ListRow } from './ui/GroupedList';
 
 type TodoHint = { muscle: MuscleGroup; sets: number | null; color: string };
-type EaseHint = { muscle: MuscleGroup; over: boolean; color: string };
+type EaseHint = { muscle: MuscleGroup; over: boolean; color: string; days: number };
 type DoneHint = { muscle: MuscleGroup; color: string };
 
 export function SessionMuscleMap({
@@ -88,6 +88,16 @@ export function SessionMuscleMap({
       if (dayTypical(m) > 0 || (today.get(m) ?? 0) > 0) scope.add(m);
     }
 
+    // Approx. days until the fading load settles back under the weekly sweet
+    // spot (MAV): load halves every `half` days, so d = half·log2(load/MAV).
+    const settleDays = (m: MuscleGroup): number => {
+      const lm = landmarks.get(m) ?? LANDMARKS[m];
+      const l = load.get(m) ?? 0;
+      if (!lm || l <= lm.mav) return 0;
+      const half = (RECOVERY_DAYS[m] ?? 2) * LOAD_HALF_LIFE_RECOVERY;
+      return Math.max(1, Math.round(half * Math.log2(l / lm.mav)));
+    };
+
     const todoOut: TodoHint[] = [];
     const easeOut: EaseHint[] = [];
     const doneOut: DoneHint[] = [];
@@ -98,13 +108,13 @@ export function SessionMuscleMap({
       const color = ZONE_COLOR[zone === 'none' ? 'under' : zone];
       const remaining = Math.max(0, Math.round(typical - doneToday));
       if (zone === 'over') {
-        easeOut.push({ muscle: m, over: true, color: ZONE_COLOR.over });
+        easeOut.push({ muscle: m, over: true, color: ZONE_COLOR.over, days: settleDays(m) });
       } else if (remaining >= 1) {
         todoOut.push({ muscle: m, sets: remaining, color });
       } else if (typical === 0 && doneToday === 0 && targets.includes(m)) {
         todoOut.push({ muscle: m, sets: null, color });
       } else if (zone === 'high' && doneToday > 0) {
-        easeOut.push({ muscle: m, over: false, color: ZONE_COLOR.high });
+        easeOut.push({ muscle: m, over: false, color: ZONE_COLOR.high, days: settleDays(m) });
       } else if (doneToday > 0) {
         doneOut.push({ muscle: m, color: ZONE_COLOR.productive });
       }
@@ -166,7 +176,12 @@ export function SessionMuscleMap({
                 row(
                   h.muscle,
                   h.color,
-                  h.over ? t.muscleMapOver : t.muscleMapNearLimit,
+                  [
+                    h.over ? t.muscleMapOver : t.muscleMapNearLimit,
+                    h.days > 0 ? t.muscleMapSettles(h.days) : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' · '),
                   `ease-${h.muscle}`,
                 ),
               )}

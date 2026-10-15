@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Workout } from '../types';
 import { chatBacked, planOutbox } from './schedule';
+import { noteFromHash } from './noteLink';
 import { buildNotes } from './notes';
 import { setWeekStartDay } from '../weekStart';
 import { proposePlan } from './plan';
@@ -116,5 +117,30 @@ describe('pushes are backed by chat notes', () => {
     } finally {
       setWeekStartDay(1);
     }
+  });
+});
+
+describe('notification → chat message link (SPO-21)', () => {
+  it('every planned push that announces a chat note links to exactly that note', () => {
+    const hist = [1, 2, 3].map((w) => session(new Date(2026, 9, 7 - 7 * w, 18).getTime()));
+    const plan = proposePlan({ finished: hist, plays: [], now: WED_NOON, weekdays: [3] });
+    const msgs = planOutbox({
+      ...base,
+      finished: hist,
+      coach: { ...COACH_DEFAULT, enabled: true, plan },
+    });
+    const backed = msgs.filter((m) => m.noteId);
+    expect(backed.length).toBeGreaterThan(0);
+    for (const m of backed) {
+      const hash = m.url.replace(/^\//, '');
+      expect(hash.startsWith('#/coach?')).toBe(true);
+      expect(noteFromHash(hash)).toBe(m.noteId);
+    }
+  });
+
+  it('noteFromHash reads the id, and nothing from a plain chat hash', () => {
+    expect(noteFromHash('#/coach?note=skipped%3A20000')).toBe('skipped:20000');
+    expect(noteFromHash('#/coach')).toBeNull();
+    expect(noteFromHash('#/coach?x=1')).toBeNull();
   });
 });

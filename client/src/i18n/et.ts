@@ -1333,6 +1333,7 @@ export const et: Strings = {
   muscleMapPlanned: 'planeeritud',
   muscleMapOver: 'üle nädala piiri',
   muscleMapNearLimit: 'piiri lähedal',
+  muscleMapSettles: (d: number) => `taandub ~${d} p`,
   sessionCoachButton: 'Tänane valmisolek',
   sessionCoachTitle: 'Tänane ülevaade',
   moreLabel: 'veel',

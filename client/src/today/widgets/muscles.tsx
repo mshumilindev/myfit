@@ -35,7 +35,7 @@ import {
 import { cachedPersonalLandmarks, weeklyMuscleSeries } from '../../personalize';
 import { focusAdjustLandmarks } from '../../goals';
 import { sessionPlateau } from '../../stimulus';
-import { muscleReadiness } from '../../recovery';
+import { muscleReadiness, recentLoadSets } from '../../recovery';
 import {
   est1rm,
   isStrengthExercise,
@@ -383,7 +383,9 @@ interface LmRow {
 
 function landmarkRows(store: StoreState, now: number): LmRow[] {
   const lms = landmarksOf(store, now);
-  const per = weeklyMuscleSets(finishedOf(store.workouts), now, 7);
+  // The same smoothly fading weekly load the session muscle map uses (recentLoadSets), so a muscle never reads
+  // "over" here while the map shows it recovered (SPO-114).
+  const per = recentLoadSets(finishedOf(store.workouts), now);
   return MAJOR.map((m) => {
     const lm = lms.get(m) ?? (LANDMARKS[m] as Landmark);
     const sets = Math.round((per.get(m) ?? 0) * 2) / 2;

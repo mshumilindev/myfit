@@ -143,7 +143,9 @@ function InfoButton({ onClick, label }: { onClick: () => void; label: string }) 
   return (
     <IconButton
       icon="info"
-      size="sm"
+      size="xs"
+      variant="photo"
+      shape="round"
       className="xp-info"
       label={label}
       title={label}
@@ -376,11 +378,24 @@ export function ExercisePicker(props: ExercisePickerProps) {
         else props.onClose();
       } else if (e.key === 'Enter' && !typing && previewItem) {
         props.onPick(previewItem);
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        // Keyboard walk through what's on screen (search results, else the
+        // group's grid): moves the preview, which Enter then adds.
+        const list = needle ? results : groupShown;
+        if (list.length === 0) return;
+        e.preventDefault();
+        const at = list.findIndex((x) => x.key === previewItem?.key);
+        const next = e.key === 'ArrowDown' ? at + 1 : at - 1;
+        setPreview(list[Math.min(list.length - 1, Math.max(0, next))]);
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isDesktop, q, previewItem, props]);
+  }, [isDesktop, q, previewItem, props, needle, results, groupShown]);
+  useEffect(() => {
+    if (isDesktop)
+      document.querySelector('.xp-card.sel, .xp-row.sel')?.scrollIntoView({ block: 'nearest' });
+  }, [isDesktop, previewItem?.key]);
 
   const pick = (i: PickItem) => props.onPick(i);
   const openInfo = (i: PickItem) => (isDesktop ? setPreview(i) : setInfo(i));
@@ -429,7 +444,8 @@ export function ExercisePicker(props: ExercisePickerProps) {
       onFocus={() => setSearching(true)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' && needle) {
-          if (results[0]) pick(results[0]);
+          const sel = results.find((r) => r.key === previewItem?.key) ?? results[0];
+          if (sel) pick(sel);
           else props.onCreate?.(q.trim());
         }
       }}
@@ -525,7 +541,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
   const row = (i: PickItem) => (
     <div
       key={i.key}
-      className={`xp-row${i.available ? '' : ' na'}`}
+      className={`xp-row${i.available ? '' : ' na'}${isDesktop && previewItem?.key === i.key ? ' sel' : ''}`}
       onMouseEnter={isDesktop ? () => setPreview(i) : undefined}
     >
       <Card as="button" pad="none" emphasis="quiet" className="xp-row-main" onClick={() => pick(i)}>

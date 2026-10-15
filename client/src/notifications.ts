@@ -21,7 +21,8 @@ import {
 import { computeStandards } from './standards';
 import { computeFeats } from './feats';
 import { computeTrends } from './trends';
-import { VOLUME_MUSCLES, classifyZone, weeklyMuscleSets } from './volume';
+import { VOLUME_MUSCLES, classifyZone } from './volume';
+import { recentLoadSets } from './recovery';
 import { landmarkFor } from './personalize';
 import { fmtKg, fmtShortDate, fmtWeekday, type LocaleId } from './i18n';
 import type { useT } from './i18n';
@@ -186,7 +187,8 @@ export function computeNotifs(
   }
 
   // --- Weekly volume goal: every landmarked muscle in its productive range+.
-  const per = weeklyMuscleSets(finished, now, 7);
+  // Same fading weekly load as the muscle map and the landmark widgets (SPO-114).
+  const per = recentLoadSets(finished, now);
   const allProductive = VOLUME_MUSCLES.every((m) => {
     const lm = landmarkFor(m, finished, now);
     if (!lm) return true;

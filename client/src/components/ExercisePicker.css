@@ -402,7 +402,8 @@ span.xp-noimg {
   font: inherit;
   cursor: pointer;
 }
-.xp-card.sel .xp-card-main {
+.xp-card.sel .xp-card-main,
+.xp-row.sel .xp-row-main {
   box-shadow: 0 0 0 2px var(--color-accent);
 }
 .xp-card-img {
@@ -999,20 +1000,23 @@ span.xp-noimg {
   place-items: center;
   font-size: var(--fs-11);
 }
-/* info button: corner of a grid card, vertically centred on wide rows */
+/* info button: the same corner and inset as the session cards (.es-info: top/right 8px, 28px glyph circle) with a
+   44px touch area (the ::after reaches 8px past the circle); vertically centred on wide rows. */
 .xp-info {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  border-radius: var(--r-round);
-  background: color-mix(in srgb, var(--color-bg) 70%, transparent);
-  color: var(--color-text);
+  top: var(--s-8);
+  right: var(--s-8);
   z-index: 1;
+}
+.xp-info::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--s-8));
 }
 .xp-best .xp-info,
 .xp-row .xp-info {
   top: 50%;
-  margin-top: calc(var(--ctl-h-sm) / -2);
+  margin-top: calc(var(--ctl-h-xs) / -2);
   background: transparent;
   color: var(--color-neutral-500);
 }

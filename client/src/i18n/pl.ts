@@ -1337,6 +1337,7 @@ export const pl: Strings = {
   muscleMapPlanned: 'zaplanowane',
   muscleMapOver: 'ponad limit tygodnia',
   muscleMapNearLimit: 'blisko limitu',
+  muscleMapSettles: (d: number) => `opadnie za ~${d} dn.`,
   sessionCoachButton: 'Dzisiejsza gotowość',
   sessionCoachTitle: 'Spojrzenie na dziś',
   moreLabel: 'więcej',

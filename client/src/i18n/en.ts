@@ -1325,6 +1325,7 @@ export const en = {
   muscleMapPlanned: 'planned today',
   muscleMapOver: 'over weekly limit',
   muscleMapNearLimit: 'near weekly limit',
+  muscleMapSettles: (d: number) => `eases in ~${d} d`,
   sessionCoachButton: 'Today’s readiness',
   sessionCoachTitle: 'Today’s read',
   moreLabel: 'more',

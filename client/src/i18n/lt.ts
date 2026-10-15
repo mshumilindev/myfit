@@ -1356,6 +1356,7 @@ export const lt: Strings = {
   muscleMapPlanned: 'suplanuota',
   muscleMapOver: 'viršija savaitės ribą',
   muscleMapNearLimit: 'prie ribos',
+  muscleMapSettles: (d: number) => `nuslūgs per ~${d} d.`,
   sessionCoachButton: 'Šiandienos pasirengimas',
   sessionCoachTitle: 'Šiandienos apžvalga',
   moreLabel: 'daugiau',

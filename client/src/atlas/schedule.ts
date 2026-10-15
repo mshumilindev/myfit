@@ -14,6 +14,7 @@ import type { Play } from '../playbook';
 import { playForWeekday } from '../playbook';
 import { isWeekEnd, skipNudgeHour, usualStartHour, weekNoteId } from './facts';
 import { planDayFor } from './plan';
+import { noteUrl } from './noteLink';
 import { say, type Fmt } from './voice';
 import type { CoachSettings, Temper } from './types';
 
@@ -85,7 +86,7 @@ export function planOutbox(p: OutboxInput): OutboxMessage[] {
         { locale: p.locale, fmt: p.fmt, yoMama: p.coach.yoMama },
       ),
       tag: 'atlas-skipped',
-      url: '/#/coach',
+      url: noteUrl(`skipped:${key}`),
       noteId: `skipped:${key}`,
     });
   }
@@ -103,7 +104,7 @@ export function planOutbox(p: OutboxInput): OutboxMessage[] {
       title: p.title,
       body: p.reviewBody,
       tag: 'atlas-review',
-      url: '/#/coach',
+      url: noteUrl(weekNoteId(review)),
       noteId: weekNoteId(review),
     });
     break;
@@ -213,7 +214,7 @@ export function planNotePushes(p: {
         title: p.title,
         body: n.text,
         tag: `atlas-${n.kind}`,
-        url: '/#/coach',
+        url: noteUrl(n.id),
       });
     }
   }
