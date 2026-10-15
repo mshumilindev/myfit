@@ -91,3 +91,5 @@ npm run build-storybook  # статичний каталог
 - [architecture.mdc](./architecture.mdc) — i18n: жодних рядкових літералів у UI
 - [quality-gate.mdc](./quality-gate.mdc) — гейт перед push
 - [test-integrity.mdc](./test-integrity.mdc) — селектори змінюються, перевірки — ні
+
+- Chat frame room (gutters, composer padding, widths, gaps) is set only in `ChatShell.css` / `ChatComposer.css`; a chat never sets padding/margin/gap/width/inset on `.chs*` / `.uicomp*` (guard: `chatFrame.guard.test.ts`, geometry: `npm run audit:chat`).

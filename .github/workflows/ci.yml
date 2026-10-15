@@ -61,3 +61,22 @@ jobs:
             sleep 0.5
           done
           BASE=http://localhost:4499 node scripts/smoke.mjs
+
+  layout:
+    name: Layout audit (Storybook geometry)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build-storybook
+      - name: Serve the built Storybook
+        run: |
+          npx --yes http-server client/storybook-static -p 6006 -s >/dev/null 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:6006/index.json >/dev/null && break; sleep 1; done
+      - name: Chat frame geometry (trainer / client / Atlas; 320-1440; 5 locales)
+        run: npm run audit:chat -- --url http://127.0.0.1:6006

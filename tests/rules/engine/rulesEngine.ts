@@ -475,7 +475,7 @@ export const ts = (ms: number): Ts => new Ts(ms);
 class Dur {
   constructor(public ms: number) {}
 }
-type NsName = 'duration' | 'timestamp';
+type NsName = 'duration' | 'timestamp' | 'firestore';
 class Namespace {
   constructor(public name: NsName) {}
 }

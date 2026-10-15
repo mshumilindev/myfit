@@ -84,7 +84,11 @@ const probe = () => {
   return found.slice(0, 6);
 };
 
-const browser = await chromium.launch();
+const browser = await chromium.launch(
+  process.env.CHROMIUM_PATH
+    ? { executablePath: process.env.CHROMIUM_PATH, args: ['--no-sandbox'] }
+    : {},
+);
 const report = [];
 for (const w of widths) {
   for (const f of fonts) {

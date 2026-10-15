@@ -389,6 +389,7 @@ Status of the whole dashboard (real vs fixtures, how to run every check, known g
 - Every dialog and sheet has a name: `Dialog` is `aria-labelledby` its title; pass `label` to `Sheet`. A menu holds only menu items (`Notice role="none"` inside `ActionMenu`).
 - Heading levels: kit panels use `h2` (`ResponsivePanel`, `RequestCard`, `StageBoard`); `EmptyState` takes `titleAs` (default `h4` for Gym, Coach screens pass `h2`).
 - `role="log"` goes on a `div` that contains the `ol` (chat thread, trainer and client).
+- Chat frame room (gutters, composer padding, widths, gaps) belongs to `ChatShell.css` / `ChatComposer.css` only. A chat (Atlas, trainer, client, dock) sets colours and its own inner parts, never padding / margin / gap / width / inset on `.chs*` / `.uicomp*`. Guard: `chatFrame.guard.test.ts`; geometry: `npm run audit:chat` on the Atlas / client / trainer chat stories (320 / 390 / 768 / 1440).
 - The Coach shell puts its skip link in its own `nav` landmark; the client trainer pages (`#/trainer…`, `#/invite…`) sit in a `main` (`display: contents`).
 - `ScrollTabs` sets `aria-controls` only on the selected tab (its panel is the only one rendered).
 
