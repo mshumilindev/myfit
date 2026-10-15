@@ -26,6 +26,15 @@ export interface Kv {
   del(path: string): Promise<void>;
   /** documents of ONE collection path */
   list(collection: string, q?: Query): Promise<Row[]>;
+  /**
+   * Server-side aggregate over ONE collection path (`where` only): how many documents match and the sum of `sumField`
+   * over the matching ones (documents where it is not a number add nothing). Cheap: no document is transferred.
+   */
+  aggregate(
+    collection: string,
+    q?: Pick<Query, 'where'>,
+    sumField?: string,
+  ): Promise<{ count: number; sum: number }>;
   /** collection group: every collection with this id, any depth */
   group(collectionId: string, q?: Query): Promise<Row[]>;
   /** all-or-nothing section; reads inside see a consistent view */

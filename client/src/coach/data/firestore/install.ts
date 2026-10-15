@@ -57,6 +57,7 @@ import type { ExtrasCatalog } from './shareExtras';
 import { createServerSigningLoader, createSignerDirectory } from './trust';
 import { createFirestoreWorldPort } from './worldPort';
 import { worldCacheOver } from './worldCache';
+import { deltaCacheOver } from './deltaCache';
 import { clientCacheOver } from './clientCache';
 
 type Signer = () => Promise<Pick<SigningKey, 'kid' | 'privateKey'> | null>;
@@ -180,6 +181,7 @@ export function installFirestoreCoach(d: InstallDeps): () => void {
     trainer: d.trainer,
     loadOwnCoachKey: d.loadOwnCoachKey,
     cache: worldCacheOver(getSealedLocal(), d.trainer.id),
+    deltaCache: (clientId) => deltaCacheOver(getSealedLocal(), d.trainer.id, clientId),
     schedule: async () => {
       await book.ready();
       return firstSchedule(schedule);

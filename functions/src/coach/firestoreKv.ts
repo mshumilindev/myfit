@@ -4,6 +4,7 @@
  * code stays free to interleave reads and writes.
  */
 import {
+  AggregateField,
   FieldPath,
   type Firestore,
   type Query as FsQuery,
@@ -27,6 +28,16 @@ function applyQuery(base: FsQuery, q?: Query): FsQuery {
   if (q?.limit) out = out.limit(q.limit);
   return out;
 }
+
+const aggregateOf = (base: FsQuery, sumField?: string) =>
+  base.aggregate({
+    count: AggregateField.count(),
+    ...(sumField ? { sum: AggregateField.sum(sumField) } : {}),
+  });
+const aggregateResult = (d: { count: number; sum?: number | null }) => ({
+  count: d.count,
+  sum: Number(d.sum ?? 0),
+});
 
 export function firestoreKv(db: Firestore): Kv {
   const rows = (snap: FirebaseFirestore.QuerySnapshot): Row[] =>
@@ -52,6 +63,10 @@ export function firestoreKv(db: Firestore): Kv {
     async group(id, q) {
       return rows(await applyQuery(db.collectionGroup(id), q).get());
     },
+    async aggregate(coll, q, sumField) {
+      const snap = await aggregateOf(applyQuery(db.collection(coll), q), sumField).get();
+      return aggregateResult(snap.data());
+    },
     async tx<T>(fn: (kv: Kv) => Promise<T>): Promise<T> {
       return db.runTransaction(async (tx: Transaction) => {
         const writes: Write[] = [];
@@ -74,6 +89,10 @@ export function firestoreKv(db: Firestore): Kv {
           },
           async group(id, q) {
             return rows(await tx.get(applyQuery(db.collectionGroup(id), q)));
+          },
+          async aggregate(coll, q, sumField) {
+            const snap = await tx.get(aggregateOf(applyQuery(db.collection(coll), q), sumField));
+            return aggregateResult(snap.data());
           },
           tx: (inner) => inner(kv), // already inside a transaction
         };

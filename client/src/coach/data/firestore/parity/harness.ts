@@ -87,6 +87,16 @@ export function kvOver(fs: MemoryFs, journal?: Map<string, Raw | null>): Kv {
     async list(coll, q) {
       return applyQuery(await rowsOf((p) => parent(p) === coll), q);
     },
+    async aggregate(coll, q, sumField) {
+      const rows = applyQuery(await rowsOf((p) => parent(p) === coll), { where: q?.where });
+      const sum = sumField
+        ? rows.reduce((a, r) => {
+            const x = getPath(r.data, sumField);
+            return typeof x === 'number' && Number.isFinite(x) ? a + x : a;
+          }, 0)
+        : 0;
+      return { count: rows.length, sum };
+    },
     async group(id, q) {
       return applyQuery(
         await rowsOf(

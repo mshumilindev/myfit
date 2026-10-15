@@ -657,8 +657,18 @@ export interface CategoryResult {
    * trainer's device with the client's grant; never returned below the level that earns it.
    */
   extras?: Doc[];
+  /**
+   * Only when the caller sent `changedSince` for a workout-based category (totals, sets): `true` = `docs` holds ONLY the
+   * workouts changed since then and `token` describes the whole window; `false` = `docs`/`view` is the ordinary full
+   * answer (the server could not prove a delta is safe). Absent for callers that did not ask.
+   */
+  delta?: boolean;
+  /** delta only: how many workouts the full read would cover and the sum of their `updatedAt` (integrity check) */
+  token?: { count: number; sum: number };
 }
 
+const TOTALS_LIMIT = 400;
+const SETS_LIMIT = 200;
 const WORKOUT_OPEN = ['id', 'startedAt', 'finishedAt', 'stats', 'autoFinished'] as const;
 const pick = (d: Doc, keys: readonly string[]): Doc =>
   Object.fromEntries(keys.filter((k) => k in d).map((k) => [k, d[k]]));
@@ -668,23 +678,66 @@ const weekStart = (at: number): number => {
   return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - day);
 };
 
+/**
+ * The workouts changed since `changedSince`, plus a token for the whole window, or null when a delta cannot be proven
+ * safe (then the caller does the ordinary full read). Safe means: every workout has a numeric `startedAt` AND a numeric
+ * `updatedAt` (nothing can be silently skipped) and the whole collection fits the window of the full read (nothing is
+ * cut off by its limit). The three counts and the sum are single-field aggregates: no composite index.
+ */
+async function workoutDelta(
+  kv: Kv,
+  clientId: string,
+  changedSince: number,
+  limit: number,
+): Promise<{ docs: Doc[]; token: { count: number; sum: number } } | null> {
+  const coll = `users/${clientId}/workouts`;
+  const [all, started, stamped] = await Promise.all([
+    kv.aggregate(coll),
+    kv.aggregate(coll, { where: [['startedAt', '>=', 0]] }),
+    kv.aggregate(coll, { where: [['updatedAt', '>=', 0]] }, 'updatedAt'),
+  ]);
+  if (all.count !== started.count || all.count !== stamped.count || all.count > limit) return null;
+  const rows = await kv.list(coll, {
+    where: [['updatedAt', '>=', changedSince]],
+    orderBy: ['updatedAt', 'asc'],
+    limit: limit + 1,
+  });
+  if (rows.length > limit) return null;
+  return {
+    docs: rows.map((r) => ({ id: r.id, ...r.data })),
+    token: { count: stamped.count, sum: stamped.sum },
+  };
+}
+
 async function readCategory(
   kv: Kv,
   clientId: string,
   cat: Category,
   level: 'effects' | 'full',
   since: number,
-): Promise<Pick<CategoryResult, 'docs' | 'view' | 'extras'>> {
+  changedSince: number | null = null,
+): Promise<Pick<CategoryResult, 'docs' | 'view' | 'extras' | 'delta' | 'token'>> {
   const share = async () => {
     const s = await kv.get(`users/${clientId}/shares/${cat}`);
     return s ? [s] : [];
   };
+  // delta only for the plain whole-history read (`since` would narrow the window) at `full` (below it the answer is a
+  // small derived view / share that is always sent whole)
+  const delta =
+    changedSince !== null && since === 0 && level === 'full' && (cat === 'totals' || cat === 'sets')
+      ? await workoutDelta(kv, clientId, changedSince, cat === 'totals' ? TOTALS_LIMIT : SETS_LIMIT)
+      : null;
   if (cat === 'totals') {
+    if (delta) {
+      // open fields only, plus `updatedAt` (also open) so the device can check the token; the device strips it again
+      const docs = delta.docs.map((d) => pick(d, [...WORKOUT_OPEN, 'updatedAt']));
+      return { docs, extras: await share(), delta: true, token: delta.token };
+    }
     // open fields only: never `exercises` / `enc` (R-BE-CON-3)
     const rows = await kv.list(`users/${clientId}/workouts`, {
       where: [['startedAt', '>=', since]],
       orderBy: ['startedAt', 'desc'],
-      limit: 400,
+      limit: TOTALS_LIMIT,
     });
     const open = rows.map((r) => pick({ id: r.id, ...r.data }, WORKOUT_OPEN));
     if (level === 'full') return { docs: open, extras: await share() };
@@ -711,10 +764,11 @@ async function readCategory(
   }
   if (level === 'effects') return { docs: await share() };
   if (cat === 'sets') {
+    if (delta) return { docs: delta.docs, delta: true, token: delta.token };
     const rows = await kv.list(`users/${clientId}/workouts`, {
       where: [['startedAt', '>=', since]],
       orderBy: ['startedAt', 'desc'],
-      limit: 200,
+      limit: SETS_LIMIT,
     });
     return { docs: rows.map((r) => ({ id: r.id, ...r.data })) }; // sealed: the trainer opens them with the grant
   }
@@ -783,6 +837,13 @@ export async function coachRead(ctx: Ctx, actor: Actor, body: Record<string, unk
   const wanted = [...new Set(cats as Category[])];
   const via = parseVia(body.via, 'client360');
   const since = typeof body.since === 'number' && Number.isFinite(body.since) ? body.since : 0;
+  // delta read (totals / sets only): ms epoch; anything else is simply not a delta request
+  const changedSince =
+    typeof body.changedSince === 'number' &&
+    Number.isFinite(body.changedSince) &&
+    body.changedSince >= 0
+      ? Math.floor(body.changedSince)
+      : null;
   const now = ctx.now();
   const kv = ctx.kv;
   const c = await loadCoaching(kv, clientId);
@@ -795,8 +856,15 @@ export async function coachRead(ctx: Ctx, actor: Actor, body: Record<string, unk
       results[cat] = { state: g.state };
       continue;
     }
-    const data = await readCategory(kv, clientId, cat, g.level, since);
-    results[cat] = { state: 'ok', level: g.level, asOf: now, ...data };
+    const data = await readCategory(kv, clientId, cat, g.level, since, changedSince);
+    const asked = changedSince !== null && (cat === 'totals' || cat === 'sets');
+    results[cat] = {
+      state: 'ok',
+      level: g.level,
+      asOf: now,
+      ...data,
+      ...(asked ? { delta: !!data.delta } : {}),
+    };
     await kv.tx((t) =>
       writeAudit(t, { reader: actor, subject: clientId, cat, level: g.level, via, now }),
     );
