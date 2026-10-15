@@ -16,6 +16,7 @@ import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { Notice } from '../components/ui/Notice';
 import { Chip } from '../components/ui/Chip';
 import { callFn } from '../api';
+import { offlineRevalidate } from '../offline/offlineCache';
 import type { Workout } from '../types';
 import { muscleInfoByName } from '../data/exercises';
 import { fmtDayMonth, fmtKg, useT } from '../i18n';
@@ -44,14 +45,17 @@ export function ExerciseHistoryView({
   const fkey = `${userId ?? ''}\u0000${name}`;
   useEffect(() => {
     if (!userId) return;
-    let alive = true;
     const key = `${userId}\u0000${name}`;
-    callFn<{ workouts: Workout[] }>('athleteExerciseHistory', { id: userId, name })
-      .then((r) => alive && setFetched({ key, workouts: r.workouts }))
-      .catch(() => alive && setFetched({ key, workouts: [] }));
-    return () => {
-      alive = false;
-    };
+    // Offline-first: the last good history (sealed on this device) first, then the network; one request per athlete+lift.
+    return offlineRevalidate<Workout[]>({
+      key: `athleteExerciseHistory.${key}`,
+      accept: Array.isArray,
+      fetch: async () =>
+        (await callFn<{ workouts: Workout[] }>('athleteExerciseHistory', { id: userId, name }))
+          .workouts,
+      apply: (workouts) => setFetched({ key, workouts }),
+      onError: () => setFetched((cur) => (cur && cur.key === key ? cur : { key, workouts: [] })),
+    });
   }, [userId, name]);
 
   const source = userId

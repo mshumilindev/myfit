@@ -9,7 +9,8 @@ import { Card } from '../components/ui/Card';
 import { ListRow } from '../components/ui/GroupedList';
 import { Segmented } from '../components/ui/Segmented';
 import { tokenMatch } from '../search';
-import { cachePeek, cacheSet, callFn, getUsername } from '../api';
+import { callFn, getUsername } from '../api';
+import { offlineHydrate, offlineLoad, offlinePeekNow } from '../offline/offlineCache';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { fullPersonName } from '../name';
 import { Dialog, Icon, Sheet } from '../ui';
@@ -52,9 +53,13 @@ function inviteLink(token: string): string {
 
 export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => void }) {
   const { t, locale } = useT();
-  const cachedPeople = cachePeek<Person[]>('adminPeople');
-  const [people, setPeople] = useState<Person[]>(cachedPeople?.data ?? []);
-  const [load, setLoad] = useState<Load>(cachedPeople ? 'ready' : 'loading');
+  // this session's copy paints at once; after a restart the sealed snapshot lands a moment later (see the effect)
+  const [people, setPeople] = useState<Person[]>(
+    () => offlinePeekNow<Person[]>('adminPeople')?.data ?? [],
+  );
+  const [load, setLoad] = useState<Load>(() =>
+    offlinePeekNow('adminPeople') ? 'ready' : 'loading',
+  );
   const [filter, setFilter] = useState<Filter>('all');
   const [q, setQ] = useState('');
   const [creating, setCreating] = useState<null | 'member' | 'trainer'>(null);
@@ -71,11 +76,16 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
   const [now, setNow] = useState(() => Date.now());
   const [online, setOnline] = useState(() => navigator.onLine);
 
-  const refresh = useCallback(() => {
-    callFn<{ people: Person[] }>('adminPeople')
-      .then((d) => {
-        cacheSet('adminPeople', d.people);
-        setPeople(d.people);
+  // `force`: after a change, never reuse a request that started before it (mount and the poll may share one)
+  const refresh = useCallback((force = true) => {
+    // one request at a time (the profile screen shares it); the answer also replaces the sealed snapshot
+    offlineLoad(
+      'adminPeople',
+      async () => (await callFn<{ people: Person[] }>('adminPeople')).people,
+      { force },
+    )
+      .then((list) => {
+        setPeople(list);
         setLoad('ready');
       })
       .catch(() => setLoad((s) => (s === 'loading' ? 'failed' : s)));
@@ -85,14 +95,23 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
   // while the tab is hidden (no point spending calls on a roster nobody's
   // looking at) and fires once on return to foreground.
   useEffect(() => {
-    refresh();
+    // Offline-first: the last good list first, only if nothing newer arrived; never awaited.
+    void offlineHydrate<Person[]>(
+      'adminPeople',
+      (list) => {
+        setPeople(list);
+        setLoad((s) => (s === 'loading' || s === 'failed' ? 'ready' : s));
+      },
+      { accept: Array.isArray },
+    );
+    refresh(false);
     const iv = setInterval(() => {
       if (document.hidden) return;
-      refresh();
+      refresh(false);
       setNow(Date.now());
     }, 15_000);
     const onVis = () => {
-      if (!document.hidden) refresh();
+      if (!document.hidden) refresh(false);
     };
     document.addEventListener('visibilitychange', onVis);
     const tick = setInterval(() => setNow(Date.now()), 1000);

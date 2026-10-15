@@ -86,6 +86,9 @@ export const defaultWipe = async (cid: string) => {
     // the snapshots hold the other side's data (a client's numbers, a trainer's name): they go with the relationship
     for (const k of [...(await local.keys('world:')), ...(await local.keys('client:'))])
       await local.remove(k);
+    // the offline Gym snapshots (rosters, profiles, history) may hold the other side's data as well
+    const { wipeOfflineEntries } = await import('../../../offline/offlineCache');
+    await wipeOfflineEntries();
   } catch {
     /* nothing cached */
   }

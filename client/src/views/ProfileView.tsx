@@ -13,17 +13,15 @@ import { temperIndex } from '../atlas/types';
 import { useEffect, useState, type ReactNode } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { deleteObject, ref } from 'firebase/storage';
+import { HttpError, callFn, currentUid, setUsername, trackMutation } from '../api';
 import {
-  HttpError,
-  cacheDelete,
-  cacheFresh,
-  cachePeek,
-  cacheSet,
-  callFn,
-  currentUid,
-  setUsername,
-  trackMutation,
-} from '../api';
+  offlineHydrate,
+  offlineLoad,
+  offlinePeekNow,
+  offlineRemove,
+  offlineRevalidate,
+  offlineSet,
+} from '../offline/offlineCache';
 import { fetchProfile } from '../profileFetch';
 import { PrivacyVault } from '../components/PrivacyVault';
 import { ConditionsProfileRow } from './health/Conditions';
@@ -143,8 +141,9 @@ export function ProfileView({
   const exName = useExerciseName();
   const { weightUnit, coach } = useStore();
   const weekStart = useWeekStartDay();
+  // This session's copy paints on the first render; after a restart the sealed snapshot lands a moment later (effect).
   const [loaded, setLoaded] = useState<{ userId: string; value: Load }>(() => {
-    const cached = cachePeek<ProfileData>(`profile.${userId}`);
+    const cached = offlinePeekNow<ProfileData>(`profile.${userId}`);
     return { userId, value: cached ? cached.data : 'loading' };
   });
   const [editFirstName, setEditFirstName] = useState('');
@@ -165,14 +164,14 @@ export function ProfileView({
   const [assignTrainerOpen, setAssignTrainerOpen] = useState(false);
   const [assignClientsOpen, setAssignClientsOpen] = useState(false);
   const [adminPeople, setAdminPeople] = useState<AdminPerson[] | null>(
-    () => cachePeek<AdminPerson[]>('adminPeople')?.data ?? null,
+    () => offlinePeekNow<AdminPerson[]>('adminPeople')?.data ?? null,
   );
   // While the fetch for a newly-opened profile is in flight, fall back to any
   // cached copy so the page paints instantly instead of flashing a skeleton.
   const load: Load =
     loaded.userId === userId
       ? loaded.value
-      : (cachePeek<ProfileData>(`profile.${userId}`)?.data ?? 'loading');
+      : (offlinePeekNow<ProfileData>(`profile.${userId}`)?.data ?? 'loading');
   const isSelf = typeof load === 'object' && load.viewer.relation === 'self';
   const isTrainerView = typeof load === 'object' && load.viewer.relation === 'trainer';
   const canEditDetails =
@@ -180,58 +179,60 @@ export function ProfileView({
     (load.viewer.relation === 'self' || load.viewer.relation === 'admin');
   const canAdminManage = typeof load === 'object' && load.viewer.role === 'admin';
 
+  // the admin roster behind the assign sheets: from the sealed snapshot after a restart, never awaited
   useEffect(() => {
-    let alive = true;
-    const cacheKey = `profile.${userId}`;
-    const cached = cachePeek<ProfileData>(cacheKey);
-    // The render already shows the cached copy (see `load` above). Serve it and
-    // skip the call when it's still fresh — a navigate-away-and-back within the
-    // window costs nothing (AC: fewer reads).
-    if (cacheFresh(cached, PROFILE_TTL_MS)) {
-      // Seed the edit fields from the cached copy too — otherwise a fresh cache
-      // left the name / username inputs empty. Deferred a tick (same as the
-      // network path) so the effect itself never sets state synchronously.
-      const data = cached!.data;
+    if (!canAdminManage) return;
+    void offlineHydrate<AdminPerson[]>(
+      'adminPeople',
+      (list) => setAdminPeople((cur) => cur ?? list),
+      {
+        accept: Array.isArray,
+      },
+    );
+  }, [canAdminManage]);
+
+  useEffect(() => {
+    const seedFields = (data: ProfileData) => {
       if (data.viewer.relation === 'self' || data.viewer.relation === 'admin') {
-        const id = window.setTimeout(() => {
-          if (!alive) return;
-          setEditFirstName(data.person.firstName);
-          setEditLastName(data.person.lastName ?? '');
-          setEditUsername(data.person.username);
-        }, 0);
-        return () => {
-          alive = false;
-          window.clearTimeout(id);
-        };
+        setEditFirstName(data.person.firstName);
+        setEditLastName(data.person.lastName ?? '');
+        setEditUsername(data.person.username);
       }
-      return;
-    }
-    fetchProfile<ProfileData>(userId)
-      .then((data) => {
-        cacheSet(cacheKey, data);
-        if (alive) setLoaded({ userId, value: data });
-        if (alive && (data.viewer.relation === 'self' || data.viewer.relation === 'admin')) {
-          setEditFirstName(data.person.firstName);
-          setEditLastName(data.person.lastName ?? '');
-          setEditUsername(data.person.username);
-        }
-      })
-      .catch((e) => {
-        if (!alive) return;
-        if (e instanceof HttpError && e.status === 403) setLoaded({ userId, value: 'denied' });
-        else if (e instanceof HttpError && e.status === 404)
-          setLoaded({ userId, value: 'missing' });
-        else setLoaded({ userId, value: 'failed' });
-      });
-    return () => {
-      alive = false;
     };
+    // Offline-first: the last good copy (sealed on this device) paints first and never overrides a newer answer; a
+    // snapshot younger than the TTL skips the call. A failed refresh keeps what is shown (offline stays usable).
+    return offlineRevalidate<ProfileData>({
+      key: `profile.${userId}`,
+      ttlMs: PROFILE_TTL_MS,
+      accept: (d) => !!d && typeof d === 'object' && !!d.person && !!d.viewer,
+      fetch: () => fetchProfile<ProfileData>(userId),
+      apply: (data, source) => {
+        setLoaded((cur) =>
+          source === 'cache' && cur.userId === userId && typeof cur.value === 'object'
+            ? cur
+            : { userId, value: data },
+        );
+        seedFields(data);
+      },
+      onError: (e) => {
+        if (e instanceof HttpError && (e.status === 403 || e.status === 404)) {
+          void offlineRemove(`profile.${userId}`); // access gone / person gone: nothing to show offline either
+          setLoaded({ userId, value: e.status === 403 ? 'denied' : 'missing' });
+        } else {
+          setLoaded((cur) =>
+            cur.userId === userId && typeof cur.value === 'object'
+              ? cur
+              : { userId, value: 'failed' },
+          );
+        }
+      },
+    });
   }, [userId]);
 
   // Persist fresh profile data to state + cache together, so an edit keeps the
   // cache current (no stale re-read on the next open).
   const commitProfile = (value: ProfileData) => {
-    cacheSet(`profile.${userId}`, value);
+    void offlineSet(`profile.${userId}`, value);
     setLoaded({ userId, value });
   };
 
@@ -243,10 +244,13 @@ export function ProfileView({
 
   async function ensureAdminPeople(): Promise<AdminPerson[]> {
     if (adminPeople) return adminPeople;
-    const d = await callFn<{ people: AdminPerson[] }>('adminPeople');
-    cacheSet('adminPeople', d.people);
-    setAdminPeople(d.people);
-    return d.people;
+    const people = await offlineLoad(
+      'adminPeople',
+      async () => (await callFn<{ people: AdminPerson[] }>('adminPeople')).people,
+      { force: true },
+    );
+    setAdminPeople(people);
+    return people;
   }
 
   function resetProfileFields(data: ProfileData) {
@@ -1018,7 +1022,7 @@ export function ProfileView({
           onClose={() => setAssignTrainerOpen(false)}
           onDone={async () => {
             setAssignTrainerOpen(false);
-            cacheDelete('adminPeople');
+            void offlineRemove('adminPeople');
             setAdminPeople(null);
             await refreshProfile();
             shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileSaved });
@@ -1032,7 +1036,7 @@ export function ProfileView({
           onClose={() => setAssignClientsOpen(false)}
           onDone={async () => {
             setAssignClientsOpen(false);
-            cacheDelete('adminPeople');
+            void offlineRemove('adminPeople');
             setAdminPeople(null);
             await refreshProfile();
             shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileSaved });

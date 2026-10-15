@@ -16,11 +16,13 @@ import { ListRow } from '../components/ui/GroupedList';
 import { collection, documentId, getDocs, query, where } from 'firebase/firestore';
 import { callFn, currentUid, getRole, getUsername, trackMutation } from '../api';
 import { db } from '../firebase';
+import { offlineHydrate, offlineDedupe, offlineRevalidate } from '../offline/offlineCache';
 import { useT } from '../i18n';
 import type { Shell } from '../App';
 import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
 import { Avatar } from '../components/Avatar';
 import { clearProgramSeed, peekProgramSeed } from '../data/programSeed';
+import { PROGRAM_NET_KEY } from '../data/programMine';
 import type { ProgramItemLike } from '../data/programCsv';
 import { knownExercises } from '../store';
 import { Icon } from '../ui';
@@ -49,6 +51,10 @@ import {
 import './programs/programs.css';
 
 type Open = { program: Program; saved: boolean; readOnly?: boolean };
+
+async function normalizeMine(a: ProgramAssignment): Promise<ProgramAssignment> {
+  return { ...a, program: normalizeProgram(await openActivities(a.program)) };
+}
 
 export function ProgramsView({
   shell,
@@ -140,38 +146,56 @@ export function ProgramsView({
       .catch(() => setFailed(true));
   }, []);
 
-  const loadMine = useCallback(() => {
-    callFn<{ assignment: ProgramAssignment | null }>('programMine')
+  // True once the network has answered: a sealed snapshot never overrides it.
+  const mineLive = useRef(false);
+  /** `force`: after a change (assign / unassign) never reuse a request that started before it. */
+  const loadMine = useCallback((force = true) => {
+    offlineDedupe(
+      PROGRAM_NET_KEY,
+      () => callFn<{ assignment: ProgramAssignment | null }>('programMine'),
+      { force },
+    )
       .then(async (data) => {
-        setMine(
-          data.assignment
-            ? {
-                ...data.assignment,
-                program: normalizeProgram(await openActivities(data.assignment.program)),
-              }
-            : null,
-        );
+        const next = data.assignment ? await normalizeMine(data.assignment) : null;
+        mineLive.current = true;
+        setMine(next);
       })
-      .catch(() => setMine(null))
+      // offline: keep the snapshot on screen; without one there is simply no program to show
+      .catch(() => undefined)
       .finally(() => setMineLoaded(true));
   }, []);
 
   useEffect(() => {
     loadPrograms();
-    loadMine();
+    // Offline-first: the last good assignment (sealed on this device) first, never awaited by the network read.
+    void offlineHydrate<ProgramAssignment>(
+      'programMine',
+      (a) => {
+        void normalizeMine(a).then((m) => {
+          if (mineLive.current) return;
+          setMine((cur) => cur ?? m);
+          setMineLoaded(true);
+        });
+      },
+      { isLive: () => mineLive.current },
+    );
+    loadMine(false);
   }, [loadPrograms, loadMine]);
 
   useEffect(() => {
     if (!isCoach) return;
-    callFn<{
-      people?: (Person & { role?: string })[];
-      clients?: Person[];
-    }>(role === 'admin' ? 'adminPeople' : 'trainerClients')
-      .then((data) => {
-        const rows = role === 'admin' ? (data.people ?? []) : (data.clients ?? []);
-        setPeople(rows.filter((c) => c.id && c.name));
-      })
-      .catch(() => setPeople([]));
+    type Reply = { people?: (Person & { role?: string })[]; clients?: Person[] };
+    // the same roster the Clients / Admin screens keep: one snapshot, one in-flight request
+    return offlineRevalidate<Person[]>({
+      key: role === 'admin' ? 'adminPeople' : 'trainerClients',
+      accept: Array.isArray,
+      fetch: async () => {
+        const data = await callFn<Reply>(role === 'admin' ? 'adminPeople' : 'trainerClients');
+        return (role === 'admin' ? data.people : data.clients) ?? [];
+      },
+      apply: (rows) => setPeople(rows.filter((c) => c.id && c.name)),
+      onError: () => setPeople((cur) => cur),
+    });
   }, [isCoach, role]);
 
   // Each client's current assignment (one per member, doc id = member id);

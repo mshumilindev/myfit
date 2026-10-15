@@ -148,6 +148,7 @@ import {
   duplicateSleepIds,
 } from './sleep';
 import { currentUid, getRole, callFn } from './api';
+import { readProgramMemory } from './data/programMemory';
 import { CONDITIONS_KEY, CONDITIONS_SHARE_KEY, createConditionsCache } from './conditionsCache';
 import { createAlcoholCache } from './alcoholCache';
 import { alcoholCoachView } from './alcoholShare';
@@ -1151,8 +1152,7 @@ interface CachedAssignment {
 }
 function readAssignment(): CachedAssignment | null {
   try {
-    const raw = localStorage.getItem('spotter.programMine');
-    return raw ? (JSON.parse(raw) as CachedAssignment) : null;
+    return readProgramMemory<CachedAssignment>(); // memory only: the on-device copy is the sealed snapshot
   } catch {
     return null;
   }

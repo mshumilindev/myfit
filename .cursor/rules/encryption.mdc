@@ -18,4 +18,7 @@ alwaysApply: true
 - Локальний кеш (localStorage): стани й налаштування доступу зберігаються запечатаними
   (`conditionsCache.ts`), відкритий текст лишається лише як запасний варіант, поки немає ключа.
   Нові чутливі дані в localStorage — лише через цей самий механізм.
+- Офлайн-знімки відповідей функцій (клієнти, профілі, програма, історія атлета) — лише запечатані в
+  `client/src/offline/` (`offlineRevalidate` / `offlineHydrate` / `offlineSet`): жодного відкритого тексту в
+  `localStorage`; старі `spotter.cache.*` і `spotter.programMine` видаляються при старті (`purgeLegacyPlaintext`).
 - Колекції коучингу (`NEW_COLLECTIONS`, `client/src/coachCrypto`): лише `sealOrThrow` / `openSealed` (кидає `vault-locked`, без plaintext-запасного варіанта), ніколи `prepareWrite`.

@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import type { Shell } from '../App';
 import type { Workout, Exercise, SetEntry, SetType } from '../types';
 import { callFn } from '../api';
+import { offlineRevalidate } from '../offline/offlineCache';
 import {
   sessionBlocks,
   groupRounds,
@@ -212,17 +213,21 @@ export function TraineeSessionView({
   >(null);
 
   useEffect(() => {
-    let alive = true;
-    callFn<{ workout: Workout }>('athleteWorkout', { id: athleteId, workoutId })
-      .then((r) => alive && setRes({ forId: workoutId, w: r.workout }))
-      .catch((e: unknown) =>
-        alive
-          ? setRes({ forId: workoutId, msg: (e as { message?: string }).message ?? String(e) })
-          : null,
-      );
-    return () => {
-      alive = false;
-    };
+    // Offline-first: the last good recap (sealed on this device) first, then the network; a failed refresh keeps it.
+    return offlineRevalidate<Workout>({
+      key: `athleteWorkout.${athleteId}.${workoutId}`,
+      accept: (w) => !!w && typeof w === 'object' && Array.isArray(w.exercises),
+      fetch: async () =>
+        (await callFn<{ workout: Workout }>('athleteWorkout', { id: athleteId, workoutId }))
+          .workout,
+      apply: (w) => setRes({ forId: workoutId, w }),
+      onError: (e) =>
+        setRes((cur) =>
+          cur && cur.forId === workoutId && 'w' in cur
+            ? cur
+            : { forId: workoutId, msg: (e as { message?: string }).message ?? String(e) },
+        ),
+    });
   }, [athleteId, workoutId]);
 
   const current = res && res.forId === workoutId ? res : null;

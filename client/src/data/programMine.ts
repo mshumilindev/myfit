@@ -1,13 +1,15 @@
 /**
  * The signed-in member's assigned program, shared by Today, the Start sheet and
- * the Overview tab. The assignment is cached in localStorage so every surface
- * paints instantly and only revalidates in the background (no cold fetch on
- * every visit); a draft program (status ≠ active) is hidden until activated.
+ * the Overview tab. The last good assignment is kept as a sealed on-device snapshot (nothing readable on disk) and
+ * seeded into memory right after start, so every surface paints without waiting for the network and only revalidates
+ * in the background; a draft program (status ≠ active) is hidden until activated.
  */
 import { useEffect, useSyncExternalStore } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { callFn } from '../api';
+import { offlineDedupe, offlineHydrate, offlineRemove, offlineSet } from '../offline/offlineCache';
+import { readProgramMemory, setProgramMemory } from './programMemory';
 import { addExercise, startWorkout } from '../store';
 import { openActivities } from '../views/programs/activitiesVault';
 import { nicMid } from '../nicotineApply';
@@ -65,7 +67,9 @@ export interface ProgramAssignment {
   adherence: number | null;
 }
 
-const PROGRAM_CACHE_KEY = 'spotter.programMine';
+const PROGRAM_CACHE_KEY = 'programMine';
+/** The raw network read (shared by every mount and by the Programs screen). */
+export const PROGRAM_NET_KEY = 'programMine.net';
 
 /**
  * A trainer layer put over the assigned program in memory (sealed targets, RPE, rest, cues, warm-up weights, planned
@@ -78,13 +82,9 @@ let rawAssignment: ProgramAssignment | null = null;
 const withOverlay = (a: ProgramAssignment | null): ProgramAssignment | null =>
   a && overlay ? { ...a, program: overlay(a.program) } : a;
 
+/** The assignment known in this session (hydrated from the sealed snapshot, then the network); sync, memory only. */
 export function readProgramCache(): ProgramAssignment | null {
-  try {
-    const raw = localStorage.getItem(PROGRAM_CACHE_KEY);
-    return withOverlay(raw ? (JSON.parse(raw) as ProgramAssignment) : null);
-  } catch {
-    return null;
-  }
+  return withOverlay(readProgramMemory<ProgramAssignment>());
 }
 
 function stripActivities(a: ProgramAssignment): ProgramAssignment {
@@ -95,13 +95,13 @@ function stripActivities(a: ProgramAssignment): ProgramAssignment {
 }
 
 function writeProgramCache(a: ProgramAssignment | null): void {
-  try {
-    if (a) localStorage.setItem(PROGRAM_CACHE_KEY, JSON.stringify(a));
-    else localStorage.removeItem(PROGRAM_CACHE_KEY);
-  } catch {
-    /* ignore */
-  }
+  setProgramMemory(a);
+  if (a) void offlineSet(PROGRAM_CACHE_KEY, a);
+  else void offlineRemove(PROGRAM_CACHE_KEY);
 }
+
+const acceptAssignment = (a: ProgramAssignment): boolean =>
+  !!a && typeof a === 'object' && !!a.program && Array.isArray(a.program.items);
 
 interface ProgramMineState {
   assignment: ProgramAssignment | null;
@@ -110,7 +110,7 @@ interface ProgramMineState {
 }
 
 let snapshot: ProgramMineState = { assignment: readProgramCache(), active: true };
-rawAssignment = snapshot.assignment;
+rawAssignment = readProgramMemory<ProgramAssignment>();
 const listeners = new Set<() => void>();
 let statusFor: string | null = null;
 
@@ -150,12 +150,37 @@ function checkStatus(a: ProgramAssignment | null): void {
     });
 }
 
-/** Re-fetch the assignment (keeps the cached one on a transient error). */
-export function refreshProgramMine(): void {
-  callFn<{ assignment: ProgramAssignment | null }>('programMine')
+/** Seed memory from the sealed snapshot after a start (once per page load), unless the network already answered. */
+let hydrated: Promise<boolean> | null = null;
+function hydrateProgramMine(): void {
+  hydrated ??= offlineHydrate<ProgramAssignment>(
+    PROGRAM_CACHE_KEY,
+    (a) => {
+      if (rawAssignment) return; // live data is already here
+      setProgramMemory(a);
+      rawAssignment = a;
+      emit({ ...snapshot, assignment: withOverlay(a) });
+      checkStatus(a);
+    },
+    { accept: acceptAssignment, isLive: () => rawAssignment !== null },
+  ).then((ok) => {
+    if (!ok) hydrated = null; // a miss (vault not ready yet, no snapshot) may be retried by the next mount
+    return ok;
+  });
+}
+
+/** Re-fetch the assignment (keeps the cached one on a transient error). `force`: after a change, skip a request already in flight. */
+export function refreshProgramMine(force = true): void {
+  offlineDedupe(
+    PROGRAM_NET_KEY,
+    () => callFn<{ assignment: ProgramAssignment | null }>('programMine'),
+    {
+      force,
+    },
+  )
     .then(async (data) => {
       // The planned activities are sealed user data: opened in memory only, never
-      // written to the localStorage cache.
+      // written to the on-device snapshot.
       const opened = data.assignment
         ? { ...data.assignment, program: await openActivities(data.assignment.program) }
         : null;
@@ -175,7 +200,8 @@ export function useProgramMine(): ProgramMineState {
   const state = useSyncExternalStore(subscribe, () => snapshot);
   useEffect(() => {
     checkStatus(snapshot.assignment);
-    refreshProgramMine();
+    hydrateProgramMine();
+    refreshProgramMine(false);
   }, []);
   return state;
 }

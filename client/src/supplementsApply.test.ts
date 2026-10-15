@@ -5,6 +5,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { __getStateForTests, __replaceStateForTests } from './store';
+import { setProgramMemory } from './data/programMemory';
 import {
   SUPPLEMENT_EFFECT_KEYS,
   SUPPLEMENT_NEUTRAL,
@@ -55,26 +56,24 @@ function setSup(
   });
 }
 const plan = (days: number[]) =>
-  localStorage.setItem(
-    'spotter.programMine',
-    JSON.stringify({
-      program: {
-        id: 'p1',
-        name: 'Plan',
-        weeks: 0,
-        daysPerWeek: days.length,
-        items: days.map((d, i) => ({
-          id: `i${i}`,
-          day: d,
-          position: 0,
-          name: 'Squat',
-          kind: 'strength',
-        })),
-      },
-    }),
-  );
+  setProgramMemory({
+    program: {
+      id: 'p1',
+      name: 'Plan',
+      weeks: 0,
+      daysPerWeek: days.length,
+      items: days.map((d, i) => ({
+        id: `i${i}`,
+        day: d,
+        position: 0,
+        name: 'Squat',
+        kind: 'strength',
+      })),
+    },
+  });
 
 beforeEach(() => {
+  setProgramMemory(null);
   try {
     localStorage.clear();
   } catch {

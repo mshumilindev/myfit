@@ -16,7 +16,9 @@
 export const FS_WIPE_FLAG = 'spotter.wipeFs';
 /** The IndexedDB databases that hold coach data (sealed chat store, device signer) and cached avatars. */
 export const COACH_IDB_NAMES = ['spotter.coach.chat', 'spotter.coach.sign', 'spotter-avatars'];
+/** The old PLAINTEXT read caches (callable reads, the assigned program). Nothing writes them any more; they are removed. */
 const CACHE_PREFIX = 'spotter.cache.';
+const LEGACY_PLAINTEXT_KEYS = ['spotter.programMine'];
 const COACH_LOCAL_KEYS = ['coach:last'];
 
 export interface WipeEnv {
@@ -125,9 +127,23 @@ export async function runPendingWipe(env: WipeEnv = browserEnv()): Promise<boole
   return true;
 }
 
-/** Local read caches that name clients: the callable cache and the last coach route. */
+/**
+ * Local read caches that name clients: the legacy plaintext callable cache and the last coach route. (The current offline
+ * snapshots are sealed, in the coach IndexedDB store: `wipeOfflineEntries` / the sign-out database delete remove them.)
+ */
 export function wipeCoachCaches(env: WipeEnv = browserEnv()): void {
-  removeKeys(env, (k) => k.startsWith(CACHE_PREFIX) || COACH_LOCAL_KEYS.includes(k));
+  removeKeys(
+    env,
+    (k) =>
+      k.startsWith(CACHE_PREFIX) ||
+      LEGACY_PLAINTEXT_KEYS.includes(k) ||
+      COACH_LOCAL_KEYS.includes(k),
+  );
+}
+
+/** First run after the offline layer became sealed: readable personal data left by older versions must not linger. */
+export function purgeLegacyPlaintext(env: WipeEnv = browserEnv()): void {
+  removeKeys(env, (k) => k.startsWith(CACHE_PREFIX) || LEGACY_PLAINTEXT_KEYS.includes(k));
 }
 
 const flagFirestoreWipe = (env: WipeEnv) => {

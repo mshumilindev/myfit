@@ -12,7 +12,7 @@ import { lockShellHeight } from './viewportFit';
 import { SyncStatusHost } from './components/SyncStatusHost';
 import { LavaBackground } from './components/LavaBackground';
 import { initMotion } from './motion';
-import { runPendingWipe } from './deviceWipe';
+import { purgeLegacyPlaintext, runPendingWipe } from './deviceWipe';
 import { AppCrashBoundary, installCrashRecovery } from './appCrash';
 
 document.documentElement.lang = getLocale();
@@ -30,6 +30,9 @@ if ('serviceWorker' in navigator) {
 }
 
 startBuildWatch();
+
+/* Older versions kept readable copies of callable reads in localStorage: remove them on the first run. */
+purgeLegacyPlaintext();
 
 /* A pending wipe of Firestore's offline cache (sign-out, relationship end) runs before the SDK opens its database. */
 /* The wipe must never keep the app from drawing: a hung IndexedDB call would leave a blank screen for good. */

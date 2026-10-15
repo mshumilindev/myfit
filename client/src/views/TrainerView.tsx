@@ -3,7 +3,8 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { useCallback, useEffect, useState } from 'react';
 import { Field } from '../components/ui/Field';
 import { Button } from '../components/ui/Button';
-import { cachePeek, cacheSet, callFn, currentUid, getUsername } from '../api';
+import { callFn, currentUid, getUsername } from '../api';
+import { offlineHydrate, offlineLoad, offlinePeekNow, offlineSet } from '../offline/offlineCache';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { fullPersonName } from '../name';
 import { Icon, Sheet } from '../ui';
@@ -38,8 +39,10 @@ export function TrainerView({
   onOpenMe: () => void;
 }) {
   const { t, locale } = useT();
-  const cachedClients = cachePeek<Client[]>('trainerClients');
-  const [clients, setClients] = useState<Client[] | null>(cachedClients?.data ?? null);
+  // this session's copy paints at once; after a restart the sealed snapshot lands a moment later (see the effect)
+  const [clients, setClients] = useState<Client[] | null>(
+    () => offlinePeekNow<Client[]>('trainerClients')?.data ?? null,
+  );
   const [failed, setFailed] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -50,11 +53,18 @@ export function TrainerView({
     expiresAt: number;
   } | null>(null);
 
-  const refresh = useCallback(() => {
-    callFn<{ clients: Client[] }>('trainerClients')
-      .then((d) => {
-        cacheSet('trainerClients', d.clients);
-        setClients(d.clients);
+  // One request at a time (Today's roster block shares it); `force` after a change so a stale in-flight answer is not reused.
+  const refresh = useCallback((force = false) => {
+    offlineLoad(
+      'trainerClients',
+      async () => (await callFn<{ clients: Client[] }>('trainerClients')).clients,
+      {
+        force,
+      },
+    )
+      .then((list) => {
+        setFailed(false);
+        setClients(list);
       })
       .catch(() => setFailed(true));
   }, []);
@@ -62,6 +72,10 @@ export function TrainerView({
   // AC-TRAINER-06: live sessions update without manual refresh. Pause the poll
   // while the tab is hidden and refetch once on return to foreground.
   useEffect(() => {
+    // Offline-first: the last good list (sealed on this device) first, only if nothing newer arrived; never awaited.
+    void offlineHydrate<Client[]>('trainerClients', (list) => setClients((cur) => cur ?? list), {
+      accept: Array.isArray,
+    });
     refresh();
     const iv = setInterval(() => {
       if (!document.hidden) refresh();
@@ -98,9 +112,9 @@ export function TrainerView({
       </div>
 
       {clients === null && !failed && <RowListSkeleton rows={4} withMeta={false} />}
-      {failed && (
+      {failed && clients === null && (
         <EmptyState icon="warning-circle" title={t.error}>
-          <Button variant="secondary" onClick={refresh}>
+          <Button variant="secondary" onClick={() => refresh()}>
             {t.retry}
           </Button>
         </EmptyState>
@@ -293,11 +307,11 @@ export function TrainerView({
           onClose={() => setCreating(false)}
           onCreated={(client, token, expiresAt) => {
             const next = [...(clients ?? []), client];
-            cacheSet('trainerClients', next);
+            void offlineSet('trainerClients', next);
             setClients(next);
             setCreating(false);
             setLinkFor({ client, token, expiresAt });
-            refresh();
+            refresh(true);
           }}
         />
       )}

@@ -1,10 +1,11 @@
 /**
  * "Who is my trainer" for Today (the `profileMe` call): name + photo only.
- * Cached like the roster — paints instantly from localStorage, skips the
- * network while fresh, and re-renders only when the payload changed.
+ * Offline-first like the roster — the last answer paints from the sealed on-device snapshot (nothing readable on disk),
+ * the network is skipped while it is fresh, and the screen re-renders only when the payload changed.
  */
-import { useCallback, useEffect, useState } from 'react';
-import { cacheFresh, cachePeek, cacheSet, callFn } from '../api';
+import { useEffect, useState } from 'react';
+import { callFn } from '../api';
+import { offlinePeekNow, offlineRevalidate } from '../offline/offlineCache';
 
 export interface MyTrainer {
   id: string;
@@ -31,31 +32,28 @@ export function trainerFromReply(d: ProfileMeReply): MyTrainer | null {
   return a ? { id: a.id, name: a.name, avatar: false } : null;
 }
 
+const SPEC = { accept: (v: Cached) => v === false || (!!v && typeof v === 'object' && 'id' in v) };
+const same = (a: MyTrainer | null, b: MyTrainer | null) => JSON.stringify(a) === JSON.stringify(b);
+
 /** My trainer, or null while unknown / when I have none. `enabled: false` never
  *  touches the network (trainers and admins have no trainer of their own). */
 export function useMyTrainer(enabled: boolean): MyTrainer | null {
-  const [trainer, setTrainer] = useState<MyTrainer | null>(() => {
-    const c = cachePeek<Cached>(CACHE_KEY)?.data;
-    return c || null;
-  });
-
-  const refresh = useCallback(() => {
-    if (cacheFresh(cachePeek<Cached>(CACHE_KEY), TTL_MS)) return;
-    callFn<ProfileMeReply>('profileMe')
-      .then((d) => {
-        const next = trainerFromReply(d);
-        const prev = cachePeek<Cached>(CACHE_KEY)?.data || null;
-        cacheSet<Cached>(CACHE_KEY, next ?? false);
-        if (JSON.stringify(prev) !== JSON.stringify(next)) setTrainer(next);
-      })
-      .catch(() => {
-        /* keep whatever is cached */
-      });
-  }, []);
+  // this session's copy paints on the very first render; the sealed snapshot lands a moment later
+  const [trainer, setTrainer] = useState<MyTrainer | null>(
+    () => offlinePeekNow<Cached>(CACHE_KEY)?.data || null,
+  );
 
   useEffect(() => {
-    if (enabled) refresh();
-  }, [enabled, refresh]);
+    if (!enabled) return;
+    return offlineRevalidate<Cached>({
+      key: CACHE_KEY,
+      ttlMs: TTL_MS,
+      ...SPEC,
+      fetch: async () => trainerFromReply(await callFn<ProfileMeReply>('profileMe')) ?? false,
+      // keep whatever is shown on an error; a snapshot never overrides what the network already said
+      apply: (v) => setTrainer((cur) => (same(cur, v || null) ? cur : v || null)),
+    });
+  }, [enabled]);
 
   return enabled ? trainer : null;
 }
