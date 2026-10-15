@@ -39,7 +39,7 @@ const probe = () => {
     // a wrapper of title + sub line is measured by its heading, so the sub line doesn't skew the axis.
     const first = kids.find((k) => /\S/.test(k.textContent)) ?? null;
     const spans = first && first.getBoundingClientRect().width >= rr.width * 0.95;
-    const title = spans ? null : (first?.querySelector('h1, h2, h3, .title-26') ?? first);
+    const title = spans ? null : first;
     const f = [];
     if (title) {
       const tr = title.getBoundingClientRect();
@@ -50,9 +50,15 @@ const probe = () => {
         tr.bottom > br.top
       )
         f.push(['overlap', 'back and title overlap']);
-      // A wrapped title is centred on its first line (the back button stays level with it).
-      const lh = parseFloat(getComputedStyle(title).lineHeight) || tr.height;
-      const dc = Math.abs(br.top + br.height / 2 - (tr.top + Math.min(tr.height, lh) / 2));
+      // Level with the title block's centre (a stacked title + status) or with its heading's first line (a wrapped title).
+      const head = title.querySelector('h1, h2, h3, .title-26') ?? title;
+      const hr = head.getBoundingClientRect();
+      const lh = parseFloat(getComputedStyle(head).lineHeight) || hr.height;
+      const mid = br.top + br.height / 2;
+      const dc = Math.min(
+        Math.abs(mid - (tr.top + tr.height / 2)),
+        Math.abs(mid - (hr.top + Math.min(hr.height, lh) / 2)),
+      );
       if (dc > 3) f.push(['axis', `back and title centres differ by ${Math.round(dc)}px`]);
     }
     const all = [back, ...kids].map((k) => k.getBoundingClientRect());
