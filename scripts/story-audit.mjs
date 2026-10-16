@@ -102,6 +102,8 @@ const probe = () => {
     if (cs.boxShadow === 'none' || cs.display === 'none') continue;
     const r = el.getBoundingClientRect();
     if (!r.width || !r.height) continue;
+    // Parked outside the window (a skip link until it takes focus) shows nothing, so its shadow cannot be a defect.
+    if (r.bottom <= 0 || r.right <= 0 || r.top >= innerHeight || r.left >= innerWidth) continue;
     const ext = { l: 0, r: 0, t: 0, b: 0 };
     for (const [ox, oy, blur, spread = 0] of layers(cs.boxShadow)) {
       const e = blur / 2 + spread; // the visible part of a blur is about half of it
