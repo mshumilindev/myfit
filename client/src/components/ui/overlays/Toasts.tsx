@@ -84,13 +84,18 @@ export function Toast({
  * Reload. Raised by the service-worker update signal (see pwaUpdate); the app
  * renders it in the toast holder when a replacement worker has taken control.
  */
-export function UpdatePlate() {
+export function UpdatePlate({
+  onReload = () => window.location.reload(),
+}: {
+  /** Apply the update; the app passes a handler that first pulls the NEWEST build (see pwaUpdate.reloadToLatest). */
+  onReload?: () => void;
+}) {
   const { t } = useT();
   return (
     <div className={`toast update ${toneClass('accent')}`} role="alert">
       <Icon name="arrows-clockwise" />
       <span className="update-text">{t.updateReady}</span>
-      <Button variant="secondary" size="sm" onClick={() => window.location.reload()}>
+      <Button variant="secondary" size="sm" onClick={onReload}>
         {t.reload}
       </Button>
     </div>

@@ -1,5 +1,11 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { FOREGROUND_CHECK_MS, checkBuild, startAutoUpdate, type PwaUpdateDeps } from './pwaUpdate';
+import {
+  FOREGROUND_CHECK_MS,
+  checkBuild,
+  reloadToLatest,
+  startAutoUpdate,
+  type PwaUpdateDeps,
+} from './pwaUpdate';
 
 interface Harness {
   deps: PwaUpdateDeps;
@@ -152,5 +158,25 @@ describe('checkBuild', () => {
     ).toBe(false);
     expect(await checkBuild(reply({ build: 'b2' }), null, onNewer)).toBe(false);
     expect(onNewer).not.toHaveBeenCalled();
+  });
+});
+
+describe('reloadToLatest', () => {
+  it('pulls the newest build first, then reloads exactly once', async () => {
+    const order: string[] = [];
+    const update = vi.fn(async () => {
+      order.push('update');
+      return 'updated' as const;
+    });
+    const reload = vi.fn(() => order.push('reload'));
+    await reloadToLatest(update, reload, 10);
+    expect(order).toEqual(['update', 'reload']);
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it('still reloads when the update check throws (offline)', async () => {
+    const reload = vi.fn();
+    await reloadToLatest(() => Promise.reject(new Error('offline')), reload, 10);
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 });

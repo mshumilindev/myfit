@@ -50,7 +50,7 @@ import { SleepHero } from './components/SleepHero';
 import { useT } from './i18n';
 import { computeMastery, rankIndexForRating, type MasteryResult } from './mastery';
 import { Icon, UndoSnackbar, Toast, UpdatePlate, type SnackState, type ToastState } from './ui';
-import { isUpdateReady, subscribeUpdateReady } from './pwaUpdate';
+import { isUpdateReady, subscribeUpdateReady, reloadToLatest } from './pwaUpdate';
 import {
   computeNotifs,
   syncNotifs,
@@ -1978,7 +1978,7 @@ export function App() {
           {authed && notices.some((n) => !n.read) && (
             <NoticeStrip notices={notices.filter((n) => !n.read)} onDismiss={dismissNotice} />
           )}
-          {updateReady && <UpdatePlate />}
+          {updateReady && <UpdatePlate onReload={() => void reloadToLatest()} />}
           {rankUp && (
             <Suspense fallback={null}>
               <MasteryRankUp
