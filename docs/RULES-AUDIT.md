@@ -151,5 +151,5 @@
 ## Гейти розділу 7 (16.10.2026)
 
 - Ratchet розширено (`tests/hygiene-ratchet.guard.test.ts`): inline `style={{}}` 368, hex у tsx 36, hex у feature-CSS 3, магічні px 35, примітиви кіту без запису в UI-KIT.md 32 — лише зменшуються.
-- Межі модулів: `npm run deps:check` (dependency-cruiser, ADR 003): 182 відомі порушення (180 циклів, 2 кіт→data/фічі) заморожено, нові блокуються в CI.
+- Межі модулів: `npm run deps:check` (dependency-cruiser, ADR 003): 183 відомі порушення (180 циклів, 2 кіт→data/фічі) заморожено, нові блокуються в CI.
 - Prod-залежності: `npm audit --omit=dev --audit-level=high` = 0 (SPO-131), крок у CI блокуючий.

@@ -18,4 +18,4 @@ paths:
 
 ## Межі модулів (примусово, `npm run deps:check`)
 
-- Нових циклів імпортів і імпортів store/firebase/vault/фіч у `components/ui` — не додавати: CI червоніє. 182 старі порушення заморожені в `.dependency-cruiser-known-violations.json`; виправив одне — `npm run deps:baseline`, файл лише зменшується.
+- Нових циклів імпортів і імпортів store/firebase/vault/фіч у `components/ui` — не додавати: CI червоніє. 183 старі порушення заморожені в `.dependency-cruiser-known-violations.json`; виправив одне — `npm run deps:baseline`, файл лише зменшується.
