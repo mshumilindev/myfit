@@ -9,6 +9,7 @@ import { App } from './App';
 import { getLocale } from './i18n';
 import { startAutoUpdate, startBuildWatch, markUpdateReady } from './pwaUpdate';
 import { lockShellHeight } from './viewportFit';
+import { installHorizontalScrollGuard } from './horizontalScrollGuard';
 import { SyncStatusHost } from './components/SyncStatusHost';
 import { LavaBackground } from './components/LavaBackground';
 import { initMotion } from './motion';
@@ -17,6 +18,7 @@ import { AppCrashBoundary, installCrashRecovery } from './appCrash';
 
 document.documentElement.lang = getLocale();
 lockShellHeight();
+installHorizontalScrollGuard();
 initMotion();
 installCrashRecovery();
 
