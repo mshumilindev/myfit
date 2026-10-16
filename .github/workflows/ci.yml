@@ -94,7 +94,7 @@ jobs:
         run: npm run test:coverage
       - name: Upload coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage
           path: client/coverage
@@ -171,7 +171,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build-storybook
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: storybook-static
           path: client/storybook-static
@@ -225,7 +225,7 @@ jobs:
       - name: Chat frame geometry (trainer / client / Atlas; 320-1920)
         if: always()
         run: npm run audit:chat -- --url http://127.0.0.1:6006 --locales ${{ env.LAYOUT_LOCALES }} --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out audit-reports/chat-${{ matrix.shard }}.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: audit-report-${{ matrix.shard }}
