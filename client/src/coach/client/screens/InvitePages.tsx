@@ -211,7 +211,7 @@ export function InvitePages({
             {inv.org ? `${cc.invInviterAt(inv.org)}. ${cc.invBody}` : cc.invBody}
           </p>
           <div className="onb-inviter">
-            <ClientAvatar id={undefined} name={inv.trainerName} size={40} />
+            <ClientAvatar id={undefined} name={inv.trainerName} size={40} hasPhoto={false} />
             <span>{cc.invInviter(inv.trainerName)}</span>
           </div>
           <Rail upTo={1} label={cc.invStep1Aria} />

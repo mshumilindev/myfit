@@ -78,7 +78,7 @@ export function PendingInvites(pp: {
           <li key={p.id}>
             <ClientRow
               name={p.name}
-              avatar={<ClientAvatar id={p.id} name={p.name} size={40} />}
+              avatar={<ClientAvatar id={p.id} name={p.name} size={40} hasPhoto={false} />}
               program={p.detail}
               trailing={
                 <>

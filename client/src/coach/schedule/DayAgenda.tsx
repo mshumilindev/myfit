@@ -91,7 +91,14 @@ export function DayAgenda(p: DayAgendaProps) {
                 key={s.id}
                 dim={isPast(s) && !running && p.selected !== s.id}
                 time={slotClock(s).split('–')[0]}
-                icon={<ClientAvatar id={ids[0]} name={p.people.name(ids[0] ?? '')} size={32} />}
+                icon={
+                  <ClientAvatar
+                    id={ids[0]}
+                    name={p.people.name(ids[0] ?? '')}
+                    size={32}
+                    hasPhoto={p.people.byId.get(ids[0] ?? '')?.hasPhoto}
+                  />
+                }
                 label={slotTitle(s, p.people, t)}
                 sub={`${slotClock(s)} · ${gymName(s.gymId)}${running ? ` · ${p.t.scLeftMin(minutesLeft(s, p.now as number))}` : ''}`}
                 trailing={

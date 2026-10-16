@@ -34,6 +34,8 @@ jobs:
         run: npm run typecheck
       - name: Unit tests + coverage gate
         run: npm run test:coverage
+      - name: Client unit tests (client/src, ~430 files; root vitest only sees tests/**)
+        run: npm run test -w client
       - name: Validate SQL schema
         run: node scripts/validate-sql.mjs
       # Warn-only until the known high/critical findings are fixed (SPO-125 follow-up); then drop continue-on-error.

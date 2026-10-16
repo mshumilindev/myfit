@@ -280,7 +280,14 @@ export function RescheduleForm(p: RescheduleFormProps) {
                 <ListRow
                   key={s.id}
                   dense
-                  icon={<ClientAvatar id={clientId} name={people.name(clientId)} size={32} />}
+                  icon={
+                    <ClientAvatar
+                      id={clientId}
+                      name={people.name(clientId)}
+                      size={32}
+                      hasPhoto={people.byId.get(clientId)?.hasPhoto}
+                    />
+                  }
                   label={`${shortDate(dayOfTs(s.start), locale)} · ${slotClock(s)}`}
                   sub={`${slotTitle(s, people, t)} · ${gymName(s.gymId)}`}
                   selected={slot?.id === s.id}
