@@ -111,10 +111,25 @@ jobs:
       - run: npm ci
       - run: npm run build -w server && npm run build -w client
 
+  # Static security analysis (replaces CodeQL, which needs a paid licence on private repos). Findings become annotations.
+  security:
+    name: Security (Semgrep)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install semgrep==1.181.0
+      - name: Scan client and functions
+        run: semgrep scan --config p/javascript --config p/typescript --config p/react --config p/secrets --metrics=off --json --output semgrep.json client/src functions/src scripts || true
+      - name: Report findings
+        run: node scripts/semgrep-annotate.mjs semgrep.json
+
   quality:
     name: Lint · types · tests · build
     if: always()
-    needs: [lint, format, types, tests, build]
+    needs: [lint, format, types, tests, build, security]
     runs-on: ubuntu-latest
     steps:
       - name: Every quality job must have succeeded (a skipped or cancelled one counts as a failure)

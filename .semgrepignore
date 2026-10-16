@@ -1,0 +1,12 @@
+# Not shipped code: tests, stories, fixtures, generated output.
+node_modules/
+dist/
+dist-e2e/
+coverage/
+storybook-static/
+*.test.ts
+*.test.tsx
+*.stories.tsx
+tests/
+server/
+desktop/
