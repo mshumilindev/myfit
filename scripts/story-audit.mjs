@@ -11,7 +11,7 @@
  *
  *   npm run build-storybook && npx http-server client/storybook-static -p 6006 &
  *   npm run audit:stories -- --url http://127.0.0.1:6006 --locales en,uk,pl,lt,et --widths 320,360,390 --fonts 1,1.5
- *   options: --filter <substring of story id> --part i/n (split the work) --out report.json
+ *   options: --height <px> (viewport height; ~380 emulates an open on-screen keyboard) --filter <substring of story id> --part i/n (split the work) --out report.json
  */
 import fs from 'node:fs';
 import { chromium } from '@playwright/test';
@@ -143,7 +143,7 @@ const report = [];
 for (const w of widths) {
   for (const f of fonts) {
     const ctx = await browser.newContext({
-      viewport: { width: w, height: 800 },
+      viewport: { width: w, height: Number(arg('height', '800')) },
       reducedMotion: 'reduce',
     });
     const page = await ctx.newPage();
