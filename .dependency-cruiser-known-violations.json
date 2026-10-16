@@ -1,0 +1,5672 @@
+[
+  {
+    "type": "dependency",
+    "from": "client/src/components/ui/ChatShell.tsx",
+    "to": "client/src/coach/chat/Chat.css",
+    "unresolvedTo": "../../coach/chat/Chat.css",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "kit-stays-presentational"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "client/src/components/ui/overlays/Toasts.tsx",
+    "to": "client/src/coach/domain/signalConfig.ts",
+    "unresolvedTo": "../../../coach/domain/signalConfig",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "kit-stays-presentational"
+    }
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/accountOverrides.ts",
+    "to": "client/src/i18n/index.ts",
+    "unresolvedTo": "./i18n",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/i18n/index.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/accountOverrides.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/components/StartSheet.tsx",
+    "unresolvedTo": "./components/StartSheet",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/components/StartSheet.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/today/WidgetLibraryScreen.tsx",
+    "unresolvedTo": "./today/WidgetLibraryScreen",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/WidgetLibraryScreen.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/EquipmentDetailView.tsx",
+    "unresolvedTo": "./views/EquipmentDetailView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/EquipmentDetailView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/ExerciseDetailView.tsx",
+    "unresolvedTo": "./views/ExerciseDetailView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/ExerciseDetailView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/ExerciseHistoryView.tsx",
+    "unresolvedTo": "./views/ExerciseHistoryView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/ExerciseHistoryView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/ExerciseLibraryView.tsx",
+    "unresolvedTo": "./views/ExerciseLibraryView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/ExerciseLibraryView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/GoalsView.tsx",
+    "unresolvedTo": "./views/GoalsView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/GoalsView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/GymDetailView.tsx",
+    "unresolvedTo": "./views/GymDetailView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/GymDetailView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/GymsView.tsx",
+    "unresolvedTo": "./views/GymsView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/GymsView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/HealthView.tsx",
+    "unresolvedTo": "./views/HealthView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/HealthView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/HistoryListView.tsx",
+    "unresolvedTo": "./views/HistoryListView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/HistoryListView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/home/HomeSetView.tsx",
+    "unresolvedTo": "./views/home/HomeSetView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/home/HomeSetView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/LogActivityView.tsx",
+    "unresolvedTo": "./views/LogActivityView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/LogActivityView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/MasteryView.tsx",
+    "unresolvedTo": "./views/MasteryView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/MasteryView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/MuscleHistoryView.tsx",
+    "unresolvedTo": "./views/MuscleHistoryView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/MuscleHistoryView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/OverviewView.tsx",
+    "unresolvedTo": "./views/OverviewView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/OverviewView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/PlaybookView.tsx",
+    "unresolvedTo": "./views/PlaybookView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/PlaybookView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/ProfileView.tsx",
+    "unresolvedTo": "./views/ProfileView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/ProfileView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/ProgramsView.tsx",
+    "unresolvedTo": "./views/ProgramsView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/ProgramsView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/ProgressView.tsx",
+    "unresolvedTo": "./views/ProgressView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/ProgressView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/RosterApp.tsx",
+    "unresolvedTo": "./views/RosterApp",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/RosterApp.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/SessionBuilderView.tsx",
+    "unresolvedTo": "./views/SessionBuilderView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/SessionBuilderView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/SessionView.tsx",
+    "unresolvedTo": "./views/SessionView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/SessionView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/TodayView.tsx",
+    "unresolvedTo": "./views/TodayView",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/TodayView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/App.tsx",
+    "to": "client/src/views/TraineeSessionView.tsx",
+    "unresolvedTo": "./views/TraineeSessionView",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/TraineeSessionView.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/eval/corpus.ts",
+    "to": "client/src/atlas/eval/corpusEt.ts",
+    "unresolvedTo": "./corpusEt",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/eval/corpusEt.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/eval/corpus.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/eval/corpus.ts",
+    "to": "client/src/atlas/eval/corpusGrammar.ts",
+    "unresolvedTo": "./corpusGrammar",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/eval/corpusGrammar.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/eval/corpus.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/eval/corpus.ts",
+    "to": "client/src/atlas/eval/corpusLt.ts",
+    "unresolvedTo": "./corpusLt",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/eval/corpusLt.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/eval/corpus.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/eval/corpus.ts",
+    "to": "client/src/atlas/eval/corpusMore.ts",
+    "unresolvedTo": "./corpusMore",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/eval/corpusMore.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/eval/corpus.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/eval/corpus.ts",
+    "to": "client/src/atlas/eval/corpusPl.ts",
+    "unresolvedTo": "./corpusPl",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/eval/corpusPl.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/eval/corpus.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/facts.ts",
+    "to": "client/src/atlas/types.ts",
+    "unresolvedTo": "./types",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/facts.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/facts.ts",
+    "to": "client/src/playbook.ts",
+    "unresolvedTo": "../playbook",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/playbook.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/facts.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/facts.ts",
+    "to": "client/src/store.ts",
+    "unresolvedTo": "../store",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/facts.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/facts.ts",
+    "to": "client/src/volume.ts",
+    "unresolvedTo": "../volume",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/facts.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/guard.ts",
+    "to": "client/src/atlas/facts.ts",
+    "unresolvedTo": "./facts",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/facts.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/playbook.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/voice.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/guard.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/guard.ts",
+    "to": "client/src/atlas/types.ts",
+    "unresolvedTo": "./types",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/voice.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/guard.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/guard.ts",
+    "to": "client/src/store.ts",
+    "unresolvedTo": "../store",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/voice.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/guard.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/intentKit.ts",
+    "to": "client/src/atlas/memory.ts",
+    "unresolvedTo": "./memory",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/intentKit.ts",
+    "to": "client/src/atlas/plan.ts",
+    "unresolvedTo": "./plan",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/playbook.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/intentKit.ts",
+    "to": "client/src/atlas/types.ts",
+    "unresolvedTo": "./types",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/intentKit.ts",
+    "to": "client/src/playbook.ts",
+    "unresolvedTo": "../playbook",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/playbook.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/intentKit.ts",
+    "to": "client/src/recovery.ts",
+    "unresolvedTo": "../recovery",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/alcoholApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/intentKit.ts",
+    "to": "client/src/store.ts",
+    "unresolvedTo": "../store",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/intentKit.ts",
+    "to": "client/src/volume.ts",
+    "unresolvedTo": "../volume",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/kb/topicsMore.ts",
+    "to": "client/src/atlas/kb/topicsMoreA.ts",
+    "unresolvedTo": "./topicsMoreA",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/kb/topicsMoreA.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/kb/topicsMore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/kb/topicsMore.ts",
+    "to": "client/src/atlas/kb/topicsMoreB.ts",
+    "unresolvedTo": "./topicsMoreB",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/kb/topicsMoreB.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/kb/topicsMore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/memory.ts",
+    "to": "client/src/atlas/teach.ts",
+    "unresolvedTo": "./teach",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/teach.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/plan.ts",
+    "to": "client/src/atlas/facts.ts",
+    "unresolvedTo": "./facts",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/facts.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/playbook.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/plan.ts",
+    "to": "client/src/playbook.ts",
+    "unresolvedTo": "../playbook",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/playbook.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/plan.ts",
+    "to": "client/src/sessionBuilder.ts",
+    "unresolvedTo": "../sessionBuilder",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/sessionBuilder.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/goals.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/plan.ts",
+    "to": "client/src/starterPlan.ts",
+    "unresolvedTo": "../starterPlan",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/starterPlan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/picker.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/fatigue.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/alcoholApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/voice.ts",
+    "to": "client/src/atlas/types.ts",
+    "unresolvedTo": "./types",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/voice.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/voice.ts",
+    "to": "client/src/i18n/atlas.en.ts",
+    "unresolvedTo": "../i18n/atlas.en",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/i18n/atlas.en.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/voice.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/voice.ts",
+    "to": "client/src/i18n/atlas.et.ts",
+    "unresolvedTo": "../i18n/atlas.et",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/i18n/atlas.et.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/voice.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/voice.ts",
+    "to": "client/src/i18n/atlas.lt.ts",
+    "unresolvedTo": "../i18n/atlas.lt",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/i18n/atlas.lt.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/voice.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/voice.ts",
+    "to": "client/src/i18n/atlas.pl.ts",
+    "unresolvedTo": "../i18n/atlas.pl",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/i18n/atlas.pl.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/voice.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/voice.ts",
+    "to": "client/src/i18n/atlas.uk.ts",
+    "unresolvedTo": "../i18n/atlas.uk",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/i18n/atlas.uk.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/voice.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/calcMods.ts",
+    "to": "client/src/nicotineApply.ts",
+    "unresolvedTo": "./nicotineApply",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/nicotineApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/calcMods.ts",
+    "to": "client/src/supplementsApply.ts",
+    "unresolvedTo": "./supplementsApply",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/supplementsApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/data/programMine.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/nicotineApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/client/data/config.ts",
+    "to": "client/src/coach/data/backend.ts",
+    "unresolvedTo": "../../data/backend",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/client/data/config.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/client/data/config.ts",
+    "to": "client/src/coach/data/unavailable.ts",
+    "unresolvedTo": "../../data/unavailable",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/unavailable.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/client/data/config.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/backend.ts",
+    "to": "client/src/coach/data/firestore/bootstrap.ts",
+    "unresolvedTo": "./firestore/bootstrap",
+    "dependencyTypes": ["local", "dynamic-import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/backend.ts",
+    "to": "client/src/coach/data/testHooks.ts",
+    "unresolvedTo": "./testHooks",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/config.ts",
+    "to": "client/src/coach/data/backend.ts",
+    "unresolvedTo": "./backend",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/config.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/config.ts",
+    "to": "client/src/coach/data/unavailable.ts",
+    "unresolvedTo": "./unavailable",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/unavailable.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/config.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/config.ts",
+    "to": "client/src/coach/data/worldStore.ts",
+    "unresolvedTo": "./worldStore",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/worldStore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/config.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/deriveWorld.ts",
+    "to": "client/src/coach/data/firestore/scheduleJoin.ts",
+    "unresolvedTo": "./firestore/scheduleJoin",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/firestore/scheduleJoin.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/model.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/feed.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/worldStore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/deriveWorld.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/deriveWorld.ts",
+    "to": "client/src/coach/schedule/port.ts",
+    "unresolvedTo": "../schedule/port",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/feed.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/worldStore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/deriveWorld.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/data/firestore/scheduleCache.ts",
+    "unresolvedTo": "./scheduleCache",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/firestore/scheduleCache.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/data/firestore/scheduleDocStore.ts",
+    "unresolvedTo": "./scheduleDocStore",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/firestore/scheduleDocStore.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/data/firestore/trustPort.ts",
+    "unresolvedTo": "./trustPort",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/firestore/trustPort.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/security/trustPort.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/data/firestore/worldCache.ts",
+    "unresolvedTo": "./worldCache",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/firestore/worldCache.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/worldPort.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/data/firestore/worldPort.ts",
+    "unresolvedTo": "./worldPort",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/firestore/worldPort.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/notes/useNotes.ts",
+    "unresolvedTo": "../../notes/useNotes",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/notes/useNotes.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/program/config.ts",
+    "unresolvedTo": "../../program/config",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/program/config.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/schedule/feed.ts",
+    "unresolvedTo": "../../schedule/feed",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/feed.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/worldStore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/schedule/port.ts",
+    "unresolvedTo": "../../schedule/port",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/schedule/sealedPort.ts",
+    "unresolvedTo": "../../schedule/sealedPort",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/sealedPort.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/schedule/useSchedule.ts",
+    "unresolvedTo": "../../schedule/useSchedule",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/useSchedule.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/client/data/config.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/screens/live/config.ts",
+    "unresolvedTo": "../../screens/live/config",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/screens/live/config.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/security/trustPort.ts",
+    "unresolvedTo": "../../security/trustPort",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/security/trustPort.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/install.ts",
+    "to": "client/src/coach/share/config.ts",
+    "unresolvedTo": "../../share/config",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/share/config.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/scheduleCache.ts",
+    "to": "client/src/coach/schedule/sealedPort.ts",
+    "unresolvedTo": "../../schedule/sealedPort",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/sealedPort.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/scheduleCache.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/scheduleJoin.ts",
+    "to": "client/src/coach/schedule/port.ts",
+    "unresolvedTo": "../../schedule/port",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/feed.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/worldStore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/deriveWorld.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/scheduleJoin.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/data/firestore/worldPort.ts",
+    "to": "client/src/coach/data/firestore/scheduleJoin.ts",
+    "unresolvedTo": "./scheduleJoin",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/firestore/scheduleJoin.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/model.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/worldPort.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/notes/useNotes.ts",
+    "to": "client/src/coach/data/unavailable.ts",
+    "unresolvedTo": "../data/unavailable",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/unavailable.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/notes/useNotes.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/program/config.ts",
+    "to": "client/src/coach/data/unavailable.ts",
+    "unresolvedTo": "../data/unavailable",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/unavailable.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/program/config.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/edits.ts",
+    "to": "client/src/coach/schedule/types.ts",
+    "unresolvedTo": "./types",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/feed.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/scheduleStore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/edits.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/requests.ts",
+    "to": "client/src/coach/schedule/model.ts",
+    "unresolvedTo": "./model",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/model.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/feed.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/scheduleStore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/requests.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/requests.ts",
+    "to": "client/src/coach/schedule/types.ts",
+    "unresolvedTo": "./types",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/feed.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/scheduleStore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/requests.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/scheduleCodec.ts",
+    "to": "client/src/coach/schedule/types.ts",
+    "unresolvedTo": "./types",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/sealedPort.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/scheduleCodec.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/scheduleStore.ts",
+    "to": "client/src/coach/schedule/model.ts",
+    "unresolvedTo": "./model",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/model.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/feed.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/scheduleStore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/scheduleStore.ts",
+    "to": "client/src/coach/schedule/port.ts",
+    "unresolvedTo": "./port",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/feed.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/scheduleStore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/scheduleStore.ts",
+    "to": "client/src/coach/schedule/types.ts",
+    "unresolvedTo": "./types",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/feed.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/scheduleStore.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/sealedPort.ts",
+    "to": "client/src/coach/schedule/types.ts",
+    "unresolvedTo": "./types",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/sealedPort.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/useSchedule.ts",
+    "to": "client/src/coach/data/backend.ts",
+    "unresolvedTo": "../data/backend",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/useSchedule.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/useSchedule.ts",
+    "to": "client/src/coach/data/config.ts",
+    "unresolvedTo": "../data/config",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/config.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/useSchedule.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/useSchedule.ts",
+    "to": "client/src/coach/data/unavailable.ts",
+    "unresolvedTo": "../data/unavailable",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/unavailable.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/useSchedule.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/useSchedule.ts",
+    "to": "client/src/coach/schedule/model.ts",
+    "unresolvedTo": "./model",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/model.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/useSchedule.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/useSchedule.ts",
+    "to": "client/src/coach/schedule/port.ts",
+    "unresolvedTo": "./port",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/useSchedule.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/useSchedule.ts",
+    "to": "client/src/coach/schedule/scheduleStore.ts",
+    "unresolvedTo": "./scheduleStore",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/scheduleStore.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/edits.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/useSchedule.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/schedule/useSchedule.ts",
+    "to": "client/src/coach/schedule/types.ts",
+    "unresolvedTo": "./types",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/useSchedule.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/screens/live/config.ts",
+    "to": "client/src/coach/data/unavailable.ts",
+    "unresolvedTo": "../../data/unavailable",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/unavailable.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/screens/live/config.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/coach/share/config.ts",
+    "to": "client/src/coach/data/unavailable.ts",
+    "unresolvedTo": "../data/unavailable",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/coach/data/unavailable.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/port.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/schedule/types.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/testHooks.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/data/backend.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/bootstrap.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/coach/data/firestore/install.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/coach/share/config.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/components/EquipmentBoard.tsx",
+    "to": "client/src/App.tsx",
+    "unresolvedTo": "../App",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/GymDetailView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/components/EquipmentBoard.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/components/ExerciseGallery.tsx",
+    "to": "client/src/App.tsx",
+    "unresolvedTo": "../App",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/ExerciseDetailView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/components/ExerciseGallery.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/components/ui/Button.tsx",
+    "to": "client/src/ui.tsx",
+    "unresolvedTo": "../../ui",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/ui.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/Button.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/components/ui/ConfirmEffectsDialog.tsx",
+    "to": "client/src/components/ui/Button.tsx",
+    "unresolvedTo": "./Button",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/components/ui/Button.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/ui.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/Overlays.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/ConfirmEffectsDialog.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/components/ui/ConfirmEffectsDialog.tsx",
+    "to": "client/src/components/ui/Overlays.tsx",
+    "unresolvedTo": "./Overlays",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/components/ui/Overlays.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/ConfirmEffectsDialog.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/components/ui/ConfirmEffectsDialog.tsx",
+    "to": "client/src/ui.tsx",
+    "unresolvedTo": "../../ui",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/ui.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/Overlays.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/ConfirmEffectsDialog.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/components/ui/Overlays.tsx",
+    "to": "client/src/components/ui/Button.tsx",
+    "unresolvedTo": "./Button",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/components/ui/Button.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/ui.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/Overlays.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/components/ui/Overlays.tsx",
+    "to": "client/src/components/ui/overlays/Toasts.tsx",
+    "unresolvedTo": "./overlays/Toasts",
+    "dependencyTypes": ["local", "export"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/components/ui/overlays/Toasts.tsx",
+        "dependencyTypes": ["local", "export"]
+      },
+      {
+        "name": "client/src/ui.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/Overlays.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/components/ui/Overlays.tsx",
+    "to": "client/src/ui.tsx",
+    "unresolvedTo": "../../ui",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/ui.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/Overlays.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/components/ui/overlays/Toasts.tsx",
+    "to": "client/src/components/ui/Button.tsx",
+    "unresolvedTo": "../Button",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/components/ui/Button.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/ui.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/Overlays.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/overlays/Toasts.tsx",
+        "dependencyTypes": ["local", "export"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/components/ui/overlays/Toasts.tsx",
+    "to": "client/src/components/ui/UndoToast.tsx",
+    "unresolvedTo": "../UndoToast",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/components/ui/UndoToast.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/Snackbar.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/ui.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/Overlays.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/components/ui/overlays/Toasts.tsx",
+        "dependencyTypes": ["local", "export"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/data/equipmentCatalog.ts",
+    "to": "client/src/data/equipmentEnrich.ts",
+    "unresolvedTo": "./equipmentEnrich",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/data/equipmentEnrich.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/data/equipmentCatalog.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/data/equipmentCatalog.ts",
+    "to": "client/src/data/equipmentImages.generated.ts",
+    "unresolvedTo": "./equipmentImages.generated",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/data/equipmentImages.generated.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/data/equipmentCatalog.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/data/exercises.ts",
+    "to": "client/src/data/subregions.ts",
+    "unresolvedTo": "./subregions",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/data/subregions.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/data/exercises.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/data/programMine.ts",
+    "to": "client/src/playbook.ts",
+    "unresolvedTo": "../playbook",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/playbook.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/supplementsApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/data/programMine.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/fatigue.ts",
+    "to": "client/src/calcMods.ts",
+    "unresolvedTo": "./calcMods",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/alcoholApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/personalize.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/fatigue.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/fatigue.ts",
+    "to": "client/src/progression.ts",
+    "unresolvedTo": "./progression",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/progression.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/alcoholApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/personalize.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/fatigue.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/fatigue.ts",
+    "to": "client/src/volume.ts",
+    "unresolvedTo": "./volume",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/personalize.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/fatigue.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/goals.ts",
+    "to": "client/src/volume.ts",
+    "unresolvedTo": "./volume",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/goals.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/loadWindow.ts",
+    "to": "client/src/store.ts",
+    "unresolvedTo": "./store",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/sessionBuilder.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/nicotineApply.ts",
+    "to": "client/src/store.ts",
+    "unresolvedTo": "./store",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/sessionBuilder.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/nicotineApply.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/personalize.ts",
+    "to": "client/src/store.ts",
+    "unresolvedTo": "./store",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/sessionBuilder.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/personalize.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/personalize.ts",
+    "to": "client/src/volume.ts",
+    "unresolvedTo": "./volume",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/personalize.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/picker.ts",
+    "to": "client/src/fatigue.ts",
+    "unresolvedTo": "./fatigue",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/fatigue.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/alcoholApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/starterPlan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/picker.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/picker.ts",
+    "to": "client/src/personalize.ts",
+    "unresolvedTo": "./personalize",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/personalize.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/fatigue.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/alcoholApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/starterPlan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/picker.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/picker.ts",
+    "to": "client/src/progression.ts",
+    "unresolvedTo": "./progression",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/progression.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/alcoholApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/starterPlan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/picker.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/picker.ts",
+    "to": "client/src/recovery.ts",
+    "unresolvedTo": "./recovery",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/alcoholApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/starterPlan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/picker.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/picker.ts",
+    "to": "client/src/store.ts",
+    "unresolvedTo": "./store",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/starterPlan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/picker.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/picker.ts",
+    "to": "client/src/volume.ts",
+    "unresolvedTo": "./volume",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/starterPlan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/picker.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/picker.ts",
+    "to": "client/src/weakpoints.ts",
+    "unresolvedTo": "./weakpoints",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/weakpoints.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/starterPlan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/picker.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/progression.ts",
+    "to": "client/src/store.ts",
+    "unresolvedTo": "./store",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/sessionBuilder.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/progression.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/push.ts",
+    "to": "client/src/quietHours.ts",
+    "unresolvedTo": "./quietHours",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/quietHours.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/push.ts",
+        "dependencyTypes": ["local", "dynamic-import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/recovery.ts",
+    "to": "client/src/loadWindow.ts",
+    "unresolvedTo": "./loadWindow",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/recovery.ts",
+    "to": "client/src/store.ts",
+    "unresolvedTo": "./store",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/recovery.ts",
+    "to": "client/src/volume.ts",
+    "unresolvedTo": "./volume",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/sessionBuilder.ts",
+    "to": "client/src/goals.ts",
+    "unresolvedTo": "./goals",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/goals.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/sessionBuilder.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/sessionBuilder.ts",
+    "to": "client/src/personalize.ts",
+    "unresolvedTo": "./personalize",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/personalize.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/fatigue.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/alcoholApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/sessionBuilder.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/sessionBuilder.ts",
+    "to": "client/src/playbook.ts",
+    "unresolvedTo": "./playbook",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/playbook.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/sessionBuilder.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/sessionBuilder.ts",
+    "to": "client/src/progression.ts",
+    "unresolvedTo": "./progression",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/progression.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/alcoholApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/sessionBuilder.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/sessionBuilder.ts",
+    "to": "client/src/recovery.ts",
+    "unresolvedTo": "./recovery",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/recovery.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/calcMods.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/alcoholApply.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/sessionBuilder.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/sessionBuilder.ts",
+    "to": "client/src/volume.ts",
+    "unresolvedTo": "./volume",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/sessionBuilder.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/store.ts",
+    "to": "client/src/goals.ts",
+    "unresolvedTo": "./goals",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/goals.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/store.ts",
+    "to": "client/src/sessionBuilder.ts",
+    "unresolvedTo": "./sessionBuilder",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/sessionBuilder.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/goals.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/AtlasClientsBlock.tsx",
+    "to": "client/src/today/widgets/learnatlas.tsx",
+    "unresolvedTo": "./widgets/learnatlas",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/learnatlas.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/TodayView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/today/AtlasClientsBlock.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/CustomSectionView.tsx",
+    "to": "client/src/today/registry.tsx",
+    "unresolvedTo": "./registry",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/TodayView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/today/CustomSectionView.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/CustomSectionView.tsx",
+    "to": "client/src/today/shortcuts.tsx",
+    "unresolvedTo": "./shortcuts",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/shortcuts.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/TodayView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/today/CustomSectionView.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/App.tsx",
+    "unresolvedTo": "../App",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/today/WidgetLibraryScreen.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/today/WidgetLibrary.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/apex.tsx",
+    "unresolvedTo": "./widgets/apex",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/apex.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/body.tsx",
+    "unresolvedTo": "./widgets/body",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/body.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/bodyplus.tsx",
+    "unresolvedTo": "./widgets/bodyplus",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/bodyplus.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/calendar.tsx",
+    "unresolvedTo": "./widgets/calendar",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/calendar.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/cardio.tsx",
+    "unresolvedTo": "./widgets/cardio",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/cardio.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/cycle.tsx",
+    "unresolvedTo": "./widgets/cycle",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/cycle.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/discover.tsx",
+    "unresolvedTo": "./widgets/discover",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/discover.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/fun.tsx",
+    "unresolvedTo": "./widgets/fun",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/fun.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/learnatlas.tsx",
+    "unresolvedTo": "./widgets/learnatlas",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/learnatlas.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/muscles.tsx",
+    "unresolvedTo": "./widgets/muscles",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/muscles.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/plan.tsx",
+    "unresolvedTo": "./widgets/plan",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/plan.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/strength.tsx",
+    "unresolvedTo": "./widgets/strength",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/strength.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/registry.tsx",
+    "to": "client/src/today/widgets/training.tsx",
+    "unresolvedTo": "./widgets/training",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/training.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/shortcuts.tsx",
+    "to": "client/src/today/registry.tsx",
+    "unresolvedTo": "./registry",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/today/WidgetLibraryScreen.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/today/shortcuts.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/TodayCustomize.tsx",
+    "to": "client/src/today/registry.tsx",
+    "unresolvedTo": "./registry",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/TodayView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/today/TodayCustomize.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/TodayCustomize.tsx",
+    "to": "client/src/today/shortcuts.tsx",
+    "unresolvedTo": "./shortcuts",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/shortcuts.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/TodayView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/today/TodayCustomize.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/WidgetLibrary.tsx",
+    "to": "client/src/today/shortcuts.tsx",
+    "unresolvedTo": "./shortcuts",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/shortcuts.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/today/WidgetLibraryScreen.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/today/WidgetLibrary.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/today/widgets/muscles.tsx",
+    "to": "client/src/today/widgets/strength.tsx",
+    "unresolvedTo": "./strength",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/widgets/strength.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/today/widgets/muscles.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/views/ApexApp.tsx",
+    "to": "client/src/views/ApexHome.tsx",
+    "unresolvedTo": "./ApexHome",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/ApexHome.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/views/ApexApp.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/views/ExerciseLibraryView.tsx",
+    "to": "client/src/components/ExerciseGallery.tsx",
+    "unresolvedTo": "../components/ExerciseGallery",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/components/ExerciseGallery.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/ExerciseLibraryView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/views/programs/ProgramPage.tsx",
+    "to": "client/src/App.tsx",
+    "unresolvedTo": "../../App",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/ProgramsView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/views/programs/ProgramPage.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/views/programs/ProgramPage.tsx",
+    "to": "client/src/views/programs/selfEditor.tsx",
+    "unresolvedTo": "./selfEditor",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/programs/selfEditor.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/ProgramsView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/views/programs/ProgramPage.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/views/RosterApp.tsx",
+    "to": "client/src/views/ProfileView.tsx",
+    "unresolvedTo": "./ProfileView",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/views/ProfileView.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/RosterApp.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/views/sessionSummary/NextUp.tsx",
+    "to": "client/src/App.tsx",
+    "unresolvedTo": "../../App",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/SessionView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      },
+      {
+        "name": "client/src/views/sessionSummary/NextUp.tsx",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/views/TodayView.tsx",
+    "to": "client/src/components/StartSheet.tsx",
+    "unresolvedTo": "../components/StartSheet",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/components/StartSheet.tsx",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/TodayView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/views/TodayView.tsx",
+    "to": "client/src/today/shortcuts.tsx",
+    "unresolvedTo": "../today/shortcuts",
+    "dependencyTypes": ["local", "type-only", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/today/shortcuts.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/today/registry.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/App.tsx",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/views/TodayView.tsx",
+        "dependencyTypes": ["local", "dynamic-import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/volume.ts",
+    "to": "client/src/store.ts",
+    "unresolvedTo": "./store",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/weakpoints.ts",
+    "to": "client/src/volume.ts",
+    "unresolvedTo": "./volume",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/volume.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/starterPlan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/picker.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/weakpoints.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  }
+]
