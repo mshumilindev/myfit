@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* global document, getComputedStyle, innerWidth -- the probe function runs inside the page */
+/* global document, getComputedStyle, innerWidth, innerHeight -- the probe function runs inside the page */
 /**
  * Story geometry audit (SPO-103 / SPO-28 / SPO-113): opens every Storybook story in a real browser across locales,
  * phone widths and a large system font, and reports layout that breaks:
@@ -127,10 +127,25 @@ const probe = () => {
       )
         break;
       const cut = [];
-      if (clipX && r.left - ar.left >= -1 && r.left - ar.left < ext.l - 3) cut.push('left');
-      if (clipX && ar.right - r.right >= -1 && ar.right - r.right < ext.r - 3) cut.push('right');
-      if (clipY && r.top - ar.top >= -1 && r.top - ar.top < ext.t - 3) cut.push('top');
-      if (clipY && ar.bottom - r.bottom >= -1 && ar.bottom - r.bottom < ext.b - 3)
+      // A clip edge that is the window edge hides nothing the user could see beyond it.
+      const atWin = (v, edge) => Math.abs(v - edge) <= 1;
+      if (clipX && !atWin(ar.left, 0) && r.left - ar.left >= -1 && r.left - ar.left < ext.l - 3)
+        cut.push('left');
+      if (
+        clipX &&
+        !atWin(ar.right, innerWidth) &&
+        ar.right - r.right >= -1 &&
+        ar.right - r.right < ext.r - 3
+      )
+        cut.push('right');
+      if (clipY && !atWin(ar.top, 0) && r.top - ar.top >= -1 && r.top - ar.top < ext.t - 3)
+        cut.push('top');
+      if (
+        clipY &&
+        !atWin(ar.bottom, innerHeight) &&
+        ar.bottom - r.bottom >= -1 &&
+        ar.bottom - r.bottom < ext.b - 3
+      )
         cut.push('bottom');
       if (cut.length) {
         const key = `${String(el.className).slice(0, 40)}>${String(a.className).slice(0, 30)}`;
