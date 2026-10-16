@@ -27,7 +27,7 @@
     "views/sessionSummary/NextUp.css": 5
   },
   "oversizedFiles": {
-    "App.tsx": 2488,
+    "App.tsx": 2195,
     "alcohol.ts": 667,
     "atlas/appTopics.ts": 1497,
     "atlas/eval/corpus.ts": 1236,
