@@ -3,10 +3,9 @@
  */
 import * as N from './num';
 import { consistencyStreak, latestWeight, setTypeOf } from '../store';
-import { muscleReadiness } from '../recovery';
+import { muscleReadiness, recentLoadSets } from '../recovery';
 import { nextTarget, topHistory } from '../progression';
 import { LANDMARKS, VOLUME_MUSCLES, weeklyMuscleSets } from '../volume';
-import { recentLoadSets } from '../loadWindow';
 import { finishedNights, nightDurationMin } from '../sleep';
 import { activeInjuries } from '../injury';
 import { blockWeek, isDeloadWeek, planDayFor } from './plan';

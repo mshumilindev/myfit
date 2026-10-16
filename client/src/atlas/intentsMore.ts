@@ -11,8 +11,7 @@ import { muscleSetsInWorkout, setTopWeight, setTypeOf, topSet } from '../store';
 import { activeInjuries } from '../injury';
 import { finishedNights, nightDurationMin } from '../sleep';
 import { topHistory } from '../progression';
-import { LANDMARKS, VOLUME_MUSCLES } from '../volume';
-import { recentLoadSets } from '../loadWindow';
+import { LANDMARKS, VOLUME_MUSCLES, recentLoadSets } from '../volume';
 import type { MuscleGroup } from '../data/exercises';
 import { STALL_SESSIONS } from './facts';
 import {

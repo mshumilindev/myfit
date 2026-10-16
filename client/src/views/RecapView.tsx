@@ -4,7 +4,7 @@
  * built from the live store for a period id. Sharing draws a portrait card on a
  * canvas (data/shareCard) and hands it to the native share sheet.
  */
-import { PageHead } from '../components/ui/PageHead';
+import { RecapHead } from './recap/RecapHead';
 import { weekOrder } from '../weekStart';
 import { Button, IconButton } from '../components/ui/Button';
 import { Segmented } from '../components/ui/Segmented';
@@ -316,16 +316,7 @@ export function RecapView({
 
   return (
     <div className={`screen rc-view${desktop ? ' desktop' : ''}`}>
-      <PageHead
-        back={{ label: t.backAction, onClick: onClose }}
-        title={t.rcRecap}
-        actions={
-          <>
-            <IconButton icon="cards" label={t.rcPlayStory} onClick={onStory} />
-            <IconButton icon="export" label={t.rcShare} onClick={() => setShareOpen(true)} />
-          </>
-        }
-      />
+      <RecapHead t={t} onClose={onClose} onStory={onStory} onShare={() => setShareOpen(true)} />
 
       <div className="rc-hero-band">
         <div className="rc-row-mid">
