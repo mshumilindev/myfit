@@ -15,6 +15,7 @@
  */
 import fs from 'node:fs';
 import { chromium } from '@playwright/test';
+import { parsePart, runPool, shard } from './lib/pool.mjs';
 
 const arg = (k, d) => {
   const i = process.argv.indexOf(`--${k}`);
@@ -25,14 +26,15 @@ const locales = arg('locales', 'en,uk,pl,lt,et').split(',');
 const widths = arg('widths', '320,360,390').split(',').map(Number);
 const fonts = arg('fonts', '1').split(',').map(Number);
 const filter = arg('filter', '');
-const [part, parts] = arg('part', '0/1').split('/').map(Number);
+const partSpec = parsePart(arg('part', '0/1'));
+const concurrency = Number(arg('concurrency', '1'));
 const out = arg('out', '');
 
 const index = await (await fetch(`${url}/index.json`)).json();
-const ids = Object.entries(index.entries)
+const allIds = Object.entries(index.entries)
   .filter(([id, e]) => e.type === 'story' && id.includes(filter))
-  .map(([id]) => id)
-  .filter((_, i) => i % parts === part);
+  .map(([id]) => id);
+const ids = shard(allIds, partSpec);
 
 /** Runs in the page. */
 const probe = () => {
@@ -140,42 +142,100 @@ const browser = await chromium.launch(
     : {},
 );
 const report = [];
-for (const w of widths) {
-  for (const f of fonts) {
+// One navigation per (width, locale, story); the font scales are applied to that same document one after another.
+// The original flow also mounted the story at 1x and only then injected the scale, so the probes are the same.
+const items = [];
+for (const w of widths) for (const loc of locales) for (const id of ids) items.push({ w, loc, id });
+const pages = [];
+let probes = 0;
+const setScale = (page, f) =>
+  page.evaluate((scale) => {
+    let el = document.getElementById('__audit_font');
+    if (scale === 1) {
+      el?.remove();
+      return;
+    }
+    if (!el) {
+      el = document.createElement('style');
+      el.id = '__audit_font';
+      document.head.appendChild(el);
+    }
+    el.textContent = `html{font-size:${scale * 100}%}`;
+  }, f);
+await runPool(items, concurrency, async ({ w, loc, id }, worker) => {
+  if (!pages[worker]) {
     const ctx = await browser.newContext({
-      viewport: { width: w, height: Number(arg('height', '800')) },
+      viewport: { width: w, height: 800 },
       reducedMotion: 'reduce',
     });
-    const page = await ctx.newPage();
-    for (const loc of locales) {
-      for (const id of ids) {
-        try {
-          await page.goto(`${url}/iframe.html?id=${id}&viewMode=story&globals=locale:${loc}`, {
-            waitUntil: 'load',
-            timeout: 20000,
-          });
-          if (f !== 1) await page.addStyleTag({ content: `html{font-size:${f * 100}%}` });
-          await page.waitForTimeout(400);
-          const found = await page.evaluate(probe);
-          for (const [kind, detail] of found)
-            report.push({ id, width: w, font: f, locale: loc, kind, detail });
-        } catch (e) {
-          report.push({
-            id,
-            width: w,
-            font: f,
-            locale: loc,
-            kind: 'error',
-            detail: String(e).slice(0, 80),
-          });
-        }
-      }
-    }
-    await ctx.close();
+    pages[worker] = await ctx.newPage();
   }
-}
+  const page = pages[worker];
+  let loaded = false;
+  try {
+    await page.setViewportSize({ width: w, height: 800 });
+    await page.goto(`${url}/iframe.html?id=${id}&viewMode=story&globals=locale:${loc}`, {
+      waitUntil: 'load',
+      timeout: 20000,
+    });
+    loaded = true;
+  } catch (e) {
+    for (const f of fonts) {
+      probes++;
+      report.push({
+        id,
+        width: w,
+        font: f,
+        locale: loc,
+        kind: 'error',
+        detail: String(e).slice(0, 80),
+      });
+    }
+  }
+  if (!loaded) return;
+  for (const f of fonts) {
+    try {
+      await setScale(page, f);
+      await page.waitForTimeout(400);
+      const found = await page.evaluate(probe);
+      probes++;
+      for (const [kind, detail] of found)
+        report.push({ id, width: w, font: f, locale: loc, kind, detail });
+    } catch (e) {
+      probes++;
+      report.push({
+        id,
+        width: w,
+        font: f,
+        locale: loc,
+        kind: 'error',
+        detail: String(e).slice(0, 80),
+      });
+    }
+  }
+});
+report.sort((x, y) =>
+  `${x.id}|${x.locale}|${x.width}|${x.font}|${x.kind}|${x.detail}`.localeCompare(
+    `${y.id}|${y.locale}|${y.width}|${y.font}|${y.kind}|${y.detail}`,
+  ),
+);
 await browser.close();
-if (out) fs.writeFileSync(out, JSON.stringify(report, null, 1));
+if (out)
+  fs.writeFileSync(
+    out,
+    JSON.stringify(
+      {
+        audit: 'stories',
+        part: partSpec,
+        total: allIds.length * locales.length * widths.length * fonts.length,
+        expected: items.length * fonts.length,
+        probes,
+        report,
+      },
+      null,
+      1,
+    ),
+  );
 console.log(
   `audited ${ids.length} stories x ${locales.length} locales x ${widths.length} widths x ${fonts.length} font scales: ${report.length} findings`,
 );
