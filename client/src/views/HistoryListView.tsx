@@ -27,7 +27,7 @@ function addWeeks(ts: number, n: number): number {
 }
 
 export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () => void }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const store = useStore();
   const weekStart = useWeekStartDay();
   const now = useMinuteClock();
@@ -57,8 +57,8 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
   }, [finished.length, thisWeek, weekStart]);
 
   const fmt = useMemo(
-    () => new Intl.DateTimeFormat(t.locale, { day: 'numeric', month: 'short' }),
-    [t.locale],
+    () => new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }),
+    [locale],
   );
   const rangeOf = (i: number) => {
     const from = addWeeks(thisWeek, -i);

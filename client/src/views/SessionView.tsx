@@ -1649,7 +1649,7 @@ export function SessionView(props: {
       day ? t.startKickerDay(slot + 1) : t.startKickerRecent(slot + 1);
     const hist = [...finished, workout!];
     const day =
-      sameDay.length > 0 ? new Intl.DateTimeFormat(t.locale, { weekday: 'long' }).format(at) : null;
+      sameDay.length > 0 ? new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(at) : null;
     const picks: TiredPick[] = [];
     // Do these sessions usually open with a warm-up (marker or cardio first)?
     // Same rule as the Playbook (store.warmupHabit), so both agree.
@@ -1731,7 +1731,7 @@ export function SessionView(props: {
   function renderPlaySheet() {
     if (!playSheet) return null;
     const { play, hero } = playSheet;
-    const day = new Intl.DateTimeFormat(t.locale, { weekday: 'long' }).format(workout!.startedAt);
+    const day = new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(workout!.startedAt);
     const steps = play.exercises.length + (play.opensWithWarmup ? 1 : 0);
     const mins = Math.round(
       (play.opensWithWarmup ? 5 : 0) + play.exercises.reduce((n, e) => n + e.sets * 2.5, 0),
@@ -1862,7 +1862,7 @@ export function SessionView(props: {
           img: MARKER_IMAGES.warmup,
           kind: 'warmup',
         };
-        heroKicker = t.esStarterKicker(dayName).toLocaleUpperCase(t.locale);
+        heroKicker = t.esStarterKicker(dayName).toLocaleUpperCase(locale);
       }
       tiles = [...tiles, ...extra];
     }
@@ -1879,7 +1879,7 @@ export function SessionView(props: {
               kicker: (p.kind === 'strength'
                 ? p.kicker
                 : t.exerciseKindNames.warmup
-              ).toLocaleUpperCase(t.locale),
+              ).toLocaleUpperCase(locale),
             },
       );
     }
