@@ -17,9 +17,10 @@ concurrency:
 env:
   ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
   # Layout audit is split into parallel shards (SPO-140); the merge job proves they add up to the full matrix.
-  # A PR audits English only (fast); main, the nightly run and a manual run audit all five locales.
-  LAYOUT_LOCALES: ${{ github.event_name == 'pull_request' && 'en' || 'en,uk,pl,lt,et' }}
-  LAYOUT_SHARDS: ${{ github.event_name == 'pull_request' && '12' || '20' }}
+  # A PR audits English only (fast); a push to main audits en, uk, pl; the nightly run and a manual run audit all five
+  # locales (lt, et are being retired, SPO-142). Shard counts are kept in step with the matrix in `layout-shard`.
+  LAYOUT_LOCALES: ${{ github.event_name == 'pull_request' && 'en' || (github.event_name == 'push' && 'en,uk,pl' || 'en,uk,pl,lt,et') }}
+  LAYOUT_SHARDS: ${{ github.event_name == 'pull_request' && '10' || (github.event_name == 'push' && '14' || '20') }}
 
 jobs:
   # ---- quality: five independent jobs instead of one 4.5-minute chain; `quality` below keeps the old check name ----
@@ -162,8 +163,6 @@ jobs:
   storybook:
     name: Build Storybook
     runs-on: ubuntu-latest
-    outputs:
-      shards: ${{ steps.shards.outputs.list }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -172,8 +171,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build-storybook
-      - id: shards
-        run: echo "list=$(node -e 'console.log(JSON.stringify([...Array(Number(process.env.LAYOUT_SHARDS)).keys()]))')" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
           name: storybook-static
@@ -183,12 +180,15 @@ jobs:
 
   layout-shard:
     name: Layout shard ${{ matrix.shard }}
-    needs: storybook
+    # No `needs: storybook`: the shard installs its tools while Storybook builds, then waits for the artifact (SPO-140).
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(needs.storybook.outputs.shards) }}
+        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[0,1,2,3,4,5,6,7,8,9]' || (github.event_name == 'push' && '[0,1,2,3,4,5,6,7,8,9,10,11,12,13]' || '[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]')) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -197,6 +197,17 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: Wait for the Storybook build (fails fast if it failed)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 120); do
+            if gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" --jq '.artifacts[].name' | grep -qx storybook-static; then echo "artifact ready after ${i} checks"; exit 0; fi
+            res=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --jq '.jobs[]|select(.name=="Build Storybook")|.conclusion // ""')
+            if [ -n "$res" ] && [ "$res" != "success" ]; then echo "Build Storybook finished with: $res"; exit 1; fi
+            sleep 3
+          done
+          echo "timed out waiting for the Storybook artifact"; exit 1
       - uses: actions/download-artifact@v4
         with:
           name: storybook-static
