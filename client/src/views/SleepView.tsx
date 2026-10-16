@@ -5,6 +5,7 @@
  * App while a live night runs.
  */
 import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { Switch as KitSwitch } from '../components/ui/Switch';
 import { useEffect, useMemo, useState } from 'react';
@@ -61,12 +62,7 @@ const WD_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 function SleepTopbar({ title, onBack }: { title: string; onBack: () => void }) {
   const { t } = useT();
-  return (
-    <div className="sleep-topbar">
-      <BackButton className="sleep-back" label={t.cancel} onClick={onBack} />
-      <span className="sleep-topbar-title">{title}</span>
-    </div>
-  );
+  return <PageHead back={{ label: t.cancel, onClick: onBack }} title={title} />;
 }
 
 export function SleepView({

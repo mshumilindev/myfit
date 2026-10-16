@@ -3,7 +3,7 @@
  * Reads computeMastery() and renders design MT-03…MT-08. Mastery is a live
  * measure of how well you train, never an achievements/points board.
  */
-import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { useMemo, useState } from 'react';
 import { RailItem } from '../components/ui/Rail';
 import { Button, IconButton } from '../components/ui/Button';
@@ -273,10 +273,7 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => v
 
   return (
     <div className="screen mst">
-      <div className="mst-head">
-        <BackButton label={t.backAction} onClick={back} />
-        <span className="mst-head-title">{t.masteryTitle}</span>
-      </div>
+      <PageHead back={{ label: t.backAction, onClick: back }} title={t.masteryTitle} />
 
       <div className="mst-body">
         {/* hero */}
@@ -487,10 +484,7 @@ function Shortfalls({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
   const impactClass = (i: string) => (i === 'high' ? 'gold' : i === 'med' ? 'goldd' : 'n');
   return (
     <div className="screen mst">
-      <div className="mst-head">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <span className="mst-head-title">{t.masteryShortfall}</span>
-      </div>
+      <PageHead back={{ label: t.backAction, onClick: onBack }} title={t.masteryShortfall} />
       <div className="mst-body mst-sf">
         <div className="mst-sf-next">
           <div>
@@ -547,11 +541,11 @@ function Ladder({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
   const ranks = [...MASTERY_RANKS].map((r, i) => ({ ...r, i })).reverse();
   return (
     <div className="screen mst">
-      <div className="mst-head">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <span className="mst-head-title">{t.masteryLadder}</span>
-        <span className="chip n mst-scale">{t.masteryScale}</span>
-      </div>
+      <PageHead
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.masteryLadder}
+        actions={<span className="chip n mst-scale">{t.masteryScale}</span>}
+      />
       <div className="mst-body mst-ladder">
         {ranks.map((r) => {
           const state = r.i > m.rankIndex ? 'locked' : r.i === m.rankIndex ? 'current' : 'done';
@@ -609,10 +603,7 @@ function Calibration({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
 
   return (
     <div className="screen mst">
-      <div className="mst-head">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <span className="mst-head-title">{t.masteryTitle}</span>
-      </div>
+      <PageHead back={{ label: t.backAction, onClick: onBack }} title={t.masteryTitle} />
       <div className="mst-body mst-calib">
         {m.calibrating && (
           <>

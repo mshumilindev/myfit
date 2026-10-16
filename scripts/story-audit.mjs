@@ -117,6 +117,15 @@ const probe = () => {
       const ar = a.getBoundingClientRect();
       const clipX = ac.overflowX !== 'visible';
       const clipY = ac.overflowY !== 'visible';
+      // An element that fills its clipping ancestor edge to edge (a card laid over a photo hero) is meant to be clipped by it; nothing further out can see the shadow.
+      if (
+        (clipX || clipY) &&
+        Math.abs(r.left - ar.left) <= 1 &&
+        Math.abs(ar.right - r.right) <= 1 &&
+        Math.abs(r.top - ar.top) <= 1 &&
+        Math.abs(ar.bottom - r.bottom) <= 1
+      )
+        break;
       const cut = [];
       if (clipX && r.left - ar.left >= -1 && r.left - ar.left < ext.l - 3) cut.push('left');
       if (clipX && ar.right - r.right >= -1 && ar.right - r.right < ext.r - 3) cut.push('right');

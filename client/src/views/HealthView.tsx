@@ -12,6 +12,7 @@
  * by default) right; forms and edits open in the right panel.
  */
 import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
 import { useT } from '../i18n';
@@ -116,6 +117,7 @@ export function HealthView(props: HealthViewProps) {
   const openForm = (form: HealthFormSpec) =>
     go({ view: props.view, hist: props.hist, form }, web && !!props.form);
   const closeForm = () => props.onClose();
+  const back = { label: t.backAction, onClick: props.onClose };
   const onRehab = (p: RehabPrefill) => shell.replaceOverlay({ screen: 'injury', prefill: p });
 
   const openItem = (it: HealthItem) => {
@@ -545,10 +547,7 @@ export function HealthView(props: HealthViewProps) {
       const mode = props.hist ?? 'list';
       return (
         <div className="screen hl">
-          <div className="hl-pbar">
-            <BackButton label={t.backAction} onClick={props.onClose} />
-            <h1 className="hl-pt">{t.hlHistoryTitle}</h1>
-          </div>
+          <PageHead className="hl-pbar" back={back} title={t.hlHistoryTitle} />
           <div className="hl-scroll">
             <div className="hl-cnt">
               <HistControls
@@ -592,10 +591,7 @@ export function HealthView(props: HealthViewProps) {
     }
     return (
       <div className="screen hl">
-        <div className="hl-pbar">
-          <BackButton label={t.backAction} onClick={props.onClose} />
-          <h1 className="hl-pt">{t.startHealthTitle}</h1>
-        </div>
+        <PageHead className="hl-pbar" back={back} title={t.startHealthTitle} />
         <div className="hl-scroll">
           <div className="hl-cnt">
             {nowGroups}
