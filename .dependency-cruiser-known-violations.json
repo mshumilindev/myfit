@@ -700,6 +700,47 @@
   {
     "type": "cycle",
     "from": "client/src/atlas/facts.ts",
+    "to": "client/src/loadWindow.ts",
+    "unresolvedTo": "../loadWindow",
+    "dependencyTypes": ["local", "import"],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "client/src/loadWindow.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/store.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/types.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/memory.ts",
+        "dependencyTypes": ["local", "type-import"]
+      },
+      {
+        "name": "client/src/atlas/intentKit.ts",
+        "dependencyTypes": ["local", "type-only", "import"]
+      },
+      {
+        "name": "client/src/atlas/plan.ts",
+        "dependencyTypes": ["local", "import"]
+      },
+      {
+        "name": "client/src/atlas/facts.ts",
+        "dependencyTypes": ["local", "import"]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "client/src/atlas/facts.ts",
     "to": "client/src/playbook.ts",
     "unresolvedTo": "../playbook",
     "dependencyTypes": ["local", "import"],
@@ -836,7 +877,7 @@
         "dependencyTypes": ["local", "import"]
       },
       {
-        "name": "client/src/playbook.ts",
+        "name": "client/src/loadWindow.ts",
         "dependencyTypes": ["local", "import"]
       },
       {
@@ -1237,7 +1278,7 @@
         "dependencyTypes": ["local", "import"]
       },
       {
-        "name": "client/src/playbook.ts",
+        "name": "client/src/loadWindow.ts",
         "dependencyTypes": ["local", "import"]
       },
       {
