@@ -11,7 +11,7 @@ export default defineConfig({
       reporter: ['text', 'html'],
       // Чесний гейт: поріг тримаємо на модулях, які реально покриті тестами
       // (i18n — словники, плюрали, форматери). Розширюємо include разом з
-      // новими тестами; знижувати пороги заборонено (test-integrity.mdc).
+      // новими тестами; знижувати пороги заборонено (.claude/rules/tests.md).
       include: ['src/i18n/**', 'src/data/**'],
       thresholds: {
         statements: 80,

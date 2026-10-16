@@ -7,7 +7,7 @@
  * Budgets (plain string entries only; functions and placeholder strings are skipped):
  *  1. Short labels (English 2..24 chars): the translation may be at most max(30, 2.2 x English) chars.
  *  2. No unbreakable word longer than 22 letters in a label of up to 40 chars (it cannot wrap and pushes the row wide).
- * Do NOT raise a budget or add an exemption to get green: shorten the translation (test-integrity.mdc).
+ * Do NOT raise a budget or add an exemption to get green: shorten the translation (.claude/rules/tests.md).
  */
 import { describe, expect, it } from 'vitest';
 import { LOCALES, LOCALE_IDS, type LocaleId } from '../client/src/i18n';

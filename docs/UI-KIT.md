@@ -27,7 +27,7 @@ variant="primary">`, `<Card tone="danger">`, etc. Layout-only inline styles
    row, a picker, a calendar, a bar — is built in `components/ui/` with its stories
    **before or together with its first use**, never as page-local CSS "for now".
 
-Enforced by `.cursor/rules/ui-kit.mdc` (always applied) and the kit test.
+Enforced by `.claude/rules/ui.md` (always applied) and the kit test.
 
 Feature-specific composition (the rehab stage ladder, the session builder wizard)
 still lives in the feature — but it is _built out of_ kit primitives (Card, ListRow,
@@ -312,7 +312,7 @@ Update: Overview drill-ins now use the round icon back button + title in ONE 36p
 Візуальні зміни — властивість/варіант примітива в `components/ui/`. Якщо не
 виходить — оверрайд у `glass.css`/`redesign.css` під конкретним фіче-класом, з
 коментарем «чому не кіт», без візуальних властивостей на `.ui*` і без
-дублікатів (повторюється — піднімаємо в кіт). Деталі: `.cursor/rules/ui-kit.mdc`.
+дублікатів (повторюється — піднімаємо в кіт). Деталі: `.claude/rules/ui.md`.
 
 ## Sheet `tone` (кольорове кодування шторок)
 
