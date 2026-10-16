@@ -27,7 +27,7 @@ npm run test:rules                            # Firestore rules на емуля�
 npm run test:e2e | e2e:coach                  # Playwright
 npm run i18n:check | deadcode                 # паритет локалей | невикористані експорти
 npm run storybook | build-storybook           # каталог кіту
-npm run audit:chat | audit:hero | audit:stories   # геометрія; прапори --part i/n --concurrency k --locales en (повні — CI `layout`: PR = лише en, main/нічний/ручний = 5 локалей, шарди зводить scripts/audit-merge.mjs)
+npm run audit:chat | audit:hero | audit:stories   # геометрія; прапори --part i/n --concurrency k --locales en (повні — CI `layout`: PR = en, push у main = en,uk,pl, нічний/ручний = усі локалі; шарди зводить scripts/audit-merge.mjs; ADR 004)
 ```
 
 ## Як працювати
@@ -39,6 +39,7 @@ npm run audit:chat | audit:hero | audit:stories   # геометрія; прап
 - **Перед зміною спільного** (кіт, глобальний CSS, пропси, i18n) — `rg` усіх споживачів і їхні сторі/тести.
 - **Мінімальний дифф.** Без рефакторингу «заодно». Залежність — лише з обґрунтуванням (розмір PWA) і ADR у тому ж коміті.
 - **Паралель:** незалежні задачі — окремим агентам з явним списком файлів; спільні файли (`styles.css`, `glass.css`, i18n, `package.json`) править один. Агенти не комітять і не пушать; звіт агента — гіпотеза, дифи й гейт перевіряє оркестратор.
+- **CI-бюджет ≤5 хв (ADR 004):** нова перевірка — окремим паралельним job, геометрична — з `--part/--out` у зведення; матрицю (локалі/ширини/шрифти/історії) заради швидкості не скорочувати.
 - **Ніколи** `pkill -f <шаблон>`, `--no-verify`, `push --force`, секрети в коді/логах.
 - Коміти й доки — українською, код — англійською.
 
