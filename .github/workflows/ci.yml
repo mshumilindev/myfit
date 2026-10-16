@@ -19,7 +19,7 @@ env:
   # Layout audit is split into parallel shards (SPO-140); the merge job proves they add up to the full matrix.
   # A PR audits English only (fast); main, the nightly run and a manual run audit all five locales.
   LAYOUT_LOCALES: ${{ github.event_name == 'pull_request' && 'en' || 'en,uk,pl,lt,et' }}
-  LAYOUT_SHARDS: ${{ github.event_name == 'pull_request' && '8' || '20' }}
+  LAYOUT_SHARDS: ${{ github.event_name == 'pull_request' && '12' || '20' }}
 
 jobs:
   # ---- quality: five independent jobs instead of one 4.5-minute chain; `quality` below keeps the old check name ----
