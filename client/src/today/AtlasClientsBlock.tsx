@@ -56,6 +56,7 @@ import { useClientCoachEnabled } from '../coach/client/gate';
 import { useClientShared } from '../coach/client/shared';
 import type { AtlasOpts, AtlasView } from './layout';
 import { Card } from '../components/ui/Card';
+import { navigateHash } from '../navigateHash';
 
 const DAY = 86_400_000;
 const INACTIVE_MS = 30 * DAY;
@@ -258,7 +259,7 @@ function TrainerTile({ trainer }: { trainer: MyTrainer }) {
         ? {
             as: 'button' as const,
             onClick: () => {
-              window.location.hash = '#/trainer/chat';
+              navigateHash('#/trainer/chat');
             },
             'aria-label': `${trainer.name}, ${t.profileTrainer}${unread > 0 ? `, ${unread}` : ''}`,
           }

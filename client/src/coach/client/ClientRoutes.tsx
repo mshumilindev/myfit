@@ -15,10 +15,11 @@ import { NoTrainerPage } from './screens/NoTrainerPage';
 import type { ClientCoachPort } from './data/port';
 import { useClientCoach } from './data/useClientCoach';
 import { parseClientRoute } from './routes';
+import { navigateHash } from '../../navigateHash';
 import './ClientCoach.css';
 
 const go = (hash: string) => {
-  window.location.hash = hash;
+  navigateHash(hash);
 };
 
 /**

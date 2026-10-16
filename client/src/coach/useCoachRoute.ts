@@ -7,6 +7,7 @@ import {
   sameRoute,
   type CoachRoute,
 } from './routes';
+import { navigateHash } from '../navigateHash';
 
 /**
  * The Coach route, a pure function of `location.hash`. Navigating assigns the
@@ -38,7 +39,7 @@ export function useCoachRoute(): [CoachRoute, (route: CoachRoute) => void] {
 
   const navigate = useCallback((next: CoachRoute) => {
     setRoute(next);
-    if (window.location.hash !== coachHash(next)) window.location.hash = coachHash(next);
+    if (window.location.hash !== coachHash(next)) navigateHash(coachHash(next));
   }, []);
 
   return [route, navigate];

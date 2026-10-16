@@ -5,6 +5,7 @@
  */
 import { BackButton } from './ui/BackButton';
 import { useT } from '../i18n';
+import { navigateHash } from '../navigateHash';
 
 export function OverviewBack({ className }: { className?: string }) {
   const { t } = useT();
@@ -13,7 +14,7 @@ export function OverviewBack({ className }: { className?: string }) {
       className={['ov-back', className].filter(Boolean).join(' ')}
       label={t.overviewTab}
       onClick={() => {
-        window.location.hash = '#/overview';
+        navigateHash('#/overview');
       }}
     />
   );
