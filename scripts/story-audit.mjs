@@ -108,6 +108,8 @@ const probe = () => {
       ext.t = Math.max(ext.t, e - oy);
       ext.b = Math.max(ext.b, e + oy);
     }
+    // A hairline glow (<= 4px, e.g. the now-line) sitting flush against a scroll edge is not a visible defect.
+    if (Math.max(ext.l, ext.r, ext.t, ext.b) <= 4) continue;
     for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
       const ac = getComputedStyle(a);
       const ar = a.getBoundingClientRect();
