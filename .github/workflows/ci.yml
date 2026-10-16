@@ -208,7 +208,7 @@ jobs:
             sleep 3
           done
           echo "timed out waiting for the Storybook artifact"; exit 1
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: storybook-static
           path: client/storybook-static
@@ -239,7 +239,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: audit-report-*
           merge-multiple: true
