@@ -42,7 +42,7 @@ import {
   setCoach,
   useSelfCoachRole,
 } from './store';
-import { SpotterSky } from './components/SpotterSky';
+import { AppRoot, SpotterSky } from './components/SpotterSky';
 import { SleepAutomation, SleepPauseController } from './components/SleepAutomation';
 import { SleepHero } from './components/SleepHero';
 import { useT } from './i18n';
@@ -1444,7 +1444,7 @@ export function App() {
   // Nutrition takes over the whole screen — its own lazurite skin & store.
   if (nutritionOpen && nutritionEnabled) {
     return (
-      <div className="app app-apex-root">
+      <AppRoot>
         <Suspense fallback={<ScreenFallback />}>
           <NutritionApp
             now={notifNow}
@@ -1475,14 +1475,14 @@ export function App() {
             onClose={() => setShellOpen(false)}
           />
         )}
-      </div>
+      </AppRoot>
     );
   }
 
   // Learn (how-to videos) takes over the whole screen — its own rubellite skin.
   if (learnOpen) {
     return (
-      <div className="app app-apex-root">
+      <AppRoot>
         <Suspense fallback={<ScreenFallback />}>
           <LearnApp
             now={notifNow}
@@ -1514,14 +1514,14 @@ export function App() {
             onClose={() => setShellOpen(false)}
           />
         )}
-      </div>
+      </AppRoot>
     );
   }
 
   // People (accounts & profiles) takes over the whole screen — its own silver skin.
   if (rosterOpen) {
     return (
-      <div className="app app-apex-root">
+      <AppRoot>
         <Suspense fallback={<ScreenFallback />}>
           <RosterApp
             role={rosterRole}
@@ -1555,14 +1555,14 @@ export function App() {
             onClose={() => setShellOpen(false)}
           />
         )}
-      </div>
+      </AppRoot>
     );
   }
 
   // Apex takes over the whole screen (its own header, nav and amethyst skin).
   if (apexOpen) {
     return (
-      <div className="app app-apex-root">
+      <AppRoot>
         <Suspense fallback={<ScreenFallback />}>
           <ApexApp
             store={store}
@@ -1596,7 +1596,7 @@ export function App() {
             onClose={() => setShellOpen(false)}
           />
         )}
-      </div>
+      </AppRoot>
     );
   }
 
