@@ -61,8 +61,6 @@ import {
   workingKg,
   marginalStimulus,
   muscleTally,
-  performanceDrops,
-  setStimuli,
   tiredVerdict,
   type SessionLift,
 } from '../stimulus';
@@ -70,6 +68,7 @@ import { muscleFatigue, stalledMuscles } from '../fatigue';
 import { PhotoSlider } from '../components/PhotoSlider';
 import { SidesChip } from '../components/SidesChip';
 import { prCardDue, usePrMomentExpiry } from './prMoment';
+import { useSetBars } from './useSetBars';
 import { MuscleStatePanel } from '../components/MuscleStatePanel';
 import { cachedPersonalLandmarks } from '../personalize';
 import { SPLIT_GROUPS } from '../data/subregions';
@@ -781,6 +780,7 @@ export function SessionView(props: {
         : new Map<MuscleGroup, number>(),
     [store.workouts, workoutId, workoutStart],
   );
+  const setBars = useSetBars(workout, live, store.workouts);
   if (!workout) return null;
 
   const sets = workoutSets(workout);
@@ -1282,8 +1282,6 @@ export function SessionView(props: {
     const m = resolveMuscles(e);
     return { sets: e.sets, primary: m.primary, secondary: m.secondary };
   };
-  const firstAt = (e: Exercise): number =>
-    Math.min(...e.sets.map((s) => s.loggedAt ?? Number.MAX_SAFE_INTEGER));
   /** Fractional hard sets per muscle this session. */
   function sessionTally(): Map<string, number> {
     return muscleTally(workout!.exercises.filter(isStrengthExercise).map(liftOf));
@@ -1294,20 +1292,6 @@ export function SessionView(props: {
     for (const [k, v] of carry) m.set(k, (m.get(k) ?? 0) + v);
     return m;
   }
-  /** What the lift's main muscle had done before this lift started. */
-  function priorBefore(ex: Exercise): number {
-    const primary = resolveMuscles(ex).primary;
-    if (!primary) return 0;
-    const start = firstAt(ex);
-    const earlier = workout!.exercises.filter(
-      (e) => e.id !== ex.id && isStrengthExercise(e) && firstAt(e) < start,
-    );
-    return (
-      (muscleTally(earlier.map(liftOf)).get(primary) ?? 0) +
-      (carry.get(primary as MuscleGroup) ?? 0)
-    );
-  }
-  /** Per-set stimulus (bar height) and performance drop (bar colour) for rows. */
   // Personal volume tolerance: per-session plateau scales with this athlete's
   // tolerated weekly volume (personalize.ts), drop tolerance with their habit
   // on the lift.
@@ -1324,29 +1308,6 @@ export function SessionView(props: {
     const finished = store.workouts.filter((w) => w.finishedAt !== null);
     const stalled = !!primary && stalledMuscles(finished, wallClock()).has(primary);
     return dropTolerance(past, stalled);
-  }
-  function rowMeters(ex: Exercise): {
-    stim: Map<string, number>;
-    drop: Map<string, number>;
-    load: Map<string, number>;
-  } {
-    const primary = resolveMuscles(ex).primary;
-    const plateau = plateauFor(primary);
-    // How loaded the muscle already was when each set started (0..1 of the
-    // session plateau) — warm-ups included at their small hardness, so a warm-
-    // up bar reads the muscle's real state instead of a fixed "priming" blue.
-    const load = new Map<string, number>();
-    let prior = priorBefore(ex);
-    const ref = workingKg(ex.sets);
-    for (const st of ex.sets) {
-      load.set(st.id, Math.min(1, prior / Math.max(1, plateau)));
-      prior += setHardness(st, ref);
-    }
-    return {
-      stim: setStimuli(ex.sets, priorBefore(ex), plateau),
-      drop: performanceDrops(ex.sets),
-      load,
-    };
   }
   /** Growth value of one more set of this lift vs the first set (0..1). */
   function nextWorth(ex: Exercise): number | null {
@@ -3133,7 +3094,7 @@ export function SessionView(props: {
       isStopwatchExercise(ex) &&
       ex.sets.every((x) => setTypeOf(x) === 'static-dynamic' && x.weight === null);
     const sortedSets = [...ex.sets].sort((a, b) => a.position - b.position);
-    const meters = focusView && live && isStrengthExercise(ex) ? rowMeters(ex) : null;
+    const meters = focusView && live && isStrengthExercise(ex) ? setBars : null;
     return (
       <Card
         key={ex.id}
@@ -3615,28 +3576,15 @@ export function SessionView(props: {
             )}
             <div style={renaming === ex.id ? { opacity: 0.6 } : undefined}>
               {sortedSets.map((s, i) => {
-                // K1 · a bar per set: height = how much it built, colour
-                // intensity = how far performance had dropped.
-                const meter = meters ? meters.stim.get(s.id) : undefined;
-                const isWarm = setTypeOf(s) === 'warmup';
-                const meterStyle =
-                  meter !== undefined
-                    ? ({
-                        // Working sets: linear, same scale as the "Muscle gain from
-                        // this set" meter. Warm-ups: the muscle's energy still in the
-                        // tank, so the bar shrinks as the session loads it.
-                        '--stim': isWarm
-                          ? (1 - (meters!.load.get(s.id) ?? 0)).toFixed(2)
-                          : meter.toFixed(2),
-                        // Colour = the worse of: how far performance dropped, and how
-                        // little this set still built (diminishing returns).
-                        // Warm-ups: the muscle's load so far (they barely build).
-                        '--fat': (isWarm
-                          ? (meters!.load.get(s.id) ?? 0)
-                          : Math.min(1, Math.max((meters!.drop.get(s.id) ?? 0) / 0.1, 1 - meter))
-                        ).toFixed(2),
-                      } as CSSProperties)
-                    : undefined;
+                // K1 · a bar per set: height = the muscle's tank after the set,
+                // colour = tank loss or measured rep loss (setTank.ts).
+                const bar = meters?.get(s.id);
+                const meterStyle = bar
+                  ? ({
+                      '--stim': bar.barHeight.toFixed(3),
+                      '--fat': bar.fat.toFixed(2),
+                    } as CSSProperties)
+                  : undefined;
                 const rec = isRecordSet(ex, s);
                 const type = setTypeOf(s);
                 const drops = setDrops(s);

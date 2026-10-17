@@ -427,3 +427,12 @@ describe('conditions and nicotine: the most conservative wins, never the product
     expect(both).toBeGreaterThanOrEqual(0.5);
   });
 });
+
+describe('cut never raises reps above last time (heavy low-rep lifter)', () => {
+  it('100 kg x 1, 30 days ago -> lighter weight, still 1 rep', () => {
+    const t = nextTarget([ago(30, 100, 1)], squat);
+    expect(t.state).toBe('return');
+    expect(t.weight).toBeLessThan(100);
+    expect(t.reps).toBeLessThanOrEqual(1);
+  });
+});

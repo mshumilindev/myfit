@@ -182,11 +182,12 @@ function returnTarget(
     // 2-decimal pre-round: 75 x (1 - 0.9) is 7.499999... in floating point, not 7.5.
     const lost = Math.round(body * (1 - row.weightMult) * 100) / 100;
     const extra = Math.max(ASSIST_STEP, roundTo(lost, ASSIST_STEP));
-    return mk(Math.min(prevWeight, 0) - extra, low, 'cut');
+    return mk(Math.min(prevWeight, 0) - extra, Math.min(prevReps, low), 'cut');
   }
   // Bodyweight / unloaded: fewer reps, no weight.
   if (unloaded) return mk(null, reduced, 'cut');
-  return mk(cutWeight(prevWeight, row.weightMult), low, 'cut');
+  // Never more reps than last time: a heavy single cut to 90% x 7 would out-lift the old best.
+  return mk(cutWeight(prevWeight, row.weightMult), Math.min(prevReps, low), 'cut');
 }
 
 /**
