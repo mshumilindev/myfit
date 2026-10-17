@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button, IconButton } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Chip } from '../components/ui/Chip';
+import { Ring } from '../components/ui/Ring';
 import { SearchField } from '../components/ui/SearchField';
 import { Segmented } from '../components/ui/Segmented';
 import { tokenMatch } from '../search';
@@ -45,49 +46,6 @@ const ACCENT_CLASS: Record<string, string> = {
   ok: 'acc-ok',
   blue: 'acc-blue',
 };
-
-/** SVG progress ring. `size` drives the geometry; stroke scales with it. */
-function ChallengeRing({
-  pct,
-  size,
-  stroke,
-  children,
-}: {
-  pct: number;
-  size: number;
-  stroke: number;
-  children?: React.ReactNode;
-}) {
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const off = c * (1 - Math.max(0, Math.min(1, pct)));
-  const gid = `chg-${size}`;
-  return (
-    <div className="ch-ring" style={{ width: size, height: size }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="ch-ring-svg">
-        <circle cx={size / 2} cy={size / 2} r={r} className="ch-ring-track" strokeWidth={stroke} />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          className="ch-ring-fill"
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={off}
-          stroke={`url(#${gid})`}
-        />
-        <defs>
-          <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="var(--color-accent-700, #8a642e)" />
-            <stop offset="1" stopColor="var(--color-accent-200, #e4bb76)" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <div className="ch-ring-mid">{children}</div>
-    </div>
-  );
-}
 
 interface LiveChallenge {
   ac: ActiveChallenge;
@@ -317,9 +275,11 @@ function ActiveCard({ l, onOpen }: { l: LiveChallenge; onOpen: () => void }) {
       className={`ch-active ${ACCENT_CLASS[tmpl.accent]}`}
       onClick={onOpen}
     >
-      <ChallengeRing pct={prog.pct} size={58} stroke={5}>
-        <Icon name={tmpl.icon} weight="bold" />
-      </ChallengeRing>
+      <Ring className="ch-ring" value={prog.pct * 100} size={58} width={5}>
+        <div className="ch-ring-mid">
+          <Icon name={tmpl.icon} weight="bold" />
+        </div>
+      </Ring>
       <div className="ch-active-main">
         <div className="ch-active-title">{tmpl.title(t, prog.target)}</div>
         <div className="ch-active-sub">
@@ -506,15 +466,17 @@ function DetailSheet({
               : `${t.chDaysLeft(prog.daysLeft)} · ${t.chEndsOn(fmtDayMonth(ac.endsAt, locale))}`}
           </div>
 
-          <ChallengeRing pct={prog.pct} size={200} stroke={12}>
-            <div className="ch-big-num num">
-              {fmtChallengeValue(tmpl.unit, prog.value, t)}
-              <span className="ch-big-den">/{fmtChallengeValue(tmpl.unit, prog.target, t)}</span>
+          <Ring className="ch-ring" value={prog.pct * 100} size={200} width={12}>
+            <div className="ch-ring-mid">
+              <div className="ch-big-num num">
+                {fmtChallengeValue(tmpl.unit, prog.value, t)}
+                <span className="ch-big-den">/{fmtChallengeValue(tmpl.unit, prog.target, t)}</span>
+              </div>
+              <div className="ch-big-lab">
+                {Math.round(prog.pct * 100)}% · {unit}
+              </div>
             </div>
-            <div className="ch-big-lab">
-              {Math.round(prog.pct * 100)}% · {unit}
-            </div>
-          </ChallengeRing>
+          </Ring>
 
           <p className="ch-detail-blurb">
             {tmpl.blurb(t)}{' '}

@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Field } from '../components/ui/Field';
-import { ListRow } from '../components/ui/GroupedList';
+import { GroupedList, ListRow } from '../components/ui/GroupedList';
+import { UserAvatar } from '../components/Avatar';
 import { OptionCard, OptionCardGrid } from '../components/ui/OptionCard';
 import { Segmented } from '../components/ui/Segmented';
 import { signOut } from './auth';
@@ -17,7 +18,6 @@ import {
   ZERO,
 } from './calc';
 import {
-  NutritionAvatar,
   Empty,
   Failed,
   Header,
@@ -527,15 +527,6 @@ export function GoalView() {
 }
 
 // ---------------------------------------------------------------- Profile
-function ProfileTile({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="tile">
-      <b className="tnum">{value}</b>
-      <span>{label}</span>
-    </div>
-  );
-}
-
 export function ProfileView() {
   const s = useStore();
   const { t } = useT();
@@ -573,7 +564,7 @@ export function ProfileView() {
       <Header overline="PROFILE" title={name} />
 
       <div className="n-acct">
-        <NutritionAvatar uid={s.uid ?? undefined} name={name} size={40} />
+        <UserAvatar userId={s.uid ?? undefined} name={name} hasPhoto size={40} />
         <span>
           <span className="nm">{name}</span>
           <span className="sub">
@@ -588,19 +579,19 @@ export function ProfileView() {
         </span>
         <span className="muted ut-xs">⟳ {t('fromSpotter')}</span>
       </div>
-      <div className="tiles">
-        <ProfileTile
-          value={spotterH ? `${spotterH} cm` : p?.heightCm ? `${p.heightCm} cm` : '—'}
+      <GroupedList>
+        <ListRow
           label={t('height')}
+          value={spotterH ? `${spotterH} cm` : p?.heightCm ? `${p.heightCm} cm` : '—'}
         />
-        <ProfileTile
-          value={spotterW != null ? `${spotterW} kg` : p?.weightKg ? `${p.weightKg} kg` : '—'}
+        <ListRow
           label={t('weight')}
+          value={spotterW != null ? `${spotterW} kg` : p?.weightKg ? `${p.weightKg} kg` : '—'}
         />
-        <ProfileTile value={p?.age ? `${p.age}` : '—'} label={t('age')} />
-        <ProfileTile value={p?.sex ? t(p.sex) : '—'} label={t('sex')} />
-        <ProfileTile value={p?.activity ? t(p.activity) : '—'} label={t('activity')} />
-      </div>
+        <ListRow label={t('age')} value={p?.age ? `${p.age}` : '—'} />
+        <ListRow label={t('sex')} value={p?.sex ? t(p.sex) : '—'} />
+        <ListRow label={t('activity')} value={p?.activity ? t(p.activity) : '—'} />
+      </GroupedList>
 
       {!complete && (
         <div className="card mt3">

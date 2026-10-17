@@ -16075,22 +16075,6 @@ button.badge {
 }
 
 /* Progress ring (shared: small on cards, large in detail) */
-.ch-ring {
-  position: relative;
-  flex: none;
-}
-.ch-ring-svg {
-  transform: rotate(-90deg);
-  display: block;
-}
-.ch-ring-track {
-  fill: none;
-  stroke: var(--color-neutral-800);
-}
-.ch-ring-fill {
-  fill: none;
-  transition: stroke-dashoffset 0.5s ease;
-}
 .ch-ring-mid {
   position: absolute;
   inset: 0;
@@ -16835,15 +16819,6 @@ button.badge {
 html.theme-glass .apx-active-title,
 html.theme-glass .apx-streak-n {
   font-weight: 700;
-}
-.apx-ring {
-  position: relative;
-  width: 58px;
-  height: 58px;
-  flex: none;
-}
-.apx-ring svg {
-  display: block;
 }
 .apx-ring-ic {
   position: absolute;
@@ -19380,15 +19355,7 @@ html.theme-glass .apx-streak-n {
 }
 
 /* ring */
-.mst-ring {
-  border-radius: var(--r-round);
-  display: grid;
-  place-items: center;
-  flex: none;
-}
 .mst-ring-in {
-  border-radius: var(--r-round);
-  background: var(--c-191712);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -19976,9 +19943,6 @@ html.theme-glass .apx-streak-n {
   box-shadow: inset 0 0 0 1px var(--color-neutral-700);
   gap: var(--s-6);
 }
-.mst-badge .mst-ring-in {
-  background: var(--c-191712);
-}
 .mst-badge-ring {
   position: relative;
   width: 26px;
@@ -20161,9 +20125,6 @@ html.theme-glass .apx-streak-n {
   display: flex;
   justify-content: center;
   padding: 0 0 var(--s-8);
-}
-.mst-railbadge .mst-ring-in {
-  background: var(--c-191712);
 }
 .mst-railbadge-ring {
   width: 38px;

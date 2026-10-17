@@ -7,6 +7,7 @@ import { PageHead } from '../components/ui/PageHead';
 import { useMemo, useState } from 'react';
 import { RailItem } from '../components/ui/Rail';
 import { Button, IconButton } from '../components/ui/Button';
+import { Ring } from '../components/ui/Ring';
 import { Card } from '../components/ui/Card';
 import { Segmented } from '../components/ui/Segmented';
 import { useStore, setMasteryHistory } from '../store';
@@ -200,35 +201,6 @@ function RankInsignia({
   );
 }
 
-/** Conic progress ring with a dark inner disc. */
-function MasteryRing({
-  frac,
-  size,
-  inner,
-  children,
-}: {
-  frac: number;
-  size: number;
-  inner: number;
-  children: React.ReactNode;
-}) {
-  const p = Math.round(Math.max(0, Math.min(1, frac)) * 100);
-  return (
-    <span
-      className="mst-ring"
-      style={{
-        width: size,
-        height: size,
-        background: `conic-gradient(var(--color-accent) 0 ${p}%, #241b0e ${p}% 100%)`,
-      }}
-    >
-      <span className="mst-ring-in" style={{ width: inner, height: inner }}>
-        {children}
-      </span>
-    </span>
-  );
-}
-
 export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => void }) {
   void shell;
   const { t } = useT();
@@ -279,10 +251,12 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => v
         {/* hero */}
         <div className="mst-hero">
           <div className="mst-hero-top">
-            <MasteryRing frac={m.rankProgress} size={120} inner={100}>
-              <span className="mst-hero-num num">{m.rating}</span>
-              <span className="mst-hero-num-lbl">{t.masteryRatingLabel}</span>
-            </MasteryRing>
+            <Ring value={m.rankProgress * 100} size={120} width={10}>
+              <span className="mst-ring-in">
+                <span className="mst-hero-num num">{m.rating}</span>
+                <span className="mst-hero-num-lbl">{t.masteryRatingLabel}</span>
+              </span>
+            </Ring>
             <div className="mst-hero-rank">
               <RankInsignia index={m.rankIndex} size={34} />
               <div className="mst-rank-line">
@@ -718,9 +692,11 @@ export function MasteryBadge({
               </span>
             </span>
           ) : (
-            <MasteryRing frac={m.rankProgress} size={38} inner={30}>
-              <RankInsignia index={m.rankIndex} size={19} />
-            </MasteryRing>
+            <Ring value={m.rankProgress * 100} size={38} width={4}>
+              <span className="mst-ring-in">
+                <RankInsignia index={m.rankIndex} size={19} />
+              </span>
+            </Ring>
           )
         }
       />
@@ -750,9 +726,11 @@ export function MasteryBadge({
       aria-label={`${t.masteryTitle} · ${m.rating}`}
       title={`${t.masteryTitle} · ${m.rating}`}
     >
-      <MasteryRing frac={m.rankProgress} size={26} inner={20}>
-        <RankInsignia index={m.rankIndex} size={11} />
-      </MasteryRing>
+      <Ring value={m.rankProgress * 100} size={26} width={3}>
+        <span className="mst-ring-in">
+          <RankInsignia index={m.rankIndex} size={11} />
+        </span>
+      </Ring>
     </Button>
   );
 }

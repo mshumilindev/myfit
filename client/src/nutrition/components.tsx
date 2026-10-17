@@ -1,9 +1,7 @@
 import type { ComponentType, CSSProperties, ReactNode } from 'react';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Sheet as KitSheet } from '../components/ui/Overlays';
-import { useEffect, useState } from 'react';
-import { getBlob, ref } from 'firebase/storage';
-import { storage } from './firebase';
+import { useState } from 'react';
 import { House } from '@phosphor-icons/react/House';
 import { ChartLineUp } from '@phosphor-icons/react/ChartLineUp';
 import { Target } from '@phosphor-icons/react/Target';
@@ -57,58 +55,6 @@ const MAP: Record<IconName, ComponentType<IconProps>> = {
 export function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
   const C = MAP[name];
   return <C size={size} weight="regular" />;
-}
-
-// ---------------------------------------------------------------- avatar (shared Spotter photo)
-const avatarCache = new Map<string, string>();
-
-export function initialsOf(name: string): string {
-  const p = name.trim().split(/\s+/).filter(Boolean);
-  if (!p.length) return '?';
-  if (p.length === 1) return p[0].slice(0, 2).toUpperCase();
-  return (p[0][0] + p[p.length - 1][0]).toUpperCase();
-}
-
-/** The user's Spotter photo (Storage avatars/{uid}/photo) or initials fallback. */
-export function NutritionAvatar({
-  uid,
-  name,
-  size = 34,
-}: {
-  uid?: string;
-  name: string;
-  size?: number;
-}) {
-  const [src, setSrc] = useState<string | null>(() =>
-    uid ? (avatarCache.get(uid) ?? null) : null,
-  );
-  useEffect(() => {
-    if (!uid || avatarCache.has(uid)) return;
-    let alive = true;
-    getBlob(ref(storage, `avatars/${uid}/photo`))
-      .then((b) => (b && b.size ? URL.createObjectURL(b) : null))
-      .then((u) => {
-        if (!alive) {
-          if (u) URL.revokeObjectURL(u);
-          return;
-        }
-        if (u) {
-          avatarCache.set(uid, u);
-          setSrc(u);
-        }
-      })
-      .catch(() => undefined);
-    return () => {
-      alive = false;
-    };
-  }, [uid]);
-  const style = { width: size, height: size, fontSize: Math.max(10, Math.round(size * 0.38)) };
-  if (src) return <img className="avatar" style={style} src={src} alt="" />;
-  return (
-    <span className="avatar initials" style={style}>
-      {initialsOf(name)}
-    </span>
-  );
 }
 
 // ---------------------------------------------------------------- sync + header
