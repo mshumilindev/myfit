@@ -39,7 +39,7 @@ vi.mock('../../api', async (orig) => ({
   currentUid: () => 'u-1',
 }));
 vi.mock('../Avatar', () => ({
-  Avatar: (p: { userId?: string; name: string; size?: number }) => (
+  UserAvatar: (p: { userId?: string; name: string; size?: number }) => (
     <span data-testid="real-avatar" data-uid={p.userId ?? ''} data-size={p.size} />
   ),
 }));

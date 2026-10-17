@@ -1,4 +1,5 @@
 import type { Strings } from './en';
+import { plural } from './coachPlural';
 import { supUk } from './sup.uk';
 import { cycUk } from './cyc.uk';
 
@@ -1235,6 +1236,12 @@ export const uk: Strings = {
   progAdd: 'Додай вагу',
   setOptions: 'Параметри підходу',
   progDeload: 'Делоад',
+  progReturn: 'Повернення',
+  progReturnCut: (weeks, lift) =>
+    `Перерва в «${lift}»: ${plural('uk', weeks, { one: '{n} тиждень', few: '{n} тижні', many: '{n} тижнів', other: '{n} тижня' })} — стартуємо легше`,
+  progReturnEase: (weeks, lift) =>
+    `Перерва в «${lift}»: ${plural('uk', weeks, { one: '{n} тиждень', few: '{n} тижні', many: '{n} тижнів', other: '{n} тижня' })} — без стрибка ваги`,
+  progReturnRegain: 'Повертаємо вагу до рівня до перерви',
   progWhyProgress: 'Дійшов до верху діапазону — додай ваги.',
   progWhyHold: 'Побий свої повтори, тоді підніметься вага.',
   progWhyStall: 'Топ-сет застояв — розвантаж і відбудуйся.',

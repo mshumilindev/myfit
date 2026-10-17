@@ -1,4 +1,5 @@
 import type { Strings } from './en';
+import { plural } from './coachPlural';
 import { supPl } from './sup.pl';
 import { cycPl } from './cyc.pl';
 
@@ -1203,6 +1204,12 @@ export const pl: Strings = {
   progAdd: 'Dodaj obciążenie',
   setOptions: 'Opcje serii',
   progDeload: 'Deload',
+  progReturn: 'Powrót',
+  progReturnCut: (weeks, lift) =>
+    `Przerwa w „${lift}”: ${plural('pl', weeks, { one: '{n} tydzień', few: '{n} tygodnie', many: '{n} tygodni', other: '{n} tygodnia' })} — zaczynamy lżej`,
+  progReturnEase: (weeks, lift) =>
+    `Przerwa w „${lift}”: ${plural('pl', weeks, { one: '{n} tydzień', few: '{n} tygodnie', many: '{n} tygodni', other: '{n} tygodnia' })} — bez zwiększania ciężaru`,
+  progReturnRegain: 'Wracamy do ciężaru sprzed przerwy',
   progWhyProgress: 'Osiągnięto górę zakresu — dodaj obciążenie.',
   progWhyHold: 'Pobij powtórzenia, potem wzrośnie ciężar.',
   progWhyStall: 'Seria szczytowa stanęła — deload i odbuduj.',

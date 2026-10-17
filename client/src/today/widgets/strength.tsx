@@ -35,6 +35,7 @@ import {
   type StandardsResult,
 } from '../../standards';
 import { nextTarget, topHistory, type Target } from '../../progression';
+import { targetFor } from './strengthTarget';
 import { solvePlates } from '../../plates';
 import { swapCandidates } from '../../swaps';
 import { strengthImbalance } from '../../weakpoints';
@@ -419,23 +420,10 @@ export interface Plan {
   lifts: PlanLift[];
 }
 
-function targetFor(
-  fin: Workout[],
-  name: string,
-  plannedReps: number | null,
-  equipment: string[],
-): Target {
-  return nextTarget(topHistory(fin, name), {
-    plannedReps,
-    equipment,
-    primary: muscleInfoByName(name)?.primary ?? null,
-    loadType: loadTypeFor({ name, equipment }),
-  });
-}
-
 /** The next program day with lifts (today first), else a repeat of the last session. */
 export function nextPlan(ctx: WidgetCtx): Plan | null {
   const fin = finishedOf(ctx.store.workouts);
+  const kg = latestWeight(ctx.store.bodyMetrics)?.weight ?? null;
   const a = readProgramCache();
   if (a) {
     for (let off = 0; off < 7; off++) {
@@ -450,7 +438,7 @@ export function nextPlan(ctx: WidgetCtx): Plan | null {
         lifts: items.map((i) => ({
           name: i.name,
           sets: i.sets,
-          target: targetFor(fin, i.name, i.reps, i.equipment),
+          target: targetFor(fin, i.name, i.reps, i.equipment, ctx.now, kg),
         })),
       };
     }
@@ -462,7 +450,7 @@ export function nextPlan(ctx: WidgetCtx): Plan | null {
     .map((e) => ({
       name: e.name,
       sets: e.sets.filter((s) => setTypeOf(s) !== 'warmup').length || e.sets.length,
-      target: targetFor(fin, e.name, e.plannedReps ?? null, equipmentFor(e)),
+      target: targetFor(fin, e.name, e.plannedReps ?? null, equipmentFor(e), ctx.now, kg),
     }));
   if (lifts.length === 0) return null;
   return { dayName: last.dayName ?? null, dayTs: null, today: false, lifts };
@@ -475,6 +463,7 @@ export function fmtSet(w: number | null, r: number): string {
 function targetDelta(t: Target, s: StrengthStrings): { text: string; good: boolean | null } {
   if (t.state === 'first') return { text: s.firstTime, good: null };
   if (t.state === 'stall') return { text: s.deload, good: false };
+  if (t.state === 'return' && t.deltaKg < 0) return { text: `${fmtKg(t.deltaKg)} kg`, good: null };
   if (t.deltaKg > 0) return { text: `+${fmtKg(t.deltaKg)} kg`, good: true };
   if (t.prevReps != null && t.reps > t.prevReps) return { text: s.plusRep, good: true };
   return { text: s.hold, good: null };
@@ -2538,6 +2527,7 @@ function stalls(
         equipment,
         primary: muscleInfoByName(name)?.primary ?? null,
         loadType: loadTypeFor({ name, equipment }),
+        now,
       });
       let n = 0;
       while (n < hist.length && hist[n].weight === hist[0].weight) n++;

@@ -1,4 +1,5 @@
 import { supEn } from './sup.en';
+import { plural } from './coachPlural';
 import { cycEn } from './cyc.en';
 /**
  * Base dictionary — copy taken VERBATIM from the design boards
@@ -1190,6 +1191,12 @@ export const en = {
   progAdd: 'Add load',
   setOptions: 'Set options',
   progDeload: 'Deload',
+  progReturn: 'Ease in',
+  progReturnCut: (weeks: number, lift: string) =>
+    `${plural('en', weeks, { one: '{n} week', other: '{n} weeks' })} since your last ${lift} — starting lighter`,
+  progReturnEase: (weeks: number, lift: string) =>
+    `${plural('en', weeks, { one: '{n} week', other: '{n} weeks' })} since your last ${lift} — no weight jump this time`,
+  progReturnRegain: 'Building back to your pre-break weight',
   progWhyProgress: 'You hit the top of your range — add load.',
   progWhyHold: 'Beat your reps, then the weight goes up.',
   progWhyStall: 'Top set has stalled — deload and rebuild.',

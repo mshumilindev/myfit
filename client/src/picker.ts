@@ -26,7 +26,8 @@ import { describeDay, exerciseDay, type DayReadout } from './data/daySuggest';
 import { RECOVERY_DAYS, computeReadiness, type ReadyState } from './recovery';
 import { LANDMARKS } from './volume';
 import { volumeWeakPoints } from './weakpoints';
-import { nextTarget, topHistory, type Target } from './progression';
+import type { Target } from './progression';
+import { pickTarget } from './pickerTarget';
 import { isStrengthExercise, resolveMuscles, topSet } from './store';
 import { fatigueSetCount } from './stimulus';
 import { FATIGUE_COLOR, muscleFatigue, type FatigueLevel, type MuscleFatigue } from './fatigue';
@@ -545,17 +546,6 @@ export interface Suggestion {
   target: Target | null;
 }
 
-function targetFor(item: PickItem, finished: Workout[], beforeTs: number): Target | null {
-  if (item.timesDone === 0) return null;
-  const hist = topHistory(finished, item.name, beforeTs);
-  if (hist.length === 0) return null;
-  return nextTarget(hist, {
-    equipment: item.equipment ? [item.equipment] : [],
-    primary: item.primary,
-    bodyweight: item.last?.weight === null,
-  });
-}
-
 /**
  * Up to `count` suggestions for this session, one reason each, never an
  * exercise already done today:
@@ -610,7 +600,7 @@ export function suggest(
   const add = (item: PickItem, reason: SuggestReason, muscle: MuscleGroup | null) => {
     if (used.has(item.key) || out.length >= count) return;
     used.add(item.key);
-    out.push({ item, reason, muscle, target: targetFor(item, finished, beforeTs) });
+    out.push({ item, reason, muscle, target: pickTarget(item, finished, beforeTs) });
   };
 
   // usual

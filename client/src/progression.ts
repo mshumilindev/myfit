@@ -7,6 +7,11 @@
  *
  * We already prefill last weight and log RPE; this turns that into an actual
  * target instead of "repeat last time".
+ *
+ * Breaks (SPO-149): when the caller passes `now`, a lift that was not trained for
+ * 15+ calendar days gets a 'return' target (no jump, then a lighter start, then a
+ * fast climb back to the pre-break load) instead of "last weight / +5 kg". See
+ * docs/specs/detraining-return-after-break.md and docs/research/detraining.md.
  */
 import { topSet, isStrengthExercise, liftVariant } from './store';
 import type { Workout } from './types';
@@ -14,6 +19,16 @@ import type { MuscleGroup } from './data/exercises';
 import type { LoadType } from './loads';
 import type { ConditionEffects } from './data/conditionCatalog';
 import { progressionMult } from './calcMods';
+import {
+  REF_BODY_KG,
+  REGAIN_MAX_SESSIONS,
+  CUT_FROM_DAYS,
+  STALL_BREAK_DAYS,
+  breakRow,
+  calendarDaysBetween,
+  gapDays,
+  type BreakRow,
+} from './detraining';
 
 export interface TopPoint {
   ts: number;
@@ -47,7 +62,11 @@ export function topHistory(
   return pts.sort((a, b) => b.ts - a.ts);
 }
 
-export type ProgState = 'first' | 'progress' | 'hold' | 'stall';
+/** 'return' = first sessions back after a break (see `Target.returnKind`). */
+export type ProgState = 'first' | 'progress' | 'hold' | 'stall' | 'return';
+
+/** ease: break of 2-4 weeks, no jump · cut: lighter start after a longer break · regain: climbing back to the pre-break load. */
+export type ReturnKind = 'ease' | 'cut' | 'regain';
 
 export interface Target {
   state: ProgState;
@@ -58,6 +77,10 @@ export interface Target {
   repHigh: number;
   prevWeight: number | null;
   prevReps: number | null;
+  /** state 'return' only: which kind of return this is. */
+  returnKind?: ReturnKind;
+  /** state 'return' only: calendar days since the lift was last trained (ease/cut). */
+  gapDays?: number;
 }
 
 export interface ProgOpts {
@@ -68,6 +91,11 @@ export interface ProgOpts {
   /** Load type (Load-entry C): steers the direction of progress. Defaults to
    *  plain weight. */
   loadType?: LoadType;
+  /** "Now" (ms) for break detection. Absent = no break logic (the old behaviour);
+   *  callers that know the time pass it, tests pin it. */
+  now?: number;
+  /** Body mass (kg), only used to size the extra help of an assisted machine after a break. */
+  bodyKg?: number | null;
 }
 
 /** Stack step for an assisted machine's counter-weight (a typical plate). */
@@ -96,8 +124,113 @@ function isStalled(history: TopPoint[]): boolean {
   const loaded = history.filter((p) => (p.weight ?? 0) > 0);
   if (loaded.length < 3) return false;
   const recent = loaded.slice(0, 3);
+  // A break inside the window is not a plateau (SPO-149).
+  for (let i = 0; i < 2; i++)
+    if (calendarDaysBetween(recent[i + 1].ts, recent[i].ts) >= STALL_BREAK_DAYS) return false;
   const w = recent[0].weight ?? 0;
   return recent.every((p) => (p.weight ?? 0) <= w) && (recent[2].weight ?? 0) === w;
+}
+
+// ---------------------------------------------------------------------------
+// Breaks (SPO-149): first session back, and the climb to the pre-break load
+// ---------------------------------------------------------------------------
+
+/** Cut a load by `mult` and keep it loadable (2.5 steps), never above the last weight. */
+function cutWeight(prev: number, mult: number): number {
+  return Math.min(prev, Math.max(2.5, roundTo(prev * mult, 2.5)));
+}
+
+/** The first target after `gap` calendar days without this lift (rows R1..R5 of the research table). */
+function returnTarget(
+  last: TopPoint,
+  row: BreakRow,
+  gap: number,
+  opts: ProgOpts,
+  range: { repLow: number; repHigh: number },
+): Target {
+  const { repLow: low, repHigh: high } = range;
+  const { weight: prevWeight, reps: prevReps } = last;
+  const mk = (weight: number | null, reps: number, kind: ReturnKind): Target => ({
+    state: 'return',
+    weight,
+    reps,
+    deltaKg: weight !== null && prevWeight !== null ? weight - prevWeight : 0,
+    repLow: low,
+    repHigh: high,
+    prevWeight,
+    prevReps,
+    returnKind: kind,
+    gapDays: gap,
+  });
+  const unloaded = opts.bodyweight || prevWeight === null || prevWeight === 0;
+  const assisted = opts.loadType === 'assist' && prevWeight !== null;
+
+  // R1: a short break (2-4 weeks) -- same load, no jump, no "+1 rep" either.
+  if (row.tier === 1) {
+    if (opts.loadType === 'band' || (unloaded && !assisted))
+      return mk(prevWeight, prevReps, 'ease');
+    return mk(prevWeight, Math.min(prevReps, high), 'ease');
+  }
+
+  const reduced = Math.max(1, Math.round(prevReps * row.weightMult));
+  // Band: the colour ladder is discrete, so fewer reps instead of a lighter band.
+  if (opts.loadType === 'band') return mk(prevWeight, reduced, 'cut');
+  // Assisted: weaker = MORE help (stored as a more negative kg). At least one stack step.
+  if (assisted) {
+    const body = opts.bodyKg && opts.bodyKg > 0 ? opts.bodyKg : REF_BODY_KG;
+    // 2-decimal pre-round: 75 x (1 - 0.9) is 7.499999... in floating point, not 7.5.
+    const lost = Math.round(body * (1 - row.weightMult) * 100) / 100;
+    const extra = Math.max(ASSIST_STEP, roundTo(lost, ASSIST_STEP));
+    return mk(Math.min(prevWeight, 0) - extra, low, 'cut');
+  }
+  // Bodyweight / unloaded: fewer reps, no weight.
+  if (unloaded) return mk(null, reduced, 'cut');
+  return mk(cutWeight(prevWeight, row.weightMult), low, 'cut');
+}
+
+/**
+ * Sessions right after a real break (>= CUT_FROM_DAYS between two sessions, within
+ * REGAIN_MAX_SESSIONS): climb back to the pre-break load by the normal step per
+ * session instead of waiting out a whole double-progression cycle at the lighter
+ * weight (return is faster than the first gain -- research R2..R5). Weighted and
+ * assisted lifts only; reps-only lifts already add a rep a session. null = nothing to do.
+ */
+function regainTarget(
+  history: TopPoint[],
+  opts: ProgOpts,
+  range: { repLow: number; repHigh: number },
+): Target | null {
+  if (opts.loadType === 'band' || opts.bodyweight) return null;
+  const last = history[0];
+  let pre: TopPoint | null = null;
+  const reach = Math.min(history.length - 1, REGAIN_MAX_SESSIONS);
+  for (let i = 0; i < reach; i++) {
+    if (calendarDaysBetween(history[i + 1].ts, history[i].ts) >= CUT_FROM_DAYS) {
+      pre = history[i + 1];
+      break;
+    }
+  }
+  if (!pre || last.weight === null || pre.weight === null) return null;
+  if (last.weight >= pre.weight) return null;
+  const assisted = opts.loadType === 'assist';
+  // An assisted lift's pre-break load can be 0 (no help at all); a plain one cannot.
+  if (!assisted && (pre.weight === 0 || last.weight <= 0)) return null;
+  const { repLow: low, repHigh: high } = range;
+  const base = {
+    state: 'return' as const,
+    repLow: low,
+    repHigh: high,
+    prevWeight: last.weight,
+    prevReps: last.reps,
+    returnKind: 'regain' as const,
+  };
+  // Not yet at the bottom of the range last time: hold the weight, chase a rep.
+  if (last.reps < low) {
+    return { ...base, weight: last.weight, reps: Math.min(last.reps + 1, high), deltaKg: 0 };
+  }
+  const step = assisted ? ASSIST_STEP : stepFor(opts);
+  const weight = Math.min(pre.weight, last.weight + step);
+  return { ...base, weight, reps: low, deltaKg: weight - last.weight };
 }
 
 function baseTarget(history: TopPoint[], opts: ProgOpts = {}): Target {
@@ -119,6 +252,15 @@ function baseTarget(history: TopPoint[], opts: ProgOpts = {}): Target {
   const last = history[0];
   const prevWeight = last.weight;
   const prevReps = last.reps;
+
+  // A break: this lift was not trained for 15+ calendar days (only when the caller gave `now`).
+  if (opts.now !== undefined) {
+    const gap = gapDays(history, opts.now) ?? 0;
+    const row = breakRow(gap);
+    if (row) return returnTarget(last, row, gap, opts, { repLow: low, repHigh: high });
+    const regain = regainTarget(history, opts, { repLow: low, repHigh: high });
+    if (regain) return regain;
+  }
 
   // Resistance band: the kg is an estimate off a discrete colour ladder, so we
   // never nudge it — chase reps, and the UI suggests the next band at the top.
@@ -225,7 +367,21 @@ export function setProgressionEffects(e: ConditionEffects): void {
 
 /** `nextTarget` with the person's conditions applied (every caller gets them for free). */
 export function nextTarget(history: TopPoint[], opts: ProgOpts = {}): Target {
-  return applyNicotineStep(applyConditionEffects(baseTarget(history, opts), activeEffects));
+  const base = baseTarget(history, opts);
+  if (isRaise(base) && base.state === 'return') {
+    // A climb back after a break is limited by conditions and nicotine alike; the
+    // most conservative step wins -- never their product (SPO-149 spec).
+    const byCondition = applyConditionEffects(base, activeEffects);
+    const byNicotine = applyNicotineStep(base);
+    return byNicotine.deltaKg < byCondition.deltaKg ? byNicotine : byCondition;
+  }
+  return applyNicotineStep(applyConditionEffects(base, activeEffects));
+}
+
+/** A target that raises the load: normal progress, or a climb back after a break. */
+function isRaise(t: Target): boolean {
+  if (t.state !== 'progress' && !(t.state === 'return' && t.returnKind === 'regain')) return false;
+  return t.weight != null && t.prevWeight != null && t.deltaKg > 0;
 }
 
 /**
@@ -234,8 +390,7 @@ export function nextTarget(history: TopPoint[], opts: ProgOpts = {}): Target {
  * A 2.5 kg step stays 2.5 at the current caps (it rounds back up); a 5 kg step can become 4.5.
  */
 export function applyNicotineStep(t: Target): Target {
-  if (t.state !== 'progress' || t.weight == null || t.prevWeight == null) return t;
-  if (t.deltaKg <= 0) return t;
+  if (!isRaise(t) || t.weight == null || t.prevWeight == null) return t;
   const k = progressionMult();
   if (k >= 1) return t;
   // Rounded UP to the half kilo, so rounding can never push the step past the cap.
@@ -245,8 +400,7 @@ export function applyNicotineStep(t: Target): Target {
 }
 
 export function applyConditionEffects(t: Target, e: ConditionEffects): Target {
-  if (t.state !== 'progress' || t.weight == null || t.prevWeight == null) return t;
-  if (t.deltaKg <= 0) return t;
+  if (!isRaise(t) || t.weight == null || t.prevWeight == null) return t;
   if (e.noAutoIncrease) {
     return {
       ...t,

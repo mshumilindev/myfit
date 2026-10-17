@@ -18,6 +18,8 @@ import {
 } from 'react';
 import { Field } from '../components/ui/Field';
 import { NumberStepper } from '../components/ui/NumberStepper';
+import { ProgReturnNote, progActionLabel } from '../components/ProgReturnNote';
+import { sessionLiftTarget } from './sessionTarget';
 import { Notice } from '../components/ui/Notice';
 import { Button, IconButton } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -989,20 +991,12 @@ export function SessionView(props: {
     // No working set yet — sequence the ramp, then the working target.
     if (isStrengthExercise(ex)) {
       const loadType = loadTypeFor(ex);
-      const nt = nextTarget(
-        topHistory(
-          store.workouts.filter((w) => w.finishedAt !== null),
-          ex.name,
-          workout!.startedAt,
-          liftVariant(workout!, ex),
-        ),
-        {
-          plannedReps: ex.plannedReps,
-          equipment: ex.equipment,
-          primary: (ex.primaryMuscle as MuscleGroup | null) ?? undefined,
-          loadType,
-        },
-      );
+      const nt = sessionLiftTarget(store, workout!, ex, {
+        plannedReps: ex.plannedReps,
+        equipment: ex.equipment,
+        primary: (ex.primaryMuscle as MuscleGroup | null) ?? undefined,
+        loadType,
+      });
       const taken = takenKg[ex.id];
       const target = taken ? { ...nt, weight: taken } : nt;
       if (loadType === 'weight' && target.weight != null && target.weight > 0) {
@@ -1891,6 +1885,8 @@ export function SessionView(props: {
     else if (hero) {
       const tg = nextTarget(topHistory(finished, hero.name, now), {
         primary: muscleOf(hero.name),
+        now,
+        bodyKg: latestWeight(store.bodyMetrics)?.weight ?? null,
       });
       heroSub =
         tg.state === 'first' || tg.prevReps == null
@@ -3096,21 +3092,13 @@ export function SessionView(props: {
     // Progression target from this lift's own history (design PROG-1).
     const target =
       live && !timed && !marker && isStrengthExercise(ex)
-        ? nextTarget(
-            topHistory(
-              store.workouts.filter((w) => w.finishedAt !== null),
-              ex.name,
-              workout!.startedAt,
-              liftVariant(workout!, ex),
-            ),
-            {
-              plannedReps: ex.plannedReps,
-              equipment,
-              primary: muscles.primary,
-              bodyweight: ghost.weight === null,
-              loadType,
-            },
-          )
+        ? sessionLiftTarget(store, workout!, ex, {
+            plannedReps: ex.plannedReps,
+            equipment,
+            primary: muscles.primary,
+            bodyweight: ghost.weight === null,
+            loadType,
+          })
         : null;
     // Weight differs per machine/gym: what the main gym says about this lift.
     const xg =
@@ -3568,36 +3556,31 @@ export function SessionView(props: {
         ) : (
           <>
             {target && showGhost && !grp && !isStopwatchExercise(ex) && (
-              <div className={`prog-hint st-${target.state}`}>
-                {target.deltaKg > 0 && (
-                  <span className="ph-delta up">+{fmtWeightValue(target.deltaKg)}</span>
-                )}
-                {target.deltaKg < 0 && (
-                  <span className="ph-delta down">{fmtWeightValue(target.deltaKg)}</span>
-                )}
-                <span className="ph-arrow">→</span>
-                <span className="ph-target">
-                  {target.weight === null
-                    ? t.progRepsTarget(target.reps)
-                    : `${fmtWeightValue(target.weight)} ${t.kgCol.toLowerCase()}`}
-                </span>
-                <span className="ph-sep">·</span>
-                <span className="ph-action">
-                  {target.state === 'progress'
-                    ? t.progAdd
-                    : target.state === 'stall'
-                      ? t.progDeload
-                      : target.state === 'hold'
-                        ? t.progHold
-                        : t.progFirst}
-                </span>
-                {prev && (
-                  <>
-                    <span className="ph-sep">·</span>
-                    <span className="ph-prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
-                  </>
-                )}
-              </div>
+              <>
+                <div className={`prog-hint st-${target.state}`}>
+                  {target.deltaKg > 0 && (
+                    <span className="ph-delta up">+{fmtWeightValue(target.deltaKg)}</span>
+                  )}
+                  {target.deltaKg < 0 && (
+                    <span className="ph-delta down">{fmtWeightValue(target.deltaKg)}</span>
+                  )}
+                  <span className="ph-arrow">→</span>
+                  <span className="ph-target">
+                    {target.weight === null
+                      ? t.progRepsTarget(target.reps)
+                      : `${fmtWeightValue(target.weight)} ${t.kgCol.toLowerCase()}`}
+                  </span>
+                  <span className="ph-sep">·</span>
+                  <span className="ph-action">{progActionLabel(t, target.state)}</span>
+                  {prev && (
+                    <>
+                      <span className="ph-sep">·</span>
+                      <span className="ph-prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
+                    </>
+                  )}
+                </div>
+                <ProgReturnNote target={target} lift={ex.name} />
+              </>
             )}
             {xg && xgText && (
               <Notice

@@ -1,4 +1,5 @@
 import type { Strings } from './en';
+import { plural } from './coachPlural';
 import { supEt } from './sup.et';
 import { cycEt } from './cyc.et';
 
@@ -1198,6 +1199,12 @@ export const et: Strings = {
   progAdd: 'Lisa raskust',
   setOptions: 'Seeria valikud',
   progDeload: 'Deload',
+  progReturn: 'Tagasitulek',
+  progReturnCut: (weeks, lift) =>
+    `Paus „${lift}” harjutuses: ${plural('et', weeks, { one: '{n} nädal', other: '{n} nädalat' })} — alustame kergemalt`,
+  progReturnEase: (weeks, lift) =>
+    `Paus „${lift}” harjutuses: ${plural('et', weeks, { one: '{n} nädal', other: '{n} nädalat' })} — kaalu ei tõsta`,
+  progReturnRegain: 'Tõuseme tagasi enne pausi kaalu juurde',
   progWhyProgress: 'Jõudsid vahemiku tippu — lisa raskust.',
   progWhyHold: 'Ületa oma kordused, siis tõuseb raskus.',
   progWhyStall: 'Tippseeria on seiskunud — tee deload ja taasta.',

@@ -1,4 +1,5 @@
 import type { Strings } from './en';
+import { plural } from './coachPlural';
 import { supLt } from './sup.lt';
 import { cycLt } from './cyc.lt';
 
@@ -1222,6 +1223,12 @@ export const lt: Strings = {
   progAdd: 'Pridėk svorio',
   setOptions: 'Serijos parinktys',
   progDeload: 'Deload',
+  progReturn: 'Sugrįžimas',
+  progReturnCut: (weeks, lift) =>
+    `Pertrauka „${lift}”: ${plural('lt', weeks, { one: '{n} savaitė', few: '{n} savaitės', other: '{n} savaičių' })} — pradedame lengviau`,
+  progReturnEase: (weeks, lift) =>
+    `Pertrauka „${lift}”: ${plural('lt', weeks, { one: '{n} savaitė', few: '{n} savaitės', other: '{n} savaičių' })} — svorio nedidiname`,
+  progReturnRegain: 'Grįžtame prie svorio prieš pertrauką',
   progWhyProgress: 'Pasiekei diapazono viršų — pridėk svorio.',
   progWhyHold: 'Pagerink pakartojimus, tada kils svoris.',
   progWhyStall: 'Viršutinė serija sustojo — sumažink ir atsistatyk.',

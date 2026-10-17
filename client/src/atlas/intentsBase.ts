@@ -4,7 +4,6 @@
 import * as N from './num';
 import { consistencyStreak, latestWeight, setTypeOf } from '../store';
 import { muscleReadiness, recentLoadSets } from '../recovery';
-import { nextTarget, topHistory } from '../progression';
 import { LANDMARKS, VOLUME_MUSCLES, weeklyMuscleSets } from '../volume';
 import { finishedNights, nightDurationMin } from '../sleep';
 import { activeInjuries } from '../injury';
@@ -15,6 +14,7 @@ import { explainLift, fmtPoint, isBodyweightLift, liftPoints, liftProgress } fro
 import { usualSessionsPerWeek } from './facts';
 import { DAY, WEEK, date, finishedOf, loggedLifts, todayLine, wd, type Intent } from './intentKit';
 import { moody } from './intentsMore';
+import { nextWeightText } from './targetText';
 import { limitNoteForLift } from './intentsHealth';
 
 // ---- the base ---------------------------------------------------------------
@@ -208,27 +208,7 @@ export const INTENTS: Intent[] = [
               `${name}: минулого разу ${last.reps} повт. Далі: ${last.reps + 1}. На 12 чистих повторах додамо вагу.`,
             );
       }
-      const tg = nextTarget(topHistory(finishedOf(c), ex, c.now), {});
-      if (tg.state === 'first' || tg.weight == null)
-        return L(
-          `No ${name} logged yet. Start light, ${tg.repLow}–${tg.repHigh} clean reps, and I’ll take it from there.`,
-          `${name} ще не записано. Почни легко, ${tg.repLow}–${tg.repHigh} чистих повторів — далі поведу я.`,
-        );
-      const last = tg.prevWeight != null ? `${N.setText(c, tg.prevWeight, tg.prevReps)}` : '—';
-      if (tg.deltaKg < 0)
-        return L(
-          `${name}: last ${last}. Stuck there — back off to ${N.setText(c, tg.weight, tg.reps)} and build up again.`,
-          `${name}: минулого разу ${last}. Застряг — скинь до ${N.setText(c, tg.weight, tg.reps)} і набирай знову.`,
-        );
-      return tg.deltaKg > 0
-        ? L(
-            `${name}: last ${last}. Next: ${N.setText(c, tg.weight, tg.reps)}.`,
-            `${name}: минулого разу ${last}. Далі: ${N.setText(c, tg.weight, tg.reps)}.`,
-          )
-        : L(
-            `${name}: last ${last}. Stay at ${c.fmt.kg(tg.weight)} and get ${tg.reps} reps before adding weight.`,
-            `${name}: минулого разу ${last}. Лишайся на ${c.fmt.kg(tg.weight)} і добий до ${tg.reps} повторів — тоді додамо.`,
-          );
+      return nextWeightText(c, ex, name, L);
     },
   },
   {

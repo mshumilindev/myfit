@@ -67,7 +67,7 @@ beforeEach(() => {
 afterEach(cleanup);
 
 vi.mock('../components/Avatar', () => ({
-  Avatar: (p: { userId?: string; name: string; size?: number; hasPhoto?: boolean }) => (
+  UserAvatar: (p: { userId?: string; name: string; size?: number; hasPhoto?: boolean }) => (
     <span
       data-testid="real-avatar"
       data-uid={p.userId ?? ''}

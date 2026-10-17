@@ -7,7 +7,7 @@
  *     weekday's usual session), as one banner tinted by fatigue severity —
  *     green when they're recovered, amber mixed, red when a lot is still under.
  *  2. The lifts you usually do on this weekday, each with its progression read
- *     (add load / hold / deload / first time) — the same coaching the exercise
+ *     (add load / hold / deload / first time / return after a break) — the same coaching the exercise
  *     cards show, previewed before you add them.
  */
 import { Icon, useExerciseName } from '../ui';
@@ -20,7 +20,7 @@ import {
   type ReadyState,
 } from '../recovery';
 import { nextTarget, topHistory } from '../progression';
-import { resolveMuscles, workoutDayReadout } from '../store';
+import { latestWeight, resolveMuscles, useStore, workoutDayReadout } from '../store';
 import { dayReadoutLabel } from '../data/daySuggest';
 import type { Workout, Exercise } from '../types';
 import type { MuscleGroup } from '../data/exercises';
@@ -93,10 +93,13 @@ function ExerciseTargetRow({
 }) {
   const exName = useExerciseName();
   const { primary } = resolveMuscles(ex);
+  const store = useStore();
   const target = nextTarget(topHistory(finished, ex.name, now), {
     plannedReps: ex.plannedReps,
     equipment: ex.equipment ?? [],
     primary,
+    now,
+    bodyKg: latestWeight(store.bodyMetrics)?.weight ?? null,
   });
   const chip =
     target.state === 'progress' && target.deltaKg > 0 ? (
@@ -107,6 +110,8 @@ function ExerciseTargetRow({
       <Tag tone="illness">{t.progDeload}</Tag>
     ) : target.state === 'first' ? (
       <Tag tone="accent">{t.progFirst}</Tag>
+    ) : target.state === 'return' ? (
+      <Tag tone="neutral">{t.progReturn}</Tag>
     ) : (
       <Tag tone="neutral">{t.progHold}</Tag>
     );
