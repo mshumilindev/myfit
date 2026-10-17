@@ -28,7 +28,7 @@ import { ConditionsProfileRow } from './health/Conditions';
 import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
 import { ConfirmDialog, Icon, LanguageSelector, Sheet, useExerciseName } from '../ui';
-import { Avatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
+import { UserAvatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { BodyMetricsSection } from '../components/BodyMetrics';
 import { useStore, setGlobalWeightUnit } from '../store';
@@ -430,7 +430,7 @@ export function ProfileView({
                 onRemoved={removeAvatar}
               />
             ) : (
-              <Avatar
+              <UserAvatar
                 userId={load.person.id}
                 name={load.person.name}
                 hasPhoto={load.person.avatar}
@@ -567,7 +567,7 @@ export function ProfileView({
               ) : (
                 load.access.map((a) => (
                   <div key={a.id} className="access-row">
-                    <Avatar userId={a.id} name={a.name} size={34} />
+                    <UserAvatar userId={a.id} name={a.name} size={34} />
                     <span className="n">{a.name}</span>
                     <span className="s">
                       {roleLabel(a.role)} · {a.role === 'admin' ? t.profFullAccess : t.profReads}
@@ -1074,7 +1074,7 @@ function ProfileAssignTrainerSheet(props: {
         {trainers.map((tr) => (
           <ListRow
             key={tr.id}
-            icon={<Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />}
+            icon={<UserAvatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />}
             label={tr.name}
             sub={t.adminClients(tr.clientCount)}
             selected={sel === tr.id}
@@ -1150,7 +1150,7 @@ function ProfileAssignClientsSheet(props: {
           return (
             <ListRow
               key={p.id}
-              icon={<Avatar userId={p.id} name={p.name} hasPhoto={p.avatar} size={34} />}
+              icon={<UserAvatar userId={p.id} name={p.name} hasPhoto={p.avatar} size={34} />}
               label={p.name}
               sub={p.trainerName ?? t.adminNoTrainer}
               selected={on}

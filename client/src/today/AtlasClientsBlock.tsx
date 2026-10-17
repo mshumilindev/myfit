@@ -35,7 +35,7 @@ import { temperIndex, type Temper } from '../atlas/types';
 import { classifyTrainee } from '../trainerLive';
 import type { LiveSession } from '../types';
 import { AtlasFace } from '../components/AtlasFace';
-import { Avatar } from '../components/Avatar';
+import { UserAvatar } from '../components/Avatar';
 import { Button, IconButton } from '../components/ui/Button';
 import { Chip, ChipGroup, type ChipTone } from '../components/ui/Chip';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
@@ -269,7 +269,7 @@ function TrainerTile({ trainer }: { trainer: MyTrainer }) {
         ring="default"
         tone="people"
         media={
-          <Avatar
+          <UserAvatar
             userId={trainer.id}
             name={trainer.name}
             hasPhoto={trainer.avatar}
@@ -627,7 +627,7 @@ function firstName(name: string): string {
 
 function avatar(c: RosterClient, size: StorySize) {
   return (
-    <Avatar
+    <UserAvatar
       userId={c.id}
       name={c.name}
       hasPhoto={c.avatar}

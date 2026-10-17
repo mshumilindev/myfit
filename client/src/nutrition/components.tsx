@@ -70,7 +70,15 @@ export function initialsOf(name: string): string {
 }
 
 /** The user's Spotter photo (Storage avatars/{uid}/photo) or initials fallback. */
-export function Avatar({ uid, name, size = 34 }: { uid?: string; name: string; size?: number }) {
+export function NutritionAvatar({
+  uid,
+  name,
+  size = 34,
+}: {
+  uid?: string;
+  name: string;
+  size?: number;
+}) {
   const [src, setSrc] = useState<string | null>(() =>
     uid ? (avatarCache.get(uid) ?? null) : null,
   );

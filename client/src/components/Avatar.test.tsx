@@ -15,7 +15,7 @@ vi.mock('../avatarStore', () => ({
   deleteAvatarBlob: vi.fn(),
 }));
 
-import { Avatar } from './Avatar';
+import { UserAvatar } from './Avatar';
 
 beforeEach(() => {
   getBlob.mockReset();
@@ -26,16 +26,16 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
-describe('Avatar (client photos in Coach)', () => {
+describe('UserAvatar (client photos in Coach)', () => {
   it('without a photo flag: initials, and Storage is never asked', () => {
-    const { container } = render(<Avatar userId="c1" name="Kate Mazur" hasPhoto={false} />);
+    const { container } = render(<UserAvatar userId="c1" name="Kate Mazur" hasPhoto={false} />);
     expect(screen.getByText('KM')).toBeTruthy();
     expect(container.querySelector('img')).toBeNull();
     expect(getBlob).not.toHaveBeenCalled();
   });
   it('with the flag: initials first, then the photo from avatars/{uid}/photo', async () => {
     getBlob.mockResolvedValue(new Blob(['x'], { type: 'image/jpeg' }));
-    const { container } = render(<Avatar userId="c1" name="Kate Mazur" hasPhoto rev={5} />);
+    const { container } = render(<UserAvatar userId="c1" name="Kate Mazur" hasPhoto rev={5} />);
     expect(screen.getByText('KM')).toBeTruthy();
     await waitFor(() => expect(container.querySelector('img')).not.toBeNull());
     expect(getBlob).toHaveBeenCalledWith('avatars/c1/photo');
@@ -43,7 +43,7 @@ describe('Avatar (client photos in Coach)', () => {
   it('a failed download keeps the initials (no broken image)', async () => {
     getBlob.mockRejectedValue(new Error('storage/unauthorized'));
     vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const { container } = render(<Avatar userId="c2" name="Veda Witch" hasPhoto rev={1} />);
+    const { container } = render(<UserAvatar userId="c2" name="Veda Witch" hasPhoto rev={1} />);
     await waitFor(() => expect(getBlob).toHaveBeenCalled());
     expect(screen.getByText('VW')).toBeTruthy();
     expect(container.querySelector('img')).toBeNull();

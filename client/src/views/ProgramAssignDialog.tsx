@@ -6,7 +6,7 @@ import { Chip } from '../components/ui/Chip';
 import { ListRow } from '../components/ui/GroupedList';
 import { Sheet, Icon } from '../ui';
 import { fmtWeekday, useT } from '../i18n';
-import { Avatar } from '../components/Avatar';
+import { UserAvatar } from '../components/Avatar';
 import { Select } from '../components/ui/Select';
 
 interface ClientOption {
@@ -71,7 +71,7 @@ export function ProgramAssignDialog({
             <div className="equipment-chips">
               {selected.map((c) => (
                 <Chip key={c.id} selected icon="x" onClick={() => onToggle(c.id)}>
-                  <Avatar userId={c.id} name={c.name} hasPhoto={false} size={20} />
+                  <UserAvatar userId={c.id} name={c.name} hasPhoto={false} size={20} />
                   {c.name}
                 </Chip>
               ))}
@@ -87,7 +87,7 @@ export function ProgramAssignDialog({
             {matches.map((c) => (
               <ListRow
                 key={c.id}
-                icon={<Avatar userId={c.id} name={c.name} hasPhoto={false} size={30} />}
+                icon={<UserAvatar userId={c.id} name={c.name} hasPhoto={false} size={30} />}
                 label={c.name}
                 sub={t.assignClientHint}
                 selected={selectedIds.includes(c.id)}

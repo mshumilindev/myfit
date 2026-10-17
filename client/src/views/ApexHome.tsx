@@ -25,7 +25,7 @@ import { computeFeats } from '../feats';
 import type { Notif } from '../notifications';
 import type { ApexTab } from './ApexApp';
 
-function Ring({ pct, icon }: { pct: number; icon: string }) {
+function ApexRing({ pct, icon }: { pct: number; icon: string }) {
   const r = 24;
   const c = 2 * Math.PI * r;
   const off = c * (1 - Math.max(0, Math.min(1, pct)));
@@ -177,7 +177,7 @@ export function ApexHome({
           className="apx-card apx-active"
           onClick={() => onTab('challenges')}
         >
-          <Ring pct={activeCard.prog.pct} icon={activeCard.tmpl.icon} />
+          <ApexRing pct={activeCard.prog.pct} icon={activeCard.tmpl.icon} />
           <div className="apx-active-main">
             <div className="apx-active-title">
               {activeCard.tmpl.title(t, activeCard.prog.target)}

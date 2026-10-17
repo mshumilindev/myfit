@@ -9,7 +9,7 @@ import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { fullPersonName } from '../name';
 import { Icon, Sheet } from '../ui';
 import { RowListSkeleton } from '../components/ui/Skeletons';
-import { Avatar } from '../components/Avatar';
+import { UserAvatar } from '../components/Avatar';
 import { Card } from '../components/ui/Card';
 import { Tag } from '../components/ui/Tag';
 
@@ -140,7 +140,7 @@ export function TrainerView({
               onClick={onOpenMe}
             >
               <span className="tr-card-thumb">
-                <Avatar userId={selfUid} name={selfName} hasPhoto size={52} />
+                <UserAvatar userId={selfUid} name={selfName} hasPhoto size={52} />
               </span>
               <span className="body">
                 <span className="n">{selfName}</span>
@@ -169,13 +169,13 @@ export function TrainerView({
                   </span>
                 ) : (
                   <span className="tr-card-thumb">
-                    <Avatar userId={c.id} name={c.name} hasPhoto={c.avatar} size={52} />
+                    <UserAvatar userId={c.id} name={c.name} hasPhoto={c.avatar} size={52} />
                   </span>
                 )}
                 <span className="body">
                   {c.live && (
                     <span className="tr-card-avatar">
-                      <Avatar userId={c.id} name={c.name} hasPhoto={c.avatar} size={38} />
+                      <UserAvatar userId={c.id} name={c.name} hasPhoto={c.avatar} size={38} />
                     </span>
                   )}
                   <span className="n">{c.name}</span>
@@ -210,7 +210,7 @@ export function TrainerView({
                   onClick={() => onOpenProfile(c.id)}
                 >
                   <span className="who">
-                    <Avatar userId={c.id} name={c.name} hasPhoto={c.avatar} size={30} />
+                    <UserAvatar userId={c.id} name={c.name} hasPhoto={c.avatar} size={30} />
                     <span>{c.name}</span>
                   </span>
                   <span>{c.totalSessions ?? c.weekSessions}</span>
@@ -228,7 +228,7 @@ export function TrainerView({
           {selected && (
             <aside className={`trainer-client-preview${selected.live ? ' live' : ''}`}>
               <div className="trainer-preview-head">
-                <Avatar
+                <UserAvatar
                   userId={selected.id}
                   name={selected.name}
                   hasPhoto={selected.avatar}

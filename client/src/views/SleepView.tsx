@@ -30,7 +30,7 @@ import { useT, fmtDurationHuman } from '../i18n';
 import { ConfirmDialog, Icon } from '../ui';
 import { MoonGlyph } from '../components/MoonGlyph';
 import { moonInfo, illumPct } from '../moon';
-import { TimeField } from '../components/PickerFields';
+import { TimePickerField } from '../components/PickerFields';
 import {
   nightDurationMin,
   lastNight,
@@ -646,7 +646,7 @@ function WakeFlow({
       </div>
       <div className="sleep-wake-field">
         <span className="slh-sec-label">{t.sleepWokeAtLabel}</span>
-        <TimeField value={wake} onChange={setWake} />
+        <TimePickerField value={wake} onChange={setWake} />
       </div>
       <Button variant="sleep-fill" className="sleep-wide" onClick={() => onConfirm(wakeAt)}>
         {t.sleepLogAndWake(dur(mins))}

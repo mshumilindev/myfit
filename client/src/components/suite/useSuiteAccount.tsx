@@ -18,7 +18,7 @@ import { useT } from '../../i18n';
 import { useCoachT } from '../../i18n/coach';
 import { coachEntryHash } from '../../coach/routes';
 import { useCoachAccess } from '../../coach/useCoachAccess';
-import { Avatar } from '../Avatar';
+import { UserAvatar } from '../Avatar';
 import type { AccountPanelProps } from '../ui/AccountPanel';
 import { ConfirmDialog } from '../../ui';
 import { useSuiteSession } from './suiteSession';
@@ -69,7 +69,7 @@ export function useSuiteAccount({
   const [asking, setAsking] = useState(false);
   return useMemo(() => {
     const avatar = (size: number) => (
-      <Avatar userId={uid} name={name || '?'} hasPhoto size={size} />
+      <UserAvatar userId={uid} name={name || '?'} hasPhoto size={size} />
     );
     const account: AccountPanelProps<SuiteMode> = {
       name,

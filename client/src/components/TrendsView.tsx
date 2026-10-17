@@ -18,7 +18,7 @@ const LEVEL_TONE: Record<Level, Tone> = {
   good: 'ok',
 };
 
-function Badge({ level }: { level: Level }) {
+function LevelBadge({ level }: { level: Level }) {
   const { t } = useT();
   return (
     <Tag tone={LEVEL_TONE[level]} className={`ai-badge lvl-${level}`}>
@@ -83,7 +83,7 @@ function CardTop({ i }: { i: Insight }) {
   return (
     <div className="ai-top">
       {i.kicker && <div className="ai-kicker">{i.kicker}</div>}
-      <Badge level={i.level} />
+      <LevelBadge level={i.level} />
     </div>
   );
 }
@@ -232,7 +232,7 @@ function TipCard({ i }: { i: Insight }) {
           )}
           <span className="ai-headline">{i.headline}</span>
         </div>
-        <Badge level={i.level} />
+        <LevelBadge level={i.level} />
       </div>
       <p className="ai-detail">{i.detail}</p>
       {i.action && i.actionHref && (

@@ -17,7 +17,7 @@ import {
   ZERO,
 } from './calc';
 import {
-  Avatar,
+  NutritionAvatar,
   Empty,
   Failed,
   Header,
@@ -527,7 +527,7 @@ export function GoalView() {
 }
 
 // ---------------------------------------------------------------- Profile
-function StatTile({ value, label }: { value: string; label: string }) {
+function ProfileTile({ value, label }: { value: string; label: string }) {
   return (
     <div className="tile">
       <b className="tnum">{value}</b>
@@ -573,7 +573,7 @@ export function ProfileView() {
       <Header overline="PROFILE" title={name} />
 
       <div className="n-acct">
-        <Avatar uid={s.uid ?? undefined} name={name} size={40} />
+        <NutritionAvatar uid={s.uid ?? undefined} name={name} size={40} />
         <span>
           <span className="nm">{name}</span>
           <span className="sub">
@@ -589,17 +589,17 @@ export function ProfileView() {
         <span className="muted ut-xs">⟳ {t('fromSpotter')}</span>
       </div>
       <div className="tiles">
-        <StatTile
+        <ProfileTile
           value={spotterH ? `${spotterH} cm` : p?.heightCm ? `${p.heightCm} cm` : '—'}
           label={t('height')}
         />
-        <StatTile
+        <ProfileTile
           value={spotterW != null ? `${spotterW} kg` : p?.weightKg ? `${p.weightKg} kg` : '—'}
           label={t('weight')}
         />
-        <StatTile value={p?.age ? `${p.age}` : '—'} label={t('age')} />
-        <StatTile value={p?.sex ? t(p.sex) : '—'} label={t('sex')} />
-        <StatTile value={p?.activity ? t(p.activity) : '—'} label={t('activity')} />
+        <ProfileTile value={p?.age ? `${p.age}` : '—'} label={t('age')} />
+        <ProfileTile value={p?.sex ? t(p.sex) : '—'} label={t('sex')} />
+        <ProfileTile value={p?.activity ? t(p.activity) : '—'} label={t('activity')} />
       </div>
 
       {!complete && (

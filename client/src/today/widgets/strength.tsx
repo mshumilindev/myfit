@@ -182,7 +182,7 @@ export function Trend({ d, suffix = '' }: { d: number; suffix?: string }) {
 }
 
 /** A delta tag that may be neutral (good = null → muted). */
-export function Tag({ text, good }: { text: string; good: boolean | null }) {
+export function DeltaTag({ text, good }: { text: string; good: boolean | null }) {
   if (good === null) return <span className="uiw-delta ut-muted">{text}</span>;
   return <WidgetDelta good={good}>{text}</WidgetDelta>;
 }
@@ -527,7 +527,7 @@ const topLifts: WidgetDef = {
           title={s.topLiftsE1}
           sub={line}
           onClick={open}
-          trailing={<Tag text={s.upCount(up)} good={up > 0 ? true : null} />}
+          trailing={<DeltaTag text={s.upCount(up)} good={up > 0 ? true : null} />}
         />
       );
     if (size === 'S')
@@ -549,7 +549,7 @@ const topLifts: WidgetDef = {
               <span key={r.k} className="ul-flex ug-4 ua-base">
                 <Muted>{s.liftShort[r.k]}</Muted>
                 <b>{fmtKg(r.cur)}</b>
-                <Tag
+                <DeltaTag
                   text={r.d > 0 ? '↑' : r.d < 0 ? '↓' : '→'}
                   good={r.d > 0 ? true : r.d < 0 ? false : null}
                 />
@@ -683,7 +683,7 @@ const nextTargetW: WidgetDef = {
           value={loaded ? fmtKg(t.weight ?? 0) : t.reps}
           unit={loaded ? `× ${t.reps}` : s.reps}
           title={<span className="uiw-t-base">{name}</span>}
-          sub={<Tag text={d.text} good={d.good} />}
+          sub={<DeltaTag text={d.text} good={d.good} />}
           onClick={start}
         />
       );
@@ -697,7 +697,7 @@ const nextTargetW: WidgetDef = {
           size="L"
           tone="accent"
           kicker={s.nextTargetKicker(when)}
-          badge={<Tag text={d.text} good={d.good} />}
+          badge={<DeltaTag text={d.text} good={d.good} />}
           value={loaded ? fmtKg(t.weight ?? 0) : t.reps}
           unit={loaded ? `kg × ${t.reps} ${s.setsX(main.sets)}` : `${s.reps} ${s.setsX(main.sets)}`}
           sub={name}
@@ -736,7 +736,7 @@ const nextTargetW: WidgetDef = {
                 <span className="ul-flex ug-10 ua-center">
                   <span className="uiw-t-md ut-text">{fmtSet(l.target.weight, l.target.reps)}</span>
                   <span className="utx-right" style={{ width: 56 }}>
-                    <Tag text={dd.text} good={dd.good} />
+                    <DeltaTag text={dd.text} good={dd.good} />
                   </span>
                 </span>
               ),
@@ -1045,7 +1045,7 @@ function PrForecastWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         size="XL"
         tone="ok"
         kicker={s.prForecastOf(lift)}
-        badge={<Tag text={s.perWeek(slope)} good={main.slope > 0.05 ? true : null} />}
+        badge={<DeltaTag text={s.perWeek(slope)} good={main.slope > 0.05 ? true : null} />}
         onClick={open}
         footer={
           <Button variant="primary" size="sm" fullWidth onClick={() => setEditing(true)}>
@@ -1072,11 +1072,11 @@ function PrForecastWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
               />
             ),
             value: f.reached ? (
-              <Tag text={s.reached} good />
+              <DeltaTag text={s.reached} good />
             ) : f.eta ? (
-              <Tag text={fmtDayMonth(f.eta, locale)} good />
+              <DeltaTag text={fmtDayMonth(f.eta, locale)} good />
             ) : (
-              <Tag text={s.noEta} good={null} />
+              <DeltaTag text={s.noEta} good={null} />
             ),
           }))}
         />
@@ -1215,7 +1215,7 @@ const recentPrs: WidgetDef = {
           title={s.prLabel(what(latest))}
           sub={`${fmtDayMonth(latest.ts, locale)}${month > 1 ? ` · ${s.moreThisMonth(month - 1)}` : ''}`}
           onClick={open}
-          trailing={<Tag text={dlt(latest)} good />}
+          trailing={<DeltaTag text={dlt(latest)} good />}
         />
       );
     if (size === 'S')
@@ -1227,7 +1227,7 @@ const recentPrs: WidgetDef = {
           value={month}
           unit={s.thisMonthUnit}
           title={<span className="uiw-t-base">{s.latest(what(latest))}</span>}
-          sub={<Tag text={`${dlt(latest)} · ${fmtDayMonth(latest.ts, locale)}`} good />}
+          sub={<DeltaTag text={`${dlt(latest)} · ${fmtDayMonth(latest.ts, locale)}`} good />}
           onClick={open}
         />
       );
@@ -1249,7 +1249,7 @@ const recentPrs: WidgetDef = {
         size="XL"
         tone="ok"
         kicker={s.recentPrs}
-        badge={<Tag text={s.prsThisMonth(month)} good={month > 0 ? true : null} />}
+        badge={<DeltaTag text={s.prsThisMonth(month)} good={month > 0 ? true : null} />}
         onClick={open}
         footer={
           <Button variant="primary" size="sm" fullWidth onClick={open}>
@@ -1273,7 +1273,7 @@ const recentPrs: WidgetDef = {
             ),
             value: (
               <span className="ul-flex ul-col ua-end">
-                <Tag text={dlt(p)} good />
+                <DeltaTag text={dlt(p)} good />
                 <span>{fmtDayMonth(p.ts, locale)}</span>
               </span>
             ),
@@ -2054,7 +2054,7 @@ const plTotal: WidgetDef = {
           title={s.totalKg(fmtKg(total))}
           sub={line}
           onClick={open}
-          trailing={<Tag text={signedKg(d30)} good={good(d30)} />}
+          trailing={<DeltaTag text={signedKg(d30)} good={good(d30)} />}
         />
       );
     if (size === 'S')
@@ -2065,7 +2065,7 @@ const plTotal: WidgetDef = {
           kicker={s.total}
           value={fmtKg(total)}
           unit="kg"
-          sub={<Tag text={s.days30(signedKg(d30))} good={good(d30)} />}
+          sub={<DeltaTag text={s.days30(signedKg(d30))} good={good(d30)} />}
           onClick={open}
         />
       );
@@ -2075,7 +2075,7 @@ const plTotal: WidgetDef = {
           size="L"
           tone="accent"
           kicker={s.plTotal}
-          badge={<Tag text={s.days30(signedKg(d30))} good={good(d30)} />}
+          badge={<DeltaTag text={s.days30(signedKg(d30))} good={good(d30)} />}
           onClick={open}
         >
           <div className="ul-flex uj-between ua-end ug-12">
@@ -2134,7 +2134,7 @@ const plTotal: WidgetDef = {
             {fmtKg(total)}
             <span className="uiw-unit">kg</span>
           </span>
-          <Tag text={s.since(signedKg(d12), fmtDayMonth(start, locale))} good={good(d12)} />
+          <DeltaTag text={s.since(signedKg(d12), fmtDayMonth(start, locale))} good={good(d12)} />
         </div>
         {spark.length > 1 && <WidgetSpark points={spark} height={64} tone="ok" area />}
         {stack}
@@ -2148,7 +2148,7 @@ const plTotal: WidgetDef = {
                 <span className="ul-flex ug-10">
                   <span className="ut-text">{fmtKg(L[k].best)}</span>
                   <span className="utx-right" style={{ width: 40 }}>
-                    <Tag text={signedKg(d)} good={good(d)} />
+                    <DeltaTag text={signedKg(d)} good={good(d)} />
                   </span>
                 </span>
               ),
@@ -2483,7 +2483,7 @@ function RepPrWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
               sub={s.bestOn(c.reps, fmtDayMonth(c.ts, locale))}
             />
           ),
-          value: <Tag text={s.isPr(c.reps + 1)} good />,
+          value: <DeltaTag text={s.isPr(c.reps + 1)} good />,
         }))}
       />
     </Widget>
@@ -2859,7 +2859,7 @@ function SmartSwapWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
                 .join(' · ')}
             />
           ),
-          value: <Tag text={`${pct(c.match)}%`} good={c === best ? true : null} />,
+          value: <DeltaTag text={`${pct(c.match)}%`} good={c === best ? true : null} />,
         }))}
       />
     </Widget>

@@ -20,7 +20,7 @@ import { offlineHydrate, offlineDedupe, offlineRevalidate } from '../offline/off
 import { useT } from '../i18n';
 import type { Shell } from '../App';
 import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
-import { Avatar } from '../components/Avatar';
+import { UserAvatar } from '../components/Avatar';
 import { clearProgramSeed, peekProgramSeed } from '../data/programSeed';
 import { PROGRAM_NET_KEY } from '../data/programMine';
 import type { ProgramItemLike } from '../data/programCsv';
@@ -378,7 +378,7 @@ export function ProgramsView({
           </span>
           {mine.assignedBy && !byMe ? (
             <span className="pg-by">
-              <Avatar name={mine.assignedBy} size={22} />
+              <UserAvatar name={mine.assignedBy} size={22} />
               {t.pgByTrainer(mine.assignedBy)}
             </span>
           ) : (

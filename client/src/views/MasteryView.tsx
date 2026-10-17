@@ -201,7 +201,7 @@ function RankInsignia({
 }
 
 /** Conic progress ring with a dark inner disc. */
-function Ring({
+function MasteryRing({
   frac,
   size,
   inner,
@@ -279,10 +279,10 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => v
         {/* hero */}
         <div className="mst-hero">
           <div className="mst-hero-top">
-            <Ring frac={m.rankProgress} size={120} inner={100}>
+            <MasteryRing frac={m.rankProgress} size={120} inner={100}>
               <span className="mst-hero-num num">{m.rating}</span>
               <span className="mst-hero-num-lbl">{t.masteryRatingLabel}</span>
-            </Ring>
+            </MasteryRing>
             <div className="mst-hero-rank">
               <RankInsignia index={m.rankIndex} size={34} />
               <div className="mst-rank-line">
@@ -718,9 +718,9 @@ export function MasteryBadge({
               </span>
             </span>
           ) : (
-            <Ring frac={m.rankProgress} size={38} inner={30}>
+            <MasteryRing frac={m.rankProgress} size={38} inner={30}>
               <RankInsignia index={m.rankIndex} size={19} />
-            </Ring>
+            </MasteryRing>
           )
         }
       />
@@ -750,9 +750,9 @@ export function MasteryBadge({
       aria-label={`${t.masteryTitle} · ${m.rating}`}
       title={`${t.masteryTitle} · ${m.rating}`}
     >
-      <Ring frac={m.rankProgress} size={26} inner={20}>
+      <MasteryRing frac={m.rankProgress} size={26} inner={20}>
         <RankInsignia index={m.rankIndex} size={11} />
-      </Ring>
+      </MasteryRing>
     </Button>
   );
 }

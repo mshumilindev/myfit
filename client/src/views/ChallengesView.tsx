@@ -47,7 +47,7 @@ const ACCENT_CLASS: Record<string, string> = {
 };
 
 /** SVG progress ring. `size` drives the geometry; stroke scales with it. */
-function Ring({
+function ChallengeRing({
   pct,
   size,
   stroke,
@@ -317,9 +317,9 @@ function ActiveCard({ l, onOpen }: { l: LiveChallenge; onOpen: () => void }) {
       className={`ch-active ${ACCENT_CLASS[tmpl.accent]}`}
       onClick={onOpen}
     >
-      <Ring pct={prog.pct} size={58} stroke={5}>
+      <ChallengeRing pct={prog.pct} size={58} stroke={5}>
         <Icon name={tmpl.icon} weight="bold" />
-      </Ring>
+      </ChallengeRing>
       <div className="ch-active-main">
         <div className="ch-active-title">{tmpl.title(t, prog.target)}</div>
         <div className="ch-active-sub">
@@ -506,7 +506,7 @@ function DetailSheet({
               : `${t.chDaysLeft(prog.daysLeft)} · ${t.chEndsOn(fmtDayMonth(ac.endsAt, locale))}`}
           </div>
 
-          <Ring pct={prog.pct} size={200} stroke={12}>
+          <ChallengeRing pct={prog.pct} size={200} stroke={12}>
             <div className="ch-big-num num">
               {fmtChallengeValue(tmpl.unit, prog.value, t)}
               <span className="ch-big-den">/{fmtChallengeValue(tmpl.unit, prog.target, t)}</span>
@@ -514,7 +514,7 @@ function DetailSheet({
             <div className="ch-big-lab">
               {Math.round(prog.pct * 100)}% · {unit}
             </div>
-          </Ring>
+          </ChallengeRing>
 
           <p className="ch-detail-blurb">
             {tmpl.blurb(t)}{' '}

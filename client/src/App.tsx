@@ -189,7 +189,7 @@ const InjuryView = lazy(() =>
 // Dev-only: the UI kit gallery is an internal tool. In production builds this
 // branch is dead code (import.meta.env.DEV === false), so the chunk isn't
 // emitted and #/uikit falls back to Today.
-const Gallery = import.meta.env.DEV
+const UiKitGallery = import.meta.env.DEV
   ? lazy(() => import('./components/ui/Gallery').then((module) => ({ default: module.Gallery })))
   : null;
 const WidgetLibraryScreen = import.meta.env.DEV
@@ -1775,7 +1775,7 @@ export function App() {
           onClose={closeOverlay}
         />
       )}
-      {Gallery && activeOverlay?.screen === 'uikit' && <Gallery onClose={closeOverlay} />}
+      {UiKitGallery && activeOverlay?.screen === 'uikit' && <UiKitGallery onClose={closeOverlay} />}
       {WidgetLibraryScreen && activeOverlay?.screen === 'widget-library' && (
         <WidgetLibraryScreen shell={shell} onClose={closeOverlay} />
       )}

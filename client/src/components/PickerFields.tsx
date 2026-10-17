@@ -23,7 +23,7 @@ import { useT } from '../i18n';
 
 /* --- shared popover shell ------------------------------------------------- */
 
-function Popover({
+function PickerPopover({
   open,
   onClose,
   children,
@@ -210,7 +210,12 @@ export function DateField({
           onClick={() => setOpen((x) => !x)}
         />
       </div>
-      <Popover open={open} onClose={() => setOpen(false)} className="cal" anchorRef={anchorRef}>
+      <PickerPopover
+        open={open}
+        onClose={() => setOpen(false)}
+        className="cal"
+        anchorRef={anchorRef}
+      >
         <div className="cal-head">
           <IconButton
             variant="ghost"
@@ -268,7 +273,7 @@ export function DateField({
         >
           {t.today}
         </Button>
-      </Popover>
+      </PickerPopover>
     </div>
   );
 }
@@ -323,7 +328,7 @@ function normalizeTime(text: string): string {
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5); // 5-min steps
 
-export function TimeField({
+export function TimePickerField({
   value, // "HH:MM"
   onChange,
 }: {
@@ -375,7 +380,7 @@ export function TimeField({
           onClick={() => setOpen((x) => !x)}
         />
       </div>
-      <Popover
+      <PickerPopover
         open={open}
         onClose={() => setOpen(false)}
         className="time"
@@ -411,7 +416,7 @@ export function TimeField({
             ))}
           </div>
         </div>
-      </Popover>
+      </PickerPopover>
     </div>
   );
 }

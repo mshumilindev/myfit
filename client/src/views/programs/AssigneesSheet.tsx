@@ -8,7 +8,7 @@ import { Card } from '../../components/ui/Card';
 import { useMemo, useState } from 'react';
 import { Button } from '../../components/ui/Button';
 import { SearchField } from '../../components/ui/SearchField';
-import { Avatar } from '../../components/Avatar';
+import { UserAvatar } from '../../components/Avatar';
 import { tokenMatch } from '../../search';
 import { useT } from '../../i18n';
 import { Icon, Sheet } from '../../ui';
@@ -95,7 +95,7 @@ export function AssigneesSheet({
         className={`pg-member${onProgram && !on ? ' leaving' : ''}`}
         onClick={() => toggle(p.id)}
       >
-        <Avatar
+        <UserAvatar
           userId={p.id}
           name={p.name}
           hasPhoto={!!p.avatar}

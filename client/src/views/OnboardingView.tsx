@@ -28,7 +28,7 @@ import { fullPersonName, splitPersonName } from '../name';
 import { SpotterMark } from '../brand/SpotterMark';
 import { Icon, LanguageSelector } from '../ui';
 import { GymThumb } from '../components/GymThumb';
-import { Avatar } from '../components/Avatar';
+import { UserAvatar } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { InstallShortcut } from './InstallShortcut';
 import { Card } from '../components/ui/Card';
@@ -329,7 +329,7 @@ export function OnboardingView({
               {info.inviterAvatarUrl ? (
                 <img className="avatar lighten" src={info.inviterAvatarUrl} alt="" />
               ) : (
-                <Avatar
+                <UserAvatar
                   userId={info.inviterId ?? undefined}
                   name={info.inviter}
                   hasPhoto={info.inviterAvatar}
@@ -496,7 +496,7 @@ export function OnboardingView({
               {gym?.gymName ? ` · ${gym.gymName}` : ''}
             </div>
             <div className="onb-me">
-              <Avatar name={name} size={76} />
+              <UserAvatar name={name} size={76} />
               <div>
                 <div className="n">{name}</div>
                 {info.inviter && (
