@@ -361,15 +361,20 @@ export function SpotterSky() {
   return <canvas ref={ref} className="spotter-sky" aria-hidden="true" />;
 }
 
+/** The sky while a night is live, nothing otherwise: drop it into any full-screen shell. */
+export function NightSky() {
+  const night = liveSleep(useStore().sleeps);
+  return night ? <SpotterSky /> : null;
+}
+
 /**
  * Root of a full-screen sub-app (Apex, Learn, People, Nutrition): the same `.app` shell as the Gym, plus the night sky
  * while a night is live, so every app wears the sleep mode instead of only the Gym (SPO-148).
  */
 export function AppRoot({ children }: { children: ReactNode }) {
-  const night = liveSleep(useStore().sleeps);
   return (
     <div className="app app-apex-root">
-      {night && <SpotterSky />}
+      <NightSky />
       {children}
     </div>
   );

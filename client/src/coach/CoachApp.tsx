@@ -44,6 +44,7 @@ import { useLiveWidget } from './screens/live/useLiveWidget';
 import { useCoachRoute } from './useCoachRoute';
 import { useBackButtonEdgeSwipe } from '../edgeSwipeBack';
 import { useCoachUnread } from './unread';
+import { NightSky } from '../components/SpotterSky';
 import './CoachApp.css';
 
 export interface CoachShellProps {
@@ -176,6 +177,7 @@ export function CoachShell({
 
   return (
     <div className={`app-coach co-shell apex-app`}>
+      <NightSky />
       <nav className="co-skip-nav" aria-label={c.skipToContent}>
         <a
           className="co-skip"

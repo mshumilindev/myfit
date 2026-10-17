@@ -42,3 +42,16 @@ html[data-sleep='night'].theme-glass.theme-coach {
   --plate-rim: color-mix(in srgb, var(--color-accent) 45%, transparent);
   --plate-edge: color-mix(in srgb, var(--color-accent) 22%, transparent);
 }
+
+/* The Coach shell is itself an `.apex-app`, whose `> *` rule would make the sky a relative box: keep it fixed. */
+html[data-sleep='night'] .apex-app > .spotter-sky {
+  position: fixed;
+  z-index: 0;
+}
+
+/* Asleep: the Start button's attention ripple stops, nothing should pull the eye at night. */
+html[data-sleep='night'] .tabbar-fab.is-attention::before,
+html[data-sleep='night'] .tabbar-fab.is-attention::after {
+  animation: none;
+  opacity: 0;
+}
