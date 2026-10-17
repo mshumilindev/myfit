@@ -57,7 +57,6 @@ import { useClientShared } from '../coach/client/shared';
 import type { AtlasOpts, AtlasView } from './layout';
 import { Card } from '../components/ui/Card';
 import { navigateHash } from '../navigateHash';
-
 const DAY = 86_400_000;
 const INACTIVE_MS = 30 * DAY;
 const FRESH_MS = 2 * DAY;
