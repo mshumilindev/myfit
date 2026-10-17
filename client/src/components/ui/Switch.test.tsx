@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Switch, SwitchIndicator } from './Switch';
+import userEvent from '@testing-library/user-event';
 
 afterEach(cleanup);
 
@@ -76,5 +77,12 @@ describe('SwitchIndicator', () => {
     expect(off.className).not.toContain('is-on');
     expect(off.className).toContain('uisw--sm');
     expect(off.className).not.toContain('uit--');
+  });
+
+  it('a user click on a disabled switch never fires onChange', async () => {
+    const onChange = vi.fn();
+    render(<Switch checked={false} onChange={onChange} disabled aria-label="s" />);
+    await userEvent.setup().click(screen.getByRole('switch'));
+    expect(onChange).not.toHaveBeenCalled();
   });
 });

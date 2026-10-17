@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Radio } from './Radio';
+import userEvent from '@testing-library/user-event';
 
 afterEach(cleanup);
 
@@ -51,5 +52,12 @@ describe('Radio', () => {
   it('defaults to the accent tone', () => {
     const { container } = render(<Radio checked={false} onChange={() => undefined} />);
     expect((container.firstChild as HTMLElement).className).toContain('uit--accent');
+  });
+
+  it('a user click on a disabled radio never fires onChange', async () => {
+    const onChange = vi.fn();
+    render(<Radio checked={false} onChange={onChange} disabled aria-label="a" />);
+    await userEvent.setup().click(screen.getByRole('radio'));
+    expect(onChange).not.toHaveBeenCalled();
   });
 });

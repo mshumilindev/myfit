@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Checkbox } from './Checkbox';
+import userEvent from '@testing-library/user-event';
 
 afterEach(cleanup);
 
@@ -54,5 +55,12 @@ describe('Checkbox', () => {
     );
     fireEvent.click(screen.getByLabelText('Also delete notes'));
     expect(onChange).toHaveBeenCalledWith(true);
+  });
+
+  it('a user click on a disabled checkbox never fires onChange', async () => {
+    const onChange = vi.fn();
+    render(<Checkbox checked={false} onChange={onChange} disabled aria-label="A" />);
+    await userEvent.setup().click(screen.getByRole('checkbox'));
+    expect(onChange).not.toHaveBeenCalled();
   });
 });

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { WeekPickerSheet, type WeekOption } from './WeekPickerSheet';
 
 afterEach(cleanup);
@@ -124,5 +124,21 @@ describe('WeekPickerSheet', () => {
       />,
     );
     expect(document.querySelector('nav.uipager')).toBeNull();
+  });
+
+  it('Escape closes the sheet (behaviour inherited from Sheet)', async () => {
+    const onClose = vi.fn();
+    render(
+      <WeekPickerSheet
+        title="Pick a week"
+        weeks={weeks}
+        selected={0}
+        onPick={() => {}}
+        onClose={onClose}
+        pageSize={3}
+      />,
+    );
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   });
 });
