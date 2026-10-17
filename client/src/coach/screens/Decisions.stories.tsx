@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { createFixturesPort } from '../data/__fixtures__/fixtures';
-import { CoachStoryFrame } from './storyKit';
+import { CoachStoryFrame } from '../../stories/coachStoryKit';
 import { worldPort } from './storyPorts';
 
 /** Decisions (S-19): summary + insight, filters, history, Decision record (side panel / inline on a phone), CSV export. */

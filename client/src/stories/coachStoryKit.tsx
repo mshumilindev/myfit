@@ -1,10 +1,10 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { CoachShell } from '../CoachApp';
-import { configureCoachData } from '../data/config';
-import type { CoachWorldPort } from '../data/port';
-import type { CoachRoute } from '../routes';
-import { configureLive } from './live/config';
-import type { LivePort } from './live/port';
+import { CoachShell } from '../coach/CoachApp';
+import { configureCoachData } from '../coach/data/config';
+import type { CoachWorldPort } from '../coach/data/port';
+import type { CoachRoute } from '../coach/routes';
+import { configureLive } from '../coach/screens/live/config';
+import type { LivePort } from '../coach/screens/live/port';
 
 /**
  * Stories: the real shell (rail / tab bar by window width) around one route, with a chosen world port.

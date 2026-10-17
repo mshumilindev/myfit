@@ -1825,12 +1825,11 @@ export function App() {
             shell={shell}
             libTab={libMine ? 'mine' : 'library'}
             onLibTab={(next) => setLibMine(next === 'mine')}
-            onProgramsTab={goProgramsPeer}
           />
         ) : programsPeer === 'playbook' ? (
-          <PlaybookView shell={shell} onProgramsTab={goProgramsPeer} />
+          <PlaybookView shell={shell} />
         ) : programsPeer === 'goals' ? (
-          <GoalsView shell={shell} onProgramsTab={goProgramsPeer} />
+          <GoalsView />
         ) : (
           <ProgramsView shell={shell} onProgramsTab={goProgramsPeer} />
         ))}

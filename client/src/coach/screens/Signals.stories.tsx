@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { createFixturesPort } from '../data/__fixtures__/fixtures';
-import { CoachStoryFrame } from './storyKit';
+import { CoachStoryFrame } from '../../stories/coachStoryKit';
 import { emptyRoster, worldPort } from './storyPorts';
 
 /** All signals (S-20): list with filters, inspector with the evidence peek (drawer on a phone). */

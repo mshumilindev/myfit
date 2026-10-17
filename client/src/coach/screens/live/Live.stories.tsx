@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { userEvent, within } from 'storybook/test';
-import { CoachStoryFrame } from '../storyKit';
+import { CoachStoryFrame } from '../../../stories/coachStoryKit';
 import { worldPort } from '../storyPorts';
 import { createFixturesLivePort, defaultLiveSessions } from './__fixtures__/fixtures';
 import type { CoachLiveSession } from './port';

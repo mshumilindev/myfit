@@ -5,34 +5,35 @@
  *  - `SupplementRpeNote`: the caffeine effort note, next to the RPE hint in the set editor.
  * Both render nothing when supplements are off, the surface is off, or nothing applies today.
  */
+import { Hint } from '../components/ui/Hint';
 import { useT } from '../i18n';
 import { supMid, supRange } from '../supplementsApply';
 import { useSupplements } from '../store';
 import { fmtRangeText } from './sessionSummary/nicotineBaselines';
 
-export function SupplementStrengthNote({ className = 'ut-xs ut-faint' }: { className?: string }) {
+export function SupplementStrengthNote({ className }: { className?: string }) {
   const { t } = useT();
   useSupplements();
   const r = supRange('creatineStrength');
   const pct = { low: Math.round(r.low * 100), high: Math.round(r.high * 100) };
   if (pct.high < 1) return null;
   return (
-    <p className={className} data-testid="sup-strength-note">
+    <Hint className={className} data-testid="sup-strength-note">
       {t.supFxStrengthNote(fmtRangeText(pct))}
-    </p>
+    </Hint>
   );
 }
 
-export function SupplementRpeNote({ className = 'se-hint' }: { className?: string }) {
+export function SupplementRpeNote({ className }: { className?: string }) {
   const { t } = useT();
   useSupplements();
   const r = supRange('caffeineRpe');
   const drop = { low: Math.round(-r.high * 10) / 10, high: Math.round(-r.low * 10) / 10 };
   if (drop.high < 0.1) return null;
   return (
-    <div className={className} data-testid="sup-rpe-note">
+    <Hint variant="field" className={className} data-testid="sup-rpe-note">
       {t.supFxRpeNote(fmtRangeText(drop, 1))}
-    </div>
+    </Hint>
   );
 }
 
@@ -41,9 +42,5 @@ export function SupplementTrendNote() {
   const { t } = useT();
   useSupplements();
   if (supMid('caffeineSleepMin') <= 0) return null;
-  return (
-    <p className="ut-xs ut-faint" data-testid="sup-trend-note">
-      {t.supFxTrendNote}
-    </p>
-  );
+  return <Hint data-testid="sup-trend-note">{t.supFxTrendNote}</Hint>;
 }

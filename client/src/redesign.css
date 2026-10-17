@@ -349,31 +349,6 @@ html.theme-glass .ov-unit {
   }
 }
 
-/* Programs / Goals / Playbook / Exercises: the back link heads the top bar,
-   then the page title (the old peer switcher is gone). */
-.programs-top:has(> .ov-back) {
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: var(--s-10);
-  min-height: var(--s-36);
-}
-.programs-top > .ov-back {
-  order: -1;
-}
-.programs-page .programs-top:has(> .ov-back) > div:first-child {
-  display: block;
-  flex: 1;
-  min-width: 0;
-  text-align: left;
-}
-.programs-top:has(> .ov-back) > div:first-child .kicker {
-  display: none;
-}
-.programs-page > .programs-top:has(> .ov-back) {
-  box-shadow: none;
-  padding-bottom: 0;
-}
 .programs-page.exlib-tab .exg-tabwrap {
   padding-top: 0;
 }
@@ -403,7 +378,6 @@ html.theme-glass .ov-unit {
 }
 .pv-title,
 .screen .pg-h1,
-.programs-top:has(> .ov-back) .title-26,
 .hl .hl-pt,
 .sleep-topbar-title,
 .mst-head-title,
@@ -415,8 +389,7 @@ html.theme-glass .ov-unit {
 }
 html.theme-glass .pv-title,
 html.theme-glass .screen .pg-h1,
-html.theme-glass .programs-top:has(> .ov-back) .title-26,
-html.theme-glass .hl .hl-pt,
+html.theme-glass html.theme-glass .hl .hl-pt,
 html.theme-glass .sleep-topbar-title,
 html.theme-glass .mst-head-title,
 html.theme-glass .rx .topbar .tt {

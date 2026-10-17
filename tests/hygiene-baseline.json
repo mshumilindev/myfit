@@ -12,7 +12,7 @@
     "views/sessionSummary/NextUp.css": 5
   },
   "oversizedFiles": {
-    "App.tsx": 2195,
+    "App.tsx": 2194,
     "alcohol.ts": 667,
     "atlas/appTopics.ts": 1497,
     "atlas/eval/corpus.ts": 1236,
@@ -92,7 +92,7 @@
     "nutrition/nutrition.css": 1779,
     "nutrition/views.tsx": 679,
     "picker.ts": 653,
-    "redesign.css": 1558,
+    "redesign.css": 1531,
     "sessionBuilder.ts": 742,
     "store.ts": 6526,
     "stories/bannerStudy/BannerStudy.tsx": 784,
