@@ -5,7 +5,6 @@
  * not trained for weeks starts with a smaller, better-prepared dose. Without a
  * gap they behave exactly as before. Re-exported from sessionBuilder.ts.
  */
-import type { Landmark } from './volume';
 import type { LoadType } from './loads';
 import { breakRow, returnSets } from './detraining';
 
@@ -20,8 +19,15 @@ const roundToStep = (n: number, step: number): number => Math.round(n / step) * 
  * `gapDays` (calendar days since the muscle was last trained) shrinks the dose
  * after a long break (docs/research/detraining.md R2..R5); absent/short = as before.
  */
+/** The weekly volume landmarks this module needs (structurally the same as volume.ts `Landmark`). */
+interface DoseLandmark {
+  mev: number;
+  mav: number;
+  mrv: number;
+}
+
 export function sessionSetsForMuscle(
-  lm: Landmark,
+  lm: DoseLandmark,
   weekToDate: number,
   sessionsLeft = 2,
   gapDays?: number | null,

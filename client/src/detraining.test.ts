@@ -5,9 +5,9 @@ import {
   calendarDaysBetween,
   gapDays,
   gapWeeks,
-  muscleGapDays,
   returnSets,
 } from './detraining';
+import { muscleGapDays } from './recovery';
 import type { Workout } from './types';
 
 /** A local date at `hour` of the day `daysBack` before the anchor day (local arithmetic, DST-proof). */

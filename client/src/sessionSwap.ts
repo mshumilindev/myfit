@@ -5,7 +5,7 @@
  * gets its extra rung, exactly as `buildDay` does for the exercises it picks.
  */
 import { nextTarget, topHistory } from './progression';
-import { muscleGapDays } from './detraining';
+import { muscleGapDays } from './recovery';
 import { deriveLoadType } from './loads';
 import { warmupRamp } from './sessionDose';
 import type { Candidate, PlannedExercise } from './sessionBuilder';

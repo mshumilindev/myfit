@@ -15,6 +15,7 @@
  */
 import { topSet, isStrengthExercise, liftVariant } from './store';
 import type { Workout } from './types';
+import type { EquipmentId } from './data/equipment';
 import type { MuscleGroup } from './data/exercises';
 import type { LoadType } from './loads';
 import type { ConditionEffects } from './data/conditionCatalog';
@@ -415,4 +416,27 @@ export function applyConditionEffects(t: Target, e: ConditionEffects): Target {
     return { ...t, weight: t.prevWeight + delta, deltaKg: delta };
   }
   return t;
+}
+
+/** The progression target shown under a picker suggestion ("Try 80 × 8"); `beforeTs` is the moment the suggestion is for, so a lift not trained for weeks shows the lighter return target (SPO-149). */
+export function pickTarget(
+  item: {
+    name: string;
+    timesDone: number;
+    equipment: EquipmentId | null;
+    primary: MuscleGroup | null;
+    last: { weight: number | null } | null;
+  },
+  finished: Workout[],
+  beforeTs: number,
+): Target | null {
+  if (item.timesDone === 0) return null;
+  const hist = topHistory(finished, item.name, beforeTs);
+  if (hist.length === 0) return null;
+  return nextTarget(hist, {
+    equipment: item.equipment ? [item.equipment] : [],
+    primary: item.primary,
+    bodyweight: item.last?.weight === null,
+    now: beforeTs,
+  });
 }

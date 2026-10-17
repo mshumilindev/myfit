@@ -1,6 +1,6 @@
 /** SPO-149: the picker's "Try ..." target knows about a break. */
 import { describe, expect, it } from 'vitest';
-import { pickTarget } from './pickerTarget';
+import { pickTarget } from './progression';
 import type { Workout } from './types';
 
 const local = (daysBack: number): number => new Date(2026, 5, 15 - daysBack, 9).getTime();

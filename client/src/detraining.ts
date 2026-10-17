@@ -6,9 +6,6 @@
  * Every number below is a row of docs/research/detraining.md (section 4) and of
  * docs/specs/detraining-return-after-break.md. Change them there first.
  */
-import { muscleSetsInWorkout } from './store';
-import type { Workout } from './types';
-import type { MuscleGroup } from './data/exercises';
 
 /**
  * Whole LOCAL calendar days from `from` to `to` (23:00 -> 01:00 is 1 day).
@@ -75,24 +72,6 @@ export function gapDays(history: readonly { ts: number }[], now: number): number
   let newest = history[0].ts;
   for (const p of history) if (p.ts > newest) newest = p.ts;
   return calendarDaysBetween(newest, now);
-}
-
-/**
- * Calendar days since `muscle` last took any work (primary or secondary credit,
- * the same attribution recovery.ts uses), looking at sessions up to `now`.
- * `null` = never trained in the given history.
- */
-export function muscleGapDays(
-  finished: readonly Workout[],
-  muscle: MuscleGroup,
-  now: number,
-): number | null {
-  let newest: number | null = null;
-  for (const w of finished) {
-    if (w.startedAt > now || (newest !== null && w.startedAt <= newest)) continue;
-    if ((muscleSetsInWorkout(w).get(muscle) ?? 0) > 0) newest = w.startedAt;
-  }
-  return newest === null ? null : calendarDaysBetween(newest, now);
 }
 
 /** Working sets of a muscle for a session after a break of `gap` days (unchanged for R0/R1). */

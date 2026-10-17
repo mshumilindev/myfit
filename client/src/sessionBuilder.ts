@@ -23,7 +23,7 @@ import {
 } from './data/exercises';
 import { exerciseDay, type TrainingDay } from './data/daySuggest';
 import { nextTarget, topHistory } from './progression';
-import { muscleReadiness, type ReadyState } from './recovery';
+import { muscleGapDays, muscleReadiness, type ReadyState } from './recovery';
 import { LANDMARKS, VOLUME_MUSCLES } from './volume';
 import { recentLoadSets } from './loadWindow';
 import { personalLandmarks } from './personalize';
@@ -35,7 +35,6 @@ import { equipmentById } from './data/equipmentCatalog';
 import { warmupProposal, type WarmupPlanItem } from './warmupFor';
 import { nicMid } from './nicotineApply';
 import { sessionSetsForMuscle, warmupRamp, type PlannedSet } from './sessionDose';
-import { muscleGapDays } from './detraining';
 
 const clamp = (n: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, n));
 const roundToStep = (n: number, step: number): number => Math.round(n / step) * step;
