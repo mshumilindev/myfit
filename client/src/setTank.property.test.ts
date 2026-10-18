@@ -427,3 +427,33 @@ describe('determinism and frozen parameters', () => {
     });
   });
 });
+
+describe('non-finite durations do not poison the tank', () => {
+  it('a timed set with Infinity minutes costs nothing and later sets stay finite', () => {
+    const mk = (id: string, position: number, extra: object) => ({
+      id,
+      position,
+      reps: 8,
+      weight: 60,
+      loggedAt: 1_000_000 + position * 120_000,
+      ...extra,
+    });
+    const out = setTanks({
+      readiness: new Map(),
+      exercises: [
+        {
+          id: 'x',
+          primary: 'chest',
+          secondary: [],
+          weighted: true,
+          e1rmRef: 0,
+          sets: [mk('a', 0, { type: 'static-dynamic', durationMin: Infinity }), mk('b', 1, {})],
+        },
+      ],
+    } as never);
+    for (const v of out.values()) {
+      expect(Number.isFinite(v.tank)).toBe(true);
+      expect(Number.isFinite(v.barHeight)).toBe(true);
+    }
+  });
+});

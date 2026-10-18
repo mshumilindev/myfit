@@ -137,7 +137,7 @@ interface Segment {
 /** The pieces of work of a set, in performed order (a drop set has several). */
 function segmentsOf(s: TankSetInput): Segment[] {
   if (isTimed(s)) {
-    const secs = (s.durationMin ?? 0) * 60;
+    const secs = fin((s.durationMin ?? 0) * 60);
     return [{ weight: s.weight, reps: secs > 0 ? secs / P.secPerRep : fin(s.reps) }];
   }
   const segs: Segment[] = [{ weight: s.weight, reps: fin(s.reps) }];
@@ -203,7 +203,8 @@ export function referenceE1rm(
 }
 
 /** Share of the effort used: reps / (reps + RIR). */
-const usedShare = (reps: number, rir: number): number => (reps <= 0 ? 0 : reps / (reps + rir));
+const usedShare = (reps: number, rir: number): number =>
+  reps <= 0 || !Number.isFinite(reps + rir) ? 0 : reps / (reps + rir);
 
 /** u of every segment of a set. */
 function segmentShares(
