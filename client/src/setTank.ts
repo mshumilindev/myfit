@@ -5,7 +5,8 @@
  * for THIS lift after the set: 1 = fresh, 0 = nothing left. The tank only falls
  * with work, recovers with rest (a fast part with a half-life, a slow part that
  * does not come back during the session) and can never climb above the level it
- * had before the previous set ("no second wind").
+ * had at the start of the previous set ("no second wind"); rest earns back only part of the
+ * fast loss and nothing at all up to ~1 min, so the bar cannot rise between quickly done sets.
  *
  * Pure: plain data in, plain data out. No store, no React, no clock, no random —
  * the adapter (views/useSetBars.ts) feeds readiness, e1RM history and the sets.
@@ -50,6 +51,10 @@ export const TANK_PARAMS = Object.freeze({
   rirMax: 5,
   /** A gap this long (or a cool-down in it) is a full rest, as restBeforeSet. */
   fullRestSec: 3 * 3600,
+  /** Rest shorter than this earns no recovery (reps still fall at ~1 min, Д№3–5; assumption). */
+  restRampStartSec: 60,
+  /** Rest of this length earns the full fast recovery; linear ramp in between (assumption). */
+  restRampFullSec: 120,
   /** Colour: tank loss that paints the bar fully red. */
   colourTankRed: 0.8,
   /** Display: exponent of the concave stretch of the deficit (spec §2.3). */
@@ -227,12 +232,16 @@ interface MuscleState {
   df: number;
   /** Loss that stays for the session. */
   ds: number;
-  /** Tank at the END of this muscle's previous event (the ratchet). */
-  prev: number;
+  /** Tank at the START of this muscle's previous event: recovery never lifts above it. */
+  cap: number;
   /** When this muscle's previous event was logged (ms), or null. */
   lastAt: number | null;
   started: boolean;
 }
+
+/** Share of the fast recovery a rest earns: 0 up to 60 s, linear to 1 at 120 s (assumption). */
+const restWeight = (rest: number): number =>
+  clamp((rest - P.restRampStartSec) / (P.restRampFullSec - P.restRampStartSec), 0, 1);
 
 /** Display height of a tank value: concave stretch of the deficit, floored. */
 export function displayHeight(tank: number): number {
@@ -273,7 +282,7 @@ export function setTanks(input: TankInput): Map<string, SetTank> {
     if (!m) {
       const r = clamp(input.readiness.get(key) ?? 1, 0, 1);
       const t0 = 1 - P.readinessWeight * (1 - r);
-      m = { df: 0, ds: 1 - t0, prev: Infinity, lastAt: null, started: false };
+      m = { df: 0, ds: 1 - t0, cap: Infinity, lastAt: null, started: false };
       muscles.set(key, m);
     }
     return m;
@@ -299,12 +308,17 @@ export function setTanks(input: TankInput): Map<string, SetTank> {
           );
           rest = gap >= P.fullRestSec || cut ? Infinity : Math.max(0, gap - work);
         } else rest = s.restSec ?? P.restFallbackSec;
-        m.df *= 2 ** (-rest / P.halfLifeSec);
-        // A real break (or a full rest) lifts the ratchet; otherwise there is no second wind.
-        if (rest === Infinity) m.prev = Infinity;
+        if (rest === Infinity) {
+          // A real break (or a full rest): the fast loss is gone and the cap is lifted.
+          m.df = 0;
+          m.cap = Infinity;
+        } else {
+          // Only the EARNED fast recovery counts, and only for a long enough rest.
+          m.df -= m.df * (1 - 2 ** (-rest / P.halfLifeSec)) * restWeight(rest);
+        }
       }
       const free = 1 - m.df - m.ds;
-      const start = Math.min(m.prev, free);
+      const start = Math.min(m.cap, free); // no overshoot above the level before the previous set
       if (start < free) m.df = 1 - start - m.ds; // surplus recovery is discarded
       let t = start;
       for (const u of shares) {
@@ -315,7 +329,7 @@ export function setTanks(input: TankInput): Map<string, SetTank> {
       }
       m.started = true;
       m.lastAt = s.loggedAt && s.loggedAt > 0 ? s.loggedAt : null;
-      m.prev = Math.max(0, t); // ratchet on the END level: the bar never rises between sets
+      m.cap = start;
       if (key === own) {
         const tank = clamp(t, 0, 1);
         out.set(s.id, {

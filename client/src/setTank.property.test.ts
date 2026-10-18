@@ -232,31 +232,84 @@ describe('property tests (seeded, 2000 cases each)', () => {
   });
 });
 
-describe('the bar never rises between adjacent sets without a real break (ratchet on the END level)', () => {
-  it('random sets, rests 0-60 s and 0-180 s, reps 1-15: tank[i] <= tank[i-1]', () => {
+describe('rest recovery: no rise up to 60 s, a capped partial rise after longer rests', () => {
+  const randSeries = (r: () => number, maxRest: number) => {
+    const n = 2 + Math.floor(r() * 12);
+    const specs: Spec[] = Array.from({ length: n }, (_, i) => ({
+      ...randSpec(r, false, i === 0),
+      reps: 1 + Math.floor(r() * 15),
+      rest: i === 0 ? 0 : Math.floor(r() * (maxRest + 1)),
+    }));
+    return { specs, out: list(run(specs, r() < 0.5 ? 0 : 60 + r() * 200), n) };
+  };
+
+  it('random sets, rests 0-60 s, reps 1-15: the bar NEVER rises between adjacent sets', () => {
     const r = prng(11);
-    for (const maxRest of [60, 180]) {
-      for (let c = 0; c < CASES; c++) {
-        const n = 2 + Math.floor(r() * 12);
-        const specs: Spec[] = Array.from({ length: n }, (_, i) => {
-          const sp = randSpec(r, false, i === 0);
-          return {
-            ...sp,
-            reps: 1 + Math.floor(r() * 15),
-            rest: i === 0 ? 0 : Math.floor(r() * maxRest),
-          };
-        });
-        const out = list(run(specs, r() < 0.5 ? 0 : 60 + r() * 200), n);
-        for (let i = 1; i < n; i++) {
-          expect(out[i].tank).toBeLessThanOrEqual(out[i - 1].tank + 1e-12);
-          expect(out[i].before).toBeLessThanOrEqual(out[i - 1].tank + 1e-12);
-        }
+    for (let c = 0; c < CASES; c++) {
+      const { out } = randSeries(r, 60);
+      for (let i = 1; i < out.length; i++) {
+        expect(out[i].tank).toBeLessThanOrEqual(out[i - 1].tank + 1e-12);
+        expect(out[i].before).toBeLessThanOrEqual(out[i - 1].tank + 1e-12);
       }
     }
   });
 
-  it('reviewer case 1: reps falling at a constant weight (10,8,7,6,5 @100 kg), rest 30/60/90 s', () => {
-    for (const rest of [30, 60, 90]) {
+  it('random sets, rests 0-180 s: a rise is at most the earned recovery and never above the previous start', () => {
+    const r = prng(12);
+    for (let c = 0; c < CASES; c++) {
+      const { out } = randSeries(r, 180);
+      for (let i = 1; i < out.length; i++) {
+        expect(out[i].before).toBeLessThanOrEqual(out[i - 1].before + 1e-12); // cap 1
+        expect(out[i].tank).toBeLessThanOrEqual(out[i - 1].before + 1e-12);
+        // earned recovery = start - previous end; the new set's cost only reduces the rise
+        expect(out[i].tank - out[i - 1].tank).toBeLessThanOrEqual(
+          out[i].before - out[i - 1].tank + 1e-12,
+        );
+      }
+    }
+  });
+
+  it('cap 1 for any rest below a real break: the start never exceeds the previous start', () => {
+    const r = prng(13);
+    for (let c = 0; c < CASES; c++) {
+      const { out } = randSeries(r, 7000);
+      for (let i = 1; i < out.length; i++)
+        expect(out[i].before).toBeLessThanOrEqual(out[i - 1].before + 1e-12);
+    }
+  });
+
+  it('more rest never gives a lower tank - and it is meaningful: 180 s is strictly higher than 30 s', () => {
+    const r = prng(14);
+    for (let c = 0; c < CASES; c++) {
+      const { specs } = randSeries(r, 100);
+      const k = 1 + Math.floor(r() * (specs.length - 1));
+      const at = (rest: number) =>
+        list(
+          run(
+            specs.map((s, i) => (i === k ? { ...s, rest } : s)),
+            0,
+          ),
+          specs.length,
+        )[k];
+      let last = at(0);
+      for (const rest of [30, 60, 90, 120, 180, 300, 1200]) {
+        const cur = at(rest);
+        expect(cur.before).toBeGreaterThanOrEqual(last.before - 1e-12);
+        expect(cur.tank).toBeGreaterThanOrEqual(last.tank - 1e-12);
+        last = cur;
+      }
+    }
+    const fail = (rest: number) =>
+      list(
+        run([W(10, 100, 0, { failure: 'manual' }), W(10, 100, rest, { failure: 'manual' })], 0),
+        2,
+      )[1];
+    expect(fail(180).tank).toBeGreaterThan(fail(30).tank + 0.05);
+    expect(fail(30).tank).toBeCloseTo(fail(60).tank, 12); // no earned recovery up to 60 s
+  });
+
+  it('reviewer case 1: reps falling at a constant weight (10,8,7,6,5 @100 kg): rest 30/60 s never rise', () => {
+    for (const rest of [30, 60]) {
       for (const stated of [false, true]) {
         const specs = [10, 8, 7, 6, 5].map((reps, i) =>
           W(reps, 100, i ? rest : 0, stated ? { rpe: 8 } : {}),
@@ -266,13 +319,25 @@ describe('the bar never rises between adjacent sets without a real break (ratche
           expect(out[i].tank).toBeLessThanOrEqual(out[i - 1].tank + 1e-12);
       }
     }
+    // 90 s: a small rise is allowed, bounded by the earned recovery and the previous start
+    const out = list(
+      run(
+        [10, 8, 7, 6, 5].map((n, i) => W(n, 100, i ? 90 : 0)),
+        0,
+      ),
+      5,
+    );
+    expect(out[4].tank).toBeGreaterThan(out[3].tank);
+    for (let i = 1; i < 5; i++) expect(out[i].tank).toBeLessThanOrEqual(out[i - 1].before + 1e-12);
   });
 
-  it('reviewer case 2: a 12-rep failure set then a light 3 x 60 kg set does not lift the bar', () => {
-    for (const rest of [30, 60, 120]) {
+  it('reviewer case 2: a 12-rep failure set then a light 3 x 60 kg: 30/60 s do not lift the bar, 120 s may (capped)', () => {
+    for (const rest of [30, 60]) {
       const out = list(run([W(12, 100, 0, { failure: 'manual' }), W(3, 60, rest)], 0), 2);
       expect(out[1].tank).toBeLessThanOrEqual(out[0].tank + 1e-12);
     }
+    const out = list(run([W(12, 100, 0, { failure: 'manual' }), W(3, 60, 120)], 0), 2);
+    expect(out[1].tank).toBeLessThanOrEqual(out[0].before + 1e-12);
   });
 
   it('a real break (3 h gap or cool-down) does lift the start again', () => {
@@ -355,6 +420,8 @@ describe('determinism and frozen parameters', () => {
       rirMax: 5,
       fullRestSec: 10800,
       colourTankRed: 0.8,
+      restRampStartSec: 60,
+      restRampFullSec: 120,
       displayGamma: 0.5,
       displayFloor: 0.1,
     });

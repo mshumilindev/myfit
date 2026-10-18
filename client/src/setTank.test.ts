@@ -45,14 +45,14 @@ const exB = () =>
 
 describe('Example A: warm-ups then a working set (spec §3.1)', () => {
   it('tank at the end of each set (bar = after the set)', () => {
-    near(col([exA()], 'tank', 'a', 4), [0.982, 0.9178, 0.7605, 0.6219]);
+    near(col([exA()], 'tank', 'a', 4), [0.982, 0.9219, 0.7793, 0.6795]);
   });
   it('start-of-set levels reproduce the spec model values', () => {
-    near(col([exA()], 'before', 'a', 4), [1, 0.982, 0.9178, 0.7605]);
+    near(col([exA()], 'before', 'a', 4), [1, 0.9864, 0.9404, 0.8309]);
   });
   it('display heights are the concave stretch and strictly fall', () => {
     const h = col([exA()], 'barHeight', 'a', 4);
-    near(h, [0.866, 0.7133, 0.5106, 0.3851]);
+    near(h, [0.866, 0.7205, 0.5302, 0.4339]);
     for (let i = 1; i < h.length; i++) expect(h[i]).toBeLessThan(h[i - 1]);
   });
   it('order is preserved for other rests; longer rest never lowers the working bar', () => {
@@ -94,6 +94,65 @@ describe('Example B: no second wind (spec §3.2)', () => {
   });
 });
 
+describe('bar vs rest (spec §3.2a, §3.2b)', () => {
+  const B = (r: number) =>
+    lift(
+      'b',
+      'chest',
+      chain('b', [WU(15, 40), W(8, 60, r, { rpe: 6 }), W(8, 60, r, { rpe: 7.5 })]),
+      {
+        e1rmRef: 84,
+      },
+    );
+  const R = (r: number) =>
+    lift(
+      'r',
+      'chest',
+      chain(
+        'r',
+        [10, 8, 7, 6, 5].map((n, i) => W(n, 100, i ? r : 0)),
+      ),
+    );
+  it('example B: tanks of sets 2 and 3 by rest (same rest before both)', () => {
+    const want: [number, number, number][] = [
+      [0, 0.6579, 0.4654],
+      [26, 0.6579, 0.4654],
+      [60, 0.6579, 0.4654],
+      [90, 0.6828, 0.5355],
+      [180, 0.7252, 0.6269],
+      [300, 0.7325, 0.6388],
+    ];
+    for (const [rest, t2, t3] of want) {
+      const t = col([B(rest)], 'tank', 'b', 3);
+      near([t[1], t[2]], [t2, t3]);
+    }
+  });
+  it('the 26 s case of example B still gives a lower third bar', () => {
+    const t = col([B(26)], 'tank', 'b', 3);
+    expect(t[2]).toBeLessThan(t[1] - 0.15);
+  });
+  it('10,8,7,6,5 reps @100 kg: 60 s falls every set, 90 s rises a little, 300 s recovers most', () => {
+    near(col([R(60)], 'tank', 'r', 5), [0.6653, 0.5059, 0.4068, 0.3435, 0.3028]);
+    near(col([R(90)], 'tank', 'r', 5), [0.6653, 0.5677, 0.5354, 0.535, 0.5513]);
+    near(col([R(300)], 'tank', 'r', 5), [0.6653, 0.6909, 0.6887, 0.6889, 0.6922]);
+  });
+  it('a long rest (20 min) restores the start to the slow-loss level, not above the previous start', () => {
+    const ex = lift(
+      'l',
+      'chest',
+      chain('l', [W(8, 60, 0, { rpe: 8 }), W(8, 60, 1200, { rpe: 8 })]),
+    );
+    const [a, b] = col([ex], 'before', 'l', 2);
+    expect(b).toBeCloseTo(0.9213, 3);
+    expect(b).toBeLessThanOrEqual(a);
+  });
+  it('is deterministic', () => {
+    expect(setTanks({ exercises: [B(90)], readiness: new Map() })).toEqual(
+      setTanks({ exercises: [B(90)], readiness: new Map() }),
+    );
+  });
+});
+
 describe('Example C: drop set with 3 drops (spec §3.3)', () => {
   const sets = (drops: boolean) =>
     lift(
@@ -121,12 +180,12 @@ describe('Example C: drop set with 3 drops (spec §3.3)', () => {
   it('three drops tire the next set much more than the plain set', () => {
     const d = col([sets(true)], 'before', 'c', 3);
     const p = col([sets(false)], 'before', 'c', 3);
-    near(d, [1, 0.6852, 0.0946]);
-    near(p, [1, 0.6852, 0.4694]);
+    near(d, [1, 0.8623, 0.5814]);
+    near(p, [1, 0.8623, 0.7878]);
     expect(p[2] - d[2]).toBeGreaterThanOrEqual(0.1);
   });
   it('the drop set bar sits on the floor and the bar never disappears', () => {
-    expect(col([sets(true)], 'tank', 'c', 3)[1]).toBeCloseTo(0.0946, 3);
+    expect(col([sets(true)], 'tank', 'c', 3)[1]).toBeCloseTo(0.119, 3);
     expect(col([sets(true)], 'barHeight', 'c', 3)[1]).toBe(TANK_PARAMS.displayFloor);
   });
   it('reverse-drop is the same as drop in performed order', () => {
@@ -192,7 +251,7 @@ describe('Example D: superset A1 B1 A2 B2 by real timestamps (spec §3.4)', () =
     const r = setTanks({ exercises: build('superset'), readiness: new Map() });
     near([r.get('B1')!.before, r.get('B2')!.before], [0.8426, 0.4621]);
     near([r.get('B1')!.tank, r.get('B2')!.tank], [0.5484, 0.3007]);
-    near([r.get('A2')!.before], [0.6852]);
+    near([r.get('A2')!.before], [0.7801]); // 96 s of rest earn 60 % of the fast recovery
   });
   it('the same sets done one lift after the other give different tanks', () => {
     const a = setTanks({ exercises: build('superset'), readiness: new Map() });
@@ -215,8 +274,8 @@ describe('Example E: yesterday + readiness input (spec §3.5)', () => {
       chain('e', [W(8, 80, 0, { rpe: 8 }), W(8, 80, 120, { rpe: 8 }), W(8, 80, 120, { rpe: 8 })]),
     );
   it('start = 1 - λ(1 - readiness)', () => {
-    near(col([three()], 'before', 'e', 3, new Map([['chest', 0.25]])), [0.8125, 0.5567, 0.3814], 3);
-    near(col([three()], 'before', 'e', 3), [1, 0.6852, 0.4694], 3);
+    near(col([three()], 'before', 'e', 3, new Map([['chest', 0.25]])), [0.8125, 0.7006, 0.6401], 3);
+    near(col([three()], 'before', 'e', 3), [1, 0.8623, 0.7878], 3);
   });
   it('a muscle with no readiness data is fresh; out-of-range readiness is clamped', () => {
     expect(col([three()], 'before', 'e', 1, new Map([['back', 0]]))[0]).toBe(1);
@@ -225,7 +284,7 @@ describe('Example E: yesterday + readiness input (spec §3.5)', () => {
   });
   it('no history and no RPE: reps in reserve default to 2, then a reference appears', () => {
     const ex = lift('n', 'chest', chain('n', [W(8, 100, 0), W(8, 100, 120), W(8, 100, 120)]));
-    near(col([ex], 'before', 'n', 3), [1, 0.6852, 0.4694]);
+    near(col([ex], 'before', 'n', 3), [1, 0.8623, 0.7878]);
     expect(setE1rm(ex.sets[0])).toBeCloseTo(100 * (1 + 10 / 30), 9);
   });
 });
@@ -336,10 +395,13 @@ describe('RIR sources and edge cases (spec §4)', () => {
       ]);
     const r = (restSec?: number | null) =>
       setTanks({ exercises: [mk(restSec)], readiness: new Map() }).get('m2')!.before;
-    // The ratchet is on the END level: a rest (fallback 90 s or stored) cannot lift the next start.
-    const end1 = 1 - TANK_PARAMS.failCost * 0.8 ** 1.5;
-    expect(r()).toBeCloseTo(end1, 9);
-    expect(r(300)).toBeCloseTo(end1, 9);
+    // Fallback 90 s earns half of the fast recovery; <= 60 s earns none; 300 s nearly all of it.
+    const loss = TANK_PARAMS.failCost * 0.8 ** 1.5;
+    const end1 = 1 - loss;
+    const df = TANK_PARAMS.fastShare * loss;
+    expect(r()).toBeCloseTo(end1 + df * (1 - 2 ** -1.5) * 0.5, 9);
+    expect(r(300)).toBeCloseTo(end1 + df * (1 - 2 ** -5), 9);
+    expect(r(30)).toBeCloseTo(end1, 9);
     expect(r(0)).toBeCloseTo(end1, 9);
   });
   it('a gap of 3 h or a cool-down in between is a full rest of the fast part', () => {
@@ -355,9 +417,13 @@ describe('RIR sources and edge cases (spec §4)', () => {
     );
     const cut = setTanks({ exercises: [ex(20)], readiness: new Map(), breaks: [T0 + 600000] });
     expect(cut.get('g2')!.before).toBeCloseTo(1 - ds, 9);
-    // 20 min without a break is NOT a full rest: the start stays at the end level of set 1.
+    // 20 min without a break is not a break, but the long rest earns back the whole fast part.
     const noCut = setTanks({ exercises: [ex(20)], readiness: new Map() });
-    expect(noCut.get('g2')!.before).toBeCloseTo(1 - TANK_PARAMS.failCost * 0.8 ** 1.5, 9);
+    expect(noCut.get('g2')!.before).toBeCloseTo(1 - ds, 3);
+    expect(noCut.get('g2')!.before).toBeLessThanOrEqual(noCut.get('g1')!.before);
+    // 30 s is nowhere near: the start stays at the end level of set 1.
+    const quick = setTanks({ exercises: [ex(1.5)], readiness: new Map() });
+    expect(quick.get('g2')!.before).toBeCloseTo(quick.get('g1')!.tank, 9);
   });
   it('a deleted set: later rest is measured to the new previous set (never above the level before it)', () => {
     const full = lift(

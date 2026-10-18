@@ -79,7 +79,7 @@ describe('useSetBars (adapter)', () => {
     const w = wk('w', NOW, false, [exampleA(NOW + 1000)]);
     const r = renderHook(() => useSetBars(w, true, [history(), w])).result.current;
     const tanks = ['s1', 's2', 's3', 's4'].map((id) => r.get(id)!.tank);
-    [0.982, 0.9178, 0.7605, 0.6219].forEach((v, i) => expect(tanks[i]).toBeCloseTo(v, 3));
+    [0.982, 0.9219, 0.7793, 0.6795].forEach((v, i) => expect(tanks[i]).toBeCloseTo(v, 3));
     ['s1', 's2', 's3', 's4'].forEach((id, i, a) => {
       if (i) expect(r.get(id)!.barHeight).toBeLessThan(r.get(a[i - 1])!.barHeight);
     });
