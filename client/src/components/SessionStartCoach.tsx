@@ -19,8 +19,8 @@ import {
   type MuscleReadiness,
   type ReadyState,
 } from '../recovery';
-import { nextTarget, topHistory } from '../progression';
-import { latestWeight, resolveMuscles, useStore, workoutDayReadout } from '../store';
+import { finishedLiftTarget } from '../liftTarget';
+import { equipmentFor, resolveMuscles, useStore, workoutDayReadout } from '../store';
 import { dayReadoutLabel } from '../data/daySuggest';
 import type { Workout, Exercise } from '../types';
 import type { MuscleGroup } from '../data/exercises';
@@ -94,12 +94,10 @@ function ExerciseTargetRow({
   const exName = useExerciseName();
   const { primary } = resolveMuscles(ex);
   const store = useStore();
-  const target = nextTarget(topHistory(finished, ex.name, now), {
+  const target = finishedLiftTarget(finished, ex.name, now, store.bodyMetrics, {
     plannedReps: ex.plannedReps,
-    equipment: ex.equipment ?? [],
+    equipment: equipmentFor(ex),
     primary,
-    now,
-    bodyKg: latestWeight(store.bodyMetrics)?.weight ?? null,
   });
   const chip =
     target.state === 'progress' && target.deltaKg > 0 ? (

@@ -1,20 +1,15 @@
 /**
  * Atlas answers about a lift's next weight, in words: what to load next and why.
  * After a training break (SPO-149) the progression engine returns a 'return' target
- * (lighter, or no jump); every call here gives `nextTarget` the clock and the body mass
- * so it can tell, and the sore-body cap never multiplies with the break cut.
+ * (lighter, or no jump); every call here gives the target the clock, the body mass and the
+ * load type so it can tell, and the sore-body cap never multiplies with the break cut.
  */
-import { latestWeight } from '../store';
 import { gapWeeks } from '../detraining';
-import { nextTarget, topHistory, type ProgOpts, type Target } from '../progression';
+import { finishedLiftTarget } from '../liftTarget';
+import type { Target } from '../progression';
 import * as N from './num';
 import { SORE_CAP } from './memoryPlan';
 import { finishedOf, type AskCtx, type Tr } from './intentKit';
-
-/** `now` + body mass for `nextTarget`, so a break shows up as a 'return' target. */
-function breakOpts(c: AskCtx): Pick<ProgOpts, 'now' | 'bodyKg'> {
-  return { now: c.now, bodyKg: latestWeight(c.s.bodyMetrics)?.weight ?? null };
-}
 
 /** The next-weight answer for a 'return' target. */
 function returnAnswer(c: AskCtx, tg: Target, name: string, last: string, L: Tr): string {
@@ -57,7 +52,7 @@ function returnReason(tg: Target, name: string, L: Tr): string {
 
 /** The next target of a lift as of `c.now` (a 'return' target after a break). */
 export function liftTargetOf(c: AskCtx, exercise: string): Target {
-  return nextTarget(topHistory(finishedOf(c), exercise, c.now), breakOpts(c));
+  return finishedLiftTarget(finishedOf(c), exercise, c.now, c.s.bodyMetrics);
 }
 
 /** The weight to take when something is sore: capped, and never capped twice after a break. */

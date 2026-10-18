@@ -232,7 +232,8 @@ import {
   withMuscleBreak,
 } from '../components/Muscle';
 import { EQUIPMENT_IDS } from '../data/equipment';
-import { nextTarget, topHistory } from '../progression';
+import { finishedLiftTarget } from '../liftTarget';
+import { fmtWeightKg, fmtWeightValue } from '../fmtWeight';
 import { starterPlan } from '../starterPlan';
 import { computePlaybook, playForWeekday, type Play } from '../playbook';
 import { equipmentById } from '../data/equipmentCatalog';
@@ -297,14 +298,6 @@ function mmss(ms: number): string {
   const total = Math.max(0, Math.round(ms / 1000));
   const m = Math.floor(total / 60);
   return `${m}:${String(total % 60).padStart(2, '0')}`;
-}
-
-function fmtWeightValue(kg: number): string {
-  return kg.toFixed(1);
-}
-
-function fmtWeightKg(kg: number): string {
-  return `${fmtWeightValue(kg)} kg`;
 }
 
 /** Ghost-row proposal; timed exercises carry duration/distance instead of kg. */
@@ -1844,10 +1837,8 @@ export function SessionView(props: {
     let heroSub = '';
     if (hero && hero.kind !== 'strength') heroSub = hero.sub;
     else if (hero) {
-      const tg = nextTarget(topHistory(finished, hero.name, now), {
+      const tg = finishedLiftTarget(finished, hero.name, now, store.bodyMetrics, {
         primary: muscleOf(hero.name),
-        now,
-        bodyKg: latestWeight(store.bodyMetrics)?.weight ?? null,
       });
       heroSub =
         tg.state === 'first' || tg.prevReps == null
@@ -3531,13 +3522,9 @@ export function SessionView(props: {
                       ? t.progRepsTarget(target.reps)
                       : `${fmtWeightValue(target.weight)} ${t.kgCol.toLowerCase()}`}
                   </span>
-                  <span className="ph-sep">·</span>
                   <span className="ph-action">{progActionLabel(t, target.state)}</span>
                   {prev && (
-                    <>
-                      <span className="ph-sep">·</span>
-                      <span className="ph-prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
-                    </>
+                    <span className="ph-prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
                   )}
                 </div>
                 <ProgReturnNote target={target} lift={ex.name} />

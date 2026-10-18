@@ -34,7 +34,18 @@ const ctx = (workouts: Workout[]): AskCtx =>
     fmt: { exercise: (n: string) => n, kg: (n: number) => `${n} kg` },
   }) as unknown as AskCtx;
 
+function pullUp(daysBack: number, kg: number): Workout {
+  const w = squat(daysBack, kg) as unknown as { exercises: { name: string }[] };
+  w.exercises[0].name = 'Assisted Pull-up';
+  return w as unknown as Workout;
+}
+
 describe('Atlas next weight after a break', () => {
+  it('an assisted lift gets more help, not a delta-0 cut', () => {
+    const tg = liftTargetOf(ctx([pullUp(60, -30)]), 'Assisted Pull-up');
+    expect(tg).toMatchObject({ state: 'return', returnKind: 'cut' });
+    expect(tg.weight).toBeLessThan(-30);
+  });
   it('the target is the return target and the words say so', () => {
     const c = ctx([squat(60, 100)]);
     expect(liftTargetOf(c, 'Barbell Back Squat')).toMatchObject({ state: 'return', weight: 90 });

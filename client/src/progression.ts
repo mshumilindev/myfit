@@ -13,7 +13,7 @@
  * fast climb back to the pre-break load) instead of "last weight / +5 kg". See
  * docs/specs/detraining-return-after-break.md and docs/research/detraining.md.
  */
-import { topSet, isStrengthExercise, liftVariant } from './store';
+import { topSet, isStrengthExercise, liftVariant, loadTypeFor } from './store';
 import type { Workout } from './types';
 import type { EquipmentId } from './data/equipment';
 import type { MuscleGroup } from './data/exercises';
@@ -187,7 +187,9 @@ function returnTarget(
   // Bodyweight / unloaded: fewer reps, no weight.
   if (unloaded) return mk(null, reduced, 'cut');
   // Never more reps than last time: a heavy single cut to 90% x 7 would out-lift the old best.
-  return mk(cutWeight(prevWeight, row.weightMult), Math.min(prevReps, low), 'cut');
+  // On a light weight the 2.5 grid swallows the cut: same weight is "no jump", never "lighter".
+  const cut = cutWeight(prevWeight, row.weightMult);
+  return mk(cut, Math.min(prevReps, low), cut < prevWeight ? 'cut' : 'ease');
 }
 
 /**
@@ -413,7 +415,8 @@ export function applyConditionEffects(t: Target, e: ConditionEffects): Target {
     };
   }
   if (e.stepScale != null && e.stepScale < 1) {
-    const delta = Math.max(0.5, roundTo(t.deltaKg * e.stepScale, 0.5));
+    // Never above the unscaled target: a regain's weight is capped at the pre-break load.
+    const delta = Math.min(t.deltaKg, Math.max(0.5, roundTo(t.deltaKg * e.stepScale, 0.5)));
     return { ...t, weight: t.prevWeight + delta, deltaKg: delta };
   }
   return t;
@@ -438,6 +441,7 @@ export function pickTarget(
     equipment: item.equipment ? [item.equipment] : [],
     primary: item.primary,
     bodyweight: item.last?.weight === null,
+    loadType: loadTypeFor({ name: item.name, equipment: item.equipment ? [item.equipment] : [] }),
     now: beforeTs,
   });
 }

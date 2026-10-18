@@ -15093,9 +15093,6 @@ button.badge {
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
-.prog-hint .ph-sep {
-  color: var(--color-neutral-700);
-}
 .prog-hint .ph-action {
   color: var(--color-neutral-300);
 }
