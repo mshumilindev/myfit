@@ -16,6 +16,7 @@ Spotter — PWA (React 19 + Vite + TS strict) на **Firestore + Cloud Functions
 5. **5 локалей одразу.** Новий рядок — у всі п'ять словників. Деталі: `i18n.md`.
 6. **Прод-дані лише для читання.** Жива перевірка — read-only, нічого не пишемо в БД з акаунта користувача. Тест-дані — синтетичні.
 7. **Тести — контракти.** Не послаблювати, не скіпати, не видаляти, не знижувати пороги заради зеленого. Деталі: `tests.md`.
+8. **Формули й моделі** (смужки, детренінг, відновлення, втома) міняти лише після досліджень і регрес-тестів. Деталі: `models-and-formulas.md`.
 
 ## Команди
 
@@ -58,7 +59,7 @@ npm run audit:chat | audit:hero | audit:stories   # геометрія; прап
 
 ## Де що лежить і що примусове
 
-- `.claude/rules/*.md` — правила за `paths` (ui, i18n, security-and-data, tests, client-architecture, coach-and-roles, server-legacy).
+- `.claude/rules/*.md` — правила за `paths` (ui, i18n, security-and-data, tests, models-and-formulas, client-architecture, coach-and-roles, server-legacy).
 - `.claude/skills/` — процедури за запитом (`work-issue`, `spec-first`, `new-screen-on-kit`, `add-kit-primitive`, `i18n-string`, `encrypted-collection`, `fix-layout-bug`, `verify-in-browser`, `linear-issue`, `cpd`); `.claude/agents/risk-reviewer` — незалежне рев'ю ризикових змін.
 - **Примусово (не покладайся на пам'ять моделі):** `.claude/settings.json` (deny на секрети/згенероване, hooks: блок `--no-verify`/force-push/`pkill -f`/`reset --hard`, автоформат після правок, Stop-hook з guard-тестами), `tests/kit-guard.test.ts`, `tests/hygiene-ratchet.guard.test.ts` (нові дублі кіт-примітивів, `!important`, inline `style={{}}`, hex, магічні px, файли >600 рядків, примітиви кіту без запису в UI-KIT.md блокуються; baseline `tests/hygiene-baseline.json` лише зменшується), `npm run deps:check` (цикли й кіт→data; baseline `.dependency-cruiser-known-violations.json`), блокуючий `npm audit` у CI, `.githooks/`.
 - Доки (`docs/`) — читай за потреби, не `@`-імпортом. Правило живе в одному місці; що можна перевірити машиною — переноси в guard/lint/CI.
