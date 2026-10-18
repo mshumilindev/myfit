@@ -48,7 +48,12 @@ fi
 #    tsc інкрементальний (tsbuildinfo у node_modules/.cache): тепла перевірка — секунди.
 log_dir=$(mktemp -d)
 trap 'rm -rf "$log_dir"' EXIT
-names=(typecheck-client typecheck-server typecheck-desktop test-coverage validate-sql coverage-guard)
+# Клієнтські тести лише для змін пуша (SPO-56): `vitest related` від файлів diff до merge-base з origin/main — вони + усі, хто їх імпортує.
+# (`--changed <ref>` тут не годиться: зміна кореневого package.json чи конфігу перезапускає всі 528 файлів.) Нічого не змінено → exit 0.
+# Три важкі Atlas-файли (≈1,5–3 хв кожен) пропускає лише цей швидкий крок; повний набір клієнтських тестів — у CI (`client-tests`).
+base_ref=$(git merge-base HEAD origin/main 2>/dev/null || echo HEAD)
+client_changed_cmd='cd client && files=$(git diff --relative --name-only --diff-filter=d '"$base_ref"' -- src | tr "\n" " ") && if [ -z "$files" ]; then echo "no client/src changes since '"$base_ref"' - skipping"; else echo "changed: $files"; npx --no-install vitest related $files --run --maxWorkers=100% --reporter=dot --passWithNoTests --exclude src/atlas/kb.test.ts --exclude src/atlas/numbers.test.ts --exclude "src/atlas/eval/**"; fi'
+names=(typecheck-client typecheck-server typecheck-desktop test-coverage validate-sql coverage-guard client-tests-changed)
 cmds=(
   "npm run --silent typecheck -w client -- --incremental --tsBuildInfoFile $cache_dir/tsc-client.tsbuildinfo"
   "npm run --silent typecheck -w server -- --incremental --tsBuildInfoFile $cache_dir/tsc-server.tsbuildinfo"
@@ -56,6 +61,7 @@ cmds=(
   "npm run --silent test:coverage"
   "node scripts/validate-sql.mjs"
   "npm run --silent coverage:guard -- --base $(git merge-base HEAD origin/main 2>/dev/null || echo HEAD)"
+  "$client_changed_cmd"
 )
 pids=()
 for i in "${!names[@]}"; do

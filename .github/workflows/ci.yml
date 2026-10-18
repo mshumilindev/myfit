@@ -100,6 +100,29 @@ jobs:
           path: client/coverage
           if-no-files-found: ignore
 
+  # Client unit tests (528 files, ~1750 CPU-s serial). Sharded by vitest (--shard i/N hashes file paths). No coverage here: SPO-56.
+  # N=8: the floor is src/atlas/kb.test.ts (~3 min alone, one file cannot be sharded); more shards do not shorten the worst one
+  # and eat the ~20 concurrent-job budget (ADR 004). --maxWorkers=100% because vitest's default on 2 vCPU is a single worker (about 1.6x slower).
+  client-tests:
+    name: Client tests ${{ matrix.shard }}/8
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # some client tests import the Cloud Functions sources (coach parity harness), which have their own lockfile
+      - run: npm ci --prefix functions
+      - name: Client unit tests (shard ${{ matrix.shard }}/8, no coverage)
+        working-directory: client
+        run: npx vitest run --shard ${{ matrix.shard }}/8 --maxWorkers=100%
+
   # Floor of coverage thresholds / include / exclude may only grow (SPO-47, .claude/rules/tests.md). Seconds, parallel.
   coverage-guard:
     name: Coverage thresholds only grow
@@ -146,7 +169,7 @@ jobs:
   quality:
     name: Lint · types · tests · build
     if: always()
-    needs: [lint, format, types, tests, coverage-guard, build, security]
+    needs: [lint, format, types, tests, client-tests, coverage-guard, build, security]
     runs-on: ubuntu-latest
     steps:
       - name: Every quality job must have succeeded (a skipped or cancelled one counts as a failure)
