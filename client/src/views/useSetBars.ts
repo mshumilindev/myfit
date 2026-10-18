@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { MuscleGroup } from '../data/exercises';
 import { muscleReadiness } from '../recovery';
 import { referenceE1rm, setTanks, type SetTank, type TankExercise } from '../setTank';
@@ -7,11 +7,10 @@ import { isMarkerExercise, isStrengthExercise, loadTypeFor, resolveMuscles } fro
 import { dropTolerance, finalDrop, performanceDrops } from '../stimulus';
 import type { Workout } from '../types';
 
-/** The lift's earlier sessions (newest first) that have sets. */
+/** The lift's earlier sessions that have sets; `done` is already sorted newest first. */
 function sessionsOf(done: readonly Workout[], name: string) {
   const needle = name.trim().toLowerCase();
-  return [...done]
-    .sort((a, b) => b.startedAt - a.startedAt)
+  return done
     .map((w) => ({
       startedAt: w.startedAt,
       sets: w.exercises.find((x) => x.name.trim().toLowerCase() === needle)?.sets ?? [],
@@ -19,6 +18,7 @@ function sessionsOf(done: readonly Workout[], name: string) {
     .filter((x) => x.sets.length > 0);
 }
 
+const EMPTY: Workout[] = [];
 const NONE: ReadonlyMap<string, SetTank> = new Map();
 
 /**
@@ -35,13 +35,16 @@ export function useSetBars(
 ): ReadonlyMap<string, SetTank> {
   const id = workout?.id;
   const startedAt = workout?.startedAt;
-  const before = useMemo(
-    () =>
-      live && id !== undefined && startedAt !== undefined
-        ? workouts.filter((w) => w.finishedAt !== null && w.id !== id && w.startedAt < startedAt)
-        : [],
-    [live, workouts, id, startedAt],
-  );
+  const filtered =
+    live && id !== undefined && startedAt !== undefined
+      ? workouts.filter((w) => w.finishedAt !== null && w.id !== id && w.startedAt < startedAt)
+      : EMPTY;
+  // `workouts` changes identity on every logged set (it holds the live workout), but the
+  // finished history before it does not: keep the previous subset while every element is
+  // the same object, so the history-derived work below runs only when history changes.
+  const [before, setBefore] = useState<Workout[]>(filtered);
+  if (before.length !== filtered.length || filtered.some((w, i) => w !== before[i]))
+    setBefore(filtered);
   const base = useMemo(() => {
     const ready = new Map<string, number>();
     if (before.length === 0 || startedAt === undefined)
@@ -50,6 +53,12 @@ export function useSetBars(
     return { ready, stalled: stalledMuscles(before, startedAt) };
   }, [before, startedAt]);
 
+  // Newest first, sorted once per history instead of once per exercise per logged set.
+  const newestFirst = useMemo(
+    () => [...before].sort((a, b) => b.startedAt - a.startedAt),
+    [before],
+  );
+
   return useMemo(() => {
     if (!live || !workout) return NONE;
     const exercises: TankExercise[] = workout.exercises
@@ -57,7 +66,7 @@ export function useSetBars(
       .map((e) => {
         const { primary, secondary } = resolveMuscles(e);
         const weighted = loadTypeFor(e) === 'weight';
-        const past = sessionsOf(before, e.name);
+        const past = sessionsOf(newestFirst, e.name);
         const drops = past
           .slice(0, 6)
           .map((x) => finalDrop(x.sets))
@@ -80,5 +89,5 @@ export function useSetBars(
       .filter((e) => e.kind === 'cooldown' && e.markerAt)
       .map((e) => e.markerAt as number);
     return setTanks({ exercises, readiness: base.ready, breaks });
-  }, [live, workout, before, base]);
+  }, [live, workout, base, newestFirst]);
 }
