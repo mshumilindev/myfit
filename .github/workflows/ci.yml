@@ -100,6 +100,22 @@ jobs:
           path: client/coverage
           if-no-files-found: ignore
 
+  # Floor of coverage thresholds / include / exclude may only grow (SPO-47, .claude/rules/tests.md). Seconds, parallel.
+  coverage-guard:
+    name: Coverage thresholds only grow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Thresholds / include / exclude never below the floor, floor never below the base commit
+        run: npm run coverage:guard -- --base ${{ github.event.pull_request.base.sha || github.event.before || 'HEAD' }}
+
   build:
     name: Build (server + client)
     runs-on: ubuntu-latest
@@ -130,7 +146,7 @@ jobs:
   quality:
     name: Lint · types · tests · build
     if: always()
-    needs: [lint, format, types, tests, build, security]
+    needs: [lint, format, types, tests, coverage-guard, build, security]
     runs-on: ubuntu-latest
     steps:
       - name: Every quality job must have succeeded (a skipped or cancelled one counts as a failure)

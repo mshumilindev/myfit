@@ -1,0 +1,62 @@
+{
+  "_doc": "Підлога покриття (SPO-47): пороги/include/exclude лише ростуть. Перевірка: npm run coverage:guard. Підняти: node scripts/check-coverage-thresholds.mjs --update. Правило: .claude/rules/tests.md.",
+  "configs": {
+    "vitest.config.ts": {
+      "include": [
+        "client/src/i18n/index.ts",
+        "server/src/auth.ts",
+        "server/src/gyms.ts",
+        "server/src/workouts.ts"
+      ],
+      "exclude": ["client/src/main.tsx", "server/src/index.ts", "**/*.d.ts", "**/dist/**"],
+      "thresholds": {
+        "statements": 90,
+        "branches": 70,
+        "functions": 90,
+        "lines": 90
+      }
+    },
+    "client/vitest.config.ts": {
+      "include": ["src/i18n/**", "src/data/**"],
+      "exclude": [],
+      "thresholds": {
+        "statements": 80,
+        "branches": 80,
+        "functions": 80,
+        "lines": 80
+      }
+    }
+  },
+  "client_full_baseline": {
+    "_doc": "Інформативна ціль-храповик (поки не примусова): повний прогін client/src з include 'src/**'. Піднімається разом із партіями етапу 3 (--update --baseline-from <coverage-summary.json>).",
+    "measured_at": "2026-10-18",
+    "commit": "42aa8d7",
+    "provider": "v8",
+    "include": ["src/**"],
+    "files": 1327,
+    "test_files": 528,
+    "tests": 5786,
+    "totals": {
+      "statements": {
+        "pct": 61.72,
+        "covered": 49610,
+        "total": 80372
+      },
+      "branches": {
+        "pct": 58.4,
+        "covered": 37665,
+        "total": 64485
+      },
+      "functions": {
+        "pct": 51.64,
+        "covered": 15673,
+        "total": 30347
+      },
+      "lines": {
+        "pct": 62.17,
+        "covered": 42604,
+        "total": 68526
+      }
+    }
+  }
+}

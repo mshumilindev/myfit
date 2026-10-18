@@ -48,13 +48,14 @@ fi
 #    tsc інкрементальний (tsbuildinfo у node_modules/.cache): тепла перевірка — секунди.
 log_dir=$(mktemp -d)
 trap 'rm -rf "$log_dir"' EXIT
-names=(typecheck-client typecheck-server typecheck-desktop test-coverage validate-sql)
+names=(typecheck-client typecheck-server typecheck-desktop test-coverage validate-sql coverage-guard)
 cmds=(
   "npm run --silent typecheck -w client -- --incremental --tsBuildInfoFile $cache_dir/tsc-client.tsbuildinfo"
   "npm run --silent typecheck -w server -- --incremental --tsBuildInfoFile $cache_dir/tsc-server.tsbuildinfo"
   "npm run --silent typecheck -w desktop -- --incremental --tsBuildInfoFile $cache_dir/tsc-desktop.tsbuildinfo"
   "npm run --silent test:coverage"
   "node scripts/validate-sql.mjs"
+  "npm run --silent coverage:guard -- --base $(git merge-base HEAD origin/main 2>/dev/null || echo HEAD)"
 )
 pids=()
 for i in "${!names[@]}"; do
