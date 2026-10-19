@@ -53,7 +53,7 @@ describe('plan: what each widget reports for the rich fixture history', () => {
       'M',
       ['Week 3 of 8 · Upper Lower Push', '6 of 8 sessions', '75% adherence'],
     ],
-    ['program-progress', 'XL', ['0 missed · 18 to go', 'Ends Sun Nov 1', 'Open program']],
+    ['program-progress', 'XL', ['0 missed · 18 to go', 'Ends Mon Nov 2', 'Open program']],
     ['week-plan', 'M', ['Today · Rest', 'Sun rest']],
     ['week-plan', 'XL', ['3 of 3 done', 'Mon · Push', '✓ 58m', 'Next week starts Mon Sep 28']],
     ['time-to-train', 'M', ['You usually train at 18:00', 'in 6h 00m']],

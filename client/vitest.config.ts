@@ -3,6 +3,9 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'jsdom',
+    // Same calendar everywhere: the CI runner is UTC, developer machines are not (a DST/midnight-dependent label made a test
+    // pass locally and fail in CI). Tests that need another zone set process.env.TZ themselves.
+    env: { TZ: 'UTC' },
     // Atlas builds its knowledge base on the first test of a file (the app does it in a worker): ~5-9 s on a loaded CI core.
     testTimeout: 30_000,
     include: ['src/**/*.test.{ts,tsx}'],
