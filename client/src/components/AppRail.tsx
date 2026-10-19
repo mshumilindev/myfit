@@ -19,7 +19,8 @@
  * Shown from 720px up (the real apps' swap width, unchanged); below it the app mounts
  * `SuiteTabBar` instead.
  */
-import { useT } from '../i18n';
+import { LOCALE_IDS, LOCALES, setLocale, useT } from '../i18n';
+import { LanguageSelector } from '../ui';
 import { useCoachT } from '../i18n/coach';
 import { SpotterMark } from '../brand/SpotterMark';
 import { badgeText } from './ui/Badge';
@@ -72,7 +73,7 @@ export function AppRail({
   /** Warning dot on the avatar (Gym: offline / sync failed). No dot while all is well. */
   syncColor?: string;
 }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const { c } = useCoachT();
   const wide = useMinWidth(COACH_WIDE_BREAKPOINT);
 
@@ -103,6 +104,15 @@ export function AppRail({
         ]
       : []),
     ...(extrasAfter ?? []),
+    // Language: the shared flag chip as the last foot extra (like the bell/settings it collapses into More on a
+    // short rail; the More row cycles to the next language).
+    {
+      id: 'language',
+      label: LOCALES[locale].language,
+      icon: 'globe',
+      node: <LanguageSelector compact />,
+      onSelect: () => setLocale(LOCALE_IDS[(LOCALE_IDS.indexOf(locale) + 1) % LOCALE_IDS.length]),
+    },
   ];
 
   return (
