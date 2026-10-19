@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import WeightedShardSequencer from './vitest.sequencer';
 
 export default defineConfig({
   test: {
@@ -9,6 +10,8 @@ export default defineConfig({
     // Atlas builds its knowledge base on the first test of a file (the app does it in a worker): ~5-9 s on a loaded CI core.
     testTimeout: 30_000,
     include: ['src/**/*.test.{ts,tsx}'],
+    // `--shard i/N` splits by measured weight, not by file count (see vitest.sequencer.ts).
+    sequence: { sequencer: WeightedShardSequencer },
     // Atlas's knowledge base, loaded up front (the app builds it in a worker).
     setupFiles: ['src/atlas/testSetup.ts', 'src/coach/__fixtures__/setup.ts'],
     coverage: {

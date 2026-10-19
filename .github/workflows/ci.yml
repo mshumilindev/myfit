@@ -97,7 +97,7 @@ jobs:
           path: client/coverage
           if-no-files-found: ignore
 
-  # Client unit tests (528 files, ~1750 CPU-s serial). Sharded by vitest (--shard i/N hashes file paths). No coverage here: SPO-56.
+  # Client unit tests (528 files, ~1750 CPU-s serial). Sharded by measured weight (client/vitest.sequencer.ts + test-weights.json), not by file count. No coverage here: SPO-56.
   # N=8: the floor was src/atlas/kb.test.ts (~3 min as one file; split into kb.*.test.ts so shards can balance it); more shards do not shorten the worst one
   # and eat the ~20 concurrent-job budget (ADR 004). --maxWorkers=100% because vitest's default on 2 vCPU is a single worker (about 1.6x slower).
   client-tests:
