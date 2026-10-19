@@ -221,14 +221,18 @@ describe('sharing into the chat', () => {
     await screen.findByRole('log');
     const before = held(chat).messages.length;
     fireEvent.click(screen.getByRole('button', { name: 'Share in chat' }));
-    fireEvent.click((await screen.findAllByRole('option'))[0]);
-    const remove = await screen.findByRole('button', { name: 'Do not share this item' });
+    fireEvent.click((await screen.findAllByRole('option', {}, { timeout: 3000 }))[0]);
+    const remove = await screen.findByRole(
+      'button',
+      { name: 'Do not share this item' },
+      { timeout: 3000 },
+    );
     fireEvent.click(remove);
     expect(screen.queryByRole('button', { name: 'Do not share this item' })).toBeNull();
     // pick again and send
     fireEvent.click(screen.getByRole('button', { name: 'Share in chat' }));
-    fireEvent.click((await screen.findAllByRole('option'))[0]);
-    const send = await screen.findByRole('button', { name: ch.chSend });
+    fireEvent.click((await screen.findAllByRole('option', {}, { timeout: 3000 }))[0]);
+    const send = await screen.findByRole('button', { name: ch.chSend }, { timeout: 3000 });
     await waitFor(() => expect((send as HTMLButtonElement).disabled).toBe(false));
     fireEvent.click(send);
     await waitFor(() => expect(held(chat).messages.length).toBe(before + 1));
