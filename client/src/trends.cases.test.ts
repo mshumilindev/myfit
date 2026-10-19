@@ -1,5 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { computeTrends, eraTrend } from './trends';
+import { computeTrends } from './trends';
+import { eraTrend } from './trendsEra';
 import type { Insight, TrendsResult } from './trends';
 import { LOCALES, fmtWeekday, getLocale, setLocale } from './i18n';
 import type { BodyMetrics, Exercise, SetEntry, Workout } from './types';

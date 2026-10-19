@@ -26,6 +26,7 @@ import type { BodyMetrics, Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 import { t as strings, getLocale, fmtWeekday } from './i18n';
 import { localizedExerciseName } from './data/exerciseNames';
+import { eraTrend } from './trendsEra';
 
 const DAY = 24 * 3600 * 1000;
 const WEEK = 7 * DAY;
@@ -188,13 +189,6 @@ function topWeight(ex: Workout['exercises'][number]): number {
   return w;
 }
 const fmtT = (kg: number) => (kg / 1000).toFixed(1);
-
-/** Recent era vs the prior one: >= +10% is "up", <= -18% is "down". Integer cross-multiplication, because `prior * 1.1`
- * is 110.00000000000001 for 100 and an exact +10% would not count. */
-export function eraTrend(recent: number, prior: number | undefined) {
-  if (!prior || prior <= 0) return { up: false, down: false };
-  return { up: recent * 10 >= prior * 11, down: recent * 100 <= prior * 82 };
-}
 
 export function computeTrends(finished: Workout[], body: BodyMetrics, now: number): TrendsResult {
   const chrono = [...finished].sort((a, b) => a.startedAt - b.startedAt);
