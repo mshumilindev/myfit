@@ -91,6 +91,9 @@ function seed(workouts: Workout[], extra: Record<string, unknown> = {}) {
 }
 /** A GPS fix: standing at (lat, lng) with the given accuracy, or no fix at all. */
 function gps(fix: { lat: number; lng: number; accuracy: number } | null) {
+  // SPO-165: the sheet never waits for a new fix, it reads the position the app cached from the last one
+  if (fix) localStorage.setItem('spotter.lastPos', JSON.stringify({ ...fix, at: Date.now() }));
+  else localStorage.removeItem('spotter.lastPos');
   Object.defineProperty(navigator, 'geolocation', {
     configurable: true,
     value: {

@@ -32,6 +32,14 @@ export function isStandaloneDisplay(): boolean {
   );
 }
 
+/**
+ * True inside the desktop shell (Electron, see desktop/): it is already an installed app, so the "create shortcut"
+ * CTA is pointless there. The shell exposes `window.spotterNative` (desktop/src/preload.ts).
+ */
+export function isNativeShell(): boolean {
+  return typeof window !== 'undefined' && 'spotterNative' in window;
+}
+
 export function detectPwaPlatform(): {
   brand: PwaBrand | null;
   mode: PwaInstallMode | null;

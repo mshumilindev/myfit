@@ -208,17 +208,24 @@ describe('location, presence and visit reminders', () => {
     expect(store.pickSessionGym()).toBeNull();
   });
 
-  it('gymAtCurrentPosition: inside a radius with good accuracy only; nearest wins', async () => {
+  it('gymAtCurrentPosition: a cached fix inside a radius with good accuracy only; nearest wins; never waits for a new fix', async () => {
+    // SPO-165: the picker must open at once, so only the cached fix (<= 2 min old) is used
+    const fix = (accuracy: number, ageMs = 0) =>
+      localStorage.setItem(
+        'spotter.lastPos',
+        JSON.stringify({ lat: 54.7, lng: 25.3, accuracy, at: Date.now() - ageMs }),
+      );
     expect(await store.gymAtCurrentPosition([])).toBeNull();
-    geo({ latitude: 54.7, longitude: 25.3, accuracy: 20 });
     const near = gymAt('near', 54.7001, 25.3);
     const nearer = gymAt('nearer', 54.70005, 25.3);
     const far = gymAt('far', 55, 25.3);
+    fix(20);
     expect((await store.gymAtCurrentPosition([far, near, nearer]))?.id).toBe('nearer');
     expect(await store.gymAtCurrentPosition([far])).toBeNull();
-    geo({ latitude: 54.7, longitude: 25.3, accuracy: 100 });
-    localStorage.clear();
+    fix(100);
     expect(await store.gymAtCurrentPosition([near])).toBeNull(); // too imprecise
+    fix(20, 3 * 60_000);
+    expect(await store.gymAtCurrentPosition([near])).toBeNull(); // stale: no waiting for a new fix
   });
 
   it('presence pings are off unless the flag is on, throttled, and only inside a gym radius', async () => {

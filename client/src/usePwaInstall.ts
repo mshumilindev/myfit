@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   detectPwaPlatform,
+  isNativeShell,
   isStandaloneDisplay,
   type BeforeInstallPromptEvent,
   type PwaBrand,
@@ -48,7 +49,7 @@ export function usePwaInstall() {
   const guideMode: PwaInstallMode =
     base.mode ?? (brand === 'apple' ? 'mac-guide' : 'android-guide');
 
-  const visible = !installed && brand !== null && mode !== null;
+  const visible = !installed && !isNativeShell() && brand !== null && mode !== null;
 
   const promptInstall = useCallback(async (): Promise<'accepted' | 'dismissed' | 'unavailable'> => {
     if (!deferred) return 'unavailable';

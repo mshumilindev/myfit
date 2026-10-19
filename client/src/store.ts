@@ -4930,18 +4930,24 @@ export function getCurrentPositionOnce(opts?: {
 
 /**
  * The saved gym you're standing in right now, if any — so starting a workout
- * can skip "which gym?". Uses a fix up to 2 min old (or a fresh one, capped at
- * 2.5 s so the start never hangs). Honest about GPS: the fix must be good
- * enough (accuracy ≤ 60 m) and fall inside one gym's radius; two gyms both in
- * range → nearest. Anything unsure → null (the picker asks).
+ * can skip "which gym?". Uses a cached fix up to 2 min old and NEVER waits for a
+ * new one: starting a workout must open the gym picker instantly. With no fresh
+ * fix it returns null (the picker asks) and, when location is already granted,
+ * refreshes the cache in the background so the next start can skip the question.
+ * Honest about GPS: the fix must be good enough (accuracy ≤ 60 m) and fall inside
+ * one gym's radius; two gyms both in range → nearest. Anything unsure → null.
  */
 export async function gymAtCurrentPosition(gyms: Gym[]): Promise<Gym | null> {
   if (gyms.length === 0) return null;
-  const pos = await Promise.race([
-    getCurrentPositionOnce({ maxAgeMs: 2 * 60 * 1000 }).catch(() => null),
-    new Promise<null>((r) => setTimeout(() => r(null), 2500)),
-  ]);
-  if (!pos || pos.accuracy > 60) return null;
+  const cached = readPosCache();
+  if (!cached || Date.now() - cached.at > 2 * 60 * 1000) {
+    void geolocationGranted().then((granted) => {
+      if (granted) void getCurrentPositionOnce().catch(() => undefined);
+    });
+    return null;
+  }
+  const pos = { lat: cached.lat, lng: cached.lng, accuracy: cached.accuracy };
+  if (pos.accuracy > 60) return null;
   const inside = gyms
     .map((g) => ({ g, d: haversineM(pos.lat, pos.lng, g.lat, g.lng) }))
     .filter((x) => x.d <= x.g.radiusM)
