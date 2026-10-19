@@ -211,6 +211,22 @@ describe('saving', () => {
     await act(async () => release());
   });
 
+  it('a second submit (Enter in a field) while saving does not write twice', async () => {
+    let release!: () => void;
+    const save = vi.fn(() => new Promise<void>((r) => (release = r)));
+    await open(null, { save });
+    const form = screen.getByRole('form', { name: t.hsTitle });
+    fireEvent.submit(form);
+    await waitFor(() =>
+      expect((screen.getByRole('button', { name: t.hsSave }) as HTMLButtonElement).disabled).toBe(
+        true,
+      ),
+    );
+    fireEvent.submit(form);
+    expect(save).toHaveBeenCalledTimes(1);
+    await act(async () => release());
+  });
+
   it('Cancel closes without saving', async () => {
     const { save, onClose } = await open(null);
     fireEvent.click(screen.getByRole('button', { name: t.bdCancel }));

@@ -75,7 +75,8 @@ export function CalendarSettingsForm(p: CalendarSettingsFormProps) {
         : [...draft.gymIds, id],
     });
   const save = async () => {
-    if (bad) return;
+    // Enter in a field submits the form even while the Save button is disabled
+    if (bad || busy) return;
     setBusy(true);
     setFailed(false);
     const ok = await cur.save(draft);
