@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { shareEn as sh } from '../../i18n/coachShare.en';
 import { setViewport } from '../testViewport';
@@ -6,7 +6,7 @@ import { buildShareSource, createFixturesShareSource } from './__fixtures__/fixt
 import type { ShareSourcePort } from './port';
 import { clearRecentShares, rememberShare } from './search';
 import { lowerConsent } from './ShareStoryFrame';
-import { SharePicker, type SharePickerProps } from './SharePicker';
+import { PICKER_DEBOUNCE_MS, SharePicker, type SharePickerProps } from './SharePicker';
 import type { ShareRef, Viewer } from './types';
 
 const TR: Viewer = { side: 'trainer', clientId: 'c1' };
@@ -209,6 +209,11 @@ describe('SharePicker: picking', () => {
     const field = await box();
     fireEvent.change(field, { target: { value: 'iron' } });
     await screen.findByRole('option', { name: /Iron Yard/ }, { timeout: 3000 });
+    // The unfiltered list already holds Iron Yard, so the row can show up before the debounced query lands; the arrow
+    // position is (by design) reset when the view changes, so let the debounce settle first (it flaked on a loaded CI core).
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, PICKER_DEBOUNCE_MS + 100));
+    });
     fireEvent.keyDown(field, { key: 'Enter' }); // nothing active yet: nothing happens
     expect(onPick).not.toHaveBeenCalled();
     fireEvent.keyDown(field, { key: 'ArrowUp' });
