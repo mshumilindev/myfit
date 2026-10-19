@@ -200,7 +200,11 @@ jobs:
 
   layout-shard:
     name: Layout shard ${{ matrix.shard }}
-    # No `needs: storybook`: the shard installs its tools while Storybook builds, then waits for the artifact (SPO-140).
+    # `needs: storybook` (was: install tools while Storybook builds, then poll for the artifact, SPO-140). That polling held
+    # a runner slot idle for the whole ~70 s build in every shard; with ~30 jobs against ~20 concurrent runners the idle
+    # shards pushed the real work (client tests, other shards) back. Setup is now short (cached browsers), so starting
+    # after the build costs less than the idle slots did. A failed build skips the shards and fails `layout`.
+    needs: storybook
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -216,18 +220,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - name: Wait for the Storybook build (fails fast if it failed)
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Playwright version
+        id: pw
+        run: echo "v=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: pwcache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.v }}
+      - name: Playwright Chromium (browser download is cached; system libraries are always installed)
         run: |
-          for i in $(seq 1 120); do
-            if gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" --jq '.artifacts[].name' | grep -qx storybook-static; then echo "artifact ready after ${i} checks"; exit 0; fi
-            res=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --jq '.jobs[]|select(.name=="Build Storybook")|.conclusion // ""')
-            if [ -n "$res" ] && [ "$res" != "success" ]; then echo "Build Storybook finished with: $res"; exit 1; fi
-            sleep 3
-          done
-          echo "timed out waiting for the Storybook artifact"; exit 1
+          if [ "${{ steps.pwcache.outputs.cache-hit }}" = "true" ]; then npx playwright install-deps chromium; else npx playwright install --with-deps chromium; fi
       - uses: actions/download-artifact@v4
         with:
           name: storybook-static
