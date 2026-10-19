@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { computeTrends } from './trends';
+import { computeTrends, eraTrend } from './trends';
 import type { Insight, TrendsResult } from './trends';
 import { LOCALES, fmtWeekday, getLocale, setLocale } from './i18n';
 import type { BodyMetrics, Exercise, SetEntry, Workout } from './types';
@@ -1119,5 +1119,21 @@ describe('localisation', () => {
     } finally {
       setLocale('en');
     }
+  });
+});
+
+describe('eraTrend boundaries', () => {
+  it('exactly +10% is up (110 vs 100) and just under is not', () => {
+    expect(eraTrend(110, 100).up).toBe(true);
+    expect(eraTrend(109.99, 100).up).toBe(false);
+    expect(eraTrend(112, 100).up).toBe(true);
+  });
+  it('exactly -18% is down and just above is not', () => {
+    expect(eraTrend(82, 100).down).toBe(true);
+    expect(eraTrend(82.01, 100).down).toBe(false);
+  });
+  it('no prior era means neither', () => {
+    expect(eraTrend(5, undefined)).toEqual({ up: false, down: false });
+    expect(eraTrend(5, 0)).toEqual({ up: false, down: false });
   });
 });

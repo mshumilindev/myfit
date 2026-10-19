@@ -227,6 +227,10 @@ describe('pickerCategoriesForExercise', () => {
     expect(pickerCategoriesForExercise(['unicorn'])).toEqual(broad);
   });
 
+  it('a band-only exercise gets bands and accessories, not the broad everyday fallback', () => {
+    expect(pickerCategoriesForExercise(['bands'])).toEqual(['band', 'accessory']);
+  });
+
   it('bodyweight lifts get rack, suspension and bench, not the broad fallback', () => {
     expect(pickerCategoriesForExercise(['body'])).toEqual([
       'rack',

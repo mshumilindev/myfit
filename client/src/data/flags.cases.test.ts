@@ -257,3 +257,18 @@ describe('global flags (machinery, with a global flag injected)', () => {
     expect(warn.mock.calls[0][1]).toBe(boom);
   });
 });
+
+describe('startGlobalFlags: a second call returns a working stop', () => {
+  it('stop from the second call also clears the listener, so the next start subscribes again', async () => {
+    const unsub = vi.fn();
+    fs.onSnapshot.mockReturnValue(unsub);
+    const f = await load();
+    f.startGlobalFlags();
+    const stop = f.startGlobalFlags();
+    expect(fs.onSnapshot).toHaveBeenCalledTimes(1);
+    stop();
+    expect(unsub).toHaveBeenCalledTimes(1);
+    f.startGlobalFlags();
+    expect(fs.onSnapshot).toHaveBeenCalledTimes(2);
+  });
+});
