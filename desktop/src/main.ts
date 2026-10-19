@@ -1,211 +1,239 @@
-import { app, BrowserWindow, Menu, Tray, nativeImage, shell, screen } from 'electron';
-import { spawn, type ChildProcess } from 'node:child_process';
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  Menu,
+  nativeImage,
+  Notification,
+  session,
+  shell,
+  Tray,
+} from 'electron';
 import path from 'node:path';
-import http from 'node:http';
+import { autoUpdater } from 'electron-updater';
+import { CHANNEL, DEFAULT_APP_URL } from './shared';
 
-const PORT = Number(process.env.PORT ?? 4477);
-const APP_URL = `http://localhost:${PORT}`;
-const SERVER_ENTRY = path.resolve(__dirname, '../../server/dist/index.js');
+/**
+ * Thin shell around the hosted Spotter web app. All product code lives in `client/`; this process only opens the
+ * deployed URL, so every Firebase Hosting deploy reaches the desktop app without a new shell release.
+ * Override the URL for local testing: SPOTTER_URL=http://localhost:5173 npm run start -w desktop
+ */
+const APP_URL = process.env.SPOTTER_URL ?? DEFAULT_APP_URL;
+const APP_ORIGIN = new URL(APP_URL).origin;
 
-let tray: Tray | null = null;
+/** Permissions the hosted app may use (camera/geolocation per Permissions-Policy in firebase.json; web notifications). */
+const ALLOWED_PERMISSIONS = new Set(['notifications', 'media', 'geolocation']);
+
 let win: BrowserWindow | null = null;
-let mainWin: BrowserWindow | null = null;
-let serverProc: ChildProcess | null = null;
-let serverUp = false;
+let tray: Tray | null = null;
 let quitting = false;
 
-// --- Embedded Node server --------------------------------------------------
+const assetPath = (name: string): string => path.resolve(__dirname, '../assets', name);
 
-function startServer(): void {
-  if (serverProc) return;
-  // ВАЖЛИВО: better-sqlite3 — нативний модуль, зібраний під ABI системного
-  // Node (npm install запускався звичайним node). Electron має ІНШИЙ ABI,
-  // тому під ELECTRON_RUN_AS_NODE він падає з NODE_MODULE_VERSION mismatch.
-  // Тож сервер запускаємо справжнім Node: npm_node_execpath — це node,
-  // яким запустили `npm run tray` (успадковується дочірнім процесом).
-  // Electron-as-Node лишаємо тільки як аварійний фолбек (для нього
-  // довелось би робити electron-rebuild).
-  const nodeBin = process.env.npm_node_execpath ?? 'node';
-  const useElectronAsNode = !nodeBin;
-  console.log(
-    `[desktop] starting server with: ${useElectronAsNode ? 'electron-as-node' : nodeBin}`,
+function isHttps(url: string): boolean {
+  try {
+    return new URL(url).protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function isAppUrl(url: string): boolean {
+  try {
+    return new URL(url).origin === APP_ORIGIN;
+  } catch {
+    return false;
+  }
+}
+
+const OFFLINE_PAGE =
+  'data:text/html;charset=utf-8,' +
+  encodeURIComponent(
+    `<!doctype html><meta charset="utf-8"><title>Spotter</title>
+<body style="font:16px -apple-system,system-ui;background:#111;color:#eee;display:grid;place-items:center;height:100vh;margin:0">
+<div style="text-align:center"><h2>Spotter</h2><p>Немає звʼязку з сервером.</p>
+<button onclick="location.href='${APP_URL}'" style="font:inherit;padding:8px 16px">Спробувати ще</button></div>`,
   );
-  serverProc = spawn(useElectronAsNode ? process.execPath : nodeBin, [SERVER_ENTRY], {
-    env: {
-      ...process.env,
-      ...(useElectronAsNode ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
-      PORT: String(PORT),
-    },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  serverProc.stdout?.on('data', (d) => process.stdout.write(`[server] ${d}`));
-  serverProc.stderr?.on('data', (d) => process.stderr.write(`[server] ${d}`));
-  serverProc.on('exit', (code) => {
-    serverProc = null;
-    serverUp = false;
-    updateMenu();
-    if (!quitting) {
-      console.log(`[desktop] server exited (${code}), restarting in 2s…`);
-      setTimeout(startServer, 2000);
-    }
-  });
-}
-
-function pollHealth(): void {
-  const req = http.get(`${APP_URL}/api/health`, (res) => {
-    const wasUp = serverUp;
-    serverUp = res.statusCode === 200;
-    if (serverUp !== wasUp) updateMenu();
-    res.resume();
-  });
-  req.on('error', () => {
-    if (serverUp) {
-      serverUp = false;
-      updateMenu();
-    }
-  });
-  req.setTimeout(2000, () => req.destroy());
-}
-
-const APP_ICON = path.resolve(__dirname, '../assets/app-icon.png');
-const TRAY_ICON = path.resolve(__dirname, '../assets/tray.png');
-
-function appIcon() {
-  return nativeImage.createFromPath(APP_ICON);
-}
-
-// --- Popup window under the tray icon --------------------------------------
 
 function createWindow(): void {
   win = new BrowserWindow({
-    width: 430,
-    height: 700,
-    show: false,
-    frame: false,
-    resizable: true,
-    fullscreenable: false,
-    skipTaskbar: true,
-    icon: appIcon(),
-    webPreferences: { contextIsolation: true },
-  });
-  win.loadURL(APP_URL);
-  win.on('blur', () => {
-    if (win && !win.webContents.isDevToolsOpened()) win.hide();
-  });
-  win.on('closed', () => {
-    win = null;
-  });
-}
-
-function toggleWindow(): void {
-  if (!win) createWindow();
-  if (!win) return;
-  if (win.isVisible()) {
-    win.hide();
-    return;
-  }
-  positionWindow();
-  win.show();
-  win.focus();
-}
-
-function positionWindow(): void {
-  if (!win || !tray) return;
-  const trayBounds = tray.getBounds();
-  const winBounds = win.getBounds();
-  const display = screen.getDisplayNearestPoint({
-    x: trayBounds.x,
-    y: trayBounds.y,
-  });
-  let x = Math.round(trayBounds.x + trayBounds.width / 2 - winBounds.width / 2);
-  const y = Math.round(trayBounds.y + trayBounds.height + 6);
-  x = Math.max(
-    display.workArea.x + 8,
-    Math.min(x, display.workArea.x + display.workArea.width - winBounds.width - 8),
-  );
-  win.setPosition(x, y, false);
-}
-
-/** Повноцінне десктопне вікно (звичайне, з рамкою, ресайзиться). */
-function openMainWindow(): void {
-  if (mainWin) {
-    mainWin.show();
-    mainWin.focus();
-    return;
-  }
-  if (process.platform === 'darwin') app.dock?.show();
-  mainWin = new BrowserWindow({
     width: 1100,
     height: 800,
     minWidth: 480,
     minHeight: 600,
     title: 'Spotter',
-    icon: appIcon(),
-    webPreferences: { contextIsolation: true },
+    icon: nativeImage.createFromPath(assetPath('app-icon.png')),
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+      webSecurity: true,
+    },
   });
-  mainWin.loadURL(APP_URL);
-  mainWin.on('closed', () => {
-    mainWin = null;
-    if (process.platform === 'darwin' && !BrowserWindow.getAllWindows().length) {
-      app.dock?.hide(); // назад у режим "тільки трей"
+
+  // Only the app's own origin may load in this window; everything else opens in the system browser.
+  win.webContents.on('will-navigate', (event, url) => {
+    if (url.startsWith('data:')) return;
+    if (!isAppUrl(url)) {
+      event.preventDefault();
+      if (isHttps(url)) void shell.openExternal(url);
     }
   });
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (isHttps(url) && !isAppUrl(url)) void shell.openExternal(url);
+    return { action: 'deny' };
+  });
+  win.webContents.on('did-fail-load', (_e, code, _desc, url, isMainFrame) => {
+    // -3 = aborted (normal during redirects). Show a retry page when the app itself cannot load.
+    if (isMainFrame && code !== -3 && isAppUrl(url)) void win?.loadURL(OFFLINE_PAGE);
+  });
+
+  win.on('close', (event) => {
+    // Closing the window hides it; the app keeps running in the tray (macOS menu bar / Windows tray).
+    // Real quit: tray menu / app menu (sets `quitting`).
+    if (!quitting) {
+      event.preventDefault();
+      win?.hide();
+    }
+  });
+  win.on('closed', () => {
+    win = null;
+  });
+
+  void win.loadURL(APP_URL);
 }
 
-// --- Tray ------------------------------------------------------------------
-
-function trayIcon() {
-  // Gold brand glyph (not a macOS template — color is intentional).
-  return nativeImage.createFromPath(TRAY_ICON);
+function showWindow(): void {
+  if (!win) createWindow();
+  win?.show();
+  win?.focus();
 }
 
-function updateMenu(): void {
-  if (!tray) return;
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: serverUp ? '🟢 Сервер працює' : '🔴 Сервер не відповідає',
-      enabled: false,
-    },
-    { type: 'separator' },
-    { label: 'Швидке вікно (біля трею)', click: toggleWindow },
-    { label: 'Відкрити десктопний додаток', click: openMainWindow },
-    {
-      label: 'Відкрити в браузері',
-      click: () => void shell.openExternal(APP_URL),
-    },
-    { type: 'separator' },
-    {
-      label: 'Вийти',
-      click: () => {
-        quitting = true;
-        app.quit();
+let updateReady = false;
+
+function refreshTrayMenu(): void {
+  tray?.setContextMenu(
+    Menu.buildFromTemplate([
+      { label: 'Відкрити Spotter', click: showWindow },
+      ...(updateReady
+        ? [
+            {
+              label: 'Перезапустити й оновити',
+              click: () => {
+                quitting = true;
+                autoUpdater.quitAndInstall();
+              },
+            },
+          ]
+        : []),
+      { type: 'separator' as const },
+      {
+        label: 'Вийти',
+        click: () => {
+          quitting = true;
+          app.quit();
+        },
       },
-    },
-  ]);
-  tray.setContextMenu(contextMenu);
+    ]),
+  );
 }
 
-app.whenReady().then(() => {
-  if (process.platform === 'darwin') {
-    app.dock?.hide(); // menu-bar app only
-    app.dock?.setIcon(appIcon());
-  }
+// Shell auto-update (Windows direct distribution, GitHub Releases via electron-updater). The web app updates itself
+// from hosting; this only replaces the shell. macOS shell updates need a signed build (SPO-162), so not enabled there.
+function setupAutoUpdate(): void {
+  if (process.platform !== 'win32' || !app.isPackaged) return;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on('update-downloaded', () => {
+    updateReady = true;
+    refreshTrayMenu();
+    if (Notification.isSupported()) {
+      new Notification({
+        title: 'Spotter',
+        body: 'Оновлення готове — встановиться при виході (або через меню в треї).',
+      }).show();
+    }
+  });
+  autoUpdater.on('error', (err) => console.warn('[updater]', err?.message ?? err));
+  const check = (): void => void autoUpdater.checkForUpdates().catch(() => undefined);
+  check();
+  setInterval(check, 6 * 60 * 60 * 1000);
+}
 
-  startServer();
-  setInterval(pollHealth, 3000);
-  pollHealth();
-
-  tray = new Tray(trayIcon());
+function createTray(): void {
+  const icon = nativeImage.createFromPath(
+    assetPath(
+      process.platform === 'darwin'
+        ? 'trayTemplate.png'
+        : process.platform === 'win32'
+          ? 'tray.ico'
+          : 'tray.png',
+    ),
+  );
+  if (process.platform === 'darwin') icon.setTemplateImage(true);
+  tray = new Tray(icon);
   tray.setToolTip('Spotter');
-  updateMenu();
-  tray.on('click', toggleWindow);
-});
+  refreshTrayMenu();
+  tray.on('click', showWindow);
+}
 
-app.on('window-all-closed', () => {
-  // Keep running in the tray even with no windows.
-});
+function buildMenu(): void {
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate([
+      ...(process.platform === 'darwin'
+        ? [{ role: 'appMenu' as const }]
+        : [{ role: 'fileMenu' as const }]),
+      { role: 'editMenu' },
+      { role: 'viewMenu' },
+      { role: 'windowMenu' },
+    ]),
+  );
+}
 
-app.on('before-quit', () => {
-  quitting = true;
-  serverProc?.kill();
-});
+function registerIpc(): void {
+  ipcMain.handle(CHANNEL.version, () => app.getVersion());
+  ipcMain.handle(CHANNEL.notify, (_e, p: { title?: unknown; body?: unknown }) => {
+    if (typeof p?.title !== 'string' || !Notification.isSupported()) return;
+    const n = new Notification({
+      title: p.title.slice(0, 120),
+      body: typeof p.body === 'string' ? p.body.slice(0, 500) : undefined,
+    });
+    n.on('click', showWindow);
+    n.show();
+  });
+  ipcMain.handle(CHANNEL.badge, (_e, count: unknown) => {
+    if (typeof count === 'number' && Number.isFinite(count) && count >= 0) {
+      app.setBadgeCount(Math.floor(count));
+    }
+  });
+  ipcMain.handle(CHANNEL.openExternal, (_e, url: unknown) => {
+    if (typeof url === 'string' && isHttps(url)) void shell.openExternal(url);
+  });
+}
+
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', showWindow);
+  app.on('before-quit', () => {
+    quitting = true;
+  });
+  app.on('activate', showWindow);
+  // No quit on window-all-closed: the app lives in the tray until "Quit".
+  app.on('window-all-closed', () => {});
+
+  // Windows: AppUserModelID is required for toast notifications and taskbar grouping (must match build appId).
+  if (process.platform === 'win32') app.setAppUserModelId('com.spotter.desktop');
+
+  void app.whenReady().then(() => {
+    session.defaultSession.setPermissionRequestHandler((wc, permission, callback) => {
+      callback(ALLOWED_PERMISSIONS.has(permission) && isAppUrl(wc.getURL()));
+    });
+    buildMenu();
+    registerIpc();
+    createTray();
+    createWindow();
+    setupAutoUpdate();
+  });
+}
