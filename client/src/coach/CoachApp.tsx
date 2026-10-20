@@ -46,6 +46,8 @@ import { ChatDock } from './chat/ChatDock';
 import { useLiveWidget } from './screens/live/useLiveWidget';
 import { useCoachRoute } from './useCoachRoute';
 import { useCoachUnread } from './unread';
+import { useTeamT } from '../i18n/coachTeam';
+import { useTeamRequests } from './team/useTeamRequests';
 import './CoachApp.css';
 
 export interface CoachShellProps {
@@ -77,10 +79,13 @@ export function CoachShell({
   onOpenShell,
 }: CoachShellProps) {
   const { c } = useCoachT();
+  const { tm } = useTeamT();
   const { t } = useT();
   const desktop = useMinWidth(COACH_BREAKPOINT);
   const wide = useMinWidth(COACH_WIDE_BREAKPOINT);
   const unread = useCoachUnread();
+  // trainers: open team requests (a manager asks to remove a client) show on Agenda, where they are answered
+  const teamAsks = useTeamRequests(undefined, role !== 'manager').requests.length;
   const active = navScreenOf(route);
   // A phone thread is the whole screen (like every other chat): the app header stays (like every app), no page title, no bottom navigation.
   const threadOpen = !desktop && route.screen === 'chat' && 'with' in route && !!route.with;
@@ -163,6 +168,9 @@ export function CoachShell({
   const railEntries: RailEntry[] = railScreens.map((s) => ({
     ...entryOf(s),
     ...(s === 'chat' ? { count: unread, countLabel: c.unread(unread) } : {}),
+    ...(s === 'agenda' && teamAsks > 0
+      ? { count: teamAsks, countLabel: `${tm.trSection}: ${teamAsks}` }
+      : {}),
   }));
   const chatLabel = unread > 0 ? c.navWithUnread(c.navChat, unread) : undefined;
   const tabs = [
@@ -172,6 +180,7 @@ export function CoachShell({
       icon: SCREEN_ICON[s],
       active: active === s,
       ...(s === 'chat' ? { badge: unread, ariaLabel: chatLabel } : {}),
+      ...(s === 'agenda' && teamAsks > 0 ? { badge: teamAsks } : {}),
     })),
     ...(manager
       ? []
@@ -288,6 +297,12 @@ export function CoachShell({
 /** The shell wired to the URL hash (`#/c/...`), as App.tsx mounts it. */
 export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
   const [route, navigate] = useCoachRoute();
+  // Real backend (production, or VITE_COACH_BACKEND=firestore in dev): the adapters are installed before any screen reads a port.
+  const backendRole = props.role === 'manager' ? 'manager' : 'trainer';
+  const { status, retry, problem } = useCoachBackendStatus(backendRole, true, {
+    id: props.userId ?? currentUid(),
+    name: props.name,
+  });
   // A manager opens only the schedule, clients and team: any other deep link lands on the schedule.
   const outOfBounds = props.role === 'manager' && !managerMayOpen(route);
   useEffect(() => {
@@ -298,12 +313,6 @@ export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
   if (coachIsUnconfigured())
     return (
       <div className="app-coach co-shell apex-app">
-  // Real backend (production, or VITE_COACH_BACKEND=firestore in dev): the adapters are installed before any screen reads a port.
-  const backendRole = props.role === 'manager' ? 'manager' : 'trainer';
-  const { status, retry, problem } = useCoachBackendStatus(backendRole, true, {
-    id: props.userId ?? currentUid(),
-    name: props.name,
-  });
         <main className="co-main" id="co-main">
           <NotConfigured onBack={props.onExitToWorkouts} />
         </main>
