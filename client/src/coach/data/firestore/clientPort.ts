@@ -25,6 +25,7 @@ import { classifyProblem } from '../problem';
 import {
   ClientPortError,
   type AccessEntry,
+  type ClientTeam,
   type AccessWhat,
   type ClientSnapshot,
   type InviteInfo,
@@ -410,6 +411,9 @@ export function createFirestoreClientPort(d: ClientPortDeps): ClientCoachPort {
       infoKey = '';
       d.onLeft?.(cid);
       void d.afterLink?.(null);
+    },
+    async team() {
+      return fs.call<ClientTeam>('teamForClient', {});
     },
     async accessLog(): Promise<AccessEntry[]> {
       try {

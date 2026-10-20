@@ -15,7 +15,7 @@
  * Everything user-written goes through `sealOrThrow` (new collections `grants`, `invites` to register by the SERVER agent).
  */
 import type { Consent } from '../../domain/types';
-import type { AccessEntry, ClientSnapshot, InviteInfo } from './types';
+import type { AccessEntry, ClientSnapshot, ClientTeam, InviteInfo } from './types';
 
 export type Unsubscribe = () => void;
 
@@ -36,6 +36,8 @@ export interface ClientCoachPort {
   restore(previous: Consent): Promise<void>;
   leave(): Promise<void>;
   accessLog(): Promise<AccessEntry[]>;
+  /** The trainer's team and what its managers did about me (empty team without a manager). Optional: a port without it shows nothing. */
+  team?(): Promise<ClientTeam>;
   ackProgram(version: number): Promise<void>;
   setSelfCoachDays(days: readonly string[]): Promise<void>;
 }

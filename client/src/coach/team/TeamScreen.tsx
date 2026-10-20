@@ -113,7 +113,7 @@ export function TeamScreen({
                   <li key={m.uid}>
                     <ListRow
                       strong
-                      icon={<ClientAvatar id={m.uid} name={m.name} size={40} />}
+                      icon={<ClientAvatar id={m.uid} name={m.name} size={40} hasPhoto={false} />}
                       label={m.name}
                       sub={memberSub(m)}
                       trailing={

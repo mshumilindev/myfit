@@ -15,6 +15,7 @@ import type { AccessEntry } from '../data/types';
 import { CATEGORY_UI, SHARE_CATEGORIES, type ShareCategory } from '../domain';
 import { accessText, catTitle, listWords } from '../labels';
 import { PushedPage } from './PushedPage';
+import { useClientTeam } from './useClientTeam';
 
 /**
  * "Who saw your data" (S-31): the trainer's reads of MY data, newest first, grouped by day. One entry per category per tab
@@ -38,6 +39,7 @@ export function AccessLogPage({ port, onBack }: { port?: ClientCoachPort; onBack
   }, [fetchLog]);
   useEffect(fetchLog, [fetchLog]);
 
+  const { team } = useClientTeam(store.port);
   const trainer = snapshot?.link.trainer;
   const first = firstName(trainer?.name ?? '');
   const now = store.port.now();
@@ -94,6 +96,19 @@ export function AccessLogPage({ port, onBack }: { port?: ClientCoachPort; onBack
           })}
         </GroupedList>
       ))}
+      {team && team.actions.length > 0 && (
+        <GroupedList header={cc.tmgActionsHead}>
+          {team.actions.map((a) => (
+            <ListRow
+              key={a.id}
+              icon={<IconTile tone="neutral" size={30} icon="calendar-dots" />}
+              label={cc.tmgKind[a.kind] ?? a.kind}
+              sub={`${a.actorName} · ${dayLabel(a.ts, now, ch, locale)}`}
+              value={<time dateTime={new Date(a.ts).toISOString()}>{clock(a.ts)}</time>}
+            />
+          ))}
+        </GroupedList>
+      )}
       <GroupedList
         footer={
           hidden.length > 0

@@ -114,3 +114,10 @@ export class ClientPortError extends Error {
     this.name = 'ClientPortError';
   }
 }
+
+/** The client's view of the trainer's team (SPO-205): names and roles, and what managers did with this client's schedule. */
+export interface ClientTeam {
+  trainerName: string;
+  members: { name: string; role: 'trainer' | 'manager' }[];
+  actions: { id: string; kind: string; actorName: string; ts: number }[];
+}

@@ -174,6 +174,22 @@ export function createFixturesClientPort(opts: FixturesClientOptions = {}): Clie
       await gate();
       emit({ link: linkFor('none'), program: null });
     },
+    async team() {
+      await gate();
+      const h = 3_600_000;
+      return {
+        trainerName: 'Olena Kovalenko',
+        members: [
+          { name: 'Irina Melnyk', role: 'manager' as const },
+          { name: 'Andriy Petrenko', role: 'trainer' as const },
+          { name: 'Olena Kovalenko', role: 'trainer' as const },
+        ],
+        actions: [
+          { id: 'a1', kind: 'move-request', actorName: 'Irina Melnyk', ts: Date.now() - 2 * h },
+          { id: 'a2', kind: 'session-done', actorName: 'Irina Melnyk', ts: Date.now() - 30 * h },
+        ],
+      };
+    },
     async accessLog() {
       await gate();
       return [...FIXTURE_ACCESS];

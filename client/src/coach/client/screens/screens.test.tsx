@@ -202,3 +202,35 @@ describe('My trainer: leaving asks for the password (plan 2.7)', () => {
     forgetReauth();
   });
 });
+
+describe("the trainer's team (SPO-205)", () => {
+  it('My trainer offers the team row; the page lists the people and what managers did, and says what they cannot see', async () => {
+    const port = createFixturesClientPort({ scenario: 'active' });
+    render(
+      <MyTrainerPage
+        port={port}
+        onBack={() => undefined}
+        onChat={() => undefined}
+        onSharing={() => undefined}
+        onProgram={() => undefined}
+        onLeft={() => undefined}
+      />,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: new RegExp(t.mtTeamRow) }));
+    expect((await screen.findAllByText('Irina Melnyk')).length).toBeGreaterThan(1);
+    expect(screen.getByText(t.tmgRoleManager)).toBeTruthy();
+    expect(screen.getByText(t.tmgKind['move-request']!)).toBeTruthy();
+    expect(screen.getByText(new RegExp(t.tmgCannot))).toBeTruthy();
+  });
+
+  it('Who saw your data also lists what managers did with the schedule', async () => {
+    render(
+      <AccessLogPage
+        port={createFixturesClientPort({ scenario: 'active' })}
+        onBack={() => undefined}
+      />,
+    );
+    expect(await screen.findByText(t.tmgActionsHead)).toBeTruthy();
+    expect(screen.getByText(t.tmgKind['session-done']!)).toBeTruthy();
+  });
+});

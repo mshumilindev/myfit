@@ -65,7 +65,7 @@ export function MemberSheet({
       >
         <div className="tm-sheet">
           <div className="tm-sheet-head">
-            <ClientAvatar id={member.uid} name={member.name} size={48} />
+            <ClientAvatar id={member.uid} name={member.name} size={48} hasPhoto={false} />
             <div>
               <h3 className="tm-sheet-title">{member.name}</h3>
               <Tag tone={member.role === 'manager' ? 'accent' : 'neutral'}>

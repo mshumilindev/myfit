@@ -25,6 +25,8 @@ import type { SchedulePort } from '../../schedule/port';
 import { ClientRescheduleSheet, UpcomingSessions, useMySessions } from './ClientSchedule';
 import { TrainerUnavailable } from './TrainerUnavailable';
 import { NoTrainerPage } from './NoTrainerPage';
+import { ClientTeamPage } from './ClientTeamPage';
+import { useClientTeam } from './useClientTeam';
 import { PushedPage } from './PushedPage';
 import type { ScheduleSlot } from '../../schedule/types';
 
@@ -54,9 +56,11 @@ export function MyTrainerPage(p: MyTrainerPageProps) {
   const [leave, setLeave] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [move, setMove] = useState<{ slot?: ScheduleSlot } | null>(null);
+  const [teamOpen, setTeamOpen] = useState(false);
+  const teamInfo = useClientTeam(store.port);
 
   const trainer = link?.trainer;
-  // Three different answers, never one eternal skeleton (architecture.mdc: loading / empty / error):
+  // Three different answers, never one eternal skeleton (.claude/rules/client-architecture.md: loading / empty / error):
   //   no snapshot yet  -> skeleton, or a FailedState with Retry when the subscription failed
   //   snapshot, no trainer link  -> the "no trainer" empty state with a way out
   if (!snapshot || !link)
@@ -78,6 +82,7 @@ export function MyTrainerPage(p: MyTrainerPageProps) {
   const prog = snapshot.program;
   const shared = notes.notes.filter((n) => n.vis === 'shared');
   const now = store.port.now();
+  if (teamOpen) return <ClientTeamPage port={store.port} onBack={() => setTeamOpen(false)} />;
 
   return (
     <PushedPage title={cc.mtTitle} backLabel={cc.ccBack} onBack={p.onBack}>
@@ -150,6 +155,18 @@ export function MyTrainerPage(p: MyTrainerPageProps) {
           <ListRow action tone="accent" label={cc.mtNotesOpen} onClick={() => setNotesOpen(true)} />
         )}
       </GroupedList>
+
+      {teamInfo.team && teamInfo.team.members.length > 0 && (
+        <GroupedList>
+          <ListRow
+            icon={<IconTile tone="people" size={30} icon="users" />}
+            label={cc.mtTeamRow}
+            sub={cc.mtTeamRowSub}
+            chevron
+            onClick={() => setTeamOpen(true)}
+          />
+        </GroupedList>
+      )}
 
       <GroupedList>
         <ListRow

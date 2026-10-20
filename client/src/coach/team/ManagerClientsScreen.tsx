@@ -150,7 +150,9 @@ export function ManagerClientsScreen({
                       <ListRow
                         strong
                         selected={desktop && selected?.clientId === r.clientId}
-                        icon={<ClientAvatar id={r.clientId} name={r.name} size={40} />}
+                        icon={
+                          <ClientAvatar id={r.clientId} name={r.name} size={40} hasPhoto={false} />
+                        }
                         label={r.name}
                         sub={shortName(r.trainerName)}
                         trailing={trailing(r)}
@@ -165,7 +167,12 @@ export function ManagerClientsScreen({
               <Inspector bare label={selected.name}>
                 <div className="mc-detail">
                   <div className="mc-detail-head">
-                    <ClientAvatar id={selected.clientId} name={selected.name} size={56} />
+                    <ClientAvatar
+                      id={selected.clientId}
+                      name={selected.name}
+                      size={56}
+                      hasPhoto={false}
+                    />
                     <div>
                       <h2 className="mc-detail-name">{selected.name}</h2>
                       <p className="mc-detail-sub">{shortName(selected.trainerName)}</p>
