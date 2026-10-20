@@ -43,6 +43,7 @@ import { createFirestoreInvitePort } from './invitePort';
 import { adoptSessionToken } from '../../../api';
 import { createFirestoreTeamPort } from './teamPort';
 import { configureTeam } from '../../team/useTeam';
+import { configureManagerClients, type ManagerClientRow } from '../../team/managerClients';
 import { createRingProvider } from './keyRing';
 import { createFirestoreLivePort } from './livePort';
 import { LIVE_BEAT_MS, createLiveWriter } from './liveWriter';
@@ -345,12 +346,32 @@ export function installFirestoreManager(d: ManagerInstallDeps): () => void {
     scheduleFeed: scheduleFeedOf(scheduleStoreFor(schedule)),
   });
   configureSchedule(schedule);
+  // one snapshot per change of the book (a stable reference for useSyncExternalStore); null until the first read finished
+  let clientRows: readonly ManagerClientRow[] | null = null;
+  const listeners = new Set<() => void>();
+  const refreshRows = () => {
+    clientRows = book.clients();
+    listeners.forEach((f) => f());
+  };
+  const stopRows = book.watch(() => {
+    if (clientRows) refreshRows();
+  });
+  void book.ready().then(refreshRows);
+  configureManagerClients({
+    peek: () => clientRows,
+    subscribe: (f) => {
+      listeners.add(f);
+      return () => void listeners.delete(f);
+    },
+  });
   configureTeam(
     createFirestoreTeamPort(d.fs, (token, role) =>
       adoptSessionToken(token, role === 'manager' ? 'manager' : 'member'),
     ),
   );
   return () => {
+    stopRows();
+    configureManagerClients(null);
     stopBook();
     rings.forget();
     configureCoachData();

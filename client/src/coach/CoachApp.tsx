@@ -253,7 +253,7 @@ export function CoachShell({
       <main id="co-main" ref={mainRef} tabIndex={-1} className="co-main">
         <CoachChromeProvider value={chrome}>
           <CoachScreenBoundary route={route}>
-            <CoachScreen route={route} onNavigate={onNavigate} />
+            <CoachScreen route={route} onNavigate={onNavigate} manager={manager} />
           </CoachScreenBoundary>
         </CoachChromeProvider>
       </main>

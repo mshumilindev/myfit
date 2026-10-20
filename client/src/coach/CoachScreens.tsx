@@ -55,6 +55,9 @@ const ProgramsScreen = lazyScreen(() =>
 );
 const Client360Screen = lazyScreen(() =>
 /** Team (SPO-196). */
+const ManagerClientsScreen = lazyScreen(() =>
+  import('./team/ManagerClientsScreen').then((m) => ({ default: m.ManagerClientsScreen })),
+);
 const TeamScreen = lazyScreen(() =>
   import('./team/TeamScreen').then((m) => ({ default: m.TeamScreen })),
 );
@@ -75,9 +78,12 @@ const Loading = () => (
 export function CoachScreen({
   route,
   onNavigate,
+  manager = false,
 }: {
   route: CoachRoute;
   onNavigate: (r: CoachRoute) => void;
+  /** a team manager: Clients is the team's list with schedule access, not a trainer's roster */
+  manager?: boolean;
 }) {
   const { c } = useCoachT();
   /** Roster / Signals / Client 360 open the Decision screen: Today's hash query carries the signal key. */
@@ -88,6 +94,12 @@ export function CoachScreen({
     return (
       <Suspense fallback={<Loading />}>
         <TodayScreen onNavigate={onNavigate} />
+      </Suspense>
+    );
+  if (route.screen === 'clients' && manager)
+    return (
+      <Suspense fallback={<Loading />}>
+        <ManagerClientsScreen onNavigate={onNavigate} />
       </Suspense>
     );
   if (route.screen === 'clients')

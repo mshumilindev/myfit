@@ -1,0 +1,33 @@
+/* Manager Clients (SPO-202). Layout only; every surface is a kit piece. Tokens only. */
+.mc-main,
+.mc-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-width: 0;
+}
+.mc-detail-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+.mc-detail-name {
+  margin: 0;
+  font-size: var(--fs-18);
+  font-weight: 600;
+}
+.mc-detail-sub {
+  margin: var(--s-4) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+}
+.mc-next {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--s-4);
+}
+.mc-next-k {
+  color: var(--color-text-muted);
+  font-size: var(--fs-12);
+}
