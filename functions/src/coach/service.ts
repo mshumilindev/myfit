@@ -1352,6 +1352,11 @@ export async function rescheduleCreate(ctx: Ctx, actor: Actor, body: Record<stri
     );
     if (p) return fail(p === 'duplicate-slot' ? 'already-exists' : 'invalid-argument', p);
     await kv.set(`${convPath(cid)}/requests/${id}`, raw);
+    if (manager) {
+      const cu = (await kv.get(`users/${clientId}`)) as UserRec | null;
+      await notice(kv, c.trainerId, 'manager-move', actor.uid, now, `mm-${id}`, displayOf(cu));
+      await ctx.notify?.(c.trainerId, 'team');
+    }
     if (manager)
       await logActivity(kv, await teamIdOf(kv, c.trainerId), now, {
         actorUid: actor.uid,

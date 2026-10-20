@@ -862,3 +862,64 @@ export async function teamActivity(
   }
   return { entries, scope };
 }
+
+/* ---- Spotter: the service messages of the team (SPO-236) -------------------------------------------------------- */
+export const SPOTTER_KINDS = ['removal-request', 'removal-answer', 'manager-move', 'team'] as const;
+export interface SpotterItem {
+  id: string;
+  kind: (typeof SPOTTER_KINDS)[number];
+  /** the other person's name (actor), when known */
+  actorName: string;
+  /** the client's / the member's name */
+  subjectName: string;
+  createdAt: number;
+  unread: boolean;
+  /** removal-request: where it stands now; removal-answer: approved / declined */
+  status?: string;
+  /** removal-request: the id the Agenda answers with */
+  refId?: string;
+}
+
+/** The caller's own service messages about the team, newest first. Metadata only: names, never client content. */
+export async function teamNotices(
+  ctx: Ctx,
+  actor: Actor,
+): Promise<{ items: SpotterItem[]; unread: number }> {
+  const rows = await ctx.kv.list(`users/${actor.uid}/notices`, { limit: 200 });
+  const kinds = new Set<string>(SPOTTER_KINDS);
+  const mine = rows
+    .map((r) => r.data as Record<string, unknown>)
+    .filter((n) => kinds.has(String(n.kind)))
+    .sort((a, b) => Number(b.createdAt) - Number(a.createdAt))
+    .slice(0, 50);
+  const items: SpotterItem[] = [];
+  for (const n of mine) {
+    const actorRec = n.actor ? ((await ctx.kv.get(`users/${n.actor}`)) as UserRec | null) : null;
+    let status = typeof n.status === 'string' ? n.status : undefined;
+    if (n.kind === 'removal-request' && typeof n.refId === 'string') {
+      const r = await ctx.kv.get(`teamRequests/${n.refId}`);
+      if (typeof r?.status === 'string') status = r.status;
+    }
+    items.push({
+      id: String(n.id),
+      kind: n.kind as SpotterItem['kind'],
+      actorName: nameOf(actorRec),
+      subjectName: typeof n.detail === 'string' ? n.detail : '',
+      createdAt: Number(n.createdAt),
+      unread: n.readAt == null,
+      ...(status ? { status } : {}),
+      ...(typeof n.refId === 'string' ? { refId: n.refId } : {}),
+    });
+  }
+  return { items, unread: items.filter((i) => i.unread).length };
+}
+
+/** Mark the caller's team service messages read. */
+export async function teamNoticesRead(ctx: Ctx, actor: Actor): Promise<{ ok: true }> {
+  const now = ctx.now();
+  const kinds = new Set<string>(SPOTTER_KINDS);
+  for (const r of await ctx.kv.list(`users/${actor.uid}/notices`, { limit: 200 }))
+    if (kinds.has(String(r.data.kind)) && r.data.readAt == null)
+      await ctx.kv.merge(r.path, { readAt: now });
+  return { ok: true };
+}

@@ -173,6 +173,10 @@ export const teamRequests = onCall(opts, (req) =>
 export const teamActivity = onCall(opts, (req) =>
   run(req, TEAM, (a) => team.teamActivity(ctx(), a, body(req))),
 );
+export const teamNotices = onCall(opts, (req) => run(req, TEAM, (a) => team.teamNotices(ctx(), a)));
+export const teamNoticesRead = onCall(opts, (req) =>
+  run(req, TEAM, (a) => team.teamNoticesRead(ctx(), a)),
+);
 export const teamLogActivity = onCall(opts, (req) =>
   run(req, ['manager'], (a) => team.teamLogActivity(ctx(), a, body(req))),
 );

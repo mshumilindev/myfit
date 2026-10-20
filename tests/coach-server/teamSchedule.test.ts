@@ -7,7 +7,14 @@ import {
   type Actor,
   type Ctx,
 } from '../../functions/src/coach/service';
-import { teamAccept, teamInvite, teamLogActivity, teamRead } from '../../functions/src/coach/team';
+import {
+  teamAccept,
+  teamInvite,
+  teamLogActivity,
+  teamNotices,
+  teamNoticesRead,
+  teamRead,
+} from '../../functions/src/coach/team';
 import { DAY } from '../../functions/src/coach/logic';
 
 const T0 = Date.UTC(2026, 9, 20, 9, 0, 0);
@@ -70,7 +77,10 @@ describe('manager reschedule requests', () => {
       id: 'r1',
       already: false,
     });
-    expect(pushes).toEqual([['c1', 'request']]);
+    expect(pushes).toEqual([
+      ['t1', 'team'],
+      ['c1', 'request'],
+    ]);
     const log = (await kv.list('teams/t1/activity')).filter((l) => l.data.actorUid === 'm1');
     expect(log.map((l) => l.data)).toMatchObject([
       { actorUid: 'm1', role: 'manager', kind: 'move-request', clientId: 'c1', refId: 'r1' },
@@ -181,5 +191,21 @@ describe('manager schedule access on the Team page', () => {
     expect(await mgrOf()).toEqual({ ready: 1, total: 1 });
     const asMgr = await teamRead(ctx(), mgr);
     expect(asMgr.members.every((m) => m.scheduleReady === undefined)).toBe(true);
+  });
+});
+
+describe('Spotter service messages', () => {
+  it('a manager proposal and a joining manager reach the trainer; read marks them; a client sees none', async () => {
+    await rescheduleCreate(ctx(), mgr, { clientId: 'c1', request: req() });
+    const s = await teamNotices(ctx(), owner);
+    const kinds = s.items.map((i) => i.kind).sort();
+    expect(kinds).toEqual(['manager-move', 'team']);
+    const mv = s.items.find((i) => i.kind === 'manager-move')!;
+    expect(mv).toMatchObject({ actorName: 'Irina', subjectName: 'Oleh', unread: true });
+    expect(s.unread).toBe(2);
+    await teamNoticesRead(ctx(), owner);
+    expect((await teamNotices(ctx(), owner)).unread).toBe(0);
+    expect((await teamNotices(ctx(), client)).items).toEqual([]);
+    expect(pushes).toContainEqual(['t1', 'team']);
   });
 });
