@@ -28,7 +28,6 @@ import { CoachChromeProvider, type CoachChrome } from './layout/chrome';
 import { Page } from './layout/Layout';
 import { CoachScreen, CoachScreenBoundary } from './CoachScreens';
 import { SCREEN_ICON, screenLabel } from './nav';
-import { teamEnabled } from './team/useTeam';
 import {
   MORE_SCREENS,
   RAIL_SCREENS,
@@ -147,17 +146,12 @@ export function CoachShell({
     onSelect: () => go(s),
   });
   // Phone More sheet: every secondary destination, then Apps (last, via the `apps` row).
-  const teamOn = teamEnabled();
-  const moreScreens: readonly ScreenId[] = teamOn
-    ? [...(MORE_SCREENS as readonly ScreenId[]), 'team']
-    : (MORE_SCREENS as readonly ScreenId[]);
+  const moreScreens: readonly ScreenId[] = [...(MORE_SCREENS as readonly ScreenId[]), 'team'];
   const moreItems: MoreMenuItem[] = moreScreens.map(entryOf);
   // Desktop rail nav: exactly the seven design items. When the rail is too short the trailing
   // ones collapse into More (Rail `overflow`); Apps is NOT among them: it is pinned in the foot.
   // Live and Signals are not rail items (phone More sheet only until the foot widgets land).
-  const railScreens: readonly ScreenId[] = teamOn
-    ? [...(RAIL_SCREENS as readonly ScreenId[]), 'team']
-    : (RAIL_SCREENS as readonly ScreenId[]);
+  const railScreens: readonly ScreenId[] = [...(RAIL_SCREENS as readonly ScreenId[]), 'team'];
   const railEntries: RailEntry[] = railScreens.map((s) => ({
     ...entryOf(s),
     ...(s === 'chat' ? { count: unread, countLabel: c.unread(unread) } : {}),
