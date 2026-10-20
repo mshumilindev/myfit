@@ -70,7 +70,7 @@ const fail = (code: ErrCode, reason: string): never => {
   throw new CoachError(code, reason);
 };
 
-export type Role = 'member' | 'trainer' | 'admin';
+export type Role = 'member' | 'trainer' | 'admin' | 'manager';
 export interface Actor {
   uid: string;
   role: Role;

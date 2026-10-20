@@ -27,7 +27,7 @@ export const bucket = getStorage().bucket(
 );
 export { FieldValue };
 
-export type Role = 'member' | 'trainer' | 'admin';
+export type Role = 'member' | 'trainer' | 'admin' | 'manager';
 export type Status = 'active' | 'invited' | 'suspended';
 
 // --- Ids, tokens, passwords -------------------------------------------------

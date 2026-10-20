@@ -13,6 +13,7 @@ import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/fire
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { db, HttpsError, requireRole, type Role } from '../lib';
 import * as svc from './service';
+import * as team from './team';
 import { CoachError, type Actor, type Signer } from './service';
 import {
   adoptLegacyClientsOf,
@@ -56,6 +57,8 @@ async function run<T>(
 }
 const ANY: Role[] = ['member', 'trainer', 'admin'];
 const COACH: Role[] = ['trainer', 'admin'];
+const TEAM: Role[] = ['trainer', 'admin', 'manager'];
+const ANY_TEAM: Role[] = ['member', 'trainer', 'admin', 'manager'];
 const body = (req: CallableRequest): Record<string, unknown> =>
   (req.data ?? {}) as Record<string, unknown>;
 const opts = coachCallOptions;
@@ -122,6 +125,31 @@ export const publishPlanVersion = onCall(opts, (req) =>
 export const programAck = onCall(opts, (req) =>
   run(req, ANY, (a) => svc.programAck(ctx(), a, body(req))),
 );
+/* ---- team (SPO-196) ------------------------------------------------------------------------------------------- */
+export const teamInvite = onCall(opts, (req) =>
+  run(req, TEAM, (a) => team.teamInvite(ctx(), a, body(req))),
+);
+export const teamInviteRevoke = onCall(opts, (req) =>
+  run(req, TEAM, (a) => team.teamInviteRevoke(ctx(), a, body(req))),
+);
+export const teamInvitePreview = onCall(opts, (req) =>
+  run(req, ANY_TEAM, () => team.teamInvitePreview(ctx(), body(req).inviteId)),
+);
+export const teamAccept = onCall(opts, (req) =>
+  run(req, ANY_TEAM, (a) => team.teamAccept(ctx(), a, body(req))),
+);
+export const teamDecline = onCall(opts, (req) =>
+  run(req, ANY_TEAM, (a) => team.teamDecline(ctx(), a, body(req))),
+);
+export const teamRemoveMember = onCall(opts, (req) =>
+  run(req, COACH, (a) => team.teamRemoveMember(ctx(), a, body(req))),
+);
+export const teamLeave = onCall(opts, (req) => run(req, TEAM, (a) => team.teamLeave(ctx(), a)));
+export const teamSetActivityScope = onCall(opts, (req) =>
+  run(req, COACH, (a) => team.teamSetActivityScope(ctx(), a, body(req))),
+);
+export const teamRead = onCall(opts, (req) => run(req, TEAM, (a) => team.teamRead(ctx(), a)));
+
 export const coachPublishSignKey = onCall(
   { secrets: [COACH_PEPPER, COACH_SIGNING_KEY], enforceAppCheck: ENFORCE_APPCHECK },
   (req) => run(req, ANY, (a) => svc.publishSignKey(ctx(), a, body(req), signer())),
