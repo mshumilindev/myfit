@@ -18,6 +18,7 @@ import { LOCALE_IDS, fmtDayMonth, setLocale, useT, type LocaleId } from '../../i
 import { AuthView } from '../AuthView';
 import { isAppShell } from './landingGate';
 import { downloadUrl } from '../../downloads';
+import { holdOffscreenMotion } from './holdOffscreenMotion';
 import './landing-design.css';
 
 const FLAGS: Record<LocaleId, string> = { en: '🇬🇧', uk: '🇺🇦', pl: '🇵🇱', lt: '🇱🇹', et: '🇪🇪' };
@@ -1362,23 +1363,11 @@ export function LandingDesign({
   useEffect(() => {
     const root = rootRef.current;
     const sc = root?.closest('.app-landing') as HTMLElement | null;
-    if (!root || !sc || typeof IntersectionObserver === 'undefined') return;
-    const secs = Array.from(root.querySelectorAll<HTMLElement>('section[id^="s-"]'));
-    const set = (s: Element, idle: boolean) => {
-      s.classList.toggle('l-idle', idle);
-      s.querySelectorAll('svg').forEach((v) => {
-        const sv = v as SVGSVGElement;
-        if (idle) sv.pauseAnimations?.();
-        else sv.unpauseAnimations?.();
-      });
-    };
-    secs.forEach((s) => set(s, true));
-    const io = new IntersectionObserver(
-      (es) => es.forEach((e) => set(e.target, !(e.isIntersecting && e.intersectionRatio > 0))),
-      { root: sc, rootMargin: '0px', threshold: [0, 0.002, 0.01] },
+    if (!root || !sc) return;
+    return holdOffscreenMotion(
+      sc,
+      Array.from(root.querySelectorAll<HTMLElement>('section[id^="s-"]')),
     );
-    secs.forEach((s) => io.observe(s));
-    return () => io.disconnect();
   }, []);
 
   // The recovery screen's background reacts to the pointer: the row (bar + ring) nearest to it turns x-ray blue.
