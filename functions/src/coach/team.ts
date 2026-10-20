@@ -10,7 +10,7 @@
  * the pending list, the accepting account is whoever opens the link signed in. Only the owner trainer removes a
  * manager; anyone else may leave. Nothing here handles keys or sealed data (the client device delegates them).
  */
-import { inviteUrl } from './inviteLink';
+import { teamInviteUrl } from './inviteLink';
 import { DAY, isUid } from './logic';
 import { CoachError, notice, type Actor, type Ctx, type ErrCode } from './service';
 import type { Doc } from './kv';
@@ -150,7 +150,12 @@ export async function teamInvite(
     expiresAt: now + TEAM_INVITE_TTL,
   };
   await kv.set(`teamInvites/${id}`, rec as unknown as Doc);
-  return { inviteId: id, url: inviteUrl(ctx.baseUrl, id), sentAt: now, expiresAt: rec.expiresAt };
+  return {
+    inviteId: id,
+    url: teamInviteUrl(ctx.baseUrl, id),
+    sentAt: now,
+    expiresAt: rec.expiresAt,
+  };
 }
 
 async function loadInvite(ctx: Ctx, id: unknown): Promise<InviteRec> {

@@ -69,6 +69,11 @@ export const teamLt: typeof teamEn = {
   tmErrOffline: 'Nėra ryšio. Bandykite vėl, kai prisijungsite.',
   tmErrGeneric: 'Nepavyko išsiųsti kvietimo. Bandykite dar kartą.',
   tmInviteSentSnack: (email) => `Kvietimas išsiųstas: ${email}`,
+  tmLinkTitle: 'Pasidalinkite kvietimo nuoroda',
+  tmLinkBody: (email) => `Nusiųskite šią nuorodą: ${email}. Ji vienkartinė ir galioja 7 dienas.`,
+  tmCopyLink: 'Kopijuoti nuorodą',
+  tmLinkCopied: 'Nuoroda nukopijuota',
+  tmDone: 'Atlikta',
 
   tmMemberTitle: 'Komandos narys',
   tmRole: 'Vaidmuo',

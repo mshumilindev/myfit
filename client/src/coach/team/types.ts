@@ -28,6 +28,8 @@ export interface TeamInvite {
   /** the role the invitee gets */
   role: TeamRole;
   sentAt: number;
+  /** the link to hand over (the inviter only); absent on a snapshot cached without it */
+  url?: string;
 }
 
 export interface TeamData {

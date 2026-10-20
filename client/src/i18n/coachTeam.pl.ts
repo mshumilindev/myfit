@@ -63,6 +63,11 @@ export const teamPl: typeof teamEn = {
   tmErrOffline: 'Brak sieci. Spróbuj ponownie po odzyskaniu połączenia.',
   tmErrGeneric: 'Nie udało się wysłać zaproszenia. Spróbuj ponownie.',
   tmInviteSentSnack: (email) => `Zaproszenie wysłano: ${email}`,
+  tmLinkTitle: 'Udostępnij link z zaproszeniem',
+  tmLinkBody: (email) => `Wyślij ten link: ${email}. Działa jeden raz i wygasa po 7 dniach.`,
+  tmCopyLink: 'Kopiuj link',
+  tmLinkCopied: 'Link skopiowany',
+  tmDone: 'Gotowe',
 
   tmMemberTitle: 'Członek zespołu',
   tmRole: 'Rola',

@@ -16,7 +16,7 @@ export interface TeamStore {
   getState(): TeamState;
   subscribe(fn: () => void): () => void;
   load(): Promise<void>;
-  invite(email: string): Promise<{ ok: true } | { ok: false; error: TeamErrorCode }>;
+  invite(email: string): Promise<{ ok: true; url: string } | { ok: false; error: TeamErrorCode }>;
   revokeInvite(id: string): Promise<void>;
   removeMember(uid: string): Promise<void>;
   leave(): Promise<void>;
@@ -80,8 +80,9 @@ export function createTeamStore(port: TeamPort): TeamStore {
       )
         return { ok: false, error: 'exists' };
       set({ busy: true });
+      let url: string;
       try {
-        await port.invite(email);
+        ({ url } = await port.invite(email));
       } catch (e) {
         set({ busy: false });
         return { ok: false, error: codeOf(e) };
@@ -92,13 +93,13 @@ export function createTeamStore(port: TeamPort): TeamStore {
             ...d,
             invites: [
               ...d.invites,
-              { id: `local-${email}`, email, role: inviteeRole(d.me.role), sentAt: now() },
+              { id: `local-${email}`, email, role: inviteeRole(d.me.role), sentAt: now(), url },
             ],
           },
         });
       set({ busy: false });
       void load();
-      return { ok: true };
+      return { ok: true, url };
     },
     revokeInvite: (id) =>
       run(async () => {

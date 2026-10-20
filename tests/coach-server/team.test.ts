@@ -75,9 +75,9 @@ beforeEach(async () => {
 });
 
 describe('team invites', () => {
-  it('a trainer invites a MANAGER; the link is a normal invite link and the team is created lazily', async () => {
+  it('a trainer invites a MANAGER; the link has its own route (never the coaching one) and the team is created lazily', async () => {
     const r = await inviteManager();
-    expect(r.url).toContain('#/invite/');
+    expect(r.url).toContain('#/team-invite/');
     expect(r.expiresAt).toBe(T0 + 7 * DAY);
     const s = await teamRead(ctx(), owner);
     expect(s.invites).toEqual([

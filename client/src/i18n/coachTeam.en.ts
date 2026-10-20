@@ -60,6 +60,11 @@ export const teamEn = {
   tmErrOffline: 'You are offline. Try again when you are back online.',
   tmErrGeneric: 'Could not send the invite. Try again.',
   tmInviteSentSnack: (email: string) => `Invite sent to ${email}`,
+  tmLinkTitle: 'Share the invite link',
+  tmLinkBody: (email: string) => `Send this link to ${email}. It works once and expires in 7 days.`,
+  tmCopyLink: 'Copy link',
+  tmLinkCopied: 'Link copied',
+  tmDone: 'Done',
 
   // member sheet
   tmMemberTitle: 'Team member',

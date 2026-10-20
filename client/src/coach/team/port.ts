@@ -19,7 +19,7 @@ export interface TeamPort {
   peek(): TeamData | null;
   load(): Promise<TeamData>;
   /** Invite by email: the role follows the viewer (a trainer invites a manager, a manager a trainer). */
-  invite(email: string): Promise<void>;
+  invite(email: string): Promise<{ url: string }>;
   revokeInvite(id: string): Promise<void>;
   /** Owner trainer only. Access ends at once; the keys are renewed by the clients' apps. */
   removeMember(uid: string): Promise<void>;

@@ -63,6 +63,11 @@ export const teamUk: typeof teamEn = {
   tmErrOffline: 'Немає мережі. Спробуйте, коли з’явиться з’єднання.',
   tmErrGeneric: 'Не вдалося надіслати запрошення. Спробуйте ще раз.',
   tmInviteSentSnack: (email) => `Запрошення надіслано: ${email}`,
+  tmLinkTitle: 'Надішліть посилання-запрошення',
+  tmLinkBody: (email) => `Надішліть це посилання: ${email}. Воно одноразове й діє 7 днів.`,
+  tmCopyLink: 'Скопіювати посилання',
+  tmLinkCopied: 'Посилання скопійовано',
+  tmDone: 'Готово',
 
   tmMemberTitle: 'Учасник команди',
   tmRole: 'Роль',

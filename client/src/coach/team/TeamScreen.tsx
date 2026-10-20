@@ -131,6 +131,20 @@ export function TeamScreen({ port }: { port?: TeamPort }) {
                       trailing={
                         <>
                           <Tag tone="neutral">{tm.tmPendingTag}</Tag>
+                          {i.url ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              aria-label={tm.tmCopyLink}
+                              onClick={() =>
+                                void navigator.clipboard
+                                  ?.writeText(i.url ?? '')
+                                  .catch(() => undefined)
+                              }
+                            >
+                              {tm.tmCopyLink}
+                            </Button>
+                          ) : null}
                           <Button
                             variant="ghost"
                             size="sm"

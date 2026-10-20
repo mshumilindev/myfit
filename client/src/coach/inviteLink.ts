@@ -42,3 +42,9 @@ export function inviteTokenOf(link: string): string | null {
   const m = /#\/invite\/([^/?#\s]+)/.exec(link);
   return m && TOKEN.test(m[1]) ? m[1] : null;
 }
+
+/** A TEAM invite (SPO-196) has its own route, never the coaching one. Same format as the server (origin, hash route team-invite, token). */
+export function teamInviteLink(token: string, origin: string = appOrigin()): string {
+  if (!TOKEN.test(token)) throw new Error('invalid-invite-token');
+  return `${origin.replace(/\/+$/, '')}/#/team-invite/${token}`;
+}

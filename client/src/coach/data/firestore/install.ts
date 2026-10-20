@@ -40,6 +40,8 @@ import { createFirestoreClientChatPort } from './clientChatPort';
 import { createFirestoreClientPort } from './clientPort';
 import type { FsApi } from './fsApi';
 import { createFirestoreInvitePort } from './invitePort';
+import { createFirestoreTeamPort } from './teamPort';
+import { configureTeam } from '../../team/useTeam';
 import { createRingProvider } from './keyRing';
 import { createFirestoreLivePort } from './livePort';
 import { LIVE_BEAT_MS, createLiveWriter } from './liveWriter';
@@ -257,6 +259,7 @@ export function installFirestoreCoach(d: InstallDeps): () => void {
     }),
   );
   configureInvitePort(createFirestoreInvitePort(d.fs));
+  configureTeam(createFirestoreTeamPort(d.fs));
   configureShare({
     source: createFirestoreShareSource({
       fs: d.fs,
@@ -287,6 +290,7 @@ export function installFirestoreCoach(d: InstallDeps): () => void {
     configureNotes(null);
     configureLive(null);
     configureInvitePort(createLocalInvitePort());
+    configureTeam(null);
     configureShare();
     configureReadLog(null);
   };

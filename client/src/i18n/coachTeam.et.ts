@@ -58,6 +58,11 @@ export const teamEt: typeof teamEn = {
   tmErrOffline: 'Võrku pole. Proovi uuesti, kui oled tagasi ühenduses.',
   tmErrGeneric: 'Kutse saatmine ebaõnnestus. Proovi uuesti.',
   tmInviteSentSnack: (email) => `Kutse saadetud: ${email}`,
+  tmLinkTitle: 'Jaga kutse linki',
+  tmLinkBody: (email) => `Saada see link: ${email}. See on ühekordne ja aegub 7 päeva pärast.`,
+  tmCopyLink: 'Kopeeri link',
+  tmLinkCopied: 'Link kopeeritud',
+  tmDone: 'Valmis',
 
   tmMemberTitle: 'Meeskonna liige',
   tmRole: 'Roll',

@@ -35,3 +35,9 @@ export function inviteTokenOf(link: string): string | null {
   const m = /#\/invite\/([A-Za-z0-9_-]{1,64})\/?$/.exec(link);
   return m ? m[1] : null;
 }
+
+/** Team invites (SPO-196) have their OWN route so they never collide with a coaching invite: `<origin>/#/team-invite/<token>`. */
+export function teamInviteUrl(origin: unknown, token: string): string {
+  if (!INVITE_TOKEN.test(token)) throw new Error('bad-invite-token');
+  return `${normalizeOrigin(origin)}/#/team-invite/${token}`;
+}
