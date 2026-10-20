@@ -119,7 +119,7 @@ export async function teamInvite(
   if (!isCoach(actor) && actor.role !== 'manager') fail('permission-denied', 'not-allowed');
   const asked = body.role;
   if (asked !== undefined && asked !== 'manager' && asked !== 'trainer')
-    fail('invalid-argument', 'invalid-role');
+    return fail('invalid-argument', 'invalid-role');
   const role: TeamRole = asked ?? (me.role === 'trainer' ? 'manager' : 'trainer');
   const kv = ctx.kv;
   const now = ctx.now();

@@ -1368,7 +1368,8 @@ export interface Signer {
   sign(payload: string): string;
 }
 export async function coachKeySign(ctx: Ctx, actor: Actor, signer: Signer) {
-  if (!isCoach(actor)) fail('permission-denied', 'not-a-coach');
+  // a team manager has a key pair too (the client device delegates the schedule keys to it, ADR 005)
+  if (!isCoach(actor) && actor.role !== 'manager') fail('permission-denied', 'not-a-coach');
   const k = await ctx.kv.get(`coachKeys/${actor.uid}`);
   const pub = k?.pub as { kty?: string; crv?: string; x?: string; y?: string } | undefined;
   if (

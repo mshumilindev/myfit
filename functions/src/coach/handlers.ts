@@ -161,7 +161,7 @@ export const coachPublishSignKey = onCall(
 export const coachKeySign = onCall(
   { secrets: [COACH_PEPPER, COACH_SIGNING_KEY], enforceAppCheck: ENFORCE_APPCHECK },
   (req) =>
-    run(req, COACH, async (a) => {
+    run(req, TEAM, async (a) => {
       const s = signer();
       // The verification key is public. Clients PIN it in the build (client/src/coachCrypto/signingPins.ts); this document
       // is only the place where a pinned key announces its successor (rotation, signed offline) or a convenience copy for

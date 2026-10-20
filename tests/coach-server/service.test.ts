@@ -1012,6 +1012,13 @@ describe('coach key signature (key pinning, C.2 no. 5)', () => {
     expect(ok('t1', 'ffffffffffffffff', 1234)).toBe(false);
     expect(ok('t1', r.fp, 1235)).toBe(false);
   });
+  it('a team manager gets their key signed too (key delegation); a plain member does not', async () => {
+    const pub = { kty: 'EC', crv: 'P-256', x: 'XX', y: 'YY', ext: true, key_ops: [] };
+    await kv.set('coachKeys/m9', { pub, updatedAt: 55 });
+    const mgr = { uid: 'm9', role: 'manager' } as typeof trainer;
+    expect((await coachKeySign(ctx(), mgr, signer)).fp).toBe(keyFingerprint(pub));
+    expect(await kv.get('coachKeys/m9')).toMatchObject({ kid: 'k1', signedAt: T0 });
+  });
   it('needs a coach and a well-formed P-256 public key', async () => {
     expect(await code(coachKeySign(ctx(), client, signer))).toBe('permission-denied:not-a-coach');
     expect(await code(coachKeySign(ctx(), trainer, signer))).toBe(
