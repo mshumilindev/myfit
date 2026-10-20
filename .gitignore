@@ -26,6 +26,8 @@ server/dist/
 desktop/dist/
 coverage/
 client/coverage/
+client/coverage-patch/
+patch-cov/
 .vite/
 client/.vite/
 test-results/

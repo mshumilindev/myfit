@@ -27,6 +27,10 @@
       }
     }
   },
+  "patch": {
+    "_doc": "Поріг patch-coverage (SPO-268): частка покритих змінених операторів client/src у diff. Лише росте; перевіряє npm run coverage:guard.",
+    "statements": 80
+  },
   "client_full_baseline": {
     "_doc": "Інформативна ціль-храповик (поки не примусова): повний прогін client/src з include 'src/**'. Піднімається разом із партіями етапу 3 (--update --baseline-from <coverage-summary.json>).",
     "measured_at": "2026-10-18",

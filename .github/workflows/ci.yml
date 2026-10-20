@@ -97,7 +97,7 @@ jobs:
           path: client/coverage
           if-no-files-found: ignore
 
-  # Client unit tests (528 files, ~1750 CPU-s serial). Sharded by measured weight (client/vitest.sequencer.ts + test-weights.json), not by file count. No coverage here: SPO-56.
+  # Client unit tests (528 files, ~1750 CPU-s serial). Sharded by measured weight (client/vitest.sequencer.ts + test-weights.json), not by file count. Coverage only of the changed files (SPO-268).
   # N=8: the floor was src/atlas/kb.test.ts (~3 min as one file; split into kb.*.test.ts so shards can balance it); more shards do not shorten the worst one
   # and eat the ~20 concurrent-job budget (ADR 004). --maxWorkers=100% because vitest's default on 2 vCPU is a single worker (about 1.6x slower).
   client-tests:
@@ -116,9 +116,49 @@ jobs:
       - run: npm ci
       # some client tests import the Cloud Functions sources (coach parity harness), which have their own lockfile
       - run: npm ci --prefix functions
-      - name: Client unit tests (shard ${{ matrix.shard }}/8, no coverage)
+      # Patch-coverage (SPO-268): coverage ONLY of the files this push/PR changed (include = diff), merged by `patch-coverage` below.
+      # No base (schedule, manual run, new branch, force-push) = no coverage flags, i.e. exactly the old no-coverage shard.
+      - name: Base commit for patch-coverage
+        id: base
+        run: |
+          BASE="${{ github.event.pull_request.base.sha || (github.event_name == 'push' && github.event.before) || '' }}"
+          if [ -n "$BASE" ] && git fetch --no-tags --depth=1 origin "$BASE" 2>/dev/null; then echo "sha=$BASE" >> "$GITHUB_OUTPUT"; fi
+      - name: Client unit tests (shard ${{ matrix.shard }}/8, coverage of the changed files only)
         working-directory: client
-        run: npx vitest run --shard ${{ matrix.shard }}/8 --maxWorkers=100%
+        run: |
+          ARGS=""
+          if [ -n "${{ steps.base.outputs.sha }}" ]; then ARGS=$(node ../scripts/patch-coverage.mjs --vitest-args --base "${{ steps.base.outputs.sha }}"); fi
+          npx vitest run --shard ${{ matrix.shard }}/8 --maxWorkers=100% $ARGS
+      - name: Upload patch coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patch-cov-${{ matrix.shard }}
+          path: client/coverage-patch/coverage-final.json
+          if-no-files-found: ignore
+
+  # Patch-coverage gate (SPO-268): share of the CHANGED executable statements of client/src that the tests cover (threshold:
+  # coverage-thresholds.json `patch`, only grows). The full coverage gate (`tests`, `static`) is unchanged. ~20 s, parallel to the rest.
+  patch-coverage:
+    name: Patch coverage
+    needs: client-tests
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Base commit
+        id: base
+        run: |
+          BASE="${{ github.event.pull_request.base.sha || (github.event_name == 'push' && github.event.before) || '' }}"
+          if [ -n "$BASE" ] && git fetch --no-tags --depth=1 origin "$BASE" 2>/dev/null; then echo "sha=$BASE" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/download-artifact@v4
+        if: needs.client-tests.result == 'success' && steps.base.outputs.sha != ''
+        with:
+          pattern: patch-cov-*
+          path: patch-cov
+      - name: Gate on the coverage of the changed lines
+        if: needs.client-tests.result == 'success'
+        run: node scripts/patch-coverage.mjs --collect patch-cov --base "${{ steps.base.outputs.sha }}"
 
   build:
     name: Build (server + client)
@@ -150,7 +190,7 @@ jobs:
   quality:
     name: Lint · types · tests · build
     if: always()
-    needs: [static, types, tests, client-tests, build, security]
+    needs: [static, types, tests, client-tests, patch-coverage, build, security]
     runs-on: ubuntu-latest
     steps:
       - name: Every quality job must have succeeded (a skipped or cancelled one counts as a failure)

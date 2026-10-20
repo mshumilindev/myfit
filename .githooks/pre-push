@@ -50,12 +50,13 @@ log_dir=$(mktemp -d)
 trap 'rm -rf "$log_dir"' EXIT
 # Клієнтські тести змін пуша (SPO-56): `vitest related` від файлів diff до merge-base з origin/main — вони + усі, хто їх імпортує.
 # (`--changed <ref>` тут не годиться: зміна кореневого package.json чи конфігу перезапускає всі файли.)
-# Це ШВИДКИЙ крок із бюджетом часу (PRE_PUSH_CLIENT_BUDGET, 120 с за замовчуванням): падіння тесту зупиняє push одразу
+# SPO-268: ті самі related-тести одразу збирають покриття ЗМІНЕНИХ рядків (patch-coverage, поріг у coverage-thresholds.json);
+# повний coverage-гейт лишається в CI. Це ШВИДКИЙ крок із бюджетом часу (PRE_PUSH_CLIENT_BUDGET, 120 с за замовчуванням): падіння тесту зупиняє push одразу
 # (`--bail=1`); якщо набір завеликий (зміна спільного модуля чіпає сотні тестів) і бюджет вичерпано, крок друкує це
 # і віддає решту CI — там повний набір тими самими тестами у 8 шардах (`client-tests`), тож нічого не пропадає.
 # Три важкі Atlas-файли (≈1,5–3 хв кожен) пропускає лише цей швидкий крок.
 base_ref=$(git merge-base HEAD origin/main 2>/dev/null || echo HEAD)
-client_changed_cmd='budget="${PRE_PUSH_CLIENT_BUDGET:-120}"; cd client && files=$(git diff --relative --name-only --diff-filter=d '"$base_ref"' -- src | tr "\n" " ") && if [ -z "$files" ]; then echo "no client/src changes since '"$base_ref"' - skipping"; else echo "changed: $(echo $files | wc -w) files, budget ${budget}s"; timeout -k 5 "$budget" ../node_modules/.bin/vitest related $files --run --bail=1 --maxWorkers=100% --reporter=dot --passWithNoTests --exclude "src/atlas/kb.*.test.ts" --exclude src/atlas/numbers.test.ts --exclude "src/atlas/eval/**"; rc=$?; if [ "$rc" -eq 124 ]; then echo "[pre-push] бюджет ${budget} с вичерпано без червоних тестів - решту (повний набір) ганяє CI client-tests"; exit 0; fi; exit $rc; fi'
+client_changed_cmd='node scripts/patch-coverage.mjs --run --base '"$base_ref"' --budget "${PRE_PUSH_CLIENT_BUDGET:-120}"'
 names=(typecheck-client typecheck-server typecheck-desktop test-coverage validate-sql coverage-guard client-tests-changed)
 cmds=(
   "npm run --silent typecheck -w client -- --incremental --tsBuildInfoFile $cache_dir/tsc-client.tsbuildinfo"

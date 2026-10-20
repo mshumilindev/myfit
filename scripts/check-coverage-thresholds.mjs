@@ -106,6 +106,15 @@ export function compareFloorToBase(base, next) {
     // exclude у підлозі може лише зменшуватись; нові — заборонені так само, як у конфігах
     problems.push(...compareBlock(base.configs[name], cur, `${FLOOR_FILE} → ${name}`));
   }
+  // Поріг patch-coverage (SPO-268) теж лише росте
+  const bp = base.patch?.statements;
+  if (typeof bp === 'number') {
+    const np = next.patch?.statements;
+    if (typeof np !== 'number' || np < bp)
+      problems.push(
+        `${FLOOR_FILE} → patch.statements: ${np ?? 'відсутній'} < ${bp} — поріг покриття патча можна лише піднімати.`,
+      );
+  }
   return problems;
 }
 

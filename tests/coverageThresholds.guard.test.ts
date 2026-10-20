@@ -77,6 +77,18 @@ describe('compareFloorToBase', () => {
     expect(guard.compareFloorToBase(wrap(floor()), wrap(raised))).toEqual([]);
   });
 
+  it('SPO-268: the patch-coverage threshold may only grow', () => {
+    const w = (n?: number) => ({
+      configs: {},
+      ...(n === undefined ? {} : { patch: { statements: n } }),
+    });
+    expect(guard.compareFloorToBase(w(80), w(75))).toHaveLength(1);
+    expect(guard.compareFloorToBase(w(80), w())).toHaveLength(1);
+    expect(guard.compareFloorToBase(w(80), w(80))).toEqual([]);
+    expect(guard.compareFloorToBase(w(80), w(90))).toEqual([]);
+    expect(guard.compareFloorToBase(w(), w(70))).toEqual([]);
+  });
+
   it('a config dropped from the floor fails', () => {
     expect(guard.compareFloorToBase(wrap(floor()), { configs: {} })).toHaveLength(1);
   });
