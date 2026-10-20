@@ -61,17 +61,11 @@ import {
 import { useChallenges } from './challenges';
 import { ShellLauncher } from './components/ShellLauncher';
 import { setSuiteSession } from './components/suite/suiteSession';
-import { watchSession } from './accounts/sessions';
+import { useSessionWatch } from './accounts/useSessionWatch';
 import type { ApexTab } from './views/ApexApp';
 import type { RosterTab } from './views/rosterAccess';
-import {
-  ROSTER_TAB_IDS,
-  guardRosterTab,
-  isLegacyPeopleClients,
-  rosterHomeTab,
-  rosterMode,
-} from './views/rosterAccess';
-import { coachHash } from './coach/routes';
+import { ROSTER_TAB_IDS, guardRosterTab, rosterHomeTab, rosterMode } from './views/rosterAccess';
+import { redirectLegacyPeopleClients } from './views/legacyPeopleRedirect';
 import { canUseCoach, coachScreenOpen } from './coach/access';
 import type { HomeSetRoute } from './views/home/HomeSetView';
 import { pruneHomeSetDrafts } from './views/home/homeSetDraft';
@@ -907,13 +901,7 @@ export function App() {
 
   // Apex (gamification) is a full-screen mode; the Shell launcher switches apps.
   const activeChallengeCount = challenges.filter((c) => c.status === 'active').length;
-  // The retired People "Clients" address (bookmarks, old links) is rewritten before any state below reads the URL:
-  // trainers and admins land on Coach clients (SPO-141).
-  useState(() => {
-    if (isLegacyPeopleClients(currentHash()) && canUseCoach(getRole()))
-      replaceHash(coachHash({ screen: 'clients' }));
-    return null;
-  });
+  useState(redirectLegacyPeopleClients); // before any state below reads the URL (SPO-141)
   const [apexOpen, setApexOpen] = useState<boolean>(() => isApexHash(currentHash()));
   const [apexTab, setApexTab] = useState<ApexTab>(() => apexTabFromHash(currentHash()));
   const [rosterOpen, setRosterOpen] = useState<boolean>(() => isRosterHash(currentHash()));
@@ -1115,11 +1103,7 @@ export function App() {
     () => setSuiteSession({ signOut: (o) => signOutRef.current(o), queueLength: queueLen }),
     [queueLen],
   );
-  // A device signed out from Profile → Sessions ends itself at its next check (start, focus, back online).
-  useEffect(() => {
-    if (!authed) return;
-    return watchSession(() => signOutRef.current({ forget: false }));
-  }, [authed]);
+  useSessionWatch(authed, signOutRef);
 
   /** Back from an overlay: pop to the logical parent screen, not history. When
    *  there's no remembered parent (deep link / refreshed URL), fall back to the
@@ -1237,9 +1221,7 @@ export function App() {
     const onPop = () => {
       setApexOpen(isApexHash(currentHash()));
       setApexTab(apexTabFromHash(currentHash()));
-      // A retired People "Clients" address reached while the app is running (pasted, Back to an old entry).
-      if (isLegacyPeopleClients(currentHash()) && canUseCoach(getRole()))
-        replaceHash(coachHash({ screen: 'clients' }));
+      redirectLegacyPeopleClients();
       setRosterOpen(isRosterHash(currentHash()));
       setRosterTab(rosterTabFromHash(currentHash()));
       setNutritionOpen(isNutritionHash(currentHash()) && isFlagOn('nutrition'));

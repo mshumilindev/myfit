@@ -224,7 +224,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           />
         )}
         {personView && person && !bio && (
-          /* Names the account for the browser's password manager, so it offers this person's saved password only. */
+          /* kit-ok: names the account for the browser's password manager, so it offers this person's saved password only. */
           <input
             type="text"
             name="username"
