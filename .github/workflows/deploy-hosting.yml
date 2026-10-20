@@ -1,0 +1,77 @@
+name: Deploy hosting
+
+# One Firebase project (spotter-64c3b), two Hosting sites:
+#   test  -> https://spotter-64c3b.web.app   (the "test env"; manual run, until FIREBASE_SERVICE_ACCOUNT is set a push trigger would fail every time)
+#   prod  -> https://myspotter.fit           (site "myspotter-fit"; manual run only, behind the `production` environment)
+# Both sites share Firestore, Auth, Storage and Functions (same project), only the static client differs.
+# The prod build sets VITE_APP_ORIGIN so invite links point at the real domain.
+#
+# Secret needed (Settings -> Secrets and variables -> Actions): FIREBASE_SERVICE_ACCOUNT
+# = JSON key of a service account with the "Firebase Hosting Admin" role. Never commit that key.
+# To require a click-to-approve before prod: Settings -> Environments -> production -> Required reviewers.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Where to deploy'
+        type: choice
+        options: [test, prod]
+        default: test
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-hosting-${{ github.event.inputs.target || 'test' }}
+  cancel-in-progress: false
+
+env:
+  FIREBASE_PROJECT: spotter-64c3b
+  TEST_SITE: spotter-64c3b
+  PROD_SITE: myspotter-fit
+  PROD_ORIGIN: https://myspotter.fit
+
+jobs:
+  deploy:
+    name: Deploy ${{ github.event.inputs.target || 'test' }}
+    runs-on: ubuntu-latest
+    environment: ${{ (github.event.inputs.target || 'test') == 'prod' && 'production' || 'test' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+      - name: Pick site
+        id: site
+        run: |
+          if [ "${{ github.event.inputs.target }}" = "prod" ]; then
+            echo "site=$PROD_SITE" >> "$GITHUB_OUTPUT"
+            echo "origin=$PROD_ORIGIN" >> "$GITHUB_OUTPUT"
+          else
+            echo "site=$TEST_SITE" >> "$GITHUB_OUTPUT"
+            echo "origin=https://$TEST_SITE.web.app" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build client
+        run: npm run build -w client
+        env:
+          VITE_APP_ORIGIN: ${{ steps.site.outputs.origin }}
+
+      - name: Point firebase.json at the chosen site
+        run: |
+          jq --arg s "${{ steps.site.outputs.site }}" '.hosting.site = $s' firebase.json > firebase.deploy.json
+          grep -n '"site"' firebase.deploy.json
+
+      - name: Deploy to Firebase Hosting
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          printf '%s' "$FIREBASE_SA" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx -y firebase-tools@latest deploy --only hosting --config firebase.deploy.json --project "$FIREBASE_PROJECT" --non-interactive
+          rm -f "$RUNNER_TEMP/sa.json"

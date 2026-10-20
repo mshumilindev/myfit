@@ -16,6 +16,7 @@ import { SUITE_TONE } from './suite/suiteTone';
 import { toneClass, type Tone } from './ui/tones';
 import { Icon, Sheet } from '../ui';
 import { consistencyStreak, type StoreState } from '../store';
+import { setHash } from '../route';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -185,7 +186,7 @@ export function ShellLauncher({
             sub={c.shellDesc}
             current={current === 'coach'}
             onSelect={() => {
-              window.location.hash = coachEntryHash();
+              setHash(coachEntryHash());
               onClose();
             }}
             currentLabel={t.shellCurrent}

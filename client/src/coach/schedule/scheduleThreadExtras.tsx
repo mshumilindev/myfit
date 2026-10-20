@@ -15,6 +15,7 @@ import { RescheduleForm } from './RescheduleForm';
 import { ScheduleRequestCard } from './ScheduleRequestCard';
 import { dayOfTs } from './time';
 import { useSchedule } from './useSchedule';
+import { setHash } from '../../route';
 
 export interface ScheduleThreadExtrasOpts {
   port?: SchedulePort;
@@ -38,7 +39,7 @@ export function createScheduleThreadExtras(opts: ScheduleThreadExtrasOpts = {}) 
             side="trainer"
             onCounter={(id) => setForm({ counter: id })}
             onOpenCalendar={(day) => {
-              window.location.assign(`#/c/schedule?d=${day}`);
+              setHash(`#/c/schedule?d=${day}`);
             }}
           />
         ) : undefined,

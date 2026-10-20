@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { currentHash, pushHash, replaceHash } from '../../route';
 
 /**
  * The Agenda's view state lives in the hash query (`#/c/agenda?view=stage&open=<key>&decision=<key>&option=<id>`),
@@ -48,11 +49,11 @@ export interface TodayParamsApi extends TodayParams {
 
 export function useTodayParams(): TodayParamsApi {
   const [params, setParams] = useState<TodayParams>(() =>
-    typeof window === 'undefined' ? EMPTY : readParams(window.location.hash),
+    typeof window === 'undefined' ? EMPTY : readParams(currentHash()),
   );
 
   useEffect(() => {
-    const on = () => setParams(readParams(window.location.hash));
+    const on = () => setParams(readParams(currentHash()));
     window.addEventListener('hashchange', on);
     window.addEventListener('popstate', on);
     return () => {
@@ -62,13 +63,13 @@ export function useTodayParams(): TodayParamsApi {
   }, []);
 
   const set = useCallback((patch: Partial<TodayParams>, push = false) => {
-    const next = { ...readParams(window.location.hash), ...patch };
-    const base = window.location.hash.split('?')[0] || '#/c/agenda';
+    const next = { ...readParams(currentHash()), ...patch };
+    const base = currentHash().split('?')[0] || '#/c/agenda';
     const hash = writeParams(base, next);
     setParams(next);
     try {
-      if (push) window.history.pushState(null, '', hash);
-      else window.history.replaceState(null, '', hash);
+      if (push) pushHash(hash);
+      else replaceHash(hash);
     } catch {
       /* history blocked: the screen state above still works */
     }

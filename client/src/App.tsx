@@ -88,6 +88,7 @@ import { ConditionsShield, useActiveConditions } from './views/health/Conditions
 import { AppRail } from './components/AppRail';
 import { SuiteTabBar } from './components/SuiteTabBar';
 import type { ProgramsPeer } from './components/ProgramsTabs';
+import { currentHash, replaceHash, setHash } from './route';
 
 const OnboardingView = lazy(() =>
   import('./views/OnboardingView').then((module) => ({ default: module.OnboardingView })),
@@ -901,18 +902,16 @@ export function App() {
 
   // Apex (gamification) is a full-screen mode; the Shell launcher switches apps.
   const activeChallengeCount = challenges.filter((c) => c.status === 'active').length;
-  const [apexOpen, setApexOpen] = useState<boolean>(() => isApexHash(window.location.hash));
-  const [apexTab, setApexTab] = useState<ApexTab>(() => apexTabFromHash(window.location.hash));
-  const [rosterOpen, setRosterOpen] = useState<boolean>(() => isRosterHash(window.location.hash));
-  const [rosterTab, setRosterTab] = useState<RosterTab>(() =>
-    rosterTabFromHash(window.location.hash),
-  );
+  const [apexOpen, setApexOpen] = useState<boolean>(() => isApexHash(currentHash()));
+  const [apexTab, setApexTab] = useState<ApexTab>(() => apexTabFromHash(currentHash()));
+  const [rosterOpen, setRosterOpen] = useState<boolean>(() => isRosterHash(currentHash()));
+  const [rosterTab, setRosterTab] = useState<RosterTab>(() => rosterTabFromHash(currentHash()));
   const [nutritionOpen, setNutritionOpen] = useState<boolean>(
-    () => isNutritionHash(window.location.hash) && isFlagOn('nutrition'),
+    () => isNutritionHash(currentHash()) && isFlagOn('nutrition'),
   );
-  const [learnOpen, setLearnOpen] = useState<boolean>(() => isLearnHash(window.location.hash));
+  const [learnOpen, setLearnOpen] = useState<boolean>(() => isLearnHash(currentHash()));
   const [coachWanted, setCoachWanted] = useState<boolean>(() =>
-    coachScreenOpen(window.location.hash, getRole()),
+    coachScreenOpen(currentHash(), getRole()),
   );
   // Nutrition is behind a feature flag (admin-only toggle in Settings); default
   // OFF → the Shell shows it as "coming soon" and it cannot be opened.
@@ -924,9 +923,7 @@ export function App() {
   // Deep-link focus: a notification can ask a screen to scroll to a specific
   // card (id) and, when it's interactive (a feat cell), open its existing
   // detail. Poll for the element until the target screen has mounted.
-  const [focusTarget, setFocusTarget] = useState<string | null>(() =>
-    focusFromHash(window.location.hash),
-  );
+  const [focusTarget, setFocusTarget] = useState<string | null>(() => focusFromHash(currentHash()));
   useEffect(() => {
     if (!focusTarget) return;
     let raf = 0;
@@ -952,35 +949,33 @@ export function App() {
   // Invite links (#/join/<token>) open onboarding before any auth gate.
   const [inviteStarted, setInviteStarted] = useState(false);
   const [joinToken, setJoinToken] = useState<string | null>(() => {
-    const m = /^#\/join\/([A-Za-z0-9-]+)/.exec(window.location.hash);
+    const m = /^#\/join\/([A-Za-z0-9-]+)/.exec(currentHash());
     return m ? m[1] : null;
   });
-  const [tab, setTab] = useState<Tab>(() => fromHash(window.location.hash).tab);
+  const [tab, setTab] = useState<Tab>(() => fromHash(currentHash()).tab);
   // Programs ↔ Exercises peer-tab lives in App (not ProgramsView) so it survives
   // opening an exercise-detail overlay, which unmounts the tab content.
   const [programsPeer, setProgramsPeer] = useState<ProgramsPeer>(
-    () => peerFromHash(window.location.hash).peer,
+    () => peerFromHash(currentHash()).peer,
   );
-  const [libMine, setLibMine] = useState<boolean>(() => peerFromHash(window.location.hash).mine);
+  const [libMine, setLibMine] = useState<boolean>(() => peerFromHash(currentHash()).mine);
   // Progress sub-tabs (Progress · Trends · Feats · Challenges) + the Feats
   // sub-tab, kept in App so each has its own URL (#/trends, #/feats,
   // #/feats/standards, #/challenges).
   const [progressSub, setProgressSub] = useState<ProgressSub>(
-    () => progressFromHash(window.location.hash).sub,
+    () => progressFromHash(currentHash()).sub,
   );
   // Progress volume seg + lens live here too, so #/progress/volume/readiness
   // survives a refresh and deep links land on the right lens.
   const [progressSeg, setProgressSeg] = useState<ProgSeg>(
-    () => progressFromHash(window.location.hash).seg,
+    () => progressFromHash(currentHash()).seg,
   );
-  const [volumeLens, setVolumeLens] = useState<VolLens>(
-    () => progressFromHash(window.location.hash).lens,
-  );
+  const [volumeLens, setVolumeLens] = useState<VolLens>(() => progressFromHash(currentHash()).lens);
   // Overlay navigation keeps a stack of parents: the back button on an overlay
   // returns to the screen it was opened from (session → exercise history →
   // back lands on the session again), never blindly through browser history.
   const [overlayNav, setOverlayNav] = useState<{ cur: Overlay; stack: Overlay[] }>(() => {
-    const o = fromHash(window.location.hash).overlay;
+    const o = fromHash(currentHash()).overlay;
     if (o?.screen === 'session' && !o.workoutId) {
       const w = getOpenWorkout();
       return { cur: w ? { screen: 'session', workoutId: w.id } : null, stack: [] };
@@ -1039,7 +1034,7 @@ export function App() {
 
   // One-shot sign-out via #/logout (local testing / support links).
   useEffect(() => {
-    if (!/^#\/logout\/?$/i.test(window.location.hash)) return;
+    if (!/^#\/logout\/?$/i.test(currentHash())) return;
     let cancelled = false;
     void (async () => {
       await apiSignOut();
@@ -1047,7 +1042,7 @@ export function App() {
       setAuthed(false);
       setOverlay(null);
       setJoinToken(null);
-      window.history.replaceState(null, '', '#/');
+      replaceHash('#/');
     })();
     return () => {
       cancelled = true;
@@ -1093,7 +1088,7 @@ export function App() {
       setTab(defaultTab());
       void apiSignOut();
       setAuthed(false);
-      window.history.replaceState(null, '', '#/today');
+      replaceHash('#/today');
     },
     queueLength: store.queue.length,
   };
@@ -1198,8 +1193,8 @@ export function App() {
       effectiveTab === 'programs' &&
       !activeOverlay &&
       programsPeer === 'programs' &&
-      isProgramsEditorHash(window.location.hash);
-    if (!keep && window.location.hash !== next) window.history.replaceState(null, '', next);
+      isProgramsEditorHash(currentHash());
+    if (!keep && currentHash() !== next) replaceHash(next);
   }, [
     authed,
     joinToken,
@@ -1223,23 +1218,23 @@ export function App() {
   useEffect(() => {
     if (!authed || joinToken) return;
     const onPop = () => {
-      setApexOpen(isApexHash(window.location.hash));
-      setApexTab(apexTabFromHash(window.location.hash));
-      setRosterOpen(isRosterHash(window.location.hash));
-      setRosterTab(rosterTabFromHash(window.location.hash));
-      setNutritionOpen(isNutritionHash(window.location.hash) && isFlagOn('nutrition'));
-      setLearnOpen(isLearnHash(window.location.hash));
-      setCoachWanted(coachScreenOpen(window.location.hash, getRole()));
-      const { tab: ht, overlay: ho } = fromHash(window.location.hash);
-      const pk = peerFromHash(window.location.hash);
-      const ps = progressFromHash(window.location.hash);
+      setApexOpen(isApexHash(currentHash()));
+      setApexTab(apexTabFromHash(currentHash()));
+      setRosterOpen(isRosterHash(currentHash()));
+      setRosterTab(rosterTabFromHash(currentHash()));
+      setNutritionOpen(isNutritionHash(currentHash()) && isFlagOn('nutrition'));
+      setLearnOpen(isLearnHash(currentHash()));
+      setCoachWanted(coachScreenOpen(currentHash(), getRole()));
+      const { tab: ht, overlay: ho } = fromHash(currentHash());
+      const pk = peerFromHash(currentHash());
+      const ps = progressFromHash(currentHash());
       setTab(ht);
       setProgramsPeer(pk.peer);
       setLibMine(pk.mine);
       setProgressSub(ps.sub);
       setProgressSeg(ps.seg);
       setVolumeLens(ps.lens);
-      setFocusTarget(focusFromHash(window.location.hash));
+      setFocusTarget(focusFromHash(currentHash()));
       setOverlayNav({
         cur:
           ho?.screen === 'session' && !ho.workoutId
@@ -1312,7 +1307,7 @@ export function App() {
             token={joinToken}
             onDone={(workoutId) => {
               setJoinToken(null);
-              window.location.hash = '#/today';
+              setHash('#/today');
               if (currentUid()) setAuthed(true);
               if (workoutId) setOverlay({ screen: 'session', workoutId });
             }}

@@ -14,7 +14,7 @@ import { Card } from '../components/ui/Card';
 import { ChatPage, ChatShell } from '../components/ui/ChatShell';
 import { ChatComposer } from '../components/ui/ChatComposer';
 import { ChatBubble, ChatDay, ChatMessage, ChatNewDivider } from '../components/ui/ChatBubble';
-import { FLAGS, LOCALES, setLocale, useT } from '../i18n';
+import { FLAGS, LOCALES, fmtBodyWeightKg, setLocale, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { latestWeight, setCoach, updateBodyMetrics, useSelfCoachRole, useStore } from '../store';
 import { AtlasFace, TemperHeat } from '../components/AtlasFace';
@@ -69,7 +69,7 @@ import {
 import { HELLO_ID, helloStep, helloIsIntro, inHistory } from '../atlas/helloPlan';
 import { useChatAccess } from '../atlas/chatAccess';
 import { langOffer, loadOfferState, saveOfferState } from '../atlas/langOffer';
-import { fmtBodyWeightKg } from '../i18n';
+import { currentHash } from '../route';
 
 /** Answers not worth a 👍 / 👎 (small talk, "did you mean…", memory notes). */
 const UNRATED = new Set(['did_you_mean', 'emoji', 'memory_note']);
@@ -1001,7 +1001,7 @@ function CoachThread({
     if (!opened.current) {
       opened.current = true;
       // A notification tap lands on ITS message (#/coach?note=<id>), before the "first unread" rule (SPO-21).
-      const wanted = noteFromHash(window.location.hash);
+      const wanted = noteFromHash(currentHash());
       const target = wanted
         ? Array.from(feedRef.current?.querySelectorAll<HTMLElement>('[data-note-id]') ?? []).find(
             (el) => el.dataset.noteId === wanted,

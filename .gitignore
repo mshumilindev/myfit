@@ -83,3 +83,6 @@ __pycache__/
 # Playwright scratch
 tests/e2e/.artifacts/
 client/dist-e2e*/
+
+# Electron shell build output (DMG)
+desktop/release/

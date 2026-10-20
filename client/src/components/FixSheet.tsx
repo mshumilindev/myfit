@@ -11,6 +11,7 @@ import { useT } from '../i18n';
 import { MuscleSetChip, equipmentLabel } from './Muscle';
 import { activeGym, fixCandidates, type FixCandidate } from '../fixit';
 import type { MuscleGroup } from '../data/exercises';
+import { setHash } from '../route';
 
 export function FixSheet({ muscle, onClose }: { muscle: MuscleGroup; onClose: () => void }) {
   const { t } = useT();
@@ -72,7 +73,7 @@ export function FixSheet({ muscle, onClose }: { muscle: MuscleGroup; onClose: ()
                   className="fix-title"
                   iconTrailing="arrow-right"
                   onClick={() => {
-                    window.location.hash = `#/exercise-detail/${encodeURIComponent(c.name)}`;
+                    setHash(`#/exercise-detail/${encodeURIComponent(c.name)}`);
                     onClose();
                   }}
                 >

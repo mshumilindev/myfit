@@ -8,6 +8,7 @@ import { ChatScreen } from './ChatScreen';
 import { conversationsFromChat } from './chatStore';
 import { createFixturesChatPort, type FixturesChatPort } from './__fixtures__/fixtures';
 import { safeEn } from '../../i18n/coachSafe.en';
+import { currentHash } from '../../route';
 
 let port: FixturesChatPort;
 beforeEach(() => {
@@ -289,7 +290,7 @@ describe('Chat: phone', () => {
     expect(screen.queryByRole('log')).toBeNull();
     expect(screen.queryByRole('textbox')).toBeNull();
     fireEvent.click(rows[1]);
-    expect(window.location.hash).toContain('with=');
+    expect(currentHash()).toContain('with=');
     act(() => {
       window.dispatchEvent(new HashChangeEvent('hashchange'));
     });

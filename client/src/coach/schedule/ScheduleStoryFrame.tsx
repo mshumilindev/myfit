@@ -8,6 +8,7 @@ import { parseCoachHash, type CoachRoute } from '../routes';
 import type { ChatMessage } from '../chat/types';
 import type { SchedulePort } from './port';
 import { configureSchedule } from './useSchedule';
+import { replaceHash } from '../../route';
 
 /**
  * Stories: the real shell around a schedule route with a chosen schedule port (the world is the lab fixtures). The
@@ -31,7 +32,7 @@ export function ScheduleStoryFrame({
     configureSchedule(makePort());
   }, [makePort]);
   useEffect(() => {
-    window.history.replaceState(null, '', hash);
+    replaceHash(hash);
   }, [hash]);
   return (
     <CoachShell

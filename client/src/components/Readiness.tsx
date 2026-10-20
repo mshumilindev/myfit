@@ -22,6 +22,7 @@ import {
 } from '../recovery';
 import type { Workout } from '../types';
 import type { MuscleGroup } from '../data/exercises';
+import { setHash } from '../route';
 
 /** Deep link to the Progress → Volume → Readiness lens. */
 export const READINESS_LENS_HASH = '#/progress/volume/readiness';
@@ -156,7 +157,7 @@ export function buildReadinessNudge(finished: Workout[], now: number, t: T): Nud
         variant="fill"
         size="sm"
         onClick={() => {
-          window.location.hash = READINESS_LENS_HASH;
+          setHash(READINESS_LENS_HASH);
           close();
         }}
       >

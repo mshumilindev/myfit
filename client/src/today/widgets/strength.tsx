@@ -60,6 +60,7 @@ import type { BodyMetrics, Workout } from '../../types';
 import type { WidgetCtx, WidgetDef } from '../registry';
 import { DAY } from './format';
 import { ss, type StrengthStrings } from './strength.strings';
+import { setHash } from '../../route';
 
 export const WEEK = 7 * DAY;
 
@@ -470,7 +471,7 @@ function targetDelta(t: Target, s: StrengthStrings): { text: string; good: boole
 }
 
 const goHash = (h: string) => () => {
-  window.location.hash = h;
+  setHash(h);
 };
 
 /* =====================================================================

@@ -131,3 +131,51 @@ describe('Sheet', () => {
     expect(el.contains(document.activeElement)).toBe(true);
   });
 });
+
+describe('Sheet drag with a mouse (desktop app)', () => {
+  const setup = () => {
+    vi.useFakeTimers();
+    const onClose = vi.fn();
+    render(
+      <Sheet label="s" onClose={onClose}>
+        body
+      </Sheet>,
+    );
+    const grip = document.querySelector('.sheet-grip') as HTMLElement;
+    grip.setPointerCapture = vi.fn();
+    return { onClose, grip };
+  };
+  afterEach(() => vi.useRealTimers());
+
+  it('pulling the grabber down with the mouse dismisses the drawer', () => {
+    const { onClose, grip } = setup();
+    fireEvent.pointerDown(grip, { pointerId: 1, pointerType: 'mouse', button: 0, clientY: 0 });
+    fireEvent.pointerMove(grip, { pointerId: 1, pointerType: 'mouse', clientY: 300 });
+    fireEvent.pointerUp(grip, { pointerId: 1, pointerType: 'mouse', clientY: 300 });
+    vi.advanceTimersByTime(300);
+    expect(grip.setPointerCapture).toHaveBeenCalledWith(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('touch pointers are left to the touch handlers (no double drag)', () => {
+    const { onClose, grip } = setup();
+    fireEvent.pointerDown(grip, { pointerId: 2, pointerType: 'touch', button: 0, clientY: 0 });
+    fireEvent.pointerMove(grip, { pointerId: 2, pointerType: 'touch', clientY: 300 });
+    fireEvent.pointerUp(grip, { pointerId: 2, pointerType: 'touch', clientY: 300 });
+    vi.advanceTimersByTime(300);
+    expect(grip.setPointerCapture).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('a click on the close button is not swallowed by the drag strip', () => {
+    const { onClose } = setup();
+    const x = screen.getByRole('button');
+    const chrome = document.querySelector('.sheet-chrome') as HTMLElement;
+    chrome.setPointerCapture = vi.fn();
+    fireEvent.pointerDown(x, { pointerId: 3, pointerType: 'mouse', button: 0, clientY: 0 });
+    expect(chrome.setPointerCapture).not.toHaveBeenCalled();
+    fireEvent.click(x);
+    vi.advanceTimersByTime(300);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+});

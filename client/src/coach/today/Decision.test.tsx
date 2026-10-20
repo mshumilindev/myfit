@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFixturesPort } from '../data/__fixtures__/fixtures';
 import { setViewport } from '../testViewport';
 import { TodayScreen } from './TodayScreen';
+import { currentHash } from '../../route';
 
 const OPTS = { refreshEveryMs: 0 };
 
@@ -32,9 +33,9 @@ afterEach(() => {
 describe('Decision screen', () => {
   it('is deep-linkable and has Back "Agenda"', async () => {
     await openOlehDecision();
-    expect(window.location.hash).toContain('decision=');
+    expect(currentHash()).toContain('decision=');
     fireEvent.click(screen.getByRole('button', { name: /Agenda/ }));
-    expect(window.location.hash).not.toContain('decision=');
+    expect(currentHash()).not.toContain('decision=');
     expect(await screen.findByRole('heading', { level: 2, name: /Needs a decision/ })).toBeTruthy();
   });
 

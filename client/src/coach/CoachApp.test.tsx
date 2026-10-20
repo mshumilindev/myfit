@@ -25,6 +25,7 @@ import {
   setRailHeight,
   uninstallRailMeasure,
 } from '../components/ui/railTestUtils';
+import { currentHash } from '../route';
 
 const unreadMock = vi.hoisted(() => ({ value: 0 }));
 vi.mock('./unread', async (orig) => ({
@@ -62,7 +63,7 @@ function Harness({
 beforeEach(() => {
   unreadMock.value = 0;
   localStorage.clear();
-  window.location.hash = '';
+  window.history.replaceState(null, '', '/');
 });
 afterEach(cleanup);
 
@@ -594,6 +595,6 @@ describe('shell basics', () => {
     fireEvent.click(
       within(screen.getByRole('complementary')).getByRole('button', { name: c.navWeek }),
     );
-    expect(window.location.hash).toBe('#/c/week');
+    expect(currentHash()).toBe('#/c/week');
   });
 });

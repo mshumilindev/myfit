@@ -22,6 +22,7 @@ import { UserAvatar } from '../Avatar';
 import type { AccountPanelProps } from '../ui/AccountPanel';
 import { ConfirmDialog } from '../../ui';
 import { useSuiteSession } from './suiteSession';
+import { setHash } from '../../route';
 
 export type SuiteMode = 'coach' | 'workouts';
 /** The app the account block is shown in. Only Gym is the "My workouts" side. */
@@ -86,10 +87,10 @@ export function useSuiteAccount({
               app === 'coach' ? ('coach' as const) : app === 'gym' ? ('workouts' as const) : null,
             modeLabel: c.modeLabel,
             onModeChange: (m: SuiteMode) => {
-              if (m === 'coach') window.location.hash = coachEntryHash();
+              if (m === 'coach') setHash(coachEntryHash());
               // Gym home: a bare Gym hash closes whatever sub-app is open (App.tsx hashchange).
               else if (onOpenGym) onOpenGym();
-              else window.location.hash = '#/today';
+              else setHash('#/today');
             },
             note: c.modeNote,
           }

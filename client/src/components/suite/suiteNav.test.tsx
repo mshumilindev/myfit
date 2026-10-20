@@ -24,6 +24,7 @@ import { NutritionRoot } from '../../nutrition/App';
 import { LearnRoot } from '../../learn/App';
 import type { StoreState } from '../../store';
 import type { Shell } from '../../App';
+import { currentHash } from '../../route';
 
 const t = LOCALES.en;
 const c = coachEn;
@@ -229,7 +230,7 @@ beforeEach(() => {
     disconnect() {}
   };
   session.role = 'member';
-  window.location.hash = '';
+  window.history.replaceState(null, '', '/');
   localStorage.clear();
   installRailMeasure(900);
 });
@@ -352,17 +353,17 @@ describe.each(CASES)('$name: desktop rail', (k) => {
     expect(within(acct).getByText(t.roleTrainer)).toBeTruthy();
     // choosing Coach opens the dashboard and closes the popover
     fireEvent.click(within(acct).getByRole('button', { name: c.modeCoach }));
-    expect(window.location.hash).toBe(coachEntryHash());
+    expect(currentHash()).toBe(coachEntryHash());
     expect(screen.queryByRole('dialog')).toBeNull();
     // selecting "My workouts" (where it is not already selected) goes to the Gym home
     if (k.name !== 'Gym') {
       acct = open();
       fireEvent.click(within(acct).getByRole('button', { name: c.modeMyWorkouts }));
-      expect(window.location.hash).toBe('#/today');
+      expect(currentHash()).toBe('#/today');
       expect(screen.queryByRole('dialog')).toBeNull();
     }
     // admin
-    window.location.hash = '';
+    window.history.replaceState(null, '', '/');
     session.role = 'admin';
     acct = open();
     expect(within(acct).getByRole('button', { name: c.modeCoach })).toBeTruthy();
