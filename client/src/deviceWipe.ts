@@ -14,8 +14,18 @@
  */
 
 export const FS_WIPE_FLAG = 'spotter.wipeFs';
-/** The IndexedDB databases that hold coach data (sealed chat store, device signer) and cached avatars. */
-export const COACH_IDB_NAMES = ['spotter.coach.chat', 'spotter.coach.sign', 'spotter-avatars'];
+/**
+ * The IndexedDB databases that hold a person's data on this device: coach data (sealed chat store, device signer), cached
+ * avatars, the cached E2EE key (`spotter.vault`, one entry per uid) and the quiet-hours copy for the service worker.
+ * Sign-out removes all of them: the next person on this device must not find the previous person's key or settings.
+ */
+export const COACH_IDB_NAMES = [
+  'spotter.coach.chat',
+  'spotter.coach.sign',
+  'spotter-avatars',
+  'spotter.vault',
+  'spotter.prefs',
+];
 /** The old PLAINTEXT read caches (callable reads, the assigned program). Nothing writes them any more; they are removed. */
 const CACHE_PREFIX = 'spotter.cache.';
 const LEGACY_PLAINTEXT_KEYS = ['spotter.programMine'];

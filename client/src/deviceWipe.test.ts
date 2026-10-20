@@ -100,3 +100,8 @@ describe('device wipe', () => {
     await expect(runPendingWipe({ storage: null, idb: null })).resolves.toBe(false);
   });
 });
+
+import { it as it2, expect as expect2 } from 'vitest';
+it2('sign-out removes the cached E2EE key and the quiet-hours copy, not only the coach stores', () => {
+  expect2(COACH_IDB_NAMES).toEqual(expect2.arrayContaining(['spotter.vault', 'spotter.prefs']));
+});
