@@ -7,7 +7,7 @@ import { useSyncExternalStore } from 'react';
  * registered session (stories, unit tests of a single app) the block simply has no Sign out row.
  */
 export interface SuiteSession {
-  signOut: () => void;
+  signOut: (opts?: { forget?: boolean }) => void;
   /** Unsynced entries: the confirmation warns that signing out discards them. */
   queueLength: number;
 }

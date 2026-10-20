@@ -27,7 +27,8 @@ import { PrivacyVault } from '../components/PrivacyVault';
 import { ConditionsProfileRow } from './health/Conditions';
 import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
-import { ConfirmDialog, Icon, LanguageSelector, Sheet, useExerciseName } from '../ui';
+import { SignOutDialog } from '../components/SignOutDialog';
+import { Icon, LanguageSelector, Sheet, useExerciseName } from '../ui';
 import { UserAvatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { BodyMetricsSection } from '../components/BodyMetrics';
@@ -1002,16 +1003,12 @@ export function ProfileView({
         </>
       )}
       {confirmSignOut && (
-        <ConfirmDialog
-          title={t.signOutTitle}
-          body={shell.queueLength > 0 ? t.signOutQueueBody(shell.queueLength) : t.signOutCleanBody}
-          confirmLabel={t.signOut}
-          cancelLabel={t.cancel}
-          danger
+        <SignOutDialog
+          queueLength={shell.queueLength}
           onCancel={() => setConfirmSignOut(false)}
-          onConfirm={() => {
+          onConfirm={(forget) => {
             setConfirmSignOut(false);
-            shell.signOut();
+            shell.signOut({ forget });
           }}
         />
       )}

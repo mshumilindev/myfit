@@ -20,7 +20,7 @@ import { coachEntryHash } from '../../coach/routes';
 import { useCoachAccess } from '../../coach/useCoachAccess';
 import { UserAvatar } from '../Avatar';
 import type { AccountPanelProps } from '../ui/AccountPanel';
-import { ConfirmDialog } from '../../ui';
+import { SignOutDialog } from '../SignOutDialog';
 import { useSuiteSession } from './suiteSession';
 import { setHash } from '../../route';
 
@@ -101,18 +101,12 @@ export function useSuiteAccount({
     };
     const dialog =
       asking && session ? (
-        <ConfirmDialog
-          title={t.signOutTitle}
-          body={
-            session.queueLength > 0 ? t.signOutQueueBody(session.queueLength) : t.signOutCleanBody
-          }
-          confirmLabel={t.signOut}
-          cancelLabel={t.cancel}
-          danger
+        <SignOutDialog
+          queueLength={session.queueLength}
           onCancel={() => setAsking(false)}
-          onConfirm={() => {
+          onConfirm={(forget) => {
             setAsking(false);
-            session.signOut();
+            session.signOut({ forget });
           }}
         />
       ) : null;

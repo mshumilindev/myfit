@@ -131,6 +131,10 @@ export const et: Strings = {
   signOutQueueBody: (n) =>
     `Järjekorras on veel ${n} ${muudatust(n)}. Väljalogimine kustutab kohaliku järjekorra — sünkroniseeri enne, kui tahad neid alles hoida.`,
   signOutCleanBody: 'Logi jääb serverisse ja tuleb järgmisel sisselogimisel tagasi.',
+  authRememberMe: 'Jäta mind meelde',
+  authRememberHint: 'Järgmine kord ilma parooli sisestamata — sellel seadmel',
+  signOutRemember: 'Jäta mind sellel seadmel meelde',
+  signOutForgetHint: 'Märkimata: seade unustab sind ega näita sind avakuval.',
   stay: 'Jää',
 
   synced: 'Sünkroonitud',

@@ -317,7 +317,7 @@ export interface Shell {
   openStart: () => void;
   toast: (t: ToastState) => void;
   snack: (s: SnackState) => void;
-  signOut: () => void;
+  signOut: (opts?: { forget?: boolean }) => void;
   queueLength: number;
 }
 
@@ -1083,10 +1083,10 @@ export function App() {
       snackSeq.current += 1;
       setSnack({ ...s, id: snackSeq.current });
     },
-    signOut: () => {
+    signOut: (opts) => {
       setOverlay(null);
       setTab(defaultTab());
-      void apiSignOut();
+      void apiSignOut(opts);
       setAuthed(false);
       replaceHash('#/today');
     },
@@ -1100,7 +1100,7 @@ export function App() {
   });
   const queueLen = store.queue.length;
   useEffect(
-    () => setSuiteSession({ signOut: () => signOutRef.current(), queueLength: queueLen }),
+    () => setSuiteSession({ signOut: (o) => signOutRef.current(o), queueLength: queueLen }),
     [queueLen],
   );
 

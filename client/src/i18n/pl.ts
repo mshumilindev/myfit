@@ -142,6 +142,10 @@ export const pl: Strings = {
   signOutQueueBody: (n) =>
     `W kolejce ${n === 1 ? 'jest jeszcze 1 zmiana' : `są jeszcze ${n} ${zmiany(n)}`}. Wylogowanie usuwa lokalną kolejkę — najpierw zsynchronizuj, jeśli chcesz je zachować.`,
   signOutCleanBody: 'Dziennik zostaje na serwerze i wróci przy następnym logowaniu.',
+  authRememberMe: 'Zapamiętaj mnie',
+  authRememberHint: 'Następnym razem bez wpisywania hasła — na tym urządzeniu',
+  signOutRemember: 'Zapamiętaj mnie na tym urządzeniu',
+  signOutForgetHint: 'Bez zaznaczenia: urządzenie o Tobie zapomni i nie pokaże Cię na ekranie startowym.',
   stay: 'Zostań',
 
   synced: 'Zsynchronizowano',

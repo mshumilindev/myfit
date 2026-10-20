@@ -117,6 +117,10 @@ export const en = {
   signOutQueueBody: (n: number) =>
     `${n} ${n === 1 ? 'change is' : 'changes are'} still queued. Signing out discards the local queue — sync first if you want to keep them.`,
   signOutCleanBody: 'Your log stays on the server and comes back on the next sign-in.',
+  authRememberMe: 'Remember me',
+  authRememberHint: 'Skip typing next time on this device',
+  signOutRemember: 'Remember me on this device',
+  signOutForgetHint: 'Unticked: this device forgets you and the landing won\'t list you.',
   stay: 'Stay',
 
   // Sync status

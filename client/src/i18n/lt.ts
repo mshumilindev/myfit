@@ -150,6 +150,10 @@ export const lt: Strings = {
   signOutQueueBody: (n) =>
     `Eilėje dar ${n} ${pakeitimai(n)}. Atsijungimas ištrina vietinę eilę — pirma sinchronizuok, jei nori juos išsaugoti.`,
   signOutCleanBody: 'Žurnalas lieka serveryje ir grįš kitą kartą prisijungus.',
+  authRememberMe: 'Prisiminti mane',
+  authRememberHint: 'Kitą kartą be slaptažodžio — šiame įrenginyje',
+  signOutRemember: 'Prisiminti mane šiame įrenginyje',
+  signOutForgetHint: 'Be varnelės: įrenginys jūsų neprisimins ir nerodys pradiniame ekrane.',
   stay: 'Likti',
 
   synced: 'Sinchronizuota',

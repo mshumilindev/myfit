@@ -2,6 +2,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Field } from '../components/ui/Field';
 import { Button } from '../components/ui/Button';
+import { Checkbox } from '../components/ui/Checkbox';
 import { HttpError, callFn, signInWithPayload, type AuthPayload } from '../api';
 import { SpotterMark } from '../brand/SpotterMark';
 import { fmtSessionClock, useT } from '../i18n';
@@ -24,6 +25,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(false);
 
   function check() {
     callFn<{ registered: boolean }>('authStatus', undefined, { timeoutMs: PROBE_TIMEOUT_MS })
@@ -69,7 +71,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
         identifier: identifier.trim(),
         password,
       });
-      await signInWithPayload(res);
+      await signInWithPayload(res, remember);
       onLoggedIn();
     } catch (err) {
       if (err instanceof HttpError && err.status === 401) setError(t.wrongCredentials);
@@ -139,6 +141,16 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           disabled={unreachable || busy || locked}
           onChange={(e) => setPassword(e.target.value)}
         />
+
+        <label style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'flex-start', margin: 'var(--space-2) 0' }}>
+          <Checkbox checked={remember} onChange={setRemember} disabled={unreachable || busy || locked} />
+          <span>
+            <span className="uf-1">{t.authRememberMe}</span>
+            <small className="detail-muted" style={{ display: 'block' }}>
+              {t.authRememberHint}
+            </small>
+          </span>
+        </label>
 
         {locked ? (
           <div className="banner danger-ring">

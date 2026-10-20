@@ -70,8 +70,19 @@ describe('AuthView: signing in', () => {
     fill();
     await submit();
     expect(h.callFn).toHaveBeenCalledWith('login', { identifier: 'me', password: 'secret1' });
-    expect(h.signIn).toHaveBeenCalledWith({ token: 't' });
+    expect(h.signIn).toHaveBeenCalledWith({ token: 't' }, false);
     expect(onLoggedIn).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes "Remember me" to the sign-in: off by default, on when ticked', async () => {
+    render(<AuthView onLoggedIn={vi.fn()} />);
+    const box = screen.getByRole('checkbox', { name: new RegExp(en.authRememberMe) }) as HTMLInputElement;
+    expect(box.checked).toBe(false);
+    fireEvent.click(box);
+    expect(box.checked).toBe(true);
+    fill();
+    await submit();
+    expect(h.signIn).toHaveBeenCalledWith({ token: 't' }, true);
   });
 
   it('shows "Signing in…" and ignores a second submit while the call is pending', async () => {
