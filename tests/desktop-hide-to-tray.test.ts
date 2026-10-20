@@ -35,3 +35,12 @@ describe('hideToTray', () => {
     expect(win.hide).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('closeBehavior', () => {
+  it('quits on macOS and hides to the tray elsewhere', async () => {
+    const { closeBehavior } = await import('../desktop/src/hideWindow');
+    expect(closeBehavior('darwin')).toBe('quit');
+    expect(closeBehavior('win32')).toBe('hide');
+    expect(closeBehavior('linux')).toBe('hide');
+  });
+});

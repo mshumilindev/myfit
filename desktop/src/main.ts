@@ -11,7 +11,7 @@ import {
 } from 'electron';
 import path from 'node:path';
 import { autoUpdater } from 'electron-updater';
-import { hideToTray } from './hideWindow';
+import { closeBehavior, hideToTray } from './hideWindow';
 import { CHANNEL, DEFAULT_APP_URL } from './shared';
 
 /**
@@ -91,12 +91,17 @@ function createWindow(): void {
   });
 
   win.on('close', (event) => {
-    // Closing the window hides it; the app keeps running in the tray (macOS menu bar / Windows tray).
+    // Windows/Linux: closing the window hides it; the app keeps running in the tray. macOS: closing quits (closeBehavior).
     // Real quit: tray menu / app menu (sets `quitting`).
-    if (!quitting) {
-      event.preventDefault();
-      if (win) hideToTray(win);
+    if (quitting) return;
+    if (closeBehavior(process.platform) === 'quit') {
+      // macOS: the close button really quits (no hidden window, no black screen). Let the close go through.
+      quitting = true;
+      app.quit();
+      return;
     }
+    event.preventDefault();
+    if (win) hideToTray(win);
   });
   win.on('closed', () => {
     win = null;

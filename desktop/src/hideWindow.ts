@@ -18,3 +18,12 @@ export function hideToTray(win: HideableWindow): void {
   }
   win.hide();
 }
+
+/**
+ * What the window's close button does. On macOS closing the window quits the app: hiding it to the menu bar left a
+ * black screen / a zombie process the owner could not get rid of (SPO-277). Windows and Linux keep the tray: there the
+ * tray icon is the only way to bring the app back and to receive notifications while the window is closed.
+ */
+export function closeBehavior(platform: string): 'quit' | 'hide' {
+  return platform === 'darwin' ? 'quit' : 'hide';
+}
