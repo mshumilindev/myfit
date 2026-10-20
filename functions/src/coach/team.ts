@@ -620,6 +620,7 @@ export async function clientRemovalCreate(
       createdAt: now,
       readAt: null,
     });
+    await ctx.notify?.(c.trainerId, 'team');
     await logActivity(kv, teamId, now, {
       actorUid: actor.uid,
       role: 'manager',
@@ -707,6 +708,7 @@ export async function clientRemovalRespond(
       createdAt: now,
       readAt: null,
     });
+    await ctx.notify?.(r.requestedBy, 'team');
     return { status };
   });
 }

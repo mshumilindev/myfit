@@ -83,7 +83,7 @@ export interface Ctx {
   pepper: Uint8Array;
   newToken(): string;
   /** content-free push: only "something happened" (C.3) */
-  notify?(uid: string, kind: 'message' | 'invite' | 'request' | 'program'): Promise<void>;
+  notify?(uid: string, kind: 'message' | 'invite' | 'request' | 'program' | 'team'): Promise<void>;
   baseUrl?: string;
 }
 

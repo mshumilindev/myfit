@@ -17,7 +17,14 @@ const mgrNow: Actor = { uid: 'm1', role: 'manager' };
 
 let kv: MemoryKv;
 let t = T0;
-const ctx = (): Ctx => ({ kv, now: () => t, pepper: new Uint8Array(32), newToken: () => 'tok' });
+const pushes: [string, string][] = [];
+const ctx = (): Ctx => ({
+  kv,
+  now: () => t,
+  pepper: new Uint8Array(32),
+  newToken: () => 'tok',
+  notify: async (uid, kind) => void pushes.push([uid, kind]),
+});
 async function code(p: Promise<unknown>): Promise<string> {
   try {
     await p;
@@ -30,6 +37,7 @@ async function code(p: Promise<unknown>): Promise<string> {
 
 beforeEach(async () => {
   kv = createMemoryKv();
+  pushes.length = 0;
   t = T0;
   await kv.set('users/t1', { role: 'trainer', status: 'active', firstName: 'Olena' });
   await kv.set('users/t2', { role: 'trainer', status: 'active', firstName: 'Andriy' });
@@ -75,6 +83,8 @@ describe('client removal requests', () => {
     ]);
     const notices = await kv.list('users/t1/notices');
     expect(notices.map((n) => n.data.kind)).toContain('removal-request');
+    // a content-free push to the trainer only
+    expect(pushes.filter(([, k]) => k === 'team')).toEqual([['t1', 'team']]);
     // another trainer sees nothing
     expect((await teamRequests(ctx(), other)).requests).toEqual([]);
   });
@@ -109,6 +119,7 @@ describe('client removal requests', () => {
       (n) => n.data.kind === 'removal-answer',
     );
     expect(answer?.data).toMatchObject({ status: 'approved', detail: 'Sofiia', refId: 'rm-c1' });
+    expect(pushes).toContainEqual(['m1', 'team']);
     expect((await teamRequests(ctx(), owner)).requests).toEqual([]);
   });
 

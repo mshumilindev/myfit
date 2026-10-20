@@ -62,7 +62,9 @@ export function coachCtx(): Ctx {
                 ? 'New invitation'
                 : kind === 'program'
                   ? 'Program updated'
-                  : 'New request',
+                  : kind === 'team'
+                    ? 'Team update'
+                    : 'New request',
           tag: pushTag(kind),
           url: '/#/',
         });

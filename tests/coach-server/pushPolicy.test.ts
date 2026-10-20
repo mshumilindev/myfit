@@ -15,7 +15,7 @@ describe('push tags are one vocabulary on the server, in the client and in the s
     expect(pushTag('message')).toBe(CHAT_PUSH_TAG);
     expect(pushTag('message').startsWith('coach-chat')).toBe(true);
     // the other notices never match it, so quiet hours cannot silence an invitation or a program
-    for (const k of ['invite', 'request', 'program'] as const)
+    for (const k of ['invite', 'request', 'program', 'team'] as const)
       expect(pushTag(k).startsWith(CHAT_PUSH_TAG)).toBe(false);
   });
   it('the client constant and the service worker check say the same word', () => {

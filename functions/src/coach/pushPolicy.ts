@@ -3,7 +3,7 @@
  * The client (`client/src/quietHours.ts` CHAT_PUSH_TAG) and the service worker (`public/sw-push.js`) key on the SAME
  * prefix `coach-chat`: a chat push is the only coach push that quiet hours apply to.
  */
-export type CoachNoticeKind = 'message' | 'invite' | 'request' | 'program';
+export type CoachNoticeKind = 'message' | 'invite' | 'request' | 'program' | 'team';
 
 /** Prefix of every chat push tag (must equal CHAT_PUSH_TAG in the client). */
 export const CHAT_PUSH_TAG = 'coach-chat';
