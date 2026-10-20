@@ -3,7 +3,7 @@
  * One sealed document per client must hold a long schedule (the old 8000-byte chat cap made `too-large` the end of a
  * busy trainer's calendar), still obeys its own cap, and keeps opening after a key rotation.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { SCHEDULE_MAX_BYTES } from '../../coachCrypto/newCollections';
 import { newConversationKeyBytes, ringFromBytes } from '../../coachCrypto/conversationKey';
 import { CID, pairedRings, trainer } from '../../coachCrypto/testHelpers';
@@ -56,7 +56,8 @@ describe('large schedules', () => {
       (d) => (got = d.docs[0]),
       () => undefined,
     );
-    await new Promise((r) => setTimeout(r, 20));
+    // opening a ~35 KB sealed doc takes longer than a fixed 20 ms on a loaded CI runner: wait for the delivery itself
+    await vi.waitFor(() => expect(got).toBeDefined(), { timeout: 5000 });
     off();
     expect(got?.oneOffs).toHaveLength(300);
   });
