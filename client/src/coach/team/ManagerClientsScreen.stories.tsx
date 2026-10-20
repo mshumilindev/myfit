@@ -40,3 +40,20 @@ export const Phone: Story = {
   parameters: { viewport: { value: 'phone' } },
   globals: { viewport: { value: 'phone', isRotated: false } },
 };
+
+/** The "Invite client" sheet over the manager's Clients (SPO-202). */
+const openInvite = async () => {
+  for (let i = 0; i < 60; i++) {
+    const b = [...document.querySelectorAll('button')].find((x) =>
+      x.textContent?.includes('Invite client'),
+    );
+    if (b) return (b as HTMLButtonElement).click();
+    await new Promise((r) => setTimeout(r, 50));
+  }
+};
+export const InviteClientDesktop: Story = { play: openInvite };
+export const InviteClientPhone: Story = {
+  play: openInvite,
+  parameters: { viewport: { value: 'phone' } },
+  globals: { viewport: { value: 'phone', isRotated: false } },
+};

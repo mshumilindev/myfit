@@ -14,7 +14,7 @@ function Frame({
   options,
   manager,
 }: {
-  screen: 'activity' | 'roles' | 'spotter';
+  screen: 'activity' | 'roles' | 'spotter' | 'agenda';
   options?: FixturesTeamOptions;
   manager?: boolean;
 }) {
@@ -62,3 +62,10 @@ export const Failed: Story = {
 export const Roles: Story = { args: { screen: 'roles' } };
 export const SpotterTrainer: Story = { args: { screen: 'spotter' } };
 export const SpotterManager: Story = { args: { screen: 'spotter', manager: true } };
+/** The Agenda tab shows the number of open team requests (SPO-204): the badge on the rail / tab bar, and the section itself. */
+export const AgendaBadge: Story = { args: { screen: 'agenda', options: { withRequests: true } } };
+export const AgendaBadgePhone: Story = {
+  args: { screen: 'agenda', options: { withRequests: true } },
+  parameters: { viewport: { value: 'phone' } },
+  globals: { viewport: { value: 'phone', isRotated: false } },
+};

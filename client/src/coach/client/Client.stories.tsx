@@ -15,6 +15,7 @@ import {
 import { AccessLogPage } from './screens/AccessLogPage';
 import { ClientChat } from './screens/ClientChat';
 import { InvitePages } from './screens/InvitePages';
+import { ClientTeamPage } from './screens/ClientTeamPage';
 import { MyTrainerPage } from './screens/MyTrainerPage';
 import { TrainerSharing } from './screens/TrainerSharing';
 import './ClientCoach.css';
@@ -134,6 +135,17 @@ export const MyTrainer: Story = world('active', trainerPage);
 export const MyTrainerNoProgram: Story = world('no-program', trainerPage);
 /** The trainer card the app already showed (legacy `users.trainerId`) opened the real screens: nothing is shared until the member chooses. */
 export const MyTrainerMigrated: Story = world('migrated', trainerPage);
+
+/** "Your trainer's team" (SPO-205, board C2). */
+export const TeamPage: Story = world(
+  'active',
+  <ClientTeamPage port={createFixturesClientPort({ scenario: 'active' })} onBack={noop} />,
+);
+export const TeamPagePhone: Story = {
+  ...TeamPage,
+  parameters: { viewport: { value: 'phone' } },
+  globals: { viewport: { value: 'phone', isRotated: false } },
+};
 
 const chat = (initial?: React.ComponentProps<typeof ClientChat>['initial']): Story =>
   world('active', <ClientChat onBack={noop} onOpenSharing={noop} initial={initial} />);
