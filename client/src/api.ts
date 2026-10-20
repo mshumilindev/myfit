@@ -79,7 +79,11 @@ export async function signInWithPayload(payload: AuthPayload, remember = false):
   /* "Remember me": only a ticked box puts the person on this device's landing list (accounts/deviceSession.ts). */
   afterSignIn(
     localStorage,
-    { uid: payload.userId, name: payload.name || payload.username, login: payload.username || undefined },
+    {
+      uid: payload.userId,
+      name: payload.name || payload.username,
+      login: payload.username || undefined,
+    },
     remember,
     Date.now(),
   );

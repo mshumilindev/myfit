@@ -29,7 +29,15 @@ const firstName = (name: string) => name.trim().split(/\s+/)[0] || name;
  * The people a device remembers, as lockers: avatar, number, first name (kit `lockerwall`).
  * One tap on a locker = "this is me". Used by the landing before sign-in.
  */
-export function LockerWall({ people, activeId, openId, openLabel, label, lockerLabel, onSelect }: LockerWallProps) {
+export function LockerWall({
+  people,
+  activeId,
+  openId,
+  openLabel,
+  label,
+  lockerLabel,
+  onSelect,
+}: LockerWallProps) {
   return (
     <div className="uilw" role="group" aria-label={label}>
       {people.map((p, i) => {

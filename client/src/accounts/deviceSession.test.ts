@@ -3,7 +3,9 @@ import type { StorageBackend } from './scopedStorage';
 import { afterSignIn, afterSignOut } from './deviceSession';
 import { readRemembered } from './rememberedPeople';
 
-function memoryBackend(seed: Record<string, string> = {}): StorageBackend & { dump(): Record<string, string> } {
+function memoryBackend(
+  seed: Record<string, string> = {},
+): StorageBackend & { dump(): Record<string, string> } {
   const m = new Map(Object.entries(seed));
   return {
     get length() {
@@ -27,7 +29,9 @@ describe('deviceSession', () => {
   it('sign-in with "Remember me" lists the person', () => {
     const b = memoryBackend();
     afterSignIn(b, { uid: 'uA', name: 'Anna' }, true, 1);
-    expect(readRemembered(b)).toEqual([{ uid: 'uA', name: 'Anna', appName: '[DEFAULT]', lastUsed: 1 }]);
+    expect(readRemembered(b)).toEqual([
+      { uid: 'uA', name: 'Anna', appName: '[DEFAULT]', lastUsed: 1 },
+    ]);
   });
 
   it('never stores a person whose uid is unusable', () => {
@@ -37,7 +41,11 @@ describe('deviceSession', () => {
   });
 
   it('sign-out wipes personal keys but keeps the person on the landing list', () => {
-    const b = memoryBackend({ 'spotter.state': '{"x":1}', 'spotter.injuries': '[]', 'gym.locale': 'pl' });
+    const b = memoryBackend({
+      'spotter.state': '{"x":1}',
+      'spotter.injuries': '[]',
+      'gym.locale': 'pl',
+    });
     afterSignIn(b, { uid: 'uA', name: 'Anna' }, true, 1);
     afterSignOut(b, 'uA', false);
     expect(b.getItem('spotter.state')).toBeNull();
@@ -59,7 +67,7 @@ describe('deviceSession', () => {
     expect(b.dump()).toEqual({});
   });
 
-  it('person B signing in after person A signed out sees none of A\'s personal data, only device settings', () => {
+  it("person B signing in after person A signed out sees none of A's personal data, only device settings", () => {
     const b = memoryBackend({
       'spotter.state': '{"goal":"A"}',
       'spotter.atlasChat': '[{"q":"A"}]',

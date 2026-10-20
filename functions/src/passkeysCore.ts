@@ -37,10 +37,13 @@ export interface PasskeyStore {
   getPasskey(id: string): Promise<PasskeyDoc | null>;
   savePasskey(id: string, doc: PasskeyDoc): Promise<void>;
   updatePasskey(id: string, patch: Partial<PasskeyDoc>): Promise<void>;
-  listPasskeys(userId: string): Promise<{ id: string; transports?: AuthenticatorTransportFuture[] }[]>;
+  listPasskeys(
+    userId: string,
+  ): Promise<{ id: string; transports?: AuthenticatorTransportFuture[] }[]>;
 }
 
-export type PasskeyErrorCode = 'unauthenticated' | 'permission-denied' | 'deadline-exceeded' | 'invalid-argument';
+export type PasskeyErrorCode =
+  'unauthenticated' | 'permission-denied' | 'deadline-exceeded' | 'invalid-argument';
 export class PasskeyError extends Error {
   constructor(
     readonly code: PasskeyErrorCode,
@@ -57,7 +60,8 @@ export interface RelyingParty {
 
 async function takeValid(store: PasskeyStore, id: string, now: number): Promise<ChallengeDoc> {
   const ch = await store.takeChallenge(id);
-  if (!ch || now > ch.expiresAt) throw new PasskeyError('deadline-exceeded', 'The request expired. Try again.');
+  if (!ch || now > ch.expiresAt)
+    throw new PasskeyError('deadline-exceeded', 'The request expired. Try again.');
   return ch;
 }
 
@@ -73,15 +77,29 @@ export async function registerOptionsCore(
     userID: new TextEncoder().encode(a.uid),
     attestationType: 'none',
     excludeCredentials: existing.map((d) => ({ id: d.id, transports: d.transports })),
-    authenticatorSelection: { residentKey: 'preferred', userVerification: 'required', authenticatorAttachment: 'platform' },
+    authenticatorSelection: {
+      residentKey: 'preferred',
+      userVerification: 'required',
+      authenticatorAttachment: 'platform',
+    },
   });
-  await store.putChallenge(a.challengeId, { challenge: options.challenge, userId: a.uid, expiresAt: a.now + CHALLENGE_TTL_MS });
+  await store.putChallenge(a.challengeId, {
+    challenge: options.challenge,
+    userId: a.uid,
+    expiresAt: a.now + CHALLENGE_TTL_MS,
+  });
   return { challengeId: a.challengeId, options };
 }
 
 export async function registerVerifyCore(
   store: PasskeyStore,
-  a: { uid: string; rp: RelyingParty; challengeId: string; response: RegistrationResponseJSON; now: number },
+  a: {
+    uid: string;
+    rp: RelyingParty;
+    challengeId: string;
+    response: RegistrationResponseJSON;
+    now: number;
+  },
 ): Promise<void> {
   const ch = await takeValid(store, a.challengeId, a.now);
   if (ch.userId !== a.uid) throw new PasskeyError('permission-denied', 'Wrong account.');
@@ -98,7 +116,9 @@ export async function registerVerifyCore(
     userId: a.uid,
     publicKey: Buffer.from(credential.publicKey).toString('base64url'),
     counter: credential.counter,
-    transports: Array.isArray(a.response.response?.transports) ? a.response.response.transports : undefined,
+    transports: Array.isArray(a.response.response?.transports)
+      ? a.response.response.transports
+      : undefined,
     createdAt: a.now,
     lastUsedAt: null,
   });
@@ -114,7 +134,11 @@ export async function loginOptionsCore(
     userVerification: 'required',
     allowCredentials: allow.length ? allow : undefined,
   });
-  await store.putChallenge(a.challengeId, { challenge: options.challenge, userId: null, expiresAt: a.now + CHALLENGE_TTL_MS });
+  await store.putChallenge(a.challengeId, {
+    challenge: options.challenge,
+    userId: null,
+    expiresAt: a.now + CHALLENGE_TTL_MS,
+  });
   return { challengeId: a.challengeId, options };
 }
 
@@ -140,6 +164,9 @@ export async function loginVerifyCore(
     },
   }).catch(() => null);
   if (!v?.verified) throw new PasskeyError('unauthenticated', 'Could not verify the passkey.');
-  await store.updatePasskey(String(a.response.id), { counter: v.authenticationInfo.newCounter, lastUsedAt: a.now });
+  await store.updatePasskey(String(a.response.id), {
+    counter: v.authenticationInfo.newCounter,
+    lastUsedAt: a.now,
+  });
   return cred.userId;
 }

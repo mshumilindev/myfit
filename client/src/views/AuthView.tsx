@@ -149,7 +149,11 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
         <SpotterMark size={88} variant="tight" className="wordmark" />
         <h2 className="auth-title">{wallView || personView ? t.authWelcomeBack : t.appName}</h2>
         <p className="auth-sub">
-          {wallView || bio ? t.authTapFace : person ? t.authPersonPassword(person.name) : t.authTagline}
+          {wallView || bio
+            ? t.authTapFace
+            : person
+              ? t.authPersonPassword(person.name)
+              : t.authTagline}
         </p>
 
         {unreachable && (
@@ -249,7 +253,11 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
 
         {formView && (
           <label className="auth-remember">
-            <Checkbox checked={remember} onChange={setRemember} disabled={unreachable || busy || locked} />
+            <Checkbox
+              checked={remember}
+              onChange={setRemember}
+              disabled={unreachable || busy || locked}
+            />
             <span className="uf-1">{t.authRememberMe}</span>
           </label>
         )}

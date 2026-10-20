@@ -137,7 +137,7 @@ export const en = {
   sessionsError: 'Could not load sessions. Try again.',
   sessionsRevokedNote: 'A device you sign out here is signed out the next time it opens Spotter.',
   signOutRemember: 'Remember me on this device',
-  signOutForgetHint: 'Unticked: this device forgets you and the landing won\'t list you.',
+  signOutForgetHint: "Unticked: this device forgets you and the landing won't list you.",
   stay: 'Stay',
 
   // Sync status

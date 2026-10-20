@@ -34,7 +34,9 @@ import { readRemembered } from '../accounts/rememberedPeople';
 const seed = (passkey: boolean) =>
   localStorage.setItem(
     'spotter.accounts',
-    JSON.stringify([{ uid: 'uA', name: 'Anna Koval', login: 'anna', passkey, appName: '[DEFAULT]', lastUsed: 2 }]),
+    JSON.stringify([
+      { uid: 'uA', name: 'Anna Koval', login: 'anna', passkey, appName: '[DEFAULT]', lastUsed: 2 },
+    ]),
   );
 const tapAnna = () => fireEvent.click(screen.getByRole('button', { name: /Anna/ }));
 const pass = () => screen.queryByPlaceholderText(en.password);
@@ -43,7 +45,9 @@ beforeEach(() => {
   setLocale('en');
   localStorage.clear();
   Object.values(h).forEach((f) => f.mockReset());
-  h.callFn.mockImplementation(async (name: string) => (name === 'login' ? { token: 't', userId: 'uA' } : { registered: true }));
+  h.callFn.mockImplementation(async (name: string) =>
+    name === 'login' ? { token: 't', userId: 'uA' } : { registered: true },
+  );
   h.signIn.mockResolvedValue(undefined);
   h.available.mockResolvedValue(true);
   h.register.mockResolvedValue(true);

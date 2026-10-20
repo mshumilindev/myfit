@@ -21,7 +21,10 @@ import {
 } from './passkeysCore';
 
 function relyingParty(origin: unknown) {
-  const extra = (process.env.PASSKEY_ORIGINS ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+  const extra = (process.env.PASSKEY_ORIGINS ?? '')
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean);
   const rp = allowedRelyingParty(origin, extra);
   if (!rp) throw new HttpsError('failed-precondition', 'This origin cannot use passkeys.');
   return rp;
@@ -85,7 +88,13 @@ export const passkeyRegisterOptions = onCall(async (req) => {
   if (!userSnap.exists) throw new HttpsError('not-found', 'Unknown account.');
   const user: UserDoc = { id: uid, ...(userSnap.data() as Omit<UserDoc, 'id'>) };
   return mapErrors(() =>
-    registerOptionsCore(firestoreStore, { uid, userName: displayName(user), rp, challengeId: randomUUID(), now: Date.now() }),
+    registerOptionsCore(firestoreStore, {
+      uid,
+      userName: displayName(user),
+      rp,
+      challengeId: randomUUID(),
+      now: Date.now(),
+    }),
   );
 });
 
@@ -94,7 +103,13 @@ export const passkeyRegisterVerify = onCall(async (req) => {
   const rp = relyingParty(req.rawRequest?.headers?.origin);
   const b = bodyOf(req.data);
   await mapErrors(() =>
-    registerVerifyCore(firestoreStore, { uid, rp, challengeId: b.challengeId, response: b.response as RegistrationResponseJSON, now: Date.now() }),
+    registerVerifyCore(firestoreStore, {
+      uid,
+      rp,
+      challengeId: b.challengeId,
+      response: b.response as RegistrationResponseJSON,
+      now: Date.now(),
+    }),
   );
   return { ok: true };
 });
@@ -105,7 +120,12 @@ export const passkeyLoginOptions = onCall(async (req) => {
   const rp = relyingParty(req.rawRequest?.headers?.origin);
   const userId = (req.data as { userId?: unknown } | undefined)?.userId;
   return mapErrors(() =>
-    loginOptionsCore(firestoreStore, { userId: typeof userId === 'string' && userId ? userId : null, rp, challengeId: randomUUID(), now: Date.now() }),
+    loginOptionsCore(firestoreStore, {
+      userId: typeof userId === 'string' && userId ? userId : null,
+      rp,
+      challengeId: randomUUID(),
+      now: Date.now(),
+    }),
   );
 });
 
@@ -113,11 +133,17 @@ export const passkeyLoginVerify = onCall(async (req) => {
   const rp = relyingParty(req.rawRequest?.headers?.origin);
   const b = bodyOf(req.data);
   const userId = await mapErrors(() =>
-    loginVerifyCore(firestoreStore, { rp, challengeId: b.challengeId, response: b.response as AuthenticationResponseJSON, now: Date.now() }),
+    loginVerifyCore(firestoreStore, {
+      rp,
+      challengeId: b.challengeId,
+      response: b.response as AuthenticationResponseJSON,
+      now: Date.now(),
+    }),
   );
   const userSnap = await db.collection('users').doc(userId).get();
   if (!userSnap.exists) throw new HttpsError('unauthenticated', 'Passkey not recognised.');
   const user: UserDoc = { id: userId, ...(userSnap.data() as Omit<UserDoc, 'id'>) };
-  if (user.status === 'suspended') throw new HttpsError('permission-denied', 'This account is suspended. Ask your admin.');
+  if (user.status === 'suspended')
+    throw new HttpsError('permission-denied', 'This account is suspended. Ask your admin.');
   return authPayload(user, await mintToken(user.id, user.role));
 });

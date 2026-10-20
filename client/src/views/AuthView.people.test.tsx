@@ -59,7 +59,9 @@ afterEach(() => {
 describe('AuthView: Remember me', () => {
   it('passes "Remember me" to the sign-in: off by default, on when ticked', async () => {
     render(<AuthView onLoggedIn={vi.fn()} />);
-    const box = screen.getByRole('checkbox', { name: new RegExp(en.authRememberMe) }) as HTMLInputElement;
+    const box = screen.getByRole('checkbox', {
+      name: new RegExp(en.authRememberMe),
+    }) as HTMLInputElement;
     expect(box.checked).toBe(false);
     fireEvent.click(box);
     expect(box.checked).toBe(true);
@@ -96,7 +98,7 @@ describe('AuthView: people this device remembers', () => {
     expect(screen.queryByPlaceholderText(en.password)).toBeNull();
   });
 
-  it('tapping a person asks for the password only and signs in with that person\'s login, staying remembered', async () => {
+  it("tapping a person asks for the password only and signs in with that person's login, staying remembered", async () => {
     seed();
     const onLoggedIn = vi.fn();
     render(<AuthView onLoggedIn={onLoggedIn} />);

@@ -16,8 +16,22 @@ import { SessionsSheet } from './SessionsSheet';
 
 const now = Date.now();
 const rows = [
-  { deviceId: 'this-device-id', label: 'Chrome · macOS', city: 'warsaw', country: 'PL', lastSeenAt: now, createdAt: now },
-  { deviceId: 'phone-device-1', label: 'Safari · iOS', city: null, country: 'UA', lastSeenAt: now - 3_600_000, createdAt: now },
+  {
+    deviceId: 'this-device-id',
+    label: 'Chrome · macOS',
+    city: 'warsaw',
+    country: 'PL',
+    lastSeenAt: now,
+    createdAt: now,
+  },
+  {
+    deviceId: 'phone-device-1',
+    label: 'Safari · iOS',
+    city: null,
+    country: 'UA',
+    lastSeenAt: now - 3_600_000,
+    createdAt: now,
+  },
 ];
 
 describe('SessionsSheet', () => {

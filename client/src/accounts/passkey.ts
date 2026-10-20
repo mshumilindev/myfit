@@ -23,11 +23,10 @@ export async function biometricsAvailable(): Promise<boolean> {
 export async function registerPasskey(): Promise<boolean> {
   try {
     if (!(await biometricsAvailable())) return false;
-    const { challengeId, options } = await callFn<{ challengeId: string; options: Parameters<typeof startRegistration>[0]['optionsJSON'] }>(
-      'passkeyRegisterOptions',
-      undefined,
-      { quiet: true },
-    );
+    const { challengeId, options } = await callFn<{
+      challengeId: string;
+      options: Parameters<typeof startRegistration>[0]['optionsJSON'];
+    }>('passkeyRegisterOptions', undefined, { quiet: true });
     const response = await startRegistration({ optionsJSON: options });
     await callFn('passkeyRegisterVerify', { challengeId, response }, { quiet: true });
     return true;
@@ -38,11 +37,10 @@ export async function registerPasskey(): Promise<boolean> {
 
 /** Signs in with the device's biometrics. Throws when cancelled or unusable: the caller falls back to the password. */
 export async function signInWithPasskey(userId: string): Promise<AuthPayload> {
-  const { challengeId, options } = await callFn<{ challengeId: string; options: Parameters<typeof startAuthentication>[0]['optionsJSON'] }>(
-    'passkeyLoginOptions',
-    { userId },
-    { quiet: true },
-  );
+  const { challengeId, options } = await callFn<{
+    challengeId: string;
+    options: Parameters<typeof startAuthentication>[0]['optionsJSON'];
+  }>('passkeyLoginOptions', { userId }, { quiet: true });
   const response = await startAuthentication({ optionsJSON: options });
   return callFn<AuthPayload>('passkeyLoginVerify', { challengeId, response }, { quiet: true });
 }

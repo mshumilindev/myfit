@@ -74,14 +74,21 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
                 key={r.deviceId}
                 icon={<Icon name={/iOS|Android/.test(r.label) ? 'device-mobile' : 'monitor'} />}
                 label={r.label}
-                sub={[place, t.sessionsSeen(relativeTime(r.lastSeenAt, locale))].filter(Boolean).join(' · ')}
+                sub={[place, t.sessionsSeen(relativeTime(r.lastSeenAt, locale))]
+                  .filter(Boolean)
+                  .join(' · ')}
                 trailing={
                   here ? (
                     <Chip tone="ok" size="xs">
                       {t.sessionsThis}
                     </Chip>
                   ) : (
-                    <Button size="sm" variant="secondary" disabled={busy} onClick={() => void revoke(r.deviceId)}>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={busy}
+                      onClick={() => void revoke(r.deviceId)}
+                    >
                       {t.sessionsSignOutDevice}
                     </Button>
                   )

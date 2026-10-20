@@ -16,7 +16,17 @@ export async function fetchAvatarThumb(uid: string): Promise<string | undefined>
     canvas.width = canvas.height = SIZE;
     const ctx = canvas.getContext('2d');
     if (!ctx) return undefined;
-    ctx.drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, SIZE, SIZE);
+    ctx.drawImage(
+      bmp,
+      (bmp.width - side) / 2,
+      (bmp.height - side) / 2,
+      side,
+      side,
+      0,
+      0,
+      SIZE,
+      SIZE,
+    );
     bmp.close?.();
     return canvas.toDataURL('image/jpeg', 0.8);
   } catch {

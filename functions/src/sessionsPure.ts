@@ -40,10 +40,13 @@ function header(h: Record<string, unknown> | undefined, name: string): string | 
 }
 
 /** Approximate place from edge headers when the host provides them (no IP lookup, nothing stored but the words). */
-export function placeFromHeaders(h: Record<string, unknown> | undefined): { city: string | null; country: string | null } {
-  const country = header(h, 'x-appengine-country') ?? header(h, 'cf-ipcountry') ?? header(h, 'x-country-code');
+export function placeFromHeaders(h: Record<string, unknown> | undefined): {
+  city: string | null;
+  country: string | null;
+} {
+  const country =
+    header(h, 'x-appengine-country') ?? header(h, 'cf-ipcountry') ?? header(h, 'x-country-code');
   const city = header(h, 'x-appengine-city') ?? header(h, 'cf-ipcity');
   const c = country && country !== 'XX' && country !== 'ZZ' ? country.toUpperCase() : null;
   return { city: city && city !== '?' ? city : null, country: c };
 }
-

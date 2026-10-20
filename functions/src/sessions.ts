@@ -12,7 +12,14 @@
 import { onCall } from 'firebase-functions/v2/https';
 import { db, HttpsError } from './lib';
 import { describeClient, placeFromHeaders, validDeviceId } from './sessionsPure';
-import { checkCore, listCore, revokeCore, revokeOthersCore, type SessionDoc, type SessionStore } from './sessionsCore';
+import {
+  checkCore,
+  listCore,
+  revokeCore,
+  revokeOthersCore,
+  type SessionDoc,
+  type SessionStore,
+} from './sessionsCore';
 
 function sessions(uid: string) {
   return db.collection('users').doc(uid).collection('sessions');
@@ -60,7 +67,9 @@ export const sessionCheck = onCall(async (req) => {
   return checkCore(storeFor(uid), deviceIdOf(req.data), info, Date.now());
 });
 
-export const sessionList = onCall(async (req) => ({ sessions: await listCore(storeFor(mustUid(req))) }));
+export const sessionList = onCall(async (req) => ({
+  sessions: await listCore(storeFor(mustUid(req))),
+}));
 
 /** Signs another device out (its next check ends its session). */
 export const sessionRevoke = onCall(async (req) => {

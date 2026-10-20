@@ -162,7 +162,8 @@ export const pl: Strings = {
   sessionsError: 'Nie udało się wczytać sesji. Spróbuj ponownie.',
   sessionsRevokedNote: 'Urządzenie wylogowane tutaj wyloguje się przy następnym otwarciu Spottera.',
   signOutRemember: 'Zapamiętaj mnie na tym urządzeniu',
-  signOutForgetHint: 'Bez zaznaczenia: urządzenie o Tobie zapomni i nie pokaże Cię na ekranie startowym.',
+  signOutForgetHint:
+    'Bez zaznaczenia: urządzenie o Tobie zapomni i nie pokaże Cię na ekranie startowym.',
   stay: 'Zostań',
 
   synced: 'Zsynchronizowano',

@@ -10,7 +10,12 @@ export function SessionsRow() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <ListRow icon={<Icon name="devices" />} label={t.sessionsRow} chevron onClick={() => setOpen(true)} />
+      <ListRow
+        icon={<Icon name="devices" />}
+        label={t.sessionsRow}
+        chevron
+        onClick={() => setOpen(true)}
+      />
       {open && <SessionsSheet onClose={() => setOpen(false)} />}
     </>
   );

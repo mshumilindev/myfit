@@ -1,7 +1,10 @@
 /** Pure helpers of passkeys.ts (no Firebase), so they can be unit-tested from the client suite. */
 
 /** The relying party is the page's own origin: localhost, Firebase hosting, or one listed in PASSKEY_ORIGINS. Null = not allowed. */
-export function allowedRelyingParty(origin: unknown, extra: string[] = []): { rpID: string; origin: string } | null {
+export function allowedRelyingParty(
+  origin: unknown,
+  extra: string[] = [],
+): { rpID: string; origin: string } | null {
   if (typeof origin !== 'string') return null;
   let url: URL;
   try {

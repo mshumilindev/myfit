@@ -30,7 +30,11 @@ const quiet = { quiet: true } as const;
 /** Refreshes this device's record. False = this device was signed out from another one. Any failure counts as still active. */
 export async function checkSession(): Promise<boolean> {
   try {
-    const r = await callFn<{ active: boolean }>('sessionCheck', { deviceId: sessionDeviceId() }, quiet);
+    const r = await callFn<{ active: boolean }>(
+      'sessionCheck',
+      { deviceId: sessionDeviceId() },
+      quiet,
+    );
     return r.active !== false;
   } catch {
     return true; // offline or server not updated yet: never sign anyone out on a failed check
@@ -47,7 +51,11 @@ export async function revokeSession(deviceId: string): Promise<void> {
 }
 
 export async function revokeOtherSessions(): Promise<number> {
-  const r = await callFn<{ revoked: number }>('sessionRevokeOthers', { deviceId: sessionDeviceId() }, quiet);
+  const r = await callFn<{ revoked: number }>(
+    'sessionRevokeOthers',
+    { deviceId: sessionDeviceId() },
+    quiet,
+  );
   return r.revoked;
 }
 
