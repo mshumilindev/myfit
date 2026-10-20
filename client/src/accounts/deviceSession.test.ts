@@ -58,4 +58,28 @@ describe('deviceSession', () => {
     afterSignOut(b, null, true);
     expect(b.dump()).toEqual({});
   });
+
+  it('person B signing in after person A signed out sees none of A\'s personal data, only device settings', () => {
+    const b = memoryBackend({
+      'spotter.state': '{"goal":"A"}',
+      'spotter.atlasChat': '[{"q":"A"}]',
+      'spotter.sleep': '[7]',
+      'gym.locale': 'uk',
+    });
+    afterSignIn(b, { uid: 'uA', name: 'Anna' }, true, 1);
+    afterSignOut(b, 'uA', false);
+    afterSignIn(b, { uid: 'uB', name: 'Boris' }, false, 2);
+    expect(b.dump()).toEqual({
+      'gym.locale': 'uk',
+      'spotter.accounts': expect.any(String),
+    });
+    expect(readRemembered(b).map((p) => p.uid)).toEqual(['uA']); // A stays offered on the landing; B left no trace
+  });
+
+  it('an already signed-in person is untouched at startup: reading the registry changes nothing (migration)', () => {
+    const seed = { 'spotter.state': '{"x":1}', 'spotter.uid': 'uA', 'gym.locale': 'pl' };
+    const b = memoryBackend(seed);
+    expect(readRemembered(b)).toEqual([]);
+    expect(b.dump()).toEqual(seed);
+  });
 });

@@ -16,6 +16,7 @@ import {
 } from '@simplewebauthn/server';
 import { randomUUID } from 'node:crypto';
 import { authPayload, db, displayName, HttpsError, mintToken, type UserDoc } from './lib';
+import { allowedRelyingParty } from './passkeysPure';
 
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
 const RP_NAME = 'Spotter';
@@ -29,24 +30,11 @@ interface PasskeyDoc {
   lastUsedAt: number | null;
 }
 
-/** The relying party is the page's own origin, limited to localhost, Firebase hosting and PASSKEY_ORIGINS (comma separated). */
 function relyingParty(origin: unknown): { rpID: string; origin: string } {
-  if (typeof origin !== 'string') throw new HttpsError('failed-precondition', 'Unknown origin.');
-  let url: URL;
-  try {
-    url = new URL(origin);
-  } catch {
-    throw new HttpsError('failed-precondition', 'Unknown origin.');
-  }
-  const extra = (process.env.PASSKEY_ORIGINS ?? '').split(',').map((s) => s.trim()).filter(Boolean);
-  const host = url.hostname;
-  const ok =
-    host === 'localhost' ||
-    host.endsWith('.web.app') ||
-    host.endsWith('.firebaseapp.com') ||
-    extra.includes(url.origin);
-  if (!ok) throw new HttpsError('failed-precondition', 'This origin cannot use passkeys.');
-  return { rpID: host, origin: url.origin };
+  const extra = (process.env.PASSKEY_ORIGINS ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+  const rp = allowedRelyingParty(origin, extra);
+  if (!rp) throw new HttpsError('failed-precondition', 'This origin cannot use passkeys.');
+  return rp;
 }
 
 async function takeChallenge(id: string): Promise<{ challenge: string; userId: string | null }> {

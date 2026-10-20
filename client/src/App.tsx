@@ -61,6 +61,7 @@ import {
 import { useChallenges } from './challenges';
 import { ShellLauncher } from './components/ShellLauncher';
 import { setSuiteSession } from './components/suite/suiteSession';
+import { watchSession } from './accounts/sessions';
 import type { ApexTab } from './views/ApexApp';
 import type { RosterTab } from './views/RosterApp';
 import { canUseCoach, coachScreenOpen } from './coach/access';
@@ -1103,6 +1104,11 @@ export function App() {
     () => setSuiteSession({ signOut: (o) => signOutRef.current(o), queueLength: queueLen }),
     [queueLen],
   );
+  // A device signed out from Profile → Sessions ends itself at its next check (start, focus, back online).
+  useEffect(() => {
+    if (!authed) return;
+    return watchSession(() => signOutRef.current({ forget: false }));
+  }, [authed]);
 
   /** Back from an overlay: pop to the logical parent screen, not history. When
    *  there's no remembered parent (deep link / refreshed URL), fall back to the

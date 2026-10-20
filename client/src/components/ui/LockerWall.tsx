@@ -1,5 +1,4 @@
 import { Avatar } from './Avatar';
-import { Chip } from './Chip';
 import './LockerWall.css';
 
 export interface LockerPerson {
@@ -45,32 +44,20 @@ export function LockerWall({ people, activeId, openId, openLabel, label, lockerL
             aria-pressed={on}
             onClick={() => onSelect(p.id)}
           >
-            {!open && (
-              <span className="uilw-vents" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-              </span>
-            )}
+            <span className="uilw-vents" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
             <span className="uilw-av" aria-hidden="true">
-              <Avatar name={p.name} src={p.avatar} size={open ? 48 : 44} />
+              <Avatar name={p.name} src={p.avatar} size={44} />
             </span>
             <span className="uilw-num" aria-hidden="true">
               {String(i + 1).padStart(2, '0')}
             </span>
-            {open ? (
-              <>
-                <span className="uilw-name">{firstName(p.name)}</span>
-                {openLabel && (
-                  <Chip tone="ok" size="xs" icon="lock-simple">
-                    {openLabel}
-                  </Chip>
-                )}
-              </>
-            ) : (
-              <span className="uilw-tag">{firstName(p.name)}</span>
-            )}
-            {!open && <i className="uilw-handle" aria-hidden="true" />}
+            <span className="uilw-tag">{firstName(p.name)}</span>
+            <i className="uilw-handle" aria-hidden="true" />
+            {open && openLabel && <span className="uilw-sr">{openLabel}</span>}
           </button>
         );
       })}
