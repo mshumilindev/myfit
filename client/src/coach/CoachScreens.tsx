@@ -9,7 +9,6 @@ import type { CoachRoute } from './routes';
 import { isChunkLoadError, lazyScreen, resetLazyScreens } from './lazyScreen';
 import { coachHash, isProgramPage, programPageClient } from './routes';
 import { writeParams } from './today/useTodayParams';
-import { navigateHash } from '../navigateHash';
 
 /** Roster, Signals and Client 360 (M1 UI): loaded on demand so the shell never waits for them. */
 /** Today + Decision (M1 UI, TODAY agent). */
@@ -98,7 +97,7 @@ export function CoachScreen({
   const { c } = useCoachT();
   /** Roster / Signals / Client 360 open the Decision screen: Today's hash query carries the signal key. */
   const openDecision = (key: string) => {
-    navigateHash(writeParams('#/c/agenda', { decision: key }));
+    window.location.hash = writeParams('#/c/agenda', { decision: key });
   };
   if (route.screen === 'agenda')
     return (
