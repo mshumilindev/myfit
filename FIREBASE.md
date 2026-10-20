@@ -3,11 +3,11 @@
 The backend moved from the self-hosted Express + SQLite server to Firebase:
 
 - **Hosting** serves the built PWA (`client/dist`) from two sites in this one project:
-  **test** at https://spotter-64c3b.web.app (`deploy-hosting.command`, or the *Deploy hosting* workflow on push to `main`)
-  and **prod** at https://myspotter.fit (site `myspotter-fit`; `deploy-hosting-prod.command`, or run the *Deploy hosting*
+  **test** at https://spotter-64c3b.web.app (`deploy-hosting.command`, or the _Deploy hosting_ workflow on push to `main`)
+  and **prod** at https://myspotter.fit (site `myspotter-fit`; `deploy-hosting-prod.command`, or run the _Deploy hosting_
   workflow by hand with target `prod`). Both sites share Firestore/Auth/Storage/Functions; only the static client differs.
   The prod build sets `VITE_APP_ORIGIN=https://myspotter.fit` so invite links use the real domain.
-  CI needs the repo secret `FIREBASE_SERVICE_ACCOUNT` (JSON key with the *Firebase Hosting Admin* role).
+  CI needs the repo secret `FIREBASE_SERVICE_ACCOUNT` (JSON key with the _Firebase Hosting Admin_ role).
 - **Firestore** holds all tracker/user/program data; the client reads & writes it
   directly (offline-first) — see `firestore.rules`.
 - **Cloud Storage** holds avatars at `avatars/{uid}/photo` — see `storage.rules`.
