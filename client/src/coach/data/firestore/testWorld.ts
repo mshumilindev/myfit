@@ -36,6 +36,8 @@ export interface TestWorld {
   trainerProvider(rec?: CoachKeyRecord): RingProvider;
   /** the coach publishes a NEW key pair, signed by the server key; returns the new record */
   rotateCoachKey(): Promise<CoachKeyRecord>;
+  /** publish another account's public key (a team manager) at `coachKeys/{uid}`, signed by the server key or not */
+  publishPeerKey(uid: string, pub: JsonWebKey, signed?: boolean): Promise<void>;
 }
 
 /** Wraps the store for one signed-in side (the rules test layer enforces `firestore.rules` through it). */
@@ -125,6 +127,20 @@ export async function makeWorld(wrap?: FsWrap): Promise<TestWorld> {
       });
       currentRec = next;
       return next;
+    },
+    async publishPeerKey(uid, pub, signed = true) {
+      const base = { pub, updatedAt: NOW };
+      if (!signed) return fs.seed(`coachKeys/${uid}`, base);
+      const sig = b64(
+        new Uint8Array(
+          await crypto.subtle.sign(
+            { name: 'Ed25519' },
+            pair.privateKey,
+            new TextEncoder().encode(coachKeySigPayload(uid, await fingerprint(pub), NOW, 'srv1')),
+          ),
+        ),
+      );
+      fs.seed(`coachKeys/${uid}`, { ...base, kid: 'srv1', sig, signedAt: NOW });
     },
     fs,
     tfs,

@@ -52,6 +52,7 @@ import { summarizeChanges } from '../../program/summary';
 import { PG_LOCALES } from '../../../i18n/coachProgram';
 import { getLocale } from '../../../i18n';
 import { createFirestoreReadLog } from './readLogPort';
+import { createDelegationPublisher, keepDelegated } from './delegationPublisher';
 import { createRingBook } from './ringBook';
 import { createFirestoreScheduleStore } from './scheduleDocStore';
 import { createFirestoreShareSource } from './shareSource';
@@ -344,6 +345,11 @@ export function installFirestoreClient(d: ClientInstallDeps): () => void {
     onEnded: (cid) => ended(cid),
   });
   const stopBook = book.start();
+  // The schedule and request keys go to the trainer team's managers from this device (ADR 005).
+  const stopDelegation = keepDelegated(
+    book,
+    createDelegationPublisher({ fs: d.fs, uid: d.uid, rings, signing }),
+  );
 
   const chat = withLocalCache(
     createFirestoreChatPort({
@@ -478,6 +484,7 @@ export function installFirestoreClient(d: ClientInstallDeps): () => void {
     offLiveWorkouts();
     clearInterval(liveTimer);
     offWorkouts();
+    stopDelegation();
     stopBook();
     rings.forget();
     configureClientCoach();

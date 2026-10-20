@@ -16,13 +16,16 @@ import { subKeyBytes, type ChatKeyRing, type Purpose } from './conversationKey';
 export const DELEGATED_PURPOSES = ['schedule', 'requests'] as const satisfies readonly Purpose[];
 export type DelegatedPurpose = (typeof DELEGATED_PURPOSES)[number];
 
+/** A wrap as the rules want it (`validCk`): the epoch and the manager key fingerprint travel with it, like on `ck`. */
+export type DelegatedWrap = Wrap & { epoch: number; fp: string };
+
 /** What is stored at conversations/{cid}/delegations/{managerUid}. */
 export interface Delegation {
   epoch: number;
   /** Fingerprint of the manager public key the wraps were made for. */
   fp: string;
-  schedule: Wrap;
-  requests: Wrap;
+  schedule: DelegatedWrap;
+  requests: DelegatedWrap;
   at: number;
 }
 
@@ -40,11 +43,12 @@ export async function createDelegation(
   at: number,
 ): Promise<Delegation> {
   const fp = await fingerprint(managerPub);
-  const out = {} as Record<DelegatedPurpose, Wrap>;
+  const out = {} as Record<DelegatedPurpose, DelegatedWrap>;
   for (const p of DELEGATED_PURPOSES) {
     const bytes = await subKeyBytes(raw, p, cid, epoch);
     try {
-      out[p] = await createWrap(bytes, managerPub, { info: INFO, aad: aad(cid, epoch, p, fp) });
+      const w = await createWrap(bytes, managerPub, { info: INFO, aad: aad(cid, epoch, p, fp) });
+      out[p] = { ...w, epoch, fp };
     } finally {
       bytes.fill(0);
     }
@@ -52,9 +56,17 @@ export async function createDelegation(
   return { epoch, fp, schedule: out.schedule, requests: out.requests, at };
 }
 
-const isWrap = (w: unknown): w is Wrap => {
-  const x = w as Partial<Wrap> | null;
-  return !!x && x.v === 1 && typeof x.iv === 'string' && typeof x.ct === 'string' && !!x.epk;
+const isWrap = (w: unknown): w is DelegatedWrap => {
+  const x = w as Partial<DelegatedWrap> | null;
+  return (
+    !!x &&
+    x.v === 1 &&
+    typeof x.iv === 'string' &&
+    typeof x.ct === 'string' &&
+    !!x.epk &&
+    typeof x.epoch === 'number' &&
+    typeof x.fp === 'string'
+  );
 };
 
 export function isDelegation(x: unknown): x is Delegation {

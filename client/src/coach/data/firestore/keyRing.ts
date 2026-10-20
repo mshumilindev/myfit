@@ -56,6 +56,15 @@ export interface RingProvider {
   current(cid: string): Promise<ChatKeyRing>;
   /** Rings of the epochs BEFORE `current` this device can open (client: its key store above the period floor; trainer: the key ring). */
   past(cid: string, current: number): Promise<Map<number, ChatKeyRing>>;
+  /**
+   * CLIENT only: lend the raw key bytes of one epoch to `fn` (to derive and wrap the schedule and request sub-keys for a
+   * manager) and zero them afterwards. `null` when this device does not hold that epoch (or on the trainer side).
+   */
+  withRawKey?<T>(
+    cid: string,
+    epoch: number,
+    fn: (raw: Uint8Array) => Promise<T>,
+  ): Promise<T | null>;
   /** Drop every cached key (sign-out, relationship end). */
   forget(): void;
 }
@@ -292,6 +301,17 @@ export function createRingProvider(d: RingDeps): RingProvider {
   return {
     forEpoch: (cid, epoch) => get(cid, epoch),
     past,
+    async withRawKey(cid, epoch, fn) {
+      if (d.side !== 'client') return null;
+      const k = (await loadKeys())[`${cid}:${epoch}`];
+      if (!k) return null;
+      const raw = unb64(k);
+      try {
+        return await fn(raw);
+      } finally {
+        raw.fill(0);
+      }
+    },
     current: (cid) => (d.side === 'client' ? clientCurrentOnce(cid) : trainerCurrent(cid)),
     forget() {
       rings.clear();

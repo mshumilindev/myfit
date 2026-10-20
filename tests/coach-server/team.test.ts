@@ -8,6 +8,7 @@ import {
   teamInvitePreview,
   teamInviteRevoke,
   teamLeave,
+  teamManagersForClient,
   teamRead,
   teamRemoveMember,
   teamSetActivityScope,
@@ -175,6 +176,22 @@ describe('accepting', () => {
     expect(await code(teamInvite(ctx(), owner, { email: 'x@example.com', role: 'admin' }))).toBe(
       'invalid-argument:invalid-role',
     );
+  });
+
+  it('a client learns the ACTIVE managers of its trainer’s team (nobody else, no removed ones)', async () => {
+    await kv.set('coaching/c1', { status: 'active', trainerId: 't1' });
+    const c1 = { uid: 'c1', role: 'member' } as Actor;
+    expect(await teamManagersForClient(ctx(), c1)).toEqual({ managers: [] });
+    await joined();
+    expect(await teamManagersForClient(ctx(), c1)).toEqual({ managers: ['m1'] });
+    await kv.set('coaching/c1', { status: 'ended', trainerId: 't1' });
+    expect(await teamManagersForClient(ctx(), c1)).toEqual({ managers: [] });
+    await kv.set('coaching/c1', { status: 'active', trainerId: 't1' });
+    await teamRemoveMember(ctx(), owner, { uid: 'm1' });
+    expect(await teamManagersForClient(ctx(), c1)).toEqual({ managers: [] });
+    expect(await teamManagersForClient(ctx(), { uid: 'zz', role: 'member' } as Actor)).toEqual({
+      managers: [],
+    });
   });
 
   it('a manager invites a TRAINER; only a trainer account may accept, a member may not', async () => {

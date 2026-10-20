@@ -429,3 +429,27 @@ export async function teamRead(ctx: Ctx, actor: Actor): Promise<TeamSnapshot> {
     asOf: now,
   };
 }
+
+/**
+ * CLIENT: the active managers of my trainer's team (uids only). The client device wraps the schedule and request keys
+ * for each of them (ADR 005); it cannot look the team up itself because the trainer's user document is not readable.
+ */
+export async function teamManagersForClient(
+  ctx: Ctx,
+  actor: Actor,
+): Promise<{ managers: string[] }> {
+  const c = (await ctx.kv.get(`coaching/${actor.uid}`)) as {
+    status?: string;
+    trainerId?: string;
+  } | null;
+  if (!c || c.status !== 'active' || !c.trainerId) return { managers: [] };
+  const trainer = (await ctx.kv.get(`users/${c.trainerId}`)) as UserRec | null;
+  const teamId = trainer?.teamId || c.trainerId;
+  const rows = await ctx.kv.list(`teams/${teamId}/members`);
+  const managers = rows
+    .map((r) => r.data as unknown as MemberRec)
+    .filter((m) => m.role === 'manager' && m.status === 'active')
+    .map((m) => m.uid)
+    .sort();
+  return { managers };
+}
