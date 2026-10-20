@@ -1,7 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { LockerWall } from './LockerWall';
 
-const names = ['Mykola Lukianov', 'Anna Koval', 'Dmytro Shevchenko', 'Iryna Petrenko', 'Oleh Bondar', 'Marek Nowak'];
+const names = [
+  'Mykola Lukianov',
+  'Anna Koval',
+  'Dmytro Shevchenko',
+  'Iryna Petrenko',
+  'Oleh Bondar',
+  'Marek Nowak',
+];
 const some = (n: number) => names.slice(0, n).map((name, i) => ({ id: String(i), name }));
 
 const meta = {
@@ -25,4 +32,6 @@ export const Five: Story = { args: { people: some(5) } };
 /** Six wrap onto a second row on a narrow panel. */
 export const Six: Story = { args: { people: some(6) } };
 /** The person who tapped: the door opens while the device asks for Face ID or the password. */
-export const OpenLocker: Story = { args: { people: some(4), activeId: '1', openId: '1', openLabel: 'Open' } };
+export const OpenLocker: Story = {
+  args: { people: some(4), activeId: '1', openId: '1', openLabel: 'Open' },
+};

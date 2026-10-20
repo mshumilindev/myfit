@@ -23,8 +23,12 @@ describe('LockerWall', () => {
     const b = screen.getByRole('button', { name: 'Boris, locker 2' });
     expect(b.textContent).toContain('02');
     expect(b.textContent).toContain('Boris');
-    expect(screen.getByRole('button', { name: 'Anna Koval, locker 1' }).textContent).toContain('Anna');
-    expect(screen.getByRole('button', { name: 'Anna Koval, locker 1' }).textContent).not.toContain('Koval');
+    expect(screen.getByRole('button', { name: 'Anna Koval, locker 1' }).textContent).toContain(
+      'Anna',
+    );
+    expect(screen.getByRole('button', { name: 'Anna Koval, locker 1' }).textContent).not.toContain(
+      'Koval',
+    );
   });
 
   it('reports the chosen person', () => {
@@ -40,6 +44,8 @@ describe('LockerWall', () => {
     expect(b.getAttribute('aria-pressed')).toBe('true');
     expect(b.className).toContain('is-open');
     expect(b.textContent).toContain('Open');
-    expect(screen.getByRole('button', { name: 'Anna Koval, locker 1' }).getAttribute('aria-pressed')).toBe('false');
+    expect(
+      screen.getByRole('button', { name: 'Anna Koval, locker 1' }).getAttribute('aria-pressed'),
+    ).toBe('false');
   });
 });
