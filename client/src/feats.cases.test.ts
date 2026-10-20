@@ -322,7 +322,7 @@ describe('solid weeks and weekly streak', () => {
     expect(tier(three, 'perfectWeeks', 1).unlocked).toBe(true);
   });
 
-  it('streak is the run of consecutive weeks ending at the latest trained week, in days', () => {
+  it('streak is the longest run of consecutive trained weeks ever, in days', () => {
     const weekly = (n: number, skip: number[] = []) =>
       Array.from({ length: n }, (_, i) => i)
         .filter((i) => !skip.includes(i))
@@ -333,6 +333,17 @@ describe('solid weeks and weekly streak', () => {
     expect(val(computeFeats([]), 'streak')).toBe(0);
     expect(tier(computeFeats(weekly(2)), 'streak', 14).unlocked).toBe(true);
     expect(tier(computeFeats(weekly(2)), 'streak', 21).unlocked).toBe(false);
+  });
+
+  it('SPO-152: a shorter run after a longer one never lowers the streak, and a pause does not decay it', () => {
+    const weekly = (weeks: number[]) => weeks.map((i) => wk(L(2026, 3, 2 + i * 7)));
+    const r = computeFeats(weekly([0, 1, 2, 3, 6])); // 4 weeks, a gap, then 1 week
+    expect(val(r, 'streak')).toBe(28);
+    expect(tier(r, 'streak', 21).unlocked).toBe(true);
+    // the same history plus a long pause (no new sessions) keeps the achievement
+    expect(val(computeFeats(weekly([0, 1, 2, 3])), 'streak')).toBe(28);
+    // a longer later run replaces the earlier best
+    expect(val(computeFeats(weekly([0, 1, 4, 5, 6])), 'streak')).toBe(21);
   });
 
   it('several sessions in one week are still one week of streak', () => {
