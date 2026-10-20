@@ -17,6 +17,7 @@ import { AnatomyTurntable } from '../../components/ui/AnatomyTurntable';
 import { LOCALE_IDS, fmtDayMonth, setLocale, useT, type LocaleId } from '../../i18n';
 import { AuthView } from '../AuthView';
 import { isAppShell } from './landingGate';
+import { downloadUrl } from '../../downloads';
 import './landing-design.css';
 
 const FLAGS: Record<LocaleId, string> = { en: '🇬🇧', uk: '🇺🇦', pl: '🇵🇱', lt: '🇱🇹', et: '🇪🇪' };
@@ -1299,9 +1300,7 @@ export function LandingDesign({
     // on an Android phone the tile downloads the .apk straight away; elsewhere it opens the QR
     toggleAnd: () =>
       os === 'and'
-        ? window.location.assign(
-            'https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.apk?alt=media&token=c19cae91-1c3f-4e4a-b8be-51aa4000072a',
-          )
+        ? window.location.assign(downloadUrl('android'))
         : patch({ andOpen: !st.andOpen, open: false }),
     // desktop installers make no sense on a phone, the .apk none on iOS, and iOS has no installer at all (it uses the web app)
     clsWin:
@@ -1571,10 +1570,7 @@ export function LandingDesign({
                 <div className={v.clsPdl}>
                   <div className="l-pdl-l l-fm">{T('get_l')}</div>
                   <div className="l-dls">
-                    <a
-                      className={v.clsWin}
-                      href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter-Setup.exe?alt=media&token=71d32b1f-0a72-486e-ae31-0b53e89112b6"
-                    >
+                    <a className={v.clsWin} href={downloadUrl('win')}>
                       <svg className="l-ic" viewBox="0 0 18 18" aria-hidden="true">
                         <path
                           fill="currentColor"
@@ -1584,10 +1580,7 @@ export function LandingDesign({
                       <span>Windows</span>
                       <small>.exe ↓</small>
                     </a>{' '}
-                    <a
-                      className={v.clsMac}
-                      href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.dmg?alt=media&token=2e3166d6-ff38-4b68-9b84-6081b9b96e90"
-                    >
+                    <a className={v.clsMac} href={downloadUrl('mac')}>
                       <svg className="l-ic" viewBox="0 0 24 24" aria-hidden="true">
                         <path
                           fill="currentColor"
@@ -1626,10 +1619,7 @@ export function LandingDesign({
                       <span>Android</span>
                       <small>{v.andSmall}</small>
                     </button>{' '}
-                    <a
-                      className="l-dl l-and-direct"
-                      href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.apk?alt=media&token=c19cae91-1c3f-4e4a-b8be-51aa4000072a"
-                    >
+                    <a className="l-dl l-and-direct" href={downloadUrl('android')}>
                       <svg className="l-ic" viewBox="0 0 24 24" aria-hidden="true">
                         <g fill="currentColor">
                           <path
@@ -1674,10 +1664,7 @@ export function LandingDesign({
                       </div>
                       <div>
                         <div className="l-qrt">{T('and_scan')}</div>
-                        <a
-                          className="l-qrl"
-                          href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.apk?alt=media&token=c19cae91-1c3f-4e4a-b8be-51aa4000072a"
-                        >
+                        <a className="l-qrl" href={downloadUrl('android')}>
                           {T('and_dl')} ↓
                         </a>
                       </div>
@@ -4273,10 +4260,7 @@ export function LandingDesign({
               <div className={v.clsPdl}>
                 <div className="l-pdl-l l-fm">{T('get_l')}</div>
                 <div className="l-dls">
-                  <a
-                    className={v.clsWin}
-                    href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter-Setup.exe?alt=media&token=71d32b1f-0a72-486e-ae31-0b53e89112b6"
-                  >
+                  <a className={v.clsWin} href={downloadUrl('win')}>
                     <svg className="l-ic" viewBox="0 0 18 18" aria-hidden="true">
                       <path
                         fill="currentColor"
@@ -4286,10 +4270,7 @@ export function LandingDesign({
                     <span>Windows</span>
                     <small>.exe ↓</small>
                   </a>{' '}
-                  <a
-                    className={v.clsMac}
-                    href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.dmg?alt=media&token=2e3166d6-ff38-4b68-9b84-6081b9b96e90"
-                  >
+                  <a className={v.clsMac} href={downloadUrl('mac')}>
                     <svg className="l-ic" viewBox="0 0 24 24" aria-hidden="true">
                       <path
                         fill="currentColor"
@@ -4328,10 +4309,7 @@ export function LandingDesign({
                     <span>Android</span>
                     <small>{v.andSmall}</small>
                   </button>{' '}
-                  <a
-                    className="l-dl l-and-direct"
-                    href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.apk?alt=media&token=c19cae91-1c3f-4e4a-b8be-51aa4000072a"
-                  >
+                  <a className="l-dl l-and-direct" href={downloadUrl('android')}>
                     <svg className="l-ic" viewBox="0 0 24 24" aria-hidden="true">
                       <g fill="currentColor">
                         <path
@@ -4376,10 +4354,7 @@ export function LandingDesign({
                     </div>
                     <div>
                       <div className="l-qrt">{T('and_scan')}</div>
-                      <a
-                        className="l-qrl"
-                        href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.apk?alt=media&token=c19cae91-1c3f-4e4a-b8be-51aa4000072a"
-                      >
+                      <a className="l-qrl" href={downloadUrl('android')}>
                         {T('and_dl')} ↓
                       </a>
                     </div>
