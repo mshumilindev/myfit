@@ -1,0 +1,1339 @@
+/* The landing is a full-width page; the app shell is a 640px column. */
+.app.app-landing {
+  max-width: none;
+  overflow-y: auto;
+  overflow-x: clip;
+}
+/* Sign-in form inside the design's hero panel: the app's AuthView restyled to the design's form. */
+.ld .ld-auth .auth-body {
+  display: block;
+  min-height: 0;
+  padding: 0;
+  background: none;
+}
+.ld .ld-auth .auth-card {
+  width: 100%;
+  gap: 0;
+}
+.ld .ld-auth .auth-lang,
+.ld .ld-auth .wordmark,
+.ld .ld-auth .auth-title,
+.ld .ld-auth .auth-sub,
+.ld .ld-auth .auth-visual {
+  display: none;
+}
+.ld .ld-auth-h {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+}
+/* "Get the app" is the twin of "Sign in": the same heading, not a small caption. */
+.ld .l-pdl-l {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: #f1efe9;
+  margin-bottom: 14px;
+}
+.ld .ld-auth .field,
+.ld .ld-auth .auth-card > * + * {
+  margin-top: 12px;
+}
+.ld .ld-auth .auth-card .input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid #4a4030;
+  background: #131416;
+  color: #ecebe7;
+  font: inherit;
+  font-size: 15px;
+}
+.ld .ld-auth .auth-card .btn,
+.ld .ld-auth .auth-card button[type='submit'] {
+  width: 100%;
+  height: 44px !important;
+  min-height: 44px !important;
+  margin-top: 12px !important;
+  border: 0;
+  border-radius: 12px;
+  background: #d9a24f;
+  color: #1e160b;
+  font-weight: 700;
+  font-size: 15px;
+}
+.ld .ld-auth .footer-link {
+  font-size: 13px;
+  color: #a9a69e;
+  margin: 12px 0 0;
+  text-align: left;
+}
+.app.app-landing > .ld {
+  width: 100%;
+  flex: 0 0 auto;
+  align-self: stretch;
+}
+/* Every screen is exactly as tall as the window (dynamic dvh, never a fixed pixel height). */
+.ld .l-hero,
+.ld .l-sc {
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* The content scales to fit the screen's height (see useFitScreens); the width limit grows back by the same factor. */
+.ld .l-wrap {
+  max-width: calc(1300px / var(--fz, 1));
+}
+.ld .l-sc {
+  padding-block: clamp(20px, 5dvh, 96px);
+}
+.ld .l-tt-wrap {
+  height: min(787px, 72dvh) !important;
+}
+.ld .l-xr-box {
+  /* width follows the height so the figure's aspect (537.6 : 1358) is kept */
+  width: calc(min(919px, 76dvh) * 0.3959) !important;
+  height: auto;
+  max-width: 100%;
+}
+.ld .l-pband {
+  margin-top: clamp(16px, 4dvh, 80px);
+}
+
+/* The body turntable is square by design: size it by the frame's height and centre it. */
+.ld .l-tt-wrap .l-tt-body .uiturn {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 100%;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+}
+.ld .l-tt-wrap .uiturn-stage {
+  height: 100%;
+  width: auto;
+  aspect-ratio: 1;
+  border-radius: 0;
+}
+
+/* Invite panel (personalised step 0) in the hero card. */
+.ld .ld-inv-by {
+  font-size: 13px;
+  color: #a9a69e;
+}
+.ld .ld-inv-by b {
+  color: #ecebe7;
+}
+.ld .ld-inv-h {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1.15;
+  margin-top: 8px;
+}
+.ld .ld-inv-steps {
+  font-size: 13px;
+  color: #a9a69e;
+  margin-top: 12px;
+}
+.ld .ld-inv-btn {
+  width: 100%;
+  height: 52px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 12px;
+  background: #d9a24f;
+  color: #1e160b;
+  font: inherit;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+}
+/* The hero spotlight wanders, but stays on screen. */
+@keyframes ld-hbx {
+  0%,
+  100% {
+    translate: -2.5% 0;
+  }
+  14% {
+    translate: 2.5% 0;
+  }
+  28% {
+    translate: -6% 0;
+  }
+  47% {
+    translate: 6% 0;
+  }
+  63% {
+    translate: -1.7% 0;
+  }
+  79% {
+    translate: 4.2% 0;
+  }
+}
+@keyframes ld-hby {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  18% {
+    transform: translateY(-5.1%);
+  }
+  37% {
+    transform: translateY(3.4%);
+  }
+  55% {
+    transform: translateY(-1.7%);
+  }
+  74% {
+    transform: translateY(5.1%);
+  }
+  88% {
+    transform: translateY(-3.4%);
+  }
+}
+/* "Create a shortcut" is for phones and tablets in a browser (the installed app and the desktop shell hide it themselves); not for desktop systems. */
+.ld #top[data-os='win'] .ld-auth .auth-install-btn,
+.ld #top[data-os='mac'] .ld-auth .auth-install-btn {
+  display: none;
+}
+
+/* The design's beam period is long; keep it slow but visibly alive. */
+.ld .l-hs-beam {
+  animation-duration: 25.3s, 16s;
+}
+/* The answer's caret never wraps to a line of its own (it would leave a blank line in the bubble). */
+.ld .l-caret {
+  margin-right: -12px;
+}
+/* X-ray: muscles below the scan line, bare skeleton above it; the skeleton alone is held in the middle. */
+@keyframes ld-cut {
+  0%,
+  8% {
+    clip-path: inset(0 0 100% 0);
+  }
+  38%,
+  62% {
+    clip-path: inset(0 0 0% 0);
+  }
+  92%,
+  100% {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+@keyframes ld-cutm {
+  0%,
+  8% {
+    clip-path: inset(0 0 0 0);
+  }
+  38%,
+  62% {
+    clip-path: inset(100% 0 0 0);
+  }
+  92%,
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes ld-lnscan {
+  0%,
+  8% {
+    top: 0;
+    opacity: 1;
+  }
+  38% {
+    top: 100%;
+    opacity: 1;
+  }
+  44%,
+  56% {
+    top: 100%;
+    opacity: 0;
+  }
+  62% {
+    top: 100%;
+    opacity: 1;
+  }
+  92%,
+  100% {
+    top: 0;
+    opacity: 1;
+  }
+}
+.ld .l-xr-bn,
+.ld .l-xr-mu,
+.ld .l-xr-ln {
+  animation-timing-function: ease-in-out;
+}
+.ld .l-xr-mu {
+  animation: ld-cutm 7s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ld .l-xr-mu {
+    clip-path: inset(50% 0 0 0);
+  }
+}
+/* Last screen: the same two-column plate as the first one - sign-in on the left, downloads on the right. */
+.ld .l-cta-panel {
+  width: min(860px, 100%);
+  margin: 32px auto 0;
+  text-align: left;
+}
+.ld .l-cta .l-cta-panel .l-dls {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  margin-top: 0;
+}
+.ld .l-cta .l-cta-panel .l-dl {
+  flex: none;
+  max-width: none;
+}
+.ld .l-cta .l-cta-panel > .l-qrp {
+  max-width: none;
+  margin: 0;
+}
+/* Kaushan Script sits low in its line box: lift the wordmark to the logo's centre line. */
+.ld .l-brand .l-word {
+  transform: translateY(-3px);
+}
+/* Readability: cards sit on solid plates, and the background art is quieter and never gets oversized. */
+.ld .l-fts li {
+  background: #1b1c20;
+}
+.ld .l-ai-c {
+  background: #202125;
+}
+.ld .l-b-a {
+  background: #2d2820;
+}
+.ld .l-bgx {
+  opacity: 0.5;
+}
+.ld .l-bgs {
+  /* The layer drifts, tilts and scales with the scroll: taller than the screen, so its edge never shows. */
+  inset: -16% -6%;
+}
+.ld .l-bgs svg {
+  inset: auto;
+  top: 0;
+  left: 50%;
+  width: min(100%, 1500px);
+  height: 100%;
+  transform: translateX(-50%);
+}
+/* The scanned skeleton reads as an X-ray: cool, luminous bone on the dark glass. */
+.ld .l-xr-bf {
+  filter: url(#ld-xray) contrast(1.08) drop-shadow(0 0 18px rgba(80, 190, 255, 0.55));
+  will-change: transform;
+}
+.ld .l-xr-mu {
+  will-change: clip-path;
+}
+/* A static glow behind the figure (a filter over the animated layers would be redone every frame). */
+.ld .l-xr-glow {
+  position: absolute;
+  inset: -8% -60%;
+  background: radial-gradient(closest-side, rgba(217, 162, 79, 0.22), rgba(217, 162, 79, 0) 100%);
+  pointer-events: none;
+}
+.ld .l-tt-body {
+  contain: layout paint;
+}
+.ld .l-hs-beam {
+  will-change: translate, transform;
+}
+/* "Everywhere": every device of the picture stays in view whatever the window's shape. */
+.ld #s-all .l-bgs svg {
+  width: auto;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 100%;
+}
+/* The cards lean towards the pointer like the 3D stage on the first screens, turned towards the
+   middle of the page from whichever side they stand on (--s is +1 on the left, -1 on the right). */
+.ld .l-tilt > .l-card,
+.ld .l-tilt > .l-pcard,
+.ld .l-tilt > .l-rcard,
+.ld .l-tilt > .l-chat {
+  transform: perspective(1400px) rotateX(calc(3deg + var(--ty, 0) * -14deg))
+    rotateY(calc(var(--s, 1) * 6deg + var(--tx, 0) * 20deg));
+  transition: transform 0.18s ease-out;
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .ld .l-tilt > .l-card,
+  .ld .l-tilt > .l-pcard,
+  .ld .l-tilt > .l-rcard,
+  .ld .l-tilt > .l-chat {
+    transform: none;
+  }
+}
+
+/* Pointer-driven positions come from CSS variables set on the screen (no re-render on every move). */
+.ld .l-bgx {
+  --bx: calc(var(--tx, 0) * -22px);
+  --by: calc(var(--ty, 0) * -14px);
+}
+.ld .l-s3d {
+  --rx: calc(8deg - var(--ty, 0) * 16deg);
+  --ry: calc(-16deg + var(--tx, 0) * 28deg);
+}
+/* Screens away from the current one stand still. */
+.ld .l-idle *,
+.ld .l-idle *::before,
+.ld .l-idle *::after {
+  animation-play-state: paused !important;
+}
+/* The progress line runs between the first and the last step only, so it reaches each step as it lights. */
+.ld .l-ph-list {
+  position: relative;
+}
+/* Atlas' answers appear whole (no typed-out reveal): opacity + transform only, cheap to animate. */
+@keyframes ld-aia1 {
+  0%,
+  24% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  27%,
+  91.7% {
+    opacity: 1;
+    transform: none;
+  }
+  97%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+@keyframes ld-aia2 {
+  0%,
+  64.5% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  67.5%,
+  91.7% {
+    opacity: 1;
+    transform: none;
+  }
+  97%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+.ld .l-caret {
+  display: none;
+}
+
+/* The barbell in the background strips its plates (outermost first) and loads them back (innermost first). */
+@keyframes ld-pl0 {
+  0%,
+  29% {
+    transform: none;
+    opacity: 1;
+  }
+  35%,
+  45% {
+    transform: translateX(calc(var(--dir) * 330px));
+    opacity: 0;
+  }
+  51%,
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+.ld .l-pl-0 {
+  animation: ld-pl0 13s ease-in-out infinite;
+}
+@keyframes ld-pl1 {
+  0%,
+  22% {
+    transform: none;
+    opacity: 1;
+  }
+  28%,
+  52% {
+    transform: translateX(calc(var(--dir) * 330px));
+    opacity: 0;
+  }
+  58%,
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+.ld .l-pl-1 {
+  animation: ld-pl1 13s ease-in-out infinite;
+}
+@keyframes ld-pl2 {
+  0%,
+  15% {
+    transform: none;
+    opacity: 1;
+  }
+  21%,
+  59% {
+    transform: translateX(calc(var(--dir) * 330px));
+    opacity: 0;
+  }
+  65%,
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+.ld .l-pl-2 {
+  animation: ld-pl2 13s ease-in-out infinite;
+}
+@keyframes ld-pl3 {
+  0%,
+  8% {
+    transform: none;
+    opacity: 1;
+  }
+  14%,
+  66% {
+    transform: translateX(calc(var(--dir) * 330px));
+    opacity: 0;
+  }
+  72%,
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+.ld .l-pl-3 {
+  animation: ld-pl3 13s ease-in-out infinite;
+}
+.ld .l-pl-l {
+  --dir: -1;
+}
+.ld .l-pl-r {
+  --dir: 1;
+}
+
+/* Inputs draw their focus ring on the rounded field box; the page-wide square outline on the inner <input> broke it. */
+.ld .ld-auth input:focus-visible,
+.ld .ld-auth .input:focus-visible {
+  outline: none;
+}
+
+/* The comeback background keeps the clock of the phase list: node k lights in the very frame phase k+1 is ticked. */
+.ld .l-rn,
+.ld .l-rw {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes ld-rn0 {
+  0%,
+  9% {
+    opacity: 0.25;
+    transform: none;
+  }
+  10% {
+    opacity: 1;
+    transform: scale(1.9);
+  }
+  16%,
+  95% {
+    opacity: 0.95;
+    transform: none;
+  }
+  99%,
+  100% {
+    opacity: 0.25;
+    transform: none;
+  }
+}
+@keyframes ld-rw0 {
+  0%,
+  10% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  11% {
+    opacity: 0.55;
+    transform: scale(0.4);
+  }
+  26%,
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+.ld .l-rn0 {
+  animation: ld-rn0 14s linear infinite;
+}
+.ld .l-rw0 {
+  animation: ld-rw0 14s linear infinite;
+}
+@keyframes ld-rn1 {
+  0%,
+  31% {
+    opacity: 0.25;
+    transform: none;
+  }
+  32% {
+    opacity: 1;
+    transform: scale(1.9);
+  }
+  38%,
+  95% {
+    opacity: 0.95;
+    transform: none;
+  }
+  99%,
+  100% {
+    opacity: 0.25;
+    transform: none;
+  }
+}
+@keyframes ld-rw1 {
+  0%,
+  32% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  33% {
+    opacity: 0.55;
+    transform: scale(0.4);
+  }
+  48%,
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+.ld .l-rn1 {
+  animation: ld-rn1 14s linear infinite;
+}
+.ld .l-rw1 {
+  animation: ld-rw1 14s linear infinite;
+}
+@keyframes ld-rn2 {
+  0%,
+  53% {
+    opacity: 0.25;
+    transform: none;
+  }
+  54% {
+    opacity: 1;
+    transform: scale(1.9);
+  }
+  60%,
+  95% {
+    opacity: 0.95;
+    transform: none;
+  }
+  99%,
+  100% {
+    opacity: 0.25;
+    transform: none;
+  }
+}
+@keyframes ld-rw2 {
+  0%,
+  54% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  55% {
+    opacity: 0.55;
+    transform: scale(0.4);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+.ld .l-rn2 {
+  animation: ld-rn2 14s linear infinite;
+}
+.ld .l-rw2 {
+  animation: ld-rw2 14s linear infinite;
+}
+@keyframes ld-rn3 {
+  0%,
+  75% {
+    opacity: 0.25;
+    transform: none;
+  }
+  76% {
+    opacity: 1;
+    transform: scale(1.9);
+  }
+  82%,
+  95% {
+    opacity: 0.95;
+    transform: none;
+  }
+  99%,
+  100% {
+    opacity: 0.25;
+    transform: none;
+  }
+}
+@keyframes ld-rw3 {
+  0%,
+  76% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  77% {
+    opacity: 0.55;
+    transform: scale(0.4);
+  }
+  92%,
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+.ld .l-rn3 {
+  animation: ld-rn3 14s linear infinite;
+}
+.ld .l-rw3 {
+  animation: ld-rw3 14s linear infinite;
+}
+@keyframes ld-rdot {
+  0% {
+    opacity: 1;
+    transform: translate(110px, 810px);
+  }
+  10% {
+    transform: translate(330px, 720px);
+  }
+  32% {
+    transform: translate(480px, 580px);
+  }
+  54% {
+    transform: translate(640px, 430px);
+  }
+  76% {
+    transform: translate(800px, 290px);
+  }
+  95% {
+    opacity: 1;
+    transform: translate(800px, 290px);
+  }
+  99%,
+  100% {
+    opacity: 0;
+    transform: translate(800px, 290px);
+  }
+}
+.ld .l-rdot {
+  animation: ld-rdot 14s linear infinite;
+}
+
+/* Last screen: no photographs (the two shots are kept in public/landing, unused). */
+.ld .l-getimgs {
+  display: none;
+}
+
+/* Download tiles: the ring runs all the way round and rests full for a beat before it gives way to the tick. */
+@keyframes ld-dla2 {
+  0%,
+  46% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+  54%,
+  100% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes ld-dlr2 {
+  0% {
+    stroke-dashoffset: var(--C);
+    opacity: 1;
+  }
+  46%,
+  58% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  64%,
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+@keyframes ld-dlc2 {
+  0%,
+  58% {
+    opacity: 0;
+  }
+  66%,
+  92% {
+    opacity: 1;
+  }
+  98%,
+  100% {
+    opacity: 0;
+  }
+}
+.ld .l-dla {
+  animation-name: ld-dla2;
+}
+.ld .l-dlr {
+  animation-name: ld-dlr2;
+}
+.ld .l-dlc {
+  animation-name: ld-dlc2;
+}
+
+/* Sign in: the button and the fields measure the same (full width, 44px, 15px), so show the fields' edge too
+   and give the label the field text's weight; the filled gold button no longer reads as the bigger one. */
+.ld .ld-auth .uifield-box {
+  box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.28);
+  background: #131416;
+}
+.ld .ld-auth .uifield-box:focus-within {
+  box-shadow:
+    inset 0 0 0 1px #d9a24f,
+    0 0 0 3px rgba(217, 162, 79, 0.18);
+}
+.ld .ld-auth .uibtn--primary {
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* Download tiles of the last screen turn up on a different tile each cycle; the tile fades in and out with the cycle so it never jumps. */
+@keyframes ld-dlg {
+  0% {
+    opacity: 0;
+  }
+  4%,
+  94% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.ld .l-dlg {
+  animation: ld-dlg 8s linear infinite;
+}
+
+/* "The trainer" calendar fills the screen; a day is marked now and then - ticked (done), crossed (missed) or set aside (rest). */
+.ld #s-prog .l-bgs svg {
+  left: 0;
+  width: 100%;
+  transform: none;
+}
+@keyframes ld-cmg {
+  0%,
+  3% {
+    opacity: 0;
+  }
+  9%,
+  88% {
+    opacity: 1;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes ld-cmp {
+  0%,
+  11% {
+    stroke-dashoffset: 1;
+  }
+  27%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes ld-cmr {
+  0%,
+  8% {
+    transform: scale(0.9);
+  }
+  14% {
+    transform: scale(1.05);
+  }
+  20%,
+  100% {
+    transform: none;
+  }
+}
+@keyframes ld-cmshake {
+  0%,
+  26% {
+    transform: none;
+  }
+  29% {
+    transform: translateX(-3px);
+  }
+  32% {
+    transform: translateX(3px);
+  }
+  35% {
+    transform: translateX(-2px);
+  }
+  38%,
+  100% {
+    transform: none;
+  }
+}
+.ld .l-cmg {
+  opacity: 0;
+  animation: ld-cmg 10s linear infinite;
+}
+.ld .l-cmr,
+.ld .l-cmp {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ld .l-cmr {
+  animation: ld-cmr 10s ease-out infinite;
+  animation-duration: inherit;
+  animation-delay: inherit;
+}
+.ld .l-cmp {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: ld-cmp 10s ease-out infinite;
+}
+.ld .l-cmr-missed {
+  animation-name: ld-cmshake;
+}
+
+/* The pulse behind "The rest timer" runs from edge to edge of the screen (the generic background-svg cap must not shrink it). */
+.ld .l-ecgbg svg {
+  position: absolute;
+  inset: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: none;
+}
+
+/* No rule between the first and the second screen. */
+.ld #s-log {
+  border-top: 0;
+}
+
+/* Barbell plates in the background are colour-coded like competition plates: 25 red, 20 blue, 15 yellow, 10 green. */
+.ld .l-pl-0 {
+  --pc: 226, 86, 79;
+}
+.ld .l-pl-1 {
+  --pc: 61, 127, 217;
+}
+.ld .l-pl-2 {
+  --pc: 224, 185, 63;
+}
+.ld .l-pl-3 {
+  --pc: 76, 190, 140;
+}
+@keyframes ld-plf2 {
+  0%,
+  100% {
+    fill: rgba(var(--pc), 0.05);
+    stroke-opacity: 0.35;
+  }
+  40% {
+    fill: rgba(var(--pc), 0.22);
+    stroke-opacity: 0.75;
+  }
+  55% {
+    fill: rgba(var(--pc), 0.09);
+    stroke-opacity: 0.5;
+  }
+}
+.ld .l-pl .l-plt {
+  stroke: rgb(var(--pc));
+  animation-name: ld-plf2;
+}
+.ld .l-pl line {
+  stroke: rgb(var(--pc));
+}
+
+/* The Atlas background network (one canvas). */
+.ld .l-net {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Recovery background: the row nearest the pointer turns x-ray blue. */
+.ld #s-rec .l-bgs svg .l-st,
+.ld #s-rec .l-bgs svg .l-mbar {
+  transition:
+    stroke 0.3s ease,
+    fill 0.3s ease;
+}
+.ld #s-rec .l-bgs svg .l-hot {
+  stroke: #6fc4ff !important;
+}
+.ld #s-rec .l-bgs svg .l-mbar.l-hot {
+  fill: rgba(80, 175, 255, 0.22) !important;
+}
+.ld #s-rec .l-bgs svg .l-hot.l-arc {
+  stroke: #9fdcff !important;
+}
+
+/* Trainer background calendar: hover lights the tile under the pointer; a click ticks it off as done. */
+.ld #s-prog .l-ct {
+  transition:
+    stroke 0.25s ease,
+    fill 0.25s ease,
+    opacity 0.25s ease;
+}
+.ld #s-prog .l-ct.l-hot {
+  stroke: #6fc4ff !important;
+  fill: rgba(80, 175, 255, 0.16) !important;
+  opacity: 1 !important;
+}
+.ld #s-prog .l-cdone rect {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ld-cdpop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+.ld #s-prog .l-cdone path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: ld-cddraw 0.4s 0.12s ease-out forwards;
+}
+@keyframes ld-cdpop {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes ld-cddraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ld #s-prog .l-cdone rect,
+  .ld #s-prog .l-cdone path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The rest-timer pulse is a canvas now (it draws its own glow). */
+.ld .l-ecgbg {
+  filter: none;
+}
+.ld .l-ecgbg .l-ecgc {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Ticks the visitor sets fade away on their own after a few seconds. */
+.ld #s-prog .l-cdone {
+  animation: ld-cdlife 7s linear both;
+}
+@keyframes ld-cdlife {
+  0%,
+  86% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The last screen's tile grid fills the whole screen: full-width svg that may draw past its own box (extra tiles are added around the grid). */
+.ld #s-get .l-bgs svg {
+  left: 0;
+  width: 100%;
+  transform: none;
+  overflow: visible;
+}
+
+/* "Everywhere" (final): the picture sits in a box the size of the screen (minus a margin) and is scaled to fit it whole — no drift, no cropping. */
+.ld #s-all .l-bgs {
+  inset: 3% 2%;
+  animation: none;
+}
+.ld #s-all .l-bgs svg {
+  position: absolute;
+  inset: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  aspect-ratio: auto;
+  transform: none;
+}
+
+/* The barbell starts bare and the plates go on first (innermost first); stripping comes later in the loop. */
+.ld .l-pl-0,
+.ld .l-pl-1,
+.ld .l-pl-2,
+.ld .l-pl-3 {
+  animation-delay: -5.2s;
+}
+
+/* One resting tilt for every card stack (a little, towards the middle of the page); the pointer adds to it. */
+.ld .l-s3d {
+  --rx: calc(3deg - var(--ty, 0) * 16deg);
+  --ry: calc(-6deg + var(--tx, 0) * 28deg);
+}
+
+/* Nothing on the landing page is selectable text (fields stay editable). */
+.ld,
+.ld * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.ld input,
+.ld textarea,
+.ld [contenteditable='true'] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* "Everywhere": a device, the server and the other devices turn blue one after another and fade back smoothly. */
+.ld #s-all .l-bgs svg > g:not(.l-ev) {
+  transition: filter 0.7s ease;
+}
+.ld #s-all .l-bgs svg > g * {
+  transition:
+    stroke 0.7s ease,
+    fill 0.7s ease;
+}
+.ld #s-all .l-bgs svg > g.l-hot * {
+  stroke: #6fc4ff !important;
+}
+.ld #s-all .l-bgs svg > g.l-hot {
+  filter: drop-shadow(0 0 6px rgba(90, 185, 255, 0.45));
+}
+.ld #s-all .l-bgs svg > path.l-flow {
+  transition:
+    stroke 0.7s ease,
+    stroke-opacity 0.7s ease;
+}
+.ld #s-all .l-bgs svg > path.l-flow.l-hot {
+  stroke: #6fc4ff !important;
+  stroke-opacity: 1 !important;
+}
+.ld #s-all .l-ev {
+  pointer-events: none;
+}
+
+/* "Everywhere" colour coding: the pointed-at device and its line are green, what the signal reaches is blue; the ambient dots rest meanwhile. */
+.ld #s-all .l-bgs svg > g.l-hot2 * {
+  stroke: #5fe08a !important;
+}
+.ld #s-all .l-bgs svg > g.l-hot2 {
+  filter: drop-shadow(0 0 6px rgba(95, 224, 138, 0.5));
+}
+.ld #s-all .l-bgs svg > path.l-flow.l-hot2 {
+  stroke: #5fe08a !important;
+  stroke-opacity: 1 !important;
+  transition:
+    stroke 0.7s ease,
+    stroke-opacity 0.7s ease;
+}
+.ld #s-all .l-bgs svg > circle.l-sd {
+  transition: opacity 0.3s ease;
+}
+.ld #s-all .l-bgs svg.l-evon > circle.l-sd {
+  opacity: 0;
+}
+
+/* Hero spotlight: the beam box is the screen itself (not a wide strip), and its centre wanders over the whole of it; sizes follow both width and height, so any window shape works. */
+@property --sx {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 50%;
+}
+@property --sy {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 48%;
+}
+@keyframes ld-sx {
+  0%,
+  100% {
+    --sx: 50%;
+  }
+  14% {
+    --sx: 18%;
+  }
+  28% {
+    --sx: 88%;
+  }
+  47% {
+    --sx: 8%;
+  }
+  63% {
+    --sx: 72%;
+  }
+  79% {
+    --sx: 34%;
+  }
+}
+@keyframes ld-sy {
+  0%,
+  100% {
+    --sy: 46%;
+  }
+  18% {
+    --sy: 16%;
+  }
+  37% {
+    --sy: 84%;
+  }
+  55% {
+    --sy: 30%;
+  }
+  74% {
+    --sy: 88%;
+  }
+  88% {
+    --sy: 58%;
+  }
+}
+.ld .l-hs-beam {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  translate: none;
+  transform: none;
+  will-change: auto;
+  background:
+    radial-gradient(
+      circle max(15cqw, 28vh) at var(--sx) var(--sy),
+      rgba(10, 10, 12, 0) 0,
+      rgba(10, 10, 12, 0.01) 12%,
+      rgba(10, 10, 12, 0.04) 28%,
+      rgba(10, 10, 12, 0.12) 45%,
+      rgba(10, 10, 12, 0.26) 62%,
+      rgba(10, 10, 12, 0.42) 80%,
+      rgba(10, 10, 12, 0.55) 100%
+    ),
+    radial-gradient(
+      circle max(36cqw, 66vh) at var(--sx) var(--sy),
+      rgba(10, 10, 12, 0) 0,
+      rgba(10, 10, 12, 0.05) 25%,
+      rgba(10, 10, 12, 0.28) 45%,
+      rgba(10, 10, 12, 0.6) 65%,
+      rgba(10, 10, 12, 0.85) 85%,
+      rgba(10, 10, 12, 0.94) 100%
+    );
+  animation:
+    ld-sx 25.3s ease-in-out infinite,
+    ld-sy 16s ease-in-out infinite;
+}
+.ld .l-hs-glow {
+  left: var(--sx);
+  top: var(--sy);
+  width: max(22cqw, 40vh);
+  height: max(22cqw, 40vh);
+}
+
+/* Phones: no desktop installers; iOS gets no download block at all (it uses the web app). */
+.ld .l-nomob {
+  display: none !important;
+}
+.ld .l-panel:has(> .l-pdl.l-nomob) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Inside the installed app (PWA or desktop shell) the Windows and macOS installers are pointless; Android stays. */
+.ld #top[data-shell='app'] .l-noapp {
+  display: none !important;
+}
+
+/* First screen: the header (logo + language) sits at the very top, the rest is centred in the space below it. */
+.ld .l-hero {
+  justify-content: flex-start;
+}
+.ld .l-hero > .l-wrap {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.ld .l-hero .l-hero-grid {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* Narrow first screen: header on top, the texts centred in the middle, the form at the very bottom. */
+@container pg (max-width: 1000px) {
+  .ld .l-hero .l-hero-grid {
+    flex: 1 1 auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: 24px;
+  }
+  .ld .l-hero .l-hero-copy {
+    align-self: center;
+    text-align: center;
+  }
+  .ld .l-hero .l-hsub {
+    margin-inline: auto;
+  }
+}
+
+/* Illustrated backgrounds: a square box centred on the screen, sized by useFitScreens so the artwork always fits and fills the screen. */
+.ld #s-log .l-bgs svg,
+.ld #s-rec .l-bgs svg,
+.ld #s-pro .l-bgs svg,
+.ld #s-ret .l-bgs svg {
+  left: 50%;
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  width: var(--bs, 1500px);
+  height: var(--bs, 1500px);
+  max-width: none;
+  aspect-ratio: auto;
+  transform: translate(-50%, -50%);
+  overflow: visible;
+}
+
+/* Last screen on a narrow window: texts centred in the free space, the form at the very bottom. */
+@container pg (max-width: 1000px) {
+  .ld #s-get > .l-wrap {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+  }
+  .ld #s-get .l-kk {
+    margin-top: auto;
+  }
+  .ld #s-get .l-cta-panel {
+    margin-top: auto;
+    text-align: left;
+  }
+}

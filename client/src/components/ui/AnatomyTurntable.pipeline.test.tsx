@@ -59,6 +59,30 @@ afterEach(() => {
 });
 
 describe('AnatomyTurntable frame pipeline (faked canvas)', () => {
+  it('baked frames: one picture per step is fetched, no layers are decoded or composed', async () => {
+    const urls: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (u: string) => {
+        urls.push(u);
+        return { ok: true, blob: async () => new Blob(['x']) } as unknown as Response;
+      }),
+    );
+    const AnatomyTurntable = await load();
+    render(
+      <AnatomyTurntable
+        label="Body"
+        camera={camera}
+        baked={{ url: (d) => `/frames/${d}.webp`, step: 30 }}
+      />,
+    );
+    await waitFor(() => expect(urls.length).toBe(12));
+    expect(urls.every((u) => /\/frames\/\d+\.webp$/.test(u))).toBe(true);
+    expect(new Set(urls).size).toBe(12);
+    expect(requested).toHaveLength(0);
+    await waitFor(() => expect(drawn).toHaveBeenCalled());
+  });
+
   it('decodes the layer pictures, builds bitmaps and paints the visible canvas', async () => {
     const AnatomyTurntable = await load();
     render(<AnatomyTurntable label="Spine" camera={camera} />);

@@ -20,10 +20,14 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
+/** The public landing page is its own design (docs/adr/006-landing-outside-kit.md), not an app screen. */
+const LANDING = join('views', 'landing');
+
 const files = walk(SRC).filter(
   (f) =>
     !relative(SRC, f).startsWith(join('components', 'ui')) &&
-    !relative(SRC, f).startsWith('stories'),
+    !relative(SRC, f).startsWith('stories') &&
+    !relative(SRC, f).startsWith(LANDING),
 );
 
 /** Strip comments so prose mentioning `<button>` does not trip the check. */
@@ -112,7 +116,7 @@ function decls(f: string): string[] {
   const text = readFileSync(f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   return text.split('\n').filter((l) => !/^\s*--[\w-]+\s*:/.test(l));
 }
-const css = cssFiles(SRC);
+const css = cssFiles(SRC).filter((f) => !relative(SRC, f).startsWith(LANDING));
 
 describe('token guard', () => {
   const scan = (re: RegExp, skip: (f: string) => boolean = () => false) => {

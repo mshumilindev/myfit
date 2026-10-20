@@ -126,13 +126,12 @@ function OnbLandingSkeleton() {
   );
 }
 
-export function OnboardingView({
-  token,
-  onDone,
-}: {
+export function OnboardingView(props: {
   token: string;
   onDone: (workoutId?: string) => void;
+  skipLanding?: boolean;
 }) {
+  const { token, onDone, skipLanding = false } = props;
   const { t, locale } = useT();
   const [info, setInfo] = useState<InviteInfo | null | 'error'>(null);
   const saved = useMemo(() => loadResume(token), [token]);
@@ -141,7 +140,7 @@ export function OnboardingView({
   // saved data still prefills the fields and the one-time claim below is never
   // re-run (the step-1 handler detects an existing account and just advances) —
   // so a half-finished invite reopens at step 0, not mid-flow.
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(skipLanding ? 1 : 0);
   const [firstName, setFirstName] = useState(saved?.firstName ?? savedName.firstName);
   const [lastName, setLastName] = useState(saved?.lastName ?? savedName.lastName);
   const [username, setUsername] = useState(saved?.username ?? '');
