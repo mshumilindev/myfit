@@ -1220,9 +1220,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           athleteName: s.athleteName,
         })
       : openClient(s.id);
-  // The Clients area lives in the People app.
+  // The Clients area lives in the Coach dashboard (People is the admin-only Users app, SPO-141).
   const allClients = () => {
-    setHash('#/people/clients');
+    setHash(coachHash({ screen: 'clients' }));
   };
   const renderAtlas = (ao: AtlasOpts): ReactNode => (
     <AtlasClientsBlock

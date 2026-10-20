@@ -1,14 +1,19 @@
 import { cleanup, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ShellLauncher } from './ShellLauncher';
 import type { StoreState } from '../store';
 
 afterEach(cleanup);
+// SPO-141: the Users tile is admin-only; these contracts are about every tile, so they run as an admin.
+vi.mock('../api', async (orig) => ({
+  ...(await orig<typeof import('../api')>()),
+  getRole: () => 'admin',
+}));
 
 type Current = 'gym' | 'apex' | 'roster' | 'nutrition' | 'learn';
 const CURRENTS: Current[] = ['gym', 'apex', 'roster', 'nutrition', 'learn'];
-/** Fixed identity tone of each app's row, whatever app is active. */
-const ROW_TONES = ['gym', 'apex', 'kcal', 'people', 'learn'];
+/** Fixed identity tone of each app's row, whatever app is active (an admin sees Users and Coach). */
+const ROW_TONES = ['gym', 'apex', 'kcal', 'people', 'coach', 'learn'];
 
 function tileClasses(current: Current): string[] {
   const noop = () => undefined;

@@ -1,42 +1,38 @@
 /**
  * People — the accounts & profiles app. A full-screen "sub-app" inside Spotter
- * with a graphite + silver skin, reusing the existing Trainer (clients), Admin
- * (users) and Profile views. The silver re-skin is pure CSS: the `.app-roster`
+ * with a graphite + silver skin, reusing the existing Admin (users) and Profile
+ * views. The silver re-skin is pure CSS: the `.app-roster`
  * wrapper overrides the accent tokens, so every reused view turns silver for
  * free. Chrome mirrors the Gym / Apex apps: a brand header (wordmark + bell) and
  * a bottom nav ending in Apps on phones, the shared icon rail on desktop.
  *
- * Which tabs show depends on role, matching the old in-Gym menu: a trainer sees
- * Clients + Me, an admin sees Users + Me, a member just Me.
+ * Two separate things share this chrome (SPO-141): Users (user management, admin only) and Me (the own
+ * profile & account, every role, reached from the avatar → Profile). They never mix in one nav. A non-admin
+ * who lands on `users` (typed URL, saved route) is redirected to Me and the admin view is never rendered.
  */
 import { SuiteTabBar } from '../components/SuiteTabBar';
 import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
 import { BrandBar, BellButton } from '../components/ui/BrandBar';
 import { BrandAccount } from '../components/suite/BrandAccount';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useT } from '../i18n';
 import type { Shell } from '../App';
 import { AppRail } from '../components/AppRail';
-import { TrainerView } from './TrainerView';
 import { AdminView } from './AdminView';
 import { ProfileView } from './ProfileView';
 import { NotificationsView } from './NotificationsView';
 import type { Notif, NotifState } from '../notifications';
 
-export type RosterTab = 'clients' | 'users' | 'me' | 'feed';
-type Role = 'trainer' | 'admin' | 'member';
+import { guardRosterTab, rosterHomeTab, rosterMode, type RosterRole } from './rosterAccess';
 
-/** The primary (non-feed) tab a given role lands on. */
-export function rosterHomeTab(role: Role): RosterTab {
-  if (role === 'trainer') return 'clients';
-  if (role === 'admin') return 'users';
-  return 'me';
-}
+export type { RosterTab } from './rosterAccess';
+import type { RosterTab } from './rosterAccess';
+type Role = RosterRole;
 
 export function RosterApp({
   role,
   now,
-  tab,
+  tab: rawTab,
   onTab,
   shell,
   onOpenShell,
@@ -63,12 +59,20 @@ export function RosterApp({
   // A specific person's profile, opened from the Clients / Users list.
   const [profileId, setProfileId] = useState<string | null>(null);
 
-  const appLabel = role === 'trainer' ? t.trClientsTab : role === 'admin' ? t.adminPeople : t.navMe;
+  // Defence in depth: whatever tab the router hands over, a non-admin never gets `users`.
+  const tab = guardRosterTab(rawTab, role);
+  useEffect(() => {
+    if (tab !== rawTab) onTab(tab);
+  }, [tab, rawTab, onTab]);
+  const mode = rosterMode(tab, role);
 
-  const nav: { id: RosterTab; icon: string; label: string }[] = [];
-  if (role === 'trainer') nav.push({ id: 'clients', icon: 'user-focus', label: t.trClientsTab });
-  if (role === 'admin') nav.push({ id: 'users', icon: 'shield-check', label: t.adminPeople });
-  nav.push({ id: 'me', icon: 'user', label: t.navMe });
+  const appLabel = mode === 'users' ? t.adminPeople : t.navMe;
+
+  // One item per screen: the admin's Users and everyone's Me are separate, never two tabs of one app.
+  const nav: { id: RosterTab; icon: string; label: string }[] =
+    mode === 'users'
+      ? [{ id: 'users', icon: 'shield-check', label: t.adminPeople }]
+      : [{ id: 'me', icon: 'user', label: t.navMe }];
 
   const openTab = (next: RosterTab) => {
     setProfileId(null);
@@ -129,11 +133,9 @@ export function RosterApp({
               embedded
               onClose={() => openTab(rosterHomeTab(role))}
             />
-          ) : tab === 'clients' ? (
-            <TrainerView onOpenProfile={setProfileId} onOpenMe={() => openTab('me')} />
-          ) : (
+          ) : tab === 'users' ? (
             <AdminView onOpenProfile={setProfileId} />
-          )}
+          ) : null}
         </div>
 
         {!desktop && (

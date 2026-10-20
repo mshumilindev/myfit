@@ -106,12 +106,8 @@ const gymItems = [
 ];
 const nutritionLabels = ['Today', 'History', 'Goal'];
 const learnLabels = ['Home', 'Topics', 'Saved'];
-const rosterNav = (r: typeof session.role) =>
-  r === 'trainer'
-    ? [t.trClientsTab, t.navMe]
-    : r === 'admin'
-      ? [t.adminPeople, t.navMe]
-      : [t.navMe];
+// SPO-141: Users is admin-only and never shares a nav with Me; trainer and member get Me alone.
+const rosterNav = (r: typeof session.role) => (r === 'admin' ? [t.adminPeople] : [t.navMe]);
 
 const CASES: Case[] = [
   {
@@ -196,7 +192,7 @@ function roster({ onShell, onProfile }: Cb) {
   return (
     <RosterApp
       role={session.role}
-      tab={session.role === 'member' ? 'me' : session.role === 'trainer' ? 'clients' : 'users'}
+      tab={session.role === 'admin' ? 'users' : 'me'}
       // People's Profile row is its "me" tab.
       onTab={(next) => next === 'me' && onProfile()}
       shell={{} as unknown as Shell}

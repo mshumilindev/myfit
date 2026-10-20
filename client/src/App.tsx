@@ -63,7 +63,15 @@ import { ShellLauncher } from './components/ShellLauncher';
 import { setSuiteSession } from './components/suite/suiteSession';
 import { watchSession } from './accounts/sessions';
 import type { ApexTab } from './views/ApexApp';
-import type { RosterTab } from './views/RosterApp';
+import type { RosterTab } from './views/rosterAccess';
+import {
+  ROSTER_TAB_IDS,
+  guardRosterTab,
+  isLegacyPeopleClients,
+  rosterHomeTab,
+  rosterMode,
+} from './views/rosterAccess';
+import { coachHash } from './coach/routes';
 import { canUseCoach, coachScreenOpen } from './coach/access';
 import type { HomeSetRoute } from './views/home/HomeSetView';
 import { pruneHomeSetDrafts } from './views/home/homeSetDraft';
@@ -331,23 +339,17 @@ type NavRole = ReturnType<typeof getRole>;
 type NavLabels = Pick<ReturnType<typeof useT>['t'], 'today' | 'overviewTab' | 'gyms'>;
 type NavItem = { id: Tab; icon: string; label: string; badge?: number; ariaLabel?: string };
 
-/** The People sub-app's label follows the role, matching the old in-Gym menu. */
-function peopleLabelFor(role: NavRole, t: ReturnType<typeof useT>['t']): string {
-  if (role === 'trainer') return t.trClientsTab;
-  if (role === 'admin') return t.adminPeople;
-  return t.navMe;
+/** The People sub-app is the admin-only Users app (SPO-141): its Shell tile exists for an admin only
+ *  (`canUsePeople`), and "Me" is a separate screen reached from the avatar → Profile. */
+function peopleLabelFor(t: ReturnType<typeof useT>['t']): string {
+  return t.adminPeople;
 }
-/** …and its Shell tile description, so each role sees what the app holds. */
-function peopleDescFor(role: NavRole, t: ReturnType<typeof useT>['t']): string {
-  if (role === 'trainer') return t.shellPeopleDescCoach;
-  if (role === 'admin') return t.shellPeopleDescAdmin;
-  return t.shellPeopleDesc;
+function peopleDescFor(t: ReturnType<typeof useT>['t']): string {
+  return t.shellPeopleDescAdmin;
 }
 /** The tab the People app opens on for a given role. */
 function rosterHomeFor(role: NavRole): RosterTab {
-  if (role === 'trainer') return 'clients';
-  if (role === 'admin') return 'users';
-  return 'me';
+  return rosterHomeTab(role);
 }
 
 function defaultTab(): Tab {
@@ -718,13 +720,15 @@ function apexHash(tab: ApexTab): string {
 }
 
 // --- People (accounts & profiles sub-app) is a full-screen mode at #/people[/<tab>].
-const ROSTER_TAB_IDS: readonly string[] = ['clients', 'users', 'me', 'feed'];
 function isRosterHash(hash: string): boolean {
   return hash.split('?')[0].replace(/^#\/?/, '').split('/')[0] === 'people';
 }
 function rosterTabFromHash(hash: string): RosterTab {
   const seg = hash.split('?')[0].replace(/^#\/?/, '').split('/')[1] ?? '';
-  return (ROSTER_TAB_IDS.includes(seg) ? seg : 'me') as RosterTab;
+  // `users` is admin-only: a typed or saved `/people/users` (or a retired `/people/clients`) never opens it for
+  // another role (SPO-141); the screen redirects the same way as a second line of defence.
+  const tab = (ROSTER_TAB_IDS.includes(seg) ? seg : 'me') as RosterTab;
+  return guardRosterTab(tab, getRole());
 }
 function rosterHash(tab: RosterTab): string {
   return `#/people/${tab}`;
@@ -903,6 +907,13 @@ export function App() {
 
   // Apex (gamification) is a full-screen mode; the Shell launcher switches apps.
   const activeChallengeCount = challenges.filter((c) => c.status === 'active').length;
+  // The retired People "Clients" address (bookmarks, old links) is rewritten before any state below reads the URL:
+  // trainers and admins land on Coach clients (SPO-141).
+  useState(() => {
+    if (isLegacyPeopleClients(currentHash()) && canUseCoach(getRole()))
+      replaceHash(coachHash({ screen: 'clients' }));
+    return null;
+  });
   const [apexOpen, setApexOpen] = useState<boolean>(() => isApexHash(currentHash()));
   const [apexTab, setApexTab] = useState<ApexTab>(() => apexTabFromHash(currentHash()));
   const [rosterOpen, setRosterOpen] = useState<boolean>(() => isRosterHash(currentHash()));
@@ -1226,6 +1237,9 @@ export function App() {
     const onPop = () => {
       setApexOpen(isApexHash(currentHash()));
       setApexTab(apexTabFromHash(currentHash()));
+      // A retired People "Clients" address reached while the app is running (pasted, Back to an old entry).
+      if (isLegacyPeopleClients(currentHash()) && canUseCoach(getRole()))
+        replaceHash(coachHash({ screen: 'clients' }));
       setRosterOpen(isRosterHash(currentHash()));
       setRosterTab(rosterTabFromHash(currentHash()));
       setNutritionOpen(isNutritionHash(currentHash()) && isFlagOn('nutrition'));
@@ -1374,8 +1388,8 @@ export function App() {
   // Suite switching: only one app owns the screen at a time.
   const rosterRole: 'trainer' | 'admin' | 'member' =
     role === 'trainer' ? 'trainer' : role === 'admin' ? 'admin' : 'member';
-  const peopleLabel = peopleLabelFor(role, t);
-  const peopleDesc = peopleDescFor(role, t);
+  const peopleLabel = peopleLabelFor(t);
+  const peopleDesc = peopleDescFor(t);
   // Switching apps always lands on that app's home screen — never the tab or
   // overlay you left behind. (Apex/Learn/Nutrition also reset their entry tab.)
   const openGym = () => {
@@ -1403,7 +1417,7 @@ export function App() {
     setApexOpen(false);
     setNutritionOpen(false);
     setLearnOpen(false);
-    setRosterTab(rtab);
+    setRosterTab(guardRosterTab(rtab, role));
     setRosterOpen(true);
   };
   const openNutrition = () => {
@@ -1560,14 +1574,16 @@ export function App() {
           <ShellLauncher
             store={store}
             now={notifNow}
-            current="roster"
+            current={rosterMode(rosterTab, role) === 'users' ? 'roster' : 'me'}
             peopleLabel={peopleLabel}
             peopleDesc={peopleDesc}
             activeChallenges={activeChallengeCount}
             notifUnread={notifUnread}
             onGym={openGym}
             onApex={openApex}
-            onRoster={() => setShellOpen(false)}
+            onRoster={() =>
+              rosterMode(rosterTab, role) === 'users' ? setShellOpen(false) : openRoster('users')
+            }
             onNutrition={openNutrition}
             nutritionEnabled={nutritionEnabled}
             onLearn={openLearn}

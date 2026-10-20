@@ -467,6 +467,7 @@ describe('TodayView: Atlas and clients', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Client0 Surname' }));
     expect(currentHash()).toBe('#/c/clients/c0');
     fireEvent.click(screen.getByRole('button', { name: new RegExp(en.todayMore) }));
-    expect(currentHash()).toBe('#/people/clients');
+    // the clients area lives in the Coach dashboard (People is the admin-only Users app, SPO-141)
+    expect(currentHash()).toBe('#/c/clients');
   });
 });
