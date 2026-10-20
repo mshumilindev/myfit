@@ -76,7 +76,9 @@ describe('AuthView: signing in', () => {
 
   it('passes "Remember me" to the sign-in: off by default, on when ticked', async () => {
     render(<AuthView onLoggedIn={vi.fn()} />);
-    const box = screen.getByRole('checkbox', { name: new RegExp(en.authRememberMe) }) as HTMLInputElement;
+    const box = screen.getByRole('checkbox', {
+      name: new RegExp(en.authRememberMe),
+    }) as HTMLInputElement;
     expect(box.checked).toBe(false);
     fireEvent.click(box);
     expect(box.checked).toBe(true);

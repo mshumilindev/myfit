@@ -197,7 +197,13 @@ describe('wipeAccountKeys', () => {
     });
     expect(wipeAccountKeys(b)).toBe(3);
     expect(Object.keys(b.dump()).sort()).toEqual(
-      ['firebase:authUser:x', 'gym.flags', 'gym.locale', 'spotter.accounts', 'spotter.pushDevice'].sort(),
+      [
+        'firebase:authUser:x',
+        'gym.flags',
+        'gym.locale',
+        'spotter.accounts',
+        'spotter.pushDevice',
+      ].sort(),
     );
   });
 });
