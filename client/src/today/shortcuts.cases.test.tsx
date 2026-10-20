@@ -1,3 +1,4 @@
+import { currentHash } from '../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { SHORTCUTS, renderShortcut, shortcutById, type ShortcutCtx } from './shortcuts';
@@ -100,7 +101,7 @@ describe('shortcut actions', () => {
   it('next lesson goes to the Learn app; an activity shortcut opens a new activity of its type', () => {
     const c = shortcutCtx();
     shortcutById('sc:next-lesson')!.run(c);
-    expect(window.location.hash).toBe('#/learn');
+    expect(currentHash()).toBe('#/learn');
     shortcutById('sc:act:swim')!.run(c);
     expect(c.shell.calls.openOverlay).toHaveBeenLastCalledWith({
       screen: 'activity',

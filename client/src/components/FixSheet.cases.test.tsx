@@ -1,3 +1,4 @@
+import { currentHash } from '../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { setLocale } from '../i18n';
@@ -169,7 +170,7 @@ describe('FixSheet', () => {
     const onClose = vi.fn();
     render(<FixSheet muscle="chest" onClose={onClose} />);
     fireEvent.click(screen.getByRole('button', { name: 'Cable Fly / Low' }));
-    expect(window.location.hash).toBe('#/exercise-detail/Cable%20Fly%20%2F%20Low');
+    expect(currentHash()).toBe('#/exercise-detail/Cable%20Fly%20%2F%20Low');
     expect(onClose).toHaveBeenCalled();
   });
 });

@@ -1,3 +1,4 @@
+import { currentHash } from '../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { AtlasClientsBlock, type AtlasClientsProps } from './AtlasClientsBlock';
@@ -230,7 +231,7 @@ describe('Atlas next to my trainer', () => {
     const tile = document.querySelector('.tac-trainer')!;
     if (tile.tagName === 'BUTTON') {
       fireEvent.click(tile);
-      expect(window.location.hash).toBe('#/trainer/chat');
+      expect(currentHash()).toBe('#/trainer/chat');
     }
   });
 });

@@ -1,3 +1,4 @@
+import { currentHash } from '../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { setLocale, fmtWeekdayDayMonth } from '../i18n';
@@ -327,7 +328,7 @@ describe('TodayView: the learn nudge', () => {
       `${Math.round((2 / total) * 100)}%`,
     );
     fireEvent.click(within(c).getByRole('button', { name: new RegExp(en.learnBannerCta) }));
-    expect(window.location.hash).toBe('#/learn');
+    expect(currentHash()).toBe('#/learn');
   });
 
   it('with nothing done it is a banner above the deck instead; unreadable progress counts as none', async () => {
@@ -464,8 +465,8 @@ describe('TodayView: Atlas and clients', () => {
     );
     expect(shell.calls.openOverlay).toHaveBeenCalledWith({ screen: 'coach' });
     fireEvent.click(screen.getByRole('button', { name: 'Client0 Surname' }));
-    expect(window.location.hash).toBe('#/c/clients/c0');
+    expect(currentHash()).toBe('#/c/clients/c0');
     fireEvent.click(screen.getByRole('button', { name: new RegExp(en.todayMore) }));
-    expect(window.location.hash).toBe('#/people/clients');
+    expect(currentHash()).toBe('#/people/clients');
   });
 });

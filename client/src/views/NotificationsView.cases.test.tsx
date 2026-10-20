@@ -1,3 +1,4 @@
+import { currentHash } from '../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { NotificationsView } from './NotificationsView';
@@ -118,7 +119,7 @@ describe('NotificationsView', () => {
     });
     const linked = screen.getByRole('button', { name: /Title a/ });
     fireEvent.click(linked);
-    expect(window.location.hash).toBe('#/goals');
+    expect(currentHash()).toBe('#/goals');
     expect(container.querySelector('[data-nid="b"]')?.tagName).toBe('DIV');
   });
 

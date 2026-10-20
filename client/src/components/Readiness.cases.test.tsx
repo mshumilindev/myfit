@@ -1,3 +1,4 @@
+import { currentHash } from '../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { setLocale, LOCALES } from '../i18n';
@@ -103,7 +104,7 @@ describe('buildReadinessNudge', () => {
     const close = vi.fn();
     render(<>{n.actions!(close)}</>);
     fireEvent.click(screen.getByRole('button', { name: /Full read/ }));
-    expect(window.location.hash).toBe(READINESS_LENS_HASH);
+    expect(currentHash()).toBe(READINESS_LENS_HASH);
     expect(close).toHaveBeenCalledTimes(1);
   });
 });

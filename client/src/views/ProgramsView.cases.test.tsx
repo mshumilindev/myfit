@@ -1,3 +1,4 @@
+import { currentHash } from '../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { setViewport } from '../coach/testViewport';
@@ -188,7 +189,7 @@ describe('ProgramsView: the list', () => {
   it('the back link goes to the Overview hub', () => {
     mount();
     fireEvent.click(screen.getByRole('button', { name: en.overviewTab }));
-    expect(window.location.hash).toBe('#/overview');
+    expect(currentHash()).toBe('#/overview');
   });
 });
 
@@ -226,7 +227,7 @@ describe('ProgramsView: My program', () => {
     mount();
     fireEvent.click(await screen.findByText('Coach plan'));
     await screen.findByText(pgEn.edTitle, { selector: 'h1' });
-    expect(window.location.hash).toBe('#/programs/t1/edit');
+    expect(currentHash()).toBe('#/programs/t1/edit');
     expect(screen.queryByRole('button', { name: /^Train on / })).toBeNull();
   });
 
@@ -236,7 +237,7 @@ describe('ProgramsView: My program', () => {
     m.mine.assignment = assignment(own, { assignedBy: 'Ada' });
     mount();
     fireEvent.click((await screen.findAllByText('Self made'))[0].closest('button')!);
-    await waitFor(() => expect(window.location.hash).toBe('#/programs/own/edit'));
+    await waitFor(() => expect(currentHash()).toBe('#/programs/own/edit'));
     expect(await screen.findAllByRole('button', { name: /^Train on / })).toHaveLength(7);
   });
 
@@ -265,7 +266,7 @@ describe('ProgramsView: new programs and import', () => {
       items: [{ ...item(1), equipment: [] }],
     });
     mount();
-    await waitFor(() => expect(window.location.hash).toBe('#/programs/new'));
+    await waitFor(() => expect(currentHash()).toBe('#/programs/new'));
     expect(await screen.findByDisplayValue('Suggested split')).toBeTruthy();
     expect(screen.getByText(en.pgOrStartFrom)).toBeTruthy();
     expect(takeProgramSeed()).toBeNull();
@@ -281,7 +282,7 @@ describe('ProgramsView: new programs and import', () => {
     fireEvent.click(screen.getByRole('button', { name: en.csvContinue }));
     fireEvent.click(screen.getByRole('button', { name: en.csvContinue }));
     fireEvent.click(screen.getByRole('button', { name: en.csvImportN(1) }));
-    await waitFor(() => expect(window.location.hash).toBe('#/programs/new'));
+    await waitFor(() => expect(currentHash()).toBe('#/programs/new'));
     expect(((await screen.findByLabelText(en.progName)) as HTMLInputElement).value).toBe(
       en.progNew,
     );
@@ -295,7 +296,7 @@ describe('ProgramsView: new programs and import', () => {
     fireEvent.click(screen.getAllByRole('button', { name: en.csvImport })[0]);
     fireEvent.keyDown(document, { key: 'Escape' });
     await waitFor(() => expect(screen.queryByPlaceholderText(/day,/i)).toBeNull());
-    expect(window.location.hash).toBe('#/programs');
+    expect(currentHash()).toBe('#/programs');
   });
 });
 
@@ -307,8 +308,8 @@ describe('ProgramsView: saving and closing the editor', () => {
     fireEvent.change(await screen.findByLabelText(en.progName), { target: { value: 'Fresh' } });
     m.programs = [prog('will-not-match', 'Fresh')];
     fireEvent.click(screen.getByRole('button', { name: en.pgSaveDraft }));
-    await waitFor(() => expect(window.location.hash).toMatch(/^#\/programs\/[^/]+\/edit$/));
-    expect(window.location.hash).not.toBe('#/programs/new');
+    await waitFor(() => expect(currentHash()).toMatch(/^#\/programs\/[^/]+\/edit$/));
+    expect(currentHash()).not.toBe('#/programs/new');
     expect(m.queryCalls.filter((q) => q === 'programs').length).toBeGreaterThanOrEqual(2);
   });
 
@@ -317,7 +318,7 @@ describe('ProgramsView: saving and closing the editor', () => {
     window.location.hash = '#/programs/p1/edit';
     mount();
     fireEvent.click(await screen.findByRole('button', { name: en.progTitle }));
-    await waitFor(() => expect(window.location.hash).toBe('#/programs'));
+    await waitFor(() => expect(currentHash()).toBe('#/programs'));
     expect(await screen.findByText(en.pgCreatedByMe)).toBeTruthy();
   });
 
@@ -332,7 +333,7 @@ describe('ProgramsView: saving and closing the editor', () => {
       .closest('[role="dialog"], [role="alertdialog"]') as HTMLElement;
     m.programs = [];
     fireEvent.click(within(dlg).getByRole('button', { name: en.delete }));
-    await waitFor(() => expect(window.location.hash).toBe('#/programs'));
+    await waitFor(() => expect(currentHash()).toBe('#/programs'));
     expect(m.callFn).toHaveBeenCalledWith('deleteProgram', { id: 'p1' });
     expect(await screen.findByText(en.progEmpty)).toBeTruthy();
   });

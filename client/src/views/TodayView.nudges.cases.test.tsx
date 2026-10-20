@@ -1,3 +1,4 @@
+import { currentHash } from '../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { setRole } from '../api';
@@ -97,7 +98,7 @@ describe('TodayView nudges: the deck', () => {
     const c = card(en.todayAnalysisKicker);
     expect(c.querySelector('.nudge-card-title')?.textContent).toBe(en.todayAnalysisTitle(2));
     fireEvent.click(within(c).getByRole('button', { name: new RegExp(en.todayAnalysisCta) }));
-    expect(window.location.hash).toBe('#/trends');
+    expect(currentHash()).toBe('#/trends');
     window.location.hash = '';
   });
 

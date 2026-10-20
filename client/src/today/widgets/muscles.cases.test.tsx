@@ -1,3 +1,4 @@
+import { currentHash } from '../../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { MUSCLES_WIDGETS } from './muscles';
@@ -123,6 +124,6 @@ describe('muscles: interaction and device-local state', () => {
     window.location.hash = '';
     const r = renderWidget(byId('muscle-map'), 'XL');
     tap(r.container, 'Details');
-    expect(window.location.hash).toBe('#/progress/volume');
+    expect(currentHash()).toBe('#/progress/volume');
   });
 });

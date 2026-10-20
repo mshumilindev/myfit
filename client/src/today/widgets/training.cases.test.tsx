@@ -1,3 +1,4 @@
+import { currentHash } from '../../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { TRAINING_WIDGETS } from './training';
@@ -111,7 +112,7 @@ describe('training: interaction and device-local state', () => {
     window.location.hash = '';
     const r = renderWidget(byId('goals'), 'XL');
     tap(r.container, 'Edit goal');
-    expect(window.location.hash).toBe('#/goals');
+    expect(currentHash()).toBe('#/goals');
   });
 
   it('my gym: Start here begins a session at that gym', () => {

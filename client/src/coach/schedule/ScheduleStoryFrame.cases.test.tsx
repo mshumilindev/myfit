@@ -1,4 +1,5 @@
 /** The Storybook frames render the real shell / chat around a chosen schedule port; assert the structure they promise. */
+import { currentHash } from '../../route';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { scheduleEn as t } from '../../i18n/coachSchedule.en';
@@ -11,7 +12,7 @@ beforeEach(() => setViewport(1440));
 afterEach(() => {
   cleanup();
   configureSchedule(null);
-  window.history.replaceState(null, '', '#/');
+  window.history.replaceState(null, '', '/');
 });
 
 describe('ScheduleStoryFrame', () => {
@@ -19,7 +20,7 @@ describe('ScheduleStoryFrame', () => {
     const makePort = vi.fn(() => createFixturesSchedulePort());
     const { rerender } = render(<ScheduleStoryFrame makePort={makePort} hash="#/c/schedule" />);
     expect(await screen.findByRole('navigation')).toBeTruthy();
-    await waitFor(() => expect(window.location.hash).toBe('#/c/schedule'));
+    await waitFor(() => expect(currentHash()).toBe('#/c/schedule'));
     expect((await screen.findAllByText(t.scTitle)).length).toBeGreaterThan(0);
     expect(makePort).toHaveBeenCalledTimes(1);
     rerender(<ScheduleStoryFrame makePort={makePort} hash="#/c/schedule" />);
@@ -41,9 +42,9 @@ describe('ScheduleStoryFrame', () => {
     const { rerender } = render(
       <ScheduleStoryFrame makePort={make} hash="#/c/schedule?view=month" />,
     );
-    await waitFor(() => expect(window.location.hash).toBe('#/c/schedule?view=month'));
+    await waitFor(() => expect(currentHash()).toBe('#/c/schedule?view=month'));
     rerender(<ScheduleStoryFrame makePort={make} hash="#/c/schedule?view=week" />);
-    await waitFor(() => expect(window.location.hash).toBe('#/c/schedule?view=week'));
+    await waitFor(() => expect(currentHash()).toBe('#/c/schedule?view=week'));
   });
 });
 
@@ -59,7 +60,7 @@ describe('ScheduleStoryFrame exits', () => {
     fireEvent.click(await screen.findByText('My workouts'));
     fireEvent.click(screen.getByRole('button', { name: 'Profile and mode' }));
     fireEvent.click(await screen.findByText('Profile'));
-    expect(window.location.hash).toBe('#/c/schedule');
+    expect(currentHash()).toBe('#/c/schedule');
     expect(screen.getAllByText(t.scTitle).length).toBeGreaterThan(0);
   });
 });

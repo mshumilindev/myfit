@@ -1,3 +1,4 @@
+import { currentHash } from '../../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { setLocale } from '../../i18n';
@@ -59,9 +60,9 @@ describe('HealthPrivacyView: exits to the trainer', () => {
   it('opens the sharing log and the trainer page by hash', () => {
     render(<HealthPrivacyView onBack={() => undefined} />);
     fireEvent.click(screen.getByText('open-log'));
-    expect(window.location.hash).toBe('#/trainer/log');
+    expect(currentHash()).toBe('#/trainer/log');
     fireEvent.click(screen.getByText('open-trainer'));
-    expect(window.location.hash).toBe('#/trainer');
+    expect(currentHash()).toBe('#/trainer');
   });
 });
 
