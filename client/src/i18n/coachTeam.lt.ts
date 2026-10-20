@@ -165,4 +165,19 @@ export const teamLt: typeof teamEn = {
   trConfirmTitle: (client: string) => `Pašalinti iš jūsų klientų: ${client}?`,
   trConfirm: 'Pašalinti klientą',
   trFailed: 'Nepavyko išsiųsti atsakymo. Bandykite dar kartą.',
+  mcRequestRemoval: 'Prašyti pašalinti',
+  mcRequestRemovalSub: (trainer: string) =>
+    `Treneris ${trainer} patvirtina, kol kas niekas nesikeičia.`,
+  mcAskTitle: (trainer: string, client: string) =>
+    `Prašyti trenerio ${trainer} pašalinti klientą ${client}?`,
+  mcAskBody: (trainer: string) =>
+    `Sprendžia treneris ${trainer}. Iki patvirtinimo niekas nesikeičia.`,
+  mcAskEffect1: (trainer: string) => `Prašymas laukia trenerio ${trainer} darbotvarkėje.`,
+  mcAskEffect2: (client: string) => `Klientas ${client} apie prašymą nežino.`,
+  mcAskEffect3: 'Prašymas įrašomas į veiklos žurnalą.',
+  mcAskReason: 'Priežastis (nebūtina)',
+  mcAskKeep: 'Palikti klientą',
+  mcAskSend: 'Siųsti prašymą',
+  mcAskSent: (trainer: string) => `Prašymas išsiųstas: ${trainer}.`,
+  mcAskFailed: 'Nepavyko išsiųsti prašymo. Bandykite dar kartą.',
 };

@@ -160,4 +160,18 @@ export const teamUk: typeof teamEn = {
   trConfirmTitle: (client: string) => `Видалити з ваших клієнтів: ${client}?`,
   trConfirm: 'Видалити клієнта',
   trFailed: 'Не вдалося надіслати відповідь. Спробуйте ще раз.',
+  mcRequestRemoval: 'Попросити видалити',
+  mcRequestRemovalSub: (trainer: string) => `${trainer} схвалює, і лише тоді щось зміниться.`,
+  mcAskTitle: (trainer: string, client: string) =>
+    `Попросити ${trainer} видалити клієнта ${client}?`,
+  mcAskBody: (trainer: string) =>
+    `Рішення за тренером: ${trainer}. До схвалення нічого не змінюється.`,
+  mcAskEffect1: (trainer: string) => `Запит чекає в Agenda тренера: ${trainer}.`,
+  mcAskEffect2: (client: string) => `Клієнт ${client} про запит не знає.`,
+  mcAskEffect3: 'Запит записується в журнал активності.',
+  mcAskReason: 'Причина (необов’язково)',
+  mcAskKeep: 'Залишити клієнта',
+  mcAskSend: 'Надіслати запит',
+  mcAskSent: (trainer: string) => `Запит надіслано: ${trainer}.`,
+  mcAskFailed: 'Не вдалося надіслати запит. Спробуйте ще раз.',
 };

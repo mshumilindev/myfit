@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { teamEn as tm } from '../../i18n/coachTeam.en';
 import { setViewport } from '../testViewport';
 import { MANAGER_CLIENTS } from './__fixtures__/managerClients';
+import { createFixturesTeamPort } from './__fixtures__/fixtures';
 import { createStaticManagerClients, createUnavailableManagerClients } from './managerClients';
 import { ManagerClientsScreen } from './ManagerClientsScreen';
 
@@ -57,5 +58,27 @@ describe('Manager Clients', () => {
       />,
     );
     expect(screen.queryByText('Oleh Bondar')).toBeNull();
+  });
+
+  it('asks the trainer to remove a client: the dialog says nothing changes until approved, the request goes out with the reason', async () => {
+    const sent: [string, string][] = [];
+    const team = {
+      ...createFixturesTeamPort({ viewer: 'manager' }),
+      requestRemoval: async (id: string, reason: string) => void sent.push([id, reason]),
+    };
+    render(
+      <ManagerClientsScreen
+        onNavigate={() => undefined}
+        port={createStaticManagerClients(MANAGER_CLIENTS)}
+        teamPort={team}
+      />,
+    );
+    fireEvent.click(screen.getByText(tm.mcRequestRemoval));
+    const dlg = await screen.findByRole('alertdialog');
+    expect(dlg.textContent).toContain(tm.mcAskBody('Andriy P.'));
+    fireEvent.change(within(dlg).getByRole('textbox'), { target: { value: 'Paused' } });
+    fireEvent.click(within(dlg).getByRole('button', { name: tm.mcAskSend }));
+    expect(await screen.findByText(tm.mcAskSent('Andriy P.'))).toBeTruthy();
+    expect(sent).toEqual([['c2', 'Paused']]);
   });
 });

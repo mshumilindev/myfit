@@ -162,4 +162,18 @@ export const teamPl: typeof teamEn = {
   trConfirmTitle: (client: string) => `Usunąć z Twoich klientów: ${client}?`,
   trConfirm: 'Usuń klienta',
   trFailed: 'Nie udało się wysłać odpowiedzi. Spróbuj ponownie.',
+  mcRequestRemoval: 'Poproś o usunięcie',
+  mcRequestRemovalSub: (trainer: string) => `${trainer} zatwierdza, zanim cokolwiek się zmieni.`,
+  mcAskTitle: (trainer: string, client: string) =>
+    `Poprosić o usunięcie klienta ${client}? Trener: ${trainer}`,
+  mcAskBody: (trainer: string) =>
+    `Decyduje trener: ${trainer}. Do zatwierdzenia nic się nie zmienia.`,
+  mcAskEffect1: (trainer: string) => `Prośba czeka w Agendzie trenera: ${trainer}.`,
+  mcAskEffect2: (client: string) => `Klient ${client} nie dowie się o prośbie.`,
+  mcAskEffect3: 'Prośba trafia do dziennika aktywności.',
+  mcAskReason: 'Powód (opcjonalnie)',
+  mcAskKeep: 'Zostaw klienta',
+  mcAskSend: 'Wyślij prośbę',
+  mcAskSent: (trainer: string) => `Prośba wysłana do trenera: ${trainer}.`,
+  mcAskFailed: 'Nie udało się wysłać prośby. Spróbuj ponownie.',
 };

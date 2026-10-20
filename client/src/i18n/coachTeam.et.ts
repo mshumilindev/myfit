@@ -156,4 +156,17 @@ export const teamEt: typeof teamEn = {
   trConfirmTitle: (client: string) => `Eemalda sinu klientide hulgast: ${client}?`,
   trConfirm: 'Eemalda klient',
   trFailed: 'Vastuse saatmine ebaõnnestus. Proovi uuesti.',
+  mcRequestRemoval: 'Palu eemaldada',
+  mcRequestRemovalSub: (trainer: string) => `Treener ${trainer} kinnitab, enne ei muutu midagi.`,
+  mcAskTitle: (trainer: string, client: string) =>
+    `Paluda treeneril ${trainer} eemaldada klient ${client}?`,
+  mcAskBody: (trainer: string) => `Otsustab treener ${trainer}. Kuni kinnituseni ei muutu midagi.`,
+  mcAskEffect1: (trainer: string) => `Taotlus ootab treeneri ${trainer} päevakavas.`,
+  mcAskEffect2: (client: string) => `Klient ${client} taotlusest ei tea.`,
+  mcAskEffect3: 'See kirjutatakse tegevuslogisse.',
+  mcAskReason: 'Põhjus (valikuline)',
+  mcAskKeep: 'Jäta klient',
+  mcAskSend: 'Saada taotlus',
+  mcAskSent: (trainer: string) => `Taotlus saadetud: ${trainer}.`,
+  mcAskFailed: 'Taotluse saatmine ebaõnnestus. Proovi uuesti.',
 };

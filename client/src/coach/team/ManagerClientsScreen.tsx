@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { COACH_BREAKPOINT, useMinWidth } from '../../components/ui/breakpoints';
 import { Button } from '../../components/ui/Button';
+import { ConfirmEffectsDialog } from '../../components/ui/ConfirmEffectsDialog';
+import { Textarea } from '../../components/ui/Textarea';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { GroupedList, ListRow } from '../../components/ui/GroupedList';
 import { Notice } from '../../components/ui/Notice';
@@ -9,6 +11,8 @@ import { Segmented } from '../../components/ui/Segmented';
 import { SkeletonRows } from '../../components/ui/Skeleton';
 import { Tag } from '../../components/ui/Tag';
 import { useTeamT } from '../../i18n/coachTeam';
+import { getTeamPort } from './useTeam';
+import type { TeamPort } from './port';
 import { ClientAvatar } from '../ClientAvatar';
 import { coachClock, coachDayMonth, coachWeekday } from '../format';
 import { Header, Inspector, Page, Split } from '../layout/Layout';
@@ -23,6 +27,8 @@ import {
 import './ManagerClients.css';
 
 const ALL = 'all';
+const trainerFirst = (r: ManagerClientRow) => shortName(r.trainerName);
+const clientFirst = (r: ManagerClientRow) => r.name.trim().split(/\s+/)[0] ?? r.name;
 
 /** "Olena K." for the trainer chip and the row sub-line. */
 const shortName = (full: string): string => {
@@ -38,9 +44,11 @@ const shortName = (full: string): string => {
 export function ManagerClientsScreen({
   onNavigate,
   port,
+  teamPort,
 }: {
   onNavigate: (r: CoachRoute) => void;
   port?: ManagerClientsPort;
+  teamPort?: TeamPort;
 }) {
   const { tm, locale } = useTeamT();
   const rows = useManagerClients(port);
@@ -49,6 +57,11 @@ export function ManagerClientsScreen({
   const [trainer, setTrainer] = useState<string>(ALL);
   const [query, setQuery] = useState('');
   const [picked, setPicked] = useState<string | null>(null);
+  const [asking, setAsking] = useState<ManagerClientRow | null>(null);
+  const [reason, setReason] = useState('');
+  const [sending, setSending] = useState(false);
+  const [askFailed, setAskFailed] = useState(false);
+  const [sent, setSent] = useState<string | null>(null);
 
   const nextOf = useMemo(() => {
     const m = new Map<string, number>();
@@ -178,11 +191,68 @@ export function ManagerClientsScreen({
                   >
                     {tm.mcOpenSchedule}
                   </Button>
+                  <GroupedList>
+                    <ListRow
+                      action
+                      tone="danger"
+                      label={tm.mcRequestRemoval}
+                      sub={tm.mcRequestRemovalSub(shortName(selected.trainerName))}
+                      onClick={() => {
+                        setReason('');
+                        setAskFailed(false);
+                        setAsking(selected);
+                      }}
+                    />
+                  </GroupedList>
+                  {sent && (
+                    <Notice icon="check-circle" role="status">
+                      {sent}
+                    </Notice>
+                  )}
                 </div>
               </Inspector>
             )}
           </Split>
         </>
+      )}
+      {asking && (
+        <ConfirmEffectsDialog
+          title={tm.mcAskTitle(trainerFirst(asking), clientFirst(asking))}
+          icon="sign-out"
+          body={tm.mcAskBody(trainerFirst(asking))}
+          effects={[
+            { icon: 'calendar-check', text: tm.mcAskEffect1(trainerFirst(asking)) },
+            { icon: 'eye-slash', text: tm.mcAskEffect2(clientFirst(asking)) },
+            { icon: 'clock-counter-clockwise', text: tm.mcAskEffect3 },
+          ]}
+          confirmLabel={tm.mcAskSend}
+          cancelLabel={tm.mcAskKeep}
+          confirmVariant="primary"
+          loading={sending}
+          small={askFailed ? tm.mcAskFailed : undefined}
+          onCancel={() => setAsking(null)}
+          onConfirm={async () => {
+            setSending(true);
+            setAskFailed(false);
+            try {
+              await (teamPort ?? getTeamPort()).requestRemoval(asking.clientId, reason.trim());
+              setSent(tm.mcAskSent(trainerFirst(asking)));
+              setAsking(null);
+            } catch {
+              setAskFailed(true);
+            } finally {
+              setSending(false);
+            }
+          }}
+        >
+          <Textarea
+            label={tm.mcAskReason}
+            value={reason}
+            maxLength={280}
+            rows={3}
+            onChange={(e) => setReason(e.target.value)}
+          />
+        </ConfirmEffectsDialog>
       )}
     </Page>
   );
