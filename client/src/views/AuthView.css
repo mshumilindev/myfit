@@ -1,0 +1,13 @@
+/* "‹ Saved accounts" back pill: the remembered people as a small overlapping stack. */
+.auth-back-stack { display: inline-flex; margin-right: 2px; }
+.auth-back-stack > * { margin-left: -4px; border: 2px solid var(--color-surface); border-radius: 50%; box-sizing: content-box; }
+.auth-back-stack > *:first-child { margin-left: 0; }
+
+/* "Remember me" row: same gap above and below (the card's 12px sibling rhythm), no own margins. */
+.auth-remember { display: flex; gap: var(--space-3); align-items: center; margin: 0; }
+.ld .ld-auth .auth-card > .auth-remember { margin-top: 12px; }
+.ld .ld-auth .auth-card > .auth-remember + * { margin-top: 20px; }
+
+/* Back pill: "‹" + the remembered faces, no text (the aria-label names it); equal padding on both sides. */
+.auth-card > .uiback--text, .ld .ld-auth .auth-card > .uiback--text { width: auto; align-self: flex-start; gap: 6px; padding: 0 9px 0 12px; }
+.auth-back-stack { margin: 0; }

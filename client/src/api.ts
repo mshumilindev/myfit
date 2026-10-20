@@ -13,6 +13,8 @@
  * HttpError shape so view-level error handling keeps working).
  */
 import { afterSignIn, afterSignOut } from './accounts/deviceSession';
+import { fetchAvatarThumb } from './accounts/avatarThumb';
+import { setAvatar } from './accounts/rememberedPeople';
 import {
   signInWithCustomToken,
   onAuthStateChanged,
@@ -75,7 +77,18 @@ export async function signInWithPayload(payload: AuthPayload, remember = false):
   setUsername(payload.name || payload.username);
   setRole(payload.role ?? 'member');
   /* "Remember me": only a ticked box puts the person on this device's landing list (accounts/deviceSession.ts). */
-  afterSignIn(localStorage, { uid: payload.userId, name: payload.name || payload.username }, remember, Date.now());
+  afterSignIn(
+    localStorage,
+    { uid: payload.userId, name: payload.name || payload.username, login: payload.username || undefined },
+    remember,
+    Date.now(),
+  );
+  if (remember) {
+    // The photo for the landing's Locker Wall; best effort, never blocks the sign-in.
+    void fetchAvatarThumb(payload.userId).then((x) => {
+      if (x) setAvatar(localStorage, payload.userId, x);
+    });
+  }
 }
 
 /** The identifier the person signed in with (username), kept so a re-authentication asks only for the password. */

@@ -15,6 +15,8 @@ export const REMEMBERED_KEY = 'spotter.accounts';
 export interface RememberedPerson {
   uid: string;
   name: string;
+  /** The identifier the person signs in with (username), so the landing can ask for the password only. */
+  login?: string;
   /** Reference to the avatar (url or id), if the person has one. */
   avatar?: string;
   /** A passkey was registered on this device for this person (SPO-211); false/absent -> the landing asks for the password. */
@@ -34,6 +36,7 @@ function isPerson(v: unknown): v is RememberedPerson {
     typeof p.appName === 'string' &&
     typeof p.lastUsed === 'number' &&
     Number.isFinite(p.lastUsed) &&
+    (p.login === undefined || typeof p.login === 'string') &&
     (p.avatar === undefined || typeof p.avatar === 'string') &&
     (p.passkey === undefined || typeof p.passkey === 'boolean')
   );
@@ -108,4 +111,14 @@ export function removeRemembered(backend: StorageBackend, uid: string): boolean 
   if (rest.length === all.length) return false;
   write(backend, rest);
   return true;
+}
+
+/** The person's small avatar picture (a data: URL), kept so the landing can show the face before anyone is signed in. */
+export function setAvatar(backend: StorageBackend, uid: string, avatar: string | undefined): void {
+  const all = readRemembered(backend);
+  if (!all.some((p) => p.uid === uid)) return;
+  write(
+    backend,
+    all.map((p) => (p.uid === uid ? { ...p, avatar } : p)),
+  );
 }

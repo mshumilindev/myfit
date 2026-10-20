@@ -34,3 +34,4 @@ export * from './push';
 
 // Coaching (invites, consent-gated reads, audit, conversations, sweeps). Needs secrets COACH_PEPPER, COACH_SIGNING_KEY.
 export * from './coach/handlers';
+export * from './passkeys';

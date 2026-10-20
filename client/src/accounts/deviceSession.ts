@@ -14,7 +14,7 @@ export const APP_NAME = '[DEFAULT]';
 
 export function afterSignIn(
   backend: StorageBackend,
-  person: { uid: string; name: string; avatar?: string },
+  person: { uid: string; name: string; login?: string; avatar?: string },
   remember: boolean,
   now: number,
 ): void {

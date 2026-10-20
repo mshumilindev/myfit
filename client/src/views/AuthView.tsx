@@ -3,11 +3,17 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Field } from '../components/ui/Field';
 import { Button } from '../components/ui/Button';
 import { Checkbox } from '../components/ui/Checkbox';
+import { BackButton } from '../components/ui/BackButton';
+import { Avatar } from '../components/ui/Avatar';
+import { LockerWall } from '../components/ui/LockerWall';
+import { readRemembered, setPasskey } from '../accounts/rememberedPeople';
+import { biometricsAvailable, registerPasskey, signInWithPasskey } from '../accounts/passkey';
 import { HttpError, callFn, signInWithPayload, type AuthPayload } from '../api';
 import { SpotterMark } from '../brand/SpotterMark';
 import { fmtSessionClock, useT } from '../i18n';
 import { Icon, LanguageSelector } from '../ui';
 import { InstallShortcut } from './InstallShortcut';
+import './AuthView.css';
 
 /** The reachability probe gives up after this long; sign-in is never held back by it. */
 const PROBE_TIMEOUT_MS = 6_000;
@@ -26,6 +32,45 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
+  // People this device remembers (SPO-210). With any, the landing opens on the Locker Wall; "Use another account" opens the plain form.
+  const [people] = useState(() => {
+    try {
+      return readRemembered(localStorage);
+    } catch {
+      return [];
+    }
+  });
+  const [wall, setWall] = useState(people.length > 0);
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const picked = people.find((p) => p.uid === pickedId) ?? null;
+  const person = picked && picked.login ? picked : null;
+  const personView = person !== null;
+  const wallView = people.length > 0 && wall && !personView;
+  const formView = !wallView && !personView;
+  // A biometric prompt is in flight for the picked person: only the locker shows, no password field.
+  const [bio, setBio] = useState(false);
+  const pick = (uid: string) => {
+    const p = people.find((x) => x.uid === uid);
+    setError(null);
+    setPassword('');
+    if (!p?.login) {
+      setWall(false); // an entry without a sign-in name cannot skip the form
+      return;
+    }
+    setPickedId(uid);
+    if (!p.passkey) return;
+    setBio(true);
+    void biometricsAvailable()
+      .then((ok) => {
+        if (!ok) throw new Error('unavailable');
+        return signInWithPasskey(p.uid);
+      })
+      .then(async (res) => {
+        await signInWithPayload(res, true);
+        onLoggedIn();
+      })
+      .catch(() => setBio(false)); // cancelled or unusable: the password field appears
+  };
 
   function check() {
     callFn<{ registered: boolean }>('authStatus', undefined, { timeoutMs: PROBE_TIMEOUT_MS })
@@ -68,10 +113,17 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
     setError(null);
     try {
       const res = await callFn<AuthPayload>('login', {
-        identifier: identifier.trim(),
+        identifier: person ? person.login : identifier.trim(),
         password,
       });
-      await signInWithPayload(res, remember);
+      // A remembered person signing in again stays remembered.
+      await signInWithPayload(res, remember || person !== null);
+      // A remembered sign-in on a device with biometrics quietly sets up the passkey for next time.
+      if ((remember || person !== null) && !person?.passkey) {
+        void registerPasskey().then((ok) => {
+          if (ok) setPasskey(localStorage, res.userId, true);
+        });
+      }
       onLoggedIn();
     } catch (err) {
       if (err instanceof HttpError && err.status === 401) setError(t.wrongCredentials);
@@ -95,8 +147,10 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           <LanguageSelector />
         </div>
         <SpotterMark size={88} variant="tight" className="wordmark" />
-        <h2 className="auth-title">{t.appName}</h2>
-        <p className="auth-sub">{t.authTagline}</p>
+        <h2 className="auth-title">{wallView || personView ? t.authWelcomeBack : t.appName}</h2>
+        <p className="auth-sub">
+          {wallView || bio ? t.authTapFace : person ? t.authPersonPassword(person.name) : t.authTagline}
+        </p>
 
         {unreachable && (
           <div
@@ -119,38 +173,86 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           </div>
         )}
 
-        <Field
-          placeholder={t.username}
-          value={identifier}
-          autoComplete="username"
-          disabled={unreachable || busy || locked}
-          onChange={(e) => setIdentifier(e.target.value)}
-        />
-        <Field
-          error={
-            !locked && error ? (
-              <>
-                <Icon name="warning-circle" /> {error}
-              </>
-            ) : undefined
-          }
-          type="password"
-          placeholder={t.password}
-          value={password}
-          autoComplete="current-password"
-          disabled={unreachable || busy || locked}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        {(wallView || personView) && (
+          <LockerWall
+            people={people.map((p) => ({ id: p.uid, name: p.name, avatar: p.avatar }))}
+            activeId={pickedId ?? undefined}
+            openId={person?.uid}
+            openLabel={t.authLockerOpen}
+            label={t.authWallLabel}
+            lockerLabel={(n, i) => t.authLockerLabel(n, i + 1)}
+            onSelect={pick}
+          />
+        )}
 
-        <label style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'flex-start', margin: 'var(--space-2) 0' }}>
-          <Checkbox checked={remember} onChange={setRemember} disabled={unreachable || busy || locked} />
-          <span>
+        {formView && people.length > 0 && (
+          <BackButton
+            label={t.authSavedAccounts}
+            size="lg"
+            text={
+              <>
+                <span className="auth-back-stack" aria-hidden="true">
+                  {people.slice(0, 3).map((p) => (
+                    <Avatar key={p.uid} name={p.name} src={p.avatar} size={34} />
+                  ))}
+                </span>
+              </>
+            }
+            onClick={() => {
+              setPickedId(null);
+              setError(null);
+              setWall(true);
+            }}
+          />
+        )}
+
+        {formView && (
+          <Field
+            placeholder={t.username}
+            value={identifier}
+            autoComplete="username"
+            disabled={unreachable || busy || locked}
+            onChange={(e) => setIdentifier(e.target.value)}
+          />
+        )}
+        {personView && person && !bio && (
+          /* Names the account for the browser's password manager, so it offers this person's saved password only. */
+          <input
+            type="text"
+            name="username"
+            autoComplete="username"
+            value={person.login ?? ''}
+            readOnly
+            tabIndex={-1}
+            aria-hidden="true"
+            style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+          />
+        )}
+        {!wallView && !bio && (
+          <Field
+            error={
+              !locked && error ? (
+                <>
+                  <Icon name="warning-circle" /> {error}
+                </>
+              ) : undefined
+            }
+            type="password"
+            placeholder={t.password}
+            value={password}
+            autoComplete="current-password"
+            autoFocus={personView}
+            disabled={unreachable || busy || locked}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        )}
+
+        {formView && (
+          <label className="auth-remember">
+            <Checkbox checked={remember} onChange={setRemember} disabled={unreachable || busy || locked} />
             <span className="uf-1">{t.authRememberMe}</span>
-            <small className="detail-muted" style={{ display: 'block' }}>
-              {t.authRememberHint}
-            </small>
-          </span>
-        </label>
+          </label>
+        )}
 
         {locked ? (
           <div className="banner danger-ring">
@@ -160,15 +262,30 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           </div>
         ) : null}
 
-        <Button
-          type="submit"
-          variant="primary"
-          className="fx-fs-15 ug-10 umt-8"
-          style={{ minHeight: 48 }}
-          disabled={busy || unreachable || locked}
-        >
-          {busy ? t.signingIn : t.signIn}
-        </Button>
+        {!wallView && !bio && (
+          <Button
+            type="submit"
+            variant="primary"
+            className="fx-fs-15 ug-10 umt-8"
+            style={{ minHeight: 48 }}
+            disabled={busy || unreachable || locked}
+          >
+            {busy ? t.signingIn : t.signIn}
+          </Button>
+        )}
+
+        {(wallView || personView) && (
+          <Button
+            variant="link"
+            onClick={() => {
+              setPickedId(null);
+              setError(null);
+              setWall(false);
+            }}
+          >
+            {t.authUseAnother}
+          </Button>
+        )}
 
         {(unreachable || slow) && (
           <Button
