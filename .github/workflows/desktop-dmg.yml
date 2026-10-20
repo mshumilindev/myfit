@@ -14,7 +14,16 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci -w desktop --ignore-scripts
-      - run: npm run dmg -w desktop
+      - name: Build DMG
+        shell: bash
+        run: |
+          set -o pipefail
+          if ! npm run dmg -w desktop 2>&1 | tee dmg.log; then
+            # Logs of failed runs are not always reachable (API/proxy), so surface the tail as an annotation.
+            tail -n 25 dmg.log | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}' > dmg.tail
+            echo "::error title=DMG build failed::$(cat dmg.tail)"
+            exit 1
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: spotter-dmg
