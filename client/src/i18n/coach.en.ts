@@ -26,6 +26,7 @@ export const coachEn = {
     "Your own workouts stay private. When you open a client's data, the client can see that you read it.",
   roleTrainer: 'Trainer',
   roleAdmin: 'Admin',
+  roleManager: 'Manager',
   moreProfile: 'Profile',
   emptyTitle: 'Nothing here yet',
   emptyBody: 'This screen is on the way.',
@@ -38,6 +39,7 @@ export const coachEn = {
 
   // Mode switch
   modeCoach: 'Coach',
+  modeManager: 'Manager',
   modeMyWorkouts: 'My workouts',
   modeLabel: 'Mode',
   railProfile: 'Profile and mode',

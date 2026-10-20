@@ -1435,7 +1435,7 @@ export function App() {
       <>
         <Suspense fallback={<ScreenFallback />}>
           <CoachApp
-            role={role === 'admin' ? 'admin' : 'trainer'}
+            role={role === 'admin' ? 'admin' : role === 'manager' ? 'manager' : 'trainer'}
             name={getUsername() ?? ''}
             userId={currentUid() ?? undefined}
             onExitToWorkouts={openGym}
@@ -1510,7 +1510,7 @@ export function App() {
         <Suspense fallback={<ScreenFallback />}>
           <LearnApp
             now={notifNow}
-            role={role}
+            role={role === 'manager' ? 'member' : role}
             onOpenShell={() => setShellOpen(true)}
             onOpenProfile={() => openRoster('me')}
             notifs={notifs}

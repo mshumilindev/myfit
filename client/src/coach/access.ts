@@ -13,8 +13,13 @@ export function isCoachRole(role: CoachRoleInput): boolean {
   return role === 'trainer' || role === 'admin';
 }
 
+/** A manager runs a trainer's schedule and client list (SPO-196): the dashboard opens for them, with fewer screens. */
+export function isManagerRole(role: CoachRoleInput): boolean {
+  return role === 'manager';
+}
+
 export function canUseCoach(role: CoachRoleInput): boolean {
-  return isCoachRole(role);
+  return isCoachRole(role) || isManagerRole(role);
 }
 
 /** Is the Coach dashboard the screen to render for this hash? */

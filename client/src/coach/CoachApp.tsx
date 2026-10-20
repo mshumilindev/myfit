@@ -31,6 +31,9 @@ import { SCREEN_ICON, screenLabel } from './nav';
 import {
   MORE_SCREENS,
   RAIL_SCREENS,
+  MANAGER_HOME_ROUTE,
+  MANAGER_RAIL_SCREENS,
+  managerMayOpen,
   TAB_SCREENS,
   navScreenOf,
   type CoachRoute,
@@ -46,7 +49,7 @@ import { useCoachUnread } from './unread';
 import './CoachApp.css';
 
 export interface CoachShellProps {
-  role: 'trainer' | 'admin';
+  role: 'trainer' | 'admin' | 'manager';
   /** Display name for the account block. */
   name: string;
   /** Signed-in user id: the real avatar (photo from storage, initials fallback) is looked up by it. */
@@ -146,31 +149,40 @@ export function CoachShell({
     onSelect: () => go(s),
   });
   // Phone More sheet: every secondary destination, then Apps (last, via the `apps` row).
-  const moreScreens: readonly ScreenId[] = [...(MORE_SCREENS as readonly ScreenId[]), 'team'];
+  const manager = role === 'manager';
+  const moreScreens: readonly ScreenId[] = manager
+    ? []
+    : [...(MORE_SCREENS as readonly ScreenId[]), 'team'];
   const moreItems: MoreMenuItem[] = moreScreens.map(entryOf);
   // Desktop rail nav: exactly the seven design items. When the rail is too short the trailing
   // ones collapse into More (Rail `overflow`); Apps is NOT among them: it is pinned in the foot.
   // Live and Signals are not rail items (phone More sheet only until the foot widgets land).
-  const railScreens: readonly ScreenId[] = [...(RAIL_SCREENS as readonly ScreenId[]), 'team'];
+  const railScreens: readonly ScreenId[] = manager
+    ? (MANAGER_RAIL_SCREENS as readonly ScreenId[])
+    : [...(RAIL_SCREENS as readonly ScreenId[]), 'team'];
   const railEntries: RailEntry[] = railScreens.map((s) => ({
     ...entryOf(s),
     ...(s === 'chat' ? { count: unread, countLabel: c.unread(unread) } : {}),
   }));
   const chatLabel = unread > 0 ? c.navWithUnread(c.navChat, unread) : undefined;
   const tabs = [
-    ...TAB_SCREENS.map((s) => ({
+    ...(manager ? MANAGER_RAIL_SCREENS : TAB_SCREENS).map((s) => ({
       id: s as TabId,
       label: screenLabel(c, s),
       icon: SCREEN_ICON[s],
       active: active === s,
       ...(s === 'chat' ? { badge: unread, ariaLabel: chatLabel } : {}),
     })),
-    {
-      id: 'more' as TabId,
-      label: c.navMore,
-      icon: 'dots-three',
-      active: moreOpen || (moreScreens as readonly string[]).includes(active),
-    },
+    ...(manager
+      ? []
+      : [
+          {
+            id: 'more' as TabId,
+            label: c.navMore,
+            icon: 'dots-three',
+            active: moreOpen || (moreScreens as readonly string[]).includes(active),
+          },
+        ]),
   ];
 
   return (
@@ -224,7 +236,7 @@ export function CoachShell({
       {!desktop && (
         <BrandBar
           header
-          app={c.modeCoach}
+          app={manager ? c.modeManager : c.modeCoach}
           onApp={onOpenShell}
           appLabel={t.shellSwitch}
           actions={
@@ -281,6 +293,11 @@ export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
     id: props.userId ?? currentUid(),
     name: props.name,
   });
+  // A manager opens only the schedule, clients and team: any other deep link lands on the schedule.
+  const outOfBounds = props.role === 'manager' && !managerMayOpen(route);
+  useEffect(() => {
+    if (outOfBounds) navigate(MANAGER_HOME_ROUTE);
+  }, [outOfBounds, navigate]);
   const ready = status === 'ready';
   // A production build with no backend configured: say so, render no client data (never the sample fixtures).
   if (coachIsUnconfigured())
@@ -315,5 +332,7 @@ export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
         </main>
       </div>
     );
-  return <CoachShell {...props} route={route} onNavigate={navigate} />;
+  return (
+    <CoachShell {...props} route={outOfBounds ? MANAGER_HOME_ROUTE : route} onNavigate={navigate} />
+  );
 }

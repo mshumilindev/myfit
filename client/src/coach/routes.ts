@@ -114,6 +114,15 @@ export const MORE_SCREENS: readonly CoachScreen[] = [
   'signals',
 ];
 
+/** What a manager may open: the schedule, the client list (and one client) and the team. Nothing else is theirs. */
+export const MANAGER_RAIL_SCREENS: readonly CoachScreen[] = ['schedule', 'clients', 'team'];
+export const MANAGER_HOME_ROUTE: CoachRoute = { screen: 'schedule' };
+
+export function managerMayOpen(route: CoachRoute): boolean {
+  if (route.screen === 'client') return route.tab !== 'live';
+  return (MANAGER_RAIL_SCREENS as readonly string[]).includes(route.screen);
+}
+
 export const DEFAULT_COACH_ROUTE: CoachRoute = { screen: 'agenda' };
 
 function segments(hash: string): string[] {

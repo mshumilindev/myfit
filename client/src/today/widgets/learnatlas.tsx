@@ -171,7 +171,11 @@ interface LearnState {
 
 /** The role-visible, localised catalog and the viewer's progress on it. */
 function learnState(ctx: WidgetCtx): LearnState {
-  const topics = localizeTopics(catalogForRole(getRole()), ctx.locale);
+  const viewer = getRole();
+  const topics = localizeTopics(
+    catalogForRole(viewer === 'manager' ? 'member' : viewer),
+    ctx.locale,
+  );
   const lessons = topics.flatMap((t) => t.lessons);
   const ids = new Set(lessons.map((l) => l.id));
   const done = new Set(readIds('spotter.learn.completed').filter((id) => ids.has(id)));

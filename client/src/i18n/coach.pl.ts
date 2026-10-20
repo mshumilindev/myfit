@@ -32,6 +32,7 @@ export const coachPl: typeof coachEn = {
     'Twoje własne treningi pozostają prywatne. Gdy otwierasz dane klienta, klient widzi, że dane zostały otwarte.',
   roleTrainer: 'Trener',
   roleAdmin: 'Administrator',
+  roleManager: 'Menedżer',
   moreProfile: 'Profil',
   emptyTitle: 'Na razie pusto',
   emptyBody: 'Ten ekran jest w przygotowaniu.',
@@ -43,6 +44,7 @@ export const coachPl: typeof coachEn = {
   drawerClose: 'Zamknij',
 
   modeCoach: 'Trener',
+  modeManager: 'Menedżer',
   modeMyWorkouts: 'Moje treningi',
   modeLabel: 'Tryb',
   railProfile: 'Profil i tryb',

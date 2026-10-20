@@ -41,7 +41,7 @@ export interface SuiteAccount {
 export interface SuiteIdentity {
   name?: string;
   userId?: string;
-  role?: 'member' | 'trainer' | 'admin';
+  role?: 'member' | 'trainer' | 'admin' | 'manager';
 }
 
 export function useSuiteAccount({
@@ -73,12 +73,19 @@ export function useSuiteAccount({
     );
     const account: AccountPanelProps<SuiteMode> = {
       name,
-      roleLabel: role === 'admin' ? t.roleAdmin : role === 'trainer' ? t.roleTrainer : t.roleMember,
+      roleLabel:
+        role === 'admin'
+          ? t.roleAdmin
+          : role === 'trainer'
+            ? t.roleTrainer
+            : role === 'manager'
+              ? c.roleManager
+              : t.roleMember,
       avatar: avatar(40),
       ...(canCoach
         ? {
             modes: [
-              { value: 'coach' as const, label: c.modeCoach },
+              { value: 'coach' as const, label: role === 'manager' ? c.modeManager : c.modeCoach },
               { value: 'workouts' as const, label: c.modeMyWorkouts },
             ],
             // Coach is the "Coach" side, Gym the "My workouts" side, every other app neither.

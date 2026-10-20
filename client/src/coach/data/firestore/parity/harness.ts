@@ -217,7 +217,10 @@ export function deviceFs(
 ): FsApi & { offline: boolean; denied: EnforcedFs['denied'] } {
   const admin = s.fs;
   const dev: FsApi & Partial<EnforcedFs> = enforce
-    ? enforceRules(RULES, s.fs, { uid: actor.uid, role: actor.role })
+    ? enforceRules(RULES, s.fs, {
+        uid: actor.uid,
+        role: actor.role === 'manager' ? 'member' : actor.role,
+      })
     : s.fs;
   const base = dev as FsApi;
   const state = { offline: false };

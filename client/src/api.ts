@@ -27,7 +27,7 @@ const ROLE_KEY = 'spotter.role';
 const UID_KEY = 'spotter.uid';
 const LOGIN_ID_KEY = 'spotter.loginId';
 
-export type Role = 'member' | 'trainer' | 'admin';
+export type Role = 'member' | 'trainer' | 'admin' | 'manager';
 
 /*
  * The callable-read cache that used to live here (plaintext `spotter.cache.*` in localStorage) is gone: reads that should
@@ -42,7 +42,7 @@ export function setUsername(username: string): void {
 }
 export function getRole(): Role {
   const r = localStorage.getItem(ROLE_KEY);
-  return r === 'admin' || r === 'trainer' ? r : 'member';
+  return r === 'admin' || r === 'trainer' || r === 'manager' ? r : 'member';
 }
 export function setRole(role: Role): void {
   localStorage.setItem(ROLE_KEY, role);
@@ -111,7 +111,8 @@ export function watchRoleClaim(): () => void {
     try {
       const res = await user.getIdTokenResult();
       const role = res.claims.role;
-      if (role === 'admin' || role === 'trainer' || role === 'member') setRole(role);
+      if (role === 'admin' || role === 'trainer' || role === 'member' || role === 'manager')
+        setRole(role);
       localStorage.setItem(UID_KEY, user.uid);
     } catch {
       /* offline / token refresh failed — keep cached role */

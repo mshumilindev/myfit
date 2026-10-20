@@ -88,7 +88,8 @@ export const teamPl: typeof teamEn = {
   tmRemoveTitle: (name) => `Usunąć ${name} z zespołu?`,
   tmRemoveBody: (name) => `${name} straci dostęp do Twoich klientów i grafiku.`,
   tmRemoveEffect1: 'Dostęp kończy się natychmiast na każdym urządzeniu.',
-  tmRemoveEffect2: (name) => `Klucze sesji są odnawiane, by ${name} nie czytał(a) nowych danych.`,
+  tmRemoveEffect2: (name) =>
+    `Klucze sesji są odnawiane, więc nowe dane przestają być dla ${name} czytelne.`,
   tmRemoveEffect3: 'Wcześniejsze działania zostają w dzienniku aktywności.',
   tmRemoveKeep: (name) => `Zostaw: ${name}`,
   tmRemoveConfirm: 'Usuń',
@@ -112,7 +113,7 @@ export const teamPl: typeof teamEn = {
   tmEmptyInvites: 'Brak otwartych zaproszeń.',
   jtTitle: (name) => `${name} zaprasza Cię do zespołu`,
   jtBodyManager: (name) =>
-    `${name} chce, żebyś prowadził(a) grafik i listę klientów. Nie zobaczysz treningów, zdrowia, żywienia, notatek ani czatu.`,
+    `${name} prosi o prowadzenie grafiku i listy klientów. Nie zobaczysz treningów, zdrowia, żywienia, notatek ani czatu.`,
   jtBodyTrainer: (name) =>
     `${name} zaprasza do wspólnej pracy. Twoi klienci i czaty zostają Twoje; menedżer zespołu widzi i zmienia Twój grafik, nic więcej.`,
   jtInviter: (name) => `${name} · trener personalny`,

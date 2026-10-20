@@ -26,6 +26,7 @@ export const coachEt: typeof coachEn = {
     'Sinu enda treeningud jäävad privaatseks. Kui avad kliendi andmed, näeb klient, et sa neid vaatasid.',
   roleTrainer: 'Treener',
   roleAdmin: 'Administraator',
+  roleManager: 'Haldur',
   moreProfile: 'Profiil',
   emptyTitle: 'Siin pole veel midagi',
   emptyBody: 'See vaade on valmimisel.',
@@ -37,6 +38,7 @@ export const coachEt: typeof coachEn = {
   drawerClose: 'Sulge',
 
   modeCoach: 'Treener',
+  modeManager: 'Haldur',
   modeMyWorkouts: 'Minu treeningud',
   modeLabel: 'Režiim',
   railProfile: 'Profiil ja režiim',

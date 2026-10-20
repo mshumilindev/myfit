@@ -32,6 +32,7 @@ export const coachLt: typeof coachEn = {
     'Jūsų pačių treniruotės lieka privačios. Kai atidarote kliento duomenis, klientas mato, kad juos peržiūrėjote.',
   roleTrainer: 'Treneris',
   roleAdmin: 'Administratorius',
+  roleManager: 'Vadybininkas',
   moreProfile: 'Profilis',
   emptyTitle: 'Kol kas tuščia',
   emptyBody: 'Šis ekranas dar kuriamas.',
@@ -43,6 +44,7 @@ export const coachLt: typeof coachEn = {
   drawerClose: 'Uždaryti',
 
   modeCoach: 'Treneris',
+  modeManager: 'Vadybininkas',
   modeMyWorkouts: 'Mano treniruotės',
   modeLabel: 'Režimas',
   railProfile: 'Profilis ir režimas',

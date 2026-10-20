@@ -32,6 +32,7 @@ export const coachUk: typeof coachEn = {
     'Ваші власні тренування лишаються приватними. Коли ви відкриваєте дані клієнта, клієнт бачить, що ви їх переглянули.',
   roleTrainer: 'Тренер',
   roleAdmin: 'Адміністратор',
+  roleManager: 'Менеджер',
   moreProfile: 'Профіль',
   emptyTitle: 'Тут поки порожньо',
   emptyBody: 'Цей екран ще в розробці.',
@@ -43,6 +44,7 @@ export const coachUk: typeof coachEn = {
   drawerClose: 'Закрити',
 
   modeCoach: 'Тренер',
+  modeManager: 'Менеджер',
   modeMyWorkouts: 'Мої тренування',
   modeLabel: 'Режим',
   railProfile: 'Профіль і режим',
