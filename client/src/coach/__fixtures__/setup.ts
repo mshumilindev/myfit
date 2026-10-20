@@ -10,7 +10,7 @@ if (typeof localStorage !== 'undefined') {
   // findBy*/waitFor wait up to 1 s by default; the Coach story frames (thread, schedule) load their sample world lazily and on a
   // loaded CI core that takes longer. A longer ceiling changes nothing for a passing test (it resolves as soon as the element
   // appears) and does not weaken an assertion: a missing element still fails, only later.
-  const { configure } = await import('@testing-library/react');
+  const { configure } = await import('@testing-library/dom');
   configure({ asyncUtilTimeout: 5000 });
 }
 export {};
