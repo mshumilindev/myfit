@@ -63,4 +63,17 @@ describe('Team screen', () => {
     expect(await screen.findByText(tm.tmLoadFailed)).toBeTruthy();
     expect(screen.getByRole('button', { name: tm.tmRetry })).toBeTruthy();
   });
+
+  it('phone: a pending invite opens a sheet with Copy link and Revoke instead of inline buttons', async () => {
+    setViewport(390);
+    mount();
+    expect(await screen.findByText('kateryna@example.com')).toBeTruthy();
+    expect(
+      screen.queryByRole('button', { name: tm.tmRevokeFor('kateryna@example.com') }),
+    ).toBeNull();
+    fireEvent.click(screen.getByText('kateryna@example.com'));
+    const sheet = await screen.findByRole('dialog');
+    fireEvent.click(within(sheet).getByText(tm.tmRevokeFor('kateryna@example.com')));
+    await waitFor(() => expect(screen.queryByText('kateryna@example.com')).toBeNull());
+  });
 });

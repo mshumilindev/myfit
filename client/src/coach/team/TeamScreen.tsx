@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { COACH_BREAKPOINT, useMinWidth } from '../../components/ui/breakpoints';
 import { Button } from '../../components/ui/Button';
 import { ConfirmEffectsDialog } from '../../components/ui/ConfirmEffectsDialog';
 import { FailedState } from '../../components/ui/FailedState';
@@ -12,6 +13,7 @@ import { coachDayMonth } from '../format';
 import { ClientAvatar } from '../ClientAvatar';
 import { Header, Inspector, Page, Split } from '../layout/Layout';
 import { AddMemberSheet } from './AddMemberSheet';
+import { InviteSheet } from './InviteSheet';
 import { MemberSheet } from './MemberSheet';
 import type { TeamPort } from './port';
 import { agoLabel, lastActiveLabel } from './teamTime';
@@ -19,7 +21,12 @@ import { canRemoveMembers, inviteeRole, type TeamMember } from './types';
 import { useTeam } from './useTeam';
 import './TeamScreen.css';
 
-type Dialog = null | { kind: 'add' } | { kind: 'member'; uid: string } | { kind: 'leave' };
+type Dialog =
+  | null
+  | { kind: 'add' }
+  | { kind: 'member'; uid: string }
+  | { kind: 'invite'; id: string }
+  | { kind: 'leave' };
 
 /**
  * Team (SPO-196): who is in the team, pending invites, the way to the activity log and the role matrix, and Leave.
@@ -30,6 +37,7 @@ export function TeamScreen({ port }: { port?: TeamPort }) {
   const { tm, locale } = useTeamT();
   const { store, state } = useTeam(port);
   const [dialog, setDialog] = useState<Dialog>(null);
+  const desktop = useMinWidth(COACH_BREAKPOINT);
   const data = state.data;
 
   if (!data) {
@@ -67,6 +75,8 @@ export function TeamScreen({ port }: { port?: TeamPort }) {
       .join(' · ');
   };
   const opened = dialog?.kind === 'member' ? members.find((m) => m.uid === dialog.uid) : undefined;
+  const openedInvite =
+    dialog?.kind === 'invite' ? invites.find((i) => i.id === dialog.id) : undefined;
   const close = () => setDialog(null);
 
   return (
@@ -128,10 +138,11 @@ export function TeamScreen({ port }: { port?: TeamPort }) {
                       icon={<IconTile tone="neutral" size={40} icon="envelope" />}
                       label={i.email}
                       sub={tm.tmInviteSent(roleName(i.role), agoLabel(tm, asOf, i.sentAt))}
+                      onClick={desktop ? undefined : () => setDialog({ kind: 'invite', id: i.id })}
                       trailing={
                         <>
                           <Tag tone="neutral">{tm.tmPendingTag}</Tag>
-                          {i.url ? (
+                          {desktop && i.url ? (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -145,14 +156,16 @@ export function TeamScreen({ port }: { port?: TeamPort }) {
                               {tm.tmCopyLink}
                             </Button>
                           ) : null}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            aria-label={tm.tmRevokeFor(i.email)}
-                            onClick={() => void store.revokeInvite(i.id)}
-                          >
-                            {tm.tmRevoke}
-                          </Button>
+                          {desktop && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              aria-label={tm.tmRevokeFor(i.email)}
+                              onClick={() => void store.revokeInvite(i.id)}
+                            >
+                              {tm.tmRevoke}
+                            </Button>
+                          )}
                         </>
                       }
                     />
@@ -211,6 +224,13 @@ export function TeamScreen({ port }: { port?: TeamPort }) {
             await store.removeMember(opened.uid);
             close();
           }}
+        />
+      )}
+      {openedInvite && (
+        <InviteSheet
+          invite={openedInvite}
+          onClose={close}
+          onRevoke={() => void store.revokeInvite(openedInvite.id)}
         />
       )}
       {dialog?.kind === 'leave' && (
