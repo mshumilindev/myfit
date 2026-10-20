@@ -157,6 +157,7 @@ describe('team activity log', () => {
     expect(all.entries.map((e) => e.kind).sort()).toEqual(
       ['member-added', 'removal-declined', 'removal-request', 'session-done'].sort(),
     );
+    expect(all.entries.find((e) => e.kind === 'removal-request')?.liveStatus).toBe('declined');
     const added = all.entries.find((e) => e.kind === 'member-added')!;
     expect(added).toMatchObject({ actorName: 'Olena', subjectName: 'Irina', role: 'trainer' });
     const own = await teamActivity(ctx(), mgr);

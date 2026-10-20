@@ -15,6 +15,7 @@ import { Header, Inspector, Page, Split } from '../layout/Layout';
 import { AddMemberSheet } from './AddMemberSheet';
 import { InviteSheet } from './InviteSheet';
 import { MemberSheet } from './MemberSheet';
+import type { CoachRoute } from '../routes';
 import type { TeamPort } from './port';
 import { agoLabel, lastActiveLabel } from './teamTime';
 import { canRemoveMembers, defaultInviteeRole, type TeamMember } from './types';
@@ -33,7 +34,13 @@ type Dialog =
  * A trainer adds managers, a manager adds trainers, nobody picks a role. Only the owner trainer opens a manager's card
  * (settings, Remove); anyone can leave on their own. Board: Design "Desktop Team" D12 / D13.
  */
-export function TeamScreen({ port }: { port?: TeamPort }) {
+export function TeamScreen({
+  port,
+  onNavigate,
+}: {
+  port?: TeamPort;
+  onNavigate?: (r: CoachRoute) => void;
+}) {
   const { tm, locale } = useTeamT();
   const { store, state } = useTeam(port);
   const [dialog, setDialog] = useState<Dialog>(null);
@@ -183,14 +190,14 @@ export function TeamScreen({ port }: { port?: TeamPort }) {
                 label={tm.tmActivityLog}
                 sub={tm.tmActivityLogSub}
                 chevron
-                onClick={() => undefined}
+                onClick={() => onNavigate?.({ screen: 'activity' })}
               />
               <ListRow
                 icon={<IconTile tone="accent" size={30} icon="shield-check" />}
                 label={tm.tmRoles}
                 sub={tm.tmRolesSub}
                 chevron
-                onClick={() => undefined}
+                onClick={() => onNavigate?.({ screen: 'roles' })}
               />
             </GroupedList>
             <GroupedList>

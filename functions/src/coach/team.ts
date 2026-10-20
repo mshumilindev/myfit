@@ -763,6 +763,8 @@ export interface ActivityRow extends Omit<ActivityEntry, 'actorUid'> {
   actorName: string;
   /** client name for entries about a client; for member entries the member's name */
   subjectName: string;
+  /** where a request stands NOW (pending / accepted / declined / cancelled / expired / approved), for request entries */
+  liveStatus?: string;
 }
 
 /**
@@ -802,11 +804,28 @@ export async function teamActivity(
     .filter((e) => scope !== 'own' || e.actorUid === actor.uid)
     .sort((a, b) => b.ts - a.ts)
     .slice(0, limit);
-  for (const e of all)
+  const liveStatusOf = async (e: ActivityEntry): Promise<string | undefined> => {
+    if (e.kind === 'removal-request' && e.refId) {
+      const r = await ctx.kv.get(`teamRequests/${e.refId}`);
+      return typeof r?.status === 'string' ? r.status : undefined;
+    }
+    if (e.kind === 'move-request' && e.refId && e.clientId) {
+      const c = (await ctx.kv.get(`coaching/${e.clientId}`)) as { trainerId?: string } | null;
+      if (!c?.trainerId) return undefined;
+      const cid = conversationId(ctx.pepper, e.clientId, c.trainerId);
+      const r = await ctx.kv.get(`conversations/${cid}/requests/${e.refId}`);
+      return typeof r?.status === 'string' ? r.status : undefined;
+    }
+    return undefined;
+  };
+  for (const e of all) {
+    const live = await liveStatusOf(e);
     entries.push({
       ...e,
       actorName: await nameFor(e.actorUid),
       subjectName: await nameFor(e.clientId ?? e.refId),
+      ...(live ? { liveStatus: live } : {}),
     });
+  }
   return { entries, scope };
 }

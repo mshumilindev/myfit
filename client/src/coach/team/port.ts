@@ -1,4 +1,4 @@
-import type { ActivityScope, TeamData, TeamRequest, TeamRole } from './types';
+import type { ActivityScope, TeamActivity, TeamData, TeamRequest, TeamRole } from './types';
 
 export type TeamErrorCode =
   | 'offline'
@@ -40,6 +40,8 @@ export interface TeamPort {
   removeMember(uid: string): Promise<void>;
   leave(): Promise<void>;
   setActivityScope(uid: string, scope: ActivityScope): Promise<void>;
+  /** The activity log as the caller may read it (owner: all; manager: own or all). */
+  activity(): Promise<TeamActivity>;
   /** TRAINER: open requests from managers about their clients (Agenda "Team requests"). */
   requests(): Promise<TeamRequest[]>;
   /** TRAINER: approve (runs the usual end-of-coaching) or decline. */
@@ -68,6 +70,7 @@ export function createUnavailableTeamPort(): TeamPort {
     removeMember: fail,
     leave: fail,
     setActivityScope: fail,
+    activity: () => Promise.reject(new TeamPortError('unavailable')),
     requests: () => Promise.reject(new TeamPortError('unavailable')),
     answerRequest: fail,
     requestRemoval: fail,

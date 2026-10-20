@@ -9,6 +9,7 @@ import type { CoachRoute } from './routes';
 import { isChunkLoadError, lazyScreen, resetLazyScreens } from './lazyScreen';
 import { coachHash, isProgramPage, programPageClient } from './routes';
 import { writeParams } from './today/useTodayParams';
+import { navigateHash } from '../navigateHash';
 
 /** Roster, Signals and Client 360 (M1 UI): loaded on demand so the shell never waits for them. */
 /** Today + Decision (M1 UI, TODAY agent). */
@@ -53,7 +54,6 @@ const LiveClientScreen = lazyScreen(() =>
 const ProgramsScreen = lazyScreen(() =>
   import('./screens/programs/ProgramsScreen').then((m) => ({ default: m.ProgramsScreen })),
 );
-const Client360Screen = lazyScreen(() =>
 /** Team (SPO-196). */
 const ManagerClientsScreen = lazyScreen(() =>
   import('./team/ManagerClientsScreen').then((m) => ({ default: m.ManagerClientsScreen })),
@@ -61,6 +61,13 @@ const ManagerClientsScreen = lazyScreen(() =>
 const TeamScreen = lazyScreen(() =>
   import('./team/TeamScreen').then((m) => ({ default: m.TeamScreen })),
 );
+const ActivityScreen = lazyScreen(() =>
+  import('./team/ActivityScreen').then((m) => ({ default: m.ActivityScreen })),
+);
+const RolesScreen = lazyScreen(() =>
+  import('./team/RolesScreen').then((m) => ({ default: m.RolesScreen })),
+);
+const Client360Screen = lazyScreen(() =>
   import('./screens/Client360Screen').then((m) => ({ default: m.Client360Screen })),
 );
 
@@ -88,7 +95,7 @@ export function CoachScreen({
   const { c } = useCoachT();
   /** Roster / Signals / Client 360 open the Decision screen: Today's hash query carries the signal key. */
   const openDecision = (key: string) => {
-    window.location.hash = writeParams('#/c/agenda', { decision: key });
+    navigateHash(writeParams('#/c/agenda', { decision: key }));
   };
   if (route.screen === 'agenda')
     return (
@@ -120,13 +127,25 @@ export function CoachScreen({
         <DecisionsScreen onNavigate={onNavigate} onOpenDecision={openDecision} />
       </Suspense>
     );
-  if (route.screen === 'schedule')
   if (route.screen === 'team')
     return (
       <Suspense fallback={<Loading />}>
-        <TeamScreen />
+        <TeamScreen onNavigate={onNavigate} />
       </Suspense>
     );
+  if (route.screen === 'activity')
+    return (
+      <Suspense fallback={<Loading />}>
+        <ActivityScreen onNavigate={onNavigate} />
+      </Suspense>
+    );
+  if (route.screen === 'roles')
+    return (
+      <Suspense fallback={<Loading />}>
+        <RolesScreen onNavigate={onNavigate} />
+      </Suspense>
+    );
+  if (route.screen === 'schedule')
     return (
       <Suspense fallback={<Loading />}>
         <ScheduleScreen onNavigate={onNavigate} />

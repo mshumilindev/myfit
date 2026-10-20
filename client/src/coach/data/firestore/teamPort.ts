@@ -5,7 +5,7 @@
  */
 import { teamInviteLink } from '../../inviteLink';
 import { TeamPortError, type TeamErrorCode, type TeamPort } from '../../team/port';
-import type { TeamData, TeamRequest } from '../../team/types';
+import type { TeamActivity, TeamData, TeamRequest } from '../../team/types';
 import type { FsApi } from './fsApi';
 
 interface Snapshot extends Omit<TeamData, 'invites'> {
@@ -75,6 +75,9 @@ export function createFirestoreTeamPort(
     },
     async leave() {
       await call('teamLeave');
+    },
+    async activity() {
+      return call<TeamActivity>('teamActivity', { limit: 200 });
     },
     async requests() {
       const r = await call<{ requests: TeamRequest[] }>('teamRequests');

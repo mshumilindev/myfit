@@ -1,0 +1,7 @@
+/* Activity log (SPO-203). Layout only; every surface is a kit piece. Tokens only. */
+.act-day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  min-width: 0;
+}

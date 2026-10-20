@@ -52,6 +52,44 @@ export const canRemoveMembers = (me: TeamData['me']): boolean =>
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export const isEmail = (s: string): boolean => EMAIL_RE.test(s.trim());
 
+export type ActivityKind =
+  | 'move-request'
+  | 'move-cancel'
+  | 'removal-request'
+  | 'removal-approved'
+  | 'removal-declined'
+  | 'removal-cancelled'
+  | 'session-done'
+  | 'session-missed'
+  | 'session-cancelled'
+  | 'session-edited'
+  | 'member-added'
+  | 'member-removed'
+  | 'member-left'
+  | 'client-invite';
+
+/** One line of the activity log (metadata only; names are resolved by the server). */
+export interface ActivityRow {
+  id: string;
+  actorUid: string;
+  actorName: string;
+  role: TeamRole;
+  kind: ActivityKind;
+  /** the client's name, or the member's name for team entries */
+  subjectName: string;
+  ts: number;
+  /** where a request stands now (pending / accepted / declined / cancelled / expired / approved) */
+  liveStatus?: string;
+  /** a detail the entry carries (an invited e-mail) */
+  detail?: string;
+}
+
+export interface TeamActivity {
+  entries: ActivityRow[];
+  /** `owner` reads all; a manager reads `own` or `all` (the owner's setting) */
+  scope: ActivityScope | 'owner';
+}
+
 /** A request from a manager the trainer answers (SPO-239). Today only: remove a client. */
 export interface TeamRequest {
   id: string;

@@ -11,6 +11,8 @@ import {
   type TeamData,
   type TeamMember,
   type TeamRequest,
+  type TeamActivity,
+  type ActivityRow,
 } from '../types';
 
 const DAY = 86_400_000;
@@ -32,6 +34,8 @@ export interface FixturesTeamOptions {
   ready?: { ready: number; total: number };
   /** open manager requests the trainer sees in the Agenda (default none, so other screens' tests stay as they are) */
   withRequests?: boolean;
+  /** a manager's activity scope (default `own`) */
+  activityScope?: 'own' | 'all';
 }
 
 export function buildFixtureTeam(
@@ -90,6 +94,58 @@ export function buildFixtureTeam(
           },
     ],
     asOf: now,
+  };
+}
+
+const HOUR = 3_600_000;
+/** The log of boards D18 / D19 / D20 (newest first). `Irina M.` is the manager, `Olena K.` and `Andriy P.` the trainers. */
+export function buildFixtureActivity(
+  viewer: TeamViewer,
+  now: number,
+  scope?: 'own' | 'all',
+): TeamActivity {
+  const irina = { actorUid: 'manager-irina', actorName: 'Irina Melnyk', role: 'manager' as const };
+  const olena = {
+    actorUid: 'trainer-olena',
+    actorName: 'Olena Kovalenko',
+    role: 'trainer' as const,
+  };
+  const andriy = {
+    actorUid: 'trainer-andriy',
+    actorName: 'Andriy Petrenko',
+    role: 'trainer' as const,
+  };
+  const row = (
+    id: string,
+    who: Pick<ActivityRow, 'actorUid' | 'actorName' | 'role'>,
+    kind: ActivityRow['kind'],
+    subjectName: string,
+    ago: number,
+    extra: Partial<ActivityRow> = {},
+  ): ActivityRow => ({
+    id,
+    ...who,
+    kind,
+    subjectName,
+    ts: now - ago,
+    ...extra,
+  });
+  const all: ActivityRow[] = [
+    row('a1', irina, 'move-request', 'Maria Tkach', 1 * HOUR, { liveStatus: 'pending' }),
+    row('a2', irina, 'session-done', 'Andriy Lysenko', 3 * HOUR),
+    row('a3', olena, 'move-request', 'Oleh Bondar', 5 * HOUR, { liveStatus: 'accepted' }),
+    row('a4', andriy, 'client-invite', 'Denys Koval', 6 * HOUR, { detail: 'denys@example.com' }),
+    row('a5', irina, 'removal-request', 'Sofiia Hnatiuk', 28 * HOUR, { liveStatus: 'pending' }),
+    row('a6', olena, 'session-cancelled', 'Bohdan Palamar', 29 * HOUR),
+    row('a7', irina, 'session-missed', 'Taras Rudenko', 31 * HOUR),
+    row('a8', irina, 'move-request', 'Maria Tkach', 50 * HOUR, { liveStatus: 'accepted' }),
+    row('a9', olena, 'member-added', 'Irina Melnyk', 38 * 24 * HOUR),
+  ];
+  if (viewer === 'trainer') return { entries: all, scope: 'owner' };
+  const s = scope ?? 'own';
+  return {
+    entries: s === 'all' ? all : all.filter((e) => e.actorUid === 'manager-irina'),
+    scope: s,
   };
 }
 
@@ -162,6 +218,10 @@ export function createFixturesTeamPort(o: FixturesTeamOptions = {}): TeamPort {
     },
     async leave() {
       await guard();
+    },
+    async activity() {
+      await guard();
+      return buildFixtureActivity(viewer, clock(), o.activityScope);
     },
     async requests() {
       await guard();

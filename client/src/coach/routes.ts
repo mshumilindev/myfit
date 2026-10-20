@@ -20,7 +20,9 @@ export type CoachScreen =
   | 'chat'
   | 'signals'
   | 'live'
-  | 'team';
+  | 'team'
+  | 'activity'
+  | 'roles';
 
 /**
  * A program page lives under `programs`: the program editor (`#/c/programs/<programId>/edit`) and Check before sending
@@ -89,6 +91,8 @@ export const COACH_SCREENS: readonly CoachScreen[] = [
   'signals',
   'live',
   'team',
+  'activity',
+  'roles',
 ];
 
 /** Desktop rail, top to bottom (R-FE-002): seven items. */
@@ -116,11 +120,16 @@ export const MORE_SCREENS: readonly CoachScreen[] = [
 
 /** What a manager may open: the schedule, the client list (and one client) and the team. Nothing else is theirs. */
 export const MANAGER_RAIL_SCREENS: readonly CoachScreen[] = ['schedule', 'clients', 'team'];
+/** Pages of the Team area (opened from the Team page), open to a manager as well. */
+export const TEAM_SUB_SCREENS: readonly CoachScreen[] = ['activity', 'roles'];
 export const MANAGER_HOME_ROUTE: CoachRoute = { screen: 'schedule' };
 
 export function managerMayOpen(route: CoachRoute): boolean {
   if (route.screen === 'client') return route.tab !== 'live';
-  return (MANAGER_RAIL_SCREENS as readonly string[]).includes(route.screen);
+  return (
+    (MANAGER_RAIL_SCREENS as readonly string[]).includes(route.screen) ||
+    (TEAM_SUB_SCREENS as readonly string[]).includes(route.screen)
+  );
 }
 
 export const DEFAULT_COACH_ROUTE: CoachRoute = { screen: 'agenda' };
@@ -198,7 +207,10 @@ export function coachHash(route: CoachRoute): string {
 
 /** The nav item a route lights: a client page belongs to Clients. */
 export function navScreenOf(route: CoachRoute): CoachScreen {
-  return route.screen === 'client' ? 'clients' : route.screen;
+  if (route.screen === 'client') return 'clients';
+  // the activity log and the role matrix belong to Team
+  if (route.screen === 'activity' || route.screen === 'roles') return 'team';
+  return route.screen;
 }
 
 export function sameRoute(a: CoachRoute, b: CoachRoute): boolean {

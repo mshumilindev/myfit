@@ -13,6 +13,8 @@ export const SCREEN_ICON: Record<CoachScreen, string> = {
   signals: 'pulse',
   live: 'heartbeat',
   team: 'users',
+  activity: 'clock-counter-clockwise',
+  roles: 'shield-check',
 };
 
 export function screenLabel(c: CoachStrings, screen: CoachScreen): string {
@@ -36,6 +38,8 @@ export function screenLabel(c: CoachStrings, screen: CoachScreen): string {
     case 'live':
       return c.navLive;
     case 'team':
+    case 'activity':
+    case 'roles':
       return c.navTeam;
   }
 }
