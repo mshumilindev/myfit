@@ -225,7 +225,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
             readOnly
             tabIndex={-1}
             aria-hidden="true"
-            style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+            className="auth-username-hidden"
           />
         )}
         {!wallView && !bio && (

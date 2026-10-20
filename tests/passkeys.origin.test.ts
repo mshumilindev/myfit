@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { allowedRelyingParty } from '../../functions/src/passkeysPure';
+import { allowedRelyingParty } from '../functions/src/passkeysPure';
 
 describe('passkey relying party', () => {
   it('allows localhost and Firebase hosting origins, with the page host as RP id', () => {

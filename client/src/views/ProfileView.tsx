@@ -28,7 +28,7 @@ import { ConditionsProfileRow } from './health/Conditions';
 import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
 import { SignOutDialog } from '../components/SignOutDialog';
-import { SessionsSheet } from '../components/SessionsSheet';
+import { SessionsRow } from '../components/SessionsRow';
 import { Icon, LanguageSelector, Sheet, useExerciseName } from '../ui';
 import { UserAvatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
@@ -160,7 +160,6 @@ export function ProfileView({
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordEditing, setPasswordEditing] = useState(false);
   const [ptab, setPtab] = useState<'overview' | 'body' | 'settings'>('overview');
-  const [sessionsOpen, setSessionsOpen] = useState(false);
   const [avatarRefresh, setAvatarRefresh] = useState(0);
   const [profileEditing, setProfileEditing] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
@@ -630,14 +629,8 @@ export function ProfileView({
                   chevron
                   onClick={() => setPasswordEditing(true)}
                 />
-                <ListRow
-                  icon={<Icon name="devices" />}
-                  label={t.sessionsRow}
-                  chevron
-                  onClick={() => setSessionsOpen(true)}
-                />
+                <SessionsRow />
               </section>
-              {sessionsOpen && <SessionsSheet onClose={() => setSessionsOpen(false)} />}
               <ListRow
                 tone="danger"
                 icon={<Icon name="sign-out" />}

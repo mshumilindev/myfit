@@ -12,9 +12,33 @@
 import { onCall } from 'firebase-functions/v2/https';
 import { db, HttpsError } from './lib';
 import { describeClient, placeFromHeaders, validDeviceId } from './sessionsPure';
+import { checkCore, listCore, revokeCore, revokeOthersCore, type SessionDoc, type SessionStore } from './sessionsCore';
 
 function sessions(uid: string) {
   return db.collection('users').doc(uid).collection('sessions');
+}
+
+/** Firestore storage for one person's session records. */
+function storeFor(uid: string): SessionStore {
+  const col = sessions(uid);
+  return {
+    async get(id) {
+      const s = await col.doc(id).get();
+      return s.exists ? (s.data() as SessionDoc) : null;
+    },
+    async set(id, doc) {
+      await col.doc(id).set(doc);
+    },
+    async update(id, patch) {
+      await col.doc(id).update(patch);
+    },
+    async list() {
+      return (await col.get()).docs.map((d) => ({ deviceId: d.id, doc: d.data() as SessionDoc }));
+    },
+    async remove(id) {
+      await col.doc(id).delete();
+    },
+  };
 }
 
 function mustUid(req: { auth?: { uid: string } | null }): string {
@@ -31,57 +55,29 @@ function deviceIdOf(data: unknown): string {
 /** Called by the app at start and on focus. Creates / adopts the record, refreshes it, and says whether this device was signed out elsewhere. */
 export const sessionCheck = onCall(async (req) => {
   const uid = mustUid(req);
-  const deviceId = deviceIdOf(req.data);
-  const ref = sessions(uid).doc(deviceId);
-  const now = Date.now();
-  const snap = await ref.get();
-  if (snap.exists && (snap.data() as { revokedAt?: number | null }).revokedAt) return { active: false };
-  const place = placeFromHeaders(req.rawRequest?.headers as Record<string, unknown> | undefined);
-  const base = { label: describeClient(req.rawRequest?.headers?.['user-agent']), lastSeenAt: now, ...place };
-  if (snap.exists) await ref.update(base);
-  else await ref.set({ ...base, createdAt: now, revokedAt: null });
-  return { active: true };
+  const headers = req.rawRequest?.headers as Record<string, unknown> | undefined;
+  const info = { label: describeClient(headers?.['user-agent']), ...placeFromHeaders(headers) };
+  return checkCore(storeFor(uid), deviceIdOf(req.data), info, Date.now());
 });
 
-export const sessionList = onCall(async (req) => {
-  const uid = mustUid(req);
-  const snap = await sessions(uid).get();
-  const rows = snap.docs
-    .map((d) => ({ deviceId: d.id, ...(d.data() as Record<string, unknown>) }))
-    .filter((r) => !(r as { revokedAt?: number | null }).revokedAt)
-    .sort((a, b) => Number((b as { lastSeenAt?: number }).lastSeenAt ?? 0) - Number((a as { lastSeenAt?: number }).lastSeenAt ?? 0));
-  return { sessions: rows };
-});
+export const sessionList = onCall(async (req) => ({ sessions: await listCore(storeFor(mustUid(req))) }));
 
 /** Signs another device out (its next check ends its session). */
 export const sessionRevoke = onCall(async (req) => {
   const uid = mustUid(req);
-  const deviceId = deviceIdOf(req.data);
-  const ref = sessions(uid).doc(deviceId);
-  if ((await ref.get()).exists) await ref.update({ revokedAt: Date.now() });
+  await revokeCore(storeFor(uid), deviceIdOf(req.data), Date.now());
   return { ok: true };
 });
 
 /** "Sign out all except this device". */
 export const sessionRevokeOthers = onCall(async (req) => {
   const uid = mustUid(req);
-  const keep = deviceIdOf(req.data);
-  const now = Date.now();
-  const snap = await sessions(uid).get();
-  const batch = db.batch();
-  let n = 0;
-  for (const d of snap.docs) {
-    if (d.id === keep || (d.data() as { revokedAt?: number | null }).revokedAt) continue;
-    batch.update(d.ref, { revokedAt: now });
-    n++;
-  }
-  if (n) await batch.commit();
-  return { revoked: n };
+  return { revoked: await revokeOthersCore(storeFor(uid), deviceIdOf(req.data), Date.now()) };
 });
 
 /** This device signed out on its own: its record goes away. */
 export const sessionEnd = onCall(async (req) => {
   const uid = mustUid(req);
-  await sessions(uid).doc(deviceIdOf(req.data)).delete();
+  await storeFor(uid).remove(deviceIdOf(req.data));
   return { ok: true };
 });
