@@ -261,4 +261,17 @@ export const teamEt: typeof teamEn = {
   spTeamTrainer: (who: string) => `Meeskonnaga liitus: ${who}, treener.`,
   spOpenSpotter: 'Spotter',
   spOpenSpotterSub: 'Taotlused ja vastused',
+  icButton: 'Kutsu klient',
+  icTitle: 'Kutsu klient',
+  icName: 'Kliendi nimi',
+  icNameHint: 'Klient näeb kutses seda nime.',
+  icTrainerLabel: 'Millisele treenerile',
+  icBody: (trainer: string) =>
+    `Pärast kutse vastuvõtmist saab kliendi treeneriks ${trainer}. Sa näed ajakava, mitte kliendi andmeid.`,
+  icCreate: 'Loo kutse',
+  icErrName: 'Sisesta kliendi nimi.',
+  icErrTrainer: 'Vali treener.',
+  icLinkTitle: 'Kutse link',
+  icLinkBody: (client: string, trainer: string) =>
+    `Saada see link: ${client}. See kehtib seitse päeva ja lisab kliendi treenerile ${trainer}.`,
 };

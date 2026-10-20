@@ -268,4 +268,17 @@ export const teamPl: typeof teamEn = {
   spTeamTrainer: (who: string) => `Do zespołu dołączono: ${who}, trener.`,
   spOpenSpotter: 'Spotter',
   spOpenSpotterSub: 'Prośby i odpowiedzi',
+  icButton: 'Zaproś klienta',
+  icTitle: 'Zaproś klienta',
+  icName: 'Imię klienta',
+  icNameHint: 'Klient zobaczy to imię w zaproszeniu.',
+  icTrainerLabel: 'Dla którego trenera',
+  icBody: (trainer: string) =>
+    `Po przyjęciu zaproszenia trenerem klienta zostaje ${trainer}. Widzisz grafik, nie dane klienta.`,
+  icCreate: 'Utwórz zaproszenie',
+  icErrName: 'Wpisz imię klienta.',
+  icErrTrainer: 'Wybierz trenera.',
+  icLinkTitle: 'Link z zaproszeniem',
+  icLinkBody: (client: string, trainer: string) =>
+    `Wyślij ten link: ${client}. Działa siedem dni i dodaje klienta do trenera ${trainer}.`,
 };

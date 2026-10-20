@@ -82,3 +82,22 @@ describe('Manager Clients', () => {
     expect(sent).toEqual([['c2', 'Paused']]);
   });
 });
+
+describe('Manager invites a client', () => {
+  it('asks the name and the trainer, then hands over the link', async () => {
+    render(
+      <ManagerClientsScreen
+        onNavigate={() => undefined}
+        port={createStaticManagerClients(MANAGER_CLIENTS)}
+        teamPort={createFixturesTeamPort({ viewer: 'manager' })}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: tm.icButton }));
+    const dlg = await screen.findByRole('dialog');
+    fireEvent.click(within(dlg).getByRole('button', { name: tm.icCreate }));
+    expect(within(dlg).getByText(tm.icErrName)).toBeTruthy();
+    fireEvent.change(within(dlg).getByRole('textbox'), { target: { value: 'Nina Test' } });
+    fireEvent.click(within(dlg).getByRole('button', { name: tm.icCreate }));
+    expect(await screen.findByDisplayValue(/invite\/ninatest/)).toBeTruthy();
+  });
+});

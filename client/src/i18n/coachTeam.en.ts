@@ -258,4 +258,17 @@ export const teamEn = {
   spTeamTrainer: (who: string) => `${who} joined the team as a trainer.`,
   spOpenSpotter: 'Spotter',
   spOpenSpotterSub: 'Requests and answers',
+  icButton: 'Invite client',
+  icTitle: 'Invite a client',
+  icName: 'Client name',
+  icNameHint: 'The client sees this name on the invitation.',
+  icTrainerLabel: 'For which trainer',
+  icBody: (trainer: string) =>
+    `${trainer} becomes the client’s trainer once they accept. You see the schedule, not their data.`,
+  icCreate: 'Create invite',
+  icErrName: 'Enter the client’s name.',
+  icErrTrainer: 'Pick a trainer.',
+  icLinkTitle: 'Invitation link',
+  icLinkBody: (client: string, trainer: string) =>
+    `Send this link to ${client}. It works for seven days and adds them to ${trainer}.`,
 };

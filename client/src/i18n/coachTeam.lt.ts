@@ -273,4 +273,17 @@ export const teamLt: typeof teamEn = {
   spTeamTrainer: (who: string) => `Prie komandos prisijungė: ${who}, treneris.`,
   spOpenSpotter: 'Spotter',
   spOpenSpotterSub: 'Prašymai ir atsakymai',
+  icButton: 'Pakviesti klientą',
+  icTitle: 'Pakviesti klientą',
+  icName: 'Kliento vardas',
+  icNameHint: 'Klientas kvietime matys šį vardą.',
+  icTrainerLabel: 'Kuriam treneriui',
+  icBody: (trainer: string) =>
+    `Priėmus kvietimą, kliento treneriu tampa ${trainer}. Matote tvarkaraštį, ne kliento duomenis.`,
+  icCreate: 'Sukurti kvietimą',
+  icErrName: 'Įveskite kliento vardą.',
+  icErrTrainer: 'Pasirinkite trenerį.',
+  icLinkTitle: 'Kvietimo nuoroda',
+  icLinkBody: (client: string, trainer: string) =>
+    `Nusiųskite šią nuorodą: ${client}. Ji galioja septynias dienas ir prideda klientą prie trenerio ${trainer}.`,
 };

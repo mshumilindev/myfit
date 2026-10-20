@@ -279,6 +279,10 @@ export function createFixturesTeamPort(o: FixturesTeamOptions = {}): TeamPort {
     async leave() {
       await guard();
     },
+    async inviteClient(_trainerId, name) {
+      await guard();
+      return { url: `https://spotter.example/#/invite/${name.replace(/\W+/g, '').toLowerCase()}` };
+    },
     async notices() {
       await guard();
       const f = buildFixtureSpotter(viewer, clock(), spotterRead);

@@ -267,4 +267,17 @@ export const teamUk: typeof teamEn = {
   spTeamTrainer: (who: string) => `До команди долучилась людина: ${who}, тренер.`,
   spOpenSpotter: 'Spotter',
   spOpenSpotterSub: 'Запити та відповіді',
+  icButton: 'Запросити клієнта',
+  icTitle: 'Запросити клієнта',
+  icName: 'Ім’я клієнта',
+  icNameHint: 'Клієнт побачить це ім’я в запрошенні.',
+  icTrainerLabel: 'Для якого тренера',
+  icBody: (trainer: string) =>
+    `Після прийняття запрошення ${trainer} стане тренером клієнта. Ви бачите розклад, а не дані клієнта.`,
+  icCreate: 'Створити запрошення',
+  icErrName: 'Введіть ім’я клієнта.',
+  icErrTrainer: 'Оберіть тренера.',
+  icLinkTitle: 'Посилання-запрошення',
+  icLinkBody: (client: string, trainer: string) =>
+    `Надішліть це посилання клієнту ${client}. Воно діє сім днів і додає клієнта до тренера ${trainer}.`,
 };

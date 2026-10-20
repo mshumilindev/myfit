@@ -3,7 +3,7 @@
  * owner trainer sees managers' settings and every pending invite); the last good snapshot is kept for the next
  * start so the page never opens on a spinner. Nothing sealed is read or written here.
  */
-import { teamInviteLink } from '../../inviteLink';
+import { inviteLink, inviteTokenOf, teamInviteLink } from '../../inviteLink';
 import { TeamPortError, type TeamErrorCode, type TeamPort } from '../../team/port';
 import type { SpotterFeed, TeamActivity, TeamData, TeamRequest } from '../../team/types';
 import type { FsApi } from './fsApi';
@@ -75,6 +75,14 @@ export function createFirestoreTeamPort(
     },
     async leave() {
       await call('teamLeave');
+    },
+    async inviteClient(trainerId, name) {
+      const r = await call<{ inviteId: string; url: string | null }>('inviteClientForTrainer', {
+        trainerId,
+        name,
+        mode: 'app',
+      });
+      return { url: r.url && inviteTokenOf(r.url) ? r.url : inviteLink(r.inviteId) };
     },
     notices: () => call<SpotterFeed>('teamNotices'),
     async markNoticesRead() {

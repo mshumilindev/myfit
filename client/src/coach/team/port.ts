@@ -56,6 +56,8 @@ export interface TeamPort {
   requests(): Promise<TeamRequest[]>;
   /** TRAINER: approve (runs the usual end-of-coaching) or decline. */
   answerRequest(id: string, approve: boolean): Promise<void>;
+  /** MANAGER: invite a client for one of the team's trainers; the link is handed over like any trainer invite. */
+  inviteClient(trainerId: string, name: string): Promise<{ url: string }>;
   /** MANAGER: ask the client's trainer to remove a client. Nothing changes until the trainer approves. */
   requestRemoval(clientId: string, reason: string): Promise<void>;
   cancelRemoval(id: string): Promise<void>;
@@ -81,6 +83,7 @@ export function createUnavailableTeamPort(): TeamPort {
     leave: fail,
     setActivityScope: fail,
     activity: () => Promise.reject(new TeamPortError('unavailable')),
+    inviteClient: () => Promise.reject(new TeamPortError('unavailable')),
     notices: () => Promise.reject(new TeamPortError('unavailable')),
     markNoticesRead: () => Promise.reject(new TeamPortError('unavailable')),
     requests: () => Promise.reject(new TeamPortError('unavailable')),

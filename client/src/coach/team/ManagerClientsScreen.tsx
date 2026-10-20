@@ -11,7 +11,8 @@ import { Segmented } from '../../components/ui/Segmented';
 import { SkeletonRows } from '../../components/ui/Skeleton';
 import { Tag } from '../../components/ui/Tag';
 import { useTeamT } from '../../i18n/coachTeam';
-import { getTeamPort } from './useTeam';
+import { InviteClientSheet } from './InviteClientSheet';
+import { getTeamPort, useTeam } from './useTeam';
 import type { TeamPort } from './port';
 import { ClientAvatar } from '../ClientAvatar';
 import { coachClock, coachDayMonth, coachWeekday } from '../format';
@@ -62,6 +63,8 @@ export function ManagerClientsScreen({
   const [sending, setSending] = useState(false);
   const [askFailed, setAskFailed] = useState(false);
   const [sent, setSent] = useState<string | null>(null);
+  const [inviting, setInviting] = useState(false);
+  const team = useTeam(teamPort);
 
   const nextOf = useMemo(() => {
     const m = new Map<string, number>();
@@ -109,7 +112,16 @@ export function ManagerClientsScreen({
 
   return (
     <Page>
-      <Header title={tm.mcTitle} slots={false} subtitle={tm.mcSub(rows.length, ready)} />
+      <Header
+        title={tm.mcTitle}
+        slots={false}
+        subtitle={tm.mcSub(rows.length, ready)}
+        actions={
+          <Button variant="primary" icon="user-plus" onClick={() => setInviting(true)}>
+            {tm.icButton}
+          </Button>
+        }
+      />
       {rows.length === 0 ? (
         <EmptyState icon="users" title={tm.mcEmptyTitle} body={tm.mcEmptyBody} />
       ) : (
@@ -260,6 +272,25 @@ export function ManagerClientsScreen({
             onChange={(e) => setReason(e.target.value)}
           />
         </ConfirmEffectsDialog>
+      )}
+      {inviting && (
+        <InviteClientSheet
+          trainers={(team.state.data?.members ?? [])
+            .filter((m) => m.role === 'trainer')
+            .map((m) => ({ id: m.uid, name: m.name }))}
+          defaultTrainerId={trainer !== ALL ? trainer : undefined}
+          onClose={() => setInviting(false)}
+          onSend={async (trainerId, name) => {
+            try {
+              return {
+                ok: true as const,
+                ...(await (teamPort ?? getTeamPort()).inviteClient(trainerId, name)),
+              };
+            } catch {
+              return { ok: false as const };
+            }
+          }}
+        />
       )}
     </Page>
   );
