@@ -31,6 +31,17 @@ describe('InstallShortcut', () => {
     expect(container.innerHTML).toBe('');
   });
 
+  it('SPO-163: hides the CTA inside the desktop shell, shows it in a plain Mac browser', () => {
+    const mac = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/130';
+    agent(mac, 'MacIntel');
+    const browser = render(<InstallShortcut />);
+    expect(screen.queryByRole('button', { name: en.createShortcut })).not.toBeNull();
+    browser.unmount();
+    agent(`${mac} Spotter/0.1.0 Electron/33.0.0`, 'MacIntel');
+    const shell = render(<InstallShortcut />);
+    expect(shell.container.innerHTML).toBe('');
+  });
+
   it('renders nothing when the app already runs standalone', () => {
     agent(UA.ios, 'iPhone');
     Object.defineProperty(navigator, 'standalone', { value: true, configurable: true });

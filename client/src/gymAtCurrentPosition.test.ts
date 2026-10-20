@@ -40,4 +40,30 @@ describe('gymAtCurrentPosition', () => {
     );
     expect(await gymAtCurrentPosition([gym])).toBeNull();
   });
+  it('refreshes the cache in the background when permission is granted, so the next start skips the question', async () => {
+    const getCurrentPosition = vi.fn((ok: PositionCallback) =>
+      ok({ coords: { latitude: 52.2, longitude: 21.0, accuracy: 15 } } as GeolocationPosition),
+    );
+    vi.stubGlobal('navigator', {
+      geolocation: { getCurrentPosition },
+      permissions: { query: vi.fn().mockResolvedValue({ state: 'granted' }) },
+    });
+    // first start: nothing cached → picker opens at once, refresh runs behind it
+    expect(await gymAtCurrentPosition([gym])).toBeNull();
+    await vi.waitFor(() => expect(getCurrentPosition).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(localStorage.getItem('spotter.lastPos')).not.toBeNull());
+    // next start: fresh cache inside the radius → no question
+    expect((await gymAtCurrentPosition([gym]))?.id).toBe('g1');
+  });
+
+  it('does not touch geolocation in the background when permission is not granted', async () => {
+    const getCurrentPosition = vi.fn();
+    vi.stubGlobal('navigator', {
+      geolocation: { getCurrentPosition },
+      permissions: { query: vi.fn().mockResolvedValue({ state: 'prompt' }) },
+    });
+    expect(await gymAtCurrentPosition([gym])).toBeNull();
+    await new Promise((r) => setTimeout(r, 20));
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+  });
 });
