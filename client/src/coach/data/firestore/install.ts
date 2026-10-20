@@ -42,6 +42,7 @@ import type { FsApi } from './fsApi';
 import { createFirestoreInvitePort } from './invitePort';
 import { adoptSessionToken } from '../../../api';
 import { createFirestoreTeamPort } from './teamPort';
+import { editKindOf } from '../../schedule/editKind';
 import { configureTeam } from '../../team/useTeam';
 import { configureManagerClients, type ManagerClientRow } from '../../team/managerClients';
 import { createRingProvider } from './keyRing';
@@ -331,15 +332,29 @@ export function installFirestoreManager(d: ManagerInstallDeps): () => void {
   // the author of a schedule document is the client's TRAINER (the rules pin `trainerId` to the coaching)
   const trainerOf = (clientId: string) =>
     book.clients().find((c) => c.clientId === clientId)?.trainerId ?? '';
-  const schedule = createSealedSchedulePort({
+  const sealed = createSealedSchedulePort({
     store: createFirestoreScheduleStore({ fs: d.fs, book }),
     vault: d.vault,
     ringFor: book.ringFor,
     ringForEpoch: book.ringForEpoch,
     uid: trainerOf,
+    via: 'manager',
+    viaName: d.manager.name,
     now: () => d.fs.now(),
     cache: scheduleCacheOver(getSealedLocal(), d.manager.id),
   });
+  // the manager's own edits of a client's schedule go to the activity log (the server cannot read the sealed document)
+  const schedule: SchedulePort = {
+    ...sealed,
+    async saveDoc(doc) {
+      const prev = sealed.peek()?.docs.find((x) => x.clientId === doc.clientId);
+      const next = await sealed.saveDoc(doc);
+      void d.fs
+        .call('teamLogActivity', { kind: editKindOf(prev, next), clientId: doc.clientId })
+        .catch(() => undefined);
+      return next;
+    },
+  };
   configureCoachData({
     uid: d.manager.id,
     world: createManagerWorldPort({ manager: d.manager, book, now: () => d.fs.now() }),

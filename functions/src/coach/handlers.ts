@@ -170,6 +170,9 @@ export const clientRemovalRespond = onCall(opts, (req) =>
 export const teamRequests = onCall(opts, (req) =>
   run(req, COACH, (a) => team.teamRequests(ctx(), a)),
 );
+export const teamLogActivity = onCall(opts, (req) =>
+  run(req, ['manager'], (a) => team.teamLogActivity(ctx(), a, body(req))),
+);
 /** A client device asks who it must delegate the schedule keys to (its trainer's active managers). */
 export const teamManagersForClient = onCall(opts, (req) =>
   run(req, ANY, (a) => team.teamManagersForClient(ctx(), a)),

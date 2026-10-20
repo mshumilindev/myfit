@@ -303,6 +303,8 @@ export const scheduleEt: typeof scheduleEn = {
   scOneOffOnly: 'Ühekordne, ei kordu',
   scReqBy: (who: string) => `Pakkus: ${who}`,
   scReqByYou: 'Sinu pakkumine',
+  scReqByManager: (m) => `Pakkumine: ${m} (haldur)`,
+  rcTitleManager: (m, c) => `${m} palub kliendil ${c} treeningut nihutada`,
   scReqExpires: (rel: string) => `Aegub ${rel}`,
   scConflictH: 'Kattub',
   scConflictShow: 'Näita',

@@ -52,6 +52,7 @@ export const todayEt: TodayStrings = {
 
   askMove: (name) => `${name} palub treeningut nihutada`,
   waitingFor: (name) => `Ootame vastust: ${name}`,
+  askedMove: (manager, name) => `${manager} palub kliendil ${name} treeningut nihutada`,
   needsAnswer: 'Ootab sinu vastust',
   moveFrom: 'Alates',
   moveTo: 'Uus aeg',

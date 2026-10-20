@@ -133,6 +133,10 @@ export interface RescheduleRequest {
   clientId: string;
   /** who asked */
   from: 'trainer' | 'client';
+  /** `manager`: a team manager proposed it on the trainer's side (the client still answers) */
+  via?: 'manager';
+  /** the manager's display name (sealed with the request), shown as "Proposed by …" */
+  byName?: string;
   slotKey: string;
   fromStart: number;
   toStart: number;

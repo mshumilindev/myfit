@@ -7,7 +7,7 @@ import {
   type Actor,
   type Ctx,
 } from '../../functions/src/coach/service';
-import { teamAccept, teamInvite } from '../../functions/src/coach/team';
+import { teamAccept, teamInvite, teamLogActivity } from '../../functions/src/coach/team';
 import { DAY } from '../../functions/src/coach/logic';
 
 const T0 = Date.UTC(2026, 9, 20, 9, 0, 0);
@@ -127,5 +127,20 @@ describe('manager reschedule requests', () => {
     expect(
       await code(rescheduleRespond(ctx(), mgr, { clientId: 'c1', id: 'rc', status: 'cancelled' })),
     ).toBe('permission-denied:not-allowed');
+  });
+
+  it('the manager reports an edit of the schedule for the log; only a manager, only own team, only known kinds', async () => {
+    await teamLogActivity(ctx(), mgr, { kind: 'session-done', clientId: 'c1' });
+    expect((await kv.list('teams/t1/activity')).map((l) => l.data.kind)).toEqual(['session-done']);
+    expect(await code(teamLogActivity(ctx(), mgr, { kind: 'drop-table', clientId: 'c1' }))).toBe(
+      'invalid-argument:invalid-kind',
+    );
+    expect(
+      await code(teamLogActivity(ctx(), owner, { kind: 'session-done', clientId: 'c1' })),
+    ).toBe('permission-denied:managers-only');
+    await kv.set('coaching/c9', { clientId: 'c9', trainerId: 'zz', status: 'active' });
+    expect(await code(teamLogActivity(ctx(), mgr, { kind: 'session-done', clientId: 'c9' }))).toBe(
+      'permission-denied:not-your-team',
+    );
   });
 });

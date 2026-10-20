@@ -64,6 +64,7 @@ export const todayUk: TodayStrings = {
 
   askMove: (name) => `${name} просить перенести заняття`,
   waitingFor: (name) => `Чекаємо на відповідь: ${name}`,
+  askedMove: (manager, name) => `${manager} надсилає запит ${name}: перенести тренування`,
   needsAnswer: 'Потрібна ваша відповідь',
   moveFrom: 'Із',
   moveTo: 'На',

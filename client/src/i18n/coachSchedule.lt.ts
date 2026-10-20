@@ -311,6 +311,8 @@ export const scheduleLt: typeof scheduleEn = {
   scOneOffOnly: 'Vienkartinė, nesikartoja',
   scReqBy: (who: string) => `Siūlo: ${who}`,
   scReqByYou: 'Jūsų pasiūlymas',
+  scReqByManager: (m) => `Pasiūlymas nuo: ${m} (vadybininkas)`,
+  rcTitleManager: (m, c) => `${m} prašo kliento ${c} perkelti treniruotę`,
   scReqExpires: (rel: string) => `Baigiasi ${rel}`,
   scConflictH: 'Sutampa su',
   scConflictShow: 'Rodyti',

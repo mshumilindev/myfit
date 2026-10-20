@@ -121,7 +121,13 @@ export function ScheduleRequestCard(p: ScheduleRequestCardProps) {
         mine={mine}
         kindLabel={t.rcKind}
         statusLabel={word}
-        title={mine ? t.rcTitleMine(name) : t.rcTitleTheirs(name)}
+        title={
+          r.via === 'manager'
+            ? t.rcTitleManager(r.byName || '', name)
+            : mine
+              ? t.rcTitleMine(name)
+              : t.rcTitleTheirs(name)
+        }
         session={{
           bold: slot ? slotTitle(slot, p.people, t) : name,
           rest: slot ? ` · ${t.scMinutes(slot.durationMin)} · ${gymName(slot.gymId)}` : undefined,

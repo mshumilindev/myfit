@@ -312,6 +312,8 @@ export const schedulePl: typeof scheduleEn = {
   scOneOffOnly: 'Jednorazowy, bez powtórzeń',
   scReqBy: (who: string) => `Propozycja od: ${who}`,
   scReqByYou: 'Twoja propozycja',
+  scReqByManager: (m) => `Propozycja od: ${m} (menedżer)`,
+  rcTitleManager: (m, c) => `${m} prosi klienta ${c} o przeniesienie treningu`,
   scReqExpires: (rel: string) => `Wygasa ${rel}`,
   scConflictH: 'Nakłada się na',
   scConflictShow: 'Pokaż',

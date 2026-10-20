@@ -13,6 +13,12 @@ import { firstName } from './names';
 import type { RescheduleRequestPort } from './requestPort';
 import { severityWord, signalText } from './signalCopy';
 
+/** "Irina Melnyk" -> "Irina M." */
+const shortPerson = (full: string): string => {
+  const p = full.trim().split(/\s+/);
+  return p.length > 1 ? `${p[0]} ${p[1]![0]}.` : full;
+};
+
 export type Answered = Record<string, 'accepted' | 'declined' | 'cancelled'>;
 
 export function RequestsSection({
@@ -57,7 +63,13 @@ export function RequestsSection({
             <li key={r.reqId}>
               <RequestCard
                 kind={r.kind}
-                title={r.kind === 'answer' ? t.askMove(n) : t.waitingFor(n)}
+                title={
+                  r.kind === 'answer'
+                    ? t.askMove(n)
+                    : r.by
+                      ? t.askedMove(shortPerson(r.by), n)
+                      : t.waitingFor(n)
+                }
                 status={r.kind === 'answer' ? t.needsAnswer : t.waitingFor(n)}
                 fromLabel={t.moveFrom}
                 from={fmtMoment(r.from, locale)}

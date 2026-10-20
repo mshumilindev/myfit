@@ -321,6 +321,8 @@ export const scheduleEn = {
   scOneOffOnly: 'One-off, does not repeat',
   scReqBy: (who: string) => `Proposed by ${who}`,
   scReqByYou: 'Proposed by you',
+  scReqByManager: (m: string) => `Proposed by ${m} (Manager)`,
+  rcTitleManager: (m: string, c: string) => `${m} asked ${c} to move a session`,
   scReqExpires: (rel: string) => `Expires ${rel}`,
   scConflictH: 'Overlaps with',
   scConflictShow: 'Show',

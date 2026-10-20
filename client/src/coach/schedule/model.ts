@@ -257,7 +257,14 @@ export function generateSlots(
       justMoved: !!f.moved && o.now - f.moved.at < 3 * DAY,
     };
     const m = wholeMove ?? (!shared ? pend[0] : undefined);
-    if (m) slot.move = { reqId: m.id, from: m.from, start: m.toStart, note: m.note };
+    if (m)
+      slot.move = {
+        reqId: m.id,
+        from: m.from,
+        start: m.toStart,
+        note: m.note,
+        ...(m.via === 'manager' ? { by: m.byName || '' } : {}),
+      };
     out.push(slot);
   }
   return [...out, ...wasPhantoms].sort((a, b) => a.start - b.start || a.id.localeCompare(b.id));

@@ -63,6 +63,7 @@ export const todayLt: TodayStrings = {
 
   askMove: (name) => `${name} prašo perkelti treniruotę`,
   waitingFor: (name) => `Laukiama atsakymo: ${name}`,
+  askedMove: (manager, name) => `${manager} prašo kliento ${name} perkelti treniruotę`,
   needsAnswer: 'Laukia jūsų atsakymo',
   moveFrom: 'Iš',
   moveTo: 'Į',

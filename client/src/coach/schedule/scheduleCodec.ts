@@ -31,6 +31,7 @@ export async function sealRequest(
     {
       id: r.id,
       from: r.from,
+      ...(r.via ? { via: r.via } : {}),
       status: r.status,
       createdAt,
       ...(r.decidedAt != null ? { decidedAt: r.decidedAt } : {}),
@@ -45,6 +46,7 @@ export async function sealRequest(
       },
       proposed: { start: r.toStart },
       ...(r.note ? { note: r.note } : {}),
+      ...(r.via && r.byName ? { byName: r.byName.slice(0, 60) } : {}),
     },
     { ...src, ctx: { messageId: r.id, fromUid: r.from, at: createdAt } },
   );
@@ -82,10 +84,12 @@ export async function openRequest(
     id: docId,
     clientId: ref.clientId,
     from: raw.from,
+    ...(raw.via === 'manager' ? { via: 'manager' as const } : {}),
     slotKey: d.slotKey,
     fromStart: ref.fromStart,
     toStart: prop.start,
     ...(typeof d.note === 'string' ? { note: d.note } : {}),
+    ...(raw.via === 'manager' && typeof d.byName === 'string' ? { byName: d.byName } : {}),
     status: d.status as ReqStatus,
     createdAt: raw.createdAt as number,
     ...(typeof d.decidedAt === 'number' ? { decidedAt: d.decidedAt } : {}),

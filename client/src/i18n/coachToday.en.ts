@@ -71,6 +71,7 @@ export const todayEn = {
   // Reschedule request card
   askMove: (name: string) => `${name} asks to move a session`,
   waitingFor: (name: string) => `Waiting for ${name}`,
+  askedMove: (manager: string, name: string) => `${manager} asked ${name} to move a session`,
   needsAnswer: 'Needs your answer',
   moveFrom: 'From',
   moveTo: 'To',

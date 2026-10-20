@@ -59,6 +59,7 @@ export const todayPl: TodayStrings = {
 
   askMove: (name) => `${name} prosi o przeniesienie sesji`,
   waitingFor: (name) => `Czekamy na odpowiedź: ${name}`,
+  askedMove: (manager, name) => `${manager} prosi klienta ${name} o przeniesienie treningu`,
   needsAnswer: 'Czeka na Twoją odpowiedź',
   moveFrom: 'Z',
   moveTo: 'Na',

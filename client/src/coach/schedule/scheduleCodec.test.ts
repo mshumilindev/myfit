@@ -74,6 +74,23 @@ describe('request codec (Part C: requester seals, the other side changes only th
     const opened = await openRequest({ vault, ring: rings.trainer }, 'rq1', raw);
     expect(opened).toEqual({ ...req, createdAt: Math.floor(AT / 1000) * 1000 });
   });
+  it('a manager proposal carries the open `via` mark and the SEALED manager name', async () => {
+    const { vault, rings } = await setup();
+    const proposal: RescheduleRequest = {
+      ...req,
+      from: 'trainer',
+      via: 'manager',
+      byName: 'Irina Melnyk',
+    };
+    const raw = await sealRequest({ vault, ring: rings.trainer }, proposal);
+    expect(raw.via).toBe('manager');
+    expect(JSON.stringify(raw)).not.toContain('Irina');
+    const opened = await openRequest({ vault, ring: rings.client }, 'rq1', raw);
+    expect(opened).toMatchObject({ via: 'manager', byName: 'Irina Melnyk', from: 'trainer' });
+    // a name without the mark is never shown, and the mark cannot be added by the client side after the fact
+    const bare = await sealRequest({ vault, ring: rings.trainer }, { ...proposal, via: undefined });
+    expect((await openRequest({ vault, ring: rings.client }, 'rq1', bare)).byName).toBeUndefined();
+  });
   it('the other party can move only the status and the request still opens', async () => {
     const { vault, rings } = await setup();
     const raw = await sealRequest({ vault, ring: rings.client }, req);

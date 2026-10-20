@@ -10,6 +10,7 @@
  * the pending list, the accepting account is whoever opens the link signed in. Only the owner trainer removes a
  * manager; anyone else may leave. Nothing here handles keys or sealed data (the client device delegates them).
  */
+import { REPORTED_KINDS, logActivity, type ReportedKind } from './activity';
 import { teamInviteUrl } from './inviteLink';
 import { DAY, conversationId, isUid } from './logic';
 import {
@@ -686,4 +687,37 @@ export async function teamRequests(
   }
   out.sort((a, b) => a.createdAt - b.createdAt);
   return { requests: out };
+}
+
+/**
+ * MANAGER's device reports an edit it just made to a client's sealed schedule (done / missed / cancelled / edited). The server
+ * cannot see inside the document, so this is the manager's own note for the activity log: metadata only, own scope, and only for
+ * a client of the team's trainers.
+ */
+export async function teamLogActivity(
+  ctx: Ctx,
+  actor: Actor,
+  body: Record<string, unknown>,
+): Promise<{ ok: true }> {
+  const kind = body.kind;
+  const clientId = body.clientId;
+  if (!REPORTED_KINDS.includes(kind as ReportedKind))
+    return fail('invalid-argument', 'invalid-kind');
+  if (!isUid(clientId)) return fail('invalid-argument', 'invalid-client');
+  const { teamId, me } = await myTeam(ctx, actor);
+  if (me.role !== 'manager') return fail('permission-denied', 'managers-only');
+  const c = (await ctx.kv.get(`coaching/${clientId}`)) as {
+    status?: string;
+    trainerId?: string;
+  } | null;
+  if (!c || c.status !== 'active' || !c.trainerId) return fail('not-found', 'no-relationship');
+  const tm = (await ctx.kv.get(`teams/${teamId}/members/${c.trainerId}`)) as MemberRec | null;
+  if (!tm || tm.status !== 'active') return fail('permission-denied', 'not-your-team');
+  await logActivity(ctx.kv, teamId, ctx.now(), {
+    actorUid: actor.uid,
+    role: 'manager',
+    kind: kind as ReportedKind,
+    clientId,
+  });
+  return { ok: true };
 }

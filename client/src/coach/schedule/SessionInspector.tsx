@@ -165,7 +165,13 @@ export function SessionInspector(p: SessionInspectorProps) {
           <section key={r.id} className="sc-insp-req" aria-label={t.scRequestOpen}>
             <div className="sc-insp-req-head">
               <Tag tone="accent">{t.scRequestOpen}</Tag>
-              <span className="sc-insp-reqtext">{byClient ? t.scReqBy(name) : t.scReqByYou}</span>
+              <span className="sc-insp-reqtext">
+                {byClient
+                  ? t.scReqBy(name)
+                  : r.via === 'manager'
+                    ? t.scReqByManager(r.byName || '')
+                    : t.scReqByYou}
+              </span>
             </div>
             <div className="sc-insp-req-move">
               <span className="sc-insp-req-at is-old">

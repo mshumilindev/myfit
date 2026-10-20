@@ -311,6 +311,8 @@ export const scheduleUk: typeof scheduleEn = {
   scOneOffOnly: 'Разове, не повторюється',
   scReqBy: (who: string) => `Запропоновано: ${who}`,
   scReqByYou: 'Запропоновано вами',
+  scReqByManager: (m) => `Пропозиція від ${m} (менеджер)`,
+  rcTitleManager: (m, c) => `${m} надсилає запит ${c}: перенести тренування`,
   scReqExpires: (rel: string) => `Спливає ${rel}`,
   scConflictH: 'Накладається на',
   scConflictShow: 'Показати',

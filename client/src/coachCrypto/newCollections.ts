@@ -93,8 +93,9 @@ export const NEW_COLLECTIONS = {
       'slotKey',
       'supersedes',
       'keyEpoch',
+      'via',
     ],
-    enc: ['slotRef', 'proposed', 'note'],
+    enc: ['slotRef', 'proposed', 'note', 'byName'],
   },
   schedules: {
     path: 'schedules/{clientId}',

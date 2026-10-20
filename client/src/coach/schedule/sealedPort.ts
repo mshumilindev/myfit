@@ -42,6 +42,10 @@ export interface SealedScheduleDeps {
    * 18:00 session is 18:00 at the gym on a phone in any zone. The trainer's device keeps its own zone.
    */
   adoptZone?: boolean;
+  /** A team manager's device: every request it creates is marked as proposed by a manager (the server enforces it too). */
+  via?: 'manager';
+  /** the manager's display name, sealed into the requests it creates */
+  viaName?: string;
   /**
    * Stale-while-revalidate: the last COMPLETE answer is kept on this device (sealed) and shown at once on the next start,
    * before the key rings arrive. A live answer always wins over it.
@@ -174,7 +178,10 @@ export function createSealedSchedulePort(d: SealedScheduleDeps): SchedulePort {
     async createRequest(r) {
       const ring = d.ringFor(r.clientId);
       if (!ring) throw new SchedulePortError('vault-locked', 'chat-key-missing');
-      const raw = await sealRequest({ vault: d.vault, ring }, r);
+      const raw = await sealRequest(
+        { vault: d.vault, ring },
+        d.via ? { ...r, via: d.via, byName: d.viaName } : r,
+      );
       raws.set(r.id, raw);
       await d.store.setRequest(r.clientId, r.id, raw);
     },

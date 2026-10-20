@@ -142,5 +142,12 @@ export interface Slot {
   gymId: string;
   status: SlotStatus;
   /** A pending reschedule request proposes this time. */
-  move?: { reqId: string; from: 'client' | 'trainer'; start: number; note?: string };
+  move?: {
+    reqId: string;
+    from: 'client' | 'trainer';
+    start: number;
+    note?: string;
+    /** a team manager proposed it (name sealed with the request) */
+    by?: string;
+  };
 }

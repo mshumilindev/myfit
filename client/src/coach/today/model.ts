@@ -33,6 +33,8 @@ export interface RequestVM {
   from: number;
   to: number;
   note?: string;
+  /** a team manager proposed it */
+  by?: string;
 }
 
 export function requestsOf(w: DerivedWorld): RequestVM[] {
@@ -48,6 +50,7 @@ export function requestsOf(w: DerivedWorld): RequestVM[] {
       from: s.start,
       to: s.move.start,
       note: s.move.note,
+      ...(s.move.by ? { by: s.move.by } : {}),
     });
   }
   // the ones that need an answer first
