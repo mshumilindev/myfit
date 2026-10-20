@@ -1,5 +1,5 @@
 import { useEffect, useRef, type KeyboardEvent, type PointerEvent } from 'react';
-import { TURN_FRAMES, TURN_STEP, file, type AnatomyMapProps } from './AnatomyMap';
+import { TURN_STEP, file, type AnatomyMapProps } from './AnatomyMap';
 import './AnatomyTurntable.css';
 
 /**
@@ -32,6 +32,12 @@ type Props = Pick<AnatomyMapProps, 'base' | 'organs' | 'marks' | 'label'> & {
   rotatable?: boolean;
   /** Spin on its own at this many degrees per second (still, if reduced motion is on). */
   spin?: number;
+  /**
+   * Ready-made frames (one picture per `step` degrees, layers already composed): nothing is composed in the browser,
+   * which is what keeps a self-spinning figure light on phones and in the desktop shells. `base`/`organs`/`marks` are
+   * ignored when this is set.
+   */
+  baked?: { url: (deg: number) => string; step: number };
 };
 
 // Frames are 320×700 renders of the 640×1400 layer canvas; the whole body is this window of it.
@@ -119,7 +125,10 @@ export function AnatomyTurntable({
   activeOrgans = [],
   rotatable = true,
   spin = 0,
+  baked,
 }: Props) {
+  const step = baked?.step ?? TURN_STEP;
+  const count = 360 / step;
   const stage = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const frames = useRef(new Map<number, ImageBitmap>());
@@ -150,10 +159,10 @@ export function AnatomyTurntable({
       cv.height = ch;
     }
     // Nearest finished frame (circular) so a frame still being built never shows as a gap.
-    const want = wrap(Math.round(angle.current / TURN_STEP) * TURN_STEP);
+    const want = wrap(Math.round(angle.current / step) * step);
     const pick = (fresh: boolean) => {
-      for (let k = 0; k <= TURN_FRAMES / 2; k++) {
-        for (const d of [wrap(want + k * TURN_STEP), wrap(want - k * TURN_STEP)]) {
+      for (let k = 0; k <= count / 2; k++) {
+        for (const d of [wrap(want + k * step), wrap(want - k * step)]) {
           const f = frames.current.get(d);
           if (f && (!fresh || tags.current.get(d) === current.current)) return f;
         }
@@ -190,10 +199,10 @@ export function AnatomyTurntable({
     };
     // While self-spinning, blend the two frames either side of the exact angle: the 5-degree steps
     // become a continuous turn at the full refresh rate instead of ~9 visible jumps a second.
-    const pos = angle.current / TURN_STEP;
+    const pos = angle.current / step;
     const fl = Math.floor(pos);
-    const fa = frames.current.get(wrap(fl * TURN_STEP));
-    const fb = frames.current.get(wrap((fl + 1) * TURN_STEP));
+    const fa = frames.current.get(wrap(fl * step));
+    const fb = frames.current.get(wrap((fl + 1) * step));
     if (spin && ready.current && fa && fb) {
       // A true cross-fade (weights add up to one): drawing the second frame over the first made
       // the semi-transparent figure denser and lighter in turn, which showed as flicker.
@@ -225,14 +234,14 @@ export function AnatomyTurntable({
     })),
     ...marks.map((m) => ({ layer: m.layer as string, alpha: 1, tint: m.tone ?? 'chronic' })),
   ];
-  const key = JSON.stringify(specs);
+  const key = baked ? `baked:${step}` : JSON.stringify(specs);
 
   useEffect(() => {
     if (typeof createImageBitmap === 'undefined') return; // no canvas pipeline (tests, very old browsers)
     let alive = true;
     ready.current = false;
     current.current = key;
-    const list = JSON.parse(key) as Spec[];
+    const list = baked ? [] : (JSON.parse(key) as Spec[]);
     const css = getComputedStyle(stage.current ?? document.body);
     const colour = (tone: string) =>
       css.getPropertyValue(`--color-${tone}-deep`).trim() ||
@@ -240,7 +249,7 @@ export function AnatomyTurntable({
       '#3a55b5';
     const bitmaps = frames.current;
     const missing = new Set<number>();
-    for (let k = 0; k < TURN_FRAMES; k++) missing.add(k * TURN_STEP);
+    for (let k = 0; k < count; k++) missing.add(k * step);
     // Always build the missing frame nearest to where the figure is NOW (it may be mid-spin).
     const takeNearest = () => {
       let best = -1;
@@ -256,7 +265,14 @@ export function AnatomyTurntable({
       return best;
     };
 
+    // Ready-made frame: a plain picture, decoded off the main thread.
+    const fetchBaked = async (deg: number) => {
+      const res = await fetch(new URL(baked!.url(deg), document.baseURI).href);
+      if (!res.ok) throw new Error(String(res.status));
+      return createImageBitmap(await res.blob());
+    };
     const compose = async (deg: number) => {
+      if (baked) return fetchBaked(deg);
       const imgs = await Promise.all(
         list.map((s) => load(new URL(file(s.layer, deg), document.baseURI).href)),
       );
@@ -332,14 +348,14 @@ export function AnatomyTurntable({
           }
           requestDraw();
           // Leave the main thread free between frames so scrolling never stalls.
-          if (spin) await new Promise((r) => setTimeout(r, 24));
+          if (spin && !baked) await new Promise((r) => setTimeout(r, 24));
         } catch {
           /* a frame that fails to load is skipped; its neighbour stands in */
         }
       }
     };
     const begin = () => {
-      const n = spin ? 2 : 4;
+      const n = baked ? 3 : spin ? 2 : 4;
       void Promise.all(Array.from({ length: n }, worker)).then(() => {
         if (alive && missing.size === 0) {
           ready.current = true;
@@ -424,7 +440,7 @@ export function AnatomyTurntable({
             {
               t: 'init',
               canvas: off,
-              step: TURN_STEP,
+              step,
               spin,
               angle: angle.current,
               rect: viewRect(view.current.y, view.current.zoom),
@@ -461,7 +477,17 @@ export function AnatomyTurntable({
               );
         if (io && stage.current) io.observe(stage.current);
         else worker.postMessage({ t: 'vis', v: true });
+        // A background tab or a minimised window has nothing to show: stop the spin until it is back.
+        const onHidden = () => {
+          if (document.hidden) worker.postMessage({ t: 'vis', v: false });
+          else if (stage.current) {
+            const r = stage.current.getBoundingClientRect();
+            worker.postMessage({ t: 'vis', v: r.bottom > 0 && r.top < window.innerHeight });
+          }
+        };
+        document.addEventListener('visibilitychange', onHidden);
         return () => {
+          document.removeEventListener('visibilitychange', onHidden);
           ro?.disconnect();
           io?.disconnect();
           worker.postMessage({ t: 'vis', v: false });
@@ -478,18 +504,18 @@ export function AnatomyTurntable({
     let id = 0;
     let last = 0;
     let visible = true;
-    const step = (now: number) => {
+    const spinFrame = (now: number) => {
       if (visible && ready.current && last && !drag.current && !moving.current) {
         angle.current = wrap(angle.current + (spin * (now - last)) / 1000);
         draw();
       }
       last = now;
-      id = requestAnimationFrame(step);
+      id = requestAnimationFrame(spinFrame);
     };
     const start = () => {
       last = 0;
       cancelAnimationFrame(id);
-      id = requestAnimationFrame(step);
+      id = requestAnimationFrame(spinFrame);
     };
     const io =
       typeof IntersectionObserver === 'undefined' || !stage.current
@@ -507,7 +533,7 @@ export function AnatomyTurntable({
     };
     // `draw` only touches refs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spin]);
+  }, [spin, step]);
 
   useEffect(() => {
     const cv = canvas.current;
@@ -539,7 +565,7 @@ export function AnatomyTurntable({
   const onKey = (e: KeyboardEvent<HTMLDivElement>) => {
     if (!rotatable || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
     e.preventDefault();
-    angle.current += e.key === 'ArrowLeft' ? -TURN_STEP * 3 : TURN_STEP * 3;
+    angle.current += e.key === 'ArrowLeft' ? -step * 3 : step * 3;
     requestDraw();
   };
 

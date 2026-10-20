@@ -16,6 +16,7 @@ import { AnatomyMap, type AnatomyMark } from '../../components/ui/AnatomyMap';
 import { AnatomyTurntable } from '../../components/ui/AnatomyTurntable';
 import { LOCALE_IDS, fmtDayMonth, setLocale, useT, type LocaleId } from '../../i18n';
 import { AuthView } from '../AuthView';
+import { isAppShell } from './landingGate';
 import './landing-design.css';
 
 const FLAGS: Record<LocaleId, string> = { en: '🇬🇧', uk: '🇺🇦', pl: '🇵🇱', lt: '🇱🇹', et: '🇪🇪' };
@@ -71,6 +72,12 @@ const RECOVERY_MARKS: AnatomyMark[] = [
   { layer: 'm_arm', tone: 'ok' },
   { layer: 'm_calves', tone: 'ok' },
 ];
+
+/** The spinning body's frames are composed ahead of time (scripts/bake-landing-turn.py): nothing is built in the browser. */
+const BAKED_TURN = {
+  url: (deg: number) => `${import.meta.env.BASE_URL ?? '/'}landing/turn/${deg}.webp`,
+  step: 10,
+};
 
 /** Muscle map with a skeleton scan sweeping over it (the design's "x-ray"). */
 function AnatomyXray({ label }: { label: string }) {
@@ -1123,6 +1130,7 @@ function AnatomyTurn({ label }: { label: string }) {
         <AnatomyTurntable
           base="muscles"
           marks={RECOVERY_MARKS}
+          baked={BAKED_TURN}
           label={label}
           camera={camera}
           rotatable={false}
@@ -1434,6 +1442,7 @@ export function LandingDesign({
       <div
         id="top"
         data-os={os}
+        data-shell={isAppShell() ? 'app' : 'web'}
         style={{ background: '#131416', color: '#ecebe7', minHeight: '100dvh' }}
       >
         <nav className="l-rail" aria-label="Sections">

@@ -1266,6 +1266,14 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+/* Inside the installed app (PWA or desktop shell) there is nothing to download: no "Get the app" block. */
+.ld #top[data-shell='app'] .l-pdl {
+  display: none !important;
+}
+.ld #top[data-shell='app'] .l-panel:has(> .l-pdl) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 /* First screen: the header (logo + language) sits at the very top, the rest is centred in the space below it. */
 .ld .l-hero {
   justify-content: flex-start;
