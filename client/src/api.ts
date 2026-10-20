@@ -24,6 +24,7 @@ import {
 } from 'firebase/auth';
 import { httpsCallable, type HttpsCallableResult } from 'firebase/functions';
 import { auth, functions } from './firebase';
+import { sessionDeviceId } from './accounts/sessionDevice';
 
 const USERNAME_KEY = 'spotter.username';
 const ROLE_KEY = 'spotter.role';
@@ -117,8 +118,10 @@ export async function signOut(opts: { forget?: boolean } = {}): Promise<void> {
   afterSignOut(localStorage, uid, opts.forget === true);
   try {
     // This device's session record goes away while the token still works (best effort, short).
-    const { endSession } = await import('./accounts/sessions');
-    await Promise.race([endSession(), new Promise((r) => setTimeout(r, 1500))]);
+    await Promise.race([
+      callFn('sessionEnd', { deviceId: sessionDeviceId() }, { quiet: true }),
+      new Promise((r) => setTimeout(r, 1500)),
+    ]);
   } catch {
     /* the record just ages out of the Sessions list */
   }

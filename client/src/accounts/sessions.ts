@@ -3,8 +3,10 @@
  * watch that signs this device out when it was signed out from another one. Server rules: functions/src/sessions.ts.
  */
 import { callFn } from '../api';
+import { sessionDeviceId } from './sessionDevice';
 
-const DEVICE_KEY = 'spotter.pushDevice'; // the device key shared with push (one id per browser install)
+export { sessionDeviceId };
+
 const CHECK_EVERY_MS = 60_000;
 
 export interface SessionRow {
@@ -14,15 +16,6 @@ export interface SessionRow {
   country: string | null;
   lastSeenAt: number;
   createdAt: number;
-}
-
-export function sessionDeviceId(): string {
-  let id = localStorage.getItem(DEVICE_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(DEVICE_KEY, id);
-  }
-  return id;
 }
 
 const quiet = { quiet: true } as const;
@@ -57,15 +50,6 @@ export async function revokeOtherSessions(): Promise<number> {
     quiet,
   );
   return r.revoked;
-}
-
-/** This device signs out by itself: its record goes away. Best effort. */
-export async function endSession(): Promise<void> {
-  try {
-    await callFn('sessionEnd', { deviceId: sessionDeviceId() }, quiet);
-  } catch {
-    /* the record just ages out of the list */
-  }
 }
 
 /** Checks now and again on focus / back online (at most once a minute); `onRevoked` runs once when this device was signed out elsewhere. */
