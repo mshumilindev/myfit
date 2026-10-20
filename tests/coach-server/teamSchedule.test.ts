@@ -71,7 +71,7 @@ describe('manager reschedule requests', () => {
       already: false,
     });
     expect(pushes).toEqual([['c1', 'request']]);
-    const log = await kv.list('teams/t1/activity');
+    const log = (await kv.list('teams/t1/activity')).filter((l) => l.data.actorUid === 'm1');
     expect(log.map((l) => l.data)).toMatchObject([
       { actorUid: 'm1', role: 'manager', kind: 'move-request', clientId: 'c1', refId: 'r1' },
     ]);
@@ -131,7 +131,7 @@ describe('manager reschedule requests', () => {
 
   it('the manager reports an edit of the schedule for the log; only a manager, only own team, only known kinds', async () => {
     await teamLogActivity(ctx(), mgr, { kind: 'session-done', clientId: 'c1' });
-    expect((await kv.list('teams/t1/activity')).map((l) => l.data.kind)).toEqual(['session-done']);
+    expect((await kv.list('teams/t1/activity')).map((l) => l.data.kind)).toContain('session-done');
     expect(await code(teamLogActivity(ctx(), mgr, { kind: 'drop-table', clientId: 'c1' }))).toBe(
       'invalid-argument:invalid-kind',
     );
@@ -142,5 +142,29 @@ describe('manager reschedule requests', () => {
     expect(await code(teamLogActivity(ctx(), mgr, { kind: 'session-done', clientId: 'c9' }))).toBe(
       'permission-denied:not-your-team',
     );
+  });
+});
+
+describe('team activity log', () => {
+  it('records team events and the removal flow; the owner reads all, a manager only own until the owner widens it', async () => {
+    const { clientRemovalCreate, clientRemovalRespond, teamActivity, teamSetActivityScope } =
+      await import('../../functions/src/coach/team');
+    await clientRemovalCreate(ctx(), mgr, { clientId: 'c1', reason: 'x' });
+    await clientRemovalRespond(ctx(), owner, { id: 'rm-c1', approve: false });
+    await teamLogActivity(ctx(), mgr, { kind: 'session-done', clientId: 'c1' });
+    const all = await teamActivity(ctx(), owner);
+    expect(all.scope).toBe('owner');
+    expect(all.entries.map((e) => e.kind).sort()).toEqual(
+      ['member-added', 'removal-declined', 'removal-request', 'session-done'].sort(),
+    );
+    const added = all.entries.find((e) => e.kind === 'member-added')!;
+    expect(added).toMatchObject({ actorName: 'Olena', subjectName: 'Irina', role: 'trainer' });
+    const own = await teamActivity(ctx(), mgr);
+    expect(own.scope).toBe('own');
+    expect(own.entries.map((e) => e.actorUid)).toEqual(['m1', 'm1']);
+    expect(own.entries.every((e) => e.actorName === 'Irina')).toBe(true);
+    await teamSetActivityScope(ctx(), owner, { uid: 'm1', scope: 'all' });
+    expect((await teamActivity(ctx(), mgr)).entries).toHaveLength(4);
+    expect(await code(teamActivity(ctx(), client))).toBe('permission-denied:not-in-team');
   });
 });

@@ -948,6 +948,8 @@ describe('the hourly sweep', () => {
     });
     await kv.set('users/c1/audit/ancient', { at: T0 - 401 * DAY });
     await kv.set('users/c1/audit/recent', { at: T0 - 399 * DAY });
+    await kv.set('teams/t1/activity/ancient', { ts: T0 - 91 * DAY });
+    await kv.set('teams/t1/activity/recent', { ts: T0 - 89 * DAY });
     await kv.merge(base, { createdAt: T0 - 91 * DAY });
     const r = await sweep(ctx());
     expect(r).toEqual({
@@ -955,6 +957,7 @@ describe('the hourly sweep', () => {
       messagesTombstoned: 1,
       notesPurged: 1,
       auditDeleted: 1,
+      activityPurged: 1,
       rotationFlagged: 1,
       rateLimitsPurged: 0,
     });
@@ -975,12 +978,15 @@ describe('the hourly sweep', () => {
     expect(kv.has(`${base}/notes/n1`)).toBe(false);
     expect(kv.has('users/c1/audit/ancient')).toBe(false);
     expect(kv.has('users/c1/audit/recent')).toBe(true);
+    expect(kv.has('teams/t1/activity/ancient')).toBe(false);
+    expect(kv.has('teams/t1/activity/recent')).toBe(true);
     expect((await kv.get(base))?.rotateDue).toBe(true);
     expect(await sweep(ctx())).toEqual({
       requestsExpired: 0,
       messagesTombstoned: 0,
       notesPurged: 0,
       auditDeleted: 0,
+      activityPurged: 0,
       rotationFlagged: 0,
       rateLimitsPurged: 0,
     });

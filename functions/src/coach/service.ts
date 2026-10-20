@@ -3,7 +3,7 @@
  * seam so every rule below runs in unit tests without an emulator. `handlers.ts` binds them to Firestore Admin
  * and Cloud Functions. Nothing here logs request bodies or envelopes; sealed fields are only ever passed through.
  */
-import { logActivity, teamIdOf } from './activity';
+import { ACTIVITY_RETENTION_MS, logActivity, teamIdOf } from './activity';
 import type { Doc, Kv } from './kv';
 import { inviteUrl } from './inviteLink';
 import {
@@ -1105,6 +1105,8 @@ export interface SweepResult {
   messagesTombstoned: number;
   notesPurged: number;
   auditDeleted: number;
+  /** team activity entries older than the retention (ADR 005 decision 4) */
+  activityPurged: number;
   rotationFlagged: number;
   rateLimitsPurged: number;
 }
@@ -1118,6 +1120,7 @@ export async function sweep(ctx: Ctx): Promise<SweepResult> {
     messagesTombstoned: 0,
     notesPurged: 0,
     auditDeleted: 0,
+    activityPurged: 0,
     rotationFlagged: 0,
     rateLimitsPurged: 0,
   };
@@ -1176,6 +1179,15 @@ export async function sweep(ctx: Ctx): Promise<SweepResult> {
   for (const a of old) {
     await kv.del(a.path);
     out.auditDeleted++;
+  }
+
+  const oldActivity = await kv.group('activity', {
+    where: [['ts', '<', now - ACTIVITY_RETENTION_MS]],
+    limit: 400,
+  });
+  for (const a of oldActivity) {
+    await kv.del(a.path);
+    out.activityPurged++;
   }
 
   const stale = await kv.list('rateLimits', { where: [['updatedAt', '<', now - DAY]], limit: 400 });

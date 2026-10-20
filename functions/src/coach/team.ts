@@ -10,7 +10,7 @@
  * the pending list, the accepting account is whoever opens the link signed in. Only the owner trainer removes a
  * manager; anyone else may leave. Nothing here handles keys or sealed data (the client device delegates them).
  */
-import { REPORTED_KINDS, logActivity, type ReportedKind } from './activity';
+import { REPORTED_KINDS, logActivity, type ActivityEntry, type ReportedKind } from './activity';
 import { teamInviteUrl } from './inviteLink';
 import { DAY, conversationId, isUid } from './logic';
 import {
@@ -261,6 +261,13 @@ export async function teamAccept(
       acceptedAt: now,
     });
     await notice(t, i.invitedBy, 'team', actor.uid, now, `team-join-${i.id}`, i.role);
+    const inviter = (await t.get(`teams/${i.teamId}/members/${i.invitedBy}`)) as MemberRec | null;
+    await logActivity(t, i.teamId, now, {
+      actorUid: i.invitedBy,
+      role: inviter?.role ?? 'trainer',
+      kind: 'member-added',
+      refId: actor.uid,
+    });
     return { teamId: i.teamId, role: i.role };
   });
 }
@@ -323,6 +330,12 @@ async function endMembership(
       `team-${why}-${target.uid}-${now}`,
       why,
     );
+    await logActivity(t, teamId, now, {
+      actorUid: by,
+      role: why === 'removed' ? 'trainer' : target.role,
+      kind: why === 'removed' ? 'member-removed' : 'member-left',
+      refId: target.uid,
+    });
   });
 }
 
@@ -576,6 +589,14 @@ export async function clientRemovalCreate(
       createdAt: now,
       readAt: null,
     });
+    await logActivity(kv, teamId, now, {
+      actorUid: actor.uid,
+      role: 'manager',
+      kind: 'removal-request',
+      clientId,
+      refId: id,
+      status: 'pending',
+    });
     return { id };
   });
 }
@@ -595,7 +616,15 @@ export async function clientRemovalCancel(
     if (!r || r.teamId !== teamId) return fail('not-found', 'no-request');
     if (r.requestedBy !== actor.uid) return fail('permission-denied', 'not-yours');
     if (r.status !== 'pending') return { ok: true as const };
-    await kv.merge(removalPath(id), { status: 'cancelled', decidedAt: ctx.now() });
+    const at = ctx.now();
+    await kv.merge(removalPath(id), { status: 'cancelled', decidedAt: at });
+    await logActivity(kv, teamId, at, {
+      actorUid: actor.uid,
+      role: 'manager',
+      kind: 'removal-cancelled',
+      clientId: r.clientId,
+      refId: id,
+    });
     return { ok: true as const };
   });
 }
@@ -628,6 +657,13 @@ export async function clientRemovalRespond(
         await endRelationship(ctx, kv, c, 'trainer', actor.uid, now);
     }
     await kv.merge(removalPath(id), { status, decidedAt: now });
+    await logActivity(kv, teamId, now, {
+      actorUid: actor.uid,
+      role: 'trainer',
+      kind: body.approve ? 'removal-approved' : 'removal-declined',
+      clientId: r.clientId,
+      refId: id,
+    });
     const client = (await kv.get(`users/${r.clientId}`)) as UserRec | null;
     await kv.set(`users/${r.requestedBy}/notices/removal-answer-${id}-${now}`, {
       id: `removal-answer-${id}-${now}`,
@@ -720,4 +756,57 @@ export async function teamLogActivity(
     clientId,
   });
   return { ok: true };
+}
+
+export interface ActivityRow extends Omit<ActivityEntry, 'actorUid'> {
+  actorUid: string;
+  actorName: string;
+  /** client name for entries about a client; for member entries the member's name */
+  subjectName: string;
+}
+
+/**
+ * The activity log as the caller may read it: the owner trainer reads everything; a manager reads own entries, or all when the
+ * owner turned on "See all team activity" for them. Names are resolved here (metadata only; session times stay in the
+ * sealed schedule). Newest first.
+ */
+export async function teamActivity(
+  ctx: Ctx,
+  actor: Actor,
+  body: Record<string, unknown> = {},
+): Promise<{ entries: ActivityRow[]; scope: ActivityScope | 'owner' }> {
+  const { teamId, me, owner } = await myTeam(ctx, actor);
+  if (!owner && me.role !== 'manager') return fail('permission-denied', 'not-allowed');
+  const limit = Math.min(Math.max(Number(body.limit) || 100, 1), 200);
+  const acl = owner
+    ? null
+    : ((await ctx.kv.get(`teams/${teamId}/acl/${actor.uid}`)) as {
+        activityScope?: ActivityScope;
+      } | null);
+  const scope: ActivityScope | 'owner' = owner
+    ? 'owner'
+    : acl?.activityScope === 'all'
+      ? 'all'
+      : 'own';
+  const rows = await ctx.kv.list(`teams/${teamId}/activity`, { limit: 500 });
+  const names = new Map<string, string>();
+  const nameFor = async (uid: string | undefined): Promise<string> => {
+    if (!uid) return '';
+    if (!names.has(uid))
+      names.set(uid, nameOf((await ctx.kv.get(`users/${uid}`)) as UserRec | null));
+    return names.get(uid) ?? '';
+  };
+  const entries: ActivityRow[] = [];
+  const all = rows
+    .map((r) => r.data as unknown as ActivityEntry)
+    .filter((e) => scope !== 'own' || e.actorUid === actor.uid)
+    .sort((a, b) => b.ts - a.ts)
+    .slice(0, limit);
+  for (const e of all)
+    entries.push({
+      ...e,
+      actorName: await nameFor(e.actorUid),
+      subjectName: await nameFor(e.clientId ?? e.refId),
+    });
+  return { entries, scope };
 }

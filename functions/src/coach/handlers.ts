@@ -170,6 +170,9 @@ export const clientRemovalRespond = onCall(opts, (req) =>
 export const teamRequests = onCall(opts, (req) =>
   run(req, COACH, (a) => team.teamRequests(ctx(), a)),
 );
+export const teamActivity = onCall(opts, (req) =>
+  run(req, TEAM, (a) => team.teamActivity(ctx(), a, body(req))),
+);
 export const teamLogActivity = onCall(opts, (req) =>
   run(req, ['manager'], (a) => team.teamLogActivity(ctx(), a, body(req))),
 );
