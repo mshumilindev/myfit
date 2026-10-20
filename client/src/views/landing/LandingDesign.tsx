@@ -1200,6 +1200,7 @@ function useFitScreens(dep: unknown) {
         const sec = document.querySelector<HTMLElement>(`.ld #s-${id}`);
         const sv = sec?.querySelector<SVGSVGElement>(':scope > .l-bgx svg');
         if (!sec || !sv) return;
+        if (typeof sv.getBBox !== 'function') return; // jsdom has no SVG geometry
         const b = sv.getBBox();
         const x0 = Math.max(0, b.x);
         const x1 = Math.min(1000, b.x + b.width);
@@ -1217,11 +1218,11 @@ function useFitScreens(dep: unknown) {
       if (!raf) raf = requestAnimationFrame(fit);
     };
     fit();
-    const ro = new ResizeObserver(queue);
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(queue);
     secs.forEach((s, i) => {
-      ro.observe(s);
+      ro?.observe(s);
       const w = wraps[i];
-      if (w) ro.observe(w);
+      if (w) ro?.observe(w);
     });
     window.addEventListener('resize', queue);
     document.fonts?.ready.then(queue);
@@ -1229,7 +1230,7 @@ function useFitScreens(dep: unknown) {
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(late);
-      ro.disconnect();
+      ro?.disconnect();
       window.removeEventListener('resize', queue);
       wraps.forEach((w) => {
         if (w) {
