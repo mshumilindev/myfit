@@ -1,5 +1,5 @@
 import { TeamPortError, type TeamErrorCode, type TeamPort } from './port';
-import { inviteeRole, isEmail, type ActivityScope, type TeamData } from './types';
+import { isEmail, type ActivityScope, type TeamData, type TeamRole } from './types';
 
 export type TeamStatus = 'loading' | 'ready' | 'failed';
 
@@ -16,7 +16,10 @@ export interface TeamStore {
   getState(): TeamState;
   subscribe(fn: () => void): () => void;
   load(): Promise<void>;
-  invite(email: string): Promise<{ ok: true; url: string } | { ok: false; error: TeamErrorCode }>;
+  invite(
+    email: string,
+    role: TeamRole,
+  ): Promise<{ ok: true; url: string } | { ok: false; error: TeamErrorCode }>;
   revokeInvite(id: string): Promise<void>;
   removeMember(uid: string): Promise<void>;
   leave(): Promise<void>;
@@ -70,7 +73,7 @@ export function createTeamStore(port: TeamPort): TeamStore {
       return () => subs.delete(fn);
     },
     load,
-    async invite(raw) {
+    async invite(raw, role) {
       const email = raw.trim().toLowerCase();
       if (!isEmail(email)) return { ok: false, error: 'invalid-email' };
       const d = state.data;
@@ -82,7 +85,7 @@ export function createTeamStore(port: TeamPort): TeamStore {
       set({ busy: true });
       let url: string;
       try {
-        ({ url } = await port.invite(email));
+        ({ url } = await port.invite(email, role));
       } catch (e) {
         set({ busy: false });
         return { ok: false, error: codeOf(e) };
@@ -91,10 +94,7 @@ export function createTeamStore(port: TeamPort): TeamStore {
         set({
           data: {
             ...d,
-            invites: [
-              ...d.invites,
-              { id: `local-${email}`, email, role: inviteeRole(d.me.role), sentAt: now(), url },
-            ],
+            invites: [...d.invites, { id: `local-${email}`, email, role, sentAt: now(), url }],
           },
         });
       set({ busy: false });

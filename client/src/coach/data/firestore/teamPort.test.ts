@@ -56,13 +56,15 @@ describe('Firestore team port', () => {
       n === 'teamInvite' ? { inviteId: 'tok2', url: 'https://x/#/team-invite/tok2' } : { ok: true },
     );
     const p = createFirestoreTeamPort(fs);
-    expect(await p.invite('b@example.com')).toEqual({ url: 'https://x/#/team-invite/tok2' });
+    expect(await p.invite('b@example.com', 'trainer')).toEqual({
+      url: 'https://x/#/team-invite/tok2',
+    });
     await p.revokeInvite('tok2');
     await p.removeMember('m1');
     await p.leave();
     await p.setActivityScope('m1', 'all');
     expect(calls).toEqual([
-      ['teamInvite', { email: 'b@example.com' }],
+      ['teamInvite', { email: 'b@example.com', role: 'trainer' }],
       ['teamInviteRevoke', { inviteId: 'tok2' }],
       ['teamRemoveMember', { uid: 'm1' }],
       ['teamLeave', {}],
@@ -73,10 +75,16 @@ describe('Firestore team port', () => {
   it('maps server reasons and codes to port errors, never copying text', async () => {
     const err = (e: unknown) => createFirestoreTeamPort(fsWith(() => Promise.reject(e)).fs);
     await expect(
-      err({ code: 'functions/invalid-argument', details: { reason: 'invalid-email' } }).invite('x'),
+      err({ code: 'functions/invalid-argument', details: { reason: 'invalid-email' } }).invite(
+        'x',
+        'manager',
+      ),
     ).rejects.toMatchObject({ code: 'invalid-email' });
     await expect(
-      err({ code: 'functions/already-exists', details: { reason: 'invite-exists' } }).invite('x'),
+      err({ code: 'functions/already-exists', details: { reason: 'invite-exists' } }).invite(
+        'x',
+        'manager',
+      ),
     ).rejects.toMatchObject({ code: 'exists' });
     await expect(err({ code: 'functions/permission-denied' }).load()).rejects.toMatchObject({
       code: 'forbidden',

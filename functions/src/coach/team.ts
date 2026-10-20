@@ -107,7 +107,7 @@ export interface TeamInviteResult {
   expiresAt: number;
 }
 
-/** A trainer invites a MANAGER, a manager invites a TRAINER (the role follows the inviter). */
+/** A trainer or a manager invites one person as a MANAGER or a TRAINER (the sender picks; no body role = the opposite of the sender's own). */
 export async function teamInvite(
   ctx: Ctx,
   actor: Actor,
@@ -117,7 +117,10 @@ export async function teamInvite(
   if (!EMAIL.test(email)) fail('invalid-argument', 'invalid-email');
   const { teamId, me } = await myTeam(ctx, actor);
   if (!isCoach(actor) && actor.role !== 'manager') fail('permission-denied', 'not-allowed');
-  const role: TeamRole = me.role === 'trainer' ? 'manager' : 'trainer';
+  const asked = body.role;
+  if (asked !== undefined && asked !== 'manager' && asked !== 'trainer')
+    fail('invalid-argument', 'invalid-role');
+  const role: TeamRole = asked ?? (me.role === 'trainer' ? 'manager' : 'trainer');
   const kv = ctx.kv;
   const now = ctx.now();
   const mine = (await kv.list('teamInvites', { where: [['teamId', '==', teamId]] })).map(

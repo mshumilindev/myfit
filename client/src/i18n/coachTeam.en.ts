@@ -10,11 +10,11 @@ const daysAgo = (n: number) => plural('en', n, { one: '{n} day ago', other: '{n}
 
 export const teamEn = {
   tmTitle: 'Team',
-  tmSubTrainer: (n: number) => `${peopleN(n)}. You add managers, a manager adds trainers.`,
+  tmSubTrainer: (n: number) => `${peopleN(n)}. Add managers and trainers to your team.`,
   tmSubManager: (n: number) =>
-    `${peopleN(n)}. You add trainers. Only a trainer can remove a manager.`,
-  tmAddManager: 'Add a manager',
-  tmAddTrainer: 'Add a trainer',
+    `${peopleN(n)}. Add managers and trainers. Only a trainer can remove a manager.`,
+  tmAddMember: 'Add a team member',
+  tmRoleLabel: 'Role',
   tmMembers: 'Members',
   tmPending: 'Pending invites',
   tmYou: 'You',
@@ -44,10 +44,8 @@ export const teamEn = {
   tmPendingLabel: 'Pending invites',
 
   // add sheet
-  tmAddManagerTitle: 'Add a manager',
   tmAddManagerBody:
-    'A manager runs your schedule and client list. They cannot see workouts, health, nutrition, notes or chat, and cannot add other managers.',
-  tmAddTrainerTitle: 'Add a trainer',
+    'A manager runs your schedule and client list. They cannot see workouts, health, nutrition, notes or chat.',
   tmAddTrainerBody:
     'A trainer coaches their own clients. They join the team you manage and appear in your Clients and Schedule.',
   tmEmail: 'Email',

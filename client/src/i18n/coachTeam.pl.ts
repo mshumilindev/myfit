@@ -14,10 +14,11 @@ const daysAgo = (n: number) =>
 
 export const teamPl: typeof teamEn = {
   tmTitle: 'Zespół',
-  tmSubTrainer: (n) => `${peopleN(n)}. Ty dodajesz menedżerów, menedżer dodaje trenerów.`,
-  tmSubManager: (n) => `${peopleN(n)}. Ty dodajesz trenerów. Menedżera może usunąć tylko trener.`,
-  tmAddManager: 'Dodaj menedżera',
-  tmAddTrainer: 'Dodaj trenera',
+  tmSubTrainer: (n) => `${peopleN(n)}. Dodawaj menedżerów i trenerów.`,
+  tmSubManager: (n) =>
+    `${peopleN(n)}. Dodawaj menedżerów i trenerów. Menedżera może usunąć tylko trener.`,
+  tmAddMember: 'Dodaj członka zespołu',
+  tmRoleLabel: 'Rola',
   tmMembers: 'Członkowie',
   tmPending: 'Oczekujące zaproszenia',
   tmYou: 'Ty',
@@ -47,10 +48,8 @@ export const teamPl: typeof teamEn = {
   tmMembersLabel: 'Członkowie zespołu',
   tmPendingLabel: 'Oczekujące zaproszenia',
 
-  tmAddManagerTitle: 'Dodaj menedżera',
   tmAddManagerBody:
-    'Menedżer prowadzi Twój grafik i listę klientów. Nie widzi treningów, zdrowia, żywienia, notatek ani czatu i nie może dodawać innych menedżerów.',
-  tmAddTrainerTitle: 'Dodaj trenera',
+    'Menedżer prowadzi Twój grafik i listę klientów. Nie widzi treningów, zdrowia, żywienia, notatek ani czatu.',
   tmAddTrainerBody:
     'Trener prowadzi własnych klientów. Dołącza do zespołu, którym zarządzasz, i pojawia się w Twoich Klientach i Grafiku.',
   tmEmail: 'Email',

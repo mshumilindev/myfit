@@ -17,7 +17,7 @@ import { InviteSheet } from './InviteSheet';
 import { MemberSheet } from './MemberSheet';
 import type { TeamPort } from './port';
 import { agoLabel, lastActiveLabel } from './teamTime';
-import { canRemoveMembers, inviteeRole, type TeamMember } from './types';
+import { canRemoveMembers, defaultInviteeRole, type TeamMember } from './types';
 import { useTeam } from './useTeam';
 import './TeamScreen.css';
 
@@ -59,7 +59,7 @@ export function TeamScreen({ port }: { port?: TeamPort }) {
 
   const { me, members, invites, asOf } = data;
   const isOwnerTrainer = canRemoveMembers(me);
-  const addLabel = me.role === 'trainer' ? tm.tmAddManager : tm.tmAddTrainer;
+  const addLabel = tm.tmAddMember;
   const roleName = (r: TeamMember['role']) =>
     r === 'manager' ? tm.tmRoleManager : tm.tmRoleTrainer;
   const memberSub = (m: TeamMember) => {
@@ -210,9 +210,9 @@ export function TeamScreen({ port }: { port?: TeamPort }) {
 
       {dialog?.kind === 'add' && (
         <AddMemberSheet
-          role={inviteeRole(me.role)}
+          defaultRole={defaultInviteeRole(me.role)}
           onClose={close}
-          onSend={(email) => store.invite(email)}
+          onSend={(email, role) => store.invite(email, role)}
         />
       )}
       {opened && (

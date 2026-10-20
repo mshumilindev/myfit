@@ -33,8 +33,8 @@ export interface TeamPort {
   /** Last good snapshot from the local cache, or null. Never blocks. */
   peek(): TeamData | null;
   load(): Promise<TeamData>;
-  /** Invite by email: the role follows the viewer (a trainer invites a manager, a manager a trainer). */
-  invite(email: string): Promise<{ url: string }>;
+  /** Invite one person by email as a manager or a trainer (the sender picks the type). */
+  invite(email: string, role: TeamRole): Promise<{ url: string }>;
   revokeInvite(id: string): Promise<void>;
   /** Owner trainer only. Access ends at once; the keys are renewed by the clients' apps. */
   removeMember(uid: string): Promise<void>;

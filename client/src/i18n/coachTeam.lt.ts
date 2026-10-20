@@ -19,11 +19,11 @@ const daysAgo = (n: number) =>
 
 export const teamLt: typeof teamEn = {
   tmTitle: 'Komanda',
-  tmSubTrainer: (n) => `${peopleN(n)}. Jūs pridedate vadybininkus, vadybininkas prideda trenerius.`,
+  tmSubTrainer: (n) => `${peopleN(n)}. Pridėkite vadybininkų ir trenerių.`,
   tmSubManager: (n) =>
-    `${peopleN(n)}. Jūs pridedate trenerius. Vadybininką gali pašalinti tik treneris.`,
-  tmAddManager: 'Pridėti vadybininką',
-  tmAddTrainer: 'Pridėti trenerį',
+    `${peopleN(n)}. Pridėkite vadybininkų ir trenerių. Vadybininką gali pašalinti tik treneris.`,
+  tmAddMember: 'Pridėti komandos narį',
+  tmRoleLabel: 'Vaidmuo',
   tmMembers: 'Nariai',
   tmPending: 'Laukiantys kvietimai',
   tmYou: 'Jūs',
@@ -53,10 +53,8 @@ export const teamLt: typeof teamEn = {
   tmMembersLabel: 'Komandos nariai',
   tmPendingLabel: 'Laukiantys kvietimai',
 
-  tmAddManagerTitle: 'Pridėti vadybininką',
   tmAddManagerBody:
-    'Vadybininkas tvarko jūsų tvarkaraštį ir klientų sąrašą. Jis nemato treniruočių, sveikatos, mitybos, užrašų ar pokalbių ir negali pridėti kitų vadybininkų.',
-  tmAddTrainerTitle: 'Pridėti trenerį',
+    'Vadybininkas tvarko jūsų tvarkaraštį ir klientų sąrašą. Jis nemato treniruočių, sveikatos, mitybos, užrašų ar pokalbių.',
   tmAddTrainerBody:
     'Treneris dirba su savo klientais. Jis prisijungia prie jūsų valdomos komandos ir atsiranda jūsų Klientuose ir Tvarkaraštyje.',
   tmEmail: 'El. paštas',

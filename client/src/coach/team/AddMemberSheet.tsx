@@ -1,25 +1,27 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { Button } from '../../components/ui/Button';
 import { Field } from '../../components/ui/Field';
+import { Segmented } from '../../components/ui/Segmented';
 import { ResponsivePanel } from '../../components/ui/ResponsivePanel';
 import { useTeamT } from '../../i18n/coachTeam';
 import type { TeamErrorCode } from './port';
 import { isEmail, type TeamRole } from './types';
 
 /**
- * Add a manager (owner trainer) / Add a trainer (manager): ONE field, no role picker. The invite is one person, seven
- * days, and access starts when they accept. Board D14 / D14b.
+ * Add a team member: an email and the type (Manager or Trainer, the sender picks). The invite is one person, seven
+ * days, and access starts when they accept. Board D14 / D14b (the type picker follows the product owner's call).
  */
 export function AddMemberSheet({
-  role,
+  defaultRole,
   onClose,
   onSend,
 }: {
-  /** the role the invitee gets */
-  role: TeamRole;
+  /** the type the picker starts on */
+  defaultRole: TeamRole;
   onClose: () => void;
   onSend: (
     email: string,
+    role: TeamRole,
   ) => Promise<{ ok: true; url: string } | { ok: false; error: TeamErrorCode }>;
 }) {
   const { tm } = useTeamT();
@@ -29,6 +31,7 @@ export function AddMemberSheet({
   const [sending, setSending] = useState(false);
   const [link, setLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [role, setRole] = useState<TeamRole>(defaultRole);
   const manager = role === 'manager';
 
   const submit = async (e?: FormEvent) => {
@@ -39,7 +42,7 @@ export function AddMemberSheet({
       return;
     }
     setSending(true);
-    const r = await onSend(email);
+    const r = await onSend(email, role);
     setSending(false);
     if (r.ok) return setLink(r.url);
     setError(
@@ -97,8 +100,8 @@ export function AddMemberSheet({
       mode="sheet"
       anchorRef={anchor}
       onClose={onClose}
-      label={manager ? tm.tmAddManagerTitle : tm.tmAddTrainerTitle}
-      title={manager ? tm.tmAddManagerTitle : tm.tmAddTrainerTitle}
+      label={tm.tmAddMember}
+      title={tm.tmAddMember}
       footer={
         <div className="tm-sheet-actions">
           <Button variant="primary" loading={sending} onClick={() => void submit()}>
@@ -111,6 +114,16 @@ export function AddMemberSheet({
       }
     >
       <form className="tm-sheet" onSubmit={(e) => void submit(e)} noValidate>
+        <Segmented<TeamRole>
+          label={tm.tmRoleLabel}
+          fill
+          value={role}
+          onChange={setRole}
+          options={[
+            { value: 'manager', label: tm.tmRoleManager },
+            { value: 'trainer', label: tm.tmRoleTrainer },
+          ]}
+        />
         <p className="tm-sheet-sub">{manager ? tm.tmAddManagerBody : tm.tmAddTrainerBody}</p>
         <Field
           label={tm.tmEmail}

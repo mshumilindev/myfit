@@ -63,8 +63,8 @@ export function createFirestoreTeamPort(
       last = { ...s, invites: s.invites.map((i) => ({ ...i, url: teamInviteLink(i.id) })) };
       return last;
     },
-    async invite(email) {
-      const r = await call<{ inviteId: string; url: string }>('teamInvite', { email });
+    async invite(email, role) {
+      const r = await call<{ inviteId: string; url: string }>('teamInvite', { email, role });
       return { url: r.url || teamInviteLink(r.inviteId) };
     },
     async revokeInvite(id) {

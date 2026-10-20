@@ -8,11 +8,11 @@ const daysAgo = (n: number) =>
 
 export const teamEt: typeof teamEn = {
   tmTitle: 'Meeskond',
-  tmSubTrainer: (n) => `${peopleN(n)}. Sina lisad haldureid, haldur lisab treenereid.`,
+  tmSubTrainer: (n) => `${peopleN(n)}. Lisa haldureid ja treenereid.`,
   tmSubManager: (n) =>
-    `${peopleN(n)}. Sina lisad treenereid. Halduri saab eemaldada ainult treener.`,
-  tmAddManager: 'Lisa haldur',
-  tmAddTrainer: 'Lisa treener',
+    `${peopleN(n)}. Lisa haldureid ja treenereid. Halduri saab eemaldada ainult treener.`,
+  tmAddMember: 'Lisa meeskonnaliige',
+  tmRoleLabel: 'Roll',
   tmMembers: 'Liikmed',
   tmPending: 'Ootel kutsed',
   tmYou: 'Sina',
@@ -42,10 +42,8 @@ export const teamEt: typeof teamEn = {
   tmMembersLabel: 'Meeskonna liikmed',
   tmPendingLabel: 'Ootel kutsed',
 
-  tmAddManagerTitle: 'Lisa haldur',
   tmAddManagerBody:
-    'Haldur korraldab sinu ajakava ja klientide nimekirja. Ta ei näe treeninguid, tervist, toitumist, märkmeid ega vestlust ega saa lisada teisi haldureid.',
-  tmAddTrainerTitle: 'Lisa treener',
+    'Haldur korraldab sinu ajakava ja klientide nimekirja. Ta ei näe treeninguid, tervist, toitumist, märkmeid ega vestlust.',
   tmAddTrainerBody:
     'Treener töötab oma klientidega. Ta liitub sinu juhitava meeskonnaga ja ilmub sinu Klientide ja Ajakava alla.',
   tmEmail: 'E-post',

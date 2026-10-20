@@ -161,6 +161,22 @@ describe('accepting', () => {
     );
   });
 
+  it('the sender picks the type: a trainer may invite a trainer, a manager a manager; an unknown type is refused', async () => {
+    await joined();
+    await teamInvite(ctx(), owner, { email: 'tr@example.com', role: 'trainer' });
+    await teamInvite(ctx(), mgrNow, { email: 'mg@example.com', role: 'manager' });
+    const roles = (await teamRead(ctx(), owner)).invites.map((i) => [i.email, i.role]);
+    expect(roles).toEqual(
+      expect.arrayContaining([
+        ['tr@example.com', 'trainer'],
+        ['mg@example.com', 'manager'],
+      ]),
+    );
+    expect(await code(teamInvite(ctx(), owner, { email: 'x@example.com', role: 'admin' }))).toBe(
+      'invalid-argument:invalid-role',
+    );
+  });
+
   it('a manager invites a TRAINER; only a trainer account may accept, a member may not', async () => {
     await joined();
     const r = await teamInvite(ctx(), mgrNow, { email: 'andriy@example.com' });

@@ -36,11 +36,17 @@ describe('team store', () => {
   it('invite: validates locally, refuses a duplicate, returns the link and shows the invite at once', async () => {
     const s = createTeamStore(mk());
     await s.load();
-    expect(await s.invite('nope')).toEqual({ ok: false, error: 'invalid-email' });
-    expect(await s.invite('Kateryna@Example.com')).toEqual({ ok: false, error: 'exists' });
-    const r = await s.invite('new@example.com');
+    expect(await s.invite('nope', 'manager')).toEqual({ ok: false, error: 'invalid-email' });
+    expect(await s.invite('Kateryna@Example.com', 'manager')).toEqual({
+      ok: false,
+      error: 'exists',
+    });
+    const r = await s.invite('new@example.com', 'trainer');
     expect(r.ok && r.url).toContain('#/team-invite/');
     expect(s.getState().data?.invites.map((i) => i.email)).toContain('new@example.com');
+    expect(s.getState().data?.invites.find((i) => i.email === 'new@example.com')?.role).toBe(
+      'trainer',
+    );
   });
 
   it('invite: a server refusal is reported and nothing is added', async () => {
@@ -51,7 +57,7 @@ describe('team store', () => {
     const s = createTeamStore(port);
     await s.load();
     const before = s.getState().data?.invites.length;
-    expect(await s.invite('x@example.com')).toEqual({ ok: false, error: 'offline' });
+    expect(await s.invite('x@example.com', 'manager')).toEqual({ ok: false, error: 'offline' });
     expect(s.getState().data?.invites.length).toBe(before);
     expect(s.getState().busy).toBe(false);
   });

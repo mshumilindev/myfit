@@ -41,8 +41,8 @@ export interface TeamData {
   asOf: number;
 }
 
-/** The role a person invited by the viewer gets: a trainer adds managers, a manager adds trainers. */
-export const inviteeRole = (viewer: TeamRole): TeamRole =>
+/** The type the add sheet starts on: a trainer usually adds a manager, a manager a trainer. Either can pick the other. */
+export const defaultInviteeRole = (viewer: TeamRole): TeamRole =>
   viewer === 'trainer' ? 'manager' : 'trainer';
 
 /** Only the team owner removes a manager; anyone leaves on their own. */

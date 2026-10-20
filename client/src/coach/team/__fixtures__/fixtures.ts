@@ -5,13 +5,7 @@
 import { createDemoClock } from '../../data/__fixtures__/demoClock';
 import { TeamPortError, type TeamPort } from '../port';
 import { teamInviteLink } from '../../inviteLink';
-import {
-  inviteeRole,
-  type TeamRole,
-  type ActivityScope,
-  type TeamData,
-  type TeamMember,
-} from '../types';
+import { type TeamRole, type ActivityScope, type TeamData, type TeamMember } from '../types';
 
 const DAY = 86_400_000;
 
@@ -110,16 +104,13 @@ export function createFixturesTeamPort(o: FixturesTeamOptions = {}): TeamPort {
       cold = false;
       return data;
     },
-    async invite(email) {
+    async invite(email, role) {
       await guard();
       if (data.invites.some((i) => i.email === email)) throw new TeamPortError('exists');
       const url = teamInviteLink(`inv-${email.replace(/[^a-z0-9]/g, '')}`);
       data = {
         ...data,
-        invites: [
-          ...data.invites,
-          { id: `inv-${email}`, email, role: inviteeRole(viewer), sentAt: clock(), url },
-        ],
+        invites: [...data.invites, { id: `inv-${email}`, email, role, sentAt: clock(), url }],
       };
       return { url };
     },
