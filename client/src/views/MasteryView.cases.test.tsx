@@ -178,7 +178,8 @@ describe('MasteryView: detail', () => {
       [...document.querySelectorAll('.mst-ps-row')]
         .find((r) => r.querySelector('.mst-ps-name')?.textContent === en.masterySignal[key])
         ?.querySelector('.mst-ps-read')?.textContent;
-    expect(read('coverage')).toBe(en.mrSkipped(`${en.muscleGroups.back}, ${en.muscleGroups.core}`));
+    // SPO-152: lats/traps/lower back count toward "back" coverage, so only core is skipped in this history.
+    expect(read('coverage')).toBe(en.mrSkipped(en.muscleGroups.core));
     expect(read('warmup')).toBe(en.mrWarm(100));
     expect(read('cooldown')).toBe(en.mrCooldownLow);
     expect(read('cardio')).toBe(en.mrCardioOk);
