@@ -923,3 +923,75 @@ export async function teamNoticesRead(ctx: Ctx, actor: Actor): Promise<{ ok: tru
       await ctx.kv.merge(r.path, { readAt: now });
   return { ok: true };
 }
+
+/* ---- the client's view of the trainer's team (SPO-205) ------------------------------------------------------------ */
+export interface ClientTeamView {
+  trainerName: string;
+  /** everyone who works with the trainer's clients (names and roles only) */
+  members: { name: string; role: TeamRole }[];
+  /** what team managers did that concerns THIS client, newest first (metadata only) */
+  actions: { id: string; kind: string; actorName: string; ts: number }[];
+}
+const CLIENT_VISIBLE_KINDS = new Set([
+  'move-request',
+  'move-cancel',
+  'session-done',
+  'session-missed',
+  'session-cancelled',
+  'session-edited',
+]);
+
+/**
+ * CLIENT: who is in my trainer's team and what managers did with my schedule. Names and roles only; nothing about other
+ * clients and no activity of the trainers themselves (those are in "Who saw your data" as before).
+ */
+export async function teamForClient(ctx: Ctx, actor: Actor): Promise<ClientTeamView> {
+  const c = (await ctx.kv.get(`coaching/${actor.uid}`)) as {
+    status?: string;
+    trainerId?: string;
+  } | null;
+  if (!c || c.status !== 'active' || !c.trainerId)
+    return { trainerName: '', members: [], actions: [] };
+  const trainer = (await ctx.kv.get(`users/${c.trainerId}`)) as UserRec | null;
+  const teamId = trainer?.teamId || c.trainerId;
+  const rows = (await ctx.kv.list(`teams/${teamId}/members`))
+    .map((r) => r.data as unknown as MemberRec)
+    .filter((m) => m.status === 'active');
+  const hasManager = rows.some((m) => m.role === 'manager');
+  const members: ClientTeamView['members'] = [];
+  if (hasManager) {
+    const uids = new Set(rows.map((m) => m.uid));
+    uids.add(teamId);
+    for (const uid of uids) {
+      const role = rows.find((m) => m.uid === uid)?.role ?? 'trainer';
+      members.push({ name: nameOf((await ctx.kv.get(`users/${uid}`)) as UserRec | null), role });
+    }
+    members.sort((a, b) => a.role.localeCompare(b.role) || a.name.localeCompare(b.name));
+  }
+  const log = await ctx.kv.list(`teams/${teamId}/activity`, {
+    where: [['clientId', '==', actor.uid]],
+    limit: 200,
+  });
+  const actions: ClientTeamView['actions'] = [];
+  for (const e of log
+    .map(
+      (r) =>
+        r.data as unknown as {
+          id: string;
+          role: string;
+          actorUid: string;
+          kind: string;
+          ts: number;
+        },
+    )
+    .filter((e) => e.role === 'manager' && CLIENT_VISIBLE_KINDS.has(e.kind))
+    .sort((a, b) => b.ts - a.ts)
+    .slice(0, 50))
+    actions.push({
+      id: e.id,
+      kind: e.kind,
+      ts: e.ts,
+      actorName: nameOf((await ctx.kv.get(`users/${e.actorUid}`)) as UserRec | null),
+    });
+  return { trainerName: nameOf(trainer), members, actions };
+}

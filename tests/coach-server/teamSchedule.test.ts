@@ -9,6 +9,7 @@ import {
 } from '../../functions/src/coach/service';
 import {
   teamAccept,
+  teamForClient,
   teamInvite,
   teamLogActivity,
   teamNotices,
@@ -207,5 +208,34 @@ describe('Spotter service messages', () => {
     expect((await teamNotices(ctx(), owner)).unread).toBe(0);
     expect((await teamNotices(ctx(), client)).items).toEqual([]);
     expect(pushes).toContainEqual(['t1', 'team']);
+  });
+});
+
+describe('the client sees the team and the manager actions about them', () => {
+  it('lists the team (names and roles) and only manager actions about this client', async () => {
+    await rescheduleCreate(ctx(), mgr, { clientId: 'c1', request: req() });
+    await teamLogActivity(ctx(), mgr, { clientId: 'c1', kind: 'session-done' });
+    await kv.set('users/c2', {
+      role: 'member',
+      status: 'active',
+      firstName: 'Other',
+      trainerId: 't1',
+    });
+    await kv.set('coaching/c2', { clientId: 'c2', trainerId: 't1', status: 'active', keyEpoch: 1 });
+    await teamLogActivity(ctx(), mgr, { clientId: 'c2', kind: 'session-missed' });
+    const v = await teamForClient(ctx(), client);
+    expect(v.trainerName).toBe('Olena');
+    expect(v.members).toEqual([
+      { name: 'Irina', role: 'manager' },
+      { name: 'Olena', role: 'trainer' },
+    ]);
+    expect(v.actions.map((a) => a.kind).sort()).toEqual(['move-request', 'session-done']);
+    expect(v.actions.every((a) => a.actorName === 'Irina')).toBe(true);
+  });
+  it('a client of a trainer with no manager sees no team', async () => {
+    await kv.set('users/t9', { role: 'trainer', status: 'active', firstName: 'Solo' });
+    await kv.set('users/c9', { role: 'member', status: 'active', firstName: 'X', trainerId: 't9' });
+    await kv.set('coaching/c9', { clientId: 'c9', trainerId: 't9', status: 'active', keyEpoch: 1 });
+    expect((await teamForClient(ctx(), { uid: 'c9', role: 'member' })).members).toEqual([]);
   });
 });
