@@ -5,7 +5,13 @@
 import { createDemoClock } from '../../data/__fixtures__/demoClock';
 import { TeamPortError, type TeamPort } from '../port';
 import { teamInviteLink } from '../../inviteLink';
-import { inviteeRole, type ActivityScope, type TeamData, type TeamMember } from '../types';
+import {
+  inviteeRole,
+  type TeamRole,
+  type ActivityScope,
+  type TeamData,
+  type TeamMember,
+} from '../types';
 
 const DAY = 86_400_000;
 
@@ -20,6 +26,8 @@ export interface FixturesTeamOptions {
   failWith?: () => TeamPortError['code'] | null;
   /** start without the cached snapshot (Loading story) */
   cold?: boolean;
+  /** the invite behind `#/team-invite/<token>`: who is invited (default manager) and whether it is still open */
+  invite?: { role?: TeamRole; closed?: boolean; notEligible?: boolean };
   /** managers: how many clients are ready for the schedule key */
   ready?: { ready: number; total: number };
 }
@@ -114,6 +122,23 @@ export function createFixturesTeamPort(o: FixturesTeamOptions = {}): TeamPort {
         ],
       };
       return { url };
+    },
+    async previewInvite() {
+      await guard();
+      if (o.invite?.closed) throw new TeamPortError('closed');
+      return {
+        role: o.invite?.role ?? 'manager',
+        ownerName: 'Olena Kovalenko',
+        inviterName: 'Olena Kovalenko',
+        expiresAt: clock() + 5 * DAY,
+      };
+    },
+    async acceptInvite() {
+      await guard();
+      if (o.invite?.notEligible) throw new TeamPortError('not-eligible');
+    },
+    async declineInvite() {
+      await guard();
     },
     async revokeInvite(id) {
       await guard();

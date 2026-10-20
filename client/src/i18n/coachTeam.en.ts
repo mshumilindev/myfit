@@ -110,4 +110,27 @@ export const teamEn = {
   tmOfflineStale: 'Offline. Showing the last saved team.',
   tmEmptyMembers: 'Only you so far.',
   tmEmptyInvites: 'No open invites.',
+  jtTitle: (name: string) => `${name} invited you to the team`,
+  jtBodyManager: (name: string) =>
+    `${name} wants you to manage the schedule and the client list. You will not see workouts, health, nutrition, notes or chat.`,
+  jtBodyTrainer: (name: string) =>
+    `${name} invited you to work together. You keep your own clients and chats; the team's manager can see and change your schedule, nothing else.`,
+  jtInviter: (name: string) => `${name} · personal trainer`,
+  jtJoinManager: 'Join as a manager',
+  jtJoinTrainer: 'Join the team',
+  jtDecline: 'Decline',
+  jtUntil: (date: string) => `This invite works until ${date} · one use`,
+  jtClosedTitle: 'This invite is no longer valid',
+  jtClosedBody: 'It was used, withdrawn or has expired. Ask for a new link.',
+  jtJoinedTitle: 'You joined the team',
+  jtJoinedBody: 'Sign in again to open the team schedule.',
+  jtDeclinedTitle: 'Invite declined',
+  jtDeclinedBody: 'Nothing changed. You can close this page.',
+  jtOfflineTitle: 'No connection',
+  jtOfflineBody: 'We could not reach the server. Check the connection and try again.',
+  jtNotEligible:
+    'This account cannot join as a manager. Use an account without a trainer or clients.',
+  jtRetry: 'Try again',
+  jtOk: 'Done',
+  jtLoading: 'Loading the invite',
 };

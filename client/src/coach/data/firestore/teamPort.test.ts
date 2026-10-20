@@ -73,4 +73,31 @@ describe('Firestore team port', () => {
       message: 'unavailable',
     });
   });
+
+  it('invitee side: preview maps the names, accept / decline call their callables, closed and ineligible are told apart', async () => {
+    const { fs, calls } = fsWith((n) =>
+      n === 'teamInvitePreview'
+        ? { role: 'manager', teamOwnerName: 'Olena', invitedByName: 'Olena', expiresAt: 7 }
+        : { ok: true },
+    );
+    const p = createFirestoreTeamPort(fs);
+    expect(await p.previewInvite('tok')).toEqual({
+      role: 'manager',
+      ownerName: 'Olena',
+      inviterName: 'Olena',
+      expiresAt: 7,
+    });
+    await p.acceptInvite('tok');
+    await p.declineInvite('tok');
+    expect(calls.map((c) => c[0])).toEqual(['teamInvitePreview', 'teamAccept', 'teamDecline']);
+    const err = (reason: string) =>
+      createFirestoreTeamPort(
+        fsWith(() => Promise.reject({ code: 'functions/failed-precondition', details: { reason } }))
+          .fs,
+      );
+    await expect(err('invite-closed').previewInvite('t')).rejects.toMatchObject({ code: 'closed' });
+    await expect(err('account-not-eligible').acceptInvite('t')).rejects.toMatchObject({
+      code: 'not-eligible',
+    });
+  });
 });

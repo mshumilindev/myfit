@@ -22,6 +22,8 @@ const REASONS: Record<string, TeamErrorCode> = {
   'invite-exists': 'exists',
   'no-invite': 'not-found',
   'no-member': 'not-found',
+  'invite-closed': 'closed',
+  'account-not-eligible': 'not-eligible',
 };
 
 function toTeamError(e: unknown): TeamPortError {
@@ -69,6 +71,26 @@ export function createFirestoreTeamPort(fs: FsApi): TeamPort {
     },
     async leave() {
       await call('teamLeave');
+    },
+    async previewInvite(token) {
+      const r = await call<{
+        role: TeamData['invites'][number]['role'];
+        teamOwnerName: string;
+        invitedByName: string;
+        expiresAt: number;
+      }>('teamInvitePreview', { inviteId: token });
+      return {
+        role: r.role,
+        ownerName: r.teamOwnerName,
+        inviterName: r.invitedByName,
+        expiresAt: r.expiresAt,
+      };
+    },
+    async acceptInvite(token) {
+      await call('teamAccept', { inviteId: token });
+    },
+    async declineInvite(token) {
+      await call('teamDecline', { inviteId: token });
     },
     async setActivityScope(uid, scope) {
       await call('teamSetActivityScope', { uid, scope });

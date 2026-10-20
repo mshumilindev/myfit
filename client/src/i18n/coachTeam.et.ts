@@ -105,4 +105,27 @@ export const teamEt: typeof teamEn = {
   tmOfflineStale: 'Võrku pole. Näidatakse viimati salvestatud meeskonda.',
   tmEmptyMembers: 'Seni ainult sina.',
   tmEmptyInvites: 'Avatud kutseid pole.',
+  jtTitle: (name) => `${name} kutsub sind meeskonda`,
+  jtBodyManager: (name) =>
+    `${name} soovib, et juhiksid ajakava ja klientide nimekirja. Treeninguid, tervist, toitumist, märkmeid ega vestlust sa ei näe.`,
+  jtBodyTrainer: (name) =>
+    `${name} kutsub koos töötama. Sinu kliendid ja vestlused jäävad sinule; meeskonna haldur näeb ja muudab sinu ajakava, rohkem mitte midagi.`,
+  jtInviter: (name) => `${name} · personaaltreener`,
+  jtJoinManager: 'Liitu halduri',
+  jtJoinTrainer: 'Liitu meeskonnaga',
+  jtDecline: 'Keeldu',
+  jtUntil: (date) => `Kutse kehtib kuni ${date} · ühekordne`,
+  jtClosedTitle: 'See kutse ei kehti enam',
+  jtClosedBody: 'See on kasutatud, tagasi võetud või aegunud. Palu uut linki.',
+  jtJoinedTitle: 'Oled meeskonnas',
+  jtJoinedBody: 'Logi uuesti sisse, et avada meeskonna ajakava.',
+  jtDeclinedTitle: 'Kutsest keelduti',
+  jtDeclinedBody: 'Midagi ei muutunud. Võid selle lehe sulgeda.',
+  jtOfflineTitle: 'Ühendus puudub',
+  jtOfflineBody: 'Serveriga ei õnnestunud ühendust luua. Kontrolli ühendust ja proovi uuesti.',
+  jtNotEligible:
+    'See konto ei saa haldurina liituda. Kasuta kontot, millel pole treenerit ega kliente.',
+  jtRetry: 'Proovi uuesti',
+  jtOk: 'Valmis',
+  jtLoading: 'Kutse laadimine',
 };

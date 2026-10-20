@@ -1,13 +1,28 @@
-import type { ActivityScope, TeamData } from './types';
+import type { ActivityScope, TeamData, TeamRole } from './types';
 
 export type TeamErrorCode =
-  'offline' | 'forbidden' | 'unavailable' | 'invalid-email' | 'exists' | 'not-found';
+  | 'offline'
+  | 'forbidden'
+  | 'unavailable'
+  | 'invalid-email'
+  | 'exists'
+  | 'not-found'
+  | 'closed'
+  | 'not-eligible';
 
 export class TeamPortError extends Error {
   constructor(readonly code: TeamErrorCode) {
     super(code);
     this.name = 'TeamPortError';
   }
+}
+
+/** What the person sees before joining (an open invite only; a closed one rejects with `closed`). */
+export interface InvitePreview {
+  role: TeamRole;
+  ownerName: string;
+  inviterName: string;
+  expiresAt: number;
 }
 
 /**
@@ -25,6 +40,10 @@ export interface TeamPort {
   removeMember(uid: string): Promise<void>;
   leave(): Promise<void>;
   setActivityScope(uid: string, scope: ActivityScope): Promise<void>;
+  /** The invitee side (`#/team-invite/<token>`). */
+  previewInvite(token: string): Promise<InvitePreview>;
+  acceptInvite(token: string): Promise<void>;
+  declineInvite(token: string): Promise<void>;
   /** Clock override (fixtures). */
   now?(): number;
 }
@@ -42,5 +61,8 @@ export function createUnavailableTeamPort(): TeamPort {
     removeMember: fail,
     leave: fail,
     setActivityScope: fail,
+    previewInvite: () => Promise.reject(new TeamPortError('unavailable')),
+    acceptInvite: fail,
+    declineInvite: fail,
   };
 }

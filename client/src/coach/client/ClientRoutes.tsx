@@ -15,6 +15,7 @@ import { NoTrainerPage } from './screens/NoTrainerPage';
 import type { ClientCoachPort } from './data/port';
 import { useClientCoach } from './data/useClientCoach';
 import { parseClientRoute } from './routes';
+import { JoinTeamPage } from '../team/JoinTeamPage';
 import './ClientCoach.css';
 
 const go = (hash: string) => {
@@ -81,6 +82,8 @@ function Routes({ route, onClose }: { route: string; onClose: () => void }) {
         }
       />
     );
+  if (r.page === 'team-invite')
+    return <JoinTeamPage token={r.token} onExit={() => go('#/today')} />;
   if (r.page === 'chat') return <ChatGate onClose={onClose} />;
   if (r.page === 'log') return <AccessLogPage onBack={onClose} />;
   return (
