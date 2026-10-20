@@ -12,6 +12,7 @@
  * `callFn()` (a thin wrapper over httpsCallable that preserves the old
  * HttpError shape so view-level error handling keeps working).
  */
+import { afterSignIn, afterSignOut } from './accounts/deviceSession';
 import {
   signInWithCustomToken,
   onAuthStateChanged,
@@ -67,12 +68,14 @@ export interface AuthPayload {
 }
 
 /** Complete a sign-in from an auth-function payload (custom token + role). */
-export async function signInWithPayload(payload: AuthPayload): Promise<void> {
+export async function signInWithPayload(payload: AuthPayload, remember = false): Promise<void> {
   await signInWithCustomToken(auth, payload.token);
   localStorage.setItem(UID_KEY, payload.userId);
   if (payload.username) localStorage.setItem(LOGIN_ID_KEY, payload.username);
   setUsername(payload.name || payload.username);
   setRole(payload.role ?? 'member');
+  /* "Remember me": only a ticked box puts the person on this device's landing list (accounts/deviceSession.ts). */
+  afterSignIn(localStorage, { uid: payload.userId, name: payload.name || payload.username }, remember, Date.now());
 }
 
 /** The identifier the person signed in with (username), kept so a re-authentication asks only for the password. */
@@ -87,8 +90,14 @@ export function clearAuth(): void {
   localStorage.removeItem(UID_KEY);
 }
 
-export async function signOut(): Promise<void> {
+/**
+ * `forget`: the person also leaves this device's landing list ("Remember me" unticked in the sign-out dialog). Either way
+ * the person's own localStorage keys are wiped here and the rest of their data by deviceWipe.ts.
+ */
+export async function signOut(opts: { forget?: boolean } = {}): Promise<void> {
+  const uid = currentUid();
   clearAuth();
+  afterSignOut(localStorage, uid, opts.forget === true);
   await firebaseSignOut(auth).catch(() => undefined);
   /* The account's data leaves the device: sealed coach stores, caches and Firestore's offline cache (deviceWipe.ts). */
   try {

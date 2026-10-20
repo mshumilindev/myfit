@@ -4,6 +4,7 @@ import {
   adoptLegacyKeys,
   createScopedStorage,
   forgetAccountKeys,
+  wipeAccountKeys,
   isDeviceKey,
   isValidUid,
   scopedKey,
@@ -179,5 +180,24 @@ describe('adoptLegacyKeys (migration of an existing single-account device)', () 
     expect(
       createScopedStorage({ backend, activeUid: active('bob') }).getItem('spotter.goals'),
     ).toBeNull();
+  });
+});
+
+describe('wipeAccountKeys', () => {
+  it('removes personal keys and keeps device and library keys', () => {
+    const b = memoryBackend({
+      'spotter.state': '{}',
+      'spotter.atlasChat': '[]',
+      'spotter.weightUnit': 'kg',
+      'gym.locale': 'uk',
+      'gym.flags': '{}',
+      'spotter.pushDevice': 'd1',
+      'firebase:authUser:x': '{}',
+      'spotter.accounts': '[]',
+    });
+    expect(wipeAccountKeys(b)).toBe(3);
+    expect(Object.keys(b.dump()).sort()).toEqual(
+      ['firebase:authUser:x', 'gym.flags', 'gym.locale', 'spotter.accounts', 'spotter.pushDevice'].sort(),
+    );
   });
 });

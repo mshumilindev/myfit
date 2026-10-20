@@ -40,6 +40,9 @@ export const DEVICE_KEYS: ReadonlySet<string> = new Set([
   'spotter.forceLayout', // dev/QA layout override
   'spotter.wipeFs', // pending Firestore wipe, honoured before the SDK opens its database
   'spotter.crashRecovery', // reload-loop guard of this window
+  'gym.flags', // feature flags of this install
+  'spotter.motion.v2', // reduced-motion choice of this install
+  'spotter.coach.tz', // time zone of this device
 ]);
 
 /** Keys owned by other libraries on this origin (Firebase Auth fallback persistence, FCM, heartbeat). */
@@ -139,6 +142,16 @@ export function adoptLegacyKeys(backend: StorageBackend, uid: string): number {
 export function forgetAccountKeys(backend: StorageBackend, uid: string): number {
   const prefix = scopedKey(uid, '');
   const mine = allKeys(backend).filter((k) => k.startsWith(prefix));
+  mine.forEach((k) => backend.removeItem(k));
+  return mine.length;
+}
+
+/**
+ * Sign-out: everything that belongs to a person leaves the device; only device keys (and other libraries' keys) stay.
+ * Returns how many keys were removed. Pairs with `deviceWipe.ts`, which clears the IndexedDB stores and Firestore's cache.
+ */
+export function wipeAccountKeys(backend: StorageBackend): number {
+  const mine = allKeys(backend).filter((k) => !isDeviceKey(k));
   mine.forEach((k) => backend.removeItem(k));
   return mine.length;
 }
