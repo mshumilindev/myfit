@@ -3,6 +3,7 @@
  * seam so every rule below runs in unit tests without an emulator. `handlers.ts` binds them to Firestore Admin
  * and Cloud Functions. Nothing here logs request bodies or envelopes; sealed fields are only ever passed through.
  */
+import { logActivity, teamIdOf } from './activity';
 import type { Doc, Kv } from './kv';
 import { inviteUrl } from './inviteLink';
 import {
@@ -1253,7 +1254,7 @@ async function partyOf(
   kv: Kv,
   clientId: string,
   actor: Actor,
-): Promise<{ side: 'client' | 'trainer'; c: CoachingDoc }> {
+): Promise<{ side: 'client' | 'trainer'; c: CoachingDoc; manager: boolean }> {
   const c = await loadCoaching(kv, clientId);
   if (c.status !== 'active') fail('failed-precondition', 'not-active');
   const side =
@@ -1262,8 +1263,15 @@ async function partyOf(
       : isCoach(actor) && actor.uid === c.trainerId
         ? 'trainer'
         : null;
-  if (!side) return fail('permission-denied', 'not-allowed');
-  return { side, c };
+  if (side) return { side, c, manager: false };
+  // A team MANAGER acts on the trainer's side of the schedule (SPO-196): an active manager of the trainer's team.
+  if (actor.role === 'manager') {
+    const teamId = await teamIdOf(kv, c.trainerId);
+    const m = await kv.get(`teams/${teamId}/members/${actor.uid}`);
+    if (m && m.status === 'active' && m.role === 'manager')
+      return { side: 'trainer', c, manager: true };
+  }
+  return fail('permission-denied', 'not-allowed');
 }
 
 const REQUEST_KEYS = [
@@ -1277,6 +1285,8 @@ const REQUEST_KEYS = [
   'supersedes',
   'keyEpoch',
   'enc',
+  /** `manager`: proposed by a team manager on the trainer's side (the client still answers) */
+  'via',
 ];
 
 /**
@@ -1288,8 +1298,11 @@ export async function rescheduleCreate(ctx: Ctx, actor: Actor, body: Record<stri
   const raw = (body.request ?? {}) as Doc;
   const now = ctx.now();
   return ctx.kv.tx(async (kv) => {
-    const { side, c } = await partyOf(kv, clientId, actor);
+    const { side, c, manager } = await partyOf(kv, clientId, actor);
     const cid = conversationId(ctx.pepper, clientId, c.trainerId);
+    // `via` marks a manager's proposal and only a manager may set it
+    if (manager ? raw.via !== 'manager' : raw.via !== undefined)
+      fail('invalid-argument', 'bad-request');
     // the id becomes a path segment: exactly the allowed alphabet, never truncated, never a '/'
     const id = typeof raw.id === 'string' && REQUEST_ID.test(raw.id) ? raw.id : '';
     if (!id || raw.from !== side) fail('invalid-argument', 'bad-request');
@@ -1327,6 +1340,15 @@ export async function rescheduleCreate(ctx: Ctx, actor: Actor, body: Record<stri
     );
     if (p) return fail(p === 'duplicate-slot' ? 'already-exists' : 'invalid-argument', p);
     await kv.set(`${convPath(cid)}/requests/${id}`, raw);
+    if (manager)
+      await logActivity(kv, await teamIdOf(kv, c.trainerId), now, {
+        actorUid: actor.uid,
+        role: 'manager',
+        kind: 'move-request',
+        clientId,
+        refId: id,
+        status: 'pending',
+      });
     await ctx.notify?.(side === 'client' ? c.trainerId : clientId, 'request');
     return { id, already: false as const };
   });
@@ -1338,10 +1360,13 @@ export async function rescheduleRespond(ctx: Ctx, actor: Actor, body: Record<str
   const to = body.status as ReqStatus;
   const now = ctx.now();
   return ctx.kv.tx(async (kv) => {
-    const { side, c } = await partyOf(kv, clientId, actor);
+    const { side, c, manager } = await partyOf(kv, clientId, actor);
     const path = `${convPath(conversationId(ctx.pepper, clientId, c.trainerId))}/requests/${id}`;
     const r = await kv.get(path);
     if (!r) return fail('not-found', 'no-such-request');
+    // a manager only withdraws a proposal a manager made; answering is for the client and the trainer
+    if (manager && !(r.via === 'manager' && to === 'cancelled'))
+      return fail('permission-denied', 'not-allowed');
     // an answer that comes too late says so (the sweep may already have flipped the stored status to `expired`)
     if (r.status === 'expired' || (r.status === 'pending' && Number(r.expiresAt) <= now))
       fail('failed-precondition', 'expired');
@@ -1350,6 +1375,15 @@ export async function rescheduleRespond(ctx: Ctx, actor: Actor, body: Record<str
     )
       fail('failed-precondition', 'cannot-decide');
     await kv.merge(path, { status: to, decidedAt: now });
+    if (manager)
+      await logActivity(kv, await teamIdOf(kv, c.trainerId), now, {
+        actorUid: actor.uid,
+        role: 'manager',
+        kind: 'move-cancel',
+        clientId,
+        refId: id,
+        status: to,
+      });
     return { id, status: to };
   });
 }

@@ -1,0 +1,131 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+import { createMemoryKv, type MemoryKv } from '../../functions/src/coach/memoryKv';
+import {
+  CoachError,
+  rescheduleCreate,
+  rescheduleRespond,
+  type Actor,
+  type Ctx,
+} from '../../functions/src/coach/service';
+import { teamAccept, teamInvite } from '../../functions/src/coach/team';
+import { DAY } from '../../functions/src/coach/logic';
+
+const T0 = Date.UTC(2026, 9, 20, 9, 0, 0);
+const owner: Actor = { uid: 't1', role: 'trainer' };
+const client: Actor = { uid: 'c1', role: 'member' };
+const mgr: Actor = { uid: 'm1', role: 'manager' };
+const outsider: Actor = { uid: 'm2', role: 'manager' };
+
+let kv: MemoryKv;
+const pushes: [string, string][] = [];
+const ctx = (): Ctx => ({
+  kv,
+  now: () => T0,
+  pepper: new Uint8Array(32),
+  newToken: () => 'tok',
+  notify: async (uid, kind) => void pushes.push([uid, kind]),
+});
+async function code(p: Promise<unknown>): Promise<string> {
+  try {
+    await p;
+  } catch (e) {
+    if (e instanceof CoachError) return `${e.code}:${e.reason}`;
+    throw e;
+  }
+  return 'ok';
+}
+const req = (over: Record<string, unknown> = {}) => ({
+  id: 'r1',
+  from: 'trainer',
+  via: 'manager',
+  status: 'pending',
+  createdAt: T0,
+  expiresAt: T0 + 3 * DAY,
+  slotKey: 'slot-1',
+  keyEpoch: 1,
+  enc: { v: 1, iv: 'A'.repeat(16), ct: 'C'.repeat(120) },
+  ...over,
+});
+
+beforeEach(async () => {
+  kv = createMemoryKv();
+  pushes.length = 0;
+  await kv.set('users/t1', { role: 'trainer', status: 'active', firstName: 'Olena' });
+  await kv.set('users/m1', { role: 'member', status: 'active', firstName: 'Irina' });
+  await kv.set('users/m2', { role: 'manager', status: 'active', firstName: 'Other' });
+  await kv.set('users/c1', {
+    role: 'member',
+    status: 'active',
+    firstName: 'Oleh',
+    trainerId: 't1',
+  });
+  await kv.set('coaching/c1', { clientId: 'c1', trainerId: 't1', status: 'active', keyEpoch: 1 });
+  const inv = await teamInvite(ctx(), owner, { email: 'irina@example.com' });
+  await teamAccept(ctx(), { uid: 'm1', role: 'member' }, { inviteId: inv.inviteId });
+});
+
+describe('manager reschedule requests', () => {
+  it('a team manager proposes on the trainer side; the CLIENT is notified and answers; the action is logged', async () => {
+    expect(await rescheduleCreate(ctx(), mgr, { clientId: 'c1', request: req() })).toEqual({
+      id: 'r1',
+      already: false,
+    });
+    expect(pushes).toEqual([['c1', 'request']]);
+    const log = await kv.list('teams/t1/activity');
+    expect(log.map((l) => l.data)).toMatchObject([
+      { actorUid: 'm1', role: 'manager', kind: 'move-request', clientId: 'c1', refId: 'r1' },
+    ]);
+    expect(
+      await rescheduleRespond(ctx(), client, { clientId: 'c1', id: 'r1', status: 'accepted' }),
+    ).toEqual({
+      id: 'r1',
+      status: 'accepted',
+    });
+  });
+
+  it('the manager must mark the proposal `via: manager`; nobody else may; a manager outside the team is refused', async () => {
+    expect(
+      await code(
+        rescheduleCreate(ctx(), mgr, { clientId: 'c1', request: req({ via: undefined }) }),
+      ),
+    ).toBe('invalid-argument:bad-request');
+    expect(await code(rescheduleCreate(ctx(), owner, { clientId: 'c1', request: req() }))).toBe(
+      'invalid-argument:bad-request',
+    );
+    expect(await code(rescheduleCreate(ctx(), outsider, { clientId: 'c1', request: req() }))).toBe(
+      'permission-denied:not-allowed',
+    );
+  });
+
+  it('a manager only withdraws a manager proposal; the trainer can withdraw it too; neither may answer for the client', async () => {
+    await rescheduleCreate(ctx(), mgr, { clientId: 'c1', request: req() });
+    expect(
+      await code(rescheduleRespond(ctx(), mgr, { clientId: 'c1', id: 'r1', status: 'accepted' })),
+    ).toBe('permission-denied:not-allowed');
+    expect(
+      await code(rescheduleRespond(ctx(), owner, { clientId: 'c1', id: 'r1', status: 'accepted' })),
+    ).toBe('failed-precondition:cannot-decide');
+    expect(
+      await rescheduleRespond(ctx(), mgr, { clientId: 'c1', id: 'r1', status: 'cancelled' }),
+    ).toMatchObject({
+      status: 'cancelled',
+    });
+    await rescheduleCreate(ctx(), mgr, {
+      clientId: 'c1',
+      request: req({ id: 'r2', slotKey: 's2' }),
+    });
+    expect(
+      await rescheduleRespond(ctx(), owner, { clientId: 'c1', id: 'r2', status: 'cancelled' }),
+    ).toMatchObject({ status: 'cancelled' });
+  });
+
+  it('a manager cannot answer or cancel a request the client made', async () => {
+    await rescheduleCreate(ctx(), client, {
+      clientId: 'c1',
+      request: req({ from: 'client', via: undefined, id: 'rc' }),
+    });
+    expect(
+      await code(rescheduleRespond(ctx(), mgr, { clientId: 'c1', id: 'rc', status: 'cancelled' })),
+    ).toBe('permission-denied:not-allowed');
+  });
+});

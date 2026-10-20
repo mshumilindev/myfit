@@ -114,10 +114,10 @@ export const coachChatReset = onCall(opts, (req) =>
   run(req, ANY, (a) => svc.chatResetKey(ctx(), a, body(req))),
 );
 export const rescheduleCreate = onCall({ ...opts, maxInstances: 20 }, (req) =>
-  run(req, ANY, (a) => svc.rescheduleCreate(ctx(), a, body(req))),
+  run(req, ANY_TEAM, (a) => svc.rescheduleCreate(ctx(), a, body(req))),
 );
 export const rescheduleRespond = onCall({ ...opts, maxInstances: 20 }, (req) =>
-  run(req, ANY, (a) => svc.rescheduleRespond(ctx(), a, body(req))),
+  run(req, ANY_TEAM, (a) => svc.rescheduleRespond(ctx(), a, body(req))),
 );
 export const publishPlanVersion = onCall(opts, (req) =>
   run(req, COACH, (a) => svc.publishPlanVersion(ctx(), a, body(req))),
