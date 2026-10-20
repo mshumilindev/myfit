@@ -10,6 +10,7 @@ import {
 import {
   teamAccept,
   teamForClient,
+  inviteClientForTrainer,
   teamInvite,
   teamLogActivity,
   teamNotices,
@@ -237,5 +238,34 @@ describe('the client sees the team and the manager actions about them', () => {
     await kv.set('users/c9', { role: 'member', status: 'active', firstName: 'X', trainerId: 't9' });
     await kv.set('coaching/c9', { clientId: 'c9', trainerId: 't9', status: 'active', keyEpoch: 1 });
     expect((await teamForClient(ctx(), { uid: 'c9', role: 'member' })).members).toEqual([]);
+  });
+});
+
+describe('a manager invites a client for a team trainer', () => {
+  it('creates the trainer invite, logs it, tells the trainer; outsiders and non-managers are refused', async () => {
+    const r = await inviteClientForTrainer(ctx(), mgr, {
+      trainerId: 't1',
+      name: 'New Client',
+      mode: 'app',
+    });
+    expect(r.url).toContain('tok');
+    expect(await kv.get('invites/tok')).toMatchObject({
+      trainerId: 't1',
+      displayName: 'New Client',
+    });
+    expect(pushes).toContainEqual(['t1', 'team']);
+    const log = (await kv.list('teams/t1/activity')).map((e) => e.data.kind);
+    expect(log).toContain('client-invite');
+    await kv.set('users/t7', { role: 'trainer', status: 'active', firstName: 'Far' });
+    expect(
+      await code(
+        inviteClientForTrainer(ctx(), mgr, { trainerId: 't7', name: 'Zed Zed', mode: 'app' }),
+      ),
+    ).toBe('permission-denied:not-your-team');
+    expect(
+      await code(
+        inviteClientForTrainer(ctx(), owner, { trainerId: 't1', name: 'Zed Zed', mode: 'app' }),
+      ),
+    ).toBe('permission-denied:managers-only');
   });
 });

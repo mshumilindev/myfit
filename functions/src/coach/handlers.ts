@@ -180,6 +180,9 @@ export const teamNoticesRead = onCall(opts, (req) =>
 export const teamForClient = onCall(opts, (req) =>
   run(req, ANY, (a) => team.teamForClient(ctx(), a)),
 );
+export const inviteClientForTrainer = onCall(opts, (req) =>
+  run(req, ['manager'], (a) => team.inviteClientForTrainer(ctx(), a, body(req))),
+);
 export const teamLogActivity = onCall(opts, (req) =>
   run(req, ['manager'], (a) => team.teamLogActivity(ctx(), a, body(req))),
 );

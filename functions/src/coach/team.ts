@@ -15,6 +15,7 @@ import { teamInviteUrl } from './inviteLink';
 import { DAY, conversationId, isUid } from './logic';
 import {
   CoachError,
+  coachInvite,
   endRelationship,
   loadCoaching,
   notice,
@@ -994,4 +995,34 @@ export async function teamForClient(ctx: Ctx, actor: Actor): Promise<ClientTeamV
       actorName: nameOf((await ctx.kv.get(`users/${e.actorUid}`)) as UserRec | null),
     });
   return { trainerName: nameOf(trainer), members, actions };
+}
+
+/* ---- a manager invites a client for one of the team's trainers (SPO-202) ---------------------------------------- */
+/**
+ * MANAGER: the same invite a trainer sends, issued for a trainer of the manager's team (`trainerId`). The client then
+ * accepts it like any trainer invite and becomes that trainer's client; the manager gets no access to the client's data
+ * beyond the schedule delegation. Logged as `client-invite`; the trainer is told by a content-free push.
+ */
+export async function inviteClientForTrainer(
+  ctx: Ctx,
+  actor: Actor,
+  body: Record<string, unknown>,
+): Promise<Awaited<ReturnType<typeof coachInvite>>> {
+  const { teamId, me } = await myTeam(ctx, actor);
+  if (me.role !== 'manager') return fail('permission-denied', 'managers-only');
+  const trainerId = typeof body.trainerId === 'string' ? body.trainerId : '';
+  if (!isUid(trainerId)) return fail('invalid-argument', 'invalid-trainer');
+  const tm = (await ctx.kv.get(`teams/${teamId}/members/${trainerId}`)) as MemberRec | null;
+  const ownerOk = trainerId === teamId;
+  if (!ownerOk && !(tm && tm.status === 'active' && tm.role === 'trainer'))
+    return fail('permission-denied', 'not-your-team');
+  const r = await coachInvite(ctx, { uid: trainerId, role: 'trainer' }, body);
+  await logActivity(ctx.kv, teamId, ctx.now(), {
+    actorUid: actor.uid,
+    role: 'manager',
+    kind: 'client-invite',
+    refId: r.inviteId.slice(0, 24),
+  });
+  await ctx.notify?.(trainerId, 'team');
+  return r;
 }
