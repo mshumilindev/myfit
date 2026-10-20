@@ -7,6 +7,5 @@ import { beforeEach } from 'vitest';
 if (typeof localStorage !== 'undefined') {
   const { setLocale } = await import('../../i18n');
   beforeEach(() => setLocale('en'));
-  await import('./register');
 }
 export {};

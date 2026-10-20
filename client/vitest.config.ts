@@ -1,7 +1,29 @@
 import { defineConfig } from 'vitest/config';
 import WeightedShardSequencer from './vitest.sequencer';
+import type { Plugin } from 'vite';
+
+/**
+ * Atlas answers synchronously in tests: the knowledge base is handed to the retriever and the facet store up front (the app
+ * gets it from a worker). It is attached to the two modules themselves, so only test files that actually load them pay for
+ * the KB import (~45% of files do not) - no list to keep in sync.
+ */
+const atlasTestKb = (): Plugin => ({
+  name: 'atlas-test-kb',
+  enforce: 'post',
+  transform(code, id) {
+    const file = id.split('?')[0].replace(/\\/g, '/');
+    if (file.endsWith('/src/atlas/retrieve.ts'))
+      return `${code}\nimport { KB as __testKb } from './kb';\nloadKb(__testKb);\n`;
+    if (file.endsWith('/src/atlas/facetStore.ts'))
+      return `${code}\nimport { KB as __testKb, facetsTable as __testFacets } from './kb';\nsetFacets(__testFacets(__testKb));\n`;
+    if (file.endsWith('/src/coach/data/testHooks.ts'))
+      return `${code}\nif (typeof localStorage !== 'undefined') await import('../__fixtures__/register');\n`;
+    return null;
+  },
+});
 
 export default defineConfig({
+  plugins: [atlasTestKb()],
   test: {
     environment: 'jsdom',
     // Same calendar everywhere: the CI runner is UTC, developer machines are not (a DST/midnight-dependent label made a test
@@ -12,8 +34,7 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     // `--shard i/N` splits by measured weight, not by file count (see vitest.sequencer.ts).
     sequence: { sequencer: WeightedShardSequencer },
-    // Atlas's knowledge base, loaded up front (the app builds it in a worker).
-    setupFiles: ['src/atlas/testSetup.ts', 'src/coach/__fixtures__/setup.ts'],
+    setupFiles: ['src/coach/__fixtures__/setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],

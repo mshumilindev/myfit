@@ -219,7 +219,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      # no lifecycle scripts: the audit needs Playwright + the built Storybook, not the husky/electron hooks
+      - run: npm ci --ignore-scripts
       - name: Playwright version
         id: pw
         run: echo "v=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
