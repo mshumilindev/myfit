@@ -9,3 +9,4 @@ export * from './envelope';
 export * from './newCollections';
 export * from './sealOrThrow';
 export * from './securityCode';
+export * from './delegation';

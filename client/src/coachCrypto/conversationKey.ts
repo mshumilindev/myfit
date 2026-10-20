@@ -124,6 +124,33 @@ export async function openChatKey(
   return ringFromRoot(cid, wrap.epoch, root);
 }
 
+/**
+ * The raw bytes of one purpose's sub-key, derived exactly as the ring derives it. For delegation only (SPO-196,
+ * ADR 005): the client hands a manager the `schedule` / `requests` sub-keys, never the root. The caller owns the result
+ * and zeroes it after wrapping. `raw` (the CK) is NOT zeroed here.
+ */
+export async function subKeyBytes(
+  raw: Uint8Array,
+  purpose: Purpose,
+  cid: string,
+  epoch: number,
+): Promise<Uint8Array> {
+  checkId(cid, epoch);
+  if (raw.length !== 32) throw new Error('bad-key');
+  if (!PURPOSES.includes(purpose)) throw new Error('bad-purpose');
+  const root = await subtle().importKey('raw', raw.slice() as BufferSource, 'HKDF', false, [
+    'deriveKey',
+  ]);
+  const k = await subtle().deriveKey(
+    { name: 'HKDF', hash: 'SHA-256', salt: HKDF_SALT, info: enc(`${purpose}|${cid}|${epoch}`) },
+    root,
+    { name: 'AES-GCM', length: 256 },
+    true,
+    ['encrypt', 'decrypt'],
+  );
+  return new Uint8Array(await subtle().exportKey('raw', k));
+}
+
 function ringFromRoot(cid: string, epoch: number, root: CryptoKey): ChatKeyRing {
   const cache = new Map<Purpose, Promise<CryptoKey>>();
   return {
