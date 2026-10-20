@@ -11,6 +11,7 @@ import {
 } from 'electron';
 import path from 'node:path';
 import { autoUpdater } from 'electron-updater';
+import { hideToTray } from './hideWindow';
 import { CHANNEL, DEFAULT_APP_URL } from './shared';
 
 /**
@@ -94,7 +95,7 @@ function createWindow(): void {
     // Real quit: tray menu / app menu (sets `quitting`).
     if (!quitting) {
       event.preventDefault();
-      win?.hide();
+      if (win) hideToTray(win);
     }
   });
   win.on('closed', () => {
