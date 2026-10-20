@@ -27,6 +27,7 @@ import { severityWord, signalText } from './signalCopy';
 import { useTodayParams } from './useTodayParams';
 import './Today.css';
 import { RequestsSection, CardsSection } from './TodaySections';
+import { TeamRequestsSection } from '../team/TeamRequestsSection';
 import { StageView, TodayLoading } from './TodayStage';
 
 export interface TodayScreenProps {
@@ -181,6 +182,7 @@ function TodayView({
       ) : (
         <Split ratio="5-7">
           <div className="td-list">
+            <TeamRequestsSection />
             <RequestsSection requests={model.requests} port={requestPort} locale={locale} />
             {model.allClear ? (
               <Card pad="lg" className="td-clear">

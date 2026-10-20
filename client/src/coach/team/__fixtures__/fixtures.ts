@@ -5,7 +5,13 @@
 import { createDemoClock } from '../../data/__fixtures__/demoClock';
 import { TeamPortError, type TeamPort } from '../port';
 import { teamInviteLink } from '../../inviteLink';
-import { type TeamRole, type ActivityScope, type TeamData, type TeamMember } from '../types';
+import {
+  type TeamRole,
+  type ActivityScope,
+  type TeamData,
+  type TeamMember,
+  type TeamRequest,
+} from '../types';
 
 const DAY = 86_400_000;
 
@@ -24,6 +30,8 @@ export interface FixturesTeamOptions {
   invite?: { role?: TeamRole; closed?: boolean; notEligible?: boolean };
   /** managers: how many clients are ready for the schedule key */
   ready?: { ready: number; total: number };
+  /** open manager requests the trainer sees in the Agenda (default none, so other screens' tests stay as they are) */
+  withRequests?: boolean;
 }
 
 export function buildFixtureTeam(
@@ -90,6 +98,19 @@ export function createFixturesTeamPort(o: FixturesTeamOptions = {}): TeamPort {
   const clock = o.now ?? createDemoClock();
   let data = buildFixtureTeam(viewer, clock(), o.ready);
   let cold = !!o.cold;
+  let reqs: TeamRequest[] = o.withRequests
+    ? [
+        {
+          id: 'rm-c4',
+          kind: 'client-removal',
+          clientId: 'c4',
+          clientName: 'Sofiia Hnatiuk',
+          managerName: 'Irina Melnyk',
+          reason: 'Moved to another city and asked to pause.',
+          createdAt: clock() - 3 * 3_600_000,
+        },
+      ]
+    : [];
   const wait = () => (o.delayMs ? new Promise((r) => setTimeout(r, o.delayMs)) : Promise.resolve());
   const guard = async () => {
     await wait();
@@ -140,6 +161,20 @@ export function createFixturesTeamPort(o: FixturesTeamOptions = {}): TeamPort {
       data = { ...data, members: data.members.filter((m) => m.uid !== uid) };
     },
     async leave() {
+      await guard();
+    },
+    async requests() {
+      await guard();
+      return reqs;
+    },
+    async answerRequest(id) {
+      await guard();
+      reqs = reqs.filter((r) => r.id !== id);
+    },
+    async requestRemoval() {
+      await guard();
+    },
+    async cancelRemoval() {
       await guard();
     },
     async setActivityScope(uid: string, scope: ActivityScope) {

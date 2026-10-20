@@ -6,6 +6,8 @@ import type { CoachWorldPort, WorldData } from '../data/port';
 import { recordProgramDecision, snoozeSignal } from '../domain/decisions';
 import { buildOptions } from '../domain/diff';
 import { TodayScreen } from './TodayScreen';
+import { createFixturesTeamPort } from '../team/__fixtures__/fixtures';
+import { configureTeam } from '../team/useTeam';
 
 /** Same padding and scroll as the shell's main column. */
 function Frame({ children, hash }: { children: ReactNode; hash: string }) {
@@ -136,3 +138,14 @@ export const DecisionSnoozed: Story = {
       withData((d) => ({ ...d, book: snoozeSignal(d.book, 'story-snz', stallKey(), FIXTURE_NOW) })),
     ),
 };
+
+/** A manager asked to remove a client (SPO-204, board D8): the "Team requests" section above the reschedule requests. */
+function TeamRequestsStory() {
+  useState(() => {
+    configureTeam(createFixturesTeamPort({ withRequests: true, delayMs: 0 }));
+    return null;
+  });
+  useEffect(() => () => configureTeam(null), []);
+  return view('#/c/agenda');
+}
+export const TeamRequests: Story = { render: () => <TeamRequestsStory /> };

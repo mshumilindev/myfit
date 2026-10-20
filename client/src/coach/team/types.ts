@@ -51,3 +51,15 @@ export const canRemoveMembers = (me: TeamData['me']): boolean =>
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export const isEmail = (s: string): boolean => EMAIL_RE.test(s.trim());
+
+/** A request from a manager the trainer answers (SPO-239). Today only: remove a client. */
+export interface TeamRequest {
+  id: string;
+  kind: 'client-removal';
+  clientId: string;
+  clientName: string;
+  managerName: string;
+  /** the manager's reason (may be empty) */
+  reason: string;
+  createdAt: number;
+}
