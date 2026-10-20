@@ -1503,7 +1503,9 @@ export function LandingDesign({
             <div className="l-hb-in" style={sv(v.bgVars)}>
               <div className="l-hs" style={{ backgroundImage: 'url(/landing/hero.webp)' }}>
                 <div className="l-hs-beam">
-                  <div className="l-hs-glow" />
+                  <div className="l-hs-wd">
+                    <div className="l-hs-glow" />
+                  </div>
                 </div>
               </div>
             </div>
