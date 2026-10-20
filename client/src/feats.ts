@@ -5,7 +5,7 @@
  * dates are recovered by replaying sessions in chronological order and noting
  * where a metric first crosses each tier.
  */
-import { weekStartOf as trainingWeekStart } from './weekStart';
+import { shiftWeeks, weekStartOf as trainingWeekStart } from './weekStart';
 import {
   isStrengthExercise,
   setBestE1rm,
@@ -345,7 +345,6 @@ export interface FeatsResult {
 }
 
 const HOUR_MS = 3_600_000;
-const WEEK_MS = 7 * 24 * HOUR_MS;
 
 /** Start of the training week holding `ts` (first day: Profile › Settings). */
 function weekStart(ts: number): number {
@@ -359,7 +358,7 @@ function currentStreakDays(weekSet: Set<number>): number {
   let w = latest;
   while (weekSet.has(w)) {
     run += 1;
-    w -= WEEK_MS;
+    w = shiftWeeks(w, -1);
   }
   return run * 7;
 }

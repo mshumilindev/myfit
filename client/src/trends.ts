@@ -12,7 +12,7 @@
  *   tip       — icon + headline + nudge (plateau, recovery, rest, neglect…)
  * Each card carries a level: risk (ruby) · info (sapphire) · good (emerald).
  */
-import { weekStartOf as trainingWeekStart } from './weekStart';
+import { shiftWeeks, weekStartOf as trainingWeekStart } from './weekStart';
 import {
   isStrengthExercise,
   muscleSetsInWorkout,
@@ -823,10 +823,10 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
   {
     let run = 0;
     let w = weekStart(now);
-    if (!weeksSet.has(w)) w -= WEEK;
+    if (!weeksSet.has(w)) w = shiftWeeks(w, -1);
     while (weeksSet.has(w)) {
       run += 1;
-      w -= WEEK;
+      w = shiftWeeks(w, -1);
     }
     if (run >= 4) {
       insights.push({

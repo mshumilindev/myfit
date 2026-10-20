@@ -237,6 +237,13 @@ describe('buildRows', () => {
     ]);
   });
 
+  it('an empty Duration cell on a cardio / warm-up row gets the default 10, not 0 (SPO-152)', () => {
+    const { rows } = rowsFor(
+      'Day,Exercise,Kind,Duration\n1,Run,cardio,\n1,Jog,cardio,   \n1,Stretch,warmup,15',
+    );
+    expect(rows.map((r) => r.durationMin)).toEqual([10, 10, 15]);
+  });
+
   it('gives non-strength rows a duration (default 10 when unparsable) and strength none', () => {
     const { rows } = rowsFor(
       'Day,Exercise,Kind,Duration,Reps\n1,Run,cardio,25,\n1,Jog,cardio,abc,\n1,Lift,strength,40,5',

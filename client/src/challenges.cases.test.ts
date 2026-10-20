@@ -681,6 +681,40 @@ describe('reach and day-based metrics', () => {
     );
   });
 
+  it('balance: a session after a block belongs to a later block, not to the earlier ones (SPO-152)', () => {
+    const muscles = [
+      'chest',
+      'lats',
+      'traps',
+      'lower_back',
+      'shoulders',
+      'biceps',
+      'triceps',
+      'forearms',
+      'quads',
+      'hamstrings',
+      'glutes',
+      'calves',
+      'core',
+    ];
+    const full = (t: number) =>
+      wk(
+        t,
+        muscles.map((m) =>
+          ex(
+            `Zed ${m}`,
+            Array.from({ length: 30 }, () => set(8, 50)),
+            { primaryMuscle: m },
+          ),
+        ),
+      );
+    // Started 1 Oct noon; the only session is 10 Oct, in block 2 (8-15 Oct). Blocks 1, 3 and 4 are empty, so one
+    // balanced week in total. Before the fix the later session also counted in block 1's window (no upper bound).
+    expect(
+      value({ kind: 'balance' }, ctx({ now: at(29), finished: [full(at(10))] }), at(1), 28),
+    ).toBe(1);
+  });
+
   it('balance stops counting at the challenge end', () => {
     const muscles = [
       'chest',

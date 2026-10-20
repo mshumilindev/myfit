@@ -130,11 +130,13 @@ export function weeklyMuscleSets(
   finished: Workout[],
   now: number,
   days = 7,
+  /** Optional exclusive upper bound: a window that ended before `now` must not count later sessions (SPO-152). */
+  until = Infinity,
 ): Map<MuscleGroup, number> {
   const since = now - days * DAY;
   const out = new Map<MuscleGroup, number>();
   for (const w of finished) {
-    if (w.startedAt < since) continue;
+    if (w.startedAt < since || w.startedAt >= until) continue;
     for (const [m, n] of muscleSetsInWorkout(w)) out.set(m, (out.get(m) ?? 0) + n);
   }
   return out;

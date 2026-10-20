@@ -297,7 +297,7 @@ const M = {
   legCurl: (n: string) => cn(n).includes('leg curl'),
   cableRow: (n: string) => {
     const c = cn(n);
-    return c.includes('cable row') && (c.includes('seated') || true) && !c.includes('upright');
+    return c.includes('cable row') && !c.includes('upright');
   },
 };
 

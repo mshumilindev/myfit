@@ -94,6 +94,15 @@ const calc = (
   );
 const sig = (r: MasteryResult, key: string) => r.practice.find((s) => s.key === key)!;
 
+describe('consistency streak input', () => {
+  it('an explicit streakDays option replaces the app-wide streak (the pure form of computeMastery)', () => {
+    const r = calc([mkW(NOW - DAY, [mkEx('Move', { primary: 'chest' })])], noBody, {
+      streakDays: 20,
+    });
+    expect(r.axes.consistency.facts).toMatchObject({ streakDays: 20 });
+  });
+});
+
 describe('constants', () => {
   it('axis weights sum to 1', () => {
     expect(Object.values(AXIS_WEIGHT).reduce((a, b) => a + b, 0)).toBeCloseTo(1, 10);
@@ -422,6 +431,28 @@ describe('practice: coverage & balance', () => {
     expect(c.facts).toMatchObject({ pushShare: 33, pullShare: 22, legShare: 44 });
     expect(c.score).toBe(95); // 0.7 + 0.3 * (1 - 1/6)
     expect(c.status).toBe('good');
+  });
+
+  it('the catalog splits the back into lats / traps / lower_back: training any of them covers the back group (SPO-152)', () => {
+    for (const fine of ['lats', 'traps', 'lower_back']) {
+      const r = calc([mkW(NOW - DAY, [mkEx('Move', { primary: fine, n: 10 })])]);
+      const c = sig(r, 'coverage');
+      expect(c.facts.skipped, fine).not.toContain('back');
+      expect(c.facts.pullShare, fine).toBe(100);
+    }
+  });
+
+  it('the fine back groups add up in one back group', () => {
+    const r = calc([
+      mkW(NOW - DAY, [
+        mkEx('A', { primary: 'lats', n: 4 }),
+        mkEx('B', { primary: 'traps', n: 4 }),
+        mkEx('C', { primary: 'back', n: 4 }),
+      ]),
+    ]);
+    // 12 sets over 8 weeks, all pull: the back counts once as trained
+    expect(sig(r, 'coverage').facts.skipped).not.toContain('back');
+    expect((sig(r, 'coverage').facts.skipped as string[]).length).toBe(9);
   });
 
   it('only counts the 8-week window', () => {
