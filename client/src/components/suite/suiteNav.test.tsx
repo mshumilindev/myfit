@@ -58,7 +58,6 @@ vi.mock('../StandardsView', () => ({ StandardsView: () => null }));
 vi.mock('../FeatsView', () => ({ FeatsView: () => null }));
 vi.mock('../StatShareSheet', () => ({ StatShareSheet: () => null }));
 vi.mock('../../views/NotificationsView', () => ({ NotificationsView: () => null }));
-vi.mock('../../views/TrainerView', () => ({ TrainerView: () => null }));
 vi.mock('../../views/AdminView', () => ({ AdminView: () => null }));
 vi.mock('../../views/ProfileView', () => ({ ProfileView: () => null }));
 vi.mock('../../nutrition/store', () => ({
