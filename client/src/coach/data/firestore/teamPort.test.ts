@@ -25,6 +25,22 @@ function fsWith(handler: (name: string, data: unknown) => unknown): {
 }
 
 describe('Firestore team port', () => {
+  it('accepting a manager invite adopts the fresh session token; a failing swap never fails the accept', async () => {
+    const seen: [string, string][] = [];
+    const { fs } = fsWith(() => ({ teamId: 't1', role: 'manager', token: 'tok-new' }));
+    await createFirestoreTeamPort(fs, async (t, r) => {
+      seen.push([t, r]);
+    }).acceptInvite('inv');
+    expect(seen).toEqual([['tok-new', 'manager']]);
+    await expect(
+      createFirestoreTeamPort(fs, () => Promise.reject(new Error('offline'))).acceptInvite('inv'),
+    ).resolves.toBeUndefined();
+    const plain = fsWith(() => ({ teamId: 't1', role: 'trainer' })).fs;
+    await createFirestoreTeamPort(plain, async () => {
+      throw new Error('must not be called');
+    }).acceptInvite('inv');
+  });
+
   it('load: reads the snapshot, derives the invite link from the id and keeps it for peek()', async () => {
     const { fs, calls } = fsWith(() => snap);
     const p = createFirestoreTeamPort(fs);

@@ -43,7 +43,11 @@ function toTeamError(e: unknown): TeamPortError {
   return new TeamPortError('unavailable');
 }
 
-export function createFirestoreTeamPort(fs: FsApi): TeamPort {
+export function createFirestoreTeamPort(
+  fs: FsApi,
+  /** Takes a fresh session token the server hands over when the role changes (a new manager). */
+  onSession?: (token: string, role: string) => Promise<void>,
+): TeamPort {
   let last: TeamData | null = null;
   const call = async <T>(name: string, data: Record<string, unknown> = {}): Promise<T> => {
     try {
@@ -87,7 +91,12 @@ export function createFirestoreTeamPort(fs: FsApi): TeamPort {
       };
     },
     async acceptInvite(token) {
-      await call('teamAccept', { inviteId: token });
+      const res = await call<{ role?: string; token?: string } | undefined>('teamAccept', {
+        inviteId: token,
+      });
+      // The invite is accepted either way; without the fresh token the new role shows at the next sign-in.
+      if (res?.token && onSession)
+        await onSession(res.token, res.role ?? 'manager').catch(() => undefined);
     },
     async declineInvite(token) {
       await call('teamDecline', { inviteId: token });

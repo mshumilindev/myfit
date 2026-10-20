@@ -40,6 +40,7 @@ import { createFirestoreClientChatPort } from './clientChatPort';
 import { createFirestoreClientPort } from './clientPort';
 import type { FsApi } from './fsApi';
 import { createFirestoreInvitePort } from './invitePort';
+import { adoptSessionToken } from '../../../api';
 import { createFirestoreTeamPort } from './teamPort';
 import { configureTeam } from '../../team/useTeam';
 import { createRingProvider } from './keyRing';
@@ -259,7 +260,11 @@ export function installFirestoreCoach(d: InstallDeps): () => void {
     }),
   );
   configureInvitePort(createFirestoreInvitePort(d.fs));
-  configureTeam(createFirestoreTeamPort(d.fs));
+  configureTeam(
+    createFirestoreTeamPort(d.fs, (token, role) =>
+      adoptSessionToken(token, role === 'manager' ? 'manager' : 'member'),
+    ),
+  );
   configureShare({
     source: createFirestoreShareSource({
       fs: d.fs,

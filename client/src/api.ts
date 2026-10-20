@@ -66,6 +66,12 @@ export interface AuthPayload {
   role: Role;
 }
 
+/** Swap the session for a fresh custom token of the same account (a new role claim, e.g. after joining a team as a manager). */
+export async function adoptSessionToken(token: string, role: Role): Promise<void> {
+  await signInWithCustomToken(auth, token);
+  setRole(role);
+}
+
 /** Complete a sign-in from an auth-function payload (custom token + role). */
 export async function signInWithPayload(payload: AuthPayload): Promise<void> {
   await signInWithCustomToken(auth, payload.token);

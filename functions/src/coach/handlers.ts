@@ -11,7 +11,7 @@ import { createPrivateKey, createPublicKey, sign as edSign } from 'node:crypto';
 import { onCall, type CallableRequest } from 'firebase-functions/v2/https';
 import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
-import { db, HttpsError, requireRole, type Role } from '../lib';
+import { db, HttpsError, mintToken, requireRole, type Role } from '../lib';
 import * as svc from './service';
 import * as team from './team';
 import { CoachError, type Actor, type Signer } from './service';
@@ -136,7 +136,11 @@ export const teamInvitePreview = onCall(opts, (req) =>
   run(req, ANY_TEAM, () => team.teamInvitePreview(ctx(), body(req).inviteId)),
 );
 export const teamAccept = onCall(opts, (req) =>
-  run(req, ANY_TEAM, (a) => team.teamAccept(ctx(), a, body(req))),
+  run(req, ANY_TEAM, async (a) => {
+    const res = await team.teamAccept(ctx(), a, body(req));
+    // The role claim is baked into the session token: a new manager gets a fresh one, so the role works at once.
+    return res.role === 'manager' ? { ...res, token: await mintToken(a.uid, 'manager') } : res;
+  }),
 );
 export const teamDecline = onCall(opts, (req) =>
   run(req, ANY_TEAM, (a) => team.teamDecline(ctx(), a, body(req))),
