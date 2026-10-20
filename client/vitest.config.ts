@@ -5,7 +5,8 @@ import type { Plugin } from 'vite';
 /**
  * Atlas answers synchronously in tests: the knowledge base is handed to the retriever and the facet store up front (the app
  * gets it from a worker). It is attached to the two modules themselves, so only test files that actually load them pay for
- * the KB import (~45% of files do not) - no list to keep in sync.
+ * the KB import (~45% of files do not) - no list to keep in sync. Only the first copy of a module in a test file is loaded,
+ * as before (a test that resets modules gets a fresh, empty retriever).
  */
 const atlasTestKb = (): Plugin => ({
   name: 'atlas-test-kb',
@@ -13,9 +14,9 @@ const atlasTestKb = (): Plugin => ({
   transform(code, id) {
     const file = id.split('?')[0].replace(/\\/g, '/');
     if (file.endsWith('/src/atlas/retrieve.ts'))
-      return `${code}\nimport { KB as __testKb } from './kb';\nloadKb(__testKb);\n`;
+      return `${code}\nimport { KB as __testKb } from './kb';\nif (!globalThis.__testKbLoaded) {\n  globalThis.__testKbLoaded = true;\n  loadKb(__testKb);\n}\n`;
     if (file.endsWith('/src/atlas/facetStore.ts'))
-      return `${code}\nimport { KB as __testKb, facetsTable as __testFacets } from './kb';\nsetFacets(__testFacets(__testKb));\n`;
+      return `${code}\nimport { KB as __testKb, facetsTable as __testFacets } from './kb';\nif (!globalThis.__testFacetsLoaded) {\n  globalThis.__testFacetsLoaded = true;\n  setFacets(__testFacets(__testKb));\n}\n`;
     if (file.endsWith('/src/coach/data/testHooks.ts'))
       return `${code}\nif (typeof localStorage !== 'undefined') await import('../__fixtures__/register');\n`;
     return null;
