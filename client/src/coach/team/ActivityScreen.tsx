@@ -34,18 +34,18 @@ const startOfDay = (ts: number) => {
 };
 
 const KIND_ICON: Record<ActivityRow['kind'], string> = {
-  'move-request': 'arrows-left-right',
+  'move-request': 'swap',
   'move-cancel': 'x-circle',
-  'removal-request': 'user-minus',
+  'removal-request': 'minus-circle',
   'removal-approved': 'check-circle',
   'removal-declined': 'x-circle',
   'removal-cancelled': 'arrow-counter-clockwise',
   'session-done': 'check-circle',
   'session-missed': 'warning-circle',
-  'session-cancelled': 'calendar-x',
+  'session-cancelled': 'x-circle',
   'session-edited': 'calendar-dots',
   'member-added': 'user-plus',
-  'member-removed': 'user-minus',
+  'member-removed': 'minus-circle',
   'member-left': 'sign-out',
   'client-invite': 'envelope',
 };
@@ -90,15 +90,16 @@ export function ActivityScreen({
     };
   }, [p, attempt]);
 
-  const [clock] = useState(() => now ?? Date.now());
-  const viewerUid = state.data?.me.uid;
+  const [clock] = useState(() => now ?? p.now?.() ?? Date.now());
   const ownerName = state.data?.ownerName ?? '';
 
+  const viewerUid = state.data?.me.uid;
   const actors = useMemo(() => {
     const m = new Map<string, string>();
     for (const e of log?.entries ?? []) m.set(e.actorUid, e.actorName);
-    return [...m.entries()];
-  }, [log]);
+    // the viewer's own chip comes last (board D18)
+    return [...m.entries()].sort(([a], [b]) => Number(a === viewerUid) - Number(b === viewerUid));
+  }, [log, viewerUid]);
 
   const back = (
     <BackButton
