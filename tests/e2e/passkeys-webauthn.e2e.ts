@@ -10,6 +10,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { AddressInfo } from 'node:net';
+import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simplewebauthn/server';
 import {
   loginOptionsCore,
   loginVerifyCore,
@@ -22,6 +23,16 @@ import {
 } from '../../functions/src/passkeysCore';
 
 const UID = 'user-olena';
+
+type Swa = {
+  startRegistration(a: { optionsJSON: unknown }): Promise<unknown>;
+  startAuthentication(a: { optionsJSON: unknown }): Promise<unknown>;
+};
+interface Body {
+  userId?: string;
+  challengeId: string;
+  response: RegistrationResponseJSON & AuthenticationResponseJSON;
+}
 const browserBundle = fs.readFileSync(
   path.resolve(
     __dirname,
@@ -52,7 +63,7 @@ let server: Server;
 let origin = '';
 
 const readBody = (req: IncomingMessage) =>
-  new Promise<any>((resolve) => {
+  new Promise<Body>((resolve) => {
     let s = '';
     req.on('data', (c) => (s += c));
     req.on('end', () => resolve(s ? JSON.parse(s) : {}));
@@ -145,7 +156,9 @@ const registerInPage = (page: Page) =>
     const post = (u: string, b?: unknown) =>
       fetch(u, { method: 'POST', body: JSON.stringify(b ?? {}) }).then((r) => r.json());
     const { challengeId, options } = await post('/register/options');
-    const response = await (window as any).SimpleWebAuthnBrowser.startRegistration({
+    const response = await (
+      window as unknown as { SimpleWebAuthnBrowser: Swa }
+    ).SimpleWebAuthnBrowser.startRegistration({
       optionsJSON: options,
     });
     return post('/register/verify', { challengeId, response });
@@ -156,7 +169,9 @@ const loginInPage = (page: Page, userId: string) =>
     const post = (u: string, b?: unknown) =>
       fetch(u, { method: 'POST', body: JSON.stringify(b ?? {}) }).then((r) => r.json());
     const { challengeId, options } = await post('/login/options', { userId: uid });
-    const response = await (window as any).SimpleWebAuthnBrowser.startAuthentication({
+    const response = await (
+      window as unknown as { SimpleWebAuthnBrowser: Swa }
+    ).SimpleWebAuthnBrowser.startAuthentication({
       optionsJSON: options,
     });
     const out = await post('/login/verify', { challengeId, response });
@@ -206,7 +221,9 @@ test('no passkey on the device: the browser prompt fails, so the app falls back 
   const err = await page.evaluate(async () => {
     try {
       const r = await fetch('/login/options', { method: 'POST', body: '{}' }).then((x) => x.json());
-      await (window as any).SimpleWebAuthnBrowser.startAuthentication({ optionsJSON: r.options });
+      await (
+        window as unknown as { SimpleWebAuthnBrowser: Swa }
+      ).SimpleWebAuthnBrowser.startAuthentication({ optionsJSON: r.options });
       return null;
     } catch (e) {
       return (e as Error).name;
@@ -227,7 +244,9 @@ test('an assertion from another origin is rejected by the server', async ({ page
       const post = (u: string, b?: unknown) =>
         fetch(u, { method: 'POST', body: JSON.stringify(b ?? {}) });
       const { challengeId, options } = await (await post('/login/options', { userId: uid })).json();
-      const response = await (window as any).SimpleWebAuthnBrowser.startAuthentication({
+      const response = await (
+        window as unknown as { SimpleWebAuthnBrowser: Swa }
+      ).SimpleWebAuthnBrowser.startAuthentication({
         optionsJSON: options,
       });
       return (await post('/login/verify', { challengeId, response })).status;
