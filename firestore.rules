@@ -45,6 +45,42 @@ service cloud.firestore {
         && liveUser().get('role', 'member') in ['trainer', 'admin']
         && notSuspended();
     }
+    // --- Team helpers (SPO-196, ADR 005) ---------------------------------------------------------
+    // A manager is NOT a coach: isCoachRole()/isTrainerOrAdmin() stay false for them. Team membership lives in
+    // teams/{teamId}/members/{uid} (functions only); teamId is the owner trainer's uid and users/{uid}.teamId points
+    // a member trainer at it (absent = the trainer owns their own team). Like every role privilege, the manager role
+    // also needs the LIVE users/{uid} document to agree with the claim (stale-claim guard).
+    function isManager() {
+      return role() == 'manager'
+        && liveUser().get('role', 'member') == 'manager'
+        && notSuspended();
+    }
+    function teamOf(trainerUid) {
+      return get(/databases/$(database)/documents/users/$(trainerUid)).data.get('teamId', trainerUid);
+    }
+    function teamMember(teamId, memberUid) {
+      return get(/databases/$(database)/documents/teams/$(teamId)/members/$(memberUid)).data;
+    }
+    function isActiveManagerIn(teamId, memberUid) {
+      return exists(/databases/$(database)/documents/teams/$(teamId)/members/$(memberUid))
+        && teamMember(teamId, memberUid).get('role', '') == 'manager'
+        && teamMember(teamId, memberUid).get('status', '') == 'active';
+    }
+    function isActiveMemberOf(teamId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/teams/$(teamId)/members/$(request.auth.uid))
+        && teamMember(teamId, request.auth.uid).get('status', '') == 'active';
+    }
+    // The signed-in manager belongs to the team of the given trainer.
+    function isTeamManagerOfTrainer(trainerUid) {
+      return isSignedIn() && isManager() && isActiveManagerIn(teamOf(trainerUid), request.auth.uid);
+    }
+    // The manager sees a client only while the client's coaching relationship is active (same switch as the trainer).
+    function isTeamManagerOf(clientId) {
+      return isSignedIn()
+        && coachingOf(clientId).status == 'active'
+        && isTeamManagerOfTrainer(coachingOf(clientId).trainerId);
+    }
     // --- Coaching helpers (conversation = one client + one trainer; cid is an OPAQUE id,
     // so the parties come from the conversation document, never from the path) ----------
     function coachingOf(clientId) {
@@ -510,8 +546,33 @@ service cloud.firestore {
       // (not expressible in rules). The other party changes only `status`/`decidedAt`, also through the callable.
       // Clients and trainers can read, never write.
       match /requests/{rid} {
-        allow read: if inConv(cid);
+        allow read: if inConv(cid) || isTeamManagerOf(convOf(cid).clientId);
         allow create, update, delete: if false;
+      }
+
+      // Delegations (SPO-196, ADR 005): the CLIENT device wraps the `schedule` and `requests` sub-keys of the CURRENT
+      // epoch for one active manager of its trainer's team (same wrap shape and AAD family as `ck`). The trainer cannot
+      // do this (their keys are non-extractable) and never writes here. The manager reads only their own document; the
+      // client reads and deletes (a removed manager's document goes away) and nobody else touches it.
+      match /delegations/{managerUid} {
+        allow read: if isSelf(managerUid) && isTeamManagerOf(convOf(cid).clientId)
+          || request.auth.uid == convOf(cid).clientId;
+        allow create, update: if activeConv(cid)
+          && request.auth.uid == convOf(cid).clientId
+          && isActiveManagerIn(teamOf(convOf(cid).trainerId), managerUid)
+          && request.resource.data.keys().hasOnly(['epoch', 'fp', 'schedule', 'requests', 'at'])
+          && request.resource.data.keys().hasAll(['epoch', 'fp', 'schedule', 'requests', 'at'])
+          && request.resource.data.epoch is int
+          && request.resource.data.epoch == convOf(cid).get('keyEpoch', 0)
+          && request.resource.data.fp is string && request.resource.data.fp.size() == 16
+          && request.resource.data.at is int
+          && validCk(request.resource.data.schedule)
+          && validCk(request.resource.data.requests)
+          && request.resource.data.schedule.epoch == request.resource.data.epoch
+          && request.resource.data.requests.epoch == request.resource.data.epoch
+          && request.resource.data.schedule.fp == request.resource.data.fp
+          && request.resource.data.requests.fp == request.resource.data.fp;
+        allow delete: if request.auth.uid == convOf(cid).clientId;
       }
 
       // Key ring of PAST epochs (plan-security C.2): the CLIENT device wraps each earlier epoch of the current link
@@ -536,22 +597,26 @@ service cloud.firestore {
       }
     }
 
-    // Weekly schedule, sealed with the conversation key. The trainer writes while active.
+    // Weekly schedule, sealed with the conversation key. The trainer writes while active; a team manager of that
+    // trainer may read and write it too (SPO-196): they only hold the delegated `schedule` sub-key (ADR 005), `trainerId`
+    // always stays the client's trainer, never the manager.
+    function scheduleWriter(clientId, d) {
+      return (isActiveCoachOf(clientId) && d.trainerId == request.auth.uid)
+        || (isTeamManagerOf(clientId) && d.trainerId == coachingOf(clientId).trainerId);
+    }
     match /schedules/{clientId} {
-      allow read: if isSelf(clientId) || isActiveCoachOf(clientId);
-      allow create: if isActiveCoachOf(clientId)
-        && request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
+      allow read: if isSelf(clientId) || isActiveCoachOf(clientId) || isTeamManagerOf(clientId);
+      allow create: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
         && request.resource.data.keys().hasAll(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
         && request.resource.data.clientId == clientId
-        && request.resource.data.trainerId == request.auth.uid
+        && scheduleWriter(clientId, request.resource.data)
         && request.resource.data.updatedAt is int
         && request.resource.data.rev == 1
         && sealedCkSchedule(request.resource.data);
-      allow update: if isActiveCoachOf(clientId)
-        && request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
+      allow update: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
         && request.resource.data.keys().hasAll(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
         && request.resource.data.clientId == clientId
-        && request.resource.data.trainerId == request.auth.uid
+        && scheduleWriter(clientId, request.resource.data)
         && request.resource.data.updatedAt is int
         && request.resource.data.rev == resource.data.rev + 1
         && sealedCkSchedule(request.resource.data);
@@ -632,7 +697,7 @@ service cloud.firestore {
       // `sig`, `kid`, `signedAt` are written by the `coachKeySignCall` function (Admin SDK) and bind uid, key
       // fingerprint and `updatedAt`. The owner may keep them untouched (e.g. a merge write) but never set or change
       // them; a new `pub` without a fresh signature is simply refused by clients (key pinning, plan-security C.2 no. 5).
-      allow create, update: if isSelf(userId) && isCoachRole()
+      allow create, update: if isSelf(userId) && (isCoachRole() || isManager())
         && request.resource.data.keys().hasOnly(['pub', 'updatedAt', 'sig', 'kid', 'signedAt'])
         && request.resource.data.keys().hasAll(['pub', 'updatedAt'])
         && request.resource.data.pub is map
@@ -713,6 +778,51 @@ service cloud.firestore {
         && request.resource.data.authorId == uid()
         && prgOk(programId);
       allow delete: if isSignedIn() && resource.data.authorId == uid() && prgOk(programId);
+    }
+
+    // --- Teams (SPO-196) ------------------------------------------------------------------------
+    // teams/{teamId}: teamId = the owner trainer's uid. EVERYTHING is written by functions (Admin SDK). Reads:
+    //  - the team document and member list: the owner, active members, and the owner's active clients (a client must
+    //    know which managers exist to delegate keys; members hold no health data, only role/status/name/fp);
+    //  - `acl/{uid}` (activityScope): the owner and that member only;
+    //  - `activity/*` (metadata only, no encrypted content): the owner reads all; a member reads own entries, or all
+    //    when the owner has set activityScope == 'all' for them.
+    function clientOfTeam(teamId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/coaching/$(request.auth.uid))
+        && coachingOf(request.auth.uid).get('status', '') == 'active'
+        && teamOf(coachingOf(request.auth.uid).trainerId) == teamId;
+    }
+    match /teams/{teamId} {
+      allow read: if isSelf(teamId) || isActiveMemberOf(teamId);
+      allow write: if false;
+      match /members/{memberUid} {
+        allow read: if isSelf(teamId) || isSelf(memberUid) || isActiveMemberOf(teamId) || clientOfTeam(teamId);
+        allow write: if false;
+      }
+      match /acl/{memberUid} {
+        allow read: if isSelf(teamId) || isSelf(memberUid);
+        allow write: if false;
+      }
+      match /activity/{entryId} {
+        allow read: if isSelf(teamId)
+          || (isActiveMemberOf(teamId)
+              && (resource.data.actorUid == request.auth.uid
+                  || (exists(/databases/$(database)/documents/teams/$(teamId)/acl/$(request.auth.uid))
+                      && get(/databases/$(database)/documents/teams/$(teamId)/acl/$(request.auth.uid)).data.get('activityScope', 'own') == 'all')));
+        allow write: if false;
+      }
+    }
+    // Invites and client-removal requests: functions write; the parties read their own.
+    match /teamInvites/{inviteId} {
+      allow read: if isSignedIn() && (resource.data.get('invitedBy', '') == request.auth.uid
+        || resource.data.get('teamId', '') == request.auth.uid);
+      allow write: if false;
+    }
+    match /teamRequests/{requestId} {
+      allow read: if isSignedIn() && (resource.data.get('requestedBy', '') == request.auth.uid
+        || resource.data.get('trainerId', '') == request.auth.uid);
+      allow write: if false;
     }
 
     // Program assignments: readable by the member and by trainers/admins;

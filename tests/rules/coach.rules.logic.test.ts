@@ -93,6 +93,8 @@ describe('rules file: static checks', () => {
         'coachKeys/{userId}',
         'config/{docId}',
         'conversations/{cid}',
+        // SPO-196: the CLIENT delegates the schedule/requests sub-keys to a team manager (ADR 005)
+        'conversations/{cid}/delegations/{managerUid}',
         'conversations/{cid}/keyring/{epoch}',
         'conversations/{cid}/messages/{mid}',
         'conversations/{cid}/notes/{nid}',
