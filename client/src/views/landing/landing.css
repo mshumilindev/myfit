@@ -200,11 +200,10 @@
     transform: translateY(-3.4%);
   }
 }
-/* "Create a shortcut" is a touch-device helper: not on desktop. */
-@media (hover: hover) and (pointer: fine) {
-  .ld .ld-auth .auth-install-btn {
-    display: none;
-  }
+/* "Create a shortcut" is for phones and tablets in a browser (the installed app and the desktop shell hide it themselves); not for desktop systems. */
+.ld #top[data-os='win'] .ld-auth .auth-install-btn,
+.ld #top[data-os='mac'] .ld-auth .auth-install-btn {
+  display: none;
 }
 
 /* The design's beam period is long; keep it slow but visibly alive. */
