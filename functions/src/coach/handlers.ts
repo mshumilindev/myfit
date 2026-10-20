@@ -153,6 +153,10 @@ export const teamSetActivityScope = onCall(opts, (req) =>
   run(req, COACH, (a) => team.teamSetActivityScope(ctx(), a, body(req))),
 );
 export const teamRead = onCall(opts, (req) => run(req, TEAM, (a) => team.teamRead(ctx(), a)));
+/** The manager's own list of the team's clients (ids, names, conversation ids; no content). */
+export const teamClients = onCall(opts, (req) =>
+  run(req, ['manager'], (a) => team.teamClients(ctx(), a)),
+);
 /** A client device asks who it must delegate the schedule keys to (its trainer's active managers). */
 export const teamManagersForClient = onCall(opts, (req) =>
   run(req, ANY, (a) => team.teamManagersForClient(ctx(), a)),

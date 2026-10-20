@@ -8,6 +8,7 @@ import {
   teamInvitePreview,
   teamInviteRevoke,
   teamLeave,
+  teamClients,
   teamManagersForClient,
   teamRead,
   teamRemoveMember,
@@ -192,6 +193,29 @@ describe('accepting', () => {
     expect(await teamManagersForClient(ctx(), { uid: 'zz', role: 'member' } as Actor)).toEqual({
       managers: [],
     });
+  });
+
+  it('a manager lists the active clients of every trainer in the team, with conversation ids; nobody else may', async () => {
+    await joined();
+    await teamAccept(ctx(), trainer2, {
+      inviteId: (await teamInvite(ctx(), mgrNow, { email: 'andriy@example.com' })).inviteId,
+    });
+    await kv.set('users/c1', { role: 'member', status: 'active', firstName: 'Zoe' });
+    await kv.set('users/c2', { role: 'member', status: 'active', firstName: 'Adam' });
+    await kv.set('users/c3', { role: 'member', status: 'active', firstName: 'Gone' });
+    await kv.set('users/c4', { role: 'member', status: 'active', firstName: 'Outsider' });
+    await kv.set('coaching/c1', { status: 'active', trainerId: 't1' });
+    await kv.set('coaching/c2', { status: 'active', trainerId: 't2' });
+    await kv.set('coaching/c3', { status: 'ended', trainerId: 't1' });
+    await kv.set('coaching/c4', { status: 'active', trainerId: 'someone-else' });
+    const r = await teamClients(ctx(), mgrNow);
+    expect(r.clients.map((c) => [c.name, c.trainerId])).toEqual([
+      ['Adam', 't2'],
+      ['Zoe', 't1'],
+    ]);
+    expect(r.clients[0].cid).toMatch(/^[a-z2-7]{26}$/);
+    expect(r.clients[0].cid).not.toBe(r.clients[1].cid);
+    expect(await code(teamClients(ctx(), owner))).toBe('permission-denied:managers-only');
   });
 
   it('a manager invites a TRAINER; only a trainer account may accept, a member may not', async () => {

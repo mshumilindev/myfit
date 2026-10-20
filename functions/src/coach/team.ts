@@ -11,7 +11,7 @@
  * manager; anyone else may leave. Nothing here handles keys or sealed data (the client device delegates them).
  */
 import { teamInviteUrl } from './inviteLink';
-import { DAY, isUid } from './logic';
+import { DAY, conversationId, isUid } from './logic';
 import { CoachError, notice, type Actor, type Ctx, type ErrCode } from './service';
 import type { Doc } from './kv';
 
@@ -452,4 +452,49 @@ export async function teamManagersForClient(
     .map((m) => m.uid)
     .sort();
   return { managers };
+}
+
+export interface TeamClient {
+  clientId: string;
+  /** the conversation id (opaque, server pepper): the manager reads `conversations/{cid}/delegations/{me}` with it */
+  cid: string;
+  trainerId: string;
+  trainerName: string;
+  name: string;
+}
+
+/**
+ * MANAGER: every client of the team with an active coaching relationship, with the conversation id and the trainer.
+ * The roster of the trainer is the trainer's; this is the manager's list (names and ids only, no content).
+ */
+export async function teamClients(ctx: Ctx, actor: Actor): Promise<{ clients: TeamClient[] }> {
+  const { teamId, me } = await myTeam(ctx, actor);
+  if (me.role !== 'manager') return fail('permission-denied', 'managers-only');
+  const members = (await ctx.kv.list(`teams/${teamId}/members`)).map(
+    (r) => r.data as unknown as MemberRec,
+  );
+  const clients: TeamClient[] = [];
+  for (const m of members) {
+    if (m.role !== 'trainer' || m.status !== 'active') continue;
+    const trainer = (await ctx.kv.get(`users/${m.uid}`)) as UserRec | null;
+    const rows = await ctx.kv.list('coaching', {
+      where: [
+        ['trainerId', '==', m.uid],
+        ['status', '==', 'active'],
+      ],
+      limit: 500,
+    });
+    for (const r of rows) {
+      const u = (await ctx.kv.get(`users/${r.id}`)) as UserRec | null;
+      clients.push({
+        clientId: r.id,
+        cid: conversationId(ctx.pepper, r.id, m.uid),
+        trainerId: m.uid,
+        trainerName: nameOf(trainer),
+        name: nameOf(u),
+      });
+    }
+  }
+  clients.sort((a, b) => a.name.localeCompare(b.name) || a.clientId.localeCompare(b.clientId));
+  return { clients };
 }
