@@ -126,16 +126,12 @@ function OnbLandingSkeleton() {
   );
 }
 
-export function OnboardingView({
-  token,
-  onDone,
-  skipLanding = false,
-}: {
+export function OnboardingView(props: {
   token: string;
   onDone: (workoutId?: string) => void;
-  /** The invite landing page was already shown (and "Start" pressed): open on step 1. */
   skipLanding?: boolean;
 }) {
+  const { token, onDone, skipLanding = false } = props;
   const { t, locale } = useT();
   const [info, setInfo] = useState<InviteInfo | null | 'error'>(null);
   const saved = useMemo(() => loadResume(token), [token]);

@@ -3,7 +3,7 @@ import { pushState, refreshPush, setAppBadge } from './push';
 import { useConditionLimits } from './healthBuild';
 import { setProgressionEffects } from './progression';
 import { ScreenSkeleton } from './components/ui/Skeletons';
-import { Button, IconButton } from './components/ui/Button';
+import { Button } from './components/ui/Button';
 import { buildNotes, useAtlasFmt, useAtlasNotes } from './atlas/notes';
 import { setOverrideUid } from './accountOverrides';
 import { chatBacked, planNotePushes, planOutbox, syncOutbox } from './atlas/schedule';
@@ -67,6 +67,7 @@ import { canUseCoach, coachScreenOpen } from './coach/access';
 import type { HomeSetRoute } from './views/home/HomeSetView';
 import { pruneHomeSetDrafts } from './views/home/homeSetDraft';
 import { AuthView } from './views/AuthView';
+import { NoticeStrip } from './components/NoticeStrip';
 import { LandingView } from './views/landing/LandingView';
 import { InviteLanding } from './views/landing/InviteLanding';
 import { shouldShowLanding } from './views/landing/landingGate';
@@ -2184,27 +2185,5 @@ function SyncBlockedCard(props: {
         </Button>
       </div>
     </div>
-  );
-}
-
-function noticeIcon(kind: string): string {
-  if (kind.startsWith('program')) return 'copy';
-  if (kind.startsWith('role')) return 'shield-check';
-  return 'barbell';
-}
-
-/** In-product notices strip: assignment, role and trainer changes (AC-ROLE-10, AC-PLAN-11). */
-function NoticeStrip(props: { notices: Notice[]; onDismiss: (id: string) => void }) {
-  const { t } = useT();
-  return (
-    <>
-      {props.notices.map((n) => (
-        <div key={n.id} className="notice" role="status">
-          <Icon name={noticeIcon(n.kind)} />
-          <span className="notice-text">{t.noticeText(n.kind, n.actor, n.detail)}</span>
-          <IconButton icon="x" size="sm" label={t.dismiss} onClick={() => props.onDismiss(n.id)} />
-        </div>
-      ))}
-    </>
   );
 }
