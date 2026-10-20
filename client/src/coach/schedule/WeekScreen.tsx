@@ -196,7 +196,12 @@ export function WeekScreen(p: WeekScreenProps) {
                           dim={selected === today && endOf(s) <= sch.now && !running}
                           time={slotClock(s).split('–')[0]}
                           icon={
-                            <ClientAvatar id={ids[0]} name={people.name(ids[0] ?? '')} size={32} />
+                            <ClientAvatar
+                              id={ids[0]}
+                              name={people.name(ids[0] ?? '')}
+                              size={32}
+                              hasPhoto={people.byId.get(ids[0] ?? '')?.hasPhoto}
+                            />
                           }
                           label={slotTitle(s, people, t)}
                           sub={
