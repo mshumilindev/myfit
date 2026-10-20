@@ -7,7 +7,7 @@ import {
   type Actor,
   type Ctx,
 } from '../../functions/src/coach/service';
-import { teamAccept, teamInvite, teamLogActivity } from '../../functions/src/coach/team';
+import { teamAccept, teamInvite, teamLogActivity, teamRead } from '../../functions/src/coach/team';
 import { DAY } from '../../functions/src/coach/logic';
 
 const T0 = Date.UTC(2026, 9, 20, 9, 0, 0);
@@ -167,5 +167,19 @@ describe('team activity log', () => {
     await teamSetActivityScope(ctx(), owner, { uid: 'm1', scope: 'all' });
     expect((await teamActivity(ctx(), mgr)).entries).toHaveLength(4);
     expect(await code(teamActivity(ctx(), client))).toBe('permission-denied:not-in-team');
+  });
+});
+
+describe('manager schedule access on the Team page', () => {
+  it('the owner sees how many team clients delegated the schedule key to each manager; a manager does not', async () => {
+    const mgrOf = async () =>
+      (await teamRead(ctx(), owner)).members.find((m) => m.uid === 'm1')?.scheduleReady;
+    expect(await mgrOf()).toEqual({ ready: 0, total: 1 });
+    const { teamClients } = await import('../../functions/src/coach/team');
+    const { clients } = await teamClients(ctx(), mgr);
+    await kv.set(`conversations/${clients[0]!.cid}/delegations/m1`, { keyEpoch: 1 });
+    expect(await mgrOf()).toEqual({ ready: 1, total: 1 });
+    const asMgr = await teamRead(ctx(), mgr);
+    expect(asMgr.members.every((m) => m.scheduleReady === undefined)).toBe(true);
   });
 });

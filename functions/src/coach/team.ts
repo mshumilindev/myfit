@@ -391,9 +391,22 @@ export interface TeamSnapshot {
     addedAt: number | null;
     lastActiveAt: number | null;
     activityScope?: ActivityScope;
+    /** managers, owner view: clients whose schedule key the client device already delegated */
+    scheduleReady?: { ready: number; total: number };
   }[];
   invites: { id: string; email: string; role: TeamRole; sentAt: number }[];
   asOf: number;
+}
+
+async function readyFor(
+  kv: Ctx['kv'],
+  clients: { cid: string }[],
+  managerUid: string,
+): Promise<{ ready: number; total: number }> {
+  let ready = 0;
+  for (const c of clients)
+    if (await kv.get(`conversations/${c.cid}/delegations/${managerUid}`)) ready++;
+  return { ready, total: clients.length };
 }
 
 /** The Team page's data. Managers' settings and pending invites are shown to the owner trainer only. */
@@ -415,6 +428,21 @@ export async function teamRead(ctx: Ctx, actor: Actor): Promise<TeamSnapshot> {
       addedBy: null,
     });
   const members: TeamSnapshot['members'] = [];
+  /** the owner sees how many team clients already delegated the schedule keys to each manager (SPO-203, board D17) */
+  const teamClientIds: { clientId: string; cid: string }[] = [];
+  if (owner && active.some((m) => m.role === 'manager')) {
+    for (const t of active.filter((m) => m.role === 'trainer')) {
+      const cs = await kv.list('coaching', {
+        where: [
+          ['trainerId', '==', t.uid],
+          ['status', '==', 'active'],
+        ],
+        limit: 500,
+      });
+      for (const c of cs)
+        teamClientIds.push({ clientId: c.id, cid: conversationId(ctx.pepper, c.id, t.uid) });
+    }
+  }
   for (const m of active) {
     const u = (await kv.get(`users/${m.uid}`)) as UserRec | null;
     const scope =
@@ -433,6 +461,9 @@ export async function teamRead(ctx: Ctx, actor: Actor): Promise<TeamSnapshot> {
       addedAt: m.owner ? null : m.addedAt,
       lastActiveAt: null,
       ...(scope ? { activityScope: scope } : {}),
+      ...(owner && m.role === 'manager'
+        ? { scheduleReady: await readyFor(kv, teamClientIds, m.uid) }
+        : {}),
     });
   }
   const invs = (await kv.list('teamInvites', { where: [['teamId', '==', teamId]] }))
