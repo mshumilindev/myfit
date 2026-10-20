@@ -72,3 +72,15 @@ export const WithMoreMenu: Story = {
     },
   },
 };
+
+/** A manager (SPO-196): "Manager" by the logo, the rail has only Schedule, Clients and Team. */
+export const ManagerRole: Story = {
+  args: { role: 'manager', name: 'Max Manager', route: { screen: 'schedule' } },
+};
+
+/** The manager on a phone: three tabs, no More. */
+export const ManagerPhone: Story = {
+  args: { role: 'manager', name: 'Max Manager', route: { screen: 'team' } },
+  parameters: { viewport: { value: 'phone' } },
+  globals: { viewport: { value: 'phone', isRotated: false } },
+};
