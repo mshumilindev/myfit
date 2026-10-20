@@ -122,7 +122,7 @@ describe('manager book', () => {
     expect(await other.fromDelegation(CID, doc)).toBeNull();
     expect(await s.rings.forEpoch(CID, 2)).toBeNull();
     expect((await s.rings.forEpoch(CID, 1))?.epoch).toBe(1);
-    expect(await s.rings.past()).toEqual(new Map());
+    expect(await s.rings.past(CID, 2)).toEqual(new Map());
   });
 
   it('plaintext never reaches the store: the delegation holds wraps only', async () => {

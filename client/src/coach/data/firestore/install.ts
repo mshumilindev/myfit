@@ -53,6 +53,8 @@ import { PG_LOCALES } from '../../../i18n/coachProgram';
 import { getLocale } from '../../../i18n';
 import { createFirestoreReadLog } from './readLogPort';
 import { createDelegationPublisher, keepDelegated } from './delegationPublisher';
+import { createManagerBook, createManagerRings } from './managerRings';
+import { createManagerWorldPort } from './managerWorld';
 import { createRingBook } from './ringBook';
 import { createFirestoreScheduleStore } from './scheduleDocStore';
 import { createFirestoreShareSource } from './shareSource';
@@ -299,6 +301,61 @@ export function installFirestoreCoach(d: InstallDeps): () => void {
     configureTeam(null);
     configureShare();
     configureReadLog(null);
+  };
+}
+
+export interface ManagerInstallDeps {
+  fs: FsApi;
+  vault: Vault;
+  manager: { id: string; name: string };
+  /** the manager's own key pair record (the client device wraps the schedule keys for its public half) */
+  loadOwnCoachKey: () => Promise<CoachKeyRecord | null>;
+}
+
+/**
+ * Team manager side (SPO-196, ADR 005): the schedule of the team's clients and the people list, read and written with the
+ * keys the CLIENT devices delegated (`schedule`, `requests`; never chat, notes, plan or live), plus the Team page.
+ * Returns the teardown.
+ */
+export function installFirestoreManager(d: ManagerInstallDeps): () => void {
+  const rings = createManagerRings({
+    fs: d.fs,
+    vault: d.vault,
+    uid: d.manager.id,
+    loadOwnCoachKey: d.loadOwnCoachKey,
+  });
+  const book = createManagerBook({ fs: d.fs, rings, uid: d.manager.id });
+  const stopBook = book.start();
+  initCoachTimeZone();
+  // the author of a schedule document is the client's TRAINER (the rules pin `trainerId` to the coaching)
+  const trainerOf = (clientId: string) =>
+    book.clients().find((c) => c.clientId === clientId)?.trainerId ?? '';
+  const schedule = createSealedSchedulePort({
+    store: createFirestoreScheduleStore({ fs: d.fs, book }),
+    vault: d.vault,
+    ringFor: book.ringFor,
+    ringForEpoch: book.ringForEpoch,
+    uid: trainerOf,
+    now: () => d.fs.now(),
+    cache: scheduleCacheOver(getSealedLocal(), d.manager.id),
+  });
+  configureCoachData({
+    uid: d.manager.id,
+    world: createManagerWorldPort({ manager: d.manager, book, now: () => d.fs.now() }),
+    scheduleFeed: scheduleFeedOf(scheduleStoreFor(schedule)),
+  });
+  configureSchedule(schedule);
+  configureTeam(
+    createFirestoreTeamPort(d.fs, (token, role) =>
+      adoptSessionToken(token, role === 'manager' ? 'manager' : 'member'),
+    ),
+  );
+  return () => {
+    stopBook();
+    rings.forget();
+    configureCoachData();
+    configureSchedule(null);
+    configureTeam(null);
   };
 }
 

@@ -288,11 +288,6 @@ export function CoachShell({
 /** The shell wired to the URL hash (`#/c/...`), as App.tsx mounts it. */
 export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
   const [route, navigate] = useCoachRoute();
-  // Real backend (production, or VITE_COACH_BACKEND=firestore in dev): the adapters are installed before any screen reads a port.
-  const { status, retry, problem } = useCoachBackendStatus('trainer', true, {
-    id: props.userId ?? currentUid(),
-    name: props.name,
-  });
   // A manager opens only the schedule, clients and team: any other deep link lands on the schedule.
   const outOfBounds = props.role === 'manager' && !managerMayOpen(route);
   useEffect(() => {
@@ -303,6 +298,12 @@ export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
   if (coachIsUnconfigured())
     return (
       <div className="app-coach co-shell apex-app">
+  // Real backend (production, or VITE_COACH_BACKEND=firestore in dev): the adapters are installed before any screen reads a port.
+  const backendRole = props.role === 'manager' ? 'manager' : 'trainer';
+  const { status, retry, problem } = useCoachBackendStatus(backendRole, true, {
+    id: props.userId ?? currentUid(),
+    name: props.name,
+  });
         <main className="co-main" id="co-main">
           <NotConfigured onBack={props.onExitToWorkouts} />
         </main>

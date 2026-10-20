@@ -13,7 +13,7 @@
 import type { LibGym } from '../../share/types';
 import { configureScheduleGyms } from '../../schedule/types';
 import { createFirebaseFs } from './firebaseFs';
-import { installFirestoreClient, installFirestoreCoach } from './install';
+import { installFirestoreClient, installFirestoreCoach, installFirestoreManager } from './install';
 import { keepCoachKeySigned } from './coachKeySigned';
 import { createDeviceSigner } from './signerStore';
 
@@ -72,6 +72,18 @@ async function startTrainer(who: { id: string; name: string }): Promise<() => vo
   };
 }
 
+async function startManager(who: { id: string; name: string }): Promise<() => void> {
+  const fs = createFirebaseFs();
+  const { vault, loadOwnCoachKey } = await import('../../../vaultIO');
+  // the manager's own public key is signed by the server like a trainer's: the client devices trust only a signed key
+  const stopSign = keepCoachKeySigned(fs, who.id);
+  const stop = installFirestoreManager({ fs, vault, manager: who, loadOwnCoachKey });
+  return () => {
+    stopSign();
+    stop();
+  };
+}
+
 async function startClient(who: { id: string; name: string }): Promise<() => void> {
   const fs = createFirebaseFs();
   const [{ vault, runKeyExchange }, store] = await Promise.all([
@@ -106,14 +118,15 @@ async function startClient(who: { id: string; name: string }): Promise<() => voi
 
 /** Installs the real adapters for this role and user (once) and returns the release function. */
 export async function acquireBackend(
-  role: 'trainer' | 'client',
+  role: 'trainer' | 'client' | 'manager',
   who: { id: string | null; name: string },
 ): Promise<() => void> {
   if (!who.id) return () => undefined; // not signed in: nothing to install, the fixtures never reach a real user
   const key = `${role}|${who.id}`;
   let r = running.get(key);
   if (!r) {
-    const start = role === 'trainer' ? startTrainer : startClient;
+    const start =
+      role === 'trainer' ? startTrainer : role === 'manager' ? startManager : startClient;
     r = { refs: 0, ready: start({ id: who.id, name: who.name }) };
     running.set(key, r);
     r.ready.catch(() => running.delete(key));

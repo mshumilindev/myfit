@@ -31,8 +31,11 @@ export interface SealedScheduleDeps {
   ringFor: (clientId: string) => ChatKeyRing | null;
   /** The ring of an earlier epoch (history after a key rotation); without it only current-epoch documents open. */
   ringForEpoch?: (clientId: string, epoch: number) => ChatKeyRing | null;
-  /** The trainer's uid (author of every schedule doc). */
-  uid: string;
+  /**
+   * The trainer's uid (author of every schedule doc). A team manager writes under the trainer of EACH client (the rules
+   * pin `trainerId` to the client's coaching), so it may be a function of the client.
+   */
+  uid: string | ((clientId: string) => string);
   now?: () => number;
   /**
    * A member's device: read every session in the zone the trainer wrote the schedule in (`ScheduleDoc.tz`), so a
@@ -158,7 +161,12 @@ export function createSealedSchedulePort(d: SealedScheduleDeps): SchedulePort {
         tz: coachTimeZone(),
         ...(Object.keys(names).length ? { gymNames: names } : {}),
       };
-      const raw = await sealSchedule({ vault: d.vault, ring }, next, d.uid, now());
+      const raw = await sealSchedule(
+        { vault: d.vault, ring },
+        next,
+        typeof d.uid === 'function' ? d.uid(doc.clientId) : d.uid,
+        now(),
+      );
       if (!(await d.store.setSchedule(doc.clientId, raw, doc.rev)))
         throw new SchedulePortError('conflict');
       return next;

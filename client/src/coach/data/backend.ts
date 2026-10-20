@@ -47,7 +47,7 @@ export function coachAdapter<T>(name: string, unavailable: () => T): T {
 /** A probe problem as the port error code `classifyProblem` already understands. */
 const probeCode = (p: CoachProblem): string => (p === 'denied' ? 'forbidden' : p);
 
-export type BackendRole = 'trainer' | 'client';
+export type BackendRole = 'trainer' | 'client' | 'manager';
 
 export type BackendStatus = 'ready' | 'loading' | 'failed';
 
