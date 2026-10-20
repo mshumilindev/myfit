@@ -1,4 +1,11 @@
-import type { ActivityScope, TeamActivity, TeamData, TeamRequest, TeamRole } from './types';
+import type {
+  ActivityScope,
+  SpotterFeed,
+  TeamActivity,
+  TeamData,
+  TeamRequest,
+  TeamRole,
+} from './types';
 
 export type TeamErrorCode =
   | 'offline'
@@ -42,6 +49,9 @@ export interface TeamPort {
   setActivityScope(uid: string, scope: ActivityScope): Promise<void>;
   /** The activity log as the caller may read it (owner: all; manager: own or all). */
   activity(): Promise<TeamActivity>;
+  /** Spotter: the caller's service messages about the team, newest first. */
+  notices(): Promise<SpotterFeed>;
+  markNoticesRead(): Promise<void>;
   /** TRAINER: open requests from managers about their clients (Agenda "Team requests"). */
   requests(): Promise<TeamRequest[]>;
   /** TRAINER: approve (runs the usual end-of-coaching) or decline. */
@@ -71,6 +81,8 @@ export function createUnavailableTeamPort(): TeamPort {
     leave: fail,
     setActivityScope: fail,
     activity: () => Promise.reject(new TeamPortError('unavailable')),
+    notices: () => Promise.reject(new TeamPortError('unavailable')),
+    markNoticesRead: () => Promise.reject(new TeamPortError('unavailable')),
     requests: () => Promise.reject(new TeamPortError('unavailable')),
     answerRequest: fail,
     requestRemoval: fail,

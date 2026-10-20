@@ -17,14 +17,21 @@ import { ThreadList } from './ThreadList';
 import { ThreadView, type ThreadViewProps } from './ThreadView';
 import { useDraft } from './chatDrafts';
 import { useChat } from './useChat';
+import { useSpotter } from '../team/useSpotter';
+import { SpotterRow } from '../team/SpotterRow';
+import type { TeamPort } from '../team/port';
 import './Chat.css';
 import { CoachProblemState } from '../BackendNotice';
+import { navigateHash } from '../../navigateHash';
+import { currentHash, setHash } from '../../route';
 
 export interface ChatScreenProps {
   onNavigate: (r: CoachRoute) => void;
   /** Test / story seams. */
   chatPort?: ChatPort;
   worldPort?: CoachWorldPort;
+  /** Spotter's team messages (the pinned row); default: the app's team port */
+  teamPort?: TeamPort;
   uid?: string | null;
   /** M5 / M6 slots, forwarded to every thread. */
   renderCard?: ThreadViewProps['renderCard'];
@@ -48,17 +55,17 @@ function useOnline(): boolean {
 }
 
 function useWithParam(): [string | null, (id: string | null, push: boolean) => void] {
-  const [id, setId] = useState(() => readWith(window.location.hash));
+  const [id, setId] = useState(() => readWith(currentHash()));
   useEffect(() => {
-    const f = () => setId(readWith(window.location.hash));
+    const f = () => setId(readWith(currentHash()));
     window.addEventListener('hashchange', f);
     return () => window.removeEventListener('hashchange', f);
   }, []);
   const set = useCallback((next: string | null, push: boolean) => {
     setId(next);
     const h = chatHash(next);
-    if (push) window.location.hash = h;
-    else window.location.replace(h);
+    if (push) navigateHash(h);
+    else setHash(h, true);
   }, []);
   return [id, set];
 }
@@ -72,6 +79,7 @@ export function ChatScreen({
   onNavigate,
   chatPort,
   worldPort,
+  teamPort,
   uid,
   renderCard,
   useThreadExtras,
@@ -81,6 +89,7 @@ export function ChatScreen({
   const online = useOnline();
   const chat = useChat({ port: chatPort, uid });
   const world = useCoachWorld(worldPort);
+  const spotter = useSpotter(teamPort);
   const [withId, setWith] = useWithParam();
 
   // ONE unread source: the same hook the rail / tab bar badge reads, over the same chat store.
@@ -151,6 +160,10 @@ export function ChatScreen({
       />
     );
 
+  const pinned = spotter.feed && spotter.feed.items.length > 0 && (
+    <SpotterRow feed={spotter.feed} onOpen={() => onNavigate({ screen: 'spotter' })} />
+  );
+
   const notices = (
     <>
       {chat.status === 'error' && threads.length > 0 && (
@@ -208,11 +221,17 @@ export function ChatScreen({
       {notices}
       {desktop ? (
         <Split ratio="5-7">
-          <div className="ch-col">{list}</div>
+          <div className="ch-col">
+            {pinned}
+            {list}
+          </div>
           {thread || <div className="ch-col" />}
         </Split>
       ) : (
-        list
+        <>
+          {pinned}
+          {list}
+        </>
       )}
     </Page>
   );

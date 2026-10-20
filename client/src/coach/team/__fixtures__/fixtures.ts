@@ -6,6 +6,8 @@ import { createDemoClock } from '../../data/__fixtures__/demoClock';
 import { TeamPortError, type TeamPort } from '../port';
 import { teamInviteLink } from '../../inviteLink';
 import {
+  type SpotterFeed,
+  type SpotterItem,
   type TeamRole,
   type ActivityScope,
   type TeamData,
@@ -149,11 +151,69 @@ export function buildFixtureActivity(
   };
 }
 
+/** Spotter's team messages for the boards (newest first). */
+export function buildFixtureSpotter(viewer: TeamViewer, now: number, read = false): SpotterFeed {
+  const H = 3_600_000;
+  const items: SpotterItem[] =
+    viewer === 'trainer'
+      ? [
+          {
+            id: 'n1',
+            kind: 'removal-request',
+            actorName: 'Irina Melnyk',
+            subjectName: 'Sofiia Hnatiuk',
+            createdAt: now - 3 * H,
+            unread: !read,
+            status: 'pending',
+            refId: 'rm-c4',
+          },
+          {
+            id: 'n2',
+            kind: 'manager-move',
+            actorName: 'Irina Melnyk',
+            subjectName: 'Maria Tkach',
+            createdAt: now - 26 * H,
+            unread: !read,
+          },
+          {
+            id: 'n3',
+            kind: 'team',
+            actorName: 'Irina Melnyk',
+            subjectName: 'manager',
+            createdAt: now - 25 * 24 * H,
+            unread: false,
+          },
+        ]
+      : [
+          {
+            id: 'n4',
+            kind: 'removal-answer',
+            actorName: 'Olena Kovalenko',
+            subjectName: 'Taras Rudenko',
+            createdAt: now - 5 * H,
+            unread: !read,
+            status: 'approved',
+          },
+          {
+            id: 'n5',
+            kind: 'removal-answer',
+            actorName: 'Olena Kovalenko',
+            subjectName: 'Bohdan Palamar',
+            createdAt: now - 50 * H,
+            unread: false,
+            status: 'declined',
+          },
+        ];
+  return { items, unread: items.filter((i) => i.unread).length };
+}
+
 export function createFixturesTeamPort(o: FixturesTeamOptions = {}): TeamPort {
   const viewer = o.viewer ?? 'trainer';
   const clock = o.now ?? createDemoClock();
   let data = buildFixtureTeam(viewer, clock(), o.ready);
   let cold = !!o.cold;
+  let spotterRead = false;
+  const answered = new Map<string, string>();
   let reqs: TeamRequest[] = o.withRequests
     ? [
         {
@@ -219,6 +279,20 @@ export function createFixturesTeamPort(o: FixturesTeamOptions = {}): TeamPort {
     async leave() {
       await guard();
     },
+    async notices() {
+      await guard();
+      const f = buildFixtureSpotter(viewer, clock(), spotterRead);
+      return {
+        ...f,
+        items: f.items.map((i) =>
+          i.refId && answered.has(i.refId) ? { ...i, status: answered.get(i.refId) } : i,
+        ),
+      };
+    },
+    async markNoticesRead() {
+      await guard();
+      spotterRead = true;
+    },
     async activity() {
       await guard();
       return buildFixtureActivity(viewer, clock(), o.activityScope);
@@ -227,8 +301,9 @@ export function createFixturesTeamPort(o: FixturesTeamOptions = {}): TeamPort {
       await guard();
       return reqs;
     },
-    async answerRequest(id) {
+    async answerRequest(id, approve) {
       await guard();
+      answered.set(id, approve ? 'approved' : 'declined');
       reqs = reqs.filter((r) => r.id !== id);
     },
     async requestRemoval() {

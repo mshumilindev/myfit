@@ -246,4 +246,31 @@ export const teamLt: typeof teamEn = {
     ['Vadybininko pašalinimas', 'yes', 'no'],
     ['Veiklos žurnalas', 'everything', 'own'],
   ] as [string, string, string][],
+  spTitle: 'Spotter',
+  spSub: 'Tarnybiniai pranešimai apie komandą.',
+  spBack: 'Komanda',
+  spUnread: (n: number) => `${n} nauji`,
+  spEmptyTitle: 'Nieko naujo',
+  spEmptyBody: 'Čia matysite komandos prašymus ir atsakymus.',
+  spFailed: 'Nepavyko įkelti pranešimų.',
+  spListLabel: 'Spotter pranešimai',
+  spRemovalRequest: (who: string, client: string) =>
+    `Prašymas iš ${who}: pašalinti klientą ${client}.`,
+  spRemovalNote: 'Klientas nieko nesužinos, kol nepatvirtinsite.',
+  spApprove: 'Patvirtinti',
+  spDecline: 'Atmesti',
+  spStatusApproved: 'Patvirtinta',
+  spStatusDeclined: 'Atmesta',
+  spStatusCancelled: 'Atsiimta',
+  spRemovalAnswerYes: (who: string, client: string) =>
+    `Kliento ${client} pašalinimas patvirtintas (${who}).`,
+  spRemovalAnswerNo: (who: string, client: string) =>
+    `Kliento ${client} pašalinimas atmestas (${who}).`,
+  spManagerMove: (who: string, client: string) =>
+    `Prašymas iš ${who}: naujas laikas klientui ${client}.`,
+  spManagerMoveNote: 'Laukiama kliento atsakymo.',
+  spTeamManager: (who: string) => `Prie komandos prisijungė: ${who}, vadybininkas.`,
+  spTeamTrainer: (who: string) => `Prie komandos prisijungė: ${who}, treneris.`,
+  spOpenSpotter: 'Spotter',
+  spOpenSpotterSub: 'Prašymai ir atsakymai',
 };

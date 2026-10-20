@@ -14,7 +14,7 @@ function Frame({
   options,
   manager,
 }: {
-  screen: 'activity' | 'roles';
+  screen: 'activity' | 'roles' | 'spotter';
   options?: FixturesTeamOptions;
   manager?: boolean;
 }) {
@@ -60,3 +60,5 @@ export const Failed: Story = {
   args: { screen: 'activity', options: { failWith: () => 'unavailable' } },
 };
 export const Roles: Story = { args: { screen: 'roles' } };
+export const SpotterTrainer: Story = { args: { screen: 'spotter' } };
+export const SpotterManager: Story = { args: { screen: 'spotter', manager: true } };

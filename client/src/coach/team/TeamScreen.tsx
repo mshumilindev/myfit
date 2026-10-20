@@ -193,6 +193,13 @@ export function TeamScreen({
                 onClick={() => onNavigate?.({ screen: 'activity' })}
               />
               <ListRow
+                icon={<IconTile tone="accent" size={30} icon="envelope" />}
+                label={tm.spOpenSpotter}
+                sub={tm.spOpenSpotterSub}
+                chevron
+                onClick={() => onNavigate?.({ screen: 'spotter' })}
+              />
+              <ListRow
                 icon={<IconTile tone="accent" size={30} icon="shield-check" />}
                 label={tm.tmRoles}
                 sub={tm.tmRolesSub}

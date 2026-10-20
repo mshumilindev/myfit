@@ -15,6 +15,7 @@ export const SCREEN_ICON: Record<CoachScreen, string> = {
   team: 'users',
   activity: 'clock-counter-clockwise',
   roles: 'shield-check',
+  spotter: 'envelope',
 };
 
 export function screenLabel(c: CoachStrings, screen: CoachScreen): string {
@@ -40,6 +41,7 @@ export function screenLabel(c: CoachStrings, screen: CoachScreen): string {
     case 'team':
     case 'activity':
     case 'roles':
+    case 'spotter':
       return c.navTeam;
   }
 }

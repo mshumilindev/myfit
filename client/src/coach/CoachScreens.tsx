@@ -64,6 +64,9 @@ const TeamScreen = lazyScreen(() =>
 const ActivityScreen = lazyScreen(() =>
   import('./team/ActivityScreen').then((m) => ({ default: m.ActivityScreen })),
 );
+const SpotterScreen = lazyScreen(() =>
+  import('./team/SpotterScreen').then((m) => ({ default: m.SpotterScreen })),
+);
 const RolesScreen = lazyScreen(() =>
   import('./team/RolesScreen').then((m) => ({ default: m.RolesScreen })),
 );
@@ -137,6 +140,12 @@ export function CoachScreen({
     return (
       <Suspense fallback={<Loading />}>
         <ActivityScreen onNavigate={onNavigate} />
+      </Suspense>
+    );
+  if (route.screen === 'spotter')
+    return (
+      <Suspense fallback={<Loading />}>
+        <SpotterScreen onNavigate={onNavigate} />
       </Suspense>
     );
   if (route.screen === 'roles')

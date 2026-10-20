@@ -240,4 +240,31 @@ export const teamUk: typeof teamEn = {
     ['Видалення менеджера', 'yes', 'no'],
     ['Журнал активності', 'everything', 'own'],
   ] as [string, string, string][],
+  spTitle: 'Spotter',
+  spSub: 'Службові повідомлення про команду.',
+  spBack: 'Команда',
+  spUnread: (n: number) => `${n} нових`,
+  spEmptyTitle: 'Нічого нового',
+  spEmptyBody: 'Тут з’являтимуться запити команди та відповіді.',
+  spFailed: 'Не вдалося завантажити повідомлення.',
+  spListLabel: 'Повідомлення Spotter',
+  spRemovalRequest: (who: string, client: string) =>
+    `Запит від ${who}: видалити клієнта ${client}.`,
+  spRemovalNote: 'Клієнт нічого не дізнається, доки ви не схвалите.',
+  spApprove: 'Схвалити',
+  spDecline: 'Відхилити',
+  spStatusApproved: 'Схвалено',
+  spStatusDeclined: 'Відхилено',
+  spStatusCancelled: 'Відкликано',
+  spRemovalAnswerYes: (who: string, client: string) =>
+    `Видалення клієнта ${client} схвалено (${who}).`,
+  spRemovalAnswerNo: (who: string, client: string) =>
+    `Видалення клієнта ${client} відхилено (${who}).`,
+  spManagerMove: (who: string, client: string) =>
+    `Запит від ${who}: новий час для клієнта ${client}.`,
+  spManagerMoveNote: 'Чекаємо на відповідь клієнта.',
+  spTeamManager: (who: string) => `До команди долучилась людина: ${who}, менеджер.`,
+  spTeamTrainer: (who: string) => `До команди долучилась людина: ${who}, тренер.`,
+  spOpenSpotter: 'Spotter',
+  spOpenSpotterSub: 'Запити та відповіді',
 };

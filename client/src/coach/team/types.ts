@@ -101,3 +101,22 @@ export interface TeamRequest {
   reason: string;
   createdAt: number;
 }
+
+/** One service message of Spotter about the team (SPO-236). Metadata only: names, never client content. */
+export interface SpotterItem {
+  id: string;
+  kind: 'removal-request' | 'removal-answer' | 'manager-move' | 'team';
+  actorName: string;
+  /** the client's name (removal / move) or the role the new member got (team) */
+  subjectName: string;
+  createdAt: number;
+  unread: boolean;
+  /** removal-request: pending / approved / declined / cancelled; removal-answer: approved / declined */
+  status?: string;
+  /** removal-request: the id the answer is sent with */
+  refId?: string;
+}
+export interface SpotterFeed {
+  items: SpotterItem[];
+  unread: number;
+}
