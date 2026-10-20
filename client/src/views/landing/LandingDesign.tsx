@@ -1267,6 +1267,8 @@ export function LandingDesign({
   const off: number = st.off || 0;
   const pd: number = st.pd || 0;
   const os = detectOS();
+  // Inside the installed app the desktop installers are pointless (Android and the rest stay).
+  const deskApp = isAppShell() ? ' l-noapp' : '';
   const rows = [
     { cls: 'l-srow l-warm', idx: 'W', reps: '10', kg: '40', kind: T('kind_w') },
     { cls: 'l-srow', idx: '1', reps: '8', kg: '80', kind: '' },
@@ -1302,8 +1304,12 @@ export function LandingDesign({
           )
         : patch({ andOpen: !st.andOpen, open: false }),
     // desktop installers make no sense on a phone, the .apk none on iOS, and iOS has no installer at all (it uses the web app)
-    clsWin: os === 'win' ? 'l-dl l-pri' : os === 'and' || os === 'ios' ? 'l-dl l-nomob' : 'l-dl',
-    clsMac: os === 'mac' ? 'l-dl l-pri' : os === 'and' || os === 'ios' ? 'l-dl l-nomob' : 'l-dl',
+    clsWin:
+      (os === 'win' ? 'l-dl l-pri' : os === 'and' || os === 'ios' ? 'l-dl l-nomob' : 'l-dl') +
+      deskApp,
+    clsMac:
+      (os === 'mac' ? 'l-dl l-pri' : os === 'and' || os === 'ios' ? 'l-dl l-nomob' : 'l-dl') +
+      deskApp,
     clsAnd: os === 'and' ? 'l-dl l-pri' : os === 'ios' ? 'l-dl l-nomob' : 'l-dl',
     clsPdl: os === 'ios' ? 'l-pdl l-nomob' : 'l-pdl',
     andSmall: os === 'and' ? '.apk ↓' : 'QR · .apk',
