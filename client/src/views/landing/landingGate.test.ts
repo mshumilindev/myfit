@@ -16,7 +16,10 @@ describe('shouldShowLanding', () => {
     expect(shouldShowLanding()).toBe(true);
   });
   it('still shows in a fullscreen browser window (F11 / macOS full screen)', () => {
-    vi.stubGlobal('matchMedia', (q: string) => ({ matches: q.includes('fullscreen') }) as MediaQueryList);
+    vi.stubGlobal(
+      'matchMedia',
+      (q: string) => ({ matches: q.includes('fullscreen') }) as MediaQueryList,
+    );
     expect(shouldShowLanding()).toBe(true);
   });
   it('is hidden in an installed PWA (standalone)', () => {

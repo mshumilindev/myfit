@@ -12,7 +12,9 @@ interface Preview {
 export function InviteLanding({ token, onStart }: { token: string; onStart: () => void }) {
   const [info, setInfo] = useState<Preview | null>(null);
   const start = useRef(onStart);
-  start.current = onStart;
+  useEffect(() => {
+    start.current = onStart;
+  });
 
   useEffect(() => {
     let live = true;

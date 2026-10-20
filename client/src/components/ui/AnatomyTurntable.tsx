@@ -176,7 +176,17 @@ export function AnatomyTurntable({
     ctx.imageSmoothingQuality = 'high';
     const blit = (img: CanvasImageSource, alpha: number) => {
       ctx.globalAlpha = alpha;
-      ctx.drawImage(img, x0, y0, x1 - x0, y1 - y0, (x0 - sx) * k, (y0 - sy) * k, (x1 - x0) * k, (y1 - y0) * k);
+      ctx.drawImage(
+        img,
+        x0,
+        y0,
+        x1 - x0,
+        y1 - y0,
+        (x0 - sx) * k,
+        (y0 - sy) * k,
+        (x1 - x0) * k,
+        (y1 - y0) * k,
+      );
     };
     // While self-spinning, blend the two frames either side of the exact angle: the 5-degree steps
     // become a continuous turn at the full refresh rate instead of ~9 visible jumps a second.
@@ -411,7 +421,16 @@ export function AnatomyTurntable({
           w = new Worker(new URL('./turntable.worker.ts', import.meta.url), { type: 'module' });
           const off = cv.transferControlToOffscreen();
           w.postMessage(
-            { t: 'init', canvas: off, step: TURN_STEP, spin, angle: angle.current, rect: viewRect(view.current.y, view.current.zoom), w: W, h: H },
+            {
+              t: 'init',
+              canvas: off,
+              step: TURN_STEP,
+              spin,
+              angle: angle.current,
+              rect: viewRect(view.current.y, view.current.zoom),
+              w: W,
+              h: H,
+            },
             [off],
           );
           TT_WORKERS.set(cv, w);
@@ -437,7 +456,9 @@ export function AnatomyTurntable({
         const io =
           typeof IntersectionObserver === 'undefined' || !stage.current
             ? null
-            : new IntersectionObserver((e) => worker.postMessage({ t: 'vis', v: e.some((x) => x.isIntersecting) }));
+            : new IntersectionObserver((e) =>
+                worker.postMessage({ t: 'vis', v: e.some((x) => x.isIntersecting) }),
+              );
         if (io && stage.current) io.observe(stage.current);
         else worker.postMessage({ t: 'vis', v: true });
         return () => {
