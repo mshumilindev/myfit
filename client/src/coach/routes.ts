@@ -19,7 +19,8 @@ export type CoachScreen =
   | 'programs'
   | 'chat'
   | 'signals'
-  | 'live';
+  | 'live'
+  | 'team';
 
 /**
  * A program page lives under `programs`: the program editor (`#/c/programs/<programId>/edit`) and Check before sending
@@ -87,6 +88,7 @@ export const COACH_SCREENS: readonly CoachScreen[] = [
   'chat',
   'signals',
   'live',
+  'team',
 ];
 
 /** Desktop rail, top to bottom (R-FE-002): seven items. */

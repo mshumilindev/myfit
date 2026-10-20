@@ -24,6 +24,7 @@ export {
 } from './components/ui/Overlays';
 import { Portal, useFixedPanelPosition } from './components/ui/Overlays';
 import { Button } from './components/ui/Button';
+import { UserPlus } from '@phosphor-icons/react/UserPlus';
 import { AndroidLogo } from '@phosphor-icons/react/AndroidLogo';
 import { AppleLogo } from '@phosphor-icons/react/AppleLogo';
 import { ArrowClockwise } from '@phosphor-icons/react/ArrowClockwise';
@@ -364,6 +365,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   scales: Scales,
   ruler: Ruler,
   'shield-check': ShieldCheck,
+  'user-plus': UserPlus,
   'shield-warning': ShieldWarning,
   'link-break': LinkBreak,
   confetti: Confetti,

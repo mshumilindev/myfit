@@ -12,6 +12,7 @@ export const coachEt: typeof coachEn = {
   navDecisions: 'Otsused',
   navPrograms: 'Programmid',
   navChat: 'Vestlus',
+  navTeam: 'Meeskond',
   navMore: 'Rohkem',
   navLandmark: 'Treeneri navigatsioon',
   skipToContent: 'Mine sisu juurde',

@@ -18,6 +18,7 @@ export const coachPl: typeof coachEn = {
   navDecisions: 'Decyzje',
   navPrograms: 'Programy',
   navChat: 'Czat',
+  navTeam: 'Zespół',
   navMore: 'Więcej',
   navLandmark: 'Nawigacja trenera',
   skipToContent: 'Przejdź do treści',

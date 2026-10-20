@@ -18,6 +18,7 @@ export const coachLt: typeof coachEn = {
   navDecisions: 'Sprendimai',
   navPrograms: 'Programos',
   navChat: 'Pokalbiai',
+  navTeam: 'Komanda',
   navMore: 'Daugiau',
   navLandmark: 'Trenerio navigacija',
   skipToContent: 'Pereiti prie turinio',

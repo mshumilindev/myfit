@@ -1,0 +1,103 @@
+/** Coachi meeskonna tekstid (eesti keel). Vt `coachTeam.en.ts`. Vajab emakeelse lugeja ülevaatust. */
+import type { teamEn } from './coachTeam.en';
+import { plural } from './coachPlural';
+
+const peopleN = (n: number) => plural('et', n, { one: '{n} inimene', other: '{n} inimest' });
+const daysAgo = (n: number) =>
+  plural('et', n, { one: '{n} päev tagasi', other: '{n} päeva tagasi' });
+
+export const teamEt: typeof teamEn = {
+  tmTitle: 'Meeskond',
+  tmSubTrainer: (n) => `${peopleN(n)}. Sina lisad haldureid, haldur lisab treenereid.`,
+  tmSubManager: (n) =>
+    `${peopleN(n)}. Sina lisad treenereid. Halduri saab eemaldada ainult treener.`,
+  tmAddManager: 'Lisa haldur',
+  tmAddTrainer: 'Lisa treener',
+  tmMembers: 'Liikmed',
+  tmPending: 'Ootel kutsed',
+  tmYou: 'Sina',
+  tmRoleTrainer: 'Treener',
+  tmRoleManager: 'Haldur',
+  tmPendingTag: 'Ootel',
+  tmRevoke: 'Tühista',
+  tmRevokeFor: (email) => `Tühista kutse: ${email}`,
+  tmActiveNow: 'Aktiivne praegu',
+  tmLastActive: (when) => `Viimati aktiivne: ${when}`,
+  tmAdded: (date) => `Lisatud ${date}`,
+  tmWhenToday: 'täna',
+  tmWhenYesterday: 'eile',
+  tmInviteSent: (role, ago) => `${role}: kutse saadetud ${ago}`,
+  tmAgoToday: 'täna',
+  tmAgoYesterday: 'eile',
+  tmAgoDays: (n) => daysAgo(n),
+  tmActivityLog: 'Tegevuslogi',
+  tmActivityLogSub: 'Kes mida tegi, päevade kaupa',
+  tmRoles: 'Mida iga roll saab',
+  tmRolesSub: 'Püsiv ligipääs, kõigile sama',
+  tmLeave: 'Lahku meeskonnast',
+  tmLeaveNoteTrainer:
+    'Haldurid kaotavad ligipääsu sinu klientidele. Sinu kliendid ja andmed jäävad sinuga.',
+  tmLeaveNoteManager: 'Kliendid ja andmed jäävad samaks. Sind saab uuesti kutsuda.',
+  tmOpenMember: (name) => `Ava: ${name}`,
+  tmMembersLabel: 'Meeskonna liikmed',
+  tmPendingLabel: 'Ootel kutsed',
+
+  tmAddManagerTitle: 'Lisa haldur',
+  tmAddManagerBody:
+    'Haldur korraldab sinu ajakava ja klientide nimekirja. Ta ei näe treeninguid, tervist, toitumist, märkmeid ega vestlust ega saa lisada teisi haldureid.',
+  tmAddTrainerTitle: 'Lisa treener',
+  tmAddTrainerBody:
+    'Treener töötab oma klientidega. Ta liitub sinu juhitava meeskonnaga ja ilmub sinu Klientide ja Ajakava alla.',
+  tmEmail: 'E-post',
+  tmEmailHint:
+    'Ta saab kutse lingi e-postiga. See kehtib 7 päeva ja ühele inimesele. Ligipääs algab pärast vastuvõtmist.',
+  tmSendInvite: 'Saada kutse',
+  tmCancel: 'Tühista',
+  tmErrInvalidEmail: 'Sisesta kehtiv e-posti aadress.',
+  tmErrExists: 'See inimene on juba meeskonnas või tal on avatud kutse.',
+  tmErrOffline: 'Võrku pole. Proovi uuesti, kui oled tagasi ühenduses.',
+  tmErrGeneric: 'Kutse saatmine ebaõnnestus. Proovi uuesti.',
+  tmInviteSentSnack: (email) => `Kutse saadetud: ${email}`,
+
+  tmMemberTitle: 'Meeskonna liige',
+  tmRole: 'Roll',
+  tmEmailRow: 'E-post',
+  tmAddedRow: 'Lisatud',
+  tmLastActiveRow: 'Viimati aktiivne',
+  tmScheduleAccess: 'Ligipääs ajakavale',
+  tmScheduleReady: (ready, total) => `Valmis ${ready} kliendist ${total}`,
+  tmPermissions: 'Õigused',
+  tmSeeAll: 'Näeb kogu meeskonna tegevust',
+  tmSeeAllOff: (name) =>
+    `Väljas: ${name} näeb logis ainult enda tegevusi. Sees: ${name} näeb kõigi treenerite ja haldurite tegevusi.`,
+  tmRemoveFromTeam: 'Eemalda meeskonnast',
+  tmRemoveNote: (name) => `${name} kaotab ligipääsu kohe. Varasemad tegevused jäävad logisse.`,
+  tmClose: 'Sulge',
+
+  tmRemoveTitle: (name) => `Kas eemaldada ${name} meeskonnast?`,
+  tmRemoveBody: (name) => `${name} kaotab ligipääsu sinu klientidele ja ajakavale.`,
+  tmRemoveEffect1: 'Ligipääs lõpeb kohe kõigis seadmetes.',
+  tmRemoveEffect2: (name) =>
+    `Sessioonivõtmed uuendatakse, et ${name} ei saaks uusi andmeid lugeda.`,
+  tmRemoveEffect3: 'Varasemad tegevused jäävad tegevuslogisse.',
+  tmRemoveKeep: (name) => `Jäta: ${name}`,
+  tmRemoveConfirm: 'Eemalda',
+  tmLeaveManagerTitle: (owner) => `Kas lahkuda meeskonnast: ${owner}?`,
+  tmLeaveManagerBody: 'Kaotad ligipääsu ajakavale ja klientidele.',
+  tmLeaveManagerEffect1: 'Kliendid ja sessioonid jäävad oma treeneritele.',
+  tmLeaveManagerEffect2: 'Treener saab sind uuesti kutsuda.',
+  tmLeaveManagerEffect3: 'Sinu varasemad tegevused jäävad tegevuslogisse.',
+  tmLeaveStay: 'Jää',
+  tmLeaveConfirm: 'Lahku meeskonnast',
+  tmLeaveTrainerTitle: 'Kas lahkuda meeskonnast?',
+  tmLeaveTrainerBody: 'Haldurid kaotavad ligipääsu sinu klientidele.',
+  tmLeaveTrainerEffect1: 'Sinu kliendid ja andmed jäävad sinuga.',
+  tmLeaveTrainerEffect2: 'Sinu klientide sessioonivõtmed uuendatakse.',
+  tmLeaveTrainerEffect3: 'Sind saab uuesti kutsuda.',
+
+  tmLoadFailed: 'Meeskonda ei saanud laadida.',
+  tmRetry: 'Proovi uuesti',
+  tmOfflineStale: 'Võrku pole. Näidatakse viimati salvestatud meeskonda.',
+  tmEmptyMembers: 'Seni ainult sina.',
+  tmEmptyInvites: 'Avatud kutseid pole.',
+};

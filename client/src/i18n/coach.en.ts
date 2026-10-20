@@ -12,6 +12,7 @@ export const coachEn = {
   navDecisions: 'Decisions',
   navPrograms: 'Programs',
   navChat: 'Chat',
+  navTeam: 'Team',
   navMore: 'More',
   navLandmark: 'Coach navigation',
   skipToContent: 'Skip to content',

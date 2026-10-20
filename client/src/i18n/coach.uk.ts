@@ -18,6 +18,7 @@ export const coachUk: typeof coachEn = {
   navDecisions: 'Рішення',
   navPrograms: 'Програми',
   navChat: 'Чат',
+  navTeam: 'Команда',
   navMore: 'Ще',
   navLandmark: 'Навігація тренера',
   skipToContent: 'До вмісту',

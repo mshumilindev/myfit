@@ -12,6 +12,7 @@ export const SCREEN_ICON: Record<CoachScreen, string> = {
   chat: 'envelope',
   signals: 'pulse',
   live: 'heartbeat',
+  team: 'users',
 };
 
 export function screenLabel(c: CoachStrings, screen: CoachScreen): string {
@@ -34,6 +35,8 @@ export function screenLabel(c: CoachStrings, screen: CoachScreen): string {
       return c.navSignals;
     case 'live':
       return c.navLive;
+    case 'team':
+      return c.navTeam;
   }
 }
 

@@ -54,6 +54,10 @@ const ProgramsScreen = lazyScreen(() =>
   import('./screens/programs/ProgramsScreen').then((m) => ({ default: m.ProgramsScreen })),
 );
 const Client360Screen = lazyScreen(() =>
+/** Team (SPO-196). */
+const TeamScreen = lazyScreen(() =>
+  import('./team/TeamScreen').then((m) => ({ default: m.TeamScreen })),
+);
   import('./screens/Client360Screen').then((m) => ({ default: m.Client360Screen })),
 );
 
@@ -105,6 +109,12 @@ export function CoachScreen({
       </Suspense>
     );
   if (route.screen === 'schedule')
+  if (route.screen === 'team')
+    return (
+      <Suspense fallback={<Loading />}>
+        <TeamScreen />
+      </Suspense>
+    );
     return (
       <Suspense fallback={<Loading />}>
         <ScheduleScreen onNavigate={onNavigate} />

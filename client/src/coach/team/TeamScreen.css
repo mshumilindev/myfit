@@ -1,0 +1,39 @@
+/* Team screen (SPO-196). Layout only; every surface is a kit piece. Tokens only. */
+.tm-main,
+.tm-side,
+.tm-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  min-width: 0;
+}
+.tm-sheet {
+  padding: var(--s-4) 0;
+}
+.tm-sheet-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+.tm-sheet-title {
+  margin: 0;
+  font-size: var(--fs-18);
+  font-weight: 600;
+}
+.tm-sheet-sub {
+  margin: var(--s-4) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+  line-height: 1.4;
+}
+.tm-sheet-actions {
+  display: flex;
+  gap: var(--s-8);
+}
+.tm-side-note {
+  margin: 0;
+  padding: 0 var(--s-12);
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.4;
+}

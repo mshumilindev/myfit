@@ -1,0 +1,107 @@
+/** Рядки команди Coach (українська). Див. `coachTeam.en.ts`. Без «вона/він»: у текстах ім'я людини. */
+import type { teamEn } from './coachTeam.en';
+import { plural } from './coachPlural';
+
+const peopleN = (n: number) =>
+  plural('uk', n, { one: '{n} людина', few: '{n} людини', many: '{n} людей', other: '{n} людини' });
+const daysAgo = (n: number) =>
+  plural('uk', n, {
+    one: '{n} день тому',
+    few: '{n} дні тому',
+    many: '{n} днів тому',
+    other: '{n} дня тому',
+  });
+
+export const teamUk: typeof teamEn = {
+  tmTitle: 'Команда',
+  tmSubTrainer: (n) => `${peopleN(n)}. Ви додаєте менеджерів, менеджер додає тренерів.`,
+  tmSubManager: (n) => `${peopleN(n)}. Ви додаєте тренерів. Видалити менеджера може лише тренер.`,
+  tmAddManager: 'Додати менеджера',
+  tmAddTrainer: 'Додати тренера',
+  tmMembers: 'Учасники',
+  tmPending: 'Запрошення в очікуванні',
+  tmYou: 'Ви',
+  tmRoleTrainer: 'Тренер',
+  tmRoleManager: 'Менеджер',
+  tmPendingTag: 'Очікує',
+  tmRevoke: 'Відкликати',
+  tmRevokeFor: (email) => `Відкликати запрошення для ${email}`,
+  tmActiveNow: 'Зараз онлайн',
+  tmLastActive: (when) => `Остання активність: ${when}`,
+  tmAdded: (date) => `Додано ${date}`,
+  tmWhenToday: 'сьогодні',
+  tmWhenYesterday: 'вчора',
+  tmInviteSent: (role, ago) => `${role}: запрошення надіслано ${ago}`,
+  tmAgoToday: 'сьогодні',
+  tmAgoYesterday: 'вчора',
+  tmAgoDays: (n) => daysAgo(n),
+  tmActivityLog: 'Журнал дій',
+  tmActivityLogSub: 'Хто що робив, по днях',
+  tmRoles: 'Що може кожна роль',
+  tmRolesSub: 'Доступ фіксований і однаковий для всіх',
+  tmLeave: 'Вийти з команди',
+  tmLeaveNoteTrainer:
+    'Менеджери втратять доступ до ваших клієнтів. Ваші клієнти й дані лишаються з вами.',
+  tmLeaveNoteManager: 'Клієнти й дані лишаються як є. Вас можна запросити знову.',
+  tmOpenMember: (name) => `Відкрити: ${name}`,
+  tmMembersLabel: 'Учасники команди',
+  tmPendingLabel: 'Запрошення в очікуванні',
+
+  tmAddManagerTitle: 'Додати менеджера',
+  tmAddManagerBody:
+    'Менеджер веде ваш розклад і список клієнтів. Він не бачить тренувань, здоров’я, харчування, нотаток і чату та не може додавати інших менеджерів.',
+  tmAddTrainerTitle: 'Додати тренера',
+  tmAddTrainerBody:
+    'Тренер працює зі своїми клієнтами. Він приєднується до команди, якою ви керуєте, і з’являється у ваших Клієнтах і Розкладі.',
+  tmEmail: 'Email',
+  tmEmailHint:
+    'Людина отримає посилання-запрошення на email. Воно діє 7 днів і для однієї особи. Доступ починається після прийняття.',
+  tmSendInvite: 'Надіслати запрошення',
+  tmCancel: 'Скасувати',
+  tmErrInvalidEmail: 'Введіть дійсну адресу email.',
+  tmErrExists: 'Ця людина вже в команді або має відкрите запрошення.',
+  tmErrOffline: 'Немає мережі. Спробуйте, коли з’явиться з’єднання.',
+  tmErrGeneric: 'Не вдалося надіслати запрошення. Спробуйте ще раз.',
+  tmInviteSentSnack: (email) => `Запрошення надіслано: ${email}`,
+
+  tmMemberTitle: 'Учасник команди',
+  tmRole: 'Роль',
+  tmEmailRow: 'Email',
+  tmAddedRow: 'Додано',
+  tmLastActiveRow: 'Остання активність',
+  tmScheduleAccess: 'Доступ до розкладу',
+  tmScheduleReady: (ready, total) => `Готово ${ready} з ${total} клієнтів`,
+  tmPermissions: 'Дозволи',
+  tmSeeAll: 'Бачити всю активність команди',
+  tmSeeAllOff: (name) =>
+    `Вимкнено: ${name} бачить у журналі лише власні дії. Увімкнено: ${name} бачить дії всіх тренерів і менеджерів.`,
+  tmRemoveFromTeam: 'Видалити з команди',
+  tmRemoveNote: (name) => `${name} одразу втрачає доступ. Минулі дії лишаються в журналі.`,
+  tmClose: 'Закрити',
+
+  tmRemoveTitle: (name) => `Видалити ${name} з команди?`,
+  tmRemoveBody: (name) => `${name} втратить доступ до ваших клієнтів і розкладу.`,
+  tmRemoveEffect1: 'Доступ одразу закінчується на всіх пристроях.',
+  tmRemoveEffect2: (name) => `Ключі сесій оновлюються, щоб ${name} не читав нових даних.`,
+  tmRemoveEffect3: 'Минулі дії лишаються в журналі.',
+  tmRemoveKeep: (name) => `Залишити: ${name}`,
+  tmRemoveConfirm: 'Видалити',
+  tmLeaveManagerTitle: (owner) => `Вийти з команди ${owner}?`,
+  tmLeaveManagerBody: 'Ви втратите доступ до розкладу й клієнтів.',
+  tmLeaveManagerEffect1: 'Клієнти й сесії лишаються зі своїми тренерами.',
+  tmLeaveManagerEffect2: 'Тренер може запросити вас знову.',
+  tmLeaveManagerEffect3: 'Ваші минулі дії лишаються в журналі.',
+  tmLeaveStay: 'Лишитися',
+  tmLeaveConfirm: 'Вийти з команди',
+  tmLeaveTrainerTitle: 'Вийти з команди?',
+  tmLeaveTrainerBody: 'Менеджери втратять доступ до ваших клієнтів.',
+  tmLeaveTrainerEffect1: 'Ваші клієнти й дані лишаються з вами.',
+  tmLeaveTrainerEffect2: 'Ключі сесій ваших клієнтів оновлюються.',
+  tmLeaveTrainerEffect3: 'Вас можна запросити знову.',
+
+  tmLoadFailed: 'Не вдалося завантажити команду.',
+  tmRetry: 'Спробувати ще раз',
+  tmOfflineStale: 'Немає мережі. Показано останню збережену команду.',
+  tmEmptyMembers: 'Поки що тільки ви.',
+  tmEmptyInvites: 'Відкритих запрошень немає.',
+};

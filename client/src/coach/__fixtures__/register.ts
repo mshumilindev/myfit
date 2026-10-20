@@ -22,6 +22,7 @@ import {
 import { createFixturesClientChatPort } from '../client/data/__fixtures__/chat';
 import { createFixturesTrustPort } from '../security/__fixtures__/trustPort';
 import { createFixturesReauthPort } from '../security/__fixtures__/reauth';
+import { createFixturesTeamPort } from '../team/__fixtures__/fixtures';
 
 const SCENARIOS: readonly ClientScenario[] = [
   'none',
@@ -60,6 +61,7 @@ hooks.defaults = {
   clientChat: () => createFixturesClientChatPort({ unread: scenario() === 'none' ? 0 : 3 }),
   trust: () => createFixturesTrustPort(),
   reauth: () => createFixturesReauthPort(),
+  team: () => createFixturesTeamPort({ now: createDemoClock() }),
   gyms: () => GYMS,
 };
 
