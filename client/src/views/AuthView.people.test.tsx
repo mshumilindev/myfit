@@ -17,7 +17,6 @@ vi.mock('../api', () => ({
   signInWithPayload: (...a: unknown[]) => h.signIn(...a),
 }));
 
-import { HttpError } from '../api';
 import { AuthView } from './AuthView';
 
 const NOW = new Date(2026, 8, 26, 12, 0).getTime();

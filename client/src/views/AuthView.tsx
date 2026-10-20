@@ -18,6 +18,11 @@ import './AuthView.css';
 /** The reachability probe gives up after this long; sign-in is never held back by it. */
 const PROBE_TIMEOUT_MS = 6_000;
 
+/** When a 15-minute lockout that starts now ends. */
+function lockoutEnd(): number {
+  return Date.now() + 15 * 60 * 1000;
+}
+
 export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
   const { t } = useT();
   const [unreachable, setUnreachable] = useState(false);
@@ -127,8 +132,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
       onLoggedIn();
     } catch (err) {
       if (err instanceof HttpError && err.status === 401) setError(t.wrongCredentials);
-      else if (err instanceof HttpError && err.status === 429)
-        setLockUntil(Date.now() + 15 * 60 * 1000);
+      else if (err instanceof HttpError && err.status === 429) setLockUntil(lockoutEnd());
       else if (err instanceof HttpError) setError(err.message || t.error);
       else {
         // signInWithCustomToken failures land here (auth/*, network, etc.)

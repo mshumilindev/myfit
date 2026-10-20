@@ -23,13 +23,15 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const me = sessionDeviceId();
 
-  function load() {
-    setFailed(false);
+  useEffect(() => {
+    let alive = true;
     listSessions()
-      .then(setRows)
-      .catch(() => setFailed(true));
-  }
-  useEffect(load, []);
+      .then((r) => alive && setRows(r))
+      .catch(() => alive && setFailed(true));
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   async function revoke(id: string) {
     setBusy(true);
