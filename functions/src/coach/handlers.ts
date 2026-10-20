@@ -157,6 +157,19 @@ export const teamRead = onCall(opts, (req) => run(req, TEAM, (a) => team.teamRea
 export const teamClients = onCall(opts, (req) =>
   run(req, ['manager'], (a) => team.teamClients(ctx(), a)),
 );
+/** SPO-239: a manager asks to remove a client; the client's trainer answers (Agenda "Team requests"). */
+export const clientRemovalCreate = onCall(opts, (req) =>
+  run(req, ['manager'], (a) => team.clientRemovalCreate(ctx(), a, body(req))),
+);
+export const clientRemovalCancel = onCall(opts, (req) =>
+  run(req, ['manager'], (a) => team.clientRemovalCancel(ctx(), a, body(req))),
+);
+export const clientRemovalRespond = onCall(opts, (req) =>
+  run(req, COACH, (a) => team.clientRemovalRespond(ctx(), a, body(req))),
+);
+export const teamRequests = onCall(opts, (req) =>
+  run(req, COACH, (a) => team.teamRequests(ctx(), a)),
+);
 /** A client device asks who it must delegate the schedule keys to (its trainer's active managers). */
 export const teamManagersForClient = onCall(opts, (req) =>
   run(req, ANY, (a) => team.teamManagersForClient(ctx(), a)),

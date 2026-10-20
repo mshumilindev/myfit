@@ -12,7 +12,15 @@
  */
 import { teamInviteUrl } from './inviteLink';
 import { DAY, conversationId, isUid } from './logic';
-import { CoachError, notice, type Actor, type Ctx, type ErrCode } from './service';
+import {
+  CoachError,
+  endRelationship,
+  loadCoaching,
+  notice,
+  type Actor,
+  type Ctx,
+  type ErrCode,
+} from './service';
 import type { Doc } from './kv';
 
 export const TEAM_INVITE_TTL = 7 * DAY;
@@ -497,4 +505,185 @@ export async function teamClients(ctx: Ctx, actor: Actor): Promise<{ clients: Te
   }
   clients.sort((a, b) => a.name.localeCompare(b.name) || a.clientId.localeCompare(b.clientId));
   return { clients };
+}
+
+/* ---- client removal requests (SPO-239) -------------------------------------------------------------------------- */
+export type RemovalStatus = 'pending' | 'approved' | 'declined' | 'cancelled';
+interface RemovalRec {
+  id: string;
+  kind: 'client-removal';
+  teamId: string;
+  clientId: string;
+  trainerId: string;
+  requestedBy: string;
+  reason: string;
+  status: RemovalStatus;
+  createdAt: number;
+  decidedAt?: number;
+}
+export const REMOVAL_REASON_MAX = 280;
+/** Top-level `teamRequests/{id}` (firestore.rules: the requester and the trainer read their own; functions write). */
+const removalPath = (id: string) => `teamRequests/${id}`;
+/** One open request per client: the id is derived, so a repeated tap is the same request. */
+const removalId = (clientId: string) => `rm-${clientId}`;
+
+/**
+ * MANAGER asks the client's trainer to remove a client. Nothing changes until the trainer approves; the client is not told.
+ * The trainer gets a notice (the Spotter chat shows it with the buttons).
+ */
+export async function clientRemovalCreate(
+  ctx: Ctx,
+  actor: Actor,
+  body: Record<string, unknown>,
+): Promise<{ id: string }> {
+  const clientId = body.clientId;
+  if (!isUid(clientId)) return fail('invalid-argument', 'invalid-client');
+  const reason =
+    typeof body.reason === 'string' ? body.reason.trim().slice(0, REMOVAL_REASON_MAX) : '';
+  const { teamId, me } = await myTeam(ctx, actor);
+  if (me.role !== 'manager') return fail('permission-denied', 'managers-only');
+  const now = ctx.now();
+  return ctx.kv.tx(async (kv) => {
+    const c = await loadCoaching(kv, clientId);
+    if (c.status !== 'active') return fail('failed-precondition', 'not-active');
+    const tm = (await kv.get(`teams/${teamId}/members/${c.trainerId}`)) as MemberRec | null;
+    if (!tm || tm.status !== 'active' || tm.role !== 'trainer')
+      return fail('permission-denied', 'not-your-team');
+    const id = removalId(clientId);
+    const open = (await kv.get(removalPath(id))) as RemovalRec | null;
+    if (open && open.status === 'pending') return { id };
+    await kv.set(removalPath(id), {
+      id,
+      kind: 'client-removal',
+      teamId,
+      clientId,
+      trainerId: c.trainerId,
+      requestedBy: actor.uid,
+      reason,
+      status: 'pending',
+      createdAt: now,
+    } satisfies RemovalRec);
+    const client = (await kv.get(`users/${clientId}`)) as UserRec | null;
+    await kv.set(`users/${c.trainerId}/notices/removal-${id}-${now}`, {
+      id: `removal-${id}-${now}`,
+      kind: 'removal-request',
+      actor: actor.uid,
+      detail: nameOf(client) || null,
+      clientId,
+      refId: id,
+      status: 'pending',
+      createdAt: now,
+      readAt: null,
+    });
+    return { id };
+  });
+}
+
+/** The requesting manager withdraws a pending request. */
+export async function clientRemovalCancel(
+  ctx: Ctx,
+  actor: Actor,
+  body: Record<string, unknown>,
+): Promise<{ ok: true }> {
+  const id = body.id;
+  if (typeof id !== 'string' || !/^rm-[A-Za-z0-9_-]{1,128}$/.test(id))
+    return fail('invalid-argument', 'invalid-id');
+  const { teamId } = await myTeam(ctx, actor);
+  return ctx.kv.tx(async (kv) => {
+    const r = (await kv.get(removalPath(id))) as RemovalRec | null;
+    if (!r || r.teamId !== teamId) return fail('not-found', 'no-request');
+    if (r.requestedBy !== actor.uid) return fail('permission-denied', 'not-yours');
+    if (r.status !== 'pending') return { ok: true as const };
+    await kv.merge(removalPath(id), { status: 'cancelled', decidedAt: ctx.now() });
+    return { ok: true as const };
+  });
+}
+
+/**
+ * The client's TRAINER answers. Approve runs the existing end-of-relationship body (the same as "remove client" on the roster);
+ * Decline changes nothing but the request. The manager is told the decision either way.
+ */
+export async function clientRemovalRespond(
+  ctx: Ctx,
+  actor: Actor,
+  body: Record<string, unknown>,
+): Promise<{ status: RemovalStatus }> {
+  const id = body.id;
+  if (typeof id !== 'string' || !/^rm-[A-Za-z0-9_-]{1,128}$/.test(id))
+    return fail('invalid-argument', 'invalid-id');
+  if (typeof body.approve !== 'boolean') return fail('invalid-argument', 'invalid-approve');
+  const { teamId } = await myTeam(ctx, actor);
+  const now = ctx.now();
+  return ctx.kv.tx(async (kv) => {
+    const r = (await kv.get(removalPath(id))) as RemovalRec | null;
+    if (!r || r.teamId !== teamId) return fail('not-found', 'no-request');
+    if (!isCoach(actor) || r.trainerId !== actor.uid)
+      return fail('permission-denied', 'not-your-client');
+    if (r.status !== 'pending') return { status: r.status };
+    const status: RemovalStatus = body.approve ? 'approved' : 'declined';
+    if (body.approve) {
+      const c = await loadCoaching(kv, r.clientId);
+      if (c.status === 'active' && c.trainerId === actor.uid)
+        await endRelationship(ctx, kv, c, 'trainer', actor.uid, now);
+    }
+    await kv.merge(removalPath(id), { status, decidedAt: now });
+    const client = (await kv.get(`users/${r.clientId}`)) as UserRec | null;
+    await kv.set(`users/${r.requestedBy}/notices/removal-answer-${id}-${now}`, {
+      id: `removal-answer-${id}-${now}`,
+      kind: 'removal-answer',
+      actor: actor.uid,
+      detail: nameOf(client) || null,
+      clientId: r.clientId,
+      refId: id,
+      status,
+      createdAt: now,
+      readAt: null,
+    });
+    return { status };
+  });
+}
+
+export interface TeamRequestRow {
+  id: string;
+  kind: 'client-removal';
+  clientId: string;
+  clientName: string;
+  managerName: string;
+  reason: string;
+  createdAt: number;
+}
+
+/** TRAINER: the open requests about their own clients (Agenda "Team requests"). */
+export async function teamRequests(
+  ctx: Ctx,
+  actor: Actor,
+): Promise<{ requests: TeamRequestRow[] }> {
+  await myTeam(ctx, actor);
+  if (!isCoach(actor)) return fail('permission-denied', 'trainers-only');
+  const rows = await ctx.kv.list('teamRequests', {
+    where: [
+      ['trainerId', '==', actor.uid],
+      ['status', '==', 'pending'],
+    ],
+    limit: 100,
+  });
+  const out: TeamRequestRow[] = [];
+  for (const r of rows) {
+    const d = r.data as unknown as RemovalRec;
+    const [client, mgr] = await Promise.all([
+      ctx.kv.get(`users/${d.clientId}`) as Promise<UserRec | null>,
+      ctx.kv.get(`users/${d.requestedBy}`) as Promise<UserRec | null>,
+    ]);
+    out.push({
+      id: d.id,
+      kind: d.kind,
+      clientId: d.clientId,
+      clientName: nameOf(client),
+      managerName: nameOf(mgr),
+      reason: d.reason,
+      createdAt: d.createdAt,
+    });
+  }
+  out.sort((a, b) => a.createdAt - b.createdAt);
+  return { requests: out };
 }
