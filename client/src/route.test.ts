@@ -32,7 +32,7 @@ describe('clean-URL routing', () => {
     window.addEventListener('hashchange', on);
     setHash('#/today');
     expect(window.location.pathname).toBe('/today');
-    expect(currentHash()).toBe('');
+    expect(window.location.hash).toBe('');
     expect(on).toHaveBeenCalledTimes(1);
     setHash('#/today'); // same route: nothing happens, like assigning the same hash
     expect(on).toHaveBeenCalledTimes(1);
@@ -61,7 +61,7 @@ describe('clean-URL routing', () => {
     expect(currentHash()).toBe('#/join/abc-123');
     normalizeLegacyHash();
     expect(window.location.pathname).toBe('/join/abc-123');
-    expect(currentHash()).toBe('');
+    expect(window.location.hash).toBe('');
     expect(currentHash()).toBe('#/join/abc-123');
   });
 });

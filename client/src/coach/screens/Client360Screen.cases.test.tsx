@@ -1,4 +1,5 @@
 /** Client 360 shell: who the header actions point at, the end-coaching flow behind the password, what a tab open logs. */
+import { currentHash } from '../../route';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { notesEn } from '../../i18n/coachNotes.en';
@@ -55,17 +56,17 @@ describe('the header actions point at THIS client', () => {
   it('Schedule opens the plan form for this client', async () => {
     mount();
     fireEvent.click(await screen.findByRole('button', { name: r.c3Schedule }));
-    expect(readScheduleParams(window.location.hash)).toMatchObject({ form: 'plan', client: OLEH });
+    expect(readScheduleParams(currentHash())).toMatchObject({ form: 'plan', client: OLEH });
   });
 
   it('the menu: reschedule picks a session of this client, schedule plans one, edit opens the programs', async () => {
     const { onNavigate } = mount();
     await openMenu();
     fireEvent.click(screen.getByRole('menuitem', { name: r.c3MenuReschedule }));
-    expect(readScheduleParams(window.location.hash)).toMatchObject({ form: 'pick', client: OLEH });
+    expect(readScheduleParams(currentHash())).toMatchObject({ form: 'pick', client: OLEH });
     await openMenu();
     fireEvent.click(screen.getByRole('menuitem', { name: r.c3MenuSchedule }));
-    expect(readScheduleParams(window.location.hash)).toMatchObject({ form: 'plan', client: OLEH });
+    expect(readScheduleParams(currentHash())).toMatchObject({ form: 'plan', client: OLEH });
     await openMenu();
     fireEvent.click(screen.getByRole('menuitem', { name: r.c3MenuEdit }));
     expect(onNavigate).toHaveBeenLastCalledWith({ screen: 'programs' });
@@ -95,7 +96,7 @@ describe('the header actions point at THIS client', () => {
     fireEvent.click(await screen.findByRole('button', { name: r.c3MessageUnread('Oleh', 2) }));
     expect(onNavigate).toHaveBeenLastCalledWith(chatRoute(OLEH));
     fireEvent.click(screen.getByRole('button', { name: r.c3Schedule }));
-    expect(readScheduleParams(window.location.hash)).toMatchObject({ form: 'plan', client: OLEH });
+    expect(readScheduleParams(currentHash())).toMatchObject({ form: 'plan', client: OLEH });
   });
 });
 
