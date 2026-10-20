@@ -129,9 +129,12 @@ function OnbLandingSkeleton() {
 export function OnboardingView({
   token,
   onDone,
+  skipLanding = false,
 }: {
   token: string;
   onDone: (workoutId?: string) => void;
+  /** The invite landing page was already shown (and "Start" pressed): open on step 1. */
+  skipLanding?: boolean;
 }) {
   const { t, locale } = useT();
   const [info, setInfo] = useState<InviteInfo | null | 'error'>(null);
@@ -141,7 +144,7 @@ export function OnboardingView({
   // saved data still prefills the fields and the one-time claim below is never
   // re-run (the step-1 handler detects an existing account and just advances) —
   // so a half-finished invite reopens at step 0, not mid-flow.
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(skipLanding ? 1 : 0);
   const [firstName, setFirstName] = useState(saved?.firstName ?? savedName.firstName);
   const [lastName, setLastName] = useState(saved?.lastName ?? savedName.lastName);
   const [username, setUsername] = useState(saved?.username ?? '');

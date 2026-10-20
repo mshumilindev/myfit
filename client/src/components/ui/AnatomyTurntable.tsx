@@ -30,6 +30,8 @@ type Props = Pick<AnatomyMapProps, 'base' | 'organs' | 'marks' | 'label'> & {
   activeOrgans?: string[];
   /** Drag / arrow keys spin the figure (default). Off for views that only face front. */
   rotatable?: boolean;
+  /** Spin on its own at this many degrees per second (still, if reduced motion is on). */
+  spin?: number;
 };
 
 // Frames are 320×700 renders of the 640×1400 layer canvas; the whole body is this window of it.
@@ -37,6 +39,8 @@ const W = 320;
 const H = 700;
 const FULL = { x0: 0.08, x1: 0.92, y0: 0.02, y1: 0.99 };
 const FULL_H = (FULL.y1 - FULL.y0) * H;
+
+const TT_WORKERS = new WeakMap<HTMLCanvasElement, Worker>();
 
 const wrap = (deg: number) => ((deg % 360) + 360) % 360;
 
@@ -114,6 +118,7 @@ export function AnatomyTurntable({
   camera,
   activeOrgans = [],
   rotatable = true,
+  spin = 0,
 }: Props) {
   const stage = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -126,12 +131,18 @@ export function AnatomyTurntable({
   const raf = useRef(0);
   const anim = useRef(0);
   const drag = useRef<{ x: number; from: number } | null>(null);
+  const moving = useRef(false);
+  // True once every frame of the current layer set is built; a self-spin waits for it, so it never stutters.
+  const ready = useRef(false);
+  // A self-spinning figure is drawn by a worker on an OffscreenCanvas, so the main thread's load can't make it stutter.
+  const wk = useRef<Worker | null>(null);
 
   const draw = () => {
+    if (wk.current) return;
     const cv = canvas.current;
     const ctx = cv?.getContext('2d');
     if (!cv || !ctx) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const dpr = Math.min(spin ? 1.5 : 2, window.devicePixelRatio || 1);
     const cw = Math.max(1, Math.round(cv.clientWidth * dpr));
     const ch = Math.max(1, Math.round(cv.clientHeight * dpr));
     if (cv.width !== cw || cv.height !== ch) {
@@ -163,20 +174,29 @@ export function AnatomyTurntable({
     if (x1 <= x0 || y1 <= y0) return;
     const k = cw / sw;
     ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(
-      best,
-      x0,
-      y0,
-      x1 - x0,
-      y1 - y0,
-      (x0 - sx) * k,
-      (y0 - sy) * k,
-      (x1 - x0) * k,
-      (y1 - y0) * k,
-    );
+    const blit = (img: CanvasImageSource, alpha: number) => {
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(img, x0, y0, x1 - x0, y1 - y0, (x0 - sx) * k, (y0 - sy) * k, (x1 - x0) * k, (y1 - y0) * k);
+    };
+    // While self-spinning, blend the two frames either side of the exact angle: the 5-degree steps
+    // become a continuous turn at the full refresh rate instead of ~9 visible jumps a second.
+    const pos = angle.current / TURN_STEP;
+    const fl = Math.floor(pos);
+    const fa = frames.current.get(wrap(fl * TURN_STEP));
+    const fb = frames.current.get(wrap((fl + 1) * TURN_STEP));
+    if (spin && ready.current && fa && fb) {
+      // A true cross-fade (weights add up to one): drawing the second frame over the first made
+      // the semi-transparent figure denser and lighter in turn, which showed as flicker.
+      const t = pos - fl;
+      ctx.globalCompositeOperation = 'lighter';
+      blit(fa, 1 - t);
+      blit(fb, t);
+      ctx.globalCompositeOperation = 'source-over';
+    } else blit(best, 1);
+    ctx.globalAlpha = 1;
   };
   const requestDraw = () => {
-    if (raf.current) return;
+    if (wk.current || raf.current) return;
     raf.current = requestAnimationFrame(() => {
       raf.current = 0;
       draw();
@@ -200,6 +220,7 @@ export function AnatomyTurntable({
   useEffect(() => {
     if (typeof createImageBitmap === 'undefined') return; // no canvas pipeline (tests, very old browsers)
     let alive = true;
+    ready.current = false;
     current.current = key;
     const list = JSON.parse(key) as Spec[];
     const css = getComputedStyle(stage.current ?? document.body);
@@ -275,7 +296,7 @@ export function AnatomyTurntable({
         tctx.fillRect(0, 0, W, H);
         ctx.globalAlpha = s.alpha;
         ctx.shadowColor = colour(s.tint);
-        ctx.shadowBlur = 4;
+        ctx.shadowBlur = spin ? 0 : 4; // a blur per layer per frame is the costly part of a self-spinning figure
         ctx.drawImage(tmp, 0, 0);
         ctx.shadowBlur = 0;
       });
@@ -292,21 +313,48 @@ export function AnatomyTurntable({
             bmp?.close();
             return;
           }
-          if (bmp) {
+          if (bmp && wk.current) {
+            wk.current.postMessage({ t: 'f', deg, bmp }, [bmp]);
+          } else if (bmp) {
             bitmaps.get(deg)?.close();
             bitmaps.set(deg, bmp);
             tags.current.set(deg, key);
           }
           requestDraw();
+          // Leave the main thread free between frames so scrolling never stalls.
+          if (spin) await new Promise((r) => setTimeout(r, 24));
         } catch {
           /* a frame that fails to load is skipped; its neighbour stands in */
         }
       }
     };
-    void Promise.all([worker(), worker(), worker()]);
+    const begin = () => {
+      const n = spin ? 2 : 4;
+      void Promise.all(Array.from({ length: n }, worker)).then(() => {
+        if (alive && missing.size === 0) {
+          ready.current = true;
+          wk.current?.postMessage({ t: 'ready' });
+        }
+      });
+    };
+    // A self-spinning figure starts building only when its screen is near, so the page above it stays smooth.
+    let io: IntersectionObserver | null = null;
+    if (spin && typeof IntersectionObserver !== 'undefined' && stage.current) {
+      io = new IntersectionObserver(
+        (e) => {
+          if (e.some((x) => x.isIntersecting)) {
+            io?.disconnect();
+            begin();
+          }
+        },
+        { rootMargin: '150% 0px' },
+      );
+      io.observe(stage.current);
+    } else begin();
     // Old frames stay on screen until each is replaced, so switching area never blanks the map.
     return () => {
       alive = false;
+      io?.disconnect();
     };
     // `requestDraw` only touches refs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -330,6 +378,7 @@ export function AnatomyTurntable({
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const dur = reduce ? 0 : 450 + Math.abs(dA) * 2 + Math.abs(camera.zoom - from.z) * 250;
     let t0 = 0;
+    moving.current = true;
     const tick = (now: number) => {
       t0 ||= now;
       const k = dur === 0 ? 1 : Math.min(1, (now - t0) / dur);
@@ -341,10 +390,103 @@ export function AnatomyTurntable({
       };
       draw();
       if (k < 1) anim.current = requestAnimationFrame(tick);
+      else moving.current = false;
     };
     anim.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(anim.current);
+    return () => {
+      cancelAnimationFrame(anim.current);
+      moving.current = false;
+    };
   }, [camera]);
+
+  // Continuous self-spin: advances the angle by elapsed time, so it never stops and starts. It only
+  // runs while the figure is on screen, and only repaints when the nearest frame actually changes.
+  useEffect(() => {
+    if (!spin || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const cv = canvas.current;
+    if (cv && typeof Worker !== 'undefined' && 'transferControlToOffscreen' in cv) {
+      let w = TT_WORKERS.get(cv);
+      if (!w) {
+        try {
+          w = new Worker(new URL('./turntable.worker.ts', import.meta.url), { type: 'module' });
+          const off = cv.transferControlToOffscreen();
+          w.postMessage(
+            { t: 'init', canvas: off, step: TURN_STEP, spin, angle: angle.current, rect: viewRect(view.current.y, view.current.zoom), w: W, h: H },
+            [off],
+          );
+          TT_WORKERS.set(cv, w);
+        } catch {
+          w = undefined;
+        }
+      }
+      if (w) {
+        const worker = w;
+        wk.current = worker;
+        const size = () => {
+          const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+          worker.postMessage({
+            t: 'size',
+            w: Math.max(1, Math.round(cv.clientWidth * dpr)),
+            h: Math.max(1, Math.round(cv.clientHeight * dpr)),
+          });
+        };
+        size();
+        const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(size);
+        ro?.observe(cv);
+        if (ready.current) worker.postMessage({ t: 'ready' });
+        const io =
+          typeof IntersectionObserver === 'undefined' || !stage.current
+            ? null
+            : new IntersectionObserver((e) => worker.postMessage({ t: 'vis', v: e.some((x) => x.isIntersecting) }));
+        if (io && stage.current) io.observe(stage.current);
+        else worker.postMessage({ t: 'vis', v: true });
+        return () => {
+          ro?.disconnect();
+          io?.disconnect();
+          worker.postMessage({ t: 'vis', v: false });
+          // React may re-run this effect on the same element (StrictMode): only a detached canvas ends its worker.
+          window.setTimeout(() => {
+            if (!cv.isConnected) {
+              worker.terminate();
+              TT_WORKERS.delete(cv);
+            }
+          }, 200);
+        };
+      }
+    }
+    let id = 0;
+    let last = 0;
+    let visible = true;
+    const step = (now: number) => {
+      if (visible && ready.current && last && !drag.current && !moving.current) {
+        angle.current = wrap(angle.current + (spin * (now - last)) / 1000);
+        draw();
+      }
+      last = now;
+      id = requestAnimationFrame(step);
+    };
+    const start = () => {
+      last = 0;
+      cancelAnimationFrame(id);
+      id = requestAnimationFrame(step);
+    };
+    const io =
+      typeof IntersectionObserver === 'undefined' || !stage.current
+        ? null
+        : new IntersectionObserver((e) => {
+            visible = e.some((x) => x.isIntersecting);
+            if (visible) start();
+            else cancelAnimationFrame(id);
+          });
+    if (io && stage.current) io.observe(stage.current);
+    start();
+    return () => {
+      io?.disconnect();
+      cancelAnimationFrame(id);
+    };
+    // `draw` only touches refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spin]);
 
   useEffect(() => {
     const cv = canvas.current;

@@ -67,6 +67,9 @@ import { canUseCoach, coachScreenOpen } from './coach/access';
 import type { HomeSetRoute } from './views/home/HomeSetView';
 import { pruneHomeSetDrafts } from './views/home/homeSetDraft';
 import { AuthView } from './views/AuthView';
+import { LandingView } from './views/landing/LandingView';
+import { InviteLanding } from './views/landing/InviteLanding';
+import { shouldShowLanding } from './views/landing/landingGate';
 import { TraineeSessionView } from './views/TraineeSessionView';
 import { LiveHero } from './components/LiveHero';
 import { ActivityHero } from './components/ActivityHero';
@@ -946,6 +949,7 @@ export function App() {
     return () => cancelAnimationFrame(raf);
   }, [focusTarget]);
   // Invite links (#/join/<token>) open onboarding before any auth gate.
+  const [inviteStarted, setInviteStarted] = useState(false);
   const [joinToken, setJoinToken] = useState<string | null>(() => {
     const m = /^#\/join\/([A-Za-z0-9-]+)/.exec(window.location.hash);
     return m ? m[1] : null;
@@ -1290,11 +1294,20 @@ export function App() {
     return () => el.classList.remove('theme-learn');
   }, [learnOpen]);
 
+  if (joinToken && !inviteStarted && shouldShowLanding()) {
+    return (
+      <div className="app app-landing">
+        <InviteLanding token={joinToken} onStart={() => setInviteStarted(true)} />
+      </div>
+    );
+  }
+
   if (joinToken) {
     return (
       <div className="app">
         <Suspense fallback={<ScreenFallback />}>
           <OnboardingView
+            skipLanding={inviteStarted}
             token={joinToken}
             onDone={(workoutId) => {
               setJoinToken(null);
@@ -1310,8 +1323,12 @@ export function App() {
 
   if (!authed) {
     return (
-      <div className="app">
-        <AuthView onLoggedIn={() => setAuthed(true)} />
+      <div className={shouldShowLanding() ? 'app app-landing' : 'app'}>
+        {shouldShowLanding() ? (
+          <LandingView onLoggedIn={() => setAuthed(true)} />
+        ) : (
+          <AuthView onLoggedIn={() => setAuthed(true)} />
+        )}
       </div>
     );
   }
