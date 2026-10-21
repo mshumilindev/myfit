@@ -27,6 +27,7 @@ import { guardRosterTab, rosterHomeTab, rosterMode, type RosterRole } from './ro
 
 export type { RosterTab } from './rosterAccess';
 import type { RosterTab } from './rosterAccess';
+import { SUITE_ICON, SUITE_TONE } from '../components/suite/suiteTone';
 type Role = RosterRole;
 
 export function RosterApp({
@@ -95,11 +96,15 @@ export function RosterApp({
       )}
       <div className="apex-col">
         <BrandBar
-          avatar={<BrandAccount app="roster" />}
+          avatar={(hidden) => (
+            <BrandAccount app="roster" hidden={hidden} onOpenProfile={() => openTab('me')} />
+          )}
           header
           app={appLabel}
           onApp={onOpenShell}
           appLabel={t.shellSwitch}
+          tone={SUITE_TONE.roster}
+          icon={SUITE_ICON.roster}
           actions={
             <>
               <BellButton
@@ -141,12 +146,12 @@ export function RosterApp({
         {!desktop && (
           <SuiteTabBar
             app="roster"
+            noMore
+            noAccount
             tabs
             activeFill
             items={nav.map((x) => ({ ...x, active: tab === x.id }))}
             onSelect={(id) => openTab(id)}
-            onOpenShell={onOpenShell}
-            onOpenProfile={() => openTab('me')}
           />
         )}
       </div>

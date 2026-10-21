@@ -16,6 +16,7 @@ import { installRailMeasure, setRailHeight, uninstallRailMeasure } from '../ui/r
 import { setSuiteSession } from './suiteSession';
 import { publishClientShared } from '../../coach/client/shared';
 import { SuiteTabBar } from '../SuiteTabBar';
+import { BrandAccount } from './BrandAccount';
 import { GymRail } from '../../App';
 import { CoachShell } from '../../coach/CoachApp';
 import { ApexApp } from '../../views/ApexApp';
@@ -72,6 +73,8 @@ vi.mock('../../nutrition/views', () => ({
 vi.mock('../../nutrition/addflow', () => ({ AddFlow: () => null }));
 
 const noop = () => undefined;
+/** The phone avatar that opens the user drawer. */
+const avatarButton = () => document.querySelector('.uibrand-avatar') as HTMLElement;
 const notifProps = {
   now: 0,
   notifs: [],
@@ -92,7 +95,7 @@ interface Case {
   /** Rail destinations in rail order. */
   nav: (role: typeof session.role) => string[];
   rail: (cb: Cb) => ReactElement;
-  /** Phone: the app's tab labels (More is appended). */
+  /** Phone: the app's tab labels (no More: the account is the avatar's drawer). */
   tabs: (role: typeof session.role) => string[];
   phone: (cb: Cb) => ReactElement;
 }
@@ -130,15 +133,19 @@ const CASES: Case[] = [
         onOpenHealth={noop}
       />
     ),
-    phone: ({ onShell, onProfile }) => (
-      <SuiteTabBar
-        app="gym"
-        items={gymItems}
-        onSelect={noop}
-        onOpenShell={onShell}
-        onOpenProfile={onProfile}
-        fab={{ ariaLabel: t.startNew, onClick: noop }}
-      />
+    // The bar and the avatar drawer, as the app composes them (the avatar owns the account).
+    phone: ({ onProfile }) => (
+      <>
+        <BrandAccount app="gym" onOpenProfile={onProfile} />
+        <SuiteTabBar
+          app="gym"
+          noMore
+          noAccount
+          items={gymItems}
+          onSelect={noop}
+          fab={{ ariaLabel: t.startNew, onClick: noop }}
+        />
+      </>
     ),
   },
   {
@@ -383,26 +390,28 @@ describe.each(CASES)('$name: desktop rail', (k) => {
 });
 
 describe.each(CASES)('$name: phone (< 720)', (k) => {
-  it('keeps its tabs, no rail; the trailing More tab replaces Apps', () => {
+  it('keeps its tabs, no rail, no More tab (the account is the avatar drawer)', () => {
     setViewport(390);
     const { container } = render(k.phone({ onShell: vi.fn(), onProfile: vi.fn() }));
     expect(screen.queryByRole('complementary')).toBeNull();
     const bar = container.querySelector('.tabbar') as HTMLElement;
+    // One destination (People for a member): no bar at all.
+    if (k.tabs(session.role).length <= 1) return expect(bar).toBeNull();
     expect(bar).not.toBeNull();
     const labels = [...bar.querySelectorAll('button:not(.tabbar-fab)')].map((b) => b.textContent);
-    expect(labels).toEqual([...k.tabs(session.role), c.navMore]);
-    expect(labels.at(-1)).toBe(c.navMore);
+    expect(labels).toEqual(k.tabs(session.role));
+    expect(within(bar).queryByRole('button', { name: c.navMore })).toBeNull();
     expect(within(bar).queryByRole('button', { name: c.navApps })).toBeNull();
     expect(within(bar).queryByRole('button', { name: t.shellSwitch })).toBeNull();
   });
 
-  it('More sheet: Apps last in the list, then the account block (avatar 40, Profile)', () => {
+  it('avatar drawer: the account block (avatar 40, Profile); no Apps row, the BrandBar chip switches apps', () => {
     setViewport(390);
     session.role = 'trainer';
     const h = { onShell: vi.fn(), onProfile: vi.fn() };
     render(k.phone(h));
-    fireEvent.click(screen.getByRole('button', { name: c.navMore }));
-    expect(screen.getByRole('heading', { name: c.navMore })).toBeTruthy();
+    fireEvent.click(avatarButton());
+    expect(screen.getByRole('heading', { name: c.railProfile })).toBeTruthy();
     // colour-coded to the current app, like the launcher sheet
     const fam = { Gym: 'gym', Apex: 'apex', People: 'people', Nutrition: 'kcal', Learn: 'learn' }[
       k.name as 'Gym'
@@ -412,14 +421,11 @@ describe.each(CASES)('$name: phone (< 720)', (k) => {
     expect(sheet.classList.contains(`uit--${fam}`)).toBe(true);
     const body = document.querySelector('.uimore-body') as HTMLElement;
     const rows = [...body.querySelectorAll('.uigl-rows button.uirow')].map((b) => b.textContent);
-    expect(rows.at(-1)).toBe(c.navApps);
+    expect(rows).not.toContain(c.navApps);
+    expect(within(body).queryByRole('button', { name: c.navApps })).toBeNull();
     expect([...body.querySelectorAll('.uiacct-action')].map((b) => b.textContent)).toEqual([
       c.moreProfile,
     ]);
-    const idx = (el: Element) => [...body.querySelectorAll('*')].indexOf(el);
-    expect(idx(screen.getByText('Iryna Koval'))).toBeGreaterThan(
-      idx(within(body).getByRole('button', { name: c.navApps })),
-    );
     expect(within(body).getByTestId('real-avatar').dataset.size).toBe('40');
     // trainer: the mode switch and its note are in the account block
     expect(
@@ -429,14 +435,12 @@ describe.each(CASES)('$name: phone (< 720)', (k) => {
       within(body).getByRole('button', { name: c.modeCoach }).getAttribute('aria-pressed'),
     ).toBe('false');
     expect(within(body).getByText(c.modeNote)).toBeTruthy();
-    fireEvent.click(within(body).getByRole('button', { name: c.navApps }));
-    expect(h.onShell).toHaveBeenCalledTimes(1);
   });
 
   it('a member sees no mode switch on the phone either', () => {
     setViewport(390);
     render(k.phone({ onShell: vi.fn(), onProfile: vi.fn() }));
-    fireEvent.click(screen.getByRole('button', { name: c.navMore }));
+    fireEvent.click(avatarButton());
     const body = document.querySelector('.uimore-body') as HTMLElement;
     expect(within(body).queryByRole('button', { name: c.modeCoach })).toBeNull();
     expect(within(body).queryByText(c.modeNote)).toBeNull();
@@ -700,7 +704,7 @@ describe('no online / presence dot on navigation avatars', () => {
     cleanup();
     setViewport(390);
     render(CASES[0].phone({ onShell: noop, onProfile: noop }));
-    fireEvent.click(screen.getByRole('button', { name: c.navMore }));
+    fireEvent.click(avatarButton());
     expect(document.querySelector('.uimore-body .dot')).toBeNull();
   });
 });
@@ -852,15 +856,15 @@ describe.each([
     confirm();
   });
 
-  it('phone More sheet: after the destinations and Apps, the account block, Profile then Sign out', () => {
+  it('phone avatar drawer: the account block, Profile then Sign out', () => {
     setViewport(390);
     render(k.phone(cbk()));
-    const open = () => fireEvent.click(screen.getByRole('button', { name: c.navMore }));
+    const open = () => fireEvent.click(avatarButton());
     open();
     const body = document.querySelector('.uimore-body') as HTMLElement;
     const idx = (el: Element) => [...body.querySelectorAll('*')].indexOf(el);
     expect(idx(within(body).getByRole('button', { name: t.signOut }))).toBeGreaterThan(
-      idx(within(body).getByRole('button', { name: c.navApps })),
+      idx(body.querySelector('.uiacct-action') as HTMLElement),
     );
     flow(body.querySelector('.uiacct') as HTMLElement);
     open();

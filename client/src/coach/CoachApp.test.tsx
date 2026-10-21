@@ -14,6 +14,7 @@ import {
 // the screens are lazy chunks: a slow machine needs more than the default 1 s to show them
 configure({ asyncUtilTimeout: 5000 });
 import { useState } from 'react';
+import { LOCALES } from '../i18n';
 import { coachEn } from '../i18n/coach.en';
 import { CoachApp, CoachShell } from './CoachApp';
 import { coachEntryHash, type CoachRoute } from './routes';
@@ -276,7 +277,7 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
 });
 
 describe('phone More sheet', () => {
-  it('390: destinations, then Apps LAST, then the account block (avatar 40)', () => {
+  it('390: More lists the destinations only; the avatar opens the account drawer (avatar 40); the top-bar chip opens the launcher', () => {
     setViewport(390);
     const onShell = vi.fn();
     render(
@@ -302,20 +303,21 @@ describe('phone More sheet', () => {
       c.navLive,
       c.navSignals,
       c.navTeam,
-      c.navApps,
     ]);
-    // the account block follows: Profile pill (no Sign out without a registered session)
-    expect([...sheet.querySelectorAll('.uiacct-action')].map((b) => b.textContent)).toEqual([
+    // no Apps row (the BrandBar chip is the switcher) and no account block (the avatar owns it)
+    expect(within(sheet).queryByRole('button', { name: c.navApps })).toBeNull();
+    expect(sheet.querySelector('.uiacct')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: c.navWeek }));
+    // the avatar drawer: Profile pill (no Sign out without a registered session)
+    fireEvent.click(document.querySelector('.uibrand-avatar') as HTMLElement);
+    const acct = document.querySelector('.uimore-body') as HTMLElement;
+    expect([...acct.querySelectorAll('.uiacct-action')].map((b) => b.textContent)).toEqual([
       c.moreProfile,
     ]);
-    const idx = (el: Element) => [...sheet.querySelectorAll('*')].indexOf(el);
-    expect(idx(screen.getByText('Iryna Koval'))).toBeGreaterThan(
-      idx(screen.getByRole('button', { name: c.navApps })),
-    );
-    expect(within(sheet).getByTestId('real-avatar').dataset.size).toBe('40');
-    fireEvent.click(screen.getByRole('button', { name: c.navApps }));
+    expect(within(acct).getByTestId('real-avatar').dataset.size).toBe('40');
+    // the chip in the top bar opens the launcher (one tap)
+    fireEvent.click(screen.getByRole('button', { name: LOCALES.en.shellSwitch }));
     expect(onShell).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText(c.modeNote)).toBeNull();
   });
 });
 
@@ -449,7 +451,7 @@ describe('tab bar (< 768)', () => {
     expect(screen.getByRole('button', { name: `${c.navChat}, ${c.unread(4)}` })).toBeTruthy();
   });
 
-  it('More opens a sheet with Week, Decisions, Programs, Live, Signals, mode switch and profile', () => {
+  it('More opens a sheet with Week, Decisions, Programs, Live, Signals; the avatar drawer has the mode switch and profile', () => {
     setViewport(390);
     const onProfile = vi.fn();
     render(<Harness onProfile={onProfile} />);
@@ -457,6 +459,10 @@ describe('tab bar (< 768)', () => {
     for (const label of [c.navWeek, c.navDecisions, c.navPrograms, c.navLive, c.navSignals]) {
       expect(screen.getByRole('button', { name: label })).toBeTruthy();
     }
+    // the account is not in More
+    expect(screen.queryByRole('button', { name: c.modeCoach })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: c.navWeek }));
+    fireEvent.click(document.querySelector('.uibrand-avatar') as HTMLElement);
     expect(screen.getByRole('button', { name: c.modeCoach }).getAttribute('aria-pressed')).toBe(
       'true',
     );

@@ -29,6 +29,7 @@ import { computeFeats } from '../feats';
 import type { StatShareModel } from '../data/shareCard';
 import type { BodyMetrics } from '../types';
 import type { Notif, NotifState } from '../notifications';
+import { SUITE_ICON, SUITE_TONE } from '../components/suite/suiteTone';
 
 export type ApexTab = 'home' | 'challenges' | 'ranks' | 'awards' | 'feed';
 
@@ -158,11 +159,15 @@ export function ApexApp({
       )}
       <div className="apex-col">
         <BrandBar
-          avatar={<BrandAccount app="apex" />}
+          avatar={(hidden) => (
+            <BrandAccount app="apex" hidden={hidden} onOpenProfile={onOpenProfile} />
+          )}
           header
           app={t.apexName}
           onApp={onOpenShell}
           appLabel={t.shellSwitch}
+          tone={SUITE_TONE.apex}
+          icon={SUITE_ICON.apex}
           actions={
             <>
               <BellButton
@@ -225,12 +230,12 @@ export function ApexApp({
         {!desktop && (
           <SuiteTabBar
             app="apex"
+            noMore
+            noAccount
             tabs
             activeFill
             items={nav.map((x) => ({ ...x, active: tab === x.id }))}
             onSelect={(id) => onTab(id)}
-            onOpenShell={onOpenShell}
-            onOpenProfile={onOpenProfile}
           />
         )}
       </div>

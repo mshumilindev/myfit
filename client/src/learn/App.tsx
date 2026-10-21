@@ -34,6 +34,7 @@ import type { Notif, NotifState } from '../notifications';
 import { useLearnT } from './i18n';
 import { catalogForRole, type Lesson, type Topic, type ViewerRole } from './catalog';
 import { localizeTopics, localTopicTitle } from './catalog.i18n';
+import { SUITE_ICON, SUITE_TONE } from '../components/suite/suiteTone';
 
 type Tab = 'home' | 'topics' | 'saved' | 'feed';
 type Cut = 'phone' | 'web';
@@ -589,11 +590,15 @@ export function LearnRoot({
       )}
       <div className="apex-col">
         <BrandBar
-          avatar={<BrandAccount app="learn" />}
+          avatar={(hidden) => (
+            <BrandAccount app="learn" hidden={hidden} onOpenProfile={onOpenProfile} />
+          )}
           header
           app={L.app}
           onApp={onOpenShell}
           appLabel={L.apps}
+          tone={SUITE_TONE.learn}
+          icon={SUITE_ICON.learn}
           actions={
             <>
               <BellButton
@@ -665,12 +670,12 @@ export function LearnRoot({
         {!desktop && (
           <SuiteTabBar
             app="learn"
+            noMore
+            noAccount
             tabs
             activeFill
             items={nav.map((x) => ({ ...x, active: !playing && tab === x.id }))}
             onSelect={(id) => goTab(id as Tab)}
-            onOpenShell={onOpenShell}
-            onOpenProfile={onOpenProfile}
           />
         )}
       </div>

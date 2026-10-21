@@ -17,6 +17,7 @@ import type { Entry } from './types';
 import { AppRail } from '../components/AppRail';
 import { NotificationsView } from '../views/NotificationsView';
 import type { Notif, NotifState } from '../notifications';
+import { SUITE_ICON, SUITE_TONE } from '../components/suite/suiteTone';
 
 type Tab = 'today' | 'history' | 'goal' | 'feed';
 
@@ -183,11 +184,15 @@ export function NutritionRoot({
       )}
       <div className="apex-col">
         <BrandBar
-          avatar={<BrandAccount app="nutrition" />}
+          avatar={(hidden) => (
+            <BrandAccount app="nutrition" hidden={hidden} onOpenProfile={onOpenProfile} />
+          )}
           header
           app={t('appName')}
           onApp={onOpenShell}
           appLabel={t('apps')}
+          tone={SUITE_TONE.nutrition}
+          icon={SUITE_ICON.nutrition}
           actions={
             <>
               <BellButton
@@ -269,12 +274,12 @@ export function NutritionRoot({
         {!desktop && (
           <SuiteTabBar
             app="nutrition"
+            noMore
+            noAccount
             tabs
             activeFill
             items={nav.map((x) => ({ ...x, active: tab === x.id }))}
             onSelect={(id) => setTab(id as Tab)}
-            onOpenShell={onOpenShell}
-            onOpenProfile={onOpenProfile}
           />
         )}
       </div>

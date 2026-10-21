@@ -16,3 +16,20 @@ export const Default: Story = {
 export const Unread: Story = {
   args: { actions: <BellButton label="Notifications" onClick={() => undefined} count={12} /> },
 };
+
+export const SwitcherChip: Story = {
+  args: {
+    tone: 'gym',
+    icon: 'barbell',
+    actions: <BellButton label="Notifications" onClick={() => undefined} />,
+  },
+};
+
+export const SwitcherChipApex: Story = {
+  args: {
+    app: 'Apex',
+    tone: 'apex',
+    icon: 'trophy',
+    actions: <BellButton label="Notifications" onClick={() => undefined} count={3} />,
+  },
+};

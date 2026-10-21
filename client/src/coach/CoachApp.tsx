@@ -10,8 +10,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SpotterMark } from '../brand/SpotterMark';
 import { SuiteRailFoot } from '../components/suite/SuiteRailFoot';
-import { SUITE_TONE } from '../components/suite/suiteTone';
-import { useSuiteAccount, type SuiteMode } from '../components/suite/useSuiteAccount';
+import { SUITE_ICON, SUITE_TONE } from '../components/suite/suiteTone';
+import type { SuiteMode } from '../components/suite/useSuiteAccount';
 import { MoreMenu, type MoreMenuItem } from '../components/ui/MoreMenu';
 import { Rail } from '../components/ui/Rail';
 import type { RailEntry } from '../components/ui/railOverflow';
@@ -97,12 +97,6 @@ export function CoachShell({
   // Phone: the More tab opens a bottom sheet. Desktop: the rail collapses its trailing entries
   // into its own More item when too short (Rail `overflow`); the avatar opens ONLY the account.
   const [moreOpen, setMoreOpen] = useState(false);
-  const { account, dialog } = useSuiteAccount({
-    app: 'coach',
-    identity: { name, userId, role },
-    onOpenGym: onExitToWorkouts,
-    onOpenProfile,
-  });
 
   useEffect(() => {
     const on = () => setMoreOpen(true);
@@ -162,7 +156,9 @@ export function CoachShell({
   const moreScreens: readonly ScreenId[] = manager
     ? []
     : [...(MORE_SCREENS as readonly ScreenId[]), 'team'];
-  const moreItems: MoreMenuItem[] = moreScreens.map(entryOf);
+  // Header controls the bar had no room for (the language) continue in More; the account is the avatar's drawer.
+  const [headerHidden, setHeaderHidden] = useState<MoreMenuItem[]>([]);
+  const moreItems: MoreMenuItem[] = [...moreScreens.map(entryOf), ...(manager ? [] : headerHidden)];
   // Desktop rail nav: exactly the seven design items. When the rail is too short the trailing
   // ones collapse into More (Rail `overflow`); Apps is NOT among them: it is pinned in the foot.
   // Live and Signals are not rail items (phone More sheet only until the foot widgets land).
@@ -253,6 +249,8 @@ export function CoachShell({
           app={manager ? c.modeManager : c.modeCoach}
           onApp={onOpenShell}
           appLabel={t.shellSwitch}
+          tone={SUITE_TONE.coach}
+          icon={SUITE_ICON.coach}
           actions={
             <BellButton
               label={c.railNotifications}
@@ -260,7 +258,15 @@ export function CoachShell({
               onClick={() => onNavigate({ screen: 'chat' })}
             />
           }
-          avatar={<BrandAccount app="coach" identity={{ name, userId, role }} />}
+          onHiddenChange={setHeaderHidden}
+          avatar={
+            <BrandAccount
+              app="coach"
+              identity={{ name, userId, role }}
+              onOpenProfile={onOpenProfile}
+              onOpenGym={onExitToWorkouts}
+            />
+          }
         />
       )}
 
@@ -290,11 +296,8 @@ export function CoachShell({
           onClose={() => setMoreOpen(false)}
           title={c.navMore}
           items={moreItems}
-          apps={{ label: c.navApps, onOpen: onOpenShell }}
-          account={account}
         />
       )}
-      {!desktop && dialog}
     </div>
   );
 }

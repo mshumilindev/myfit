@@ -95,6 +95,8 @@ export function TabBar<Id extends string = string>({
     );
   };
   const cols = items.length + (apps ? 1 : 0) + (more ? 1 : 0) + (fab ? 1 : 0);
+  // A bar with a single destination navigates nowhere (the admin Users app): no bar at all.
+  if (cols <= 1) return null;
   return (
     <div
       className={`tabbar-wrap${fab ? ' tabbar-wrap--fab' : ''}${breakpoint === 'coach' ? ' tabbar-wrap--coach' : ''}`}
