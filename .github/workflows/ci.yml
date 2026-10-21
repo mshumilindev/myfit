@@ -254,6 +254,7 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=6144
         run: |
           set -o pipefail
+          mkdir -p client/node_modules/.cache/storybook
           npm run build-storybook 2>&1 | tee sb.log || { grep -iE 'error|cannot|could not|failed|unresolved|not found' sb.log | head -8 | sed 's/^/::error::/'; exit 1; }
       - uses: actions/upload-artifact@v4
         with:
