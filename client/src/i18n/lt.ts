@@ -856,7 +856,6 @@ export const lt: Strings = {
   backfillContinue: 'Toliau prie pratimų',
   backfillFuture: 'Šis laikas ateityje',
   dismiss: 'Atmesti',
-  unloggedVisit: (dur, gym, date) => `${dur} ${gym} ${date} — nieko neužfiksuota.`,
   sessionInProgress: 'Treniruotė vyksta',
   recent: 'Paskutinės',
   templates: 'Šablonai',
@@ -1624,9 +1623,6 @@ export const lt: Strings = {
   todayOptLiveFirstCardSub: 'Kortelė „Gyvai“ viršuje',
   showMore: 'Rodyti daugiau',
   historyCount: (n: number) => `${n} treniruočių`,
-  flagGymPresence: 'Priminimai pagal buvimą salėje',
-  flagGymPresenceDesc:
-    'Nustatyti apsilankymus salėje pagal vietą ir siūlyti įrašyti treniruotę. Numatytai išjungta.',
   flagNutrition: 'Nutrition programa',
   flagNutritionDesc: 'Atrakinti Nutrition programą (KBRA sekiklį) programų perjungiklyje.',
   flagConditions: 'Ilgalaikės būklės',

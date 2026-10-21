@@ -13,7 +13,6 @@ export function SettingsView({ onClose }: { onClose: () => void }) {
   useFlagsVersion(); // re-render when a flag changes
 
   const meta: Record<string, { label: string; desc: string }> = {
-    gymPresence: { label: t.flagGymPresence, desc: t.flagGymPresenceDesc },
     nutrition: { label: t.flagNutrition, desc: t.flagNutritionDesc },
   };
 

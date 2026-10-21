@@ -48,7 +48,6 @@ import {
   type Gym,
   type LiveSession,
   type QueuedMutation,
-  type Reminder,
   type RestMode,
   type IllnessKind,
   type RestPeriod,
@@ -113,7 +112,6 @@ import { sleepBlockedBy, type SleepBlock } from './sleepGuard';
 import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { REST_PREFS_DEFAULT, type RestPrefs } from './restTimer';
-import { isFlagOn } from './data/flags';
 import { describeDay, dayReadoutLabel, type DayReadout } from './data/daySuggest';
 import { t, getLocale, type LocaleId } from './i18n';
 import {
@@ -258,7 +256,6 @@ export {
 const STATE_KEY = 'spotter.state';
 const GYMS_KEY = 'spotter.gyms';
 const SHARED_GYMS_KEY = 'spotter.sharedGyms';
-const REMINDERS_KEY = 'spotter.reminders';
 const BODY_KEY = 'spotter.body';
 const GOALS_KEY = 'spotter.goals';
 const HOME_KEY = 'spotter.home';
@@ -370,7 +367,6 @@ export interface StoreState {
   gyms: Gym[];
   /** Shared gym inventories by externalId (cache of sharedGyms/*). */
   sharedGyms: Record<string, SharedGym>;
-  reminders: Reminder[];
   /** Planned rest / recovery / vacation windows. */
   restPeriods: RestPeriod[];
   /** Tracked injuries with feel-driven rehab plans. */
@@ -448,7 +444,6 @@ let state: StoreState = {
   workouts: load<Workout[]>(STATE_KEY, []),
   gyms: load<Gym[]>(GYMS_KEY, []),
   sharedGyms: load<Record<string, SharedGym>>(SHARED_GYMS_KEY, {}),
-  reminders: load<Reminder[]>(REMINDERS_KEY, []),
   restPeriods: load<RestPeriod[]>(REST_KEY, []),
   injuries: load<Injury[]>(INJURY_KEY, []),
   conditions: stripLegacyConditions(load<ChronicCondition[]>(CONDITIONS_KEY, [])),
@@ -493,10 +488,6 @@ let state: StoreState = {
   syncError: null,
   lastSyncAt: null,
 };
-
-// Pings & dismissals feed reminder computation; kept outside StoreState.
-let pings: Array<{ gymId: string; at: number }> = [];
-let dismissals: Array<{ gymId: string; visitStart: number }> = [];
 
 const listeners = new Set<() => void>();
 
@@ -593,7 +584,6 @@ function persist(): void {
     localStorage.setItem(COACH_KEY, JSON.stringify(state.coach));
     localStorage.setItem(GYMS_KEY, JSON.stringify(state.gyms));
     localStorage.setItem(SHARED_GYMS_KEY, JSON.stringify(state.sharedGyms));
-    localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
     localStorage.setItem(REST_KEY, JSON.stringify(state.restPeriods));
     localStorage.setItem(INJURY_KEY, JSON.stringify(state.injuries));
     // Sealed on device once the vault key is here; plaintext only as the no-key fallback.
@@ -1475,19 +1465,6 @@ function deleteGymDoc(id: string): void {
   const uid = currentUid();
   if (!uid) return;
   deleteDoc(doc(db, 'users', uid, 'gyms', id)).catch(onWriteError);
-}
-function writePingDoc(id: string, gymId: string, at: number): void {
-  const uid = currentUid();
-  if (!uid) return;
-  setDoc(doc(db, 'users', uid, 'pings', id), { gymId, at }).catch(onWriteError);
-}
-function writeDismissalDoc(gymId: string, visitStart: number): void {
-  const uid = currentUid();
-  if (!uid) return;
-  setDoc(doc(db, 'users', uid, 'reminderDismissals', `${gymId}:${visitStart}`), {
-    gymId,
-    visitStart,
-  }).catch(onWriteError);
 }
 
 function sortWorkouts(ws: Workout[]): Workout[] {
@@ -4572,7 +4549,6 @@ export function watchSharedGym(externalId: string): void {
         // Re-overlay the local gyms so filters/board reflect the shared set.
         state = { ...state, gyms: state.gyms.map(applyShared) };
         persist();
-        recomputeReminders();
         emit();
       },
       () => {
@@ -4741,37 +4717,6 @@ export function bmiValue(heightCm?: number | null, weightKg?: number | null): nu
   return weightKg / (m * m);
 }
 
-export function dismissReminder(r: Reminder): void {
-  dismissals = [...dismissals, { gymId: r.gymId, visitStart: r.visitStart }];
-  setState({
-    reminders: state.reminders.filter(
-      (x) => !(x.gymId === r.gymId && x.visitStart === r.visitStart),
-    ),
-    syncStatus: bumpPending(),
-  });
-  writeDismissalDoc(r.gymId, r.visitStart);
-}
-
-export function logVisitAsWorkout(r: Reminder): Workout {
-  const workout: Workout = {
-    id: uuid(),
-    startedAt: r.visitStart,
-    finishedAt: r.visitEnd,
-    autoFinished: false,
-    gymId: r.gymId,
-    exercises: [],
-  };
-  setState({
-    workouts: sortWorkouts([workout, ...state.workouts]),
-    reminders: state.reminders.filter(
-      (x) => !(x.gymId === r.gymId && x.visitStart === r.visitStart),
-    ),
-    syncStatus: bumpPending(),
-  });
-  writeWorkoutDoc(workout);
-  return workout;
-}
-
 function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -4781,34 +4726,6 @@ function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): num
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
-}
-
-const LAST_PING_KEY = 'spotter.lastPingAt';
-const PING_EVERY_MS = 5 * 60 * 1000;
-
-export function recordPresence(): void {
-  // Off by default: no location pings unless the gym-presence flag is on, so
-  // living next to a gym never fabricates a "log this visit" prompt.
-  if (!isFlagOn('gymPresence')) return;
-  if (state.gyms.length === 0 || !('geolocation' in navigator)) return;
-  const last = Number(localStorage.getItem(LAST_PING_KEY) ?? 0);
-  if (Date.now() - last < PING_EVERY_MS) return;
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      const { latitude, longitude, accuracy } = pos.coords;
-      if (accuracy > 500) return;
-      const gym = state.gyms.find(
-        (g) => haversineM(latitude, longitude, g.lat, g.lng) <= g.radiusM + accuracy,
-      );
-      if (!gym) return;
-      localStorage.setItem(LAST_PING_KEY, String(Date.now()));
-      writePingDoc(uuid(), gym.id, Date.now());
-    },
-    () => {
-      /* denied — stay quiet */
-    },
-    { enableHighAccuracy: false, maximumAge: 120_000, timeout: 10_000 },
-  );
 }
 
 type PosFix = { lat: number; lng: number; accuracy: number; at: number };
@@ -4949,55 +4866,6 @@ export async function gymAtCurrentPosition(gyms: Gym[]): Promise<Gym | null> {
   return inside[0]?.g ?? null;
 }
 
-// --- Reminders (computed client-side from own pings + workouts) ------------
-
-const LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;
-const VISIT_GAP_MS = 45 * 60 * 1000;
-const MIN_VISIT_MS = 60 * 60 * 1000;
-const OVERLAP_SLACK_MS = 30 * 60 * 1000;
-
-function computeReminders(now = Date.now()): Reminder[] {
-  const recent = pings
-    .filter((p) => p.at >= now - LOOKBACK_MS)
-    .sort((a, b) => a.gymId.localeCompare(b.gymId) || a.at - b.at);
-  if (recent.length === 0) return [];
-  const gymNames = new Map(state.gyms.map((g) => [g.id, g.name]));
-  const dismissed = new Set(dismissals.map((d) => `${d.gymId}:${d.visitStart}`));
-  const out: Reminder[] = [];
-  let visit: { gymId: string; start: number; end: number } | null = null;
-
-  const flush = (v: { gymId: string; start: number; end: number }) => {
-    if (v.end - v.start < MIN_VISIT_MS) return;
-    if (dismissed.has(`${v.gymId}:${v.start}`)) return;
-    const overlaps = state.workouts.some((w) => {
-      const wEnd = w.finishedAt ?? now;
-      return w.startedAt <= v.end + OVERLAP_SLACK_MS && wEnd >= v.start - OVERLAP_SLACK_MS;
-    });
-    if (overlaps) return;
-    out.push({
-      gymId: v.gymId,
-      gymName: gymNames.get(v.gymId) ?? 'зал',
-      visitStart: v.start,
-      visitEnd: v.end,
-    });
-  };
-
-  for (const p of recent) {
-    if (!visit || visit.gymId !== p.gymId || p.at - visit.end > VISIT_GAP_MS) {
-      if (visit) flush(visit);
-      visit = { gymId: p.gymId, start: p.at, end: p.at };
-    } else {
-      visit.end = p.at;
-    }
-  }
-  if (visit) flush(visit);
-  return out.sort((a, b) => b.visitStart - a.visitStart);
-}
-
-function recomputeReminders(): void {
-  setState({ reminders: computeReminders() });
-}
-
 // --- Live listeners (replaces the old sync loop) ---------------------------
 
 let unsubs: Unsubscribe[] = [];
@@ -5116,7 +4984,6 @@ export function startSyncLoop(): () => void {
       ...state,
       workouts: mergeServerWorkoutsWithLocalDrafts(serverWorkouts, state.workouts),
     };
-    recomputeReminders();
     markSynced(meta.fromCache, meta.pending);
     applyAutoFinish();
     clearStoredRest();
@@ -5139,7 +5006,6 @@ export function startSyncLoop(): () => void {
     state = { ...state, gyms };
     // Subscribe to the shared entity for every gym that has a stable id.
     gyms.forEach((g) => g.externalId && watchSharedGym(g.externalId));
-    recomputeReminders();
     emit();
   });
   unsubs.push(gymsMirror.dispose);
@@ -5461,26 +5327,6 @@ export function startSyncLoop(): () => void {
   );
   unsubs.push(
     onSnapshot(
-      collection(db, 'users', uid, 'pings'),
-      (snap) => {
-        pings = snap.docs.map((d) => d.data() as { gymId: string; at: number });
-        recomputeReminders();
-      },
-      onWriteError,
-    ),
-  );
-  unsubs.push(
-    onSnapshot(
-      collection(db, 'users', uid, 'reminderDismissals'),
-      (snap) => {
-        dismissals = snap.docs.map((d) => d.data() as { gymId: string; visitStart: number });
-        recomputeReminders();
-      },
-      onWriteError,
-    ),
-  );
-  unsubs.push(
-    onSnapshot(
       collection(db, 'exerciseCatalog'),
       (snap) => {
         registerCustomExercises(snap.docs.map((d) => d.data() as CustomExercise));
@@ -5492,7 +5338,6 @@ export function startSyncLoop(): () => void {
 
   const tick = () => {
     applyAutoFinish();
-    recordPresence();
     heartbeatLiveSession();
   };
   presenceTimer = setInterval(tick, 15_000);
@@ -6430,7 +6275,6 @@ export function resetLocalData(): void {
   void initVault(null); // forget the data key on this device
   localStorage.removeItem(STATE_KEY);
   localStorage.removeItem(GYMS_KEY);
-  localStorage.removeItem(REMINDERS_KEY);
   localStorage.removeItem(BODY_KEY);
   localStorage.removeItem(REST_KEY);
   localStorage.removeItem(COACH_KEY);
@@ -6461,13 +6305,10 @@ export function resetLocalData(): void {
   localStorage.removeItem(EX_REST_KEY);
   localStorage.removeItem(REST_PREFS_KEY);
   localStorage.removeItem(SHARED_GYMS_KEY);
-  pings = [];
-  dismissals = [];
   state = {
     workouts: [],
     gyms: [],
     sharedGyms: {},
-    reminders: [],
     restPeriods: [],
     injuries: [],
     conditions: [],

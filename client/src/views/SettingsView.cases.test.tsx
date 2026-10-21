@@ -17,13 +17,13 @@ describe('SettingsView', () => {
     render(<SettingsView onClose={onClose} />);
     expect(screen.getByText(en.settingsTitle)).toBeTruthy();
     expect(screen.getByText(en.settingsSub)).toBeTruthy();
-    for (const label of [en.flagGymPresence, en.flagNutrition]) {
+    for (const label of [en.flagNutrition]) {
       const sw = screen.getByRole('switch', { name: label }) as HTMLInputElement | HTMLElement;
       expect(sw.getAttribute('aria-checked') ?? (sw as HTMLInputElement).checked).toMatch(
         /false|^$|undefined/,
       );
     }
-    expect(screen.getByText(en.flagGymPresenceDesc)).toBeTruthy();
+    expect(screen.getByText(en.flagNutritionDesc)).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: en.backAction }));
     expect(onClose).toHaveBeenCalled();
   });
@@ -44,13 +44,10 @@ describe('SettingsView', () => {
   });
 
   it('starts with the flags already stored on the device', () => {
-    localStorage.setItem('gym.flags', JSON.stringify({ gymPresence: true }));
+    localStorage.setItem('gym.flags', JSON.stringify({ nutrition: true }));
     render(<SettingsView onClose={() => undefined} />);
     expect(
-      screen.getByRole('switch', { name: en.flagGymPresence }).getAttribute('aria-checked'),
-    ).toBe('true');
-    expect(
       screen.getByRole('switch', { name: en.flagNutrition }).getAttribute('aria-checked'),
-    ).toBe('false');
+    ).toBe('true');
   });
 });

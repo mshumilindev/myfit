@@ -821,8 +821,6 @@ export const en = {
   backfillContinue: 'Continue to exercises',
   backfillFuture: 'That time is in the future',
   dismiss: 'Dismiss',
-  unloggedVisit: (dur: string, gym: string, date: string) =>
-    `${dur} at ${gym} on ${date} with nothing logged.`,
   sessionInProgress: 'Session in progress',
   recent: 'Recent',
   templates: 'Templates',
@@ -1592,9 +1590,6 @@ export const en = {
   todayOptLiveFirstCardSub: 'Show a “Live now” card on top',
   showMore: 'Show more',
   historyCount: (n: number) => `${n} sessions`,
-  flagGymPresence: 'Gym-presence reminders',
-  flagGymPresenceDesc:
-    'Use location to detect gym visits and suggest logging a session. Off by default.',
   flagNutrition: 'Nutrition app',
   flagNutritionDesc: 'Unlock the Nutrition app (КБЖУ tracker) in the app switcher.',
   flagConditions: 'Long-term conditions',

@@ -43,7 +43,6 @@ import { getRole } from '../api';
 import { canUseCoach } from '../coach/access';
 import { coachClientHash, coachHash } from '../coach/routes';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
-import { useFlag } from '../data/flags';
 import { HistoryTimeline, buildHistoryDays } from '../components/HistoryTimeline';
 import { dayReadoutLabel, type TrainingDay } from '../data/daySuggest';
 import {
@@ -69,21 +68,13 @@ import {
   endRestPeriod,
   latestWeight,
   liveSleep,
-  logVisitAsWorkout,
   resolveMuscles,
   workoutDayReadout,
   type useStore,
   backfillHomeSet,
   gymAtCurrentPosition,
 } from '../store';
-import {
-  fmtDayMonth,
-  fmtDurationHuman,
-  fmtWeekday,
-  fmtWeekdayDayMonth,
-  fmtWeekdayShort,
-  useT,
-} from '../i18n';
+import { fmtDayMonth, fmtWeekday, fmtWeekdayDayMonth, fmtWeekdayShort, useT } from '../i18n';
 import { DayHistorySheet } from '../components/DayHistorySheet';
 import { BackfillSheet, StartSheet } from '../components/StartSheet';
 import { WeightSheet } from '../components/BodyMetrics';
@@ -153,7 +144,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const [editing, setEditing] = useState(false);
   /** Desktop right panel host for Customize's "Add to Today" (portal target). */
   const [editSide, setEditSide] = useState<HTMLElement | null>(null);
-  const presenceOn = useFlag('gymPresence');
   const suggestOn = true; // muscle readouts are always on (not flagged)
   const [backfill, setBackfill] = useState(false);
   // The program card arrives after the first paint (the assignment is opened from the sealed cache and revalidated), so
@@ -385,8 +375,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const firstLoad = store.workouts.length === 0 && store.lastSyncAt === null && !!store.queue;
   const showSkeleton = firstLoad && store.syncStatus === 'syncing';
-
-  const reminder = presenceOn ? store.reminders[0] : undefined;
 
   // Weekly energy out (design feature 6, KCAL): lifting (session wall-clock) +
   // logged activities, split so non-lifting work reads as a peer to strength.
@@ -708,34 +696,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           }}
         >
           {t.bmAddWeight}
-        </Button>
-      ),
-    });
-  }
-  if (reminder) {
-    nudges.push({
-      id: 'visit',
-      tone: 'body',
-      priority: 90,
-      icon: 'map-pin',
-      kicker: reminder.gymName,
-      title: t.unloggedVisit(
-        fmtDurationHuman(reminder.visitEnd - reminder.visitStart),
-        reminder.gymName,
-        fmtDayMonth(reminder.visitStart, locale),
-      ),
-      body: null,
-      actions: (close) => (
-        <Button
-          variant="fill"
-          size="sm"
-          onClick={() => {
-            const w = logVisitAsWorkout(reminder);
-            close();
-            shell.openOverlay({ screen: 'past-workout', workoutId: w.id });
-          }}
-        >
-          {t.logIt}
         </Button>
       ),
     });

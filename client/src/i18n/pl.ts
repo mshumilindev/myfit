@@ -848,7 +848,6 @@ export const pl: Strings = {
   backfillContinue: 'Dalej do ćwiczeń',
   backfillFuture: 'Ten czas jest w przyszłości',
   dismiss: 'Odrzuć',
-  unloggedVisit: (dur, gym, date) => `${dur} w ${gym} ${date} — nic nie zapisano.`,
   sessionInProgress: 'Trening w toku',
   recent: 'Ostatnie',
   templates: 'Szablony',
@@ -1606,9 +1605,6 @@ export const pl: Strings = {
   todayOptLiveFirstCardSub: 'Karta „Na żywo” na górze',
   showMore: 'Pokaż więcej',
   historyCount: (n: number) => `${n} sesji`,
-  flagGymPresence: 'Przypomnienia wg obecności na siłowni',
-  flagGymPresenceDesc:
-    'Wykrywaj wizyty na siłowni po lokalizacji i proponuj zapis sesji. Domyślnie wyłączone.',
   flagNutrition: 'Aplikacja Nutrition',
   flagNutritionDesc: 'Odblokuj aplikację Nutrition (licznik KBŻU) w przełączniku aplikacji.',
   flagConditions: 'Przewlekłe schorzenia',

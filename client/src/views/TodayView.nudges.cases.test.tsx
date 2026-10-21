@@ -256,38 +256,6 @@ describe('TodayView nudges: weigh-in, visit, plan, likely', () => {
     );
   });
 
-  it('a long unlogged gym visit is offered as a workout, which opens in the past-workout editor', async () => {
-    localStorage.setItem('gym.flags', JSON.stringify({ gymPresence: true }));
-    const r = richState();
-    const reminder = {
-      gymId: 'g1',
-      gymName: 'Iron Works',
-      visitStart: NOW - 3 * 3600_000,
-      visitEnd: NOW - 3600_000,
-    };
-    const { shell } = await openToday({ ...r, reminders: [reminder] });
-    const c = card('Iron Works');
-    expect(c.querySelector('.nudge-card-title')?.textContent).toContain('Iron Works');
-    const before = __getStateForTests().workouts.length;
-    fireEvent.click(within(c).getByRole('button', { name: en.logIt }));
-    expect(__getStateForTests().workouts.length).toBe(before + 1);
-    expect(shell.calls.openOverlay).toHaveBeenCalledWith({
-      screen: 'past-workout',
-      workoutId: expect.any(String),
-    });
-  });
-
-  it('without the presence flag the visit reminder stays hidden', async () => {
-    const reminder = {
-      gymId: 'g1',
-      gymName: 'Iron Works',
-      visitStart: NOW - 3 * 3600_000,
-      visitEnd: NOW - 3600_000,
-    };
-    await openToday({ ...richState(), reminders: [reminder] });
-    expect(kickers()).not.toContain('Iron Works');
-  });
-
   it("with a program, today's plan comes first with its muscles and the usual start and meal times", async () => {
     const a = assignment({ targetMuscles: { '6': ['lats', 'biceps'] } });
     m.mine = { assignment: a, active: true };

@@ -54,7 +54,6 @@ function seed(workouts: Workout[], extra: Record<string, unknown> = {}) {
     activities: [],
     sleeps: [],
     gyms: [],
-    reminders: [],
     queue: [],
     coach: { ...COACH_DEFAULT },
     cycle: emptyCycleState(),

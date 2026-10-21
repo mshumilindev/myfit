@@ -880,7 +880,6 @@ export const uk: Strings = {
   backfillContinue: 'Далі до вправ',
   backfillFuture: 'Цей час у майбутньому',
   dismiss: 'Прибрати',
-  unloggedVisit: (dur, gym, date) => `${dur} у ${gym} ${date} — нічого не записано.`,
   sessionInProgress: 'Тренування триває',
   recent: 'Останні',
   templates: 'Шаблони',
@@ -1641,9 +1640,6 @@ export const uk: Strings = {
   todayOptLiveFirstCardSub: 'Картка «Наживо» зверху',
   showMore: 'Показати більше',
   historyCount: (n: number) => `${n} тренувань`,
-  flagGymPresence: 'Нагадування за присутністю в залі',
-  flagGymPresenceDesc:
-    'Визначати відвідування залу за геолокацією і пропонувати залогувати тренування. Вимкнено за замовчуванням.',
   flagNutrition: 'Додаток Nutrition',
   flagNutritionDesc: 'Розблокувати додаток Nutrition (трекер КБЖУ) у перемикачі додатків.',
   flagConditions: 'Хронічні стани',

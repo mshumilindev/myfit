@@ -834,7 +834,6 @@ export const et: Strings = {
   backfillContinue: 'Edasi harjutustesse',
   backfillFuture: 'See aeg on tulevikus',
   dismiss: 'Peida',
-  unloggedVisit: (dur, gym, date) => `${dur} saalis ${gym} ${date} — midagi ei logitud.`,
   sessionInProgress: 'Treening käib',
   recent: 'Viimased',
   templates: 'Mallid',
@@ -1594,9 +1593,6 @@ export const et: Strings = {
   todayOptLiveFirstCardSub: '„Otse“ kaart üleval',
   showMore: 'Näita rohkem',
   historyCount: (n: number) => `${n} seanssi`,
-  flagGymPresence: 'Jõusaali kohaloleku meeldetuletused',
-  flagGymPresenceDesc:
-    'Tuvasta jõusaali külastusi asukoha järgi ja paku seansi salvestamist. Vaikimisi väljas.',
   flagNutrition: 'Nutrition rakendus',
   flagNutritionDesc: 'Ava Nutrition rakendus (KBRÜ jälgija) rakenduste vahetajas.',
   flagConditions: 'Krooniline tervis',

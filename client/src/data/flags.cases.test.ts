@@ -37,7 +37,6 @@ describe('device flags', () => {
   it('are off by default', async () => {
     const f = await load();
     expect(f.isFlagOn('nutrition')).toBe(false);
-    expect(f.isFlagOn('gymPresence')).toBe(false);
   });
 
   it('persist per flag in localStorage under gym.flags', async () => {
@@ -45,7 +44,6 @@ describe('device flags', () => {
     f.setFlag('nutrition', true);
     expect(JSON.parse(localStorage.getItem('gym.flags')!)).toEqual({ nutrition: true });
     expect(f.isFlagOn('nutrition')).toBe(true);
-    expect(f.isFlagOn('gymPresence')).toBe(false);
     f.setFlag('nutrition', false);
     expect(f.isFlagOn('nutrition')).toBe(false);
     expect(JSON.parse(localStorage.getItem('gym.flags')!)).toEqual({ nutrition: false });
@@ -75,14 +73,13 @@ describe('device flags', () => {
 
   it('never touches Firestore for a device flag', async () => {
     const f = await load();
-    f.setFlag('gymPresence', true);
+    f.setFlag('nutrition', true);
     expect(fs.setDoc).not.toHaveBeenCalled();
   });
 
   it('declares only device-scoped flags today', async () => {
     const f = await load();
     expect(f.FEATURE_FLAGS.map((x) => [x.id, x.scope])).toEqual([
-      ['gymPresence', 'device'],
       ['nutrition', 'device'],
     ]);
   });
@@ -101,8 +98,8 @@ describe('useFlag / useFlagsVersion', () => {
 
   it('useFlag follows cross-tab changes via the storage event', async () => {
     const f = await load();
-    const { result } = renderHook(() => f.useFlag('gymPresence'));
-    localStorage.setItem('gym.flags', JSON.stringify({ gymPresence: true }));
+    const { result } = renderHook(() => f.useFlag('nutrition'));
+    localStorage.setItem('gym.flags', JSON.stringify({ nutrition: true }));
     act(() => {
       window.dispatchEvent(new StorageEvent('storage', { key: 'gym.flags' }));
     });
@@ -120,7 +117,7 @@ describe('useFlag / useFlagsVersion', () => {
     const { result, unmount } = renderHook(() => f.useFlagsVersion());
     expect(result.current).toBe(0);
     act(() => f.setFlag('nutrition', true));
-    act(() => f.setFlag('gymPresence', true));
+    act(() => f.setFlag('nutrition', true));
     expect(result.current).toBe(2);
     unmount();
     const removed = vi.spyOn(window, 'removeEventListener');
@@ -168,9 +165,9 @@ describe('startGlobalFlags', () => {
     const { result } = renderHook(() => f.useFlagsVersion());
     f.startGlobalFlags();
     act(() => {
-      onSnap({ exists: () => true, data: () => ({ nutrition: true, gymPresence: true }) });
+      onSnap({ exists: () => true, data: () => ({ nutrition: true }) });
     });
-    // both flags are device-scoped, so nothing is turned on globally
+    // the flag is device-scoped, so nothing is turned on globally
     expect(f.isFlagOn('nutrition')).toBe(false);
     expect(JSON.parse(localStorage.getItem('gym.flags.global')!)).toEqual({});
     expect(result.current).toBe(1);
@@ -199,7 +196,7 @@ describe('global flags (machinery, with a global flag injected)', () => {
   async function withGlobal() {
     const f = await load();
     (f.FEATURE_FLAGS as { id: string; scope: string }[]).push({
-      id: 'gymPresence',
+      id: 'nutrition',
       scope: 'global',
     });
     (f.FEATURE_FLAGS as { id: string; scope: string }[]).splice(0, 1);
@@ -214,17 +211,17 @@ describe('global flags (machinery, with a global flag injected)', () => {
     });
     const f = await withGlobal();
     f.startGlobalFlags();
-    onSnap({ exists: () => true, data: () => ({ gymPresence: 'true' }) });
-    expect(f.isFlagOn('gymPresence')).toBe(false);
-    onSnap({ exists: () => true, data: () => ({ gymPresence: true }) });
-    expect(f.isFlagOn('gymPresence')).toBe(true);
-    expect(JSON.parse(localStorage.getItem('gym.flags.global')!)).toEqual({ gymPresence: true });
+    onSnap({ exists: () => true, data: () => ({ nutrition: 'true' }) });
+    expect(f.isFlagOn('nutrition')).toBe(false);
+    onSnap({ exists: () => true, data: () => ({ nutrition: true }) });
+    expect(f.isFlagOn('nutrition')).toBe(true);
+    expect(JSON.parse(localStorage.getItem('gym.flags.global')!)).toEqual({ nutrition: true });
   });
 
   it('paints from the mirrored value before Firestore answers', async () => {
-    localStorage.setItem('gym.flags.global', JSON.stringify({ gymPresence: true }));
+    localStorage.setItem('gym.flags.global', JSON.stringify({ nutrition: true }));
     const f = await withGlobal();
-    expect(f.isFlagOn('gymPresence')).toBe(true);
+    expect(f.isFlagOn('nutrition')).toBe(true);
   });
 
   it('setFlag is optimistic and merges into config/flags with a timestamp', async () => {
@@ -232,11 +229,11 @@ describe('global flags (machinery, with a global flag injected)', () => {
     vi.setSystemTime(new Date('2026-03-01T12:00:00Z'));
     try {
       const f = await withGlobal();
-      f.setFlag('gymPresence', true);
-      expect(f.isFlagOn('gymPresence')).toBe(true);
+      f.setFlag('nutrition', true);
+      expect(f.isFlagOn('nutrition')).toBe(true);
       expect(fs.setDoc).toHaveBeenCalledWith(
         { path: 'config/flags' },
-        { gymPresence: true, updatedAt: Date.parse('2026-03-01T12:00:00Z') },
+        { nutrition: true, updatedAt: Date.parse('2026-03-01T12:00:00Z') },
         { merge: true },
       );
       // device storage untouched
@@ -251,9 +248,9 @@ describe('global flags (machinery, with a global flag injected)', () => {
     const boom = new Error('permission-denied');
     fs.setDoc.mockRejectedValue(boom);
     const f = await withGlobal();
-    f.setFlag('gymPresence', true);
+    f.setFlag('nutrition', true);
     await vi.waitFor(() => expect(warn).toHaveBeenCalledTimes(1));
-    expect(warn.mock.calls[0][0]).toContain('config/flags.gymPresence');
+    expect(warn.mock.calls[0][0]).toContain('config/flags.nutrition');
     expect(warn.mock.calls[0][1]).toBe(boom);
   });
 });
