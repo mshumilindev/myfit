@@ -100,6 +100,15 @@ describe('runReminders', () => {
     expect((await kv.get('schedules/c1'))?.timing).toMatchObject({ dueAt: 0 });
   });
 
+  it('forgets reminder log entries older than a month', async () => {
+    await kv.set('users/c1/reminderLog/old', { start: 1, sentAt: T0 - 31 * 24 * H });
+    const start = T0 + 20 * H;
+    await sched({ starts: [start], unmarked: [], dueAt: start - REMIND_BEFORE });
+    clock = start - REMIND_BEFORE;
+    await runReminders(ctx());
+    expect(await kv.get('users/c1/reminderLog/old')).toBeNull();
+  });
+
   it('dueAtOf matches the client formula', () => {
     expect(dueAtOf({ starts: [REMIND_BEFORE + 10], unmarked: [] }, 0)).toBe(10);
     expect(dueAtOf({ starts: [], unmarked: [5] }, 0)).toBe(5 + UNMARKED_AFTER);

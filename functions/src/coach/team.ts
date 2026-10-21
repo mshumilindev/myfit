@@ -1101,7 +1101,14 @@ export async function inviteClientForTrainer(
   const ownerOk = trainerId === teamId;
   if (!ownerOk && !(tm && tm.status === 'active' && tm.role === 'trainer'))
     return fail('permission-denied', 'not-your-team');
-  const r = await coachInvite(ctx, { uid: trainerId, role: 'trainer' }, body);
+  // A manager only starts the ordinary app invite: the client accepts it and decides what to share. No instant program-only
+  // client, no consent levels chosen for the client, no push to a named user (SPO-267).
+  if (body.mode !== 'app') return fail('permission-denied', 'app-invite-only');
+  const r = await coachInvite(
+    ctx,
+    { uid: trainerId, role: 'trainer' },
+    { name: body.name, mode: 'app' },
+  );
   await logActivity(ctx.kv, teamId, ctx.now(), {
     actorUid: actor.uid,
     role: 'manager',

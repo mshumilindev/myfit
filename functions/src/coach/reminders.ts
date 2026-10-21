@@ -97,6 +97,9 @@ export async function runReminders(ctx: Ctx): Promise<RemindersResult> {
         }
       }
     }
+    // the log only exists to make a reminder idempotent: nothing older than a month is kept (plaintext session times)
+    for (const l of await kv.list(`users/${clientId}/reminderLog`, { limit: 100 }))
+      if (Number(l.data.sentAt) < now - 30 * DAY) await kv.del(l.path);
     // advance the timer only if nobody saved the schedule meanwhile (their save carries its own, fresher `dueAt`)
     await kv.tx(async (tx) => {
       const cur = await tx.get(r.path);

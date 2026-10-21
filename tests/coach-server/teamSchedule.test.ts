@@ -271,6 +271,12 @@ describe('a manager invites a client for a team trainer', () => {
         inviteClientForTrainer(ctx(), owner, { trainerId: 't1', name: 'Zed Zed', mode: 'app' }),
       ),
     ).toBe('permission-denied:managers-only');
+    for (const extra of [{ mode: 'program' }, { mode: 'chat', username: 'someone' }])
+      expect(
+        await code(
+          inviteClientForTrainer(ctx(), mgr, { trainerId: 't1', name: 'Zed Zed', ...extra }),
+        ),
+      ).toBe('permission-denied:app-invite-only');
   });
 });
 
