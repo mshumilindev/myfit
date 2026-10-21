@@ -130,13 +130,16 @@ export async function notice(
   id: string,
   detail: string | null = null,
 ): Promise<void> {
-  await kv.set(`users/${to}/notices/${id}`, {
+  const path = `users/${to}/notices/${id}`;
+  // a retried write (same id) must not make an already read notice unread again (SPO-267 L11)
+  const prior = (await kv.get(path)) as { readAt?: unknown; createdAt?: unknown } | null;
+  await kv.set(path, {
     id,
     kind,
     actor,
     detail,
-    createdAt: now,
-    readAt: null,
+    createdAt: typeof prior?.createdAt === 'number' ? prior.createdAt : now,
+    readAt: typeof prior?.readAt === 'number' ? prior.readAt : null,
   });
 }
 export async function loadCoaching(kv: Kv, clientId: string): Promise<CoachingDoc> {

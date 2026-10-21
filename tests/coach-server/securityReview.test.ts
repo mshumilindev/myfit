@@ -367,3 +367,27 @@ describe('L7: the journal cursor does not skip rows that share a millisecond', (
     expect(p2.entries).toEqual([]);
   });
 });
+
+describe('SPO-267 L11 / L6 follow-ups', () => {
+  it('L11: writing the same notice again keeps it read', async () => {
+    const { notice } = await import('../../functions/src/coach/service');
+    const store = new Map<string, unknown>();
+    const kv = {
+      get: async (p: string) => store.get(p) ?? null,
+      set: async (p: string, v: unknown) => void store.set(p, v),
+    } as never;
+    await notice(kv, 'u1', 'team', 'a', 1000, 'n1');
+    const path = 'users/u1/notices/n1';
+    store.set(path, { ...(store.get(path) as object), readAt: 1500 });
+    await notice(kv, 'u1', 'team', 'a', 2000, 'n1');
+    expect(store.get(path)).toMatchObject({ createdAt: 1000, readAt: 1500 });
+  });
+
+  it('L6: localDate follows the zone and falls back to UTC for an unknown one', async () => {
+    const { localDate } = await import('../../functions/src/coach/pushPolicy');
+    const at = Date.UTC(2026, 9, 21, 23, 30);
+    expect(localDate(at, 'Europe/Warsaw')).toBe('2026-10-22');
+    expect(localDate(at, 'Not/AZone')).toBe('2026-10-21');
+    expect(localDate(at, undefined)).toBe('2026-10-21');
+  });
+});

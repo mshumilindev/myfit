@@ -71,23 +71,21 @@ export function localMinutes(at: number, tz: unknown): number {
   return h * 60 + m;
 }
 
-/** Local calendar date (YYYY-MM-DD) at `at` in the IANA zone `tz` (UTC when the zone is unknown). */
+const dateFormatters = new Map<string, Intl.DateTimeFormat>();
+/** Local calendar date (YYYY-MM-DD) at `at` in the IANA zone `tz` (UTC when the zone is unknown). One formatter per zone. */
 export function localDate(at: number, tz: unknown): string {
-  let zone = 'UTC';
-  if (typeof tz === 'string' && tz) {
+  const key = typeof tz === 'string' && tz ? tz : 'UTC';
+  let f = dateFormatters.get(key);
+  if (!f) {
+    const opts = { year: 'numeric', month: '2-digit', day: '2-digit' } as const;
     try {
-      new Intl.DateTimeFormat('en-US', { timeZone: tz });
-      zone = tz;
+      f = new Intl.DateTimeFormat('en-CA', { timeZone: key, ...opts });
     } catch {
-      /* unknown zone: UTC */
+      f = new Intl.DateTimeFormat('en-CA', { timeZone: 'UTC', ...opts });
     }
+    dateFormatters.set(key, f);
   }
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: zone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date(at));
+  return f.format(new Date(at));
 }
 
 /** Is `at` inside the device's quiet window? The window may wrap midnight; from === to means never. */
