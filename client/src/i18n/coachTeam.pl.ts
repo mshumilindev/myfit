@@ -263,6 +263,7 @@ export const teamPl: typeof teamEn = {
     `Usunięcie klienta ${client} odrzucone (${who}).`,
   spManagerMove: (who: string, client: string) =>
     `Prośba od ${who}: nowy termin dla klienta ${client}.`,
+  spUnmarked: (client: string) => `${client}: zakończony trening nie jest jeszcze oznaczony.`,
   spManagerMoveNote: 'Czekamy na odpowiedź klienta.',
   spTeamManager: (who: string) => `Do zespołu dołączono: ${who}, menedżer.`,
   spTeamTrainer: (who: string) => `Do zespołu dołączono: ${who}, trener.`,

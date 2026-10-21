@@ -256,6 +256,7 @@ export const teamEt: typeof teamEn = {
   spRemovalAnswerNo: (who: string, client: string) =>
     `Kliendi ${client} eemaldamine tagasi lükatud (${who}).`,
   spManagerMove: (who: string, client: string) => `Taotlus (${who}): uus aeg kliendile ${client}.`,
+  spUnmarked: (client: string) => `${client}: lõppenud treening on märkimata.`,
   spManagerMoveNote: 'Ootame kliendi vastust.',
   spTeamManager: (who: string) => `Meeskonnaga liitus: ${who}, haldur.`,
   spTeamTrainer: (who: string) => `Meeskonnaga liitus: ${who}, treener.`,

@@ -268,6 +268,7 @@ export const teamLt: typeof teamEn = {
     `Kliento ${client} pašalinimas atmestas (${who}).`,
   spManagerMove: (who: string, client: string) =>
     `Prašymas iš ${who}: naujas laikas klientui ${client}.`,
+  spUnmarked: (client: string) => `${client}: baigta treniruotė dar nepažymėta.`,
   spManagerMoveNote: 'Laukiama kliento atsakymo.',
   spTeamManager: (who: string) => `Prie komandos prisijungė: ${who}, vadybininkas.`,
   spTeamTrainer: (who: string) => `Prie komandos prisijungė: ${who}, treneris.`,

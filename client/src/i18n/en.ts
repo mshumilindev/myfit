@@ -3521,6 +3521,13 @@ export const en = {
         return `Your role was changed to ${detail}.`;
       case 'trainer-assigned':
         return detail ? `${detail} is now your trainer.` : 'You have a new trainer.';
+      case 'unmarked':
+        return `${detail ?? 'A client'}: a finished session is not marked yet.`;
+      case 'removal-request':
+      case 'removal-answer':
+      case 'manager-move':
+      case 'team':
+        return 'New message in Spotter.';
       case 'trainer-removed':
         return 'Your trainer was removed.';
       case 'client-assigned':

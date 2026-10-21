@@ -3474,6 +3474,13 @@ export const et: Strings = {
         return `Sinu roll muudeti: ${detail}.`;
       case 'trainer-assigned':
         return detail ? `${detail} on nüüd sinu treener.` : 'Sul on uus treener.';
+      case 'unmarked':
+        return `${detail ?? 'Klient'}: lõppenud treening on märkimata.`;
+      case 'removal-request':
+      case 'removal-answer':
+      case 'manager-move':
+      case 'team':
+        return 'Uus teade Spotteris.';
       case 'trainer-removed':
         return 'Sinu treener eemaldati.';
       case 'client-assigned':

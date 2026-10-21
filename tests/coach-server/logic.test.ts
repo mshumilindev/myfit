@@ -267,7 +267,7 @@ describe('rotation, rate limit, audit id, redaction', () => {
   it('the handlers never log bodies: only the allowed console calls exist', () => {
     const src = readFileSync(resolve(process.cwd(), 'functions/src/coach/handlers.ts'), 'utf8');
     const calls = src.match(/console\.\w+\([^;]*;/g) ?? [];
-    expect(calls).toHaveLength(2);
+    expect(calls).toHaveLength(3) // error path, sweep counts, reminders counts;
     for (const c of calls) expect(c).not.toMatch(/req\.|body\(|\.data|message/);
     const svc = readFileSync(resolve(process.cwd(), 'functions/src/coach/service.ts'), 'utf8');
     expect(svc).not.toMatch(/console\./);

@@ -105,7 +105,7 @@ export interface TeamRequest {
 /** One service message of Spotter about the team (SPO-236). Metadata only: names, never client content. */
 export interface SpotterItem {
   id: string;
-  kind: 'removal-request' | 'removal-answer' | 'manager-move' | 'team';
+  kind: 'removal-request' | 'removal-answer' | 'manager-move' | 'team' | 'unmarked';
   actorName: string;
   /** the client's name (removal / move) or the role the new member got (team) */
   subjectName: string;
@@ -115,6 +115,8 @@ export interface SpotterItem {
   status?: string;
   /** removal-request: the id the answer is sent with */
   refId?: string;
+  /** unmarked: when the session ended (epoch ms) */
+  at?: number;
 }
 export interface SpotterFeed {
   items: SpotterItem[];

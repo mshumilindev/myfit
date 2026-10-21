@@ -604,21 +604,31 @@ service cloud.firestore {
       return (isActiveCoachOf(clientId) && d.trainerId == request.auth.uid)
         || (isTeamManagerOf(clientId) && d.trainerId == coachingOf(clientId).trainerId);
     }
+    // `timing` is the only open part: moments (epoch ms) for the server's reminders, never what the session is (SPO-265).
+    function validTiming(t) {
+      return t == null || (t is map
+        && t.keys().hasOnly(['starts', 'unmarked', 'dueAt'])
+        && t.starts is list && t.starts.size() <= 12
+        && t.unmarked is list && t.unmarked.size() <= 12
+        && t.dueAt is int);
+    }
     match /schedules/{clientId} {
       allow read: if isSelf(clientId) || isActiveCoachOf(clientId) || isTeamManagerOf(clientId);
-      allow create: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
+      allow create: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc', 'timing'])
         && request.resource.data.keys().hasAll(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
         && request.resource.data.clientId == clientId
         && scheduleWriter(clientId, request.resource.data)
         && request.resource.data.updatedAt is int
         && request.resource.data.rev == 1
+        && validTiming(request.resource.data.get('timing', null))
         && sealedCkSchedule(request.resource.data);
-      allow update: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
+      allow update: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc', 'timing'])
         && request.resource.data.keys().hasAll(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
         && request.resource.data.clientId == clientId
         && scheduleWriter(clientId, request.resource.data)
         && request.resource.data.updatedAt is int
         && request.resource.data.rev == resource.data.rev + 1
+        && validTiming(request.resource.data.get('timing', null))
         && sealedCkSchedule(request.resource.data);
       allow delete: if false;
     }

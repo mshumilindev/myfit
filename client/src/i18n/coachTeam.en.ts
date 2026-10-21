@@ -253,6 +253,7 @@ export const teamEn = {
   spRemovalAnswerYes: (who: string, client: string) => `${who} approved removing ${client}.`,
   spRemovalAnswerNo: (who: string, client: string) => `${who} declined removing ${client}.`,
   spManagerMove: (who: string, client: string) => `${who} proposed a new time to ${client}.`,
+  spUnmarked: (client: string) => `${client}: a finished session is not marked yet.`,
   spManagerMoveNote: 'Waiting for the client’s answer.',
   spTeamManager: (who: string) => `${who} joined the team as a manager.`,
   spTeamTrainer: (who: string) => `${who} joined the team as a trainer.`,

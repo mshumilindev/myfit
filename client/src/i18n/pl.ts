@@ -3485,6 +3485,13 @@ export const pl: Strings = {
         return `Twoja rola została zmieniona na ${detail}.`;
       case 'trainer-assigned':
         return detail ? `${detail} jest teraz twoim trenerem.` : 'Masz nowego trenera.';
+      case 'unmarked':
+        return `${detail ?? 'Podopieczny'}: zakończony trening nie jest jeszcze oznaczony.`;
+      case 'removal-request':
+      case 'removal-answer':
+      case 'manager-move':
+      case 'team':
+        return 'Nowa wiadomość w Spotterze.';
       case 'trainer-removed':
         return 'Twój trener został odłączony.';
       case 'client-assigned':

@@ -3508,6 +3508,13 @@ export const lt: Strings = {
         return `Tavo vaidmuo pakeistas į ${detail}.`;
       case 'trainer-assigned':
         return detail ? `${detail} dabar yra tavo treneris.` : 'Turi naują trenerį.';
+      case 'unmarked':
+        return `${detail ?? 'Klientas'}: baigta treniruotė dar nepažymėta.`;
+      case 'removal-request':
+      case 'removal-answer':
+      case 'manager-move':
+      case 'team':
+        return 'Nauja žinutė Spotter.';
       case 'trainer-removed':
         return 'Tavo treneris pašalintas.';
       case 'client-assigned':

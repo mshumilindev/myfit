@@ -17,6 +17,7 @@ import {
   type ScheduleDoc,
 } from './types';
 import { coachTimeZone, setCoachTimeZone } from '../format';
+import { timingOf } from './timing';
 
 /** The on-device snapshot of the schedule (sealed; `data/firestore/scheduleCache.ts`). Never rejects. */
 export interface ScheduleCache {
@@ -165,12 +166,14 @@ export function createSealedSchedulePort(d: SealedScheduleDeps): SchedulePort {
         tz: coachTimeZone(),
         ...(Object.keys(names).length ? { gymNames: names } : {}),
       };
-      const raw = await sealSchedule(
+      const sealed = await sealSchedule(
         { vault: d.vault, ring },
         next,
         typeof d.uid === 'function' ? d.uid(doc.clientId) : d.uid,
         now(),
       );
+      // the one open field: moments only (SPO-265), see timing.ts
+      const raw = { ...sealed, timing: timingOf(next, now()) };
       if (!(await d.store.setSchedule(doc.clientId, raw, doc.rev)))
         throw new SchedulePortError('conflict');
       return next;

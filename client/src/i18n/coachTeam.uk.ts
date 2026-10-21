@@ -262,6 +262,7 @@ export const teamUk: typeof teamEn = {
     `Видалення клієнта ${client} відхилено (${who}).`,
   spManagerMove: (who: string, client: string) =>
     `Запит від ${who}: новий час для клієнта ${client}.`,
+  spUnmarked: (client: string) => `${client}: завершене заняття ще не відмічене.`,
   spManagerMoveNote: 'Чекаємо на відповідь клієнта.',
   spTeamManager: (who: string) => `До команди долучилась людина: ${who}, менеджер.`,
   spTeamTrainer: (who: string) => `До команди долучилась людина: ${who}, тренер.`,

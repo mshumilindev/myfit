@@ -66,7 +66,7 @@ interface InviteRec {
   expiresAt: number;
 }
 
-const nameOf = (u: UserRec | null): string =>
+export const nameOf = (u: UserRec | null): string =>
   u ? [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || '' : '';
 
 /** The team the signed-in person belongs to and their member record; permission-denied when they have none. */
@@ -922,7 +922,7 @@ export async function teamActivity(
 }
 
 /* ---- Spotter: the service messages of the team (SPO-236) -------------------------------------------------------- */
-export const SPOTTER_KINDS = ['removal-request', 'removal-answer', 'manager-move', 'team'] as const;
+export const SPOTTER_KINDS = ['removal-request', 'removal-answer', 'manager-move', 'team', 'unmarked'] as const;
 export interface SpotterItem {
   id: string;
   kind: (typeof SPOTTER_KINDS)[number];
@@ -936,6 +936,8 @@ export interface SpotterItem {
   status?: string;
   /** removal-request: the id the Agenda answers with */
   refId?: string;
+  /** unmarked: when the unmarked session ended (epoch ms) */
+  at?: number;
 }
 
 /** The caller's own service messages about the team, newest first. Metadata only: names, never client content. */
@@ -967,6 +969,7 @@ export async function teamNotices(
       unread: n.readAt == null,
       ...(status ? { status } : {}),
       ...(typeof n.refId === 'string' ? { refId: n.refId } : {}),
+      ...(n.kind === 'unmarked' && typeof n.start === 'number' ? { at: n.start } : {}),
     });
   }
   return { items, unread: items.filter((i) => i.unread).length };

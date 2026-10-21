@@ -3518,6 +3518,13 @@ export const uk: Strings = {
         return `Вашу роль змінено на ${detail}.`;
       case 'trainer-assigned':
         return detail ? `${detail} тепер ваш тренер.` : 'У вас новий тренер.';
+      case 'unmarked':
+        return `${detail ?? 'Клієнт'}: завершене заняття ще не відмічене.`;
+      case 'removal-request':
+      case 'removal-answer':
+      case 'manager-move':
+      case 'team':
+        return 'Нове повідомлення в Spotter.';
       case 'trainer-removed':
         return 'Вашого тренера відкріплено.';
       case 'client-assigned':

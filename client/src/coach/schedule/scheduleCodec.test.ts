@@ -190,6 +190,21 @@ describe('sealed port over a raw document store', () => {
     await expect(port.saveDoc({ ...doc, rev: 0 })).rejects.toBeInstanceOf(SchedulePortError);
     off();
   });
+  it('the saved document carries `timing` (moments only) beside the sealed content', async () => {
+    const { vault, rings } = await setup();
+    const store = createMemoryDocStore();
+    const port = createSealedSchedulePort({
+      store,
+      vault,
+      ringFor: () => rings.trainer,
+      uid: 'trainer-uid',
+      now: () => AT,
+    });
+    await port.saveDoc({ ...doc, rev: 0 });
+    const t = (store.raw().schedules[0] as { timing?: Record<string, unknown> }).timing;
+    expect(Object.keys(t ?? {}).sort()).toEqual(['dueAt', 'starts', 'unmarked']);
+    expect(JSON.stringify(t)).not.toMatch(/iron-yard|Technique|Upper/);
+  });
   it('never calls the store when the vault is locked or the key is missing', async () => {
     const { vault, rings } = await setup();
     const store = createMemoryDocStore();
