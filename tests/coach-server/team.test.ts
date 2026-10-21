@@ -437,3 +437,20 @@ describe('public preview name', () => {
     });
   });
 });
+
+describe('invite rate', () => {
+  it('one person cannot create more than the hourly cap of invites, even with revoking in between', async () => {
+    let last = '';
+    for (let n = 0; n < 30; n++) {
+      const r = await inviteManager(`p${n}@example.com`);
+      await teamInviteRevoke(ctx(), owner, { inviteId: r.inviteId });
+      last = r.inviteId;
+    }
+    expect(last).not.toBe('');
+    expect(await code(inviteManager('late@example.com'))).toBe(
+      'resource-exhausted:too-many-invites',
+    );
+    t += 3_600_000 + 1;
+    expect((await inviteManager('later@example.com')).inviteId).toBeTruthy();
+  });
+});

@@ -10,7 +10,7 @@
  * the pending list, the accepting account is whoever opens the link signed in. Only the owner trainer removes a
  * manager; anyone else may leave. Nothing here handles keys or sealed data (the client device delegates them).
  */
-import { safeName, takeSlot, HOUR, REPORTS_PER_HOUR } from './guards';
+import { safeName, takeSlot, HOUR, INVITES_PER_HOUR, REPORTS_PER_HOUR } from './guards';
 import { REPORTED_KINDS, logActivity, type ActivityEntry, type ReportedKind } from './activity';
 import { teamInviteUrl } from './inviteLink';
 import { DAY, conversationId, isUid } from './logic';
@@ -155,6 +155,8 @@ export async function teamInvite(
     if (managers + open.filter((i) => i.role === 'manager').length >= MAX_MANAGERS)
       fail('resource-exhausted', 'too-many-managers');
   }
+  if (!(await takeSlot(kv, `inv-${actor.uid}-${Math.floor(now / HOUR)}`, now, INVITES_PER_HOUR)))
+    fail('resource-exhausted', 'too-many-invites');
   await ensureTeam(ctx, teamId);
   const id = ctx.newToken();
   const rec: InviteRec = {

@@ -39,3 +39,5 @@ export const DAY_MS = 86_400_000;
 export const REMINDERS_PER_DAY = 60;
 /** activity reports one manager can send per hour */
 export const REPORTS_PER_HOUR = 120;
+/** team invites one person can create per hour (the pending cap bounds the total; this bounds create/revoke churn) */
+export const INVITES_PER_HOUR = 30;
