@@ -195,6 +195,20 @@ describe('accepting', () => {
     expect(await code(teamAccept(ctx(), { ...m, email: 'someone@example.com' }, body))).toBe('ok');
   });
 
+  it('an invite without an e-mail is a plain one-person link; a malformed e-mail is still refused', async () => {
+    expect(await code(teamInvite(ctx(), owner, { email: 'nope', role: 'trainer' }))).toBe(
+      'invalid-argument:invalid-email',
+    );
+    const inv = await teamInvite(ctx(), owner, { role: 'manager' });
+    const again = await teamInvite(ctx(), owner, { role: 'manager' });
+    expect(again.inviteId).not.toBe(inv.inviteId);
+    const m = { uid: 'm1', role: 'member' } as Actor;
+    expect(await code(teamAccept(ctx(), m, { inviteId: inv.inviteId }))).toBe('ok');
+    expect(await code(teamAccept(ctx(), { ...m, uid: 'm2' }, { inviteId: inv.inviteId }))).toBe(
+      'failed-precondition:invite-closed',
+    );
+  });
+
   it('what a removed member invited can no longer be accepted', async () => {
     await joined();
     const inv = await teamInvite(ctx(), mgrNow, { email: 'friend@example.com', role: 'trainer' });

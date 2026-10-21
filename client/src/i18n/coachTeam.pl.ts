@@ -52,10 +52,11 @@ export const teamPl: typeof teamEn = {
     'Menedżer prowadzi Twój grafik i listę klientów. Nie widzi treningów, zdrowia, żywienia, notatek ani czatu.',
   tmAddTrainerBody:
     'Trener prowadzi własnych klientów. Dołącza do zespołu, którym zarządzasz, i pojawia się w Twoich Klientach i Grafiku.',
-  tmEmail: 'Email',
+  tmEmail: 'Email (opcjonalnie)',
   tmEmailHint:
-    'Osoba dostanie link z zaproszeniem e-mailem. Działa 7 dni i dla jednej osoby. Dostęp zaczyna się po przyjęciu.',
-  tmSendInvite: 'Wyślij zaproszenie',
+    'Dostaniesz link z zaproszeniem i przekażesz go sam. Działa 7 dni i dla jednej osoby. Podaj e-mail, aby dołączyć mogło tylko to konto.',
+  tmSendInvite: 'Utwórz link',
+  tmInviteLinkRow: 'Link z zaproszeniem',
   tmCancel: 'Anuluj',
   tmErrInvalidEmail: 'Podaj poprawny adres e-mail.',
   tmErrExists: 'Ta osoba jest już w zespole lub ma otwarte zaproszenie.',
@@ -63,7 +64,10 @@ export const teamPl: typeof teamEn = {
   tmErrGeneric: 'Nie udało się wysłać zaproszenia. Spróbuj ponownie.',
   tmInviteSentSnack: (email) => `Zaproszenie wysłano: ${email}`,
   tmLinkTitle: 'Udostępnij link z zaproszeniem',
-  tmLinkBody: (email) => `Wyślij ten link: ${email}. Działa jeden raz i wygasa po 7 dniach.`,
+  tmLinkBody: (email) =>
+    email
+      ? `Wyślij ten link: ${email}. Dołączyć może tylko to zweryfikowane konto. Działa jeden raz i wygasa po 7 dniach.`
+      : 'Wyślij ten link tej osobie. Działa jeden raz i wygasa po 7 dniach.',
   tmCopyLink: 'Kopiuj link',
   tmLinkCopied: 'Link skopiowany',
   tmDone: 'Gotowe',

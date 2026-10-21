@@ -46,10 +46,11 @@ export const teamEt: typeof teamEn = {
     'Haldur korraldab sinu ajakava ja klientide nimekirja. Ta ei näe treeninguid, tervist, toitumist, märkmeid ega vestlust.',
   tmAddTrainerBody:
     'Treener töötab oma klientidega. Ta liitub sinu juhitava meeskonnaga ja ilmub sinu Klientide ja Ajakava alla.',
-  tmEmail: 'E-post',
+  tmEmail: 'E-post (valikuline)',
   tmEmailHint:
-    'Ta saab kutse lingi e-postiga. See kehtib 7 päeva ja ühele inimesele. Ligipääs algab pärast vastuvõtmist.',
-  tmSendInvite: 'Saada kutse',
+    'Saad kutse lingi ja edastad selle ise. See kehtib 7 päeva ja ühele inimesele. Lisa e-post, et liituda saaks ainult see konto.',
+  tmSendInvite: 'Loo link',
+  tmInviteLinkRow: 'Kutse link',
   tmCancel: 'Tühista',
   tmErrInvalidEmail: 'Sisesta kehtiv e-posti aadress.',
   tmErrExists: 'See inimene on juba meeskonnas või tal on avatud kutse.',
@@ -57,7 +58,10 @@ export const teamEt: typeof teamEn = {
   tmErrGeneric: 'Kutse saatmine ebaõnnestus. Proovi uuesti.',
   tmInviteSentSnack: (email) => `Kutse saadetud: ${email}`,
   tmLinkTitle: 'Jaga kutse linki',
-  tmLinkBody: (email) => `Saada see link: ${email}. See on ühekordne ja aegub 7 päeva pärast.`,
+  tmLinkBody: (email) =>
+    email
+      ? `Saada see link: ${email}. Liituda saab ainult see kinnitatud konto. See on ühekordne ja aegub 7 päeva pärast.`
+      : 'Saada see link inimesele. See on ühekordne ja aegub 7 päeva pärast.',
   tmCopyLink: 'Kopeeri link',
   tmLinkCopied: 'Link kopeeritud',
   tmDone: 'Valmis',

@@ -48,10 +48,11 @@ export const teamEn = {
     'A manager runs your schedule and client list. They cannot see workouts, health, nutrition, notes or chat.',
   tmAddTrainerBody:
     'A trainer coaches their own clients. They join the team you manage and appear in your Clients and Schedule.',
-  tmEmail: 'Email',
+  tmEmail: 'Email (optional)',
   tmEmailHint:
-    'They get an invite link by email. It works for 7 days and one person. Access starts when they accept.',
-  tmSendInvite: 'Send invite',
+    'You get an invite link to pass on yourself. It works for 7 days and one person. Add an email to let only that account join.',
+  tmSendInvite: 'Create invite link',
+  tmInviteLinkRow: 'Invite link',
   tmCancel: 'Cancel',
   tmErrInvalidEmail: 'Enter a valid email address.',
   tmErrExists: 'This person is already in the team or has an open invite.',
@@ -59,7 +60,10 @@ export const teamEn = {
   tmErrGeneric: 'Could not send the invite. Try again.',
   tmInviteSentSnack: (email: string) => `Invite sent to ${email}`,
   tmLinkTitle: 'Share the invite link',
-  tmLinkBody: (email: string) => `Send this link to ${email}. It works once and expires in 7 days.`,
+  tmLinkBody: (email: string) =>
+    email
+      ? `Send this link to ${email}. Only that verified account can join. It works once and expires in 7 days.`
+      : 'Send this link to the person. It works once and expires in 7 days.',
   tmCopyLink: 'Copy link',
   tmLinkCopied: 'Link copied',
   tmDone: 'Done',

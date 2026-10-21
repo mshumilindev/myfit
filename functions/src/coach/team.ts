@@ -124,7 +124,8 @@ export async function teamInvite(
   body: Record<string, unknown>,
 ): Promise<TeamInviteResult> {
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase().slice(0, 200) : '';
-  if (!EMAIL.test(email)) fail('invalid-argument', 'invalid-email');
+  // The e-mail is optional (mail is not connected: the sender passes the link on). When given, only that verified account can join.
+  if (email && !EMAIL.test(email)) fail('invalid-argument', 'invalid-email');
   const { teamId } = await myTeam(ctx, actor);
   if (!isCoach(actor) && actor.role !== 'manager') fail('permission-denied', 'not-allowed');
   const asked = body.role;
@@ -141,7 +142,7 @@ export async function teamInvite(
   );
   const open = mine.filter((i) => i.status === 'pending' && i.expiresAt > now);
   if (open.length >= MAX_TEAM_INVITES_PENDING) fail('resource-exhausted', 'too-many-invites');
-  if (open.some((i) => i.emailLower === email && i.role === role))
+  if (email && open.some((i) => i.emailLower === email && i.role === role))
     fail('already-exists', 'invite-exists');
   if (role === 'manager') {
     const members = await kv.list(`teams/${teamId}/members`);
@@ -226,8 +227,8 @@ export async function teamAccept(
   if (i.status !== 'pending' || i.expiresAt <= now) fail('failed-precondition', 'invite-closed');
   if (i.invitedBy === actor.uid || i.teamId === actor.uid)
     fail('invalid-argument', 'cannot-join-own-team');
-  // The link is not a bearer token: it works only for the verified e-mail it was written for (a leaked link is useless).
-  if (actor.email !== i.emailLower) fail('permission-denied', 'wrong-email');
+  // A link written for an e-mail works only for that verified account (a leaked link is useless); without an e-mail it is a plain one-person link.
+  if (i.emailLower && actor.email !== i.emailLower) fail('permission-denied', 'wrong-email');
   const kv = ctx.kv;
   const joined = await kv.tx(async (t) => {
     // re-read INSIDE the transaction: two accounts racing one link cannot both join

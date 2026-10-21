@@ -57,10 +57,11 @@ export const teamLt: typeof teamEn = {
     'Vadybininkas tvarko jūsų tvarkaraštį ir klientų sąrašą. Jis nemato treniruočių, sveikatos, mitybos, užrašų ar pokalbių.',
   tmAddTrainerBody:
     'Treneris dirba su savo klientais. Jis prisijungia prie jūsų valdomos komandos ir atsiranda jūsų Klientuose ir Tvarkaraštyje.',
-  tmEmail: 'El. paštas',
+  tmEmail: 'El. paštas (neprivaloma)',
   tmEmailHint:
-    'Asmuo gaus kvietimo nuorodą el. paštu. Ji galioja 7 dienas ir vienam asmeniui. Prieiga prasideda priėmus.',
-  tmSendInvite: 'Siųsti kvietimą',
+    'Gausite kvietimo nuorodą ir perduosite ją patys. Ji galioja 7 dienas ir vienam asmeniui. Nurodykite el. paštą, kad prisijungti galėtų tik ta paskyra.',
+  tmSendInvite: 'Sukurti nuorodą',
+  tmInviteLinkRow: 'Kvietimo nuoroda',
   tmCancel: 'Atšaukti',
   tmErrInvalidEmail: 'Įveskite galiojantį el. pašto adresą.',
   tmErrExists: 'Šis asmuo jau komandoje arba turi atvirą kvietimą.',
@@ -68,7 +69,10 @@ export const teamLt: typeof teamEn = {
   tmErrGeneric: 'Nepavyko išsiųsti kvietimo. Bandykite dar kartą.',
   tmInviteSentSnack: (email) => `Kvietimas išsiųstas: ${email}`,
   tmLinkTitle: 'Pasidalinkite kvietimo nuoroda',
-  tmLinkBody: (email) => `Nusiųskite šią nuorodą: ${email}. Ji vienkartinė ir galioja 7 dienas.`,
+  tmLinkBody: (email) =>
+    email
+      ? `Nusiųskite šią nuorodą: ${email}. Prisijungti gali tik ši patvirtinta paskyra. Ji vienkartinė ir galioja 7 dienas.`
+      : 'Nusiųskite šią nuorodą asmeniui. Ji vienkartinė ir galioja 7 dienas.',
   tmCopyLink: 'Kopijuoti nuorodą',
   tmLinkCopied: 'Nuoroda nukopijuota',
   tmDone: 'Atlikta',

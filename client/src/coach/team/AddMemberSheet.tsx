@@ -37,7 +37,7 @@ export function AddMemberSheet({
   const submit = async (e?: FormEvent) => {
     e?.preventDefault();
     if (sending) return;
-    if (!isEmail(email)) {
+    if (email.trim() && !isEmail(email)) {
       setError(tm.tmErrInvalidEmail);
       return;
     }
