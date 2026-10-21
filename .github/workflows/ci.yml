@@ -255,7 +255,7 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p client/node_modules/.cache/storybook
-          npm run build-storybook 2>&1 | tee sb.log || { echo "::error::$(tail -n 30 sb.log | sed 's/\x1b\[[0-9;]*m//g' | head -c 3000 | sed ':a;N;$!ba;s/\n/%0A/g')"; exit 1; }
+          npm run build-storybook 2>&1 | tee sb.log || { tail -n 14 sb.log | sed 's/\x1b\[[0-9;]*m//g; s/^/::error::/'; exit 1; }
       - uses: actions/upload-artifact@v4
         with:
           name: storybook-static
