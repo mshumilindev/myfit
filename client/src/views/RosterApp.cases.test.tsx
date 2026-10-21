@@ -90,20 +90,21 @@ describe('RosterApp on a phone', () => {
   it('a trainer has only Me: no Users, no Clients, the app is named Me', () => {
     const { container } = app('trainer', 'me');
     expect(screen.getByTestId('profile')).toBeTruthy();
-    const bar = container.querySelector('nav, [role="tablist"], .suite-tabbar') as HTMLElement;
-    expect(within(bar).getByText(en.navMe)).toBeTruthy();
-    expect(within(bar).queryByText(en.adminPeople)).toBeNull();
-    expect(within(bar).queryByText(en.trClientsTab)).toBeNull();
+    // One destination: no bottom bar at all; the app is named in the header chip.
+    expect(container.querySelector('.tabbar')).toBeNull();
+    expect(container.querySelector('.uibrand-chip-name')?.textContent).toBe(en.navMe);
+    expect(screen.queryByText(en.adminPeople)).toBeNull();
+    expect(screen.queryByText(en.trClientsTab)).toBeNull();
     expect(screen.queryByTestId('admin')).toBeNull();
   });
 
-  it('an admin on Users has only Users in the bar (Me is a separate screen)', () => {
+  it('an admin on Users has only Users (Me is a separate screen), so no bottom bar', () => {
     const { container } = app('admin', 'users');
     expect(screen.getByTestId('admin')).toBeTruthy();
-    const bar = container.querySelector('nav, [role="tablist"], .suite-tabbar') as HTMLElement;
-    expect(within(bar).getByText(en.adminPeople)).toBeTruthy();
-    expect(within(bar).queryByText(en.navMe)).toBeNull();
-    expect(within(bar).queryByText(en.trClientsTab)).toBeNull();
+    expect(container.querySelector('.tabbar')).toBeNull();
+    expect(container.querySelector('.uibrand-chip-name')?.textContent).toBe(en.adminPeople);
+    expect(screen.queryByText(en.navMe)).toBeNull();
+    expect(screen.queryByText(en.trClientsTab)).toBeNull();
   });
 
   it('a member only has Me, shown as an embedded profile of themself', () => {
@@ -126,9 +127,9 @@ describe('RosterApp on a phone', () => {
   });
 
   it('switching to Me while a profile is open clears it', () => {
-    const { props, rerender } = app('admin', 'users');
+    const { props, rerender, container } = app('admin', 'users');
     fireEvent.click(screen.getByText('open user'));
-    fireEvent.click(screen.getByRole('button', { name: coachEn.navMore }));
+    fireEvent.click(container.querySelector('.uibrand-avatar') as HTMLElement);
     fireEvent.click(screen.getByText(coachEn.moreProfile));
     expect(props.onTab).toHaveBeenCalledWith('me');
     rerender(<RosterApp {...props} tab="me" />);
@@ -141,21 +142,12 @@ describe('RosterApp on a phone', () => {
     expect(props.onTab).toHaveBeenCalledWith('users');
   });
 
-  it('the bell opens the feed; the feed lists notifications and closing returns home', () => {
+  it('People has no bell (client apps only); the feed, if routed, still lists notifications', () => {
     const { props, rerender } = app('admin', 'users');
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(en.feedTitle) }));
-    expect(props.onTab).toHaveBeenCalledWith('feed');
+    expect(screen.queryByRole('button', { name: new RegExp(en.feedTitle) })).toBeNull();
     rerender(<RosterApp {...props} tab="feed" />);
     expect(screen.getByText('New PR')).toBeTruthy();
     expect(screen.queryByTestId('admin')).toBeNull();
-  });
-
-  it('the bell shows the unread count except on the feed itself', () => {
-    const { props, rerender, container } = app('admin', 'users', { notifUnread: 4 });
-    expect(container.querySelector('.apex-col')?.textContent).toContain('4');
-    rerender(<RosterApp {...props} tab="feed" />);
-    const bell = screen.getByRole('button', { name: new RegExp(en.feedTitle) });
-    expect(bell.textContent).not.toContain('4');
   });
 
   it('the app switcher in the header opens the suite shell', () => {
@@ -166,23 +158,24 @@ describe('RosterApp on a phone', () => {
 });
 
 describe('RosterApp: profile entry points', () => {
-  it('phone: More -> Profile opens my profile', () => {
-    const { props } = app('member', 'me');
-    fireEvent.click(screen.getByRole('button', { name: coachEn.navMore }));
+  it('phone: the avatar drawer -> Profile opens my profile', () => {
+    const { props, container } = app('member', 'me');
+    fireEvent.click(container.querySelector('.uibrand-avatar') as HTMLElement);
     fireEvent.click(screen.getByText(coachEn.moreProfile));
     expect(props.onTab).toHaveBeenCalledWith('me');
   });
 
-  it('desktop: the rail avatar menu opens my profile and the rail bell opens the feed', () => {
+  it('desktop: the rail avatar menu opens my profile; no rail bell, the unread rides on Apps', () => {
     setDesktop(true);
     const { props, container } = app('admin', 'users');
     const rail = container.querySelector('.rail, [class*="rail"]') as HTMLElement;
     fireEvent.click(within(rail).getByRole('button', { name: coachEn.railProfile }));
     fireEvent.click(screen.getByText(coachEn.moreProfile));
     expect(props.onTab).toHaveBeenCalledWith('me');
-    vi.mocked(props.onTab).mockClear();
-    fireEvent.click(within(rail).getByRole('button', { name: new RegExp(en.notifTitle) }));
-    expect(props.onTab).toHaveBeenCalledWith('feed');
+    expect(within(rail).queryByRole('button', { name: new RegExp(en.notifTitle) })).toBeNull();
+    expect(
+      within(rail).getByRole('button', { name: new RegExp(`^${coachEn.navApps}`) }).textContent,
+    ).toContain('3');
   });
 });
 

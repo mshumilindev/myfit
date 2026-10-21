@@ -94,6 +94,8 @@ const navLabels = () =>
   [...screen.getByRole('complementary').querySelectorAll('.rail-nav > .rail-item')].map(
     (b) => b.getAttribute('aria-label')?.split(',')[0],
   );
+/** The language chip every foot carries (SPO-234). */
+const LANGUAGE = 'Language';
 const footLabels = () =>
   [...screen.getByRole('complementary').querySelectorAll('.rail-foot button')].map((b) =>
     b.getAttribute('aria-label'),
@@ -108,7 +110,7 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     const onShell = vi.fn();
     render(<Harness onShell={onShell} />);
     expect(navLabels()).toEqual(EIGHT);
-    expect(footLabels()).toEqual([c.navApps, c.railProfile]);
+    expect(footLabels()).toEqual([LANGUAGE, c.navApps, c.railProfile]);
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
     for (const l of [c.navLive, c.navSignals])
       expect(screen.queryByRole('complementary')?.textContent).not.toContain(l);
@@ -119,32 +121,38 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     expect(onShell).toHaveBeenCalledTimes(1);
   });
 
-  it('exact fit (8 x 69.6 - 5.6 = 551.2) shows no More; one px less moves the trailing two into More', () => {
+  it('exact fit (8 x 69.6 - 5.6 + the language 49.6 = 600.8) shows no More; one px less moves the language and the trailing entry into More', () => {
     setViewport(1440);
-    setRailHeight(552);
     render(<Harness />);
+    setRailHeight(601);
     expect(navLabels()).toEqual(EIGHT);
-    expect(footLabels()).toEqual([c.navApps, c.railProfile]);
-    setRailHeight(551);
-    expect(navLabels()).toEqual(EIGHT.slice(0, 6));
+    expect(footLabels()).toEqual([LANGUAGE, c.navApps, c.railProfile]);
+    setRailHeight(600);
+    setRailHeight(600); // the foot extra leaves, the column is measured again (a real ResizeObserver does it)
+    expect(navLabels()).toEqual(EIGHT.slice(0, 7));
     // More sits in the nav column, right below the last visible nav item; the foot is only Apps + avatar.
     expect(footLabels()).toEqual([c.navApps, c.railProfile]);
     const kids = [...document.querySelectorAll('.rail-nav > *')];
-    expect(kids).toHaveLength(7);
-    expect(kids[6].classList.contains('rail-more')).toBe(true);
+    expect(kids).toHaveLength(8);
+    expect(kids[7].classList.contains('rail-more')).toBe(true);
     expect(kids[5].textContent).toContain(c.navPrograms);
+    setRailHeight(551);
+    expect(navLabels()).toEqual(EIGHT.slice(0, 6));
+    expect(footLabels()).toEqual([c.navApps, c.railProfile]);
   });
 
   it('300: More (right below the last visible nav item) lists only the overflowed nav items, in order, no Apps, no account', () => {
     setViewport(1440);
-    setRailHeight(300);
     render(<Harness />);
+    setRailHeight(300);
+    setRailHeight(300);
     expect(navLabels()).toEqual(EIGHT.slice(0, 3));
     fireEvent.click(screen.getByRole('button', { name: c.navMore }));
     const dlg = screen.getByRole('dialog', { name: c.navMore });
-    expect([...dlg.querySelectorAll('button.uirow')].map((b) => b.textContent)).toEqual(
-      EIGHT.slice(3),
-    );
+    const rows = [...dlg.querySelectorAll('button.uirow')].map((b) => b.textContent);
+    // the overflowed nav items in order, then the foot extra that collapsed first: the language
+    expect(rows.slice(0, -1)).toEqual(EIGHT.slice(3));
+    expect(rows.at(-1)).toContain(LANGUAGE);
     expect(within(dlg).queryByRole('button', { name: c.navApps })).toBeNull();
     expect(within(dlg).queryByText('Iryna Koval')).toBeNull();
     expect(within(dlg).queryByText(c.modeNote)).toBeNull();
@@ -211,8 +219,9 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
 
   it('1024: the same rule on the 60px rail; More is icon + tooltip, Apps icon + tooltip', () => {
     setViewport(1024);
-    setRailHeight(300);
     render(<Harness />);
+    setRailHeight(300);
+    setRailHeight(300);
     // compact tile 44, pitch 49.6: 8 fit in 392; at 300 five stay.
     expect(navLabels()).toEqual(EIGHT.slice(0, 5));
     const rail = screen.getByRole('complementary');
@@ -222,15 +231,15 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     expect(
       within(rail).getByRole('button', { name: c.navApps }).querySelector('.rail-tip')?.textContent,
     ).toBe(c.navApps);
-    setRailHeight(392);
+    setRailHeight(441); // 8 x 49.6 - 5.6 + the language 49.6 = 440.8
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
   });
 
-  it('tile heights never change with viewport height: same fixed 72x64 tiles at 1000/720/600/500', () => {
+  it('tile heights never change with viewport height: same fixed 72x64 tiles at 1000/720/640/610', () => {
     setViewport(1440);
     const seen: number[] = [];
     render(<Harness />);
-    for (const h of [1000, 720, 600, 500]) {
+    for (const h of [1000, 720, 640, 610]) {
       setRailHeight(h);
       const tiles = [
         ...screen.getByRole('complementary').querySelectorAll('.rail-nav > .rail-item'),
@@ -239,8 +248,9 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
       for (const t of tiles) expect(t.getAttribute('style')).toBeNull();
       seen.push(tiles.length);
     }
-    // ...the count is the only thing that follows the height (600 still fits 8: 551.2; 500 keeps 6 and More).
-    expect(seen).toEqual([8, 8, 8, 6]);
+    // ...the count is the only thing that follows the height (610 still fits 8 + the language: 600.8).
+    expect(seen).toEqual([8, 8, 8, 8]);
+    setRailHeight(200);
     setRailHeight(200);
     expect(navLabels()).toHaveLength(1);
     // ...and CSS pins the original tiles: labelled 72x64, compact 44, flex none, top aligned, 5.6 gap.

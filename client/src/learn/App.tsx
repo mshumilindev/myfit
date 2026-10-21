@@ -571,6 +571,11 @@ export function LearnRoot({
     setTab(id);
   }
 
+  const openFeed = () => {
+    setPlaying(null);
+    setTab('feed');
+  };
+
   return (
     <div className="app-learn apex-app">
       {desktop && (
@@ -580,10 +585,7 @@ export function LearnRoot({
           activeId={playing || tab === 'feed' ? null : tab}
           onNav={(id) => goTab(id as Tab)}
           onOpenShell={onOpenShell}
-          onOpenNotifications={() => {
-            setPlaying(null);
-            setTab('feed');
-          }}
+          onOpenNotifications={openFeed}
           onOpenProfile={onOpenProfile}
           notifUnread={notifUnread}
         />
@@ -600,20 +602,14 @@ export function LearnRoot({
           tone={SUITE_TONE.learn}
           icon={SUITE_ICON.learn}
           actions={
-            <>
-              <BellButton
-                label={L.notifications}
-                onClick={() => {
-                  setPlaying(null);
-                  setTab('feed');
-                }}
-                active={tab === 'feed'}
-                count={tab !== 'feed' ? notifUnread : 0}
-              />
-            </>
+            <BellButton
+              label={L.notifications}
+              onClick={openFeed}
+              active={tab === 'feed'}
+              count={tab !== 'feed' ? notifUnread : 0}
+            />
           }
         />
-
         <div className="apex-body">
           {playingLive ? (
             <div className="apex-scroll" ref={scrollRef}>
@@ -671,7 +667,6 @@ export function LearnRoot({
           <SuiteTabBar
             app="learn"
             noMore
-            noAccount
             tabs
             activeFill
             items={nav.map((x) => ({ ...x, active: !playing && tab === x.id }))}

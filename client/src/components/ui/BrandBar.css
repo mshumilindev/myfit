@@ -36,10 +36,10 @@
 .uibrand-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--s-6);
   min-width: 0;
   height: 32px;
-  padding: 0 10px 0 4px;
+  padding: 0 var(--s-10) 0 var(--s-4);
   border: 1px solid var(--t-line);
   border-radius: 999px;
   background: var(--t-tint);
@@ -71,7 +71,7 @@
 }
 .uibrand-chip-caret {
   flex: none;
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 .uibrand-chip:focus-visible {
   outline: 2px solid var(--t-text);

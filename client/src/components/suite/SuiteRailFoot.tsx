@@ -2,7 +2,7 @@
  * The pinned bottom of every rail in the suite, Coach included: Apps (opens the launcher), then
  * the account trigger (real 34px avatar, optional warning dot) with its `AccountPopover`. ONE
  * component, so the avatar and Apps sit at the same offset from the bottom in all six apps.
- * Sizes come from Rail.css (`.rail-foot` items and `.account-chip` are fixed 44px slots); the rail
+ * `appsUnread` puts the shared feed's unread count on Apps for apps without a bell. Sizes come from Rail.css (`.rail-foot` items and `.account-chip` are fixed 44px slots); the rail
  * frame (padding, gap) is the shared one from styles.css. Nothing here is app specific.
  */
 import { useRef, useState } from 'react';
@@ -24,6 +24,7 @@ export function SuiteRailFoot({
   onOpenGym,
   identity,
   warnColor,
+  appsUnread = 0,
 }: {
   app: SuiteApp;
   onOpenShell: () => void;
@@ -32,6 +33,8 @@ export function SuiteRailFoot({
   identity?: SuiteIdentity;
   /** Warning dot on the avatar (Gym: offline / sync failed). No dot while all is well. */
   warnColor?: string;
+  /** Unread of the shared feed, shown on Apps in apps that have no bell (People, Coach). */
+  appsUnread?: number;
 }) {
   const { c } = useCoachT();
   const { account, title, avatar, dialog } = useSuiteAccount({
@@ -51,6 +54,8 @@ export function SuiteRailFoot({
         label={c.navApps}
         tooltip={c.navApps}
         aria-haspopup="dialog"
+        count={appsUnread}
+        countLabel={c.unread(appsUnread)}
         onClick={onOpenShell}
       />
       <div ref={accountRef} className="rail-account">

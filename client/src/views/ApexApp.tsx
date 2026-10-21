@@ -231,7 +231,6 @@ export function ApexApp({
           <SuiteTabBar
             app="apex"
             noMore
-            noAccount
             tabs
             activeFill
             items={nav.map((x) => ({ ...x, active: tab === x.id }))}

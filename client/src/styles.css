@@ -19267,10 +19267,6 @@ html.theme-glass .apx-streak-n {
 .mst {
   color: var(--color-text);
 }
-.mst.screen {
-  /* the tab bar (and its notched FAB) can stay under this page: keep the last button clear of it */
-  padding-bottom: calc(var(--s-32) + var(--safe-bottom, 0px));
-}
 .mst-body {
   display: flex;
   flex-direction: column;

@@ -80,9 +80,14 @@ describe('one shared rail foot (Apps + avatar) for all six apps', () => {
     expect(foot).toMatch(/className="account-chip"/);
     expect(foot).toMatch(/avatar\(34\)/);
     expect(foot).toMatch(/<AccountPopover/);
+    // the shared rail (foot + language entry) is one component both rails go through
+    const rail = tsx('components/suite/SuiteRail.tsx');
+    expect(rail).toMatch(/<SuiteRailFoot/);
+    expect(rail).toMatch(/id: 'language'/);
     for (const f of ['components/AppRail.tsx', 'coach/CoachApp.tsx']) {
       const src = tsx(f);
-      expect(src, f).toMatch(/<SuiteRailFoot/);
+      expect(src, f).toMatch(/<SuiteRail\b/);
+      expect(src, f).not.toMatch(/<SuiteRailFoot|<Rail\b|id: 'language'/);
       expect(src, f).not.toMatch(
         /account-chip|account-avatar|rail-account|<AccountPopover|<Avatar\b/,
       );

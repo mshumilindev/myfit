@@ -275,7 +275,6 @@ export function NutritionRoot({
           <SuiteTabBar
             app="nutrition"
             noMore
-            noAccount
             tabs
             activeFill
             items={nav.map((x) => ({ ...x, active: tab === x.id }))}

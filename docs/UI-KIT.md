@@ -438,10 +438,10 @@ Status of the whole dashboard (real vs fixtures, how to run every check, known g
 
 ### Shared suite navigation
 
-One navigation pattern for every app of the suite (Gym, Coach, Apex, Nutrition, Learn):
+One navigation pattern for every app of the suite (Gym, Coach, Apex, People, Nutrition, Learn):
 
-- Phone: `SuiteTabBar` (the app's own tabs + a trailing More tab). More opens a sheet: the app's secondary destinations, then the `Apps` row (`SuiteLauncherRow`, last row, opens the suite launcher), then the account block (`useSuiteAccount`: avatar, name, role, mode switch for trainer / admin, privacy note, Profile). Coach uses `TabBar` + `MoreMenu` with the same parts.
-- Desktop: `Rail` with `SuiteRailFoot` (app switch to Gym, Profile, Shell) and the Coach foot widgets (Live, bell).
+- Phone: the app's own tabs (`SuiteTabBar`, Coach: `TabBar`). The app switcher is the chip in `BrandBar` (opens the launcher). The avatar opens the user drawer (`BrandAccount`: name, role, mode switch for trainer / admin, Profile, Sign out). A More tab exists only when it has something to show (Coach: its destinations; Gym: Mastery plus the header controls that had no room); one destination becomes a tab, a bar with a single tab is not shown.
+- Desktop: `SuiteRail` (kit `Rail` + the ONE shared foot, `SuiteRailFoot`), used by `AppRail` (Gym, Apex, People, Nutrition, Learn) and by Coach. Foot, top to bottom: the app's own extras (Gym: conditions shield, Mastery), the bell (client apps only: Gym, Apex, Nutrition, Learn), more extras (Gym: admin settings), language, Apps, avatar. Apps and the avatar never collapse; everything above them collapses into More first (the language row opens a language list). People and Coach have no bell: the shared feed's unread shows on Apps (`appsUnread`) and on the Gym tile of the launcher.
 - App tone for the shell comes from `SUITE_TONE` (`components/suite/suiteTone.ts`); do not hard-code a hue in an app.
 - Help texts (Atlas) name the control "More" then "Apps", not an "Apps" button on the bar.
 

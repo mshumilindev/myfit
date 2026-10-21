@@ -53,11 +53,29 @@ describe('TabBar', () => {
   it('a node badge is placed as given', () => {
     render(
       <TabBar
-        items={[{ id: 'a', label: 'A', icon: 'house', badge: <i data-testid="dot" /> }]}
+        items={[
+          { id: 'a', label: 'A', icon: 'house', badge: <i data-testid="dot" /> },
+          { id: 'b', label: 'B', icon: 'chart-line-up' },
+        ]}
         onSelect={() => {}}
       />,
     );
     expect(screen.getByTestId('dot').closest('.tabbar-ico')).not.toBeNull();
+  });
+
+  it('a bar with a single destination is not shown (it navigates nowhere)', () => {
+    const { container } = render(
+      <TabBar items={[{ id: 'a', label: 'A', icon: 'house' }]} onSelect={() => {}} />,
+    );
+    expect(container.querySelector('.tabbar')).toBeNull();
+    const withMore = render(
+      <TabBar
+        items={[{ id: 'a', label: 'A', icon: 'house' }]}
+        more={{ label: 'More', onClick: () => {} }}
+        onSelect={() => {}}
+      />,
+    );
+    expect(withMore.container.querySelector('.tabbar')).not.toBeNull();
   });
 
   it('fab adds the notch, the Start button and splits tabs 2 + rest', () => {

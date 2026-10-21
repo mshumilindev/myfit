@@ -8,12 +8,10 @@
  * pure UI: it renders from props and local state and never waits on the server.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { SpotterMark } from '../brand/SpotterMark';
-import { SuiteRailFoot } from '../components/suite/SuiteRailFoot';
+import { SuiteRail } from '../components/suite/SuiteRail';
 import { SUITE_ICON, SUITE_TONE } from '../components/suite/suiteTone';
 import type { SuiteMode } from '../components/suite/useSuiteAccount';
 import { MoreMenu, type MoreMenuItem } from '../components/ui/MoreMenu';
-import { Rail } from '../components/ui/Rail';
 import type { RailEntry } from '../components/ui/railOverflow';
 import { SkeletonRows } from '../components/ui/Skeleton';
 import { TabBar } from '../components/ui/TabBar';
@@ -21,7 +19,7 @@ import { COACH_BREAKPOINT, COACH_WIDE_BREAKPOINT, useMinWidth } from '../compone
 import { useT } from '../i18n';
 import { useCoachT } from '../i18n/coach';
 import { useRosterT } from '../i18n/coachRoster';
-import { BrandBar, BellButton } from '../components/ui/BrandBar';
+import { BrandBar } from '../components/ui/BrandBar';
 import { OPEN_MORE_EVENT } from '../components/suite/openMore';
 import { BrandAccount } from '../components/suite/BrandAccount';
 import { CoachChromeProvider, type CoachChrome } from './layout/chrome';
@@ -65,6 +63,8 @@ export interface CoachShellProps {
   onOpenProfile?: () => void;
   /** Opens the suite launcher (Gym / Apex / People / Nutrition / Learn / Coach). */
   onOpenShell: () => void;
+  /** Unread of the shared feed (Coach has no bell): shown on the rail's Apps button. */
+  notifUnread?: number;
 }
 
 type TabId = ScreenId | 'more';
@@ -79,6 +79,7 @@ export function CoachShell({
   onExitToWorkouts,
   onOpenProfile,
   onOpenShell,
+  notifUnread = 0,
 }: CoachShellProps) {
   const { c } = useCoachT();
   const { tm } = useTeamT();
@@ -211,35 +212,15 @@ export function CoachShell({
       </nav>
 
       {desktop && (
-        <Rail
-          brand={<SpotterMark size={40} variant="sidebar" />}
-          labelled={wide}
-          compact={!wide}
+        <SuiteRail
+          app="coach"
           breakpoint="coach"
-          ariaLabel={c.navLandmark}
-          overflow={{
-            entries: railEntries,
-            moreLabel: c.navMore,
-            renderMenu: ({ hidden, open, onClose, anchorRef }) => (
-              <MoreMenu
-                presentation="popover"
-                open={open}
-                onClose={onClose}
-                anchorRef={anchorRef}
-                title={c.navMore}
-                items={hidden}
-              />
-            ),
-          }}
-          foot={
-            <SuiteRailFoot
-              app="coach"
-              identity={{ name, userId, role }}
-              onOpenGym={onExitToWorkouts}
-              onOpenProfile={onOpenProfile}
-              onOpenShell={onOpenShell}
-            />
-          }
+          nav={railEntries}
+          identity={{ name, userId, role }}
+          appsUnread={notifUnread}
+          onOpenGym={onExitToWorkouts}
+          onOpenProfile={onOpenProfile}
+          onOpenShell={onOpenShell}
         />
       )}
 
@@ -251,13 +232,6 @@ export function CoachShell({
           appLabel={t.shellSwitch}
           tone={SUITE_TONE.coach}
           icon={SUITE_ICON.coach}
-          actions={
-            <BellButton
-              label={c.railNotifications}
-              count={unread}
-              onClick={() => onNavigate({ screen: 'chat' })}
-            />
-          }
           onHiddenChange={setHeaderHidden}
           avatar={
             <BrandAccount

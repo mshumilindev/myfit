@@ -85,15 +85,12 @@ import { useFlag, isFlagOn, startGlobalFlags } from './data/flags';
 import { isClientHead } from './coach/client/routes';
 import { useClientShared } from './coach/client/shared';
 import { ClientBridgeLazy, ClientRoutesLazy } from './coach/client/lazy';
-import { BrandBar, BellButton } from './components/ui/BrandBar';
-import { BrandAccount } from './components/suite/BrandAccount';
+import { GymBrandBar, GymTabBar } from './components/suite/GymChrome';
 import { ConditionsShield, useActiveConditions } from './views/health/ConditionsShield';
 import { AppRail } from './components/AppRail';
-import { SuiteTabBar } from './components/SuiteTabBar';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 import { currentHash, replaceHash, setHash } from './route';
-import { SUITE_ICON, SUITE_TONE } from './components/suite/suiteTone';
 
 const OnboardingView = lazy(() =>
   import('./views/OnboardingView').then((module) => ({ default: module.OnboardingView })),
@@ -1127,7 +1124,6 @@ export function App() {
   }, [store.workouts]);
   const role = getRole();
   const tabs = tabsForRole(role, t);
-  const activeConditions = useActiveConditions();
   // Header controls the BrandBar had no room for; they continue in the More menu.
   const [headerHidden, setHeaderHidden] = useState<MoreMenuItem[]>([]);
   // Coach dashboard: trainer OR admin, only while the flag is on (access.ts).
@@ -1441,6 +1437,7 @@ export function App() {
             onExitToWorkouts={openGym}
             onOpenProfile={() => openRoster('me')}
             onOpenShell={() => setShellOpen(true)}
+            notifUnread={notifUnread}
           />
         </Suspense>
         {shellOpen && (
@@ -1886,41 +1883,13 @@ export function App() {
       )}
       <div className="main-col">
         {!desktopRail && (
-          <BrandBar
-            avatar={
-              <BrandAccount
-                app="gym"
-                onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
-              />
-            }
-            onHiddenChange={setHeaderHidden}
-            app={t.shellGym}
+          <GymBrandBar
+            notifUnread={notifUnread}
             onApp={() => setShellOpen(true)}
-            appLabel={t.shellSwitch}
-            tone={SUITE_TONE.gym}
-            icon={SUITE_ICON.gym}
-            // The health shield leaves the bar into the user drawer when the bar is tight (only while a
-            // condition is active). Mastery moved into More.
-            entries={
-              activeConditions > 0
-                ? [
-                    {
-                      id: 'conditions',
-                      label: t.cndTodayTitle(activeConditions),
-                      icon: 'shield-check',
-                      node: <ConditionsShield onOpen={() => setOverlay({ screen: 'health' })} />,
-                      onSelect: () => setOverlay({ screen: 'health' }),
-                    },
-                  ]
-                : []
-            }
-            actions={
-              <BellButton
-                label={t.notifTitle}
-                onClick={() => setOverlay({ screen: 'notifications' })}
-                count={notifUnread}
-              />
-            }
+            onProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
+            onHealth={() => setOverlay({ screen: 'health' })}
+            onNotifications={() => setOverlay({ screen: 'notifications' })}
+            onHiddenChange={setHeaderHidden}
           />
         )}
         {store.syncStatus === 'failed' && (
@@ -1968,48 +1937,22 @@ export function App() {
           {backSwipe && <div className="stage-scrim" ref={scrimRef} aria-hidden />}
         </main>
         {showTabbar && (
-          <SuiteTabBar
-            app="gym"
-            // The account is the avatar's drawer. Roomy header: a Mastery tab. Tight header: More = Mastery + the
-            // controls the bar had no room for (shield, language).
-            noAccount
-            noMore={masteryTab}
-            moreItems={[
-              {
-                id: 'mastery',
-                icon: 'medal',
-                label: t.masteryTitle,
-                onSelect: () => setOverlay({ screen: 'mastery' }),
-              },
-              ...headerHidden,
-            ]}
-            items={[
-              ...tabs.map((x) => ({
-                ...x,
-                active: !onMastery && navActive(x.id, effectiveTab),
-                // unread messages from my trainer sit on Today (R-KIT-21); nothing without a trainer
-                ...(x.id === 'today' && clientShared.unread > 0
-                  ? {
-                      badge: clientShared.unread,
-                      ariaLabel: `${x.label}, ${clientShared.unreadLabel || clientShared.unread}`,
-                    }
-                  : {}),
-              })),
-              ...(masteryTab
-                ? [
-                    {
-                      id: 'mastery' as const,
-                      icon: 'medal',
-                      label: t.masteryTitle,
-                      active: onMastery,
-                    },
-                  ]
-                : []),
-            ]}
-            onSelect={(id) =>
-              id === 'mastery' ? !onMastery && setOverlay({ screen: 'mastery' }) : goTab(id)
-            }
-            onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
+          <GymTabBar
+            items={tabs.map((x) => ({
+              ...x,
+              active: !onMastery && navActive(x.id, effectiveTab),
+              // unread messages from my trainer sit on Today (R-KIT-21); nothing without a trainer
+              ...(x.id === 'today' && clientShared.unread > 0
+                ? {
+                    badge: clientShared.unread,
+                    ariaLabel: `${x.label}, ${clientShared.unreadLabel || clientShared.unread}`,
+                  }
+                : {}),
+            }))}
+            hidden={headerHidden}
+            mastery={onMastery}
+            onMastery={() => setOverlay({ screen: 'mastery' })}
+            onSelect={goTab}
             fab={{
               ariaLabel: t.startNew,
               onClick: () => setStartOpen(true),
