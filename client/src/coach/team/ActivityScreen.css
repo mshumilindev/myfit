@@ -5,3 +5,8 @@
   gap: var(--s-8);
   min-width: 0;
 }
+.act-more-failed {
+  margin: 0;
+  color: var(--color-danger-text, var(--color-text-muted));
+  font-size: var(--fs-14);
+}

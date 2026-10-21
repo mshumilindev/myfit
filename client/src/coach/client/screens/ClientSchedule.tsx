@@ -69,7 +69,7 @@ export function useMySessions(port?: SchedulePort): MySessions | null {
 }
 
 /** A People of one: me. Other attendees of a shared session are never named on this side. */
-function myPeople(myId: string, name: string): People {
+export function myPeople(myId: string, name: string): People {
   return {
     list: [],
     byId: new Map(),

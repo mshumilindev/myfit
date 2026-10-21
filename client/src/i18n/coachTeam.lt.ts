@@ -199,6 +199,8 @@ export const teamLt: typeof teamEn = {
   actEmptyTitle: 'Kol kas nieko nėra',
   actEmptyBody: 'Komandos veiksmai čia saugomi 90 dienų.',
   actFailed: 'Nepavyko įkelti veiklos žurnalo.',
+  actMore: 'Rodyti ankstesnius',
+  actMoreFailed: 'Nepavyko įkelti ankstesnių įrašų.',
   actListLabel: 'Veikla',
   actKind: {
     'move-request': 'Prašymas perkelti treniruotę',

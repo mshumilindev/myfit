@@ -193,6 +193,8 @@ export const teamUk: typeof teamEn = {
   actEmptyTitle: 'Поки нічого немає',
   actEmptyBody: 'Дії команди зберігаються тут 90 днів.',
   actFailed: 'Не вдалося завантажити журнал активності.',
+  actMore: 'Показати раніші',
+  actMoreFailed: 'Не вдалося завантажити раніші записи.',
   actListLabel: 'Активність',
   actKind: {
     'move-request': 'Запит на перенесення заняття',

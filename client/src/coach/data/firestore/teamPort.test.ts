@@ -124,4 +124,25 @@ describe('Firestore team port', () => {
       code: 'not-eligible',
     });
   });
+  it('activity: asks for one page with the cursor and derives the next cursor; a server without `before` ends the log', async () => {
+    const row = (id: string, ts: number) => ({ id, ts });
+    const { fs, calls } = fsWith((_n, d) =>
+      (d as { before?: number }).before
+        ? { entries: [row('x', 40), row('y', 30)], scope: 'owner' } // ignores the cursor: repeats newer rows
+        : { entries: [row('a', 90), row('b', 80), row('c', 70)], scope: 'owner' },
+    );
+    const p = createFirestoreTeamPort(fs);
+    const first = await p.activity({ limit: 3 });
+    expect(calls[0]).toEqual(['teamActivity', { limit: 3 }]);
+    expect(first.next).toBe(70);
+    const second = await p.activity({ before: 70, limit: 3 });
+    expect(calls[1]).toEqual(['teamActivity', { limit: 3, before: 70 }]);
+    expect(second.entries.map((e) => e.id)).toEqual(['x', 'y']);
+    expect(second.next).toBeNull();
+    // rows not older than the cursor are dropped
+    const stale = await createFirestoreTeamPort(
+      fsWith(() => ({ entries: [row('a', 90), row('z', 10)], scope: 'owner' })).fs,
+    ).activity({ before: 50 });
+    expect(stale.entries.map((e) => e.id)).toEqual(['z']);
+  });
 });

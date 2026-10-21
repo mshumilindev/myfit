@@ -188,6 +188,8 @@ export const teamEt: typeof teamEn = {
   actEmptyTitle: 'Siin pole veel midagi',
   actEmptyBody: 'Meeskonna tegevused on siin 90 päeva.',
   actFailed: 'Tegevuslogi laadimine ebaõnnestus.',
+  actMore: 'Näita varasemaid',
+  actMoreFailed: 'Varasemate kirjete laadimine ebaõnnestus.',
   actListLabel: 'Tegevus',
   actKind: {
     'move-request': 'Treeningu nihutamise taotlus',

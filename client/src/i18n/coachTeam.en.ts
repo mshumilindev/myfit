@@ -191,6 +191,8 @@ export const teamEn = {
   actEmptyTitle: 'Nothing here yet',
   actEmptyBody: 'Team actions appear here for 90 days.',
   actFailed: 'Could not load the activity log.',
+  actMore: 'Show earlier',
+  actMoreFailed: 'Could not load earlier entries.',
   actListLabel: 'Activity',
   actKind: {
     'move-request': 'Sent a move request',

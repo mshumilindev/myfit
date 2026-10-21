@@ -84,8 +84,16 @@ export interface ActivityRow {
   detail?: string;
 }
 
+/** One page of the log: entries strictly older than `before` (epoch ms), at most `limit` of them. */
+export interface ActivityPage {
+  before?: number;
+  limit?: number;
+}
+
 export interface TeamActivity {
   entries: ActivityRow[];
+  /** cursor for the next (older) page: the oldest `ts` of this page; null / absent = the log ends here */
+  next?: number | null;
   /** `owner` reads all; a manager reads `own` or `all` (the owner's setting) */
   scope: ActivityScope | 'owner';
 }

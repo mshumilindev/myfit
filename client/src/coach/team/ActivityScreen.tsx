@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { BackButton } from '../../components/ui/BackButton';
+import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { FailedState } from '../../components/ui/FailedState';
 import { GroupedList, ListRow } from '../../components/ui/GroupedList';
@@ -78,6 +79,8 @@ export function ActivityScreen({
   const [failed, setFailed] = useState(false);
   const [who, setWho] = useState<string>(ALL);
   const [attempt, setAttempt] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [moreFailed, setMoreFailed] = useState(false);
 
   useEffect(() => {
     let live = true;
@@ -89,6 +92,31 @@ export function ActivityScreen({
       live = false;
     };
   }, [p, attempt]);
+
+  // Older entries come page by page from the cursor (delta style, like deltaSync): nothing already shown is loaded again.
+  const showEarlier = async () => {
+    if (!log || log.next == null || loadingMore) return;
+    setLoadingMore(true);
+    setMoreFailed(false);
+    try {
+      const page = await p.activity({ before: log.next });
+      setLog((cur) => {
+        if (!cur) return cur;
+        const seen = new Set(cur.entries.map((e) => e.id));
+        const fresh = page.entries.filter((e) => !seen.has(e.id));
+        // a page with nothing new ends the log (a server that ignored the cursor must not loop forever)
+        return {
+          ...cur,
+          entries: [...cur.entries, ...fresh],
+          next: fresh.length ? page.next : null,
+        };
+      });
+    } catch {
+      setMoreFailed(true);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const [clock] = useState(() => now ?? p.now?.() ?? Date.now());
   const ownerName = state.data?.ownerName ?? '';
@@ -223,6 +251,22 @@ export function ActivityScreen({
             </GroupedList>
           </section>
         ))
+      )}
+      {moreFailed && (
+        <p role="alert" className="act-more-failed">
+          {tm.actMoreFailed}
+        </p>
+      )}
+      {log.next != null && (
+        <Button
+          variant="secondary"
+          size="md"
+          fullWidth
+          disabled={loadingMore}
+          onClick={() => void showEarlier()}
+        >
+          {tm.actMore}
+        </Button>
       )}
     </Page>
   );

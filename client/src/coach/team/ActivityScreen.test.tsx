@@ -70,6 +70,58 @@ describe('Activity log', () => {
   });
 });
 
+describe('Activity log pagination (SPO-203)', () => {
+  it('loads one page, then older ones from the cursor; the button goes when the log ends', async () => {
+    const port = createFixturesTeamPort({ now: () => NOW, activityPage: 4 });
+    const spy = vi.spyOn(port, 'activity');
+    render(<ActivityScreen now={NOW} onNavigate={vi.fn()} port={port} />);
+    await screen.findByText(tm.actSubOwner);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0]![0]).toBeUndefined();
+    // 4 of 9 rows
+    expect(document.querySelectorAll('.act-day li').length).toBe(4);
+    fireEvent.click(screen.getByRole('button', { name: tm.actMore }));
+    await waitFor(() => expect(document.querySelectorAll('.act-day li').length).toBe(8));
+    // the cursor is the oldest ts of what is shown, never a count or a page number
+    const first = await spy.mock.results[0]!.value;
+    expect(spy.mock.calls[1]![0]).toEqual({ before: first.next });
+    fireEvent.click(screen.getByRole('button', { name: tm.actMore }));
+    await waitFor(() => expect(document.querySelectorAll('.act-day li').length).toBe(9));
+    expect(screen.queryByRole('button', { name: tm.actMore })).toBeNull();
+    expect(spy).toHaveBeenCalledTimes(3);
+  });
+
+  it('a short log has no button; a failed page says so and keeps what is shown', async () => {
+    mount();
+    await screen.findByText(tm.actSubOwner);
+    expect(screen.queryByRole('button', { name: tm.actMore })).toBeNull();
+    cleanup();
+    const port = createFixturesTeamPort({ now: () => NOW, activityPage: 4 });
+    const real = port.activity.bind(port);
+    port.activity = vi.fn(async (page) => {
+      if (page?.before) throw new Error('offline');
+      return real(page);
+    });
+    render(<ActivityScreen now={NOW} onNavigate={vi.fn()} port={port} />);
+    await screen.findByText(tm.actSubOwner);
+    fireEvent.click(screen.getByRole('button', { name: tm.actMore }));
+    expect(await screen.findByRole('alert')).toBeTruthy();
+    expect(document.querySelectorAll('.act-day li').length).toBe(4);
+    expect(screen.getByRole('button', { name: tm.actMore })).toBeTruthy();
+  });
+
+  it('a server that ignores the cursor cannot loop: a page with nothing new ends the log', async () => {
+    const base = createFixturesTeamPort({ now: () => NOW, activityPage: 4 });
+    const first = await base.activity();
+    const port = { ...base, activity: vi.fn(async () => first) };
+    render(<ActivityScreen now={NOW} onNavigate={vi.fn()} port={port} />);
+    await screen.findByText(tm.actSubOwner);
+    fireEvent.click(screen.getByRole('button', { name: tm.actMore }));
+    await waitFor(() => expect(screen.queryByRole('button', { name: tm.actMore })).toBeNull());
+    expect(document.querySelectorAll('.act-day li').length).toBe(4);
+  });
+});
+
 describe('Roles', () => {
   it('lists every capability for both roles and states the manager limits', () => {
     render(<RolesScreen onNavigate={() => undefined} />);

@@ -9,6 +9,7 @@ describe('client routes', () => {
       '#/trainer',
       '#/trainer/chat',
       '#/trainer/log',
+      '#/trainer/spotter',
     ]) {
       const r = parseClientRoute(hash.slice(2));
       expect(r).not.toBeNull();

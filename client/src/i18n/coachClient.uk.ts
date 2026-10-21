@@ -285,4 +285,24 @@ export const clientUk: typeof clientEn = {
     'session-cancelled': 'Заняття скасовано',
     'session-edited': 'Розклад змінено',
   } as Record<string, string>,
+  spTitle: 'Spotter',
+  spSub: 'Службові повідомлення від тренера й команди',
+  spBarSub: 'Лише читання',
+  spReadOnly: 'Spotter лише для читання. Відповідайте в картках.',
+  spListLabel: 'Повідомлення Spotter',
+  spUnread: (n) => `${n} нових`,
+  spEmptyTitle: 'Нічого нового',
+  spEmptyBody: 'Тут з’являтимуться запити та новини про ваші заняття.',
+  spFailed: 'Не вдалося завантажити Spotter.',
+  spMoveAnswer: (who, accepted) =>
+    accepted
+      ? `Запит на перенесення: ${who} — прийнято`
+      : `Запит на перенесення: ${who} — відхилено`,
+  spDone: (who) => `Заняття позначено виконаним (${who})`,
+  spMissed: (who) => `Заняття позначено пропущеним (${who})`,
+  spCancelled: (who) => `Заняття скасовано (${who})`,
+  spAccess: 'Змінився доступ команди до вашого розкладу',
+  spTeam: (who) => `До команди тренера додано: ${who}`,
+  spReminder: 'Скоро заняття',
+  spSummary: 'Готовий підсумок ваших занять',
 };

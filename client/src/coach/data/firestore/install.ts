@@ -14,6 +14,8 @@ import type { Vault } from '../../../autoVault';
 import type { CoachKeyRecord } from '../../../vaultShare';
 import type { Activity, Workout } from '../../../types';
 import { configureClientCoach } from '../../client/data/config';
+import { createFirestoreClientSpotterPort } from '../../client/spotter/clientSpotterPort';
+import { configureClientSpotter } from '../../client/spotter/config';
 import { withLocalCache } from '../../chat/cachedPort';
 import { getSealedLocal } from '../../chat/sealedLocal';
 import { configureTrustPort } from '../../security/trustPort';
@@ -476,6 +478,8 @@ export function installFirestoreClient(d: ClientInstallDeps): () => void {
     port,
     chat: createFirestoreClientChatPort({ fs: d.fs, chat, uid: d.uid }),
   });
+  // Spotter: a view over the member's own notices (read, and mark read; the rules allow nothing else)
+  configureClientSpotter(createFirestoreClientSpotterPort(d.fs, d.uid));
   configureSchedule(
     createSealedSchedulePort({
       store: createFirestoreScheduleStore({ fs: d.fs, book }),
@@ -582,6 +586,7 @@ export function installFirestoreClient(d: ClientInstallDeps): () => void {
     stopBook();
     rings.forget();
     configureClientCoach();
+    configureClientSpotter(null);
     configureSchedule(null);
     configureNotes(null);
     configureShare();

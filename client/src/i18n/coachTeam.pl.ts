@@ -195,6 +195,8 @@ export const teamPl: typeof teamEn = {
   actEmptyTitle: 'Na razie pusto',
   actEmptyBody: 'Działania zespołu są tu przez 90 dni.',
   actFailed: 'Nie udało się wczytać dziennika aktywności.',
+  actMore: 'Pokaż wcześniejsze',
+  actMoreFailed: 'Nie udało się wczytać wcześniejszych wpisów.',
   actListLabel: 'Aktywność',
   actKind: {
     'move-request': 'Prośba o przeniesienie treningu',

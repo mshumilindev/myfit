@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { navigateHash } from '../../../navigateHash';
 import { Button } from '../../../components/ui/Button';
 import { useSafeT } from '../../../i18n/coachSafe';
 import { useReauthGuard } from '../../security/useReauthGuard';
@@ -27,6 +28,7 @@ import { TrainerUnavailable } from './TrainerUnavailable';
 import { NoTrainerPage } from './NoTrainerPage';
 import { ClientTeamPage } from './ClientTeamPage';
 import { ClientMoveRequests } from './ClientMoveRequests';
+import { ClientSpotterRow } from '../spotter/ClientSpotterRow';
 import { useClientTeam } from './useClientTeam';
 import { PushedPage } from './PushedPage';
 import type { RescheduleRequest, ScheduleSlot } from '../../schedule/types';
@@ -36,6 +38,8 @@ export interface MyTrainerPageProps {
   schedulePort?: SchedulePort;
   onBack: () => void;
   onChat: () => void;
+  /** the pinned Spotter row above the chat (default: the hash route) */
+  onSpotter?: () => void;
   onSharing: () => void;
   onProgram: () => void;
   /** after leaving: back to Today */
@@ -89,6 +93,7 @@ export function MyTrainerPage(p: MyTrainerPageProps) {
 
   return (
     <PushedPage title={cc.mtTitle} backLabel={cc.ccBack} onBack={p.onBack}>
+      <ClientSpotterRow onOpen={p.onSpotter ?? (() => navigateHash('#/trainer/spotter'))} />
       <Card emphasis="hero" pad="lg" className="cc-hero">
         <ClientAvatar id={trainer.id} name={trainer.name} size={56} hasPhoto={trainer.hasPhoto} />
         <div className="cc-hero-t">

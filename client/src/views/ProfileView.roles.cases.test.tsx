@@ -13,6 +13,8 @@ import {
 } from './__fixtures__/viewKit';
 import { __getStateForTests } from '../store';
 import { pm, profile } from './__fixtures__/profileKit';
+import { safeEn as sf } from '../i18n/coachSafe.en';
+import { resetPrefsForTests } from '../pushPrefs';
 
 vi.mock('firebase/firestore', () => ({
   doc: (_d: unknown, c: string, id: string) => ({ c, id }),
@@ -439,6 +441,28 @@ describe('ProfileView: my settings', () => {
     expect(screen.getByLabelText(en.weekStartsOn)).toBeTruthy();
     expect(screen.getByText(en.profileUnits)).toBeTruthy();
   });
+
+  it.each(['member', 'trainer', 'admin'] as const)(
+    'SPO-237: a %s gets the Requests / Reminders / Team switches, kept on the device',
+    async (role) => {
+      localStorage.removeItem('spotter.pushPrefs');
+      resetPrefsForTests();
+      await settings({ person: { ...profile().person, role } });
+      for (const name of [sf.pnRequests, sf.pnReminders, sf.pnTeam])
+        expect(screen.getByRole('switch', { name }).getAttribute('aria-checked')).toBe('true');
+      fireEvent.click(screen.getByRole('switch', { name: sf.pnTeam }));
+      expect(screen.getByRole('switch', { name: sf.pnTeam }).getAttribute('aria-checked')).toBe(
+        'false',
+      );
+      expect(JSON.parse(localStorage.getItem('spotter.pushPrefs') as string)).toEqual({
+        requests: true,
+        reminders: true,
+        team: false,
+      });
+      localStorage.removeItem('spotter.pushPrefs');
+      resetPrefsForTests();
+    },
+  );
 
   it('the unit switch changes the account weight unit', async () => {
     await settings();

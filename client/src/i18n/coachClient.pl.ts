@@ -289,4 +289,24 @@ export const clientPl: typeof clientEn = {
     'session-cancelled': 'Trening anulowany',
     'session-edited': 'Grafik zmieniony',
   } as Record<string, string>,
+  spTitle: 'Spotter',
+  spSub: 'Komunikaty od trenera i zespołu',
+  spBarSub: 'Tylko odczyt',
+  spReadOnly: 'Spotter jest tylko do odczytu. Odpowiadaj na kartach.',
+  spListLabel: 'Komunikaty Spotter',
+  spUnread: (n) => `${n} nowych`,
+  spEmptyTitle: 'Nic nowego',
+  spEmptyBody: 'Tu pojawią się prośby i nowości o Twoich sesjach.',
+  spFailed: 'Nie udało się wczytać Spotter.',
+  spMoveAnswer: (who, accepted) =>
+    accepted
+      ? `Prośba o przeniesienie: ${who} — przyjęta`
+      : `Prośba o przeniesienie: ${who} — odrzucona`,
+  spDone: (who) => `Sesja oznaczona jako zrealizowana (${who})`,
+  spMissed: (who) => `Sesja oznaczona jako opuszczona (${who})`,
+  spCancelled: (who) => `Sesja odwołana (${who})`,
+  spAccess: 'Zmienił się dostęp zespołu do Twojego harmonogramu',
+  spTeam: (who) => `Nowa osoba w zespole trenera: ${who}`,
+  spReminder: 'Wkrótce sesja',
+  spSummary: 'Podsumowanie Twoich sesji jest gotowe',
 };

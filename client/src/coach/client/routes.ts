@@ -5,6 +5,7 @@
  *   #/trainer          My trainer page
  *   #/trainer/chat     chat with my trainer (S-35)
  *   #/trainer/log      Who saw your data (S-31)
+ *   #/trainer/spotter  Spotter, the pinned service chat (SPO-236, also the target of the push)
  * Privacy and sharing (S-29) stays the real Health page `#/health/privacy` with the trainer block on top.
  */
 export type ClientRoute =
@@ -12,7 +13,8 @@ export type ClientRoute =
   | { page: 'team-invite'; token: string }
   | { page: 'trainer' }
   | { page: 'chat' }
-  | { page: 'log' };
+  | { page: 'log' }
+  | { page: 'spotter' };
 
 export const CLIENT_HEADS = ['invite', 'team-invite', 'trainer'] as const;
 
@@ -27,6 +29,7 @@ export function parseClientRoute(route: string): ClientRoute | null {
     if (!a) return { page: 'trainer' };
     if (a === 'chat') return { page: 'chat' };
     if (a === 'log') return { page: 'log' };
+    if (a === 'spotter') return { page: 'spotter' };
   }
   return null;
 }
@@ -43,4 +46,6 @@ export const clientHash = (r: ClientRoute): string =>
         ? '#/trainer'
         : r.page === 'chat'
           ? '#/trainer/chat'
-          : '#/trainer/log';
+          : r.page === 'log'
+            ? '#/trainer/log'
+            : '#/trainer/spotter';
