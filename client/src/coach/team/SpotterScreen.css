@@ -1,7 +1,10 @@
 /* Spotter team messages (SPO-236). Layout only. Tokens only. */
+/* Actions sit under the message, aligned with its text (icon 40 + gap), so a narrow phone row keeps full-width text. */
 .sp-actions {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--s-8);
+  padding: 0 var(--s-16) var(--s-12) calc(var(--s-16) + 40px + var(--s-12));
 }
 .sp-problem {
   margin: 0;

@@ -129,30 +129,29 @@ export function SpotterScreen({
                   .filter(Boolean)
                   .join(' · ')}
                 trailing={
-                  i.kind === 'removal-request' && i.status === 'pending' ? (
-                    <span className="sp-actions">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        disabled={busy === i.id}
-                        onClick={() => void decide(i, false)}
-                      >
-                        {tm.spDecline}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        disabled={busy === i.id}
-                        onClick={() => void decide(i, true)}
-                      >
-                        {tm.spApprove}
-                      </Button>
-                    </span>
-                  ) : (
-                    statusTag(i)
-                  )
+                  i.kind === 'removal-request' && i.status === 'pending' ? undefined : statusTag(i)
                 }
               />
+              {i.kind === 'removal-request' && i.status === 'pending' && (
+                <div className="sp-actions">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={busy === i.id}
+                    onClick={() => void decide(i, false)}
+                  >
+                    {tm.spDecline}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    disabled={busy === i.id}
+                    onClick={() => void decide(i, true)}
+                  >
+                    {tm.spApprove}
+                  </Button>
+                </div>
+              )}
             </li>
           ))}
         </GroupedList>
