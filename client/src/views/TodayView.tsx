@@ -41,7 +41,7 @@ import { computeTrends } from '../trends';
 import { computePlaybook, type Play } from '../playbook';
 import { getRole } from '../api';
 import { canUseCoach } from '../coach/access';
-import { coachHash } from '../coach/routes';
+import { coachHash, rememberCoachRoute } from '../coach/routes';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
 import { useFlag } from '../data/flags';
 import { HistoryTimeline, buildHistoryDays } from '../components/HistoryTimeline';
@@ -1208,10 +1208,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const openCoach = () => shell.openOverlay({ screen: 'coach' });
   // a client opens in the Coach Dashboard (their profile there), not in a Gym screen of its own; without Coach access
   // (role or flag) the old Coach screen is the nearest place
-  const openClient = (id: string) =>
-    canUseCoach(getRole())
-      ? window.location.assign(coachHash({ screen: 'client', cid: id }))
-      : openCoach();
+  const openClient = (id: string) => {
+    if (!canUseCoach(getRole())) return openCoach();
+    // Remember the target too: whatever opens the dashboard next (mode switch, a reload) lands on THIS client, not the Agenda.
+    const route = { screen: 'client' as const, cid: id };
+    rememberCoachRoute(route);
+    window.location.assign(coachHash(route));
+  };
   const watchClient = (s: LiveSession) =>
     s.workoutId
       ? shell.openOverlay({

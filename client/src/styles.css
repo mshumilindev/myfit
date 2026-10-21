@@ -3617,8 +3617,8 @@ i > svg {
 }
 /* Desktop: keep the feed a comfortable reading width, not full-bleed. */
 @media (min-width: 720px) {
-  .notif-screen .notif-feed,
-  .notif-screen .notif-head {
+  /* the head spans the content width (Mark all read sits at the right edge, like "See all" below); only the feed is capped */
+  .notif-screen .notif-feed {
     max-width: 620px;
   }
 }
