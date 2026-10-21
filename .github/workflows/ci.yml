@@ -254,7 +254,7 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=6144
         run: |
           set +e
-          mkdir -p client/node_modules/.cache/storybook
+          mkdir -p client/node_modules/.cache/storybook/10.6.0/default
           npm run build-storybook > sb.log 2>&1
           rc=$?
           cat sb.log
