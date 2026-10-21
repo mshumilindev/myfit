@@ -99,7 +99,10 @@ export function ActivityScreen({
     setLoadingMore(true);
     setMoreFailed(false);
     try {
-      const page = await p.activity({ before: log.next });
+      const page = await p.activity({
+        before: log.next,
+        ...(log.nextId ? { beforeId: log.nextId } : {}),
+      });
       setLog((cur) => {
         if (!cur) return cur;
         const seen = new Set(cur.entries.map((e) => e.id));
@@ -109,6 +112,7 @@ export function ActivityScreen({
           ...cur,
           entries: [...cur.entries, ...fresh],
           next: fresh.length ? page.next : null,
+          nextId: fresh.length ? (page.nextId ?? null) : null,
         };
       });
     } catch {

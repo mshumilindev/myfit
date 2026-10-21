@@ -97,8 +97,11 @@ export function createFirestoreTeamPort(
       const r = await call<TeamActivity>('teamActivity', {
         limit,
         ...(page?.before ? { before: page.before } : {}),
+        ...(page?.beforeId ? { beforeId: page.beforeId } : {}),
       });
-      // a server that does not know `before` repeats the first page: only entries older than the cursor count
+      // the server pages by (ts, id) and sends its own cursor
+      if (r.nextId !== undefined) return r;
+      // an older server repeats the first page: only entries older than the cursor count
       const entries = page?.before ? r.entries.filter((e) => e.ts < page.before!) : r.entries;
       const oldest = entries.reduce((m, e) => Math.min(m, e.ts), Infinity);
       return { ...r, entries, next: entries.length >= limit ? oldest : null };

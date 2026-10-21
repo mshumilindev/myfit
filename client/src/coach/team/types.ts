@@ -87,6 +87,8 @@ export interface ActivityRow {
 /** One page of the log: entries strictly older than `before` (epoch ms), at most `limit` of them. */
 export interface ActivityPage {
   before?: number;
+  /** the `nextId` of the previous page: with `before` it is the (ts, id) cursor, so rows sharing a millisecond are not skipped */
+  beforeId?: string;
   limit?: number;
 }
 
@@ -94,6 +96,8 @@ export interface TeamActivity {
   entries: ActivityRow[];
   /** cursor for the next (older) page: the oldest `ts` of this page; null / absent = the log ends here */
   next?: number | null;
+  /** id half of the cursor (the server sends it with `next`); absent on an older server */
+  nextId?: string | null;
   /** `owner` reads all; a manager reads `own` or `all` (the owner's setting) */
   scope: ActivityScope | 'owner';
 }

@@ -145,4 +145,21 @@ describe('Firestore team port', () => {
     ).activity({ before: 50 });
     expect(stale.entries.map((e) => e.id)).toEqual(['z']);
   });
+  it('activity: a (ts, id) cursor goes to the server as is, and the server page is kept whole', async () => {
+    const row = (id: string, ts: number) => ({ id, ts });
+    const { fs, calls } = fsWith(() => ({
+      entries: [row('b', 50), row('a', 50)], // two rows share the cursor's millisecond: they must stay
+      scope: 'owner',
+      next: 50,
+      nextId: 'a',
+    }));
+    const page = await createFirestoreTeamPort(fs).activity({
+      before: 50,
+      beforeId: 'c',
+      limit: 2,
+    });
+    expect(calls[0]).toEqual(['teamActivity', { limit: 2, before: 50, beforeId: 'c' }]);
+    expect(page.entries.map((e) => e.id)).toEqual(['b', 'a']);
+    expect(page).toMatchObject({ next: 50, nextId: 'a' });
+  });
 });
