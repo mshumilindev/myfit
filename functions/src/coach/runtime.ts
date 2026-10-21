@@ -53,6 +53,9 @@ export function coachCtx(): Ctx {
     // Content-free (C.3): no text, no sender name, no deep link with data.
     notify: async (uid, kind) => {
       try {
+        // A coach / manager lands on Spotter (the service messages); anyone else on the home page. No data in the link.
+        const u = (await coachKv.get(`users/${uid}`)) as { role?: string } | null;
+        const staff = u?.role === 'trainer' || u?.role === 'manager' || u?.role === 'admin';
         await sendToUser(uid, {
           title: 'Spotter',
           body:
@@ -68,7 +71,7 @@ export function coachCtx(): Ctx {
                       ? 'Reminder'
                       : 'New request',
           tag: pushTag(kind),
-          url: '/#/',
+          url: staff && kind !== 'message' && kind !== 'sync' ? '/#/c/spotter' : '/#/',
           kind,
         });
       } catch {

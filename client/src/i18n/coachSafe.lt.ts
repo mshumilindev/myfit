@@ -107,4 +107,10 @@ export const safeLt: typeof import('./coachSafe.en').safeEn = {
     `Trenerio žinutės be garso nuo ${from} iki ${to}. Jos vis tiek lieka neperskaitytos.`,
   qhFrom: 'Nuo',
   qhTo: 'Iki',
+  // Notification switches (SPO-237)
+  pnRequests: 'Prašymai',
+  pnReminders: 'Priminimai',
+  pnTeam: 'Komanda',
+  pnSub:
+    'Išjunkite rūšį, kad negautumėte jos push. Žinutė lieka Spotter. Tylos valandos nelaiko prašymų.',
 };

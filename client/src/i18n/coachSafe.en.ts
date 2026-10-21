@@ -108,4 +108,10 @@ export const safeEn = {
     `No sound for your trainer’s messages from ${from} to ${to}. They still count as unread.`,
   qhFrom: 'From',
   qhTo: 'To',
+  // Notification switches (SPO-237)
+  pnRequests: 'Requests',
+  pnReminders: 'Reminders',
+  pnTeam: 'Team',
+  pnSub:
+    'Switch off a kind to stop its push. The message stays in Spotter. Quiet hours never hold requests.',
 };

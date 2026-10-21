@@ -13,6 +13,7 @@ import { httpsCallable } from 'firebase/functions';
 import { app, db, functions } from './firebase';
 import { currentUid } from './api';
 import { isAppleTouch } from './haptics';
+import { loadPrefs, type PushPrefs } from './pushPrefs';
 import { loadQuiet, type QuietHours } from './quietHours';
 
 const VAPID_KEY = import.meta.env.VITE_FCM_VAPID_KEY as string | undefined;
@@ -73,6 +74,8 @@ async function saveToken(locale: string): Promise<boolean> {
     tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
     /* Q-17: the server holds back chat pushes inside this window (minutes after local midnight, in `tz`). */
     quiet: loadQuiet(),
+    /* SPO-237: the category switches (requests / reminders / team); the server sends no push for a switched-off one. */
+    prefs: loadPrefs(),
     updatedAt: Date.now(),
   });
   return true;
@@ -85,6 +88,17 @@ export async function syncQuietToServer(q: QuietHours): Promise<void> {
   await setDoc(
     doc(db, 'users', uid, 'push', deviceId()),
     { quiet: q, tz: Intl.DateTimeFormat().resolvedOptions().timeZone, updatedAt: Date.now() },
+    { merge: true },
+  );
+}
+
+/** The notification switches changed: tell the server through this device's push doc (no-op without push). */
+export async function syncPrefsToServer(p: PushPrefs): Promise<void> {
+  const uid = currentUid();
+  if (!uid || pushState() !== 'on') return;
+  await setDoc(
+    doc(db, 'users', uid, 'push', deviceId()),
+    { prefs: p, updatedAt: Date.now() },
     { merge: true },
   );
 }

@@ -107,4 +107,10 @@ export const safeUk: typeof import('./coachSafe.en').safeEn = {
     `Без звуку для повідомлень тренера з ${from} до ${to}. Вони все одно лишаються непрочитаними.`,
   qhFrom: 'З',
   qhTo: 'До',
+  // Notification switches (SPO-237)
+  pnRequests: 'Запити',
+  pnReminders: 'Нагадування',
+  pnTeam: 'Команда',
+  pnSub:
+    'Вимкніть вид, щоб не отримувати його push. Повідомлення лишається в Spotter. Тихі години не затримують запити.',
 };

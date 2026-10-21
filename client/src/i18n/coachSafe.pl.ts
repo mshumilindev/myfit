@@ -109,4 +109,10 @@ export const safePl: typeof import('./coachSafe.en').safeEn = {
     `Bez dźwięku dla wiadomości od trenera między ${from} a ${to}. Nadal liczą się jako nieprzeczytane.`,
   qhFrom: 'Od',
   qhTo: 'Do',
+  // Notification switches (SPO-237)
+  pnRequests: 'Prośby',
+  pnReminders: 'Przypomnienia',
+  pnTeam: 'Zespół',
+  pnSub:
+    'Wyłącz rodzaj, aby nie dostawać jego push. Wiadomość zostaje w Spotterze. Godziny ciszy nie wstrzymują próśb.',
 };

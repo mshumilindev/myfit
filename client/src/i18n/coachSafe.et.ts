@@ -104,4 +104,10 @@ export const safeEt: typeof import('./coachSafe.en').safeEn = {
     `Treeneri sõnumid ilma helita ajavahemikus ${from}–${to}. Need jäävad ikka lugemata.`,
   qhFrom: 'Alates',
   qhTo: 'Kuni',
+  // Notification switches (SPO-237)
+  pnRequests: 'Taotlused',
+  pnReminders: 'Meeldetuletused',
+  pnTeam: 'Meeskond',
+  pnSub:
+    'Lülita liik välja, et selle push ei tuleks. Teade jääb Spotterisse. Vaikne aeg taotlusi ei peata.',
 };

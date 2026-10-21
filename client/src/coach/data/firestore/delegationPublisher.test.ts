@@ -171,4 +171,31 @@ describe('keepDelegated', () => {
     stop();
     expect(subs.size).toBe(0);
   });
+
+  it("the service worker's silent sync push runs it at once, past the gap; cleanup stops listening", async () => {
+    const { keepDelegated } = await import('./delegationPublisher');
+    const sw = new EventTarget();
+    Object.defineProperty(navigator, 'serviceWorker', { value: sw, configurable: true });
+    try {
+      const calls: string[] = [];
+      const pub = {
+        sync: async (cid: string) => (calls.push(cid), { ready: [], pending: [], removed: [] }),
+      };
+      const book = {
+        entries: () => [{ cid: 'c1', ring: { epoch: 1 } }] as never,
+        watch: () => () => undefined,
+      };
+      const stop = keepDelegated(book, pub, { everyMs: 1e9, minGapMs: 1e9, now: () => 0 });
+      expect(calls).toHaveLength(1);
+      sw.dispatchEvent(new MessageEvent('message', { data: { type: 'something-else' } }));
+      expect(calls).toHaveLength(1);
+      sw.dispatchEvent(new MessageEvent('message', { data: { type: 'coach-sync' } }));
+      expect(calls).toHaveLength(2);
+      stop();
+      sw.dispatchEvent(new MessageEvent('message', { data: { type: 'coach-sync' } }));
+      expect(calls).toHaveLength(2);
+    } finally {
+      Reflect.deleteProperty(navigator, 'serviceWorker');
+    }
+  });
 });

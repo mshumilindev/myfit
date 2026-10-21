@@ -125,9 +125,17 @@ export function keepDelegated(
   };
   const off = book.watch(() => run(false));
   const timer = setInterval(() => run(true), every);
+  // The server's silent `sync` push (a manager joined the team): the service worker hands it to the open page.
+  const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker : undefined;
+  const onMessage = (e: Event) => {
+    const data = (e as MessageEvent).data as { type?: unknown } | null;
+    if (data && data.type === 'coach-sync') run(true);
+  };
+  sw?.addEventListener?.('message', onMessage);
   run(false);
   return () => {
     off();
     clearInterval(timer);
+    sw?.removeEventListener?.('message', onMessage);
   };
 }
