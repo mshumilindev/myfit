@@ -25,6 +25,8 @@ export interface ScheduleParams {
   /** filters */
   who: string | null;
   gym: string | null;
+  /** a manager's filter: one trainer's clients */
+  trainer: string | null;
   /** legend filters: comma list of hidden kinds (`done,missed,overlap`), see `legend.ts`; null = all shown */
   hide: string | null;
   /** create-from-an-empty-slot form: `day.start[.dur]`, see `grid.ts` */
@@ -41,6 +43,7 @@ const EMPTY: ScheduleParams = {
   req: null,
   who: null,
   gym: null,
+  trainer: null,
   hide: null,
   create: null,
 };
@@ -64,6 +67,7 @@ export function readScheduleParams(hash: string): ScheduleParams {
     req: p.get('req'),
     who: p.get('who'),
     gym: p.get('gym'),
+    trainer: p.get('trainer'),
     hide: p.get('hide'),
     create: p.get('create'),
   };
@@ -81,6 +85,7 @@ export function writeScheduleParams(base: string, p: Partial<ScheduleParams>): s
     'req',
     'who',
     'gym',
+    'trainer',
     'hide',
     'create',
   ] as const) {

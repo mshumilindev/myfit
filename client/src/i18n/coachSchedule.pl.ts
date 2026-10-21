@@ -32,6 +32,8 @@ export const schedulePl: typeof scheduleEn = {
   scAllClients: 'Wszyscy klienci',
   scGymLabel: 'Siłownia',
   scClientLabel: 'Klient',
+  scTrainerLabel: 'Trener',
+  scAllTrainers: 'Wszyscy trenerzy',
   scSummary: sessions,
   scRequestsN: requests,
   scOverlap: (names) => `1 nakładka: ${names}`,
@@ -313,6 +315,9 @@ export const schedulePl: typeof scheduleEn = {
   scReqBy: (who: string) => `Propozycja od: ${who}`,
   scReqByYou: 'Twoja propozycja',
   scReqByManager: (m) => `Propozycja od: ${m} (menedżer)`,
+  scReqByTrainer: (n) => `Propozycja od trenera ${n}`,
+  rfSubManager:
+    'Klient dostanie prośbę w sekcji „Mój trener” i tam odpowie. Nic się nie przeniesie, dopóki jej nie zaakceptuje.',
   rcTitleManager: (m, c) => `${m} prosi klienta ${c} o przeniesienie treningu`,
   scReqExpires: (rel: string) => `Wygasa ${rel}`,
   scConflictH: 'Nakłada się na',

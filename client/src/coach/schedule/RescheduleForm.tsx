@@ -50,7 +50,7 @@ export interface RescheduleFormProps {
   /** after a send: the chat is where the answer shows up */
   onOpenChat?: (clientId: string) => void;
   /** M7: who is asking. `client` = the member's own form (no client picker, the request is `from: 'client'`). Default trainer. */
-  side?: 'trainer' | 'client';
+  side?: 'trainer' | 'client' | 'manager';
   /** M7: words in the asker's voice (the client's form); anything missing falls back to the trainer's copy. */
   copy?: Partial<{
     title: string;
@@ -180,7 +180,7 @@ export function RescheduleForm(p: RescheduleFormProps) {
         const drafts: Omit<RequestDraft, 'id' | 'now'>[] = targets.map((id) => ({
           ...base,
           clientId: id,
-          from: p.side ?? 'trainer',
+          from: p.side === 'client' ? 'client' : 'trainer', // a manager proposes on the trainer's side (the sealed port marks it `via: manager`)
           scope: shared && scope === 'one' ? 'one' : 'all',
           ...(groupKey ? { groupKey } : {}),
         }));
@@ -244,7 +244,7 @@ export function RescheduleForm(p: RescheduleFormProps) {
                 shortDate(dayOfTs(p.counterOf.toStart), locale),
                 coachClock(p.counterOf.toStart),
               )
-            : (p.copy?.sub ?? t.rfSub)}
+            : (p.copy?.sub ?? (p.side === 'manager' ? t.rfSubManager : t.rfSub))}
         </p>
       </div>
 

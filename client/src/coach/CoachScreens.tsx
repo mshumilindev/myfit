@@ -157,7 +157,7 @@ export function CoachScreen({
   if (route.screen === 'schedule')
     return (
       <Suspense fallback={<Loading />}>
-        <ScheduleScreen onNavigate={onNavigate} />
+        <ScheduleScreen onNavigate={onNavigate} manager={manager} />
       </Suspense>
     );
   if (route.screen === 'week')

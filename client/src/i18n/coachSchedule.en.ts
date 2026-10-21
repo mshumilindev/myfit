@@ -28,6 +28,8 @@ export const scheduleEn = {
   scAllClients: 'All clients',
   scGymLabel: 'Gym',
   scClientLabel: 'Client',
+  scTrainerLabel: 'Trainer',
+  scAllTrainers: 'All trainers',
   scSummary: (n: number) => fmt(sessions(n), n),
   scRequestsN: (n: number) => fmt(requests(n), n),
   scOverlap: (names: string) => `1 overlap: ${names}`,
@@ -322,6 +324,9 @@ export const scheduleEn = {
   scReqBy: (who: string) => `Proposed by ${who}`,
   scReqByYou: 'Proposed by you',
   scReqByManager: (m: string) => `Proposed by ${m} (Manager)`,
+  scReqByTrainer: (n: string) => `Proposed by trainer ${n}`,
+  rfSubManager:
+    'The client gets a request in My trainer and answers there. Nothing moves until they accept.',
   rcTitleManager: (m: string, c: string) => `${m} asked ${c} to move a session`,
   scReqExpires: (rel: string) => `Expires ${rel}`,
   scConflictH: 'Overlaps with',

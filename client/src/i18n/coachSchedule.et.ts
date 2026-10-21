@@ -25,6 +25,8 @@ export const scheduleEt: typeof scheduleEn = {
   scAllClients: 'Kõik kliendid',
   scGymLabel: 'Jõusaal',
   scClientLabel: 'Klient',
+  scTrainerLabel: 'Treener',
+  scAllTrainers: 'Kõik treenerid',
   scSummary: sessions,
   scRequestsN: requests,
   scOverlap: (names) => `1 kattuvus: ${names}`,
@@ -304,6 +306,9 @@ export const scheduleEt: typeof scheduleEn = {
   scReqBy: (who: string) => `Pakkus: ${who}`,
   scReqByYou: 'Sinu pakkumine',
   scReqByManager: (m) => `Pakkumine: ${m} (haldur)`,
+  scReqByTrainer: (n) => `Pakkumine: treener ${n}`,
+  rfSubManager:
+    'Klient saab soovi jaotises „Minu treener“ ja vastab seal. Midagi ei nihku, kuni ta nõustub.',
   rcTitleManager: (m, c) => `${m} palub kliendil ${c} treeningut nihutada`,
   scReqExpires: (rel: string) => `Aegub ${rel}`,
   scConflictH: 'Kattub',

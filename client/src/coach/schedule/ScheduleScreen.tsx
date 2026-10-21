@@ -7,7 +7,6 @@ import { Card } from '../../components/ui/Card';
 import { Chip } from '../../components/ui/Chip';
 import { Notice } from '../../components/ui/Notice';
 import { Segmented } from '../../components/ui/Segmented';
-import { Select } from '../../components/ui/Select';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { UndoToast } from '../../components/ui/UndoToast';
 import { useMinWidth, COACH_BREAKPOINT } from '../../components/ui/breakpoints';
@@ -38,7 +37,10 @@ import { dayOfTs, monthStartDay, weekStartDay } from './time';
 import { useSchedule } from './useSchedule';
 import { useScheduleParams } from './useScheduleParams';
 import { WeekGrid } from './WeekGrid';
-import { gymName, scheduleGyms } from './types';
+import { scheduleGyms } from './types';
+import { ScheduleFilters, failText } from './ManagerFilters';
+import { useManagerSchedule } from './managerSchedule';
+import { Tag } from '../../components/ui/Tag';
 import './Schedule.css';
 import { CoachProblemState } from '../BackendNotice';
 import { offlineOrUnknown } from '../data/problem';
@@ -48,7 +50,11 @@ const keepSlot = (
   s: { gymId: string; attendees: { clientId: string }[] },
   gym: string | null,
   who: string | null,
-) => (!gym || s.gymId === gym) && (!who || s.attendees.some((a) => a.clientId === who));
+  team: readonly string[] | null = null,
+) =>
+  (!gym || s.gymId === gym) &&
+  (!who || s.attendees.some((a) => a.clientId === who)) &&
+  (!team || s.attendees.some((a) => team.includes(a.clientId)));
 
 /** The legend: each chip is a filter of the calendar (aria-pressed = shown). Swatch and icon are the card's own (`StateMark`). */
 const LEGEND: { key: LegendKey; label: (t: ScheduleStrings) => string }[] = [
@@ -65,6 +71,8 @@ export interface ScheduleScreenProps {
   /** Stories and tests inject their own; the app uses the configured schedule port. */
   port?: SchedulePort;
   worldPort?: CoachWorldPort;
+  /** A team manager's schedule: every trainer's sessions, a Trainer filter, requests only (no gyms, no calendar settings). */
+  manager?: boolean;
 }
 
 /**
@@ -79,8 +87,13 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
   const { tm } = useTeamT();
   // A manager only: clients whose app has not delegated the schedule key yet are not here ("Waiting for client's app"); null for a trainer
   const teamRows = useManagerClients();
-  const waitingApps = teamRows ? teamRows.filter((r) => !r.ready).length : 0;
   const prm = useScheduleParams();
+  const team = useManagerSchedule(teamRows, !!p.manager);
+  const pool = useMemo(
+    () => (team && prm.trainer ? team.clientsOf(prm.trainer) : null),
+    [team, prm.trainer],
+  );
+  const waitingApps = teamRows ? teamRows.filter((r) => !r.ready).length : 0;
   const sch = useSchedule(p.port, prm.d ?? undefined);
   const people = usePeople(p.worldPort);
   const wide = useMinWidth(COACH_BREAKPOINT);
@@ -109,17 +122,18 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
   const slots = useMemo(
     () =>
       sch.slots.filter(
-        (s) => keepSlot(s, prm.gym, prm.who) && !hidden.has(legendKeyOf(s, false, sch.now)),
+        (s) => keepSlot(s, prm.gym, prm.who, pool) && !hidden.has(legendKeyOf(s, false, sch.now)),
       ),
-    [sch.slots, prm.gym, prm.who, hidden, sch.now],
+    [sch.slots, prm.gym, prm.who, pool, hidden, sch.now],
   );
   const ghosts = useMemo(
     () =>
       sch.ghosts.filter(
         (g) =>
-          keepSlot(g.slot, prm.gym, prm.who) && !hidden.has(legendKeyOf(g.slot, true, sch.now)),
+          keepSlot(g.slot, prm.gym, prm.who, pool) &&
+          !hidden.has(legendKeyOf(g.slot, true, sch.now)),
       ),
-    [sch.ghosts, prm.gym, prm.who, hidden, sch.now],
+    [sch.ghosts, prm.gym, prm.who, pool, hidden, sch.now],
   );
   /* the overlap flag is a legend filter too: off = no warning marks anywhere (the sessions stay) */
   const conflicts = useMemo(
@@ -145,14 +159,14 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
     };
     const inView = (d: number) => d >= from && d <= until;
     for (const s of sch.slots) {
-      if (!keepSlot(s, prm.gym, prm.who) || !inView(dayOfTs(s.start))) continue;
+      if (!keepSlot(s, prm.gym, prm.who, pool) || !inView(dayOfTs(s.start))) continue;
       n[legendKeyOf(s, false, sch.now)] += 1;
       if (s.status !== 'moved' && sch.conflicts.has(s.id)) n.overlap += 1;
     }
     for (const g of sch.ghosts)
-      if (keepSlot(g.slot, prm.gym, prm.who) && inView(dayOfTs(g.start))) n.proposed += 1;
+      if (keepSlot(g.slot, prm.gym, prm.who, pool) && inView(dayOfTs(g.start))) n.proposed += 1;
     return n;
-  }, [sch.slots, sch.ghosts, sch.conflicts, sch.now, prm.gym, prm.who, from, until]);
+  }, [sch.slots, sch.ghosts, sch.conflicts, sch.now, prm.gym, prm.who, pool, from, until]);
   const inRange = slots.filter(
     (s) => s.status !== 'moved' && dayOfTs(s.start) >= range[0] && dayOfTs(s.start) <= range[1],
   );
@@ -225,6 +239,7 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
       }
       onOpenClient={(cid) => p.onNavigate({ screen: 'client', cid })}
       onMessage={goChat}
+      manager={team ?? undefined}
       onJump={(id) => prm.set({ open: id })}
     />
   );
@@ -328,6 +343,7 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
         now={sch.now}
         today={today}
         titleInPanel
+        side={team ? 'manager' : undefined}
         mode={prm.form === 'move' ? 'known' : prm.form}
         slot={prm.form === 'move' ? sch.slots.find((s) => s.id === prm.slot) : undefined}
         clientId={prm.client ?? undefined}
@@ -339,37 +355,25 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
       />
     ) : null;
 
-  const failMsg =
-    state.failed === 'save'
-      ? t.scFailSave
-      : state.failed === 'conflict'
-        ? t.scFailConflict
-        : state.failed === 'request'
-          ? t.scFailRequest
-          : state.failed === 'answer'
-            ? t.scFailAnswer
-            : state.failed === 'expired'
-              ? t.scFailExpired
-              : state.failed === 'vault-locked'
-                ? t.scFailVault
-                : state.failed === 'limit'
-                  ? t.scFailLimit
-                  : null;
+  const failMsg = failText(state.failed, t);
 
   return (
     <Page className="sc-page">
       <Header
         eyebrow={t.scEyebrow}
         title={t.scTitle}
+        pills={team ? <Tag tone="accent">{tm.tmRoleManager}</Tag> : undefined}
         actions={
           wide ? (
             <>
-              <IconButton
-                icon="sliders-horizontal"
-                variant="secondary"
-                label={t.hsOpen}
-                onClick={() => prm.set({ form: 'settings' })}
-              />
+              {!team && (
+                <IconButton
+                  icon="sliders-horizontal"
+                  variant="secondary"
+                  label={t.hsOpen}
+                  onClick={() => prm.set({ form: 'settings' })}
+                />
+              )}
               <Button variant="secondary" icon="plus" onClick={() => prm.set({ form: 'oneoff' })}>
                 {t.scOneOff}
               </Button>
@@ -403,11 +407,13 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
           </Button>
           {!wide && (
             <>
-              <IconButton
-                icon="sliders-horizontal"
-                label={t.hsOpen}
-                onClick={() => prm.set({ form: 'settings' })}
-              />
+              {!team && (
+                <IconButton
+                  icon="sliders-horizontal"
+                  label={t.hsOpen}
+                  onClick={() => prm.set({ form: 'settings' })}
+                />
+              )}
               <IconButton
                 icon="calendar-plus"
                 label={t.scAddSessions}
@@ -426,34 +432,14 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
             { value: 'month', label: t.scMonth },
           ]}
         />
-        <div className="sc-toolbar-filters">
-          <Select
-            labelInline={wide}
-            label={t.scGymLabel}
-            value={prm.gym ?? ''}
-            onChange={(e) => prm.set({ gym: e.target.value || null, open: null })}
-          >
-            <option value="">{t.scAllGyms}</option>
-            {filterGyms.map((g) => (
-              <option key={g.id} value={g.id}>
-                {gymName(g.id)}
-              </option>
-            ))}
-          </Select>
-          <Select
-            labelInline={wide}
-            label={t.scClientLabel}
-            value={prm.who ?? ''}
-            onChange={(e) => prm.set({ who: e.target.value || null, open: null })}
-          >
-            <option value="">{t.scAllClients}</option>
-            {people.list.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
-        </div>
+        <ScheduleFilters
+          t={t}
+          wide={wide}
+          prm={prm}
+          gyms={filterGyms}
+          people={people}
+          team={team}
+        />
       </Toolbar>
 
       <div className="sc-notices">
