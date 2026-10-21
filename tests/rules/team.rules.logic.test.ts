@@ -83,12 +83,13 @@ const world = (): Record<string, Doc> => ({
   },
 });
 
+const NOW = 1_699_900_000_000; // request.time: just before the sample timing moments
 const ok = (
   op: Op,
   path: string,
   auth: Ctx['auth'],
   o: { data?: Doc; db?: Record<string, Doc> } = {},
-) => decide(rules, op, path, { auth, db: o.db ?? world(), data: o.data, time: 1_000_000 }).allowed;
+) => decide(rules, op, path, { auth, db: o.db ?? world(), data: o.data, time: NOW }).allowed;
 
 const ms = (o: Doc = {}): Doc => sched({ updatedBy: 'm1', ...o });
 const sched = (over: Doc = {}): Doc => ({
@@ -362,5 +363,106 @@ describe('manager role plumbing', () => {
     expect(ok('update', 'users/c1', client, { data: { role: 'manager', firstName: 'x' } })).toBe(
       false,
     );
+  });
+});
+
+describe('security review fixes (M3 M5 M6 L1 L5 L9)', () => {
+  const OLD = 'oldconvidabcdefghijklmnopqr';
+  const withOld = (): Record<string, Doc> => ({
+    ...world(),
+    [`conversations/${OLD}`]: { clientId: 'c1', trainerId: 't0', keyEpoch: 1, active: false },
+    [`conversations/${OLD}/requests/r1`]: { status: 'pending' },
+    [`conversations/${OLD}/delegations/m1`]: deleg(),
+  });
+
+  it('M5: after a rotation (conversation epoch 2, relationship epoch 1) the manager writes the CURRENT epoch only', () => {
+    const rotated = world();
+    rotated['coaching/c1'] = { trainerId: 't1', status: 'active', keyEpoch: 1, convEpoch: 2 };
+    rotated[`conversations/${CID}`] = {
+      clientId: 'c1',
+      trainerId: 't1',
+      keyEpoch: 2,
+      active: true,
+    };
+    expect(ok('update', 'schedules/c1', mgr, { db: rotated, data: ms({ keyEpoch: 2 }) })).toBe(
+      true,
+    );
+    expect(ok('update', 'schedules/c1', mgr, { db: rotated, data: ms({ keyEpoch: 1 }) })).toBe(
+      false,
+    );
+    // before the mirror exists the relationship epoch decides (old behaviour)
+    expect(ok('update', 'schedules/c1', mgr, { data: ms({ keyEpoch: 1 }) })).toBe(true);
+    // and a manager whose delegation is of epoch 1 cannot read it any more
+    const d = { ...rotated, [`conversations/${CID}/delegations/m1`]: deleg({ epoch: 1 }) };
+    expect(ok('get', `conversations/${CID}/delegations/m1`, mgr, { db: d })).toBe(false);
+    const d2 = { ...rotated, [`conversations/${CID}/delegations/m1`]: deleg({ epoch: 2 }) };
+    expect(ok('get', `conversations/${CID}/delegations/m1`, mgr, { db: d2 })).toBe(true);
+  });
+
+  it('M6: a manager of the NEW trainer team cannot read requests or delegations of an old conversation', () => {
+    const w = withOld();
+    expect(ok('get', `conversations/${OLD}/requests/r1`, mgr, { db: w })).toBe(false);
+    expect(ok('get', `conversations/${OLD}/delegations/m1`, mgr, { db: w })).toBe(false);
+    // the live conversation is unchanged, and the client still reads its own old one
+    expect(ok('get', `conversations/${CID}/requests/r1`, mgr, { db: w })).toBe(true);
+    expect(ok('get', `conversations/${OLD}/delegations/m1`, client, { db: w })).toBe(true);
+  });
+
+  it('L9: a client does not see removed members; active ones stay readable', () => {
+    const w = world();
+    w['teams/t1/members/m2'] = { role: 'manager', status: 'removed' };
+    expect(ok('get', 'teams/t1/members/m2', client, { db: w })).toBe(false);
+    expect(ok('get', 'teams/t1/members/m1', client, { db: w })).toBe(true);
+    expect(ok('get', 'teams/t1/members/m2', owner, { db: w })).toBe(true);
+  });
+
+  it('L1: a suspended member or client reads nothing of the team', () => {
+    const w = world();
+    w['users/m1'] = { role: 'manager', status: 'suspended' };
+    w['users/c1'] = { role: 'member', status: 'suspended' };
+    expect(ok('get', 'teams/t1', mgr, { db: w })).toBe(false);
+    expect(ok('get', 'teams/t1/members/m2', mgr, { db: w })).toBe(false);
+    expect(ok('get', 'teams/t1/members/m1', client, { db: w })).toBe(false);
+  });
+
+  it('L5: the only client write to a notice is readAt, as an integer', () => {
+    const w = { ...world(), 'users/c1/notices/n1': { kind: 'team', readAt: null, createdAt: 1 } };
+    const upd = (readAt: unknown) =>
+      ok('update', 'users/c1/notices/n1', client, {
+        db: w,
+        data: { kind: 'team', readAt, createdAt: 1 },
+      });
+    expect(upd(5)).toBe(true);
+    expect(upd(null)).toBe(false);
+    expect(upd('now')).toBe(false);
+    expect(upd(1.5)).toBe(false);
+  });
+
+  it('M3: timing moments must be near now (starts now-1d..now+15d, unmarked now-31d..now+1d)', () => {
+    const w = (timing: unknown) => ok('update', 'schedules/c1', owner, { data: sched({ timing }) });
+    const D = 86_400_000;
+    const t = (o: Doc) => ({ starts: [], unmarked: [], dueAt: 1, ...o });
+    expect(w(t({ starts: [NOW + 14 * D], unmarked: [NOW - 30 * D] }))).toBe(true);
+    expect(w(t({ starts: [NOW + 400 * D] }))).toBe(false);
+    expect(w(t({ starts: [NOW - 5 * D] }))).toBe(false);
+    expect(w(t({ starts: [1] }))).toBe(false);
+    expect(w(t({ unmarked: [NOW - 90 * D] }))).toBe(false);
+    expect(w(t({ unmarked: [NOW + 5 * D] }))).toBe(false);
+    expect(w(t({ starts: [], unmarked: [] }))).toBe(true);
+  });
+});
+
+describe('L4: display names written by their owner are bounded', () => {
+  const upd = (d: Doc) =>
+    ok('update', 'users/c1', client, {
+      data: { role: 'member', status: 'active', ...d, updatedAt: 5 },
+    });
+  it('a normal, empty or null name passes; a huge or non-text one does not', () => {
+    expect(upd({ firstName: 'Oleh', lastName: 'K' })).toBe(true);
+    expect(upd({ firstName: null })).toBe(true);
+    expect(upd({ firstName: 'x'.repeat(60) })).toBe(true);
+    expect(upd({ firstName: 'x'.repeat(61) })).toBe(false);
+    expect(upd({ lastName: 'y'.repeat(5000) })).toBe(false);
+    expect(upd({ firstName: 5 })).toBe(false);
   });
 });

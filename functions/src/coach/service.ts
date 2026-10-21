@@ -5,6 +5,7 @@
  */
 import { ACTIVITY_RETENTION_MS, logActivity, teamIdOf } from './activity';
 import type { Doc, Kv } from './kv';
+import { safeName } from './guards';
 import { inviteUrl } from './inviteLink';
 import type { CoachNoticeKind } from './pushPolicy';
 import type { PushTextKey } from './pushText';
@@ -107,7 +108,7 @@ interface UserRec {
   updatedAt?: number;
 }
 const displayOf = (u: UserRec | null): string =>
-  u ? [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || '' : '';
+  u ? safeName([u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || '') : '';
 async function userName(kv: Kv, uid: string): Promise<{ name: string; role: Role | null }> {
   const u = (await kv.get(`users/${uid}`)) as UserRec | null;
   if (!u) return { name: '', role: null };
@@ -1106,6 +1107,8 @@ export async function afterMessageCreated(ctx: Ctx, cid: string, mid: string): P
   await ctx.notify?.(to, 'message');
 }
 
+export const NOTICE_RETENTION_MS = 30 * 86_400_000;
+
 export interface SweepResult {
   requestsExpired: number;
   messagesTombstoned: number;
@@ -1115,6 +1118,8 @@ export interface SweepResult {
   activityPurged: number;
   rotationFlagged: number;
   rateLimitsPurged: number;
+  /** user notices past their retention (30 days; reminders 24 h after the session start) */
+  noticesPurged: number;
 }
 
 /** The hourly job: request expiry, straggling deletes, audit retention, 90-day key rotation flags. */
@@ -1129,6 +1134,7 @@ export async function sweep(ctx: Ctx): Promise<SweepResult> {
     activityPurged: 0,
     rotationFlagged: 0,
     rateLimitsPurged: 0,
+    noticesPurged: 0,
   };
 
   const pending = await kv.group('requests', {
@@ -1196,6 +1202,27 @@ export async function sweep(ctx: Ctx): Promise<SweepResult> {
     out.activityPurged++;
   }
 
+  // Notices are written by functions and clients cannot delete them (rules), so nothing else ever removes them. A reminder
+  // carries its session's start (plaintext moment): it goes 24 h after that start; every notice goes after 30 days.
+  const oldNotices = await kv.group('notices', {
+    where: [['createdAt', '<', now - NOTICE_RETENTION_MS]],
+    limit: 400,
+  });
+  const pastReminders = await kv.group('notices', {
+    where: [
+      ['kind', '==', 'reminder'],
+      ['start', '<', now - DAY],
+    ],
+    limit: 400,
+  });
+  for (const n of [
+    ...oldNotices,
+    ...pastReminders.filter((p) => !oldNotices.some((o) => o.path === p.path)),
+  ]) {
+    await kv.del(n.path);
+    out.noticesPurged++;
+  }
+
   const stale = await kv.list('rateLimits', { where: [['updatedAt', '<', now - DAY]], limit: 400 });
   for (const r of stale) {
     await kv.del(r.path);
@@ -1225,6 +1252,15 @@ export async function onConversationKey(
   after: Doc | null,
 ): Promise<boolean> {
   if (!after) return false;
+  // The schedule rules compare a manager's write with the PUBLISHED conversation epoch, but they can only reach the
+  // coaching document (the cid is an opaque hash): mirror the epoch there whenever it changes.
+  if (
+    Number(after.keyEpoch ?? 0) !== Number(before?.keyEpoch ?? 0) &&
+    typeof after.clientId === 'string' &&
+    Number(after.keyEpoch ?? 0) > 0 &&
+    (await ctx.kv.get(`coaching/${after.clientId}`))
+  )
+    await ctx.kv.merge(`coaching/${after.clientId}`, { convEpoch: Number(after.keyEpoch) });
   if (Number(after.keyEpoch ?? 0) > Number(before?.keyEpoch ?? 0)) {
     await ctx.kv.merge(convPath(cid), { rotatedAt: ctx.now(), rotateDue: false, keyStale: false });
     return true;

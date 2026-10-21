@@ -68,6 +68,7 @@ service cloud.firestore {
     }
     function isActiveMemberOf(teamId) {
       return isSignedIn()
+        && notSuspended()
         && exists(/databases/$(database)/documents/teams/$(teamId)/members/$(request.auth.uid))
         && teamMember(teamId, request.auth.uid).get('status', '') == 'active';
     }
@@ -258,7 +259,12 @@ service cloud.firestore {
       // and role/status/trainer (privilege) change via functions.
       allow update: if isSelf(userId)
         && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['firstName', 'lastName', 'avatarExt', 'updatedAt']);
+             .hasOnly(['firstName', 'lastName', 'avatarExt', 'updatedAt'])
+        // display names are copied into other people's notices: bounded text (the profile function caps them tighter)
+        && (request.resource.data.get('firstName', null) == null
+            || (request.resource.data.firstName is string && request.resource.data.firstName.size() <= 60))
+        && (request.resource.data.get('lastName', null) == null
+            || (request.resource.data.lastName is string && request.resource.data.lastName.size() <= 60));
 
       // Tracker data — a workout is one document with nested exercises/sets.
       match /workouts/{workoutId} {
@@ -367,7 +373,8 @@ service cloud.firestore {
       match /notices/{noticeId} {
         allow read: if isSelf(userId);
         allow update: if isSelf(userId)
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt']);
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt'])
+          && request.resource.data.readAt is int;
         allow create, delete: if false;
       }
 
@@ -546,7 +553,9 @@ service cloud.firestore {
       // (not expressible in rules). The other party changes only `status`/`decidedAt`, also through the callable.
       // Clients and trainers can read, never write.
       match /requests/{rid} {
-        allow read: if inConv(cid) || isTeamManagerOf(convOf(cid).clientId);
+        allow read: if inConv(cid)
+          || (isTeamManagerOf(convOf(cid).clientId)
+              && coachingOf(convOf(cid).clientId).trainerId == convOf(cid).trainerId);
         allow create, update, delete: if false;
       }
 
@@ -555,8 +564,9 @@ service cloud.firestore {
       // do this (their keys are non-extractable) and never writes here. The manager reads only their own document; the
       // client reads and deletes (a removed manager's document goes away) and nobody else touches it.
       match /delegations/{managerUid} {
-        allow read: if isSelf(managerUid) && isTeamManagerOf(convOf(cid).clientId)
-          && resource.data.epoch == convOf(cid).get('keyEpoch', 0)
+        allow read: if (isSelf(managerUid) && isTeamManagerOf(convOf(cid).clientId)
+            && coachingOf(convOf(cid).clientId).trainerId == convOf(cid).trainerId
+            && resource.data.epoch == convOf(cid).get('keyEpoch', 0))
           || request.auth.uid == convOf(cid).clientId;
         allow create, update: if activeConv(cid)
           && request.auth.uid == convOf(cid).clientId
@@ -609,20 +619,27 @@ service cloud.firestore {
     function momentsOnly(l) {
       return l is list && l.size() <= 12 && (l.size() <= 0 || (l[0] is int && l[0] > 0)) && (l.size() <= 1 || (l[1] is int && l[1] > 0)) && (l.size() <= 2 || (l[2] is int && l[2] > 0)) && (l.size() <= 3 || (l[3] is int && l[3] > 0)) && (l.size() <= 4 || (l[4] is int && l[4] > 0)) && (l.size() <= 5 || (l[5] is int && l[5] > 0)) && (l.size() <= 6 || (l[6] is int && l[6] > 0)) && (l.size() <= 7 || (l[7] is int && l[7] > 0)) && (l.size() <= 8 || (l[8] is int && l[8] > 0)) && (l.size() <= 9 || (l[9] is int && l[9] > 0)) && (l.size() <= 10 || (l[10] is int && l[10] > 0)) && (l.size() <= 11 || (l[11] is int && l[11] > 0));
     }
+    function momentsIn(l, lo, hi) {
+      return l is list && l.size() <= 12 && (l.size() <= 0 || (l[0] is int && l[0] > lo && l[0] < hi)) && (l.size() <= 1 || (l[1] is int && l[1] > lo && l[1] < hi)) && (l.size() <= 2 || (l[2] is int && l[2] > lo && l[2] < hi)) && (l.size() <= 3 || (l[3] is int && l[3] > lo && l[3] < hi)) && (l.size() <= 4 || (l[4] is int && l[4] > lo && l[4] < hi)) && (l.size() <= 5 || (l[5] is int && l[5] > lo && l[5] < hi)) && (l.size() <= 6 || (l[6] is int && l[6] > lo && l[6] < hi)) && (l.size() <= 7 || (l[7] is int && l[7] > lo && l[7] < hi)) && (l.size() <= 8 || (l[8] is int && l[8] > lo && l[8] < hi)) && (l.size() <= 9 || (l[9] is int && l[9] > lo && l[9] < hi)) && (l.size() <= 10 || (l[10] is int && l[10] > lo && l[10] < hi)) && (l.size() <= 11 || (l[11] is int && l[11] > lo && l[11] < hi));
+    }
     function validTiming(t) {
       return t == null || (t is map
         && t.keys().hasOnly(['starts', 'unmarked', 'dueAt'])
         && momentsOnly(t.starts)
         && momentsOnly(t.unmarked)
+        // bounds (the client writes at most 14 days ahead and 3 days back): starts now-1d..now+15d, unmarked now-31d..now+1d
+        && momentsIn(t.starts, request.time.toMillis() - 86400000, request.time.toMillis() + 15 * 86400000)
+        && momentsIn(t.unmarked, request.time.toMillis() - 31 * 86400000, request.time.toMillis() + 86400000)
         && t.dueAt is int && t.dueAt >= 0);
     }
     // Who saved it: optional for the trainer (older apps), required and truthful for a manager, who also may only write
-    // under the key epoch that is current (a stale or garbage write from a removed/rotated manager is refused).
+    // under the key epoch that is current (`convEpoch` = the published conversation key epoch, mirrored onto coaching by the
+    // conversation trigger because rules cannot derive the opaque cid; before the first mirror: the relationship epoch). A stale or garbage write from a removed/rotated manager is refused).
     function validWriter(clientId, d) {
       return d.get('updatedBy', request.auth.uid) == request.auth.uid
         && (!isTeamManagerOf(clientId)
           || (d.get('updatedBy', '') == request.auth.uid
-            && d.keyEpoch == coachingOf(clientId).get('keyEpoch', 1)));
+            && d.keyEpoch == coachingOf(clientId).get('convEpoch', coachingOf(clientId).get('keyEpoch', 1))));
     }
     match /schedules/{clientId} {
       allow read: if isSelf(clientId) || isActiveCoachOf(clientId) || isTeamManagerOf(clientId);
@@ -813,6 +830,7 @@ service cloud.firestore {
     //    when the owner has set activityScope == 'all' for them.
     function clientOfTeam(teamId) {
       return isSignedIn()
+        && notSuspended()
         && exists(/databases/$(database)/documents/coaching/$(request.auth.uid))
         && coachingOf(request.auth.uid).get('status', '') == 'active'
         && teamOf(coachingOf(request.auth.uid).trainerId) == teamId;
@@ -821,7 +839,8 @@ service cloud.firestore {
       allow read: if isSelf(teamId) || isActiveMemberOf(teamId);
       allow write: if false;
       match /members/{memberUid} {
-        allow read: if isSelf(teamId) || isSelf(memberUid) || isActiveMemberOf(teamId) || clientOfTeam(teamId);
+        allow read: if isSelf(teamId) || isSelf(memberUid) || isActiveMemberOf(teamId)
+          || (clientOfTeam(teamId) && resource.data.get('status', '') == 'active');
         allow write: if false;
       }
       match /acl/{memberUid} {

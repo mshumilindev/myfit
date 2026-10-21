@@ -9,6 +9,7 @@
 import type { Ctx } from './service';
 import { CLIENT_SPOTTER_KINDS, nameOf, SPOTTER_KINDS } from './team';
 import { localDate, localMinutes } from './pushPolicy';
+import { DAY_MS, REMINDERS_PER_DAY, takeSlot } from './guards';
 import { DAY } from './logic';
 
 export const REMIND_BEFORE = 18 * 3_600_000;
@@ -22,6 +23,19 @@ interface Timing {
   unmarked: number[];
   dueAt: number;
 }
+
+/**
+ * The moments a writer may ask for (the rules bound them too): starts in now-1 d .. now+15 d, unmarked ends in now-31 d ..
+ * now+1 d. Anything else is ignored, so a writer cannot make the job act on the distant past or future.
+ */
+const inRange = (n: number, lo: number, hi: number) => n > lo && n < hi;
+export const boundedStarts = (l: number[], now: number) =>
+  l.filter((n) => inRange(n, now - DAY_MS, now + 15 * DAY_MS));
+export const boundedUnmarked = (l: number[], now: number) =>
+  l.filter((n) => inRange(n, now - 31 * DAY_MS, now + DAY_MS));
+/** one person gets at most REMINDERS_PER_DAY reminder / unmarked notices (and pushes) per UTC day */
+const roomFor = (ctx: Ctx, uid: string, now: number) =>
+  takeSlot(ctx.kv, `rem-${uid}-${Math.floor(now / DAY_MS)}`, now, REMINDERS_PER_DAY);
 
 const nums = (x: unknown): number[] =>
   Array.isArray(x) ? x.filter((n): n is number => typeof n === 'number' && Number.isFinite(n)) : [];
@@ -55,7 +69,10 @@ export async function runReminders(ctx: Ctx): Promise<RemindersResult> {
     const clientId = r.id;
     const trainerId = String(r.data.trainerId ?? '');
     const raw = (r.data.timing ?? {}) as Partial<Timing>;
-    const t = { starts: nums(raw.starts), unmarked: nums(raw.unmarked) };
+    const t = {
+      starts: boundedStarts(nums(raw.starts), now),
+      unmarked: boundedUnmarked(nums(raw.unmarked), now),
+    };
     out.schedules++;
     const c = (await kv.get(`coaching/${clientId}`)) as {
       status?: string;
@@ -68,6 +85,7 @@ export async function runReminders(ctx: Ctx): Promise<RemindersResult> {
         if (at > now || now - at > STALE || s <= now) continue;
         const id = `rm-${clientId}-${s}`;
         if (await kv.get(`users/${clientId}/reminderLog/${id}`)) continue;
+        if (!(await roomFor(ctx, clientId, now))) continue;
         await kv.set(`users/${clientId}/reminderLog/${id}`, {
           start: s,
           sentAt: now,
@@ -95,6 +113,7 @@ export async function runReminders(ctx: Ctx): Promise<RemindersResult> {
           for (const uid of who) {
             const id = `um-${clientId}-${e}`;
             if (await kv.get(`users/${uid}/notices/${id}`)) continue;
+            if (!(await roomFor(ctx, uid, now))) continue;
             await kv.set(`users/${uid}/notices/${id}`, {
               id,
               kind: 'unmarked',
@@ -177,6 +196,7 @@ export async function runUnanswered(ctx: Ctx): Promise<number> {
     const day = Math.floor((now - Number(r.data.createdAt)) / UNANSWERED_AFTER);
     const id = `rq-${r.id}-${day}`;
     if (await kv.get(`users/${to}/notices/${id}`)) continue;
+    if (!(await roomFor(ctx, to, now))) continue;
     const name =
       to === conv.trainerId ? nameOf((await kv.get(`users/${conv.clientId}`)) as never) : '';
     await kv.set(`users/${to}/notices/${id}`, {

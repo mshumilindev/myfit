@@ -55,8 +55,12 @@ export async function logActivity(
   teamId: string,
   now: number,
   e: Omit<ActivityEntry, 'id' | 'ts'>,
+  /** a caller-chosen deterministic id (an idempotency key): the same key upserts the same entry */
+  fixedId?: string,
 ): Promise<void> {
-  const id = `${now}-${e.kind}-${(e.refId ?? e.clientId ?? '').slice(0, 24)}-${e.actorUid.slice(0, 8)}`;
+  const id =
+    fixedId ??
+    `${now}-${e.kind}-${(e.refId ?? e.clientId ?? '').slice(0, 24)}-${e.actorUid.slice(0, 8)}`;
   const entry: ActivityEntry = { ...e, id, ts: now };
   // drop undefined fields (Firestore rejects them)
   await kv.set(

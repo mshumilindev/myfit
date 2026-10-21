@@ -10,6 +10,7 @@
  * the pending list, the accepting account is whoever opens the link signed in. Only the owner trainer removes a
  * manager; anyone else may leave. Nothing here handles keys or sealed data (the client device delegates them).
  */
+import { safeName, takeSlot, HOUR, REPORTS_PER_HOUR } from './guards';
 import { REPORTED_KINDS, logActivity, type ActivityEntry, type ReportedKind } from './activity';
 import { teamInviteUrl } from './inviteLink';
 import { DAY, conversationId, isUid } from './logic';
@@ -67,7 +68,7 @@ interface InviteRec {
 }
 
 export const nameOf = (u: UserRec | null): string =>
-  u ? [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || '' : '';
+  u ? safeName([u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || '') : '';
 
 /** The team the signed-in person belongs to and their member record; permission-denied when they have none. */
 async function myTeam(
@@ -292,6 +293,9 @@ export async function teamAccept(
     await syncTeamClients(ctx, i.teamId);
     await tellClientsOfTeamChange(ctx, i.teamId, actor.uid, `tj-${i.id}`);
   }
+  // a trainer joins a team that already has managers: their clients' devices will now delegate to those managers
+  if (i.role === 'trainer' && (await teamHasManager(ctx, i.teamId)))
+    await tellClientsOfTeamChange(ctx, i.teamId, actor.uid, `tj-${i.id}`, actor.uid);
   return joined;
 }
 
@@ -309,6 +313,8 @@ async function tellClientsOfTeamChange(
   teamId: string,
   managerUid: string,
   key: string,
+  /** a TRAINER joined or left: only that trainer's clients are told (their keys reach the team's managers) */
+  onlyTrainer?: string,
 ): Promise<void> {
   try {
     const name = nameOf((await ctx.kv.get(`users/${managerUid}`)) as UserRec | null);
@@ -316,11 +322,13 @@ async function tellClientsOfTeamChange(
     const members = (await ctx.kv.list(`teams/${teamId}/members`)).map(
       (r) => r.data as unknown as MemberRec,
     );
-    for (const m of members) {
-      if (m.role !== 'trainer' || m.status !== 'active') continue;
+    const trainers = onlyTrainer
+      ? [onlyTrainer]
+      : members.filter((m) => m.role === 'trainer' && m.status === 'active').map((m) => m.uid);
+    for (const trainerUid of trainers) {
       const rows = await ctx.kv.list('coaching', {
         where: [
-          ['trainerId', '==', m.uid],
+          ['trainerId', '==', trainerUid],
           ['status', '==', 'active'],
         ],
         limit: TEAM_FANOUT_CAP,
@@ -336,6 +344,13 @@ async function tellClientsOfTeamChange(
   } catch {
     /* a failed notice never fails the membership change */
   }
+}
+
+/** Does the team have an active manager (so a trainer's clients delegate their keys to someone besides the trainer)? */
+async function teamHasManager(ctx: Ctx, teamId: string): Promise<boolean> {
+  return (await ctx.kv.list(`teams/${teamId}/members`)).some(
+    (r) => r.data.role === 'manager' && r.data.status === 'active',
+  );
 }
 
 /** A silent `sync` push to every client of every active trainer of the team (best effort, capped). */
@@ -433,6 +448,8 @@ async function endMembership(
   await dropDelegations(ctx, teamId, target);
   if (target.role === 'manager')
     await tellClientsOfTeamChange(ctx, teamId, target.uid, `tl-${target.uid}-${now}`);
+  else if (await teamHasManager(ctx, teamId))
+    await tellClientsOfTeamChange(ctx, teamId, target.uid, `tl-${target.uid}-${now}`, target.uid);
 }
 
 /**
@@ -919,6 +936,10 @@ export async function teamLogActivity(
   if (!REPORTED_KINDS.includes(kind as ReportedKind))
     return fail('invalid-argument', 'invalid-kind');
   if (!isUid(clientId)) return fail('invalid-argument', 'invalid-client');
+  // optional client-generated idempotency key: the same key is the same report (journal entry and notices upsert)
+  const opId = body.opId;
+  if (opId !== undefined && !(typeof opId === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(opId)))
+    return fail('invalid-argument', 'invalid-op');
   const { teamId, me } = await myTeam(ctx, actor);
   if (me.role !== 'manager') return fail('permission-denied', 'managers-only');
   const c = (await ctx.kv.get(`coaching/${clientId}`)) as {
@@ -928,19 +949,28 @@ export async function teamLogActivity(
   if (!c || c.status !== 'active' || !c.trainerId) return fail('not-found', 'no-relationship');
   const tm = (await ctx.kv.get(`teams/${teamId}/members/${c.trainerId}`)) as MemberRec | null;
   if (!tm || tm.status !== 'active') return fail('permission-denied', 'not-your-team');
-  await logActivity(ctx.kv, teamId, ctx.now(), {
-    actorUid: actor.uid,
-    role: 'manager',
-    kind: kind as ReportedKind,
-    clientId,
-  });
+  const now = ctx.now();
+  const entryId = typeof opId === 'string' ? `op-${opId}` : undefined;
+  // a replay of a report already recorded changes nothing and tells nobody again
+  if (entryId && (await ctx.kv.get(`teams/${teamId}/activity/${entryId}`))) return { ok: true };
+  // per-manager hourly cap: a runaway or hostile device cannot flood the journal and the people's notices
+  if (
+    !(await takeSlot(ctx.kv, `act-${actor.uid}-${Math.floor(now / HOUR)}`, now, REPORTS_PER_HOUR))
+  )
+    return fail('resource-exhausted', 'too-many-reports');
+  await logActivity(
+    ctx.kv,
+    teamId,
+    now,
+    { actorUid: actor.uid, role: 'manager', kind: kind as ReportedKind, clientId },
+    entryId,
+  );
   // done / missed / cancelled by a MANAGER: the client and the trainer hear of it in Spotter (names only, no times: those
   // stay in the sealed schedule). A trainer who is the actor is not told about their own action (managers only reach here).
   if (kind === 'session-done' || kind === 'session-missed' || kind === 'session-cancelled') {
-    const now = ctx.now();
     const mgrName = nameOf((await ctx.kv.get(`users/${actor.uid}`)) as UserRec | null);
     const cName = nameOf((await ctx.kv.get(`users/${clientId}`)) as UserRec | null);
-    const nid = `${kind}-${clientId}-${now}`;
+    const nid = opId ? `${kind}-${opId}` : `${kind}-${clientId}-${now}`;
     await notice(ctx.kv, clientId, kind, actor.uid, now, nid, mgrName || null);
     await notice(ctx.kv, c.trainerId, kind, actor.uid, now, nid, cName || null);
     await ctx.notify?.(clientId, 'team');
@@ -967,7 +997,12 @@ export async function teamActivity(
   ctx: Ctx,
   actor: Actor,
   body: Record<string, unknown> = {},
-): Promise<{ entries: ActivityRow[]; scope: ActivityScope | 'owner'; next: number | null }> {
+): Promise<{
+  entries: ActivityRow[];
+  scope: ActivityScope | 'owner';
+  next: number | null;
+  nextId: string | null;
+}> {
   const { teamId, me, owner } = await myTeam(ctx, actor);
   if (!owner && me.role !== 'manager') return fail('permission-denied', 'not-allowed');
   const limit = Math.min(Math.max(Number(body.limit) || 100, 1), 200);
@@ -983,15 +1018,35 @@ export async function teamActivity(
     : acl?.activityScope === 'all'
       ? 'all'
       : 'own';
-  const where: [string, '==' | '<', unknown][] = [];
-  if (scope === 'own') where.push(['actorUid', '==', actor.uid]);
-  if (before !== null) where.push(['ts', '<', before]);
-  const rows = await ctx.kv.list(`teams/${teamId}/activity`, {
-    where,
+  // Keyset cursor over (ts desc, id desc): `before` is the `next` of the previous page and `beforeId` its `nextId`. Without
+  // `beforeId` (an older caller) the cursor is the timestamp alone, which skips rows that share the boundary millisecond.
+  const beforeId = typeof body.beforeId === 'string' ? body.beforeId : null;
+  const mine: [string, '==' | '<', unknown][] =
+    scope === 'own' ? [['actorUid', '==', actor.uid]] : [];
+  const rowsAt = async (ts: number) =>
+    (await ctx.kv.list(`teams/${teamId}/activity`, { where: [...mine, ['ts', '==', ts]] })).map(
+      (r) => r.data as unknown as ActivityEntry,
+    );
+  const newer = (a: ActivityEntry, b: ActivityEntry) => b.ts - a.ts || (a.id < b.id ? 1 : -1);
+  let merged: ActivityEntry[] = [];
+  if (before !== null && beforeId !== null)
+    merged.push(...(await rowsAt(before)).filter((e) => e.id < beforeId));
+  const rest = await ctx.kv.list(`teams/${teamId}/activity`, {
+    where: [...mine, ...(before !== null ? ([['ts', '<', before]] as const) : [])],
     orderBy: ['ts', 'desc'],
     limit: limit + 1,
   });
-  const more = rows.length > limit;
+  merged.push(...rest.map((r) => r.data as unknown as ActivityEntry));
+  merged.sort(newer);
+  // the page boundary may cut through rows that share one millisecond: take that whole group so the order is stable
+  if (merged.length > limit && merged[limit].ts === merged[limit - 1].ts) {
+    const ts = merged[limit - 1].ts;
+    const group = (await rowsAt(ts)).filter(
+      (e) => before === null || ts < before || beforeId === null || e.id < beforeId,
+    );
+    merged = [...merged.filter((e) => e.ts !== ts), ...group].sort(newer);
+  }
+  const more = merged.length > limit;
   const names = new Map<string, string>();
   const nameFor = async (uid: string | undefined): Promise<string> => {
     if (!uid) return '';
@@ -1000,7 +1055,7 @@ export async function teamActivity(
     return names.get(uid) ?? '';
   };
   const entries: ActivityRow[] = [];
-  const all = rows.slice(0, limit).map((r) => r.data as unknown as ActivityEntry);
+  const all = merged.slice(0, limit);
   const liveStatusOf = async (e: ActivityEntry): Promise<string | undefined> => {
     if (e.kind === 'removal-request' && e.refId) {
       const r = await ctx.kv.get(`teamRequests/${e.refId}`);
@@ -1024,7 +1079,8 @@ export async function teamActivity(
       ...(live ? { liveStatus: live } : {}),
     });
   }
-  return { entries, scope, next: more && all.length ? all[all.length - 1].ts : null };
+  const last = more && all.length ? all[all.length - 1] : null;
+  return { entries, scope, next: last ? last.ts : null, nextId: last ? last.id : null };
 }
 
 /* ---- Spotter: the service messages of the team (SPO-236) -------------------------------------------------------- */
