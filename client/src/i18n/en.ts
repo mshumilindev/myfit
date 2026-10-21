@@ -911,6 +911,8 @@ export const en = {
   statSessions: 'Sessions',
   statVolume: 'Volume',
   statNewPrs: 'New PRs',
+  widgetLibraryTitle: 'Widget library',
+  rcPrs: 'PRs',
   statStreak: 'Streak',
   statDays: (n: number) => `${n} d`,
   weeklyVolume: 'Weekly volume',

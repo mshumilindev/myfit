@@ -287,7 +287,7 @@ function StatRow({ r, t }: { r: Recap; t: T }) {
       </div>
       <div>
         <div className="rc-num rc-hs-n">{r.prCount}</div>
-        <div className="rc-lbl ut-accent-lo umt-6">PRs</div>
+        <div className="rc-lbl ut-accent-lo umt-6">{t.rcPrs}</div>
       </div>
     </div>
   );

@@ -946,6 +946,8 @@ export const lt: Strings = {
   statSessions: 'Sesijos',
   statVolume: 'Apimtis',
   statNewPrs: 'Nauji rekordai',
+  widgetLibraryTitle: 'Valdiklių biblioteka',
+  rcPrs: 'Rekordai',
   statStreak: 'Serija',
   statDays: (n) => `${n} d.`,
   weeklyVolume: 'Savaitės apimtis',

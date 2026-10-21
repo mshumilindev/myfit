@@ -928,6 +928,8 @@ export const pl: Strings = {
   statSessions: 'Sesje',
   statVolume: 'Objętość',
   statNewPrs: 'Nowe rekordy',
+  widgetLibraryTitle: 'Biblioteka widżetów',
+  rcPrs: 'Rekordy',
   statStreak: 'Seria',
   statDays: (n) => `${n} d`,
   weeklyVolume: 'Objętość tygodniowa',

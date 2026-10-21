@@ -923,6 +923,8 @@ export const et: Strings = {
   statSessions: 'Sessioonid',
   statVolume: 'Maht',
   statNewPrs: 'Uued rekordid',
+  widgetLibraryTitle: 'Vidinate raamatukogu',
+  rcPrs: 'Rekordid',
   statStreak: 'Seeria',
   statDays: (n) => `${n} p`,
   weeklyVolume: 'Nädala maht',
