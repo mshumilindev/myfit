@@ -140,6 +140,15 @@ export const teamInviteRevoke = onCall(opts, (req) =>
 export const teamInvitePreview = onCall(opts, (req) =>
   run(req, ANY_TEAM, () => team.teamInvitePreview(ctx(), body(req).inviteId)),
 );
+// Public (no sign-in): the link page of a person who has no session yet. Role and inviter name only.
+export const teamInvitePublic = onCall({ ...opts, maxInstances: 10 }, async (req) => {
+  try {
+    return await team.teamInvitePublicPreview(ctx(), body(req).inviteId);
+  } catch (e) {
+    if (e instanceof CoachError) throw new HttpsError(e.code, e.reason, { reason: e.reason });
+    throw new HttpsError('internal', 'Something went wrong.');
+  }
+});
 export const teamAccept = onCall(opts, (req) =>
   run(req, ANY_TEAM, async (a) => {
     const res = await team.teamAccept(ctx(), a, body(req));

@@ -218,6 +218,28 @@ export async function teamInvitePreview(ctx: Ctx, token: unknown): Promise<TeamI
   };
 }
 
+/** What a person without a session sees: the role and who invited them, nothing else. Every closed, unknown or malformed link answers the same way, so the link page cannot be used to probe tokens. */
+export interface TeamInvitePublicPreview {
+  role: TeamRole;
+  invitedByName: string;
+}
+
+export async function teamInvitePublicPreview(
+  ctx: Ctx,
+  token: unknown,
+): Promise<TeamInvitePublicPreview> {
+  const i =
+    typeof token === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(token)
+      ? ((await ctx.kv.get(`teamInvites/${token}`)) as InviteRec | null)
+      : null;
+  if (!i || i.status !== 'pending' || i.expiresAt <= ctx.now())
+    return fail('not-found', 'no-invite');
+  const by = (await ctx.kv.get(`users/${i.invitedBy}`)) as UserRec | null;
+  // Real name only: the username may be a sign-in identifier and must not go to someone who is not signed in.
+  const real = by ? safeName([by.firstName, by.lastName].filter(Boolean).join(' ')) : '';
+  return { role: i.role, invitedByName: real };
+}
+
 export async function teamAccept(
   ctx: Ctx,
   actor: Actor,

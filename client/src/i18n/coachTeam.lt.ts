@@ -140,6 +140,13 @@ export const teamLt: typeof teamEn = {
   jtRetry: 'Bandyti dar kartą',
   jtOk: 'Atlikta',
   jtLoading: 'Įkeliamas kvietimas',
+  jtSignInManager: (name: string) =>
+    `${name} kviečia tave į komandą kaip vadybininką. Prisijunk prie savo Spotter paskyros, kad tęstum.`,
+  jtSignInTrainer: (name: string) =>
+    `${name} kviečia tave į komandą kaip trenerį. Prisijunk prie trenerio paskyros, kad tęstum.`,
+  jtSomeone: 'Tavo treneris',
+  jtNoAccount:
+    'Dar neturi paskyros? Ją sukuria treneris. Paprašyk paskyros nuorodos, tada atidaryk šį kvietimą dar kartą.',
   mcTitle: 'Klientai',
   mcSub: (n: number, ready: number) => `Klientų: ${n} · paruošta: ${ready}`,
   mcAll: (n: number) => `Visi ${n}`,

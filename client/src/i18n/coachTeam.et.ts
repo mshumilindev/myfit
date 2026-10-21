@@ -130,6 +130,13 @@ export const teamEt: typeof teamEn = {
   jtRetry: 'Proovi uuesti',
   jtOk: 'Valmis',
   jtLoading: 'Kutse laadimine',
+  jtSignInManager: (name: string) =>
+    `${name} kutsub sind meeskonda haldurina. Jätkamiseks logi sisse oma Spotteri kontole.`,
+  jtSignInTrainer: (name: string) =>
+    `${name} kutsub sind meeskonda treenerina. Jätkamiseks logi sisse oma treeneri kontole.`,
+  jtSomeone: 'Sinu treener',
+  jtNoAccount:
+    'Kontot veel pole? Selle loob treener. Palu tal konto link saata ja ava see kutse siis uuesti.',
   mcTitle: 'Kliendid',
   mcSub: (n: number, ready: number) => `Kliente: ${n} · valmis: ${ready}`,
   mcAll: (n: number) => `Kõik ${n}`,

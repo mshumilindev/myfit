@@ -135,6 +135,13 @@ export const teamUk: typeof teamEn = {
   jtRetry: 'Спробувати ще раз',
   jtOk: 'Готово',
   jtLoading: 'Завантажуємо запрошення',
+  jtSignInManager: (name: string) =>
+    `${name} запрошує вас до команди як менеджера. Увійдіть в акаунт Spotter, щоб продовжити.`,
+  jtSignInTrainer: (name: string) =>
+    `${name} запрошує вас до команди як тренера. Увійдіть в акаунт тренера, щоб продовжити.`,
+  jtSomeone: 'Ваш тренер',
+  jtNoAccount:
+    'Ще немає акаунта? Його створює тренер. Попросіть у нього посилання на акаунт, а потім відкрийте це запрошення ще раз.',
   mcTitle: 'Клієнти',
   mcSub: (n: number, ready: number) => `Клієнтів: ${n} · готово: ${ready}`,
   mcAll: (n: number) => `Усі ${n}`,

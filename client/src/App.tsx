@@ -70,6 +70,7 @@ import { canUseCoach, coachScreenOpen } from './coach/access';
 import type { HomeSetRoute } from './views/home/HomeSetView';
 import { pruneHomeSetDrafts } from './views/home/homeSetDraft';
 import { AuthView } from './views/AuthView';
+import { TeamInviteSignInNotice } from './coach/team/TeamInviteSignInNotice';
 import { NoticeStrip } from './components/NoticeStrip';
 import { LandingView } from './views/landing/LandingView';
 import { InviteLanding } from './views/landing/InviteLanding';
@@ -1325,12 +1326,14 @@ export function App() {
   }
 
   if (!authed) {
+    const teamToken = /^#\/team-invite\/([A-Za-z0-9_-]{1,64})/.exec(currentHash())?.[1];
+    const teamNotice = teamToken ? <TeamInviteSignInNotice token={teamToken} /> : undefined;
     return (
       <div className={shouldShowLanding() ? 'app app-landing' : 'app'}>
         {shouldShowLanding() ? (
-          <LandingView onLoggedIn={() => setAuthed(true)} />
+          <LandingView onLoggedIn={() => setAuthed(true)} signInNotice={teamNotice} />
         ) : (
-          <AuthView onLoggedIn={() => setAuthed(true)} />
+          <AuthView onLoggedIn={() => setAuthed(true)} notice={teamNotice} />
         )}
       </div>
     );

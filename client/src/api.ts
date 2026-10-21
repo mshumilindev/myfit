@@ -218,6 +218,7 @@ function codeToStatus(code: string): number {
 const QUIET_CALLABLES = new Set([
   'authStatus',
   'invitePreview',
+  'teamInvitePublic',
   'profileUser',
   'adminPeople',
   'adminUserDetail',

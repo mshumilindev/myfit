@@ -137,6 +137,13 @@ export const teamPl: typeof teamEn = {
   jtRetry: 'Spróbuj ponownie',
   jtOk: 'Gotowe',
   jtLoading: 'Wczytywanie zaproszenia',
+  jtSignInManager: (name: string) =>
+    `${name} zaprasza Cię do zespołu jako menedżera. Zaloguj się na konto Spotter, aby kontynuować.`,
+  jtSignInTrainer: (name: string) =>
+    `${name} zaprasza Cię do zespołu jako trenera. Zaloguj się na konto trenera, aby kontynuować.`,
+  jtSomeone: 'Twój trener',
+  jtNoAccount:
+    'Nie masz jeszcze konta? Zakłada je trener. Poproś o link do konta, a potem otwórz to zaproszenie ponownie.',
   mcTitle: 'Klienci',
   mcSub: (n: number, ready: number) => `Klientów: ${n} · gotowych: ${ready}`,
   mcAll: (n: number) => `Wszyscy ${n}`,

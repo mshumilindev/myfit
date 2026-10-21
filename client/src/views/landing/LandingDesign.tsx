@@ -10,6 +10,7 @@ import {
   type CSSProperties,
   type MouseEvent,
   type ReactElement,
+  type ReactNode,
 } from 'react';
 import { AtlasFace } from '../../components/AtlasFace';
 import { AnatomyMap, type AnatomyMark } from '../../components/ui/AnatomyMap';
@@ -1149,7 +1150,15 @@ export interface LandingInvite {
   onStart: () => void;
 }
 
-function AuthSlot({ onLoggedIn, invite }: { onLoggedIn: () => void; invite?: LandingInvite }) {
+function AuthSlot({
+  onLoggedIn,
+  invite,
+  notice,
+}: {
+  onLoggedIn: () => void;
+  invite?: LandingInvite;
+  notice?: ReactNode;
+}) {
   const { t, locale } = useT();
   const T = (k: string): string => (t as unknown as Record<string, string>)[`landing_${k}`] ?? k;
   if (invite) {
@@ -1171,7 +1180,7 @@ function AuthSlot({ onLoggedIn, invite }: { onLoggedIn: () => void; invite?: Lan
   return (
     <div className="ld-auth">
       <div className="ld-auth-h">{t.signIn}</div>
-      <AuthView onLoggedIn={onLoggedIn} />
+      <AuthView onLoggedIn={onLoggedIn} notice={notice} />
     </div>
   );
 }
@@ -1255,9 +1264,12 @@ function useFitScreens(dep: unknown) {
 export function LandingDesign({
   onLoggedIn,
   invite,
+  signInNotice,
 }: {
   onLoggedIn: () => void;
   invite?: LandingInvite;
+  /** A note above the sign-in form (a team link says who invited the person). */
+  signInNotice?: ReactNode;
 }) {
   const { t, locale } = useT();
   useFitScreens(locale);
@@ -1554,7 +1566,7 @@ export function LandingDesign({
               </div>
               <div className="l-panel">
                 <div className="l-pform">
-                  <AuthSlot onLoggedIn={onLoggedIn} invite={invite} />
+                  <AuthSlot onLoggedIn={onLoggedIn} invite={invite} notice={signInNotice} />
                 </div>
                 <div className={v.clsPdl}>
                   <div className="l-pdl-l l-fm">{T('get_l')}</div>
@@ -4244,7 +4256,7 @@ export function LandingDesign({
             <p className="l-lead">{T('f_p')}</p>
             <div className="l-panel l-cta-panel">
               <div className="l-pform">
-                <AuthSlot onLoggedIn={onLoggedIn} invite={invite} />
+                <AuthSlot onLoggedIn={onLoggedIn} invite={invite} notice={signInNotice} />
               </div>
               <div className={v.clsPdl}>
                 <div className="l-pdl-l l-fm">{T('get_l')}</div>

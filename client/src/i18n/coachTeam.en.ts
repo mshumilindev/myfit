@@ -135,6 +135,13 @@ export const teamEn = {
   jtRetry: 'Try again',
   jtOk: 'Done',
   jtLoading: 'Loading the invite',
+  jtSignInManager: (name: string) =>
+    `${name} invited you to join the team as a manager. Sign in to your Spotter account to continue.`,
+  jtSignInTrainer: (name: string) =>
+    `${name} invited you to join the team as a trainer. Sign in to your trainer account to continue.`,
+  jtSomeone: 'Your trainer',
+  jtNoAccount:
+    'No account yet? A trainer creates it for you. Ask them for an account link, then open this invite again.',
   mcTitle: 'Clients',
   mcSub: (n: number, ready: number) => `${n} ${n === 1 ? 'client' : 'clients'}, ${ready} ready`,
   mcAll: (n: number) => `All ${n}`,

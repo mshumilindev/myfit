@@ -7,6 +7,7 @@ import {
   teamDecline,
   teamInvite,
   teamInvitePreview,
+  teamInvitePublicPreview,
   teamInviteRevoke,
   teamLeave,
   teamClients,
@@ -139,6 +140,32 @@ describe('team invites', () => {
       invitedByName: 'Olena Kovalenko',
       expiresAt: T0 + 7 * DAY,
     });
+  });
+});
+
+describe('public preview (no sign-in)', () => {
+  it('shows only the role and who invited', async () => {
+    const r = await inviteManager();
+    expect(await teamInvitePublicPreview(ctx(), r.inviteId)).toEqual({
+      role: 'manager',
+      invitedByName: 'Olena Kovalenko',
+    });
+  });
+
+  it('expired, used, withdrawn, unknown and malformed links all answer alike', async () => {
+    const r = await inviteManager();
+    const closed = 'not-found:no-invite';
+    expect(await code(teamInvitePublicPreview(ctx(), 'nope'))).toBe(closed);
+    expect(await code(teamInvitePublicPreview(ctx(), '../x'))).toBe(closed);
+    expect(await code(teamInvitePublicPreview(ctx(), undefined))).toBe(closed);
+    await acceptWithMail(ctx(), mgr, { inviteId: r.inviteId });
+    expect(await code(teamInvitePublicPreview(ctx(), r.inviteId))).toBe(closed);
+    const r2 = await inviteManager('other@example.com');
+    await teamInviteRevoke(ctx(), owner, { inviteId: r2.inviteId });
+    expect(await code(teamInvitePublicPreview(ctx(), r2.inviteId))).toBe(closed);
+    const r3 = await inviteManager('third@example.com');
+    t += 7 * DAY + 1;
+    expect(await code(teamInvitePublicPreview(ctx(), r3.inviteId))).toBe(closed);
   });
 });
 
@@ -396,5 +423,17 @@ describe('activity scope and the page data', () => {
       'trainer@example.com',
     ]);
     expect((await teamRead(ctx(), owner)).invites).toHaveLength(2);
+  });
+});
+
+describe('public preview name', () => {
+  it('never falls back to the username', async () => {
+    const r = await inviteManager();
+    const kv = ctx().kv;
+    await kv.merge(`users/${owner.uid}`, { firstName: '', lastName: '', username: 'olena_login' });
+    expect(await teamInvitePublicPreview(ctx(), r.inviteId)).toEqual({
+      role: 'manager',
+      invitedByName: '',
+    });
   });
 });

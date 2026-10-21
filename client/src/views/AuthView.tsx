@@ -1,5 +1,5 @@
 /** Auth — design S-01. Sign-in only; new accounts come via invite onboarding. */
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Field } from '../components/ui/Field';
 import { Button } from '../components/ui/Button';
 import { Checkbox } from '../components/ui/Checkbox';
@@ -23,7 +23,14 @@ function lockoutEnd(): number {
   return Date.now() + 15 * 60 * 1000;
 }
 
-export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
+export function AuthView({
+  onLoggedIn,
+  notice,
+}: {
+  onLoggedIn: () => void;
+  /** Optional note above the title (a team link explains who invited the person). */
+  notice?: ReactNode;
+}) {
   const { t } = useT();
   const [unreachable, setUnreachable] = useState(false);
   // The server answered slowly or not at all, but the browser is online: the
@@ -151,6 +158,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           <LanguageSelector />
         </div>
         <SpotterMark size={88} variant="tight" className="wordmark" />
+        {notice}
         <h2 className="auth-title">{wallView || personView ? t.authWelcomeBack : t.appName}</h2>
         <p className="auth-sub">
           {wallView || bio
