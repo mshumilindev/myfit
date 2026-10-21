@@ -14,7 +14,7 @@ import {
   teamRemoveMember,
   teamSetActivityScope,
 } from '../../functions/src/coach/team';
-import { DAY } from '../../functions/src/coach/logic';
+import { DAY, conversationId } from '../../functions/src/coach/logic';
 
 const T0 = Date.UTC(2026, 9, 20, 9, 0, 0);
 const owner: Actor = { uid: 't1', role: 'trainer' };
@@ -163,10 +163,13 @@ describe('accepting', () => {
     );
   });
 
-  it('the sender picks the type: a trainer may invite a trainer, a manager a manager; an unknown type is refused', async () => {
+  it('only the owner invites managers; anyone on the team invites trainers; an unknown type is refused', async () => {
     await joined();
     await teamInvite(ctx(), owner, { email: 'tr@example.com', role: 'trainer' });
-    await teamInvite(ctx(), mgrNow, { email: 'mg@example.com', role: 'manager' });
+    await teamInvite(ctx(), owner, { email: 'mg@example.com', role: 'manager' });
+    expect(
+      await code(teamInvite(ctx(), mgrNow, { email: 'mg2@example.com', role: 'manager' })),
+    ).toBe('permission-denied:owner-only');
     const roles = (await teamRead(ctx(), owner)).invites.map((i) => [i.email, i.role]);
     expect(roles).toEqual(
       expect.arrayContaining([
@@ -177,6 +180,26 @@ describe('accepting', () => {
     expect(await code(teamInvite(ctx(), owner, { email: 'x@example.com', role: 'admin' }))).toBe(
       'invalid-argument:invalid-role',
     );
+  });
+
+  it('what a removed member invited can no longer be accepted', async () => {
+    await joined();
+    const inv = await teamInvite(ctx(), mgrNow, { email: 'friend@example.com', role: 'trainer' });
+    await teamRemoveMember(ctx(), owner, { uid: 'm1' });
+    expect((await kv.get(`teamInvites/${inv.inviteId}`))?.status).toBe('revoked');
+    await kv.set('users/t9', { role: 'trainer', status: 'active' });
+    expect(
+      await code(teamAccept(ctx(), { uid: 't9', role: 'trainer' }, { inviteId: inv.inviteId })),
+    ).toBe('failed-precondition:invite-closed');
+  });
+
+  it('removing a manager flags the clients’ conversations for key rotation', async () => {
+    await joined();
+    await kv.set('coaching/c1', { clientId: 'c1', status: 'active', trainerId: 't1' });
+    const cid = conversationId(new Uint8Array(32), 'c1', 't1');
+    await kv.set(`conversations/${cid}`, { clientId: 'c1', trainerId: 't1', keyEpoch: 1 });
+    await teamRemoveMember(ctx(), owner, { uid: 'm1' });
+    expect((await kv.get(`conversations/${cid}`))?.rotateDue).toBe(true);
   });
 
   it('a client learns the ACTIVE managers of its trainer’s team (nobody else, no removed ones)', async () => {

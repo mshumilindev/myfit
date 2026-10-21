@@ -97,7 +97,12 @@ export async function runReminders(ctx: Ctx): Promise<RemindersResult> {
         }
       }
     }
-    await kv.merge(r.path, { 'timing.dueAt': active ? dueAtOf(t, now) : 0 });
+    // advance the timer only if nobody saved the schedule meanwhile (their save carries its own, fresher `dueAt`)
+    await kv.tx(async (tx) => {
+      const cur = await tx.get(r.path);
+      if (cur && cur.rev === r.data.rev)
+        await tx.merge(r.path, { 'timing.dueAt': active ? dueAtOf(t, now) : 0 });
+    });
   }
   return out;
 }

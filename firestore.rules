@@ -556,6 +556,7 @@ service cloud.firestore {
       // client reads and deletes (a removed manager's document goes away) and nobody else touches it.
       match /delegations/{managerUid} {
         allow read: if isSelf(managerUid) && isTeamManagerOf(convOf(cid).clientId)
+          && resource.data.epoch == convOf(cid).get('keyEpoch', 0)
           || request.auth.uid == convOf(cid).clientId;
         allow create, update: if activeConv(cid)
           && request.auth.uid == convOf(cid).clientId

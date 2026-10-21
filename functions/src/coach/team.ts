@@ -125,12 +125,15 @@ export async function teamInvite(
 ): Promise<TeamInviteResult> {
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase().slice(0, 200) : '';
   if (!EMAIL.test(email)) fail('invalid-argument', 'invalid-email');
-  const { teamId, me } = await myTeam(ctx, actor);
+  const { teamId } = await myTeam(ctx, actor);
   if (!isCoach(actor) && actor.role !== 'manager') fail('permission-denied', 'not-allowed');
   const asked = body.role;
   if (asked !== undefined && asked !== 'manager' && asked !== 'trainer')
     return fail('invalid-argument', 'invalid-role');
-  const role: TeamRole = asked ?? (me.role === 'trainer' ? 'manager' : 'trainer');
+  // Only the team's owner grants the manager role (a manager sees every client's schedule); everyone else adds trainers.
+  const isOwner = teamId === actor.uid;
+  const role: TeamRole = asked ?? (isOwner ? 'manager' : 'trainer');
+  if (role === 'manager' && !isOwner) fail('permission-denied', 'owner-only');
   const kv = ctx.kv;
   const now = ctx.now();
   const mine = (await kv.list('teamInvites', { where: [['teamId', '==', teamId]] })).map(
@@ -225,6 +228,15 @@ export async function teamAccept(
     fail('invalid-argument', 'cannot-join-own-team');
   const kv = ctx.kv;
   const joined = await kv.tx(async (t) => {
+    // re-read INSIDE the transaction: two accounts racing one link cannot both join
+    const fresh = (await t.get(`teamInvites/${i.id}`)) as InviteRec | null;
+    if (!fresh || fresh.status !== 'pending' || fresh.expiresAt <= now)
+      fail('failed-precondition', 'invite-closed');
+    // an invite outlives neither its sender's membership
+    if (i.invitedBy !== i.teamId) {
+      const sender = (await t.get(`teams/${i.teamId}/members/${i.invitedBy}`)) as MemberRec | null;
+      if (sender?.status !== 'active') fail('failed-precondition', 'invite-closed');
+    }
     const u = (await t.get(`users/${actor.uid}`)) as UserRec | null;
     if (!u || u.status === 'suspended') return fail('permission-denied', 'not-allowed');
     if (i.role === 'manager') {
@@ -365,6 +377,10 @@ async function endMembership(
       refId: target.uid,
     });
   });
+  // what the leaver invited can no longer be accepted (teamAccept also checks the sender is still a member)
+  for (const inv of await ctx.kv.list('teamInvites', { where: [['invitedBy', '==', target.uid]] }))
+    if (inv.data.status === 'pending' && inv.data.teamId === teamId)
+      await ctx.kv.merge(inv.path, { status: 'revoked' });
   await dropDelegations(ctx, teamId, target);
 }
 
@@ -388,6 +404,9 @@ async function dropDelegations(ctx: Ctx, teamId: string, target: MemberRec): Pro
     });
     for (const r of rows) {
       const cid = conversationId(ctx.pepper, r.id, tr.uid);
+      // the leaver holds the current schedule / requests sub-keys: the client rotates at its next open (ADR 005)
+      if (await ctx.kv.get(`conversations/${cid}`))
+        await ctx.kv.merge(`conversations/${cid}`, { rotateDue: true });
       if (target.role === 'manager')
         await ctx.kv.del(`conversations/${cid}/delegations/${target.uid}`);
       else
@@ -922,7 +941,13 @@ export async function teamActivity(
 }
 
 /* ---- Spotter: the service messages of the team (SPO-236) -------------------------------------------------------- */
-export const SPOTTER_KINDS = ['removal-request', 'removal-answer', 'manager-move', 'team', 'unmarked'] as const;
+export const SPOTTER_KINDS = [
+  'removal-request',
+  'removal-answer',
+  'manager-move',
+  'team',
+  'unmarked',
+] as const;
 export interface SpotterItem {
   id: string;
   kind: (typeof SPOTTER_KINDS)[number];
