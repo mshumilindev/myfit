@@ -260,6 +260,7 @@ jobs:
           cat sb.log
           if [ "$rc" != 0 ]; then
             echo "::error::storybook exit $rc, $(wc -l < sb.log) log lines"
+            { ls -la client/node_modules/.cache/storybook/10.6.0/default 2>&1 | head -5; ls -ld client/node_modules client/node_modules/.cache 2>&1; sed 's/\x1b\[[0-9;]*m//g' sb.log | grep -n -m1 -B14 -A3 ENOENT; } | while IFS= read -r l; do echo "::error::${l:0:220}"; done
             tail -n 12 sb.log | sed 's/\x1b\[[0-9;]*m//g' | while IFS= read -r l; do echo "::error::${l:0:220}"; done
           fi
           exit $rc
