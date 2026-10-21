@@ -187,10 +187,25 @@ jobs:
       - name: Report findings
         run: node scripts/semgrep-annotate.mjs semgrep.json
 
+  # Passkeys against a software authenticator (SPO-211/229): a local server runs the real passkeysCore rules, Chromium has a
+  # CDP virtual authenticator. No app build needed, so it runs in parallel and takes about a minute.
+  passkeys-e2e:
+    name: Passkeys e2e (virtual authenticator)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=mobile-chromium tests/e2e/passkeys-webauthn.e2e.ts
+
   quality:
     name: Lint · types · tests · build
     if: always()
-    needs: [static, types, tests, client-tests, patch-coverage, build, security]
+    needs: [static, types, tests, client-tests, patch-coverage, build, security, passkeys-e2e]
     runs-on: ubuntu-latest
     steps:
       - name: Every quality job must have succeeded (a skipped or cancelled one counts as a failure)

@@ -193,12 +193,20 @@ dateless-днів і prescription items; клієнт бачить активн�
   запускає біометрію без поля пароля; скасування чи відсутність біометрії показує пароль
   (`AuthView.passkey.test.tsx`).
 - Сервер passkey: реєстрація і вхід, повтор, застарілий лічильник, чужий origin, підроблений і невідомий credential,
-  прострочений і чужий challenge (`tests/passkeys.core.test.ts`, `tests/passkeys.origin.test.ts`).
+  прострочений і чужий challenge, registration-challenge не годиться для входу, create-only, заміна на пристрої, свіжий вхід
+  для реєстрації, точний https-allowlist origin (`tests/passkeys.core.test.ts`, `tests/passkeys.origin.test.ts`).
+- Passkey e2e: Chromium з віртуальним WebAuthn authenticator проти справжнього `passkeysCore` — реєстрація, вхід, повтор
+  відхилено, чужий origin відхилено, без passkey браузер падає і застосунок іде на пароль
+  (`tests/e2e/passkeys-webauthn.e2e.ts`, CI job `passkeys-e2e`).
 - Сесії: пристрій, час і місце, поточна позначена, вихід з окремого пристрою, «Вийти скрізь, крім поточного»;
-  IP не зберігається (`SessionsSheet.test.tsx`, `accounts/sessions.test.ts`, `tests/sessions.server.test.ts`).
+  IP не зберігається; відкликання не стирається евікцією, ліміт 50 записів; «скрізь, крім поточного» відкликає токени
+  і повертає свіжий токен (`SessionsSheet.test.tsx`, `accounts/sessions.test.ts`, `tests/sessions.server.test.ts`).
+- Passkey і сесії закриті для клієнта на рівні rules (`tests/rules/passkeys-sessions.rules.test.ts`).
+- Зміна пароля відкликає токени і повертає свіжий (`ProfileView.cases.test.tsx`).
+- Locker Wall показує прогрес входу на вибраній людині (`LockerWall.test.tsx`, `AuthView.passkey.test.tsx`).
 
-**Статус:** код і unit/component-тести готові. Не перевірено: passkey наживо на реальному пристрої (Face ID / Touch ID /
-Windows Hello), e2e з віртуальним WebAuthn authenticator, сервер сесій на емуляторі. Потрібен деплой функцій.
+**Статус:** код, unit/component-тести і passkey e2e готові; функції й hosting задеплоєні (test, prod). Не перевірено: passkey
+наживо на реальному пристрої (Face ID / Touch ID / Windows Hello), сервер сесій на емуляторі, візуальний збіг із дизайнами.
 
 ## Матриця Автоперевірок
 
@@ -213,4 +221,4 @@ Windows Hello), e2e з віртуальним WebAuthn authenticator, серве
 | F-07 PWA/Desktop        | частково         | health    | PWA так, desktop manual  |
 | F-08 Design System      | так              | ні        | так                      |
 | F-09 Programs           | так              | так       | Today/start day частково |
-| F-10 Кілька людей       | так              | ні        | passkey e2e ще немає     |
+| F-10 Кілька людей       | так              | ні        | passkey e2e так          |
