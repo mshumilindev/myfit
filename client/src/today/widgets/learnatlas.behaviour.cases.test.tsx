@@ -28,11 +28,11 @@ type Row = [id: string, size: WidgetSize, parts: string[]];
 
 // Coach on, three lessons watched and six saved (one saved id no longer exists and is dropped).
 const PARTIAL: Row[] = [
-  ['learn-next', 'M', ['Set up your first workout', 'Basics · 3 of 65 lessons']],
+  ['learn-next', 'M', ['Set up your first workout', 'Basics · 3 of 66 lessons']],
   [
     'learn-next',
     'XL',
-    ['3 / 65', 'Library progress', '5%', 'Log a set the fast way', 'Install Spotter on your phone'],
+    ['3 / 66', 'Library progress', '5%', 'Log a set the fast way', 'Install Spotter on your phone'],
   ],
   ['lesson-of-day', 'M', ['Install Spotter on your phone', 'Lesson of the day · Basics']],
   [
@@ -42,7 +42,7 @@ const PARTIAL: Row[] = [
   ],
   ['learn-saved', 'M', ['Saved lessons · 6', 'Next: Log a set the fast way']],
   ['learn-saved', 'XL', ['Unwatched · 5', 'Warm-up sets', 'The rest timer', 'Play all']],
-  ['learn-topics', 'M', ['3 of 65 lessons', 'Basics 3/7', 'Topics done · 0 of 10']],
+  ['learn-topics', 'M', ['3 of 66 lessons', 'Basics 3/7', 'Topics done · 0 of 10']],
   ['learn-topics', 'XL', ['Logging0/14', 'Cardio & recovery0/6', 'Next: finish Basics']],
   ['atlas-insight', 'M', ['Short night · 5 h', 'Sleep']],
   ['atlas-insight', 'XL', ['Only 5 h of sleep', 'Ask Atlas']],
@@ -97,11 +97,11 @@ describe('learn and Atlas widgets with progress and the coach on', () => {
 
 describe('learn and Atlas widgets with nothing started', () => {
   it.each([
-    ['learn-next', 'M', ['Get started in 3 minutes', 'Basics · 0 of 65 lessons']],
-    ['learn-next', 'XL', ['0 / 65', '0%', 'Start learning']],
+    ['learn-next', 'M', ['Get started in 3 minutes', 'Basics · 0 of 66 lessons']],
+    ['learn-next', 'XL', ['0 / 66', '0%', 'Start learning']],
     ['learn-saved', 'M', ['Nothing saved yet', 'Bookmark a lesson in Learn to watch it later']],
     ['learn-saved', 'XL', ['Nothing saved yet', 'Open Learn']],
-    ['learn-topics', 'XL', ['0 of 65 lessons', 'Basics0/7']],
+    ['learn-topics', 'XL', ['0 of 66 lessons', 'Basics0/7']],
     [
       'did-you-know',
       'XL',

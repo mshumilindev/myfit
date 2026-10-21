@@ -146,7 +146,7 @@ for (const file of localeFiles.slice(1)) {
 
 const textRe = /[A-Za-zА-Яа-яІіЇїЄєҐґ]/;
 const attrRe = /\b(aria-label|placeholder|title)="([^"{]*[A-Za-zА-Яа-яІіЇїЄєҐґ][^"{]*)"/g;
-const visibleRe = /(?<![=\-])>\s*([^<>{}\n]*[A-Za-zА-Яа-яІіЇїЄєҐґ][^<>{}\n]*)\s*</g;
+const visibleRe = /(?<![=-])>\s*([^<>{}\n]*[A-Za-zА-Яа-яІіЇїЄєҐґ][^<>{}\n]*)\s*</g;
 // Units and symbols that read the same in every language.
 const allowVisible = new Set([
   't',
@@ -181,7 +181,6 @@ const ignoredDirs = new Set(['i18n', 'data', 'stories', '__fixtures__']);
 // Tests and their fixtures are never shipped either.
 const ignoredFileRe =
   /\.(stories|test|cases\.test)\.tsx?$|\.test\.tsx?$|(^|[\\/])(testWorld|testVault)\.tsx?$/;
-const ignoredDirNames = new Set(['__fixtures__']);
 
 function walk(dir) {
   const out = [];
