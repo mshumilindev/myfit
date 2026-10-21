@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Pre-push hook для gym-tracker (адаптовано з b2b-portal-ui).
 #
-# Прогонить ESLint + Prettier + tsc --noEmit (всі воркспейси) + validate-sql,
+# Прогонить ESLint + Prettier + tsc --noEmit (всі воркспейси) + coverage-тести + validate-sql,
 # щоб стильові/типові регресії не їхали в remote. Авто-фіксить що може, і
 # перериває push, якщо авто-фіксери створили диф — закоміть і пушни знову.
 #
@@ -19,10 +19,17 @@ if [ ! -d node_modules ]; then
   exit 1
 fi
 
-echo "[pre-push] npm run lint:fix"
-npm run --silent lint:fix
-echo "[pre-push] npm run format"
-npm run --silent format
+cache_dir="$repo_root/node_modules/.cache"
+mkdir -p "$cache_dir"
+
+# 1) Авто-фіксери (послідовно: обидва пишуть у ті самі файли). Кеш за вмістом: повторний push
+#    чіпає лише змінені файли. eslint --fix сам падає на невиправних помилках, тож окремий
+#    повторний `eslint .` не потрібен; prettier --write + перевірка diff нижче замінює format:check.
+echo "[pre-push] eslint --fix"
+npx --no-install eslint . --fix --cache --cache-strategy content --cache-location "$cache_dir/eslint/"
+echo "[pre-push] prettier --write"
+npx --no-install prettier --write --log-level warn --cache --cache-strategy content \
+  --cache-location "$cache_dir/prettier/.cache" .
 
 if ! git diff --quiet HEAD --; then
   echo ""
@@ -37,15 +44,51 @@ if ! git diff --quiet HEAD --; then
   exit 1
 fi
 
-echo "[pre-push] npm run lint"
-npm run --silent lint
-echo "[pre-push] npm run format:check"
-npm run --silent format:check
-echo "[pre-push] npm run typecheck"
-npm run --silent typecheck
-echo "[pre-push] npm run test:coverage"
-npm run --silent test:coverage
-echo "[pre-push] node scripts/validate-sql.mjs"
-node scripts/validate-sql.mjs
+# 2) Незалежні перевірки паралельно; кожна пише у свій лог, вивід друкується по порядку.
+#    tsc інкрементальний (tsbuildinfo у node_modules/.cache): тепла перевірка — секунди.
+log_dir=$(mktemp -d)
+trap 'rm -rf "$log_dir"' EXIT
+# Клієнтські тести змін пуша (SPO-56): `vitest related` від файлів diff до merge-base з origin/main — вони + усі, хто їх імпортує.
+# (`--changed <ref>` тут не годиться: зміна кореневого package.json чи конфігу перезапускає всі файли.)
+# SPO-268: ті самі related-тести одразу збирають покриття ЗМІНЕНИХ рядків (patch-coverage, поріг у coverage-thresholds.json);
+# повний coverage-гейт лишається в CI. Це ШВИДКИЙ крок із бюджетом часу (PRE_PUSH_CLIENT_BUDGET, 120 с за замовчуванням): падіння тесту зупиняє push одразу
+# (`--bail=1`); якщо набір завеликий (зміна спільного модуля чіпає сотні тестів) і бюджет вичерпано, крок друкує це
+# і віддає решту CI — там повний набір тими самими тестами у 8 шардах (`client-tests`), тож нічого не пропадає.
+# Три важкі Atlas-файли (≈1,5–3 хв кожен) пропускає лише цей швидкий крок.
+base_ref=$(git merge-base HEAD origin/main 2>/dev/null || echo HEAD)
+# Root tests/** (SPO-268): only those related to the push; the full suite + coverage gate is the CI job `Unit tests + coverage gate`.
+client_changed_cmd='node scripts/patch-coverage.mjs --run --base '"$base_ref"' --budget "${PRE_PUSH_CLIENT_BUDGET:-120}"'
+names=(typecheck-client typecheck-server typecheck-desktop test-root-related validate-sql coverage-guard client-tests-changed)
+cmds=(
+  "npm run --silent typecheck -w client -- --incremental --tsBuildInfoFile $cache_dir/tsc-client.tsbuildinfo"
+  "npm run --silent typecheck -w server -- --incremental --tsBuildInfoFile $cache_dir/tsc-server.tsbuildinfo"
+  "npm run --silent typecheck -w desktop -- --incremental --tsBuildInfoFile $cache_dir/tsc-desktop.tsbuildinfo"
+  "node scripts/root-tests-related.mjs --base $base_ref"
+  "node scripts/validate-sql.mjs"
+  "npm run --silent coverage:guard -- --base $(git merge-base HEAD origin/main 2>/dev/null || echo HEAD)"
+  "$client_changed_cmd"
+)
+pids=()
+for i in "${!names[@]}"; do
+  echo "[pre-push] ${names[$i]} (паралельно)"
+  bash -c "${cmds[$i]}" >"$log_dir/${names[$i]}.log" 2>&1 &
+  pids+=($!)
+done
+failed=0
+for i in "${!names[@]}"; do
+  if wait "${pids[$i]}"; then
+    echo "[pre-push] ✓ ${names[$i]}"
+  else
+    failed=1
+    echo ""
+    echo "[pre-push] ✗ ${names[$i]} — вивід:"
+    cat "$log_dir/${names[$i]}.log"
+  fi
+done
+if [ "$failed" -ne 0 ]; then
+  echo ""
+  echo "[pre-push] ПЕРЕРИВАЮ push: є червоні перевірки (див. вище)."
+  exit 1
+fi
 
 echo "[pre-push] OK"

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { createFixturesPort, buildFixtureWorld } from '../data/__fixtures__/fixtures';
-import { CoachStoryFrame } from './storyKit';
+import { CoachStoryFrame } from '../../stories/coachStoryKit';
 import { idOf, lockedClient, totalsOnlyClient, worldPort } from './storyPorts';
 
 /** Client 360 shell (S-03): header, tabs, Overview; locked / program-only / revoked / not-found states. */

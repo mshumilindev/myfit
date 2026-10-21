@@ -13,6 +13,7 @@ const pendingRequestPort: RescheduleRequestPort = {
   propose: () => undefined,
 };
 import { TodayScreen } from './TodayScreen';
+import { currentHash } from '../../route';
 
 const OPTS = { refreshEveryMs: 0 };
 
@@ -55,7 +56,7 @@ describe('default request port', () => {
     );
     await screen.findByRole('heading', { level: 2, name: /Reschedule requests/ });
     fireEvent.click(screen.getByRole('button', { name: 'Propose another time to Oleh' }));
-    expect(window.location.hash).toBe('#/c/schedule?form=counter&req=rq1');
+    expect(currentHash()).toBe('#/c/schedule?form=counter&req=rq1');
     expect(onNavigate).not.toHaveBeenCalled();
   });
 });
@@ -95,8 +96,8 @@ describe('Agenda: by priority', () => {
       )!;
     fireEvent.click(oleh);
     expect(oleh.getAttribute('aria-current')).toBe('true');
-    expect(window.location.hash).toContain('open=');
-    expect(window.location.hash.startsWith('#/c/agenda')).toBe(true);
+    expect(currentHash()).toContain('open=');
+    expect(currentHash().startsWith('#/c/agenda')).toBe(true);
     const primary = screen.getByRole('button', { name: 'Add a variation + 1 set' });
     expect(primary).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Message Oleh' })).toBeTruthy();
@@ -236,7 +237,7 @@ describe('Agenda: by stage', () => {
     setup();
     await ready();
     fireEvent.click(screen.getByRole('button', { name: 'By stage' }));
-    expect(window.location.hash).toContain('view=stage');
+    expect(currentHash()).toContain('view=stage');
     const board = screen.getByRole('region', { name: 'Stage board, scroll for more' });
     for (const s of ['Signal', 'Evidence', 'Decided', 'Measuring', 'Result']) {
       expect(

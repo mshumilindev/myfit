@@ -16,7 +16,7 @@
  */
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Shell } from '../../App';
-import { BackButton } from '../../components/ui/BackButton';
+import { PageHead } from '../../components/ui/PageHead';
 import { Button, IconButton } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Field } from '../../components/ui/Field';
@@ -90,12 +90,10 @@ function Page(props: {
   barNote?: ReactNode;
 }) {
   const { t } = useT();
+  const back = { label: t.backAction, onClick: props.onBack };
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={t.backAction} onClick={props.onBack} />
-        <h1 className="hl-pt">{props.title}</h1>
-      </div>
+      <PageHead className="hl-pbar" back={back} title={props.title} />
       <div className="hl-scroll">
         <div className="hl-cnt">{props.children}</div>
       </div>

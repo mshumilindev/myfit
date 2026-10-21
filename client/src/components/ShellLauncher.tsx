@@ -16,6 +16,9 @@ import { SUITE_TONE } from './suite/suiteTone';
 import { toneClass, type Tone } from './ui/tones';
 import { Icon, Sheet } from '../ui';
 import { consistencyStreak, type StoreState } from '../store';
+import { setHash } from '../route';
+import { getRole } from '../api';
+import { canUsePeople } from '../views/rosterAccess';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -95,7 +98,8 @@ export function ShellLauncher({
 }: {
   store: StoreState;
   now: number;
-  current: 'gym' | 'apex' | 'roster' | 'nutrition' | 'learn' | 'coach';
+  /** `me` = the own-account screen (People chrome, but not the Users app: no tile is current). */
+  current: 'gym' | 'apex' | 'roster' | 'me' | 'nutrition' | 'learn' | 'coach';
   peopleLabel: string;
   peopleDesc: string;
   activeChallenges: number;
@@ -112,6 +116,7 @@ export function ShellLauncher({
   const { c } = useCoachT();
   // Coach dashboard entry: trainer or admin, flag on (coach/access.ts). Hidden otherwise.
   const coachEnabled = useCoachAccess();
+  const peopleEnabled = canUsePeople(getRole());
   const sessionsWeek = store.workouts.filter(
     (w) => w.finishedAt !== null && w.startedAt >= now - 7 * DAY,
   ).length;
@@ -121,7 +126,7 @@ export function ShellLauncher({
     <Sheet
       onClose={onClose}
       className="shell-sheet"
-      tone={SUITE_TONE[current]}
+      tone={SUITE_TONE[current === 'me' ? 'roster' : current]}
       label={t.shellSwitch}
     >
       <div className="shell-head">{t.shellSwitch}</div>
@@ -168,15 +173,18 @@ export function ShellLauncher({
           onSelect={onNutrition}
           currentLabel={t.shellCurrent}
         />
-        <AppTile
-          tone="people"
-          icon="user-focus"
-          name={peopleLabel}
-          sub={peopleDesc}
-          current={current === 'roster'}
-          onSelect={onRoster}
-          currentLabel={t.shellCurrent}
-        />
+        {/* Users (user management) is admin-only; Me is reached from the avatar, not from a tile. */}
+        {(peopleEnabled || current === 'roster') && (
+          <AppTile
+            tone="people"
+            icon="user-focus"
+            name={peopleLabel}
+            sub={peopleDesc}
+            current={current === 'roster'}
+            onSelect={onRoster}
+            currentLabel={t.shellCurrent}
+          />
+        )}
         {(coachEnabled || current === 'coach') && (
           <AppTile
             tone="coach"
@@ -185,7 +193,7 @@ export function ShellLauncher({
             sub={c.shellDesc}
             current={current === 'coach'}
             onSelect={() => {
-              window.location.hash = coachEntryHash();
+              setHash(coachEntryHash());
               onClose();
             }}
             currentLabel={t.shellCurrent}

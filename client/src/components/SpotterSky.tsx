@@ -18,7 +18,9 @@
  * hidden, DPR is capped at 2, and prefers-reduced-motion renders static only.
  */
 import { useEffect, useRef } from 'react';
-import { useStore } from '../store';
+import './SpotterSky.css';
+import type { ReactNode } from 'react';
+import { liveSleep, useStore } from '../store';
 import { downgradeMotion, useMotionTier } from '../motion';
 
 const BAND_HUES = ['#ffffff', '#f2f6ff', '#fff4e6', '#dbe6ff', '#ffe6cc', '#cdd8ff'];
@@ -357,4 +359,23 @@ export function SpotterSky() {
   }, [richness, tier]);
 
   return <canvas ref={ref} className="spotter-sky" aria-hidden="true" />;
+}
+
+/** The sky while a night is live, nothing otherwise: drop it into any full-screen shell. */
+export function NightSky() {
+  const night = liveSleep(useStore().sleeps);
+  return night ? <SpotterSky /> : null;
+}
+
+/**
+ * Root of a full-screen sub-app (Apex, Learn, People, Nutrition): the same `.app` shell as the Gym, plus the night sky
+ * while a night is live, so every app wears the sleep mode instead of only the Gym (SPO-148).
+ */
+export function AppRoot({ children }: { children: ReactNode }) {
+  return (
+    <div className="app app-apex-root">
+      <NightSky />
+      {children}
+    </div>
+  );
 }

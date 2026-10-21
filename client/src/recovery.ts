@@ -10,6 +10,7 @@
  * the deload nudge (a muscle long past its window shouldn't read as fatigued).
  */
 import { muscleSetsInWorkout } from './store';
+import { calendarDaysBetween } from './detraining';
 import { LANDMARKS, VOLUME_MUSCLES, type Landmark } from './volume';
 import { RECOVERY_DAYS } from './loadWindow';
 import { landmarkFor } from './personalize';
@@ -212,4 +213,22 @@ export function readinessMood(map: Map<MuscleGroup, MuscleReadiness>): Readiness
   if (cooling === 0) return 'fresh';
   if (cooling >= 4) return 'cooked';
   return 'mixed';
+}
+
+/**
+ * Calendar days since `muscle` last took any work (primary or secondary credit,
+ * the same attribution recovery.ts uses), looking at sessions up to `now`.
+ * `null` = never trained in the given history.
+ */
+export function muscleGapDays(
+  finished: readonly Workout[],
+  muscle: MuscleGroup,
+  now: number,
+): number | null {
+  let newest: number | null = null;
+  for (const w of finished) {
+    if (w.startedAt > now || (newest !== null && w.startedAt <= newest)) continue;
+    if ((muscleSetsInWorkout(w).get(muscle) ?? 0) > 0) newest = w.startedAt;
+  }
+  return newest === null ? null : calendarDaysBetween(newest, now);
 }

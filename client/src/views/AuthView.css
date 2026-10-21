@@ -1,0 +1,44 @@
+/* "‹" back pill: the remembered people as a small overlapping stack of faces (the pill's aria-label names it). */
+.auth-back-stack {
+  display: inline-flex;
+  margin: 0;
+}
+.auth-back-stack > * {
+  margin-left: calc(var(--s-4) * -1);
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  box-sizing: content-box;
+}
+.auth-back-stack > *:first-child {
+  margin-left: 0;
+}
+.auth-card > .uiback--text,
+.ld .ld-auth .auth-card > .uiback--text {
+  width: auto;
+  align-self: flex-start;
+  gap: var(--s-6);
+  padding: 0 var(--s-10) 0 var(--s-12);
+}
+
+/* "Remember me" row: the card's sibling rhythm above, a little more air before the button; no margins of its own. */
+.auth-remember {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  margin: 0;
+}
+.ld .ld-auth .auth-card > .auth-remember {
+  margin-top: var(--s-12);
+}
+.ld .ld-auth .auth-card > .auth-remember + * {
+  margin-top: var(--s-20);
+}
+
+/* Names the account for the browser's password manager without being seen. */
+.auth-username-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}

@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { detectPwaPlatform, isStandaloneDisplay } from './pwaInstall';
+import { afterEach, describe, expect, it } from 'vitest';
+import { detectPwaPlatform, isNativeShell, isStandaloneDisplay } from './pwaInstall';
 
 describe('detectPwaPlatform', () => {
   it('detects iPhone as apple / ios-guide', () => {
@@ -52,5 +52,31 @@ describe('detectPwaPlatform', () => {
 describe('isStandaloneDisplay', () => {
   it('returns boolean without throwing', () => {
     expect(typeof isStandaloneDisplay()).toBe('boolean');
+  });
+});
+
+describe('isNativeShell', () => {
+  afterEach(() => {
+    delete (window as unknown as Record<string, unknown>).spotterNative;
+  });
+
+  it('is false in a plain browser and true when the desktop shell bridge exists', () => {
+    expect(isNativeShell()).toBe(false);
+    (window as unknown as Record<string, unknown>).spotterNative = {};
+    expect(isNativeShell()).toBe(true);
+  });
+
+  it('recognises Electron by its user agent when the bridge did not load', () => {
+    const before = navigator.userAgent;
+    Object.defineProperty(navigator, 'userAgent', {
+      configurable: true,
+      value:
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Spotter/0.1.0 Chrome/130.0.0.0 Electron/33.0.0 Safari/537.36',
+    });
+    try {
+      expect(isNativeShell()).toBe(true);
+    } finally {
+      Object.defineProperty(navigator, 'userAgent', { configurable: true, value: before });
+    }
   });
 });

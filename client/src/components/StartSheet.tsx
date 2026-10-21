@@ -48,7 +48,7 @@ import { fmtDayMonth, fmtDurationHM, fmtKg, fmtWeekday, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import './HomeSet.css';
 import { useLiveLock } from '../views/home/homeHooks';
-import { DateField, TimeField, DurationField } from './PickerFields';
+import { DateField, TimePickerField, DurationField } from './PickerFields';
 import { GymPicker } from './GymPicker';
 import { GymThumb } from './GymThumb';
 
@@ -514,7 +514,7 @@ export function BackfillSheet(props: {
         <div className="backfill-grid">
           <label className="field-block">
             <span className="field-label">{t.backfillStart}</span>
-            <TimeField value={time} onChange={setTime} />
+            <TimePickerField value={time} onChange={setTime} />
           </label>
           <label className="field-block">
             <span className="field-label">{t.backfillDuration}</span>

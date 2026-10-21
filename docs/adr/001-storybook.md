@@ -14,7 +14,7 @@
 
 Storybook 10 (`@storybook/react-vite`, React 19, Vite 6) у `client/.storybook`.
 Кожен примітив `components/ui/` має `*.stories.tsx`; тест `kit.test.ts`
-вимагає це. Правило — `.cursor/rules/ui-kit.mdc`, контракт — `docs/UI-KIT.md`.
+вимагає це. Правило — `.claude/rules/ui.md`, контракт — `docs/UI-KIT.md`.
 
 ## Ціна і що купуємо
 

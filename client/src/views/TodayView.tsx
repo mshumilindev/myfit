@@ -103,6 +103,7 @@ import { ConfirmDialog, Icon, Sheet, useIsDesktop } from '../ui';
 import { REHAB_STAGES, stageIndex, inFullRest, nextStage } from '../injury';
 import { useGymStep } from '../components/useGymStep';
 import { Tag } from '../components/ui/Tag';
+import { setHash } from '../route';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -519,7 +520,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   })();
 
   function openTrends() {
-    window.location.hash = '#/trends';
+    setHash('#/trends');
   }
 
   // Every advisory card on Today, collapsed into one deck instead of a wall of
@@ -1146,7 +1147,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return { done, total, pct: total ? Math.round((done / total) * 100) : 0 };
   })();
   const openLearn = () => {
-    window.location.hash = '#/learn';
+    setHash('#/learn');
   };
   const learnBanner = (
     <Card as="button" pad="none" emphasis="glass" className="learn-banner" onClick={openLearn}>
@@ -1213,7 +1214,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     // Remember the target too: whatever opens the dashboard next (mode switch, a reload) lands on THIS client, not the Agenda.
     const route = { screen: 'client' as const, cid: id };
     rememberCoachRoute(route);
-    window.location.assign(coachHash(route));
+    setHash(coachHash(route));
   };
   const watchClient = (s: LiveSession) =>
     s.workoutId
@@ -1224,9 +1225,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           athleteName: s.athleteName,
         })
       : openClient(s.id);
-  // The Clients area lives in the People app.
+  // The Clients area lives in the Coach dashboard (People is the admin-only Users app, SPO-141).
   const allClients = () => {
-    window.location.hash = '#/people/clients';
+    setHash(coachHash({ screen: 'clients' }));
   };
   const renderAtlas = (ao: AtlasOpts): ReactNode => (
     <AtlasClientsBlock

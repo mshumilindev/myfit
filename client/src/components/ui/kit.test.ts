@@ -1,5 +1,5 @@
 /**
- * UI-kit contract (docs/UI-KIT.md, .cursor/rules/ui-kit.mdc), checked on every
+ * UI-kit contract (docs/UI-KIT.md, .claude/rules/ui.md), checked on every
  * test run:
  *   1. every primitive in components/ui/ ships a CSF3 story file next to it;
  *   2. kit CSS and the kit-built pages use tokens — no raw hex colours.

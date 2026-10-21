@@ -5,6 +5,7 @@
  * App while a live night runs.
  */
 import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { Switch as KitSwitch } from '../components/ui/Switch';
 import { useEffect, useMemo, useState } from 'react';
@@ -29,7 +30,7 @@ import { useT, fmtDurationHuman } from '../i18n';
 import { ConfirmDialog, Icon } from '../ui';
 import { MoonGlyph } from '../components/MoonGlyph';
 import { moonInfo, illumPct } from '../moon';
-import { TimeField } from '../components/PickerFields';
+import { TimePickerField } from '../components/PickerFields';
 import {
   nightDurationMin,
   lastNight,
@@ -61,12 +62,7 @@ const WD_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 function SleepTopbar({ title, onBack }: { title: string; onBack: () => void }) {
   const { t } = useT();
-  return (
-    <div className="sleep-topbar">
-      <BackButton className="sleep-back" label={t.cancel} onClick={onBack} />
-      <span className="sleep-topbar-title">{title}</span>
-    </div>
-  );
+  return <PageHead back={{ label: t.cancel, onClick: onBack }} title={title} />;
 }
 
 export function SleepView({
@@ -650,7 +646,7 @@ function WakeFlow({
       </div>
       <div className="sleep-wake-field">
         <span className="slh-sec-label">{t.sleepWokeAtLabel}</span>
-        <TimeField value={wake} onChange={setWake} />
+        <TimePickerField value={wake} onChange={setWake} />
       </div>
       <Button variant="sleep-fill" className="sleep-wide" onClick={() => onConfirm(wakeAt)}>
         {t.sleepLogAndWake(dur(mins))}

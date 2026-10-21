@@ -41,7 +41,7 @@ export function StandardsView({ finished, body }: { finished: Workout[]; body: B
   const tierLabel = (system: DiscResult['system'], id: string): string =>
     system === 'rank' ? t.rankShort[id] : t.lvlShort[id];
 
-  const Card = ({ r }: { r: DiscResult }) => (
+  const StandardCard = ({ r }: { r: DiscResult }) => (
     <section id={`std-${r.key}`} className="std-card">
       <div className="std-card-head">
         <div className="std-titles">
@@ -127,7 +127,7 @@ export function StandardsView({ finished, body }: { finished: Workout[]; body: B
         <>
           <div className="std-section-lab">{t.stdYouTrain}</div>
           {trained.map((r) => (
-            <Card key={r.key} r={r} />
+            <StandardCard key={r.key} r={r} />
           ))}
         </>
       )}
@@ -136,7 +136,7 @@ export function StandardsView({ finished, body }: { finished: Workout[]; body: B
         <>
           <div className="std-section-lab">{t.stdNotYet}</div>
           {untrained.map((r) => (
-            <Card key={r.key} r={r} />
+            <StandardCard key={r.key} r={r} />
           ))}
         </>
       )}

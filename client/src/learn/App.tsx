@@ -15,6 +15,7 @@
 import { SuiteTabBar } from '../components/SuiteTabBar';
 import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
 import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { Button } from '../components/ui/Button';
 import { SearchField } from '../components/ui/SearchField';
 import { Card } from '../components/ui/Card';
@@ -241,13 +242,14 @@ function HomeScreen({
 
   return (
     <div className="ln-screen">
-      <div className="ln-head">
-        <h1>{L.howTo}</h1>
-        <span className="ln-count">
-          <span className="acc">0</span> / {lessons.length}
-        </span>
-      </div>
-
+      <PageHead
+        title={L.howTo}
+        actions={
+          <span className="ln-count">
+            <span className="acc">0</span> / {lessons.length}
+          </span>
+        }
+      />
       <Toolbar
         q={q}
         onQ={setQ}
@@ -315,9 +317,7 @@ function TopicsScreen({
   const { L } = useLearnT();
   return (
     <div className="ln-screen">
-      <div className="ln-head">
-        <h1>{L.topics}</h1>
-      </div>
+      <PageHead title={L.topics} />
       <div className="ln-topics">
         {topics.map((t) => (
           <ListRow
@@ -349,11 +349,11 @@ function TopicDetail({
   const { L } = useLearnT();
   return (
     <div className="ln-screen">
-      <BackButton className="ln-back" label={L.topics} text={L.topics} onClick={onBack} />
-      <div className="ln-head">
-        <h1>{topic.title}</h1>
-        <span className="ln-count">{L.lessons(topic.lessons.length)}</span>
-      </div>
+      <PageHead
+        back={{ label: L.topics, text: L.topics, onClick: onBack }}
+        title={topic.title}
+        actions={<span className="ln-count">{L.lessons(topic.lessons.length)}</span>}
+      />
       <LessonGrid lessons={topic.lessons} cut={cut} onPlay={onPlay} />
     </div>
   );
@@ -377,10 +377,10 @@ function SavedScreen({
   const items = saved.map((id) => byId.get(id)).filter((l): l is Lesson => !!l);
   return (
     <div className="ln-screen">
-      <div className="ln-head">
-        <h1>{L.saved}</h1>
-        {items.length > 0 && <span className="ln-count">{L.videos(items.length)}</span>}
-      </div>
+      <PageHead
+        title={L.saved}
+        actions={items.length > 0 && <span className="ln-count">{L.videos(items.length)}</span>}
+      />
       {items.length === 0 ? (
         <div className="ln-empty">
           <span className="ln-empty-ic">

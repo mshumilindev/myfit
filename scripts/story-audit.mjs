@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* global document, getComputedStyle, innerWidth -- the probe function runs inside the page */
+/* global document, getComputedStyle, innerWidth, innerHeight -- the probe function runs inside the page */
 /**
  * Story geometry audit (SPO-103 / SPO-28 / SPO-113): opens every Storybook story in a real browser across locales,
  * phone widths and a large system font, and reports layout that breaks:
@@ -11,10 +11,11 @@
  *
  *   npm run build-storybook && npx http-server client/storybook-static -p 6006 &
  *   npm run audit:stories -- --url http://127.0.0.1:6006 --locales en,uk,pl,lt,et --widths 320,360,390 --fonts 1,1.5
- *   options: --filter <substring of story id> --part i/n (split the work) --out report.json
+ *   options: --height <px> (viewport height; ~380 emulates an open on-screen keyboard) --filter <substring of story id> --part i/n (split the work) --out report.json
  */
 import fs from 'node:fs';
 import { chromium } from '@playwright/test';
+import { parsePart, runPool, shard } from './lib/pool.mjs';
 
 const arg = (k, d) => {
   const i = process.argv.indexOf(`--${k}`);
@@ -25,14 +26,15 @@ const locales = arg('locales', 'en,uk,pl,lt,et').split(',');
 const widths = arg('widths', '320,360,390').split(',').map(Number);
 const fonts = arg('fonts', '1').split(',').map(Number);
 const filter = arg('filter', '');
-const [part, parts] = arg('part', '0/1').split('/').map(Number);
+const partSpec = parsePart(arg('part', '0/1'));
+const concurrency = Number(arg('concurrency', '1'));
 const out = arg('out', '');
 
 const index = await (await fetch(`${url}/index.json`)).json();
-const ids = Object.entries(index.entries)
+const allIds = Object.entries(index.entries)
   .filter(([id, e]) => e.type === 'story' && id.includes(filter))
-  .map(([id]) => id)
-  .filter((_, i) => i % parts === part);
+  .map(([id]) => id);
+const ids = shard(allIds, partSpec);
 
 /** Runs in the page. */
 const probe = () => {
@@ -100,6 +102,8 @@ const probe = () => {
     if (cs.boxShadow === 'none' || cs.display === 'none') continue;
     const r = el.getBoundingClientRect();
     if (!r.width || !r.height) continue;
+    // Parked outside the window (a skip link until it takes focus) shows nothing, so its shadow cannot be a defect.
+    if (r.bottom <= 0 || r.right <= 0 || r.top >= innerHeight || r.left >= innerWidth) continue;
     const ext = { l: 0, r: 0, t: 0, b: 0 };
     for (const [ox, oy, blur, spread = 0] of layers(cs.boxShadow)) {
       const e = blur / 2 + spread; // the visible part of a blur is about half of it
@@ -108,16 +112,42 @@ const probe = () => {
       ext.t = Math.max(ext.t, e - oy);
       ext.b = Math.max(ext.b, e + oy);
     }
+    // A hairline glow (<= 4px, e.g. the now-line) sitting flush against a scroll edge is not a visible defect.
+    if (Math.max(ext.l, ext.r, ext.t, ext.b) <= 4) continue;
     for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
       const ac = getComputedStyle(a);
       const ar = a.getBoundingClientRect();
       const clipX = ac.overflowX !== 'visible';
       const clipY = ac.overflowY !== 'visible';
+      // An element that fills its clipping ancestor edge to edge (a card laid over a photo hero) is meant to be clipped by it; nothing further out can see the shadow.
+      if (
+        (clipX || clipY) &&
+        Math.abs(r.left - ar.left) <= 1 &&
+        Math.abs(ar.right - r.right) <= 1 &&
+        Math.abs(r.top - ar.top) <= 1 &&
+        Math.abs(ar.bottom - r.bottom) <= 1
+      )
+        break;
       const cut = [];
-      if (clipX && r.left - ar.left >= -1 && r.left - ar.left < ext.l - 3) cut.push('left');
-      if (clipX && ar.right - r.right >= -1 && ar.right - r.right < ext.r - 3) cut.push('right');
-      if (clipY && r.top - ar.top >= -1 && r.top - ar.top < ext.t - 3) cut.push('top');
-      if (clipY && ar.bottom - r.bottom >= -1 && ar.bottom - r.bottom < ext.b - 3)
+      // A clip edge that is the window edge hides nothing the user could see beyond it.
+      const atWin = (v, edge) => Math.abs(v - edge) <= 1;
+      if (clipX && !atWin(ar.left, 0) && r.left - ar.left >= -1 && r.left - ar.left < ext.l - 3)
+        cut.push('left');
+      if (
+        clipX &&
+        !atWin(ar.right, innerWidth) &&
+        ar.right - r.right >= -1 &&
+        ar.right - r.right < ext.r - 3
+      )
+        cut.push('right');
+      if (clipY && !atWin(ar.top, 0) && r.top - ar.top >= -1 && r.top - ar.top < ext.t - 3)
+        cut.push('top');
+      if (
+        clipY &&
+        !atWin(ar.bottom, innerHeight) &&
+        ar.bottom - r.bottom >= -1 &&
+        ar.bottom - r.bottom < ext.b - 3
+      )
         cut.push('bottom');
       if (cut.length) {
         const key = `${String(el.className).slice(0, 40)}>${String(a.className).slice(0, 30)}`;
@@ -138,42 +168,100 @@ const browser = await chromium.launch(
     : {},
 );
 const report = [];
-for (const w of widths) {
-  for (const f of fonts) {
+// One navigation per (width, locale, story); the font scales are applied to that same document one after another.
+// The original flow also mounted the story at 1x and only then injected the scale, so the probes are the same.
+const items = [];
+for (const w of widths) for (const loc of locales) for (const id of ids) items.push({ w, loc, id });
+const pages = [];
+let probes = 0;
+const setScale = (page, f) =>
+  page.evaluate((scale) => {
+    let el = document.getElementById('__audit_font');
+    if (scale === 1) {
+      el?.remove();
+      return;
+    }
+    if (!el) {
+      el = document.createElement('style');
+      el.id = '__audit_font';
+      document.head.appendChild(el);
+    }
+    el.textContent = `html{font-size:${scale * 100}%}`;
+  }, f);
+await runPool(items, concurrency, async ({ w, loc, id }, worker) => {
+  if (!pages[worker]) {
     const ctx = await browser.newContext({
       viewport: { width: w, height: 800 },
       reducedMotion: 'reduce',
     });
-    const page = await ctx.newPage();
-    for (const loc of locales) {
-      for (const id of ids) {
-        try {
-          await page.goto(`${url}/iframe.html?id=${id}&viewMode=story&globals=locale:${loc}`, {
-            waitUntil: 'load',
-            timeout: 20000,
-          });
-          if (f !== 1) await page.addStyleTag({ content: `html{font-size:${f * 100}%}` });
-          await page.waitForTimeout(400);
-          const found = await page.evaluate(probe);
-          for (const [kind, detail] of found)
-            report.push({ id, width: w, font: f, locale: loc, kind, detail });
-        } catch (e) {
-          report.push({
-            id,
-            width: w,
-            font: f,
-            locale: loc,
-            kind: 'error',
-            detail: String(e).slice(0, 80),
-          });
-        }
-      }
-    }
-    await ctx.close();
+    pages[worker] = await ctx.newPage();
   }
-}
+  const page = pages[worker];
+  let loaded = false;
+  try {
+    await page.setViewportSize({ width: w, height: 800 });
+    await page.goto(`${url}/iframe.html?id=${id}&viewMode=story&globals=locale:${loc}`, {
+      waitUntil: 'load',
+      timeout: 20000,
+    });
+    loaded = true;
+  } catch (e) {
+    for (const f of fonts) {
+      probes++;
+      report.push({
+        id,
+        width: w,
+        font: f,
+        locale: loc,
+        kind: 'error',
+        detail: String(e).slice(0, 80),
+      });
+    }
+  }
+  if (!loaded) return;
+  for (const f of fonts) {
+    try {
+      await setScale(page, f);
+      await page.waitForTimeout(400);
+      const found = await page.evaluate(probe);
+      probes++;
+      for (const [kind, detail] of found)
+        report.push({ id, width: w, font: f, locale: loc, kind, detail });
+    } catch (e) {
+      probes++;
+      report.push({
+        id,
+        width: w,
+        font: f,
+        locale: loc,
+        kind: 'error',
+        detail: String(e).slice(0, 80),
+      });
+    }
+  }
+});
+report.sort((x, y) =>
+  `${x.id}|${x.locale}|${x.width}|${x.font}|${x.kind}|${x.detail}`.localeCompare(
+    `${y.id}|${y.locale}|${y.width}|${y.font}|${y.kind}|${y.detail}`,
+  ),
+);
 await browser.close();
-if (out) fs.writeFileSync(out, JSON.stringify(report, null, 1));
+if (out)
+  fs.writeFileSync(
+    out,
+    JSON.stringify(
+      {
+        audit: 'stories',
+        part: partSpec,
+        total: allIds.length * locales.length * widths.length * fonts.length,
+        expected: items.length * fonts.length,
+        probes,
+        report,
+      },
+      null,
+      1,
+    ),
+  );
 console.log(
   `audited ${ids.length} stories x ${locales.length} locales x ${widths.length} widths x ${fonts.length} font scales: ${report.length} findings`,
 );

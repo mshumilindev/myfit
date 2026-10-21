@@ -9,7 +9,9 @@
  *   npm run audit:chat -- --url http://127.0.0.1:6006 --widths 320,390,768,1440
  * Exit code 1 on any violation.
  */
+import fs from 'node:fs';
 import { chromium } from '@playwright/test';
+import { parsePart, runPool, shard } from './lib/pool.mjs';
 
 const arg = (k, d) => {
   const i = process.argv.indexOf(`--${k}`);
@@ -18,6 +20,9 @@ const arg = (k, d) => {
 const url = arg('url', 'http://127.0.0.1:6006');
 const widths = arg('widths', '320,360,390,768,1024,1440,1920').split(',').map(Number);
 const locales = arg('locales', 'en,uk,pl,lt,et').split(',');
+const partSpec = parsePart(arg('part', '0/1'));
+const concurrency = Number(arg('concurrency', '1'));
+const out = arg('out', '');
 const STORIES = [
   'pages-coach-chat--thread-phone', // trainer (thread open at every width)
   'pages-coach-client--chat', // client
@@ -87,99 +92,124 @@ const browser = await chromium.launch(
     : {},
 );
 const problems = [];
-for (const w of widths) {
-  const ctx = await browser.newContext({
-    viewport: { width: w, height: 800 },
-    reducedMotion: 'reduce',
-  });
-  const page = await ctx.newPage();
-  for (const loc of locales) {
-    const results = {};
-    for (const id of STORIES) {
-      await page.goto(`${url}/iframe.html?id=${id}&viewMode=story&globals=locale:${loc}`, {
-        waitUntil: 'load',
-      });
-      await page.waitForSelector('.chs-foot, .uicomp', { timeout: 20000 }).catch(() => {});
-      await page.waitForTimeout(500);
-      const m = await page.evaluate(probe);
-      results[id] = m;
-      // SPO-95: hovering / focusing Atlas's face keeps a circle the size of the avatar (no capsule around it)
-      if (id.startsWith('pages-atlas') && loc === 'en') {
-        const face = page.locator('.atl-face-btn').first();
-        if (await face.count()) {
-          await face.hover();
-          await face.focus();
-          const g = await face.evaluate((e) => {
-            const r = e.getBoundingClientRect();
-            const c = getComputedStyle(e);
-            const a = e.querySelector('.atl-face').getBoundingClientRect();
-            return {
-              w: r.width,
-              h: r.height,
-              br: c.borderRadius,
-              pad: Math.round((r.width - a.width) / 2),
-            };
-          });
-          if (Math.abs(g.w - g.h) > 1 || g.br !== '50%' || g.pad > 3)
-            problems.push(
-              `${id} @${w}px: Atlas face hover is not a tight circle (${g.w}x${g.h}, radius ${g.br}, ${g.pad}px around the avatar)`,
-            );
-        }
-      }
-      const at = `${id} @${w}px ${loc}`;
-      if (w >= 1024 && m.roomB < 16)
-        problems.push(`${at}: the chat touches the window bottom (${m.roomB}px under the frame)`);
-      if (m.actionAbove)
-        problems.push(
-          `${at}: an action button sits in a row above the field, not in the composer row`,
-        );
-      if (m.rowTops && Math.max(...m.rowTops) - Math.min(...m.rowTops) > 2)
-        problems.push(`${at}: composer buttons and field are not on one line (${m.rowTops})`);
-      if (m.belowBeside) problems.push(`${at}: chips / extras sit beside the bubble, not under it`);
-      if (m.firstW !== null && m.firstW < Math.min(0.5 * m.bodyW, 200))
-        problems.push(`${at}: first message squeezed to ${m.firstW}px in a ${m.bodyW}px list`);
-      if (m.missing) {
-        problems.push(`${at}: no .chs-foot / .uicomp (the chat did not render)`);
-        continue;
-      }
-      if (m.hscroll > 0) problems.push(`${at}: page scrolls sideways by ${m.hscroll}px`);
-      if (!m.sendInside) problems.push(`${at}: the send button sticks out of the composer`);
-      if (m.gapL < m.pad[3] - 1 || m.gapR < m.pad[1] - 1)
-        problems.push(
-          `${at}: composer closer to the side than the frame padding (${m.gapL}/${m.gapR} < ${m.pad})`,
-        );
-      if (m.gapB < Math.min(m.pad[2], 8) - 1)
-        problems.push(`${at}: no room under the composer (${m.gapB}px)`);
-      if (m.widest < Math.min(0.6 * m.bodyW, 280))
-        problems.push(`${at}: messages squeezed (widest ${m.widest}px in a ${m.bodyW}px list)`);
-    }
-    // the three chats share one frame: same composer room and shell gutter at this width
-    const ref = results[STORIES[1]];
-    for (const id of STORIES) {
-      const m = results[id];
-      if (m.missing || ref.missing) continue;
-      if (w >= 1024 && !id.startsWith('pages-coach-chat--') && m.roomB !== ref.roomB)
-        problems.push(
-          `${id} @${w}px ${loc}: room under the frame ${m.roomB}px differs from the client chat ${ref.roomB}px`,
-        );
-      if (JSON.stringify(m.pad) !== JSON.stringify(ref.pad))
-        problems.push(
-          `${id} @${w}px ${loc}: composer padding ${m.pad} differs from the client chat ${ref.pad}`,
-        );
-      if (
-        id.startsWith('pages-atlas') &&
-        JSON.stringify(m.shellGutter) !== JSON.stringify(ref.shellGutter)
-      )
-        problems.push(
-          `${id} @${w}px ${loc}: frame gutter ${m.shellGutter} differs from the client chat ${ref.shellGutter}`,
-        );
-    }
+const units = [];
+for (const w of widths) for (const loc of locales) units.push({ w, loc });
+const mine = shard(units, partSpec);
+const pages = [];
+let probes = 0;
+await runPool(mine, concurrency, async ({ w, loc }, worker) => {
+  if (!pages[worker]) {
+    const ctx = await browser.newContext({
+      viewport: { width: w, height: 800 },
+      reducedMotion: 'reduce',
+    });
+    pages[worker] = await ctx.newPage();
   }
-  await ctx.close();
-}
+  const page = pages[worker];
+  await page.setViewportSize({ width: w, height: 800 });
+  const results = {};
+  for (const id of STORIES) {
+    await page.goto(`${url}/iframe.html?id=${id}&viewMode=story&globals=locale:${loc}`, {
+      waitUntil: 'load',
+    });
+    await page.waitForSelector('.chs-foot, .uicomp', { timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(500);
+    const m = await page.evaluate(probe);
+    results[id] = m;
+    // SPO-95: hovering / focusing Atlas's face keeps a circle the size of the avatar (no capsule around it)
+    if (id.startsWith('pages-atlas') && loc === 'en') {
+      const face = page.locator('.atl-face-btn').first();
+      if (await face.count()) {
+        await face.hover();
+        await face.focus();
+        const g = await face.evaluate((e) => {
+          const r = e.getBoundingClientRect();
+          const c = getComputedStyle(e);
+          const a = e.querySelector('.atl-face').getBoundingClientRect();
+          return {
+            w: r.width,
+            h: r.height,
+            br: c.borderRadius,
+            pad: Math.round((r.width - a.width) / 2),
+          };
+        });
+        if (Math.abs(g.w - g.h) > 1 || g.br !== '50%' || g.pad > 3)
+          problems.push(
+            `${id} @${w}px: Atlas face hover is not a tight circle (${g.w}x${g.h}, radius ${g.br}, ${g.pad}px around the avatar)`,
+          );
+      }
+    }
+    const at = `${id} @${w}px ${loc}`;
+    if (w >= 1024 && m.roomB < 16)
+      problems.push(`${at}: the chat touches the window bottom (${m.roomB}px under the frame)`);
+    if (m.actionAbove)
+      problems.push(
+        `${at}: an action button sits in a row above the field, not in the composer row`,
+      );
+    if (m.rowTops && Math.max(...m.rowTops) - Math.min(...m.rowTops) > 2)
+      problems.push(`${at}: composer buttons and field are not on one line (${m.rowTops})`);
+    if (m.belowBeside) problems.push(`${at}: chips / extras sit beside the bubble, not under it`);
+    if (m.firstW !== null && m.firstW < Math.min(0.5 * m.bodyW, 200))
+      problems.push(`${at}: first message squeezed to ${m.firstW}px in a ${m.bodyW}px list`);
+    if (m.missing) {
+      problems.push(`${at}: no .chs-foot / .uicomp (the chat did not render)`);
+      continue;
+    }
+    if (m.hscroll > 0) problems.push(`${at}: page scrolls sideways by ${m.hscroll}px`);
+    if (!m.sendInside) problems.push(`${at}: the send button sticks out of the composer`);
+    if (m.gapL < m.pad[3] - 1 || m.gapR < m.pad[1] - 1)
+      problems.push(
+        `${at}: composer closer to the side than the frame padding (${m.gapL}/${m.gapR} < ${m.pad})`,
+      );
+    if (m.gapB < Math.min(m.pad[2], 8) - 1)
+      problems.push(`${at}: no room under the composer (${m.gapB}px)`);
+    if (m.widest < Math.min(0.6 * m.bodyW, 280))
+      problems.push(`${at}: messages squeezed (widest ${m.widest}px in a ${m.bodyW}px list)`);
+  }
+  // the three chats share one frame: same composer room and shell gutter at this width
+  const ref = results[STORIES[1]];
+  for (const id of STORIES) {
+    const m = results[id];
+    if (m.missing || ref.missing) continue;
+    if (w >= 1024 && !id.startsWith('pages-coach-chat--') && m.roomB !== ref.roomB)
+      problems.push(
+        `${id} @${w}px ${loc}: room under the frame ${m.roomB}px differs from the client chat ${ref.roomB}px`,
+      );
+    if (JSON.stringify(m.pad) !== JSON.stringify(ref.pad))
+      problems.push(
+        `${id} @${w}px ${loc}: composer padding ${m.pad} differs from the client chat ${ref.pad}`,
+      );
+    if (
+      id.startsWith('pages-atlas') &&
+      JSON.stringify(m.shellGutter) !== JSON.stringify(ref.shellGutter)
+    )
+      problems.push(
+        `${id} @${w}px ${loc}: frame gutter ${m.shellGutter} differs from the client chat ${ref.shellGutter}`,
+      );
+  }
+
+  probes += STORIES.length;
+});
+problems.sort();
 await browser.close();
+if (out)
+  fs.writeFileSync(
+    out,
+    JSON.stringify(
+      {
+        audit: 'chat',
+        part: partSpec,
+        total: units.length * STORIES.length,
+        expected: mine.length * STORIES.length,
+        probes,
+        report: problems,
+      },
+      null,
+      1,
+    ),
+  );
 console.log(
-  `chat layout: ${STORIES.length} stories x ${locales.length} locales x ${widths.length} widths, ${problems.length} problems`,
+  `chat layout: ${mine.length}/${units.length} width x locale units (${STORIES.length} stories each), ${problems.length} problems`,
 );
 for (const p of problems.slice(0, 60)) console.log(` - ${p}`);
 process.exit(problems.length ? 1 : 0);

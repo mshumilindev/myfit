@@ -26,6 +26,8 @@ server/dist/
 desktop/dist/
 coverage/
 client/coverage/
+client/coverage-patch/
+patch-cov/
 .vite/
 client/.vite/
 test-results/
@@ -83,3 +85,6 @@ __pycache__/
 # Playwright scratch
 tests/e2e/.artifacts/
 client/dist-e2e*/
+
+# Electron shell build output (DMG)
+desktop/release/

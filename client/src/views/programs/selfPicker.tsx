@@ -11,7 +11,7 @@ import { ExercisePicker } from '../../components/ExercisePicker';
 import { useT } from '../../i18n';
 import type { ExercisePickerSlotProps } from '../../tools/programEditor';
 import type { Workout } from '../../types';
-import { Sheet } from '../../ui';
+import { Sheet } from '../../components/ui/Overlays';
 
 /** Program authoring has no live workout: the picker only needs a blank one. */
 const PLAIN_WORKOUT: Workout = {

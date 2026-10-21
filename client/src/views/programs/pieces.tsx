@@ -1,6 +1,6 @@
 /** Small shared pieces of the Programs page. */
 import type { ReactNode } from 'react';
-import { Avatar } from '../../components/Avatar';
+import { UserAvatar } from '../../components/Avatar';
 import { ListRow } from '../../components/ui/GroupedList';
 import { Switch as KitSwitch } from '../../components/ui/Switch';
 import type { Person } from './model';
@@ -43,7 +43,7 @@ export function AvatarStack({ people, max = 3 }: { people: Person[]; max?: numbe
     <span className="pg-avs" aria-hidden>
       {shown.map((p) => (
         <span key={p.id} className="pg-av">
-          <Avatar
+          <UserAvatar
             userId={p.id}
             name={p.name}
             hasPhoto={!!p.avatar}

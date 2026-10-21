@@ -8,6 +8,7 @@ import { setViewport } from '../testViewport';
 import { createFixturesSchedulePort, TODAY_KEY, WEEK0 } from './__fixtures__/fixtures';
 import { ScheduleScreen } from './ScheduleScreen';
 import { tsOf } from './time';
+import { currentHash } from '../../route';
 
 beforeEach(() => {
   setLocale('en');
@@ -62,14 +63,14 @@ describe('Calendar navigation', () => {
     expect((today as HTMLButtonElement).disabled).toBe(true); // already on this week
     fireEvent.click(within(nav()).getByRole('button', { name: t.scNextWeek }));
     expect(label()).toBe('12 – 18 Oct 2026');
-    expect(window.location.hash).toContain(`d=${TODAY_KEY + 7}`);
+    expect(currentHash()).toContain(`d=${TODAY_KEY + 7}`);
     expect((today as HTMLButtonElement).disabled).toBe(false);
     fireEvent.click(within(nav()).getByRole('button', { name: t.scPrevWeek }));
     fireEvent.click(within(nav()).getByRole('button', { name: t.scPrevWeek }));
     expect(label()).toBe('28 Sep – 4 Oct 2026');
     fireEvent.click(today);
     expect(label()).toBe('5 – 11 Oct 2026');
-    expect(window.location.hash).not.toContain('d=');
+    expect(currentHash()).not.toContain('d=');
   });
 
   it('the Now line and the today highlight belong to the current week only', async () => {
@@ -341,7 +342,7 @@ describe('Create a session from an empty slot', () => {
     expect(within(form).getByText(/Sunday, 11 Oct · 13:30 – 14:15/)).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: t.bdCancel }));
     expect(screen.queryByRole('form', { name: t.qcTitle })).toBeNull();
-    expect(window.location.hash).not.toContain('create=');
+    expect(currentHash()).not.toContain('create=');
   });
 
   it('phone: the agenda has an "Add a session" button for the day shown', async () => {
@@ -385,7 +386,7 @@ describe('Session drawer', () => {
     const { b, dialog } = await open();
     fireEvent.click(within(dialog).getByRole('button', { name: t.scInspectorClose }));
     await waitFor(() => expect(screen.queryByRole('dialog', { name: t.scInspectorH })).toBeNull());
-    expect(window.location.hash).not.toContain('open=');
+    expect(currentHash()).not.toContain('open=');
     expect(document.activeElement).toBe(b);
   });
 

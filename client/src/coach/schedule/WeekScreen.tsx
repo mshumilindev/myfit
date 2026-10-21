@@ -31,6 +31,7 @@ import { scheduleHref, useScheduleParams } from './useScheduleParams';
 import './Schedule.css';
 import { CoachProblemState } from '../BackendNotice';
 import { offlineOrUnknown } from '../data/problem';
+import { setHash } from '../../route';
 
 export interface WeekScreenProps {
   onNavigate: (r: CoachRoute) => void;
@@ -227,9 +228,7 @@ export function WeekScreen(p: WeekScreenProps) {
                                   variant="link"
                                   size="sm"
                                   onClick={() => {
-                                    window.location.assign(
-                                      scheduleHref({ form: 'move', slot: s.id }),
-                                    );
+                                    setHash(scheduleHref({ form: 'move', slot: s.id }));
                                   }}
                                 >
                                   {t.wkReschedule}

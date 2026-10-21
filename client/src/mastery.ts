@@ -28,6 +28,7 @@ import {
 import { computeStandards, LEVELS, type Sex } from './standards';
 import { topHistory, nextTarget } from './progression';
 import { sleepStats, finishedNights } from './sleep';
+import { foldedWeekly } from './masteryBack';
 
 // --- Ranks -----------------------------------------------------------------
 export type MasteryRankId =
@@ -73,6 +74,7 @@ export const PATTERN_FACTOR: Record<TrainingPattern, number> = {
 export interface MasteryOpts {
   trainingSinceYear?: number | null;
   trainingPattern?: TrainingPattern | null;
+  streakDays?: number; // default: the app-wide streak from the store
 }
 
 export type AxisKey = 'strength' | 'consistency' | 'experience' | 'practice';
@@ -202,7 +204,7 @@ function strengthAxis(finished: Workout[], bodyKg: number, sex: Sex | null): Axi
 }
 
 // --- axis: consistency -----------------------------------------------------
-function consistencyAxis(finished: Workout[], now: number): AxisScore {
+function consistencyAxis(finished: Workout[], now: number, streakDays?: number): AxisScore {
   const windowStart = now - 56 * DAY; // 8 weeks
   const recent = finished.filter((w) => (w.finishedAt ?? 0) >= windowStart);
   const perWeek = recent.length / 8;
@@ -210,7 +212,7 @@ function consistencyAxis(finished: Workout[], now: number): AxisScore {
   const weeks = new Set<number>();
   for (const w of recent) weeks.add(Math.floor(((w.finishedAt ?? 0) - windowStart) / (7 * DAY)));
   const activeWeeks = weeks.size;
-  const streak = consistencyStreak(now);
+  const streak = streakDays ?? consistencyStreak(now);
 
   // Regularity, not volume: reward a steady ~3–5 sessions/wk and unbroken weeks.
   const rateScore = clamp01(perWeek / 4); // 4/wk saturates
@@ -285,11 +287,9 @@ function practiceSignals(
   const weekly = (m: MuscleGroup) => (setsPerMuscle.get(m) ?? 0) / weeks;
 
   // 1 · coverage & balance
-  const trainedMajors = MAJOR_GROUPS.filter((m) => (setsPerMuscle.get(m) ?? 0) > 0);
-  const skipped = MAJOR_GROUPS.filter((m) => (setsPerMuscle.get(m) ?? 0) === 0);
-  const push = sum(PUSH.map(weekly));
-  const pull = sum(PULL.map(weekly));
-  const legs = sum(LEGS.map(weekly));
+  const covWeekly = foldedWeekly(setsPerMuscle, weeks);
+  const skipped = MAJOR_GROUPS.filter((m) => covWeekly(m) === 0);
+  const [push, pull, legs] = [PUSH, PULL, LEGS].map((g) => sum(g.map(covWeekly)));
   const balTotal = push + pull + legs || 1;
   // Balance penalty: how far the push/pull/legs split is from an even third.
   const balSpread =
@@ -298,7 +298,7 @@ function practiceSignals(
       Math.abs(legs / balTotal - 1 / 3)) /
     (4 / 3);
   const coverageScore = pct(
-    0.7 * (trainedMajors.length / MAJOR_GROUPS.length) + 0.3 * (1 - clamp01(balSpread)),
+    0.7 * (1 - skipped.length / MAJOR_GROUPS.length) + 0.3 * (1 - clamp01(balSpread)),
   );
 
   // 2 · load progression (top trained lifts trending up)
@@ -552,7 +552,7 @@ export function computeMastery(
   const sex: Sex | null = bm?.sex === 'female' ? 'F' : bm?.sex === 'male' ? 'M' : null;
 
   const strength = strengthAxis(finished, bodyKg, sex);
-  const consistency = consistencyAxis(finished, now);
+  const consistency = consistencyAxis(finished, now, opts.streakDays);
   const experience = experienceAxis(
     finished,
     now,

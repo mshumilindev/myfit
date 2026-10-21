@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { BackButton } from '../../../components/ui/BackButton';
+import { PageHead } from '../../../components/ui/PageHead';
 import '../../../views/Health.css';
 import '../ClientCoach.css';
 
@@ -17,10 +17,7 @@ export function PushedPage({
 }) {
   return (
     <div className="screen hl">
-      <div className="hl-pbar">
-        <BackButton label={backLabel} onClick={onBack} />
-        <h1 className="hl-pt">{title}</h1>
-      </div>
+      <PageHead className="hl-pbar" back={{ label: backLabel, onClick: onBack }} title={title} />
       <div className="hl-scroll">
         <div className="hl-cnt">{children}</div>
       </div>

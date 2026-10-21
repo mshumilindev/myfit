@@ -1,0 +1,40 @@
+# Unsigned DMG for local checks (no Apple Developer account yet). Signing/notarization is added later (SPO-157):
+# set mac.identity to the Developer ID Application certificate and add `notarize: true`.
+appId: com.spotter.desktop
+productName: Spotter
+# electron-builder needs an exact version (package.json has a range). Keep in sync with the installed electron.
+electronVersion: 37.10.3
+directories:
+  output: release
+files:
+  - dist/**
+  - assets/**
+  - '!assets/AppIcon.iconset/**'
+  - package.json
+artifactName: Spotter-${version}-${arch}.${ext}
+mac:
+  category: public.app-category.healthcare-fitness
+  icon: assets/app-icon.png
+  identity: null
+  target:
+    - dmg
+  extendInfo:
+    NSCameraUsageDescription: Spotter uses the camera to scan food and take progress photos.
+    NSLocationWhenInUseUsageDescription: Spotter uses your location to find gyms and plan routes.
+publish:
+  # Repo owner/name are taken from the CI environment / git remote. Releases are created as drafts (publish by hand).
+  provider: github
+  releaseType: draft
+win:
+  artifactName: Spotter-Setup-${version}.${ext}
+  icon: assets/app-icon.png
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+  # Unsigned for now (no certificate): SmartScreen shows a warning. Signing / Microsoft Store: SPO-159.
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+dmg:
+  title: Spotter ${version}

@@ -26,22 +26,23 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/brand/v2/apple-touch-180.png" />
     <link rel="apple-touch-icon" href="/brand/v2/apple-touch-180.png" />
     <link rel="apple-touch-icon-precomposed" href="/brand/v2/apple-touch-precomposed.png" />
-    <!-- Brand wordmark font (header "spotter · gym"). Loads at runtime; falls
-         back to cursive offline. -->
+    <!-- Brand wordmark font (header "spotter · gym") and the landing fonts. Loads at runtime; falls
+         back to system fonts offline. They used to be a CSS @import in landing-design.css, which holds the first
+         paint until Google answers (SPO-14). -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Non-blocking: a normal stylesheet link would hold the first paint until
          Google answers, which on a dead or very slow network is "never". The
          media swap loads it in the background; font-display: swap does the rest. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700&amp;family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Kaushan+Script&amp;display=swap"
       rel="stylesheet"
       media="print"
       onload="this.media = 'all'"
     />
     <noscript>
       <link
-        href="https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700&amp;family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Kaushan+Script&amp;display=swap"
         rel="stylesheet"
       />
     </noscript>

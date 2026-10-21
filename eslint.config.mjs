@@ -12,6 +12,8 @@ export default tseslint.config(
       '**/.vite/',
       '**/node_modules/',
       '**/coverage/',
+      '**/coverage-patch/',
+      'patch-cov/',
       '**/storybook-static/',
       '_sync/',
       '**/_to_delete/',

@@ -127,7 +127,7 @@ const EQUIP_RANK: Record<string, number> = {
   barbell: 0,
   cable: 0,
   machine: 1,
-  'e-z-curl-bar': 1,
+  ezBar: 1,
   kettlebell: 2,
   body: 3,
 };

@@ -1,0 +1,118 @@
+/** Shared mocks and data for the ProfileView behaviour tests (boundaries only: callable functions, offline cache, storage). */
+import { vi } from 'vitest';
+import { NOW, DAY } from './viewKit';
+
+export const pm = {
+  data: {} as Record<string, unknown>,
+  peek: {} as Record<string, unknown>,
+  fetchFail: null as null | { status?: number; message: string },
+  fetchProfile: vi.fn(),
+  callFn: vi.fn(),
+  renew: vi.fn(),
+  setUsername: vi.fn(),
+  updateDoc: vi.fn(),
+  setDoc: vi.fn(),
+  deleteObject: vi.fn(),
+  offlineSet: vi.fn(),
+  offlineRemove: vi.fn(),
+  offlineLoad: vi.fn(),
+  hydrate: null as unknown,
+  revalMode: 'network' as 'network' | 'cache' | 'none',
+  uid: 'me' as string | null,
+};
+
+export const person = (over: Record<string, unknown> = {}) => ({
+  id: 'me',
+  name: 'Ada Lovelace',
+  username: 'ada',
+  firstName: 'Ada',
+  lastName: 'Lovelace',
+  role: 'member',
+  status: 'active',
+  joinedAt: NOW - 200 * DAY,
+  trainerId: null,
+  trainerName: null,
+  clientCount: 0,
+  avatar: false,
+  ...over,
+});
+
+export const profile = (
+  over: Record<string, unknown> = {},
+  who: Record<string, unknown> = {},
+  viewer: Record<string, unknown> = {},
+) => ({
+  viewer: { id: 'me', relation: 'self', role: 'member', ...viewer },
+  person: person(who),
+  access: [] as unknown[],
+  summary: {
+    sessions: 42,
+    sessions30: 9,
+    perWeek30: 2.1,
+    liveSessions: 0,
+    firstSessionAt: NOW - 190 * DAY,
+    lastSessionAt: NOW - 2 * DAY,
+    durationMs: 90 * 60000 * 5,
+    sets: 640,
+    exercises: 18,
+    volumeKg: 123_400,
+    cardioMinutes: 95.4,
+    volume30: 21_000,
+    volume7: 4_500,
+  },
+  sessions: [
+    {
+      id: 's1',
+      startedAt: NOW - 2 * DAY,
+      finishedAt: NOW - 2 * DAY + 3_600_000,
+      autoFinished: false,
+      live: false,
+      durationMs: 3_600_000,
+      gymName: 'Iron Yard',
+      sets: 20,
+      exercises: 4,
+      volumeKg: 5_000,
+      exerciseNames: ['Barbell Squat', 'Leg Press'],
+    },
+  ],
+  gyms: [
+    {
+      id: 'g1',
+      name: 'Iron Yard',
+      favorite: 1,
+      lat: 1,
+      lng: 2,
+      radiusM: 100,
+      sessions: 30,
+      lastSessionAt: NOW - DAY,
+      volumeKg: 90_000,
+    },
+    {
+      id: 'g2',
+      name: 'Home Rack',
+      favorite: 0,
+      lat: 5.123456,
+      lng: 6,
+      radiusM: 50,
+      sessions: 2,
+      lastSessionAt: null,
+      volumeKg: 1_000,
+    },
+  ],
+  topExercises: [
+    {
+      name: 'Barbell Squat',
+      sets: 100,
+      sessions: 20,
+      lastAt: NOW,
+      volumeKg: 40_000,
+      bestE1rm: 152.6,
+    },
+    { name: 'Plank', sets: 12, sessions: 4, lastAt: NOW, volumeKg: 0, bestE1rm: null },
+  ],
+  audit: [
+    { at: NOW - 3 * DAY, resource: 'profile', readerName: 'Carl Coach', readerRole: 'trainer' },
+  ],
+  bodyMetrics: null,
+  ...over,
+});

@@ -18,6 +18,7 @@
   "dependencies": {
     "@fontsource/inter": "^5.2.5",
     "@phosphor-icons/react": "^2.1.10",
+    "@simplewebauthn/browser": "^13.3.0",
     "body-muscles": "^1.0.0",
     "firebase": "^11.3.0",
     "react": "^19.1.0",

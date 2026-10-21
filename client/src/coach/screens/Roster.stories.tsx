@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { userEvent, within } from 'storybook/test';
 import { createFixturesPort } from '../data/__fixtures__/fixtures';
-import { CoachStoryFrame } from './storyKit';
+import { CoachStoryFrame } from '../../stories/coachStoryKit';
 import { emptyRoster, lockedClient, withInvites, worldPort } from './storyPorts';
 
 /**

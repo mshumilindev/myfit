@@ -174,6 +174,40 @@ dateless-днів і prescription items; клієнт бачить активн�
 Залишаються фазовими gaps: повний CSV mapping+preview, backfill missed day зі
 `Mark skipped`, equipment mismatch prompt і нотифікації assignment/replaced.
 
+## F-10 Кілька людей на одному пристрої (SPO-207)
+
+**Сценарій:** один комп'ютер, телефон чи планшет, яким користуються двоє. Усі переходи між людьми йдуть через
+лендинг; у застосунку немає перемикача акаунтів, автолоку та окремого «Forget».
+
+**AC** (тест у дужках)
+
+- Людина потрапляє на лендинг пристрою лише з «Запам'ятати мене»; без галочки слідів на пристрої немає
+  (`client/src/accounts/rememberedPeople.test.ts`, `deviceSession.test.ts`, `AuthView.people.test.tsx`).
+- Реєстр читається синхронно до першого рендера (`AuthView.people.test.tsx`).
+- Після виходу A особисті ключі стерті, людина B не бачить даних A, налаштування пристрою лишаються
+  (`deviceSession.test.ts`, `scopedStorage.test.ts`, `client/src/deviceWipe.test.ts`).
+- Існуюча сесія при старті не змінюється (`deviceSession.test.ts`).
+- «Вийти» має галочку «Запам'ятати мене на цьому пристрої»; зняття забуває людину (`SignOutDialog.test.tsx`).
+- Locker Wall: вибір людини, відкритий локер, aria-атрибути (`LockerWall.test.tsx`, Storybook).
+- Passkey: після входу із «Запам'ятати мене» реєструється автоматично, без нього ні; тап по людині одразу
+  запускає біометрію без поля пароля; скасування чи відсутність біометрії показує пароль
+  (`AuthView.passkey.test.tsx`).
+- Сервер passkey: реєстрація і вхід, повтор, застарілий лічильник, чужий origin, підроблений і невідомий credential,
+  прострочений і чужий challenge, registration-challenge не годиться для входу, create-only, заміна на пристрої, свіжий вхід
+  для реєстрації, точний https-allowlist origin (`tests/passkeys.core.test.ts`, `tests/passkeys.origin.test.ts`).
+- Passkey e2e: Chromium з віртуальним WebAuthn authenticator проти справжнього `passkeysCore` — реєстрація, вхід, повтор
+  відхилено, чужий origin відхилено, без passkey браузер падає і застосунок іде на пароль
+  (`tests/e2e/passkeys-webauthn.e2e.ts`, CI job `passkeys-e2e`).
+- Сесії: пристрій, час і місце, поточна позначена, вихід з окремого пристрою, «Вийти скрізь, крім поточного»;
+  IP не зберігається; відкликання не стирається евікцією, ліміт 50 записів; «скрізь, крім поточного» відкликає токени
+  і повертає свіжий токен (`SessionsSheet.test.tsx`, `accounts/sessions.test.ts`, `tests/sessions.server.test.ts`).
+- Passkey і сесії закриті для клієнта на рівні rules (`tests/rules/passkeys-sessions.rules.test.ts`).
+- Зміна пароля відкликає токени і повертає свіжий (`ProfileView.cases.test.tsx`).
+- Locker Wall показує прогрес входу на вибраній людині (`LockerWall.test.tsx`, `AuthView.passkey.test.tsx`).
+
+**Статус:** код, unit/component-тести і passkey e2e готові; функції й hosting задеплоєні (test, prod). Не перевірено: passkey
+наживо на реальному пристрої (Face ID / Touch ID / Windows Hello), сервер сесій на емуляторі, візуальний збіг із дизайнами.
+
 ## Матриця Автоперевірок
 
 | Feature                 | Unit/integration | API smoke | E2E                      |
@@ -187,3 +221,4 @@ dateless-днів і prescription items; клієнт бачить активн�
 | F-07 PWA/Desktop        | частково         | health    | PWA так, desktop manual  |
 | F-08 Design System      | так              | ні        | так                      |
 | F-09 Programs           | так              | так       | Today/start day частково |
+| F-10 Кілька людей       | так              | ні        | passkey e2e так          |

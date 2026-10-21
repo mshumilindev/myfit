@@ -1,5 +1,5 @@
 /**
- * Offline queue invariants (architecture.mdc §3): a change made offline is applied
+ * Offline queue invariants (.claude/rules/client-architecture.md): a change made offline is applied
  * optimistically, persisted locally and handed to Firestore's write queue; when the
  * connection returns, a retry re-attaches the listeners and the next server snapshot
  * replaces the local cache and settles the status. Replaying is idempotent: the write

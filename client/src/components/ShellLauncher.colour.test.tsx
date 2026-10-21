@@ -7,6 +7,11 @@ import { stylesCss } from './ui/readCss';
 import type { StoreState } from '../store';
 
 vi.mock('../coach/useCoachAccess', () => ({ useCoachAccess: () => true }));
+// SPO-141: the Users tile is admin-only; these contracts are about every tile, so they run as an admin.
+vi.mock('../api', async (orig) => ({
+  ...(await orig<typeof import('../api')>()),
+  getRole: () => 'admin',
+}));
 afterEach(cleanup);
 
 type Current = 'gym' | 'apex' | 'roster' | 'nutrition' | 'learn' | 'coach';

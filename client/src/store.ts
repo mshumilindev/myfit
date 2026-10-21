@@ -4929,19 +4929,19 @@ export function getCurrentPositionOnce(opts?: {
 }
 
 /**
- * The saved gym you're standing in right now, if any — so starting a workout
- * can skip "which gym?". Uses a fix up to 2 min old (or a fresh one, capped at
- * 2.5 s so the start never hangs). Honest about GPS: the fix must be good
- * enough (accuracy ≤ 60 m) and fall inside one gym's radius; two gyms both in
- * range → nearest. Anything unsure → null (the picker asks).
+ * The saved gym you're standing in, if any. Uses a cached fix ≤ 2 min old and NEVER waits for a new
+ * one (the picker opens instantly): none → null + background refresh if granted. ≤ 60 m, nearest wins.
  */
 export async function gymAtCurrentPosition(gyms: Gym[]): Promise<Gym | null> {
   if (gyms.length === 0) return null;
-  const pos = await Promise.race([
-    getCurrentPositionOnce({ maxAgeMs: 2 * 60 * 1000 }).catch(() => null),
-    new Promise<null>((r) => setTimeout(() => r(null), 2500)),
-  ]);
-  if (!pos || pos.accuracy > 60) return null;
+  const pos = readPosCache();
+  if (!pos || Date.now() - pos.at > 2 * 60 * 1000) {
+    void geolocationGranted()
+      .then((ok) => (ok ? getCurrentPositionOnce() : null))
+      .catch(() => undefined);
+    return null;
+  }
+  if (pos.accuracy > 60) return null;
   const inside = gyms
     .map((g) => ({ g, d: haversineM(pos.lat, pos.lng, g.lat, g.lng) }))
     .filter((x) => x.d <= x.g.radiusM)

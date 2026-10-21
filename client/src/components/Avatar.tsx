@@ -1,5 +1,5 @@
 /**
- * Avatar (AC-AVATAR-07/08): the person's photo when one exists, otherwise
+ * UserAvatar (AC-AVATAR-07/08): the person's photo when one exists, otherwise
  * initials on a graphite disc — never a broken image, silhouette or empty
  * circle. The photo is fetched from Cloud Storage via getBlob, which downloads
  * over an authenticated request so storage.rules (owner/admin/assigned-trainer)
@@ -32,13 +32,13 @@ export function invalidateAvatarCache(userId: string): void {
   deleteAvatarBlob(userId);
 }
 
-/** Seed cache so the next Avatar mount paints immediately after upload. */
+/** Seed cache so the next UserAvatar mount paints immediately after upload. */
 export function seedAvatarCache(userId: string, objectUrl: string, refreshKey = 0, rev = 0): void {
   invalidateAvatarCache(userId);
   urlCache.set(`${userId}#${refreshKey}#${rev}`, objectUrl);
 }
 
-export function Avatar({
+export function UserAvatar({
   userId,
   name,
   hasPhoto = false,

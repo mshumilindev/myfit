@@ -25,6 +25,7 @@ import {
   setRailHeight,
   uninstallRailMeasure,
 } from '../components/ui/railTestUtils';
+import { currentHash } from '../route';
 
 const unreadMock = vi.hoisted(() => ({ value: 0 }));
 vi.mock('./unread', async (orig) => ({
@@ -62,12 +63,12 @@ function Harness({
 beforeEach(() => {
   unreadMock.value = 0;
   localStorage.clear();
-  window.location.hash = '';
+  window.history.replaceState(null, '', '/');
 });
 afterEach(cleanup);
 
 vi.mock('../components/Avatar', () => ({
-  Avatar: (p: { userId?: string; name: string; size?: number; hasPhoto?: boolean }) => (
+  UserAvatar: (p: { userId?: string; name: string; size?: number; hasPhoto?: boolean }) => (
     <span
       data-testid="real-avatar"
       data-uid={p.userId ?? ''}
@@ -598,6 +599,6 @@ describe('shell basics', () => {
     fireEvent.click(
       within(screen.getByRole('complementary')).getByRole('button', { name: c.navWeek }),
     );
-    expect(window.location.hash).toBe('#/c/week');
+    expect(currentHash()).toBe('#/c/week');
   });
 });

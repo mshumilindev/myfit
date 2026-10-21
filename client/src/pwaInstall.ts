@@ -32,6 +32,18 @@ export function isStandaloneDisplay(): boolean {
   );
 }
 
+/**
+ * True inside the desktop shell (Electron, see desktop/): it is already an installed app, so the "create shortcut"
+ * CTA is pointless there. The shell exposes `window.spotterNative` (desktop/src/preload.ts).
+ */
+export function isNativeShell(): boolean {
+  if (typeof window === 'undefined') return false;
+  if ('spotterNative' in window) return true;
+  // Backstop for a shell whose preload did not run (the 0.1.0 DMG/EXE: its sandboxed preload failed on a relative
+  // require, so the bridge never appeared). Electron always puts "Electron/x.y.z" in the user agent.
+  return typeof navigator !== 'undefined' && /\bElectron\//.test(navigator.userAgent);
+}
+
 export function detectPwaPlatform(): {
   brand: PwaBrand | null;
   mode: PwaInstallMode | null;

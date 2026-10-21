@@ -31,6 +31,7 @@ import { downloadCsv, fileSlug } from './csvDownload';
 import { exportStrings } from './exportStrings';
 import { firstName } from './format';
 import { WorkoutsHistory } from './workouts/WorkoutsHistory';
+import { setHash } from '../../route';
 
 export interface WorkoutsTabProps {
   client: CoachClient;
@@ -119,8 +120,7 @@ export function WorkoutsTab({
     .slice(0, NEXT_COUNT);
   const reqs = requestsOf(world).filter((q) => q.client.id === client.id);
   const schedulePort = useScheduleRequestPort();
-  const toSchedule = () =>
-    window.location.assign(scheduleHref({ form: 'pick', client: client.id }));
+  const toSchedule = () => setHash(scheduleHref({ form: 'pick', client: client.id }));
   const port = requestPort ?? schedulePort;
 
   const visible = gated.entries.slice(0, shown);

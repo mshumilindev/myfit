@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ShellLauncher } from './ShellLauncher';
 import { coachEn } from '../i18n/coach.en';
 import type { StoreState } from '../store';
+import { currentHash } from '../route';
 
 const access = vi.hoisted(() => ({ value: false }));
 vi.mock('../coach/useCoachAccess', () => ({ useCoachAccess: () => access.value }));
@@ -10,7 +11,7 @@ vi.mock('../coach/useCoachAccess', () => ({ useCoachAccess: () => access.value }
 afterEach(cleanup);
 beforeEach(() => {
   access.value = false;
-  window.location.hash = '';
+  window.history.replaceState(null, '', '/');
 });
 
 const noop = () => undefined;
@@ -71,7 +72,7 @@ describe('ShellLauncher Coach tile', () => {
     expect(tile.disabled).toBe(false);
     expect(tile.className).not.toContain('current');
     fireEvent.click(tile);
-    expect(window.location.hash).toMatch(/^#\/c\//);
+    expect(currentHash()).toMatch(/^#\/c\//);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

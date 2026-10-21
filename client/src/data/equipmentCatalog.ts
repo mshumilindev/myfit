@@ -4900,12 +4900,15 @@ const PICKER_CATEGORY_ORDER: EquipCategory[] = [
  *  its coarse equipment classes (from equipmentFor). Ordered for display. */
 export function pickerCategoriesForExercise(equipIds: readonly string[]): EquipCategory[] {
   const set = new Set<EquipCategory>(UNIVERSAL_EQUIP_CATEGORIES);
+  let matched = false;
   for (const id of equipIds) {
     const cats = EXERCISE_EQUIP_CATEGORIES[id as EquipmentId];
+    if (cats) matched = true;
     if (cats) for (const c of cats) set.add(c);
   }
-  // Nothing specific matched (unknown/bodyweight-only) → a sensible broad set.
-  if (set.size === UNIVERSAL_EQUIP_CATEGORIES.length) {
+  // No known class at all (unknown / empty) → a sensible broad set. A band-only exercise matched ('band' is universal,
+  // so comparing set sizes wrongly offered the full gym for it).
+  if (!matched) {
     for (const c of [
       'barbell',
       'dumbbell',

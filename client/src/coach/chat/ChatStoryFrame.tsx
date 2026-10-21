@@ -5,6 +5,7 @@ import { createFixturesPort } from '../data/__fixtures__/fixtures';
 import type { CoachRoute } from '../routes';
 import { dock } from './dockStore';
 import type { ChatPort } from './port';
+import { navigateHash } from '../../navigateHash';
 
 /**
  * Stories: the real shell around the chat route with a chosen chat port (the world is the lab fixtures).
@@ -39,7 +40,7 @@ export function ChatStoryFrame({
   const hasStart = !!start;
   useEffect(() => {
     // the screen listens to hashchange, so setting it after mount opens the thread
-    window.location.hash = hash ?? (hasStart ? '#/c/agenda' : '#/c/chat');
+    navigateHash(hash ?? (hasStart ? '#/c/agenda' : '#/c/chat'));
   }, [hash, hasStart]);
   return (
     <CoachShell

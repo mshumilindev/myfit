@@ -35,7 +35,7 @@ import { temperIndex, type Temper } from '../atlas/types';
 import { classifyTrainee } from '../trainerLive';
 import type { LiveSession } from '../types';
 import { AtlasFace } from '../components/AtlasFace';
-import { Avatar } from '../components/Avatar';
+import { UserAvatar } from '../components/Avatar';
 import { Button, IconButton } from '../components/ui/Button';
 import { Chip, ChipGroup, type ChipTone } from '../components/ui/Chip';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
@@ -56,7 +56,7 @@ import { useClientCoachEnabled } from '../coach/client/gate';
 import { useClientShared } from '../coach/client/shared';
 import type { AtlasOpts, AtlasView } from './layout';
 import { Card } from '../components/ui/Card';
-
+import { navigateHash } from '../navigateHash';
 const DAY = 86_400_000;
 const INACTIVE_MS = 30 * DAY;
 const FRESH_MS = 2 * DAY;
@@ -258,7 +258,7 @@ function TrainerTile({ trainer }: { trainer: MyTrainer }) {
         ? {
             as: 'button' as const,
             onClick: () => {
-              window.location.hash = '#/trainer/chat';
+              navigateHash('#/trainer/chat');
             },
             'aria-label': `${trainer.name}, ${t.profileTrainer}${unread > 0 ? `, ${unread}` : ''}`,
           }
@@ -269,7 +269,7 @@ function TrainerTile({ trainer }: { trainer: MyTrainer }) {
         ring="default"
         tone="people"
         media={
-          <Avatar
+          <UserAvatar
             userId={trainer.id}
             name={trainer.name}
             hasPhoto={trainer.avatar}
@@ -627,7 +627,7 @@ function firstName(name: string): string {
 
 function avatar(c: RosterClient, size: StorySize) {
   return (
-    <Avatar
+    <UserAvatar
       userId={c.id}
       name={c.name}
       hasPhoto={c.avatar}

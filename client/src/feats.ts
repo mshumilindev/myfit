@@ -5,7 +5,7 @@
  * dates are recovered by replaying sessions in chronological order and noting
  * where a metric first crosses each tier.
  */
-import { weekStartOf as trainingWeekStart } from './weekStart';
+import { shiftWeeks, weekStartOf as trainingWeekStart } from './weekStart';
 import {
   isStrengthExercise,
   setBestE1rm,
@@ -345,23 +345,26 @@ export interface FeatsResult {
 }
 
 const HOUR_MS = 3_600_000;
-const WEEK_MS = 7 * 24 * HOUR_MS;
 
 /** Start of the training week holding `ts` (first day: Profile › Settings). */
 function weekStart(ts: number): number {
   return trainingWeekStart(ts);
 }
 
-function currentStreakDays(weekSet: Set<number>): number {
-  if (weekSet.size === 0) return 0;
-  const latest = Math.max(...weekSet);
-  let run = 0;
-  let w = latest;
-  while (weekSet.has(w)) {
-    run += 1;
-    w -= WEEK_MS;
+/**
+ * Longest run of consecutive trained weeks ever, in days. An achievement must never go down: counting only the run that
+ * ends at the latest trained week (SPO-152) made a tier relock after a shorter run followed a longer one. The decaying
+ * "current" streak lives in trends/recovery (SPO-42), not here.
+ */
+function longestStreakDays(weekSet: Set<number>): number {
+  let best = 0;
+  for (const start of weekSet) {
+    if (weekSet.has(shiftWeeks(start, -1))) continue; // not the first week of a run
+    let run = 0;
+    for (let w = start; weekSet.has(w); w = shiftWeeks(w, 1)) run += 1;
+    best = Math.max(best, run);
   }
-  return run * 7;
+  return best * 7;
 }
 
 export function computeFeats(finished: Workout[]): FeatsResult {
@@ -466,7 +469,7 @@ export function computeFeats(finished: Workout[]): FeatsResult {
     record('trainingDays', daySet.size, at);
   }
 
-  const streakDays = currentStreakDays(weekSet);
+  const streakDays = longestStreakDays(weekSet);
 
   const valueOf: Record<FeatGroup, number> = {
     volume: volumeKg,

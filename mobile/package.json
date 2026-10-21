@@ -1,0 +1,20 @@
+{
+  "name": "spotter-mobile",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Thin Capacitor shell around the hosted Spotter web app (no product code here). Android first; iOS later (SPO-161).",
+  "scripts": {
+    "sync": "cap sync android",
+    "doctor": "cap doctor"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/core": "8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

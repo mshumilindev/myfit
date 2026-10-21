@@ -9,6 +9,7 @@ import { ScheduleScreen } from './ScheduleScreen';
 import { usePeople } from './people';
 import { WeekScreen } from './WeekScreen';
 import { safeEn } from '../../i18n/coachSafe.en';
+import { currentHash } from '../../route';
 
 afterEach(() => {
   cleanup();
@@ -213,7 +214,7 @@ describe('Schedule legend filters', () => {
     expect(doneBefore).toBeGreaterThan(0);
     fireEvent.click(chip(t.scDone));
     expect(chip(t.scDone).getAttribute('aria-pressed')).toBe('false');
-    expect(window.location.hash).toContain('hide=done');
+    expect(currentHash()).toContain('hide=done');
     expect(screen.queryAllByRole('button', { name: new RegExp(`${t.scDone}$`) })).toHaveLength(
       screen
         .queryAllByRole('button', { name: new RegExp(`${t.scDone}$`) })
@@ -221,7 +222,7 @@ describe('Schedule legend filters', () => {
     );
     expect(blocks().length).toBeGreaterThan(5);
     fireEvent.click(chip(t.scDone));
-    expect(window.location.hash).not.toContain('hide');
+    expect(currentHash()).not.toContain('hide');
   });
 
   it('Overlap off removes the warning marks but keeps the sessions', async () => {

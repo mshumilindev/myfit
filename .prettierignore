@@ -28,3 +28,5 @@ client/design-lab/
 
 # Зовнішні конфіги, чутливі до форматування
 cloudflare/config.example.yml
+client/coverage-patch/
+patch-cov/

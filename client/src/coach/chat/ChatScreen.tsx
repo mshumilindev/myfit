@@ -22,6 +22,7 @@ import { SpotterRow } from '../team/SpotterRow';
 import type { TeamPort } from '../team/port';
 import './Chat.css';
 import { CoachProblemState } from '../BackendNotice';
+import { navigateHash } from '../../navigateHash';
 
 export interface ChatScreenProps {
   onNavigate: (r: CoachRoute) => void;
@@ -62,7 +63,7 @@ function useWithParam(): [string | null, (id: string | null, push: boolean) => v
   const set = useCallback((next: string | null, push: boolean) => {
     setId(next);
     const h = chatHash(next);
-    if (push) window.location.hash = h;
+    if (push) navigateHash(h);
     else window.location.replace(h);
   }, []);
   return [id, set];

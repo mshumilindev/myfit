@@ -108,9 +108,8 @@ export function HealthForm(props: {
   const { t, locale } = useT();
   const store = useStore();
   const weekStart = useWeekStartDay();
-  const { spec, now } = props;
+  const { spec, now, onCancel } = props;
   const today = dayKey(now);
-
   const editing =
     spec.kind === 'edit' ? store.restPeriods.find((p) => p.id === spec.periodId) : null;
   const editingInj =
@@ -1051,7 +1050,7 @@ export function HealthForm(props: {
     <div className="screen hl">
       <PageHead
         className="hl-pbar"
-        back={{ label: t.backAction, onClick: props.onCancel }}
+        back={{ label: t.backAction, onClick: onCancel }}
         title={title}
       />
       <div className="hl-scroll">

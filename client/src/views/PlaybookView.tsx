@@ -21,7 +21,7 @@ import { computePlaybook, type Play, type PlaySuggestion } from '../playbook';
 import { fmtKg, fmtShortDate, fmtWeekday, useT } from '../i18n';
 import { dayReadoutLabel } from '../data/daySuggest';
 import { MuscleSetChip, withMuscleBreak } from '../components/Muscle';
-import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
+import { OverviewHead } from '../components/ui/OverviewHead';
 import { Icon, useExerciseName } from '../ui';
 import { useGymStep } from '../components/useGymStep';
 import { ListRow } from '../components/ui/GroupedList';
@@ -38,12 +38,9 @@ const DAY_TONE: Record<string, 'accent' | 'rest' | 'ok' | 'sleep' | 'neutral'> =
 
 export function PlaybookView({
   shell,
-  onProgramsTab,
   embedded,
 }: {
   shell: Shell;
-  /** Peer-tab switch (Programs · Playbook · Exercises). Absent when embedded. */
-  onProgramsTab?: (peer: ProgramsPeer) => void;
   /** Rendered inside another surface (no page chrome / tab bar). */
   embedded?: boolean;
 }) {
@@ -222,13 +219,7 @@ export function PlaybookView({
 
   return (
     <div className="screen programs-page programs-author-page programs-has-tabs playbook-tab">
-      <div className="programs-top ctl-row--md">
-        <div>
-          <div className="kicker">{t.training}</div>
-          <h2 className="title-26">{t.playbook}</h2>
-        </div>
-        <ProgramsTabs active="playbook" onSelect={(peer) => onProgramsTab?.(peer)} />
-      </div>
+      <OverviewHead title={t.playbook} />
       {body}
       {gymPicker}
     </div>

@@ -5,7 +5,7 @@
  * Return, advanced by a green/amber/red check-in. An optional clinician no-load
  * window is a date-bound Stage 0 · Full rest (rest-blue) before it.
  */
-import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { useState } from 'react';
 import { Button, IconButton } from '../components/ui/Button';
 import { Chip } from '../components/ui/Chip';
@@ -168,16 +168,16 @@ function InjurySetup({
 
   return (
     <div className="rx">
-      <div className="topbar">
-        <BackButton label={t.backAction} onClick={back} />
-        <span className="tt">
-          {step === 'general'
+      <PageHead
+        back={{ label: t.backAction, onClick: back }}
+        title={
+          step === 'general'
             ? t.injGeneralTitle
             : step === 'clinician'
               ? t.injClinicianTitle
-              : t.injWhereTitle}
-        </span>
-      </div>
+              : t.injWhereTitle
+        }
+      />
 
       {step === 'where' && (
         <>
@@ -536,15 +536,17 @@ function InjuryPlan({
 
   return (
     <div className="rx">
-      <div className="topbar">
-        <BackButton label={t.backAction} onClick={onClose} />
-        <span className="tt">{t.injPlanTitle(partName)}</span>
-        <IconButton
-          label={t.injManage}
-          icon="dots-three-vertical"
-          onClick={() => setManage(true)}
-        />
-      </div>
+      <PageHead
+        back={{ label: t.backAction, onClick: onClose }}
+        title={t.injPlanTitle(partName)}
+        actions={
+          <IconButton
+            label={t.injManage}
+            icon="dots-three-vertical"
+            onClick={() => setManage(true)}
+          />
+        }
+      />
 
       <div className="rulebox umt-16">
         <Icon
@@ -688,10 +690,7 @@ function InjuryManage({
 
   return (
     <div className="rx">
-      <div className="topbar">
-        <BackButton label={t.backAction} onClick={onClose} />
-        <span className="tt">{t.injManageTitle}</span>
-      </div>
+      <PageHead back={{ label: t.backAction, onClick: onClose }} title={t.injManageTitle} />
 
       <div className="sec">{t.injInjury}</div>
       <div className="slist umt-8">

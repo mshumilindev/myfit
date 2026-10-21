@@ -17,6 +17,7 @@ import { isSeen, notifTime, type Notif, type NotifKind, type NotifState } from '
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { SectionLabel } from '../components/ui/SectionLabel';
+import { setHash } from '../route';
 
 const KIND_ICON: Record<NotifKind, string> = {
   standard: 'trophy',
@@ -190,7 +191,7 @@ export function NotificationsView({
                       data-nid={n.id}
                       className={cls}
                       onClick={() => {
-                        window.location.hash = n.nav as string;
+                        setHash(n.nav as string);
                       }}
                     >
                       {inner}

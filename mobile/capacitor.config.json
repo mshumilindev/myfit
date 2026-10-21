@@ -1,0 +1,17 @@
+{
+  "appId": "com.spotter.app",
+  "appName": "Spotter",
+  "webDir": "www",
+  "server": {
+    "url": "https://spotter-64c3b.web.app",
+    "cleartext": false,
+    "androidScheme": "https",
+    "errorPath": "error.html"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false,
+    "minWebViewVersion": 90,
+    "backgroundColor": "#111111"
+  }
+}

@@ -23,8 +23,8 @@ import {
 } from './data/exercises';
 import { exerciseDay, type TrainingDay } from './data/daySuggest';
 import { nextTarget, topHistory } from './progression';
-import { muscleReadiness, type ReadyState } from './recovery';
-import { LANDMARKS, VOLUME_MUSCLES, type Landmark } from './volume';
+import { muscleGapDays, muscleReadiness, type ReadyState } from './recovery';
+import { LANDMARKS, VOLUME_MUSCLES } from './volume';
 import { recentLoadSets } from './loadWindow';
 import { personalLandmarks } from './personalize';
 import { focusAdjustLandmarks, groupEmphasis, type Emphasis, type FitGoals } from './goals';
@@ -34,6 +34,7 @@ import { pickCardioMachine } from './cardio';
 import { equipmentById } from './data/equipmentCatalog';
 import { warmupProposal, type WarmupPlanItem } from './warmupFor';
 import { nicMid } from './nicotineApply';
+import { sessionSetsForMuscle, warmupRamp, type PlannedSet } from './sessionDose';
 
 const clamp = (n: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, n));
 const roundToStep = (n: number, step: number): number => Math.round(n / step) * step;
@@ -71,58 +72,7 @@ export function intentSpec(i: SessionIntent): IntentSpec {
   return INTENT_SPEC[i] ?? INTENT_SPEC.muscle;
 }
 
-// ---------------------------------------------------------------------------
-// Volume sizing — how many working sets for a muscle today
-// ---------------------------------------------------------------------------
-
-/**
- * Today's working-set dose for one muscle: aim to reach the (goal-adjusted,
- * personalised) weekly MAV, credit what's already been done this week, and
- * split the remainder over the sessions left — bounded to a sane per-session
- * dose that never pushes the muscle over half its weekly MRV in one day.
- */
-export function sessionSetsForMuscle(lm: Landmark, weekToDate: number, sessionsLeft = 2): number {
-  const target = Math.max(lm.mev, lm.mav);
-  const remaining = Math.max(lm.mev, target - Math.max(0, weekToDate));
-  const per = sessionsLeft > 0 ? remaining / sessionsLeft : remaining;
-  const hi = Math.max(3, Math.round(lm.mrv / 2));
-  return clamp(Math.round(per), 3, hi);
-}
-
-// ---------------------------------------------------------------------------
-// Warm-up ramp
-// ---------------------------------------------------------------------------
-export interface PlannedSet {
-  reps: number;
-  weight: number | null;
-  type: 'warmup' | 'working';
-}
-
-/**
- * A ramp of three warm-up sets up to the first working weight. Only for loaded
- * compound work heavy enough to warrant it; light isolation and non-weight
- * load types get none. Each rung is rounded to a loadable step.
- */
-export function warmupRamp(
-  workingKg: number | null,
-  opts: { loadType?: LoadType; compound?: boolean; barKg?: number; step?: number } = {},
-): PlannedSet[] {
-  const { loadType = 'weight', compound = true, barKg = 20, step = 2.5 } = opts;
-  if (loadType !== 'weight' || !compound || !workingKg || workingKg <= 0) return [];
-  if (workingKg < barKg * 1.5) return [];
-  const out: PlannedSet[] = [{ reps: 10, weight: barKg, type: 'warmup' }];
-  // Three sets: the empty bar, then ~60% × 5 and ~80% × 2 — enough to groove
-  // the pattern and prime the load without eating into the working sets.
-  for (const [f, reps] of [
-    [0.6, 5],
-    [0.8, 2],
-  ] as [number, number][]) {
-    const w = roundToStep(workingKg * f, step);
-    if (w > out[out.length - 1].weight! && w < workingKg)
-      out.push({ reps, weight: w, type: 'warmup' });
-  }
-  return out;
-}
+export { sessionSetsForMuscle, warmupRamp, type PlannedSet } from './sessionDose';
 
 // ---------------------------------------------------------------------------
 // Cold-start weight (no history) — conservative body-weight fractions
@@ -469,6 +419,11 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
   const emph = groupEmphasis(ctx.goals);
   const play = playForMuscles(ctx.finished, ctx.now, muscles);
   const bodyKg = ctx.bodyKg ?? null;
+  const gaps = new Map<MuscleGroup, number | null>();
+  const gapOf = (m: MuscleGroup): number | null => {
+    if (!gaps.has(m)) gaps.set(m, muscleGapDays(ctx.finished, m, ctx.now));
+    return gaps.get(m) ?? null;
+  };
 
   const used = new Set<string>();
   const main: PlannedExercise[] = [];
@@ -490,13 +445,19 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
       equipment: equipment ? [equipment] : [],
       primary,
       loadType,
+      now: ctx.now,
+      bodyKg,
     });
     let weight = target.weight;
     const cap = primary != null ? ctx.loadCaps?.get(primary) : undefined;
     if (weight != null && cap != null && cap < 1 && loadType === 'weight') {
       // Graded return to load: ease the returning muscle back instead of
-      // jumping to old working weights. Round to a 2.5-unit step.
-      weight = Math.max(2.5, Math.round((weight * cap) / 2.5) * 2.5);
+      // jumping to old working weights. Round to a 2.5-unit step. After a break
+      // (state 'return') the cap applies to the last weight and the lower of the
+      // two wins -- never cap x break cut (SPO-149 spec, "most conservative").
+      const basis = target.state === 'return' ? (target.prevWeight ?? weight) : weight;
+      const capped = Math.max(2.5, Math.round((basis * cap) / 2.5) * 2.5);
+      weight = target.state === 'return' ? Math.min(weight, capped) : capped;
     }
     if (weight == null && loadType === 'weight') {
       weight = coldStartWeight(
@@ -505,7 +466,11 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
         ctx.sex,
       );
     }
-    const warmupSets = warmupRamp(weight, { loadType, compound });
+    const warmupSets = warmupRamp(weight, {
+      loadType,
+      compound,
+      gapDays: gapOf(primary ?? selMuscle),
+    });
     return {
       name,
       kind: 'strength',
@@ -536,7 +501,7 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
   for (const m of muscles) {
     const lm = lms.get(m) ?? LANDMARKS[m];
     if (!lm) continue;
-    let budget = sessionSetsForMuscle(lm, week.get(m) ?? 0, 2);
+    let budget = sessionSetsForMuscle(lm, week.get(m) ?? 0, 2, gapOf(m));
     const vScale = ctx.conditions?.effects.volumeScale;
     if (vScale != null && vScale < 1) budget = Math.max(1, Math.round(budget * vScale));
     const avoid = new Set((ctx.avoid ?? []).map((x) => x.toLowerCase()));

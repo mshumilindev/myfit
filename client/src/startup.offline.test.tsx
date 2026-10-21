@@ -52,6 +52,7 @@ vi.mock('firebase/storage', () => ({
 import { App } from './App';
 import { SyncStatusHost } from './components/SyncStatusHost';
 import { callFn, trackMutation } from './api';
+import { currentHash } from './route';
 
 beforeEach(() => {
   localStorage.clear();
@@ -106,7 +107,7 @@ describe('startup with a network that never answers', () => {
     await act(async () => {
       fireEvent.click(buttons[1]);
     });
-    await waitFor(() => expect(window.location.hash).not.toBe('#/today'));
+    await waitFor(() => expect(currentHash()).not.toBe('#/today'));
     expectNoBlockingOverlay();
   }, 20000);
 

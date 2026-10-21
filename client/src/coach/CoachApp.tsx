@@ -45,9 +45,11 @@ import { CoachBackendFailed, NotConfigured } from './BackendNotice';
 import { ChatDock } from './chat/ChatDock';
 import { useLiveWidget } from './screens/live/useLiveWidget';
 import { useCoachRoute } from './useCoachRoute';
+import { useBackButtonEdgeSwipe } from '../edgeSwipeBack';
 import { useCoachUnread } from './unread';
 import { useTeamT } from '../i18n/coachTeam';
 import { useTeamRequests } from './team/useTeamRequests';
+import { NightSky } from '../components/SpotterSky';
 import './CoachApp.css';
 
 export interface CoachShellProps {
@@ -89,6 +91,8 @@ export function CoachShell({
   const active = navScreenOf(route);
   // A phone thread is the whole screen (like every other chat): the app header stays (like every app), no page title, no bottom navigation.
   const threadOpen = !desktop && route.screen === 'chat' && 'with' in route && !!route.with;
+  // Phone: a swipe from the left edge presses the screen's Back button (never the system history swipe, SPO-146).
+  useBackButtonEdgeSwipe(!desktop);
   const mainRef = useRef<HTMLElement>(null);
   // Phone: the More tab opens a bottom sheet. Desktop: the rail collapses its trailing entries
   // into its own More item when too short (Rail `overflow`); the avatar opens ONLY the account.
@@ -196,6 +200,7 @@ export function CoachShell({
 
   return (
     <div className={`app-coach co-shell apex-app`}>
+      <NightSky />
       <nav className="co-skip-nav" aria-label={c.skipToContent}>
         <a
           className="co-skip"

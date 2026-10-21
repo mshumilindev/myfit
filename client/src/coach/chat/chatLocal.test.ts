@@ -79,9 +79,13 @@ describe('sealed outbox', () => {
     fail = false;
     const s2 = createChatStore(flaky);
     s2.attachLocal(local);
-    await tick(20);
-    expect(down.dump('cid-c1').some((m) => m.id === id)).toBe(true);
-    expect(s2.getState().outbox['cid-c1'] ?? []).toHaveLength(0);
+    // the resend is async (vault unseal -> send -> ack): wait for it instead of a fixed number of ticks (flaky on a loaded CI core)
+    await vi.waitFor(() => expect(down.dump('cid-c1').some((m) => m.id === id)).toBe(true), {
+      timeout: 5000,
+    });
+    await vi.waitFor(() => expect(s2.getState().outbox['cid-c1'] ?? []).toHaveLength(0), {
+      timeout: 5000,
+    });
     expect(await backend.keys()).toEqual([]);
   });
 });

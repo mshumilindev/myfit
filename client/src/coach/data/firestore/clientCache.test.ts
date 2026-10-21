@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readyVault, unsetVault } from '../../../testVault';
 import { createSealedLocal, memoryBackend } from '../../chat/sealedLocal';
 import { createFixturesClientPort } from '../../client/data/__fixtures__/fixtures';
@@ -6,8 +6,13 @@ import { CLIENT_MAX_AGE_MS, CLIENT_SCHEMA, clientCacheOver } from './clientCache
 
 const snap = () => createFixturesClientPort({ scenario: 'active' }).state();
 
+afterEach(() => vi.useRealTimers());
+
 describe('the on-device snapshot of the client link', () => {
   it('is sealed on disk and comes back whole', async () => {
+    // The fixture has a fixed asOf; the clock is pinned to it so the 14-day age limit doesn't turn this into a time bomb.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(snap().asOf);
     const backend = memoryBackend();
     const local = createSealedLocal({ vault: await readyVault(), backend });
     const c = clientCacheOver(Promise.resolve(local), 'u1');

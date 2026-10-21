@@ -24,6 +24,7 @@ import { NutritionRoot } from '../../nutrition/App';
 import { LearnRoot } from '../../learn/App';
 import type { StoreState } from '../../store';
 import type { Shell } from '../../App';
+import { currentHash } from '../../route';
 
 const t = LOCALES.en;
 const c = coachEn;
@@ -39,7 +40,7 @@ vi.mock('../../api', async (orig) => ({
   currentUid: () => 'u-1',
 }));
 vi.mock('../Avatar', () => ({
-  Avatar: (p: { userId?: string; name: string; size?: number }) => (
+  UserAvatar: (p: { userId?: string; name: string; size?: number }) => (
     <span data-testid="real-avatar" data-uid={p.userId ?? ''} data-size={p.size} />
   ),
 }));
@@ -57,7 +58,6 @@ vi.mock('../StandardsView', () => ({ StandardsView: () => null }));
 vi.mock('../FeatsView', () => ({ FeatsView: () => null }));
 vi.mock('../StatShareSheet', () => ({ StatShareSheet: () => null }));
 vi.mock('../../views/NotificationsView', () => ({ NotificationsView: () => null }));
-vi.mock('../../views/TrainerView', () => ({ TrainerView: () => null }));
 vi.mock('../../views/AdminView', () => ({ AdminView: () => null }));
 vi.mock('../../views/ProfileView', () => ({ ProfileView: () => null }));
 vi.mock('../../nutrition/store', () => ({
@@ -105,17 +105,13 @@ const gymItems = [
 ];
 const nutritionLabels = ['Today', 'History', 'Goal'];
 const learnLabels = ['Home', 'Topics', 'Saved'];
-const rosterNav = (r: typeof session.role) =>
-  r === 'trainer'
-    ? [t.trClientsTab, t.navMe]
-    : r === 'admin'
-      ? [t.adminPeople, t.navMe]
-      : [t.navMe];
+// SPO-141: Users is admin-only and never shares a nav with Me; trainer and member get Me alone.
+const rosterNav = (r: typeof session.role) => (r === 'admin' ? [t.adminPeople] : [t.navMe]);
 
 const CASES: Case[] = [
   {
     name: 'Gym',
-    extras: [t.masteryTitle, t.notifTitle],
+    extras: [t.masteryTitle, t.notifTitle, t.language],
     nav: () => gymNav,
     tabs: () => gymNav,
     rail: ({ onShell, onProfile }) => (
@@ -147,7 +143,7 @@ const CASES: Case[] = [
   },
   {
     name: 'Apex',
-    extras: [t.notifTitle],
+    extras: [t.notifTitle, t.language],
     nav: () => [t.apexHomeTab, t.challengesTab, t.apexRanksTab, t.apexAwardsTab],
     tabs: () => [t.apexHomeTab, t.challengesTab, t.apexRanksTab, t.apexAwardsTab],
     rail: (cb) => apex(cb),
@@ -155,7 +151,7 @@ const CASES: Case[] = [
   },
   {
     name: 'People',
-    extras: [t.notifTitle],
+    extras: [t.notifTitle, t.language],
     nav: rosterNav,
     tabs: rosterNav,
     rail: (cb) => roster(cb),
@@ -163,7 +159,7 @@ const CASES: Case[] = [
   },
   {
     name: 'Nutrition',
-    extras: [t.notifTitle],
+    extras: [t.notifTitle, t.language],
     nav: () => nutritionLabels,
     tabs: () => nutritionLabels,
     rail: (cb) => nutrition(cb),
@@ -171,7 +167,7 @@ const CASES: Case[] = [
   },
   {
     name: 'Learn',
-    extras: [t.notifTitle],
+    extras: [t.notifTitle, t.language],
     nav: () => learnLabels,
     tabs: () => learnLabels,
     rail: (cb) => learn(cb),
@@ -195,7 +191,7 @@ function roster({ onShell, onProfile }: Cb) {
   return (
     <RosterApp
       role={session.role}
-      tab={session.role === 'member' ? 'me' : session.role === 'trainer' ? 'clients' : 'users'}
+      tab={session.role === 'admin' ? 'users' : 'me'}
       // People's Profile row is its "me" tab.
       onTab={(next) => next === 'me' && onProfile()}
       shell={{} as unknown as Shell}
@@ -229,7 +225,7 @@ beforeEach(() => {
     disconnect() {}
   };
   session.role = 'member';
-  window.location.hash = '';
+  window.history.replaceState(null, '', '/');
   localStorage.clear();
   installRailMeasure(900);
 });
@@ -352,17 +348,17 @@ describe.each(CASES)('$name: desktop rail', (k) => {
     expect(within(acct).getByText(t.roleTrainer)).toBeTruthy();
     // choosing Coach opens the dashboard and closes the popover
     fireEvent.click(within(acct).getByRole('button', { name: c.modeCoach }));
-    expect(window.location.hash).toBe(coachEntryHash());
+    expect(currentHash()).toBe(coachEntryHash());
     expect(screen.queryByRole('dialog')).toBeNull();
     // selecting "My workouts" (where it is not already selected) goes to the Gym home
     if (k.name !== 'Gym') {
       acct = open();
       fireEvent.click(within(acct).getByRole('button', { name: c.modeMyWorkouts }));
-      expect(window.location.hash).toBe('#/today');
+      expect(currentHash()).toBe('#/today');
       expect(screen.queryByRole('dialog')).toBeNull();
     }
     // admin
-    window.location.hash = '';
+    window.history.replaceState(null, '', '/');
     session.role = 'admin';
     acct = open();
     expect(within(acct).getByRole('button', { name: c.modeCoach })).toBeTruthy();
@@ -537,7 +533,12 @@ describe('Apex: partial overflow keeps the leading destinations', () => {
     const rows = [
       ...screen.getByRole('dialog', { name: c.navMore }).querySelectorAll('button.uirow'),
     ];
-    expect(rows.map((b) => b.textContent)).toEqual([t.apexRanksTab, t.apexAwardsTab, t.notifTitle]);
+    expect(rows.map((b) => b.textContent)).toEqual([
+      t.apexRanksTab,
+      t.apexAwardsTab,
+      t.notifTitle,
+      t.language,
+    ]);
     // A hidden destination selected from More navigates (and the menu closes).
   });
 });
@@ -556,7 +557,7 @@ describe('real-app CSS does not fight the shared rail geometry', () => {
 
 describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)', () => {
   // Labelled rail: nav tile 64 (pitch 69.6, 3 entries = 203.2), foot extra 44 (pitch 49.6).
-  // Admin with an active condition: shield, mastery, bell, gear = 4 extras = 198.4.
+  // Admin with an active condition: shield, mastery, bell, gear, language (SPO-164) = 5 extras = 248.
   const gym = (unread = 0) => (
     <GymRail
       tab="today"
@@ -589,24 +590,30 @@ describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)',
     session.conditions = 1;
   });
 
-  it('everything fits: no More, all four extras', () => {
+  it('everything fits: no More, all five extras', () => {
     render(gym());
-    setRailHeight(420);
+    setRailHeight(460);
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
     expect(navLabels()).toEqual(gymNav);
-    expect(extraCount()).toBe(4);
+    expect(extraCount()).toBe(5);
   });
 
-  it('too short for even one extra: ALL four go into More at once, the nav stays whole', () => {
+  it('too short for even one extra: ALL five go into More at once, the nav stays whole', () => {
     render(gym());
-    // 4 extras = 198.4 on top of the 203.2 nav: 401.6 fits; 1px less hides every extra.
-    for (const h of [401, 380, 330, 290]) {
+    // 5 extras = 248 on top of the 203.2 nav: 451.2 fits; 1px less hides every extra.
+    for (const h of [451, 430, 380, 330, 290]) {
       setRailHeight(h);
       expect(extraCount(), String(h)).toBe(0);
       expect(navLabels(), String(h)).toEqual(gymNav);
     }
-    // in the order of the rail: conditions shield, mastery, bell, settings
-    expect(menuRows()).toEqual([t.cndTodayTitle(1), t.masteryTitle, t.notifTitle, t.settingsTitle]);
+    // in the order of the rail: conditions shield, mastery, bell, settings, language
+    expect(menuRows()).toEqual([
+      t.cndTodayTitle(1),
+      t.masteryTitle,
+      t.notifTitle,
+      t.settingsTitle,
+      t.language,
+    ]);
   });
 
   it('More sits in the nav column right below the last visible nav item, not in the foot', () => {
@@ -632,7 +639,7 @@ describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)',
     expect(navLabels()).toEqual([t.today, t.overviewTab]);
     const rows = menuRows();
     expect(rows[0]).toBe(t.gyms);
-    expect(rows.slice(1)).toHaveLength(4);
+    expect(rows.slice(1)).toHaveLength(5);
     // Apps and the avatar are pinned all the way down
     setRailHeight(40);
     expect(
@@ -652,7 +659,7 @@ describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)',
     expect(within(menu).getByRole('button', { name: t.notifTitle }).textContent).toContain('3');
     fireEvent.click(more);
     // everything fits again: the badge leaves More and shows on the bell
-    setRailHeight(420);
+    setRailHeight(460);
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
     expect(within(rail()).getByRole('button', { name: /Notifications/ }).textContent).toContain(
       '3',
@@ -663,7 +670,7 @@ describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)',
     session.conditions = 0;
     render(gym());
     setRailHeight(900);
-    expect(extraCount()).toBe(3);
+    expect(extraCount()).toBe(4);
   });
 });
 

@@ -1,0 +1,37 @@
+name: Desktop release (draft)
+
+# Builds the unsigned Electron shell installers and attaches them to a DRAFT GitHub Release (publish it by hand).
+# Windows installer also gets latest.yml, which the in-app updater (electron-updater) reads.
+# Before running: bump "version" in desktop/package.json (the release tag is v<version>).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci -w desktop --ignore-scripts
+      - run: npm run release:win -w desktop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci -w desktop --ignore-scripts
+      - run: npm run release:mac -w desktop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

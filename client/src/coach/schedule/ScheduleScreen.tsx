@@ -42,6 +42,7 @@ import { gymName, scheduleGyms } from './types';
 import './Schedule.css';
 import { CoachProblemState } from '../BackendNotice';
 import { offlineOrUnknown } from '../data/problem';
+import { setHash } from '../../route';
 
 const keepSlot = (
   s: { gymId: string; attendees: { clientId: string }[] },
@@ -190,7 +191,7 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
   const setDraft = (d: CreateDraft | null) =>
     prm.set({ create: d ? formatDraft(d) : null, ...(d ? { open: null } : {}) });
   const goChat = (id: string) => {
-    window.location.assign(`#/c/chat?with=${id}`);
+    setHash(`#/c/chat?with=${id}`);
   };
   const ghostDur = lastDuration(); // a cheap read; changes after each save
   /* a click on the faint scrim: on a session behind it that selects that session (the panel swaps its content), else closes */

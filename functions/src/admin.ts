@@ -25,6 +25,7 @@ import { listUserWorkouts, volume30d, lastSession, workoutStrengthStats } from '
 import { aggregateWorkouts, cutWorkouts, legacyCut, type LegacyCut } from './coach/legacy';
 import { coachCallOptions, coachCtx, coachKv } from './coach/runtime';
 import * as lifecycle from './coach/lifecycle';
+import { deletePasskeysOf } from './passkeysStore';
 import { CoachError } from './coach/service';
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -398,8 +399,9 @@ export const adminAssignTrainer = onCall(coachCallOptions, async (req) => {
 
 // --- role / suspension ------------------------------------------------------
 
-/** Ends the user's refresh tokens; a user who never signed in has no auth record, which is fine. */
+/** Ends the user's refresh tokens and passkeys; a user who never signed in has no auth record, which is fine. */
 async function revokeSessions(id: string): Promise<void> {
+  await deletePasskeysOf(id);
   try {
     await authAdmin.revokeRefreshTokens(id);
   } catch (e) {

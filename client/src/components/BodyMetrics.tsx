@@ -20,7 +20,7 @@ import {
 import type { BodyMetrics, WeightEntry } from '../types';
 import { fmtBodyWeightKg, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
-import { DateField, TimeField } from './PickerFields';
+import { DateField, TimePickerField } from './PickerFields';
 import { Tag } from './ui/Tag';
 
 function isoOf(ts: number): string {
@@ -411,7 +411,7 @@ export function WeightSheet({
         </label>
         <label className="bm-field">
           <span className="bm-field-label">{t.bmTime}</span>
-          <TimeField value={hhmm} onChange={setHhmm} />
+          <TimePickerField value={hhmm} onChange={setHhmm} />
         </label>
       </div>
       <div className="bm-sheet-actions">

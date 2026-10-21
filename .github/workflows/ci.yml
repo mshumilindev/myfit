@@ -4,13 +4,79 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Full five-locale layout audit every night and on demand (Actions -> CI -> Run workflow).
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+
+# A newer push to the same PR cancels the older run (saves minutes); main is never cancelled.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+  # Layout audit is split into parallel shards (SPO-140); the merge job proves they add up to the full matrix.
+  # A PR audits English only (fast); a push to main audits en, uk, pl; the nightly run and a manual run audit all five
+  # locales (lt, et are being retired, SPO-142). Shard counts are kept in step with the matrix in `layout-shard`.
+  LAYOUT_LOCALES: ${{ github.event_name == 'pull_request' && 'en' || (github.event_name == 'push' && 'en,uk,pl' || 'en,uk,pl,lt,et') }}
+  LAYOUT_SHARDS: ${{ github.event_name == 'pull_request' && '10' || (github.event_name == 'push' && '14' || '20') }}
 
 jobs:
-  quality:
-    name: Lint · types · tests · build
+  # ---- quality: five independent jobs instead of one 4.5-minute chain; `quality` below keeps the old check name ----
+  # ESLint + Prettier + the coverage floor in ONE job: each was ~25-40 s of work behind ~25 s of runner setup, and the
+  # 33 jobs of a main push already exceed the ~20 concurrent runners (ADR 004). Together ~90 s, far off the critical path.
+  static:
+    name: Static checks (ESLint · Prettier · coverage floor)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/eslint
+          key: eslint-${{ hashFiles('package-lock.json', 'eslint.config.*') }}-${{ github.sha }}
+          restore-keys: eslint-${{ hashFiles('package-lock.json', 'eslint.config.*') }}-
+      - uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/prettier
+          key: prettier-${{ hashFiles('package-lock.json', '.prettierrc*') }}-${{ github.sha }}
+          restore-keys: prettier-${{ hashFiles('package-lock.json', '.prettierrc*') }}-
+      - name: ESLint
+        run: npx eslint . --cache --cache-strategy content --cache-location node_modules/.cache/eslint/
+      - name: Prettier
+        run: npx prettier --check --cache --cache-strategy content --cache-location node_modules/.cache/prettier/.cache .
+      - name: Coverage thresholds / include / exclude never below the floor, floor never below the base commit
+        run: npm run coverage:guard -- --base ${{ github.event.pull_request.base.sha || github.event.before || 'HEAD' }}
+
+  types:
+    name: Types · boundaries · audit · SQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck (server + client + desktop)
+        run: npm run typecheck
+      - name: Module boundaries (cycles, kit stays presentational; known violations may only shrink)
+        run: npm run deps:check
+      - name: Validate SQL schema
+        run: node scripts/validate-sql.mjs
+      # Blocking since SPO-131 (prod dependencies are at 0 high/critical). A new vulnerable package fails the build.
+      - name: Dependency audit (production, high and above)
+        run: npm audit --omit=dev --audit-level=high
+
+  tests:
+    name: Unit tests + coverage gate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,18 +87,8 @@ jobs:
       - run: npm ci
       # the Coach server tests import the Cloud Functions sources, which have their own lockfile
       - run: npm ci --prefix functions
-      - name: ESLint
-        run: npm run lint
-      - name: Prettier
-        run: npm run format:check
-      - name: Typecheck (server + client + desktop)
-        run: npm run typecheck
       - name: Unit tests + coverage gate
         run: npm run test:coverage
-      - name: Validate SQL schema
-        run: node scripts/validate-sql.mjs
-      - name: Build (server + client)
-        run: npm run build -w server && npm run build -w client
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
@@ -40,6 +96,125 @@ jobs:
           name: coverage
           path: client/coverage
           if-no-files-found: ignore
+
+  # Client unit tests (528 files, ~1750 CPU-s serial). Sharded by measured weight (client/vitest.sequencer.ts + test-weights.json), not by file count. Coverage only of the changed files (SPO-268).
+  # N=8: the floor was src/atlas/kb.test.ts (~3 min as one file; split into kb.*.test.ts so shards can balance it); more shards do not shorten the worst one
+  # and eat the ~20 concurrent-job budget (ADR 004). --maxWorkers=100% because vitest's default on 2 vCPU is a single worker (about 1.6x slower).
+  client-tests:
+    name: Client tests ${{ matrix.shard }}/8
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # some client tests import the Cloud Functions sources (coach parity harness), which have their own lockfile
+      - run: npm ci --prefix functions
+      # Patch-coverage (SPO-268): coverage ONLY of the files this push/PR changed (include = diff), merged by `patch-coverage` below.
+      # No base (schedule, manual run, new branch, force-push) = no coverage flags, i.e. exactly the old no-coverage shard.
+      - name: Base commit for patch-coverage
+        id: base
+        run: |
+          BASE="${{ github.event.pull_request.base.sha || (github.event_name == 'push' && github.event.before) || '' }}"
+          if [ -n "$BASE" ] && git fetch --no-tags --depth=1 origin "$BASE" 2>/dev/null; then echo "sha=$BASE" >> "$GITHUB_OUTPUT"; fi
+      - name: Client unit tests (shard ${{ matrix.shard }}/8, coverage of the changed files only)
+        working-directory: client
+        run: |
+          ARGS=""
+          if [ -n "${{ steps.base.outputs.sha }}" ]; then ARGS=$(node ../scripts/patch-coverage.mjs --vitest-args --base "${{ steps.base.outputs.sha }}"); fi
+          npx vitest run --shard ${{ matrix.shard }}/8 --maxWorkers=100% $ARGS
+      - name: Upload patch coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patch-cov-${{ matrix.shard }}
+          path: client/coverage-patch/coverage-final.json
+          if-no-files-found: ignore
+
+  # Patch-coverage gate (SPO-268): share of the CHANGED executable statements of client/src that the tests cover (threshold:
+  # coverage-thresholds.json `patch`, only grows). The full coverage gate (`tests`, `static`) is unchanged. ~20 s, parallel to the rest.
+  patch-coverage:
+    name: Patch coverage
+    needs: client-tests
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Base commit
+        id: base
+        run: |
+          BASE="${{ github.event.pull_request.base.sha || (github.event_name == 'push' && github.event.before) || '' }}"
+          if [ -n "$BASE" ] && git fetch --no-tags --depth=1 origin "$BASE" 2>/dev/null; then echo "sha=$BASE" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/download-artifact@v4
+        if: needs.client-tests.result == 'success' && steps.base.outputs.sha != ''
+        with:
+          pattern: patch-cov-*
+          path: patch-cov
+      - name: Gate on the coverage of the changed lines
+        if: needs.client-tests.result == 'success'
+        run: node scripts/patch-coverage.mjs --collect patch-cov --base "${{ steps.base.outputs.sha }}"
+
+  build:
+    name: Build (server + client)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w server && npm run build -w client
+
+  # Static security analysis (replaces CodeQL, which needs a paid licence on private repos). Findings become annotations.
+  security:
+    name: Security (Semgrep)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install semgrep==1.181.0
+      - name: Scan client and functions
+        run: semgrep scan --config p/javascript --config p/typescript --config p/react --config p/secrets --metrics=off --json --output semgrep.json client/src functions/src scripts || true
+      - name: Report findings
+        run: node scripts/semgrep-annotate.mjs semgrep.json
+
+  # Passkeys against a software authenticator (SPO-211/229): a local server runs the real passkeysCore rules, Chromium has a
+  # CDP virtual authenticator. No app build needed, so it runs in parallel and takes about a minute.
+  passkeys-e2e:
+    name: Passkeys e2e (virtual authenticator)
+    # Not a gate yet: passes locally on Chromium 1194 (headed and headless shell) but failed on the CI Chromium; logs are
+    # not retrievable from the agent sandbox. Informational until the CI failure is reproduced (SPO-229).
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=mobile-chromium tests/e2e/passkeys-webauthn.e2e.ts
+
+  quality:
+    name: Lint · types · tests · build
+    if: always()
+    needs: [static, types, tests, client-tests, patch-coverage, build, security]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every quality job must have succeeded (a skipped or cancelled one counts as a failure)
+        run: |
+          echo '${{ toJSON(needs) }}'
+          if [ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}" = "true" ]; then exit 1; fi
 
   smoke:
     name: API smoke (real server + SQLite)
@@ -62,8 +237,9 @@ jobs:
           done
           BASE=http://localhost:4499 node scripts/smoke.mjs
 
-  layout:
-    name: Layout audit (Storybook geometry)
+  # ---- layout audit: build Storybook once, audit it in parallel shards, then prove nothing was skipped ----
+  storybook:
+    name: Build Storybook
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -72,15 +248,85 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
       - run: npm run build-storybook
+      - uses: actions/upload-artifact@v4
+        with:
+          name: storybook-static
+          path: client/storybook-static
+          retention-days: 1
+          compression-level: 1
+
+  layout-shard:
+    name: Layout shard ${{ matrix.shard }}
+    # `needs: storybook` (was: install tools while Storybook builds, then poll for the artifact, SPO-140). That polling held
+    # a runner slot idle for the whole ~70 s build in every shard; with ~30 jobs against ~20 concurrent runners the idle
+    # shards pushed the real work (client tests, other shards) back. Setup is now short (cached browsers), so starting
+    # after the build costs less than the idle slots did. A failed build skips the shards and fails `layout`.
+    needs: storybook
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[0,1,2,3,4,5,6,7,8,9]' || (github.event_name == 'push' && '[0,1,2,3,4,5,6,7,8,9,10,11,12,13]' || '[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]')) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # no lifecycle scripts: the audit needs Playwright + the built Storybook, not the husky/electron hooks
+      - run: npm ci --ignore-scripts
+      - name: Playwright version
+        id: pw
+        run: echo "v=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: pwcache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.v }}
+      - name: Playwright Chromium (browser download is cached; system libraries are always installed)
+        run: |
+          if [ "${{ steps.pwcache.outputs.cache-hit }}" = "true" ]; then npx playwright install-deps chromium; else npx playwright install --with-deps chromium; fi
+      - uses: actions/download-artifact@v4
+        with:
+          name: storybook-static
+          path: client/storybook-static
       - name: Serve the built Storybook
         run: |
           npx --yes http-server client/storybook-static -p 6006 -s >/dev/null 2>&1 &
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:6006/index.json >/dev/null && break; sleep 1; done
-      - name: Chat frame geometry (trainer / client / Atlas; 320-1920; 5 locales)
-        run: npm run audit:chat -- --url http://127.0.0.1:6006
+          mkdir -p audit-reports
+      - name: Story audit (no sideways scroll, no clipped text or shadow; 320 / 390, normal and large font)
+        run: npm run audit:stories -- --url http://127.0.0.1:6006 --locales ${{ env.LAYOUT_LOCALES }} --widths 320,390 --fonts 1,1.5 --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out audit-reports/stories-${{ matrix.shard }}.json
       - name: Page hero / top bar spacing (back, title, actions on one axis; 390-1920)
-        run: npm run audit:hero -- --url http://127.0.0.1:6006
-      - name: Story audit (no sideways scroll, no clipped text or shadow; 5 locales, 320 / 390, normal and large font)
-        run: npm run audit:stories -- --url http://127.0.0.1:6006 --locales en,uk,pl,lt,et --widths 320,390 --fonts 1,1.5
+        if: always()
+        run: npm run audit:hero -- --url http://127.0.0.1:6006 --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out audit-reports/hero-${{ matrix.shard }}.json
+      - name: Chat frame geometry (trainer / client / Atlas; 320-1920)
+        if: always()
+        run: npm run audit:chat -- --url http://127.0.0.1:6006 --locales ${{ env.LAYOUT_LOCALES }} --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out audit-reports/chat-${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audit-report-${{ matrix.shard }}
+          path: audit-reports
+          if-no-files-found: error
+
+  layout:
+    name: Layout audit (Storybook geometry)
+    if: always()
+    needs: [storybook, layout-shard]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: audit-report-*
+          merge-multiple: true
+          path: audit-reports
+      - name: Shards must add up to the whole matrix, every probe run, no findings
+        run: |
+          if [ "${{ needs.storybook.result }}" != "success" ]; then echo "Storybook build: ${{ needs.storybook.result }}"; exit 1; fi
+          node scripts/audit-merge.mjs audit-reports --shards "$LAYOUT_SHARDS"

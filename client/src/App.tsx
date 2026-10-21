@@ -3,7 +3,7 @@ import { pushState, refreshPush, setAppBadge } from './push';
 import { useConditionLimits } from './healthBuild';
 import { setProgressionEffects } from './progression';
 import { ScreenSkeleton } from './components/ui/Skeletons';
-import { Button, IconButton } from './components/ui/Button';
+import { Button } from './components/ui/Button';
 import { buildNotes, useAtlasFmt, useAtlasNotes } from './atlas/notes';
 import { setOverrideUid } from './accountOverrides';
 import { chatBacked, planNotePushes, planOutbox, syncOutbox } from './atlas/schedule';
@@ -17,9 +17,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
-  type RefObject,
 } from 'react';
-import { flushSync } from 'react-dom';
 import { collection, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import {
   getRole,
@@ -44,13 +42,14 @@ import {
   setCoach,
   useSelfCoachRole,
 } from './store';
-import { SpotterSky } from './components/SpotterSky';
+import { AppRoot, SpotterSky } from './components/SpotterSky';
 import { SleepAutomation, SleepPauseController } from './components/SleepAutomation';
 import { SleepHero } from './components/SleepHero';
 import { useT } from './i18n';
 import { computeMastery, rankIndexForRating, type MasteryResult } from './mastery';
 import { Icon, UndoSnackbar, Toast, UpdatePlate, type SnackState, type ToastState } from './ui';
-import { isUpdateReady, subscribeUpdateReady } from './pwaUpdate';
+import { useEdgeSwipeBack } from './edgeSwipeBack';
+import { isUpdateReady, subscribeUpdateReady, reloadToLatest } from './pwaUpdate';
 import {
   computeNotifs,
   syncNotifs,
@@ -62,12 +61,19 @@ import {
 import { useChallenges } from './challenges';
 import { ShellLauncher } from './components/ShellLauncher';
 import { setSuiteSession } from './components/suite/suiteSession';
+import { useSessionWatch } from './accounts/useSessionWatch';
 import type { ApexTab } from './views/ApexApp';
-import type { RosterTab } from './views/RosterApp';
+import type { RosterTab } from './views/rosterAccess';
+import { ROSTER_TAB_IDS, guardRosterTab, rosterHomeTab, rosterMode } from './views/rosterAccess';
+import { redirectLegacyPeopleClients } from './views/legacyPeopleRedirect';
 import { canUseCoach, coachScreenOpen } from './coach/access';
 import type { HomeSetRoute } from './views/home/HomeSetView';
 import { pruneHomeSetDrafts } from './views/home/homeSetDraft';
 import { AuthView } from './views/AuthView';
+import { NoticeStrip } from './components/NoticeStrip';
+import { LandingView } from './views/landing/LandingView';
+import { InviteLanding } from './views/landing/InviteLanding';
+import { shouldShowLanding } from './views/landing/landingGate';
 import { TraineeSessionView } from './views/TraineeSessionView';
 import { LiveHero } from './components/LiveHero';
 import { ActivityHero } from './components/ActivityHero';
@@ -85,6 +91,7 @@ import { ConditionsShield, useActiveConditions } from './views/health/Conditions
 import { AppRail } from './components/AppRail';
 import { SuiteTabBar } from './components/SuiteTabBar';
 import type { ProgramsPeer } from './components/ProgramsTabs';
+import { currentHash, replaceHash, setHash } from './route';
 
 const OnboardingView = lazy(() =>
   import('./views/OnboardingView').then((module) => ({ default: module.OnboardingView })),
@@ -190,7 +197,7 @@ const InjuryView = lazy(() =>
 // Dev-only: the UI kit gallery is an internal tool. In production builds this
 // branch is dead code (import.meta.env.DEV === false), so the chunk isn't
 // emitted and #/uikit falls back to Today.
-const Gallery = import.meta.env.DEV
+const UiKitGallery = import.meta.env.DEV
   ? lazy(() => import('./components/ui/Gallery').then((module) => ({ default: module.Gallery })))
   : null;
 const WidgetLibraryScreen = import.meta.env.DEV
@@ -313,7 +320,7 @@ export interface Shell {
   openStart: () => void;
   toast: (t: ToastState) => void;
   snack: (s: SnackState) => void;
-  signOut: () => void;
+  signOut: (opts?: { forget?: boolean }) => void;
   queueLength: number;
 }
 
@@ -326,47 +333,18 @@ type NavRole = ReturnType<typeof getRole>;
 type NavLabels = Pick<ReturnType<typeof useT>['t'], 'today' | 'overviewTab' | 'gyms'>;
 type NavItem = { id: Tab; icon: string; label: string; badge?: number; ariaLabel?: string };
 
-/** The People sub-app's label follows the role, matching the old in-Gym menu. */
-function peopleLabelFor(role: NavRole, t: ReturnType<typeof useT>['t']): string {
-  if (role === 'trainer') return t.trClientsTab;
-  if (role === 'admin') return t.adminPeople;
-  return t.navMe;
+/** The People sub-app is the admin-only Users app (SPO-141): its Shell tile exists for an admin only
+ *  (`canUsePeople`), and "Me" is a separate screen reached from the avatar → Profile. */
+function peopleLabelFor(t: ReturnType<typeof useT>['t']): string {
+  return t.adminPeople;
 }
-/** …and its Shell tile description, so each role sees what the app holds. */
-function peopleDescFor(role: NavRole, t: ReturnType<typeof useT>['t']): string {
-  if (role === 'trainer') return t.shellPeopleDescCoach;
-  if (role === 'admin') return t.shellPeopleDescAdmin;
-  return t.shellPeopleDesc;
+function peopleDescFor(t: ReturnType<typeof useT>['t']): string {
+  return t.shellPeopleDescAdmin;
 }
 /** The tab the People app opens on for a given role. */
 function rosterHomeFor(role: NavRole): RosterTab {
-  if (role === 'trainer') return 'clients';
-  if (role === 'admin') return 'users';
-  return 'me';
+  return rosterHomeTab(role);
 }
-const EDGE_BACK_START_PX = 28;
-const EDGE_BACK_LOCK_PX = 18;
-const EDGE_BACK_TRIGGER_PX = 72;
-const EDGE_BACK_MAX_VERTICAL_PX = 52;
-const EDGE_BACK_DOMINANCE = 1.8;
-const EDGE_BACK_EXCLUDE_SELECTOR = [
-  'a',
-  'button',
-  'input',
-  'select',
-  'textarea',
-  '[contenteditable="true"]',
-  '[role="button"]',
-  '[data-no-edge-swipe]',
-  '.tabbar',
-  '.tabbar-fab',
-  '.rail',
-  '.sheet',
-  '.scrim',
-  '.dialog-scrim',
-  '.exd-lightbox',
-  '.toast-holder',
-].join(',');
 
 function defaultTab(): Tab {
   return 'today';
@@ -736,13 +714,15 @@ function apexHash(tab: ApexTab): string {
 }
 
 // --- People (accounts & profiles sub-app) is a full-screen mode at #/people[/<tab>].
-const ROSTER_TAB_IDS: readonly string[] = ['clients', 'users', 'me', 'feed'];
 function isRosterHash(hash: string): boolean {
   return hash.split('?')[0].replace(/^#\/?/, '').split('/')[0] === 'people';
 }
 function rosterTabFromHash(hash: string): RosterTab {
   const seg = hash.split('?')[0].replace(/^#\/?/, '').split('/')[1] ?? '';
-  return (ROSTER_TAB_IDS.includes(seg) ? seg : 'me') as RosterTab;
+  // `users` is admin-only: a typed or saved `/people/users` (or a retired `/people/clients`) never opens it for
+  // another role (SPO-141); the screen redirects the same way as a second line of defence.
+  const tab = (ROSTER_TAB_IDS.includes(seg) ? seg : 'me') as RosterTab;
+  return guardRosterTab(tab, getRole());
 }
 function rosterHash(tab: RosterTab): string {
   return `#/people/${tab}`;
@@ -921,18 +901,17 @@ export function App() {
 
   // Apex (gamification) is a full-screen mode; the Shell launcher switches apps.
   const activeChallengeCount = challenges.filter((c) => c.status === 'active').length;
-  const [apexOpen, setApexOpen] = useState<boolean>(() => isApexHash(window.location.hash));
-  const [apexTab, setApexTab] = useState<ApexTab>(() => apexTabFromHash(window.location.hash));
-  const [rosterOpen, setRosterOpen] = useState<boolean>(() => isRosterHash(window.location.hash));
-  const [rosterTab, setRosterTab] = useState<RosterTab>(() =>
-    rosterTabFromHash(window.location.hash),
-  );
+  useState(redirectLegacyPeopleClients); // before any state below reads the URL (SPO-141)
+  const [apexOpen, setApexOpen] = useState<boolean>(() => isApexHash(currentHash()));
+  const [apexTab, setApexTab] = useState<ApexTab>(() => apexTabFromHash(currentHash()));
+  const [rosterOpen, setRosterOpen] = useState<boolean>(() => isRosterHash(currentHash()));
+  const [rosterTab, setRosterTab] = useState<RosterTab>(() => rosterTabFromHash(currentHash()));
   const [nutritionOpen, setNutritionOpen] = useState<boolean>(
-    () => isNutritionHash(window.location.hash) && isFlagOn('nutrition'),
+    () => isNutritionHash(currentHash()) && isFlagOn('nutrition'),
   );
-  const [learnOpen, setLearnOpen] = useState<boolean>(() => isLearnHash(window.location.hash));
+  const [learnOpen, setLearnOpen] = useState<boolean>(() => isLearnHash(currentHash()));
   const [coachWanted, setCoachWanted] = useState<boolean>(() =>
-    coachScreenOpen(window.location.hash, getRole()),
+    coachScreenOpen(currentHash(), getRole()),
   );
   // Nutrition is behind a feature flag (admin-only toggle in Settings); default
   // OFF → the Shell shows it as "coming soon" and it cannot be opened.
@@ -944,9 +923,7 @@ export function App() {
   // Deep-link focus: a notification can ask a screen to scroll to a specific
   // card (id) and, when it's interactive (a feat cell), open its existing
   // detail. Poll for the element until the target screen has mounted.
-  const [focusTarget, setFocusTarget] = useState<string | null>(() =>
-    focusFromHash(window.location.hash),
-  );
+  const [focusTarget, setFocusTarget] = useState<string | null>(() => focusFromHash(currentHash()));
   useEffect(() => {
     if (!focusTarget) return;
     let raf = 0;
@@ -970,36 +947,35 @@ export function App() {
     return () => cancelAnimationFrame(raf);
   }, [focusTarget]);
   // Invite links (#/join/<token>) open onboarding before any auth gate.
+  const [inviteStarted, setInviteStarted] = useState(false);
   const [joinToken, setJoinToken] = useState<string | null>(() => {
-    const m = /^#\/join\/([A-Za-z0-9-]+)/.exec(window.location.hash);
+    const m = /^#\/join\/([A-Za-z0-9-]+)/.exec(currentHash());
     return m ? m[1] : null;
   });
-  const [tab, setTab] = useState<Tab>(() => fromHash(window.location.hash).tab);
+  const [tab, setTab] = useState<Tab>(() => fromHash(currentHash()).tab);
   // Programs ↔ Exercises peer-tab lives in App (not ProgramsView) so it survives
   // opening an exercise-detail overlay, which unmounts the tab content.
   const [programsPeer, setProgramsPeer] = useState<ProgramsPeer>(
-    () => peerFromHash(window.location.hash).peer,
+    () => peerFromHash(currentHash()).peer,
   );
-  const [libMine, setLibMine] = useState<boolean>(() => peerFromHash(window.location.hash).mine);
+  const [libMine, setLibMine] = useState<boolean>(() => peerFromHash(currentHash()).mine);
   // Progress sub-tabs (Progress · Trends · Feats · Challenges) + the Feats
   // sub-tab, kept in App so each has its own URL (#/trends, #/feats,
   // #/feats/standards, #/challenges).
   const [progressSub, setProgressSub] = useState<ProgressSub>(
-    () => progressFromHash(window.location.hash).sub,
+    () => progressFromHash(currentHash()).sub,
   );
   // Progress volume seg + lens live here too, so #/progress/volume/readiness
   // survives a refresh and deep links land on the right lens.
   const [progressSeg, setProgressSeg] = useState<ProgSeg>(
-    () => progressFromHash(window.location.hash).seg,
+    () => progressFromHash(currentHash()).seg,
   );
-  const [volumeLens, setVolumeLens] = useState<VolLens>(
-    () => progressFromHash(window.location.hash).lens,
-  );
+  const [volumeLens, setVolumeLens] = useState<VolLens>(() => progressFromHash(currentHash()).lens);
   // Overlay navigation keeps a stack of parents: the back button on an overlay
   // returns to the screen it was opened from (session → exercise history →
   // back lands on the session again), never blindly through browser history.
   const [overlayNav, setOverlayNav] = useState<{ cur: Overlay; stack: Overlay[] }>(() => {
-    const o = fromHash(window.location.hash).overlay;
+    const o = fromHash(currentHash()).overlay;
     if (o?.screen === 'session' && !o.workoutId) {
       const w = getOpenWorkout();
       return { cur: w ? { screen: 'session', workoutId: w.id } : null, stack: [] };
@@ -1058,7 +1034,7 @@ export function App() {
 
   // One-shot sign-out via #/logout (local testing / support links).
   useEffect(() => {
-    if (!/^#\/logout\/?$/i.test(window.location.hash)) return;
+    if (!/^#\/logout\/?$/i.test(currentHash())) return;
     let cancelled = false;
     void (async () => {
       await apiSignOut();
@@ -1066,7 +1042,7 @@ export function App() {
       setAuthed(false);
       setOverlay(null);
       setJoinToken(null);
-      window.history.replaceState(null, '', '#/');
+      replaceHash('#/');
     })();
     return () => {
       cancelled = true;
@@ -1107,12 +1083,12 @@ export function App() {
       snackSeq.current += 1;
       setSnack({ ...s, id: snackSeq.current });
     },
-    signOut: () => {
+    signOut: (opts) => {
       setOverlay(null);
       setTab(defaultTab());
-      void apiSignOut();
+      void apiSignOut(opts);
       setAuthed(false);
-      window.history.replaceState(null, '', '#/today');
+      replaceHash('#/today');
     },
     queueLength: store.queue.length,
   };
@@ -1124,9 +1100,10 @@ export function App() {
   });
   const queueLen = store.queue.length;
   useEffect(
-    () => setSuiteSession({ signOut: () => signOutRef.current(), queueLength: queueLen }),
+    () => setSuiteSession({ signOut: (o) => signOutRef.current(o), queueLength: queueLen }),
     [queueLen],
   );
+  useSessionWatch(authed, signOutRef);
 
   /** Back from an overlay: pop to the logical parent screen, not history. When
    *  there's no remembered parent (deep link / refreshed URL), fall back to the
@@ -1217,8 +1194,8 @@ export function App() {
       effectiveTab === 'programs' &&
       !activeOverlay &&
       programsPeer === 'programs' &&
-      isProgramsEditorHash(window.location.hash);
-    if (!keep && window.location.hash !== next) window.history.replaceState(null, '', next);
+      isProgramsEditorHash(currentHash());
+    if (!keep && currentHash() !== next) replaceHash(next);
   }, [
     authed,
     joinToken,
@@ -1242,23 +1219,24 @@ export function App() {
   useEffect(() => {
     if (!authed || joinToken) return;
     const onPop = () => {
-      setApexOpen(isApexHash(window.location.hash));
-      setApexTab(apexTabFromHash(window.location.hash));
-      setRosterOpen(isRosterHash(window.location.hash));
-      setRosterTab(rosterTabFromHash(window.location.hash));
-      setNutritionOpen(isNutritionHash(window.location.hash) && isFlagOn('nutrition'));
-      setLearnOpen(isLearnHash(window.location.hash));
-      setCoachWanted(coachScreenOpen(window.location.hash, getRole()));
-      const { tab: ht, overlay: ho } = fromHash(window.location.hash);
-      const pk = peerFromHash(window.location.hash);
-      const ps = progressFromHash(window.location.hash);
+      setApexOpen(isApexHash(currentHash()));
+      setApexTab(apexTabFromHash(currentHash()));
+      redirectLegacyPeopleClients();
+      setRosterOpen(isRosterHash(currentHash()));
+      setRosterTab(rosterTabFromHash(currentHash()));
+      setNutritionOpen(isNutritionHash(currentHash()) && isFlagOn('nutrition'));
+      setLearnOpen(isLearnHash(currentHash()));
+      setCoachWanted(coachScreenOpen(currentHash(), getRole()));
+      const { tab: ht, overlay: ho } = fromHash(currentHash());
+      const pk = peerFromHash(currentHash());
+      const ps = progressFromHash(currentHash());
       setTab(ht);
       setProgramsPeer(pk.peer);
       setLibMine(pk.mine);
       setProgressSub(ps.sub);
       setProgressSeg(ps.seg);
       setVolumeLens(ps.lens);
-      setFocusTarget(focusFromHash(window.location.hash));
+      setFocusTarget(focusFromHash(currentHash()));
       setOverlayNav({
         cur:
           ho?.screen === 'session' && !ho.workoutId
@@ -1314,15 +1292,24 @@ export function App() {
     return () => el.classList.remove('theme-learn');
   }, [learnOpen]);
 
+  if (joinToken && !inviteStarted && shouldShowLanding()) {
+    return (
+      <div className="app app-landing">
+        <InviteLanding token={joinToken} onStart={() => setInviteStarted(true)} />
+      </div>
+    );
+  }
+
   if (joinToken) {
     return (
       <div className="app">
         <Suspense fallback={<ScreenFallback />}>
           <OnboardingView
+            skipLanding={inviteStarted}
             token={joinToken}
             onDone={(workoutId) => {
               setJoinToken(null);
-              window.location.hash = '#/today';
+              setHash('#/today');
               if (currentUid()) setAuthed(true);
               if (workoutId) setOverlay({ screen: 'session', workoutId });
             }}
@@ -1334,8 +1321,12 @@ export function App() {
 
   if (!authed) {
     return (
-      <div className="app">
-        <AuthView onLoggedIn={() => setAuthed(true)} />
+      <div className={shouldShowLanding() ? 'app app-landing' : 'app'}>
+        {shouldShowLanding() ? (
+          <LandingView onLoggedIn={() => setAuthed(true)} />
+        ) : (
+          <AuthView onLoggedIn={() => setAuthed(true)} />
+        )}
       </div>
     );
   }
@@ -1379,8 +1370,8 @@ export function App() {
   // Suite switching: only one app owns the screen at a time.
   const rosterRole: 'trainer' | 'admin' | 'member' =
     role === 'trainer' ? 'trainer' : role === 'admin' ? 'admin' : 'member';
-  const peopleLabel = peopleLabelFor(role, t);
-  const peopleDesc = peopleDescFor(role, t);
+  const peopleLabel = peopleLabelFor(t);
+  const peopleDesc = peopleDescFor(t);
   // Switching apps always lands on that app's home screen — never the tab or
   // overlay you left behind. (Apex/Learn/Nutrition also reset their entry tab.)
   const openGym = () => {
@@ -1408,7 +1399,7 @@ export function App() {
     setApexOpen(false);
     setNutritionOpen(false);
     setLearnOpen(false);
-    setRosterTab(rtab);
+    setRosterTab(guardRosterTab(rtab, role));
     setRosterOpen(true);
   };
   const openNutrition = () => {
@@ -1468,7 +1459,7 @@ export function App() {
   // Nutrition takes over the whole screen — its own lazurite skin & store.
   if (nutritionOpen && nutritionEnabled) {
     return (
-      <div className="app app-apex-root">
+      <AppRoot>
         <Suspense fallback={<ScreenFallback />}>
           <NutritionApp
             now={notifNow}
@@ -1499,14 +1490,14 @@ export function App() {
             onClose={() => setShellOpen(false)}
           />
         )}
-      </div>
+      </AppRoot>
     );
   }
 
   // Learn (how-to videos) takes over the whole screen — its own rubellite skin.
   if (learnOpen) {
     return (
-      <div className="app app-apex-root">
+      <AppRoot>
         <Suspense fallback={<ScreenFallback />}>
           <LearnApp
             now={notifNow}
@@ -1538,14 +1529,14 @@ export function App() {
             onClose={() => setShellOpen(false)}
           />
         )}
-      </div>
+      </AppRoot>
     );
   }
 
   // People (accounts & profiles) takes over the whole screen — its own silver skin.
   if (rosterOpen) {
     return (
-      <div className="app app-apex-root">
+      <AppRoot>
         <Suspense fallback={<ScreenFallback />}>
           <RosterApp
             role={rosterRole}
@@ -1565,28 +1556,30 @@ export function App() {
           <ShellLauncher
             store={store}
             now={notifNow}
-            current="roster"
+            current={rosterMode(rosterTab, role) === 'users' ? 'roster' : 'me'}
             peopleLabel={peopleLabel}
             peopleDesc={peopleDesc}
             activeChallenges={activeChallengeCount}
             notifUnread={notifUnread}
             onGym={openGym}
             onApex={openApex}
-            onRoster={() => setShellOpen(false)}
+            onRoster={() =>
+              rosterMode(rosterTab, role) === 'users' ? setShellOpen(false) : openRoster('users')
+            }
             onNutrition={openNutrition}
             nutritionEnabled={nutritionEnabled}
             onLearn={openLearn}
             onClose={() => setShellOpen(false)}
           />
         )}
-      </div>
+      </AppRoot>
     );
   }
 
   // Apex takes over the whole screen (its own header, nav and amethyst skin).
   if (apexOpen) {
     return (
-      <div className="app app-apex-root">
+      <AppRoot>
         <Suspense fallback={<ScreenFallback />}>
           <ApexApp
             store={store}
@@ -1620,7 +1613,7 @@ export function App() {
             onClose={() => setShellOpen(false)}
           />
         )}
-      </div>
+      </AppRoot>
     );
   }
 
@@ -1799,7 +1792,7 @@ export function App() {
           onClose={closeOverlay}
         />
       )}
-      {Gallery && activeOverlay?.screen === 'uikit' && <Gallery onClose={closeOverlay} />}
+      {UiKitGallery && activeOverlay?.screen === 'uikit' && <UiKitGallery onClose={closeOverlay} />}
       {WidgetLibraryScreen && activeOverlay?.screen === 'widget-library' && (
         <WidgetLibraryScreen shell={shell} onClose={closeOverlay} />
       )}
@@ -1849,12 +1842,11 @@ export function App() {
             shell={shell}
             libTab={libMine ? 'mine' : 'library'}
             onLibTab={(next) => setLibMine(next === 'mine')}
-            onProgramsTab={goProgramsPeer}
           />
         ) : programsPeer === 'playbook' ? (
-          <PlaybookView shell={shell} onProgramsTab={goProgramsPeer} />
+          <PlaybookView shell={shell} />
         ) : programsPeer === 'goals' ? (
-          <GoalsView shell={shell} onProgramsTab={goProgramsPeer} />
+          <GoalsView />
         ) : (
           <ProgramsView shell={shell} onProgramsTab={goProgramsPeer} />
         ))}
@@ -1978,7 +1970,7 @@ export function App() {
           {authed && notices.some((n) => !n.read) && (
             <NoticeStrip notices={notices.filter((n) => !n.read)} onDismiss={dismissNotice} />
           )}
-          {updateReady && <UpdatePlate />}
+          {updateReady && <UpdatePlate onReload={() => void reloadToLatest()} />}
           {rankUp && (
             <Suspense fallback={null}>
               <MasteryRankUp
@@ -2068,275 +2060,6 @@ function useDesktopRail(): boolean {
   }, []);
 
   return matches;
-}
-
-function isEdgeSwipeExcluded(target: EventTarget | null): boolean {
-  if (typeof Element === 'undefined' || !(target instanceof Element)) return false;
-  return target.closest(EDGE_BACK_EXCLUDE_SELECTOR) !== null;
-}
-
-interface EdgeBackOpts {
-  enabled: boolean;
-  /** Do the interactive reveal (an overlay is open). Off = plain threshold back. */
-  interactive: boolean;
-  onBack: () => void;
-  stageRef: RefObject<HTMLElement | null>;
-  overRef: RefObject<HTMLDivElement | null>;
-  underRef: RefObject<HTMLDivElement | null>;
-  scrimRef: RefObject<HTMLDivElement | null>;
-  onSwipeStart: () => void;
-  onSwipeEnd: () => void;
-}
-
-const BACK_PARALLAX = 0.25; // how far the revealed screen sits behind, as a fraction of width
-const BACK_SCRIM = 0.12; // dim over the revealed screen at rest
-const BACK_EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
-
-/**
- * Interactive iOS-style edge-back. From the left edge, the current overlay
- * follows the finger to the right while the destination (rendered underneath)
- * eases in from a slight left parallax with a fading scrim; release past the
- * halfway point (or a flick) completes the pop, otherwise it springs back.
- * When no overlay is open (e.g. a Programs sub-tab) it falls back to a plain
- * threshold trigger with no visual.
- *
- * Smoothness: the destination is mounted on touch-start (before the finger has
- * moved), only transforms/opacity are written per frame (no CSS-variable
- * invalidation), the release duration follows the finger's velocity, the pop is
- * committed with flushSync so the old screen never flashes back for a frame, and
- * the non-passive touchmove listener exists only while an edge gesture runs.
- */
-export function useEdgeSwipeBack(opts: EdgeBackOpts): void {
-  const ref = useRef(opts);
-  useEffect(() => {
-    ref.current = opts;
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    let startX = 0;
-    let startY = 0;
-    let startTime = 0;
-    let tracking = false;
-    let locked = false;
-    let cancelled = false;
-    let armed = false; // destination mounted (touch-start on the edge)
-    let active = false; // interactive reveal engaged
-    let dx = 0;
-    let width = 1;
-    let raf = 0;
-    let moving = false; // touchmove listener attached
-    let samples: Array<{ x: number; t: number }> = [];
-
-    const layers = () => ({
-      over: ref.current.overRef.current,
-      under: ref.current.underRef.current,
-      stage: ref.current.stageRef.current,
-      scrim: ref.current.scrimRef.current,
-    });
-    const frame = (x: number) => {
-      const { over, under, scrim } = layers();
-      const p = Math.max(0, Math.min(1, x / width));
-      if (over) over.style.transform = `translate3d(${Math.max(0, x)}px,0,0)`;
-      if (under) under.style.transform = `translate3d(${-(1 - p) * width * BACK_PARALLAX}px,0,0)`;
-      if (scrim) scrim.style.opacity = String((1 - p) * BACK_SCRIM);
-    };
-    const paint = () => {
-      raf = 0;
-      frame(dx);
-    };
-    const schedule = () => {
-      if (!raf) raf = requestAnimationFrame(paint);
-    };
-    const clearStyles = () => {
-      const { over, under, scrim } = layers();
-      for (const el of [over, under]) {
-        if (!el) continue;
-        el.style.transition = '';
-        el.style.transform = '';
-        el.style.willChange = '';
-      }
-      if (scrim) {
-        scrim.style.transition = '';
-        scrim.style.opacity = '';
-      }
-    };
-    const track = (x: number) => {
-      const t = performance.now();
-      samples.push({ x, t });
-      while (samples.length > 2 && t - samples[0].t > 100) samples.shift();
-    };
-    /** px per ms over the last ~100 ms (0 when unknown). */
-    const velocity = () => {
-      if (samples.length < 2) return 0;
-      const a = samples[0];
-      const b = samples[samples.length - 1];
-      return b.t > a.t ? (b.x - a.x) / (b.t - a.t) : 0;
-    };
-    const onMove = (event: TouchEvent) => {
-      if (!tracking || cancelled || event.touches.length !== 1) return;
-      const touch = event.touches[0];
-      if (!touch) return;
-      dx = touch.clientX - startX;
-      const dy = touch.clientY - startY;
-      const absX = Math.abs(dx);
-      const absY = Math.abs(dy);
-      if (dx < -8) {
-        release();
-        return;
-      }
-      if (!locked) {
-        if (absY > 10 && absY > absX) {
-          cancelled = true;
-          tracking = false;
-          release();
-          return;
-        }
-        if (dx > EDGE_BACK_LOCK_PX && absX > absY * EDGE_BACK_DOMINANCE) {
-          locked = true;
-          if (armed) {
-            active = true;
-            width = window.innerWidth || 1;
-            const { over, under } = layers();
-            for (const el of [over, under]) if (el) el.style.willChange = 'transform';
-          }
-        }
-      }
-      if (locked && event.cancelable) event.preventDefault();
-      if (active) {
-        track(touch.clientX);
-        schedule();
-      }
-    };
-    const attachMove = () => {
-      if (moving) return;
-      moving = true;
-      window.addEventListener('touchmove', onMove, { passive: false });
-    };
-    const detachMove = () => {
-      if (!moving) return;
-      moving = false;
-      window.removeEventListener('touchmove', onMove);
-    };
-    /** Gesture over without an interactive reveal: drop the pre-mounted destination. */
-    const release = () => {
-      detachMove();
-      tracking = false;
-      locked = false;
-      cancelled = false;
-      if (armed && !active) {
-        armed = false;
-        ref.current.onSwipeEnd();
-      }
-    };
-    const endInteractive = (commit: boolean, v: number) => {
-      const { over, under, scrim } = layers();
-      if (raf) {
-        cancelAnimationFrame(raf);
-        raf = 0;
-      }
-      // Duration follows the remaining distance and the flick speed.
-      const remaining = commit ? Math.max(0, width - dx) : Math.max(0, dx);
-      const speed = Math.max(Math.abs(v), 0.9); // px/ms
-      const ms = Math.round(Math.max(140, Math.min(320, remaining / speed)));
-      const tr = `transform ${ms}ms ${BACK_EASE}`;
-      if (over) {
-        over.style.transition = tr;
-        void over.offsetWidth; // flush so the release animates from the current spot
-      }
-      if (under) under.style.transition = tr;
-      if (scrim) scrim.style.transition = `opacity ${ms}ms ${BACK_EASE}`;
-      frame(commit ? width : 0);
-      let done = false;
-      const finish = () => {
-        if (done) return;
-        done = true;
-        // Commit the pop (and unmount the layers) in one synchronous render, so
-        // the screen that just slid away never reappears for a frame.
-        flushSync(() => {
-          if (commit) ref.current.onBack();
-          ref.current.onSwipeEnd();
-        });
-        clearStyles();
-        active = false;
-        armed = false;
-      };
-      if (over) over.addEventListener('transitionend', finish, { once: true });
-      window.setTimeout(finish, ms + 80);
-    };
-
-    const onTouchStart = (event: TouchEvent) => {
-      if (!ref.current.enabled || active) return;
-      if (event.touches.length !== 1 || isEdgeSwipeExcluded(event.target)) return;
-      const touch = event.touches[0];
-      if (!touch || touch.clientX > EDGE_BACK_START_PX) return;
-      startX = touch.clientX;
-      startY = touch.clientY;
-      startTime = Date.now();
-      tracking = true;
-      locked = false;
-      cancelled = false;
-      dx = 0;
-      samples = [{ x: touch.clientX, t: performance.now() }];
-      attachMove();
-      if (ref.current.interactive && !armed) {
-        armed = true;
-        ref.current.onSwipeStart(); // mount the destination before the finger moves
-      }
-    };
-    const onTouchEnd = (event: TouchEvent) => {
-      if (!tracking || cancelled) {
-        release();
-        return;
-      }
-      const touch = event.changedTouches[0];
-      if (!touch) {
-        release();
-        return;
-      }
-      dx = touch.clientX - startX;
-      const absY = Math.abs(touch.clientY - startY);
-      const elapsed = Date.now() - startTime;
-      const intentional =
-        locked &&
-        dx >= EDGE_BACK_TRIGGER_PX &&
-        absY <= EDGE_BACK_MAX_VERTICAL_PX &&
-        dx > absY * EDGE_BACK_DOMINANCE;
-      const fast = dx >= 52 && elapsed < 280 && dx > absY * 2;
-      if (active) {
-        track(touch.clientX);
-        const v = velocity();
-        detachMove();
-        tracking = false;
-        locked = false;
-        endInteractive(dx >= width * 0.5 || fast || intentional || v > 0.5, v);
-        return;
-      }
-      const go = intentional || fast;
-      release();
-      if (go) ref.current.onBack();
-    };
-    const onCancel = () => {
-      if (active) {
-        detachMove();
-        tracking = false;
-        locked = false;
-        endInteractive(false, 0);
-      } else release();
-    };
-
-    window.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchend', onTouchEnd, { passive: true });
-    window.addEventListener('touchcancel', onCancel, { passive: true });
-    return () => {
-      if (raf) cancelAnimationFrame(raf);
-      detachMove();
-      window.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchend', onTouchEnd);
-      window.removeEventListener('touchcancel', onCancel);
-    };
-  }, []);
 }
 
 /**
@@ -2461,27 +2184,5 @@ function SyncBlockedCard(props: {
         </Button>
       </div>
     </div>
-  );
-}
-
-function noticeIcon(kind: string): string {
-  if (kind.startsWith('program')) return 'copy';
-  if (kind.startsWith('role')) return 'shield-check';
-  return 'barbell';
-}
-
-/** In-product notices strip: assignment, role and trainer changes (AC-ROLE-10, AC-PLAN-11). */
-function NoticeStrip(props: { notices: Notice[]; onDismiss: (id: string) => void }) {
-  const { t } = useT();
-  return (
-    <>
-      {props.notices.map((n) => (
-        <div key={n.id} className="notice" role="status">
-          <Icon name={noticeIcon(n.kind)} />
-          <span className="notice-text">{t.noticeText(n.kind, n.actor, n.detail)}</span>
-          <IconButton icon="x" size="sm" label={t.dismiss} onClick={() => props.onDismiss(n.id)} />
-        </div>
-      ))}
-    </>
   );
 }

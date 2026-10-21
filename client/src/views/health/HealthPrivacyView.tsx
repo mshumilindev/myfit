@@ -37,6 +37,7 @@ import {
   useStore,
   useSupplements,
 } from '../../store';
+import { setHash } from '../../route';
 
 export interface HealthPrivacyViewProps {
   onBack: () => void;
@@ -175,10 +176,10 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
         <div className="hl-cnt">
           <ClientTrainerSharing
             onOpenLog={() => {
-              window.location.hash = '#/trainer/log';
+              setHash('#/trainer/log');
             }}
             onOpenTrainer={() => {
-              window.location.hash = '#/trainer';
+              setHash('#/trainer');
             }}
           />
           <Card emphasis="glass" pad="md" aria-live="polite">

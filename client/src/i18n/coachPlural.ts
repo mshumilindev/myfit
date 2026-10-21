@@ -1,5 +1,6 @@
 /** Plural helpers for the Coach dictionary (no imports from the dictionaries: they use these). */
-import type { LocaleId } from './index';
+// Same ids as `LocaleId` in ./index, declared here so the dictionaries can import this file without a cycle.
+type LocaleId = 'en' | 'uk' | 'pl' | 'lt' | 'et';
 
 export type PluralForms = Partial<Record<Intl.LDMLPluralRule, string>> & { other: string };
 

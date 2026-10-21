@@ -167,7 +167,7 @@ function AddedBadge({ on, t }: { on: boolean; t: Strings }) {
   );
 }
 
-function Badge({ item, t, flag }: { item: PickItem; t: Strings; flag?: ExerciseFlag['level'] }) {
+function XpBadge({ item, t, flag }: { item: PickItem; t: Strings; flag?: ExerciseFlag['level'] }) {
   if (flag === 'avoid' || flag === 'caution')
     return (
       <span className="xp-badge care">
@@ -508,7 +508,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
     const f = props.warmup ? flagOf(i.name) : 'ok';
     return (
       <>
-        {(f === 'avoid' || f === 'caution') && <Badge item={i} t={t} flag={f} />}
+        {(f === 'avoid' || f === 'caution') && <XpBadge item={i} t={t} flag={f} />}
         {!props.warmup && <AddedBadge on={addedKeys.has(i.key)} t={t} />}
       </>
     );
@@ -533,7 +533,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
           <span className="xp-card-meta">{itemMeta(t, i, plain)}</span>
         </span>
       </Card>
-      {plain ? plainBadges(i) : <Badge item={i} t={t} flag={flagOf(i.name)} />}
+      {plain ? plainBadges(i) : <XpBadge item={i} t={t} flag={flagOf(i.name)} />}
       <InfoButton onClick={() => openInfo(i)} label={t.detailsAction} />
     </div>
   );
@@ -555,7 +555,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
         ) : suggestedKeys.has(i.key) && !i.doneToday ? (
           <span className="xp-badge sug">{t.pickSuggestedTag}</span>
         ) : (
-          <Badge item={i} t={t} flag={flagOf(i.name)} />
+          <XpBadge item={i} t={t} flag={flagOf(i.name)} />
         )}
       </Card>
       <InfoButton onClick={() => openInfo(i)} label={t.detailsAction} />
