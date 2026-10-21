@@ -117,7 +117,7 @@ export function ManagerClientsScreen({
         slots={false}
         subtitle={tm.mcSub(rows.length, ready)}
         actions={
-          <Button variant="primary" icon="user-plus" onClick={() => setInviting(true)}>
+          <Button variant="primary" icon="users" onClick={() => setInviting(true)}>
             {tm.icButton}
           </Button>
         }

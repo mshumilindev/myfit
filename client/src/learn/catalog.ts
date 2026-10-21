@@ -532,8 +532,10 @@ export function canSee(l: Lesson, role: ViewerRole): boolean {
 }
 
 /** The topics + lessons a given role may see (topics with no visible lessons drop). */
-export function catalogForRole(role: ViewerRole): Topic[] {
-  return CATALOG.map((t) => ({ ...t, lessons: t.lessons.filter((l) => canSee(l, role)) })).filter(
+/** A manager (team role) reads the lessons a member reads. */
+export function catalogForRole(role: ViewerRole | 'manager'): Topic[] {
+  const seen = role === 'manager' ? 'member' : role;
+  return CATALOG.map((t) => ({ ...t, lessons: t.lessons.filter((l) => canSee(l, seen)) })).filter(
     (t) => t.lessons.length > 0,
   );
 }

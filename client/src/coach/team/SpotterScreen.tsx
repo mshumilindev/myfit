@@ -25,7 +25,7 @@ const ICON: Record<SpotterItem['kind'], string> = {
   'removal-request': 'minus-circle',
   'removal-answer': 'check-circle',
   'manager-move': 'swap',
-  team: 'user-plus',
+  team: 'users',
   unmarked: 'clock',
 };
 

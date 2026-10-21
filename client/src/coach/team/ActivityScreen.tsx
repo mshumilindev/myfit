@@ -44,7 +44,7 @@ const KIND_ICON: Record<ActivityRow['kind'], string> = {
   'session-missed': 'warning-circle',
   'session-cancelled': 'x-circle',
   'session-edited': 'calendar-dots',
-  'member-added': 'user-plus',
+  'member-added': 'users',
   'member-removed': 'minus-circle',
   'member-left': 'sign-out',
   'client-invite': 'envelope',

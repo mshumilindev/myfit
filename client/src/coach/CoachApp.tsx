@@ -308,7 +308,7 @@ export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
     id: props.userId ?? currentUid(),
     name: props.name,
   });
-  // A manager opens only the schedule, clients and team: any other deep link lands on the schedule.
+  // A manager opens only the schedule, clients and team; every other deep link lands on the schedule.
   const outOfBounds = props.role === 'manager' && !managerMayOpen(route);
   useEffect(() => {
     if (outOfBounds) navigate(MANAGER_HOME_ROUTE);

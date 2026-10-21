@@ -95,7 +95,7 @@ export function TeamScreen({
           me.role === 'trainer' ? tm.tmSubTrainer(members.length) : tm.tmSubManager(members.length)
         }
         actions={
-          <Button variant="primary" icon="user-plus" onClick={() => setDialog({ kind: 'add' })}>
+          <Button variant="primary" icon="users" onClick={() => setDialog({ kind: 'add' })}>
             {addLabel}
           </Button>
         }

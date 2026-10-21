@@ -246,3 +246,10 @@ export function readLastCoachRoute(): CoachRoute {
 export function coachEntryHash(): string {
   return coachHash(readLastCoachRoute());
 }
+
+/** The hash that opens one client in Coach; the target is remembered too, so a reload or a mode switch lands on that client. */
+export function coachClientHash(cid: string): string {
+  const route = { screen: 'client' as const, cid };
+  rememberCoachRoute(route);
+  return coachHash(route);
+}
