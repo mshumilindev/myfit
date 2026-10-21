@@ -40,6 +40,7 @@ import {
 import { currentUid } from '../api';
 import { coachIsUnconfigured, useCoachBackendStatus } from './data/backend';
 import { CoachBackendFailed, NotConfigured } from './BackendNotice';
+import type { CoachProblem } from './data/problem';
 import { ChatDock } from './chat/ChatDock';
 import { useLiveWidget } from './screens/live/useLiveWidget';
 import { useCoachRoute } from './useCoachRoute';
@@ -65,6 +66,15 @@ export interface CoachShellProps {
   onOpenShell: () => void;
   /** Unread of the shared feed (Coach has no bell): shown on the rail's Apps button. */
   notifUnread?: number;
+  /**
+   * Where the real backend stands. The shell (rail, header, tab bar, More) is ALWAYS there; only the main area waits:
+   * a quiet skeleton while the adapters install, the problem state with Retry when they could not. Omitted = ready.
+   */
+  backend?: {
+    status: 'ready' | 'loading' | 'failed';
+    problem: CoachProblem | null;
+    retry: () => void;
+  };
 }
 
 type TabId = ScreenId | 'more';
@@ -80,13 +90,17 @@ export function CoachShell({
   onOpenProfile,
   onOpenShell,
   notifUnread = 0,
+  backend,
 }: CoachShellProps) {
   const { c } = useCoachT();
   const { tm } = useTeamT();
   const { t } = useT();
   const desktop = useMinWidth(COACH_BREAKPOINT);
   const wide = useMinWidth(COACH_WIDE_BREAKPOINT);
-  const unread = useCoachUnread();
+  const ready = !backend || backend.status === 'ready';
+  // Nothing from the ports shows before they are the real ones: the badge and the live pill wait with the main area.
+  const liveRaw = useCoachUnread();
+  const unread = ready ? liveRaw : 0;
   // trainers: open team requests (a manager asks to remove a client) show on Agenda, where they are answered
   const teamAsks = useTeamRequests(undefined, role !== 'manager').requests.length;
   const active = navScreenOf(route);
@@ -115,7 +129,8 @@ export function CoachShell({
 
   // Header slots (live pill, search, bell, avatar): what sits at the right edge of every page header.
   const { r } = useRosterT();
-  const liveWidget = useLiveWidget(onNavigate);
+  const liveRawWidget = useLiveWidget(onNavigate);
+  const liveWidget = ready ? liveRawWidget : null;
   const chrome = useMemo<CoachChrome>(
     () => ({
       desktop,
@@ -246,13 +261,29 @@ export function CoachShell({
 
       <main id="co-main" ref={mainRef} tabIndex={-1} className="co-main">
         <CoachChromeProvider value={chrome}>
-          <CoachScreenBoundary route={route}>
-            <CoachScreen route={route} onNavigate={onNavigate} manager={manager} />
-          </CoachScreenBoundary>
+          {ready ? (
+            <CoachScreenBoundary route={route}>
+              <CoachScreen route={route} onNavigate={onNavigate} manager={manager} />
+            </CoachScreenBoundary>
+          ) : backend.status === 'failed' ? (
+            <CoachBackendFailed
+              onRetry={backend.retry}
+              onBack={onExitToWorkouts}
+              problem={backend.problem ?? 'unknown'}
+            />
+          ) : (
+            <div aria-busy="true">
+              <Page>
+                <SkeletonRows rows={6} />
+              </Page>
+            </div>
+          )}
         </CoachChromeProvider>
       </main>
 
-      {wide && route.screen !== 'chat' && <ChatDock unread={unread} onNavigate={onNavigate} />}
+      {ready && wide && route.screen !== 'chat' && (
+        <ChatDock unread={unread} onNavigate={onNavigate} />
+      )}
 
       {!desktop && !threadOpen && (
         <TabBar<TabId>
@@ -290,7 +321,6 @@ export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
   useEffect(() => {
     if (outOfBounds) navigate(MANAGER_HOME_ROUTE);
   }, [outOfBounds, navigate]);
-  const ready = status === 'ready';
   // A production build with no backend configured: say so, render no client data (never the sample fixtures).
   if (coachIsUnconfigured())
     return (
@@ -300,31 +330,14 @@ export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
         </main>
       </div>
     );
-  // The real backend could not be installed: an error with Retry, never the sample clients.
-  if (status === 'failed')
-    return (
-      <div className="app-coach co-shell apex-app">
-        <main className="co-main" id="co-main">
-          <CoachBackendFailed
-            onRetry={retry}
-            onBack={props.onExitToWorkouts}
-            problem={problem ?? 'unknown'}
-          />
-        </main>
-      </div>
-    );
-  // Never a blank page while the real backend installs its adapters (milliseconds, no network): a quiet skeleton.
-  if (!ready)
-    return (
-      <div className="app-coach co-shell apex-app">
-        <main className="co-main" aria-busy="true">
-          <Page>
-            <SkeletonRows rows={6} />
-          </Page>
-        </main>
-      </div>
-    );
+  // The shell is always mounted (like every other app); the real backend installs in the background and only the main area
+  // shows its state: a quiet skeleton while loading, the problem with Retry on a failure (never sample clients).
   return (
-    <CoachShell {...props} route={outOfBounds ? MANAGER_HOME_ROUTE : route} onNavigate={navigate} />
+    <CoachShell
+      {...props}
+      route={outOfBounds ? MANAGER_HOME_ROUTE : route}
+      onNavigate={navigate}
+      backend={{ status, problem, retry }}
+    />
   );
 }
