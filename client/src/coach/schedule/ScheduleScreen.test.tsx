@@ -264,3 +264,23 @@ describe('Schedule legend filters', () => {
     expect(b.getAttribute('title')).toBe(b.getAttribute('aria-label'));
   });
 });
+
+describe('Schedule screen: a manager whose clients have not delegated yet (SPO-202)', () => {
+  it('says how many clients wait for their app; a trainer sees no such note', async () => {
+    const { configureManagerClients, createStaticManagerClients } =
+      await import('../team/managerClients');
+    const { MANAGER_CLIENTS } = await import('../team/__fixtures__/managerClients');
+    const { teamEn } = await import('../../i18n/coachTeam.en');
+    mount();
+    await waitFor(() => expect(blocks().length).toBeGreaterThan(8));
+    expect(screen.queryByText(teamEn.mcPending(5))).toBeNull();
+    cleanup();
+    configureManagerClients(createStaticManagerClients(MANAGER_CLIENTS));
+    try {
+      mount();
+      expect(await screen.findByText(teamEn.mcPending(5))).toBeTruthy();
+    } finally {
+      configureManagerClients(null);
+    }
+  });
+});
