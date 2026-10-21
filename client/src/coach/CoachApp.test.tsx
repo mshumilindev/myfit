@@ -78,7 +78,7 @@ vi.mock('../components/Avatar', () => ({
   ),
 }));
 
-const SEVEN = [
+const EIGHT = [
   c.navAgenda,
   c.navClients,
   c.navSchedule,
@@ -86,6 +86,7 @@ const SEVEN = [
   c.navDecisions,
   c.navPrograms,
   c.navChat,
+  c.navTeam,
 ];
 const navLabels = () =>
   [...screen.getByRole('complementary').querySelectorAll('.rail-nav > .rail-item')].map(
@@ -96,15 +97,15 @@ const footLabels = () =>
     b.getAttribute('aria-label'),
   );
 
-describe('rail: exactly the seven design items; Apps pinned in the foot; More only on overflow', () => {
+describe('rail: exactly the eight design items (seven + Team); Apps pinned in the foot; More only on overflow', () => {
   beforeEach(() => installRailMeasure(900));
   afterEach(uninstallRailMeasure);
 
-  it('1440, tall: seven nav items (no Live / Signals / Apps among them), foot = Apps, avatar; no More', () => {
+  it('1440, tall: eight nav items (no Live / Signals / Apps among them), foot = Apps, avatar; no More', () => {
     setViewport(1440);
     const onShell = vi.fn();
     render(<Harness onShell={onShell} />);
-    expect(navLabels()).toEqual(SEVEN);
+    expect(navLabels()).toEqual(EIGHT);
     expect(footLabels()).toEqual([c.navApps, c.railProfile]);
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
     for (const l of [c.navLive, c.navSignals])
@@ -116,31 +117,31 @@ describe('rail: exactly the seven design items; Apps pinned in the foot; More on
     expect(onShell).toHaveBeenCalledTimes(1);
   });
 
-  it('exact fit (7 x 69.6 - 5.6 = 481.6) shows no More; one px less moves the trailing two into More', () => {
+  it('exact fit (8 x 69.6 - 5.6 = 551.2) shows no More; one px less moves the trailing two into More', () => {
     setViewport(1440);
-    setRailHeight(482);
+    setRailHeight(552);
     render(<Harness />);
-    expect(navLabels()).toEqual(SEVEN);
+    expect(navLabels()).toEqual(EIGHT);
     expect(footLabels()).toEqual([c.navApps, c.railProfile]);
-    setRailHeight(481);
-    expect(navLabels()).toEqual(SEVEN.slice(0, 5));
+    setRailHeight(551);
+    expect(navLabels()).toEqual(EIGHT.slice(0, 6));
     // More sits in the nav column, right below the last visible nav item; the foot is only Apps + avatar.
     expect(footLabels()).toEqual([c.navApps, c.railProfile]);
     const kids = [...document.querySelectorAll('.rail-nav > *')];
-    expect(kids).toHaveLength(6);
-    expect(kids[5].classList.contains('rail-more')).toBe(true);
-    expect(kids[4].textContent).toContain(c.navDecisions);
+    expect(kids).toHaveLength(7);
+    expect(kids[6].classList.contains('rail-more')).toBe(true);
+    expect(kids[5].textContent).toContain(c.navPrograms);
   });
 
   it('300: More (right below the last visible nav item) lists only the overflowed nav items, in order, no Apps, no account', () => {
     setViewport(1440);
     setRailHeight(300);
     render(<Harness />);
-    expect(navLabels()).toEqual(SEVEN.slice(0, 3));
+    expect(navLabels()).toEqual(EIGHT.slice(0, 3));
     fireEvent.click(screen.getByRole('button', { name: c.navMore }));
     const dlg = screen.getByRole('dialog', { name: c.navMore });
     expect([...dlg.querySelectorAll('button.uirow')].map((b) => b.textContent)).toEqual(
-      SEVEN.slice(3),
+      EIGHT.slice(3),
     );
     expect(within(dlg).queryByRole('button', { name: c.navApps })).toBeNull();
     expect(within(dlg).queryByText('Iryna Koval')).toBeNull();
@@ -166,10 +167,10 @@ describe('rail: exactly the seven design items; Apps pinned in the foot; More on
     setRailHeight(300);
     expect(screen.getByRole('button', { name: c.navMore })).toBeTruthy();
     setRailHeight(300);
-    expect(navLabels()).toEqual(SEVEN.slice(0, 3));
+    expect(navLabels()).toEqual(EIGHT.slice(0, 3));
     setRailHeight(900);
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
-    expect(navLabels()).toEqual(SEVEN);
+    expect(navLabels()).toEqual(EIGHT);
   });
 
   it('More has a menu name, aria-haspopup, aria-expanded; a destination navigates, closes it and lights More', async () => {
@@ -210,8 +211,8 @@ describe('rail: exactly the seven design items; Apps pinned in the foot; More on
     setViewport(1024);
     setRailHeight(300);
     render(<Harness />);
-    // compact tile 44, pitch 49.6: 7 fit in 342; at 300 five stay.
-    expect(navLabels()).toEqual(SEVEN.slice(0, 5));
+    // compact tile 44, pitch 49.6: 8 fit in 392; at 300 five stay.
+    expect(navLabels()).toEqual(EIGHT.slice(0, 5));
     const rail = screen.getByRole('complementary');
     expect(
       within(rail).getByRole('button', { name: c.navMore }).querySelector('.rail-tip')?.textContent,
@@ -219,7 +220,7 @@ describe('rail: exactly the seven design items; Apps pinned in the foot; More on
     expect(
       within(rail).getByRole('button', { name: c.navApps }).querySelector('.rail-tip')?.textContent,
     ).toBe(c.navApps);
-    setRailHeight(342);
+    setRailHeight(392);
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
   });
 
@@ -236,8 +237,8 @@ describe('rail: exactly the seven design items; Apps pinned in the foot; More on
       for (const t of tiles) expect(t.getAttribute('style')).toBeNull();
       seen.push(tiles.length);
     }
-    // ...the count is the only thing that follows the height (500 still fits 7: 481.6).
-    expect(seen).toEqual([7, 7, 7, 7]);
+    // ...the count is the only thing that follows the height (600 still fits 8: 551.2; 500 keeps 6 and More).
+    expect(seen).toEqual([8, 8, 8, 6]);
     setRailHeight(200);
     expect(navLabels()).toHaveLength(1);
     // ...and CSS pins the original tiles: labelled 72x64, compact 44, flex none, top aligned, 5.6 gap.
@@ -299,6 +300,7 @@ describe('phone More sheet', () => {
       c.navPrograms,
       c.navLive,
       c.navSignals,
+      c.navTeam,
       c.navApps,
     ]);
     // the account block follows: Profile pill (no Sign out without a registered session)
@@ -327,7 +329,7 @@ describe('theme', () => {
 });
 
 describe('rail (>= 768)', () => {
-  it('1440: labelled 88px rail, seven items with visible labels, no tab bar', () => {
+  it('1440: labelled 88px rail, eight items with visible labels, no tab bar', () => {
     setViewport(1440);
     const { container } = render(<Harness />);
     const rail = screen.getByRole('complementary', { name: c.navLandmark });
@@ -343,6 +345,7 @@ describe('rail (>= 768)', () => {
       c.navDecisions,
       c.navPrograms,
       c.navChat,
+      c.navTeam,
       c.navApps,
     ]);
     expect(container.querySelector('.tabbar')).toBeNull();
@@ -361,6 +364,7 @@ describe('rail (>= 768)', () => {
       c.navDecisions,
       c.navPrograms,
       c.navChat,
+      c.navTeam,
     ]) {
       const btn = within(rail).getByRole('button', { name });
       expect(btn.getAttribute('title')).toBeNull();

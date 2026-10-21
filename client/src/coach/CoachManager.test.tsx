@@ -79,7 +79,7 @@ describe('manager shell (SPO-196)', () => {
       within(tabbar)
         .getAllByRole('button')
         .map((b) => b.textContent),
-    ).toEqual([c.navSchedule, c.navClients, c.navTeam]);
+    ).toEqual([c.navClients, c.navSchedule, c.navTeam]);
     expect(queryByText(c.navMore)).toBeNull();
     expect(container.textContent).toContain(c.modeManager);
   });

@@ -29,7 +29,7 @@ function TeamStoryFrame({
   }, [options, manager]);
   return (
     <CoachShell
-      role="trainer"
+      role={manager ? 'manager' : 'trainer'}
       name={manager ? 'Irina Melnyk' : 'Olena Kovalenko'}
       route={route}
       onNavigate={setRoute}

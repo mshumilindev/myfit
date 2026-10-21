@@ -120,11 +120,11 @@ export const MORE_SCREENS: readonly CoachScreen[] = [
   'signals',
 ];
 
-/** What a manager may open: the schedule, the client list (and one client) and the team. Nothing else is theirs. */
-export const MANAGER_RAIL_SCREENS: readonly CoachScreen[] = ['schedule', 'clients', 'team'];
+/** What a manager may open: the client list (and one client), the schedule and the team. Nothing else is theirs. Clients first: it is their home (boards D29 / P15). */
+export const MANAGER_RAIL_SCREENS: readonly CoachScreen[] = ['clients', 'schedule', 'team'];
 /** Pages of the Team area (opened from the Team page), open to a manager as well. */
 export const TEAM_SUB_SCREENS: readonly CoachScreen[] = ['activity', 'roles', 'spotter'];
-export const MANAGER_HOME_ROUTE: CoachRoute = { screen: 'schedule' };
+export const MANAGER_HOME_ROUTE: CoachRoute = { screen: 'clients' };
 
 export function managerMayOpen(route: CoachRoute): boolean {
   if (route.screen === 'client') return route.tab !== 'live';

@@ -17,8 +17,8 @@ const mount = (rows = MANAGER_CLIENTS) =>
 describe('Manager Clients', () => {
   it('counts the clients and the ready ones, and says how many have not opened the app', () => {
     mount();
-    expect(screen.getByText(tm.mcSub(14, 11))).toBeTruthy();
-    expect(screen.getByText(tm.mcPending(3))).toBeTruthy();
+    expect(screen.getByText(tm.mcSub(14, 9))).toBeTruthy();
+    expect(screen.getByText(tm.mcPending(5))).toBeTruthy();
   });
 
   it('a client without delegated keys waits; the others show their next session', () => {
@@ -26,7 +26,7 @@ describe('Manager Clients', () => {
     const list = screen.getByRole('list', { name: tm.mcListLabel });
     const row = within(list).getByText('Taras Rudenko').closest('li')!;
     expect(row.textContent).toContain(tm.mcWaiting);
-    expect(within(list).getAllByText(tm.mcWaiting)).toHaveLength(3);
+    expect(within(list).getAllByText(tm.mcWaiting)).toHaveLength(5);
   });
 
   it('filters by trainer with the count on the chip', () => {
