@@ -16,6 +16,10 @@ export interface LockerWallProps {
   openId?: string;
   /** Text of the chip on the open locker. */
   openLabel?: string;
+  /** The person being signed in right now: that locker shows a spinner around the avatar and the others are disabled. */
+  busyId?: string;
+  /** Spoken status while `busyId` is set ("Signing in…"). */
+  busyLabel?: string;
   /** Accessible name of the whole wall. */
   label: string;
   /** Accessible name of one locker (the visible number is decoration). */
@@ -34,20 +38,24 @@ export function LockerWall({
   activeId,
   openId,
   openLabel,
+  busyId,
+  busyLabel,
   label,
   lockerLabel,
   onSelect,
 }: LockerWallProps) {
   return (
-    <div className="uilw" role="group" aria-label={label}>
+    <div className="uilw" role="group" aria-label={label} aria-busy={busyId ? true : undefined}>
       {people.map((p, i) => {
         const open = p.id === openId;
         const on = p.id === activeId;
+        const busy = p.id === busyId;
         return (
           <button
             key={p.id}
             type="button"
-            className={`uilw-locker${on ? ' is-on' : ''}${open ? ' is-open' : ''}`}
+            className={`uilw-locker${on ? ' is-on' : ''}${open ? ' is-open' : ''}${busy ? ' is-busy' : ''}`}
+            disabled={busyId !== undefined && !busy}
             aria-label={lockerLabel(p.name, i)}
             aria-pressed={on}
             onClick={() => onSelect(p.id)}
@@ -59,6 +67,7 @@ export function LockerWall({
             </span>
             <span className="uilw-av" aria-hidden="true">
               <Avatar name={p.name} src={p.avatar} size={44} />
+              {busy && <span className="uilw-spin" aria-hidden="true" />}
             </span>
             <span className="uilw-num" aria-hidden="true">
               {String(i + 1).padStart(2, '0')}
@@ -66,6 +75,11 @@ export function LockerWall({
             <span className="uilw-tag">{firstName(p.name)}</span>
             <i className="uilw-handle" aria-hidden="true" />
             {open && openLabel && <span className="uilw-sr">{openLabel}</span>}
+            {busy && busyLabel && (
+              <span className="uilw-sr" role="status">
+                {busyLabel}
+              </span>
+            )}
           </button>
         );
       })}

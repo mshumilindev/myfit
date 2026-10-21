@@ -187,6 +187,8 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
             activeId={pickedId ?? undefined}
             openId={person?.uid}
             openLabel={t.authLockerOpen}
+            busyId={(bio || busy) && person ? person.uid : undefined}
+            busyLabel={t.signingIn}
             label={t.authWallLabel}
             lockerLabel={(n, i) => t.authLockerLabel(n, i + 1)}
             onSelect={pick}

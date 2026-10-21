@@ -48,4 +48,25 @@ describe('LockerWall', () => {
       screen.getByRole('button', { name: 'Anna Koval, locker 1' }).getAttribute('aria-pressed'),
     ).toBe('false');
   });
+
+  it('shows progress on the person being signed in and disables the other lockers', () => {
+    render(<LockerWall {...base} busyId="b" busyLabel="Signing in…" />);
+    const b = screen.getByRole('button', { name: 'Boris, locker 2' });
+    expect(b.className).toContain('is-busy');
+    expect(b.querySelector('.uilw-spin')).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toBe('Signing in…');
+    expect((b as HTMLButtonElement).disabled).toBe(false);
+    expect(
+      (screen.getByRole('button', { name: 'Anna Koval, locker 1' }) as HTMLButtonElement).disabled,
+    ).toBe(true);
+    expect(screen.getByRole('group').getAttribute('aria-busy')).toBe('true');
+  });
+
+  it('nothing is busy or disabled by default', () => {
+    render(<LockerWall {...base} />);
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(
+      (screen.getByRole('button', { name: 'Boris, locker 2' }) as HTMLButtonElement).disabled,
+    ).toBe(false);
+  });
 });

@@ -13,14 +13,8 @@ import { temperIndex } from '../atlas/types';
 import { useEffect, useState, type ReactNode } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { deleteObject, ref } from 'firebase/storage';
-import {
-  HttpError,
-  callFn,
-  currentUid,
-  renewSessionWithToken,
-  setUsername,
-  trackMutation,
-} from '../api';
+import { changePassword } from '../accounts/password';
+import { HttpError, callFn, currentUid, setUsername, trackMutation } from '../api';
 import {
   offlineHydrate,
   offlineLoad,
@@ -357,12 +351,7 @@ export function ProfileView({
     setSavingPassword(true);
     setPasswordError(null);
     try {
-      const r = await callFn<{ token?: string } | undefined>('changePassword', {
-        currentPassword,
-        newPassword,
-      });
-      // Every refresh token ended with the old password: this device signs back in with the fresh one.
-      if (r?.token) await renewSessionWithToken(r.token);
+      await changePassword(currentPassword, newPassword);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');

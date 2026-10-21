@@ -53,6 +53,7 @@
   opacity: 0.9;
 }
 .uilw-av {
+  position: relative;
   display: inline-flex;
   flex: none;
   border-radius: var(--r-round, 50%);
@@ -135,4 +136,24 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* Sign-in in progress: a ring turns around the avatar of the tapped locker. */
+.uilw-spin {
+  position: absolute;
+  inset: calc(var(--s-4) * -1);
+  border-radius: var(--r-round, 50%);
+  border: 2px solid var(--color-accent);
+  border-top-color: transparent;
+  animation: uilw-spin 0.8s linear infinite;
+}
+@keyframes uilw-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .uilw-spin {
+    animation-duration: 3s;
+  }
 }
