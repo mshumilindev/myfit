@@ -124,13 +124,21 @@ describe('push matrix: the TRAINER', () => {
     const inv2 = await teamInvite(ctx(), owner, { email: 'third@example.com' });
     expect(
       await got(() =>
-        teamDecline(ctx(), { uid: 'x9', role: 'member' }, { inviteId: inv2.inviteId }),
+        teamDecline(
+          ctx(),
+          { uid: 'x9', role: 'member', email: 'third@example.com' },
+          { inviteId: inv2.inviteId },
+        ),
       ),
     ).toEqual(['trainer: coach-team']);
     // a repeated decline changes nothing and tells nobody again
     expect(
       await got(() =>
-        teamDecline(ctx(), { uid: 'x9', role: 'member' }, { inviteId: inv2.inviteId }),
+        teamDecline(
+          ctx(),
+          { uid: 'x9', role: 'member', email: 'third@example.com' },
+          { inviteId: inv2.inviteId },
+        ),
       ),
     ).toEqual([]);
     expect(await got(() => teamLeave(ctx(), mgr))).toEqual([
@@ -190,7 +198,11 @@ describe('push matrix: the MANAGER', () => {
     const inv = await teamInvite(ctx(), mgr, { email: 'andriy@example.com' });
     expect(
       await got(() =>
-        acceptWithMail(ctx(), { uid: 't2', role: 'trainer' }, { inviteId: inv.inviteId }),
+        acceptWithMail(
+          ctx(),
+          { uid: 't2', role: 'trainer', email: 'andriy@example.com' },
+          { inviteId: inv.inviteId },
+        ),
       ),
     ).toEqual(['manager: coach-team']);
     expect(await got(() => teamRemoveMember(ctx(), owner, { uid: 'm1' }))).toEqual([
@@ -203,7 +215,11 @@ describe('push matrix: the MANAGER', () => {
     const inv = await teamInvite(ctx(), mgr, { email: 'andriy@example.com' });
     expect(
       await got(() =>
-        teamDecline(ctx(), { uid: 't2', role: 'trainer' }, { inviteId: inv.inviteId }),
+        teamDecline(
+          ctx(),
+          { uid: 't2', role: 'trainer', email: 'andriy@example.com' },
+          { inviteId: inv.inviteId },
+        ),
       ),
     ).toEqual(['manager: coach-team']);
   });

@@ -398,6 +398,8 @@ export async function teamDecline(
   body: Record<string, unknown>,
 ): Promise<{ ok: true }> {
   const i = await loadInvite(ctx, body.inviteId);
+  // the same gate as accepting: a link written for an e-mail can be declined only by that account (SPO-267 pass 2)
+  if (i.emailLower && actor.email !== i.emailLower) fail('permission-denied', 'wrong-email');
   if (i.status === 'pending') {
     await ctx.kv.merge(`teamInvites/${i.id}`, { status: 'declined' });
     await notice(
@@ -499,8 +501,15 @@ export async function teamRemoveMember(
   const { teamId, owner } = await myTeam(ctx, actor);
   if (!owner) fail('permission-denied', 'owner-only');
   const target = (await ctx.kv.get(`teams/${teamId}/members/${uid}`)) as MemberRec | null;
-  if (!target || target.status !== 'active') return fail('not-found', 'no-member');
-  if (target.role !== 'manager') fail('permission-denied', 'managers-only');
+  if (!target || target.status === undefined) return fail('not-found', 'no-member');
+  // a removal that was cut short (timeout) is finished by repeating it: the cleanup is idempotent (SPO-267 pass 2)
+  if (target.status === 'removed') {
+    await dropDelegations(ctx, teamId, target);
+    return { ok: true };
+  }
+  if (target.status !== 'active') return fail('not-found', 'no-member');
+  // the owner may remove any other member: a trainer someone else added is not locked in the owner's team
+  if (target.owner) fail('permission-denied', 'owner-cannot-leave');
   await endMembership(ctx, teamId, target, actor.uid, 'removed');
   return { ok: true };
 }

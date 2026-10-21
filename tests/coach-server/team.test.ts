@@ -299,7 +299,10 @@ describe('accepting', () => {
 
   it('decline closes the invite and tells the inviter', async () => {
     const r = await inviteManager();
-    await teamDecline(ctx(), mgr, { inviteId: r.inviteId });
+    expect(await code(teamDecline(ctx(), mgr, { inviteId: r.inviteId }))).toBe(
+      'permission-denied:wrong-email',
+    );
+    await teamDecline(ctx(), { ...mgr, email: 'irina@example.com' }, { inviteId: r.inviteId });
     expect(await code(acceptWithMail(ctx(), mgr, { inviteId: r.inviteId }))).toBe(
       'failed-precondition:invite-closed',
     );
@@ -314,7 +317,7 @@ describe('removing and leaving', () => {
       'permission-denied:owner-only',
     );
     expect(await code(teamRemoveMember(ctx(), owner, { uid: 't1' }))).toBe(
-      'permission-denied:managers-only',
+      'permission-denied:owner-cannot-leave',
     );
     await teamRemoveMember(ctx(), owner, { uid: 'm1' });
     expect(await kv.get('teams/t1/members/m1')).toMatchObject({ status: 'removed' });
@@ -323,7 +326,25 @@ describe('removing and leaving', () => {
     // the removed manager is no longer in the team and can read nothing of it
     expect(await code(teamRead(ctx(), mgrNow))).toBe('permission-denied:not-in-team');
     expect((await teamRead(ctx(), owner)).members.map((m) => m.uid)).toEqual(['t1']);
-    expect(await code(teamRemoveMember(ctx(), owner, { uid: 'm1' }))).toBe('not-found:no-member');
+    // repeating a removal only finishes the clean-up (a cut-short one is not lost); an unknown uid is still unknown
+    expect(await code(teamRemoveMember(ctx(), owner, { uid: 'm1' }))).toBe('ok');
+    expect(await code(teamRemoveMember(ctx(), owner, { uid: 'zz9' }))).toBe('not-found:no-member');
+  });
+
+  it('the owner can remove a trainer somebody else added, and repeating it re-flags the keys for rotation', async () => {
+    const r = await teamInvite(ctx(), owner, { email: 'tr@example.com', role: 'trainer' });
+    await teamAccept(ctx(), { ...trainer2, email: 'tr@example.com' }, { inviteId: r.inviteId });
+    const cid = conversationId(new Uint8Array(32), 'c1', 't2');
+    await kv.set('coaching/c1', { clientId: 'c1', trainerId: 't2', status: 'active', keyEpoch: 1 });
+    await kv.set(`conversations/${cid}`, { keyEpoch: 1 });
+    await kv.set(`conversations/${cid}/delegations/m1`, { keyEpoch: 1 });
+    await teamRemoveMember(ctx(), owner, { uid: 't2' });
+    expect(await kv.get('teams/t1/members/t2')).toMatchObject({ status: 'removed' });
+    expect(await kv.get(`conversations/${cid}/delegations/m1`)).toBeNull();
+    // a cut-short removal: the flag is lost, repeating the call sets it again
+    await kv.merge(`conversations/${cid}`, { rotateDue: false });
+    await teamRemoveMember(ctx(), owner, { uid: 't2' });
+    expect(await kv.get(`conversations/${cid}`)).toMatchObject({ rotateDue: true });
   });
 
   it('anyone but the owner may leave on their own; the owner may not', async () => {
