@@ -1,12 +1,9 @@
 import { coachAdapter } from '../../data/backend';
-import { createUnavailableClientSpotterPort, type ClientSpotterPort } from './clientSpotterPort';
+import { createUnavailableClientSpotterPort } from './clientSpotterPort';
+import { clientSpotterPortOr, setClientSpotterPort } from './portSlot';
 
-let port: ClientSpotterPort | null = null;
+/** Install the real port (`install.ts`, through `portSlot.ts`) or a double (tests, stories); `null` forgets it (sign-out). */
+export const configureClientSpotter = setClientSpotterPort;
 
-/** Install the real port (`install.ts`) or a double (tests, stories); `null` forgets it (sign-out). */
-export function configureClientSpotter(p: ClientSpotterPort | null): void {
-  port = p;
-}
-
-export const getClientSpotterPort = (): ClientSpotterPort =>
-  (port ??= coachAdapter('clientSpotter', createUnavailableClientSpotterPort));
+export const getClientSpotterPort = () =>
+  clientSpotterPortOr(() => coachAdapter('clientSpotter', createUnavailableClientSpotterPort));

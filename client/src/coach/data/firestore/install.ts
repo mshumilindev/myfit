@@ -15,7 +15,7 @@ import type { CoachKeyRecord } from '../../../vaultShare';
 import type { Activity, Workout } from '../../../types';
 import { configureClientCoach } from '../../client/data/config';
 import { createFirestoreClientSpotterPort } from '../../client/spotter/clientSpotterPort';
-import { configureClientSpotter } from '../../client/spotter/config';
+import { setClientSpotterPort as configureClientSpotter } from '../../client/spotter/portSlot';
 import { withLocalCache } from '../../chat/cachedPort';
 import { getSealedLocal } from '../../chat/sealedLocal';
 import { configureTrustPort } from '../../security/trustPort';
