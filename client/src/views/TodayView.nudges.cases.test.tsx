@@ -4,7 +4,6 @@ import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { setRole } from '../api';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
-import { __getStateForTests } from '../store';
 import type { StoreState } from '../store';
 import type { Workout } from '../types';
 import { assignment, m, openToday, resetTodayMocks } from './__fixtures__/todayMocks';

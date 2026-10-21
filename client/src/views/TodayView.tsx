@@ -74,7 +74,7 @@ import {
   backfillHomeSet,
   gymAtCurrentPosition,
 } from '../store';
-import { fmtDayMonth, fmtWeekday, fmtWeekdayDayMonth, fmtWeekdayShort, useT } from '../i18n';
+import { fmtWeekday, fmtWeekdayDayMonth, fmtWeekdayShort, useT } from '../i18n';
 import { DayHistorySheet } from '../components/DayHistorySheet';
 import { BackfillSheet, StartSheet } from '../components/StartSheet';
 import { WeightSheet } from '../components/BodyMetrics';

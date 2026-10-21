@@ -63,8 +63,6 @@ vi.mock('./vaultIO', async (orig) => {
 });
 import * as store from './store';
 import { setRole } from './api';
-import { vault } from './vaultIO';
-import { unsealDoc } from './encryptedDoc';
 import { CONDITION_CATALOG } from './data/conditionCatalog';
 import { weekStartDay, setWeekStartDay } from './weekStart';
 import { activityPins, setActivityPins } from './activityPrefs';
@@ -73,22 +71,15 @@ import type { Gym } from './types';
 const KEY = CONDITION_CATALOG[0].key;
 const T0 = new Date('2026-03-04T10:00:00Z').getTime();
 const DAY = 86_400_000;
-const stub = vault as unknown as import('./autoVault').Vault;
 const st = () => store.__getStateForTests();
 const settle = async () => {
   for (let i = 0; i < 6; i++) await new Promise((r) => setTimeout(r, 8));
 };
 const at = (path: string) => fs.writes.filter((w) => w.path === path);
-const open = (w: { data: Record<string, unknown> }) =>
-  unsealDoc<Record<string, unknown>>(w.data, stub.material().key);
 const snap = (d: Record<string, unknown> | null) => ({
   exists: () => d !== null,
   data: () => d,
   docs: d ? [{ data: () => d }] : [],
-  metadata: { fromCache: false, hasPendingWrites: false },
-});
-const docsSnap = (ds: Record<string, unknown>[]) => ({
-  docs: ds.map((d) => ({ data: () => d })),
   metadata: { fromCache: false, hasPendingWrites: false },
 });
 const gymAt = (id: string, lat: number, lng: number): Gym => ({

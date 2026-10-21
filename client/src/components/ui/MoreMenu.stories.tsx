@@ -173,35 +173,37 @@ export const Locales: Story = {
 
 /** A row that opens a choose-one list inside the menu (Language): click, Enter or → opens it, Esc / ← / Back return. */
 export const LanguageSubmenu: Story = {
-  render: () => {
-    const [value, setValue] = useState('en');
-    return (
-      <MoreMenu
-        presentation="popover"
-        open
-        onClose={() => undefined}
-        anchorRef={{ current: null }}
-        title="More"
-        items={[
-          ...items,
-          {
-            id: 'language',
-            label: 'Language',
-            icon: 'globe',
-            onSelect: () => undefined,
-            submenu: {
-              title: 'Language',
-              value,
-              options: [
-                { id: 'en', label: 'English', icon: <span aria-hidden>🇬🇧</span> },
-                { id: 'uk', label: 'Українська', icon: <span aria-hidden>🇺🇦</span> },
-                { id: 'pl', label: 'Polski', icon: <span aria-hidden>🇵🇱</span> },
-              ],
-              onChange: setValue,
-            },
-          },
-        ]}
-      />
-    );
-  },
+  render: () => <LanguageSubmenuDemo />,
 };
+
+function LanguageSubmenuDemo() {
+  const [value, setValue] = useState('en');
+  return (
+    <MoreMenu
+      presentation="popover"
+      open
+      onClose={() => undefined}
+      anchorRef={{ current: null }}
+      title="More"
+      items={[
+        ...items,
+        {
+          id: 'language',
+          label: 'Language',
+          icon: 'globe',
+          onSelect: () => undefined,
+          submenu: {
+            title: 'Language',
+            value,
+            options: [
+              { id: 'en', label: 'English', icon: <span aria-hidden>🇬🇧</span> },
+              { id: 'uk', label: 'Українська', icon: <span aria-hidden>🇺🇦</span> },
+              { id: 'pl', label: 'Polski', icon: <span aria-hidden>🇵🇱</span> },
+            ],
+            onChange: setValue,
+          },
+        },
+      ]}
+    />
+  );
+}

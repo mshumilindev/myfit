@@ -79,9 +79,7 @@ describe('device flags', () => {
 
   it('declares only device-scoped flags today', async () => {
     const f = await load();
-    expect(f.FEATURE_FLAGS.map((x) => [x.id, x.scope])).toEqual([
-      ['nutrition', 'device'],
-    ]);
+    expect(f.FEATURE_FLAGS.map((x) => [x.id, x.scope])).toEqual([['nutrition', 'device']]);
   });
 });
 
