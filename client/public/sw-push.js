@@ -42,6 +42,18 @@ self.addEventListener('push', (event) => {
   } catch {
     d = { body: event.data ? event.data.text() : '' };
   }
+  // SPO-237: the server's silent `sync` push (a manager joined the team) carries no text. It is handed to the open page,
+  // which delegates the schedule keys; with no page open the next start does it. Nothing is shown. (Safari may revoke a
+  // subscription that keeps receiving silent pushes; the sync push is rare: once per client per joining manager.)
+  if (d.type === 'sync') {
+    event.waitUntil(
+      (async () => {
+        const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        for (const w of wins) w.postMessage({ type: 'coach-sync' });
+      })(),
+    );
+    return;
+  }
   event.waitUntil(
     (async () => {
       const chat = typeof d.tag === 'string' && d.tag.indexOf('coach-chat') === 0;
