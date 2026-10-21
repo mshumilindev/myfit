@@ -90,6 +90,7 @@ const ok = (
   o: { data?: Doc; db?: Record<string, Doc> } = {},
 ) => decide(rules, op, path, { auth, db: o.db ?? world(), data: o.data, time: 1_000_000 }).allowed;
 
+const ms = (o: Doc = {}): Doc => sched({ updatedBy: 'm1', ...o });
 const sched = (over: Doc = {}): Doc => ({
   clientId: 'c1',
   trainerId: 't1',
@@ -135,17 +136,17 @@ describe('manager: schedule (read/write) for the team, nothing else', () => {
   });
 
   it('writes the schedule only with the client trainer as trainerId and rev + 1', () => {
-    expect(ok('update', 'schedules/c1', mgr, { data: sched() })).toBe(true);
-    expect(ok('update', 'schedules/c1', mgr, { data: sched({ trainerId: 'm1' }) })).toBe(false);
-    expect(ok('update', 'schedules/c1', mgr, { data: sched({ rev: 3 }) })).toBe(false);
-    expect(ok('update', 'schedules/c1', mgr, { data: sched({ rev: 9 }) })).toBe(false);
+    expect(ok('update', 'schedules/c1', mgr, { data: ms() })).toBe(true);
+    expect(ok('update', 'schedules/c1', mgr, { data: ms({ trainerId: 'm1' }) })).toBe(false);
+    expect(ok('update', 'schedules/c1', mgr, { data: ms({ rev: 3 }) })).toBe(false);
+    expect(ok('update', 'schedules/c1', mgr, { data: ms({ rev: 9 }) })).toBe(false);
     expect(
-      ok('update', 'schedules/c9', mgr, { data: sched({ clientId: 'c9', trainerId: 't9' }) }),
+      ok('update', 'schedules/c9', mgr, { data: ms({ clientId: 'c9', trainerId: 't9' }) }),
     ).toBe(false);
-    expect(ok('update', 'schedules/c1', mgrOther, { data: sched() })).toBe(false);
+    expect(ok('update', 'schedules/c1', mgrOther, { data: ms() })).toBe(false);
     expect(
       ok('update', 'schedules/c2', mgr, {
-        data: sched({ clientId: 'c2', trainerId: 't2', rev: 2 }),
+        data: ms({ clientId: 'c2', trainerId: 't2', rev: 2 }),
       }),
     ).toBe(true);
     expect(ok('delete', 'schedules/c1', mgr)).toBe(false);
@@ -207,6 +208,45 @@ describe('manager: everything else about a client stays closed', () => {
     expect(ok('get', `conversations/${CID}/requests/r1`, mgr)).toBe(true);
     expect(ok('get', `conversations/${CID}/requests/r1`, mgrOther)).toBe(false);
     expect(ok('get', `conversations/${CID}/requests/r1`, stranger)).toBe(false);
+  });
+});
+
+describe('schedule writes: attribution, epoch, timing (SPO-267)', () => {
+  const t = (o: Doc = {}) => ({
+    starts: [1_700_000_000_000],
+    unmarked: [],
+    dueAt: 1_699_000_000_000,
+    ...o,
+  });
+  it('a manager must sign the write with their own uid and the current epoch', () => {
+    expect(ok('update', 'schedules/c1', mgr, { data: sched() })).toBe(false); // no updatedBy
+    expect(ok('update', 'schedules/c1', mgr, { data: sched({ updatedBy: 'm1' }) })).toBe(true);
+    expect(ok('update', 'schedules/c1', mgr, { data: sched({ updatedBy: 't1' }) })).toBe(false);
+    expect(
+      ok('update', 'schedules/c1', mgr, { data: sched({ updatedBy: 'm1', keyEpoch: 2 }) }),
+    ).toBe(false);
+    const db = world();
+    db['coaching/c1'] = { trainerId: 't1', status: 'active', keyEpoch: 2 };
+    expect(ok('update', 'schedules/c1', mgr, { db, data: sched({ updatedBy: 'm1' }) })).toBe(false);
+    expect(
+      ok('update', 'schedules/c1', mgr, { db, data: sched({ updatedBy: 'm1', keyEpoch: 2 }) }),
+    ).toBe(true);
+  });
+  it('the trainer may omit updatedBy but not forge it', () => {
+    expect(ok('update', 'schedules/c1', owner, { data: sched() })).toBe(true);
+    expect(ok('update', 'schedules/c1', owner, { data: sched({ updatedBy: 't1' }) })).toBe(true);
+    expect(ok('update', 'schedules/c1', owner, { data: sched({ updatedBy: 'm1' }) })).toBe(false);
+  });
+  it('timing holds integers only, bounded', () => {
+    const w = (timing: unknown) => ok('update', 'schedules/c1', owner, { data: sched({ timing }) });
+    expect(w(t())).toBe(true);
+    expect(w(t({ starts: ['Upper B'] }))).toBe(false);
+    expect(w(t({ starts: [{ gym: 'x' }] }))).toBe(false);
+    expect(w(t({ unmarked: [1.5e12, 'x'] }))).toBe(false);
+    expect(w(t({ starts: Array.from({ length: 13 }, (_, i) => 1 + i) }))).toBe(false);
+    expect(w(t({ dueAt: 'soon' }))).toBe(false);
+    expect(w(t({ dueAt: -1 }))).toBe(false);
+    expect(w(t({ gym: 'iron-yard' }))).toBe(false);
   });
 });
 

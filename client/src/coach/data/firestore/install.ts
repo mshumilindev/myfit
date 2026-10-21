@@ -340,6 +340,7 @@ export function installFirestoreManager(d: ManagerInstallDeps): () => void {
     uid: trainerOf,
     via: 'manager',
     viaName: d.manager.name,
+    writerUid: d.manager.id,
     now: () => d.fs.now(),
     cache: scheduleCacheOver(getSealedLocal(), d.manager.id),
   });
