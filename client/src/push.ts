@@ -13,7 +13,7 @@ import { httpsCallable } from 'firebase/functions';
 import { app, db, functions } from './firebase';
 import { currentUid } from './api';
 import { isAppleTouch } from './haptics';
-import { loadPrefs, type PushPrefs } from './pushPrefs';
+import { loadPrefs, type PushPrefs } from './pushPrefsStore';
 import { loadQuiet, type QuietHours } from './quietHours';
 
 const VAPID_KEY = import.meta.env.VITE_FCM_VAPID_KEY as string | undefined;

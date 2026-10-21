@@ -4,7 +4,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--s-8);
-  padding: 0 var(--s-16) var(--s-12) calc(var(--s-16) + 40px + var(--s-12));
+  padding: 0 var(--s-16) var(--s-12) calc(var(--s-16) + var(--s-40) + var(--s-12));
 }
 .sp-problem {
   margin: 0;

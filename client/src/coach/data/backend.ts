@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { classifyProblem, type CoachProblem } from './problem';
-import { coachTestDefault, coachTestHooks } from './testHooks';
+import { coachTestDefault, coachTestHooks, type CoachBackendMode } from './testHooks';
 
 /**
  * Where Coach gets its data, kept free of Firebase so the Gym entry can import it. There is ONE backend in every app build
@@ -13,7 +13,7 @@ import { coachTestDefault, coachTestHooks } from './testHooks';
  * There is no demo, no sample data, no localStorage override and no setter here. Unit tests, Storybook and the QA screenshot
  * build put test doubles in through `testHooks.ts` (see there); that door does not exist in an app build.
  */
-export type CoachBackendMode = 'firestore' | 'fixtures' | 'unconfigured';
+export type { CoachBackendMode } from './testHooks';
 
 export function coachBackendMode(): CoachBackendMode {
   if ((import.meta.env.VITE_COACH_BACKEND as string | undefined)?.trim() === 'off')
