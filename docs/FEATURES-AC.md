@@ -208,17 +208,39 @@ dateless-днів і prescription items; клієнт бачить активн�
 **Статус:** код, unit/component-тести і passkey e2e готові; функції й hosting задеплоєні (test, prod). Не перевірено: passkey
 наживо на реальному пристрої (Face ID / Touch ID / Windows Hello), сервер сесій на емуляторі, візуальний збіг із дизайнами.
 
+## F-11 Команда тренера і роль Manager (SPO-196)
+
+**Сценарій:** тренер додає менеджера (адмін-помічника) посиланням-запрошенням; менеджер бачить розклад клієнтів команди, просить перенос (запит), скасовує, відмічає done/missed, запрошує клієнтів і просить видалити клієнта; чату й чутливих даних не бачить. Закріплений read-only чат Spotter збирає запити й нагадування; push без вмісту. Фіча-флага немає, доступ за роллю. Spec: `docs/specs/team-manager.md`, рішення: `docs/adr/005-team-manager-key-delegation.md`.
+
+**AC** (докази; `[x]` лише з прогоном)
+
+- [ ] Роль `manager` не має прав тренера, не читає `notes|plan|chat|live|health|nutrition|body` і не пише `coaching` (`tests/rules/team.rules.logic.test.ts`, `coach.rules.logic.test.ts`; емулятор `npm run test:rules` ще не запускався).
+- [ ] Менеджера додає лише власник команди; решта запрошують тренерів; запрошення працює лише для підтвердженої пошти (`tests/coach-server/team.test.ts`).
+- [ ] Клієнтський пристрій делегує `schedule|requests`; менеджер не відкриває `chat|notes|plan|live`; чужа розмова, епоха, призначення чи ключ відхиляються (`client/src/coachCrypto`, `delegationPublisher.test.ts`, `managerRings.test.ts`).
+- [ ] Видалення менеджера: доступ закритий одразу, ротація епохи при наступному відкритті клієнтом (`tests/coach-server/teamSchedule.test.ts`).
+- [ ] Перенос менеджером = запит `from:'manager'`; скасування, done/missed потрапляють у журнал (`teamSchedule.test.ts`).
+- [ ] Запит менеджера на видалення клієнта схвалює лише тренер цього клієнта; клієнт про запит не знає (`teamRemoval.test.ts`).
+- [ ] Журнал: тренер усе, менеджер своє або все за `activityScope`, ретеншн 90 днів (`teamSchedule.test.ts`, rules-тести).
+- [ ] Spotter read-only, дії кнопками (`SpotterScreen.test.tsx`).
+- [ ] Push без вмісту, теги `coach-request|team|reminder` (`pushPolicy.test.ts`, `reminders.test.ts`).
+- [ ] Стан «Waiting for client's app» (`ManagerClientsScreen.test.tsx`).
+- [ ] 5 локалей, `i18n:check`; сторі й геометрія (`audit:stories`) зелені.
+- [ ] Реліз за чек-листом на staging з синтетичними акаунтами.
+
+**Статус:** код і unit-тести в main, не запушено; не перевірено: rules на емуляторі, e2e, браузерний прогін зі скріншотами, живий push, незалежне рев'ю безпеки (SPO-267), переклади lt/et носієм.
+
 ## Матриця Автоперевірок
 
-| Feature                 | Unit/integration | API smoke | E2E                      |
-| ----------------------- | ---------------- | --------- | ------------------------ |
-| F-01 Auth               | так              | так       | так                      |
-| F-02 Shell/i18n         | так              | ні        | так                      |
-| F-03 Workout Session    | так              | так       | так                      |
-| F-04 Offline Queue/Sync | так              | так       | так                      |
-| F-05 Gyms/Reminders     | так              | так       | так                      |
-| F-06 Progress/History   | так              | ні        | так                      |
-| F-07 PWA/Desktop        | частково         | health    | PWA так, desktop manual  |
-| F-08 Design System      | так              | ні        | так                      |
-| F-09 Programs           | так              | так       | Today/start day частково |
-| F-10 Кілька людей       | так              | ні        | passkey e2e так          |
+| Feature                 | Unit/integration | API smoke     | E2E                      |
+| ----------------------- | ---------------- | ------------- | ------------------------ |
+| F-01 Auth               | так              | так           | так                      |
+| F-02 Shell/i18n         | так              | ні            | так                      |
+| F-03 Workout Session    | так              | так           | так                      |
+| F-04 Offline Queue/Sync | так              | так           | так                      |
+| F-05 Gyms/Reminders     | так              | так           | так                      |
+| F-06 Progress/History   | так              | ні            | так                      |
+| F-07 PWA/Desktop        | частково         | health        | PWA так, desktop manual  |
+| F-08 Design System      | так              | ні            | так                      |
+| F-09 Programs           | так              | так           | Today/start day частково |
+| F-10 Кілька людей       | так              | ні            | passkey e2e так          |
+| F-11 Команда/Manager    | так              | так (функції) | сторі, e2e ще нема       |

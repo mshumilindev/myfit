@@ -1,4 +1,4 @@
-# ADR 005 — тонка Electron-оболонка десктопу й `electron-updater` (SPO-154, SPO-156)
+# ADR 009 — тонка Electron-оболонка десктопу й `electron-updater` (SPO-154, SPO-156)
 
 **Статус:** прийнято (19.10.2026)
 
