@@ -17,7 +17,7 @@ functions/lib/
 functions/node_modules/
 
 # Node / build artifacts
-node_modules/
+node_modules
 dist/
 dev-dist/
 client/dist/
