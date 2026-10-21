@@ -1,4 +1,11 @@
-import type { ReactNode, RefObject } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { Badge } from './Badge';
 import { Icon } from '../../ui';
 import { AccountPanel, withClose, type AccountPanelProps } from './AccountPanel';
@@ -10,6 +17,17 @@ import type { PopoverAlign, PopoverSide } from './popoverPosition';
 import { SuiteLauncherRow } from './SuiteLauncherRow';
 import './MoreMenu.css';
 
+/** A choose-one list a row opens inside the menu (Language: the current locale is marked). */
+export interface MoreMenuSubmenu {
+  /** Heading of the list and its accessible name (the row's own label). */
+  title: string;
+  options: { id: string; label: string; /** Leading glyph (a flag). */ icon?: ReactNode }[];
+  /** The current option (marked, `aria-selected`). */
+  value: string;
+  /** A pick; the menu closes after it like after any row (`closeOnSelect`). */
+  onChange: (id: string) => void;
+}
+
 export interface MoreMenuItem {
   id: string;
   label: string;
@@ -20,6 +38,11 @@ export interface MoreMenuItem {
   active?: boolean;
   /** Unread count (kit Badge, 1..9, 9+). */
   count?: number;
+  /**
+   * The row opens this list inside the menu (Enter / click / →; Esc / ← / Back return) instead of
+   * running `onSelect`, which is then unused.
+   */
+  submenu?: MoreMenuSubmenu;
 }
 
 export interface MoreMenuProps<V extends string = string> {
@@ -83,10 +106,15 @@ export function MoreMenu<V extends string = string>({
           fn(...a);
         }
       : fn;
+  const wrap = (i: MoreMenuItem): MoreMenuItem => ({
+    ...i,
+    onSelect: done(i.onSelect),
+    ...(i.submenu ? { submenu: { ...i.submenu, onChange: done(i.submenu.onChange) } } : {}),
+  });
   const body = (
     <MoreMenuBody
-      items={items?.map((i) => ({ ...i, onSelect: done(i.onSelect) }))}
-      extraItems={extraItems?.map((i) => ({ ...i, onSelect: done(i.onSelect) }))}
+      items={items?.map(wrap)}
+      extraItems={extraItems?.map(wrap)}
       apps={apps && { ...apps, onOpen: done(apps.onOpen) }}
       account={account && (closeOnSelect ? withClose(account, onClose) : account)}
     />
@@ -121,6 +149,9 @@ export function MoreMenu<V extends string = string>({
   );
 }
 
+/** DOM id of a row (the keyboard handlers find the row a key press came from). */
+const rowDomId = (id: string) => `uimore-row-${id}`;
+
 /** The menu content without a container, for custom presentations and stories. */
 export function MoreMenuBody<V extends string = string>({
   items,
@@ -128,21 +159,117 @@ export function MoreMenuBody<V extends string = string>({
   apps,
   account,
 }: Pick<MoreMenuProps<V>, 'items' | 'extraItems' | 'apps' | 'account'>): ReactNode {
-  const hasList = !!apps || !!items?.length;
+  const [openId, setOpenId] = useState<string | null>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const backTo = useRef<string | null>(null);
+  const open = [...(items ?? []), ...(extraItems ?? [])].find((i) => i.id === openId && i.submenu);
+
+  // Focus follows the view: into the list (the current option) on open, back onto its row on return.
+  useEffect(() => {
+    const root = bodyRef.current;
+    if (!root) return;
+    if (open) {
+      const target =
+        root.querySelector<HTMLElement>('[role="option"][aria-selected="true"]') ??
+        root.querySelector<HTMLElement>('[role="option"]');
+      target?.focus({ preventScroll: true });
+    } else if (backTo.current) {
+      document.getElementById(rowDomId(backTo.current))?.focus();
+      backTo.current = null;
+    }
+  }, [open]);
+
+  const close = () => {
+    backTo.current = openId;
+    setOpenId(null);
+  };
+
   const row = (i: MoreMenuItem) => (
     <ListRow
       key={i.id}
+      id={rowDomId(i.id)}
       icon={<Icon name={i.icon} />}
       label={i.label}
       chevron
       selected={i.active}
       aria-current={i.active ? 'page' : undefined}
+      aria-haspopup={i.submenu ? 'listbox' : undefined}
       trailing={i.count ? <Badge n={i.count} anchor="inline" /> : undefined}
-      onClick={i.onSelect}
+      onClick={i.submenu ? () => setOpenId(i.id) : i.onSelect}
     />
   );
+
+  // → on a row with a submenu opens it (Enter / click are the button's own).
+  const onListKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'ArrowRight') return;
+    const hit = [...(items ?? []), ...(extraItems ?? [])].find(
+      (i) => i.submenu && rowDomId(i.id) === (e.target as HTMLElement).id,
+    );
+    if (!hit) return;
+    e.preventDefault();
+    setOpenId(hit.id);
+  };
+
+  const onSubKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape' || e.key === 'ArrowLeft') {
+      // Esc closes the submenu only; the popover's own Esc handler (on document) never sees it.
+      e.preventDefault();
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      close();
+      return;
+    }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Home' && e.key !== 'End') return;
+    const opts = [...e.currentTarget.querySelectorAll<HTMLElement>('[role="option"]')];
+    const at = opts.indexOf(document.activeElement as HTMLElement);
+    const next =
+      e.key === 'Home'
+        ? 0
+        : e.key === 'End'
+          ? opts.length - 1
+          : (at + (e.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length;
+    e.preventDefault();
+    opts[next]?.focus();
+  };
+
+  if (open?.submenu) {
+    const sub = open.submenu;
+    return (
+      <div className="uimore-body uimore-sub" ref={bodyRef} onKeyDown={onSubKey}>
+        <div className="uimore-list">
+          <GroupedList surface="raised">
+            <ListRow
+              icon={<Icon name="caret-left" />}
+              label={sub.title}
+              strong
+              onClick={close}
+              aria-label={sub.title}
+            />
+          </GroupedList>
+        </div>
+        <div className="uimore-list uimore-extra">
+          <GroupedList surface="raised" rowsRole="listbox" label={sub.title}>
+            {sub.options.map((o) => (
+              <ListRow
+                key={o.id}
+                role="option"
+                aria-selected={o.id === sub.value}
+                icon={o.icon}
+                label={o.label}
+                check={o.id === sub.value}
+                selected={o.id === sub.value}
+                onClick={() => sub.onChange(o.id)}
+              />
+            ))}
+          </GroupedList>
+        </div>
+      </div>
+    );
+  }
+
+  const hasList = !!apps || !!items?.length;
   return (
-    <div className="uimore-body">
+    <div className="uimore-body" ref={bodyRef} onKeyDown={onListKey}>
       {hasList && (
         <div className="uimore-list">
           <GroupedList surface="raised">
