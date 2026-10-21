@@ -248,10 +248,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build-storybook
+      - name: Build Storybook
         env:
-          # the catalog outgrew Node's default heap (the build died with 'JavaScript heap out of memory')
+          # the catalog outgrew Node's default heap
           NODE_OPTIONS: --max-old-space-size=6144
+        run: |
+          set -o pipefail
+          npm run build-storybook 2>&1 | tee sb.log || { grep -iE 'error|cannot|could not|failed|unresolved|not found' sb.log | head -8 | sed 's/^/::error::/'; exit 1; }
       - uses: actions/upload-artifact@v4
         with:
           name: storybook-static
