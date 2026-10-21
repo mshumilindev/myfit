@@ -14,7 +14,7 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { db, HttpsError, mintToken, requireRole, type Role } from '../lib';
 import * as svc from './service';
 import * as team from './team';
-import { runReminders } from './reminders';
+import { runDaily, runReminders } from './reminders';
 import { CoachError, type Actor, type Signer } from './service';
 import {
   adoptLegacyClientsOf,
@@ -295,7 +295,7 @@ export const onCoachKeyWritten = onDocumentWritten(
 /** Every 15 minutes: session reminders for clients, "not marked" notices for the trainer and managers (SPO-265). */
 export const coachReminders = onSchedule({ schedule: 'every 15 minutes', ...trig }, async () => {
   const r = await runReminders(ctx());
-  console.log('[coach] reminders', JSON.stringify(r)); // counts only
+  console.log('[coach] reminders', JSON.stringify({ ...r, ...(await runDaily(ctx())) })); // counts only
 });
 
 /** Hourly: request expiry, straggling deletes, audit retention, 90-day rotation flags. */

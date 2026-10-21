@@ -109,9 +109,12 @@ describe('categories, switches and what quiet hours hold (SPO-237)', () => {
     expect(shouldDeliver('sync', dev(all), inNight)).toBe(true);
   });
   it('no push text carries content: the runtime text is generic', () => {
-    const rt = readFileSync('functions/src/coach/runtime.ts', 'utf8');
+    // the texts live in the five-locale table (pushText.ts); runtime.ts only picks a key, never builds a sentence
+    const table = readFileSync('functions/src/coach/pushText.ts', 'utf8');
     for (const word of ['Reminder', 'Team update', 'New request', 'New message'])
-      expect(rt).toContain(`'${word}'`);
+      expect(table).toContain(`'${word}'`);
+    const rt = readFileSync('functions/src/coach/runtime.ts', 'utf8');
+    expect(rt).toContain('pushTextFor(');
     expect(rt).not.toMatch(/body:\s*[^'\s(]*\bname\b/);
   });
 });

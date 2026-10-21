@@ -15,6 +15,7 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { db } from './lib';
+import { pushLocaleOf, pushTextFor, type PushTextKey } from './coach/pushText';
 import { CHAT_PUSH_TAG, isQuietNow, shouldDeliver, type CoachNoticeKind } from './coach/pushPolicy';
 
 export interface PushMessage {
@@ -26,7 +27,12 @@ export interface PushMessage {
   url?: string;
   /** The coaching notice kind: decides the category switch and quiet hours (see `shouldDeliver`). */
   kind?: CoachNoticeKind;
+  /** A fixed, content-free text key: the body is then chosen per device language (SPO-263). */
+  text?: PushTextKey;
 }
+
+/** The messaging client; a seam so the unit tests can see exactly what would be sent. */
+export const pushDeps = { messaging: () => getMessaging() };
 
 const DEAD_TOKEN = new Set([
   'messaging/registration-token-not-registered',
@@ -46,7 +52,7 @@ export async function sendToUser(uid: string, msg: PushMessage): Promise<number>
   // keeps the old rule: only a trainer-chat tag is held back inside the quiet window.
   const held = msg.tag?.startsWith(CHAT_PUSH_TAG) === true;
   const now = Date.now();
-  const tokens = devices.docs
+  const targets = devices.docs
     .filter((d) =>
       msg.kind
         ? shouldDeliver(
@@ -56,24 +62,44 @@ export async function sendToUser(uid: string, msg: PushMessage): Promise<number>
           )
         : !held || !isQuietNow(d.get('quiet'), d.get('tz'), now),
     )
-    .map((d) => String(d.get('token') ?? ''))
-    .filter(Boolean);
-  if (tokens.length === 0) return 0;
+    .map((d) => ({
+      token: String(d.get('token') ?? ''),
+      locale: pushLocaleOf(d.get('locale')),
+    }))
+    .filter((t) => t.token);
+  if (targets.length === 0) return 0;
   // `sync` is a silent data push (no text at all): the page delegates the keys, nothing is shown.
-  const data: Record<string, string> =
-    msg.kind === 'sync'
-      ? { type: 'sync' }
-      : { title: clip(msg.title, 120), body: clip(msg.body, 400) };
-  if (msg.tag) data.tag = clip(msg.tag, 60);
-  if (msg.url) data.url = clip(msg.url, 200);
-  const res = await getMessaging().sendEachForMulticast({
-    tokens,
-    data,
-    webpush: { headers: { Urgency: 'high', TTL: '3600' } },
+  const base: Record<string, string> = {};
+  if (msg.tag) base.tag = clip(msg.tag, 60);
+  if (msg.url) base.url = clip(msg.url, 200);
+  // one multicast per language: the text is the device's own language, never the sender's or any content
+  const byLocale = new Map<string, string[]>();
+  for (const t of targets) byLocale.set(t.locale, [...(byLocale.get(t.locale) ?? []), t.token]);
+  const sends = [...byLocale].map(([locale, toks]) => {
+    const data: Record<string, string> =
+      msg.kind === 'sync'
+        ? { type: 'sync', ...base }
+        : {
+            title: clip(msg.title, 120),
+            body: msg.text ? pushTextFor(msg.text, locale) : clip(msg.body, 400),
+            ...base,
+          };
+    return pushDeps.messaging().sendEachForMulticast({
+      tokens: toks,
+      data,
+      webpush: { headers: { Urgency: 'high', TTL: '3600' } },
+    });
   });
-  const dead = res.responses
-    .map((r, i) => (!r.success && r.error && DEAD_TOKEN.has(r.error.code) ? tokens[i] : null))
-    .filter((t): t is string => t !== null);
+  const results = await Promise.all(sends);
+  const flat: { token: string; ok: boolean; code?: string }[] = [];
+  [...byLocale.values()].forEach((toks, gi) =>
+    toks.forEach((token, i) => {
+      const r = results[gi].responses[i];
+      flat.push({ token, ok: r.success, code: r.error?.code });
+    }),
+  );
+  const res = { successCount: flat.filter((f) => f.ok).length };
+  const dead = flat.filter((f) => !f.ok && f.code && DEAD_TOKEN.has(f.code)).map((f) => f.token);
   if (dead.length) {
     const batch = db.batch();
     for (const d of devices.docs) if (dead.includes(String(d.get('token')))) batch.delete(d.ref);

@@ -181,7 +181,8 @@ describe('team activity log', () => {
     expect(own.entries.map((e) => e.actorUid)).toEqual(['m1', 'm1']);
     expect(own.entries.every((e) => e.actorName === 'Irina')).toBe(true);
     await teamSetActivityScope(ctx(), owner, { uid: 'm1', scope: 'all' });
-    expect((await teamActivity(ctx(), mgr)).entries).toHaveLength(4);
+    // the four earlier entries plus the owner's own `access-change` (SPO-238)
+    expect((await teamActivity(ctx(), mgr)).entries).toHaveLength(5);
     expect(await code(teamActivity(ctx(), client))).toBe('permission-denied:not-in-team');
   });
 });
@@ -211,7 +212,8 @@ describe('Spotter service messages', () => {
     expect(s.unread).toBe(2);
     await teamNoticesRead(ctx(), owner);
     expect((await teamNotices(ctx(), owner)).unread).toBe(0);
-    expect((await teamNotices(ctx(), client)).items).toEqual([]);
+    // a client sees none of the staff messages; only its own "a manager joined" notice (SPO-236 client Spotter)
+    expect((await teamNotices(ctx(), client)).items.map((i) => i.kind)).toEqual(['team']);
     expect(pushes).toContainEqual(['t1', 'team']);
   });
 });

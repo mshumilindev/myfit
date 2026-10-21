@@ -7,6 +7,7 @@ import { ACTIVITY_RETENTION_MS, logActivity, teamIdOf } from './activity';
 import type { Doc, Kv } from './kv';
 import { inviteUrl } from './inviteLink';
 import type { CoachNoticeKind } from './pushPolicy';
+import type { PushTextKey } from './pushText';
 import {
   ALL_OFF,
   MAX_AT_SKEW,
@@ -86,7 +87,7 @@ export interface Ctx {
   pepper: Uint8Array;
   newToken(): string;
   /** content-free push: only "something happened" (C.3) */
-  notify?(uid: string, kind: CoachNoticeKind): Promise<void>;
+  notify?(uid: string, kind: CoachNoticeKind, topic?: PushTextKey): Promise<void>;
   baseUrl?: string;
 }
 
@@ -1357,6 +1358,20 @@ export async function rescheduleCreate(ctx: Ctx, actor: Actor, body: Record<stri
     );
     if (p) return fail(p === 'duplicate-slot' ? 'already-exists' : 'invalid-argument', p);
     await kv.set(`${convPath(cid)}/requests/${id}`, raw);
+    // the client's own Spotter: a request from the trainer's side (trainer or manager); the time stays in the sealed
+    // request, the notice only points at it by id. Idempotent by id (the early `already` return above covers a resend).
+    if (side === 'trainer') {
+      await notice(
+        kv,
+        clientId,
+        'move-request',
+        actor.uid,
+        now,
+        `mv-${id}`,
+        (await userName(kv, actor.uid)).name || null,
+      );
+      await kv.merge(`users/${clientId}/notices/mv-${id}`, { refId: id });
+    }
     if (manager) {
       const cu = (await kv.get(`users/${clientId}`)) as UserRec | null;
       await notice(kv, c.trainerId, 'manager-move', actor.uid, now, `mm-${id}`, displayOf(cu));
@@ -1381,7 +1396,9 @@ export async function rescheduleRespond(ctx: Ctx, actor: Actor, body: Record<str
   const id = str(body.id, 80);
   const to = body.status as ReqStatus;
   const now = ctx.now();
-  return ctx.kv.tx(async (kv) => {
+  let answeredManager = '';
+  let answeredClient = false;
+  const out = await ctx.kv.tx(async (kv) => {
     const { side, c, manager } = await partyOf(kv, clientId, actor);
     const path = `${convPath(conversationId(ctx.pepper, clientId, c.trainerId))}/requests/${id}`;
     const r = await kv.get(path);
@@ -1397,6 +1414,41 @@ export async function rescheduleRespond(ctx: Ctx, actor: Actor, body: Record<str
     )
       fail('failed-precondition', 'cannot-decide');
     await kv.merge(path, { status: to, decidedAt: now });
+    // the answer to a proposal a MANAGER made: tell that manager in Spotter (metadata + status only) and keep the journal
+    if (!manager && r.via === 'manager') {
+      const mm = await kv.get(`users/${c.trainerId}/notices/mm-${id}`);
+      const proposer = typeof mm?.actor === 'string' ? mm.actor : '';
+      const teamId = await teamIdOf(kv, c.trainerId);
+      await logActivity(kv, teamId, now, {
+        actorUid: actor.uid,
+        role: side === 'client' ? 'client' : 'trainer',
+        kind: 'move-answer',
+        clientId,
+        refId: id,
+        status: to,
+      });
+      if (proposer && proposer !== actor.uid) {
+        const cu = (await kv.get(`users/${clientId}`)) as UserRec | null;
+        await notice(kv, proposer, 'move-answer', actor.uid, now, `ma-${id}-${to}`, displayOf(cu));
+        await kv.merge(`users/${proposer}/notices/ma-${id}-${to}`, { status: to, refId: id });
+        answeredManager = proposer;
+      }
+    }
+    // the trainer (or a manager's withdrawal is not one) answered a request the CLIENT made: the client's own Spotter hears it
+    if (!manager && side === 'trainer' && r.from === 'client') {
+      const nid = `ma-${id}-${to}`;
+      await notice(
+        kv,
+        clientId,
+        'move-answer',
+        actor.uid,
+        now,
+        nid,
+        (await userName(kv, actor.uid)).name || null,
+      );
+      await kv.merge(`users/${clientId}/notices/${nid}`, { status: to, refId: id });
+      answeredClient = true;
+    }
     if (manager)
       await logActivity(kv, await teamIdOf(kv, c.trainerId), now, {
         actorUid: actor.uid,
@@ -1408,6 +1460,9 @@ export async function rescheduleRespond(ctx: Ctx, actor: Actor, body: Record<str
       });
     return { id, status: to };
   });
+  if (answeredManager) await ctx.notify?.(answeredManager, 'team');
+  if (answeredClient) await ctx.notify?.(clientId, 'request');
+  return out;
 }
 
 /* ---- trainer key signature (C.2 no. 5) ------------------------------------------------------------------------ */

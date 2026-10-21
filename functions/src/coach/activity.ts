@@ -21,6 +21,7 @@ export type ActivityKind =
   | ReportedKind
   | 'move-request'
   | 'move-cancel'
+  | 'move-answer'
   | 'removal-request'
   | 'removal-approved'
   | 'removal-declined'
@@ -28,12 +29,14 @@ export type ActivityKind =
   | 'member-added'
   | 'member-removed'
   | 'member-left'
-  | 'client-invite';
+  | 'client-invite'
+  | 'access-change';
 
 export interface ActivityEntry {
   id: string;
   actorUid: string;
-  role: 'trainer' | 'manager';
+  /** who acted: the team's trainer or manager, or the client answering a proposal a manager made */
+  role: 'trainer' | 'manager' | 'client';
   kind: ActivityKind;
   clientId?: string;
   refId?: string;

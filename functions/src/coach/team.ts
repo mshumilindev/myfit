@@ -288,8 +288,54 @@ export async function teamAccept(
   });
   // A new manager needs the clients' devices to delegate the schedule keys: a silent `sync` push asks every client of
   // the team to do it now (an improvement, never a guarantee: a client that is offline does it on its next open).
-  if (i.role === 'manager') await syncTeamClients(ctx, i.teamId);
+  if (i.role === 'manager') {
+    await syncTeamClients(ctx, i.teamId);
+    await tellClientsOfTeamChange(ctx, i.teamId, actor.uid, `tj-${i.id}`);
+  }
   return joined;
+}
+
+/** Upper bound of clients told per trainer about one team change (the same cap as the key-delegation sweeps). */
+export const TEAM_FANOUT_CAP = 500;
+
+/**
+ * A manager joined or left the team of the clients' trainer: every active client of every active trainer of the team gets a
+ * `team` notice (the manager's name, nothing else) and a `team` push that follows their switch and never quiet hours.
+ * Cost: one `coaching` query per trainer (active clients, capped at TEAM_FANOUT_CAP) plus one write per client; no
+ * per-client reads. Notice id is deterministic per event, so a retry overwrites instead of duplicating. Best effort.
+ */
+async function tellClientsOfTeamChange(
+  ctx: Ctx,
+  teamId: string,
+  managerUid: string,
+  key: string,
+): Promise<void> {
+  try {
+    const name = nameOf((await ctx.kv.get(`users/${managerUid}`)) as UserRec | null);
+    const now = ctx.now();
+    const members = (await ctx.kv.list(`teams/${teamId}/members`)).map(
+      (r) => r.data as unknown as MemberRec,
+    );
+    for (const m of members) {
+      if (m.role !== 'trainer' || m.status !== 'active') continue;
+      const rows = await ctx.kv.list('coaching', {
+        where: [
+          ['trainerId', '==', m.uid],
+          ['status', '==', 'active'],
+        ],
+        limit: TEAM_FANOUT_CAP,
+      });
+      for (let i = 0; i < rows.length; i += 50)
+        await Promise.allSettled(
+          rows.slice(i, i + 50).map(async (r) => {
+            await notice(ctx.kv, r.id, 'team', managerUid, now, key, name || null);
+            await ctx.notify?.(r.id, 'team');
+          }),
+        );
+    }
+  } catch {
+    /* a failed notice never fails the membership change */
+  }
 }
 
 /** A silent `sync` push to every client of every active trainer of the team (best effort, capped). */
@@ -385,6 +431,8 @@ async function endMembership(
     if (inv.data.status === 'pending' && inv.data.teamId === teamId)
       await ctx.kv.merge(inv.path, { status: 'revoked' });
   await dropDelegations(ctx, teamId, target);
+  if (target.role === 'manager')
+    await tellClientsOfTeamChange(ctx, teamId, target.uid, `tl-${target.uid}-${now}`);
 }
 
 /**
@@ -456,7 +504,25 @@ export async function teamSetActivityScope(
   const target = (await ctx.kv.get(`teams/${teamId}/members/${uid}`)) as MemberRec | null;
   if (!target || target.status !== 'active' || target.role !== 'manager')
     return fail('not-found', 'no-member');
-  await ctx.kv.set(`teams/${teamId}/acl/${uid}`, { activityScope: scope });
+  const prev = (await ctx.kv.get(`teams/${teamId}/acl/${uid}`)) as {
+    activityScope?: ActivityScope;
+  } | null;
+  // the same switch position again changes nothing: no second entry, no second notice, no second push
+  if ((prev?.activityScope ?? 'own') === scope) return { ok: true };
+  const now = ctx.now();
+  await ctx.kv.tx(async (t) => {
+    await t.set(`teams/${teamId}/acl/${uid}`, { activityScope: scope });
+    // metadata only: who changed whose access to what; the manager is told in Spotter (and by a push below)
+    await logActivity(t, teamId, now, {
+      actorUid: actor.uid,
+      role: 'trainer',
+      kind: 'access-change',
+      refId: uid,
+      status: scope,
+    });
+    await notice(t, uid, 'access', actor.uid, now, `access-${uid}-${now}`, scope);
+  });
+  await ctx.notify?.(uid, 'team', 'access');
   return { ok: true };
 }
 
@@ -868,6 +934,18 @@ export async function teamLogActivity(
     kind: kind as ReportedKind,
     clientId,
   });
+  // done / missed / cancelled by a MANAGER: the client and the trainer hear of it in Spotter (names only, no times: those
+  // stay in the sealed schedule). A trainer who is the actor is not told about their own action (managers only reach here).
+  if (kind === 'session-done' || kind === 'session-missed' || kind === 'session-cancelled') {
+    const now = ctx.now();
+    const mgrName = nameOf((await ctx.kv.get(`users/${actor.uid}`)) as UserRec | null);
+    const cName = nameOf((await ctx.kv.get(`users/${clientId}`)) as UserRec | null);
+    const nid = `${kind}-${clientId}-${now}`;
+    await notice(ctx.kv, clientId, kind, actor.uid, now, nid, mgrName || null);
+    await notice(ctx.kv, c.trainerId, kind, actor.uid, now, nid, cName || null);
+    await ctx.notify?.(clientId, 'team');
+    await ctx.notify?.(c.trainerId, 'team');
+  }
   return { ok: true };
 }
 
@@ -889,10 +967,12 @@ export async function teamActivity(
   ctx: Ctx,
   actor: Actor,
   body: Record<string, unknown> = {},
-): Promise<{ entries: ActivityRow[]; scope: ActivityScope | 'owner' }> {
+): Promise<{ entries: ActivityRow[]; scope: ActivityScope | 'owner'; next: number | null }> {
   const { teamId, me, owner } = await myTeam(ctx, actor);
   if (!owner && me.role !== 'manager') return fail('permission-denied', 'not-allowed');
   const limit = Math.min(Math.max(Number(body.limit) || 100, 1), 200);
+  // keyset cursor: `before` is the `next` of the previous page (the ts of its last entry); no full-journal read
+  const before = Number.isFinite(Number(body.before)) && body.before ? Number(body.before) : null;
   const acl = owner
     ? null
     : ((await ctx.kv.get(`teams/${teamId}/acl/${actor.uid}`)) as {
@@ -903,7 +983,15 @@ export async function teamActivity(
     : acl?.activityScope === 'all'
       ? 'all'
       : 'own';
-  const rows = await ctx.kv.list(`teams/${teamId}/activity`, { limit: 500 });
+  const where: [string, '==' | '<', unknown][] = [];
+  if (scope === 'own') where.push(['actorUid', '==', actor.uid]);
+  if (before !== null) where.push(['ts', '<', before]);
+  const rows = await ctx.kv.list(`teams/${teamId}/activity`, {
+    where,
+    orderBy: ['ts', 'desc'],
+    limit: limit + 1,
+  });
+  const more = rows.length > limit;
   const names = new Map<string, string>();
   const nameFor = async (uid: string | undefined): Promise<string> => {
     if (!uid) return '';
@@ -912,11 +1000,7 @@ export async function teamActivity(
     return names.get(uid) ?? '';
   };
   const entries: ActivityRow[] = [];
-  const all = rows
-    .map((r) => r.data as unknown as ActivityEntry)
-    .filter((e) => scope !== 'own' || e.actorUid === actor.uid)
-    .sort((a, b) => b.ts - a.ts)
-    .slice(0, limit);
+  const all = rows.slice(0, limit).map((r) => r.data as unknown as ActivityEntry);
   const liveStatusOf = async (e: ActivityEntry): Promise<string | undefined> => {
     if (e.kind === 'removal-request' && e.refId) {
       const r = await ctx.kv.get(`teamRequests/${e.refId}`);
@@ -940,7 +1024,7 @@ export async function teamActivity(
       ...(live ? { liveStatus: live } : {}),
     });
   }
-  return { entries, scope };
+  return { entries, scope, next: more && all.length ? all[all.length - 1].ts : null };
 }
 
 /* ---- Spotter: the service messages of the team (SPO-236) -------------------------------------------------------- */
@@ -948,9 +1032,29 @@ export const SPOTTER_KINDS = [
   'removal-request',
   'removal-answer',
   'manager-move',
+  'move-answer',
   'team',
+  'access',
   'unmarked',
+  'summary',
+  'reminder',
+  'session-done',
+  'session-missed',
+  'session-cancelled',
 ] as const;
+/** The kinds the CLIENT's own Spotter shows (client/src/coach/client/spotter/clientSpotterPort.ts); metadata only. */
+export const CLIENT_SPOTTER_KINDS = [
+  'move-request',
+  'move-answer',
+  'session-done',
+  'session-missed',
+  'session-cancelled',
+  'team',
+  'access',
+  'reminder',
+  'summary',
+] as const;
+const EPHEMERAL = new Set(['unmarked', 'reminder', 'summary']);
 export interface SpotterItem {
   id: string;
   kind: (typeof SPOTTER_KINDS)[number];
@@ -966,6 +1070,8 @@ export interface SpotterItem {
   refId?: string;
   /** unmarked: when the unmarked session ended (epoch ms) */
   at?: number;
+  /** summary: how many unread service messages it counts (access: the new scope arrives as `subjectName`) */
+  count?: number;
 }
 
 /** The caller's own service messages about the team, newest first. Metadata only: names, never client content. */
@@ -975,12 +1081,13 @@ export async function teamNotices(
 ): Promise<{ items: SpotterItem[]; unread: number }> {
   const rows = await ctx.kv.list(`users/${actor.uid}/notices`, { limit: 200 });
   const kinds = new Set<string>(SPOTTER_KINDS);
-  // "not marked" notices carry a session time: they are forgotten after 30 days
+  // "not marked", reminders and summaries are time-bound: they are forgotten after 30 days
   const stale = ctx.now() - 30 * 86_400_000;
-  for (const r of rows)
-    if (r.data.kind === 'unmarked' && Number(r.data.createdAt) < stale) await ctx.kv.del(r.path);
+  const expires = (r: { data: Record<string, unknown> }) =>
+    EPHEMERAL.has(String(r.data.kind)) && Number(r.data.createdAt) < stale;
+  for (const r of rows) if (expires(r)) await ctx.kv.del(r.path);
   const mine = rows
-    .filter((r) => !(r.data.kind === 'unmarked' && Number(r.data.createdAt) < stale))
+    .filter((r) => !expires(r))
     .map((r) => r.data as Record<string, unknown>)
     .filter((n) => kinds.has(String(n.kind)))
     .sort((a, b) => Number(b.createdAt) - Number(a.createdAt))
@@ -1003,6 +1110,7 @@ export async function teamNotices(
       ...(status ? { status } : {}),
       ...(typeof n.refId === 'string' ? { refId: n.refId } : {}),
       ...(n.kind === 'unmarked' && typeof n.start === 'number' ? { at: n.start } : {}),
+      ...(n.kind === 'summary' && typeof n.count === 'number' ? { count: n.count } : {}),
     });
   }
   return { items, unread: items.filter((i) => i.unread).length };

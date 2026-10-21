@@ -42,26 +42,52 @@ export function parseQuietWindow(v: unknown): QuietWindow | null {
   return { on: o.on, from: o.from, to: o.to };
 }
 
+const formatters = new Map<string, Intl.DateTimeFormat | null>();
+/** One formatter per zone (building one is slow); null for a zone name the platform does not know. */
+function zoneFormatter(tz: unknown): Intl.DateTimeFormat {
+  const key = typeof tz === 'string' && tz ? tz : 'UTC';
+  let f = formatters.get(key);
+  if (f === undefined) {
+    try {
+      f = new Intl.DateTimeFormat('en-GB', {
+        timeZone: key,
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+      });
+    } catch {
+      f = null;
+    }
+    formatters.set(key, f);
+  }
+  return f ?? zoneFormatter('UTC');
+}
+
 /** Minutes after local midnight at `at` in the IANA zone `tz` (UTC when the zone is unknown). */
 export function localMinutes(at: number, tz: unknown): number {
-  let zone: string | undefined;
+  const parts = zoneFormatter(tz).formatToParts(new Date(at));
+  const h = Number(parts.find((p) => p.type === 'hour')?.value ?? 0);
+  const m = Number(parts.find((p) => p.type === 'minute')?.value ?? 0);
+  return h * 60 + m;
+}
+
+/** Local calendar date (YYYY-MM-DD) at `at` in the IANA zone `tz` (UTC when the zone is unknown). */
+export function localDate(at: number, tz: unknown): string {
+  let zone = 'UTC';
   if (typeof tz === 'string' && tz) {
     try {
       new Intl.DateTimeFormat('en-US', { timeZone: tz });
       zone = tz;
     } catch {
-      zone = undefined;
+      /* unknown zone: UTC */
     }
   }
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: zone ?? 'UTC',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(new Date(at));
-  const h = Number(parts.find((p) => p.type === 'hour')?.value ?? 0);
-  const m = Number(parts.find((p) => p.type === 'minute')?.value ?? 0);
-  return h * 60 + m;
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: zone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date(at));
 }
 
 /** Is `at` inside the device's quiet window? The window may wrap midnight; from === to means never. */
