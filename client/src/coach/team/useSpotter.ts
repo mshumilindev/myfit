@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { TeamPort } from './port';
 import type { SpotterFeed } from './types';
 import { getTeamPort } from './useTeam';
+import { teamRequestsStoreFor } from './useTeamRequests';
 
 export interface SpotterApi {
   feed: SpotterFeed | null;
@@ -31,13 +32,10 @@ export function useSpotter(port?: TeamPort): SpotterApi {
   const reload = useCallback(() => setAttempt((n) => n + 1), []);
   const answer = useCallback(
     async (refId: string, approve: boolean) => {
-      try {
-        await p.answerRequest(refId, approve);
-        setAttempt((n) => n + 1);
-        return true;
-      } catch {
-        return false;
-      }
+      // the same action as the Agenda card: its store sends the answer and drops the request there too
+      const ok = await teamRequestsStoreFor(p).answer(refId, approve);
+      if (ok) setAttempt((n) => n + 1);
+      return ok;
     },
     [p],
   );

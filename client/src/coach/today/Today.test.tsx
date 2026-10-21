@@ -14,6 +14,9 @@ const pendingRequestPort: RescheduleRequestPort = {
 };
 import { TodayScreen } from './TodayScreen';
 import { currentHash } from '../../route';
+import { teamEn as tm } from '../../i18n/coachTeam.en';
+import { configureTeam } from '../team/teamConfig';
+import { createFixturesTeamPort } from '../team/__fixtures__/fixtures';
 
 const OPTS = { refreshEveryMs: 0 };
 
@@ -39,6 +42,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  configureTeam(null);
   window.history.replaceState(null, '', '#/c/agenda');
 });
 
@@ -307,5 +311,46 @@ describe('Agenda: navigation callbacks', () => {
     fireEvent.click(screen.getByRole('button', { name: 'All decisions' }));
     expect(onNavigate).toHaveBeenCalledWith({ screen: 'decisions' });
     await act(async () => undefined);
+  });
+});
+
+describe('Agenda: what the team asks (SPO-204)', () => {
+  /** the fixture world with the trainer's own request to Maria re-labelled as a manager's proposal */
+  const managerMovePort = () => {
+    const port = createFixturesPort();
+    return {
+      ...port,
+      load: async (o: Parameters<typeof port.load>[0]) => {
+        const w = await port.load(o);
+        return {
+          ...w,
+          slots: w.slots.map((s) =>
+            s.move?.reqId === 'rq2' ? { ...s, move: { ...s.move, by: 'Irina Melnyk' } } : s,
+          ),
+        };
+      },
+    };
+  };
+
+  it('a manager move request reads "Irina M. asked Maria to move a session", waiting, with Cancel request and no accept/decline', async () => {
+    setup(managerMovePort(), { requestPort: pendingRequestPort });
+    await ready();
+    expect(screen.getByText('Irina M. asked Maria to move a session')).toBeTruthy();
+    expect(screen.getAllByText('Waiting for Maria').length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: 'Cancel request to Maria' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Accept move for Maria/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Decline move for Maria/ })).toBeNull();
+  });
+
+  it('"Team requests" sits above "Reschedule requests" and counts the open requests', async () => {
+    configureTeam(createFixturesTeamPort({ withRequests: true }));
+    setup();
+    await ready();
+    const team = await screen.findByRole('heading', { level: 2, name: new RegExp(tm.trSection) });
+    const resched = screen.getByRole('heading', { level: 2, name: /Reschedule requests/ });
+    expect(team.compareDocumentPosition(resched) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(team.textContent).toContain('1');
+    expect(screen.getByText(tm.trTitle('Irina', 'Sofiia'))).toBeTruthy();
+    expect(screen.getByText(/Moved to another city/)).toBeTruthy();
   });
 });

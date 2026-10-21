@@ -58,7 +58,8 @@ function createStore(p: TeamPort): RequestsStore {
 }
 
 const stores = new WeakMap<TeamPort, RequestsStore>();
-const storeFor = (p: TeamPort): RequestsStore => {
+/** The one requests store of a port: the Agenda, the rail badge and Spotter answer through it, so they never disagree. */
+export const teamRequestsStoreFor = (p: TeamPort): RequestsStore => {
   let s = stores.get(p);
   if (!s) stores.set(p, (s = createStore(p)));
   return s;
@@ -71,7 +72,7 @@ const storeFor = (p: TeamPort): RequestsStore => {
  */
 export function useTeamRequests(port?: TeamPort, enabled = true): TeamRequestsApi {
   const p = port ?? getTeamPort();
-  const s = storeFor(p);
+  const s = teamRequestsStoreFor(p);
   const requests = useSyncExternalStore(
     s.subscribe,
     () => (enabled ? s.get() : NONE),

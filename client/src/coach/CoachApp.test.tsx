@@ -16,6 +16,9 @@ configure({ asyncUtilTimeout: 5000 });
 import { useState } from 'react';
 import { LOCALES } from '../i18n';
 import { coachEn } from '../i18n/coach.en';
+import { teamEn } from '../i18n/coachTeam.en';
+import { configureTeam } from './team/teamConfig';
+import { createFixturesTeamPort } from './team/__fixtures__/fixtures';
 import { CoachApp, CoachShell } from './CoachApp';
 import { coachEntryHash, type CoachRoute } from './routes';
 import { readFileSync } from 'node:fs';
@@ -425,6 +428,29 @@ describe('rail (>= 768)', () => {
     rerender(<Harness />);
     expect(container.querySelector('.rail .uibadge')?.textContent).toBe('9+');
     expect(screen.getByRole('button', { name: `${c.navChat}, ${c.unread(23)}` })).toBeTruthy();
+  });
+});
+
+describe('team requests badge (SPO-204)', () => {
+  it('Agenda carries the open team requests on the rail and the tab bar, spoken in its name', async () => {
+    configureTeam(createFixturesTeamPort({ withRequests: true }));
+    try {
+      setViewport(1440);
+      const { container, unmount } = render(<Harness />);
+      await waitFor(() => expect(container.querySelector('.rail .uibadge')?.textContent).toBe('1'));
+      expect(
+        screen.getByRole('button', { name: new RegExp(`${c.navAgenda}.*${teamEn.trSection}: 1`) }),
+      ).toBeTruthy();
+      unmount();
+      cleanup();
+      setViewport(390);
+      const phone = render(<Harness />);
+      await waitFor(() =>
+        expect(phone.container.querySelector('.tabbar .uibadge')?.textContent).toBe('1'),
+      );
+    } finally {
+      configureTeam(null);
+    }
   });
 });
 
