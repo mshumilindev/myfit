@@ -17,6 +17,9 @@ export interface SessionStore {
   remove(deviceId: string): Promise<void>;
 }
 
+/** Records one person may keep; the least recently seen ones go first, so a script can't grow the collection without bound. */
+export const MAX_SESSIONS = 50;
+
 export type SessionInfo = Pick<SessionDoc, 'label' | 'city' | 'country'>;
 
 /** Refreshes (or adopts) the device's record; `active:false` when it was signed out from another device. */
@@ -29,7 +32,18 @@ export async function checkCore(
   const cur = await store.get(deviceId);
   if (cur?.revokedAt) return { active: false };
   if (cur) await store.update(deviceId, { ...info, lastSeenAt: now });
-  else await store.set(deviceId, { ...info, lastSeenAt: now, createdAt: now, revokedAt: null });
+  else {
+    const all = await store.list();
+    const excess = all.length + 1 - MAX_SESSIONS;
+    if (excess > 0) {
+      const oldest = all
+        .filter((r) => !r.doc.revokedAt) // a revocation is never evicted: that would let the device re-adopt itself
+        .sort((a, b) => a.doc.lastSeenAt - b.doc.lastSeenAt)
+        .slice(0, excess);
+      for (const r of oldest) await store.remove(r.deviceId);
+    }
+    await store.set(deviceId, { ...info, lastSeenAt: now, createdAt: now, revokedAt: null });
+  }
   return { active: true };
 }
 

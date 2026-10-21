@@ -6,11 +6,16 @@
  *
  * Sign-out of another device: the record gets `revokedAt`. That device checks its record at start and on focus
  * (`sessionCheck`) and signs itself out when it finds it revoked. A device with no record yet (signed in before this
- * existed) is adopted, not signed out. A revoked device keeps working until its next check; the Firebase ID token itself
- * is not killed (revokeRefreshTokens would end every device at once).
+ * existed) is adopted, not signed out. A single revoked device keeps working until its next check (Firebase can't end one
+ * device's refresh token alone); its passkeys are deleted at once so it can't sign in again by biometrics.
+ *
+ * "Sign out all except this device" is hard: every refresh token of the account is revoked (other devices can't renew
+ * after their current ID token, at most about an hour), all other passkeys are deleted, and this device gets a fresh
+ * custom token to sign itself back in.
  */
 import { onCall } from 'firebase-functions/v2/https';
-import { db, HttpsError } from './lib';
+import { authAdmin, db, HttpsError, mintToken, type UserDoc } from './lib';
+import { deletePasskeysOf, deletePasskeysOfDevice } from './passkeysStore';
 import { describeClient, placeFromHeaders, validDeviceId } from './sessionsPure';
 import {
   checkCore,
@@ -74,19 +79,33 @@ export const sessionList = onCall(async (req) => ({
 /** Signs another device out (its next check ends its session). */
 export const sessionRevoke = onCall(async (req) => {
   const uid = mustUid(req);
-  await revokeCore(storeFor(uid), deviceIdOf(req.data), Date.now());
+  const deviceId = deviceIdOf(req.data);
+  await revokeCore(storeFor(uid), deviceId, Date.now());
+  await deletePasskeysOfDevice(uid, deviceId);
   return { ok: true };
 });
 
 /** "Sign out all except this device". */
 export const sessionRevokeOthers = onCall(async (req) => {
   const uid = mustUid(req);
-  return { revoked: await revokeOthersCore(storeFor(uid), deviceIdOf(req.data), Date.now()) };
+  const keep = deviceIdOf(req.data);
+  const userSnap = await db.collection('users').doc(uid).get();
+  if (!userSnap.exists) throw new HttpsError('not-found', 'Unknown account.');
+  const user = userSnap.data() as Omit<UserDoc, 'id'>;
+  if (user.status === 'suspended') throw new HttpsError('permission-denied', 'forbidden');
+  const revoked = await revokeOthersCore(storeFor(uid), keep, Date.now());
+  await deletePasskeysOf(uid, keep);
+  await authAdmin.revokeRefreshTokens(uid);
+  // This device's own refresh token died too: it signs itself back in with this fresh token.
+  return { revoked, token: await mintToken(uid, user.role) };
 });
 
-/** This device signed out on its own: its record goes away. */
+/** This device signed out on its own: its record goes away; with `forget` (left the landing list) so does its passkey. */
 export const sessionEnd = onCall(async (req) => {
   const uid = mustUid(req);
-  await storeFor(uid).remove(deviceIdOf(req.data));
+  const deviceId = deviceIdOf(req.data);
+  await storeFor(uid).remove(deviceId);
+  if ((req.data as { forget?: unknown }).forget === true)
+    await deletePasskeysOfDevice(uid, deviceId);
   return { ok: true };
 });

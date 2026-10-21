@@ -47,12 +47,16 @@ function memoryStore() {
       return d;
     },
     getPasskey: async (id) => keys.get(id) ?? null,
-    savePasskey: async (id, d) => void keys.set(id, d),
+    savePasskey: async (id, d) => {
+      if (keys.has(id)) throw new PasskeyError('permission-denied', 'exists');
+      keys.set(id, d);
+    },
+    deletePasskey: async (id) => void keys.delete(id),
     updatePasskey: async (id, p) => void keys.set(id, { ...keys.get(id)!, ...p }),
     listPasskeys: async (uid) =>
       [...keys]
         .filter(([, d]) => d.userId === uid)
-        .map(([id, d]) => ({ id, transports: d.transports })),
+        .map(([id, d]) => ({ id, transports: d.transports, deviceId: d.deviceId })),
   };
   return { store, keys, challenges };
 }
@@ -150,6 +154,7 @@ async function registered() {
     rp,
     challengeId: 'c-reg',
     now,
+    authTimeMs: now,
   });
   await registerVerifyCore(m.store, {
     uid: 'uA',
@@ -157,6 +162,8 @@ async function registered() {
     challengeId: 'c-reg',
     response: dev.create(opts.options.challenge),
     now,
+    deviceId: 'dev-1',
+    authTimeMs: now,
   });
   return { ...m, dev, now };
 }
@@ -267,6 +274,7 @@ describe('passkeys: server rules with a software authenticator', () => {
       rp,
       challengeId: 'c1',
       now: 1000,
+      authTimeMs: 1000,
     });
     await fails(
       registerVerifyCore(m.store, {
@@ -275,6 +283,8 @@ describe('passkeys: server rules with a software authenticator', () => {
         challengeId: 'c1',
         response: dev.create(o.options.challenge),
         now: 1000 + 6 * 60 * 1000,
+        deviceId: 'dev-x',
+        authTimeMs: 1000,
       }),
       'deadline-exceeded',
     );
@@ -284,6 +294,7 @@ describe('passkeys: server rules with a software authenticator', () => {
       rp,
       challengeId: 'c2',
       now: 1000,
+      authTimeMs: 1000,
     });
     await fails(
       registerVerifyCore(m.store, {
@@ -292,9 +303,176 @@ describe('passkeys: server rules with a software authenticator', () => {
         challengeId: 'c2',
         response: dev.create(o2.options.challenge),
         now: 1000,
+        deviceId: 'dev-x',
+        authTimeMs: 1000,
       }),
       'permission-denied',
     );
     expect(m.keys.size).toBe(0);
+  });
+
+  it('a registration challenge cannot be used to sign in', async () => {
+    const m = memoryStore();
+    const dev = authenticator();
+    const o = await registerOptionsCore(m.store, {
+      uid: 'uA',
+      userName: 'Anna',
+      rp,
+      challengeId: 'c-reg',
+      now: 1000,
+      authTimeMs: 1000,
+    });
+    await registerVerifyCore(m.store, {
+      uid: 'uA',
+      rp,
+      challengeId: 'c-reg',
+      response: dev.create(o.options.challenge),
+      now: 1000,
+      deviceId: 'dev-1',
+      authTimeMs: 1000,
+    });
+    // a second registration challenge, then presented to login
+    const o2 = await registerOptionsCore(m.store, {
+      uid: 'uA',
+      userName: 'Anna',
+      rp,
+      challengeId: 'c-reg2',
+      now: 1000,
+      authTimeMs: 1000,
+    });
+    await fails(
+      loginVerifyCore(m.store, {
+        rp,
+        challengeId: 'c-reg2',
+        response: dev.get(o2.options.challenge, 1),
+        now: 1000,
+      }),
+      'unauthenticated',
+    );
+  });
+
+  it('registration needs a recent sign-in', async () => {
+    const m = memoryStore();
+    const base = { uid: 'uA', userName: 'Anna', rp, challengeId: 'c', now: 10_000_000 };
+    await fails(
+      registerOptionsCore(m.store, { ...base, authTimeMs: base.now - 11 * 60 * 1000 }),
+      'permission-denied',
+    );
+    await fails(registerOptionsCore(m.store, { ...base, authTimeMs: null }), 'permission-denied');
+    await registerOptionsCore(m.store, { ...base, authTimeMs: base.now - 60_000 });
+  });
+
+  it("a new passkey replaces the same device's old one, other devices keep theirs", async () => {
+    const r = await registered(); // dev-1
+    const reg = async (dev: ReturnType<typeof authenticator>, deviceId: string, cid: string) => {
+      const o = await registerOptionsCore(r.store, {
+        uid: 'uA',
+        userName: 'Anna',
+        rp,
+        challengeId: cid,
+        now: r.now,
+        authTimeMs: r.now,
+      });
+      await registerVerifyCore(r.store, {
+        uid: 'uA',
+        rp,
+        challengeId: cid,
+        response: dev.create(o.options.challenge),
+        now: r.now,
+        deviceId,
+        authTimeMs: r.now,
+      });
+    };
+    const second = authenticator();
+    await reg(second, 'dev-1', 'c2'); // same device: replaces
+    expect([...r.keys.keys()]).toEqual([second.id]);
+    const third = authenticator();
+    await reg(third, 'dev-2', 'c3'); // another device: both stay
+    expect(r.keys.size).toBe(2);
+  });
+
+  it("never overwrites an existing credential id (even another account's)", async () => {
+    const r = await registered();
+    const o = await registerOptionsCore(r.store, {
+      uid: 'uB',
+      userName: 'Bob',
+      rp,
+      challengeId: 'cb',
+      now: r.now,
+      authTimeMs: r.now,
+    });
+    await fails(
+      registerVerifyCore(r.store, {
+        uid: 'uB',
+        rp,
+        challengeId: 'cb',
+        response: r.dev.create(o.options.challenge), // same credential id as uA's
+        now: r.now,
+        deviceId: 'dev-9',
+        authTimeMs: r.now,
+      }),
+      'permission-denied',
+    );
+    expect(r.keys.get(r.dev.id)?.userId).toBe('uA');
+  });
+
+  it('registration verify needs a device id and a recent sign-in', async () => {
+    const m = memoryStore();
+    const dev = authenticator();
+    const o = await registerOptionsCore(m.store, {
+      uid: 'uA',
+      userName: 'Anna',
+      rp,
+      challengeId: 'cv',
+      now: 1000,
+      authTimeMs: 1000,
+    });
+    const base = {
+      uid: 'uA',
+      rp,
+      challengeId: 'cv',
+      response: dev.create(o.options.challenge),
+      now: 1000,
+    };
+    await fails(
+      registerVerifyCore(m.store, { ...base, deviceId: '', authTimeMs: 1000 }),
+      'invalid-argument',
+    );
+    await fails(
+      registerVerifyCore(m.store, { ...base, deviceId: 'd', authTimeMs: null }),
+      'permission-denied',
+    );
+    expect(m.keys.size).toBe(0);
+  });
+
+  it("a failed save keeps the device's existing passkey", async () => {
+    const r = await registered(); // dev-1
+    const o = await registerOptionsCore(r.store, {
+      uid: 'uA',
+      userName: 'Anna',
+      rp,
+      challengeId: 'cf',
+      now: r.now,
+      authTimeMs: r.now,
+    });
+    const failing: PasskeyStore = {
+      ...r.store,
+      savePasskey: async () => {
+        throw new PasskeyError('permission-denied', 'exists');
+      },
+    };
+    await fails(
+      registerVerifyCore(failing, {
+        uid: 'uA',
+        rp,
+        challengeId: 'cf',
+        response: authenticator().create(o.options.challenge),
+        now: r.now,
+        deviceId: 'dev-1',
+        authTimeMs: r.now,
+      }),
+      'permission-denied',
+    );
+    expect(r.keys.has(r.dev.id)).toBe(true);
   });
 });

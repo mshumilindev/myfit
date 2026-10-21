@@ -52,11 +52,12 @@ const store: PasskeyStore = {
   },
   getPasskey: async (id) => keys.get(id) ?? null,
   savePasskey: async (id, d) => void keys.set(id, d),
+  deletePasskey: async (id) => void keys.delete(id),
   updatePasskey: async (id, p) => void keys.set(id, { ...keys.get(id)!, ...p }),
   listPasskeys: async (uid) =>
     [...keys]
       .filter(([, d]) => d.userId === uid)
-      .map(([id, d]) => ({ id, transports: d.transports })),
+      .map(([id, d]) => ({ id, transports: d.transports, deviceId: d.deviceId })),
 };
 
 let server: Server;
@@ -93,6 +94,7 @@ test.beforeAll(async () => {
             rp,
             challengeId: randomUUID(),
             now,
+            authTimeMs: now,
           }),
         );
       if (req.url === '/register/verify') {
@@ -102,6 +104,8 @@ test.beforeAll(async () => {
           challengeId: b.challengeId,
           response: b.response,
           now,
+          deviceId: 'e2e-device',
+          authTimeMs: now,
         });
         return json(200, { ok: true });
       }
@@ -113,6 +117,7 @@ test.beforeAll(async () => {
             rp,
             challengeId: randomUUID(),
             now,
+            authTimeMs: now,
           }),
         );
       if (req.url === '/login/verify')

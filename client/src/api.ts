@@ -96,6 +96,11 @@ export async function signInWithPayload(payload: AuthPayload, remember = false):
   }
 }
 
+/** Signs this device back in with a fresh custom token (after "sign out all other devices" ended every refresh token). */
+export async function renewSessionWithToken(token: string): Promise<void> {
+  await signInWithCustomToken(auth, token);
+}
+
 /** The identifier the person signed in with (username), kept so a re-authentication asks only for the password. */
 export function getLoginId(): string | null {
   return localStorage.getItem(LOGIN_ID_KEY);
@@ -119,7 +124,11 @@ export async function signOut(opts: { forget?: boolean } = {}): Promise<void> {
   try {
     // This device's session record goes away while the token still works (best effort, short).
     await Promise.race([
-      callFn('sessionEnd', { deviceId: sessionDeviceId() }, { quiet: true }),
+      callFn(
+        'sessionEnd',
+        { deviceId: sessionDeviceId(), forget: opts.forget === true },
+        { quiet: true },
+      ),
       new Promise((r) => setTimeout(r, 1500)),
     ]);
   } catch {

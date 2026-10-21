@@ -18,6 +18,7 @@ vi.mock('../firebase', () => ({ db: {}, storage: {} }));
 vi.mock('../api', async (orig) => ({
   ...(await orig<typeof import('../api')>()),
   callFn: (...a: unknown[]) => pm.callFn(...a),
+  renewSessionWithToken: (...a: unknown[]) => pm.renew(...a),
   currentUid: () => pm.uid,
   setUsername: (...a: unknown[]) => pm.setUsername(...a),
   trackMutation: <T,>(p: Promise<T>) => p,
@@ -106,6 +107,7 @@ beforeEach(() => {
   pm.revalMode = 'network';
   pm.fetchProfile.mockReset().mockImplementation(async (id: string) => pm.data[id] ?? profile());
   pm.callFn.mockReset().mockResolvedValue({});
+  pm.renew.mockReset();
   pm.setUsername.mockReset();
   pm.updateDoc.mockReset().mockResolvedValue(undefined);
   pm.setDoc.mockReset().mockResolvedValue(undefined);
@@ -466,6 +468,15 @@ describe('ProfileView: password and sign out', () => {
     });
     expect(pw(en.profilePasswordNew).value).toBe('');
     expect(pw(en.profilePasswordCurrent).value).toBe('');
+  });
+
+  it('a change signs this device back in with the fresh token the server returns', async () => {
+    pm.callFn.mockResolvedValue({ ok: true, token: 'fresh' });
+    const { shell } = await settings();
+    fill('old', '123456', '123456');
+    fireEvent.click(submit());
+    await waitFor(() => expect(shell.toast).toHaveBeenCalled());
+    expect(pm.renew).toHaveBeenCalledWith('fresh');
   });
 
   it('a wrong current password shows the server message', async () => {

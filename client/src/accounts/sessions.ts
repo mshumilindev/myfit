@@ -2,7 +2,7 @@
  * Sessions (SPO-212), client side: this device's record on the server, the list for Profile → Settings → Sessions, and the
  * watch that signs this device out when it was signed out from another one. Server rules: functions/src/sessions.ts.
  */
-import { callFn } from '../api';
+import { callFn, renewSessionWithToken } from '../api';
 import { sessionDeviceId } from './sessionDevice';
 
 export { sessionDeviceId };
@@ -44,11 +44,13 @@ export async function revokeSession(deviceId: string): Promise<void> {
 }
 
 export async function revokeOtherSessions(): Promise<number> {
-  const r = await callFn<{ revoked: number }>(
+  const r = await callFn<{ revoked: number; token?: string }>(
     'sessionRevokeOthers',
     { deviceId: sessionDeviceId() },
     quiet,
   );
+  // The server ended every refresh token of the account, this device's too: sign it back in right away.
+  if (r.token) await renewSessionWithToken(r.token);
   return r.revoked;
 }
 

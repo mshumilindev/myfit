@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   checkCore,
+  MAX_SESSIONS,
   listCore,
   revokeCore,
   revokeOthersCore,
@@ -111,5 +112,26 @@ describe('session rules', () => {
       99,
     );
     expect(m.get('dev-laptop-1')).toMatchObject({ createdAt: 10, lastSeenAt: 99, city: 'warsaw' });
+  });
+
+  it('caps the records of one account: the least recently seen go first', async () => {
+    const { store, m } = memorySessions();
+    for (let i = 0; i < MAX_SESSIONS; i++)
+      await checkCore(store, `dev-${String(i).padStart(8, '0')}`, info('x'), i + 1);
+    expect(m.size).toBe(MAX_SESSIONS);
+    await checkCore(store, 'dev-new-00001', info('x'), 1000);
+    expect(m.size).toBe(MAX_SESSIONS);
+    expect(m.has('dev-00000000')).toBe(false);
+    expect(m.has('dev-new-00001')).toBe(true);
+  });
+
+  it('eviction never drops a revocation, so a revoked device cannot re-adopt itself', async () => {
+    const { store, m } = memorySessions();
+    await checkCore(store, 'dev-revoked-1', info('x'), 1); // oldest
+    await revokeCore(store, 'dev-revoked-1', 2);
+    for (let i = 0; i < MAX_SESSIONS; i++)
+      await checkCore(store, `dev-${String(i).padStart(8, '0')}`, info('x'), 10 + i);
+    expect(m.get('dev-revoked-1')?.revokedAt).toBe(2);
+    expect(await checkCore(store, 'dev-revoked-1', info('x'), 999)).toEqual({ active: false });
   });
 });

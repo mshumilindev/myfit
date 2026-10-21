@@ -8,6 +8,7 @@ export const pm = {
   fetchFail: null as null | { status?: number; message: string },
   fetchProfile: vi.fn(),
   callFn: vi.fn(),
+  renew: vi.fn(),
   setUsername: vi.fn(),
   updateDoc: vi.fn(),
   setDoc: vi.fn(),
