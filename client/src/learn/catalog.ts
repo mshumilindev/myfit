@@ -457,6 +457,41 @@ export const CATALOG: Topic[] = [
         'trainer',
       ],
       [
+        'team-add-manager',
+        'Add a team member',
+        'Invite a manager from Team: one email, a link valid for 7 days, one use.',
+        'trainer',
+      ],
+      [
+        'team-manager-access',
+        'What a manager sees',
+        'A manager sees the schedule and client contacts, never workouts, health, nutrition, notes or messages.',
+        'trainer',
+      ],
+      [
+        'team-waiting',
+        'Waiting for the client’s app',
+        'Why a client shows as waiting for the app and what to do: the client opens Spotter once.',
+        'trainer',
+      ],
+      [
+        'team-remove',
+        'Remove a manager or leave',
+        'End a manager’s access at once, or leave a team yourself; clients are not affected.',
+        'trainer',
+      ],
+      [
+        'team-spotter',
+        'Spotter messages',
+        'Spotter is the pinned read-only thread with requests and team events; buttons act on the card.',
+        'trainer',
+      ],
+      [
+        'team-privacy',
+        'Who saw your data',
+        'What a client sees about the team and how the privacy note reads: the server sees times, never content.',
+      ],
+      [
         'users-admin',
         'Manage users',
         'See every account, search, and open a user as an admin.',
