@@ -187,6 +187,12 @@ export const clientEt: typeof clientEn = {
   mtMove: 'Teisalda',
   mtWaiting: 'Ootel',
   mtYouAsked: (when) => `Palusid aega ${when}`,
+  mtReqStatus: 'Ootab sinu vastust',
+  mtReqTitleManager: (who, trainer) =>
+    `${who} treeneri ${trainer} meeskonnast palub treeningu ümber tõsta`,
+  mtReqTitleTrainer: (trainer) => `${trainer} palub treeningu ümber tõsta`,
+  mtReqFailed: 'Vastuse saatmine ebaõnnestus. Proovi uuesti.',
+  mtReqAnswer: 'Vasta',
   mtShowAll: (n) => `Näita kõiki: ${n}`,
   mtNoSessions: 'Treeneriga pole treeninguid planeeritud.',
   mtPeople: (n) => P(n, '{n} inimene', '{n} inimest'),

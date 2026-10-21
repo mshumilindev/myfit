@@ -199,7 +199,7 @@ export function UpcomingSessions({
             sub={`${whenText(s, locale)} · ${gymName(s.gymId)}${people}${waiting && r ? `. ${cc.mtYouAsked(askedText(r, locale))}` : ''}`}
             trailing={
               r ? (
-                <Tag tone="illness">{cc.mtWaiting}</Tag>
+                <Tag tone="illness">{waiting ? cc.mtWaiting : cc.mtReqAnswer}</Tag>
               ) : (
                 <Button variant="secondary" size="sm" onClick={() => onMove(s)}>
                   {cc.mtMove}

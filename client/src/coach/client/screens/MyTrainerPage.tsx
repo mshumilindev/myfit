@@ -26,9 +26,10 @@ import { ClientRescheduleSheet, UpcomingSessions, useMySessions } from './Client
 import { TrainerUnavailable } from './TrainerUnavailable';
 import { NoTrainerPage } from './NoTrainerPage';
 import { ClientTeamPage } from './ClientTeamPage';
+import { ClientMoveRequests } from './ClientMoveRequests';
 import { useClientTeam } from './useClientTeam';
 import { PushedPage } from './PushedPage';
-import type { ScheduleSlot } from '../../schedule/types';
+import type { RescheduleRequest, ScheduleSlot } from '../../schedule/types';
 
 export interface MyTrainerPageProps {
   port?: ClientCoachPort;
@@ -55,7 +56,9 @@ export function MyTrainerPage(p: MyTrainerPageProps) {
   const { ask, dialog: reauthDialog } = useReauthGuard();
   const [leave, setLeave] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
-  const [move, setMove] = useState<{ slot?: ScheduleSlot } | null>(null);
+  const [move, setMove] = useState<{ slot?: ScheduleSlot; counterOf?: RescheduleRequest } | null>(
+    null,
+  );
   const [teamOpen, setTeamOpen] = useState(false);
   const teamInfo = useClientTeam(store.port);
 
@@ -116,6 +119,14 @@ export function MyTrainerPage(p: MyTrainerPageProps) {
         >
           {cc.mtMigratedNote(first)}
         </Notice>
+      )}
+
+      {my && (
+        <ClientMoveRequests
+          my={my}
+          trainerFirst={first}
+          onPropose={(r) => setMove({ counterOf: r })}
+        />
       )}
 
       {my && <UpcomingSessions my={my} onMove={(s) => setMove({ slot: s })} />}
@@ -225,6 +236,7 @@ export function MyTrainerPage(p: MyTrainerPageProps) {
         <ClientRescheduleSheet
           my={my}
           slot={move.slot}
+          counterOf={move.counterOf}
           onClose={() => setMove(null)}
           onOpenChat={p.onChat}
         />

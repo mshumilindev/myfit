@@ -200,6 +200,12 @@ export const clientEn = {
   mtMove: 'Move',
   mtWaiting: 'Waiting',
   mtYouAsked: (when: string) => `You asked for ${when}`,
+  mtReqStatus: 'Needs your answer',
+  mtReqTitleManager: (who: string, trainer: string) =>
+    `${who} from ${trainer}'s team asks to move a session`,
+  mtReqTitleTrainer: (trainer: string) => `${trainer} asks to move a session`,
+  mtReqFailed: 'Could not send your answer. Try again.',
+  mtReqAnswer: 'Answer needed',
   mtShowAll: (n: number) => `Show all ${n}`,
   mtNoSessions: 'No sessions with your trainer are planned.',
   mtPeople: (n: number) => plural('en', n, { one: '{n} person', other: '{n} people' }),
