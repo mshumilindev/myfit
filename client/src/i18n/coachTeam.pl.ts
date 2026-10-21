@@ -128,7 +128,8 @@ export const teamPl: typeof teamEn = {
   jtDeclinedBody: 'Nic się nie zmieniło. Możesz zamknąć tę stronę.',
   jtOfflineTitle: 'Brak połączenia',
   jtOfflineBody: 'Nie udało się połączyć z serwerem. Sprawdź połączenie i spróbuj ponownie.',
-  jtNotEligible: 'To konto nie może zostać menedżerem. Użyj konta bez trenera i klientów.',
+  jtNotEligible:
+    'To konto nie może przyjąć tego zaproszenia. Zaloguj się zweryfikowanym adresem e-mail, na który wysłano zaproszenie, i użyj konta bez trenera i klientów.',
   jtRetry: 'Spróbuj ponownie',
   jtOk: 'Gotowe',
   jtLoading: 'Wczytywanie zaproszenia',

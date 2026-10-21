@@ -131,7 +131,8 @@ export const teamLt: typeof teamEn = {
   jtDeclinedBody: 'Niekas nepasikeitė. Šį puslapį galite uždaryti.',
   jtOfflineTitle: 'Nėra ryšio',
   jtOfflineBody: 'Nepavyko susisiekti su serveriu. Patikrinkite ryšį ir bandykite dar kartą.',
-  jtNotEligible: 'Ši paskyra negali tapti vadybininko. Naudokite paskyrą be trenerio ir klientų.',
+  jtNotEligible:
+    'Ši paskyra negali priimti šio kvietimo. Prisijunkite patvirtintu el. paštu, į kurį išsiųstas kvietimas, ir naudokite paskyrą be trenerio ir klientų.',
   jtRetry: 'Bandyti dar kartą',
   jtOk: 'Atlikta',
   jtLoading: 'Įkeliamas kvietimas',

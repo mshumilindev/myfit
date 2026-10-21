@@ -275,6 +275,8 @@ export const clientEn = {
   tmgCan:
     'Team members can see your schedule, your name and your contact details. They can propose a new time; you answer.',
   tmgCannot: 'They do not see your workouts, health, nutrition, notes or messages.',
+  tmgTiming:
+    'For reminders, our server sees only the times of your upcoming sessions — never the gym, program or notes.',
   tmgActionsHead: 'What managers did with your schedule',
   tmgActionsNone: 'Nothing yet',
   tmgFailed: 'Could not load the team.',

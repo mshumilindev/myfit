@@ -271,6 +271,8 @@ export const clientPl: typeof clientEn = {
   tmgCan:
     'Członkowie zespołu widzą Twój grafik, imię i dane kontaktowe. Mogą zaproponować nowy termin, a odpowiadasz Ty.',
   tmgCannot: 'Nie widzą Twoich treningów, zdrowia, żywienia, notatek ani wiadomości.',
+  tmgTiming:
+    'Do przypomnień nasz serwer widzi tylko godziny Twoich najbliższych treningów — nigdy sali, programu ani notatek.',
   tmgActionsHead: 'Co menedżerowie zrobili z Twoim grafikiem',
   tmgActionsNone: 'Na razie nic',
   tmgFailed: 'Nie udało się wczytać zespołu.',

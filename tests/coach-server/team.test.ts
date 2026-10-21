@@ -1,3 +1,4 @@
+import { acceptWithMail } from './acceptHelper';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createMemoryKv, type MemoryKv } from '../../functions/src/coach/memoryKv';
 import { CoachError, type Actor, type Ctx } from '../../functions/src/coach/service';
@@ -65,7 +66,7 @@ async function seed() {
 const inviteManager = async (email = 'irina@example.com') => teamInvite(ctx(), owner, { email });
 async function joined() {
   const inv = await inviteManager();
-  await teamAccept(ctx(), mgr, { inviteId: inv.inviteId });
+  await acceptWithMail(ctx(), mgr, { inviteId: inv.inviteId });
   return inv;
 }
 
@@ -113,7 +114,7 @@ describe('team invites', () => {
       'permission-denied:not-your-invite',
     );
     await teamInviteRevoke(ctx(), owner, { inviteId: r.inviteId });
-    expect(await code(teamAccept(ctx(), mgr, { inviteId: r.inviteId }))).toBe(
+    expect(await code(acceptWithMail(ctx(), mgr, { inviteId: r.inviteId }))).toBe(
       'failed-precondition:invite-closed',
     );
     expect((await teamRead(ctx(), owner)).invites).toEqual([]);
@@ -122,7 +123,7 @@ describe('team invites', () => {
   it('expires after seven days', async () => {
     const r = await inviteManager();
     t += 7 * DAY + 1;
-    expect(await code(teamAccept(ctx(), mgr, { inviteId: r.inviteId }))).toBe(
+    expect(await code(acceptWithMail(ctx(), mgr, { inviteId: r.inviteId }))).toBe(
       'failed-precondition:invite-closed',
     );
     expect(await code(teamInvitePreview(ctx(), r.inviteId))).toBe(
@@ -158,7 +159,7 @@ describe('accepting', () => {
     });
     expect(kv.has(`users/t1/notices/team-join-${inv.inviteId}`)).toBe(true);
     // the link cannot be reused
-    expect(await code(teamAccept(ctx(), stranger, { inviteId: inv.inviteId }))).toBe(
+    expect(await code(acceptWithMail(ctx(), stranger, { inviteId: inv.inviteId }))).toBe(
       'failed-precondition:invite-closed',
     );
   });
@@ -182,6 +183,18 @@ describe('accepting', () => {
     );
   });
 
+  it('an invite works only for the verified e-mail it was written for', async () => {
+    const inv = await teamInvite(ctx(), owner, { email: 'someone@example.com', role: 'manager' });
+    const body = { inviteId: inv.inviteId };
+    const m = { uid: 'm1', role: 'member' } as Actor;
+    expect(await code(teamAccept(ctx(), m, body))).toBe('permission-denied:wrong-email');
+    expect(await code(teamAccept(ctx(), { ...m, email: 'other@example.com' }, body))).toBe(
+      'permission-denied:wrong-email',
+    );
+    expect((await kv.get(`teamInvites/${inv.inviteId}`))?.status).toBe('pending');
+    expect(await code(teamAccept(ctx(), { ...m, email: 'someone@example.com' }, body))).toBe('ok');
+  });
+
   it('what a removed member invited can no longer be accepted', async () => {
     await joined();
     const inv = await teamInvite(ctx(), mgrNow, { email: 'friend@example.com', role: 'trainer' });
@@ -189,7 +202,7 @@ describe('accepting', () => {
     expect((await kv.get(`teamInvites/${inv.inviteId}`))?.status).toBe('revoked');
     await kv.set('users/t9', { role: 'trainer', status: 'active' });
     expect(
-      await code(teamAccept(ctx(), { uid: 't9', role: 'trainer' }, { inviteId: inv.inviteId })),
+      await code(acceptWithMail(ctx(), { uid: 't9', role: 'trainer' }, { inviteId: inv.inviteId })),
     ).toBe('failed-precondition:invite-closed');
   });
 
@@ -220,7 +233,7 @@ describe('accepting', () => {
 
   it('a manager lists the active clients of every trainer in the team, with conversation ids; nobody else may', async () => {
     await joined();
-    await teamAccept(ctx(), trainer2, {
+    await acceptWithMail(ctx(), trainer2, {
       inviteId: (await teamInvite(ctx(), mgrNow, { email: 'andriy@example.com' })).inviteId,
     });
     await kv.set('users/c1', { role: 'member', status: 'active', firstName: 'Zoe' });
@@ -245,10 +258,10 @@ describe('accepting', () => {
     await joined();
     const r = await teamInvite(ctx(), mgrNow, { email: 'andriy@example.com' });
     expect((await teamRead(ctx(), mgrNow)).invites[0].role).toBe('trainer');
-    expect(await code(teamAccept(ctx(), stranger, { inviteId: r.inviteId }))).toBe(
+    expect(await code(acceptWithMail(ctx(), stranger, { inviteId: r.inviteId }))).toBe(
       'failed-precondition:account-not-eligible',
     );
-    await teamAccept(ctx(), trainer2, { inviteId: r.inviteId });
+    await acceptWithMail(ctx(), trainer2, { inviteId: r.inviteId });
     expect(await kv.get('users/t2')).toMatchObject({ role: 'trainer', teamId: 't1' });
     expect(await kv.get('teams/t1/members/t2')).toMatchObject({
       role: 'trainer',
@@ -258,14 +271,14 @@ describe('accepting', () => {
 
   it('refuses a manager invite for an account that coaches or is coached; the inviter cannot join their own team', async () => {
     const r = await inviteManager();
-    expect(await code(teamAccept(ctx(), owner, { inviteId: r.inviteId }))).toBe(
+    expect(await code(acceptWithMail(ctx(), owner, { inviteId: r.inviteId }))).toBe(
       'invalid-argument:cannot-join-own-team',
     );
-    expect(await code(teamAccept(ctx(), trainer2, { inviteId: r.inviteId }))).toBe(
+    expect(await code(acceptWithMail(ctx(), trainer2, { inviteId: r.inviteId }))).toBe(
       'failed-precondition:account-not-eligible',
     );
     await kv.set('coaching/m1', { status: 'active', trainerId: 't2' });
-    expect(await code(teamAccept(ctx(), mgr, { inviteId: r.inviteId }))).toBe(
+    expect(await code(acceptWithMail(ctx(), mgr, { inviteId: r.inviteId }))).toBe(
       'failed-precondition:account-not-eligible',
     );
   });
@@ -273,7 +286,7 @@ describe('accepting', () => {
   it('decline closes the invite and tells the inviter', async () => {
     const r = await inviteManager();
     await teamDecline(ctx(), mgr, { inviteId: r.inviteId });
-    expect(await code(teamAccept(ctx(), mgr, { inviteId: r.inviteId }))).toBe(
+    expect(await code(acceptWithMail(ctx(), mgr, { inviteId: r.inviteId }))).toBe(
       'failed-precondition:invite-closed',
     );
     expect(kv.has(`users/t1/notices/team-decline-${r.inviteId}`)).toBe(true);
@@ -311,7 +324,7 @@ describe('removing and leaving', () => {
     await joined();
     await teamRemoveMember(ctx(), owner, { uid: 'm1' });
     const r = await inviteManager('irina2@example.com');
-    await teamAccept(ctx(), mgrNow, { inviteId: r.inviteId });
+    await acceptWithMail(ctx(), mgrNow, { inviteId: r.inviteId });
     expect(await kv.get('teams/t1/members/m1')).toMatchObject({
       status: 'active',
       role: 'manager',

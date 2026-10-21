@@ -48,7 +48,10 @@ async function run<T>(
 ): Promise<T> {
   const { uid, user } = await requireRole(req, roles);
   try {
-    return await fn({ uid, role: user.role });
+    const t = req.auth?.token;
+    const email =
+      t?.email_verified === true && typeof t.email === 'string' ? t.email.toLowerCase() : undefined;
+    return await fn({ uid, role: user.role, ...(email ? { email } : {}) });
   } catch (e) {
     if (e instanceof CoachError) throw new HttpsError(e.code, e.reason, { reason: e.reason });
     if (e instanceof HttpsError) throw e;

@@ -1,3 +1,4 @@
+import { acceptWithMail } from './acceptHelper';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createMemoryKv, type MemoryKv } from '../../functions/src/coach/memoryKv';
 import {
@@ -9,7 +10,6 @@ import {
   type Ctx,
 } from '../../functions/src/coach/service';
 import {
-  teamAccept,
   teamForClient,
   inviteClientForTrainer,
   teamInvite,
@@ -73,7 +73,7 @@ beforeEach(async () => {
   });
   await kv.set('coaching/c1', { clientId: 'c1', trainerId: 't1', status: 'active', keyEpoch: 1 });
   const inv = await teamInvite(ctx(), owner, { email: 'irina@example.com' });
-  await teamAccept(ctx(), { uid: 'm1', role: 'member' }, { inviteId: inv.inviteId });
+  await acceptWithMail(ctx(), { uid: 'm1', role: 'member' }, { inviteId: inv.inviteId });
   pushes.length = 0;
 });
 
@@ -293,7 +293,7 @@ describe('delegations follow the team (ADR 005)', () => {
     await kv.set('users/m3', { role: 'member', status: 'active', firstName: 'Third' });
     const inv = await teamInvite(ctx(), owner, { email: 'third@example.com' });
     pushes.length = 0;
-    await teamAccept(ctx(), { uid: 'm3', role: 'member' }, { inviteId: inv.inviteId });
+    await acceptWithMail(ctx(), { uid: 'm3', role: 'member' }, { inviteId: inv.inviteId });
     expect(pushes).toContainEqual(['c1', 'sync']);
     // a trainer joining the team does not (nothing to delegate)
     await kv.set('users/t2', { role: 'trainer', status: 'active', firstName: 'Andriy' });
@@ -303,7 +303,7 @@ describe('delegations follow the team (ADR 005)', () => {
       { email: 'a@example.com' },
     );
     pushes.length = 0;
-    await teamAccept(ctx(), { uid: 't2', role: 'trainer' }, { inviteId: inv2.inviteId });
+    await acceptWithMail(ctx(), { uid: 't2', role: 'trainer' }, { inviteId: inv2.inviteId });
     expect(pushes.filter(([, k]) => k === 'sync')).toEqual([]);
   });
 

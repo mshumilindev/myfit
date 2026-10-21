@@ -1,3 +1,4 @@
+import { acceptWithMail } from './acceptHelper';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createMemoryKv, type MemoryKv } from '../../functions/src/coach/memoryKv';
 import { CoachError, type Actor, type Ctx } from '../../functions/src/coach/service';
@@ -5,7 +6,6 @@ import {
   clientRemovalCancel,
   clientRemovalCreate,
   clientRemovalRespond,
-  teamAccept,
   teamInvite,
   teamRequests,
 } from '../../functions/src/coach/team';
@@ -56,7 +56,7 @@ beforeEach(async () => {
     mode: 'full',
   });
   const inv = await teamInvite(ctx(), owner, { email: 'irina@example.com' });
-  await teamAccept(ctx(), { uid: 'm1', role: 'member' }, { inviteId: inv.inviteId });
+  await acceptWithMail(ctx(), { uid: 'm1', role: 'member' }, { inviteId: inv.inviteId });
 });
 
 describe('client removal requests', () => {

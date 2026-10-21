@@ -24,6 +24,7 @@ const REASONS: Record<string, TeamErrorCode> = {
   'no-member': 'not-found',
   'invite-closed': 'closed',
   'account-not-eligible': 'not-eligible',
+  'wrong-email': 'not-eligible',
 };
 
 function toTeamError(e: unknown): TeamPortError {

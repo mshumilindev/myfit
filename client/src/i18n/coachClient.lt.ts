@@ -264,6 +264,8 @@ export const clientLt: typeof clientEn = {
   tmgCan:
     'Komandos nariai mato jūsų tvarkaraštį, vardą ir kontaktus. Jie gali pasiūlyti naują laiką, o atsakote jūs.',
   tmgCannot: 'Jie nemato jūsų treniruočių, sveikatos, mitybos, užrašų ar žinučių.',
+  tmgTiming:
+    'Priminimams mūsų serveris mato tik artimiausių treniruočių laiką — niekada salės, programos ar užrašų.',
   tmgActionsHead: 'Ką vadybininkai darė su jūsų tvarkaraščiu',
   tmgActionsNone: 'Kol kas nieko',
   tmgFailed: 'Nepavyko įkelti komandos.',

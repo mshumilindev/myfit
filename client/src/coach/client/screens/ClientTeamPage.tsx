@@ -31,7 +31,7 @@ export function ClientTeamPage({ port, onBack }: { port: ClientCoachPort; onBack
       {team && (
         <>
           <Notice tone="rest" icon="shield-check" aligned>
-            {cc.tmgCan} {cc.tmgCannot}
+            {cc.tmgCan} {cc.tmgCannot} {cc.tmgTiming}
           </Notice>
           <GroupedList header={cc.tmgPeople}>
             {team.members.map((m) => (

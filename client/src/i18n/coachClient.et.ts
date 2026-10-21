@@ -257,6 +257,8 @@ export const clientEt: typeof clientEn = {
   tmgCan:
     'Meeskonnaliikmed näevad sinu ajakava, nime ja kontakte. Nad saavad pakkuda uut aega, vastad sina.',
   tmgCannot: 'Nad ei näe sinu treeninguid, tervist, toitumist, märkmeid ega sõnumeid.',
+  tmgTiming:
+    'Meeldetuletusteks näeb meie server ainult sinu lähimate treeningute kellaaegu — mitte kunagi saali, programmi ega märkmeid.',
   tmgActionsHead: 'Mida haldurid sinu ajakavaga tegid',
   tmgActionsNone: 'Veel mitte midagi',
   tmgFailed: 'Meeskonna laadimine ebaõnnestus.',

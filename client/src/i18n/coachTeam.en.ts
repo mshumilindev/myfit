@@ -127,7 +127,7 @@ export const teamEn = {
   jtOfflineTitle: 'No connection',
   jtOfflineBody: 'We could not reach the server. Check the connection and try again.',
   jtNotEligible:
-    'This account cannot join as a manager. Use an account without a trainer or clients.',
+    'This account cannot join with this invite. Sign in with the verified e-mail the invite was sent to, and use an account without a trainer or clients.',
   jtRetry: 'Try again',
   jtOk: 'Done',
   jtLoading: 'Loading the invite',

@@ -226,6 +226,8 @@ export async function teamAccept(
   if (i.status !== 'pending' || i.expiresAt <= now) fail('failed-precondition', 'invite-closed');
   if (i.invitedBy === actor.uid || i.teamId === actor.uid)
     fail('invalid-argument', 'cannot-join-own-team');
+  // The link is not a bearer token: it works only for the verified e-mail it was written for (a leaked link is useless).
+  if (actor.email !== i.emailLower) fail('permission-denied', 'wrong-email');
   const kv = ctx.kv;
   const joined = await kv.tx(async (t) => {
     // re-read INSIDE the transaction: two accounts racing one link cannot both join
@@ -972,7 +974,12 @@ export async function teamNotices(
 ): Promise<{ items: SpotterItem[]; unread: number }> {
   const rows = await ctx.kv.list(`users/${actor.uid}/notices`, { limit: 200 });
   const kinds = new Set<string>(SPOTTER_KINDS);
+  // "not marked" notices carry a session time: they are forgotten after 30 days
+  const stale = ctx.now() - 30 * 86_400_000;
+  for (const r of rows)
+    if (r.data.kind === 'unmarked' && Number(r.data.createdAt) < stale) await ctx.kv.del(r.path);
   const mine = rows
+    .filter((r) => !(r.data.kind === 'unmarked' && Number(r.data.createdAt) < stale))
     .map((r) => r.data as Record<string, unknown>)
     .filter((n) => kinds.has(String(n.kind)))
     .sort((a, b) => Number(b.createdAt) - Number(a.createdAt))

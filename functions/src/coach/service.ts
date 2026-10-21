@@ -76,6 +76,8 @@ export type Role = 'member' | 'trainer' | 'admin' | 'manager';
 export interface Actor {
   uid: string;
   role: Role;
+  /** the sign-in e-mail, lower-case, ONLY when the identity provider verified it */
+  email?: string;
 }
 export interface Ctx {
   kv: Kv;
