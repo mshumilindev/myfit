@@ -51,6 +51,15 @@ describe('Firestore team port', () => {
     expect(p.peek()).toBe(d);
   });
 
+  it("Spotter's team notices and their read mark are server calls, so read state follows the user to every device (SPO-236)", async () => {
+    const feed = { items: [], unread: 3 };
+    const { fs, calls } = fsWith((n) => (n === 'teamNotices' ? feed : { ok: true }));
+    const p = createFirestoreTeamPort(fs);
+    expect(await p.notices()).toBe(feed);
+    await p.markNoticesRead();
+    expect(calls.map((c) => c[0])).toEqual(['teamNotices', 'teamNoticesRead']);
+  });
+
   it('maps every action to its callable with only the ids it needs', async () => {
     const { fs, calls } = fsWith((n) =>
       n === 'teamInvite' ? { inviteId: 'tok2', url: 'https://x/#/team-invite/tok2' } : { ok: true },

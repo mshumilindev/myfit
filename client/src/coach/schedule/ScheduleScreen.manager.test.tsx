@@ -143,6 +143,14 @@ describe('manager toolbar and header (AC 1)', () => {
   });
 });
 
+describe("clients whose app has not delegated yet (SPO-201 'waiting for client's app')", () => {
+  it('the manager schedule explains it with a status notice', async () => {
+    mountScreen(true);
+    const note = await screen.findByText(teamEn.mcPending(5));
+    expect(note.closest('[role="status"]')).toBeTruthy();
+  });
+});
+
 describe('manager inspector (AC 2, 4, 5)', () => {
   it('shows the Trainer row and Move / Cancel, with no Message button', () => {
     render(<Inspector slotId={FRI_ID} manager />);
@@ -214,6 +222,21 @@ describe('manager inspector (AC 2, 4, 5)', () => {
     );
     expect(screen.getByText('Proposed by trainer Olena Kovalenko')).toBeTruthy();
     expect(screen.queryByRole('button', { name: t.scCancelRequest })).toBeNull();
+  });
+
+  it('once the client accepts the manager request, the trainer sees the session "Just moved" at the new time', () => {
+    const accepted = req({
+      status: 'accepted',
+      decidedAt: FIXTURE_NOW - 1000,
+    });
+    render(<Inspector slotId={FRI_ID} manager={false} requests={[accepted]} />);
+    expect(screen.getByText(t.scJustMoved)).toBeTruthy();
+    expect(screen.queryByText(t.scReqByYou)).toBeNull();
+  });
+
+  it('a pending manager request is not yet "Just moved"', () => {
+    render(<Inspector slotId={FRI_ID} manager={false} requests={[req()]} />);
+    expect(screen.queryByText(t.scJustMoved)).toBeNull();
   });
 });
 

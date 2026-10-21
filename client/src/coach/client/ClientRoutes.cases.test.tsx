@@ -88,6 +88,16 @@ describe('pages', () => {
     expect(navigate).toHaveBeenLastCalledWith('#/health/privacy');
   });
 
+  it('#/trainer/spotter (the push deep link) opens the pinned Spotter thread, read-only; Back closes it', async () => {
+    link('active');
+    const onClose = vi.fn();
+    render(<ClientRoutes route="trainer/spotter" onClose={onClose} />);
+    expect(await screen.findByText(cc.spTitle)).toBeTruthy();
+    expect(screen.queryByRole('textbox')).toBeNull();
+    fireEvent.click(screen.getAllByRole('button', { name: cc.ccBack })[0]);
+    expect(onClose).toHaveBeenCalled();
+  });
+
   it('leaving the trainer sends the member back to Today', async () => {
     const { configureReauth, forgetReauth } = await import('../security/reauth');
     const { createFixturesReauthPort } = await import('../security/__fixtures__/reauth');

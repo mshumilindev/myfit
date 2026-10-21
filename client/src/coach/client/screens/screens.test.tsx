@@ -221,6 +221,8 @@ describe("the trainer's team (SPO-205)", () => {
     expect(screen.getByText(t.tmgRoleManager)).toBeTruthy();
     expect(screen.getByText(t.tmgKind['move-request']!)).toBeTruthy();
     expect(screen.getByText(new RegExp(t.tmgCannot))).toBeTruthy();
+    // what they CAN see is stated too: schedule, name and contact details
+    expect(screen.getByText(new RegExp(t.tmgCan.slice(0, 40)))).toBeTruthy();
   });
 
   it('Who saw your data also lists what managers did with the schedule', async () => {

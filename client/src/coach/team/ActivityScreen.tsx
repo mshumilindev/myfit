@@ -5,6 +5,7 @@ import { EmptyState } from '../../components/ui/EmptyState';
 import { FailedState } from '../../components/ui/FailedState';
 import { GroupedList, ListRow } from '../../components/ui/GroupedList';
 import { IconTile } from '../../components/ui/IconTile';
+import { Notice } from '../../components/ui/Notice';
 import { Segmented } from '../../components/ui/Segmented';
 import { SectionLabel } from '../../components/ui/SectionLabel';
 import { SkeletonRows } from '../../components/ui/Skeleton';
@@ -56,7 +57,13 @@ const STATUS_TONE: Record<string, Tone> = {
   accepted: 'ok',
   approved: 'ok',
   done: 'ok',
+  missed: 'danger',
 };
+
+/** Session marks carry their state themselves (no later answer to wait for): the row shows Done / Missed. */
+const rowStatus = (e: ActivityRow): string | undefined =>
+  e.liveStatus ??
+  (e.kind === 'session-done' ? 'done' : e.kind === 'session-missed' ? 'missed' : undefined);
 
 /**
  * Activity log (SPO-203 / SPO-238, boards D18 / D19 / D20): who did what, by day. The owner trainer reads everything; a manager
@@ -163,11 +170,7 @@ export function ActivityScreen({
 
   const scope = log.scope;
   const subtitle =
-    scope === 'owner'
-      ? tm.actSubOwner
-      : scope === 'all'
-        ? tm.actSubAll
-        : `${tm.actSubOwn} ${tm.actSubOwnHint(shortName(ownerName))}`;
+    scope === 'owner' ? tm.actSubOwner : scope === 'all' ? tm.actSubAll : tm.actSubOwn;
   const filterable = scope !== 'own';
   const mine = (uid: string) => uid === viewerUid;
   const options = [
@@ -204,7 +207,18 @@ export function ActivityScreen({
 
   return (
     <Page>
-      <Header eyebrow={back} title={tm.actTitle} slots={false} subtitle={subtitle} />
+      <Header
+        eyebrow={back}
+        title={tm.actTitle}
+        slots={false}
+        subtitle={subtitle}
+        actions={scope === 'all' ? <Tag tone="accent">{tm.actFullAccess}</Tag> : undefined}
+      />
+      {scope === 'own' && (
+        <Notice icon="eye-slash">
+          {tm.actOwnNotice} {tm.actSubOwnHint(shortName(ownerName))}
+        </Notice>
+      )}
       {filterable && actors.length > 1 && (
         <Segmented
           label={tm.actFilterLabel}
@@ -243,9 +257,9 @@ export function ActivityScreen({
                     label={tm.actKind[e.kind] ?? e.kind}
                     sub={[shortName(e.actorName), e.subjectName, coachClock(e.ts)].join(' · ')}
                     trailing={
-                      e.liveStatus ? (
-                        <Tag tone={STATUS_TONE[e.liveStatus] ?? 'neutral'}>
-                          {tm.actStatus[e.liveStatus] ?? e.liveStatus}
+                      rowStatus(e) ? (
+                        <Tag tone={STATUS_TONE[rowStatus(e)!] ?? 'neutral'}>
+                          {tm.actStatus[rowStatus(e)!] ?? rowStatus(e)}
                         </Tag>
                       ) : undefined
                     }

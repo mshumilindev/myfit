@@ -159,7 +159,7 @@ export function ChatScreen({
       />
     );
 
-  const pinned = spotter.feed && spotter.feed.items.length > 0 && (
+  const pinned = spotter.feed && (
     <SpotterRow feed={spotter.feed} onOpen={() => onNavigate({ screen: 'spotter' })} />
   );
 

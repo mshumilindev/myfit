@@ -122,6 +122,84 @@ describe('Activity log pagination (SPO-203)', () => {
   });
 });
 
+describe('Activity log states and access (SPO-203 / SPO-238 UI)', () => {
+  it('a manager without access gets the notice "You see your own actions…" with the owner named; no Full access tag', async () => {
+    mount({ viewer: 'manager' });
+    const note = await screen.findByText(new RegExp(`^${tm.actOwnNotice}`));
+    expect(note.textContent).toBe(`${tm.actOwnNotice} ${tm.actSubOwnHint('Olena K.')}`);
+    expect(screen.queryByText(tm.actFullAccess)).toBeNull();
+    // only their own rows
+    expect(screen.queryByText(/Olena K\. ·/)).toBeNull();
+    expect(screen.getAllByText(/Irina M\. ·/).length).toBeGreaterThan(0);
+  });
+
+  it('a manager with access shows the Full access tag, Mine / Everyone chips and no notice; Mine narrows to their actions', async () => {
+    mount({ viewer: 'manager', activityScope: 'all' });
+    expect(await screen.findByText(tm.actFullAccess)).toBeTruthy();
+    expect(screen.queryByText(new RegExp(`^${tm.actOwnNotice}`))).toBeNull();
+    expect(screen.getByRole('button', { name: tm.actEveryone })).toBeTruthy();
+    expect(screen.getAllByText(/Olena K\. ·/).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: tm.actMine }));
+    await waitFor(() => expect(screen.queryByText(/Olena K\. ·/)).toBeNull());
+    expect(screen.getAllByText(/Irina M\. ·/).length).toBeGreaterThan(0);
+  });
+
+  it('the trainer has neither the notice nor the Full access tag; the Me chip shows only their actions', async () => {
+    mount();
+    await screen.findByText(tm.actSubOwner);
+    expect(screen.queryByText(tm.actFullAccess)).toBeNull();
+    expect(screen.queryByText(new RegExp(`^${tm.actOwnNotice}`))).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: tm.actMe }));
+    await waitFor(() => expect(screen.queryByText(/Irina M\. ·/)).toBeNull());
+    expect(screen.getAllByText(/Olena K\. ·/).length).toBeGreaterThan(0);
+  });
+
+  it('rows read "action / who · whom · time" with a state tag: Waiting, Accepted, Done, Missed', async () => {
+    mount();
+    await screen.findByText(tm.actSubOwner);
+    const row = screen.getByText('Irina M. · Maria Tkach · 11:00').closest('li')!;
+    expect(row.textContent).toContain(tm.actKind['move-request']!);
+    expect(row.textContent).toContain(tm.actStatus.pending!);
+    for (const s of ['accepted', 'done', 'missed'])
+      expect(screen.getAllByText(tm.actStatus[s]!).length).toBeGreaterThan(0);
+  });
+
+  it('days are Today / Yesterday / a date', async () => {
+    mount();
+    await screen.findByText(tm.actSubOwner);
+    const heads = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
+    expect(heads.slice(0, 2)).toEqual([tm.actToday, tm.actYesterday]);
+    expect(heads.length).toBeGreaterThan(2);
+  });
+
+  it('loading is a skeleton, not an empty page', () => {
+    const base = createFixturesTeamPort({ now: () => NOW });
+    render(
+      <ActivityScreen
+        now={NOW}
+        onNavigate={() => undefined}
+        port={{ ...base, activity: () => new Promise(() => undefined) }}
+      />,
+    );
+    expect(screen.getByRole('heading', { name: tm.actTitle })).toBeTruthy();
+    expect(screen.queryByText(tm.actEmptyTitle)).toBeNull();
+    expect(document.querySelector('.uisk-rows')).toBeTruthy();
+  });
+
+  it('an empty log is the empty state with the 90-day line', async () => {
+    const base = createFixturesTeamPort({ now: () => NOW });
+    render(
+      <ActivityScreen
+        now={NOW}
+        onNavigate={() => undefined}
+        port={{ ...base, activity: async () => ({ entries: [], scope: 'owner' }) }}
+      />,
+    );
+    expect(await screen.findByText(tm.actEmptyTitle)).toBeTruthy();
+    expect(screen.getByText(tm.actEmptyBody)).toBeTruthy();
+  });
+});
+
 describe('Roles', () => {
   it('lists every capability for both roles and states the manager limits', () => {
     render(<RolesScreen onNavigate={() => undefined} />);

@@ -150,6 +150,8 @@ export const teamEt: typeof teamEn = {
   mcEmptyBody: 'Siia ilmuvad meeskonna treenerite kliendid.',
   mcLoadFailed: 'Klientide laadimine ebaõnnestus.',
   mcNextShort: 'Järgmine',
+  mcUpcoming: 'Lähimad treeningud',
+  mcRecent: 'Viimased treeningud',
   trSection: 'Meeskonna taotlused',
   trTitle: (manager: string, client: string) => `${manager} palub eemaldada: ${client}`,
   trStatus: 'Ootab sinu vastust',
@@ -179,6 +181,8 @@ export const teamEt: typeof teamEn = {
   actSubOwnHint: (owner: string) =>
     `Treener ${owner} saab lubada sul näha kogu meeskonna tegevusi.`,
   actSubAll: 'Kogu meeskond.',
+  actFullAccess: 'Täielik ligipääs',
+  actOwnNotice: 'Näed ainult enda tegevusi.',
   actEveryone: 'Kõik',
   actMe: 'Mina',
   actMine: 'Minu',

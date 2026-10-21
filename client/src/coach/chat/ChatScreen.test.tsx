@@ -9,6 +9,8 @@ import { conversationsFromChat } from './chatStore';
 import { createFixturesChatPort, type FixturesChatPort } from './__fixtures__/fixtures';
 import { safeEn } from '../../i18n/coachSafe.en';
 import { currentHash } from '../../route';
+import { teamEn as tm } from '../../i18n/coachTeam.en';
+import { createFixturesTeamPort } from '../team/__fixtures__/fixtures';
 
 let port: FixturesChatPort;
 beforeEach(() => {
@@ -297,5 +299,34 @@ describe('Chat: phone', () => {
     expect(await screen.findByRole('log')).toBeTruthy();
     expect(screen.getByRole('textbox')).toBeTruthy();
     expect(screen.getByRole('button', { name: ch.chBack })).toBeTruthy();
+  });
+});
+
+describe('Chat: pinned Spotter (SPO-236)', () => {
+  it('is the first line of the list with the unread badge and opens Spotter', async () => {
+    setViewport(390);
+    const team = createFixturesTeamPort();
+    const unread = (await team.notices()).unread;
+    expect(unread).toBeGreaterThan(0);
+    const { onNavigate } = mount({ teamPort: team });
+    const pinned = await screen.findByRole('list', { name: tm.spListLabel });
+    expect(within(pinned).getByText(tm.spTitle)).toBeTruthy();
+    expect(within(pinned).getByText(String(unread))).toBeTruthy();
+    // above the conversations in the document
+    expect(
+      pinned.compareDocumentPosition(convs().getAllByRole('button')[0]) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    fireEvent.click(within(pinned).getByRole('button'));
+    expect(onNavigate).toHaveBeenCalledWith({ screen: 'spotter' });
+  });
+
+  it('stays pinned when there are no team messages at all (never removed), without a badge', async () => {
+    setViewport(390);
+    const team = createFixturesTeamPort();
+    mount({ teamPort: { ...team, notices: async () => ({ items: [], unread: 0 }) } });
+    const pinned = await screen.findByRole('list', { name: tm.spListLabel });
+    expect(within(pinned).getByText(tm.spTitle)).toBeTruthy();
+    expect(within(pinned).queryByText(/^\d+$/)).toBeNull();
   });
 });
