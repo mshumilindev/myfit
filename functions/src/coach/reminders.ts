@@ -6,6 +6,7 @@
  * Everything is idempotent: a notice has a deterministic id, and `timing.dueAt` is advanced after acting (an Admin
  * write; the client's own save recomputes it). Nothing here knows what the session is, where, or who the program is for.
  */
+import type { Doc, Row } from './kv';
 import type { Ctx } from './service';
 import { CLIENT_SPOTTER_KINDS, nameOf, SPOTTER_KINDS } from './team';
 import { localDate, localMinutes } from './pushPolicy';
@@ -54,18 +55,47 @@ export interface RemindersResult {
   unmarked: number;
 }
 
+/** Pages one run may read of one query (BATCH rows each): a hard bound on the cost of a cycle, whatever the backlog. */
+export const MAX_PAGES = 5;
+/** A schedule whose processing failed is looked at again after this long (it moves behind the healthy ones meanwhile). */
+const RETRY_AFTER = 30 * 60_000;
+
+/**
+ * Walks a query that is ordered by `key` ascending, a page at a time, without ever re-reading the same row in one run: the
+ * next page starts at the last row's key (`from`, inclusive, so rows sharing a key across the boundary are not lost) and rows
+ * already acted on are skipped. Stops at a short page, at a page with nothing new, or after MAX_PAGES.
+ */
+async function eachPage(
+  fetch: (from: number) => Promise<Row[]>,
+  key: (r: Row) => number,
+  act: (r: Row) => Promise<void>,
+): Promise<void> {
+  const seen = new Set<string>();
+  let from = 0;
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const rows = await fetch(from);
+    const fresh = rows.filter((r) => !seen.has(r.path));
+    if (!fresh.length) return;
+    for (const r of fresh) {
+      seen.add(r.path);
+      await act(r);
+    }
+    if (rows.length < BATCH) return;
+    from = key(rows[rows.length - 1]);
+  }
+}
+
 export async function runReminders(ctx: Ctx): Promise<RemindersResult> {
   const kv = ctx.kv;
   const now = ctx.now();
   const out: RemindersResult = { schedules: 0, reminders: 0, unmarked: 0 };
-  const rows = await kv.list('schedules', {
-    where: [
-      ['timing.dueAt', '>', 0],
-      ['timing.dueAt', '<=', now],
-    ],
-    limit: BATCH,
-  });
-  for (const r of rows) {
+  const act = async (listed: Row) => {
+    // Read the schedule AGAIN: between the query and this row (a run may take minutes over a big backlog) someone may have
+    // marked, moved or cancelled a session. What they saved is what counts; a session marked by the other side earlier is
+    // no longer in `unmarked`, a cancelled one no longer in `starts`.
+    const live: Doc | null = await kv.get(listed.path);
+    if (!live) return;
+    const r: Row = { ...listed, data: live };
     const clientId = r.id;
     const trainerId = String(r.data.trainerId ?? '');
     const raw = (r.data.timing ?? {}) as Partial<Timing>;
@@ -138,7 +168,33 @@ export async function runReminders(ctx: Ctx): Promise<RemindersResult> {
       if (cur && cur.rev === r.data.rev)
         await tx.merge(r.path, { 'timing.dueAt': active ? dueAtOf(t, now) : 0 });
     });
-  }
+  };
+  // ONE indexed query per page (`timing.dueAt` range, ordered by it: the oldest due schedules first, so a backlog is worked
+  // off in order and a row that keeps failing cannot starve the ones behind it, see RETRY_AFTER)
+  await eachPage(
+    (from) =>
+      kv.list('schedules', {
+        where: [
+          ['timing.dueAt', '>=', Math.max(from, 1)],
+          ['timing.dueAt', '<=', now],
+        ],
+        orderBy: ['timing.dueAt', 'asc'],
+        limit: BATCH,
+      }),
+    (r) => Number((r.data.timing as Partial<Timing> | undefined)?.dueAt ?? 0),
+    async (row) => {
+      try {
+        await act(row);
+      } catch (e) {
+        console.error('[coach] reminder failed for a schedule', (e as Error)?.name); // name only: no ids, no data
+        try {
+          await kv.merge(row.path, { 'timing.dueAt': now + RETRY_AFTER });
+        } catch {
+          /* the document is gone or unreachable: the next run decides */
+        }
+      }
+    },
+  );
   return out;
 }
 
@@ -175,28 +231,20 @@ export async function runUnanswered(ctx: Ctx): Promise<number> {
   const kv = ctx.kv;
   const now = ctx.now();
   let sent = 0;
-  const rows = await kv.group('requests', {
-    where: [
-      ['status', '==', 'pending'],
-      ['createdAt', '<=', now - UNANSWERED_AFTER],
-    ],
-    orderBy: ['createdAt', 'asc'],
-    limit: BATCH,
-  });
-  for (const r of rows) {
+  const act = async (r: Row) => {
     const [, cid] = r.path.split('/');
-    if (r.path.split('/')[0] !== 'conversations' || Number(r.data.expiresAt) <= now) continue;
+    if (r.path.split('/')[0] !== 'conversations' || Number(r.data.expiresAt) <= now) return;
     const conv = (await kv.get(`conversations/${cid}`)) as {
       active?: boolean;
       clientId?: string;
       trainerId?: string;
     } | null;
-    if (!conv?.active || !conv.clientId || !conv.trainerId) continue;
+    if (!conv?.active || !conv.clientId || !conv.trainerId) return;
     const to = r.data.from === 'client' ? conv.trainerId : conv.clientId;
     const day = Math.floor((now - Number(r.data.createdAt)) / UNANSWERED_AFTER);
     const id = `rq-${r.id}-${day}`;
-    if (await kv.get(`users/${to}/notices/${id}`)) continue;
-    if (!(await roomFor(ctx, to, now))) continue;
+    if (await kv.get(`users/${to}/notices/${id}`)) return;
+    if (!(await roomFor(ctx, to, now))) return;
     const name =
       to === conv.trainerId ? nameOf((await kv.get(`users/${conv.clientId}`)) as never) : '';
     await kv.set(`users/${to}/notices/${id}`, {
@@ -211,7 +259,29 @@ export async function runUnanswered(ctx: Ctx): Promise<number> {
     });
     await ctx.notify?.(to, 'reminder');
     sent++;
-  }
+  };
+  // Requests stay `pending` until answered or expired, so they are still in the result next cycle: a window of the oldest
+  // BATCH would shadow every newer one. Walk them oldest first, page by page (status + createdAt group index), bounded.
+  await eachPage(
+    (from) =>
+      kv.group('requests', {
+        where: [
+          ['status', '==', 'pending'],
+          ['createdAt', '>=', from],
+          ['createdAt', '<=', now - UNANSWERED_AFTER],
+        ],
+        orderBy: ['createdAt', 'asc'],
+        limit: BATCH,
+      }),
+    (r) => Number(r.data.createdAt),
+    async (row) => {
+      try {
+        await act(row);
+      } catch (e) {
+        console.error('[coach] unanswered reminder failed', (e as Error)?.name);
+      }
+    },
+  );
   return sent;
 }
 

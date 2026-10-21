@@ -506,6 +506,10 @@ export async function endRelationship(
     }))
       await kv.merge(r.path, { status: 'cancelled', decidedAt: now });
   }
+  // a team manager's open request to remove this client has nothing left to decide (SPO-199): it closes with the relationship
+  const removal = await kv.get(`teamRequests/rm-${clientId}`);
+  if (removal && removal.status === 'pending')
+    await kv.merge(`teamRequests/rm-${clientId}`, { status: 'cancelled', decidedAt: now });
   await kv.del(`liveSessions/${clientId}`);
   await kv.del(`users/${clientId}/grants/${c.trainerId}`);
   await deleteEvidence(kv, c.trainerId, clientId, null);
@@ -1434,6 +1438,7 @@ export async function rescheduleRespond(ctx: Ctx, actor: Actor, body: Record<str
   const now = ctx.now();
   let answeredManager = '';
   let answeredClient = false;
+  let answeredTrainer = '';
   const out = await ctx.kv.tx(async (kv) => {
     const { side, c, manager } = await partyOf(kv, clientId, actor);
     const path = `${convPath(conversationId(ctx.pepper, clientId, c.trainerId))}/requests/${id}`;
@@ -1470,6 +1475,22 @@ export async function rescheduleRespond(ctx: Ctx, actor: Actor, body: Record<str
         answeredManager = proposer;
       }
     }
+    // the CLIENT answered a proposal the TRAINER made himself (a manager's proposal is answered to that manager, above): the
+    // trainer hears the answer in Spotter and by a request push (names and status only; the time stays in the sealed request)
+    if (!manager && side === 'client' && r.from === 'trainer' && r.via !== 'manager') {
+      const nid = `ma-${id}-${to}`;
+      await notice(
+        kv,
+        c.trainerId,
+        'move-answer',
+        actor.uid,
+        now,
+        nid,
+        displayOf((await kv.get(`users/${clientId}`)) as UserRec | null),
+      );
+      await kv.merge(`users/${c.trainerId}/notices/${nid}`, { status: to, refId: id });
+      answeredTrainer = c.trainerId;
+    }
     // the trainer (or a manager's withdrawal is not one) answered a request the CLIENT made: the client's own Spotter hears it
     if (!manager && side === 'trainer' && r.from === 'client') {
       const nid = `ma-${id}-${to}`;
@@ -1497,6 +1518,7 @@ export async function rescheduleRespond(ctx: Ctx, actor: Actor, body: Record<str
     return { id, status: to };
   });
   if (answeredManager) await ctx.notify?.(answeredManager, 'team');
+  if (answeredTrainer) await ctx.notify?.(answeredTrainer, 'request');
   if (answeredClient) await ctx.notify?.(clientId, 'request');
   return out;
 }

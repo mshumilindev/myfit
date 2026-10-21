@@ -8,6 +8,7 @@ import {
   pushTextFor,
 } from '../../functions/src/coach/pushText';
 import {
+  pushLink,
   categoryOf,
   pushTag,
   shouldDeliver,
@@ -214,5 +215,13 @@ describe('sendToUser: language per device, payload without content', () => {
     dev('a', { locale: 'uk' });
     await sendToUser('u1', { title: 'Rest', body: 'Rest is over', tag: 'rest-done' });
     expect(sent[0].data.body).toBe('Rest is over');
+  });
+
+  it('the link of a push: staff to the coach Spotter, a client to the client Spotter, chat and sync to home', () => {
+    expect(pushLink('request', true)).toBe('/#/c/spotter');
+    expect(pushLink('request', false)).toBe('/#/trainer/spotter');
+    expect(pushLink('team', false)).toBe('/#/trainer/spotter');
+    expect(pushLink('message', false)).toBe('/#/');
+    expect(pushLink('sync', true)).toBe('/#/');
   });
 });

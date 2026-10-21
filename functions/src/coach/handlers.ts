@@ -15,6 +15,7 @@ import { db, HttpsError, mintToken, requireRole, type Role } from '../lib';
 import * as svc from './service';
 import * as team from './team';
 import { runDaily, runReminders } from './reminders';
+import { afterScheduleWritten } from './scheduleTrail';
 import { CoachError, type Actor, type Signer } from './service';
 import {
   adoptLegacyClientsOf,
@@ -289,6 +290,23 @@ export const onCoachKeyWritten = onDocumentWritten(
       ? (event.data.after.data() as Record<string, unknown>)
       : null;
     await svc.onCoachKeyChanged(ctx(), event.params.uid, before, after);
+  },
+);
+
+/**
+ * SPO-267 M4: every new version of a client's schedule written by a manager leaves a metadata-only journal entry, written
+ * here by the server (idempotent by client + rev), so a manager cannot change a schedule without a trace.
+ */
+export const onScheduleWritten = onDocumentWritten(
+  { document: 'schedules/{clientId}', ...trig },
+  async (event) => {
+    const before = event.data?.before.exists
+      ? (event.data.before.data() as Record<string, unknown>)
+      : null;
+    const after = event.data?.after.exists
+      ? (event.data.after.data() as Record<string, unknown>)
+      : null;
+    await afterScheduleWritten(ctx(), event.params.clientId, before, after);
   },
 );
 

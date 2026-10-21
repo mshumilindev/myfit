@@ -21,7 +21,7 @@ import { db, HttpsError } from '../lib';
 import { sendToUser } from '../push';
 import { firestoreKv } from './firestoreKv';
 import { DEFAULT_APP_ORIGIN } from './inviteLink';
-import { pushTag } from './pushPolicy';
+import { pushLink, pushTag } from './pushPolicy';
 import { defaultTextKey, pushTextFor } from './pushText';
 import type { Ctx } from './service';
 
@@ -63,7 +63,7 @@ export function coachCtx(): Ctx {
           body: pushTextFor(topic ?? defaultTextKey(kind), 'en'),
           text: topic ?? defaultTextKey(kind),
           tag: pushTag(kind),
-          url: staff && kind !== 'message' && kind !== 'sync' ? '/#/c/spotter' : '/#/',
+          url: pushLink(kind, staff),
           kind,
         });
       } catch {

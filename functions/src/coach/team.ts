@@ -287,6 +287,8 @@ export async function teamAccept(
     });
     return { teamId: i.teamId, role: i.role };
   });
+  // the inviter hears that the link was used (content-free `team` push; the notice with the role is already written)
+  await ctx.notify?.(i.invitedBy, 'team');
   // A new manager needs the clients' devices to delegate the schedule keys: a silent `sync` push asks every client of
   // the team to do it now (an improvement, never a guarantee: a client that is offline does it on its next open).
   if (i.role === 'manager') {
@@ -407,6 +409,7 @@ export async function teamDecline(
       `team-decline-${i.id}`,
       'declined',
     );
+    await ctx.notify?.(i.invitedBy, 'team');
   }
   return { ok: true };
 }
@@ -441,6 +444,8 @@ async function endMembership(
       refId: target.uid,
     });
   });
+  // who has to know: the owner when somebody leaves, the manager who was removed (both already have the notice)
+  await ctx.notify?.(why === 'removed' ? target.uid : teamId, 'team');
   // what the leaver invited can no longer be accepted (teamAccept also checks the sender is still a member)
   for (const inv of await ctx.kv.list('teamInvites', { where: [['invitedBy', '==', target.uid]] }))
     if (inv.data.status === 'pending' && inv.data.teamId === teamId)
@@ -845,6 +850,15 @@ export async function clientRemovalRespond(
     if (!isCoach(actor) || r.trainerId !== actor.uid)
       return fail('permission-denied', 'not-your-client');
     if (r.status !== 'pending') return { status: r.status };
+    // the client is already gone (left, was removed, or moved to another trainer): there is nothing to approve or decline
+    const cur = (await kv.get(`coaching/${r.clientId}`)) as {
+      status?: string;
+      trainerId?: string;
+    } | null;
+    if (!cur || cur.status !== 'active' || cur.trainerId !== actor.uid) {
+      await kv.merge(removalPath(id), { status: 'cancelled', decidedAt: now });
+      return { status: 'cancelled' as RemovalStatus };
+    }
     const status: RemovalStatus = body.approve ? 'approved' : 'declined';
     if (body.approve) {
       const c = await loadCoaching(kv, r.clientId);
@@ -903,6 +917,16 @@ export async function teamRequests(
   const out: TeamRequestRow[] = [];
   for (const r of rows) {
     const d = r.data as unknown as RemovalRec;
+    // a request whose client is no longer this trainer's active client is closed here (requests from before the end-of-
+    // relationship body cancelled them) and is not listed
+    const cur = (await ctx.kv.get(`coaching/${d.clientId}`)) as {
+      status?: string;
+      trainerId?: string;
+    } | null;
+    if (!cur || cur.status !== 'active' || cur.trainerId !== actor.uid) {
+      await ctx.kv.merge(r.path, { status: 'cancelled', decidedAt: ctx.now() });
+      continue;
+    }
     const [client, mgr] = await Promise.all([
       ctx.kv.get(`users/${d.clientId}`) as Promise<UserRec | null>,
       ctx.kv.get(`users/${d.requestedBy}`) as Promise<UserRec | null>,

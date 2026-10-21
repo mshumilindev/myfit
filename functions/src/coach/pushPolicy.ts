@@ -131,3 +131,12 @@ export function shouldDeliver(
   if (cat === 'reminders') return prefs.reminders && !isQuietNow(device.quiet, device.tz, at);
   return prefs[cat];
 }
+
+/**
+ * Where a tap on the push goes. No data in the link (content-free push): a trainer / manager lands on Spotter in the coach
+ * app, a client on the client's Spotter thread; chat messages and silent syncs keep the home page.
+ */
+export function pushLink(kind: CoachNoticeKind, staff: boolean): string {
+  if (kind === 'message' || kind === 'sync') return '/#/';
+  return staff ? '/#/c/spotter' : '/#/trainer/spotter';
+}
