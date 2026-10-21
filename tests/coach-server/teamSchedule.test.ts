@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createMemoryKv, type MemoryKv } from '../../functions/src/coach/memoryKv';
 import {
   CoachError,
+  coachEnd,
   rescheduleCreate,
   rescheduleRespond,
   type Actor,
@@ -15,9 +16,11 @@ import {
   teamLogActivity,
   teamNotices,
   teamNoticesRead,
+  teamLeave,
   teamRead,
+  teamRemoveMember,
 } from '../../functions/src/coach/team';
-import { DAY } from '../../functions/src/coach/logic';
+import { DAY, conversationId } from '../../functions/src/coach/logic';
 
 const T0 = Date.UTC(2026, 9, 20, 9, 0, 0);
 const owner: Actor = { uid: 't1', role: 'trainer' };
@@ -71,6 +74,7 @@ beforeEach(async () => {
   await kv.set('coaching/c1', { clientId: 'c1', trainerId: 't1', status: 'active', keyEpoch: 1 });
   const inv = await teamInvite(ctx(), owner, { email: 'irina@example.com' });
   await teamAccept(ctx(), { uid: 'm1', role: 'member' }, { inviteId: inv.inviteId });
+  pushes.length = 0;
 });
 
 describe('manager reschedule requests', () => {
@@ -267,5 +271,54 @@ describe('a manager invites a client for a team trainer', () => {
         inviteClientForTrainer(ctx(), owner, { trainerId: 't1', name: 'Zed Zed', mode: 'app' }),
       ),
     ).toBe('permission-denied:managers-only');
+  });
+});
+
+describe('delegations follow the team (ADR 005)', () => {
+  const cid = conversationId(new Uint8Array(32), 'c1', 't1');
+  const seedDelegations = async () => {
+    await kv.set(`conversations/${cid}`, { clientId: 'c1', active: true, keyEpoch: 1 });
+    await kv.set(`conversations/${cid}/delegations/m1`, { keyEpoch: 1 });
+    await kv.set(`conversations/${cid}/delegations/m3`, { keyEpoch: 1 });
+  };
+  const has = async (uid: string) => !!(await kv.get(`conversations/${cid}/delegations/${uid}`));
+
+  it('a manager who joins asks every client of the team to delegate, with a silent sync push', async () => {
+    await kv.set('users/m3', { role: 'member', status: 'active', firstName: 'Third' });
+    const inv = await teamInvite(ctx(), owner, { email: 'third@example.com' });
+    pushes.length = 0;
+    await teamAccept(ctx(), { uid: 'm3', role: 'member' }, { inviteId: inv.inviteId });
+    expect(pushes).toContainEqual(['c1', 'sync']);
+    // a trainer joining the team does not (nothing to delegate)
+    await kv.set('users/t2', { role: 'trainer', status: 'active', firstName: 'Andriy' });
+    const inv2 = await teamInvite(
+      ctx(),
+      { uid: 'm3', role: 'manager' },
+      { email: 'a@example.com' },
+    );
+    pushes.length = 0;
+    await teamAccept(ctx(), { uid: 't2', role: 'trainer' }, { inviteId: inv2.inviteId });
+    expect(pushes.filter(([, k]) => k === 'sync')).toEqual([]);
+  });
+
+  it("removing a manager deletes their delegations and nobody else's", async () => {
+    await seedDelegations();
+    await teamRemoveMember(ctx(), owner, { uid: 'm1' });
+    expect(await has('m1')).toBe(false);
+    expect(await has('m3')).toBe(true);
+  });
+
+  it('a manager who leaves deletes their own delegations', async () => {
+    await seedDelegations();
+    await teamLeave(ctx(), mgr);
+    expect(await has('m1')).toBe(false);
+    expect(await has('m3')).toBe(true);
+  });
+
+  it('a client who leaves the trainer takes every delegation of the conversation with the key', async () => {
+    await seedDelegations();
+    await coachEnd(ctx(), client, { clientId: 'c1' });
+    expect(await has('m1')).toBe(false);
+    expect(await has('m3')).toBe(false);
   });
 });

@@ -3,7 +3,21 @@
  * The client (`client/src/quietHours.ts` CHAT_PUSH_TAG) and the service worker (`public/sw-push.js`) key on the SAME
  * prefix `coach-chat`: a chat push is the only coach push that quiet hours apply to.
  */
-export type CoachNoticeKind = 'message' | 'invite' | 'request' | 'program' | 'team';
+export type CoachNoticeKind =
+  'message' | 'invite' | 'request' | 'program' | 'team' | 'reminder' | 'sync';
+
+/** The notification categories a person can switch (boards C6 / U1-U3); `sync` is silent and has no switch. */
+export type PushCategory = 'chat' | 'requests' | 'team' | 'reminders';
+export const categoryOf = (kind: CoachNoticeKind): PushCategory | null =>
+  kind === 'message'
+    ? 'chat'
+    : kind === 'team'
+      ? 'team'
+      : kind === 'reminder'
+        ? 'reminders'
+        : kind === 'sync'
+          ? null
+          : 'requests';
 
 /** Prefix of every chat push tag (must equal CHAT_PUSH_TAG in the client). */
 export const CHAT_PUSH_TAG = 'coach-chat';
@@ -58,4 +72,36 @@ export function isQuietNow(quiet: unknown, tz: unknown, at: number): boolean {
   if (!w.on || w.from === w.to) return false;
   const m = localMinutes(at, tz);
   return w.from < w.to ? m >= w.from && m < w.to : m >= w.from || m < w.to;
+}
+
+/** Per-device switches stored in the push doc next to `quiet` (`prefs`). A missing or malformed value means ON. */
+export interface PushPrefs {
+  requests: boolean;
+  reminders: boolean;
+  team: boolean;
+}
+export function parsePushPrefs(v: unknown): PushPrefs {
+  const o = v && typeof v === 'object' ? (v as Record<string, unknown>) : {};
+  const on = (k: string) => o[k] !== false;
+  return { requests: on('requests'), reminders: on('reminders'), team: on('team') };
+}
+
+/**
+ * Does this notice reach this device as a push? (The Spotter entry is written either way; only the push is held.)
+ *  - chat: held inside the device's quiet window (unchanged);
+ *  - reminders: off when switched off, held inside the quiet window;
+ *  - requests and team: off only when switched off; quiet hours never hold them (a request with an action must arrive);
+ *  - sync: silent data push, always.
+ */
+export function shouldDeliver(
+  kind: CoachNoticeKind,
+  device: { quiet?: unknown; tz?: unknown; prefs?: unknown },
+  at: number,
+): boolean {
+  const cat = categoryOf(kind);
+  if (cat === null) return true;
+  if (cat === 'chat') return !isQuietNow(device.quiet, device.tz, at);
+  const prefs = parsePushPrefs(device.prefs);
+  if (cat === 'reminders') return prefs.reminders && !isQuietNow(device.quiet, device.tz, at);
+  return prefs[cat];
 }

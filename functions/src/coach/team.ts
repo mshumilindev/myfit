@@ -224,7 +224,7 @@ export async function teamAccept(
   if (i.invitedBy === actor.uid || i.teamId === actor.uid)
     fail('invalid-argument', 'cannot-join-own-team');
   const kv = ctx.kv;
-  return kv.tx(async (t) => {
+  const joined = await kv.tx(async (t) => {
     const u = (await t.get(`users/${actor.uid}`)) as UserRec | null;
     if (!u || u.status === 'suspended') return fail('permission-denied', 'not-allowed');
     if (i.role === 'manager') {
@@ -271,6 +271,33 @@ export async function teamAccept(
     });
     return { teamId: i.teamId, role: i.role };
   });
+  // A new manager needs the clients' devices to delegate the schedule keys: a silent `sync` push asks every client of
+  // the team to do it now (an improvement, never a guarantee: a client that is offline does it on its next open).
+  if (i.role === 'manager') await syncTeamClients(ctx, i.teamId);
+  return joined;
+}
+
+/** A silent `sync` push to every client of every active trainer of the team (best effort, capped). */
+async function syncTeamClients(ctx: Ctx, teamId: string): Promise<void> {
+  if (!ctx.notify) return;
+  try {
+    const members = (await ctx.kv.list(`teams/${teamId}/members`)).map(
+      (r) => r.data as unknown as MemberRec,
+    );
+    for (const m of members) {
+      if (m.role !== 'trainer' || m.status !== 'active') continue;
+      const rows = await ctx.kv.list('coaching', {
+        where: [
+          ['trainerId', '==', m.uid],
+          ['status', '==', 'active'],
+        ],
+        limit: 500,
+      });
+      await Promise.allSettled(rows.map((r) => ctx.notify?.(r.id, 'sync')));
+    }
+  } catch {
+    /* a failed push never fails the invite */
+  }
 }
 
 async function ensureTeamTx(t: Ctx['kv'], teamId: string, now: number): Promise<void> {
@@ -338,6 +365,36 @@ async function endMembership(
       refId: target.uid,
     });
   });
+  await dropDelegations(ctx, teamId, target);
+}
+
+/**
+ * After a member leaves or is removed: the delegations that belonged to them are deleted (ADR 005). A manager: their
+ * document in every conversation of the team's clients. A trainer who leaves: ALL delegations on their own clients
+ * (the managers no longer serve them). Access is already closed by the rules; this removes the wrapped keys too.
+ */
+async function dropDelegations(ctx: Ctx, teamId: string, target: MemberRec): Promise<void> {
+  const members = (await ctx.kv.list(`teams/${teamId}/members`)).map(
+    (r) => r.data as unknown as MemberRec,
+  );
+  const trainers =
+    target.role === 'manager'
+      ? members.filter((m) => m.role === 'trainer' && m.status === 'active')
+      : [target];
+  for (const tr of trainers) {
+    const rows = await ctx.kv.list('coaching', {
+      where: [['trainerId', '==', tr.uid]],
+      limit: 500,
+    });
+    for (const r of rows) {
+      const cid = conversationId(ctx.pepper, r.id, tr.uid);
+      if (target.role === 'manager')
+        await ctx.kv.del(`conversations/${cid}/delegations/${target.uid}`);
+      else
+        for (const d of await ctx.kv.list(`conversations/${cid}/delegations`))
+          await ctx.kv.del(d.path);
+    }
+  }
 }
 
 export async function teamRemoveMember(

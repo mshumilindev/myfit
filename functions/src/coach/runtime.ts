@@ -64,9 +64,12 @@ export function coachCtx(): Ctx {
                   ? 'Program updated'
                   : kind === 'team'
                     ? 'Team update'
-                    : 'New request',
+                    : kind === 'reminder'
+                      ? 'Reminder'
+                      : 'New request',
           tag: pushTag(kind),
           url: '/#/',
+          kind,
         });
       } catch {
         /* a failed push never fails the write */

@@ -6,6 +6,7 @@
 import { ACTIVITY_RETENTION_MS, logActivity, teamIdOf } from './activity';
 import type { Doc, Kv } from './kv';
 import { inviteUrl } from './inviteLink';
+import type { CoachNoticeKind } from './pushPolicy';
 import {
   ALL_OFF,
   MAX_AT_SKEW,
@@ -83,7 +84,7 @@ export interface Ctx {
   pepper: Uint8Array;
   newToken(): string;
   /** content-free push: only "something happened" (C.3) */
-  notify?(uid: string, kind: 'message' | 'invite' | 'request' | 'program' | 'team'): Promise<void>;
+  notify?(uid: string, kind: CoachNoticeKind): Promise<void>;
   baseUrl?: string;
 }
 
@@ -491,6 +492,8 @@ export async function endRelationship(
     await kv.set(convPath(cid), { ...rest, active: false, endedAt: now });
     // the wraps of earlier epochs go with it: a trainer who is linked again later starts a new link period
     for (const r of await kv.list(`${convPath(cid)}/keyring`)) await kv.del(r.path);
+    // the managers' delegated schedule / request keys wrap the key that just went: they go with it (ADR 005)
+    for (const r of await kv.list(`${convPath(cid)}/delegations`)) await kv.del(r.path);
     // the shared notes are sealed under the conversation key that just went: nobody can read them again, so they go too
     // (the trainer's private notes live under users/{trainer}/clientNotes and are theirs to keep)
     for (const r of await kv.list(`${convPath(cid)}/notes`)) await kv.del(r.path);

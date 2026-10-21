@@ -15,7 +15,7 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { db } from './lib';
-import { CHAT_PUSH_TAG, isQuietNow } from './coach/pushPolicy';
+import { CHAT_PUSH_TAG, isQuietNow, shouldDeliver, type CoachNoticeKind } from './coach/pushPolicy';
 
 export interface PushMessage {
   title: string;
@@ -24,6 +24,8 @@ export interface PushMessage {
   tag?: string;
   /** In-app route opened on tap (hash URL, e.g. "/#/coach"). */
   url?: string;
+  /** The coaching notice kind: decides the category switch and quiet hours (see `shouldDeliver`). */
+  kind?: CoachNoticeKind;
 }
 
 const DEAD_TOKEN = new Set([
@@ -40,15 +42,28 @@ function clip(v: unknown, max: number): string {
 export async function sendToUser(uid: string, msg: PushMessage): Promise<number> {
   const devices = await db.collection('users').doc(uid).collection('push').get();
   if (devices.empty) return 0;
-  // Quiet hours (Q-17): a trainer-chat push is held back on a device inside its own window (the message stays unread)
+  // Quiet hours (Q-17) and the category switches: see `shouldDeliver`. A notice without a `kind` (outbox, rest alert)
+  // keeps the old rule: only a trainer-chat tag is held back inside the quiet window.
   const held = msg.tag?.startsWith(CHAT_PUSH_TAG) === true;
   const now = Date.now();
   const tokens = devices.docs
-    .filter((d) => !held || !isQuietNow(d.get('quiet'), d.get('tz'), now))
+    .filter((d) =>
+      msg.kind
+        ? shouldDeliver(
+            msg.kind,
+            { quiet: d.get('quiet'), tz: d.get('tz'), prefs: d.get('prefs') },
+            now,
+          )
+        : !held || !isQuietNow(d.get('quiet'), d.get('tz'), now),
+    )
     .map((d) => String(d.get('token') ?? ''))
     .filter(Boolean);
   if (tokens.length === 0) return 0;
-  const data: Record<string, string> = { title: clip(msg.title, 120), body: clip(msg.body, 400) };
+  // `sync` is a silent data push (no text at all): the page delegates the keys, nothing is shown.
+  const data: Record<string, string> =
+    msg.kind === 'sync'
+      ? { type: 'sync' }
+      : { title: clip(msg.title, 120), body: clip(msg.body, 400) };
   if (msg.tag) data.tag = clip(msg.tag, 60);
   if (msg.url) data.url = clip(msg.url, 200);
   const res = await getMessaging().sendEachForMulticast({
