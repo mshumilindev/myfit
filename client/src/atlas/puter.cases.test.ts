@@ -1,8 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ChatTurn } from './chat';
+import { grantFor } from './aiConsent';
+
+const GRANT = grantFor({ gemini: true, puter: true }, 'puter');
 
 // Importing the module afresh each time must not re-initialise Firebase.
-vi.mock('../firebase', () => ({ app: {}, db: {} }));
+vi.mock('../firebase', () => ({ app: {}, db: {}, auth: { currentUser: null } }));
 
 type Chunk = { text?: string };
 interface FakePuter {
@@ -34,7 +37,7 @@ async function fresh() {
 }
 
 const ask = (m: typeof import('./puter'), extra: Record<string, unknown> = {}) =>
-  m.askPuter({ system: 'SYS', history: [], question: 'Q?', temper: 1, ...extra });
+  m.askPuter({ grant: GRANT, system: 'SYS', history: [], question: 'Q?', temper: 1, ...extra });
 
 describe('puter loader', () => {
   beforeEach(() => {
@@ -110,9 +113,21 @@ describe('puterReady / puterSignIn', () => {
 
   it('is ready only when loaded and signed in', async () => {
     g.puter = fakePuter([], true);
-    expect(await (await fresh()).puterReady()).toBe(true);
+    expect(await (await fresh()).puterReady(GRANT)).toBe(true);
     g.puter = fakePuter([], false);
-    expect(await (await fresh()).puterReady()).toBe(false);
+    expect(await (await fresh()).puterReady(GRANT)).toBe(false);
+  });
+
+  it('without a grant it is not ready, not signed in, and the SDK is never loaded', async () => {
+    const p = fakePuter([], true);
+    g.puter = p;
+    const m = await fresh();
+    expect(await m.puterReady(null)).toBe(false);
+    expect(await m.puterSignIn(null)).toBe(false);
+    expect(await m.puterReady({ engine: 'gemini' })).toBe(false);
+    expect(p.auth.isSignedIn).not.toHaveBeenCalled();
+    expect(p.auth.signIn).not.toHaveBeenCalled();
+    expect(document.head.querySelectorAll('script')).toHaveLength(0);
   });
 
   it('is not ready when the sign-in check throws', async () => {
@@ -121,12 +136,12 @@ describe('puterReady / puterSignIn', () => {
       throw new Error('boom');
     });
     g.puter = p;
-    expect(await (await fresh()).puterReady()).toBe(false);
+    expect(await (await fresh()).puterReady(GRANT)).toBe(false);
   });
 
   it('is not ready when the SDK could not be loaded', async () => {
     const m = await fresh();
-    const r = m.puterReady();
+    const r = m.puterReady(GRANT);
     document.head.querySelector('script')!.onerror?.(new Event('error'));
     expect(await r).toBe(false);
     document.head.innerHTML = '';
@@ -140,22 +155,22 @@ describe('puterReady / puterSignIn', () => {
       signed = true;
     });
     g.puter = p;
-    expect(await (await fresh()).puterSignIn()).toBe(true);
+    expect(await (await fresh()).puterSignIn(GRANT)).toBe(true);
     expect(p.auth.signIn).toHaveBeenCalledTimes(1);
     // the user closes the window without signing in
     signed = false;
     p.auth.signIn.mockResolvedValue(undefined);
-    expect(await (await fresh()).puterSignIn()).toBe(false);
+    expect(await (await fresh()).puterSignIn(GRANT)).toBe(false);
   });
 
   it('signIn is false when the window is closed (throws) or the SDK is missing', async () => {
     const p = fakePuter();
     p.auth.signIn.mockRejectedValue(new Error('closed'));
     g.puter = p;
-    expect(await (await fresh()).puterSignIn()).toBe(false);
+    expect(await (await fresh()).puterSignIn(GRANT)).toBe(false);
     delete g.puter;
     const m = await fresh();
-    const r = m.puterSignIn();
+    const r = m.puterSignIn(GRANT);
     document.head.querySelector('script')!.onerror?.(new Event('error'));
     expect(await r).toBe(false);
     document.head.innerHTML = '';
@@ -170,6 +185,14 @@ describe('askPuter', () => {
   afterEach(() => {
     delete g.puter;
     vi.restoreAllMocks();
+  });
+
+  it('without a grant nothing is loaded or sent', async () => {
+    const p = fakePuter();
+    g.puter = p;
+    expect(await ask(await fresh(), { grant: null })).toEqual({ ok: false, reason: 'consent' });
+    expect(p.auth.isSignedIn).not.toHaveBeenCalled();
+    expect(p.ai.chat).not.toHaveBeenCalled();
   });
 
   it('is unavailable offline without even loading the SDK', async () => {

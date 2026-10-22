@@ -55,6 +55,11 @@ vi.mock('./vaultIO', async (orig) => {
   };
 });
 
+import {
+  isHealthWriteDenied,
+  resetHealthGateForTests,
+  type HealthWriteDenied,
+} from './data/healthConsentGate';
 import * as store from './store';
 import { vault } from './vaultIO';
 import { isSealed, unsealDoc } from './encryptedDoc';
@@ -65,6 +70,12 @@ const KEY = CONDITION_CATALOG[0].key;
 const T0 = new Date('2026-03-04T10:00:00Z').getTime();
 const DAY = 86_400_000;
 const stub = vault as unknown as import('./autoVault').Vault;
+/** The test grants every health consent (setup), so a write here is never denied; narrows the union. */
+function granted<T>(x: T): Exclude<T, HealthWriteDenied> {
+  if (isHealthWriteDenied(x)) throw new Error(`health write denied: ${x.feature}`);
+  return x as Exclude<T, HealthWriteDenied>;
+}
+
 const st = () => store.__getStateForTests();
 const settle = async () => {
   for (let i = 0; i < 6; i++) await new Promise((r) => setTimeout(r, 8));
@@ -98,7 +109,7 @@ afterEach(async () => {
 
 describe('chronic conditions', () => {
   it('add / update / delete write sealed docs and delete the document', async () => {
-    const c = store.addCondition({ key: KEY, severity: 2, share: 'off' });
+    const c = granted(store.addCondition({ key: KEY, severity: 2, share: 'off' }));
     await settle();
     let w = at(`users/u1/conditions/${c.id}`).at(-1)!;
     expect(isSealed(w.data)).toBe(true);
@@ -115,6 +126,8 @@ describe('chronic conditions', () => {
   });
 
   it('the coach share is published sealed and only when it changed', async () => {
+    // A condition makes the coach view differ from the empty one an earlier test left as the last published view.
+    granted(store.addCondition({ key: KEY, severity: 2, share: 'inherit' }));
     store.setConditionsShare('full');
     store.setConditionsShare('full'); // unchanged: nothing
     store.setConditionsShare('bogus' as never);
@@ -141,13 +154,27 @@ describe('chronic conditions', () => {
 
   it('the server snapshot of conditions and prefs updates state', async () => {
     const stop = store.startSyncLoop();
-    fs.listeners.get('users/u1/meta/conditionPrefs')!(snap({ conditionsShare: 'full' }));
+    fs.listeners.get('users/u1/meta/conditionPrefs')!(
+      snap({ conditionsShare: 'full', updatedAt: Date.now() }),
+    );
     await settle();
     expect(st().conditionsShare).toBe('full');
     fs.listeners.get('users/u1/meta/conditionPrefs')!(snap({ conditionsShare: 'junk' }));
     await settle();
     expect(st().conditionsShare).toBe('full');
     stop();
+  });
+
+  it('without the chronic-conditions consent a write is refused and nothing is stored', async () => {
+    resetHealthGateForTests();
+    expect(store.addCondition({ key: KEY, severity: 2, share: 'off' })).toEqual({
+      ok: false,
+      reason: 'consent',
+      feature: 'chronic',
+    });
+    await settle();
+    expect(st().conditions).toEqual([]);
+    expect(fs.writes.filter((w) => w.path.includes('/conditions/'))).toEqual([]);
   });
 });
 
@@ -190,10 +217,10 @@ describe('cycle', () => {
   });
 
   it('pregnancy / menopause become private conditions', () => {
-    const p = store.markPregnancyFromCycle(T0 - 30 * DAY);
+    const p = granted(store.markPregnancyFromCycle(T0 - 30 * DAY));
     expect(p.share).toBe('off');
     expect(p.startedAt).toBe(T0 - 30 * DAY);
-    const m = store.markMenopauseFromCycle();
+    const m = granted(store.markMenopauseFromCycle());
     expect(m.share).toBe('off');
     expect(st().conditions.map((c) => c.id)).toEqual([m.id, p.id]);
   });

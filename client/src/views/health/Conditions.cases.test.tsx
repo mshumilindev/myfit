@@ -7,6 +7,7 @@ import {
   CONDITION_CATEGORIES,
   catalogCondition,
 } from '../../data/conditionCatalog';
+import { isHealthWriteDenied } from '../../data/healthConsentGate';
 import { setLocale } from '../../i18n';
 import { en } from '../../i18n/en';
 import { __getStateForTests, addCondition, resetLocalData, setConditionsShare } from '../../store';
@@ -44,8 +45,12 @@ afterEach(() => {
 });
 
 const conds = () => __getStateForTests().conditions;
-const add = (over: Partial<ChronicCondition> & { key: string }): ChronicCondition =>
-  addCondition({ severity: 2, share: 'inherit', ...over } as never);
+const add = (over: Partial<ChronicCondition> & { key: string }): ChronicCondition => {
+  // The suite setup grants every health consent, so a write is stored; a denial would be a broken setup.
+  const r = addCondition({ severity: 2, share: 'inherit', ...over } as never);
+  if (isHealthWriteDenied(r)) throw new Error(`health write denied: ${r.feature}`);
+  return r;
+};
 const page = (
   cond: string,
   condKey?: string,

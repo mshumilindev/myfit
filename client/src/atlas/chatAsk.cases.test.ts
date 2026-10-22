@@ -7,7 +7,7 @@ const sdk = vi.hoisted(() => ({
   startChat: vi.fn(),
   getGenerativeModel: vi.fn(),
 }));
-vi.mock('../firebase', () => ({ app: { name: 'test-app' } }));
+vi.mock('../firebase', () => ({ app: { name: 'test-app' }, auth: { currentUser: null } }));
 vi.mock('firebase/ai', () => ({
   getAI: vi.fn(() => ({ ai: true })),
   GoogleAIBackend: class {},
@@ -24,6 +24,9 @@ import {
   systemPrompt,
 } from './chat';
 import { COACH_DEFAULT } from './types';
+import { grantFor } from './aiConsent';
+
+const GRANT = grantFor({ gemini: true, puter: false }, 'gemini');
 
 const NOW = Date.UTC(2026, 9, 7, 12);
 const coach = { ...COACH_DEFAULT, enabled: true };
@@ -37,6 +40,7 @@ const chunks = (...texts: string[]) => ({
 });
 
 const base = (extra: Record<string, unknown> = {}) => ({
+  grant: GRANT,
   question: 'How is bench?',
   history: [],
   temper: 1 as const,
@@ -152,6 +156,15 @@ describe('askAtlas', () => {
   it('works without onText', async () => {
     expect(await askAtlas(base())).toEqual({ ok: true, text: 'Solid.' });
   });
+  it('without a grant nothing is sent and the SDK is never reached', async () => {
+    expect(await askAtlas(base({ grant: null }))).toEqual({ ok: false, reason: 'consent' });
+    expect(await askAtlas(base({ grant: { engine: 'puter' } }))).toEqual({
+      ok: false,
+      reason: 'consent',
+    });
+    expect(sdk.getGenerativeModel).not.toHaveBeenCalled();
+    expect(sdk.sendMessageStream).not.toHaveBeenCalled();
+  });
   it('is offline without touching the SDK', async () => {
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
     expect(await askAtlas(base())).toEqual({ ok: false, reason: 'offline' });
@@ -211,7 +224,7 @@ describe('classifyTopic', () => {
     { id: 'bench', ask: 'How is bench?' },
   ];
   const run = (extra: Record<string, unknown> = {}) =>
-    classifyTopic({ question: 'скільки відпочивати', topics, now: NOW, ...extra });
+    classifyTopic({ grant: GRANT, question: 'скільки відпочивати', topics, now: NOW, ...extra });
   const reply = (text: string) => ({ response: { text: () => text } });
 
   it('returns the picked topic and asks for cheap deterministic JSON', async () => {
@@ -225,6 +238,11 @@ describe('classifyTopic', () => {
       responseMimeType: 'application/json',
     });
     expect(cfg.systemInstruction).toContain('bench: How is bench?');
+  });
+  it('null without a grant, without calling Gemini', async () => {
+    expect(await run({ grant: null })).toBeNull();
+    expect(sdk.getGenerativeModel).not.toHaveBeenCalled();
+    expect(sdk.generateContent).not.toHaveBeenCalled();
   });
   it('null for an id that is not ours or "none"', async () => {
     sdk.generateContent.mockResolvedValue(reply('{"id":"none"}'));

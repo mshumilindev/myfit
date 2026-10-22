@@ -7,7 +7,9 @@ import { expect, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { en } from '../../i18n/en';
 import { clearChat } from '../../atlas/chatLog';
+import { resetAiOverride } from '../../atlas/aiConsent';
 import { atlasReady } from '../../atlas/intents';
+import { currentVersion, type ConsentRecord } from '../../legal/consents';
 import { __getStateForTests } from '../../store';
 import type { StoreState } from '../../store';
 import { coachOn, installIntersectionObserver, richState, seed } from './viewKit';
@@ -22,9 +24,22 @@ const hoisted = vi.hoisted(() => ({
   signIn: vi.fn(),
   askPuter: vi.fn(),
   pushReply: vi.fn(),
+  /** The consent records the (mocked) consent API returns: what the Atlas AI state is read from. */
+  records: [] as ConsentRecord[],
+  grant: vi.fn(),
 }));
 export const m = hoisted;
 
+vi.mock('../../legal/consentApi', () => ({
+  useConsentRecords: () => ({
+    records: hoisted.records,
+    loading: false,
+    confirmed: true,
+    error: null,
+  }),
+  grantConsent: (...a: unknown[]) => hoisted.grant(...a),
+  withdrawConsent: vi.fn(async () => ({ id: 'w', at: 2 })),
+}));
 vi.mock('../../atlas/chatAccess', () => ({ useChatAccess: () => hoisted.canChat }));
 vi.mock('../../atlas/chat', async (orig) => ({
   ...(await orig<typeof import('../../atlas/chat')>()),
@@ -60,6 +75,21 @@ export function stillMotion(): void {
   })) as unknown as typeof window.matchMedia;
 }
 
+/**
+ * Atlas AI on/off the way the app reads it (SPO-286): from the consent records, never from the coach settings. On =
+ * a current `atlas-ai` grant (plus `atlas-puter` when `puter`); off = no record, so the first question that would leave the device asks first.
+ */
+export function setAtlasAi(on: boolean, puter = false): void {
+  const rec = (kind: 'atlas-ai' | 'atlas-puter', id: string): ConsentRecord => ({
+    id,
+    kind,
+    action: 'grant',
+    version: currentVersion(kind),
+    at: 1,
+  });
+  hoisted.records = on ? [rec('atlas-ai', 'r1'), ...(puter ? [rec('atlas-puter', 'r2')] : [])] : [];
+}
+
 export function resetCoachMocks(): void {
   m.canChat = true;
   m.push = 'off';
@@ -71,6 +101,9 @@ export function resetCoachMocks(): void {
   m.signIn.mockResolvedValue(true);
   m.askPuter.mockResolvedValue({ ok: true, text: 'Puter says hi' });
   m.pushReply.mockResolvedValue(undefined);
+  m.grant.mockReset().mockResolvedValue({ id: 'x', at: 1 });
+  resetAiOverride();
+  setAtlasAi(true);
   localStorage.clear();
   clearChat();
   stillMotion();
@@ -80,12 +113,12 @@ export function resetCoachMocks(): void {
 
 export const coach = () => __getStateForTests().coach;
 
-/** A coach that is on, with a chat consent unless told otherwise. */
+/** A coach that is on (the AI chat is on too unless a test calls `setAtlasAi(false)`). */
 export function coachState(
   over: Partial<StoreState['coach']> = {},
   base: StoreState = richState(),
 ): StoreState {
-  return coachOn(base, { chatConsent: true, ...over });
+  return coachOn(base, over);
 }
 
 export async function openThread(

@@ -54,6 +54,11 @@ vi.mock('./vaultIO', async (orig) => {
     mirrorCollection: (apply: never) => real.mirrorCollection(apply, v),
   };
 });
+import {
+  isHealthWriteDenied,
+  resetHealthGateForTests,
+  type HealthWriteDenied,
+} from './data/healthConsentGate';
 import * as store from './store';
 import { vault } from './vaultIO';
 import { isSealed, unsealDoc } from './encryptedDoc';
@@ -61,6 +66,17 @@ import { isSealed, unsealDoc } from './encryptedDoc';
 const T0 = new Date('2026-03-04T10:00:00Z').getTime();
 const DAY = 86_400_000;
 const stub = vault as unknown as import('./autoVault').Vault;
+/** The test grants every health consent (setup), so a write here is never denied; narrows the union. */
+function granted<T>(x: T): Exclude<T, HealthWriteDenied> {
+  if (isHealthWriteDenied(x)) throw new Error(`health write denied: ${x.feature}`);
+  return x as Exclude<T, HealthWriteDenied>;
+}
+
+const startInjury = (...a: Parameters<typeof store.startInjury>) =>
+  granted(store.startInjury(...a));
+const logRehabCheckin = (...a: Parameters<typeof store.logRehabCheckin>) =>
+  granted(store.logRehabCheckin(...a));
+
 const st = () => store.__getStateForTests();
 const settle = async () => {
   for (let i = 0; i < 6; i++) await new Promise((r) => setTimeout(r, 8));
@@ -93,9 +109,20 @@ afterEach(async () => {
 });
 
 describe('injuries and rehab', () => {
+  it('without the injuries consent a write is refused and nothing is stored', async () => {
+    resetHealthGateForTests();
+    const denied = { ok: false, reason: 'consent', feature: 'injuries' };
+    expect(
+      store.startInjury({ reason: 'injury', bodyPart: 'knee', muscles: [], stage: 'protect' }),
+    ).toEqual(denied);
+    expect(store.logRehabCheckin('any', 'fine')).toEqual(denied);
+    await settle();
+    expect(st().injuries).toEqual([]);
+    expect(fs.writes.filter((w) => w.path.includes('/injuries/'))).toEqual([]);
+  });
   const D = store.dayKey(T0);
   const hurt = () =>
-    store.startInjury({
+    startInjury({
       reason: 'injury',
       bodyPart: 'shoulder',
       side: 'left',
@@ -119,7 +146,7 @@ describe('injuries and rehab', () => {
   });
 
   it('a backfilled start day cannot lie in the future', () => {
-    const inj = store.startInjury({
+    const inj = startInjury({
       reason: 'injury',
       bodyPart: 'elbow',
       muscles: [],
@@ -127,7 +154,7 @@ describe('injuries and rehab', () => {
       startDay: D + 5,
     });
     expect(inj.startDay).toBe(D);
-    const old = store.startInjury({
+    const old = startInjury({
       reason: 'surgery',
       bodyPart: 'elbow',
       muscles: [],
@@ -158,17 +185,17 @@ describe('injuries and rehab', () => {
   it('check-ins: pain eases back a stage, sore holds, three fine offers the step up which the user confirms', () => {
     const inj = hurt();
     store.setInjuryStage(inj.id, 'reintroduce');
-    expect(store.logRehabCheckin('missing', 'fine')).toBeNull();
-    expect(store.logRehabCheckin(inj.id, 'pain', T0)).toMatchObject({
+    expect(logRehabCheckin('missing', 'fine')).toBeNull();
+    expect(logRehabCheckin(inj.id, 'pain', T0)).toMatchObject({
       outcome: 'regress',
       stage: 'protect',
     });
     expect(st().injuries[0].stage).toBe('protect');
-    expect(store.logRehabCheckin(inj.id, 'pain', T0)).toMatchObject({ outcome: 'hold' });
-    expect(store.logRehabCheckin(inj.id, 'sore', T0)).toMatchObject({ outcome: 'hold' });
-    let last = store.logRehabCheckin(inj.id, 'fine', T0);
+    expect(logRehabCheckin(inj.id, 'pain', T0)).toMatchObject({ outcome: 'hold' });
+    expect(logRehabCheckin(inj.id, 'sore', T0)).toMatchObject({ outcome: 'hold' });
+    let last = logRehabCheckin(inj.id, 'fine', T0);
     for (let i = 0; i < 6 && last?.outcome !== 'ready'; i++)
-      last = store.logRehabCheckin(inj.id, 'fine', T0);
+      last = logRehabCheckin(inj.id, 'fine', T0);
     expect(last?.outcome).toBe('ready');
     expect(st().injuries[0].pendingAdvance).toBe(true);
     expect(st().injuries[0].checkins.at(-1)).toMatchObject({ day: D, at: T0, feel: 'fine' });
@@ -257,7 +284,7 @@ describe('injuries and rehab', () => {
   });
 
   it('streaks are protected by injury and surgery rehab days', () => {
-    store.startInjury({
+    startInjury({
       reason: 'surgery',
       bodyPart: 'elbow',
       muscles: [],

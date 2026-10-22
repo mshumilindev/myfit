@@ -34,7 +34,7 @@ import { useAskGeoConsent, useGeoSearchOn } from '../legal/useGeoSearch';
 import { UserAvatar } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { InstallShortcut } from './InstallShortcut';
-import { OnbLandingSkeleton } from './OnbLandingSkeleton';
+import { Skeleton } from '../components/ui/Skeleton';
 import { Card } from '../components/ui/Card';
 import { ConditionPage, ConditionsOnboardingRow } from './health/Conditions';
 import { NicotineOnboardingRow } from './health/nicotine/NicotineSection';

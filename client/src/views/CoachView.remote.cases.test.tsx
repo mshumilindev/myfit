@@ -1,16 +1,16 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
 import {
   ask,
   bubbles,
-  coach,
   coachState,
   m,
   openThread,
   resetCoachMocks,
   send,
+  setAtlasAi,
   warmAtlas,
 } from './__fixtures__/coachMocks';
 import { freezeClock, NOW, richState } from './__fixtures__/viewKit';
@@ -57,32 +57,40 @@ describe('CoachView remote: no AI access', () => {
 });
 
 describe('CoachView remote: consent sheet', () => {
-  const sheet = () => document.querySelector('.atl-sheet') as HTMLElement;
+  const sheet = () => screen.getByRole('alertdialog', { name: 'Turn on Atlas AI chat?' });
+  const turnOnOffer = () =>
+    screen.findByRole('button', { name: 'Turn on Atlas AI' }, { timeout: 20000 });
 
   it('asks before the first question leaves the device; Not now sends nothing', async () => {
-    await openThread(coachState({ chatConsent: false }));
+    setAtlasAi(false);
+    await openThread(coachState());
     send(UNKNOWN);
-    await vi.waitFor(() => expect(sheet()).not.toBeNull(), { timeout: 20000 });
-    expect(sheet().textContent).toContain(en.atlasConsentBody);
-    fireEvent.click(screen.getByRole('button', { name: en.atlasNotNow }));
+    fireEvent.click(await turnOnOffer());
+    expect(sheet().textContent).toContain('Gemini');
+    fireEvent.click(within(sheet()).getByRole('button', { name: en.atlasNotNow }));
     expect(m.ask).not.toHaveBeenCalled();
-    expect(coach().chatConsent).toBeFalsy();
+    expect(m.grant).not.toHaveBeenCalled();
+    expect(screen.queryByRole('alertdialog')).toBeNull();
   });
 
-  it('agreeing stores the consent and sends that question to Gemini', async () => {
-    await openThread(coachState({ chatConsent: false }));
+  it('agreeing records the consent and sends that question to Gemini', async () => {
+    setAtlasAi(false);
+    await openThread(coachState());
     send(UNKNOWN);
-    await vi.waitFor(() => expect(sheet()).not.toBeNull(), { timeout: 20000 });
-    fireEvent.click(screen.getByRole('button', { name: en.atlasConsentOk }));
-    expect(coach().chatConsent).toBe(true);
-    await screen.findByText('Gemini says hi', {}, { timeout: 10000 });
+    fireEvent.click(await turnOnOffer());
+    fireEvent.click(within(sheet()).getByRole('button', { name: 'Turn on Atlas AI' }));
+    await screen.findAllByText('Gemini says hi', {}, { timeout: 10000 });
+    expect(m.grant).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'atlas-ai', engines: ['gemini'] }),
+    );
     expect(m.ask).toHaveBeenCalledTimes(1);
     expect(m.ask.mock.calls[0][0].question).toBe(UNKNOWN);
+    expect(m.ask.mock.calls[0][0].grant).toEqual({ engine: 'gemini' });
   });
 });
 
 describe('CoachView remote: Gemini', () => {
-  it('sends the question with the conversation, the temper and the consent flag; streams partial text', async () => {
+  it('sends the question with the conversation, the temper and the Gemini grant; streams partial text', async () => {
     m.ask.mockImplementation(async (a: { onText: (t: string) => void }) => {
       a.onText('Gemini says');
       return { ok: true, text: 'Gemini says hi' };
@@ -93,7 +101,7 @@ describe('CoachView remote: Gemini', () => {
     expect(arg.question).toBe(UNKNOWN);
     expect(arg.temper).toBe(3);
     expect(arg.locale).toBe('en');
-    expect(arg.coach.chatConsent).toBe(true);
+    expect(arg.grant).toEqual({ engine: 'gemini' });
     expect(typeof arg.factsJson).toBe('string');
     expect(arg.history.every((h: { from: string }) => h.from === 'me' || h.from === 'atlas')).toBe(
       true,
@@ -129,7 +137,8 @@ describe('CoachView remote: Gemini', () => {
   });
 
   it('without consent an unsure answer stays local', async () => {
-    await openThread(coachState({ chatConsent: false }));
+    setAtlasAi(false);
+    await openThread(coachState());
     await ask('squat');
     expect(m.ask).not.toHaveBeenCalled();
     expect(last()).toMatch(/bail/i);
@@ -140,7 +149,11 @@ describe('CoachView remote: Gemini', () => {
     Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
     await openThread(coachState());
     await ask(UNKNOWN);
-    expect(m.pushReply).toHaveBeenCalledWith(en.atlasName, 'Gemini says hi', expect.any(Number));
+    expect(m.pushReply).toHaveBeenCalledWith(
+      en.atlasAiPushTitle,
+      'Gemini says hi',
+      expect.any(Number),
+    );
   });
 
   it('a failing push is logged, never thrown at the user', async () => {
@@ -166,6 +179,21 @@ describe('CoachView remote: Gemini', () => {
 describe('CoachView remote: out of quota -> Puter', () => {
   const quota = () =>
     m.ask.mockResolvedValue({ ok: false, reason: 'quota', until: NOW + 3_600_000 });
+
+  beforeEach(() => setAtlasAi(true, true)); // Puter is its own consent
+
+  it('Enable without the Puter consent asks first: no sign-in, nothing loaded or sent', async () => {
+    setAtlasAi(true, false);
+    quota();
+    await openThread(coachState());
+    await ask(UNKNOWN);
+    fireEvent.click(chip(en.atlasPuterEnable)!);
+    expect(screen.getByRole('alertdialog', { name: 'Use Puter as backup?' })).toBeTruthy();
+    expect(m.signIn).not.toHaveBeenCalled();
+    // puterReady may be asked, but only ever without a grant (which makes it refuse before loading anything)
+    expect(m.puterReady.mock.calls.every((c) => c[0] === null)).toBe(true);
+    expect(m.askPuter).not.toHaveBeenCalled();
+  });
 
   it('offers Puter with a quota notice when Puter is not signed in', async () => {
     quota();
