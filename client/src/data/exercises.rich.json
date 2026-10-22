@@ -378,7 +378,10 @@
     "equipment": "other",
     "primaryMuscles": ["lower_back"],
     "secondaryMuscles": ["biceps", "forearms", "glutes", "hamstrings", "quads"],
-    "images": ["/exercise-img/Atlas_Stone_Trainer/0.webp", "/exercise-img/Atlas_Stone_Trainer/1.webp"]
+    "images": [
+      "/exercise-img/Atlas_Stone_Trainer/0.webp",
+      "/exercise-img/Atlas_Stone_Trainer/1.webp"
+    ]
   },
   {
     "id": "Atlas_Stones",
@@ -532,7 +535,10 @@
     "equipment": "bands",
     "primaryMuscles": ["adductors"],
     "secondaryMuscles": [],
-    "images": ["/exercise-img/Band_Hip_Adductions/0.webp", "/exercise-img/Band_Hip_Adductions/1.webp"]
+    "images": [
+      "/exercise-img/Band_Hip_Adductions/0.webp",
+      "/exercise-img/Band_Hip_Adductions/1.webp"
+    ]
   },
   {
     "id": "Band_Pull_Apart",
@@ -1195,7 +1201,10 @@
     "equipment": "body",
     "primaryMuscles": ["core"],
     "secondaryMuscles": [],
-    "images": ["/exercise-img/Bent-Knee_Hip_Raise/0.webp", "/exercise-img/Bent-Knee_Hip_Raise/1.webp"]
+    "images": [
+      "/exercise-img/Bent-Knee_Hip_Raise/0.webp",
+      "/exercise-img/Bent-Knee_Hip_Raise/1.webp"
+    ]
   },
   {
     "id": "Bicycling",
@@ -1558,7 +1567,10 @@
     "equipment": "cable",
     "primaryMuscles": ["quads"],
     "secondaryMuscles": [],
-    "images": ["/exercise-img/Cable_Hip_Adduction/0.webp", "/exercise-img/Cable_Hip_Adduction/1.webp"]
+    "images": [
+      "/exercise-img/Cable_Hip_Adduction/0.webp",
+      "/exercise-img/Cable_Hip_Adduction/1.webp"
+    ]
   },
   {
     "id": "Cable_Incline_Pushdown",
@@ -1669,7 +1681,10 @@
     "equipment": "cable",
     "primaryMuscles": ["biceps"],
     "secondaryMuscles": ["forearms"],
-    "images": ["/exercise-img/Cable_Preacher_Curl/0.webp", "/exercise-img/Cable_Preacher_Curl/1.webp"]
+    "images": [
+      "/exercise-img/Cable_Preacher_Curl/0.webp",
+      "/exercise-img/Cable_Preacher_Curl/1.webp"
+    ]
   },
   {
     "id": "Cable_Rear_Delt_Fly",
@@ -1681,7 +1696,10 @@
     "equipment": "cable",
     "primaryMuscles": ["shoulders"],
     "secondaryMuscles": [],
-    "images": ["/exercise-img/Cable_Rear_Delt_Fly/0.webp", "/exercise-img/Cable_Rear_Delt_Fly/1.webp"]
+    "images": [
+      "/exercise-img/Cable_Rear_Delt_Fly/0.webp",
+      "/exercise-img/Cable_Rear_Delt_Fly/1.webp"
+    ]
   },
   {
     "id": "Cable_Reverse_Crunch",
@@ -1753,7 +1771,10 @@
     "equipment": "cable",
     "primaryMuscles": ["core"],
     "secondaryMuscles": [],
-    "images": ["/exercise-img/Cable_Seated_Crunch/0.webp", "/exercise-img/Cable_Seated_Crunch/1.webp"]
+    "images": [
+      "/exercise-img/Cable_Seated_Crunch/0.webp",
+      "/exercise-img/Cable_Seated_Crunch/1.webp"
+    ]
   },
   {
     "id": "Cable_Seated_Lateral_Raise",
@@ -2486,7 +2507,10 @@
     "equipment": "dumbbell",
     "primaryMuscles": ["biceps"],
     "secondaryMuscles": ["forearms"],
-    "images": ["/exercise-img/Concentration_Curls/0.webp", "/exercise-img/Concentration_Curls/1.webp"]
+    "images": [
+      "/exercise-img/Concentration_Curls/0.webp",
+      "/exercise-img/Concentration_Curls/1.webp"
+    ]
   },
   {
     "id": "Cross_Body_Hammer_Curl",
@@ -2645,7 +2669,10 @@
     "equipment": "barbell",
     "primaryMuscles": ["lower_back"],
     "secondaryMuscles": ["forearms", "glutes", "hamstrings", "traps", "quads"],
-    "images": ["/exercise-img/Deadlift_with_Bands/0.webp", "/exercise-img/Deadlift_with_Bands/1.webp"]
+    "images": [
+      "/exercise-img/Deadlift_with_Bands/0.webp",
+      "/exercise-img/Deadlift_with_Bands/1.webp"
+    ]
   },
   {
     "id": "Deadlift_with_Chains",
@@ -2816,7 +2843,10 @@
     "equipment": "machine",
     "primaryMuscles": ["chest"],
     "secondaryMuscles": ["shoulders", "triceps"],
-    "images": ["/exercise-img/Decline_Smith_Press/0.webp", "/exercise-img/Decline_Smith_Press/1.webp"]
+    "images": [
+      "/exercise-img/Decline_Smith_Press/0.webp",
+      "/exercise-img/Decline_Smith_Press/1.webp"
+    ]
   },
   {
     "id": "Deficit_Deadlift",
@@ -3080,7 +3110,10 @@
     "equipment": "dumbbell",
     "primaryMuscles": ["biceps"],
     "secondaryMuscles": ["forearms"],
-    "images": ["/exercise-img/Dumbbell_Bicep_Curl/0.webp", "/exercise-img/Dumbbell_Bicep_Curl/1.webp"]
+    "images": [
+      "/exercise-img/Dumbbell_Bicep_Curl/0.webp",
+      "/exercise-img/Dumbbell_Bicep_Curl/1.webp"
+    ]
   },
   {
     "id": "Dumbbell_Clean",
@@ -3313,7 +3346,10 @@
     "equipment": "dumbbell",
     "primaryMuscles": ["quads"],
     "secondaryMuscles": ["calves", "glutes", "hamstrings"],
-    "images": ["/exercise-img/Dumbbell_Rear_Lunge/0.webp", "/exercise-img/Dumbbell_Rear_Lunge/1.webp"]
+    "images": [
+      "/exercise-img/Dumbbell_Rear_Lunge/0.webp",
+      "/exercise-img/Dumbbell_Rear_Lunge/1.webp"
+    ]
   },
   {
     "id": "Dumbbell_Scaption",
@@ -3526,7 +3562,10 @@
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
     "secondaryMuscles": ["glutes", "hamstrings"],
-    "images": ["/exercise-img/Elevated_Back_Lunge/0.webp", "/exercise-img/Elevated_Back_Lunge/1.webp"]
+    "images": [
+      "/exercise-img/Elevated_Back_Lunge/0.webp",
+      "/exercise-img/Elevated_Back_Lunge/1.webp"
+    ]
   },
   {
     "id": "Elevated_Cable_Rows",
@@ -3538,7 +3577,10 @@
     "equipment": "cable",
     "primaryMuscles": ["lats"],
     "secondaryMuscles": ["traps"],
-    "images": ["/exercise-img/Elevated_Cable_Rows/0.webp", "/exercise-img/Elevated_Cable_Rows/1.webp"]
+    "images": [
+      "/exercise-img/Elevated_Cable_Rows/0.webp",
+      "/exercise-img/Elevated_Cable_Rows/1.webp"
+    ]
   },
   {
     "id": "Elliptical_Trainer",
@@ -3661,7 +3703,10 @@
     "equipment": "ezBar",
     "primaryMuscles": ["triceps"],
     "secondaryMuscles": ["forearms"],
-    "images": ["/exercise-img/EZ-Bar_Skullcrusher/0.webp", "/exercise-img/EZ-Bar_Skullcrusher/1.webp"]
+    "images": [
+      "/exercise-img/EZ-Bar_Skullcrusher/0.webp",
+      "/exercise-img/EZ-Bar_Skullcrusher/1.webp"
+    ]
   },
   {
     "id": "Face_Pull",
@@ -3874,7 +3919,10 @@
     "equipment": "body",
     "primaryMuscles": ["quads"],
     "secondaryMuscles": ["calves", "glutes", "hamstrings"],
-    "images": ["/exercise-img/Freehand_Jump_Squat/0.webp", "/exercise-img/Freehand_Jump_Squat/1.webp"]
+    "images": [
+      "/exercise-img/Freehand_Jump_Squat/0.webp",
+      "/exercise-img/Freehand_Jump_Squat/1.webp"
+    ]
   },
   {
     "id": "Frog_Hops",
@@ -3910,7 +3958,10 @@
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
     "secondaryMuscles": ["calves", "glutes", "hamstrings"],
-    "images": ["/exercise-img/Front_Barbell_Squat/0.webp", "/exercise-img/Front_Barbell_Squat/1.webp"]
+    "images": [
+      "/exercise-img/Front_Barbell_Squat/0.webp",
+      "/exercise-img/Front_Barbell_Squat/1.webp"
+    ]
   },
   {
     "id": "Front_Barbell_Squat_To_A_Bench",
@@ -4183,7 +4234,10 @@
     "equipment": "body",
     "primaryMuscles": ["core"],
     "secondaryMuscles": ["biceps", "lats"],
-    "images": ["/exercise-img/Gorilla_Chin_Crunch/0.webp", "/exercise-img/Gorilla_Chin_Crunch/1.webp"]
+    "images": [
+      "/exercise-img/Gorilla_Chin_Crunch/0.webp",
+      "/exercise-img/Gorilla_Chin_Crunch/1.webp"
+    ]
   },
   {
     "id": "Groin_and_Back_Stretch",
@@ -5163,7 +5217,10 @@
     "equipment": "kettlebell",
     "primaryMuscles": ["core"],
     "secondaryMuscles": ["hamstrings", "shoulders"],
-    "images": ["/exercise-img/Kettlebell_Figure_8/0.webp", "/exercise-img/Kettlebell_Figure_8/1.webp"]
+    "images": [
+      "/exercise-img/Kettlebell_Figure_8/0.webp",
+      "/exercise-img/Kettlebell_Figure_8/1.webp"
+    ]
   },
   {
     "id": "Kettlebell_Hang_Clean",
@@ -5295,7 +5352,10 @@
     "equipment": "kettlebell",
     "primaryMuscles": ["shoulders"],
     "secondaryMuscles": ["quads", "triceps"],
-    "images": ["/exercise-img/Kettlebell_Thruster/0.webp", "/exercise-img/Kettlebell_Thruster/1.webp"]
+    "images": [
+      "/exercise-img/Kettlebell_Thruster/0.webp",
+      "/exercise-img/Kettlebell_Thruster/1.webp"
+    ]
   },
   {
     "id": "Kettlebell_Turkish_Get-Up_Lunge_style",
@@ -5337,7 +5397,10 @@
     "equipment": "kettlebell",
     "primaryMuscles": ["core"],
     "secondaryMuscles": ["glutes", "hamstrings", "shoulders", "triceps"],
-    "images": ["/exercise-img/Kettlebell_Windmill/0.webp", "/exercise-img/Kettlebell_Windmill/1.webp"]
+    "images": [
+      "/exercise-img/Kettlebell_Windmill/0.webp",
+      "/exercise-img/Kettlebell_Windmill/1.webp"
+    ]
   },
   {
     "id": "Kipping_Muscle_Up",
@@ -5487,7 +5550,10 @@
     "equipment": null,
     "primaryMuscles": ["quads"],
     "secondaryMuscles": [],
-    "images": ["/exercise-img/Kneeling_Hip_Flexor/0.webp", "/exercise-img/Kneeling_Hip_Flexor/1.webp"]
+    "images": [
+      "/exercise-img/Kneeling_Hip_Flexor/0.webp",
+      "/exercise-img/Kneeling_Hip_Flexor/1.webp"
+    ]
   },
   {
     "id": "Kneeling_Jump_Squat",
@@ -5499,7 +5565,10 @@
     "equipment": "barbell",
     "primaryMuscles": ["glutes"],
     "secondaryMuscles": ["calves", "hamstrings", "quads"],
-    "images": ["/exercise-img/Kneeling_Jump_Squat/0.webp", "/exercise-img/Kneeling_Jump_Squat/1.webp"]
+    "images": [
+      "/exercise-img/Kneeling_Jump_Squat/0.webp",
+      "/exercise-img/Kneeling_Jump_Squat/1.webp"
+    ]
   },
   {
     "id": "Kneeling_Single-Arm_High_Pulley_Row",
@@ -5904,7 +5973,10 @@
     "equipment": "cable",
     "primaryMuscles": ["chest"],
     "secondaryMuscles": ["shoulders"],
-    "images": ["/exercise-img/Low_Cable_Crossover/0.webp", "/exercise-img/Low_Cable_Crossover/1.webp"]
+    "images": [
+      "/exercise-img/Low_Cable_Crossover/0.webp",
+      "/exercise-img/Low_Cable_Crossover/1.webp"
+    ]
   },
   {
     "id": "Low_Cable_Triceps_Extension",
@@ -6189,7 +6261,10 @@
     "equipment": "machine",
     "primaryMuscles": ["quads"],
     "secondaryMuscles": ["calves", "glutes", "hamstrings"],
-    "images": ["/exercise-img/Lying_Machine_Squat/0.webp", "/exercise-img/Lying_Machine_Squat/1.webp"]
+    "images": [
+      "/exercise-img/Lying_Machine_Squat/0.webp",
+      "/exercise-img/Lying_Machine_Squat/1.webp"
+    ]
   },
   {
     "id": "Lying_One-Arm_Lateral_Raise",
@@ -6273,7 +6348,10 @@
     "equipment": "ezBar",
     "primaryMuscles": ["triceps"],
     "secondaryMuscles": [],
-    "images": ["/exercise-img/Lying_Triceps_Press/0.webp", "/exercise-img/Lying_Triceps_Press/1.webp"]
+    "images": [
+      "/exercise-img/Lying_Triceps_Press/0.webp",
+      "/exercise-img/Lying_Triceps_Press/1.webp"
+    ]
   },
   {
     "id": "Machine_Bench_Press",
@@ -6285,7 +6363,10 @@
     "equipment": "machine",
     "primaryMuscles": ["chest"],
     "secondaryMuscles": ["shoulders", "triceps"],
-    "images": ["/exercise-img/Machine_Bench_Press/0.webp", "/exercise-img/Machine_Bench_Press/1.webp"]
+    "images": [
+      "/exercise-img/Machine_Bench_Press/0.webp",
+      "/exercise-img/Machine_Bench_Press/1.webp"
+    ]
   },
   {
     "id": "Machine_Bicep_Curl",
@@ -6411,7 +6492,10 @@
     "equipment": null,
     "primaryMuscles": ["traps"],
     "secondaryMuscles": ["core", "lats", "lower_back"],
-    "images": ["/exercise-img/Middle_Back_Stretch/0.webp", "/exercise-img/Middle_Back_Stretch/1.webp"]
+    "images": [
+      "/exercise-img/Middle_Back_Stretch/0.webp",
+      "/exercise-img/Middle_Back_Stretch/1.webp"
+    ]
   },
   {
     "id": "Mixed_Grip_Chin",
@@ -6705,7 +6789,10 @@
     "equipment": "barbell",
     "primaryMuscles": ["triceps"],
     "secondaryMuscles": ["chest", "shoulders"],
-    "images": ["/exercise-img/One_Arm_Floor_Press/0.webp", "/exercise-img/One_Arm_Floor_Press/1.webp"]
+    "images": [
+      "/exercise-img/One_Arm_Floor_Press/0.webp",
+      "/exercise-img/One_Arm_Floor_Press/1.webp"
+    ]
   },
   {
     "id": "One_Arm_Lat_Pulldown",
@@ -7185,7 +7272,10 @@
     "equipment": "cable",
     "primaryMuscles": ["biceps"],
     "secondaryMuscles": [],
-    "images": ["/exercise-img/Overhead_Cable_Curl/0.webp", "/exercise-img/Overhead_Cable_Curl/1.webp"]
+    "images": [
+      "/exercise-img/Overhead_Cable_Curl/0.webp",
+      "/exercise-img/Overhead_Cable_Curl/1.webp"
+    ]
   },
   {
     "id": "Overhead_Lat",
@@ -7493,7 +7583,10 @@
     "equipment": "dumbbell",
     "primaryMuscles": ["quads"],
     "secondaryMuscles": ["core", "calves", "glutes", "hamstrings"],
-    "images": ["/exercise-img/Plie_Dumbbell_Squat/0.webp", "/exercise-img/Plie_Dumbbell_Squat/1.webp"]
+    "images": [
+      "/exercise-img/Plie_Dumbbell_Squat/0.webp",
+      "/exercise-img/Plie_Dumbbell_Squat/1.webp"
+    ]
   },
   {
     "id": "Plyo_Kettlebell_Pushups",
@@ -8246,7 +8339,10 @@
     "equipment": "other",
     "primaryMuscles": ["biceps"],
     "secondaryMuscles": ["forearms"],
-    "images": ["/exercise-img/Reverse_Plate_Curls/0.webp", "/exercise-img/Reverse_Plate_Curls/1.webp"]
+    "images": [
+      "/exercise-img/Reverse_Plate_Curls/0.webp",
+      "/exercise-img/Reverse_Plate_Curls/1.webp"
+    ]
   },
   {
     "id": "Reverse_Triceps_Bench_Press",
@@ -8703,7 +8799,10 @@
     "equipment": null,
     "primaryMuscles": ["calves"],
     "secondaryMuscles": ["hamstrings", "lower_back"],
-    "images": ["/exercise-img/Seated_Calf_Stretch/0.webp", "/exercise-img/Seated_Calf_Stretch/1.webp"]
+    "images": [
+      "/exercise-img/Seated_Calf_Stretch/0.webp",
+      "/exercise-img/Seated_Calf_Stretch/1.webp"
+    ]
   },
   {
     "id": "Seated_Close-Grip_Concentration_Barbell_Curl",
@@ -9372,7 +9471,10 @@
     "equipment": "other",
     "primaryMuscles": ["quads"],
     "secondaryMuscles": ["calves", "hamstrings"],
-    "images": ["/exercise-img/Single_Leg_Push-off/0.webp", "/exercise-img/Single_Leg_Push-off/1.webp"]
+    "images": [
+      "/exercise-img/Single_Leg_Push-off/0.webp",
+      "/exercise-img/Single_Leg_Push-off/1.webp"
+    ]
   },
   {
     "id": "Single-Arm_Cable_Crossover",
@@ -9552,7 +9654,10 @@
     "equipment": "other",
     "primaryMuscles": ["quads"],
     "secondaryMuscles": ["calves", "glutes", "hamstrings"],
-    "images": ["/exercise-img/Sled_Drag_-_Harness/0.webp", "/exercise-img/Sled_Drag_-_Harness/1.webp"]
+    "images": [
+      "/exercise-img/Sled_Drag_-_Harness/0.webp",
+      "/exercise-img/Sled_Drag_-_Harness/1.webp"
+    ]
   },
   {
     "id": "Sled_Overhead_Backward_Walk",
@@ -9630,7 +9735,10 @@
     "equipment": "other",
     "primaryMuscles": ["core"],
     "secondaryMuscles": ["calves", "forearms", "lats", "traps", "shoulders"],
-    "images": ["/exercise-img/Sledgehammer_Swings/0.webp", "/exercise-img/Sledgehammer_Swings/1.webp"]
+    "images": [
+      "/exercise-img/Sledgehammer_Swings/0.webp",
+      "/exercise-img/Sledgehammer_Swings/1.webp"
+    ]
   },
   {
     "id": "Smith_Incline_Shoulder_Raise",
@@ -9867,7 +9975,10 @@
     "equipment": "machine",
     "primaryMuscles": ["quads"],
     "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
-    "images": ["/exercise-img/Smith_Machine_Squat/0.webp", "/exercise-img/Smith_Machine_Squat/1.webp"]
+    "images": [
+      "/exercise-img/Smith_Machine_Squat/0.webp",
+      "/exercise-img/Smith_Machine_Squat/1.webp"
+    ]
   },
   {
     "id": "Smith_Machine_Stiff-Legged_Deadlift",
@@ -10243,7 +10354,10 @@
     "equipment": "bands",
     "primaryMuscles": ["quads"],
     "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
-    "images": ["/exercise-img/Squats_-_With_Bands/0.webp", "/exercise-img/Squats_-_With_Bands/1.webp"]
+    "images": [
+      "/exercise-img/Squats_-_With_Bands/0.webp",
+      "/exercise-img/Squats_-_With_Bands/1.webp"
+    ]
   },
   {
     "id": "Stairmaster",
@@ -10402,7 +10516,10 @@
     "equipment": "cable",
     "primaryMuscles": ["core"],
     "secondaryMuscles": ["shoulders"],
-    "images": ["/exercise-img/Standing_Cable_Lift/0.webp", "/exercise-img/Standing_Cable_Lift/1.webp"]
+    "images": [
+      "/exercise-img/Standing_Cable_Lift/0.webp",
+      "/exercise-img/Standing_Cable_Lift/1.webp"
+    ]
   },
   {
     "id": "Standing_Cable_Wood_Chop",
@@ -11452,7 +11569,10 @@
     "equipment": null,
     "primaryMuscles": ["triceps"],
     "secondaryMuscles": ["shoulders"],
-    "images": ["/exercise-img/Tricep_Side_Stretch/0.webp", "/exercise-img/Tricep_Side_Stretch/1.webp"]
+    "images": [
+      "/exercise-img/Tricep_Side_Stretch/0.webp",
+      "/exercise-img/Tricep_Side_Stretch/1.webp"
+    ]
   },
   {
     "id": "Triceps_Overhead_Extension_with_Rope",
@@ -11647,7 +11767,10 @@
     "equipment": null,
     "primaryMuscles": ["hamstrings"],
     "secondaryMuscles": ["lower_back", "traps"],
-    "images": ["/exercise-img/Upper_Back-Leg_Grab/0.webp", "/exercise-img/Upper_Back-Leg_Grab/1.webp"]
+    "images": [
+      "/exercise-img/Upper_Back-Leg_Grab/0.webp",
+      "/exercise-img/Upper_Back-Leg_Grab/1.webp"
+    ]
   },
   {
     "id": "Upright_Barbell_Row",
@@ -11659,7 +11782,10 @@
     "equipment": "barbell",
     "primaryMuscles": ["shoulders"],
     "secondaryMuscles": ["traps"],
-    "images": ["/exercise-img/Upright_Barbell_Row/0.webp", "/exercise-img/Upright_Barbell_Row/1.webp"]
+    "images": [
+      "/exercise-img/Upright_Barbell_Row/0.webp",
+      "/exercise-img/Upright_Barbell_Row/1.webp"
+    ]
   },
   {
     "id": "Upright_Cable_Row",
@@ -11812,7 +11938,10 @@
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
     "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
-    "images": ["/exercise-img/Weighted_Jump_Squat/0.webp", "/exercise-img/Weighted_Jump_Squat/1.webp"]
+    "images": [
+      "/exercise-img/Weighted_Jump_Squat/0.webp",
+      "/exercise-img/Weighted_Jump_Squat/1.webp"
+    ]
   },
   {
     "id": "Weighted_Pull_Ups",
