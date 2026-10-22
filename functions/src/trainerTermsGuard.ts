@@ -43,16 +43,14 @@ interface RecordLike {
 }
 
 /** The newest record wins (`at`, then id): a later withdrawal or an older-version grant after it is not acceptance. */
-export function isTrainerTermsAccepted(rows: readonly { data: Record<string, unknown> }[]): boolean {
+export function isTrainerTermsAccepted(
+  rows: readonly { data: Record<string, unknown> }[],
+): boolean {
   let best: RecordLike | null = null;
   for (const r of rows) {
     const d = r.data as RecordLike;
     if (typeof d.at !== 'number') continue;
-    if (
-      !best ||
-      d.at > (best.at as number) ||
-      (d.at === best.at && String(d.id) > String(best.id))
-    )
+    if (!best || d.at > (best.at as number) || (d.at === best.at && String(d.id) > String(best.id)))
       best = d;
   }
   return (

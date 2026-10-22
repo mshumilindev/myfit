@@ -22,15 +22,14 @@ const trackers = read('docs/compliance/trackers.md');
 const aiDoc = read('docs/compliance/ai-providers.md');
 
 const report = (title: string, missing: string[], howTo: string) =>
-  missing.length
-    ? `${title}\n  missing: ${missing.join(', ')}\n  ADD: ${howTo}`
-    : '';
+  missing.length ? `${title}\n  missing: ${missing.join(', ')}\n  ADD: ${howTo}` : '';
 
 /** Collections that hold no personal data. Allowed WITHOUT a registry row, each with its reason. */
 const NO_PERSONAL_DATA: Record<string, string> = {
   exerciseCatalog: 'shared exercise catalog, written by admins',
   sharedGyms: 'crowdsourced equipment ids per venue, no personal data (rules comment)',
-  config: 'app-wide switches edited in the console (see registry R53 for the closed-test allow-list caveat)',
+  config:
+    'app-wide switches edited in the console (see registry R53 for the closed-test allow-list caveat)',
 };
 
 /** Registry paths: backticked tokens, normalised to `top` or `users/{uid}/sub`, each with the id of its `| Rn |` row. */
@@ -39,9 +38,14 @@ function registryPaths(): Map<string, string> {
   for (const line of registry.split('\n')) {
     const row = /^\| (R\d+) \|/.exec(line);
     if (!row) continue;
-    for (const m of line.matchAll(/`([A-Za-z]+(?:\/\{[A-Za-z]+\})?(?:\/[A-Za-z]+)?(?:\/\{[A-Za-z]+\})?)[^`]*`/g)) {
+    for (const m of line.matchAll(
+      /`([A-Za-z]+(?:\/\{[A-Za-z]+\})?(?:\/[A-Za-z]+)?(?:\/\{[A-Za-z]+\})?)[^`]*`/g,
+    )) {
       const parts = m[1].split('/');
-      const key = parts[0] === 'users' && parts[1] === '{uid}' && parts[2] ? `users/{uid}/${parts[2]}` : parts[0];
+      const key =
+        parts[0] === 'users' && parts[1] === '{uid}' && parts[2]
+          ? `users/{uid}/${parts[2]}`
+          : parts[0];
       if (!out.has(key)) out.set(key, row[1]);
     }
   }
@@ -73,7 +77,8 @@ const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:]
 
 function hostsOf(text: string): string[] {
   const hosts = new Set<string>();
-  for (const m of text.matchAll(/(?:https?|wss):\/\/([A-Za-z0-9*][A-Za-z0-9*.-]*\.[A-Za-z]{2,})/g)) hosts.add(m[1].toLowerCase());
+  for (const m of text.matchAll(/(?:https?|wss):\/\/([A-Za-z0-9*][A-Za-z0-9*.-]*\.[A-Za-z]{2,})/g))
+    hosts.add(m[1].toLowerCase());
   return [...hosts];
 }
 
@@ -153,7 +158,9 @@ describe('compliance-sync: docs/compliance stay in step with the code', () => {
     const src = read('client/src/atlas/chatFacts.ts');
     const body = /export const FACT_CATEGORY = \{([\s\S]*?)\} as const/.exec(src);
     expect(body, 'FACT_CATEGORY not found in client/src/atlas/chatFacts.ts').not.toBeNull();
-    const keys = [...(body as RegExpExecArray)[1].matchAll(/^\s*([A-Za-z]+)\s*:/gm)].map((m) => m[1]);
+    const keys = [...(body as RegExpExecArray)[1].matchAll(/^\s*([A-Za-z]+)\s*:/gm)].map(
+      (m) => m[1],
+    );
     expect(keys.length).toBeGreaterThan(5);
     const missingKeys = keys.filter((k) => !aiDoc.includes(`\`${k}\``));
     const missingCats = ATLAS_AI_CATEGORIES.filter((c) => !aiDoc.includes(`\`${c}\``));

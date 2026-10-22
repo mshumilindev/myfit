@@ -14,7 +14,7 @@ import { Card } from '../components/ui/Card';
 import { ChatPage, ChatShell } from '../components/ui/ChatShell';
 import { ChatComposer } from '../components/ui/ChatComposer';
 import { ChatBubble, ChatDay, ChatMessage, ChatNewDivider } from '../components/ui/ChatBubble';
-import { FLAGS, LOCALES, fmtBodyWeightKg, setLocale, useT } from '../i18n';
+import { FLAGS, LOCALES, setLocale, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { setCoach, useSelfCoachRole, useStore } from '../store';
 import { AtlasFace, TemperHeat } from '../components/AtlasFace';
