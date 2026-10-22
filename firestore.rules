@@ -648,21 +648,23 @@ service cloud.firestore {
     }
     match /schedules/{clientId} {
       allow read: if isSelf(clientId) || isActiveCoachOf(clientId) || isTeamManagerOf(clientId);
-      allow create: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc', 'timing'])
+      allow create: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc', 'timing', 'updatedBy'])
         && request.resource.data.keys().hasAll(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
         && request.resource.data.clientId == clientId
         && scheduleWriter(clientId, request.resource.data)
         && request.resource.data.updatedAt is int
         && request.resource.data.rev == 1
         && validTiming(request.resource.data.get('timing', null))
+        && validWriter(clientId, request.resource.data)
         && sealedCkSchedule(request.resource.data);
-      allow update: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc', 'timing'])
+      allow update: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc', 'timing', 'updatedBy'])
         && request.resource.data.keys().hasAll(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
         && request.resource.data.clientId == clientId
         && scheduleWriter(clientId, request.resource.data)
         && request.resource.data.updatedAt is int
         && request.resource.data.rev == resource.data.rev + 1
         && validTiming(request.resource.data.get('timing', null))
+        && validWriter(clientId, request.resource.data)
         && sealedCkSchedule(request.resource.data);
       allow delete: if false;
     }
