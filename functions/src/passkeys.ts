@@ -7,7 +7,7 @@
 import { onCall } from 'firebase-functions/v2/https';
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simplewebauthn/server';
 import { randomUUID } from 'node:crypto';
-import { authPayload, db, displayName, HttpsError, mintToken, type UserDoc } from './lib';
+import { authPayload, db, displayName, HttpsError, mintToken, type UserDoc, HOT } from './lib';
 import { allowedRelyingParty } from './passkeysPure';
 import {
   loginOptionsCore,
@@ -119,7 +119,7 @@ export const passkeyRegisterVerify = onCall(async (req) => {
 
 // --- sign-in (landing; no session yet) ---------------------------------------
 
-export const passkeyLoginOptions = onCall(async (req) => {
+export const passkeyLoginOptions = onCall(HOT, async (req) => {
   await rateLimit(req);
   const rp = relyingParty(req.rawRequest?.headers?.origin);
   const userId = (req.data as { userId?: unknown } | undefined)?.userId;
@@ -133,7 +133,7 @@ export const passkeyLoginOptions = onCall(async (req) => {
   );
 });
 
-export const passkeyLoginVerify = onCall(async (req) => {
+export const passkeyLoginVerify = onCall(HOT, async (req) => {
   await rateLimit(req);
   const rp = relyingParty(req.rawRequest?.headers?.origin);
   const b = bodyOf(req.data);

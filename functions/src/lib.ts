@@ -228,3 +228,10 @@ export function usernameRef(lower: string) {
 
 export { HttpsError };
 export type { CallableRequest };
+
+/**
+ * Always-warm options for the few callables without which nobody can sign in or open the app (login, session check,
+ * vault key, consent). One instance stays running, so these never wait for a cold start. Keep this list short: each
+ * one is billed all month.
+ */
+export const HOT = { minInstances: 1 } as const;

@@ -4,13 +4,13 @@
  */
 import { randomBytes } from 'node:crypto';
 import { onCall } from 'firebase-functions/v2/https';
-import { db } from './lib';
+import { db, HOT } from './lib';
 import { ENFORCE_APPCHECK } from './coach/runtime';
 import { firestoreKv } from './coach/firestoreKv';
 import { recordConsentHandler } from './consentRecordsCore';
 
 export const recordConsent = onCall(
-  { enforceAppCheck: ENFORCE_APPCHECK, maxInstances: 10 },
+  { enforceAppCheck: ENFORCE_APPCHECK, maxInstances: 10, ...HOT },
   (req) =>
     recordConsentHandler(firestoreKv(db), {
       uid: req.auth?.uid,

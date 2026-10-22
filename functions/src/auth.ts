@@ -20,6 +20,7 @@ import {
   verifyPassword,
   type Status,
   type UserDoc,
+  HOT,
 } from './lib';
 
 const USERNAME_MAX = 64;
@@ -120,7 +121,7 @@ export const register = onCall(async () => {
 
 // --- login ------------------------------------------------------------------
 
-export const login = onCall(async (req) => {
+export const login = onCall(HOT, async (req) => {
   const body = (req.data ?? {}) as Record<string, unknown>;
   const identifierRaw = (body.identifier ?? body.username) as unknown;
   const { password } = body;
@@ -166,7 +167,7 @@ export const login = onCall(async (req) => {
 
 // --- status -----------------------------------------------------------------
 
-export const authStatus = onCall(async () => {
+export const authStatus = onCall(HOT, async () => {
   const meta = await db.collection('meta').doc('app').get();
   if (meta.exists && (meta.data() as { hasAdmin?: boolean }).hasAdmin) return { registered: true };
   const any = await db.collection('users').limit(1).get();

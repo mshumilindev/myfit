@@ -14,7 +14,7 @@
  * custom token to sign itself back in.
  */
 import { onCall } from 'firebase-functions/v2/https';
-import { authAdmin, db, HttpsError, mintToken, type UserDoc } from './lib';
+import { authAdmin, db, HttpsError, mintToken, type UserDoc, HOT } from './lib';
 import { deletePasskeysOf, deletePasskeysOfDevice } from './passkeysStore';
 import { describeClient, placeFromHeaders, validDeviceId } from './sessionsPure';
 import {
@@ -65,7 +65,7 @@ function deviceIdOf(data: unknown): string {
 }
 
 /** Called by the app at start and on focus. Creates / adopts the record, refreshes it, and says whether this device was signed out elsewhere. */
-export const sessionCheck = onCall(async (req) => {
+export const sessionCheck = onCall(HOT, async (req) => {
   const uid = mustUid(req);
   const headers = req.rawRequest?.headers as Record<string, unknown> | undefined;
   const info = { label: describeClient(headers?.['user-agent']), ...placeFromHeaders(headers) };
@@ -101,7 +101,7 @@ export const sessionRevokeOthers = onCall(async (req) => {
 });
 
 /** This device signed out on its own: its record goes away; with `forget` (left the landing list) so does its passkey. */
-export const sessionEnd = onCall(async (req) => {
+export const sessionEnd = onCall(HOT, async (req) => {
   const uid = mustUid(req);
   const deviceId = deviceIdOf(req.data);
   await storeFor(uid).remove(deviceId);

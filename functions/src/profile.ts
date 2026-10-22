@@ -23,6 +23,7 @@ import {
   recordAudit,
   usernameRef,
   type UserDoc,
+  HOT,
 } from './lib';
 import {
   listUserWorkouts,
@@ -397,7 +398,7 @@ async function fullProfilePayload(
 
 // --- callables --------------------------------------------------------------
 
-export const profileMe = onCall(async (req) => {
+export const profileMe = onCall(HOT, async (req) => {
   const uid = requireAuth(req);
   const u = await loadUser(uid);
   const tr = u.trainerId ? await usersById(u.trainerId) : null;

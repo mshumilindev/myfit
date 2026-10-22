@@ -23,7 +23,7 @@
 import { hkdfSync } from 'node:crypto';
 import { onCall } from 'firebase-functions/v2/https';
 import { defineSecret, defineString } from 'firebase-functions/params';
-import { db, HttpsError, requireAuth } from './lib';
+import { db, HttpsError, requireAuth, HOT } from './lib';
 import { ENFORCE_APPCHECK } from './coach/runtime';
 import { firestoreKv } from './coach/firestoreKv';
 import type { Kv } from './coach/kv';
@@ -96,7 +96,7 @@ export async function vaultKeyHandler(
 }
 
 export const vaultKey = onCall(
-  { secrets: [VAULT_MASTER], enforceAppCheck: ENFORCE_APPCHECK },
+  { secrets: [VAULT_MASTER], enforceAppCheck: ENFORCE_APPCHECK, ...HOT },
   async (req) => {
     const uid = requireAuth(req);
     const requested = (req.data as { kv?: unknown } | undefined)?.kv;
