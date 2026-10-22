@@ -3,8 +3,10 @@ name: CI
 on:
   push:
     branches: [main]
+    # A release tag (vYYYY.MM.DD-N) is what goes to prod: it gets the full matrix (all five locales).
+    tags: ['v*']
   pull_request:
-  # Full five-locale layout audit every night and on demand (Actions -> CI -> Run workflow).
+  # Full five-locale layout audit every night, on demand (Actions -> CI -> Run workflow) and on a release tag.
   schedule:
     - cron: '17 2 * * *'
   workflow_dispatch:
@@ -17,10 +19,11 @@ concurrency:
 env:
   ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
   # Layout audit is split into parallel shards (SPO-140); the merge job proves they add up to the full matrix.
-  # A PR audits English only (fast); a push to main audits en, uk, pl; the nightly run and a manual run audit all five
-  # locales (lt, et are being retired, SPO-142). Shard counts are kept in step with the matrix in `layout-shard`.
-  LAYOUT_LOCALES: ${{ github.event_name == 'pull_request' && 'en' || (github.event_name == 'push' && 'en,uk,pl' || 'en,uk,pl,lt,et') }}
-  LAYOUT_SHARDS: ${{ github.event_name == 'pull_request' && '10' || (github.event_name == 'push' && '14' || '20') }}
+  # A PR and a push to main audit English only (fast); the nightly run, a manual run and a release tag audit all five
+  # locales (lt, et are being retired, SPO-142). That every locale HAS every string is checked on every run by
+  # `i18n:check` (static job). Shard counts are kept in step with the matrix in `layout-shard`.
+  LAYOUT_LOCALES: ${{ (github.event_name == 'pull_request' || (github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/'))) && 'en' || 'en,uk,pl,lt,et' }}
+  LAYOUT_SHARDS: ${{ (github.event_name == 'pull_request' || (github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/'))) && '10' || '20' }}
 
 jobs:
   # ---- quality: five independent jobs instead of one 4.5-minute chain; `quality` below keeps the old check name ----
@@ -52,6 +55,8 @@ jobs:
         run: npx eslint . --cache --cache-strategy content --cache-location node_modules/.cache/eslint/
       - name: Prettier
         run: npx prettier --check --cache --cache-strategy content --cache-location node_modules/.cache/prettier/.cache .
+      - name: Every locale has every string (en, uk, pl, lt, et)
+        run: npm run i18n:check
       - name: Coverage thresholds / include / exclude never below the floor, floor never below the base commit
         run: npm run coverage:guard -- --base ${{ github.event.pull_request.base.sha || github.event.before || 'HEAD' }}
 
@@ -128,6 +133,11 @@ jobs:
         run: |
           ARGS=""
           if [ -n "${{ steps.base.outputs.sha }}" ]; then ARGS=$(node ../scripts/patch-coverage.mjs --vitest-args --base "${{ steps.base.outputs.sha }}"); fi
+          # A push/PR runs only the tests that import something changed since the base (vitest --changed; a changed config,
+          # setup or package.json reruns everything). The nightly run, a manual run and a release tag run ALL tests.
+          if [ -n "${{ steps.base.outputs.sha }}" ] && [ "${{ github.event_name }}" != "schedule" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ] && [[ "${{ github.ref }}" != refs/tags/* ]]; then
+            ARGS="$ARGS --changed ${{ steps.base.outputs.sha }} --passWithNoTests"
+          fi
           npx vitest run --shard ${{ matrix.shard }}/8 --maxWorkers=100% $ARGS
       - name: Upload patch coverage
         if: always()
@@ -202,6 +212,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
+      # passkeysCore imports @simplewebauthn/server, which lives only in functions/ (own lockfile)
+      - run: npm ci --ignore-scripts --prefix functions
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --project=mobile-chromium tests/e2e/passkeys-webauthn.e2e.ts
 
@@ -285,7 +297,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[0,1,2,3,4,5,6,7,8,9]' || (github.event_name == 'push' && '[0,1,2,3,4,5,6,7,8,9,10,11,12,13]' || '[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]')) }}
+        shard: ${{ fromJSON((github.event_name == 'pull_request' || (github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/'))) && '[0,1,2,3,4,5,6,7,8,9]' || '[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -28,7 +28,7 @@ npm run test:rules                            # Firestore rules на емуля�
 npm run test:e2e | e2e:coach                  # Playwright
 npm run i18n:check | deadcode                 # паритет локалей | невикористані експорти
 npm run storybook | build-storybook           # каталог кіту
-npm run audit:chat | audit:hero | audit:stories   # геометрія; прапори --part i/n --concurrency k --locales en (повні — CI `layout`: PR = en, push у main = en,uk,pl, нічний/ручний = усі локалі; шарди зводить scripts/audit-merge.mjs; ADR 004)
+npm run audit:chat | audit:hero | audit:stories   # геометрія; прапори --part i/n --concurrency k --locales en (повні — CI `layout`: PR і push у main = en, нічний/ручний/тег релізу `v*` = усі локалі; наявність усіх рядків у всіх локалях перевіряє `i18n:check` на кожному прогоні; клієнтські тести на push/PR — лише зачеплені (`vitest --changed`), повні — вночі й на теґу; шарди зводить scripts/audit-merge.mjs; ADR 004)
 ```
 
 ## Як працювати
