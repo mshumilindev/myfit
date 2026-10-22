@@ -84,7 +84,8 @@ export const clientLt: typeof clientEn = {
   invOkTagEffects: (n) => `Tik suvestinės: ${n}`,
   invOkTagNone: 'Bendrinimas: kol kas nieko',
   invOkInjuryOff: 'Traumos: išjungta',
-  invOkWaiting: (first) => `Laukiama, kol ${first} programėlė įjungs bendrinimą`,
+  invOkWaiting: (first) =>
+    `Bendrinimas su ${first} prasidės, kai treneris kitą kartą atidarys Spotter`,
   invOkWaitingBody:
     'Tai nutinka vieną kartą, kai treneris kitą kartą atidarys Spotter. Jūsų pasirinkimai išsaugoti.',
   invGoToday: 'Eiti į Šiandien',
@@ -124,11 +125,11 @@ export const clientLt: typeof clientEn = {
   shWaiting: 'Laukiama',
   shNotShared: 'Nebendrinama',
   shNoneSub: 'Kol kas nieko nebendrinama',
-  shWaitingSub: (first) => `Laukiama, kol ${first} įjungs bendrinimą`,
+  shWaitingSub: (first) => `Prasidės, kai ${first} kitą kartą atidarys Spotter`,
   shCaption: (first) =>
     `Bendrinimą galite nutraukti bet kada. Tai, ką ${first} jau matė, lieka jo įrašuose.`,
   shWaitingNote: (first) =>
-    `Laukiama, kol ${first} programėlė įjungs bendrinimą. Tai nutinka vieną kartą, kai treneris kitą kartą atidarys Spotter. Iki tol jis mato tik tai, kad treniravotės. Jūsų pasirinkimai žemiau išsaugoti.`,
+    `Bendrinimas su ${first} prasidės, kai jo programėlė kitą kartą atidarys Spotter (vieną kartą). Iki tol jis mato tik tai, kad treniravotės. Jūsų pasirinkimai žemiau išsaugoti.`,
   shNoneNote: (first) => `Kol kas nieko nebendrinate. ${first} nieko nemato, kol to nepakeisite.`,
   shStart: 'Pradėti bendrinti',
   shLog: 'Kas ką matė ir kada',

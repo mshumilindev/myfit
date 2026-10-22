@@ -88,7 +88,8 @@ export const clientPl: typeof clientEn = {
   invOkTagEffects: (n) => `Tylko podsumowania: ${n}`,
   invOkTagNone: 'Udostępnianie: na razie nic',
   invOkInjuryOff: 'Kontuzje: wyłączone',
-  invOkWaiting: (first) => `Czekamy, aż aplikacja ${first} włączy udostępnianie`,
+  invOkWaiting: (first) =>
+    `Udostępnianie dla ${first} ruszy, gdy trener następnym razem otworzy Spotter`,
   invOkWaitingBody:
     'Dzieje się to raz, gdy trener następnym razem otworzy Spotter. Twoje wybory są zapisane.',
   invGoToday: 'Przejdź do Dziś',
@@ -128,11 +129,11 @@ export const clientPl: typeof clientEn = {
   shWaiting: 'Oczekuje',
   shNotShared: 'Nie udostępniono',
   shNoneSub: 'Nic jeszcze nie jest udostępniane',
-  shWaitingSub: (first) => `Czekamy, aż ${first} włączy udostępnianie`,
+  shWaitingSub: (first) => `Ruszy, gdy ${first} następnym razem otworzy Spotter`,
   shCaption: (first) =>
     `Możesz przestać udostępniać w dowolnej chwili. To, co zostało już zobaczone, zostaje w zapisach trenera ${first}.`,
   shWaitingNote: (first) =>
-    `Czekamy, aż aplikacja ${first} włączy udostępnianie. Dzieje się to raz, gdy trener następnym razem otworzy Spotter. Do tego czasu widzi tylko, że trenujesz. Twoje wybory poniżej są zapisane.`,
+    `Udostępnianie dla ${first} ruszy, gdy jego aplikacja następnym razem otworzy Spotter (jednorazowo). Do tego czasu widzi tylko, że trenujesz. Twoje wybory poniżej są zapisane.`,
   shNoneNote: (first) =>
     `Nic jeszcze nie udostępniasz. ${first} nic nie widzi, dopóki tego nie zmienisz.`,
   shStart: 'Zacznij udostępniać',

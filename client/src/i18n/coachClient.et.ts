@@ -80,7 +80,8 @@ export const clientEt: typeof clientEn = {
   invOkTagEffects: (n) => `Ainult kokkuvõtted: ${n}`,
   invOkTagNone: 'Jagamine: praegu midagi',
   invOkInjuryOff: 'Vigastused: väljas',
-  invOkWaiting: (first) => `Ootame, kuni ${first} rakendus jagamise sisse lülitab`,
+  invOkWaiting: (first) =>
+    `Jagamine kasutajaga ${first} algab, kui treener järgmine kord Spotteri avab`,
   invOkWaitingBody:
     'See juhtub üks kord, kui treener järgmine kord Spotteri avab. Sinu valikud on salvestatud.',
   invGoToday: 'Mine vaatesse Täna',
@@ -117,11 +118,11 @@ export const clientEt: typeof clientEn = {
   shWaiting: 'Ootel',
   shNotShared: 'Ei jagata',
   shNoneSub: 'Midagi ei jagata veel',
-  shWaitingSub: (first) => `Ootame, kuni ${first} jagamise sisse lülitab`,
+  shWaitingSub: (first) => `Algab, kui ${first} järgmine kord Spotteri avab`,
   shCaption: (first) =>
     `Jagamise saad igal ajal lõpetada. See, mida ${first} on juba näinud, jääb tema kirjetesse.`,
   shWaitingNote: (first) =>
-    `Ootame, kuni ${first} rakendus jagamise sisse lülitab. See juhtub üks kord, kui treener järgmine kord Spotteri avab. Seni näeb ta ainult seda, et sa treenisid. Sinu valikud allpool on salvestatud.`,
+    `Jagamine kasutajaga ${first} algab, kui tema rakendus järgmine kord Spotteri avab (ühekordne). Seni näeb ta ainult seda, et sa treenisid. Sinu valikud allpool on salvestatud.`,
   shNoneNote: (first) => `Sa ei jaga veel midagi. ${first} ei näe midagi, kuni sa seda ei muuda.`,
   shStart: 'Alusta jagamist',
   shLog: 'Kes mida ja millal nägi',

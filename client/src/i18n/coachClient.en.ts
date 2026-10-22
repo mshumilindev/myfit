@@ -85,7 +85,7 @@ export const clientEn = {
   invOkTagEffects: (n: number) => `Effects only: ${n}`,
   invOkTagNone: 'Sharing: nothing yet',
   invOkInjuryOff: 'Injuries: off',
-  invOkWaiting: (first: string) => `Waiting for ${first}'s app to turn sharing on`,
+  invOkWaiting: (first: string) => `Sharing with ${first} starts when their app next opens Spotter`,
   invOkWaitingBody:
     'This happens once, when your trainer next opens Spotter. Your choices are saved.',
   invGoToday: 'Go to Today',
@@ -125,11 +125,11 @@ export const clientEn = {
   shWaiting: 'Waiting',
   shNotShared: 'Not shared',
   shNoneSub: 'Nothing is shared yet',
-  shWaitingSub: (first: string) => `Waiting for ${first} to turn sharing on`,
+  shWaitingSub: (first: string) => `Starts when ${first} next opens Spotter`,
   shCaption: (first: string) =>
     `You can stop sharing at any time. What ${first} already saw stays in their records.`,
   shWaitingNote: (first: string) =>
-    `Waiting for ${first}'s app to turn sharing on. This happens once, when they next open Spotter. Until then they only see that you trained. Your choices below are saved.`,
+    `Sharing with ${first} starts once their app opens Spotter next time (one-off). Until then they only see that you trained. Your choices below are saved.`,
   shNoneNote: (first: string) =>
     `You are not sharing anything yet. ${first} sees nothing until you do.`,
   shStart: 'Start sharing',
