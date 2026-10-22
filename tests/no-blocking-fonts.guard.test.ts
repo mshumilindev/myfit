@@ -21,12 +21,16 @@ describe('startup never waits for a remote host', () => {
     expect(bad).toEqual([]);
   });
 
-  it('loads the Google Fonts stylesheet with the non-blocking media swap, landing families included', () => {
+  // SPO-287: the fonts are self-hosted (@fontsource), so there is no remote font host left to wait for or to leak the
+  // visitor's IP to. This replaces the earlier "non-blocking media swap" contract (SPO-14): the goal, startup never waits
+  // for a remote host, is now met by having none.
+  it('index.html names no remote font host, and the landing fonts are bundled', () => {
     const html = readFileSync('client/index.html', 'utf8');
-    const link = /<link[^>]*fonts\.googleapis\.com\/css2[^>]*>/s.exec(html)?.[0] ?? '';
-    expect(link).toContain('media="print"');
-    expect(link).toContain("this.media = 'all'");
-    for (const fam of ['Inter+Tight', 'Manrope', 'JetBrains+Mono', 'Kaushan+Script'])
-      expect(link).toContain(fam);
+    expect(html).not.toMatch(/fonts\.(googleapis|gstatic)\.com/);
+    const bundled =
+      readFileSync('client/src/main.tsx', 'utf8') +
+      readFileSync('client/src/views/landing/LandingDesign.tsx', 'utf8');
+    for (const fam of ['inter-tight', 'manrope', 'jetbrains-mono', 'kaushan-script'])
+      expect(bundled).toContain(`@fontsource/${fam}/`);
   });
 });
