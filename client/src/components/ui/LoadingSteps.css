@@ -1,0 +1,68 @@
+.uils {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--s-24);
+}
+.uils-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+.uils-card {
+  list-style: none;
+  margin: 0;
+  padding: var(--s-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  border-radius: var(--r-16, 16px);
+  background: var(--color-surface);
+}
+.uils-i {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  color: var(--color-text-faint);
+}
+.uils-i.is-active {
+  color: var(--color-text);
+  font-weight: 600;
+}
+.uils-i.is-done {
+  color: var(--color-ok-text);
+}
+.uils-mark {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.is-done .uils-mark {
+  color: var(--color-ok);
+}
+.uils-spin {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+  border-top-color: var(--color-accent);
+  animation: uils-spin 0.9s linear infinite;
+}
+@keyframes uils-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.uils-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .uils-spin {
+    animation-duration: 3s;
+  }
+}

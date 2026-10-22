@@ -1,0 +1,19 @@
+.uistep {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.uistep-bar {
+  display: flex;
+  gap: var(--s-4);
+}
+.uistep-bar i {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-divider);
+}
+.uistep-bar i.is-on,
+.uistep-bar i.is-done {
+  background: var(--color-accent);
+}

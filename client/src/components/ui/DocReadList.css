@@ -1,5 +1,10 @@
 .uidr-accept {
   display: flex;
   gap: var(--s-12);
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s-8) 0;
+}
+.uidr-accept-t {
+  flex: 1;
 }

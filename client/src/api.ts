@@ -62,6 +62,29 @@ export function setRole(role: Role): void {
 
 /** The signed-in user's uid, or null. Also used as the "am I logged in" guard
  *  that the old code expressed as getToken(). */
+// A sign-in is in progress (token exchanged, Firebase not yet reporting the user): the gate shows its loading page.
+let signingIn = false;
+const signingListeners = new Set<() => void>();
+function setSigningIn(v: boolean): void {
+  if (signingIn === v) return;
+  signingIn = v;
+  signingListeners.forEach((cb) => cb());
+}
+export const isSigningIn = (): boolean => signingIn;
+export function onSigningInChange(cb: () => void): () => void {
+  signingListeners.add(cb);
+  return () => void signingListeners.delete(cb);
+}
+async function signInTracked(token: string): Promise<void> {
+  setSigningIn(true);
+  try {
+    await signInWithCustomToken(auth, token);
+  } catch (e) {
+    setSigningIn(false);
+    throw e;
+  }
+}
+
 export function currentUid(): string | null {
   return auth.currentUser?.uid ?? localStorage.getItem(UID_KEY);
 }
@@ -80,13 +103,13 @@ export interface AuthPayload {
 
 /** Swap the session for a fresh custom token of the same account (a new role claim, e.g. after joining a team as a manager). */
 export async function adoptSessionToken(token: string, role: Role): Promise<void> {
-  await signInWithCustomToken(auth, token);
+  await signInTracked(token);
   setRole(role);
 }
 
 /** Complete a sign-in from an auth-function payload (custom token + role). */
 export async function signInWithPayload(payload: AuthPayload, remember = false): Promise<void> {
-  await signInWithCustomToken(auth, payload.token);
+  await signInTracked(payload.token);
   localStorage.setItem(UID_KEY, payload.userId);
   if (payload.username) localStorage.setItem(LOGIN_ID_KEY, payload.username);
   setUsername(payload.name || payload.username);
@@ -112,7 +135,7 @@ export async function signInWithPayload(payload: AuthPayload, remember = false):
 
 /** Signs this device back in with a fresh custom token (after "sign out all other devices" ended every refresh token). */
 export async function renewSessionWithToken(token: string): Promise<void> {
-  await signInWithCustomToken(auth, token);
+  await signInTracked(token);
 }
 
 /** The identifier the person signed in with (username), kept so a re-authentication asks only for the password. */
@@ -178,7 +201,10 @@ export async function signOut(opts: { forget?: boolean } = {}): Promise<void> {
 
 /** Subscribe to sign-in / sign-out. Fires with the current user (or null). */
 export function onAuthChange(cb: (user: User | null) => void): () => void {
-  return onAuthStateChanged(auth, cb);
+  return onAuthStateChanged(auth, (user) => {
+    if (user) setSigningIn(false);
+    cb(user);
+  });
 }
 
 /** Keep the cached role in sync with the ID token's `role` claim. */

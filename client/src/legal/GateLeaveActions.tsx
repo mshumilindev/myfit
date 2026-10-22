@@ -31,14 +31,14 @@ export function useGateLeave(onSignOut: () => void): { buttons: ReactNode; dialo
   const [deleting, setDeleting] = useState(false);
   return {
     buttons: (
-      <>
-        <Button variant="ghost" size="md" onClick={() => setConfirmOut(true)}>
+      <div className="lgg-leave">
+        <Button variant="danger" size="sm" icon="sign-out" onClick={() => setConfirmOut(true)}>
           {t.signOut}
         </Button>
-        <Button variant="ghost" size="md" onClick={() => setDeleting(true)}>
+        <Button variant="danger" size="sm" icon="trash" onClick={() => setDeleting(true)}>
           {d.deleteMyAccount}
         </Button>
-      </>
+      </div>
     ),
     // Rendered beside the Sheet, not inside it: a dialog must not sit in the sheet's own stacking context.
     dialogs: (

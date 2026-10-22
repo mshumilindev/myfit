@@ -8,19 +8,14 @@
 import { useEffect, useState } from 'react';
 import { ConsentPrompt } from '../components/ui/ConsentPrompt';
 import { Notice } from '../components/ui/Notice';
-import {
-  closeGeoPrompt,
-  GEO_ENGINES,
-  setGeoOverride,
-  setGeoSearchState,
-} from '../data/geoSearchGate';
+import { closeGeoPrompt, setGeoOverride, setGeoSearchState } from '../data/geoSearchGate';
 import { useT } from '../i18n';
 import { useGeoT } from '../i18n/geoConsent';
 import { currentUid } from '../api';
-import { grantConsent, useConsentRecords } from './consentApi';
+import { useConsentRecords } from './consentApi';
 import { consentState, currentVersion, optionalConsentOn } from './consents';
-import { clearLocalOff, localOffKinds } from './localOff';
-import { prepareDirectGrant } from './signupConsents';
+import { localOffKinds } from './localOff';
+import { grantGeoSearch } from './geoGrant';
 import { useGeoPromptOpen } from './useGeoSearch';
 
 function GeoConsentSync() {
@@ -47,18 +42,8 @@ function GeoConsentPrompt() {
   async function accept() {
     setBusy(true);
     setFailed(false);
-    try {
-      const commit = await prepareDirectGrant('geo-search');
-      await grantConsent({ kind: 'geo-search', engines: [...GEO_ENGINES] });
-      commit(); // only now may an unsent withdrawal of this kind be dropped
-      clearLocalOff(currentUid(), 'geo-search');
-      setGeoOverride(true); // a stop left over from an unsent withdrawal must not outlive this newer grant
-      closeGeoPrompt();
-    } catch {
-      setFailed(true);
-    } finally {
-      setBusy(false);
-    }
+    if (!(await grantGeoSearch())) setFailed(true);
+    setBusy(false);
   }
 
   return (

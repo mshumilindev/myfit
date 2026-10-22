@@ -233,11 +233,11 @@ describe('PolicyUpdateHost', () => {
     expect(screen.getByText('Retention')).toBeTruthy();
     // Only the affected document is listed; no 18+ box.
     expect(screen.queryByText('Terms of Use')).toBeNull();
-    expect(screen.queryByRole('checkbox', { name: 'I am 18 or older.' })).toBeNull();
+    expect(screen.queryByRole('switch', { name: 'I am 18 or older.' })).toBeNull();
     const cont = screen.getByRole('button', {
       name: 'I have read it, continue',
     }) as HTMLButtonElement;
-    const box = screen.getByRole('checkbox', {
+    const box = screen.getByRole('switch', {
       name: 'I have read the updated Privacy Policy and agree.',
     }) as HTMLInputElement;
     expect(cont.disabled).toBe(true);

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Checkbox } from './Checkbox';
+import { Switch } from './Switch';
 import { GroupedList, ListRow } from './GroupedList';
 import { IconTile } from './IconTile';
 import type { DocOpened } from './docReadGate';
@@ -57,7 +57,7 @@ export function DocReadList({
   );
 }
 
-/** A box beside its sentence, for "I am 18 or older" / "I agree to ...". Disabled until the documents were opened. */
+/** A switch beside its sentence, for "I am 18 or older" / "I agree to ...". Disabled until the documents were opened. */
 export function AcceptCheck({
   checked,
   disabled,
@@ -71,8 +71,8 @@ export function AcceptCheck({
 }) {
   return (
     <label className="uidr-accept ut-sm">
-      <Checkbox checked={checked} disabled={disabled} onChange={onChange} />
-      <span>{children}</span>
+      <span className="uidr-accept-t">{children}</span>
+      <Switch checked={checked} disabled={disabled} onChange={onChange} />
     </label>
   );
 }

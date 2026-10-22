@@ -26,7 +26,7 @@ function Harness({ onOpen }: { onOpen: (id: string) => void }) {
     </>
   );
 }
-const box = (name: string) => screen.getByRole('checkbox', { name }) as HTMLInputElement;
+const box = (name: string) => screen.getByRole('switch', { name }) as HTMLInputElement;
 const cont = () => screen.getByRole('button', { name: 'Continue' }) as HTMLButtonElement;
 
 describe('AgreementBlock', () => {

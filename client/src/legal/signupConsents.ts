@@ -7,6 +7,7 @@
  * that could not be sent before sign-out is still sent at that account's next sign-in. It is pruned for an account
  * that was deleted (`pruneConsentsOf`).
  */
+import { clearGateDraft } from './gateDraft';
 import { useEffect } from 'react';
 import { currentUid } from '../api';
 import { legalTexts } from '../i18n/legal';
@@ -297,6 +298,7 @@ export function pruneConsentsOf(uid: string | null): void {
   save(q.filter((x) => x.uid !== uid));
   forgetLocalOff(uid);
   clearVerified(uid);
+  clearGateDraft(uid);
   pruneRevokesOf(uid); // a waiting "Stop sharing" revoke has no account left to act on
 }
 

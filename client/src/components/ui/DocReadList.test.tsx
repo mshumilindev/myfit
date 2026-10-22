@@ -46,21 +46,21 @@ describe('DocReadList', () => {
 });
 
 describe('AcceptCheck', () => {
-  it('is a labelled checkbox that can be disabled', () => {
+  it('is a labelled switch that can be disabled', () => {
     const onChange = vi.fn();
     const { rerender } = render(
       <AcceptCheck checked={false} disabled onChange={onChange}>
         I am 18 or older.
       </AcceptCheck>,
     );
-    const box = screen.getByRole('checkbox', { name: 'I am 18 or older.' }) as HTMLInputElement;
+    const box = screen.getByRole('switch', { name: 'I am 18 or older.' }) as HTMLInputElement;
     expect(box.disabled).toBe(true);
     rerender(
       <AcceptCheck checked={false} onChange={onChange}>
         I am 18 or older.
       </AcceptCheck>,
     );
-    fireEvent.click(screen.getByRole('checkbox', { name: 'I am 18 or older.' }));
+    fireEvent.click(screen.getByRole('switch', { name: 'I am 18 or older.' }));
     expect(onChange).toHaveBeenCalledWith(true);
   });
 });

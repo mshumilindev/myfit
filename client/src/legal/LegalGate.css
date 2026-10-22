@@ -19,3 +19,20 @@
   gap: var(--s-8);
   align-items: stretch;
 }
+
+/* Step 2 rows: what is sent shows under the switch that was turned on. */
+.lgp-bulk {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-12);
+}
+.lgp-facts {
+  padding: 0 var(--s-12) var(--s-12);
+}
+.lgg-leave {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+  justify-content: center;
+}

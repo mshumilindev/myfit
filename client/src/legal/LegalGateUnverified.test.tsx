@@ -7,7 +7,7 @@ vi.mock('../api', () => ({
   signOut: vi.fn(),
 }));
 
-import { CHECK_TIMEOUT_MS, LegalGateUnverified } from './LegalGateUnverified';
+import { LegalGateUnverified } from './LegalGateUnverified';
 
 function setOnline(v: boolean) {
   Object.defineProperty(window.navigator, 'onLine', { value: v, configurable: true });
@@ -37,21 +37,20 @@ afterEach(() => {
 });
 
 describe('LegalGateUnverified', () => {
-  it('online and waiting: says "checking" with a busy spinner, keeps Sign out / Delete', () => {
+  it('online and waiting: the loading ladder says "checking" with a spinner; Sign out only once it is slow', () => {
     mount();
-    expect(screen.getByRole('alertdialog', { name: 'Checking your agreement' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Checking your agreement' })).toBeTruthy();
     expect(screen.getByRole('status').textContent).toMatch(/Checking your agreement/);
-    expect(document.querySelector('[aria-busy="true"]')).toBeTruthy();
-    expect(retryBtn()?.disabled).toBe(true);
-    expect(screen.getByRole('button', { name: 'Sign out' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Delete my account' })).toBeTruthy();
+    expect(document.querySelector('.uils-spin')).toBeTruthy();
+    expect(retryBtn()).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Sign out' })).toBeNull(); // only once it is slow
     expect(screen.queryByText(/Connect to the internet/)).toBeNull();
   });
 
   it('offline: asks to connect, no retry button, no diagnostic code', () => {
     setOnline(false);
     mount(coded('unavailable'));
-    expect(screen.getByRole('alertdialog', { name: 'Connect to continue' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Connect to continue' })).toBeTruthy();
     expect(screen.getByRole('status').textContent).toMatch(/Connect to the internet/);
     expect(retryBtn()).toBeNull();
     expect(screen.queryByText(/Code:/)).toBeNull();
@@ -60,9 +59,7 @@ describe('LegalGateUnverified', () => {
 
   it('online with a listener error: service problem with the error code (never the message) and Try again', () => {
     const { onRetry } = mount(coded('permission-denied'));
-    expect(
-      screen.getByRole('alertdialog', { name: "We couldn't check your agreement" }),
-    ).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: "We couldn't check your agreement" })).toBeTruthy();
     expect(screen.getByRole('status').textContent).toMatch(
       /problem on our side or with your connection/,
     );
@@ -75,48 +72,36 @@ describe('LegalGateUnverified', () => {
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeTruthy();
   });
 
-  it('online and still waiting after 8 s: becomes a service problem with code "timeout"; Try again restarts the wait', () => {
+  it('online and slow: keeps waiting (no timeout error), says so and offers Sign out; asks again quietly', () => {
     const { onRetry } = mount();
     act(() => {
-      vi.advanceTimersByTime(CHECK_TIMEOUT_MS - 1);
+      vi.advanceTimersByTime(4000);
     });
-    expect(screen.getByRole('alertdialog', { name: 'Checking your agreement' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Checking your agreement' })).toBeTruthy();
+    expect(screen.getByText('Taking longer than usual…')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeTruthy();
     act(() => {
-      vi.advanceTimersByTime(1);
+      vi.advanceTimersByTime(60000);
     });
-    expect(
-      screen.getByRole('alertdialog', { name: "We couldn't check your agreement" }),
-    ).toBeTruthy();
-    expect(screen.getByText('Code: timeout')).toBeTruthy();
-    fireEvent.click(retryBtn()!);
-    expect(onRetry).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole('alertdialog', { name: 'Checking your agreement' })).toBeTruthy();
-    act(() => {
-      vi.advanceTimersByTime(CHECK_TIMEOUT_MS);
-    });
-    expect(screen.getByText('Code: timeout')).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Checking your agreement' })).toBeTruthy();
+    expect(screen.queryByText(/Code:/)).toBeNull();
+    expect(onRetry).toHaveBeenCalled();
   });
 
   it('an error without a code shows no code line', () => {
     mount(new Error('x'));
-    expect(
-      screen.getByRole('alertdialog', { name: "We couldn't check your agreement" }),
-    ).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: "We couldn't check your agreement" })).toBeTruthy();
     expect(screen.queryByText(/Code:/)).toBeNull();
   });
 
   it('follows the connection: online -> offline -> online retries by itself', () => {
     const { onRetry } = mount(coded('unavailable'));
-    expect(
-      screen.getByRole('alertdialog', { name: "We couldn't check your agreement" }),
-    ).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: "We couldn't check your agreement" })).toBeTruthy();
     fire('offline', false);
-    expect(screen.getByRole('alertdialog', { name: 'Connect to continue' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Connect to continue' })).toBeTruthy();
     expect(onRetry).not.toHaveBeenCalled();
     fire('online', true);
     expect(onRetry).toHaveBeenCalledTimes(1);
-    expect(
-      screen.getByRole('alertdialog', { name: "We couldn't check your agreement" }),
-    ).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: "We couldn't check your agreement" })).toBeTruthy();
   });
 });

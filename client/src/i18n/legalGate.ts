@@ -14,7 +14,43 @@ export interface GateChoiceText {
   hint: string;
 }
 
+export interface GatePageStrings {
+  step: (n: number, total: number) => string;
+  stepTerms: string;
+  stepChoices: string;
+  leftTitle: string;
+  leftDone: string;
+  loadSigningIn: string;
+  loadSignedIn: string;
+  loadChecked: string;
+  loadRecording: string;
+  loadSlow: string;
+  loadChecking: string;
+  loadRecorded: string;
+  loadOpening: string;
+  loadHint: string;
+  readLabel: string;
+  unreadLabel: string;
+  leftRead: (doc: string) => string;
+  leftAge: string;
+  leftAgree: string;
+  acceptAll: string;
+  next: string;
+  saving: string;
+  waiting: string;
+  failed: string;
+  retry: string;
+  finish: string;
+  allOn: string;
+  allOff: string;
+  onCount: (n: number, total: number) => string;
+  optionalNote: string;
+  choicesSaving: string;
+  choicesFailed: string;
+}
+
 export interface LegalGateStrings {
+  page: GatePageStrings;
   termsTitle: string;
   termsLead: string;
   signOutBody: string;
@@ -54,6 +90,40 @@ const healthSub = (sub: string, hints: Record<HealthFeature, [string, string]>) 
   ) as Record<HealthFeature, GateChoiceText>;
 
 const en: LegalGateStrings = {
+  page: {
+    step: (n, total) => `Step ${n} of ${total}`,
+    stepTerms: 'Terms',
+    stepChoices: 'Your choices',
+    leftTitle: 'Still to do on this page',
+    leftDone: 'Ready to continue',
+    loadSigningIn: 'Signing you in',
+    loadSignedIn: 'Signed in',
+    loadChecked: 'Agreement checked',
+    loadRecording: 'Recording your agreement',
+    loadSlow: 'Taking longer than usual…',
+    loadChecking: 'Checking your agreement',
+    loadRecorded: 'Agreement recorded',
+    loadOpening: 'Opening Spotter',
+    loadHint: 'This only takes a few seconds, and only when something needs confirming.',
+    readLabel: 'Read',
+    unreadLabel: 'Scroll to the end',
+    leftRead: (doc) => `Read: ${doc}`,
+    leftAge: 'Confirm you are 18 or older',
+    leftAgree: 'Tick the agreement',
+    acceptAll: 'Accept all',
+    next: 'Continue',
+    saving: 'Saving your agreement…',
+    waiting: 'Waiting for the connection to save your agreement. Keep this page open.',
+    failed: 'We could not save your agreement yet. Your ticks are kept; try again.',
+    retry: 'Try again',
+    finish: 'Save and start',
+    allOn: 'Turn on all',
+    allOff: 'Turn off all',
+    onCount: (n, total) => `${n} of ${total} on`,
+    optionalNote: 'Nothing here is required. Skip it and Spotter works as before.',
+    choicesSaving: 'Saving your choices…',
+    choicesFailed: 'Some choices were not saved. Try again or skip.',
+  },
   termsTitle: 'We updated how Spotter works with your data',
   termsLead:
     'You can now read the Terms of Use and the Privacy Policy, and choose your consents. To keep using Spotter, please read and accept the two documents.',
@@ -107,6 +177,40 @@ const en: LegalGateStrings = {
 };
 
 const uk: LegalGateStrings = {
+  page: {
+    step: (n, total) => `Крок ${n} з ${total}`,
+    stepTerms: 'Умови',
+    stepChoices: 'Ваш вибір',
+    leftTitle: 'Що ще лишилось на цій сторінці',
+    leftDone: 'Готово до продовження',
+    loadSigningIn: 'Входимо в акаунт',
+    loadSignedIn: 'Вхід виконано',
+    loadChecked: 'Згоду перевірено',
+    loadRecording: 'Записуємо вашу згоду',
+    loadSlow: 'Довше, ніж зазвичай…',
+    loadChecking: 'Перевіряємо вашу згоду',
+    loadRecorded: 'Згоду записано',
+    loadOpening: 'Відкриваємо Spotter',
+    loadHint: 'Це кілька секунд, і лише коли треба щось підтвердити.',
+    readLabel: 'Прочитано',
+    unreadLabel: 'Прокрутіть до кінця',
+    leftRead: (doc) => `Прочитати: ${doc}`,
+    leftAge: 'Підтвердити, що вам 18 або більше',
+    leftAgree: 'Поставити позначку згоди',
+    acceptAll: 'Прийняти все',
+    next: 'Продовжити',
+    saving: 'Записуємо вашу згоду…',
+    waiting: 'Чекаємо на з’єднання, щоб записати вашу згоду. Не закривайте сторінку.',
+    failed: 'Поки не вдалося записати вашу згоду. Позначки збережено; спробуйте ще раз.',
+    retry: 'Спробувати ще раз',
+    finish: 'Зберегти й почати',
+    allOn: 'Увімкнути все',
+    allOff: 'Вимкнути все',
+    onCount: (n, total) => `Увімкнено ${n} з ${total}`,
+    optionalNote: 'Тут нічого не обов’язково. Пропустіть, і Spotter працює як раніше.',
+    choicesSaving: 'Зберігаємо ваш вибір…',
+    choicesFailed: 'Частину вибору не збережено. Спробуйте ще раз або пропустіть.',
+  },
   termsTitle: 'Ми оновили, як Spotter працює з вашими даними',
   termsLead:
     'Тепер ви можете прочитати Умови використання та Політику конфіденційності й обрати свої згоди. Щоб продовжити користуватися Spotter, прочитайте й прийміть обидва документи.',
@@ -160,6 +264,40 @@ const uk: LegalGateStrings = {
 };
 
 const pl: LegalGateStrings = {
+  page: {
+    step: (n, total) => `Krok ${n} z ${total}`,
+    stepTerms: 'Warunki',
+    stepChoices: 'Twój wybór',
+    leftTitle: 'Co jeszcze zostało na tej stronie',
+    leftDone: 'Gotowe do kontynuacji',
+    loadSigningIn: 'Logujemy Cię',
+    loadSignedIn: 'Zalogowano',
+    loadChecked: 'Zgoda sprawdzona',
+    loadRecording: 'Zapisujemy Twoją zgodę',
+    loadSlow: 'Trwa dłużej niż zwykle…',
+    loadChecking: 'Sprawdzamy Twoją zgodę',
+    loadRecorded: 'Zgoda zapisana',
+    loadOpening: 'Otwieramy Spotter',
+    loadHint: 'To kilka sekund i tylko wtedy, gdy trzeba coś potwierdzić.',
+    readLabel: 'Przeczytano',
+    unreadLabel: 'Przewiń do końca',
+    leftRead: (doc) => `Przeczytaj: ${doc}`,
+    leftAge: 'Potwierdź, że masz 18 lat lub więcej',
+    leftAgree: 'Zaznacz zgodę',
+    acceptAll: 'Zaakceptuj wszystko',
+    next: 'Kontynuuj',
+    saving: 'Zapisujemy Twoją zgodę…',
+    waiting: 'Czekamy na połączenie, aby zapisać Twoją zgodę. Nie zamykaj strony.',
+    failed: 'Nie udało się jeszcze zapisać Twojej zgody. Zaznaczenia zostały; spróbuj ponownie.',
+    retry: 'Spróbuj ponownie',
+    finish: 'Zapisz i zacznij',
+    allOn: 'Włącz wszystko',
+    allOff: 'Wyłącz wszystko',
+    onCount: (n, total) => `Włączono ${n} z ${total}`,
+    optionalNote: 'Nic tu nie jest wymagane. Pomiń, a Spotter działa jak dotąd.',
+    choicesSaving: 'Zapisujemy Twój wybór…',
+    choicesFailed: 'Część wyborów nie została zapisana. Spróbuj ponownie lub pomiń.',
+  },
   termsTitle: 'Zaktualizowaliśmy sposób, w jaki Spotter korzysta z Twoich danych',
   termsLead:
     'Możesz teraz przeczytać Regulamin i Politykę prywatności oraz wybrać swoje zgody. Aby nadal korzystać ze Spottera, przeczytaj i zaakceptuj oba dokumenty.',

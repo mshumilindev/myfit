@@ -1,0 +1,46 @@
+.uifp-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-50);
+}
+.uifp {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-text);
+  outline: none;
+}
+.uifp-in {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: max(var(--s-16), env(safe-area-inset-top)) var(--s-16) var(--s-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  box-sizing: border-box;
+}
+.uifp-bar {
+  border-top: 1px solid var(--color-divider);
+  background: var(--color-bg);
+  padding: var(--s-8) var(--s-16) max(var(--s-8), env(safe-area-inset-bottom));
+}
+.uifp-bar-in {
+  max-width: 40rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.uifp-row {
+  display: flex;
+  gap: var(--s-8);
+}
+.uifp-row .uibtn--primary {
+  flex: 1;
+}
