@@ -10,7 +10,7 @@
 .uistepr-bar i {
   flex: 1;
   height: 4px;
-  border-radius: 2px;
+  border-radius: var(--r-2);
   background: var(--color-divider);
 }
 .uistepr-bar i.is-on,
@@ -41,7 +41,7 @@
   height: 26px;
   border-radius: 50%;
   border: 1.5px solid currentColor;
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 .uistepr-i.is-on {
   color: var(--color-accent);

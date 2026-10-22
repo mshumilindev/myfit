@@ -39,7 +39,7 @@
   height: 22px;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: var(--fs-22);
 }
 .is-done .uils-mark {
   color: var(--color-ok);
