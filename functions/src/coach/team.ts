@@ -10,6 +10,7 @@
  * the pending list, the accepting account is whoever opens the link signed in. Only the owner trainer removes a
  * manager; anyone else may leave. Nothing here handles keys or sealed data (the client device delegates them).
  */
+import { safeName, takeSlot, HOUR, INVITES_PER_HOUR, REPORTS_PER_HOUR } from './guards';
 import { REPORTED_KINDS, logActivity, type ActivityEntry, type ReportedKind } from './activity';
 import { teamInviteUrl } from './inviteLink';
 import { DAY, conversationId, isUid } from './logic';
@@ -66,8 +67,8 @@ interface InviteRec {
   expiresAt: number;
 }
 
-const nameOf = (u: UserRec | null): string =>
-  u ? [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || '' : '';
+export const nameOf = (u: UserRec | null): string =>
+  u ? safeName([u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || '') : '';
 
 /** The team the signed-in person belongs to and their member record; permission-denied when they have none. */
 async function myTeam(
@@ -124,13 +125,17 @@ export async function teamInvite(
   body: Record<string, unknown>,
 ): Promise<TeamInviteResult> {
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase().slice(0, 200) : '';
-  if (!EMAIL.test(email)) fail('invalid-argument', 'invalid-email');
-  const { teamId, me } = await myTeam(ctx, actor);
+  // The e-mail is optional (mail is not connected: the sender passes the link on). When given, only that verified account can join.
+  if (email && !EMAIL.test(email)) fail('invalid-argument', 'invalid-email');
+  const { teamId } = await myTeam(ctx, actor);
   if (!isCoach(actor) && actor.role !== 'manager') fail('permission-denied', 'not-allowed');
   const asked = body.role;
   if (asked !== undefined && asked !== 'manager' && asked !== 'trainer')
     return fail('invalid-argument', 'invalid-role');
-  const role: TeamRole = asked ?? (me.role === 'trainer' ? 'manager' : 'trainer');
+  // Only the team's owner grants the manager role (a manager sees every client's schedule); everyone else adds trainers.
+  const isOwner = teamId === actor.uid;
+  const role: TeamRole = asked ?? (isOwner ? 'manager' : 'trainer');
+  if (role === 'manager' && !isOwner) fail('permission-denied', 'owner-only');
   const kv = ctx.kv;
   const now = ctx.now();
   const mine = (await kv.list('teamInvites', { where: [['teamId', '==', teamId]] })).map(
@@ -138,7 +143,7 @@ export async function teamInvite(
   );
   const open = mine.filter((i) => i.status === 'pending' && i.expiresAt > now);
   if (open.length >= MAX_TEAM_INVITES_PENDING) fail('resource-exhausted', 'too-many-invites');
-  if (open.some((i) => i.emailLower === email && i.role === role))
+  if (email && open.some((i) => i.emailLower === email && i.role === role))
     fail('already-exists', 'invite-exists');
   if (role === 'manager') {
     const members = await kv.list(`teams/${teamId}/members`);
@@ -150,6 +155,8 @@ export async function teamInvite(
     if (managers + open.filter((i) => i.role === 'manager').length >= MAX_MANAGERS)
       fail('resource-exhausted', 'too-many-managers');
   }
+  if (!(await takeSlot(kv, `inv-${actor.uid}-${Math.floor(now / HOUR)}`, now, INVITES_PER_HOUR)))
+    fail('resource-exhausted', 'too-many-invites');
   await ensureTeam(ctx, teamId);
   const id = ctx.newToken();
   const rec: InviteRec = {
@@ -213,6 +220,28 @@ export async function teamInvitePreview(ctx: Ctx, token: unknown): Promise<TeamI
   };
 }
 
+/** What a person without a session sees: the role and who invited them, nothing else. Every closed, unknown or malformed link answers the same way, so the link page cannot be used to probe tokens. */
+export interface TeamInvitePublicPreview {
+  role: TeamRole;
+  invitedByName: string;
+}
+
+export async function teamInvitePublicPreview(
+  ctx: Ctx,
+  token: unknown,
+): Promise<TeamInvitePublicPreview> {
+  const i =
+    typeof token === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(token)
+      ? ((await ctx.kv.get(`teamInvites/${token}`)) as InviteRec | null)
+      : null;
+  if (!i || i.status !== 'pending' || i.expiresAt <= ctx.now())
+    return fail('not-found', 'no-invite');
+  const by = (await ctx.kv.get(`users/${i.invitedBy}`)) as UserRec | null;
+  // Real name only: the username may be a sign-in identifier and must not go to someone who is not signed in.
+  const real = by ? safeName([by.firstName, by.lastName].filter(Boolean).join(' ')) : '';
+  return { role: i.role, invitedByName: real };
+}
+
 export async function teamAccept(
   ctx: Ctx,
   actor: Actor,
@@ -223,8 +252,19 @@ export async function teamAccept(
   if (i.status !== 'pending' || i.expiresAt <= now) fail('failed-precondition', 'invite-closed');
   if (i.invitedBy === actor.uid || i.teamId === actor.uid)
     fail('invalid-argument', 'cannot-join-own-team');
+  // A link written for an e-mail works only for that verified account (a leaked link is useless); without an e-mail it is a plain one-person link.
+  if (i.emailLower && actor.email !== i.emailLower) fail('permission-denied', 'wrong-email');
   const kv = ctx.kv;
   const joined = await kv.tx(async (t) => {
+    // re-read INSIDE the transaction: two accounts racing one link cannot both join
+    const fresh = (await t.get(`teamInvites/${i.id}`)) as InviteRec | null;
+    if (!fresh || fresh.status !== 'pending' || fresh.expiresAt <= now)
+      fail('failed-precondition', 'invite-closed');
+    // an invite outlives neither its sender's membership
+    if (i.invitedBy !== i.teamId) {
+      const sender = (await t.get(`teams/${i.teamId}/members/${i.invitedBy}`)) as MemberRec | null;
+      if (sender?.status !== 'active') fail('failed-precondition', 'invite-closed');
+    }
     const u = (await t.get(`users/${actor.uid}`)) as UserRec | null;
     if (!u || u.status === 'suspended') return fail('permission-denied', 'not-allowed');
     if (i.role === 'manager') {
@@ -271,10 +311,72 @@ export async function teamAccept(
     });
     return { teamId: i.teamId, role: i.role };
   });
+  // the inviter hears that the link was used (content-free `team` push; the notice with the role is already written)
+  await ctx.notify?.(i.invitedBy, 'team');
   // A new manager needs the clients' devices to delegate the schedule keys: a silent `sync` push asks every client of
   // the team to do it now (an improvement, never a guarantee: a client that is offline does it on its next open).
-  if (i.role === 'manager') await syncTeamClients(ctx, i.teamId);
+  if (i.role === 'manager') {
+    await syncTeamClients(ctx, i.teamId);
+    await tellClientsOfTeamChange(ctx, i.teamId, actor.uid, `tj-${i.id}`);
+  }
+  // a trainer joins a team that already has managers: their clients' devices will now delegate to those managers
+  if (i.role === 'trainer' && (await teamHasManager(ctx, i.teamId)))
+    await tellClientsOfTeamChange(ctx, i.teamId, actor.uid, `tj-${i.id}`, actor.uid);
   return joined;
+}
+
+/** Upper bound of clients told per trainer about one team change (the same cap as the key-delegation sweeps). */
+export const TEAM_FANOUT_CAP = 500;
+
+/**
+ * A manager joined or left the team of the clients' trainer: every active client of every active trainer of the team gets a
+ * `team` notice (the manager's name, nothing else) and a `team` push that follows their switch and never quiet hours.
+ * Cost: one `coaching` query per trainer (active clients, capped at TEAM_FANOUT_CAP) plus one write per client; no
+ * per-client reads. Notice id is deterministic per event, so a retry overwrites instead of duplicating. Best effort.
+ */
+async function tellClientsOfTeamChange(
+  ctx: Ctx,
+  teamId: string,
+  managerUid: string,
+  key: string,
+  /** a TRAINER joined or left: only that trainer's clients are told (their keys reach the team's managers) */
+  onlyTrainer?: string,
+): Promise<void> {
+  try {
+    const name = nameOf((await ctx.kv.get(`users/${managerUid}`)) as UserRec | null);
+    const now = ctx.now();
+    const members = (await ctx.kv.list(`teams/${teamId}/members`)).map(
+      (r) => r.data as unknown as MemberRec,
+    );
+    const trainers = onlyTrainer
+      ? [onlyTrainer]
+      : members.filter((m) => m.role === 'trainer' && m.status === 'active').map((m) => m.uid);
+    for (const trainerUid of trainers) {
+      const rows = await ctx.kv.list('coaching', {
+        where: [
+          ['trainerId', '==', trainerUid],
+          ['status', '==', 'active'],
+        ],
+        limit: TEAM_FANOUT_CAP,
+      });
+      for (let i = 0; i < rows.length; i += 50)
+        await Promise.allSettled(
+          rows.slice(i, i + 50).map(async (r) => {
+            await notice(ctx.kv, r.id, 'team', managerUid, now, key, name || null);
+            await ctx.notify?.(r.id, 'team');
+          }),
+        );
+    }
+  } catch {
+    /* a failed notice never fails the membership change */
+  }
+}
+
+/** Does the team have an active manager (so a trainer's clients delegate their keys to someone besides the trainer)? */
+async function teamHasManager(ctx: Ctx, teamId: string): Promise<boolean> {
+  return (await ctx.kv.list(`teams/${teamId}/members`)).some(
+    (r) => r.data.role === 'manager' && r.data.status === 'active',
+  );
 }
 
 /** A silent `sync` push to every client of every active trainer of the team (best effort, capped). */
@@ -320,6 +422,8 @@ export async function teamDecline(
   body: Record<string, unknown>,
 ): Promise<{ ok: true }> {
   const i = await loadInvite(ctx, body.inviteId);
+  // the same gate as accepting: a link written for an e-mail can be declined only by that account (SPO-267 pass 2)
+  if (i.emailLower && actor.email !== i.emailLower) fail('permission-denied', 'wrong-email');
   if (i.status === 'pending') {
     await ctx.kv.merge(`teamInvites/${i.id}`, { status: 'declined' });
     await notice(
@@ -331,6 +435,7 @@ export async function teamDecline(
       `team-decline-${i.id}`,
       'declined',
     );
+    await ctx.notify?.(i.invitedBy, 'team');
   }
   return { ok: true };
 }
@@ -365,7 +470,17 @@ async function endMembership(
       refId: target.uid,
     });
   });
+  // who has to know: the owner when somebody leaves, the manager who was removed (both already have the notice)
+  await ctx.notify?.(why === 'removed' ? target.uid : teamId, 'team');
+  // what the leaver invited can no longer be accepted (teamAccept also checks the sender is still a member)
+  for (const inv of await ctx.kv.list('teamInvites', { where: [['invitedBy', '==', target.uid]] }))
+    if (inv.data.status === 'pending' && inv.data.teamId === teamId)
+      await ctx.kv.merge(inv.path, { status: 'revoked' });
   await dropDelegations(ctx, teamId, target);
+  if (target.role === 'manager')
+    await tellClientsOfTeamChange(ctx, teamId, target.uid, `tl-${target.uid}-${now}`);
+  else if (await teamHasManager(ctx, teamId))
+    await tellClientsOfTeamChange(ctx, teamId, target.uid, `tl-${target.uid}-${now}`, target.uid);
 }
 
 /**
@@ -388,6 +503,9 @@ async function dropDelegations(ctx: Ctx, teamId: string, target: MemberRec): Pro
     });
     for (const r of rows) {
       const cid = conversationId(ctx.pepper, r.id, tr.uid);
+      // the leaver holds the current schedule / requests sub-keys: the client rotates at its next open (ADR 005)
+      if (await ctx.kv.get(`conversations/${cid}`))
+        await ctx.kv.merge(`conversations/${cid}`, { rotateDue: true });
       if (target.role === 'manager')
         await ctx.kv.del(`conversations/${cid}/delegations/${target.uid}`);
       else
@@ -407,8 +525,15 @@ export async function teamRemoveMember(
   const { teamId, owner } = await myTeam(ctx, actor);
   if (!owner) fail('permission-denied', 'owner-only');
   const target = (await ctx.kv.get(`teams/${teamId}/members/${uid}`)) as MemberRec | null;
-  if (!target || target.status !== 'active') return fail('not-found', 'no-member');
-  if (target.role !== 'manager') fail('permission-denied', 'managers-only');
+  if (!target || target.status === undefined) return fail('not-found', 'no-member');
+  // a removal that was cut short (timeout) is finished by repeating it: the cleanup is idempotent (SPO-267 pass 2)
+  if (target.status === 'removed') {
+    await dropDelegations(ctx, teamId, target);
+    return { ok: true };
+  }
+  if (target.status !== 'active') return fail('not-found', 'no-member');
+  // the owner may remove any other member: a trainer someone else added is not locked in the owner's team
+  if (target.owner) fail('permission-denied', 'owner-cannot-leave');
   await endMembership(ctx, teamId, target, actor.uid, 'removed');
   return { ok: true };
 }
@@ -434,7 +559,25 @@ export async function teamSetActivityScope(
   const target = (await ctx.kv.get(`teams/${teamId}/members/${uid}`)) as MemberRec | null;
   if (!target || target.status !== 'active' || target.role !== 'manager')
     return fail('not-found', 'no-member');
-  await ctx.kv.set(`teams/${teamId}/acl/${uid}`, { activityScope: scope });
+  const prev = (await ctx.kv.get(`teams/${teamId}/acl/${uid}`)) as {
+    activityScope?: ActivityScope;
+  } | null;
+  // the same switch position again changes nothing: no second entry, no second notice, no second push
+  if ((prev?.activityScope ?? 'own') === scope) return { ok: true };
+  const now = ctx.now();
+  await ctx.kv.tx(async (t) => {
+    await t.set(`teams/${teamId}/acl/${uid}`, { activityScope: scope });
+    // metadata only: who changed whose access to what; the manager is told in Spotter (and by a push below)
+    await logActivity(t, teamId, now, {
+      actorUid: actor.uid,
+      role: 'trainer',
+      kind: 'access-change',
+      refId: uid,
+      status: scope,
+    });
+    await notice(t, uid, 'access', actor.uid, now, `access-${uid}-${now}`, scope);
+  });
+  await ctx.notify?.(uid, 'team', 'access');
   return { ok: true };
 }
 
@@ -740,6 +883,15 @@ export async function clientRemovalRespond(
     if (!isCoach(actor) || r.trainerId !== actor.uid)
       return fail('permission-denied', 'not-your-client');
     if (r.status !== 'pending') return { status: r.status };
+    // the client is already gone (left, was removed, or moved to another trainer): there is nothing to approve or decline
+    const cur = (await kv.get(`coaching/${r.clientId}`)) as {
+      status?: string;
+      trainerId?: string;
+    } | null;
+    if (!cur || cur.status !== 'active' || cur.trainerId !== actor.uid) {
+      await kv.merge(removalPath(id), { status: 'cancelled', decidedAt: now });
+      return { status: 'cancelled' as RemovalStatus };
+    }
     const status: RemovalStatus = body.approve ? 'approved' : 'declined';
     if (body.approve) {
       const c = await loadCoaching(kv, r.clientId);
@@ -798,6 +950,16 @@ export async function teamRequests(
   const out: TeamRequestRow[] = [];
   for (const r of rows) {
     const d = r.data as unknown as RemovalRec;
+    // a request whose client is no longer this trainer's active client is closed here (requests from before the end-of-
+    // relationship body cancelled them) and is not listed
+    const cur = (await ctx.kv.get(`coaching/${d.clientId}`)) as {
+      status?: string;
+      trainerId?: string;
+    } | null;
+    if (!cur || cur.status !== 'active' || cur.trainerId !== actor.uid) {
+      await ctx.kv.merge(r.path, { status: 'cancelled', decidedAt: ctx.now() });
+      continue;
+    }
     const [client, mgr] = await Promise.all([
       ctx.kv.get(`users/${d.clientId}`) as Promise<UserRec | null>,
       ctx.kv.get(`users/${d.requestedBy}`) as Promise<UserRec | null>,
@@ -831,6 +993,10 @@ export async function teamLogActivity(
   if (!REPORTED_KINDS.includes(kind as ReportedKind))
     return fail('invalid-argument', 'invalid-kind');
   if (!isUid(clientId)) return fail('invalid-argument', 'invalid-client');
+  // optional client-generated idempotency key: the same key is the same report (journal entry and notices upsert)
+  const opId = body.opId;
+  if (opId !== undefined && !(typeof opId === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(opId)))
+    return fail('invalid-argument', 'invalid-op');
   const { teamId, me } = await myTeam(ctx, actor);
   if (me.role !== 'manager') return fail('permission-denied', 'managers-only');
   const c = (await ctx.kv.get(`coaching/${clientId}`)) as {
@@ -840,12 +1006,33 @@ export async function teamLogActivity(
   if (!c || c.status !== 'active' || !c.trainerId) return fail('not-found', 'no-relationship');
   const tm = (await ctx.kv.get(`teams/${teamId}/members/${c.trainerId}`)) as MemberRec | null;
   if (!tm || tm.status !== 'active') return fail('permission-denied', 'not-your-team');
-  await logActivity(ctx.kv, teamId, ctx.now(), {
-    actorUid: actor.uid,
-    role: 'manager',
-    kind: kind as ReportedKind,
-    clientId,
-  });
+  const now = ctx.now();
+  const entryId = typeof opId === 'string' ? `op-${opId}` : undefined;
+  // a replay of a report already recorded changes nothing and tells nobody again
+  if (entryId && (await ctx.kv.get(`teams/${teamId}/activity/${entryId}`))) return { ok: true };
+  // per-manager hourly cap: a runaway or hostile device cannot flood the journal and the people's notices
+  if (
+    !(await takeSlot(ctx.kv, `act-${actor.uid}-${Math.floor(now / HOUR)}`, now, REPORTS_PER_HOUR))
+  )
+    return fail('resource-exhausted', 'too-many-reports');
+  await logActivity(
+    ctx.kv,
+    teamId,
+    now,
+    { actorUid: actor.uid, role: 'manager', kind: kind as ReportedKind, clientId },
+    entryId,
+  );
+  // done / missed / cancelled by a MANAGER: the client and the trainer hear of it in Spotter (names only, no times: those
+  // stay in the sealed schedule). A trainer who is the actor is not told about their own action (managers only reach here).
+  if (kind === 'session-done' || kind === 'session-missed' || kind === 'session-cancelled') {
+    const mgrName = nameOf((await ctx.kv.get(`users/${actor.uid}`)) as UserRec | null);
+    const cName = nameOf((await ctx.kv.get(`users/${clientId}`)) as UserRec | null);
+    const nid = opId ? `${kind}-${opId}` : `${kind}-${clientId}-${now}`;
+    await notice(ctx.kv, clientId, kind, actor.uid, now, nid, mgrName || null);
+    await notice(ctx.kv, c.trainerId, kind, actor.uid, now, nid, cName || null);
+    await ctx.notify?.(clientId, 'team');
+    await ctx.notify?.(c.trainerId, 'team');
+  }
   return { ok: true };
 }
 
@@ -867,10 +1054,17 @@ export async function teamActivity(
   ctx: Ctx,
   actor: Actor,
   body: Record<string, unknown> = {},
-): Promise<{ entries: ActivityRow[]; scope: ActivityScope | 'owner' }> {
+): Promise<{
+  entries: ActivityRow[];
+  scope: ActivityScope | 'owner';
+  next: number | null;
+  nextId: string | null;
+}> {
   const { teamId, me, owner } = await myTeam(ctx, actor);
   if (!owner && me.role !== 'manager') return fail('permission-denied', 'not-allowed');
   const limit = Math.min(Math.max(Number(body.limit) || 100, 1), 200);
+  // keyset cursor: `before` is the `next` of the previous page (the ts of its last entry); no full-journal read
+  const before = Number.isFinite(Number(body.before)) && body.before ? Number(body.before) : null;
   const acl = owner
     ? null
     : ((await ctx.kv.get(`teams/${teamId}/acl/${actor.uid}`)) as {
@@ -881,7 +1075,35 @@ export async function teamActivity(
     : acl?.activityScope === 'all'
       ? 'all'
       : 'own';
-  const rows = await ctx.kv.list(`teams/${teamId}/activity`, { limit: 500 });
+  // Keyset cursor over (ts desc, id desc): `before` is the `next` of the previous page and `beforeId` its `nextId`. Without
+  // `beforeId` (an older caller) the cursor is the timestamp alone, which skips rows that share the boundary millisecond.
+  const beforeId = typeof body.beforeId === 'string' ? body.beforeId : null;
+  const mine: [string, '==' | '<', unknown][] =
+    scope === 'own' ? [['actorUid', '==', actor.uid]] : [];
+  const rowsAt = async (ts: number) =>
+    (await ctx.kv.list(`teams/${teamId}/activity`, { where: [...mine, ['ts', '==', ts]] })).map(
+      (r) => r.data as unknown as ActivityEntry,
+    );
+  const newer = (a: ActivityEntry, b: ActivityEntry) => b.ts - a.ts || (a.id < b.id ? 1 : -1);
+  let merged: ActivityEntry[] = [];
+  if (before !== null && beforeId !== null)
+    merged.push(...(await rowsAt(before)).filter((e) => e.id < beforeId));
+  const rest = await ctx.kv.list(`teams/${teamId}/activity`, {
+    where: [...mine, ...(before !== null ? ([['ts', '<', before]] as const) : [])],
+    orderBy: ['ts', 'desc'],
+    limit: limit + 1,
+  });
+  merged.push(...rest.map((r) => r.data as unknown as ActivityEntry));
+  merged.sort(newer);
+  // the page boundary may cut through rows that share one millisecond: take that whole group so the order is stable
+  if (merged.length > limit && merged[limit].ts === merged[limit - 1].ts) {
+    const ts = merged[limit - 1].ts;
+    const group = (await rowsAt(ts)).filter(
+      (e) => before === null || ts < before || beforeId === null || e.id < beforeId,
+    );
+    merged = [...merged.filter((e) => e.ts !== ts), ...group].sort(newer);
+  }
+  const more = merged.length > limit;
   const names = new Map<string, string>();
   const nameFor = async (uid: string | undefined): Promise<string> => {
     if (!uid) return '';
@@ -890,11 +1112,7 @@ export async function teamActivity(
     return names.get(uid) ?? '';
   };
   const entries: ActivityRow[] = [];
-  const all = rows
-    .map((r) => r.data as unknown as ActivityEntry)
-    .filter((e) => scope !== 'own' || e.actorUid === actor.uid)
-    .sort((a, b) => b.ts - a.ts)
-    .slice(0, limit);
+  const all = merged.slice(0, limit);
   const liveStatusOf = async (e: ActivityEntry): Promise<string | undefined> => {
     if (e.kind === 'removal-request' && e.refId) {
       const r = await ctx.kv.get(`teamRequests/${e.refId}`);
@@ -918,11 +1136,38 @@ export async function teamActivity(
       ...(live ? { liveStatus: live } : {}),
     });
   }
-  return { entries, scope };
+  const last = more && all.length ? all[all.length - 1] : null;
+  return { entries, scope, next: last ? last.ts : null, nextId: last ? last.id : null };
 }
 
 /* ---- Spotter: the service messages of the team (SPO-236) -------------------------------------------------------- */
-export const SPOTTER_KINDS = ['removal-request', 'removal-answer', 'manager-move', 'team'] as const;
+export const SPOTTER_KINDS = [
+  'removal-request',
+  'removal-answer',
+  'manager-move',
+  'move-answer',
+  'team',
+  'access',
+  'unmarked',
+  'summary',
+  'reminder',
+  'session-done',
+  'session-missed',
+  'session-cancelled',
+] as const;
+/** The kinds the CLIENT's own Spotter shows (client/src/coach/client/spotter/clientSpotterPort.ts); metadata only. */
+export const CLIENT_SPOTTER_KINDS = [
+  'move-request',
+  'move-answer',
+  'session-done',
+  'session-missed',
+  'session-cancelled',
+  'team',
+  'access',
+  'reminder',
+  'summary',
+] as const;
+const EPHEMERAL = new Set(['unmarked', 'reminder', 'summary']);
 export interface SpotterItem {
   id: string;
   kind: (typeof SPOTTER_KINDS)[number];
@@ -936,6 +1181,10 @@ export interface SpotterItem {
   status?: string;
   /** removal-request: the id the Agenda answers with */
   refId?: string;
+  /** unmarked: when the unmarked session ended (epoch ms) */
+  at?: number;
+  /** summary: how many unread service messages it counts (access: the new scope arrives as `subjectName`) */
+  count?: number;
 }
 
 /** The caller's own service messages about the team, newest first. Metadata only: names, never client content. */
@@ -945,7 +1194,13 @@ export async function teamNotices(
 ): Promise<{ items: SpotterItem[]; unread: number }> {
   const rows = await ctx.kv.list(`users/${actor.uid}/notices`, { limit: 200 });
   const kinds = new Set<string>(SPOTTER_KINDS);
+  // "not marked", reminders and summaries are time-bound: they are forgotten after 30 days
+  const stale = ctx.now() - 30 * 86_400_000;
+  const expires = (r: { data: Record<string, unknown> }) =>
+    EPHEMERAL.has(String(r.data.kind)) && Number(r.data.createdAt) < stale;
+  for (const r of rows) if (expires(r)) await ctx.kv.del(r.path);
   const mine = rows
+    .filter((r) => !expires(r))
     .map((r) => r.data as Record<string, unknown>)
     .filter((n) => kinds.has(String(n.kind)))
     .sort((a, b) => Number(b.createdAt) - Number(a.createdAt))
@@ -967,6 +1222,8 @@ export async function teamNotices(
       unread: n.readAt == null,
       ...(status ? { status } : {}),
       ...(typeof n.refId === 'string' ? { refId: n.refId } : {}),
+      ...(n.kind === 'unmarked' && typeof n.start === 'number' ? { at: n.start } : {}),
+      ...(n.kind === 'summary' && typeof n.count === 'number' ? { count: n.count } : {}),
     });
   }
   return { items, unread: items.filter((i) => i.unread).length };
@@ -1073,7 +1330,14 @@ export async function inviteClientForTrainer(
   const ownerOk = trainerId === teamId;
   if (!ownerOk && !(tm && tm.status === 'active' && tm.role === 'trainer'))
     return fail('permission-denied', 'not-your-team');
-  const r = await coachInvite(ctx, { uid: trainerId, role: 'trainer' }, body);
+  // A manager only starts the ordinary app invite: the client accepts it and decides what to share. No instant program-only
+  // client, no consent levels chosen for the client, no push to a named user (SPO-267).
+  if (body.mode !== 'app') return fail('permission-denied', 'app-invite-only');
+  const r = await coachInvite(
+    ctx,
+    { uid: trainerId, role: 'trainer' },
+    { name: body.name, mode: 'app' },
+  );
   await logActivity(ctx.kv, teamId, ctx.now(), {
     actorUid: actor.uid,
     role: 'manager',

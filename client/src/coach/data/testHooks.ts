@@ -7,7 +7,8 @@
  * the branch and nothing under `__fixtures__` is ever imported by runtime code (guarded by `tests/kit-guard.test.ts`).
  * There is no runtime switch, no localStorage override and no setter in this module.
  */
-import type { CoachBackendMode } from './backend';
+/** Which backend the coach data layer runs on (declared here so this module imports nothing from `backend.ts`: no cycle). */
+export type CoachBackendMode = 'firestore' | 'fixtures' | 'unconfigured';
 
 export interface CoachTestHooks {
   /** Pins the backend mode (tests: `'firestore'` to exercise the real path, null = the fixtures). */

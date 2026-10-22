@@ -32,6 +32,8 @@ export const scheduleUk: typeof scheduleEn = {
   scAllClients: 'Усі клієнти',
   scGymLabel: 'Зал',
   scClientLabel: 'Клієнт',
+  scTrainerLabel: 'Тренер',
+  scAllTrainers: 'Усі тренери',
   scSummary: sessions,
   scRequestsN: requests,
   scOverlap: (names) => `1 накладка: ${names}`,
@@ -312,6 +314,9 @@ export const scheduleUk: typeof scheduleEn = {
   scReqBy: (who: string) => `Запропоновано: ${who}`,
   scReqByYou: 'Запропоновано вами',
   scReqByManager: (m) => `Пропозиція від ${m} (менеджер)`,
+  scReqByTrainer: (n) => `Пропозиція від тренера ${n}`,
+  rfSubManager:
+    'Клієнт отримає запит у розділі «Мій тренер» і відповість там. Нічого не зміниться, доки він не погодиться.',
   rcTitleManager: (m, c) => `${m} надсилає запит ${c}: перенести тренування`,
   scReqExpires: (rel: string) => `Спливає ${rel}`,
   scConflictH: 'Накладається на',

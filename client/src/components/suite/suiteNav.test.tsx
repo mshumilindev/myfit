@@ -59,7 +59,6 @@ vi.mock('../StandardsView', () => ({ StandardsView: () => null }));
 vi.mock('../FeatsView', () => ({ FeatsView: () => null }));
 vi.mock('../StatShareSheet', () => ({ StatShareSheet: () => null }));
 vi.mock('../../views/NotificationsView', () => ({ NotificationsView: () => null }));
-vi.mock('../../views/TrainerView', () => ({ TrainerView: () => null }));
 vi.mock('../../views/AdminView', () => ({ AdminView: () => null }));
 vi.mock('../../views/ProfileView', () => ({ ProfileView: () => null }));
 vi.mock('../../nutrition/store', () => ({
@@ -159,7 +158,8 @@ const CASES: Case[] = [
   },
   {
     name: 'People',
-    extras: [t.notifTitle, t.language],
+    // client apps only have the bell (SPO-234); People shows the unread on Apps
+    extras: [t.language],
     nav: rosterNav,
     tabs: rosterNav,
     rail: (cb) => roster(cb),
@@ -446,6 +446,63 @@ describe.each(CASES)('$name: phone (< 720)', (k) => {
     expect(within(body).queryByRole('button', { name: c.modeCoach })).toBeNull();
     expect(within(body).queryByText(c.modeNote)).toBeNull();
     expect(within(body).getByText(t.roleMember)).toBeTruthy();
+  });
+});
+
+describe('apps without a bell: the shared feed unread rides on Apps (SPO-234)', () => {
+  const people = (unread: number) => (
+    <RosterApp
+      role="admin"
+      tab="users"
+      onTab={noop}
+      shell={{} as unknown as Shell}
+      onOpenShell={noop}
+      {...notifProps}
+      notifUnread={unread}
+    />
+  );
+  const coachRail = (unread: number) => (
+    <CoachShell
+      role="trainer"
+      name="Iryna Koval"
+      route={{ screen: 'agenda' }}
+      onNavigate={noop}
+      onExitToWorkouts={noop}
+      onOpenShell={noop}
+      notifUnread={unread}
+    />
+  );
+  const apps = () => within(rail()).getByRole('button', { name: new RegExp(`^${c.navApps}`) });
+
+  it.each([
+    ['People', people],
+    ['Coach', coachRail],
+  ])('%s: no bell in the rail, the count is on Apps with a spoken label', (_n, make) => {
+    setViewport(1440);
+    session.role = 'admin';
+    render(make(3));
+    expect(within(rail()).queryByRole('button', { name: t.notifTitle })).toBeNull();
+    expect(apps().textContent).toContain('3');
+    expect(apps().getAttribute('aria-label')).toContain(c.unread(3));
+  });
+
+  it.each([
+    ['People', people],
+    ['Coach', coachRail],
+  ])('%s: nothing unread, nothing on Apps; the language is in the foot', (_n, make) => {
+    setViewport(1440);
+    session.role = 'admin';
+    render(make(0));
+    expect(apps().textContent).not.toMatch(/\d/);
+    expect(apps().getAttribute('aria-label')).not.toContain(c.unread(0));
+    expect(rail().querySelector('.rail-foot .lang, .rail-foot .lang-chip')).not.toBeNull();
+  });
+
+  it('a client app keeps the bell and shows nothing on Apps', () => {
+    setViewport(1440);
+    render(CASES[1].rail({ onShell: noop, onProfile: noop }));
+    expect(within(rail()).getByRole('button', { name: t.notifTitle })).toBeTruthy();
+    expect(apps().textContent).not.toMatch(/\d/);
   });
 });
 

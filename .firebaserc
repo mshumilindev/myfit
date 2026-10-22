@@ -1,11 +1,5 @@
 {
   "projects": {
     "default": "spotter-64c3b"
-  },
-  "targets": {},
-  "etags": {
-    "spotter-64c3b": {
-      "extensionInstances": {}
-    }
   }
 }

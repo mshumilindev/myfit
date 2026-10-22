@@ -38,12 +38,19 @@ export interface FixturesTeamOptions {
   withRequests?: boolean;
   /** a manager's activity scope (default `own`) */
   activityScope?: 'own' | 'all';
+  /** rows per activity page (default: all in one page) */
+  activityPage?: number;
+  /** the manager's "See all team activity" switch (default off) */
+  managerScope?: ActivityScope;
+  /** the trainer viewer is a member of someone else's team (not the owner): the "Leave team" row shows */
+  notOwner?: boolean;
 }
 
 export function buildFixtureTeam(
   viewer: TeamViewer,
   now: number,
   ready = { ready: 9, total: 14 },
+  extra: { managerScope?: ActivityScope; notOwner?: boolean } = {},
 ): TeamData {
   const olena: TeamMember = {
     uid: 'trainer-olena',
@@ -70,12 +77,16 @@ export function buildFixtureTeam(
     addedAt: now - 25 * DAY,
     lastActiveAt: viewer === 'manager' ? now : now - 40 * 60_000,
     email: 'irina.m@example.com',
-    activityScope: 'own',
+    activityScope: extra.managerScope ?? 'own',
     scheduleReady: ready,
   };
   const members = viewer === 'trainer' ? [olena, andriy, irina] : [irina, olena, andriy];
   return {
-    me: { uid: members[0].uid, role: viewer, isOwner: viewer === 'trainer' },
+    me: {
+      uid: members[0].uid,
+      role: viewer,
+      isOwner: viewer === 'trainer' && !extra.notOwner,
+    },
     ownerName: olena.name,
     members,
     invites: [
@@ -210,7 +221,10 @@ export function buildFixtureSpotter(viewer: TeamViewer, now: number, read = fals
 export function createFixturesTeamPort(o: FixturesTeamOptions = {}): TeamPort {
   const viewer = o.viewer ?? 'trainer';
   const clock = o.now ?? createDemoClock();
-  let data = buildFixtureTeam(viewer, clock(), o.ready);
+  let data = buildFixtureTeam(viewer, clock(), o.ready, {
+    managerScope: o.managerScope,
+    notOwner: o.notOwner,
+  });
   let cold = !!o.cold;
   let spotterRead = false;
   const answered = new Map<string, string>();
@@ -297,9 +311,17 @@ export function createFixturesTeamPort(o: FixturesTeamOptions = {}): TeamPort {
       await guard();
       spotterRead = true;
     },
-    async activity() {
+    async activity(page) {
       await guard();
-      return buildFixtureActivity(viewer, clock(), o.activityScope);
+      const full = buildFixtureActivity(viewer, clock(), o.activityScope);
+      const older = page?.before ? full.entries.filter((e) => e.ts < page.before!) : full.entries;
+      const size = page?.limit ?? o.activityPage ?? older.length;
+      const entries = older.slice(0, size);
+      return {
+        ...full,
+        entries,
+        next: older.length > size ? entries[entries.length - 1]!.ts : null,
+      };
     },
     async requests() {
       await guard();

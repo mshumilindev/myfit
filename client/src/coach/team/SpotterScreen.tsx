@@ -25,7 +25,8 @@ const ICON: Record<SpotterItem['kind'], string> = {
   'removal-request': 'minus-circle',
   'removal-answer': 'check-circle',
   'manager-move': 'swap',
-  team: 'user-plus',
+  team: 'users',
+  unmarked: 'clock',
 };
 
 /**
@@ -75,6 +76,8 @@ export function SpotterScreen({
           : tm.spRemovalAnswerNo(who, i.subjectName);
       case 'manager-move':
         return tm.spManagerMove(who, i.subjectName);
+      case 'unmarked':
+        return tm.spUnmarked(i.subjectName);
       default:
         return i.subjectName === 'trainer' ? tm.spTeamTrainer(who) : tm.spTeamManager(who);
     }

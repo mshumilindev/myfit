@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { BackButton } from '../../components/ui/BackButton';
+import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { FailedState } from '../../components/ui/FailedState';
 import { GroupedList, ListRow } from '../../components/ui/GroupedList';
 import { IconTile } from '../../components/ui/IconTile';
+import { Notice } from '../../components/ui/Notice';
 import { Segmented } from '../../components/ui/Segmented';
 import { SectionLabel } from '../../components/ui/SectionLabel';
 import { SkeletonRows } from '../../components/ui/Skeleton';
@@ -44,7 +46,7 @@ const KIND_ICON: Record<ActivityRow['kind'], string> = {
   'session-missed': 'warning-circle',
   'session-cancelled': 'x-circle',
   'session-edited': 'calendar-dots',
-  'member-added': 'user-plus',
+  'member-added': 'users',
   'member-removed': 'minus-circle',
   'member-left': 'sign-out',
   'client-invite': 'envelope',
@@ -55,7 +57,13 @@ const STATUS_TONE: Record<string, Tone> = {
   accepted: 'ok',
   approved: 'ok',
   done: 'ok',
+  missed: 'danger',
 };
+
+/** Session marks carry their state themselves (no later answer to wait for): the row shows Done / Missed. */
+const rowStatus = (e: ActivityRow): string | undefined =>
+  e.liveStatus ??
+  (e.kind === 'session-done' ? 'done' : e.kind === 'session-missed' ? 'missed' : undefined);
 
 /**
  * Activity log (SPO-203 / SPO-238, boards D18 / D19 / D20): who did what, by day. The owner trainer reads everything; a manager
@@ -78,6 +86,8 @@ export function ActivityScreen({
   const [failed, setFailed] = useState(false);
   const [who, setWho] = useState<string>(ALL);
   const [attempt, setAttempt] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [moreFailed, setMoreFailed] = useState(false);
 
   useEffect(() => {
     let live = true;
@@ -89,6 +99,35 @@ export function ActivityScreen({
       live = false;
     };
   }, [p, attempt]);
+
+  // Older entries come page by page from the cursor (delta style, like deltaSync): nothing already shown is loaded again.
+  const showEarlier = async () => {
+    if (!log || log.next == null || loadingMore) return;
+    setLoadingMore(true);
+    setMoreFailed(false);
+    try {
+      const page = await p.activity({
+        before: log.next,
+        ...(log.nextId ? { beforeId: log.nextId } : {}),
+      });
+      setLog((cur) => {
+        if (!cur) return cur;
+        const seen = new Set(cur.entries.map((e) => e.id));
+        const fresh = page.entries.filter((e) => !seen.has(e.id));
+        // a page with nothing new ends the log (a server that ignored the cursor must not loop forever)
+        return {
+          ...cur,
+          entries: [...cur.entries, ...fresh],
+          next: fresh.length ? page.next : null,
+          nextId: fresh.length ? (page.nextId ?? null) : null,
+        };
+      });
+    } catch {
+      setMoreFailed(true);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const [clock] = useState(() => now ?? p.now?.() ?? Date.now());
   const ownerName = state.data?.ownerName ?? '';
@@ -131,11 +170,7 @@ export function ActivityScreen({
 
   const scope = log.scope;
   const subtitle =
-    scope === 'owner'
-      ? tm.actSubOwner
-      : scope === 'all'
-        ? tm.actSubAll
-        : `${tm.actSubOwn} ${tm.actSubOwnHint(shortName(ownerName))}`;
+    scope === 'owner' ? tm.actSubOwner : scope === 'all' ? tm.actSubAll : tm.actSubOwn;
   const filterable = scope !== 'own';
   const mine = (uid: string) => uid === viewerUid;
   const options = [
@@ -172,7 +207,18 @@ export function ActivityScreen({
 
   return (
     <Page>
-      <Header eyebrow={back} title={tm.actTitle} slots={false} subtitle={subtitle} />
+      <Header
+        eyebrow={back}
+        title={tm.actTitle}
+        slots={false}
+        subtitle={subtitle}
+        actions={scope === 'all' ? <Tag tone="accent">{tm.actFullAccess}</Tag> : undefined}
+      />
+      {scope === 'own' && (
+        <Notice icon="eye-slash">
+          {tm.actOwnNotice} {tm.actSubOwnHint(shortName(ownerName))}
+        </Notice>
+      )}
       {filterable && actors.length > 1 && (
         <Segmented
           label={tm.actFilterLabel}
@@ -211,9 +257,9 @@ export function ActivityScreen({
                     label={tm.actKind[e.kind] ?? e.kind}
                     sub={[shortName(e.actorName), e.subjectName, coachClock(e.ts)].join(' · ')}
                     trailing={
-                      e.liveStatus ? (
-                        <Tag tone={STATUS_TONE[e.liveStatus] ?? 'neutral'}>
-                          {tm.actStatus[e.liveStatus] ?? e.liveStatus}
+                      rowStatus(e) ? (
+                        <Tag tone={STATUS_TONE[rowStatus(e)!] ?? 'neutral'}>
+                          {tm.actStatus[rowStatus(e)!] ?? rowStatus(e)}
                         </Tag>
                       ) : undefined
                     }
@@ -223,6 +269,22 @@ export function ActivityScreen({
             </GroupedList>
           </section>
         ))
+      )}
+      {moreFailed && (
+        <p role="alert" className="act-more-failed">
+          {tm.actMoreFailed}
+        </p>
+      )}
+      {log.next != null && (
+        <Button
+          variant="secondary"
+          size="md"
+          fullWidth
+          disabled={loadingMore}
+          onClick={() => void showEarlier()}
+        >
+          {tm.actMore}
+        </Button>
       )}
     </Page>
   );

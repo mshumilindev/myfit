@@ -32,6 +32,8 @@ export const scheduleLt: typeof scheduleEn = {
   scAllClients: 'Visi klientai',
   scGymLabel: 'Salė',
   scClientLabel: 'Klientas',
+  scTrainerLabel: 'Treneris',
+  scAllTrainers: 'Visi treneriai',
   scSummary: sessions,
   scRequestsN: requests,
   scOverlap: (names) => `1 sutapimas: ${names}`,
@@ -312,6 +314,9 @@ export const scheduleLt: typeof scheduleEn = {
   scReqBy: (who: string) => `Siūlo: ${who}`,
   scReqByYou: 'Jūsų pasiūlymas',
   scReqByManager: (m) => `Pasiūlymas nuo: ${m} (vadybininkas)`,
+  scReqByTrainer: (n) => `Pasiūlymas nuo trenerio ${n}`,
+  rfSubManager:
+    'Klientas gaus prašymą skiltyje „Mano treneris“ ir atsakys ten. Niekas nebus perkelta, kol jis nesutiks.',
   rcTitleManager: (m, c) => `${m} prašo kliento ${c} perkelti treniruotę`,
   scReqExpires: (rel: string) => `Baigiasi ${rel}`,
   scConflictH: 'Sutampa su',

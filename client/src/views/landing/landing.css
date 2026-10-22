@@ -157,24 +157,6 @@
   font-size: 16px;
   cursor: pointer;
 }
-.ld .ld-inv-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-.ld .ld-inv-btn--ghost {
-  background: transparent;
-  color: #d9a24f;
-  border: 1px solid rgba(217, 162, 79, 0.45);
-  height: 44px;
-  margin-top: 10px;
-  font-weight: 600;
-  font-size: 15px;
-}
-.ld .ld-inv-err {
-  margin-top: 12px;
-  font-size: 13px;
-  color: #e08a7a;
-}
 /* The hero spotlight wanders, but stays on screen. */
 @keyframes ld-hbx {
   0%,
@@ -225,7 +207,7 @@
 }
 
 /* The design's beam period is long; keep it slow but visibly alive. */
-.ld .l-hs-beam {
+.ld .l-hs-wd {
   animation-duration: 25.3s, 16s;
 }
 /* The answer's caret never wraps to a line of its own (it would leave a blank line in the bubble). */
@@ -1184,57 +1166,50 @@
   opacity: 0;
 }
 
-/* Hero spotlight: the beam box is the screen itself (not a wide strip), and its centre wanders over the whole of it; sizes follow both width and height, so any window shape works. */
-@property --sx {
-  syntax: '<percentage>';
-  inherits: true;
-  initial-value: 50%;
-}
-@property --sy {
-  syntax: '<percentage>';
-  inherits: true;
-  initial-value: 48%;
-}
+/* Hero spotlight: the beam box is the screen itself (not a wide strip), and the hole of light wanders over the whole of it; sizes follow both width and height, so any window shape works.
+   The wandering is a transform of one big layer (compositor only): the box (200% x 200%, centred on the screen) carries the
+   gradients with the hole at its centre and moves by up to half the screen, so the hole reaches any point of the screen
+   while the box still covers it. Animating a custom property for the hole (as before) repainted the whole screen every frame. */
 @keyframes ld-sx {
   0%,
   100% {
-    --sx: 50%;
+    translate: 0 0;
   }
   14% {
-    --sx: 18%;
+    translate: -16% 0;
   }
   28% {
-    --sx: 88%;
+    translate: 19% 0;
   }
   47% {
-    --sx: 8%;
+    translate: -21% 0;
   }
   63% {
-    --sx: 72%;
+    translate: 11% 0;
   }
   79% {
-    --sx: 34%;
+    translate: -8% 0;
   }
 }
 @keyframes ld-sy {
   0%,
   100% {
-    --sy: 46%;
+    transform: translateY(-2%);
   }
   18% {
-    --sy: 16%;
+    transform: translateY(-17%);
   }
   37% {
-    --sy: 84%;
+    transform: translateY(17%);
   }
   55% {
-    --sy: 30%;
+    transform: translateY(-10%);
   }
   74% {
-    --sy: 88%;
+    transform: translateY(19%);
   }
   88% {
-    --sy: 58%;
+    transform: translateY(4%);
   }
 }
 .ld .l-hs-beam {
@@ -1245,9 +1220,19 @@
   translate: none;
   transform: none;
   will-change: auto;
+  background: none;
+  animation: none;
+}
+.ld .l-hs-wd {
+  position: absolute;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  will-change: translate, transform;
   background:
     radial-gradient(
-      circle max(15cqw, 28vh) at var(--sx) var(--sy),
+      circle max(15cqw, 28vh) at 50% 50%,
       rgba(10, 10, 12, 0) 0,
       rgba(10, 10, 12, 0.01) 12%,
       rgba(10, 10, 12, 0.04) 28%,
@@ -1257,7 +1242,7 @@
       rgba(10, 10, 12, 0.55) 100%
     ),
     radial-gradient(
-      circle max(36cqw, 66vh) at var(--sx) var(--sy),
+      circle max(36cqw, 66vh) at 50% 50%,
       rgba(10, 10, 12, 0) 0,
       rgba(10, 10, 12, 0.05) 25%,
       rgba(10, 10, 12, 0.28) 45%,
@@ -1270,8 +1255,8 @@
     ld-sy 16s ease-in-out infinite;
 }
 .ld .l-hs-glow {
-  left: var(--sx);
-  top: var(--sy);
+  left: 50%;
+  top: 50%;
   width: max(22cqw, 40vh);
   height: max(22cqw, 40vh);
 }
@@ -1282,6 +1267,11 @@
 }
 .ld .l-panel:has(> .l-pdl.l-nomob) {
   grid-template-columns: minmax(0, 1fr);
+}
+
+/* Inside the installed app (PWA or desktop shell) the Windows and macOS installers are pointless; Android stays. */
+.ld #top[data-shell='app'] .l-noapp {
+  display: none !important;
 }
 
 /* First screen: the header (logo + language) sits at the very top, the rest is centred in the space below it. */

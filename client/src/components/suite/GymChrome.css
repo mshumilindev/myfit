@@ -1,0 +1,4 @@
+/* Gym keeps its tab bar (and the notched FAB) under the Mastery page: keep the last button clear of it. */
+.mst.screen {
+  padding-bottom: calc(var(--s-32) + var(--safe-bottom, 0px));
+}

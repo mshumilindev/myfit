@@ -1,3 +1,4 @@
+import { acceptWithMail } from './acceptHelper';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createMemoryKv, type MemoryKv } from '../../functions/src/coach/memoryKv';
 import {
@@ -9,7 +10,6 @@ import {
   type Ctx,
 } from '../../functions/src/coach/service';
 import {
-  teamAccept,
   teamForClient,
   inviteClientForTrainer,
   teamInvite,
@@ -73,7 +73,7 @@ beforeEach(async () => {
   });
   await kv.set('coaching/c1', { clientId: 'c1', trainerId: 't1', status: 'active', keyEpoch: 1 });
   const inv = await teamInvite(ctx(), owner, { email: 'irina@example.com' });
-  await teamAccept(ctx(), { uid: 'm1', role: 'member' }, { inviteId: inv.inviteId });
+  await acceptWithMail(ctx(), { uid: 'm1', role: 'member' }, { inviteId: inv.inviteId });
   pushes.length = 0;
 });
 
@@ -181,7 +181,8 @@ describe('team activity log', () => {
     expect(own.entries.map((e) => e.actorUid)).toEqual(['m1', 'm1']);
     expect(own.entries.every((e) => e.actorName === 'Irina')).toBe(true);
     await teamSetActivityScope(ctx(), owner, { uid: 'm1', scope: 'all' });
-    expect((await teamActivity(ctx(), mgr)).entries).toHaveLength(4);
+    // the four earlier entries plus the owner's own `access-change` (SPO-238)
+    expect((await teamActivity(ctx(), mgr)).entries).toHaveLength(5);
     expect(await code(teamActivity(ctx(), client))).toBe('permission-denied:not-in-team');
   });
 });
@@ -211,7 +212,8 @@ describe('Spotter service messages', () => {
     expect(s.unread).toBe(2);
     await teamNoticesRead(ctx(), owner);
     expect((await teamNotices(ctx(), owner)).unread).toBe(0);
-    expect((await teamNotices(ctx(), client)).items).toEqual([]);
+    // a client sees none of the staff messages; only its own "a manager joined" notice (SPO-236 client Spotter)
+    expect((await teamNotices(ctx(), client)).items.map((i) => i.kind)).toEqual(['team']);
     expect(pushes).toContainEqual(['t1', 'team']);
   });
 });
@@ -271,6 +273,12 @@ describe('a manager invites a client for a team trainer', () => {
         inviteClientForTrainer(ctx(), owner, { trainerId: 't1', name: 'Zed Zed', mode: 'app' }),
       ),
     ).toBe('permission-denied:managers-only');
+    for (const extra of [{ mode: 'program' }, { mode: 'chat', username: 'someone' }])
+      expect(
+        await code(
+          inviteClientForTrainer(ctx(), mgr, { trainerId: 't1', name: 'Zed Zed', ...extra }),
+        ),
+      ).toBe('permission-denied:app-invite-only');
   });
 });
 
@@ -287,7 +295,7 @@ describe('delegations follow the team (ADR 005)', () => {
     await kv.set('users/m3', { role: 'member', status: 'active', firstName: 'Third' });
     const inv = await teamInvite(ctx(), owner, { email: 'third@example.com' });
     pushes.length = 0;
-    await teamAccept(ctx(), { uid: 'm3', role: 'member' }, { inviteId: inv.inviteId });
+    await acceptWithMail(ctx(), { uid: 'm3', role: 'member' }, { inviteId: inv.inviteId });
     expect(pushes).toContainEqual(['c1', 'sync']);
     // a trainer joining the team does not (nothing to delegate)
     await kv.set('users/t2', { role: 'trainer', status: 'active', firstName: 'Andriy' });
@@ -297,7 +305,7 @@ describe('delegations follow the team (ADR 005)', () => {
       { email: 'a@example.com' },
     );
     pushes.length = 0;
-    await teamAccept(ctx(), { uid: 't2', role: 'trainer' }, { inviteId: inv2.inviteId });
+    await acceptWithMail(ctx(), { uid: 't2', role: 'trainer' }, { inviteId: inv2.inviteId });
     expect(pushes.filter(([, k]) => k === 'sync')).toEqual([]);
   });
 

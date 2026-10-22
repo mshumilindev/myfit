@@ -61,13 +61,15 @@ beforeEach(async () => {
 
 describe('client removal requests', () => {
   it('a manager asks; nothing changes and the client is not told; the trainer sees it and gets a notice', async () => {
+    pushes.length = 0; // the join pushes of the setup are not under test
     const r = await clientRemovalCreate(ctx(), mgrNow, {
       clientId: 'c1',
       reason: '  Moved away  ',
     });
     expect(r.id).toBe('rm-c1');
     expect(await kv.get('coaching/c1')).toMatchObject({ status: 'active' });
-    const mine = await kv.list('users/c1/notices');
+    // the removal request tells the client nothing; the only notice is the earlier "a manager joined" (SPO-236 client Spotter)
+    const mine = (await kv.list('users/c1/notices')).filter((n) => n.data.kind !== 'team');
     expect(mine).toHaveLength(0);
     const list = await teamRequests(ctx(), owner);
     expect(list.requests).toEqual([

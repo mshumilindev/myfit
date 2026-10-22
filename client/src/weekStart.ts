@@ -124,6 +124,17 @@ export function dateInWeek(weekStart: number, day: number, start: IsoDay = weekS
   return d.getTime();
 }
 
+/**
+ * A week start moved by `n` whole calendar weeks (negative = earlier), still at local midnight. Calendar arithmetic, not
+ * `n * 7 * 24 h`: a daylight-saving change inside the span makes a week 167 or 169 hours long, and a millisecond step
+ * would then miss the week start (SPO-152).
+ */
+export function shiftWeeks(weekStart: number, n: number): number {
+  const d = new Date(weekStart);
+  d.setDate(d.getDate() + 7 * n);
+  return d.getTime();
+}
+
 /** [start, end) of the week containing `ts`. */
 export function weekBounds(ts: number, start: IsoDay = weekStartDay()): [number, number] {
   const s = weekStartOf(ts, start);

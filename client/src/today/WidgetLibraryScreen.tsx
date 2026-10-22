@@ -30,7 +30,7 @@ export function WidgetLibraryScreen({ shell, onClose }: { shell: Shell; onClose:
     <div className="screen wlib-screen">
       <div className="wlib-top">
         <BackButton label={t.backAction} onClick={onClose} />
-        <span className="wlib-title">Widget library</span>
+        <span className="wlib-title">{t.widgetLibraryTitle}</span>
       </div>
       <WidgetLibrary ctx={ctx} />
       {weight && <WeightSheet state={{ kind: 'add' }} onClose={() => setWeight(false)} />}

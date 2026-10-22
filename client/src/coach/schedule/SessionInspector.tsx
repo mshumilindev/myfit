@@ -22,6 +22,7 @@ import type { ScheduleStore } from './scheduleStore';
 import { dayOfTs } from './time';
 import { gymName, type RescheduleRequest, type ScheduleSlot } from './types';
 import { requestsOf } from './view';
+import type { ManagerSchedule } from './managerSchedule';
 
 export interface SessionInspectorProps {
   slot: ScheduleSlot;
@@ -40,6 +41,8 @@ export interface SessionInspectorProps {
   onMessage: (clientId: string) => void;
   /** Show another session (an overlapping one) in this panel. */
   onJump: (slotId: string) => void;
+  /** A team manager's view: a Trainer row, no Message, own requests are "Proposed by you". */
+  manager?: ManagerSchedule;
 }
 
 const HERO_AVATARS = 3;
@@ -74,6 +77,9 @@ export function SessionInspector(p: SessionInspectorProps) {
     for (const id of unmarked(status))
       void (status === 'done' ? p.store.markDone(slot, id) : p.store.markMissed(slot, id));
   };
+  const trainerNames = p.manager
+    ? [...new Set(ids.map((id) => p.manager?.trainerOf(id)).filter((n): n is string => !!n))]
+    : [];
   const when = relativeWhen(slot.start, endOf(slot), p.now, locale, { inProgress: t.scInProgress });
 
   return (
@@ -135,6 +141,14 @@ export function SessionInspector(p: SessionInspectorProps) {
             {slot.oneOff ? t.scOneOffOnly : t.scEvery(longWeekday(day, locale))}
           </span>
         </li>
+        {p.manager && trainerNames.length > 0 && (
+          <li>
+            <Icon name="user" />
+            <span>
+              {t.scTrainerLabel}: {trainerNames.join(', ')}
+            </span>
+          </li>
+        )}
       </ul>
 
       {slot.note && (
@@ -169,8 +183,12 @@ export function SessionInspector(p: SessionInspectorProps) {
                 {byClient
                   ? t.scReqBy(name)
                   : r.via === 'manager'
-                    ? t.scReqByManager(r.byName || '')
-                    : t.scReqByYou}
+                    ? p.manager
+                      ? t.scReqByYou
+                      : t.scReqByManager(r.byName || '')
+                    : p.manager
+                      ? t.scReqByTrainer(p.manager.trainerOf(r.clientId) ?? '')
+                      : t.scReqByYou}
               </span>
             </div>
             <div className="sc-insp-req-move">
@@ -208,7 +226,7 @@ export function SessionInspector(p: SessionInspectorProps) {
                     {t.rcDecline}
                   </Button>
                 </>
-              ) : (
+              ) : p.manager && r.via !== 'manager' ? null : (
                 <Button
                   variant="secondary"
                   size="sm"
@@ -326,12 +344,14 @@ export function SessionInspector(p: SessionInspectorProps) {
                 }
                 trailing={
                   <span className="sc-insp-quick">
-                    <IconButton
-                      icon="chat-circle"
-                      variant="ghost"
-                      label={`${t.scMessage}: ${people.first(id)}`}
-                      onClick={() => p.onMessage(id)}
-                    />
+                    {!p.manager && (
+                      <IconButton
+                        icon="chat-circle"
+                        variant="ghost"
+                        label={`${t.scMessage}: ${people.first(id)}`}
+                        onClick={() => p.onMessage(id)}
+                      />
+                    )}
                     <IconButton
                       icon="user"
                       variant="ghost"

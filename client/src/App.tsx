@@ -3,7 +3,7 @@ import { pushState, refreshPush, setAppBadge } from './push';
 import { useStoredConditionLimits } from './healthBuild';
 import { setProgressionEffects } from './progression';
 import { ScreenSkeleton } from './components/ui/Skeletons';
-import { Button, IconButton } from './components/ui/Button';
+import { Button } from './components/ui/Button';
 import { buildNotes, useAtlasFmt, useAtlasNotes } from './atlas/notes';
 import { setOverrideUid } from './accountOverrides';
 import { chatBacked, planNotePushes, planOutbox, syncOutbox } from './atlas/schedule';
@@ -61,21 +61,17 @@ import {
 import { useChallenges } from './challenges';
 import { ShellLauncher } from './components/ShellLauncher';
 import { setSuiteSession } from './components/suite/suiteSession';
-import { watchSession } from './accounts/sessions';
+import { useSessionWatch } from './accounts/useSessionWatch';
 import type { ApexTab } from './views/ApexApp';
 import type { RosterTab } from './views/rosterAccess';
-import {
-  ROSTER_TAB_IDS,
-  guardRosterTab,
-  isLegacyPeopleClients,
-  rosterHomeTab,
-  rosterMode,
-} from './views/rosterAccess';
-import { coachHash } from './coach/routes';
+import { ROSTER_TAB_IDS, guardRosterTab, rosterHomeTab, rosterMode } from './views/rosterAccess';
+import { redirectLegacyPeopleClients } from './views/legacyPeopleRedirect';
 import { canUseCoach, coachScreenOpen } from './coach/access';
 import type { HomeSetRoute } from './views/home/HomeSetView';
 import { pruneHomeSetDrafts } from './views/home/homeSetDraft';
 import { AuthView } from './views/AuthView';
+import { TeamInviteSignInNotice } from './coach/team/TeamInviteSignInNotice';
+import { NoticeStrip } from './components/NoticeStrip';
 import { LandingView } from './views/landing/LandingView';
 import { InviteLanding } from './views/landing/InviteLanding';
 import { shouldShowLanding } from './views/landing/landingGate';
@@ -90,18 +86,15 @@ import { useFlag, isFlagOn, startGlobalFlags } from './data/flags';
 import { isClientHead } from './coach/client/routes';
 import { useClientShared } from './coach/client/shared';
 import { ClientBridgeLazy, ClientRoutesLazy } from './coach/client/lazy';
-import { BrandBar, BellButton } from './components/ui/BrandBar';
-import { BrandAccount } from './components/suite/BrandAccount';
+import { GymBrandBar, GymTabBar } from './components/suite/GymChrome';
 import { ConditionsShield, useActiveConditions } from './views/health/ConditionsShield';
 import { AppRail } from './components/AppRail';
-import { SuiteTabBar } from './components/SuiteTabBar';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 import { currentHash, replaceHash, setHash } from './route';
 import { legalRoute, useJoinLinkSync, useLegalRoute } from './legal/route';
 import { usePendingConsentFlush } from './legal/signupConsents';
 import { usePendingRevokeFlush } from './coach/client/revokeQueue';
-import { SUITE_ICON, SUITE_TONE } from './components/suite/suiteTone';
 
 const LegalPage = lazy(() =>
   import('./views/LegalPage').then((module) => ({ default: module.LegalPage })),
@@ -917,13 +910,7 @@ export function App() {
 
   // Apex (gamification) is a full-screen mode; the Shell launcher switches apps.
   const activeChallengeCount = challenges.filter((c) => c.status === 'active').length;
-  // The retired People "Clients" address (bookmarks, old links) is rewritten before any state below reads the URL:
-  // trainers and admins land on Coach clients (SPO-141).
-  useState(() => {
-    if (isLegacyPeopleClients(currentHash()) && canUseCoach(getRole()))
-      replaceHash(coachHash({ screen: 'clients' }));
-    return null;
-  });
+  useState(redirectLegacyPeopleClients); // before any state below reads the URL (SPO-141)
   const [apexOpen, setApexOpen] = useState<boolean>(() => isApexHash(currentHash()));
   const [apexTab, setApexTab] = useState<ApexTab>(() => apexTabFromHash(currentHash()));
   const [rosterOpen, setRosterOpen] = useState<boolean>(() => isRosterHash(currentHash()));
@@ -1128,11 +1115,7 @@ export function App() {
     () => setSuiteSession({ signOut: (o) => signOutRef.current(o), queueLength: queueLen }),
     [queueLen],
   );
-  // A device signed out from Profile → Sessions ends itself at its next check (start, focus, back online).
-  useEffect(() => {
-    if (!authed) return;
-    return watchSession(() => signOutRef.current({ forget: false }));
-  }, [authed]);
+  useSessionWatch(authed, signOutRef);
 
   /** Back from an overlay: pop to the logical parent screen, not history. When
    *  there's no remembered parent (deep link / refreshed URL), fall back to the
@@ -1154,7 +1137,6 @@ export function App() {
   }, [store.workouts]);
   const role = getRole();
   const tabs = tabsForRole(role, t);
-  const activeConditions = useActiveConditions();
   // Header controls the BrandBar had no room for; they continue in the More menu.
   const [headerHidden, setHeaderHidden] = useState<MoreMenuItem[]>([]);
   // Coach dashboard: trainer OR admin, only while the flag is on (access.ts).
@@ -1259,9 +1241,7 @@ export function App() {
       if (legalRoute(currentHash())) return; // a public legal page, not an app screen
       setApexOpen(isApexHash(currentHash()));
       setApexTab(apexTabFromHash(currentHash()));
-      // A retired People "Clients" address reached while the app is running (pasted, Back to an old entry).
-      if (isLegacyPeopleClients(currentHash()) && canUseCoach(getRole()))
-        replaceHash(coachHash({ screen: 'clients' }));
+      redirectLegacyPeopleClients();
       setRosterOpen(isRosterHash(currentHash()));
       setRosterTab(rosterTabFromHash(currentHash()));
       setNutritionOpen(isNutritionHash(currentHash()) && isFlagOn('nutrition'));
@@ -1368,12 +1348,14 @@ export function App() {
   }
 
   if (!authed) {
+    const teamToken = /^#\/team-invite\/([A-Za-z0-9_-]{1,64})/.exec(currentHash())?.[1];
+    const teamNotice = teamToken ? <TeamInviteSignInNotice token={teamToken} /> : undefined;
     return (
       <div className={shouldShowLanding() ? 'app app-landing' : 'app'}>
         {shouldShowLanding() ? (
-          <LandingView onLoggedIn={() => setAuthed(true)} />
+          <LandingView onLoggedIn={() => setAuthed(true)} signInNotice={teamNotice} />
         ) : (
-          <AuthView onLoggedIn={() => setAuthed(true)} />
+          <AuthView onLoggedIn={() => setAuthed(true)} notice={teamNotice} />
         )}
       </div>
     );
@@ -1480,6 +1462,7 @@ export function App() {
             onExitToWorkouts={openGym}
             onOpenProfile={() => openRoster('me')}
             onOpenShell={() => setShellOpen(true)}
+            notifUnread={notifUnread}
           />
         </Suspense>
         {shellOpen && (
@@ -1925,41 +1908,13 @@ export function App() {
       )}
       <div className="main-col">
         {!desktopRail && (
-          <BrandBar
-            avatar={
-              <BrandAccount
-                app="gym"
-                onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
-              />
-            }
-            onHiddenChange={setHeaderHidden}
-            app={t.shellGym}
+          <GymBrandBar
+            notifUnread={notifUnread}
             onApp={() => setShellOpen(true)}
-            appLabel={t.shellSwitch}
-            tone={SUITE_TONE.gym}
-            icon={SUITE_ICON.gym}
-            // The health shield leaves the bar into the user drawer when the bar is tight (only while a
-            // condition is active). Mastery moved into More.
-            entries={
-              activeConditions > 0
-                ? [
-                    {
-                      id: 'conditions',
-                      label: t.cndTodayTitle(activeConditions),
-                      icon: 'shield-check',
-                      node: <ConditionsShield onOpen={() => setOverlay({ screen: 'health' })} />,
-                      onSelect: () => setOverlay({ screen: 'health' }),
-                    },
-                  ]
-                : []
-            }
-            actions={
-              <BellButton
-                label={t.notifTitle}
-                onClick={() => setOverlay({ screen: 'notifications' })}
-                count={notifUnread}
-              />
-            }
+            onProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
+            onHealth={() => setOverlay({ screen: 'health' })}
+            onNotifications={() => setOverlay({ screen: 'notifications' })}
+            onHiddenChange={setHeaderHidden}
           />
         )}
         {store.syncStatus === 'failed' && (
@@ -2007,48 +1962,22 @@ export function App() {
           {backSwipe && <div className="stage-scrim" ref={scrimRef} aria-hidden />}
         </main>
         {showTabbar && (
-          <SuiteTabBar
-            app="gym"
-            // The account is the avatar's drawer. Roomy header: a Mastery tab. Tight header: More = Mastery + the
-            // controls the bar had no room for (shield, language).
-            noAccount
-            noMore={masteryTab}
-            moreItems={[
-              {
-                id: 'mastery',
-                icon: 'medal',
-                label: t.masteryTitle,
-                onSelect: () => setOverlay({ screen: 'mastery' }),
-              },
-              ...headerHidden,
-            ]}
-            items={[
-              ...tabs.map((x) => ({
-                ...x,
-                active: !onMastery && navActive(x.id, effectiveTab),
-                // unread messages from my trainer sit on Today (R-KIT-21); nothing without a trainer
-                ...(x.id === 'today' && clientShared.unread > 0
-                  ? {
-                      badge: clientShared.unread,
-                      ariaLabel: `${x.label}, ${clientShared.unreadLabel || clientShared.unread}`,
-                    }
-                  : {}),
-              })),
-              ...(masteryTab
-                ? [
-                    {
-                      id: 'mastery' as const,
-                      icon: 'medal',
-                      label: t.masteryTitle,
-                      active: onMastery,
-                    },
-                  ]
-                : []),
-            ]}
-            onSelect={(id) =>
-              id === 'mastery' ? !onMastery && setOverlay({ screen: 'mastery' }) : goTab(id)
-            }
-            onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
+          <GymTabBar
+            items={tabs.map((x) => ({
+              ...x,
+              active: !onMastery && navActive(x.id, effectiveTab),
+              // unread messages from my trainer sit on Today (R-KIT-21); nothing without a trainer
+              ...(x.id === 'today' && clientShared.unread > 0
+                ? {
+                    badge: clientShared.unread,
+                    ariaLabel: `${x.label}, ${clientShared.unreadLabel || clientShared.unread}`,
+                  }
+                : {}),
+            }))}
+            hidden={headerHidden}
+            mastery={onMastery}
+            onMastery={() => setOverlay({ screen: 'mastery' })}
+            onSelect={goTab}
             fab={{
               ariaLabel: t.startNew,
               onClick: () => setStartOpen(true),
@@ -2275,27 +2204,5 @@ function SyncBlockedCard(props: {
         </Button>
       </div>
     </div>
-  );
-}
-
-function noticeIcon(kind: string): string {
-  if (kind.startsWith('program')) return 'copy';
-  if (kind.startsWith('role')) return 'shield-check';
-  return 'barbell';
-}
-
-/** In-product notices strip: assignment, role and trainer changes (AC-ROLE-10, AC-PLAN-11). */
-function NoticeStrip(props: { notices: Notice[]; onDismiss: (id: string) => void }) {
-  const { t } = useT();
-  return (
-    <>
-      {props.notices.map((n) => (
-        <div key={n.id} className="notice" role="status">
-          <Icon name={noticeIcon(n.kind)} />
-          <span className="notice-text">{t.noticeText(n.kind, n.actor, n.detail)}</span>
-          <IconButton icon="x" size="sm" label={t.dismiss} onClick={() => props.onDismiss(n.id)} />
-        </div>
-      ))}
-    </>
   );
 }

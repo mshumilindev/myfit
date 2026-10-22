@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { COACH_BREAKPOINT, useMinWidth } from '../../components/ui/breakpoints';
 import { Button } from '../../components/ui/Button';
 import { ConfirmEffectsDialog } from '../../components/ui/ConfirmEffectsDialog';
@@ -6,10 +6,12 @@ import { Textarea } from '../../components/ui/Textarea';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { GroupedList, ListRow } from '../../components/ui/GroupedList';
 import { Notice } from '../../components/ui/Notice';
+import { ResponsivePanel } from '../../components/ui/ResponsivePanel';
 import { SearchField } from '../../components/ui/SearchField';
 import { Segmented } from '../../components/ui/Segmented';
 import { SkeletonRows } from '../../components/ui/Skeleton';
 import { Tag } from '../../components/ui/Tag';
+import { useScheduleT } from '../../i18n/coachSchedule';
 import { useTeamT } from '../../i18n/coachTeam';
 import { InviteClientSheet } from './InviteClientSheet';
 import { getTeamPort, useTeam } from './useTeam';
@@ -28,6 +30,7 @@ import {
 import './ManagerClients.css';
 
 const ALL = 'all';
+const SESSIONS_SHOWN = 3;
 const trainerFirst = (r: ManagerClientRow) => shortName(r.trainerName);
 const clientFirst = (r: ManagerClientRow) => r.name.trim().split(/\s+/)[0] ?? r.name;
 
@@ -65,6 +68,8 @@ export function ManagerClientsScreen({
   const [sent, setSent] = useState<string | null>(null);
   const [inviting, setInviting] = useState(false);
   const team = useTeam(teamPort);
+  const { s: sc } = useScheduleT();
+  const anchor = useRef<HTMLElement | null>(null);
 
   const nextOf = useMemo(() => {
     const m = new Map<string, number>();
@@ -75,6 +80,21 @@ export function ManagerClientsScreen({
     }
     return m;
   }, [slots, rows, now]);
+
+  /** The client's next and latest sessions, read from the schedule the client's device handed over (no other client data). */
+  const sessionsOf = (clientId: string) => {
+    const mine = slots.filter((x) => hasClient(x, clientId) && x.status !== 'moved');
+    return {
+      upcoming: mine
+        .filter((x) => x.start >= now && x.status === 'planned')
+        .sort((a, b) => a.start - b.start)
+        .slice(0, SESSIONS_SHOWN),
+      recent: mine
+        .filter((x) => x.start < now && (x.status === 'done' || x.status === 'missed'))
+        .sort((a, b) => b.start - a.start)
+        .slice(0, SESSIONS_SHOWN),
+    };
+  };
 
   if (!rows) {
     return (
@@ -110,6 +130,83 @@ export function ManagerClientsScreen({
     );
   };
 
+  const detail = (selected: ManagerClientRow) => {
+    const { upcoming, recent } = sessionsOf(selected.clientId);
+    return (
+      <div className="mc-detail">
+        <div className="mc-detail-head">
+          <ClientAvatar id={selected.clientId} name={selected.name} size={56} hasPhoto={false} />
+          <div>
+            <h2 className="mc-detail-name">{selected.name}</h2>
+            <p className="mc-detail-sub">{shortName(selected.trainerName)}</p>
+          </div>
+        </div>
+        <GroupedList>
+          <ListRow label={tm.mcDetailTrainer} trailing={selected.trainerName} />
+          <ListRow
+            label={tm.mcNext}
+            trailing={
+              !selected.ready
+                ? tm.mcWaiting
+                : nextOf.has(selected.clientId)
+                  ? when(nextOf.get(selected.clientId)!)
+                  : tm.mcNoSession
+            }
+          />
+        </GroupedList>
+        {selected.ready && (
+          <GroupedList header={tm.mcUpcoming} label={tm.mcUpcoming}>
+            {upcoming.length === 0 ? (
+              <ListRow label={tm.mcNoSession} />
+            ) : (
+              upcoming.map((x) => <ListRow key={x.id} label={when(x.start)} />)
+            )}
+          </GroupedList>
+        )}
+        {selected.ready && recent.length > 0 && (
+          <GroupedList header={tm.mcRecent} label={tm.mcRecent}>
+            {recent.map((x) => (
+              <ListRow
+                key={x.id}
+                label={when(x.start)}
+                trailing={
+                  <Tag tone={x.status === 'done' ? 'ok' : 'danger'}>
+                    {x.status === 'done' ? sc.scDone : sc.scMissed}
+                  </Tag>
+                }
+              />
+            ))}
+          </GroupedList>
+        )}
+        <Button
+          variant="secondary"
+          disabled={!selected.ready}
+          onClick={() => onNavigate({ screen: 'schedule' })}
+        >
+          {tm.mcOpenSchedule}
+        </Button>
+        <GroupedList>
+          <ListRow
+            action
+            tone="danger"
+            label={tm.mcRequestRemoval}
+            sub={tm.mcRequestRemovalSub(shortName(selected.trainerName))}
+            onClick={() => {
+              setReason('');
+              setAskFailed(false);
+              setAsking(selected);
+            }}
+          />
+        </GroupedList>
+        {sent && (
+          <Notice icon="check-circle" role="status">
+            {sent}
+          </Notice>
+        )}
+      </div>
+    );
+  };
+
   return (
     <Page>
       <Header
@@ -117,7 +214,7 @@ export function ManagerClientsScreen({
         slots={false}
         subtitle={tm.mcSub(rows.length, ready)}
         actions={
-          <Button variant="primary" icon="user-plus" onClick={() => setInviting(true)}>
+          <Button variant="primary" icon="users" onClick={() => setInviting(true)}>
             {tm.icButton}
           </Button>
         }
@@ -177,62 +274,22 @@ export function ManagerClientsScreen({
             </div>
             {desktop && selected && (
               <Inspector bare label={selected.name}>
-                <div className="mc-detail">
-                  <div className="mc-detail-head">
-                    <ClientAvatar
-                      id={selected.clientId}
-                      name={selected.name}
-                      size={56}
-                      hasPhoto={false}
-                    />
-                    <div>
-                      <h2 className="mc-detail-name">{selected.name}</h2>
-                      <p className="mc-detail-sub">{shortName(selected.trainerName)}</p>
-                    </div>
-                  </div>
-                  <GroupedList>
-                    <ListRow label={tm.mcDetailTrainer} trailing={selected.trainerName} />
-                    <ListRow
-                      label={tm.mcNext}
-                      trailing={
-                        !selected.ready
-                          ? tm.mcWaiting
-                          : nextOf.has(selected.clientId)
-                            ? when(nextOf.get(selected.clientId)!)
-                            : tm.mcNoSession
-                      }
-                    />
-                  </GroupedList>
-                  <Button
-                    variant="secondary"
-                    disabled={!selected.ready}
-                    onClick={() => onNavigate({ screen: 'schedule' })}
-                  >
-                    {tm.mcOpenSchedule}
-                  </Button>
-                  <GroupedList>
-                    <ListRow
-                      action
-                      tone="danger"
-                      label={tm.mcRequestRemoval}
-                      sub={tm.mcRequestRemovalSub(shortName(selected.trainerName))}
-                      onClick={() => {
-                        setReason('');
-                        setAskFailed(false);
-                        setAsking(selected);
-                      }}
-                    />
-                  </GroupedList>
-                  {sent && (
-                    <Notice icon="check-circle" role="status">
-                      {sent}
-                    </Notice>
-                  )}
-                </div>
+                {detail(selected)}
               </Inspector>
             )}
           </Split>
         </>
+      )}
+      {!desktop && selected && picked && (
+        <ResponsivePanel
+          open
+          mode="sheet"
+          anchorRef={anchor}
+          onClose={() => setPicked(null)}
+          label={selected.name}
+        >
+          {detail(selected)}
+        </ResponsivePanel>
       )}
       {asking && (
         <ConfirmEffectsDialog

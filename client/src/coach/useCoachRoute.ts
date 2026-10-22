@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { currentHash, replaceHash } from '../route';
 import {
   coachHash,
   isCoachDashHash,
@@ -8,7 +9,6 @@ import {
   type CoachRoute,
 } from './routes';
 import { navigateHash } from '../navigateHash';
-import { currentHash, replaceHash } from '../route';
 
 /**
  * The Coach route, a pure function of `location.hash`. Navigating assigns the
@@ -40,7 +40,7 @@ export function useCoachRoute(): [CoachRoute, (route: CoachRoute) => void] {
 
   const navigate = useCallback((next: CoachRoute) => {
     setRoute(next);
-    if (currentHash() !== coachHash(next)) navigateHash(coachHash(next));
+    if (window.location.hash !== coachHash(next)) navigateHash(coachHash(next));
   }, []);
 
   return [route, navigate];

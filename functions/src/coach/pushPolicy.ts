@@ -42,26 +42,50 @@ export function parseQuietWindow(v: unknown): QuietWindow | null {
   return { on: o.on, from: o.from, to: o.to };
 }
 
+const formatters = new Map<string, Intl.DateTimeFormat | null>();
+/** One formatter per zone (building one is slow); null for a zone name the platform does not know. */
+function zoneFormatter(tz: unknown): Intl.DateTimeFormat {
+  const key = typeof tz === 'string' && tz ? tz : 'UTC';
+  let f = formatters.get(key);
+  if (f === undefined) {
+    try {
+      f = new Intl.DateTimeFormat('en-GB', {
+        timeZone: key,
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+      });
+    } catch {
+      f = null;
+    }
+    formatters.set(key, f);
+  }
+  return f ?? zoneFormatter('UTC');
+}
+
 /** Minutes after local midnight at `at` in the IANA zone `tz` (UTC when the zone is unknown). */
 export function localMinutes(at: number, tz: unknown): number {
-  let zone: string | undefined;
-  if (typeof tz === 'string' && tz) {
-    try {
-      new Intl.DateTimeFormat('en-US', { timeZone: tz });
-      zone = tz;
-    } catch {
-      zone = undefined;
-    }
-  }
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: zone ?? 'UTC',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(new Date(at));
+  const parts = zoneFormatter(tz).formatToParts(new Date(at));
   const h = Number(parts.find((p) => p.type === 'hour')?.value ?? 0);
   const m = Number(parts.find((p) => p.type === 'minute')?.value ?? 0);
   return h * 60 + m;
+}
+
+const dateFormatters = new Map<string, Intl.DateTimeFormat>();
+/** Local calendar date (YYYY-MM-DD) at `at` in the IANA zone `tz` (UTC when the zone is unknown). One formatter per zone. */
+export function localDate(at: number, tz: unknown): string {
+  const key = typeof tz === 'string' && tz ? tz : 'UTC';
+  let f = dateFormatters.get(key);
+  if (!f) {
+    const opts = { year: 'numeric', month: '2-digit', day: '2-digit' } as const;
+    try {
+      f = new Intl.DateTimeFormat('en-CA', { timeZone: key, ...opts });
+    } catch {
+      f = new Intl.DateTimeFormat('en-CA', { timeZone: 'UTC', ...opts });
+    }
+    dateFormatters.set(key, f);
+  }
+  return f.format(new Date(at));
 }
 
 /** Is `at` inside the device's quiet window? The window may wrap midnight; from === to means never. */
@@ -104,4 +128,13 @@ export function shouldDeliver(
   const prefs = parsePushPrefs(device.prefs);
   if (cat === 'reminders') return prefs.reminders && !isQuietNow(device.quiet, device.tz, at);
   return prefs[cat];
+}
+
+/**
+ * Where a tap on the push goes. No data in the link (content-free push): a trainer / manager lands on Spotter in the coach
+ * app, a client on the client's Spotter thread; chat messages and silent syncs keep the home page.
+ */
+export function pushLink(kind: CoachNoticeKind, staff: boolean): string {
+  if (kind === 'message' || kind === 'sync') return '/#/';
+  return staff ? '/#/c/spotter' : '/#/trainer/spotter';
 }

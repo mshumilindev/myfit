@@ -87,7 +87,46 @@ function staticStringValues(text) {
 const baseKeys = topLevelKeys(read(path.join(localeDir, 'en.ts')));
 const baseStaticValues = staticStringValues(read(path.join(localeDir, 'en.ts')));
 const failures = [];
-const allowedIdentical = new Set(['appName', 'menuAction', 'adminQr', 'min', 'kg', 'bmBmi']);
+// Brand names, units and loanwords that are the same word in the other languages (not forgotten translations).
+const allowedIdentical = new Set([
+  'appName',
+  'menuAction',
+  'adminQr',
+  'min',
+  'kg',
+  'bmBmi',
+  'themeBrassName',
+  'atlasName',
+  'apexName',
+  'playbook',
+  'prE1',
+  'speedCol',
+  'rcKcal',
+  'setSDShort',
+  'chMinShort',
+  'rcMinShort',
+  'sbMinShort',
+  'sleepAutoBadge',
+  'sbAutoPick',
+  'restAuto',
+  'amenAuto',
+  'alcRegionAuto',
+  'progDeload',
+  'amen_sauna',
+  'amen_jacuzzi',
+  'alcPint',
+  'todayAtlasOnline',
+  'landing_ai_off',
+  'injStepPlan',
+  'injBannerCheckin',
+  'timerStart',
+  'pickStart',
+  'homeStart',
+  'esCircuitStart',
+  'chStart',
+  'atlasPlanStart',
+  'actStart',
+]);
 for (const file of localeFiles.slice(1)) {
   const text = read(path.join(localeDir, file));
   const keys = topLevelKeys(text);
@@ -107,14 +146,41 @@ for (const file of localeFiles.slice(1)) {
 
 const textRe = /[A-Za-zА-Яа-яІіЇїЄєҐґ]/;
 const attrRe = /\b(aria-label|placeholder|title)="([^"{]*[A-Za-zА-Яа-яІіЇїЄєҐґ][^"{]*)"/g;
-const visibleRe = />\s*([^<>{}\n]*[A-Za-zА-Яа-яІіЇїЄєҐґ][^<>{}\n]*)\s*</g;
-const allowVisible = new Set(['t']);
+const visibleRe = /(?<![=-])>\s*([^<>{}\n]*[A-Za-zА-Яа-яІіЇїЄєҐґ][^<>{}\n]*)\s*</g;
+// Units and symbols that read the same in every language.
+const allowVisible = new Set([
+  't',
+  'spotter',
+  'kg',
+  'km',
+  'kcal',
+  'reps',
+  'h',
+  'k',
+  's',
+  'z',
+  'x',
+  'y',
+  'n',
+  'i',
+  'o',
+  'u',
+  'F',
+  'PR',
+  'MEV–MRV',
+  '&lt;5',
+]);
 const codeLikeVisibleRe =
   /[=()?:.]|&&|\|\||\bPromise\b|\bMath\b|\bGET\b|\bPOST\b|\bPUT\b|\bDELETE\b/;
 // Storybook stories and their fixtures are a dev-only catalog (never shipped):
 // demo copy there is not UI text. Product components are still checked.
-const ignoredDirs = new Set(['i18n', 'data', 'stories']);
-const ignoredFileRe = /\.stories\.tsx?$/;
+// The dev-only UI-kit gallery (import.meta.env.DEV) and the generated, owner-approved landing template (its copy goes
+// through T(); the leftovers are brand/OS names and phone-mockup art, tracked in SPO-168/169) are not scanned.
+const ignoredFileNames = new Set(['Gallery.tsx', 'LandingDesign.tsx']);
+const ignoredDirs = new Set(['i18n', 'data', 'stories', '__fixtures__']);
+// Tests and their fixtures are never shipped either.
+const ignoredFileRe =
+  /\.(stories|test|cases\.test)\.tsx?$|\.test\.tsx?$|(^|[\\/])(testWorld|testVault)\.tsx?$/;
 
 function walk(dir) {
   const out = [];
@@ -123,20 +189,31 @@ function walk(dir) {
       if (!ignoredDirs.has(entry.name)) out.push(...walk(path.join(dir, entry.name)));
       continue;
     }
-    if (/\.(tsx|ts)$/.test(entry.name) && !ignoredFileRe.test(entry.name))
+    if (
+      /\.(tsx|ts)$/.test(entry.name) &&
+      !ignoredFileRe.test(entry.name) &&
+      !ignoredFileNames.has(entry.name)
+    )
       out.push(path.join(dir, entry.name));
   }
   return out;
 }
 
+// Comments are not UI, and `<Type>` generics in plain .ts files are not JSX: only .tsx has visible text.
+const stripComments = (src) =>
+  src
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+    .replace(/(^|[^:'"`])\/\/[^\n]*/g, '$1');
+
 for (const file of walk(sourceDir)) {
   const rel = path.relative(root, file);
-  const text = read(file);
+  const text = stripComments(read(file));
   let match;
   while ((match = attrRe.exec(text))) {
+    if (/^(Spotter|0 t)$/.test(match[2])) continue; // brand and a unit
     failures.push(`${rel}: hardcoded ${match[1]}="${match[2]}"`);
   }
-  while ((match = visibleRe.exec(text))) {
+  while (file.endsWith('.tsx') && (match = visibleRe.exec(text))) {
     const value = match[1].trim();
     if (value && textRe.test(value) && !allowVisible.has(value) && !codeLikeVisibleRe.test(value)) {
       failures.push(`${rel}: hardcoded visible text "${value}"`);

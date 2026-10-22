@@ -57,10 +57,11 @@ export const teamLt: typeof teamEn = {
     'Vadybininkas tvarko jūsų tvarkaraštį ir klientų sąrašą. Jis nemato treniruočių, sveikatos, mitybos, užrašų ar pokalbių.',
   tmAddTrainerBody:
     'Treneris dirba su savo klientais. Jis prisijungia prie jūsų valdomos komandos ir atsiranda jūsų Klientuose ir Tvarkaraštyje.',
-  tmEmail: 'El. paštas',
+  tmEmail: 'El. paštas (neprivaloma)',
   tmEmailHint:
-    'Asmuo gaus kvietimo nuorodą el. paštu. Ji galioja 7 dienas ir vienam asmeniui. Prieiga prasideda priėmus.',
-  tmSendInvite: 'Siųsti kvietimą',
+    'Gausite kvietimo nuorodą ir perduosite ją patys. Ji galioja 7 dienas ir vienam asmeniui. Nurodykite el. paštą, kad prisijungti galėtų tik ta paskyra.',
+  tmSendInvite: 'Sukurti nuorodą',
+  tmInviteLinkRow: 'Kvietimo nuoroda',
   tmCancel: 'Atšaukti',
   tmErrInvalidEmail: 'Įveskite galiojantį el. pašto adresą.',
   tmErrExists: 'Šis asmuo jau komandoje arba turi atvirą kvietimą.',
@@ -68,7 +69,10 @@ export const teamLt: typeof teamEn = {
   tmErrGeneric: 'Nepavyko išsiųsti kvietimo. Bandykite dar kartą.',
   tmInviteSentSnack: (email) => `Kvietimas išsiųstas: ${email}`,
   tmLinkTitle: 'Pasidalinkite kvietimo nuoroda',
-  tmLinkBody: (email) => `Nusiųskite šią nuorodą: ${email}. Ji vienkartinė ir galioja 7 dienas.`,
+  tmLinkBody: (email) =>
+    email
+      ? `Nusiųskite šią nuorodą: ${email}. Prisijungti gali tik ši patvirtinta paskyra. Ji vienkartinė ir galioja 7 dienas.`
+      : 'Nusiųskite šią nuorodą asmeniui. Ji vienkartinė ir galioja 7 dienas.',
   tmCopyLink: 'Kopijuoti nuorodą',
   tmLinkCopied: 'Nuoroda nukopijuota',
   tmDone: 'Atlikta',
@@ -135,6 +139,13 @@ export const teamLt: typeof teamEn = {
   jtRetry: 'Bandyti dar kartą',
   jtOk: 'Atlikta',
   jtLoading: 'Įkeliamas kvietimas',
+  jtSignInManager: (name: string) =>
+    `${name} kviečia tave į komandą kaip vadybininką. Prisijunk prie savo Spotter paskyros, kad tęstum.`,
+  jtSignInTrainer: (name: string) =>
+    `${name} kviečia tave į komandą kaip trenerį. Prisijunk prie trenerio paskyros, kad tęstum.`,
+  jtSomeone: 'Tavo treneris',
+  jtNoAccount:
+    'Dar neturi paskyros? Ją sukuria treneris. Paprašyk paskyros nuorodos, tada atidaryk šį kvietimą dar kartą.',
   mcTitle: 'Klientai',
   mcSub: (n: number, ready: number) => `Klientų: ${n} · paruošta: ${ready}`,
   mcAll: (n: number) => `Visi ${n}`,
@@ -155,6 +166,8 @@ export const teamLt: typeof teamEn = {
   mcEmptyBody: 'Čia atsiras komandos trenerių klientai.',
   mcLoadFailed: 'Nepavyko įkelti klientų.',
   mcNextShort: 'Kita',
+  mcUpcoming: 'Artimiausios treniruotės',
+  mcRecent: 'Paskutinės treniruotės',
   trSection: 'Komandos prašymai',
   trTitle: (manager: string, client: string) => `${manager} prašo pašalinti: ${client}`,
   trStatus: 'Laukia jūsų atsakymo',
@@ -185,6 +198,8 @@ export const teamLt: typeof teamEn = {
   actSubOwn: 'Jūsų veiksmai.',
   actSubOwnHint: (owner: string) => `Treneris ${owner} gali leisti matyti visos komandos veiksmus.`,
   actSubAll: 'Visa komanda.',
+  actFullAccess: 'Pilna prieiga',
+  actOwnNotice: 'Matote tik savo veiksmus.',
   actEveryone: 'Visi',
   actMe: 'Aš',
   actMine: 'Mano',
@@ -194,6 +209,8 @@ export const teamLt: typeof teamEn = {
   actEmptyTitle: 'Kol kas nieko nėra',
   actEmptyBody: 'Komandos veiksmai čia saugomi 90 dienų.',
   actFailed: 'Nepavyko įkelti veiklos žurnalo.',
+  actMore: 'Rodyti ankstesnius',
+  actMoreFailed: 'Nepavyko įkelti ankstesnių įrašų.',
   actListLabel: 'Veikla',
   actKind: {
     'move-request': 'Prašymas perkelti treniruotę',

@@ -1,24 +1,13 @@
 import { useSyncExternalStore } from 'react';
 import { coachAdapter } from '../data/backend';
+import {
+  configureManagerClients,
+  configuredManagerClients,
+  type ManagerClientRow,
+  type ManagerClientsPort,
+} from './managerClientsConfig';
 
-/** One client of the team as the manager's list shows it (names and the trainer; never content). */
-export interface ManagerClientRow {
-  clientId: string;
-  trainerId: string;
-  trainerName: string;
-  name: string;
-  /** the client's device delegated the schedule keys: the schedule can be read and written */
-  ready: boolean;
-}
-
-/**
- * The seam under the manager's Clients screen. The real adapter reads the key book (`createManagerBook`); stories and tests
- * pass a fixed list. `null` = not installed / not read yet (never sample people).
- */
-export interface ManagerClientsPort {
-  peek(): readonly ManagerClientRow[] | null;
-  subscribe(f: () => void): () => void;
-}
+export { configureManagerClients, type ManagerClientRow, type ManagerClientsPort };
 
 export const createUnavailableManagerClients = (): ManagerClientsPort => ({
   peek: () => null,
@@ -30,12 +19,13 @@ export function createStaticManagerClients(rows: readonly ManagerClientRow[]): M
   return { peek: () => rows, subscribe: () => () => undefined };
 }
 
-let configured: ManagerClientsPort | null = null;
-export function configureManagerClients(p: ManagerClientsPort | null): void {
-  configured = p;
-}
-export const getManagerClientsPort = (): ManagerClientsPort =>
-  (configured ??= coachAdapter('managerClients', createUnavailableManagerClients));
+export const getManagerClientsPort = (): ManagerClientsPort => {
+  const c = configuredManagerClients();
+  if (c) return c;
+  const p = coachAdapter('managerClients', createUnavailableManagerClients);
+  configureManagerClients(p);
+  return p;
+};
 
 export function useManagerClients(port?: ManagerClientsPort): readonly ManagerClientRow[] | null {
   const p = port ?? getManagerClientsPort();

@@ -15,18 +15,15 @@ import {
   deleteExercise,
   deleteSet,
   deleteWorkout,
-  dismissReminder,
   duplicateExercise,
   est1rm,
   finishWorkoutClean,
   getCurrentPositionOnce,
   getOpenWorkout,
   knownExercises,
-  logVisitAsWorkout,
   mergeServerActivitiesWithLocalLive,
   mergeServerWorkoutsWithLocalDrafts,
   prevLift,
-  recordPresence,
   repeatWorkout,
   recordWeight,
   removeSleepNight,
@@ -72,7 +69,6 @@ import {
   customExercises,
   registerCustomExercise,
 } from '../client/src/data/exercises';
-import { setFlag } from '../client/src/data/flags';
 
 function state(patch: Partial<StoreState> = {}): StoreState {
   return {
@@ -282,23 +278,6 @@ describe('F-03 Workout store (local state)', () => {
 });
 
 describe('F-05 Gyms and reminders store', () => {
-  it('logs a retrospective workout and dismisses reminders', () => {
-    const gym = upsertGym({ name: 'Smartfit', lat: 50.45, lng: 30.52, radiusM: 150 });
-    __replaceStateForTests(
-      state({
-        gyms: [gym],
-        reminders: [{ gymId: gym.id, gymName: gym.name, visitStart: 10, visitEnd: 70 }],
-      }),
-    );
-
-    const retro = logVisitAsWorkout(__getStateForTests().reminders[0]);
-    dismissReminder({ gymId: gym.id, gymName: gym.name, visitStart: 20, visitEnd: 30 });
-
-    expect(retro).toMatchObject({ startedAt: 10, finishedAt: 70 });
-    expect(__getStateForTests().reminders).toEqual([]);
-    expect(__getStateForTests().workouts.some((w) => w.id === retro.id)).toBe(true);
-  });
-
   it('backfills a finished workout with an optional gym id', () => {
     const startedAt = Date.now() - 3600_000;
     const retro = backfillWorkout(startedAt, 45 * 60_000, 'gym-1');
@@ -385,60 +364,6 @@ describe('F-05 Gyms and reminders store', () => {
     expect(__getStateForTests().gyms[0]).toMatchObject({ name: 'New', favorite: true });
     deleteGym('g1');
     expect(__getStateForTests().gyms).toEqual([]);
-  });
-
-  it('records presence only inside a gym radius and throttles pings', () => {
-    __replaceStateForTests(
-      state({ gyms: [{ id: 'g1', name: 'Gym', lat: 50, lng: 30, radiusM: 200 }] }),
-    );
-    const getCurrentPosition = vi.fn((ok: PositionCallback) =>
-      ok({
-        coords: { latitude: 50.0001, longitude: 30.0001, accuracy: 20 },
-      } as GeolocationPosition),
-    );
-    Object.defineProperty(navigator, 'geolocation', {
-      configurable: true,
-      value: { getCurrentPosition },
-    });
-
-    // Presence is behind a flag that ships off: no flag, no location request.
-    recordPresence();
-    expect(getCurrentPosition).not.toHaveBeenCalled();
-
-    setFlag('gymPresence', true);
-    recordPresence();
-    recordPresence();
-
-    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
-    expect(localStorage.getItem('spotter.lastPingAt')).not.toBeNull();
-  });
-
-  it('ignores presence without gyms, coarse GPS and outside radius', () => {
-    setFlag('gymPresence', true);
-    recordPresence();
-    expect(localStorage.getItem('spotter.lastPingAt')).toBeNull();
-
-    __replaceStateForTests(
-      state({ gyms: [{ id: 'g1', name: 'Gym', lat: 50, lng: 30, radiusM: 30 }] }),
-    );
-    const getCurrentPosition = vi
-      .fn()
-      .mockImplementationOnce((ok: PositionCallback) =>
-        ok({ coords: { latitude: 50, longitude: 30, accuracy: 600 } } as GeolocationPosition),
-      )
-      .mockImplementationOnce((ok: PositionCallback) =>
-        ok({ coords: { latitude: 51, longitude: 31, accuracy: 20 } } as GeolocationPosition),
-      );
-    Object.defineProperty(navigator, 'geolocation', {
-      configurable: true,
-      value: { getCurrentPosition },
-    });
-
-    recordPresence();
-    vi.setSystemTime(Date.now() + 6 * 60_000);
-    recordPresence();
-
-    expect(localStorage.getItem('spotter.lastPingAt')).toBeNull();
   });
 
   it('resolves and rejects one-shot geolocation lookup', async () => {

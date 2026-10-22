@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, within } from '@testing-library/react';
+import { cleanup, render, waitFor, within } from '@testing-library/react';
 import { coachEn } from '../i18n/coach.en';
-import { CoachShell } from './CoachApp';
-import { MANAGER_HOME_ROUTE, managerMayOpen } from './routes';
+import { CoachApp, CoachShell } from './CoachApp';
+import { currentHash } from '../route';
+import { MANAGER_HOME_ROUTE, managerMayOpen, parseCoachHash } from './routes';
 import { canUseCoach, isManagerRole } from './access';
 import { setViewport } from './testViewport';
 
@@ -89,5 +90,51 @@ describe('manager shell (SPO-196)', () => {
     const { container } = render(<Shell role="trainer" />);
     expect(container.textContent).toContain(c.modeCoach);
     expect(container.textContent).not.toContain(c.modeManager);
+  });
+});
+
+describe('manager deep links (SPO-200)', () => {
+  const mount = (role: 'manager' | 'trainer') =>
+    render(
+      <CoachApp
+        role={role}
+        name="Max Manager"
+        onExitToWorkouts={() => undefined}
+        onOpenShell={() => undefined}
+      />,
+    );
+
+  it.each(['agenda', 'chat', 'programs', 'decisions', 'week', 'signals', 'live'])(
+    'a direct link to #/c/%s lands on Clients',
+    async (screen) => {
+      setViewport(1440);
+      window.location.hash = `#/c/${screen}`;
+      mount('manager');
+      await waitFor(() => expect(currentHash()).toBe('#/c/clients'));
+    },
+  );
+
+  it('a link to a client tab the manager cannot open (live) and to a chat thread lands on Clients', async () => {
+    setViewport(1440);
+    window.location.hash = '#/c/clients/c1/live';
+    mount('manager');
+    await waitFor(() => expect(currentHash()).toBe('#/c/clients'));
+  });
+
+  it('Spotter, Activity and Roles belong to Team and stay open to a manager; the trainer is never redirected', async () => {
+    for (const sub of ['spotter', 'activity', 'roles'] as const) {
+      expect(parseCoachHash(`#/c/${sub}`)).toEqual({ screen: sub });
+      expect(managerMayOpen({ screen: sub })).toBe(true);
+    }
+    setViewport(1440);
+    window.location.hash = '#/c/spotter';
+    const { unmount } = mount('manager');
+    await new Promise((r) => setTimeout(r, 50));
+    expect(currentHash()).toBe('#/c/spotter');
+    unmount();
+    window.location.hash = '#/c/agenda';
+    mount('trainer');
+    await new Promise((r) => setTimeout(r, 50));
+    expect(currentHash()).toBe('#/c/agenda');
   });
 });

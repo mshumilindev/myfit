@@ -75,7 +75,7 @@ export function createTeamStore(port: TeamPort): TeamStore {
     load,
     async invite(raw, role) {
       const email = raw.trim().toLowerCase();
-      if (!isEmail(email)) return { ok: false, error: 'invalid-email' };
+      if (email.trim() && !isEmail(email)) return { ok: false, error: 'invalid-email' };
       const d = state.data;
       if (
         d &&

@@ -65,4 +65,18 @@ describe('isNativeShell', () => {
     (window as unknown as Record<string, unknown>).spotterNative = {};
     expect(isNativeShell()).toBe(true);
   });
+
+  it('recognises Electron by its user agent when the bridge did not load', () => {
+    const before = navigator.userAgent;
+    Object.defineProperty(navigator, 'userAgent', {
+      configurable: true,
+      value:
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Spotter/0.1.0 Chrome/130.0.0.0 Electron/33.0.0 Safari/537.36',
+    });
+    try {
+      expect(isNativeShell()).toBe(true);
+    } finally {
+      Object.defineProperty(navigator, 'userAgent', { configurable: true, value: before });
+    }
+  });
 });

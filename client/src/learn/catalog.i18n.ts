@@ -6,7 +6,7 @@
  * Keyed by the stable topic id / lesson id from catalog.ts.
  */
 import type { LearnTopicId } from './catalog';
-
+import { TEAM_LESSON_TX } from './catalog.team.i18n';
 type Lang = 'uk' | 'pl' | 'lt' | 'et';
 export interface Tx {
   title: string;
@@ -1340,7 +1340,7 @@ export function localizeTopic(topic: Topic, lang: AnyLang): Topic {
 /** Localised title/blurb for a lesson, falling back to the English source. */
 export function localizeLesson(lesson: Lesson, lang: AnyLang): Lesson {
   if (!isTx(lang)) return lesson;
-  const tx = LESSON_TX[lang][lesson.id];
+  const tx = LESSON_TX[lang][lesson.id] ?? TEAM_LESSON_TX[lang][lesson.id];
   if (!tx) return lesson;
   return { ...lesson, title: tx.title, blurb: tx.blurb };
 }

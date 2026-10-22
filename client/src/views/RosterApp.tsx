@@ -12,7 +12,7 @@
  */
 import { SuiteTabBar } from '../components/SuiteTabBar';
 import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
-import { BrandBar, BellButton } from '../components/ui/BrandBar';
+import { BrandBar } from '../components/ui/BrandBar';
 import { BrandAccount } from '../components/suite/BrandAccount';
 import { useEffect, useState } from 'react';
 import { useT } from '../i18n';
@@ -89,7 +89,6 @@ export function RosterApp({
           activeId={tab === 'feed' ? null : tab}
           onNav={(id) => openTab(id as RosterTab)}
           onOpenShell={onOpenShell}
-          onOpenNotifications={() => openTab('feed')}
           onOpenProfile={() => openTab('me')}
           notifUnread={notifUnread}
         />
@@ -105,16 +104,6 @@ export function RosterApp({
           appLabel={t.shellSwitch}
           tone={SUITE_TONE.roster}
           icon={SUITE_ICON.roster}
-          actions={
-            <>
-              <BellButton
-                label={t.feedTitle}
-                onClick={() => openTab('feed')}
-                active={tab === 'feed'}
-                count={tab !== 'feed' ? notifUnread : 0}
-              />
-            </>
-          }
         />
 
         <div className="apex-body">
@@ -147,7 +136,6 @@ export function RosterApp({
           <SuiteTabBar
             app="roster"
             noMore
-            noAccount
             tabs
             activeFill
             items={nav.map((x) => ({ ...x, active: tab === x.id }))}

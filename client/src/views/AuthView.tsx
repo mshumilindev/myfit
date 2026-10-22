@@ -1,5 +1,5 @@
 /** Auth — design S-01. Sign-in only; new accounts come via invite onboarding. */
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Field } from '../components/ui/Field';
 import { Button } from '../components/ui/Button';
 import { Checkbox } from '../components/ui/Checkbox';
@@ -25,7 +25,14 @@ function lockoutEnd(): number {
   return Date.now() + 15 * 60 * 1000;
 }
 
-export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
+export function AuthView({
+  onLoggedIn,
+  notice,
+}: {
+  onLoggedIn: () => void;
+  /** Optional note above the title (a team link explains who invited the person). */
+  notice?: ReactNode;
+}) {
   const { t } = useT();
   const { lg } = useLegalT();
   const [unreachable, setUnreachable] = useState(false);
@@ -154,6 +161,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           <LanguageSelector />
         </div>
         <SpotterMark size={88} variant="tight" className="wordmark" />
+        {notice}
         <h2 className="auth-title">{wallView || personView ? t.authWelcomeBack : t.appName}</h2>
         <p className="auth-sub">
           {wallView || bio
@@ -190,6 +198,8 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
             activeId={pickedId ?? undefined}
             openId={person?.uid}
             openLabel={t.authLockerOpen}
+            busyId={(bio || busy) && person ? person.uid : undefined}
+            busyLabel={t.signingIn}
             label={t.authWallLabel}
             lockerLabel={(n, i) => t.authLockerLabel(n, i + 1)}
             onSelect={pick}
@@ -227,7 +237,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           />
         )}
         {personView && person && !bio && (
-          /* Names the account for the browser's password manager, so it offers this person's saved password only. */
+          /* kit-ok: names the account for the browser's password manager, so it offers this person's saved password only. */
           <input
             type="text"
             name="username"

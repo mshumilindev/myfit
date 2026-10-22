@@ -7,7 +7,8 @@ import type { SuiteApp } from './useSuiteAccount';
 /**
  * Regression story for "switching apps must not move the buttons": all six rails side by side,
  * same nav (4 entries), same height. Logo, first tile, pitch, tile size, label and the foot
- * (Apps, avatar) must line up pixel for pixel across Gym, Apex, People, Nutrition, Learn and
+ * (language, Apps, avatar; the bell only in the client apps Gym, Apex, Nutrition, Learn; People and
+ * Coach show the shared feed's unread on Apps instead) must line up pixel for pixel across Gym, Apex, People, Nutrition, Learn and
  * Coach; only the accent colour changes. Use the Web 1280 viewport (labelled) and Tablet (60px).
  * Coach is the REAL `CoachShell` (its own rail, foot and avatar), clipped to the rail column: a
  * transformed wrapper makes the shell's fixed layout fill the 640px box. The avatar and Apps
@@ -47,6 +48,7 @@ function CoachColumn({ wide }: { wide: boolean }) {
         onExitToWorkouts={() => undefined}
         onOpenProfile={() => undefined}
         onOpenShell={() => undefined}
+        notifUnread={3}
       />
     </div>
   );
@@ -70,7 +72,9 @@ function Row() {
               activeId="a"
               onNav={() => undefined}
               onOpenShell={() => undefined}
-              onOpenNotifications={() => undefined}
+              // People has no bell: its unread rides on Apps (SPO-234).
+              onOpenNotifications={a.app === 'roster' ? undefined : () => undefined}
+              notifUnread={3}
               onOpenProfile={() => undefined}
             />
           </div>

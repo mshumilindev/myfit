@@ -63,7 +63,7 @@ let globalUnsub: Unsubscribe | null = null;
 /** Subscribe to `config/flags`. Call once the user is signed in (rules require
  * auth); the returned function stops the listener (call it on sign-out). */
 export function startGlobalFlags(): () => void {
-  if (globalUnsub) return globalUnsub;
+  if (globalUnsub) return stopGlobalFlags;
   globalUnsub = onSnapshot(
     doc(db, 'config', 'flags'),
     (snap) => {
@@ -80,10 +80,12 @@ export function startGlobalFlags(): () => void {
       /* offline or no permission — keep the mirrored value */
     },
   );
-  return () => {
-    globalUnsub?.();
-    globalUnsub = null;
-  };
+  return stopGlobalFlags;
+}
+
+function stopGlobalFlags(): void {
+  globalUnsub?.();
+  globalUnsub = null;
 }
 
 // --- public API --------------------------------------------------------------

@@ -204,6 +204,12 @@ export const clientEt: typeof clientEn = {
   mtMove: 'Teisalda',
   mtWaiting: 'Ootel',
   mtYouAsked: (when) => `Palusid aega ${when}`,
+  mtReqStatus: 'Ootab sinu vastust',
+  mtReqTitleManager: (who, trainer) =>
+    `${who} treeneri ${trainer} meeskonnast palub treeningu ümber tõsta`,
+  mtReqTitleTrainer: (trainer) => `${trainer} palub treeningu ümber tõsta`,
+  mtReqFailed: 'Vastuse saatmine ebaõnnestus. Proovi uuesti.',
+  mtReqAnswer: 'Vasta',
   mtShowAll: (n) => `Näita kõiki: ${n}`,
   mtNoSessions: 'Treeneriga pole treeninguid planeeritud.',
   mtPeople: (n) => P(n, '{n} inimene', '{n} inimest'),
@@ -287,4 +293,24 @@ export const clientEt: typeof clientEn = {
     'session-cancelled': 'Treening tühistatud',
     'session-edited': 'Ajakava muudetud',
   } as Record<string, string>,
+  spTitle: 'Spotter',
+  spSub: 'Treeneri ja meeskonna teated',
+  spBarSub: 'Ainult lugemiseks',
+  spReadOnly: 'Spotter on ainult lugemiseks. Vasta kaartidel.',
+  spListLabel: 'Spotteri teated',
+  spUnread: (n) => `${n} uut`,
+  spEmptyTitle: 'Midagi uut pole',
+  spEmptyBody: 'Siia ilmuvad taotlused ja uudised sinu treeningute kohta.',
+  spFailed: 'Spotteri laadimine ebaõnnestus.',
+  spMoveAnswer: (who, accepted) =>
+    accepted
+      ? `Ümberpaigutamise taotlus: ${who} — vastu võetud`
+      : `Ümberpaigutamise taotlus: ${who} — tagasi lükatud`,
+  spDone: (who) => `Treening märgiti toimunuks (${who})`,
+  spMissed: (who) => `Treening märgiti vahelejäänuks (${who})`,
+  spCancelled: (who) => `Treening tühistati (${who})`,
+  spAccess: 'Meeskonna ligipääs sinu ajakavale muutus',
+  spTeam: (who) => `Treeneri meeskonnas uus liige: ${who}`,
+  spReminder: 'Varsti on treening',
+  spSummary: 'Sinu treeningute kokkuvõte on valmis',
 };

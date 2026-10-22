@@ -5,8 +5,10 @@
  */
 import { ACTIVITY_RETENTION_MS, logActivity, teamIdOf } from './activity';
 import type { Doc, Kv } from './kv';
+import { safeName } from './guards';
 import { inviteUrl } from './inviteLink';
 import type { CoachNoticeKind } from './pushPolicy';
+import type { PushTextKey } from './pushText';
 import {
   ALL_OFF,
   MAX_AT_SKEW,
@@ -76,6 +78,8 @@ export type Role = 'member' | 'trainer' | 'admin' | 'manager';
 export interface Actor {
   uid: string;
   role: Role;
+  /** the sign-in e-mail, lower-case, ONLY when the identity provider verified it */
+  email?: string;
 }
 export interface Ctx {
   kv: Kv;
@@ -84,7 +88,7 @@ export interface Ctx {
   pepper: Uint8Array;
   newToken(): string;
   /** content-free push: only "something happened" (C.3) */
-  notify?(uid: string, kind: CoachNoticeKind): Promise<void>;
+  notify?(uid: string, kind: CoachNoticeKind, topic?: PushTextKey): Promise<void>;
   baseUrl?: string;
 }
 
@@ -104,7 +108,7 @@ interface UserRec {
   updatedAt?: number;
 }
 const displayOf = (u: UserRec | null): string =>
-  u ? [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || '' : '';
+  u ? safeName([u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || '') : '';
 async function userName(kv: Kv, uid: string): Promise<{ name: string; role: Role | null }> {
   const u = (await kv.get(`users/${uid}`)) as UserRec | null;
   if (!u) return { name: '', role: null };
@@ -126,13 +130,16 @@ export async function notice(
   id: string,
   detail: string | null = null,
 ): Promise<void> {
-  await kv.set(`users/${to}/notices/${id}`, {
+  const path = `users/${to}/notices/${id}`;
+  // a retried write (same id) must not make an already read notice unread again (SPO-267 L11)
+  const prior = (await kv.get(path)) as { readAt?: unknown; createdAt?: unknown } | null;
+  await kv.set(path, {
     id,
     kind,
     actor,
     detail,
-    createdAt: now,
-    readAt: null,
+    createdAt: typeof prior?.createdAt === 'number' ? prior.createdAt : now,
+    readAt: typeof prior?.readAt === 'number' ? prior.readAt : null,
   });
 }
 export async function loadCoaching(kv: Kv, clientId: string): Promise<CoachingDoc> {
@@ -504,6 +511,10 @@ export async function endRelationship(
     }))
       await kv.merge(r.path, { status: 'cancelled', decidedAt: now });
   }
+  // a team manager's open request to remove this client has nothing left to decide (SPO-199): it closes with the relationship
+  const removal = await kv.get(`teamRequests/rm-${clientId}`);
+  if (removal && removal.status === 'pending')
+    await kv.merge(`teamRequests/rm-${clientId}`, { status: 'cancelled', decidedAt: now });
   await kv.del(`liveSessions/${clientId}`);
   await kv.del(`users/${clientId}/grants/${c.trainerId}`);
   await deleteEvidence(kv, c.trainerId, clientId, null);
@@ -1105,6 +1116,8 @@ export async function afterMessageCreated(ctx: Ctx, cid: string, mid: string): P
   await ctx.notify?.(to, 'message');
 }
 
+export const NOTICE_RETENTION_MS = 30 * 86_400_000;
+
 export interface SweepResult {
   requestsExpired: number;
   messagesTombstoned: number;
@@ -1114,6 +1127,8 @@ export interface SweepResult {
   activityPurged: number;
   rotationFlagged: number;
   rateLimitsPurged: number;
+  /** user notices past their retention (30 days; reminders 24 h after the session start) */
+  noticesPurged: number;
 }
 
 /** The hourly job: request expiry, straggling deletes, audit retention, 90-day key rotation flags. */
@@ -1128,6 +1143,7 @@ export async function sweep(ctx: Ctx): Promise<SweepResult> {
     activityPurged: 0,
     rotationFlagged: 0,
     rateLimitsPurged: 0,
+    noticesPurged: 0,
   };
 
   const pending = await kv.group('requests', {
@@ -1195,6 +1211,27 @@ export async function sweep(ctx: Ctx): Promise<SweepResult> {
     out.activityPurged++;
   }
 
+  // Notices are written by functions and clients cannot delete them (rules), so nothing else ever removes them. A reminder
+  // carries its session's start (plaintext moment): it goes 24 h after that start; every notice goes after 30 days.
+  const oldNotices = await kv.group('notices', {
+    where: [['createdAt', '<', now - NOTICE_RETENTION_MS]],
+    limit: 400,
+  });
+  const pastReminders = await kv.group('notices', {
+    where: [
+      ['kind', '==', 'reminder'],
+      ['start', '<', now - DAY],
+    ],
+    limit: 400,
+  });
+  for (const n of [
+    ...oldNotices,
+    ...pastReminders.filter((p) => !oldNotices.some((o) => o.path === p.path)),
+  ]) {
+    await kv.del(n.path);
+    out.noticesPurged++;
+  }
+
   const stale = await kv.list('rateLimits', { where: [['updatedAt', '<', now - DAY]], limit: 400 });
   for (const r of stale) {
     await kv.del(r.path);
@@ -1224,6 +1261,15 @@ export async function onConversationKey(
   after: Doc | null,
 ): Promise<boolean> {
   if (!after) return false;
+  // The schedule rules compare a manager's write with the PUBLISHED conversation epoch, but they can only reach the
+  // coaching document (the cid is an opaque hash): mirror the epoch there whenever it changes.
+  if (
+    Number(after.keyEpoch ?? 0) !== Number(before?.keyEpoch ?? 0) &&
+    typeof after.clientId === 'string' &&
+    Number(after.keyEpoch ?? 0) > 0 &&
+    (await ctx.kv.get(`coaching/${after.clientId}`))
+  )
+    await ctx.kv.merge(`coaching/${after.clientId}`, { convEpoch: Number(after.keyEpoch) });
   if (Number(after.keyEpoch ?? 0) > Number(before?.keyEpoch ?? 0)) {
     await ctx.kv.merge(convPath(cid), { rotatedAt: ctx.now(), rotateDue: false, keyStale: false });
     return true;
@@ -1357,6 +1403,20 @@ export async function rescheduleCreate(ctx: Ctx, actor: Actor, body: Record<stri
     );
     if (p) return fail(p === 'duplicate-slot' ? 'already-exists' : 'invalid-argument', p);
     await kv.set(`${convPath(cid)}/requests/${id}`, raw);
+    // the client's own Spotter: a request from the trainer's side (trainer or manager); the time stays in the sealed
+    // request, the notice only points at it by id. Idempotent by id (the early `already` return above covers a resend).
+    if (side === 'trainer') {
+      await notice(
+        kv,
+        clientId,
+        'move-request',
+        actor.uid,
+        now,
+        `mv-${id}`,
+        (await userName(kv, actor.uid)).name || null,
+      );
+      await kv.merge(`users/${clientId}/notices/mv-${id}`, { refId: id });
+    }
     if (manager) {
       const cu = (await kv.get(`users/${clientId}`)) as UserRec | null;
       await notice(kv, c.trainerId, 'manager-move', actor.uid, now, `mm-${id}`, displayOf(cu));
@@ -1381,7 +1441,10 @@ export async function rescheduleRespond(ctx: Ctx, actor: Actor, body: Record<str
   const id = str(body.id, 80);
   const to = body.status as ReqStatus;
   const now = ctx.now();
-  return ctx.kv.tx(async (kv) => {
+  let answeredManager = '';
+  let answeredClient = false;
+  let answeredTrainer = '';
+  const out = await ctx.kv.tx(async (kv) => {
     const { side, c, manager } = await partyOf(kv, clientId, actor);
     const path = `${convPath(conversationId(ctx.pepper, clientId, c.trainerId))}/requests/${id}`;
     const r = await kv.get(path);
@@ -1397,6 +1460,57 @@ export async function rescheduleRespond(ctx: Ctx, actor: Actor, body: Record<str
     )
       fail('failed-precondition', 'cannot-decide');
     await kv.merge(path, { status: to, decidedAt: now });
+    // the answer to a proposal a MANAGER made: tell that manager in Spotter (metadata + status only) and keep the journal
+    if (!manager && r.via === 'manager') {
+      const mm = await kv.get(`users/${c.trainerId}/notices/mm-${id}`);
+      const proposer = typeof mm?.actor === 'string' ? mm.actor : '';
+      const teamId = await teamIdOf(kv, c.trainerId);
+      await logActivity(kv, teamId, now, {
+        actorUid: actor.uid,
+        role: side === 'client' ? 'client' : 'trainer',
+        kind: 'move-answer',
+        clientId,
+        refId: id,
+        status: to,
+      });
+      if (proposer && proposer !== actor.uid) {
+        const cu = (await kv.get(`users/${clientId}`)) as UserRec | null;
+        await notice(kv, proposer, 'move-answer', actor.uid, now, `ma-${id}-${to}`, displayOf(cu));
+        await kv.merge(`users/${proposer}/notices/ma-${id}-${to}`, { status: to, refId: id });
+        answeredManager = proposer;
+      }
+    }
+    // the CLIENT answered a proposal the TRAINER made himself (a manager's proposal is answered to that manager, above): the
+    // trainer hears the answer in Spotter and by a request push (names and status only; the time stays in the sealed request)
+    if (!manager && side === 'client' && r.from === 'trainer' && r.via !== 'manager') {
+      const nid = `ma-${id}-${to}`;
+      await notice(
+        kv,
+        c.trainerId,
+        'move-answer',
+        actor.uid,
+        now,
+        nid,
+        displayOf((await kv.get(`users/${clientId}`)) as UserRec | null),
+      );
+      await kv.merge(`users/${c.trainerId}/notices/${nid}`, { status: to, refId: id });
+      answeredTrainer = c.trainerId;
+    }
+    // the trainer (or a manager's withdrawal is not one) answered a request the CLIENT made: the client's own Spotter hears it
+    if (!manager && side === 'trainer' && r.from === 'client') {
+      const nid = `ma-${id}-${to}`;
+      await notice(
+        kv,
+        clientId,
+        'move-answer',
+        actor.uid,
+        now,
+        nid,
+        (await userName(kv, actor.uid)).name || null,
+      );
+      await kv.merge(`users/${clientId}/notices/${nid}`, { status: to, refId: id });
+      answeredClient = true;
+    }
     if (manager)
       await logActivity(kv, await teamIdOf(kv, c.trainerId), now, {
         actorUid: actor.uid,
@@ -1408,6 +1522,10 @@ export async function rescheduleRespond(ctx: Ctx, actor: Actor, body: Record<str
       });
     return { id, status: to };
   });
+  if (answeredManager) await ctx.notify?.(answeredManager, 'team');
+  if (answeredTrainer) await ctx.notify?.(answeredTrainer, 'request');
+  if (answeredClient) await ctx.notify?.(clientId, 'request');
+  return out;
 }
 
 /* ---- trainer key signature (C.2 no. 5) ------------------------------------------------------------------------ */

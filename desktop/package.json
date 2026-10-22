@@ -22,5 +22,9 @@
   "author": "Spotter",
   "dependencies": {
     "electron-updater": "^6.8.9"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mshumilindev/myfit.git"
   }
 }

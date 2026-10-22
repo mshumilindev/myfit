@@ -1,4 +1,5 @@
 import type {
+  ActivityPage,
   ActivityScope,
   SpotterFeed,
   TeamActivity,
@@ -47,8 +48,12 @@ export interface TeamPort {
   removeMember(uid: string): Promise<void>;
   leave(): Promise<void>;
   setActivityScope(uid: string, scope: ActivityScope): Promise<void>;
-  /** The activity log as the caller may read it (owner: all; manager: own or all). */
-  activity(): Promise<TeamActivity>;
+  /**
+   * The activity log as the caller may read it (owner: all; manager: own or all), one page at a time, newest first.
+   * No page = the first one. The cursor is (`before`, `beforeId`) = the previous page's (`next`, `nextId`); the server
+   * (functions/src/coach/team.ts `teamActivity`) pages by (ts, id), so rows sharing a millisecond are never skipped.
+   */
+  activity(page?: ActivityPage): Promise<TeamActivity>;
   /** Spotter: the caller's service messages about the team, newest first. */
   notices(): Promise<SpotterFeed>;
   markNoticesRead(): Promise<void>;

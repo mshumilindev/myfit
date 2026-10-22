@@ -1,34 +1,22 @@
 /**
  * The desktop rail of every app in the suite except Coach's own shell (Gym, Apex, People,
- * Nutrition, Learn): the kit `Rail` configured exactly like Coach's, so the navigation works the
- * same everywhere.
+ * Nutrition, Learn): maps the app's nav onto the shared `SuiteRail` (kit `Rail` + the one shared
+ * foot, SPO-234/235), exactly like Coach's.
  *
  *  - geometry: 88px labelled rail from 1280px, 60px icon-only rail (tooltips) below it; tiles
  *    have fixed sizes and never squeeze with the window height;
  *  - nav: `nav` entries top to bottom; only when they do not all fit vertically the trailing ones
- *    collapse into a More item (kit `Rail` `overflow`), otherwise there is no More;
- *  - the More item (only when needed) sits in the nav column right below the last visible entry;
- *  - foot, top to bottom: extras (`extrasBefore`, the notifications bell,
- *    `extrasAfter`), Apps (pinned, opens the suite launcher), the avatar. The avatar opens ONLY
- *    the account popover (real avatar, name, role, mode switch for trainer/admin, Profile);
- *    More holds only the overflowed entries: the foot extras collapse FIRST (all at once,
- *    listed as their own group), then the nav entries from the end. A hidden bell with unread
- *    lights More. Apps and the avatar never collapse;
+ *    collapse into a More item, otherwise there is no More;
+ *  - foot, top to bottom: `extrasBefore`, the bell (client apps only: `onOpenNotifications`),
+ *    `extrasAfter`, language, Apps (pinned), the avatar (pinned). The avatar opens ONLY the
+ *    account popover; More holds the overflowed entries, the foot extras collapsing first;
  *  - the app's accent comes from the wrapping `.app-*` theme (accent-ramp), not from here.
  *
  * Shown from 720px up (the real apps' swap width, unchanged); below it the app mounts
  * `SuiteTabBar` instead.
  */
-import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from '../i18n';
-import { LanguageSelector } from '../ui';
-import { useCoachT } from '../i18n/coach';
-import { SpotterMark } from '../brand/SpotterMark';
-import { badgeText } from './ui/Badge';
-import { COACH_WIDE_BREAKPOINT, useMinWidth } from './ui/breakpoints';
-import { MoreMenu } from './ui/MoreMenu';
-import { Rail } from './ui/Rail';
 import type { RailEntry, RailFootEntry } from './ui/railOverflow';
-import { SuiteRailFoot } from './suite/SuiteRailFoot';
+import { SuiteRail } from './suite/SuiteRail';
 import type { SuiteApp } from './suite/useSuiteAccount';
 
 export type RailNavItem = {
@@ -61,22 +49,19 @@ export function AppRail({
   activeId: string | null;
   onNav: (id: string) => void;
   onOpenShell: () => void;
-  /** The bell; omitted = no bell in the foot. */
+  /** The bell; omitted = no bell in the foot (People, Coach). The unread then rides on Apps. */
   onOpenNotifications?: () => void;
   /** Profile row of the account popover. */
   onOpenProfile?: () => void;
+  /** Unread of the shared feed: on the bell, or on Apps when there is no bell. */
   notifUnread?: number;
   /** App-specific foot extras above the bell (Gym: conditions shield, mastery). */
   extrasBefore?: RailFootEntry[];
-  /** App-specific foot extras between the bell and Apps (Gym: admin settings). */
+  /** App-specific foot extras between the bell and the language (Gym: admin settings). */
   extrasAfter?: RailFootEntry[];
   /** Warning dot on the avatar (Gym: offline / sync failed). No dot while all is well. */
   syncColor?: string;
 }) {
-  const { t, locale } = useT();
-  const { c } = useCoachT();
-  const wide = useMinWidth(COACH_WIDE_BREAKPOINT);
-
   const entries: RailEntry[] = nav.map((x) => ({
     id: x.id,
     label: x.label,
@@ -86,78 +71,17 @@ export function AppRail({
     ...(x.live ? { live: true, liveLabel: x.liveLabel } : {}),
     ...(x.count ? { count: x.count, countLabel: x.countLabel } : {}),
   }));
-
-  const footEntries: RailFootEntry[] = [
-    ...(extrasBefore ?? []),
-    ...(onOpenNotifications
-      ? [
-          {
-            id: 'notifications',
-            label: t.notifTitle,
-            icon: 'bell',
-            fill: true,
-            onSelect: onOpenNotifications,
-            badge: badgeText(notifUnread) || null,
-            count: notifUnread,
-            countLabel: c.unread(notifUnread),
-          },
-        ]
-      : []),
-    ...(extrasAfter ?? []),
-    // Language: the shared flag chip as the last foot extra (like the bell/settings it collapses into More on a
-    // short rail; the More row opens a language list, the locale changes only on a pick).
-    {
-      id: 'language',
-      label: LOCALES[locale].language,
-      icon: 'globe',
-      node: <LanguageSelector compact />,
-      onSelect: () => undefined,
-      submenu: {
-        title: LOCALES[locale].language,
-        value: locale,
-        options: LOCALE_IDS.map((id) => ({
-          id,
-          label: LOCALES[id].locale,
-          icon: <span aria-hidden>{FLAGS[id]}</span>,
-        })),
-        onChange: (id) => setLocale(id as (typeof LOCALE_IDS)[number]),
-      },
-    },
-  ];
-
   return (
-    <Rail
-      brand={<SpotterMark size={40} variant="sidebar" />}
-      labelled={wide}
-      compact={!wide}
-      ariaLabel={c.navLandmark}
-      overflow={{
-        entries,
-        footEntries,
-        moreLabel: c.navMore,
-        moreCountLabel: c.unread,
-        renderMenu: ({ hiddenNav, hiddenFoot, open, onClose, anchorRef }) => (
-          <MoreMenu
-            presentation="popover"
-            open={open}
-            onClose={onClose}
-            anchorRef={anchorRef}
-            title={c.navMore}
-            items={hiddenNav}
-            extraItems={hiddenFoot}
-          />
-        ),
-      }}
-      foot={
-        <>
-          <SuiteRailFoot
-            app={app}
-            onOpenShell={onOpenShell}
-            onOpenProfile={onOpenProfile}
-            warnColor={syncColor}
-          />
-        </>
-      }
+    <SuiteRail
+      app={app}
+      nav={entries}
+      footBefore={extrasBefore}
+      footAfter={extrasAfter}
+      bell={onOpenNotifications ? { onOpen: onOpenNotifications, unread: notifUnread } : undefined}
+      appsUnread={onOpenNotifications ? 0 : notifUnread}
+      syncColor={syncColor}
+      onOpenShell={onOpenShell}
+      onOpenProfile={onOpenProfile}
     />
   );
 }

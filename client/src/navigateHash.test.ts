@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { isIosStandalone, navigateHash } from './navigateHash';
-import { currentHash } from './route';
 
 const setEnv = (ua: string, standalone: boolean) => {
   vi.stubGlobal('navigator', { userAgent: ua, platform: 'iPhone', maxTouchPoints: 5, standalone });
@@ -8,7 +7,7 @@ const setEnv = (ua: string, standalone: boolean) => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  window.history.replaceState(null, '', '/');
+  window.location.hash = '';
 });
 
 describe('navigateHash', () => {
@@ -16,7 +15,7 @@ describe('navigateHash', () => {
     setEnv('Mozilla/5.0 (Macintosh)', false);
     const spy = vi.spyOn(window.history, 'replaceState');
     navigateHash('#/trainer/chat');
-    expect(currentHash()).toBe('#/trainer/chat');
+    expect(window.location.hash).toBe('#/trainer/chat');
     expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
   });
@@ -29,7 +28,7 @@ describe('navigateHash', () => {
     window.addEventListener('hashchange', onHash);
     navigateHash('#/trainer/chat');
     window.removeEventListener('hashchange', onHash);
-    expect(currentHash()).toBe('#/trainer/chat');
+    expect(window.location.hash).toBe('#/trainer/chat');
     expect(window.history.length).toBe(before);
     expect(onHash).toHaveBeenCalledTimes(1);
   });

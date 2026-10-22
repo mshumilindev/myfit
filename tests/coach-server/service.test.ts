@@ -958,6 +958,7 @@ describe('the hourly sweep', () => {
       notesPurged: 1,
       auditDeleted: 1,
       activityPurged: 1,
+      noticesPurged: 0,
       rotationFlagged: 1,
       rateLimitsPurged: 0,
     });
@@ -987,6 +988,7 @@ describe('the hourly sweep', () => {
       notesPurged: 0,
       auditDeleted: 0,
       activityPurged: 0,
+      noticesPurged: 0,
       rotationFlagged: 0,
       rateLimitsPurged: 0,
     });

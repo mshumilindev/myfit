@@ -22,12 +22,13 @@ import { connectAuthEmulator } from 'firebase/auth';
 import { connectFirestoreEmulator } from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import { STORAGE_BUCKET } from './downloads';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBd29dSkA_ddsCXbJT6XuI1zUi6FGhUeOE',
   authDomain: 'spotter-64c3b.firebaseapp.com',
   projectId: 'spotter-64c3b',
-  storageBucket: 'spotter-64c3b.firebasestorage.app',
+  storageBucket: STORAGE_BUCKET,
   messagingSenderId: '217152431785',
   appId: '1:217152431785:web:ea63d4c2bfa6251484abb8',
 };

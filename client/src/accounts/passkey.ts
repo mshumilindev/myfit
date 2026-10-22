@@ -10,6 +10,7 @@ import {
   startRegistration,
 } from '@simplewebauthn/browser';
 import { callFn, type AuthPayload } from '../api';
+import { sessionDeviceId } from './sessionDevice';
 
 export async function biometricsAvailable(): Promise<boolean> {
   try {
@@ -28,7 +29,11 @@ export async function registerPasskey(): Promise<boolean> {
       options: Parameters<typeof startRegistration>[0]['optionsJSON'];
     }>('passkeyRegisterOptions', undefined, { quiet: true });
     const response = await startRegistration({ optionsJSON: options });
-    await callFn('passkeyRegisterVerify', { challengeId, response }, { quiet: true });
+    await callFn(
+      'passkeyRegisterVerify',
+      { challengeId, response, deviceId: sessionDeviceId() },
+      { quiet: true },
+    );
     return true;
   } catch {
     return false; // declined, unsupported or server not updated yet: the password keeps working

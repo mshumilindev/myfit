@@ -31,7 +31,8 @@ describe('LandingView', () => {
 
   it('offers the three downloads', () => {
     render(<LandingView onLoggedIn={vi.fn()} />);
-    for (const name of ['Windows', 'macOS', 'Android']) expect(screen.getAllByText(name).length).toBeGreaterThan(0);
+    for (const name of ['Windows', 'macOS', 'Android'])
+      expect(screen.getAllByText(name).length).toBeGreaterThan(0);
   });
 
   it('invite mode replaces the form with the personalised step 0', () => {

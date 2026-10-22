@@ -961,6 +961,8 @@ export const uk: Strings = {
   statSessions: 'Сесії',
   statVolume: 'Обʼєм',
   statNewPrs: 'Нові рекорди',
+  widgetLibraryTitle: 'Бібліотека віджетів',
+  rcPrs: 'Рекорди',
   statStreak: 'Серія',
   statDays: (n) => `${n} дн`,
   weeklyVolume: 'Обʼєм за тиждень',

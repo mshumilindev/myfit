@@ -4,6 +4,7 @@ import { teamEn as tm } from '../../i18n/coachTeam.en';
 import { setViewport } from '../testViewport';
 import { createFixturesTeamPort } from './__fixtures__/fixtures';
 import { SpotterScreen } from './SpotterScreen';
+import { TeamRequestsSection } from './TeamRequestsSection';
 
 afterEach(cleanup);
 beforeEach(() => setViewport(1440));
@@ -27,6 +28,22 @@ describe('Spotter team messages', () => {
     fireEvent.click(await screen.findByRole('button', { name: tm.spApprove }));
     expect(await screen.findByText(tm.spStatusApproved)).toBeTruthy();
     expect(screen.queryByRole('button', { name: tm.spApprove })).toBeNull();
+  });
+
+  it('approving in Spotter answers the very request the Agenda card shows: the card leaves there too', async () => {
+    const port = createFixturesTeamPort({ now: () => NOW, withRequests: true });
+    const answer = vi.spyOn(port, 'answerRequest');
+    render(
+      <>
+        <TeamRequestsSection port={port} />
+        <SpotterScreen onNavigate={vi.fn()} port={port} />
+      </>,
+    );
+    expect(await screen.findByText(tm.trTitle('Irina', 'Sofiia'))).toBeTruthy();
+    fireEvent.click(await screen.findByRole('button', { name: tm.spApprove }));
+    await waitFor(() => expect(screen.queryByText(tm.trTitle('Irina', 'Sofiia'))).toBeNull());
+    expect(answer).toHaveBeenCalledTimes(1);
+    expect(answer).toHaveBeenCalledWith('rm-c4', true);
   });
 
   it('opening marks the messages read (the subtitle stops counting)', async () => {

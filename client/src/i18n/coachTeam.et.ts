@@ -46,10 +46,11 @@ export const teamEt: typeof teamEn = {
     'Haldur korraldab sinu ajakava ja klientide nimekirja. Ta ei näe treeninguid, tervist, toitumist, märkmeid ega vestlust.',
   tmAddTrainerBody:
     'Treener töötab oma klientidega. Ta liitub sinu juhitava meeskonnaga ja ilmub sinu Klientide ja Ajakava alla.',
-  tmEmail: 'E-post',
+  tmEmail: 'E-post (valikuline)',
   tmEmailHint:
-    'Ta saab kutse lingi e-postiga. See kehtib 7 päeva ja ühele inimesele. Ligipääs algab pärast vastuvõtmist.',
-  tmSendInvite: 'Saada kutse',
+    'Saad kutse lingi ja edastad selle ise. See kehtib 7 päeva ja ühele inimesele. Lisa e-post, et liituda saaks ainult see konto.',
+  tmSendInvite: 'Loo link',
+  tmInviteLinkRow: 'Kutse link',
   tmCancel: 'Tühista',
   tmErrInvalidEmail: 'Sisesta kehtiv e-posti aadress.',
   tmErrExists: 'See inimene on juba meeskonnas või tal on avatud kutse.',
@@ -57,7 +58,10 @@ export const teamEt: typeof teamEn = {
   tmErrGeneric: 'Kutse saatmine ebaõnnestus. Proovi uuesti.',
   tmInviteSentSnack: (email) => `Kutse saadetud: ${email}`,
   tmLinkTitle: 'Jaga kutse linki',
-  tmLinkBody: (email) => `Saada see link: ${email}. See on ühekordne ja aegub 7 päeva pärast.`,
+  tmLinkBody: (email) =>
+    email
+      ? `Saada see link: ${email}. Liituda saab ainult see kinnitatud konto. See on ühekordne ja aegub 7 päeva pärast.`
+      : 'Saada see link inimesele. See on ühekordne ja aegub 7 päeva pärast.',
   tmCopyLink: 'Kopeeri link',
   tmLinkCopied: 'Link kopeeritud',
   tmDone: 'Valmis',
@@ -126,6 +130,13 @@ export const teamEt: typeof teamEn = {
   jtRetry: 'Proovi uuesti',
   jtOk: 'Valmis',
   jtLoading: 'Kutse laadimine',
+  jtSignInManager: (name: string) =>
+    `${name} kutsub sind meeskonda haldurina. Jätkamiseks logi sisse oma Spotteri kontole.`,
+  jtSignInTrainer: (name: string) =>
+    `${name} kutsub sind meeskonda treenerina. Jätkamiseks logi sisse oma treeneri kontole.`,
+  jtSomeone: 'Sinu treener',
+  jtNoAccount:
+    'Kontot veel pole? Selle loob treener. Palu tal konto link saata ja ava see kutse siis uuesti.',
   mcTitle: 'Kliendid',
   mcSub: (n: number, ready: number) => `Kliente: ${n} · valmis: ${ready}`,
   mcAll: (n: number) => `Kõik ${n}`,
@@ -146,6 +157,8 @@ export const teamEt: typeof teamEn = {
   mcEmptyBody: 'Siia ilmuvad meeskonna treenerite kliendid.',
   mcLoadFailed: 'Klientide laadimine ebaõnnestus.',
   mcNextShort: 'Järgmine',
+  mcUpcoming: 'Lähimad treeningud',
+  mcRecent: 'Viimased treeningud',
   trSection: 'Meeskonna taotlused',
   trTitle: (manager: string, client: string) => `${manager} palub eemaldada: ${client}`,
   trStatus: 'Ootab sinu vastust',
@@ -175,6 +188,8 @@ export const teamEt: typeof teamEn = {
   actSubOwnHint: (owner: string) =>
     `Treener ${owner} saab lubada sul näha kogu meeskonna tegevusi.`,
   actSubAll: 'Kogu meeskond.',
+  actFullAccess: 'Täielik ligipääs',
+  actOwnNotice: 'Näed ainult enda tegevusi.',
   actEveryone: 'Kõik',
   actMe: 'Mina',
   actMine: 'Minu',
@@ -184,6 +199,8 @@ export const teamEt: typeof teamEn = {
   actEmptyTitle: 'Siin pole veel midagi',
   actEmptyBody: 'Meeskonna tegevused on siin 90 päeva.',
   actFailed: 'Tegevuslogi laadimine ebaõnnestus.',
+  actMore: 'Näita varasemaid',
+  actMoreFailed: 'Varasemate kirjete laadimine ebaõnnestus.',
   actListLabel: 'Tegevus',
   actKind: {
     'move-request': 'Treeningu nihutamise taotlus',

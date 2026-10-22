@@ -135,6 +135,12 @@ export function ShellLauncher({
           tone="gym"
           icon="barbell"
           name={t.shellGym}
+          // People and Coach have no bell: the shared feed's unread is flagged on Gym, where the bell is.
+          badge={
+            notifUnread > 0 && (current === 'roster' || current === 'me' || current === 'coach') ? (
+              <span className="shell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
+            ) : undefined
+          }
           sub={`${t.shellSessionsWeek(sessionsWeek)} · ${t.shellDayStreak(streak)}`}
           current={current === 'gym'}
           onSelect={onGym}

@@ -4,6 +4,7 @@
  * Also: login, status, invite preview, request-new.
  */
 import { onCall } from 'firebase-functions/v2/https';
+import { deletePasskeysOf } from './passkeysStore';
 import {
   db,
   authAdmin,
@@ -266,6 +267,10 @@ export const claim = onCall(async (req) => {
     tx.update(invRef, { claimedAt: Date.now() });
     return next;
   });
+
+  // The password was (re)set: biometric sign-ins made under the old one end here.
+  await deletePasskeysOf(updated.id);
+  await authAdmin.revokeRefreshTokens(updated.id).catch(() => undefined); // a brand-new user has no auth record yet
 
   // Ensure a Firebase Auth user exists for this uid (custom-token sign-in
   // creates one too, but doing it here keeps Auth in sync after invite claim).

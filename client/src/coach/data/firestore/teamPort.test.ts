@@ -51,6 +51,15 @@ describe('Firestore team port', () => {
     expect(p.peek()).toBe(d);
   });
 
+  it("Spotter's team notices and their read mark are server calls, so read state follows the user to every device (SPO-236)", async () => {
+    const feed = { items: [], unread: 3 };
+    const { fs, calls } = fsWith((n) => (n === 'teamNotices' ? feed : { ok: true }));
+    const p = createFirestoreTeamPort(fs);
+    expect(await p.notices()).toBe(feed);
+    await p.markNoticesRead();
+    expect(calls.map((c) => c[0])).toEqual(['teamNotices', 'teamNoticesRead']);
+  });
+
   it('maps every action to its callable with only the ids it needs', async () => {
     const { fs, calls } = fsWith((n) =>
       n === 'teamInvite' ? { inviteId: 'tok2', url: 'https://x/#/team-invite/tok2' } : { ok: true },
@@ -123,5 +132,43 @@ describe('Firestore team port', () => {
     await expect(err('account-not-eligible').acceptInvite('t')).rejects.toMatchObject({
       code: 'not-eligible',
     });
+  });
+  it('activity: asks for one page with the cursor and derives the next cursor; a server without `before` ends the log', async () => {
+    const row = (id: string, ts: number) => ({ id, ts });
+    const { fs, calls } = fsWith((_n, d) =>
+      (d as { before?: number }).before
+        ? { entries: [row('x', 40), row('y', 30)], scope: 'owner' } // ignores the cursor: repeats newer rows
+        : { entries: [row('a', 90), row('b', 80), row('c', 70)], scope: 'owner' },
+    );
+    const p = createFirestoreTeamPort(fs);
+    const first = await p.activity({ limit: 3 });
+    expect(calls[0]).toEqual(['teamActivity', { limit: 3 }]);
+    expect(first.next).toBe(70);
+    const second = await p.activity({ before: 70, limit: 3 });
+    expect(calls[1]).toEqual(['teamActivity', { limit: 3, before: 70 }]);
+    expect(second.entries.map((e) => e.id)).toEqual(['x', 'y']);
+    expect(second.next).toBeNull();
+    // rows not older than the cursor are dropped
+    const stale = await createFirestoreTeamPort(
+      fsWith(() => ({ entries: [row('a', 90), row('z', 10)], scope: 'owner' })).fs,
+    ).activity({ before: 50 });
+    expect(stale.entries.map((e) => e.id)).toEqual(['z']);
+  });
+  it('activity: a (ts, id) cursor goes to the server as is, and the server page is kept whole', async () => {
+    const row = (id: string, ts: number) => ({ id, ts });
+    const { fs, calls } = fsWith(() => ({
+      entries: [row('b', 50), row('a', 50)], // two rows share the cursor's millisecond: they must stay
+      scope: 'owner',
+      next: 50,
+      nextId: 'a',
+    }));
+    const page = await createFirestoreTeamPort(fs).activity({
+      before: 50,
+      beforeId: 'c',
+      limit: 2,
+    });
+    expect(calls[0]).toEqual(['teamActivity', { limit: 2, before: 50, beforeId: 'c' }]);
+    expect(page.entries.map((e) => e.id)).toEqual(['b', 'a']);
+    expect(page).toMatchObject({ next: 50, nextId: 'a' });
   });
 });

@@ -922,6 +922,8 @@ export const et: Strings = {
   statSessions: 'Sessioonid',
   statVolume: 'Maht',
   statNewPrs: 'Uued rekordid',
+  widgetLibraryTitle: 'Vidinate raamatukogu',
+  rcPrs: 'Rekordid',
   statStreak: 'Seeria',
   statDays: (n) => `${n} p`,
   weeklyVolume: 'Nädala maht',
@@ -3323,7 +3325,6 @@ export const et: Strings = {
   landing_pr_e2: 'Kangitõmme',
   landing_pr_e3: 'Õlapress',
   landing_pr_e4: 'Lat-tõmme',
-  landing_pr_go: 'Alusta',
   landing_r_1: 'See loeb ülespoole, kuni puhkad, nii et näed, kui kaua tegelikult puhkasid.',
   landing_r_2:
     'See kandub üle järgmisele harjutusele, nii et jalutuskäik teise raami juurde seda nulli ei viska.',

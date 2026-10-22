@@ -52,10 +52,11 @@ export const teamUk: typeof teamEn = {
     'Менеджер веде ваш розклад і список клієнтів. Він не бачить тренувань, здоров’я, харчування, нотаток і чату.',
   tmAddTrainerBody:
     'Тренер працює зі своїми клієнтами. Він приєднується до команди, якою ви керуєте, і з’являється у ваших Клієнтах і Розкладі.',
-  tmEmail: 'Email',
+  tmEmail: "Email (необов'язково)",
   tmEmailHint:
-    'Людина отримає посилання-запрошення на email. Воно діє 7 днів і для однієї особи. Доступ починається після прийняття.',
-  tmSendInvite: 'Надіслати запрошення',
+    'Ви отримаєте посилання-запрошення і передасте його самі. Воно діє 7 днів і для однієї особи. Вкажіть email, щоб приєднатися міг лише цей акаунт.',
+  tmSendInvite: 'Створити посилання',
+  tmInviteLinkRow: 'Посилання-запрошення',
   tmCancel: 'Скасувати',
   tmErrInvalidEmail: 'Введіть дійсну адресу email.',
   tmErrExists: 'Ця людина вже в команді або має відкрите запрошення.',
@@ -63,7 +64,10 @@ export const teamUk: typeof teamEn = {
   tmErrGeneric: 'Не вдалося надіслати запрошення. Спробуйте ще раз.',
   tmInviteSentSnack: (email) => `Запрошення надіслано: ${email}`,
   tmLinkTitle: 'Надішліть посилання-запрошення',
-  tmLinkBody: (email) => `Надішліть це посилання: ${email}. Воно одноразове й діє 7 днів.`,
+  tmLinkBody: (email) =>
+    email
+      ? `Надішліть це посилання: ${email}. Приєднатися зможе лише цей підтверджений акаунт. Воно одноразове й діє 7 днів.`
+      : 'Надішліть це посилання людині. Воно одноразове й діє 7 днів.',
   tmCopyLink: 'Скопіювати посилання',
   tmLinkCopied: 'Посилання скопійовано',
   tmDone: 'Готово',
@@ -130,6 +134,13 @@ export const teamUk: typeof teamEn = {
   jtRetry: 'Спробувати ще раз',
   jtOk: 'Готово',
   jtLoading: 'Завантажуємо запрошення',
+  jtSignInManager: (name: string) =>
+    `${name} запрошує вас до команди як менеджера. Увійдіть в акаунт Spotter, щоб продовжити.`,
+  jtSignInTrainer: (name: string) =>
+    `${name} запрошує вас до команди як тренера. Увійдіть в акаунт тренера, щоб продовжити.`,
+  jtSomeone: 'Ваш тренер',
+  jtNoAccount:
+    'Ще немає акаунта? Його створює тренер. Попросіть у нього посилання на акаунт, а потім відкрийте це запрошення ще раз.',
   mcTitle: 'Клієнти',
   mcSub: (n: number, ready: number) => `Клієнтів: ${n} · готово: ${ready}`,
   mcAll: (n: number) => `Усі ${n}`,
@@ -150,6 +161,8 @@ export const teamUk: typeof teamEn = {
   mcEmptyBody: 'Тут з’являться клієнти тренерів команди.',
   mcLoadFailed: 'Не вдалося завантажити клієнтів.',
   mcNextShort: 'Далі',
+  mcUpcoming: 'Найближчі заняття',
+  mcRecent: 'Останні заняття',
   trSection: 'Запити команди',
   trTitle: (manager: string, client: string) => `${manager} просить видалити: ${client}`,
   trStatus: 'Потрібна ваша відповідь',
@@ -179,6 +192,8 @@ export const teamUk: typeof teamEn = {
   actSubOwn: 'Ваші дії.',
   actSubOwnHint: (owner: string) => `Тренер ${owner} може відкрити вам дії всієї команди.`,
   actSubAll: 'Уся команда.',
+  actFullAccess: 'Повний доступ',
+  actOwnNotice: 'Ви бачите лише свої дії.',
   actEveryone: 'Усі',
   actMe: 'Я',
   actMine: 'Мої',
@@ -188,6 +203,8 @@ export const teamUk: typeof teamEn = {
   actEmptyTitle: 'Поки нічого немає',
   actEmptyBody: 'Дії команди зберігаються тут 90 днів.',
   actFailed: 'Не вдалося завантажити журнал активності.',
+  actMore: 'Показати раніші',
+  actMoreFailed: 'Не вдалося завантажити раніші записи.',
   actListLabel: 'Активність',
   actKind: {
     'move-request': 'Запит на перенесення заняття',

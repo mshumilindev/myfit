@@ -95,7 +95,7 @@ export function TeamScreen({
           me.role === 'trainer' ? tm.tmSubTrainer(members.length) : tm.tmSubManager(members.length)
         }
         actions={
-          <Button variant="primary" icon="user-plus" onClick={() => setDialog({ kind: 'add' })}>
+          <Button variant="primary" icon="users" onClick={() => setDialog({ kind: 'add' })}>
             {addLabel}
           </Button>
         }
@@ -143,7 +143,7 @@ export function TeamScreen({
                     <ListRow
                       strong
                       icon={<IconTile tone="neutral" size={40} icon="envelope" />}
-                      label={i.email}
+                      label={i.email || tm.tmInviteLinkRow}
                       sub={tm.tmInviteSent(roleName(i.role), agoLabel(tm, asOf, i.sentAt))}
                       onClick={desktop ? undefined : () => setDialog({ kind: 'invite', id: i.id })}
                       trailing={
@@ -167,7 +167,7 @@ export function TeamScreen({
                             <Button
                               variant="ghost"
                               size="sm"
-                              aria-label={tm.tmRevokeFor(i.email)}
+                              aria-label={tm.tmRevokeFor(i.email || tm.tmInviteLinkRow)}
                               onClick={() => void store.revokeInvite(i.id)}
                             >
                               {tm.tmRevoke}
@@ -207,17 +207,22 @@ export function TeamScreen({
                 onClick={() => onNavigate?.({ screen: 'roles' })}
               />
             </GroupedList>
-            <GroupedList>
-              <ListRow
-                action
-                tone="danger"
-                label={tm.tmLeave}
-                onClick={() => setDialog({ kind: 'leave' })}
-              />
-            </GroupedList>
-            <p className="tm-side-note">
-              {me.role === 'trainer' ? tm.tmLeaveNoteTrainer : tm.tmLeaveNoteManager}
-            </p>
+            {/* The team's owner cannot leave (it would end the team): no button when you are the only one. */}
+            {!me.isOwner && (
+              <>
+                <GroupedList>
+                  <ListRow
+                    action
+                    tone="danger"
+                    label={tm.tmLeave}
+                    onClick={() => setDialog({ kind: 'leave' })}
+                  />
+                </GroupedList>
+                <p className="tm-side-note">
+                  {me.role === 'trainer' ? tm.tmLeaveNoteTrainer : tm.tmLeaveNoteManager}
+                </p>
+              </>
+            )}
           </div>
         </Inspector>
       </Split>

@@ -9,7 +9,9 @@ import {
   setPasskey,
 } from './rememberedPeople';
 
-function memoryBackend(seed: Record<string, string> = {}): StorageBackend & { dump(): Record<string, string> } {
+function memoryBackend(
+  seed: Record<string, string> = {},
+): StorageBackend & { dump(): Record<string, string> } {
   const m = new Map(Object.entries(seed));
   return {
     get length() {
@@ -48,7 +50,7 @@ describe('rememberedPeople', () => {
     expect(readRemembered(b)).toHaveLength(2);
   });
 
-  it('an unticked sign-in drops that person\'s older entry and leaves the others', () => {
+  it("an unticked sign-in drops that person's older entry and leaves the others", () => {
     const b = memoryBackend();
     recordSignIn(b, anna, true, 1);
     recordSignIn(b, boris, true, 2);
@@ -84,10 +86,14 @@ describe('rememberedPeople', () => {
       { uid: 'ok', name: 'Dup', appName: 'a', lastUsed: 3 },
       { uid: 'nan', name: 'N', appName: 'a', lastUsed: 'x' },
     ]);
-    expect(readRemembered(memoryBackend({ [REMEMBERED_KEY]: rows })).map((p) => p.name)).toEqual(['Ok']);
+    expect(readRemembered(memoryBackend({ [REMEMBERED_KEY]: rows })).map((p) => p.name)).toEqual([
+      'Ok',
+    ]);
   });
 
   it('refuses an invalid uid', () => {
-    expect(() => recordSignIn(memoryBackend(), { ...anna, uid: 'a:b' }, true, 1)).toThrow('bad-uid');
+    expect(() => recordSignIn(memoryBackend(), { ...anna, uid: 'a:b' }, true, 1)).toThrow(
+      'bad-uid',
+    );
   });
 });

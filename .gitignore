@@ -17,7 +17,7 @@ functions/lib/
 functions/node_modules/
 
 # Node / build artifacts
-node_modules/
+node_modules
 dist/
 dev-dist/
 client/dist/
@@ -26,6 +26,8 @@ server/dist/
 desktop/dist/
 coverage/
 client/coverage/
+client/coverage-patch/
+patch-cov/
 .vite/
 client/.vite/
 test-results/

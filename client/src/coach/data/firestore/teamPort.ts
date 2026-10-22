@@ -44,6 +44,9 @@ function toTeamError(e: unknown): TeamPortError {
   return new TeamPortError('unavailable');
 }
 
+/** Rows per page of the activity log: a page is loaded on open, older ones on request (never the whole log). */
+export const ACTIVITY_PAGE = 50;
+
 export function createFirestoreTeamPort(
   fs: FsApi,
   /** Takes a fresh session token the server hands over when the role changes (a new manager). */
@@ -89,8 +92,19 @@ export function createFirestoreTeamPort(
     async markNoticesRead() {
       await call('teamNoticesRead');
     },
-    async activity() {
-      return call<TeamActivity>('teamActivity', { limit: 200 });
+    async activity(page) {
+      const limit = page?.limit ?? ACTIVITY_PAGE;
+      const r = await call<TeamActivity>('teamActivity', {
+        limit,
+        ...(page?.before ? { before: page.before } : {}),
+        ...(page?.beforeId ? { beforeId: page.beforeId } : {}),
+      });
+      // the server pages by (ts, id) and sends its own cursor
+      if (r.nextId !== undefined) return r;
+      // an older server repeats the first page: only entries older than the cursor count
+      const entries = page?.before ? r.entries.filter((e) => e.ts < page.before!) : r.entries;
+      const oldest = entries.reduce((m, e) => Math.min(m, e.ts), Infinity);
+      return { ...r, entries, next: entries.length >= limit ? oldest : null };
     },
     async requests() {
       const r = await call<{ requests: TeamRequest[] }>('teamRequests');

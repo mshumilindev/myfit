@@ -23,7 +23,6 @@ import type { TeamPort } from '../team/port';
 import './Chat.css';
 import { CoachProblemState } from '../BackendNotice';
 import { navigateHash } from '../../navigateHash';
-import { currentHash, setHash } from '../../route';
 
 export interface ChatScreenProps {
   onNavigate: (r: CoachRoute) => void;
@@ -55,9 +54,9 @@ function useOnline(): boolean {
 }
 
 function useWithParam(): [string | null, (id: string | null, push: boolean) => void] {
-  const [id, setId] = useState(() => readWith(currentHash()));
+  const [id, setId] = useState(() => readWith(window.location.hash));
   useEffect(() => {
-    const f = () => setId(readWith(currentHash()));
+    const f = () => setId(readWith(window.location.hash));
     window.addEventListener('hashchange', f);
     return () => window.removeEventListener('hashchange', f);
   }, []);
@@ -65,7 +64,7 @@ function useWithParam(): [string | null, (id: string | null, push: boolean) => v
     setId(next);
     const h = chatHash(next);
     if (push) navigateHash(h);
-    else setHash(h, true);
+    else window.location.replace(h);
   }, []);
   return [id, set];
 }
@@ -160,7 +159,7 @@ export function ChatScreen({
       />
     );
 
-  const pinned = spotter.feed && spotter.feed.items.length > 0 && (
+  const pinned = spotter.feed && (
     <SpotterRow feed={spotter.feed} onOpen={() => onNavigate({ screen: 'spotter' })} />
   );
 

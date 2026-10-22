@@ -65,6 +65,8 @@ describe('AuthView: passkeys (SPO-211)', () => {
     await waitFor(() => expect(h.passkeyLogin).toHaveBeenCalledWith('uA'));
     expect(pass()).toBeNull();
     expect(screen.queryByRole('button', { name: en.signIn })).toBeNull();
+    // Progress is visible: the tapped locker shows a status while the device asks for biometrics.
+    expect(screen.getByRole('status').textContent).toBe(en.signingIn);
     finish({ token: 'pk', userId: 'uA' });
     await waitFor(() => expect(onLoggedIn).toHaveBeenCalled());
     expect(h.signIn).toHaveBeenCalledWith({ token: 'pk', userId: 'uA' }, true);

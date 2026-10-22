@@ -15,6 +15,7 @@ import { NoTrainerPage } from './screens/NoTrainerPage';
 import type { ClientCoachPort } from './data/port';
 import { useClientCoach } from './data/useClientCoach';
 import { parseClientRoute } from './routes';
+import { ClientSpotterScreen } from './spotter/ClientSpotterScreen';
 import { JoinTeamPage } from '../team/JoinTeamPage';
 import { navigateHash } from '../../navigateHash';
 import './ClientCoach.css';
@@ -87,10 +88,12 @@ function Routes({ route, onClose }: { route: string; onClose: () => void }) {
     return <JoinTeamPage token={r.token} onExit={() => go('#/today')} />;
   if (r.page === 'chat') return <ChatGate onClose={onClose} />;
   if (r.page === 'log') return <AccessLogPage onBack={onClose} />;
+  if (r.page === 'spotter') return <ClientSpotterScreen onBack={onClose} />;
   return (
     <MyTrainerPage
       onBack={onClose}
       onChat={() => go('#/trainer/chat')}
+      onSpotter={() => go('#/trainer/spotter')}
       onSharing={() => go('#/health/privacy')}
       onProgram={() => go('#/programs')}
       onLeft={() => go('#/today')}

@@ -8,12 +8,10 @@
  * pure UI: it renders from props and local state and never waits on the server.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { SpotterMark } from '../brand/SpotterMark';
-import { SuiteRailFoot } from '../components/suite/SuiteRailFoot';
+import { SuiteRail } from '../components/suite/SuiteRail';
 import { SUITE_ICON, SUITE_TONE } from '../components/suite/suiteTone';
 import type { SuiteMode } from '../components/suite/useSuiteAccount';
 import { MoreMenu, type MoreMenuItem } from '../components/ui/MoreMenu';
-import { Rail } from '../components/ui/Rail';
 import type { RailEntry } from '../components/ui/railOverflow';
 import { SkeletonRows } from '../components/ui/Skeleton';
 import { TabBar } from '../components/ui/TabBar';
@@ -21,7 +19,7 @@ import { COACH_BREAKPOINT, COACH_WIDE_BREAKPOINT, useMinWidth } from '../compone
 import { useT } from '../i18n';
 import { useCoachT } from '../i18n/coach';
 import { useRosterT } from '../i18n/coachRoster';
-import { BrandBar, BellButton } from '../components/ui/BrandBar';
+import { BrandBar } from '../components/ui/BrandBar';
 import { OPEN_MORE_EVENT } from '../components/suite/openMore';
 import { BrandAccount } from '../components/suite/BrandAccount';
 import { CoachChromeProvider, type CoachChrome } from './layout/chrome';
@@ -42,6 +40,7 @@ import {
 import { currentUid } from '../api';
 import { coachIsUnconfigured, useCoachBackendStatus } from './data/backend';
 import { CoachBackendFailed, NotConfigured } from './BackendNotice';
+import type { CoachProblem } from './data/problem';
 import { ChatDock } from './chat/ChatDock';
 import { useLiveWidget } from './screens/live/useLiveWidget';
 import { useCoachRoute } from './useCoachRoute';
@@ -65,6 +64,17 @@ export interface CoachShellProps {
   onOpenProfile?: () => void;
   /** Opens the suite launcher (Gym / Apex / People / Nutrition / Learn / Coach). */
   onOpenShell: () => void;
+  /** Unread of the shared feed (Coach has no bell): shown on the rail's Apps button. */
+  notifUnread?: number;
+  /**
+   * Where the real backend stands. The shell (rail, header, tab bar, More) is ALWAYS there; only the main area waits:
+   * a quiet skeleton while the adapters install, the problem state with Retry when they could not. Omitted = ready.
+   */
+  backend?: {
+    status: 'ready' | 'loading' | 'failed';
+    problem: CoachProblem | null;
+    retry: () => void;
+  };
 }
 
 type TabId = ScreenId | 'more';
@@ -79,13 +89,18 @@ export function CoachShell({
   onExitToWorkouts,
   onOpenProfile,
   onOpenShell,
+  notifUnread = 0,
+  backend,
 }: CoachShellProps) {
   const { c } = useCoachT();
   const { tm } = useTeamT();
   const { t } = useT();
   const desktop = useMinWidth(COACH_BREAKPOINT);
   const wide = useMinWidth(COACH_WIDE_BREAKPOINT);
-  const unread = useCoachUnread();
+  const ready = !backend || backend.status === 'ready';
+  // Nothing from the ports shows before they are the real ones: the badge and the live pill wait with the main area.
+  const liveRaw = useCoachUnread();
+  const unread = ready ? liveRaw : 0;
   // trainers: open team requests (a manager asks to remove a client) show on Agenda, where they are answered
   const teamAsks = useTeamRequests(undefined, role !== 'manager').requests.length;
   const active = navScreenOf(route);
@@ -114,7 +129,8 @@ export function CoachShell({
 
   // Header slots (live pill, search, bell, avatar): what sits at the right edge of every page header.
   const { r } = useRosterT();
-  const liveWidget = useLiveWidget(onNavigate);
+  const liveRawWidget = useLiveWidget(onNavigate);
+  const liveWidget = ready ? liveRawWidget : null;
   const chrome = useMemo<CoachChrome>(
     () => ({
       desktop,
@@ -156,7 +172,7 @@ export function CoachShell({
   const moreScreens: readonly ScreenId[] = manager
     ? []
     : [...(MORE_SCREENS as readonly ScreenId[]), 'team'];
-  // Header controls the bar had no room for continue in More (a manager has none: they go to the avatar's drawer).
+  // Header controls the bar had no room for (the language) continue in More; the account is the avatar's drawer.
   const [headerHidden, setHeaderHidden] = useState<MoreMenuItem[]>([]);
   const moreItems: MoreMenuItem[] = [...moreScreens.map(entryOf), ...(manager ? [] : headerHidden)];
   // Desktop rail nav: exactly the seven design items. When the rail is too short the trailing
@@ -211,35 +227,15 @@ export function CoachShell({
       </nav>
 
       {desktop && (
-        <Rail
-          brand={<SpotterMark size={40} variant="sidebar" />}
-          labelled={wide}
-          compact={!wide}
+        <SuiteRail
+          app="coach"
           breakpoint="coach"
-          ariaLabel={c.navLandmark}
-          overflow={{
-            entries: railEntries,
-            moreLabel: c.navMore,
-            renderMenu: ({ hidden, open, onClose, anchorRef }) => (
-              <MoreMenu
-                presentation="popover"
-                open={open}
-                onClose={onClose}
-                anchorRef={anchorRef}
-                title={c.navMore}
-                items={hidden}
-              />
-            ),
-          }}
-          foot={
-            <SuiteRailFoot
-              app="coach"
-              identity={{ name, userId, role }}
-              onOpenGym={onExitToWorkouts}
-              onOpenProfile={onOpenProfile}
-              onOpenShell={onOpenShell}
-            />
-          }
+          nav={railEntries}
+          identity={{ name, userId, role }}
+          appsUnread={notifUnread}
+          onOpenGym={onExitToWorkouts}
+          onOpenProfile={onOpenProfile}
+          onOpenShell={onOpenShell}
         />
       )}
 
@@ -251,35 +247,43 @@ export function CoachShell({
           appLabel={t.shellSwitch}
           tone={SUITE_TONE.coach}
           icon={SUITE_ICON.coach}
-          actions={
-            <BellButton
-              label={c.railNotifications}
-              count={unread}
-              onClick={() => onNavigate({ screen: 'chat' })}
-            />
-          }
           onHiddenChange={setHeaderHidden}
-          avatar={(hidden) => (
+          avatar={
             <BrandAccount
               app="coach"
               identity={{ name, userId, role }}
-              hidden={manager ? hidden : undefined}
               onOpenProfile={onOpenProfile}
               onOpenGym={onExitToWorkouts}
             />
-          )}
+          }
         />
       )}
 
       <main id="co-main" ref={mainRef} tabIndex={-1} className="co-main">
         <CoachChromeProvider value={chrome}>
-          <CoachScreenBoundary route={route}>
-            <CoachScreen route={route} onNavigate={onNavigate} manager={manager} />
-          </CoachScreenBoundary>
+          {ready ? (
+            <CoachScreenBoundary route={route}>
+              <CoachScreen route={route} onNavigate={onNavigate} manager={manager} />
+            </CoachScreenBoundary>
+          ) : backend.status === 'failed' ? (
+            <CoachBackendFailed
+              onRetry={backend.retry}
+              onBack={onExitToWorkouts}
+              problem={backend.problem ?? 'unknown'}
+            />
+          ) : (
+            <div aria-busy="true">
+              <Page>
+                <SkeletonRows rows={6} />
+              </Page>
+            </div>
+          )}
         </CoachChromeProvider>
       </main>
 
-      {wide && route.screen !== 'chat' && <ChatDock unread={unread} onNavigate={onNavigate} />}
+      {ready && wide && route.screen !== 'chat' && (
+        <ChatDock unread={unread} onNavigate={onNavigate} />
+      )}
 
       {!desktop && !threadOpen && (
         <TabBar<TabId>
@@ -306,18 +310,17 @@ export function CoachShell({
 /** The shell wired to the URL hash (`#/c/...`), as App.tsx mounts it. */
 export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
   const [route, navigate] = useCoachRoute();
-  // A manager opens only the schedule, clients and team: any other deep link lands on the schedule.
-  const outOfBounds = props.role === 'manager' && !managerMayOpen(route);
-  useEffect(() => {
-    if (outOfBounds) navigate(MANAGER_HOME_ROUTE);
-  }, [outOfBounds, navigate]);
   // Real backend (production, or VITE_COACH_BACKEND=firestore in dev): the adapters are installed before any screen reads a port.
   const backendRole = props.role === 'manager' ? 'manager' : 'trainer';
   const { status, retry, problem } = useCoachBackendStatus(backendRole, true, {
     id: props.userId ?? currentUid(),
     name: props.name,
   });
-  const ready = status === 'ready';
+  // A manager opens only the schedule, clients and team; every other deep link lands on Clients (their home, MANAGER_HOME_ROUTE).
+  const outOfBounds = props.role === 'manager' && !managerMayOpen(route);
+  useEffect(() => {
+    if (outOfBounds) navigate(MANAGER_HOME_ROUTE);
+  }, [outOfBounds, navigate]);
   // A production build with no backend configured: say so, render no client data (never the sample fixtures).
   if (coachIsUnconfigured())
     return (
@@ -327,31 +330,14 @@ export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
         </main>
       </div>
     );
-  // The real backend could not be installed: an error with Retry, never the sample clients.
-  if (status === 'failed')
-    return (
-      <div className="app-coach co-shell apex-app">
-        <main className="co-main" id="co-main">
-          <CoachBackendFailed
-            onRetry={retry}
-            onBack={props.onExitToWorkouts}
-            problem={problem ?? 'unknown'}
-          />
-        </main>
-      </div>
-    );
-  // Never a blank page while the real backend installs its adapters (milliseconds, no network): a quiet skeleton.
-  if (!ready)
-    return (
-      <div className="app-coach co-shell apex-app">
-        <main className="co-main" aria-busy="true">
-          <Page>
-            <SkeletonRows rows={6} />
-          </Page>
-        </main>
-      </div>
-    );
+  // The shell is always mounted (like every other app); the real backend installs in the background and only the main area
+  // shows its state: a quiet skeleton while loading, the problem with Retry on a failure (never sample clients).
   return (
-    <CoachShell {...props} route={outOfBounds ? MANAGER_HOME_ROUTE : route} onNavigate={navigate} />
+    <CoachShell
+      {...props}
+      route={outOfBounds ? MANAGER_HOME_ROUTE : route}
+      onNavigate={navigate}
+      backend={{ status, problem, retry }}
+    />
   );
 }

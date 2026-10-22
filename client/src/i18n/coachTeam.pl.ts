@@ -52,10 +52,11 @@ export const teamPl: typeof teamEn = {
     'Menedżer prowadzi Twój grafik i listę klientów. Nie widzi treningów, zdrowia, żywienia, notatek ani czatu.',
   tmAddTrainerBody:
     'Trener prowadzi własnych klientów. Dołącza do zespołu, którym zarządzasz, i pojawia się w Twoich Klientach i Grafiku.',
-  tmEmail: 'Email',
+  tmEmail: 'Email (opcjonalnie)',
   tmEmailHint:
-    'Osoba dostanie link z zaproszeniem e-mailem. Działa 7 dni i dla jednej osoby. Dostęp zaczyna się po przyjęciu.',
-  tmSendInvite: 'Wyślij zaproszenie',
+    'Dostaniesz link z zaproszeniem i przekażesz go sam. Działa 7 dni i dla jednej osoby. Podaj e-mail, aby dołączyć mogło tylko to konto.',
+  tmSendInvite: 'Utwórz link',
+  tmInviteLinkRow: 'Link z zaproszeniem',
   tmCancel: 'Anuluj',
   tmErrInvalidEmail: 'Podaj poprawny adres e-mail.',
   tmErrExists: 'Ta osoba jest już w zespole lub ma otwarte zaproszenie.',
@@ -63,7 +64,10 @@ export const teamPl: typeof teamEn = {
   tmErrGeneric: 'Nie udało się wysłać zaproszenia. Spróbuj ponownie.',
   tmInviteSentSnack: (email) => `Zaproszenie wysłano: ${email}`,
   tmLinkTitle: 'Udostępnij link z zaproszeniem',
-  tmLinkBody: (email) => `Wyślij ten link: ${email}. Działa jeden raz i wygasa po 7 dniach.`,
+  tmLinkBody: (email) =>
+    email
+      ? `Wyślij ten link: ${email}. Dołączyć może tylko to zweryfikowane konto. Działa jeden raz i wygasa po 7 dniach.`
+      : 'Wyślij ten link tej osobie. Działa jeden raz i wygasa po 7 dniach.',
   tmCopyLink: 'Kopiuj link',
   tmLinkCopied: 'Link skopiowany',
   tmDone: 'Gotowe',
@@ -132,6 +136,13 @@ export const teamPl: typeof teamEn = {
   jtRetry: 'Spróbuj ponownie',
   jtOk: 'Gotowe',
   jtLoading: 'Wczytywanie zaproszenia',
+  jtSignInManager: (name: string) =>
+    `${name} zaprasza Cię do zespołu jako menedżera. Zaloguj się na konto Spotter, aby kontynuować.`,
+  jtSignInTrainer: (name: string) =>
+    `${name} zaprasza Cię do zespołu jako trenera. Zaloguj się na konto trenera, aby kontynuować.`,
+  jtSomeone: 'Twój trener',
+  jtNoAccount:
+    'Nie masz jeszcze konta? Zakłada je trener. Poproś o link do konta, a potem otwórz to zaproszenie ponownie.',
   mcTitle: 'Klienci',
   mcSub: (n: number, ready: number) => `Klientów: ${n} · gotowych: ${ready}`,
   mcAll: (n: number) => `Wszyscy ${n}`,
@@ -152,6 +163,8 @@ export const teamPl: typeof teamEn = {
   mcEmptyBody: 'Tutaj pojawią się klienci trenerów zespołu.',
   mcLoadFailed: 'Nie udało się wczytać klientów.',
   mcNextShort: 'Dalej',
+  mcUpcoming: 'Najbliższe treningi',
+  mcRecent: 'Ostatnie treningi',
   trSection: 'Prośby zespołu',
   trTitle: (manager: string, client: string) => `${manager} prosi o usunięcie: ${client}`,
   trStatus: 'Czeka na Twoją odpowiedź',
@@ -181,6 +194,8 @@ export const teamPl: typeof teamEn = {
   actSubOwn: 'Twoje działania.',
   actSubOwnHint: (owner: string) => `Trener ${owner} może pokazać Ci działania całego zespołu.`,
   actSubAll: 'Cały zespół.',
+  actFullAccess: 'Pełny dostęp',
+  actOwnNotice: 'Widzisz tylko własne działania.',
   actEveryone: 'Wszyscy',
   actMe: 'Ja',
   actMine: 'Moje',
@@ -190,6 +205,8 @@ export const teamPl: typeof teamEn = {
   actEmptyTitle: 'Na razie pusto',
   actEmptyBody: 'Działania zespołu są tu przez 90 dni.',
   actFailed: 'Nie udało się wczytać dziennika aktywności.',
+  actMore: 'Pokaż wcześniejsze',
+  actMoreFailed: 'Nie udało się wczytać wcześniejszych wpisów.',
   actListLabel: 'Aktywność',
   actKind: {
     'move-request': 'Prośba o przeniesienie treningu',

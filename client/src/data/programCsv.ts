@@ -188,7 +188,10 @@ function matchEquipment(raw: string): { ids: EquipmentId[]; unknown: string[] } 
 
 function toInt(value: string | undefined): number | null {
   if (value === undefined) return null;
-  const n = Number(value.trim());
+  const t = value.trim();
+  // `Number('')` is 0: an empty cell is "no value", so the caller's default applies (SPO-152).
+  if (t === '') return null;
+  const n = Number(t);
   return Number.isFinite(n) ? Math.trunc(n) : null;
 }
 

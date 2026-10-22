@@ -48,10 +48,11 @@ export const teamEn = {
     'A manager runs your schedule and client list. They cannot see workouts, health, nutrition, notes or chat.',
   tmAddTrainerBody:
     'A trainer coaches their own clients. They join the team you manage and appear in your Clients and Schedule.',
-  tmEmail: 'Email',
+  tmEmail: 'Email (optional)',
   tmEmailHint:
-    'They get an invite link by email. It works for 7 days and one person. Access starts when they accept.',
-  tmSendInvite: 'Send invite',
+    'You get an invite link to pass on yourself. It works for 7 days and one person. Add an email to let only that account join.',
+  tmSendInvite: 'Create invite link',
+  tmInviteLinkRow: 'Invite link',
   tmCancel: 'Cancel',
   tmErrInvalidEmail: 'Enter a valid email address.',
   tmErrExists: 'This person is already in the team or has an open invite.',
@@ -59,7 +60,10 @@ export const teamEn = {
   tmErrGeneric: 'Could not send the invite. Try again.',
   tmInviteSentSnack: (email: string) => `Invite sent to ${email}`,
   tmLinkTitle: 'Share the invite link',
-  tmLinkBody: (email: string) => `Send this link to ${email}. It works once and expires in 7 days.`,
+  tmLinkBody: (email: string) =>
+    email
+      ? `Send this link to ${email}. Only that verified account can join. It works once and expires in 7 days.`
+      : 'Send this link to the person. It works once and expires in 7 days.',
   tmCopyLink: 'Copy link',
   tmLinkCopied: 'Link copied',
   tmDone: 'Done',
@@ -131,6 +135,13 @@ export const teamEn = {
   jtRetry: 'Try again',
   jtOk: 'Done',
   jtLoading: 'Loading the invite',
+  jtSignInManager: (name: string) =>
+    `${name} invited you to join the team as a manager. Sign in to your Spotter account to continue.`,
+  jtSignInTrainer: (name: string) =>
+    `${name} invited you to join the team as a trainer. Sign in to your trainer account to continue.`,
+  jtSomeone: 'Your trainer',
+  jtNoAccount:
+    'No account yet? A trainer creates it for you. Ask them for an account link, then open this invite again.',
   mcTitle: 'Clients',
   mcSub: (n: number, ready: number) => `${n} ${n === 1 ? 'client' : 'clients'}, ${ready} ready`,
   mcAll: (n: number) => `All ${n}`,
@@ -151,6 +162,8 @@ export const teamEn = {
   mcEmptyBody: 'Clients of the team’s trainers appear here.',
   mcLoadFailed: 'Could not load the clients.',
   mcNextShort: 'Next',
+  mcUpcoming: 'Upcoming sessions',
+  mcRecent: 'Recent sessions',
   trSection: 'Team requests',
   trTitle: (manager: string, client: string) => `${manager} asks to remove ${client}`,
   trStatus: 'Needs your answer',
@@ -178,6 +191,8 @@ export const teamEn = {
   actSubOwn: 'Your actions.',
   actSubOwnHint: (owner: string) => `${owner} can allow you to see the whole team’s.`,
   actSubAll: 'The whole team.',
+  actFullAccess: 'Full access',
+  actOwnNotice: 'You see your own actions.',
   actEveryone: 'Everyone',
   actMe: 'Me',
   actMine: 'Mine',
@@ -187,6 +202,8 @@ export const teamEn = {
   actEmptyTitle: 'Nothing here yet',
   actEmptyBody: 'Team actions appear here for 90 days.',
   actFailed: 'Could not load the activity log.',
+  actMore: 'Show earlier',
+  actMoreFailed: 'Could not load earlier entries.',
   actListLabel: 'Activity',
   actKind: {
     'move-request': 'Sent a move request',

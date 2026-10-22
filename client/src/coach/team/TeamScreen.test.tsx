@@ -63,6 +63,21 @@ describe('Team screen', () => {
     await waitFor(() => expect(screen.getByText('new@example.com')).toBeTruthy());
   });
 
+  it('the team owner has no Leave team (it would end the team); a member does', async () => {
+    mount();
+    expect(await screen.findByText('Olena Kovalenko')).toBeTruthy();
+    expect(screen.queryByText(tm.tmLeave)).toBeNull();
+  });
+
+  it('add: the e-mail is optional (mail is not connected): the sheet hands over a plain link', async () => {
+    mount();
+    fireEvent.click(await screen.findByRole('button', { name: tm.tmAddMember }));
+    const dlg = await screen.findByRole('dialog');
+    fireEvent.click(within(dlg).getByRole('button', { name: tm.tmSendInvite }));
+    expect(await screen.findByRole('button', { name: tm.tmCopyLink })).toBeTruthy();
+    expect(screen.queryByText(tm.tmErrInvalidEmail)).toBeNull();
+  });
+
   it('remove a manager: confirm dialog first, then the member is gone', async () => {
     mount();
     fireEvent.click(await screen.findByRole('button', { name: tm.tmOpenMember('Irina Melnyk') }));

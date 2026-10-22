@@ -112,4 +112,18 @@ describe('manager and trainer share one schedule', () => {
     await expect(s.manager.saveDoc(doc(0))).rejects.toMatchObject({ code: 'vault-locked' });
     expect(s.w.fs.has(`schedules/${C}`)).toBe(false);
   });
+
+  it('offline: the manager has the same behaviour as the trainer (a failed write changes nothing, a retry saves once)', async () => {
+    const s = await setup();
+    const real = s.w.fs.transact.bind(s.w.fs);
+    let offline = true;
+    s.w.fs.transact = ((fn: Parameters<typeof real>[0]) =>
+      offline ? Promise.reject(new Error('offline')) : real(fn)) as typeof s.w.fs.transact;
+    await expect(s.manager.saveDoc(doc(0, ['mon-1']))).rejects.toThrow('offline');
+    expect(s.w.fs.has(`schedules/${C}`)).toBe(false);
+    await expect(s.trainer.saveDoc(doc(0, ['mon-1']))).rejects.toThrow('offline'); // same for the trainer
+    offline = false;
+    const saved = await s.manager.saveDoc(doc(0, ['mon-1']));
+    expect(saved.rev).toBe(1);
+  });
 });

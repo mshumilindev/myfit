@@ -35,3 +35,7 @@ export const Six: Story = { args: { people: some(6) } };
 export const OpenLocker: Story = {
   args: { people: some(4), activeId: '1', openId: '1', openLabel: 'Open' },
 };
+/** Signing in (Face ID or password in flight): a ring turns around the avatar and the other lockers are disabled. */
+export const Busy: Story = {
+  args: { people: some(4), activeId: '1', openId: '1', busyId: '1', busyLabel: 'Signing in…' },
+};

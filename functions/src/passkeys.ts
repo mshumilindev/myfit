@@ -15,46 +15,20 @@ import {
   PasskeyError,
   registerOptionsCore,
   registerVerifyCore,
-  type ChallengeDoc,
-  type PasskeyDoc,
-  type PasskeyStore,
 } from './passkeysCore';
+import { firestoreStore } from './passkeysStore';
+import { validDeviceId } from './sessionsPure';
 
 function relyingParty(origin: unknown) {
   const extra = (process.env.PASSKEY_ORIGINS ?? '')
     .split(',')
     .map((x) => x.trim())
     .filter(Boolean);
-  const rp = allowedRelyingParty(origin, extra);
+  // localhost only in the emulator / local dev, never in production.
+  const rp = allowedRelyingParty(origin, extra, process.env.FUNCTIONS_EMULATOR === 'true');
   if (!rp) throw new HttpsError('failed-precondition', 'This origin cannot use passkeys.');
   return rp;
 }
-
-const firestoreStore: PasskeyStore = {
-  async putChallenge(id, doc) {
-    await db.collection('passkeyChallenges').doc(id).set(doc);
-  },
-  async takeChallenge(id) {
-    const ref = db.collection('passkeyChallenges').doc(id);
-    const snap = await ref.get();
-    await ref.delete().catch(() => undefined); // single use
-    return snap.exists ? (snap.data() as ChallengeDoc) : null;
-  },
-  async getPasskey(id) {
-    const snap = await db.collection('passkeys').doc(id).get();
-    return snap.exists ? (snap.data() as PasskeyDoc) : null;
-  },
-  async savePasskey(id, doc) {
-    await db.collection('passkeys').doc(id).set(doc);
-  },
-  async updatePasskey(id, patch) {
-    await db.collection('passkeys').doc(id).update(patch);
-  },
-  async listPasskeys(userId) {
-    const snap = await db.collection('passkeys').where('userId', '==', userId).get();
-    return snap.docs.map((d) => ({ id: d.id, transports: (d.data() as PasskeyDoc).transports }));
-  },
-};
 
 /** The core's errors become callable errors. */
 async function mapErrors<T>(run: () => Promise<T>): Promise<T> {
@@ -66,17 +40,38 @@ async function mapErrors<T>(run: () => Promise<T>): Promise<T> {
   }
 }
 
+const RATE_WINDOW_MS = 15 * 60 * 1000;
+const RATE_MAX = 40;
+
+/** Per-address cap on the unauthenticated passkey endpoints (each call counts; the window resets after 15 minutes). */
+async function rateLimit(req: { rawRequest?: { ip?: string } }): Promise<void> {
+  const ip = (req.rawRequest?.ip ?? 'noip').replace(/[^\w.:-]/g, '_').slice(0, 100);
+  const ref = db.collection('passkeyAttempts').doc(ip);
+  const over = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const now = Date.now();
+    const cur = snap.exists ? (snap.data() as { count: number; windowStart: number }) : null;
+    if (!cur || now - cur.windowStart > RATE_WINDOW_MS) {
+      tx.set(ref, { count: 1, windowStart: now, expireAt: new Date(now + 2 * RATE_WINDOW_MS) });
+      return false;
+    }
+    tx.update(ref, { count: cur.count + 1 });
+    return cur.count + 1 > RATE_MAX;
+  });
+  if (over) throw new HttpsError('resource-exhausted', 'Too many attempts. Try again later.');
+}
+
 function mustUid(req: { auth?: { uid: string } | null }): string {
   if (!req.auth?.uid) throw new HttpsError('unauthenticated', 'Sign in first.');
   return req.auth.uid;
 }
 
-function bodyOf(data: unknown): { challengeId: string; response: unknown } {
-  const b = (data ?? {}) as { challengeId?: unknown; response?: unknown };
+function bodyOf(data: unknown): { challengeId: string; response: unknown; deviceId?: unknown } {
+  const b = (data ?? {}) as { challengeId?: unknown; response?: unknown; deviceId?: unknown };
   if (typeof b.challengeId !== 'string' || typeof b.response !== 'object' || !b.response) {
     throw new HttpsError('invalid-argument', 'Bad request.');
   }
-  return { challengeId: b.challengeId, response: b.response };
+  return { challengeId: b.challengeId, response: b.response, deviceId: b.deviceId };
 }
 
 // --- register (signed-in person, after "Remember me") -----------------------
@@ -84,6 +79,7 @@ function bodyOf(data: unknown): { challengeId: string; response: unknown } {
 export const passkeyRegisterOptions = onCall(async (req) => {
   const uid = mustUid(req);
   const rp = relyingParty(req.rawRequest?.headers?.origin);
+  const authSec = (req.auth?.token as { auth_time?: number } | undefined)?.auth_time;
   const userSnap = await db.collection('users').doc(uid).get();
   if (!userSnap.exists) throw new HttpsError('not-found', 'Unknown account.');
   const user: UserDoc = { id: uid, ...(userSnap.data() as Omit<UserDoc, 'id'>) };
@@ -94,6 +90,7 @@ export const passkeyRegisterOptions = onCall(async (req) => {
       rp,
       challengeId: randomUUID(),
       now: Date.now(),
+      authTimeMs: typeof authSec === 'number' ? authSec * 1000 : null,
     }),
   );
 });
@@ -102,6 +99,10 @@ export const passkeyRegisterVerify = onCall(async (req) => {
   const uid = mustUid(req);
   const rp = relyingParty(req.rawRequest?.headers?.origin);
   const b = bodyOf(req.data);
+  const authSec = (req.auth?.token as { auth_time?: number } | undefined)?.auth_time;
+  const userSnap = await db.collection('users').doc(uid).get();
+  if (!userSnap.exists || (userSnap.data() as { status?: string }).status === 'suspended')
+    throw new HttpsError('permission-denied', 'forbidden');
   await mapErrors(() =>
     registerVerifyCore(firestoreStore, {
       uid,
@@ -109,6 +110,8 @@ export const passkeyRegisterVerify = onCall(async (req) => {
       challengeId: b.challengeId,
       response: b.response as RegistrationResponseJSON,
       now: Date.now(),
+      deviceId: validDeviceId(b.deviceId) ? b.deviceId : '',
+      authTimeMs: typeof authSec === 'number' ? authSec * 1000 : null,
     }),
   );
   return { ok: true };
@@ -117,6 +120,7 @@ export const passkeyRegisterVerify = onCall(async (req) => {
 // --- sign-in (landing; no session yet) ---------------------------------------
 
 export const passkeyLoginOptions = onCall(async (req) => {
+  await rateLimit(req);
   const rp = relyingParty(req.rawRequest?.headers?.origin);
   const userId = (req.data as { userId?: unknown } | undefined)?.userId;
   return mapErrors(() =>
@@ -130,6 +134,7 @@ export const passkeyLoginOptions = onCall(async (req) => {
 });
 
 export const passkeyLoginVerify = onCall(async (req) => {
+  await rateLimit(req);
   const rp = relyingParty(req.rawRequest?.headers?.origin);
   const b = bodyOf(req.data);
   const userId = await mapErrors(() =>

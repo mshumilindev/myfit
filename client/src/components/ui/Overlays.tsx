@@ -9,6 +9,7 @@ import {
   useRef,
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
+  type PointerEvent,
   type TouchEvent as ReactTouchEvent,
   type RefObject,
   type ReactNode,
@@ -160,6 +161,27 @@ export function Sheet(props: {
   const { mode, heightPx, liveH, drag, dragging, closing, requestClose } = g;
   const { onGrabStart, onGrabMove, onGrabEnd } = g;
 
+  // Touch drags are handled by the touch events below. A mouse or pen (the desktop app, a laptop) sends no touch
+  // events at all, so the same drag is wired to pointer events for those (touch pointers are skipped: no double run).
+  const mouseGrab = {
+    onPointerDown: (e: PointerEvent<HTMLDivElement>) => {
+      if (e.pointerType === 'touch' || e.button !== 0) return;
+      // The close button keeps its own click: capturing the pointer would send the click to this strip instead.
+      if ((e.target as HTMLElement).closest('button')) return;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      onGrabStart(e.clientY);
+    },
+    onPointerMove: (e: PointerEvent<HTMLDivElement>) => {
+      if (e.pointerType !== 'touch') onGrabMove(e.clientY);
+    },
+    onPointerUp: (e: PointerEvent<HTMLDivElement>) => {
+      if (e.pointerType !== 'touch') onGrabEnd();
+    },
+    onPointerCancel: (e: PointerEvent<HTMLDivElement>) => {
+      if (e.pointerType !== 'touch') onGrabEnd();
+    },
+  };
+
   // Modal behaviour: focus moves into the drawer (to the drawer itself, so a phone keyboard is not
   // raised by accident; a field with autoFocus keeps it), Escape closes it, focus returns to the
   // opener when it unmounts.
@@ -225,6 +247,7 @@ export function Sheet(props: {
         onTouchMove: (e: ReactTouchEvent<HTMLElement>) => onGrabMove(e.touches[0].clientY),
         onTouchEnd: onGrabEnd,
         onTouchCancel: onGrabEnd,
+        ...mouseGrab,
       }
     : {};
 

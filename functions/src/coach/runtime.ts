@@ -21,7 +21,8 @@ import { db, HttpsError } from '../lib';
 import { sendToUser } from '../push';
 import { firestoreKv } from './firestoreKv';
 import { DEFAULT_APP_ORIGIN } from './inviteLink';
-import { pushTag } from './pushPolicy';
+import { pushLink, pushTag } from './pushPolicy';
+import { defaultTextKey, pushTextFor } from './pushText';
 import type { Ctx } from './service';
 
 export const COACH_PEPPER = defineSecret('COACH_PEPPER');
@@ -51,27 +52,18 @@ export function coachCtx(): Ctx {
     newToken: () => randomBytes(16).toString('hex'),
     baseUrl: APP_ORIGIN.value(),
     // Content-free (C.3): no text, no sender name, no deep link with data.
-    notify: async (uid, kind) => {
+    notify: async (uid, kind, topic) => {
       try {
         // A coach / manager lands on Spotter (the service messages); anyone else on the home page. No data in the link.
         const u = (await coachKv.get(`users/${uid}`)) as { role?: string } | null;
         const staff = u?.role === 'trainer' || u?.role === 'manager' || u?.role === 'admin';
         await sendToUser(uid, {
           title: 'Spotter',
-          body:
-            kind === 'message'
-              ? 'New message'
-              : kind === 'invite'
-                ? 'New invitation'
-                : kind === 'program'
-                  ? 'Program updated'
-                  : kind === 'team'
-                    ? 'Team update'
-                    : kind === 'reminder'
-                      ? 'Reminder'
-                      : 'New request',
+          // the text is picked per device language in sendToUser; this is the English fallback
+          body: pushTextFor(topic ?? defaultTextKey(kind), 'en'),
+          text: topic ?? defaultTextKey(kind),
           tag: pushTag(kind),
-          url: staff && kind !== 'message' && kind !== 'sync' ? '/#/c/spotter' : '/#/',
+          url: pushLink(kind, staff),
           kind,
         });
       } catch {

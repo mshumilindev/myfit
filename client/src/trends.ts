@@ -12,7 +12,7 @@
  *   tip       — icon + headline + nudge (plateau, recovery, rest, neglect…)
  * Each card carries a level: risk (ruby) · info (sapphire) · good (emerald).
  */
-import { weekStartOf as trainingWeekStart } from './weekStart';
+import { shiftWeeks, weekStartOf as trainingWeekStart } from './weekStart';
 import {
   isStrengthExercise,
   muscleSetsInWorkout,
@@ -26,6 +26,7 @@ import type { BodyMetrics, Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 import { t as strings, getLocale, fmtWeekday } from './i18n';
 import { localizedExerciseName } from './data/exerciseNames';
+import { eraTrend } from './trendsEra';
 
 const DAY = 24 * 3600 * 1000;
 const WEEK = 7 * DAY;
@@ -402,10 +403,6 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
   }
 
   // ---- HORIZON: one metric across 30/90/180/365d eras as stage bars -----
-  const eraTrend = (recent: number, prior: number | undefined) => {
-    if (!prior || prior <= 0) return { up: false, down: false };
-    return { up: recent >= prior * 1.1, down: recent <= prior * 0.82 };
-  };
   {
     const bars = eraBars((f, t, wk) => {
       const raw =
@@ -826,10 +823,10 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
   {
     let run = 0;
     let w = weekStart(now);
-    if (!weeksSet.has(w)) w -= WEEK;
+    if (!weeksSet.has(w)) w = shiftWeeks(w, -1);
     while (weeksSet.has(w)) {
       run += 1;
-      w -= WEEK;
+      w = shiftWeeks(w, -1);
     }
     if (run >= 4) {
       insights.push({

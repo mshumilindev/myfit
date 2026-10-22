@@ -64,5 +64,5 @@ tray (all platforms); quit via tray menu or File → Exit. Signing / Microsoft S
    the tray item "Перезапустити й оновити"). Only the shell is updated this way; the web app updates itself from hosting.
 4. macOS: unsigned, no in-app shell update (needs Developer ID signing, SPO-162) — reinstall the new DMG when the shell
    changes (rare).
-Unsigned installers: Windows SmartScreen warns ("More info" → "Run anyway"); macOS needs right-click → Open for a
-downloaded DMG. Microsoft Store / signing are separate later tasks.
+   Unsigned installers: Windows SmartScreen warns ("More info" → "Run anyway"); macOS needs right-click → Open for a
+   downloaded DMG. Microsoft Store / signing are separate later tasks.

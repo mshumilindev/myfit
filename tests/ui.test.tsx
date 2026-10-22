@@ -14,7 +14,6 @@ import { AuthView } from '../client/src/views/AuthView';
 import { ExerciseHistoryView } from '../client/src/views/ExerciseHistoryView';
 import { ProfileView } from '../client/src/views/ProfileView';
 import { AdminView } from '../client/src/views/AdminView';
-import { TrainerView } from '../client/src/views/TrainerView';
 import { ProgramsView } from '../client/src/views/ProgramsView';
 import { addExercise, __getStateForTests, __replaceStateForTests } from '../client/src/store';
 import { setRole } from '../client/src/api';
@@ -275,43 +274,6 @@ describe.skip('F-02/F-08 shell views and design states', () => {
     const row = (await screen.findByText('Client User')).closest('.admin-row');
     expect(row).toBeTruthy();
     await userEvent.click(row!);
-
-    expect(onOpenProfile).toHaveBeenCalledWith('member1');
-  });
-
-  it('opens trainer clients through the full user details page', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url: string) => {
-        if (url.endsWith('/api/trainer/clients')) {
-          return new Response(
-            JSON.stringify({
-              clients: [
-                {
-                  id: 'member1',
-                  name: 'Client User',
-                  avatar: false,
-                  lastSessionAt: null,
-                  live: false,
-                  liveStartedAt: null,
-                  liveSets: 0,
-                  liveVolumeKg: 0,
-                  weekSessions: 0,
-                  weekVolumeKg: 0,
-                  dormantDays: null,
-                },
-              ],
-            }),
-            { status: 200 },
-          );
-        }
-        return new Response(JSON.stringify({ error: 'unexpected request' }), { status: 500 });
-      }),
-    );
-    const onOpenProfile = vi.fn();
-    render(<TrainerView onOpenProfile={onOpenProfile} onOpenMe={vi.fn()} />);
-
-    await userEvent.click(await screen.findByRole('button', { name: /Client User/ }));
 
     expect(onOpenProfile).toHaveBeenCalledWith('member1');
   });

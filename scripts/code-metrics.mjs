@@ -30,11 +30,26 @@ const featureCss = css.filter(
   (f) => !inKit(f) && !/(^|\/)(styles|glass|redesign)\.css$/.test(rel(f)),
 );
 
-const kitImporters = feature.filter((f) =>
-  /from\s+['"][^'"]*components\/ui(\/[^'"]*)?['"]/.test(read(f)),
-);
+// A file imports the kit when any import specifier RESOLVES into components/ui (so `./ui/Card` inside
+// components/ counts, not only the `components/ui` spelling).
+const importsKit = (f) => {
+  const dir = join(f, '..');
+  for (const m of read(f).matchAll(/from\s+['"]([^'"]+)['"]/g)) {
+    const spec = m[1];
+    if (!spec.startsWith('.')) continue;
+    const target = rel(join(dir, spec)).replace(/\/+$/, '');
+    if (target === 'components/ui' || target.startsWith('components/ui/')) return true;
+  }
+  return false;
+};
+const kitImporters = feature.filter(importsKit);
+// A screen is a file that draws its own markup (an intrinsic JSX element). A pure switch / wrapper that only
+// returns other components (AlcoholScreens, SelfProgramEditor …) has nothing to put on the kit itself.
+const drawsMarkup = (f) => /<[a-z][a-zA-Z0-9]*[\s>/]/.test(strip(read(f)));
 const screens = feature.filter(
-  (f) => /(views|screens|pages|routes)\//i.test(rel(f)) || /(View|Page|Screen)\.tsx$/.test(f),
+  (f) =>
+    (/(views|screens|pages|routes)\//i.test(rel(f)) || /(View|Page|Screen)\.tsx$/.test(f)) &&
+    drawsMarkup(f),
 );
 const screensOnKit = screens.filter((f) => kitImporters.includes(f));
 const count = (re, files) => files.reduce((n, f) => n + (strip(read(f)).match(re) ?? []).length, 0);

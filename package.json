@@ -43,6 +43,7 @@
     "verify:pwa": "npm run build -w client && node scripts/verify-tabbar-safe-area.mjs && node scripts/verify-pwa-autoupdate.mjs",
     "verify:ui": "npm run build -w client && node scripts/verify-pinned-headers.mjs && node scripts/verify-empty-exercise-card.mjs",
     "prepare": "node ./scripts/install-git-hooks.mjs",
+    "coverage:guard": "node scripts/check-coverage-thresholds.mjs",
     "deps:check": "depcruise client/src --config .dependency-cruiser.cjs --ignore-known .dependency-cruiser-known-violations.json",
     "deps:baseline": "depcruise client/src --config .dependency-cruiser.cjs --output-type baseline > .dependency-cruiser-known-violations.json",
     "metrics:stability": "node scripts/stability-metrics.mjs"

@@ -1,7 +1,7 @@
 name: Deploy hosting
 
 # One Firebase project (spotter-64c3b), two Hosting sites:
-#   test  -> https://spotter-64c3b.web.app   (the "test env"; deployed on every push to main, or by hand)
+#   test  -> https://spotter-64c3b.web.app   (the "test env"; manual run, until FIREBASE_SERVICE_ACCOUNT is set a push trigger would fail every time)
 #   prod  -> https://myspotter.fit           (site "myspotter-fit"; manual run only, behind the `production` environment)
 # Both sites share Firestore, Auth, Storage and Functions (same project), only the static client differs.
 # The prod build sets VITE_APP_ORIGIN so invite links point at the real domain.
@@ -10,13 +10,6 @@ name: Deploy hosting
 # = JSON key of a service account with the "Firebase Hosting Admin" role. Never commit that key.
 # To require a click-to-approve before prod: Settings -> Environments -> production -> Required reviewers.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'client/**'
-      - 'firebase.json'
-      - 'package-lock.json'
-      - '.github/workflows/deploy-hosting.yml'
   workflow_dispatch:
     inputs:
       target:

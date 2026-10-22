@@ -14,7 +14,8 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { db, HttpsError, mintToken, requireRole, type Role } from '../lib';
 import * as svc from './service';
 import * as team from './team';
-import { runReminders } from './reminders';
+import { runDaily, runReminders } from './reminders';
+import { afterScheduleWritten } from './scheduleTrail';
 import { CoachError, type Actor, type Signer } from './service';
 import {
   adoptLegacyClientsOf,
@@ -48,7 +49,10 @@ async function run<T>(
 ): Promise<T> {
   const { uid, user } = await requireRole(req, roles);
   try {
-    return await fn({ uid, role: user.role });
+    const t = req.auth?.token;
+    const email =
+      t?.email_verified === true && typeof t.email === 'string' ? t.email.toLowerCase() : undefined;
+    return await fn({ uid, role: user.role, ...(email ? { email } : {}) });
   } catch (e) {
     if (e instanceof CoachError) throw new HttpsError(e.code, e.reason, { reason: e.reason });
     if (e instanceof HttpsError) throw e;
@@ -136,6 +140,15 @@ export const teamInviteRevoke = onCall(opts, (req) =>
 export const teamInvitePreview = onCall(opts, (req) =>
   run(req, ANY_TEAM, () => team.teamInvitePreview(ctx(), body(req).inviteId)),
 );
+// Public (no sign-in): the link page of a person who has no session yet. Role and inviter name only.
+export const teamInvitePublic = onCall({ ...opts, maxInstances: 10 }, async (req) => {
+  try {
+    return await team.teamInvitePublicPreview(ctx(), body(req).inviteId);
+  } catch (e) {
+    if (e instanceof CoachError) throw new HttpsError(e.code, e.reason, { reason: e.reason });
+    throw new HttpsError('internal', 'Something went wrong.');
+  }
+});
 export const teamAccept = onCall(opts, (req) =>
   run(req, ANY_TEAM, async (a) => {
     const res = await team.teamAccept(ctx(), a, body(req));
@@ -289,10 +302,27 @@ export const onCoachKeyWritten = onDocumentWritten(
   },
 );
 
+/**
+ * SPO-267 M4: every new version of a client's schedule written by a manager leaves a metadata-only journal entry, written
+ * here by the server (idempotent by client + rev), so a manager cannot change a schedule without a trace.
+ */
+export const onScheduleWritten = onDocumentWritten(
+  { document: 'schedules/{clientId}', ...trig },
+  async (event) => {
+    const before = event.data?.before.exists
+      ? (event.data.before.data() as Record<string, unknown>)
+      : null;
+    const after = event.data?.after.exists
+      ? (event.data.after.data() as Record<string, unknown>)
+      : null;
+    await afterScheduleWritten(ctx(), event.params.clientId, before, after);
+  },
+);
+
 /** Every 15 minutes: session reminders for clients, "not marked" notices for the trainer and managers (SPO-265). */
 export const coachReminders = onSchedule({ schedule: 'every 15 minutes', ...trig }, async () => {
   const r = await runReminders(ctx());
-  console.log('[coach] reminders', JSON.stringify(r)); // counts only
+  console.log('[coach] reminders', JSON.stringify({ ...r, ...(await runDaily(ctx())) })); // counts only
 });
 
 /** Hourly: request expiry, straggling deletes, audit retention, 90-day rotation flags. */

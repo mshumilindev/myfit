@@ -13,6 +13,7 @@ import { temperIndex } from '../atlas/types';
 import { useEffect, useState, type ReactNode } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { deleteObject, ref } from 'firebase/storage';
+import { changePassword } from '../accounts/password';
 import { HttpError, callFn, currentUid, setUsername, trackMutation } from '../api';
 import {
   offlineHydrate,
@@ -40,7 +41,7 @@ import type { BodyMetrics } from '../types';
 import { GymThumb } from '../components/GymThumb';
 import type { Shell } from '../App';
 import { Select } from '../components/ui/Select';
-import { QuietHoursRows } from './QuietHoursRows';
+import { NotificationSettings } from './NotificationSettings';
 import { Tag } from '../components/ui/Tag';
 
 interface ProfileData {
@@ -354,7 +355,7 @@ export function ProfileView({
     setSavingPassword(true);
     setPasswordError(null);
     try {
-      await callFn('changePassword', { currentPassword, newPassword });
+      await changePassword(currentPassword, newPassword);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -626,7 +627,7 @@ export function ProfileView({
                     ))}
                   </Select>
                 </div>
-                <QuietHoursRows />
+                <NotificationSettings />
                 <ListRow
                   icon={<Icon name="robot" />}
                   label={`${t.atlasName}${coach.enabled ? ` · ${t.atlasTemper[temperIndex(coach.temper)]}` : ''}`}

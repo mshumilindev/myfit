@@ -7,7 +7,7 @@
  */
 import type { CoachBackendMode } from '../data/backend';
 import { createDemoClock } from '../data/__fixtures__/demoClock';
-import { buildFixtureWorld, createFixturesPort } from '../data/__fixtures__/fixtures';
+import { FIXTURE_NOW, buildFixtureWorld, createFixturesPort } from '../data/__fixtures__/fixtures';
 import { createFixturesChatPort } from '../chat/__fixtures__/fixtures';
 import { createFixturesLivePort } from '../screens/live/__fixtures__/fixtures';
 import { createFixturesShareSource } from '../share/__fixtures__/fixtures';
@@ -22,6 +22,7 @@ import {
 import { createFixturesClientChatPort } from '../client/data/__fixtures__/chat';
 import { createFixturesTrustPort } from '../security/__fixtures__/trustPort';
 import { createFixturesReauthPort } from '../security/__fixtures__/reauth';
+import { createFixturesClientSpotterPort } from '../client/spotter/__fixtures__/fixtures';
 import { createFixturesTeamPort } from '../team/__fixtures__/fixtures';
 
 const SCENARIOS: readonly ClientScenario[] = [
@@ -59,6 +60,11 @@ hooks.defaults = {
   notes: () => createFixturesNotesPort({ now: createDemoClock() }),
   client: () => createFixturesClientPort({ scenario: scenario() }),
   clientChat: () => createFixturesClientChatPort({ unread: scenario() === 'none' ? 0 : 3 }),
+  clientSpotter: () =>
+    createFixturesClientSpotterPort({
+      now: FIXTURE_NOW,
+      items: scenario() === 'none' ? [] : undefined,
+    }),
   trust: () => createFixturesTrustPort(),
   reauth: () => createFixturesReauthPort(),
   team: () => createFixturesTeamPort({ now: createDemoClock() }),

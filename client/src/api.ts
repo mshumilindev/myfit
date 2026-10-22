@@ -24,6 +24,7 @@ import {
 } from 'firebase/auth';
 import { httpsCallable, type HttpsCallableResult } from 'firebase/functions';
 import { auth, functions } from './firebase';
+import { sessionDeviceId } from './accounts/sessionDevice';
 
 const USERNAME_KEY = 'spotter.username';
 const ROLE_KEY = 'spotter.role';
@@ -103,10 +104,15 @@ export async function signInWithPayload(payload: AuthPayload, remember = false):
   );
   if (remember) {
     // The photo for the landing's Locker Wall; best effort, never blocks the sign-in.
-    void fetchAvatarThumb(payload.userId).then((a) => {
-      if (a) setAvatar(localStorage, payload.userId, a);
+    void fetchAvatarThumb(payload.userId).then((x) => {
+      if (x) setAvatar(localStorage, payload.userId, x);
     });
   }
+}
+
+/** Signs this device back in with a fresh custom token (after "sign out all other devices" ended every refresh token). */
+export async function renewSessionWithToken(token: string): Promise<void> {
+  await signInWithCustomToken(auth, token);
 }
 
 /** The identifier the person signed in with (username), kept so a re-authentication asks only for the password. */
@@ -149,8 +155,14 @@ export async function signOut(opts: { forget?: boolean } = {}): Promise<void> {
   afterSignOut(localStorage, uid, opts.forget === true);
   try {
     // This device's session record goes away while the token still works (best effort, short).
-    const { endSession } = await import('./accounts/sessions');
-    await Promise.race([endSession(), new Promise((r) => setTimeout(r, 1500))]);
+    await Promise.race([
+      callFn(
+        'sessionEnd',
+        { deviceId: sessionDeviceId(), forget: opts.forget === true },
+        { quiet: true },
+      ),
+      new Promise((r) => setTimeout(r, 1500)),
+    ]);
   } catch {
     /* the record just ages out of the Sessions list */
   }
@@ -232,6 +244,7 @@ function codeToStatus(code: string): number {
 const QUIET_CALLABLES = new Set([
   'authStatus',
   'invitePreview',
+  'teamInvitePublic',
   'profileUser',
   'adminPeople',
   'adminUserDetail',

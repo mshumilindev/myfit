@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { currentHash, hashToUrl, normalizeLegacyHash, pushHash, replaceHash, setHash } from './route';
+import {
+  currentHash,
+  hashToUrl,
+  normalizeLegacyHash,
+  pushHash,
+  replaceHash,
+  setHash,
+} from './route';
 
 beforeEach(() => window.history.replaceState(null, '', '/'));
 afterEach(() => vi.restoreAllMocks());
@@ -25,7 +32,7 @@ describe('clean-URL routing', () => {
     window.addEventListener('hashchange', on);
     setHash('#/today');
     expect(window.location.pathname).toBe('/today');
-    expect(currentHash()).toBe('');
+    expect(window.location.hash).toBe('');
     expect(on).toHaveBeenCalledTimes(1);
     setHash('#/today'); // same route: nothing happens, like assigning the same hash
     expect(on).toHaveBeenCalledTimes(1);
@@ -54,7 +61,7 @@ describe('clean-URL routing', () => {
     expect(currentHash()).toBe('#/join/abc-123');
     normalizeLegacyHash();
     expect(window.location.pathname).toBe('/join/abc-123');
-    expect(currentHash()).toBe('');
+    expect(window.location.hash).toBe('');
     expect(currentHash()).toBe('#/join/abc-123');
   });
 });

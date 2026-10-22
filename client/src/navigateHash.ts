@@ -1,4 +1,3 @@
-import { setHash } from './route';
 /**
  * Hash navigation that leaves no browser-history entry on an iOS home-screen app (SPO-146).
  *
@@ -21,6 +20,16 @@ export function isIosStandalone(): boolean {
 }
 
 export function navigateHash(hash: string): void {
-  // setHash pushes a history entry; the iOS home-screen app replaces it instead (see above).
-  setHash(hash, isIosStandalone());
+  if (!isIosStandalone()) {
+    window.location.hash = hash;
+    return;
+  }
+  if (window.location.hash === hash) return;
+  try {
+    window.history.replaceState(null, '', hash);
+  } catch {
+    window.location.hash = hash;
+    return;
+  }
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
 }

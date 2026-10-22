@@ -11,6 +11,7 @@ import {
 } from 'electron';
 import path from 'node:path';
 import { autoUpdater } from 'electron-updater';
+import { closeBehavior, hideToTray } from './hideWindow';
 import { CHANNEL, DEFAULT_APP_URL } from './shared';
 
 /**
@@ -90,12 +91,17 @@ function createWindow(): void {
   });
 
   win.on('close', (event) => {
-    // Closing the window hides it; the app keeps running in the tray (macOS menu bar / Windows tray).
+    // Windows/Linux: closing the window hides it; the app keeps running in the tray. macOS: closing quits (closeBehavior).
     // Real quit: tray menu / app menu (sets `quitting`).
-    if (!quitting) {
-      event.preventDefault();
-      win?.hide();
+    if (quitting) return;
+    if (closeBehavior(process.platform) === 'quit') {
+      // macOS: the close button really quits (no hidden window, no black screen). Let the close go through.
+      quitting = true;
+      app.quit();
+      return;
     }
+    event.preventDefault();
+    if (win) hideToTray(win);
   });
   win.on('closed', () => {
     win = null;
@@ -163,7 +169,13 @@ function setupAutoUpdate(): void {
 
 function createTray(): void {
   const icon = nativeImage.createFromPath(
-    assetPath(process.platform === 'darwin' ? 'trayTemplate.png' : process.platform === 'win32' ? 'tray.ico' : 'tray.png'),
+    assetPath(
+      process.platform === 'darwin'
+        ? 'trayTemplate.png'
+        : process.platform === 'win32'
+          ? 'tray.ico'
+          : 'tray.png',
+    ),
   );
   if (process.platform === 'darwin') icon.setTemplateImage(true);
   tray = new Tray(icon);
@@ -175,7 +187,9 @@ function createTray(): void {
 function buildMenu(): void {
   Menu.setApplicationMenu(
     Menu.buildFromTemplate([
-      ...(process.platform === 'darwin' ? [{ role: 'appMenu' as const }] : [{ role: 'fileMenu' as const }]),
+      ...(process.platform === 'darwin'
+        ? [{ role: 'appMenu' as const }]
+        : [{ role: 'fileMenu' as const }]),
       { role: 'editMenu' },
       { role: 'viewMenu' },
       { role: 'windowMenu' },

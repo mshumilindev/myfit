@@ -1,24 +1,7 @@
 /* eslint-disable */
 // Landing design v36 (SPO-168 / SPO-169). The markup and landing-design.css are generated from the
 // approved design template; only the state logic above the return is hand-written.
-import {
-  Fragment,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type MouseEvent,
-  type ReactElement,
-} from 'react';
-import { AtlasFace } from '../../components/AtlasFace';
-import { AnatomyMap, type AnatomyMark } from '../../components/ui/AnatomyMap';
-import { AnatomyTurntable } from '../../components/ui/AnatomyTurntable';
-import { LOCALE_IDS, fmtDayMonth, setLocale, useT, type LocaleId } from '../../i18n';
-import { AuthView } from '../AuthView';
-import { LegalLinks } from '../../components/ui/LegalLinks';
-import { useLegalT } from '../../i18n/legal';
-// Landing fonts, self-hosted (SPO-287). latin + latin-ext (pl, lt, et) + cyrillic (uk); weights as the old Google URL.
+// Self-hosted fonts (SPO-287, ADR 007): no request to Google Fonts.
 import '@fontsource/inter-tight/latin-500.css';
 import '@fontsource/inter-tight/latin-ext-500.css';
 import '@fontsource/inter-tight/cyrillic-500.css';
@@ -43,6 +26,25 @@ import '@fontsource/jetbrains-mono/cyrillic-400.css';
 import '@fontsource/jetbrains-mono/latin-700.css';
 import '@fontsource/jetbrains-mono/latin-ext-700.css';
 import '@fontsource/jetbrains-mono/cyrillic-700.css';
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
+import { AtlasFace } from '../../components/AtlasFace';
+import { AnatomyMap, type AnatomyMark } from '../../components/ui/AnatomyMap';
+import { AnatomyTurntable } from '../../components/ui/AnatomyTurntable';
+import { LOCALE_IDS, fmtDayMonth, setLocale, useT, type LocaleId } from '../../i18n';
+import { AuthView } from '../AuthView';
+import { isAppShell } from './landingGate';
+import { downloadUrl } from '../../downloads';
+import { holdOffscreenMotion } from './holdOffscreenMotion';
 import './landing-design.css';
 
 const FLAGS: Record<LocaleId, string> = { en: '🇬🇧', uk: '🇺🇦', pl: '🇵🇱', lt: '🇱🇹', et: '🇪🇪' };
@@ -98,6 +100,12 @@ const RECOVERY_MARKS: AnatomyMark[] = [
   { layer: 'm_arm', tone: 'ok' },
   { layer: 'm_calves', tone: 'ok' },
 ];
+
+/** The spinning body's frames are composed ahead of time (scripts/bake-landing-turn.py): nothing is built in the browser. */
+const BAKED_TURN = {
+  url: (deg: number) => `${import.meta.env.BASE_URL ?? '/'}landing/turn/${deg}.webp`,
+  step: 10,
+};
 
 /** Muscle map with a skeleton scan sweeping over it (the design's "x-ray"). */
 function AnatomyXray({ label }: { label: string }) {
@@ -1150,6 +1158,7 @@ function AnatomyTurn({ label }: { label: string }) {
         <AnatomyTurntable
           base="muscles"
           marks={RECOVERY_MARKS}
+          baked={BAKED_TURN}
           label={label}
           camera={camera}
           rotatable={false}
@@ -1164,58 +1173,19 @@ export interface LandingInvite {
   inviter: string | null;
   expiresAt: number;
   onStart: () => void;
-  /** A ready-made panel instead of the gym-invite copy (the team invite, SPO-196): the hero card shows these lines and actions. */
-  custom?: {
-    by: string;
-    title: string;
-    body: string;
-    note?: string;
-    error?: string | null;
-    busy?: boolean;
-    primary?: { label: string; onClick: () => void };
-    secondary?: { label: string; onClick: () => void };
-  };
 }
 
-function AuthSlot({ onLoggedIn, invite }: { onLoggedIn: () => void; invite?: LandingInvite }) {
+function AuthSlot({
+  onLoggedIn,
+  invite,
+  notice,
+}: {
+  onLoggedIn: () => void;
+  invite?: LandingInvite;
+  notice?: ReactNode;
+}) {
   const { t, locale } = useT();
   const T = (k: string): string => (t as unknown as Record<string, string>)[`landing_${k}`] ?? k;
-  if (invite?.custom) {
-    const c = invite.custom;
-    return (
-      <div className="ld-auth" aria-busy={c.busy || undefined}>
-        <div className="ld-inv-by">{c.by}</div>
-        <h2 className="ld-inv-h">{c.title}</h2>
-        <div className="ld-inv-steps">{c.body}</div>
-        {c.error && (
-          <div className="ld-inv-err" role="alert">
-            {c.error}
-          </div>
-        )}
-        {c.primary && (
-          <button
-            type="button"
-            className="ld-inv-btn"
-            disabled={c.busy}
-            onClick={c.primary.onClick}
-          >
-            {c.primary.label}
-          </button>
-        )}
-        {c.secondary && (
-          <button
-            type="button"
-            className="ld-inv-btn ld-inv-btn--ghost"
-            disabled={c.busy}
-            onClick={c.secondary.onClick}
-          >
-            {c.secondary.label}
-          </button>
-        )}
-        {c.note && <div className="ld-inv-steps">{c.note}</div>}
-      </div>
-    );
-  }
   if (invite) {
     return (
       <div className="ld-auth">
@@ -1235,7 +1205,7 @@ function AuthSlot({ onLoggedIn, invite }: { onLoggedIn: () => void; invite?: Lan
   return (
     <div className="ld-auth">
       <div className="ld-auth-h">{t.signIn}</div>
-      <AuthView onLoggedIn={onLoggedIn} />
+      <AuthView onLoggedIn={onLoggedIn} notice={notice} />
     </div>
   );
 }
@@ -1319,12 +1289,14 @@ function useFitScreens(dep: unknown) {
 export function LandingDesign({
   onLoggedIn,
   invite,
+  signInNotice,
 }: {
   onLoggedIn: () => void;
   invite?: LandingInvite;
+  /** A note above the sign-in form (a team link says who invited the person). */
+  signInNotice?: ReactNode;
 }) {
   const { t, locale } = useT();
-  const { lg } = useLegalT();
   useFitScreens(locale);
   const T = (k: string): string => (t as unknown as Record<string, string>)[`landing_${k}`] ?? k;
   const [st, setSt] = useState<Record<string, any>>({});
@@ -1334,6 +1306,8 @@ export function LandingDesign({
   const off: number = st.off || 0;
   const pd: number = st.pd || 0;
   const os = detectOS();
+  // Inside the installed app the desktop installers are pointless (Android and the rest stay).
+  const deskApp = isAppShell() ? ' l-noapp' : '';
   const rows = [
     { cls: 'l-srow l-warm', idx: 'W', reps: '10', kg: '40', kind: T('kind_w') },
     { cls: 'l-srow', idx: '1', reps: '8', kg: '80', kind: '' },
@@ -1364,15 +1338,15 @@ export function LandingDesign({
     // on an Android phone the tile downloads the .apk straight away; elsewhere it opens the QR
     toggleAnd: () =>
       os === 'and'
-        ? window.location.assign(
-            'https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.apk?alt=media&token=c19cae91-1c3f-4e4a-b8be-51aa4000072a',
-          )
+        ? window.location.assign(downloadUrl('android'))
         : patch({ andOpen: !st.andOpen, open: false }),
     // desktop installers make no sense on a phone, the .apk none on iOS, and iOS has no installer at all (it uses the web app)
     clsWin:
-      os === 'win' ? 'l-dl l-pri' : os === 'and' || os === 'ios' ? 'l-dl l-nomob' : 'l-dl l-hide',
+      (os === 'win' ? 'l-dl l-pri' : os === 'and' || os === 'ios' ? 'l-dl l-nomob' : 'l-dl') +
+      deskApp,
     clsMac:
-      os === 'mac' ? 'l-dl l-pri' : os === 'and' || os === 'ios' ? 'l-dl l-nomob' : 'l-dl l-hide',
+      (os === 'mac' ? 'l-dl l-pri' : os === 'and' || os === 'ios' ? 'l-dl l-nomob' : 'l-dl') +
+      deskApp,
     clsAnd: os === 'and' ? 'l-dl l-pri' : os === 'ios' ? 'l-dl l-nomob' : 'l-dl',
     clsPdl: os === 'ios' ? 'l-pdl l-nomob' : 'l-pdl',
     andSmall: os === 'and' ? '.apk ↓' : 'QR · .apk',
@@ -1426,23 +1400,11 @@ export function LandingDesign({
   useEffect(() => {
     const root = rootRef.current;
     const sc = root?.closest('.app-landing') as HTMLElement | null;
-    if (!root || !sc || typeof IntersectionObserver === 'undefined') return;
-    const secs = Array.from(root.querySelectorAll<HTMLElement>('section[id^="s-"]'));
-    const set = (s: Element, idle: boolean) => {
-      s.classList.toggle('l-idle', idle);
-      s.querySelectorAll('svg').forEach((v) => {
-        const sv = v as SVGSVGElement;
-        if (idle) sv.pauseAnimations?.();
-        else sv.unpauseAnimations?.();
-      });
-    };
-    secs.forEach((s) => set(s, true));
-    const io = new IntersectionObserver(
-      (es) => es.forEach((e) => set(e.target, !(e.isIntersecting && e.intersectionRatio > 0))),
-      { root: sc, rootMargin: '0px', threshold: [0, 0.002, 0.01] },
+    if (!root || !sc) return;
+    return holdOffscreenMotion(
+      sc,
+      Array.from(root.querySelectorAll<HTMLElement>('section[id^="s-"]')),
     );
-    secs.forEach((s) => io.observe(s));
-    return () => io.disconnect();
   }, []);
 
   // The recovery screen's background reacts to the pointer: the row (bar + ring) nearest to it turns x-ray blue.
@@ -1511,6 +1473,7 @@ export function LandingDesign({
       <div
         id="top"
         data-os={os}
+        data-shell={isAppShell() ? 'app' : 'web'}
         style={{ background: '#131416', color: '#ecebe7', minHeight: '100dvh' }}
       >
         <nav className="l-rail" aria-label="Sections">
@@ -1565,7 +1528,9 @@ export function LandingDesign({
             <div className="l-hb-in" style={sv(v.bgVars)}>
               <div className="l-hs" style={{ backgroundImage: 'url(/landing/hero.webp)' }}>
                 <div className="l-hs-beam">
-                  <div className="l-hs-glow" />
+                  <div className="l-hs-wd">
+                    <div className="l-hs-glow" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -1626,15 +1591,12 @@ export function LandingDesign({
               </div>
               <div className="l-panel">
                 <div className="l-pform">
-                  <AuthSlot onLoggedIn={onLoggedIn} invite={invite} />
+                  <AuthSlot onLoggedIn={onLoggedIn} invite={invite} notice={signInNotice} />
                 </div>
                 <div className={v.clsPdl}>
                   <div className="l-pdl-l l-fm">{T('get_l')}</div>
                   <div className="l-dls">
-                    <a
-                      className={v.clsWin}
-                      href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter-Setup.exe?alt=media&token=71d32b1f-0a72-486e-ae31-0b53e89112b6"
-                    >
+                    <a className={v.clsWin} href={downloadUrl('win')}>
                       <svg className="l-ic" viewBox="0 0 18 18" aria-hidden="true">
                         <path
                           fill="currentColor"
@@ -1644,10 +1606,7 @@ export function LandingDesign({
                       <span>Windows</span>
                       <small>.exe ↓</small>
                     </a>{' '}
-                    <a
-                      className={v.clsMac}
-                      href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.dmg?alt=media&token=2e3166d6-ff38-4b68-9b84-6081b9b96e90"
-                    >
+                    <a className={v.clsMac} href={downloadUrl('mac')}>
                       <svg className="l-ic" viewBox="0 0 24 24" aria-hidden="true">
                         <path
                           fill="currentColor"
@@ -1686,10 +1645,7 @@ export function LandingDesign({
                       <span>Android</span>
                       <small>{v.andSmall}</small>
                     </button>{' '}
-                    <a
-                      className="l-dl l-and-direct"
-                      href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.apk?alt=media&token=c19cae91-1c3f-4e4a-b8be-51aa4000072a"
-                    >
+                    <a className="l-dl l-and-direct" href={downloadUrl('android')}>
                       <svg className="l-ic" viewBox="0 0 24 24" aria-hidden="true">
                         <g fill="currentColor">
                           <path
@@ -1734,10 +1690,7 @@ export function LandingDesign({
                       </div>
                       <div>
                         <div className="l-qrt">{T('and_scan')}</div>
-                        <a
-                          className="l-qrl"
-                          href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.apk?alt=media&token=c19cae91-1c3f-4e4a-b8be-51aa4000072a"
-                        >
+                        <a className="l-qrl" href={downloadUrl('android')}>
                           {T('and_dl')} ↓
                         </a>
                       </div>
@@ -4328,15 +4281,12 @@ export function LandingDesign({
             <p className="l-lead">{T('f_p')}</p>
             <div className="l-panel l-cta-panel">
               <div className="l-pform">
-                <AuthSlot onLoggedIn={onLoggedIn} invite={invite} />
+                <AuthSlot onLoggedIn={onLoggedIn} invite={invite} notice={signInNotice} />
               </div>
               <div className={v.clsPdl}>
                 <div className="l-pdl-l l-fm">{T('get_l')}</div>
                 <div className="l-dls">
-                  <a
-                    className={v.clsWin}
-                    href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter-Setup.exe?alt=media&token=71d32b1f-0a72-486e-ae31-0b53e89112b6"
-                  >
+                  <a className={v.clsWin} href={downloadUrl('win')}>
                     <svg className="l-ic" viewBox="0 0 18 18" aria-hidden="true">
                       <path
                         fill="currentColor"
@@ -4346,10 +4296,7 @@ export function LandingDesign({
                     <span>Windows</span>
                     <small>.exe ↓</small>
                   </a>{' '}
-                  <a
-                    className={v.clsMac}
-                    href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.dmg?alt=media&token=2e3166d6-ff38-4b68-9b84-6081b9b96e90"
-                  >
+                  <a className={v.clsMac} href={downloadUrl('mac')}>
                     <svg className="l-ic" viewBox="0 0 24 24" aria-hidden="true">
                       <path
                         fill="currentColor"
@@ -4388,10 +4335,7 @@ export function LandingDesign({
                     <span>Android</span>
                     <small>{v.andSmall}</small>
                   </button>{' '}
-                  <a
-                    className="l-dl l-and-direct"
-                    href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.apk?alt=media&token=c19cae91-1c3f-4e4a-b8be-51aa4000072a"
-                  >
+                  <a className="l-dl l-and-direct" href={downloadUrl('android')}>
                     <svg className="l-ic" viewBox="0 0 24 24" aria-hidden="true">
                       <g fill="currentColor">
                         <path
@@ -4436,10 +4380,7 @@ export function LandingDesign({
                     </div>
                     <div>
                       <div className="l-qrt">{T('and_scan')}</div>
-                      <a
-                        className="l-qrl"
-                        href="https://firebasestorage.googleapis.com/v0/b/spotter-64c3b.firebasestorage.app/o/downloads%2FSpotter.apk?alt=media&token=c19cae91-1c3f-4e4a-b8be-51aa4000072a"
-                      >
+                      <a className="l-qrl" href={downloadUrl('android')}>
                         {T('and_dl')} ↓
                       </a>
                     </div>
@@ -4457,16 +4398,6 @@ export function LandingDesign({
             </div>
             <div className="l-getimgs"></div>
           </div>
-          {/* One row of legal links: the sign-in card (AuthView) carries it; the invite panels have no such card. */}
-          {invite && (
-            <footer className="l-foot">
-              <LegalLinks
-                label={lg.ui.legalNav}
-                privacyLabel={lg.ui.privacyLink}
-                termsLabel={lg.ui.termsLink}
-              />
-            </footer>
-          )}
         </section>
       </div>
     </div>

@@ -790,7 +790,7 @@ function balanceWeeks(ctx: Ctx, startedAt: number, endsAt: number): number {
   const end = Math.min(ctx.now, endsAt);
   let weeks = 0;
   for (let blockEnd = startedAt + 7 * DAY; blockEnd <= end + 1; blockEnd += 7 * DAY) {
-    const per = weeklyMuscleSets(ctx.finished, blockEnd, 7);
+    const per = weeklyMuscleSets(ctx.finished, blockEnd, 7, blockEnd); // later = next block (SPO-152)
     const ok = VOLUME_MUSCLES.every((mm) => {
       const lm = LANDMARKS[mm];
       if (!lm) return true;

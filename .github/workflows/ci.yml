@@ -24,11 +24,15 @@ env:
 
 jobs:
   # ---- quality: five independent jobs instead of one 4.5-minute chain; `quality` below keeps the old check name ----
-  lint:
-    name: ESLint
+  # ESLint + Prettier + the coverage floor in ONE job: each was ~25-40 s of work behind ~25 s of runner setup, and the
+  # 33 jobs of a main push already exceed the ~20 concurrent runners (ADR 004). Together ~90 s, far off the critical path.
+  static:
+    name: Static checks (ESLint · Prettier · coverage floor)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -39,24 +43,17 @@ jobs:
           path: node_modules/.cache/eslint
           key: eslint-${{ hashFiles('package-lock.json', 'eslint.config.*') }}-${{ github.sha }}
           restore-keys: eslint-${{ hashFiles('package-lock.json', 'eslint.config.*') }}-
-      - run: npx eslint . --cache --cache-strategy content --cache-location node_modules/.cache/eslint/
-
-  format:
-    name: Prettier
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
       - uses: actions/cache@v4
         with:
           path: node_modules/.cache/prettier
           key: prettier-${{ hashFiles('package-lock.json', '.prettierrc*') }}-${{ github.sha }}
           restore-keys: prettier-${{ hashFiles('package-lock.json', '.prettierrc*') }}-
-      - run: npx prettier --check --cache --cache-strategy content --cache-location node_modules/.cache/prettier/.cache .
+      - name: ESLint
+        run: npx eslint . --cache --cache-strategy content --cache-location node_modules/.cache/eslint/
+      - name: Prettier
+        run: npx prettier --check --cache --cache-strategy content --cache-location node_modules/.cache/prettier/.cache .
+      - name: Coverage thresholds / include / exclude never below the floor, floor never below the base commit
+        run: npm run coverage:guard -- --base ${{ github.event.pull_request.base.sha || github.event.before || 'HEAD' }}
 
   types:
     name: Types · boundaries · audit · SQL
@@ -100,6 +97,69 @@ jobs:
           path: client/coverage
           if-no-files-found: ignore
 
+  # Client unit tests (528 files, ~1750 CPU-s serial). Sharded by measured weight (client/vitest.sequencer.ts + test-weights.json), not by file count. Coverage only of the changed files (SPO-268).
+  # N=8: the floor was src/atlas/kb.test.ts (~3 min as one file; split into kb.*.test.ts so shards can balance it); more shards do not shorten the worst one
+  # and eat the ~20 concurrent-job budget (ADR 004). --maxWorkers=100% because vitest's default on 2 vCPU is a single worker (about 1.6x slower).
+  client-tests:
+    name: Client tests ${{ matrix.shard }}/8
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # some client tests import the Cloud Functions sources (coach parity harness), which have their own lockfile
+      - run: npm ci --prefix functions
+      # Patch-coverage (SPO-268): coverage ONLY of the files this push/PR changed (include = diff), merged by `patch-coverage` below.
+      # No base (schedule, manual run, new branch, force-push) = no coverage flags, i.e. exactly the old no-coverage shard.
+      - name: Base commit for patch-coverage
+        id: base
+        run: |
+          BASE="${{ github.event.pull_request.base.sha || (github.event_name == 'push' && github.event.before) || '' }}"
+          if [ -n "$BASE" ] && git fetch --no-tags --depth=1 origin "$BASE" 2>/dev/null; then echo "sha=$BASE" >> "$GITHUB_OUTPUT"; fi
+      - name: Client unit tests (shard ${{ matrix.shard }}/8, coverage of the changed files only)
+        working-directory: client
+        run: |
+          ARGS=""
+          if [ -n "${{ steps.base.outputs.sha }}" ]; then ARGS=$(node ../scripts/patch-coverage.mjs --vitest-args --base "${{ steps.base.outputs.sha }}"); fi
+          npx vitest run --shard ${{ matrix.shard }}/8 --maxWorkers=100% $ARGS
+      - name: Upload patch coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patch-cov-${{ matrix.shard }}
+          path: client/coverage-patch/coverage-final.json
+          if-no-files-found: ignore
+
+  # Patch-coverage gate (SPO-268): share of the CHANGED executable statements of client/src that the tests cover (threshold:
+  # coverage-thresholds.json `patch`, only grows). The full coverage gate (`tests`, `static`) is unchanged. ~20 s, parallel to the rest.
+  patch-coverage:
+    name: Patch coverage
+    needs: client-tests
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Base commit
+        id: base
+        run: |
+          BASE="${{ github.event.pull_request.base.sha || (github.event_name == 'push' && github.event.before) || '' }}"
+          if [ -n "$BASE" ] && git fetch --no-tags --depth=1 origin "$BASE" 2>/dev/null; then echo "sha=$BASE" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/download-artifact@v4
+        if: needs.client-tests.result == 'success' && steps.base.outputs.sha != ''
+        with:
+          pattern: patch-cov-*
+          path: patch-cov
+      - name: Gate on the coverage of the changed lines
+        if: needs.client-tests.result == 'success'
+        run: node scripts/patch-coverage.mjs --collect patch-cov --base "${{ steps.base.outputs.sha }}"
+
   build:
     name: Build (server + client)
     runs-on: ubuntu-latest
@@ -127,10 +187,28 @@ jobs:
       - name: Report findings
         run: node scripts/semgrep-annotate.mjs semgrep.json
 
+  # Passkeys against a software authenticator (SPO-211/229): a local server runs the real passkeysCore rules, Chromium has a
+  # CDP virtual authenticator. No app build needed, so it runs in parallel and takes about a minute.
+  passkeys-e2e:
+    name: Passkeys e2e (virtual authenticator)
+    # Not a gate yet: passes locally on Chromium 1194 (headed and headless shell) but failed on the CI Chromium; logs are
+    # not retrievable from the agent sandbox. Informational until the CI failure is reproduced (SPO-229).
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=mobile-chromium tests/e2e/passkeys-webauthn.e2e.ts
+
   quality:
     name: Lint · types · tests · build
     if: always()
-    needs: [lint, format, types, tests, build, security]
+    needs: [static, types, tests, client-tests, patch-coverage, build, security]
     runs-on: ubuntu-latest
     steps:
       - name: Every quality job must have succeeded (a skipped or cancelled one counts as a failure)
@@ -170,7 +248,22 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build-storybook
+      - name: Build Storybook
+        env:
+          # the catalog outgrew Node's default heap
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: |
+          set +e
+          mkdir -p client/node_modules/.cache/storybook/10.6.0/default
+          npm run build-storybook > sb.log 2>&1
+          rc=$?
+          cat sb.log
+          if [ "$rc" != 0 ]; then
+            echo "::error::storybook exit $rc, $(wc -l < sb.log) log lines"
+            { ls -la client/node_modules/.cache/storybook/10.6.0/default 2>&1 | head -5; ls -ld client/node_modules client/node_modules/.cache 2>&1; sed 's/\x1b\[[0-9;]*m//g' sb.log | grep -n -m1 -B14 -A3 ENOENT; } | while IFS= read -r l; do echo "::error::${l:0:220}"; done
+            tail -n 12 sb.log | sed 's/\x1b\[[0-9;]*m//g' | while IFS= read -r l; do echo "::error::${l:0:220}"; done
+          fi
+          exit $rc
       - uses: actions/upload-artifact@v4
         with:
           name: storybook-static
@@ -180,7 +273,11 @@ jobs:
 
   layout-shard:
     name: Layout shard ${{ matrix.shard }}
-    # No `needs: storybook`: the shard installs its tools while Storybook builds, then waits for the artifact (SPO-140).
+    # `needs: storybook` (was: install tools while Storybook builds, then poll for the artifact, SPO-140). That polling held
+    # a runner slot idle for the whole ~70 s build in every shard; with ~30 jobs against ~20 concurrent runners the idle
+    # shards pushed the real work (client tests, other shards) back. Setup is now short (cached browsers), so starting
+    # after the build costs less than the idle slots did. A failed build skips the shards and fails `layout`.
+    needs: storybook
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -195,19 +292,19 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - name: Wait for the Storybook build (fails fast if it failed)
-        env:
-          GH_TOKEN: ${{ github.token }}
+      # no lifecycle scripts: the audit needs Playwright + the built Storybook, not the husky/electron hooks
+      - run: npm ci --ignore-scripts
+      - name: Playwright version
+        id: pw
+        run: echo "v=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: pwcache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.v }}
+      - name: Playwright Chromium (browser download is cached; system libraries are always installed)
         run: |
-          for i in $(seq 1 120); do
-            if gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" --jq '.artifacts[].name' | grep -qx storybook-static; then echo "artifact ready after ${i} checks"; exit 0; fi
-            res=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" --jq '.jobs[]|select(.name=="Build Storybook")|.conclusion // ""')
-            if [ -n "$res" ] && [ "$res" != "success" ]; then echo "Build Storybook finished with: $res"; exit 1; fi
-            sleep 3
-          done
-          echo "timed out waiting for the Storybook artifact"; exit 1
+          if [ "${{ steps.pwcache.outputs.cache-hit }}" = "true" ]; then npx playwright install-deps chromium; else npx playwright install --with-deps chromium; fi
       - uses: actions/download-artifact@v4
         with:
           name: storybook-static

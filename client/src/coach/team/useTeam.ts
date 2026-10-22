@@ -2,14 +2,17 @@ import { useEffect, useSyncExternalStore } from 'react';
 import { coachAdapter } from '../data/backend';
 import { createTeamStore, type TeamState, type TeamStore } from './teamStore';
 import { createUnavailableTeamPort, type TeamPort } from './port';
+import { configureTeam, configuredTeam } from './teamConfig';
 
-let configured: TeamPort | null = null;
+export { configureTeam };
 /** The app's team port (the Firestore adapter once installed). Tests and stories pass their own. */
-export function configureTeam(p: TeamPort | null): void {
-  configured = p;
-}
-export const getTeamPort = (): TeamPort =>
-  (configured ??= coachAdapter('team', createUnavailableTeamPort));
+export const getTeamPort = (): TeamPort => {
+  const c = configuredTeam();
+  if (c) return c;
+  const p = coachAdapter('team', createUnavailableTeamPort);
+  configureTeam(p);
+  return p;
+};
 
 const stores = new WeakMap<TeamPort, TeamStore>();
 export function teamStoreFor(port: TeamPort): TeamStore {

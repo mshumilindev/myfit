@@ -21,6 +21,7 @@ export type ActivityKind =
   | ReportedKind
   | 'move-request'
   | 'move-cancel'
+  | 'move-answer'
   | 'removal-request'
   | 'removal-approved'
   | 'removal-declined'
@@ -28,12 +29,14 @@ export type ActivityKind =
   | 'member-added'
   | 'member-removed'
   | 'member-left'
-  | 'client-invite';
+  | 'client-invite'
+  | 'access-change';
 
 export interface ActivityEntry {
   id: string;
   actorUid: string;
-  role: 'trainer' | 'manager';
+  /** who acted: the team's trainer or manager, or the client answering a proposal a manager made */
+  role: 'trainer' | 'manager' | 'client';
   kind: ActivityKind;
   clientId?: string;
   refId?: string;
@@ -52,8 +55,12 @@ export async function logActivity(
   teamId: string,
   now: number,
   e: Omit<ActivityEntry, 'id' | 'ts'>,
+  /** a caller-chosen deterministic id (an idempotency key): the same key upserts the same entry */
+  fixedId?: string,
 ): Promise<void> {
-  const id = `${now}-${e.kind}-${(e.refId ?? e.clientId ?? '').slice(0, 24)}-${e.actorUid.slice(0, 8)}`;
+  const id =
+    fixedId ??
+    `${now}-${e.kind}-${(e.refId ?? e.clientId ?? '').slice(0, 24)}-${e.actorUid.slice(0, 8)}`;
   const entry: ActivityEntry = { ...e, id, ts: now };
   // drop undefined fields (Firestore rejects them)
   await kv.set(

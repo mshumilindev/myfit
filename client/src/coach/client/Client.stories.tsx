@@ -131,7 +131,14 @@ const world = (scenario: ClientScenario, child: ReactNode): Story => ({
 export const AccessLog: Story = world('active', <AccessLogPage onBack={noop} />);
 
 const trainerPage = (
-  <MyTrainerPage onBack={noop} onChat={noop} onSharing={noop} onProgram={noop} onLeft={noop} />
+  <MyTrainerPage
+    onBack={noop}
+    onChat={noop}
+    onSpotter={noop}
+    onSharing={noop}
+    onProgram={noop}
+    onLeft={noop}
+  />
 );
 export const MyTrainer: Story = world('active', trainerPage);
 export const MyTrainerNoProgram: Story = world('no-program', trainerPage);

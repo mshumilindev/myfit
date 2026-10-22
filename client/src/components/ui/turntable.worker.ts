@@ -5,7 +5,16 @@
  * angle advances by elapsed time and the two frames either side of it are cross-faded, so a 5-degree step is invisible.
  */
 type Msg =
-  | { t: 'init'; canvas: OffscreenCanvas; step: number; spin: number; angle: number; rect: [number, number, number, number]; w: number; h: number }
+  | {
+      t: 'init';
+      canvas: OffscreenCanvas;
+      step: number;
+      spin: number;
+      angle: number;
+      rect: [number, number, number, number];
+      w: number;
+      h: number;
+    }
   | { t: 'size'; w: number; h: number }
   | { t: 'f'; deg: number; bmp: ImageBitmap }
   | { t: 'ready' }
@@ -58,7 +67,17 @@ const draw = () => {
   const k = cw / sw;
   const blit = (img: ImageBitmap, a: number) => {
     ctx!.globalAlpha = a;
-    ctx!.drawImage(img, x0, y0, x1 - x0, y1 - y0, (x0 - sx) * k, (y0 - sy) * k, (x1 - x0) * k, (y1 - y0) * k);
+    ctx!.drawImage(
+      img,
+      x0,
+      y0,
+      x1 - x0,
+      y1 - y0,
+      (x0 - sx) * k,
+      (y0 - sy) * k,
+      (x1 - x0) * k,
+      (y1 - y0) * k,
+    );
   };
   const pos = angle / step;
   const fl = Math.floor(pos);

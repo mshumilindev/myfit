@@ -5,11 +5,10 @@ import { useTeamT } from '../../i18n/coachTeam';
 import { coachClock, coachDayMonth } from '../format';
 import type { SpotterFeed } from './types';
 
-/** The pinned Spotter line at the top of the Chat list (SPO-236): the newest team message and the unread count. */
+/** The pinned Spotter line at the top of the Chat list (SPO-236): always there (never removed or archived), with the newest team message and the unread count when there are any. */
 export function SpotterRow({ feed, onOpen }: { feed: SpotterFeed; onOpen: () => void }) {
   const { tm, locale } = useTeamT();
   const last = feed.items[0];
-  if (!last) return null;
   return (
     <GroupedList list label={tm.spListLabel}>
       <li>
@@ -18,7 +17,11 @@ export function SpotterRow({ feed, onOpen }: { feed: SpotterFeed; onOpen: () => 
           icon={<IconTile tone="accent" size={40} icon="envelope" />}
           label={tm.spTitle}
           sub={tm.spSub}
-          value={`${coachDayMonth(last.createdAt, locale)} ${coachClock(last.createdAt)}`}
+          value={
+            last
+              ? `${coachDayMonth(last.createdAt, locale)} ${coachClock(last.createdAt)}`
+              : undefined
+          }
           trailing={feed.unread > 0 ? <Badge n={feed.unread} /> : undefined}
           onClick={onOpen}
         />

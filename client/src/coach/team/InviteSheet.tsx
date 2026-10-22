@@ -26,8 +26,8 @@ export function InviteSheet({
       mode="sheet"
       anchorRef={anchor}
       onClose={onClose}
-      label={invite.email}
-      title={invite.email}
+      label={invite.email || tm.tmInviteLinkRow}
+      title={invite.email || tm.tmInviteLinkRow}
     >
       <div className="tm-sheet">
         <GroupedList surface="raised">
@@ -43,7 +43,7 @@ export function InviteSheet({
           <ListRow
             action
             tone="danger"
-            label={tm.tmRevokeFor(invite.email)}
+            label={tm.tmRevokeFor(invite.email || tm.tmInviteLinkRow)}
             onClick={() => {
               onRevoke();
               onClose();

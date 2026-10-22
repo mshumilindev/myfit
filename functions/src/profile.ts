@@ -12,6 +12,8 @@ import {
   db,
   requireAuth,
   loadUser,
+  authAdmin,
+  mintToken,
   HttpsError,
   displayName,
   parseNameInput,
@@ -37,6 +39,7 @@ import {
   type LegacyCut,
 } from './coach/legacy';
 import { coachKv } from './coach/runtime';
+import { deletePasskeysOf } from './passkeysStore';
 
 const DAY = 24 * 60 * 60 * 1000;
 const USERNAME_MAX = 64;
@@ -473,7 +476,11 @@ export const changePassword = onCall(async (req) => {
     .collection('credentials')
     .doc(uid)
     .set({ passwordHash: hashPassword(newPassword) });
-  return { ok: true };
+  // A new password ends every biometric sign-in made under the old one.
+  await deletePasskeysOf(uid);
+  // ...and so does every other signed-in device; this one signs itself back in with the fresh token.
+  await authAdmin.revokeRefreshTokens(uid);
+  return { ok: true, token: await mintToken(uid, u.role) };
 });
 
 export const profileUser = onCall(async (req) => {
