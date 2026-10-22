@@ -68,6 +68,7 @@ export function ConsentPrompt({
       label={title}
       role="alertdialog"
       closeLabel={closeLabel}
+      overTrap
     >
       <div className="uicp">
         <div className="uicp-head">

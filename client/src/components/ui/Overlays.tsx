@@ -143,6 +143,8 @@ export function Sheet(props: {
    * for a blocking prompt the person must answer through its own buttons (the legal gate). Default `true`.
    */
   dismissible?: boolean;
+  /** A consent prompt that must stay usable above a blocking sheet even when it mounted in the same commit (not made inert). */
+  overTrap?: boolean;
 }) {
   const { t } = useT();
   const dismissible = props.dismissible !== false;
@@ -265,6 +267,7 @@ export function Sheet(props: {
         aria-label={props.label}
         tabIndex={-1}
         style={baseStyle}
+        data-over-trap={props.overTrap ? '' : undefined}
       >
         <div className="sheet-grip" {...grab}>
           <div className="grabber" />

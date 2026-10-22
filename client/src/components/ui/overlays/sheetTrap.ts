@@ -80,6 +80,7 @@ export function useBlockingSheetTrap(
     const made: Element[] = [];
     for (const el of Array.from(document.body.children)) {
       if (el === layer || el.contains(layer)) continue;
+      if (el.querySelector('[data-over-trap]')) continue; // a consent prompt above the gate stays usable
       if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE') continue;
       if (makeInert(el)) made.push(el);
     }
