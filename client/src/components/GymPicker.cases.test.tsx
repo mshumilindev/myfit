@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { setLocale } from '../i18n';
+import { resetGeoGateForTests, setGeoSearchState } from '../data/geoSearchGate';
 import { __getStateForTests, __replaceStateForTests } from '../store';
 import type { PlaceResult } from '../data/gymProviders';
 import type { Gym } from '../types';
@@ -47,6 +48,9 @@ const place = (over: Partial<PlaceResult> = {}): PlaceResult =>
 const flush = () => act(async () => void (await new Promise((r) => setTimeout(r, 0))));
 
 beforeEach(() => {
+  // The picker's search and distances are gated on the geo-search consent (SPO-293): granted here.
+  resetGeoGateForTests();
+  setGeoSearchState({ on: true, ready: true, answered: true });
   setLocale('en');
   getPos.mockReset();
   getPos.mockResolvedValue({ lat: 50.0, lng: 14.0, accuracy: 5 });
@@ -313,5 +317,22 @@ describe('GymPicker · opening hours', () => {
     render(<GymPicker {...base} gyms={[NEAR]} variant="inline" />);
     await flush();
     expect(document.querySelector('.row-hours')).toBeNull();
+  });
+});
+
+describe('GymPicker without the geo-search consent (SPO-293)', () => {
+  const base = { title: 'Where?', onPick: () => undefined, onClose: () => undefined };
+
+  it('still lists the saved gyms, but reads no position, shows no distances and searches nothing nearby', async () => {
+    resetGeoGateForTests();
+    render(<GymPicker {...base} gyms={[FAR, NEAR]} />);
+    await flush();
+    expect(getPos).not.toHaveBeenCalled();
+    expect(searchNearby).not.toHaveBeenCalled();
+    const list = document.querySelector('.gym-pick-list')!;
+    expect(list.textContent).toContain('Far Gym');
+    expect(list.textContent).toContain('Near Gym');
+    expect(list.textContent).not.toMatch(/\d\s?(km|m)\b/);
+    expect(screen.getByText('Gym search is off')).toBeTruthy();
   });
 });

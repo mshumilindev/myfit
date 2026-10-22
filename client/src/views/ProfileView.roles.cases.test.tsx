@@ -16,10 +16,17 @@ import { pm, profile } from './__fixtures__/profileKit';
 import { safeEn as sf } from '../i18n/coachSafe.en';
 import { resetPrefsForTests } from '../pushPrefs';
 
-vi.mock('firebase/firestore', () => ({
+vi.mock('firebase/firestore', async (orig) => ({
+  ...(await orig<typeof import('firebase/firestore')>()),
   doc: (_d: unknown, c: string, id: string) => ({ c, id }),
   updateDoc: (...a: unknown[]) => pm.updateDoc(...a),
   setDoc: (...a: unknown[]) => pm.setDoc(...a),
+  onSnapshot: () => () => undefined, // the nutrition store streams its meta docs
+  collection: (_d: unknown, ...p: string[]) => ({ path: p.join('/') }),
+}));
+vi.mock('../nutrition/auth', () => ({
+  onAuthChange: () => () => undefined,
+  watchRole: () => () => undefined,
 }));
 vi.mock('firebase/storage', () => ({
   ref: (_s: unknown, p: string) => ({ p }),

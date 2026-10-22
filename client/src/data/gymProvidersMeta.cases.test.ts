@@ -12,10 +12,16 @@ const json = (body: unknown, status = 200) =>
 const on = (part: string, h: Handler) => routes.push([part, h]);
 const ctl = () => new AbortController();
 
-/** The Google key is read at import time, so each scenario loads the module afresh. */
-async function load(key = '') {
+/**
+ * The Google key is read at import time, so each scenario loads the module afresh. The gate is a module too, so the
+ * geo-search consent (SPO-293) is granted on the fresh copy; `consent: false` leaves it off.
+ */
+async function load(key = '', consent = true) {
   vi.stubEnv('VITE_GOOGLE_PLACES_KEY', key);
   vi.resetModules();
+  const gate = await import('./geoSearchGate');
+  gate.resetGeoGateForTests();
+  if (consent) gate.setGeoSearchState({ on: true, ready: true, answered: true });
   return import('./gymProviders');
 }
 
@@ -78,12 +84,13 @@ describe('brandLogo', () => {
     expect(claims).toContain('property=P154');
     expect(calls.find((c) => c.url.includes('commons'))!.url).toContain('titles=File%3AMcFit.svg');
   });
-  it('falls back to Clearbit → DuckDuckGo icon when Wikidata has no logo', async () => {
+  it('does not fall back to Clearbit / DuckDuckGo when Wikidata has no logo (dropped, SPO-293)', async () => {
     wikidata('Q1', null, null);
     on('clearbit', () => json([{ domain: 'zdrofit.pl' }]));
     const m = await load();
-    expect(await m.brandLogo('Zdrofit', ctl().signal)).toBe(
-      'https://icons.duckduckgo.com/ip3/zdrofit.pl.ico',
+    expect(await m.brandLogo('Zdrofit', ctl().signal)).toBeNull();
+    expect(calls.some((c) => c.url.includes('clearbit') || c.url.includes('duckduckgo'))).toBe(
+      false,
     );
   });
   it('is null (and remembered as null) when nobody knows the brand', async () => {
@@ -175,7 +182,7 @@ describe('resolvePhoto (no Google key)', () => {
       'https://t/2.jpg',
     );
   });
-  it('then the brand Wikidata logo, then the name-based brand logo', async () => {
+  it('then the brand Wikidata logo; the name-based lookup no longer uses Clearbit / DuckDuckGo', async () => {
     on('wbgetclaims', () =>
       json({ claims: { P154: [{ mainsnak: { datavalue: { value: 'L.svg' } } }] } }),
     );
@@ -189,8 +196,9 @@ describe('resolvePhoto (no Google key)', () => {
     routes = [];
     on('wbsearchentities', () => json({ search: [] }));
     on('clearbit', () => json([{ domain: 'x.com' }]));
-    expect(await m.resolvePhoto(row({ name: 'Xfit' }), ctl().signal)).toBe(
-      'https://icons.duckduckgo.com/ip3/x.com.ico',
+    expect(await m.resolvePhoto(row({ name: 'Xfit' }), ctl().signal)).toBeNull();
+    expect(calls.some((c) => c.url.includes('clearbit') || c.url.includes('duckduckgo'))).toBe(
+      false,
     );
   });
   it('falls through a Commons miss to the next source, and to null at the end', async () => {
@@ -289,150 +297,51 @@ describe('resolveGymMeta (OSM via Nominatim, no Google key)', () => {
   });
 });
 
-describe('with a Google Places key', () => {
-  const periods = [
-    { open: { day: 1, hour: 6, minute: 30 }, close: { day: 1, hour: 22, minute: 0 } },
-    { open: { day: 0, hour: 8 }, close: { day: 0, hour: 20 } },
-    { open: { day: 5, hour: 18 }, close: { day: 6, hour: 2 } },
-    { open: { day: 3, hour: 0 } },
-    { close: { day: 2, hour: 1 } },
-  ];
-  const place = {
-    photos: [{ name: 'places/p1/photos/x' }],
-    websiteUri: 'https://gym.example',
-    internationalPhoneNumber: '+380 44',
-    regularOpeningHours: { periods, weekdayDescriptions: ['Mon: 6–22', 'Tue: closed'] },
-    currentOpeningHours: { openNow: true },
-  };
-  const google = (p: unknown = place) =>
-    on('places.googleapis.com', () => json({ places: p ? [p] : [] }));
-
+// SPO-293: Google Places is switched off by a constant in gymProviders.ts, so a key in the build never enables it.
+describe('with a Google Places key in the build (keyed services are off)', () => {
   it('googleLookup is null without a name', async () => {
     const m = await load('KEY');
     expect(await m.googleLookup('', 1, 1, ctl().signal)).toBeNull();
     expect(calls).toHaveLength(0);
   });
-  it('googleLookup is null without a key, with no request', async () => {
-    const m = await load('');
+  it('googleLookup is null even with a key and a name, with no request', async () => {
+    const m = await load('KEY');
     expect(await m.googleLookup('Gym', 1, 1, ctl().signal)).toBeNull();
     expect(calls).toHaveLength(0);
   });
-  it('maps photo, website, phone, open-now and Monday-first structured hours', async () => {
-    google();
-    const m = await load('KEY');
-    const info = await m.googleLookup('Zdrofit', 50.45, 30.52, ctl().signal);
-    expect(info).toMatchObject({
-      photoUrl: 'https://places.googleapis.com/v1/places/p1/photos/x/media?maxWidthPx=1200&key=KEY',
-      website: 'https://gym.example',
-      phone: '+380 44',
-      openNow: true,
-      hoursRaw: ['Mon: 6–22', 'Tue: closed'],
-    });
-    const w = info!.hours!.week;
-    expect(w[0]).toEqual([[390, 1320]]); // Google Monday (1) -> index 0
-    expect(w[6]).toEqual([[480, 1200]]); // Google Sunday (0) -> index 6
-    expect(w[4]).toEqual([[1080, 1440]]); // closes the next day -> capped at midnight
-    expect(w[2]).toEqual([[0, 1440]]); // open with no close -> all day
-    expect(w[1]).toEqual([]); // a period with no "open" is ignored
-    const sent = calls[0];
-    expect((sent.init!.headers as Record<string, string>)['X-Goog-Api-Key']).toBe('KEY');
-    expect(JSON.parse(String(sent.init!.body))).toMatchObject({
-      textQuery: 'Zdrofit',
-      maxResultCount: 1,
-    });
-  });
-  it('has no hours when there are no periods or none usable', async () => {
-    google({ regularOpeningHours: { periods: [] } });
-    const m = await load('KEY');
-    expect((await m.googleLookup('A', 1, 1, ctl().signal))!.hours).toBeUndefined();
-    routes = [];
-    google({ regularOpeningHours: { periods: [{ close: { day: 1, hour: 1 } }] } });
-    expect((await m.googleLookup('B', 2, 2, ctl().signal))!.hours).toBeUndefined();
-  });
-  it('is null when Google has no match or answers with an error', async () => {
-    google(null);
-    const m = await load('KEY');
-    expect(await m.googleLookup('A', 1, 1, ctl().signal)).toBeNull();
-    routes = [];
-    on('places.googleapis.com', () => json({}, 403));
-    expect(await m.googleLookup('B', 2, 2, ctl().signal)).toBeNull();
-  });
-  it('caches for 7 days and shares one in-flight request', async () => {
-    google();
-    const m = await load('KEY');
-    await Promise.all([
-      m.googleLookup('A', 1, 1, ctl().signal),
-      m.googleLookup('A', 1, 1, ctl().signal),
-    ]);
-    expect(calls).toHaveLength(1);
-    vi.setSystemTime(NOW + 7 * DAY);
-    await m.googleLookup('A', 1, 1, ctl().signal);
-    expect(calls).toHaveLength(1);
-    vi.setSystemTime(NOW + 7 * DAY + 1);
-    await m.googleLookup('A', 1, 1, ctl().signal);
-    expect(calls).toHaveLength(2);
-  });
-  it('a network error is null, an aborted one throws, bad cache is a miss', async () => {
-    on('places.googleapis.com', () => Promise.reject(new Error('aborted')));
-    const m = await load('KEY');
-    expect(await m.googleLookup('A', 1, 1, ctl().signal)).toBeNull();
-    const ac = ctl();
-    ac.abort();
-    await expect(m.googleLookup('B', 2, 2, ac.signal)).rejects.toThrow('aborted');
-    localStorage.setItem('gym.google.3,3', '{bad');
-    expect(await m.googleLookup('C', 3, 3, ctl().signal)).toBeNull();
-  });
-  it('resolvePhoto prefers the Google photo, then falls back to the keyless chain', async () => {
-    google();
-    const m = await load('KEY');
-    expect(await m.resolvePhoto(row(), ctl().signal)).toContain('maxWidthPx=1200');
-    routes = [];
-    on('places.googleapis.com', () => json({ places: [{}] }));
+  it('resolvePhoto never asks Google and falls back to the keyless chain', async () => {
     on('commons.wikimedia.org', () =>
       json({ query: { pages: { 1: { imageinfo: [{ thumburl: 'https://t/c.jpg' }] } } } }),
     );
-    expect(
-      await m.resolvePhoto(row({ lat: 9, lng: 9, wikimediaCommons: 'File:c.jpg' }), ctl().signal),
-    ).toBe('https://t/c.jpg');
-  });
-  it('resolvePhoto rethrows an abort from Google', async () => {
-    on('places.googleapis.com', () => Promise.reject(new Error('aborted')));
     const m = await load('KEY');
-    const ac = ctl();
-    ac.abort();
-    await expect(m.resolvePhoto(row(), ac.signal)).rejects.toThrow('aborted');
+    expect(await m.resolvePhoto(row({ wikimediaCommons: 'File:c.jpg' }), ctl().signal)).toBe(
+      'https://t/c.jpg',
+    );
+    expect(calls.some((c) => c.url.includes('places.googleapis.com'))).toBe(false);
   });
-  it('resolveGymMeta uses Google hours, website and phone with raw hours joined', async () => {
-    google();
-    const m = await load('KEY');
-    const meta = await m.resolveGymMeta(50.45, 30.52, ctl().signal, 'Zdrofit');
-    expect(meta).toMatchObject({
-      openingHours: 'Mon: 6–22 · Tue: closed',
-      website: 'https://gym.example',
-      phone: '+380 44',
-      openNow: true,
-      category: 'gym',
-    });
-    expect(meta!.hours!.week[0]).toEqual([[390, 1320]]);
-    expect(calls.some((c) => c.url.includes('nominatim'))).toBe(false);
-  });
-  it('resolveGymMeta falls back to OSM when Google knows nothing useful, or fails', async () => {
+  it('resolveGymMeta reads OSM only and never asks Google', async () => {
     on('nominatim', () => json({ type: 'gym', extratags: { phone: 'osm' } }));
-    on('places.googleapis.com', () => json({ places: [{}] }));
     const m = await load('KEY');
     expect(await m.resolveGymMeta(1, 1, ctl().signal, 'A')).toMatchObject({ phone: 'osm' });
-    routes = routes.filter(([p]) => p === 'nominatim');
-    on('places.googleapis.com', () => json({}, 500));
-    expect(await m.resolveGymMeta(2, 2, ctl().signal, 'B')).toMatchObject({ phone: 'osm' });
-  });
-  it('resolveGymMeta rethrows an abort, and skips Google when no name is given', async () => {
-    on('places.googleapis.com', () => Promise.reject(new Error('aborted')));
-    on('nominatim', () => json({ type: 'gym', extratags: { phone: 'osm' } }));
-    const m = await load('KEY');
-    expect(await m.resolveGymMeta(3, 3, ctl().signal)).toMatchObject({ phone: 'osm' });
     expect(calls.some((c) => c.url.includes('places.googleapis.com'))).toBe(false);
+    expect(await m.resolveGymMeta(3, 3, ctl().signal)).toMatchObject({ phone: 'osm' });
+  });
+  it('resolveGymMeta rethrows an abort', async () => {
+    on('nominatim', () => Promise.reject(new Error('aborted')));
+    const m = await load('KEY');
     const ac = ctl();
     ac.abort();
     await expect(m.resolveGymMeta(4, 4, ac.signal, 'Named')).rejects.toThrow('aborted');
+  });
+});
+
+describe('without the geo-search consent (SPO-293)', () => {
+  it('resolveGymMeta and resolvePhoto send nothing and give nothing', async () => {
+    on('nominatim', () => json({ type: 'gym', extratags: { phone: 'osm' } }));
+    const m = await load('', false);
+    expect(await m.resolveGymMeta(5, 5, ctl().signal, 'A')).toBeNull();
+    expect(await m.brandLogo('McFit', ctl().signal)).toBeNull();
+    expect(await m.resolvePhoto(row({ wikimediaCommons: 'File:c.jpg' }), ctl().signal)).toBeNull();
+    expect(calls).toHaveLength(0);
   });
 });

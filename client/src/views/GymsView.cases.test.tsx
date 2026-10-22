@@ -7,6 +7,7 @@ import { __getStateForTests, workoutVolumeKg } from '../store';
 import { DEFAULT_GYM_RADIUS_M } from '../types';
 import { emptyState, freezeClock, NOW, richState, seed, setDesktop } from './__fixtures__/viewKit';
 import { openGyms, setGeo } from './__fixtures__/gymsKit';
+import { resetGeoGateForTests, setGeoSearchState } from '../data/geoSearchGate';
 
 const m = vi.hoisted(() => ({ address: vi.fn(), search: vi.fn() }));
 vi.mock('../data/gymProviders', async (orig) => ({
@@ -35,6 +36,9 @@ const withSessions = () => {
 };
 
 beforeEach(() => {
+  // Gym search and maps are gated on the geo-search consent (SPO-293): these cases run with it granted.
+  resetGeoGateForTests();
+  setGeoSearchState({ on: true, ready: true, answered: true });
   freezeClock();
   setLocale('en');
   localStorage.clear();

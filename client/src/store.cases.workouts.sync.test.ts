@@ -74,7 +74,7 @@ const plain = (w: { data: Record<string, unknown> }) =>
   unsealDoc<Workout & Record<string, unknown>>(w.data, stub.material().key);
 const setIn = (over: Partial<SetEntry> = {}) => ({ reps: 8, weight: 80, isWarmup: false, ...over });
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(T0);
   localStorage.clear();
@@ -84,6 +84,9 @@ beforeEach(() => {
   fs.failWith = null;
   fs.uid = 'u1';
   store.resetLocalData();
+  // the per-test consent reset (legal/testSetup) republishes the coach view asynchronously: let it land, then start clean
+  await settle();
+  fs.writes.length = 0;
 });
 afterEach(async () => {
   vi.useRealTimers();

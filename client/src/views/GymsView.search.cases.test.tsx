@@ -5,6 +5,7 @@ import { en } from '../i18n/en';
 import type { PlaceResult, ProviderId, ProviderState, SearchHandlers } from '../data/gymProviders';
 import { emptyState, NOW, seed, setDesktop } from './__fixtures__/viewKit';
 import { openGyms, setGeo } from './__fixtures__/gymsKit';
+import { resetGeoGateForTests, setGeoSearchState } from '../data/geoSearchGate';
 
 const m = vi.hoisted(() => ({
   search: vi.fn(),
@@ -47,6 +48,9 @@ const type = (v: string) => fireEvent.change(input(), { target: { value: v } });
 const tick = (ms: number) => act(async () => void (await vi.advanceTimersByTimeAsync(ms)));
 
 beforeEach(() => {
+  // Gym search and maps are gated on the geo-search consent (SPO-293): these cases run with it granted.
+  resetGeoGateForTests();
+  setGeoSearchState({ on: true, ready: true, answered: true });
   vi.useFakeTimers();
   vi.setSystemTime(NOW);
   setLocale('en');
@@ -333,5 +337,18 @@ describe('GymsView search: nearby suggestions', () => {
     await tick(500);
     expect(m.search).not.toHaveBeenCalled();
     expect(screen.queryByText(en.nearbyGyms)).toBeNull();
+  });
+});
+
+describe('GymsView search: without the geo-search consent (SPO-293)', () => {
+  it('shows the "Gym search is off" notice and searches nothing, however much is typed', async () => {
+    resetGeoGateForTests();
+    setGeo({ lat: 0, lng: 0, accuracy: 5 });
+    const { container } = openGyms();
+    type('iron');
+    await tick(1000);
+    expect(screen.getByText('Gym search is off')).toBeTruthy();
+    expect(m.search).not.toHaveBeenCalled();
+    expect(container.querySelector('.provider-chips')).toBeNull();
   });
 });

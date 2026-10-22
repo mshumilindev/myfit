@@ -131,6 +131,7 @@ import { MapPinLine } from '@phosphor-icons/react/MapPinLine';
 import { PencilSimple } from '@phosphor-icons/react/PencilSimple';
 import { Phone } from '@phosphor-icons/react/Phone';
 import { Play } from '@phosphor-icons/react/Play';
+import { Printer } from '@phosphor-icons/react/Printer';
 import { PlayCircle } from '@phosphor-icons/react/PlayCircle';
 import { YoutubeLogo } from '@phosphor-icons/react/YoutubeLogo';
 import { SpeakerSimpleSlash } from '@phosphor-icons/react/SpeakerSimpleSlash';
@@ -260,6 +261,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'moon-stars': MoonStars,
   'android-logo': AndroidLogo,
   'apple-logo': AppleLogo,
+  printer: Printer,
   'arrow-clockwise': ArrowClockwise,
   'arrow-counter-clockwise': ArrowCounterClockwise,
   'arrow-right': ArrowRight,

@@ -15,6 +15,7 @@ import {
   type ProviderId,
   type ProviderState,
 } from './gymProviders';
+import { resetGeoGateForTests, setGeoSearchState } from './geoSearchGate';
 import type { Gym } from '../types';
 
 const NOW = new Date('2026-05-04T10:00:00Z').getTime();
@@ -29,7 +30,12 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 const on = (part: string, h: Handler) => routes.push([part, h]);
 
+/** Gym search is gated on the geo-search consent (SPO-293): these cases run with it granted. */
+const grantGeo = () => setGeoSearchState({ on: true, ready: true, answered: true });
+
 beforeEach(() => {
+  resetGeoGateForTests();
+  grantGeo();
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
   localStorage.clear();
@@ -207,6 +213,19 @@ describe('searchNearbyGyms (Overpass)', () => {
     tags: { name, ...tags },
   });
 
+  it('without the geo-search consent it returns the saved gyms only and asks Overpass nothing', async () => {
+    resetGeoGateForTests();
+    on('overpass', () => json({ elements: [el(1, 'Far Gym', 50.46, 30.52)] }));
+    const out = await searchNearbyGyms(
+      KYIV,
+      2000,
+      [gym('g1', 'Saved', 50.45, 30.52)],
+      ctl().signal,
+    );
+    expect(out.map((p) => p.name)).toEqual(['Saved']);
+    expect(calls).toHaveLength(0);
+  });
+
   it('queries a bbox around the user, keeps named elements inside the radius, nearest first', async () => {
     on('overpass', () =>
       json({
@@ -307,8 +326,8 @@ describe('searchGyms', () => {
     const final = (id: ProviderId) => states.filter(([i]) => i === id).at(-1)![1];
     expect(final('local')).toEqual({ status: 'answered', count: 1 });
     expect(final('osm')).toEqual({ status: 'answered', count: 1 });
-    expect(final('google')).toEqual({ status: 'skipped', reason: 'no Google Places key' });
-    expect(final('foursquare')).toEqual({ status: 'skipped', reason: 'no Foursquare key' });
+    expect(final('google')).toEqual({ status: 'skipped', reason: 'not enabled' });
+    expect(final('foursquare')).toEqual({ status: 'skipped', reason: 'not enabled' });
     expect(snaps.length).toBe(2);
     expect(readCache('smartass', KYIV)).toEqual(merged);
   });
@@ -365,72 +384,46 @@ describe('searchGyms', () => {
       reason: 'failed',
     });
   });
-  it('with Google and Foursquare keys, queries both and maps their rows', async () => {
+  // SPO-293: Google Places / Foursquare are switched off by a constant in gymProviders.ts, so a key never enables them.
+  it('Google and Foursquare keys do not switch those services on: skipped, no request, no key sent', async () => {
     on('photon', () => photon([]));
-    on('places.googleapis.com', () =>
-      json({
-        places: [
-          {
-            id: 'g1',
-            displayName: { text: 'G Gym' },
-            location: { latitude: 50.45, longitude: 30.52 },
-            formattedAddress: 'A 1',
-            photos: [{ name: 'places/g1/photos/p' }],
-          },
-          { id: 'g2' },
-        ],
-      }),
-    );
-    on('foursquare', () =>
-      json({
-        results: [
-          {
-            fsq_id: 'f1',
-            name: 'F Gym',
-            geocodes: { main: { latitude: 50.5, longitude: 30.6 } },
-            location: { formatted_address: 'B 2' },
-          },
-          { fsq_id: 'f2', name: 'Fitness Hall' },
-        ],
-      }),
-    );
-    const { p } = run('gym', KYIV, { googlePlaces: 'GK', foursquare: 'FK' });
-    const merged = await p;
-    const g = calls.find((c) => c.url.includes('places.googleapis.com'))!;
-    expect(JSON.parse(String(g.init!.body))).toEqual({
-      textQuery: 'gym gym',
-      locationBias: { circle: { center: { latitude: 50.45, longitude: 30.52 }, radius: 5000 } },
-    });
-    expect((g.init!.headers as Record<string, string>)['X-Goog-Api-Key']).toBe('GK');
-    const f = calls.find((c) => c.url.includes('foursquare'))!;
-    expect(f.url).toContain('ll=50.45%2C30.52');
-    expect((f.init!.headers as Record<string, string>).Authorization).toBe('FK');
-    const byId = Object.fromEntries(merged.map((m) => [m.externalId, m]));
-    expect(byId['google:g1']).toMatchObject({
-      name: 'G Gym',
-      address: 'A 1',
-      photoUrl: 'https://places.googleapis.com/v1/places/g1/photos/p/media?maxWidthPx=1600&key=GK',
-    });
-    expect(byId['google:g2']).toMatchObject({ name: 'gym', lat: 0, lng: 0 });
-    expect(byId['fsq:f1']).toMatchObject({ lat: 50.5, lng: 30.6, address: 'B 2' });
-    expect(byId['fsq:f2']).toMatchObject({ lat: 0, lng: 0 });
-  });
-  it('google/foursquare without a position send no bias; HTTP errors fail the provider', async () => {
-    on('photon', () => photon([]));
-    on('places.googleapis.com', () => json({}, 403));
-    on('foursquare', () => json({}, 401));
-    const { p, states } = run('gym', null, { googlePlaces: 'GK', foursquare: 'FK' });
+    const { p, states } = run('gym', KYIV, { googlePlaces: 'GK', foursquare: 'FK' });
     await p;
-    const g = calls.find((c) => c.url.includes('places.googleapis.com'))!;
-    expect(JSON.parse(String(g.init!.body))).toEqual({ textQuery: 'gym gym' });
-    expect(calls.find((c) => c.url.includes('foursquare'))!.url).not.toContain('ll=');
+    expect(calls.some((c) => c.url.includes('places.googleapis.com'))).toBe(false);
+    expect(calls.some((c) => c.url.includes('foursquare'))).toBe(false);
     expect(states.filter(([i]) => i === 'google').at(-1)![1]).toEqual({
-      status: 'failed',
-      reason: 'google 403',
+      status: 'skipped',
+      reason: 'not enabled',
     });
     expect(states.filter(([i]) => i === 'foursquare').at(-1)![1]).toEqual({
-      status: 'failed',
-      reason: 'foursquare 401',
+      status: 'skipped',
+      reason: 'not enabled',
+    });
+    expect(calls.every((c) => !JSON.stringify(c.init ?? {}).includes('GK'))).toBe(true);
+  });
+  it('without a position the keyed services are skipped the same way', async () => {
+    on('photon', () => photon([]));
+    const { p, states } = run('gym', null, { googlePlaces: 'GK', foursquare: 'FK' });
+    await p;
+    expect(states.filter(([i]) => i === 'google').at(-1)![1]).toMatchObject({ status: 'skipped' });
+    expect(states.filter(([i]) => i === 'foursquare').at(-1)![1]).toMatchObject({
+      status: 'skipped',
+    });
+  });
+  it('without the geo-search consent no request leaves the device: Photon fails with the reason, saved gyms still answer', async () => {
+    resetGeoGateForTests();
+    on('photon', () => photon([feat('Smartass Gym', 30.52, 50.45)]));
+    const { p, states } = run('smartass', KYIV, {}, [gym('g1', 'Smartass', 50.45, 30.52)]);
+    const merged = await p;
+    expect(calls).toHaveLength(0);
+    expect(merged.map((m) => m.sources)).toEqual([['local']]);
+    expect(states.filter(([i]) => i === 'osm').at(-1)![1]).toMatchObject({
+      status: 'skipped',
+      reason: 'Gym search and maps are off: no consent',
+    });
+    expect(states.filter(([i]) => i === 'local').at(-1)![1]).toEqual({
+      status: 'answered',
+      count: 1,
     });
   });
   it('an empty query finds nothing locally; nothing is cached for no results', async () => {

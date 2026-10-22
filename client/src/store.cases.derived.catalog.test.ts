@@ -77,7 +77,7 @@ const snap = (d: Record<string, unknown> | null) => ({
   metadata: { fromCache: false, hasPendingWrites: false },
 });
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(T0);
   localStorage.clear();
@@ -93,6 +93,9 @@ beforeEach(() => {
   setRole('member');
   registerCustomExercises([]);
   store.resetLocalData();
+  // the per-test consent reset (legal/testSetup) republishes the coach view asynchronously: let it land, then start clean
+  await settle();
+  fs.writes.length = 0;
 });
 afterEach(async () => {
   vi.useRealTimers();

@@ -84,7 +84,7 @@ describe('pages', () => {
     expect(await screen.findByText(cc.mtTitle)).toBeTruthy();
     fireEvent.click(await screen.findByRole('button', { name: cc.mtChat }));
     expect(navigate).toHaveBeenLastCalledWith('#/trainer/chat');
-    fireEvent.click(screen.getAllByRole('button', { name: cc.mtSharing })[0]);
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(cc.mtPrivacy) }));
     expect(navigate).toHaveBeenLastCalledWith('#/health/privacy');
   });
 

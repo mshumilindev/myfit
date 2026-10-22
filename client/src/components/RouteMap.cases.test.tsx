@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, render } from '@testing-library/react';
+import { resetGeoGateForTests, setGeoSearchState } from '../data/geoSearchGate';
 import { RouteMap } from './RouteMap';
+
+/** Maps are gated on the geo-search consent (SPO-293); these cases run with it granted. */
+const grantGeo = () => setGeoSearchState({ on: true, ready: true, answered: true });
 
 type AnyFn = (...a: unknown[]) => unknown;
 const calls: Record<string, unknown[][]> = {};
@@ -48,6 +52,8 @@ function fakeLeaflet() {
 }
 
 beforeEach(() => {
+  resetGeoGateForTests();
+  grantGeo();
   for (const k of Object.keys(calls)) delete calls[k];
   removed = 0;
   delete (window as unknown as { L?: unknown }).L;
@@ -222,6 +228,8 @@ describe('RouteMap · live route', () => {
 
   it('stays on the static fallback when Leaflet cannot load', async () => {
     vi.resetModules();
+    const freshGate = await import('../data/geoSearchGate');
+    freshGate.setGeoSearchState({ on: true, ready: true, answered: true });
     const { RouteMap: Fresh } = await import('./RouteMap');
     const { container } = render(<Fresh from={from} to={to} />);
     const script = document.head.querySelector('script[src*="leaflet"]') as HTMLScriptElement;
@@ -236,6 +244,8 @@ describe('RouteMap · live route', () => {
 
   it('loads Leaflet once from the CDN and reuses the pending promise', async () => {
     vi.resetModules();
+    const freshGate = await import('../data/geoSearchGate');
+    freshGate.setGeoSearchState({ on: true, ready: true, answered: true });
     const { RouteMap: Fresh } = await import('./RouteMap');
     const before = document.head.querySelectorAll('script[src*="leaflet"]').length;
     render(<Fresh from={null} to={to} />);
@@ -247,5 +257,24 @@ describe('RouteMap · live route', () => {
       (scripts[scripts.length - 1] as HTMLScriptElement).onload?.(new Event('load'));
     });
     expect(calls.map).toHaveLength(2);
+  });
+});
+
+describe('RouteMap · without the geo-search consent (SPO-293)', () => {
+  const from = { lat: 50.0, lng: 14.0 };
+  const to = { lat: 50.01, lng: 14.01 };
+
+  it('shows the "map off" notice, loads no Leaflet and makes no request', async () => {
+    resetGeoGateForTests();
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    const before = document.head.querySelectorAll('script[src*="leaflet"]').length;
+    const { container } = render(<RouteMap from={from} to={to} />);
+    await flush();
+    expect(container.querySelector('.route-map.ready')).toBeNull();
+    expect(container.querySelector('.route-map-fallback')).toBeNull();
+    expect(container.textContent).toContain('Maps are off');
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(document.head.querySelectorAll('script[src*="leaflet"]').length).toBe(before);
   });
 });

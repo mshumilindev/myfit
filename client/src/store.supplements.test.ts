@@ -314,8 +314,11 @@ describe('supplements store', () => {
     const root = `${process.cwd()}/..`;
     const rules = readFileSync(`${root}/firestore.rules`, 'utf8');
     expect(rules).toMatch(/match \/meta\/\{docId\}[\s\S]*?allow read, write: if isSelf\(userId\)/);
-    const admin = readFileSync(`${root}/functions/src/admin.ts`, 'utf8');
-    expect(admin).toMatch(/recursiveDelete\(db\.collection\('users'\)\.doc\(id\)\)/);
+    // account deletion (SPO-285): the whole `users/{uid}` tree (meta/supplements included) goes through recursiveDelete
+    const ports = readFileSync(`${root}/functions/src/accountDeletion.ts`, 'utf8');
+    expect(ports).toMatch(/recursiveDelete\(db\.doc\(path\)\)/);
+    const core = readFileSync(`${root}/functions/src/accountDeletionCore.ts`, 'utf8');
+    expect(core).toMatch(/ports\.deleteTree\(`users\/\$\{uid\}`\)/);
   });
 
   describe('day check-ins', () => {

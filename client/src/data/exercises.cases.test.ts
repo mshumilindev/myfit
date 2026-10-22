@@ -249,9 +249,9 @@ describe('exerciseImage', () => {
   });
 
   it('returns the first catalog photo for a lift, nothing for unknown names', () => {
-    expect(exerciseImage(BENCH)).toBe('/exercise-img/Barbell_Bench_Press_-_Medium_Grip/0.jpg');
+    expect(exerciseImage(BENCH)).toBe('/exercise-img/Barbell_Bench_Press_-_Medium_Grip/0.webp');
     expect(exerciseImage(BENCH, 'strength')).toBe(
-      '/exercise-img/Barbell_Bench_Press_-_Medium_Grip/0.jpg',
+      '/exercise-img/Barbell_Bench_Press_-_Medium_Grip/0.webp',
     );
     expect(exerciseImage('nope')).toBeUndefined();
     expect(exerciseImage(undefined)).toBeUndefined();
