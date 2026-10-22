@@ -61,6 +61,14 @@ describe('HealthPrivacyView', () => {
     ).toBeTruthy();
   });
 
+  it('shows the shared "Your privacy" block (Consents, documents, What Spotter knows about you)', () => {
+    render(<HealthPrivacyView onBack={() => undefined} />);
+    expect(screen.getByText('Consents')).toBeTruthy();
+    expect(screen.getByText('Privacy Policy')).toBeTruthy();
+    expect(screen.getByText('Terms of Use')).toBeTruthy();
+    expect(screen.getByText('What Spotter knows about you')).toBeTruthy();
+  });
+
   it('the summary says nothing is shared when everything is off', async () => {
     render(<HealthPrivacyView onBack={() => undefined} />);
     await ready();

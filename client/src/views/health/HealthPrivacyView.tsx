@@ -18,6 +18,8 @@ import {
   deleteSupplementData,
 } from '../../store';
 import { setHash } from '../../route';
+import { PrivacyHub, useConsentsPage } from '../../legal/PrivacyHub';
+import { useMyDataPage } from '../../legal/mydata/MyDataScreen';
 
 export interface HealthPrivacyViewProps {
   onBack: () => void;
@@ -28,7 +30,12 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
   const cycleOn = useCycle().enabled;
   const [confirmCycle, setConfirmCycle] = useState(false);
   const [confirm, setConfirm] = useState<'nicotine' | 'alcohol' | 'supplements' | null>(null);
+  // The same "Your privacy" block as Profile → Settings (one component, `PrivacyHub`), so Consents, the two documents and
+  // "What Spotter knows about you" are one tap from here too. This screen IS the sharing page, so no sharing link back.
+  const myData = useMyDataPage();
+  const consents = useConsentsPage(() => myData.openExport(true));
 
+  if (consents.page ?? myData.page) return <>{consents.page ?? myData.page}</>;
   return (
     <div className="screen hl">
       <PageHead
@@ -45,6 +52,11 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
             onOpenTrainer={() => {
               setHash('#/trainer');
             }}
+          />
+          <PrivacyHub
+            onOpenConsents={consents.open}
+            onOpenMyData={myData.open}
+            onOpenExport={myData.openExport}
           />
           <GroupedList header={t.nicPrivData} footer={t.hlPrivNote}>
             <ListRow
