@@ -369,8 +369,8 @@ describe('store: injury backfill', () => {
       startDay: D(9, 20),
       now: NOW,
     });
-    expect(inj.startDay).toBe(D(9, 20));
-    expect(inj.healedDay).toBeNull();
+    expect((inj as Injury).startDay).toBe(D(9, 20));
+    expect((inj as Injury).healedDay).toBeNull();
   });
 
   it('edits an injury (place, dates, healed)', () => {

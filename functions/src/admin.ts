@@ -5,7 +5,6 @@
  * on the next call. Cross-user reads (detail/export) are audited.
  */
 import { onCall } from 'firebase-functions/v2/https';
-import type { DocumentReference, WriteBatch } from 'firebase-admin/firestore';
 import {
   db,
   requireRole,
@@ -26,6 +25,7 @@ import { aggregateWorkouts, cutWorkouts, legacyCut, type LegacyCut } from './coa
 import { coachCallOptions, coachCtx, coachKv } from './coach/runtime';
 import * as lifecycle from './coach/lifecycle';
 import { CoachError } from './coach/service';
+import { adminCascade } from './accountDeletion';
 
 const DAY = 24 * 60 * 60 * 1000;
 const INVITE_TTL = 7 * DAY;
@@ -108,51 +108,6 @@ async function latestInvite(userId: string): Promise<InviteDoc | null> {
     .filter((i) => i.kind === 'invite')
     .sort((a, b) => b.createdAt - a.createdAt);
   return invites[0] ?? null;
-}
-
-async function commitBatch(batch: WriteBatch, writes: number): Promise<void> {
-  if (writes > 0) await batch.commit();
-}
-
-async function flushIfFull(
-  batch: WriteBatch,
-  writes: number,
-): Promise<{ batch: WriteBatch; writes: number }> {
-  if (writes < 450) return { batch, writes };
-  await batch.commit();
-  return { batch: db.batch(), writes: 0 };
-}
-
-async function queueDelete(
-  state: { batch: WriteBatch; writes: number },
-  ref: DocumentReference,
-): Promise<{ batch: WriteBatch; writes: number }> {
-  state.batch.delete(ref);
-  return flushIfFull(state.batch, state.writes + 1);
-}
-
-async function queueUpdate(
-  state: { batch: WriteBatch; writes: number },
-  ref: DocumentReference,
-  data: Record<string, unknown>,
-): Promise<{ batch: WriteBatch; writes: number }> {
-  state.batch.update(ref, data);
-  return flushIfFull(state.batch, state.writes + 1);
-}
-
-async function deleteTrainerAuthoredNotes(
-  state: { batch: WriteBatch; writes: number },
-  trainerId: string,
-): Promise<{ batch: WriteBatch; writes: number }> {
-  const users = await db.collection('users').select().get();
-  for (const user of users.docs) {
-    const notes = await user.ref
-      .collection('trainerNotes')
-      .where('trainerId', '==', trainerId)
-      .get();
-    for (const note of notes.docs) state = await queueDelete(state, note.ref);
-  }
-  return state;
 }
 
 export interface PersonJson {
@@ -463,40 +418,9 @@ export const adminDeleteUser = onCall(coachCallOptions, async (req) => {
   const u = await usersById(id);
   if (!u) throw new HttpsError('not-found', 'not found');
 
-  // Coaching first (plan-security B-08): relationships end with notices, then conversations, schedules, plans,
-  // `prg-*` programs, live docs, keys, keyring, requests, invites and the trainer's private notes about the user go.
-  await lifecycle.purgeAccountCoaching(coachCtx(), id);
-  await revokeSessions(id);
-
-  let state = { batch: db.batch(), writes: 0 };
-  // Detach trainees.
-  const trainees = await db.collection('users').where('trainerId', '==', id).get();
-  for (const d of trainees.docs) state = await queueUpdate(state, d.ref, { trainerId: null });
-  // Their reservations + invites + assignment.
-  if (u.usernameLower) state = await queueDelete(state, usernameRef(u.usernameLower));
-  state = await queueDelete(state, db.collection('credentials').doc(id));
-  state = await queueDelete(state, db.collection('assignments').doc(id));
-  const invites = await db.collection('invites').where('userId', '==', id).get();
-  for (const d of invites.docs) state = await queueDelete(state, d.ref);
-  // Trainer notes this user authored across other members. This intentionally
-  // walks user subcollections instead of collectionGroup('trainerNotes') so
-  // deletion does not depend on a production index existing.
-  state = await deleteTrainerAuthoredNotes(state, id);
-  // Programs they authored + assignments pointing at those programs.
-  const programs = await db.collection('programs').where('authorId', '==', id).get();
-  for (const p of programs.docs) {
-    state = await queueDelete(state, p.ref);
-    const assigned = await db.collection('assignments').where('programId', '==', p.id).get();
-    for (const a of assigned.docs) state = await queueDelete(state, a.ref);
-  }
-  await commitBatch(state.batch, state.writes);
-  // Nuke the user doc + all subcollections (workouts/gyms/notices/audit/...).
-  await db.recursiveDelete(db.collection('users').doc(id));
-  try {
-    await authAdmin.deleteUser(id); // the Auth record would otherwise outlive the account
-  } catch (e) {
-    if ((e as { code?: string })?.code !== 'auth/user-not-found') throw e;
-  }
+  // One cascade for admin and self-service deletion (accountDeletionCore.ts): coaching, team, programs, passkeys,
+  // sessions, Storage avatar, the user tree and, last, the Auth record.
+  await adminCascade(id);
   return { ok: true };
 });
 

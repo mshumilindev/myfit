@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { fmtDayMonth, useT } from '../i18n';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { Ring } from '../components/ui/Ring';
 import { ListRow } from '../components/ui/GroupedList';
 import { IconTile } from '../components/ui/IconTile';
 import { Icon } from '../ui';
@@ -24,46 +25,6 @@ import { computeStandards } from '../standards';
 import { computeFeats } from '../feats';
 import type { Notif } from '../notifications';
 import type { ApexTab } from './ApexApp';
-
-function Ring({ pct, icon }: { pct: number; icon: string }) {
-  const r = 24;
-  const c = 2 * Math.PI * r;
-  const off = c * (1 - Math.max(0, Math.min(1, pct)));
-  return (
-    <div className="apx-ring">
-      <svg width="58" height="58" viewBox="0 0 58 58" style={{ transform: 'rotate(-90deg)' }}>
-        <circle
-          cx="29"
-          cy="29"
-          r={r}
-          fill="none"
-          stroke="var(--color-neutral-800)"
-          strokeWidth="5"
-        />
-        <circle
-          cx="29"
-          cy="29"
-          r={r}
-          fill="none"
-          stroke="url(#apxg)"
-          strokeWidth="5"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={off}
-        />
-        <defs>
-          <linearGradient id="apxg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="var(--color-accent-700)" />
-            <stop offset="1" stopColor="var(--color-accent-200)" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <span className="apx-ring-ic">
-        <Icon name={icon} weight="bold" />
-      </span>
-    </div>
-  );
-}
 
 export function ApexHome({
   store,
@@ -177,7 +138,11 @@ export function ApexHome({
           className="apx-card apx-active"
           onClick={() => onTab('challenges')}
         >
-          <Ring pct={activeCard.prog.pct} icon={activeCard.tmpl.icon} />
+          <Ring value={activeCard.prog.pct * 100} size={58} width={5}>
+            <span className="apx-ring-ic">
+              <Icon name={activeCard.tmpl.icon} weight="bold" />
+            </span>
+          </Ring>
           <div className="apx-active-main">
             <div className="apx-active-title">
               {activeCard.tmpl.title(t, activeCard.prog.target)}

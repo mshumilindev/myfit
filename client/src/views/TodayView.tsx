@@ -43,7 +43,6 @@ import { getRole } from '../api';
 import { canUseCoach } from '../coach/access';
 import { coachHash, rememberCoachRoute } from '../coach/routes';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
-import { useFlag } from '../data/flags';
 import { HistoryTimeline, buildHistoryDays } from '../components/HistoryTimeline';
 import { dayReadoutLabel, type TrainingDay } from '../data/daySuggest';
 import {
@@ -69,21 +68,13 @@ import {
   endRestPeriod,
   latestWeight,
   liveSleep,
-  logVisitAsWorkout,
   resolveMuscles,
   workoutDayReadout,
   type useStore,
   backfillHomeSet,
   gymAtCurrentPosition,
 } from '../store';
-import {
-  fmtDayMonth,
-  fmtDurationHuman,
-  fmtWeekday,
-  fmtWeekdayDayMonth,
-  fmtWeekdayShort,
-  useT,
-} from '../i18n';
+import { fmtDayMonth, fmtWeekday, fmtWeekdayDayMonth, fmtWeekdayShort, useT } from '../i18n';
 import { DayHistorySheet } from '../components/DayHistorySheet';
 import { BackfillSheet, StartSheet } from '../components/StartSheet';
 import { WeightSheet } from '../components/BodyMetrics';
@@ -103,6 +94,7 @@ import { ConfirmDialog, Icon, Sheet, useIsDesktop } from '../ui';
 import { REHAB_STAGES, stageIndex, inFullRest, nextStage } from '../injury';
 import { useGymStep } from '../components/useGymStep';
 import { Tag } from '../components/ui/Tag';
+import { setHash } from '../route';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -152,7 +144,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const [editing, setEditing] = useState(false);
   /** Desktop right panel host for Customize's "Add to Today" (portal target). */
   const [editSide, setEditSide] = useState<HTMLElement | null>(null);
-  const presenceOn = useFlag('gymPresence');
   const suggestOn = true; // muscle readouts are always on (not flagged)
   const [backfill, setBackfill] = useState(false);
   // The program card arrives after the first paint (the assignment is opened from the sealed cache and revalidated), so
@@ -385,8 +376,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const firstLoad = store.workouts.length === 0 && store.lastSyncAt === null && !!store.queue;
   const showSkeleton = firstLoad && store.syncStatus === 'syncing';
 
-  const reminder = presenceOn ? store.reminders[0] : undefined;
-
   // Weekly energy out (design feature 6, KCAL): lifting (session wall-clock) +
   // logged activities, split so non-lifting work reads as a peer to strength.
   const weekAgoTs = now - WEEK_MS;
@@ -519,7 +508,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   })();
 
   function openTrends() {
-    window.location.hash = '#/trends';
+    setHash('#/trends');
   }
 
   // Every advisory card on Today, collapsed into one deck instead of a wall of
@@ -707,34 +696,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           }}
         >
           {t.bmAddWeight}
-        </Button>
-      ),
-    });
-  }
-  if (reminder) {
-    nudges.push({
-      id: 'visit',
-      tone: 'body',
-      priority: 90,
-      icon: 'map-pin',
-      kicker: reminder.gymName,
-      title: t.unloggedVisit(
-        fmtDurationHuman(reminder.visitEnd - reminder.visitStart),
-        reminder.gymName,
-        fmtDayMonth(reminder.visitStart, locale),
-      ),
-      body: null,
-      actions: (close) => (
-        <Button
-          variant="fill"
-          size="sm"
-          onClick={() => {
-            const w = logVisitAsWorkout(reminder);
-            close();
-            shell.openOverlay({ screen: 'past-workout', workoutId: w.id });
-          }}
-        >
-          {t.logIt}
         </Button>
       ),
     });
@@ -1146,7 +1107,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return { done, total, pct: total ? Math.round((done / total) * 100) : 0 };
   })();
   const openLearn = () => {
-    window.location.hash = '#/learn';
+    setHash('#/learn');
   };
   const learnBanner = (
     <Card as="button" pad="none" emphasis="glass" className="learn-banner" onClick={openLearn}>
@@ -1213,7 +1174,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     // Remember the target too: whatever opens the dashboard next (mode switch, a reload) lands on THIS client, not the Agenda.
     const route = { screen: 'client' as const, cid: id };
     rememberCoachRoute(route);
-    window.location.assign(coachHash(route));
+    setHash(coachHash(route));
   };
   const watchClient = (s: LiveSession) =>
     s.workoutId
@@ -1224,9 +1185,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           athleteName: s.athleteName,
         })
       : openClient(s.id);
-  // The Clients area lives in the People app.
+  // The Clients area lives in the Coach dashboard (People is the admin-only Users app, SPO-141).
   const allClients = () => {
-    window.location.hash = '#/people/clients';
+    setHash(coachHash({ screen: 'clients' }));
   };
   const renderAtlas = (ao: AtlasOpts): ReactNode => (
     <AtlasClientsBlock

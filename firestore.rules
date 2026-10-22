@@ -438,6 +438,11 @@ service cloud.firestore {
         allow read: if isSelf(userId);
         allow write: if false;
       }
+      // Legal consent records (SPO-296, append-only): written by the recordConsent function only.
+      match /consentRecords/{recordId} {
+        allow read: if isSelf(userId);
+        allow write: if false;
+      }
     }
 
     // --- Coaching ------------------------------------------------------------------
@@ -556,7 +561,6 @@ service cloud.firestore {
       // client reads and deletes (a removed manager's document goes away) and nobody else touches it.
       match /delegations/{managerUid} {
         allow read: if isSelf(managerUid) && isTeamManagerOf(convOf(cid).clientId)
-          && resource.data.epoch == convOf(cid).get('keyEpoch', 0)
           || request.auth.uid == convOf(cid).clientId;
         allow create, update: if activeConv(cid)
           && request.auth.uid == convOf(cid).clientId
@@ -606,43 +610,30 @@ service cloud.firestore {
         || (isTeamManagerOf(clientId) && d.trainerId == coachingOf(clientId).trainerId);
     }
     // `timing` is the only open part: moments (epoch ms) for the server's reminders, never what the session is (SPO-265).
-    function momentsOnly(l) {
-      return l is list && l.size() <= 12 && (l.size() <= 0 || (l[0] is int && l[0] > 0)) && (l.size() <= 1 || (l[1] is int && l[1] > 0)) && (l.size() <= 2 || (l[2] is int && l[2] > 0)) && (l.size() <= 3 || (l[3] is int && l[3] > 0)) && (l.size() <= 4 || (l[4] is int && l[4] > 0)) && (l.size() <= 5 || (l[5] is int && l[5] > 0)) && (l.size() <= 6 || (l[6] is int && l[6] > 0)) && (l.size() <= 7 || (l[7] is int && l[7] > 0)) && (l.size() <= 8 || (l[8] is int && l[8] > 0)) && (l.size() <= 9 || (l[9] is int && l[9] > 0)) && (l.size() <= 10 || (l[10] is int && l[10] > 0)) && (l.size() <= 11 || (l[11] is int && l[11] > 0));
-    }
     function validTiming(t) {
       return t == null || (t is map
         && t.keys().hasOnly(['starts', 'unmarked', 'dueAt'])
-        && momentsOnly(t.starts)
-        && momentsOnly(t.unmarked)
-        && t.dueAt is int && t.dueAt >= 0);
-    }
-    // Who saved it: optional for the trainer (older apps), required and truthful for a manager, who also may only write
-    // under the key epoch that is current (a stale or garbage write from a removed/rotated manager is refused).
-    function validWriter(clientId, d) {
-      return d.get('updatedBy', request.auth.uid) == request.auth.uid
-        && (!isTeamManagerOf(clientId)
-          || (d.get('updatedBy', '') == request.auth.uid
-            && d.keyEpoch == coachingOf(clientId).get('keyEpoch', 1)));
+        && t.starts is list && t.starts.size() <= 12
+        && t.unmarked is list && t.unmarked.size() <= 12
+        && t.dueAt is int);
     }
     match /schedules/{clientId} {
       allow read: if isSelf(clientId) || isActiveCoachOf(clientId) || isTeamManagerOf(clientId);
-      allow create: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc', 'timing', 'updatedBy'])
+      allow create: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc', 'timing'])
         && request.resource.data.keys().hasAll(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
         && request.resource.data.clientId == clientId
         && scheduleWriter(clientId, request.resource.data)
         && request.resource.data.updatedAt is int
         && request.resource.data.rev == 1
         && validTiming(request.resource.data.get('timing', null))
-        && validWriter(clientId, request.resource.data)
         && sealedCkSchedule(request.resource.data);
-      allow update: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc', 'timing', 'updatedBy'])
+      allow update: if request.resource.data.keys().hasOnly(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc', 'timing'])
         && request.resource.data.keys().hasAll(['clientId', 'trainerId', 'rev', 'updatedAt', 'keyEpoch', 'enc'])
         && request.resource.data.clientId == clientId
         && scheduleWriter(clientId, request.resource.data)
         && request.resource.data.updatedAt is int
         && request.resource.data.rev == resource.data.rev + 1
         && validTiming(request.resource.data.get('timing', null))
-        && validWriter(clientId, request.resource.data)
         && sealedCkSchedule(request.resource.data);
       allow delete: if false;
     }

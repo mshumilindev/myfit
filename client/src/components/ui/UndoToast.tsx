@@ -55,11 +55,12 @@ export function UndoToast({
         sub={<span className="visually-hidden">{countdownLabel}</span>}
         action={{ label: undoLabel, onClick: onUndo }}
       />
-      <i
-        className={`uiundo-bar${frozenLeftMs != null ? ' is-frozen' : ''}`}
-        aria-hidden
-        data-testid="undo-bar"
-      />
+      <span className="uiundo-track" aria-hidden>
+        <i
+          className={`uiundo-bar${frozenLeftMs != null ? ' is-frozen' : ''}`}
+          data-testid="undo-bar"
+        />
+      </span>
     </div>
   );
 }

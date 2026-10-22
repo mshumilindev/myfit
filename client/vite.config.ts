@@ -39,6 +39,33 @@ export default defineConfig({
         });
       },
     },
+    {
+      // Preload the self-hosted wordmark font (header, first paint) so the script face does not pop in after the
+      // fallback. Hashed name, so the tag is written from the built bundle, not by hand in index.html.
+      name: 'spotter-preload-wordmark-font',
+      transformIndexHtml: {
+        order: 'post',
+        handler(_html, ctx) {
+          const file = Object.keys(ctx.bundle ?? {}).find((f) =>
+            /^assets\/kaushan-script-latin-400-normal-.*\.woff2$/.test(f),
+          );
+          if (!file) return [];
+          return [
+            {
+              tag: 'link',
+              attrs: {
+                rel: 'preload',
+                as: 'font',
+                type: 'font/woff2',
+                href: `/${file}`,
+                crossorigin: '',
+              },
+              injectTo: 'head',
+            },
+          ];
+        },
+      },
+    },
     VitePWA({
       registerType: 'autoUpdate',
       // The injected registerSW.js only registers; it never reloads a page that
@@ -116,6 +143,8 @@ export default defineConfig({
           'sw-push.js',
           'assets/atlas-kb-*.js',
           'assets/atlasDict.*.js',
+          // Landing-page fonts: loaded by the lazy landing chunk, cached on first use (runtimeCaching below).
+          'assets/{inter-tight,manrope,jetbrains-mono}-*.woff2',
         ],
         // App shell is precached; API goes network-only (the app has its own
         // offline queue in localStorage, so we must never serve stale API data).

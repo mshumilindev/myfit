@@ -11,7 +11,7 @@ import { currentUid, trackMutation } from '../api';
 import { db, storage } from '../firebase';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
-import { Avatar, invalidateAvatarCache } from './Avatar';
+import { UserAvatar, invalidateAvatarCache } from './Avatar';
 import { writeAvatarBlob } from '../avatarStore';
 import { Card } from './ui/Card';
 
@@ -281,7 +281,7 @@ export function AvatarUploader({
             disabled={busy}
           >
             {userId && hasPhoto ? (
-              <Avatar
+              <UserAvatar
                 userId={userId}
                 name={name}
                 hasPhoto={hasPhoto}

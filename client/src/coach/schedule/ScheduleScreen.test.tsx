@@ -9,6 +9,7 @@ import { ScheduleScreen } from './ScheduleScreen';
 import { usePeople } from './people';
 import { WeekScreen } from './WeekScreen';
 import { safeEn } from '../../i18n/coachSafe.en';
+import { currentHash } from '../../route';
 
 afterEach(() => {
   cleanup();
@@ -213,7 +214,7 @@ describe('Schedule legend filters', () => {
     expect(doneBefore).toBeGreaterThan(0);
     fireEvent.click(chip(t.scDone));
     expect(chip(t.scDone).getAttribute('aria-pressed')).toBe('false');
-    expect(window.location.hash).toContain('hide=done');
+    expect(currentHash()).toContain('hide=done');
     expect(screen.queryAllByRole('button', { name: new RegExp(`${t.scDone}$`) })).toHaveLength(
       screen
         .queryAllByRole('button', { name: new RegExp(`${t.scDone}$`) })
@@ -221,7 +222,7 @@ describe('Schedule legend filters', () => {
     );
     expect(blocks().length).toBeGreaterThan(5);
     fireEvent.click(chip(t.scDone));
-    expect(window.location.hash).not.toContain('hide');
+    expect(currentHash()).not.toContain('hide');
   });
 
   it('Overlap off removes the warning marks but keeps the sessions', async () => {
@@ -262,25 +263,5 @@ describe('Schedule legend filters', () => {
     expect(b.querySelector('.sc-t-full')?.textContent).toMatch(/\d\d:\d\d/);
     expect(b.querySelector('.sc-t-start')?.textContent).toMatch(/^\d\d:\d\d$/);
     expect(b.getAttribute('title')).toBe(b.getAttribute('aria-label'));
-  });
-});
-
-describe('Schedule screen: a manager whose clients have not delegated yet (SPO-202)', () => {
-  it('says how many clients wait for their app; a trainer sees no such note', async () => {
-    const { configureManagerClients, createStaticManagerClients } =
-      await import('../team/managerClients');
-    const { MANAGER_CLIENTS } = await import('../team/__fixtures__/managerClients');
-    const { teamEn } = await import('../../i18n/coachTeam.en');
-    mount();
-    await waitFor(() => expect(blocks().length).toBeGreaterThan(8));
-    expect(screen.queryByText(teamEn.mcPending(5))).toBeNull();
-    cleanup();
-    configureManagerClients(createStaticManagerClients(MANAGER_CLIENTS));
-    try {
-      mount();
-      expect(await screen.findByText(teamEn.mcPending(5))).toBeTruthy();
-    } finally {
-      configureManagerClients(null);
-    }
   });
 });

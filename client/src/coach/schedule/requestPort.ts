@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import type { RescheduleRequestPort } from '../today/requestPort';
 import { useScheduleStore } from './useSchedule';
 import { scheduleHref } from './useScheduleParams';
+import { setHash } from '../../route';
 
 /**
  * The reschedule-request port Today and Client 360 use, backed by the schedule store: Accept / Decline / Cancel answer
@@ -22,7 +23,7 @@ export function useScheduleRequestPort(): RescheduleRequestPort {
       accept: (a) => answer(a.reqId, 'accepted'),
       decline: (a) => answer(a.reqId, 'declined'),
       cancel: (a) => answer(a.reqId, 'cancelled'),
-      propose: (a) => window.location.assign(scheduleHref({ form: 'counter', req: a.reqId })),
+      propose: (a) => setHash(scheduleHref({ form: 'counter', req: a.reqId })),
     };
   }, [store]);
 }

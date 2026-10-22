@@ -8,7 +8,7 @@
  * modal: family rail · suggestions + grid · live preview.
  */
 import { exerciseFlag, type ExerciseFlag } from '../conditions';
-import { healthBuildCtx, useConditionLimits } from '../healthBuild';
+import { healthBuildCtx, useConditionLimits, useStoredConditionLimits } from '../healthBuild';
 import { warmupProposal } from '../warmupFor';
 import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -167,7 +167,7 @@ function AddedBadge({ on, t }: { on: boolean; t: Strings }) {
   );
 }
 
-function Badge({ item, t, flag }: { item: PickItem; t: Strings; flag?: ExerciseFlag['level'] }) {
+function XpBadge({ item, t, flag }: { item: PickItem; t: Strings; flag?: ExerciseFlag['level'] }) {
   if (flag === 'avoid' || flag === 'caution')
     return (
       <span className="xp-badge care">
@@ -193,6 +193,8 @@ export function ExercisePicker(props: ExercisePickerProps) {
   const exName = useExerciseName();
   const store = useStore();
   const limits = useConditionLimits();
+  // DISPLAY (flag badges) reads the displayable conditions; RESTRICTION (what gets suggested / swapped) the stored ones (SPO-290).
+  const storedLimits = useStoredConditionLimits();
   const flagOf = (name: string) => (limits.keys.length ? exerciseFlag(name, limits).level : 'ok');
   const isDesktop = useIsDesktop();
   const [now] = useState(() => Date.now());
@@ -267,9 +269,9 @@ export function ExercisePicker(props: ExercisePickerProps) {
         ? []
         : suggest(eqFiltered, day, finished, readiness, now, {
             beforeTs: props.workout.startedAt,
-            limits,
+            limits: storedLimits,
           }),
-    [plain, eqFiltered, day, finished, readiness, now, props.workout.startedAt, limits],
+    [plain, eqFiltered, day, finished, readiness, now, props.workout.startedAt, storedLimits],
   );
   const addedKeys = useMemo(
     () => new Set((props.added ?? []).map((n) => canonicalExerciseName(n).toLowerCase())),
@@ -283,14 +285,14 @@ export function ExercisePicker(props: ExercisePickerProps) {
     const proposal = warmupProposal({
       muscles: warmupMuscles,
       gym: props.gym,
-      limits,
-      protect: healthBuildCtx(store).protectedMuscles,
+      limits: storedLimits,
+      protect: healthBuildCtx().protectedMuscles,
     });
     if (!proposal) return [];
     return proposal.items
       .map((x) => items.find((i) => i.key === x.name.toLowerCase()))
       .filter((i): i is PickItem => !!i);
-  }, [props.warmup, warmupMuscles, props.gym, limits, store, items]);
+  }, [props.warmup, warmupMuscles, props.gym, storedLimits, items]);
   const suggestedKeys = useMemo(() => new Set(suggestions.map((x) => x.item.key)), [suggestions]);
   const doneToday = props.workout.exercises.filter(
     (e) => e.sets.length > 0 && (e.kind ?? 'strength') === 'strength',
@@ -324,10 +326,21 @@ export function ExercisePicker(props: ExercisePickerProps) {
             family: fam.id,
             sub,
             beforeTs: props.workout.startedAt,
-            limits,
+            limits: storedLimits,
           })[0] ?? null)
         : null,
-    [plain, fam, sub, eqFiltered, day, finished, readiness, now, props.workout.startedAt, limits],
+    [
+      plain,
+      fam,
+      sub,
+      eqFiltered,
+      day,
+      finished,
+      readiness,
+      now,
+      props.workout.startedAt,
+      storedLimits,
+    ],
   );
 
   const needle = q.trim().toLowerCase();
@@ -508,7 +521,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
     const f = props.warmup ? flagOf(i.name) : 'ok';
     return (
       <>
-        {(f === 'avoid' || f === 'caution') && <Badge item={i} t={t} flag={f} />}
+        {(f === 'avoid' || f === 'caution') && <XpBadge item={i} t={t} flag={f} />}
         {!props.warmup && <AddedBadge on={addedKeys.has(i.key)} t={t} />}
       </>
     );
@@ -533,7 +546,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
           <span className="xp-card-meta">{itemMeta(t, i, plain)}</span>
         </span>
       </Card>
-      {plain ? plainBadges(i) : <Badge item={i} t={t} flag={flagOf(i.name)} />}
+      {plain ? plainBadges(i) : <XpBadge item={i} t={t} flag={flagOf(i.name)} />}
       <InfoButton onClick={() => openInfo(i)} label={t.detailsAction} />
     </div>
   );
@@ -555,7 +568,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
         ) : suggestedKeys.has(i.key) && !i.doneToday ? (
           <span className="xp-badge sug">{t.pickSuggestedTag}</span>
         ) : (
-          <Badge item={i} t={t} flag={flagOf(i.name)} />
+          <XpBadge item={i} t={t} flag={flagOf(i.name)} />
         )}
       </Card>
       <InfoButton onClick={() => openInfo(i)} label={t.detailsAction} />
@@ -1149,7 +1162,7 @@ export function ExerciseDetail(props: {
       live = false;
     };
   }, [item.catalogId]);
-  const limits = useConditionLimits();
+  const limits = useStoredConditionLimits();
   const byKey = useMemo(() => new Map(props.items.map((i) => [i.key, i])), [props.items]);
   const swaps = useMemo(
     () =>

@@ -1,236 +1,227 @@
-import { Fragment, useState } from 'react';
-import { Button } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
-import { GroupedList, ListRow } from '../../../components/ui/GroupedList';
-import { IconTile } from '../../../components/ui/IconTile';
-import { Notice } from '../../../components/ui/Notice';
-import { OptionCard, OptionCardGrid } from '../../../components/ui/OptionCard';
-import { ConfirmDialog, Sheet } from '../../../components/ui/Overlays';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { GroupedList } from '../../../components/ui/GroupedList';
 import { SkeletonRows } from '../../../components/ui/Skeleton';
 import { Snackbar } from '../../../components/ui/Snackbar';
-import { ToneText } from '../../../components/ui/ToneText';
+import { StepConfirmDialog } from '../../../components/ui/StepConfirmDialog';
 import { UndoToast } from '../../../components/ui/UndoToast';
+import { healthSnapshot, openHealthPrompt, subscribeHealth } from '../../../data/healthConsentGate';
 import { useChatT } from '../../../i18n/coachChat';
-import { useClientT, type ClientStrings } from '../../../i18n/coachClient';
-import { ClientAvatar } from '../../ClientAvatar';
+import { useClientT } from '../../../i18n/coachClient';
+import { currentUid } from '../../../api';
+import {
+  forgetShareLevel,
+  whenCoachSharePublished,
+  setAlcoholSharing,
+  setConditionsShare,
+  setNicotineSharing,
+  setSupplementSharing,
+  useAlcohol,
+  useNicotine,
+  useStore,
+  useSupplements,
+} from '../../../store';
+import { SupplementCoachPreview } from '../../../views/health/supplements/SupplementCoachPreview';
 import { firstName } from '../../screens/format';
 import type { Level } from '../../domain/types';
-import { LEVELS } from '../../domain/types';
 import type { ClientCoachPort } from '../data/port';
 import { REVOKE_UNDO_MS } from '../data/store';
 import { useClientCoach, useClientCoachEnabled } from '../data/useClientCoach';
 import {
-  CATEGORY_UI,
-  LEVEL_ICON,
-  SHARE_CATEGORIES,
-  levelsBy,
-  sharedCount,
-  sharesNothing,
-  type ShareCategory,
-} from '../domain';
-import { catTitle, levelWord, seesText, sinceDate } from '../labels';
+  FEATURE_OF,
+  SHARE_IDS,
+  clampLevel,
+  isLocalCategory,
+  isStaleGrant,
+  rowBlock,
+  sharedCountAll,
+  sharesNothingAll,
+  type LocalCategory,
+  type ShareBlocks,
+  type ShareId,
+  type ShareLevels,
+} from '../shareModel';
+import { restoreLocals, stopAllSharing, type LocalLevels } from '../stopSharing';
+import { rememberStop, takePendingStop, type PendingLocals } from '../stopUndo';
+import { LevelSheet, SharingList } from './SharingList';
 import '../ClientCoach.css';
-
-const tone = (l: Level) => (l === 'full' ? 'ok' : l === 'effects' ? 'rest' : undefined);
-
-function Names({ names }: { names: readonly string[] }) {
-  return (
-    <>
-      {names.map((n, i) => (
-        <Fragment key={n}>
-          {i > 0 && (i === names.length - 1 ? ' · ' : ', ')}
-          <ToneText tone="accent" strong>
-            {n}
-          </ToneText>
-        </Fragment>
-      ))}
-    </>
-  );
-}
 
 export interface TrainerSharingProps {
   port?: ClientCoachPort;
   /** Stories: skip the flag gate. */
   force?: boolean;
-  /** Stories: open the level sheet / revoke dialog at mount. */
-  initial?: { sheet?: ShareCategory; revoke?: boolean };
+  /** Stories: open the level sheet / stop dialog at mount. */
+  initial?: { sheet?: ShareId; revoke?: boolean };
   onOpenLog?: () => void;
   onOpenTrainer?: () => void;
   /** "Start sharing" (state none): open the presets (the invite step 2 look) */
   onStart?: () => void;
 }
 
+/** Writes of the four on-device levels (they republish what a coach sees by themselves). */
+const writeLocal = (id: LocalCategory, l: Level): void => {
+  if (id === 'conditions') setConditionsShare(l);
+  else if (id === 'nicotine') setNicotineSharing(l);
+  else if (id === 'alcohol') setAlcoholSharing(clampLevel('alcohol', l) as 'off' | 'effects');
+  else setSupplementSharing(l);
+};
+
 /**
- * "Your trainer" block at the top of Privacy and sharing (S-29, S-30, S-32, S-33, S-34): the summary, the trainer row, the
- * six settings (each opens the level sheet and applies at once), the access log row and the danger row. A fragment: it
- * lives inside the real `.hl-cnt` and the real categories below it stay unchanged. Without a trainer it renders nothing.
+ * Everything the person shares, in one list (S-29 .. S-34, SPO-107): the trainer's six grants and the four on-device
+ * settings, one summary, one Stop sharing. The list of the on-device settings is always there (also without the coach
+ * feature or a trainer); the trainer block and the grant rows need the flag and a link. A health setting whose feature has
+ * no consent (SPO-290) reads "Feature is off" and opens the consent prompt instead of the level sheet.
  */
 export function TrainerSharing(p: TrainerSharingProps) {
   const flag = useClientCoachEnabled();
   const on = p.force || flag;
-  const { cc, locale } = useClientT();
+  const { cc } = useClientT();
   const { ch } = useChatT();
   const { snapshot, status, failure, undo, store } = useClientCoach(p.port, on);
-  const [sheet, setSheet] = useState<ShareCategory | null>(p.initial?.sheet ?? null);
+  const [sheet, setSheet] = useState<ShareId | null>(p.initial?.sheet ?? null);
   const [confirm, setConfirm] = useState(p.initial?.revoke ?? false);
-  if (!on) return null;
-  if (!snapshot)
-    return status === 'error' ? null : (
+  const health = useSyncExternalStore(subscribeHealth, healthSnapshot);
+  const { conditionsShare } = useStore();
+  const nic = useNicotine().settings.sharing;
+  const alc = useAlcohol().settings.sharing;
+  const sup = useSupplements().settings.sharing;
+
+  const link = on ? snapshot?.link : undefined;
+  const trainer = link && link.state !== 'none' ? link.trainer : null;
+  const locals: LocalLevels = {
+    conditions: conditionsShare,
+    nicotine: nic,
+    alcohol: clampLevel('alcohol', alc),
+    supplements: sup,
+  };
+  const levels = Object.fromEntries(
+    SHARE_IDS.map((id) => [
+      id,
+      isLocalCategory(id) ? locals[id] : trainer && link ? link.grants[id] : ('off' as Level),
+    ]),
+  ) as ShareLevels;
+  const blocks: ShareBlocks = {};
+  for (const id of SHARE_IDS) {
+    if (!FEATURE_OF[id]) continue;
+    // without a trainer the grant rows are not listed at all; the on-device ones always are
+    blocks[id] = rowBlock(id, health.on, health.ready);
+  }
+
+  // A grant above Off whose feature has no consent is switched off by itself (fail to the private side): once per
+  // level, so a failing write does not loop. Until it lands the row says "shared, feature off" with a one-tap switch.
+  // what Stop turned off on this device, kept for the Retry of a failed revoke (the levels are already Off by then)
+  const stopped = useRef<PendingLocals>({});
+  const reconciled = useRef(new Map<ShareId, Level>());
+  useEffect(() => {
+    if (!trainer || !health.ready) return;
+    for (const id of SHARE_IDS) {
+      if (!isStaleGrant(id, levels, blocks) || reconciled.current.get(id) === levels[id]) continue;
+      reconciled.current.set(id, levels[id]);
+      if (!isLocalCategory(id)) void store.setLevel(id, 'off');
+    }
+  });
+
+  if (on && !snapshot && status !== 'error')
+    return (
       <GroupedList header={cc.shYourTrainer}>
         <SkeletonRows rows={3} label={cc.ccLoading} />
       </GroupedList>
     );
-  const { link } = snapshot;
-  const trainer = link.trainer;
-  if (link.state === 'none' || !trainer) return null;
-  const first = firstName(trainer.name);
-  const g = link.grants;
-  const waiting = link.state === 'waiting';
-  const none = link.state === 'revoked' || sharesNothing(g);
-  const eff = levelsBy(g, 'effects').map((k) => catTitle(cc, k));
-  const full = levelsBy(g, 'full').map((k) => catTitle(cc, k));
-  const status3 = waiting ? 'waiting' : none ? 'none' : 'active';
+
+  const first = trainer ? firstName(trainer.name) : '';
+  const onRow = (id: ShareId) => {
+    const f = FEATURE_OF[id];
+    if (isStaleGrant(id, levels, blocks))
+      void store.setLevel(id as Exclude<ShareId, LocalCategory>, 'off');
+    else if (blocks[id] === 'off' && f) openHealthPrompt(f);
+    else if (!blocks[id]) setSheet(id);
+  };
+  const pick = (id: ShareId, l: Level) => {
+    if (isLocalCategory(id)) writeLocal(id, clampLevel(id, l));
+    else void store.setLevel(id, l);
+  };
+  const stop = () => {
+    setConfirm(false);
+    // the pending Undo lives in a module store: it survives this screen unmounting inside the 8 s window
+    void stopAllSharing({
+      locals,
+      forget: forgetShareLevel,
+      revoke: store.revoke,
+      settle: whenCoachSharePublished,
+    }).then((r) => {
+      stopped.current = r.previous;
+      if (r.ok) rememberStop(currentUid() ?? '', r.previous, REVOKE_UNDO_MS);
+    });
+  };
+  const retry = () => {
+    const failed = failure;
+    store.clearFailure();
+    if (failed !== 'revoke') return;
+    // the revoke is also queued durably (B4); Retry sends it again right now
+    void store.revoke().then((ok) => {
+      if (ok) rememberStop(currentUid() ?? '', stopped.current, REVOKE_UNDO_MS);
+    });
+  };
+  const undoStop = () => {
+    // only a setting whose consent is on NOW comes back; one switched off meanwhile stays off
+    restoreLocals(takePendingStop(currentUid() ?? ''), writeLocal, (id) => {
+      const f = FEATURE_OF[id];
+      return !f || healthSnapshot().on[f];
+    });
+    void store.undoRevoke();
+  };
 
   return (
     <>
-      <Card emphasis="glass" pad="md" aria-live="polite">
-        <div className="ul-flex ua-start ug-12">
-          <IconTile tone="accent" size={30} icon="eye" />
-          <div className="ul-flex ul-col ug-8 uf-1">
-            <span className="ut-sm ut-muted">
-              {waiting ? cc.shSeesWaiting(first) : cc.shSees(first)}
-            </span>
-            {none ? (
-              <span className="ut-w6">{cc.shNothing(first)}</span>
-            ) : (
-              <>
-                {eff.length > 0 && (
-                  <span className="ut-w6">
-                    {cc.shEffectsOnly} <Names names={eff} />.
-                  </span>
-                )}
-                {full.length > 0 && (
-                  <span className="ut-w6">
-                    {cc.shFullLabel} <Names names={full} />.
-                  </span>
-                )}
-                <span className="ut-sm ut-muted">{cc.shRest}</span>
-              </>
-            )}
-          </div>
-        </div>
-      </Card>
-
-      <GroupedList
-        header={cc.shYourTrainer}
-        footer={status3 === 'active' ? cc.shCaption(first) : undefined}
-      >
-        <ListRow
-          icon={
-            <ClientAvatar
-              id={trainer.id}
-              name={trainer.name}
-              size={30}
-              hasPhoto={trainer.hasPhoto}
-            />
-          }
-          label={trainer.name}
-          sub={
-            status3 === 'active'
-              ? `${cc.shSince(sinceDate(trainer.since, locale))} · ${cc.shOfSix(sharedCount(g))}`
-              : status3 === 'waiting'
-                ? cc.shWaitingSub(first)
-                : cc.shNoneSub
-          }
-          value={
-            status3 === 'active'
-              ? cc.shActive
-              : status3 === 'waiting'
-                ? cc.shWaiting
-                : cc.shNotShared
-          }
-          valueTone={status3 === 'active' ? 'ok' : status3 === 'waiting' ? 'illness' : undefined}
-          chevron={!!p.onOpenTrainer}
-          onClick={p.onOpenTrainer}
-        />
-      </GroupedList>
-
-      {waiting && (
-        <Notice tone="illness" icon="hourglass" aligned>
-          {cc.shWaitingNote(first)}
-        </Notice>
-      )}
-      {none && !waiting && (
-        <Notice
-          tone="rest"
-          icon="info"
-          aligned
-          below={
-            p.onStart && (
-              <Button variant="secondary" size="md" fullWidth onClick={p.onStart}>
-                {cc.shStart}
-              </Button>
-            )
-          }
-        >
-          {link.state === 'revoked' ? cc.shRevokedNote(first) : cc.shNoneNote(first)}
-        </Notice>
-      )}
-
-      <GroupedList header={cc.shHead(first)} footer={cc.shFoot}>
-        {SHARE_CATEGORIES.map((k) => (
-          <ListRow
-            key={k}
-            icon={<IconTile tone={CATEGORY_UI[k].tone} size={30} icon={CATEGORY_UI[k].icon} />}
-            label={catTitle(cc, k)}
-            sub={seesText(cc, k, g[k])}
-            value={levelWord(cc, g[k])}
-            valueTone={tone(g[k])}
-            chevron
-            aria-label={`${catTitle(cc, k)}, ${levelWord(cc, g[k])}`}
-            onClick={() => setSheet(k)}
-          />
-        ))}
-      </GroupedList>
-
-      <GroupedList>
-        {p.onOpenLog && (
-          <ListRow
-            icon={<IconTile tone="people" size={30} icon="clock-counter-clockwise" />}
-            label={cc.shLog}
-            sub={cc.shLogSub(first)}
-            chevron
-            onClick={p.onOpenLog}
-          />
-        )}
-        {!none && (
-          <ListRow action tone="danger" label={cc.shStop(first)} onClick={() => setConfirm(true)} />
-        )}
-      </GroupedList>
-
+      <SharingList
+        trainer={trainer}
+        linkState={link && link.state !== 'none' ? link.state : undefined}
+        levels={levels}
+        blocks={blocks}
+        onRow={onRow}
+        onOpenLog={trainer ? p.onOpenLog : undefined}
+        onOpenTrainer={p.onOpenTrainer}
+        onStart={p.onStart}
+        onStop={trainer && !sharesNothingAll(levels, blocks) ? () => setConfirm(true) : undefined}
+      />
       {sheet && (
         <LevelSheet
           cc={cc}
           first={first}
-          cat={sheet}
-          level={g[sheet]}
-          onPick={(l) => void store.setLevel(sheet, l)}
+          id={sheet}
+          level={levels[sheet]}
+          onPick={(l) => pick(sheet, l)}
           onClose={() => setSheet(null)}
-        />
+        >
+          {sheet === 'supplements' && levels.supplements !== 'off' && <SupplementCoachPreview />}
+        </LevelSheet>
       )}
       {confirm && (
-        <ConfirmDialog
-          title={cc.shRevokeTitle(first)}
-          body={cc.shRevokeBody(first)}
-          confirmLabel={cc.shStopConfirm}
+        <StepConfirmDialog
+          steps={[
+            {
+              id: 'what',
+              title: cc.shRevokeTitle(first),
+              body: cc.shStop1Body(first),
+              effects: [
+                { icon: 'eye-slash', text: cc.shStopFx1(first) },
+                { icon: 'chat-circle', text: cc.shStopFx2 },
+                { icon: 'heartbeat', text: cc.shStopFx3 },
+              ],
+              confirmLabel: cc.shContinue,
+              icon: 'eye-slash',
+            },
+            {
+              id: 'confirm',
+              title: cc.shStop2Title(first),
+              body: cc.shStop2Body(sharedCountAll(levels, blocks)),
+              confirmLabel: cc.shStopConfirm,
+              icon: 'eye-slash',
+            },
+          ]}
           cancelLabel={cc.shKeep}
-          danger
-          icon="trash"
+          progressLabel={cc.shStepOf}
           onCancel={() => setConfirm(false)}
-          onConfirm={() => {
-            setConfirm(false);
-            void store.revoke();
-          }}
+          onConfirm={stop}
         />
       )}
       {undo && (
@@ -242,7 +233,7 @@ export function TrainerSharing(p: TrainerSharingProps) {
           undoLabel={cc.ccUndo}
           countdownLabel={ch.chUndoCountdown}
           durationMs={REVOKE_UNDO_MS}
-          onUndo={() => void store.undoRevoke()}
+          onUndo={undoStop}
         />
       )}
       {failure && (
@@ -251,50 +242,9 @@ export function TrainerSharing(p: TrainerSharingProps) {
           tone="danger"
           icon="warning-circle"
           text={cc.ccSaveFailed}
-          action={{ label: cc.ccRetry, onClick: () => store.clearFailure() }}
+          action={{ label: cc.ccRetry, onClick: retry }}
         />
       )}
     </>
-  );
-}
-
-/** S-32: three option cards, applies right away, Done only closes. */
-export function LevelSheet(p: {
-  cc: ClientStrings;
-  first: string;
-  cat: ShareCategory;
-  level: Level;
-  onPick: (l: Level) => void;
-  onClose: () => void;
-}) {
-  const { cc } = p;
-  const ui = CATEGORY_UI[p.cat];
-  return (
-    <Sheet onClose={p.onClose} label={catTitle(cc, p.cat)} padded>
-      <div className="cc-stack">
-        <div className="ul-flex ua-center ug-12">
-          <IconTile tone={ui.tone} size={40} icon={ui.icon} />
-          <div className="ul-flex ul-col uf-1">
-            <span className="ut-lg ut-w7">{catTitle(cc, p.cat)}</span>
-            <span className="ut-sm ut-muted">{cc.lvSheetSees(p.first)}</span>
-          </div>
-        </div>
-        <OptionCardGrid label={cc.lvSheetLabel} columns={1}>
-          {LEVELS.map((l) => (
-            <OptionCard
-              key={l}
-              icon={<IconTile tone={ui.tone} size={30} icon={LEVEL_ICON[l]} />}
-              title={levelWord(cc, l)}
-              sub={seesText(cc, p.cat, l)}
-              selected={p.level === l}
-              onSelect={() => p.onPick(l)}
-            />
-          ))}
-        </OptionCardGrid>
-        <Button variant="primary" fullWidth onClick={p.onClose}>
-          {cc.ccDone}
-        </Button>
-      </div>
-    </Sheet>
   );
 }

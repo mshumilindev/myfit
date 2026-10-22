@@ -28,6 +28,7 @@ import {
 } from '../data/gymProviders';
 import { fmtTonnes, fmtDurationHM, useT } from '../i18n';
 import { Icon, ConfirmDialog } from '../ui';
+import { useGeoSearchOn } from '../legal/useGeoSearch';
 import { GymThumb } from '../components/GymThumb';
 import { RouteMap } from '../components/RouteMap';
 import { EquipmentBoard } from '../components/EquipmentBoard';
@@ -94,7 +95,10 @@ export function GymDetailView({
   const [showWeek, setShowWeek] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
 
+  const geoOn = useGeoSearchOn();
   useEffect(() => {
+    // The browser's location prompt comes only after the gym-search consent (SPO-293).
+    if (!geoOn) return;
     let alive = true;
     getCurrentPositionOnce()
       .then((p) => alive && setCoords({ lat: p.lat, lng: p.lng }))
@@ -102,7 +106,7 @@ export function GymDetailView({
     return () => {
       alive = false;
     };
-  }, []);
+  }, [geoOn]);
 
   useEffect(() => {
     if (lat === undefined || lng === undefined) return;
@@ -118,7 +122,7 @@ export function GymDetailView({
     return () => {
       alive = false;
     };
-  }, [lat, lng, name, candAddress]);
+  }, [lat, lng, name, candAddress, geoOn]);
 
   const parsed = useMemo(() => meta?.hours ?? parseOpeningHours(meta?.openingHours), [meta]);
   const weekdays = useMemo(() => {

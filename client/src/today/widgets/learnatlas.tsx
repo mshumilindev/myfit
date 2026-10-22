@@ -52,6 +52,7 @@ import type { Fmt } from '../../atlas/voice';
 import type { WidgetCtx, WidgetDef } from '../registry';
 import { DAY, pct, signed } from './format';
 import { las, type LearnAtlasStrings } from './learnatlas.strings';
+import { setHash } from '../../route';
 
 type S = LearnAtlasStrings;
 
@@ -60,7 +61,7 @@ type S = LearnAtlasStrings;
 /* ------------------------------------------------------------------ */
 
 const openLearn = () => {
-  window.location.hash = '#/learn';
+  setHash('#/learn');
 };
 const openCoach = (ctx: WidgetCtx) => () => ctx.shell.openOverlay({ screen: 'coach' });
 

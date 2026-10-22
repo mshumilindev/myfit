@@ -54,8 +54,6 @@ export interface CoachSettings {
   keepTemper?: boolean;
   /** Muted for today from a debrief ("Mute for today"): until this ms. */
   mutedUntil?: number | null;
-  /** Agreed to send a training summary to Gemini for chat (one-time consent). */
-  chatConsent?: boolean;
   /** Notes newer than this are unread (the ring in the stories strip). */
   readAt: number;
   /** The programme (main-coach role); null until Atlas writes one. */

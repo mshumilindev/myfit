@@ -79,6 +79,22 @@ describe('client store', () => {
     store.release();
   });
 
+  it('the Undo window survives the last screen releasing the store, and still closes by itself', async () => {
+    const port = createFixturesClientPort({ scenario: 'active' });
+    const store = createClientStore(port);
+    store.retain();
+    await store.revoke();
+    store.release(); // the Stop screen unmounts inside the window
+    expect(store.getState().undo).not.toBeNull();
+    store.retain(); // and mounts again
+    await store.undoRevoke();
+    expect(port.state().link.state).toBe('active');
+    await store.revoke();
+    store.release();
+    vi.advanceTimersByTime(8100);
+    expect(store.getState().undo).toBeNull();
+  });
+
   it('revoke opens an 8 s Undo window, undo restores the grants, the window closes by itself', async () => {
     const port = createFixturesClientPort({ scenario: 'active' });
     const store = createClientStore(port);
@@ -159,5 +175,64 @@ describe('first load is bounded', () => {
     s2.retain();
     fail({ status: 403 });
     expect(s2.getState()).toMatchObject({ status: 'error', problem: 'denied' });
+  });
+});
+
+describe('durable revoke and Undo guards (B4, B5)', () => {
+  const rec = () => ({ pending: vi.fn(), settled: vi.fn(), cancel: vi.fn() });
+
+  it('the revoke is recorded before it is sent, settled on success only, and Retry (revoke again) can finish it', async () => {
+    const port = createFixturesClientPort({ scenario: 'active' });
+    const r = rec();
+    const order: string[] = [];
+    r.pending.mockImplementation(() => order.push('pending'));
+    const real = port.revoke.bind(port);
+    port.revoke = () => {
+      order.push('send');
+      return Promise.reject(new ClientPortError('offline'));
+    };
+    const store = createClientStore(port, undefined, undefined, { revokeRecord: r });
+    store.retain();
+    await expect(store.revoke()).resolves.toBe(false);
+    expect(order).toEqual(['pending', 'send']);
+    expect(r.settled).not.toHaveBeenCalled();
+    expect(store.getState().failure).toBe('revoke');
+    port.revoke = real;
+    await expect(store.revoke()).resolves.toBe(true); // what the Snackbar's Retry runs
+    expect(r.settled).toHaveBeenCalledTimes(1);
+    expect(port.state().link.state).toBe('revoked');
+    store.release();
+  });
+
+  it('a newer level choice and Undo cancel a waiting revoke', async () => {
+    const port = createFixturesClientPort({ scenario: 'active' });
+    const r = rec();
+    const store = createClientStore(port, undefined, undefined, { revokeRecord: r });
+    store.retain();
+    await store.setLevel('sleep', 'effects');
+    expect(r.cancel).toHaveBeenCalledTimes(1);
+    await store.revoke();
+    await store.undoRevoke();
+    expect(r.cancel).toHaveBeenCalledTimes(2);
+    store.release();
+  });
+
+  it('Undo keeps injury and nutrition off when their consent is off now, and leaves grants changed meanwhile alone', async () => {
+    const port = createFixturesClientPort({ scenario: 'active' });
+    const store = createClientStore(port, undefined, undefined, {
+      grantAllowed: (c) => c !== 'injury' && c !== 'nutrition',
+    });
+    store.retain();
+    const before = port.state().link.grants;
+    await store.revoke();
+    await store.setLevel('sleep', 'effects'); // the person changed one grant inside the window
+    const restore = vi.spyOn(port, 'restore');
+    await store.undoRevoke();
+    const sent = restore.mock.calls[0][0];
+    expect(sent.injury).toBe('off');
+    expect(sent.nutrition).toBe('off');
+    expect(sent.sleep).toBe('effects');
+    expect(sent.totals).toBe(before.totals);
+    store.release();
   });
 });

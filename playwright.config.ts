@@ -11,7 +11,8 @@ import { defineConfig, devices } from '@playwright/test';
  */
 const COACH_PORT = 4174;
 const coachUrl = process.env.E2E_COACH_URL ?? `http://127.0.0.1:${COACH_PORT}`;
-const coachFiles = '**/coach-*.e2e.ts';
+// privacy-sharing (SPO-107/108) runs on the same fixtures build: the member-side sample trainer
+const coachFiles = ['**/coach-*.e2e.ts', '**/privacy-sharing.e2e.ts'];
 
 const coachProject = (width: number, height: number) => ({
   name: `coach-${width}`,

@@ -47,8 +47,6 @@ export interface SealedScheduleDeps {
   via?: 'manager';
   /** the manager's display name, sealed into the requests it creates */
   viaName?: string;
-  /** the signed-in writer, recorded open as `updatedBy` (rules: must equal the caller; required for a manager) */
-  writerUid?: string;
   /**
    * Stale-while-revalidate: the last COMPLETE answer is kept on this device (sealed) and shown at once on the next start,
    * before the key rings arrive. A live answer always wins over it.
@@ -175,11 +173,7 @@ export function createSealedSchedulePort(d: SealedScheduleDeps): SchedulePort {
         now(),
       );
       // the one open field: moments only (SPO-265), see timing.ts
-      const raw = {
-        ...sealed,
-        timing: timingOf(next, now()),
-        ...(d.writerUid ? { updatedBy: d.writerUid } : {}),
-      };
+      const raw = { ...sealed, timing: timingOf(next, now()) };
       if (!(await d.store.setSchedule(doc.clientId, raw, doc.rev)))
         throw new SchedulePortError('conflict');
       return next;

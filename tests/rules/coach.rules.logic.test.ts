@@ -143,6 +143,7 @@ describe('rules file: static checks', () => {
       `conversations/${CID}/requests/r1`,
       `users/${C}/audit/e1`,
       `users/${C}/consentLog/e1`,
+      `users/${C}/consentRecords/e1`,
       `users/${C}/trainerNotes/n1`,
       'credentials/x',
       'usernames/x',

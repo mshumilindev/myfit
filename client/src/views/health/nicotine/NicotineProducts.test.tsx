@@ -7,6 +7,12 @@ import { setLocale } from '../../../i18n';
 import { __getStateForTests, deleteNicotineData, saveNicotineProduct } from '../../../store';
 import { newNicotineProduct } from '../../../nicotine';
 import { amountText, snapAmount } from './text';
+import {
+  closeHealthPrompt,
+  healthPromptFeature,
+  setHealthConsentState,
+} from '../../../data/healthConsentGate';
+import { HEALTH_FEATURES } from '../../../legal/consents';
 
 beforeEach(() => {
   setLocale('en');
@@ -241,5 +247,22 @@ describe('amounts the stepper can represent', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(products()[0]).toMatchObject({ unit: 'pods', amount: 1 });
     expect(within(row('Vape')).getByText('About 1 pods a day')).toBeTruthy();
+  });
+});
+
+describe('NicotineProductSheet without consent (SPO-290 review B2)', () => {
+  it('Save is refused: the nicotine prompt opens, the sheet stays open and nothing is stored', () => {
+    render(<NicotineProductsView onBack={() => undefined} />);
+    fireEvent.click(row('Vape'));
+    setHealthConsentState({
+      on: Object.fromEntries(HEALTH_FEATURES.map((k) => [k, k !== 'nicotine'])) as never,
+      answered: {} as never,
+      ready: true,
+    });
+    fireEvent.click(save());
+    expect(healthPromptFeature()).toBe('nicotine');
+    expect(screen.getByRole('button', { name: 'Save' })).toBeTruthy(); // still open: the choice is not lost
+    expect(products()).toHaveLength(0);
+    closeHealthPrompt();
   });
 });

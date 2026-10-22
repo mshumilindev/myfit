@@ -7,6 +7,7 @@
  * The port is the seam: the real one calls `login`; the stories / tests double (`__fixtures__/reauth.ts`) accepts any
  * non-empty password because there is nothing real to protect.
  */
+import { onAfterSignOut } from '../../accounts/deviceSession';
 import { callFn, currentUid, getLoginId, HttpError, type AuthPayload } from '../../api';
 import { coachTestDefault } from '../data/testHooks';
 
@@ -19,7 +20,7 @@ export interface ReauthPort {
   knowsIdentifier(): boolean;
 }
 
-export type ReauthAction = 'export' | 'end' | 'revoke-invite';
+export type ReauthAction = 'export' | 'end' | 'revoke-invite' | 'delete-account' | 'my-export';
 
 /** The real thing: the sign-in callable, accepted only when it names THIS signed-in user. */
 export function createAuthReauthPort(): ReauthPort {
@@ -54,12 +55,17 @@ export const getReauthPort = (): ReauthPort =>
 
 export const REAUTH_FRESH_MS = 5 * 60 * 1000;
 let okAt = 0;
+/** Whose password was checked: the recency never carries over to another account. */
+let okUid: string | null = null;
 export const markReauthed = (now = Date.now()): void => {
   okAt = now;
+  okUid = currentUid();
 };
 export const reauthFresh = (now = Date.now(), ms = REAUTH_FRESH_MS): boolean =>
-  okAt > 0 && now - okAt < ms;
-/** Sign-out, tests. */
+  okAt > 0 && okUid === currentUid() && now - okAt < ms;
+/** Sign-out (registered below), tests. */
 export const forgetReauth = (): void => {
   okAt = 0;
+  okUid = null;
 };
+onAfterSignOut(forgetReauth);

@@ -12,6 +12,9 @@
  */
 import { muscleSetsInWorkout } from './store';
 import { recentLoadSets } from './loadWindow';
+
+// The one weekly-load window: screens that grade a muscle's week import it from here (or recovery).
+export { recentLoadSets };
 import type { Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 

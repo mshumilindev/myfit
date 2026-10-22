@@ -51,6 +51,8 @@ afterEach(cleanup);
 const sup = () => __getStateForTests().supplements;
 const entries = () => sup().entries;
 const row = (name: string) => screen.getByRole('button', { name: new RegExp(`^${name}`) });
+/** The sharing list is a lazy chunk: wait for its Supplements row. */
+const sharingReady = () => screen.findByRole('button', { name: /^Supplements,/ });
 const save = () => screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement;
 const pressed = (el: HTMLElement) => el.closest('button')?.getAttribute('aria-pressed');
 const chip = (group: string, name: string) =>
@@ -424,10 +426,11 @@ describe('rows around the app', () => {
 });
 
 describe('Health › Privacy and sharing', () => {
-  it('has a Supplements row with Off / Effects only / Full and the sheet shows what the coach sees', () => {
+  it('has a Supplements row with Off / Effects only / Full and the sheet shows what the coach sees', async () => {
     seed('creatine');
     seed('whey');
     render(<HealthPrivacyView onBack={() => undefined} />);
+    await sharingReady();
     expect(within(row('Supplements')).getByText('Off')).toBeTruthy();
     fireEvent.click(row('Supplements'));
     expect(screen.getByRole('button', { name: /^Off/ })).toBeTruthy();
@@ -443,10 +446,11 @@ describe('Health › Privacy and sharing', () => {
     expect(screen.queryByText('Creatine monohydrate')).toBeNull();
   });
 
-  it('the summary card lists Supplements by level and "Delete supplement data" asks first', () => {
+  it('the summary card lists Supplements by level and "Delete supplement data" asks first', async () => {
     seed('creatine');
     setSupplementSharing('effects');
     render(<HealthPrivacyView onBack={() => undefined} />);
+    await sharingReady();
     expect(document.querySelector('.ut-w6')?.textContent).toContain('Supplements');
     fireEvent.click(screen.getByRole('button', { name: 'Delete supplement data' }));
     expect(screen.getByText('Delete all supplement data?')).toBeTruthy();

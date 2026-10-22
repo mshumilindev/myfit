@@ -45,6 +45,7 @@ import {
   supEntryId,
   useSupplementText,
 } from './text';
+import { askForDeniedWrite } from '../../../data/healthConsentGate';
 
 /** Does the draft differ from the stored entry? */
 const changed = (a: SupplementEntry, b: SupplementEntry): boolean =>
@@ -94,7 +95,8 @@ export function SupplementGroupSheet({
   };
   const save = () => {
     if (!dirty) return;
-    for (const id of toSave) saveSupplementEntry({ ...draftOf(id), active: true });
+    for (const id of toSave)
+      if (askForDeniedWrite(saveSupplementEntry({ ...draftOf(id), active: true }))) return; // no consent: prompt, sheet stays
     onClose();
   };
 

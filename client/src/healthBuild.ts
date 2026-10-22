@@ -4,11 +4,10 @@
  * be honoured by one builder and forgotten by another.
  */
 import { useMemo } from 'react';
-import { useStore } from './store';
+import { getStoredLimits, useStore, useStoredLimits, type StoredLimits } from './store';
 import type { MuscleGroup } from './data/exercises';
 import { conditionLimits, type Limits } from './conditions';
 import { loadCaps as injuryLoadCaps, protectedMuscles as injuryProtected } from './injury';
-import type { ChronicCondition, Injury } from './types';
 
 export interface HealthBuild {
   protectedMuscles: MuscleGroup[];
@@ -17,9 +16,14 @@ export interface HealthBuild {
   conditions: Limits;
 }
 
+/**
+ * RESTRICTION path (SPO-290 owner decision): workout generation always honours the stored injuries and conditions, even
+ * when their features are off or the consent is unknown. They only cap and protect; the result names nothing and is
+ * never displayed, shared or sent. `limits` defaults to the stored ones (a test or a caller may pass others).
+ */
 export function healthBuildCtx(
-  s: { injuries: readonly Injury[]; conditions: readonly ChronicCondition[] },
   now: number = Date.now(),
+  s: StoredLimits = getStoredLimits(),
 ): HealthBuild {
   const limits = conditionLimits(s.conditions ?? [], now);
   const caps = new Map(injuryLoadCaps([...s.injuries]));
@@ -32,8 +36,20 @@ export function healthBuildCtx(
   };
 }
 
-/** The stacked limits of the signed-in person's active conditions, for screens that flag exercises. */
+/**
+ * DISPLAY path: the stacked limits of the conditions the app may show (empty while Chronic conditions is off), for
+ * screens that flag exercises or remind the person of a limit. What only restricts uses `useStoredConditionLimits`.
+ */
 export function useConditionLimits(): Limits {
   const { conditions } = useStore();
+  return useMemo(() => conditionLimits(conditions ?? []), [conditions]);
+}
+
+/**
+ * RESTRICTION path: the same limits from the stored conditions, whatever the consent says. For progression caps (RPE
+ * ceiling, no-failure, rest scaling) that must keep protecting, never for anything that shows or sends a condition.
+ */
+export function useStoredConditionLimits(): Limits {
+  const { conditions } = useStoredLimits();
   return useMemo(() => conditionLimits(conditions ?? []), [conditions]);
 }

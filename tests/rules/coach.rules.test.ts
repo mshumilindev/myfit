@@ -741,6 +741,34 @@ suite('coach firestore rules (needs emulator)', () => {
       await ok(fs.setDoc(D(client(), 'users', 'c1', 'meta', 'anything'), { whatever: 1 }));
       await no(fs.setDoc(D(client(), 'users', 'c1', 'consentLog', 'x'), { at: 1 }));
       await ok(fs.getDocs(fs.collection(client(), 'users', 'c1', 'consentLog')));
+      await no(fs.setDoc(D(client(), 'users', 'c1', 'consentRecords', 'x'), { at: 1 }));
+      await ok(fs.getDocs(fs.collection(client(), 'users', 'c1', 'consentRecords')));
+    });
+    it('consentRecords (SPO-296): only the owner reads; the coach, an admin, another member and a signed-out caller cannot; nobody writes', async () => {
+      await T.withSecurityRulesDisabled(async (ctx: { firestore(): unknown }) => {
+        await fs.setDoc(D(ctx.firestore(), 'users', 'c1', 'consentRecords', 'r1'), {
+          id: 'r1',
+          kind: 'terms',
+          action: 'grant',
+          version: '2026-10-21',
+          at: 1,
+        });
+      });
+      const coll = (db: unknown) => fs.collection(db, 'users', 'c1', 'consentRecords');
+      const anon = () => T.unauthenticatedContext().firestore();
+      await ok(fs.getDoc(D(client(), 'users', 'c1', 'consentRecords', 'r1')));
+      await ok(fs.getDocs(coll(client())));
+      for (const who of [trainer, adminCoach, stranger, anon]) {
+        await no(fs.getDoc(D(who(), 'users', 'c1', 'consentRecords', 'r1')));
+        await no(fs.getDocs(coll(who())));
+      }
+      // no direct writes, not even by the owner: create, update, delete
+      const rec = { kind: 'terms', action: 'grant', version: '2026-10-21', at: 2 };
+      for (const who of [client, trainer, adminCoach, stranger, anon]) {
+        await no(fs.setDoc(D(who(), 'users', 'c1', 'consentRecords', 'r2'), rec));
+        await no(fs.setDoc(D(who(), 'users', 'c1', 'consentRecords', 'r1'), rec));
+        await no(fs.deleteDoc(D(who(), 'users', 'c1', 'consentRecords', 'r1')));
+      }
     });
   });
   describe('query shapes the real adapters run (ITER8)', () => {

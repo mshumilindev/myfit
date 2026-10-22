@@ -31,6 +31,7 @@ vi.mock('../api', async (orig) => ({
 vi.mock('../coach/client/lazy', () => ({ ClientProgramExtrasLazy: () => null }));
 
 import { ProgramsView } from './ProgramsView';
+import { currentHash } from '../route';
 
 const shell = { openOverlay: vi.fn() } as never;
 const mine = (): Program => ({
@@ -62,7 +63,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
-  window.location.hash = '';
+  window.history.replaceState(null, '', '/');
 });
 
 describe('Programs: the editor under #/programs/<id>/edit', () => {
@@ -70,9 +71,9 @@ describe('Programs: the editor under #/programs/<id>/edit', () => {
     render(<ProgramsView shell={shell} />);
     fireEvent.click(await screen.findByRole('button', { name: /Push Pull/ }));
     expect(await screen.findByText(pgEn.edTitle, { selector: 'h1' })).toBeTruthy();
-    expect(window.location.hash).toBe('#/programs/p-1/edit');
+    expect(currentHash()).toBe('#/programs/p-1/edit');
     fireEvent.click(screen.getByRole('button', { name: 'Programs' }));
-    await waitFor(() => expect(window.location.hash).toBe('#/programs'));
+    await waitFor(() => expect(currentHash()).toBe('#/programs'));
     expect(await screen.findByRole('button', { name: /Push Pull/ })).toBeTruthy();
   });
 
@@ -93,11 +94,11 @@ describe('Programs: the editor under #/programs/<id>/edit', () => {
     render(<ProgramsView shell={shell} />);
     fireEvent.click((await screen.findAllByRole('button', { name: /New program/ }))[0]);
     expect(await screen.findByText(pgEn.edTitle, { selector: 'h1' })).toBeTruthy();
-    expect(window.location.hash).toBe('#/programs/new');
+    expect(currentHash()).toBe('#/programs/new');
     cleanup();
     window.location.hash = '#/programs/nope/edit';
     render(<ProgramsView shell={shell} />);
-    await waitFor(() => expect(window.location.hash).toBe('#/programs'));
+    await waitFor(() => expect(currentHash()).toBe('#/programs'));
     expect(await screen.findByRole('button', { name: /Push Pull/ })).toBeTruthy();
   });
 });

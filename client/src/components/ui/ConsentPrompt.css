@@ -1,0 +1,23 @@
+.uicp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  padding-bottom: var(--s-8);
+}
+.uicp-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+.uicp-t,
+.uicp-lead {
+  margin: 0;
+}
+.uicp-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.uicp-foot {
+  text-align: center;
+}

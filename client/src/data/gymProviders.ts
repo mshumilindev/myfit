@@ -9,10 +9,37 @@
  * identical venues merge into one row that lists every contributing source.
  */
 import { detectAmenities, unionAmenities } from './gymAmenities';
+import { GeoConsentError, assertGeoSearchOn, geoSignal, isGeoSearchOn } from './geoSearchGate';
 import type { Gym } from '../types';
 
-/** Google Places key from Vite env — enables Google photos/hours everywhere. */
-const GOOGLE_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined;
+/**
+ * Google Places and Foursquare are NOT enabled (SPO-293): the consent a person gives for gym search names only the
+ * OpenStreetMap-based services below. A key in the build must never switch them on. Turning this on needs its own
+ * consent kind, its own disclosure and a processor-register entry first, so it stays a constant, not an env flag.
+ */
+const KEYED_PLACE_SERVICES_ENABLED: boolean = false;
+
+/** Google Places key from Vite env, only when the keyed services are enabled above. */
+const GOOGLE_KEY = KEYED_PLACE_SERVICES_ENABLED
+  ? (import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined)
+  : undefined;
+
+/**
+ * Every request to a place or map service goes through here: no consent, no request (throws `GeoConsentError` before
+ * `fetch` is reached).
+ */
+function geoFetch(input: string, init?: RequestInit): Promise<Response> {
+  assertGeoSearchOn();
+  // Switching gym search off also cancels a request already on its way.
+  const signal = geoSignal(init?.signal ?? undefined);
+  return fetch(input, { ...init, signal });
+}
+
+/** Google Places / Foursquare: refused outright unless the keyed services are enabled (and then still need consent). */
+function keyedFetch(input: string, init?: RequestInit): Promise<Response> {
+  if (!KEYED_PLACE_SERVICES_ENABLED) throw new Error('keyed place services are not enabled');
+  return geoFetch(input, init);
+}
 
 export type ProviderId = 'local' | 'osm' | 'overpass' | 'google' | 'foursquare';
 
@@ -269,7 +296,7 @@ async function overpassNearbyGyms(
     );
     out center tags 50;
   `;
-  const res = await fetch('https://overpass-api.de/api/interpreter', {
+  const res = await geoFetch('https://overpass-api.de/api/interpreter', {
     method: 'POST',
     signal,
     headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
@@ -333,6 +360,8 @@ export async function searchNearbyGyms(
       sources: ['local'] as ProviderId[],
     }));
   const merged = [...local];
+  // No consent: the saved gyms only, nothing asked of Overpass.
+  if (!isGeoSearchOn()) return merged.sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
   mergeResults(merged, await overpassNearbyGyms(coords, radiusM, signal));
   return merged.sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
 }
@@ -347,7 +376,7 @@ async function photonOnce(
     params.set('lat', String(coords.lat));
     params.set('lon', String(coords.lng));
   }
-  const res = await fetch(`https://photon.komoot.io/api/?${params}`, {
+  const res = await geoFetch(`https://photon.komoot.io/api/?${params}`, {
     signal,
     headers: { 'Accept-Language': navigator.language || 'en' },
   });
@@ -395,7 +424,7 @@ async function photonOnce(
 }
 
 const googleProvider: Provider = async ({ query, coords, keys, signal }) => {
-  if (!keys.googlePlaces) throw new SkipError('no Google Places key');
+  if (!KEYED_PLACE_SERVICES_ENABLED || !keys.googlePlaces) throw new SkipError('not enabled');
   const body = {
     textQuery: `${query} gym`,
     ...(coords
@@ -406,7 +435,7 @@ const googleProvider: Provider = async ({ query, coords, keys, signal }) => {
         }
       : {}),
   };
-  const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+  const res = await keyedFetch('https://places.googleapis.com/v1/places:searchText', {
     method: 'POST',
     signal,
     headers: {
@@ -442,10 +471,10 @@ const googleProvider: Provider = async ({ query, coords, keys, signal }) => {
 };
 
 const foursquareProvider: Provider = async ({ query, coords, keys, signal }) => {
-  if (!keys.foursquare) throw new SkipError('no Foursquare key');
+  if (!KEYED_PLACE_SERVICES_ENABLED || !keys.foursquare) throw new SkipError('not enabled');
   const params = new URLSearchParams({ query, categories: '18021', limit: '8' });
   if (coords) params.set('ll', `${coords.lat},${coords.lng}`);
-  const res = await fetch(`https://api.foursquare.com/v3/places/search?${params}`, {
+  const res = await keyedFetch(`https://api.foursquare.com/v3/places/search?${params}`, {
     signal,
     headers: { Authorization: keys.foursquare, Accept: 'application/json' },
   });
@@ -545,7 +574,7 @@ export async function searchGyms(
         handlers.onResults([...merged]);
       } catch (err) {
         if (signal.aborted) return;
-        if (err instanceof SkipError) {
+        if (err instanceof SkipError || err instanceof GeoConsentError) {
           handlers.onProvider(p.id, { status: 'skipped', reason: err.message });
         } else {
           const reason = err instanceof Error ? err.message : 'failed';
@@ -588,7 +617,7 @@ async function commonsThumb(fileTag: string, signal: AbortSignal): Promise<strin
     format: 'json',
     origin: '*',
   });
-  const res = await fetch(`https://commons.wikimedia.org/w/api.php?${params}`, { signal });
+  const res = await geoFetch(`https://commons.wikimedia.org/w/api.php?${params}`, { signal });
   if (!res.ok) return null;
   const data = (await res.json()) as {
     query?: { pages?: Record<string, { imageinfo?: Array<{ thumburl?: string; url?: string }> }> };
@@ -610,7 +639,7 @@ async function wikidataLogo(qid: string, signal: AbortSignal): Promise<string | 
     format: 'json',
     origin: '*',
   });
-  const res = await fetch(`https://www.wikidata.org/w/api.php?${params}`, { signal });
+  const res = await geoFetch(`https://www.wikidata.org/w/api.php?${params}`, { signal });
   if (!res.ok) return null;
   const data = (await res.json()) as {
     claims?: { P154?: Array<{ mainsnak?: { datavalue?: { value?: string } } }> };
@@ -625,6 +654,8 @@ async function wikidataLogo(qid: string, signal: AbortSignal): Promise<string | 
  * nothing is found (the UI then falls back to the map-tile thumbnail).
  */
 export async function resolvePhoto(r: PlaceResult, signal: AbortSignal): Promise<string | null> {
+  // No consent: no photo lookup, and no third-party image URL (even a remembered one) is handed to an <img>.
+  if (!isGeoSearchOn()) return null;
   if (r.photoUrl) return r.photoUrl;
   if (GOOGLE_KEY) {
     try {
@@ -656,9 +687,10 @@ export async function resolvePhoto(r: PlaceResult, signal: AbortSignal): Promise
 /**
  * Brand/chain logo for a gym name, keyless and universal, cached per brand
  * (in-flight dedup + 30-day localStorage) so a chain with 40 branches resolves
- * once. Order: Wikidata logo (P154, a real wordmark, e.g. McFit) → Clearbit
- * name→domain → DuckDuckGo brand icon (works where Wikidata has no logo, e.g.
- * Zdrofit). Returns null when nothing is found.
+ * once. Wikidata logo only (P154, a real wordmark, e.g. McFit). Clearbit and
+ * DuckDuckGo icons were dropped (SPO-293): they are not among the services the
+ * gym-search consent names. Returns null when nothing is found, and with no
+ * consent (nothing cached then, so a later consent still resolves).
  */
 const LOGO_PREFIX = 'gym.logo.';
 const LOGO_TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -686,7 +718,7 @@ function writeLogoCache(brand: string, url: string | null): void {
 
 export function brandLogo(name: string, signal: AbortSignal): Promise<string | null> {
   const brand = name.trim().toLowerCase();
-  if (!brand) return Promise.resolve(null);
+  if (!brand || !isGeoSearchOn()) return Promise.resolve(null);
   const cached = readLogoCache(brand);
   if (cached !== undefined) return Promise.resolve(cached);
   const existing = logoInflight.get(brand);
@@ -697,7 +729,7 @@ export function brandLogo(name: string, signal: AbortSignal): Promise<string | n
       return url;
     })
     .catch((e) => {
-      if (signal.aborted) throw e; // don't cache aborts — allow a later retry
+      if (signal.aborted || e instanceof GeoConsentError) throw e; // don't cache aborts or a refused call — allow a later retry
       writeLogoCache(brand, null);
       return null;
     })
@@ -720,7 +752,7 @@ async function resolveBrandLogo(name: string, signal: AbortSignal): Promise<stri
     origin: '*',
   });
   try {
-    const sr = await fetch(`https://www.wikidata.org/w/api.php?${search}`, { signal });
+    const sr = await geoFetch(`https://www.wikidata.org/w/api.php?${search}`, { signal });
     if (sr.ok) {
       const sd = (await sr.json()) as { search?: Array<{ id: string }> };
       const qid = sd.search?.[0]?.id;
@@ -730,21 +762,7 @@ async function resolveBrandLogo(name: string, signal: AbortSignal): Promise<stri
       }
     }
   } catch (e) {
-    if (signal.aborted) throw e;
-  }
-  // 2) Clearbit name→domain suggestion, then the domain's brand icon.
-  try {
-    const cr = await fetch(
-      `https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(name)}`,
-      { signal },
-    );
-    if (cr.ok) {
-      const cd = (await cr.json()) as Array<{ domain?: string }>;
-      const domain = cd[0]?.domain;
-      if (domain) return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
-    }
-  } catch (e) {
-    if (signal.aborted) throw e;
+    if (signal.aborted || e instanceof GeoConsentError) throw e;
   }
   return null;
 }
@@ -822,7 +840,9 @@ export function resolveAddress(
 
 async function fetchAddress(lat: number, lng: number, signal: AbortSignal): Promise<string | null> {
   try {
-    const res = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}`, { signal });
+    const res = await geoFetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}`, {
+      signal,
+    });
     if (!res.ok) return null;
     const data = (await res.json()) as {
       features?: Array<{ properties?: Parameters<typeof formatAddr>[0] }>;
@@ -929,7 +949,7 @@ async function fetchGymMeta(
   lng: number,
   signal: AbortSignal,
 ): Promise<GymMeta | null> {
-  const res = await fetch(
+  const res = await geoFetch(
     `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=jsonv2&extratags=1&zoom=18`,
     { signal, headers: { Accept: 'application/json' } },
   );
@@ -1095,7 +1115,7 @@ async function fetchGoogle(
   lng: number,
   signal: AbortSignal,
 ): Promise<GoogleInfo | null> {
-  const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+  const res = await keyedFetch('https://places.googleapis.com/v1/places:searchText', {
     method: 'POST',
     signal,
     headers: {

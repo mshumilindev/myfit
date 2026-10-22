@@ -30,6 +30,7 @@ import {
 import { removeAlcoholEntry, saveAlcoholEntry, useAlcohol } from '../../../store';
 import type { AlcoholEntry, AlcoholItemId } from '../../../types';
 import { ALC_ICON, alcEntryId, defaultItemOf, numText, roundG, useAlcoholText } from './text';
+import { askForDeniedWrite } from '../../../data/healthConsentGate';
 
 /** Does the draft differ from the stored entry? The count and serving only matter most weeks. */
 const changed = (a: AlcoholEntry, b: AlcoholEntry): boolean =>
@@ -90,7 +91,8 @@ export function AlcoholCategorySheet({
   };
   const save = () => {
     if (!dirty) return;
-    for (const id of toSave) saveAlcoholEntry({ ...draftOf(id), active: true });
+    for (const id of toSave)
+      if (askForDeniedWrite(saveAlcoholEntry({ ...draftOf(id), active: true }))) return; // no consent: prompt, sheet stays
     onClose();
   };
 

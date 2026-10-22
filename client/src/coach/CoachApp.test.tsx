@@ -14,6 +14,7 @@ import {
 // the screens are lazy chunks: a slow machine needs more than the default 1 s to show them
 configure({ asyncUtilTimeout: 5000 });
 import { useState } from 'react';
+import { LOCALES } from '../i18n';
 import { coachEn } from '../i18n/coach.en';
 import { CoachApp, CoachShell } from './CoachApp';
 import { coachEntryHash, type CoachRoute } from './routes';
@@ -25,6 +26,7 @@ import {
   setRailHeight,
   uninstallRailMeasure,
 } from '../components/ui/railTestUtils';
+import { currentHash } from '../route';
 
 const unreadMock = vi.hoisted(() => ({ value: 0 }));
 vi.mock('./unread', async (orig) => ({
@@ -62,7 +64,7 @@ function Harness({
 beforeEach(() => {
   unreadMock.value = 0;
   localStorage.clear();
-  window.location.hash = '';
+  window.history.replaceState(null, '', '/');
 });
 afterEach(cleanup);
 
@@ -78,7 +80,7 @@ vi.mock('../components/Avatar', () => ({
   ),
 }));
 
-const EIGHT = [
+const SEVEN = [
   c.navAgenda,
   c.navClients,
   c.navSchedule,
@@ -86,7 +88,6 @@ const EIGHT = [
   c.navDecisions,
   c.navPrograms,
   c.navChat,
-  c.navTeam,
 ];
 const navLabels = () =>
   [...screen.getByRole('complementary').querySelectorAll('.rail-nav > .rail-item')].map(
@@ -97,15 +98,15 @@ const footLabels = () =>
     b.getAttribute('aria-label'),
   );
 
-describe('rail: exactly the eight design items (seven + Team); Apps pinned in the foot; More only on overflow', () => {
+describe('rail: exactly the seven design items; Apps pinned in the foot; More only on overflow', () => {
   beforeEach(() => installRailMeasure(900));
   afterEach(uninstallRailMeasure);
 
-  it('1440, tall: eight nav items (no Live / Signals / Apps among them), foot = Apps, avatar; no More', () => {
+  it('1440, tall: seven nav items (no Live / Signals / Apps among them), foot = Apps, avatar; no More', () => {
     setViewport(1440);
     const onShell = vi.fn();
     render(<Harness onShell={onShell} />);
-    expect(navLabels()).toEqual(EIGHT);
+    expect(navLabels()).toEqual(SEVEN);
     expect(footLabels()).toEqual([c.navApps, c.railProfile]);
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
     for (const l of [c.navLive, c.navSignals])
@@ -117,31 +118,31 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     expect(onShell).toHaveBeenCalledTimes(1);
   });
 
-  it('exact fit (8 x 69.6 - 5.6 = 551.2) shows no More; one px less moves the trailing two into More', () => {
+  it('exact fit (7 x 69.6 - 5.6 = 481.6) shows no More; one px less moves the trailing two into More', () => {
     setViewport(1440);
-    setRailHeight(552);
+    setRailHeight(482);
     render(<Harness />);
-    expect(navLabels()).toEqual(EIGHT);
+    expect(navLabels()).toEqual(SEVEN);
     expect(footLabels()).toEqual([c.navApps, c.railProfile]);
-    setRailHeight(551);
-    expect(navLabels()).toEqual(EIGHT.slice(0, 6));
+    setRailHeight(481);
+    expect(navLabels()).toEqual(SEVEN.slice(0, 5));
     // More sits in the nav column, right below the last visible nav item; the foot is only Apps + avatar.
     expect(footLabels()).toEqual([c.navApps, c.railProfile]);
     const kids = [...document.querySelectorAll('.rail-nav > *')];
-    expect(kids).toHaveLength(7);
-    expect(kids[6].classList.contains('rail-more')).toBe(true);
-    expect(kids[5].textContent).toContain(c.navPrograms);
+    expect(kids).toHaveLength(6);
+    expect(kids[5].classList.contains('rail-more')).toBe(true);
+    expect(kids[4].textContent).toContain(c.navDecisions);
   });
 
   it('300: More (right below the last visible nav item) lists only the overflowed nav items, in order, no Apps, no account', () => {
     setViewport(1440);
     setRailHeight(300);
     render(<Harness />);
-    expect(navLabels()).toEqual(EIGHT.slice(0, 3));
+    expect(navLabels()).toEqual(SEVEN.slice(0, 3));
     fireEvent.click(screen.getByRole('button', { name: c.navMore }));
     const dlg = screen.getByRole('dialog', { name: c.navMore });
     expect([...dlg.querySelectorAll('button.uirow')].map((b) => b.textContent)).toEqual(
-      EIGHT.slice(3),
+      SEVEN.slice(3),
     );
     expect(within(dlg).queryByRole('button', { name: c.navApps })).toBeNull();
     expect(within(dlg).queryByText('Iryna Koval')).toBeNull();
@@ -167,10 +168,10 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     setRailHeight(300);
     expect(screen.getByRole('button', { name: c.navMore })).toBeTruthy();
     setRailHeight(300);
-    expect(navLabels()).toEqual(EIGHT.slice(0, 3));
+    expect(navLabels()).toEqual(SEVEN.slice(0, 3));
     setRailHeight(900);
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
-    expect(navLabels()).toEqual(EIGHT);
+    expect(navLabels()).toEqual(SEVEN);
   });
 
   it('More has a menu name, aria-haspopup, aria-expanded; a destination navigates, closes it and lights More', async () => {
@@ -211,8 +212,8 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     setViewport(1024);
     setRailHeight(300);
     render(<Harness />);
-    // compact tile 44, pitch 49.6: 8 fit in 392; at 300 five stay.
-    expect(navLabels()).toEqual(EIGHT.slice(0, 5));
+    // compact tile 44, pitch 49.6: 7 fit in 342; at 300 five stay.
+    expect(navLabels()).toEqual(SEVEN.slice(0, 5));
     const rail = screen.getByRole('complementary');
     expect(
       within(rail).getByRole('button', { name: c.navMore }).querySelector('.rail-tip')?.textContent,
@@ -220,7 +221,7 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     expect(
       within(rail).getByRole('button', { name: c.navApps }).querySelector('.rail-tip')?.textContent,
     ).toBe(c.navApps);
-    setRailHeight(392);
+    setRailHeight(342);
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
   });
 
@@ -237,8 +238,8 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
       for (const t of tiles) expect(t.getAttribute('style')).toBeNull();
       seen.push(tiles.length);
     }
-    // ...the count is the only thing that follows the height (600 still fits 8: 551.2; 500 keeps 6 and More).
-    expect(seen).toEqual([8, 8, 8, 6]);
+    // ...the count is the only thing that follows the height (500 still fits 7: 481.6).
+    expect(seen).toEqual([7, 7, 7, 7]);
     setRailHeight(200);
     expect(navLabels()).toHaveLength(1);
     // ...and CSS pins the original tiles: labelled 72x64, compact 44, flex none, top aligned, 5.6 gap.
@@ -275,7 +276,7 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
 });
 
 describe('phone More sheet', () => {
-  it('390: destinations, then Apps LAST, then the account block (avatar 40)', () => {
+  it('390: More lists the destinations only; the avatar opens the account drawer (avatar 40); the top-bar chip opens the launcher', () => {
     setViewport(390);
     const onShell = vi.fn();
     render(
@@ -294,27 +295,21 @@ describe('phone More sheet', () => {
     expect(screen.getByRole('heading', { name: c.navMore })).toBeTruthy();
     const sheet = document.querySelector('.uimore-body') as HTMLElement;
     const rows = [...sheet.querySelectorAll('.uigl-rows button.uirow')].map((b) => b.textContent);
-    expect(rows).toEqual([
-      c.navWeek,
-      c.navDecisions,
-      c.navPrograms,
-      c.navLive,
-      c.navSignals,
-      c.navTeam,
-      c.navApps,
-    ]);
-    // the account block follows: Profile pill (no Sign out without a registered session)
-    expect([...sheet.querySelectorAll('.uiacct-action')].map((b) => b.textContent)).toEqual([
+    expect(rows).toEqual([c.navWeek, c.navDecisions, c.navPrograms, c.navLive, c.navSignals]);
+    // no Apps row (the BrandBar chip is the switcher) and no account block (the avatar owns it)
+    expect(within(sheet).queryByRole('button', { name: c.navApps })).toBeNull();
+    expect(sheet.querySelector('.uiacct')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: c.navWeek }));
+    // the avatar drawer: Profile pill (no Sign out without a registered session)
+    fireEvent.click(document.querySelector('.uibrand-avatar') as HTMLElement);
+    const acct = document.querySelector('.uimore-body') as HTMLElement;
+    expect([...acct.querySelectorAll('.uiacct-action')].map((b) => b.textContent)).toEqual([
       c.moreProfile,
     ]);
-    const idx = (el: Element) => [...sheet.querySelectorAll('*')].indexOf(el);
-    expect(idx(screen.getByText('Iryna Koval'))).toBeGreaterThan(
-      idx(screen.getByRole('button', { name: c.navApps })),
-    );
-    expect(within(sheet).getByTestId('real-avatar').dataset.size).toBe('40');
-    fireEvent.click(screen.getByRole('button', { name: c.navApps }));
+    expect(within(acct).getByTestId('real-avatar').dataset.size).toBe('40');
+    // the chip in the top bar opens the launcher (one tap)
+    fireEvent.click(screen.getByRole('button', { name: LOCALES.en.shellSwitch }));
     expect(onShell).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText(c.modeNote)).toBeNull();
   });
 });
 
@@ -329,7 +324,7 @@ describe('theme', () => {
 });
 
 describe('rail (>= 768)', () => {
-  it('1440: labelled 88px rail, eight items with visible labels, no tab bar', () => {
+  it('1440: labelled 88px rail, seven items with visible labels, no tab bar', () => {
     setViewport(1440);
     const { container } = render(<Harness />);
     const rail = screen.getByRole('complementary', { name: c.navLandmark });
@@ -345,7 +340,6 @@ describe('rail (>= 768)', () => {
       c.navDecisions,
       c.navPrograms,
       c.navChat,
-      c.navTeam,
       c.navApps,
     ]);
     expect(container.querySelector('.tabbar')).toBeNull();
@@ -364,7 +358,6 @@ describe('rail (>= 768)', () => {
       c.navDecisions,
       c.navPrograms,
       c.navChat,
-      c.navTeam,
     ]) {
       const btn = within(rail).getByRole('button', { name });
       expect(btn.getAttribute('title')).toBeNull();
@@ -448,7 +441,7 @@ describe('tab bar (< 768)', () => {
     expect(screen.getByRole('button', { name: `${c.navChat}, ${c.unread(4)}` })).toBeTruthy();
   });
 
-  it('More opens a sheet with Week, Decisions, Programs, Live, Signals, mode switch and profile', () => {
+  it('More opens a sheet with Week, Decisions, Programs, Live, Signals; the avatar drawer has the mode switch and profile', () => {
     setViewport(390);
     const onProfile = vi.fn();
     render(<Harness onProfile={onProfile} />);
@@ -456,6 +449,10 @@ describe('tab bar (< 768)', () => {
     for (const label of [c.navWeek, c.navDecisions, c.navPrograms, c.navLive, c.navSignals]) {
       expect(screen.getByRole('button', { name: label })).toBeTruthy();
     }
+    // the account is not in More
+    expect(screen.queryByRole('button', { name: c.modeCoach })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: c.navWeek }));
+    fireEvent.click(document.querySelector('.uibrand-avatar') as HTMLElement);
     expect(screen.getByRole('button', { name: c.modeCoach }).getAttribute('aria-pressed')).toBe(
       'true',
     );
@@ -598,6 +595,6 @@ describe('shell basics', () => {
     fireEvent.click(
       within(screen.getByRole('complementary')).getByRole('button', { name: c.navWeek }),
     );
-    expect(window.location.hash).toBe('#/c/week');
+    expect(currentHash()).toBe('#/c/week');
   });
 });

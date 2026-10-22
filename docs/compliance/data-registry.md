@@ -1,0 +1,156 @@
+# D1: Реєстр даних Spotter (R1–R54)
+
+Статус: чернетка v2 · 2026-10-22 · канон кодових фактів (дзеркало: проєкт Spotter, `SPO-252-my-data-spike.md`, там історія й обґрунтування). Це інженерний документ, не юридична консультація. Зміна даних = зміна цього файлу в тому ж PR (`.claude/rules/legal-compliance.md`). Синхронність із кодом перевіряє `tests/compliance-sync.guard.test.ts`.
+
+Стан дерева: робоче дерево після HEAD `020bf531` (незакомічені зміни SPO-285/286/290/293/296 враховано). Позначки: **unknown/lawyer** = факт або рішення, якого немає в коді; число не вигадуємо (G9).
+
+Нумерація рядків змінена відносно SPO-252 (R1–R43 було 43 рядки в 7 групах; тут рядки розбито детальніше й додано нові). Відповідність: R1–R6 = R1–R6; R7(sessions/keyLog) ← R6 + `keyLog` з R36; R8 ← R7; R10–R22 ← R8–R21; R23 ← R22; R24 ← R23; R25–R26 ← R24; R27 ← R25; R28 ← R26; R29–R35 ← R27–R33; R37–R40 ← R34–R37; R41–R42 ← R38–R39; R46–R47 ← R43 (Open Food Facts, Firebase); R48 ← R40; R50 ← R41; R51 ← R42. Нові: R9, R36, R43, R44, R45, R49, R52–R54. Коментарі в старих тестах (`R30 shared notes` тощо) посилаються на нумерацію спайка.
+
+## Умовні позначення
+
+**Шифрування (як у коді, не як хотілося б).**
+
+- `DEK` запечатано на клієнті ключем користувача (`prepareWrite`/`sealDoc`, `client/src/encryptedDoc.ts`); ключ видає сервер (`functions/src/vault.ts`: HKDF від `VAULT_MASTER` і uid). Це **не end-to-end щодо оператора** (правило 1): оператор із секретом технічно може вивести ключ.
+- `ck` запечатано ключем розмови (`client/src/coachCrypto`), ECDH-гранти; ближче до E2EE, описувати окремо.
+- `open` відкритий текст у Firestore/сховищі. `fn` пише лише Admin SDK (rules `write: false`). `hash` хеш. `local-open` / `local-sealed` на пристрої.
+
+**Підстава (пропозиція SPO-29, фінал: юрист, SPO-258).** `C` = Art. 6(1)(b) договір; `K` = згода, Art. 6(1)(a) + для здоров'я 9(2)(a); `L` = Art. 6(1)(f) законний інтерес (LIA не зроблено, `{{ЮРИСТ}}`); `Lg` = юридичний обов'язок; `?` = не визначено.
+
+**Строк.** `до-видал.` = у коді немає TTL, зберігається до видалення акаунта, **період/обґрунтування unknown/lawyer** (G9, D9). Явні числа лише ті, що є в коді.
+
+**Експорт (N6, SPO-252 §5).** N6 реалізовано (`client/src/legal/export`): ZIP з JSON/CSV/README будується на пристрої з того, що застосунок уже вміє прочитати й розшифрувати; категорії `account`, `training`, `body`, `atlas`, `sharing`. Власні ЗБЕРЕЖЕНІ дані здоров'я (шість функцій головного сховища й журнал харчування) входять до копії й тоді, коли згоду на функцію вимкнено (Art. 15/20: повернення людині її даних на її пристрій не є обробкою для функції і не потребує повторної згоди); їх читають лише в коді експорту «сирими» акцесорами (`getStoredHealthForExport`, `storedNutrition`), у UI вони не потрапляють, а README частини позначає їх «stored; hidden in the app because consent is off». Нотатки (тренування, чат і налаштування Atlas, записи здоров'я) позначені як такі, що можуть містити введені користувачем деталі здоров'я. CSV починається з BOM U+FEFF, клітинки з `= + - @` отримують апостроф (описано в README). Історія згод у копії — лише після підтвердження сервером, інакше `not-loaded`. Що не можна прочитати на пристрої, іде в маніфест `notIncluded` з причиною (`server-only`, `not-loaded`, `feature-off`, `held-by-other`). Server-only у маніфесті: деталі профілю на сервері (ім'я, фото, історія ролей, команда), спроби входу, passkeys і сесії пристроїв, журнал доступу до ключів і службові сповіщення; `not-loaded`: листування з тренером, плани/розклад/запити, журнал доступу; `held-by-other`: приватні записи тренера. Решта колонки лишається описом покриття за рядками; чи достатньо server-only для Art. 15: питання юристу. `так` / `ні (причина)` / `запит` / `н/д`.
+**Видалення (SPO-285, `functions/src/accountDeletionCore.ts`, реалізовано, дерево).** `✓ крок` = покрито каскадом; `не покрито` = прогалина.
+**Згода** = `ConsentKind` (`client/src/legal/consents.ts`); `—` = немає окремої згоди.
+
+## A. Акаунт і ідентичність
+
+| id | Що | Де | Шифр. | Відкриті поля | Мета | Підстава | Строк | Одержувачі | Експорт N6 | Видалення | Згода |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| R1 | Профіль: username(Lower), ім'я, role, status, trainerId, teamId, avatarExt, дати | `users/{uid}` | open | усе | акаунт, ролі | C | до-видал. | Google; адмін, тренер через функції | частково (N6: uid, username, role у `account.json`; ім'я, фото, історія ролей, команда: `notIncluded` server-only) | ✓ крок 4 | `terms` |
+| R2 | Хеш пароля | `credentials/{uid}` | hash, fn | хеш | вхід | C | до-видал. | Google | ні (не віддається, лише «пароль задано») | ✓ крок 5 | — |
+| R3 | Резервація username; запрошення | `usernames/{lower}`, `invites/{token}` | open, fn | усе | унікальність, запрошення | C | до-видал.; запрошення мають термін | Google | ні (системні) | ✓ кроки 2, 5 | — |
+| R4 | Запис Firebase Auth (uid, custom-токен) | Google Firebase Auth | n/a | uid | вхід | C | до-видал. | Google | ні | ✓ крок 6 (`deleteAuthUser`) | — |
+| R5 | Лічильник спроб входу; ключ `ip | identifier`, поле **`identifier`** (введений логін, нижній регістр) | `loginAttempts/{key}` (не в rules, лише функції) | open, fn | усе, включно з IP | захист від перебору | L | вікно 15 хв (`auth.ts`), **очищення записів не знайдено**: unknown/lawyer (G9) | Google | ні | частково ✓ крок 2: видаляє за `identifier == usernameLower`; рядки без поля `identifier` (до SPO-285) **не покрито** | — |
+| R6 | Passkeys, challenges | `passkeys`, `passkeyChallenges` (не в rules) | fn | `userId`, публічний ключ, метадані | вхід без пароля | C | до-видал. | Google | ні (лише кількість) | ✓ крок 2 | — |
+| R7 | Сесії пристроїв (multi-account), журнал видач ключа | `users/{uid}/sessions`, `users/{uid}/keyLog` (не в rules, лише функції) | fn | версія ключа, лічильник, час, пристрій | сесії, аудит видачі DEK | C/L | keyLog: очищення немає (unknown/lawyer, G9) | Google | ні (лише кількість сесій) | ✓ крок 4 (дерево users) | — |
+| R8 | Фото профілю | Storage `avatars/{uid}/photo` (`storage.rules`) | open (зображення) | файл | аватар | C | до-видал. | Google; сам, адмін, тренер клієнта | так | ✓ крок 3 | — |
+| R9 | Лічильник видалення акаунта (rate limit) | `rateLimits/acctdel_{uid}` (не в rules, лише функції), `ATTEMPT_MAX=5` за вікно 15 хв | open, fn | count, час | захист `deleteMyAccount` від перебору пароля | L | вікно 15 хв; запис видаляється каскадом | Google | ні | ✓ крок 5 | — |
+
+## B. Тренування, тіло, здоров'я
+
+Усе під `users/{uid}/…`, читає/пише лише власник (rules); тренер бачить лише через ECDH-гранти й `coachShare`. Відкриті поля = `OPEN_FIELDS` (`client/src/encryptedDoc.ts`). Мета: функція трекера; підстава `K` для health-kind, `C` для решти; строк до-видал.; одержувачі Google, і тренер за дозволом користувача; експорт так; видалення ✓ крок 4 (дерево `users/{uid}`).
+
+| id | Що | Де | Шифр. | Відкриті поля | Згода (gate) |
+|---|---|---|---|---|---|
+| R10 | Тренування | `users/{uid}/workouts` | DEK | id, startedAt, finishedAt, autoFinished, updatedAt, `stats` | — |
+| R11 | Зали | `users/{uid}/gyms` | DEK | id, updatedAt | — |
+| R12 | Періоди відпочинку | `users/{uid}/restPeriods` | DEK | id, updatedAt | — |
+| R13 | Травми, реабілітація | `users/{uid}/injuries` | DEK | id, updatedAt | `health:injuries` (`isHealthOn`) |
+| R14 | Хронічні стани | `users/{uid}/conditions` | DEK | id, updatedAt | `health:chronic` |
+| R15 | Активності (кардіо/відновлення) | `users/{uid}/activities` | DEK | id, startedAt, updatedAt | — |
+| R16 | Сон | `users/{uid}/sleeps` | DEK | id, date, bedtime, wake, autoWakeAt, source, kind, updatedAt | — (сон не є health-kind: unknown/lawyer) |
+| R17 | Тіло: вага, склад, зріст | `users/{uid}/meta` (`body`) | DEK | updatedAt | — (вага не є health-kind: unknown/lawyer) |
+| R18 | Цикл | `users/{uid}/meta` (`cycle`) | DEK | updatedAt | `health:cycle` |
+| R19 | Нікотин | `users/{uid}/meta` (`nicotine`) | DEK | updatedAt | `health:nicotine` |
+| R20 | Алкоголь | `users/{uid}/meta` (`alcohol`) | DEK | updatedAt | `health:alcohol` |
+| R21 | Добавки | `users/{uid}/meta` (`supplements`) | DEK | updatedAt | `health:supplements` |
+| R22 | Що дозволено тренеру; налаштування станів | `users/{uid}/meta` (`coachShare`, `conditionPrefs`) | DEK | updatedAt | — |
+
+> Примітка до R22 (`meta/coachShare`): «Stop sharing» і відкликання згоди на здоров'я обнуляють збережені рівні поширення (стан, нікотин, алкоголь, добавки → Off, навіть коли згода вимкнена) і перепублікують `coachShare` без цих функцій; повторна згода нічого не відновлює (`store.forgetShareLevel`).
+
+## C. Відкрито у Firestore (прогалини G3–G4, G7)
+
+| id | Що | Де | Шифр. | Мета | Підстава | Строк | Одержувачі | Експорт | Видалення | Згода |
+|---|---|---|---|---|---|---|---|---|---|---|
+| R23 | Харчування: журнал, продукти, ціль, профіль | `users/{uid}/meta` (`nutritionLog`, `nutritionFoods`, `nutritionGoal`, `nutritionProfile`) | **open** (`setDoc` без `prepareWrite`, `nutrition/store.ts`; G3, SPO-73) | трекер харчування | K | до-видал. | Google | так | ✓ крок 4 | `health:nutrition` (запис заблоковано без згоди: `canWrite`) |
+| R24 | Цілі, домашні, майстерність, налаштування Atlas/тренера (пам'ять Atlas, нотатки, прапор чату) | `users/{uid}/meta` (`goals`, `home`, `mastery`, `coach`) | **open** (G4) | персоналізація | C | до-видал. | Google | так | ✓ крок 4 | — |
+| R25 | Пінги, відхилені нагадування | `users/{uid}/pings`, `users/{uid}/reminderDismissals` | open | нагадування | C | до-видал. | Google | так | ✓ крок 4 | — |
+| R26 | Черга автостарту сну (абсолютні часи відходу до сну) | `sleepSchedules/{uid}` | open | автостарт сну | C | до-видал. | Google; функція автостарту | так | ✓ крок 2 | — |
+| R27 | Програми, призначення | `programs/{id}` (authorId), `assignments/{uid}` | open (G4) | програми тренера | C | до-видал. | Google; автор, призначений; тренери/адмін | так | ✓ кроки 2, 5 | — |
+| R28 | Токени push-пристроїв; заплановані сповіщення (`title` ≤120, `body` ≤400 символів відкрито) | `users/{uid}/push`, `users/{uid}/outbox` | open | push | C (токен) / K? (браузерний дозвіл) | до-видал.; чистка доставлених: unknown/lawyer | Google (FCM) | ні (технічні) | ✓ крок 4 | — |
+
+## D. Коучинг
+
+| id | Що | Де | Шифр. | Відкриті поля | Мета | Підстава | Строк | Одержувачі | Експорт | Видалення | Згода |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| R29 | Зв'язок клієнт-тренер, статус, згоди, підсумок | `coaching/{clientId}` | open, fn | усе | коучинг | C | до-видал.; завершені зв'язки: unknown/lawyer | Google; клієнт, активний тренер | так | ✓ крок 1 (`purgeAccountCoaching`) | — |
+| R30 | Метадані розмови (clientId, trainerId, обгорнутий `ck`, lastAt, unread, keyEpoch) | `conversations/{cid}` | open | усе | чат | C | до-видал. | Google; обидві сторони | так | ✓ крок 1 | — |
+| R31 | Повідомлення чату | `conversations/{cid}/messages` (під `conversations`) | ck | id, from, at, v, keyEpoch, sig | чат | C | до-видал. | Google; обидві сторони | так | ✓ крок 1 | — |
+| R32 | Спільні нотатки тренера для клієнта | `conversations/{cid}/notes` (під `conversations`) | ck | v, keyEpoch | коучинг | C | до-видал. | Google; клієнт, тренер | так | ✓ крок 1 | — |
+| R33 | Запити на перенесення, плани й версії, розклад, keyring, делегації менеджерам, жива сесія | `schedules/{clientId}`, `plans/{clientId}`, `liveSessions/{athleteId}`; під `conversations`: requests, keyring, delegations | ck; `schedules.timing` open; `liveSessions` частково open | `timing` (моменти), trainerId, presence | розклад, програма | C | `requests`: ttl ≤14 дн. у rules; решта до-видал. | Google; клієнт, тренер, менеджер (делеговані підключі) | так | ✓ кроки 1 | — |
+| R34 | Нотатки тренера (legacy) | `users/{uid}/trainerNotes` | **не підтверджено** (G10); вважати open | text, time, ім'я тренера | коучинг | C | до-видал. | Google; клієнт читає свої | так | ✓ крок 4; нотатки, написані видаленим тренером: крок 2 | — |
+| R35 | **Приватні** нотатки й рішення тренера про клієнта | `users/{uid}/clientNotes`, `users/{uid}/decisions` (з `evidence`) | DEK тренера | id, updatedAt | коучинг | C | до-видал. тренера та клієнта | Google; лише тренер | ні (не розшифрувати; запит до тренера, SPO-252 §4) | ✓ кроки 1, 4 | — |
+| R36 | Публічні ключі тренера; підписи пристроїв | `coachKeys/{uid}`, `signKeys/{uid}` | open (публічні) | JWK, sig, kid | обмін ключами | C | до-видал. | Google; будь-який увійшовший читає | ні | ✓ крок 1 | — |
+| R37 | Гранти (обгорнутий ключ для тренера), знімки згод за категоріями | `users/{uid}/grants`, `users/{uid}/shares` | ciphertext / DEK | — | шеринг з тренером | K | до-видал. | Google; тренер (функція) | так | ✓ крок 4 | — |
+| R38 | Журнал змін шерингу (коучинг, **не** юридичні згоди) | `users/{uid}/consentLog` | open, fn | усе | доказ шерингу | Lg/L | до-видал.; записи, які тримають ІНШІ про цей акаунт, лишаються (unknown/lawyer, SPO-258) | Google; сам | так | ✓ крок 4; чужі записи **лишаються навмисно** | — |
+| R39 | Журнал «хто читав мої дані»: readerId, readerName, readerRole, resource, at | `users/{uid}/audit` | open, fn | усе | прозорість | Lg/L | 400 днів (коментар `coach/lifecycle.ts:88`); решта unknown/lawyer | Google; сам | так (останні 200 у профілі) | ✓ крок 4; чужі записи **лишаються навмисно** | — |
+| R40 | Службові повідомлення Spotter | `users/{uid}/notices` | open, fn | kind, actorUid, refId, status, ts, detail (ім'я) | сповіщення | C | «not marked» мають строк дії; решта до-видал. | Google; сам | так | ✓ крок 4; чужі лишаються | — |
+
+## E. Команда (SPO-196)
+
+| id | Що | Де | Шифр. | Мета | Підстава | Строк | Одержувачі | Експорт | Видалення | Згода |
+|---|---|---|---|---|---|---|---|---|---|---|
+| R41 | Склад команди, ролі, ACL, запрошення, запити на видалення клієнта | `teams/{ownerUid}` (members, acl), `teamInvites`, `teamRequests` | open, fn | команда | C | запрошення мають термін; решта до-видал. | Google; власник, члени; клієнт бачить склад команди тренера | так (де про себе) | ✓ крок 2 (`purgeTeams`) | `trainer-terms` (тренер) |
+| R42 | Журнал активності команди (метадані: actorUid, role, kind, clientId, refId, status, ts) | `teams/{ownerUid}/activity` (під `teams`) | open, fn | журнал | L | 90 днів (handoff SPO-196); у видалення чужої команди лишається | Google; тренер, менеджер | ні (R39 дзеркалить дії над клієнтом) | ✓ власна команда; чужої команди записи **лишаються** | — |
+
+## F. Юридичні згоди
+
+| id | Що | Де | Шифр. | Мета | Підстава | Строк | Одержувачі | Експорт | Видалення | Згода |
+|---|---|---|---|---|---|---|---|---|---|---|
+| R43 | **Записи згод (SPO-296, append-only):** `kind`, `action` (grant/withdraw), `version`, `textHash`, `categories`, `engines`, `at`, opaque id. Пише лише функція `recordConsent` (rules `write: false`), читає лише власник | `users/{uid}/consentRecords` | **open (відкритий текст)**: `kind` для health і Atlas, `categories` розкривають, що користувач вмикав функції здоров'я / які категорії давав ШІ. Open item: чи це допустиме розкриття health-стану оператору; мінімізація (хеш kind?) unknown/lawyer | доказ згоди (Art. 7(1)), `isStale` | Lg (Art. 7(1)) | до-видал.; після видалення мінімальний доказ видалення не лишається (питання юристу) | Google; сам | так | ✓ крок 4 | усі `ConsentKind`: `terms`, `policy-ack`, `age-18`, `health:*`, `atlas-ai`, `atlas-puter`, `geo-search`, `trainer-terms` |
+
+Розбивка `ConsentKind` (джерело `client/src/legal/consents.ts`, не дублюйте логіку тут):
+
+| Kind | Що охоплює | Gate у коді | Стан |
+|---|---|---|---|
+| `terms` | Terms of Use | обов'язкова, `REQUIRED_KINDS` | реалізовано (N3/N12 у плані) |
+| `policy-ack` | ознайомлення з Privacy Policy (з `textHash`) | обов'язкова | те саме |
+| `age-18` | підтвердження віку 18+ | обов'язкова | те саме |
+| `health:injuries` | R13 | `isHealthOn('injuries')` (`data/healthConsentGate.ts`) | gate є; промпти health = SPO-290 (коротке речення в drawer 2 до цього) |
+| `health:chronic` | R14 | `isHealthOn('chronic')` | те саме |
+| `health:cycle` | R18 | `isHealthOn('cycle')` | те саме |
+| `health:nicotine` | R19 | `isHealthOn('nicotine')` | те саме |
+| `health:alcohol` | R20 | `isHealthOn('alcohol')` | те саме |
+| `health:supplements` | R21 | `isHealthOn('supplements')` | те саме |
+| `health:nutrition` | R23 | `isHealthOn('nutrition')`, `canWrite` у `nutrition/store.ts` | те саме |
+| `atlas-ai` | запит до Gemini (R46) | `atlas/aiConsent.ts` | згода при вмиканні (SPO-286) |
+| `atlas-puter` | резервний рушій Puter (окремо; потребує `atlas-ai`) | `atlas/aiConsent.ts` | те саме |
+| `geo-search` | геосервіси (R47) | `assertGeoSearchOn` у `geoFetch` (`data/geoSearchGate.ts`) | реалізовано (SPO-293) |
+| `trainer-terms` | Trainer Terms + DPA (один запис на обидва документи; `textHash` = SHA-256 двох текстів у мові показу, Trainer Terms, потім DPA; версія `RELEASED_VERSIONS['trainer-terms']`, база 2026-10-22; нова версія = повторне повне прийняття) | обов'язковий для trainer/manager/admin: той самий блокуючий gate-аркуш 1 після входу (`legal/LegalGateTerms.tsx`, разом з Terms/Privacy/18+ або окремо, якщо вони вже прийняті); відмова = Вийти / Видалити акаунт; невідомий/офлайн стан як у gate (`unverified` без кешу) | реалізовано (SPO-289, SPO-295); тексти: ЧЕРНЕТКА, маркери в `legal/pending.ts`; серверного enforcement немає (не потрібен, поки gate блокує весь застосунок; до публічного релізу) |
+
+## G. Обробка поза сховищами (потоки)
+
+| id | Що | Де | Шифр. | Мета | Підстава | Строк | Одержувачі | Експорт | Видалення | Згода |
+|---|---|---|---|---|---|---|---|---|---|---|
+| R44 | Запит до Atlas AI з пристрою: питання + категорії фактів (див. `ai-providers.md`, D13). Не зберігається Spotter | з браузера напряму до провайдера | у транзиті | відповідь Atlas | K (9(2)(a) для чутливих категорій) | у Spotter не зберігається; у провайдера: умови провайдера, unknown/lawyer | Google (Gemini через Firebase AI Logic); Puter (власний акаунт користувача) | н/д (лише запис згоди R43) | н/д | `atlas-ai`, `atlas-puter` |
+| R45 | Geo-запити: пошук залів/маршрут/мапа; текст пошуку, за дозволом наближені координати, IP | з браузера до OSM-сервісів (`processors.md`) | у транзиті | пошук залу, мапа | K | у Spotter не зберігається | Photon, Overpass, Nominatim, OSRM, OSM tiles, Wikidata, Wikimedia Commons, unpkg (Leaflet) | н/д | н/д | `geo-search` |
+| R46 | Open Food Facts: пошук продуктів, штрихкоди (IP) | `client/src/nutrition/off.ts` | у транзиті | харчування | ? (згода geo/health на це не поширюється: unknown/lawyer) | не зберігається | Open Food Facts | н/д | н/д | `health:nutrition` (непрямо) |
+| R47 | Лічильники/діагностика Firebase: App Check (reCAPTCHA Enterprise), Analytics (**видалено, SPO-287, ADR 007**), Hosting-логи | Google | — | безпека, статистика | L? | unknown/lawyer | Google | н/д | н/д | — |
+
+## H. На пристрої
+
+| id | Що | Де | Шифр. | Мета | Підстава | Строк | Експорт | Видалення | Згода |
+|---|---|---|---|---|---|---|---|---|---|
+| R48 | Локальні налаштування й кеші: `spotter.uid`, `spotter.username`, `spotter.role`, `spotter.state`, `spotter.sleeps`, `spotter.activities`, `spotter.body`, `spotter.goals`, `spotter.home`, `spotter.mastery`, `spotter.coach`, `spotter.gyms`, `spotter.injuries`, `spotter.cycle`, `spotter.nicotine`, `spotter.alcohol`, `spotter.conditions` (є `*.enc` варіанти), `spotter.pushPrefs`, `spotter.quietHours`, `spotter.lastPos`, `spotter.cache.*`, `spotter.accounts`, `spotter.activeAccount`, `spotter.loginId`, `gym.*`, `sc.quick.*` | `localStorage` | `store.persist()` пише більшість **відкритим текстом** (G5); `*.enc` частково запечатано | робота офлайн, кеш | C | до виходу/очищення | так (за реєстром N6) | `wipeAfterSignOut` (`client/src/deviceWipe.ts`) при виході; N7 «Очистити пристрій» | — |
+| R49 | **Черга згод:** `spotter.consentQueue` (згоди з реєстрації та відкликання до першого запису; відкликання теж стоять у черзі й не губляться офлайн), `spotter.consentRevokeQueue` (невідправлене «Stop sharing»: uid + види шести грантів тренеру, без рівнів; повторюється при старті/online/вході, пробуваний перед виходом, прибирається з видаленням акаунта; `client/src/coach/client/revokeQueue.ts`), `spotter.consentLocalOff` (прапор «вимкнено на цьому пристрої» до підтвердження відкликання сервером; лише види згод, за uid), `spotter.consentChoicesShown`, `spotter.consentVerified` (uid → види згод із версіями документів, коли сервер востаннє підтвердив «обов'язкові згоди в порядку»; лише для офлайн-старту, `client/src/legal/gateVerified.ts`; пристроєвий ключ, лишається після виходу, прибирається з акаунтом через `pruneConsentsOf`); sessionStorage `spotter.docRead.<документ>@<версія>` (чи відкрито документ у цій вкладці) | `localStorage` (`client/src/legal/signupConsents.ts`) | open | доставка згод після входу | Lg | до відправки (або запису відкликання); пристроєвий рівень: **переживає вихід і device wipe** (ключі в `DEVICE_KEYS`, прив'язані до uid, лише види/версії), щоб невідправлене відкликання дійшло при наступному вході цього акаунта; 403/404 на відкликання — до 5 спроб, далі запис відкидається | ні | при видаленні акаунта (`pruneConsentsOf` після успіху `deleteMyAccount`); при виході **лишається** | усі, що в черзі |
+| R50 | **Чат з Atlas:** останні 100 повідомлень (`MAX = 100`), `spotter.atlasChat`, `spotter.atlasChatCap`, `spotter.atlasSaid`, `spotter.atlasGeminiPausedUntil` | `localStorage` (`atlas/chatLog.ts`) | local-open | історія чату лише на пристрої | C | остання 100 повідомлень | ні (локальна; запис згоди R43 в експорті) | при виході, N7 | — |
+| R51 | Запечатані сховища й ключі: `spotter.coach.chat`, `spotter.coach.sign`, `spotter.vault` (неекстрактований кеш DEK), `spotter.prefs`, `spotter-avatars`, офлайн-кеш Firestore (`persistentLocalCache`) | IndexedDB | local-sealed (`spotter.coach.*`, vault); avatars/prefs/кеш Firestore відкриті | сесія, офлайн | C | до виходу | ні (ключі) / так (кеш за реєстром) | `wipeAfterSignOut` | — |
+
+## I. Спільні дані без персональних даних (allow-list guard-тесту)
+
+| id | Що | Де | Чому не персональні |
+|---|---|---|---|
+| R52 | Каталог вправ | `exerciseCatalog` | довідник, пише адмін |
+| R53 | Глобальні прапори й allow-list Atlas (`config/atlas`: `chatUsers`, `chatUids`; `config/flags`) | `config` | `chatUsers`/`chatUids` містять username/uid тестових користувачів: **персональні, лише закрите тестування**; рядок лишається в allow-list guard-тесту як свідоме рішення, перевірити перед відкритим запуском (unknown/lawyer) |
+| R54 | Спільний інвентар залів (список id обладнання + updatedAt) | `sharedGyms` | без персональних даних (коментар rules 158–167) |
+
+## Відкриті питання (зведення)
+
+1. `consentRecords` відкритим текстом розкривають health-kind (R43): допустимо чи мінімізувати. unknown/lawyer.
+2. G9: строки для `loginAttempts`, `keyLog`, `pings`, `outbox`, `reminderDismissals`, `notices`, `consentLog`, закінчених зв'язків коучингу: немає TTL, період unknown/lawyer.
+3. R5: рядки `loginAttempts` до SPO-285 без поля `identifier` не видаляються каскадом.
+4. Чужі `audit`/`consentLog`/`notices`/`teams/*/activity` лишаються після видалення (навмисно, SPO-252 §6); мінімальний доказ видалення: питання юристу (SPO-258).
+5. G3 (R23 харчування відкрито), G4 (R24, R27), G5 (R48 відкритий localStorage), G10 (R34).
+6. Вага (R17) і сон (R16) не мають health-kind; чи є вони «даними здоров'я» за Art. 9: unknown/lawyer.
+7. Open Food Facts (R46) не покритий окремою згодою.
+8. N6 експорт реалізований; дані, що живуть лише на сервері (R1 частково, R5–R7, R36, R28), потрапляють у маніфест як `notIncluded`. Чи це задовольняє Art. 15, чи треба запит оператору: питання юристу.

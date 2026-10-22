@@ -1,0 +1,162 @@
+name: Android APK
+
+# Builds the thin Capacitor shell (mobile/) into an APK for DIRECT distribution (no Google Play, SPO-158).
+# Manual only. Before a signed release: bump "version" in mobile/package.json (versionCode derives from it).
+#
+# Secrets for a signed (distributable) APK — the SAME key every time, otherwise a new APK cannot update the old one:
+#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+# Without them run with signed=false: a debug-signed APK for smoke tests only (not for distribution).
+on:
+  # Temporary: lets the first build run from this branch before the workflow exists on main (inputs are empty on push:
+  # debug-signed APK + emulator smoke test). Remove the push trigger when the branch is merged.
+  push:
+    branches: [android-shell-spo-158]
+  workflow_dispatch:
+    inputs:
+      signed:
+        description: 'Sign with the release key from secrets (false = debug-signed test build)'
+        type: boolean
+        default: true
+      draft_release:
+        description: 'Attach the signed APK to a DRAFT GitHub Release (android-v<version>)'
+        type: boolean
+        default: false
+      smoke:
+        description: 'Install on an emulator, start the app and save a screenshot + logcat'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@v3
+
+      - name: Read version
+        id: meta
+        run: echo "version=$(node -p "require('./mobile/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Install and sync Capacitor
+        working-directory: mobile
+        run: |
+          npm ci
+          npx cap sync android
+
+      - name: Restore release keystore
+        if: ${{ inputs.signed }}
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not set. Add the signing secrets or run with signed=false."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/spotter.jks"
+          echo "SPOTTER_KEYSTORE_PATH=$RUNNER_TEMP/spotter.jks" >> "$GITHUB_ENV"
+
+      - name: Build APK
+        id: build
+        working-directory: mobile/android
+        env:
+          SPOTTER_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          SPOTTER_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          SPOTTER_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          start=$(date +%s)
+          if [ "${{ inputs.signed }}" = "true" ]; then
+            ./gradlew --no-daemon assembleRelease
+            src=app/build/outputs/apk/release/app-release.apk
+          else
+            ./gradlew --no-daemon assembleDebug
+            src=app/build/outputs/apk/debug/app-debug.apk
+          fi
+          echo "build_seconds=$(( $(date +%s) - start ))" >> "$GITHUB_OUTPUT"
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          suffix=""
+          [ "${{ inputs.signed }}" = "true" ] || suffix="-debug"
+          cp "$src" "$GITHUB_WORKSPACE/out/Spotter-${{ steps.meta.outputs.version }}$suffix.apk"
+
+      - name: Verify signature and record size
+        run: |
+          apk=$(ls out/*.apk)
+          apksigner=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/apksigner
+          "$apksigner" verify --print-certs "$apk" | tee out/signature.txt
+          (cd out && sha256sum "$(basename "$apk")" > SHA256SUMS.txt)
+          {
+            echo "### Android APK"
+            echo "- file: \`$(basename "$apk")\`"
+            echo "- size: $(stat -c %s "$apk") bytes"
+            echo "- gradle build time: ${{ steps.build.outputs.build_seconds }} s"
+            echo "- sha256: \`$(cut -d' ' -f1 out/SHA256SUMS.txt)\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spotter-apk
+          path: out/
+          if-no-files-found: error
+
+      - name: Draft GitHub Release
+        if: ${{ inputs.signed && inputs.draft_release }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "android-v${{ steps.meta.outputs.version }}" out/*.apk out/SHA256SUMS.txt \
+            --draft --title "Spotter Android ${{ steps.meta.outputs.version }}" \
+            --notes "APK for direct install, not from a store (SPO-158). Allow Install unknown apps for the browser or file manager that opens it."
+
+  smoke:
+    if: ${{ inputs.smoke || github.event_name == 'push' }}
+    needs: apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: spotter-apk
+          path: out
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          script: |
+            adb install -r out/*.apk
+            adb logcat -c
+            adb shell monkey -p com.spotter.app -c android.intent.category.LAUNCHER 1
+            sleep 40
+            adb exec-out screencap -p > out/smoke.png
+            adb logcat -d > out/logcat.txt
+            adb shell dumpsys package com.spotter.app | grep -E "versionName|versionCode" > out/package.txt || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spotter-smoke
+          path: |
+            out/smoke.png
+            out/logcat.txt
+            out/package.txt

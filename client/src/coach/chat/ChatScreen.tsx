@@ -22,6 +22,8 @@ import { SpotterRow } from '../team/SpotterRow';
 import type { TeamPort } from '../team/port';
 import './Chat.css';
 import { CoachProblemState } from '../BackendNotice';
+import { navigateHash } from '../../navigateHash';
+import { currentHash, setHash } from '../../route';
 
 export interface ChatScreenProps {
   onNavigate: (r: CoachRoute) => void;
@@ -53,17 +55,17 @@ function useOnline(): boolean {
 }
 
 function useWithParam(): [string | null, (id: string | null, push: boolean) => void] {
-  const [id, setId] = useState(() => readWith(window.location.hash));
+  const [id, setId] = useState(() => readWith(currentHash()));
   useEffect(() => {
-    const f = () => setId(readWith(window.location.hash));
+    const f = () => setId(readWith(currentHash()));
     window.addEventListener('hashchange', f);
     return () => window.removeEventListener('hashchange', f);
   }, []);
   const set = useCallback((next: string | null, push: boolean) => {
     setId(next);
     const h = chatHash(next);
-    if (push) window.location.hash = h;
-    else window.location.replace(h);
+    if (push) navigateHash(h);
+    else setHash(h, true);
   }, []);
   return [id, set];
 }

@@ -13,6 +13,31 @@ import { blockWeek, planDayFor } from './plan';
 import type { AtlasNote } from './notes';
 import type { Temper } from './types';
 import { describeMemory } from './memory';
+import type { AtlasAiCategory } from '../legal/gateChoices';
+
+/**
+ * Which consent category every top-level key of the facts belongs to (SPO-286). The consent text lists exactly the
+ * categories of `ATLAS_AI_CATEGORIES` (legal/gateChoices.ts); `facts` below is typed by this map, so a new key without a
+ * category here does not compile, and `chatFacts.consent.test.ts` fails when a category is not in the consent list.
+ * `context` is not about the person: today's date and weekday, and the coach role (main or extra).
+ */
+export const FACT_CATEGORY = {
+  today: 'context',
+  weekday: 'context',
+  role: 'context',
+  athleteToldMe: 'notes',
+  plan: 'plan',
+  sessionsTotal: 'workouts',
+  recentActivities: 'activities',
+  recentSessions: 'workouts',
+  allLifts: 'workouts',
+  yourRecentNotes: 'notes',
+  injuredMuscles: 'injured-muscles',
+  trainingLimits: 'training-limits',
+  lastNightSleepH: 'sleep',
+  bodyweightKg: 'bodyweight',
+} as const satisfies Record<string, AtlasAiCategory | 'context'>;
+type FactKey = keyof typeof FACT_CATEGORY;
 
 /**
  * Every lift you've ever logged, over your WHOLE history (not just the recent
@@ -103,7 +128,7 @@ export function buildChatFacts(
   }));
   const plan = s.coach.plan ?? null;
   const night = finishedNights(s.sleeps, now)[0];
-  const facts = {
+  const facts: Record<FactKey, unknown> = {
     today: iso(now),
     weekday: new Date(now).toLocaleDateString('en', { weekday: 'long' }),
     role: s.coach.role,

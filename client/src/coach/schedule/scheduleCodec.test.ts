@@ -198,11 +198,9 @@ describe('sealed port over a raw document store', () => {
       vault,
       ringFor: () => rings.trainer,
       uid: 'trainer-uid',
-      writerUid: 'm1',
       now: () => AT,
     });
     await port.saveDoc({ ...doc, rev: 0 });
-    expect((store.raw().schedules[0] as { updatedBy?: string }).updatedBy).toBe('m1');
     const t = (store.raw().schedules[0] as { timing?: Record<string, unknown> }).timing;
     expect(Object.keys(t ?? {}).sort()).toEqual(['dueAt', 'starts', 'unmarked']);
     expect(JSON.stringify(t)).not.toMatch(/iron-yard|Technique|Upper/);

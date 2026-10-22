@@ -1,0 +1,21 @@
+.lgg {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  padding-bottom: var(--s-8);
+}
+.lgg-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+.lgg-t,
+.lgg-lead {
+  margin: 0;
+}
+.lgg-acts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  align-items: stretch;
+}

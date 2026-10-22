@@ -44,6 +44,14 @@ describe('hosting security headers (iteration 14 item 3)', () => {
       .filter((x) => x.startsWith('https://'));
     expect(hosts.every((x) => /google|gstatic|googletagmanager/.test(x))).toBe(true);
   });
+  it('names no font host and no analytics host in any policy (SPO-287)', () => {
+    for (const policy of [csp, ro]) {
+      expect(policy).not.toMatch(
+        /fonts\.googleapis\.com|fonts\.gstatic\.com|google-analytics\.com|analytics\.google\.com|googletagmanager\.com/,
+      );
+      expect(directive(policy, 'font-src')).toBe("font-src 'self' data:");
+    }
+  });
   it('every inline event handler in index.html is covered by a hash', () => {
     const html = readFileSync(resolve(root, 'client/index.html'), 'utf8');
     const handlers = [...html.matchAll(/\son[a-z]+="([^"]+)"/g)].map((m) =>

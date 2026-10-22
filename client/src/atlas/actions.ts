@@ -21,6 +21,7 @@ import {
 } from '../store';
 import { activityType, estimateCalories } from '../activities';
 import { bodyPart as bodyPartOf } from '../injury';
+import { isHealthOn, isHealthWriteDenied } from '../data/healthConsentGate';
 import { healthBuildCtx } from '../healthBuild';
 import { buildPlanDay, planDayFor, proposePlan } from './plan';
 import { computePlaybook } from '../playbook';
@@ -143,7 +144,7 @@ export function runAction(
           now,
           intent: 'muscle',
           ...(() => {
-            const h = healthBuildCtx(s, now);
+            const h = healthBuildCtx(now);
             return {
               protectedMuscles: h.protectedMuscles,
               conditions: h.conditions,
@@ -206,9 +207,17 @@ export function runAction(
       };
     }
     case 'injury': {
+      // No consent for Injuries (SPO-290): nothing is logged, and Atlas says why instead of claiming it did.
+      if (!isHealthOn('injuries'))
+        return {
+          text: L(
+            'Injuries is off, so I did not log that. Turn it on in Health to track injuries.',
+            'Травми вимкнено, тому я цього не записав. Увімкни їх у розділі «Здоров’я», щоб вести травми.',
+          ),
+        };
       const part = bodyPartOf(a.bodyPart);
       const today = dayKey(now);
-      startInjury({
+      const started = startInjury({
         reason: 'injury',
         bodyPart: a.bodyPart,
         muscles: part?.muscles ?? [],
@@ -217,6 +226,14 @@ export function runAction(
         note: a.note ?? 'Atlas',
         now,
       });
+      // The consent can go between the check above and the write: never claim a log that was refused.
+      if (isHealthWriteDenied(started))
+        return {
+          text: L(
+            'Injuries is off, so I did not log that. Turn it on in Health to track injuries.',
+            'Травми вимкнено, тому я цього не записав. Увімкни їх у розділі «Здоров’я», щоб вести травми.',
+          ),
+        };
       return {
         text: L(
           a.restDays

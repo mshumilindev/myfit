@@ -12,6 +12,7 @@ import type { LocaleId } from '../i18n';
 import type { CoachSettings, Temper } from './types';
 import { TEMPER_ID } from './types';
 import { lineAllowed } from './guard';
+import type { AiGrant } from './aiConsent';
 
 /** Model id — override with VITE_ATLAS_MODEL without a code change. */
 export const ATLAS_MODEL =
@@ -88,7 +89,7 @@ export type AskResult =
   | { ok: true; text: string }
   | {
       ok: false;
-      reason: 'offline' | 'cap' | 'error' | 'blocked' | 'quota';
+      reason: 'offline' | 'cap' | 'error' | 'blocked' | 'quota' | 'consent';
       until?: number;
     };
 
@@ -118,6 +119,8 @@ export function isQuotaError(err: unknown): boolean {
  * (guarded) reply, or a reason to answer from the phrase book instead.
  */
 export async function askAtlas(p: {
+  /** Consent to Google Gemini (`grantFor`). Without it nothing is sent. */
+  grant: AiGrant | null;
   question: string;
   history: ChatTurn[];
   temper: Temper;
@@ -126,7 +129,13 @@ export async function askAtlas(p: {
   factsJson: string;
   now: number;
   onText?: (partial: string) => void;
+  /**
+   * Asked while the reply streams. False (consent withdrawn meanwhile) stops reading, shows nothing more and discards
+   * the reply. The SDK has no cancel for a stream, so the request itself may still finish on Google's side.
+   */
+  stillAllowed?: () => boolean;
 }): Promise<AskResult> {
+  if (p.grant?.engine !== 'gemini') return { ok: false, reason: 'consent' };
   if (typeof navigator !== 'undefined' && navigator.onLine === false)
     return { ok: false, reason: 'offline' };
   const paused = geminiPausedUntil(p.now);
@@ -148,9 +157,11 @@ export async function askAtlas(p: {
     const res = await chat.sendMessageStream(p.question);
     let text = '';
     for await (const chunk of res.stream) {
+      if (p.stillAllowed && !p.stillAllowed()) return { ok: false, reason: 'consent' };
       text += chunk.text();
       p.onText?.(text);
     }
+    if (p.stillAllowed && !p.stillAllowed()) return { ok: false, reason: 'consent' };
     text = text.trim();
     if (!text) return { ok: false, reason: 'error' };
     if (!lineAllowed(text, p.temper)) return { ok: false, reason: 'blocked' };
@@ -176,10 +187,12 @@ export async function askAtlas(p: {
  * Nothing but the question and the topic list is sent. Null → no pick.
  */
 export async function classifyTopic(p: {
+  grant: AiGrant | null;
   question: string;
   topics: { id: string; ask: string }[];
   now: number;
 }): Promise<string | null> {
+  if (p.grant?.engine !== 'gemini') return null;
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return null;
   if (geminiPausedUntil(p.now)) return null;
   if (!underCap(p.now)) return null;

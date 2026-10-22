@@ -100,6 +100,7 @@ type RowAria = Pick<
   | 'aria-label'
   | 'aria-describedby'
   | 'aria-controls'
+  | 'aria-haspopup'
   | 'aria-selected'
 >;
 

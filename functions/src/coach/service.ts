@@ -76,8 +76,6 @@ export type Role = 'member' | 'trainer' | 'admin' | 'manager';
 export interface Actor {
   uid: string;
   role: Role;
-  /** the sign-in e-mail, lower-case, ONLY when the identity provider verified it */
-  email?: string;
 }
 export interface Ctx {
   kv: Kv;
@@ -474,6 +472,8 @@ export async function endRelationship(
   endedBy: 'client' | 'trainer' | 'admin',
   actorUid: string,
   now: number,
+  /** `neutral`: an account deletion (Art. 17) ends it, so the notices carry neither the deleted person's name nor their uid */
+  opts: { neutral?: boolean } = {},
 ): Promise<void> {
   const clientId = c.clientId;
   const cid = conversationId(ctx.pepper, clientId, c.trainerId);
@@ -518,19 +518,19 @@ export async function endRelationship(
     kv,
     clientId,
     'trainer-removed',
-    actorUid,
+    opts.neutral ? null : actorUid,
     now,
     `tr-${now}`,
-    trainerName.name || null,
+    opts.neutral ? null : trainerName.name || null,
   );
   await notice(
     kv,
     c.trainerId,
     'client-removed',
-    actorUid,
+    opts.neutral ? null : actorUid,
     now,
     `cr-${now}`,
-    clientName.name || null,
+    opts.neutral ? null : clientName.name || null,
   );
 }
 

@@ -51,6 +51,9 @@ beforeEach(() => {
 afterEach(cleanup);
 
 async function mountRoot() {
+  // The food log needs its own consent (SPO-290); this suite is about startup, so it is on. `vi.resetModules` gives the app
+  // a fresh gate, so it is switched on here, in that copy.
+  (await import('../data/healthConsentGate')).resetHealthGateForTests(true);
   const { NutritionRoot } = await import('./App');
   return render(
     <NutritionRoot

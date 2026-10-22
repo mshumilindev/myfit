@@ -1,4 +1,3 @@
-import { acceptWithMail } from './acceptHelper';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createMemoryKv, type MemoryKv } from '../../functions/src/coach/memoryKv';
 import {
@@ -10,6 +9,7 @@ import {
   type Ctx,
 } from '../../functions/src/coach/service';
 import {
+  teamAccept,
   teamForClient,
   inviteClientForTrainer,
   teamInvite,
@@ -73,7 +73,7 @@ beforeEach(async () => {
   });
   await kv.set('coaching/c1', { clientId: 'c1', trainerId: 't1', status: 'active', keyEpoch: 1 });
   const inv = await teamInvite(ctx(), owner, { email: 'irina@example.com' });
-  await acceptWithMail(ctx(), { uid: 'm1', role: 'member' }, { inviteId: inv.inviteId });
+  await teamAccept(ctx(), { uid: 'm1', role: 'member' }, { inviteId: inv.inviteId });
   pushes.length = 0;
 });
 
@@ -271,12 +271,6 @@ describe('a manager invites a client for a team trainer', () => {
         inviteClientForTrainer(ctx(), owner, { trainerId: 't1', name: 'Zed Zed', mode: 'app' }),
       ),
     ).toBe('permission-denied:managers-only');
-    for (const extra of [{ mode: 'program' }, { mode: 'chat', username: 'someone' }])
-      expect(
-        await code(
-          inviteClientForTrainer(ctx(), mgr, { trainerId: 't1', name: 'Zed Zed', ...extra }),
-        ),
-      ).toBe('permission-denied:app-invite-only');
   });
 });
 
@@ -293,7 +287,7 @@ describe('delegations follow the team (ADR 005)', () => {
     await kv.set('users/m3', { role: 'member', status: 'active', firstName: 'Third' });
     const inv = await teamInvite(ctx(), owner, { email: 'third@example.com' });
     pushes.length = 0;
-    await acceptWithMail(ctx(), { uid: 'm3', role: 'member' }, { inviteId: inv.inviteId });
+    await teamAccept(ctx(), { uid: 'm3', role: 'member' }, { inviteId: inv.inviteId });
     expect(pushes).toContainEqual(['c1', 'sync']);
     // a trainer joining the team does not (nothing to delegate)
     await kv.set('users/t2', { role: 'trainer', status: 'active', firstName: 'Andriy' });
@@ -303,7 +297,7 @@ describe('delegations follow the team (ADR 005)', () => {
       { email: 'a@example.com' },
     );
     pushes.length = 0;
-    await acceptWithMail(ctx(), { uid: 't2', role: 'trainer' }, { inviteId: inv2.inviteId });
+    await teamAccept(ctx(), { uid: 't2', role: 'trainer' }, { inviteId: inv2.inviteId });
     expect(pushes.filter(([, k]) => k === 'sync')).toEqual([]);
   });
 

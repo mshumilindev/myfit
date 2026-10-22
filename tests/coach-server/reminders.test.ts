@@ -1,4 +1,3 @@
-import { acceptWithMail } from './acceptHelper';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createMemoryKv, type MemoryKv } from '../../functions/src/coach/memoryKv';
 import type { Ctx } from '../../functions/src/coach/service';
@@ -8,7 +7,7 @@ import {
   dueAtOf,
   runReminders,
 } from '../../functions/src/coach/reminders';
-import { teamInvite, teamNotices } from '../../functions/src/coach/team';
+import { teamAccept, teamInvite, teamNotices } from '../../functions/src/coach/team';
 
 const H = 3_600_000;
 const T0 = Date.UTC(2026, 9, 20, 9, 0, 0);
@@ -39,7 +38,7 @@ beforeEach(async () => {
   await kv.set('users/m1', { role: 'member', status: 'active', firstName: 'Irina' });
   await kv.set('coaching/c1', { clientId: 'c1', trainerId: 't1', status: 'active', keyEpoch: 1 });
   const inv = await teamInvite(ctx(), { uid: 't1', role: 'trainer' }, { email: 'i@example.com' });
-  await acceptWithMail(ctx(), { uid: 'm1', role: 'member' }, { inviteId: inv.inviteId });
+  await teamAccept(ctx(), { uid: 'm1', role: 'member' }, { inviteId: inv.inviteId });
   pushes.length = 0;
 });
 
@@ -99,29 +98,6 @@ describe('runReminders', () => {
     expect(await runReminders(ctx())).toEqual({ schedules: 1, reminders: 0, unmarked: 0 });
     expect(pushes).toEqual([]);
     expect((await kv.get('schedules/c1'))?.timing).toMatchObject({ dueAt: 0 });
-  });
-
-  it('forgets reminder log entries older than a month', async () => {
-    await kv.set('users/c1/reminderLog/old', { start: 1, sentAt: T0 - 31 * 24 * H });
-    const start = T0 + 20 * H;
-    await sched({ starts: [start], unmarked: [], dueAt: start - REMIND_BEFORE });
-    clock = start - REMIND_BEFORE;
-    await runReminders(ctx());
-    expect(await kv.get('users/c1/reminderLog/old')).toBeNull();
-  });
-
-  it('"not marked" notices disappear after 30 days', async () => {
-    await kv.set('users/t1/notices/um-c1-1', {
-      id: 'um-c1-1',
-      kind: 'unmarked',
-      detail: 'Oleh',
-      start: 1,
-      createdAt: T0 - 31 * 24 * H,
-      readAt: null,
-    });
-    const r = await teamNotices(ctx(), { uid: 't1', role: 'trainer' });
-    expect(r.items.filter((i) => i.kind === 'unmarked')).toEqual([]);
-    expect(await kv.get('users/t1/notices/um-c1-1')).toBeNull();
   });
 
   it('dueAtOf matches the client formula', () => {

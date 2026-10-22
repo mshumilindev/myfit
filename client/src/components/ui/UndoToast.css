@@ -1,7 +1,18 @@
+/* No overflow clip on the root: it would saw off the snackbar's drop shadow. Only the countdown bar is clipped
+   (by its own track, to the toast's rounded bottom corners). */
 .uiundo {
   position: relative;
-  overflow: hidden;
   border-radius: var(--radius-lg);
+}
+.uiundo-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--s-4);
+  overflow: hidden;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  pointer-events: none;
 }
 .uiundo--fixed {
   position: fixed;
@@ -18,10 +29,7 @@
 }
 .uiundo-bar {
   position: absolute;
-  left: 0;
-  bottom: 0;
-  height: var(--s-4);
-  width: 100%;
+  inset: 0;
   transform-origin: left center;
   background: var(--color-accent);
   animation: uiundo-run var(--undo-ms, 8000ms) linear var(--undo-delay, 0s) forwards;

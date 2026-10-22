@@ -62,6 +62,9 @@ export const safeEn = {
     'Ending the relationship stops sharing in both directions. Enter your password to continue.',
   raBodyRevoke:
     'Withdrawing the invite switches its link off for everybody. Enter your password to continue.',
+  raBodyDelete: 'Deleting your account cannot be undone. Enter your password to delete it now.',
+  raBodyMyExport:
+    'Your copy contains your personal data, including health data. Enter your password to continue.',
   raPassword: 'Password',
   raIdentifier: 'Username or email',
   raConfirm: 'Confirm',

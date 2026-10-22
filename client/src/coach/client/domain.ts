@@ -55,9 +55,6 @@ export const NOTHING: Consent = { ...ALL_OFF };
 export function levelsBy(c: Consent, level: Level): ShareCategory[] {
   return SHARE_CATEGORIES.filter((k) => c[k] === level);
 }
-export const sharedCount = (c: Consent): number =>
-  SHARE_CATEGORIES.filter((k) => c[k] !== 'off').length;
-export const sharesNothing = (c: Consent): boolean => sharedCount(c) === 0;
 
 /** Stop sharing: every category goes off. */
 export const revokedConsent = (): Consent => ({ ...ALL_OFF });

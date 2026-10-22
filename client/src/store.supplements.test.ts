@@ -154,13 +154,13 @@ describe('supplements store', () => {
 
   it('startedAt is set when the entry is first saved and kept on every edit', async () => {
     const before = Date.now();
-    const first = store.saveSupplementEntry({ ...creatine(), startedAt: 0 })!;
+    const first = store.saveSupplementEntry({ ...creatine(), startedAt: 0 }) as SupplementEntry;
     expect(first.startedAt).toBeGreaterThanOrEqual(before); // a missing one is "now"
     const stamped = first.startedAt;
     const edited = store.saveSupplementEntry({
       ...creatine({ dose: 3, schedule: 'trainingDays', timing: 'morning' }),
       startedAt: 5, // whatever the caller sends is ignored for an existing id
-    })!;
+    }) as SupplementEntry;
     expect(edited.startedAt).toBe(stamped);
     expect(cur().entries[0]).toMatchObject({
       dose: 3,
@@ -172,12 +172,12 @@ describe('supplements store', () => {
     expect((await lastPlain()).entries[0].startedAt).toBe(stamped);
     // Removing and adding again starts over.
     store.removeSupplementEntry('e-cr');
-    const again = store.saveSupplementEntry({ ...creatine(), startedAt: 0 })!;
+    const again = store.saveSupplementEntry({ ...creatine(), startedAt: 0 }) as SupplementEntry;
     expect(again.startedAt).toBeGreaterThanOrEqual(stamped);
   });
 
   it('a given startedAt is kept for a new entry; the dose is clamped to the item range', () => {
-    const e = store.saveSupplementEntry(creatine({ dose: 500 }))!;
+    const e = store.saveSupplementEntry(creatine({ dose: 500 })) as SupplementEntry;
     expect(e.startedAt).toBe(1000);
     expect(e.dose).toBe(20);
   });

@@ -45,7 +45,13 @@ const b64url = (o: unknown) => Buffer.from(JSON.stringify(o)).toString('base64ur
  * record the SDK writes; its token is an unsigned JWT with `role: trainer`, which the client only reads, never verifies),
  * the global `coach` flag is on, and every request that leaves localhost is aborted.
  */
-export async function seedTrainer(page: Page, origin: string): Promise<void> {
+export async function seedTrainer(
+  page: Page,
+  origin: string,
+  who: { role?: 'trainer' | 'member'; scenario?: string; name?: string; locale?: string } = {},
+): Promise<void> {
+  const role = who.role ?? 'trainer';
+  const uid = `e2e-${role}`;
   const apiKey = await bundleApiKey(page, origin);
   const now = Math.floor(Date.now() / 1000);
   const jwt = [
@@ -53,25 +59,27 @@ export async function seedTrainer(page: Page, origin: string): Promise<void> {
     b64url({
       iss: 'e2e',
       aud: 'e2e',
-      sub: 'e2e-trainer',
-      user_id: 'e2e-trainer',
-      role: 'trainer',
+      sub: uid,
+      user_id: uid,
+      role,
       iat: now,
       exp: now + 86_400 * 30,
     }),
     'sig',
   ].join('.');
   await page.addInitScript(
-    ({ apiKey, jwt }) => {
-      localStorage.setItem('gym.locale', 'en');
-      localStorage.setItem('spotter.uid', 'e2e-trainer');
-      localStorage.setItem('spotter.role', 'trainer');
-      localStorage.setItem('spotter.username', 'Iryna Melnyk');
+    ({ apiKey, jwt, uid, role, name, scenario, locale }) => {
+      localStorage.setItem('gym.locale', locale);
+      localStorage.setItem('spotter.uid', uid);
+      localStorage.setItem('spotter.role', role);
+      localStorage.setItem('spotter.username', name);
+      // the member-side sample world (fixtures build): active | waiting | revoked | none | migrated
+      if (scenario) localStorage.setItem('spotter.clientCoach', scenario);
       localStorage.setItem('gym.flags.global', JSON.stringify({ coach: true }));
       localStorage.setItem(
         `firebase:authUser:${apiKey}:[DEFAULT]`,
         JSON.stringify({
-          uid: 'e2e-trainer',
+          uid,
           email: null,
           emailVerified: false,
           isAnonymous: false,
@@ -88,7 +96,15 @@ export async function seedTrainer(page: Page, origin: string): Promise<void> {
         }),
       );
     },
-    { apiKey, jwt },
+    {
+      apiKey,
+      jwt,
+      uid,
+      role,
+      name: who.name ?? 'Iryna Melnyk',
+      scenario: who.scenario ?? '',
+      locale: who.locale ?? 'en',
+    },
   );
   // Nothing leaves the machine: the sandbox has no network and a spec must not depend on one.
   await page.route(

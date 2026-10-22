@@ -121,6 +121,8 @@ export const SharingNone: Story = sharing('none');
 export const SharingRevoked: Story = sharing('revoked');
 export const SharingLevelSheet: Story = sharing('active', { sheet: 'sleep' });
 export const SharingRevokeDialog: Story = sharing('active', { revoke: true });
+/** Alcohol: two levels and the reason Full is not offered (SPO-107). */
+export const SharingAlcoholSheet: Story = sharing('active', { sheet: 'alcohol' });
 
 const world = (scenario: ClientScenario, child: ReactNode): Story => ({
   render: () => <World scenario={scenario}>{child}</World>,

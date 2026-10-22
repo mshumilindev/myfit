@@ -123,7 +123,7 @@ export const clientPl: typeof clientEn = {
   shRest: 'Nic więcej. Prywatne notatki o Tobie nie są częścią tego.',
   shYourTrainer: 'Twój trener',
   shSince: (date) => `Od ${date}`,
-  shOfSix: (n) => `Udostępniono ${n} z 6`,
+  shOfTen: (n) => `Udostępniono ${n} z 10`,
   shActive: 'Aktywne',
   shWaiting: 'Oczekuje',
   shNotShared: 'Nie udostępniono',
@@ -136,9 +136,6 @@ export const clientPl: typeof clientEn = {
   shNoneNote: (first) =>
     `Nic jeszcze nie udostępniasz. ${first} nic nie widzi, dopóki tego nie zmienisz.`,
   shStart: 'Zacznij udostępniać',
-  shHead: (first) => `Udostępnij trenerowi ${first}`,
-  shFoot:
-    'Każde ustawienie działa od razu. Schorzenia, nikotyna, alkohol i suplementy mają własne ustawienia poniżej.',
   shLog: 'Kto co widział i kiedy',
   shLogSub: (first) => `Lista wszystkich otwarć Twoich danych przez ${first}`,
   shStop: (first) => `Przestań udostępniać trenerowi ${first}`,
@@ -148,6 +145,26 @@ export const clientPl: typeof clientEn = {
   shKeep: 'Nadal udostępniaj',
   shStopConfirm: 'Przestań udostępniać',
   shStopped: 'Udostępnianie zatrzymane',
+  shGroupTraining: 'Trening',
+  shGroupBody: 'Ciało',
+  shGroupLife: 'Styl życia i zdrowie',
+  shMore: 'Więcej',
+  shFeatureOff: 'Funkcja wyłączona',
+  shFeatureOffSub: 'Nie jest zbierane, więc nie ma czym się dzielić.',
+  shSharedFeatureOff: 'Udostępniane, funkcja wyłączona',
+  shSharedFeatureOffSub:
+    'Funkcja jest wyłączona, ale trener nadal ma dostęp. Dotknij, aby przestać udostępniać.',
+  shFullNotOffered: (cat) => `Tryb „Pełne” nie jest dostępny dla: ${cat}.`,
+  shStopFx1: (first) => `${first} nie widzi już niczego nowego`,
+  shStopFx2: 'Czat i notatki trenera zostają',
+  shStopFx3: 'Ustawienia zdrowia też zostają wyłączone',
+  shStop1Body: (first) =>
+    `${first} nie zobaczy już Twoich nowych danych. To, co już zobaczone, zostaje w jego zapisach.`,
+  shStop2Title: (first) => `Wyłączyć wszystkie 10 ustawień dla trenera ${first}?`,
+  shStop2Body: (count) =>
+    `Trening, Ciało oraz Styl życia i zdrowie przechodzą na „Wyłączone”${count > 0 ? `, w tym ${count}, które udostępniasz teraz` : ''}. Później możesz udostępnić ponownie, jedno ustawienie po drugim.`,
+  shContinue: 'Dalej',
+  shStepOf: (i, n) => `Krok ${i} z ${n}`,
   shRevokedNote: (first) =>
     `Udostępnianie trenerowi ${first} zostało zatrzymane. Nic nowego nie jest widoczne.`,
 

@@ -313,14 +313,6 @@ export const DEFAULT_GYM_RADIUS_M = 50;
  *  read as inside. Capped independent of the saved radiusM. */
 export const INSIDE_RADIUS_M = 30;
 
-/** "Був у залі 1год+, але тренування не залоговане" */
-export interface Reminder {
-  gymId: string;
-  gymName: string;
-  visitStart: number;
-  visitEnd: number;
-}
-
 /** A queued offline mutation = one HTTP request to replay later. */
 /** How light a rest/recovery period is. 'active' = deloaded training still in
  *  the gym; 'off' = fully away from the gym (e.g. a vacation); 'illness' = sick

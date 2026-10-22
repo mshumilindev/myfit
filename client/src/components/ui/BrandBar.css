@@ -15,3 +15,65 @@
   overflow: hidden;
   cursor: pointer;
 }
+
+/* The bar measures itself (BrandBar.tsx): the left part keeps its natural width, entries that do not fit
+   leave the bar for the user drawer. The fixed cluster (bell, avatar) never collapses. */
+.uibrand-lead {
+  flex: none;
+}
+.uibrand-lead:has(.uibrand-chip) {
+  /* the chip's name sits on the wordmark's baseline, like the text label it replaces */
+  align-items: baseline;
+}
+.uibrand-fixed {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+}
+
+/* The app switcher chip (SPO-279): the app's tile + name + caret, one tap to the launcher.
+   Colours come from the app's tone family (.uit--*), so it matches its launcher tile. */
+.uibrand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px 0 4px;
+  border: 1px solid var(--t-line);
+  border-radius: 999px;
+  background: var(--t-tint);
+  color: var(--t-text);
+  font:
+    600 13px/1 'Inter',
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+  /* 44px touch target without growing the visible chip */
+  position: relative;
+}
+.uibrand-chip::after {
+  content: '';
+  position: absolute;
+  inset: -6px -4px;
+}
+.uibrand-chip .uitile {
+  flex: none;
+  background: var(--t-tint);
+  color: var(--t-text);
+}
+.uibrand-chip-name {
+  min-width: 0;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.uibrand-chip-caret {
+  flex: none;
+  font-size: 12px;
+}
+.uibrand-chip:focus-visible {
+  outline: 2px solid var(--t-text);
+  outline-offset: 2px;
+}

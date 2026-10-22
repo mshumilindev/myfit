@@ -122,7 +122,7 @@ export const teamEt: typeof teamEn = {
   jtOfflineTitle: 'Ühendus puudub',
   jtOfflineBody: 'Serveriga ei õnnestunud ühendust luua. Kontrolli ühendust ja proovi uuesti.',
   jtNotEligible:
-    'See konto ei saa seda kutset vastu võtta. Logi sisse kinnitatud e-posti aadressiga, kuhu kutse saadeti, ja kasuta kontot, millel pole treenerit ega kliente.',
+    'See konto ei saa haldurina liituda. Kasuta kontot, millel pole treenerit ega kliente.',
   jtRetry: 'Proovi uuesti',
   jtOk: 'Valmis',
   jtLoading: 'Kutse laadimine',

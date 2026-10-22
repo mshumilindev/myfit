@@ -1,4 +1,5 @@
 import type { Strings } from './en';
+import { plural } from './coachPlural';
 import { supPl } from './sup.pl';
 import { cycPl } from './cyc.pl';
 
@@ -91,7 +92,6 @@ export const pl: Strings = {
   password: 'Hasło',
   signIn: 'Zaloguj się',
   signingIn: 'Logowanie…',
-  newHereCreate: 'Nowy tutaj? Poproś admina o link zaproszenia.',
   createShortcut: 'Utwórz skrót',
   createShortcutHint: 'Działa offline jak natywna aplikacja.',
   installIosTitle: 'Dodaj do ekranu początkowego',
@@ -141,6 +141,28 @@ export const pl: Strings = {
   signOutQueueBody: (n) =>
     `W kolejce ${n === 1 ? 'jest jeszcze 1 zmiana' : `są jeszcze ${n} ${zmiany(n)}`}. Wylogowanie usuwa lokalną kolejkę — najpierw zsynchronizuj, jeśli chcesz je zachować.`,
   signOutCleanBody: 'Dziennik zostaje na serwerze i wróci przy następnym logowaniu.',
+  authRememberMe: 'Zapamiętaj mnie',
+  authWelcomeBack: 'Witaj ponownie',
+  authTapFace: 'Dotknij swojej twarzy, aby się zalogować',
+  authUseAnother: 'Użyj innego konta',
+  authSavedAccounts: 'Zapisane konta',
+  authWallLabel: 'Osoby na tym urządzeniu',
+  authLockerOpen: 'Otwarta',
+  authLockerLabel: (n, i) => `${n}, szafka ${i}`,
+  authPersonPassword: (n) => `${n}, wpisz hasło`,
+  sessionsRow: 'Sesje',
+  sessionsTitle: 'Sesje',
+  sessionsHint: 'Urządzenia, na których jesteś zalogowany.',
+  sessionsThis: 'To urządzenie',
+  sessionsSignOutDevice: 'Wyloguj',
+  sessionsSignOutOthers: 'Wyloguj na wszystkich innych urządzeniach',
+  sessionsSeen: (w) => `Ostatnia aktywność: ${w}`,
+  sessionsEmpty: 'Brak innych urządzeń.',
+  sessionsError: 'Nie udało się wczytać sesji. Spróbuj ponownie.',
+  sessionsRevokedNote: 'Urządzenie wylogowane tutaj wyloguje się przy następnym otwarciu Spottera.',
+  signOutRemember: 'Zapamiętaj mnie na tym urządzeniu',
+  signOutForgetHint:
+    'Bez zaznaczenia: urządzenie o Tobie zapomni i nie pokaże Cię na ekranie startowym.',
   stay: 'Zostań',
 
   synced: 'Zsynchronizowano',
@@ -825,7 +847,6 @@ export const pl: Strings = {
   backfillContinue: 'Dalej do ćwiczeń',
   backfillFuture: 'Ten czas jest w przyszłości',
   dismiss: 'Odrzuć',
-  unloggedVisit: (dur, gym, date) => `${dur} w ${gym} ${date} — nic nie zapisano.`,
   sessionInProgress: 'Trening w toku',
   recent: 'Ostatnie',
   templates: 'Szablony',
@@ -1203,6 +1224,12 @@ export const pl: Strings = {
   progAdd: 'Dodaj obciążenie',
   setOptions: 'Opcje serii',
   progDeload: 'Deload',
+  progReturn: 'Powrót',
+  progReturnCut: (weeks, lift) =>
+    `Przerwa w „${lift}”: ${plural('pl', weeks, { one: '{n} tydzień', few: '{n} tygodnie', many: '{n} tygodni', other: '{n} tygodnia' })} — zaczynamy lżej`,
+  progReturnEase: (weeks, lift) =>
+    `Przerwa w „${lift}”: ${plural('pl', weeks, { one: '{n} tydzień', few: '{n} tygodnie', many: '{n} tygodni', other: '{n} tygodnia' })} — bez zwiększania ciężaru`,
+  progReturnRegain: 'Wracamy do ciężaru sprzed przerwy',
   progWhyProgress: 'Osiągnięto górę zakresu — dodaj obciążenie.',
   progWhyHold: 'Pobij powtórzenia, potem wzrośnie ciężar.',
   progWhyStall: 'Seria szczytowa stanęła — deload i odbuduj.',
@@ -1577,9 +1604,6 @@ export const pl: Strings = {
   todayOptLiveFirstCardSub: 'Karta „Na żywo” na górze',
   showMore: 'Pokaż więcej',
   historyCount: (n: number) => `${n} sesji`,
-  flagGymPresence: 'Przypomnienia wg obecności na siłowni',
-  flagGymPresenceDesc:
-    'Wykrywaj wizyty na siłowni po lokalizacji i proponuj zapis sesji. Domyślnie wyłączone.',
   flagNutrition: 'Aplikacja Nutrition',
   flagNutritionDesc: 'Odblokuj aplikację Nutrition (licznik KBŻU) w przełączniku aplikacji.',
   flagConditions: 'Przewlekłe schorzenia',
@@ -1625,7 +1649,6 @@ export const pl: Strings = {
   nicSfTrendsSub: 'Kontekst na wykresach treningu',
   nicSfAfter: 'Po treningu',
   nicSfAfterSub: 'Wskazówki „Bez nikotyny”',
-  nicPrivShare: 'Udostępnianie trenerowi',
   nicPrivOff: 'Wył.',
   nicPrivEffects: 'Efekty',
   nicPrivFull: 'Pełny',
@@ -2744,6 +2767,8 @@ export const pl: Strings = {
     'Najpierw dodaj Spotter do ekranu głównego (Udostępnij → Do ekranu początkowego) — iPhone pozwala na powiadomienia tylko tam.',
   pushDenied: 'Powiadomienia dla Spotter są zablokowane. Zezwól na nie w ustawieniach telefonu.',
   atlasName: 'Atlas',
+  /** Title of a push that carries an AI-written reply (marks it as AI; EU AI Act Art. 50). */
+  atlasAiPushTitle: 'Atlas · SI',
   atlasTemper: ['Ziomek', 'Neutralny', 'Brutalny'],
   atlasTemperTag: ['kumpel z siłowni', 'prosto z mostu', 'jedzie po każdej leniwej serii'],
   atlasTemperQuote: [
@@ -2865,10 +2890,6 @@ export const pl: Strings = {
     `Darmowy limit Gemini się wyczerpał. Do ${time} Atlas odpowiada z własnej wiedzy — albo przez Puter, na Twoim darmowym koncie Puter.`,
   atlasAsk: 'Zapytaj Atlasa o trening…',
   atlasSend: 'Wyślij',
-  atlasConsentTitle: 'Czat z Atlasem',
-  atlasConsentBody:
-    'Aby odpowiadać na dowolne pytania, Atlas wysyła krótkie podsumowanie treningów (ostatnie sesje, plan, godziny snu) do Google Gemini, a gdy dzienny darmowy limit Gemini się wyczerpie — do Puter (puter.com) przez Twoje własne konto Puter. Bez imienia, e-maila, daty urodzenia i zdjęć. W darmowych planach te usługi mogą używać zapytań do ulepszania modeli. Notatki, podsumowania i powiadomienia działają bez tego.',
-  atlasConsentOk: 'Zgadzam się i wyślij',
   atlasChatOffline: 'Brak połączenia. Trenuj teraz, pogadamy później.',
   atlasChatCap: 'Dość gadania na dziś. Sztanga czeka.',
   atlasChatBlocked: 'Trzymajmy się tematu treningu.',
@@ -3213,9 +3234,203 @@ export const pl: Strings = {
   onbRequestNew: 'Poproś o nowy link',
   onbRequested: 'Wysłano — admin zobaczy to na swojej liście osób',
   onbHaveAccount: 'Mam już konto — zaloguj się',
+  landingKicker: 'Dziennik treningowy · Windows · macOS · Android',
+  landingHeadline: 'Światło jest na tobie.',
+  landingHeadline2: 'Resztę bierzemy na siebie.',
+  landingLead:
+    'Dziennik treningowy, który zna już twoją poprzednią serię, wie, ile odpocząć i który mięsień jeszcze nie jest gotowy.',
+  landingHaveInvite: 'Mam zaproszenie',
+  landingInviteTitle: 'Konta powstają na zaproszenie',
+  landingInviteBody:
+    'Otwórz link z zaproszeniem, który dostałeś: prowadzi prosto do konfiguracji konta.',
+  landingBack: 'Wstecz',
+  landing_a_1: 'Przeciągnij ćwiczenia w inną kolejność w trakcie treningu.',
+  landing_a_2:
+    'Rozgrzewkowe serie są oznaczone jako rozgrzewka, więc nie pomylisz ich z roboczymi.',
+  landing_a_3: 'Wpisałeś złą liczbę? „Cofnij” usunie serię.',
+  landing_a_4: 'Kalkulator talerzy: wpisz docelowy ciężar i zobacz, co założyć na każdą stronę.',
+  landing_a_h: 'Następna seria jest już wpisana.',
+  landing_a_k: 'Dziennik',
+  landing_a_p:
+    'Spotter wstawia do pustego wiersza twoją ostatnią najlepszą serię. Ten sam ciężar, te same powtórzenia? Stuknij „Zapisz”. Dziś inaczej? Najpierw popraw liczbę.',
+  landing_ai_off: 'Offline',
+  landing_ai_ph: 'Zapytaj Atlasa…',
+  landing_ai_s1: 'Przysiad · wszystkie treningi',
+  landing_ai_s2: 'Filtr: od 100 kg',
+  landing_ai_s3: 'Ostatnie trafienie: 3 lutego',
+  landing_ai_s4: 'Wyciskanie · marzec',
+  landing_ai_s5: 'Znaleziono wpisów: 0',
+  landing_ai_t: 'Czytam twój dziennik…',
+  landing_and_close: 'Zamknij',
+  landing_and_dl: 'Pobierz .apk',
+  landing_and_scan: 'Zeskanuj telefonem, aby pobrać aplikację na Androida',
+  landing_atlas_k: 'Atlas',
+  landing_btn_log: 'Zapisz',
+  landing_btn_undo: 'Cofnij',
+  landing_c_1: 'Tygodniowa objętość każdego mięśnia — na tle limitu.',
+  landing_c_2: 'Stuknij mięsień, żeby zobaczyć, kiedy ostatnio go trenowałeś.',
+  landing_c_h: 'To, czego nie widać w lustrze.',
+  landing_c_k: 'Regeneracja',
+  landing_c_p:
+    'Każdy mięsień ma własny zegar. Przysiad w poniedziałek — czworogłowe zostają oznaczone, dopóki się nie zregenerują; klatce to obojętne. Jedno spojrzenie na mapę ciała i wiesz, co trenować dziś.',
+  landing_col_kg: 'Kg',
+  landing_col_reps: 'Powt.',
+  landing_e_d1: 'Zapisuje bez zasięgu i synchronizuje bez duplikatów, gdy wróci.',
+  landing_e_d2: 'Wrażliwe pola są szyfrowane na urządzeniu, zanim gdziekolwiek trafią.',
+  landing_e_d3:
+    'Angielski, ukraiński, polski, litewski i estoński. Przełącznik jest u góry tej strony.',
+  landing_e_d4: '873 ćwiczenia ze zdjęciami i mięśniami, które każde angażuje.',
+  landing_e_h: 'Jeden dziennik, na którym ekranie wygodniej.',
+  landing_e_k: 'Wszędzie',
+  landing_e_p:
+    'Aplikacje na Windows i macOS, Android albo po prostu przeglądarka. W sali zapisujesz w telefonie, w domu oglądasz liczby na laptopie.',
+  landing_e_t1: 'Najpierw offline',
+  landing_e_t2: 'Prywatność domyślnie',
+  landing_e_t3: 'Pięć języków',
+  landing_e_t4: 'Biblioteka ćwiczeń',
+  landing_f_h: 'Zainstaluj aplikację i otwórz link od trenera.',
+  landing_f_p:
+    'Logujesz się na konto założone przez trenera. Nie masz jeszcze linku? Poproś go o wysłanie.',
+  landing_get_l: 'Pobierz aplikację',
+  landing_h_h: 'Światło jest na tobie.',
+  landing_h_h2: 'Resztę bierzemy na siebie.',
+  landing_h_p:
+    'Dziennik treningowy, który zna już twoją poprzednią serię, wie, ile odpocząć i który mięsień jeszcze nie jest gotowy.',
+  landing_i_1:
+    'Wracasz po przerwie? Aplikacja policzy dni od ostatniego razu z tym ćwiczeniem i zaproponuje lżejszy pierwszy trening.',
+  landing_i_h: 'Kontuzja? Wracaj w czterech krokach, we własnym tempie.',
+  landing_i_k: 'Kontuzje i powroty',
+  landing_i_p:
+    'Powiedz Spotterowi, co boli. Trening przechodzi przez Protect, Reintroduce, Rebuild i Return, a ty idziesz dalej, gdy czujesz się na siłach, a nie gdy tak mówi kalendarz.',
+  landing_k126: 'Zacznij →',
+  landing_k163: 'Utworzymy konto w 4 krokach',
+  landing_k191: 'Kim jesteś · Zdjęcie · Siłownia · Ciało · ważne do [data]',
+  landing_k231: 'Obrotowy model 3D mięśni człowieka',
+  landing_k77: 'Zaprasza',
+  landing_k94: 'Mięśnie człowieka, widok z przodu',
+  landing_kind_w: 'rozgrzewka',
+  landing_lang_aria: 'Język',
+  landing_lg_musc: 'Czworogłowe',
+  landing_lg_name: 'Przysiad ze sztangą',
+  landing_m_1: 'Rekordy życiowe i szacowane 1RM dla każdego ćwiczenia.',
+  landing_m_2:
+    'Playbook: twoje typowe dni zbudowane z twojej historii — zakresy powtórzeń, kolejność, ćwiczenie, w którym utknąłeś.',
+  landing_m_h: 'Każde ćwiczenie pamięta swój rekord.',
+  landing_m_k: 'Postępy',
+  landing_m_p:
+    'Spotter prowadzi rekord życiowy dla każdego ćwiczenia i szacuje 1RM z tego, co faktycznie podniosłeś. Nic nie trzeba ustawiać: rekordy pojawiają się same, gdy trenujesz.',
+  landing_m_pr: 'PR',
+  landing_m_rm: 'szac. 1RM',
+  landing_nav_get: 'Pobierz',
+  landing_p_1:
+    'Link z zaproszeniem otwiera konfigurację w czterech krokach: kim jesteś, zdjęcie, siłownia, ciało.',
+  landing_p_2: 'Trener może wgrać cały program z arkusza (CSV).',
+  landing_p_3:
+    'Trenujesz w kilku salach? Wybierz dzisiejszą, a aplikacja przypomni, jeśli wyszedłeś bez zapisu.',
+  landing_p_h: 'Trener układa tydzień. Ty otwierasz dzisiejszy dzień.',
+  landing_p_k: 'Od trenera',
+  landing_p_p:
+    'Program od trenera pojawia się dzień po dniu: ćwiczenia, serie, zakresy powtórzeń. Wybierasz dzień, naciskasz start i jesteś w dzienniku.',
+  landing_ph_c1: 'Ostatni przysiad: 3 tygodnie temu',
+  landing_ph_c2: 'Dziś zacznij lżej.',
+  landing_ph_done: 'Zrobione',
+  landing_ph_next: 'Dalej',
+  landing_ph_now: 'Teraz',
+  landing_pr_by: 'Od trenera',
+  landing_pr_day: 'Dzień 2 · Góra ciała',
+  landing_pr_e1: 'Wyciskanie leżąc',
+  landing_pr_e2: 'Wiosłowanie sztangą',
+  landing_pr_e3: 'Wyciskanie nad głowę',
+  landing_pr_e4: 'Ściąganie drążka',
+  landing_pr_go: 'Start',
+  landing_r_1: 'Liczy w górę, gdy odpoczywasz, więc widzisz, ile naprawdę to trwało.',
+  landing_r_2: 'Przechodzi na kolejne ćwiczenie, więc spacer do innej klatki go nie zeruje.',
+  landing_r_3: 'Chory albo rozbity? Powiedz to, a liczba się wydłuży.',
+  landing_r_h: 'Ile odpoczywać i dlaczego tyle.',
+  landing_r_p:
+    'Po serii licznik liczy od tego, co właśnie zrobiłeś: ćwiczenie, jak ciężko było, jak zmęczony jest mięsień, jak spałeś. Licznik pokazuje, jak doszedł do tej liczby.',
+  landing_rb_base: 'To ćwiczenie',
+  landing_rb_mus: 'Czworogłowe wciąż zmęczone',
+  landing_rb_rpe: 'Wyszło jak RPE 9',
+  landing_rb_slp: 'Źle spałeś',
+  landing_rb_tot: 'Odpoczynek',
+  landing_rest_k: 'Odpoczynek',
+  landing_rest_l: 'Odpoczynek',
+  landing_t_1: 'Brak zasięgu na siłowni w piwnicy? I tak odpowie.',
+  landing_t_a1: '3 lutego: 100 × 5, trzy serie. Od tego czasu nic cięższego.',
+  landing_t_a2: 'W marcu nic nie zapisano, więc nie będę zgadywać.',
+  landing_t_h: 'Trener, który przeczytał każdą twoją serię.',
+  landing_t_p:
+    'Zapytaj, kiedy ostatnio przysiadłeś ze 100, albo dlaczego czwartek wyszedł mdło. Atlas odpowiada z twojego dziennika i mówi wprost, gdy nic o tym nie ma. Wybierz postać, a będzie mówić jej głosem.',
+  landing_t_q1: 'Kiedy ostatnio przysiadłem ze 100?',
+  landing_t_q2: 'Ile wyciskałem w marcu?',
+  landing_t_s1: 'Z twojego dziennika · 3 lut.',
   onbAvatarTooBig: (size) =>
     `Ten plik ma ${size}. Wybierz coś do 10 MB — i tak jest zmniejszane do 512 px.`,
   onbContinue: 'Dalej',
+  onbAgreeHeader: 'Zanim przejdziesz dalej',
+  onbAgreeLocked: 'Otwórz oba dokumenty i przeczytaj je, aby odblokować pola poniżej.',
+  onbAgreeNotOpened: 'Jeszcze nie otwarto',
+  onbAgreeRead: 'Przeczytano',
+  onbAgreeAge: 'Mam ukończone 18 lat.',
+  onbAgreeAccept:
+    'Akceptuję Warunki korzystania i potwierdzam zapoznanie się z Polityką prywatności.',
+  privHubHeader: 'Twoja prywatność',
+  privTitle: 'Zgody',
+  privHubSub: 'Na co się zgodziłeś i jak to wycofać',
+  privSub: 'Ty decydujesz. Wycofanie jest tak łatwe jak udzielenie.',
+  privGrpRequired: 'Wymagane do korzystania ze Spotter',
+  privRequiredLabel: 'Warunki korzystania i Polityka prywatności',
+  privRequiredSub: 'Zaakceptowałeś je i zapoznałeś się z nimi, zakładając konto',
+  privRequiredFoot:
+    'Bez tego Spotter nie działa. Wycofanie kończy Twoją umowę ze Spotter, więc konto zostanie usunięte.',
+  privGrpHealth: 'Dane o zdrowiu',
+  privHealthSub: 'Dane o zdrowiu dla tej funkcji',
+  privHealthFoot:
+    'Każda funkcja zdrowotna ma własną zgodę. Wycofanie zatrzymuje funkcję; Twoje wpisy zostają na koncie, nieużywane, dopóki ich nie usuniesz.',
+  privGrpOutside: 'Poza Spotter',
+  privAtlasLabel: 'Czat Atlas AI',
+  privAtlasSub: 'Wysyła Twoje pytanie i podsumowanie treningów do Google',
+  privGeoLabel: 'Wyszukiwarka siłowni i mapy',
+  privGeoSub: 'Wysyła Twoje wyszukiwanie i, jeśli zezwolisz, pozycję do usług map',
+  privPuterLabel: 'Czat Atlas AI (usługa zapasowa)',
+  privPuterSub:
+    'Wysyła Twoje pytanie i podsumowanie treningów do Puter, gdy dzienny limit Google zostanie wyczerpany',
+  privOutsideFoot: 'Te funkcje przekazują dane innym firmom.',
+  privStatusLoading: 'Wczytywanie…',
+  privStatusNone: 'Nie udzielono',
+  privOffConfirm: 'Wycofaj zgodę',
+  privOffKeep: 'Zostaw włączone',
+  privOffHealthBody:
+    'Funkcja przestaje działać, a trener już jej nie widzi. Twoje wpisy zostają na koncie, nieużywane, dopóki ich nie usuniesz. Reszta Spotter działa dalej.',
+  privOffAtlasBody: 'Atlas przestaje wysyłać Twoje pytania do Google. Reszta Spotter działa dalej.',
+  privOffGeoBody:
+    'Wyszukiwarka siłowni i mapy przestają wysyłać Twoje zapytania i pozycję. Reszta Spotter działa dalej.',
+  privOffPuterBody:
+    'Atlas przestaje używać usługi zapasowej. Twoje pytania nie trafiają już do Puter. Reszta Spotter działa dalej.',
+  privReqTitle: 'Wycofać zgodę i usunąć konto?',
+  privReqBody:
+    'Spotter potrzebuje Twojej zgody na Warunki i Politykę prywatności, by działać. Jeśli ją wycofasz, usuniemy konto i wszystkie Twoje dane. Nie można tego cofnąć.',
+  privReqCheck: 'Najpierw pobierz kopię moich danych',
+  privReqFine: 'Później możesz założyć nowe konto.',
+  privReqUnavailable:
+    'Usunięcie konta nie jest tu jeszcze dostępne, więc nic nie zostaje wycofane.',
+  privReqConfirm: 'Usuń konto',
+  privReqKeep: 'Zachowaj konto',
+  privSaveError: 'Nie udało się zapisać. Spróbuj ponownie.',
+  privCount: (n: number, m: number) => `${n} z ${m} włączone`,
+  privStatusGiven: (v: string, d: string) => `Udzielono · v${v} · ${d}`,
+  privStatusOlder: (v: string, d: string) => `Udzielono · v${v} · jest nowsza wersja · ${d}`,
+  privOffTitle: (n: string) => `Wyłączyć: ${n}?`,
+  privFeature: {
+    injuries: 'Urazy',
+    chronic: 'Choroby przewlekłe',
+    cycle: 'Cykl',
+    nicotine: 'Nikotyna',
+    alcohol: 'Alkohol',
+    supplements: 'Suplementy',
+    nutrition: 'Odżywianie',
+  },
   onbBack: 'Wstecz',
   onbAvatarType: 'Tylko JPEG, PNG, HEIC lub WebP',
   onbCameraUnavailable: 'Aparat się nie otworzył. Sprawdź uprawnienia albo wybierz Galerię.',
@@ -3485,13 +3700,6 @@ export const pl: Strings = {
         return `Twoja rola została zmieniona na ${detail}.`;
       case 'trainer-assigned':
         return detail ? `${detail} jest teraz twoim trenerem.` : 'Masz nowego trenera.';
-      case 'unmarked':
-        return `${detail ?? 'Podopieczny'}: zakończony trening nie jest jeszcze oznaczony.`;
-      case 'removal-request':
-      case 'removal-answer':
-      case 'manager-move':
-      case 'team':
-        return 'Nowa wiadomość w Spotterze.';
       case 'trainer-removed':
         return 'Twój trener został odłączony.';
       case 'client-assigned':
@@ -3928,9 +4136,7 @@ export const pl: Strings = {
   learnBannerTitleGoing: 'Kontynuuj naukę Spotter',
   learnBannerCta: 'Zacznij naukę',
   learnBannerProgress: (done: number, total: number) => `${done} / ${total} lekcji`,
-  shellPeopleDesc: 'Twój profil i konto.',
-  shellPeopleDescCoach: 'Twoi klienci i profil.',
-  shellPeopleDescAdmin: 'Członkowie, trenerzy i konto.',
+  shellPeopleDescAdmin: 'Członkowie i trenerzy.',
   appsTab: 'Aplikacje',
   shellSessionsWeek: (n: number) => `${n} treningów w tym tygodniu`,
   shellDayStreak: (n: number) => `seria ${n} dni`,
@@ -4709,11 +4915,7 @@ export const pl: Strings = {
   hlPrivMixed: 'Trener: różnie',
   hlPrivNote:
     'Wszystko, co wpisujesz w Zdrowiu, jest szyfrowane na Twoim urządzeniu i w chmurze. Służy tylko do dopasowania planów i podpowiedzi.',
-  hlPrivCondNote: 'Każdy stan może to zmienić na swojej stronie.',
   hlPrivSumNone: 'Trener niczego nie widzi.',
-  hlPrivSumEffects: 'Tylko wpływ na trening: {list}.',
-  hlPrivSumFull: 'Pełne dane: {list}.',
-  hlPrivSumRest: 'Nic więcej.',
   hlLogPastNote: 'Wybierz dni w kalendarzu. Jeśli w tym czasie trenowałeś, zapytamy, co zostawić.',
   hlHistory: 'Historia',
   hlHistoryTitle: 'Historia zdrowia',

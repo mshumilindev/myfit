@@ -32,15 +32,13 @@ import {
   buildDay,
   intentSpec,
   rankExercisesForMuscle,
-  warmupRamp,
   type BuildContext,
   type PlannedExercise,
   type Candidate,
   type SessionIntent,
   type WhyKey,
 } from '../sessionBuilder';
-import { nextTarget, topHistory } from '../progression';
-import { deriveLoadType } from '../loads';
+import { swapExercise } from '../sessionSwap';
 import { muscleReadiness, READINESS_COLOR } from '../recovery';
 import { ARCHETYPES_BY_SEX, ARCHETYPES, type ArchetypeId } from '../goals';
 import { exerciseImage, type MuscleGroup } from '../data/exercises';
@@ -102,7 +100,7 @@ export function SessionBuilderView({
     now,
     intent,
     targetMuscles: muscles ?? undefined,
-    ...healthBuildCtx(store, now),
+    ...healthBuildCtx(now),
     lengthMin,
     warmup,
     cardio,
@@ -168,33 +166,8 @@ export function SessionBuilderView({
       setDrag(target);
     }
   };
-  const buildSwap = (cand: Candidate, slot: PlannedExercise): PlannedExercise => {
-    const equipment = cand.equipment ? [cand.equipment] : [];
-    const loadType = deriveLoadType(cand.name, equipment);
-    const target = nextTarget(topHistory(finished, cand.name, now), {
-      plannedReps: slot.repHigh,
-      equipment,
-      primary: cand.primary ?? undefined,
-      loadType,
-    });
-    return {
-      name: cand.name,
-      kind: 'strength',
-      primary: cand.primary,
-      secondary: cand.secondary,
-      equipment,
-      loadType,
-      sets: slot.sets,
-      repLow: slot.repLow,
-      repHigh: slot.repHigh,
-      targetWeight: target.weight,
-      deltaKg: target.deltaKg,
-      progState: target.state,
-      warmup: warmupRamp(target.weight, { loadType, compound: cand.compound }),
-      whyKey: slot.whyKey,
-      priority: slot.priority,
-    };
-  };
+  const buildSwap = (cand: Candidate, slot: PlannedExercise): PlannedExercise =>
+    swapExercise(cand, slot, finished, now, ctx.bodyKg ?? null);
   const swapMain = (i: number) => {
     const cur = mainList[i];
     if (!cur.primary) return;

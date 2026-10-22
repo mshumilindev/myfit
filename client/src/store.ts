@@ -48,7 +48,6 @@ import {
   type Gym,
   type LiveSession,
   type QueuedMutation,
-  type Reminder,
   type RestMode,
   type IllnessKind,
   type RestPeriod,
@@ -113,7 +112,6 @@ import { sleepBlockedBy, type SleepBlock } from './sleepGuard';
 import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { REST_PREFS_DEFAULT, type RestPrefs } from './restTimer';
-import { isFlagOn } from './data/flags';
 import { describeDay, dayReadoutLabel, type DayReadout } from './data/daySuggest';
 import { t, getLocale, type LocaleId } from './i18n';
 import {
@@ -151,6 +149,17 @@ import { computeStreak } from './streak';
 import { currentUid, getRole, callFn } from './api';
 import { readProgramMemory } from './data/programMemory';
 import { CONDITIONS_KEY, CONDITIONS_SHARE_KEY, createConditionsCache } from './conditionsCache';
+import {
+  healthSnapshot,
+  healthVersion,
+  healthWriteDenied,
+  isHealthOn,
+  subscribeHealth,
+  type HealthWriteDenied,
+  type HealthWriteResult,
+} from './data/healthConsentGate';
+import { maskHealth } from './healthMask';
+import type { HealthFeature } from './legal/consents';
 import { createAlcoholCache } from './alcoholCache';
 import { alcoholCoachView } from './alcoholShare';
 import {
@@ -258,7 +267,6 @@ export {
 const STATE_KEY = 'spotter.state';
 const GYMS_KEY = 'spotter.gyms';
 const SHARED_GYMS_KEY = 'spotter.sharedGyms';
-const REMINDERS_KEY = 'spotter.reminders';
 const BODY_KEY = 'spotter.body';
 const GOALS_KEY = 'spotter.goals';
 const HOME_KEY = 'spotter.home';
@@ -370,7 +378,6 @@ export interface StoreState {
   gyms: Gym[];
   /** Shared gym inventories by externalId (cache of sharedGyms/*). */
   sharedGyms: Record<string, SharedGym>;
-  reminders: Reminder[];
   /** Planned rest / recovery / vacation windows. */
   restPeriods: RestPeriod[];
   /** Tracked injuries with feel-driven rehab plans. */
@@ -448,7 +455,6 @@ let state: StoreState = {
   workouts: load<Workout[]>(STATE_KEY, []),
   gyms: load<Gym[]>(GYMS_KEY, []),
   sharedGyms: load<Record<string, SharedGym>>(SHARED_GYMS_KEY, {}),
-  reminders: load<Reminder[]>(REMINDERS_KEY, []),
   restPeriods: load<RestPeriod[]>(REST_KEY, []),
   injuries: load<Injury[]>(INJURY_KEY, []),
   conditions: stripLegacyConditions(load<ChronicCondition[]>(CONDITIONS_KEY, [])),
@@ -493,10 +499,6 @@ let state: StoreState = {
   syncError: null,
   lastSyncAt: null,
 };
-
-// Pings & dismissals feed reminder computation; kept outside StoreState.
-let pings: Array<{ gymId: string; at: number }> = [];
-let dismissals: Array<{ gymId: string; visitStart: number }> = [];
 
 const listeners = new Set<() => void>();
 
@@ -587,21 +589,36 @@ function hydrateSupplements(): void {
 vault.subscribe(hydrateSupplements);
 if (vault.materialOrNull()) hydrateSupplements();
 
+/** Features whose delete is emptying the on-device copy right now: they may write (the empty value) while off. */
+const forcedPersist = new Set<HealthFeature>();
+const mayPersist = (f: HealthFeature): boolean => isHealthOn(f) || forcedPersist.has(f);
+function withForcedPersist(f: HealthFeature, run: () => void): void {
+  forcedPersist.add(f);
+  try {
+    run();
+  } finally {
+    forcedPersist.delete(f);
+  }
+}
+
 function persist(): void {
   try {
     localStorage.setItem(STATE_KEY, JSON.stringify(state.workouts));
     localStorage.setItem(COACH_KEY, JSON.stringify(state.coach));
     localStorage.setItem(GYMS_KEY, JSON.stringify(state.gyms));
     localStorage.setItem(SHARED_GYMS_KEY, JSON.stringify(state.sharedGyms));
-    localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
     localStorage.setItem(REST_KEY, JSON.stringify(state.restPeriods));
-    localStorage.setItem(INJURY_KEY, JSON.stringify(state.injuries));
+    // A health key is written only while its consent is on (or while a delete empties it): a feature that is off adds
+    // nothing new to this device, and a Firestore mirror cannot put data back (SPO-290 S3). What was stored before stays
+    // until the person deletes it; the safety limits are read from memory, loaded from that copy at start.
+    if (mayPersist('injuries')) localStorage.setItem(INJURY_KEY, JSON.stringify(state.injuries));
     // Sealed on device once the vault key is here; plaintext only as the no-key fallback.
-    conditionsCache.persist({ conditions: state.conditions, share: state.conditionsShare });
-    nicotineCache.persist(state.nicotine);
-    cycleCache.persist(state.cycle);
-    alcoholCache.persist(state.alcohol);
-    supplementsCache.persist(state.supplements);
+    if (mayPersist('chronic'))
+      conditionsCache.persist({ conditions: state.conditions, share: state.conditionsShare });
+    if (mayPersist('nicotine')) nicotineCache.persist(state.nicotine);
+    if (mayPersist('cycle')) cycleCache.persist(state.cycle);
+    if (mayPersist('alcohol')) alcoholCache.persist(state.alcohol);
+    if (mayPersist('supplements')) supplementsCache.persist(state.supplements);
     localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(state.activities));
     localStorage.setItem(WEIGHT_UNIT_KEY, JSON.stringify(state.weightUnit));
     localStorage.setItem(EX_UNIT_KEY, JSON.stringify(state.exerciseUnits));
@@ -627,27 +644,68 @@ function setState(patch: Partial<StoreState>): void {
   emit();
 }
 
+let exposedMemo: { raw: StoreState; v: number; out: StoreState } | null = null;
+/**
+ * What the rest of the app may see (SPO-290): the state, with every health feature that has no consent replaced by its
+ * empty value. Stable between changes. Writers inside this file keep using the raw `state`.
+ */
+function exposed(): StoreState {
+  const v = healthVersion();
+  if (exposedMemo === null || exposedMemo.raw !== state || exposedMemo.v !== v)
+    exposedMemo = { raw: state, v, out: maskHealth(state, healthSnapshot().on) };
+  return exposedMemo.out;
+}
+
 /** The current state, outside React (for chained actions). */
 export function getStoreState(): StoreState {
-  return state;
+  return exposed();
+}
+
+/** The stored safety limits. Content-free by contract: callers may only turn them into restrictions. */
+export interface StoredLimits {
+  injuries: readonly Injury[];
+  conditions: readonly ChronicCondition[];
+}
+let limitsMemo: { i: Injury[]; c: ChronicCondition[]; out: StoredLimits } | null = null;
+/**
+ * RESTRICTION path (SPO-290 owner decision): the stored injuries and conditions, whatever the consent says. An active
+ * injury needing rest, a pregnancy or a limiting condition the person once entered keep capping workout generation,
+ * protecting the streak and pausing the cycle even when the feature is off or its consent is unknown. They only ever
+ * restrict: this is for `healthBuildCtx`, `cycleSuppressedBy` and the like, NEVER for anything shown, shared or sent
+ * (those read `useStore()` / `getStoreState()`, the masked view). Stable between changes.
+ */
+export function getStoredLimits(): StoredLimits {
+  if (limitsMemo === null || limitsMemo.i !== state.injuries || limitsMemo.c !== state.conditions)
+    limitsMemo = {
+      i: state.injuries,
+      c: state.conditions,
+      out: { injuries: state.injuries, conditions: state.conditions },
+    };
+  return limitsMemo.out;
+}
+export function useStoredLimits(): StoredLimits {
+  return useSyncExternalStore(subscribeStore, getStoredLimits);
 }
 
 /** Cycle settings + switches (a stable object until something changes). */
 export function useCycle(): CycleState {
-  return useSyncExternalStore(subscribeStore, () => state.cycle);
+  return useSyncExternalStore(subscribeStore, () => exposed().cycle);
 }
 
 /** Nicotine products + switches (a stable object until something changes). */
 export function useNicotine(): NicotineState {
-  return useSyncExternalStore(subscribeStore, () => state.nicotine);
+  return useSyncExternalStore(subscribeStore, () => exposed().nicotine);
 }
 
 let nicotineMemo: { n: NicotineState; load: NicotineLoad } | null = null;
 /** The combined load of the active products (mg and cigarette-equivalents per day). */
 export function getNicotineLoad(): NicotineLoad {
-  // `state.nicotine` can be missing in an old seeded / not yet migrated state: count it as empty.
-  if (nicotineMemo === null || nicotineMemo.n !== state.nicotine)
-    nicotineMemo = { n: state.nicotine, load: nicotineLoad(state.nicotine?.products ?? []) };
+  // `exposed().nicotine` can be missing in an old seeded / not yet migrated state: count it as empty.
+  if (nicotineMemo === null || nicotineMemo.n !== exposed().nicotine)
+    nicotineMemo = {
+      n: exposed().nicotine,
+      load: nicotineLoad(exposed().nicotine?.products ?? []),
+    };
   return nicotineMemo.load;
 }
 export function useNicotineLoad(): NicotineLoad {
@@ -657,10 +715,10 @@ export function useNicotineLoad(): NicotineLoad {
 let effectsMemo: { n: NicotineState; e: NicotineEffects | null } | null = null;
 /** What the engines should apply now; null = master off or no product (change nothing). */
 export function getNicotineEffects(): NicotineEffects | null {
-  if (effectsMemo === null || effectsMemo.n !== state.nicotine)
+  if (effectsMemo === null || effectsMemo.n !== exposed().nicotine)
     effectsMemo = {
-      n: state.nicotine,
-      e: state.nicotine ? nicotineEffects(state.nicotine) : null,
+      n: exposed().nicotine,
+      e: exposed().nicotine ? nicotineEffects(exposed().nicotine) : null,
     };
   return effectsMemo.e;
 }
@@ -670,14 +728,14 @@ export function useNicotineEffects(): NicotineEffects | null {
 
 /** Alcohol entries + switches (a stable object until something changes). */
 export function useAlcohol(): AlcoholState {
-  return useSyncExternalStore(subscribeStore, () => state.alcohol);
+  return useSyncExternalStore(subscribeStore, () => exposed().alcohol);
 }
 
 let alcoholMemo: { a: AlcoholState; load: AlcoholLoad } | null = null;
 /** Weekly grams of pure alcohol, memoised on the state object (an old / missing state counts as empty). */
 export function getAlcoholLoad(): AlcoholLoad {
-  if (alcoholMemo === null || alcoholMemo.a !== state.alcohol)
-    alcoholMemo = { a: state.alcohol, load: alcoholLoad(state.alcohol?.entries ?? []) };
+  if (alcoholMemo === null || alcoholMemo.a !== exposed().alcohol)
+    alcoholMemo = { a: exposed().alcohol, load: alcoholLoad(exposed().alcohol?.entries ?? []) };
   return alcoholMemo.load;
 }
 export function useAlcoholLoad(): AlcoholLoad {
@@ -687,10 +745,10 @@ export function useAlcoholLoad(): AlcoholLoad {
 let alcoholEffectsMemo: { a: AlcoholState; e: AlcoholEffects | null } | null = null;
 /** Flat weekly effects (null = nothing to apply), memoised; guarded against a missing state. */
 export function getAlcoholEffects(): AlcoholEffects | null {
-  if (alcoholEffectsMemo === null || alcoholEffectsMemo.a !== state.alcohol)
+  if (alcoholEffectsMemo === null || alcoholEffectsMemo.a !== exposed().alcohol)
     alcoholEffectsMemo = {
-      a: state.alcohol,
-      e: state.alcohol ? alcoholEffects(state.alcohol) : null,
+      a: exposed().alcohol,
+      e: exposed().alcohol ? alcoholEffects(exposed().alcohol) : null,
     };
   return alcoholEffectsMemo.e;
 }
@@ -699,15 +757,15 @@ export function useAlcoholEffects(): AlcoholEffects | null {
 }
 /** Effects for one calendar day, honouring "usually drink on" (null = nothing to apply). */
 export function getAlcoholEffectsFor(day: DayInput): AlcoholEffects | null {
-  return alcoholEffectsFor(state.alcohol, day);
+  return alcoholEffectsFor(exposed().alcohol, day);
 }
 
 let pendingMemo: { a: AlcoholState; hour: number; p: PendingCheckin | null } | null = null;
 /** The check-in to ask on Today (see `pendingAlcoholCheckin`), or null. Stable between calls within an hour. */
 export function getPendingAlcoholCheckin(now: number = Date.now()): PendingCheckin | null {
   const hour = Math.floor(now / 3_600_000);
-  if (pendingMemo === null || pendingMemo.a !== state.alcohol || pendingMemo.hour !== hour)
-    pendingMemo = { a: state.alcohol, hour, p: pendingAlcoholCheckin(now, state.alcohol) };
+  if (pendingMemo === null || pendingMemo.a !== exposed().alcohol || pendingMemo.hour !== hour)
+    pendingMemo = { a: exposed().alcohol, hour, p: pendingAlcoholCheckin(now, exposed().alcohol) };
   return pendingMemo.p;
 }
 export function usePendingAlcoholCheckin(): PendingCheckin | null {
@@ -715,12 +773,12 @@ export function usePendingAlcoholCheckin(): PendingCheckin | null {
 }
 /** The week so far from the check-ins; `weekStart` = ISO weekday the week begins on (default Monday). */
 export function getAlcoholWeekActual(now: number = Date.now(), weekStart = 1): WeekActual | null {
-  return alcoholWeekActual(state.alcohol, now, weekStart);
+  return alcoholWeekActual(exposed().alcohol, now, weekStart);
 }
 
 /** The region in force: the manual choice, else detected from position / time zone / language. */
 export function getAlcoholRegion(): AlcoholRegion {
-  return resolveAlcoholRegion(state.alcohol?.settings?.regionOverride);
+  return resolveAlcoholRegion(exposed().alcohol?.settings?.regionOverride);
 }
 export function useAlcoholRegion(): AlcoholRegion {
   return useSyncExternalStore(subscribeStore, getAlcoholRegion);
@@ -728,10 +786,11 @@ export function useAlcoholRegion(): AlcoholRegion {
 
 /** Supplement entries + switches + check-ins (a stable object until something changes). */
 export function useSupplements(): SupplementState {
-  return useSyncExternalStore(subscribeStore, () => state.supplements);
+  return useSyncExternalStore(subscribeStore, () => exposed().supplements);
 }
 /** The current supplements document, outside React (an old / missing state counts as empty). */
-export const getSupplements = (): SupplementState => state.supplements ?? emptySupplementState();
+export const getSupplements = (): SupplementState =>
+  exposed().supplements ?? emptySupplementState();
 
 /**
  * What the model needs from the rest of the store to tell a training day: today, the days with
@@ -772,13 +831,13 @@ export function getSupplementEffectsFor(
   day: DayInput,
   ctx: SupplementContext,
 ): SupplementEffects | null {
-  return supplementEffectsFor(state.supplements, day, ctx);
+  return supplementEffectsFor(exposed().supplements, day, ctx);
 }
 export function getSupplementProteinGramsFor(day: DayInput, ctx: SupplementContext): number {
-  return supplementProteinGramsFor(state.supplements, day, ctx);
+  return supplementProteinGramsFor(exposed().supplements, day, ctx);
 }
 export function getSupplementWarnings(ctx: SupplementContext): SupplementWarning[] {
-  return supplementWarnings(state.supplements, ctx);
+  return supplementWarnings(exposed().supplements, ctx);
 }
 
 /**
@@ -789,7 +848,7 @@ export function getPendingSupplementCheckin(
   ctx: SupplementContext,
   now: number = Date.now(),
 ): PendingSupplementCheckin | null {
-  return pendingSupplementCheckin(now, state.supplements, ctx);
+  return pendingSupplementCheckin(now, exposed().supplements, ctx);
 }
 
 export function subscribeStore(cb: () => void): () => void {
@@ -797,14 +856,24 @@ export function subscribeStore(cb: () => void): () => void {
   return () => listeners.delete(cb);
 }
 
+/** A consent turned on or off: every reader gets the new masked state, and the coach's view is rebuilt without (or with) it. */
+let seenHealthVersion = healthVersion();
+subscribeHealth(() => {
+  // Changes that arrived while a feature was off or its consent unknown are written now if it is on.
+  if (healthVersion() !== seenHealthVersion) {
+    seenHealthVersion = healthVersion();
+    persist();
+  }
+  emit();
+  const uid = currentUid();
+  if (uid) publishCoachShare(uid, state.conditions);
+});
+
 export function useStore(): StoreState {
-  return useSyncExternalStore(
-    (cb) => {
-      listeners.add(cb);
-      return () => listeners.delete(cb);
-    },
-    () => state,
-  );
+  return useSyncExternalStore((cb) => {
+    listeners.add(cb);
+    return () => listeners.delete(cb);
+  }, exposed);
 }
 
 export const uuid = (): string => crypto.randomUUID();
@@ -1475,19 +1544,6 @@ function deleteGymDoc(id: string): void {
   const uid = currentUid();
   if (!uid) return;
   deleteDoc(doc(db, 'users', uid, 'gyms', id)).catch(onWriteError);
-}
-function writePingDoc(id: string, gymId: string, at: number): void {
-  const uid = currentUid();
-  if (!uid) return;
-  setDoc(doc(db, 'users', uid, 'pings', id), { gymId, at }).catch(onWriteError);
-}
-function writeDismissalDoc(gymId: string, visitStart: number): void {
-  const uid = currentUid();
-  if (!uid) return;
-  setDoc(doc(db, 'users', uid, 'reminderDismissals', `${gymId}:${visitStart}`), {
-    gymId,
-    visitStart,
-  }).catch(onWriteError);
 }
 
 function sortWorkouts(ws: Workout[]): Workout[] {
@@ -2995,14 +3051,44 @@ export function restDayKeys(
 
 // --- Chronic conditions -----------------------------------------------------
 let lastCoachShare = '';
+// Publishes are serialised (B3): an older view can never overwrite a newer one, whatever the sealing latency.
+let coachShareSeq = 0;
+let coachShareChain: Promise<void> = Promise.resolve();
+let coachShareRetry: ReturnType<typeof setTimeout> | null = null;
+let coachShareFails = 0;
+const COACH_SHARE_RETRY_MS = [2000, 5000, 15000, 60000] as const;
+
+/** Resolves when every coach view requested so far has been handed to Firestore (its offline queue; not the server ack). */
+export function whenCoachSharePublished(): Promise<void> {
+  return coachShareChain;
+}
+
+function coachShareFailed(uid: string, mine: number, err: unknown): void {
+  if (mine !== coachShareSeq) return; // a newer view follows; this one is moot
+  lastCoachShare = ''; // the next change republishes
+  onWriteError(err);
+  const delay = COACH_SHARE_RETRY_MS[Math.min(coachShareFails, COACH_SHARE_RETRY_MS.length - 1)];
+  coachShareFails++;
+  if (coachShareRetry) clearTimeout(coachShareRetry);
+  coachShareRetry = setTimeout(() => {
+    coachShareRetry = null;
+    if (currentUid() === uid) publishCoachShare(uid, state.conditions);
+  }, delay);
+}
 
 /** What the coach may see of the conditions (per-condition share), sealed like everything else. */
-function publishCoachShare(uid: string, items: readonly ChronicCondition[]): void {
-  const nic = nicotineCoachView(state.nicotine);
-  const alc = alcoholCoachView(state.alcohol);
+function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): void {
+  // Until the consent records are known nothing is published (a cold start must not blank what the coach sees), and a
+  // feature without consent contributes nothing (SPO-290).
+  if (!healthSnapshot().ready) return;
+  const vis = exposed();
+  // The general level Off is a MASTER off: a per-condition override (Full / Effects) never outlives it (B1).
+  const items = isHealthOn('chronic') && state.conditionsShare !== 'off' ? rawItems : [];
+  const nic = nicotineCoachView(vis.nicotine);
+  const alc = alcoholCoachView(vis.alcohol);
   const facts = getSupplementTrainingFacts();
   const sup = supplementsCoachView(
-    state.supplements,
+    vis.supplements,
     {
       isTrainingDay: () => true,
       bodyWeightKg: facts.bodyWeightKg,
@@ -3019,11 +3105,24 @@ function publishCoachShare(uid: string, items: readonly ChronicCondition[]): voi
   const json = JSON.stringify(view);
   if (json === lastCoachShare) return;
   lastCoachShare = json;
-  prepareWrite('coachShare', { view, updatedAt: Date.now() })
-    .then((d) => setDoc(doc(db, 'users', uid, 'meta', 'coachShare'), d))
-    .catch(() => {
-      lastCoachShare = ''; // retried with the next change
-    });
+  if (coachShareRetry) {
+    clearTimeout(coachShareRetry);
+    coachShareRetry = null;
+  }
+  const mine = ++coachShareSeq;
+  coachShareChain = coachShareChain.then(async () => {
+    if (mine !== coachShareSeq) return; // superseded while queued: the newest one in the chain is the one that is sent
+    try {
+      const d = await prepareWrite('coachShare', { view, updatedAt: Date.now() });
+      // issued in chain order; the server ack is not awaited (offline it only comes with the connection)
+      setDoc(doc(db, 'users', uid, 'meta', 'coachShare'), d).then(
+        () => void (coachShareFails = 0),
+        (e) => coachShareFailed(uid, mine, e),
+      );
+    } catch (e) {
+      coachShareFailed(uid, mine, e);
+    }
+  });
 }
 
 /** Sets the general default and republishes what the coach sees. */
@@ -3049,26 +3148,39 @@ function writeConditionDoc(c: ChronicCondition): void {
 export function addCondition(
   input: Pick<ChronicCondition, 'key' | 'severity' | 'share'> &
     Partial<Pick<ChronicCondition, 'startedAt' | 'endsAt'>>,
-): ChronicCondition {
+): ChronicCondition | HealthWriteDenied {
+  // No consent, nothing stored (SPO-290): an explicit refusal, never a made-up condition the caller could show.
+  if (!isHealthOn('chronic')) return healthWriteDenied('chronic');
   const c: ChronicCondition = { ...input, id: uuid(), createdAt: Date.now() };
   setState({ conditions: [c, ...state.conditions], syncStatus: bumpPending() });
   writeConditionDoc(c);
   return c;
 }
 
-export function updateCondition(id: string, patch: Partial<Omit<ChronicCondition, 'id'>>): void {
+export function updateCondition(
+  id: string,
+  patch: Partial<Omit<ChronicCondition, 'id'>>,
+): HealthWriteResult {
+  if (!isHealthOn('chronic')) return healthWriteDenied('chronic');
   const cur = state.conditions.find((c) => c.id === id);
-  if (!cur) return;
+  if (!cur) return { ok: true };
   const next = { ...cur, ...patch };
   setState({
     conditions: state.conditions.map((c) => (c.id === id ? next : c)),
     syncStatus: bumpPending(),
   });
   writeConditionDoc(next);
+  return { ok: true };
 }
 
 export function deleteCondition(id: string): void {
-  setState({ conditions: state.conditions.filter((c) => c.id !== id), syncStatus: bumpPending() });
+  deletedConditionIds.add(id);
+  withForcedPersist('chronic', () =>
+    setState({
+      conditions: state.conditions.filter((c) => c.id !== id),
+      syncStatus: bumpPending(),
+    }),
+  );
   const uid = currentUid();
   if (uid) deleteDoc(doc(db, 'users', uid, 'conditions', id)).catch(onWriteError);
 }
@@ -3087,7 +3199,8 @@ function writeCycleDoc(c: CycleState): void {
 
 function commitCycle(
   patch: Partial<Pick<CycleState, 'enabled' | 'settings' | 'surfaces' | 'pendingDate' | 'starts'>>,
-): void {
+): boolean {
+  if (!isHealthOn('cycle')) return false;
   const next: CycleState = {
     ...state.cycle,
     ...patch,
@@ -3095,13 +3208,15 @@ function commitCycle(
   };
   setState({ cycle: next, syncStatus: bumpPending() });
   writeCycleDoc(next);
+  return true;
 }
 
 /** The current cycle document, outside React. */
-export const getCycle = (): CycleState => state.cycle;
+export const getCycle = (): CycleState => exposed().cycle;
 
 /** First setup / Save in settings: turns the feature on with these typical values. */
-export function saveCycleSettings(input: CycleSettings): void {
+export function saveCycleSettings(input: CycleSettings): HealthWriteResult {
+  if (!isHealthOn('cycle')) return healthWriteDenied('cycle');
   const settings = normalizeSettings(input);
   commitCycle({
     enabled: true,
@@ -3109,6 +3224,7 @@ export function saveCycleSettings(input: CycleSettings): void {
     pendingDate: false,
     starts: withStart(state.cycle.starts, settings.anchor),
   });
+  return { ok: true };
 }
 
 /** "Update the date": only the anchor moves, the typical values stay. */
@@ -3135,7 +3251,7 @@ export function setCycleSurface(surface: CycleSurface, on: boolean): void {
  * Marks a pregnancy from the Cycle screen: creates the chronic condition right away (the
  * conditions store is the one source of truth; it switches the Cycle off). Private by default.
  */
-export function markPregnancyFromCycle(startedAt: number): ChronicCondition {
+export function markPregnancyFromCycle(startedAt: number): ChronicCondition | HealthWriteDenied {
   const now = Date.now();
   return addCondition({
     key: pregnancyKeyAt(startedAt, now),
@@ -3147,12 +3263,13 @@ export function markPregnancyFromCycle(startedAt: number): ChronicCondition {
 }
 
 /** Marks menopause from the Cycle screen: a permanent chronic condition, private by default. */
-export function markMenopauseFromCycle(): ChronicCondition {
+export function markMenopauseFromCycle(): ChronicCondition | HealthWriteDenied {
   return addCondition({ key: MENOPAUSE_KEY, severity: 2, share: 'off' });
 }
 
 /** Full wipe: settings, the sealed Firestore document and the on-device copy. */
 export function deleteCycleData(): void {
+  wipedAt.cycle = Math.max(Date.now(), state.cycle?.updatedAt ?? 0);
   cycleCache.clear();
   state = { ...state, cycle: emptyCycleState(), syncStatus: bumpPending() };
   persist();
@@ -3173,7 +3290,8 @@ function writeNicotineDoc(n: NicotineState): void {
     .catch(onWriteError);
 }
 
-function commitNicotine(patch: Partial<Pick<NicotineState, 'products' | 'settings'>>): void {
+function commitNicotine(patch: Partial<Pick<NicotineState, 'products' | 'settings'>>): boolean {
+  if (!isHealthOn('nicotine')) return false;
   const next: NicotineState = {
     ...state.nicotine,
     ...patch,
@@ -3183,16 +3301,20 @@ function commitNicotine(patch: Partial<Pick<NicotineState, 'products' | 'setting
   writeNicotineDoc(next);
   const uid = currentUid();
   if (uid) publishCoachShare(uid, state.conditions);
+  return true;
 }
 
 /** The current nicotine document, outside React. */
-export const getNicotine = (): NicotineState => state.nicotine;
+export const getNicotine = (): NicotineState => exposed().nicotine;
 
 /**
  * Adds a product, or replaces the one with the same id (Save in the product sheet).
  * Returns the cleaned product, or null if it was not valid.
  */
-export function saveNicotineProduct(input: NicotineProduct): NicotineProduct | null {
+export function saveNicotineProduct(
+  input: NicotineProduct,
+): NicotineProduct | null | HealthWriteDenied {
+  if (!isHealthOn('nicotine')) return healthWriteDenied('nicotine');
   const p = normalizeNicotineProduct(input);
   if (!p) return null;
   const has = state.nicotine.products.some((x) => x.id === p.id);
@@ -3247,6 +3369,7 @@ export function setNicotineSharing(v: NicotineSettings['sharing']): void {
 
 /** Full wipe: products, settings, the sealed Firestore document and the on-device copy. */
 export function deleteNicotineData(): void {
+  wipedAt.nicotine = Math.max(Date.now(), state.nicotine?.updatedAt ?? 0);
   nicotineCache.clear();
   state = { ...state, nicotine: emptyNicotineState(), syncStatus: bumpPending() };
   persist();
@@ -3273,6 +3396,7 @@ function writeAlcoholDoc(a: AlcoholState): void {
 function commitAlcohol(
   patch: Partial<Pick<AlcoholState, 'entries' | 'settings' | 'checkins'>>,
 ): void {
+  if (!isHealthOn('alcohol')) return;
   const cur = state.alcohol ?? emptyAlcoholState();
   const next: AlcoholState = {
     ...cur,
@@ -3286,13 +3410,14 @@ function commitAlcohol(
 }
 
 /** The current alcohol document, outside React. */
-export const getAlcohol = (): AlcoholState => state.alcohol;
+export const getAlcohol = (): AlcoholState => exposed().alcohol;
 
 /**
  * Adds an entry, or replaces the one with the same id (Save in the drink sheet). Returns the
  * cleaned entry, or null if it was not valid (unknown drink: the user cannot create drinks).
  */
-export function saveAlcoholEntry(input: AlcoholEntry): AlcoholEntry | null {
+export function saveAlcoholEntry(input: AlcoholEntry): AlcoholEntry | null | HealthWriteDenied {
+  if (!isHealthOn('alcohol')) return healthWriteDenied('alcohol');
   const e = normalizeAlcoholEntry(input);
   if (!e) return null;
   const cur = (state.alcohol ?? emptyAlcoholState()).entries;
@@ -3364,7 +3489,7 @@ export type AlcoholDayAnswer =
 export function answerAlcoholDay(day: string | number | Date, answer: AlcoholDayAnswer): boolean {
   const key = alcoholDayKey(day);
   const cur = state.alcohol ?? emptyAlcoholState();
-  if (!key) return false;
+  if (!key || !isHealthOn('alcohol')) return false; // false = nothing stored (never a fake "logged")
   let c: AlcoholCheckin;
   if (answer.kind === 'none') c = { drank: false };
   else if (answer.kind === 'custom') {
@@ -3397,6 +3522,7 @@ export function clearAlcoholDay(day: string | number | Date): void {
 
 /** Full wipe: entries, settings, the sealed Firestore document and the on-device copy. */
 export function deleteAlcoholData(): void {
+  wipedAt.alcohol = Math.max(Date.now(), state.alcohol?.updatedAt ?? 0);
   alcoholCache.clear();
   state = { ...state, alcohol: emptyAlcoholState(), syncStatus: bumpPending() };
   persist();
@@ -3423,6 +3549,7 @@ function writeSupplementsDoc(a: SupplementState): void {
 function commitSupplements(
   patch: Partial<Pick<SupplementState, 'entries' | 'settings' | 'checkins'>>,
 ): void {
+  if (!isHealthOn('supplements')) return;
   const cur = state.supplements ?? emptySupplementState();
   const next: SupplementState = {
     ...cur,
@@ -3441,7 +3568,10 @@ function commitSupplements(
  * `startedAt` is set once, when the entry is first saved, and kept on every later edit (the
  * caller's value is ignored for an id that already exists).
  */
-export function saveSupplementEntry(input: SupplementEntry): SupplementEntry | null {
+export function saveSupplementEntry(
+  input: SupplementEntry,
+): SupplementEntry | null | HealthWriteDenied {
+  if (!isHealthOn('supplements')) return healthWriteDenied('supplements');
   const e = normalizeSupplementEntry(input, Date.now());
   if (!e) return null;
   const cur = (state.supplements ?? emptySupplementState()).entries;
@@ -3505,7 +3635,7 @@ export function answerSupplementDay(
 ): boolean {
   const key = supplementDayKey(day);
   const cur = state.supplements ?? emptySupplementState();
-  if (!key) return false;
+  if (!key || !isHealthOn('supplements')) return false; // false = nothing stored (never a fake "logged")
   let raw: Record<string, unknown>;
   if (answer.kind === 'none') raw = { taken: false };
   else if (answer.kind === 'all') raw = { taken: true };
@@ -3531,6 +3661,7 @@ export function clearSupplementDay(day: string | number | Date): void {
 
 /** Full wipe: entries, settings, check-ins, the sealed Firestore document and the on-device copy. */
 export function deleteSupplementData(): void {
+  wipedAt.supplements = Math.max(Date.now(), state.supplements?.updatedAt ?? 0);
   supplementsCache.clear();
   state = { ...state, supplements: emptySupplementState(), syncStatus: bumpPending() };
   persist();
@@ -3540,6 +3671,73 @@ export function deleteSupplementData(): void {
     deleteDoc(doc(db, 'users', uid, 'meta', 'supplements')).catch(onWriteError);
     publishCoachShare(uid, state.conditions);
   }
+}
+
+/** The four on-device sharing levels (`meta/coachShare`) that can be forgotten without consent. */
+export type ForgettableShare = 'conditions' | 'nicotine' | 'alcohol' | 'supplements';
+
+/**
+ * Stop sharing / withdrawing a consent: sets the RAW stored sharing level to Off, also while the feature's consent is off
+ * (its setters refuse then, and a stored Full would come back with the next grant). Narrow on purpose: the only value it
+ * can write is Off, there is no level argument, and nothing else of the feature is touched (no deletion). The write goes to
+ * the sealed document and the device copy like any other, then the coach view is republished (without the feature).
+ */
+export function forgetShareLevel(kind: ForgettableShare): void {
+  const uid = currentUid();
+  if (kind === 'conditions') {
+    // Per-condition overrides (Full / Effects) go to Off too, so a later grant brings nothing back (B1).
+    const overridden = state.conditions.filter((c) => c.share === 'full' || c.share === 'effects');
+    if (state.conditionsShare === 'off' && !overridden.length) return;
+    const wasOff = state.conditionsShare === 'off';
+    withForcedPersist('chronic', () =>
+      setState({
+        conditionsShare: 'off',
+        conditions: state.conditions.map((c) =>
+          overridden.includes(c) ? { ...c, share: 'off' as const } : c,
+        ),
+        syncStatus: bumpPending(),
+      }),
+    );
+    for (const c of overridden) writeConditionDoc({ ...c, share: 'off' });
+    if (uid && !wasOff) {
+      prepareWrite('conditionPrefs', { conditionsShare: 'off', updatedAt: Date.now() })
+        .then((d) => setDoc(doc(db, 'users', uid, 'meta', 'conditionPrefs'), d))
+        .catch(onWriteError);
+    }
+  } else if (kind === 'nicotine') {
+    const cur = state.nicotine;
+    if (cur.settings.sharing === 'off') return;
+    const next: NicotineState = {
+      ...cur,
+      settings: { ...cur.settings, sharing: 'off' },
+      updatedAt: Math.max(Date.now(), cur.updatedAt + 1),
+    };
+    withForcedPersist('nicotine', () => setState({ nicotine: next, syncStatus: bumpPending() }));
+    writeNicotineDoc(next);
+  } else if (kind === 'alcohol') {
+    const cur = state.alcohol ?? emptyAlcoholState();
+    if (cur.settings.sharing === 'off') return;
+    const next: AlcoholState = {
+      ...cur,
+      settings: { ...cur.settings, sharing: 'off' },
+      updatedAt: Math.max(Date.now(), cur.updatedAt + 1),
+    };
+    withForcedPersist('alcohol', () => setState({ alcohol: next, syncStatus: bumpPending() }));
+    writeAlcoholDoc(next);
+  } else {
+    const cur = state.supplements ?? emptySupplementState();
+    if (cur.settings.sharing === 'off') return;
+    const next: SupplementState = {
+      ...cur,
+      settings: { ...cur.settings, sharing: 'off' },
+      updatedAt: Math.max(Date.now(), cur.updatedAt + 1),
+    };
+    withForcedPersist('supplements', () =>
+      setState({ supplements: next, syncStatus: bumpPending() }),
+    );
+    writeSupplementsDoc(next);
+  }
+  if (uid) publishCoachShare(uid, state.conditions);
 }
 
 // --- Injuries & rehab -------------------------------------------------------
@@ -3568,7 +3766,9 @@ export function startInjury(input: {
   now?: number;
   /** The day it happened, when logged later (defaults to today). */
   startDay?: number;
-}): Injury {
+}): Injury | HealthWriteDenied {
+  // No consent, nothing stored (SPO-290): an explicit refusal, never a made-up injury the caller could show as logged.
+  if (!isHealthOn('injuries')) return healthWriteDenied('injuries');
   const now = input.now ?? Date.now();
   const inj: Injury = {
     id: uuid(),
@@ -3591,6 +3791,7 @@ export function startInjury(input: {
 }
 
 function patchInjury(id: string, patch: (i: Injury) => Injury): void {
+  if (!isHealthOn('injuries')) return;
   let updated: Injury | undefined;
   const list = state.injuries.map((i) => {
     if (i.id !== id) return i;
@@ -3625,7 +3826,8 @@ export function logRehabCheckin(
   id: string,
   feel: CheckinFeel,
   now: number = Date.now(),
-): { outcome: 'ready' | 'hold' | 'regress'; stage: RehabStageId } | null {
+): { outcome: 'ready' | 'hold' | 'regress'; stage: RehabStageId } | HealthWriteDenied | null {
+  if (!isHealthOn('injuries')) return healthWriteDenied('injuries');
   const inj = state.injuries.find((i) => i.id === id);
   if (!inj) return null;
   const res = applyCheckin(inj, feel);
@@ -3662,11 +3864,22 @@ export function healInjury(id: string, now: number = Date.now()): void {
   patchInjury(id, (i) => ({ ...i, healedDay: dayKey(now) }));
 }
 
+/** Ids deleted in this session: a snapshot that was already decrypting must not bring them back (SPO-290 S3). */
+const deletedInjuryIds = new Set<string>();
+const deletedConditionIds = new Set<string>();
+/** When each feature's data was last wiped: a mirrored document not newer than that is the old data, not new. */
+const wipedAt: Partial<Record<HealthFeature, number>> = {};
+const wipeFloor = (f: HealthFeature): number => wipedAt[f] ?? 0;
+
 export function deleteInjury(id: string): void {
-  setState({
-    injuries: state.injuries.filter((i) => i.id !== id),
-    syncStatus: bumpPending(),
-  });
+  deletedInjuryIds.add(id);
+  // Deleting works while the feature is off, and must reach the on-device copy too.
+  withForcedPersist('injuries', () =>
+    setState({
+      injuries: state.injuries.filter((i) => i.id !== id),
+      syncStatus: bumpPending(),
+    }),
+  );
   deleteInjuryDoc(id);
 }
 
@@ -3676,7 +3889,8 @@ function bodyPartMuscles(id: string): MuscleGroup[] | null {
 
 export type InjurySaveResult =
   | { ok: true; injury: Injury }
-  | { ok: false; reason: 'future' | 'healed-before-start' | 'not-found' };
+  | { ok: false; reason: 'future' | 'healed-before-start' | 'not-found' }
+  | HealthWriteDenied;
 
 function validInjuryDays(
   startDay: number,
@@ -3696,6 +3910,7 @@ export function logPastInjury(
   input: { bodyPart: string; side: InjurySide; startDay: number; healedDay: number },
   now: number = Date.now(),
 ): InjurySaveResult {
+  if (!isHealthOn('injuries')) return healthWriteDenied('injuries');
   const err = validInjuryDays(input.startDay, input.healedDay, dayKey(now));
   if (err) return { ok: false, reason: err };
   const inj: Injury = {
@@ -3723,6 +3938,7 @@ export function updateInjury(
   patch: { bodyPart: string; side: InjurySide; startDay: number; healedDay: number | null },
   now: number = Date.now(),
 ): InjurySaveResult {
+  if (!isHealthOn('injuries')) return healthWriteDenied('injuries');
   const inj = state.injuries.find((i) => i.id === id);
   if (!inj) return { ok: false, reason: 'not-found' };
   const err = validInjuryDays(patch.startDay, patch.healedDay, dayKey(now));
@@ -3743,14 +3959,74 @@ export function updateInjury(
   return { ok: true, injury: updated };
 }
 
-/** The most recently logged active (not-healed) injury, if any. */
+/**
+ * DISPLAY path (SPO-290): the most recently logged active (not-healed) injury, if any. Reads the MASKED view, so with
+ * the Injuries consent off it is null and nothing that names an injury (Today banner, body-part title) is shown.
+ * Anything that only RESTRICTS (load caps, streak protection) uses `getStoredLimits()` instead.
+ */
 export function activeInjury(): Injury | null {
-  return selectActiveInjuries(state.injuries)[0] ?? null;
+  return selectActiveInjuries(exposed().injuries)[0] ?? null;
 }
 
-/** All active injuries. */
+/** DISPLAY path: all active injuries, masked like `activeInjury` (empty while the Injuries consent is off). */
 export function activeInjuryList(): Injury[] {
-  return selectActiveInjuries(state.injuries);
+  return selectActiveInjuries(exposed().injuries);
+}
+
+/** The health features the main store holds (the food log has its own store, `nutrition/store.ts`). */
+export type StoreHealthFeature = Exclude<HealthFeature, 'nutrition'>;
+
+/**
+ * RAW (unmasked) stored health state, for the data copy only (GDPR Art. 15 / 20: giving a person their own stored data
+ * back to their own device is not processing for the feature, so it needs no consent). NEVER read this for anything shown.
+ */
+export function getStoredHealthForExport(): Pick<
+  StoreState,
+  'injuries' | 'conditions' | 'conditionsShare' | 'cycle' | 'nicotine' | 'alcohol' | 'supplements'
+> {
+  const { injuries, conditions, conditionsShare, cycle, nicotine, alcohol, supplements } = state;
+  return { injuries, conditions, conditionsShare, cycle, nicotine, alcohol, supplements };
+}
+
+/** Whether anything of a feature is stored, whatever the consent says (the withdrawal flow offers to delete it). */
+export function hasStoredHealthData(f: StoreHealthFeature): boolean {
+  const s = getStoredHealthForExport();
+  if (f === 'injuries') return s.injuries.length > 0;
+  if (f === 'chronic') return s.conditions.length > 0;
+  return (s[f]?.updatedAt ?? 0) > 0;
+}
+
+/** Deletes everything stored for a feature through the feature's own delete path (works while it is off). */
+export function deleteStoredHealthData(f: StoreHealthFeature): void {
+  switch (f) {
+    case 'injuries':
+      for (const i of [...state.injuries]) deleteInjury(i.id);
+      return;
+    case 'chronic': {
+      wipedAt.chronic = Date.now();
+      for (const c of [...state.conditions]) deleteCondition(c.id);
+      // The sharing preference (meta/conditionPrefs) is part of the feature's data: it goes too, back to the default.
+      withForcedPersist('chronic', () => {
+        state = { ...state, conditionsShare: 'effects', syncStatus: bumpPending() };
+        persist();
+        emit();
+      });
+      const uid = currentUid();
+      if (uid) {
+        deleteDoc(doc(db, 'users', uid, 'meta', 'conditionPrefs')).catch(onWriteError);
+        publishCoachShare(uid, state.conditions);
+      }
+      return;
+    }
+    case 'cycle':
+      return deleteCycleData();
+    case 'nicotine':
+      return deleteNicotineData();
+    case 'alcohol':
+      return deleteAlcoholData();
+    case 'supplements':
+      return deleteSupplementData();
+  }
 }
 
 // --- Activities (design feature 6: cardio & recovery + calories) -----------
@@ -4572,7 +4848,6 @@ export function watchSharedGym(externalId: string): void {
         // Re-overlay the local gyms so filters/board reflect the shared set.
         state = { ...state, gyms: state.gyms.map(applyShared) };
         persist();
-        recomputeReminders();
         emit();
       },
       () => {
@@ -4684,6 +4959,8 @@ function isoWeekdayOfDay(day: number): number {
 export function streakProtectedPredicate(now: number = Date.now()): (day: number) => boolean {
   const today = dayKey(now);
   const rests = restDayKeys(state.restPeriods, now);
+  // RESTRICTION path (SPO-290 owner decision): the stored injuries protect the streak even with the Injuries consent
+  // off. Raw state on purpose; it only decides which days count, and nothing about the injury is shown or sent.
   const rehab = state.injuries.filter(
     (i) => (i.reason === 'injury' || i.reason === 'surgery') && i.startDay <= today,
   );
@@ -4741,37 +5018,6 @@ export function bmiValue(heightCm?: number | null, weightKg?: number | null): nu
   return weightKg / (m * m);
 }
 
-export function dismissReminder(r: Reminder): void {
-  dismissals = [...dismissals, { gymId: r.gymId, visitStart: r.visitStart }];
-  setState({
-    reminders: state.reminders.filter(
-      (x) => !(x.gymId === r.gymId && x.visitStart === r.visitStart),
-    ),
-    syncStatus: bumpPending(),
-  });
-  writeDismissalDoc(r.gymId, r.visitStart);
-}
-
-export function logVisitAsWorkout(r: Reminder): Workout {
-  const workout: Workout = {
-    id: uuid(),
-    startedAt: r.visitStart,
-    finishedAt: r.visitEnd,
-    autoFinished: false,
-    gymId: r.gymId,
-    exercises: [],
-  };
-  setState({
-    workouts: sortWorkouts([workout, ...state.workouts]),
-    reminders: state.reminders.filter(
-      (x) => !(x.gymId === r.gymId && x.visitStart === r.visitStart),
-    ),
-    syncStatus: bumpPending(),
-  });
-  writeWorkoutDoc(workout);
-  return workout;
-}
-
 function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -4781,34 +5027,6 @@ function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): num
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
-}
-
-const LAST_PING_KEY = 'spotter.lastPingAt';
-const PING_EVERY_MS = 5 * 60 * 1000;
-
-export function recordPresence(): void {
-  // Off by default: no location pings unless the gym-presence flag is on, so
-  // living next to a gym never fabricates a "log this visit" prompt.
-  if (!isFlagOn('gymPresence')) return;
-  if (state.gyms.length === 0 || !('geolocation' in navigator)) return;
-  const last = Number(localStorage.getItem(LAST_PING_KEY) ?? 0);
-  if (Date.now() - last < PING_EVERY_MS) return;
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      const { latitude, longitude, accuracy } = pos.coords;
-      if (accuracy > 500) return;
-      const gym = state.gyms.find(
-        (g) => haversineM(latitude, longitude, g.lat, g.lng) <= g.radiusM + accuracy,
-      );
-      if (!gym) return;
-      localStorage.setItem(LAST_PING_KEY, String(Date.now()));
-      writePingDoc(uuid(), gym.id, Date.now());
-    },
-    () => {
-      /* denied — stay quiet */
-    },
-    { enableHighAccuracy: false, maximumAge: 120_000, timeout: 10_000 },
-  );
 }
 
 type PosFix = { lat: number; lng: number; accuracy: number; at: number };
@@ -4930,72 +5148,29 @@ export function getCurrentPositionOnce(opts?: {
 
 /**
  * The saved gym you're standing in right now, if any — so starting a workout
- * can skip "which gym?". Uses a fix up to 2 min old (or a fresh one, capped at
- * 2.5 s so the start never hangs). Honest about GPS: the fix must be good
- * enough (accuracy ≤ 60 m) and fall inside one gym's radius; two gyms both in
- * range → nearest. Anything unsure → null (the picker asks).
+ * can skip "which gym?". Uses a cached fix up to 2 min old and NEVER waits for a
+ * new one: starting a workout must open the gym picker instantly. With no fresh
+ * fix it returns null (the picker asks) and, when location is already granted,
+ * refreshes the cache in the background so the next start can skip the question.
+ * Honest about GPS: the fix must be good enough (accuracy ≤ 60 m) and fall inside
+ * one gym's radius; two gyms both in range → nearest. Anything unsure → null.
  */
 export async function gymAtCurrentPosition(gyms: Gym[]): Promise<Gym | null> {
   if (gyms.length === 0) return null;
-  const pos = await Promise.race([
-    getCurrentPositionOnce({ maxAgeMs: 2 * 60 * 1000 }).catch(() => null),
-    new Promise<null>((r) => setTimeout(() => r(null), 2500)),
-  ]);
-  if (!pos || pos.accuracy > 60) return null;
+  const cached = readPosCache();
+  if (!cached || Date.now() - cached.at > 2 * 60 * 1000) {
+    void geolocationGranted().then((granted) => {
+      if (granted) void getCurrentPositionOnce().catch(() => undefined);
+    });
+    return null;
+  }
+  const pos = { lat: cached.lat, lng: cached.lng, accuracy: cached.accuracy };
+  if (pos.accuracy > 60) return null;
   const inside = gyms
     .map((g) => ({ g, d: haversineM(pos.lat, pos.lng, g.lat, g.lng) }))
     .filter((x) => x.d <= x.g.radiusM)
     .sort((a, b) => a.d - b.d);
   return inside[0]?.g ?? null;
-}
-
-// --- Reminders (computed client-side from own pings + workouts) ------------
-
-const LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;
-const VISIT_GAP_MS = 45 * 60 * 1000;
-const MIN_VISIT_MS = 60 * 60 * 1000;
-const OVERLAP_SLACK_MS = 30 * 60 * 1000;
-
-function computeReminders(now = Date.now()): Reminder[] {
-  const recent = pings
-    .filter((p) => p.at >= now - LOOKBACK_MS)
-    .sort((a, b) => a.gymId.localeCompare(b.gymId) || a.at - b.at);
-  if (recent.length === 0) return [];
-  const gymNames = new Map(state.gyms.map((g) => [g.id, g.name]));
-  const dismissed = new Set(dismissals.map((d) => `${d.gymId}:${d.visitStart}`));
-  const out: Reminder[] = [];
-  let visit: { gymId: string; start: number; end: number } | null = null;
-
-  const flush = (v: { gymId: string; start: number; end: number }) => {
-    if (v.end - v.start < MIN_VISIT_MS) return;
-    if (dismissed.has(`${v.gymId}:${v.start}`)) return;
-    const overlaps = state.workouts.some((w) => {
-      const wEnd = w.finishedAt ?? now;
-      return w.startedAt <= v.end + OVERLAP_SLACK_MS && wEnd >= v.start - OVERLAP_SLACK_MS;
-    });
-    if (overlaps) return;
-    out.push({
-      gymId: v.gymId,
-      gymName: gymNames.get(v.gymId) ?? 'зал',
-      visitStart: v.start,
-      visitEnd: v.end,
-    });
-  };
-
-  for (const p of recent) {
-    if (!visit || visit.gymId !== p.gymId || p.at - visit.end > VISIT_GAP_MS) {
-      if (visit) flush(visit);
-      visit = { gymId: p.gymId, start: p.at, end: p.at };
-    } else {
-      visit.end = p.at;
-    }
-  }
-  if (visit) flush(visit);
-  return out.sort((a, b) => b.visitStart - a.visitStart);
-}
-
-function recomputeReminders(): void {
-  setState({ reminders: computeReminders() });
 }
 
 // --- Live listeners (replaces the old sync loop) ---------------------------
@@ -5116,7 +5291,6 @@ export function startSyncLoop(): () => void {
       ...state,
       workouts: mergeServerWorkoutsWithLocalDrafts(serverWorkouts, state.workouts),
     };
-    recomputeReminders();
     markSynced(meta.fromCache, meta.pending);
     applyAutoFinish();
     clearStoredRest();
@@ -5139,7 +5313,6 @@ export function startSyncLoop(): () => void {
     state = { ...state, gyms };
     // Subscribe to the shared entity for every gym that has a stable id.
     gyms.forEach((g) => g.externalId && watchSharedGym(g.externalId));
-    recomputeReminders();
     emit();
   });
   unsubs.push(gymsMirror.dispose);
@@ -5164,7 +5337,8 @@ export function startSyncLoop(): () => void {
       () => undefined,
     ),
   );
-  const injuriesMirror = mirrorCollection<Injury & Record<string, unknown>>((items) => {
+  const injuriesMirror = mirrorCollection<Injury & Record<string, unknown>>((raw) => {
+    const items = raw.filter((i) => !deletedInjuryIds.has(i.id));
     state = { ...state, injuries: items };
     persist();
     emit();
@@ -5178,7 +5352,8 @@ export function startSyncLoop(): () => void {
       () => undefined,
     ),
   );
-  const conditionsMirror = mirrorCollection<ChronicCondition & Record<string, unknown>>((items) => {
+  const conditionsMirror = mirrorCollection<ChronicCondition & Record<string, unknown>>((raw) => {
+    const items = raw.filter((c) => !deletedConditionIds.has(c.id));
     conditionsCache.markRemote('conditions');
     state = { ...state, conditions: stripLegacyConditions(items) };
     persist();
@@ -5264,6 +5439,8 @@ export function startSyncLoop(): () => void {
     (items) => {
       const v = items[0]?.conditionsShare;
       if (!isGeneralShare(v)) return;
+      // The preference document of data that was deleted must not come back with a late snapshot.
+      if (Number(items[0]?.updatedAt ?? 0) <= wipeFloor('chronic')) return;
       conditionsCache.markRemote('share');
       if (v === state.conditionsShare) return;
       state = { ...state, conditionsShare: v };
@@ -5285,6 +5462,7 @@ export function startSyncLoop(): () => void {
     if (!items.length) return; // locked, absent or wiped: keep what is on screen
     cycleCache.markRemote();
     const remote = normalizeCycle(items[0]);
+    if (remote.updatedAt <= wipeFloor('cycle')) return; // deleted since: this is the old document
     if (remote.updatedAt < state.cycle.updatedAt) return;
     if (JSON.stringify(remote) === JSON.stringify(state.cycle)) return;
     state = { ...state, cycle: remote };
@@ -5303,6 +5481,7 @@ export function startSyncLoop(): () => void {
     if (!items.length) return; // locked, absent or wiped: keep what is on screen
     nicotineCache.markRemote();
     const remote = normalizeNicotine(items[0]);
+    if (remote.updatedAt <= wipeFloor('nicotine')) return; // deleted since: this is the old document
     // Last-write-wins: a newer local edit (not yet echoed back) beats the snapshot.
     if (remote.updatedAt < state.nicotine.updatedAt) return;
     if (JSON.stringify(remote) === JSON.stringify(state.nicotine)) return;
@@ -5323,6 +5502,7 @@ export function startSyncLoop(): () => void {
     if (!items.length) return; // locked, absent or wiped: keep what is on screen
     alcoholCache.markRemote();
     const remote = normalizeAlcohol(items[0]);
+    if (remote.updatedAt <= wipeFloor('alcohol')) return; // deleted since: this is the old document
     // Last-write-wins: a newer local edit (not yet echoed back) beats the snapshot.
     if (remote.updatedAt < (state.alcohol?.updatedAt ?? 0)) return;
     if (JSON.stringify(remote) === JSON.stringify(state.alcohol)) return;
@@ -5335,6 +5515,7 @@ export function startSyncLoop(): () => void {
     if (!items.length) return; // locked, absent or wiped: keep what is on screen
     supplementsCache.markRemote();
     const remote = normalizeSupplements(items[0]);
+    if (remote.updatedAt <= wipeFloor('supplements')) return; // deleted since: this is the old document
     // Last-write-wins: a newer local edit (not yet echoed back) beats the snapshot.
     if (remote.updatedAt < (state.supplements?.updatedAt ?? 0)) return;
     if (JSON.stringify(remote) === JSON.stringify(state.supplements)) return;
@@ -5461,26 +5642,6 @@ export function startSyncLoop(): () => void {
   );
   unsubs.push(
     onSnapshot(
-      collection(db, 'users', uid, 'pings'),
-      (snap) => {
-        pings = snap.docs.map((d) => d.data() as { gymId: string; at: number });
-        recomputeReminders();
-      },
-      onWriteError,
-    ),
-  );
-  unsubs.push(
-    onSnapshot(
-      collection(db, 'users', uid, 'reminderDismissals'),
-      (snap) => {
-        dismissals = snap.docs.map((d) => d.data() as { gymId: string; visitStart: number });
-        recomputeReminders();
-      },
-      onWriteError,
-    ),
-  );
-  unsubs.push(
-    onSnapshot(
       collection(db, 'exerciseCatalog'),
       (snap) => {
         registerCustomExercises(snap.docs.map((d) => d.data() as CustomExercise));
@@ -5492,7 +5653,6 @@ export function startSyncLoop(): () => void {
 
   const tick = () => {
     applyAutoFinish();
-    recordPresence();
     heartbeatLiveSession();
   };
   presenceTimer = setInterval(tick, 15_000);
@@ -6427,10 +6587,12 @@ export function repeatWorkout(sourceId: string): Workout | undefined {
 
 export function resetLocalData(): void {
   stopListeners();
+  deletedInjuryIds.clear();
+  deletedConditionIds.clear();
+  for (const k of Object.keys(wipedAt)) delete wipedAt[k as HealthFeature];
   void initVault(null); // forget the data key on this device
   localStorage.removeItem(STATE_KEY);
   localStorage.removeItem(GYMS_KEY);
-  localStorage.removeItem(REMINDERS_KEY);
   localStorage.removeItem(BODY_KEY);
   localStorage.removeItem(REST_KEY);
   localStorage.removeItem(COACH_KEY);
@@ -6461,13 +6623,10 @@ export function resetLocalData(): void {
   localStorage.removeItem(EX_REST_KEY);
   localStorage.removeItem(REST_PREFS_KEY);
   localStorage.removeItem(SHARED_GYMS_KEY);
-  pings = [];
-  dismissals = [];
   state = {
     workouts: [],
     gyms: [],
     sharedGyms: {},
-    reminders: [],
     restPeriods: [],
     injuries: [],
     conditions: [],

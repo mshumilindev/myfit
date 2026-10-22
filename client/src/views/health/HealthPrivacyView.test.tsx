@@ -48,6 +48,8 @@ describe('HealthPrivacyView', () => {
     [...document.querySelectorAll<HTMLElement>('button.uirow')].find((b) =>
       b.querySelector('.uirow-l')?.textContent?.includes(name),
     ) as HTMLElement;
+  /** The sharing list is a lazy chunk: wait for its rows. */
+  const ready = () => screen.findByRole('button', { name: /^Nicotine,/ });
 
   it('has the Privacy and sharing title and the universal encryption note as the footer', () => {
     render(<HealthPrivacyView onBack={() => undefined} />);
@@ -59,53 +61,57 @@ describe('HealthPrivacyView', () => {
     ).toBeTruthy();
   });
 
-  it('the summary says nothing is shared when everything is off', () => {
+  it('the summary says nothing is shared when everything is off', async () => {
     render(<HealthPrivacyView onBack={() => undefined} />);
+    await ready();
     expect(screen.getByText('What your coach would see')).toBeTruthy();
     expect(screen.getByText('Your coach sees nothing.')).toBeTruthy();
     expect(screen.queryByText('Nothing else.')).toBeNull();
   });
 
-  it('the summary lists categories by level, built from the live state', () => {
+  it('the one summary lists categories by level, built from the live state', async () => {
     setConditionsShare('effects');
     setNicotineSharing('full');
     const { container } = render(<HealthPrivacyView onBack={() => undefined} />);
+    await ready();
     const lines = [...container.querySelectorAll('.uicard .ut-w6')].map((e) => e.textContent);
-    expect(lines).toEqual([
-      'Training effects only: Long-term conditions.',
-      'Full details: Nicotine.',
-    ]);
-    expect(screen.getByText('Nothing else.')).toBeTruthy();
+    expect(lines).toEqual(['Effects only: Long-term conditions.', 'Full: Nicotine.']);
+    expect(
+      screen.getByText('Nothing else. Private notes about you are not part of this.'),
+    ).toBeTruthy();
     setNicotineSharing('effects');
     cleanup();
     const again = render(<HealthPrivacyView onBack={() => undefined} />);
+    await ready();
     expect(
       [...again.container.querySelectorAll('.uicard .ut-w6')].map((e) => e.textContent),
-    ).toEqual(['Training effects only: Long-term conditions and Nicotine.']);
+    ).toEqual(['Effects only: Long-term conditions and Nicotine.']);
     setNicotineSharing('off');
   });
 
-  it('rows show the current level; the conditions row carries the override note', () => {
+  it('rows show the current level; the old "settings below" and override notes are gone', async () => {
     setConditionsShare('effects');
     render(<HealthPrivacyView onBack={() => undefined} />);
+    await ready();
     const cond = rowOf('Long-term conditions');
     expect(cond.textContent).toContain('Effects only');
     expect(cond.textContent).not.toContain('override');
-    expect(screen.getByText('Each condition can override this on its own page.')).toBeTruthy();
+    expect(screen.queryByText('Each condition can override this on its own page.')).toBeNull();
     expect(rowOf('Nicotine').textContent).toContain('Off');
   });
 
-  it('the conditions row remains available with a legacy disabled flag', () => {
+  it('the conditions row remains available with a legacy disabled flag', async () => {
     localStorage.setItem('gym.flags', JSON.stringify({ conditions: false }));
     render(<HealthPrivacyView onBack={() => undefined} />);
-    expect(screen.getByText('Long-term conditions')).toBeTruthy();
-    expect(screen.getByText('Nicotine')).toBeTruthy();
+    await ready();
+    expect(screen.getByRole('button', { name: /^Long-term conditions,/ })).toBeTruthy();
   });
 
-  it('a category opens a sheet; choosing a level applies at once and Done closes it', () => {
+  it('a category opens a sheet; choosing a level applies at once and Done closes it', async () => {
     render(<HealthPrivacyView onBack={() => undefined} />);
+    await ready();
     fireEvent.click(rowOf('Nicotine'));
-    const group = screen.getByRole('group', { name: 'Coach sharing' });
+    const group = screen.getByRole('group', { name: 'Sharing level' });
     expect(within(group).getByText('Off').closest('button')?.getAttribute('aria-pressed')).toBe(
       'true',
     );
@@ -115,18 +121,21 @@ describe('HealthPrivacyView', () => {
     fireEvent.click(within(group).getByText('Full'));
     expect(settings().sharing).toBe('full');
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
-    expect(screen.queryByRole('group', { name: 'Coach sharing' })).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Sharing level' })).toBeNull();
     expect(rowOf('Nicotine').textContent).toContain('Full');
     setNicotineSharing('off');
   });
 
-  it('the conditions sheet sets the conditions default', () => {
+  it('the conditions sheet sets the conditions default', async () => {
     render(<HealthPrivacyView onBack={() => undefined} />);
+    await ready();
     fireEvent.click(rowOf('Long-term conditions'));
-    const group = screen.getByRole('group', { name: 'Coach sharing' });
+    const group = screen.getByRole('group', { name: 'Sharing level' });
     fireEvent.click(within(group).getByText('Full'));
     expect(__getStateForTests().conditionsShare).toBe('full');
-    expect(screen.getByText('Your coach sees the condition and its severity.')).toBeTruthy();
+    expect(
+      screen.getAllByText('Your coach sees the condition and its severity.').length,
+    ).toBeGreaterThan(0);
   });
 
   it('delete asks first (danger), cancel keeps data, confirm wipes it', () => {

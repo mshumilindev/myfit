@@ -1,0 +1,178 @@
+/* LegalDoc: the reader is its own scroll container (the app shell is a fixed, non-scrolling box). */
+.uild {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: clip;
+  background: transparent; /* the app's lava background shows through */
+  color: var(--color-text);
+}
+.uild-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-24);
+  min-height: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding: var(--s-24) var(--s-16);
+}
+.uild-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-16);
+}
+.uild-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-8);
+  color: inherit;
+  text-decoration: none;
+}
+.uild-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--s-24);
+  flex: 1;
+}
+@media (min-width: 720px) {
+  .uild-grid {
+    grid-template-columns: 15rem minmax(0, 1fr);
+    align-items: start;
+  }
+  .uild-toc {
+    position: sticky;
+    top: var(--s-24);
+  }
+}
+.uild-toc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
+.uild-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  align-items: flex-start;
+}
+.uild-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.uild-nav-a {
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.8;
+  padding-block: var(--s-4);
+}
+.uild-nav-a:hover,
+.uild-nav-a:focus-visible {
+  opacity: 1;
+  text-decoration: underline;
+}
+.uild-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.uild-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-20);
+  max-width: 45rem;
+  min-width: 0;
+}
+.uild-body h1,
+.uild-body h2 {
+  margin: 0;
+}
+.uild-print-meta {
+  display: none;
+  margin: 0;
+}
+.uild-sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  scroll-margin-top: var(--s-24);
+}
+.uild-text {
+  color: var(--color-text-muted, inherit);
+  overflow-wrap: anywhere;
+}
+.uild-text p {
+  margin: 0 0 var(--s-8);
+}
+.uild-text ul {
+  margin: 0 0 var(--s-8);
+  padding-inline-start: var(--s-20);
+}
+.uild-text li {
+  margin-bottom: var(--s-4);
+}
+/* Tables (the data-and-bases list) scroll sideways inside their box on a phone instead of widening the page. */
+.uild-table {
+  overflow-x: auto;
+  margin-bottom: var(--s-8);
+}
+.uild-table table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 32rem;
+}
+.uild-table th,
+.uild-table td {
+  text-align: start;
+  vertical-align: top;
+  padding: var(--s-8) var(--s-12);
+  border-bottom: 1px solid var(--color-border);
+}
+.uild-foot {
+  padding-block: var(--s-16);
+}
+
+/* Print / Save as PDF: only the document. The shell is pinned to the window (fixed, no overflow) for the app,
+   so for paper it is released, and the chrome (header, contents, buttons, footer, background) is dropped. */
+@media print {
+  html:has(.uild),
+  html:has(.uild) body,
+  html:has(.uild) #root {
+    position: static;
+    height: auto;
+    overflow: visible;
+    background: none;
+  }
+  html:has(.uild) .lava {
+    display: none;
+  }
+  .uild {
+    height: auto;
+    overflow: visible;
+    background: none;
+    color: inherit;
+  }
+  .uild-page {
+    display: block;
+    max-width: none;
+    padding: 0;
+  }
+  .uild-grid {
+    display: block;
+  }
+  .uild-noprint {
+    display: none;
+  }
+  .uild-print-meta {
+    display: block;
+  }
+  .uild-sec h2 {
+    break-after: avoid;
+  }
+  .uild-table {
+    overflow: visible;
+  }
+  .uild-table table {
+    min-width: 0;
+  }
+}

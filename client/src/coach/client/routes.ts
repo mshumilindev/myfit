@@ -5,7 +5,7 @@
  *   #/trainer          My trainer page
  *   #/trainer/chat     chat with my trainer (S-35)
  *   #/trainer/log      Who saw your data (S-31)
- * Privacy and sharing (S-29) stays the real Health page `#/health/privacy` with the trainer block on top.
+ * Privacy and sharing (S-29) stays the real Health page `#/health/privacy`; its one sharing list (SPO-107) holds the trainer block.
  */
 export type ClientRoute =
   | { page: 'invite'; token: string }

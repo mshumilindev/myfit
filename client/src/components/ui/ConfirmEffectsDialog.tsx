@@ -39,6 +39,8 @@ export interface ConfirmEffectsDialogProps {
   confirmVariant?: 'danger' | 'primary';
   /** Look of the cancelling button (default `primary`: the safe choice is the offered one). */
   cancelVariant?: 'primary' | 'secondary';
+  /** The confirm stays disabled (a typed-word step) while true. */
+  confirmDisabled?: boolean;
   /** Which button takes focus when the dialog opens (default `cancel`, the safe one). */
   initialFocus?: 'cancel' | 'confirm';
   onConfirm?: () => void;
@@ -119,7 +121,7 @@ export function ConfirmEffectsDialog(p: ConfirmEffectsDialogProps) {
           <Button
             variant={p.confirmVariant ?? 'danger'}
             loading={p.loading}
-            disabled={p.loading}
+            disabled={p.loading || p.confirmDisabled}
             onClick={p.onConfirm}
           >
             {p.confirmLabel}

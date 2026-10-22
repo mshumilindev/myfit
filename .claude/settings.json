@@ -1,0 +1,66 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env*)",
+      "Read(./functions/.env*)",
+      "Read(./serviceAccountKey.json)",
+      "Read(./**/*.pem)",
+      "Read(./client/dist/**)",
+      "Read(./client/dist-e2e*/**)",
+      "Read(./client/storybook-static/**)",
+      "Read(./coverage/**)",
+      "Read(./test-results/**)",
+      "Read(./_shots/**)",
+      "Read(./_to_delete/**)",
+      "Read(./_audit_tmp/**)",
+      "Read(./design-archive/**)",
+      "Bash(*--no-verify*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -f*)",
+      "Bash(pkill -f *)",
+      "Bash(git push *--force*)",
+      "Bash(git push * -f*)",
+      "Bash(git push -f*)",
+      "Bash(git commit * -n*)",
+      "Bash(cat *serviceAccountKey*)",
+      "Bash(cat *functions/.env*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-bash.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit.sh\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-guards.sh\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}

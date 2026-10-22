@@ -71,6 +71,7 @@ import { activityType, durationMin } from '../../activities';
 import type { WidgetCtx, WidgetDef } from '../registry';
 import { ds, type DiscoverStrings } from './discover.strings';
 import { DAY, hm, pct, signed } from './format';
+import { setHash } from '../../route';
 
 /* ---------------------------------------------------------------- helpers */
 
@@ -1148,7 +1149,7 @@ const nightSky: WidgetDef = {
 
 /** Sub-app navigation (outside components: the React compiler forbids the write there). */
 function goHash(h: string): void {
-  window.location.hash = h;
+  setHash(h);
 }
 
 function ChallengeToTry({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {

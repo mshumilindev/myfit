@@ -61,6 +61,9 @@ export const safeLt: typeof import('./coachSafe.en').safeEn = {
     'Baigus bendradarbiavimą, dalijimasis sustoja abiem kryptimis. Įveskite slaptažodį, kad tęstumėte.',
   raBodyRevoke:
     'Atšaukus kvietimą, nuoroda išjungiama visiems. Įveskite slaptažodį, kad tęstumėte.',
+  raBodyDelete: 'Deleting your account cannot be undone. Enter your password to delete it now.',
+  raBodyMyExport:
+    'Your copy contains your personal data, including health data. Enter your password to continue.',
   raPassword: 'Slaptažodis',
   raIdentifier: 'Vartotojo vardas arba el. paštas',
   raConfirm: 'Patvirtinti',

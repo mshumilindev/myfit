@@ -11,7 +11,6 @@
 import * as N from './num';
 import { muscleSetsInWorkout, setTopWeight, setTypeOf } from '../store';
 import type { Workout } from '../types';
-import { nextTarget, topHistory } from '../progression';
 import { muscleReadiness } from '../recovery';
 import { computePlaybook, playForWeekday } from '../playbook';
 import { usualSessionsPerWeek } from './facts';
@@ -19,6 +18,7 @@ import { isDeloadWeek, planDayFor } from './plan';
 import { describeMemory, soreFor } from './memory';
 import { e1rm, isBodyweightLift, liftPoints } from './liftStats';
 import { SORE_CAP } from './memoryPlan';
+import { whyWeightBit } from './targetText';
 import { groupMatches } from './nlu';
 import { TEMPERS, type Temper } from './types';
 import {
@@ -1009,33 +1009,7 @@ export const INTENTS_FIFTH: Intent[] = [
     ],
     needs: 'exercise',
     answer: (c, p, L) => {
-      const hist = topHistory(finishedOf(c), p.exercise!, c.now);
-      const tg = nextTarget(hist, {});
-      const name = c.fmt.exercise(p.exercise!);
-      const bits: string[] = [];
-      if (tg.state === 'first')
-        bits.push(L('No history yet, so I start light.', 'Історії ще нема, тож починаю легко.'));
-      else if (tg.deltaKg < 0)
-        bits.push(
-          L(
-            `${name} stalled at the same top weight 3 sessions running — a small back-off lets you build past it.`,
-            `${name} стоїть на тій самій вазі 3 тренування поспіль — невеликий відкат дає пройти далі.`,
-          ),
-        );
-      else if (tg.deltaKg > 0)
-        bits.push(
-          L(
-            `You hit the top of the rep range last time (${tg.prevReps} reps), so the weight goes up.`,
-            `Минулого разу ти дійшов до верху діапазону (${tg.prevReps} повт.), тож вага росте.`,
-          ),
-        );
-      else
-        bits.push(
-          L(
-            `Last time ${tg.prevReps} reps — not the top of the range yet, so same weight, more reps.`,
-            `Минулого разу ${tg.prevReps} повт. — ще не верх діапазону, тож та сама вага, більше повторів.`,
-          ),
-        );
+      const bits: string[] = [whyWeightBit(c, p.exercise!, L)];
       const plan = c.s.coach.plan;
       if (plan && isDeloadWeek(plan, c.now))
         bits.push(L('It’s the lighter week: fewer sets.', 'Це легший тиждень: менше сетів.'));

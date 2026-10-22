@@ -1156,7 +1156,7 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     author: 'Nenad Stojkovic',
   },
   'm-biceps-curl': {
-    thumbUrl: '/equipment/m-biceps-curl.jpg',
+    thumbUrl: '/equipment/m-biceps-curl.webp',
     pageUrl: 'https://commons.wikimedia.org/w/index.php?curid=179972391',
     license: 'CC BY-SA 4.0',
     author: 'Aliva Sahoo',
@@ -1310,7 +1310,7 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     author: 'Miguel Angel Omaña Rojas',
   },
   'm-shoulder-press': {
-    thumbUrl: '/equipment/m-shoulder-press.jpg',
+    thumbUrl: '/equipment/m-shoulder-press.webp',
     pageUrl: 'https://commons.wikimedia.org/w/index.php?curid=179972401',
     license: 'CC BY-SA 4.0',
     author: 'Aliva Sahoo',

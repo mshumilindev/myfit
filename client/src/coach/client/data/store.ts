@@ -7,6 +7,9 @@ import type { Category, Consent, Level } from '../../domain/types';
 import type { ClientCoachPort } from './port';
 import { classifyProblem, type CoachProblem } from '../../data/problem';
 import type { ClientSnapshot } from './types';
+import { cancelRevoke, clearRevoke, enqueueRevoke } from '../revokeQueue';
+import { FEATURE_OF } from '../shareModel';
+import { healthSnapshot } from '../../../data/healthConsentGate';
 
 export const REVOKE_UNDO_MS = 8000;
 /** Nothing cached and no first snapshot by then: an error with a reason, never an endless skeleton. */
@@ -41,11 +44,33 @@ export interface ClientStore {
   clearFailure(): void;
 }
 
+/**
+ * What the store may do beyond the port. Defaults are the permissive/no-op ones (fixtures, stories); `clientStoreFor`
+ * wires the real ones.
+ */
+export interface ClientStoreOptions {
+  /** Undo only brings back a grant whose health feature has consent NOW (fail to the private side). */
+  grantAllowed?: (cat: Category) => boolean;
+  /** The durable "revoke all" record: written before the call, cleared by its success or by a newer choice. */
+  revokeRecord?: { pending(): void; settled(): void; cancel(): void };
+}
+
+/** Consent of the feature behind a grant (injury, nutrition); workout categories have none. Unknown records read as off. */
+function grantAllowedByConsent(cat: Category): boolean {
+  const f = FEATURE_OF[cat as keyof typeof FEATURE_OF];
+  if (!f) return true;
+  const h = healthSnapshot();
+  return h.ready && !!h.on[f];
+}
+
 export function createClientStore(
   port: ClientCoachPort,
   undoMs = REVOKE_UNDO_MS,
   firstLoadMs = FIRST_LOAD_TIMEOUT_MS,
+  opts: ClientStoreOptions = {},
 ): ClientStore {
+  const grantAllowed = opts.grantAllowed ?? (() => true);
+  const rec = opts.revokeRecord;
   const cached = port.peek();
   let state: ClientState = {
     snapshot: cached,
@@ -130,12 +155,13 @@ export function createClientStore(
         off?.();
         off = undefined;
         stopFirstTimer();
-        closeUndo();
+        // the Undo window is NOT closed here: it ends by its own 8 s timer, so it survives the screen unmounting (SPO-107)
       }
     },
     async setLevel(cat, level) {
       const before = state.snapshot;
       if (!before) return false;
+      rec?.cancel(); // a newer choice replaces a revoke that was still waiting to be sent
       // optimistic: the page behind the sheet updates at once
       set({
         failure: null,
@@ -153,8 +179,10 @@ export function createClientStore(
       }
     },
     async revoke() {
+      rec?.pending(); // durable first: offline or closed before the answer, it is still sent later
       try {
         const { previous } = await port.revoke();
+        rec?.settled();
         closeUndo();
         set({ failure: null, undo: { until: Date.now() + undoMs, previous } });
         timer = setTimeout(closeUndo, undoMs);
@@ -168,8 +196,17 @@ export function createClientStore(
       const u = state.undo;
       if (!u) return;
       closeUndo();
+      rec?.cancel();
+      // Only what is still Off comes back (a grant the person changed meanwhile is theirs), and only for a feature whose
+      // consent is on now.
+      const now = state.snapshot?.link.grants;
+      const next: Record<Category, Level> = { ...u.previous };
+      for (const cat of Object.keys(next) as Category[]) {
+        if (!grantAllowed(cat)) next[cat] = 'off';
+        else if (now && now[cat] !== 'off') next[cat] = now[cat];
+      }
       try {
-        await port.restore(u.previous);
+        await port.restore(next);
       } catch {
         set({ failure: 'undo' });
       }
@@ -193,6 +230,13 @@ export function createClientStore(
 const stores = new WeakMap<ClientCoachPort, ClientStore>();
 export function clientStoreFor(port: ClientCoachPort): ClientStore {
   let s = stores.get(port);
-  if (!s) stores.set(port, (s = createClientStore(port)));
+  if (!s)
+    stores.set(
+      port,
+      (s = createClientStore(port, REVOKE_UNDO_MS, FIRST_LOAD_TIMEOUT_MS, {
+        grantAllowed: grantAllowedByConsent,
+        revokeRecord: { pending: enqueueRevoke, settled: clearRevoke, cancel: cancelRevoke },
+      })),
+    );
   return s;
 }

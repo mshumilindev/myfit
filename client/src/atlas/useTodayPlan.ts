@@ -4,7 +4,7 @@
  * builder (recovery, injuries, gym, progression), same as a hand-built day.
  */
 import { useMemo } from 'react';
-import { latestWeight, pickSessionGym, useStore } from '../store';
+import { latestWeight, pickSessionGym, useStore, useStoredLimits } from '../store';
 import { healthBuildCtx } from '../healthBuild';
 import { buildPlanDay, planDayFor, type CoachPlanDay } from './plan';
 import type { GeneratedDay } from '../sessionBuilder';
@@ -17,6 +17,7 @@ export interface TodayPlan {
 
 export function useTodayPlan(now: number, excludeWorkoutId?: string): TodayPlan | null {
   const s = useStore();
+  const stored = useStoredLimits(); // restriction: stored injuries / conditions still shape the built day
   const plan = s.coach.enabled && s.coach.role === 'main' ? (s.coach.plan ?? null) : null;
   return useMemo(() => {
     if (!plan || now <= 0) return null;
@@ -32,7 +33,7 @@ export function useTodayPlan(now: number, excludeWorkoutId?: string): TodayPlan 
       now,
       intent: 'muscle',
       ...(() => {
-        const h = healthBuildCtx(s, now);
+        const h = healthBuildCtx(now, stored);
         return {
           protectedMuscles: h.protectedMuscles,
           conditions: h.conditions,
@@ -50,7 +51,7 @@ export function useTodayPlan(now: number, excludeWorkoutId?: string): TodayPlan 
     s.activities,
     s.bodyMetrics,
     s.goals,
-    s.injuries,
+    stored,
     s.coach.memory,
     excludeWorkoutId,
   ]);

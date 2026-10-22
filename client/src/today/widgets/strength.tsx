@@ -7,7 +7,7 @@
  * The small shared helpers at the top (memo, local store, lift stats, empty
  * state) are also used by muscles.tsx.
  */
-import { useConditionLimits } from '../../healthBuild';
+import { useStoredConditionLimits } from '../../healthBuild';
 import { useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { Field } from '../../components/ui/Field';
 import {
@@ -35,6 +35,7 @@ import {
   type StandardsResult,
 } from '../../standards';
 import { nextTarget, topHistory, type Target } from '../../progression';
+import { targetFor } from './strengthTarget';
 import { solvePlates } from '../../plates';
 import { swapCandidates } from '../../swaps';
 import { strengthImbalance } from '../../weakpoints';
@@ -59,6 +60,7 @@ import type { BodyMetrics, Workout } from '../../types';
 import type { WidgetCtx, WidgetDef } from '../registry';
 import { DAY } from './format';
 import { ss, type StrengthStrings } from './strength.strings';
+import { setHash } from '../../route';
 
 export const WEEK = 7 * DAY;
 
@@ -182,7 +184,7 @@ export function Trend({ d, suffix = '' }: { d: number; suffix?: string }) {
 }
 
 /** A delta tag that may be neutral (good = null → muted). */
-export function Tag({ text, good }: { text: string; good: boolean | null }) {
+export function DeltaTag({ text, good }: { text: string; good: boolean | null }) {
   if (good === null) return <span className="uiw-delta ut-muted">{text}</span>;
   return <WidgetDelta good={good}>{text}</WidgetDelta>;
 }
@@ -419,23 +421,10 @@ export interface Plan {
   lifts: PlanLift[];
 }
 
-function targetFor(
-  fin: Workout[],
-  name: string,
-  plannedReps: number | null,
-  equipment: string[],
-): Target {
-  return nextTarget(topHistory(fin, name), {
-    plannedReps,
-    equipment,
-    primary: muscleInfoByName(name)?.primary ?? null,
-    loadType: loadTypeFor({ name, equipment }),
-  });
-}
-
 /** The next program day with lifts (today first), else a repeat of the last session. */
 export function nextPlan(ctx: WidgetCtx): Plan | null {
   const fin = finishedOf(ctx.store.workouts);
+  const kg = latestWeight(ctx.store.bodyMetrics)?.weight ?? null;
   const a = readProgramCache();
   if (a) {
     for (let off = 0; off < 7; off++) {
@@ -450,7 +439,7 @@ export function nextPlan(ctx: WidgetCtx): Plan | null {
         lifts: items.map((i) => ({
           name: i.name,
           sets: i.sets,
-          target: targetFor(fin, i.name, i.reps, i.equipment),
+          target: targetFor(fin, i.name, i.reps, i.equipment, ctx.now, kg),
         })),
       };
     }
@@ -462,7 +451,7 @@ export function nextPlan(ctx: WidgetCtx): Plan | null {
     .map((e) => ({
       name: e.name,
       sets: e.sets.filter((s) => setTypeOf(s) !== 'warmup').length || e.sets.length,
-      target: targetFor(fin, e.name, e.plannedReps ?? null, equipmentFor(e)),
+      target: targetFor(fin, e.name, e.plannedReps ?? null, equipmentFor(e), ctx.now, kg),
     }));
   if (lifts.length === 0) return null;
   return { dayName: last.dayName ?? null, dayTs: null, today: false, lifts };
@@ -475,13 +464,14 @@ export function fmtSet(w: number | null, r: number): string {
 function targetDelta(t: Target, s: StrengthStrings): { text: string; good: boolean | null } {
   if (t.state === 'first') return { text: s.firstTime, good: null };
   if (t.state === 'stall') return { text: s.deload, good: false };
+  if (t.state === 'return' && t.deltaKg < 0) return { text: `${fmtKg(t.deltaKg)} kg`, good: null };
   if (t.deltaKg > 0) return { text: `+${fmtKg(t.deltaKg)} kg`, good: true };
   if (t.prevReps != null && t.reps > t.prevReps) return { text: s.plusRep, good: true };
   return { text: s.hold, good: null };
 }
 
 const goHash = (h: string) => () => {
-  window.location.hash = h;
+  setHash(h);
 };
 
 /* =====================================================================
@@ -527,7 +517,7 @@ const topLifts: WidgetDef = {
           title={s.topLiftsE1}
           sub={line}
           onClick={open}
-          trailing={<Tag text={s.upCount(up)} good={up > 0 ? true : null} />}
+          trailing={<DeltaTag text={s.upCount(up)} good={up > 0 ? true : null} />}
         />
       );
     if (size === 'S')
@@ -549,7 +539,7 @@ const topLifts: WidgetDef = {
               <span key={r.k} className="ul-flex ug-4 ua-base">
                 <Muted>{s.liftShort[r.k]}</Muted>
                 <b>{fmtKg(r.cur)}</b>
-                <Tag
+                <DeltaTag
                   text={r.d > 0 ? '↑' : r.d < 0 ? '↓' : '→'}
                   good={r.d > 0 ? true : r.d < 0 ? false : null}
                 />
@@ -683,7 +673,7 @@ const nextTargetW: WidgetDef = {
           value={loaded ? fmtKg(t.weight ?? 0) : t.reps}
           unit={loaded ? `× ${t.reps}` : s.reps}
           title={<span className="uiw-t-base">{name}</span>}
-          sub={<Tag text={d.text} good={d.good} />}
+          sub={<DeltaTag text={d.text} good={d.good} />}
           onClick={start}
         />
       );
@@ -697,7 +687,7 @@ const nextTargetW: WidgetDef = {
           size="L"
           tone="accent"
           kicker={s.nextTargetKicker(when)}
-          badge={<Tag text={d.text} good={d.good} />}
+          badge={<DeltaTag text={d.text} good={d.good} />}
           value={loaded ? fmtKg(t.weight ?? 0) : t.reps}
           unit={loaded ? `kg × ${t.reps} ${s.setsX(main.sets)}` : `${s.reps} ${s.setsX(main.sets)}`}
           sub={name}
@@ -736,7 +726,7 @@ const nextTargetW: WidgetDef = {
                 <span className="ul-flex ug-10 ua-center">
                   <span className="uiw-t-md ut-text">{fmtSet(l.target.weight, l.target.reps)}</span>
                   <span className="utx-right" style={{ width: 56 }}>
-                    <Tag text={dd.text} good={dd.good} />
+                    <DeltaTag text={dd.text} good={dd.good} />
                   </span>
                 </span>
               ),
@@ -1045,7 +1035,7 @@ function PrForecastWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         size="XL"
         tone="ok"
         kicker={s.prForecastOf(lift)}
-        badge={<Tag text={s.perWeek(slope)} good={main.slope > 0.05 ? true : null} />}
+        badge={<DeltaTag text={s.perWeek(slope)} good={main.slope > 0.05 ? true : null} />}
         onClick={open}
         footer={
           <Button variant="primary" size="sm" fullWidth onClick={() => setEditing(true)}>
@@ -1072,11 +1062,11 @@ function PrForecastWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
               />
             ),
             value: f.reached ? (
-              <Tag text={s.reached} good />
+              <DeltaTag text={s.reached} good />
             ) : f.eta ? (
-              <Tag text={fmtDayMonth(f.eta, locale)} good />
+              <DeltaTag text={fmtDayMonth(f.eta, locale)} good />
             ) : (
-              <Tag text={s.noEta} good={null} />
+              <DeltaTag text={s.noEta} good={null} />
             ),
           }))}
         />
@@ -1215,7 +1205,7 @@ const recentPrs: WidgetDef = {
           title={s.prLabel(what(latest))}
           sub={`${fmtDayMonth(latest.ts, locale)}${month > 1 ? ` · ${s.moreThisMonth(month - 1)}` : ''}`}
           onClick={open}
-          trailing={<Tag text={dlt(latest)} good />}
+          trailing={<DeltaTag text={dlt(latest)} good />}
         />
       );
     if (size === 'S')
@@ -1227,7 +1217,7 @@ const recentPrs: WidgetDef = {
           value={month}
           unit={s.thisMonthUnit}
           title={<span className="uiw-t-base">{s.latest(what(latest))}</span>}
-          sub={<Tag text={`${dlt(latest)} · ${fmtDayMonth(latest.ts, locale)}`} good />}
+          sub={<DeltaTag text={`${dlt(latest)} · ${fmtDayMonth(latest.ts, locale)}`} good />}
           onClick={open}
         />
       );
@@ -1249,7 +1239,7 @@ const recentPrs: WidgetDef = {
         size="XL"
         tone="ok"
         kicker={s.recentPrs}
-        badge={<Tag text={s.prsThisMonth(month)} good={month > 0 ? true : null} />}
+        badge={<DeltaTag text={s.prsThisMonth(month)} good={month > 0 ? true : null} />}
         onClick={open}
         footer={
           <Button variant="primary" size="sm" fullWidth onClick={open}>
@@ -1273,7 +1263,7 @@ const recentPrs: WidgetDef = {
             ),
             value: (
               <span className="ul-flex ul-col ua-end">
-                <Tag text={dlt(p)} good />
+                <DeltaTag text={dlt(p)} good />
                 <span>{fmtDayMonth(p.ts, locale)}</span>
               </span>
             ),
@@ -2054,7 +2044,7 @@ const plTotal: WidgetDef = {
           title={s.totalKg(fmtKg(total))}
           sub={line}
           onClick={open}
-          trailing={<Tag text={signedKg(d30)} good={good(d30)} />}
+          trailing={<DeltaTag text={signedKg(d30)} good={good(d30)} />}
         />
       );
     if (size === 'S')
@@ -2065,7 +2055,7 @@ const plTotal: WidgetDef = {
           kicker={s.total}
           value={fmtKg(total)}
           unit="kg"
-          sub={<Tag text={s.days30(signedKg(d30))} good={good(d30)} />}
+          sub={<DeltaTag text={s.days30(signedKg(d30))} good={good(d30)} />}
           onClick={open}
         />
       );
@@ -2075,7 +2065,7 @@ const plTotal: WidgetDef = {
           size="L"
           tone="accent"
           kicker={s.plTotal}
-          badge={<Tag text={s.days30(signedKg(d30))} good={good(d30)} />}
+          badge={<DeltaTag text={s.days30(signedKg(d30))} good={good(d30)} />}
           onClick={open}
         >
           <div className="ul-flex uj-between ua-end ug-12">
@@ -2134,7 +2124,7 @@ const plTotal: WidgetDef = {
             {fmtKg(total)}
             <span className="uiw-unit">kg</span>
           </span>
-          <Tag text={s.since(signedKg(d12), fmtDayMonth(start, locale))} good={good(d12)} />
+          <DeltaTag text={s.since(signedKg(d12), fmtDayMonth(start, locale))} good={good(d12)} />
         </div>
         {spark.length > 1 && <WidgetSpark points={spark} height={64} tone="ok" area />}
         {stack}
@@ -2148,7 +2138,7 @@ const plTotal: WidgetDef = {
                 <span className="ul-flex ug-10">
                   <span className="ut-text">{fmtKg(L[k].best)}</span>
                   <span className="utx-right" style={{ width: 40 }}>
-                    <Tag text={signedKg(d)} good={good(d)} />
+                    <DeltaTag text={signedKg(d)} good={good(d)} />
                   </span>
                 </span>
               ),
@@ -2483,7 +2473,7 @@ function RepPrWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
               sub={s.bestOn(c.reps, fmtDayMonth(c.ts, locale))}
             />
           ),
-          value: <Tag text={s.isPr(c.reps + 1)} good />,
+          value: <DeltaTag text={s.isPr(c.reps + 1)} good />,
         }))}
       />
     </Widget>
@@ -2538,6 +2528,7 @@ function stalls(
         equipment,
         primary: muscleInfoByName(name)?.primary ?? null,
         loadType: loadTypeFor({ name, equipment }),
+        now,
       });
       let n = 0;
       while (n < hist.length && hist[n].weight === hist[0].weight) n++;
@@ -2704,7 +2695,7 @@ function SmartSwapWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const gym =
     (live?.gymId ? store.gyms.find((g) => g.id === live.gymId) : null) ?? pickSessionGym();
   const gymId = gym?.id ?? null;
-  const limits = useConditionLimits();
+  const limits = useStoredConditionLimits(); // restriction: swaps never offer what a stored limit rules out
   const cands = useMemo(
     () => (src ? swapCandidates(src, gym, 3, limits) : []),
     // `gym` is resolved from `gymId`; the list only changes with the lift, the gym or the limits.
@@ -2859,7 +2850,7 @@ function SmartSwapWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
                 .join(' · ')}
             />
           ),
-          value: <Tag text={`${pct(c.match)}%`} good={c === best ? true : null} />,
+          value: <DeltaTag text={`${pct(c.match)}%`} good={c === best ? true : null} />,
         }))}
       />
     </Widget>

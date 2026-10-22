@@ -16,6 +16,7 @@ import {
   reauthFresh,
   REAUTH_FRESH_MS,
 } from './reauth';
+import { afterSignOut } from '../../accounts/deviceSession';
 import { createFixturesReauthPort } from './__fixtures__/reauth';
 import { useReauthGuard } from './useReauthGuard';
 
@@ -25,12 +26,13 @@ const PW = new RegExp(sf.raPassword);
 const api = vi.hoisted(() => ({
   callFn: vi.fn(),
   loginId: 'iryna' as string | null,
+  uid: 'u1' as string | null,
 }));
 vi.mock('../../api', async (orig) => ({
   ...(await orig<typeof import('../../api')>()),
   callFn: api.callFn,
   getLoginId: () => api.loginId,
-  currentUid: () => 'u1',
+  currentUid: () => api.uid,
 }));
 
 beforeEach(() => {
@@ -39,6 +41,7 @@ beforeEach(() => {
   configureReauth(createFixturesReauthPort({ accept: 'secret' }));
   api.callFn.mockReset();
   api.loginId = 'iryna';
+  api.uid = 'u1';
 });
 afterEach(() => {
   cleanup();
@@ -53,6 +56,22 @@ describe('recency', () => {
     markReauthed(1_000);
     expect(reauthFresh(1_000 + REAUTH_FRESH_MS - 1)).toBe(true);
     expect(reauthFresh(1_000 + REAUTH_FRESH_MS)).toBe(false);
+  });
+});
+
+describe('recency does not outlive the session or the account', () => {
+  it('signing out forgets a fresh confirmation', () => {
+    markReauthed(1_000);
+    expect(reauthFresh(1_001)).toBe(true);
+    afterSignOut(localStorage, 'u1', false);
+    expect(reauthFresh(1_001)).toBe(false);
+  });
+  it('another account never inherits it', () => {
+    markReauthed(1_000);
+    api.uid = 'u2';
+    expect(reauthFresh(1_001)).toBe(false);
+    api.uid = 'u1';
+    expect(reauthFresh(1_001)).toBe(true);
   });
 });
 

@@ -16,56 +16,56 @@ const mount = (o: FixturesTeamOptions = {}, onExit = vi.fn()) => {
   );
   return onExit;
 };
+// the landing draws the hero card twice (wide and narrow layout): the first copy is enough
+const text = async (t: string) => (await screen.findAllByText(t))[0];
+const button = async (name: string | RegExp) => (await screen.findAllByRole('button', { name }))[0];
 
-describe('Join the team', () => {
+describe('Join the team (inside the landing)', () => {
   it('manager invite: names the inviter, says what the role cannot see, joins', async () => {
     mount();
-    expect(
-      await screen.findByRole('heading', { level: 1, name: tm.jtTitle('Olena') }),
-    ).toBeTruthy();
-    expect(screen.getByText(tm.jtBodyManager('Olena'))).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(tm.jtJoinManager) }));
-    expect(await screen.findByText(tm.jtJoinedTitle)).toBeTruthy();
+    expect(await text(tm.jtTitle('Olena'))).toBeTruthy();
+    expect(await text(tm.jtBodyManager('Olena'))).toBeTruthy();
+    fireEvent.click(await button(tm.jtJoinManager));
+    expect(await text(tm.jtJoinedTitle)).toBeTruthy();
   });
 
   it('trainer invite says the manager sees only the schedule', async () => {
     mount({ invite: { role: 'trainer' } });
-    expect(await screen.findByText(tm.jtBodyTrainer('Olena'))).toBeTruthy();
-    expect(screen.getByRole('button', { name: new RegExp(tm.jtJoinTrainer) })).toBeTruthy();
+    expect(await text(tm.jtBodyTrainer('Olena'))).toBeTruthy();
+    expect(await button(tm.jtJoinTrainer)).toBeTruthy();
   });
 
   it('decline is one tap and changes nothing else', async () => {
     mount();
-    fireEvent.click(await screen.findByRole('button', { name: tm.jtDecline }));
-    expect(await screen.findByText(tm.jtDeclinedTitle)).toBeTruthy();
+    fireEvent.click(await button(tm.jtDecline));
+    expect(await text(tm.jtDeclinedTitle)).toBeTruthy();
   });
 
-  it('a closed link is a plain page with no Join button', async () => {
+  it('a closed link says so and offers no Join', async () => {
     mount({ invite: { closed: true } });
-    expect(await screen.findByRole('alert')).toBeTruthy();
-    expect(screen.getByText(tm.jtClosedTitle)).toBeTruthy();
-    expect(screen.queryByRole('button', { name: new RegExp(tm.jtJoinManager) })).toBeNull();
+    expect(await text(tm.jtClosedTitle)).toBeTruthy();
+    expect(screen.queryAllByRole('button', { name: tm.jtJoinManager })).toHaveLength(0);
   });
 
   it('an account that cannot be a manager gets the reason and can still decline', async () => {
     mount({ invite: { notEligible: true } });
-    fireEvent.click(await screen.findByRole('button', { name: new RegExp(tm.jtJoinManager) }));
-    expect(await screen.findByText(tm.jtNotEligible)).toBeTruthy();
-    expect(screen.getByRole('button', { name: tm.jtDecline })).toBeTruthy();
+    fireEvent.click(await button(tm.jtJoinManager));
+    expect((await screen.findAllByRole('alert'))[0].textContent).toBe(tm.jtNotEligible);
+    expect(await button(tm.jtDecline)).toBeTruthy();
   });
 
   it('offline: Try again recovers', async () => {
     let off = true;
     mount({ failWith: () => (off ? 'offline' : null) });
-    expect(await screen.findByText(tm.jtOfflineTitle)).toBeTruthy();
+    expect(await text(tm.jtOfflineTitle)).toBeTruthy();
     off = false;
-    fireEvent.click(screen.getByRole('button', { name: tm.jtRetry }));
-    await waitFor(() => expect(screen.getByText(tm.jtDecline)).toBeTruthy());
+    fireEvent.click(await button(tm.jtRetry));
+    await waitFor(() => expect(screen.getAllByText(tm.jtDecline).length).toBeGreaterThan(0));
   });
 
   it('Done leaves the page', async () => {
     const exit = mount({ invite: { closed: true } });
-    fireEvent.click(await screen.findByRole('button', { name: tm.jtOk }));
+    fireEvent.click(await button(tm.jtOk));
     expect(exit).toHaveBeenCalled();
   });
 });

@@ -19,7 +19,6 @@ import {
   readCache,
   haversineM,
   resolvePhoto,
-  staticMapThumb,
   resolveAddress,
   cacheAddress,
   type Coords,
@@ -28,7 +27,9 @@ import {
   type ProviderId,
   type ProviderState,
 } from '../data/gymProviders';
-import { HouseGraphic } from '../components/HouseGraphic';
+import { GymResultThumb } from '../components/GymResultThumb';
+import { GeoOffNotice } from '../legal/GeoOff';
+import { useAskGeoConsent, useGeoSearchOn } from '../legal/useGeoSearch';
 import { GymThumb } from '../components/GymThumb';
 import { RouteMap } from '../components/RouteMap';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
@@ -65,7 +66,10 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
   const showDesktopDetail = useDesktopDetail();
   // Where we are, for the "1.2 km ·" on My gyms (same as the Nearby rows).
   const [here, setHere] = useState<Coords | null>(null);
+  const geoOn = useGeoSearchOn();
   useEffect(() => {
+    // Location is read only once the person consented to gym search (the browser prompt comes after the consent).
+    if (!geoOn) return;
     let alive = true;
     getCurrentPositionOnce()
       .then((p) => alive && setHere({ lat: p.lat, lng: p.lng }))
@@ -73,7 +77,7 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [geoOn]);
 
   async function locateFor(gymName: string) {
     const n = gymName.trim();
@@ -517,6 +521,8 @@ function GymSearch({
   busy: boolean;
 }) {
   const { t, locale } = useT();
+  const on = useGeoSearchOn();
+  useAskGeoConsent();
   const [q, setQ] = useState('');
   const [results, setResults] = useState<PlaceResult[]>([]);
   const [providers, setProviders] = useState<Record<ProviderId, ProviderState>>(
@@ -528,8 +534,9 @@ function GymSearch({
   const abortRef = useRef<AbortController | null>(null);
   const [nearby, setNearby] = useState<PlaceResult[]>([]);
 
-  // One geolocation read to bias results (AC-SEARCH-01); silent on denial.
+  // One geolocation read to bias results (AC-SEARCH-01); silent on denial. Only after the consent (SPO-293).
   useEffect(() => {
+    if (!on) return;
     let alive = true;
     getCurrentPositionOnce()
       .then((p) => {
@@ -542,12 +549,12 @@ function GymSearch({
     return () => {
       alive = false;
     };
-  }, []);
+  }, [on]);
 
   // Nearby suggestions: once we have a location, fetch a few closest gyms with a
   // generic locale term so the list has something useful before any typing.
   useEffect(() => {
-    if (!coords) return;
+    if (!coords || !on) return;
     const ctrl = new AbortController();
     void searchGyms(t.nearbyQuery, coords, GYM_KEYS, savedGyms, ctrl.signal, {
       onResults: (merged) => {
@@ -557,13 +564,13 @@ function GymSearch({
     });
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [coords]);
+  }, [coords, on]);
 
   const needle = q.trim();
 
   useEffect(() => {
     abortRef.current?.abort();
-    if (needle.length < 2) return; // render is gated on needle length; no reset needed
+    if (!on || needle.length < 2) return; // render is gated on needle length; no reset needed
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     const cached = readCache(needle, coordsRef.current);
@@ -590,26 +597,27 @@ function GymSearch({
       clearTimeout(skeletonTimer);
       ctrl.abort();
     };
-  }, [needle, savedGyms]);
+  }, [needle, savedGyms, on]);
 
   const li = useMemo(() => locale, [locale]);
 
   // Sort nearest-first when we have a location (AC: closer gyms rank higher).
   const sorted = useMemo(() => {
+    if (!on) return [] as PlaceResult[];
     if (!coords) return results;
     return [...results].sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
-  }, [results, coords]);
+  }, [results, coords, on]);
 
   // Closest 5 nearby gyms not already saved (within ~80 m counts as saved).
   const nearbySorted = useMemo(() => {
-    if (!coords) return [] as PlaceResult[];
+    if (!coords || !on) return [] as PlaceResult[];
     const isSaved = (r: PlaceResult) =>
       savedGyms.some((g) => haversineM({ lat: g.lat, lng: g.lng }, r) < 80);
     return [...nearby]
       .filter((r) => !isSaved(r))
       .sort((a, b) => haversineM(coords, a) - haversineM(coords, b))
       .slice(0, 5);
-  }, [nearby, coords, savedGyms]);
+  }, [nearby, coords, savedGyms, on]);
 
   // Lazily resolve a real photo/logo per result (keyless: OSM/Commons/Wikidata).
   // Rows render immediately with a map-tile thumbnail; a photo replaces it if
@@ -617,6 +625,7 @@ function GymSearch({
   const [photos, setPhotos] = useState<Record<string, string>>({});
   const requested = useRef<Set<string>>(new Set());
   useEffect(() => {
+    if (!on) return;
     const ctrl = new AbortController();
     for (const r of [...results, ...nearby]) {
       if (r.photoUrl || requested.current.has(r.key)) continue;
@@ -628,7 +637,7 @@ function GymSearch({
         .catch(() => {});
     }
     return () => ctrl.abort();
-  }, [results, nearby]);
+  }, [results, nearby, on]);
 
   return (
     <div className="gym-search">
@@ -639,7 +648,9 @@ function GymSearch({
         clearLabel={t.todayClear}
       />
 
-      {needle.length < 2 && nearbySorted.length > 0 && (
+      {!on && <GeoOffNotice />}
+
+      {on && needle.length < 2 && nearbySorted.length > 0 && (
         <>
           <div className="section-label umt-4">{t.nearbyGyms}</div>
           {nearbySorted.map((r) => {
@@ -655,7 +666,7 @@ function GymSearch({
                 lang={li}
               >
                 <span className="thumb">
-                  <ResultThumb photo={r.photoUrl ?? photos[r.key]} lat={r.lat} lng={r.lng} />
+                  <GymResultThumb photo={r.photoUrl ?? photos[r.key]} lat={r.lat} lng={r.lng} />
                 </span>
                 <span className="body">
                   <span className="name">{r.name}</span>
@@ -672,7 +683,7 @@ function GymSearch({
         </>
       )}
 
-      {needle.length >= 2 && (
+      {on && needle.length >= 2 && (
         <div className="provider-chips">
           {PROVIDER_ORDER.map((id) => {
             const st = providers[id];
@@ -692,7 +703,8 @@ function GymSearch({
         </div>
       )}
 
-      {showSkeleton &&
+      {on &&
+        showSkeleton &&
         [0, 1, 2].map((i) => (
           <div key={i} className="gym-result skeleton">
             <Skeleton className="thumb" />
@@ -703,7 +715,8 @@ function GymSearch({
           </div>
         ))}
 
-      {needle.length >= 2 &&
+      {on &&
+        needle.length >= 2 &&
         sorted.map((r) => {
           const dist = coords ? haversineM(coords, r) : null;
           return (
@@ -717,7 +730,7 @@ function GymSearch({
               lang={li}
             >
               <span className="thumb">
-                <ResultThumb photo={r.photoUrl ?? photos[r.key]} lat={r.lat} lng={r.lng} />
+                <GymResultThumb photo={r.photoUrl ?? photos[r.key]} lat={r.lat} lng={r.lng} />
               </span>
               <span className="body">
                 <span className="name">{highlightSubsequence(r.name, needle)}</span>
@@ -732,7 +745,8 @@ function GymSearch({
           );
         })}
 
-      {needle.length >= 2 &&
+      {on &&
+        needle.length >= 2 &&
         !showSkeleton &&
         results.length === 0 &&
         PROVIDER_ORDER.every((id) => {
@@ -759,21 +773,6 @@ function GymSearch({
         </Card>
       )}
     </div>
-  );
-}
-
-/**
- * Result thumbnail with a graceful fallback chain: real photo/logo (when
- * resolved) → OSM map-tile of the venue → local house graphic. Each level
- * degrades on load error, so a row is never blank.
- */
-function ResultThumb({ photo, lat, lng }: { photo?: string; lat: number; lng: number }) {
-  const [failed, setFailed] = useState<Set<string>>(new Set());
-  const map = staticMapThumb(lat, lng);
-  const src = photo && !failed.has(photo) ? photo : !failed.has(map) ? map : null;
-  if (!src) return <HouseGraphic size={64} />;
-  return (
-    <img src={src} alt="" loading="lazy" onError={() => setFailed((f) => new Set(f).add(src))} />
   );
 }
 

@@ -9,6 +9,7 @@
 import type { ChatTurn } from './chat';
 import { lineAllowed } from './guard';
 import type { Temper } from './types';
+import type { AiGrant } from './aiConsent';
 
 const SRC = 'https://js.puter.com/v2/';
 /** Small and cheap, so a person's free allowance lasts. Override with VITE_ATLAS_PUTER_MODEL. */
@@ -51,10 +52,12 @@ export function loadPuter(): Promise<PuterApi | null> {
 
 export type PuterResult =
   | { ok: true; text: string }
-  | { ok: false; reason: 'signin' | 'unavailable' | 'error' | 'blocked' };
+  | { ok: false; reason: 'signin' | 'unavailable' | 'error' | 'blocked' | 'consent' };
 
 /** Is the spare engine ready without asking anything (loaded and signed in)? */
-export async function puterReady(): Promise<boolean> {
+export async function puterReady(grant: AiGrant | null): Promise<boolean> {
+  // Loading the script is already a request to Puter: never before the person agreed to it.
+  if (grant?.engine !== 'puter') return false;
   const p = await loadPuter();
   try {
     return !!p && p.auth.isSignedIn();
@@ -64,7 +67,8 @@ export async function puterReady(): Promise<boolean> {
 }
 
 /** Sign in to Puter — call from a tap (it opens Puter's own window). */
-export async function puterSignIn(): Promise<boolean> {
+export async function puterSignIn(grant: AiGrant | null): Promise<boolean> {
+  if (grant?.engine !== 'puter') return false;
   const p = await loadPuter();
   if (!p) return false;
   try {
@@ -77,12 +81,17 @@ export async function puterSignIn(): Promise<boolean> {
 
 /** Ask through Puter with the same system prompt Gemini gets. */
 export async function askPuter(p: {
+  /** Consent to Puter (`grantFor`), separate from the Gemini one. Without it nothing is sent or loaded. */
+  grant: AiGrant | null;
   system: string;
   history: ChatTurn[];
   question: string;
   temper: Temper;
   onText?: (partial: string) => void;
+  /** False (consent withdrawn while streaming) stops reading and discards the reply; the request itself may still finish. */
+  stillAllowed?: () => boolean;
 }): Promise<PuterResult> {
+  if (p.grant?.engine !== 'puter') return { ok: false, reason: 'consent' };
   if (typeof navigator !== 'undefined' && navigator.onLine === false)
     return { ok: false, reason: 'unavailable' };
   const api = await loadPuter();
@@ -102,9 +111,11 @@ export async function askPuter(p: {
     );
     let text = '';
     for await (const part of stream) {
+      if (p.stillAllowed && !p.stillAllowed()) return { ok: false, reason: 'consent' };
       text += part?.text ?? '';
       p.onText?.(text);
     }
+    if (p.stillAllowed && !p.stillAllowed()) return { ok: false, reason: 'consent' };
     text = text.trim();
     if (!text) return { ok: false, reason: 'error' };
     // The same line Gemini must pass: hard tempers never touch the body.

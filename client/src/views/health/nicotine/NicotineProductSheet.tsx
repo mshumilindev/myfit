@@ -23,6 +23,7 @@ import {
 import { removeNicotineProduct, saveNicotineProduct } from '../../../store';
 import type { NicotineProduct, NicotineUnit } from '../../../types';
 import { NIC_ICON, numText, roundMg, snapAmount, stepFor, useNicotineText } from './text';
+import { askForDeniedWrite } from '../../../data/healthConsentGate';
 
 /** Does the draft differ from the stored product? Amount, unit and pod size only matter daily. */
 const changed = (a: NicotineProduct, b: NicotineProduct): boolean =>
@@ -85,7 +86,8 @@ export function NicotineProductSheet({
     });
   const save = () => {
     if (!dirty) return;
-    saveNicotineProduct({ ...draft, active: true });
+    // Refused without consent (SPO-290): the prompt opens, the sheet stays so nothing typed is lost.
+    if (askForDeniedWrite(saveNicotineProduct({ ...draft, active: true }))) return;
     onClose();
   };
 

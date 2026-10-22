@@ -1,0 +1,42 @@
+# D13: Реєстр ШІ-провайдерів і payload-специфікація (Atlas)
+
+Статус: чернетка v1 · 2026-10-22 · інженерний документ, не юридична консультація. Пов'язано: `processors.md` (D4), `data-registry.md` R43–R44, SPO-286 (згода при вмиканні). Код: `client/src/atlas/chatFacts.ts` (`buildChatFacts`, `FACT_CATEGORY`), `client/src/legal/gateChoices.ts` (`ATLAS_AI_CATEGORIES`, engines), `client/src/atlas/aiConsent.ts`. **Зміна `chatFacts.ts` без зміни цього файлу = червоний guard (правило 4).**
+
+## Провайдери
+
+| Рушій | Kind згоди | Хто | Як іде запит | Коли |
+|---|---|---|---|---|
+| `gemini` | `atlas-ai` | Google Gemini через Firebase AI Logic | з пристрою напряму до Google (не через наші функції) | кожна відповідь Atlas у AI-режимі, лише при ввімкненому `atlas-ai` |
+| `puter` | `atlas-puter` (потребує `atlas-ai`) | Puter.js, модель `gpt-5-nano` за замовчуванням (`PUTER_MODEL`) | з пристрою; **акаунт користувача в Puter**, скрипт `js.puter.com/v2/` завантажується лише після згоди | резервний рушій, коли безкоштовна квота Gemini вичерпана |
+
+Без AI Atlas відповідає з власного каталогу фраз (без згоди й без запитів назовні). Мітка «відповідь ШІ» (EU AI Act Art. 50) на повідомленнях: поле `ai` у `ChatMsg`. Згода: щоразу при вмиканні з вимкненого стану, з версією в `consentRecords` (R43).
+
+## Категорії payload (контракт `FACT_CATEGORY`)
+
+Категорія згоди (`ATLAS_AI_CATEGORIES`): `workouts`, `plan`, `notes`, `activities`, `injured-muscles`, `training-limits`, `sleep`, `bodyweight`. Кожен ключ фактів у запиті мапиться на категорію або `context`:
+
+| Ключ факту | Категорія | Що це |
+|---|---|---|
+| `today` | context | поточна дата |
+| `weekday` | context | день тижня |
+| `role` | context | роль користувача |
+| `athleteToldMe` | notes | що користувач сам розповів Atlas |
+| `plan` | plan | план тренувань |
+| `sessionsTotal` | workouts | кількість тренувань |
+| `recentActivities` | activities | нещодавні нетренажерні активності |
+| `recentSessions` | workouts | останні тренування (вправи, ваги, повторення) |
+| `allLifts` | workouts | історія по вправах (оцінка максимумів) |
+| `yourRecentNotes` | notes | нотатки користувача |
+| `injuredMuscles` | injured-muscles | травмовані м'язи (дані здоров'я) |
+| `trainingLimits` | training-limits | знеособлені обмеження від хронічних станів (дані здоров'я) |
+| `lastNightSleepH` | sleep | тривалість сну |
+| `bodyweightKg` | bodyweight | вага тіла |
+
+Також надсилається саме питання користувача (не категорія). Не надсилаються: ім'я, email, дата народження, фото (за текстом SPO-252 §11; перевіряти при кожній зміні `buildChatFacts`).
+
+## Відкриті питання
+
+- Умови провайдерів щодо збереження й навчання на запитах: unknown/lawyer (правило власника 20.10 «без навчання»; EEA потребує Paid Services Gemini, B3).
+- Puter: контролер/процесор, передача в США: unknown/lawyer.
+- Чи достатня «явна згода» перемикачем за Art. 9(2)(a): unknown/lawyer.
+- Мінімізація: `allLifts` і `yourRecentNotes` ширші за потреби; чутливі категорії мають бути вимкнені за замовчуванням (SPO-286).

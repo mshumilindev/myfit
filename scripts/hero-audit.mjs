@@ -9,6 +9,7 @@
  * Exit code 1 on any finding.
  */
 import { chromium } from '@playwright/test';
+import { parsePart, runPool, shard } from './lib/pool.mjs';
 import fs from 'node:fs';
 
 const arg = (k, d) => {
@@ -19,6 +20,8 @@ const url = arg('url', 'http://127.0.0.1:6006');
 const widths = arg('widths', '390,768,1024,1440,1920').split(',').map(Number);
 const filter = arg('filter', 'pages-');
 const out = arg('out', '');
+const partSpec = parsePart(arg('part', '0/1'));
+const concurrency = Number(arg('concurrency', '1'));
 
 const probe = () => {
   const vis = (e) => {
@@ -99,32 +102,59 @@ const browser = await chromium.launch(
 );
 const report = [];
 let probed = 0;
-for (const w of widths) {
-  const ctx = await browser.newContext({
-    viewport: { width: w, height: 900 },
-    reducedMotion: 'reduce',
-  });
-  const page = await ctx.newPage();
-  for (const id of ids) {
-    try {
-      await page.goto(`${url}/iframe.html?id=${id}&viewMode=story`, {
-        waitUntil: 'load',
-        timeout: 20000,
-      });
-      await page.waitForTimeout(350);
-      const got = await page.evaluate(probe);
-      probed += got.n ? 1 : 0;
-      for (const [kind, detail] of got.res) report.push({ id, width: w, kind, detail });
-    } catch (e) {
-      report.push({ id, width: w, kind: 'error', detail: String(e).slice(0, 80) });
-    }
+let probes = 0;
+const items = [];
+for (const w of widths) for (const id of ids) items.push({ w, id });
+const mine = shard(items, partSpec);
+const pages = [];
+await runPool(mine, concurrency, async ({ w, id }, worker) => {
+  if (!pages[worker]) {
+    const ctx = await browser.newContext({
+      viewport: { width: w, height: 900 },
+      reducedMotion: 'reduce',
+    });
+    pages[worker] = await ctx.newPage();
   }
-  await ctx.close();
-}
+  const page = pages[worker];
+  try {
+    await page.setViewportSize({ width: w, height: 900 });
+    await page.goto(`${url}/iframe.html?id=${id}&viewMode=story`, {
+      waitUntil: 'load',
+      timeout: 20000,
+    });
+    await page.waitForTimeout(350);
+    const got = await page.evaluate(probe);
+    probes++;
+    probed += got.n ? 1 : 0;
+    for (const [kind, detail] of got.res) report.push({ id, width: w, kind, detail });
+  } catch (e) {
+    report.push({ id, width: w, kind: 'error', detail: String(e).slice(0, 80) });
+  }
+});
+report.sort((x, y) =>
+  `${x.id}|${x.width}|${x.kind}|${x.detail}`.localeCompare(
+    `${y.id}|${y.width}|${y.kind}|${y.detail}`,
+  ),
+);
 await browser.close();
-if (out) fs.writeFileSync(out, JSON.stringify(report, null, 1));
+if (out)
+  fs.writeFileSync(
+    out,
+    JSON.stringify(
+      {
+        audit: 'hero',
+        part: partSpec,
+        total: items.length,
+        expected: mine.length,
+        probes,
+        report,
+      },
+      null,
+      1,
+    ),
+  );
 console.log(
-  `hero audit: ${ids.length} stories (${probed} with a back bar) x ${widths.length} widths: ${report.length} findings`,
+  `hero audit: ${mine.length}/${items.length} probes (${probed} with a back bar): ${report.length} findings`,
 );
 for (const r of report.slice(0, 80)) console.log(`${r.kind}\t${r.id}\t${r.width}px\t${r.detail}`);
 process.exit(report.length ? 1 : 0);

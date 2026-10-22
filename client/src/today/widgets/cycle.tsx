@@ -4,13 +4,15 @@
  */
 import { Widget } from '../../components/ui/Widget';
 import { cycleToday } from '../../cycle/cycleView';
+import { getStoredLimits } from '../../store';
 import { PHASE_TONE } from '../../views/health/cycle/text';
 import type { WidgetCtx, WidgetDef } from '../registry';
 
 function CycleBody({ size, ctx }: { size: Parameters<WidgetDef['render']>[0]; ctx: WidgetCtx }) {
   const { store, now, t, shell } = ctx;
   const open = () => shell.openOverlay({ screen: 'health', cyc: 'hub' });
-  const today = cycleToday(store.cycle, store.conditions, now);
+  // `store.conditions` is the displayable view; the stored limits still pause the Cycle (SPO-290).
+  const today = cycleToday(store.cycle, store.conditions, now, getStoredLimits().conditions);
   const shown = store.cycle.surfaces.today;
   const phase = {
     menses: t.cycPhMenses,
@@ -27,7 +29,12 @@ function CycleBody({ size, ctx }: { size: Parameters<WidgetDef['render']>[0]; ct
     sub = t.cycRowDay(today.est.dayOfCycle, t.cycApprox);
   } else if (today.kind === 'off') sub = t.cycRowOff;
   else if (today.kind === 'paused')
-    sub = today.why === 'pregnancy' ? t.cycRowPaused : t.cycRowMenopause;
+    sub =
+      today.why === 'hidden'
+        ? t.cycPausedNeutral
+        : today.why === 'pregnancy'
+          ? t.cycRowPaused
+          : t.cycRowMenopause;
   else if (today.kind === 'stale') sub = t.cycStaleBtn;
   else if (today.kind === 'log') sub = t.cycRowLog;
   return (

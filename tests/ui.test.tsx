@@ -1295,7 +1295,7 @@ describe.skip('F-01 auth UI', () => {
     expect(await screen.findByRole('heading', { name: 'Spotter' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Sign in' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Create account/ })).toBeNull();
-    expect(screen.getByText(/Ask your admin for an invite link/)).toBeTruthy();
+    expect(screen.queryByText(/for an invite link/)).toBeNull();
   });
 
   it('renders sign-in errors and retry for unreachable server', async () => {

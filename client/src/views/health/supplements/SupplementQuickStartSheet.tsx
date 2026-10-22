@@ -14,6 +14,7 @@ import { newSupplementEntry } from '../../../supplements';
 import { saveSupplementEntry, useSupplements } from '../../../store';
 import type { SupplementId } from '../../../types';
 import { supEntryId, useSupplementText } from './text';
+import { askForDeniedWrite } from '../../../data/healthConsentGate';
 
 /** The six tiles: the item each one saves. */
 export const QUICK_ITEMS: readonly SupplementId[] = [
@@ -39,8 +40,12 @@ export function SupplementQuickStartSheet({
   const [picked, setPicked] = useState<readonly SupplementId[]>([]);
   const toggle = (id: SupplementId) =>
     setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
-  const saveAll = () => {
-    for (const id of picked) saveSupplementEntry(newSupplementEntry(id, supEntryId(id)));
+  /** False when the consent is missing: the prompt is open and the sheet stays (nothing is claimed saved). */
+  const saveAll = (): boolean => {
+    for (const id of picked)
+      if (askForDeniedWrite(saveSupplementEntry(newSupplementEntry(id, supEntryId(id)))))
+        return false;
+    return true;
   };
   const title = (id: SupplementId): string =>
     id === 'whey' ? t.supQuickProtein : id === 'caffeine' ? t.supQuickCaffeine : t.supItemShort[id];
@@ -78,8 +83,7 @@ export function SupplementQuickStartSheet({
           fullWidth
           disabled={picked.length === 0}
           onClick={() => {
-            saveAll();
-            onClose();
+            if (saveAll()) onClose();
           }}
         >
           {t.supQuickSave(picked.length)}
@@ -89,8 +93,7 @@ export function SupplementQuickStartSheet({
           fullWidth
           iconTrailing="arrow-right"
           onClick={() => {
-            saveAll();
-            onMore();
+            if (saveAll()) onMore();
           }}
         >
           {t.supQuickMore}

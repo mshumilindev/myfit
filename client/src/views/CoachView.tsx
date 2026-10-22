@@ -7,7 +7,7 @@ import { Chip } from '../components/ui/Chip';
 import { BackButton } from '../components/ui/BackButton';
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Switch as KitSwitch } from '../components/ui/Switch';
-import { ListRow } from '../components/ui/GroupedList';
+import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { Button, IconButton } from '../components/ui/Button';
 import { Notice } from '../components/ui/Notice';
 import { Card } from '../components/ui/Card';
@@ -16,7 +16,7 @@ import { ChatComposer } from '../components/ui/ChatComposer';
 import { ChatBubble, ChatDay, ChatMessage, ChatNewDivider } from '../components/ui/ChatBubble';
 import { FLAGS, LOCALES, setLocale, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
-import { latestWeight, setCoach, updateBodyMetrics, useSelfCoachRole, useStore } from '../store';
+import { setCoach, useSelfCoachRole, useStore } from '../store';
 import { AtlasFace, TemperHeat } from '../components/AtlasFace';
 import { useAtlasFmt, useAtlasNotes, useMinuteClock, useSoftenReason } from '../atlas/notes';
 import { noteFromHash } from '../atlas/noteLink';
@@ -48,7 +48,7 @@ import {
   atlasReady,
   type Convo,
 } from '../atlas/intents';
-import { clearSaid, loadSaid, mergeMemory, rememberSaid } from '../atlas/memory';
+import { loadSaid, mergeMemory, rememberSaid } from '../atlas/memory';
 import { teach, unteach } from '../atlas/teach';
 import { runAction } from '../atlas/actions';
 import { welcome, welcomeBack } from '../atlas/welcome';
@@ -57,7 +57,6 @@ import { isOther, loadDict, markFmt, translateOut } from '../atlas/translate';
 import { ChatChart } from '../components/ChatChart';
 import { buildChatFacts } from '../atlas/chatFacts';
 import {
-  clearChat,
   pushChat,
   removeChat,
   introSeen,
@@ -68,8 +67,17 @@ import {
 } from '../atlas/chatLog';
 import { HELLO_ID, helloStep, helloIsIntro, inHistory } from '../atlas/helloPlan';
 import { useChatAccess } from '../atlas/chatAccess';
+import { useAtlasAi } from '../atlas/useAtlasAi';
+import { AtlasConsentPrompt } from '../atlas/AtlasConsentPrompt';
+import { AtlasWithdrawDialog } from '../atlas/AtlasWithdrawDialog';
+import { clearAtlasConversation } from '../atlas/clearConversation';
+import { useAtlasConsentT } from '../i18n/atlasConsent';
+import { latestRecord } from '../legal/consents';
+import { AiTag } from '../components/ui/AiTag';
+import { ConsentRow } from '../components/ui/ConsentRow';
 import { langOffer, loadOfferState, saveOfferState } from '../atlas/langOffer';
-import { fmtBodyWeightKg } from '../i18n';
+import { currentHash } from '../route';
+import { Bubble, DataStep } from './CoachDataStep';
 
 /** Answers not worth a 👍 / 👎 (small talk, "did you mean…", memory notes). */
 const UNRATED = new Set(['did_you_mean', 'emoji', 'memory_note']);
@@ -302,157 +310,6 @@ function RuleRow(props: {
   );
 }
 
-function Bubble({
-  temper,
-  time,
-  children,
-}: {
-  temper: Temper;
-  /** When Atlas said it ("14:05"); omitted while still typing. */
-  time?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="atl-say">
-      <AtlasFace temper={temper} size={28} />
-      <div className="atl-bubble">
-        {children}
-        {time && <time className="atl-time">{time}</time>}
-      </div>
-    </div>
-  );
-}
-
-/** "What I know" + inline pickers for only what's missing (each skippable). */
-function DataStep({ temper, onDone }: { temper: Temper; onDone: () => void }) {
-  const { t } = useT();
-  const store = useStore();
-  const bm = store.bodyMetrics;
-  const finished = store.workouts.filter((w) => w.finishedAt !== null).length;
-  const w = latestWeight(bm);
-  const thisYear = new Date().getFullYear();
-  const [year, setYear] = useState<number>(thisYear - 30);
-  const [height, setHeight] = useState<number>(bm.heightCm ?? 178);
-  const [asked, setAsked] = useState<{ sex: boolean; dob: boolean; height: boolean }>({
-    sex: !bm.sex,
-    dob: !bm.dob,
-    height: !bm.heightCm,
-  });
-  const missing = (v: unknown) => (v ? null : t.atlasMissing);
-  const rows: [string, string | null][] = [
-    [t.atlasKnowSessions, String(finished)],
-    [t.atlasKnowWeight, w ? fmtBodyWeightKg(w.weight) : t.atlasMissing],
-    [t.atlasKnowSex, bm.sex ? (bm.sex === 'male' ? t.atlasMale : t.atlasFemale) : missing(bm.sex)],
-    [t.atlasKnowBirth, bm.dob ? bm.dob.slice(0, 4) : missing(bm.dob)],
-    [t.atlasKnowHeight, bm.heightCm ? `${bm.heightCm} cm` : missing(bm.heightCm)],
-  ];
-  const years = [year - 2, year - 1, year, year + 1, year + 2].filter((y) => y <= thisYear - 12);
-
-  return (
-    <div className="atl-body atl-chat">
-      <Bubble temper={temper}>{t.atlasKnowIntro}</Bubble>
-      <div className="atl-card static">
-        {rows.map(([k, v]) => (
-          <div key={k} className="atl-kv">
-            <span>{k}</span>
-            <b className={v === t.atlasMissing ? 'miss' : ''}>{v}</b>
-          </div>
-        ))}
-      </div>
-      {asked.sex && (
-        <>
-          <Bubble temper={temper}>{t.atlasAskSex}</Bubble>
-          <div className="atl-replies">
-            <Chip
-              tone="atlas"
-              onClick={() => {
-                updateBodyMetrics({ sex: 'male' });
-                setAsked((a) => ({ ...a, sex: false }));
-              }}
-            >
-              {t.atlasMale}
-            </Chip>
-            <Chip
-              tone="atlas"
-              onClick={() => {
-                updateBodyMetrics({ sex: 'female' });
-                setAsked((a) => ({ ...a, sex: false }));
-              }}
-            >
-              {t.atlasFemale}
-            </Chip>
-            <Chip tone="atlas" onClick={() => setAsked((a) => ({ ...a, sex: false }))}>
-              {t.atlasSkip}
-            </Chip>
-          </div>
-        </>
-      )}
-      {!asked.sex && asked.dob && (
-        <>
-          <Bubble temper={temper}>{t.atlasAskBirth}</Bubble>
-          <div className="atl-years">
-            <Chip tone="atlas" aria-label="−" onClick={() => setYear((y) => y - 5)}>
-              <Icon name="caret-left" />
-            </Chip>
-            {years.map((y) => (
-              <Chip
-                tone="atlas"
-                key={y}
-                onClick={() => {
-                  updateBodyMetrics({ dob: `${y}-07-01` });
-                  setAsked((a) => ({ ...a, dob: false }));
-                }}
-              >
-                {y}
-              </Chip>
-            ))}
-            <Chip tone="atlas" aria-label="+" onClick={() => setYear((y) => y + 5)}>
-              <Icon name="caret-right" />
-            </Chip>
-          </div>
-          <div className="atl-replies">
-            <Chip tone="atlas" onClick={() => setAsked((a) => ({ ...a, dob: false }))}>
-              {t.atlasSkip}
-            </Chip>
-          </div>
-        </>
-      )}
-      {!asked.sex && !asked.dob && asked.height && (
-        <>
-          <Bubble temper={temper}>{t.atlasAskHeight}</Bubble>
-          <div className="atl-stepper">
-            <Chip tone="atlas" aria-label="−" onClick={() => setHeight((h) => h - 1)}>
-              −
-            </Chip>
-            <b className="tnum">{height} cm</b>
-            <Chip tone="atlas" aria-label="+" onClick={() => setHeight((h) => h + 1)}>
-              +
-            </Chip>
-          </div>
-          <div className="atl-replies">
-            <Chip
-              tone="atlas"
-              onClick={() => {
-                updateBodyMetrics({ heightCm: height });
-                setAsked((a) => ({ ...a, height: false }));
-              }}
-            >
-              {t.atlasSave}
-            </Chip>
-            <Chip tone="atlas" onClick={() => setAsked((a) => ({ ...a, height: false }))}>
-              {t.atlasSkip}
-            </Chip>
-          </div>
-        </>
-      )}
-      <p className="atl-hint">{t.atlasSkipHint}</p>
-      <Button variant="primary" className="atl-cta" onClick={onDone}>
-        {t.atlasNext}
-      </Button>
-    </div>
-  );
-}
-
 // ---------------------------------------------------------------------------
 // Thread
 
@@ -529,10 +386,19 @@ function CoachThread({
   );
 
   const canChat = useChatAccess();
+  // The AI chat is OFF until the person turns it on (SPO-286): the consent records are the only source, never a flag.
+  const ai = useAtlasAi();
+  const ax = useAtlasConsentT();
+  const aiOn = canChat && ai.state.gemini;
   const fmt = useAtlasFmt();
   const chat = useChatLog();
   const [draft, setDraft] = useState('');
-  const [consent, setConsent] = useState<string | null>(null);
+  /** The consent prompt / withdraw dialog being shown; `q` = a question waiting for the AI, `id` = the bubble that offered it. */
+  const [aiAsk, setAiAsk] = useState<{
+    kind: 'on' | 'puter' | 'off';
+    q?: string;
+    id?: string;
+  } | null>(null);
   // Off-topic guard: quiet for 30 min after the third off-topic try (this device only).
   const [quietTill, setQuietTill] = useState(() => blockedUntil(loadGuard(), Date.now()));
   useEffect(() => {
@@ -587,7 +453,7 @@ function CoachThread({
     });
 
   /** Typed in another language → answer in the app's language, then offer the switch once. */
-  const send = async (text: string, consented = false, typed = true) => {
+  const send = async (text: string, typed = true) => {
     const q = text.trim();
     if (!q || busy) return;
     fromChip.current = !typed;
@@ -597,7 +463,7 @@ function CoachThread({
       saveOfferState(r.state);
       offer = r.offer;
     }
-    const answered = await reply(q, consented);
+    const answered = await reply(q);
     if (offer && answered) {
       const at = wallClock();
       pushChat({
@@ -617,8 +483,8 @@ function CoachThread({
   const track = (e: AtlasEvent) =>
     setCoach({ stats: countEvent(store.coach.stats, e, wallClock()) });
 
-  /** Answer one message; false when it stopped for the Gemini consent sheet. */
-  const reply = async (q: string, consented: boolean): Promise<boolean> => {
+  /** Answer one message. */
+  const reply = async (q: string): Promise<boolean> => {
     setDraft('');
     const at = wallClock();
     const history = chat.filter(inHistory);
@@ -673,8 +539,13 @@ function CoachThread({
     }
     // Unsure which topic it is → Gemini only picks the topic (from Atlas's own
     // list); the answer is still built here, from your data.
-    if (local?.intent === 'did_you_mean' && canChat && store.coach.chatConsent) {
-      const id = await classifyTopic({ question: q, topics: topicMenu(qe, ctx), now: at });
+    if (local?.intent === 'did_you_mean' && aiOn) {
+      const id = await classifyTopic({
+        grant: ai.grant('gemini'),
+        question: q,
+        topics: topicMenu(qe, ctx),
+        now: at,
+      });
       const routed = id ? answerAs(id, qe, ctx, convo.current) : null;
       if (routed) local = routed;
     }
@@ -688,14 +559,13 @@ function CoachThread({
     if (local?.learned) setCoach({ memory: mergeMemory(store.coach.memory, local.learned) });
     if (local?.said) rememberSaid(local.said);
     // Hybrid: an answer Atlas isn't sure it understood goes to Gemini when it
-    // can (consent given, not offline or out of quota). Safety, pain, flows
+    // can (AI chat turned on, not offline or out of quota). Safety, pain, flows
     // and proposed actions stay local — they're either critical or confirmed
     // by a tap anyway. The local answer is the fallback if Gemini fails.
     const unsure =
       !!local &&
       local.confidence < CONFIDENT &&
-      canChat &&
-      store.coach.chatConsent &&
+      aiOn &&
       !alwaysAnswered(local.intent, local.convo.flow?.kind) &&
       !local.convo.flow &&
       !local.action &&
@@ -716,7 +586,7 @@ function CoachThread({
         );
       return true;
     }
-    if (local && !(local.escalate && canChat)) {
+    if (local && !(local.escalate && aiOn)) {
       convo.current = local.convo;
       await typeOut(
         rid,
@@ -734,8 +604,8 @@ function CoachThread({
       return true;
     }
     if (local?.escalate) convo.current = local.convo;
-    // 2) Nothing fits → Gemini (closed testing), seamlessly in the same thread.
-    if (!canChat) {
+    // 2) Nothing fits → Gemini (closed testing), seamlessly in the same thread, but only when the AI chat is on.
+    if (!aiOn) {
       const guess = didYouMean(qe, ctx);
       // Your pick among these teaches Atlas this wording.
       if (guess.length)
@@ -747,12 +617,10 @@ function CoachThread({
         guess.length
           ? guess.map((g) => tr(g.ask))
           : [t.atlasSuggestToday, t.atlasSuggestProgress, t.atlasSuggestRest],
+        // The AI chat is off, not unavailable: offer to turn it on (the question is kept for that).
+        canChat ? { aiFor: q } : {},
       );
       return true;
-    }
-    if (!store.coach.chatConsent && !consented) {
-      setConsent(q);
-      return false;
     }
     await sendGemini(q, history);
     return true;
@@ -792,9 +660,9 @@ function CoachThread({
    * push. (iPhone pauses a closed web app quickly, so this works while the
    * answer can still finish — switching apps, a locked Android or desktop.)
    */
-  const pushIfAway = (text: string) => {
+  const pushIfAway = (text: string, ai = false) => {
     if (document.visibilityState !== 'hidden' || pushState() !== 'on') return;
-    void pushReplyNow(t.atlasName, text, wallClock()).catch((err) =>
+    void pushReplyNow(ai ? t.atlasAiPushTitle : t.atlasName, text, wallClock()).catch((err) =>
       console.warn('atlas: reply push failed', err),
     );
   };
@@ -817,15 +685,22 @@ function CoachThread({
       question: q,
       history: history.map((m) => ({ from: m.from, text: m.text })),
       temper,
-      coach: { ...store.coach, chatConsent: true },
+      coach: store.coach,
+      grant: ai.grant('gemini'),
       locale,
       factsJson: buildChatFacts(store, notes, temper, at),
       now: at,
-      onText: (partial) => updateChat(rid, { text: partial }),
+      onText: (partial) => updateChat(rid, { text: partial, ai: 'gemini' }),
+      stillAllowed: () => !!ai.grant('gemini'),
     });
+    if (!res.ok && res.reason === 'consent') {
+      // Withdrawn while the reply was coming: nothing of it is shown.
+      removeChat(rid);
+      return true;
+    }
     if (!res.ok && res.reason === 'quota') {
       // Gemini is out for the day → Puter, on the person's own free account.
-      if (await puterReady()) {
+      if (await puterReady(ai.grant('puter'))) {
         await sendPuter(q, history, rid);
         return true;
       }
@@ -849,6 +724,7 @@ function CoachThread({
     }
     updateChat(rid, {
       pending: false,
+      ai: res.ok ? 'gemini' : undefined,
       text: res.ok
         ? res.text
         : res.reason === 'offline'
@@ -859,7 +735,7 @@ function CoachThread({
               ? t.atlasChatBlocked
               : t.atlasChatError,
     });
-    if (res.ok) pushIfAway(res.text);
+    if (res.ok) pushIfAway(res.text, true);
     return true;
   };
 
@@ -875,22 +751,29 @@ function CoachThread({
     if (into) updateChat(rid, { text: '…', pending: true, puterFor: undefined });
     else pushChat({ id: rid, at, from: 'atlas', text: '…', pending: true });
     const r = await askPuter({
+      grant: ai.grant('puter'),
       system: systemPrompt({
         temper,
-        coach: { ...store.coach, chatConsent: true },
+        coach: store.coach,
         locale,
         factsJson: buildChatFacts(store, notes, temper, at),
       }),
       history: history.map((m) => ({ from: m.from, text: m.text })),
       question: q,
       temper,
-      onText: (partial) => updateChat(rid, { text: partial }),
+      onText: (partial) => updateChat(rid, { text: partial, ai: 'puter' }),
+      stillAllowed: () => !!ai.grant('puter'),
     });
+    if (!r.ok && r.reason === 'consent') {
+      removeChat(rid);
+      return;
+    }
     updateChat(rid, {
       pending: false,
+      ai: r.ok ? 'puter' : undefined,
       text: r.ok ? r.text : r.reason === 'blocked' ? t.atlasChatBlocked : t.atlasPuterFail,
     });
-    if (r.ok) pushIfAway(r.text);
+    if (r.ok) pushIfAway(r.text, true);
   };
 
   type Item = {
@@ -908,6 +791,8 @@ function CoachThread({
     q?: string;
     rated?: ChatMsg['rated'];
     puterFor?: string;
+    aiFor?: string;
+    ai?: ChatMsg['ai'];
   };
   const items: Item[] = useMemo(() => {
     // A note learned after later messages goes where it appeared, not above them.
@@ -1001,7 +886,7 @@ function CoachThread({
     if (!opened.current) {
       opened.current = true;
       // A notification tap lands on ITS message (#/coach?note=<id>), before the "first unread" rule (SPO-21).
-      const wanted = noteFromHash(window.location.hash);
+      const wanted = noteFromHash(currentHash());
       const target = wanted
         ? Array.from(feedRef.current?.querySelectorAll<HTMLElement>('[data-note-id]') ?? []).find(
             (el) => el.dataset.noteId === wanted,
@@ -1128,30 +1013,36 @@ function CoachThread({
         }
         overlays={
           <>
-            {consent !== null && (
-              <Sheet onClose={() => setConsent(null)} className="atl-sheet">
-                <div className="sheet-head">
-                  <h3>{t.atlasConsentTitle}</h3>
-                </div>
-                <p className="atl-consent">{t.atlasConsentBody}</p>
-                <div className="sheet-actions">
-                  <Button variant="secondary" className="grow" onClick={() => setConsent(null)}>
-                    {t.atlasNotNow}
-                  </Button>
-                  <Button
-                    variant="primary"
-                    className="grow"
-                    onClick={() => {
-                      const q = consent;
-                      setCoach({ chatConsent: true });
-                      setConsent(null);
-                      void sendGemini(q);
-                    }}
-                  >
-                    {t.atlasConsentOk}
-                  </Button>
-                </div>
-              </Sheet>
+            {(aiAsk?.kind === 'on' || aiAsk?.kind === 'puter') && (
+              <AtlasConsentPrompt
+                engine={aiAsk.kind === 'puter' ? 'puter' : 'gemini'}
+                onDone={(granted) => {
+                  const ask = aiAsk;
+                  setAiAsk(null);
+                  if (!granted) return;
+                  if (ask.id) updateChat(ask.id, { aiFor: undefined });
+                  if (!ask.q) return;
+                  // The question is already in the thread: the person turned it on to ask it.
+                  if (ask.kind === 'on') void sendGemini(ask.q);
+                  // Puter's sign-in window has to open straight from a tap, so only a ready account answers now.
+                  else
+                    void puterReady(ai.grant('puter')).then((ok) => {
+                      if (ok) void sendPuter(ask.q!, undefined, ask.id);
+                    });
+                }}
+              />
+            )}
+            {aiAsk?.kind === 'off' && (
+              <AtlasWithdrawDialog
+                engine="gemini"
+                records={ai.records}
+                onDone={({ confirmed, ok }) => {
+                  setAiAsk(null);
+                  if (!confirmed || ok) return;
+                  const at = wallClock();
+                  pushChat({ id: `n-${at}`, at, from: 'atlas', notice: true, text: ax.offFailed });
+                }}
+              />
             )}
             {portrait && (
               <div
@@ -1168,7 +1059,24 @@ function CoachThread({
                 <IconButton icon="x" label={t.backAction} className="atl-portrait-close" />
               </div>
             )}
-            {settings && <CoachSettingsSheet onClose={() => setSettings(false)} />}
+            {settings && (
+              <CoachSettingsSheet
+                onClose={() => setSettings(false)}
+                ai={
+                  canChat
+                    ? {
+                        on: ai.state.gemini,
+                        loading: ai.loading,
+                        version: latestRecord(ai.records, 'atlas-ai')?.version,
+                        onToggle: (on) => {
+                          setSettings(false);
+                          setAiAsk({ kind: on ? 'on' : 'off' });
+                        },
+                      }
+                    : null
+                }
+              />
+            )}
           </>
         }
       >
@@ -1214,6 +1122,24 @@ function CoachThread({
                           attrs={{ 'data-note-at': noteAt.get(n.id), 'data-note-id': n.id }}
                           below={
                             <>
+                              {n.ai && <AiTag label={ax.aiTag} />}
+                              {n.aiFor && !busy && (
+                                <div className="atl-suggest">
+                                  <Chip
+                                    tone="atlas"
+                                    selected
+                                    onClick={() => setAiAsk({ kind: 'on', q: n.aiFor, id: n.id })}
+                                  >
+                                    {ax.offer}
+                                  </Chip>
+                                  <Chip
+                                    tone="atlas"
+                                    onClick={() => updateChat(n.id, { aiFor: undefined })}
+                                  >
+                                    {t.atlasNotNow}
+                                  </Chip>
+                                </div>
+                              )}
                               {n.action && !busy && (
                                 <div className="atl-suggest">
                                   <Chip
@@ -1279,7 +1205,7 @@ function CoachThread({
                                     <Chip
                                       tone="atlas"
                                       key={ch}
-                                      onClick={() => void send(ch, false, false)}
+                                      onClick={() => void send(ch, false)}
                                     >
                                       {ch}
                                     </Chip>
@@ -1292,8 +1218,13 @@ function CoachThread({
                                     tone="atlas"
                                     onClick={() => {
                                       const q = n.puterFor!;
+                                      // Puter is its own consent: ask first (nothing is loaded from Puter before it).
+                                      if (!ai.grant('puter')) {
+                                        setAiAsk({ kind: 'puter', q, id: n.id });
+                                        return;
+                                      }
                                       // The sign-in window has to open straight from this tap.
-                                      void puterSignIn().then((ok) => {
+                                      void puterSignIn(ai.grant('puter')).then((ok) => {
                                         if (ok) void sendPuter(q, undefined, n.id);
                                         else
                                           updateChat(n.id, {
@@ -1437,8 +1368,16 @@ function PlanCard({ temper, now }: { temper: Temper; now: number }) {
   );
 }
 
-function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
+interface AiRow {
+  on: boolean;
+  loading: boolean;
+  version?: string;
+  onToggle: (on: boolean) => void;
+}
+
+function CoachSettingsSheet({ onClose, ai }: { onClose: () => void; ai: AiRow | null }) {
   const { t } = useT();
+  const ax = useAtlasConsentT();
   const { coach } = useStore();
   const soft = useSoftenReason();
   // A draft: nothing changes (and nothing is rebuilt) until Save.
@@ -1478,10 +1417,7 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
               else {
                 // The conversation (and what Atlas said, for consistency) —
                 // not your log, not what he remembers about you.
-                clearChat();
-                clearSaid();
-                const now = Date.now();
-                setCoach({ clearedAt: now, readAt: now });
+                clearAtlasConversation();
               }
               onClose();
             }}
@@ -1549,6 +1485,21 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
           onToggle={() => edit({ swearing: !draft.swearing })}
         />
       </div>
+      {/* The AI chat is its own consent: it acts at once (not part of the draft) and turning it on asks first. */}
+      {ai && (
+        <GroupedList>
+          <ConsentRow
+            icon="sparkle"
+            tone="atlas"
+            label={ax.settingsLabel}
+            sub={ax.settingsSub}
+            status={ai.on ? ax.settingsOn(ai.version ?? '') : ax.settingsOff}
+            on={ai.on}
+            disabled={ai.loading}
+            onChange={ai.onToggle}
+          />
+        </GroupedList>
+      )}
       {/* Two quiet actions side by side — both ask to confirm first. */}
       <div className="atl-act-pair">
         <Button variant="secondary" icon="trash" onClick={() => setConfirm('clear')}>

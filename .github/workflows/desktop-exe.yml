@@ -1,0 +1,22 @@
+name: Desktop EXE (unsigned)
+
+# Manual only: builds an unsigned Windows installer (NSIS, x64 + arm64) of the Electron shell as a run artifact.
+on:
+  workflow_dispatch:
+
+jobs:
+  exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci -w desktop --ignore-scripts
+      - run: npm run exe -w desktop
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spotter-exe
+          path: desktop/release/*.exe
+          if-no-files-found: error

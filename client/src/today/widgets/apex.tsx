@@ -43,6 +43,7 @@ import type { WidgetCtx, WidgetDef } from '../registry';
 import type { WidgetSize } from '../../components/ui/Widget';
 import { axs, type ApexStrings } from './apex.strings';
 import { DAY, pct, signed } from './format';
+import { setHash } from '../../route';
 
 /* ---------- Shared, memoised reads (several widgets share one computation) ---------- */
 
@@ -222,7 +223,7 @@ function action(label: string, onClick: () => void) {
 }
 
 const goApex = (tab?: string) => () => {
-  window.location.hash = tab ? `#/apex/${tab}` : '#/apex';
+  setHash(tab ? `#/apex/${tab}` : '#/apex');
 };
 
 /** Empty state shared by the Apex widgets. */
@@ -264,7 +265,7 @@ const streak: WidgetDef = {
     );
     const last7 = Array.from({ length: 7 }, (_, i) => trained.has(dayKey(now - (6 - i) * DAY)));
     const openApex = () => {
-      window.location.hash = '#/apex';
+      setHash('#/apex');
     };
     if (size === 'M')
       return (

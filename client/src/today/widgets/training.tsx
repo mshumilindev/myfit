@@ -61,6 +61,7 @@ import type { Activity, SetEntry, Workout } from '../../types';
 import type { WidgetCtx, WidgetDef } from '../registry';
 import { DAY, signed } from './format';
 import { trs } from './training.strings';
+import { setHash } from '../../route';
 
 /* ---------- shared helpers ---------- */
 
@@ -75,7 +76,7 @@ function exName(name: string, locale: LocaleId): string {
 }
 
 function goHash(hash: string): void {
-  window.location.hash = hash;
+  setHash(hash);
 }
 
 /** "1 480" — thin-space thousands like the app's kg/kcal figures. */

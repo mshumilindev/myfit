@@ -28,6 +28,9 @@
     "format:check": "prettier --check .",
     "test": "npm run test:coverage && npm run test:e2e",
     "test:unit": "vitest run",
+    "test:changed": "vitest run --changed",
+    "check:fast": "node scripts/check-fast.mjs",
+    "metrics": "node scripts/code-metrics.mjs",
     "test:coach-server": "vitest run tests/coach-server",
     "test:rules": "firebase emulators:exec --only firestore --project demo-spotter \"vitest run --config vitest.rules.config.ts\"",
     "test:coverage": "vitest run --coverage",
@@ -39,7 +42,10 @@
     "tutorial:mobile:first-workout": "node scripts/record-mobile-video.mjs --scenario first-workout",
     "verify:pwa": "npm run build -w client && node scripts/verify-tabbar-safe-area.mjs && node scripts/verify-pwa-autoupdate.mjs",
     "verify:ui": "npm run build -w client && node scripts/verify-pinned-headers.mjs && node scripts/verify-empty-exercise-card.mjs",
-    "prepare": "node ./scripts/install-git-hooks.mjs"
+    "prepare": "node ./scripts/install-git-hooks.mjs",
+    "deps:check": "depcruise client/src --config .dependency-cruiser.cjs --ignore-known .dependency-cruiser-known-violations.json",
+    "deps:baseline": "depcruise client/src --config .dependency-cruiser.cjs --output-type baseline > .dependency-cruiser-known-violations.json",
+    "metrics:stability": "node scripts/stability-metrics.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -50,6 +56,7 @@
     "@types/supertest": "^7.2.1",
     "@vitest/coverage-v8": "^4.1.10",
     "axe-core": "^4.14.0",
+    "dependency-cruiser": "^18.6.0",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.6.0",
@@ -59,5 +66,8 @@
     "supertest": "^7.2.2",
     "typescript-eslint": "^8.59.3",
     "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.14.0"
   }
 }

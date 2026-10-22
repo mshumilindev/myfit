@@ -75,6 +75,8 @@ export const cycLt: typeof cycEn = {
   cycOffPregnancy:
     'Tarp lėtinių yra aktyvus nėštumas. Duomenys išsaugoti; jam pasibaigus paklausime naujos pradžios datos.',
   cycOffMenopause: 'Tarp lėtinių pažymėta menopauzė. Duomenys išsaugoti.',
+  cycPausedNeutral: 'Pristabdyta',
+  cycOffNeutral: 'Ciklas kol kas pristabdytas. Jūsų duomenys išsaugoti.',
   cycOpenStates: 'Atidaryti būsenas',
   cycAfterPause: 'Pertrauka baigėsi. Nurodyk, kada prasidėjo ciklas, kad tęstum.',
 

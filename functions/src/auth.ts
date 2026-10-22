@@ -68,6 +68,10 @@ async function isLocked(key: string): Promise<boolean> {
   if (Date.now() - windowStart > FAIL_WINDOW_MS) return false;
   return count >= MAX_FAILURES;
 }
+/** The typed sign-in name part of a limiter key (`ip|identifier`; the ip never contains `|`). Stored so deleting an account can find its counters. */
+function identifierOf(key: string): string {
+  return key.slice(key.indexOf('|') + 1);
+}
 async function recordFailure(key: string): Promise<void> {
   const ref = db.collection('loginAttempts').doc(key);
   await db.runTransaction(async (tx) => {
@@ -77,9 +81,12 @@ async function recordFailure(key: string): Promise<void> {
       !snap.exists ||
       now - (snap.data() as { windowStart: number }).windowStart > FAIL_WINDOW_MS
     ) {
-      tx.set(ref, { count: 1, windowStart: now });
+      tx.set(ref, { count: 1, windowStart: now, identifier: identifierOf(key) });
     } else {
-      tx.update(ref, { count: (snap.data() as { count: number }).count + 1 });
+      tx.update(ref, {
+        count: (snap.data() as { count: number }).count + 1,
+        identifier: identifierOf(key),
+      });
     }
   });
 }

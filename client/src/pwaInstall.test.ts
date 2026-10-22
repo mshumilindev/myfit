@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { detectPwaPlatform, isStandaloneDisplay } from './pwaInstall';
+import { afterEach, describe, expect, it } from 'vitest';
+import { detectPwaPlatform, isNativeShell, isStandaloneDisplay } from './pwaInstall';
 
 describe('detectPwaPlatform', () => {
   it('detects iPhone as apple / ios-guide', () => {
@@ -52,5 +52,17 @@ describe('detectPwaPlatform', () => {
 describe('isStandaloneDisplay', () => {
   it('returns boolean without throwing', () => {
     expect(typeof isStandaloneDisplay()).toBe('boolean');
+  });
+});
+
+describe('isNativeShell', () => {
+  afterEach(() => {
+    delete (window as unknown as Record<string, unknown>).spotterNative;
+  });
+
+  it('is false in a plain browser and true when the desktop shell bridge exists', () => {
+    expect(isNativeShell()).toBe(false);
+    (window as unknown as Record<string, unknown>).spotterNative = {};
+    expect(isNativeShell()).toBe(true);
   });
 });

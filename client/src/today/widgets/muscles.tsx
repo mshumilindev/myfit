@@ -58,7 +58,7 @@ import {
   NoteAction,
   StackBar,
   Swatch,
-  Tag,
+  DeltaTag,
   TwoLine,
   WEEK,
   exName,
@@ -70,6 +70,7 @@ import {
   useLocal,
 } from './strength';
 import { ms, type MusclesStrings } from './muscles.strings';
+import { setHash } from '../../route';
 
 /** XL heatmap width: two figures ≈ 1 : 2.8 each, so ~165 px keeps them ≈ 220 px
  *  tall and the XL tile square (a % width made it grow 110–160 px taller). */
@@ -185,7 +186,7 @@ function Cell({
 }
 
 const goHash = (h: string) => () => {
-  window.location.hash = h;
+  setHash(h);
 };
 
 /* =====================================================================
@@ -783,7 +784,7 @@ function LrRow({ x, locale, s }: { x: LrTest; locale: LocaleId; s: MusclesString
     <div className="ul-flex ul-col ug-4">
       <div className="ul-flex uj-between ug-8">
         <Muted>{exName(x.name, locale)}</Muted>
-        <Tag
+        <DeltaTag
           text={even ? s.even : s.sideTag(d < 0 ? s.l : s.r, Math.round(Math.abs(d)))}
           good={even ? true : null}
         />
@@ -1857,7 +1858,7 @@ function WeeklyGoalWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
               ))}
             </div>
             <Muted>{status}</Muted>
-            {streak > 0 && <Tag text={s.streakWeeks(streak)} good />}
+            {streak > 0 && <DeltaTag text={s.streakWeeks(streak)} good />}
           </div>
         </div>
       </Widget>
@@ -1886,7 +1887,7 @@ function WeeklyGoalWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
           <div className="ul-flex ul-col ug-2">
             <span className="uiw-t-lg">{status}</span>
             <Muted>{s.daysLeft(daysLeft)}</Muted>
-            {streak > 0 && <Tag text={s.streakWeeks(streak)} good />}
+            {streak > 0 && <DeltaTag text={s.streakWeeks(streak)} good />}
           </div>
         </div>
         <WidgetList
@@ -1977,7 +1978,7 @@ const sessionsMonth: WidgetDef = {
           title={s.inMonth(n, mName0)}
           sub={`${s.vsIn(prev, mName1)}${best6 ? ` · ${s.best6}` : ''}`}
           onClick={open}
-          trailing={<Tag text={dTxt} good={good} />}
+          trailing={<DeltaTag text={dTxt} good={good} />}
         />
       );
     if (size === 'S')
@@ -1988,7 +1989,7 @@ const sessionsMonth: WidgetDef = {
           kicker={mName0}
           value={n}
           unit={s.sessionsUnit}
-          sub={<Tag text={s.vsMonth(dTxt, mName1)} good={good} />}
+          sub={<DeltaTag text={s.vsMonth(dTxt, mName1)} good={good} />}
           onClick={open}
         />
       );
@@ -2007,7 +2008,7 @@ const sessionsMonth: WidgetDef = {
           size="L"
           tone="accent"
           kicker={s.monthVs(monthName(mStart(0), locale, true), monthName(mStart(1), locale, true))}
-          badge={<Tag text={dTxt} good={good} />}
+          badge={<DeltaTag text={dTxt} good={good} />}
           onClick={open}
         >
           <div className="ul-flex ug-14 ua-end uf-1">
@@ -2032,7 +2033,7 @@ const sessionsMonth: WidgetDef = {
         size="XL"
         tone="accent"
         kicker={s.sessionsOf(mName0)}
-        badge={<Tag text={s.vsMonth(dTxt, monthName(mStart(1), locale, true))} good={good} />}
+        badge={<DeltaTag text={s.vsMonth(dTxt, monthName(mStart(1), locale, true))} good={good} />}
         onClick={open}
         footer={
           <NoteAction
@@ -2235,7 +2236,7 @@ const bestTime: WidgetDef = {
           tone="accent"
           kicker={s.bestTimeShort}
           title={bestLabel}
-          sub={<Tag text={s.topSetsShort(sign(best.v))} good={best.v > 0 ? true : null} />}
+          sub={<DeltaTag text={s.topSetsShort(sign(best.v))} good={best.v > 0 ? true : null} />}
           onClick={open}
         >
           <div className="ul-grid ug-4" style={{ gridTemplateColumns: 'repeat(7, 1fr)' }}>
@@ -2253,7 +2254,7 @@ const bestTime: WidgetDef = {
             <div className="ul-flex ul-col ug-4 uf-none" style={{ width: 100 }}>
               <span className="uiw-kicker">{s.bestTimeShort}</span>
               <span className="uiw-t-md">{bestLabel}</span>
-              <Tag text={s.topSetsShort(sign(best.v))} good={best.v > 0 ? true : null} />
+              <DeltaTag text={s.topSetsShort(sign(best.v))} good={best.v > 0 ? true : null} />
               <Muted>{s.fromN(g.sessions)}</Muted>
             </div>
           </div>

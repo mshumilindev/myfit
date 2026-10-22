@@ -1,6 +1,7 @@
 /** The Cycle hub (docs mockups): today card, calendar tinted by phase, actions, states. */
 import { useState } from 'react';
 import { PageHead } from '../../../components/ui/PageHead';
+import { HealthDisclaimer } from '../../../legal/HealthDisclaimer';
 import { Button } from '../../../components/ui/Button';
 import { Calendar } from '../../../components/ui/Calendar';
 import { Card } from '../../../components/ui/Card';
@@ -15,18 +16,19 @@ import { SectionLabel } from '../../../components/ui/SectionLabel';
 import { Tag } from '../../../components/ui/Tag';
 import {
   calendarPhase,
-  cycleSuppressedBy,
   estimate,
   isStale,
   type CyclePhase,
   type CycleSettings,
-  type CycleSuppression,
 } from '../../../cycle/cycleCore';
+import { cyclePause, type CyclePause } from '../../../cycle/cycleView';
+import { askForDeniedWrite, isHealthOn, openHealthPrompt } from '../../../data/healthConsentGate';
 import {
   markMenopauseFromCycle,
   markPregnancyFromCycle,
   updateCycleAnchor,
   useCycle,
+  useStoredLimits,
   useStore,
 } from '../../../store';
 import { timestampOfDay } from '../../../components/ui/calendarDays';
@@ -49,8 +51,19 @@ export function CycleHubView({
   const cycle = useCycle();
   const { conditions } = useStore();
   const [now] = useState(() => Date.now());
-  const suppressed = cycleSuppressedBy(conditions, now);
+  const limits = useStoredLimits();
+  // RESTRICTION: a stored pregnancy / menopause pauses the Cycle even with Chronic conditions off; it is only named when
+  // the conditions are displayable (SPO-290 owner decision).
+  const suppressed = cyclePause(conditions, limits.conditions, now);
   const s = cycle.settings as CycleSettings;
+  /**
+   * Pregnancy / menopause are chronic conditions: without that consent the button asks for it (the chronic prompt)
+   * and nothing is saved or claimed.
+   */
+  const openState = (which: 'preg' | 'meno') => {
+    if (!isHealthOn('chronic')) return openHealthPrompt('chronic');
+    setSheet(which);
+  };
   const today = todayKey();
   const stale = cycle.pendingDate || isStale(s, today);
   const [sheet, setSheet] = useState<null | 'preg' | 'meno' | 'date'>(null);
@@ -72,6 +85,7 @@ export function CycleHubView({
       />
       <div className="hl-scroll">
         <div className="hl-cnt">
+          <HealthDisclaimer />
           {stale ? (
             <Notice
               tone="illness"
@@ -172,13 +186,13 @@ export function CycleHubView({
               icon={<IconTile tone="chronic" size={30} icon="heartbeat" />}
               label={t.cycMarkPreg}
               chevron
-              onClick={() => setSheet('preg')}
+              onClick={() => openState('preg')}
             />
             <ListRow
               icon={<IconTile tone="chronic" size={30} icon="sun-horizon" />}
               label={t.cycMarkMeno}
               chevron
-              onClick={() => setSheet('meno')}
+              onClick={() => openState('meno')}
             />
           </GroupedList>
         </div>
@@ -228,7 +242,8 @@ export function CycleHubView({
               variant="primary"
               fullWidth
               onClick={() => {
-                markPregnancyFromCycle(timestampOfDay(pregStart));
+                // Refused (consent withdrawn meanwhile): the chronic prompt opens, the sheet stays.
+                if (askForDeniedWrite(markPregnancyFromCycle(timestampOfDay(pregStart)))) return;
                 setSheet(null);
               }}
             >
@@ -247,7 +262,7 @@ export function CycleHubView({
           cancelLabel={t.cycCancel}
           onCancel={() => setSheet(null)}
           onConfirm={() => {
-            markMenopauseFromCycle();
+            if (askForDeniedWrite(markMenopauseFromCycle())) return;
             setSheet(null);
           }}
         />
@@ -261,7 +276,7 @@ function Suppressed({
   onBack,
   onOpenStates,
 }: {
-  kind: CycleSuppression;
+  kind: CyclePause;
   onBack: () => void;
   onOpenStates: () => void;
 }) {
@@ -275,15 +290,24 @@ function Suppressed({
       />
       <div className="hl-scroll">
         <div className="hl-cnt">
+          <HealthDisclaimer />
           <EmptyState
-            icon={kind === 'pregnancy' ? 'heartbeat' : 'sun-horizon'}
+            icon={kind === 'menopause' ? 'sun-horizon' : 'heartbeat'}
             title={t.cycOffTitle}
-            body={kind === 'pregnancy' ? t.cycOffPregnancy : t.cycOffMenopause}
+            body={
+              kind === 'hidden'
+                ? t.cycOffNeutral
+                : kind === 'pregnancy'
+                  ? t.cycOffPregnancy
+                  : t.cycOffMenopause
+            }
             centered
           >
-            <Button variant="secondary" icon="arrow-right" onClick={onOpenStates}>
-              {t.cycOpenStates}
-            </Button>
+            {kind !== 'hidden' && (
+              <Button variant="secondary" icon="arrow-right" onClick={onOpenStates}>
+                {t.cycOpenStates}
+              </Button>
+            )}
           </EmptyState>
         </div>
       </div>

@@ -5,7 +5,7 @@
  * Return, advanced by a green/amber/red check-in. An optional clinician no-load
  * window is a date-bound Stage 0 · Full rest (rest-blue) before it.
  */
-import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { useState } from 'react';
 import { Button, IconButton } from '../components/ui/Button';
 import { Chip } from '../components/ui/Chip';
@@ -37,6 +37,7 @@ import {
 import type { Injury, RehabStageId, CheckinFeel, RehabReason, InjurySide } from '../types';
 import type { MuscleGroup } from '../data/exercises';
 import { useT } from '../i18n';
+import { isHealthWriteDenied, openHealthPrompt } from '../data/healthConsentGate';
 import { Icon, Sheet, ConfirmDialog, useIsDesktop } from '../ui';
 
 const REASON_ICON: Record<RehabReason, string> = {
@@ -156,6 +157,8 @@ function InjurySetup({
       fullRestUntil,
       startDay: prefill?.startDay,
     });
+    // Refused without consent (SPO-290): the prompt opens, the screen stays, nothing is claimed logged.
+    if (isHealthWriteDenied(inj)) return void openHealthPrompt(inj.feature);
     onDone(inj.id);
   };
 
@@ -168,16 +171,16 @@ function InjurySetup({
 
   return (
     <div className="rx">
-      <div className="topbar">
-        <BackButton label={t.backAction} onClick={back} />
-        <span className="tt">
-          {step === 'general'
+      <PageHead
+        back={{ label: t.backAction, onClick: back }}
+        title={
+          step === 'general'
             ? t.injGeneralTitle
             : step === 'clinician'
               ? t.injClinicianTitle
-              : t.injWhereTitle}
-        </span>
-      </div>
+              : t.injWhereTitle
+        }
+      />
 
       {step === 'where' && (
         <>
@@ -536,15 +539,17 @@ function InjuryPlan({
 
   return (
     <div className="rx">
-      <div className="topbar">
-        <BackButton label={t.backAction} onClick={onClose} />
-        <span className="tt">{t.injPlanTitle(partName)}</span>
-        <IconButton
-          label={t.injManage}
-          icon="dots-three-vertical"
-          onClick={() => setManage(true)}
-        />
-      </div>
+      <PageHead
+        back={{ label: t.backAction, onClick: onClose }}
+        title={t.injPlanTitle(partName)}
+        actions={
+          <IconButton
+            label={t.injManage}
+            icon="dots-three-vertical"
+            onClick={() => setManage(true)}
+          />
+        }
+      />
 
       <div className="rulebox umt-16">
         <Icon
@@ -688,10 +693,7 @@ function InjuryManage({
 
   return (
     <div className="rx">
-      <div className="topbar">
-        <BackButton label={t.backAction} onClick={onClose} />
-        <span className="tt">{t.injManageTitle}</span>
-      </div>
+      <PageHead back={{ label: t.backAction, onClick: onClose }} title={t.injManageTitle} />
 
       <div className="sec">{t.injInjury}</div>
       <div className="slist umt-8">
@@ -768,6 +770,10 @@ function CheckinSheet({ inj, onClose }: { inj: Injury; onClose: () => void }) {
   const pick = (feel: CheckinFeel) => {
     const from = inj.stage;
     const res = logRehabCheckin(inj.id, feel);
+    if (isHealthWriteDenied(res)) {
+      openHealthPrompt(res.feature);
+      return onClose();
+    }
     if (res) setDone({ ...res, from });
     else onClose();
   };

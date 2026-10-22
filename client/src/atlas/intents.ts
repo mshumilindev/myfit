@@ -5,7 +5,6 @@
  * here fits does the question go to Gemini. More intents: intentsMore.ts.
  */
 import { setTypeOf } from '../store';
-import { nextTarget, topHistory } from '../progression';
 import {
   findCatalogExercise,
   findExercise,
@@ -33,7 +32,7 @@ import { asksIfOk, INTENTS_HEALTH, limitsOf } from './intentsHealth';
 import { appChipsFor, INTENTS_APP_MORE, withAppTips } from './appTips';
 import { emojiReply, INTENTS_SMALL, SMALLTALK_IDS, SMALL_OVERRIDES } from './smalltalk';
 import { parseRange, parseWeekdays } from './when';
-import { SORE_CAP } from './memoryPlan';
+import { liftTargetOf, soreWeight } from './targetText';
 import { isLiftStatus, nameHits, resolveCatalogLift, resolveMyLift } from './liftNames';
 import { taughtFor, teach, wrongFor } from './teach';
 import { styled, unsureLine } from './style';
@@ -498,12 +497,12 @@ function memoryLine(id: string, p: Parsed, c: AskCtx, core: string, L: Tr): stri
     const sore = soreFor(mem, c.now, `${p.exercise ?? ''} ${p.muscle ?? ''} ${core}`);
     const tg =
       p.exercise && ['next_weight', 'add_weight', 'why_weight'].includes(id)
-        ? nextTarget(topHistory(finishedOf(c), p.exercise, c.now), {})
+        ? liftTargetOf(c, p.exercise)
         : null;
     if (sore.length && tg?.weight) {
       // Same number the plan uses — never "stay at 100" and "go lighter" at once.
       const names = sore.map((x) => L(PART_NAME[x][0], PART_NAME[x][1])).join(', ');
-      const w = Math.max(2.5, Math.round((tg.weight * SORE_CAP) / 2.5) * 2.5);
+      const w = soreWeight(tg);
       out.push(
         L(
           `But your ${names} comes first: take ${c.fmt.kg(w)} instead (20% lighter), pain-free, until you tell me it’s fine — your plan uses the same.`,

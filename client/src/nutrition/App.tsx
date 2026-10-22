@@ -17,6 +17,10 @@ import type { Entry } from './types';
 import { AppRail } from '../components/AppRail';
 import { NotificationsView } from '../views/NotificationsView';
 import type { Notif, NotifState } from '../notifications';
+import { SUITE_ICON, SUITE_TONE } from '../components/suite/suiteTone';
+import { HealthDisclaimer } from '../legal/HealthDisclaimer';
+import { HealthOffState } from '../legal/HealthOff';
+import { useAskHealthConsent, useHealthOn } from '../legal/useHealthConsent';
 
 type Tab = 'today' | 'history' | 'goal' | 'feed';
 
@@ -130,6 +134,9 @@ export function NutritionRoot({
   const [detail, setDetail] = useState<Entry | null>(null);
   const [undo, setUndo] = useState<Entry | null>(null);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Nutrition is a health feature with its own consent (SPO-290): off = nothing shown, nothing written; the first visit asks.
+  const food = useHealthOn('nutrition');
+  useAskHealthConsent('nutrition');
 
   useEffect(
     () => () => {
@@ -183,11 +190,15 @@ export function NutritionRoot({
       )}
       <div className="apex-col">
         <BrandBar
-          avatar={<BrandAccount app="nutrition" />}
+          avatar={(hidden) => (
+            <BrandAccount app="nutrition" hidden={hidden} onOpenProfile={onOpenProfile} />
+          )}
           header
           app={t('appName')}
           onApp={onOpenShell}
           appLabel={t('apps')}
+          tone={SUITE_TONE.nutrition}
+          icon={SUITE_ICON.nutrition}
           actions={
             <>
               <BellButton
@@ -214,20 +225,22 @@ export function NutritionRoot({
             />
           ) : (
             <div className="apex-scroll">
-              {tab === 'today' && (
+              <HealthDisclaimer />
+              {!food.on && food.ready && <HealthOffState feature="nutrition" />}
+              {food.on && tab === 'today' && (
                 <TodayView
                   onOpenEntry={setDetail}
                   onGoal={() => setTab('goal')}
                   onAdd={() => setAdding(true)}
                 />
               )}
-              {tab === 'history' && <HistoryView onOpenEntry={setDetail} />}
-              {tab === 'goal' && <GoalView />}
+              {food.on && tab === 'history' && <HistoryView onOpenEntry={setDetail} />}
+              {food.on && tab === 'goal' && <GoalView />}
             </div>
           )}
         </div>
 
-        {tab !== 'feed' && (
+        {tab !== 'feed' && food.on && (
           <div className="n-addpill-wrap">
             <svg className="glass-defs" aria-hidden width="0" height="0">
               <filter
@@ -269,17 +282,17 @@ export function NutritionRoot({
         {!desktop && (
           <SuiteTabBar
             app="nutrition"
+            noMore
+            noAccount
             tabs
             activeFill
             items={nav.map((x) => ({ ...x, active: tab === x.id }))}
             onSelect={(id) => setTab(id as Tab)}
-            onOpenShell={onOpenShell}
-            onOpenProfile={onOpenProfile}
           />
         )}
       </div>
 
-      {adding && <AddFlow onClose={() => setAdding(false)} />}
+      {adding && food.on && <AddFlow onClose={() => setAdding(false)} />}
 
       {detail && <EntryDetail entry={detail} onClose={() => setDetail(null)} onDelete={del} />}
 

@@ -3,10 +3,11 @@
  * Reads computeMastery() and renders design MT-03…MT-08. Mastery is a live
  * measure of how well you train, never an achievements/points board.
  */
-import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { useMemo, useState } from 'react';
 import { RailItem } from '../components/ui/Rail';
 import { Button, IconButton } from '../components/ui/Button';
+import { Ring } from '../components/ui/Ring';
 import { Card } from '../components/ui/Card';
 import { Segmented } from '../components/ui/Segmented';
 import { useStore, setMasteryHistory } from '../store';
@@ -200,35 +201,6 @@ function RankInsignia({
   );
 }
 
-/** Conic progress ring with a dark inner disc. */
-function Ring({
-  frac,
-  size,
-  inner,
-  children,
-}: {
-  frac: number;
-  size: number;
-  inner: number;
-  children: React.ReactNode;
-}) {
-  const p = Math.round(Math.max(0, Math.min(1, frac)) * 100);
-  return (
-    <span
-      className="mst-ring"
-      style={{
-        width: size,
-        height: size,
-        background: `conic-gradient(var(--color-accent) 0 ${p}%, #241b0e ${p}% 100%)`,
-      }}
-    >
-      <span className="mst-ring-in" style={{ width: inner, height: inner }}>
-        {children}
-      </span>
-    </span>
-  );
-}
-
 export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => void }) {
   void shell;
   const { t } = useT();
@@ -273,18 +245,17 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => v
 
   return (
     <div className="screen mst">
-      <div className="mst-head">
-        <BackButton label={t.backAction} onClick={back} />
-        <span className="mst-head-title">{t.masteryTitle}</span>
-      </div>
+      <PageHead back={{ label: t.backAction, onClick: back }} title={t.masteryTitle} />
 
       <div className="mst-body">
         {/* hero */}
         <div className="mst-hero">
           <div className="mst-hero-top">
-            <Ring frac={m.rankProgress} size={120} inner={100}>
-              <span className="mst-hero-num num">{m.rating}</span>
-              <span className="mst-hero-num-lbl">{t.masteryRatingLabel}</span>
+            <Ring value={m.rankProgress * 100} size={120} width={10}>
+              <span className="mst-ring-in">
+                <span className="mst-hero-num num">{m.rating}</span>
+                <span className="mst-hero-num-lbl">{t.masteryRatingLabel}</span>
+              </span>
             </Ring>
             <div className="mst-hero-rank">
               <RankInsignia index={m.rankIndex} size={34} />
@@ -487,10 +458,7 @@ function Shortfalls({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
   const impactClass = (i: string) => (i === 'high' ? 'gold' : i === 'med' ? 'goldd' : 'n');
   return (
     <div className="screen mst">
-      <div className="mst-head">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <span className="mst-head-title">{t.masteryShortfall}</span>
-      </div>
+      <PageHead back={{ label: t.backAction, onClick: onBack }} title={t.masteryShortfall} />
       <div className="mst-body mst-sf">
         <div className="mst-sf-next">
           <div>
@@ -547,11 +515,11 @@ function Ladder({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
   const ranks = [...MASTERY_RANKS].map((r, i) => ({ ...r, i })).reverse();
   return (
     <div className="screen mst">
-      <div className="mst-head">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <span className="mst-head-title">{t.masteryLadder}</span>
-        <span className="chip n mst-scale">{t.masteryScale}</span>
-      </div>
+      <PageHead
+        back={{ label: t.backAction, onClick: onBack }}
+        title={t.masteryLadder}
+        actions={<span className="chip n mst-scale">{t.masteryScale}</span>}
+      />
       <div className="mst-body mst-ladder">
         {ranks.map((r) => {
           const state = r.i > m.rankIndex ? 'locked' : r.i === m.rankIndex ? 'current' : 'done';
@@ -609,10 +577,7 @@ function Calibration({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
 
   return (
     <div className="screen mst">
-      <div className="mst-head">
-        <BackButton label={t.backAction} onClick={onBack} />
-        <span className="mst-head-title">{t.masteryTitle}</span>
-      </div>
+      <PageHead back={{ label: t.backAction, onClick: onBack }} title={t.masteryTitle} />
       <div className="mst-body mst-calib">
         {m.calibrating && (
           <>
@@ -727,8 +692,10 @@ export function MasteryBadge({
               </span>
             </span>
           ) : (
-            <Ring frac={m.rankProgress} size={38} inner={30}>
-              <RankInsignia index={m.rankIndex} size={19} />
+            <Ring value={m.rankProgress * 100} size={38} width={4}>
+              <span className="mst-ring-in">
+                <RankInsignia index={m.rankIndex} size={19} />
+              </span>
             </Ring>
           )
         }
@@ -759,8 +726,10 @@ export function MasteryBadge({
       aria-label={`${t.masteryTitle} · ${m.rating}`}
       title={`${t.masteryTitle} · ${m.rating}`}
     >
-      <Ring frac={m.rankProgress} size={26} inner={20}>
-        <RankInsignia index={m.rankIndex} size={11} />
+      <Ring value={m.rankProgress * 100} size={26} width={3}>
+        <span className="mst-ring-in">
+          <RankInsignia index={m.rankIndex} size={11} />
+        </span>
       </Ring>
     </Button>
   );

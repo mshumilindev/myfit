@@ -13,8 +13,6 @@ import { UndoToast } from '../../components/ui/UndoToast';
 import { useMinWidth, COACH_BREAKPOINT } from '../../components/ui/breakpoints';
 import { UNDO_MS } from '../chat/types';
 import { useScheduleT, type ScheduleStrings } from '../../i18n/coachSchedule';
-import { useTeamT } from '../../i18n/coachTeam';
-import { useManagerClients } from '../team/managerClients';
 import type { CoachWorldPort } from '../data/port';
 import { coachClock } from '../format';
 import { Header, Page, Toolbar } from '../layout/Layout';
@@ -42,6 +40,7 @@ import { gymName, scheduleGyms } from './types';
 import './Schedule.css';
 import { CoachProblemState } from '../BackendNotice';
 import { offlineOrUnknown } from '../data/problem';
+import { setHash } from '../../route';
 
 const keepSlot = (
   s: { gymId: string; attendees: { clientId: string }[] },
@@ -75,10 +74,6 @@ export interface ScheduleScreenProps {
  */
 export function ScheduleScreen(p: ScheduleScreenProps) {
   const { s: t, locale } = useScheduleT();
-  const { tm } = useTeamT();
-  // A manager only: clients whose app has not delegated the schedule key yet are not here ("Waiting for client's app"); null for a trainer
-  const teamRows = useManagerClients();
-  const waitingApps = teamRows ? teamRows.filter((r) => !r.ready).length : 0;
   const prm = useScheduleParams();
   const sch = useSchedule(p.port, prm.d ?? undefined);
   const people = usePeople(p.worldPort);
@@ -190,7 +185,7 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
   const setDraft = (d: CreateDraft | null) =>
     prm.set({ create: d ? formatDraft(d) : null, ...(d ? { open: null } : {}) });
   const goChat = (id: string) => {
-    window.location.assign(`#/c/chat?with=${id}`);
+    setHash(`#/c/chat?with=${id}`);
   };
   const ghostDur = lastDuration(); // a cheap read; changes after each save
   /* a click on the faint scrim: on a session behind it that selects that session (the panel swaps its content), else closes */
@@ -456,11 +451,6 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
       </Toolbar>
 
       <div className="sc-notices">
-        {waitingApps > 0 && (
-          <Notice tone="neutral" icon="hourglass" role="status">
-            {tm.mcPending(waitingApps)}
-          </Notice>
-        )}
         {state.status === 'offline' && (
           <Notice tone="note" icon="cloud-slash" role="status">
             {t.scOfflineNote}

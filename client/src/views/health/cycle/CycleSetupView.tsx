@@ -23,6 +23,7 @@ import {
 import { CYCLE_SURFACES, type CycleSurface } from '../../../cycle/cycleState';
 import { deleteCycleData, saveCycleSettings, setCycleSurface, useCycle } from '../../../store';
 import { CYCLE_TONE, dayText, todayKey, useCycleText } from './text';
+import { askForDeniedWrite } from '../../../data/healthConsentGate';
 
 const DEFAULT = (): CycleSettings => ({
   mode: 'regular',
@@ -176,7 +177,8 @@ export function CycleSetupView({ onBack }: { onBack: () => void }) {
           variant="primary"
           disabled={!dirty}
           onClick={() => {
-            saveCycleSettings(norm);
+            // Refused without consent (SPO-290): the prompt opens and the screen stays, nothing is claimed saved.
+            if (askForDeniedWrite(saveCycleSettings(norm))) return;
             onBack();
           }}
         >

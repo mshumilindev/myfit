@@ -36,6 +36,7 @@ import type { SleepNight } from '../../types';
 import type { WidgetCtx, WidgetDef } from '../registry';
 import { DAY, clock, hm, pct, signed } from './format';
 import { bs } from './body.strings';
+import { setHash } from '../../route';
 
 /* ---------- helpers ---------- */
 
@@ -955,7 +956,7 @@ const physiqueGoal: WidgetDef = {
     const phys = store.goals?.physique;
     const goal = bm?.goalWeightKg ?? null;
     const openGoals = () => {
-      window.location.hash = '#/goals';
+      setHash('#/goals');
     };
     const openBody = () => shell.goTab('me');
     if (!phys && !goal)

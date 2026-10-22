@@ -34,3 +34,9 @@ export * from './push';
 
 // Coaching (invites, consent-gated reads, audit, conversations, sweeps). Needs secrets COACH_PEPPER, COACH_SIGNING_KEY.
 export * from './coach/handlers';
+export * from './passkeys';
+export * from './sessions';
+// Legal consent records (SPO-296).
+export * from './consentRecords';
+// Self-service account deletion (SPO-285).
+export * from './accountDeletion';

@@ -9,6 +9,7 @@ import {
   useRef,
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
+  type TouchEvent as ReactTouchEvent,
   type RefObject,
   type ReactNode,
 } from 'react';
@@ -22,6 +23,7 @@ import { useFixedPanelPosition } from './overlays/position';
 import { useMobileSheetKeyboardMode } from './overlays/useSheetKeyboard';
 import { useSheetGesture } from './overlays/useSheetGesture';
 import { useSheetOverflowGuard } from './overlays/sheetOverflow';
+import { useBlockingSheetTrap } from './overlays/sheetTrap';
 import { toneClass, type Tone } from './tones';
 
 import './Overlays.css';
@@ -135,11 +137,19 @@ export function Sheet(props: {
   scrim?: 'default' | 'light';
   /** A click on the scrim (default: close). A screen may pass the click on to what is under it. */
   onScrimClick?: (e: ReactMouseEvent<HTMLElement>) => void;
+  /**
+   * `false`: the sheet cannot be dismissed (no close button, the scrim, Escape and the grabber swipe do nothing). Only
+   * for a blocking prompt the person must answer through its own buttons (the legal gate). Default `true`.
+   */
+  dismissible?: boolean;
 }) {
   const { t } = useT();
+  const dismissible = props.dismissible !== false;
   const sheetRef = useRef<HTMLDivElement>(null);
   const keyboardMode = useMobileSheetKeyboardMode(sheetRef);
   useSheetOverflowGuard(sheetRef);
+  // A blocking sheet is modal for the keyboard and assistive tech too: focus cycles inside, the page behind is inert.
+  useBlockingSheetTrap(sheetRef, !dismissible);
   const style = useFixedPanelPosition(
     'sheet',
     undefined,
@@ -158,8 +168,10 @@ export function Sheet(props: {
   // keystroke in a search field). The effect below must NOT re-run for that: its cleanup returns focus to the opener,
   // which blurred the field after each character. So the effect reads the latest callback through a ref.
   const requestCloseRef = useRef(requestClose);
+  const dismissibleRef = useRef(dismissible);
   useEffect(() => {
     requestCloseRef.current = requestClose;
+    dismissibleRef.current = dismissible;
   });
   useEffect(() => {
     const target = returnFocusRef;
@@ -167,7 +179,7 @@ export function Sheet(props: {
     const el = sheetRef.current;
     if (el && !el.contains(document.activeElement)) el.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      if (e.key !== 'Escape' || e.defaultPrevented || !dismissibleRef.current) return;
       // A confirm dialog opened over the sheet owns Escape.
       if (document.querySelector('.dialog-scrim')) return;
       requestCloseRef.current();
@@ -206,11 +218,21 @@ export function Sheet(props: {
     if (drag !== 0) cssStyle.transform = `translateY(${drag}px)`;
   }
 
+  // A blocking sheet has no swipe either: the gesture would slide it away and close it.
+  const grab = dismissible
+    ? {
+        onTouchStart: (e: ReactTouchEvent<HTMLElement>) => onGrabStart(e.touches[0].clientY),
+        onTouchMove: (e: ReactTouchEvent<HTMLElement>) => onGrabMove(e.touches[0].clientY),
+        onTouchEnd: onGrabEnd,
+        onTouchCancel: onGrabEnd,
+      }
+    : {};
+
   return (
     <Portal>
       <div
         className={`scrim${closing ? ' scrim-closing' : ''}${props.scrim === 'light' ? ' scrim--light' : ''}`}
-        onClick={props.onScrimClick ?? requestClose}
+        onClick={dismissible ? (props.onScrimClick ?? requestClose) : undefined}
       />
       <div
         ref={sheetRef}
@@ -221,31 +243,21 @@ export function Sheet(props: {
         tabIndex={-1}
         style={baseStyle}
       >
-        <div
-          className="sheet-grip"
-          onTouchStart={(e) => onGrabStart(e.touches[0].clientY)}
-          onTouchMove={(e) => onGrabMove(e.touches[0].clientY)}
-          onTouchEnd={onGrabEnd}
-          onTouchCancel={onGrabEnd}
-        >
+        <div className="sheet-grip" {...grab}>
           <div className="grabber" />
         </div>
-        <div
-          className="sheet-chrome"
-          onTouchStart={(e) => onGrabStart(e.touches[0].clientY)}
-          onTouchMove={(e) => onGrabMove(e.touches[0].clientY)}
-          onTouchEnd={onGrabEnd}
-          onTouchCancel={onGrabEnd}
-        >
-          <IconButton
-            className="sheet-close"
-            icon="x"
-            variant="fill"
-            shape="round"
-            size="sm"
-            label={props.closeLabel ?? t.cancel}
-            onClick={requestClose}
-          />
+        <div className="sheet-chrome" {...grab}>
+          {dismissible && (
+            <IconButton
+              className="sheet-close"
+              icon="x"
+              variant="fill"
+              shape="round"
+              size="sm"
+              label={props.closeLabel ?? t.cancel}
+              onClick={requestClose}
+            />
+          )}
         </div>
         {props.children}
       </div>

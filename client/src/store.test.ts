@@ -33,7 +33,7 @@ import {
   upsertSet,
 } from './store';
 import { SLEEP_IDLE_MS } from './sleep';
-import type { SetEntry, SleepNight, Workout } from './types';
+import type { ChronicCondition, SetEntry, SleepNight, Workout } from './types';
 
 const set = (over: Partial<SetEntry>): SetEntry => ({
   id: over.id ?? Math.random().toString(36).slice(2),
@@ -510,7 +510,7 @@ describe('setCoach', () => {
 describe('conditions store', () => {
   it('adds, edits and deletes a condition', async () => {
     const s = await import('./store');
-    const c = s.addCondition({ key: 'asthma', severity: 2, share: 'effects' });
+    const c = s.addCondition({ key: 'asthma', severity: 2, share: 'effects' }) as ChronicCondition;
     expect(s.__getStateForTests().conditions.some((x) => x.id === c.id)).toBe(true);
     s.updateCondition(c.id, { severity: 3 });
     expect(s.__getStateForTests().conditions.find((x) => x.id === c.id)?.severity).toBe(3);

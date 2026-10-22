@@ -5,8 +5,9 @@
 import { useEffect, useState } from 'react';
 import { IconTile } from '../../../components/ui/IconTile';
 import { ListRow } from '../../../components/ui/GroupedList';
-import { cycleSuppressedBy, estimate } from '../../../cycle/cycleCore';
-import { setCyclePendingDate, useCycle, useStore } from '../../../store';
+import { estimate } from '../../../cycle/cycleCore';
+import { cyclePause } from '../../../cycle/cycleView';
+import { setCyclePendingDate, useCycle, useStoredLimits, useStore } from '../../../store';
 import { CYCLE_TONE, todayKey, useCycleText } from './text';
 
 export function CycleHealthRow({ onOpen }: { onOpen: () => void }) {
@@ -14,14 +15,21 @@ export function CycleHealthRow({ onOpen }: { onOpen: () => void }) {
   const cycle = useCycle();
   const { conditions } = useStore();
   const [now] = useState(() => Date.now());
-  const suppressed = cycleSuppressedBy(conditions, now);
+  const limits = useStoredLimits(); // RESTRICTION: a stored pregnancy / menopause pauses it, named only if displayable
+  const suppressed = cyclePause(conditions, limits.conditions, now);
   useEffect(() => {
     if (cycle.enabled && suppressed) setCyclePendingDate(true);
   }, [cycle.enabled, suppressed]);
 
   let sub = t.cycRowOff;
   if (cycle.enabled && cycle.settings) {
-    if (suppressed) sub = suppressed === 'pregnancy' ? t.cycRowPaused : t.cycRowMenopause;
+    if (suppressed)
+      sub =
+        suppressed === 'hidden'
+          ? t.cycPausedNeutral
+          : suppressed === 'pregnancy'
+            ? t.cycRowPaused
+            : t.cycRowMenopause;
     else if (cycle.settings.mode === 'log') sub = t.cycRowLog;
     else {
       const e = estimate(cycle.settings, todayKey());

@@ -28,14 +28,23 @@ export function useMobileSheetKeyboardMode(sheetRef: RefObject<HTMLElement | nul
       if (!next && pointerDown) return;
       setExpanded(next);
     };
-    const updateAfterFocusSettles = () => window.setTimeout(update, 160);
+    // deferred updates must not outlive the sheet (they touch window / state after unmount)
+    const timers = new Set<number>();
+    const later = (ms: number) => {
+      const id = window.setTimeout(() => {
+        timers.delete(id);
+        update();
+      }, ms);
+      timers.add(id);
+    };
+    const updateAfterFocusSettles = () => later(160);
     const onPointerDown = () => {
       pointerDown = true;
     };
     const onPointerEnd = () => {
       if (!pointerDown) return;
       pointerDown = false;
-      window.setTimeout(update, 0);
+      later(0);
     };
 
     update();
@@ -50,6 +59,8 @@ export function useMobileSheetKeyboardMode(sheetRef: RefObject<HTMLElement | nul
     window.visualViewport?.addEventListener('resize', update);
 
     return () => {
+      timers.forEach((id) => window.clearTimeout(id));
+      timers.clear();
       window.cancelAnimationFrame(frame);
       window.removeEventListener('focusin', update);
       window.removeEventListener('focusout', updateAfterFocusSettles);

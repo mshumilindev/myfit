@@ -24,11 +24,15 @@ import {
 } from '../offline/offlineCache';
 import { fetchProfile } from '../profileFetch';
 import { PrivacyVault } from '../components/PrivacyVault';
+import { PrivacyHub, useConsentsPage } from '../legal/PrivacyHub';
+import { useMyDataPage } from '../legal/mydata/MyDataScreen';
 import { ConditionsProfileRow } from './health/Conditions';
 import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
-import { ConfirmDialog, Icon, LanguageSelector, Sheet, useExerciseName } from '../ui';
-import { Avatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
+import { SignOutDialog } from '../components/SignOutDialog';
+import { SessionsRow } from '../components/SessionsRow';
+import { Icon, LanguageSelector, Sheet, useExerciseName } from '../ui';
+import { UserAvatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { BodyMetricsSection } from '../components/BodyMetrics';
 import { useStore, setGlobalWeightUnit } from '../store';
@@ -37,7 +41,6 @@ import { GymThumb } from '../components/GymThumb';
 import type { Shell } from '../App';
 import { Select } from '../components/ui/Select';
 import { QuietHoursRows } from './QuietHoursRows';
-import { NotificationRows } from './NotificationRows';
 import { Tag } from '../components/ui/Tag';
 
 interface ProfileData {
@@ -162,6 +165,8 @@ export function ProfileView({
   const [avatarRefresh, setAvatarRefresh] = useState(0);
   const [profileEditing, setProfileEditing] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
+  const myData = useMyDataPage(() => shell.openOverlay({ screen: 'health', priv: true }));
+  const consents = useConsentsPage(() => myData.openExport(true));
   const [assignTrainerOpen, setAssignTrainerOpen] = useState(false);
   const [assignClientsOpen, setAssignClientsOpen] = useState(false);
   const [adminPeople, setAdminPeople] = useState<AdminPerson[] | null>(
@@ -392,6 +397,7 @@ export function ProfileView({
     .filter(Boolean)
     .join(' ');
 
+  if (consents.page ?? myData.page) return consents.page ?? myData.page;
   return (
     <div className={pageClass}>
       <div className="profile-top">
@@ -431,7 +437,7 @@ export function ProfileView({
                 onRemoved={removeAvatar}
               />
             ) : (
-              <Avatar
+              <UserAvatar
                 userId={load.person.id}
                 name={load.person.name}
                 hasPhoto={load.person.avatar}
@@ -568,7 +574,7 @@ export function ProfileView({
               ) : (
                 load.access.map((a) => (
                   <div key={a.id} className="access-row">
-                    <Avatar userId={a.id} name={a.name} size={34} />
+                    <UserAvatar userId={a.id} name={a.name} size={34} />
                     <span className="n">{a.name}</span>
                     <span className="s">
                       {roleLabel(a.role)} · {a.role === 'admin' ? t.profFullAccess : t.profReads}
@@ -586,6 +592,11 @@ export function ProfileView({
                 <LanguageSelector />
               </div>
               <PrivacyVault />
+              <PrivacyHub
+                onOpenConsents={consents.open}
+                onOpenMyData={myData.open}
+                onOpenExport={myData.openExport}
+              />
               <ConditionsProfileRow onOpen={() => shell.openOverlay({ screen: 'health' })} />
               <section className="profile-mobile-settings">
                 <div className="profile-setting-row static">
@@ -616,7 +627,6 @@ export function ProfileView({
                   </Select>
                 </div>
                 <QuietHoursRows />
-                <NotificationRows />
                 <ListRow
                   icon={<Icon name="robot" />}
                   label={`${t.atlasName}${coach.enabled ? ` · ${t.atlasTemper[temperIndex(coach.temper)]}` : ''}`}
@@ -629,6 +639,7 @@ export function ProfileView({
                   chevron
                   onClick={() => setPasswordEditing(true)}
                 />
+                <SessionsRow />
               </section>
               <ListRow
                 tone="danger"
@@ -1004,16 +1015,12 @@ export function ProfileView({
         </>
       )}
       {confirmSignOut && (
-        <ConfirmDialog
-          title={t.signOutTitle}
-          body={shell.queueLength > 0 ? t.signOutQueueBody(shell.queueLength) : t.signOutCleanBody}
-          confirmLabel={t.signOut}
-          cancelLabel={t.cancel}
-          danger
+        <SignOutDialog
+          queueLength={shell.queueLength}
           onCancel={() => setConfirmSignOut(false)}
-          onConfirm={() => {
+          onConfirm={(forget) => {
             setConfirmSignOut(false);
-            shell.signOut();
+            shell.signOut({ forget });
           }}
         />
       )}
@@ -1076,7 +1083,7 @@ function ProfileAssignTrainerSheet(props: {
         {trainers.map((tr) => (
           <ListRow
             key={tr.id}
-            icon={<Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />}
+            icon={<UserAvatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />}
             label={tr.name}
             sub={t.adminClients(tr.clientCount)}
             selected={sel === tr.id}
@@ -1152,7 +1159,7 @@ function ProfileAssignClientsSheet(props: {
           return (
             <ListRow
               key={p.id}
-              icon={<Avatar userId={p.id} name={p.name} hasPhoto={p.avatar} size={34} />}
+              icon={<UserAvatar userId={p.id} name={p.name} hasPhoto={p.avatar} size={34} />}
               label={p.name}
               sub={p.trainerName ?? t.adminNoTrainer}
               selected={on}

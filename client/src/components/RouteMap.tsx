@@ -4,9 +4,14 @@
  * Leaflet is loaded once from CDN (no npm dep, offline-tolerant), tiles from
  * OSM, the route line from the keyless OSRM demo. Everything degrades: no route
  * → just the two markers; no Leaflet → nothing (the caller keeps a text link).
+ * The live map (Leaflet from unpkg, tiles, the route) exists only with the gym-search consent (SPO-293): without it
+ * nothing is loaded or sent and a "Maps are off" strip takes its place.
  */
 import { useEffect, useRef, useState } from 'react';
 import type { Coords } from '../data/gymProviders';
+import { geoSignal, isGeoSearchOn } from '../data/geoSearchGate';
+import { GeoOffNotice } from '../legal/GeoOff';
+import { useGeoSearchOn } from '../legal/useGeoSearch';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 let leafletPromise: Promise<any> | null = null;
@@ -22,7 +27,13 @@ function loadLeaflet(): Promise<any> {
     const js = document.createElement('script');
     js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
     js.onload = () => resolve(w.L);
-    js.onerror = reject;
+    js.onerror = () => {
+      // Do not remember a failed load: the next call tries again (and drops the dead tags).
+      leafletPromise = null;
+      css.remove();
+      js.remove();
+      reject(new Error('leaflet failed to load'));
+    };
     document.head.appendChild(js);
   });
   return leafletPromise;
@@ -101,6 +112,17 @@ function TrackMap({
 }
 
 function LiveRouteMap({ from, to }: { from: Coords | null; to: Coords }) {
+  const on = useGeoSearchOn();
+  if (!on)
+    return (
+      <div className="gym-map route-map">
+        <GeoOffNotice map />
+      </div>
+    );
+  return <ConsentedRouteMap from={from} to={to} />;
+}
+
+function ConsentedRouteMap({ from, to }: { from: Coords | null; to: Coords }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const routeKey = `${from?.lat ?? 'none'}:${from?.lng ?? 'none'}:${to.lat}:${to.lng}`;
   const [readyKey, setReadyKey] = useState<string | null>(null);
@@ -109,6 +131,8 @@ function LiveRouteMap({ from, to }: { from: Coords | null; to: Coords }) {
   useEffect(() => {
     let cancelled = false;
     let map: any;
+    // Cancels the route request when the map goes away (gym search turned off unmounts it) or the route changes.
+    const abort = new AbortController();
     loadLeaflet()
       .then(async (L: any) => {
         if (cancelled || !ref.current) return;
@@ -140,8 +164,10 @@ function LiveRouteMap({ from, to }: { from: Coords | null; to: Coords }) {
             ]).pad(0.3),
           );
         try {
+          if (!isGeoSearchOn()) return;
           const r = await fetch(
             `https://router.project-osrm.org/route/v1/foot/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`,
+            { signal: geoSignal(abort.signal) },
           );
           const j = await r.json();
           const coords = j.routes?.[0]?.geometry?.coordinates as number[][] | undefined;
@@ -166,6 +192,7 @@ function LiveRouteMap({ from, to }: { from: Coords | null; to: Coords }) {
       });
     return () => {
       cancelled = true;
+      abort.abort();
       if (map) map.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

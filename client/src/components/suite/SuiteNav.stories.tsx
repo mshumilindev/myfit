@@ -85,7 +85,6 @@ function Phone({ app }: { app: keyof typeof NAV }) {
         activeFill
         items={NAV[app].map((x) => ({ ...x, active: x.id === id }))}
         onSelect={setId}
-        onOpenShell={() => window.alert('Suite launcher opens here')}
         onOpenProfile={() => undefined}
       />
     </div>

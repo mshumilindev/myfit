@@ -6,6 +6,7 @@
  */
 import { useEffect, useState, type ReactNode } from 'react';
 import { resolvePhoto, staticMapThumb } from '../data/gymProviders';
+import { useGeoSearchOn } from '../legal/useGeoSearch';
 import { HouseGraphic } from './HouseGraphic';
 
 /** Bundled with the app (public/gyms): the last step of the chain when `neutral` is set. */
@@ -47,10 +48,13 @@ export function GymThumb({
   });
   const [failed, setFailed] = useState<Set<string>>(new Set());
   const unknown = !name && lat === 0 && lng === 0;
+  // Photos, logos and map tiles all come from outside services: without the gym-search consent (SPO-293) the thumbnail is
+  // the local graphic and nothing is requested.
+  const geoOn = useGeoSearchOn();
 
   useEffect(() => {
     // Gym not known yet (its record still loading): nothing to look up.
-    if (unknown || RESOLVED.has(key)) return;
+    if (!geoOn || unknown || RESOLVED.has(key)) return;
     let alive = true;
     const sig = new AbortController().signal;
     resolvePhoto({ key: `${lat},${lng}`, name, lat, lng, sources: ['local'] }, sig)
@@ -63,10 +67,10 @@ export function GymThumb({
     return () => {
       alive = false;
     };
-  }, [key, name, lat, lng, unknown]);
+  }, [key, name, lat, lng, unknown, geoOn]);
 
-  const cached = RESOLVED.get(key);
-  const photoUrl = photo?.key === key ? photo.url : cached;
+  const cached = geoOn ? RESOLVED.get(key) : undefined;
+  const photoUrl = geoOn ? (photo?.key === key ? photo.url : cached) : undefined;
 
   const box = (node: ReactNode) =>
     boxed ? (
@@ -79,7 +83,7 @@ export function GymThumb({
   if (unknown && neutral)
     return box(<img className="lighten" src={NEUTRAL_GYM} alt="" loading="lazy" />);
   if (unknown) return box(<HouseGraphic size={size} />);
-  const map = neutral ? '' : staticMapThumb(lat, lng);
+  const map = neutral || !geoOn ? '' : staticMapThumb(lat, lng);
   const src = photoUrl && !failed.has(photoUrl) ? photoUrl : map && !failed.has(map) ? map : null;
   if (!src && neutral)
     return box(<img className="lighten" src={NEUTRAL_GYM} alt="" loading="lazy" />);

@@ -1,0 +1,55 @@
+# D4: Реєстр процесорів і отримувачів
+
+Статус: чернетка v1 · 2026-10-22 · інженерний документ, не юридична консультація. Пов'язано: `data-registry.md` (D1), `trackers.md` (D12), `ai-providers.md` (D13). Зміна постачальника = зміна цього файлу в тому ж PR; `tests/compliance-sync.guard.test.ts` порівнює його з хостами в коді й CSP.
+
+Правило власника (21.10): передача стороннім сервісам можлива, коли потрібна функції, за умов: мінімум даних, запис тут, розкриття в Privacy Policy у тій самій зміні, згода де потрібна.
+
+**Передачі за межі ЄС/ЄЕЗ, DPA/SCC/DPF:** для кожного рядка нижче **pending** (посилання на DPA/SCC, перевірка DPF-сертифікації постачальника, TIA/D6 не зроблено). Не стверджуємо відповідність, поки SPO-257/258 не закриють.
+
+## Основний постачальник
+
+| Постачальник | Хост у коді/CSP | Що отримує | Коли | Підстава (пропозиція) | Передача / DPA |
+|---|---|---|---|---|---|
+| Google (Firebase): Auth, Firestore, Functions (us-central1), Storage, Hosting, FCM | `*.googleapis.com`, `*.cloudfunctions.net`, `*.run.app`, `*.firebaseio.com` (`wss://`), `*.firebaseapp.com`, `firebasestorage.googleapis.com` | усе з `data-registry.md`, що зберігається на сервері (шифр. за колонкою «Шифр.»), технічні дані запитів (IP); токени push | постійно при використанні застосунку | договір (C); для health K | **pending**: регіон Firestore та умови трансферу, Firebase DPA: посилання `{{ПОТРІБНО}}` |
+| Google reCAPTCHA Enterprise / Firebase App Check | `www.google.com/recaptcha/`, `www.gstatic.com/recaptcha/`, `recaptcha.google.com` | сигнали браузера/пристрою для оцінки ботів, IP | при завантаженні застосунку й запитах до Firebase | L (безпека) `{{ЮРИСТ}}`: ePrivacy: чи потрібна згода | **pending** |
+
+## ШІ (Atlas), деталі в `ai-providers.md`
+
+| Постачальник | Хост | Що отримує | Коли | Підстава | Передача / DPA |
+|---|---|---|---|---|---|
+| Google Gemini (Firebase AI Logic) | `*.googleapis.com` (firebasevertexai / generativelanguage, з браузера) | питання + дозволені категорії фактів | лише після `atlas-ai`, при кожному запиті Atlas у AI-режимі | K (9(2)(a) для чутливих категорій) | **pending**: тариф/умови (EEA потребує Paid Services, B3 плану), чи використовуються дані для навчання: unknown/lawyer |
+| Puter (puter.com), user-pays | `js.puter.com/v2/` (скрипт), `*.puter.com`, `wss://*.puter.com` | те саме, що Gemini, через **власний акаунт користувача в Puter** | лише після `atlas-puter`; скрипт завантажується лише тоді | K | **pending**: Puter як окремий контролер чи процесор: unknown/lawyer |
+
+## Гео й карта (лише після `geo-search`, `data/geoSearchGate.ts`)
+
+| Постачальник | Хост | Що отримує | Коли | Підстава | Передача / DPA |
+|---|---|---|---|---|---|
+| Photon (Komoot) | `photon.komoot.io` | текст пошуку, наближені координати (якщо дозволено), IP | пошук залу, reverse-геокод | K | **pending** (ЄС-хост? unknown) |
+| Overpass API (OSM) | `overpass-api.de` | bounding box/координати, IP | пошук залів | K | **pending** |
+| Nominatim (OSMF) | `nominatim.openstreetmap.org` | координати для reverse, IP | вибір залу | K | **pending** |
+| OSRM | `router.project-osrm.org` | початок/кінець маршруту, IP | маршрут до залу | K | **pending** |
+| OSM tiles | `tile.openstreetmap.org` | тайли в межах видимої області (виводять позицію), IP | відкриття мапи (`RouteMap.tsx`) | K | **pending** |
+| Wikidata | `www.wikidata.org` | назва мережі/бренду (лого), IP | пошук логотипу залу | K | **pending** |
+| Wikimedia Commons | `commons.wikimedia.org` | назва файлу/запит фото, IP | фото залу, лого | K | **pending** |
+| unpkg (CDN) | `unpkg.com` (`leaflet@1.9.4`) | IP, запит скрипта/CSS Leaflet | відкриття мапи; **стороннє виконуваний код**: ризик ланцюга постачання, SRI/self-host unknown | K | **pending**; рішення self-host: окрема задача |
+| Google Places, Foursquare | `places.googleapis.com`, `api.foursquare.com` | **НЕ ВМИКАЄТЬСЯ** (`KEYED_PLACE_SERVICES_ENABLED = false`, SPO-293) | ніколи, доки немає окремої згоди, розкриття й запису тут | — | n/a |
+
+## Харчування
+
+| Постачальник | Хост | Що отримує | Коли | Підстава | Передача / DPA |
+|---|---|---|---|---|---|
+| Open Food Facts | `world.openfoodfacts.org` | пошуковий запит або штрихкод, IP | пошук продуктів у харчуванні | `?` (немає окремої згоди: unknown/lawyer) | **pending** |
+
+## Шрифти й аналітика
+
+Див. `trackers.md`: `fonts.googleapis.com` / `fonts.gstatic.com` (Google Fonts), Firebase Analytics (`*.google-analytics.com`, `*.analytics.google.com`, `*.googletagmanager.com`, `www.googletagmanager.com`) **видалено (SPO-287, ADR 007)**: шрифти self-hosted (`@fontsource`), Firebase Analytics прибрано повністю, CSP очищено; передавання IP Google з цих причин припинено.
+
+## QR-код запрошення (admin/trainer)
+
+| Постачальник | Хост | Що отримує | Коли | Підстава | Передача / DPA |
+|---|---|---|---|---|---|
+| QR Server (goqr.me) | `api.qrserver.com` (`client/src/views/AdminView.tsx`, картинка `<img src>`) | **повний URL запрошення (містить токен запрошення)** у query, IP | коли адмін натискає «QR» на запрошенні | L? `{{ЮРИСТ}}`; токен потрапляє третій стороні: **прогалина**, рекомендація: генерувати QR на клієнті (без мережі) | **pending**; не було в реєстрах до N11 |
+
+## Не обробники (для повноти)
+
+Pexels, Flickr, Rawpixel лише посилання `pageUrl` (атрибуція) в `data/equipmentImages.generated.ts`; браузер на них не звертається, зображення в сховищі.

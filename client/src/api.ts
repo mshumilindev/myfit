@@ -12,6 +12,9 @@
  * `callFn()` (a thin wrapper over httpsCallable that preserves the old
  * HttpError shape so view-level error handling keeps working).
  */
+import { afterSignIn, afterSignOut } from './accounts/deviceSession';
+import { fetchAvatarThumb } from './accounts/avatarThumb';
+import { setAvatar } from './accounts/rememberedPeople';
 import {
   signInWithCustomToken,
   onAuthStateChanged,
@@ -44,8 +47,16 @@ export function getRole(): Role {
   const r = localStorage.getItem(ROLE_KEY);
   return r === 'admin' || r === 'trainer' || r === 'manager' ? r : 'member';
 }
+const roleListeners = new Set<() => void>();
+/** Fires when the cached role changes (a promotion arrives with the next ID token); the legal gate re-reads it. */
+export function onRoleChange(cb: () => void): () => void {
+  roleListeners.add(cb);
+  return () => void roleListeners.delete(cb);
+}
 export function setRole(role: Role): void {
+  const changed = getRole() !== role;
   localStorage.setItem(ROLE_KEY, role);
+  if (changed) roleListeners.forEach((cb) => cb());
 }
 
 /** The signed-in user's uid, or null. Also used as the "am I logged in" guard
@@ -73,12 +84,29 @@ export async function adoptSessionToken(token: string, role: Role): Promise<void
 }
 
 /** Complete a sign-in from an auth-function payload (custom token + role). */
-export async function signInWithPayload(payload: AuthPayload): Promise<void> {
+export async function signInWithPayload(payload: AuthPayload, remember = false): Promise<void> {
   await signInWithCustomToken(auth, payload.token);
   localStorage.setItem(UID_KEY, payload.userId);
   if (payload.username) localStorage.setItem(LOGIN_ID_KEY, payload.username);
   setUsername(payload.name || payload.username);
   setRole(payload.role ?? 'member');
+  /* "Remember me": only a ticked box puts the person on this device's landing list (accounts/deviceSession.ts). */
+  afterSignIn(
+    localStorage,
+    {
+      uid: payload.userId,
+      name: payload.name || payload.username,
+      login: payload.username || undefined,
+    },
+    remember,
+    Date.now(),
+  );
+  if (remember) {
+    // The photo for the landing's Locker Wall; best effort, never blocks the sign-in.
+    void fetchAvatarThumb(payload.userId).then((a) => {
+      if (a) setAvatar(localStorage, payload.userId, a);
+    });
+  }
 }
 
 /** The identifier the person signed in with (username), kept so a re-authentication asks only for the password. */
@@ -93,8 +121,39 @@ export function clearAuth(): void {
   localStorage.removeItem(UID_KEY);
 }
 
-export async function signOut(): Promise<void> {
+/** Longest sign-out waits for queued consents and the queued sharing revoke to be sent (never blocks the sign-out). */
+export const SIGN_OUT_FLUSH_MS = 3000;
+
+/**
+ * `forget`: the person also leaves this device's landing list ("Remember me" unticked in the sign-out dialog). Either way
+ * the person's own localStorage keys are wiped here and the rest of their data by deviceWipe.ts.
+ */
+export async function signOut(opts: { forget?: boolean } = {}): Promise<void> {
+  const uid = currentUid();
+  // Queued consent withdrawals are sent while the token still works. Short and never blocking: the queue is device-level
+  // and survives sign-out, so whatever is not sent now is sent at this account's next sign-in.
+  try {
+    const { flushPendingConsents } = await import('./legal/signupConsents');
+    // the queued "Stop sharing" revoke goes out with them (B4)
+    const { flushPendingRevokes } = await import('./coach/client/revokeQueue');
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    await Promise.race([
+      Promise.all([flushPendingConsents(), flushPendingRevokes()]).catch(() => undefined),
+      new Promise((r) => (timer = setTimeout(r, SIGN_OUT_FLUSH_MS))),
+    ]);
+    clearTimeout(timer);
+  } catch {
+    /* best effort */
+  }
   clearAuth();
+  afterSignOut(localStorage, uid, opts.forget === true);
+  try {
+    // This device's session record goes away while the token still works (best effort, short).
+    const { endSession } = await import('./accounts/sessions');
+    await Promise.race([endSession(), new Promise((r) => setTimeout(r, 1500))]);
+  } catch {
+    /* the record just ages out of the Sessions list */
+  }
   await firebaseSignOut(auth).catch(() => undefined);
   /* The account's data leaves the device: sealed coach stores, caches and Firestore's offline cache (deviceWipe.ts). */
   try {

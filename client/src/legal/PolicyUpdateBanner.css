@@ -1,0 +1,9 @@
+/* The editorial-update notice floats over the top of the app, like the sync chip. */
+.lgub {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + var(--s-8));
+  left: 0;
+  right: 0;
+  z-index: var(--z-120);
+  padding: 0 var(--s-16);
+}

@@ -12,6 +12,7 @@
  * by default) right; forms and edits open in the right panel.
  */
 import { BackButton } from '../components/ui/BackButton';
+import { PageHead } from '../components/ui/PageHead';
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
 import { useT } from '../i18n';
@@ -65,6 +66,8 @@ import { SupplementScreens } from './health/supplements/SupplementScreens';
 import { SupplementQuickStartSheet } from './health/supplements/SupplementQuickStartSheet';
 import { hasSupplementData } from '../supplements';
 import { HealthPrivacyView } from './health/HealthPrivacyView';
+import { HealthGate } from '../legal/HealthOff';
+import { HealthDisclaimer } from '../legal/HealthDisclaimer';
 import './Health.css';
 import { Button } from '../components/ui/Button';
 
@@ -116,6 +119,7 @@ export function HealthView(props: HealthViewProps) {
   const openForm = (form: HealthFormSpec) =>
     go({ view: props.view, hist: props.hist, form }, web && !!props.form);
   const closeForm = () => props.onClose();
+  const back = { label: t.backAction, onClick: props.onClose };
   const onRehab = (p: RehabPrefill) => shell.replaceOverlay({ screen: 'injury', prefill: p });
 
   const openItem = (it: HealthItem) => {
@@ -490,7 +494,11 @@ export function HealthView(props: HealthViewProps) {
         store.restPeriods.some((p) => p.id === (props.form as { periodId: string }).periodId)) ||
       (props.form.kind === 'edit-injury' &&
         store.injuries.some((i) => i.id === (props.form as { injuryId: string }).injuryId)));
-  const form =
+  // Injuries and long-term conditions are health features with their own consent (SPO-290): without it the page says so.
+  const injuryForm =
+    props.form?.kind === 'edit-injury' ||
+    (props.form?.kind === 'new' && props.form.type === 'injury');
+  const formEl =
     props.form && formOk ? (
       <HealthForm
         key={JSON.stringify(props.form)}
@@ -502,39 +510,61 @@ export function HealthView(props: HealthViewProps) {
         onRehab={onRehab}
       />
     ) : null;
+  const form =
+    formEl && injuryForm ? (
+      <HealthGate feature="injuries" onBack={web ? undefined : closeForm}>
+        {formEl}
+      </HealthGate>
+    ) : (
+      formEl
+    );
   const condPage =
     !form && props.cond ? (
-      <ConditionPage
-        cond={props.cond}
-        condKey={props.condKey}
-        web={web}
-        onBack={props.onClose}
-        onPickKey={(key) => go({ cond: 'new', condKey: key }, true)}
-      />
+      <HealthGate feature="chronic" onBack={web ? undefined : props.onClose}>
+        <ConditionPage
+          cond={props.cond}
+          condKey={props.condKey}
+          web={web}
+          onBack={props.onClose}
+          onPickKey={(key) => go({ cond: 'new', condKey: key }, true)}
+        />
+      </HealthGate>
     ) : null;
 
   // Privacy and Nicotine pages replace the whole Health overview (mobile and web).
   if (props.priv) return <HealthPrivacyView onBack={props.onClose} />;
   if (props.nic)
     return (
-      <NicotineScreens screen={props.nic} onOpen={(nic) => go({ nic })} onBack={props.onClose} />
+      <HealthGate feature="nicotine" onBack={props.onClose}>
+        <NicotineScreens screen={props.nic} onOpen={(nic) => go({ nic })} onBack={props.onClose} />
+      </HealthGate>
     );
   if (props.cyc)
     return (
-      <CycleScreens
-        screen={props.cyc}
-        onOpen={(cyc) => go({ cyc })}
-        onBack={props.onClose}
-        onOpenStates={() => go({ cond: undefined })}
-      />
+      <HealthGate feature="cycle" onBack={props.onClose}>
+        <CycleScreens
+          screen={props.cyc}
+          onOpen={(cyc) => go({ cyc })}
+          onBack={props.onClose}
+          onOpenStates={() => go({ cond: undefined })}
+        />
+      </HealthGate>
     );
   if (props.alc)
     return (
-      <AlcoholScreens screen={props.alc} onOpen={(alc) => go({ alc })} onBack={props.onClose} />
+      <HealthGate feature="alcohol" onBack={props.onClose}>
+        <AlcoholScreens screen={props.alc} onOpen={(alc) => go({ alc })} onBack={props.onClose} />
+      </HealthGate>
     );
   if (props.sup)
     return (
-      <SupplementScreens screen={props.sup} onOpen={(sup) => go({ sup })} onBack={props.onClose} />
+      <HealthGate feature="supplements" onBack={props.onClose}>
+        <SupplementScreens
+          screen={props.sup}
+          onOpen={(sup) => go({ sup })}
+          onBack={props.onClose}
+        />
+      </HealthGate>
     );
 
   // ============================ mobile ============================
@@ -545,10 +575,7 @@ export function HealthView(props: HealthViewProps) {
       const mode = props.hist ?? 'list';
       return (
         <div className="screen hl">
-          <div className="hl-pbar">
-            <BackButton label={t.backAction} onClick={props.onClose} />
-            <h1 className="hl-pt">{t.hlHistoryTitle}</h1>
-          </div>
+          <PageHead className="hl-pbar" back={back} title={t.hlHistoryTitle} />
           <div className="hl-scroll">
             <div className="hl-cnt">
               <HistControls
@@ -592,12 +619,10 @@ export function HealthView(props: HealthViewProps) {
     }
     return (
       <div className="screen hl">
-        <div className="hl-pbar">
-          <BackButton label={t.backAction} onClick={props.onClose} />
-          <h1 className="hl-pt">{t.startHealthTitle}</h1>
-        </div>
+        <PageHead className="hl-pbar" back={back} title={t.startHealthTitle} />
         <div className="hl-scroll">
           <div className="hl-cnt">
+            <HealthDisclaimer />
             {nowGroups}
             {sleepGroup}
             {startGroup}
@@ -619,6 +644,7 @@ export function HealthView(props: HealthViewProps) {
   const left = (
     <section className="hl-pane" aria-label={t.startHealthTitle}>
       <div className="hl-wc">
+        <HealthDisclaimer />
         {form || condPage ? (
           <>
             {nowGroups}

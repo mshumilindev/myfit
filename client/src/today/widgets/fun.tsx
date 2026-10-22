@@ -273,7 +273,7 @@ function wildcardFor(
   const done = store.workouts.filter((w) => w.finishedAt !== null);
   if (done.length < 2) return null;
   const ready = muscleReadiness(done, now);
-  const health = healthBuildCtx(store, now);
+  const health = healthBuildCtx(now);
   const prot = new Set(health.protectedMuscles);
   const usable = (m: MuscleGroup) => !prot.has(m) && ready.get(m)?.state !== 'recovering';
   let target: MuscleGroup[] | undefined;

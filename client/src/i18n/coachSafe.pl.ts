@@ -61,6 +61,9 @@ export const safePl: typeof import('./coachSafe.en').safeEn = {
   raBodyEnd:
     'Zakończenie współpracy wstrzymuje udostępnianie w obie strony. Wpisz hasło, aby kontynuować.',
   raBodyRevoke: 'Wycofanie zaproszenia wyłącza link dla wszystkich. Wpisz hasło, aby kontynuować.',
+  raBodyDelete: 'Usunięcia konta nie można cofnąć. Wpisz hasło, aby usunąć je teraz.',
+  raBodyMyExport:
+    'Kopia zawiera Twoje dane osobowe, w tym dane o zdrowiu. Wpisz hasło, aby kontynuować.',
   raPassword: 'Hasło',
   raIdentifier: 'Nazwa użytkownika lub e-mail',
   raConfirm: 'Potwierdź',

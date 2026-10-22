@@ -10,6 +10,7 @@ import { fixtureWorldLite, olehDraft } from './program/__fixtures__/fixtures';
 import type { ProgramPort } from './program/port';
 import { createFixturesProgramPort } from './program/__fixtures__/programPort';
 import { setViewport } from './testViewport';
+import { currentHash } from '../route';
 
 const p = pgEn;
 
@@ -25,7 +26,7 @@ afterEach(() => {
   cleanup();
   configureCoachData();
   configureProgramData();
-  window.location.hash = '';
+  window.history.replaceState(null, '', '/');
 });
 
 function mount(hash: string) {
@@ -73,7 +74,7 @@ describe('CoachApp program routes (whole shell, fixtures port)', () => {
           { timeout: 3000 },
         ),
       ).toBeTruthy();
-      expect(window.location.hash).toBe(`#/c/programs/prg-c1/${sub}?client=c1`);
+      expect(currentHash()).toBe(`#/c/programs/prg-c1/${sub}?client=c1`);
     },
   );
 
@@ -82,12 +83,12 @@ describe('CoachApp program routes (whole shell, fixtures port)', () => {
     await screen.findByText(p.edTitle, { selector: 'h1' }, { timeout: 3000 });
     fireEvent.click(screen.getByRole('button', { name: p.edBack }));
     expect(await screen.findByText(p.ptOpenEditor, {}, { timeout: 3000 })).toBeTruthy();
-    expect(window.location.hash).toBe('#/c/clients/c1/program');
+    expect(currentHash()).toBe('#/c/clients/c1/program');
     cleanup();
     mount('#/c/programs/prg-c1/edit');
     await screen.findByText(p.edTitle, { selector: 'h1' }, { timeout: 3000 });
     fireEvent.click(screen.getByRole('button', { name: p.edBack }));
-    await waitFor(() => expect(window.location.hash).toBe('#/c/programs'));
+    await waitFor(() => expect(currentHash()).toBe('#/c/programs'));
   });
 });
 

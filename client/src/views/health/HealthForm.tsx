@@ -35,6 +35,7 @@ import {
 } from '../../health';
 import { BODY_PARTS, bodyPart as findBodyPart } from '../../injury';
 import { useWeekStartDay } from '../../weekStart';
+import { useHealthOn } from '../../legal/useHealthConsent';
 import type { IllnessKind, InjurySide, RestMode } from '../../types';
 import { ILLNESS_KINDS } from '../../illness';
 import { Sheet } from '../../ui';
@@ -45,6 +46,7 @@ import { GroupedList, ListPanel, ListRow } from '../../components/ui/GroupedList
 import { PresetChips } from '../../components/ui/PresetChips';
 import { Segmented } from '../../components/ui/Segmented';
 import { Notice } from '../../components/ui/Notice';
+import { openHealthPrompt } from '../../data/healthConsentGate';
 import { StickyActionBar } from '../../components/ui/StickyActionBar';
 import { Switch } from '../../components/ui/Switch';
 import type { Tone as KitTone } from '../../components/ui/tones';
@@ -107,10 +109,10 @@ export function HealthForm(props: {
 }) {
   const { t, locale } = useT();
   const store = useStore();
+  const injuriesOn = useHealthOn('injuries').on;
   const weekStart = useWeekStartDay();
-  const { spec, now } = props;
+  const { spec, now, onCancel } = props;
   const today = dayKey(now);
-
   const editing =
     spec.kind === 'edit' ? store.restPeriods.find((p) => p.id === spec.periodId) : null;
   const editingInj =
@@ -198,7 +200,9 @@ export function HealthForm(props: {
       ? ['off', 'active', 'illness']
       : spec.kind === 'edit-injury'
         ? []
-        : ['off', 'active', 'illness', 'injury'];
+        : injuriesOn
+          ? ['off', 'active', 'illness', 'injury']
+          : ['off', 'active', 'illness'];
 
   const pickType = (next: HealthType) => {
     setType(next);
@@ -294,6 +298,11 @@ export function HealthForm(props: {
       )
     : t.hlFilter.injury;
 
+  /** A refused injury write: without consent the Injuries prompt opens (SPO-290), else the usual message. */
+  const failInjury = (reason: string) => {
+    if (reason === 'consent') openHealthPrompt('injuries');
+    else setSaveErr(reason);
+  };
   const save = () => {
     setSaveErr(null);
     if (blocked) return;
@@ -305,12 +314,12 @@ export function HealthForm(props: {
           { bodyPart: part, side, startDay: start, healedDay: healed ? healedDay : null },
           now,
         );
-        if (!r.ok) return setSaveErr(r.reason);
+        if (!r.ok) return failInjury(r.reason);
         return props.onDone();
       }
       if (healed) {
         const r = logPastInjury({ bodyPart: part, side, startDay: start, healedDay }, now);
-        if (!r.ok) return setSaveErr(r.reason);
+        if (!r.ok) return failInjury(r.reason);
         return props.onDone();
       }
       return props.onRehab({ bodyPart: part, side, startDay: start });
@@ -1051,7 +1060,7 @@ export function HealthForm(props: {
     <div className="screen hl">
       <PageHead
         className="hl-pbar"
-        back={{ label: t.backAction, onClick: props.onCancel }}
+        back={{ label: t.backAction, onClick: onCancel }}
         title={title}
       />
       <div className="hl-scroll">

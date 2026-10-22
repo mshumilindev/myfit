@@ -19,6 +19,7 @@ import { ClientRescheduleSheet, NextSessionTile, useMySessions } from './screens
 import type { ScheduleSlot } from '../schedule/types';
 import { dayOfTs } from '../schedule/time';
 import { shortWeekday } from '../schedule/labels';
+import { navigateHash } from '../../navigateHash';
 import './ClientCoach.css';
 
 /** Any Monday (1 Jan 2024) as a day key: weekday names come from the locale. */
@@ -61,7 +62,7 @@ export function ClientTodayExtras() {
           slot={form}
           onClose={() => setForm(null)}
           onOpenChat={() => {
-            window.location.hash = '#/trainer/chat';
+            navigateHash('#/trainer/chat');
           }}
         />
       )}

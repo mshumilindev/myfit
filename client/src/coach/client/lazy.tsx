@@ -26,12 +26,16 @@ export function ClientBridgeLazy() {
     </Suspense>
   ) : null;
 }
+/**
+ * The one sharing list of Privacy and sharing. NOT flag-gated here: the four on-device settings are listed with or without
+ * the coach feature; `TrainerSharing` itself adds the trainer block and the grant rows only when the flag is on.
+ */
 export function ClientTrainerSharing(p: ComponentProps<typeof Sharing>) {
-  return useClientCoachEnabled() ? (
+  return (
     <Suspense fallback={null}>
       <Sharing {...p} />
     </Suspense>
-  ) : null;
+  );
 }
 export function ClientTodayExtrasLazy() {
   return useClientCoachEnabled() ? (

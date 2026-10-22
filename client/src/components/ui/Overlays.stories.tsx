@@ -40,6 +40,20 @@ export const SheetStory: Story = {
   render: (args) => <SheetDemo {...args} />,
 };
 
+/** `dismissible={false}`: no close button, the scrim, Escape and the grabber swipe do nothing (the legal gate). */
+export const SheetNotDismissible: Story = {
+  name: 'Sheet · not dismissible',
+  args: {
+    onClose: () => undefined,
+    padded: true,
+    dismissible: false,
+    role: 'alertdialog',
+    label: 'Blocking prompt',
+    children: 'Answer with the buttons inside the sheet.',
+  },
+  render: (args) => <SheetDemo {...args} />,
+};
+
 /** Centered dialog with actions; `danger` swaps the tone and icon. */
 export const DialogStory: Story = {
   name: 'Dialog',

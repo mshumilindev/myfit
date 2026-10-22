@@ -1,5 +1,4 @@
 /** Onboarding — design O-01…O-09. Steps end inside a live session. */
-import { Skeleton } from '../components/ui/Skeleton';
 import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Field } from '../components/ui/Field';
@@ -24,13 +23,18 @@ import {
   type PlaceResult,
 } from '../data/gymProviders';
 import { fmtDayMonth, useT } from '../i18n';
+import { RegistrationAgreement, useAgreementGate } from '../legal/AgreementBlock';
+import { recordSignupConsents } from '../legal/signupConsents';
 import { fullPersonName, splitPersonName } from '../name';
 import { SpotterMark } from '../brand/SpotterMark';
 import { Icon, LanguageSelector } from '../ui';
 import { GymThumb } from '../components/GymThumb';
-import { Avatar } from '../components/Avatar';
+import { GeoOffState } from '../legal/GeoOff';
+import { useAskGeoConsent, useGeoSearchOn } from '../legal/useGeoSearch';
+import { UserAvatar } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { InstallShortcut } from './InstallShortcut';
+import { OnbLandingSkeleton } from './OnbLandingSkeleton';
 import { Card } from '../components/ui/Card';
 import { ConditionPage, ConditionsOnboardingRow } from './health/Conditions';
 import { NicotineOnboardingRow } from './health/nicotine/NicotineSection';
@@ -72,6 +76,9 @@ interface Resume {
 
 const resumeKey = (token: string) => `onb.${token}`;
 
+/** The legal documents shown before the account is created; ids are their public routes (`#/terms`, `#/privacy`). */
+const AGREE_DOCS = ['terms', 'privacy'] as const;
+
 function loadResume(token: string): Resume | null {
   try {
     const raw = localStorage.getItem(resumeKey(token));
@@ -81,57 +88,15 @@ function loadResume(token: string): Resume | null {
   }
 }
 
-/**
- * Landing skeleton (O-01) — mirrors the real landing card block-for-block so the
- * invite-preview gate resolves into the landing with no layout shift. Blocks are
- * sized from the real type scale (wordmark 48px, display title 2×34px, lead
- * 2×16px, 52px CTA, footnote, inviter). Onboarding always opens on the landing,
- * so this is the only gate skeleton the flow needs.
- */
-function OnbLandingSkeleton() {
-  return (
-    <div className="onb-shell" role="status" aria-busy="true">
-      <div className="onb-top">
-        <span />
-        <LanguageSelector />
-      </div>
-      <div className="onb-card landing onb-skel" aria-hidden>
-        <Skeleton className="onb-skel-mark" />
-        <div className="onb-skel-title">
-          <span className="uisk" />
-          <span className="uisk" />
-        </div>
-        <div className="onb-skel-lead">
-          <span className="uisk" />
-          <span className="uisk" />
-        </div>
-        <div className="onb-rail">
-          {Array.from({ length: 4 }, (_, i) => (
-            <span key={i} className={`bar${i === 0 ? ' on' : ''}`} />
-          ))}
-        </div>
-        <Skeleton className="onb-skel-btn" />
-        <div className="onb-skel-foot">
-          <span className="uisk" />
-        </div>
-        <div className="onb-inviter">
-          <span className="uisk onb-skel-avatar" />
-          <span className="onb-skel-inviter">
-            <span className="uisk" />
-            <span className="uisk" />
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function OnboardingView({
   token,
   onDone,
+  skipLanding = false,
 }: {
   token: string;
   onDone: (workoutId?: string) => void;
+  /** The invite landing page was already shown (and "Start" pressed): open on step 1. */
+  skipLanding?: boolean;
 }) {
   const { t, locale } = useT();
   const [info, setInfo] = useState<InviteInfo | null | 'error'>(null);
@@ -141,7 +106,7 @@ export function OnboardingView({
   // saved data still prefills the fields and the one-time claim below is never
   // re-run (the step-1 handler detects an existing account and just advances) —
   // so a half-finished invite reopens at step 0, not mid-flow.
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(skipLanding ? 1 : 0);
   const [firstName, setFirstName] = useState(saved?.firstName ?? savedName.firstName);
   const [lastName, setLastName] = useState(saved?.lastName ?? savedName.lastName);
   const [username, setUsername] = useState(saved?.username ?? '');
@@ -157,6 +122,7 @@ export function OnboardingView({
   const [supQuick, setSupQuick] = useState(false);
   const [supOpen, setSupOpen] = useState(false);
   const [condKey, setCondKey] = useState<string | undefined>();
+  const agreement = useAgreementGate(AGREE_DOCS);
 
   // AC-ONB-06: persist on every meaningful change.
   function persist(patch: Partial<Resume>): void {
@@ -178,6 +144,25 @@ export function OnboardingView({
       })
       .catch(() => setInfo('error'));
   }, [token]);
+
+  // Read-before-accept guards account creation; a person who already has the account (resumed invite) is not asked again.
+  const needsAgreement = !(currentUid() && loadResume(token));
+
+  /**
+   * Opens a legal document in a NEW tab/window: the hash router has no back-stack that keeps this step's typed (and
+   * unsaved password) state, so the onboarding page stays alive underneath. If the browser blocks the new window, the
+   * document opens in this tab instead (the typed names are saved first; the opened/ticked state starts again).
+   */
+  function openLegalDoc(id: string): void {
+    const url = `${window.location.pathname}${window.location.search}#/${id}`;
+    const w = window.open(url, '_blank');
+    if (w) {
+      w.opener = null;
+      return;
+    }
+    persist({});
+    window.location.hash = `#/${id}`;
+  }
 
   if (info === null) {
     return <OnbLandingSkeleton />;
@@ -329,7 +314,7 @@ export function OnboardingView({
               {info.inviterAvatarUrl ? (
                 <img className="avatar lighten" src={info.inviterAvatarUrl} alt="" />
               ) : (
-                <Avatar
+                <UserAvatar
                   userId={info.inviterId ?? undefined}
                   name={info.inviter}
                   hasPhoto={info.inviterAvatar}
@@ -383,6 +368,7 @@ export function OnboardingView({
               <span>{t.onbPrefilled}</span>
             </div>
           )}
+          {needsAgreement && <RegistrationAgreement gate={agreement} onOpen={openLegalDoc} />}
           <Button
             variant="primary"
             size="lg"
@@ -390,7 +376,8 @@ export function OnboardingView({
               busy ||
               firstName.trim().length < 2 ||
               username.trim().length < 2 ||
-              password.length < 6
+              password.length < 6 ||
+              (needsAgreement && !agreement.canContinue)
             }
             onClick={async () => {
               // Already claimed on a previous run → just advance.
@@ -400,6 +387,8 @@ export function OnboardingView({
                 return;
               }
               if (await claim()) {
+                // The account exists: record terms / policy-ack / age-18 (queued locally if offline; never blocks).
+                void recordSignupConsents(locale);
                 setStep(2);
                 persist({ step: 2 });
               }
@@ -496,7 +485,7 @@ export function OnboardingView({
               {gym?.gymName ? ` · ${gym.gymName}` : ''}
             </div>
             <div className="onb-me">
-              <Avatar name={name} size={76} />
+              <UserAvatar name={name} size={76} />
               <div>
                 <div className="n">{name}</div>
                 {info.inviter && (
@@ -690,8 +679,13 @@ function GymStep({
   const [nearbyDone, setNearbyDone] = useState(false);
   const [searchedNeedle, setSearchedNeedle] = useState('');
   const abortRef = useRef<AbortController | null>(null);
+  // Search, nearby gyms and the location read are outside-service calls: only with the consent (SPO-293). The first
+  // visit asks; "Not now" leaves the step skippable.
+  const on = useGeoSearchOn();
+  useAskGeoConsent();
 
   useEffect(() => {
+    if (!on) return;
     let alive = true;
     getCurrentPositionOnce()
       .then((p) => alive && setCoords({ lat: p.lat, lng: p.lng }))
@@ -699,12 +693,12 @@ function GymStep({
     return () => {
       alive = false;
     };
-  }, []);
+  }, [on]);
 
   const needle = q.trim();
   useEffect(() => {
     abortRef.current?.abort();
-    if (needle.length < 2) return;
+    if (!on || needle.length < 2) return;
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     const deb = setTimeout(() => {
@@ -724,10 +718,10 @@ function GymStep({
       clearTimeout(deb);
       ctrl.abort();
     };
-  }, [needle, coords]);
+  }, [needle, coords, on]);
 
   useEffect(() => {
-    if (!coords) return;
+    if (!on || !coords) return;
     const ctrl = new AbortController();
     void searchNearbyGyms(coords, 2000, [], ctrl.signal)
       .then((m) => {
@@ -737,7 +731,7 @@ function GymStep({
         if (!ctrl.signal.aborted) setNearbyDone(true);
       });
     return () => ctrl.abort();
-  }, [coords]);
+  }, [coords, on]);
 
   const sorted = useMemo(() => {
     if (!coords) return results;
@@ -752,28 +746,32 @@ function GymStep({
   // a search is pending until its results are the ones for the current query.
   // While pending we show skeleton cards and hold the near-header so nothing pops.
   const searchPending = !showNearby && searchedNeedle !== needle;
-  const list = showNearby ? nearbySorted : searchPending ? [] : sorted;
+  const list = !on ? [] : showNearby ? nearbySorted : searchPending ? [] : sorted;
   const nearbyLoading = showNearby && !denied && !nearbyDone;
-  const showSkeleton = (nearbyLoading || searchPending) && list.length === 0;
+  const showSkeleton = on && (nearbyLoading || searchPending) && list.length === 0;
 
   return (
     <div className="onb-card">
       {rail}
       <h2>{t.onbGymStep}</h2>
       <p className="lead">{t.onbGymLead}</p>
-      <SearchField
-        value={q}
-        placeholder={t.searchGymPlaceholder}
-        clearLabel={t.laClearSearch}
-        onChange={setQ}
-      />
-      {denied && (
+      {!on ? (
+        <GeoOffState />
+      ) : (
+        <SearchField
+          value={q}
+          placeholder={t.searchGymPlaceholder}
+          clearLabel={t.laClearSearch}
+          onChange={setQ}
+        />
+      )}
+      {on && denied && (
         <div className="banner">
           <Icon name="map-pin-slash" />
           <span>{t.locationBlockedBody}</span>
         </div>
       )}
-      {showNearby && !denied && (list.length > 0 || nearbyLoading) && (
+      {on && showNearby && !denied && (list.length > 0 || nearbyLoading) && (
         <div className="onb-near">
           <Icon name="crosshair" />
           <span>{t.onbNearYou(fmtDistance(2000))}</span>

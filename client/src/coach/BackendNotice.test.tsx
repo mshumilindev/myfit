@@ -10,7 +10,7 @@ import { setViewport } from './testViewport';
 
 beforeEach(() => {
   setViewport(1440);
-  window.location.hash = '';
+  window.history.replaceState(null, '', '/');
 });
 afterEach(() => {
   cleanup();

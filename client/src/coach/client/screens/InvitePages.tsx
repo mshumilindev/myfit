@@ -39,7 +39,7 @@ type Phase =
   | { k: 'accepted'; inv: InviteInfo; waiting: boolean }
   | { k: 'end'; inv: InviteInfo };
 
-function Rail({ upTo, label }: { upTo: number; label: string }) {
+function StepRail({ upTo, label }: { upTo: number; label: string }) {
   return (
     <div
       className="onb-rail"
@@ -214,7 +214,7 @@ export function InvitePages({
             <ClientAvatar id={undefined} name={inv.trainerName} size={40} hasPhoto={false} />
             <span>{cc.invInviter(inv.trainerName)}</span>
           </div>
-          <Rail upTo={1} label={cc.invStep1Aria} />
+          <StepRail upTo={1} label={cc.invStep1Aria} />
           <Button variant="primary" size="lg" onClick={() => setPhase({ k: 'share', inv })}>
             {cc.invAccept} <Icon name="arrow-right" />
           </Button>
@@ -243,7 +243,7 @@ export function InvitePages({
       <Shell onBack={() => setPhase({ k: 'landing', inv })} backLabel={cc.ccBack}>
         <div className="onb-card">
           <div className="onb-steptop">
-            <Rail upTo={2} label={cc.invStep2Aria} />
+            <StepRail upTo={2} label={cc.invStep2Aria} />
             <div className="row">
               <span className="k">{cc.invStep}</span>
               <span className="k right">{cc.invStepName}</span>

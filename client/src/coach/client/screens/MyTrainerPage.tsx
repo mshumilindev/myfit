@@ -90,30 +90,18 @@ export function MyTrainerPage(p: MyTrainerPageProps) {
         <ClientAvatar id={trainer.id} name={trainer.name} size={56} hasPhoto={trainer.hasPhoto} />
         <div className="cc-hero-t">
           <h2 className="cc-h2">{trainer.name}</h2>
-          <span>{cc.invInviterAt(trainer.org)}</span>
+          {trainer.org.trim() !== '' && <span>{cc.invInviterAt(trainer.org.trim())}</span>}
           <span>{cc.mtSince(sinceDate(trainer.since, locale))}</span>
         </div>
         <div className="cc-hero-b">
           <Button variant="primary" size="md" icon="envelope" onClick={p.onChat}>
             {cc.mtChat}
           </Button>
-          <Button variant="secondary" size="md" icon="eye" onClick={p.onSharing}>
-            {cc.mtSharing}
-          </Button>
         </div>
       </Card>
 
       {link.migrated && (
-        <Notice
-          tone="accent"
-          icon="shield-check"
-          aligned
-          below={
-            <Button variant="secondary" size="md" fullWidth onClick={p.onSharing}>
-              {cc.mtSharing}
-            </Button>
-          }
-        >
+        <Notice tone="accent" icon="shield-check" aligned>
           {cc.mtMigratedNote(first)}
         </Notice>
       )}

@@ -12,6 +12,12 @@ import {
   useStore,
 } from '../../../store';
 import { MENOPAUSE_KEY } from '../../../cycle/cycleCore';
+import {
+  closeHealthPrompt,
+  healthPromptFeature,
+  setHealthConsentState,
+} from '../../../data/healthConsentGate';
+import { HEALTH_FEATURES } from '../../../legal/consents';
 
 const nop = () => undefined;
 const today = () => dayOfTimestamp(Date.now());
@@ -77,5 +83,50 @@ describe('Cycle screens', () => {
   it('row is quiet for everyone who has not turned it on', () => {
     render(<CycleHealthRow onOpen={nop} />);
     expect(screen.getByText('Not set up')).toBeTruthy();
+  });
+
+  // SPO-290 review B2: pregnancy / menopause are chronic conditions. Without that consent the buttons ask for it.
+  const chronicOff = () =>
+    setHealthConsentState({
+      on: Object.fromEntries(HEALTH_FEATURES.map((k) => [k, k !== 'chronic'])) as never,
+      answered: {} as never,
+      ready: true,
+    });
+
+  it('hub: with Chronic conditions off, "Mark pregnancy" / "Mark menopause" open the chronic prompt and save nothing', () => {
+    saveCycleSettings({ mode: 'regular', length: 28, period: 5, anchor: today() - 9 });
+    render(<Conds />);
+    mount();
+    chronicOff();
+    act(() => fireEvent.click(screen.getByText('Mark pregnancy')));
+    expect(healthPromptFeature()).toBe('chronic');
+    expect(screen.queryByText('Add condition')).toBeNull(); // the pregnancy sheet did not open
+    closeHealthPrompt();
+    act(() => fireEvent.click(screen.getByText('Mark menopause')));
+    expect(healthPromptFeature()).toBe('chronic');
+    expect(screen.queryByText('Mark')).toBeNull();
+    expect(screen.getByTestId('n').textContent).toBe('');
+    closeHealthPrompt();
+  });
+
+  it('a pregnancy stored before still pauses the Cycle with Chronic conditions off, without naming it', () => {
+    saveCycleSettings({ mode: 'regular', length: 28, period: 5, anchor: today() - 9 });
+    act(() => {
+      addCondition({
+        key: 'preg_first',
+        severity: 2,
+        share: 'off',
+        startedAt: Date.now() - 86_400_000 * 20,
+      });
+    });
+    chronicOff();
+    render(<CycleHealthRow onOpen={nop} />);
+    expect(screen.getByText('Paused')).toBeTruthy();
+    expect(screen.queryByText('Off during pregnancy')).toBeNull();
+    cleanup();
+    mount();
+    expect(screen.getByText('Cycle is off')).toBeTruthy();
+    expect(screen.getByText('The Cycle is paused for now. Your data is kept.')).toBeTruthy();
+    expect(screen.queryByText(/pregnancy/i)).toBeNull();
   });
 });

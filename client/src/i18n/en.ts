@@ -1,4 +1,5 @@
 import { supEn } from './sup.en';
+import { plural } from './coachPlural';
 import { cycEn } from './cyc.en';
 /**
  * Base dictionary — copy taken VERBATIM from the design boards
@@ -65,7 +66,6 @@ export const en = {
   password: 'Password',
   signIn: 'Sign in',
   signingIn: 'Signing in…',
-  newHereCreate: 'New here? Ask your admin for an invite link.',
   createShortcut: 'Create a shortcut',
   createShortcutHint: 'Works offline like a native app.',
   installIosTitle: 'Add to Home Screen',
@@ -116,6 +116,27 @@ export const en = {
   signOutQueueBody: (n: number) =>
     `${n} ${n === 1 ? 'change is' : 'changes are'} still queued. Signing out discards the local queue — sync first if you want to keep them.`,
   signOutCleanBody: 'Your log stays on the server and comes back on the next sign-in.',
+  authRememberMe: 'Remember me',
+  authWelcomeBack: 'Welcome back',
+  authTapFace: 'Tap your face to sign in',
+  authUseAnother: 'Use another account',
+  authSavedAccounts: 'Saved accounts',
+  authWallLabel: 'People on this device',
+  authLockerOpen: 'Open',
+  authLockerLabel: (n: string, i: number) => `${n}, locker ${i}`,
+  authPersonPassword: (n: string) => `${n}, enter your password`,
+  sessionsRow: 'Sessions',
+  sessionsTitle: 'Sessions',
+  sessionsHint: 'Devices where you are signed in.',
+  sessionsThis: 'This device',
+  sessionsSignOutDevice: 'Sign out',
+  sessionsSignOutOthers: 'Sign out all other devices',
+  sessionsSeen: (w: string) => `Last active ${w}`,
+  sessionsEmpty: 'No other devices.',
+  sessionsError: 'Could not load sessions. Try again.',
+  sessionsRevokedNote: 'A device you sign out here is signed out the next time it opens Spotter.',
+  signOutRemember: 'Remember me on this device',
+  signOutForgetHint: "Unticked: this device forgets you and the landing won't list you.",
   stay: 'Stay',
 
   // Sync status
@@ -799,8 +820,6 @@ export const en = {
   backfillContinue: 'Continue to exercises',
   backfillFuture: 'That time is in the future',
   dismiss: 'Dismiss',
-  unloggedVisit: (dur: string, gym: string, date: string) =>
-    `${dur} at ${gym} on ${date} with nothing logged.`,
   sessionInProgress: 'Session in progress',
   recent: 'Recent',
   templates: 'Templates',
@@ -1190,6 +1209,12 @@ export const en = {
   progAdd: 'Add load',
   setOptions: 'Set options',
   progDeload: 'Deload',
+  progReturn: 'Ease in',
+  progReturnCut: (weeks: number, lift: string) =>
+    `${plural('en', weeks, { one: '{n} week', other: '{n} weeks' })} since your last ${lift} — starting lighter`,
+  progReturnEase: (weeks: number, lift: string) =>
+    `${plural('en', weeks, { one: '{n} week', other: '{n} weeks' })} since your last ${lift} — no weight jump this time`,
+  progReturnRegain: 'Building back to your pre-break weight',
   progWhyProgress: 'You hit the top of your range — add load.',
   progWhyHold: 'Beat your reps, then the weight goes up.',
   progWhyStall: 'Top set has stalled — deload and rebuild.',
@@ -1564,9 +1589,6 @@ export const en = {
   todayOptLiveFirstCardSub: 'Show a “Live now” card on top',
   showMore: 'Show more',
   historyCount: (n: number) => `${n} sessions`,
-  flagGymPresence: 'Gym-presence reminders',
-  flagGymPresenceDesc:
-    'Use location to detect gym visits and suggest logging a session. Off by default.',
   flagNutrition: 'Nutrition app',
   flagNutritionDesc: 'Unlock the Nutrition app (КБЖУ tracker) in the app switcher.',
   flagConditions: 'Long-term conditions',
@@ -1613,7 +1635,6 @@ export const en = {
   nicSfTrendsSub: 'Context on training charts',
   nicSfAfter: 'After a workout',
   nicSfAfterSub: 'Without nicotine hints',
-  nicPrivShare: 'Coach sharing',
   nicPrivOff: 'Off',
   nicPrivEffects: 'Effects only',
   nicPrivFull: 'Full',
@@ -2775,6 +2796,8 @@ export const en = {
     'Add Spotter to your Home Screen first (Share → Add to Home Screen) — iPhone only allows notifications there.',
   pushDenied: 'Notifications are blocked for Spotter. Allow them in the phone’s settings.',
   atlasName: 'Atlas',
+  /** Title of a push that carries an AI-written reply (marks it as AI; EU AI Act Art. 50). */
+  atlasAiPushTitle: 'Atlas · AI',
   atlasTemper: ['Bro', 'Neutral', 'Savage'],
   atlasTemperTag: ['your gym bro', 'straight talk, no fluff', 'roasts every lazy set'],
   atlasTemperQuote: [
@@ -2896,10 +2919,6 @@ export const en = {
     `Gemini’s free limit is used up. Until ${time} Atlas answers from his own knowledge — or through Puter, on your own free Puter account.`,
   atlasAsk: 'Ask Atlas about your training…',
   atlasSend: 'Send',
-  atlasConsentTitle: 'Chat with Atlas',
-  atlasConsentBody:
-    "To answer free-form questions, Atlas sends a short training summary (recent sessions, your plan, sleep hours) to Google Gemini — and, once Gemini's free daily limit is used up, to Puter (puter.com) through your own Puter account. No name, email, birth date or photos. On free tiers these services may use requests to improve their models. The notes, debriefs and pushes work without this.",
-  atlasConsentOk: 'Agree and send',
   atlasChatOffline: 'No connection. Train now, talk later.',
   atlasChatCap: 'That’s enough talk for today. The bar is waiting.',
   atlasChatBlocked: 'Let’s keep this about your training.',
@@ -3248,9 +3267,200 @@ export const en = {
   onbRequestNew: 'Request a new link',
   onbRequested: 'Requested — your admin will see it in their people list',
   onbHaveAccount: 'I already have an account — sign in',
+  landingKicker: 'Workout log · Windows · macOS · Android',
+  landingHeadline: "The spotlight's on you.",
+  landingHeadline2: 'We handle the rest.',
+  landingLead:
+    "A workout log that already knows your last set, how long to rest, and which muscle isn't ready yet.",
+  landingHaveInvite: 'I have an invite',
+  landingInviteTitle: 'Accounts are created by invitation',
+  landingInviteBody:
+    'Open the invite link you received: it takes you straight to setting up your account.',
+  landingBack: 'Back',
+  landing_a_1: 'Drag exercises into a different order mid-workout.',
+  landing_a_2: "Warm-ups are marked as warm-ups, so they don't pass for working sets.",
+  landing_a_3: 'Typed the wrong number? Undo takes the set back out.',
+  landing_a_4: 'Plate calculator: enter the target weight, see what goes on each side.',
+  landing_a_h: 'The next set is already filled in.',
+  landing_a_k: 'The log',
+  landing_a_p:
+    'Spotter copies your last top set into the empty row. Same weight, same reps? Tap Log. Different today? Change the number first.',
+  landing_ai_off: 'Offline',
+  landing_ai_ph: 'Ask Atlas…',
+  landing_ai_s1: 'Squat · all sessions',
+  landing_ai_s2: 'Filter: 100 kg and up',
+  landing_ai_s3: 'Latest match: 3 Feb',
+  landing_ai_s4: 'Bench · March',
+  landing_ai_s5: 'Entries found: 0',
+  landing_ai_t: 'Reading your log…',
+  landing_and_close: 'Close',
+  landing_and_dl: 'Download .apk',
+  landing_and_scan: 'Scan with your phone to get the Android app',
+  landing_atlas_k: 'The Atlas',
+  landing_btn_log: 'Log',
+  landing_btn_undo: 'Undo',
+  landing_c_1: 'Weekly volume per muscle, measured against a limit.',
+  landing_c_2: 'Tap a muscle to see when you last trained it.',
+  landing_c_h: "What the mirror can't show you.",
+  landing_c_k: 'The recovery',
+  landing_c_p:
+    "Every muscle keeps its own clock. Squat on Monday and the quads stay flagged until they've recovered; your chest doesn't care. One look at the body map and you know what to train today.",
+  landing_col_kg: 'Kg',
+  landing_col_reps: 'Reps',
+  landing_e_d1: 'Logs without a signal and syncs without duplicates when it comes back.',
+  landing_e_d2: 'Sensitive fields are encrypted on your device before they go anywhere.',
+  landing_e_d3:
+    'English, Ukrainian, Polish, Lithuanian and Estonian. The switch is at the top of this page.',
+  landing_e_d4: '873 exercises with photos and the muscles each one works.',
+  landing_e_h: 'One log, whichever screen is nearest.',
+  landing_e_k: 'The apps',
+  landing_e_p:
+    'Windows and macOS apps, Android, or just the browser. Log on your phone in the gym, look at the numbers on the laptop at home.',
+  landing_e_t1: 'Offline first',
+  landing_e_t2: 'Private by default',
+  landing_e_t3: 'Five languages',
+  landing_e_t4: 'Exercise library',
+  landing_f_h: 'Install it, then open your invite link.',
+  landing_f_p:
+    'Accounts are created by invitation. Open the link your trainer or admin sent you, or sign in if you already have an account.',
+  landing_get_l: 'Get the app',
+  landing_h_h: "The spotlight's on you.",
+  landing_h_h2: 'We handle the rest.',
+  landing_h_p:
+    "A workout log that already knows your last set, how long to rest, and which muscle isn't ready yet.",
+  landing_i_1:
+    'Back after a break? The app counts the days since you last did that lift, and suggests an easier first session.',
+  landing_i_h: 'Injured? Come back in four steps, at your own pace.',
+  landing_i_k: 'The comeback',
+  landing_i_p:
+    'Tell Spotter what hurts. Training then moves through Protect, Reintroduce, Rebuild and Return, and you advance when it feels right, not when the calendar says so.',
+  landing_k126: 'Start →',
+  landing_k163: 'We’ll create your account in 4 steps',
+  landing_k191: 'You · Photo · Gym · Body · valid until [date]',
+  landing_k231: 'Rotating 3D model of human muscles',
+  landing_k77: 'Invited by',
+  landing_k94: 'Human muscles, front view',
+  landing_kind_w: 'warm-up',
+  landing_lang_aria: 'Language',
+  landing_lg_musc: 'Quads',
+  landing_lg_name: 'Back squat',
+  landing_m_1: 'Personal records and an estimated 1RM for every lift.',
+  landing_m_2:
+    'Playbook: your usual training days, rebuilt from your own history — rep ranges, order, the lift where you stalled.',
+  landing_m_h: 'Every lift remembers its best.',
+  landing_m_k: 'The progress',
+  landing_m_p:
+    'Spotter keeps a personal record for every lift and works out your 1RM from what you actually lifted. Nothing to set up: the records appear as you train.',
+  landing_m_pr: 'PR',
+  landing_m_rm: 'est. 1RM',
+  landing_nav_get: 'Get the app',
+  landing_p_1:
+    'The invitation link opens a four-step setup: who you are, a photo, your gym, your body.',
+  landing_p_2: 'Trainers can paste a whole program in from a spreadsheet (CSV).',
+  landing_p_3:
+    "Train in more than one gym? Pick today's, and the app nudges you if you left without logging.",
+  landing_p_h: 'Your trainer writes the week. You open today.',
+  landing_p_k: 'The trainer',
+  landing_p_p:
+    "A program your trainer assigns shows up day by day, with exercises, sets and rep ranges. Pick the day, press start, and you're in the log.",
+  landing_ph_c1: 'Last squat: 3 weeks ago',
+  landing_ph_c2: 'Start lighter today.',
+  landing_ph_done: 'Done',
+  landing_ph_next: 'Next',
+  landing_ph_now: 'Now',
+  landing_pr_by: 'From your trainer',
+  landing_pr_day: 'Day 2 · Upper body',
+  landing_pr_e1: 'Bench press',
+  landing_pr_e2: 'Barbell row',
+  landing_pr_e3: 'Overhead press',
+  landing_pr_e4: 'Lat pulldown',
+  landing_r_1: 'It counts up while you rest, so you see how long you really took.',
+  landing_r_2: "It carries over to the next exercise, so walking to another rack doesn't reset it.",
+  landing_r_3: 'Sick or beaten up? Say so, and the number stretches.',
+  landing_r_h: 'How long to rest, and why that long.',
+  landing_r_p:
+    'After a set the timer starts from what you just did: the lift, how hard it felt, how tired that muscle already is, how you slept. The timer shows how it got to the number.',
+  landing_rb_base: 'This lift',
+  landing_rb_mus: 'Quads still tired',
+  landing_rb_rpe: 'Felt like RPE 9',
+  landing_rb_slp: 'Slept badly',
+  landing_rb_tot: 'Rest',
+  landing_rest_k: 'The rest timer',
+  landing_rest_l: 'Rest',
+  landing_t_1: 'No signal in the basement gym? It still answers.',
+  landing_t_a1: '3 Feb: 100 × 5, three sets. Nothing heavier since.',
+  landing_t_a2: "Nothing logged in March, so I won't guess.",
+  landing_t_h: 'A coach that has read every set you ever logged.',
+  landing_t_p:
+    'Ask when you last squatted 100, or why Thursday felt flat. Atlas answers from your log and says so when the log has nothing on it. Pick a character and it talks in that voice.',
+  landing_t_q1: 'When did I last squat 100?',
+  landing_t_q2: 'What was my bench in March?',
+  landing_t_s1: 'From your log · 3 Feb',
   onbAvatarTooBig: (size: string) =>
     `That file is ${size}. Pick something under 10 MB — it's downscaled to 512 px anyway.`,
   onbContinue: 'Continue',
+  onbAgreeHeader: 'Before you continue',
+  onbAgreeLocked: 'Open both documents and read them to unlock the boxes below.',
+  onbAgreeNotOpened: 'Not opened yet',
+  onbAgreeRead: 'Read',
+  onbAgreeAge: 'I am 18 or older.',
+  onbAgreeAccept: 'I agree to the Terms of Use and acknowledge the Privacy Policy.',
+  privHubHeader: 'Your privacy',
+  privTitle: 'Consents',
+  privHubSub: 'What you have agreed to, and withdrawing it',
+  privSub: 'You choose. Withdrawing is as easy as giving.',
+  privGrpRequired: 'Required to use Spotter',
+  privRequiredLabel: 'Terms of Use and Privacy Policy',
+  privRequiredSub: 'You agreed and acknowledged them to create your account',
+  privRequiredFoot:
+    'Spotter cannot run without these. Withdrawing them ends your agreement with Spotter, so your account is deleted.',
+  privGrpHealth: 'Health data',
+  privHealthSub: 'Health data for this feature',
+  privHealthFoot:
+    'Each health feature has its own consent. Withdrawing stops the feature; entries you made stay in your account, unused, until you delete them.',
+  privGrpOutside: 'Outside Spotter',
+  privAtlasLabel: 'Atlas AI chat',
+  privAtlasSub: 'Sends your question and a training summary to Google',
+  privGeoLabel: 'Gym search and maps',
+  privGeoSub: 'Sends your search and, if allowed, your position to map services',
+  privPuterLabel: 'Atlas AI chat (backup service)',
+  privPuterSub:
+    'Sends your question and a training summary to Puter when Google’s daily limit is reached',
+  privOutsideFoot: 'These send data to other companies.',
+  privStatusLoading: 'Loading…',
+  privStatusNone: 'Not given',
+  privOffConfirm: 'Withdraw consent',
+  privOffKeep: 'Keep it on',
+  privOffHealthBody:
+    'The feature stops and your coach no longer sees it. Entries you made stay in your account, unused, until you delete them. The rest of Spotter keeps working.',
+  privOffAtlasBody:
+    'Atlas stops sending your questions to Google. The rest of Spotter keeps working.',
+  privOffGeoBody:
+    'Gym search and maps stop sending your searches and position. The rest of Spotter keeps working.',
+  privOffPuterBody:
+    'Atlas stops using the backup service. Your questions are no longer sent to Puter. The rest of Spotter keeps working.',
+  privReqTitle: 'Withdraw and delete your account?',
+  privReqBody:
+    'Spotter needs your agreement to the Terms and Privacy Policy to work. If you withdraw it, we delete your account and all your data. This cannot be undone.',
+  privReqCheck: 'Download a copy of my data first',
+  privReqFine: 'You can create a new account later.',
+  privReqUnavailable: 'Deleting your account is not available here yet, so nothing is withdrawn.',
+  privReqConfirm: 'Delete account',
+  privReqKeep: 'Keep account',
+  privSaveError: 'Could not save. Try again.',
+  privCount: (n: number, m: number) => `${n} of ${m} on`,
+  privStatusGiven: (v: string, d: string) => `Given · v${v} · ${d}`,
+  privStatusOlder: (v: string, d: string) => `Given · v${v} · newer version available · ${d}`,
+  privOffTitle: (n: string) => `Turn off ${n}?`,
+  privFeature: {
+    injuries: 'Injuries',
+    chronic: 'Long-term conditions',
+    cycle: 'Cycle',
+    nicotine: 'Nicotine',
+    alcohol: 'Alcohol',
+    supplements: 'Supplements',
+    nutrition: 'Nutrition',
+  },
   onbBack: 'Back',
   onbAvatarType: 'JPEG, PNG, HEIC or WebP only',
   onbCameraUnavailable: 'Camera did not open. Check browser permission or choose Library.',
@@ -3521,13 +3731,6 @@ export const en = {
         return `Your role was changed to ${detail}.`;
       case 'trainer-assigned':
         return detail ? `${detail} is now your trainer.` : 'You have a new trainer.';
-      case 'unmarked':
-        return `${detail ?? 'A client'}: a finished session is not marked yet.`;
-      case 'removal-request':
-      case 'removal-answer':
-      case 'manager-move':
-      case 'team':
-        return 'New message in Spotter.';
       case 'trainer-removed':
         return 'Your trainer was removed.';
       case 'client-assigned':
@@ -3930,9 +4133,7 @@ export const en = {
   learnBannerTitleGoing: 'Keep learning Spotter',
   learnBannerCta: 'Start learning',
   learnBannerProgress: (done: number, total: number) => `${done} / ${total} lessons`,
-  shellPeopleDesc: 'Your profile & account.',
-  shellPeopleDescCoach: 'Your clients & profile.',
-  shellPeopleDescAdmin: 'Members, trainers & account.',
+  shellPeopleDescAdmin: 'Members & trainers.',
   appsTab: 'Apps',
   shellSessionsWeek: (n: number) => `${n} sessions this week`,
   shellDayStreak: (n: number) => `${n} day streak`,
@@ -4701,11 +4902,7 @@ export const en = {
   hlPrivMixed: 'Coach: mixed',
   hlPrivNote:
     'Everything you enter in Health is encrypted on your device and in the cloud. It only adjusts your plans and suggestions.',
-  hlPrivCondNote: 'Each condition can override this on its own page.',
   hlPrivSumNone: 'Your coach sees nothing.',
-  hlPrivSumEffects: 'Training effects only: {list}.',
-  hlPrivSumFull: 'Full details: {list}.',
-  hlPrivSumRest: 'Nothing else.',
   hlLogPastNote: 'Pick the days on a calendar. If you trained in between, we’ll ask what to keep.',
   hlHistory: 'History',
   hlHistoryTitle: 'Health history',

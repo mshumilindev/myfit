@@ -12,7 +12,6 @@
  */
 import { initializeApp } from 'firebase/app';
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
-import { getAnalytics, isSupported as analyticsIsSupported } from 'firebase/analytics';
 import { browserLocalPersistence, initializeAuth, indexedDBLocalPersistence } from 'firebase/auth';
 import {
   initializeFirestore,
@@ -23,7 +22,6 @@ import { connectAuthEmulator } from 'firebase/auth';
 import { connectFirestoreEmulator } from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
-import type { Analytics } from 'firebase/analytics';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBd29dSkA_ddsCXbJT6XuI1zUi6FGhUeOE',
@@ -32,7 +30,6 @@ const firebaseConfig = {
   storageBucket: 'spotter-64c3b.firebasestorage.app',
   messagingSenderId: '217152431785',
   appId: '1:217152431785:web:ea63d4c2bfa6251484abb8',
-  measurementId: 'G-4RZ03T456T',
 };
 
 export const app = initializeApp(firebaseConfig);
@@ -80,16 +77,4 @@ if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATORS) {
   connectFirestoreEmulator(db, '127.0.0.1', 8080);
   connectFunctionsEmulator(functions, '127.0.0.1', 5001);
   connectStorageEmulator(storage, '127.0.0.1', 9199);
-}
-
-// Analytics only in a supporting browser context (no-op in tests / SSR).
-export let analytics: Analytics | null = null;
-if (typeof window !== 'undefined') {
-  analyticsIsSupported()
-    .then((ok) => {
-      if (ok) analytics = getAnalytics(app);
-    })
-    .catch(() => {
-      /* analytics unavailable — non-fatal */
-    });
 }

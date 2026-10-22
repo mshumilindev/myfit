@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { userEvent, within } from 'storybook/test';
 import { createFixturesPort } from '../../data/__fixtures__/fixtures';
-import { CoachStoryFrame } from '../storyKit';
+import { CoachStoryFrame } from '../../../stories/coachStoryKit';
 import { emptyRoster, worldPort } from '../storyPorts';
 
 /** Programs (S-21) inside the real shell. 1440 / 1024 = list + detail, 390 = list, then the pushed detail. */

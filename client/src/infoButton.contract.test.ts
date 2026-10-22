@@ -43,4 +43,14 @@ describe('exercise card info button (i)', () => {
       /size="xs"\s+variant="photo"\s+shape="round"\s+className=\{cls\}\s+label=\{t\.detailsAction\}/,
     );
   });
+  it('every place has a story the geometry audit covers (hero + tiles, picker grid)', () => {
+    const read = (f: string) => readFileSync(join(__dirname, f), 'utf8');
+    // hero and the 2x2 tiles share one builder, so both get the same class
+    expect(session.match(/infoBtn\([^)]*'es-info'\)/g)?.length).toBe(2);
+    expect(read('views/SessionStart.stories.tsx')).toMatch(/export const LongNames/);
+    expect(read('views/SessionStart.stories.tsx')).toMatch(/export const NoHistory/);
+    expect(read('components/ExercisePicker.stories.tsx')).toMatch(/export const Browse/);
+    // the picker's three card kinds all render the one InfoButton
+    expect(pickerTsx.match(/<InfoButton /g)?.length).toBe(3);
+  });
 });

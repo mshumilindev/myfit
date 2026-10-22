@@ -14,7 +14,7 @@ import { offlineHydrate, offlineLoad, offlinePeekNow } from '../offline/offlineC
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { fullPersonName } from '../name';
 import { Dialog, Icon, Sheet } from '../ui';
-import { Avatar } from '../components/Avatar';
+import { UserAvatar } from '../components/Avatar';
 import { Tag } from '../components/ui/Tag';
 
 interface Person {
@@ -279,7 +279,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
           aria-label={me.name}
         >
           <div className="who">
-            <Avatar userId={me.id} name={me.name} hasPhoto={me.avatar} size={40} />
+            <UserAvatar userId={me.id} name={me.name} hasPhoto={me.avatar} size={40} />
             <div className="who-text">
               <div className="n">
                 <span className="nm">{me.name}</span>
@@ -333,7 +333,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                 }}
               >
                 <div className="who">
-                  <Avatar userId={p.id} name={p.name} hasPhoto={p.avatar} size={34} />
+                  <UserAvatar userId={p.id} name={p.name} hasPhoto={p.avatar} size={34} />
                   <div>
                     <div className="n">{p.name}</div>
                     <div className="e">@{p.username}</div>
@@ -666,7 +666,7 @@ function NewPersonDialog(props: {
           {props.trainers.map((tr) => (
             <ListRow
               key={tr.id}
-              icon={<Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />}
+              icon={<UserAvatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />}
               label={tr.name}
               sub={t.adminClients(tr.clientCount)}
               selected={trainerId === tr.id}
@@ -819,7 +819,7 @@ function AssignTrainerDialog(props: {
           .map((tr) => (
             <ListRow
               key={tr.id}
-              icon={<Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />}
+              icon={<UserAvatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />}
               label={tr.name}
               sub={t.adminClients(tr.clientCount)}
               selected={sel === tr.id}

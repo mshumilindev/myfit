@@ -36,6 +36,7 @@ import {
 import { toneClass } from '../../components/ui/tones';
 import { useT } from '../../i18n';
 import { useConditionName, useConditionSearch } from '../../useConditionName';
+import { askForDeniedWrite } from '../../data/healthConsentGate';
 import { addCondition, deleteCondition, updateCondition, useStore } from '../../store';
 import type { ChronicCondition, ConditionShare } from '../../types';
 
@@ -85,8 +86,11 @@ function Form({
       startedAt,
       endsAt,
     };
-    if (existing) updateCondition(existing.id, base);
-    else addCondition({ key: cat.key, ...base });
+    // Refused without consent (SPO-290): the prompt opens, the form stays, nothing is claimed saved.
+    const r = existing
+      ? updateCondition(existing.id, base)
+      : addCondition({ key: cat.key, ...base });
+    if (askForDeniedWrite(r)) return;
     onDone();
   };
   const hint = {

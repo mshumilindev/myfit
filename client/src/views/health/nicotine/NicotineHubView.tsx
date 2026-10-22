@@ -3,6 +3,7 @@
  * own page. Sharing and delete live in Health › Privacy and sharing. Kit primitives only.
  */
 import { PageHead } from '../../../components/ui/PageHead';
+import { HealthDisclaimer } from '../../../legal/HealthDisclaimer';
 import { GroupedList, ListRow } from '../../../components/ui/GroupedList';
 import { IconTile } from '../../../components/ui/IconTile';
 import { useNicotine } from '../../../store';
@@ -28,6 +29,7 @@ export function NicotineHubView({
       />
       <div className="hl-scroll">
         <div className="hl-cnt">
+          <HealthDisclaimer />
           <GroupedList footer={t.nicHubFoot}>
             <ListRow
               icon={<IconTile tone="neutral" size={30} icon="list-checks" />}

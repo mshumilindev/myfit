@@ -36,6 +36,14 @@ self-host them), then copy the Report-Only value into `Content-Security-Policy`.
   rate counters. `adminDeleteUser` runs `purgeAccountCoaching` (conversations with messages, notes, requests, keyring;
   coaching, summaries, trainer notes and decisions about the client, coach and device keys, invites). The audit entries
   other users hold about reads stay on purpose (they are those users' records, 400-day retention).
+- Account deletion (SPO-285) is ONE cascade, `functions/src/accountDeletionCore.ts`, used by `adminDeleteUser` and by the
+  self-service `deleteMyAccount` (the caller's own uid only; the password is verified on the server as the step-up, five
+  attempts per 15 minutes, the last admin cannot delete itself). After `purgeAccountCoaching` it removes the team the
+  account owns (members go back to their own team) or its place in another team, programs and their assignments, invites,
+  passkeys and challenges, login counters (`loginAttempts.identifier`), `sleepSchedules/{uid}`, legacy trainer notes it wrote,
+  Storage `avatars/{uid}/`, `users/{uid}` with every subcollection, username, credentials, and last the Auth user. Every step
+  is delete-if-present, so a failed run is finished by running it again. Kept: other people's own records (audit, consentLog,
+  notices, 90-day team activity entries). Test: `tests/coach-server/accountDeletion.test.ts` ("registry empty after deletion").
 
 ## Legacy callables
 

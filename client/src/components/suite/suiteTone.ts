@@ -11,3 +11,13 @@ export const SUITE_TONE: Record<SuiteApp, Tone> = {
   learn: 'learn',
   coach: 'coach',
 };
+
+/** The icon of each app (its launcher tile; also the BrandBar switcher chip). */
+export const SUITE_ICON: Record<SuiteApp, string> = {
+  gym: 'barbell',
+  apex: 'trophy',
+  roster: 'user-focus',
+  nutrition: 'fork-knife',
+  learn: 'graduation-cap',
+  coach: 'chalkboard-teacher',
+};

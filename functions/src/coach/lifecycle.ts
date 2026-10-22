@@ -43,6 +43,7 @@ export async function endTrainerRelationships(
   ctx: Ctx,
   trainerId: string,
   endedBy: 'admin' | 'trainer' = 'admin',
+  neutral = false,
 ): Promise<number> {
   const rows = await ctx.kv.list('coaching', {
     where: [
@@ -56,7 +57,7 @@ export async function endTrainerRelationships(
     await ctx.kv.tx(async (kv) => {
       const c = (await kv.get(`coaching/${clientId}`)) as CoachingDoc | null;
       if (!c || c.status !== 'active' || c.trainerId !== trainerId) return;
-      await endRelationship(ctx, kv, c, endedBy, trainerId, ctx.now());
+      await endRelationship(ctx, kv, c, endedBy, trainerId, ctx.now(), { neutral });
       n++;
     });
   }
@@ -92,10 +93,11 @@ export async function purgeAccountCoaching(ctx: Ctx, uid: string): Promise<Purge
   const kv = ctx.kv;
   const rep: PurgeReport = { ended: 0, conversations: 0, docs: 0 };
 
-  rep.ended += await endTrainerRelationships(ctx, uid, 'admin');
+  // neutral notices: the counterpart's account must not keep the deleted person's name or uid (SPO-285 N1)
+  rep.ended += await endTrainerRelationships(ctx, uid, 'admin', true);
   const mine = (await kv.get(`coaching/${uid}`)) as CoachingDoc | null;
   if (mine?.status === 'active') {
-    await kv.tx((t) => endRelationship(ctx, t, mine, 'admin', uid, ctx.now()));
+    await kv.tx((t) => endRelationship(ctx, t, mine, 'admin', uid, ctx.now(), { neutral: true }));
     rep.ended++;
   }
 

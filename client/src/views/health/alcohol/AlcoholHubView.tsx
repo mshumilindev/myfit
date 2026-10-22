@@ -5,6 +5,7 @@
  */
 import { useState } from 'react';
 import { PageHead } from '../../../components/ui/PageHead';
+import { HealthDisclaimer } from '../../../legal/HealthDisclaimer';
 import { GroupedList, ListRow } from '../../../components/ui/GroupedList';
 import { IconTile } from '../../../components/ui/IconTile';
 import { Switch } from '../../../components/ui/Switch';
@@ -42,6 +43,7 @@ export function AlcoholHubView({
       />
       <div className="hl-scroll">
         <div className="hl-cnt">
+          <HealthDisclaimer />
           <GroupedList footer={t.nicHubFoot}>
             <ListRow
               icon={<IconTile tone="neutral" size={30} icon="list-checks" />}

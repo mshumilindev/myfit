@@ -10,8 +10,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SpotterMark } from '../brand/SpotterMark';
 import { SuiteRailFoot } from '../components/suite/SuiteRailFoot';
-import { SUITE_TONE } from '../components/suite/suiteTone';
-import { useSuiteAccount, type SuiteMode } from '../components/suite/useSuiteAccount';
+import { SUITE_ICON, SUITE_TONE } from '../components/suite/suiteTone';
+import type { SuiteMode } from '../components/suite/useSuiteAccount';
 import { MoreMenu, type MoreMenuItem } from '../components/ui/MoreMenu';
 import { Rail } from '../components/ui/Rail';
 import type { RailEntry } from '../components/ui/railOverflow';
@@ -45,9 +45,11 @@ import { CoachBackendFailed, NotConfigured } from './BackendNotice';
 import { ChatDock } from './chat/ChatDock';
 import { useLiveWidget } from './screens/live/useLiveWidget';
 import { useCoachRoute } from './useCoachRoute';
+import { useBackButtonEdgeSwipe } from '../edgeSwipeBack';
 import { useCoachUnread } from './unread';
 import { useTeamT } from '../i18n/coachTeam';
 import { useTeamRequests } from './team/useTeamRequests';
+import { NightSky } from '../components/SpotterSky';
 import './CoachApp.css';
 
 export interface CoachShellProps {
@@ -89,16 +91,12 @@ export function CoachShell({
   const active = navScreenOf(route);
   // A phone thread is the whole screen (like every other chat): the app header stays (like every app), no page title, no bottom navigation.
   const threadOpen = !desktop && route.screen === 'chat' && 'with' in route && !!route.with;
+  // Phone: a swipe from the left edge presses the screen's Back button (never the system history swipe, SPO-146).
+  useBackButtonEdgeSwipe(!desktop);
   const mainRef = useRef<HTMLElement>(null);
   // Phone: the More tab opens a bottom sheet. Desktop: the rail collapses its trailing entries
   // into its own More item when too short (Rail `overflow`); the avatar opens ONLY the account.
   const [moreOpen, setMoreOpen] = useState(false);
-  const { account, dialog } = useSuiteAccount({
-    app: 'coach',
-    identity: { name, userId, role },
-    onOpenGym: onExitToWorkouts,
-    onOpenProfile,
-  });
 
   useEffect(() => {
     const on = () => setMoreOpen(true);
@@ -158,7 +156,9 @@ export function CoachShell({
   const moreScreens: readonly ScreenId[] = manager
     ? []
     : [...(MORE_SCREENS as readonly ScreenId[]), 'team'];
-  const moreItems: MoreMenuItem[] = moreScreens.map(entryOf);
+  // Header controls the bar had no room for continue in More (a manager has none: they go to the avatar's drawer).
+  const [headerHidden, setHeaderHidden] = useState<MoreMenuItem[]>([]);
+  const moreItems: MoreMenuItem[] = [...moreScreens.map(entryOf), ...(manager ? [] : headerHidden)];
   // Desktop rail nav: exactly the seven design items. When the rail is too short the trailing
   // ones collapse into More (Rail `overflow`); Apps is NOT among them: it is pinned in the foot.
   // Live and Signals are not rail items (phone More sheet only until the foot widgets land).
@@ -196,6 +196,7 @@ export function CoachShell({
 
   return (
     <div className={`app-coach co-shell apex-app`}>
+      <NightSky />
       <nav className="co-skip-nav" aria-label={c.skipToContent}>
         <a
           className="co-skip"
@@ -248,6 +249,8 @@ export function CoachShell({
           app={manager ? c.modeManager : c.modeCoach}
           onApp={onOpenShell}
           appLabel={t.shellSwitch}
+          tone={SUITE_TONE.coach}
+          icon={SUITE_ICON.coach}
           actions={
             <BellButton
               label={c.railNotifications}
@@ -255,7 +258,16 @@ export function CoachShell({
               onClick={() => onNavigate({ screen: 'chat' })}
             />
           }
-          avatar={<BrandAccount app="coach" identity={{ name, userId, role }} />}
+          onHiddenChange={setHeaderHidden}
+          avatar={(hidden) => (
+            <BrandAccount
+              app="coach"
+              identity={{ name, userId, role }}
+              hidden={manager ? hidden : undefined}
+              onOpenProfile={onOpenProfile}
+              onOpenGym={onExitToWorkouts}
+            />
+          )}
         />
       )}
 
@@ -285,11 +297,8 @@ export function CoachShell({
           onClose={() => setMoreOpen(false)}
           title={c.navMore}
           items={moreItems}
-          apps={{ label: c.navApps, onOpen: onOpenShell }}
-          account={account}
         />
       )}
-      {!desktop && dialog}
     </div>
   );
 }
@@ -297,17 +306,17 @@ export function CoachShell({
 /** The shell wired to the URL hash (`#/c/...`), as App.tsx mounts it. */
 export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
   const [route, navigate] = useCoachRoute();
+  // A manager opens only the schedule, clients and team: any other deep link lands on the schedule.
+  const outOfBounds = props.role === 'manager' && !managerMayOpen(route);
+  useEffect(() => {
+    if (outOfBounds) navigate(MANAGER_HOME_ROUTE);
+  }, [outOfBounds, navigate]);
   // Real backend (production, or VITE_COACH_BACKEND=firestore in dev): the adapters are installed before any screen reads a port.
   const backendRole = props.role === 'manager' ? 'manager' : 'trainer';
   const { status, retry, problem } = useCoachBackendStatus(backendRole, true, {
     id: props.userId ?? currentUid(),
     name: props.name,
   });
-  // A manager opens only the schedule, clients and team: any other deep link lands on the schedule.
-  const outOfBounds = props.role === 'manager' && !managerMayOpen(route);
-  useEffect(() => {
-    if (outOfBounds) navigate(MANAGER_HOME_ROUTE);
-  }, [outOfBounds, navigate]);
   const ready = status === 'ready';
   // A production build with no backend configured: say so, render no client data (never the sample fixtures).
   if (coachIsUnconfigured())

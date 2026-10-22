@@ -10,7 +10,7 @@ import { Button, IconButton } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { useT } from '../i18n';
 import { useStore, resetGoals } from '../store';
-import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
+import { OverviewHead } from '../components/ui/OverviewHead';
 import { FocusBodyMap } from '../components/Muscle';
 import { FocusEditor } from './FocusEditor';
 import { PhysiquePicker } from './PhysiquePicker';
@@ -19,16 +19,10 @@ import { focusToGroup, type FocusMuscle } from '../data/subregions';
 import { LANDMARKS } from '../volume';
 import { exercisesForSubRegions } from '../data/exercises';
 import type { MuscleGroup } from '../data/exercises';
-import type { Shell } from '../App';
 import { Icon, ConfirmDialog, useExerciseName } from '../ui';
 import { Chip, ChipGroup } from '../components/ui/Chip';
 
-export function GoalsView({
-  onProgramsTab,
-}: {
-  shell: Shell;
-  onProgramsTab?: (peer: ProgramsPeer) => void;
-}) {
+export function GoalsView() {
   const { t } = useT();
   const exName = useExerciseName();
   const store = useStore();
@@ -58,13 +52,7 @@ export function GoalsView({
 
   return (
     <div className="screen programs-page programs-author-page programs-has-tabs goals-tab">
-      <div className="programs-top ctl-row--md">
-        <div>
-          <div className="kicker">{t.training}</div>
-          <h2 className="title-26">{t.goalsTab}</h2>
-        </div>
-        <ProgramsTabs active="goals" onSelect={(peer) => onProgramsTab?.(peer)} />
-      </div>
+      <OverviewHead title={t.goalsTab} />
 
       <div className="goals-body">
         <p className="goals-intro">{t.goalsIntro}</p>

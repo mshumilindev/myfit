@@ -18,10 +18,11 @@ import { useT } from '../../i18n';
 import { useCoachT } from '../../i18n/coach';
 import { coachEntryHash } from '../../coach/routes';
 import { useCoachAccess } from '../../coach/useCoachAccess';
-import { Avatar } from '../Avatar';
+import { UserAvatar } from '../Avatar';
 import type { AccountPanelProps } from '../ui/AccountPanel';
-import { ConfirmDialog } from '../../ui';
+import { SignOutDialog } from '../SignOutDialog';
 import { useSuiteSession } from './suiteSession';
+import { setHash } from '../../route';
 
 export type SuiteMode = 'coach' | 'workouts';
 /** The app the account block is shown in. Only Gym is the "My workouts" side. */
@@ -69,7 +70,7 @@ export function useSuiteAccount({
   const [asking, setAsking] = useState(false);
   return useMemo(() => {
     const avatar = (size: number) => (
-      <Avatar userId={uid} name={name || '?'} hasPhoto size={size} />
+      <UserAvatar userId={uid} name={name || '?'} hasPhoto size={size} />
     );
     const account: AccountPanelProps<SuiteMode> = {
       name,
@@ -93,10 +94,10 @@ export function useSuiteAccount({
               app === 'coach' ? ('coach' as const) : app === 'gym' ? ('workouts' as const) : null,
             modeLabel: c.modeLabel,
             onModeChange: (m: SuiteMode) => {
-              if (m === 'coach') window.location.hash = coachEntryHash();
+              if (m === 'coach') setHash(coachEntryHash());
               // Gym home: a bare Gym hash closes whatever sub-app is open (App.tsx hashchange).
               else if (onOpenGym) onOpenGym();
-              else window.location.hash = '#/today';
+              else setHash('#/today');
             },
             note: c.modeNote,
           }
@@ -107,18 +108,12 @@ export function useSuiteAccount({
     };
     const dialog =
       asking && session ? (
-        <ConfirmDialog
-          title={t.signOutTitle}
-          body={
-            session.queueLength > 0 ? t.signOutQueueBody(session.queueLength) : t.signOutCleanBody
-          }
-          confirmLabel={t.signOut}
-          cancelLabel={t.cancel}
-          danger
+        <SignOutDialog
+          queueLength={session.queueLength}
           onCancel={() => setAsking(false)}
-          onConfirm={() => {
+          onConfirm={(forget) => {
             setAsking(false);
-            session.signOut();
+            session.signOut({ forget });
           }}
         />
       ) : null;

@@ -1,6 +1,12 @@
 import { useSyncExternalStore } from 'react';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { deleteDoc, doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { currentUid, getUsername } from '../api';
+import {
+  healthSnapshot,
+  healthVersion,
+  isHealthOn,
+  subscribeHealth,
+} from '../data/healthConsentGate';
 import { onAuthChange, watchRole } from './auth';
 import { sumMacros } from './calc';
 import { db } from './firebase';
@@ -80,13 +86,45 @@ function sortByTime(entries: Entry[]): Entry[] {
   return entries.slice().sort((a, b) => (a.loggedAt < b.loggedAt ? 1 : -1));
 }
 
+/** The four singleton documents of the food feature. */
+const FOOD_DOCS = ['nutritionLog', 'nutritionFoods', 'nutritionGoal', 'nutritionProfile'] as const;
+type FoodDoc = (typeof FOOD_DOCS)[number];
+/** Documents that have delivered their first snapshot on this stream (until then "nothing stored" is not an answer). */
+const seenDocs = new Set<FoodDoc>();
+let loadWaiters: (() => void)[] = [];
+/** Documents the person deleted: a snapshot that still carries data for one is the old data, so it is deleted again. */
+const wipedDocs = new Set<FoodDoc>();
+
+function markSeen(name: FoodDoc) {
+  seenDocs.add(name);
+  if (seenDocs.size >= FOOD_DOCS.length) loadWaiters.splice(0).forEach((w) => w());
+}
+
+/**
+ * A snapshot of `name` arrived. True when it must be ignored: the document was deleted by the person and this snapshot
+ * (read before the delete reached the server) still has data, so it is removed again instead of refilling the screen.
+ * The first empty snapshot after a delete (or a write of the person's own) ends the guard.
+ */
+function ignoreAfterWipe(u: string, name: FoodDoc, exists: boolean): boolean {
+  if (!wipedDocs.has(name)) return false;
+  if (!exists) {
+    wipedDocs.delete(name);
+    return false;
+  }
+  deleteDoc(metaRef(u, name)).catch(onWriteError);
+  return true;
+}
+
 function startStreams(u: string) {
   stopStreams();
+  seenDocs.clear();
   set({ loading: true, failed: false });
   unsubs.push(
     onSnapshot(
       metaRef(u, 'nutritionLog'),
       (d) => {
+        markSeen('nutritionLog');
+        if (ignoreAfterWipe(u, 'nutritionLog', d.exists())) return;
         const data = d.exists() ? (d.data() as { entries?: Entry[] }) : {};
         set({ entries: sortByTime(data.entries ?? []), loading: false, failed: false });
       },
@@ -94,17 +132,29 @@ function startStreams(u: string) {
     ),
     onSnapshot(
       metaRef(u, 'nutritionFoods'),
-      (d) => set({ customFoods: d.exists() ? ((d.data() as { foods?: Food[] }).foods ?? []) : [] }),
+      (d) => {
+        markSeen('nutritionFoods');
+        if (ignoreAfterWipe(u, 'nutritionFoods', d.exists())) return;
+        set({ customFoods: d.exists() ? ((d.data() as { foods?: Food[] }).foods ?? []) : [] });
+      },
       () => undefined,
     ),
     onSnapshot(
       metaRef(u, 'nutritionGoal'),
-      (d) => set({ goal: d.exists() ? (d.data() as Goal) : null }),
+      (d) => {
+        markSeen('nutritionGoal');
+        if (ignoreAfterWipe(u, 'nutritionGoal', d.exists())) return;
+        set({ goal: d.exists() ? (d.data() as Goal) : null });
+      },
       () => undefined,
     ),
     onSnapshot(
       metaRef(u, 'nutritionProfile'),
-      (d) => set({ profile: d.exists() ? (d.data() as NutritionProfile) : null }),
+      (d) => {
+        markSeen('nutritionProfile');
+        if (ignoreAfterWipe(u, 'nutritionProfile', d.exists())) return;
+        set({ profile: d.exists() ? (d.data() as NutritionProfile) : null });
+      },
       () => undefined,
     ),
     onSnapshot(
@@ -134,6 +184,8 @@ onAuthChange((user) => {
     if (!same) startStreams(user.uid);
   } else {
     stopStreams();
+    seenDocs.clear();
+    wipedDocs.clear();
     state = { ...SIGNED_OUT, authReady: true, lang: state.lang };
     emit();
   }
@@ -149,13 +201,93 @@ function onWriteError(err: unknown) {
   console.error('[nutrition] write failed', err);
 }
 
+/**
+ * The food log is a health feature (SPO-290): without consent nothing is written. That includes removing a single entry
+ * or food (they are writes of the whole document); what works while the feature is off is the bulk delete,
+ * `deleteNutritionData`, which is the delete offered when consent is withdrawn.
+ */
+const canWrite = (): boolean => isHealthOn('nutrition');
+
 function writeLog(entries: Entry[]) {
+  if (!canWrite()) return;
+  wipedDocs.delete('nutritionLog');
   set({ entries: sortByTime(entries) }); // optimistic; snapshot confirms
   if (state.uid) setDoc(metaRef(state.uid, 'nutritionLog'), { entries }).catch(onWriteError);
 }
 function writeFoods(foods: Food[]) {
+  if (!canWrite()) return;
+  wipedDocs.delete('nutritionFoods');
   set({ customFoods: foods });
   if (state.uid) setDoc(metaRef(state.uid, 'nutritionFoods'), { foods }).catch(onWriteError);
+}
+
+let exposedMemo: { raw: AppState; v: number; out: AppState } | null = null;
+/** What the screens see: without the `nutrition` consent the food log, goal and profile are not shown or used. */
+function exposed(): AppState {
+  const v = healthVersion();
+  if (exposedMemo === null || exposedMemo.raw !== state || exposedMemo.v !== v) {
+    const on = healthSnapshot().on.nutrition;
+    exposedMemo = {
+      raw: state,
+      v,
+      out: on ? state : { ...state, entries: [], customFoods: [], goal: null, profile: null },
+    };
+  }
+  return exposedMemo.out;
+}
+subscribeHealth(emit);
+
+/**
+ * Deletes everything stored for the food log, goal and profile (the four `meta/nutrition*` documents) and empties the
+ * in-memory copy. Works while the feature is off: it is the delete offered when consent is withdrawn (SPO-290).
+ */
+export function deleteNutritionData(): void {
+  const u = state.uid;
+  // Marked before anything else: even a snapshot that is still on its way (or the first one, when the person deletes
+  // before the streams have answered) must not put the data back; it is deleted again when it arrives.
+  for (const name of FOOD_DOCS) wipedDocs.add(name);
+  set({ entries: [], customFoods: [], goal: null, profile: null });
+  if (!u) return;
+  // Queued by Firestore's offline persistence like every other write; never awaited (offline it resolves only later).
+  for (const name of FOOD_DOCS) deleteDoc(metaRef(u, name)).catch(onWriteError);
+}
+
+/** Anything of the food feature is stored (raw), whatever the consent says. Only meaningful once `nutritionLoaded()`. */
+export const hasNutritionData = (): boolean =>
+  state.entries.length > 0 || state.customFoods.length > 0 || !!state.goal || !!state.profile;
+
+/** RAW food log, foods, goal and profile, for the data copy only (Art. 15 / 20, no consent needed to give a person their own data back). Never shown. */
+export const storedNutrition = (): Pick<
+  AppState,
+  'entries' | 'customFoods' | 'goal' | 'profile'
+> => ({
+  entries: state.entries,
+  customFoods: state.customFoods,
+  goal: state.goal,
+  profile: state.profile,
+});
+
+/** How long to wait for the first snapshots before answering without them (offline with nothing cached). */
+const NUTRITION_LOAD_WAIT_MS = 4000;
+
+/**
+ * Resolves true once all four documents have delivered their first snapshot (or at once when there is no account to
+ * read); false when they have not within `waitMs`. Whether anything is stored is not known before that: an empty
+ * state at start is "not loaded yet", not "nothing there".
+ */
+export function nutritionLoaded(waitMs: number = NUTRITION_LOAD_WAIT_MS): Promise<boolean> {
+  if (!state.uid || seenDocs.size >= FOOD_DOCS.length) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const done = () => {
+      clearTimeout(timer);
+      resolve(true);
+    };
+    const timer = setTimeout(() => {
+      loadWaiters = loadWaiters.filter((w) => w !== done);
+      resolve(false);
+    }, waitMs);
+    loadWaiters.push(done);
+  });
 }
 
 export const store = {
@@ -163,7 +295,7 @@ export const store = {
     listeners.add(cb);
     return () => listeners.delete(cb);
   },
-  get: () => state,
+  get: exposed,
 
   retry() {
     if (state.uid) startStreams(state.uid);
@@ -219,11 +351,15 @@ export const store = {
   },
 
   setGoal(goal: Goal) {
+    if (!canWrite()) return;
+    wipedDocs.delete('nutritionGoal');
     set({ goal });
     if (state.uid) setDoc(metaRef(state.uid, 'nutritionGoal'), goal).catch(onWriteError);
   },
 
   setProfile(patch: Partial<NutritionProfile>) {
+    if (!canWrite()) return;
+    wipedDocs.delete('nutritionProfile');
     const next = { ...(state.profile ?? {}), ...patch };
     set({ profile: next });
     if (state.uid)
@@ -241,7 +377,7 @@ export const store = {
 };
 
 export function useStore(): AppState {
-  return useSyncExternalStore(store.subscribe, store.get, store.get);
+  return useSyncExternalStore(store.subscribe, exposed, exposed);
 }
 
 export function entriesForDay(s: AppState, day: string): Entry[] {

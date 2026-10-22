@@ -177,6 +177,28 @@ export async function updateNow(
   }
 }
 
+/**
+ * Reload into the NEWEST build. A plain reload serves whatever worker is active now; when several deploys landed since
+ * the page started, that can be an intermediate build and the plate would come back once per deploy. So first let the
+ * worker pick up the latest build (bounded wait, offline-safe), then reload exactly once.
+ */
+export async function reloadToLatest(
+  update: (
+    container: undefined,
+    reload: () => void,
+    timeoutMs: number,
+  ) => Promise<UpdateResult> = updateNow,
+  reload: () => void = () => window.location.reload(),
+  timeoutMs = 4_000,
+): Promise<void> {
+  try {
+    await update(undefined, () => undefined, timeoutMs);
+  } catch {
+    /* reload anyway */
+  }
+  reload();
+}
+
 /** The last resort: drop every worker and every cache, then load the app fresh from the network. */
 export async function resetApp(): Promise<void> {
   try {

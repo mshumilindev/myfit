@@ -26,6 +26,10 @@ export interface ChatMsg {
   q?: string;
   /** Your verdict on this answer (hides the buttons). */
   rated?: 'up' | 'down';
+  /** The reply was written by an AI model (Gemini or Puter): shown with the AI mark (EU AI Act Art. 50). */
+  ai?: 'gemini' | 'puter';
+  /** The AI chat is off: the question to send once the person turns it on (a chip under Atlas's answer). */
+  aiFor?: string;
   /** Gemini is out for the day: the question to ask again through Puter after a sign-in. */
   puterFor?: string;
 }
@@ -80,6 +84,10 @@ export function removeChat(id: string): void {
 }
 export function clearChat(): void {
   commit([]);
+}
+/** The chat on this device right now, outside React (the data export reads it). */
+export function getChatLog(): ChatMsg[] {
+  return log;
 }
 export function useChatLog(): ChatMsg[] {
   return useSyncExternalStore(

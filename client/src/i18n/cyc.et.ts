@@ -76,6 +76,8 @@ export const cycEt: typeof cycEn = {
   cycOffPregnancy:
     'Kroonilistes on aktiivne rasedus. Andmed jäävad alles; kui see lõpeb, küsime uut alguskuupäeva.',
   cycOffMenopause: 'Kroonilistes on märgitud menopaus. Andmed jäävad alles.',
+  cycPausedNeutral: 'Peatatud',
+  cycOffNeutral: 'Tsükkel on praegu peatatud. Sinu andmed on alles.',
   cycOpenStates: 'Ava seisundid',
   cycAfterPause: 'Paus on läbi. Sisesta, millal tsükkel algas, et jätkata.',
 

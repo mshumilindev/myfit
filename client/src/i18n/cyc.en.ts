@@ -75,6 +75,8 @@ export const cycEn = {
   cycOffPregnancy:
     'There is an active pregnancy in your Chronic conditions. Your data is kept; when it ends we will ask for a new start date.',
   cycOffMenopause: 'Menopause is marked in your Chronic conditions. Your data is kept.',
+  cycPausedNeutral: 'Paused',
+  cycOffNeutral: 'The Cycle is paused for now. Your data is kept.',
   cycOpenStates: 'Open conditions',
   cycAfterPause: 'The pause is over. Enter when your cycle started to continue.',
 

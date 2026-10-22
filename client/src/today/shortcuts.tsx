@@ -9,6 +9,7 @@ import type { Tone } from '../components/ui/tones';
 import { ACTIVITY_TYPES, activityType } from '../activities';
 import { dayKey } from '../store';
 import type { WidgetCtx } from './registry';
+import { setHash } from '../route';
 
 export interface ShortcutCtx extends WidgetCtx {
   startToday: (() => void) | null;
@@ -127,7 +128,7 @@ const BASE: ShortcutDef[] = [
     tone: 'learn',
     label: ({ tw }) => tw.scNextLesson,
     run: () => {
-      window.location.hash = '#/learn';
+      setHash('#/learn');
     },
   },
   {

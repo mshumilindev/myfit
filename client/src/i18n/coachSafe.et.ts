@@ -58,6 +58,9 @@ export const safeEt: typeof import('./coachSafe.en').safeEn = {
   raBodyExport: 'Eksport kopeerib kliendi andmed rakendusest välja. Jätkamiseks sisesta parool.',
   raBodyEnd: 'Suhte lõpetamine peatab jagamise mõlemas suunas. Jätkamiseks sisesta parool.',
   raBodyRevoke: 'Kutse tagasivõtmine lülitab lingi kõigile välja. Jätkamiseks sisesta parool.',
+  raBodyDelete: 'Deleting your account cannot be undone. Enter your password to delete it now.',
+  raBodyMyExport:
+    'Your copy contains your personal data, including health data. Enter your password to continue.',
   raPassword: 'Parool',
   raIdentifier: 'Kasutajanimi või e-post',
   raConfirm: 'Kinnita',

@@ -103,7 +103,7 @@ describe('coachShare publishing', () => {
       share: 'full',
     });
     await echoConditions();
-    store.updateCondition(a.id, { severity: 3 });
+    store.updateCondition((a as { id: string }).id, { severity: 3 });
     await echoConditions();
     const v1 = await lastView();
     expect(v1).toEqual(coachView(items(), general()));
@@ -111,7 +111,7 @@ describe('coachShare publishing', () => {
     expect(JSON.stringify(shareWrites().at(-1)!.data)).not.toContain(KEY);
 
     // Delete: the mirror reports no documents -> empty view.
-    store.deleteCondition(a.id);
+    store.deleteCondition((a as { id: string }).id);
     await echoConditions();
     expect(await lastView()).toEqual({ full: [], effects: [] });
   });

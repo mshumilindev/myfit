@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { currentHash, pushHash, replaceHash } from '../../route';
 
 /**
  * The schedule's view state lives in the hash query (`#/c/schedule?view=day&d=20733&open=<slot>&form=move`), so a
@@ -96,10 +97,10 @@ export interface ScheduleParamsApi extends ScheduleParams {
 
 export function useScheduleParams(): ScheduleParamsApi {
   const [params, setParams] = useState<ScheduleParams>(() =>
-    typeof window === 'undefined' ? EMPTY : readScheduleParams(window.location.hash),
+    typeof window === 'undefined' ? EMPTY : readScheduleParams(currentHash()),
   );
   useEffect(() => {
-    const on = () => setParams(readScheduleParams(window.location.hash));
+    const on = () => setParams(readScheduleParams(currentHash()));
     window.addEventListener('hashchange', on);
     window.addEventListener('popstate', on);
     return () => {
@@ -108,13 +109,13 @@ export function useScheduleParams(): ScheduleParamsApi {
     };
   }, []);
   const set = useCallback((patch: Partial<ScheduleParams>, push = false) => {
-    const next = { ...readScheduleParams(window.location.hash), ...patch };
-    const base = window.location.hash.split('?')[0] || '#/c/schedule';
+    const next = { ...readScheduleParams(currentHash()), ...patch };
+    const base = currentHash().split('?')[0] || '#/c/schedule';
     const hash = writeScheduleParams(base, next);
     setParams(next);
     try {
-      if (push) window.history.pushState(null, '', hash);
-      else window.history.replaceState(null, '', hash);
+      if (push) pushHash(hash);
+      else replaceHash(hash);
     } catch {
       /* history blocked: the screen state above still works */
     }

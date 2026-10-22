@@ -40,6 +40,7 @@ import { DataStatusBar } from './DataStatus';
 import { firstName } from './format';
 import './Client360.css';
 import { WorldFailed } from '../today/WorldNotices';
+import { setHash } from '../../route';
 
 export const CLIENT_TABS = [
   'overview',
@@ -218,13 +219,13 @@ export function Client360Screen({
       id: 'resched',
       label: r.c3MenuReschedule,
       icon: 'calendar-blank',
-      onSelect: () => window.location.assign(scheduleHref({ form: 'pick', client: cid })),
+      onSelect: () => setHash(scheduleHref({ form: 'pick', client: cid })),
     },
     {
       id: 'sched',
       label: r.c3MenuSchedule,
       icon: 'calendar-plus',
-      onSelect: () => window.location.assign(scheduleHref({ form: 'plan', client: cid })),
+      onSelect: () => setHash(scheduleHref({ form: 'plan', client: cid })),
     },
     {
       id: 'edit',
@@ -262,7 +263,7 @@ export function Client360Screen({
       <Button
         variant="secondary"
         icon="calendar-plus"
-        onClick={() => window.location.assign(scheduleHref({ form: 'plan', client: cid }))}
+        onClick={() => setHash(scheduleHref({ form: 'plan', client: cid }))}
       >
         {r.c3Schedule}
       </Button>
@@ -288,7 +289,7 @@ export function Client360Screen({
       <IconButton
         icon="calendar-plus"
         label={r.c3Schedule}
-        onClick={() => window.location.assign(scheduleHref({ form: 'plan', client: cid }))}
+        onClick={() => setHash(scheduleHref({ form: 'plan', client: cid }))}
       />
       <ActionMenu
         label={r.c3MenuLabel}

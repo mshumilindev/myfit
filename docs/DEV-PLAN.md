@@ -2,7 +2,7 @@
 
 Продуктовий скоуп — у [MVP.md](./MVP.md). Тут — інженерні кроки: кожен має
 Definition of Done і закінчується зеленим гейтом
-([quality-gate.mdc](../.cursor/rules/quality-gate.mdc)). Один крок = один
+([CLAUDE.md](../CLAUDE.md) (Definition of Done)). Один крок = один
 акуратний коміт (або кілька дрібних), без змішування з наступним.
 
 ## Крок 0 — Bootstrap якості (разовий)
@@ -19,7 +19,7 @@ git add -A && git commit -m "chore: eslint+prettier+хуки, правила р�
 ```
 
 **DoD:** `lint`, `format:check`, `typecheck` зелені; хуки спрацьовують на
-коміт/пуш; правила лежать у `.cursor/rules/`, `CLAUDE.md` у корені.
+коміт/пуш; правила лежать у `.claude/rules/`, `CLAUDE.md` у корені.
 
 ## Крок 1 — Зелена верифікація наявного коду
 
@@ -30,7 +30,7 @@ node scripts/validate-sql.mjs
 ```
 
 **DoD:** смоук — 0 FAIL; validate-sql чистий. Будь-який FAIL лагодиться за
-[test-integrity.mdc](../.cursor/rules/test-integrity.mdc) (спершу гіпотеза
+[tests.md](../.claude/rules/tests.md) (спершу гіпотеза
 «реграсія в коді», не «поганий тест»).
 
 ## Крок 2 — Перший реальний запуск (MVP.md, кроки 1–3)
@@ -61,10 +61,10 @@ Vitest на два найризиковіші модулі: `client/src/store.ts
 Cloudflare Tunnel за `cloudflare/SETUP.md` (потрібен домен).
 
 **DoD:** PWA відкривається по HTTPS з мобільної мережі; смоук проти
-production-БД НЕ ганяли (див. test-integrity).
+production-БД НЕ ганяли (див. `.claude/rules/tests.md`).
 
 ## Далі (поза цим планом)
 
 Нові сервіси («Харчування», «AI-оцінка тіла») — кожен окремим міні-планом за
 шаблоном shell'а (два реєстри), зі своїм смоук-розділом. Скоуп затверджується
-у MVP.md відповідного сервіса до коду ([agent-approach.mdc](../.cursor/rules/agent-approach.mdc)).
+у MVP.md відповідного сервіса до коду ([CLAUDE.md](../CLAUDE.md)).

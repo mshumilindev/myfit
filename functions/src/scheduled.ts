@@ -14,6 +14,9 @@ import { db } from './lib';
 import { sendDueOutbox } from './push';
 import * as crypto from 'node:crypto';
 import { takeDueSlot, wakeToCloseAt, type UpcomingNight } from './sleepAuto';
+import { firestoreKv } from './coach/firestoreKv';
+import { purgeStaleLoginAttempts, sweepPhantomUsers } from './accountMaintenanceCore';
+import { firebaseDeletionPorts, phantomUserIds } from './accountDeletion';
 
 const AUTO_FINISH_AFTER_MS = 8 * 60 * 60 * 1000;
 /** Close any workout still open more than 8h after it started. */
@@ -151,7 +154,26 @@ export const autoFinishStaleWorkouts = onSchedule('every 60 minutes', async () =
   } catch (e) {
     console.error('[maintenance] push outbox failed', e);
   }
+  let attempts = 0;
+  try {
+    attempts = await purgeStaleLoginAttempts(firestoreKv(db), Date.now());
+  } catch (e) {
+    console.error('[maintenance] login attempts purge failed', e);
+  }
   console.log(
-    `[maintenance] workouts closed=${closed} sleeps ended=${ended} started=${started} pushed=${pushed}`,
+    `[maintenance] workouts closed=${closed} sleeps ended=${ended} started=${started} pushed=${pushed} loginAttemptsPurged=${attempts}`,
   );
+});
+
+/** Daily: user trees whose account document is gone (written back by a stale token or an offline queue after deletion). */
+export const sweepOrphanUserTrees = onSchedule('every 24 hours', async () => {
+  try {
+    const n = await sweepPhantomUsers(firestoreKv(db), {
+      phantomUserIds,
+      deleteTree: firebaseDeletionPorts.deleteTree,
+    });
+    console.log(`[maintenance] orphan user trees removed=${n}`);
+  } catch (e) {
+    console.error('[maintenance] orphan sweep failed', e);
+  }
 });

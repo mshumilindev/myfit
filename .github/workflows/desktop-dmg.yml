@@ -1,0 +1,22 @@
+name: Desktop DMG (unsigned)
+
+# Manual only: builds an unsigned macOS DMG of the Electron shell and attaches it as a run artifact.
+on:
+  workflow_dispatch:
+
+jobs:
+  dmg:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci -w desktop --ignore-scripts
+      - run: npm run dmg -w desktop
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spotter-dmg
+          path: desktop/release/*.dmg
+          if-no-files-found: error

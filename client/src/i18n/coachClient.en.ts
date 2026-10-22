@@ -5,8 +5,6 @@
  */
 import { plural } from './coachPlural';
 
-const sharedOf = (n: number) => `${n} of 6 shared`;
-
 export const clientEn = {
   /* ---- common ---- */
   ccBack: 'Back',
@@ -122,7 +120,7 @@ export const clientEn = {
   shRest: 'Nothing else. Private notes about you are not part of this.',
   shYourTrainer: 'Your trainer',
   shSince: (date: string) => `Since ${date}`,
-  shOfSix: sharedOf,
+  shOfTen: (n: number) => `${n} of 10 shared`,
   shActive: 'Active',
   shWaiting: 'Waiting',
   shNotShared: 'Not shared',
@@ -135,9 +133,6 @@ export const clientEn = {
   shNoneNote: (first: string) =>
     `You are not sharing anything yet. ${first} sees nothing until you do.`,
   shStart: 'Start sharing',
-  shHead: (first: string) => `Share with ${first}`,
-  shFoot:
-    'Each setting applies right away. Conditions, nicotine, alcohol and supplements have their own settings below.',
   shLog: 'Who saw what and when',
   shLogSub: (first: string) => `A list of every time ${first} opened your data`,
   shStop: (first: string) => `Stop sharing with ${first}`,
@@ -147,6 +142,26 @@ export const clientEn = {
   shKeep: 'Keep sharing',
   shStopConfirm: 'Stop sharing',
   shStopped: 'Sharing stopped',
+  shGroupTraining: 'Training',
+  shGroupBody: 'Body',
+  shGroupLife: 'Lifestyle and health',
+  shMore: 'More',
+  shFeatureOff: 'Feature is off',
+  shFeatureOffSub: 'Not collected, so nothing to share.',
+  shSharedFeatureOff: 'Shared, feature off',
+  shSharedFeatureOffSub:
+    'The feature is off, but your trainer still has access. Tap to stop sharing.',
+  shFullNotOffered: (cat: string) => `Full is not offered for ${cat}.`,
+  shStopFx1: (first: string) => `${first} sees nothing new from now on`,
+  shStopFx2: 'Your chat and their notes stay',
+  shStopFx3: 'Health settings are turned off too',
+  shStop1Body: (first: string) =>
+    `${first} will no longer see your new data. What was already seen stays in their records.`,
+  shStop2Title: (first: string) => `Turn off all 10 settings for ${first}?`,
+  shStop2Body: (count: number) =>
+    `Training, Body, and Lifestyle and health all go to Off${count > 0 ? `, including the ${count} you share now` : ''}. You can share again later, one setting at a time.`,
+  shContinue: 'Continue',
+  shStepOf: (i: number, n: number) => `Step ${i} of ${n}`,
   shRevokedNote: (first: string) => `You stopped sharing with ${first}. They see nothing new.`,
 
   /* ---- access log (S-31) ---- */

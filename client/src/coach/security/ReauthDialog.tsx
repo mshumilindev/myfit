@@ -64,7 +64,11 @@ export function ReauthDialog({
       ? sf.raBodyEnd
       : action === 'revoke-invite'
         ? sf.raBodyRevoke
-        : sf.raBodyExport;
+        : action === 'delete-account'
+          ? sf.raBodyDelete
+          : action === 'my-export'
+            ? sf.raBodyMyExport
+            : sf.raBodyExport;
   return (
     <ConfirmEffectsDialog
       title={sf.raTitle}

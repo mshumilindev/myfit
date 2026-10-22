@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Build the client and deploy it to Firebase Hosting (spotter-64c3b.web.app).
+# Build the client and deploy it to the TEST Hosting site (spotter-64c3b.web.app). Prod: deploy-hosting-prod.command.
 # Double-click in Finder, or run from a terminal.
 source ~/.zprofile 2>/dev/null
 source ~/.zshrc 2>/dev/null

@@ -20,7 +20,7 @@ import { offlineHydrate, offlineDedupe, offlineRevalidate } from '../offline/off
 import { useT } from '../i18n';
 import type { Shell } from '../App';
 import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
-import { Avatar } from '../components/Avatar';
+import { UserAvatar } from '../components/Avatar';
 import { clearProgramSeed, peekProgramSeed } from '../data/programSeed';
 import { PROGRAM_NET_KEY } from '../data/programMine';
 import type { ProgramItemLike } from '../data/programCsv';
@@ -49,6 +49,7 @@ import {
   type ProgramItem,
 } from './programs/model';
 import './programs/programs.css';
+import { currentHash, replaceHash, setHash as goTo } from '../route';
 
 type Open = { program: Program; saved: boolean; readOnly?: boolean };
 
@@ -78,9 +79,9 @@ export function ProgramsView({
   const [membersOf, setMembersOf] = useState<Program | null>(null);
   // The editor lives under the URL: `#/programs/<id>/edit` (a saved program) or `#/programs/new` (not saved yet). The hash
   // is the source of truth, so Back, reload and shared links all land on the same page.
-  const [hash, setHash] = useState(() => window.location.hash);
+  const [hash, setHash] = useState(() => currentHash());
   useEffect(() => {
-    const on = () => setHash(window.location.hash);
+    const on = () => setHash(currentHash());
     window.addEventListener('hashchange', on);
     return () => window.removeEventListener('hashchange', on);
   }, []);
@@ -106,7 +107,7 @@ export function ProgramsView({
     if (seed && !seeded.current) {
       seeded.current = true;
       pushed.current = true;
-      window.location.hash = PROGRAM_NEW_HASH;
+      goTo(PROGRAM_NEW_HASH);
     }
     clearProgramSeed(seed);
   }, []);
@@ -115,7 +116,7 @@ export function ProgramsView({
 
   function goEditor(r: Parameters<typeof programsHash>[0]) {
     pushed.current = true;
-    window.location.hash = programsHash(r);
+    goTo(programsHash(r));
   }
   function openNew(draft: Program) {
     setNewDraft(draft);
@@ -126,7 +127,7 @@ export function ProgramsView({
       pushed.current = false;
       window.history.back();
     } else {
-      window.history.replaceState(null, '', '#/programs');
+      replaceHash('#/programs');
       setHash('#/programs');
     }
   }
@@ -290,7 +291,7 @@ export function ProgramsView({
   const missing = !!parsedRoute && !open && loaded;
   useEffect(() => {
     if (!missing) return;
-    window.history.replaceState(null, '', '#/programs');
+    replaceHash('#/programs');
   }, [missing]);
 
   if (parsedRoute && !open && !missing) {
@@ -319,8 +320,8 @@ export function ProgramsView({
             // The first save of a new program turns `#/programs/new` into its own address.
             if (parsedRoute?.kind === 'new') {
               setJustSaved(p);
-              window.history.replaceState(null, '', programEditHash(p.id));
-              setHash(window.location.hash);
+              replaceHash(programEditHash(p.id));
+              setHash(currentHash());
             }
             loadPrograms();
             loadMine();
@@ -378,7 +379,7 @@ export function ProgramsView({
           </span>
           {mine.assignedBy && !byMe ? (
             <span className="pg-by">
-              <Avatar name={mine.assignedBy} size={22} />
+              <UserAvatar name={mine.assignedBy} size={22} />
               {t.pgByTrainer(mine.assignedBy)}
             </span>
           ) : (

@@ -524,7 +524,7 @@ function generate(ctx: WidgetCtx, len: number, focus: Focus, avoid: string[]): G
     now,
     intent: 'muscle',
     targetMuscles: FOCUS_MUSCLES[focus],
-    ...healthBuildCtx(store, now),
+    ...healthBuildCtx(now),
     lengthMin: len,
     warmup: true,
     cooldown: false,

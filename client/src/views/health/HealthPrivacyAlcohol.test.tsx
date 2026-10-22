@@ -48,23 +48,28 @@ const rowOf = (name: string) =>
   [...document.querySelectorAll<HTMLElement>('button.uirow')].find(
     (b) => b.querySelector('.uirow-l')?.textContent === name,
   ) as HTMLElement;
+/** The sharing list is a lazy chunk: wait for its rows. */
+const ready = () => screen.findByRole('button', { name: /^Alcohol,/ });
 const lines = (c: HTMLElement) =>
   [...c.querySelectorAll('.uicard .ut-w6')].map((e) => e.textContent);
 
 describe('HealthPrivacyView: Alcohol', () => {
-  it('has an Alcohol row (Off by default) and a "Delete alcohol data" row', () => {
+  it('has an Alcohol row (Off by default) and a "Delete alcohol data" row', async () => {
     render(<HealthPrivacyView onBack={() => undefined} />);
+    await ready();
     expect(rowOf('Alcohol').textContent).toContain('Off');
     expect(screen.getByText('Delete nicotine data')).toBeTruthy();
     expect(screen.getByText('Delete alcohol data')).toBeTruthy();
   });
 
-  it('the sheet offers Off and Effects only, no Full; a choice applies at once', () => {
+  it('the sheet offers Off and Effects only, no Full, and says why; a choice applies at once', async () => {
     render(<HealthPrivacyView onBack={() => undefined} />);
+    await ready();
     fireEvent.click(rowOf('Alcohol'));
-    const group = within(screen.getByRole('group', { name: 'Coach sharing' }));
+    const group = within(screen.getByRole('group', { name: 'Sharing level' }));
     expect(group.getAllByRole('button')).toHaveLength(2);
     expect(group.queryByText('Full')).toBeNull();
+    expect(screen.getByText('Full is not offered for Alcohol.')).toBeTruthy();
     expect(
       group.getByText('“Sleep need +10 min, readiness −4%.” No drinks or amounts.'),
     ).toBeTruthy();
@@ -77,25 +82,23 @@ describe('HealthPrivacyView: Alcohol', () => {
     expect(rowOf('Alcohol').textContent).toContain('Effects only');
   });
 
-  it('the summary card includes alcohol, built from the live state', () => {
+  it('the one summary includes alcohol, built from the live state', async () => {
     setConditionsShare('effects');
     setAlcoholSharing('effects');
     const a = render(<HealthPrivacyView onBack={() => undefined} />);
-    expect(lines(a.container)).toEqual([
-      'Training effects only: Long-term conditions and Alcohol.',
-    ]);
+    await ready();
+    expect(lines(a.container)).toEqual(['Effects only: Long-term conditions and Alcohol.']);
     a.unmount();
     setConditionsShare('off');
     setNicotineSharing('full');
     const b = render(<HealthPrivacyView onBack={() => undefined} />);
-    expect(lines(b.container)).toEqual([
-      'Training effects only: Alcohol.',
-      'Full details: Nicotine.',
-    ]);
+    await ready();
+    expect(lines(b.container)).toEqual(['Effects only: Alcohol.', 'Full: Nicotine.']);
     b.unmount();
     setNicotineSharing('off');
     setAlcoholSharing('off');
     const c = render(<HealthPrivacyView onBack={() => undefined} />);
+    await ready();
     expect(screen.getByText('Your coach sees nothing.')).toBeTruthy();
     c.unmount();
   });

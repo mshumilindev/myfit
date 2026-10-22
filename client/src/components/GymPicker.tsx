@@ -21,6 +21,8 @@ import {
   type PlaceResult,
 } from '../data/gymProviders';
 import { useT } from '../i18n';
+import { GeoOffNotice } from '../legal/GeoOff';
+import { useGeoSearchOn } from '../legal/useGeoSearch';
 import { Sheet } from '../ui';
 import { GymThumb } from './GymThumb';
 import { ListRow } from './ui/GroupedList';
@@ -106,8 +108,11 @@ export function GymPicker({
   // Gyms around you that aren't saved yet (sheet only): pick one and it's
   // saved and used in one tap.
   const [nearby, setNearby] = useState<PlaceResult[] | null>(null);
+  // Position and "gyms around you" use outside services: only with the gym-search consent (SPO-293).
+  const geoOn = useGeoSearchOn();
 
   useEffect(() => {
+    if (!geoOn) return;
     let alive = true;
     // Sort gyms by rough distance without re-prompting: reuse the last known
     // fix and refresh it silently only when permission is already granted, so
@@ -118,10 +123,10 @@ export function GymPicker({
     return () => {
       alive = false;
     };
-  }, []);
+  }, [geoOn]);
 
   useEffect(() => {
-    if (variant !== 'sheet' || !coords) return;
+    if (!geoOn || variant !== 'sheet' || !coords) return;
     const ctl = new AbortController();
     searchNearbyGyms(coords, 3000, gyms, ctl.signal)
       .then((rs) =>
@@ -134,7 +139,7 @@ export function GymPicker({
       )
       .catch(() => setNearby([]));
     return () => ctl.abort();
-  }, [coords, gyms, variant]);
+  }, [coords, gyms, variant, geoOn]);
 
   const pickNew = (r: PlaceResult) => {
     const g = upsertGym({
@@ -152,10 +157,10 @@ export function GymPicker({
   const autoMain = useMemo(() => autoMainGymIds(workouts), [workouts]);
   const sorted = useMemo(() => {
     const list = [...gyms];
-    if (coords) list.sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
+    if (geoOn && coords) list.sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
     return list.sort((a, b) => Number(isMainGym(b, autoMain)) - Number(isMainGym(a, autoMain))); // main gyms first
-  }, [gyms, coords, autoMain]);
-  const suggested = useMemo(() => suggestGymId(gyms, coords), [gyms, coords]);
+  }, [gyms, coords, autoMain, geoOn]);
+  const suggested = useMemo(() => suggestGymId(gyms, geoOn ? coords : null), [gyms, coords, geoOn]);
   const needle = q.trim().toLowerCase();
   const filtered = sorted.filter((g) => tokenMatch(g.name, needle));
 
@@ -174,7 +179,7 @@ export function GymPicker({
       )}
       <div className="gym-pick-list">
         {filtered.map((g) => {
-          const d = coords ? haversineM(coords, g) : null;
+          const d = geoOn && coords ? haversineM(coords, g) : null;
           const isSug = g.id === suggested && !needle;
           return (
             <ListRow
@@ -208,7 +213,9 @@ export function GymPicker({
         {variant === 'sheet' && (
           <>
             <div className="gym-pick-sub">{t.pickGymNearby}</div>
-            {nearby === null ? (
+            {!geoOn ? (
+              <GeoOffNotice />
+            ) : nearby === null ? (
               <div className="gym-pick-note">
                 {coords ? t.pickGymSearching : t.pickGymNoLocation}
               </div>

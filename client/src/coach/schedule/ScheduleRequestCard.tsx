@@ -17,6 +17,7 @@ import { gymName } from './types';
 import { useScheduleState } from './useSchedule';
 import { scheduleHref } from './useScheduleParams';
 import { slotOfRequest } from './view';
+import { setHash } from '../../route';
 
 export interface ScheduleRequestCardProps {
   reqId: string;
@@ -154,7 +155,7 @@ export function ScheduleRequestCard(p: ScheduleRequestCardProps) {
                 onClick: () =>
                   p.onCounter
                     ? p.onCounter(r.id)
-                    : window.location.assign(scheduleHref({ form: 'counter', req: r.id })),
+                    : setHash(scheduleHref({ form: 'counter', req: r.id })),
               }
             : undefined
         }
@@ -174,7 +175,7 @@ export function ScheduleRequestCard(p: ScheduleRequestCardProps) {
           !pending && status !== 'countered' && mine && !accepted && slotId
             ? {
                 label: t.rcFollowNew,
-                onClick: () => window.location.assign(scheduleHref({ form: 'move', slot: slotId })),
+                onClick: () => setHash(scheduleHref({ form: 'move', slot: slotId })),
               }
             : accepted
               ? {
@@ -182,7 +183,7 @@ export function ScheduleRequestCard(p: ScheduleRequestCardProps) {
                   onClick: () =>
                     p.onOpenCalendar
                       ? p.onOpenCalendar(dayOfTs(r.toStart))
-                      : window.location.assign(scheduleHref({ d: dayOfTs(r.toStart) })),
+                      : setHash(scheduleHref({ d: dayOfTs(r.toStart) })),
                 }
               : undefined
         }

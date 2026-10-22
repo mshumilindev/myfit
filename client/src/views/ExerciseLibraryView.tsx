@@ -8,35 +8,23 @@
  * subtabs inside the gallery.
  */
 import { useT } from '../i18n';
-import { getRole } from '../api';
 import { ExerciseGallery } from '../components/ExerciseGallery';
-import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
+import { OverviewHead } from '../components/ui/OverviewHead';
 import type { Shell } from '../App';
 
 export function ExerciseLibraryView({
   shell,
   libTab,
   onLibTab,
-  onProgramsTab,
 }: {
   shell: Shell;
   libTab: 'library' | 'mine';
   onLibTab: (t: 'library' | 'mine') => void;
-  onProgramsTab: (peer: ProgramsPeer) => void;
 }) {
   const { t } = useT();
-  const role = getRole();
   return (
     <div className="screen programs-page programs-author-page programs-has-tabs show-exercises exlib-tab">
-      <div className="programs-top ctl-row--md">
-        <div>
-          <div className="kicker">
-            {role === 'admin' ? t.roleAdmin : role === 'trainer' ? t.roleTrainer : t.training}
-          </div>
-          <h2 className="title-26">{t.exercisesTabLabel}</h2>
-        </div>
-        <ProgramsTabs active="exercises" onSelect={onProgramsTab} />
-      </div>
+      <OverviewHead title={t.exercisesTabLabel} />
       <div className="exg-tabwrap">
         <ExerciseGallery shell={shell} libTab={libTab} onLibTab={onLibTab} />
       </div>

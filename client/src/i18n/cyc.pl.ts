@@ -75,6 +75,8 @@ export const cycPl: typeof cycEn = {
   cycOffPregnancy:
     'W Przewlekłych jest aktywna ciąża. Dane zostają; po jej zakończeniu zapytamy o nową datę początku.',
   cycOffMenopause: 'W Przewlekłych oznaczono menopauzę. Dane zostają.',
+  cycPausedNeutral: 'Wstrzymano',
+  cycOffNeutral: 'Cykl jest na razie wstrzymany. Twoje dane są zachowane.',
   cycOpenStates: 'Otwórz stany',
   cycAfterPause: 'Przerwa się skończyła. Podaj, kiedy zaczął się cykl, aby kontynuować.',
 

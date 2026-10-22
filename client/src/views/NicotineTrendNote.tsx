@@ -6,6 +6,7 @@
  * (readiness reads the sleep need): creatine's strength expectation has no place in these
  * lenses, so it is not mentioned here.
  */
+import { Hint } from '../components/ui/Hint';
 import { useT } from '../i18n';
 import { surfaceOn } from '../nicotine';
 import { surfaceOn as alcoholSurfaceOn } from '../alcohol';
@@ -23,7 +24,7 @@ export function NicotineTrendNote() {
   const text = nicOn && alcOn ? t.alcFxTrendBoth : alcOn ? t.alcFxTrendNote : t.nicFxTrendNote;
   return (
     <>
-      {(nicOn || alcOn) && <p className="ut-xs ut-faint">{text}</p>}
+      {(nicOn || alcOn) && <Hint>{text}</Hint>}
       <SupplementTrendNote />
     </>
   );
