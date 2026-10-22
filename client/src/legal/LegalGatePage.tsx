@@ -19,7 +19,7 @@ import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { IconTile } from '../components/ui/IconTile';
 import { Notice } from '../components/ui/Notice';
 import { Stepper } from '../components/ui/Stepper';
-import { acceptBoxesEnabled, clearDocRead } from '../components/ui/docReadGate';
+import { clearDocRead } from '../components/ui/docReadGate';
 import { categoryList, useAtlasConsentT } from '../i18n/atlasConsent';
 import { useGeoT } from '../i18n/geoConsent';
 import { useGateT, type GateChoiceText } from '../i18n/legalGate';
@@ -31,7 +31,7 @@ import { agreementDocIds, agreementVersions, useAgreementGate } from './Agreemen
 import { renderBlocks } from './docBlocks';
 import { clearGateDraft, loadGateDraft, saveGateDraft } from './gateDraft';
 import { ATLAS_AI_CATEGORIES, GATE_CHOICES, choiceGrants, type GateChoice } from './gateChoices';
-import { useGateRecorder } from './gateRecorder';
+import { lastConsentFailure, useGateRecorder } from './gateRecorder';
 import { grantGeoSearch } from './geoGrant';
 import { useGateLeave } from './GateLeaveActions';
 import type { ConsentKind } from './consents';
@@ -61,10 +61,15 @@ export function LegalGatePage({
   const g = useGateT();
   const s = useTrainerTermsT();
   const hasTerms = parts.base || parts.trainer;
-  const [step, setStep] = useState<'terms' | 'choices'>(hasTerms ? 'terms' : 'choices');
+  const [step, setStep] = useState<'docs' | 'agree' | 'choices'>(hasTerms ? 'docs' : 'choices');
   const leave = useGateLeave(onSignOut);
   const steps = [
-    ...(hasTerms ? [{ id: 'terms', label: g.page.stepTerms }] : []),
+    ...(hasTerms
+      ? [
+          { id: 'docs', label: g.page.stepDocs },
+          { id: 'agree', label: g.page.stepAgree },
+        ]
+      : []),
     ...(withChoices ? [{ id: 'choices', label: g.page.stepChoices }] : []),
   ];
   const current = Math.max(
@@ -73,16 +78,28 @@ export function LegalGatePage({
   );
   const termsDone = () => (withChoices ? setStep('choices') : onFinished());
   const label = step === 'choices' ? g.choicesTitle : parts.base ? g.termsTitle : s.title;
-  const top =
+  const top = (done: readonly string[]) =>
     steps.length > 1 ? (
-      <Stepper steps={steps} current={current} stepLabel={g.page.step} />
+      <Stepper
+        steps={steps}
+        current={current}
+        done={done}
+        reachable={
+          step === 'agree' ? ['docs'] : step === 'docs' && done.includes('docs') ? ['agree'] : []
+        }
+        onStep={(id) => setStep(id as 'docs' | 'agree')}
+        stepLabel={g.page.step}
+      />
     ) : undefined;
   const common = { label, top, aside: leave.dialogs };
-  return step === 'terms' ? (
+  return step !== 'choices' ? (
     <TermsStep
       {...common}
       parts={parts}
       preview={preview}
+      phase={step}
+      onDocsDone={() => setStep('agree')}
+      onBack={() => setStep('docs')}
       onRecorded={termsDone}
       leave={leave.buttons}
     />
@@ -98,13 +115,17 @@ export function LegalGatePage({
 
 interface StepShell {
   label: string;
-  top: ReactNode;
+  /** The stepper, given the ids of the steps that are complete right now. */
+  top: (done: readonly string[]) => ReactNode;
   aside: ReactNode;
 }
 
 function TermsStep({
   parts,
   preview,
+  phase,
+  onDocsDone,
+  onBack,
   onRecorded,
   leave,
   label,
@@ -113,6 +134,9 @@ function TermsStep({
 }: StepShell & {
   parts: Parts;
   preview: boolean;
+  phase: 'docs' | 'agree';
+  onDocsDone: () => void;
+  onBack: () => void;
   onRecorded: () => void;
   leave: ReactNode;
 }) {
@@ -153,6 +177,7 @@ function TermsStep({
     onRecorded();
   });
   const busy = rec.state === 'saving' || rec.state === 'waiting';
+  const backLabel = useT().t.backAction;
   const nameOf = (id: string) =>
     id === 'terms'
       ? lg.ui.termsLink
@@ -181,80 +206,104 @@ function TermsStep({
       </>
     ),
   }));
-  const boxes = acceptBoxesEnabled(gate.allOpened);
-  const items = [
-    ...ids.map((id) => ({ id, label: p.leftRead(nameOf(id)), done: gate.opened[id] === true })),
+  const docItems = ids.map((id) => ({
+    id,
+    label: p.leftRead(nameOf(id)),
+    done: gate.opened[id] === true,
+  }));
+  const agreeItems = [
     ...(base ? [{ id: 'age', label: p.leftAge, done: gate.age }] : []),
     { id: 'agree', label: p.leftAgree, done: gate.agree },
   ];
+  const docsPhase = phase === 'docs';
   return (
     <FullPage
       label={label}
-      top={top}
       aside={aside}
       actions={
-        <div className="uifp-row">
-          {boxes && !gate.canContinue && (
-            <Button
-              variant="secondary"
-              size="lg"
-              icon="check-circle"
-              onClick={() => {
-                gate.setAge(true);
-                gate.setAgree(true);
-              }}
-            >
-              {p.acceptAll}
+        docsPhase ? (
+          <div className="uifp-row">
+            <Button variant="primary" size="lg" disabled={!gate.allOpened} onClick={onDocsDone}>
+              {p.next}
             </Button>
-          )}
-          <Button
-            variant="primary"
-            size="lg"
-            loading={busy}
-            disabled={!gate.canContinue || busy}
-            onClick={rec.start}
-          >
-            {rec.state === 'failed' ? p.retry : busy ? p.saving : p.next}
-          </Button>
-        </div>
+          </div>
+        ) : (
+          <div className="uifp-row">
+            <Button variant="ghost" size="lg" icon="arrow-left" disabled={busy} onClick={onBack}>
+              {backLabel}
+            </Button>
+            {!gate.canContinue && (
+              <Button
+                variant="secondary"
+                size="lg"
+                icon="check-circle"
+                onClick={() => {
+                  gate.setAge(true);
+                  gate.setAgree(true);
+                }}
+              >
+                {p.acceptAll}
+              </Button>
+            )}
+            <Button
+              variant="primary"
+              size="lg"
+              loading={busy}
+              disabled={!gate.canContinue || busy}
+              onClick={rec.start}
+            >
+              {rec.state === 'failed' ? p.retry : busy ? p.saving : p.next}
+            </Button>
+          </div>
+        )
       }
     >
       <div className="lgg-head">
         <IconTile tone="accent" size={44} icon="shield-check" />
         <h2 className="lgg-t ut-xl ut-w7">{base ? g.termsTitle : s.title}</h2>
       </div>
-      <p className="lgg-lead ut-base ut-muted">{base ? g.termsLead : s.lead}</p>
-      {trainer && <TrainerTermsBlock />}
-      <DocReader
-        docs={docs}
-        read={gate.opened}
-        onRead={gate.markOpened}
-        readLabel={p.readLabel}
-        unreadLabel={p.unreadLabel}
-      />
-      {base && (
-        <AcceptCheck checked={gate.age} disabled={!boxes} onChange={gate.setAge}>
-          <AgeText />
-        </AcceptCheck>
-      )}
-      <AcceptCheck checked={gate.agree} disabled={!boxes} onChange={gate.setAgree}>
-        <AgreeText base={base} trainer={trainer} />
-      </AcceptCheck>
-      <Checklist title={gate.canContinue ? p.leftDone : p.leftTitle} items={items} />
-      {rec.state === 'saving' && (
-        <Notice tone="neutral" icon="info">
-          {p.saving}
-        </Notice>
-      )}
-      {rec.state === 'waiting' && (
-        <Notice tone="neutral" icon="info">
-          {p.waiting}
-        </Notice>
-      )}
-      {rec.state === 'failed' && (
-        <Notice tone="danger" icon="info">
-          {p.failed}
-        </Notice>
+      {top([...(gate.allOpened ? ['docs'] : []), ...(gate.canContinue ? ['agree'] : [])])}
+      {docsPhase ? (
+        <>
+          <p className="lgg-lead ut-base ut-muted">{base ? g.termsLead : s.lead}</p>
+          {trainer && <TrainerTermsBlock />}
+          <DocReader
+            docs={docs}
+            read={gate.opened}
+            onRead={gate.markOpened}
+            readLabel={p.readLabel}
+            unreadLabel={p.unreadLabel}
+          />
+          <Checklist title={gate.allOpened ? p.leftDone : p.leftTitle} items={docItems} />
+        </>
+      ) : (
+        <>
+          {base && (
+            <AcceptCheck checked={gate.age} onChange={gate.setAge}>
+              <AgeText />
+            </AcceptCheck>
+          )}
+          <AcceptCheck checked={gate.agree} onChange={gate.setAgree}>
+            <AgreeText base={base} trainer={trainer} />
+          </AcceptCheck>
+          <Checklist title={gate.canContinue ? p.leftDone : p.leftTitle} items={agreeItems} />
+          {rec.state === 'saving' && (
+            <Notice tone="neutral" icon="info">
+              {p.saving}
+            </Notice>
+          )}
+          {rec.state === 'waiting' && (
+            <Notice tone="neutral" icon="info">
+              {p.waiting}
+            </Notice>
+          )}
+          {rec.state === 'failed' && (
+            <Notice tone="danger" icon="info">
+              {p.failed}
+              {lastConsentFailure() && ` (${lastConsentFailure()})`}
+            </Notice>
+          )}
+        </>
       )}
       {leave}
     </FullPage>
@@ -375,7 +424,6 @@ function ChoicesStep({
   return (
     <FullPage
       label={label}
-      top={top}
       aside={aside}
       actions={
         <div className="uifp-row">
@@ -398,6 +446,7 @@ function ChoicesStep({
         <IconTile tone="accent" size={44} icon="shield-check" />
         <h2 className="lgg-t ut-xl ut-w7">{g.choicesTitle}</h2>
       </div>
+      {top([])}
       <p className="lgg-lead ut-base ut-muted">{g.choicesLead}</p>
       <div className="lgp-bulk">
         <span className="ut-sm ut-muted">{p.onCount(on.size, GATE_CHOICES.length)}</span>

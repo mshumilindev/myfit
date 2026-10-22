@@ -130,6 +130,14 @@ describe('grantConsent / withdrawConsent', () => {
     });
   });
 
+  it('omits undefined fields (the callable SDK would send them as null and the server answers bad-textHash)', async () => {
+    h.callFn.mockResolvedValue({ id: 'a', at: 1 });
+    await grantConsent({ kind: 'age-18', textHash: undefined });
+    const body = h.callFn.mock.calls.at(-1)?.[1] as Record<string, unknown>;
+    expect('textHash' in body).toBe(false);
+    expect(body).toMatchObject({ kind: 'age-18', action: 'grant' });
+  });
+
   it('treats already-exists (409) as success and rethrows everything else', async () => {
     h.callFn.mockRejectedValueOnce(new h.HttpError(409, 'retry'));
     await expect(grantConsent({ kind: 'atlas-ai' })).resolves.toEqual({ id: '', at: 0 });

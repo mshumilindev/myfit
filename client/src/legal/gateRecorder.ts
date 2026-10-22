@@ -10,6 +10,7 @@ import { getLocale } from '../i18n';
 import { REQUIRED_KINDS, type ConsentKind } from './consents';
 import { flushPendingConsents, pendingConsentKinds, recordGateConsents } from './signupConsents';
 
+export { lastConsentFailure } from './signupConsents';
 export type RecordState = 'idle' | 'saving' | 'waiting' | 'failed' | 'done';
 const WAIT_MS = 4000;
 const AUTO_RETRIES = 2;

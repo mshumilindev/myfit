@@ -1,19 +1,79 @@
-.uistep {
+.uistepr {
   display: flex;
   flex-direction: column;
   gap: var(--s-8);
 }
-.uistep-bar {
+.uistepr-bar {
   display: flex;
   gap: var(--s-4);
 }
-.uistep-bar i {
+.uistepr-bar i {
   flex: 1;
   height: 4px;
   border-radius: 2px;
   background: var(--color-divider);
 }
-.uistep-bar i.is-on,
-.uistep-bar i.is-done {
+.uistepr-bar i.is-on,
+.uistepr-bar i.is-done {
   background: var(--color-accent);
+}
+.uistepr-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--s-16);
+}
+.uistepr-i {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  color: var(--color-text-faint);
+  min-width: 0;
+}
+.uistepr-n {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  font-size: 13px;
+}
+.uistepr-i.is-on {
+  color: var(--color-accent);
+}
+.uistepr-i.is-on .uistepr-l {
+  color: var(--color-text);
+}
+.uistepr-i.is-done {
+  color: var(--color-ok);
+}
+.uistepr-i.is-done .uistepr-n {
+  background: var(--color-ok);
+  border-color: var(--color-ok);
+  color: var(--color-bg);
+}
+.uistepr-t {
+  color: var(--color-text-muted);
+}
+.uistepr-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.uistepr-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: var(--r-8, 8px);
 }

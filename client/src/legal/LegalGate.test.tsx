@@ -116,8 +116,13 @@ const readTrainer = () => {
   fireEvent.click(doc(/^Trainer Terms/));
   fireEvent.click(doc(/^Data Processing Agreement/));
 };
+/** Step 1 (Documents): read both, then Continue to the Agreement step. */
+const toAgreement = (read: () => void = readBase) => {
+  read();
+  fireEvent.click(cont());
+};
 function acceptAll() {
-  readBase();
+  toAgreement();
   fireEvent.click(screen.getByRole('switch', AGE));
   fireEvent.click(screen.getByRole('switch', AGREE));
 }
@@ -135,7 +140,7 @@ describe('when the gate shows', () => {
     render(<LegalGate />);
     expect(page(TITLE)).toBeTruthy();
     expect(document.querySelector('.sheet')).toBeNull(); // a page, not a drawer
-    expect(screen.getByText('Step 1 of 2 · Terms')).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Step 1 of 3' })).toBeTruthy();
   });
 
   it.each([
@@ -277,18 +282,25 @@ describe('step 1: the documents are read on the page', () => {
     expect(items().map((i) => i.textContent?.trim())).toEqual([
       'Read: Terms of Use',
       'Read: Privacy Policy',
+    ]);
+    expect(done()).toBe(0);
+    fireEvent.click(doc(/^Terms of Use/));
+    expect(items()).toHaveLength(2);
+    expect(done()).toBe(1);
+    expect(screen.getByText('Still to do on this page')).toBeTruthy();
+    fireEvent.click(doc(/^Privacy Policy/));
+    expect(done()).toBe(2);
+    expect(screen.getByText('Ready to continue')).toBeTruthy();
+    fireEvent.click(cont()); // step 2: the agreement items, all still listed
+    expect(items().map((i) => i.textContent?.trim())).toEqual([
       'Confirm you are 18 or older',
       'Tick the agreement',
     ]);
     expect(done()).toBe(0);
-    fireEvent.click(doc(/^Terms of Use/));
-    expect(items()).toHaveLength(4);
-    expect(done()).toBe(1);
-    expect(screen.getByText('Still to do on this page')).toBeTruthy();
-    fireEvent.click(doc(/^Privacy Policy/));
     fireEvent.click(screen.getByRole('switch', AGE));
     fireEvent.click(screen.getByRole('switch', AGREE));
-    expect(done()).toBe(4);
+    expect(items()).toHaveLength(2);
+    expect(done()).toBe(2);
     expect(screen.getByText('Ready to continue')).toBeTruthy();
   });
 
@@ -314,15 +326,17 @@ describe('step 1: the documents are read on the page', () => {
     }
   });
 
-  it('the 18+ and agree switches stay locked until every document is read; Continue needs all of it', () => {
+  it('Continue on the Documents step needs every document read; the switches live on the next step', () => {
     render(<LegalGate />);
     expect(cont().disabled).toBe(true);
-    const age = screen.getByRole('switch', AGE) as HTMLInputElement;
-    expect(age.disabled).toBe(true);
+    expect(screen.queryByRole('switch', AGE)).toBeNull();
     fireEvent.click(doc(/^Terms of Use/));
-    expect(age.disabled).toBe(true);
+    expect(cont().disabled).toBe(true);
     fireEvent.click(doc(/^Privacy Policy/));
-    expect(age.disabled).toBe(false);
+    expect(cont().disabled).toBe(false);
+    fireEvent.click(cont());
+    expect(screen.getByRole('group', { name: 'Step 2 of 3' })).toBeTruthy();
+    const age = screen.getByRole('switch', AGE) as HTMLInputElement;
     expect(cont().disabled).toBe(true);
     fireEvent.click(age);
     expect(cont().disabled).toBe(true);
@@ -330,14 +344,26 @@ describe('step 1: the documents are read on the page', () => {
     expect(cont().disabled).toBe(false);
   });
 
-  it('"Accept all" appears once everything is read and switches both on', () => {
+  it('"Accept all" is on the Agreement step and switches both on', () => {
     render(<LegalGate />);
     expect(screen.queryByRole('button', { name: 'Accept all' })).toBeNull();
-    readBase();
+    toAgreement();
     fireEvent.click(screen.getByRole('button', { name: 'Accept all' }));
     expect((screen.getByRole('switch', AGE) as HTMLInputElement).checked).toBe(true);
     expect((screen.getByRole('switch', AGREE) as HTMLInputElement).checked).toBe(true);
     expect(cont().disabled).toBe(false);
+  });
+
+  it('Back returns to the Documents step with the reading kept; a finished step is a button in the Stepper', () => {
+    render(<LegalGate />);
+    toAgreement();
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByRole('group', { name: 'Step 1 of 3' })).toBeTruthy();
+    expect(done()).toBe(2);
+    fireEvent.click(screen.getByRole('button', { name: /Agreement/ })); // reachable once both are read
+    expect(screen.getByRole('group', { name: 'Step 2 of 3' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Documents/ }));
+    expect(screen.getByRole('group', { name: 'Step 1 of 3' })).toBeTruthy();
   });
 
   it('shows no "Before you continue" heading and no locked hint', () => {
@@ -436,7 +462,12 @@ describe('unsent progress is kept on this device only', () => {
     sessionStorage.clear(); // a different tab / browser restart: only localStorage is left
     render(<LegalGate />);
     await waitFor(() => expect(cont().disabled).toBe(false));
-    expect(done()).toBe(4);
+    expect(done()).toBe(2); // both documents are still read
+    fireEvent.click(cont());
+    expect((screen.getByRole('switch', AGE) as HTMLInputElement).checked).toBe(true);
+    expect((screen.getByRole('switch', AGREE) as HTMLInputElement).checked).toBe(true);
+    expect(done()).toBe(2);
+    expect(cont().disabled).toBe(false);
     fireEvent.click(cont());
     await waitFor(() => expect(page(CHOICES)).toBeTruthy());
     expect(localStorage.getItem('spotter.gateDraft.u1')).toBeNull();
@@ -478,7 +509,7 @@ describe('?gatepreview=1', () => {
 describe('step 2: your choices', () => {
   it('lists every optional consent, all off, with the Stepper on step 2 of 2', async () => {
     await toStep2();
-    expect(screen.getByText('Step 2 of 2 · Your choices')).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Step 3 of 3' })).toBeTruthy();
     const sw = screen.getAllByRole('switch') as HTMLInputElement[];
     expect(sw).toHaveLength(9); // Atlas AI, 7 health features, gym search and maps
     expect(sw.every((s) => !s.checked)).toBe(true);
@@ -563,7 +594,7 @@ describe('step 2: your choices', () => {
     h.uid = 'u2';
     h.state = server([]);
     render(<LegalGate />);
-    expect(screen.getByText('Step 1 of 2 · Terms')).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Step 1 of 3' })).toBeTruthy();
   });
 
   it('is skipped when the person already has any optional consent record', () => {
@@ -572,7 +603,7 @@ describe('step 2: your choices', () => {
     ]);
     render(<LegalGate />);
     expect(page(TITLE)).toBeTruthy();
-    expect(screen.queryByText(/Step 1 of/)).toBeNull(); // a single step: no Stepper
+    expect(screen.getByRole('group', { name: 'Step 1 of 2' })).toBeTruthy(); // Documents + Agreement, no choices
   });
 });
 
@@ -594,7 +625,7 @@ describe('sign out and delete my account', () => {
     render(<LegalGate />);
     fireEvent.click(screen.getByRole('button', { name: 'Delete my account' }));
     expect(screen.getByText('Delete your account?')).toBeTruthy();
-    expect(screen.getByText('Step 1 of 3')).toBeTruthy();
+    expect(screen.getAllByText('Step 1 of 3')).toHaveLength(2); // the delete prompt's caption and the gate's own Stepper
     expect(h.signOut).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Keep my account' }));
     expect(screen.queryByText('Delete your account?')).toBeNull();
@@ -615,10 +646,14 @@ describe('Trainer Terms + DPA on the same page', () => {
       /^Data Processing Agreement/,
     ])
       expect(doc(d)).toBeTruthy();
-    expect(screen.getByRole('switch', AGE)).toBeTruthy();
-    expect(screen.getByRole('switch', AGREE_ALL)).toBeTruthy();
     expect(screen.getByText('Draft: not yet reviewed by a lawyer')).toBeTruthy();
     expect(screen.getByText('In short')).toBeTruthy();
+    toAgreement(() => {
+      readBase();
+      readTrainer();
+    });
+    expect(screen.getByRole('switch', AGE)).toBeTruthy();
+    expect(screen.getByRole('switch', AGREE_ALL)).toBeTruthy();
     expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
   });
 
@@ -626,10 +661,12 @@ describe('Trainer Terms + DPA on the same page', () => {
     h.role = 'trainer';
     render(<LegalGate />);
     readBase();
-    expect((screen.getByRole('switch', AGREE_ALL) as HTMLInputElement).disabled).toBe(true);
+    expect(cont().disabled).toBe(true);
     fireEvent.click(doc(/^Trainer Terms/));
     expect(cont().disabled).toBe(true);
     fireEvent.click(doc(/^Data Processing Agreement/));
+    expect(cont().disabled).toBe(false);
+    fireEvent.click(cont());
     fireEvent.click(screen.getByRole('switch', AGE));
     expect(cont().disabled).toBe(true);
     fireEvent.click(screen.getByRole('switch', AGREE_ALL));
@@ -639,8 +676,10 @@ describe('Trainer Terms + DPA on the same page', () => {
   it('Continue records terms, policy-ack, age-18 and trainer-terms in one queued go, with a hash for each text kind', async () => {
     h.role = 'trainer';
     render(<LegalGate />);
-    readBase();
-    readTrainer();
+    toAgreement(() => {
+      readBase();
+      readTrainer();
+    });
     fireEvent.click(screen.getByRole('switch', AGE));
     fireEvent.click(screen.getByRole('switch', AGREE_ALL));
     fireEvent.click(cont());
@@ -653,7 +692,7 @@ describe('Trainer Terms + DPA on the same page', () => {
     await waitFor(() => expect(page(CHOICES)).toBeTruthy()); // new account: step 2 follows
   });
 
-  it('a trainer who already accepted terms / policy / age sees ONLY the trainer part (no 18+, no Terms row, no step 2)', async () => {
+  it('a trainer who already accepted terms / policy / age sees ONLY the trainer part (no 18+, no Terms row, no choices step)', async () => {
     h.role = 'trainer';
     h.state = server(REQUIRED);
     render(<LegalGate />);
@@ -661,10 +700,10 @@ describe('Trainer Terms + DPA on the same page', () => {
     expect(page(TITLE)).toBeNull();
     expect(screen.queryByRole('button', { name: /^Terms of Use/ })).toBeNull();
     expect(screen.queryByRole('switch', AGE)).toBeNull();
-    expect(screen.queryByText(/Step 1 of/)).toBeNull();
+    expect(screen.getByRole('group', { name: 'Step 1 of 2' })).toBeTruthy(); // Documents + Agreement; no choices step
     expect(screen.getByText('Draft: not yet reviewed by a lawyer')).toBeTruthy();
     expect(cont().disabled).toBe(true);
-    readTrainer();
+    toAgreement(readTrainer);
     fireEvent.click(screen.getByRole('switch', AGREE_TT));
     expect(cont().disabled).toBe(false);
     fireEvent.click(cont());

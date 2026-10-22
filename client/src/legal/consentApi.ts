@@ -35,11 +35,15 @@ export interface ConsentWrite {
 
 async function send(action: ConsentAction, input: RecordConsentInput): Promise<ConsentWrite> {
   try {
-    return await callFn<ConsentWrite>('recordConsent', {
-      ...input,
-      action,
-      version: input.version ?? currentVersion(input.kind),
-    });
+    // The callable SDK encodes `undefined` as `null`, which the server rejects (`bad-textHash`): send only the fields we have.
+    const body = Object.fromEntries(
+      Object.entries({
+        ...input,
+        action,
+        version: input.version ?? currentVersion(input.kind),
+      }).filter(([, v]) => v !== undefined && v !== null),
+    );
+    return await callFn<ConsentWrite>('recordConsent', body);
   } catch (e) {
     // The record is already there (a retried or concurrent identical write): that is success, not an error.
     if (e instanceof HttpError && e.status === 409) return { id: '', at: 0 };

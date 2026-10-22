@@ -12,7 +12,13 @@ import { useEffect } from 'react';
 import { currentUid } from '../api';
 import { legalTexts } from '../i18n/legal';
 import type { LocaleId } from '../i18n';
-import { currentVersion, type ConsentAction, type ConsentKind, type LegalCtx } from './consents';
+import {
+  HASH_REQUIRED_KINDS,
+  currentVersion,
+  type ConsentAction,
+  type ConsentKind,
+  type LegalCtx,
+} from './consents';
 import { grantConsent, withdrawConsent } from './consentApi';
 import { clearVerified } from './gateVerified';
 import { clearLocalOff, forgetLocalOff } from './localOff';
@@ -180,10 +186,24 @@ function noteRefusal(uid: string, item: QueuedConsent): boolean {
 }
 
 async function pass(uid: string): Promise<void> {
-  const failedKinds = new Set<ConsentKind>(); // later items of a kind that failed wait: the order of a kind is kept
-  for (const item of [...(load().find((x) => x.uid === uid)?.items ?? [])]) {
+  // Different kinds are independent: they are sent AT THE SAME TIME (terms, policy and age together take one round trip
+  // instead of three). Within a kind the order is kept, and a kind that failed leaves its later items for the next pass.
+  const byKind = new Map<ConsentKind, QueuedConsent[]>();
+  for (const item of load().find((x) => x.uid === uid)?.items ?? []) {
+    const chain = byKind.get(item.kind);
+    if (chain) chain.push(item);
+    else byKind.set(item.kind, [item]);
+  }
+  await Promise.all([...byKind.values()].map((chain) => passKind(uid, chain)));
+}
+
+/** The last refusal or failure of a send (for the "Code: …" line on the legal page): status and the server's short message. */
+let lastFailure: string | null = null;
+export const lastConsentFailure = (): string | null => lastFailure;
+
+async function passKind(uid: string, chain: readonly QueuedConsent[]): Promise<void> {
+  for (const item of chain) {
     if (currentUid() !== uid) return; // the account changed mid-pass: the rest is not this account's to send
-    if (failedKinds.has(item.kind)) continue;
     const withdraw = item.action === 'withdraw';
     try {
       const input = {
@@ -197,14 +217,17 @@ async function pass(uid: string): Promise<void> {
     } catch (e) {
       const status = (e as { status?: unknown } | null)?.status;
       if (status !== 409) {
-        if (withdraw && (status === 403 || status === 404) && noteRefusal(uid, item))
-          failedKinds.add(item.kind); // maybe not ready yet: retried on the next passes, up to the limit
-        else if (refusedForGood(e)) {
+        lastFailure = `${item.kind}: ${typeof status === 'number' ? status : 'network'} ${
+          e instanceof Error ? e.message.slice(0, 120) : ''
+        }`.trim();
+        if (withdraw && (status === 403 || status === 404) && noteRefusal(uid, item)) return; // maybe not ready yet: retried on the next passes, up to the limit
+        if (refusedForGood(e)) {
           if (item.qid) droppedQids.add(item.qid);
           removeItem(uid, item);
           dropListeners.forEach((cb) => cb(uid, item.kind)); // never succeeds: drop it, never block the gate forever
-        } else failedKinds.add(item.kind); // offline or busy: keep it
-        continue;
+          continue;
+        }
+        return; // offline or busy: keep it, and the later items of this kind wait
       }
     }
     if (item.qid && watched.has(item.qid)) watched.set(item.qid, true);
@@ -323,6 +346,8 @@ export async function recordGateConsents(
 ): Promise<boolean> {
   const uid = currentUid();
   if (!uid) return true;
+  lastFailure = null; // the "Code: …" line must describe THIS attempt, not an earlier one
+  dropUnhashable(uid);
   const [base, trainer] = await Promise.all([
     need.base ? buildSignupGrants(locale) : Promise.resolve([]),
     need.trainer ? buildTrainerTermsGrant(locale) : Promise.resolve(null),
@@ -333,6 +358,22 @@ export async function recordGateConsents(
   await flushPendingConsents();
   const lost = stored.filter((i) => i.qid !== undefined && droppedQids.delete(i.qid));
   return lost.length === 0;
+}
+
+/**
+ * A grant of a hash-required kind that was queued WITHOUT a hash (an older build on a page without WebCrypto) can never
+ * be accepted: it leaves the queue instead of failing every pass before the good one.
+ */
+function dropUnhashable(uid: string): void {
+  const q = load();
+  const own = q.find((x) => x.uid === uid);
+  if (!own) return;
+  const keep = own.items.filter(
+    (i) => !(i.action !== 'withdraw' && HASH_REQUIRED_KINDS.includes(i.kind) && !i.textHash),
+  );
+  if (keep.length === own.items.length) return;
+  own.items = keep;
+  save(q.filter((x) => x.items.length));
 }
 
 /** Retries queued consents when the app opens signed in and whenever the connection returns. */

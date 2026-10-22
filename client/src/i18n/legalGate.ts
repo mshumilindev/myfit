@@ -17,6 +17,8 @@ export interface GateChoiceText {
 export interface GatePageStrings {
   step: (n: number, total: number) => string;
   stepTerms: string;
+  stepDocs: string;
+  stepAgree: string;
   stepChoices: string;
   leftTitle: string;
   leftDone: string;
@@ -93,6 +95,8 @@ const en: LegalGateStrings = {
   page: {
     step: (n, total) => `Step ${n} of ${total}`,
     stepTerms: 'Terms',
+    stepDocs: 'Documents',
+    stepAgree: 'Agreement',
     stepChoices: 'Your choices',
     leftTitle: 'Still to do on this page',
     leftDone: 'Ready to continue',
@@ -180,6 +184,8 @@ const uk: LegalGateStrings = {
   page: {
     step: (n, total) => `Крок ${n} з ${total}`,
     stepTerms: 'Умови',
+    stepDocs: 'Документи',
+    stepAgree: 'Згода',
     stepChoices: 'Ваш вибір',
     leftTitle: 'Що ще лишилось на цій сторінці',
     leftDone: 'Готово до продовження',
@@ -267,6 +273,8 @@ const pl: LegalGateStrings = {
   page: {
     step: (n, total) => `Krok ${n} z ${total}`,
     stepTerms: 'Warunki',
+    stepDocs: 'Dokumenty',
+    stepAgree: 'Zgoda',
     stepChoices: 'Twój wybór',
     leftTitle: 'Co jeszcze zostało na tej stronie',
     leftDone: 'Gotowe do kontynuacji',
