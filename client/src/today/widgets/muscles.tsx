@@ -185,9 +185,7 @@ function Cell({
   );
 }
 
-const goHash = (h: string) => () => {
-  setHash(h);
-};
+const goHash = (h: string) => () => setHash(h);
 
 /* =====================================================================
  * 1. Muscle map (sets per muscle, 7 days)

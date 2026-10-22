@@ -109,7 +109,14 @@ import {
   type HomeState,
 } from './homeSets';
 import { sleepBlockedBy, type SleepBlock } from './sleepGuard';
-import PER_SIDE from './data/per-side.json';
+import { setTypeOf, setDrops, setVolumeKg, topSet, autoWarmupSets } from './setMath';
+import { resolveSidesMode, ONE_ARM_NAME, type SidesMode } from './sidesMode';
+import { groupRounds } from './supersetBlocks';
+export { setTypeOf, setDrops, setVolumeKg, topSet, autoWarmupSets, groupRounds };
+export { setRepsTotal, setTopWeight, WARMUP_FRAC } from './setMath';
+export { sessionBlocks, nextSupersetLetter, groupCurrentRound } from './supersetBlocks';
+export type { SupersetGroup, SessionBlock } from './supersetBlocks';
+export type { SidesMode };
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { REST_PREFS_DEFAULT, type RestPrefs } from './restTimer';
 import { describeDay, dayReadoutLabel, type DayReadout } from './data/daySuggest';
@@ -899,73 +906,8 @@ export function isMarkerExercise(ex: Exercise): boolean {
 
 // --- Set types & drops (design DS-1…DS-4, EQ-4) ----------------------------
 
-export function setTypeOf(s: SetEntry): SetType {
-  return s.type ?? (s.isWarmup ? 'warmup' : 'working');
-}
-export function setDrops(s: SetEntry): DropEntry[] {
-  const t = setTypeOf(s);
-  return t === 'drop' || t === 'reverse-drop' ? (s.drops ?? []) : [];
-}
-export function setRepsTotal(s: SetEntry): number {
-  return s.reps + setDrops(s).reduce((n, d) => n + d.reps, 0);
-}
-export function setVolumeKg(s: SetEntry): number {
-  // Warm-ups count toward tonnage too — it's still weight moved. (They stay out
-  // of PRs / top-set and the working-set counts, which filter by type instead.)
-  // Null/0 means bodyweight in the UI, but contributes no external load to total volume.
-  const load = (w: number | null): number => w ?? 0;
-  return load(s.weight) * s.reps + setDrops(s).reduce((v, d) => v + load(d.weight) * d.reps, 0);
-}
-
-/**
- * Per-side entry doubling: ×2 means the logged weight is one side's load.
- *  - `per-side.json` decides first — the only place a move is classified by hand.
- *  - Dumbbells / kettlebell pairs: ×2, unless one implement is shared by both hands.
- *  - Cables: one stack ×1 (a cable crunch is not doubled); two-stack moves ×2.
- * Names are matched on the English catalog name, so the factor does not depend
- * on the interface language the set was logged in.
- */
-const ONE_ARM_NAME = /\b(one|single)[- ](arm|hand|leg)\b|unilateral|одн(ією|у|ой)\s*рук/i;
-const SINGLE_IMPLEMENT = /goblet|pull[- ]?over|two[- ]?hand|both hands|svend|\bskull\s*crusher\b/i;
-const BILATERAL_CABLE = /\bfly(e|es|s)?\b|cross[- ]?over|\biron cross\b|\bpec\b/i;
-const PAIRED_KETTLEBELL = /\bdouble\b|two[- ]arm|two kettlebells|alternating|seesaw/i;
-const TWO_SIDED = new Set(PER_SIDE.twoSided);
-const ONE_SIDED = new Set(PER_SIDE.oneSided);
-
-/**
- * How a lift's logged weight relates to both sides of the body:
- *  - 'pair'       two implements / two stacks at once — the weight is per hand
- *                 (dumbbell press, cable crossover, iso-lateral machine).
- *  - 'unilateral' one side at a time — you log one side's set, the other side
- *                 does the same (one-arm row, single-leg press, lunge).
- *  - 'single'     one load moved by both sides together (barbell, stack).
- * 'pair' and 'unilateral' both count ×2 toward volume.
- */
-export type SidesMode = 'pair' | 'unilateral' | 'single';
-
-const UNILATERAL_NAME =
-  /\b(one|single)[- ]?(arm|hand|leg|side)d?\b|\bunilateral\b|\bsplit squat\b|\blunge|\bstep[- ]?ups?\b|\bpistol\b|bulgarian|concentration|одн(ією|у|ой)\s*(рук|ног)/i;
-const ISO_LATERAL = /iso[- ]?lateral|independent arms?/i;
-
 export function sidesMode(ex: Pick<Exercise, 'name' | 'equipment'>): SidesMode {
-  // An explicit per-exercise Sides choice is the single source of truth.
-  const pinned = sidesFor(ex.name);
-  if (pinned === 'both') return 'single';
-  const name = ex.name;
-  const canon = canonicalExerciseName(name).toLowerCase();
-  const eq = equipmentFor(ex);
-  const unilateral = UNILATERAL_NAME.test(name) || UNILATERAL_NAME.test(canon);
-  if (pinned === 'one') return unilateral || !eq.includes('dumbbell') ? 'unilateral' : 'pair';
-  // Hand-classified moves first (per-side.json).
-  if (TWO_SIDED.has(canon) || TWO_SIDED.has(name.trim().toLowerCase())) return 'pair';
-  if (ONE_SIDED.has(canon) || ONE_SIDED.has(name.trim().toLowerCase())) return 'single';
-  // One side at a time: you log one side, the other side matches it.
-  if (unilateral || ONE_ARM_NAME.test(name) || ONE_ARM_NAME.test(canon)) return 'unilateral';
-  if (ISO_LATERAL.test(canon) || ISO_LATERAL.test(name)) return 'pair';
-  if (eq.includes('dumbbell')) return SINGLE_IMPLEMENT.test(canon) ? 'single' : 'pair';
-  if (eq.includes('kettlebell')) return PAIRED_KETTLEBELL.test(canon) ? 'pair' : 'single';
-  if (eq.includes('cable')) return BILATERAL_CABLE.test(canon) ? 'pair' : 'single';
-  return 'single';
+  return resolveSidesMode(ex, sidesFor(ex.name), () => equipmentFor(ex));
 }
 
 export function perHandFactor(ex: Pick<Exercise, 'name' | 'equipment'>): number {
@@ -980,64 +922,6 @@ export function exerciseVolumeKg(ex: Exercise): number {
 }
 
 // --- Supersets (design SS-1…SS-3) ------------------------------------------
-
-export interface SupersetGroup {
-  groupId: string;
-  letter: string;
-  exercises: Exercise[];
-  /** A round-based circuit (F3) vs a plain back-to-back superset. */
-  circuit: boolean;
-}
-export type SessionBlock =
-  { kind: 'single'; exercise: Exercise } | { kind: 'group'; group: SupersetGroup };
-
-export function sessionBlocks(w: Workout): SessionBlock[] {
-  const sorted = [...w.exercises].sort((a, b) => a.position - b.position);
-  const seen = new Set<string>();
-  const blocks: SessionBlock[] = [];
-  let letterIdx = 0;
-  for (const ex of sorted) {
-    const gid = ex.groupId ?? null;
-    if (!gid) {
-      blocks.push({ kind: 'single', exercise: ex });
-      continue;
-    }
-    if (seen.has(gid)) continue;
-    seen.add(gid);
-    const members = sorted
-      .filter((e) => (e.groupId ?? null) === gid)
-      .sort((a, b) => (a.groupOrder ?? 0) - (b.groupOrder ?? 0));
-    if (members.length < 2) {
-      blocks.push({ kind: 'single', exercise: ex });
-      continue;
-    }
-    blocks.push({
-      kind: 'group',
-      group: {
-        groupId: gid,
-        letter: String.fromCharCode(65 + letterIdx++),
-        exercises: members,
-        circuit: members.some((e) => e.groupKind === 'circuit'),
-      },
-    });
-  }
-  return blocks;
-}
-
-export function nextSupersetLetter(w: Workout): string {
-  const used = sessionBlocks(w).filter((b) => b.kind === 'group').length;
-  return String.fromCharCode(65 + used);
-}
-export function groupRounds(g: SupersetGroup): number {
-  return Math.max(
-    1,
-    ...g.exercises.map((e) => Math.max(e.sets.length, Math.max(0, e.plannedSets ?? 0))),
-  );
-}
-export function groupCurrentRound(g: SupersetGroup): number {
-  const done = Math.min(...g.exercises.map((e) => e.sets.length));
-  return Math.min(done + 1, groupRounds(g));
-}
 
 /** Set the round count for a circuit — stored as plannedSets on each member,
  *  which is what groupRounds() reads. */
@@ -5816,27 +5700,6 @@ export interface PrevLift {
   weight: number | null;
 }
 
-export function setTopWeight(s: SetEntry): number {
-  return Math.max(s.weight ?? 0, ...setDrops(s).map((d) => d.weight ?? 0));
-}
-export function topSet(sets: SetEntry[]): SetEntry | undefined {
-  return [...sets]
-    .filter((s) => setTypeOf(s) !== 'warmup')
-    .sort((a, b) => setTopWeight(b) - setTopWeight(a) || b.reps - a.reps)[0];
-}
-
-/** Fraction of the exercise's heaviest set below which a *leading* set reads as
- *  a warm-up. Deload-safe: the reference is today's top set, so the bar scales
- *  with how heavy you actually went. */
-export const WARMUP_FRAC = 0.85;
-
-/**
- * Auto-classify the leading light sets of a weight exercise as warm-ups: any set
- * before the first working set whose top weight is under WARMUP_FRAC of the
- * exercise's heaviest set. Manual choices (warmupManual) and special set types
- * (drop / static-dynamic) are never touched and anchor the working run. Pure and
- * idempotent — safe to re-run on every set change.
- */
 /**
  * The athlete's usual working weight on a lift, from history (not today's
  * session): the most common working weight of the last session, heavier one on
@@ -5861,34 +5724,6 @@ export function historicalWorkingKg(
   return best;
 }
 
-export function autoWarmupSets(sets: SetEntry[], loadType: LoadType, histRef = 0): SetEntry[] {
-  if (loadType !== 'weight') return sets;
-  // Reference the known working weight from history, so a light opener is a
-  // warm-up on the fly and a PR later in the session never turns the real
-  // working sets before it into "warm-ups". Only without history does today's
-  // top set serve as the reference.
-  const ref = histRef > 0 ? histRef : Math.max(0, ...sets.map(setTopWeight));
-  if (ref <= 0) return sets;
-  const threshold = WARMUP_FRAC * ref;
-  const ordered = [...sets].sort((a, b) => a.position - b.position);
-  let working = false; // reached the first working set yet?
-  const byId = new Map<string, SetEntry>();
-  for (const s of ordered) {
-    const t = setTypeOf(s);
-    if (s.warmupManual || (t !== 'working' && t !== 'warmup')) {
-      if (t !== 'warmup') working = true; // a manual/special working set anchors
-      byId.set(s.id, s);
-      continue;
-    }
-    if (!working && setTopWeight(s) > 0 && setTopWeight(s) < threshold) {
-      byId.set(s.id, t === 'warmup' ? s : { ...s, type: 'warmup', isWarmup: true });
-    } else {
-      working = true;
-      byId.set(s.id, t === 'working' ? s : { ...s, type: 'working', isWarmup: false });
-    }
-  }
-  return sets.map((s) => byId.get(s.id) ?? s);
-}
 /**
  * Weight differs per machine, not per exercise name. A "variant" tells which
  * physical setup a lift was done on: the picked equipment item, else the gym —

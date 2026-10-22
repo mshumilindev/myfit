@@ -56,13 +56,12 @@ import {
 } from './health/parts';
 import { ConditionPage, ConditionsSection } from './health/Conditions';
 import { NicotineHealthGroup } from './health/nicotine/NicotineSection';
-import { NicotineScreens } from './health/nicotine/NicotineScreens';
 import { CycleHealthRow } from './health/cycle/CycleSection';
-import { CycleScreens, type CycleScreen } from './health/cycle/CycleScreens';
+import type { CycleScreen } from './health/cycle/CycleScreens';
+import { formExists, isInjuryForm } from './health/healthRoute';
+import { HealthFeatureScreen } from './health/HealthFeatureScreen';
 import { AlcoholHealthRow } from './health/alcohol/AlcoholSection';
-import { AlcoholScreens } from './health/alcohol/AlcoholScreens';
 import { SupplementHealthRow } from './health/supplements/SupplementSection';
-import { SupplementScreens } from './health/supplements/SupplementScreens';
 import { SupplementQuickStartSheet } from './health/supplements/SupplementQuickStartSheet';
 import { hasSupplementData } from '../supplements';
 import { HealthPrivacyView } from './health/HealthPrivacyView';
@@ -487,17 +486,9 @@ export function HealthView(props: HealthViewProps) {
 
   // A form for a period / injury that no longer exists (deleted elsewhere, or a
   // stale #/health/edit/<id> link) falls back to the page itself.
-  const formOk =
-    !!props.form &&
-    (props.form.kind === 'new' ||
-      (props.form.kind === 'edit' &&
-        store.restPeriods.some((p) => p.id === (props.form as { periodId: string }).periodId)) ||
-      (props.form.kind === 'edit-injury' &&
-        store.injuries.some((i) => i.id === (props.form as { injuryId: string }).injuryId)));
+  const formOk = formExists(props.form, store.restPeriods, store.injuries);
   // Injuries and long-term conditions are health features with their own consent (SPO-290): without it the page says so.
-  const injuryForm =
-    props.form?.kind === 'edit-injury' ||
-    (props.form?.kind === 'new' && props.form.type === 'injury');
+  const injuryForm = isInjuryForm(props.form);
   const formEl =
     props.form && formOk ? (
       <HealthForm
@@ -533,38 +524,16 @@ export function HealthView(props: HealthViewProps) {
 
   // Privacy and Nicotine pages replace the whole Health overview (mobile and web).
   if (props.priv) return <HealthPrivacyView onBack={props.onClose} />;
-  if (props.nic)
+  if (props.nic || props.cyc || props.alc || props.sup)
     return (
-      <HealthGate feature="nicotine" onBack={props.onClose}>
-        <NicotineScreens screen={props.nic} onOpen={(nic) => go({ nic })} onBack={props.onClose} />
-      </HealthGate>
-    );
-  if (props.cyc)
-    return (
-      <HealthGate feature="cycle" onBack={props.onClose}>
-        <CycleScreens
-          screen={props.cyc}
-          onOpen={(cyc) => go({ cyc })}
-          onBack={props.onClose}
-          onOpenStates={() => go({ cond: undefined })}
-        />
-      </HealthGate>
-    );
-  if (props.alc)
-    return (
-      <HealthGate feature="alcohol" onBack={props.onClose}>
-        <AlcoholScreens screen={props.alc} onOpen={(alc) => go({ alc })} onBack={props.onClose} />
-      </HealthGate>
-    );
-  if (props.sup)
-    return (
-      <HealthGate feature="supplements" onBack={props.onClose}>
-        <SupplementScreens
-          screen={props.sup}
-          onOpen={(sup) => go({ sup })}
-          onBack={props.onClose}
-        />
-      </HealthGate>
+      <HealthFeatureScreen
+        nic={props.nic}
+        cyc={props.cyc}
+        alc={props.alc}
+        sup={props.sup}
+        go={go}
+        onBack={props.onClose}
+      />
     );
 
   // ============================ mobile ============================

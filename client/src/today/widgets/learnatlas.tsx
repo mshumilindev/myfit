@@ -60,9 +60,7 @@ type S = LearnAtlasStrings;
 /* Shared bits                                                         */
 /* ------------------------------------------------------------------ */
 
-const openLearn = () => {
-  setHash('#/learn');
-};
+const openLearn = () => setHash('#/learn');
 const openCoach = (ctx: WidgetCtx) => () => ctx.shell.openOverlay({ screen: 'coach' });
 
 /** Local day number — the daily lesson and fact change at local midnight. */

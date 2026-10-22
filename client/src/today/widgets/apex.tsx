@@ -222,9 +222,7 @@ function action(label: string, onClick: () => void) {
   );
 }
 
-const goApex = (tab?: string) => () => {
-  setHash(tab ? `#/apex/${tab}` : '#/apex');
-};
+const goApex = (tab?: string) => () => setHash(tab ? `#/apex/${tab}` : '#/apex');
 
 /** Empty state shared by the Apex widgets. */
 function emptyWidget(

@@ -9,7 +9,7 @@
  */
 import { clearGateDraft } from './gateDraft';
 import { useEffect } from 'react';
-import { currentUid } from '../api';
+import { currentUid, registerSignOutFlush } from '../api';
 import { legalTexts } from '../i18n/legal';
 import type { LocaleId } from '../i18n';
 import {
@@ -24,7 +24,7 @@ import { clearVerified } from './gateVerified';
 import { clearLocalOff, forgetLocalOff } from './localOff';
 import { docPlainText, sha256Hex } from './textHash';
 import { trainerTermsHashInput } from './trainerTerms';
-import { pruneRevokesOf } from '../coach/client/revokeQueue';
+import { flushPendingRevokes, pruneRevokesOf } from '../coach/client/revokeQueue';
 
 export interface QueuedConsent {
   kind: ConsentKind;
@@ -386,3 +386,7 @@ export function usePendingConsentFlush(authed: boolean): void {
     return () => window.removeEventListener('online', on);
   }, [authed]);
 }
+
+// Sign-out sends the queued consents and the queued "Stop sharing" revoke (B4) first; api.ts only holds the seam.
+registerSignOutFlush(flushPendingConsents);
+registerSignOutFlush(flushPendingRevokes);

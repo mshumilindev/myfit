@@ -36,7 +36,7 @@ const NO_PERSONAL_DATA: Record<string, string> = {
 function registryPaths(): Map<string, string> {
   const out = new Map<string, string>();
   for (const line of registry.split('\n')) {
-    const row = /^\| (R\d+) \|/.exec(line);
+    const row = /^\| (R\d+)\s*\|/.exec(line); // prettier pads the cells: "| R2  |"
     if (!row) continue;
     for (const m of line.matchAll(
       /`([A-Za-z]+(?:\/\{[A-Za-z]+\})?(?:\/[A-Za-z]+)?(?:\/\{[A-Za-z]+\})?)[^`]*`/g,

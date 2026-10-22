@@ -687,8 +687,7 @@
 html {
   height: 100%;
   overflow: hidden;
-  /* SPO-146: no sideways history-swipe of the page itself; the app has its own edge-back */
-  overscroll-behavior-x: none;
+  overscroll-behavior-x: none; /* SPO-146: no sideways history-swipe; the app has its own edge-back */
   background: var(--color-bg);
 }
 /* Pin the shell to the visual viewport. 100dvh / max-height on iOS standalone

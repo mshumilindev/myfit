@@ -6,7 +6,8 @@ const h = vi.hoisted(() => ({
   grant: vi.fn(),
   withdraw: vi.fn(),
 }));
-vi.mock('../api', () => ({ currentUid: () => h.uid }));
+// registerSignOutFlush: signupConsents registers its queues with api.ts at import (api.ts stays a leaf)
+vi.mock('../api', () => ({ currentUid: () => h.uid, registerSignOutFlush: () => undefined }));
 vi.mock('./consentApi', () => ({ grantConsent: h.grant, withdrawConsent: h.withdraw }));
 
 import { LEGAL_VERSIONS, currentVersion } from './consents';

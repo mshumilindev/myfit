@@ -153,6 +153,12 @@ export function clearAuth(): void {
 /** Longest sign-out waits for queued consents and the queued sharing revoke to be sent (never blocks the sign-out). */
 export const SIGN_OUT_FLUSH_MS = 3000;
 
+const signOutFlushers: Array<() => Promise<void>> = [];
+/** Queues that must be sent before sign-out (consents, the "Stop sharing" revoke) register here; keeps api.ts a leaf. */
+export function registerSignOutFlush(fn: () => Promise<void>): void {
+  if (!signOutFlushers.includes(fn)) signOutFlushers.push(fn);
+}
+
 /**
  * `forget`: the person also leaves this device's landing list ("Remember me" unticked in the sign-out dialog). Either way
  * the person's own localStorage keys are wiped here and the rest of their data by deviceWipe.ts.
@@ -162,12 +168,9 @@ export async function signOut(opts: { forget?: boolean } = {}): Promise<void> {
   // Queued consent withdrawals are sent while the token still works. Short and never blocking: the queue is device-level
   // and survives sign-out, so whatever is not sent now is sent at this account's next sign-in.
   try {
-    const { flushPendingConsents } = await import('./legal/signupConsents');
-    // the queued "Stop sharing" revoke goes out with them (B4)
-    const { flushPendingRevokes } = await import('./coach/client/revokeQueue');
     let timer: ReturnType<typeof setTimeout> | undefined;
     await Promise.race([
-      Promise.all([flushPendingConsents(), flushPendingRevokes()]).catch(() => undefined),
+      Promise.all(signOutFlushers.map((f) => f())).catch(() => undefined),
       new Promise((r) => (timer = setTimeout(r, SIGN_OUT_FLUSH_MS))),
     ]);
     clearTimeout(timer);

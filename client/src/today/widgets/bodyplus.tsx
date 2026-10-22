@@ -955,9 +955,7 @@ const physiqueGoal: WidgetDef = {
     const bm = store.bodyMetrics;
     const phys = store.goals?.physique;
     const goal = bm?.goalWeightKg ?? null;
-    const openGoals = () => {
-      setHash('#/goals');
-    };
+    const openGoals = () => setHash('#/goals');
     const openBody = () => shell.goTab('me');
     if (!phys && !goal)
       return (

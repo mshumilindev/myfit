@@ -42,7 +42,6 @@ import { Clock } from '@phosphor-icons/react/Clock';
 import { Info } from '@phosphor-icons/react/Info';
 import { Plus } from '@phosphor-icons/react/Plus';
 import { Check } from '@phosphor-icons/react/Check';
-import { SkipForward } from '@phosphor-icons/react/SkipForward';
 import { Vibrate } from '@phosphor-icons/react/Vibrate';
 import { ShareNetwork } from '@phosphor-icons/react/ShareNetwork';
 import { Users } from '@phosphor-icons/react/Users';
@@ -306,7 +305,6 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'eye-slash': EyeSlash,
   feather: Feather,
   flame: Flame,
-  'skip-forward': SkipForward,
   vibrate: Vibrate,
   'share-network': ShareNetwork,
   users: Users,

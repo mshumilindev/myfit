@@ -10,7 +10,7 @@ import { Field } from '../components/ui/Field';
 import { Button } from '../components/ui/Button';
 import { Segmented } from '../components/ui/Segmented';
 import { temperIndex } from '../atlas/types';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { deleteObject, ref } from 'firebase/storage';
 import { changePassword } from '../accounts/password';
@@ -43,6 +43,7 @@ import type { Shell } from '../App';
 import { Select } from '../components/ui/Select';
 import { NotificationSettings } from './NotificationSettings';
 import { Tag } from '../components/ui/Tag';
+import { Stat, StatGroup } from './ProfileStats';
 
 interface ProfileData {
   viewer: { id: string; relation: 'self' | 'admin' | 'trainer'; role: string };
@@ -1246,48 +1247,6 @@ function TrainerLivePanel({ load }: { load: ProfileData }) {
         <p>{t.trLiveReadOnly}</p>
       </div>
     </section>
-  );
-}
-
-function StatGroup({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="profile-stat-section">
-      <div className="profile-stat-heading">
-        <Icon name={icon} />
-        <span>{title}</span>
-      </div>
-      <div className="stat-grid profile-stat-grid">{children}</div>
-    </div>
-  );
-}
-
-function Stat({
-  value,
-  label,
-  icon,
-  accent = false,
-}: {
-  value: string;
-  label: string;
-  icon: string;
-  accent?: boolean;
-}) {
-  return (
-    <div className={`cell profile-stat-cell${accent ? ' accent' : ''}`}>
-      <Icon name={icon} />
-      <div>
-        <div className="v">{value}</div>
-        <div className="l">{label}</div>
-      </div>
-    </div>
   );
 }
 

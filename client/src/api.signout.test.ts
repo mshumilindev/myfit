@@ -11,12 +11,14 @@ vi.mock('firebase/auth', () => ({
   }),
 }));
 vi.mock('firebase/functions', () => ({ httpsCallable: vi.fn() }));
-vi.mock('./legal/signupConsents', () => ({ flushPendingConsents: h.flush }));
-vi.mock('./coach/client/revokeQueue', () => ({ flushPendingRevokes: h.flushRevokes }));
 vi.mock('./accounts/sessions', () => ({ endSession: vi.fn(async () => undefined) }));
 vi.mock('./deviceWipe', () => ({ wipeAfterSignOut: vi.fn(async () => undefined) }));
 
-import { SIGN_OUT_FLUSH_MS, signOut } from './api';
+import { SIGN_OUT_FLUSH_MS, registerSignOutFlush, signOut } from './api';
+
+// signupConsents.ts registers both queues at load (api.ts only holds the seam); the test registers its doubles.
+registerSignOutFlush(() => h.flush());
+registerSignOutFlush(() => h.flushRevokes());
 
 beforeEach(() => {
   vi.useFakeTimers();

@@ -1148,9 +1148,7 @@ const nightSky: WidgetDef = {
 /* --------------------------------------------------------- challenge to try */
 
 /** Sub-app navigation (outside components: the React compiler forbids the write there). */
-function goHash(h: string): void {
-  setHash(h);
-}
+const goHash = (h: string): void => setHash(h);
 
 function ChallengeToTry({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const { store, now, t, locale, shell } = ctx;

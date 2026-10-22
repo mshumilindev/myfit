@@ -1,4 +1,4 @@
-import type { MyDataStrings } from './myData';
+import type { MyDataStrings } from './myData.types';
 
 export const myDataEn: MyDataStrings = {
   title: 'What Spotter knows about you',

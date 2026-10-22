@@ -75,9 +75,7 @@ function exName(name: string, locale: LocaleId): string {
   return localizedExerciseName(name, locale) ?? name;
 }
 
-function goHash(hash: string): void {
-  setHash(hash);
-}
+const goHash = (hash: string): void => setHash(hash);
 
 /** "1 480" — thin-space thousands like the app's kg/kcal figures. */
 function thousands(n: number): string {

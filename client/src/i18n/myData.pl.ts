@@ -1,4 +1,4 @@
-import type { MyDataStrings } from './myData';
+import type { MyDataStrings } from './myData.types';
 
 export const myDataPl: MyDataStrings = {
   title: 'Co Spotter wie o Tobie',

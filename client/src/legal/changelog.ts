@@ -7,7 +7,7 @@
  * purpose, recipient, category, period or transfer) blocks with a confirm sheet that lists the `bullets` and records a
  * fresh consent at the new version (LEGAL-compliance-system §3). Bullet texts are i18n keys (`i18n/legalUpdate.ts`).
  */
-import type { LegalDoc } from './consents';
+import type { LegalDoc } from './releasedVersions';
 
 /** The documents that carry a changelog, and the consent kind that records the person's standing on each. */
 export const UPDATE_DOCS = ['terms', 'policy'] as const satisfies readonly LegalDoc[];
