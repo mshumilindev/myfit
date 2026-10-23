@@ -110,7 +110,7 @@ jobs:
             echo "- sha256: \`$(cut -d' ' -f1 out/SHA256SUMS.txt)\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: spotter-apk
           path: out/
@@ -153,7 +153,7 @@ jobs:
             adb exec-out screencap -p > out/smoke.png
             adb logcat -d > out/logcat.txt
             adb shell dumpsys package com.spotter.app | grep -E "versionName|versionCode" > out/package.txt || true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: spotter-smoke
           path: |
