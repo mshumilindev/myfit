@@ -70,7 +70,7 @@ describe('OnboardingView step 1: read-before-accept', () => {
     await fillAll();
     expect(cont().disabled).toBe(true);
     expect(screen.getAllByText('Not opened yet')).toHaveLength(2);
-    const [age, agree] = screen.getAllByRole('checkbox') as HTMLInputElement[];
+    const [age, agree] = screen.getAllByRole('switch') as HTMLInputElement[];
     expect(age.disabled && agree.disabled).toBe(true);
 
     fireEvent.click(screen.getByText('Terms of Use'));
@@ -88,7 +88,7 @@ describe('OnboardingView step 1: read-before-accept', () => {
     setup();
     await screen.findByText('Before you continue');
     openBoth();
-    const [age, agree] = screen.getAllByRole('checkbox');
+    const [age, agree] = screen.getAllByRole('switch');
     fireEvent.click(age);
     fireEvent.click(agree);
     expect(cont().disabled).toBe(true);
@@ -109,7 +109,7 @@ describe('OnboardingView step 1: read-before-accept', () => {
     setup();
     await fillAll();
     openBoth();
-    for (const c of screen.getAllByRole('checkbox')) fireEvent.click(c);
+    for (const c of screen.getAllByRole('switch')) fireEvent.click(c);
     fireEvent.click(cont());
     await waitFor(() => expect(h.grant).toHaveBeenCalledTimes(3));
     expect(h.callFn).toHaveBeenCalledWith('claim', expect.objectContaining({ token: 'tok' }));
@@ -125,7 +125,7 @@ describe('OnboardingView step 1: read-before-accept', () => {
     setup();
     await fillAll();
     openBoth();
-    for (const c of screen.getAllByRole('checkbox')) fireEvent.click(c);
+    for (const c of screen.getAllByRole('switch')) fireEvent.click(c);
     fireEvent.click(cont());
     await waitFor(() => expect(h.callFn).toHaveBeenCalledWith('claim', expect.anything()));
     await waitFor(() => expect(localStorage.getItem(CONSENT_QUEUE_KEY)).toContain('policy-ack'));

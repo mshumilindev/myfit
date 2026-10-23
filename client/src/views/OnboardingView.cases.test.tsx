@@ -4,6 +4,7 @@ import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
 import { DAY, emptyState, freezeClock, NOW, seed, setDesktop } from './__fixtures__/viewKit';
 import {
+  agreeToTerms,
   goto,
   invite,
   m,
@@ -206,6 +207,7 @@ describe('OnboardingView: step 1, who are you', () => {
     typeInto(en.firstName, 'A');
     typeInto(en.username, 'an');
     typeInto(en.passwordMin, 'secret1');
+    agreeToTerms();
     expect(cont().disabled).toBe(true);
     typeInto(en.firstName, 'An');
     expect(cont().disabled).toBe(false);
@@ -223,6 +225,7 @@ describe('OnboardingView: step 1, who are you', () => {
     typeInto(en.lastName, 'Kay');
     typeInto(en.username, '  ana  ');
     typeInto(en.passwordMin, 'secret1');
+    agreeToTerms();
     fireEvent.blur(screen.getByPlaceholderText(en.username));
     expect(JSON.parse(localStorage.getItem(`onb.${TOKEN}`)!)).toMatchObject({
       step: 1,
@@ -253,6 +256,7 @@ describe('OnboardingView: step 1, who are you', () => {
     typeInto(en.firstName, 'Ana');
     typeInto(en.username, 'ana');
     typeInto(en.passwordMin, 'secret1');
+    agreeToTerms();
     m.callFn.mockImplementation(async (n: string) => {
       if (n === 'claim') throw new Error('Username taken');
       return m.inviteResult;
@@ -273,6 +277,7 @@ describe('OnboardingView: step 1, who are you', () => {
     typeInto(en.firstName, 'Ana');
     typeInto(en.username, 'ana');
     typeInto(en.passwordMin, 'secret1');
+    agreeToTerms();
     m.callFn.mockImplementation(async (n: string) => {
       if (n === 'claim') throw 'boom';
       return m.inviteResult;
@@ -292,7 +297,7 @@ describe('OnboardingView: step 1, who are you', () => {
     await open();
     fireEvent.click(screen.getByText(en.onbStart));
     expect((screen.getByPlaceholderText(en.firstName) as HTMLInputElement).value).toBe('Ana');
-    typeInto(en.passwordMin, 'secret1');
+    typeInto(en.passwordMin, 'secret1'); // an existing account has already agreed: no agreement block
     await act(async () => {
       fireEvent.click(screen.getByText(en.onbContinue));
     });
@@ -424,7 +429,6 @@ describe('OnboardingView: step 3 gym', () => {
       async (
         _q: string,
         _c: unknown,
-        _o: unknown,
         _s: unknown,
         _sig: unknown,
         h: { onResults: (r: unknown[]) => void },

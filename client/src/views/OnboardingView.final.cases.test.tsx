@@ -4,6 +4,7 @@ import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
 import { emptyState, freezeClock, NOW, seed, setDesktop } from './__fixtures__/viewKit';
 import {
+  agreeToTerms,
   goto,
   m,
   open,
@@ -96,6 +97,7 @@ describe('OnboardingView: final step', () => {
     typeInto(en.firstName, 'Ana');
     typeInto(en.username, 'ana');
     typeInto(en.passwordMin, 'secret1');
+    agreeToTerms();
     m.callFn.mockImplementation(async (n: string) =>
       n === 'claim' ? { token: 'jwt' } : m.inviteResult,
     );

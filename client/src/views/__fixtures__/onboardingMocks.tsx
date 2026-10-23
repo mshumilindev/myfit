@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { resetGeoGateForTests, setGeoSearchState } from '../../data/geoSearchGate';
 import { en } from '../../i18n/en';
 import { DAY, NOW } from './viewKit';
 import { OnboardingView } from '../OnboardingView';
@@ -129,6 +130,19 @@ export const open = async (token = TOKEN) => {
 };
 export const typeInto = (ph: string, v: string) =>
   fireEvent.change(screen.getByPlaceholderText(ph), { target: { value: v } });
+/** Step 1 asks for the documents to be opened and both switches ticked before Continue unlocks; safe to call twice. */
+export const agreeToTerms = () => {
+  if (!vi.isMockFunction(window.open)) {
+    vi.spyOn(window, 'open').mockImplementation(() => ({ opener: {} }) as unknown as Window);
+  }
+  fireEvent.click(screen.getByText('Terms of Use'));
+  fireEvent.click(screen.getByText('Privacy Policy'));
+  for (const sw of screen.getAllByRole('switch')) {
+    if (sw.getAttribute('aria-checked') !== 'true' && !(sw as HTMLInputElement).checked) {
+      fireEvent.click(sw);
+    }
+  }
+};
 export const goto = async (step: 1 | 2 | 3 | 4 | 5) => {
   const out = await open();
   fireEvent.click(screen.getByText(en.onbStart));
@@ -136,6 +150,7 @@ export const goto = async (step: 1 | 2 | 3 | 4 | 5) => {
   typeInto(en.firstName, 'Ana');
   typeInto(en.username, 'ana');
   typeInto(en.passwordMin, 'secret1');
+  agreeToTerms();
   m.callFn.mockImplementation(async (name: string) =>
     name === 'claim' ? { token: 'jwt' } : m.inviteResult,
   );
@@ -156,6 +171,9 @@ export const goto = async (step: 1 | 2 | 3 | 4 | 5) => {
 
 export function resetOnboardingMocks(): void {
   localStorage.clear();
+  // Nearby gyms and search are gated on the geo-search consent (SPO-293): these cases run with it granted.
+  resetGeoGateForTests();
+  setGeoSearchState({ on: true, ready: true, answered: true });
   Object.values(m).forEach(
     (f) => typeof f === 'function' && 'mockReset' in f && (f as { mockReset(): void }).mockReset(),
   );
