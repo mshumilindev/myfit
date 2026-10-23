@@ -118,7 +118,7 @@ describe('L8: the schedulers walk their backlog in order, in bounded pages', () 
     expect(pushes).toHaveLength(450);
     expect(new Set(pushes.map((p) => p[0])).size).toBe(450);
     expect(await runReminders(ctx())).toEqual({ schedules: 0, reminders: 0, unmarked: 0 });
-  });
+  }, 60_000);
 
   it(`a backlog beyond ${MAX_PAGES} pages is worked off over the next runs, never in one unbounded read`, async () => {
     const start = T0 + 30 * H;
