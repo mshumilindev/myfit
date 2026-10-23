@@ -167,7 +167,7 @@ jobs:
         run: |
           BASE="${{ github.event.pull_request.base.sha || (github.event_name == 'push' && github.event.before) || '' }}"
           if [ -n "$BASE" ] && git fetch --no-tags --depth=1 origin "$BASE" 2>/dev/null; then echo "sha=$BASE" >> "$GITHUB_OUTPUT"; fi
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         if: needs.client-tests.result == 'success' && steps.base.outputs.sha != ''
         with:
           pattern: patch-cov-*
@@ -339,7 +339,7 @@ jobs:
       - name: Playwright Chromium (browser download is cached; system libraries are always installed)
         run: |
           if [ "${{ steps.pwcache.outputs.cache-hit }}" = "true" ]; then npx playwright install-deps chromium; else npx playwright install --with-deps chromium; fi
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: storybook-static
           path: client/storybook-static
@@ -373,7 +373,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: audit-report-*
           merge-multiple: true
