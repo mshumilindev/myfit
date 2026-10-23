@@ -1188,6 +1188,7 @@ function AuthSlot({
 }) {
   const { t, locale } = useT();
   const { lg } = useLegalT();
+  void lg.ui.legalNav;
   const T = (k: string): string => (t as unknown as Record<string, string>)[`landing_${k}`] ?? k;
   if (invite) {
     return (
