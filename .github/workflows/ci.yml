@@ -174,7 +174,7 @@ jobs:
           rc=$?
           cat pc.log
           # the report as annotations too: the job log is not always reachable, the annotations are
-          if [ "$rc" != 0 ]; then head -n 12 pc.log | while IFS= read -r l; do echo "::error::${l:0:220}"; done; ls -R patch-cov 2>&1 | head -8 | while IFS= read -r l; do echo "::error::${l:0:200}"; done; fi
+          if [ "$rc" != 0 ]; then head -n 12 pc.log | while IFS= read -r l; do echo "::error::${l:0:220}"; done; node -e "const fs=require('fs'),path=require('path');const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):e.name==='coverage-final.json'?[path.join(d,e.name)]:[]);for(const f of walk('patch-cov')){const j=JSON.parse(fs.readFileSync(f,'utf8'));const k=Object.keys(j);console.log('::error::'+f+' '+k.length+' '+(k[0]||'').slice(-70)+' '+k.some(x=>x.includes('LandingDesign')))}"; fi
           exit $rc
 
   build:
