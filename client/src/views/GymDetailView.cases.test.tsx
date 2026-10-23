@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { setLocale } from '../i18n';
+import { resetGeoGateForTests, setGeoSearchState } from '../data/geoSearchGate';
 import { en } from '../i18n/en';
 import { fmtTonnes } from '../i18n';
 import { __getStateForTests, workoutVolumeKg } from '../store';
@@ -80,6 +81,9 @@ const open = (props: Partial<React.ComponentProps<typeof GymDetailView>> = {}) =
 };
 
 beforeEach(() => {
+  // Position and map lookups are gated on the geo-search consent (SPO-293): these cases run with it granted.
+  resetGeoGateForTests();
+  setGeoSearchState({ on: true, ready: true, answered: true });
   freezeClock();
   setLocale('en');
   localStorage.clear();

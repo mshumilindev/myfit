@@ -21,7 +21,7 @@ export function useGymWeeks(gyms: readonly Gym[] = scheduleGyms()): GymWeeks {
       const ctl = new AbortController();
       void import('../../data/gymProviders')
         .then((m) =>
-          m.resolveGymMeta(g.place!.lat, g.place!.lng, ctl.signal, g.name).then((meta) => {
+          m.resolveGymMeta(g.place!.lat, g.place!.lng, ctl.signal).then((meta) => {
             const parsed = meta ? (meta.hours ?? m.parseOpeningHours(meta.openingHours)) : null;
             found.set(g.id, parsed ? parsed.week : null);
           }),

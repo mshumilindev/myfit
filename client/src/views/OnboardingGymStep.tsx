@@ -74,7 +74,7 @@ export function GymStep({
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     const deb = setTimeout(() => {
-      void searchGyms(needle, coords, {}, [], ctrl.signal, {
+      void searchGyms(needle, coords, [], ctrl.signal, {
         onResults: (m) => {
           if (!ctrl.signal.aborted) {
             setResults([...m]);

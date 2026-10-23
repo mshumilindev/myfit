@@ -8,8 +8,8 @@
 
 /**
  * The services that actually receive a request once the person consents, as the code calls them today. These ids are
- * recorded as the `engines` of the consent. Google Places and Foursquare are NOT here: they are not enabled (see
- * `KEYED_PLACE_SERVICES_ENABLED` in `gymProviders.ts`) and would need their own consent kind.
+ * recorded as the `engines` of the consent. Google Places and Foursquare are NOT here: their code was removed (SPO-293);
+ * connecting them again needs their own consent kind, disclosure and a processor-register entry.
  */
 export const GEO_ENGINES = [
   'photon',

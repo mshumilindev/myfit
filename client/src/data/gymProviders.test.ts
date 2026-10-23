@@ -35,17 +35,17 @@ describe('normalizeName', () => {
 describe('sameVenue (AC-SEARCH-05)', () => {
   it('should merge when within 60 m and names within 2 edits', () => {
     const a = place({ name: 'Smartass Gym', lat: 50.45, lng: 30.52 });
-    const b = place({ name: 'Smartass', lat: 50.4501, lng: 30.5201, sources: ['google'] });
+    const b = place({ name: 'Smartass', lat: 50.4501, lng: 30.5201, sources: ['overpass'] });
     expect(sameVenue(a, b)).toBe(true);
   });
   it('should not merge distant venues with same name', () => {
     const a = place({ name: 'Smartass', lat: 50.45, lng: 30.52 });
-    const b = place({ name: 'Smartass', lat: 50.9, lng: 30.9, sources: ['google'] });
+    const b = place({ name: 'Smartass', lat: 50.9, lng: 30.9, sources: ['overpass'] });
     expect(sameVenue(a, b)).toBe(false);
   });
   it('should merge on shared external id regardless of distance', () => {
     const a = place({ name: 'A', externalId: 'x:1', lat: 0, lng: 0 });
-    const b = place({ name: 'B', externalId: 'x:1', lat: 40, lng: 40, sources: ['foursquare'] });
+    const b = place({ name: 'B', externalId: 'x:1', lat: 40, lng: 40, sources: ['overpass'] });
     expect(sameVenue(a, b)).toBe(true);
   });
 });
@@ -55,15 +55,15 @@ describe('mergeResults', () => {
     const acc: PlaceResult[] = [];
     mergeResults(acc, [place({ name: 'Smartass Gym', sources: ['osm'] })]);
     mergeResults(acc, [
-      place({ name: 'Smartass', lat: 50.4501, lng: 30.5201, sources: ['google'] }),
-      place({ name: 'Other Gym', lat: 51, lng: 31, sources: ['google'] }),
+      place({ name: 'Smartass', lat: 50.4501, lng: 30.5201, sources: ['overpass'] }),
+      place({ name: 'Other Gym', lat: 51, lng: 31, sources: ['overpass'] }),
     ]);
     expect(acc).toHaveLength(2);
-    expect(acc[0].sources.sort()).toEqual(['google', 'osm']);
+    expect(acc[0].sources.sort()).toEqual(['osm', 'overpass']);
   });
   it('should fill a missing photo from the merged duplicate', () => {
     const acc = [place({ name: 'Smartass', sources: ['osm'] })];
-    mergeResults(acc, [place({ name: 'Smartass', photoUrl: 'p.jpg', sources: ['google'] })]);
+    mergeResults(acc, [place({ name: 'Smartass', photoUrl: 'p.jpg', sources: ['overpass'] })]);
     expect(acc[0].photoUrl).toBe('p.jpg');
   });
 });

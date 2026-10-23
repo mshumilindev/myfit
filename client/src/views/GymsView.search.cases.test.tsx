@@ -41,7 +41,7 @@ const place = (
 const handlersFor = (query: string): SearchHandlers => {
   const call = [...m.search.mock.calls].reverse().find((c) => c[0] === query);
   if (!call) throw new Error(`no search for ${query}`);
-  return call[5] as SearchHandlers;
+  return call[4] as SearchHandlers;
 };
 const input = () => screen.getByPlaceholderText(en.searchGymPlaceholder);
 const type = (v: string) => fireEvent.change(input(), { target: { value: v } });
@@ -98,21 +98,18 @@ describe('GymsView search: query handling', () => {
     expect(chips().map((c) => c.className)).toEqual([
       'provider-chip pending',
       'provider-chip pending',
-      'provider-chip pending',
-      'provider-chip pending',
     ]);
     const h = handlersFor('iron');
     const states: Array<[ProviderId, ProviderState]> = [
       ['local', { status: 'answered', count: 3 }],
       ['osm', { status: 'failed', reason: 'x' }],
-      ['google', { status: 'skipped', reason: 'no key' }],
     ];
     act(() => states.forEach(([id, st]) => h.onProvider(id, st)));
     expect(chips()[0].textContent).toContain('3');
     expect(chips()[0].className).toContain('answered');
     expect(chips()[1].textContent).toContain('—');
-    expect(chips()[2].className).toContain('skipped');
-    expect(chips()[3].className).toContain('pending');
+    act(() => h.onProvider('osm', { status: 'skipped', reason: 'no consent' }));
+    expect(chips()[1].className).toContain('skipped');
   });
 
   it('results are highlighted by subsequence and a stale search is ignored once the query changes', async () => {
@@ -136,11 +133,8 @@ describe('GymsView search: query handling', () => {
     expect(screen.queryByText(en.searchGymEmpty)).toBeNull();
     const h = handlersFor('zzz');
     act(() => {
-      (['local', 'osm', 'google', 'foursquare'] as ProviderId[]).forEach((id) =>
-        h.onProvider(
-          id,
-          id === 'google' ? { status: 'skipped', reason: 'k' } : { status: 'answered', count: 0 },
-        ),
+      (['local', 'osm'] as ProviderId[]).forEach((id) =>
+        h.onProvider(id, { status: 'answered', count: 0 }),
       );
       h.onResults([]);
     });
@@ -299,7 +293,6 @@ describe('GymsView search: nearby suggestions', () => {
     expect(m.search).toHaveBeenCalledWith(
       en.nearbyQuery,
       { lat: 0, lng: 0 },
-      expect.anything(),
       expect.any(Array),
       expect.anything(),
       expect.anything(),

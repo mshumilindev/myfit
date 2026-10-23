@@ -4,25 +4,12 @@
  * Pure client logic — no design/styling here. The UI (provider chips,
  * skeleton rows, merged-row layout) is owned by the design-system layer.
  *
- * Resolution order (venue): local DB → OpenStreetMap → Google Places →
- * Foursquare. Providers run in PARALLEL, stream results as each answers, and
+ * Resolution order (venue): local DB → OpenStreetMap. Providers run in PARALLEL, stream results as each answers, and
  * identical venues merge into one row that lists every contributing source.
  */
 import { detectAmenities, unionAmenities } from './gymAmenities';
 import { GeoConsentError, assertGeoSearchOn, geoSignal, isGeoSearchOn } from './geoSearchGate';
 import type { Gym } from '../types';
-
-/**
- * Google Places and Foursquare are NOT enabled (SPO-293): the consent a person gives for gym search names only the
- * OpenStreetMap-based services below. A key in the build must never switch them on. Turning this on needs its own
- * consent kind, its own disclosure and a processor-register entry first, so it stays a constant, not an env flag.
- */
-const KEYED_PLACE_SERVICES_ENABLED: boolean = false;
-
-/** Google Places key from Vite env, only when the keyed services are enabled above. */
-const GOOGLE_KEY = KEYED_PLACE_SERVICES_ENABLED
-  ? (import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined)
-  : undefined;
 
 /**
  * Every request to a place or map service goes through here: no consent, no request (throws `GeoConsentError` before
@@ -35,13 +22,7 @@ function geoFetch(input: string, init?: RequestInit): Promise<Response> {
   return fetch(input, { ...init, signal });
 }
 
-/** Google Places / Foursquare: refused outright unless the keyed services are enabled (and then still need consent). */
-function keyedFetch(input: string, init?: RequestInit): Promise<Response> {
-  if (!KEYED_PLACE_SERVICES_ENABLED) throw new Error('keyed place services are not enabled');
-  return geoFetch(input, init);
-}
-
-export type ProviderId = 'local' | 'osm' | 'overpass' | 'google' | 'foursquare';
+export type ProviderId = 'local' | 'osm' | 'overpass';
 
 export interface PlaceResult {
   /** Stable within a provider; used only for React keys before merge. */
@@ -73,12 +54,6 @@ export type ProviderState =
 export interface Coords {
   lat: number;
   lng: number;
-}
-
-/** Runtime config: keys come from validated runtime config, never hardcoded. */
-export interface ProviderKeys {
-  googlePlaces?: string;
-  foursquare?: string;
 }
 
 // --- geo + string helpers --------------------------------------------------
@@ -165,7 +140,6 @@ export function mergeResults(acc: PlaceResult[], incoming: PlaceResult[]): Place
 interface ProviderCtx {
   query: string;
   coords: Coords | null;
-  keys: ProviderKeys;
   savedGyms: Gym[];
   signal: AbortSignal;
 }
@@ -423,89 +397,12 @@ async function photonOnce(
     });
 }
 
-const googleProvider: Provider = async ({ query, coords, keys, signal }) => {
-  if (!KEYED_PLACE_SERVICES_ENABLED || !keys.googlePlaces) throw new SkipError('not enabled');
-  const body = {
-    textQuery: `${query} gym`,
-    ...(coords
-      ? {
-          locationBias: {
-            circle: { center: { latitude: coords.lat, longitude: coords.lng }, radius: 5000 },
-          },
-        }
-      : {}),
-  };
-  const res = await keyedFetch('https://places.googleapis.com/v1/places:searchText', {
-    method: 'POST',
-    signal,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Goog-Api-Key': keys.googlePlaces,
-      'X-Goog-FieldMask':
-        'places.id,places.displayName,places.location,places.formattedAddress,places.photos',
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`google ${res.status}`);
-  const data = (await res.json()) as {
-    places?: Array<{
-      id: string;
-      displayName?: { text: string };
-      location?: { latitude: number; longitude: number };
-      formattedAddress?: string;
-      photos?: Array<{ name: string }>;
-    }>;
-  };
-  return (data.places ?? []).map((p) => ({
-    key: `google:${p.id}`,
-    name: p.displayName?.text ?? query,
-    lat: p.location?.latitude ?? 0,
-    lng: p.location?.longitude ?? 0,
-    address: p.formattedAddress,
-    photoUrl: p.photos?.[0]
-      ? `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxWidthPx=1600&key=${keys.googlePlaces}`
-      : undefined,
-    externalId: `google:${p.id}`,
-    sources: ['google'] as ProviderId[],
-  }));
-};
-
-const foursquareProvider: Provider = async ({ query, coords, keys, signal }) => {
-  if (!KEYED_PLACE_SERVICES_ENABLED || !keys.foursquare) throw new SkipError('not enabled');
-  const params = new URLSearchParams({ query, categories: '18021', limit: '8' });
-  if (coords) params.set('ll', `${coords.lat},${coords.lng}`);
-  const res = await keyedFetch(`https://api.foursquare.com/v3/places/search?${params}`, {
-    signal,
-    headers: { Authorization: keys.foursquare, Accept: 'application/json' },
-  });
-  if (!res.ok) throw new Error(`foursquare ${res.status}`);
-  const data = (await res.json()) as {
-    results?: Array<{
-      fsq_id: string;
-      name: string;
-      geocodes?: { main?: { latitude: number; longitude: number } };
-      location?: { formatted_address?: string };
-    }>;
-  };
-  return (data.results ?? []).map((r) => ({
-    key: `fsq:${r.fsq_id}`,
-    name: r.name,
-    lat: r.geocodes?.main?.latitude ?? 0,
-    lng: r.geocodes?.main?.longitude ?? 0,
-    address: r.location?.formatted_address,
-    externalId: `fsq:${r.fsq_id}`,
-    sources: ['foursquare'] as ProviderId[],
-  }));
-};
-
 /** A provider that can't run (missing key) throws this → chip state 'skipped'. */
 class SkipError extends Error {}
 
 const PROVIDERS: { id: ProviderId; run: Provider }[] = [
   { id: 'local', run: localProvider },
   { id: 'osm', run: osmProvider },
-  { id: 'google', run: googleProvider },
-  { id: 'foursquare', run: foursquareProvider },
 ];
 
 export interface SearchHandlers {
@@ -554,13 +451,12 @@ function writeCache(query: string, coords: Coords | null, results: PlaceResult[]
 export async function searchGyms(
   query: string,
   coords: Coords | null,
-  keys: ProviderKeys,
   savedGyms: Gym[],
   signal: AbortSignal,
   handlers: SearchHandlers,
 ): Promise<PlaceResult[]> {
   const merged: PlaceResult[] = [];
-  const ctx: ProviderCtx = { query, coords, keys, savedGyms, signal };
+  const ctx: ProviderCtx = { query, coords, savedGyms, signal };
 
   for (const p of PROVIDERS) handlers.onProvider(p.id, { status: 'pending' });
 
@@ -657,14 +553,6 @@ export async function resolvePhoto(r: PlaceResult, signal: AbortSignal): Promise
   // No consent: no photo lookup, and no third-party image URL (even a remembered one) is handed to an <img>.
   if (!isGeoSearchOn()) return null;
   if (r.photoUrl) return r.photoUrl;
-  if (GOOGLE_KEY) {
-    try {
-      const g = await googleLookup(r.name, r.lat, r.lng, signal);
-      if (g?.photoUrl) return g.photoUrl;
-    } catch (e) {
-      if (signal.aborted) throw e;
-    }
-  }
   try {
     if (r.wikimediaCommons) {
       const url = await commonsThumb(r.wikimediaCommons, signal);
@@ -871,7 +759,7 @@ export interface GymMeta {
   website?: string;
   phone?: string;
   category?: string;
-  /** Structured hours (Google periods) when available — preferred over raw. */
+  /** Structured hours when available — preferred over raw. */
   hours?: ParsedHours;
   openNow?: boolean;
 }
@@ -884,28 +772,7 @@ export function resolveGymMeta(
   lat: number,
   lng: number,
   signal: AbortSignal,
-  name?: string,
 ): Promise<GymMeta | null> {
-  if (GOOGLE_KEY && name) {
-    return googleLookup(name, lat, lng, signal)
-      .then((g) => {
-        if (g && (g.hours || g.website || g.phone || g.hoursRaw)) {
-          return {
-            openingHours: g.hoursRaw?.join(' · '),
-            hours: g.hours,
-            openNow: g.openNow,
-            website: g.website,
-            phone: g.phone,
-            category: 'gym',
-          } as GymMeta;
-        }
-        return fetchGymMetaCached(lat, lng, signal);
-      })
-      .catch((e) => {
-        if (signal.aborted) throw e;
-        return fetchGymMetaCached(lat, lng, signal);
-      });
-  }
   return fetchGymMetaCached(lat, lng, signal);
 }
 
@@ -1028,128 +895,4 @@ export function parseOpeningHours(raw: string | undefined): ParsedHours | null {
     matched = true;
   }
   return matched ? { week } : null;
-}
-
-// --- Google Places lookup: real photo + hours + website + phone -------------
-// One searchText call per venue (cached by coords), used by resolvePhoto and
-// resolveGymMeta so Google enriches the whole app once the key is enabled.
-
-export interface GoogleInfo {
-  photoUrl?: string;
-  website?: string;
-  phone?: string;
-  hours?: ParsedHours;
-  hoursRaw?: string[];
-  openNow?: boolean;
-}
-
-const G_PREFIX = 'gym.google.';
-const G_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const googleInflight = new Map<string, Promise<GoogleInfo | null>>();
-
-export function googleLookup(
-  name: string,
-  lat: number,
-  lng: number,
-  signal: AbortSignal,
-): Promise<GoogleInfo | null> {
-  if (!GOOGLE_KEY || !name) return Promise.resolve(null);
-  const key = `${G_PREFIX}${Math.round(lat * 1e5) / 1e5},${Math.round(lng * 1e5) / 1e5}`;
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw) {
-      const { at, info } = JSON.parse(raw) as { at: number; info: GoogleInfo | null };
-      if (Date.now() - at <= G_TTL_MS) return Promise.resolve(info);
-    }
-  } catch {
-    /* ignore */
-  }
-  const existing = googleInflight.get(key);
-  if (existing) return existing;
-  const job = fetchGoogle(name, lat, lng, signal)
-    .then((info) => {
-      try {
-        localStorage.setItem(key, JSON.stringify({ at: Date.now(), info }));
-      } catch {
-        /* quota */
-      }
-      return info;
-    })
-    .catch((e) => {
-      if (signal.aborted) throw e;
-      return null;
-    })
-    .finally(() => googleInflight.delete(key));
-  googleInflight.set(key, job);
-  return job;
-}
-
-interface GPeriodPt {
-  day: number;
-  hour: number;
-  minute: number;
-}
-interface GPeriod {
-  open?: GPeriodPt;
-  close?: GPeriodPt;
-}
-
-function googlePeriodsToHours(periods: GPeriod[] | undefined): ParsedHours | null {
-  if (!periods || periods.length === 0) return null;
-  const week: Array<Array<[number, number]>> = Array.from({ length: 7 }, () => []);
-  const mon = (d: number) => (d + 6) % 7; // Google day 0=Sun → Monday-first
-  for (const per of periods) {
-    if (!per.open) continue;
-    const oi = mon(per.open.day);
-    const openMin = per.open.hour * 60 + (per.open.minute || 0);
-    const closeMin = per.close ? per.close.hour * 60 + (per.close.minute || 0) : 1440;
-    // A close on a later day (overnight/24h) → cap that day at midnight.
-    week[oi].push([openMin, per.close && per.close.day !== per.open.day ? 1440 : closeMin]);
-  }
-  return week.some((d) => d.length) ? { week } : null;
-}
-
-async function fetchGoogle(
-  name: string,
-  lat: number,
-  lng: number,
-  signal: AbortSignal,
-): Promise<GoogleInfo | null> {
-  const res = await keyedFetch('https://places.googleapis.com/v1/places:searchText', {
-    method: 'POST',
-    signal,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Goog-Api-Key': GOOGLE_KEY as string,
-      'X-Goog-FieldMask':
-        'places.photos,places.regularOpeningHours,places.currentOpeningHours,places.websiteUri,places.internationalPhoneNumber',
-    },
-    body: JSON.stringify({
-      textQuery: name,
-      locationBias: { circle: { center: { latitude: lat, longitude: lng }, radius: 500 } },
-      maxResultCount: 1,
-    }),
-  });
-  if (!res.ok) return null;
-  const j = (await res.json()) as {
-    places?: Array<{
-      photos?: Array<{ name: string }>;
-      websiteUri?: string;
-      internationalPhoneNumber?: string;
-      regularOpeningHours?: { periods?: GPeriod[]; weekdayDescriptions?: string[] };
-      currentOpeningHours?: { openNow?: boolean };
-    }>;
-  };
-  const p = j.places?.[0];
-  if (!p) return null;
-  return {
-    photoUrl: p.photos?.[0]
-      ? `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxWidthPx=1200&key=${GOOGLE_KEY}`
-      : undefined,
-    website: p.websiteUri,
-    phone: p.internationalPhoneNumber,
-    hours: googlePeriodsToHours(p.regularOpeningHours?.periods) ?? undefined,
-    hoursRaw: p.regularOpeningHours?.weekdayDescriptions,
-    openNow: p.currentOpeningHours?.openNow,
-  };
 }

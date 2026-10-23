@@ -13,11 +13,10 @@ const on = (part: string, h: Handler) => routes.push([part, h]);
 const ctl = () => new AbortController();
 
 /**
- * The Google key is read at import time, so each scenario loads the module afresh. The gate is a module too, so the
+ * Each scenario loads the module afresh. The gate is a module too, so the
  * geo-search consent (SPO-293) is granted on the fresh copy; `consent: false` leaves it off.
  */
-async function load(key = '', consent = true) {
-  vi.stubEnv('VITE_GOOGLE_PLACES_KEY', key);
+async function load(consent = true) {
   vi.resetModules();
   const gate = await import('./geoSearchGate');
   gate.resetGeoGateForTests();
@@ -222,13 +221,13 @@ describe('resolvePhoto (no Google key)', () => {
   });
 });
 
-describe('resolveGymMeta (OSM via Nominatim, no Google key)', () => {
+describe('resolveGymMeta (OSM via Nominatim)', () => {
   const nominatim = (extratags: Record<string, string> | undefined, type = 'gym') =>
     on('nominatim', () => json({ type, category: 'leisure', extratags }));
   it('reads hours, website (with fallbacks), phone and category', async () => {
     nominatim({ opening_hours: 'Mo-Su 06:00-22:00', url: 'https://u', phone: '+48 1' });
     const m = await load();
-    expect(await m.resolveGymMeta(50.45, 30.52, ctl().signal, 'Zdrofit')).toEqual({
+    expect(await m.resolveGymMeta(50.45, 30.52, ctl().signal)).toEqual({
       openingHours: 'Mo-Su 06:00-22:00',
       website: 'https://u',
       phone: '+48 1',
@@ -297,23 +296,12 @@ describe('resolveGymMeta (OSM via Nominatim, no Google key)', () => {
   });
 });
 
-// SPO-293: Google Places is switched off by a constant in gymProviders.ts, so a key in the build never enables it.
-describe('with a Google Places key in the build (keyed services are off)', () => {
-  it('googleLookup is null without a name', async () => {
-    const m = await load('KEY');
-    expect(await m.googleLookup('', 1, 1, ctl().signal)).toBeNull();
-    expect(calls).toHaveLength(0);
-  });
-  it('googleLookup is null even with a key and a name, with no request', async () => {
-    const m = await load('KEY');
-    expect(await m.googleLookup('Gym', 1, 1, ctl().signal)).toBeNull();
-    expect(calls).toHaveLength(0);
-  });
-  it('resolvePhoto never asks Google and falls back to the keyless chain', async () => {
+describe('no Google Places lookup exists', () => {
+  it('resolvePhoto falls back to the keyless chain and never asks Google', async () => {
     on('commons.wikimedia.org', () =>
       json({ query: { pages: { 1: { imageinfo: [{ thumburl: 'https://t/c.jpg' }] } } } }),
     );
-    const m = await load('KEY');
+    const m = await load();
     expect(await m.resolvePhoto(row({ wikimediaCommons: 'File:c.jpg' }), ctl().signal)).toBe(
       'https://t/c.jpg',
     );
@@ -321,25 +309,17 @@ describe('with a Google Places key in the build (keyed services are off)', () =>
   });
   it('resolveGymMeta reads OSM only and never asks Google', async () => {
     on('nominatim', () => json({ type: 'gym', extratags: { phone: 'osm' } }));
-    const m = await load('KEY');
-    expect(await m.resolveGymMeta(1, 1, ctl().signal, 'A')).toMatchObject({ phone: 'osm' });
+    const m = await load();
+    expect(await m.resolveGymMeta(1, 1, ctl().signal)).toMatchObject({ phone: 'osm' });
     expect(calls.some((c) => c.url.includes('places.googleapis.com'))).toBe(false);
-    expect(await m.resolveGymMeta(3, 3, ctl().signal)).toMatchObject({ phone: 'osm' });
-  });
-  it('resolveGymMeta rethrows an abort', async () => {
-    on('nominatim', () => Promise.reject(new Error('aborted')));
-    const m = await load('KEY');
-    const ac = ctl();
-    ac.abort();
-    await expect(m.resolveGymMeta(4, 4, ac.signal, 'Named')).rejects.toThrow('aborted');
   });
 });
 
 describe('without the geo-search consent (SPO-293)', () => {
   it('resolveGymMeta and resolvePhoto send nothing and give nothing', async () => {
     on('nominatim', () => json({ type: 'gym', extratags: { phone: 'osm' } }));
-    const m = await load('', false);
-    expect(await m.resolveGymMeta(5, 5, ctl().signal, 'A')).toBeNull();
+    const m = await load(false);
+    expect(await m.resolveGymMeta(5, 5, ctl().signal)).toBeNull();
     expect(await m.brandLogo('McFit', ctl().signal)).toBeNull();
     expect(await m.resolvePhoto(row({ wikimediaCommons: 'File:c.jpg' }), ctl().signal)).toBeNull();
     expect(calls).toHaveLength(0);

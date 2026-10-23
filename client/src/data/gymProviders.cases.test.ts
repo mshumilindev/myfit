@@ -118,7 +118,7 @@ describe('mergeResults', () => {
     const acc = [place('Alpha Gym', 50.45, 30.52, { address: 'Main 1' })];
     const out = mergeResults(acc, [
       place('Alpha', 50.4501, 30.5201, {
-        sources: ['google'],
+        sources: ['overpass'],
         photoUrl: 'p.jpg',
         address: 'Other 2',
         externalId: 'g:1',
@@ -131,7 +131,7 @@ describe('mergeResults', () => {
     expect(out).toBe(acc);
     expect(out.map((p) => p.name)).toEqual(['Alpha Gym', 'Beta']);
     expect(out[0]).toMatchObject({
-      sources: ['osm', 'google'],
+      sources: ['osm', 'overpass'],
       photoUrl: 'p.jpg',
       address: 'Main 1',
       externalId: 'g:1',
@@ -143,7 +143,7 @@ describe('mergeResults', () => {
   it('does not mutate the incoming row it appends (sources are copied)', () => {
     const inc = place('Gamma', 52, 32, { sources: ['osm'] });
     const out = mergeResults([], [inc]);
-    out[0].sources.push('google');
+    out[0].sources.push('overpass');
     expect(inc.sources).toEqual(['osm']);
   });
   it('merges rows that share an external id even when far apart', () => {
@@ -288,11 +288,11 @@ describe('searchGyms', () => {
     geometry: { coordinates: [lon, lat] },
     properties: { name, osm_id: 7, osm_type: 'N', ...pr },
   });
-  const run = (q: string, coords: typeof KYIV | null = KYIV, keys = {}, saved: Gym[] = []) => {
+  const run = (q: string, coords: typeof KYIV | null = KYIV, saved: Gym[] = []) => {
     const states: [ProviderId, ProviderState][] = [];
     const snaps: PlaceResult[][] = [];
     const ac = ctl();
-    const p = searchGyms(q, coords, keys, saved, ac.signal, {
+    const p = searchGyms(q, coords, saved, ac.signal, {
       onProvider: (id, s) => states.push([id, s]),
       onResults: (m) => snaps.push(m),
     });
@@ -312,22 +312,18 @@ describe('searchGyms', () => {
         { properties: { name: 'No geometry' } },
       ]),
     );
-    const { p, states, snaps } = run('smartass', KYIV, {}, [gym('g1', 'Smartass', 50.45, 30.52)]);
+    const { p, states, snaps } = run('smartass', KYIV, [gym('g1', 'Smartass', 50.45, 30.52)]);
     const merged = await p;
     expect(merged).toHaveLength(1);
     expect(merged[0].sources.sort()).toEqual(['local', 'osm']);
     expect(merged[0].address).toBe('Khreshchatyk 1, Kyiv, UA');
-    expect(states.slice(0, 4)).toEqual([
+    expect(states.slice(0, 2)).toEqual([
       ['local', { status: 'pending' }],
       ['osm', { status: 'pending' }],
-      ['google', { status: 'pending' }],
-      ['foursquare', { status: 'pending' }],
     ]);
     const final = (id: ProviderId) => states.filter(([i]) => i === id).at(-1)![1];
     expect(final('local')).toEqual({ status: 'answered', count: 1 });
     expect(final('osm')).toEqual({ status: 'answered', count: 1 });
-    expect(final('google')).toEqual({ status: 'skipped', reason: 'not enabled' });
-    expect(final('foursquare')).toEqual({ status: 'skipped', reason: 'not enabled' });
     expect(snaps.length).toBe(2);
     expect(readCache('smartass', KYIV)).toEqual(merged);
   });
@@ -366,7 +362,7 @@ describe('searchGyms', () => {
   });
   it('a failing provider is logged, reported, and does not block the others', async () => {
     on('photon', () => json({}, 500));
-    const { p, states } = run('x', KYIV, {}, [gym('g1', 'Xtreme', 50.45, 30.52)]);
+    const { p, states } = run('x', KYIV, [gym('g1', 'Xtreme', 50.45, 30.52)]);
     const merged = await p;
     expect(merged).toHaveLength(1);
     expect(states.filter(([i]) => i === 'osm').at(-1)![1]).toEqual({
@@ -384,36 +380,17 @@ describe('searchGyms', () => {
       reason: 'failed',
     });
   });
-  // SPO-293: Google Places / Foursquare are switched off by a constant in gymProviders.ts, so a key never enables them.
-  it('Google and Foursquare keys do not switch those services on: skipped, no request, no key sent', async () => {
+  it('queries only local + OpenStreetMap services: no Google Places / Foursquare provider exists', async () => {
     on('photon', () => photon([]));
-    const { p, states } = run('gym', KYIV, { googlePlaces: 'GK', foursquare: 'FK' });
+    const { p, states } = run('gym', KYIV);
     await p;
-    expect(calls.some((c) => c.url.includes('places.googleapis.com'))).toBe(false);
-    expect(calls.some((c) => c.url.includes('foursquare'))).toBe(false);
-    expect(states.filter(([i]) => i === 'google').at(-1)![1]).toEqual({
-      status: 'skipped',
-      reason: 'not enabled',
-    });
-    expect(states.filter(([i]) => i === 'foursquare').at(-1)![1]).toEqual({
-      status: 'skipped',
-      reason: 'not enabled',
-    });
-    expect(calls.every((c) => !JSON.stringify(c.init ?? {}).includes('GK'))).toBe(true);
-  });
-  it('without a position the keyed services are skipped the same way', async () => {
-    on('photon', () => photon([]));
-    const { p, states } = run('gym', null, { googlePlaces: 'GK', foursquare: 'FK' });
-    await p;
-    expect(states.filter(([i]) => i === 'google').at(-1)![1]).toMatchObject({ status: 'skipped' });
-    expect(states.filter(([i]) => i === 'foursquare').at(-1)![1]).toMatchObject({
-      status: 'skipped',
-    });
+    expect([...new Set(states.map(([i]) => i))].sort()).toEqual(['local', 'osm']);
+    expect(calls.some((c) => /googleapis|foursquare/.test(c.url))).toBe(false);
   });
   it('without the geo-search consent no request leaves the device: Photon fails with the reason, saved gyms still answer', async () => {
     resetGeoGateForTests();
     on('photon', () => photon([feat('Smartass Gym', 30.52, 50.45)]));
-    const { p, states } = run('smartass', KYIV, {}, [gym('g1', 'Smartass', 50.45, 30.52)]);
+    const { p, states } = run('smartass', KYIV, [gym('g1', 'Smartass', 50.45, 30.52)]);
     const merged = await p;
     expect(calls).toHaveLength(0);
     expect(merged.map((m) => m.sources)).toEqual([['local']]);
@@ -428,7 +405,7 @@ describe('searchGyms', () => {
   });
   it('an empty query finds nothing locally; nothing is cached for no results', async () => {
     on('photon', () => photon([]));
-    const merged = await run('  ', KYIV, {}, [gym('g1', 'Anything', 50.45, 30.52)]).p;
+    const merged = await run('  ', KYIV, [gym('g1', 'Anything', 50.45, 30.52)]).p;
     expect(merged).toEqual([]);
     expect(readCache('  ', KYIV)).toBeNull();
   });
@@ -438,7 +415,7 @@ describe('searchGyms', () => {
       'photon',
       () => new Promise((r) => (release = () => r(photon([feat('Late', 30.52, 50.45)])))),
     );
-    const { p, states, snaps, ac } = run('late', KYIV, {}, []);
+    const { p, states, snaps, ac } = run('late', KYIV, []);
     ac.abort();
     release();
     await p;
@@ -484,17 +461,10 @@ describe('search cache', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('quota');
     });
-    const merged = await searchGyms(
-      'q',
-      KYIV,
-      {},
-      [gym('g1', 'Qgym', 50.45, 30.52)],
-      ctl().signal,
-      {
-        onProvider: () => {},
-        onResults: () => {},
-      },
-    );
+    const merged = await searchGyms('q', KYIV, [gym('g1', 'Qgym', 50.45, 30.52)], ctl().signal, {
+      onProvider: () => {},
+      onResults: () => {},
+    });
     expect(merged).toHaveLength(1);
   });
 });

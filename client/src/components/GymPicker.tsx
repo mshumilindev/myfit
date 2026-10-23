@@ -56,7 +56,7 @@ function RowHours({ name, lat, lng }: { name: string; lat: number; lng: number }
   useEffect(() => {
     let alive = true;
     const sig = new AbortController().signal;
-    resolveGymMeta(lat, lng, sig, name)
+    resolveGymMeta(lat, lng, sig)
       .then((meta) => {
         if (!alive || !meta) return;
         const parsed = meta.hours ?? parseOpeningHours(meta.openingHours);

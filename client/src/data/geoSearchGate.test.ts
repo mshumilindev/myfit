@@ -11,7 +11,6 @@ import {
 } from './geoSearchGate';
 import {
   brandLogo,
-  googleLookup,
   resolveAddress,
   resolveGymMeta,
   resolvePhoto,
@@ -48,14 +47,10 @@ describe('with no consent', () => {
 
   it('searchGyms sends nothing to any provider and still lists the saved gyms', async () => {
     const states: Partial<Record<ProviderId, ProviderState>> = {};
-    const rows = await searchGyms(
-      'home',
-      coords,
-      { googlePlaces: 'k', foursquare: 'k' },
-      [saved],
-      new AbortController().signal,
-      { onResults: () => undefined, onProvider: (id, s) => (states[id] = s) },
-    );
+    const rows = await searchGyms('home', coords, [saved], new AbortController().signal, {
+      onResults: () => undefined,
+      onProvider: (id, s) => (states[id] = s),
+    });
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(rows.map((r) => r.name)).toEqual(['Home Gym']);
     expect(states.osm?.status).toBe('skipped');
@@ -81,8 +76,7 @@ describe('with no consent', () => {
     await expect(resolvePhoto(place, sig)).resolves.toBeNull();
     await expect(brandLogo('McFit', sig)).resolves.toBeNull();
     await expect(resolveAddress(1, 2, sig)).resolves.toBeNull();
-    await expect(resolveGymMeta(1, 2, sig, 'McFit')).resolves.toBeNull();
-    await expect(googleLookup('McFit', 1, 2, sig)).resolves.toBeNull();
+    await expect(resolveGymMeta(1, 2, sig)).resolves.toBeNull();
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
@@ -98,22 +92,18 @@ describe('with no consent', () => {
 describe('with consent', () => {
   beforeEach(on);
 
-  it('calls only the OpenStreetMap-based services; Google Places and Foursquare are never called, even with keys', async () => {
-    await searchGyms(
-      'home',
-      coords,
-      { googlePlaces: 'k', foursquare: 'k' },
-      [saved],
-      new AbortController().signal,
-      { onResults: () => undefined, onProvider: () => undefined },
-    );
+  it('calls only the OpenStreetMap-based services; Google Places and Foursquare are not part of the app', async () => {
+    await searchGyms('home', coords, [saved], new AbortController().signal, {
+      onResults: () => undefined,
+      onProvider: () => undefined,
+    });
     expect(fetchSpy).toHaveBeenCalled();
     expect(new Set(hosts())).toEqual(new Set(['photon.komoot.io']));
   });
 
   it('Overpass and Nominatim are called for nearby gyms and hours', async () => {
     await searchNearbyGyms(coords, 3000, [], new AbortController().signal);
-    await resolveGymMeta(3, 4, new AbortController().signal, 'Gym');
+    await resolveGymMeta(3, 4, new AbortController().signal);
     expect(new Set(hosts())).toEqual(new Set(['overpass-api.de', 'nominatim.openstreetmap.org']));
   });
 

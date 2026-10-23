@@ -23,7 +23,6 @@ import {
   cacheAddress,
   type Coords,
   type PlaceResult,
-  type ProviderKeys,
   type ProviderId,
   type ProviderState,
 } from '../data/gymProviders';
@@ -36,16 +35,6 @@ import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
 import { autoMainGymIds, isMainGym } from '../mainGym';
 import { Tag } from '../components/ui/Tag';
 import { Icon, useExerciseName } from '../ui';
-
-// Optional place-provider keys, read from Vite env at build time. Absent keys
-// leave that provider "skipped" (chip greyed) — the app works without them.
-// NOTE: these ship in the client bundle; restrict the Google key by HTTP
-// referrer in Google Cloud Console. For a fully private key, proxy through the
-// server (BFF) instead of calling the provider from the browser.
-const GYM_KEYS: ProviderKeys = {
-  googlePlaces: import.meta.env.VITE_GOOGLE_PLACES_KEY,
-  foursquare: import.meta.env.VITE_FOURSQUARE_KEY,
-};
 
 type Store = ReturnType<typeof useStore>;
 
@@ -502,7 +491,7 @@ function useDesktopDetail(): boolean {
   return matches;
 }
 
-const PROVIDER_ORDER: ProviderId[] = ['local', 'osm', 'google', 'foursquare'];
+const PROVIDER_ORDER: ProviderId[] = ['local', 'osm'];
 
 /**
  * Suggestive gym search (AC-SEARCH). Debounced 350 ms; each keystroke cancels
@@ -556,7 +545,7 @@ function GymSearch({
   useEffect(() => {
     if (!coords || !on) return;
     const ctrl = new AbortController();
-    void searchGyms(t.nearbyQuery, coords, GYM_KEYS, savedGyms, ctrl.signal, {
+    void searchGyms(t.nearbyQuery, coords, savedGyms, ctrl.signal, {
       onResults: (merged) => {
         if (!ctrl.signal.aborted) setNearby([...merged]);
       },
@@ -580,7 +569,7 @@ function GymSearch({
     const debounce = setTimeout(() => {
       if (cached) setResults(cached);
       setProviders({} as Record<ProviderId, ProviderState>);
-      void searchGyms(needle, coordsRef.current, GYM_KEYS, savedGyms, ctrl.signal, {
+      void searchGyms(needle, coordsRef.current, savedGyms, ctrl.signal, {
         onResults: (merged) => {
           if (!ctrl.signal.aborted) {
             setResults([...merged]);
