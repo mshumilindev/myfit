@@ -114,6 +114,10 @@ jobs:
         shard: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
       - uses: actions/checkout@v4
+        with:
+          # `vitest --changed <base>` needs the history between base and HEAD: on a depth-1 clone it selects NO tests at all
+          # (every shard then "passes" with an empty coverage file), so the full history is fetched here.
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
