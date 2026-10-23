@@ -269,6 +269,14 @@ jobs:
           mkdir -p client/node_modules/.cache/storybook/10.6.0/default
           npm run build-storybook > sb.log 2>&1
           rc=$?
+          # Storybook 10 creates its cache directories in parallel (manager + preview) and loses the race on a cold runner
+          # (EEXIST / ENOENT on mkdir). The directories exist after the first attempt, so one retry is deterministic.
+          if [ "$rc" != 0 ] && grep -qE 'EEXIST|ENOENT' sb.log; then
+            echo "::warning::storybook cache-directory race, retrying once"
+            cp sb.log sb.first.log
+            npm run build-storybook > sb.log 2>&1
+            rc=$?
+          fi
           cat sb.log
           if [ "$rc" != 0 ]; then
             echo "::error::storybook exit $rc, $(wc -l < sb.log) log lines"
