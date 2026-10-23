@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 
 const h = vi.hoisted(() => ({ grant: vi.fn(), signOut: vi.fn() }));
 vi.mock('../api', () => ({
+  registerSignOutFlush: () => undefined, // signupConsents registers its queues with api.ts at import
   currentUid: () => 'u1',
   onAuthChange: () => () => undefined,
   signOut: h.signOut,

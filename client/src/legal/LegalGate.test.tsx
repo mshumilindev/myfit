@@ -15,6 +15,7 @@ const h = vi.hoisted(() => ({
   signOut: vi.fn(),
 }));
 vi.mock('../api', () => ({
+  registerSignOutFlush: () => undefined, // signupConsents registers its queues with api.ts at import
   currentUid: () => h.uid,
   getRole: () => h.role,
   onRoleChange: (cb: () => void) => {

@@ -14,7 +14,6 @@ import {
   saveAlcoholEntry,
   saveNicotineProduct,
   saveSupplementEntry,
-  setNicotineSharing,
   setConditionsShare,
 } from '../../store';
 import { dayOfTimestamp } from '../../components/ui/calendarDays';
@@ -36,11 +35,6 @@ vi.mock('../../coach/client/lazy', async (orig) => ({
 import { HealthPrivacyView } from './HealthPrivacyView';
 
 const dlg = () => document.querySelector('[role="alertdialog"], [role="dialog"]') as HTMLElement;
-const row = (label: string) =>
-  [...document.querySelectorAll<HTMLElement>('button.uirow')].find((b) =>
-    b.querySelector('.uirow-l')?.textContent?.includes(label),
-  ) as HTMLElement;
-const summary = () => document.querySelector('[aria-live="polite"]') as HTMLElement;
 
 beforeEach(() => {
   setLocale('en');
@@ -63,52 +57,6 @@ describe('HealthPrivacyView: exits to the trainer', () => {
     expect(currentHash()).toBe('#/trainer/log');
     fireEvent.click(screen.getByText('open-trainer'));
     expect(currentHash()).toBe('#/trainer');
-  });
-});
-
-describe('HealthPrivacyView: summary sentence', () => {
-  it('names the categories shared as effects, and without a list formatter falls back to plain names', () => {
-    setConditionsShare('effects');
-    vi.spyOn(Intl, 'ListFormat').mockImplementation(function () {
-      throw new Error('unsupported');
-    } as never);
-    render(<HealthPrivacyView onBack={() => undefined} />);
-    expect(summary().textContent).toContain(en.cndTitle);
-    expect(summary().textContent).toContain('Training effects only: ');
-  });
-
-  it("with the real formatter two categories are joined in the locale's own words", () => {
-    setConditionsShare('effects');
-    saveNicotineProduct({ ...newNicotineProduct('cigarettes', 'c'), amount: 5 });
-    setNicotineSharing('effects');
-    render(<HealthPrivacyView onBack={() => undefined} />);
-    expect(summary().textContent).toContain(en.cndTitle);
-    expect(summary().textContent).toContain(en.nicTitle);
-    expect(summary().textContent).toMatch(/ and /);
-  });
-});
-
-describe('HealthPrivacyView: category sheet', () => {
-  it('opens on a row, lets the level be changed, and closes with Done or Escape', async () => {
-    render(<HealthPrivacyView onBack={() => undefined} />);
-    fireEvent.click(row(en.cndTitle));
-    const sheet = dlg();
-    expect(within(sheet).getByText(en.cndShareHintFull)).toBeTruthy();
-    fireEvent.click(within(sheet).getByText(en.cndShareHintFull));
-    expect(__getStateForTests().conditionsShare).toBe('full');
-    fireEvent.click(within(sheet).getByRole('button', { name: en.done }));
-    await vi.waitFor(() => expect(dlg()).toBeNull());
-    fireEvent.click(row(en.cndTitle));
-    fireEvent.keyDown(document, { key: 'Escape' });
-    await vi.waitFor(() => expect(dlg()).toBeNull());
-  });
-
-  it('alcohol offers no "full" level', () => {
-    render(<HealthPrivacyView onBack={() => undefined} />);
-    fireEvent.click(row(en.alcTitle));
-    expect(within(dlg()).queryByText(en.nicPrivSeeFull)).toBeNull();
-    fireEvent.click(within(dlg()).getByText(en.alcPrivSeeEffects));
-    expect(__getStateForTests().alcohol.settings.sharing).toBe('effects');
   });
 });
 

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 
 vi.mock('../api', () => ({
+  registerSignOutFlush: () => undefined, // signupConsents registers its queues with api.ts at import
   currentUid: () => 'u1',
   onAuthChange: () => () => undefined,
   signOut: vi.fn(),

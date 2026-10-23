@@ -11,7 +11,11 @@ const h = vi.hoisted(() => ({
   grant: vi.fn(),
   getPos: vi.fn(),
 }));
-vi.mock('../api', () => ({ currentUid: () => 'u1', onAuthChange: () => () => undefined }));
+vi.mock('../api', () => ({
+  currentUid: () => 'u1',
+  onAuthChange: () => () => undefined,
+  registerSignOutFlush: () => undefined, // signupConsents registers its queues with api.ts at import
+}));
 vi.mock('./consentApi', async () => {
   const real = await vi.importActual<typeof import('./consentApi')>('./consentApi');
   return { ...real, useConsentRecords: () => h.state, grantConsent: h.grant };
