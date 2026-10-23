@@ -120,9 +120,9 @@ describe("recordGateConsents (the legal gate's Continue)", () => {
   const hex = /^[0-9a-f]{64}$/;
 
   it('a new trainer: terms, policy-ack, age-18 AND trainer-terms queued in one go, each with its hash/version', async () => {
-    h.grant.mockResolvedValue({ id: 'x', at: 1 });
-    let release: (v: unknown) => void = () => undefined;
-    h.grant.mockReturnValueOnce(new Promise((r) => (release = r))); // offline / slow: only the queue is certain
+    // offline / slow: every send hangs (the kinds are sent at the same time), so only the queue is certain
+    const releases: Array<(v: unknown) => void> = [];
+    h.grant.mockImplementation(() => new Promise((r) => releases.push(r)));
     const p = recordGateConsents('en', { base: true, trainer: true });
     await vi.waitFor(() => expect(queued()[0]?.items).toHaveLength(4)); // durable before anything is sent
     expect(queued()[0].items.map((i: { kind: string }) => i.kind)).toEqual([
@@ -131,7 +131,8 @@ describe("recordGateConsents (the legal gate's Continue)", () => {
       'age-18',
       'trainer-terms',
     ]);
-    release({ id: 'x', at: 1 });
+    await vi.waitFor(() => expect(releases).toHaveLength(4));
+    releases.forEach((r) => r({ id: 'x', at: 1 }));
     await p;
     const calls = h.grant.mock.calls.map((c) => c[0]);
     expect(calls.map((c) => c.kind)).toEqual(['terms', 'policy-ack', 'age-18', 'trainer-terms']);
