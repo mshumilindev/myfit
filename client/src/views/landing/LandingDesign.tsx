@@ -41,6 +41,8 @@ import { AtlasFace } from '../../components/AtlasFace';
 import { AnatomyMap, type AnatomyMark } from '../../components/ui/AnatomyMap';
 import { AnatomyTurntable } from '../../components/ui/AnatomyTurntable';
 import { LOCALE_IDS, fmtDayMonth, setLocale, useT, type LocaleId } from '../../i18n';
+import { LegalLinks } from '../../components/ui/LegalLinks';
+import { useLegalT } from '../../i18n/legal';
 import { AuthView } from '../AuthView';
 import { isAppShell } from './landingGate';
 import { downloadUrl } from '../../downloads';
@@ -1185,6 +1187,7 @@ function AuthSlot({
   notice?: ReactNode;
 }) {
   const { t, locale } = useT();
+  const { lg } = useLegalT();
   const T = (k: string): string => (t as unknown as Record<string, string>)[`landing_${k}`] ?? k;
   if (invite) {
     return (
@@ -1199,6 +1202,14 @@ function AuthSlot({
         <button type="button" className="ld-inv-btn" onClick={invite.onStart}>
           {T('k126')}
         </button>
+        {/* The invite panel has no sign-in card (AuthView carries the legal links there), so it keeps its own row. */}
+        <footer className="l-foot">
+          <LegalLinks
+            label={lg.ui.legalNav}
+            privacyLabel={lg.ui.privacyLink}
+            termsLabel={lg.ui.termsLink}
+          />
+        </footer>
       </div>
     );
   }

@@ -57,10 +57,13 @@ const PATH = 'users/u1/meta/supplements';
 // Waits until the Firestore write count stops changing (a fixed delay was flaky under load).
 const tick = async () => {
   let last = -1;
-  for (let i = 0; i < 40; i++) {
+  let stable = 0;
+  for (let i = 0; i < 80; i++) {
     await new Promise((r) => setTimeout(r, 30));
     const n = fs.writes.filter((w) => w.path === PATH).length;
-    if (n === last) return;
+    // three quiet intervals in a row: one slow sealing step on a loaded CI runner must not read as "done"
+    stable = n === last ? stable + 1 : 0;
+    if (stable >= 3) return;
     last = n;
   }
 };

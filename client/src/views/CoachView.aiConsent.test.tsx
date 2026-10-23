@@ -22,6 +22,11 @@ vi.mock('../legal/consentApi', () => ({
   grantConsent: h.grant,
   withdrawConsent: h.withdraw,
 }));
+// A withdrawal is recorded for the signed-in account (no account: nothing to record), so the person here is signed in.
+vi.mock('../api', async (orig) => ({
+  ...(await orig<typeof import('../api')>()),
+  currentUid: () => 'u1',
+}));
 vi.mock('../atlas/chatAccess', () => ({ useChatAccess: () => true }));
 vi.mock('../atlas/chat', async (orig) => ({
   ...(await orig<typeof import('../atlas/chat')>()),

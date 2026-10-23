@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../api', () => ({
+  registerSignOutFlush: () => undefined, // signupConsents registers its queues with api.ts at import
   HttpError: class HttpError extends Error {
     status = 0;
   },

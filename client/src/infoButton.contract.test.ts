@@ -7,6 +7,8 @@ import { join } from 'node:path';
 const styles = readFileSync(join(__dirname, 'styles.css'), 'utf8');
 const picker = readFileSync(join(__dirname, 'components/ExercisePicker.css'), 'utf8');
 const pickerTsx = readFileSync(join(__dirname, 'components/ExercisePicker.tsx'), 'utf8');
+// The InfoButton component itself lives in ExercisePickerParts.tsx (extracted to keep ExercisePicker.tsx under the size baseline).
+const pickerParts = readFileSync(join(__dirname, 'components/ExercisePickerParts.tsx'), 'utf8');
 const session = readFileSync(join(__dirname, 'views/SessionView.tsx'), 'utf8');
 
 const rule = (css: string, sel: string): string =>
@@ -36,7 +38,7 @@ describe('exercise card info button (i)', () => {
     expect(rule(styles, '.es-info::after')).toMatch(/inset:\s*-9px/);
   });
   it('both are the same kit button (xs, photo, round) with an accessible label', () => {
-    expect(pickerTsx).toMatch(
+    expect(pickerParts).toMatch(
       /size="xs"\s+variant="photo"\s+shape="round"\s+className="xp-info"\s+label=\{label\}/,
     );
     expect(session).toMatch(

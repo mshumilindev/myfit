@@ -2,7 +2,10 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const callFn = vi.fn();
-vi.mock('../../api', () => ({ callFn: (...a: unknown[]) => callFn(...a) }));
+vi.mock('../../api', () => ({
+  registerSignOutFlush: () => undefined, // signupConsents registers its queues with api.ts at import
+  callFn: (...a: unknown[]) => callFn(...a),
+}));
 
 import { TeamInviteSignInNotice } from './TeamInviteSignInNotice';
 

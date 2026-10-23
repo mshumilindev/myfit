@@ -2,7 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const callFn = vi.fn();
 let uid: string | null = 'u1';
-vi.mock('../../api', () => ({ callFn: (...a: unknown[]) => callFn(...a), currentUid: () => uid }));
+vi.mock('../../api', () => ({
+  registerSignOutFlush: () => undefined, // signupConsents registers its queues with api.ts at import
+  callFn: (...a: unknown[]) => callFn(...a),
+  currentUid: () => uid,
+}));
 
 import {
   PROBE_FAIL_TTL_MS,

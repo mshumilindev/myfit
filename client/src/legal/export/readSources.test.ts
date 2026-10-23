@@ -17,6 +17,7 @@ const h = vi.hoisted(() => ({
   chat: [] as unknown[],
 }));
 vi.mock('../../api', () => ({
+  registerSignOutFlush: () => undefined, // signupConsents registers its queues with api.ts at import
   currentUid: () => 'u1',
   getRole: () => 'member',
   getUsername: () => 'tester',

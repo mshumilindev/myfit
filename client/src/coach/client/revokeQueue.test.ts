@@ -1,7 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const h = vi.hoisted(() => ({ uid: 'u1' as string | null, revoke: vi.fn() }));
-vi.mock('../../api', () => ({ currentUid: () => h.uid }));
+vi.mock('../../api', () => ({
+  registerSignOutFlush: () => undefined, // signupConsents registers its queues with api.ts at import
+  currentUid: () => h.uid,
+}));
 vi.mock('./data/config', () => ({ getClientPort: () => ({ revoke: h.revoke }) }));
 
 import {
