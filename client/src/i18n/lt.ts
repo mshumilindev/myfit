@@ -2259,6 +2259,7 @@ export const lt: Strings = {
   settingsTitle: 'Nustatymai',
   settingsSub: 'Šio įrenginio funkcijų vėliavėlės',
   settingsFeaturesLabel: 'Funkcijos',
+  settingsThemeLabel: 'Tema',
   flagExerciseFeature: 'Pratimų biblioteka ir detalės',
   flagExerciseFeatureDesc:
     'Pratimų galerija, pilni pratimų puslapiai ir Pratimų skirtukas Programose.',

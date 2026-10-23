@@ -5,7 +5,7 @@
   min-height: 86px;
   padding: var(--s-10) var(--s-4) var(--s-10);
   border-radius: var(--r-14);
-  border: 1px solid var(--color-border);
+  border: var(--bw-1) solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
@@ -41,8 +41,8 @@
   font-variant-numeric: tabular-nums;
 }
 .uisc-primary-icon {
-  width: 36px;
-  height: 36px;
+  width: var(--sz-36);
+  height: var(--sz-36);
   border-radius: var(--r-12);
   display: grid;
   place-items: center;
@@ -58,8 +58,8 @@
   position: absolute;
   top: 7px;
   right: 7px;
-  width: 8px;
-  height: 8px;
+  width: var(--sz-8);
+  height: var(--sz-8);
   border-radius: var(--r-round);
   background: var(--t-base);
   animation: uisc-pulse 1.6s ease-in-out infinite;
@@ -78,8 +78,8 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 16px;
-  height: 16px;
+  width: var(--sz-16);
+  height: var(--sz-16);
   border-radius: var(--r-round);
   display: grid;
   place-items: center;
@@ -95,8 +95,8 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 16px;
-  height: 16px;
+  width: var(--sz-16);
+  height: var(--sz-16);
   border-radius: var(--r-round);
   display: grid;
   place-items: center;

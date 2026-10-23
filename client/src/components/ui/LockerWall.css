@@ -43,11 +43,11 @@
 .uilw-vents {
   display: grid;
   gap: var(--s-4);
-  width: 44px;
+  width: var(--sz-44);
 }
 .uilw-vents i {
   display: block;
-  height: 3px;
+  height: var(--sz-3);
   border-radius: var(--r-2);
   background: var(--color-bg);
   opacity: 0.9;
@@ -84,8 +84,8 @@
   position: absolute;
   right: 8px;
   top: 62%;
-  width: 4px;
-  height: 22px;
+  width: var(--sz-4);
+  height: var(--sz-22);
   border-radius: var(--r-2);
   background: var(--color-neutral-500);
 }
@@ -131,8 +131,8 @@
 }
 .uilw-sr {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  width: var(--sz-1);
+  height: var(--sz-1);
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;

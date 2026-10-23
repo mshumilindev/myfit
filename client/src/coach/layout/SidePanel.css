@@ -13,12 +13,12 @@
 }
 .sdp-foot {
   position: sticky;
-  z-index: 1;
+  z-index: var(--z-1);
   /* the sheet pads its bottom by --space-8 + the safe area: cancel exactly that so nothing shows under the footer */
   bottom: calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)) + var(--sdp-edge));
-  margin: 0 calc(-1 * var(--gutter, 18px) + var(--sdp-edge))
+  margin: 0 calc(-1 * var(--gutter, var(--s-18)) + var(--sdp-edge))
     calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)));
-  padding: var(--s-12) calc(var(--gutter, 18px) - var(--sdp-edge))
+  padding: var(--s-12) calc(var(--gutter, var(--s-18)) - var(--sdp-edge))
     calc(var(--s-8) + var(--safe-bottom, 0px));
   border-top: var(--co-hair) solid var(--t-line, var(--color-divider));
   /* the plate is a hair translucent: sit it on the page colour so nothing shows through from below */

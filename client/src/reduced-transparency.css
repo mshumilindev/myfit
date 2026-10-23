@@ -1,0 +1,47 @@
+/* ==========================================================================
+   Backdrop-blur recipes and reduced transparency (SPO-136, ADR 010).
+
+   Every `backdrop-filter` in the app reads one of the --bf-* recipes below (stylelint enforces
+   it), so the OS setting `prefers-reduced-transparency` switches the whole blur layer off from
+   this one file. Brass Glass surfaces become opaque in the same media query.
+   Loaded after styles.css, redesign.css and glass.css so equal specificity wins.
+   ========================================================================== */
+:root {
+  --bf-glass: blur(24px) saturate(1.35);
+  --bf-glass-mid: blur(18px) saturate(1.35);
+  --bf-glass-strong: blur(24px) saturate(1.5);
+  --bf-dock: blur(32px) saturate(1.4);
+  --bf-banner: blur(12px) saturate(1.3);
+  --bf-chat: blur(14px);
+  --bf-dim: blur(9px) saturate(1.05) brightness(0.78);
+  --bf-soft: blur(6px);
+  --bf-xs: blur(4px);
+  --bf-lens: blur(3px) saturate(1.9) brightness(1.08);
+  --bf-lens-warm: blur(7px) saturate(1.7) sepia(0.25) brightness(1.1);
+  --bf-sky: blur(7px) saturate(1.3) brightness(1.1);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-backdrop: none;
+    --bf-glass: none;
+    --bf-glass-mid: none;
+    --bf-glass-strong: none;
+    --bf-dock: none;
+    --bf-banner: none;
+    --bf-chat: none;
+    --bf-dim: none;
+    --bf-soft: none;
+    --bf-xs: none;
+    --bf-lens: none;
+    --bf-lens-warm: none;
+    --bf-sky: none;
+  }
+
+  html[data-theme='glass'] {
+    --glass-surface: var(--color-surface);
+    --glass-tint: linear-gradient(var(--color-surface), var(--color-surface));
+    --glass-hero-tint: linear-gradient(var(--color-surface), var(--color-surface));
+    --glass-rest-tint: linear-gradient(var(--color-surface), var(--color-surface));
+  }
+}

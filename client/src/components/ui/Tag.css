@@ -3,7 +3,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--s-6);
-  height: 24px;
+  height: var(--sz-24);
   padding: 0 var(--s-12);
   border-radius: var(--r-12);
   font-size: var(--fs-min);

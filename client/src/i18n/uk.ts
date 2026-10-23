@@ -2276,6 +2276,7 @@ export const uk: Strings = {
   settingsTitle: 'Налаштування',
   settingsSub: 'Прапорці функцій для цього пристрою',
   settingsFeaturesLabel: 'Функції',
+  settingsThemeLabel: 'Тема',
   flagExerciseFeature: 'Бібліотека вправ і деталка',
   flagExerciseFeatureDesc:
     'Галерея вправ, повні сторінки вправ і таб «Вправи» на сторінці Programs.',

@@ -54,7 +54,7 @@ button.uistory:focus-visible {
 }
 .uistory-face {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-1);
   width: calc(var(--story-d) - 8px);
   height: calc(var(--story-d) - 8px);
   border-radius: var(--radius-pill);
@@ -110,7 +110,7 @@ button.uistory:focus-visible {
 }
 .uistory--more .uistory-ring {
   box-shadow: none;
-  border: 1px dashed var(--color-neutral-700);
+  border: var(--bw-1) dashed var(--color-neutral-700);
 }
 .uistory-face--more {
   background: transparent;
@@ -142,11 +142,11 @@ button.uistory:focus-visible {
 /* Training now: green dot bottom-right. */
 .uistory-live {
   position: absolute;
-  z-index: 2;
+  z-index: var(--z-2);
   right: -1px;
   bottom: -1px;
-  width: 14px;
-  height: 14px;
+  width: var(--sz-14);
+  height: var(--sz-14);
   border-radius: var(--radius-pill);
   background: var(--color-ok);
   box-shadow: 0 0 0 2.5px var(--story-gap);
@@ -154,19 +154,19 @@ button.uistory:focus-visible {
 .uistory--md .uistory-live,
 .uistory--sm .uistory-live,
 .uistory--xs .uistory-live {
-  width: 11px;
-  height: 11px;
+  width: var(--sz-11);
+  height: var(--sz-11);
 }
 
 /* Count (Atlas coral, else red) or "!" (red). Inside the ring box so a
    scrolling row never clips it. */
 .uistory-badge {
   position: absolute;
-  z-index: 2;
+  z-index: var(--z-2);
   top: 0;
   right: 0;
-  min-width: 18px;
-  height: 18px;
+  min-width: var(--sz-18);
+  height: var(--sz-18);
   padding: 0 var(--s-4);
   border-radius: var(--radius-pill);
   background: var(--color-danger);
@@ -182,9 +182,9 @@ button.uistory:focus-visible {
   color: var(--color-atlas-tint);
 }
 .uistory-badge--alert {
-  min-width: 16px;
-  width: 16px;
-  height: 16px;
+  min-width: var(--sz-16);
+  width: var(--sz-16);
+  height: var(--sz-16);
   padding: 0;
   font-size: var(--fs-9);
   line-height: 16px;
@@ -221,7 +221,7 @@ button.uistory:focus-visible {
 }
 .uistory-divider {
   flex: none;
-  width: 1px;
+  width: var(--sz-1);
   margin: var(--s-8) 0 var(--s-24);
   background: var(--color-divider);
 }

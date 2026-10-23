@@ -128,13 +128,13 @@
   grid-template-columns: minmax(0, 1fr);
 }
 .la-pad24 {
-  height: 24px;
+  height: var(--sz-24);
   flex-shrink: 0;
 }
 
 /* --- page bar + search ------------------------------------------------- */
 .la-pbar {
-  height: 56px;
+  height: var(--sz-56);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -166,7 +166,7 @@
 .la-sticky {
   position: sticky;
   top: 0;
-  z-index: 3;
+  z-index: var(--z-3);
   background: var(--color-bg);
   padding-bottom: var(--s-12);
   display: flex;
@@ -181,8 +181,8 @@
   margin-top: var(--s-12);
 }
 .la-clr {
-  width: 44px;
-  height: 44px;
+  width: var(--sz-44);
+  height: var(--sz-44);
   margin-right: -12px;
   border: 0;
   background: transparent;
@@ -199,7 +199,7 @@
 /* --- section headers --------------------------------------------------- */
 /* Section header: 40px row, 12px above it (8-pt rhythm between blocks). */
 .la-sec {
-  min-height: 40px;
+  min-height: var(--sz-40);
   margin-top: var(--sp-3);
   flex-shrink: 0;
   display: flex;
@@ -209,7 +209,7 @@
   padding: 0 var(--page-x);
 }
 .la-sec.tight {
-  min-height: 32px;
+  min-height: var(--sz-32);
   margin-top: 0;
 }
 .la-sticky + .la-sec {
@@ -248,7 +248,7 @@
   font-weight: 600;
 }
 .la-see {
-  height: 40px;
+  height: var(--sz-40);
   display: flex;
   align-items: center;
   padding: 0 var(--s-8);
@@ -264,8 +264,8 @@
 
 /* --- icon tiles ---------------------------------------------------------- */
 .la-ico {
-  width: 40px;
-  height: 40px;
+  width: var(--sz-40);
+  height: var(--sz-40);
   border-radius: var(--r-12);
   display: flex;
   align-items: center;
@@ -275,43 +275,43 @@
   background: var(--tt);
 }
 .la-ico.n32 {
-  width: 32px;
-  height: 32px;
+  width: var(--sz-32);
+  height: var(--sz-32);
   border-radius: var(--r-10);
 }
 .la-ico.n32 .ui-icon {
   font-size: var(--fs-16);
 }
 .la-ico.n34 {
-  width: 34px;
-  height: 34px;
+  width: var(--sz-34);
+  height: var(--sz-34);
   border-radius: var(--r-10);
 }
 .la-ico.n34 .ui-icon {
   font-size: var(--fs-18);
 }
 .la-ico.n36 {
-  width: 36px;
-  height: 36px;
+  width: var(--sz-36);
+  height: var(--sz-36);
   border-radius: var(--r-12);
 }
 .la-ico.n36 .ui-icon {
   font-size: var(--fs-20);
 }
 .la-ico.n44 {
-  width: 44px;
-  height: 44px;
+  width: var(--sz-44);
+  height: var(--sz-44);
   border-radius: var(--r-14);
 }
 .la-ico.n48,
 .la-ico.big {
-  width: 48px;
-  height: 48px;
+  width: var(--sz-48);
+  height: var(--sz-48);
   border-radius: var(--r-14);
 }
 .la-ico.n56 {
-  width: 56px;
-  height: 56px;
+  width: var(--sz-56);
+  height: var(--sz-56);
   border-radius: var(--r-16);
 }
 .la-ico.n56 .ui-icon {
@@ -320,14 +320,14 @@
 .la-ico.neutral {
   background: var(--la-tile);
   color: var(--la-muted);
-  border: 1px solid var(--la-line);
+  border: var(--bw-1) solid var(--la-line);
 }
 .la-ico.neutral.gold {
   color: var(--color-accent);
 }
 .la-mini {
-  width: 26px;
-  height: 26px;
+  width: var(--sz-26);
+  height: var(--sz-26);
   border-radius: var(--r-8);
   display: flex;
   align-items: center;
@@ -339,8 +339,8 @@
   font-size: var(--fs-13);
 }
 .la-mini.big {
-  width: 32px;
-  height: 32px;
+  width: var(--sz-32);
+  height: var(--sz-32);
   border-radius: var(--r-10);
 }
 .la-mini.big .ui-icon {
@@ -375,7 +375,7 @@
   font-size: var(--fs-11);
   font-weight: 600;
   color: var(--tc);
-  border: 1px solid var(--ta);
+  border: var(--bw-1) solid var(--ta);
   border-radius: var(--r-6);
   padding: 1px var(--s-6);
   white-space: nowrap;
@@ -383,7 +383,7 @@
 
 /* --- buttons --------------------------------------------------------------- */
 .la-ob {
-  height: 48px;
+  height: var(--sz-48);
   border-radius: var(--r-24);
   font-size: var(--fs-15);
   font-weight: 600;
@@ -398,7 +398,7 @@
 }
 .la-ob.og {
   background: transparent;
-  border: 1px solid var(--color-accent);
+  border: var(--bw-1) solid var(--color-accent);
   color: var(--color-accent);
 }
 .la-ob.wide {
@@ -410,14 +410,14 @@
   cursor: default;
 }
 .la-ob.sm {
-  height: 36px;
+  height: var(--sz-36);
   padding: 0 var(--s-12);
   font-size: var(--fs-13);
   flex-shrink: 0;
 }
 .la-ob.tone {
   background: transparent;
-  border: 1px solid var(--ta);
+  border: var(--bw-1) solid var(--ta);
   color: var(--tc);
 }
 
@@ -426,7 +426,7 @@
   flex-shrink: 0;
   margin: 0 var(--page-x);
   background: var(--la-card);
-  border: 1px solid var(--ta);
+  border: var(--bw-1) solid var(--ta);
   border-radius: var(--r-18);
   padding: var(--s-16) var(--s-16) var(--s-12);
 }
@@ -438,7 +438,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 20px;
+  height: var(--sz-20);
   font-size: var(--fs-12);
   font-weight: 600;
 }
@@ -452,7 +452,7 @@
 }
 .la-hide {
   flex: none;
-  width: 44px;
+  width: var(--sz-44);
   margin: -12px -12px -12px 0;
 }
 .la-hero-main {
@@ -486,7 +486,7 @@
   gap: var(--s-4);
 }
 .la-bar-box {
-  height: 24px;
+  height: var(--sz-24);
   display: flex;
   align-items: flex-end;
 }
@@ -568,7 +568,7 @@
   margin-bottom: var(--s-8);
 }
 .la-sug-act {
-  height: 28px;
+  height: var(--sz-28);
   border-radius: var(--r-14);
   padding: 0 var(--s-12);
   display: flex;
@@ -576,7 +576,7 @@
   gap: var(--s-4);
   font-size: var(--fs-12);
   font-weight: 600;
-  border: 1px solid currentColor;
+  border: var(--bw-1) solid currentColor;
   color: var(--tc);
   white-space: nowrap;
 }
@@ -600,9 +600,9 @@
 .la-st {
   position: relative;
   background: var(--la-tile);
-  border: 1px solid var(--la-line);
+  border: var(--bw-1) solid var(--la-line);
   border-radius: var(--r-14);
-  min-height: 64px;
+  min-height: var(--sz-64);
   display: flex;
   align-items: center;
   gap: var(--s-12);
@@ -645,7 +645,7 @@
 }
 .la-pcard {
   width: 116px;
-  height: 60px;
+  height: var(--sz-60);
   flex-shrink: 0;
   position: relative;
   padding: 0 var(--s-12);
@@ -658,7 +658,7 @@
   user-select: none;
 }
 .la-pcard.wide {
-  width: 150px;
+  width: var(--sz-150);
 }
 .la-pcard .la-cn {
   font-size: var(--fs-13);
@@ -700,8 +700,8 @@
 .la-pinhint {
   flex-shrink: 0;
   margin: 0 var(--page-x);
-  min-height: 60px;
-  border: 1px dashed var(--color-neutral-700);
+  min-height: var(--sz-60);
+  border: var(--bw-1) dashed var(--color-neutral-700);
   border-radius: var(--r-14);
   display: flex;
   align-items: center;
@@ -734,7 +734,7 @@
   flex-shrink: 0;
   margin: 0 var(--page-x) var(--s-12);
   background: var(--la-card);
-  border: 1px solid var(--la-hair);
+  border: var(--bw-1) solid var(--la-hair);
   border-radius: var(--r-16);
   padding: var(--s-4) var(--s-4) var(--s-4) var(--s-12);
 }
@@ -742,10 +742,10 @@
   display: flex;
   align-items: center;
   gap: var(--s-12);
-  min-height: 52px;
+  min-height: var(--sz-52);
 }
 .la-trow.head {
-  min-height: 32px;
+  min-height: var(--sz-32);
   justify-content: space-between;
   padding-right: var(--s-8);
 }
@@ -763,7 +763,7 @@
   flex-shrink: 0;
   margin: 0 var(--page-x);
   background: var(--la-card);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+  border: var(--bw-1) solid color-mix(in srgb, var(--color-accent) 55%, transparent);
   border-radius: var(--r-18);
   padding: var(--s-12);
 }
@@ -776,8 +776,8 @@
   color: var(--color-accent);
 }
 .la-dot {
-  width: 8px;
-  height: 8px;
+  width: var(--sz-8);
+  height: var(--sz-8);
   border-radius: var(--r-4);
   background: var(--color-accent);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 18%, transparent);
@@ -797,10 +797,10 @@
 .la-lockbar {
   flex-shrink: 0;
   margin: 0 var(--page-x) var(--s-4);
-  min-height: 44px;
+  min-height: var(--sz-44);
   border-radius: var(--r-12);
   background: var(--color-bg);
-  border: 1px solid var(--la-line);
+  border: var(--bw-1) solid var(--la-line);
   display: flex;
   align-items: center;
   gap: var(--s-12);
@@ -819,18 +819,18 @@
   flex-shrink: 0;
   margin: 0 var(--page-x);
   background: var(--la-card);
-  border: 1px solid var(--la-hair);
+  border: var(--bw-1) solid var(--la-hair);
   border-radius: var(--r-16);
   overflow: hidden;
 }
 .la-rr {
   width: 100%;
-  min-height: 64px;
+  min-height: var(--sz-64);
   display: flex;
   align-items: center;
   gap: var(--s-12);
   padding: var(--s-12) var(--s-4) var(--s-12) var(--s-12);
-  border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  border-top: var(--bw-1) solid color-mix(in srgb, var(--color-text) 8%, transparent);
 }
 .la-rr:first-child {
   border-top: 0;
@@ -838,7 +838,7 @@
 .la-rr-b {
   flex: 1;
   min-width: 0;
-  min-height: 44px;
+  min-height: var(--sz-44);
   border: 0;
   background: transparent;
   color: var(--color-text);
@@ -866,7 +866,7 @@
   font-size: var(--fs-11);
   font-weight: 600;
   color: var(--tc);
-  border: 1px solid var(--ta);
+  border: var(--bw-1) solid var(--ta);
   border-radius: var(--r-6);
   padding: 1px var(--s-6);
   margin-left: var(--s-6);
@@ -880,7 +880,7 @@
 .la-fb {
   flex-shrink: 0;
   margin: var(--s-12) var(--page-x) 0;
-  min-height: 56px;
+  min-height: var(--sz-56);
 }
 .la-fb-t {
   flex: 1;
@@ -894,8 +894,8 @@
 .la-band {
   flex-shrink: 0;
   background: color-mix(in srgb, var(--tt) 60%, var(--color-bg));
-  border-top: 1px solid var(--ta);
-  border-bottom: 1px solid var(--ta);
+  border-top: var(--bw-1) solid var(--ta);
+  border-bottom: var(--bw-1) solid var(--ta);
   display: flex;
   align-items: center;
   gap: var(--s-12);
@@ -904,8 +904,8 @@
 .la-cc {
   font-size: var(--fs-13);
   font-weight: 600;
-  min-width: 28px;
-  height: 24px;
+  min-width: var(--sz-28);
+  height: var(--sz-24);
   border-radius: var(--r-8);
   display: inline-flex;
   align-items: center;
@@ -913,7 +913,7 @@
   padding: 0 var(--s-8);
   background: var(--tt);
   color: var(--tc);
-  border: 1px solid var(--ta);
+  border: var(--bw-1) solid var(--ta);
 }
 .la-cc.dark {
   background: var(--color-bg);
@@ -929,9 +929,9 @@
 .la-tile {
   position: relative;
   background: var(--la-tile);
-  border: 1px solid var(--la-line);
+  border: var(--bw-1) solid var(--la-line);
   border-radius: var(--r-14);
-  min-height: 104px;
+  min-height: var(--sz-104);
 }
 .la-tile.on {
   border-color: var(--tc);
@@ -1049,9 +1049,9 @@
   margin-top: var(--s-8) !important;
 }
 .la-fld {
-  height: 48px;
+  height: var(--sz-48);
   border-radius: var(--r-12);
-  border: 1px solid var(--la-line);
+  border: var(--bw-1) solid var(--la-line);
   background: var(--la-tile);
   display: flex;
   align-items: center;
@@ -1060,7 +1060,7 @@
   color: var(--color-text);
 }
 .la-fld.plain {
-  height: 44px;
+  height: var(--sz-44);
   border-radius: var(--r-10);
   font-size: var(--fs-15);
   font-weight: 600;
@@ -1079,10 +1079,10 @@
   color: var(--la-muted);
 }
 .la-stp {
-  width: 40px;
-  height: 40px;
+  width: var(--sz-40);
+  height: var(--sz-40);
   border-radius: var(--r-10);
-  border: 1px solid var(--la-line);
+  border: var(--bw-1) solid var(--la-line);
   background: transparent;
   color: var(--color-text);
   display: flex;
@@ -1105,9 +1105,9 @@
   font-weight: 400;
 }
 .la-pacebox {
-  height: 44px;
+  height: var(--sz-44);
   border-radius: var(--r-10);
-  border: 1px solid var(--ta);
+  border: var(--bw-1) solid var(--ta);
   background: var(--tt);
   display: flex;
   align-items: center;
@@ -1127,7 +1127,7 @@
   flex-shrink: 0;
   margin-top: var(--s-16);
   padding-top: var(--s-12);
-  border-top: 1px solid var(--la-hair);
+  border-top: var(--bw-1) solid var(--la-hair);
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -1155,9 +1155,9 @@
 }
 .la-pinrow {
   flex-shrink: 0;
-  min-height: 52px;
+  min-height: var(--sz-52);
   margin-top: var(--s-12);
-  border: 1px solid var(--la-line);
+  border: var(--bw-1) solid var(--la-line);
   border-radius: var(--r-14);
   background: var(--la-tile);
   display: flex;
@@ -1183,7 +1183,7 @@
 /* Pick a day (m04): the kit Calendar on a tile. */
 .la-cal {
   margin-top: var(--sp-2);
-  border: 1px solid var(--la-line);
+  border: var(--bw-1) solid var(--la-line);
   border-radius: var(--radius-lg);
   background: var(--la-tile);
   padding: var(--sp-2) var(--sp-3) var(--sp-3);
@@ -1219,12 +1219,12 @@
   padding: 0;
 }
 .la-wbar {
-  min-height: 72px;
+  min-height: var(--sz-72);
   display: flex;
   align-items: center;
   gap: var(--sp-4);
   padding: var(--sp-3) var(--sp-6);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  border-bottom: var(--bw-1) solid color-mix(in srgb, var(--color-text) 8%, transparent);
   flex-shrink: 0;
 }
 .la-wtitle {
@@ -1296,7 +1296,7 @@
   max-height: calc(100vh - 120px);
   overflow-y: auto;
   background: var(--la-card);
-  border: 1px solid var(--la-hair);
+  border: var(--bw-1) solid var(--la-hair);
   border-radius: var(--r-18);
   padding: var(--s-16);
   display: flex;
@@ -1309,14 +1309,14 @@
 .la-panel-foot {
   margin-top: auto;
   padding-top: var(--s-12);
-  border-top: 1px solid var(--la-hair);
+  border-top: var(--bw-1) solid var(--la-hair);
 }
 .la-panel .la-sec {
   padding: 0;
 }
 .la-empty {
   margin-top: var(--s-16);
-  border: 1px dashed var(--la-line);
+  border: var(--bw-1) dashed var(--la-line);
   border-radius: var(--r-14);
   padding: var(--s-24) var(--s-20);
   display: flex;
@@ -1344,7 +1344,7 @@
   font-weight: 600;
   border-radius: var(--r-6);
   padding: var(--s-2) var(--s-6);
-  border: 1px solid var(--ta);
+  border: var(--bw-1) solid var(--ta);
   color: var(--tc);
 }
 .la-tl {
@@ -1352,9 +1352,9 @@
   display: flex;
   align-items: center;
   gap: var(--s-12);
-  min-height: 52px;
+  min-height: var(--sz-52);
   border: 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  border-bottom: var(--bw-1) solid color-mix(in srgb, var(--color-text) 8%, transparent);
   background: transparent;
   color: var(--color-text);
   text-align: left;
@@ -1362,7 +1362,7 @@
 }
 .la-loadbox {
   margin-top: var(--s-12);
-  border: 1px solid var(--la-line);
+  border: var(--bw-1) solid var(--la-line);
   border-radius: var(--r-12);
   padding: var(--s-12) var(--s-12);
 }
@@ -1371,14 +1371,14 @@
   font-weight: 600;
 }
 .la-loadbar {
-  height: 6px;
+  height: var(--sz-6);
   border-radius: var(--r-4);
   background: var(--la-tile);
   margin-top: var(--s-8);
   overflow: hidden;
 }
 .la-loadbar div {
-  height: 6px;
+  height: var(--sz-6);
   background: var(--color-accent);
   border-radius: var(--r-4);
 }
@@ -1422,7 +1422,7 @@
   line-height: 14px;
 }
 .la-bb {
-  height: 28px;
+  height: var(--sz-28);
   display: flex;
   align-items: flex-end;
 }
@@ -1461,11 +1461,11 @@
   gap: var(--s-8);
 }
 .la-also-col > .la-lbl {
-  height: 18px;
+  height: var(--sz-18);
 }
 .la-mini-row {
   background: var(--la-tile);
-  border: 1px solid var(--la-line);
+  border: var(--bw-1) solid var(--la-line);
   border-radius: var(--r-14);
   padding: var(--s-12);
   display: flex;
@@ -1476,7 +1476,7 @@
   opacity: 0.6;
 }
 .la-web .la-st {
-  min-height: 56px;
+  min-height: var(--sz-56);
 }
 
 /* pinned drop zone (w01/w04) */
@@ -1485,7 +1485,7 @@
   align-items: center;
   gap: var(--s-12);
   padding: var(--s-6);
-  border: 1px dashed color-mix(in srgb, var(--color-text) 16%, transparent);
+  border: var(--bw-1) dashed color-mix(in srgb, var(--color-text) 16%, transparent);
   border-radius: var(--r-18);
   flex-shrink: 0;
   overflow-x: auto;
@@ -1498,9 +1498,9 @@
 .la-pinc {
   width: 178px;
   flex-shrink: 0;
-  height: 56px;
+  height: var(--sz-56);
   background: var(--la-tile);
-  border: 1px solid var(--la-line);
+  border: var(--bw-1) solid var(--la-line);
   border-radius: var(--r-14);
   padding: 0 0 0 var(--s-4);
   display: flex;
@@ -1527,8 +1527,8 @@
   border-color: var(--color-accent);
 }
 .la-grip {
-  width: 16px;
-  height: 44px;
+  width: var(--sz-16);
+  height: var(--sz-44);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1555,13 +1555,13 @@
   text-overflow: ellipsis;
 }
 .la-pint {
-  width: 36px;
+  width: var(--sz-36);
 }
 .la-pslot {
   width: 140px;
-  height: 56px;
+  height: var(--sz-56);
   flex-shrink: 0;
-  border: 1px dashed var(--la-line);
+  border: var(--bw-1) dashed var(--la-line);
   border-radius: var(--r-14);
   display: flex;
   align-items: center;
@@ -1579,8 +1579,8 @@
   color: var(--color-accent);
 }
 .la-ins {
-  width: 4px;
-  height: 52px;
+  width: var(--sz-4);
+  height: var(--sz-52);
   border-radius: var(--r-2);
   background: var(--color-accent);
   flex-shrink: 0;
@@ -1600,7 +1600,7 @@
   align-self: center;
 }
 .la-cexp {
-  border: 1px solid var(--tb);
+  border: var(--bw-1) solid var(--tb);
   border-radius: var(--r-16);
   background: var(--la-tile);
   padding: var(--s-4) var(--s-12) var(--s-12);
@@ -1611,12 +1611,12 @@
   gap: var(--s-8);
 }
 .la-tile2 {
-  height: 56px;
+  height: var(--sz-56);
   display: flex;
   align-items: center;
   gap: var(--s-8);
   background: var(--la-card);
-  border: 1px solid var(--la-line);
+  border: var(--bw-1) solid var(--la-line);
   border-radius: var(--r-14);
   padding: 0 0 0 var(--s-4);
   cursor: grab;
@@ -1630,13 +1630,13 @@
   color: var(--la-faint);
 }
 .la-cexp-foot .la-see {
-  height: 32px;
+  height: var(--sz-32);
 }
 
 /* web category page (w03) */
 .la-cathead {
   flex-shrink: 0;
-  border: 1px solid var(--tb);
+  border: var(--bw-1) solid var(--tb);
   background: var(--tt);
   border-radius: var(--r-18);
   padding: var(--s-16) var(--s-16);
@@ -1651,9 +1651,9 @@
 }
 .la-pinbar {
   margin-top: var(--s-12);
-  height: 44px;
+  height: var(--sz-44);
   border-radius: var(--r-12);
-  border: 1px solid var(--tc);
+  border: var(--bw-1) solid var(--tc);
   background: var(--tt);
   display: flex;
   align-items: center;
@@ -1668,7 +1668,7 @@
   font-size: var(--fs-18);
 }
 .la-pinbar button {
-  height: 44px;
+  height: var(--sz-44);
   border: 0;
   background: transparent;
   color: var(--tc);
@@ -1740,7 +1740,7 @@
 /* Section header with a second line (category page): label + hint, then a note. */
 .la-sec.la-sec-2l {
   height: auto;
-  min-height: 44px;
+  min-height: var(--sz-44);
   padding-top: var(--s-12);
   padding-bottom: var(--s-6);
   flex-wrap: wrap;

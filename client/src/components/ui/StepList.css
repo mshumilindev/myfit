@@ -10,7 +10,7 @@
   padding: var(--s-16) var(--s-20);
 }
 .uisteplist-row + .uisteplist-row {
-  border-top: 1px solid var(--color-divider);
+  border-top: var(--bw-1) solid var(--color-divider);
 }
 .uisteplist-t {
   min-width: 0;

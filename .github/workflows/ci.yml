@@ -74,6 +74,8 @@ jobs:
         run: npm run typecheck
       - name: Module boundaries (cycles, kit stays presentational; known violations may only shrink)
         run: npm run deps:check
+      - name: Style tokens (stylelint ratchet; known violations may only shrink)
+        run: npm run lint:css
       - name: Validate SQL schema
         run: node scripts/validate-sql.mjs
       # Blocking since SPO-131 (prod dependencies are at 0 high/critical). A new vulnerable package fails the build.
@@ -354,6 +356,9 @@ jobs:
       - name: Chat frame geometry (trainer / client / Atlas; 320-1920)
         if: always()
         run: npm run audit:chat -- --url http://127.0.0.1:6006 --locales ${{ env.LAYOUT_LOCALES }} --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out audit-reports/chat-${{ matrix.shard }}.json
+      - name: Theme swap (hostile token edit re-themes every story; hard-coded values are frozen in a baseline that only shrinks)
+        if: always()
+        run: npm run audit:theme-swap -- --url http://127.0.0.1:6006 --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out audit-reports/swap-${{ matrix.shard }}.json --shots audit-reports/swap-shots
       - uses: actions/upload-artifact@v4
         if: always()
         with:

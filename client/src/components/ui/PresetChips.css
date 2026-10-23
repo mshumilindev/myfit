@@ -37,7 +37,7 @@
   height: var(--ctl-h);
   padding: 0 var(--ctl-px);
   border-radius: var(--radius-pill);
-  border: 1px solid var(--color-border);
+  border: var(--bw-1) solid var(--color-border);
   background: transparent;
   color: var(--color-text);
   font: 500 var(--ctl-fs) / 1 var(--font);

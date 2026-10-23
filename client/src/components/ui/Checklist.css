@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: var(--s-8);
   padding: var(--s-12) var(--s-16);
-  border-radius: var(--r-16, 16px);
+  border-radius: var(--r-16, var(--r-16));
   background: var(--color-surface-raised, var(--color-surface));
 }
 .uichk-t {

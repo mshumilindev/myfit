@@ -44,9 +44,9 @@ ul.uigl-rows {
   left: var(--row-inset, var(--sp-4));
   right: 0;
   top: 0;
-  height: 1px;
+  height: var(--sz-1);
   background: var(--color-divider);
-  z-index: 1;
+  z-index: var(--z-1);
 }
 .uigl-f {
   font-size: var(--fs-13);
@@ -67,7 +67,7 @@ ul.uigl-rows {
   align-items: center;
   gap: var(--sp-3);
   width: 100%;
-  min-height: 52px;
+  min-height: var(--sz-52);
   padding: var(--sp-2) var(--sp-4);
   margin: 0;
   border: 0;
@@ -120,7 +120,7 @@ label.uirow {
 }
 .uirow-time {
   flex: none;
-  width: 40px;
+  width: var(--sz-40);
   font-size: var(--fs-12);
   font-weight: var(--row-time-weight, 600);
   letter-spacing: var(--row-time-ls, normal);

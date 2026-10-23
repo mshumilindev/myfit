@@ -2,8 +2,8 @@
 .uicheck {
   position: relative;
   display: inline-flex;
-  width: 22px;
-  height: 22px;
+  width: var(--sz-22);
+  height: var(--sz-22);
   flex: none;
 }
 .uicheck-in {
@@ -17,8 +17,8 @@
   cursor: default;
 }
 .uicheck-box {
-  width: 22px;
-  height: 22px;
+  width: var(--sz-22);
+  height: var(--sz-22);
   border-radius: var(--r-8);
   border: 1.5px solid var(--color-neutral-700);
   display: inline-flex;

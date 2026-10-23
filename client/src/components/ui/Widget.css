@@ -8,7 +8,7 @@
   padding: var(--s-14);
   border-radius: var(--r-18);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: var(--bw-1) solid var(--color-border);
   /* clip (not hidden) keeps the automatic min size: a tile grows instead of
      cutting its content, while rounded corners still clip children. */
   overflow: clip;
@@ -16,7 +16,7 @@
 }
 .uiw--s,
 .uiw--l {
-  min-height: 150px;
+  min-height: var(--sz-150);
 }
 /* XL is a big square at minimum; content-rich widgets may grow taller. */
 .uiw--xl {
@@ -24,7 +24,7 @@
   gap: var(--s-10);
 }
 .uiw--m {
-  height: 64px;
+  height: var(--sz-64);
   flex-direction: row;
   align-items: center;
   gap: var(--s-12);
@@ -36,7 +36,7 @@
 .uiw-hit {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: var(--z-0);
   border: 0;
   padding: 0;
   background: transparent;
@@ -49,7 +49,7 @@
 }
 .uiw > :not(.uiw-hit) {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-1);
   pointer-events: none;
 }
 .uiw .uiw-footer,
@@ -63,7 +63,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--s-8);
-  min-height: 16px;
+  min-height: var(--sz-16);
 }
 .uiw-kicker {
   font-size: var(--fs-11);
@@ -158,8 +158,8 @@
 }
 .uiw-go {
   flex: none;
-  width: 30px;
-  height: 30px;
+  width: var(--sz-30);
+  height: var(--sz-30);
   border-radius: var(--r-round);
   display: grid;
   place-items: center;
@@ -257,7 +257,7 @@
 }
 .uiw-bars-cols > span {
   flex: 1;
-  max-width: 28px;
+  max-width: var(--sz-28);
   margin: 0 auto;
   border-radius: var(--r-4) var(--r-4) var(--r-2) var(--r-2);
   background: var(--color-neutral-800);
@@ -285,7 +285,7 @@
   align-items: center;
   gap: var(--s-10);
   padding: var(--s-8) 0;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: var(--bw-1) solid var(--color-border);
   font-size: var(--fs-14);
   font-weight: 600;
   min-width: 0;

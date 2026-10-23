@@ -3,22 +3,22 @@
   display: inline-flex;
   align-items: flex-end;
   gap: var(--s-4);
-  height: 18px;
+  height: var(--sz-18);
 }
 .uiwb-bar {
   display: block;
-  width: 8px;
+  width: var(--sz-8);
   border-radius: var(--r-2);
   background: var(--t-base);
 }
 .uiwb-bar--1 {
-  height: 6px;
+  height: var(--sz-6);
 }
 .uiwb-bar--2 {
-  height: 12px;
+  height: var(--sz-12);
 }
 .uiwb-bar--3 {
-  height: 18px;
+  height: var(--sz-18);
 }
 .uiwb-bar--none {
   background: var(--color-neutral-700);

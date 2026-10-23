@@ -33,7 +33,7 @@
   pointer-events: none;
 }
 .uirh-g i {
-  height: 1px;
+  height: var(--sz-1);
   background: var(--color-divider);
 }
 .uirh-c {
@@ -64,7 +64,7 @@
 }
 .uirh-s.is-now {
   background: color-mix(in srgb, var(--color-text) 22%, transparent);
-  outline: 1px dashed var(--color-text-muted);
+  outline: var(--bw-1) dashed var(--color-text-muted);
 }
 .uirh-v {
   position: absolute;
@@ -108,8 +108,8 @@
   gap: var(--s-6);
 }
 .uirh-leg i {
-  width: 12px;
-  height: 12px;
+  width: var(--sz-12);
+  height: var(--sz-12);
   border-radius: var(--r-4);
   background: color-mix(in srgb, var(--color-text) 38%, transparent);
 }

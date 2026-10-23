@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { useRef } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { kitCss, stylesCss } from './readCss';
+import { kitCss, stylesCss, glassCss } from './readCss';
 import {
   msToNextMinute,
   NowDivider,
@@ -272,7 +272,7 @@ describe('NowLine colour (token, contrast)', () => {
 describe('NowLine and reduced motion', () => {
   it('has no animation or transition of its own, so there is nothing to switch off for prefers-reduced-motion', () => {
     expect(kitCss('NowLine')).not.toMatch(/animation|transition|@keyframes/);
-    const glass = readFileSync(join(__dirname, '..', '..', 'glass.css'), 'utf8');
+    const glass = glassCss();
     const rules = glass.match(/[^{}]*\.uinow[^{}]*\{[^}]*\}/g) ?? [];
     expect(rules.length).toBeGreaterThan(0);
     for (const r of rules) expect(r).not.toMatch(/animation|transition/);

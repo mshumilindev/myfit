@@ -1,7 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { kitCss, stylesCss } from './readCss';
+import { kitCss, stylesCss, glassCss } from './readCss';
 
 /**
  * WCAG AA (4.5:1) for the text tiers of the kit on every surface they sit on, including the
@@ -9,7 +7,7 @@ import { kitCss, stylesCss } from './readCss';
  * #80858a; these numbers are the proof that the new value holds on each surface (glass included).
  */
 const STYLES = stylesCss();
-const GLASS = readFileSync(join(__dirname, '..', '..', 'glass.css'), 'utf8');
+const GLASS = glassCss();
 
 const tokens = new Map<string, string>();
 for (const m of (STYLES + GLASS).matchAll(/(--[\w-]+):\s*(#[0-9a-fA-F]{6}|var\(--[\w-]+\));/g)) {

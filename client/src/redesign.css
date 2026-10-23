@@ -55,8 +55,8 @@
 }
 .ss-hero-go {
   flex: none;
-  width: 60px;
-  height: 60px;
+  width: var(--sz-60);
+  height: var(--sz-60);
   border-radius: var(--r-round);
   display: grid;
   place-items: center;
@@ -213,12 +213,12 @@
   color: var(--c-f6c3bc);
 }
 /* Brass Glass: the big number carries the type scale's bold. */
-html.theme-glass .ov-big {
+html[data-theme='glass'] .ov-big {
   font-size: var(--fs-52);
   font-weight: 700;
   letter-spacing: -0.03em;
 }
-html.theme-glass .ov-unit {
+html[data-theme='glass'] .ov-unit {
   font-size: var(--fs-18);
   font-weight: 600;
 }
@@ -232,7 +232,7 @@ html.theme-glass .ov-unit {
 }
 .ov-day {
   min-width: 0;
-  height: 48px;
+  height: var(--sz-48);
   padding: 0 var(--s-2);
   border-radius: var(--r-10);
   background: var(--c-2a2c31);
@@ -276,7 +276,7 @@ html.theme-glass .ov-unit {
   height: 112px;
 }
 .ov-row {
-  height: 72px;
+  height: var(--sz-72);
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
@@ -284,8 +284,8 @@ html.theme-glass .ov-unit {
 }
 .ov-row-ic {
   flex: none;
-  width: 44px;
-  height: 44px;
+  width: var(--sz-44);
+  height: var(--sz-44);
   border-radius: var(--r-14);
   background: var(--c-2a2c31);
   display: grid;
@@ -387,12 +387,12 @@ html.theme-glass .ov-unit {
   letter-spacing: -0.025em;
   line-height: 1.15;
 }
-html.theme-glass .pv-title,
-html.theme-glass .screen .pg-h1,
-html.theme-glass html.theme-glass .hl .hl-pt,
-html.theme-glass .sleep-topbar-title,
-html.theme-glass .mst-head-title,
-html.theme-glass .rx .topbar .tt {
+html[data-theme='glass'] .pv-title,
+html[data-theme='glass'] .screen .pg-h1,
+html[data-theme='glass'] html[data-theme='glass'] .hl .hl-pt,
+html[data-theme='glass'] .sleep-topbar-title,
+html[data-theme='glass'] .mst-head-title,
+html[data-theme='glass'] .rx .topbar .tt {
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -458,7 +458,7 @@ html.theme-glass .rx .topbar .tt {
   --acc: var(--color-illness);
 }
 .td-week[data-mode='off'] {
-  --acc: #6fb7de;
+  --acc: var(--c-6fb7de);
 }
 .td-week[data-mode='injury'] {
   --acc: var(--color-injury);
@@ -489,7 +489,7 @@ html.theme-glass .rx .topbar .tt {
   font-weight: 700;
 }
 .td-week .program-card-head .pch-bar {
-  height: 5px;
+  height: var(--sz-5);
   background: color-mix(in srgb, var(--color-text) 12%, transparent);
 }
 .pch-status {
@@ -517,9 +517,9 @@ html.theme-glass .rx .topbar .tt {
   background: none;
   color: inherit;
   font: inherit;
-  --pb: rgba(233, 234, 236, 0.04);
+  --pb: var(--c-e9eaec-a40);
   --pc: transparent;
-  --ring: rgba(233, 234, 236, 0.45);
+  --ring: var(--c-e9eaec-a450);
 }
 button.wk-pill {
   cursor: pointer;
@@ -528,7 +528,7 @@ button.wk-pill {
 .wk-pill-bar {
   /* Square day cells (same radius), capped so wide layouts stay square too. */
   width: 100%;
-  max-width: 44px;
+  max-width: var(--sz-44);
   aspect-ratio: 1;
   box-sizing: border-box;
   border-radius: var(--r-10);
@@ -587,7 +587,7 @@ button.wk-pill {
   --nc: var(--color-rest-300);
 }
 .hist-tl-day.st-vacation {
-  --nc: #6fb7de;
+  --nc: var(--c-6fb7de);
 }
 .hist-tl-day.st-injury {
   --nc: var(--color-injury);
@@ -626,7 +626,7 @@ button.wk-pill {
   flex-direction: column;
   border-radius: var(--r-18);
   background: var(--color-control);
-  border: 1px solid color-mix(in srgb, var(--color-text) 6%, transparent);
+  border: var(--bw-1) solid color-mix(in srgb, var(--color-text) 6%, transparent);
   overflow: hidden;
 }
 .hist-item {
@@ -641,7 +641,7 @@ button.wk-pill {
 .hist-item + .hist-item {
   margin-top: 0;
   padding-top: var(--s-12);
-  border-top: 1px solid color-mix(in srgb, var(--color-text) 6%, transparent);
+  border-top: var(--bw-1) solid color-mix(in srgb, var(--color-text) 6%, transparent);
 }
 div.hist-item {
   cursor: default;
@@ -661,15 +661,15 @@ div.hist-item {
 }
 .hist-tm {
   flex: none;
-  width: 40px;
+  width: var(--sz-40);
   font-size: var(--fs-12);
   font-weight: 600;
   color: var(--color-neutral-500);
 }
 .hist-ic {
   flex: none;
-  width: 36px;
-  height: 36px;
+  width: var(--sz-36);
+  height: var(--sz-36);
   border-radius: var(--r-12);
   display: grid;
   place-items: center;
@@ -703,8 +703,8 @@ div.hist-item {
 }
 .hist-go {
   flex: none;
-  width: 28px;
-  height: 28px;
+  width: var(--sz-28);
+  height: var(--sz-28);
   margin-left: auto;
   border-radius: var(--r-round);
   background: var(--c-2a2c31);
@@ -765,7 +765,7 @@ div.hist-item {
 }
 .vol-sort {
   flex: none;
-  width: 38px;
+  width: var(--sz-38);
   min-height: 0;
   padding: 0;
 }
@@ -924,8 +924,8 @@ div.hist-item {
   position: absolute;
   right: 8px;
   top: 8px;
-  width: 28px;
-  height: 28px;
+  width: var(--sz-28);
+  height: var(--sz-28);
   border-radius: var(--r-round);
   background: color-mix(in srgb, var(--c-0e0f11) 72%, transparent);
   color: var(--color-text);
@@ -954,7 +954,7 @@ div.hist-item {
   align-items: center;
   justify-content: space-between;
   gap: var(--s-12);
-  padding: var(--s-8) var(--page-x, 20px);
+  padding: var(--s-8) var(--page-x, var(--s-20));
 }
 .ps-title {
   min-width: 0;
@@ -967,7 +967,7 @@ div.hist-item {
 }
 .ps-close {
   flex: none;
-  width: 40px;
+  width: var(--sz-40);
   border-radius: var(--r-round);
   border: none;
   background: color-mix(in srgb, var(--color-text) 10%, transparent);
@@ -997,7 +997,7 @@ div.hist-item {
   scroll-snap-align: center;
   display: grid;
   place-items: center;
-  padding: var(--s-12) var(--page-x, 20px);
+  padding: var(--s-12) var(--page-x, var(--s-20));
   box-sizing: border-box;
 }
 .ps-slide img {
@@ -1013,7 +1013,7 @@ div.hist-item {
   align-items: center;
   justify-content: center;
   gap: var(--s-12);
-  padding: var(--s-8) var(--page-x, 20px) 0;
+  padding: var(--s-8) var(--page-x, var(--s-20)) 0;
 }
 .ps-steps {
   display: flex;
@@ -1047,12 +1047,12 @@ div.hist-item {
   padding: var(--s-12) var(--s-14);
   border-radius: var(--r-14);
   background: color-mix(in srgb, var(--rc) 10%, var(--color-surface));
-  border: 1px solid color-mix(in srgb, var(--rc) 30%, transparent);
+  border: var(--bw-1) solid color-mix(in srgb, var(--rc) 30%, transparent);
 }
 .mss-dot {
   flex: none;
-  width: 10px;
-  height: 10px;
+  width: var(--sz-10);
+  height: var(--sz-10);
   margin-top: var(--s-6);
   border-radius: var(--r-round);
   background: var(--rc);
@@ -1110,7 +1110,7 @@ div.hist-item {
 /* Days ahead in a program: what's planned, in quiet greyscale. */
 .wk-pill.st-next-train,
 .wk-pill.st-next-rest {
-  --pc: #6f7479;
+  --pc: var(--c-6f7479);
 }
 
 /* Session: ×2 sides badge is the kit Chip with a `lead` tab (SidesChip). */
@@ -1173,21 +1173,21 @@ div.hist-item {
   flex-direction: column;
   gap: var(--s-18);
 }
-html.theme-glass .kpi .big {
+html[data-theme='glass'] .kpi .big {
   font-size: var(--fs-52);
   font-weight: 700;
   letter-spacing: -0.03em;
 }
-html.theme-glass .kpi .unit {
+html[data-theme='glass'] .kpi .unit {
   font-size: var(--fs-18);
   font-weight: 600;
 }
-html.theme-glass .kpi .lab {
+html[data-theme='glass'] .kpi .lab {
   font-weight: 600;
   color: var(--color-text-muted);
 }
 .pv-hero .bars {
-  height: 104px;
+  height: var(--sz-104);
 }
 
 /* Overview back pill: sits at the start of its column, never stretched. */
@@ -1248,8 +1248,8 @@ html.theme-glass .kpi .lab {
   letter-spacing: -0.025em;
   line-height: 1.15;
 }
-html.theme-glass .la-pbar .la-ptitle,
-html.theme-glass .wlib-top .wlib-title {
+html[data-theme='glass'] .la-pbar .la-ptitle,
+html[data-theme='glass'] .wlib-top .wlib-title {
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -1389,8 +1389,8 @@ html.theme-glass .wlib-top .wlib-title {
 }
 .ov-act-bars {
   flex: none;
-  width: 72px;
-  height: 36px;
+  width: var(--sz-72);
+  height: var(--sz-36);
 }
 .ov-act .ov-bar {
   background: var(--t-line);

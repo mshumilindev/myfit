@@ -5,7 +5,7 @@
   align-items: center;
   gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-3);
-  border: 1px solid var(--t-line);
+  border: var(--bw-1) solid var(--t-line);
   border-radius: var(--r-16);
   background: var(--color-surface);
   color: var(--color-text);

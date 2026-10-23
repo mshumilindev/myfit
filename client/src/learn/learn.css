@@ -132,7 +132,7 @@
 }
 .app-learn .ln-thumb.cut-p.lead {
   height: auto;
-  width: 96px;
+  width: var(--sz-96);
 }
 .app-learn .ln-thumb-ph {
   position: absolute;
@@ -228,7 +228,7 @@
   flex-direction: column;
   gap: var(--s-14);
   padding-top: var(--s-20);
-  border-top: 1px solid var(--color-divider);
+  border-top: var(--bw-1) solid var(--color-divider);
 }
 .app-learn .ln-grid {
   display: grid;
@@ -268,7 +268,7 @@
   color: var(--color-text);
 }
 .app-learn .ln-sentinel {
-  height: 1px;
+  height: var(--sz-1);
 }
 .app-learn .ln-noresults {
   color: var(--color-neutral-500);
@@ -307,8 +307,8 @@
   padding: var(--s-48) var(--s-24);
 }
 .app-learn .ln-empty-ic {
-  width: 72px;
-  height: 72px;
+  width: var(--sz-72);
+  height: var(--sz-72);
   border-radius: var(--r-20);
   display: grid;
   place-items: center;
@@ -379,8 +379,8 @@
   padding: 0 var(--s-28);
 }
 .app-learn .ln-stage-ic {
-  width: 60px;
-  height: 60px;
+  width: var(--sz-60);
+  height: var(--sz-60);
   border-radius: var(--r-round);
   display: grid;
   place-items: center;
@@ -434,7 +434,7 @@
   gap: var(--s-12);
   margin-top: var(--s-18);
   padding-top: var(--s-18);
-  border-top: 1px solid var(--color-divider);
+  border-top: var(--bw-1) solid var(--color-divider);
 }
 
 /* ---- web hover states ---- */
@@ -469,14 +469,14 @@
 /* Layout hooks for kit primitives (positional only) */
 .app-learn .ln-filter-btn {
   flex: none;
-  width: 42px;
+  width: var(--sz-42);
 }
 .app-learn .ln-filter-count {
   position: absolute;
   top: -5px;
   right: -5px;
-  min-width: 16px;
-  height: 16px;
+  min-width: var(--sz-16);
+  height: var(--sz-16);
   padding: 0 var(--s-4);
   border-radius: var(--r-pill);
   background: var(--color-accent);

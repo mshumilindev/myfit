@@ -5,9 +5,9 @@
    (brass) and activities (green / blue).
    ========================================================================== */
 :root {
-  --home-tint: #2b2a1a;
-  --home-ink: #e8dc9a;
-  --home-line: #4a4526;
+  --home-tint: var(--c-2b2a1a);
+  --home-ink: var(--c-e8dc9a);
+  --home-line: var(--c-4a4526);
 }
 .sheet.home-sheet {
   gap: 0;
@@ -21,7 +21,7 @@
   display: flex;
   align-items: center;
   gap: var(--s-8);
-  min-height: 36px;
+  min-height: var(--sz-36);
 }
 .hs-head .hs-title {
   flex: 1;
@@ -36,7 +36,7 @@
 }
 .hs-back {
   flex: none;
-  width: 34px;
+  width: var(--sz-34);
   margin-left: -8px;
   border: none;
   background: none;
@@ -176,7 +176,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--s-8);
-  min-height: 48px;
+  min-height: var(--sz-48);
   border: none;
   border-radius: var(--r-12);
   background: var(--color-neutral-900);

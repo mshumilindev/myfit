@@ -44,7 +44,7 @@
   justify-content: center;
   gap: var(--s-10);
   width: 100%;
-  min-height: 48px;
+  min-height: var(--sz-48);
   padding: var(--s-12) var(--s-14);
   border-radius: var(--r-pill);
   color: var(--t-text);

@@ -18,7 +18,7 @@
 }
 .uibar-seg {
   flex-basis: 0;
-  min-width: 4px;
+  min-width: var(--sz-4);
   background: var(--t-base);
 }
 

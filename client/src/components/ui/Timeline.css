@@ -7,13 +7,13 @@
 .uitl-row {
   display: flex;
   align-items: stretch;
-  min-height: 52px;
+  min-height: var(--sz-52);
 }
 .uitl-row--month {
-  min-height: 40px;
+  min-height: var(--sz-40);
 }
 .uitl-date {
-  width: 48px;
+  width: var(--sz-48);
   flex-shrink: 0;
   padding: var(--sp-2) 0 var(--sp-2) var(--sp-2);
   display: flex;
@@ -51,7 +51,7 @@
 /* Rail */
 .uitl-rail {
   --lane-w: 8px;
-  width: 36px;
+  width: var(--sz-36);
   flex-shrink: 0;
   position: relative;
 }
@@ -115,8 +115,8 @@
   left: 11px;
   top: 50%;
   margin-top: -7px;
-  width: 14px;
-  height: 14px;
+  width: var(--sz-14);
+  height: var(--sz-14);
   border-radius: var(--radius-pill);
   background: var(--color-surface);
   border: 2px solid var(--color-text);
@@ -126,8 +126,8 @@
   left: 13px;
   top: 50%;
   margin-top: -5px;
-  width: 10px;
-  height: 10px;
+  width: var(--sz-10);
+  height: var(--sz-10);
   border-radius: var(--radius-pill);
   background: var(--color-border);
 }

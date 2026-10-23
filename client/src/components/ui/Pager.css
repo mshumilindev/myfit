@@ -9,7 +9,7 @@
   padding: var(--space-5) 0 calc(var(--space-6) + env(safe-area-inset-bottom));
 }
 .uipager-of {
-  min-width: 56px;
+  min-width: var(--sz-56);
   text-align: center;
   font-size: var(--fs-14);
   color: var(--color-text-muted);

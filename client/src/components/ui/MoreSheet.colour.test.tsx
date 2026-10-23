@@ -3,15 +3,15 @@ import { join } from 'node:path';
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { MoreMenu } from './MoreMenu';
-import { stylesCss } from './readCss';
+import { stylesCss, glassCss, inlinePrimitives } from './readCss';
 import { SUITE_TONE } from '../suite/suiteTone';
 import type { SuiteApp } from '../suite/useSuiteAccount';
 
 afterEach(cleanup);
 
 const css = stylesCss();
-const glass = readFileSync(join(__dirname, '..', '..', 'glass.css'), 'utf8');
-const more = readFileSync(join(__dirname, 'MoreMenu.css'), 'utf8');
+const glass = glassCss();
+const more = inlinePrimitives(readFileSync(join(__dirname, 'MoreMenu.css'), 'utf8'));
 const root = css.slice(css.indexOf(':root {'), css.indexOf('\n}\n', css.indexOf(':root {')));
 const tok = new Map<string, string>();
 for (const m of root.matchAll(/(--[\w-]+):\s*([^;]+);/g)) tok.set(m[1], m[2].trim());
@@ -69,7 +69,7 @@ describe('phone More sheet: colour-coded to the current app', () => {
       /var\(--t-base\) 7%[\s\S]*border: 1px solid var\(--t-line\)/,
     );
     expect(glass).toMatch(
-      /\.sheet--toned\.shell-sheet,\s*html\.theme-glass \.sheet\.sheet--toned\.uimore \{/,
+      /\.sheet--toned\.shell-sheet,\s*html\[data-theme=glass\] \.sheet\.sheet--toned\.uimore \{/,
     );
   });
 

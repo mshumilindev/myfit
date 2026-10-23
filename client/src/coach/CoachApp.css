@@ -21,7 +21,7 @@
    only decides the frame (fixed, column on a phone, row with the rail). */
 /* The rail's tooltips reach into the main column: keep the rail above it. */
 .co-shell > .rail {
-  z-index: 2;
+  z-index: var(--z-2);
 }
 
 .co-main {

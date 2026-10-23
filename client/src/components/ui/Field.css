@@ -100,7 +100,7 @@
 }
 .uifield-area {
   height: auto;
-  min-height: 72px;
+  min-height: var(--sz-72);
   resize: vertical;
   line-height: 1.4;
 }

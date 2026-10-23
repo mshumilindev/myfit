@@ -31,12 +31,6 @@
   --radius-s: var(--radius-sm);
   --radius-m: var(--radius-md);
   --radius-l: var(--radius-lg);
-  --space-1: 2.8px;
-  --space-2: 5.6px;
-  --space-3: 8.4px;
-  --space-4: 11.2px;
-  --space-5: 14px;
-  --space-6: 16.8px;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 .app-nutrition * {
@@ -163,8 +157,8 @@
   white-space: nowrap;
 }
 .app-nutrition .sync .dot {
-  width: 8px;
-  height: 8px;
+  width: var(--sz-8);
+  height: var(--sz-8);
   border-radius: var(--r-round);
   background: var(--ok);
 }
@@ -176,7 +170,7 @@
 }
 .app-nutrition .card {
   background: var(--surface);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   border-radius: var(--radius-l);
   padding: var(--space-4);
 }
@@ -192,12 +186,12 @@
 }
 .app-nutrition .kbju {
   background: linear-gradient(180deg, var(--acc-900) 0%, var(--surface) 60%);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   border-radius: var(--radius-l);
   padding: var(--space-5) var(--space-4);
 }
 .app-nutrition .kbju .foot {
-  border-top: 1px solid var(--hairline);
+  border-top: var(--bw-1) solid var(--hairline);
   margin-top: var(--space-4);
   padding-top: var(--space-3);
   color: var(--muted);
@@ -217,7 +211,7 @@
   background: var(--surface);
   box-shadow: 0 -1px 0 var(--hairline);
   padding: var(--s-8) var(--s-8) max(var(--s-8), env(safe-area-inset-bottom));
-  z-index: 8;
+  z-index: var(--z-8);
 }
 .app-nutrition .tabbar .tab {
   display: flex;
@@ -232,8 +226,8 @@
   font-size: var(--fs-10);
 }
 .app-nutrition .tabbar .tab svg {
-  width: 22px;
-  height: 22px;
+  width: var(--sz-22);
+  height: var(--sz-22);
 }
 .app-nutrition .tabbar .tab.active {
   color: var(--acc-200);
@@ -300,15 +294,15 @@
   color: var(--muted);
 }
 .app-nutrition .bar .top .lbl svg {
-  width: 14px;
-  height: 14px;
+  width: var(--sz-14);
+  height: var(--sz-14);
 }
 .app-nutrition .bar .top .val b {
   color: var(--text);
   font-weight: 600;
 }
 .app-nutrition .bar .track {
-  height: 7px;
+  height: var(--sz-7);
   border-radius: var(--r-6);
   background: var(--surface-2);
   overflow: hidden;
@@ -342,13 +336,13 @@
   width: 100%;
   text-align: left;
   background: var(--surface);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   border-radius: var(--radius-m);
   padding: var(--space-3);
 }
 .app-nutrition .entry .ic {
-  width: 38px;
-  height: 38px;
+  width: var(--sz-38);
+  height: var(--sz-38);
   border-radius: var(--radius-s);
   background: var(--surface-2);
   display: flex;
@@ -389,14 +383,14 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--hairline);
+  border-bottom: var(--bw-1) solid var(--hairline);
 }
 .app-nutrition .row:last-child {
   border-bottom: none;
 }
 .app-nutrition .row .ic {
-  width: 36px;
-  height: 36px;
+  width: var(--sz-36);
+  height: var(--sz-36);
   border-radius: var(--radius-s);
   background: var(--surface-2);
   display: flex;
@@ -426,7 +420,7 @@
   padding: var(--s-2) var(--s-8);
   border-radius: var(--r-pill);
   font-size: var(--fs-11);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   color: var(--muted);
 }
 .app-nutrition .tag.ok {
@@ -452,9 +446,9 @@
   color: var(--muted);
 }
 .app-nutrition .select {
-  min-height: 44px;
+  min-height: var(--sz-44);
   border-radius: var(--radius-m);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   background: var(--surface);
   color: var(--text);
   padding: 0 var(--space-3);
@@ -473,7 +467,7 @@
 .app-nutrition .chip {
   padding: var(--s-8) var(--s-14);
   border-radius: var(--r-pill);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   background: transparent;
   color: var(--muted);
   font-size: var(--fs-13);
@@ -492,7 +486,7 @@
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   border-radius: var(--radius-l);
   background: var(--surface);
   text-align: left;
@@ -509,7 +503,7 @@
 }
 .app-nutrition .plaque {
   background: var(--acc-900);
-  border: 1px solid var(--acc-800);
+  border: var(--bw-1) solid var(--acc-800);
   border-radius: var(--radius-m);
   padding: var(--space-3) var(--space-4);
   font-size: var(--fs-13);
@@ -556,7 +550,7 @@
   background: var(--bg);
   border-top-left-radius: var(--radius-l);
   border-top-right-radius: var(--radius-l);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   padding: var(--space-4) var(--space-4) var(--space-6);
 }
 @media (min-width: 720px) {
@@ -588,8 +582,8 @@
   }
 }
 .app-nutrition .sheet .grab {
-  width: 40px;
-  height: 4px;
+  width: var(--sz-40);
+  height: var(--sz-4);
   border-radius: var(--r-2);
   background: var(--hairline);
   margin: var(--s-2) auto var(--space-4);
@@ -599,7 +593,7 @@
   max-width: 380px;
   margin: auto;
   background: var(--surface);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   border-radius: var(--radius-l);
   padding: var(--space-5);
 }
@@ -679,7 +673,7 @@
   align-items: center;
   gap: var(--space-2);
   background: var(--surface-2);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   border-radius: var(--radius-m);
   padding: var(--s-10) var(--space-3);
   color: var(--muted);
@@ -697,7 +691,7 @@
   align-items: flex-start;
   gap: var(--space-3);
   padding: var(--space-4);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   border-radius: var(--radius-l);
   background: var(--surface);
   min-height: 84px;
@@ -748,7 +742,7 @@
 }
 .app-nutrition .chart .colbar {
   width: 62%;
-  max-width: 26px;
+  max-width: var(--sz-26);
   flex: 1;
   display: flex;
   align-items: flex-end;
@@ -776,8 +770,8 @@
 }
 .app-nutrition .legend .sw {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: var(--sz-10);
+  height: var(--sz-10);
   border-radius: var(--r-4);
   margin-right: var(--s-6);
   vertical-align: middle;
@@ -793,11 +787,11 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--hairline);
+  border-bottom: var(--bw-1) solid var(--hairline);
 }
 .app-nutrition .n-acct .ava {
-  width: 40px;
-  height: 40px;
+  width: var(--sz-40);
+  height: var(--sz-40);
   flex: none;
   border-radius: var(--radius-m);
   background: var(--acc-800);
@@ -835,10 +829,10 @@
   text-align: center;
 }
 .app-nutrition .auth-card .mark {
-  width: 64px;
-  height: 64px;
+  width: var(--sz-64);
+  height: var(--sz-64);
   border-radius: var(--radius-l);
-  border: 1px solid var(--acc);
+  border: var(--bw-1) solid var(--acc);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -889,12 +883,6 @@
   --radius-s: var(--radius-sm);
   --radius-m: var(--radius-md);
   --radius-l: var(--radius-lg);
-  --space-1: 2.8px;
-  --space-2: 5.6px;
-  --space-3: 8.4px;
-  --space-4: 11.2px;
-  --space-5: 14px;
-  --space-6: 16.8px;
 
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -961,8 +949,8 @@
   color: var(--muted);
 }
 .app-nutrition .sync .dot {
-  width: 8px;
-  height: 8px;
+  width: var(--sz-8);
+  height: var(--sz-8);
   border-radius: var(--r-round);
   background: var(--ok);
 }
@@ -974,7 +962,7 @@
 }
 .app-nutrition .card {
   background: var(--surface);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   border-radius: var(--radius-l);
   padding: var(--space-4);
 }
@@ -992,10 +980,10 @@
   position: absolute;
   right: var(--space-4);
   bottom: 88px;
-  width: 56px;
-  height: 56px;
+  width: var(--sz-56);
+  height: var(--sz-56);
   border-radius: var(--r-round);
-  border: 1px solid var(--acc);
+  border: var(--bw-1) solid var(--acc);
   background: var(--acc-900);
   color: var(--acc-100);
   font-size: var(--fs-26);
@@ -1003,19 +991,19 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 6px 20px color-mix(in srgb, var(--c-000000) 40%, transparent);
-  z-index: 6;
+  z-index: var(--z-6);
 }
 .app-nutrition .tabbar {
   position: sticky;
   bottom: 0;
   display: flex;
-  border-top: 1px solid var(--hairline);
+  border-top: var(--bw-1) solid var(--hairline);
   background: var(--surface);
   padding-bottom: env(safe-area-inset-bottom);
 }
 .app-nutrition .tabbar button {
   flex: 1;
-  min-height: 56px;
+  min-height: var(--sz-56);
   background: none;
   border: none;
   color: var(--dim);
@@ -1077,7 +1065,7 @@
   color: var(--muted);
 }
 .app-nutrition .bar .track {
-  height: 8px;
+  height: var(--sz-8);
   border-radius: var(--r-6);
   background: var(--surface-2);
   overflow: hidden;
@@ -1103,14 +1091,14 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--hairline);
+  border-bottom: var(--bw-1) solid var(--hairline);
 }
 .app-nutrition .row:last-child {
   border-bottom: none;
 }
 .app-nutrition .row .ic {
-  width: 36px;
-  height: 36px;
+  width: var(--sz-36);
+  height: var(--sz-36);
   border-radius: var(--radius-s);
   background: var(--surface-2);
   display: flex;
@@ -1140,7 +1128,7 @@
   padding: var(--s-2) var(--s-8);
   border-radius: var(--r-pill);
   font-size: var(--fs-11);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   color: var(--muted);
 }
 .app-nutrition .tag.ok {
@@ -1166,9 +1154,9 @@
   color: var(--muted);
 }
 .app-nutrition .select {
-  min-height: 44px;
+  min-height: var(--sz-44);
   border-radius: var(--radius-m);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   background: var(--surface);
   color: var(--text);
   padding: 0 var(--space-3);
@@ -1186,7 +1174,7 @@
 .app-nutrition .chip {
   padding: var(--s-8) var(--s-14);
   border-radius: var(--r-pill);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   background: transparent;
   color: var(--muted);
   font-size: var(--fs-13);
@@ -1204,7 +1192,7 @@
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   border-radius: var(--radius-l);
   background: var(--surface);
 }
@@ -1235,12 +1223,12 @@
   background: var(--bg);
   border-top-left-radius: var(--radius-l);
   border-top-right-radius: var(--radius-l);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   padding: var(--space-4) var(--space-4) var(--space-6);
 }
 .app-nutrition .sheet .grab {
-  width: 40px;
-  height: 4px;
+  width: var(--sz-40);
+  height: var(--sz-4);
   border-radius: var(--r-2);
   background: var(--hairline);
   margin: var(--s-2) auto var(--space-4);
@@ -1250,7 +1238,7 @@
   max-width: 380px;
   margin: auto;
   background: var(--surface);
-  border: 1px solid var(--hairline);
+  border: var(--bw-1) solid var(--hairline);
   border-radius: var(--radius-l);
   padding: var(--space-5);
 }
@@ -1298,7 +1286,7 @@
   align-items: center;
   gap: var(--space-3);
   background: var(--acc-900);
-  border: 1px solid var(--acc-800);
+  border: var(--bw-1) solid var(--acc-800);
   border-radius: var(--radius-m);
   padding: var(--space-3) var(--space-4);
   font-size: var(--fs-13);
@@ -1356,8 +1344,8 @@
   margin-left: auto;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: var(--sz-34);
+  height: var(--sz-34);
   border: none;
   background: none;
   color: var(--muted);
@@ -1444,17 +1432,17 @@
   content: '';
   position: absolute;
   inset: 0;
-  z-index: -2;
+  z-index: var(--z-n2);
   border-radius: inherit;
-  -webkit-backdrop-filter: blur(3px) saturate(1.9) brightness(1.08);
-  backdrop-filter: blur(3px) saturate(1.9) brightness(1.08);
+  -webkit-backdrop-filter: var(--bf-lens);
+  backdrop-filter: var(--bf-lens);
   filter: url(#liquid-glass);
 }
 .app-nutrition .n-addpill::after {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: var(--z-n1);
   border-radius: inherit;
   background: linear-gradient(
     135deg,
@@ -1580,8 +1568,8 @@
 
 /* Product thumbnail (Open Food Facts photo) — same footprint as the emoji .ic. */
 .app-nutrition .food-ic {
-  width: 36px;
-  height: 36px;
+  width: var(--sz-36);
+  height: var(--sz-36);
   border-radius: var(--radius-s);
   object-fit: cover;
   background: var(--surface-2);
@@ -1651,7 +1639,7 @@
    the overline + CTA only. */
 .app-nutrition .plaque {
   background: var(--color-surface);
-  border: 1px solid var(--color-divider);
+  border: var(--bw-1) solid var(--color-divider);
   border-radius: var(--radius-lg);
 }
 

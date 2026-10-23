@@ -7,10 +7,12 @@ import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { Switch } from '../components/ui/Switch';
 import { FEATURE_FLAGS, isFlagOn, setFlag, useFlagsVersion, type FlagId } from '../data/flags';
 import { useT } from '../i18n';
+import { THEMES, setTheme, useTheme } from '../themes';
 
 export function SettingsView({ onClose }: { onClose: () => void }) {
   const { t } = useT();
   useFlagsVersion(); // re-render when a flag changes
+  const theme = useTheme();
 
   const meta: Record<string, { label: string; desc: string }> = {
     nutrition: { label: t.flagNutrition, desc: t.flagNutritionDesc },
@@ -44,6 +46,19 @@ export function SettingsView({ onClose }: { onClose: () => void }) {
           );
         })}
       </GroupedList>
+
+      {THEMES.length > 1 && (
+        <GroupedList header={t.settingsThemeLabel}>
+          {THEMES.map((th) => (
+            <ListRow
+              key={th.id}
+              label={th.name}
+              check={th.id === theme}
+              onClick={() => setTheme(th.id)}
+            />
+          ))}
+        </GroupedList>
+      )}
     </div>
   );
 }

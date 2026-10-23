@@ -48,7 +48,7 @@
   min-width: 0;
   overflow: hidden;
   border-radius: var(--radius-md);
-  border: 1px solid color-mix(in srgb, var(--color-divider) 36%, transparent);
+  border: var(--bw-1) solid color-mix(in srgb, var(--color-divider) 36%, transparent);
   background: var(--color-surface);
   color: var(--color-neutral-300);
   font: inherit;
@@ -91,11 +91,11 @@
 }
 .uimg-day.is-plan-train {
   background: transparent;
-  border: 1px dashed var(--color-accent-line);
+  border: var(--bw-1) dashed var(--color-accent-line);
 }
 .uimg-day.is-plan-rest {
   background: transparent;
-  border: 1px dashed var(--color-rest-line);
+  border: var(--bw-1) dashed var(--color-rest-line);
 }
 .uimg-day.is-future .uimg-num,
 .uimg-day.is-plan-train .uimg-num,
@@ -145,7 +145,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--s-2) var(--s-4);
-  min-height: 9px;
+  min-height: var(--sz-9);
 }
 .uimg-mk {
   display: inline-block;
@@ -154,13 +154,13 @@
 }
 .uimg-mk--workout,
 .uimg-mk--planned {
-  width: 14px;
-  height: 3px;
+  width: var(--sz-14);
+  height: var(--sz-3);
   border-radius: var(--r-2);
   background: var(--color-accent);
 }
 .uimg-mk--planned {
-  height: 4px;
+  height: var(--sz-4);
   background: transparent;
   box-shadow: inset 0 0 0 1px var(--color-accent);
 }
@@ -168,8 +168,8 @@
 .uimg-mk--sleep,
 .uimg-mk--weight,
 .uimg-mk--trainer {
-  width: 5px;
-  height: 5px;
+  width: var(--sz-5);
+  height: var(--sz-5);
   border-radius: var(--radius-pill);
   background: var(--color-ok);
 }
@@ -241,8 +241,8 @@
 }
 .uimg-sw {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: var(--sz-10);
+  height: var(--sz-10);
   border-radius: var(--r-4);
   background: var(--t-tint);
   box-shadow: inset 0 0 0 1px var(--t-base);
@@ -250,5 +250,5 @@
 .uimg-sw.is-plan {
   background: transparent;
   box-shadow: none;
-  border: 1px dashed var(--color-accent-line);
+  border: var(--bw-1) dashed var(--color-accent-line);
 }

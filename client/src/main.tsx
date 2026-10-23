@@ -5,9 +5,12 @@ import '@fontsource/inter/500.css';
 // Brand wordmark (header, nutrition bar, share card). Self-hosted: no request to Google Fonts (SPO-287).
 import '@fontsource/kaushan-script/latin-400.css';
 import '@fontsource/kaushan-script/latin-ext-400.css';
+import './tokens/primitives.css';
 import './styles.css';
 import './redesign.css';
+import { initTheme } from './themes';
 import './glass.css';
+import './reduced-transparency.css';
 import { App } from './App';
 import { getLocale } from './i18n';
 import { startAutoUpdate, startBuildWatch, markUpdateReady } from './pwaUpdate';
@@ -25,6 +28,7 @@ import { HealthConsentHost } from './legal/HealthConsentHost';
 
 // Clean URLs (no `#`): rewrite a legacy `/#/route` link to `/route` before the app reads its route.
 installCleanUrls();
+initTheme();
 document.documentElement.lang = getLocale();
 lockShellHeight();
 installHorizontalScrollGuard();

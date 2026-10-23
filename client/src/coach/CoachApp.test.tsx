@@ -1,3 +1,4 @@
+import { inlinePrimitives } from '../components/ui/readCss';
 import { todayEn } from '../i18n/coachToday.en';
 import { rosterEn } from '../i18n/coachRoster.en';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -257,7 +258,9 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     setRailHeight(200);
     expect(navLabels()).toHaveLength(1);
     // ...and CSS pins the original tiles: labelled 72x64, compact 44, flex none, top aligned, 5.6 gap.
-    const css = readFileSync(join(__dirname, '..', 'components', 'ui', 'Rail.css'), 'utf8');
+    const css = inlinePrimitives(
+      readFileSync(join(__dirname, '..', 'components', 'ui', 'Rail.css'), 'utf8'),
+    );
     expect(css).toMatch(/\.rail--overflow \.rail-item \{[^}]*flex: none;/);
     expect(css).toMatch(/\.rail--labelled \.rail-item \{[^}]*width: 72px;[^}]*height: 64px;/);
     expect(css).toMatch(/\.rail--compact \.rail-item \{[^}]*height: 44px;/);

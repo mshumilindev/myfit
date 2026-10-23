@@ -2,8 +2,8 @@
 .uiradio {
   position: relative;
   display: inline-flex;
-  width: 22px;
-  height: 22px;
+  width: var(--sz-22);
+  height: var(--sz-22);
   flex: none;
 }
 .uiradio-in {
@@ -17,8 +17,8 @@
   cursor: default;
 }
 .uiradio-ring {
-  width: 22px;
-  height: 22px;
+  width: var(--sz-22);
+  height: var(--sz-22);
   border-radius: var(--r-round);
   border: 1.5px solid var(--color-neutral-700);
   display: inline-flex;
@@ -28,8 +28,8 @@
 }
 .uiradio-ring::after {
   content: '';
-  width: 10px;
-  height: 10px;
+  width: var(--sz-10);
+  height: var(--sz-10);
   border-radius: var(--r-round);
   background: var(--t-base);
   transform: scale(0);

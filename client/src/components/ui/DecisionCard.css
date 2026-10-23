@@ -54,8 +54,8 @@
   gap: var(--s-16);
   margin-top: var(--s-4);
   padding: var(--s-16) 0;
-  border-top: 1px solid var(--color-divider);
-  border-bottom: 1px solid var(--color-divider);
+  border-top: var(--bw-1) solid var(--color-divider);
+  border-bottom: var(--bw-1) solid var(--color-divider);
 }
 /* Side by side only when the card itself is wide: a board drawer stacks the number over the chart. */
 @container (min-width: 480px) {

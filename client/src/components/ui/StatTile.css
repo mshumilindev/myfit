@@ -48,7 +48,7 @@
 }
 .uistat-bar {
   display: block;
-  height: 6px;
+  height: var(--sz-6);
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--color-text) 10%, transparent);
   overflow: hidden;

@@ -1,0 +1,133 @@
+/* Brass Glass — theme file (SPO-344, ADR 010). Tokens only: a theme is exactly this file.
+   Contract: client/src/themes/contract.ts. Everything the kit draws reads these tokens. */
+html[data-theme='glass'] {
+  /* surfaces */
+  --color-bg: var(--c-121316);
+  /* Opaque: legacy screens stack surfaces (nudge deck, sheets over cards) and
+     must not show through. Kit cards use the translucent --glass-surface. */
+  --color-surface: var(--c-1c1e22);
+  --glass-surface: var(--c-1f2125-a720);
+  --color-control: var(--glass-surface);
+  --color-divider: var(--c-e9eaec-a70);
+  /* brass ramp is unchanged (kit.py T.brass = #d9a24f, brass3 = #eed3a5) */
+  /* liquid glass — neutral (kit .card) and brass (kit .card.glass) */
+  --glass-backdrop: none;
+  --glass-float: 0 10px 30px -12px var(--c-000000-a700);
+  --glass-rest-tint: linear-gradient(180deg, var(--c-1c4664-a360), var(--c-0a1a26-a580));
+  --glass-rest-specular:
+    inset 0 1.2px 0.5px var(--c-93d4f2-a420), inset 0 0 0 1px var(--c-33a8e0-a300);
+  /* hero (kit .card.hero) — the one focal block of a screen */
+  /* wells (kit .well) — recessed inputs and steppers */
+  --glass-well: var(--c-060608-a500);
+  --glass-well-ring: var(--c-e9eaec-a60);
+  --glass-field: var(--c-0a0a0c-a450);
+  --glass-field-ring: var(--c-e9eaec-a100);
+  /* screen moods (kit .m-*) — the background glow behind a screen */
+  --mood-art:
+    radial-gradient(80% 42% at 22% 14%, var(--c-2b1f3a-a950), transparent 70%),
+    radial-gradient(90% 55% at 88% 34%, var(--c-8a642e-a800), transparent 70%),
+    radial-gradient(90% 45% at 50% 96%, var(--c-342713-a900), transparent 70%), var(--c-121316);
+  --mood-rest:
+    radial-gradient(90% 42% at 80% 100%, var(--c-1c6f9a-a450), transparent 70%),
+    radial-gradient(70% 32% at 8% 96%, var(--c-2b1f3a-a700), transparent 70%),
+    radial-gradient(80% 30% at 92% 0%, var(--c-33a8e0-a180), transparent 70%), var(--c-111417);
+  --mood-sleep:
+    radial-gradient(90% 45% at 75% 0%, var(--c-5a46aa-a500), transparent 70%),
+    radial-gradient(80% 40% at 10% 100%, var(--c-2b1f3a-a850), transparent 70%), var(--c-0f0f16);
+  --mood-ok:
+    radial-gradient(90% 50% at 50% 28%, var(--c-4cbe8c-a260), transparent 70%),
+    radial-gradient(80% 50% at 60% 40%, var(--c-8a642e-a450), transparent 70%),
+    radial-gradient(70% 30% at 8% 96%, var(--c-2b1f3a-a700), transparent 70%), var(--c-0f1311);
+  --mood-bad:
+    radial-gradient(90% 40% at 80% 100%, var(--c-7d302b-a450), transparent 70%),
+    radial-gradient(70% 32% at 8% 96%, var(--c-2b1f3a-a700), transparent 70%), var(--c-131112);
+  --mood-night: radial-gradient(
+    120% 70% at 30% 10%,
+    var(--c-2a2f36) 0%,
+    var(--c-111214) 60%,
+    var(--c-0a0a0b) 100%
+  );
+  /* Body/muscle map: on the brass glass the untrained body reads light (a soft
+     warm grey from the palette, never #fff); worked muscles stay brass. */
+  --body-dim: var(--color-neutral-300);
+  --body-dim-stroke: color-mix(in srgb, var(--color-neutral-500) 70%, transparent);
+  /* radii (kit: card 18, hero 24, sheet 26, pills 999) */
+  --radius-lg: var(--r-18);
+  --radius-md: var(--r-12);
+  /* inset rows/tiles inside cards */
+  --radius-sm: var(--r-8);
+  /* thumbs, small blocks */
+  --radius-hero: var(--r-24);
+  --radius-sheet: 26px;
+  /* no --r-26 step: stays literal */
+  /* type scale from P00-Type (kit .t-*) */
+  --type-d1: 600 34px/1.08 var(--font);
+  --type-h1: 600 26px/1.15 var(--font);
+  --type-h2: 600 20px/1.2 var(--font);
+  --type-h3: 600 16px/1.3 var(--font);
+  --type-b: 400 15px/1.45 var(--font);
+  --type-s: 400 13px/1.4 var(--font);
+  --type-m: 400 12px/1.35 var(--font);
+  --type-l: 600 10.5px/1.2 var(--font);
+  --type-num: 600 28px/1.05 var(--font);
+  --type-hero: 600 56px/1 var(--font);
+  --lava-1: var(--c-2b1f3a-a950);
+  --lava-2: var(--c-8a642e-a800);
+  --lava-3: var(--c-342713-a900);
+  /* the base of a raised list inside a sheet: graphite-brown on the brass apps, graphite-teal on Coach (below) */
+  --glass-raised-base: var(--c-181613-a920);
+  --plate-top: var(--c-28221a-a960);
+  --plate-bot: var(--c-121110-a980);
+  --plate-rim: var(--c-eed3a5-a450);
+  --plate-edge: var(--c-d9a24f-a220);
+}
+
+/* --- Sub-app skins: the colour of the screen glow per app (theme × skin) --- */
+/* Three glows (LavaBackground) sit exactly where the old static gradient's spots
+   were — a soft purple top-left, the app's gem on the right, a dark shade at the
+   bottom — so with animation off the look is unchanged. They only move once the
+   device has proven it can (motion.ts sets html[data-motion]). Sub-apps swap
+   the colours, not the mechanism. */
+html[data-theme='glass'].theme-apex {
+  --lava-2: var(--c-4a3480-a700);
+  --lava-3: var(--c-241a3a-a900);
+}
+html[data-theme='glass'].theme-learn {
+  --lava-2: var(--c-6e2a3e-a700);
+  --lava-3: var(--c-3a1420-a900);
+}
+html[data-theme='glass'].theme-roster {
+  --lava-1: var(--c-2b1f3a-a800);
+  --lava-2: var(--c-4a4d53-a700);
+  --lava-3: var(--c-26282c-a900);
+}
+html[data-theme='glass'].theme-nutrition {
+  --lava-1: var(--c-2b1f3a-a800);
+  --lava-2: var(--c-24486b-a700);
+  --lava-3: var(--c-14222f-a900);
+}
+/* Coach: the same three-glow recipe as every sub-app. lava-1 is the one universal violet spot
+   (not overridden, exactly as in Gym / Apex / Learn); only the right-hand gem and the bottom
+   shade take the app colour, at the same alpha (.7 / .9) and the same ~47% / ~23% ramp depth as
+   Apex and Nutrition. The gem is a notch darker than a pure ramp step so muted text keeps
+   >= 4.5:1 at its peak (coach/coachColour.test.ts). */
+html[data-theme='glass'].theme-coach {
+  --glass-raised-base: color-mix(in srgb, var(--color-accent) 5%, var(--c-131718-a920));
+  --lava-2: var(--c-06434e-a700);
+  --lava-3: var(--c-10383c-a900);
+}
+/* One plate recipe for EVERY overlay (sheet, drawer, dialog, popover, toast, chat dock). The overlays are portaled to
+   <body>, outside any app wrapper, so they read the app identity from the document root: `html.theme-coach` re-defines
+   the plate (graphite, not brass brown) and the family aliases (--t-base ... = the Coach accent) below. A new overlay
+   only has to use these tokens to follow the app colour. */
+html[data-theme='glass'].theme-coach {
+  --plate-top: color-mix(in srgb, var(--color-accent) 7%, var(--c-1e2426-a970));
+  --plate-bot: color-mix(in srgb, var(--color-accent) 3%, var(--c-0f1213-a985));
+  --plate-rim: color-mix(in srgb, var(--color-accent) 45%, transparent);
+  --plate-edge: var(--color-accent-line);
+  --t-base: var(--color-accent);
+  --t-tint: var(--color-accent-tint);
+  --t-text: var(--color-accent-text);
+  --t-line: var(--color-accent-line);
+  --t-on: var(--color-bg);
+}

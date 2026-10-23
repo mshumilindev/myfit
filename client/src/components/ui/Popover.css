@@ -45,8 +45,8 @@
 .uipop--arrow::before {
   content: '';
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: var(--sz-12);
+  height: var(--sz-12);
   background: var(--color-surface);
   transform: rotate(45deg);
   border-radius: var(--r-2);

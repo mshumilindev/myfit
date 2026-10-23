@@ -7,6 +7,7 @@ export default tseslint.config(
   {
     ignores: [
       '**/dist/',
+      'mobile/android/**/build/', // gitignored Gradle output (generated native-bridge.js etc.), not source
       '**/dist-e2e*/',
       '**/dev-dist/',
       '**/.vite/',

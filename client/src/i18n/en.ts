@@ -2221,6 +2221,7 @@ export const en = {
   settingsTitle: 'Settings',
   settingsSub: 'Feature flags for this device',
   settingsFeaturesLabel: 'Features',
+  settingsThemeLabel: 'Theme',
   flagExerciseFeature: 'Exercise library & detail',
   flagExerciseFeatureDesc:
     'Exercise gallery, rich exercise pages, and the Exercises tab on Programs.',

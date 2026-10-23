@@ -105,7 +105,10 @@ function typeEscapes(): Record<string, number> {
 const isFeatureTsx = (f: string) =>
   /\.tsx$/.test(f) && !isTest(f) && !inKit(f) && !rel(f).startsWith('stories/');
 const isFeatureCss = (f: string) =>
-  f.endsWith('.css') && !inKit(f) && !/(^|\/)(styles|glass|redesign)\.css$/.test(rel(f));
+  f.endsWith('.css') &&
+  !inKit(f) &&
+  !/(^|\/)(styles|glass|redesign)\.css$/.test(rel(f)) &&
+  !rel(f).startsWith('tokens/'); // primitives live there: raw values are its job (ADR 010)
 
 function countByFile(files: string[], re: RegExp): Record<string, number> {
   const out: Record<string, number> = {};

@@ -1,9 +1,12 @@
 import type { Decorator, Preview } from '@storybook/react-vite';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
+import '../src/tokens/primitives.css';
 import '../src/styles.css';
 import '../src/redesign.css';
+import { AXES, DEFAULT_THEME, THEMES, type AxisName } from '../src/themes';
 import '../src/glass.css';
+import '../src/reduced-transparency.css';
 import { LOCALE_IDS, setLocale, type LocaleId } from '../src/i18n';
 import '../src/coach/__fixtures__/register';
 
@@ -15,12 +18,45 @@ const withLocale: Decorator = (Story, ctx) => {
   return <Story />;
 };
 
-/** Stories always render in Brass Glass — the app's only theme. */
-document.documentElement.classList.add('theme-glass');
+/** Toolbar theme (SPO-344): every theme in the registry; default = the app's default theme. */
+const withTheme: Decorator = (Story, ctx) => {
+  const id = (ctx.globals.theme as string | undefined) ?? DEFAULT_THEME;
+  document.documentElement.setAttribute('data-theme', id);
+  for (const axis of Object.keys(AXES) as AxisName[]) {
+    document.documentElement.setAttribute(
+      AXES[axis].attr,
+      (ctx.globals[axis] as string | undefined) ?? AXES[axis].default,
+    );
+  }
+  return <Story />;
+};
+document.documentElement.setAttribute('data-theme', DEFAULT_THEME);
 
 const preview: Preview = {
-  decorators: [withLocale],
+  decorators: [withLocale, withTheme],
   globalTypes: {
+    theme: {
+      description: 'Theme',
+      toolbar: {
+        title: 'Theme',
+        icon: 'paintbrush',
+        items: THEMES.map((t) => ({ value: t.id, title: t.name })),
+        dynamicTitle: true,
+      },
+    },
+    ...Object.fromEntries(
+      (Object.keys(AXES) as AxisName[]).map((axis) => [
+        axis,
+        {
+          description: `Look axis: ${axis}`,
+          toolbar: {
+            title: axis,
+            items: AXES[axis].values.map((v) => ({ value: v, title: v })),
+            dynamicTitle: true,
+          },
+        },
+      ]),
+    ),
     locale: {
       description: 'UI locale',
       toolbar: {
@@ -33,6 +69,7 @@ const preview: Preview = {
   },
   initialGlobals: {
     locale: 'en',
+    theme: DEFAULT_THEME,
     backgrounds: { value: 'app' },
     viewport: { value: 'phone', isRotated: false },
   },

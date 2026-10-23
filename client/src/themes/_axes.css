@@ -1,0 +1,7 @@
+/* Look axes (SPO-344, ADR 010): one block per non-default value of AXES in registry.ts. Tokens only,
+   from the theme contract. Selectors are always on <html> and carry [data-theme] so they out-rank a theme block whatever the load order, e.g.
+     html[data-theme][data-density=compact] { --s-16: 12px; ... }
+     html[data-theme][data-accent=teal] { --color-accent: var(--c-1f9d8f); ... }
+   A colour mode that needs per-theme colours goes into the theme file as
+     html[data-theme=<id>][data-mode=light] { ...contract tokens... }
+   Empty on purpose: every axis currently has only its default value. */

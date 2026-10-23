@@ -16,7 +16,7 @@
      small floor for home-indicator clearance) — never 22px + safe-area. */
   padding: var(--s-8) var(--s-12) max(var(--s-8), calc(var(--safe-bottom) - var(--s-16)));
   background: var(--color-tabbar);
-  border-top: 1px solid var(--color-divider);
+  border-top: var(--bw-1) solid var(--color-divider);
   z-index: var(--z-30);
 }
 /* The notch the Start button sits in (centre 18px below the bar's top). */
@@ -53,8 +53,8 @@
   position: absolute;
   left: 50%;
   top: -14px;
-  width: 64px;
-  height: 64px;
+  width: var(--sz-64);
+  height: var(--sz-64);
   margin-left: -32px;
   border: none;
   border-radius: var(--r-round);
@@ -76,7 +76,7 @@
   position: absolute;
   inset: 0;
   border-radius: var(--r-round);
-  border: 1px solid var(--color-accent);
+  border: var(--bw-1) solid var(--color-accent);
   opacity: 0;
   pointer-events: none;
   animation: tabbar-fab-ripple 7s ease-out infinite;

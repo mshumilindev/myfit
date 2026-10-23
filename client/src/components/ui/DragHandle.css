@@ -1,7 +1,7 @@
 /* Drag handle (⋮⋮). Tokens only. */
 .uidrag {
   flex: none;
-  width: 28px;
+  width: var(--sz-28);
   height: var(--ctl-h-sm);
   border-radius: var(--radius-md);
   display: inline-grid;

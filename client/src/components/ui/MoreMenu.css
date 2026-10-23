@@ -28,5 +28,5 @@
   padding-bottom: var(--s-24);
 }
 .uimore .uiacct {
-  border-top: 1px solid var(--t-line, var(--color-border));
+  border-top: var(--bw-1) solid var(--t-line, var(--color-border));
 }

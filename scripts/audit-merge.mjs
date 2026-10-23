@@ -3,7 +3,7 @@
  * Proves that sharded geometry audits cover the WHOLE matrix (SPO-140): every shard report must exist, each shard must have
  * run every probe it was given, and the shards must add up to the full matrix size. Also fails when any shard has findings.
  *   node scripts/audit-merge.mjs <dir with *.json reports> --shards 16
- * Report files: stories-<i>.json, hero-<i>.json, chat-<i>.json (written by the audits via --out).
+ * Report files: stories-<i>.json, hero-<i>.json, chat-<i>.json, swap-<i>.json (written by the audits via --out).
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -21,7 +21,7 @@ const fail = (m) => {
   console.error(`✗ ${m}`);
 };
 
-for (const audit of ['stories', 'hero', 'chat']) {
+for (const audit of ['stories', 'hero', 'chat', 'swap']) {
   let sum = 0;
   let total = null;
   let findings = 0;

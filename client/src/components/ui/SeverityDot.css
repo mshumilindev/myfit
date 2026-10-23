@@ -9,8 +9,8 @@
   white-space: nowrap;
 }
 .uisevdot-d {
-  width: 8px;
-  height: 8px;
+  width: var(--sz-8);
+  height: var(--sz-8);
   border-radius: var(--radius-pill);
   background: var(--t-base, var(--color-text-faint));
 }

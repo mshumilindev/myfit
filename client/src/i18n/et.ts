@@ -2225,6 +2225,7 @@ export const et: Strings = {
   settingsTitle: 'Seaded',
   settingsSub: 'Selle seadme funktsioonilipud',
   settingsFeaturesLabel: 'Funktsioonid',
+  settingsThemeLabel: 'Teema',
   flagExerciseFeature: 'Harjutuste teek ja detailid',
   flagExerciseFeatureDesc:
     'Harjutuste galerii, täielikud harjutuste lehed ja Harjutuste vahekaart Programmides.',

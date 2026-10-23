@@ -15,6 +15,9 @@
     "audit:stories": "node scripts/story-audit.mjs",
     "audit:chat": "node scripts/chat-layout-audit.mjs",
     "audit:hero": "node scripts/hero-audit.mjs",
+    "audit:theme-swap": "node scripts/theme-swap-audit.mjs",
+    "audit:pixels": "node scripts/pixel-diff.mjs",
+    "theme:new": "node scripts/theme-new.mjs",
     "dev": "npm run dev -w server & npm run dev -w client & wait",
     "build": "npm run build -w server && npm run build -w client && npm run build -w desktop",
     "start": "npm run start -w server",
@@ -44,6 +47,7 @@
     "verify:ui": "npm run build -w client && node scripts/verify-pinned-headers.mjs && node scripts/verify-empty-exercise-card.mjs",
     "prepare": "node ./scripts/install-git-hooks.mjs",
     "coverage:guard": "node scripts/check-coverage-thresholds.mjs",
+    "lint:css": "node scripts/stylelint-ratchet.mjs",
     "deps:check": "depcruise client/src --config .dependency-cruiser.cjs --ignore-known .dependency-cruiser-known-violations.json",
     "deps:baseline": "depcruise client/src --config .dependency-cruiser.cjs --output-type baseline > .dependency-cruiser-known-violations.json",
     "metrics:stability": "node scripts/stability-metrics.mjs"
@@ -62,8 +66,10 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.6.0",
     "jsdom": "^29.1.1",
+    "postcss": "^8.5.23",
     "prettier": "^3.8.3",
     "sharp": "^0.35.4",
+    "stylelint": "^16.26.1",
     "supertest": "^7.2.2",
     "typescript-eslint": "^8.59.3",
     "vitest": "^4.1.10"

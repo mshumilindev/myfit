@@ -16,7 +16,7 @@
      is not honoured at the end of a scrolling flex column) */
   content: '';
   flex: none;
-  height: 44px;
+  height: var(--sz-44);
 }
 .pg-page > * {
   flex-shrink: 0;
@@ -131,22 +131,22 @@
   text-align: left;
 }
 .pg-card.uisk {
-  height: 104px;
+  height: var(--sz-104);
   opacity: 0.6;
 }
-html.theme-glass .pg-mine .pg-card-name {
+html[data-theme='glass'] .pg-mine .pg-card-name {
   font-size: var(--fs-34);
   line-height: 1.1;
   letter-spacing: -0.01em;
 }
-html.theme-glass .pg-mine {
+html[data-theme='glass'] .pg-mine {
   padding: var(--s-18) var(--s-20) var(--s-20);
   gap: var(--s-8);
 }
-html.theme-glass .pg-card-name {
+html[data-theme='glass'] .pg-card-name {
   font-size: var(--fs-22);
 }
-html.theme-glass .pg-mine .pg-card-name {
+html[data-theme='glass'] .pg-mine .pg-card-name {
   font-size: var(--fs-34);
 }
 .pg-card-name {
@@ -228,8 +228,8 @@ html.theme-glass .pg-mine .pg-card-name {
   box-shadow: 0 0 0 2px var(--color-surface);
 }
 .pg-av-more {
-  width: 30px;
-  height: 30px;
+  width: var(--sz-30);
+  height: var(--sz-30);
   align-items: center;
   justify-content: center;
   background: var(--color-neutral-800);
@@ -295,7 +295,7 @@ html.theme-glass .pg-mine .pg-card-name {
   min-height: 58px;
   padding: 0;
   border: 0;
-  border-top: 1px solid var(--color-divider);
+  border-top: var(--bw-1) solid var(--color-divider);
   background: none;
   color: var(--color-text);
   font: inherit;
@@ -324,8 +324,8 @@ html.theme-glass .pg-mine .pg-card-name {
   text-decoration: line-through;
 }
 .pg-check {
-  width: 28px;
-  height: 28px;
+  width: var(--sz-28);
+  height: var(--sz-28);
   flex: none;
   display: inline-flex;
   align-items: center;

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { stylesCss } from '../components/ui/readCss';
+import { stylesCss, glassCss } from '../components/ui/readCss';
 
 /**
  * The Coach identity colour (tourmaline) must stay distinct from every other app and status
@@ -9,7 +9,7 @@ import { stylesCss } from '../components/ui/readCss';
  * glow. The numbers behind the choice are in dev1-shell2.md.
  */
 const STYLES = stylesCss();
-const GLASS = readFileSync(join(__dirname, '..', 'glass.css'), 'utf8');
+const GLASS = glassCss();
 
 const rootTokens = new Map<string, string>();
 const rootBlock = STYLES.slice(
@@ -174,7 +174,7 @@ describe('ambient background stays readable', () => {
   const lava = (name: string) => {
     const m = GLASS.match(
       new RegExp(
-        `html\\.theme-glass\\.theme-coach\\s*\\{[^}]*${name}:\\s*rgba\\((\\d+),\\s*(\\d+),\\s*(\\d+),\\s*([\\d.]+)\\)`,
+        `html\\[data-theme=glass\\]\\.theme-coach\\s*\\{[^}]*${name}:\\s*rgba\\((\\d+),\\s*(\\d+),\\s*(\\d+),\\s*([\\d.]+)\\)`,
       ),
     ) as RegExpMatchArray;
     expect(m, name).toBeTruthy();
@@ -211,12 +211,14 @@ describe('ambient background stays readable', () => {
   );
 
   it('keeps the one universal violet spot: Coach does not override --lava-1', () => {
-    const block = GLASS.match(/html\.theme-glass\.theme-coach\s*\{([^}]*)\}/) as RegExpMatchArray;
+    const block = GLASS.match(
+      /html\[data-theme=glass\]\.theme-coach\s*\{([^}]*)\}/,
+    ) as RegExpMatchArray;
     expect(block).toBeTruthy();
     expect(block[1]).not.toMatch(/--lava-1/);
     // The shared violet (default block) at its peak is readable too.
     const m = GLASS.match(
-      /html\.theme-glass\s*\{[^}]*--lava-1:\s*rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/,
+      /html\[data-theme=glass\]\s*\{[^}]*--lava-1:\s*rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/,
     ) as RegExpMatchArray;
     const violet =
       '#' + [m[1], m[2], m[3]].map((v) => Number(v).toString(16).padStart(2, '0')).join('');
@@ -228,7 +230,7 @@ describe('ambient background stays readable', () => {
     expect(lava('--lava-3').alpha).toBe(0.9);
     for (const app of ['apex', 'learn', 'roster', 'nutrition']) {
       const b = GLASS.match(
-        new RegExp(`html\\.theme-glass\\.theme-${app}\\s*\\{([^}]*)\\}`),
+        new RegExp(`html\\[data-theme=glass\\]\\.theme-${app}\\s*\\{([^}]*)\\}`),
       ) as RegExpMatchArray;
       expect(b[1], app).toMatch(/--lava-2:\s*rgba\([^)]*,\s*0\.7\)/);
       expect(b[1], app).toMatch(/--lava-3:\s*rgba\([^)]*,\s*0\.9\)/);

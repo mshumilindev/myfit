@@ -2242,6 +2242,7 @@ export const pl: Strings = {
   settingsTitle: 'Ustawienia',
   settingsSub: 'Flagi funkcji na tym urządzeniu',
   settingsFeaturesLabel: 'Funkcje',
+  settingsThemeLabel: 'Motyw',
   flagExerciseFeature: 'Biblioteka i szczegóły ćwiczeń',
   flagExerciseFeatureDesc:
     'Galeria ćwiczeń, pełne strony ćwiczeń i zakładka Ćwiczenia w Programach.',

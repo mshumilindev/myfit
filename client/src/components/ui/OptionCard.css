@@ -12,7 +12,7 @@
   gap: var(--s-2);
   padding: var(--sp-2);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+  border: var(--bw-1) solid var(--color-border);
   background: var(--color-surface-2);
   color: var(--color-text);
   font: inherit;
@@ -38,7 +38,7 @@
   display: flex;
   align-items: center;
   gap: var(--s-6);
-  min-height: 40px;
+  min-height: var(--sz-40);
   margin-bottom: var(--sp-2);
   padding: var(--sp-2);
   border-radius: var(--radius-md);
@@ -60,8 +60,8 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 18px;
-  height: 18px;
+  width: var(--sz-18);
+  height: var(--sz-18);
   border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
@@ -75,7 +75,7 @@
   flex-direction: row;
   align-items: center;
   gap: var(--sp-3);
-  min-height: 52px;
+  min-height: var(--sz-52);
   padding: var(--sp-3) var(--sp-4);
 }
 .uiopt--row .uiopt-ic {
@@ -99,7 +99,7 @@
 .uiopt--row .uiopt-check {
   position: static;
   flex: none;
-  width: 22px;
-  height: 22px;
+  width: var(--sz-22);
+  height: var(--sz-22);
   font-size: var(--fs-13);
 }

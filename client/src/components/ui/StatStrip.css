@@ -5,7 +5,7 @@
   min-width: 0;
   border-radius: var(--radius-lg);
   background: var(--color-surface);
-  border: 1px solid color-mix(in srgb, var(--color-divider) 43%, transparent);
+  border: var(--bw-1) solid color-mix(in srgb, var(--color-divider) 43%, transparent);
   overflow: hidden;
 }
 .uiss-cell {
@@ -19,7 +19,7 @@
   text-align: center;
 }
 .uiss-cell + .uiss-cell {
-  border-left: 1px solid color-mix(in srgb, var(--color-divider) 43%, transparent);
+  border-left: var(--bw-1) solid color-mix(in srgb, var(--color-divider) 43%, transparent);
 }
 .uiss-val {
   /* shrinks with the strip so 5 values never clip in a narrow column */

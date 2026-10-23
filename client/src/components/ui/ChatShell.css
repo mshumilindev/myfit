@@ -51,7 +51,7 @@
 @media (max-width: 719px) {
   .chs,
   .chs.uicard,
-  html.theme-glass .chs.uicard {
+  html[data-theme='glass'] .chs.uicard {
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -61,8 +61,8 @@
   }
   .chs-head {
     background: color-mix(in srgb, var(--color-bg) 82%, transparent);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: var(--bf-chat);
+    backdrop-filter: var(--bf-chat);
   }
   .chs-foot {
     padding: var(--s-8) var(--s-8) calc(var(--s-8) + env(safe-area-inset-bottom, 0px));
@@ -74,7 +74,7 @@
 @media (min-width: 720px) and (max-width: 767px) {
   .chs--coach,
   .chs--coach.uicard,
-  html.theme-glass .chs--coach.uicard {
+  html[data-theme='glass'] .chs--coach.uicard {
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -84,8 +84,8 @@
   }
   .chs--coach .chs-head {
     background: color-mix(in srgb, var(--color-bg) 82%, transparent);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: var(--bf-chat);
+    backdrop-filter: var(--bf-chat);
   }
   .chs--coach .chs-foot {
     padding: var(--s-8) var(--s-8) calc(var(--s-8) + env(safe-area-inset-bottom, 0px));

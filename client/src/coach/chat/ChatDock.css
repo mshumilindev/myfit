@@ -25,8 +25,8 @@
 /* Not see-through in any theme: a near-opaque surface with a strong blur (glass.css adds the family tint). */
 .cd-panel .cd-card {
   background: color-mix(in srgb, var(--color-surface) 96%, transparent);
-  backdrop-filter: blur(32px) saturate(1.4);
-  -webkit-backdrop-filter: blur(32px) saturate(1.4);
+  backdrop-filter: var(--bf-dock);
+  -webkit-backdrop-filter: var(--bf-dock);
 }
 .cd-card {
   flex: 1;

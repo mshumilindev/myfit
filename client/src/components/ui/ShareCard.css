@@ -174,7 +174,7 @@
   gap: var(--s-12);
   min-height: var(--s-28);
   padding-top: var(--s-8);
-  border-top: 1px solid var(--color-divider);
+  border-top: var(--bw-1) solid var(--color-divider);
 }
 .uishc-foot small {
   color: var(--color-text-muted);

@@ -53,6 +53,8 @@ if (!changed.length)
   console.log('nothing changed vs ' + base + '; running only the always-on guards');
 if (fmt.length) step('prettier --check', 'npx', ['prettier', '--check', ...fmt]);
 if (code.length) step('eslint', 'npx', ['eslint', '--max-warnings=1000', ...code]);
+if (changed.some((f) => /^client\/src\/.+\.css$/.test(f)))
+  step('stylelint ratchet', 'node', ['scripts/stylelint-ratchet.mjs']);
 if (clientTouched)
   step('client typecheck', 'npx', ['tsc', '-p', 'client/tsconfig.json', '--noEmit']);
 if (srcOrTests.length)

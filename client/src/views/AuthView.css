@@ -37,8 +37,8 @@
 /* Names the account for the browser's password manager without being seen. */
 .auth-username-hidden {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  width: var(--sz-1);
+  height: var(--sz-1);
   opacity: 0;
   pointer-events: none;
 }

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ShellLauncher } from './ShellLauncher';
-import { stylesCss } from './ui/readCss';
+import { stylesCss, glassCss } from './ui/readCss';
 import type { StoreState } from '../store';
 
 vi.mock('../coach/useCoachAccess', () => ({ useCoachAccess: () => true }));
@@ -127,9 +127,10 @@ describe('ShellLauncher: tokens and contrast', () => {
   it('the selected rule (Card.css, glass.css) and the caret read the family tokens, not a fixed colour', () => {
     for (const [file, sel] of [
       ['ui/Card.css', '.uicard--selected {'],
-      ['../glass.css', 'html.theme-glass .uicard.uicard--selected {'],
+      ['../glass.css', 'html[data-theme=glass] .uicard.uicard--selected {'],
     ]) {
-      const src = readFileSync(join(__dirname, file), 'utf8');
+      const src =
+        file === '../glass.css' ? glassCss() : readFileSync(join(__dirname, file), 'utf8');
       const rule = src.slice(src.indexOf(sel));
       const body = rule.slice(0, rule.indexOf('}'));
       expect(body, file).toMatch(/var\(--t-base\)/);
@@ -176,8 +177,8 @@ describe('ShellLauncher: tokens and contrast', () => {
   };
 
   it('the sheet recipe in CSS: current-app tone, accent 6-8% over a dark base, 1px accent-line edge', () => {
-    const glass = readFileSync(join(__dirname, '..', 'glass.css'), 'utf8');
-    const at = glass.indexOf('html.theme-glass .sheet.sheet--toned.uimore {');
+    const glass = glassCss();
+    const at = glass.indexOf('html[data-theme=glass] .sheet.sheet--toned.uimore {');
     expect(at).toBeGreaterThan(0);
     const rule = glass.slice(at, glass.indexOf('\n}\n', at));
     expect(rule).toMatch(/var\(--t-base\) 8%/);

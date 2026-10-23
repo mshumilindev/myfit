@@ -1,3 +1,4 @@
+import { glassCss } from '../../components/ui/readCss';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -25,8 +26,8 @@ describe('Hour labels sit in the gutter, not on the lines (iter19)', () => {
 });
 
 describe('The chat popover is solid frosted glass (iter19)', () => {
-  const glass = src('glass.css');
-  const block = rule(glass, 'html.theme-glass .uicard.cd-card');
+  const glass = glassCss();
+  const block = rule(glass, 'html[data-theme=glass] .uicard.cd-card');
   it('is at least 94% opaque: it paints from the shared plate tokens, and every plate stop is >= 0.94', () => {
     expect(block).toMatch(/var\(--plate-top\)/);
     expect(block).toMatch(/var\(--plate-bot\)/);
@@ -37,8 +38,10 @@ describe('The chat popover is solid frosted glass (iter19)', () => {
     for (const a of alphas) expect(a).toBeGreaterThanOrEqual(0.94);
   });
   it('blurs what is behind it strongly', () => {
-    expect(block).toMatch(/backdrop-filter: blur\((\d+)px\)/);
-    expect(Number(/blur\((\d+)px\)/.exec(block)![1])).toBeGreaterThanOrEqual(24);
+    // the blur is the --bf-dock token (reduced-transparency.css defines it, and turns it off for the accessibility mode)
+    expect(block).toMatch(/backdrop-filter: var\(--bf-dock\)/);
+    const def = /--bf-dock:\s*blur\((\d+)px\)/.exec(src('reduced-transparency.css'));
+    expect(Number(def![1])).toBeGreaterThanOrEqual(24);
   });
   it('is 440 px wide on a desktop, and the base style is near-opaque in every theme', () => {
     expect(src('coach', 'layout', 'frame.css')).toMatch(/--co-dock-w: 440px/);

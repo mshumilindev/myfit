@@ -1,0 +1,345 @@
+{
+  "files": {
+    "client/src/appCrash.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/coach/chat/Chat.css": {
+      "declaration-property-unit-disallowed-list": 2,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/coach/CoachApp.css": {
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/coach/layout/frame.css": {
+      "media-feature-name-value-allowed-list": 2
+    },
+    "client/src/coach/layout/Layout.css": {
+      "media-feature-name-value-allowed-list": 4
+    },
+    "client/src/coach/layout/SidePanel.css": {
+      "declaration-property-unit-disallowed-list": 3,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/coach/schedule/Schedule.css": {
+      "declaration-property-unit-disallowed-list": 1,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/coach/screens/Client360.css": {
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/coach/screens/Signals.css": {
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/coach/today/Today.css": {
+      "media-feature-name-value-allowed-list": 4
+    },
+    "client/src/components/ExercisePicker.css": {
+      "declaration-property-unit-disallowed-list": 39,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/components/HomeSet.css": {
+      "declaration-property-unit-disallowed-list": 4
+    },
+    "client/src/components/SpotterSky.css": {
+      "declaration-property-unit-disallowed-list": 3,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/components/suite/GymChrome.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/ActionMenu.css": {
+      "declaration-property-unit-disallowed-list": 2
+    },
+    "client/src/components/ui/AnatomyTurntable.css": {
+      "declaration-property-unit-disallowed-list": 2
+    },
+    "client/src/components/ui/BackButton.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/Badge.css": {
+      "declaration-property-unit-disallowed-list": 3
+    },
+    "client/src/components/ui/Banner.css": {
+      "declaration-property-unit-disallowed-list": 7
+    },
+    "client/src/components/ui/BrandBar.css": {
+      "declaration-property-unit-disallowed-list": 6
+    },
+    "client/src/components/ui/Button.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/Calendar.css": {
+      "declaration-property-unit-disallowed-list": 6,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/components/ui/Card.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/CategoryRow.css": {
+      "declaration-property-unit-disallowed-list": 3
+    },
+    "client/src/components/ui/ChatBubble.css": {
+      "declaration-property-unit-disallowed-list": 4
+    },
+    "client/src/components/ui/ChatComposer.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/ChatShell.css": {
+      "declaration-property-unit-disallowed-list": 2,
+      "media-feature-name-value-allowed-list": 4
+    },
+    "client/src/components/ui/Checkbox.css": {
+      "declaration-property-unit-disallowed-list": 3
+    },
+    "client/src/components/ui/Checklist.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/Chip.css": {
+      "declaration-property-unit-disallowed-list": 7
+    },
+    "client/src/components/ui/ChoiceList.css": {
+      "declaration-property-unit-disallowed-list": 2
+    },
+    "client/src/components/ui/ConfirmEffectsDialog.css": {
+      "declaration-property-unit-disallowed-list": 2
+    },
+    "client/src/components/ui/ConsentControls.css": {
+      "declaration-property-unit-disallowed-list": 2,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/components/ui/DecisionCard.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/DocReader.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/DragHandle.css": {
+      "declaration-property-unit-disallowed-list": 2
+    },
+    "client/src/components/ui/EvidenceChart.css": {
+      "declaration-property-unit-disallowed-list": 2
+    },
+    "client/src/components/ui/FailedState.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/Field.css": {
+      "declaration-property-unit-disallowed-list": 5
+    },
+    "client/src/components/ui/GroupedList.css": {
+      "declaration-property-unit-disallowed-list": 2
+    },
+    "client/src/components/ui/InvitePanel.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/Layout.css": {
+      "declaration-no-important": 52
+    },
+    "client/src/components/ui/LegalDoc.css": {
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/components/ui/LegalLinks.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/LoadingSteps.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/LockerWall.css": {
+      "declaration-property-unit-disallowed-list": 20
+    },
+    "client/src/components/ui/MonthGrid.css": {
+      "declaration-property-unit-disallowed-list": 7
+    },
+    "client/src/components/ui/NoteCard.css": {
+      "declaration-property-unit-disallowed-list": 2
+    },
+    "client/src/components/ui/Notice.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/NumberStepper.css": {
+      "declaration-property-unit-disallowed-list": 6
+    },
+    "client/src/components/ui/OptionCard.css": {
+      "declaration-property-unit-disallowed-list": 4
+    },
+    "client/src/components/ui/Overlays.css": {
+      "declaration-no-important": 3,
+      "declaration-property-unit-disallowed-list": 16,
+      "media-feature-name-value-allowed-list": 6
+    },
+    "client/src/components/ui/PinToggle.css": {
+      "declaration-property-unit-disallowed-list": 2
+    },
+    "client/src/components/ui/Popover.css": {
+      "declaration-property-unit-disallowed-list": 9
+    },
+    "client/src/components/ui/PresetChips.css": {
+      "declaration-property-unit-disallowed-list": 3
+    },
+    "client/src/components/ui/Radio.css": {
+      "declaration-property-unit-disallowed-list": 3
+    },
+    "client/src/components/ui/Rail.css": {
+      "declaration-property-unit-disallowed-list": 3,
+      "media-feature-name-value-allowed-list": 2
+    },
+    "client/src/components/ui/RequestCard.css": {
+      "declaration-property-unit-disallowed-list": 1,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/components/ui/RescheduleMessage.css": {
+      "declaration-property-unit-disallowed-list": 3,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/components/ui/RhythmChart.css": {
+      "declaration-property-unit-disallowed-list": 5
+    },
+    "client/src/components/ui/RosterRows.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/ScrollTabs.css": {
+      "declaration-property-unit-disallowed-list": 2
+    },
+    "client/src/components/ui/SecurityCode.css": {
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/components/ui/Segmented.css": {
+      "declaration-property-unit-disallowed-list": 8
+    },
+    "client/src/components/ui/SetRow.css": {
+      "declaration-property-unit-disallowed-list": 6
+    },
+    "client/src/components/ui/ShortcutTile.css": {
+      "declaration-property-unit-disallowed-list": 11
+    },
+    "client/src/components/ui/Snackbar.css": {
+      "declaration-property-unit-disallowed-list": 4,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/components/ui/StageBoard.css": {
+      "declaration-property-unit-disallowed-list": 6,
+      "media-feature-name-value-allowed-list": 2
+    },
+    "client/src/components/ui/Stepper.css": {
+      "declaration-property-unit-disallowed-list": 3
+    },
+    "client/src/components/ui/StickyActionBar.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/StoryBubble.css": {
+      "declaration-property-unit-disallowed-list": 15
+    },
+    "client/src/components/ui/Switch.css": {
+      "declaration-property-unit-disallowed-list": 6
+    },
+    "client/src/components/ui/SyncStatus.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/TabBar.css": {
+      "declaration-property-unit-disallowed-list": 13,
+      "media-feature-name-value-allowed-list": 4
+    },
+    "client/src/components/ui/Tag.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/components/ui/Timeline.css": {
+      "declaration-property-unit-disallowed-list": 14
+    },
+    "client/src/components/ui/UndoToast.css": {
+      "declaration-property-unit-disallowed-list": 3,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/components/ui/WeekdayToggle.css": {
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/components/ui/Widget.css": {
+      "declaration-property-unit-disallowed-list": 2
+    },
+    "client/src/components/ui/WidgetGrid.css": {
+      "declaration-property-unit-disallowed-list": 1,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/glass.css": {
+      "declaration-no-important": 3,
+      "declaration-property-unit-disallowed-list": 107,
+      "media-feature-name-value-allowed-list": 4
+    },
+    "client/src/learn/learn.css": {
+      "declaration-property-unit-disallowed-list": 37,
+      "media-feature-name-value-allowed-list": 3
+    },
+    "client/src/legal/PolicyUpdateBanner.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/nutrition/nutrition.css": {
+      "declaration-no-important": 1,
+      "declaration-property-unit-disallowed-list": 53,
+      "media-feature-name-value-allowed-list": 5
+    },
+    "client/src/redesign.css": {
+      "declaration-no-important": 6,
+      "declaration-property-unit-disallowed-list": 28,
+      "media-feature-name-value-allowed-list": 12
+    },
+    "client/src/styles.css": {
+      "declaration-no-important": 10,
+      "declaration-property-unit-disallowed-list": 907,
+      "media-feature-name-value-allowed-list": 81
+    },
+    "client/src/today/library.css": {
+      "declaration-no-important": 1,
+      "declaration-property-unit-disallowed-list": 4
+    },
+    "client/src/today/today.css": {
+      "declaration-property-unit-disallowed-list": 49,
+      "media-feature-name-value-allowed-list": 3
+    },
+    "client/src/tools/programEditor/ui/EditorPage.css": {
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/tools/programEditor/ui/ProgramEditor.css": {
+      "media-feature-name-value-allowed-list": 4
+    },
+    "client/src/views/AuthView.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/views/Health.css": {
+      "declaration-property-unit-disallowed-list": 6,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/views/health/BodyMapPicker.css": {
+      "declaration-property-unit-disallowed-list": 1
+    },
+    "client/src/views/landing/landing-design.css": {
+      "color-no-hex": 202,
+      "declaration-no-important": 5,
+      "declaration-property-unit-disallowed-list": 475,
+      "declaration-property-value-disallowed-list": 7,
+      "function-disallowed-list": 78
+    },
+    "client/src/views/landing/landing.css": {
+      "color-no-hex": 24,
+      "declaration-no-important": 20,
+      "declaration-property-unit-disallowed-list": 73,
+      "function-disallowed-list": 27
+    },
+    "client/src/views/LogActivity.css": {
+      "declaration-no-important": 12,
+      "declaration-property-unit-disallowed-list": 40,
+      "media-feature-name-value-allowed-list": 2
+    },
+    "client/src/views/programs/programs.css": {
+      "declaration-property-unit-disallowed-list": 9,
+      "media-feature-name-value-allowed-list": 1
+    },
+    "client/src/views/QuietHoursRows.css": {
+      "declaration-property-unit-disallowed-list": 2
+    },
+    "client/src/views/sessionSummary/NextUp.css": {
+      "declaration-no-important": 5,
+      "declaration-property-unit-disallowed-list": 10
+    },
+    "client/src/views/themes.css": {
+      "declaration-property-unit-disallowed-list": 2
+    }
+  }
+}

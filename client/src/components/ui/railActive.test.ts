@@ -1,3 +1,4 @@
+import { glassCss, inlinePrimitives } from './readCss';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -7,8 +8,8 @@ import { describe, expect, it } from 'vitest';
  * ring from styles.css / glass.css, accent re-tints per app) and NOTHING else (no edge bar). Active must never change the tile's size.
  */
 const read = (f: string) => readFileSync(join(__dirname, f), 'utf8');
-const SOURCES = { 'styles.css': read('../../styles.css'), 'glass.css': read('../../glass.css') };
-const RAIL = read('Rail.css');
+const SOURCES = { 'styles.css': read('../../styles.css'), 'glass.css': glassCss() };
+const RAIL = inlinePrimitives(read('Rail.css'));
 
 function rules(css: string, match: (sel: string) => boolean): string[] {
   const out: string[] = [];

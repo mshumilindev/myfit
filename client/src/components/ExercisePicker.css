@@ -98,8 +98,8 @@
 }
 .xp .dot,
 .xp-modal .dot {
-  width: 7px;
-  height: 7px;
+  width: var(--sz-7);
+  height: var(--sz-7);
   border-radius: var(--r-round);
   flex: none;
 }
@@ -117,7 +117,7 @@
 .xp-kinds button {
   flex: 1 1 auto;
   min-width: 0;
-  min-height: 40px;
+  min-height: var(--sz-40);
   padding: 0 var(--s-4);
   border: 1.5px solid transparent;
   border-radius: var(--radius-md);
@@ -408,7 +408,7 @@ span.xp-noimg {
 }
 .xp-card-img {
   width: 100%;
-  height: 104px;
+  height: var(--sz-104);
   object-fit: cover;
   display: block;
 }
@@ -449,7 +449,7 @@ span.xp-noimg {
 }
 .xp-row {
   position: relative;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent);
+  border-bottom: var(--bw-1) solid color-mix(in srgb, var(--color-text) 7%, transparent);
 }
 .xp-row.na {
   opacity: 0.45;
@@ -459,7 +459,7 @@ span.xp-noimg {
   display: flex;
   align-items: center;
   gap: var(--s-10);
-  min-height: 60px;
+  min-height: var(--sz-60);
   padding: var(--s-6) var(--s-44) var(--s-6) 0;
   border: 0;
   background: none;
@@ -469,8 +469,8 @@ span.xp-noimg {
   cursor: pointer;
 }
 .xp-row-img {
-  width: 64px;
-  height: 48px;
+  width: var(--sz-64);
+  height: var(--sz-48);
   object-fit: cover;
   border-radius: var(--r-6);
   flex: none;
@@ -508,11 +508,11 @@ span.xp-noimg {
 .sheet.xp-equip-sheet .xp-detail-actions {
   position: sticky;
   bottom: calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)));
-  margin: var(--s-4) calc(-1 * var(--gutter, 18px))
+  margin: var(--s-4) calc(-1 * var(--gutter, var(--s-18)))
     calc(-1 * (var(--space-8) + var(--safe-bottom, 0px)));
-  padding: var(--s-12) var(--gutter, 18px) calc(var(--space-8) + var(--safe-bottom, 0px));
+  padding: var(--s-12) var(--gutter, var(--s-18)) calc(var(--space-8) + var(--safe-bottom, 0px));
   background: var(--color-surface);
-  border-top: 1px solid var(--color-divider);
+  border-top: var(--bw-1) solid var(--color-divider);
 }
 .xp-detail {
   display: flex;
@@ -537,7 +537,7 @@ span.xp-noimg {
   display: block;
 }
 .xp-detail.compact .xp-frames img {
-  height: 96px;
+  height: var(--sz-96);
 }
 .xp-frames figcaption {
   position: absolute;
@@ -619,10 +619,10 @@ span.xp-noimg {
   display: flex;
   align-items: center;
   gap: var(--s-8);
-  min-height: 52px;
+  min-height: var(--sz-52);
   padding: var(--s-6);
   border-radius: var(--r-10);
-  border: 1px solid var(--color-neutral-800);
+  border: var(--bw-1) solid var(--color-neutral-800);
   background: transparent;
   color: var(--color-text);
   text-align: left;
@@ -632,8 +632,8 @@ span.xp-noimg {
 }
 .xp-swaps img,
 .xp-swaps .xp-noimg {
-  width: 40px;
-  height: 40px;
+  width: var(--sz-40);
+  height: var(--sz-40);
   object-fit: cover;
   border-radius: var(--r-6);
   flex: none;
@@ -722,7 +722,7 @@ span.xp-noimg {
   justify-content: space-between;
   gap: var(--s-12);
   width: 100%;
-  min-height: 48px;
+  min-height: var(--sz-48);
   padding: 0 var(--s-12);
   border: 0;
   border-radius: var(--r-10);
@@ -779,7 +779,7 @@ span.xp-noimg {
   align-items: center;
   gap: var(--s-18);
   padding: var(--s-18) var(--s-24);
-  border-bottom: 1px solid var(--color-divider);
+  border-bottom: var(--bw-1) solid var(--color-divider);
 }
 .xp-title {
   display: flex;
@@ -814,7 +814,7 @@ span.xp-noimg {
 }
 .xp-rail {
   padding: var(--s-16) var(--s-12);
-  border-right: 1px solid var(--color-divider);
+  border-right: var(--bw-1) solid var(--color-divider);
   display: flex;
   flex-direction: column;
   gap: var(--s-4);
@@ -868,7 +868,7 @@ span.xp-noimg {
   height: 108px;
 }
 .xp-preview {
-  border-left: 1px solid var(--color-divider);
+  border-left: var(--bw-1) solid var(--color-divider);
   background: color-mix(in srgb, var(--color-surface) 50%, var(--color-bg));
   padding: var(--s-16) var(--s-18);
   display: flex;
@@ -968,7 +968,7 @@ span.xp-noimg {
   display: flex;
   align-items: center;
   gap: var(--s-10);
-  min-height: 64px;
+  min-height: var(--sz-64);
   width: 100%;
 }
 .xp-rail-fam .xp-fam-state-subs {
@@ -999,8 +999,8 @@ span.xp-noimg {
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 18px;
-  height: 18px;
+  width: var(--sz-18);
+  height: var(--sz-18);
   border-radius: var(--r-round);
   display: grid;
   place-items: center;
@@ -1012,7 +1012,7 @@ span.xp-noimg {
   position: absolute;
   top: var(--s-8);
   right: var(--s-8);
-  z-index: 1;
+  z-index: var(--z-1);
 }
 .xp-info::after {
   content: '';

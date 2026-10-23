@@ -9,7 +9,7 @@
 }
 .uistepr-bar i {
   flex: 1;
-  height: 4px;
+  height: var(--sz-4);
   border-radius: var(--r-2);
   background: var(--color-divider);
 }
@@ -37,8 +37,8 @@
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 26px;
-  height: 26px;
+  width: var(--sz-26);
+  height: var(--sz-26);
   border-radius: 50%;
   border: 1.5px solid currentColor;
   font-size: var(--fs-13);
@@ -75,5 +75,5 @@
 .uistepr-btn:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
-  border-radius: var(--r-8, 8px);
+  border-radius: var(--r-8, var(--r-8));
 }

@@ -36,11 +36,11 @@ body.td-editing .today-page .td-topbar {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: var(--s-8);
-  min-height: 60px;
-  margin: 0 calc(-1 * var(--page-x, 20px));
-  padding: calc(var(--s-8) + var(--safe-top, 0px)) var(--page-x, 20px) var(--s-8);
+  min-height: var(--sz-60);
+  margin: 0 calc(-1 * var(--page-x, var(--s-20)));
+  padding: calc(var(--s-8) + var(--safe-top, 0px)) var(--page-x, var(--s-20)) var(--s-8);
   background: var(--color-bg);
-  border-bottom: 1px solid var(--color-divider);
+  border-bottom: var(--bw-1) solid var(--color-divider);
 }
 .tdc-top > :first-child {
   justify-self: start;
@@ -63,7 +63,7 @@ body.td-editing .today-page .td-topbar {
   position: absolute;
   inset: -8px -10px;
   border-radius: var(--r-18);
-  border: 1px dashed var(--color-neutral-800);
+  border: var(--bw-1) dashed var(--color-neutral-800);
   pointer-events: none;
 }
 .tdc-block.is-custom::after {
@@ -73,7 +73,7 @@ body.td-editing .today-page .td-topbar {
   display: flex;
   align-items: center;
   gap: var(--s-6);
-  min-height: 44px;
+  min-height: var(--sz-44);
 }
 .tdc-name {
   flex: 1;
@@ -111,9 +111,9 @@ body.td-editing .today-page .td-topbar {
 .tdc-hint {
   display: grid;
   place-items: center;
-  height: 44px;
+  height: var(--sz-44);
   border-radius: var(--r-14);
-  border: 1px dashed var(--color-border);
+  border: var(--bw-1) dashed var(--color-border);
   font-size: var(--fs-13);
   color: var(--color-text-muted);
 }
@@ -171,10 +171,10 @@ body.td-editing .today-page .td-topbar {
 }
 .tdc-slot.is-empty.size-s,
 .tdc-slot.is-empty.size-l {
-  height: 150px;
+  height: var(--sz-150);
 }
 .tdc-slot.is-empty.size-m {
-  height: 64px;
+  height: var(--sz-64);
 }
 .tdc-slot.is-empty.size-xl {
   aspect-ratio: 1 / 1;
@@ -233,7 +233,7 @@ body.td-editing .today-page .td-topbar {
   gap: var(--s-8);
   padding: var(--s-10);
   border-radius: var(--r-16);
-  border: 1px solid var(--color-border);
+  border: var(--bw-1) solid var(--color-border);
   background: var(--color-control);
   color: var(--color-text);
   text-align: left;
@@ -380,8 +380,8 @@ body.td-editing .today-page .td-topbar {
   display: flex;
   gap: var(--s-8);
   overflow-x: auto;
-  margin: 0 calc(-1 * var(--gutter, 18px)) var(--s-4);
-  padding: var(--s-2) var(--gutter, 18px) var(--s-6);
+  margin: 0 calc(-1 * var(--gutter, var(--s-18))) var(--s-4);
+  padding: var(--s-2) var(--gutter, var(--s-18)) var(--s-6);
   scrollbar-width: none;
 }
 .tdc-chips > * {
@@ -421,17 +421,17 @@ body.td-editing .today-page .td-topbar {
 }
 .tdc-pick-foot {
   position: sticky;
-  z-index: 3;
+  z-index: var(--z-3);
   /* Stick to the very bottom of the sheet and cover its whole bottom padding
      (which includes the iPhone home-indicator inset), so nothing shows below. */
   --sheet-pb: calc(var(--space-8) + var(--safe-bottom, 0px));
   bottom: calc(-1 * var(--sheet-pb));
   display: flex;
   gap: var(--s-10);
-  margin: var(--s-18) calc(-1 * var(--gutter, 18px)) calc(-1 * var(--sheet-pb));
-  padding: var(--s-12) var(--gutter, 18px) calc(var(--s-12) + var(--safe-bottom, 0px));
+  margin: var(--s-18) calc(-1 * var(--gutter, var(--s-18))) calc(-1 * var(--sheet-pb));
+  padding: var(--s-12) var(--gutter, var(--s-18)) calc(var(--s-12) + var(--safe-bottom, 0px));
   background: var(--color-bg);
-  border-top: 1px solid var(--color-divider);
+  border-top: var(--bw-1) solid var(--color-divider);
 }
 .tdc-pick-foot > .uibtn--full,
 .tdc-pick-foot > :last-child {
@@ -505,20 +505,20 @@ body.td-editing .today-page .td-topbar {
   display: block;
 }
 .tdc-sk .sk-face {
-  width: 20px;
-  height: 20px;
+  width: var(--sz-20);
+  height: var(--sz-20);
   border-radius: var(--radius-pill);
   background: var(--color-atlas-tint);
   border: 2px solid var(--color-atlas-line);
 }
 .tdc-sk .sk-face.is-sm,
 .tdc-sk .sk-ring.is-sm {
-  width: 14px;
-  height: 14px;
+  width: var(--sz-14);
+  height: var(--sz-14);
 }
 .tdc-sk .sk-ring {
-  width: 18px;
-  height: 18px;
+  width: var(--sz-18);
+  height: var(--sz-18);
   border-radius: var(--radius-pill);
   border: 2px solid var(--color-accent);
 }
@@ -530,14 +530,14 @@ body.td-editing .today-page .td-topbar {
   background: var(--color-neutral-800);
 }
 .tdc-sk .sk-split {
-  width: 1px;
-  height: 18px;
+  width: var(--sz-1);
+  height: var(--sz-18);
   background: var(--color-divider);
 }
 .tdc-sk .sk-line {
   flex: 1;
-  min-width: 24px;
-  height: 3px;
+  min-width: var(--sz-24);
+  height: var(--sz-3);
   border-radius: var(--radius-pill);
   background: var(--color-neutral-700);
 }
@@ -549,27 +549,27 @@ body.td-editing .today-page .td-topbar {
   flex: none;
 }
 .tdc-sk .sk-dot {
-  width: 7px;
-  height: 7px;
+  width: var(--sz-7);
+  height: var(--sz-7);
   border-radius: var(--radius-pill);
   background: var(--color-atlas);
 }
 .tdc-sk .sk-bubble {
-  height: 10px;
+  height: var(--sz-10);
   width: 70%;
   border-radius: var(--radius-sm);
   background: var(--color-atlas-tint);
-  border: 1px solid var(--color-atlas-line);
+  border: var(--bw-1) solid var(--color-atlas-line);
 }
 .tdc-sk .sk-pill {
-  width: 18px;
-  height: 7px;
+  width: var(--sz-18);
+  height: var(--sz-7);
   border-radius: var(--radius-pill);
-  border: 1px solid var(--color-atlas-line);
+  border: var(--bw-1) solid var(--color-atlas-line);
 }
 .tdc-sk.is-under {
   padding-top: var(--s-4);
-  border-top: 1px solid var(--color-border);
+  border-top: var(--bw-1) solid var(--color-border);
 }
 .tdc-sk.is-top {
   align-items: flex-start;
@@ -578,10 +578,10 @@ body.td-editing .today-page .td-topbar {
   background: var(--color-atlas);
 }
 .tdc-sk .sk-pill.is-md {
-  width: 15px;
+  width: var(--sz-15);
 }
 .tdc-sk .sk-pill.is-sm {
-  width: 12px;
+  width: var(--sz-12);
 }
 .uiopt-pv > .sk-ghost {
   flex: 1;
@@ -589,7 +589,7 @@ body.td-editing .today-page .td-topbar {
   display: grid;
   place-items: center;
   border-radius: var(--radius-sm);
-  border: 1px dashed var(--color-neutral-700);
+  border: var(--bw-1) dashed var(--color-neutral-700);
   font-size: var(--fs-10);
   color: var(--color-text-faint);
 }
@@ -608,8 +608,8 @@ body.td-editing .today-page .td-topbar {
 }
 .tac-count {
   flex: none;
-  min-width: 22px;
-  height: 22px;
+  min-width: var(--sz-22);
+  height: var(--sz-22);
   padding: 0 var(--s-6);
   border-radius: var(--radius-pill);
   background: var(--color-atlas);
@@ -736,7 +736,7 @@ body.td-editing .today-page .td-topbar {
   margin-inline: 0;
   padding: var(--sp-4);
   border-radius: var(--radius-sheet);
-  border: 1px solid color-mix(in srgb, var(--color-atlas) 22%, transparent);
+  border: var(--bw-1) solid color-mix(in srgb, var(--color-atlas) 22%, transparent);
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--color-atlas) 12%, transparent),
@@ -786,8 +786,8 @@ body.td-editing .today-page .td-topbar {
   color: var(--color-ok);
 }
 .tac-online {
-  width: 6px;
-  height: 6px;
+  width: var(--sz-6);
+  height: var(--sz-6);
   border-radius: var(--radius-pill);
   background: var(--color-ok);
 }
@@ -819,7 +819,7 @@ body.td-editing .today-page .td-topbar {
 }
 .tac-rule {
   width: 100%;
-  height: 1px;
+  height: var(--sz-1);
   margin: 0;
   border: 0;
   background: color-mix(in srgb, var(--color-text) 8%, transparent);
@@ -856,7 +856,7 @@ body.td-editing .today-page .td-topbar {
   padding: var(--s-10) var(--s-12);
   border-radius: var(--r-4) var(--r-16) var(--r-16) var(--r-16);
   background: color-mix(in srgb, var(--color-atlas) 12%, var(--color-surface));
-  border: 1px solid color-mix(in srgb, var(--color-atlas) 18%, transparent);
+  border: var(--bw-1) solid color-mix(in srgb, var(--color-atlas) 18%, transparent);
   font-size: var(--fs-14);
   line-height: 19px;
   color: var(--color-text);
@@ -872,14 +872,14 @@ body.td-editing .today-page .td-topbar {
 }
 .tac-ask {
   width: 100%;
-  height: 42px;
+  height: var(--sz-42);
   display: flex;
   align-items: center;
   gap: var(--sp-2);
   padding: 0 var(--s-6) 0 var(--s-14);
   border-radius: var(--radius-pill);
   background: var(--color-control);
-  border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  border: var(--bw-1) solid color-mix(in srgb, var(--color-text) 10%, transparent);
   color: var(--color-text-faint);
   font: inherit;
   font-size: var(--fs-14);
@@ -899,8 +899,8 @@ body.td-editing .today-page .td-topbar {
 .tac-ask-mic,
 .tac-ask-send {
   flex: none;
-  width: 32px;
-  height: 32px;
+  width: var(--sz-32);
+  height: var(--sz-32);
   border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
@@ -949,8 +949,8 @@ body.td-editing .today-page .td-topbar {
   color: var(--color-text);
 }
 .tac-compact .tac-count {
-  min-width: 20px;
-  height: 20px;
+  min-width: var(--sz-20);
+  height: var(--sz-20);
   font-size: var(--fs-11);
 }
 
@@ -997,7 +997,7 @@ body.td-editing .today-page .td-topbar {
     color-mix(in srgb, var(--color-ok) 14%, transparent),
     color-mix(in srgb, var(--color-ok) 4%, transparent)
   );
-  border: 1px solid color-mix(in srgb, var(--color-ok) 28%, transparent);
+  border: var(--bw-1) solid color-mix(in srgb, var(--color-ok) 28%, transparent);
 }
 .tac-live-main {
   flex: 1;
@@ -1014,8 +1014,8 @@ body.td-editing .today-page .td-topbar {
   color: var(--color-ok);
 }
 .tac-live-kick i {
-  width: 6px;
-  height: 6px;
+  width: var(--sz-6);
+  height: var(--sz-6);
   border-radius: var(--radius-pill);
   background: var(--color-ok);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-ok) 25%, transparent);
@@ -1074,7 +1074,7 @@ body.td-editing .today-page .td-topbar {
   justify-content: center;
   gap: var(--s-4);
   background: transparent;
-  border: 1px dashed color-mix(in srgb, var(--color-text) 16%, transparent);
+  border: var(--bw-1) dashed color-mix(in srgb, var(--color-text) 16%, transparent);
   color: var(--color-text-muted);
   font-size: var(--fs-13);
   font-weight: 600;
@@ -1149,7 +1149,7 @@ body.td-editing .today-page .td-topbar {
   margin-top: var(--s-14);
   padding: var(--s-10) var(--s-12);
   border-radius: var(--r-12);
-  border: 1px solid var(--color-danger-line);
+  border: var(--bw-1) solid var(--color-danger-line);
   background: var(--color-danger-tint);
   color: var(--color-danger-text, var(--color-text));
   font-size: var(--fs-13);
@@ -1291,7 +1291,7 @@ body.td-editing .today-page .td-topbar {
   justify-content: space-between;
   top: -26px;
   gap: var(--sp-4);
-  min-height: 64px;
+  min-height: var(--sz-64);
   margin: 0 -30px -4px;
   padding: var(--sp-3) 30px;
 }
@@ -1320,7 +1320,7 @@ body.td-editing .today-page .td-topbar {
   margin-left: calc(var(--sp-1) * -1);
 }
 .tdc.is-desk .tdc-ib {
-  width: 36px;
+  width: var(--sz-36);
   border-radius: var(--r-10);
   font-size: var(--fs-15);
 }
@@ -1334,7 +1334,7 @@ body.td-editing .today-page .td-topbar {
 /* the drop line between sections; its negative margins cancel the extra flex gap */
 .tdc-drop {
   flex: none;
-  height: 3px;
+  height: var(--sz-3);
   margin: -16.5px 0;
   border-radius: var(--radius-pill);
   background: var(--color-accent);
@@ -1410,7 +1410,7 @@ body.td-editing .today-page .td-topbar {
   gap: var(--sp-2);
   padding: var(--sp-2) var(--sp-3);
   border-radius: var(--radius-xl);
-  border: 1px solid var(--color-accent-line);
+  border: var(--bw-1) solid var(--color-accent-line);
   background: var(--color-accent-tint);
   color: var(--color-accent);
   font: 600 var(--fs-13) var(--font);
@@ -1532,7 +1532,7 @@ body.td-editing .today-page .td-topbar {
 }
 .tw-tint-card {
   background: var(--t-tint);
-  border: 1px solid var(--t-line);
+  border: var(--bw-1) solid var(--t-line);
 }
 .tw-caps-wide {
   letter-spacing: 0.12em;
@@ -1541,5 +1541,5 @@ body.td-editing .today-page .td-topbar {
   background: var(--color-tile);
 }
 .tw-photo-empty {
-  border: 1px dashed var(--color-border);
+  border: var(--bw-1) dashed var(--color-border);
 }

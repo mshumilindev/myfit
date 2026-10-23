@@ -62,8 +62,8 @@
 
 /* --- icon tiles ------------------------------------------------------------ */
 .nu-ico {
-  width: 40px;
-  height: 40px;
+  width: var(--sz-40);
+  height: var(--sz-40);
   border-radius: var(--r-12);
   display: flex;
   align-items: center;
@@ -77,24 +77,24 @@
   display: inline-flex;
 }
 .nu-ico.n56 {
-  width: 56px;
-  height: 56px;
+  width: var(--sz-56);
+  height: var(--sz-56);
   border-radius: var(--r-16);
   font-size: var(--fs-28);
 }
 .nu-ico.n44 {
-  width: 44px;
-  height: 44px;
+  width: var(--sz-44);
+  height: var(--sz-44);
   border-radius: var(--r-14);
 }
 .nu-ico.n36 {
-  width: 36px;
-  height: 36px;
+  width: var(--sz-36);
+  height: var(--sz-36);
   border-radius: var(--r-12);
 }
 .nu-ico.n32 {
-  width: 32px;
-  height: 32px;
+  width: var(--sz-32);
+  height: var(--sz-32);
   border-radius: var(--r-10);
   font-size: var(--fs-16);
 }
@@ -104,7 +104,7 @@
 /* --- p01 card -------------------------------------------------------------- */
 .nu-card {
   background: var(--color-control);
-  border: 1px solid var(--ta);
+  border: var(--bw-1) solid var(--ta);
   border-radius: var(--r-18);
   padding: var(--s-16);
 }
@@ -112,16 +112,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 20px;
+  height: var(--sz-20);
 }
 .nu-more {
   flex: none;
-  width: 44px;
+  width: var(--sz-44);
   margin: -12px -12px -12px 0;
 }
 .nu-x {
   flex: none;
-  width: 44px;
+  width: var(--sz-44);
 }
 .nu-undo {
   flex: none;
@@ -163,7 +163,7 @@
   gap: var(--s-4);
 }
 .nu-dt {
-  height: 8px;
+  height: var(--sz-8);
   border-radius: var(--r-4);
   background: var(--color-surface-2);
 }
@@ -181,7 +181,7 @@
 .nu-alts {
   margin-top: var(--s-12);
   padding-top: var(--s-12);
-  border-top: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  border-top: var(--bw-1) solid color-mix(in srgb, var(--color-text) 10%, transparent);
 }
 .nu-alts-l {
   font-size: var(--fs-12);
@@ -217,10 +217,10 @@
 .nu-live {
   position: sticky;
   top: 0;
-  z-index: 3;
+  z-index: var(--z-3);
   flex-shrink: 0;
   background: var(--color-control);
-  border: 1px solid var(--ta);
+  border: var(--bw-1) solid var(--ta);
   border-radius: var(--r-18);
   padding: var(--s-12);
   box-shadow: var(--glass-float);
@@ -234,16 +234,16 @@
   color: var(--tc);
 }
 .nu-dot {
-  width: 8px;
-  height: 8px;
+  width: var(--sz-8);
+  height: var(--sz-8);
   border-radius: var(--r-4);
   background: var(--tc);
   box-shadow: 0 0 0 4px var(--tg);
   flex-shrink: 0;
 }
 .nu-dot.sm {
-  width: 6px;
-  height: 6px;
+  width: var(--sz-6);
+  height: var(--sz-6);
   box-shadow: none;
 }
 .nu-live-t {
@@ -258,14 +258,14 @@
   color: var(--color-neutral-500);
 }
 .nu-prog {
-  height: 4px;
+  height: var(--sz-4);
   border-radius: var(--r-2);
   background: var(--color-neutral-900);
   margin-top: var(--s-12);
   overflow: hidden;
 }
 .nu-prog > div {
-  height: 4px;
+  height: var(--sz-4);
   background: var(--tc);
   border-radius: var(--r-2);
 }
@@ -286,8 +286,8 @@
   margin: 0 -20px -20px;
   padding: var(--s-12) var(--s-20) calc(var(--s-24) + var(--safe-bottom, 0px));
   background: var(--color-bg);
-  border-top: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
-  z-index: 3;
+  border-top: var(--bw-1) solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  z-index: var(--z-3);
   gap: 0;
 }
 .nu-bar {
@@ -296,7 +296,7 @@
   gap: var(--s-8);
 }
 .nu-bar .share-icon {
-  width: 44px;
+  width: var(--sz-44);
 }
 
 /* --- p03 options sheet ------------------------------------------------------ */
@@ -339,12 +339,12 @@
 
 /* --- p04 quiet row ----------------------------------------------------------- */
 .nu-quiet {
-  min-height: 52px;
+  min-height: var(--sz-52);
   display: flex;
   align-items: center;
   gap: var(--s-12);
-  border-top: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  border-top: var(--bw-1) solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  border-bottom: var(--bw-1) solid color-mix(in srgb, var(--color-text) 10%, transparent);
   color: var(--color-neutral-500);
   font-size: var(--fs-14);
 }
@@ -384,7 +384,7 @@
   width: 360px;
   flex-shrink: 0;
   background: var(--color-control);
-  border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  border: var(--bw-1) solid color-mix(in srgb, var(--color-text) 10%, transparent);
   border-radius: var(--r-18);
   padding: var(--s-16);
   display: flex;
@@ -422,7 +422,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-neutral-500);
-  height: 32px;
+  height: var(--sz-32);
   display: flex;
   align-items: center;
 }
@@ -430,8 +430,8 @@
   display: flex;
   align-items: center;
   gap: var(--s-12);
-  height: 52px;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  height: var(--sz-52);
+  border-bottom: var(--bw-1) solid color-mix(in srgb, var(--color-text) 8%, transparent);
 }
 .nu-tl-n {
   display: block;

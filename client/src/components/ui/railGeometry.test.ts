@@ -1,3 +1,4 @@
+import { inlinePrimitives } from './readCss';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -9,8 +10,8 @@ import { RAIL_EXTRA_TILE, RAIL_GAP, RAIL_TILE } from './railOverflow';
  * numbers (kit CSS and railOverflow.ts agree), and no app-scoped CSS may change geometry.
  */
 const SRC = join(__dirname, '..', '..');
-const read = (f: string) => readFileSync(join(__dirname, f), 'utf8');
-const STYLES = readFileSync(join(SRC, 'styles.css'), 'utf8');
+const read = (f: string) => inlinePrimitives(readFileSync(join(__dirname, f), 'utf8'));
+const STYLES = inlinePrimitives(readFileSync(join(SRC, 'styles.css'), 'utf8'));
 const RAIL = read('Rail.css');
 
 function walk(dir: string, out: string[] = []): string[] {
@@ -126,7 +127,7 @@ describe('one shared rail foot (Apps + avatar) for all six apps', () => {
   });
 
   it('Coach has no foot / avatar CSS of its own', () => {
-    const css = readFileSync(join(SRC, 'coach', 'CoachApp.css'), 'utf8');
+    const css = inlinePrimitives(readFileSync(join(SRC, 'coach', 'CoachApp.css'), 'utf8'));
     expect(css).not.toMatch(/account-|rail-foot|rail-account|rail-switch/);
   });
 });
@@ -142,7 +143,7 @@ describe('no app-scoped CSS moves the rail', () => {
   it('every app-scoped .rail* rule is skin only', () => {
     const offenders: string[] = [];
     for (const f of walk(SRC)) {
-      const css = readFileSync(f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+      const css = inlinePrimitives(readFileSync(f, 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '');
       for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
         const sel = m[1].trim();
         if (!SCOPE.test(sel)) continue;
