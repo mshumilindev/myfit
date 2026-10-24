@@ -309,10 +309,19 @@ html[data-theme='cyberpunk'] {
     /* the app's city photo sits under a scrim so text keeps its contrast (none = no photo) */
     var(--bg-scrim, none),
     var(--bg-photo, none) center / cover no-repeat;
-  --bg-scrim: linear-gradient(
-    color-mix(in srgb, var(--color-bg) 50%, transparent),
-    color-mix(in srgb, var(--color-bg) 76%, transparent)
-  );
+  /* frosted-glass sheen (two soft diagonal highlights) over the scrim */
+  --bg-scrim:
+    linear-gradient(
+      115deg,
+      color-mix(in srgb, var(--color-text) 7%, transparent) 0 16%,
+      transparent 16% 38%,
+      color-mix(in srgb, var(--color-text) 5%, transparent) 38% 44%,
+      transparent 44%
+    ),
+    linear-gradient(
+      color-mix(in srgb, var(--color-bg) 50%, transparent),
+      color-mix(in srgb, var(--color-bg) 76%, transparent)
+    );
   --bg-photo-land: url('/backgrounds/gym-land.webp');
   --bg-photo-port: url('/backgrounds/gym-port.webp');
   --bg-glitch-content: '';
