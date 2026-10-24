@@ -310,8 +310,8 @@ html[data-theme='cyberpunk'] {
     var(--bg-scrim, none),
     var(--bg-photo, none) center / cover no-repeat;
   --bg-scrim: linear-gradient(
-    color-mix(in srgb, var(--color-bg) 22%, transparent),
-    color-mix(in srgb, var(--color-bg) 48%, transparent)
+    color-mix(in srgb, var(--color-bg) 50%, transparent),
+    color-mix(in srgb, var(--color-bg) 76%, transparent)
   );
   --bg-photo-land: url('/backgrounds/gym-land.webp');
   --bg-photo-port: url('/backgrounds/gym-port.webp');
