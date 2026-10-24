@@ -9,6 +9,7 @@ import type { AriaAttributes, MouseEvent, ReactNode } from 'react';
 import { Icon } from '../../ui';
 import { toneClass, type Tone } from './tones';
 import './GroupedList.css';
+import './Chamfer.css';
 
 export interface GroupedListProps {
   header?: ReactNode;

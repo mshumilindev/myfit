@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Icon } from '../../ui';
 
 import './Banner.css';
+import './Chamfer.css';
 
 export type BannerTone = 'accent' | 'rest' | 'danger' | 'ok' | 'sport' | 'conditioning';
 

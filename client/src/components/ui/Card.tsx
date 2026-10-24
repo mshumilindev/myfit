@@ -2,6 +2,7 @@ import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
 
 import { toneClass, type Tone } from './tones';
 import './Card.css';
+import './Chamfer.css';
 
 /** `neutral` is the plain surface; every other value is a colour family from
  * tones.ts (danger · ok · rest · accent · active · illness · injury · sleep ·

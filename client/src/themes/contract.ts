@@ -178,6 +178,8 @@ export const SKIN_TOKENS_OPTIONAL = [
  * Cyberpunk folds the rainbow of per-feature hues into a few (info, platinum, lime, amber, red) and gives each app its own neon.
  */
 export const THEME_TOKENS_OPTIONAL = [
+  '--corner-mark-content',
+  '--corner-mark-color',
   '--color-sleep',
   '--color-sleep-tint',
   '--color-sleep-text',

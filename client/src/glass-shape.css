@@ -30,6 +30,7 @@ html[data-theme]
     .uicard:not(.uicard--e-quiet):not(.uicard--nested),
     .uibanner,
     .uinotice:not(.uinotice--nested),
+    .uigl-rows,
     .uipop,
     .dialog
   ) {

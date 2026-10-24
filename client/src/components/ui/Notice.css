@@ -1,5 +1,6 @@
 /* Notice — Spotter UI kit primitive. Tokens only (the old .banner strip). */
 .uinotice {
+  position: relative;
   padding: var(--s-12) var(--s-14);
   border-radius: var(--radius-md);
   background: var(--t-tint);

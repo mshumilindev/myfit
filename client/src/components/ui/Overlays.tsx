@@ -28,6 +28,7 @@ import { useBlockingSheetTrap } from './overlays/sheetTrap';
 import { toneClass, type Tone } from './tones';
 
 import './Overlays.css';
+import './Chamfer.css';
 
 // Public surface unchanged: everything below is re-exported from here.
 export { Portal, useFixedPanelPosition };

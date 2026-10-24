@@ -315,6 +315,9 @@ html[data-theme='cyberpunk'] {
   --label-mark-w: auto;
   --label-mark-content: '//';
   --clip-fab: none;
+  /* a thin accent stroke along each chamfer, so the cut corner keeps its border */
+  --corner-mark-content: '';
+  --corner-mark-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
   --clip-sheet: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%, 0 14px);
   --clip-surface: polygon(
     0 0,

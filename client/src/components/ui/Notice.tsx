@@ -3,6 +3,7 @@ import { Icon } from '../../ui';
 import { IconTile } from './IconTile';
 import { toneClass, type Tone } from './tones';
 import './Notice.css';
+import './Chamfer.css';
 
 export interface NoticeProps extends HTMLAttributes<HTMLDivElement> {
   tone?: Tone;

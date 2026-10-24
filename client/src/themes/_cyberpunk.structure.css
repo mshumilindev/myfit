@@ -12,8 +12,16 @@ html[data-theme='cyberpunk'] .tabbar-fab.is-attention::after {
 html[data-theme='cyberpunk'] .tabbar-fab.is-attention::after {
   border: none;
   background: conic-gradient(from 0deg, transparent 0 70%, var(--color-accent) 100%);
-  -webkit-mask: radial-gradient(circle closest-side, transparent calc(100% - 4px), var(--color-bg) calc(100% - 3px));
-  mask: radial-gradient(circle closest-side, transparent calc(100% - 4px), var(--color-bg) calc(100% - 3px));
+  -webkit-mask: radial-gradient(
+    circle closest-side,
+    transparent calc(100% - 4px),
+    var(--color-bg) calc(100% - 3px)
+  );
+  mask: radial-gradient(
+    circle closest-side,
+    transparent calc(100% - 4px),
+    var(--color-bg) calc(100% - 3px)
+  );
   opacity: 1;
   animation: cyber-fab-turn 3.2s linear infinite;
 }
