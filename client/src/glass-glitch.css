@@ -2,7 +2,8 @@
    A theme supplies --bg-photo-land / --bg-photo-port (url()) per app skin and sets --bg-glitch-content ('')
    to turn the glitch on. Brass sets none of them: no photo, no pseudo-element. The photo itself is the last
    layer of the theme's --backdrop; this file only picks the crop for the screen orientation and animates
-   a rare slice-tear copy of it (transform + clip-path only, nothing re-layouts or re-paints the UI). */
+   a rare anaglyph tear of it, like 3D-film glasses: a red and a cyan copy of the picture slide apart in
+   a slice and, for a moment, over the whole frame (transform + clip-path only, nothing re-layouts the UI). */
 html[data-theme] {
   --bg-photo: var(--bg-photo-land, none);
 }
@@ -11,22 +12,41 @@ html[data-theme] {
     --bg-photo: var(--bg-photo-port, var(--bg-photo-land, none));
   }
 }
+/* Two channel copies of the page's picture (same scrim, so the tone matches): ::before keeps only the red
+   channel, ::after the green+blue (cyan). `lighten` against the page adds the fringe without brightening it. */
+html[data-theme] body::before,
 html[data-theme] body::after {
   content: var(--bg-glitch-content, none);
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  /* the same scrim as the page, so a torn slice is the same tone as the picture it was cut from */
+  mix-blend-mode: lighten;
+  /* the picture is soft (baked bokeh): lifted, so the red / cyan fringes read like a real anaglyph */
+  filter: brightness(2.2) saturate(1.6);
+  opacity: 0;
+  animation-duration: 11s;
+  animation-timing-function: steps(1, end);
+  animation-iteration-count: infinite;
+}
+html[data-theme] body::before {
   background:
+    linear-gradient(red, red),
     var(--bg-scrim, none),
     var(--bg-photo, none) center / cover no-repeat;
-  /* the picture is soft (baked bokeh), so a torn slice is lifted a little to read as a tear */
-  filter: brightness(1.6) saturate(1.3);
-  opacity: 0;
-  animation: bg-glitch 11s steps(1, end) infinite;
+  background-blend-mode: multiply, normal, normal, normal;
+  animation-name: bg-glitch-r;
 }
-@keyframes bg-glitch {
+html[data-theme] body::after {
+  background:
+    linear-gradient(cyan, cyan),
+    var(--bg-scrim, none),
+    var(--bg-photo, none) center / cover no-repeat;
+  background-blend-mode: multiply, normal, normal, normal;
+  animation-name: bg-glitch-c;
+}
+/* Same timeline, mirrored shifts: a slice tears, then a short full-frame ghost, twice per cycle. */
+@keyframes bg-glitch-r {
   0%,
   58%,
   63.4%,
@@ -36,45 +56,86 @@ html[data-theme] body::after {
     opacity: 0;
   }
   58.2% {
-    opacity: 0.42;
+    opacity: 1;
     clip-path: inset(16% 0 76% 0);
-    transform: translateX(-16px);
+    transform: translateX(-10px);
   }
   59% {
     clip-path: inset(48% 0 41% 0);
-    transform: translateX(20px);
-    filter: brightness(1.7) hue-rotate(70deg) saturate(1.3);
+    transform: translateX(-14px);
   }
   60.2% {
-    clip-path: inset(31% 0 60% 0);
-    transform: translateX(-9px);
-    filter: brightness(1.6) saturate(1.3);
+    clip-path: none;
+    transform: translateX(-14px);
   }
   61.4% {
     clip-path: inset(72% 0 20% 0);
-    transform: translateX(13px);
+    transform: translateX(-12px);
   }
   62.4% {
     clip-path: inset(8% 0 86% 0);
-    transform: translateX(-24px);
+    transform: translateX(-16px);
   }
   86.2% {
-    opacity: 0.34;
+    opacity: 1;
     clip-path: inset(55% 0 36% 0);
-    transform: translateX(14px);
+    transform: translateX(-9px);
   }
   87.6% {
-    clip-path: inset(22% 0 70% 0);
-    transform: translateX(-12px);
-    filter: brightness(1.7) hue-rotate(-60deg) saturate(1.3);
+    clip-path: none;
+    transform: translateX(-10px);
   }
   88.8% {
     clip-path: inset(80% 0 12% 0);
+    transform: translateX(-11px);
+  }
+}
+@keyframes bg-glitch-c {
+  0%,
+  58%,
+  63.4%,
+  86%,
+  90%,
+  100% {
+    opacity: 0;
+  }
+  58.2% {
+    opacity: 1;
+    clip-path: inset(16% 0 76% 0);
+    transform: translateX(10px);
+  }
+  59% {
+    clip-path: inset(48% 0 41% 0);
+    transform: translateX(14px);
+  }
+  60.2% {
+    clip-path: none;
+    transform: translateX(14px);
+  }
+  61.4% {
+    clip-path: inset(72% 0 20% 0);
+    transform: translateX(12px);
+  }
+  62.4% {
+    clip-path: inset(8% 0 86% 0);
+    transform: translateX(16px);
+  }
+  86.2% {
+    opacity: 1;
+    clip-path: inset(55% 0 36% 0);
     transform: translateX(9px);
-    filter: brightness(1.6) saturate(1.3);
+  }
+  87.6% {
+    clip-path: none;
+    transform: translateX(10px);
+  }
+  88.8% {
+    clip-path: inset(80% 0 12% 0);
+    transform: translateX(11px);
   }
 }
 @media (prefers-reduced-motion: reduce), (update: slow) {
+  html[data-theme] body::before,
   html[data-theme] body::after {
     animation: none;
   }
