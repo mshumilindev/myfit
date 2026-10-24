@@ -16,6 +16,7 @@ import {
   type PopoverSide,
 } from './popoverPosition';
 import './Popover.css';
+import './Chamfer.css';
 
 export interface PopoverProps {
   open: boolean;
