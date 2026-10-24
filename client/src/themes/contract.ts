@@ -116,6 +116,11 @@ export const THEME_TOKENS = [
   '--fab-ink',
   '--fab-edge',
   '--fab-lens-display',
+  '--tab-active-mark',
+  '--label-mark-display',
+  '--r-ctl',
+  '--avatar-k',
+  '--ambient-display',
 ] as const;
 
 /**

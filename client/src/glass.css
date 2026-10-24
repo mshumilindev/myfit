@@ -533,10 +533,70 @@ html[data-theme] .uicard--rest {
 
 /* --- Kit primitives: buttons — the brass glass pill ------------------------- */
 html[data-theme] .uibtn {
-  border-radius: var(--r-pill);
+  border-radius: var(--r-ctl);
 }
+/* Text-bearing pills follow the theme's control corner; avatars, dots, rings and bars keep --r-pill / --r-round. */
+html[data-theme]
+  :is(
+    .uibadge.uibadge,
+    .uipc-chip,
+    .uibanner-cta,
+    .uiback--text,
+    .uibrand-chip,
+    .ur-pill.ur-pill,
+    .uibtn.uibtn--pill,
+    .uiex-badge,
+    .uinote-ctx,
+    .badge,
+    .mchip,
+    .std-tag,
+    .pt-tag,
+    .eq-fchip,
+    .me-chip,
+    .glass-pill,
+    .app-nutrition .tag,
+    .app-nutrition .chip,
+    .app-nutrition .n-addpill,
+    .app-learn .ln-soon-chip
+  ) {
+  border-radius: var(--r-ctl);
+}
+/* Avatars and round icon buttons take the theme's avatar corner (k = 0.5 is a circle); status dots stay round. */
+html[data-theme]
+  :is(
+    .uiav,
+    .uibrand-avatar,
+    .uiback:not(.uiback--text),
+    .uibrand-actions .uibell,
+    .uibrand-actions .lang-chip,
+    .avatar,
+    .account-chip .avatar,
+    .tr-card-avatar,
+    .me-chip .av,
+    .trlive-ava-lg,
+    .trlive-ava-sm,
+    .atl-face,
+    .pg-av,
+    .row-list-skel-avatar,
+    .onb-avatar-ring
+  ),
 html[data-theme] .uibtn.uibtn--round {
-  border-radius: var(--r-round);
+  border-radius: calc(var(--avatar-k) * 100%);
+}
+/* Story bubble: ring, gap and face stay concentric (each inset 2.5px / 4px from the ring). */
+html[data-theme] .uistory-ring {
+  border-radius: calc(var(--story-d) * var(--avatar-k));
+}
+html[data-theme] .uistory-ring::before {
+  border-radius: calc(var(--story-d) * var(--avatar-k) - 2.5px);
+}
+html[data-theme] .uistory-face {
+  border-radius: calc(var(--story-d) * var(--avatar-k) - 4px);
+}
+/* Behind-the-screen art (accent glow, lattice): off when the theme wants a flat field. */
+html[data-theme] :is(.app, .apex-app)::before,
+html[data-theme] :is(.app, .apex-app)::after {
+  display: var(--ambient-display);
 }
 html[data-theme] .uibtn--photo {
   background: color-mix(in srgb, var(--color-bg) 70%, transparent);
@@ -582,6 +642,18 @@ html[data-theme] .uisec-l {
   font-size: var(--fs-11);
   letter-spacing: var(--label-tracking);
   color: var(--color-neutral-400);
+}
+html[data-theme] .uisec-l::before {
+  content: '';
+  display: var(--label-mark-display);
+  width: var(--s-6);
+  height: var(--s-6);
+  margin-right: var(--s-8);
+  vertical-align: middle;
+  background: var(--color-accent);
+}
+html[data-theme] .tabbar button.active {
+  background: var(--tab-active-mark);
 }
 html[data-theme] .uisec-a {
   color: var(--color-accent-400);

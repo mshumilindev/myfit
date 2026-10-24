@@ -146,6 +146,15 @@ html[data-theme='glass'] {
   --fab-ink: var(--color-accent-300);
   --fab-edge: inset 0 1.2px 0.5px var(--c-eed3a5-a500), inset 0 0 0 1px var(--c-d9a24f-a550);
   --fab-lens-display: block;
+  /* marks the theme may add without moving anything: active-tab edge, square before section labels */
+  --tab-active-mark: none;
+  --label-mark-display: none;
+  /* corner of text-bearing controls (buttons, badges, chips, tags); 999px = pill. Avatars, dots, rings stay round. */
+  --r-ctl: 999px;
+  /* corner of avatars and round icon buttons as a share of their size (0.5 = circle) */
+  --avatar-k: 0.5;
+  /* the accent top-glow and diamond lattice behind every screen */
+  --ambient-display: block;
 }
 
 /* --- Sub-app skins: the colour of the screen glow per app (theme × skin) --- */
