@@ -40,3 +40,10 @@ html[data-theme='cyberpunk'] .tabbar-fab.is-attention::after {
 html[data-theme='cyberpunk'] .tabbar-wrap .tabbar-fab {
   border-radius: var(--r-round);
 }
+
+/* Launcher: Gym's count is the shared feed's unread, the same red as the bell it stands in for (Apex keeps its own
+   colour). Only this theme: Brass Glass keeps the badge it always had. */
+html[data-theme='cyberpunk'] .shell-badge--feed {
+  background: var(--color-danger-solid);
+  color: var(--color-on-solid);
+}
