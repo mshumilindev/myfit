@@ -1,8 +1,8 @@
 /**
  * Themes — its own page (opened from Today, under Customize Today) because more
  * look-and-feel settings will join it. A preview of Today as it really looks
- * now sits beside the theme's name, status and the Applied button. Only Brass
- * Glass exists today. Kit components only; the preview is a scaled, inert copy
+ * now sits beside the current theme's name and status; every other theme has an
+ * Apply button. Kit components only; the preview is a scaled, inert copy
  * of the live Today screen (data/todaySnapshot).
  */
 import { useLayoutEffect, useRef, useState } from 'react';
@@ -14,6 +14,7 @@ import { SectionLabel } from '../components/ui/SectionLabel';
 import { Tag } from '../components/ui/Tag';
 import { todaySnapshot } from '../data/todaySnapshot';
 import { useT } from '../i18n';
+import { THEMES, setTheme, useTheme } from '../themes';
 import './themes.css';
 
 /** The scaled copy of Today. `inert` + aria-hidden: it is a picture, not a second screen. */
@@ -52,23 +53,44 @@ function TodayPreview({ alt }: { alt: string }) {
 
 export function ThemesView({ onClose }: { onClose: () => void }) {
   const { t } = useT();
+  const current = useTheme();
+  const sub: Record<string, string> = { glass: t.themeBrassSub, 'lime-graphite': t.themeLimeSub };
   return (
     <div className="screen themes-screen">
       <PageHead back={{ label: t.backAction, onClick: onClose }} title={t.themesTitle} />
       <SectionLabel>{t.themesSection}</SectionLabel>
-      <Card pad="md">
-        <div className="thm-row">
-          <TodayPreview alt={t.themesPreviewAlt} />
-          <div className="thm-info">
-            <Tag tone="accent">{t.themesCurrent}</Tag>
-            <h3 className="thm-name">{t.themeBrassName}</h3>
-            <p className="thm-sub">{t.themeBrassSub}</p>
-            <Button variant="secondary" size="sm" icon="check" disabled>
-              {t.themesApplied}
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <div className="thm-list">
+        {THEMES.map((th) => {
+          const on = th.id === current;
+          return (
+            <Card pad="md" key={th.id}>
+              <div className="thm-row">
+                {on ? (
+                  <TodayPreview alt={t.themesPreviewAlt} />
+                ) : (
+                  <div className="thm-sw">
+                    <IconTile tone="accent" size={48} icon="palette" />
+                  </div>
+                )}
+                <div className="thm-info">
+                  {on && <Tag tone="accent">{t.themesCurrent}</Tag>}
+                  <h3 className="thm-name">{th.name}</h3>
+                  <p className="thm-sub">{sub[th.id] ?? ''}</p>
+                  {on ? (
+                    <Button variant="secondary" size="sm" icon="check" disabled>
+                      {t.themesApplied}
+                    </Button>
+                  ) : (
+                    <Button variant="primary" size="sm" onClick={() => setTheme(th.id)}>
+                      {t.themesApply}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 }

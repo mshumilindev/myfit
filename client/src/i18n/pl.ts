@@ -1404,8 +1404,9 @@ export const pl: Strings = {
   themesSection: 'Motyw',
   themesCurrent: 'Obecny',
   themesApplied: 'Zastosowano',
-  themeBrassName: 'Brass Glass',
+  themesApply: 'Zastosuj',
   themeBrassSub: 'Ciepły mosiądz na grafitowym tle ze świecącym szkłem',
+  themeLimeSub: 'Chłodny grafit, platynowy tekst i jeden neonowy akcent limonki',
   themesPreviewAlt: 'Jak teraz wygląda Today',
   todayEditDone: 'Gotowe',
   todayEditCancel: 'Anuluj',
@@ -2242,7 +2243,6 @@ export const pl: Strings = {
   settingsTitle: 'Ustawienia',
   settingsSub: 'Flagi funkcji na tym urządzeniu',
   settingsFeaturesLabel: 'Funkcje',
-  settingsThemeLabel: 'Motyw',
   flagExerciseFeature: 'Biblioteka i szczegóły ćwiczeń',
   flagExerciseFeatureDesc:
     'Galeria ćwiczeń, pełne strony ćwiczeń i zakładka Ćwiczenia w Programach.',

@@ -21,3 +21,5 @@
 ## Наслідки
 
 Нові залежності: `@fontsource/kaushan-script`, `inter-tight`, `manrope`, `jetbrains-mono` (OFL-шрифти, пакети без коду, лише CSS і woff/woff2). Guard: `tests/no-third-party-fonts-analytics.test.ts`, `tests/firebase-headers.test.ts`.
+
+Доповнення (SPO-344, тема Lime Graphite): `@fontsource/barlow`, `barlow-condensed` (latin + latin-ext) і `fira-sans`, `fira-sans-condensed` (лише cyrillic: у Barlow немає кирилиці, Fira як запасний шрифт стеку дає українським заголовкам ту саму гротескну форму). Імпорти в `main.tsx`; шрифти не в precache PWA (woff2 не входять у типовий glob), тож офлайн до першого завантаження діє запасний стек.

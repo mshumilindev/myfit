@@ -1390,8 +1390,9 @@ export const en = {
   themesSection: 'Theme',
   themesCurrent: 'Current',
   themesApplied: 'Applied',
-  themeBrassName: 'Brass Glass',
+  themesApply: 'Apply',
   themeBrassSub: 'Warm brass on graphite with glowing glass',
+  themeLimeSub: 'Cool graphite, platinum text and one neon-lime accent',
   themesPreviewAlt: 'How Today looks right now',
   todayEditDone: 'Done',
   todayEditCancel: 'Cancel',
@@ -2221,7 +2222,6 @@ export const en = {
   settingsTitle: 'Settings',
   settingsSub: 'Feature flags for this device',
   settingsFeaturesLabel: 'Features',
-  settingsThemeLabel: 'Theme',
   flagExerciseFeature: 'Exercise library & detail',
   flagExerciseFeatureDesc:
     'Exercise gallery, rich exercise pages, and the Exercises tab on Programs.',

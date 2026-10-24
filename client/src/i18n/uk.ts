@@ -1439,8 +1439,9 @@ export const uk: Strings = {
   themesSection: 'Тема',
   themesCurrent: 'Поточна',
   themesApplied: 'Застосовано',
-  themeBrassName: 'Brass Glass',
+  themesApply: 'Застосувати',
   themeBrassSub: 'Теплий мідний відтінок на графіті зі світним склом',
+  themeLimeSub: 'Холодний графіт, платиновий текст і один неоновий лаймовий акцент',
   themesPreviewAlt: 'Як Today виглядає зараз',
   todayEditDone: 'Готово',
   todayEditCancel: 'Скасувати',
@@ -2276,7 +2277,6 @@ export const uk: Strings = {
   settingsTitle: 'Налаштування',
   settingsSub: 'Прапорці функцій для цього пристрою',
   settingsFeaturesLabel: 'Функції',
-  settingsThemeLabel: 'Тема',
   flagExerciseFeature: 'Бібліотека вправ і деталка',
   flagExerciseFeatureDesc:
     'Галерея вправ, повні сторінки вправ і таб «Вправи» на сторінці Programs.',

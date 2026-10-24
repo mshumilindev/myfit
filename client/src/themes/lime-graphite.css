@@ -1,0 +1,157 @@
+/* Lime Graphite — theme file. Tokens only (contract: themes/contract.ts).
+   Cool graphite surfaces, platinum text, one neon-lime accent for the main action;
+   Barlow / Barlow Condensed type, uppercase condensed headings. */
+html[data-theme='lime-graphite'] {
+  /* identity */
+  --font: 'Barlow', 'Fira Sans', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Barlow Condensed', 'Fira Sans Condensed', 'Arial Narrow', sans-serif;
+  --heading-transform: uppercase;
+  --heading-tracking: 0.02em;
+  --label-tracking: 0.2em;
+  --color-text: var(--c-ecebe7);
+  --color-text-muted: var(--c-9a9da4);
+  --color-text-faint: var(--c-8f939a);
+  --color-text-disabled: var(--c-4a4d54);
+  --color-accent: var(--c-c8ff3a);
+  --color-accent-100: var(--c-f4ffd0);
+  --color-accent-200: var(--c-e6ff9a);
+  --color-accent-300: var(--c-d9ff6b);
+  --color-accent-400: var(--c-cfff4f);
+  --color-accent-500: var(--c-c8ff3a);
+  --color-accent-600: var(--c-a6d92c);
+  --color-accent-700: var(--c-7fa621);
+  --color-accent-800: var(--c-566f16);
+  --color-accent-900: var(--c-2f3d0c);
+  --color-accent-950: var(--c-1a2206);
+  --color-on-accent: var(--c-0c1100);
+  --color-neutral-100: var(--c-f2f1ed);
+  --color-neutral-200: var(--c-e2e1dc);
+  --color-neutral-300: var(--c-c9c9c6);
+  --color-neutral-400: var(--c-aeb0b4);
+  --color-neutral-500: var(--c-9a9da4);
+  --color-neutral-600: var(--c-8f939a);
+  --color-neutral-700: var(--c-4a4d54);
+  --color-neutral-800: var(--c-33353b);
+  --color-neutral-900: var(--c-202126);
+  --color-gym: var(--c-ecebe7);
+  --color-gym-tint: var(--c-1b1c20);
+  --color-gym-text: var(--c-ecebe7);
+  --color-gym-line: var(--c-3a3c42);
+  --color-note: var(--c-c8ff3a);
+  --color-note-tint: var(--c-1b2008);
+  --color-note-text: var(--c-e6ff9a);
+  --color-note-line: var(--c-566f16);
+  /* surfaces */
+  --color-bg: var(--c-0d0e10);
+  --color-surface: var(--c-151619);
+  --glass-surface: var(--c-151619);
+  --color-control: var(--c-151619);
+  --color-divider: var(--c-ffffff-a75);
+  /* glass: graphite, not accent-tinted */
+  --glass-backdrop: none;
+  --glass-float: 0 18px 36px -24px var(--c-000000);
+  --glass-rest-tint: linear-gradient(180deg, var(--c-1d1e23), var(--c-141518));
+  --glass-rest-specular: inset 0 1px 0 var(--c-ffffff-a80), inset 0 0 0 1px var(--c-ffffff-a75);
+  --glass-accent-k: 0;
+  --glass-base-1: var(--c-1d1e23);
+  --glass-base-2: var(--c-141518);
+  --glass-hero-base-1: var(--c-212228);
+  --glass-hero-base-2: var(--c-141518);
+  --glass-edge: inset 0 1px 0 var(--c-ffffff-a80), inset 0 0 0 1px var(--c-ffffff-a75);
+  --glass-hero-edge:
+    inset 0 1px 0 var(--c-ffffff-a100), inset 0 0 0 1px var(--c-ffffff-a90),
+    inset 3px 0 0 var(--color-accent), 0 18px 36px -24px var(--c-000000);
+  --glass-well: var(--c-0a0b0d);
+  --glass-well-ring: var(--c-ffffff-a60);
+  --glass-field: var(--c-101114);
+  --glass-field-ring: var(--c-ffffff-a90);
+  --glass-raised-base: var(--c-18191d);
+  --plate-top: var(--c-1d1e23);
+  --plate-bot: var(--c-141518);
+  --plate-rim: var(--c-ffffff-a120);
+  --plate-edge: var(--c-ffffff-a60);
+  /* moods: barely-there neutral glows */
+  --mood-art: var(--c-0d0e10);
+  --mood-rest: var(--c-0d0e10);
+  --mood-sleep: var(--c-0c0c12);
+  --mood-ok: var(--c-0d0f0e);
+  --mood-bad: var(--c-0f0d0d);
+  --mood-night: var(--c-08090a);
+  --body-dim: var(--c-2b2d33);
+  --body-dim-stroke: var(--c-ffffff-a120);
+  /* radii and type */
+  --radius-lg: var(--r-10);
+  --radius-md: var(--r-6);
+  --radius-sm: var(--r-4);
+  --radius-hero: var(--r-12);
+  --radius-sheet: var(--r-16);
+  --type-d1: 600 40px/1 var(--font-display);
+  --type-h1: 600 30px/1.05 var(--font-display);
+  --type-h2: 600 22px/1.1 var(--font-display);
+  --type-h3: 600 16px/1.3 var(--font);
+  --type-b: 400 15px/1.4 var(--font);
+  --type-s: 400 13px/1.4 var(--font);
+  --type-m: 400 12px/1.35 var(--font);
+  --type-l: 600 11px/1.2 var(--font);
+  --type-num: 600 30px/1 var(--font-display);
+  --type-hero: 600 64px/0.95 var(--font-display);
+  --lava-1: transparent;
+  --lava-2: transparent;
+  --lava-3: transparent;
+  /* primary button: solid accent, dark ink, soft neon glow */
+  --btn-fill-mix: 100%;
+  --btn-hover-mix: 100%;
+  --btn-active-mix: 100%;
+  --btn-ring-mix: 0%;
+  --btn-ink-on: 100%;
+  --btn-glow: 0 8px 24px -10px var(--c-c8ff3a-a550);
+  --btn-case: uppercase;
+  --btn-tracking: 0.06em;
+  /* tab bar and Start: flat graphite bar, solid accent plate, no lens */
+  --tabbar-bg: var(--c-18191d);
+  --tabbar-line-mix: 0%;
+  --tabbar-line-flat: var(--c-ffffff-a75);
+  --fab-bg: var(--color-accent);
+  --fab-ink: var(--color-on-accent);
+  --fab-edge: 0 8px 22px -8px var(--c-c8ff3a-a600);
+  --fab-lens-display: none;
+  --tab-active-mark: linear-gradient(var(--color-accent), var(--color-accent)) top center / 28px 2px
+    no-repeat;
+  --label-mark-display: inline-block;
+  --r-ctl: var(--r-6);
+  --avatar-k: 0.24;
+  /* flat field: no accent top-glow, no diamond lattice, no lava blobs */
+  --ambient-display: none;
+}
+
+/* --- Sub-app skins: the glow per app, kept to a faint tint of graphite --- */
+html[data-theme='lime-graphite'].theme-apex {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}
+html[data-theme='lime-graphite'].theme-learn {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}
+html[data-theme='lime-graphite'].theme-roster {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}
+html[data-theme='lime-graphite'].theme-nutrition {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}
+html[data-theme='lime-graphite'].theme-coach {
+  --glass-raised-base: color-mix(in srgb, var(--color-accent) 4%, var(--c-18191d));
+  --lava-2: transparent;
+  --lava-3: transparent;
+  --plate-top: color-mix(in srgb, var(--color-accent) 5%, var(--c-1d1e23));
+  --plate-bot: color-mix(in srgb, var(--color-accent) 2%, var(--c-141518));
+  --plate-rim: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  --plate-edge: var(--color-accent-line);
+  --t-base: var(--color-accent);
+  --t-tint: var(--color-accent-tint);
+  --t-text: var(--color-accent-text);
+  --t-line: var(--color-accent-line);
+  --t-on: var(--color-bg);
+}

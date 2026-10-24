@@ -1,6 +1,29 @@
 import type { Decorator, Preview } from '@storybook/react-vite';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
+// Lime Graphite type (SPO-344, ADR 007): Barlow / Barlow Condensed for latin, Fira Sans / Fira Sans Condensed for
+// Cyrillic (Barlow has none). Subsets only, self-hosted.
+import '@fontsource/barlow/latin-400.css';
+import '@fontsource/barlow/latin-500.css';
+import '@fontsource/barlow/latin-600.css';
+import '@fontsource/barlow/latin-700.css';
+import '@fontsource/barlow/latin-ext-400.css';
+import '@fontsource/barlow/latin-ext-500.css';
+import '@fontsource/barlow/latin-ext-600.css';
+import '@fontsource/barlow/latin-ext-700.css';
+import '@fontsource/barlow-condensed/latin-500.css';
+import '@fontsource/barlow-condensed/latin-600.css';
+import '@fontsource/barlow-condensed/latin-700.css';
+import '@fontsource/barlow-condensed/latin-ext-500.css';
+import '@fontsource/barlow-condensed/latin-ext-600.css';
+import '@fontsource/barlow-condensed/latin-ext-700.css';
+import '@fontsource/fira-sans/cyrillic-400.css';
+import '@fontsource/fira-sans/cyrillic-500.css';
+import '@fontsource/fira-sans/cyrillic-600.css';
+import '@fontsource/fira-sans/cyrillic-700.css';
+import '@fontsource/fira-sans-condensed/cyrillic-500.css';
+import '@fontsource/fira-sans-condensed/cyrillic-600.css';
+import '@fontsource/fira-sans-condensed/cyrillic-700.css';
 import '../src/tokens/primitives.css';
 import '../src/styles.css';
 import '../src/redesign.css';

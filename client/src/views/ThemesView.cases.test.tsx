@@ -4,6 +4,7 @@ import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
 import { captureToday, clearTodaySnapshot } from '../data/todaySnapshot';
 import { ThemesView } from './ThemesView';
+import { setTheme } from '../themes';
 
 const capture = (width: number) => {
   const el = document.createElement('div');
@@ -95,15 +96,34 @@ describe('ThemesView with a captured Today', () => {
 });
 
 describe('ThemesView chrome', () => {
-  it('back closes the page; the only theme is marked current and applied', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    document.documentElement.removeAttribute('data-theme');
+  });
+
+  it('back closes the page; the current theme is marked and applied, the others offer Apply', () => {
     const onClose = vi.fn();
     render(<ThemesView onClose={onClose} />);
     fireEvent.click(screen.getByRole('button', { name: en.backAction }));
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(screen.getByText(en.themesCurrent)).toBeTruthy();
+    expect(screen.getByText('Brass Glass')).toBeTruthy();
     expect(screen.getByText(en.themeBrassSub)).toBeTruthy();
+    expect(screen.getByText('Lime Graphite')).toBeTruthy();
+    expect(screen.getByText(en.themeLimeSub)).toBeTruthy();
     expect(
       (screen.getByText(en.themesApplied).closest('button') as HTMLButtonElement).disabled,
     ).toBe(true);
+  });
+
+  it('Apply switches the theme and moves the Current mark to the tapped card', () => {
+    render(<ThemesView onClose={vi.fn()} />);
+    fireEvent.click(screen.getByText(en.themesApply));
+    expect(document.documentElement.getAttribute('data-theme')).toBe('lime-graphite');
+    expect(localStorage.getItem('gym.theme')).toBe('lime-graphite');
+    expect(screen.getAllByText(en.themesApply)).toHaveLength(1);
+    const cur = screen.getByText(en.themesCurrent).closest('.uicard') ?? document.body;
+    expect(cur.textContent).toContain('Lime Graphite');
+    act(() => setTheme('glass'));
   });
 });

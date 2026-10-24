@@ -1422,8 +1422,9 @@ export const lt: Strings = {
   themesSection: 'Tema',
   themesCurrent: 'Dabartinė',
   themesApplied: 'Pritaikyta',
-  themeBrassName: 'Brass Glass',
+  themesApply: 'Taikyti',
   themeBrassSub: 'Šiltas žalvaris ant grafito su švytinčiu stiklu',
+  themeLimeSub: 'Šaltas grafitas, platininis tekstas ir vienas neoninis laimo akcentas',
   themesPreviewAlt: 'Kaip Today atrodo dabar',
   todayEditDone: 'Atlikta',
   todayEditCancel: 'Atšaukti',
@@ -2259,7 +2260,6 @@ export const lt: Strings = {
   settingsTitle: 'Nustatymai',
   settingsSub: 'Šio įrenginio funkcijų vėliavėlės',
   settingsFeaturesLabel: 'Funkcijos',
-  settingsThemeLabel: 'Tema',
   flagExerciseFeature: 'Pratimų biblioteka ir detalės',
   flagExerciseFeatureDesc:
     'Pratimų galerija, pilni pratimų puslapiai ir Pratimų skirtukas Programose.',

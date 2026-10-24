@@ -2,12 +2,18 @@
 .themes-screen .uipagehead {
   margin-bottom: var(--s-4);
 }
+.thm-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+}
 .thm-row {
   display: flex;
   gap: var(--s-16);
   align-items: flex-start;
 }
-.thm-pv {
+.thm-pv,
+.thm-sw {
   position: relative;
   flex: none;
   width: var(--sz-104);
