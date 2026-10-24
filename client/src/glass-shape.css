@@ -47,8 +47,10 @@ html[data-theme]
   :is(.uitag, .uibadge, .uibanner-kicker, .shell-head, .uistat-l, .uistat-v, .uistat-u, .uistat-d) {
   font-family: var(--font-label);
 }
+/* The layers carry their own positions and sizes, so they go through the `background` shorthand (a bare
+   `background-image` would reject the whole list); the page colour stays as the last layer. Brass: `none`. */
 html[data-theme] body {
-  background-image: var(--backdrop);
+  background: var(--backdrop), var(--color-bg);
   background-attachment: fixed;
 }
 
