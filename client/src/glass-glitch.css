@@ -1,0 +1,79 @@
+/* --- Photo backdrop switch + glitch ---------------------------------------------------------------
+   A theme supplies --bg-photo-land / --bg-photo-port (url()) per app skin and sets --bg-glitch-content ('')
+   to turn the glitch on. Brass sets none of them: no photo, no pseudo-element. The photo itself is the last
+   layer of the theme's --backdrop; this file only picks the crop for the screen orientation and animates
+   a rare slice-tear copy of it (transform + clip-path only, nothing re-layouts or re-paints the UI). */
+html[data-theme] {
+  --bg-photo: var(--bg-photo-land, none);
+}
+@media (orientation: portrait) {
+  html[data-theme] {
+    --bg-photo: var(--bg-photo-port, var(--bg-photo-land, none));
+  }
+}
+html[data-theme] body::after {
+  content: var(--bg-glitch-content, none);
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* the same scrim as the page, so a torn slice is the same tone as the picture it was cut from */
+  background:
+    var(--bg-scrim, none),
+    var(--bg-photo, none) center / cover no-repeat;
+  opacity: 0;
+  animation: bg-glitch 11s steps(1, end) infinite;
+}
+@keyframes bg-glitch {
+  0%,
+  58%,
+  63.4%,
+  86%,
+  90%,
+  100% {
+    opacity: 0;
+  }
+  58.2% {
+    opacity: 0.42;
+    clip-path: inset(16% 0 76% 0);
+    transform: translateX(-16px);
+  }
+  59% {
+    clip-path: inset(48% 0 41% 0);
+    transform: translateX(20px);
+    filter: hue-rotate(70deg) saturate(1.25);
+  }
+  60.2% {
+    clip-path: inset(31% 0 60% 0);
+    transform: translateX(-9px);
+    filter: none;
+  }
+  61.4% {
+    clip-path: inset(72% 0 20% 0);
+    transform: translateX(13px);
+  }
+  62.4% {
+    clip-path: inset(8% 0 86% 0);
+    transform: translateX(-24px);
+  }
+  86.2% {
+    opacity: 0.34;
+    clip-path: inset(55% 0 36% 0);
+    transform: translateX(14px);
+  }
+  87.6% {
+    clip-path: inset(22% 0 70% 0);
+    transform: translateX(-12px);
+    filter: hue-rotate(-60deg) saturate(1.25);
+  }
+  88.8% {
+    clip-path: inset(80% 0 12% 0);
+    transform: translateX(9px);
+    filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce), (update: slow) {
+  html[data-theme] body::after {
+    animation: none;
+  }
+}

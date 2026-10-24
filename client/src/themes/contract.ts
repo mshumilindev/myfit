@@ -160,6 +160,8 @@ export const THEME_TOKENS = [
 export const THEME_SKINS = ['apex', 'learn', 'roster', 'nutrition', 'coach'] as const;
 export const SKIN_TOKENS_REQUIRED = ['--lava-2', '--lava-3'] as const;
 export const SKIN_TOKENS_OPTIONAL = [
+  '--bg-photo-land',
+  '--bg-photo-port',
   '--lava-1',
   '--glass-raised-base',
   '--plate-top',
@@ -178,6 +180,10 @@ export const SKIN_TOKENS_OPTIONAL = [
  * Cyberpunk folds the rainbow of per-feature hues into a few (info, platinum, lime, amber, red) and gives each app its own neon.
  */
 export const THEME_TOKENS_OPTIONAL = [
+  '--bg-photo-land',
+  '--bg-photo-port',
+  '--bg-glitch-content',
+  '--bg-scrim',
   '--corner-mark-content',
   '--corner-mark-color',
   '--color-sleep',

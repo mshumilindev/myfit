@@ -49,6 +49,7 @@ import './redesign.css';
 import { initTheme } from './themes';
 import './glass.css';
 import './glass-shape.css';
+import './glass-glitch.css';
 import './reduced-transparency.css';
 import { App } from './App';
 import { getLocale } from './i18n';
