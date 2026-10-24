@@ -584,13 +584,16 @@ html[data-theme] .uibtn.uibtn--round {
   border-radius: calc(var(--avatar-k) * 100%);
 }
 /* Story bubble: ring, gap and face stay concentric (each inset 2.5px / 4px from the ring). */
-html[data-theme] .uistory-ring {
+html[data-theme] .uistory .uistory-ring {
   border-radius: calc(var(--story-d) * var(--avatar-k));
 }
-html[data-theme] .uistory-ring::before {
+html[data-theme] .uistory .uistory-ring::before {
   border-radius: calc(var(--story-d) * var(--avatar-k) - 2.5px);
 }
-html[data-theme] .uistory-face {
+html[data-theme] .uistory .uistory-face .uiav {
+  border-radius: inherit;
+}
+html[data-theme] .uistory .uistory-face {
   border-radius: calc(var(--story-d) * var(--avatar-k) - 4px);
 }
 /* Behind-the-screen art (accent glow, lattice): off when the theme wants a flat field. */
