@@ -16894,6 +16894,11 @@ html[data-theme] .apx-streak-n {
   display: grid;
   place-items: center;
 }
+/* Gym's count is the shared feed's unread, the same red as the bell it stands in for (Apex keeps its own colour). */
+.shell-badge--feed {
+  background: var(--color-danger-solid);
+  color: var(--color-on-solid);
+}
 .shell-tile-sub {
   font-size: var(--fs-13);
   color: var(--color-neutral-500, var(--color-neutral-600));
