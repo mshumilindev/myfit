@@ -272,7 +272,10 @@ html[data-theme='cyberpunk'] {
   --tabbar-line-flat: var(--c-8fb4ff-a140);
   --fab-bg: var(--color-accent);
   --fab-ink: var(--color-on-accent);
-  --fab-edge: 0 0 0 0 transparent;
+  /* a thin dark inner ring: the round button reads as a lens, not a flat disc */
+  --fab-edge:
+    inset 0 0 0 5px var(--fab-bg),
+    inset 0 0 0 6.5px color-mix(in srgb, var(--fab-ink) 45%, transparent);
   --fab-lens-display: none;
   --tab-active-mark: linear-gradient(var(--color-accent), var(--color-accent)) top center / 28px 2px
     no-repeat;
@@ -311,16 +314,7 @@ html[data-theme='cyberpunk'] {
   --label-mark-h: auto;
   --label-mark-w: auto;
   --label-mark-content: '//';
-  --clip-fab: polygon(
-    12px 0,
-    calc(100% - 12px) 0,
-    100% 12px,
-    100% calc(100% - 12px),
-    calc(100% - 12px) 100%,
-    12px 100%,
-    0 calc(100% - 12px),
-    0 12px
-  );
+  --clip-fab: none;
   --clip-sheet: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%, 0 14px);
   --clip-surface: polygon(
     0 0,
