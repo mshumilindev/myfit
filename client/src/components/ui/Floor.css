@@ -1,7 +1,9 @@
 /* Floor — kit rule: an opaque floor under every translucent plate. Imported by the surfaces it draws on. */
 /* An opaque floor under every translucent plate: a theme that shows a photo as the page backdrop sets
-   --surface-floor so no plate lets it through (the plate's own gradient is laid over this colour). Unset = untouched. */
-html[data-theme]
+   --surface-floor so no plate lets it through (the plate's own gradient is laid over this colour).
+   Scoped to the themes that set the token: for any other theme an unset var() would turn into
+   `background-color: transparent` and wipe the plate's own fill (Brass Glass lost its cards that way). */
+html[data-theme='cyberpunk']
   :is(
     .uicard:not(.uicard--e-quiet):not(.uicard--nested),
     .uibanner,
@@ -11,5 +13,5 @@ html[data-theme]
     .dialog,
     .sheet
   ) {
-  background-color: var(--surface-floor, transparent);
+  background-color: var(--surface-floor);
 }
