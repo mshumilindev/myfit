@@ -319,8 +319,8 @@ html[data-theme='cyberpunk'] {
       transparent 44%
     ),
     linear-gradient(
-      color-mix(in srgb, var(--color-bg) 50%, transparent),
-      color-mix(in srgb, var(--color-bg) 76%, transparent)
+      color-mix(in srgb, var(--color-bg) 42%, transparent),
+      color-mix(in srgb, var(--color-bg) 70%, transparent)
     );
   --bg-photo-land: url('/backgrounds/gym-land.webp');
   --bg-photo-port: url('/backgrounds/gym-port.webp');
