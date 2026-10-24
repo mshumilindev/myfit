@@ -293,6 +293,9 @@ html[data-theme='cyberpunk'] {
       color-mix(in srgb, var(--color-accent) 11%, transparent),
       transparent
     ),
+    /* scrim + fade-out over everything below: the photo, its glass sheen, the grid and the scanlines all
+       die out into the plain dark under the header (none = no photo) */
+    var(--bg-scrim, none),
     linear-gradient(
         to right,
         color-mix(in srgb, var(--color-accent) 4%, transparent) 1px,
@@ -306,8 +309,6 @@ html[data-theme='cyberpunk'] {
       )
       0 0 / 32px 32px,
     repeating-linear-gradient(0deg, var(--c-ffffff-a22) 0 1px, transparent 1px 3px),
-    /* the app's city photo sits under a scrim so text keeps its contrast (none = no photo) */
-    var(--bg-scrim, none),
     var(--bg-photo, none) center / cover no-repeat;
   --bg-scrim:
     /* the photo lives under the header only and fades out into the plain dark: nothing behind the content */
