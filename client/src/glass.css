@@ -687,7 +687,8 @@ html[data-theme] .uisec-l::before {
   color: var(--color-accent);
   font-weight: 700;
   letter-spacing: 0;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) var(--glow-k), transparent);
+  /* text-shadow, not box-shadow: a glyph mark must not cast a rectangular halo */
+  text-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) var(--glow-k), transparent);
 }
 html[data-theme] .tabbar button.active {
   background: var(--tab-active-mark);
