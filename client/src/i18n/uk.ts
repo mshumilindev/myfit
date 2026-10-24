@@ -1441,7 +1441,8 @@ export const uk: Strings = {
   themesApplied: 'Застосовано',
   themesApply: 'Застосувати',
   themeBrassSub: 'Теплий мідний відтінок на графіті зі світним склом',
-  themeLimeSub: 'Холодний графіт, платиновий текст і один неоновий лаймовий акцент',
+  themeCyberSub:
+    'Неон на чорному: фасочні панелі, моно-дані й свій світний колір для кожного застосунку',
   themesPreviewAlt: 'Як Today виглядає зараз',
   todayEditDone: 'Готово',
   todayEditCancel: 'Скасувати',

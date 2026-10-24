@@ -1401,7 +1401,8 @@ export const et: Strings = {
   themesApplied: 'Rakendatud',
   themesApply: 'Rakenda',
   themeBrassSub: 'Soe messing grafiidil helendava klaasiga',
-  themeLimeSub: 'Külm grafiit, plaatinatekst ja üks neoonlaimi aktsent',
+  themeCyberSub:
+    'Neoon mustal: lõigatud nurgaga paneelid, mono-andmed ja igale rakendusele oma helendav värv',
   themesPreviewAlt: 'Kuidas Today praegu välja näeb',
   todayEditDone: 'Valmis',
   todayEditCancel: 'Tühista',

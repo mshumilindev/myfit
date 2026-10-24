@@ -1424,7 +1424,8 @@ export const lt: Strings = {
   themesApplied: 'Pritaikyta',
   themesApply: 'Taikyti',
   themeBrassSub: 'Šiltas žalvaris ant grafito su švytinčiu stiklu',
-  themeLimeSub: 'Šaltas grafitas, platininis tekstas ir vienas neoninis laimo akcentas',
+  themeCyberSub:
+    'Neonas ant juodo: nusklembtos plokštės, mono duomenys ir sava švytinti spalva kiekvienai programai',
   themesPreviewAlt: 'Kaip Today atrodo dabar',
   todayEditDone: 'Atlikta',
   todayEditCancel: 'Atšaukti',

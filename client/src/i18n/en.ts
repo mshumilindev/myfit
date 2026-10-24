@@ -1392,7 +1392,7 @@ export const en = {
   themesApplied: 'Applied',
   themesApply: 'Apply',
   themeBrassSub: 'Warm brass on graphite with glowing glass',
-  themeLimeSub: 'Cool graphite, platinum text and one neon-lime accent',
+  themeCyberSub: 'Neon on black: chamfered panels, mono data and a glowing colour for every app',
   themesPreviewAlt: 'How Today looks right now',
   todayEditDone: 'Done',
   todayEditCancel: 'Cancel',

@@ -13,7 +13,7 @@ export interface ThemeDef {
 
 export const THEMES: readonly ThemeDef[] = [
   { id: 'glass', name: 'Brass Glass' },
-  { id: 'lime-graphite', name: 'Lime Graphite' },
+  { id: 'cyberpunk', name: 'Cyberpunk' },
   // theme:new inserts new themes above this line
 ];
 

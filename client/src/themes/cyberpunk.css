@@ -1,0 +1,374 @@
+/* Cyberpunk — theme file. Tokens only (contract: themes/contract.ts).
+   Cool graphite surfaces, platinum text, and a neon colour per app (Gym = lime);
+   Barlow / Barlow Condensed type, uppercase condensed headings. */
+html[data-theme='cyberpunk'] {
+  /* identity */
+  --font: 'Barlow', 'Fira Sans', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Chakra Petch', 'Exo 2', 'Arial Narrow', sans-serif;
+  --font-label: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --heading-transform: uppercase;
+  --heading-tracking: 0.03em;
+  --label-tracking: 0.14em;
+  --color-text: var(--c-e6f1ff);
+  --color-text-muted: var(--c-9aa8c4);
+  --color-text-faint: var(--c-8c9ab6);
+  --color-text-disabled: var(--c-485068);
+  --color-accent: var(--c-c8ff3a);
+  --color-accent-100: var(--c-f4ffd0);
+  --color-accent-200: var(--c-e6ff9a);
+  --color-accent-300: var(--c-d9ff6b);
+  --color-accent-400: var(--c-cfff4f);
+  --color-accent-500: var(--c-c8ff3a);
+  --color-accent-600: var(--c-a6d92c);
+  --color-accent-700: var(--c-7fa621);
+  --color-accent-800: var(--c-566f16);
+  --color-accent-900: var(--c-2f3d0c);
+  --color-accent-950: var(--c-1a2206);
+  --color-accent-line: var(--c-566f16);
+  --color-on-accent: var(--c-0c1100);
+  --color-neutral-100: var(--c-eef4ff);
+  --color-neutral-200: var(--c-dbe5f6);
+  --color-neutral-300: var(--c-c0cde3);
+  --color-neutral-400: var(--c-a2b0c9);
+  --color-neutral-500: var(--c-8f9db8);
+  --color-neutral-600: var(--c-7d8aa6);
+  --color-neutral-700: var(--c-485068);
+  --color-neutral-800: var(--c-2b3144);
+  --color-neutral-900: var(--c-1a1f2e);
+  --color-gym: var(--c-c8ff3a);
+  --color-gym-tint: var(--c-1b2008);
+  --color-gym-text: var(--c-e6ff9a);
+  --color-gym-line: var(--c-566f16);
+  --color-note: var(--c-c8ff3a);
+  --color-note-tint: var(--c-1b2008);
+  --color-note-text: var(--c-e6ff9a);
+  --color-note-line: var(--c-566f16);
+  /* semantic families: a restrained palette (info steel, platinum, lime, amber, red) */
+  --color-sleep: var(--c-b9bcc3);
+  --color-sleep-tint: var(--c-1d1e23);
+  --color-sleep-text: var(--c-dcdee2);
+  --color-sleep-line: var(--c-3f4148);
+  --color-chronic: var(--c-b9bcc3);
+  --color-chronic-tint: var(--c-1d1e23);
+  --color-chronic-text: var(--c-dcdee2);
+  --color-chronic-line: var(--c-3f4148);
+  --color-people: var(--c-ff8a1f);
+  --color-people-tint: var(--c-2e1c0b);
+  --color-people-text: var(--c-ffa552);
+  --color-people-line: var(--c-a05512);
+  --color-apex: var(--c-a95cff);
+  --color-apex-tint: var(--c-220e38);
+  --color-apex-text: var(--c-c48fff);
+  --color-apex-line: var(--c-6716c2);
+  --color-learn: var(--c-ff2bd6);
+  --color-learn-tint: var(--c-300c29);
+  --color-learn-text: var(--c-ff5ee0);
+  --color-learn-line: var(--c-a6128a);
+  --color-atlas: var(--c-ff2a55);
+  --color-atlas-tint: var(--c-300c13);
+  --color-atlas-text: var(--c-ff5d7e);
+  --color-atlas-line: var(--c-a61230);
+  --color-warmup: var(--c-8ab8dc);
+  --color-warmup-tint: var(--c-14202b);
+  --color-warmup-text: var(--c-cfe4f4);
+  --color-warmup-line: var(--c-2f4d66);
+  --color-kcal: var(--c-3d8bff);
+  --color-kcal-tint: var(--c-0d1c33);
+  --color-kcal-text: var(--c-70a9ff);
+  --color-kcal-line: var(--c-1453b0);
+  --color-rest: var(--c-8ab8dc);
+  --color-rest-tint: var(--c-14202b);
+  --color-rest-text: var(--c-cfe4f4);
+  --color-rest-line: var(--c-2f4d66);
+  --color-share: var(--c-8ab8dc);
+  --color-share-tint: var(--c-14202b);
+  --color-share-text: var(--c-cfe4f4);
+  --color-share-line: var(--c-2f4d66);
+  --color-active: var(--c-b9bcc3);
+  --color-active-tint: var(--c-1d1e23);
+  --color-active-text: var(--c-dcdee2);
+  --color-active-line: var(--c-3f4148);
+  --color-coach: var(--c-00f0ff);
+  --color-coach-tint: var(--c-0a2729);
+  --color-coach-text: var(--c-33f3ff);
+  --color-coach-line: var(--c-10878e);
+  --color-home: var(--c-c8ff3a);
+  --color-home-tint: var(--c-1b2008);
+  --color-home-text: var(--c-e6ff9a);
+  --color-home-line: var(--c-566f16);
+  --color-sport: var(--c-c8ff3a);
+  --color-sport-tint: var(--c-1b2008);
+  --color-sport-text: var(--c-e6ff9a);
+  --color-sport-line: var(--c-566f16);
+  --color-illness: var(--c-ffb224);
+  --color-illness-tint: var(--c-2a2008);
+  --color-illness-text: var(--c-ffdca0);
+  --color-illness-line: var(--c-7a5a14);
+  --color-conditioning: var(--c-ffb224);
+  --color-conditioning-tint: var(--c-2a2008);
+  --color-conditioning-text: var(--c-ffdca0);
+  --color-conditioning-line: var(--c-7a5a14);
+  --color-injury: var(--c-ff6b5e);
+  --color-injury-tint: var(--c-2c1614);
+  --color-injury-text: var(--c-ffc7c1);
+  --color-injury-line: var(--c-7d302b);
+  --color-rest-200: var(--c-cfe4f4);
+  --color-rest-300: var(--c-a9cbe8);
+  --color-rest-400: var(--c-8ab8dc);
+  --color-rest-700: var(--c-4d7396);
+  --color-rest-800: var(--c-2f4d66);
+  --color-rest-900: var(--c-14202b);
+  --color-sport-300: var(--c-c8ff3a);
+  --color-sport-800: var(--c-566f16);
+  --color-sport-900: var(--c-1b2008);
+  --color-conditioning-300: var(--c-ffb224);
+  --color-conditioning-800: var(--c-7a5a14);
+  --color-conditioning-900: var(--c-2a2008);
+  --color-chronic-deep: var(--c-7f8793);
+  --color-ok: var(--c-2ef2a2);
+  --color-ok-text: var(--c-b4ffdf);
+  --color-ok-tint: var(--c-0b2a1e);
+  --color-ok-line: var(--c-138a5c);
+  --color-danger: var(--c-ff3b5c);
+  --color-danger-text: var(--c-ffc2cc);
+  --color-danger-tint: var(--c-2c0f16);
+  --color-danger-line: var(--c-8a1f35);
+  /* app colour-coding: each app keeps its own neon, so people never mix them up */
+  --skin-apex: var(--c-a95cff);
+  --skin-apex-100: var(--c-efe2fd);
+  --skin-apex-200: var(--c-d4affd);
+  --skin-apex-300: var(--c-c48fff);
+  --skin-apex-400: var(--c-b470ff);
+  --skin-apex-500: var(--c-a95cff);
+  --skin-apex-600: var(--c-8929f4);
+  --skin-apex-700: var(--c-6716c2);
+  --skin-apex-800: var(--c-431576);
+  --skin-apex-900: var(--c-220e38);
+  --skin-learn: var(--c-ff2bd6);
+  --skin-learn-100: var(--c-fde2f8);
+  --skin-learn-200: var(--c-fdafee);
+  --skin-learn-300: var(--c-ff5ee0);
+  --skin-learn-400: var(--c-ff3fda);
+  --skin-learn-500: var(--c-ff2bd6);
+  --skin-learn-600: var(--c-e80cbe);
+  --skin-learn-700: var(--c-a6128a);
+  --skin-learn-800: var(--c-651255);
+  --skin-learn-900: var(--c-300c29);
+  --skin-roster: var(--c-ff8a1f);
+  --skin-roster-100: var(--c-fdefe2);
+  --skin-roster-200: var(--c-fdd4af);
+  --skin-roster-300: var(--c-ffa552);
+  --skin-roster-400: var(--c-ff9533);
+  --skin-roster-500: var(--c-ff8a1f);
+  --skin-roster-600: var(--c-df710c);
+  --skin-roster-700: var(--c-a05512);
+  --skin-roster-800: var(--c-613711);
+  --skin-roster-900: var(--c-2e1c0b);
+  --skin-nutrition: var(--c-3d8bff);
+  --skin-nutrition-100: var(--c-e2edfd);
+  --skin-nutrition-200: var(--c-afcffd);
+  --skin-nutrition-300: var(--c-70a9ff);
+  --skin-nutrition-400: var(--c-5197ff);
+  --skin-nutrition-500: var(--c-3d8bff);
+  --skin-nutrition-600: var(--c-116bf2);
+  --skin-nutrition-700: var(--c-1453b0);
+  --skin-nutrition-800: var(--c-13376b);
+  --skin-nutrition-900: var(--c-0d1c33);
+  --skin-coach: var(--c-00f0ff);
+  --skin-coach-100: var(--c-e2fcfd);
+  --skin-coach-200: var(--c-aff8fd);
+  --skin-coach-300: var(--c-33f3ff);
+  --skin-coach-400: var(--c-14f1ff);
+  --skin-coach-500: var(--c-00f0ff);
+  --skin-coach-600: var(--c-0abcc7);
+  --skin-coach-700: var(--c-10878e);
+  --skin-coach-800: var(--c-0f5257);
+  --skin-coach-900: var(--c-0a2729);
+  --skin-coach-tint: var(--c-0a2729);
+  --skin-coach-text: var(--c-33f3ff);
+  --skin-coach-line: var(--c-10878e);
+  /* surfaces */
+  --color-bg: var(--c-07080c);
+  --color-surface: var(--c-0d0f16);
+  --color-surface-2: var(--c-171b29);
+  --glass-surface: var(--c-0d0f16);
+  --color-control: var(--c-0d0f16);
+  --color-divider: var(--c-8fb4ff-a110);
+  /* glass: graphite, not accent-tinted */
+  --glass-backdrop: none;
+  --glass-float: 0 18px 36px -24px var(--c-000000);
+  --glass-rest-tint: linear-gradient(180deg, var(--c-131726), var(--c-0d0f16));
+  --glass-rest-specular: inset 0 1px 0 var(--c-8fb4ff-a140), inset 0 0 0 1px var(--c-8fb4ff-a110);
+  --glass-accent-k: 0;
+  --glass-base-1: var(--c-131726);
+  --glass-base-2: var(--c-0d0f16);
+  --glass-hero-base-1: var(--c-171c2e);
+  --glass-hero-base-2: var(--c-0d0f16);
+  --glass-edge: inset 0 1px 0 var(--c-8fb4ff-a140), inset 0 0 0 1px var(--c-8fb4ff-a110);
+  --glass-hero-edge:
+    inset 0 1px 0 var(--c-8fb4ff-a180), inset 0 0 0 1px var(--c-8fb4ff-a140),
+    inset 3px 0 0 var(--color-accent);
+  --glass-well: var(--c-06070a);
+  --glass-well-ring: var(--c-8fb4ff-a90);
+  --glass-field: var(--c-090b11);
+  --glass-field-ring: var(--c-8fb4ff-a140);
+  --glass-raised-base: var(--c-121521);
+  --plate-top: var(--c-131726);
+  --plate-bot: var(--c-0d0f16);
+  --plate-rim: var(--c-8fb4ff-a180);
+  --plate-edge: var(--c-8fb4ff-a140);
+  /* moods: barely-there neutral glows */
+  --mood-art: var(--c-07080c);
+  --mood-rest: var(--c-07080c);
+  --mood-sleep: var(--c-08080f);
+  --mood-ok: var(--c-07090a);
+  --mood-bad: var(--c-0b080a);
+  --mood-night: var(--c-050609);
+  --body-dim: var(--c-1f2434);
+  --body-dim-stroke: var(--c-8fb4ff-a180);
+  /* radii and type */
+  /* the radius scale folded to near-square: the chamfer clips give the shape */
+  --r-6: var(--r-2);
+  --r-8: var(--r-2);
+  --r-10: var(--r-4);
+  --r-12: var(--r-4);
+  --r-14: var(--r-4);
+  --r-16: var(--r-4);
+  --r-18: var(--r-4);
+  --r-20: var(--r-4);
+  --r-24: var(--r-4);
+  --radius-lg: var(--r-2);
+  --radius-md: var(--r-2);
+  --radius-sm: var(--r-2);
+  --radius-hero: var(--r-2);
+  --radius-sheet: var(--r-2);
+  --type-d1: 600 40px/1 var(--font-display);
+  --type-h1: 600 30px/1.05 var(--font-display);
+  --type-h2: 600 22px/1.1 var(--font-display);
+  --type-h3: 600 16px/1.3 var(--font-display);
+  --type-b: 400 15px/1.4 var(--font);
+  --type-s: 400 13px/1.4 var(--font);
+  --type-m: 400 12px/1.35 var(--font);
+  --type-l: 600 11px/1.2 var(--font-label);
+  --type-num: 600 30px/1 var(--font-display);
+  --type-hero: 600 64px/0.95 var(--font-display);
+  --lava-1: transparent;
+  --lava-2: transparent;
+  --lava-3: transparent;
+  /* primary button: solid accent, dark ink, soft neon glow */
+  --btn-fill-mix: 100%;
+  --btn-hover-mix: 100%;
+  --btn-active-mix: 100%;
+  --btn-ring-mix: 0%;
+  --btn-ink-on: 100%;
+  --btn-glow: 0 0 0 0 transparent;
+  --glow-k: 55%;
+  --btn-disabled-filter: grayscale(1) brightness(0.5);
+  --btn-case: uppercase;
+  --btn-tracking: 0.06em;
+  /* tab bar and Start: flat graphite bar, solid accent plate, no lens */
+  --tabbar-bg: var(--c-0a0c12);
+  --tabbar-line-mix: 0%;
+  --tabbar-line-flat: var(--c-8fb4ff-a140);
+  --fab-bg: var(--color-accent);
+  --fab-ink: var(--color-on-accent);
+  --fab-edge: 0 0 0 0 transparent;
+  --fab-lens-display: none;
+  --tab-active-mark: linear-gradient(var(--color-accent), var(--color-accent)) top center / 28px 2px
+    no-repeat;
+  --label-mark-display: inline-block;
+  --r-ctl: var(--r-2);
+  --r-input: var(--r-2);
+  --r-bar: var(--r-2);
+  --tile-k: 0.2;
+  --avatar-k: 0.18;
+  /* flat field: no accent top-glow, no diamond lattice, no lava blobs */
+  --ambient-display: none;
+  --backdrop:
+    radial-gradient(
+      90% 38% at 50% -6%,
+      color-mix(in srgb, var(--color-accent) 11%, transparent),
+      transparent
+    ),
+    linear-gradient(
+        to right,
+        color-mix(in srgb, var(--color-accent) 4%, transparent) 1px,
+        transparent 1px
+      )
+      0 0 / 32px 32px,
+    linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--color-accent) 4%, transparent) 1px,
+        transparent 1px
+      )
+      0 0 / 32px 32px,
+    repeating-linear-gradient(0deg, var(--c-ffffff-a22) 0 1px, transparent 1px 3px);
+  --hud-brackets:
+    linear-gradient(var(--color-accent), var(--color-accent)) bottom right / 18px 2px no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) bottom right / 2px 18px no-repeat;
+  --focus-offset: -2px;
+  --label-mark-bg: none;
+  --label-mark-h: auto;
+  --label-mark-w: auto;
+  --label-mark-content: '//';
+  --clip-fab: polygon(
+    12px 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    12px 100%,
+    0 calc(100% - 12px),
+    0 12px
+  );
+  --clip-sheet: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%, 0 14px);
+  --clip-surface: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+  --clip-tag: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+  --clip-ctl: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px));
+  --plate-tint-k: 0;
+  --tone-fill-k: 0;
+  --seg-on-mix: 100%;
+  --segb-on-mix: 100%;
+  --seg-on-ink-k: 100%;
+  --tone-bar-w: 3px;
+  --sheet-mark: inset 0 2px 0 0 var(--color-accent);
+}
+
+/* --- Sub-app skins: the glow per app, kept to a faint tint of graphite --- */
+html[data-theme='cyberpunk'].theme-apex {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}
+html[data-theme='cyberpunk'].theme-learn {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}
+html[data-theme='cyberpunk'].theme-roster {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}
+html[data-theme='cyberpunk'].theme-nutrition {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}
+html[data-theme='cyberpunk'].theme-coach {
+  --glass-raised-base: color-mix(in srgb, var(--color-accent) 4%, var(--c-18191d));
+  --lava-2: transparent;
+  --lava-3: transparent;
+  --plate-top: color-mix(in srgb, var(--color-accent) 5%, var(--c-1d1e23));
+  --plate-bot: color-mix(in srgb, var(--color-accent) 2%, var(--c-141518));
+  --plate-rim: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  --plate-edge: var(--color-accent-line);
+  --t-base: var(--color-accent);
+  --t-tint: var(--color-accent-tint);
+  --t-text: var(--color-accent-text);
+  --t-line: var(--color-accent-line);
+  --t-on: var(--color-bg);
+}

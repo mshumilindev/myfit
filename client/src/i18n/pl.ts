@@ -1406,7 +1406,8 @@ export const pl: Strings = {
   themesApplied: 'Zastosowano',
   themesApply: 'Zastosuj',
   themeBrassSub: 'Ciepły mosiądz na grafitowym tle ze świecącym szkłem',
-  themeLimeSub: 'Chłodny grafit, platynowy tekst i jeden neonowy akcent limonki',
+  themeCyberSub:
+    'Neon na czerni: ścięte panele, dane w monospace i własny świecący kolor dla każdej aplikacji',
   themesPreviewAlt: 'Jak teraz wygląda Today',
   todayEditDone: 'Gotowe',
   todayEditCancel: 'Anuluj',

@@ -109,8 +109,8 @@ describe('ThemesView chrome', () => {
     expect(screen.getByText(en.themesCurrent)).toBeTruthy();
     expect(screen.getByText('Brass Glass')).toBeTruthy();
     expect(screen.getByText(en.themeBrassSub)).toBeTruthy();
-    expect(screen.getByText('Lime Graphite')).toBeTruthy();
-    expect(screen.getByText(en.themeLimeSub)).toBeTruthy();
+    expect(screen.getByText('Cyberpunk')).toBeTruthy();
+    expect(screen.getByText(en.themeCyberSub)).toBeTruthy();
     expect(
       (screen.getByText(en.themesApplied).closest('button') as HTMLButtonElement).disabled,
     ).toBe(true);
@@ -119,11 +119,11 @@ describe('ThemesView chrome', () => {
   it('Apply switches the theme and moves the Current mark to the tapped card', () => {
     render(<ThemesView onClose={vi.fn()} />);
     fireEvent.click(screen.getByText(en.themesApply));
-    expect(document.documentElement.getAttribute('data-theme')).toBe('lime-graphite');
-    expect(localStorage.getItem('gym.theme')).toBe('lime-graphite');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('cyberpunk');
+    expect(localStorage.getItem('gym.theme')).toBe('cyberpunk');
     expect(screen.getAllByText(en.themesApply)).toHaveLength(1);
     const cur = screen.getByText(en.themesCurrent).closest('.uicard') ?? document.body;
-    expect(cur.textContent).toContain('Lime Graphite');
+    expect(cur.textContent).toContain('Cyberpunk');
     act(() => setTheme('glass'));
   });
 });

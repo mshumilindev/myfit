@@ -54,7 +54,7 @@ function TodayPreview({ alt }: { alt: string }) {
 export function ThemesView({ onClose }: { onClose: () => void }) {
   const { t } = useT();
   const current = useTheme();
-  const sub: Record<string, string> = { glass: t.themeBrassSub, 'lime-graphite': t.themeLimeSub };
+  const sub: Record<string, string> = { glass: t.themeBrassSub, cyberpunk: t.themeCyberSub };
   return (
     <div className="screen themes-screen">
       <PageHead back={{ label: t.backAction, onClick: onClose }} title={t.themesTitle} />

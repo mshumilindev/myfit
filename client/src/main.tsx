@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
-// Lime Graphite type (SPO-344, ADR 007): Barlow / Barlow Condensed for latin, Fira Sans / Fira Sans Condensed for
+// Cyberpunk type (SPO-344, ADR 007): Barlow / Barlow Condensed for latin, Fira Sans / Fira Sans Condensed for
 // Cyrillic (Barlow has none). Subsets only, self-hosted.
 import '@fontsource/barlow/latin-400.css';
 import '@fontsource/barlow/latin-500.css';
@@ -18,6 +18,20 @@ import '@fontsource/barlow-condensed/latin-700.css';
 import '@fontsource/barlow-condensed/latin-ext-500.css';
 import '@fontsource/barlow-condensed/latin-ext-600.css';
 import '@fontsource/barlow-condensed/latin-ext-700.css';
+import '@fontsource/chakra-petch/latin-500.css';
+import '@fontsource/chakra-petch/latin-600.css';
+import '@fontsource/chakra-petch/latin-700.css';
+import '@fontsource/chakra-petch/latin-ext-500.css';
+import '@fontsource/chakra-petch/latin-ext-600.css';
+import '@fontsource/chakra-petch/latin-ext-700.css';
+import '@fontsource/exo-2/cyrillic-600.css';
+import '@fontsource/exo-2/cyrillic-700.css';
+import '@fontsource/jetbrains-mono/latin-500.css';
+import '@fontsource/jetbrains-mono/latin-700.css';
+import '@fontsource/jetbrains-mono/latin-ext-500.css';
+import '@fontsource/jetbrains-mono/latin-ext-700.css';
+import '@fontsource/jetbrains-mono/cyrillic-500.css';
+import '@fontsource/jetbrains-mono/cyrillic-700.css';
 import '@fontsource/fira-sans/cyrillic-400.css';
 import '@fontsource/fira-sans/cyrillic-500.css';
 import '@fontsource/fira-sans/cyrillic-600.css';
@@ -29,6 +43,7 @@ import '@fontsource/fira-sans-condensed/cyrillic-700.css';
 import '@fontsource/kaushan-script/latin-400.css';
 import '@fontsource/kaushan-script/latin-ext-400.css';
 import './tokens/primitives.css';
+import './tokens/primitives.cyberpunk.css';
 import './styles.css';
 import './redesign.css';
 import { initTheme } from './themes';
