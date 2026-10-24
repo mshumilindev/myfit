@@ -305,7 +305,17 @@ html[data-theme='cyberpunk'] {
         transparent 1px
       )
       0 0 / 32px 32px,
-    repeating-linear-gradient(0deg, var(--c-ffffff-a22) 0 1px, transparent 1px 3px);
+    repeating-linear-gradient(0deg, var(--c-ffffff-a22) 0 1px, transparent 1px 3px),
+    /* the app's city photo sits under a scrim so text keeps its contrast (none = no photo) */
+    var(--bg-scrim, none),
+    var(--bg-photo, none) center / cover no-repeat;
+  --bg-scrim: linear-gradient(
+    color-mix(in srgb, var(--color-bg) 28%, transparent),
+    color-mix(in srgb, var(--color-bg) 58%, transparent)
+  );
+  --bg-photo-land: url('/backgrounds/gym-land.webp');
+  --bg-photo-port: url('/backgrounds/gym-port.webp');
+  --bg-glitch-content: '';
   --hud-brackets:
     linear-gradient(var(--color-accent), var(--color-accent)) bottom right / 18px 2px no-repeat,
     linear-gradient(var(--color-accent), var(--color-accent)) bottom right / 2px 18px no-repeat;
@@ -340,22 +350,32 @@ html[data-theme='cyberpunk'] {
 
 /* --- Sub-app skins: the glow per app, kept to a faint tint of graphite --- */
 html[data-theme='cyberpunk'].theme-apex {
+  --bg-photo-land: url('/backgrounds/apex-land.webp');
+  --bg-photo-port: url('/backgrounds/apex-port.webp');
   --lava-2: transparent;
   --lava-3: transparent;
 }
 html[data-theme='cyberpunk'].theme-learn {
+  --bg-photo-land: url('/backgrounds/learn-land.webp');
+  --bg-photo-port: url('/backgrounds/learn-port.webp');
   --lava-2: transparent;
   --lava-3: transparent;
 }
 html[data-theme='cyberpunk'].theme-roster {
+  --bg-photo-land: url('/backgrounds/roster-land.webp');
+  --bg-photo-port: url('/backgrounds/roster-port.webp');
   --lava-2: transparent;
   --lava-3: transparent;
 }
 html[data-theme='cyberpunk'].theme-nutrition {
+  --bg-photo-land: url('/backgrounds/nutrition-land.webp');
+  --bg-photo-port: url('/backgrounds/nutrition-port.webp');
   --lava-2: transparent;
   --lava-3: transparent;
 }
 html[data-theme='cyberpunk'].theme-coach {
+  --bg-photo-land: url('/backgrounds/coach-land.webp');
+  --bg-photo-port: url('/backgrounds/coach-port.webp');
   --glass-raised-base: color-mix(in srgb, var(--color-accent) 4%, var(--c-18191d));
   --lava-2: transparent;
   --lava-3: transparent;
