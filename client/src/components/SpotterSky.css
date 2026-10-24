@@ -8,7 +8,7 @@ html[data-sleep='night'] .app-apex-root > :not(.spotter-sky) {
 }
 
 /* Start button: moon-tinted instead of the brass gradient. */
-html[data-sleep='night'][data-theme='glass'] .tabbar-fab {
+html[data-sleep='night'][data-theme] .tabbar-fab {
   color: var(--color-accent-300);
   background: linear-gradient(
     180deg,
@@ -22,7 +22,7 @@ html[data-sleep='night'][data-theme='glass'] .tabbar-fab {
 
 /* The glass lens in the tab bar notch under the button. */
 @media (max-width: 719px) {
-  html[data-sleep='night'][data-theme='glass'] .tabbar-wrap--fab::before {
+  html[data-sleep='night'][data-theme] .tabbar-wrap--fab::before {
     background: radial-gradient(
       circle at 50% 18%,
       color-mix(in srgb, var(--color-accent-200) 20%, transparent),
@@ -35,8 +35,8 @@ html[data-sleep='night'][data-theme='glass'] .tabbar-fab {
 }
 
 /* Sheets, dialogs and toasts: the plate is moonlit, not brown. */
-html[data-sleep='night'][data-theme='glass'],
-html[data-sleep='night'][data-theme='glass'].theme-coach {
+html[data-sleep='night'][data-theme],
+html[data-sleep='night'][data-theme].theme-coach {
   --plate-top: color-mix(in srgb, var(--color-accent) 9%, var(--color-surface));
   --plate-bot: var(--color-bg);
   --plate-rim: color-mix(in srgb, var(--color-accent) 45%, transparent);

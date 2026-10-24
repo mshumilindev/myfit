@@ -3665,10 +3665,10 @@ i > svg {
   flex: none;
   color: var(--color-neutral-500);
 }
-html[data-theme='glass'] .gym-card {
+html[data-theme] .gym-card {
   padding: var(--s-16);
 }
-html[data-theme='glass'] .gym-card .head .n {
+html[data-theme] .gym-card .head .n {
   font-weight: 700;
 }
 
@@ -16433,6 +16433,7 @@ button.badge {
    The reused views (Challenges, Ranks, Awards, Feed) re-skin to amethyst for
    free: `.app-apex` just overrides the accent ramp they already read from.
    ========================================================================== */
+:root.theme-apex,
 .app-apex,
 .theme-apex {
   --color-accent: var(--c-9d6ff0);
@@ -16451,6 +16452,7 @@ button.badge {
 /* People — graphite + silver. Same re-skin trick: override the accent ramp on
    the wrapper (and on the document root, for portaled sheets) so the reused
    Trainer/Admin/Profile views turn silver for free. */
+:root.theme-roster,
 .app-roster,
 .theme-roster {
   --color-accent: var(--c-c3c7cf);
@@ -16471,6 +16473,7 @@ button.badge {
 /* Learn — graphite + rubellite ("gem"). Same re-skin trick: override the accent
    ramp (and the gem helper vars learn.css reads) so the shared sub-app chrome
    turns rose. */
+:root.theme-learn,
 .app-learn,
 .theme-learn {
   --color-accent: var(--c-e5537e);
@@ -16492,6 +16495,7 @@ button.badge {
    primitives and every screen follow the Coach colour. The tint/text/line aliases are set here
    too: `:root` resolves them once against the gold ramp, so a wrapper (unlike the root) would
    otherwise keep brass borders. */
+:root.theme-coach,
 .app-coach,
 .theme-coach {
   --color-accent: var(--c-32bbc8);
@@ -16510,6 +16514,7 @@ button.badge {
   --coach-glow: var(--c-32bbc8-a500);
 }
 
+:root.theme-nutrition,
 .app-nutrition,
 .theme-nutrition {
   --color-accent: var(--c-4f93d6);
@@ -16668,8 +16673,8 @@ button.badge {
 .apx-card.uicard {
   padding: var(--s-16);
 }
-html[data-theme='glass'] .apx-active-title,
-html[data-theme='glass'] .apx-streak-n {
+html[data-theme] .apx-active-title,
+html[data-theme] .apx-streak-n {
   font-weight: 700;
 }
 .apx-ring-ic {
@@ -26457,7 +26462,7 @@ body {
   );
   border-bottom: var(--bw-1) solid color-mix(in srgb, var(--atl) 26%, transparent);
 }
-html[data-theme='glass'] .chs.atl-thread {
+html[data-theme] .chs.atl-thread {
   background:
     radial-gradient(
       90% 45% at 82% 22%,
@@ -26670,7 +26675,7 @@ html[data-theme='glass'] .chs.atl-thread {
 .activity-screen.cat-sport .av-head-name i {
   color: var(--color-sport-300);
 }
-html[data-theme='glass'] .apx-recent {
+html[data-theme] .apx-recent {
   padding: var(--s-4) 0;
 }
 

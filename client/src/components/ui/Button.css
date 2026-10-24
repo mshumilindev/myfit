@@ -125,7 +125,7 @@
 
 @media (hover: hover) {
   .uibtn--primary:not(:disabled):hover {
-    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    background: color-mix(in srgb, var(--color-accent) var(--btn-hover-mix, 12%), transparent);
   }
   .uibtn--secondary:not(:disabled):hover {
     background: var(--state-hover);

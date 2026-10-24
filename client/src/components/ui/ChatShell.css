@@ -51,7 +51,7 @@
 @media (max-width: 719px) {
   .chs,
   .chs.uicard,
-  html[data-theme='glass'] .chs.uicard {
+  html[data-theme] .chs.uicard {
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -74,7 +74,7 @@
 @media (min-width: 720px) and (max-width: 767px) {
   .chs--coach,
   .chs--coach.uicard,
-  html[data-theme='glass'] .chs--coach.uicard {
+  html[data-theme] .chs--coach.uicard {
     border: 0;
     border-radius: 0;
     background: transparent;

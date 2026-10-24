@@ -134,19 +134,19 @@
   height: var(--sz-104);
   opacity: 0.6;
 }
-html[data-theme='glass'] .pg-mine .pg-card-name {
+html[data-theme] .pg-mine .pg-card-name {
   font-size: var(--fs-34);
   line-height: 1.1;
   letter-spacing: -0.01em;
 }
-html[data-theme='glass'] .pg-mine {
+html[data-theme] .pg-mine {
   padding: var(--s-18) var(--s-20) var(--s-20);
   gap: var(--s-8);
 }
-html[data-theme='glass'] .pg-card-name {
+html[data-theme] .pg-card-name {
   font-size: var(--fs-22);
 }
-html[data-theme='glass'] .pg-mine .pg-card-name {
+html[data-theme] .pg-mine .pg-card-name {
   font-size: var(--fs-34);
 }
 .pg-card-name {

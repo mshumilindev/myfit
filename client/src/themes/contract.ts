@@ -1,8 +1,8 @@
 /**
  * Theme contract (SPO-344, ADR 010): the tokens EVERY theme file must set on html[data-theme=<id>].
  * Source of truth is the reference theme (glass.css); tests/theme-contract.guard.test.ts fails when a
- * theme misses one, or sets a token that is not listed here. Anything not listed (accent, text
- * colours, status colours) falls back to the base palette in styles.css.
+ * theme misses one, or sets a token that is not listed here. Anything not listed (status colours,
+ * the semantic families) falls back to the base palette in styles.css.
  */
 export const THEME_TOKENS = [
   '--color-bg',
@@ -49,6 +49,73 @@ export const THEME_TOKENS = [
   '--plate-bot',
   '--plate-rim',
   '--plate-edge',
+  // Identity (SPO-344 stage 2): fonts, text, accent, neutrals, brand families. Before this a theme
+  // could not change them: styles.css owned them and only the accent axis could swap the accent.
+  '--font',
+  '--font-display',
+  '--heading-transform',
+  '--heading-tracking',
+  '--label-tracking',
+  '--color-text',
+  '--color-text-muted',
+  '--color-text-faint',
+  '--color-text-disabled',
+  '--color-accent',
+  '--color-accent-100',
+  '--color-accent-200',
+  '--color-accent-300',
+  '--color-accent-400',
+  '--color-accent-500',
+  '--color-accent-600',
+  '--color-accent-700',
+  '--color-accent-800',
+  '--color-accent-900',
+  '--color-accent-950',
+  '--color-on-accent',
+  '--color-neutral-100',
+  '--color-neutral-200',
+  '--color-neutral-300',
+  '--color-neutral-400',
+  '--color-neutral-500',
+  '--color-neutral-600',
+  '--color-neutral-700',
+  '--color-neutral-800',
+  '--color-neutral-900',
+  '--color-gym',
+  '--color-gym-tint',
+  '--color-gym-text',
+  '--color-gym-line',
+  '--color-note',
+  '--color-note-tint',
+  '--color-note-text',
+  '--color-note-line',
+  // Accent-derived glass: k = how much of the app accent tints glass cards and the hero (1 = fully,
+  // 0 = none); the bases are what the tint sits on; the edges are extra box-shadow layers.
+  '--glass-accent-k',
+  '--glass-base-1',
+  '--glass-base-2',
+  '--glass-hero-base-1',
+  '--glass-hero-base-2',
+  '--glass-edge',
+  '--glass-hero-edge',
+  // Primary / filled button: fill and ring strength (percent of the tone colour), how much of the
+  // ink is the dark "on" colour (0% = tone text, 100% = on colour), outer glow, label case/tracking.
+  '--btn-fill-mix',
+  '--btn-hover-mix',
+  '--btn-active-mix',
+  '--btn-ring-mix',
+  '--btn-ink-on',
+  '--btn-glow',
+  '--btn-case',
+  '--btn-tracking',
+  // Tab bar and its Start button.
+  '--tabbar-bg',
+  '--tabbar-line-mix',
+  '--tabbar-line-flat',
+  '--fab-bg',
+  '--fab-ink',
+  '--fab-edge',
+  '--fab-lens-display',
 ] as const;
 
 /**

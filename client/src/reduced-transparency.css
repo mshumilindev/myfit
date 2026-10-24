@@ -38,7 +38,7 @@
     --bf-sky: none;
   }
 
-  html[data-theme='glass'] {
+  html[data-theme] {
     --glass-surface: var(--color-surface);
     --glass-tint: linear-gradient(var(--color-surface), var(--color-surface));
     --glass-hero-tint: linear-gradient(var(--color-surface), var(--color-surface));

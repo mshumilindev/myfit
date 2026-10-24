@@ -312,7 +312,7 @@
   gap: var(--s-6);
 }
 /* a card: one calm plate, the state is the inset bar + one small glyph in the top-right slot. No outline, glow or coloured border. */
-html[data-theme='glass'] .sc-block.sc-st,
+html[data-theme] .sc-block.sc-st,
 .sc-block {
   background: color-mix(in srgb, var(--sc-state) 12%, var(--color-surface));
   box-shadow: none;
@@ -330,15 +330,15 @@ html[data-theme='glass'] .sc-block.sc-st,
   border-radius: var(--radius-pill);
   background: var(--sc-state);
 }
-html[data-theme='glass'] .sc-block.sc-st.sc-block--done {
+html[data-theme] .sc-block.sc-st.sc-block--done {
   background: color-mix(in srgb, var(--sc-state) 9%, var(--color-surface));
   color: var(--color-text-muted);
 }
-html[data-theme='glass'] .sc-block.sc-st.sc-block--missed {
+html[data-theme] .sc-block.sc-st.sc-block--missed {
   background: color-mix(in srgb, var(--sc-state) 10%, var(--color-surface));
 }
 /* proposed move / "Moved to": a dashed ghost, no fill, no bar; the padding is the same as every card */
-html[data-theme='glass'] .sc-block.sc-st.sc-block--proposed {
+html[data-theme] .sc-block.sc-st.sc-block--proposed {
   background: transparent;
   box-shadow: inset 0 0 0 var(--co-hair) var(--sc-state);
   border: 0;
@@ -353,7 +353,7 @@ html[data-theme='glass'] .sc-block.sc-st.sc-block--proposed {
   text-decoration: line-through;
 }
 /* running now: solid accent, the thin bar at the foot is the elapsed share */
-html[data-theme='glass'] .sc-block.sc-st.sc-block--inprogress {
+html[data-theme] .sc-block.sc-st.sc-block--inprogress {
   background: var(--sc-state);
   box-shadow: none;
   color: var(--color-bg);

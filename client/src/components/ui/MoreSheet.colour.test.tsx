@@ -69,7 +69,7 @@ describe('phone More sheet: colour-coded to the current app', () => {
       /var\(--t-base\) 7%[\s\S]*border: 1px solid var\(--t-line\)/,
     );
     expect(glass).toMatch(
-      /\.sheet--toned\.shell-sheet,\s*html\[data-theme=glass\] \.sheet\.sheet--toned\.uimore \{/,
+      /\.sheet--toned\.shell-sheet,\s*html\[data-theme\] \.sheet\.sheet--toned\.uimore \{/,
     );
   });
 

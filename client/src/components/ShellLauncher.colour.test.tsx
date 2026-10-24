@@ -127,7 +127,7 @@ describe('ShellLauncher: tokens and contrast', () => {
   it('the selected rule (Card.css, glass.css) and the caret read the family tokens, not a fixed colour', () => {
     for (const [file, sel] of [
       ['ui/Card.css', '.uicard--selected {'],
-      ['../glass.css', 'html[data-theme=glass] .uicard.uicard--selected {'],
+      ['../glass.css', 'html[data-theme] .uicard.uicard--selected {'],
     ]) {
       const src =
         file === '../glass.css' ? glassCss() : readFileSync(join(__dirname, file), 'utf8');
@@ -178,7 +178,7 @@ describe('ShellLauncher: tokens and contrast', () => {
 
   it('the sheet recipe in CSS: current-app tone, accent 6-8% over a dark base, 1px accent-line edge', () => {
     const glass = glassCss();
-    const at = glass.indexOf('html[data-theme=glass] .sheet.sheet--toned.uimore {');
+    const at = glass.indexOf('html[data-theme] .sheet.sheet--toned.uimore {');
     expect(at).toBeGreaterThan(0);
     const rule = glass.slice(at, glass.indexOf('\n}\n', at));
     expect(rule).toMatch(/var\(--t-base\) 8%/);

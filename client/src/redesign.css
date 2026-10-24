@@ -213,12 +213,12 @@
   color: var(--c-f6c3bc);
 }
 /* Brass Glass: the big number carries the type scale's bold. */
-html[data-theme='glass'] .ov-big {
+html[data-theme] .ov-big {
   font-size: var(--fs-52);
   font-weight: 700;
   letter-spacing: -0.03em;
 }
-html[data-theme='glass'] .ov-unit {
+html[data-theme] .ov-unit {
   font-size: var(--fs-18);
   font-weight: 600;
 }
@@ -387,12 +387,12 @@ html[data-theme='glass'] .ov-unit {
   letter-spacing: -0.025em;
   line-height: 1.15;
 }
-html[data-theme='glass'] .pv-title,
-html[data-theme='glass'] .screen .pg-h1,
-html[data-theme='glass'] html[data-theme='glass'] .hl .hl-pt,
-html[data-theme='glass'] .sleep-topbar-title,
-html[data-theme='glass'] .mst-head-title,
-html[data-theme='glass'] .rx .topbar .tt {
+html[data-theme] .pv-title,
+html[data-theme] .screen .pg-h1,
+html[data-theme] html[data-theme] .hl .hl-pt,
+html[data-theme] .sleep-topbar-title,
+html[data-theme] .mst-head-title,
+html[data-theme] .rx .topbar .tt {
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -1173,16 +1173,16 @@ div.hist-item {
   flex-direction: column;
   gap: var(--s-18);
 }
-html[data-theme='glass'] .kpi .big {
+html[data-theme] .kpi .big {
   font-size: var(--fs-52);
   font-weight: 700;
   letter-spacing: -0.03em;
 }
-html[data-theme='glass'] .kpi .unit {
+html[data-theme] .kpi .unit {
   font-size: var(--fs-18);
   font-weight: 600;
 }
-html[data-theme='glass'] .kpi .lab {
+html[data-theme] .kpi .lab {
   font-weight: 600;
   color: var(--color-text-muted);
 }
@@ -1248,8 +1248,8 @@ html[data-theme='glass'] .kpi .lab {
   letter-spacing: -0.025em;
   line-height: 1.15;
 }
-html[data-theme='glass'] .la-pbar .la-ptitle,
-html[data-theme='glass'] .wlib-top .wlib-title {
+html[data-theme] .la-pbar .la-ptitle,
+html[data-theme] .wlib-top .wlib-title {
   font-weight: 700;
   letter-spacing: -0.02em;
 }

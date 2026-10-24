@@ -80,6 +80,72 @@ html[data-theme='glass'] {
   --plate-bot: var(--c-121110-a980);
   --plate-rim: var(--c-eed3a5-a450);
   --plate-edge: var(--c-d9a24f-a220);
+  /* identity (SPO-344 stage 2): the values styles.css carried, so Brass Glass is unchanged */
+  --font-display: var(--font);
+  --heading-transform: none;
+  --heading-tracking: normal;
+  --label-tracking: 0.12em;
+  --font: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --color-text: var(--c-e9eaec);
+  --color-text-muted: var(--color-neutral-500);
+  --color-text-faint: var(--color-neutral-600);
+  --color-text-disabled: var(--color-neutral-700);
+  --color-accent: var(--c-d9a24f);
+  --color-accent-100: var(--c-fbf3e6);
+  --color-accent-200: var(--c-f6e6cb);
+  --color-accent-300: var(--c-eed3a5);
+  --color-accent-400: var(--c-e4bb76);
+  --color-accent-500: var(--c-d9a24f);
+  --color-accent-600: var(--c-b3833d);
+  --color-accent-700: var(--c-8a642e);
+  --color-accent-800: var(--c-5b4420);
+  --color-accent-900: var(--c-342713);
+  --color-accent-950: var(--c-1e160b);
+  --color-neutral-100: var(--c-f5f6f7);
+  --color-neutral-200: var(--c-e6e8ea);
+  --color-neutral-300: var(--c-d0d3d6);
+  --color-neutral-400: var(--c-b0b4b8);
+  --color-neutral-500: var(--c-9a9fa4);
+  --color-neutral-600: var(--c-8c9196);
+  --color-neutral-700: var(--c-55595e);
+  --color-neutral-800: var(--c-3b3f43);
+  --color-neutral-900: var(--c-262a2d);
+  --color-gym: var(--c-d9a24f);
+  --color-gym-tint: var(--c-342713);
+  --color-gym-text: var(--c-eed3a5);
+  --color-gym-line: var(--c-5a4524);
+  --color-note: var(--c-d9a24f);
+  --color-note-tint: var(--c-2c2316);
+  --color-note-text: var(--c-f6e6cb);
+  --color-note-line: var(--c-5b4420);
+  --color-on-accent: var(--color-accent-950);
+  /* accent-derived glass: full accent tint on a warm brown base (was inline in glass.css) */
+  --glass-accent-k: 1;
+  --glass-base-1: var(--c-14120e-a440);
+  --glass-base-2: var(--c-14120e-a580);
+  --glass-hero-base-1: var(--c-16130e-a700);
+  --glass-hero-base-2: var(--c-16130e-a780);
+  --glass-edge: 0 0 0 0 transparent;
+  --glass-hero-edge: 0 0 0 0 transparent;
+  /* primary / filled button: accent-outlined tint */
+  --btn-fill-mix: 18%;
+  --btn-hover-mix: 12%;
+  --btn-active-mix: 26%;
+  --btn-ring-mix: 62%;
+  --btn-ink-on: 0%;
+  --btn-glow: 0 0 0 0 transparent;
+  --btn-case: none;
+  --btn-tracking: normal;
+  /* tab bar and Start button: frosted bar, brass hairline, brass lens and plate */
+  --tabbar-bg:
+    linear-gradient(180deg, var(--c-ffffff-a50), transparent 55%),
+    linear-gradient(180deg, var(--c-111214-a880), var(--c-0b0c0d-a940));
+  --tabbar-line-mix: 100%;
+  --tabbar-line-flat: transparent;
+  --fab-bg: linear-gradient(180deg, var(--c-3a2f1d), var(--c-171410));
+  --fab-ink: var(--color-accent-300);
+  --fab-edge: inset 0 1.2px 0.5px var(--c-eed3a5-a500), inset 0 0 0 1px var(--c-d9a24f-a550);
+  --fab-lens-display: block;
 }
 
 /* --- Sub-app skins: the colour of the screen glow per app (theme × skin) --- */

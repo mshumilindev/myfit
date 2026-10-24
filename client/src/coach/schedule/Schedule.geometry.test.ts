@@ -27,7 +27,7 @@ describe('Hour labels sit in the gutter, not on the lines (iter19)', () => {
 
 describe('The chat popover is solid frosted glass (iter19)', () => {
   const glass = glassCss();
-  const block = rule(glass, 'html[data-theme=glass] .uicard.cd-card');
+  const block = rule(glass, 'html[data-theme] .uicard.cd-card');
   it('is at least 94% opaque: it paints from the shared plate tokens, and every plate stop is >= 0.94', () => {
     expect(block).toMatch(/var\(--plate-top\)/);
     expect(block).toMatch(/var\(--plate-bot\)/);

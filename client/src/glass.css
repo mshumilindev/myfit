@@ -18,46 +18,63 @@
 
 /* Accent-derived glass — recomputed inside every sub-app (.apex-app), so hero and
    glass cards wear the app's colour (brass in Gym, violet in Apex, pink in Learn…). */
-html[data-theme='glass'],
-html[data-theme='glass'] .apex-app {
+html[data-theme],
+html[data-theme] .apex-app {
   --glass-tint: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--color-accent) 16%, var(--c-14120e-a440)),
-    var(--c-14120e-a580)
+    color-mix(in srgb, var(--color-accent) calc(16% * var(--glass-accent-k)), var(--glass-base-1)),
+    var(--glass-base-2)
   );
   --glass-specular:
-    inset 0 1.2px 0.5px color-mix(in srgb, var(--color-accent-200) 45%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 26%, transparent);
+    inset 0 1.2px 0.5px
+      color-mix(in srgb, var(--color-accent-200) calc(45% * var(--glass-accent-k)), transparent),
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--color-accent) calc(26% * var(--glass-accent-k)), transparent),
+    var(--glass-edge);
   --glass-brass-tint: var(--glass-tint);
   --glass-brass-specular: var(--glass-specular);
   /* hero (kit .card.hero) — the one focal block of a screen */
   --glass-hero-tint:
     radial-gradient(
       120% 90% at 20% 0%,
-      color-mix(in srgb, var(--color-accent) 20%, transparent),
+      color-mix(in srgb, var(--color-accent) calc(20% * var(--glass-accent-k)), transparent),
       transparent 60%
     ),
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--color-accent) 22%, var(--c-16130e-a700)),
-      var(--c-16130e-a780)
+      color-mix(
+        in srgb,
+        var(--color-accent) calc(22% * var(--glass-accent-k)),
+        var(--glass-hero-base-1)
+      ),
+      var(--glass-hero-base-2)
     );
   --glass-hero-specular:
-    inset 0 1.4px 0.5px color-mix(in srgb, var(--color-accent-200) 62%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 50%, transparent),
-    0 22px 60px -22px color-mix(in srgb, var(--color-accent) 55%, transparent),
-    0 10px 30px -12px var(--c-000000-a700);
+    inset 0 1.4px 0.5px
+      color-mix(in srgb, var(--color-accent-200) calc(62% * var(--glass-accent-k)), transparent),
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--color-accent) calc(50% * var(--glass-accent-k)), transparent),
+    0 22px 60px -22px
+      color-mix(in srgb, var(--color-accent) calc(55% * var(--glass-accent-k)), transparent),
+    0 10px 30px -12px var(--c-000000-a700), var(--glass-hero-edge);
+}
+
+/* Headings follow the theme's display face and case (SPO-344 stage 2). Zero specificity: any component rule wins. */
+:where(h1, h2) {
+  font-family: var(--font-display);
+  text-transform: var(--heading-transform);
+  letter-spacing: var(--heading-tracking);
 }
 
 /* --- Screen background: the art mood glow, drifting like a lava lamp --------- */
-html[data-theme='glass'] body {
+html[data-theme] body {
   background: var(--color-bg);
 }
-html[data-theme='glass'] .app,
-html[data-theme='glass'] .apex-app,
-html[data-theme='glass'] .app-learn,
-html[data-theme='glass'] .app-roster,
-html[data-theme='glass'] .app-nutrition {
+html[data-theme] .app,
+html[data-theme] .apex-app,
+html[data-theme] .app-learn,
+html[data-theme] .app-roster,
+html[data-theme] .app-nutrition {
   background: transparent;
 }
 .lava {
@@ -153,34 +170,34 @@ html[data-motion='full'] .lava-c {
 html[data-sleep='night'] .lava {
   display: none;
 }
-html[data-theme='glass'] .screen[data-mood='rest'] {
+html[data-theme] .screen[data-mood='rest'] {
   background: var(--mood-rest);
 }
-html[data-theme='glass'] .screen[data-mood='sleep'] {
+html[data-theme] .screen[data-mood='sleep'] {
   background: var(--mood-sleep);
 }
-html[data-theme='glass'] .screen[data-mood='ok'] {
+html[data-theme] .screen[data-mood='ok'] {
   background: var(--mood-ok);
 }
-html[data-theme='glass'] .screen[data-mood='bad'] {
+html[data-theme] .screen[data-mood='bad'] {
   background: var(--mood-bad);
 }
-html[data-theme='glass'] .screen[data-mood='night'] {
+html[data-theme] .screen[data-mood='night'] {
   background: var(--mood-night);
 }
 
 /* --- Shell: brand bar (kit BrandBar) — melts into the page; round well controls ---- */
-html[data-theme='glass'] .uibrand {
+html[data-theme] .uibrand {
   /* no plate — the bar melts into the page background */
   padding: var(--s-8) var(--s-20) var(--s-12);
 }
-html[data-theme='glass'] .uibrand-actions {
+html[data-theme] .uibrand-actions {
   top: 0;
   gap: var(--s-8);
 }
-html[data-theme='glass'] .uibrand-actions .mst-badge,
-html[data-theme='glass'] .uibrand-actions .uibell,
-html[data-theme='glass'] .uibrand-actions .lang-chip {
+html[data-theme] .uibrand-actions .mst-badge,
+html[data-theme] .uibrand-actions .uibell,
+html[data-theme] .uibrand-actions .lang-chip {
   width: var(--ctl-h-sm);
   height: var(--ctl-h-sm);
   min-width: var(--ctl-h-sm);
@@ -190,17 +207,17 @@ html[data-theme='glass'] .uibrand-actions .lang-chip {
   background: var(--glass-well);
   box-shadow: inset 0 0 0 1px var(--glass-well-ring);
 }
-html[data-theme='glass'] .uibrand-actions .mst-badge.calib {
+html[data-theme] .uibrand-actions .mst-badge.calib {
   background: var(--glass-well);
   box-shadow: inset 0 0 0 1px var(--glass-well-ring);
 }
-html[data-theme='glass'] .uibrand-actions .lang-chip {
+html[data-theme] .uibrand-actions .lang-chip {
   font-size: var(--fs-16);
 }
-html[data-theme='glass'] .uibrand-actions .uibell {
+html[data-theme] .uibrand-actions .uibell {
   font-size: var(--fs-17);
 }
-html[data-theme='glass'] .uibell-badge {
+html[data-theme] .uibell-badge {
   top: -3px;
   right: -3px;
   background: var(--color-danger);
@@ -211,22 +228,21 @@ html[data-theme='glass'] .uibell-badge {
 /* --- Shell: tab bar with the glass FAB ----------------------------------- */
 /* Hairline colour follows the app's accent (brass in Gym, violet in Apex, …) — an
    opaque mix so it reads the same over the bar and over the notch lens. */
-html[data-theme='glass'] .tabbar-wrap {
+html[data-theme] .tabbar-wrap {
   --glass-brass-line: color-mix(in srgb, var(--color-accent) 45%, var(--c-121316));
 }
-html[data-theme='glass'] .tabbar {
+html[data-theme] .tabbar {
   /* Frosted glass like the sheets. The notch is cut with clip-path (not mask):
      a mask isolates the backdrop (no blur at all) and Safari ignores it for
      backdrop-filter, while clip-path clips the blur cleanly. */
-  background:
-    linear-gradient(180deg, var(--c-ffffff-a50), transparent 55%),
-    linear-gradient(180deg, var(--c-111214-a880), var(--c-0b0c0d-a940));
+  background: var(--tabbar-bg);
   backdrop-filter: var(--bf-glass-strong);
   -webkit-backdrop-filter: var(--bf-glass-strong);
   /* brass hairline along the top edge, like the glass plates */
-  border-top: var(--bw-1) solid var(--glass-brass-line);
+  border-top: var(--bw-1) solid
+    color-mix(in srgb, var(--glass-brass-line) var(--tabbar-line-mix), var(--tabbar-line-flat));
 }
-html[data-theme='glass'] .tabbar-notched {
+html[data-theme] .tabbar-notched {
   -webkit-mask: none;
   mask: none;
   clip-path: polygon(
@@ -256,14 +272,14 @@ html[data-theme='glass'] .tabbar-notched {
 /* The notch is a true cut-out: page content runs underneath the bar, so the ring
    around the Start button shows what is behind it instead of the page glow. */
 @media (max-width: 719px) {
-  html[data-theme='glass'] .tabbar-wrap--fab {
+  html[data-theme] .tabbar-wrap--fab {
     margin-top: -56px;
     pointer-events: none;
   }
-  html[data-theme='glass'] .tabbar-wrap--fab > * {
+  html[data-theme] .tabbar-wrap--fab > * {
     pointer-events: auto;
   }
-  html[data-theme='glass'] .main-col:has(.tabbar-wrap--fab) .stage-layer > .screen {
+  html[data-theme] .main-col:has(.tabbar-wrap--fab) .stage-layer > .screen {
     /* the strip the screen keeps free for the tab bar; a pinned bottom bar reads it to sit in that strip */
     --screen-pad-b: 76px;
     padding-bottom: var(--screen-pad-b);
@@ -272,7 +288,7 @@ html[data-theme='glass'] .tabbar-notched {
 @media (max-width: 719px) {
   /* Liquid-glass lens in the notch: what runs under the Start button is blurred and
      brass-tinted, with a bright specular rim (top-lit) like Apple's glass. */
-  html[data-theme='glass'] .tabbar-wrap--fab::before {
+  html[data-theme] .tabbar-wrap--fab::before {
     content: '';
     position: absolute;
     left: 50%;
@@ -285,6 +301,7 @@ html[data-theme='glass'] .tabbar-notched {
     clip-path: inset(20px 0 0 0);
     z-index: var(--z-30);
     pointer-events: none;
+    display: var(--fab-lens-display);
     background: radial-gradient(
       circle at 50% 18%,
       var(--c-eed3a5-a200),
@@ -296,22 +313,20 @@ html[data-theme='glass'] .tabbar-notched {
     box-shadow: inset 0 0 0 1px var(--glass-brass-line);
   }
 }
-html[data-theme='glass'] .tabbar-fab {
-  color: var(--color-accent-300);
+html[data-theme] .tabbar-fab {
+  color: var(--fab-ink);
   /* Opaque: the button itself never shows the page through it. */
-  background: linear-gradient(180deg, var(--c-3a2f1d), var(--c-171410));
-  box-shadow:
-    inset 0 1.2px 0.5px var(--c-eed3a5-a500),
-    inset 0 0 0 1px var(--c-d9a24f-a550);
+  background: var(--fab-bg);
+  box-shadow: var(--fab-edge);
 }
 
 /* --- Shell: desktop rail --------------------------------------------------- */
 @media (min-width: 720px) {
-  html[data-theme='glass'] .rail {
+  html[data-theme] .rail {
     background: var(--color-rail);
     box-shadow: 1px 0 0 var(--color-divider);
   }
-  html[data-theme='glass'] .rail-item.active {
+  html[data-theme] .rail-item.active {
     color: var(--color-accent-300);
     background: color-mix(in srgb, var(--color-accent) 14%, transparent);
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent);
@@ -320,7 +335,7 @@ html[data-theme='glass'] .tabbar-fab {
 }
 
 /* --- Shell: sheets, dialogs, snackbar (brass glass) ------------------------- */
-html[data-theme='glass'] .sheet {
+html[data-theme] .sheet {
   background: linear-gradient(180deg, var(--plate-top), var(--plate-bot));
   backdrop-filter: var(--bf-glass);
   -webkit-backdrop-filter: var(--bf-glass);
@@ -330,7 +345,7 @@ html[data-theme='glass'] .sheet {
 }
 /* Toned drawer (kit <Sheet tone>): the family colours the plate, its edge, the
    grabber and the title. */
-html[data-theme='glass'] .sheet.sheet--toned {
+html[data-theme] .sheet.sheet--toned {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--t-base) 20%, var(--plate-top)),
@@ -340,16 +355,16 @@ html[data-theme='glass'] .sheet.sheet--toned {
     inset 0 1.2px 0.5px color-mix(in srgb, var(--t-base) 60%, white),
     inset 0 0 0 1px color-mix(in srgb, var(--t-base) 45%, transparent);
 }
-html[data-theme='glass'] .sheet.sheet--toned .grabber {
+html[data-theme] .sheet.sheet--toned .grabber {
   background: color-mix(in srgb, var(--t-base) 70%, transparent);
 }
-html[data-theme='glass'] .sheet.sheet--toned .ss-title,
-html[data-theme='glass'] .sheet.sheet--toned .day-sheet-head .t {
+html[data-theme] .sheet.sheet--toned .ss-title,
+html[data-theme] .sheet.sheet--toned .day-sheet-head .t {
   color: var(--t-text);
 }
 /* Popovers (account, action menus, pickers): the same frosted plate as the sheets, tinted by the
    current app's family colour (--t-base), so the Coach popovers are tourmaline and others keep theirs. */
-html[data-theme='glass'] .uipop {
+html[data-theme] .uipop {
   /* Near-opaque base: text of the page behind (a chat) must not read through a picker. */
   background: linear-gradient(
     180deg,
@@ -365,7 +380,7 @@ html[data-theme='glass'] .uipop {
 }
 /* Coach chat popover (the dock panel): a solid frosted family-tinted plate (about 96% opaque, strong blur), so the
    calendar or list behind it never reads through the conversation list. Same recipe as the popovers above. */
-html[data-theme='glass'] .uicard.cd-card {
+html[data-theme] .uicard.cd-card {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--t-base, var(--color-accent)) 14%, var(--plate-top)),
@@ -382,8 +397,8 @@ html[data-theme='glass'] .uicard.cd-card {
 /* App launcher: the plate is the current app's accent at 6-8% over a dark base, with a 1px
    accent-line edge; the tiles on it (lighter glass, own rims) stay clearly separate. Contrast is
    pinned numerically in ShellLauncher.colour.test.tsx. */
-html[data-theme='glass'] .sheet.sheet--toned.shell-sheet,
-html[data-theme='glass'] .sheet.sheet--toned.uimore {
+html[data-theme] .sheet.sheet--toned.shell-sheet,
+html[data-theme] .sheet.sheet--toned.uimore {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--t-base) 8%, var(--shell-sheet-base)),
@@ -394,7 +409,7 @@ html[data-theme='glass'] .sheet.sheet--toned.uimore {
     inset 0 1.2px 0.5px color-mix(in srgb, var(--t-base) 45%, transparent),
     inset 0 0 0 1px var(--t-line);
 }
-html[data-theme='glass'] .dialog {
+html[data-theme] .dialog {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--t-base, var(--color-accent)) 14%, var(--plate-top)),
@@ -405,13 +420,13 @@ html[data-theme='glass'] .dialog {
     inset 0 1.2px 0.5px var(--plate-rim),
     inset 0 0 0 1px color-mix(in srgb, var(--t-base, var(--color-accent)) 42%, transparent);
 }
-html[data-theme='glass'] .dialog-title i {
+html[data-theme] .dialog-title i {
   color: var(--t-base);
 }
-html[data-theme='glass'] .dialog-scrim {
+html[data-theme] .dialog-scrim {
   background: var(--c-060608-a620);
 }
-html[data-theme='glass'] .toast {
+html[data-theme] .toast {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--t-base, var(--color-accent)) 14%, var(--plate-top)),
@@ -423,39 +438,39 @@ html[data-theme='glass'] .toast {
     inset 0 1.2px 0.5px var(--plate-rim),
     inset 0 0 0 1px color-mix(in srgb, var(--t-base, var(--color-accent)) 40%, transparent);
 }
-html[data-theme='glass'] .toast > i {
+html[data-theme] .toast > i {
   color: var(--t-base);
 }
 
 /* --- Kit primitives: surfaces --------------------------------------------- */
 /* One radius per emphasis, regardless of feature classes (18 card / 24 hero). */
-html[data-theme='glass'] .uicard:not(.uicard--e-quiet) {
+html[data-theme] .uicard:not(.uicard--e-quiet) {
   border-radius: var(--radius-lg) !important;
 }
-html[data-theme='glass'] .uicard--e-hero {
+html[data-theme] .uicard--e-hero {
   border-radius: var(--radius-hero) !important;
 }
-html[data-theme='glass'] .uicard {
+html[data-theme] .uicard {
   background: var(--glass-surface);
   border-width: var(--bw-1);
   border-color: var(--color-divider);
 }
 /* Family cards: kit .card.<tone> — a vertical glass wash in the family colour
    with a specular rim, no border. */
-html[data-theme='glass'] .uicard--danger,
-html[data-theme='glass'] .uicard--ok,
-html[data-theme='glass'] .uicard--rest,
-html[data-theme='glass'] .uicard--active,
-html[data-theme='glass'] .uicard--illness,
-html[data-theme='glass'] .uicard--injury,
-html[data-theme='glass'] .uicard--sleep,
-html[data-theme='glass'] .uicard--sport,
-html[data-theme='glass'] .uicard--conditioning,
-html[data-theme='glass'] .uicard--kcal,
-html[data-theme='glass'] .uicard--apex,
-html[data-theme='glass'] .uicard--learn,
-html[data-theme='glass'] .uicard--atlas,
-html[data-theme='glass'] .uicard--people {
+html[data-theme] .uicard--danger,
+html[data-theme] .uicard--ok,
+html[data-theme] .uicard--rest,
+html[data-theme] .uicard--active,
+html[data-theme] .uicard--illness,
+html[data-theme] .uicard--injury,
+html[data-theme] .uicard--sleep,
+html[data-theme] .uicard--sport,
+html[data-theme] .uicard--conditioning,
+html[data-theme] .uicard--kcal,
+html[data-theme] .uicard--apex,
+html[data-theme] .uicard--learn,
+html[data-theme] .uicard--atlas,
+html[data-theme] .uicard--people {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--t-base) 22%, var(--c-14120e-a400)),
@@ -466,19 +481,19 @@ html[data-theme='glass'] .uicard--people {
     inset 0 1.2px 0.5px color-mix(in srgb, var(--t-text) 40%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--t-base) 32%, transparent);
 }
-html[data-theme='glass'] .uicard.uicard--selected {
+html[data-theme] .uicard.uicard--selected {
   background: color-mix(in srgb, var(--t-base) 14%, var(--t-tint));
   border-color: var(--t-base);
   box-shadow: inset 0 0 0 1px var(--t-base);
 }
-html[data-theme='glass'] .uicard--e-hero {
+html[data-theme] .uicard--e-hero {
   background: var(--glass-hero-tint);
   box-shadow: var(--glass-hero-specular);
   border-radius: var(--radius-hero);
 }
 /* Hero + a status family (done green, rest blue, illness amber, injury red …):
    the whole plate — fill, ring, glow — takes the family colour. */
-html[data-theme='glass'] .uicard--e-hero[class*='uit--']:not(.uicard--accent) {
+html[data-theme] .uicard--e-hero[class*='uit--']:not(.uicard--accent) {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--t-base) 17%, var(--c-28221a-a620)),
@@ -489,57 +504,69 @@ html[data-theme='glass'] .uicard--e-hero[class*='uit--']:not(.uicard--accent) {
     inset 0 0 0 1px color-mix(in srgb, var(--t-base) 50%, transparent),
     0 0 34px color-mix(in srgb, var(--t-base) 14%, transparent);
 }
-html[data-theme='glass'] .uicard--e-glass {
+html[data-theme] .uicard--e-glass {
   background: var(--glass-tint);
   box-shadow: var(--glass-specular);
 }
-html[data-theme='glass'] .uicard--e-quiet {
+html[data-theme] .uicard--e-quiet {
   background: transparent;
   box-shadow: none;
 }
 /* Nested card: flat inside its parent (R-KIT-25); after the card rules above so it wins. */
-html[data-theme='glass'] .uicard.uicard--nested {
+html[data-theme] .uicard.uicard--nested {
   background: transparent;
   border-color: transparent;
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
-html[data-theme='glass'] .uicard--accent {
+html[data-theme] .uicard--accent {
   background: var(--glass-brass-tint);
   border-color: transparent;
   box-shadow: var(--glass-brass-specular);
 }
-html[data-theme='glass'] .uicard--rest {
+html[data-theme] .uicard--rest {
   background: var(--glass-rest-tint);
   border-color: transparent;
   box-shadow: var(--glass-rest-specular);
 }
 
 /* --- Kit primitives: buttons — the brass glass pill ------------------------- */
-html[data-theme='glass'] .uibtn {
+html[data-theme] .uibtn {
   border-radius: var(--r-pill);
 }
-html[data-theme='glass'] .uibtn.uibtn--round {
+html[data-theme] .uibtn.uibtn--round {
   border-radius: var(--r-round);
 }
-html[data-theme='glass'] .uibtn--photo {
+html[data-theme] .uibtn--photo {
   background: color-mix(in srgb, var(--color-bg) 70%, transparent);
   color: var(--color-text);
 }
-html[data-theme='glass'] .uibtn--primary,
-html[data-theme='glass'] .uibtn--fill {
+html[data-theme] .uibtn--primary,
+html[data-theme] .uibtn--fill {
   --b-base: var(--t-base, var(--color-accent));
-  color: var(--t-text, var(--color-accent-300));
-  background: color-mix(in srgb, var(--b-base) 18%, var(--btn-under, transparent));
+  color: color-mix(
+    in srgb,
+    var(--t-on, var(--color-on-accent)) var(--btn-ink-on),
+    var(--t-text, var(--color-accent-300))
+  );
+  background: color-mix(in srgb, var(--b-base) var(--btn-fill-mix), var(--btn-under, transparent));
   border-color: transparent;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--b-base) 62%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--b-base) var(--btn-ring-mix), transparent),
+    var(--btn-glow);
+  text-transform: var(--btn-case);
+  letter-spacing: var(--btn-tracking);
 }
-html[data-theme='glass'] .uibtn--primary:not(:disabled):active,
-html[data-theme='glass'] .uibtn--fill:not(:disabled):active {
-  background: color-mix(in srgb, var(--b-base) 26%, var(--btn-under, transparent));
+html[data-theme] .uibtn--primary:not(:disabled):active,
+html[data-theme] .uibtn--fill:not(:disabled):active {
+  background: color-mix(
+    in srgb,
+    var(--b-base) var(--btn-active-mix),
+    var(--btn-under, transparent)
+  );
 }
-html[data-theme='glass'] .uibtn--secondary {
+html[data-theme] .uibtn--secondary {
   background: var(--color-btn-2);
   border-color: transparent;
   font-weight: 500;
@@ -547,119 +574,119 @@ html[data-theme='glass'] .uibtn--secondary {
 
 /* --- Kit primitives: chips, segmented ------------------------------------- */
 /* Weekday tiles: off = a plain plate (it reads as a button), on = accent fill + a 2px ring. */
-html[data-theme='glass'] .uiwd-d.is-on {
+html[data-theme] .uiwd-d.is-on {
   box-shadow: inset 0 0 0 var(--co-ring, 2px) var(--t-base);
 }
 /* --- Kit primitives: labels, tags, checks ---------------------------------- */
-html[data-theme='glass'] .uisec-l {
+html[data-theme] .uisec-l {
   font-size: var(--fs-11);
-  letter-spacing: 0.12em;
+  letter-spacing: var(--label-tracking);
   color: var(--color-neutral-400);
 }
-html[data-theme='glass'] .uisec-a {
+html[data-theme] .uisec-a {
   color: var(--color-accent-400);
   font-weight: 600;
 }
-html[data-theme='glass'] .uitag {
+html[data-theme] .uitag {
   background: color-mix(in srgb, var(--t-base) 16%, transparent);
   box-shadow: none;
 }
-html[data-theme='glass'] .uicheck-in:checked + .uicheck-box {
+html[data-theme] .uicheck-in:checked + .uicheck-box {
   background: color-mix(in srgb, var(--t-base) 25%, transparent);
   color: var(--t-text);
 }
 
 /* --- Kit primitives: fields, steppers, stats ------------------------------- */
-html[data-theme='glass'] .uifield-box {
+html[data-theme] .uifield-box {
   background: var(--field-bg, var(--glass-field));
   box-shadow: inset 0 0 0 1px var(--field-ring, var(--glass-field-ring));
   border-radius: var(--field-radius, var(--r-14));
 }
-html[data-theme='glass'] .uifield-box:focus-within {
+html[data-theme] .uifield-box:focus-within {
   box-shadow:
     inset 0 0 0 1px var(--color-accent),
     0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
 }
-html[data-theme='glass'] .uifield--err .uifield-box,
-html[data-theme='glass'] .uifield--err .uifield-box:focus-within {
+html[data-theme] .uifield--err .uifield-box,
+html[data-theme] .uifield--err .uifield-box:focus-within {
   box-shadow:
     inset 0 0 0 1px var(--color-danger),
     0 0 0 3px color-mix(in srgb, var(--color-danger) 14%, transparent);
 }
-html[data-theme='glass'] .uifield--bare .uifield-box,
-html[data-theme='glass'] .uifield--bare .uifield-box:focus-within {
+html[data-theme] .uifield--bare .uifield-box,
+html[data-theme] .uifield--bare .uifield-box:focus-within {
   background: none;
   box-shadow: none;
   border-radius: 0;
 }
-html[data-theme='glass'] .uistep {
+html[data-theme] .uistep {
   background: var(--glass-well);
   box-shadow:
     inset 0 1px 0 var(--c-000000-a400),
     inset 0 0 0 1px var(--glass-well-ring);
   border-radius: var(--r-16);
 }
-html[data-theme='glass'] .uistep:focus-within {
+html[data-theme] .uistep:focus-within {
   box-shadow:
     inset 0 1px 0 var(--c-000000-a400),
     inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 70%, transparent);
 }
-html[data-theme='glass'] .uistep--xl,
-html[data-theme='glass'] .uistep--xl:focus-within {
+html[data-theme] .uistep--xl,
+html[data-theme] .uistep--xl:focus-within {
   background: none;
   box-shadow: none;
 }
-html[data-theme='glass'] .uistep--xl .uistep-b {
+html[data-theme] .uistep--xl .uistep-b {
   background: var(--glass-surface);
   box-shadow: inset 0 0 0 1px var(--glass-well-ring);
   border-radius: var(--r-24);
 }
-html[data-theme='glass'] .uistep--xl .uistep-b:last-child {
+html[data-theme] .uistep--xl .uistep-b:last-child {
   background: color-mix(in srgb, var(--color-accent) 14%, var(--glass-surface));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 30%, transparent);
 }
-html[data-theme='glass'] .uicard--e-hero .uistep--big .uistep-v {
+html[data-theme] .uicard--e-hero .uistep--big .uistep-v {
   font-size: var(--fs-34);
 }
 
 /* --- Kit primitives: notices ------------------------------------------------ */
-html[data-theme='glass'] .uinotice {
+html[data-theme] .uinotice {
   border-radius: var(--r-14);
   background: color-mix(in srgb, var(--t-base) 12%, var(--c-100f0d-a550));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t-base) 30%, transparent);
 }
-html[data-theme='glass'] .uit--neutral.uinotice {
+html[data-theme] .uit--neutral.uinotice {
   background: var(--c-0a0a0c-a350);
   box-shadow: inset 0 0 0 1px var(--color-ink-ring);
 }
-html[data-theme='glass'] .uinotice.uinotice--nested,
-html[data-theme='glass'] .uit--neutral.uinotice.uinotice--nested {
+html[data-theme] .uinotice.uinotice--nested,
+html[data-theme] .uit--neutral.uinotice.uinotice--nested {
   background: transparent;
   box-shadow: inset 3px 0 0 var(--t-base, var(--color-divider));
 }
 
 /* --- Kit primitives: avatar (initials on brass) ---------------------------- */
-html[data-theme='glass'] .uiav--ini {
+html[data-theme] .uiav--ini {
   color: var(--color-accent-300);
   background: linear-gradient(135deg, var(--color-accent-900), var(--color-accent-700));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent-300) 35%, transparent);
 }
 
 /* Opaque cards — decks and stacks where cards overlap. */
-html[data-theme='glass'] .uicard.uicard--opaque {
+html[data-theme] .uicard.uicard--opaque {
   background: color-mix(in srgb, var(--t-base, var(--color-accent)) 8%, var(--color-surface));
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 
 /* DayTimeline — the History rail: a tinted rounded-square node per day. */
-html[data-theme='glass'] .uidt-day {
+html[data-theme] .uidt-day {
   gap: var(--s-14);
 }
-html[data-theme='glass'] .uidt-rail {
+html[data-theme] .uidt-rail {
   width: var(--sz-34);
 }
-html[data-theme='glass'] .uidt-node {
+html[data-theme] .uidt-node {
   width: var(--sz-34);
   height: var(--sz-34);
   border-radius: var(--r-12);
@@ -667,133 +694,133 @@ html[data-theme='glass'] .uidt-node {
   background: color-mix(in srgb, var(--t-base) 16%, var(--c-100f0d-a600));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t-base) 30%, transparent);
 }
-html[data-theme='glass'] .uidt-node i {
+html[data-theme] .uidt-node i {
   font-size: var(--fs-16);
 }
-html[data-theme='glass'] .uidt-day.is-today .uidt-node {
+html[data-theme] .uidt-day.is-today .uidt-node {
   box-shadow: inset 0 0 0 1.5px var(--t-base);
 }
-html[data-theme='glass'] .uidt-dot {
+html[data-theme] .uidt-dot {
   width: var(--sz-9);
   height: var(--sz-9);
   margin-top: var(--s-12);
   background: var(--t-base);
   box-shadow: 0 0 0 4px var(--c-e9eaec-a60);
 }
-html[data-theme='glass'] .uidt-line {
+html[data-theme] .uidt-line {
   width: 2px;
   margin: var(--s-6) 0;
   background: linear-gradient(180deg, var(--c-e9eaec-a140), var(--c-e9eaec-a50));
 }
-html[data-theme='glass'] .uidt-head {
+html[data-theme] .uidt-head {
   min-height: var(--sz-34);
 }
-html[data-theme='glass'] .uidt-date {
+html[data-theme] .uidt-date {
   font-size: var(--fs-11);
   font-weight: 600;
   letter-spacing: 0.12em;
   color: var(--color-text-muted);
 }
-html[data-theme='glass'] .uidt-day.is-today .uidt-date {
+html[data-theme] .uidt-day.is-today .uidt-date {
   color: var(--t-base);
 }
-html[data-theme='glass'] .uidt-body {
+html[data-theme] .uidt-body {
   gap: var(--s-8);
   padding-bottom: var(--s-24);
 }
-html[data-theme='glass'] .uidt-day.is-last .uidt-body {
+html[data-theme] .uidt-day.is-last .uidt-body {
   padding-bottom: 0;
 }
 
 /* ListRow density and weight — compact list cards (History, sheets). */
-html[data-theme='glass'] .uirow--dense {
+html[data-theme] .uirow--dense {
   min-height: 0;
   padding: var(--s-10) var(--s-12) var(--s-10) var(--s-14);
 }
-html[data-theme='glass'] .uirow--strong .uirow-l {
+html[data-theme] .uirow--strong .uirow-l {
   font-size: var(--fs-16);
   font-weight: 700;
   letter-spacing: -0.01em;
 }
-html[data-theme='glass'] .uirow--strong .uirow-s {
+html[data-theme] .uirow--strong .uirow-s {
   font-size: var(--fs-13);
 }
 
 /* BackButton — recessed glass well. */
-html[data-theme='glass'] .uiback {
+html[data-theme] .uiback {
   background: var(--glass-well);
   box-shadow: inset 0 0 0 1px var(--glass-well-ring);
 }
-html[data-theme='glass'] .uiback--overlay {
+html[data-theme] .uiback--overlay {
   background: var(--c-0a0b0d-a550);
   box-shadow: none;
 }
 
 /* Screen titles carry the type scale's weight (t-h1 26 / bold). */
-html[data-theme='glass'] .title-26 {
+html[data-theme] .title-26 {
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 /* Kit list / tile surfaces on glass. */
-html[data-theme='glass'] .uigl-rows,
-html[data-theme='glass'] .uiw,
-html[data-theme='glass'] .uisc,
-html[data-theme='glass'] .uicat,
-html[data-theme='glass'] .uiss {
+html[data-theme] .uigl-rows,
+html[data-theme] .uiw,
+html[data-theme] .uisc,
+html[data-theme] .uicat,
+html[data-theme] .uiss {
   background: var(--glass-surface);
   border-color: var(--color-divider);
 }
-html[data-theme='glass'] .uigl-rows {
+html[data-theme] .uigl-rows {
   border: var(--bw-1) solid var(--color-divider);
 }
-html[data-theme='glass'] .uigl--flat .uigl-rows {
+html[data-theme] .uigl--flat .uigl-rows {
   background: none;
   border: 0;
 }
-html[data-theme='glass'] .uigl--raised .uigl-rows {
+html[data-theme] .uigl--raised .uigl-rows {
   background: color-mix(in srgb, var(--color-text) 7%, var(--glass-raised-base));
 }
 /* A list nested in a glass card or popover is a light wash in the family colour, not a second
    opaque plate stacked on the first. */
-html[data-theme='glass'] .uicard .uigl:not(.uigl--flat) .uigl-rows,
-html[data-theme='glass'] .uipop .uigl:not(.uigl--flat) .uigl-rows {
+html[data-theme] .uicard .uigl:not(.uigl--flat) .uigl-rows,
+html[data-theme] .uipop .uigl:not(.uigl--flat) .uigl-rows {
   background: color-mix(in srgb, var(--t-base, var(--color-accent)) 6%, var(--c-ffffff-a35));
   border-color: color-mix(in srgb, var(--t-base, var(--color-accent)) 18%, var(--color-divider));
 }
-html[data-theme='glass'] .uiopt {
+html[data-theme] .uiopt {
   background: var(--glass-surface);
   border-color: var(--color-divider);
 }
-html[data-theme='glass'] .uiopt.is-on {
+html[data-theme] .uiopt.is-on {
   background: color-mix(in srgb, var(--t-base) 14%, var(--c-14120e-a700));
   border-color: color-mix(in srgb, var(--t-base) 55%, transparent);
 }
-html[data-theme='glass'] .uisearch {
+html[data-theme] .uisearch {
   background: var(--glass-field);
   border-color: var(--glass-field-ring);
   border-radius: var(--r-14);
 }
 
 /* Injury flow (.rx) sits on the app mood, not a solid plate. */
-html[data-theme='glass'] .rx {
+html[data-theme] .rx {
   background: transparent;
 }
 
-html[data-theme='glass'] .uichip.uichip--photo {
+html[data-theme] .uichip.uichip--photo {
   background: color-mix(in srgb, var(--color-bg) 70%, transparent);
   color: var(--color-text);
 }
 
 /* Sticky search/filter strips carry no plate in Brass Glass — the field floats on the mood. */
-html[data-theme='glass'] .la-sticky {
+html[data-theme] .la-sticky {
   background: transparent;
 }
 
 /* Set-entry card: the set-type colour (warm-up blue, drop violet, reverse teal,
    static-dynamic pink, PR gold, failure red) tints the plate and rings it. The
    per-kind rules in styles.css set the ::after fill; graphite already draws it. */
-html[data-theme='glass'] .focus-view .gset::after {
+html[data-theme] .focus-view .gset::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -803,10 +830,10 @@ html[data-theme='glass'] .focus-view .gset::after {
 }
 
 /* Set-type plate: full family wash + ring + glow, like a status-family hero card. */
-html[data-theme='glass'] .focus-view .gset.kind-warmup {
+html[data-theme] .focus-view .gset.kind-warmup {
   --gk: var(--set-warmup);
 }
-html[data-theme='glass']
+html[data-theme]
   .focus-view
   .gset:is(
     .kind-warmup,
@@ -828,14 +855,14 @@ html[data-theme='glass']
 }
 
 /* Set-type chips: the selected one wears its set-type hue (--kc from .se-kind-*). */
-html[data-theme='glass'] .se-types .uichip.is-selected {
+html[data-theme] .se-types .uichip.is-selected {
   background: color-mix(in srgb, var(--kc) 16%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kc) 55%, transparent);
   color: var(--kc);
 }
 
 /* Midnight-blue notices (long-term conditions): the navy tint, not a grey wash. */
-html[data-theme='glass'] .uit--chronic.uinotice {
+html[data-theme] .uit--chronic.uinotice {
   background: color-mix(in srgb, var(--color-chronic-tint) 88%, var(--c-100f0d-a400));
   box-shadow: inset 0 0 0 1px var(--color-chronic-line);
 }
@@ -849,7 +876,7 @@ html[data-theme='glass'] .uit--chronic.uinotice {
 
 /* Coach Today (phone): the sticky action row above the tab bar is a frosted bar. Surface recipe lives here, not in coach/today. */
 @media (max-width: 767px) {
-  html[data-theme='glass'] .td-actions {
+  html[data-theme] .td-actions {
     background: color-mix(in srgb, var(--color-bg) 72%, transparent);
     backdrop-filter: var(--bf-glass-mid);
     -webkit-backdrop-filter: var(--bf-glass-mid);
@@ -858,7 +885,7 @@ html[data-theme='glass'] .uit--chronic.uinotice {
 }
 
 /* Kit NowLine (current-time marker): the rule and dot glow softly so the line stays readable over glass cards. */
-html[data-theme='glass'] .uinow-rule,
-html[data-theme='glass'] .uinow-dot {
+html[data-theme] .uinow-rule,
+html[data-theme] .uinow-dot {
   box-shadow: 0 0 var(--s-6) color-mix(in srgb, var(--color-now) 55%, transparent);
 }
