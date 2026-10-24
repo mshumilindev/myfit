@@ -1,0 +1,15 @@
+/* Floor — kit rule: an opaque floor under every translucent plate. Imported by the surfaces it draws on. */
+/* An opaque floor under every translucent plate: a theme that shows a photo as the page backdrop sets
+   --surface-floor so no plate lets it through (the plate's own gradient is laid over this colour). Unset = untouched. */
+html[data-theme]
+  :is(
+    .uicard:not(.uicard--e-quiet):not(.uicard--nested),
+    .uibanner,
+    .uinotice:not(.uinotice--nested),
+    .uigl-rows,
+    .uipop,
+    .dialog,
+    .sheet
+  ) {
+  background-color: var(--surface-floor, transparent);
+}

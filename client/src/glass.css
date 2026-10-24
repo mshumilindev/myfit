@@ -699,7 +699,7 @@ html[data-theme] .uisec-a {
   font-weight: 600;
 }
 html[data-theme] .uitag {
-  background: color-mix(in srgb, var(--t-base) 16%, transparent);
+  background: color-mix(in srgb, var(--t-base) 16%, var(--tag-under, transparent));
   box-shadow: none;
 }
 html[data-theme] .uicheck-in:checked + .uicheck-box {

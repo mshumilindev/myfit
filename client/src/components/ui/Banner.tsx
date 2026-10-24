@@ -4,6 +4,7 @@ import { Icon } from '../../ui';
 
 import './Banner.css';
 import './Chamfer.css';
+import './Floor.css';
 
 export type BannerTone = 'accent' | 'rest' | 'danger' | 'ok' | 'sport' | 'conditioning';
 

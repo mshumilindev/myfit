@@ -316,6 +316,10 @@ html[data-theme='cyberpunk'] {
   --bg-photo-land: url('/backgrounds/gym-land.webp');
   --bg-photo-port: url('/backgrounds/gym-port.webp');
   --bg-glitch-content: '';
+  /* no plate lets the photo through: a solid floor under every glass plate, tags and secondary buttons */
+  --surface-floor: var(--c-0d0f16);
+  --tag-under: var(--c-0d0f16);
+  --color-btn-2: color-mix(in srgb, var(--c-e9eaec) 8%, var(--c-0d0f16));
   --hud-brackets:
     linear-gradient(var(--color-accent), var(--color-accent)) bottom right / 18px 2px no-repeat,
     linear-gradient(var(--color-accent), var(--color-accent)) bottom right / 2px 18px no-repeat;
