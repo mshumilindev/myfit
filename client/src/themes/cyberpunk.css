@@ -318,9 +318,12 @@ html[data-theme='cyberpunk'] {
       color-mix(in srgb, var(--color-text) 5%, transparent) 38% 44%,
       transparent 44%
     ),
+    /* the photo lives under the header only and fades out into the plain dark: nothing behind the content */
     linear-gradient(
-      color-mix(in srgb, var(--color-bg) 42%, transparent),
-      color-mix(in srgb, var(--color-bg) 70%, transparent)
+      to bottom,
+      color-mix(in srgb, var(--color-bg) 15%, transparent) 0,
+      color-mix(in srgb, var(--color-bg) 45%, transparent) 14%,
+      var(--color-bg) 36%
     );
   --bg-photo-land: url('/backgrounds/gym-land.webp');
   --bg-photo-port: url('/backgrounds/gym-port.webp');
