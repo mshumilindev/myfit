@@ -55,3 +55,12 @@
   font: var(--type-s);
   color: var(--color-text-muted);
 }
+/* A card of another theme: its own document, so the frame is just a borderless window of the content's height. */
+.thm-frame {
+  display: block;
+  /* pulled out by the frame's inner padding, so the card inside lines up with the live ones */
+  width: calc(100% + 2 * var(--s-6));
+  margin: calc(-1 * var(--s-6));
+  border: 0;
+  border-radius: var(--radius-md);
+}

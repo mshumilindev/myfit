@@ -5,7 +5,7 @@
  * Apply button. Kit components only; the preview is a scaled, inert copy
  * of the live Today screen (data/todaySnapshot).
  */
-import { useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useLayoutEffect, useRef, useState } from 'react';
 import { PageHead } from '../components/ui/PageHead';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -15,6 +15,7 @@ import { Tag } from '../components/ui/Tag';
 import { todaySnapshot } from '../data/todaySnapshot';
 import { useT } from '../i18n';
 import { THEMES, setTheme, useTheme } from '../themes';
+import { ThemeFrame } from './ThemeFrame';
 import './themes.css';
 
 /** The scaled copy of Today. `inert` + aria-hidden: it is a picture, not a second screen. */
@@ -62,8 +63,8 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
       <div className="thm-list">
         {THEMES.map((th) => {
           const on = th.id === current;
-          return (
-            <Card pad="md" key={th.id}>
+          const card = (
+            <Card pad="md">
               <div className="thm-row">
                 {on ? (
                   <TodayPreview alt={t.themesPreviewAlt} />
@@ -88,6 +89,14 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
                 </div>
               </div>
             </Card>
+          );
+          // a card is drawn in ITS theme: the current one is already live, the others go through a frame
+          return on ? (
+            <Fragment key={th.id}>{card}</Fragment>
+          ) : (
+            <ThemeFrame key={th.id} themeId={th.id} title={th.name}>
+              {card}
+            </ThemeFrame>
           );
         })}
       </div>

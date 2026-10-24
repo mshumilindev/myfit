@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
 import { captureToday, clearTodaySnapshot } from '../data/todaySnapshot';
@@ -62,18 +62,27 @@ describe('ThemesView with a captured Today', () => {
     ) {
       return this.classList.contains('thm-pv') ? box : 0;
     });
-    let fire: () => void = () => undefined;
+    // the page has two observers now (the Today preview and the height of each other-theme frame):
+    // only the preview's is driven here
+    const seen: { el?: Element; cb: () => void; disconnect: () => void }[] = [];
     const disconnect = vi.fn();
     vi.stubGlobal(
       'ResizeObserver',
       class {
+        rec: (typeof seen)[number];
         constructor(cb: () => void) {
-          fire = cb;
+          this.rec = { cb, disconnect };
+          seen.push(this.rec);
         }
-        observe() {}
-        disconnect = disconnect;
+        observe(el: Element) {
+          this.rec.el = el;
+        }
+        disconnect = () => this.rec.disconnect();
       },
     );
+    const previewObs = () =>
+      seen.filter((o) => (o.el as HTMLElement | undefined)?.classList.contains('thm-pv'));
+    const fire = () => previewObs().forEach((o) => o.cb());
     const { container, unmount } = render(<ThemesView onClose={vi.fn()} />);
     expect((container.querySelector('.thm-pv-in') as HTMLElement).style.transform).toBe(
       'scale(0.5)',
@@ -83,8 +92,9 @@ describe('ThemesView with a captured Today', () => {
     expect((container.querySelector('.thm-pv-in') as HTMLElement).style.transform).toBe(
       'scale(0.75)',
     );
+    expect(previewObs()).toHaveLength(1);
     unmount();
-    expect(disconnect).toHaveBeenCalledTimes(1);
+    expect(disconnect).toHaveBeenCalled();
   });
 
   it('hides the copy (opacity 0) until the box has a width', () => {
@@ -101,7 +111,14 @@ describe('ThemesView chrome', () => {
     document.documentElement.removeAttribute('data-theme');
   });
 
-  it('back closes the page; the current theme is marked and applied, the others offer Apply', () => {
+  /** Another theme's card lives in its own document (an iframe), drawn in that theme. */
+  const frameOf = async (title: string) => {
+    const f = (await screen.findByTitle(title)) as HTMLIFrameElement;
+    await waitFor(() => expect(f.contentDocument?.body.textContent).toContain(title));
+    return within(f.contentDocument!.body);
+  };
+
+  it('back closes the page; the current theme is marked and applied, the others offer Apply', async () => {
     const onClose = vi.fn();
     render(<ThemesView onClose={onClose} />);
     fireEvent.click(screen.getByRole('button', { name: en.backAction }));
@@ -109,19 +126,26 @@ describe('ThemesView chrome', () => {
     expect(screen.getByText(en.themesCurrent)).toBeTruthy();
     expect(screen.getByText('Brass Glass')).toBeTruthy();
     expect(screen.getByText(en.themeBrassSub)).toBeTruthy();
-    expect(screen.getByText('Cyberpunk')).toBeTruthy();
-    expect(screen.getByText(en.themeCyberSub)).toBeTruthy();
+    const cyber = await frameOf('Cyberpunk');
+    expect(cyber.getByText(en.themeCyberSub)).toBeTruthy();
+    expect(cyber.getByText(en.themesApply)).toBeTruthy();
+    // the card is drawn in ITS theme, not the page's
+    const doc = (screen.getByTitle('Cyberpunk') as HTMLIFrameElement).contentDocument!;
+    expect(doc.documentElement.getAttribute('data-theme')).toBe('cyberpunk');
     expect(
       (screen.getByText(en.themesApplied).closest('button') as HTMLButtonElement).disabled,
     ).toBe(true);
   });
 
-  it('Apply switches the theme and moves the Current mark to the tapped card', () => {
+  it('Apply switches the theme and moves the Current mark to the tapped card', async () => {
     render(<ThemesView onClose={vi.fn()} />);
-    fireEvent.click(screen.getByText(en.themesApply));
+    const cyber = await frameOf('Cyberpunk');
+    fireEvent.click(cyber.getByText(en.themesApply));
     expect(document.documentElement.getAttribute('data-theme')).toBe('cyberpunk');
     expect(localStorage.getItem('gym.theme')).toBe('cyberpunk');
-    expect(screen.getAllByText(en.themesApply)).toHaveLength(1);
+    // the roles swap: Brass Glass is now the framed card with Apply, Cyberpunk the live one
+    const glass = await frameOf('Brass Glass');
+    expect(glass.getByText(en.themesApply)).toBeTruthy();
     const cur = screen.getByText(en.themesCurrent).closest('.uicard') ?? document.body;
     expect(cur.textContent).toContain('Cyberpunk');
     act(() => setTheme('glass'));
