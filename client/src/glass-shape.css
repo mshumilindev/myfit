@@ -1,0 +1,82 @@
+/* --- Shape language: chamfered corners, mono labels, backdrop ------------------------------ */
+/* Themes set the polygons (`none` = the plain rounded box). A clip hides the outline outside the box,
+   so the focus ring moves inside (--focus-offset). Low specificity: components keep their own offsets. */
+:where(html[data-theme]) :focus-visible {
+  outline-offset: var(--focus-offset);
+}
+html[data-theme] .uibtn:not(.uibtn--round):not(.uibtn--photo) {
+  clip-path: var(--clip-ctl);
+}
+html[data-theme]
+  :is(
+    .uibadge.uibadge,
+    .uitag,
+    .uipc-chip,
+    .uibanner-cta,
+    .uibrand-chip,
+    .uiex-badge,
+    .std-tag,
+    .pt-tag,
+    .eq-fchip,
+    .me-chip,
+    .glass-pill,
+    .shell-badge,
+    .shell-current
+  ) {
+  clip-path: var(--clip-tag);
+}
+html[data-theme]
+  :is(
+    .uicard:not(.uicard--e-quiet):not(.uicard--nested),
+    .uibanner,
+    .uinotice:not(.uinotice--nested),
+    .uipop,
+    .dialog
+  ) {
+  clip-path: var(--clip-surface);
+}
+html[data-theme] .sheet {
+  clip-path: var(--clip-sheet);
+}
+html[data-theme] .tabbar-fab {
+  clip-path: var(--clip-fab);
+}
+/* Mono for labels, tags, kickers and figures. */
+html[data-theme]
+  :is(.uitag, .uibadge, .uibanner-kicker, .shell-head, .uistat-l, .uistat-v, .uistat-u, .uistat-d) {
+  font-family: var(--font-label);
+}
+html[data-theme] body {
+  background-image: var(--backdrop);
+  background-attachment: fixed;
+}
+
+/* Titles wear the theme's display face and case (zero specificity: a component that sets its own wins). */
+:where(html[data-theme])
+  :is(
+    .uipagehead-t,
+    .uibanner-title,
+    .dialog-title,
+    .ss-title,
+    .uiw-title,
+    .uiwsec-title,
+    .uishc-title,
+    .uisteplist-title,
+    .uifailed-t,
+    .uimore-title,
+    .shell-tile-name,
+    .uicfx-title,
+    .uilivew-title
+  ) {
+  font-family: var(--font-display);
+  text-transform: var(--heading-transform);
+}
+html[data-theme] .tabbar-fab {
+  border-radius: calc(var(--avatar-k) * 100%);
+}
+
+/* Kit NowLine (current-time marker): the rule and dot glow softly so the line stays readable over glass cards. */
+html[data-theme] .uinow-rule,
+html[data-theme] .uinow-dot {
+  box-shadow: 0 0 var(--s-6) color-mix(in srgb, var(--color-now) 55%, transparent);
+}

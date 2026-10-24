@@ -317,7 +317,9 @@ html[data-theme] .tabbar-fab {
   color: var(--fab-ink);
   /* Opaque: the button itself never shows the page through it. */
   background: var(--fab-bg);
-  box-shadow: var(--fab-edge);
+  box-shadow:
+    var(--fab-edge),
+    0 0 22px -2px color-mix(in srgb, var(--color-accent) var(--glow-k), transparent);
 }
 
 /* --- Shell: desktop rail --------------------------------------------------- */
@@ -341,19 +343,21 @@ html[data-theme] .sheet {
   -webkit-backdrop-filter: var(--bf-glass);
   box-shadow:
     inset 0 1.2px 0.5px var(--plate-rim),
-    inset 0 0 0 1px var(--plate-edge);
+    inset 0 0 0 1px var(--plate-edge),
+    var(--sheet-mark);
 }
 /* Toned drawer (kit <Sheet tone>): the family colours the plate, its edge, the
    grabber and the title. */
 html[data-theme] .sheet.sheet--toned {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base) 20%, var(--plate-top)),
-    color-mix(in srgb, var(--t-base) 6%, var(--plate-bot))
+    color-mix(in srgb, var(--t-base) calc(20% * var(--plate-tint-k)), var(--plate-top)),
+    color-mix(in srgb, var(--t-base) calc(6% * var(--plate-tint-k)), var(--plate-bot))
   );
   box-shadow:
     inset 0 1.2px 0.5px color-mix(in srgb, var(--t-base) 60%, white),
-    inset 0 0 0 1px color-mix(in srgb, var(--t-base) 45%, transparent);
+    inset 0 0 0 1px color-mix(in srgb, var(--t-base) 45%, transparent),
+    var(--sheet-mark);
 }
 html[data-theme] .sheet.sheet--toned .grabber {
   background: color-mix(in srgb, var(--t-base) 70%, transparent);
@@ -368,8 +372,16 @@ html[data-theme] .uipop {
   /* Near-opaque base: text of the page behind (a chat) must not read through a picker. */
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base, var(--color-accent)) 14%, var(--plate-top)),
-    color-mix(in srgb, var(--t-base, var(--color-accent)) 6%, var(--plate-bot))
+    color-mix(
+      in srgb,
+      var(--t-base, var(--color-accent)) calc(14% * var(--plate-tint-k)),
+      var(--plate-top)
+    ),
+    color-mix(
+      in srgb,
+      var(--t-base, var(--color-accent)) calc(6% * var(--plate-tint-k)),
+      var(--plate-bot)
+    )
   );
   backdrop-filter: var(--bf-glass);
   -webkit-backdrop-filter: var(--bf-glass);
@@ -383,8 +395,16 @@ html[data-theme] .uipop {
 html[data-theme] .uicard.cd-card {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base, var(--color-accent)) 14%, var(--plate-top)),
-    color-mix(in srgb, var(--t-base, var(--color-accent)) 6%, var(--plate-bot))
+    color-mix(
+      in srgb,
+      var(--t-base, var(--color-accent)) calc(14% * var(--plate-tint-k)),
+      var(--plate-top)
+    ),
+    color-mix(
+      in srgb,
+      var(--t-base, var(--color-accent)) calc(6% * var(--plate-tint-k)),
+      var(--plate-bot)
+    )
   );
   backdrop-filter: var(--bf-dock);
   -webkit-backdrop-filter: var(--bf-dock);
@@ -401,8 +421,8 @@ html[data-theme] .sheet.sheet--toned.shell-sheet,
 html[data-theme] .sheet.sheet--toned.uimore {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base) 8%, var(--shell-sheet-base)),
-    color-mix(in srgb, var(--t-base) 6%, var(--shell-sheet-base))
+    color-mix(in srgb, var(--t-base) calc(8% * var(--plate-tint-k)), var(--shell-sheet-base)),
+    color-mix(in srgb, var(--t-base) calc(6% * var(--plate-tint-k)), var(--shell-sheet-base))
   );
   border: 0;
   box-shadow:
@@ -412,7 +432,11 @@ html[data-theme] .sheet.sheet--toned.uimore {
 html[data-theme] .dialog {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base, var(--color-accent)) 14%, var(--plate-top)),
+    color-mix(
+      in srgb,
+      var(--t-base, var(--color-accent)) calc(14% * var(--plate-tint-k)),
+      var(--plate-top)
+    ),
     var(--plate-bot)
   );
   border-radius: var(--radius-hero);
@@ -429,7 +453,11 @@ html[data-theme] .dialog-scrim {
 html[data-theme] .toast {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base, var(--color-accent)) 14%, var(--plate-top)),
+    color-mix(
+      in srgb,
+      var(--t-base, var(--color-accent)) calc(14% * var(--plate-tint-k)),
+      var(--plate-top)
+    ),
     var(--plate-bot)
   );
   border: 0;
@@ -473,8 +501,8 @@ html[data-theme] .uicard--atlas,
 html[data-theme] .uicard--people {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base) 22%, var(--c-14120e-a400)),
-    color-mix(in srgb, var(--t-base) 6%, var(--c-100f0d-a600))
+    color-mix(in srgb, var(--t-base) calc(22% * var(--tone-fill-k)), var(--c-14120e-a400)),
+    color-mix(in srgb, var(--t-base) calc(6% * var(--tone-fill-k)), var(--c-100f0d-a600))
   );
   border-color: transparent;
   box-shadow:
@@ -482,12 +510,12 @@ html[data-theme] .uicard--people {
     inset 0 0 0 1px color-mix(in srgb, var(--t-base) 32%, transparent);
 }
 html[data-theme] .uicard.uicard--selected {
-  background: color-mix(in srgb, var(--t-base) 14%, var(--t-tint));
+  background: color-mix(in srgb, var(--t-base) calc(14% * var(--tone-fill-k)), var(--t-tint));
   border-color: var(--t-base);
   box-shadow: inset 0 0 0 1px var(--t-base);
 }
 html[data-theme] .uicard--e-hero {
-  background: var(--glass-hero-tint);
+  background: var(--hud-brackets), var(--glass-hero-tint);
   box-shadow: var(--glass-hero-specular);
   border-radius: var(--radius-hero);
 }
@@ -496,13 +524,13 @@ html[data-theme] .uicard--e-hero {
 html[data-theme] .uicard--e-hero[class*='uit--']:not(.uicard--accent) {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base) 17%, var(--c-28221a-a620)),
-    color-mix(in srgb, var(--t-base) 5%, var(--c-121110-a580))
+    color-mix(in srgb, var(--t-base) calc(17% * var(--tone-fill-k)), var(--c-28221a-a620)),
+    color-mix(in srgb, var(--t-base) calc(5% * var(--tone-fill-k)), var(--c-121110-a580))
   );
   box-shadow:
     inset 0 1.2px 0.5px var(--c-ffffff-a260),
     inset 0 0 0 1px color-mix(in srgb, var(--t-base) 50%, transparent),
-    0 0 34px color-mix(in srgb, var(--t-base) 14%, transparent);
+    0 0 34px color-mix(in srgb, var(--t-base) calc(14% * var(--tone-fill-k)), transparent);
 }
 html[data-theme] .uicard--e-glass {
   background: var(--glass-tint);
@@ -594,7 +622,7 @@ html[data-theme] .uistory .uistory-face .uiav {
   border-radius: inherit;
 }
 html[data-theme] .uistory .uistory-face {
-  border-radius: calc(var(--story-d) * var(--avatar-k) - 4px);
+  border-radius: calc(var(--story-d) * var(--avatar-k) - var(--s-4));
 }
 /* Behind-the-screen art (accent glow, lattice): off when the theme wants a flat field. */
 html[data-theme] :is(.app, .apex-app)::before,
@@ -617,7 +645,8 @@ html[data-theme] .uibtn--fill {
   border-color: transparent;
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--b-base) var(--btn-ring-mix), transparent),
-    var(--btn-glow);
+    var(--btn-glow),
+    0 0 18px -2px color-mix(in srgb, var(--b-base) var(--glow-k), transparent);
   text-transform: var(--btn-case);
   letter-spacing: var(--btn-tracking);
 }
@@ -642,21 +671,27 @@ html[data-theme] .uiwd-d.is-on {
 }
 /* --- Kit primitives: labels, tags, checks ---------------------------------- */
 html[data-theme] .uisec-l {
+  font-family: var(--font-label);
   font-size: var(--fs-11);
   letter-spacing: var(--label-tracking);
   color: var(--color-neutral-400);
 }
 html[data-theme] .uisec-l::before {
-  content: '';
+  content: var(--label-mark-content);
   display: var(--label-mark-display);
-  width: var(--s-6);
-  height: var(--s-6);
+  width: var(--label-mark-w);
+  height: var(--label-mark-h);
   margin-right: var(--s-8);
   vertical-align: middle;
-  background: var(--color-accent);
+  background: var(--label-mark-bg);
+  color: var(--color-accent);
+  font-weight: 700;
+  letter-spacing: 0;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) var(--glow-k), transparent);
 }
 html[data-theme] .tabbar button.active {
   background: var(--tab-active-mark);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) var(--glow-k), transparent);
 }
 html[data-theme] .uisec-a {
   color: var(--color-accent-400);
@@ -957,10 +992,4 @@ html[data-theme] .uit--chronic.uinotice {
     -webkit-backdrop-filter: var(--bf-glass-mid);
     box-shadow: inset 0 1px 0 var(--t-line);
   }
-}
-
-/* Kit NowLine (current-time marker): the rule and dot glow softly so the line stays readable over glass cards. */
-html[data-theme] .uinow-rule,
-html[data-theme] .uinow-dot {
-  box-shadow: 0 0 var(--s-6) color-mix(in srgb, var(--color-now) 55%, transparent);
 }

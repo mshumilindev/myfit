@@ -19,7 +19,7 @@
 .uicheck-box {
   width: var(--sz-22);
   height: var(--sz-22);
-  border-radius: var(--r-8);
+  border-radius: calc(var(--r-input, var(--r-12)) - var(--s-4));
   border: 1.5px solid var(--color-neutral-700);
   display: inline-flex;
   align-items: center;

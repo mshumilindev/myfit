@@ -17,7 +17,20 @@ const THEME_FILES = readdirSync(join(SRC, 'themes'))
   .filter((f) => f.endsWith('.css') && !f.startsWith('_'))
   .sort()
   .map((f) => `themes/${f}`);
-const FILES = ['tokens/primitives.css', 'styles.css', 'redesign.css', ...THEME_FILES, 'glass.css'];
+/** Per-theme raw colours: tokens/primitives.<id>.css. */
+const THEME_PRIMITIVES = readdirSync(join(SRC, 'tokens'))
+  .filter((f) => /^primitives\..+\.css$/.test(f))
+  .sort()
+  .map((f) => `tokens/${f}`);
+const FILES = [
+  'tokens/primitives.css',
+  ...THEME_PRIMITIVES,
+  'styles.css',
+  'redesign.css',
+  ...THEME_FILES,
+  'glass.css',
+  'glass-shape.css',
+];
 
 /** Theme ids found on disk (client/src/themes/<id>.css). */
 export const THEME_IDS = THEME_FILES.map((f) => f.replace(/^themes\/|\.css$/g, ''));
@@ -166,16 +179,23 @@ export function resolve(props: Map<string, string>, value: string, depth = 0): R
     const a = p[3] === undefined ? 1 : p[3].endsWith('%') ? parseFloat(p[3]) / 100 : Number(p[3]);
     return [ch[0], ch[1], ch[2], a];
   }
-  const mix = v.match(/^color-mix\(\s*in srgb\s*,(.*)\)$/);
+  const mix = v.match(/^color-mix\(\s*in srgb\s*,(.*)\)$/s);
   if (mix) {
     const parts = splitTop(mix[1]);
     if (parts.length !== 2) return null;
     const read = (p: string): { c: RGBA | null; w: number | null } => {
-      const m = p.match(/^(.*?)(?:\s+(\d+(?:\.\d+)?)%)?$/s);
+      const m = p.match(/^(.*?)(?:\s+(\d+(?:\.\d+)?%|var\([^()]*\)))?$/s);
       const colour = m ? m[1].trim() : p;
+      // The weight is a number, or a `var()` holding one (e.g. the app-skin strength token).
+      let weight: string | undefined = m?.[2];
+      for (let i = 0; weight?.startsWith('var(') && i < 4; i++) {
+        const w = weight.match(/^var\(\s*(--[\w-]+)\s*(?:,\s*(.+))?\)$/);
+        weight = w ? (props.get(w[1]) ?? w[2])?.trim() : undefined;
+      }
+      const wn = weight?.match(/^(\d+(?:\.\d+)?)%$/);
       return {
         c: colour === 'transparent' ? [0, 0, 0, 0] : resolve(props, colour, depth + 1),
-        w: m && m[2] ? parseFloat(m[2]) : null,
+        w: wn ? parseFloat(wn[1]) : null,
       };
     };
     const a = read(parts[0]);

@@ -234,7 +234,11 @@ describe('NowLine colour (token, contrast)', () => {
       return css.slice(i, css.indexOf('\n}\n', i));
     })();
     const cv = (n: string): RGB =>
-      rgb(coach.match(new RegExp(`${n}:\\s*(#[0-9a-f]{6})`, 'i'))?.[1] ?? '#000000');
+      rgb(
+        coach.match(
+          new RegExp(`${n}:\\s*(?:var\\(--skin-[a-z0-9-]+,\\s*)?(#[0-9a-f]{6})`, 'i'),
+        )?.[1] ?? '#000000',
+      );
     it.each([
       ['Coach glow peak', glow],
       ['accent tint (tinted block ground)', () => cv('--color-accent-tint')],

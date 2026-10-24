@@ -49,14 +49,14 @@
 .uistat-bar {
   display: block;
   height: var(--sz-6);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-bar, var(--r-pill));
   background: color-mix(in srgb, var(--color-text) 10%, transparent);
   overflow: hidden;
 }
 .uistat-bar > span {
   display: block;
   height: 100%;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-bar, var(--r-pill));
   background: var(--t-base);
 }
 .uistat-s {

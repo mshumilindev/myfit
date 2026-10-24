@@ -5,7 +5,7 @@
   gap: var(--s-6);
   height: var(--sz-24);
   padding: 0 var(--s-12);
-  border-radius: var(--r-12);
+  border-radius: var(--r-ctl, var(--r-12));
   font-size: var(--fs-min);
   font-weight: 600;
   line-height: 1;

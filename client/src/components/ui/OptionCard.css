@@ -24,7 +24,11 @@
 }
 .uiopt.is-on {
   border-color: var(--t-base);
-  background: color-mix(in srgb, var(--t-base) 8%, var(--color-surface-2));
+  background: color-mix(
+    in srgb,
+    var(--t-base) calc(8% * var(--tone-fill-k, 1)),
+    var(--color-surface-2)
+  );
 }
 .uiopt:disabled {
   opacity: 0.4;
@@ -62,7 +66,7 @@
   right: 6px;
   width: var(--sz-18);
   height: var(--sz-18);
-  border-radius: var(--radius-pill);
+  border-radius: var(--r-ctl, var(--radius-pill));
   display: grid;
   place-items: center;
   background: var(--t-base);

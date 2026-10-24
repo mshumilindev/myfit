@@ -37,7 +37,7 @@
 .uibtn[aria-disabled='true'] {
   /* Dimmed, never see-through: a disabled button over scrolling content must
      stay opaque, so it is desaturated + darkened instead of faded. */
-  filter: saturate(0.5) brightness(0.62);
+  filter: var(--btn-disabled-filter, saturate(0.5) brightness(0.62));
   cursor: not-allowed;
 }
 

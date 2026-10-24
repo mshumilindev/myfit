@@ -101,6 +101,7 @@ html[data-theme='glass'] {
   --color-accent-800: var(--c-5b4420);
   --color-accent-900: var(--c-342713);
   --color-accent-950: var(--c-1e160b);
+  --color-accent-line: var(--c-5a4524);
   --color-neutral-100: var(--c-f5f6f7);
   --color-neutral-200: var(--c-e6e8ea);
   --color-neutral-300: var(--c-d0d3d6);
@@ -134,6 +135,8 @@ html[data-theme='glass'] {
   --btn-ring-mix: 62%;
   --btn-ink-on: 0%;
   --btn-glow: 0 0 0 0 transparent;
+  --glow-k: 0%;
+  --btn-disabled-filter: saturate(0.5) brightness(0.62);
   --btn-case: none;
   --btn-tracking: normal;
   /* tab bar and Start button: frosted bar, brass hairline, brass lens and plate */
@@ -151,10 +154,33 @@ html[data-theme='glass'] {
   --label-mark-display: none;
   /* corner of text-bearing controls (buttons, badges, chips, tags); 999px = pill. Avatars, dots, rings stay round. */
   --r-ctl: 999px;
+  --r-input: var(--r-12);
+  --r-bar: var(--r-pill);
+  --tile-k: 1;
   /* corner of avatars and round icon buttons as a share of their size (0.5 = circle) */
   --avatar-k: 0.5;
   /* the accent top-glow and diamond lattice behind every screen */
   --ambient-display: block;
+  --font-label: var(--font);
+  --clip-ctl: none;
+  --clip-tag: none;
+  --clip-surface: none;
+  --clip-sheet: none;
+  --clip-fab: none;
+  --label-mark-content: '';
+  --label-mark-w: var(--s-6);
+  --label-mark-h: var(--s-6);
+  --label-mark-bg: var(--color-accent);
+  --focus-offset: 2px;
+  --backdrop: none;
+  --hud-brackets: none;
+  --plate-tint-k: 1;
+  --tone-fill-k: 1;
+  --seg-on-mix: 20%;
+  --segb-on-mix: 16%;
+  --seg-on-ink-k: 0%;
+  --tone-bar-w: 0px;
+  --sheet-mark: 0 0 0 0 transparent;
 }
 
 /* --- Sub-app skins: the colour of the screen glow per app (theme × skin) --- */

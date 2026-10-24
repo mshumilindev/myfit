@@ -485,7 +485,7 @@
   --seg-h-md: var(--ctl-h-md);
   --seg-h-sm: var(--ctl-h-sm);
   --seg-h-lg: var(--ctl-h-lg);
-  --seg-r-inner: var(--r-12);
+  --seg-r-inner: var(--r-input, var(--r-12));
   --seg-r-outer: calc(var(--seg-r-inner) + var(--seg-pad));
   --seg-bg: var(--glass-field, var(--color-tile));
   --seg-ring: var(--glass-field-ring, transparent);
@@ -495,13 +495,13 @@
   --seg-fg: var(--color-text-muted);
   --seg-on-weight: 600;
   /* "buttons" variant: separate outlined pills; "stack": icon-over-label tiles */
-  --segb-r: var(--r-pill);
+  --segb-r: var(--r-ctl, var(--r-pill));
   --segb-bg: var(--glass-well, var(--color-tile));
   --segb-ring: var(--glass-well-ring, var(--color-border));
   --segb-on-mix: 16%;
   --segb-on-base: var(--c-100f0d-a600);
   --segb-on-ring-mix: 55%;
-  --segs-r: var(--r-14);
+  --segs-r: calc(var(--r-input, var(--r-12)) + 2px);
   --segs-bg: var(--glass-surface, var(--color-tile));
 
   /* Chip / pill rows (Chip, ChipGroup): the same family, one height scale with Segmented (md = --seg-h-sm) */
@@ -510,7 +510,7 @@
   --chip-px: var(--s-14);
   --chip-px-sm: var(--s-12);
   --chip-gap: var(--s-8);
-  --chip-r: var(--r-pill);
+  --chip-r: var(--r-ctl, var(--r-pill));
   --chip-bg: var(--c-e9eaec-a70);
   --chip-line: transparent;
   --chip-fg: var(--color-neutral-300);
@@ -16436,16 +16436,16 @@ button.badge {
 :root.theme-apex,
 .app-apex,
 .theme-apex {
-  --color-accent: var(--c-9d6ff0);
-  --color-accent-100: var(--c-efe7fd);
-  --color-accent-200: var(--c-c4a4f7);
-  --color-accent-300: var(--c-b98ee6);
-  --color-accent-400: var(--c-a97ef2);
-  --color-accent-500: var(--c-9d6ff0);
-  --color-accent-600: var(--c-7d59c8);
-  --color-accent-700: var(--c-6b4bb0);
-  --color-accent-800: var(--c-4a3480);
-  --color-accent-900: var(--c-241a3a);
+  --color-accent: var(--skin-apex, var(--c-9d6ff0));
+  --color-accent-100: var(--skin-apex-100, var(--c-efe7fd));
+  --color-accent-200: var(--skin-apex-200, var(--c-c4a4f7));
+  --color-accent-300: var(--skin-apex-300, var(--c-b98ee6));
+  --color-accent-400: var(--skin-apex-400, var(--c-a97ef2));
+  --color-accent-500: var(--skin-apex-500, var(--c-9d6ff0));
+  --color-accent-600: var(--skin-apex-600, var(--c-7d59c8));
+  --color-accent-700: var(--skin-apex-700, var(--c-6b4bb0));
+  --color-accent-800: var(--skin-apex-800, var(--c-4a3480));
+  --color-accent-900: var(--skin-apex-900, var(--c-241a3a));
   --amethyst-glow: var(--c-9d6ff0-a500);
 }
 
@@ -16455,16 +16455,16 @@ button.badge {
 :root.theme-roster,
 .app-roster,
 .theme-roster {
-  --color-accent: var(--c-c3c7cf);
-  --color-accent-100: var(--c-eceef1);
-  --color-accent-200: var(--c-d7dae0);
-  --color-accent-300: var(--c-c3c7cf);
-  --color-accent-400: var(--c-b0b4bd);
-  --color-accent-500: var(--c-c3c7cf);
-  --color-accent-600: var(--c-8b8f98);
-  --color-accent-700: var(--c-6f727a);
-  --color-accent-800: var(--c-4a4d53);
-  --color-accent-900: var(--c-26282c);
+  --color-accent: var(--skin-roster, var(--c-c3c7cf));
+  --color-accent-100: var(--skin-roster-100, var(--c-eceef1));
+  --color-accent-200: var(--skin-roster-200, var(--c-d7dae0));
+  --color-accent-300: var(--skin-roster-300, var(--c-c3c7cf));
+  --color-accent-400: var(--skin-roster-400, var(--c-b0b4bd));
+  --color-accent-500: var(--skin-roster-500, var(--c-c3c7cf));
+  --color-accent-600: var(--skin-roster-600, var(--c-8b8f98));
+  --color-accent-700: var(--skin-roster-700, var(--c-6f727a));
+  --color-accent-800: var(--skin-roster-800, var(--c-4a4d53));
+  --color-accent-900: var(--skin-roster-900, var(--c-26282c));
 }
 
 /* Nutrition — graphite + lazurite. Same re-skin trick: override the accent ramp
@@ -16476,16 +16476,16 @@ button.badge {
 :root.theme-learn,
 .app-learn,
 .theme-learn {
-  --color-accent: var(--c-e5537e);
-  --color-accent-100: var(--c-fdeaf0);
-  --color-accent-200: var(--c-f7c0d1);
-  --color-accent-300: var(--c-f58fac);
-  --color-accent-400: var(--c-ef6f94);
-  --color-accent-500: var(--c-e5537e);
-  --color-accent-600: var(--c-c9426a);
-  --color-accent-700: var(--c-a12f52);
-  --color-accent-800: var(--c-6e2039);
-  --color-accent-900: var(--c-3a1420);
+  --color-accent: var(--skin-learn, var(--c-e5537e));
+  --color-accent-100: var(--skin-learn-100, var(--c-fdeaf0));
+  --color-accent-200: var(--skin-learn-200, var(--c-f7c0d1));
+  --color-accent-300: var(--skin-learn-300, var(--c-f58fac));
+  --color-accent-400: var(--skin-learn-400, var(--c-ef6f94));
+  --color-accent-500: var(--skin-learn-500, var(--c-e5537e));
+  --color-accent-600: var(--skin-learn-600, var(--c-c9426a));
+  --color-accent-700: var(--skin-learn-700, var(--c-a12f52));
+  --color-accent-800: var(--skin-learn-800, var(--c-6e2039));
+  --color-accent-900: var(--skin-learn-900, var(--c-3a1420));
   --gem-glow: var(--c-e5537e-a500);
   --gem-deep: var(--c-a12f52);
 }
@@ -16498,35 +16498,35 @@ button.badge {
 :root.theme-coach,
 .app-coach,
 .theme-coach {
-  --color-accent: var(--c-32bbc8);
-  --color-accent-100: var(--c-def5f7);
-  --color-accent-200: var(--c-ace6ec);
-  --color-accent-300: var(--c-7bd8e0);
-  --color-accent-400: var(--c-49c9d4);
-  --color-accent-500: var(--c-32bbc8);
-  --color-accent-600: var(--c-289fa9);
-  --color-accent-700: var(--c-227e87);
-  --color-accent-800: var(--c-195257);
-  --color-accent-900: var(--c-0f2729);
-  --color-accent-tint: var(--c-0f2729);
-  --color-accent-text: var(--c-7bd8e0);
-  --color-accent-line: var(--c-1f6a72);
+  --color-accent: var(--skin-coach, var(--c-32bbc8));
+  --color-accent-100: var(--skin-coach-100, var(--c-def5f7));
+  --color-accent-200: var(--skin-coach-200, var(--c-ace6ec));
+  --color-accent-300: var(--skin-coach-300, var(--c-7bd8e0));
+  --color-accent-400: var(--skin-coach-400, var(--c-49c9d4));
+  --color-accent-500: var(--skin-coach-500, var(--c-32bbc8));
+  --color-accent-600: var(--skin-coach-600, var(--c-289fa9));
+  --color-accent-700: var(--skin-coach-700, var(--c-227e87));
+  --color-accent-800: var(--skin-coach-800, var(--c-195257));
+  --color-accent-900: var(--skin-coach-900, var(--c-0f2729));
+  --color-accent-tint: var(--skin-coach-tint, var(--c-0f2729));
+  --color-accent-text: var(--skin-coach-text, var(--c-7bd8e0));
+  --color-accent-line: var(--skin-coach-line, var(--c-1f6a72));
   --coach-glow: var(--c-32bbc8-a500);
 }
 
 :root.theme-nutrition,
 .app-nutrition,
 .theme-nutrition {
-  --color-accent: var(--c-4f93d6);
-  --color-accent-100: var(--c-e6f0fa);
-  --color-accent-200: var(--c-bcd8f2);
-  --color-accent-300: var(--c-93bfe8);
-  --color-accent-400: var(--c-6ba6de);
-  --color-accent-500: var(--c-4f93d6);
-  --color-accent-600: var(--c-3d84c9);
-  --color-accent-700: var(--c-336ea8);
-  --color-accent-800: var(--c-24486b);
-  --color-accent-900: var(--c-14222f);
+  --color-accent: var(--skin-nutrition, var(--c-4f93d6));
+  --color-accent-100: var(--skin-nutrition-100, var(--c-e6f0fa));
+  --color-accent-200: var(--skin-nutrition-200, var(--c-bcd8f2));
+  --color-accent-300: var(--skin-nutrition-300, var(--c-93bfe8));
+  --color-accent-400: var(--skin-nutrition-400, var(--c-6ba6de));
+  --color-accent-500: var(--skin-nutrition-500, var(--c-4f93d6));
+  --color-accent-600: var(--skin-nutrition-600, var(--c-3d84c9));
+  --color-accent-700: var(--skin-nutrition-700, var(--c-336ea8));
+  --color-accent-800: var(--skin-nutrition-800, var(--c-24486b));
+  --color-accent-900: var(--skin-nutrition-900, var(--c-14222f));
 }
 /* The app's own identity glyph in the brand header (nutrition shows a fork-knife
    mark beside the wordmark). */
@@ -16886,7 +16886,7 @@ html[data-theme] .apx-streak-n {
   height: 17px;
   padding: 0 var(--s-6);
   box-sizing: border-box;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-ctl, var(--r-pill));
   background: var(--color-apex);
   color: var(--c-160f24);
   font-size: var(--fs-10);
@@ -16914,7 +16914,7 @@ html[data-theme] .apx-streak-n {
   font-weight: 600;
   color: var(--t-text, var(--silver));
   padding: var(--s-6) var(--s-12);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-ctl, var(--r-pill));
   box-shadow: inset 0 0 0 1px var(--t-base, var(--color-neutral-800));
 }
 .shell-go {

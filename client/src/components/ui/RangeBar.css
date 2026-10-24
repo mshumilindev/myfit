@@ -3,7 +3,7 @@
   position: relative;
   width: 100%;
   height: var(--s-8);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-bar, var(--r-pill));
   background: color-mix(in srgb, var(--color-text) 10%, transparent);
   overflow: hidden;
 }
@@ -19,7 +19,7 @@
   inset-block: 0;
   inset-inline-start: 0;
   width: var(--uirange-v);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-bar, var(--r-pill));
   background: var(--t-base);
   transition: width 240ms ease;
 }

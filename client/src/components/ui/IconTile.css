@@ -5,7 +5,7 @@
   height: var(--tile);
   flex-shrink: 0;
   /* a step of the radius scale picked by the tile's size (IconTile.tsx): a re-themed --r-* scale reshapes every tile */
-  border-radius: var(--tile-r);
+  border-radius: calc(var(--tile-r) * var(--tile-k, 1));
   display: inline-flex;
   align-items: center;
   justify-content: center;

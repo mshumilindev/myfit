@@ -10,7 +10,7 @@
 .uiwk .uiwk-pick {
   flex: 1;
   min-width: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--r-ctl, var(--radius-pill));
 }
 .uiwk-text {
   display: flex;

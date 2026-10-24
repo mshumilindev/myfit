@@ -7,7 +7,7 @@
   height: var(--ctl-h);
   min-height: var(--ctl-h);
   padding: 0 var(--s-6) 0 var(--s-14);
-  border-radius: var(--r-12);
+  border-radius: var(--r-input, var(--r-12));
   border: var(--bw-1) solid var(--color-border);
   background: var(--color-bg);
   color: var(--color-text-muted);
@@ -39,7 +39,7 @@
   width: calc(var(--ctl-h) - var(--s-12));
   height: calc(var(--ctl-h) - var(--s-12));
   border: 0;
-  border-radius: var(--r-10);
+  border-radius: calc(var(--r-input, var(--r-12)) - var(--s-2));
   background: var(--color-surface);
   color: var(--color-text-muted);
   display: grid;

@@ -122,6 +122,33 @@ html[data-theme='lime-graphite'] {
   --avatar-k: 0.24;
   /* flat field: no accent top-glow, no diamond lattice, no lava blobs */
   --ambient-display: none;
+  /* contract extensions (SPO-344): neutral values, this theme keeps the plain rounded look */
+  --color-accent-line: var(--c-5a4524);
+  --glow-k: 0%;
+  --btn-disabled-filter: saturate(0.5) brightness(0.62);
+  --r-input: var(--r-12);
+  --r-bar: var(--r-pill);
+  --tile-k: 1;
+  --font-label: var(--font);
+  --clip-ctl: none;
+  --clip-tag: none;
+  --clip-surface: none;
+  --clip-sheet: none;
+  --clip-fab: none;
+  --label-mark-content: '';
+  --label-mark-w: var(--s-6);
+  --label-mark-h: var(--s-6);
+  --label-mark-bg: var(--color-accent);
+  --focus-offset: 2px;
+  --backdrop: none;
+  --hud-brackets: none;
+  --plate-tint-k: 1;
+  --tone-fill-k: 1;
+  --seg-on-mix: 20%;
+  --segb-on-mix: 16%;
+  --seg-on-ink-k: 0%;
+  --tone-bar-w: 0px;
+  --sheet-mark: 0 0 0 0 transparent;
 }
 
 /* --- Sub-app skins: the glow per app, kept to a faint tint of graphite --- */

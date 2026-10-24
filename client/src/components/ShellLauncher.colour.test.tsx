@@ -181,8 +181,8 @@ describe('ShellLauncher: tokens and contrast', () => {
     const at = glass.indexOf('html[data-theme] .sheet.sheet--toned.uimore {');
     expect(at).toBeGreaterThan(0);
     const rule = glass.slice(at, glass.indexOf('\n}\n', at));
-    expect(rule).toMatch(/var\(--t-base\) 8%/);
-    expect(rule).toMatch(/var\(--t-base\) 6%/);
+    expect(rule).toMatch(/var\(--t-base\) calc\(8% \* var\(--plate-tint-k\)\)/);
+    expect(rule).toMatch(/var\(--t-base\) calc\(6% \* var\(--plate-tint-k\)\)/);
     expect(rule).toMatch(/inset 0 0 0 1px var\(--t-line\)/);
     const own = css.slice(css.indexOf('.uimore.sheet--toned {'));
     expect(own.slice(0, own.indexOf('}'))).toMatch(/border: 1px solid var\(--t-line\)/);

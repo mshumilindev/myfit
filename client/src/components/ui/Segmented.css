@@ -72,7 +72,7 @@
 }
 .uiseg--track .uiseg-opt.is-on {
   background: color-mix(in srgb, var(--t-base) var(--seg-on-mix), var(--seg-on-base));
-  color: var(--t-text);
+  color: color-mix(in srgb, var(--t-on) var(--seg-on-ink-k, 0%), var(--t-text));
   font-weight: var(--seg-on-weight);
 }
 
@@ -95,7 +95,7 @@
 .uiseg--buttons .uiseg-opt.is-on {
   background: color-mix(in srgb, var(--t-base) var(--segb-on-mix), var(--segb-on-base));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t-base) var(--segb-on-ring-mix), transparent);
-  color: var(--t-text);
+  color: color-mix(in srgb, var(--t-on) var(--seg-on-ink-k, 0%), var(--t-text));
   font-weight: var(--seg-on-weight);
 }
 .uiseg.is-dense .uiseg-opt {

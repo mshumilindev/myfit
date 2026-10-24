@@ -87,7 +87,7 @@
 }
 .uibub--toned {
   border-color: var(--t-line);
-  background: color-mix(in srgb, var(--t-base) 14%, transparent);
+  background: color-mix(in srgb, var(--t-base) calc(14% * var(--tone-fill-k, 1)), transparent);
   box-shadow: inset 3px 0 0 var(--t-base);
   color: var(--color-text);
 }

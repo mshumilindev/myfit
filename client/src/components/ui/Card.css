@@ -76,7 +76,7 @@ button.uicard[aria-disabled='true'] {
 /* Selected: the chosen card of a set. Reads the tone's --t-* family (tones.css), so it is
    gold on a gym tone, amethyst on apex… and never changes a card that does not set it. */
 .uicard--selected {
-  background: color-mix(in srgb, var(--t-base) 14%, var(--t-tint));
+  background: color-mix(in srgb, var(--t-base) calc(14% * var(--tone-fill-k, 1)), var(--t-tint));
   border-color: var(--t-base);
   box-shadow: inset 0 0 0 1px var(--t-base);
 }

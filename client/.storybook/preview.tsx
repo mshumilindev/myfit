@@ -29,6 +29,7 @@ import '../src/styles.css';
 import '../src/redesign.css';
 import { AXES, DEFAULT_THEME, THEMES, type AxisName } from '../src/themes';
 import '../src/glass.css';
+import '../src/glass-shape.css';
 import '../src/reduced-transparency.css';
 import { LOCALE_IDS, setLocale, type LocaleId } from '../src/i18n';
 import '../src/coach/__fixtures__/register';

@@ -11,6 +11,7 @@ import {
   SKIN_TOKENS_REQUIRED,
   THEME_SKINS,
   THEME_TOKENS,
+  THEME_TOKENS_OPTIONAL,
 } from '../client/src/themes/contract';
 import { AXES, THEMES } from '../client/src/themes/registry';
 
@@ -68,7 +69,11 @@ describe('theme contract', () => {
         'missing tokens',
       ).toEqual([]);
       expect(
-        [...set].filter((t) => !(THEME_TOKENS as readonly string[]).includes(t)),
+        [...set].filter(
+          (t) =>
+            !(THEME_TOKENS as readonly string[]).includes(t) &&
+            !(THEME_TOKENS_OPTIONAL as readonly string[]).includes(t),
+        ),
         'tokens outside the contract',
       ).toEqual([]);
       const allowed = new Set<string>([...SKIN_TOKENS_REQUIRED, ...SKIN_TOKENS_OPTIONAL]);
