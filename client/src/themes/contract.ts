@@ -120,6 +120,10 @@ export const THEME_TOKENS = [
   '--fab-edge',
   '--fab-lens-display',
   '--tab-active-mark',
+  // App switch (components/appGlitch.ts): ms the old app takes to go out / the new one to settle in; 0 = instant.
+  // A theme that sets them above 0 must draw the phases on `html[data-theme=<id>][data-glitch]` (tests/theme-switch.guard).
+  '--switch-out',
+  '--switch-tail',
   '--label-mark-display',
   '--r-ctl',
   '--r-input',

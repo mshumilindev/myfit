@@ -338,6 +338,8 @@
   --z-80: 80;
   --z-120: 120;
   --z-200: 200;
+  --z-1000: 1000; /* app switch: the veil over everything */
+  --z-1001: 1001;
   /* One hover / pressed wash for every neutral tappable surface. */
   --state-hover: color-mix(in srgb, var(--color-text) 6%, transparent);
   --state-press: color-mix(in srgb, var(--color-text) 10%, transparent);

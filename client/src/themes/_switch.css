@@ -1,0 +1,92 @@
+/* Brass Glass app switch: a focus pull. Everything on screen, the rail and the tab bar included, is frosted and drained of colour until the
+   old app is gone, held as warm glass while the next app loads, then brought into focus and colour. Two fixed layers on <html>
+   (no filter on #root, so the glass panels inside keep their own backdrop): ::before is the solid colour that
+   hides the old app, ::after is the blur. `html[data-glitch]` carries the phase, see components/appGlitch.ts. The
+   Cyberpunk glitch lives in _cyberpunk.structure.css; reduced motion never sets the attribute. */
+@keyframes switch-veil-in {
+  0%,
+  30% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes switch-veil-out {
+  0% {
+    opacity: 1;
+  }
+  55%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes switch-blur-in {
+  from {
+    backdrop-filter: var(--bf-focus-0);
+  }
+  to {
+    backdrop-filter: var(--bf-focus-1);
+  }
+}
+@keyframes switch-blur-out {
+  from {
+    backdrop-filter: var(--bf-focus-1);
+  }
+  to {
+    backdrop-filter: var(--bf-focus-0);
+  }
+}
+@keyframes switch-glow {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+html[data-theme='glass'][data-glitch]::before,
+html[data-theme='glass'][data-glitch]::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  will-change: opacity;
+}
+html[data-theme='glass'][data-glitch]::before {
+  z-index: var(--z-1000);
+  background:
+    radial-gradient(
+      ellipse 70% 45% at 50% 100%,
+      color-mix(in srgb, var(--color-accent) 20%, transparent),
+      transparent 70%
+    ),
+    var(--color-bg);
+}
+html[data-theme='glass'][data-glitch]::after {
+  z-index: var(--z-1001);
+  backdrop-filter: var(--bf-focus-1);
+  -webkit-backdrop-filter: var(--bf-focus-1);
+}
+html[data-theme='glass'][data-glitch='out']::before {
+  animation: switch-veil-in 0.32s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+html[data-theme='glass'][data-glitch='out']::after {
+  animation: switch-blur-in 0.32s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+html[data-theme='glass'][data-glitch='load']::before {
+  opacity: 1;
+  animation: switch-glow 0.9s ease-in-out infinite alternate;
+}
+html[data-theme='glass'][data-glitch='in']::before {
+  animation: switch-veil-out 0.64s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+html[data-theme='glass'][data-glitch='in']::after {
+  animation: switch-blur-out 0.64s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='glass'][data-glitch]::before,
+  html[data-theme='glass'][data-glitch]::after {
+    animation: none;
+  }
+}

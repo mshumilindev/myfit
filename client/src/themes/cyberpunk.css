@@ -278,6 +278,8 @@ html[data-theme='cyberpunk'] {
     inset 0 0 0 6.5px color-mix(in srgb, var(--fab-ink) 45%, transparent);
   --fab-lens-display: block;
   --tab-active-mark: none;
+  --switch-out: 220;
+  --switch-tail: 460;
   --label-mark-display: inline-block;
   --r-ctl: var(--r-2);
   --r-input: var(--r-2);

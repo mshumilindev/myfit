@@ -151,6 +151,8 @@ html[data-theme='glass'] {
   --fab-lens-display: block;
   /* marks the theme may add without moving anything: active-tab edge, square before section labels */
   --tab-active-mark: none;
+  --switch-out: 320;
+  --switch-tail: 640;
   --label-mark-display: none;
   /* corner of text-bearing controls (buttons, badges, chips, tags); 999px = pill. Avatars, dots, rings stay round. */
   --r-ctl: 999px;
