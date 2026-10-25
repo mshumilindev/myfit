@@ -140,3 +140,16 @@ html[data-theme='cyberpunk'] .shell-badge {
 html[data-theme='cyberpunk'] .uiex-badge {
   --bd: var(--color-accent-line, var(--color-accent));
 }
+
+/* Session focus nav: feature CSS restyles kit buttons (own border/fill) → strokes must follow the real border. */
+html[data-theme='cyberpunk'] .focus-nav .focus-discard {
+  --bd: color-mix(in srgb, var(--color-danger) 35%, transparent);
+  --bd-w: var(--bw-1);
+}
+html[data-theme='cyberpunk'] .focus-nav .focus-next {
+  --bd: var(--color-neutral-700);
+  --bd-w: var(--bw-1);
+}
+html[data-theme='cyberpunk'] .focus-nav .focus-finish {
+  --bd: var(--color-ok);
+}
