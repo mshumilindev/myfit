@@ -2895,6 +2895,12 @@ i > svg {
   min-width: 0;
 }
 
+/* Progress: the two panes sit in one wrapper so the top bar and its next sibling share edges;
+   below the two-pane width the wrapper dissolves and the page stacks as before. */
+.progress-body {
+  display: contents;
+}
+
 .progress-detail-pane {
   display: none;
   min-width: 0;
@@ -3234,7 +3240,14 @@ i > svg {
   }
 
   .progress-filled {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .progress-body {
     display: grid;
+    flex: 1;
     grid-template-columns: 520px minmax(0, 1fr);
     min-height: 0;
   }
@@ -11930,11 +11943,6 @@ button.badge {
 }
 
 /* Fix: sub-tabs span the full width above the Progress two-pane grid */
-@media (min-width: 720px) {
-  .progress-filled {
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-}
 
 /* Feats: per-category sections (grid of tiers grouped by axis) */
 .feats-section {

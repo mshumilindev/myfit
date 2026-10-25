@@ -147,8 +147,8 @@ export function ExerciseHistoryView({
         actions={
           <Button
             variant="secondary"
+            size="sm"
             className="fx-fs-13 uf-none ug-6"
-            style={{ minHeight: 36, padding: '0 14px' }}
             onClick={() => shell.openOverlay({ screen: 'exercise-detail', name })}
           >
             <Icon name="cards" />

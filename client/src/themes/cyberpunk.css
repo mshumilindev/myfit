@@ -263,6 +263,7 @@ html[data-theme='cyberpunk'] {
   --btn-ink-on: 100%;
   --btn-glow: 0 0 0 0 transparent;
   --glow-k: 55%;
+  --glow-size: 1;
   --btn-disabled-filter: grayscale(1) brightness(0.5);
   --btn-case: uppercase;
   --btn-tracking: 0.06em;

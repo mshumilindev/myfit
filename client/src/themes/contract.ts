@@ -108,6 +108,7 @@ export const THEME_TOKENS = [
   '--btn-ink-on',
   '--btn-glow',
   '--glow-k',
+  '--glow-size',
   '--btn-disabled-filter',
   '--btn-case',
   '--btn-tracking',

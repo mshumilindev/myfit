@@ -136,6 +136,7 @@ html[data-theme='glass'] {
   --btn-ink-on: 0%;
   --btn-glow: 0 0 0 0 transparent;
   --glow-k: 0%;
+  --glow-size: 0;
   --btn-disabled-filter: saturate(0.5) brightness(0.62);
   --btn-case: none;
   --btn-tracking: normal;

@@ -344,9 +344,6 @@ html[data-theme] .ov-unit {
   .progress-page > .pv-top {
     padding-top: var(--s-16);
   }
-  .progress-filled {
-    grid-template-rows: auto auto minmax(0, 1fr);
-  }
 }
 
 .programs-page.exlib-tab .exg-tabwrap {

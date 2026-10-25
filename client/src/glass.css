@@ -319,7 +319,7 @@ html[data-theme] .tabbar-fab {
   background: var(--fab-bg);
   box-shadow:
     var(--fab-edge),
-    0 0 var(--sz-22) calc(-2 * var(--sz-1))
+    0 0 calc(var(--sz-22) * var(--glow-size)) calc(-2 * var(--sz-1))
       color-mix(in srgb, var(--color-accent) var(--glow-k), transparent);
 }
 
@@ -652,7 +652,7 @@ html[data-theme] .uibtn--fill {
   box-shadow:
     inset 0 0 0 var(--sz-1) color-mix(in srgb, var(--b-base) var(--btn-ring-mix), transparent),
     var(--btn-glow),
-    0 0 var(--sz-18) calc(-2 * var(--sz-1))
+    0 0 calc(var(--sz-18) * var(--glow-size)) calc(-2 * var(--sz-1))
       color-mix(in srgb, var(--b-base) var(--glow-k), transparent);
   text-transform: var(--btn-case);
   letter-spacing: var(--btn-tracking);

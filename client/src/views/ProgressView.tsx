@@ -581,357 +581,361 @@ export function ProgressView({
   return (
     <div className="screen progress-page progress-filled">
       {topBar}
-      <section className="progress-summary-pane">
-        <Card emphasis="hero" className="pv-hero">
-          <ProgressKpi
-            cur={cur}
-            deltaPct={deltaPct}
-            label={range.key === 'week' ? t.volumeThisWeek : rangeLabel}
-          />
-          {seg === 'total' && (
-            <Bars
-              weeks={rangeBars}
-              maxWeek={Math.max(...rangeBars, 1)}
-              colors={rangeBarColors ?? barColors}
+      <div className="progress-body">
+        <section className="progress-summary-pane">
+          <Card emphasis="hero" className="pv-hero">
+            <ProgressKpi
+              cur={cur}
+              deltaPct={deltaPct}
+              label={range.key === 'week' ? t.volumeThisWeek : rangeLabel}
+            />
+            {seg === 'total' && (
+              <Bars
+                weeks={rangeBars}
+                maxWeek={Math.max(...rangeBars, 1)}
+                colors={rangeBarColors ?? barColors}
+              />
+            )}
+          </Card>
+          {segControl}
+          {seg === 'volume' && (
+            <Button
+              variant="secondary"
+              fullWidth
+              icon="sliders-horizontal"
+              iconTrailing="caret-down"
+              onClick={() => setCtrlSheet(true)}
+            >
+              <span className="vvb-text">
+                {lens === 'fatigue'
+                  ? t.fatigueTab
+                  : lens === 'readiness'
+                    ? t.readinessKicker
+                    : t.volumeTab}{' '}
+                · {mapView ? t.volMap : t.volList} · {volGrain === 'zones' ? t.volZones : t.volFine}
+              </span>
+            </Button>
+          )}
+          {seg === 'muscle' && renderMuscleRows(showDesktopDetail)}
+          {seg === 'muscle' && range.key === 'week' && muscleNote}
+          {seg === 'volume' && (
+            <VolumePanel
+              finished={volFinished}
+              mapWorkouts={mapWorkouts}
+              nowTs={volEnd}
+              t={t}
+              grain={volGrain}
+              onGrain={setVolGrain}
+              rangeDays={rangeDays}
+              landmarks={effLandmarks}
+              tuned={tuned}
+              desktop={showDesktopDetail}
+              deload={deload}
+              lens={lens}
+              onLens={setLens}
+              fatColors={fatColors}
+              mapView={mapView}
+              onMapView={setMapView}
             />
           )}
-        </Card>
-        {segControl}
-        {seg === 'volume' && (
-          <Button
-            variant="secondary"
-            fullWidth
-            icon="sliders-horizontal"
-            iconTrailing="caret-down"
-            onClick={() => setCtrlSheet(true)}
-          >
-            <span className="vvb-text">
-              {lens === 'fatigue'
-                ? t.fatigueTab
-                : lens === 'readiness'
-                  ? t.readinessKicker
-                  : t.volumeTab}{' '}
-              · {mapView ? t.volMap : t.volList} · {volGrain === 'zones' ? t.volZones : t.volFine}
-            </span>
-          </Button>
-        )}
-        {seg === 'muscle' && renderMuscleRows(showDesktopDetail)}
-        {seg === 'muscle' && range.key === 'week' && muscleNote}
-        {seg === 'volume' && (
-          <VolumePanel
-            finished={volFinished}
-            mapWorkouts={mapWorkouts}
-            nowTs={volEnd}
-            t={t}
-            grain={volGrain}
-            onGrain={setVolGrain}
-            rangeDays={rangeDays}
-            landmarks={effLandmarks}
-            tuned={tuned}
-            desktop={showDesktopDetail}
-            deload={deload}
-            lens={lens}
-            onLens={setLens}
-            fatColors={fatColors}
-            mapView={mapView}
-            onMapView={setMapView}
-          />
-        )}
-        {seg === 'total' && lines.length > 0 && lines[0].pts.length >= 2 && (
-          <div>
-            <div className="section-label umb-8">{t.estimated1rm}</div>
-            <Card className="chart-card">
-              <svg viewBox="0 0 300 100" className="uw-full ul-block" style={{ height: 100 }}>
-                <polyline
-                  points={polyline(lines[0].pts, 300, 100)}
-                  fill="none"
-                  stroke="var(--color-accent)"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-                {lines[1] && lines[1].pts.length >= 2 && (
-                  <polyline
-                    points={polyline(lines[1].pts, 300, 100)}
-                    fill="none"
-                    stroke="var(--color-neutral-700)"
-                    strokeWidth="1.5"
-                    strokeDasharray="3 4"
-                  />
-                )}
-              </svg>
-              <div className="chart-legend">
-                <span>
-                  <span className="sw sw--accent" />
-                  {exName(lines[0].name)} {lines[0].pts[lines[0].pts.length - 1].rm} kg
-                </span>
-                {lines[1] && lines[1].pts.length >= 2 && (
-                  <span>
-                    <span className="sw sw--muted" />
-                    {exName(lines[1].name)} {lines[1].pts[lines[1].pts.length - 1].rm} kg
-                  </span>
-                )}
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {seg === 'records' && (
-          <div>
-            <div className="section-label umb-4 ul-flex ua-center">
-              <span className="uf-1">{t.records}</span>
-              {showDesktopDetail && (
-                <a href="#/exercises" className="link ut-sm">
-                  {t.exercisesTitle}
-                </a>
-              )}
-            </div>
+          {seg === 'total' && lines.length > 0 && lines[0].pts.length >= 2 && (
             <div>
-              {recordGroups.map((group) => (
-                <div key={group.muscle ?? 'other'} className="record-group">
-                  <div className="record-group-head">
-                    {group.muscle ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openMuscleHistory(group.muscle as MuscleGroup)}
-                      >
-                        <MuscleIcon muscle={group.muscle} variant="row" tone="primary" />
-                      </Button>
-                    ) : (
-                      <Icon name="barbell" />
-                    )}
-                    <Button
-                      variant="link"
-                      onClick={() => group.muscle && openMuscleHistory(group.muscle)}
-                    >
-                      {group.muscle ? t.muscleGroups[group.muscle] : t.recordsOther}
-                    </Button>
-                  </div>
-                  {group.rows.map(([name, r]) => {
-                    const wksAgo = Math.floor((nowTs - r.recTs) / WEEK_MS);
-                    return (
-                      <Card
-                        as="button"
-                        pad="sm"
-                        emphasis="quiet"
-                        tone={showDesktopDetail && selected?.[0] === name ? 'accent' : 'neutral'}
-                        className="record-row"
-                        key={name}
-                        onClick={() => {
-                          if (showDesktopDetail) setSelectedName(name);
-                          else shell.openOverlay({ screen: 'exercise-history', name });
-                        }}
-                      >
-                        <span className="n">{exName(name)}</span>
-                        <span className="v">{r.recW} kg</span>
-                        {wksAgo < 2 ? (
-                          <Tag tone="ok">{t.record}</Tag>
-                        ) : (
-                          <span className="when num">{t.wksAgo(wksAgo)}</span>
-                        )}
-                      </Card>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
-
-      {showDesktopDetail && seg === 'volume' && (
-        <section className="progress-detail-pane vol-map-pane">
-          <div className="progress-detail-title">
-            <h3>
-              {lens === 'fatigue'
-                ? t.fatigueTab
-                : lens === 'readiness'
-                  ? t.readinessKicker
-                  : t.volumeTab}
-            </h3>
-            <Segmented
-              className="lens-seg"
-              size="sm"
-              value={lens}
-              onChange={setLens}
-              options={[
-                { value: 'volume', label: t.volumeTab },
-                { value: 'fatigue', label: t.fatigueTab },
-                { value: 'readiness', label: t.readinessKicker },
-              ]}
-            />
-          </div>
-          {lens === 'readiness' ? (
-            <ReadinessLens finished={mapWorkouts} now={nowTs} view="map" />
-          ) : (
-            <>
-              <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : volHeat} />
-              {lens === 'fatigue' ? (
-                <div className="vol-legend">
-                  {(['fresh', 'moderate', 'high', 'fried'] as FatigueLevel[]).map((l) => (
-                    <span key={l} className="vol-leg">
-                      <span className="sw" style={{ background: FATIGUE_COLOR[l] }} />
-                      {t.fatLevel[l]}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <div className="vol-legend">
-                  {(['under', 'productive', 'high', 'over'] as Zone[]).map((z) => (
-                    <span key={z} className="vol-leg">
-                      <span className="sw" style={{ background: ZONE_COLOR[z] }} />
-                      {t.volZone[z]}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {lens === 'fatigue' && <NicotineTrendNote />}
-            </>
-          )}
-          {lens === 'readiness' && <NicotineTrendNote />}
-        </section>
-      )}
-
-      {showDesktopDetail && (seg === 'muscle' || seg === 'total') && (
-        <section className="progress-detail-pane vol-map-pane">
-          <div className="progress-detail-title">
-            <h3>{t.volumeThisWeek}</h3>
-          </div>
-          <MuscleHeatmap colors={brassColors} />
-          <div className="brass-legend">
-            <span className="brass-grad" aria-hidden />
-          </div>
-        </section>
-      )}
-
-      {seg === 'records' && showDesktopDetail && selected && selectedRecord && (
-        <section className="progress-detail-pane">
-          <div>
-            <div className="progress-detail-title">
-              <h3>{exName(selected[0])}</h3>
-              <Button
-                variant="link"
-                onClick={() => shell.openOverlay({ screen: 'exercise-history', name: selected[0] })}
-              >
-                {t.fullHistory}
-              </Button>
-            </div>
-            {(() => {
-              const info = muscleInfoByName(selected[0]);
-              const needs = exerciseNeeds(selected[0]);
-              if (!info && needs.length === 0)
-                return <p>{t.nSessionsSince(selectedSessions.length, selectedSince)}</p>;
-              return (
-                <div className="hist-chips ua-center">
-                  {info && info.primary !== 'cardio' && (
-                    <MuscleChip
-                      muscle={info.primary}
-                      tone="primary"
-                      onClick={openMuscleHistory}
-                      detail
+              <div className="section-label umb-8">{t.estimated1rm}</div>
+              <Card className="chart-card">
+                <svg viewBox="0 0 300 100" className="uw-full ul-block" style={{ height: 100 }}>
+                  <polyline
+                    points={polyline(lines[0].pts, 300, 100)}
+                    fill="none"
+                    stroke="var(--color-accent)"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                  {lines[1] && lines[1].pts.length >= 2 && (
+                    <polyline
+                      points={polyline(lines[1].pts, 300, 100)}
+                      fill="none"
+                      stroke="var(--color-neutral-700)"
+                      strokeWidth="1.5"
+                      strokeDasharray="3 4"
                     />
                   )}
-                  {info?.secondary.map((m) => (
-                    <MuscleChip
-                      key={m}
-                      muscle={m}
-                      tone="secondary"
-                      onClick={openMuscleHistory}
-                      detail
-                    />
-                  ))}
-                  {needs.map((id) => (
-                    <EquipChip key={id} id={id} style={{ padding: '4px 9px' }} />
-                  ))}
+                </svg>
+                <div className="chart-legend">
+                  <span>
+                    <span className="sw sw--accent" />
+                    {exName(lines[0].name)} {lines[0].pts[lines[0].pts.length - 1].rm} kg
+                  </span>
+                  {lines[1] && lines[1].pts.length >= 2 && (
+                    <span>
+                      <span className="sw sw--muted" />
+                      {exName(lines[1].name)} {lines[1].pts[lines[1].pts.length - 1].rm} kg
+                    </span>
+                  )}
                 </div>
-              );
-            })()}
-          </div>
-          <div className="progress-detail-stats">
-            <div className="cell">
-              <div className="v ok">{selectedRecord.recW}</div>
-              <div className="l">{t.recordKg}</div>
+              </Card>
             </div>
-            <div className="cell">
-              <div className="v">{selectedRecordRm > 0 ? selectedRecordRm : '—'}</div>
-              <div className="l">{t.est1rm}</div>
-            </div>
-            <div className="cell">
-              <div className="v">{latest?.top.weight ?? 0}</div>
-              <div className="l">{t.lastTopSet}</div>
-            </div>
-            <div className="cell">
-              <div className="v">{fmtKg(latestVolume)}</div>
-              <div className="l">{t.lastVolume}</div>
-            </div>
-          </div>
+          )}
 
-          <div>
-            <div className="section-label">{t.topSet12w}</div>
-            <div className="progress-detail-chart">
-              <svg viewBox="0 0 400 130" preserveAspectRatio="none">
-                <polyline
-                  points={polyline(selectedE1rmPoints, 400, 130)}
-                  fill="none"
-                  stroke="var(--color-accent)"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="progress-chart-axis">
-                <span>
-                  {selectedSessions.length
-                    ? `${selectedSessions.length} ${t.gymStatSessions.toLowerCase()}`
-                    : ''}
-                </span>
-                <span>
-                  {selectedRecord.recW} kg · {t.record}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {store.gyms.length > 0 && (
+          {seg === 'records' && (
             <div>
-              <div className="section-label">{t.whereYouCanDoIt}</div>
-              <table className="table progress-detail-table">
-                <thead>
-                  <tr>
-                    <th>{t.gymCol}</th>
-                    <th>{t.needsCol}</th>
-                    <th>{t.statusCol}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {store.gyms.map((g) => {
-                    const needs = exerciseNeeds(selected[0]);
-                    const missing = missingAtGym(g, needs);
-                    return (
-                      <tr key={g.id}>
-                        <td>{g.name}</td>
-                        <td className="ut-muted">
-                          {needs.map((id) => equipLabel(id, t)).join(' · ') || '—'}
-                        </td>
-                        <td>
-                          {missing.length === 0 ? (
-                            <span className="ut-ok">{t.allHere(needs.length)}</span>
+              <div className="section-label umb-4 ul-flex ua-center">
+                <span className="uf-1">{t.records}</span>
+                {showDesktopDetail && (
+                  <a href="#/exercises" className="link ut-sm">
+                    {t.exercisesTitle}
+                  </a>
+                )}
+              </div>
+              <div>
+                {recordGroups.map((group) => (
+                  <div key={group.muscle ?? 'other'} className="record-group">
+                    <div className="record-group-head">
+                      {group.muscle ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openMuscleHistory(group.muscle as MuscleGroup)}
+                        >
+                          <MuscleIcon muscle={group.muscle} variant="row" tone="primary" />
+                        </Button>
+                      ) : (
+                        <Icon name="barbell" />
+                      )}
+                      <Button
+                        variant="link"
+                        onClick={() => group.muscle && openMuscleHistory(group.muscle)}
+                      >
+                        {group.muscle ? t.muscleGroups[group.muscle] : t.recordsOther}
+                      </Button>
+                    </div>
+                    {group.rows.map(([name, r]) => {
+                      const wksAgo = Math.floor((nowTs - r.recTs) / WEEK_MS);
+                      return (
+                        <Card
+                          as="button"
+                          pad="sm"
+                          emphasis="quiet"
+                          tone={showDesktopDetail && selected?.[0] === name ? 'accent' : 'neutral'}
+                          className="record-row"
+                          key={name}
+                          onClick={() => {
+                            if (showDesktopDetail) setSelectedName(name);
+                            else shell.openOverlay({ screen: 'exercise-history', name });
+                          }}
+                        >
+                          <span className="n">{exName(name)}</span>
+                          <span className="v">{r.recW} kg</span>
+                          {wksAgo < 2 ? (
+                            <Tag tone="ok">{t.record}</Tag>
                           ) : (
-                            <span className="ut-danger">
-                              {t.noItemShort(equipLabel(missing[0], t))}
-                            </span>
+                            <span className="when num">{t.wksAgo(wksAgo)}</span>
                           )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </section>
-      )}
+
+        {showDesktopDetail && seg === 'volume' && (
+          <section className="progress-detail-pane vol-map-pane">
+            <div className="progress-detail-title">
+              <h3>
+                {lens === 'fatigue'
+                  ? t.fatigueTab
+                  : lens === 'readiness'
+                    ? t.readinessKicker
+                    : t.volumeTab}
+              </h3>
+              <Segmented
+                className="lens-seg"
+                size="sm"
+                value={lens}
+                onChange={setLens}
+                options={[
+                  { value: 'volume', label: t.volumeTab },
+                  { value: 'fatigue', label: t.fatigueTab },
+                  { value: 'readiness', label: t.readinessKicker },
+                ]}
+              />
+            </div>
+            {lens === 'readiness' ? (
+              <ReadinessLens finished={mapWorkouts} now={nowTs} view="map" />
+            ) : (
+              <>
+                <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : volHeat} />
+                {lens === 'fatigue' ? (
+                  <div className="vol-legend">
+                    {(['fresh', 'moderate', 'high', 'fried'] as FatigueLevel[]).map((l) => (
+                      <span key={l} className="vol-leg">
+                        <span className="sw" style={{ background: FATIGUE_COLOR[l] }} />
+                        {t.fatLevel[l]}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="vol-legend">
+                    {(['under', 'productive', 'high', 'over'] as Zone[]).map((z) => (
+                      <span key={z} className="vol-leg">
+                        <span className="sw" style={{ background: ZONE_COLOR[z] }} />
+                        {t.volZone[z]}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {lens === 'fatigue' && <NicotineTrendNote />}
+              </>
+            )}
+            {lens === 'readiness' && <NicotineTrendNote />}
+          </section>
+        )}
+
+        {showDesktopDetail && (seg === 'muscle' || seg === 'total') && (
+          <section className="progress-detail-pane vol-map-pane">
+            <div className="progress-detail-title">
+              <h3>{t.volumeThisWeek}</h3>
+            </div>
+            <MuscleHeatmap colors={brassColors} />
+            <div className="brass-legend">
+              <span className="brass-grad" aria-hidden />
+            </div>
+          </section>
+        )}
+
+        {seg === 'records' && showDesktopDetail && selected && selectedRecord && (
+          <section className="progress-detail-pane">
+            <div>
+              <div className="progress-detail-title">
+                <h3>{exName(selected[0])}</h3>
+                <Button
+                  variant="link"
+                  onClick={() =>
+                    shell.openOverlay({ screen: 'exercise-history', name: selected[0] })
+                  }
+                >
+                  {t.fullHistory}
+                </Button>
+              </div>
+              {(() => {
+                const info = muscleInfoByName(selected[0]);
+                const needs = exerciseNeeds(selected[0]);
+                if (!info && needs.length === 0)
+                  return <p>{t.nSessionsSince(selectedSessions.length, selectedSince)}</p>;
+                return (
+                  <div className="hist-chips ua-center">
+                    {info && info.primary !== 'cardio' && (
+                      <MuscleChip
+                        muscle={info.primary}
+                        tone="primary"
+                        onClick={openMuscleHistory}
+                        detail
+                      />
+                    )}
+                    {info?.secondary.map((m) => (
+                      <MuscleChip
+                        key={m}
+                        muscle={m}
+                        tone="secondary"
+                        onClick={openMuscleHistory}
+                        detail
+                      />
+                    ))}
+                    {needs.map((id) => (
+                      <EquipChip key={id} id={id} style={{ padding: '4px 9px' }} />
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+            <div className="progress-detail-stats">
+              <div className="cell">
+                <div className="v ok">{selectedRecord.recW}</div>
+                <div className="l">{t.recordKg}</div>
+              </div>
+              <div className="cell">
+                <div className="v">{selectedRecordRm > 0 ? selectedRecordRm : '—'}</div>
+                <div className="l">{t.est1rm}</div>
+              </div>
+              <div className="cell">
+                <div className="v">{latest?.top.weight ?? 0}</div>
+                <div className="l">{t.lastTopSet}</div>
+              </div>
+              <div className="cell">
+                <div className="v">{fmtKg(latestVolume)}</div>
+                <div className="l">{t.lastVolume}</div>
+              </div>
+            </div>
+
+            <div>
+              <div className="section-label">{t.topSet12w}</div>
+              <div className="progress-detail-chart">
+                <svg viewBox="0 0 400 130" preserveAspectRatio="none">
+                  <polyline
+                    points={polyline(selectedE1rmPoints, 400, 130)}
+                    fill="none"
+                    stroke="var(--color-accent)"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="progress-chart-axis">
+                  <span>
+                    {selectedSessions.length
+                      ? `${selectedSessions.length} ${t.gymStatSessions.toLowerCase()}`
+                      : ''}
+                  </span>
+                  <span>
+                    {selectedRecord.recW} kg · {t.record}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {store.gyms.length > 0 && (
+              <div>
+                <div className="section-label">{t.whereYouCanDoIt}</div>
+                <table className="table progress-detail-table">
+                  <thead>
+                    <tr>
+                      <th>{t.gymCol}</th>
+                      <th>{t.needsCol}</th>
+                      <th>{t.statusCol}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {store.gyms.map((g) => {
+                      const needs = exerciseNeeds(selected[0]);
+                      const missing = missingAtGym(g, needs);
+                      return (
+                        <tr key={g.id}>
+                          <td>{g.name}</td>
+                          <td className="ut-muted">
+                            {needs.map((id) => equipLabel(id, t)).join(' · ') || '—'}
+                          </td>
+                          <td>
+                            {missing.length === 0 ? (
+                              <span className="ut-ok">{t.allHere(needs.length)}</span>
+                            ) : (
+                              <span className="ut-danger">
+                                {t.noItemShort(equipLabel(missing[0], t))}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        )}
+      </div>
 
       {rangeSheet && (
         <RangeSheet
