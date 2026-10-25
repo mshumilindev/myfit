@@ -11,6 +11,7 @@
  * dashboard through its entry hash (as the launcher's Coach tile does), choosing "My workouts"
  * goes to the Gym home.
  */
+import { glitchSwitch } from '../appGlitch';
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { currentUid, getRole, getUsername, setUsername } from '../../api';
@@ -114,10 +115,10 @@ export function useSuiteAccount({
               app === 'coach' ? ('coach' as const) : app === 'gym' ? ('workouts' as const) : null,
             modeLabel: c.modeLabel,
             onModeChange: (m: SuiteMode) => {
-              if (m === 'coach') setHash(coachEntryHash());
+              if (m === 'coach') glitchSwitch(() => setHash(coachEntryHash()));
               // Gym home: a bare Gym hash closes whatever sub-app is open (App.tsx hashchange).
               else if (onOpenGym) onOpenGym();
-              else setHash('#/today');
+              else glitchSwitch(() => setHash('#/today'));
             },
             note: c.modeNote,
           }

@@ -5,6 +5,7 @@
  * colour: every tile wears its own app's accent (IconTile, caret, and the outline + tint + check
  * of the current tile).
  */
+import { glitchSwitch } from './appGlitch';
 import type { ReactNode } from 'react';
 import { useT } from '../i18n';
 import { useCoachT } from '../i18n/coach';
@@ -201,8 +202,8 @@ export function ShellLauncher({
             sub={c.shellDesc}
             current={current === 'coach'}
             onSelect={() => {
-              setHash(coachEntryHash());
               onClose();
+              glitchSwitch(() => setHash(coachEntryHash()));
             }}
             currentLabel={t.shellCurrent}
           />
