@@ -6722,17 +6722,19 @@ html[data-theme] .gym-card .head .n {
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--s-12);
-  padding-top: var(--s-6);
-}
-.td-topbar h1,
-.td-topbar h2 {
-  font-size: var(--fs-30);
-  letter-spacing: -0.025em;
-  margin: var(--s-6) 0 0;
-  font-weight: 500;
+  padding-top: 0;
 }
 /* Today's date = kit <SectionLabel>; graphite keeps the .kicker metrics. */
 .td-topbar .td-topbar-date.uisec {
+  margin: 0;
+}
+.td-topbar-title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.td-topbar-title h2 {
   margin: 0;
 }
 .td-topbar-actions {
@@ -6751,11 +6753,6 @@ html[data-theme] .gym-card .head .n {
   .td-topbar {
     align-items: flex-end;
     padding-top: 0;
-  }
-  .td-topbar h1,
-  .td-topbar h2 {
-    font-size: var(--fs-32);
-    margin-top: var(--s-4);
   }
   .td-topbar-actions {
     margin-top: 0;
@@ -7451,11 +7448,6 @@ html[data-theme] .gym-card .head .n {
     overflow-y: auto;
     border-right: var(--bw-1) solid var(--color-divider);
     background: var(--c-151619);
-  }
-
-  .gyms-list-pane .title-26 {
-    font-size: var(--fs-32);
-    line-height: 1.05;
   }
 
   .gyms-list-pane .section-label {
@@ -16615,7 +16607,7 @@ button.badge {
   align-items: baseline;
   justify-content: space-between;
   gap: var(--s-10);
-  padding: var(--s-4) 0 var(--s-6);
+  padding: 0;
 }
 .apex-title-sub {
   font-size: var(--fs-13);
@@ -21945,11 +21937,6 @@ body {
   flex: none;
   width: 54px;
 }
-.focus-nav .focus-discard {
-  background: transparent;
-  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
-  color: var(--color-danger);
-}
 .focus-nav {
   gap: var(--s-8);
 }
@@ -21960,29 +21947,10 @@ body {
   white-space: normal;
 }
 /* One primary action per screen: Log (in the set panel) owns the accent, so
-   Next is a quiet outlined button — never the same look as Log right above it. */
-.focus-nav .focus-next {
-  background: transparent;
-  box-shadow: none;
-  border: var(--bw-1) solid var(--color-neutral-700);
-  color: var(--color-neutral-200);
-  font-weight: 500;
-  font-size: var(--fs-14);
-}
-.focus-nav .focus-next .ph,
-.focus-nav .focus-next svg {
-  color: var(--color-neutral-400);
-}
+   Next is the kit's `quiet` button — never the same look as Log right above it. */
 .focus-nav .focus-finish {
   flex: none;
   width: 54px;
-
-  background: var(--color-ok);
-  color: var(--c-0d1f16);
-  border: none;
-}
-.focus-nav .focus-finish:disabled {
-  opacity: 0.4;
 }
 
 /* entry button (classic) */
@@ -24722,9 +24690,6 @@ body {
   width: var(--sz-48);
   min-width: 0;
   padding: 0;
-  border: var(--bw-1) solid color-mix(in srgb, var(--color-danger) 35%, transparent);
-  background: var(--color-danger-tint);
-  color: var(--color-danger);
   font-size: var(--fs-18);
   display: flex;
   align-items: center;

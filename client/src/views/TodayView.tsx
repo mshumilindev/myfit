@@ -74,7 +74,7 @@ import {
   backfillHomeSet,
   gymAtCurrentPosition,
 } from '../store';
-import { fmtWeekday, fmtWeekdayDayMonth, fmtWeekdayShort, useT } from '../i18n';
+import { fmtDayMonth, fmtWeekday, fmtWeekdayShort, useT } from '../i18n';
 import { DayHistorySheet } from '../components/DayHistorySheet';
 import { BackfillSheet, StartSheet } from '../components/StartSheet';
 import { WeightSheet } from '../components/BodyMetrics';
@@ -1666,7 +1666,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     <div className="screen paned today-page">
       <div className="pane-main">
         <div className="td-topbar">
-          <SectionLabel className="td-topbar-date">{fmtWeekdayDayMonth(now, locale)}</SectionLabel>
+          <div className="td-topbar-title">
+            <h2 className="title-26">{fmtWeekday(now, locale)}</h2>
+            <SectionLabel className="td-topbar-date">{fmtDayMonth(now, locale)}</SectionLabel>
+          </div>
           <div className="td-topbar-actions">
             <SyncChip store={store} />
           </div>

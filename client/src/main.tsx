@@ -46,6 +46,7 @@ import './tokens/primitives.css';
 import './tokens/primitives.cyberpunk.css';
 import './styles.css';
 import './redesign.css';
+import './page-titles.css';
 import { initTheme } from './themes';
 import './glass.css';
 import './glass-shape.css';

@@ -28,6 +28,9 @@ describe('Button', () => {
     'ok',
     'photo',
     'dashed',
+    'ok-fill',
+    'danger-soft',
+    'quiet',
   ] as const)('variant %s maps to a class', (variant) => {
     render(<Button variant={variant}>x</Button>);
     expect(screen.getByRole('button').className).toContain(`uibtn--${variant}`);

@@ -201,7 +201,7 @@ function RankInsignia({
   );
 }
 
-export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => void }) {
+export function MasteryView({ shell, onClose }: { shell: Shell; onClose?: () => void }) {
   void shell;
   const { t } = useT();
   const store = useStore();
@@ -221,12 +221,12 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => v
   const [practiceOpen, setPracticeOpen] = useState(false);
 
   const rankName = (id: string) => t.masteryRank[id] ?? id;
-  const back = () => (page === 'detail' ? onClose() : setPage('detail'));
+  const back = () => (page === 'detail' ? onClose?.() : setPage('detail'));
 
   if (page === 'ladder') return <Ladder m={m} onBack={() => setPage('detail')} />;
   if (page === 'shortfall') return <Shortfalls m={m} onBack={() => setPage('detail')} />;
   if (page === 'calibrate')
-    return <Calibration m={m} onBack={() => (m.calibrating ? onClose() : setPage('detail'))} />;
+    return <Calibration m={m} onBack={() => (m.calibrating ? onClose?.() : setPage('detail'))} />;
 
   // --- MT-03 · detail ------------------------------------------------------
   const axisReadout = (key: AxisKey): string => {
@@ -245,7 +245,7 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => v
 
   return (
     <div className="screen mst">
-      <PageHead back={{ label: t.backAction, onClick: back }} title={t.masteryTitle} />
+      <PageHead back={onClose && { label: t.backAction, onClick: back }} title={t.masteryTitle} />
 
       <div className="mst-body">
         {/* hero */}

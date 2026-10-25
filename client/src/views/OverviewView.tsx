@@ -6,6 +6,7 @@
  * and the Exercises library. Each tile drills into that page, which carries a
  * "‹ Overview" back link.
  */
+import { PageHead } from '../components/ui/PageHead';
 import { Card } from '../components/ui/Card';
 import { dateInWeek, useWeekStartDay, weekOrder, weekStartOf } from '../weekStart';
 import { useMemo, useState } from 'react';
@@ -123,7 +124,7 @@ export function OverviewView({
 
   return (
     <div className="screen ov-page">
-      <h2 className="visually-hidden">{t.overviewTab}</h2>
+      <PageHead title={t.overviewTab} />
       <div className="ov-grid ov-top">
         <Card
           as="button"

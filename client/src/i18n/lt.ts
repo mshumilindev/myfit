@@ -1419,7 +1419,7 @@ export const lt: Strings = {
   todayCustomize: 'Tinkinti Today',
   todayThemes: 'Temos',
   themesTitle: 'Temos',
-  themesSection: 'Tema',
+  themesSection: 'Pasirinkite temą',
   themesCurrent: 'Dabartinė',
   themesApplied: 'Pritaikyta',
   themesApply: 'Taikyti',

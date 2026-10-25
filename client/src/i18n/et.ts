@@ -1396,7 +1396,7 @@ export const et: Strings = {
   todayCustomize: 'Kohanda Today',
   todayThemes: 'Teemad',
   themesTitle: 'Teemad',
-  themesSection: 'Teema',
+  themesSection: 'Vali teema',
   themesCurrent: 'Praegune',
   themesApplied: 'Rakendatud',
   themesApply: 'Rakenda',

@@ -1,0 +1,18 @@
+/* One title height for every page header, with or without a back button: the screens that lay the title out
+   themselves (Gyms, Challenges, Apex, Profile, Admin, Today, Progress, Health, Sleep, Mastery) get the same 36px first
+   line as PageHead (`.hist-head`), so a title sits at the same y on every page. */
+.hist-head .title-26,
+.notif-head .title-26,
+.gyms-title-row .title-26,
+.ch-head .title-26,
+.apex-title .title-26,
+.profile-top .title-26,
+.td-topbar-title .title-26,
+.screen.admin .title-26,
+.pv-title,
+.screen .pg-h1,
+.hl .hl-pt,
+.sleep-topbar-title,
+.mst-head-title {
+  line-height: var(--s-36);
+}

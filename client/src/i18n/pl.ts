@@ -1401,7 +1401,7 @@ export const pl: Strings = {
   todayCustomize: 'Dostosuj Today',
   todayThemes: 'Motywy',
   themesTitle: 'Motywy',
-  themesSection: 'Motyw',
+  themesSection: 'Wybierz motyw',
   themesCurrent: 'Obecny',
   themesApplied: 'Zastosowano',
   themesApply: 'Zastosuj',

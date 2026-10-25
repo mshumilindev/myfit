@@ -4,7 +4,8 @@
 :where(html[data-theme]) :focus-visible {
   outline-offset: var(--focus-offset);
 }
-html[data-theme] .uibtn:not(.uibtn--round):not(.uibtn--photo) {
+html[data-theme]
+  :is(.uibtn:not(.uibtn--round):not(.uibtn--photo), .uisearch, .uirow.has-icon, .uibub) {
   clip-path: var(--clip-ctl);
 }
 html[data-theme]
@@ -28,6 +29,8 @@ html[data-theme]
 html[data-theme]
   :is(
     .uicard:not(.uicard--e-quiet):not(.uicard--nested),
+    .uicat,
+    .uiss,
     .uibanner,
     .uinotice:not(.uinotice--nested),
     .uigl-rows,
@@ -36,7 +39,7 @@ html[data-theme]
   ) {
   clip-path: var(--clip-surface);
 }
-html[data-theme] .sheet {
+html[data-theme] :is(.sheet, .hl-sheet) {
   clip-path: var(--clip-sheet);
 }
 html[data-theme] .tabbar-fab {

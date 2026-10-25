@@ -266,7 +266,7 @@ html[data-theme='cyberpunk'] {
   --btn-disabled-filter: grayscale(1) brightness(0.5);
   --btn-case: uppercase;
   --btn-tracking: 0.06em;
-  /* tab bar and Start: flat graphite bar, solid accent plate, no lens */
+  /* tab bar and Start: flat graphite bar, solid accent plate, a cold scan-lined lens in the notch */
   --tabbar-bg: var(--c-0a0c12);
   --tabbar-line-mix: 0%;
   --tabbar-line-flat: var(--c-8fb4ff-a140);
@@ -276,9 +276,8 @@ html[data-theme='cyberpunk'] {
   --fab-edge:
     inset 0 0 0 5px var(--fab-bg),
     inset 0 0 0 6.5px color-mix(in srgb, var(--fab-ink) 45%, transparent);
-  --fab-lens-display: none;
-  --tab-active-mark: linear-gradient(var(--color-accent), var(--color-accent)) top center / 28px 2px
-    no-repeat;
+  --fab-lens-display: block;
+  --tab-active-mark: none;
   --label-mark-display: inline-block;
   --r-ctl: var(--r-2);
   --r-input: var(--r-2);
@@ -313,15 +312,23 @@ html[data-theme='cyberpunk'] {
   --bg-scrim:
     /* darkening along the very top and the top-left corner, so the date / title text over the photo reads
        (matters on desktop, where the text sits straight on the picture) */
-    radial-gradient(60% 140px at 0 0, color-mix(in srgb, var(--color-bg) 82%, transparent), transparent),
-    linear-gradient(to bottom, color-mix(in srgb, var(--color-bg) 62%, transparent) 0, transparent 110px),
+    radial-gradient(
+      60% 140px at 0 0,
+      color-mix(in srgb, var(--color-bg) 82%, transparent),
+      transparent
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-bg) 62%, transparent) 0,
+      transparent 110px
+    ),
     /* the photo lives under the header only and fades out into the plain dark: nothing behind the content */
-      linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--color-bg) 15%, transparent) 0,
-    color-mix(in srgb, var(--color-bg) 45%, transparent) 14%,
-    var(--color-bg) 36%
-  );
+    linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--color-bg) 15%, transparent) 0,
+        color-mix(in srgb, var(--color-bg) 45%, transparent) 14%,
+        var(--color-bg) 36%
+      );
   --bg-photo-land: url('/backgrounds/gym-land.webp');
   --bg-photo-port: url('/backgrounds/gym-port.webp');
   --bg-glitch-content: '';

@@ -1387,7 +1387,7 @@ export const en = {
   todayCustomize: 'Customize Today',
   todayThemes: 'Themes',
   themesTitle: 'Themes',
-  themesSection: 'Theme',
+  themesSection: 'Pick a theme',
   themesCurrent: 'Current',
   themesApplied: 'Applied',
   themesApply: 'Apply',

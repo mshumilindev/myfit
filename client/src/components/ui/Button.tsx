@@ -17,7 +17,10 @@ export type ButtonVariant =
   | 'link'
   | 'ok'
   | 'photo'
-  | 'dashed';
+  | 'dashed'
+  | 'ok-fill'
+  | 'danger-soft'
+  | 'quiet';
 /** Control scale (styles.css --ctl-h-*): xs 28 (dense icon / inline), sm 36, md 44 (default), lg 52. */
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 /** Corner shape override: `pill` (fully rounded) or `round` (a true circle for square buttons). */

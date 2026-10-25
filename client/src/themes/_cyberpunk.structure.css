@@ -36,6 +36,62 @@ html[data-theme='cyberpunk'] .tabbar-fab.is-attention::after {
     animation: none;
   }
 }
+/* Notch lens: what runs under the Start button is blurred and cooled, cut with scan lines and a thin accent rim —
+   the Cyberpunk reading of the Brass Glass lens (same frame, same size; the animation above is untouched). */
+@media (max-width: 719px) {
+  html[data-theme='cyberpunk'] .tabbar-wrap.tabbar-wrap--fab::before {
+    background:
+      repeating-linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--color-accent) 16%, transparent) 0 1px,
+        transparent 1px 3px
+      ),
+      radial-gradient(
+        circle at 50% 18%,
+        color-mix(in srgb, var(--color-accent) 20%, transparent),
+        var(--c-8fb4ff-a140) 62%,
+        color-mix(in srgb, var(--c-0a0c12) 55%, transparent)
+      );
+    backdrop-filter: var(--bf-lens-cyber);
+    -webkit-backdrop-filter: var(--bf-lens-cyber);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 55%, transparent),
+      inset 0 0 14px color-mix(in srgb, var(--color-accent) 22%, transparent);
+  }
+}
+/* The tab bar's top edge takes the accent of the app you are in (the notch clip cuts it at the Start hub). */
+html[data-theme='cyberpunk'] .tabbar.tabbar {
+  border-top-color: color-mix(in srgb, var(--color-accent) 75%, transparent);
+}
+/* ...and thickens right under the active tab: one 2px accent strip, flush against that border, that glides to
+   whichever tab is lit (TabBar measures it into --tab-ind-x/-w). */
+html[data-theme='cyberpunk'] .tabbar {
+  position: relative;
+}
+html[data-theme='cyberpunk'] .tabbar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: calc(var(--tab-ind-x, 0px) + var(--s-6));
+  width: calc(var(--tab-ind-w, 0px) - var(--s-12));
+  height: 2px;
+  opacity: var(--tab-ind-o, 0);
+  background: var(--color-accent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 60%, transparent);
+  pointer-events: none;
+}
+html[data-theme='cyberpunk'] .tabbar[data-ind]::after {
+  transition:
+    left 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.2s;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='cyberpunk'] .tabbar[data-ind]::after {
+    transition: none;
+  }
+}
+
 /* The Start button stays a true circle: it sits in the circular notch of the bar. */
 html[data-theme='cyberpunk'] .tabbar-wrap .tabbar-fab {
   border-radius: var(--r-round);
@@ -96,7 +152,7 @@ html[data-theme='cyberpunk'] .es-hero::after {
 
 /* Drawers: one edge colour all the way round (no separate top bar, no bright glass rim) and the diagonal strokes
    take that colour and its 1px, like every other bordered element. */
-html[data-theme='cyberpunk'] .sheet.sheet {
+html[data-theme='cyberpunk'] :is(.sheet.sheet, .hl-sheet) {
   --bd: var(--plate-edge);
   --bd-w: 1px;
   box-shadow: inset 0 0 0 1px var(--bd);
@@ -131,6 +187,10 @@ html[data-theme='cyberpunk'] .dialog {
 html[data-theme='cyberpunk'] :is(.uibtn--ghost, .uibtn--link) {
   --bd: transparent;
 }
+/* Buttons that sit side by side read as one family: a ghost uses the secondary's weight, not the bold base. */
+html[data-theme='cyberpunk'] .uibtn--ghost {
+  font-weight: 500;
+}
 html[data-theme='cyberpunk'] .uibadge {
   --bd: var(--badge-bg);
 }
@@ -141,15 +201,32 @@ html[data-theme='cyberpunk'] .uiex-badge {
   --bd: var(--color-accent-line, var(--color-accent));
 }
 
-/* Session focus nav: feature CSS restyles kit buttons (own border/fill) → strokes must follow the real border. */
-html[data-theme='cyberpunk'] .focus-nav .focus-discard {
-  --bd: color-mix(in srgb, var(--color-danger) 35%, transparent);
-  --bd-w: var(--bw-1);
+/* Feature panels that carry a border but were left square get the surface cut and the diagonal strokes like the kit
+   cards (the kit's own classes are in Chamfer.css / glass-shape.css). A stroke sits on the border box, so it lies on
+   the cut itself. None of these classes draws its own ::after. */
+html[data-theme='cyberpunk'] :is(.la-cal, .la-tile, .la-pinrow, .la-est, .eqd-sec, .pb-ex) {
+  clip-path: var(--clip-surface);
+  position: relative;
 }
-html[data-theme='cyberpunk'] .focus-nav .focus-next {
-  --bd: var(--color-neutral-700);
-  --bd-w: var(--bw-1);
-}
-html[data-theme='cyberpunk'] .focus-nav .focus-finish {
-  --bd: var(--color-ok);
+html[data-theme='cyberpunk'] :is(.la-cal, .la-tile, .la-pinrow, .la-est, .eqd-sec, .pb-ex)::after {
+  content: var(--corner-mark-content, none);
+  display: block;
+  position: absolute;
+  inset: calc(-1 * var(--bw-1));
+  pointer-events: none;
+  background:
+    linear-gradient(
+        to top right,
+        transparent calc(50% - var(--bd-w, 1px)),
+        var(--bd, var(--corner-mark-color, transparent)) calc(50% - var(--bd-w, 1px)) 50%,
+        transparent 50%
+      )
+      top right / var(--s-12) var(--s-12) no-repeat,
+    linear-gradient(
+        to top right,
+        transparent 50%,
+        var(--bd, var(--corner-mark-color, transparent)) 50% calc(50% + var(--bd-w, 1px)),
+        transparent calc(50% + var(--bd-w, 1px))
+      )
+      bottom left / var(--s-12) var(--s-12) no-repeat;
 }

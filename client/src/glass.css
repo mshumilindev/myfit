@@ -658,7 +658,7 @@ html[data-theme] .uibtn--fill:not(:disabled):active {
     var(--btn-under, transparent)
   );
 }
-html[data-theme] .uibtn--secondary {
+html[data-theme] :is(.uibtn--secondary, .uibtn--quiet) {
   background: var(--color-btn-2);
   border-color: transparent;
   font-weight: 500;
@@ -676,7 +676,8 @@ html[data-theme] .uisec-l {
   letter-spacing: var(--label-tracking);
   color: var(--color-neutral-400);
 }
-html[data-theme] .uisec-l::before {
+/* the same // mark on the legacy label classes that are not <SectionLabel> yet */
+html[data-theme] :is(.uisec-l, .section-label, .kicker)::before {
   content: var(--label-mark-content);
   display: var(--label-mark-display);
   width: var(--label-mark-w);

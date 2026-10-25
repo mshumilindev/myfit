@@ -1436,7 +1436,7 @@ export const uk: Strings = {
   todayCustomize: 'Налаштувати Today',
   todayThemes: 'Теми',
   themesTitle: 'Теми',
-  themesSection: 'Тема',
+  themesSection: 'Оберіть тему',
   themesCurrent: 'Поточна',
   themesApplied: 'Застосовано',
   themesApply: 'Застосувати',

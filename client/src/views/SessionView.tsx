@@ -2428,7 +2428,7 @@ export function SessionView(props: {
     ) : null;
     const finishBtn = (
       <Button
-        variant="ghost"
+        variant="ok-fill"
         className="focus-finish"
         disabled={entries === 0}
         onClick={requestFinish}
@@ -2521,7 +2521,7 @@ export function SessionView(props: {
         {renderKitTray()}
         <div className="focus-nav">
           <Button
-            variant="ghost"
+            variant="danger-soft"
             className="focus-discard"
             onClick={() => setDialog({ kind: 'del-workout' })}
             aria-label={t.discardSession}
@@ -2540,7 +2540,7 @@ export function SessionView(props: {
           </Button>
           {focusHasNext ? (
             <Button
-              variant="secondary"
+              variant="quiet"
               className="focus-next"
               onClick={() => setFocusIdx(focusPos + 1)}
             >
@@ -2561,7 +2561,7 @@ export function SessionView(props: {
             </Button>
           ) : (
             <Button
-              variant="secondary"
+              variant="quiet"
               className="focus-next"
               onClick={() => setSheet({ kind: 'add' })}
             >

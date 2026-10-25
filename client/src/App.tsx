@@ -1692,7 +1692,9 @@ export function App() {
           <ClientRoutesLazy route={activeOverlay.route} onClose={closeOverlay} />
         </Suspense>
       )}
-      {activeOverlay?.screen === 'mastery' && <MasteryView shell={shell} onClose={closeOverlay} />}
+      {activeOverlay?.screen === 'mastery' && (
+        <MasteryView shell={shell} onClose={masteryTab ? undefined : closeOverlay} />
+      )}
       {activeOverlay?.screen === 'coach' && (
         <CoachView
           onClose={closeOverlay}

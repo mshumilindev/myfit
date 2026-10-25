@@ -11,9 +11,10 @@
  * dashboard through its entry hash (as the launcher's Coach tile does), choosing "My workouts"
  * goes to the Gym home.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { currentUid, getRole, getUsername } from '../../api';
+import { currentUid, getRole, getUsername, setUsername } from '../../api';
+import { fetchProfile } from '../../profileFetch';
 import { useT } from '../../i18n';
 import { useCoachT } from '../../i18n/coach';
 import { coachEntryHash } from '../../coach/routes';
@@ -64,8 +65,27 @@ export function useSuiteAccount({
   // Coach is only reachable with access, so its switch is always there.
   const canCoach = flag || app === 'coach';
   const role = identity?.role ?? getRole();
-  const name = identity?.name ?? getUsername() ?? '';
+  const stored = identity?.name ?? getUsername() ?? '';
   const uid = identity?.userId ?? currentUid() ?? undefined;
+  // The saved display name can be missing on a live session (cleared site data, a re-issued token): read it back from
+  // the profile once and keep it, so the account sheet never shows a role with no name.
+  const [healed, setHealed] = useState('');
+  useEffect(() => {
+    if (stored || !uid) return;
+    let off = false;
+    fetchProfile<{ person?: { name?: string } }>(uid)
+      .then((d) => {
+        const n = d.person?.name;
+        if (off || !n) return;
+        setUsername(n);
+        setHealed(n);
+      })
+      .catch(() => undefined);
+    return () => {
+      off = true;
+    };
+  }, [stored, uid]);
+  const name = stored || healed;
   const session = useSuiteSession();
   const [asking, setAsking] = useState(false);
   return useMemo(() => {

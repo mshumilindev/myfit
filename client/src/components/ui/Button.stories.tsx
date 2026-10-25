@@ -13,6 +13,10 @@ const VARIANTS: ButtonVariant[] = [
   'sleep',
   'sleep-fill',
   'link',
+  'ok',
+  'ok-fill',
+  'danger-soft',
+  'quiet',
 ];
 
 const meta = {

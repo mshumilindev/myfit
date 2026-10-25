@@ -117,3 +117,45 @@ export function seedStore(over: {
     sleeps: [],
   });
 }
+
+/** A few weeks of finished strength sessions (bench + row) plus mixed activity: enough for every data screen to render. */
+export function pageWorkouts(): Workout[] {
+  return [1, 3, 5, 8, 10, 12, 15, 18, 22, 26].map((daysAgo, n) => {
+    const w = workoutOn(`page-w${daysAgo}`, daysAgo);
+    w.dayName = n % 2 ? 'Lower body' : 'Upper body';
+    w.exercises = [
+      {
+        id: `b${daysAgo}`,
+        name: 'Barbell Bench Press',
+        position: 0,
+        sets: [0, 1, 2].map((p) => ({
+          id: `bs${daysAgo}${p}`,
+          position: p,
+          reps: 8,
+          weight: 60 + n * 2,
+          isWarmup: false,
+          loggedAt: w.startedAt + (p + 1) * 4 * MIN,
+        })),
+      },
+      {
+        id: `r${daysAgo}`,
+        name: 'Barbell Row',
+        position: 1,
+        sets: [0, 1, 2].map((p) => ({
+          id: `rs${daysAgo}${p}`,
+          position: p,
+          reps: 10,
+          weight: 50 + n * 2,
+          isWarmup: false,
+          loggedAt: w.startedAt + (p + 5) * 4 * MIN,
+        })),
+      },
+    ];
+    return w;
+  });
+}
+
+/** The default data set for page stories. */
+export function seedPage(): void {
+  seedStore({ workouts: pageWorkouts(), activities: activityHistory() });
+}

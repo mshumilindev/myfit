@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { Icon } from '../../ui';
 import { Badge } from './Badge';
 import './TabBar.css';
@@ -67,6 +67,33 @@ export function TabBar<Id extends string = string>({
   activeFill,
   breakpoint = 'app',
 }: TabBarProps<Id>) {
+  const navRef = useRef<HTMLElement>(null);
+  // The active-tab indicator is one element that slides between tabs (a theme draws it; see the Cyberpunk structure
+  // sheet): measure the lit tab and publish its box as CSS variables. No markup is added, other themes ignore them.
+  const measure = () => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const on = nav.querySelector<HTMLElement>(':scope > button.active');
+    nav.style.setProperty('--tab-ind-o', on ? '1' : '0');
+    if (on) {
+      nav.style.setProperty('--tab-ind-x', `${on.offsetLeft}px`);
+      nav.style.setProperty('--tab-ind-w', `${on.offsetWidth}px`);
+    }
+  };
+  useLayoutEffect(measure);
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return undefined;
+    // Animate only after the first placement, so the strip does not slide in from the left edge on mount.
+    const raf = requestAnimationFrame(() => nav.setAttribute('data-ind', ''));
+    if (typeof ResizeObserver === 'undefined') return () => cancelAnimationFrame(raf);
+    const ro = new ResizeObserver(measure);
+    ro.observe(nav);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, []);
   const btn = (x: TabBarItem<Id>) => {
     const icon = <Icon name={x.icon} weight={activeFill && x.active ? 'fill' : undefined} />;
     const badge =
@@ -102,6 +129,7 @@ export function TabBar<Id extends string = string>({
       className={`tabbar-wrap${fab ? ' tabbar-wrap--fab' : ''}${breakpoint === 'coach' ? ' tabbar-wrap--coach' : ''}`}
     >
       <nav
+        ref={navRef}
         className={`tabbar${fab ? ' tabbar-notched' : ''}${breakpoint === 'coach' ? ' tabbar--coach' : ''}`}
         role={tabs ? 'tablist' : undefined}
         style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}

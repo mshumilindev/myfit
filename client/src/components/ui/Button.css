@@ -135,10 +135,12 @@
   .uibtn--primary:not(:disabled):hover {
     background: color-mix(in srgb, var(--color-accent) var(--btn-hover-mix, 12%), transparent);
   }
-  .uibtn--secondary:not(:disabled):hover {
+  .uibtn--secondary:not(:disabled):hover,
+  .uibtn--quiet:not(:disabled):hover {
     background: var(--state-hover);
   }
-  .uibtn--ghost:not(:disabled):hover {
+  .uibtn--ghost:not(:disabled):hover,
+  .uibtn--danger-soft:not(:disabled):hover {
     background: var(--state-hover);
   }
   .uibtn--danger:not(:disabled):hover {
@@ -246,6 +248,35 @@ a.uibtn:hover {
   color: var(--color-ok);
   border-color: var(--color-ok);
   --bd: var(--color-ok);
+}
+/* ok-fill: the solid positive action (finish / confirm), a filled `ok`. */
+.uibtn--ok-fill {
+  background: var(--color-ok);
+  color: var(--c-0d1f16);
+  border-color: transparent;
+  --bd: var(--color-ok);
+}
+.uibtn--ok-fill:disabled {
+  opacity: 0.4;
+}
+/* danger-soft: a destructive icon action that stays quiet until used (discard): tinted fill, soft danger outline. */
+.uibtn--danger-soft {
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  --bd: color-mix(in srgb, var(--color-danger) 35%, transparent);
+}
+/* quiet: a secondary that never competes with the primary action next to it (Next beside Log). */
+.uibtn--quiet {
+  border-color: var(--color-divider);
+  color: var(--color-neutral-200);
+  font-weight: 500;
+  font-size: var(--fs-14);
+}
+.uibtn--quiet .ph,
+.uibtn--quiet svg {
+  color: var(--color-neutral-400);
 }
 /* photo: a frosted control that sits on top of imagery. */
 .uibtn--photo {

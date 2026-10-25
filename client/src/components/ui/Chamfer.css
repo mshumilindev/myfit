@@ -5,6 +5,8 @@
 html[data-theme]
   :is(
     .uicard:not(.uicard--e-quiet):not(.uicard--nested),
+    .uicat,
+    .uiss,
     .uibanner,
     .uinotice:not(.uinotice--nested),
     .uigl-rows,
@@ -33,7 +35,7 @@ html[data-theme]
       )
       bottom left / var(--s-12) var(--s-12) no-repeat;
 }
-html[data-theme] .sheet::after {
+html[data-theme] :is(.sheet, .hl-sheet)::after {
   content: var(--corner-mark-content, none);
   display: block;
   position: absolute;
@@ -63,6 +65,11 @@ html[data-theme] .sheet::after {
 :where(html[data-theme])
   :where(
     .uibtn:not(.uibtn--round):not(.uibtn--photo),
+    .uisearch,
+    .uirow.has-icon,
+    .uibub,
+    .uicat,
+    .uiss,
     .uibadge,
     .uitag,
     .uipc-chip,
@@ -81,6 +88,9 @@ html[data-theme] .sheet::after {
 html[data-theme]
   :is(
     .uibtn:not(.uibtn--round):not(.uibtn--photo),
+    .uisearch,
+    .uirow.has-icon,
+    .uibub,
     .uibadge.uibadge,
     .uitag,
     .uipc-chip,
@@ -135,7 +145,15 @@ html[data-theme]
 /* A stroke is positioned against the padding box, so on an element with a real border it would sit one border
    width inside the cut. Bordered elements pull it out to the border box, so it lies on the cut itself. */
 html[data-theme]
-  :is(.uibtn:not(.uibtn--round):not(.uibtn--photo), .uicard:not(.uicard--e-quiet):not(.uicard--nested))::after,
+  :is(
+    .uibtn:not(.uibtn--round):not(.uibtn--photo),
+    .uisearch,
+    .uirow.has-icon,
+    .uibub,
+    .uicat,
+    .uiss,
+    .uicard:not(.uicard--e-quiet):not(.uicard--nested)
+  )::after,
 html[data-theme] .uibrand-chip::before {
   inset: calc(-1 * var(--bw-1));
 }
