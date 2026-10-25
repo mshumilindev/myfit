@@ -1,7 +1,7 @@
 /**
  * Screen-to-screen transition inside an app (route change). The moment the route changes (`hashchange`) the old
  * screen is covered, so the new one never flashes: `html[data-route]` = `load` (covered; stays so while the next
- * screen's chunk loads, so the wait can be as long as it needs) → `in` (the cover leaves and the new screen shows).
+ * screen loads — its chunk or its own skeletons — so the wait can be as long as it needs) → `in` (the cover leaves and the new screen shows).
  * The duration of `in` is the theme token `--route-tail` (ms, 0 = instant); the theme draws the phases on
  * `html[data-theme=<id>][data-route]` (tests/theme-switch.guard). The cover sits over the app's `<main>` only.
  * An app switch (appGlitch) in progress, or reduced motion, leaves the route change instant.
@@ -41,6 +41,10 @@ function tail() {
   timer = window.setTimeout(end, tailMs());
 }
 
+/** A loading placeholder is on screen: a lazy chunk's fallback, a kit skeleton or an `aria-busy` region in `<main>`. */
+const busy = () =>
+  isHolding() || document.querySelector('main .uisk, main [aria-busy="true"]') !== null;
+
 function onRoute() {
   const now = screenOf(currentHash());
   if (now === last) return;
@@ -61,11 +65,26 @@ function onRoute() {
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
       if (root().dataset.route !== 'load') return;
-      if (isHolding()) {
-        off = onHoldRelease(() => {
-          if (root().dataset.route === 'load') tail();
-        });
-      } else tail();
+      if (!busy()) return tail();
+      // Stay covered while the screen shows a loading placeholder (lazy chunk or a screen's own skeleton).
+      const check = () =>
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => {
+            if (root().dataset.route === 'load' && !busy()) tail();
+          }),
+        );
+      const mo = new MutationObserver(check);
+      mo.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['aria-busy'],
+      });
+      const rel = onHoldRelease(check);
+      off = () => {
+        mo.disconnect();
+        rel();
+      };
     }),
   );
 }
