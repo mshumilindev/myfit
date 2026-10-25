@@ -364,3 +364,14 @@ html[data-theme='cyberpunk'][data-glitch]::after {
     animation: none;
   }
 }
+
+/* Themes page wordmark: platinum letters, the first one in the neon accent. */
+html[data-theme='cyberpunk'] .thm-wm {
+  background: none;
+  filter: none;
+  color: var(--color-text);
+}
+html[data-theme='cyberpunk'] .thm-wm::first-letter {
+  color: var(--color-accent);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--color-accent) 55%, transparent);
+}

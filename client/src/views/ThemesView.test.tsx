@@ -1,54 +1,34 @@
 import { setLocale } from '../i18n';
+import { en } from '../i18n/en';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { captureToday, clearTodaySnapshot, todaySnapshot } from '../data/todaySnapshot';
 import { ThemesView } from './ThemesView';
 
-beforeEach(() => setLocale('en'));
-
-afterEach(() => {
-  cleanup();
-  clearTodaySnapshot();
+beforeEach(() => {
+  setLocale('en');
+  localStorage.clear();
+  document.documentElement.removeAttribute('data-theme');
 });
-
-describe('todaySnapshot', () => {
-  it('copies the screen without ids so it cannot clash with the live one', () => {
-    const el = document.createElement('div');
-    el.className = 'screen today-page';
-    el.id = 'live';
-    el.innerHTML = '<span id="x">hi</span><script>1</script>';
-    captureToday(el);
-    const snap = todaySnapshot();
-    expect(snap?.html).toContain('today-page');
-    expect(snap?.html).not.toContain('id=');
-    expect(snap?.html).not.toContain('<script');
-    expect(snap?.width).toBeGreaterThanOrEqual(320);
-  });
-
-  it('ignores a missing element', () => {
-    captureToday(null);
-    expect(todaySnapshot()).toBeNull();
-  });
-});
+afterEach(cleanup);
 
 describe('ThemesView', () => {
-  it('shows the current theme as applied, with a neutral tile when nothing was captured', () => {
+  it('draws each theme as its name set as a wordmark, with no screenshot and no user data', () => {
     const { container } = render(<ThemesView onClose={() => undefined} />);
-    expect(screen.getByText('Brass Glass')).toBeTruthy();
-    expect(screen.getByText('Current')).toBeTruthy();
-    expect(screen.getByText('Applied').closest('button')?.hasAttribute('disabled')).toBe(true);
-    expect(container.querySelector('.thm-pv-in')).toBeNull();
+    expect(container.querySelector('.thm-wm')?.textContent).toBe('Brass Glass');
+    expect(container.querySelector('img, .thm-pv, .thm-pv-in')).toBeNull();
   });
 
-  it('previews the captured Today as an inert picture', () => {
-    const el = document.createElement('div');
-    el.className = 'screen today-page';
-    el.textContent = 'Today now';
-    captureToday(el);
+  it('puts the theme in use first, as a disabled Applied button, without a Current tag', () => {
     const { container } = render(<ThemesView onClose={() => undefined} />);
-    const pv = container.querySelector('.thm-pv-in');
-    expect(pv?.getAttribute('aria-hidden')).toBe('true');
-    expect(pv?.hasAttribute('inert')).toBe(true);
-    expect(pv?.textContent).toContain('Today now');
+    expect(container.querySelector('.thm-cell')?.classList.contains('thm-hero')).toBe(true);
+    expect(screen.getByText(en.themesApplied).closest('button')?.hasAttribute('disabled')).toBe(
+      true,
+    );
+    expect(screen.queryByText('Current')).toBeNull();
+  });
+
+  it('holds places for the themes still to come', () => {
+    render(<ThemesView onClose={() => undefined} />);
+    expect(screen.getAllByText(en.themesSoon)).toHaveLength(3);
   });
 });

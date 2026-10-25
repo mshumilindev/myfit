@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
-import { fmtWeekdayDayMonth, setLocale } from '../i18n';
+import { fmtDayMonth, fmtWeekday, setLocale } from '../i18n';
 import { en } from '../i18n/en';
 import { openToday, resetTodayMocks } from './__fixtures__/todayMocks';
 import {
@@ -23,11 +23,10 @@ afterEach(() => {
 });
 
 describe('TodayView: chrome', () => {
-  it('shows today as weekday, day and month', async () => {
+  it('shows today as the weekday title with the day and month under it', async () => {
     await openToday();
-    expect(document.querySelector('.td-topbar-date')?.textContent).toBe(
-      fmtWeekdayDayMonth(NOW, 'en'),
-    );
+    expect(document.querySelector('.td-topbar-title h2')?.textContent).toBe(fmtWeekday(NOW, 'en'));
+    expect(document.querySelector('.td-topbar-date')?.textContent).toBe(fmtDayMonth(NOW, 'en'));
   });
 
   it.each([

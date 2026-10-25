@@ -22,7 +22,6 @@ import {
   type TodayLayout,
 } from '../today/layout';
 import { Button } from '../components/ui/Button';
-import { captureToday } from '../data/todaySnapshot';
 import { Card } from '../components/ui/Card';
 import { ListRow } from '../components/ui/GroupedList';
 import { toneClass, type Tone } from '../components/ui/tones';
@@ -1708,11 +1707,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               fullWidth
               icon="palette"
               className="td-themes"
-              onClick={(e) => {
-                // Freeze Today as it looks now: the Themes page previews it.
-                captureToday(e.currentTarget.closest('.today-page'));
-                shell.openOverlay({ screen: 'themes' });
-              }}
+              onClick={() => shell.openOverlay({ screen: 'themes' })}
             >
               {t.todayThemes}
             </Button>

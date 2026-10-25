@@ -1,7 +1,7 @@
 import { currentHash } from '../route';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
-import { setLocale, fmtWeekdayDayMonth } from '../i18n';
+import { setLocale, fmtDayMonth } from '../i18n';
 import { en } from '../i18n/en';
 import { __getStateForTests } from '../store';
 import type { StoreState } from '../store';
@@ -202,12 +202,12 @@ describe('TodayView: clock', () => {
     } as Workout;
     await openToday({ ...r, workouts: [...r.workouts, live] });
     const head = () => document.querySelector('.td-topbar-date')?.textContent;
-    expect(head()).toBe(fmtWeekdayDayMonth(NOW, 'en'));
+    expect(head()).toBe(fmtDayMonth(NOW, 'en'));
     vi.setSystemTime(NOW + DAY);
     await act(async () => {
       await new Promise((res) => setTimeout(res, 1200));
     });
-    expect(head()).toBe(fmtWeekdayDayMonth(NOW + DAY, 'en'));
+    expect(head()).toBe(fmtDayMonth(NOW + DAY, 'en'));
   });
 });
 

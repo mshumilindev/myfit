@@ -1,0 +1,13 @@
+/* Themes page, Brass Glass: the picture of the theme wears its screen mood (violet top-left, brass right, dark
+   brass below), faded out at the bottom so it melts into the glass card instead of ending in a seam. */
+html[data-theme='glass'] .thm-art {
+  background: var(--mood-art);
+  -webkit-mask-image: linear-gradient(180deg, black 55%, transparent);
+  mask-image: linear-gradient(180deg, black 55%, transparent);
+}
+/* The theme's name is set in the theme's own text colour, like every title in it. */
+html[data-theme='glass'] .thm-wm {
+  background: none;
+  filter: none;
+  color: var(--color-text);
+}

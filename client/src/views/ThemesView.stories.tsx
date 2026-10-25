@@ -3,7 +3,7 @@ import { ThemesView } from './ThemesView';
 import { PageFrame } from '../stories/PageFrame';
 import { seedPage } from '../stories/fixtures';
 
-/** The Themes screen with a few weeks of seeded training data. */
+/** The Themes screen: the theme in use big, the others and the places held for future themes as landscape tiles. */
 const meta = {
   title: 'Pages/Themes',
   component: ThemesView,

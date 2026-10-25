@@ -3,7 +3,9 @@
  * `html[data-theme=<id>]`, so the only way to show a theme the page is not wearing is a second
  * document: an iframe that carries a copy of the app's stylesheets and `data-theme=<id>` on its own
  * <html>. The children are React-portalled into it (so they stay live: Apply still works and the
- * i18n context is shared) and the frame grows to its content.
+ * i18n context is shared) and the frame grows to its content. The frame declares the app's `color-scheme: dark`
+ * like index.html does: a frame whose scheme differs from the page's gets an opaque white canvas, which turns
+ * glass surfaces milky.
  */
 import { useCallback, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
@@ -77,7 +79,7 @@ export function ThemeFrame({
         onLoad={setup}
         className="thm-frame"
         title={title}
-        srcDoc="<!doctype html><html><head><meta charset='utf-8'></head><body></body></html>"
+        srcDoc="<!doctype html><html><head><meta charset='utf-8'><meta name='color-scheme' content='dark'></head><body></body></html>"
       />
       {body ? createPortal(children, body) : null}
     </>
