@@ -47,3 +47,96 @@ html[data-theme='cyberpunk'] .shell-badge {
   background: var(--color-danger-solid);
   color: var(--color-on-solid);
 }
+
+/* Empty-session picks (hero photo card, tiles): the wrapper holds the photo and the ring behind a chamfered card, so
+   it is cut the same way, or the photo shows through the cut corners. The diagonal strokes take the ring's colour. */
+html[data-theme='cyberpunk'] :is(.es-hero, .es-tile) {
+  clip-path: var(--clip-surface);
+}
+/* The wrapper owns the ring, so it also owns the diagonal strokes: the ring's colour and thickness. */
+html[data-theme='cyberpunk'] .es-hero {
+  --bd: var(--color-accent);
+  --bd-w: 1.5px;
+  --hud-brackets: none;
+}
+html[data-theme='cyberpunk'] .es-hero.warm {
+  --bd: var(--set-warmup);
+}
+html[data-theme='cyberpunk'] .es-hero,
+html[data-theme='cyberpunk'] .es-hero .es-hero-main {
+  box-shadow: none;
+}
+html[data-theme='cyberpunk'] .es-hero .es-hero-main.uicard.uicard--e-hero::after {
+  content: none;
+}
+html[data-theme='cyberpunk'] .es-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 var(--bd-w) var(--bd);
+  background:
+    linear-gradient(
+        to top right,
+        transparent calc(50% - var(--bd-w)),
+        var(--bd) calc(50% - var(--bd-w)) 50%,
+        transparent 50%
+      )
+      top right / 12px 12px no-repeat,
+    linear-gradient(
+        to top right,
+        transparent 50%,
+        var(--bd) 50% calc(50% + var(--bd-w)),
+        transparent calc(50% + var(--bd-w))
+      )
+      bottom left / 12px 12px no-repeat;
+}
+
+/* Drawers: one edge colour all the way round (no separate top bar, no bright glass rim) and the diagonal strokes
+   take that colour and its 1px, like every other bordered element. */
+html[data-theme='cyberpunk'] .sheet.sheet {
+  --bd: var(--plate-edge);
+  --bd-w: 1px;
+  box-shadow: inset 0 0 0 1px var(--bd);
+}
+html[data-theme='cyberpunk'] .sheet.sheet.sheet--toned {
+  --bd: color-mix(in srgb, var(--t-base) 45%, transparent);
+  box-shadow: inset 0 0 0 1px var(--bd);
+}
+
+/* Diagonal strokes on elements that are filled or tinted by a tone rather than bordered: the stroke takes the tone,
+   so a danger tag is not cut with a lime line. Neutral and borderless elements keep the app accent
+   (`--corner-mark-color`); elements with a real border set `--bd` next to it (Card.css, Button.css). */
+html[data-theme='cyberpunk']
+  :is(.uitag, .uibadge, .uinotice, .uifind-tag)[class*='uit--']:not(.uit--neutral) {
+  --bd: var(--t-base);
+}
+html[data-theme='cyberpunk'] .uibanner {
+  --bd: var(--gem-line);
+}
+html[data-theme='cyberpunk'] .uipc-chip.is-on {
+  --bd: var(--t-base);
+}
+html[data-theme='cyberpunk'] .uibrand-chip {
+  --bd: var(--t-line);
+}
+html[data-theme='cyberpunk'] .dialog {
+  --bd: color-mix(in srgb, var(--t-base) 45%, transparent);
+}
+
+/* Chrome-less and solid elements: a ghost or link button has nothing to cut a stroke into, a solid badge is cut
+   in its own fill (so no stray accent tick on a red badge), a bordered badge follows its border. */
+html[data-theme='cyberpunk'] :is(.uibtn--ghost, .uibtn--link) {
+  --bd: transparent;
+}
+html[data-theme='cyberpunk'] .uibadge {
+  --bd: var(--badge-bg);
+}
+html[data-theme='cyberpunk'] .shell-badge {
+  --bd: var(--color-danger-solid);
+}
+html[data-theme='cyberpunk'] .uiex-badge {
+  --bd: var(--color-accent-line, var(--color-accent));
+}

@@ -311,21 +311,12 @@ html[data-theme='cyberpunk'] {
     repeating-linear-gradient(0deg, var(--c-ffffff-a22) 0 1px, transparent 1px 3px),
     var(--bg-photo, none) center / cover no-repeat;
   --bg-scrim:
-    /* the photo lives under the header only and fades out into the plain dark: nothing behind the content */
-    linear-gradient(
-      to bottom,
-      color-mix(in srgb, var(--color-bg) 15%, transparent) 0,
-      color-mix(in srgb, var(--color-bg) 45%, transparent) 14%,
-      var(--color-bg) 36%
-    ),
-    /* frosted-glass sheen (two soft diagonal highlights): under the fade, so the glass dies out with the photo */
-    linear-gradient(
-      115deg,
-      color-mix(in srgb, var(--color-text) 7%, transparent) 0 16%,
-      transparent 16% 38%,
-      color-mix(in srgb, var(--color-text) 5%, transparent) 38% 44%,
-      transparent 44%
-    );
+    /* the photo lives under the header only and fades out into the plain dark: nothing behind the content */ linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-bg) 15%, transparent) 0,
+    color-mix(in srgb, var(--color-bg) 45%, transparent) 14%,
+    var(--color-bg) 36%
+  );
   --bg-photo-land: url('/backgrounds/gym-land.webp');
   --bg-photo-port: url('/backgrounds/gym-port.webp');
   --bg-glitch-content: '';
@@ -344,7 +335,7 @@ html[data-theme='cyberpunk'] {
   --clip-fab: none;
   /* a thin accent stroke along each chamfer, so the cut corner keeps its border */
   --corner-mark-content: '';
-  --corner-mark-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+  --corner-mark-color: var(--color-accent);
   --clip-sheet: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%, 0 14px);
   --clip-surface: polygon(
     0 0,

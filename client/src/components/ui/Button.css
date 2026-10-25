@@ -113,7 +113,7 @@
   background: var(--color-sleep);
   color: var(--color-sleep-tint);
   border-color: transparent;
-  --bd: initial;
+  --bd: var(--color-sleep);
 }
 .uibtn--dashed {
   /* An "add another" row: no fill, a dashed outline, brass text. */
