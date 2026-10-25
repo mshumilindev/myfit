@@ -311,7 +311,12 @@ html[data-theme='cyberpunk'] {
     repeating-linear-gradient(0deg, var(--c-ffffff-a22) 0 1px, transparent 1px 3px),
     var(--bg-photo, none) center / cover no-repeat;
   --bg-scrim:
-    /* the photo lives under the header only and fades out into the plain dark: nothing behind the content */ linear-gradient(
+    /* darkening along the very top and the top-left corner, so the date / title text over the photo reads
+       (matters on desktop, where the text sits straight on the picture) */
+    radial-gradient(60% 140px at 0 0, color-mix(in srgb, var(--color-bg) 82%, transparent), transparent),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-bg) 62%, transparent) 0, transparent 110px),
+    /* the photo lives under the header only and fades out into the plain dark: nothing behind the content */
+      linear-gradient(
     to bottom,
     color-mix(in srgb, var(--color-bg) 15%, transparent) 0,
     color-mix(in srgb, var(--color-bg) 45%, transparent) 14%,
