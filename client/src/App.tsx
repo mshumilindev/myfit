@@ -60,6 +60,7 @@ import {
 } from './notifications';
 import { useChallenges } from './challenges';
 import { ShellLauncher } from './components/ShellLauncher';
+import { glitchHold, glitchSwitch } from './components/appGlitch';
 import { setSuiteSession } from './components/suite/suiteSession';
 import { useSessionWatch } from './accounts/useSessionWatch';
 import type { ApexTab } from './views/ApexApp';
@@ -1315,49 +1316,59 @@ export function App() {
   // Switching apps always lands on that app's home screen — never the tab or
   // overlay you left behind. (Apex/Learn/Nutrition also reset their entry tab.)
   const openGym = () => {
-    setShellOpen(false);
-    setCoachWanted(false);
-    setApexOpen(false);
-    setRosterOpen(false);
-    setNutritionOpen(false);
-    setLearnOpen(false);
-    setOverlay(null);
-    setTab('today');
+    setShellOpen(false); // the apps drawer goes at once, before the glitch
+    glitchSwitch(() => {
+      setCoachWanted(false);
+      setApexOpen(false);
+      setRosterOpen(false);
+      setNutritionOpen(false);
+      setLearnOpen(false);
+      setOverlay(null);
+      setTab('today');
+    });
   };
   const openApex = () => {
-    setShellOpen(false);
-    setCoachWanted(false);
-    setRosterOpen(false);
-    setNutritionOpen(false);
-    setLearnOpen(false);
-    setApexTab('home');
-    setApexOpen(true);
+    setShellOpen(false); // the apps drawer goes at once, before the glitch
+    glitchSwitch(() => {
+      setCoachWanted(false);
+      setRosterOpen(false);
+      setNutritionOpen(false);
+      setLearnOpen(false);
+      setApexTab('home');
+      setApexOpen(true);
+    });
   };
   const openRoster = (rtab: RosterTab) => {
-    setShellOpen(false);
-    setCoachWanted(false);
-    setApexOpen(false);
-    setNutritionOpen(false);
-    setLearnOpen(false);
-    setRosterTab(guardRosterTab(rtab, role));
-    setRosterOpen(true);
+    setShellOpen(false); // the apps drawer goes at once, before the glitch
+    glitchSwitch(() => {
+      setCoachWanted(false);
+      setApexOpen(false);
+      setNutritionOpen(false);
+      setLearnOpen(false);
+      setRosterTab(guardRosterTab(rtab, role));
+      setRosterOpen(true);
+    });
   };
   const openNutrition = () => {
     if (!nutritionEnabled) return;
-    setShellOpen(false);
-    setCoachWanted(false);
-    setApexOpen(false);
-    setRosterOpen(false);
-    setLearnOpen(false);
-    setNutritionOpen(true);
+    setShellOpen(false); // the apps drawer goes at once, before the glitch
+    glitchSwitch(() => {
+      setCoachWanted(false);
+      setApexOpen(false);
+      setRosterOpen(false);
+      setLearnOpen(false);
+      setNutritionOpen(true);
+    });
   };
   const openLearn = () => {
-    setShellOpen(false);
-    setCoachWanted(false);
-    setApexOpen(false);
-    setRosterOpen(false);
-    setNutritionOpen(false);
-    setLearnOpen(true);
+    setShellOpen(false); // the apps drawer goes at once, before the glitch
+    glitchSwitch(() => {
+      setCoachWanted(false);
+      setApexOpen(false);
+      setRosterOpen(false);
+      setNutritionOpen(false);
+      setLearnOpen(true);
+    });
   };
 
   // Coach dashboard takes over the whole screen (flag `coach`; trainer or admin).
@@ -1959,6 +1970,7 @@ export function App() {
  */
 function ScreenFallback() {
   const { t } = useT();
+  useEffect(() => glitchHold(), []);
   return <ScreenSkeleton label={t.loadingApp} />;
 }
 
