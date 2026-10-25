@@ -22,16 +22,16 @@ html[data-theme]
   background:
     linear-gradient(
         to top right,
-        transparent calc(50% - var(--bd-w, 1px)),
-        var(--bd, var(--corner-mark-color, transparent)) calc(50% - var(--bd-w, 1px)) 50%,
+        transparent calc(50% - var(--bd-w, var(--sz-1))),
+        var(--bd, var(--corner-mark-color, transparent)) calc(50% - var(--bd-w, var(--sz-1))) 50%,
         transparent 50%
       )
       top right / var(--s-12) var(--s-12) no-repeat,
     linear-gradient(
         to top right,
         transparent 50%,
-        var(--bd, var(--corner-mark-color, transparent)) 50% calc(50% + var(--bd-w, 1px)),
-        transparent calc(50% + var(--bd-w, 1px))
+        var(--bd, var(--corner-mark-color, transparent)) 50% calc(50% + var(--bd-w, var(--sz-1))),
+        transparent calc(50% + var(--bd-w, var(--sz-1)))
       )
       bottom left / var(--s-12) var(--s-12) no-repeat;
 }
@@ -44,18 +44,18 @@ html[data-theme] :is(.sheet, .hl-sheet)::after {
   background:
     linear-gradient(
         to top right,
-        transparent calc(50% - var(--bd-w, 1px)),
-        var(--bd, var(--corner-mark-color, transparent)) calc(50% - var(--bd-w, 1px)) 50%,
+        transparent calc(50% - var(--bd-w, var(--sz-1))),
+        var(--bd, var(--corner-mark-color, transparent)) calc(50% - var(--bd-w, var(--sz-1))) 50%,
         transparent 50%
       )
-      top right / 14px 14px no-repeat,
+      top right / var(--sz-14) var(--sz-14) no-repeat,
     linear-gradient(
         to bottom right,
         transparent 50%,
-        var(--bd, var(--corner-mark-color, transparent)) 50% calc(50% + var(--bd-w, 1px)),
-        transparent calc(50% + var(--bd-w, 1px))
+        var(--bd, var(--corner-mark-color, transparent)) 50% calc(50% + var(--bd-w, var(--sz-1))),
+        transparent calc(50% + var(--bd-w, var(--sz-1)))
       )
-      top left / 14px 14px no-repeat;
+      top left / var(--sz-14) var(--sz-14) no-repeat;
 }
 
 /* Controls and tags: same corner stroke on their small cuts (7px / 4px). The selectors mirror the clip lists in
@@ -112,18 +112,18 @@ html[data-theme] .uibrand-chip::before {
   background:
     linear-gradient(
         to top right,
-        transparent calc(50% - var(--bd-w, 1px)),
-        var(--bd, var(--corner-mark-color, transparent)) calc(50% - var(--bd-w, 1px)) 50%,
+        transparent calc(50% - var(--bd-w, var(--sz-1))),
+        var(--bd, var(--corner-mark-color, transparent)) calc(50% - var(--bd-w, var(--sz-1))) 50%,
         transparent 50%
       )
-      top right / var(--cut-ctl, 7px) var(--cut-ctl, 7px) no-repeat,
+      top right / var(--cut-ctl, var(--sz-7)) var(--cut-ctl, var(--sz-7)) no-repeat,
     linear-gradient(
         to top right,
         transparent 50%,
-        var(--bd, var(--corner-mark-color, transparent)) 50% calc(50% + var(--bd-w, 1px)),
-        transparent calc(50% + var(--bd-w, 1px))
+        var(--bd, var(--corner-mark-color, transparent)) 50% calc(50% + var(--bd-w, var(--sz-1))),
+        transparent calc(50% + var(--bd-w, var(--sz-1)))
       )
-      bottom left / var(--cut-ctl, 7px) var(--cut-ctl, 7px) no-repeat;
+      bottom left / var(--cut-ctl, var(--sz-7)) var(--cut-ctl, var(--sz-7)) no-repeat;
 }
 html[data-theme]
   :is(

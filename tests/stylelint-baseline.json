@@ -59,14 +59,8 @@
     "client/src/components/ui/Badge.css": {
       "declaration-property-unit-disallowed-list": 3
     },
-    "client/src/components/ui/Banner.css": {
-      "declaration-property-unit-disallowed-list": 7
-    },
     "client/src/components/ui/BrandBar.css": {
       "declaration-property-unit-disallowed-list": 6
-    },
-    "client/src/components/ui/Button.css": {
-      "declaration-property-unit-disallowed-list": 1
     },
     "client/src/components/ui/Calendar.css": {
       "declaration-property-unit-disallowed-list": 6,
@@ -260,7 +254,6 @@
     },
     "client/src/glass.css": {
       "declaration-no-important": 3,
-      "declaration-property-unit-disallowed-list": 104,
       "media-feature-name-value-allowed-list": 4
     },
     "client/src/learn/learn.css": {
@@ -282,7 +275,7 @@
     },
     "client/src/styles.css": {
       "declaration-no-important": 10,
-      "declaration-property-unit-disallowed-list": 907,
+      "declaration-property-unit-disallowed-list": 906,
       "media-feature-name-value-allowed-list": 81
     },
     "client/src/today/library.css": {
@@ -337,9 +330,6 @@
     "client/src/views/sessionSummary/NextUp.css": {
       "declaration-no-important": 5,
       "declaration-property-unit-disallowed-list": 10
-    },
-    "client/src/views/themes.css": {
-      "declaration-property-unit-disallowed-list": 2
     }
   }
 }

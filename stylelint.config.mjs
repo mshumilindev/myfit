@@ -11,7 +11,7 @@
 export default {
   overrides: [
     {
-      files: ['client/src/tokens/primitives.css'],
+      files: ['client/src/tokens/primitives.css', 'client/src/tokens/primitives.*.css'],
       rules: { 'color-no-hex': null, 'function-disallowed-list': null },
     },
   ],
