@@ -1,7 +1,7 @@
 /* Button / IconButton — Spotter UI kit primitive.
    Geometry (base, sizes, icon width) is wrapped in :where() = zero specificity,
    so a feature class can always position / size a kit button without a fight.
-   Canonical control built on design tokens (design spec: var(--sz-46) / var(--sz-15) / 600).
+   Canonical control built on design tokens (design spec: 46px / 15px / 600).
    Absorbs the global .btn* family and the .rx .btn.p/.s/.b system into one.
    Variants map to token families only; no raw hex. */
 

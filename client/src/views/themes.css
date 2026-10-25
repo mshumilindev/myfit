@@ -50,12 +50,10 @@
   line-height: 1.1;
   text-transform: var(--heading-transform, none);
   letter-spacing: var(--heading-tracking, -0.02em);
-  background: linear-gradient(
-    180deg,
-    var(--color-accent-400),
-    var(--color-accent-500)
+  background: linear-gradient(180deg, var(--color-accent-400), var(--color-accent-500));
+  filter: drop-shadow(
+    0 var(--s-4) var(--s-12) color-mix(in srgb, var(--color-accent) 35%, transparent)
   );
-  filter: drop-shadow(0 var(--s-4) var(--s-12) color-mix(in srgb, var(--color-accent) 35%, transparent));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

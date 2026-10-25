@@ -36,7 +36,8 @@
     inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1))
       color-mix(in srgb, var(--gem) 45%, color-mix(in srgb, var(--c-ffffff) 40%, transparent)),
     inset var(--tone-bar-w, 0) 0 0 var(--gem),
-    inset 0 calc(-12 * var(--sz-1)) var(--sz-16) calc(-12 * var(--sz-1)) color-mix(in srgb, var(--c-000000) 50%, transparent),
+    inset 0 calc(-12 * var(--sz-1)) var(--sz-16) calc(-12 * var(--sz-1))
+      color-mix(in srgb, var(--c-000000) 50%, transparent),
     inset 0 0 0 var(--sz-1)
       color-mix(in srgb, var(--gem) 30%, color-mix(in srgb, var(--c-ffffff) 8%, transparent)),
     var(--glass-float);

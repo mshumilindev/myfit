@@ -77,7 +77,7 @@ html[data-theme] body::after {
 }
 /* Contours: |picture shifted a little - picture| leaves only the edges of what is in it. One copy is tinted the app's
    accent colour (shifted left), one its neon complement (shifted right); `screen` adds just the thin lines to the page. They tear in the same
-   slices as the lifted copy, with an var(--sz-8) margin at the sides so the shifted layer never shows its own edge. */
+   slices as the lifted copy, with an 8px margin at the sides so the shifted layer never shows its own edge. */
 html[data-theme] body::before,
 html[data-theme]::before {
   content: var(--bg-glitch-content, none);

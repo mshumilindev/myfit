@@ -11,18 +11,32 @@ import { stylesCss, glassCss } from '../components/ui/readCss';
 const STYLES = stylesCss();
 const GLASS = glassCss();
 
+/**
+ * A token may read `var(--skin-x, var(--c-aabbcc))` (a theme can skin it) or `var(--c-aabbcc)` (a raw primitive,
+ * ADR 010): the colour the maths is about is the unskinned primitive's hex.
+ */
+function plain(v: string): string {
+  const skin = v.match(/^var\(--skin-[\w-]+,\s*(.+)\)$/);
+  if (skin) return plain(skin[1].trim());
+  const prim = v.match(/^var\(--c-([0-9a-f]{6})\)$/);
+  return prim ? `#${prim[1]}` : v;
+}
+
 const rootTokens = new Map<string, string>();
 const rootBlock = STYLES.slice(
   STYLES.indexOf(':root {'),
   STYLES.indexOf('\n}\n', STYLES.indexOf(':root {')),
 );
-for (const m of rootBlock.matchAll(/(--[\w-]+):\s*([^;]+);/g)) rootTokens.set(m[1], m[2].trim());
+for (const m of rootBlock.matchAll(/(--[\w-]+):\s*([^;]+);/g))
+  rootTokens.set(m[1], plain(m[2].trim()));
 
 function blockOf(selector: string): Map<string, string> {
   const at = STYLES.indexOf(selector);
   expect(at, selector).toBeGreaterThan(-1);
   const body = STYLES.slice(STYLES.indexOf('{', at) + 1, STYLES.indexOf('}', at));
-  return new Map([...body.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
+  return new Map(
+    [...body.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], plain(m[2].trim())]),
+  );
 }
 const coach = blockOf('.app-coach,\n.theme-coach {');
 const resolve = (name: string): string => {

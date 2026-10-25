@@ -319,7 +319,8 @@ html[data-theme] .tabbar-fab {
   background: var(--fab-bg);
   box-shadow:
     var(--fab-edge),
-    0 0 var(--sz-22) calc(-2 * var(--sz-1)) color-mix(in srgb, var(--color-accent) var(--glow-k), transparent);
+    0 0 var(--sz-22) calc(-2 * var(--sz-1))
+      color-mix(in srgb, var(--color-accent) var(--glow-k), transparent);
 }
 
 /* --- Shell: desktop rail --------------------------------------------------- */
@@ -355,7 +356,8 @@ html[data-theme] .sheet.sheet--toned {
     color-mix(in srgb, var(--t-base) calc(6% * var(--plate-tint-k)), var(--plate-bot))
   );
   box-shadow:
-    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1)) color-mix(in srgb, var(--t-base) 60%, white),
+    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1))
+      color-mix(in srgb, var(--t-base) 60%, white),
     inset 0 0 0 var(--sz-1) color-mix(in srgb, var(--t-base) 45%, transparent),
     var(--sheet-mark);
 }
@@ -387,7 +389,8 @@ html[data-theme] .uipop {
   -webkit-backdrop-filter: var(--bf-glass);
   box-shadow:
     var(--shadow-md),
-    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1)) color-mix(in srgb, var(--t-base, var(--color-accent)) 45%, transparent),
+    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1))
+      color-mix(in srgb, var(--t-base, var(--color-accent)) 45%, transparent),
     inset 0 0 0 var(--sz-1) var(--t-line, var(--color-border));
 }
 /* Coach chat popover (the dock panel): a solid frosted family-tinted plate (about 96% opaque, strong blur), so the
@@ -411,7 +414,8 @@ html[data-theme] .uicard.cd-card {
   border-color: transparent;
   box-shadow:
     var(--shadow-lg),
-    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1)) color-mix(in srgb, var(--t-base, var(--color-accent)) 45%, transparent),
+    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1))
+      color-mix(in srgb, var(--t-base, var(--color-accent)) 45%, transparent),
     inset 0 0 0 var(--sz-1) var(--t-line, var(--color-border));
 }
 /* App launcher: the plate is the current app's accent at 6-8% over a dark base, with a 1px
@@ -426,7 +430,8 @@ html[data-theme] .sheet.sheet--toned.uimore {
   );
   border: 0;
   box-shadow:
-    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1)) color-mix(in srgb, var(--t-base) 45%, transparent),
+    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1))
+      color-mix(in srgb, var(--t-base) 45%, transparent),
     inset 0 0 0 var(--sz-1) var(--t-line);
 }
 html[data-theme] .dialog {
@@ -506,7 +511,8 @@ html[data-theme] .uicard--people {
   );
   border-color: transparent;
   box-shadow:
-    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1)) color-mix(in srgb, var(--t-text) 40%, transparent),
+    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1))
+      color-mix(in srgb, var(--t-text) 40%, transparent),
     inset 0 0 0 var(--sz-1) color-mix(in srgb, var(--t-base) 32%, transparent);
 }
 html[data-theme] .uicard.uicard--selected {
@@ -646,7 +652,8 @@ html[data-theme] .uibtn--fill {
   box-shadow:
     inset 0 0 0 var(--sz-1) color-mix(in srgb, var(--b-base) var(--btn-ring-mix), transparent),
     var(--btn-glow),
-    0 0 var(--sz-18) calc(-2 * var(--sz-1)) color-mix(in srgb, var(--b-base) var(--glow-k), transparent);
+    0 0 var(--sz-18) calc(-2 * var(--sz-1))
+      color-mix(in srgb, var(--b-base) var(--glow-k), transparent);
   text-transform: var(--btn-case);
   letter-spacing: var(--btn-tracking);
 }

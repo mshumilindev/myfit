@@ -1,5 +1,5 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { useRef } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -276,10 +276,18 @@ describe('NowLine colour (token, contrast)', () => {
 describe('NowLine and reduced motion', () => {
   it('has no animation or transition of its own, so there is nothing to switch off for prefers-reduced-motion', () => {
     expect(kitCss('NowLine')).not.toMatch(/animation|transition|@keyframes/);
-    const glass = glassCss();
-    const rules = glass.match(/[^{}]*\.uinow[^{}]*\{[^}]*\}/g) ?? [];
-    expect(rules.length).toBeGreaterThan(0);
-    for (const r of rules) expect(r).not.toMatch(/animation|transition/);
+    // nor may any theme restyle it with one: every theme sheet that mentions the line (Brass Glass's glass.css,
+    // each theme's own files) is read; NowLine.css above carries the base rules
+    const themes = join(__dirname, '..', '..', 'themes');
+    const sheets = [
+      glassCss(),
+      ...readdirSync(themes)
+        .filter((n) => n.endsWith('.css'))
+        .map((n) => readFileSync(join(themes, n), 'utf8')),
+    ];
+    for (const css of sheets)
+      for (const r of css.match(/[^{}]*\.uinow[^{}]*\{[^}]*\}/g) ?? [])
+        expect(r).not.toMatch(/animation|transition/);
   });
   it('the scroll to "now" is an instant jump (behavior auto), never smooth', () => {
     const src = readFileSync(join(__dirname, 'NowLine.tsx'), 'utf8');
