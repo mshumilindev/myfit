@@ -20,16 +20,16 @@ html[data-theme]
   background:
     linear-gradient(
         to top right,
-        transparent calc(50% - 1px),
-        var(--corner-mark-color, transparent) calc(50% - 1px) 50%,
+        transparent calc(50% - var(--bd-w, 1px)),
+        var(--bd, var(--corner-mark-color, transparent)) calc(50% - var(--bd-w, 1px)) 50%,
         transparent 50%
       )
       top right / var(--s-12) var(--s-12) no-repeat,
     linear-gradient(
         to top right,
         transparent 50%,
-        var(--corner-mark-color, transparent) 50% calc(50% + 1px),
-        transparent calc(50% + 1px)
+        var(--bd, var(--corner-mark-color, transparent)) 50% calc(50% + var(--bd-w, 1px)),
+        transparent calc(50% + var(--bd-w, 1px))
       )
       bottom left / var(--s-12) var(--s-12) no-repeat;
 }
@@ -42,16 +42,16 @@ html[data-theme] .sheet::after {
   background:
     linear-gradient(
         to top right,
-        transparent calc(50% - 1px),
-        var(--corner-mark-color, transparent) calc(50% - 1px) 50%,
+        transparent calc(50% - var(--bd-w, 1px)),
+        var(--bd, var(--corner-mark-color, transparent)) calc(50% - var(--bd-w, 1px)) 50%,
         transparent 50%
       )
       top right / 14px 14px no-repeat,
     linear-gradient(
         to bottom right,
         transparent 50%,
-        var(--corner-mark-color, transparent) 50% calc(50% + 1px),
-        transparent calc(50% + 1px)
+        var(--bd, var(--corner-mark-color, transparent)) 50% calc(50% + var(--bd-w, 1px)),
+        transparent calc(50% + var(--bd-w, 1px))
       )
       top left / 14px 14px no-repeat;
 }
@@ -102,16 +102,16 @@ html[data-theme] .uibrand-chip::before {
   background:
     linear-gradient(
         to top right,
-        transparent calc(50% - 1px),
-        var(--corner-mark-color, transparent) calc(50% - 1px) 50%,
+        transparent calc(50% - var(--bd-w, 1px)),
+        var(--bd, var(--corner-mark-color, transparent)) calc(50% - var(--bd-w, 1px)) 50%,
         transparent 50%
       )
       top right / var(--cut-ctl, 7px) var(--cut-ctl, 7px) no-repeat,
     linear-gradient(
         to top right,
         transparent 50%,
-        var(--corner-mark-color, transparent) 50% calc(50% + 1px),
-        transparent calc(50% + 1px)
+        var(--bd, var(--corner-mark-color, transparent)) 50% calc(50% + var(--bd-w, 1px)),
+        transparent calc(50% + var(--bd-w, 1px))
       )
       bottom left / var(--cut-ctl, 7px) var(--cut-ctl, 7px) no-repeat;
 }

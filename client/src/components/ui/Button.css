@@ -54,6 +54,7 @@
 .uibtn--primary {
   color: var(--t-base, var(--color-accent));
   border-color: var(--t-base, var(--color-accent));
+  --bd: var(--t-base, var(--color-accent));
 }
 .uibtn--secondary {
   border-color: var(--color-divider);
@@ -61,6 +62,7 @@
 }
 .uibtn--ghost {
   border-color: transparent;
+  --bd: initial;
   color: var(--color-text);
 }
 .uibtn--link {
@@ -69,6 +71,7 @@
   min-height: var(--ctl-h-xs);
   padding: var(--s-4) var(--s-12);
   border-color: transparent;
+  --bd: initial;
   color: var(--color-accent);
   font-size: var(--fs-13);
   font-weight: 500;
@@ -94,19 +97,23 @@
 .uibtn--danger {
   color: var(--color-danger);
   border-color: var(--color-danger);
+  --bd: var(--color-danger);
 }
 .uibtn--rest {
   color: var(--color-rest-400);
   border-color: var(--color-rest-700);
+  --bd: var(--color-rest-700);
 }
 .uibtn--sleep {
   color: var(--color-sleep-text);
   border-color: var(--color-sleep-line);
+  --bd: var(--color-sleep-line);
 }
 .uibtn--sleep-fill {
   background: var(--color-sleep);
   color: var(--color-sleep-tint);
   border-color: transparent;
+  --bd: initial;
 }
 .uibtn--dashed {
   /* An "add another" row: no fill, a dashed outline, brass text. */
@@ -120,6 +127,7 @@
   background: var(--t-base, var(--color-accent));
   color: var(--t-on, var(--color-accent-900));
   border-color: var(--t-base, var(--color-accent));
+  --bd: var(--t-base, var(--color-accent));
   font-weight: 700;
 }
 
@@ -153,6 +161,7 @@
 .uibtn--primary:not(:disabled):active {
   background: color-mix(in srgb, var(--color-accent) 22%, transparent);
   border-color: var(--color-accent-400);
+  --bd: var(--color-accent-400);
 }
 .uibtn--fill:not(:disabled):active {
   background: var(--color-accent-600);
@@ -236,6 +245,7 @@ a.uibtn:hover {
 .uibtn--ok {
   color: var(--color-ok);
   border-color: var(--color-ok);
+  --bd: var(--color-ok);
 }
 /* photo: a frosted control that sits on top of imagery. */
 .uibtn--photo {

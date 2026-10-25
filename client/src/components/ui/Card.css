@@ -44,18 +44,22 @@ button.uicard[aria-disabled='true'] {
 .uicard--danger {
   background: var(--color-danger-tint);
   border-color: var(--color-danger-line);
+  --bd: var(--color-danger-line);
 }
 .uicard--ok {
   background: var(--color-ok-tint);
   border-color: var(--color-ok-line);
+  --bd: var(--color-ok-line);
 }
 .uicard--rest {
   background: var(--color-rest-900);
   border-color: var(--color-rest-800);
+  --bd: var(--color-rest-800);
 }
 .uicard--accent {
   background: color-mix(in srgb, var(--color-accent) 8%, transparent);
   border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  --bd: color-mix(in srgb, var(--color-accent) 40%, transparent);
 }
 /* Every other family (active, illness, injury, sleep, sport, kcal, apex, learn,
    atlas) — the tone class binds --t-tint / --t-line (tones.css). */
@@ -72,6 +76,7 @@ button.uicard[aria-disabled='true'] {
 .uicard--people {
   background: var(--t-tint);
   border-color: var(--t-line);
+  --bd: var(--t-line);
 }
 
 /* Selected: the chosen card of a set. Reads the tone's --t-* family (tones.css), so it is
@@ -79,7 +84,10 @@ button.uicard[aria-disabled='true'] {
 .uicard--selected {
   background: color-mix(in srgb, var(--t-base) calc(14% * var(--tone-fill-k, 1)), var(--t-tint));
   border-color: var(--t-base);
+  --bd: var(--t-base);
   box-shadow: inset 0 0 0 1px var(--t-base);
+  /* border + inset ring: the corner stroke is as thick as both together */
+  --bd-w: 2px;
 }
 
 /* Emphasis (design rule 0b). Graphite keeps its current looks: hero = the
@@ -87,6 +95,7 @@ button.uicard[aria-disabled='true'] {
    = no chrome. The Brass Glass theme restyles these in glass.css. */
 .uicard--e-hero {
   border-color: transparent;
+  --bd: initial;
   border-radius: var(--radius-hero, var(--radius-lg));
   background: var(--glass-brass-tint);
   box-shadow: var(--glass-brass-specular), var(--glass-float);
@@ -94,6 +103,7 @@ button.uicard[aria-disabled='true'] {
 .uicard--e-glass {
   background: var(--glass-tint);
   border-color: transparent;
+  --bd: initial;
   box-shadow: var(--glass-specular);
 }
 :where(.uicard--e-quiet) {
