@@ -280,7 +280,7 @@ html[data-theme='cyberpunk'] {
   --tab-active-mark: none;
   --switch-out: 220;
   --switch-tail: 460;
-  --route-tail: 240;
+  --route-tail: 0;
   --label-mark-display: inline-block;
   --r-ctl: var(--r-2);
   --r-input: var(--r-2);
