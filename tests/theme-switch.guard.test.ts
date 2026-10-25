@@ -27,5 +27,15 @@ describe('app switch', () => {
         }
       }
     });
+    it(`${id}: has route-change tokens and draws the route phases`, () => {
+      const file = readFileSync(join(DIR, `${id}.css`), 'utf8');
+      const tail = Number(/--route-tail:\s*(\d+)/.exec(file)?.[1]);
+      expect(Number.isFinite(tail)).toBe(true);
+      if (tail > 0) {
+        for (const phase of ['load', 'in']) {
+          expect(css).toContain(`html[data-theme='${id}'][data-route='${phase}']`);
+        }
+      }
+    });
   }
 });

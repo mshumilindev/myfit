@@ -1,0 +1,43 @@
+/* Route change inside an app (components/routeSwitch.ts): a diagonal 45° wipe over the screen stage (the app's <main> only; tab bar and
+   rail stay untouched). `load` – the old screen is covered at once and stays so while the next screen loads (any length);
+   `in` – the accent edge sweeps from the top-left corner to the far one and uncovers the new screen. Reduced motion never sets the attribute. */
+@property --route-p {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+@keyframes cyber-route-cover {
+  from {
+    --route-p: -2%;
+  }
+  to {
+    --route-p: 102%;
+  }
+}
+html[data-theme='cyberpunk'][data-route]::after {
+  content: '';
+  position: fixed;
+  top: var(--route-t);
+  left: var(--route-l);
+  width: var(--route-w);
+  height: var(--route-h);
+  z-index: var(--z-1000);
+  pointer-events: none;
+}
+html[data-theme='cyberpunk'][data-route='load']::after {
+  background: color-mix(in srgb, var(--color-bg) 99%, transparent);
+}
+html[data-theme='cyberpunk'][data-route='in']::after {
+  background: linear-gradient(
+    135deg,
+    transparent calc(var(--route-p) - 3px),
+    var(--color-accent) calc(var(--route-p) - 3px) var(--route-p),
+    color-mix(in srgb, var(--color-bg) 99%, transparent) var(--route-p)
+  );
+  animation: cyber-route-cover calc(var(--route-tail) * 1ms) cubic-bezier(0.2, 0.6, 0.4, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='cyberpunk'][data-route]::after {
+    display: none;
+  }
+}

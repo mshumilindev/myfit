@@ -62,6 +62,7 @@ import { LavaBackground } from './components/LavaBackground';
 import { initMotion } from './motion';
 import { purgeLegacyPlaintext, runPendingWipe } from './deviceWipe';
 import { AppCrashBoundary, installCrashRecovery } from './appCrash';
+import { installRouteSwitch } from './components/routeSwitch';
 import { installCleanUrls } from './route';
 import { LegalGate } from './legal/LegalGate';
 import { GeoConsentHost } from './legal/GeoConsentHost';
@@ -69,6 +70,7 @@ import { HealthConsentHost } from './legal/HealthConsentHost';
 
 // Clean URLs (no `#`): rewrite a legacy `/#/route` link to `/route` before the app reads its route.
 installCleanUrls();
+installRouteSwitch();
 initTheme();
 document.documentElement.lang = getLocale();
 lockShellHeight();

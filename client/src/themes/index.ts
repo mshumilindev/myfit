@@ -4,4 +4,5 @@ import.meta.glob(['./*.css', '!./_*.css'], { eager: true });
 import './_axes.css';
 import './_cyberpunk.structure.css';
 import './_switch.css';
+import './_cyberpunk.route.css';
 export * from './registry';

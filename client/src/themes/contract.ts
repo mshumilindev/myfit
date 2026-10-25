@@ -124,6 +124,9 @@ export const THEME_TOKENS = [
   // A theme that sets them above 0 must draw the phases on `html[data-theme=<id>][data-glitch]` (tests/theme-switch.guard).
   '--switch-out',
   '--switch-tail',
+  // Route change inside an app (components/routeSwitch.ts): ms the cover takes to leave the new screen; 0 = instant.
+  // Above 0 the theme must draw `html[data-theme=<id>][data-route='load'|'in']` (tests/theme-switch.guard).
+  '--route-tail',
   '--label-mark-display',
   '--r-ctl',
   '--r-input',

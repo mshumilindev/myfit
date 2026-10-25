@@ -10,6 +10,14 @@ const SAFETY_MS = 6000;
 let timer: number | undefined;
 let safety: number | undefined;
 let holds = 0;
+const releaseFns = new Set<() => void>();
+/** True while a lazy screen's loading placeholder is mounted. */
+export const isHolding = () => holds > 0;
+/** Called whenever the last loading placeholder goes away. */
+export function onHoldRelease(fn: () => void) {
+  releaseFns.add(fn);
+  return () => void releaseFns.delete(fn);
+}
 
 const root = () => document.documentElement;
 const ms = (name: string) =>
@@ -55,6 +63,7 @@ export function glitchHold() {
   if (root().dataset.glitch === 'in') root().dataset.glitch = 'load';
   return () => {
     holds = Math.max(0, holds - 1);
+    if (holds === 0) for (const fn of [...releaseFns]) fn();
     if (holds === 0 && root().dataset.glitch === 'load') tail();
   };
 }

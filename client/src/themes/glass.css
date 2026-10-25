@@ -153,6 +153,7 @@ html[data-theme='glass'] {
   --tab-active-mark: none;
   --switch-out: 320;
   --switch-tail: 640;
+  --route-tail: 0;
   --label-mark-display: none;
   /* corner of text-bearing controls (buttons, badges, chips, tags); 999px = pill. Avatars, dots, rings stay round. */
   --r-ctl: 999px;
