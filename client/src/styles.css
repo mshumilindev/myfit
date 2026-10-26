@@ -9424,8 +9424,14 @@ button.exd-media {
 @media (min-width: 720px) {
   .programs-author-page .goals-body {
     padding: var(--s-24) var(--s-28) var(--s-44);
-    max-width: 760px;
     scrollbar-gutter: stable;
+  }
+}
+/* A readable column below the wide layout: the body keeps the page's edges (as the bar above it does),
+   its contents hold the width. */
+@media (min-width: 720px) and (max-width: 1099.98px) {
+  .programs-author-page .goals-body > * {
+    max-width: 44rem;
   }
 }
 .goals-intro {
@@ -17685,7 +17691,7 @@ html[data-theme] .apx-streak-n {
 /* --- EquipmentDetailView (machine detail, MD-02) -------------------------- */
 .eqd-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--s-12);
   padding-top: var(--s-2);
   margin-bottom: var(--s-10);
@@ -17693,9 +17699,6 @@ html[data-theme] .apx-streak-n {
 .eqd-headtext {
   flex: 1;
   min-width: 0;
-}
-.eqd-back {
-  margin-top: var(--s-2);
 }
 .eqd-body {
   position: relative;
