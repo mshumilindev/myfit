@@ -34,7 +34,7 @@ const en: GeoConsentStrings = {
   sentLabel: 'What is sent',
   sent: 'The gym names you type; the names and coordinates of gyms, including gyms you saved (for logos and address and details lookups); the map area you view; and, if you allow location (your browser asks separately), your position, to find places and draw a route.',
   whoLabel: 'Who receives it',
-  who: 'OpenStreetMap-based services (Photon, Overpass, Nominatim, OSRM) and map tiles from OpenStreetMap; gym logo lookups go to Wikidata and Wikimedia, address and details lookups for gyms (including saved ones) to Photon and Nominatim; the map library comes from unpkg. They see your IP address.',
+  who: 'OpenStreetMap-based services (Photon, Overpass, Nominatim, OSRM) and map tiles from OpenStreetMap; gym logo lookups go to Wikidata and Wikimedia, address and details lookups for gyms (including saved ones) to Photon and Nominatim; the map library comes from unpkg. They see your IP address. Google Places is asked through our server: Google gets your search text and approximate position, not your IP address or account.',
   withoutLabel: 'Without it',
   without:
     'Gym search and maps stay off. Nothing is sent to these services. Gyms you already saved still show.',
@@ -56,7 +56,7 @@ const uk: GeoConsentStrings = {
   sentLabel: 'Що надсилається',
   sent: 'Назви залів, які ви вводите; назви й координати залів, зокрема збережених вами (для логотипів, адрес і подробиць); ділянка мапи, яку ви дивитесь; і, якщо дозволите геолокацію (браузер запитає окремо), ваше місцеперебування, щоб знайти місця й побудувати маршрут.',
   whoLabel: 'Хто отримує',
-  who: 'Сервіси на основі OpenStreetMap (Photon, Overpass, Nominatim, OSRM) і плитки мапи OpenStreetMap; пошук логотипів залів іде до Wikidata та Wikimedia, пошук адрес і подробиць залів (зокрема збережених) до Photon і Nominatim; бібліотека мапи з unpkg. Вони бачать вашу IP-адресу.',
+  who: 'Сервіси на основі OpenStreetMap (Photon, Overpass, Nominatim, OSRM) і плитки мапи OpenStreetMap; пошук логотипів залів іде до Wikidata та Wikimedia, пошук адрес і подробиць залів (зокрема збережених) до Photon і Nominatim; бібліотека мапи з unpkg. Google Places опитується через наш сервер: Google бачить пошуковий запит і наближене розташування, але не вашу IP-адресу чи акаунт. Вони бачать вашу IP-адресу.',
   withoutLabel: 'Без цього',
   without:
     'Пошук залів і мапи лишаються вимкненими. Цим сервісам нічого не надсилається. Зали, які ви вже зберегли, показуються й далі.',
@@ -78,7 +78,7 @@ const pl: GeoConsentStrings = {
   sentLabel: 'Co jest wysyłane',
   sent: 'Nazwy siłowni, które wpisujesz; nazwy i współrzędne siłowni, także zapisanych przez Ciebie (do logotypów, adresów i szczegółów); obszar mapy, który oglądasz; oraz, jeśli pozwolisz na lokalizację (przeglądarka zapyta osobno), Twoja pozycja, aby znaleźć miejsca i wyznaczyć trasę.',
   whoLabel: 'Kto to otrzymuje',
-  who: 'Serwisy oparte na OpenStreetMap (Photon, Overpass, Nominatim, OSRM) i kafelki map OpenStreetMap; wyszukiwanie logotypów siłowni trafia do Wikidata i Wikimedia, wyszukiwanie adresów i szczegółów siłowni (także zapisanych) do Photon i Nominatim; biblioteka map z unpkg. Widzą Twój adres IP.',
+  who: 'Serwisy oparte na OpenStreetMap (Photon, Overpass, Nominatim, OSRM) i kafelki map OpenStreetMap; wyszukiwanie logotypów siłowni trafia do Wikidata i Wikimedia, wyszukiwanie adresów i szczegółów siłowni (także zapisanych) do Photon i Nominatim; biblioteka map z unpkg. Widzą Twój adres IP. Google Places jest odpytywane przez nasz serwer: Google dostaje tekst wyszukiwania i przybliżoną pozycję, ale nie Twój adres IP ani konto.',
   withoutLabel: 'Bez tego',
   without:
     'Wyszukiwanie siłowni i mapy pozostają wyłączone. Nic nie jest wysyłane do tych serwisów. Zapisane już siłownie nadal się wyświetlają.',

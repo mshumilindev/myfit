@@ -256,10 +256,10 @@ describe('Overpass nearby query and parsing (SPO-360)', () => {
     expect(out.map((p) => p.name)).toEqual(['Retry Gym']);
   });
 
-  it('gives up after the second failure', async () => {
+  it('gives up after the retries (Overpass overloaded)', async () => {
     on('overpass', () => json({}, 504));
     await expect(searchNearbyGyms(MOKOTOW, 3000, [], ctl().signal)).rejects.toThrow('overpass 504');
-    expect(calls).toHaveLength(2);
+    expect(calls).toHaveLength(4);
   });
 
   it('an abort during the wait before the retry stops it', async () => {

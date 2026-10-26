@@ -150,7 +150,7 @@ export const PENDING: readonly PendingItem[] = [
     'privacy',
     'p5',
     'lawyer',
-    'SPO-293: p5 (three locales) now matches the calls in gymProviders.ts / gateChoices.ts: consent-based, OSM services (Photon, Overpass, Nominatim, OSRM, tiles), Wikidata / Wikimedia Commons, unpkg; no Google Places / Foursquare. Still open: LEGAL_VERSIONS is NOT raised (draft not released); raise it with the release, and have the wording checked by a lawyer.',
+    'SPO-293: p5 (three locales) now matches the calls in gymProviders.ts / gateChoices.ts: consent-based, OSM services (Photon, Overpass, Nominatim, OSRM, tiles), Wikidata / Wikimedia Commons, unpkg; no Foursquare. SPO-360: Google Places is back, called only through the gymPlaces Cloud Function (server key, consent re-checked on the server, geo-search version 2026-10-27); p5 and the consent text name it. Still open: LEGAL_VERSIONS is NOT raised (draft not released); raise it with the release, and have the wording checked by a lawyer.',
   ),
   item(
     'pp-off',

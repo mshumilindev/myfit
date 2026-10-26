@@ -283,6 +283,7 @@ const QUIET_CALLABLES = new Set([
   'profileMe',
   'athleteExerciseHistory',
   'athleteWorkout',
+  'gymPlaces',
 ]);
 
 /** A callable that has not answered by then fails (504), so a dead network never hangs a screen. */

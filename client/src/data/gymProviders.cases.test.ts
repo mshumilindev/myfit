@@ -15,6 +15,8 @@ import {
   type ProviderId,
   type ProviderState,
 } from './gymProviders';
+// Google Places goes through our function (SPO-360); these cases are about the keyless services, so it answers nothing.
+vi.mock('../api', () => ({ callFn: vi.fn(async () => ({ places: [] })) }));
 import { resetGeoGateForTests, setGeoSearchState } from './geoSearchGate';
 import type { Gym } from '../types';
 
@@ -376,7 +378,7 @@ describe('searchGyms', () => {
     const final = (id: ProviderId) => states.filter(([i]) => i === id).at(-1)![1];
     expect(final('local')).toEqual({ status: 'answered', count: 1 });
     expect(final('osm')).toEqual({ status: 'answered', count: 1 });
-    expect(snaps.length).toBe(2);
+    expect(snaps.length).toBe(3);
     expect(readCache('smartass', KYIV)).toEqual(merged);
   });
   it('queries Photon with the user position and sends the browser language', async () => {
@@ -432,11 +434,11 @@ describe('searchGyms', () => {
       reason: 'failed',
     });
   });
-  it('queries only local + OpenStreetMap services: no Google Places / Foursquare provider exists', async () => {
+  it('queries local + OpenStreetMap services + Google Places through our function; no direct Google / Foursquare call', async () => {
     on('photon', () => photon([]));
     const { p, states } = run('gym', KYIV);
     await p;
-    expect([...new Set(states.map(([i]) => i))].sort()).toEqual(['local', 'osm']);
+    expect([...new Set(states.map(([i]) => i))].sort()).toEqual(['google', 'local', 'osm']);
     expect(calls.some((c) => /googleapis|foursquare/.test(c.url))).toBe(false);
   });
   it('without the geo-search consent no request leaves the device: Photon fails with the reason, saved gyms still answer', async () => {

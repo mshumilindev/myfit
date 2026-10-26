@@ -115,7 +115,8 @@ describe('the consent prompt', () => {
     await waitFor(() => expect(prompt()).not.toBeNull());
     expect(screen.getByText('Who receives it')).toBeTruthy();
     expect(screen.getByText(/Photon, Overpass, Nominatim, OSRM/)).toBeTruthy();
-    expect(screen.queryByText(/Google|Foursquare/)).toBeNull();
+    expect(screen.getByText(/Google Places is asked through our server/)).toBeTruthy();
+    expect(screen.queryByText(/Foursquare/)).toBeNull();
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(geoSpy).not.toHaveBeenCalled();
   });

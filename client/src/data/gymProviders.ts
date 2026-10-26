@@ -22,7 +22,7 @@ function geoFetch(input: string, init?: RequestInit): Promise<Response> {
   return fetch(input, { ...init, signal });
 }
 
-export type ProviderId = 'local' | 'osm' | 'overpass';
+export type ProviderId = 'local' | 'osm' | 'overpass' | 'google';
 
 export interface PlaceResult {
   /** Stable within a provider; used only for React keys before merge. */
@@ -34,6 +34,10 @@ export interface PlaceResult {
   address?: string;
   /** Venue-attached photo URL, if any (AC-IMG-01 step 1). */
   photoUrl?: string;
+  /** Google Places photo reference (fetched through our proxy, only with consent). */
+  googlePhotoName?: string;
+  /** Photo author names Google asks to show next to the photo. */
+  googlePhotoBy?: string[];
   /** Provider-native id, used for id-based merge (AC-SEARCH-05b). */
   externalId?: string;
   /** OSM `wikimedia_commons` tag (e.g. "File:Foo.jpg") — lazy photo resolve. */
@@ -118,6 +122,10 @@ function mergeInto(a: PlaceResult, b: PlaceResult): void {
   for (const src of b.sources) if (!a.sources.includes(src)) a.sources.push(src);
   if (!a.photoUrl && b.photoUrl) a.photoUrl = b.photoUrl;
   if (!a.address && b.address) a.address = b.address;
+  if (!a.googlePhotoName && b.googlePhotoName) {
+    a.googlePhotoName = b.googlePhotoName;
+    a.googlePhotoBy = b.googlePhotoBy;
+  }
   if (!a.externalId && b.externalId) a.externalId = b.externalId;
   if (!a.wikimediaCommons && b.wikimediaCommons) a.wikimediaCommons = b.wikimediaCommons;
   if (!a.brandWikidata && b.brandWikidata) a.brandWikidata = b.brandWikidata;
@@ -419,6 +427,7 @@ export async function searchNearbyGymsMerged(
   await Promise.all([
     guarded('overpass', searchNearbyGyms(coords, radiusM, savedGyms, signal)),
     guarded('photon', photonNearby(query, coords, radiusM, signal)),
+    guarded('google', googleNearby(coords, radiusM)),
   ]);
   return nearestFirst();
 }
@@ -511,9 +520,84 @@ async function photonOnce(
 /** A provider that can't run (missing key) throws this → chip state 'skipped'. */
 class SkipError extends Error {}
 
+interface GooglePlacesRow {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  address?: string;
+  photoName?: string;
+  photoBy?: string[];
+}
+
+/**
+ * Google Places through our own Cloud Function (the key stays on the server; the function re-checks the consent record
+ * that names Google). Needs the same gym-search consent on the client; not configured / no consent → skipped, not failed.
+ */
+/** Loaded on first use: the Firebase client is not pulled into every module that only reads gym data. */
+const loadCallFn = async () => (await import('../api')).callFn;
+
+async function callGoogle(payload: Record<string, unknown>): Promise<GooglePlacesRow[]> {
+  assertGeoSearchOn();
+  try {
+    const callFn = await loadCallFn();
+    const res = await callFn<{ places?: GooglePlacesRow[] }>('gymPlaces', payload, { quiet: true });
+    return res?.places ?? [];
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : '';
+    // Consent not recorded for Google / key not configured / not signed in: nothing to show, not an error.
+    if (/no-consent|not-configured|unauthenticated|permission-denied/.test(msg))
+      throw new SkipError(msg);
+    throw err;
+  }
+}
+
+function googleToPlace(r: GooglePlacesRow): PlaceResult {
+  return {
+    key: `google:${r.id}`,
+    name: r.name,
+    lat: r.lat,
+    lng: r.lng,
+    address: r.address,
+    externalId: `google:${r.id}`,
+    googlePhotoName: r.photoName,
+    googlePhotoBy: r.photoBy,
+    amenities: detectAmenities({ name: r.name }),
+    sources: ['google'],
+  };
+}
+
+const googleProvider: Provider = async ({ query, coords }) => {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const rows = await callGoogle(
+    coords ? { op: 'search', q, lat: coords.lat, lng: coords.lng } : { op: 'search', q },
+  );
+  return rows.map(googleToPlace);
+};
+
+async function googleNearby(coords: Coords, radiusM: number): Promise<PlaceResult[]> {
+  const rows = await callGoogle({ op: 'nearby', lat: coords.lat, lng: coords.lng, radiusM });
+  return rows.map(googleToPlace);
+}
+
+async function googlePhoto(r: PlaceResult): Promise<GymPhoto | null> {
+  if (!r.googlePhotoName) return null;
+  const callFn = await loadCallFn();
+  const res = await callFn<{ photo?: string | null }>(
+    'gymPlaces',
+    { op: 'photo', name: r.googlePhotoName },
+    { quiet: true },
+  );
+  if (!res?.photo) return null;
+  const by = r.googlePhotoBy?.filter(Boolean).join(', ');
+  return { url: res.photo, credit: { author: by ? `${by} (Google)` : 'Google' } };
+}
+
 const PROVIDERS: { id: ProviderId; run: Provider }[] = [
   { id: 'local', run: localProvider },
   { id: 'osm', run: osmProvider },
+  { id: 'google', run: googleProvider },
 ];
 
 export interface SearchHandlers {
@@ -714,6 +798,10 @@ export async function resolvePhotoInfo(
   if (!isGeoSearchOn()) return null;
   if (r.photoUrl) return { url: r.photoUrl };
   try {
+    if (r.googlePhotoName) {
+      const photo = await googlePhoto(r).catch(() => null);
+      if (photo) return photo;
+    }
     if (r.venueWikidata) {
       const photo = await wikidataImage(r.venueWikidata, 'P18', signal);
       if (photo) return photo;

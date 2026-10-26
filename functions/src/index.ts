@@ -38,5 +38,7 @@ export * from './passkeys';
 export * from './sessions';
 // Legal consent records (SPO-296).
 export * from './consentRecords';
+// Gym search and photos from Google Places, through the server (SPO-360).
+export * from './gymPlaces';
 // Self-service account deletion (SPO-285).
 export * from './accountDeletion';

@@ -1,3 +1,5 @@
+// Google Places is asked through our own function (SPO-360), never from the browser: the stub answers nothing.
+vi.mock('../api', () => ({ callFn: vi.fn(async () => ({ places: [] })) }));
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   GEO_ENGINES,
@@ -92,7 +94,7 @@ describe('with no consent', () => {
 describe('with consent', () => {
   beforeEach(on);
 
-  it('calls only the OpenStreetMap-based services; Google Places and Foursquare are not part of the app', async () => {
+  it('calls only the OpenStreetMap-based services directly; Google Places goes through our function, Foursquare is not part of the app', async () => {
     await searchGyms('home', coords, [saved], new AbortController().signal, {
       onResults: () => undefined,
       onProvider: () => undefined,
@@ -122,6 +124,7 @@ describe('with consent', () => {
       'wikidata',
       'wikimedia-commons',
       'unpkg',
+      'google-places',
     ]);
   });
 

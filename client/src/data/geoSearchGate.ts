@@ -20,6 +20,7 @@ export const GEO_ENGINES = [
   'wikidata',
   'wikimedia-commons',
   'unpkg',
+  'google-places',
 ] as const;
 
 export class GeoConsentError extends Error {
