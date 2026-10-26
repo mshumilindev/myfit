@@ -1255,6 +1255,14 @@ export const pl: Strings = {
     high: 'Wysokie',
     fried: 'Zmęczony',
   },
+  fatWhy: {
+    idle: (d: number | null) =>
+      d === null
+        ? 'Brak ostatnich serii: zregenerowany'
+        : `Ostatni trening ${d} dn. temu: zregenerowany`,
+    load: (s: number, m: number) =>
+      `${s} serii w ostatnich 7 dniach (limit ~${m}): zmęczenie to niedawne obciążenie, nie brak objętości`,
+  },
   deloadLocalTitle: (m: string) => `${m} są zmęczone`,
   deloadLocalBody: (m: string) =>
     `Utnij około jednej trzeciej serii na ${m} na tydzień, potem odbuduj.`,

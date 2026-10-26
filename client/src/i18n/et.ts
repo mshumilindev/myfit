@@ -1249,6 +1249,12 @@ export const et: Strings = {
     high: 'Kõrge',
     fried: 'Kurnatud',
   },
+  fatWhy: {
+    idle: (d: number | null) =>
+      d === null ? 'Hiljutisi seeriaid pole: taastunud' : `Viimane trenn ${d} p tagasi: taastunud`,
+    load: (s: number, m: number) =>
+      `${s} seeriat viimase 7 päeva jooksul (piir ~${m}): väsimus näitab hiljutist koormust, mitte puuduvat mahtu`,
+  },
   deloadLocalTitle: (m: string) => `${m} on kurnatud`,
   deloadLocalBody: (m: string) =>
     `Vähenda ${m} seeriaid umbes kolmandiku võrra nädalaks, siis taasta.`,

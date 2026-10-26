@@ -1240,6 +1240,12 @@ export const en = {
     high: 'High',
     fried: 'Fried',
   },
+  fatWhy: {
+    idle: (d: number | null) =>
+      d === null ? 'No sets logged recently: recovered' : `Last trained ${d} d ago: recovered`,
+    load: (s: number, m: number) =>
+      `${s} sets in the last 7 days (limit ~${m}): fatigue shows recent load, not missing volume`,
+  },
   deloadLocalTitle: (m: string) => `${m} looks fried`,
   deloadLocalBody: (m: string) => `Cut about a third of ${m} sets for a week, then rebuild.`,
   deloadSystemicTitle: 'Fatigue is piling up',

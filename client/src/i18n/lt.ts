@@ -1273,6 +1273,12 @@ export const lt: Strings = {
     high: 'Didelis',
     fried: 'Pervargęs',
   },
+  fatWhy: {
+    idle: (d: number | null) =>
+      d === null ? 'Naujų serijų nėra: atsigavęs' : `Paskutinė treniruotė prieš ${d} d.: atsigavęs`,
+    load: (s: number, m: number) =>
+      `${s} serijų per 7 dienas (riba ~${m}): nuovargis rodo neseną apkrovą, o ne trūkstamą apimtį`,
+  },
   deloadLocalTitle: (m: string) => `${m} pervargę`,
   deloadLocalBody: (m: string) => `Sumažink apie trečdalį ${m} serijų savaitei, tada atsistatyk.`,
   deloadSystemicTitle: 'Nuovargis kaupiasi',

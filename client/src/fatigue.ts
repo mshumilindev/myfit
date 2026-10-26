@@ -114,7 +114,8 @@ export function stalledMuscles(finished: Workout[], now: number): Set<MuscleGrou
 
 /**
  * Per-muscle fatigue. Volume component ramps as the trailing-week sets climb
- * from ~70% of MRV up past it; a stalled main lift adds a fixed bump. A muscle
+ * from ~70% of MRV up past it; a stalled main lift adds a fixed bump (only for a
+ * muscle with direct sets in the window, SPO-352). A muscle
  * with little volume and no stall reads fresh.
  */
 export function muscleFatigue(
@@ -136,10 +137,16 @@ export function muscleFatigue(
     const fatSets = wk.primary + wk.secondary * FATIGUE_SECONDARY_WEIGHT;
     const volComp = clamp((fatSets / lm.mrv - 0.7) / 0.45, 0, 1);
     const isSt = stalled.has(m);
-    let score = clamp(volComp * 0.75 + (isSt ? 0.4 : 0), 0, 1);
+    let score = clamp(volComp * 0.75 + (isSt && wk.primary > 0 ? 0.4 : 0), 0, 1);
     // A muscle only stabilized this week (no direct sets) can't read "fried" —
     // stabilizer load and a stale lift alone don't warrant a deload here.
     if (wk.primary <= 0) score = Math.min(score, NO_DIRECT_CEILING);
+    // SPO-352: fatigue is accumulated LOAD. The stall bump (0.4) used to land
+    // exactly on the 'high' threshold on its own, flagging a rested muscle
+    // ("High, 0 of 16 sets this week"). Now the bump needs direct sets in the
+    // window (above), and a muscle with no sets at all carries no load -> fresh.
+    // The stall itself stays visible through `stalled`; it just isn't fatigue.
+    if (sets <= 0) score = 0;
     out.set(m, { muscle: m, score, level: levelOf(score), sets, mrv: lm.mrv, stalled: isSt });
   }
   return out;

@@ -4,6 +4,29 @@ import { PageFrame } from '../stories/PageFrame';
 import { seedStore, workoutOn } from '../stories/fixtures';
 import type { Gym, Workout } from '../types';
 
+/** SPO-352: bench flat for 4 sessions, the last 9 days ago, nothing since. */
+function restedStalled(): Workout[] {
+  return [9, 12, 15, 18].map((d) => {
+    const w = workoutOn(`picker-rested-${d}`, d);
+    w.exercises = [
+      {
+        id: `bench-${d}`,
+        name: 'Barbell Bench Press - Medium Grip',
+        position: 0,
+        sets: Array.from({ length: 3 }, (_, i) => ({
+          id: `bs-${d}-${i}`,
+          reps: 8,
+          weight: 60,
+          isWarmup: false,
+          position: i,
+          loggedAt: w.startedAt,
+        })),
+      },
+    ];
+    return w;
+  });
+}
+
 const gym: Gym = { id: 'g1', name: 'Home gym', lat: 0, lng: 0, radiusM: 100 };
 
 function session(): Workout {
@@ -50,3 +73,12 @@ export const Plain: Story = {
 };
 /** Warm-up block picker. */
 export const Warmup: Story = { args: { warmup: true } };
+/** SPO-352: a flat lift with no sets for 9 days reads Fresh (with the reason), not High. */
+export const RestedStalledLift: Story = {
+  loaders: [
+    () => {
+      seedStore({ workouts: [session(), ...restedStalled()] });
+      return {};
+    },
+  ],
+};

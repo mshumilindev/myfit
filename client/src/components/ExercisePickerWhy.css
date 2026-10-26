@@ -1,0 +1,4 @@
+/* SPO-352: the one-line reason under a muscle group's fatigue label (wraps, unlike the nowrap sub line). */
+.xp-ghead-why {
+  white-space: normal;
+}

@@ -60,6 +60,8 @@ import {
   type Suggestion,
 } from '../picker';
 import './ExercisePicker.css';
+import './ExercisePickerWhy.css';
+import { fatigueWhy } from '../fatigueWhy';
 import { SearchField } from './ui/SearchField';
 import { Img, InfoButton, AddedBadge, XpBadge } from './ExercisePickerParts';
 
@@ -161,6 +163,14 @@ export function ExercisePicker(props: ExercisePickerProps) {
   const readiness = useMemo(() => readinessByGroup(withToday, now), [withToday, now]);
   // Tile colours come from the Progress fatigue map (same per-muscle levels).
   const fatigue = useMemo(() => fatigueByGroup(withToday, now), [withToday, now]);
+  // Why the level reads as it does: a rested muscle says so, a loaded one shows its week.
+  const whyLine = (groups: readonly MuscleGroup[]) => {
+    const w = fatigueWhy(groups, withToday, now, fatigue);
+    return w.kind === 'idle' ? t.fatWhy.idle(w.days) : t.fatWhy.load(w.sets, w.mrv);
+  };
+  // The muscles behind a header level: the picked sub chip's own group, else the family's.
+  const subGroups = (groups: readonly MuscleGroup[], s: SubId | null): readonly MuscleGroup[] =>
+    s ? [isFocusSub(s) ? (s.startsWith('delt') ? 'shoulders' : 'chest') : s] : groups;
   const famLevel = useMemo(
     () => new Map(FAMILIES.map((f) => [f.id, familyFatigueLevel(f.groups, fatigue)])),
     [fatigue],
@@ -534,7 +544,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
         <span className="xp-fam-body">
           <span className="xp-fam-name">{t.pickFamilies[f.id]}</span>
           {!noFatigue && (
-            <span className="xp-fam-state">
+            <span className="xp-fam-state" title={whyLine(f.groups)}>
               <span className="dot" style={{ background: color }} />
               {levelLabel(t, lvl)}
             </span>
@@ -885,7 +895,10 @@ export function ExercisePicker(props: ExercisePickerProps) {
                           )}
                         </b>
                         {!plain && (
-                          <span className="xp-fam-state">
+                          <span
+                            className="xp-fam-state"
+                            title={whyLine(subGroups(fam.groups, sub))}
+                          >
                             <span
                               className="dot"
                               style={{ background: levelColor(famHeaderState) }}
@@ -944,6 +957,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
     const subState = sub ? subFatigueLevel(sub, fatigue) : null;
     const st = subState ?? famHeaderState;
     const mainG: MuscleGroup = sub && !isFocusSub(sub) ? sub : familyMain(fam.id);
+    const whyGroups = subGroups(fam.groups, sub);
     body = (
       <>
         <div className="xp-ghead m">
@@ -971,6 +985,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
                 )}
               </span>
             )}
+            {!noFatigue && <span className="xp-ghead-sub xp-ghead-why">{whyLine(whyGroups)}</span>}
           </span>
           <IconButton
             icon="magnifying-glass"
