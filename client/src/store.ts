@@ -1302,11 +1302,67 @@ export function workoutStats(
 
 setMigrationEnricher((d) => ({ ...d, stats: workoutStats(d as unknown as Workout) }));
 
+/**
+ * Finished workouts whose write is still waiting for the encryption key (SPO-269): the write is parked in memory
+ * and would be lost with the tab, and the next server snapshot would then drop the workout from this device.
+ * The ids are kept in localStorage (never the data: that stays in the app state), per account, until the write
+ * has been handed to Firestore's own offline queue; they are re-sent on the next start.
+ */
+const UNSENT_KEY = 'spotter.unsentWorkouts.v1';
+function readUnsent(uid: string): Set<string> {
+  try {
+    const raw = JSON.parse(localStorage.getItem(UNSENT_KEY) ?? 'null') as {
+      uid?: string;
+      ids?: unknown;
+    } | null;
+    if (!raw || raw.uid !== uid || !Array.isArray(raw.ids)) return new Set();
+    return new Set(raw.ids.filter((x): x is string => typeof x === 'string'));
+  } catch {
+    return new Set();
+  }
+}
+const unsentWorkouts = new Set<string>();
+let unsentUid: string | null = null;
+function saveUnsent(uid: string): void {
+  try {
+    if (unsentWorkouts.size === 0) localStorage.removeItem(UNSENT_KEY);
+    else localStorage.setItem(UNSENT_KEY, JSON.stringify({ uid, ids: [...unsentWorkouts] }));
+  } catch {
+    /* storage full or blocked: the write still goes out in this session */
+  }
+}
+function loadUnsent(uid: string): void {
+  if (unsentUid !== uid) {
+    unsentWorkouts.clear();
+    unsentUid = uid;
+  }
+  for (const id of readUnsent(uid)) unsentWorkouts.add(id);
+}
+/** Re-sends the finished workouts whose write never reached Firestore's queue (idempotent upsert). */
+function resendUnsentWorkouts(uid: string): void {
+  loadUnsent(uid);
+  for (const id of [...unsentWorkouts]) {
+    const w = state.workouts.find((x) => x.id === id);
+    if (w && w.finishedAt !== null) writeWorkoutDoc(w);
+    else unsentWorkouts.delete(id);
+  }
+  saveUnsent(uid);
+}
+
 function writeWorkoutDoc(w: Workout): void {
   const uid = currentUid();
   if (!uid) return;
+  loadUnsent(uid);
+  unsentWorkouts.add(w.id);
+  saveUnsent(uid);
   prepareWrite('workouts', { ...w, stats: workoutStats(w), updatedAt: Date.now() })
-    .then((d) => setDoc(doc(db, 'users', uid, 'workouts', w.id), d))
+    .then((d) => {
+      const sent = setDoc(doc(db, 'users', uid, 'workouts', w.id), d);
+      // setDoc has taken the document into Firestore's persistent queue: it survives a reload from here on.
+      unsentWorkouts.delete(w.id);
+      saveUnsent(uid);
+      return sent;
+    })
     .catch(onWriteError);
 }
 
@@ -1447,7 +1503,10 @@ export function mergeServerWorkoutsWithLocalDrafts(
   const merged = serverWorkouts.map((sw) =>
     draftWorkouts.has(sw.id) ? (localById.get(sw.id) ?? sw) : sw,
   );
-  const localOnly = localWorkouts.filter((w) => isLocalOnlyWorkout(w) && !byId.has(w.id));
+  // A finished workout still waiting to reach Firestore's queue is kept too (SPO-269), or the snapshot would drop it.
+  const localOnly = localWorkouts.filter(
+    (w) => (isLocalOnlyWorkout(w) || unsentWorkouts.has(w.id)) && !byId.has(w.id),
+  );
   return sortWorkouts([...merged, ...localOnly]);
 }
 
@@ -5139,6 +5198,7 @@ export function startSyncLoop(): () => void {
   // Sign-out does not go through resetLocalData: a different account signing in here must not inherit the memo (SPO-219).
   if (coachShareUid !== uid) resetCoachSharePublisher();
   coachShareUid = uid;
+  resendUnsentWorkouts(uid);
   void initVault(uid);
 
   unsubs.push(
@@ -6440,6 +6500,8 @@ export function resetLocalData(): void {
   deletedConditionIds.clear();
   for (const k of Object.keys(wipedAt)) delete wipedAt[k as HealthFeature];
   resetCoachSharePublisher();
+  unsentWorkouts.clear();
+  localStorage.removeItem(UNSENT_KEY);
   void initVault(null); // forget the data key on this device
   localStorage.removeItem(STATE_KEY);
   localStorage.removeItem(GYMS_KEY);
