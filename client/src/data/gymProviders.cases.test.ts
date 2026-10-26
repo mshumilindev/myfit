@@ -10,6 +10,7 @@ import {
   resolveAddress,
   searchGyms,
   searchNearbyGyms,
+  searchNearbyGymsMerged,
   type PlaceResult,
   type ProviderId,
   type ProviderState,
@@ -270,9 +271,66 @@ describe('searchNearbyGyms (Overpass)', () => {
   it('handles an empty answer and throws on a bad status', async () => {
     on('overpass', () => json({}));
     expect(await searchNearbyGyms(KYIV, 500, [], ctl().signal)).toEqual([]);
-    routes = [];
+  });
+  it('an overloaded Overpass is retried with growing pauses, then reported as a bad status', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
     on('overpass', () => json({}, 504));
-    await expect(searchNearbyGyms(KYIV, 500, [], ctl().signal)).rejects.toThrow('overpass 504');
+    const out = searchNearbyGyms(KYIV, 500, [], ctl().signal);
+    const assertion = expect(out).rejects.toThrow('overpass 504');
+    await vi.advanceTimersByTimeAsync(700 + 2500 + 6000);
+    await assertion;
+    expect(calls.filter((c) => c.url.includes('overpass'))).toHaveLength(4);
+  });
+  it('recovers when Overpass answers on a later retry', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+    let n = 0;
+    on('overpass', () =>
+      ++n < 3 ? json({}, 502) : json({ elements: [el(1, 'Late Gym', 50.4503, 30.52)] }),
+    );
+    const out = searchNearbyGyms(KYIV, 2000, [], ctl().signal);
+    await vi.advanceTimersByTimeAsync(700 + 2500);
+    expect((await out).map((p) => p.name)).toEqual(['Late Gym']);
+    expect(n).toBe(3);
+  });
+});
+
+describe('searchNearbyGymsMerged (Overpass down)', () => {
+  const feat = (name: string, id: number, lat: number, lon: number) => ({
+    geometry: { coordinates: [lon, lat] },
+    properties: { name, osm_id: id, osm_type: 'N' },
+  });
+  it('still lists several gyms near the person from Photon (several gym words), nearest first', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+    on('overpass', () => json({}, 502));
+    on('photon', (url) => {
+      const q = new URL(url).searchParams.get('q');
+      if (q === 'gym') return json({ features: [feat('Alpha Gym', 1, 50.4502, 30.52)] });
+      if (q === 'fitness') return json({ features: [feat('Beta Fitness', 2, 50.4501, 30.52)] });
+      if (q === 'siłownia') {
+        return json({
+          features: [feat('Gamma', 3, 50.4504, 30.52), feat('Far Away', 4, 51.5, 30.52)],
+        });
+      }
+      return json({ features: [] });
+    });
+    const out = searchNearbyGymsMerged(KYIV, 3000, 'gym', [], ctl().signal, () => {});
+    await vi.advanceTimersByTimeAsync(700 + 2500 + 6000);
+    expect((await out).map((p) => p.name)).toEqual(['Beta Fitness', 'Alpha Gym', 'Gamma']);
+  });
+  it('one Photon word failing does not hide the others', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+    on('overpass', () => json({ elements: [] }));
+    on('photon', (url) =>
+      new URL(url).searchParams.get('q') === 'fitness'
+        ? json({}, 500)
+        : json({ features: [feat('Only Gym', 5, 50.4502, 30.52)] }),
+    );
+    const out = await searchNearbyGymsMerged(KYIV, 3000, 'gym', [], ctl().signal, () => {});
+    expect(out.map((p) => p.name)).toEqual(['Only Gym']);
   });
 });
 

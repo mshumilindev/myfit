@@ -256,7 +256,8 @@ const GYM_SPORT = 'fitness|gym|weightlifting|crossfit|bodybuilding|powerlifting|
 const GYM_SPORT_RE = new RegExp(`(^|;)(${GYM_SPORT})(;|$)`);
 /** Overpass answers 429/5xx under load; one polite retry recovers most of them. */
 const OVERPASS_RETRY_STATUS = new Set([429, 502, 503, 504]);
-const OVERPASS_RETRY_DELAY_MS = 700;
+/** Delays before each retry: the public instance is often overloaded for a few seconds (502/504 in a row). */
+const OVERPASS_RETRY_DELAYS_MS = [700, 2500, 6000];
 /** Overpass returns elements in no distance order, so a low cap drops the nearest ones in dense cities. */
 const OVERPASS_LIMIT = 300;
 
@@ -292,20 +293,23 @@ async function overpassFetch(query: string, signal: AbortSignal): Promise<Respon
       headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
       body: new URLSearchParams({ data: query }),
     });
-  const res = await send();
-  if (!OVERPASS_RETRY_STATUS.has(res.status)) return res;
-  await new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(resolve, OVERPASS_RETRY_DELAY_MS);
-    signal.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timer);
-        reject(new DOMException('aborted', 'AbortError'));
-      },
-      { once: true },
-    );
-  });
-  return send();
+  let res = await send();
+  for (const delay of OVERPASS_RETRY_DELAYS_MS) {
+    if (!OVERPASS_RETRY_STATUS.has(res.status)) return res;
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(resolve, delay);
+      signal.addEventListener(
+        'abort',
+        () => {
+          clearTimeout(timer);
+          reject(new DOMException('aborted', 'AbortError'));
+        },
+        { once: true },
+      );
+    });
+    res = await send();
+  }
+  return res;
 }
 
 async function overpassNearbyGyms(
@@ -414,14 +418,36 @@ export async function searchNearbyGymsMerged(
   };
   await Promise.all([
     guarded('overpass', searchNearbyGyms(coords, radiusM, savedGyms, signal)),
-    guarded(
-      'photon',
-      osmProvider({ query, coords, savedGyms, signal }).then((rows) =>
-        rows.filter((r) => haversineM(coords, r) <= radiusM),
-      ),
-    ),
+    guarded('photon', photonNearby(query, coords, radiusM, signal)),
   ]);
   return nearestFirst();
+}
+
+/** Words that find gyms in Photon when Overpass is down; the same host and consent as the plain search. */
+const PHOTON_NEARBY_TERMS = ['fitness', 'fitness club', 'siłownia', 'crossfit', 'sports centre'];
+
+/**
+ * Photon ranks by text, not distance, so one query returns only a few gyms near the person. Several gym words (one
+ * request each, same host) fill the list when Overpass is overloaded; a failed word never hides the others.
+ */
+async function photonNearby(
+  query: string,
+  coords: Coords,
+  radiusM: number,
+  signal: AbortSignal,
+): Promise<PlaceResult[]> {
+  const terms = [...new Set([query, ...PHOTON_NEARBY_TERMS])];
+  const lists = await Promise.all(
+    terms.map((t) =>
+      osmProvider({ query: t, coords, savedGyms: [], signal }).catch((err) => {
+        if (signal.aborted || err instanceof GeoConsentError) throw err;
+        return [] as PlaceResult[];
+      }),
+    ),
+  );
+  const merged: PlaceResult[] = [];
+  for (const l of lists) mergeResults(merged, l);
+  return merged.filter((r) => haversineM(coords, r) <= radiusM);
 }
 
 async function photonOnce(
