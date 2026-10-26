@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { imageCacheGuard } from './swImageCacheGuard';
 
 /** Identifies this build; the page compares it with /version.json to learn that a newer one is live. */
 const BUILD_ID = Date.now().toString(36);
@@ -200,6 +201,7 @@ export default defineConfig({
                 maxAgeSeconds: 30 * 24 * 3600,
                 purgeOnQuotaError: true,
               },
+              plugins: [imageCacheGuard],
             },
           },
         ],

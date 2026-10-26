@@ -31,6 +31,7 @@ import { fmtWarmupClock, warmupMeasuredSec, warmupSummary } from '../warmupLog';
 import { StatTile } from '../components/ui/StatTile';
 import { Chip } from '../components/ui/Chip';
 import { IconTile } from '../components/ui/IconTile';
+import { PickPhoto } from '../components/PickPhoto';
 import { Segmented } from '../components/ui/Segmented';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
@@ -1528,20 +1529,10 @@ export function SessionView(props: {
               className={`tb-tile-main${photoTintClass}${tintOf(p)}`}
               onClick={() => openPick(p)}
             >
-              {p.img ? (
-                <span className="tb-img-wrap">
-                  <img src={p.img} alt="" />
-                  <span className="photo-tint-layer" aria-hidden />
-                </span>
-              ) : (
-                <span className="tb-noimg">
-                  <Icon
-                    name={
-                      p.kind === 'strength' ? 'barbell' : p.kind === 'warmup' ? 'flame' : 'wind'
-                    }
-                  />
-                </span>
-              )}
+              <span className="tb-img-wrap">
+                <PickPhoto src={p.img} kind={p.kind} fallbackClassName="tb-noimg" />
+                <span className="photo-tint-layer" aria-hidden />
+              </span>
               <span className="tb-kicker">{p.kicker}</span>
               <span className="tb-name">
                 {p.kind === 'cooldown' || p.kind === 'warmup' ? p.name : exName(p.name)}
@@ -1714,7 +1705,7 @@ export function SessionView(props: {
             {play.opensWithWarmup && (
               <div className="pbs-row warm">
                 <span className="pbs-n">{++i}</span>
-                <img src={MARKER_IMAGES.warmup} alt="" />
+                <PickPhoto src={MARKER_IMAGES.warmup} kind="warmup" fallbackClassName="pbs-noimg" />
                 <span className="pbs-row-text">
                   <b>{t.defaultTimedExerciseNames.warmup}</b>
                   <span>{t.pickWarmupSub}</span>
@@ -1726,7 +1717,7 @@ export function SessionView(props: {
               return (
                 <div key={e.name} className="pbs-row">
                   <span className="pbs-n">{++i}</span>
-                  {img ? <img src={img} alt="" /> : <span className="pbs-noimg" />}
+                  <PickPhoto src={img} kind="strength" fallbackClassName="pbs-noimg" />
                   <span className="pbs-row-text">
                     <b>{exName(e.name)}</b>
                     <span className="num">
@@ -1934,7 +1925,7 @@ export function SessionView(props: {
           </div>
           {hero && (
             <div className={`es-hero${hero.kind === 'strength' ? '' : ' warm'}${tintOf(hero)}`}>
-              {hero.img ? <img src={hero.img} alt="" /> : <span className="es-hero-noimg" />}
+              <PickPhoto src={hero.img} kind={hero.kind} fallbackClassName="es-hero-noimg" />
               <span className="photo-tint-layer" aria-hidden />
               <Card
                 as="button"
@@ -1979,13 +1970,7 @@ export function SessionView(props: {
                       className="es-tile-main"
                       onClick={() => openPick(p)}
                     >
-                      {p.img ? (
-                        <img src={p.img} alt="" />
-                      ) : (
-                        <span className="es-noimg">
-                          <Icon name={p.kind === 'strength' ? 'barbell' : 'wind'} />
-                        </span>
-                      )}
+                      <PickPhoto src={p.img} kind={p.kind} fallbackClassName="es-noimg" />
                       <span className="photo-tint-layer" aria-hidden />
                       <span className="es-tile-text">
                         <span className="es-kicker">{p.kicker}</span>

@@ -1,0 +1,32 @@
+/* Start-card picture fallback (SPO-358): the type glyph on a tinted gradient, never an empty box. */
+.pickphoto-fallback {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  color: var(--color-neutral-400);
+  font-size: var(--fs-28);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-accent) 22%, var(--color-neutral-900)),
+    var(--color-neutral-900)
+  );
+}
+.pickphoto-fallback--warmup,
+.pickphoto-fallback--cooldown {
+  color: var(--set-warmup);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--set-warmup) 28%, var(--color-neutral-900)),
+    var(--color-neutral-900)
+  );
+}
+.es-hero > .pickphoto-fallback {
+  font-size: var(--fs-40);
+  align-content: start;
+  padding-top: var(--s-24);
+}
+.tb-img-wrap > .pickphoto-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
