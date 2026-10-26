@@ -42,8 +42,11 @@ export interface WorldStoreOptions {
   schedule?: ScheduleFeed | null;
   now?: () => number;
   isOnline?: () => boolean;
-  /** hard cap for one load; the UI never waits on it anyway */
+  /** cap for one load; the UI never waits on it anyway (skeletons / cached data are already on screen) */
   timeoutMs?: number;
+  /** automatic retry after a failed refresh: first delay, doubled each time up to `retryMaxMs`; 0 = off */
+  retryBaseMs?: number;
+  retryMaxMs?: number;
   /** background refresh period; 0 = off */
   refreshEveryMs?: number;
 }
@@ -60,7 +63,20 @@ export interface WorldStore {
   dispatch(op: BookOp): void;
 }
 
-const DEFAULTS = { timeoutMs: 8_000, refreshEveryMs: 60_000 };
+/**
+ * One load = the roster callable plus a read per client (cold function starts included). The cap used to be 8 s while a
+ * single callable may take 15 s (`READ_TIMEOUT_MS`), so a slow-but-working backend ALWAYS ended in "Coach is taking too
+ * long" (SPO-364). The cap now sits above the callable bound; the screen never waits on it (cache / skeleton first).
+ */
+export const WORLD_LOAD_TIMEOUT_MS = 30_000;
+const DEFAULTS = {
+  timeoutMs: WORLD_LOAD_TIMEOUT_MS,
+  refreshEveryMs: 60_000,
+  retryBaseMs: 2_000,
+  retryMaxMs: 60_000,
+};
+/** Failures that more waiting cannot fix: no automatic retry (the person's Retry still works). */
+const NO_AUTO_RETRY: ReadonlySet<PortErrorCode> = new Set(['forbidden', 'not-deployed']);
 
 export function createWorldStore(port: CoachWorldPort, opts: WorldStoreOptions = {}): WorldStore {
   const now = opts.now ?? (port.now ? () => port.now!() : Date.now);
@@ -71,6 +87,8 @@ export function createWorldStore(port: CoachWorldPort, opts: WorldStoreOptions =
       : true;
   const timeoutMs = opts.timeoutMs ?? DEFAULTS.timeoutMs;
   const every = opts.refreshEveryMs ?? DEFAULTS.refreshEveryMs;
+  const retryBase = opts.retryBaseMs ?? DEFAULTS.retryBaseMs;
+  const retryMax = opts.retryMaxMs ?? DEFAULTS.retryMaxMs;
 
   let data: WorldData | null = null;
   let remoteBook: DecisionBook = emptyBook();
@@ -82,6 +100,11 @@ export function createWorldStore(port: CoachWorldPort, opts: WorldStoreOptions =
   let timer: ReturnType<typeof setInterval> | undefined;
   let unsub: (() => void) | undefined;
   let unsubSchedule: (() => void) | undefined;
+  let retryTimer: ReturnType<typeof setTimeout> | undefined;
+  let failures = 0;
+  /** the port's load that outlived its cap: it may still land and is then shown (never thrown away) */
+  let straggler: Promise<WorldData> | null = null;
+  let epoch = 0;
   const feed = opts.schedule ?? null;
   let state: WorldState = {
     status: 'loading',
@@ -138,13 +161,55 @@ export function createWorldStore(port: CoachWorldPort, opts: WorldStoreOptions =
     }
   }
 
+  /** Adopt a fresh answer from the port (shared by the normal path and a load that landed after its cap). */
+  async function applyFresh(fresh: WorldData): Promise<void> {
+    data = fresh;
+    rememberPhotoRevs(fresh.clients);
+    remoteBook = fresh.book;
+    rebuildBook();
+    fetchedAt = now();
+    failures = 0;
+    if (retryTimer) clearTimeout(retryTimer);
+    retryTimer = undefined;
+    await measureDue();
+    publish({ status: 'ready', updatedAt: fetchedAt, refreshing: false, error: null });
+    await flush();
+    publish({});
+  }
+
+  /** Quiet automatic retry with exponential backoff; the person's Retry stays as the fallback. */
+  function scheduleRetry(code: PortErrorCode): void {
+    if (!started || retryBase <= 0 || NO_AUTO_RETRY.has(code) || retryTimer) return;
+    const delay = Math.min(retryMax, retryBase * 2 ** Math.min(failures, 16));
+    failures++;
+    retryTimer = setTimeout(() => {
+      retryTimer = undefined;
+      if (started && online) void refresh();
+    }, delay);
+  }
+
   async function doRefresh(): Promise<void> {
     publish({ refreshing: true });
     const ctl = new AbortController();
     let to: ReturnType<typeof setTimeout> | undefined;
+    const mine = epoch;
     try {
+      // a load that outlived its cap is joined, not duplicated (a second one would only double the work)
+      const load = straggler ?? port.load({ signal: ctl.signal });
+      straggler = load;
+      load.then(
+        (fresh) => {
+          // landed after its cap: show it unless something newer already did
+          if (straggler === load) straggler = null;
+          if (started && mine === epoch && state.status !== 'ready' && !inflight)
+            void applyFresh(fresh);
+        },
+        () => {
+          if (straggler === load) straggler = null;
+        },
+      );
       const fresh = await Promise.race([
-        port.load({ signal: ctl.signal }),
+        load,
         new Promise<never>((_, rej) => {
           to = setTimeout(() => {
             ctl.abort();
@@ -152,15 +217,8 @@ export function createWorldStore(port: CoachWorldPort, opts: WorldStoreOptions =
           }, timeoutMs);
         }),
       ]);
-      data = fresh;
-      rememberPhotoRevs(fresh.clients);
-      remoteBook = fresh.book;
-      rebuildBook();
-      fetchedAt = now();
-      await measureDue();
-      publish({ status: 'ready', updatedAt: fetchedAt, refreshing: false, error: null });
-      await flush();
-      publish({});
+      if (straggler === load) straggler = null;
+      await applyFresh(fresh);
     } catch (e) {
       const code = online ? classify(e) : 'offline';
       if (data)
@@ -170,6 +228,7 @@ export function createWorldStore(port: CoachWorldPort, opts: WorldStoreOptions =
           error: online ? code : 'offline',
         });
       else publish({ status: online ? 'error' : 'offline', refreshing: false, error: code });
+      if (online) scheduleRetry(code);
     } finally {
       if (to) clearTimeout(to);
     }
@@ -229,6 +288,11 @@ export function createWorldStore(port: CoachWorldPort, opts: WorldStoreOptions =
     stop() {
       started = false;
       if (timer) clearInterval(timer);
+      if (retryTimer) clearTimeout(retryTimer);
+      retryTimer = undefined;
+      failures = 0;
+      epoch++;
+      straggler = null;
       unsub?.();
       unsubSchedule?.();
       timer = undefined;
