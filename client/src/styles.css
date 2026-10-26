@@ -8791,6 +8791,10 @@ h6 {
   margin-top: var(--space-3);
 }
 
+.hist-chips--tight .uitag {
+  padding: 0 var(--sz-9);
+}
+
 .hist-sub {
   margin-top: var(--space-3);
   font-size: var(--fs-12);

@@ -49,7 +49,10 @@ export function ThemeFrame({
     doc.documentElement.style.background = 'transparent';
     doc.body.style.background = 'transparent';
     const style = doc.createElement('style');
-    style.textContent = 'body::after{display:none!important}';
+    // the app's body says `overscroll-behavior: none`, which would stop the wheel from reaching the page
+    // when the pointer is over a frame
+    style.textContent =
+      'body::after{display:none!important}html,body{overscroll-behavior:auto!important}';
     doc.head.appendChild(style);
     copyStyles(document, doc);
     // the content gets its own host node: if the frame is torn down first, React still finds its children

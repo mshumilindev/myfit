@@ -16,17 +16,17 @@
 
 /* --- Tokens ---------------------------------------------------------------- */
 
-/* Accent-derived glass — recomputed inside every sub-app (.apex-app), so hero and
-   glass cards wear the app's colour (brass in Gym, violet in Apex, pink in Learn…). */
+/* Accent-derived glass, recomputed in every sub-app (.apex-app): hero and glass cards wear its colour. */
 html[data-theme],
 html[data-theme] .apex-app {
+  --glass-lip: inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1));
   --glass-tint: linear-gradient(
     180deg,
     color-mix(in srgb, var(--color-accent) calc(16% * var(--glass-accent-k)), var(--glass-base-1)),
     var(--glass-base-2)
   );
   --glass-specular:
-    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1))
+    var(--glass-lip)
       color-mix(in srgb, var(--color-accent-200) calc(45% * var(--glass-accent-k)), transparent),
     inset 0 0 0 var(--sz-1)
       color-mix(in srgb, var(--color-accent) calc(26% * var(--glass-accent-k)), transparent),
@@ -356,8 +356,7 @@ html[data-theme] .sheet.sheet--toned {
     color-mix(in srgb, var(--t-base) calc(6% * var(--plate-tint-k)), var(--plate-bot))
   );
   box-shadow:
-    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1))
-      color-mix(in srgb, var(--t-base) 60%, white),
+    var(--glass-lip) color-mix(in srgb, var(--t-base) 60%, white),
     inset 0 0 0 var(--sz-1) color-mix(in srgb, var(--t-base) 45%, transparent),
     var(--sheet-mark);
 }
@@ -389,8 +388,7 @@ html[data-theme] .uipop {
   -webkit-backdrop-filter: var(--bf-glass);
   box-shadow:
     var(--shadow-md),
-    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1))
-      color-mix(in srgb, var(--t-base, var(--color-accent)) 45%, transparent),
+    var(--glass-lip) color-mix(in srgb, var(--t-base, var(--color-accent)) 45%, transparent),
     inset 0 0 0 var(--sz-1) var(--t-line, var(--color-border));
 }
 /* Coach chat popover (the dock panel): a solid frosted family-tinted plate (about 96% opaque, strong blur), so the
@@ -414,8 +412,7 @@ html[data-theme] .uicard.cd-card {
   border-color: transparent;
   box-shadow:
     var(--shadow-lg),
-    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1))
-      color-mix(in srgb, var(--t-base, var(--color-accent)) 45%, transparent),
+    var(--glass-lip) color-mix(in srgb, var(--t-base, var(--color-accent)) 45%, transparent),
     inset 0 0 0 var(--sz-1) var(--t-line, var(--color-border));
 }
 /* App launcher: the plate is the current app's accent at 6-8% over a dark base, with a 1px
@@ -430,8 +427,7 @@ html[data-theme] .sheet.sheet--toned.uimore {
   );
   border: 0;
   box-shadow:
-    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1))
-      color-mix(in srgb, var(--t-base) 45%, transparent),
+    var(--glass-lip) color-mix(in srgb, var(--t-base) 45%, transparent),
     inset 0 0 0 var(--sz-1) var(--t-line);
 }
 html[data-theme] .dialog {
@@ -511,8 +507,7 @@ html[data-theme] .uicard--people {
   );
   border-color: transparent;
   box-shadow:
-    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1))
-      color-mix(in srgb, var(--t-text) 40%, transparent),
+    var(--glass-lip) color-mix(in srgb, var(--t-text) 40%, transparent),
     inset 0 0 0 var(--sz-1) color-mix(in srgb, var(--t-base) 32%, transparent);
 }
 html[data-theme] .uicard.uicard--selected {

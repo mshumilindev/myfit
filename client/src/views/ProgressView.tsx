@@ -23,7 +23,8 @@ import { fmtDayMonth, fmtKg, fmtTonnes, useT } from '../i18n';
 import { NicotineTrendNote } from './NicotineTrendNote';
 import { Icon, Sheet, useExerciseName } from '../ui';
 import { EmptyState } from '../components/ui/EmptyState';
-import { EquipChip, MuscleChip, MuscleHeatmap, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
+import { MuscleHeatmap, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
+import { ExerciseChips } from './ExerciseChips';
 import { muscleInfoByName, type MuscleGroup } from '../data/exercises';
 import type { Shell } from '../App';
 import type { Workout } from '../types';
@@ -820,36 +821,11 @@ export function ProgressView({
                   {t.fullHistory}
                 </Button>
               </div>
-              {(() => {
-                const info = muscleInfoByName(selected[0]);
-                const needs = exerciseNeeds(selected[0]);
-                if (!info && needs.length === 0)
-                  return <p>{t.nSessionsSince(selectedSessions.length, selectedSince)}</p>;
-                return (
-                  <div className="hist-chips ua-center">
-                    {info && info.primary !== 'cardio' && (
-                      <MuscleChip
-                        muscle={info.primary}
-                        tone="primary"
-                        onClick={openMuscleHistory}
-                        detail
-                      />
-                    )}
-                    {info?.secondary.map((m) => (
-                      <MuscleChip
-                        key={m}
-                        muscle={m}
-                        tone="secondary"
-                        onClick={openMuscleHistory}
-                        detail
-                      />
-                    ))}
-                    {needs.map((id) => (
-                      <EquipChip key={id} id={id} style={{ padding: '4px 9px' }} />
-                    ))}
-                  </div>
-                );
-              })()}
+              <ExerciseChips
+                name={selected[0]}
+                empty={<p>{t.nSessionsSince(selectedSessions.length, selectedSince)}</p>}
+                onMuscle={openMuscleHistory}
+              />
             </div>
             <div className="progress-detail-stats">
               <div className="cell">
