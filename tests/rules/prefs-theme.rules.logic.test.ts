@@ -1,5 +1,5 @@
 /**
- * SPO-366: the synced theme (`theme` + `themeUpdatedAt`) rides on `users/{uid}/meta/prefs`, the
+ * SPO-366: the synced theme (`theme`) rides on `users/{uid}/meta/prefs`, the
  * same open settings doc as the Today layout. Pins that the owner can write it, nobody else can
  * read or write it, and that no rule change was needed.
  */
@@ -18,7 +18,7 @@ const db = {
 const PATH = 'users/member1/meta/prefs';
 const run = (op: Op, auth: Auth, data?: Record<string, unknown>) =>
   decide(rules, op, PATH, { auth, db, data, time: NOW }).allowed;
-const theme = { theme: 'cyberpunk', themeUpdatedAt: NOW };
+const theme = { theme: 'cyberpunk' };
 
 describe('meta/prefs theme fields', () => {
   it('the owner reads and writes their own theme', () => {

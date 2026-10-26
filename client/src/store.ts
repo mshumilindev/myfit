@@ -5083,7 +5083,7 @@ function markSynced(fromCache: boolean, hasPending: boolean): void {
 //   nextUpOff + nextUpOffUpdatedAt        — types not to suggest after workouts
 //   programSuggestOff + …UpdatedAt        — "add to program" suggestions muted / snoozed
 //   todayLayout + todayLayoutUpdatedAt    — the Today layout (today/layoutSync.ts)
-//   theme + themeUpdatedAt                — the chosen theme (themes/themeSync.ts)
+//   theme                                 — the chosen theme (themes/themeSync.ts)
 // Every write merges only its own fields, so a device with a stale copy of one
 // setting can't clobber a newer value of another.
 let applyingRemotePrefs = false;
