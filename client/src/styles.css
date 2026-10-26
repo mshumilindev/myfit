@@ -9429,7 +9429,7 @@ button.exd-media {
 }
 /* A readable column below the wide layout: the body keeps the page's edges (as the bar above it does),
    its contents hold the width. */
-@media (min-width: 720px) and (max-width: 1099.98px) {
+@media (min-width: 45em) and (max-width: 68.74em) {
   .programs-author-page .goals-body > * {
     max-width: 44rem;
   }

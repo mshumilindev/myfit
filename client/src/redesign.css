@@ -335,6 +335,10 @@ html[data-theme] .ov-unit {
   flex: 1;
   min-width: 0;
 }
+/* In the drill-in bar the back pill shares the row's centre line with the title and a taller action. */
+.pv-top > .ov-back {
+  align-self: center;
+}
 @media (min-width: 720px) {
   .progress-page > .pv-top,
   .progress-page > .pv-title {
