@@ -270,7 +270,7 @@ describe('thumbnails and maps', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('with consent the thumbnail uses the OpenStreetMap tile', async () => {
+  it('with consent but no photo the thumbnail is still the local graphic: never an OpenStreetMap tile (SPO-340)', async () => {
     setRecords([geoRec('grant')]);
     const { container } = render(
       <>
@@ -278,10 +278,11 @@ describe('thumbnails and maps', () => {
         <GymThumb name="Tile Gym" lat={10.1} lng={20.2} />
       </>,
     );
-    await waitFor(() =>
-      expect(container.querySelector('img')?.getAttribute('src')).toMatch(
-        /^https:\/\/tile\.openstreetmap\.org\//,
-      ),
+    await act(async () => undefined);
+    expect(container.querySelector('img')).toBeNull();
+    expect(container.querySelector('.house-graphic')).not.toBeNull();
+    expect(fetchSpy.mock.calls.some((c) => String(c[0]).includes('tile.openstreetmap.org'))).toBe(
+      false,
     );
   });
 
