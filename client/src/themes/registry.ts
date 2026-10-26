@@ -19,7 +19,11 @@ export const THEMES: readonly ThemeDef[] = [
 
 export const DEFAULT_THEME = 'glass';
 const KEY = 'gym.theme';
+/** When the user last CHOSE a theme on this device (ms). Absent = never chosen → nothing to sync up. */
+const STAMP_KEY = 'gym.theme.at';
+let memStamp = 0; // survives a failing localStorage within the session
 const listeners = new Set<() => void>();
+const choiceListeners = new Set<(id: string, at: number) => void>();
 
 const isKnown = (id: string | null | undefined): id is string => THEMES.some((t) => t.id === id);
 
@@ -45,15 +49,49 @@ export function initTheme(): void {
   initAxes();
 }
 
-export function setTheme(id: string): void {
-  if (!isKnown(id)) return;
+export const isKnownTheme = isKnown;
+
+/** The time of the user's last explicit choice (0 = never chosen on this device). */
+export function getThemeStamp(): number {
+  try {
+    const n = Number(localStorage.getItem(STAMP_KEY));
+    return Math.max(memStamp, Number.isFinite(n) && n > 0 ? n : 0);
+  } catch {
+    return memStamp;
+  }
+}
+
+function store(id: string, at: number | null): void {
   apply(id);
   try {
     localStorage.setItem(KEY, id);
+    if (at !== null) localStorage.setItem(STAMP_KEY, String(at));
+    memStamp = 0;
   } catch {
+    if (at !== null) memStamp = at;
     /* storage unavailable — the choice lasts for this session */
   }
   listeners.forEach((fn) => fn());
+}
+
+/** The user picked a theme: apply, stamp and tell the account sync (themeSync.ts). */
+export function setTheme(id: string): void {
+  if (!isKnown(id)) return;
+  const at = Date.now();
+  store(id, at);
+  choiceListeners.forEach((fn) => fn(id, at));
+}
+
+/** A theme that arrived from the account (another device): applied, but not echoed back. */
+export function applyRemoteTheme(id: string, at: number): void {
+  if (!isKnown(id)) return;
+  store(id, at);
+}
+
+/** Subscribe to the user's own choices only (remote ones don't fire it). */
+export function onThemeChoice(fn: (id: string, at: number) => void): () => void {
+  choiceListeners.add(fn);
+  return () => choiceListeners.delete(fn);
 }
 
 export function useTheme(): string {

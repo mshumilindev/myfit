@@ -257,6 +257,7 @@ import {
 } from './activityPrefs';
 import { resetTodayLayout } from './today/layout';
 import { pushTodayLayoutEdits, syncTodayLayoutFromDoc } from './today/layoutSync';
+import { pushThemeEdits, syncThemeFromDoc } from './themes/themeSync';
 // Synced Log-activity prefs (pins + "don't suggest after workouts").
 export {
   activityPins,
@@ -5082,6 +5083,7 @@ function markSynced(fromCache: boolean, hasPending: boolean): void {
 //   nextUpOff + nextUpOffUpdatedAt        — types not to suggest after workouts
 //   programSuggestOff + …UpdatedAt        — "add to program" suggestions muted / snoozed
 //   todayLayout + todayLayoutUpdatedAt    — the Today layout (today/layoutSync.ts)
+//   theme + themeUpdatedAt                — the chosen theme (themes/themeSync.ts)
 // Every write merges only its own fields, so a device with a stale copy of one
 // setting can't clobber a newer value of another.
 let applyingRemotePrefs = false;
@@ -5117,6 +5119,7 @@ for (const [name, pref] of LIST_PREFS) {
 }
 // Local Today-layout edits only; synced values never fire this (no echo).
 pushTodayLayoutEdits(writePrefsFields);
+pushThemeEdits(writePrefsFields);
 
 export function startSyncLoop(): () => void {
   const uid = currentUid();
@@ -5156,6 +5159,7 @@ export function startSyncLoop(): () => void {
           if (push) writeListPref(name, pref);
         }
         syncTodayLayoutFromDoc(data, writePrefsFields);
+        syncThemeFromDoc(data, writePrefsFields);
       },
       onWriteError,
     ),
