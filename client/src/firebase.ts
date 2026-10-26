@@ -40,7 +40,20 @@ export const app = initializeApp(firebaseConfig);
 // only services where App Check is *enforced* in the console reject calls
 // without one. No key configured → skipped (chat falls back to the phrase book).
 const APP_CHECK_KEY = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_KEY as string | undefined;
-if (typeof window !== 'undefined' && APP_CHECK_KEY && !import.meta.env.VITE_USE_EMULATORS) {
+// The production site key is not valid on localhost: a dev build would log a reCAPTCHA error on every start (SPO-337).
+// Dev runs App Check only with a debug token registered in the Firebase console (VITE_APPCHECK_DEBUG_TOKEN).
+const APP_CHECK_DEBUG_TOKEN = import.meta.env.VITE_APPCHECK_DEBUG_TOKEN as string | undefined;
+const APP_CHECK_ON = !import.meta.env.DEV || !!APP_CHECK_DEBUG_TOKEN;
+if (
+  typeof window !== 'undefined' &&
+  APP_CHECK_KEY &&
+  APP_CHECK_ON &&
+  !import.meta.env.VITE_USE_EMULATORS
+) {
+  if (import.meta.env.DEV && APP_CHECK_DEBUG_TOKEN) {
+    (self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN?: string }).FIREBASE_APPCHECK_DEBUG_TOKEN =
+      APP_CHECK_DEBUG_TOKEN;
+  }
   try {
     initializeAppCheck(app, {
       provider: new ReCaptchaEnterpriseProvider(APP_CHECK_KEY),
