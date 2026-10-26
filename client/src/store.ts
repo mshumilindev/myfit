@@ -2943,6 +2943,17 @@ let coachShareRetry: ReturnType<typeof setTimeout> | null = null;
 let coachShareFails = 0;
 const COACH_SHARE_RETRY_MS = [2000, 5000, 15000, 60000] as const;
 
+/** The memo of the last published coach view (and its retry) belongs to one account: the next one must publish its own. */
+function resetCoachSharePublisher(): void {
+  lastCoachShare = '';
+  coachShareFails = 0;
+  if (coachShareRetry) {
+    clearTimeout(coachShareRetry);
+    coachShareRetry = null;
+  }
+}
+let coachShareUid: string | null = null;
+
 /** Resolves when every coach view requested so far has been handed to Firestore (its offline queue; not the server ack). */
 export function whenCoachSharePublished(): Promise<void> {
   return coachShareChain;
@@ -5125,6 +5136,9 @@ export function startSyncLoop(): () => void {
   const uid = currentUid();
   if (!uid) return () => undefined;
   stopListeners();
+  // Sign-out does not go through resetLocalData: a different account signing in here must not inherit the memo (SPO-219).
+  if (coachShareUid !== uid) resetCoachSharePublisher();
+  coachShareUid = uid;
   void initVault(uid);
 
   unsubs.push(
@@ -5169,9 +5183,11 @@ export function startSyncLoop(): () => void {
     Workout & Record<string, unknown>,
     { fromCache: boolean; pending: boolean }
   >((serverWorkouts, { meta }) => {
+    // A document without its exercise list is damaged: skipped, so the code below never trips over it (SPO-219).
+    const usable = serverWorkouts.filter((w) => Array.isArray(w.exercises));
     state = {
       ...state,
-      workouts: mergeServerWorkoutsWithLocalDrafts(serverWorkouts, state.workouts),
+      workouts: mergeServerWorkoutsWithLocalDrafts(usable, state.workouts),
     };
     markSynced(meta.fromCache, meta.pending);
     applyAutoFinish();
@@ -6423,6 +6439,7 @@ export function resetLocalData(): void {
   deletedInjuryIds.clear();
   deletedConditionIds.clear();
   for (const k of Object.keys(wipedAt)) delete wipedAt[k as HealthFeature];
+  resetCoachSharePublisher();
   void initVault(null); // forget the data key on this device
   localStorage.removeItem(STATE_KEY);
   localStorage.removeItem(GYMS_KEY);

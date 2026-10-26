@@ -89,12 +89,15 @@ afterEach(() => {
 });
 
 describe('initVault / prepareWrite with the app-wide vault', () => {
-  it('stays plaintext-passthrough until a key arrives, then seals; sign-out locks again', async () => {
+  it('holds writes (never plaintext) until a key arrives, then seals; sign-out locks again', async () => {
     const io = await load();
     const data = { id: 'g1', updatedAt: 5, name: 'Secret Gym' };
-    expect(await io.prepareWrite('gyms', data)).toEqual(data);
+    let early: Record<string, unknown> | null = null;
+    void io.prepareWrite('gyms', data).then((r) => (early = r));
 
     await io.initVault('u1');
+    await vi.waitFor(() => expect(early).not.toBeNull());
+    expect(JSON.stringify(early)).not.toContain('Secret Gym');
     expect(io.vault.status()).toBe('ready');
     expect(fs.keyCalls).toBe(1);
     const sealed = await io.prepareWrite('gyms', data);
@@ -106,12 +109,43 @@ describe('initVault / prepareWrite with the app-wide vault', () => {
     expect(io.vault.materialOrNull()).toBeNull();
   });
 
-  it('a failed key fetch leaves the vault unset (writes unchanged, retried later)', async () => {
+  it('a failed key fetch leaves the vault unset: the write stays parked (no plaintext) and is sealed once the key comes', async () => {
     const io = await load();
     fs.keyFails = true;
     await io.initVault('u1');
     expect(io.vault.status()).toBe('unset');
-    expect(await io.prepareWrite('gyms', { id: 'a', name: 'x' })).toEqual({ id: 'a', name: 'x' });
+    let out: Record<string, unknown> | null = null;
+    void io.prepareWrite('gyms', { id: 'a', name: 'x' }).then((r) => (out = r));
+    await new Promise((r) => setTimeout(r, 20));
+    expect(out).toBeNull();
+    fs.keyFails = false;
+    window.dispatchEvent(new Event('online'));
+    await vi.waitFor(() => expect(out).not.toBeNull());
+    expect(JSON.stringify(out)).not.toContain('"x"');
+  });
+
+  it('a parked write is dropped on sign-out and is never sealed with the next account key', async () => {
+    const io = await load();
+    fs.keyFails = true;
+    await io.initVault('u1');
+    let out: Record<string, unknown> | null = null;
+    void io.prepareWrite('gyms', { id: 'a', name: 'old-account' }).then((r) => (out = r));
+    await io.initVault(null);
+    fs.keyFails = false;
+    await io.initVault('u2');
+    expect(io.vault.status()).toBe('ready');
+    await new Promise((r) => setTimeout(r, 20));
+    expect(out).toBeNull();
+  });
+
+  it('switching account without a sign-out call forgets the previous key first', async () => {
+    const io = await load();
+    await io.initVault('u1');
+    expect(io.vault.status()).toBe('ready');
+    fs.keyFails = true;
+    await io.initVault('u2');
+    expect(io.vault.status()).toBe('unset');
+    expect(io.vault.materialOrNull()).toBeNull();
   });
 
   it('retries the key on `online` and on becoming visible, only while signed in and not ready', async () => {

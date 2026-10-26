@@ -229,6 +229,9 @@ describe('goals, mastery, home, coach settings: synced docs', () => {
   });
 
   it('coach: a signed-out edit is never written; a stale server copy does not undo a pending edit; a newer one wins', async () => {
+    // the consent reset in beforeEach republishes the (empty) coach view, since a reset forgets the last one (SPO-219): let it land first
+    await settle();
+    fs.writes.length = 0;
     vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
     vi.setSystemTime(T0);
     fs.uid = null;

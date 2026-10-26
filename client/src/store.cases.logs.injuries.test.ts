@@ -312,6 +312,8 @@ describe('injuries and rehab', () => {
 
 describe('activities', () => {
   it('a live activity stays on the device; pausing banks the segment; finishing writes it sealed once', async () => {
+    await settle(); // the beforeEach reset republishes the coach view (SPO-219): let that land, then count only this test's writes
+    fs.writes.length = 0;
     const a = store.startActivity('Running', 'conditioning')!;
     expect(store.liveActivity()?.id).toBe(a.id);
     vi.setSystemTime(T0 + 10 * 60_000);

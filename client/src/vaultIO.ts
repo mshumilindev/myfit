@@ -3,9 +3,10 @@
  * original collections; this only transforms them on the way in and out.
  *
  * Write rules (by vault status):
- *  - unknown / unset → plaintext, exactly as before (feature off or not set up yet)
  *  - ready           → sealed
- *  - locked          → refuse: writing plaintext would downgrade encrypted data
+ *  - unknown / unset → the write WAITS until the key arrives (SPO-269): user data never reaches
+ *                      Firestore as plaintext. It is sealed and sent the moment the vault is ready;
+ *                      sign-out / switching account drops it (it belongs to the old account).
  */
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
 import type { MigratePorts } from './vaultMigrate';
@@ -65,14 +66,26 @@ async function autoMigrate(): Promise<void> {
   }
 }
 
+/** Writes parked until the app-wide vault is ready; dropped (never resolved) when the account changes. */
+const parked = new Set<() => void>();
+function dropParkedWrites(): void {
+  for (const drop of [...parked]) drop();
+  parked.clear();
+}
+
 /** Call after sign-in (and on sign-out with null). Initializes encryption for every signed-in user. */
 export async function initVault(uid: string | null): Promise<void> {
+  if (uidNow && uid !== uidNow) dropParkedWrites();
   if (!uid) {
     uidNow = null;
     await vault.lock();
     return;
   }
+  // Another account on the same device: the previous account's key must not seal this one's data. `lock()` clears
+  // that account's cache entry synchronously, so it runs before `uidNow` moves on.
+  const switching = uidNow && uidNow !== uid ? vault.lock() : null;
   uidNow = uid;
+  await switching;
   await vault.init();
   // Let the first sync settle before rewriting documents in place.
   setTimeout(() => void autoMigrate(), 8000);
@@ -89,17 +102,51 @@ if (typeof window !== 'undefined') {
   });
 }
 
-/** What to store for `data`. Plaintext until the vault is set up. */
+/** Resolves once `v` is ready. For the app-wide vault it never resolves if the account changes first. */
+function whenReady(v: Vault): Promise<void> {
+  return new Promise<void>((resolve) => {
+    let off: () => void = () => undefined;
+    const drop = () => {
+      parked.delete(drop);
+      off();
+    };
+    const check = () => {
+      if (v.status() !== 'ready') return;
+      drop();
+      resolve();
+    };
+    off = v.subscribe(check);
+    if (v === vault) parked.add(drop);
+    check();
+  });
+}
+
+/**
+ * What to store for `data`: always the sealed form. While the vault is not ready the returned promise stays
+ * pending (the caller's `setDoc` is simply deferred; the writes keep their order) instead of falling back to
+ * plaintext. Writing is idempotent (client ids, upsert), so a deferred write is safe to send later.
+ */
 export async function prepareWrite<T extends Record<string, unknown>>(
   collection: SealedCollection,
   data: T,
   v: Vault = vault,
 ): Promise<Record<string, unknown>> {
-  const st = v.status();
-  if (st !== 'ready') return data;
-  const { key, salt } = v.material();
-  return sealDoc(collection, data, key, salt);
+  if (v.status() !== 'ready') await whenReady(v);
+  // Sealed one after another: a later write of the same document must never finish before an earlier one.
+  const run = (sealChains.get(v) ?? Promise.resolve()).then(() => {
+    const { key, salt } = v.material();
+    return sealDoc(collection, data, key, salt);
+  });
+  sealChains.set(
+    v,
+    run.then(
+      () => undefined,
+      () => undefined,
+    ),
+  );
+  return run;
 }
+const sealChains = new WeakMap<Vault, Promise<void>>();
 
 /**
  * Turns raw snapshot documents into plain objects. While the vault is locked, sealed
