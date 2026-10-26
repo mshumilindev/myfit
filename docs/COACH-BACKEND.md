@@ -116,7 +116,7 @@ firebase functions:list | grep -E "coach|program|vaultKey|reschedule|publishPlan
 | `VITE_COACH_BACKEND=firestore` | справжній бекенд                                                                                                 | справжній бекенд    |
 | помилка справжнього бекенду    | помилка з «Спробувати ще раз», без демо (кнопку «Use demo data» і localStorage-перемикач прибрано в ітерації 25) | те саме             |
 
-Стани помилки (одна мова для тренера і клієнта): завантаження (скелетон до 8 с) -> `offline` «Немає з'єднання», `not-deployed` «Сервіс Coach ще недоступний у цьому проєкті»,
+Стани помилки (одна мова для тренера і клієнта): завантаження (скелетон; ліміт одного завантаження 30 с, див. розділ 9) -> `offline` «Немає з'єднання», `not-deployed` «Сервіс Coach ще недоступний у цьому проєкті»,
 `denied` «Coach недоступний для цього акаунта», `timeout` «Coach відповідає надто довго», `unknown`. Клієнт зі старим тренером бачить картку тренера з спокійною приміткою (не порожній скелетон).
 
 ## 8. Демо-даних у застосунку немає (ітерація 25)
@@ -131,3 +131,22 @@ firebase functions:list | grep -E "coach|program|vaultKey|reschedule|publishPlan
 - QA / скріншоти: `cd client && npx vite build --config vite.config.qa.ts --outDir ../_shots/iter25/qa --emptyOutDir` (визначає `VITE_COACH_TEST_HOOKS=1` і вантажить `qaEntry.ts` перед застосунком). Ця конфігурація не входить у `npm run build`.
 - Доказ: `vite build` у тимчасовий каталог і `grep -rlF` по `dist` для `Oleh`, `Iryna`, `Taras Rudenko`, `Iron Yard`, `FitHub`, `Use demo data`, `__SPOTTER_COACH_TEST__`, `spotter.coachBackend`: 0 збігів.
 - Порти за замовчуванням (`data/unavailable.ts`): world, chat, live, share, program, schedule, notes, client, clientChat, trust; кожен лише повідомляє `unavailable`. Шлюз `coachAdapter(name, unavailable)` у `backend.ts`.
+
+## 9. «Coach is taking too long»: причина, модель завантаження, smoke після деплою (SPO-364 / SPO-365)
+
+**Причина в коді.** Один «світ» тренера = `coachClients` + `coachRead` на кожного клієнта (пачками по 3) + книга рішень + розклад. Ліміт цього завантаження в `worldStore` був 8 с, а один виклик callable дозволено до 15 с (`READ_TIMEOUT_MS`): повільний, але робочий бекенд (холодний старт функцій, багато клієнтів) завжди закінчувався «Coach is taking too long», а пізня відповідь губилась. Без кешу (перший вхід, інший пристрій) екран лишався на помилці.
+
+**Тепер (offline-first, `coach/data/worldStore.ts`).**
+
+- Кеш показується одразу (`stale`), мережа оновлює у фоні; без кешу — скелетон, не помилка.
+- Ліміт завантаження 30 с (`WORLD_LOAD_TIMEOUT_MS`, вище за 15 с callable). Відповідь, що прийшла після ліміту, показується (не викидається); повторний запит приєднується до того, що ще виконується, а не дублює його.
+- Автоповтор із backoff 2 → 4 → 8 … до 60 с після збою (не для `forbidden` / `not-deployed`); «Спробувати ще раз» лишається запасним. З кешем збій = кешовані дані + ненав'язлива позначка.
+- DEV-підказка («функції, правила, індекси не розгорнуті») більше не в інтерфейсі: dev-збірка пише її в `console.warn`, production — нічого.
+
+**Smoke після деплою** (лише читання, без акаунта і без запису в БД):
+
+```sh
+node scripts/coach-smoke.mjs --project spotter-64c3b --indexes
+```
+
+Кожен Coach-callable має відповісти на анонімний виклик кодом 4xx (UNAUTHENTICATED) за < 15 с; 404 = функцію не розгорнуто, 5xx = зламана, довго = холодний старт/квота. `--indexes` порівнює `firestore.indexes.json` з `firebase firestore:indexes` (потрібен `firebase login`). Код виходу 1 = деплой неповний. Запускати після кроку 3 розділу 7.2 разом із `firebase functions:list`; логіка перевірок у `scripts/lib/coachSmoke.mjs`, тест `tests/coach-smoke.test.ts`.
