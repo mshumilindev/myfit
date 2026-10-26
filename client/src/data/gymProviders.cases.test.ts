@@ -10,7 +10,6 @@ import {
   resolveAddress,
   searchGyms,
   searchNearbyGyms,
-  staticMapThumb,
   type PlaceResult,
   type ProviderId,
   type ProviderState,
@@ -105,11 +104,6 @@ describe('geometry helpers', () => {
     expect(fmtDistance(949)).toBe('950 m');
     expect(fmtDistance(960)).toBe('1.0 km');
     expect(fmtDistance(1234)).toBe('1.2 km');
-  });
-  it('staticMapThumb returns the OSM tile that holds the point', () => {
-    expect(staticMapThumb(0, 0, 1)).toBe('https://tile.openstreetmap.org/1/1/1.png');
-    expect(staticMapThumb(50.45, 30.52)).toBe('https://tile.openstreetmap.org/16/38323/22098.png');
-    expect(staticMapThumb(-33.87, 151.21, 10)).toMatch(/\/10\/\d+\/\d+\.png$/);
   });
 });
 

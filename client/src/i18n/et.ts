@@ -3086,6 +3086,8 @@ export const et: Strings = {
   gymName: 'Saali nimi',
   searchGymPlaceholder: 'Otsi saali',
   myGyms: 'Minu jõusaalid',
+  gymPhotoCredit: 'Foto',
+  gymPhotoAlt: (n: string) => `Foto: ${n}`,
   nearbyGyms: 'Lähedal',
   nearbyQuery: 'jõusaal',
   navMe: 'Mina',

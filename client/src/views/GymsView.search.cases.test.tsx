@@ -12,12 +12,14 @@ const m = vi.hoisted(() => ({
   cache: vi.fn(),
   cacheAddress: vi.fn(),
   photo: vi.fn(),
+  nearby: vi.fn(),
 }));
 vi.mock('../data/gymProviders', async (orig) => ({
   ...(await orig<typeof import('../data/gymProviders')>()),
   resolveAddress: () => Promise.resolve(null),
   resolvePhoto: m.photo,
   searchGyms: m.search,
+  searchNearbyGymsMerged: m.nearby,
   readCache: m.cache,
   cacheAddress: m.cacheAddress,
 }));
@@ -43,6 +45,9 @@ const handlersFor = (query: string): SearchHandlers => {
   if (!call) throw new Error(`no search for ${query}`);
   return call[4] as SearchHandlers;
 };
+/** Push nearby results into the screen, as the merged Overpass + Photon search does while it streams. */
+const nearbyResults = (rows: PlaceResult[]) =>
+  act(() => (m.nearby.mock.calls.at(-1)![5] as (r: PlaceResult[]) => void)(rows));
 const input = () => screen.getByPlaceholderText(en.searchGymPlaceholder);
 const type = (v: string) => fireEvent.change(input(), { target: { value: v } });
 const tick = (ms: number) => act(async () => void (await vi.advanceTimersByTimeAsync(ms)));
@@ -58,6 +63,7 @@ beforeEach(() => {
   setDesktop(false);
   setGeo('denied');
   m.search.mockReset().mockResolvedValue(undefined);
+  m.nearby.mockReset().mockResolvedValue([]);
   m.cache.mockReset().mockReturnValue(null);
   m.cacheAddress.mockReset();
   m.photo.mockReset().mockResolvedValue(null);
@@ -236,7 +242,7 @@ describe('GymsView search: picking and ordering', () => {
     expect(m.cacheAddress).toHaveBeenCalledTimes(1);
   });
 
-  it('thumbnails fall back from photo to map tile to the house graphic when images fail', async () => {
+  it('thumbnails fall back from the photo straight to the house graphic, never a map tile (SPO-340)', async () => {
     const { container } = openGyms();
     type('gym');
     await tick(400);
@@ -248,15 +254,13 @@ describe('GymsView search: picking and ordering', () => {
     const img = () => container.querySelector('.gym-result .thumb img') as HTMLImageElement | null;
     expect(img()?.src).toBe('https://img.example/a.jpg');
     fireEvent.error(img()!);
-    expect(img()?.src).toContain('tile');
-    fireEvent.error(img()!);
     expect(img()).toBeNull();
     expect(
       container.querySelector('.gym-result .thumb svg, .gym-result .thumb [class*="house"]'),
     ).not.toBeNull();
   });
 
-  it('a resolved photo replaces the tile; lookups happen once per venue', async () => {
+  it('a resolved photo replaces the graphic; lookups happen once per venue', async () => {
     m.photo.mockResolvedValue('https://img.example/resolved.jpg');
     const { container } = openGyms();
     type('gym');
@@ -282,7 +286,7 @@ describe('GymsView search: picking and ordering', () => {
 });
 
 describe('GymsView search: nearby suggestions', () => {
-  it('searches the locale term around me and lists the five closest unsaved gyms', async () => {
+  it('searches around me (3 km, the locale term) and lists the eight closest unsaved gyms', async () => {
     setGeo({ lat: 0, lng: 0, accuracy: 5 });
     seed({
       ...emptyState(),
@@ -290,25 +294,21 @@ describe('GymsView search: nearby suggestions', () => {
     } as never);
     const { container } = openGyms();
     await tick(0);
-    expect(m.search).toHaveBeenCalledWith(
-      en.nearbyQuery,
+    expect(m.nearby).toHaveBeenCalledWith(
       { lat: 0, lng: 0 },
+      3000,
+      en.nearbyQuery,
       expect.any(Array),
       expect.anything(),
-      expect.anything(),
+      expect.any(Function),
     );
-    const lst = Array.from({ length: 7 }, (_, i) =>
+    const lst = Array.from({ length: 10 }, (_, i) =>
       place(`p${i}`, `Gym ${i}`, (i + 1) * 0.001, 0, { address: i === 0 ? 'Zero St' : undefined }),
     );
-    act(() =>
-      handlersFor(en.nearbyQuery).onResults([
-        ...lst.reverse(),
-        place('dup', 'Saved Twin', 0.0003, 0),
-      ]),
-    );
+    nearbyResults([...lst.reverse(), place('dup', 'Saved Twin', 0.0003, 0)]);
     expect(screen.getByText(en.nearbyGyms)).toBeTruthy();
     const names = [...container.querySelectorAll('.gym-result .name')].map((n) => n.textContent);
-    expect(names).toEqual(['Gym 0', 'Gym 1', 'Gym 2', 'Gym 3', 'Gym 4']);
+    expect(names).toEqual([0, 1, 2, 3, 4, 5, 6, 7].map((i) => `Gym ${i}`));
     expect(container.querySelector('.gym-result .addr')?.textContent).toBe('110 m · Zero St');
   });
 
@@ -316,7 +316,7 @@ describe('GymsView search: nearby suggestions', () => {
     setGeo({ lat: 0, lng: 0, accuracy: 5 });
     const { container, shell } = openGyms();
     await tick(0);
-    act(() => handlersFor(en.nearbyQuery).onResults([place('p', 'Close Gym', 0.001, 0)]));
+    nearbyResults([place('p', 'Close Gym', 0.001, 0)]);
     fireEvent.click(container.querySelector('.gym-result')!);
     expect(shell.openOverlay).toHaveBeenLastCalledWith(
       expect.objectContaining({ screen: 'gym', name: 'Close Gym' }),
@@ -329,6 +329,7 @@ describe('GymsView search: nearby suggestions', () => {
     openGyms();
     await tick(500);
     expect(m.search).not.toHaveBeenCalled();
+    expect(m.nearby).not.toHaveBeenCalled();
     expect(screen.queryByText(en.nearbyGyms)).toBeNull();
   });
 });

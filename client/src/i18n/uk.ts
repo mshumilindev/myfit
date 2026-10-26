@@ -3133,6 +3133,8 @@ export const uk: Strings = {
   gymName: 'Назва залу',
   searchGymPlaceholder: 'Знайти зал',
   myGyms: 'Мої джими',
+  gymPhotoCredit: 'Фото',
+  gymPhotoAlt: (n: string) => `Фото: ${n}`,
   nearbyGyms: 'Поблизу',
   nearbyQuery: 'спортзал',
   navMe: 'Я',

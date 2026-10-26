@@ -3098,6 +3098,8 @@ export const pl: Strings = {
   gymName: 'Nazwa siłowni',
   searchGymPlaceholder: 'Znajdź siłownię',
   myGyms: 'Moje siłownie',
+  gymPhotoCredit: 'Zdjęcie',
+  gymPhotoAlt: (n: string) => `Zdjęcie: ${n}`,
   nearbyGyms: 'W pobliżu',
   nearbyQuery: 'siłownia',
   navMe: 'Ja',

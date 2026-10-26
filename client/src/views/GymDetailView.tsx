@@ -202,7 +202,7 @@ export function GymDetailView({
   return (
     <div className="gym-detail">
       <div className="gym-detail-hero">
-        <GymThumb name={name} lat={lat} lng={lng} size={320} />
+        <GymThumb name={name} lat={lat} lng={lng} size={320} credit />
         <div className="hero-scrim" />
         <BackButton className="hero-back" overlay label={t.backAction} onClick={onClose} />
         <div className="hero-top-right"></div>

@@ -3123,6 +3123,8 @@ export const lt: Strings = {
   gymName: 'Salės pavadinimas',
   searchGymPlaceholder: 'Rasti salę',
   myGyms: 'Mano sporto klubai',
+  gymPhotoCredit: 'Nuotrauka',
+  gymPhotoAlt: (n: string) => `Nuotrauka: ${n}`,
   nearbyGyms: 'Netoliese',
   nearbyQuery: 'sporto klubas',
   navMe: 'Aš',

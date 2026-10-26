@@ -4445,6 +4445,26 @@ html[data-theme] .gym-card .head .n {
   height: 100%;
   object-fit: cover;
 }
+/* Licence credit of a Commons photo (author · licence), over the hero picture. Only printed when the licence asks. */
+.gym-photo-credit {
+  position: absolute;
+  z-index: var(--z-2);
+  top: var(--space-2);
+  right: var(--space-2);
+  max-width: 70%;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-4);
+  font-size: var(--fs-10);
+  color: var(--c-ffffff);
+  background: color-mix(in srgb, var(--c-000000) 55%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gym-photo-credit a {
+  color: inherit;
+  text-decoration: underline;
+}
 .gym-detail-hero .hero-scrim {
   position: absolute;
   inset: 0;

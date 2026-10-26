@@ -163,7 +163,7 @@ describe('resolvePhoto (no Google key)', () => {
       'https://full/x.jpg',
     );
     expect(calls[0].url).toContain('titles=File%3AGym.jpg');
-    expect(calls[0].url).toContain('iiurlwidth=320');
+    expect(calls[0].url).toContain('iiurlwidth=640');
   });
   it('prefers the thumbnail over the full url; skips pages without image info', async () => {
     on('commons.wikimedia.org', () =>

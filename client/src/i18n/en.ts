@@ -3131,6 +3131,8 @@ export const en = {
   gymName: 'Gym name',
   searchGymPlaceholder: 'Search for a gym',
   myGyms: 'My gyms',
+  gymPhotoCredit: 'Photo',
+  gymPhotoAlt: (n: string) => `Photo of ${n}`,
   nearbyGyms: 'Nearby',
   nearbyQuery: 'gym',
   navMe: 'Me',

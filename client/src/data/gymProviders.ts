@@ -38,6 +38,8 @@ export interface PlaceResult {
   externalId?: string;
   /** OSM `wikimedia_commons` tag (e.g. "File:Foo.jpg") — lazy photo resolve. */
   wikimediaCommons?: string;
+  /** OSM `wikidata` QID of the venue itself — its Wikidata image (P18) is a venue photo. */
+  venueWikidata?: string;
   /** OSM `brand:wikidata` QID — brand-logo fallback when no venue photo. */
   brandWikidata?: string;
   /** Detected facilities (gymAmenities ids) from place tags + name. */
@@ -119,6 +121,7 @@ function mergeInto(a: PlaceResult, b: PlaceResult): void {
   if (!a.externalId && b.externalId) a.externalId = b.externalId;
   if (!a.wikimediaCommons && b.wikimediaCommons) a.wikimediaCommons = b.wikimediaCommons;
   if (!a.brandWikidata && b.brandWikidata) a.brandWikidata = b.brandWikidata;
+  if (!a.venueWikidata && b.venueWikidata) a.venueWikidata = b.venueWikidata;
   if (a.amenities || b.amenities) a.amenities = unionAmenities(a.amenities, b.amenities);
 }
 
@@ -248,34 +251,70 @@ export function bboxAround(coords: Coords, radiusM: number): [number, number, nu
   ];
 }
 
+/** `sport` values that mean a gym; the tag may hold a `;` list ("fitness;yoga"). */
+const GYM_SPORT = 'fitness|gym|weightlifting|crossfit|bodybuilding|powerlifting|calisthenics';
+const GYM_SPORT_RE = new RegExp(`(^|;)(${GYM_SPORT})(;|$)`);
+/** Overpass answers 429/5xx under load; one polite retry recovers most of them. */
+const OVERPASS_RETRY_STATUS = new Set([429, 502, 503, 504]);
+const OVERPASS_RETRY_DELAY_MS = 700;
+/** Overpass returns elements in no distance order, so a low cap drops the nearest ones in dense cities. */
+const OVERPASS_LIMIT = 300;
+
+/**
+ * Whether OSM tags can be a gym. `leisure=sports_centre` is also a pool, a stadium or a tennis hall: those stay out
+ * when their `sport` tag names something else, and stay in when it names a gym sport or there is no `sport` tag.
+ */
+export function isGymLike(tags: Record<string, string | undefined> | undefined): boolean {
+  if (!tags) return true;
+  if (tags.amenity === 'gym' || tags.leisure === 'fitness_centre') return true;
+  if (tags.sport && GYM_SPORT_RE.test(tags.sport)) return true;
+  return !(tags.leisure === 'sports_centre' && tags.sport);
+}
+
+function overpassQuery(bbox: string): string {
+  const sport = `(^|;)(${GYM_SPORT})(;|$)`;
+  return `
+    [out:json][timeout:12];
+    (
+      nwr["leisure"~"^(fitness_centre|sports_centre)$"](${bbox});
+      nwr["amenity"="gym"](${bbox});
+      nwr["sport"~"${sport}"](${bbox});
+    );
+    out center tags ${OVERPASS_LIMIT};
+  `;
+}
+
+async function overpassFetch(query: string, signal: AbortSignal): Promise<Response> {
+  const send = () =>
+    geoFetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      signal,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: new URLSearchParams({ data: query }),
+    });
+  const res = await send();
+  if (!OVERPASS_RETRY_STATUS.has(res.status)) return res;
+  await new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(resolve, OVERPASS_RETRY_DELAY_MS);
+    signal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer);
+        reject(new DOMException('aborted', 'AbortError'));
+      },
+      { once: true },
+    );
+  });
+  return send();
+}
+
 async function overpassNearbyGyms(
   coords: Coords,
   radiusM: number,
   signal: AbortSignal,
 ): Promise<PlaceResult[]> {
   const [south, west, north, east] = bboxAround(coords, radiusM);
-  const bbox = `${south},${west},${north},${east}`;
-  const query = `
-    [out:json][timeout:8];
-    (
-      node["name"]["leisure"~"^(fitness_centre|sports_centre)$"](${bbox});
-      way["name"]["leisure"~"^(fitness_centre|sports_centre)$"](${bbox});
-      relation["name"]["leisure"~"^(fitness_centre|sports_centre)$"](${bbox});
-      node["name"]["amenity"="gym"](${bbox});
-      way["name"]["amenity"="gym"](${bbox});
-      relation["name"]["amenity"="gym"](${bbox});
-      node["name"]["sport"~"^(fitness|gym|weightlifting|crossfit)$"](${bbox});
-      way["name"]["sport"~"^(fitness|gym|weightlifting|crossfit)$"](${bbox});
-      relation["name"]["sport"~"^(fitness|gym|weightlifting|crossfit)$"](${bbox});
-    );
-    out center tags 50;
-  `;
-  const res = await geoFetch('https://overpass-api.de/api/interpreter', {
-    method: 'POST',
-    signal,
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-    body: new URLSearchParams({ data: query }),
-  });
+  const res = await overpassFetch(overpassQuery(`${south},${west},${north},${east}`), signal);
   if (!res.ok) throw new Error(`overpass ${res.status}`);
   const data = (await res.json()) as {
     elements?: Array<{
@@ -291,8 +330,9 @@ async function overpassNearbyGyms(
     .map((el): PlaceResult | null => {
       const lat = el.lat ?? el.center?.lat;
       const lng = el.lon ?? el.center?.lon;
-      const name = el.tags?.name?.trim();
-      if (!name || lat === undefined || lng === undefined) return null;
+      // A venue tagged only with its chain (`brand`/`operator`) still has a usable name.
+      const name = (el.tags?.name ?? el.tags?.brand ?? el.tags?.operator)?.trim();
+      if (!name || lat === undefined || lng === undefined || !isGymLike(el.tags)) return null;
       const address = [
         [el.tags?.['addr:street'], el.tags?.['addr:housenumber']].filter(Boolean).join(' '),
         el.tags?.['addr:city'],
@@ -307,6 +347,7 @@ async function overpassNearbyGyms(
         address: address || undefined,
         externalId: `osm:${el.type}${el.id}`,
         wikimediaCommons: el.tags?.wikimedia_commons,
+        venueWikidata: el.tags?.wikidata,
         brandWikidata: el.tags?.['brand:wikidata'],
         amenities: detectAmenities({ tags: el.tags, name }),
         sources: ['overpass'] as ProviderId[],
@@ -338,6 +379,49 @@ export async function searchNearbyGyms(
   if (!isGeoSearchOn()) return merged.sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
   mergeResults(merged, await overpassNearbyGyms(coords, radiusM, signal));
   return merged.sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
+}
+
+/** Photon names OSM element types N/W/R; Overpass says node/way/relation. One vocabulary lets the ids merge a venue. */
+const PHOTON_OSM_TYPE: Record<string, string> = { N: 'node', W: 'way', R: 'relation' };
+
+/**
+ * Nearby gyms from two independent sources at once: Overpass (every OSM place tagged as a gym, by tag) and Photon
+ * (text search with a location bias, which also finds venues Overpass lacks a tag for). Streams the merged list,
+ * nearest first, as each answers; one source failing never hides the other (a failure is logged, not thrown).
+ */
+export async function searchNearbyGymsMerged(
+  coords: Coords,
+  radiusM: number,
+  query: string,
+  savedGyms: Gym[],
+  signal: AbortSignal,
+  onResults: (merged: PlaceResult[]) => void,
+): Promise<PlaceResult[]> {
+  const acc: PlaceResult[] = [];
+  const nearestFirst = () => [...acc].sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
+  const fold = (rows: PlaceResult[]) => {
+    if (signal.aborted) return;
+    mergeResults(acc, rows);
+    onResults(nearestFirst());
+  };
+  const guarded = async (name: string, job: Promise<PlaceResult[]>) => {
+    try {
+      fold(await job);
+    } catch (err) {
+      if (signal.aborted || err instanceof GeoConsentError) return;
+      console.warn(`[gym-nearby] ${name} failed:`, err instanceof Error ? err.message : 'failed');
+    }
+  };
+  await Promise.all([
+    guarded('overpass', searchNearbyGyms(coords, radiusM, savedGyms, signal)),
+    guarded(
+      'photon',
+      osmProvider({ query, coords, savedGyms, signal }).then((rows) =>
+        rows.filter((r) => haversineM(coords, r) <= radiusM),
+      ),
+    ),
+  ]);
+  return nearestFirst();
 }
 
 async function photonOnce(
@@ -384,13 +468,14 @@ async function photonOnce(
       ]
         .filter(Boolean)
         .join(', ');
+      const osmType = PHOTON_OSM_TYPE[pr.osm_type ?? ''] ?? pr.osm_type ?? '';
       return {
-        key: `osm:${pr.osm_type ?? ''}${pr.osm_id ?? Math.round(c[0] * 1e6)}`,
+        key: `osm:${osmType}${pr.osm_id ?? Math.round(c[0] * 1e6)}`,
         name: pr.name!,
         lat: c[1],
         lng: c[0],
         address: addr || undefined,
-        externalId: pr.osm_id ? `osm:${pr.osm_type ?? ''}${pr.osm_id}` : undefined,
+        externalId: pr.osm_id ? `osm:${osmType}${pr.osm_id}` : undefined,
         amenities: detectAmenities({ name: pr.name }),
         sources: ['osm'] as ProviderId[],
       };
@@ -486,90 +571,147 @@ export async function searchGyms(
   return merged;
 }
 
-// --- keyless gym imagery (AC-IMG) ------------------------------------------
+// --- keyless gym imagery (AC-IMG): Wikimedia only, with attribution --------
 
-/**
- * A guaranteed, keyless thumbnail: the OSM map tile the venue sits on. Not a
- * photo, but it always renders and shows the venue's surroundings — the last
- * resort when no real photo or brand logo is available.
- */
-export function staticMapThumb(lat: number, lng: number, zoom = 16): string {
-  const n = 2 ** zoom;
-  const x = Math.floor(((lng + 180) / 360) * n);
-  const latRad = (lat * Math.PI) / 180;
-  const y = Math.floor(((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n);
-  return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`;
+/** Who to credit for an image and under what licence (Commons requires attribution for CC BY / CC BY-SA). */
+export interface PhotoCredit {
+  author?: string;
+  license?: string;
+  licenseUrl?: string;
+  /** The image's own page on Commons. */
+  pageUrl?: string;
 }
 
-/** Resolve a Commons "File:Name.jpg" (or bare "Name.jpg") to a thumb URL. */
-async function commonsThumb(fileTag: string, signal: AbortSignal): Promise<string | null> {
+/** An image URL plus the credit its licence asks for. */
+export interface GymPhoto {
+  url: string;
+  credit?: PhotoCredit;
+}
+
+/** Commons metadata values are HTML (`<a href>Name</a>`): keep the text only, short enough for a caption. */
+export function plainCreditText(html: string | undefined, max = 60): string | undefined {
+  if (!html) return undefined;
+  const text = html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#0?39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!text) return undefined;
+  return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
+}
+
+/** Resolve a Commons "File:Name.jpg" (or bare "Name.jpg") to a thumb URL and its credit. */
+async function commonsPhoto(fileTag: string, signal: AbortSignal): Promise<GymPhoto | null> {
+  // A `Category:` tag names a folder of files, not one image.
+  if (/^category:/i.test(fileTag.trim())) return null;
   const title = fileTag.startsWith('File:') ? fileTag : `File:${fileTag}`;
   const params = new URLSearchParams({
     action: 'query',
     titles: title,
     prop: 'imageinfo',
-    iiprop: 'url',
-    iiurlwidth: '320',
+    iiprop: 'url|extmetadata',
+    iiextmetadatafilter: 'Artist|LicenseShortName|LicenseUrl',
+    iiurlwidth: '640',
     format: 'json',
     origin: '*',
   });
   const res = await geoFetch(`https://commons.wikimedia.org/w/api.php?${params}`, { signal });
   if (!res.ok) return null;
   const data = (await res.json()) as {
-    query?: { pages?: Record<string, { imageinfo?: Array<{ thumburl?: string; url?: string }> }> };
+    query?: {
+      pages?: Record<
+        string,
+        {
+          imageinfo?: Array<{
+            thumburl?: string;
+            url?: string;
+            descriptionurl?: string;
+            extmetadata?: Record<string, { value?: string } | undefined>;
+          }>;
+        }
+      >;
+    };
   };
   const pages = data.query?.pages ?? {};
   for (const k of Object.keys(pages)) {
     const info = pages[k].imageinfo?.[0];
-    if (info?.thumburl || info?.url) return info.thumburl ?? info.url ?? null;
+    const url = info?.thumburl ?? info?.url;
+    if (!url) continue;
+    const meta = info?.extmetadata;
+    const credit: PhotoCredit = {
+      author: plainCreditText(meta?.Artist?.value),
+      license: plainCreditText(meta?.LicenseShortName?.value, 40),
+      licenseUrl: meta?.LicenseUrl?.value,
+      pageUrl: info?.descriptionurl,
+    };
+    return { url, ...(credit.author || credit.license || credit.pageUrl ? { credit } : {}) };
   }
   return null;
 }
 
-/** Resolve a brand's Wikidata QID to its logo (P154) on Commons. */
-async function wikidataLogo(qid: string, signal: AbortSignal): Promise<string | null> {
+/** The first Commons file a Wikidata entity lists under `property` (P18 image, P154 logo), resolved to a photo. */
+async function wikidataImage(
+  qid: string,
+  property: 'P18' | 'P154',
+  signal: AbortSignal,
+): Promise<GymPhoto | null> {
   const params = new URLSearchParams({
     action: 'wbgetclaims',
     entity: qid,
-    property: 'P154',
+    property,
     format: 'json',
     origin: '*',
   });
   const res = await geoFetch(`https://www.wikidata.org/w/api.php?${params}`, { signal });
   if (!res.ok) return null;
   const data = (await res.json()) as {
-    claims?: { P154?: Array<{ mainsnak?: { datavalue?: { value?: string } } }> };
+    claims?: Record<string, Array<{ mainsnak?: { datavalue?: { value?: string } } }> | undefined>;
   };
-  const file = data.claims?.P154?.[0]?.mainsnak?.datavalue?.value;
-  return file ? commonsThumb(file, signal) : null;
+  const file = data.claims?.[property]?.[0]?.mainsnak?.datavalue?.value;
+  return file ? commonsPhoto(file, signal) : null;
 }
 
 /**
- * Best-effort real image for a result, tried cheapest → richest and all
- * keyless: venue photo tag → Commons file tag → brand logo. Returns null when
- * nothing is found (the UI then falls back to the map-tile thumbnail).
+ * Best-effort real image for a result with the credit its licence asks for, tried cheapest → richest and all keyless
+ * (Wikimedia only): venue photo URL → the venue's own Wikidata image → Commons file tag → brand logo. Returns null
+ * when nothing is found; the UI then shows the bundled neutral gym picture, never a map tile.
  */
-export async function resolvePhoto(r: PlaceResult, signal: AbortSignal): Promise<string | null> {
+export async function resolvePhotoInfo(
+  r: PlaceResult,
+  signal: AbortSignal,
+): Promise<GymPhoto | null> {
   // No consent: no photo lookup, and no third-party image URL (even a remembered one) is handed to an <img>.
   if (!isGeoSearchOn()) return null;
-  if (r.photoUrl) return r.photoUrl;
+  if (r.photoUrl) return { url: r.photoUrl };
   try {
+    if (r.venueWikidata) {
+      const photo = await wikidataImage(r.venueWikidata, 'P18', signal);
+      if (photo) return photo;
+    }
     if (r.wikimediaCommons) {
-      const url = await commonsThumb(r.wikimediaCommons, signal);
-      if (url) return url;
+      const photo = await commonsPhoto(r.wikimediaCommons, signal);
+      if (photo) return photo;
     }
     if (r.brandWikidata) {
-      const url = await wikidataLogo(r.brandWikidata, signal);
-      if (url) return url;
+      const photo = await wikidataImage(r.brandWikidata, 'P154', signal);
+      if (photo) return photo;
     }
-    // No venue photo anywhere — fall back to the brand/chain logo. Applies to
-    // every network, not a special case: a recognizable logo beats a map tile.
-    const logo = await brandLogo(r.name, signal);
+    // No venue photo anywhere — fall back to the brand/chain logo. Applies to every network, not a special case.
+    const logo = await brandLogoInfo(r.name, signal);
     if (logo) return logo;
   } catch (e) {
     if (signal.aborted) throw e;
   }
   return null;
+}
+
+/** The image URL alone (see `resolvePhotoInfo`). */
+export async function resolvePhoto(r: PlaceResult, signal: AbortSignal): Promise<string | null> {
+  return (await resolvePhotoInfo(r, signal))?.url ?? null;
 }
 
 /**
@@ -582,29 +724,40 @@ export async function resolvePhoto(r: PlaceResult, signal: AbortSignal): Promise
  */
 const LOGO_PREFIX = 'gym.logo.';
 const LOGO_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-const logoInflight = new Map<string, Promise<string | null>>();
+const logoInflight = new Map<string, Promise<GymPhoto | null>>();
 
-function readLogoCache(brand: string): string | null | undefined {
+function readLogoCache(brand: string): GymPhoto | null | undefined {
   try {
     const raw = localStorage.getItem(LOGO_PREFIX + brand);
     if (!raw) return undefined;
-    const { at, url } = JSON.parse(raw) as { at: number; url: string | null };
+    const { at, url, credit } = JSON.parse(raw) as {
+      at: number;
+      url: string | null;
+      credit?: PhotoCredit;
+    };
     if (Date.now() - at > LOGO_TTL_MS) return undefined;
-    return url;
+    return url ? { url, ...(credit ? { credit } : {}) } : null;
   } catch {
     return undefined;
   }
 }
 
-function writeLogoCache(brand: string, url: string | null): void {
+function writeLogoCache(brand: string, photo: GymPhoto | null): void {
   try {
-    localStorage.setItem(LOGO_PREFIX + brand, JSON.stringify({ at: Date.now(), url }));
+    localStorage.setItem(
+      LOGO_PREFIX + brand,
+      JSON.stringify({ at: Date.now(), url: photo?.url ?? null, credit: photo?.credit }),
+    );
   } catch {
     /* quota — ignore */
   }
 }
 
-export function brandLogo(name: string, signal: AbortSignal): Promise<string | null> {
+export async function brandLogo(name: string, signal: AbortSignal): Promise<string | null> {
+  return (await brandLogoInfo(name, signal))?.url ?? null;
+}
+
+function brandLogoInfo(name: string, signal: AbortSignal): Promise<GymPhoto | null> {
   const brand = name.trim().toLowerCase();
   if (!brand || !isGeoSearchOn()) return Promise.resolve(null);
   const cached = readLogoCache(brand);
@@ -612,9 +765,9 @@ export function brandLogo(name: string, signal: AbortSignal): Promise<string | n
   const existing = logoInflight.get(brand);
   if (existing) return existing;
   const job = resolveBrandLogo(name, signal)
-    .then((url) => {
-      writeLogoCache(brand, url);
-      return url;
+    .then((photo) => {
+      writeLogoCache(brand, photo);
+      return photo;
     })
     .catch((e) => {
       if (signal.aborted || e instanceof GeoConsentError) throw e; // don't cache aborts or a refused call — allow a later retry
@@ -628,7 +781,7 @@ export function brandLogo(name: string, signal: AbortSignal): Promise<string | n
   return job;
 }
 
-async function resolveBrandLogo(name: string, signal: AbortSignal): Promise<string | null> {
+async function resolveBrandLogo(name: string, signal: AbortSignal): Promise<GymPhoto | null> {
   // 1) Wikidata entity for the brand → its logo (P154).
   const search = new URLSearchParams({
     action: 'wbsearchentities',
@@ -645,7 +798,7 @@ async function resolveBrandLogo(name: string, signal: AbortSignal): Promise<stri
       const sd = (await sr.json()) as { search?: Array<{ id: string }> };
       const qid = sd.search?.[0]?.id;
       if (qid) {
-        const logo = await wikidataLogo(qid, signal);
+        const logo = await wikidataImage(qid, 'P154', signal);
         if (logo) return logo;
       }
     }

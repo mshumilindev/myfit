@@ -19,6 +19,7 @@ import {
   readCache,
   haversineM,
   resolvePhoto,
+  searchNearbyGymsMerged,
   resolveAddress,
   cacheAddress,
   type Coords,
@@ -343,6 +344,7 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
                 lat={selectedGym.lat}
                 lng={selectedGym.lng}
                 size={480}
+                credit
               />
               <div className="gyms-hero-scrim" />
               <div className="gyms-hero-text">
@@ -491,6 +493,10 @@ function useDesktopDetail(): boolean {
   return matches;
 }
 
+/** How far and how many nearby gyms the Gyms screen offers before anything is typed. */
+const NEARBY_RADIUS_M = 3000;
+const NEARBY_SHOWN = 8;
+
 const PROVIDER_ORDER: ProviderId[] = ['local', 'osm'];
 
 /**
@@ -545,12 +551,16 @@ function GymSearch({
   useEffect(() => {
     if (!coords || !on) return;
     const ctrl = new AbortController();
-    void searchGyms(t.nearbyQuery, coords, savedGyms, ctrl.signal, {
-      onResults: (merged) => {
-        if (!ctrl.signal.aborted) setNearby([...merged]);
+    void searchNearbyGymsMerged(
+      coords,
+      NEARBY_RADIUS_M,
+      t.nearbyQuery,
+      savedGyms,
+      ctrl.signal,
+      (merged) => {
+        if (!ctrl.signal.aborted) setNearby(merged);
       },
-      onProvider: () => {},
-    });
+    );
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coords, on]);
@@ -597,7 +607,7 @@ function GymSearch({
     return [...results].sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
   }, [results, coords, on]);
 
-  // Closest 5 nearby gyms not already saved (within ~80 m counts as saved).
+  // Closest nearby gyms (NEARBY_SHOWN) not already saved (within ~80 m counts as saved).
   const nearbySorted = useMemo(() => {
     if (!coords || !on) return [] as PlaceResult[];
     const isSaved = (r: PlaceResult) =>
@@ -605,11 +615,11 @@ function GymSearch({
     return [...nearby]
       .filter((r) => !isSaved(r))
       .sort((a, b) => haversineM(coords, a) - haversineM(coords, b))
-      .slice(0, 5);
+      .slice(0, NEARBY_SHOWN);
   }, [nearby, coords, savedGyms, on]);
 
   // Lazily resolve a real photo/logo per result (keyless: OSM/Commons/Wikidata).
-  // Rows render immediately with a map-tile thumbnail; a photo replaces it if
+  // Rows render immediately with the local graphic; a photo replaces it if
   // one is found. `requested` guards against re-fetching the same venue.
   const [photos, setPhotos] = useState<Record<string, string>>({});
   const requested = useRef<Set<string>>(new Set());
@@ -655,7 +665,7 @@ function GymSearch({
                 lang={li}
               >
                 <span className="thumb">
-                  <GymResultThumb photo={r.photoUrl ?? photos[r.key]} lat={r.lat} lng={r.lng} />
+                  <GymResultThumb photo={r.photoUrl ?? photos[r.key]} />
                 </span>
                 <span className="body">
                   <span className="name">{r.name}</span>
@@ -719,7 +729,7 @@ function GymSearch({
               lang={li}
             >
               <span className="thumb">
-                <GymResultThumb photo={r.photoUrl ?? photos[r.key]} lat={r.lat} lng={r.lng} />
+                <GymResultThumb photo={r.photoUrl ?? photos[r.key]} />
               </span>
               <span className="body">
                 <span className="name">{highlightSubsequence(r.name, needle)}</span>
