@@ -18,6 +18,7 @@ import { LANDMARKS } from '../volume';
 import { recentLoadSets } from '../loadWindow';
 import { cachedPersonalLandmarks } from '../personalize';
 import { muscleFatigue, FATIGUE_COLOR } from '../fatigue';
+import { fatigueWhy } from '../fatigueWhy';
 
 export function MuscleStatePanel({
   muscle,
@@ -48,7 +49,8 @@ export function MuscleStatePanel({
     const week = recentLoadSets(withToday, now).get(muscle) ?? 0;
     const lm = cachedPersonalLandmarks(store.workouts, now).get(muscle) ?? LANDMARKS[muscle];
     const fat = muscleFatigue(withToday, now).get(muscle) ?? null;
-    return { state, before, week, lm, fat };
+    const why = fat ? fatigueWhy([muscle], withToday, now, new Map([[muscle, fat]])) : null;
+    return { state, before, week, lm, fat, why };
   }, [store.workouts, workout, muscle, now]);
 
   const worth = Math.round(marginalStimulus(todaySets + (carry ?? 0), plateau) * 100);
@@ -92,6 +94,13 @@ export function MuscleStatePanel({
           <span className="mss-l">{t.msFatigue}</span>
         </div>
       </div>
+      {read.why && (
+        <div className="mss-hint mss-why">
+          {read.why.kind === 'idle'
+            ? t.fatWhy.idle(read.why.days)
+            : t.fatWhy.load(read.why.sets, read.why.mrv)}
+        </div>
+      )}
       <div className="mss-row">
         <span className="mss-l">{t.msLast}</span>
         <span className="mss-rv">
