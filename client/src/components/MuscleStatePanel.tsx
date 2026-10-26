@@ -47,8 +47,10 @@ export function MuscleStatePanel({
     const state = directReadiness([muscle], muscle, withToday, now);
     const before = directReadiness([muscle], muscle, finished, now);
     const week = recentLoadSets(withToday, now).get(muscle) ?? 0;
-    const lm = cachedPersonalLandmarks(store.workouts, now).get(muscle) ?? LANDMARKS[muscle];
-    const fat = muscleFatigue(withToday, now).get(muscle) ?? null;
+    const personal = cachedPersonalLandmarks(store.workouts, now);
+    const lm = personal.get(muscle) ?? LANDMARKS[muscle];
+    // Same personal ceilings as the picker and the Progress map, so the card and the drawer agree.
+    const fat = muscleFatigue(withToday, now, personal).get(muscle) ?? null;
     const why = fat ? fatigueWhy([muscle], withToday, now, new Map([[muscle, fat]])) : null;
     return { state, before, week, lm, fat, why };
   }, [store.workouts, workout, muscle, now]);

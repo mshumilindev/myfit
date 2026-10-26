@@ -5,6 +5,7 @@ import { __getStateForTests, __replaceStateForTests } from '../store';
 import { BUILT_IN_CATALOG } from '../data/exercises';
 import type { Workout } from '../types';
 import { MuscleStatePanel } from './MuscleStatePanel';
+import { fatigueByGroup } from '../picker';
 
 // SPO-352: the session muscle drawer says why the weekly fatigue reads as it does, consistent with the picker.
 const NOW = new Date(2026, 9, 26, 12, 0).getTime();
@@ -65,5 +66,16 @@ describe('MuscleStatePanel fatigue reason', () => {
     setWorkouts([session('h', NOW - DAY, 24)]);
     const { container } = show();
     expect(container.querySelector('.mss-why')!.textContent).toBe(LOCALES.en.fatWhy.load(24, 22));
+  });
+
+  it('agrees with the picker card for the same muscle (same ceilings)', () => {
+    const ws = [session('a', NOW - DAY, 18), session('b', NOW - 3 * DAY, 14)];
+    setWorkouts(ws);
+    const card = fatigueByGroup(ws, NOW).get('chest')!;
+    const { container } = show();
+    expect(container.textContent).toContain(LOCALES.en.fatLevel[card.level]);
+    expect(container.querySelector('.mss-why')!.textContent).toBe(
+      LOCALES.en.fatWhy.load(Math.round(card.sets * 10) / 10, card.mrv),
+    );
   });
 });
