@@ -15,10 +15,6 @@
   align-items: flex-start;
   gap: var(--s-16);
 }
-.co-pb-hint {
-  display: block;
-  margin-block-start: var(--s-8);
-}
 .co-pb-actions {
   display: flex;
   flex-wrap: wrap;

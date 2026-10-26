@@ -21,8 +21,6 @@ export const safeEt: typeof import('./coachSafe.en').safeEn = {
   pbTimeoutBody: 'Sinu andmed on turvas. Teenus ei vastanud õigel ajal. Proovi uuesti.',
   pbUnknownTitle: 'Coachi laadimine ebaõnnestus',
   pbUnknownBody: 'Sinu andmed on turvas. Meie poolel läks midagi valesti. Proovi uuesti.',
-  pbDevHint:
-    "Dev: Coachi funktsioonid, reeglid ja indeksid pole selles Firebase'i projektis tõenäoliselt juurutatud. Vt docs/COACH-BACKEND.md (juurutuse kontrollnimekiri).",
   mtFailTitle: 'Treeneri laadimine ebaõnnestus',
   mtFailBody: 'Sinu andmed on turvas. Kontrolli ühendust ja proovi uuesti.',
   mtNoneTitle: 'Treenerit veel pole',

@@ -5,6 +5,7 @@
  *   <CoachProblemState />   offline / not deployed / denied / timeout / unknown, with Retry
  * Both read the dictionary `coachSafe`; no layout of their own beyond a gap (kit elements only).
  */
+import { useEffect } from 'react';
 import { Button } from '../components/ui/Button';
 import { FailedState } from '../components/ui/FailedState';
 import { useSafeT, type SafeStrings } from '../i18n/coachSafe';
@@ -26,6 +27,10 @@ export function NotConfigured({ onBack }: { onBack?: () => void }) {
   );
 }
 
+/** Console-only (dev build): where to look when the real backend does not answer. */
+const DEV_DEPLOY_HINT =
+  'The Coach callables, rules and indexes are probably not deployed to this Firebase project: see docs/COACH-BACKEND.md (deploy checklist).';
+
 /** [title, body, icon] of one problem, in the person's language. */
 export function problemWords(sf: SafeStrings, problem: CoachProblem): [string, string, string] {
   switch (problem) {
@@ -44,7 +49,7 @@ export function problemWords(sf: SafeStrings, problem: CoachProblem): [string, s
 
 /**
  * The real backend could not serve this screen: what is wrong in plain words (offline / not deployed / denied / timeout /
- * unknown), a Retry, and in `npm run dev` one extra hint line. Kit FailedState only.
+ * unknown) and a Retry. Kit FailedState only; the developer hint goes to the console of a dev build.
  * `title`/`body` override the words when a screen has its own (e.g. "Couldn't load your trainer").
  */
 export function CoachProblemState({
@@ -61,29 +66,18 @@ export function CoachProblemState({
 }) {
   const { sf } = useSafeT();
   const [title, body, icon] = problemWords(sf, problem);
-  const hint = !!import.meta.env?.DEV && problem !== 'offline';
+  // Developer diagnostics belong in the console of a dev build, never in the person's screen (SPO-364).
+  useEffect(() => {
+    if (import.meta.env?.DEV && problem !== 'offline')
+      console.warn(`[coach] backend problem "${problem}". ${DEV_DEPLOY_HINT}`);
+  }, [problem]);
   return (
     <div
       className={inline ? 'co-pb' : 'co-notcfg'}
       data-testid="coach-backend-failed"
       data-problem={problem}
     >
-      <FailedState
-        icon={icon}
-        title={title}
-        body={
-          <>
-            {body}
-            {hint && (
-              <span className="co-pb-hint" data-testid="coach-dev-hint">
-                {sf.pbDevHint}
-              </span>
-            )}
-          </>
-        }
-        retryLabel={sf.retry}
-        onRetry={onRetry}
-      />
+      <FailedState icon={icon} title={title} body={body} retryLabel={sf.retry} onRetry={onRetry} />
       {onBack && (
         <div className="co-pb-actions">
           <Button variant="secondary" onClick={onBack}>

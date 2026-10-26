@@ -21,8 +21,6 @@ export const safeLt: typeof import('./coachSafe.en').safeEn = {
   pbTimeoutBody: 'Jūsų duomenys saugūs. Paslauga neatsakė laiku. Bandykite dar kartą.',
   pbUnknownTitle: 'Nepavyko įkelti Coach',
   pbUnknownBody: 'Jūsų duomenys saugūs. Mūsų pusėje kažkas nutiko. Bandykite dar kartą.',
-  pbDevHint:
-    'Dev: Coach funkcijos, taisyklės ir indeksai tikriausiai neįdiegti šiame Firebase projekte. Žr. docs/COACH-BACKEND.md (diegimo sąrašas).',
   mtFailTitle: 'Nepavyko įkelti trenerio',
   mtFailBody: 'Jūsų duomenys saugūs. Patikrinkite ryšį ir bandykite dar kartą.',
   mtNoneTitle: 'Trenerio dar nėra',

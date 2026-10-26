@@ -21,8 +21,6 @@ export const safeUk: typeof import('./coachSafe.en').safeEn = {
   pbTimeoutBody: 'Ваші дані в безпеці. Сервіс не відповів вчасно. Спробуйте ще раз.',
   pbUnknownTitle: 'Не вдалося завантажити Coach',
   pbUnknownBody: 'Ваші дані в безпеці. Щось пішло не так на нашому боці. Спробуйте ще раз.',
-  pbDevHint:
-    'Dev: функції, правила та індекси Coach, імовірно, не розгорнуті в цьому проєкті Firebase. Див. docs/COACH-BACKEND.md (чекліст розгортання).',
   mtFailTitle: 'Не вдалося завантажити тренера',
   mtFailBody: 'Ваші дані в безпеці. Перевірте з’єднання та спробуйте ще раз.',
   mtNoneTitle: 'Тренера ще немає',

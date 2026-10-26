@@ -23,8 +23,6 @@ export const safePl: typeof import('./coachSafe.en').safeEn = {
   pbUnknownTitle: 'Nie udało się wczytać Coacha',
   pbUnknownBody:
     'Twoje dane są bezpieczne. Coś poszło nie tak po naszej stronie. Spróbuj ponownie.',
-  pbDevHint:
-    'Dev: funkcje, reguły i indeksy Coacha prawdopodobnie nie są wdrożone w tym projekcie Firebase. Zob. docs/COACH-BACKEND.md (lista wdrożeniowa).',
   mtFailTitle: 'Nie udało się wczytać trenera',
   mtFailBody: 'Twoje dane są bezpieczne. Sprawdź połączenie i spróbuj ponownie.',
   mtNoneTitle: 'Nie masz jeszcze trenera',

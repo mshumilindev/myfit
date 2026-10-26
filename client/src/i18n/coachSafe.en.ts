@@ -24,8 +24,6 @@ export const safeEn = {
   pbTimeoutBody: 'Your data is safe. The service did not answer in time. Try again.',
   pbUnknownTitle: "Couldn't load Coach",
   pbUnknownBody: 'Your data is safe. Something went wrong on our side. Try again.',
-  pbDevHint:
-    'Dev: the Coach callables, rules and indexes are probably not deployed to this Firebase project. See docs/COACH-BACKEND.md (deploy checklist).',
   mtFailTitle: "Couldn't load your trainer",
   mtFailBody: 'Your data is safe. Check the connection and try again.',
   mtNoneTitle: 'No trainer yet',
