@@ -2886,6 +2886,11 @@ i > svg {
   gap: var(--space-8);
 }
 
+/* In the drill-in bar the back pill shares the row's centre line with the title and a taller action. */
+.pv-top > .ov-back {
+  align-self: center;
+}
+
 .progress-locked-layout,
 .progress-locked-empty,
 .progress-summary-pane {
