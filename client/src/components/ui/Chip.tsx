@@ -1,4 +1,10 @@
-import type { HTMLAttributes, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
+import { Children } from 'react';
+import type {
+  CSSProperties,
+  HTMLAttributes,
+  MouseEvent as ReactMouseEvent,
+  ReactNode,
+} from 'react';
 
 import { Icon } from '../../ui';
 
@@ -126,20 +132,36 @@ export interface ChipGroupProps extends HTMLAttributes<HTMLDivElement> {
   scroll?: boolean;
   /** Equal-width chips across the row. */
   fill?: boolean;
+  /**
+   * ONE row of equal columns that never wraps (a week of seven days): the columns come from the number of chips, a chip
+   * is as wide as its column whatever it shows, and a check icon is an overlay, so picking one never moves its neighbours.
+   */
+  grid?: boolean;
 }
 
-/** Row of chips: wraps by default; `scroll` = one sideways-scrolling row; `fill` = equal columns. The only chip layout. */
-export function ChipGroup({ children, className, scroll, fill, ...rest }: ChipGroupProps) {
+/** Row of chips: wraps by default; `scroll` = one sideways-scrolling row; `fill` = equal columns; `grid` = one row, n equal columns. The only chip layout. */
+export function ChipGroup({
+  children,
+  className,
+  scroll,
+  fill,
+  grid,
+  style,
+  ...rest
+}: ChipGroupProps) {
+  const cols = grid ? ({ '--uichip-cols': Children.count(children) } as CSSProperties) : undefined;
   return (
     <div
       className={[
         'uichip-group',
         scroll ? 'uichip-group--scroll' : '',
         fill ? 'uichip-group--fill' : '',
+        grid ? 'uichip-group--grid' : '',
         className,
       ]
         .filter(Boolean)
         .join(' ')}
+      style={cols ? { ...cols, ...style } : style}
       {...rest}
     >
       {children}

@@ -43,6 +43,11 @@ export const SelfHost: Story = {
   args: { host: demoHost({ mode: 'self' }) },
 };
 
+/** mode self, the week starts on Sunday (Profile > Settings): the seven weekday toggles follow that order */
+export const SelfHostSundayStart: Story = {
+  args: { host: demoHost({ mode: 'self', weekOrder: [7, 1, 2, 3, 4, 5, 6] }) },
+};
+
 /** readOnly: every op is a no-op, panes are disabled */
 export const ReadOnly: Story = {
   args: { readOnly: true, audience: 'Oleh Bondar', initial: { rowName: 'Barbell Bench Press' } },

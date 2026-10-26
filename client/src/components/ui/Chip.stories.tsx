@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { LocaleId } from '../../i18n';
+import { PG_LOCALES } from '../../i18n/coachProgram';
 import { Chip, ChipGroup, type ChipTone } from './Chip';
 
 const TONES: ChipTone[] = ['neutral', 'accent', 'danger', 'ok', 'rest', 'atlas'];
@@ -102,6 +104,52 @@ export const WithCounts: Story = {
             </Chip>
           ))}
         </ChipGroup>
+      </div>
+    );
+  },
+};
+
+const WEEK_ISO = [1, 2, 3, 4, 5, 6, 7] as const;
+const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+
+function WeekRow({ first, locale }: { first: 1 | 7; locale: LocaleId }) {
+  const short = PG_LOCALES[locale].dowShort;
+  const full = PG_LOCALES[locale].dowFull;
+  const order = first === 7 ? [7, 1, 2, 3, 4, 5, 6] : [...WEEK_ISO];
+  const [on, setOn] = useState<number[]>([1, 3, 5, 7]);
+  return (
+    <ChipGroup grid data-weekrow={`start-${first}`} role="group" aria-label="Training days">
+      {order.map((d) => {
+        const sel = on.includes(d);
+        return (
+          <Chip
+            key={d}
+            size="md"
+            selected={sel}
+            icon={sel ? 'check' : undefined}
+            aria-pressed={sel}
+            aria-label={full[DOW[d - 1]]}
+            onClick={() => setOn((c) => (c.includes(d) ? c.filter((x) => x !== d) : [...c, d]))}
+          >
+            {short[DOW[d - 1]]}
+          </Chip>
+        );
+      })}
+    </ChipGroup>
+  );
+}
+
+/**
+ * `ChipGroup grid`: seven weekday chips, ALWAYS one row of equal columns (320 px up to desktop), the week starting on
+ * Mon or Sun. Picking a day never changes a chip's width: the check mark is an overlay, not part of the row.
+ */
+export const WeekdayGrid: Story = {
+  render: (_args, ctx) => {
+    const locale = (ctx.globals.locale as LocaleId | undefined) ?? 'en';
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <WeekRow first={1} locale={locale} />
+        <WeekRow first={7} locale={locale} />
       </div>
     );
   },

@@ -7,7 +7,7 @@
 import { weekOrder } from '../weekStart';
 import { Button, IconButton } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { Chip } from '../components/ui/Chip';
+import { Chip, ChipGroup } from '../components/ui/Chip';
 import { Field } from '../components/ui/Field';
 import { ListRow } from '../components/ui/GroupedList';
 import { IconTile } from '../components/ui/IconTile';
@@ -533,10 +533,11 @@ export function SessionBuilderView({
             onChange={(e) => setNameInput(e.target.value)}
           />
           <span className="section-title">{t.sbSaveOn}</span>
-          <div className="sbw-wdrow">
+          <ChipGroup grid role="group" aria-label={t.sbSaveOn}>
             {weekOrder().map((n) => (
               <Chip
                 key={n}
+                size="md"
                 className="sbw-wd"
                 tone={filled.includes(n) ? 'ok' : 'neutral'}
                 selected={n === selWd}
@@ -545,7 +546,7 @@ export function SessionBuilderView({
                 {wdShort(n)}
               </Chip>
             ))}
-          </div>
+          </ChipGroup>
         </div>
       )}
     </div>

@@ -152,3 +152,64 @@ describe('ChipGroup', () => {
       expect(g.className).toContain(c);
   });
 });
+
+describe('ChipGroup grid (SPO-362: seven weekdays are always one row)', () => {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  it('takes its column count from the number of chips and keeps the caller style', () => {
+    render(
+      <ChipGroup grid data-testid="g" style={{ marginTop: 3 }}>
+        {days.map((d) => (
+          <Chip key={d}>{d}</Chip>
+        ))}
+      </ChipGroup>,
+    );
+    const g = screen.getByTestId('g');
+    expect(g.className).toContain('uichip-group--grid');
+    expect(g.style.getPropertyValue('--uichip-cols')).toBe('7');
+    expect(g.style.marginTop).toBe('3px');
+  });
+
+  it('a picked day keeps the same markup box: the check is an icon inside the chip, no extra element in the row', () => {
+    const { rerender } = render(
+      <ChipGroup grid data-testid="g">
+        {days.map((d) => (
+          <Chip key={d} aria-pressed={false} onClick={() => undefined}>
+            {d}
+          </Chip>
+        ))}
+      </ChipGroup>,
+    );
+    const g = screen.getByTestId('g');
+    const before = g.children.length;
+    rerender(
+      <ChipGroup grid data-testid="g">
+        {days.map((d) => (
+          <Chip
+            key={d}
+            selected={d === 'Sat'}
+            icon={d === 'Sat' ? 'check' : undefined}
+            aria-pressed={d === 'Sat'}
+            onClick={() => undefined}
+          >
+            {d}
+          </Chip>
+        ))}
+      </ChipGroup>,
+    );
+    expect(g.children.length).toBe(before);
+    expect(g.children.length).toBe(7);
+    expect(g.querySelectorAll('.ui-icon').length).toBe(1);
+  });
+
+  it('a plain group has no grid class and no column variable', () => {
+    render(
+      <ChipGroup data-testid="g">
+        <Chip>a</Chip>
+      </ChipGroup>,
+    );
+    const g = screen.getByTestId('g');
+    expect(g.className).not.toContain('uichip-group--grid');
+    expect(g.style.getPropertyValue('--uichip-cols')).toBe('');
+  });
+});

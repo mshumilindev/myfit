@@ -45,6 +45,7 @@ function GridLive() {
   return (
     <PresetChips
       layout="grid"
+      size="md"
       label="Days"
       items={days.map((d) => ({
         id: d,

@@ -40,6 +40,7 @@ export function AlcoholDaysView({ onBack }: { onBack: () => void }) {
             <SectionLabel>{t.alcDaysHead}</SectionLabel>
             <PresetChips
               layout="grid"
+              size="md"
               label={t.alcDaysHead}
               items={WEEKDAYS.map((d) => ({
                 id: String(d),

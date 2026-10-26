@@ -126,6 +126,27 @@ button.uichip {
 .uichip-group--fill > * {
   flex: 1 1 0;
 }
+/* grid: one row of n equal columns, never wraps. A chip is exactly its column (no padding, the label ellipsizes), and a
+   check icon is an overlay in the corner, so the selected chip is not wider than the others and nothing shifts. */
+.uichip-group--grid {
+  display: grid;
+  grid-template-columns: repeat(var(--uichip-cols, 7), minmax(0, 1fr));
+  gap: var(--s-4);
+}
+.uichip-group--grid > .uichip {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  padding-inline: 0;
+  /* Seven columns on a 320 px phone leave ~40 px a label: the small step, not the chip size's own. */
+  font-size: var(--ctl-fs-sm);
+}
+.uichip-group--grid > .uichip .ui-icon {
+  position: absolute;
+  inset-block-start: var(--s-2);
+  inset-inline-end: var(--s-2);
+  font-size: var(--fs-10);
+}
 
 /* photo: a frosted chip that sits on top of imagery. */
 .uichip.uichip--photo {

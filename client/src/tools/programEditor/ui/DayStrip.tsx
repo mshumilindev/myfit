@@ -53,13 +53,13 @@ export function DayStrip({
     <section className="pe-days-sec" aria-label={p.edDayTabs}>
       <SectionLabel>{p.edTrainingDays}</SectionLabel>
       {onToggleDay && (
-        <ChipGroup className="pe-weekset" aria-label={p.edTrainingDays}>
+        <ChipGroup grid className="pe-weekset" aria-label={p.edTrainingDays}>
           {(weekOrder ?? DOW_OF_ISO.map((_, i) => i + 1)).map((d) => {
             const on = days.includes(d);
             return (
               <Chip
                 key={d}
-                size="xs"
+                size="md"
                 selected={on}
                 icon={on ? 'check' : undefined}
                 aria-pressed={on}
