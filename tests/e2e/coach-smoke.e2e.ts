@@ -53,6 +53,17 @@ test('coach warm start and offline log no console errors', async ({ page, contex
     await page.waitForTimeout(500);
   }
   await page.evaluate(() => navigator.serviceWorker?.ready);
+  // The worker precaches in the background: go offline only once it controls the page and every route's chunks have been fetched through it.
+  await page.reload();
+  await page
+    .waitForFunction(() => !!navigator.serviceWorker?.controller, undefined, { timeout: 15_000 })
+    .catch(() => undefined);
+  for (const hash of ['#/c/today', '#/c/clients']) {
+    await page.goto('/' + hash);
+    await page.waitForLoadState('networkidle').catch(() => undefined);
+  }
+  await page.waitForTimeout(1500);
+  expect(errors, `console errors on warm start`).toEqual([]);
   await context.setOffline(true);
   for (const hash of ['#/c/today', '#/c/clients']) {
     await page.goto('/' + hash).catch(() => undefined);
