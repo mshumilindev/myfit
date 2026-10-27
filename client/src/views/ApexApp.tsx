@@ -10,18 +10,14 @@
  * Feed (notifications) is reached via the bell, not a nav tab.
  */
 import { IconButton } from '../components/ui/Button';
-import { SuiteTabBar } from '../components/SuiteTabBar';
 import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
-import { BrandBar, BellButton } from '../components/ui/BrandBar';
-import { BrandAccount } from '../components/suite/BrandAccount';
 import { useMemo, useState } from 'react';
 import { fmtDayMonth, useT } from '../i18n';
 import type { StoreState } from '../store';
-import { AppRail } from '../components/AppRail';
+import { SuiteAppFrame } from '../components/suite/SuiteAppFrame';
 import { ChallengesView } from './ChallengesView';
 import { StandardsView } from '../components/StandardsView';
 import { FeatsView } from '../components/FeatsView';
-import { NotificationsView } from './NotificationsView';
 import { ApexHome } from './ApexHome';
 import { StatShareSheet } from '../components/StatShareSheet';
 import { computeStandards, type Sex } from '../standards';
@@ -29,7 +25,6 @@ import { computeFeats } from '../feats';
 import type { StatShareModel } from '../data/shareCard';
 import type { BodyMetrics } from '../types';
 import type { Notif, NotifState } from '../notifications';
-import { SUITE_ICON, SUITE_TONE } from '../components/suite/suiteTone';
 
 export type ApexTab = 'home' | 'challenges' | 'ranks' | 'awards' | 'feed';
 
@@ -144,107 +139,64 @@ export function ApexApp({
   ];
 
   return (
-    <div className="app-apex apex-app">
-      {desktop && (
-        <AppRail
-          app="apex"
-          nav={nav}
-          activeId={tab === 'feed' ? null : tab}
-          onNav={(id) => onTab(id as ApexTab)}
-          onOpenShell={onOpenShell}
-          onOpenNotifications={() => onTab('feed')}
-          onOpenProfile={onOpenProfile}
-          notifUnread={notifUnread}
-        />
-      )}
-      <div className="apex-col">
-        <BrandBar
-          avatar={(hidden) => (
-            <BrandAccount app="apex" hidden={hidden} onOpenProfile={onOpenProfile} />
-          )}
-          header
-          app={t.apexName}
-          onApp={onOpenShell}
-          appLabel={t.shellSwitch}
-          tone={SUITE_TONE.apex}
-          icon={SUITE_ICON.apex}
-          actions={
-            <>
-              <BellButton
-                label={t.feedTitle}
-                onClick={() => onTab('feed')}
-                active={tab === 'feed'}
-                count={tab !== 'feed' ? notifUnread : 0}
-              />
-            </>
-          }
-        />
-
-        <div className="apex-body">
-          {tab === 'feed' ? (
-            <NotificationsView
-              embedded
-              title={t.feedTitle}
-              notifs={notifs}
-              now={now}
-              state={notifState}
-              onSeen={onNotifSeen}
-              onMarkAll={onNotifMarkAll}
-              onClose={() => onTab('home')}
+    <SuiteAppFrame
+      app="apex"
+      className="app-apex"
+      desktop={desktop}
+      nav={nav}
+      tab={tab}
+      homeTab="home"
+      onTab={(id) => onTab(id as ApexTab)}
+      names={{ appName: t.apexName, apps: t.shellSwitch, feed: t.feedTitle }}
+      onOpenShell={onOpenShell}
+      onOpenProfile={onOpenProfile}
+      notifs={notifs}
+      notifState={notifState}
+      notifUnread={notifUnread}
+      now={now}
+      onNotifSeen={onNotifSeen}
+      onNotifMarkAll={onNotifMarkAll}
+      overlays={
+        <>
+          {share && (
+            <StatShareSheet
+              model={share.model}
+              fileBase={share.fileBase}
+              onClose={() => setShare(null)}
             />
-          ) : (
-            <div className="apex-scroll">
-              {tab === 'home' && <ApexHome store={store} now={now} notifs={notifs} onTab={onTab} />}
-              {tab === 'challenges' && <ChallengesView store={store} />}
-              {tab === 'ranks' && (
-                <div className="apex-page">
-                  <div className="apex-title">
-                    <div className="apex-title-txt">
-                      <h2 className="title-26">{t.ranksTitle}</h2>
-                      <span className="apex-title-sub">{t.ranksSub}</span>
-                    </div>
-                    <IconButton icon="export" onClick={shareRanks} label={t.rcShare} />
-                  </div>
-                  <StandardsView finished={finished} body={store.bodyMetrics} />
-                </div>
-              )}
-              {tab === 'awards' && (
-                <div className="apex-page">
-                  <div className="apex-title">
-                    <h2 className="title-26">{t.awardsTitle}</h2>
-                    <IconButton icon="export" onClick={shareAwards} label={t.rcShare} />
-                  </div>
-                  <FeatsView
-                    finished={finished}
-                    body={store.bodyMetrics}
-                    sub="achievements"
-                    onSub={() => {}}
-                    hideSubtabs
-                  />
-                </div>
-              )}
-            </div>
           )}
+        </>
+      }
+    >
+      {tab === 'home' && <ApexHome store={store} now={now} notifs={notifs} onTab={onTab} />}
+      {tab === 'challenges' && <ChallengesView store={store} />}
+      {tab === 'ranks' && (
+        <div className="apex-page">
+          <div className="apex-title">
+            <div className="apex-title-txt">
+              <h2 className="title-26">{t.ranksTitle}</h2>
+              <span className="apex-title-sub">{t.ranksSub}</span>
+            </div>
+            <IconButton icon="export" onClick={shareRanks} label={t.rcShare} />
+          </div>
+          <StandardsView finished={finished} body={store.bodyMetrics} />
         </div>
-
-        {!desktop && (
-          <SuiteTabBar
-            app="apex"
-            noMore
-            tabs
-            activeFill
-            items={nav.map((x) => ({ ...x, active: tab === x.id }))}
-            onSelect={(id) => onTab(id)}
-          />
-        )}
-      </div>
-      {share && (
-        <StatShareSheet
-          model={share.model}
-          fileBase={share.fileBase}
-          onClose={() => setShare(null)}
-        />
       )}
-    </div>
+      {tab === 'awards' && (
+        <div className="apex-page">
+          <div className="apex-title">
+            <h2 className="title-26">{t.awardsTitle}</h2>
+            <IconButton icon="export" onClick={shareAwards} label={t.rcShare} />
+          </div>
+          <FeatsView
+            finished={finished}
+            body={store.bodyMetrics}
+            sub="achievements"
+            onSub={() => {}}
+            hideSubtabs
+          />
+        </div>
+      )}
+    </SuiteAppFrame>
   );
 }

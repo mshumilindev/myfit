@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { SuiteTabBar } from '../components/SuiteTabBar';
 import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
 import { Button } from '../components/ui/Button';
 import { Field } from '../components/ui/Field';
 import { UndoToast } from '../components/ui/UndoToast';
+import { SuiteAppFrame } from '../components/suite/SuiteAppFrame';
 import { UNDO_MS } from '../coach/domain/signalConfig';
-import { BrandBar, BellButton } from '../components/ui/BrandBar';
-import { BrandAccount } from '../components/suite/BrandAccount';
 import { AddFlow } from './addflow';
 import { Sheet } from './components';
 import { round, sumMacros } from './calc';
@@ -14,10 +12,7 @@ import { useT } from './i18n';
 import { store, useStore } from './store';
 import { GoalView, HistoryView, TodayView } from './views';
 import type { Entry } from './types';
-import { AppRail } from '../components/AppRail';
-import { NotificationsView } from '../views/NotificationsView';
 import type { Notif, NotifState } from '../notifications';
-import { SUITE_ICON, SUITE_TONE } from '../components/suite/suiteTone';
 import { HealthDisclaimer } from '../legal/HealthDisclaimer';
 import { HealthOffState } from '../legal/HealthOff';
 import { useAskHealthConsent, useHealthOn } from '../legal/useHealthConsent';
@@ -175,72 +170,26 @@ export function NutritionRoot({
   }
 
   return (
-    <div className="app-nutrition apex-app">
-      {desktop && (
-        <AppRail
-          app="nutrition"
-          nav={nav}
-          activeId={tab === 'feed' ? null : tab}
-          onNav={(id) => setTab(id as Tab)}
-          onOpenShell={onOpenShell}
-          onOpenNotifications={() => setTab('feed')}
-          onOpenProfile={onOpenProfile}
-          notifUnread={notifUnread}
-        />
-      )}
-      <div className="apex-col">
-        <BrandBar
-          avatar={(hidden) => (
-            <BrandAccount app="nutrition" hidden={hidden} onOpenProfile={onOpenProfile} />
-          )}
-          header
-          app={t('appName')}
-          onApp={onOpenShell}
-          appLabel={t('apps')}
-          tone={SUITE_TONE.nutrition}
-          icon={SUITE_ICON.nutrition}
-          actions={
-            <>
-              <BellButton
-                label={t('notifications')}
-                onClick={() => setTab('feed')}
-                active={tab === 'feed'}
-                count={tab !== 'feed' ? notifUnread : 0}
-              />
-            </>
-          }
-        />
-
-        <div className="apex-body">
-          {tab === 'feed' ? (
-            <NotificationsView
-              embedded
-              title={t('notifications')}
-              notifs={notifs}
-              now={now}
-              state={notifState}
-              onSeen={onNotifSeen}
-              onMarkAll={onNotifMarkAll}
-              onClose={() => setTab('today')}
-            />
-          ) : (
-            <div className="apex-scroll">
-              <HealthDisclaimer />
-              {!food.on && food.ready && <HealthOffState feature="nutrition" />}
-              {food.on && tab === 'today' && (
-                <TodayView
-                  onOpenEntry={setDetail}
-                  onGoal={() => setTab('goal')}
-                  onAdd={() => setAdding(true)}
-                />
-              )}
-              {food.on && tab === 'history' && <HistoryView onOpenEntry={setDetail} />}
-              {food.on && tab === 'goal' && <GoalView />}
-            </div>
-          )}
-        </div>
-
-        {tab !== 'feed' && food.on && (
+    <SuiteAppFrame
+      app="nutrition"
+      className="app-nutrition"
+      desktop={desktop}
+      nav={nav}
+      tab={tab}
+      homeTab="today"
+      onTab={(id) => setTab(id as Tab)}
+      names={{ appName: t('appName'), apps: t('apps'), feed: t('notifications') }}
+      onOpenShell={onOpenShell}
+      onOpenProfile={onOpenProfile}
+      notifs={notifs}
+      notifState={notifState}
+      notifUnread={notifUnread}
+      now={now}
+      onNotifSeen={onNotifSeen}
+      onNotifMarkAll={onNotifMarkAll}
+      afterBody={
+        tab !== 'feed' &&
+        food.on && (
           <div className="n-addpill-wrap">
             <svg className="glass-defs" aria-hidden width="0" height="0">
               <filter
@@ -277,38 +226,42 @@ export function NutritionRoot({
               {t('addEntry')}
             </Button>
           </div>
-        )}
+        )
+      }
+      overlays={
+        <>
+          {adding && food.on && <AddFlow onClose={() => setAdding(false)} />}
 
-        {!desktop && (
-          <SuiteTabBar
-            app="nutrition"
-            noMore
-            tabs
-            activeFill
-            items={nav.map((x) => ({ ...x, active: tab === x.id }))}
-            onSelect={(id) => setTab(id as Tab)}
-          />
-        )}
-      </div>
+          {detail && <EntryDetail entry={detail} onClose={() => setDetail(null)} onDelete={del} />}
 
-      {adding && food.on && <AddFlow onClose={() => setAdding(false)} />}
-
-      {detail && <EntryDetail entry={detail} onClose={() => setDetail(null)} onDelete={del} />}
-
-      {undo && (
-        <UndoToast
-          position="fixed"
-          text={t('deleted')}
-          undoLabel={t('undo')}
-          countdownLabel={t('undoCountdown')}
-          durationMs={UNDO_MS}
-          onUndo={() => {
-            store.restoreEntry(undo);
-            setUndo(null);
-            if (undoTimer.current) clearTimeout(undoTimer.current);
-          }}
+          {undo && (
+            <UndoToast
+              position="fixed"
+              text={t('deleted')}
+              undoLabel={t('undo')}
+              countdownLabel={t('undoCountdown')}
+              durationMs={UNDO_MS}
+              onUndo={() => {
+                store.restoreEntry(undo);
+                setUndo(null);
+                if (undoTimer.current) clearTimeout(undoTimer.current);
+              }}
+            />
+          )}
+        </>
+      }
+    >
+      <HealthDisclaimer />
+      {!food.on && food.ready && <HealthOffState feature="nutrition" />}
+      {food.on && tab === 'today' && (
+        <TodayView
+          onOpenEntry={setDetail}
+          onGoal={() => setTab('goal')}
+          onAdd={() => setAdding(true)}
         />
       )}
-    </div>
+      {food.on && tab === 'history' && <HistoryView onOpenEntry={setDetail} />}
+      {food.on && tab === 'goal' && <GoalView />}
+    </SuiteAppFrame>
   );
 }
