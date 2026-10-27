@@ -231,7 +231,7 @@ jobs:
       - run: npx playwright test --project=mobile-chromium tests/e2e/passkeys-webauthn.e2e.ts
 
   client-e2e:
-    name: Client e2e (console errors, offline start, session pictures)
+    name: Client e2e (console errors, offline start, session pictures, Coach smoke)
     # Informational until it has run green on a CI runner (not yet seen there); the specs pass locally on Chromium
     # (SPO-337, SPO-341, SPO-358). Not in `quality`'s needs.
     continue-on-error: true
@@ -252,6 +252,13 @@ jobs:
       - run: npx playwright test --project=mobile-chromium tests/e2e/client-console.e2e.ts tests/e2e/offline-startup.e2e.ts tests/e2e/session-images.e2e.ts
         env:
           E2E_BASE_URL: http://127.0.0.1:4173
+
+      - name: Coach smoke on the fixtures build (clean console on every route, 390 and 1440)
+        run: |
+          (cd client && VITE_COACH_BACKEND=fixtures npx vite build --outDir dist-e2e --emptyOutDir)
+          (cd client && npx vite preview --outDir dist-e2e --host 127.0.0.1 --port 4174 --strictPort >/dev/null 2>&1 &)
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
+          E2E_COACH_URL=http://127.0.0.1:4174 npx playwright test --project=coach-390 --project=coach-1440 tests/e2e/coach-smoke.e2e.ts
 
   duplication:
     name: Copy-paste detector (jscpd, threshold 1 %)
