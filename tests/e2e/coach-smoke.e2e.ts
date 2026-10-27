@@ -64,22 +64,20 @@ test('coach warm start and offline log no console errors', async ({ page, contex
   }
   await page.waitForTimeout(1500);
   expect(errors, `console errors on warm start`).toEqual([]);
-  // A slow runner is still precaching the route chunks (and their stylesheets) in the background: go offline once the
-  // worker's caches have stopped growing, otherwise the first offline visit asks for a file that is not there yet.
+  // A slow runner is still precaching the route chunks (and their stylesheets) in the background: go offline only once
+  // every file the worker's precache manifest lists is in the caches, otherwise the first offline visit asks for a file
+  // that is not there yet.
   await expect
     .poll(
-      async () => {
-        const count = () =>
-          page.evaluate(async () => {
-            let n = 0;
-            for (const k of await caches.keys()) n += (await (await caches.open(k)).keys()).length;
-            return n;
-          });
-        const before = await count();
-        await page.waitForTimeout(2500);
-        return before > 0 && before === (await count());
-      },
-      { timeout: 45_000, intervals: [0] },
+      () =>
+        page.evaluate(async () => {
+          const sw = await (await fetch('/sw.js', { cache: 'no-store' })).text();
+          const urls = [...new Set(sw.match(/assets\/[\w.-]+\.(?:js|css)/g) ?? [])];
+          if (urls.length === 0) return false;
+          for (const u of urls) if (!(await caches.match('/' + u))) return u;
+          return true;
+        }),
+      { timeout: 60_000, intervals: [1000] },
     )
     .toBe(true);
   await context.setOffline(true);
