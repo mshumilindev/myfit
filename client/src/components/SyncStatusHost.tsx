@@ -14,14 +14,23 @@ export function SyncStatusHost() {
   const { t } = useT();
   const { state, retry } = useSyncUi();
   const hasIcon = useHasSyncIndicator();
-  // Pages with the header SyncIndicator (SPO-375) show every state themselves; elsewhere this pill
-  // is the indicator, and only for the states that need a Retry.
-  const canRetry = state === 'slow' || state === 'offline' || state === 'failed';
-  if (hasIcon || !canRetry) return null;
+  // Pages with the header SyncIndicator (SPO-375) show every state themselves; elsewhere this pill is
+  // the indicator. It has no look for `locked`, and a saved copy (`stale`) reads as plain offline here.
+  if (hasIcon || state === 'synced' || state === 'locked') return null;
+  const shown = state === 'stale' ? 'offline' : state;
+  const canRetry = shown === 'slow' || shown === 'offline' || shown === 'failed';
   const label =
-    state === 'slow' ? t.syncSlow : state === 'offline' ? t.syncOfflineWork : t.syncProblem;
+    shown === 'saving'
+      ? t.saving
+      : shown === 'slow'
+        ? t.syncSlow
+        : shown === 'offline'
+          ? t.syncOfflineWork
+          : shown === 'failed'
+            ? t.syncProblem
+            : t.syncing;
   return (
-    <SyncStatus state={state} floating onRetry={retry} retryLabel={t.retry}>
+    <SyncStatus state={shown} floating onRetry={canRetry ? retry : undefined} retryLabel={t.retry}>
       {label}
     </SyncStatus>
   );

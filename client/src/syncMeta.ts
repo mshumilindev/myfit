@@ -24,7 +24,7 @@ export function snapMeta(snap: QuerySnapshot): SnapMeta {
   return {
     fromCache: snap.metadata.fromCache,
     pending: snap.metadata.hasPendingWrites,
-    pendingCount: snap.docs.filter((d) => d.metadata.hasPendingWrites).length,
+    pendingCount: snap.docs.filter((d) => d.metadata?.hasPendingWrites).length,
   };
 }
 
