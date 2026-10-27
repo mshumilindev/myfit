@@ -285,6 +285,22 @@ describe('GymsView search: picking and ordering', () => {
   });
 });
 
+describe('GymsView search: photos of streaming results (SPO-360)', () => {
+  it('a photo that resolves after more results arrived still shows (no lookup is cancelled by a re-render)', async () => {
+    setGeo({ lat: 0, lng: 0, accuracy: 5 });
+    const waiting: Array<(u: string) => void> = [];
+    m.photo.mockImplementation(() => new Promise<string>((res) => waiting.push(res)));
+    const { container } = openGyms();
+    await tick(0);
+    nearbyResults([place('a', 'A Gym', 0.001, 0)]);
+    nearbyResults([place('a', 'A Gym', 0.001, 0), place('b', 'B Gym', 0.002, 0)]);
+    await act(async () => waiting.forEach((r, i) => r(`https://img.example/${i}.jpg`)));
+    await tick(0);
+    const imgs = container.querySelectorAll('.gym-result .thumb img');
+    expect(imgs).toHaveLength(2);
+  });
+});
+
 describe('GymsView search: nearby suggestions', () => {
   it('searches around me (3 km, the locale term) and lists the eight closest unsaved gyms', async () => {
     setGeo({ lat: 0, lng: 0, accuracy: 5 });
