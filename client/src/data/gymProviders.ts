@@ -607,6 +607,7 @@ async function googlePhoto(r: PlaceResult): Promise<GymPhoto | null> {
  */
 const GLOOKUP_PREFIX = 'gym.glookup.';
 const GLOOKUP_TTL_MS = 24 * 60 * 60 * 1000;
+const GLOOKUP_MISS_TTL_MS = 10 * 60_000;
 const GLOOKUP_MAX_M = 250;
 const GLOOKUP_RETRY_MS = 60_000;
 const GLOOKUP_FAILED = new Map<string, number>();
@@ -623,7 +624,8 @@ async function googleLookup(r: PlaceResult): Promise<PlaceResult | null> {
     const raw = localStorage.getItem(k);
     if (raw) {
       const hit = JSON.parse(raw) as { at: number; photoName?: string; photoBy?: string[] };
-      if (Date.now() - hit.at < GLOOKUP_TTL_MS)
+      // A miss is remembered only briefly: the place may get a photo (or the backend be fixed) soon.
+      if (Date.now() - hit.at < (hit.photoName ? GLOOKUP_TTL_MS : GLOOKUP_MISS_TTL_MS))
         return hit.photoName
           ? { ...r, googlePhotoName: hit.photoName, googlePhotoBy: hit.photoBy }
           : null;

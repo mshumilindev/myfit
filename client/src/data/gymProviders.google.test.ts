@@ -205,3 +205,27 @@ describe('nearby gyms are remembered for a day', () => {
     await p;
   });
 });
+
+describe('a missed photo lookup is not remembered for long', () => {
+  beforeEach(() => localStorage.clear());
+  it('after the short miss window the gym is looked up again and its photo shows', async () => {
+    const saved: PlaceResult = {
+      key: 'k',
+      name: 'Gym Z',
+      lat: 52.19,
+      lng: 21.02,
+      sources: ['local'],
+    };
+    const sig = () => new AbortController().signal;
+    m.callFn.mockResolvedValue({ places: [] });
+    expect(await resolvePhotoInfo(saved, sig())).toBeNull();
+    const now = Date.now();
+    vi.spyOn(Date, 'now').mockReturnValue(now + 11 * 60_000);
+    m.callFn.mockImplementation(async (_f: string, p: { op: string }) =>
+      p.op === 'search'
+        ? { places: [{ ...ROW, lat: 52.1901, lng: 21.0201 }] }
+        : { photo: 'data:image/jpeg;base64,AAAA' },
+    );
+    expect((await resolvePhotoInfo(saved, sig()))?.url).toBe('data:image/jpeg;base64,AAAA');
+  });
+});
