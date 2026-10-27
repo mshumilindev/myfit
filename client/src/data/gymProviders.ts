@@ -411,6 +411,10 @@ export async function searchNearbyGymsMerged(
 ): Promise<PlaceResult[]> {
   const acc: PlaceResult[] = [];
   const nearestFirst = () => [...acc].sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
+  // Gyms around here seen in the last day show at once (stale-while-revalidate), then the services refresh the list.
+  const cacheQuery = `nearby:${radiusM}:${query}`;
+  const seen = readCache(cacheQuery, coords);
+  if (seen?.length && !signal.aborted) onResults(seen);
   const fold = (rows: PlaceResult[]) => {
     if (signal.aborted) return;
     mergeResults(acc, rows);
@@ -429,7 +433,9 @@ export async function searchNearbyGymsMerged(
     guarded('photon', photonNearby(query, coords, radiusM, signal)),
     guarded('google', googleNearby(coords, radiusM)),
   ]);
-  return nearestFirst();
+  const fresh = nearestFirst();
+  if (!signal.aborted && fresh.length > 0) writeCache(cacheQuery, coords, fresh);
+  return fresh;
 }
 
 /** Words that find gyms in Photon when Overpass is down; the same host and consent as the plain search. */

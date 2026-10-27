@@ -190,3 +190,18 @@ describe('photo of a saved gym (SPO-360): found by name and place, no stored ref
     expect(m.callFn).not.toHaveBeenCalled();
   });
 });
+
+describe('nearby gyms are remembered for a day', () => {
+  beforeEach(() => localStorage.clear());
+  it('the second visit shows the gyms at once, from the device, and then refreshes them', async () => {
+    m.callFn.mockResolvedValue({ places: [ROW] });
+    const first = vi.fn();
+    await searchNearbyGymsMerged(KYIV, 1500, 'gym', [], new AbortController().signal, first);
+    expect(first.mock.calls.length).toBeGreaterThan(0);
+    const second = vi.fn();
+    const p = searchNearbyGymsMerged(KYIV, 1500, 'gym', [], new AbortController().signal, second);
+    expect(second).toHaveBeenCalledTimes(1); // synchronously, before any service answered
+    expect(second.mock.calls[0][0].some((x: PlaceResult) => x.name === 'Google Gym')).toBe(true);
+    await p;
+  });
+});
