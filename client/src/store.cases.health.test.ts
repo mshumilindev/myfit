@@ -161,14 +161,26 @@ describe('goals, mastery, home, coach settings: synced docs', () => {
     expect(st().goals.focus).toBe('strength');
     await settle();
     const w = at('users/u1/meta/goals').at(-1)!;
-    expect(w.data.physique).toBe('lean');
-    expect(typeof w.data.updatedAt).toBe('number');
+    // sealed (SPO-217): only the stamp is readable in the database
+    expect(isSealed(w.data)).toBe(true);
+    expect(w.data.physique).toBeUndefined();
+    expect(Object.keys(w.data).sort()).toEqual(['enc', 'updatedAt']);
+    const o = await open(w);
+    expect(o.physique).toBe('lean');
+    expect(typeof o.updatedAt).toBe('number');
     store.resetGoals();
     expect(st().goals.physique).toBeUndefined();
     const stop = store.startSyncLoop();
+    // a legacy (not yet migrated) plaintext document is still read
     fs.listeners.get('users/u1/meta/goals')!(snap({ physique: 'bulk' }));
+    await settle();
     expect(st().goals.physique).toBe('bulk');
+    // and so is the sealed one
+    fs.listeners.get('users/u1/meta/goals')!(snap(w.data));
+    await settle();
+    expect(st().goals.physique).toBe('lean');
     fs.listeners.get('users/u1/meta/goals')!(snap(null));
+    await settle();
     expect(st().goals.physique).toBeUndefined();
     stop();
   });
@@ -177,7 +189,8 @@ describe('goals, mastery, home, coach settings: synced docs', () => {
     store.setMasteryHistory(2019, 'continuous');
     store.setMasterySeenRating(61);
     await settle();
-    expect(at('users/u1/meta/mastery').at(-1)!.data).toMatchObject({
+    expect(isSealed(at('users/u1/meta/mastery').at(-1)!.data)).toBe(true);
+    expect(await open(at('users/u1/meta/mastery').at(-1)!)).toMatchObject({
       sinceYear: 2019,
       pattern: 'continuous',
       seenRating: 61,
@@ -192,10 +205,12 @@ describe('goals, mastery, home, coach settings: synced docs', () => {
     fs.listeners.get('users/u1/meta/mastery')!(
       snap({ sinceYear: 2000, pattern: 'occasional', seenRating: 1, updatedAt: localAt - 10 }),
     );
+    await settle();
     expect(st().mastery.sinceYear).toBe(2019); // stale server copy ignored
     fs.listeners.get('users/u1/meta/mastery')!(
       snap({ sinceYear: 2000, pattern: 'occasional', updatedAt: localAt + 10 }),
     );
+    await settle();
     expect(st().mastery).toEqual({
       sinceYear: 2000,
       pattern: 'occasional',
@@ -205,7 +220,7 @@ describe('goals, mastery, home, coach settings: synced docs', () => {
     stop();
   });
 
-  it('coach settings write is debounced to one merge-write holding only the changed fields', async () => {
+  it('coach settings write is debounced to one sealed write holding only the changed fields over the server copy', async () => {
     vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
     vi.setSystemTime(T0);
     store.setCoach({ enabled: true });
@@ -213,17 +228,22 @@ describe('goals, mastery, home, coach settings: synced docs', () => {
     await vi.advanceTimersByTimeAsync(3999);
     expect(at('users/u1/meta/coach')).toHaveLength(0);
     await vi.advanceTimersByTimeAsync(1);
+    await vi.waitFor(() => expect(at('users/u1/meta/coach')).toHaveLength(1));
     const w = at('users/u1/meta/coach');
-    expect(w).toHaveLength(1);
-    expect(w[0].opts).toEqual({ merge: true });
-    expect(Object.keys(w[0].data).sort()).toEqual(['enabled', 'temper', 'updatedAt']);
+    // sealed (SPO-217): a whole document, no partial merge-write; only the stamp is readable
+    expect(w[0].opts).toBeUndefined();
+    expect(isSealed(w[0].data)).toBe(true);
+    expect(Object.keys(w[0].data).sort()).toEqual(['enc', 'updatedAt']);
+    expect(Object.keys(await open(w[0])).sort()).toEqual(['enabled', 'temper', 'updatedAt']);
     expect(st().coach.temper).toBe(5);
 
-    // leaving the page flushes a pending change at once
+    // leaving the page flushes a pending change at once; the earlier fields are kept (the server copy is remembered)
     store.setCoach({ enabled: false });
     window.dispatchEvent(new Event('pagehide'));
-    expect(at('users/u1/meta/coach')).toHaveLength(2);
-    expect(at('users/u1/meta/coach')[1].data.enabled).toBe(false);
+    await vi.waitFor(() => expect(at('users/u1/meta/coach')).toHaveLength(2));
+    const second = await open(at('users/u1/meta/coach')[1]);
+    expect(second.enabled).toBe(false);
+    expect(second.temper).toBe(5);
     await vi.advanceTimersByTimeAsync(5000);
     expect(at('users/u1/meta/coach')).toHaveLength(2);
   });
@@ -243,14 +263,16 @@ describe('goals, mastery, home, coach settings: synced docs', () => {
     const stop = store.startSyncLoop();
     fs.listeners.get('users/u1/meta/coach')!(snap(null)); // enabled locally, none on server: push everything
     await vi.advanceTimersByTimeAsync(4000);
-    expect(at('users/u1/meta/coach').length).toBe(1);
-    expect(Object.keys(at('users/u1/meta/coach')[0].data).length).toBeGreaterThan(3);
+    await vi.waitFor(() => expect(at('users/u1/meta/coach').length).toBe(1));
+    expect(Object.keys(await open(at('users/u1/meta/coach')[0])).length).toBeGreaterThan(3);
 
     store.setCoach({ temper: 5 });
     fs.listeners.get('users/u1/meta/coach')!(snap({ temper: 1, updatedAt: 1 }));
+    await vi.advanceTimersByTimeAsync(1);
     expect(st().coach.temper).toBe(5);
     await vi.advanceTimersByTimeAsync(4000);
     fs.listeners.get('users/u1/meta/coach')!(snap({ temper: 3, updatedAt: Date.now() + 100_000 }));
+    await vi.advanceTimersByTimeAsync(1);
     expect(st().coach.temper).toBe(3);
     stop();
   });

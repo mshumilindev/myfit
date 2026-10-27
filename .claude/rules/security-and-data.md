@@ -21,6 +21,7 @@ paths:
 - Ключ автоматичний (`vaultKey`: Cloud Function, секрет `VAULT_MASTER`, HKDF на uid). Жодних екранів збереження ключа.
 - Обмін з тренером — лише через ECDH-гранти (`runKeyExchange`); жодних plaintext-копій.
 - Колекції коучингу (`NEW_COLLECTIONS`, `coachCrypto`): лише `sealOrThrow`/`openSealed` (кидає `vault-locked`, без plaintext-запасного), ніколи `prepareWrite`.
+- Винятки з шифрування (`liveSessions`, `programs/*`) і компенсуючі заходи: `docs/adr/011-sealed-account-meta-and-plaintext-exceptions.md`. `meta/goals|home|mastery|coach` запечатані; `pings`, `reminderDismissals` лише читання/видалення.
 - Нова колекція: `firestore.rules` + міграція (`autoMigrate`) + тест round-trip + перевірка, що в Firestore немає plaintext.
 - Не логувати й не слати в аналітику вміст зашифрованих полів. Розшифровані дані й дані здоров'я — не в логи.
 - localStorage: чутливе лише запечатаним (`conditionsCache.ts`, `offline/`: `offlineRevalidate/Hydrate/Set`); відкритий текст не зберігаємо. Старі `spotter.cache.*` чистить `purgeLegacyPlaintext`. JWT в localStorage не використовуємо (авторизація через Firebase Auth).

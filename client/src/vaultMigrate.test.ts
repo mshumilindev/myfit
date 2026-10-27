@@ -1,8 +1,9 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { readyVault, unsetVault } from './testVault';
-import { isSealed, type SealedCollection } from './encryptedDoc';
+import { OPEN_FIELDS, isSealed, type SealedCollection } from './encryptedDoc';
 import {
+  MIGRATION_ORDER,
   migrateAll,
   migrateCollection,
   rollbackCollection,
@@ -95,15 +96,30 @@ describe('migration', () => {
       (c) => void (seen.includes(c) || seen.push(c)),
     );
     expect(ok).toBe(true);
-    expect(seen).toEqual([
-      'workouts',
-      'gyms',
-      'restPeriods',
-      'injuries',
-      'activities',
-      'sleeps',
-      'body',
-    ]);
+    expect(seen).toEqual([...MIGRATION_ORDER]);
     expect(results.find((r) => r.collection === 'body')!.migrated).toBe(1);
+  });
+
+  it('SPO-218 guard: the order covers EVERY collection that can be sealed, each exactly once', () => {
+    expect([...MIGRATION_ORDER].sort()).toEqual(Object.keys(OPEN_FIELDS).sort());
+    expect(new Set(MIGRATION_ORDER).size).toBe(MIGRATION_ORDER.length);
+  });
+
+  it('SPO-218: documents written in the clear before the key (meta/*) are sealed by the migration, then left alone', async () => {
+    const v = await readyVault();
+    const { ports, data } = store({
+      goals: { goals: { physique: 'lean', updatedAt: 3 } },
+      coach: { coach: { temper: 5, updatedAt: 4 } },
+      nicotine: { nicotine: { updatedAt: 2, products: [{ name: 'secret-brand' }] } },
+    });
+    const first = await migrateAll(v, ports);
+    expect(first.ok).toBe(true);
+    for (const c of ['goals', 'coach', 'nicotine'] as const) {
+      const doc = data.get(`${c}/${c}`)!;
+      expect(isSealed(doc), c).toBe(true);
+      expect(JSON.stringify(doc)).not.toContain('secret-brand');
+    }
+    const second = await migrateAll(v, ports);
+    expect(second.results.reduce((n, r) => n + r.migrated, 0)).toBe(0);
   });
 });

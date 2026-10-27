@@ -7,6 +7,13 @@
 import { isSealed, sealDoc, unsealDoc, type SealedCollection } from './encryptedDoc';
 import type { Vault } from './autoVault';
 
+/**
+ * Version of the order below. Bump it when a collection is ADDED: the "migrated" marker is kept per version, so every
+ * account runs the migration again once (already sealed documents are skipped, so it is cheap and idempotent).
+ */
+export const MIGRATION_VERSION = 2;
+
+/** Every collection `sealDoc` can seal (SPO-218: a document written before the vault was ready must not stay open). */
 export const MIGRATION_ORDER: SealedCollection[] = [
   'workouts',
   'gyms',
@@ -15,6 +22,17 @@ export const MIGRATION_ORDER: SealedCollection[] = [
   'activities',
   'sleeps',
   'body',
+  'conditions',
+  'coachShare',
+  'conditionPrefs',
+  'nicotine',
+  'cycle',
+  'alcohol',
+  'supplements',
+  'goals',
+  'home',
+  'mastery',
+  'coach',
 ];
 
 export interface MigratePorts {

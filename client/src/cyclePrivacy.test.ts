@@ -10,7 +10,9 @@ describe('cycle stays private', () => {
     expect([...OPEN_FIELDS.cycle]).toEqual(['updatedAt']);
   });
   it('is part of the migration lists', () => {
-    expect(src('./vaultIO.ts').match(/c === 'cycle'/g)?.length).toBe(2);
+    // the sealed meta list of the key-exchange migration and the ordered migration list
+    expect(src('./vaultIO.ts')).toContain("'cycle'");
+    expect(src('./vaultMigrate.ts')).toContain("'cycle'");
   });
   it('is not mentioned by coach-share or Atlas fact builders', () => {
     for (const f of [

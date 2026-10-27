@@ -204,7 +204,7 @@ describe('auto-migration of plaintext documents', () => {
     io.setMigrationEnricher((d) => ({ ...d, stats: { sets: 4 } }));
     await io.initVault('u1');
     await vi.advanceTimersByTimeAsync(8000);
-    await vi.waitFor(() => expect(localStorage.getItem('spotter.vault.migrated.u1')).toBe('1'));
+    await vi.waitFor(() => expect(localStorage.getItem('spotter.vault.migrated.v2.u1')).toBe('1'));
 
     const paths = fs.writes.map((w) => w.path).sort();
     expect(paths).toEqual(['users/u1/gyms/g1', 'users/u1/meta/body', 'users/u1/workouts/w1']);
@@ -241,7 +241,7 @@ describe('auto-migration of plaintext documents', () => {
     await io.initVault('u1');
     await vi.advanceTimersByTimeAsync(8000);
     await Promise.resolve();
-    expect(localStorage.getItem('spotter.vault.migrated.u1')).toBeNull();
+    expect(localStorage.getItem('spotter.vault.migrated.v2.u1')).toBeNull();
     expect(fs.writes).toEqual([]);
 
     fs.failReads = false;
@@ -250,7 +250,7 @@ describe('auto-migration of plaintext documents', () => {
     await vi.advanceTimersByTimeAsync(8000);
     await vi.waitFor(() => expect(fs.failedWrites).toBeGreaterThan(0));
     await vi.advanceTimersByTimeAsync(0);
-    expect(localStorage.getItem('spotter.vault.migrated.u1')).toBeNull();
+    expect(localStorage.getItem('spotter.vault.migrated.v2.u1')).toBeNull();
   });
 
   it('does nothing when the vault is not ready or localStorage is unavailable still migrates', async () => {

@@ -60,6 +60,8 @@ vi.mock('./vaultIO', async (orig) => {
   };
 });
 import * as store from './store';
+import { vault } from './vaultIO';
+import { isSealed, unsealDoc } from './encryptedDoc';
 import { setRole } from './api';
 import { registerCustomExercises } from './data/exercises';
 
@@ -70,6 +72,11 @@ const settle = async () => {
   for (let i = 0; i < 6; i++) await new Promise((r) => setTimeout(r, 8));
 };
 const at = (path: string) => fs.writes.filter((w) => w.path === path);
+const open = (w: { data: Record<string, unknown> }) =>
+  unsealDoc<Record<string, unknown>>(
+    w.data,
+    (vault as unknown as import('./autoVault').Vault).material().key,
+  );
 const snap = (d: Record<string, unknown> | null) => ({
   exists: () => d !== null,
   data: () => d,
@@ -263,7 +270,7 @@ describe('warm-up block items', () => {
 });
 
 describe('home sets', () => {
-  it('sets and own moves are saved, edited, deleted, and synced as one document (not encrypted today)', async () => {
+  it('sets and own moves are saved, edited, deleted, and synced as one document (sealed, SPO-217)', async () => {
     const mv = store.saveHomeMove({
       name: ' Door Rows ',
       measure: 'reps',
@@ -278,7 +285,9 @@ describe('home sets', () => {
     expect(st().home.sets).toHaveLength(1);
     await settle();
     const w = at('users/u1/meta/home').at(-1)!;
-    expect(w.data.sets).toHaveLength(1);
+    expect(isSealed(w.data)).toBe(true); // sealed (SPO-217): no set or move names readable in the database
+    expect(w.data.sets).toBeUndefined();
+    expect((await open(w)).sets).toHaveLength(1);
     store.deleteHomeMove(mv.id);
     expect(st().home.moves).toEqual([]);
     store.deleteHomeSet(set1.id);
@@ -386,8 +395,10 @@ describe('home sets', () => {
     expect(at('users/u1/meta/home')).toHaveLength(1);
     const local = st().home.updatedAt!;
     fs.listeners.get('users/u1/meta/home')!(snap({ sets: [], moves: [], updatedAt: local - 1 }));
+    await settle();
     expect(st().home.sets).toHaveLength(1);
     fs.listeners.get('users/u1/meta/home')!(snap({ sets: [], moves: [], updatedAt: local + 1 }));
+    await settle();
     expect(st().home.sets).toHaveLength(0);
     stop();
   });

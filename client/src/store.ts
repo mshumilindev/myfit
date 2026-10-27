@@ -161,6 +161,7 @@ import { resolveRestOverlap, type RestOverlapChoice } from './restOverlap';
 import { readProgramMemory } from './data/programMemory';
 import { CONDITIONS_KEY, CONDITIONS_SHARE_KEY, createConditionsCache } from './conditionsCache';
 import { createStoreSealed } from './storeSealed';
+import { watchSealedMeta, writeSealedMeta } from './storeMeta';
 import {
   healthSnapshot,
   healthVersion,
@@ -1369,7 +1370,7 @@ function writeGoalsDoc(): void {
   const uid = currentUid();
   if (!uid) return;
   const clean = JSON.parse(JSON.stringify({ ...state.goals, updatedAt: Date.now() }));
-  setDoc(doc(db, 'users', uid, 'meta', 'goals'), clean).catch(onWriteError);
+  writeSealedMeta(uid, 'goals', clean, onWriteError);
 }
 function writeHomeDoc(): void {
   const uid = currentUid();
@@ -1377,7 +1378,7 @@ function writeHomeDoc(): void {
   const clean = JSON.parse(
     JSON.stringify({ ...state.home, updatedAt: state.home.updatedAt ?? Date.now() }),
   );
-  setDoc(doc(db, 'users', uid, 'meta', 'home'), clean).catch(onWriteError);
+  writeSealedMeta(uid, 'home', clean, onWriteError);
 }
 function writeMasteryDoc(): void {
   const uid = currentUid();
@@ -1385,7 +1386,7 @@ function writeMasteryDoc(): void {
   const clean = JSON.parse(
     JSON.stringify({ ...state.mastery, updatedAt: state.mastery.updatedAt ?? Date.now() }),
   );
-  setDoc(doc(db, 'users', uid, 'meta', 'mastery'), clean).catch(onWriteError);
+  writeSealedMeta(uid, 'mastery', clean, onWriteError);
 }
 /**
  * The coach doc is written a few seconds after the last change, not on every
@@ -1402,6 +1403,8 @@ const coachDirty = new Set<string>();
 /** Newest `updatedAt` seen on the server copy; local edits always stamp above it, so a
  *  clock that runs behind (or a device in the future) cannot make an edit lose. */
 let coachServerAt = 0;
+/** The last copy of the sealed coach document this device saw or wrote; the base of the next write. */
+let coachServer: Record<string, unknown> = {};
 function flushCoachDoc(): void {
   if (coachTimer) clearTimeout(coachTimer);
   coachTimer = null;
@@ -1411,9 +1414,15 @@ function flushCoachDoc(): void {
   const full = JSON.parse(JSON.stringify(state.coach)) as Record<string, unknown>;
   const keys = [...coachDirty];
   coachDirty.clear();
-  const clean: Record<string, unknown> = { updatedAt: full.updatedAt };
+  // Sealed, so no partial merge-write: the changed fields go over the last server copy this device saw (the server
+  // copy is remembered, so two writes in a row keep each other's fields).
+  const clean: Record<string, unknown> = {
+    ...coachServer,
+    updatedAt: full.updatedAt ?? Date.now(),
+  };
   for (const k of keys) if (k in full) clean[k] = full[k];
-  setDoc(doc(db, 'users', uid, 'meta', 'coach'), clean, { merge: true }).catch(onWriteError);
+  coachServer = clean;
+  writeSealedMeta(uid, 'coach', clean, onWriteError);
 }
 function writeCoachDoc(): void {
   coachFor = currentUid();
@@ -5430,12 +5439,16 @@ export function startSyncLoop(): () => void {
     ),
   );
 
+  // goals / home / mastery / coach are sealed documents (SPO-217): read through the mirror, which opens them with the
+  // vault key. While they are locked (`info.locked`) nothing is decided — an empty list then does NOT mean "no server copy".
   unsubs.push(
-    onSnapshot(
-      doc(db, 'users', uid, 'meta', 'goals'),
-      (snap) => {
-        const data = snap.exists() ? (snap.data() as FitGoals) : EMPTY_GOALS;
-        state = { ...state, goals: { ...EMPTY_GOALS, ...data } };
+    watchSealedMeta<FitGoals & Record<string, unknown>>(
+      uid,
+      'goals',
+      (items, info) => {
+        if (!items.length && info.locked) return;
+        if (!info.locked) sealedStore.markRemote('goals');
+        state = { ...state, goals: { ...EMPTY_GOALS, ...(items[0] ?? EMPTY_GOALS) } };
         persist();
         emit();
       },
@@ -5443,15 +5456,18 @@ export function startSyncLoop(): () => void {
     ),
   );
   unsubs.push(
-    onSnapshot(
-      doc(db, 'users', uid, 'meta', 'home'),
-      (snap) => {
-        if (!snap.exists()) {
+    watchSealedMeta<Partial<HomeState> & Record<string, unknown>>(
+      uid,
+      'home',
+      (items, info) => {
+        if (!items.length && info.locked) return;
+        if (!items.length) {
           // First sync on this account — push home sets made before signing in.
           if (state.home.sets.length || state.home.moves.length) writeHomeDoc();
           return;
         }
-        const data = snap.data() as Partial<HomeState>;
+        sealedStore.markRemote('home');
+        const data = items[0];
         // Last-write-wins: a newer local edit (not yet echoed) beats the snapshot.
         if ((state.home.updatedAt ?? 0) > (data.updatedAt ?? 0)) return;
         state = { ...state, home: { ...EMPTY_HOME, ...data } };
@@ -5462,17 +5478,19 @@ export function startSyncLoop(): () => void {
     ),
   );
   unsubs.push(
-    onSnapshot(
-      doc(db, 'users', uid, 'meta', 'mastery'),
-      (snap) => {
-        if (!snap.exists()) {
-          // No server copy yet — push existing local mastery up so pre-sync
-          // data is preserved rather than lost. (One-time migration per user.)
+    watchSealedMeta<Partial<StoreState['mastery']> & Record<string, unknown>>(
+      uid,
+      'mastery',
+      (items, info) => {
+        if (!items.length && info.locked) return;
+        if (!items.length) {
+          // No server copy yet — push existing local mastery up so pre-sync data is preserved rather than lost.
           const m = state.mastery;
           if (m.sinceYear != null || m.pattern != null || m.seenRating != null) writeMasteryDoc();
           return;
         }
-        const data = snap.data() as StoreState['mastery'];
+        sealedStore.markRemote('mastery');
+        const data = items[0];
         // Last-write-wins: keep a newer local edit over a stale server copy.
         if ((state.mastery.updatedAt ?? 0) > (data.updatedAt ?? 0)) return;
         state = {
@@ -5491,17 +5509,21 @@ export function startSyncLoop(): () => void {
     ),
   );
   unsubs.push(
-    onSnapshot(
-      doc(db, 'users', uid, 'meta', 'coach'),
-      (snap) => {
-        if (!snap.exists()) {
+    watchSealedMeta<Partial<CoachSettings> & Record<string, unknown>>(
+      uid,
+      'coach',
+      (items, info) => {
+        if (!items.length && info.locked) return;
+        if (!items.length) {
           if (state.coach.enabled) {
             for (const k of Object.keys(state.coach)) coachDirty.add(k);
             writeCoachDoc();
           }
           return;
         }
-        const data = snap.data() as Partial<CoachSettings>;
+        sealedStore.markRemote('coach');
+        const data = items[0];
+        coachServer = data;
         // Last-write-wins: keep a newer local edit over a stale server copy.
         coachServerAt = Math.max(coachServerAt, data.updatedAt ?? 0);
         // An edit still waiting to be written is never overwritten by an older copy.
@@ -6416,6 +6438,7 @@ export function resetLocalData(): void {
   for (const k of Object.keys(wipedAt)) delete wipedAt[k as HealthFeature];
   resetCoachSharePublisher();
   unsentWorkouts.clear();
+  coachServer = {}; // the sealed Atlas settings of the previous account must not be the base of the next one's write
   localStorage.removeItem(UNSENT_KEY);
   void initVault(null); // forget the data key on this device
   sealedStore.clear();

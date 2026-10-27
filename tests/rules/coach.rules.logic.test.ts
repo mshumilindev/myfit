@@ -118,6 +118,11 @@ describe('rules file: static checks', () => {
         // sealed coaching documents with their own shape rules (before the generic meta/* above them)
         'users/{userId}/meta/calendarSettings',
         'users/{userId}/meta/chatKeys',
+        // SPO-217: the account's own goals, home sets, mastery and Atlas settings are sealed too
+        'users/{userId}/meta/coach',
+        'users/{userId}/meta/goals',
+        'users/{userId}/meta/home',
+        'users/{userId}/meta/mastery',
         'users/{userId}/meta/selfCoach',
         'users/{userId}/meta/signalState',
         'users/{userId}/meta/{docId}',
@@ -610,5 +615,77 @@ describe('liveSessions: the writer and the allow-list', () => {
     await denied(t.get('liveSessions/stranger'));
     // the legacy presence-only shape stays valid
     await c.set(`liveSessions/${C}`, { id: C, trainerId: T, startedAt: 1, updatedAt: 2 });
+  });
+
+  // SPO-217: meta/{goals,home,mastery,coach} carry only the freshness stamp in the clear; pings and
+  // reminderDismissals are legacy plaintext collections the owner can read and delete but nobody can write.
+  describe('SPO-217: sealed account meta documents and retired plaintext collections', () => {
+    const ok = (op: 'get' | 'create' | 'update' | 'delete', path: string, data?: Doc, uid = C) =>
+      decide(rules, op, path, {
+        auth: { uid, token: { role: 'member' } },
+        db: {
+          [path]: {
+            updatedAt: 1,
+            enc: { v: 1, salt: 's', iv: 'A'.repeat(16), ct: 'A'.repeat(40) },
+          },
+        },
+        data,
+        time: NOW,
+      }).allowed;
+    const sealed = (extra: Doc = {}): Doc => ({
+      updatedAt: 5,
+      enc: { v: 1, salt: 's', iv: 'A'.repeat(16), ct: 'A'.repeat(40) },
+      ...extra,
+    });
+
+    for (const name of ['goals', 'home', 'mastery', 'coach']) {
+      it(`meta/${name}: only the owner, only a sealed document with an int stamp`, () => {
+        const p = `users/${C}/meta/${name}`;
+        expect(ok('create', p, sealed())).toBe(true);
+        expect(ok('update', p, sealed())).toBe(true);
+        expect(ok('get', p)).toBe(true);
+        expect(ok('delete', p)).toBe(true);
+        // plaintext, plaintext sibling, bad stamp, oversized or malformed envelope are refused
+        expect(ok('create', p, { updatedAt: 5, sets: [{ name: 'Squat' }] })).toBe(false);
+        expect(ok('update', p, sealed({ sets: [{ name: 'Squat' }] }))).toBe(false);
+        expect(ok('update', p, sealed({ temper: 5 }))).toBe(false);
+        expect(ok('update', p, sealed({ updatedAt: 'now' }))).toBe(false);
+        expect(ok('update', p, { enc: sealed().enc })).toBe(false); // merge-writing without a stamp
+        expect(
+          ok('update', p, sealed({ enc: { v: 1, salt: 's', iv: 'short', ct: 'A'.repeat(40) } })),
+        ).toBe(false);
+        expect(
+          ok(
+            'update',
+            p,
+            sealed({ enc: { v: 1, salt: 's', iv: 'A'.repeat(16), ct: 'A'.repeat(900_000) } }),
+          ),
+        ).toBe(false);
+        // another account, a trainer or a signed-out caller can neither read nor write it
+        expect(ok('get', p, undefined, 'stranger')).toBe(false);
+        expect(ok('update', p, sealed(), 'stranger')).toBe(false);
+        expect(ok('get', p, undefined, T)).toBe(false);
+        expect(
+          decide(rules, 'get', p, { auth: null, db: { [p]: { updatedAt: 1 } }, time: NOW }).allowed,
+        ).toBe(false);
+      });
+    }
+
+    it('a plaintext document under another meta name is still allowed (body, nutrition ...) but not for the sealed names', () => {
+      expect(ok('update', `users/${C}/meta/body`, { weight: 80 })).toBe(true);
+      expect(ok('update', `users/${C}/meta/coach`, { enabled: true })).toBe(false);
+    });
+
+    for (const col of ['pings/p1', 'reminderDismissals/d1']) {
+      it(`${col.split('/')[0]}: the owner reads and deletes but nothing is written`, () => {
+        const p = `users/${C}/${col}`;
+        expect(ok('get', p)).toBe(true);
+        expect(ok('delete', p)).toBe(true);
+        expect(ok('create', p, { at: 1, text: 'x' })).toBe(false);
+        expect(ok('update', p, { at: 2 })).toBe(false);
+        expect(ok('get', p, undefined, 'stranger')).toBe(false);
+        expect(ok('delete', p, undefined, 'stranger')).toBe(false);
+      });
+    }
   });
 });

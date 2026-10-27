@@ -302,8 +302,9 @@ service cloud.firestore {
       // go through functions (Admin SDK).
       match /meta/{docId} {
         allow read: if isSelf(userId);
-        // the sealed coaching documents have their own shape rules below
-        allow write: if isSelf(userId) && !(docId in ['chatKeys', 'signalState', 'selfCoach', 'calendarSettings']);
+        // the sealed documents have their own shape rules below (SPO-217: goals/home/mastery/coach are sealed too)
+        allow write: if isSelf(userId) && !(docId in ['chatKeys', 'signalState', 'selfCoach', 'calendarSettings',
+          'goals', 'home', 'mastery', 'coach']);
       }
       // Chat key store: every conversation key of this user, sealed under their DEK (written with encryptJson).
       match /meta/chatKeys {
@@ -340,8 +341,44 @@ service cloud.firestore {
           && dekEnc(request.resource.data, 20000);
         allow delete: if isSelf(userId);
       }
+      // SPO-217: the account's own goals, home-workout sets, mastery and Atlas settings, sealed under the DEK
+      // (only the freshness stamp stays readable). Plaintext siblings are refused.
+      match /meta/goals {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 20000);
+        allow delete: if isSelf(userId);
+      }
+      match /meta/home {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 400000);
+        allow delete: if isSelf(userId);
+      }
+      match /meta/mastery {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 100000);
+        allow delete: if isSelf(userId);
+      }
+      match /meta/coach {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 100000);
+        allow delete: if isSelf(userId);
+      }
+      // Legacy plaintext collection: no client writes it any more (SPO-217); the owner may still read and delete it.
       match /pings/{pingId} {
-        allow read, write: if isSelf(userId);
+        allow read, delete: if isSelf(userId);
+        allow create, update: if false;
       }
       // Vault grants: the athlete's data key, encrypted for one coach (ciphertext only).
       // The coach receives it through a function; the server never holds a readable key.
@@ -365,8 +402,10 @@ service cloud.firestore {
           && request.resource.data.body is string
           && request.resource.data.body.size() <= 400;
       }
+      // Legacy plaintext collection (SPO-217): read and delete only, nothing new is written.
       match /reminderDismissals/{dismissId} {
-        allow read, write: if isSelf(userId);
+        allow read, delete: if isSelf(userId);
+        allow create, update: if false;
       }
 
       // Notices: read your own; mark-as-read is the only client write.

@@ -40,6 +40,13 @@ export const OPEN_FIELDS = {
   alcohol: ['updatedAt'],
   // users/{uid}/meta/supplements — entries, doses, schedules, check-ins, switches and sharing: all inside, only the stamp open.
   supplements: ['updatedAt'],
+  // users/{uid}/meta/goals | home | mastery | coach — what the person sets about themselves (physique target and focus,
+  // home sets and own moves, training history, Atlas settings and what it learned): no server reads, all inside, only
+  // the stamp open (the stamp drives last-write-wins on the client) (SPO-217).
+  goals: ['updatedAt'],
+  home: ['updatedAt'],
+  mastery: ['updatedAt'],
+  coach: ['updatedAt'],
 } as const satisfies Record<string, readonly string[]>;
 
 export type SealedCollection = keyof typeof OPEN_FIELDS;

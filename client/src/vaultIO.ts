@@ -13,7 +13,7 @@ import type { MigratePorts } from './vaultMigrate';
 import { db } from './firebase';
 import { createAutoVault, idbKeyCache, type Vault } from './autoVault';
 import { callFn } from './api';
-import { migrateAll } from './vaultMigrate';
+import { MIGRATION_VERSION, migrateAll } from './vaultMigrate';
 import { sealDoc, unsealDoc, isSealed, type SealedCollection } from './encryptedDoc';
 import { ensureCoachKey, ensureGrant, type GrantPorts, type StoredGrant } from './vaultGrants';
 import type { CoachKeyRecord } from './vaultShare';
@@ -37,7 +37,8 @@ export function setMigrationEnricher(f: typeof enrichWorkout): void {
   enrichWorkout = f;
 }
 
-const migratedKey = (uid: string) => `spotter.vault.migrated.${uid}`;
+// Per migration version (SPO-218): a collection added to the order is migrated for accounts that finished an older one.
+const migratedKey = (uid: string) => `spotter.vault.migrated.v${MIGRATION_VERSION}.${uid}`;
 let migrating = false;
 
 /** Seals existing plaintext once per account; idempotent, and a failure just retries next start. */
@@ -265,6 +266,21 @@ vault.subscribe(() => {
 export const loadOwnCoachKey = async (): Promise<CoachKeyRecord | null> =>
   uidNow ? grantPorts(uidNow).loadOwnCoachKey() : null;
 
+/** Collections that are ONE document under `users/{uid}/meta/<name>`; the rest are subcollections of documents. */
+const META_DOCS: ReadonlySet<string> = new Set<SealedCollection>([
+  'body',
+  'coachShare',
+  'conditionPrefs',
+  'nicotine',
+  'cycle',
+  'alcohol',
+  'supplements',
+  'goals',
+  'home',
+  'mastery',
+  'coach',
+]);
+
 /**
  * Firestore ports for the one-time migration. `enrichWorkout` adds the readable `stats`
  * (passed in to keep this file free of a store import).
@@ -278,15 +294,7 @@ export function migratePorts(
   };
   return {
     async list(c) {
-      if (
-        c === 'body' ||
-        c === 'coachShare' ||
-        c === 'conditionPrefs' ||
-        c === 'nicotine' ||
-        c === 'cycle' ||
-        c === 'alcohol' ||
-        c === 'supplements'
-      ) {
+      if (META_DOCS.has(c)) {
         const s = await getDoc(doc(db, 'users', uid(), 'meta', c));
         return s.exists() ? [{ id: c, data: s.data() }] : [];
       }
@@ -294,16 +302,9 @@ export function migratePorts(
       return snap.docs.map((d) => ({ id: d.id, data: d.data() }));
     },
     async write(c, id, data) {
-      const ref =
-        c === 'body' ||
-        c === 'coachShare' ||
-        c === 'conditionPrefs' ||
-        c === 'nicotine' ||
-        c === 'cycle' ||
-        c === 'alcohol' ||
-        c === 'supplements'
-          ? doc(db, 'users', uid(), 'meta', c)
-          : doc(db, 'users', uid(), c, id);
+      const ref = META_DOCS.has(c)
+        ? doc(db, 'users', uid(), 'meta', c)
+        : doc(db, 'users', uid(), c, id);
       await setDoc(ref, data);
     },
     enrich: (c, d) => (c === 'workouts' ? enrichWorkout(d) : d),
