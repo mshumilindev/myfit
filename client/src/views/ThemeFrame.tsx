@@ -13,6 +13,9 @@ import { createPortal } from 'react-dom';
 /** Room around the card inside the frame (its shadow); themes.css pulls the frame out by the same amount. */
 const PAD = 6;
 
+/** Phases of the app / theme / route transitions on `<html>`: they belong to the page, never to a frame. */
+const TRANSITION_ATTRS = ['data-glitch', 'data-route'];
+
 /** Copies the page's `<link rel=stylesheet>` and `<style>` nodes into the frame's head. */
 function copyStyles(from: Document, to: Document): void {
   from.querySelectorAll('link[rel="stylesheet"], style').forEach((n) => {
@@ -38,8 +41,11 @@ export function ThemeFrame({
     const doc = frameRef.current?.contentDocument;
     if (!doc?.body) return;
     // the other look axes (mode / accent / density) follow the page; only the theme differs
+    // (not the transition phases: a frame born while a theme change is playing would keep the veil for good)
     for (const a of Array.from(document.documentElement.attributes)) {
-      if (a.name.startsWith('data-')) doc.documentElement.setAttribute(a.name, a.value);
+      if (a.name.startsWith('data-') && !TRANSITION_ATTRS.includes(a.name)) {
+        doc.documentElement.setAttribute(a.name, a.value);
+      }
     }
     doc.documentElement.setAttribute('data-theme', themeId);
     doc.body.style.margin = '0';
