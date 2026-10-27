@@ -594,6 +594,61 @@ async function googlePhoto(r: PlaceResult): Promise<GymPhoto | null> {
   return { url: res.photo, credit: { author: by ? `${by} (Google)` : 'Google' } };
 }
 
+/**
+ * A saved gym carries no Google reference, so its photo is found the way a person would: search Google by its name near
+ * its coordinates and accept only a hit that is the same place (within 250 m). Only the reference (photo name + authors)
+ * is remembered, for a day, so a list of gyms does not search again on every card; the image itself is not stored.
+ */
+const GLOOKUP_PREFIX = 'gym.glookup.';
+const GLOOKUP_TTL_MS = 24 * 60 * 60 * 1000;
+const GLOOKUP_MAX_M = 250;
+const GLOOKUP_RETRY_MS = 60_000;
+const GLOOKUP_FAILED = new Map<string, number>();
+
+function glookupKey(r: PlaceResult): string {
+  const round = (n: number) => Math.round(n * 1000) / 1000;
+  return `${GLOOKUP_PREFIX}${normalizeName(r.name)}|${round(r.lat)},${round(r.lng)}`;
+}
+
+async function googleLookup(r: PlaceResult): Promise<PlaceResult | null> {
+  if (!r.name.trim() || (r.lat === 0 && r.lng === 0)) return null;
+  const k = glookupKey(r);
+  try {
+    const raw = localStorage.getItem(k);
+    if (raw) {
+      const hit = JSON.parse(raw) as { at: number; photoName?: string; photoBy?: string[] };
+      if (Date.now() - hit.at < GLOOKUP_TTL_MS)
+        return hit.photoName
+          ? { ...r, googlePhotoName: hit.photoName, googlePhotoBy: hit.photoBy }
+          : null;
+    }
+  } catch {
+    /* unreadable cache: look it up again */
+  }
+  // A lookup that just failed (backend down, no consent record, not signed in) is not repeated for every card at once.
+  const failedAt = GLOOKUP_FAILED.get(k);
+  if (failedAt && Date.now() - failedAt < GLOOKUP_RETRY_MS) return null;
+  let rows: GooglePlacesRow[];
+  try {
+    rows = await callGoogle({ op: 'search', q: r.name.trim(), lat: r.lat, lng: r.lng });
+  } catch (e) {
+    GLOOKUP_FAILED.set(k, Date.now());
+    throw e;
+  }
+  const best = rows
+    .filter((x) => x.photoName && haversineM(r, x) <= GLOOKUP_MAX_M)
+    .sort((a, b) => haversineM(r, a) - haversineM(r, b))[0];
+  try {
+    localStorage.setItem(
+      k,
+      JSON.stringify({ at: Date.now(), photoName: best?.photoName, photoBy: best?.photoBy }),
+    );
+  } catch {
+    /* quota: fine */
+  }
+  return best ? { ...r, googlePhotoName: best.photoName, googlePhotoBy: best.photoBy } : null;
+}
+
 const PROVIDERS: { id: ProviderId; run: Provider }[] = [
   { id: 'local', run: localProvider },
   { id: 'osm', run: osmProvider },
@@ -813,6 +868,14 @@ export async function resolvePhotoInfo(
     if (r.brandWikidata) {
       const photo = await wikidataImage(r.brandWikidata, 'P154', signal);
       if (photo) return photo;
+    }
+    // A saved gym has no Google reference yet: find the place by name and coordinates, then its photo.
+    if (!r.googlePhotoName) {
+      const found = await googleLookup(r).catch(() => null);
+      if (found) {
+        const photo = await googlePhoto(found).catch(() => null);
+        if (photo) return photo;
+      }
     }
     // No venue photo anywhere — fall back to the brand/chain logo. Applies to every network, not a special case.
     const logo = await brandLogoInfo(r.name, signal);

@@ -137,3 +137,56 @@ describe('Google provider (via gymPlaces)', () => {
     expect(m.callFn).not.toHaveBeenCalled();
   });
 });
+
+describe('photo of a saved gym (SPO-360): found by name and place, no stored reference needed', () => {
+  const saved: PlaceResult = {
+    key: '52.19,21.02',
+    name: 'Fitness Club Mokotów Zdrofit',
+    lat: 52.19,
+    lng: 21.02,
+    sources: ['local'],
+  };
+  const sig = () => new AbortController().signal;
+  beforeEach(() => localStorage.clear());
+
+  it('looks the gym up through gymPlaces (search by name near its coordinates), then fetches its photo', async () => {
+    m.callFn.mockImplementation(async (_fn: string, p: { op: string }) =>
+      p.op === 'search'
+        ? { places: [{ ...ROW, lat: 52.1901, lng: 21.0201 }] }
+        : { photo: 'data:image/jpeg;base64,AAAA' },
+    );
+    const got = await resolvePhotoInfo(saved, sig());
+    expect(got?.url).toBe('data:image/jpeg;base64,AAAA');
+    expect(got?.credit?.author).toContain('Google');
+    expect(m.callFn).toHaveBeenCalledWith(
+      'gymPlaces',
+      { op: 'search', q: saved.name, lat: saved.lat, lng: saved.lng },
+      expect.anything(),
+    );
+  });
+  it('ignores a match that is not this place (far away) and keeps the fallback', async () => {
+    m.callFn.mockResolvedValue({ places: [{ ...ROW, lat: 52.3, lng: 21.2 }] });
+    expect(await resolvePhotoInfo(saved, sig())).toBeNull();
+    expect(m.callFn).not.toHaveBeenCalledWith(
+      'gymPlaces',
+      expect.objectContaining({ op: 'photo' }),
+      expect.anything(),
+    );
+  });
+  it('remembers the lookup (reference only) so the next gym card does not search again', async () => {
+    m.callFn.mockImplementation(async (_fn: string, p: { op: string }) =>
+      p.op === 'search'
+        ? { places: [{ ...ROW, lat: 52.1901, lng: 21.0201 }] }
+        : { photo: 'data:image/jpeg;base64,AAAA' },
+    );
+    await resolvePhotoInfo(saved, sig());
+    m.callFn.mockClear();
+    await resolvePhotoInfo(saved, sig());
+    expect(m.callFn.mock.calls.filter((c) => c[1].op === 'search')).toHaveLength(0);
+  });
+  it('no consent, no lookup', async () => {
+    setGeoSearchState({ on: false, ready: true, answered: true });
+    expect(await resolvePhotoInfo(saved, sig())).toBeNull();
+    expect(m.callFn).not.toHaveBeenCalled();
+  });
+});
