@@ -1,4 +1,5 @@
 import { isProgramsEditorHash } from './views/programs/programsRoute';
+import { getSyncMeta } from './syncMeta';
 import { pushState, refreshPush, setAppBadge } from './push';
 import { useStoredConditionLimits } from './healthBuild';
 import { setProgressionEffects } from './progression';
@@ -1013,7 +1014,7 @@ export function App() {
       setAuthed(false);
       replaceHash('#/today');
     },
-    queueLength: store.pendingWrites,
+    queueLength: getSyncMeta().pendingWrites,
   };
 
   // Every app's account block (rail avatar popover, phone More sheet) signs out through here.
@@ -1021,7 +1022,7 @@ export function App() {
   useEffect(() => {
     signOutRef.current = shell.signOut;
   });
-  const queueLen = store.pendingWrites;
+  const queueLen = getSyncMeta().pendingWrites;
   useEffect(
     () => setSuiteSession({ signOut: (o) => signOutRef.current(o), queueLength: queueLen }),
     [queueLen],
@@ -1863,7 +1864,7 @@ export function App() {
             gym={store.gyms.find((g) => g.id === open.gymId) ?? null}
             gyms={store.gyms}
             offline={store.syncStatus === 'offline'}
-            queued={store.pendingWrites}
+            queued={getSyncMeta().pendingWrites}
             onResume={() => setOverlay({ screen: 'session', workoutId: open.id })}
             mode="compact"
           />

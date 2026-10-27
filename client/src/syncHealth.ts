@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { currentUid, getMutationPending, subscribeMutation } from './api';
 import { getStoreState, retrySync, subscribeStore } from './store';
+import { getSyncMeta, subscribeSyncMeta } from './syncMeta';
 import type { SyncStatus } from './types';
 import type { SyncStatusState } from './components/ui/SyncStatus';
 
@@ -121,15 +122,10 @@ export function useSyncUi(): { state: SyncUiState; retry: () => void; count: num
     () => getStoreState().syncStatus,
     () => getStoreState().syncStatus,
   );
-  const pendingWrites = useSyncExternalStore(
-    subscribeStore,
-    () => getStoreState().pendingWrites,
-    () => getStoreState().pendingWrites,
-  );
-  const locked = useSyncExternalStore(
-    subscribeStore,
-    () => getStoreState().dataLocked,
-    () => getStoreState().dataLocked,
+  const { pendingWrites, dataLocked: locked } = useSyncExternalStore(
+    subscribeSyncMeta,
+    getSyncMeta,
+    getSyncMeta,
   );
   const online = useOnline();
   const unsettledSince = useSyncExternalStore(

@@ -1,4 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
+import { getSyncMeta } from '../syncMeta';
 import { ClientTargetStripLazy } from '../coach/client/lazy';
 import { useStoredConditionLimits } from '../healthBuild';
 import { EmptyState } from '../components/ui/EmptyState';
@@ -4708,7 +4709,7 @@ export function SessionView(props: {
                 gym={gym}
                 gyms={store.gyms}
                 offline={store.syncStatus === 'offline'}
-                queued={store.pendingWrites}
+                queued={getSyncMeta().pendingWrites}
                 mode="session"
               />
             )}

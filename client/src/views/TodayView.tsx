@@ -1,4 +1,5 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
+import { getSyncMeta } from '../syncMeta';
 import { HubSlot } from '../components/HubSlot';
 import { SyncIndicator } from '../components/SyncIndicator';
 import { illnessState } from '../illness';
@@ -1075,16 +1076,16 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const banners = (
     <>
-      {store.syncStatus === 'offline' && store.pendingWrites > 0 && (
+      {store.syncStatus === 'offline' && getSyncMeta().pendingWrites > 0 && (
         <Notice tone="danger" icon="cloud-slash">
-          {t.offlineQueued(store.pendingWrites)}
+          {t.offlineQueued(getSyncMeta().pendingWrites)}
         </Notice>
       )}
-      {store.syncStatus === 'syncing' && store.pendingWrites > 0 && (
+      {store.syncStatus === 'syncing' && getSyncMeta().pendingWrites > 0 && (
         <Notice
           tone="neutral"
           icon="arrows-clockwise"
-          trail={store.pendingWrites}
+          trail={getSyncMeta().pendingWrites}
           below={<ProgressBar value={66} height={4} />}
         >
           {t.sendingQueued}

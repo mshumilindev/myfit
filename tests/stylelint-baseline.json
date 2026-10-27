@@ -275,8 +275,8 @@
     },
     "client/src/styles.css": {
       "declaration-no-important": 10,
-      "declaration-property-unit-disallowed-list": 906,
-      "media-feature-name-value-allowed-list": 81
+      "declaration-property-unit-disallowed-list": 905,
+      "media-feature-name-value-allowed-list": 80
     },
     "client/src/today/library.css": {
       "declaration-no-important": 1,

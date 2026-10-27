@@ -21,6 +21,7 @@ vi.mock('./api', () => ({
   subscribeMutation: () => () => undefined,
 }));
 
+import { setSyncMeta } from './syncMeta';
 import {
   BACKOFF_MAX_MS,
   SLOW_AFTER_MS,
@@ -96,6 +97,7 @@ describe('useSyncUi', () => {
     h.retrySync.mockClear();
   });
   afterEach(() => {
+    setSyncMeta(0, false);
     cleanup();
     vi.useRealTimers();
     setStatus('synced');
@@ -152,7 +154,10 @@ describe('useSyncUi', () => {
   it('reports offline calmly without scheduling retries', async () => {
     const { result } = renderHook(() => useSyncUi());
     act(() => setStatus('offline'));
+    expect(result.current.state).toBe('stale'); // nothing of ours is waiting: a saved copy
+    act(() => setSyncMeta(2, false));
     expect(result.current.state).toBe('offline');
+    expect(result.current.count).toBe(2);
     await act(async () => {
       await vi.advanceTimersByTimeAsync(120_000);
     });

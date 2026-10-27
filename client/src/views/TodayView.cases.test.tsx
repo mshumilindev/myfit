@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { setSyncMeta } from '../syncMeta';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { fmtDayMonth, fmtWeekday, setLocale } from '../i18n';
 import { en } from '../i18n/en';
@@ -23,6 +24,7 @@ afterEach(() => {
 });
 
 describe('TodayView: chrome', () => {
+  beforeEach(() => setSyncMeta(0, false));
   it('shows today as the weekday title with the day and month under it', async () => {
     await openToday();
     expect(document.querySelector('.td-topbar-title h2')?.textContent).toBe(fmtWeekday(NOW, 'en'));
@@ -41,20 +43,20 @@ describe('TodayView: chrome', () => {
   });
 
   it('offline shows the cache note and the number of queued writes', async () => {
+    setSyncMeta(2, false);
     await openToday({
       ...richState(),
       syncStatus: 'offline' as never,
-      pendingWrites: 2,
     });
     expect(screen.getByText(en.servedFromCache)).toBeTruthy();
     expect(screen.getByText(en.offlineQueued(2))).toBeTruthy();
   });
 
   it('syncing with a queue shows the sending notice with the count', async () => {
+    setSyncMeta(1, false);
     await openToday({
       ...richState(),
       syncStatus: 'syncing' as never,
-      pendingWrites: 1,
     });
     expect(screen.getByText(en.sendingQueued)).toBeTruthy();
     expect(screen.queryByText(en.servedFromCache)).toBeNull();
@@ -65,7 +67,6 @@ describe('TodayView: chrome', () => {
       ...emptyState(),
       lastSyncAt: null,
       syncStatus: 'syncing' as never,
-      pendingWrites: 0,
     });
     expect(document.querySelector('.td-topbar')).toBeNull();
     expect(document.querySelectorAll('.uisk').length).toBeGreaterThan(0);
