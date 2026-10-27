@@ -89,7 +89,9 @@ export function useCoachBackendStatus(
       ? import('./probe').then(async (m) => {
           if (attempt > 0) m.resetBackendProbe();
           const r = await m.probeCoachBackend();
-          if (!r.ok)
+          // A slow cold start or no connection proves nothing about the deploy: go on with the offline-first adapters, which
+          // show the snapshot kept on the device (SPO-364). Only a definite answer (not deployed / denied) fails the start.
+          if (!r.ok && r.problem !== 'timeout' && r.problem !== 'offline')
             throw Object.assign(new Error('probe'), {
               name: 'PortError',
               code: probeCode(r.problem),
