@@ -58,6 +58,7 @@ import { startAutoUpdate, startBuildWatch, markUpdateReady } from './pwaUpdate';
 import { lockShellHeight } from './viewportFit';
 import { installHorizontalScrollGuard } from './horizontalScrollGuard';
 import { SyncStatusHost } from './components/SyncStatusHost';
+import { ThemePreviewHost } from './components/ThemeAnnouncement';
 import { LavaBackground } from './components/LavaBackground';
 import { initMotion } from './motion';
 import { purgeLegacyPlaintext, runPendingWipe } from './deviceWipe';
@@ -104,6 +105,7 @@ void Promise.race([
         <LavaBackground />
         <App />
         <SyncStatusHost />
+        <ThemePreviewHost />
         <LegalGate />
         <GeoConsentHost />
         <HealthConsentHost />

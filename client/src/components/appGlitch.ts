@@ -67,3 +67,18 @@ export function glitchHold() {
     if (holds === 0 && root().dataset.glitch === 'load') tail();
   };
 }
+
+/**
+ * A theme change (SPO-355): the same transition as an app switch, drawn by the theme being switched TO. `go` puts
+ * the new theme on `<html>` first, so every phase (`out` → `in`) is that theme's own; nothing has to load, so the
+ * cover leaves as soon as `--switch-out` has run.
+ */
+export function glitchTheme(go: () => void) {
+  go();
+  if (!live()) return;
+  window.clearTimeout(timer);
+  root().dataset.glitch = 'out';
+  window.clearTimeout(safety);
+  safety = window.setTimeout(end, SAFETY_MS);
+  timer = window.setTimeout(tail, ms('--switch-out'));
+}

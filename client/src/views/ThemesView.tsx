@@ -4,14 +4,16 @@
  * on its own atmosphere, and one button. Landscape tiles on desktop: the theme in use is the big one. The theme in use comes first and shows "Applied"; the others have
  * Apply. No user data and no screenshot: the picture is the theme's tokens (SPO-346).
  */
-import { Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { PageHead } from '../components/ui/PageHead';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { useT } from '../i18n';
 import { APP_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
-import { THEMES, setTheme, useTheme } from '../themes';
+import { PICKABLE_THEMES, setTheme, useCommittedTheme } from '../themes';
+import { getUnseenThemes, markAllThemesSeen } from '../themes/seen';
+import { Tag } from '../components/ui/Tag';
 import { ThemeFrame } from './ThemeFrame';
 import './themes.css';
 
@@ -20,11 +22,18 @@ const SOON_SLOTS = 3;
 
 export function ThemesView({ onClose }: { onClose: () => void }) {
   const { t } = useT();
-  const current = useTheme();
+  const current = useCommittedTheme();
+  // the themes that were new when the screen opened keep their tag for this visit; opening counts as seen
+  const [fresh] = useState(() => new Set(getUnseenThemes().map((x) => x.id)));
+  useEffect(() => {
+    markAllThemesSeen();
+  }, []);
   const land = useMinWidth(APP_BREAKPOINT);
   const cardCls = land ? 'thm-card thm-card--land' : 'thm-card';
   // the theme in use goes to the top; the registry order holds for the rest
-  const list = [...THEMES].sort((a, b) => Number(b.id === current) - Number(a.id === current));
+  const list = [...PICKABLE_THEMES].sort(
+    (a, b) => Number(b.id === current) - Number(a.id === current),
+  );
   return (
     <div className="screen themes-screen">
       <PageHead back={{ label: t.backAction, onClick: onClose }} title={t.themesTitle} />
@@ -37,6 +46,11 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
               <div className="thm-art" aria-hidden="true">
                 <span className="thm-wm">{th.name}</span>
               </div>
+              {fresh.has(th.id) && (
+                <Tag tone="accent" className="thm-new">
+                  {t.themeNew}
+                </Tag>
+              )}
               <div className="thm-foot">
                 {on ? (
                   <Button variant="secondary" icon="check" disabled fullWidth>

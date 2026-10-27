@@ -263,7 +263,7 @@ import {
 } from './activityPrefs';
 import { resetTodayLayout } from './today/layout';
 import { pushTodayLayoutEdits, syncTodayLayoutFromDoc } from './today/layoutSync';
-import { pushThemeEdits, syncThemeFromDoc } from './themes/themeSync';
+import { pushThemeEdits, syncThemePrefsFromDoc } from './themes/themeSync';
 // Synced Log-activity prefs (pins + "don't suggest after workouts").
 export {
   activityPins,
@@ -5139,7 +5139,7 @@ export function startSyncLoop(): () => void {
           if (push) writeListPref(name, pref);
         }
         syncTodayLayoutFromDoc(data, writePrefsFields);
-        syncThemeFromDoc(data, writePrefsFields);
+        syncThemePrefsFromDoc(data, writePrefsFields);
       },
       onWriteError,
     ),

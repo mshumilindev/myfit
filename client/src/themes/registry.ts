@@ -4,25 +4,53 @@
  * adds both. The choice lives on `<html data-theme>` and in localStorage (`gym.theme`).
  */
 import { useSyncExternalStore } from 'react';
+import { glitchTheme } from '../components/appGlitch';
 
 export interface ThemeDef {
   id: string;
   /** Brand name, shown as-is in Settings (not translated). */
   name: string;
+  /** Release date (ISO). Orders the announcement; says nothing about what a user has seen. */
+  since: string;
+  /**
+   * `false` = not offered in Themes and never announced: the theme is switched on by the app itself (the
+   * holiday themes, SPO-321), so a user cannot pick it by hand. Default: pickable.
+   */
+  pickable?: boolean;
 }
 
 export const THEMES: readonly ThemeDef[] = [
-  { id: 'glass', name: 'Brass Glass' },
-  { id: 'cyberpunk', name: 'Cyberpunk' },
+  { id: 'glass', name: 'Brass Glass', since: '2026-10-01' },
+  { id: 'cyberpunk', name: 'Cyberpunk', since: '2026-10-24' },
   // theme:new inserts new themes above this line
 ];
+
+/** The themes a user may pick by hand (everything the Themes screen and the announcement deal with). */
+export const PICKABLE_THEMES: readonly ThemeDef[] = THEMES.filter((t) => t.pickable !== false);
 
 export const DEFAULT_THEME = 'glass';
 const KEY = 'gym.theme';
 const listeners = new Set<() => void>();
 const choiceListeners = new Set<(id: string) => void>();
+const commitListeners = new Set<(id: string) => void>();
+
+/** Every time a theme becomes the SAVED one (picked, used after a preview, or arriving from the account). */
+export function onThemeCommitted(fn: (id: string) => void): () => void {
+  commitListeners.add(fn);
+  return () => commitListeners.delete(fn);
+}
 
 const isKnown = (id: string | null | undefined): id is string => THEMES.some((t) => t.id === id);
+
+/** The theme the user has chosen (saved). While a preview runs, `<html data-theme>` shows another one. */
+let committed: string | null = null;
+let previewing: string | null = null;
+
+/** The saved choice — not the look on screen during a preview. */
+export function getCommittedTheme(): string {
+  // outside a preview the attribute IS the saved theme (it is also set directly by older callers and tests)
+  return previewing !== null ? (committed ?? DEFAULT_THEME) : getTheme();
+}
 
 export function getTheme(): string {
   if (typeof document === 'undefined') return DEFAULT_THEME;
@@ -34,6 +62,18 @@ function apply(id: string): void {
   document.documentElement.setAttribute('data-theme', id);
 }
 
+/**
+ * Wear `id`. EVERY change of theme after the first paint plays the transition of the theme being switched TO
+ * (appGlitch): a pick in Themes, a preview, a choice from another device, and any theme the app puts on by itself
+ * (the holiday themes, SPO-321) — route those through `applyRemoteTheme`/`setTheme`, never `apply`. The only quiet
+ * ones: the first paint (`initTheme`) and a preview cut short by a workout, a document or a chat (`endPreview` quiet).
+ */
+function swap(id: string, animate: boolean): void {
+  if (document.documentElement.getAttribute('data-theme') === id) return;
+  if (animate) glitchTheme(() => apply(id));
+  else apply(id);
+}
+
 /** Call once before the first render: restores the saved theme, falls back to the default. */
 export function initTheme(): void {
   let saved: string | null = null;
@@ -42,20 +82,25 @@ export function initTheme(): void {
   } catch {
     /* storage unavailable — default theme */
   }
-  apply(isKnown(saved) ? saved : DEFAULT_THEME);
+  committed = isKnown(saved) ? saved : DEFAULT_THEME;
+  previewing = null;
+  apply(committed);
   initAxes();
 }
 
 export const isKnownTheme = isKnown;
 
-function store(id: string): void {
-  apply(id);
+function store(id: string, animate = true): void {
+  committed = id;
+  previewing = null;
+  swap(id, animate);
   try {
     localStorage.setItem(KEY, id);
   } catch {
     /* storage unavailable — the choice lasts for this session */
   }
   listeners.forEach((fn) => fn());
+  commitListeners.forEach((fn) => fn(id));
 }
 
 /** The user picked a theme: apply, cache it and tell the account sync (themeSync.ts). */
@@ -67,13 +112,78 @@ export function setTheme(id: string): void {
 
 /** A theme that arrived from the account (another device): applied, but not echoed back. */
 export function applyRemoteTheme(id: string): void {
-  if (isKnown(id)) store(id);
+  if (!isKnown(id)) return;
+  if (previewing !== null) {
+    // a preview is on screen: the account's choice is remembered, the look stays until the user decides
+    committed = id;
+    try {
+      localStorage.setItem(KEY, id);
+    } catch {
+      /* storage unavailable */
+    }
+    return;
+  }
+  store(id);
 }
 
 /** Subscribe to the user's own choices only (remote ones don't fire it). */
 export function onThemeChoice(fn: (id: string) => void): () => void {
   choiceListeners.add(fn);
   return () => choiceListeners.delete(fn);
+}
+
+/**
+ * Preview (SPO-355): wear a theme on `<html>` WITHOUT saving it — no localStorage, no account write, no
+ * choice listener. Ends with `endPreview(true)` (= the user's choice, `setTheme`) or `endPreview(false)`
+ * (back to the saved one). Nothing survives a reload: `initTheme` starts from the saved theme.
+ */
+export function startPreview(id: string): void {
+  if (!isKnown(id)) return;
+  if (previewing === null) committed = getTheme(); // what to go back to
+  previewing = id;
+  swap(id, true);
+  listeners.forEach((fn) => fn());
+}
+
+/** `quiet`: the preview is cut short (the person entered a workout, a document…): the look goes back without a show. */
+export function endPreview(keep: boolean, quiet = false): void {
+  const id = previewing;
+  if (id === null) return;
+  if (keep) {
+    setTheme(id);
+    return;
+  }
+  const back = committed ?? DEFAULT_THEME;
+  previewing = null;
+  swap(back, !quiet);
+  listeners.forEach((fn) => fn());
+}
+
+export function getPreview(): string | null {
+  return previewing;
+}
+
+export function usePreview(): string | null {
+  return useSyncExternalStore(
+    (fn) => {
+      listeners.add(fn);
+      return () => listeners.delete(fn);
+    },
+    getPreview,
+    () => null,
+  );
+}
+
+/** The saved theme, for screens that say which one is "applied" (not the one a preview is wearing). */
+export function useCommittedTheme(): string {
+  return useSyncExternalStore(
+    (fn) => {
+      listeners.add(fn);
+      return () => listeners.delete(fn);
+    },
+    getCommittedTheme,
+    () => DEFAULT_THEME,
+  );
 }
 
 export function useTheme(): string {

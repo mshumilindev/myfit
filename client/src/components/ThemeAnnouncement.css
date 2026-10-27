@@ -1,0 +1,27 @@
+/* The invite sits in the page flow; the card inside the frame is drawn in the announced theme. */
+.thinv {
+  margin: var(--s-12) 0;
+}
+.thinv-card {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+.thinv-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.thinv-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-8);
+  font-size: var(--fs-min);
+  color: var(--color-text-muted);
+}
+.thinv-name {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}

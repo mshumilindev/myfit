@@ -1,4 +1,5 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
+import { HubSlot } from '../components/HubSlot';
 import { illnessState } from '../illness';
 import { illnessKindName } from './health/parts';
 import { Skeleton } from '../components/ui/Skeleton';
@@ -1679,6 +1680,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             <SyncChip store={store} />
           </div>
         </div>
+
+        <HubSlot surface="today" />
 
         {/* An admin who is also a trainer sees their clients between the day
             heading and the calendar. */}

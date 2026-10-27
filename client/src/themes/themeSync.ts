@@ -13,7 +13,14 @@
  * Only the theme — the mode / accent / density axes are not synced.
  * Pure (no Firebase import): store.ts owns the listener and the write.
  */
-import { DEFAULT_THEME, applyRemoteTheme, getTheme, isKnownTheme, onThemeChoice } from './registry';
+import {
+  DEFAULT_THEME,
+  applyRemoteTheme,
+  getCommittedTheme,
+  isKnownTheme,
+  onThemeChoice,
+} from './registry';
+import { bindSeenWriter, syncSeenFromDoc } from './seen';
 
 export const THEME_FIELD = 'theme';
 
@@ -23,16 +30,23 @@ export type PrefsWriter = (fields: Record<string, unknown>) => void;
 export function syncThemeFromDoc(data: Record<string, unknown>, write: PrefsWriter): void {
   const remote = data[THEME_FIELD];
   if (remote === undefined || remote === null) {
-    const local = getTheme();
+    const local = getCommittedTheme();
     if (local !== DEFAULT_THEME) write({ [THEME_FIELD]: local });
     return;
   }
-  if (typeof remote === 'string' && isKnownTheme(remote) && remote !== getTheme()) {
+  if (typeof remote === 'string' && isKnownTheme(remote) && remote !== getCommittedTheme()) {
     applyRemoteTheme(remote);
   }
 }
 
 /** Push every explicit choice (synced values don't fire this, so nothing echoes). */
 export function pushThemeEdits(write: PrefsWriter): () => void {
+  bindSeenWriter(write);
   return onThemeChoice((id) => write({ [THEME_FIELD]: id }));
+}
+
+/** The theme AND the list of themes already shown (SPO-355) live in the same prefs doc: one entry point for store.ts. */
+export function syncThemePrefsFromDoc(data: Record<string, unknown>, write: PrefsWriter): void {
+  syncThemeFromDoc(data, write);
+  syncSeenFromDoc(data, write);
 }

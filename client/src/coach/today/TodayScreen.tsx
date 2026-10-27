@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { HubSlot } from '../../components/HubSlot';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -117,6 +118,7 @@ function TodayView({
     <Page className="td">
       <WorldNotices api={api} />
       <Header eyebrow={eyebrow} title={t.queueTitle} subtitle={subtitle} />
+      <HubSlot surface="coachAgenda" />
       {!loadFailed && (
         <Toolbar className="td-toolbar">
           <Segmented

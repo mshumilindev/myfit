@@ -107,3 +107,10 @@ html[data-theme] .thm-soon .thm-art {
     width: min(calc(25 * var(--s-12)), 100%);
   }
 }
+/* "New" tag on a theme the user has not seen yet (SPO-355): the kit's Tag, laid over the picture's corner. */
+.thm-new {
+  position: absolute;
+  top: var(--s-12);
+  left: var(--s-12);
+  z-index: var(--z-20);
+}
