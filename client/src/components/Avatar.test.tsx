@@ -77,4 +77,23 @@ describe('UserAvatar: a face that is not lost (SPO-109)', () => {
     expect(container.querySelector('img')).not.toBeNull();
     vi.useRealTimers();
   });
+  it('a download that never succeeds logs no person id or path to the console (SPO-337)', async () => {
+    vi.useFakeTimers();
+    const store = await import('../avatarStore');
+    vi.mocked(store.readAvatarBlob).mockResolvedValue(null);
+    getBlob.mockRejectedValue(
+      Object.assign(new Error("Object 'avatars/uid-secret-77/photo' does not exist."), {
+        code: 'storage/object-not-found',
+      }),
+    );
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    render(<UserAvatar userId="uid-secret-77" name="Ivo B" hasPhoto rev={3} />);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(12_000);
+    });
+    expect(warn).toHaveBeenCalled();
+    expect(JSON.stringify(warn.mock.calls)).not.toContain('uid-secret-77');
+    expect(JSON.stringify(warn.mock.calls)).toContain('storage/object-not-found');
+    vi.useRealTimers();
+  });
 });

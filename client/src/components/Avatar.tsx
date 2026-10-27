@@ -45,7 +45,8 @@ async function downloadAvatar(uid: string, wanted: () => boolean): Promise<Blob 
     } catch (err) {
       const pause = DOWNLOAD_PAUSES_MS[attempt];
       if (pause === undefined || !wanted()) {
-        console.warn('[avatar] getBlob failed', uid, err);
+        // Only the error code: a Storage message names the object path, which holds the person's id.
+        console.warn('[avatar] getBlob failed', (err as { code?: string } | null)?.code ?? 'error');
         return null;
       }
       await new Promise((res) => setTimeout(res, pause));
