@@ -1171,6 +1171,68 @@ function AnatomyTurn({ label }: { label: string }) {
   );
 }
 
+/** The Atlas chat demo of the AI section (shown in two layout variants, so it is one piece). */
+function AtlasChatDemo({ T, onReplay }: { T: (k: string) => string; onReplay: () => void }) {
+  return (
+    <div className="l-chat l-aiw">
+      <div className="l-ch-head">
+        <AtlasFace temper={3} size={40} />
+        <b className="l-fd" style={{ fontSize: '18px' }}>
+          Atlas
+        </b>
+        <span className="l-ai-off l-fm">{T('ai_off')}</span>
+        <button type="button" className="l-ai-rp" onClick={onReplay} aria-label="Replay">
+          ↻
+        </button>
+      </div>
+      <div className="l-b-u l-ai-q1">{T('t_q1')}</div>
+      <div className="l-ai-turn">
+        <div className="l-ai-th">
+          <div className="l-ai-t">
+            <i />
+            <i />
+            <i />
+            <span className="l-fm">{T('ai_t')}</span>
+          </div>
+          <div className="l-ai-cs">
+            <span className="l-ai-c l-ai-c1">{T('ai_s1')}</span>
+            <span className="l-ai-c l-ai-c2">{T('ai_s2')}</span>
+            <span className="l-ai-c l-ai-c3">{T('ai_s3')}</span>
+          </div>
+        </div>
+        <div className="l-b-a l-ai-a1">
+          {T('t_a1')}
+          <span className="l-caret l-c1" />
+          <div className="l-src">{T('t_s1')}</div>
+        </div>
+      </div>
+      <div className="l-b-u l-ai-q2">{T('t_q2')}</div>
+      <div className="l-ai-turn">
+        <div className="l-ai-th l-ai-th2">
+          <div className="l-ai-t">
+            <i />
+            <i />
+            <i />
+            <span className="l-fm">{T('ai_t')}</span>
+          </div>
+          <div className="l-ai-cs">
+            <span className="l-ai-c l-ai-c4">{T('ai_s4')}</span>
+            <span className="l-ai-c l-ai-c5">{T('ai_s5')}</span>
+          </div>
+        </div>
+        <div className="l-b-a l-ai-a2">
+          {T('t_a2')}
+          <span className="l-caret l-c2" />
+        </div>
+      </div>
+      <div className="l-ai-in">
+        <span>{T('ai_ph')}</span>
+        <i />
+      </div>
+    </div>
+  );
+}
+
 export interface LandingInvite {
   inviter: string | null;
   expiresAt: number;
@@ -2922,136 +2984,8 @@ export function LandingDesign({
                     alignItems: 'center',
                   }}
                 >
-                  {v.aiA && (
-                    <>
-                      <div className="l-chat l-aiw">
-                        <div className="l-ch-head">
-                          <AtlasFace temper={3} size={40} />
-                          <b className="l-fd" style={{ fontSize: '18px' }}>
-                            Atlas
-                          </b>
-                          <span className="l-ai-off l-fm">{T('ai_off')}</span>
-                          <button
-                            type="button"
-                            className="l-ai-rp"
-                            onClick={v.aiReplay}
-                            aria-label="Replay"
-                          >
-                            ↻
-                          </button>
-                        </div>
-                        <div className="l-b-u l-ai-q1">{T('t_q1')}</div>
-                        <div className="l-ai-turn">
-                          <div className="l-ai-th">
-                            <div className="l-ai-t">
-                              <i />
-                              <i />
-                              <i />
-                              <span className="l-fm">{T('ai_t')}</span>
-                            </div>
-                            <div className="l-ai-cs">
-                              <span className="l-ai-c l-ai-c1">{T('ai_s1')}</span>
-                              <span className="l-ai-c l-ai-c2">{T('ai_s2')}</span>
-                              <span className="l-ai-c l-ai-c3">{T('ai_s3')}</span>
-                            </div>
-                          </div>
-                          <div className="l-b-a l-ai-a1">
-                            {T('t_a1')}
-                            <span className="l-caret l-c1" />
-                            <div className="l-src">{T('t_s1')}</div>
-                          </div>
-                        </div>
-                        <div className="l-b-u l-ai-q2">{T('t_q2')}</div>
-                        <div className="l-ai-turn">
-                          <div className="l-ai-th l-ai-th2">
-                            <div className="l-ai-t">
-                              <i />
-                              <i />
-                              <i />
-                              <span className="l-fm">{T('ai_t')}</span>
-                            </div>
-                            <div className="l-ai-cs">
-                              <span className="l-ai-c l-ai-c4">{T('ai_s4')}</span>
-                              <span className="l-ai-c l-ai-c5">{T('ai_s5')}</span>
-                            </div>
-                          </div>
-                          <div className="l-b-a l-ai-a2">
-                            {T('t_a2')}
-                            <span className="l-caret l-c2" />
-                          </div>
-                        </div>
-                        <div className="l-ai-in">
-                          <span>{T('ai_ph')}</span>
-                          <i />
-                        </div>
-                      </div>
-                    </>
-                  )}
-                  {v.aiB && (
-                    <>
-                      <div className="l-chat l-aiw">
-                        <div className="l-ch-head">
-                          <AtlasFace temper={3} size={40} />
-                          <b className="l-fd" style={{ fontSize: '18px' }}>
-                            Atlas
-                          </b>
-                          <span className="l-ai-off l-fm">{T('ai_off')}</span>
-                          <button
-                            type="button"
-                            className="l-ai-rp"
-                            onClick={v.aiReplay}
-                            aria-label="Replay"
-                          >
-                            ↻
-                          </button>
-                        </div>
-                        <div className="l-b-u l-ai-q1">{T('t_q1')}</div>
-                        <div className="l-ai-turn">
-                          <div className="l-ai-th">
-                            <div className="l-ai-t">
-                              <i />
-                              <i />
-                              <i />
-                              <span className="l-fm">{T('ai_t')}</span>
-                            </div>
-                            <div className="l-ai-cs">
-                              <span className="l-ai-c l-ai-c1">{T('ai_s1')}</span>
-                              <span className="l-ai-c l-ai-c2">{T('ai_s2')}</span>
-                              <span className="l-ai-c l-ai-c3">{T('ai_s3')}</span>
-                            </div>
-                          </div>
-                          <div className="l-b-a l-ai-a1">
-                            {T('t_a1')}
-                            <span className="l-caret l-c1" />
-                            <div className="l-src">{T('t_s1')}</div>
-                          </div>
-                        </div>
-                        <div className="l-b-u l-ai-q2">{T('t_q2')}</div>
-                        <div className="l-ai-turn">
-                          <div className="l-ai-th l-ai-th2">
-                            <div className="l-ai-t">
-                              <i />
-                              <i />
-                              <i />
-                              <span className="l-fm">{T('ai_t')}</span>
-                            </div>
-                            <div className="l-ai-cs">
-                              <span className="l-ai-c l-ai-c4">{T('ai_s4')}</span>
-                              <span className="l-ai-c l-ai-c5">{T('ai_s5')}</span>
-                            </div>
-                          </div>
-                          <div className="l-b-a l-ai-a2">
-                            {T('t_a2')}
-                            <span className="l-caret l-c2" />
-                          </div>
-                        </div>
-                        <div className="l-ai-in">
-                          <span>{T('ai_ph')}</span>
-                          <i />
-                        </div>
-                      </div>
-                    </>
-                  )}
+                  {v.aiA && <AtlasChatDemo T={T} onReplay={v.aiReplay} />}
+                  {v.aiB && <AtlasChatDemo T={T} onReplay={v.aiReplay} />}
                 </div>
               </div>
             </div>
