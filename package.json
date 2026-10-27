@@ -13,6 +13,7 @@
     "storybook": "npm run storybook -w client",
     "build-storybook": "npm run build-storybook -w client",
     "audit:stories": "node scripts/story-audit.mjs",
+    "audit:weekdays": "node scripts/weekday-row-audit.mjs",
     "audit:chat": "node scripts/chat-layout-audit.mjs",
     "audit:hero": "node scripts/hero-audit.mjs",
     "audit:theme-swap": "node scripts/theme-swap-audit.mjs",
