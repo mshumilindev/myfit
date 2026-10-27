@@ -299,6 +299,21 @@ describe('migratePorts', () => {
     expect(ports.enrich!('gyms', { q: 1 })).toEqual({ q: 1 });
   });
 
+  it('gives the sealed account documents the integer stamp the rules demand (legacy copies may lack one)', async () => {
+    const io = await load();
+    await io.initVault('u9');
+    const ports = io.migratePorts((d) => d);
+    await ports.write('coach' as never, 'coach', { enc: 'x' });
+    await ports.write('goals' as never, 'goals', { enc: 'x', updatedAt: 12.7 });
+    await ports.write('home' as never, 'home', { enc: 'x', updatedAt: 5 });
+    await ports.write('nicotine' as never, 'nicotine', { enc: 'x' });
+    const at = (p: string) => fs.writes.find((w) => w.path === p)!.data as Record<string, unknown>;
+    expect(Number.isInteger(at('users/u9/meta/coach').updatedAt)).toBe(true);
+    expect(at('users/u9/meta/goals').updatedAt).toBe(12);
+    expect(at('users/u9/meta/home').updatedAt).toBe(5);
+    expect(at('users/u9/meta/nicotine').updatedAt).toBeUndefined();
+  });
+
   it('throws when nobody is signed in', async () => {
     const io = await load();
     const ports = io.migratePorts((d) => d);

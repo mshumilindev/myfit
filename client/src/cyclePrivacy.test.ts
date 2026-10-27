@@ -11,8 +11,8 @@ describe('cycle stays private', () => {
   });
   it('is part of the migration lists', () => {
     // the sealed meta list of the key-exchange migration and the ordered migration list
-    expect(src('./vaultIO.ts')).toContain("'cycle'");
-    expect(src('./vaultMigrate.ts')).toContain("'cycle'");
+    expect(src('./vaultIO.ts')).toMatch(/^\s*'cycle',$/m);
+    expect(src('./vaultMigrate.ts')).toMatch(/^\s*'cycle',$/m);
   });
   it('is not mentioned by coach-share or Atlas fact builders', () => {
     for (const f of [

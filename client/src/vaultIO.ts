@@ -281,6 +281,9 @@ const META_DOCS: ReadonlySet<string> = new Set<SealedCollection>([
   'coach',
 ]);
 
+/** Documents whose rules require `updatedAt is int` next to `enc` (SPO-217). */
+const STAMPED_DOCS: ReadonlySet<string> = new Set(['goals', 'home', 'mastery', 'coach']);
+
 /**
  * Firestore ports for the one-time migration. `enrichWorkout` adds the readable `stats`
  * (passed in to keep this file free of a store import).
@@ -305,7 +308,16 @@ export function migratePorts(
       const ref = META_DOCS.has(c)
         ? doc(db, 'users', uid(), 'meta', c)
         : doc(db, 'users', uid(), c, id);
-      await setDoc(ref, data);
+      // the rules demand an integer stamp on the sealed account documents; a legacy plaintext copy may lack one
+      const stamped =
+        STAMPED_DOCS.has(c) && !Number.isInteger(data.updatedAt)
+          ? {
+              ...data,
+              updatedAt:
+                typeof data.updatedAt === 'number' ? Math.trunc(data.updatedAt) : Date.now(),
+            }
+          : data;
+      await setDoc(ref, stamped);
     },
     enrich: (c, d) => (c === 'workouts' ? enrichWorkout(d) : d),
   };

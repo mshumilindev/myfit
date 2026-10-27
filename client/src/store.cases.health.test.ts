@@ -223,6 +223,9 @@ describe('goals, mastery, home, coach settings: synced docs', () => {
   it('coach settings write is debounced to one sealed write holding only the changed fields over the server copy', async () => {
     vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
     vi.setSystemTime(T0);
+    const stop = store.startSyncLoop();
+    fs.listeners.get('users/u1/meta/coach')!(snap({ memory: ['m'], updatedAt: 1 }));
+    await vi.advanceTimersByTimeAsync(1);
     store.setCoach({ enabled: true });
     store.setCoach({ temper: 5 });
     await vi.advanceTimersByTimeAsync(3999);
@@ -234,7 +237,12 @@ describe('goals, mastery, home, coach settings: synced docs', () => {
     expect(w[0].opts).toBeUndefined();
     expect(isSealed(w[0].data)).toBe(true);
     expect(Object.keys(w[0].data).sort()).toEqual(['enc', 'updatedAt']);
-    expect(Object.keys(await open(w[0])).sort()).toEqual(['enabled', 'temper', 'updatedAt']);
+    expect(Object.keys(await open(w[0])).sort()).toEqual([
+      'enabled',
+      'memory',
+      'temper',
+      'updatedAt',
+    ]);
     expect(st().coach.temper).toBe(5);
 
     // leaving the page flushes a pending change at once; the earlier fields are kept (the server copy is remembered)
@@ -244,6 +252,7 @@ describe('goals, mastery, home, coach settings: synced docs', () => {
     const second = await open(at('users/u1/meta/coach')[1]);
     expect(second.enabled).toBe(false);
     expect(second.temper).toBe(5);
+    stop();
     await vi.advanceTimersByTimeAsync(5000);
     expect(at('users/u1/meta/coach')).toHaveLength(2);
   });
@@ -274,6 +283,28 @@ describe('goals, mastery, home, coach settings: synced docs', () => {
     fs.listeners.get('users/u1/meta/coach')!(snap({ temper: 3, updatedAt: Date.now() + 100_000 }));
     await vi.advanceTimersByTimeAsync(1);
     expect(st().coach.temper).toBe(3);
+    stop();
+  });
+
+  it('coach: an edit made before the first snapshot waits for it and keeps the fields of the server copy (SPO-217)', async () => {
+    fs.writes.length = 0;
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+    vi.setSystemTime(T0);
+    fs.uid = 'u1';
+    const stop = store.startSyncLoop();
+    store.setCoach({ temper: 5 });
+    await vi.advanceTimersByTimeAsync(5000);
+    // nothing was written over a server copy this device has not read yet
+    expect(at('users/u1/meta/coach')).toHaveLength(0);
+
+    fs.listeners.get('users/u1/meta/coach')!(
+      snap({ temper: 1, memory: ['likes squats'], updatedAt: 1 }),
+    );
+    await vi.advanceTimersByTimeAsync(4000);
+    await vi.waitFor(() => expect(at('users/u1/meta/coach')).toHaveLength(1));
+    const written = await open(at('users/u1/meta/coach')[0]);
+    expect(written.temper).toBe(5);
+    expect(written.memory).toEqual(['likes squats']);
     stop();
   });
 

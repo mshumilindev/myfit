@@ -161,7 +161,7 @@ import { resolveRestOverlap, type RestOverlapChoice } from './restOverlap';
 import { readProgramMemory } from './data/programMemory';
 import { CONDITIONS_KEY, CONDITIONS_SHARE_KEY, createConditionsCache } from './conditionsCache';
 import { createStoreSealed } from './storeSealed';
-import { watchSealedMeta, writeSealedMeta } from './storeMeta';
+import { stampedCopy, watchSealedMeta, writeSealedMeta, type SealedMetaName } from './storeMeta';
 import {
   healthSnapshot,
   healthVersion,
@@ -1366,27 +1366,18 @@ function writeBodyDoc(): void {
     .catch(onWriteError);
 }
 
-function writeGoalsDoc(): void {
+function writeMetaDoc(name: SealedMetaName, value: object, stamp = Date.now()): void {
   const uid = currentUid();
-  if (!uid) return;
-  const clean = JSON.parse(JSON.stringify({ ...state.goals, updatedAt: Date.now() }));
-  writeSealedMeta(uid, 'goals', clean, onWriteError);
+  if (uid) writeSealedMeta(uid, name, stampedCopy(value, stamp), onWriteError);
+}
+function writeGoalsDoc(): void {
+  writeMetaDoc('goals', state.goals);
 }
 function writeHomeDoc(): void {
-  const uid = currentUid();
-  if (!uid) return;
-  const clean = JSON.parse(
-    JSON.stringify({ ...state.home, updatedAt: state.home.updatedAt ?? Date.now() }),
-  );
-  writeSealedMeta(uid, 'home', clean, onWriteError);
+  writeMetaDoc('home', state.home, state.home.updatedAt ?? Date.now());
 }
 function writeMasteryDoc(): void {
-  const uid = currentUid();
-  if (!uid) return;
-  const clean = JSON.parse(
-    JSON.stringify({ ...state.mastery, updatedAt: state.mastery.updatedAt ?? Date.now() }),
-  );
-  writeSealedMeta(uid, 'mastery', clean, onWriteError);
+  writeMetaDoc('mastery', state.mastery, state.mastery.updatedAt ?? Date.now());
 }
 /**
  * The coach doc is written a few seconds after the last change, not on every
@@ -1405,17 +1396,19 @@ const coachDirty = new Set<string>();
 let coachServerAt = 0;
 /** The last copy of the sealed coach document this device saw or wrote; the base of the next write. */
 let coachServer: Record<string, unknown> = {};
+/** Server copy read (or absent): an earlier whole-document write would erase fields this device never saw. */
+let coachSynced = false;
 function flushCoachDoc(): void {
   if (coachTimer) clearTimeout(coachTimer);
   coachTimer = null;
   const uid = currentUid();
   // Signed out or switched account meanwhile → that change belonged to the old one.
   if (!uid || uid !== coachFor) return;
+  if (!coachSynced) return; // the first snapshot re-arms the write
   const full = JSON.parse(JSON.stringify(state.coach)) as Record<string, unknown>;
   const keys = [...coachDirty];
   coachDirty.clear();
-  // Sealed, so no partial merge-write: the changed fields go over the last server copy this device saw (the server
-  // copy is remembered, so two writes in a row keep each other's fields).
+  // Sealed, so no merge-write: changed fields go over the last server copy this device saw.
   const clean: Record<string, unknown> = {
     ...coachServer,
     updatedAt: full.updatedAt ?? Date.now(),
@@ -5439,8 +5432,7 @@ export function startSyncLoop(): () => void {
     ),
   );
 
-  // goals / home / mastery / coach are sealed documents (SPO-217): read through the mirror, which opens them with the
-  // vault key. While they are locked (`info.locked`) nothing is decided — an empty list then does NOT mean "no server copy".
+  // goals/home/mastery/coach are sealed (SPO-217); while locked (`info.locked`) an empty list is NOT "no server copy".
   unsubs.push(
     watchSealedMeta<FitGoals & Record<string, unknown>>(
       uid,
@@ -5508,12 +5500,14 @@ export function startSyncLoop(): () => void {
       onWriteError,
     ),
   );
+  coachSynced = false;
   unsubs.push(
     watchSealedMeta<Partial<CoachSettings> & Record<string, unknown>>(
       uid,
       'coach',
       (items, info) => {
         if (!items.length && info.locked) return;
+        coachSynced = true;
         if (!items.length) {
           if (state.coach.enabled) {
             for (const k of Object.keys(state.coach)) coachDirty.add(k);
@@ -5527,7 +5521,13 @@ export function startSyncLoop(): () => void {
         // Last-write-wins: keep a newer local edit over a stale server copy.
         coachServerAt = Math.max(coachServerAt, data.updatedAt ?? 0);
         // An edit still waiting to be written is never overwritten by an older copy.
-        if (coachDirty.size || (state.coach.updatedAt ?? 0) > (data.updatedAt ?? 0)) return;
+        const localNewer = (state.coach.updatedAt ?? 0) > (data.updatedAt ?? 0);
+        if (coachDirty.size || localNewer) {
+          // a pending edit, or one lost when the page closed, goes out over the copy just read
+          if (localNewer) for (const k of Object.keys(state.coach)) coachDirty.add(k);
+          writeCoachDoc();
+          return;
+        }
         state = { ...state, coach: coachFrom(data) };
         persist();
         emit();
@@ -6438,6 +6438,7 @@ export function resetLocalData(): void {
   for (const k of Object.keys(wipedAt)) delete wipedAt[k as HealthFeature];
   resetCoachSharePublisher();
   unsentWorkouts.clear();
+  coachSynced = false;
   coachServer = {}; // the sealed Atlas settings of the previous account must not be the base of the next one's write
   localStorage.removeItem(UNSENT_KEY);
   void initVault(null); // forget the data key on this device

@@ -9,6 +9,10 @@ import { mirrorCollection, prepareWrite } from './vaultIO';
 
 export type SealedMetaName = 'goals' | 'home' | 'mastery' | 'coach';
 
+/** A plain JSON copy of `value` carrying the integer freshness stamp the rules demand. */
+export const stampedCopy = (value: object, updatedAt: number): Record<string, unknown> =>
+  JSON.parse(JSON.stringify({ ...value, updatedAt }));
+
 export function writeSealedMeta(
   uid: string,
   name: SealedMetaName,
