@@ -3,6 +3,7 @@ import {
   FOREGROUND_CHECK_MS,
   checkBuild,
   reloadToLatest,
+  settledBuildCheck,
   startAutoUpdate,
   type PwaUpdateDeps,
 } from './pwaUpdate';
@@ -193,5 +194,32 @@ describe('reloadToLatest', () => {
     const reload = vi.fn();
     await reloadToLatest(() => Promise.reject(new Error('offline')), reload, 10);
     expect(reload).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('settledBuildCheck', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it('turns the triggers of one page load into a single check, after the settle time', () => {
+    const check = vi.fn();
+    const run = settledBuildCheck(check, 1500);
+    run(); // start
+    run(); // pageshow
+    run(); // visible
+    vi.advanceTimersByTime(1499);
+    expect(check).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    expect(check).toHaveBeenCalledTimes(1);
+  });
+
+  it('accepts a new trigger once the previous check has run', () => {
+    const check = vi.fn();
+    const run = settledBuildCheck(check, 100);
+    run();
+    vi.advanceTimersByTime(100);
+    run();
+    vi.advanceTimersByTime(100);
+    expect(check).toHaveBeenCalledTimes(2);
   });
 });

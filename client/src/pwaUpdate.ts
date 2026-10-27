@@ -126,12 +126,34 @@ export async function checkBuild(
   return false;
 }
 
+/** A fresh page can still report `onLine` from before an offline switch for a moment; let it settle before asking. */
+const BUILD_CHECK_SETTLE_MS = 1500;
+
+/**
+ * Wraps a check so that the triggers which fire together on a page load (start, `pageshow`, `online`, visible) become
+ * one check, run after the connection state has settled. Offline the check then sends no request at all, so the
+ * browser has no failed fetch to log.
+ */
+export function settledBuildCheck(
+  check: () => void,
+  settleMs: number = BUILD_CHECK_SETTLE_MS,
+): () => void {
+  let pending: ReturnType<typeof setTimeout> | null = null;
+  return () => {
+    if (pending !== null) return;
+    pending = setTimeout(() => {
+      pending = null;
+      check();
+    }, settleMs);
+  };
+}
+
 /** Check at start, whenever the app comes back to the foreground and every few minutes while it stays open. */
 export function startBuildWatch(
   doc: Pick<Document, 'addEventListener' | 'visibilityState'> = document,
 ): void {
   if (!RUNNING_BUILD) return;
-  const run = () => void checkBuild();
+  const run = settledBuildCheck(() => void checkBuild());
   run();
   doc.addEventListener('visibilitychange', () => {
     if (doc.visibilityState === 'visible') run();
