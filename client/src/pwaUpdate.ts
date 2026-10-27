@@ -110,6 +110,8 @@ export async function checkBuild(
   onNewer: () => void = markUpdateReady,
 ): Promise<boolean> {
   if (!running) return false;
+  // Offline: no request at all (the browser would log the failed fetch itself); the `online` event runs the check again.
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return false;
   try {
     const res = await fetchFn(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) return false;

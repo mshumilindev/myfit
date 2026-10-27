@@ -41,3 +41,24 @@ test('coach serves its screens on the fixtures backend, not the not-configured s
   await expect(page.locator('#co-main')).toBeVisible();
   await expect(page.getByTestId('coach-not-configured')).toHaveCount(0);
 });
+
+// SPO-337: warm start (reload with everything on the device) and offline keep the console clean on the main Coach routes.
+test('coach warm start and offline log no console errors', async ({ page, context }) => {
+  test.setTimeout(90_000);
+  const errors = collectConsoleErrors(page);
+  for (const hash of ['#/c/today', '#/c/clients', '#/c/schedule']) {
+    await openCoach(page, hash);
+    await page.reload();
+    await page.waitForLoadState('networkidle').catch(() => undefined);
+    await page.waitForTimeout(500);
+  }
+  await page.evaluate(() => navigator.serviceWorker?.ready);
+  await context.setOffline(true);
+  for (const hash of ['#/c/today', '#/c/clients']) {
+    await page.goto('/' + hash).catch(() => undefined);
+    await page.waitForSelector('#root *', { timeout: 15_000 });
+    await page.waitForTimeout(500);
+  }
+  expect(errors, `console errors on warm start / offline`).toEqual([]);
+  await expect(page.locator('#root')).not.toBeEmpty();
+});

@@ -161,6 +161,21 @@ describe('checkBuild', () => {
   });
 });
 
+describe('checkBuild offline', () => {
+  it('sends no request while the browser is offline (a failed fetch would be logged to the console)', async () => {
+    const spy = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    try {
+      const fetchFn = vi.fn();
+      const onNewer = vi.fn();
+      expect(await checkBuild(fetchFn as unknown as typeof fetch, 'b1', onNewer)).toBe(false);
+      expect(fetchFn).not.toHaveBeenCalled();
+      expect(onNewer).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+});
+
 describe('reloadToLatest', () => {
   it('pulls the newest build first, then reloads exactly once', async () => {
     const order: string[] = [];
