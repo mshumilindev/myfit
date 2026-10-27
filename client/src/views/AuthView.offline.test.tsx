@@ -54,4 +54,18 @@ describe('AuthView on a bad network (first sign-in, no cached session)', () => {
     expect(screen.getByRole('button', { name: /retry/i })).toBeTruthy();
     expect(signIn().hasAttribute('disabled')).toBe(true);
   });
+
+  it('the connection dropping under the open form shows the offline message at once', async () => {
+    h.callFn.mockResolvedValue({ registered: true });
+    render(<AuthView onLoggedIn={() => undefined} />);
+    await waitFor(() => expect(h.callFn).toHaveBeenCalled());
+    expect(screen.queryByText(/can't reach the server/i)).toBeNull();
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
+    fireEvent(window, new Event('offline'));
+    await screen.findByText(/can't reach the server/i);
+    h.callFn.mockResolvedValue({ registered: true });
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
+    fireEvent(window, new Event('online'));
+    await waitFor(() => expect(screen.queryByText(/can't reach the server/i)).toBeNull());
+  });
 });

@@ -110,8 +110,14 @@ export function AuthView({
       setSlow(false);
       check();
     };
+    // The connection dropping under the open form shows the offline message at once (no probe needed to know it).
+    const onOffline = () => setUnreachable(true);
     window.addEventListener('online', onOnline);
-    return () => window.removeEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
   }, []);
 
   useEffect(() => {
