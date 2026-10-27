@@ -33,6 +33,21 @@ const SIZES = [
   { name: 'desktop', width: 1440, height: 900 },
 ] as const;
 
+async function fillGateIfShown(page: Page): Promise<void> {
+  const gate = page.locator('.body-gate input');
+  if (
+    !(await gate
+      .first()
+      .isVisible()
+      .catch(() => false))
+  )
+    return;
+  await gate.nth(0).fill('180');
+  await gate.nth(1).fill('80');
+  await page.locator('.body-gate button').last().click();
+  await page.waitForTimeout(500);
+}
+
 for (const th of ['glass', 'cyberpunk'])
   for (const size of SIZES) {
     test(`session start and picker pictures load: ${size.name} ${th}`, async ({ page }) => {
@@ -79,8 +94,23 @@ for (const th of ['glass', 'cyberpunk'])
 
       // every tab of the picker (reopened for each: Warm-up / Cardio / Cool-down open their own list)
       for (const tab of ['Strength', 'Warm-up', 'Cardio', 'Cool-down']) {
-        await page.getByRole('button', { name: 'Add exercise', exact: true }).first().click();
-        await page.locator('.uiseg-opt', { hasText: new RegExp(`^${tab}$`) }).click();
+        // The harness backend never keeps a write, so a late snapshot can bring the profile gate back over the app
+        // (it empties the body the page just filled). Fill it again and retry the step instead of failing on it.
+        for (let attempt = 0; ; attempt++) {
+          await fillGateIfShown(page);
+          try {
+            await page
+              .getByRole('button', { name: 'Add exercise', exact: true })
+              .first()
+              .click({ timeout: 8_000 });
+            await page
+              .locator('.uiseg-opt', { hasText: new RegExp(`^${tab}$`) })
+              .click({ timeout: 8_000 });
+            break;
+          } catch (e) {
+            if (attempt >= 4) throw e;
+          }
+        }
         await page.waitForTimeout(900);
         expect(await broken(page), `picker tab ${tab}`).toEqual([]);
         expect(failedImages, `image requests on ${tab}`).toEqual([]);
