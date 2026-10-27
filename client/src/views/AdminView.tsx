@@ -594,6 +594,39 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
   );
 }
 
+// --- Shared pieces of the person dialogs ---------------------------------------
+
+/** First name · last name · username, the same three fields in "New" and "Edit". */
+function PersonFields(props: {
+  firstName: string;
+  lastName: string;
+  username: string;
+  onFirstName: (v: string) => void;
+  onLastName: (v: string) => void;
+  onUsername: (v: string) => void;
+}) {
+  const { t } = useT();
+  return (
+    <>
+      <Field
+        placeholder={t.firstName}
+        value={props.firstName}
+        onChange={(e) => props.onFirstName(e.target.value)}
+      />
+      <Field
+        placeholder={t.lastName}
+        value={props.lastName}
+        onChange={(e) => props.onLastName(e.target.value)}
+      />
+      <Field
+        placeholder={t.username}
+        value={props.username}
+        onChange={(e) => props.onUsername(e.target.value)}
+      />
+    </>
+  );
+}
+
 // --- New member / trainer (AD-02) -------------------------------------------
 
 function NewPersonDialog(props: {
@@ -616,20 +649,13 @@ function NewPersonDialog(props: {
       <div className="sheet-head">
         <span className="t">{t.adminNewMember}</span>
       </div>
-      <Field
-        placeholder={t.firstName}
-        value={firstName}
-        onChange={(e) => setFirstName(e.target.value)}
-      />
-      <Field
-        placeholder={t.lastName}
-        value={lastName}
-        onChange={(e) => setLastName(e.target.value)}
-      />
-      <Field
-        placeholder={t.username}
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+      <PersonFields
+        firstName={firstName}
+        lastName={lastName}
+        username={username}
+        onFirstName={setFirstName}
+        onLastName={setLastName}
+        onUsername={setUsername}
       />
       <div className="admin-role-field">
         <div className="field-label">{t.adminColRole}</div>
@@ -874,20 +900,13 @@ function EditDialog(props: { person: Person; onClose: () => void; onDone: () => 
       <div className="sheet-head">
         <span className="t">{t.adminEditUserDetails}</span>
       </div>
-      <Field
-        placeholder={t.firstName}
-        value={firstName}
-        onChange={(e) => setFirstName(e.target.value)}
-      />
-      <Field
-        placeholder={t.lastName}
-        value={lastName}
-        onChange={(e) => setLastName(e.target.value)}
-      />
-      <Field
-        placeholder={t.username}
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+      <PersonFields
+        firstName={firstName}
+        lastName={lastName}
+        username={username}
+        onFirstName={setFirstName}
+        onLastName={setLastName}
+        onUsername={setUsername}
       />
       {error && (
         <div className="field-error">
