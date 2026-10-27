@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SyncStateIcon, type SyncIconState } from './SyncStateIcon';
 import { Stack } from '../../stories/LocaleMatrix';
+import { Button } from './Button';
 
 const STATES: SyncIconState[] = [
   'synced',
@@ -83,9 +84,9 @@ export const TransitionMatrix: Story = {
         <SyncStateIcon state={s} size="lg" label={s} />
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {STATES.map((t) => (
-            <button key={t} type="button" onClick={() => setS(t)}>
+            <Button key={t} variant="secondary" size="sm" onClick={() => setS(t)}>
               {t}
-            </button>
+            </Button>
           ))}
         </div>
       </Stack>
