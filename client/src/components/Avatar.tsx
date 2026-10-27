@@ -21,6 +21,39 @@ export { initialsOf };
 
 const urlCache = new Map<string, string>();
 
+const DOWNLOAD_PAUSES_MS = [800, 2500, 7000];
+const MAX_PARALLEL = 4;
+let running = 0;
+const waiting: Array<() => void> = [];
+
+async function slot<T>(job: () => Promise<T>): Promise<T> {
+  if (running >= MAX_PARALLEL) await new Promise<void>((res) => waiting.push(res));
+  running += 1;
+  try {
+    return await job();
+  } finally {
+    running -= 1;
+    waiting.shift()?.();
+  }
+}
+
+/** One photo from Storage, a few at a time, retried with growing pauses while the caller still wants it. */
+async function downloadAvatar(uid: string, wanted: () => boolean): Promise<Blob | null> {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await slot(() => getBlob(ref(storage, `avatars/${uid}/photo`)));
+    } catch (err) {
+      const pause = DOWNLOAD_PAUSES_MS[attempt];
+      if (pause === undefined || !wanted()) {
+        console.warn('[avatar] getBlob failed', uid, err);
+        return null;
+      }
+      await new Promise((res) => setTimeout(res, pause));
+      if (!wanted()) return null;
+    }
+  }
+}
+
 /** Drop cached object-URLs (all generations) and the persisted blob for a user. */
 export function invalidateAvatarCache(userId: string): void {
   for (const [key, url] of urlCache) {
@@ -102,28 +135,37 @@ function AvatarFace({
       setSrc(url);
     };
 
-    // 1) Persisted blob (survives reloads); served only when its rev matches.
-    readAvatarBlob(uid, rev)
-      .then((cachedBlob) => {
+    const swap = (blob: Blob): void => {
+      const old = urlCache.get(cacheKey);
+      adopt(blob);
+      // The stale copy shown meanwhile is replaced by the fresh one: release its object URL.
+      if (old) setTimeout(() => URL.revokeObjectURL(old), 1000);
+    };
+
+    // 1) The copy kept on the device for this revision: paint it and stop (no network).
+    // 2) Otherwise a copy of an OLDER revision (or one saved before the revision was known) still paints at once — a
+    //    face that is slightly stale beats initials, and beats nothing offline — while the fresh one is fetched.
+    // 3) The fetch retries a few times with a pause (a roster of faces opens in a burst and the odd request fails), a
+    //    few at a time, and only a success replaces what is shown; a failure leaves the old face or the initials.
+    void (async () => {
+      try {
+        const fresh = await readAvatarBlob(uid, rev);
         if (!alive) return;
-        if (cachedBlob && cachedBlob.size > 0) {
-          adopt(cachedBlob);
+        if (fresh && fresh.size > 0) {
+          adopt(fresh);
           return;
         }
-        // 2) Miss (or rev changed) → download once, then persist for next time.
-        getBlob(ref(storage, `avatars/${uid}/photo`))
-          .then((blob) => {
-            if (!alive || !blob || blob.size === 0) return;
-            writeAvatarBlob(uid, rev, blob);
-            adopt(blob);
-          })
-          .catch((err) => {
-            console.warn('[avatar] getBlob failed', uid, err);
-          });
-      })
-      .catch(() => {
-        /* best-effort — falls through to initials */
-      });
+        const stale = await readAvatarBlob(uid);
+        if (!alive) return;
+        if (stale && stale.size > 0) adopt(stale);
+        const blob = await downloadAvatar(uid, () => alive);
+        if (!alive || !blob || blob.size === 0) return;
+        writeAvatarBlob(uid, rev, blob);
+        swap(blob);
+      } catch {
+        /* best-effort — the initials (or the stale face) stay */
+      }
+    })();
 
     return () => {
       alive = false;

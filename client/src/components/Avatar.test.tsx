@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 
 // SPO-109: a client's photo comes from Storage only when the roster says there is one; otherwise (no photo, no app,
 // a failed download) the initials stay, with no broken image.
@@ -47,5 +47,34 @@ describe('UserAvatar (client photos in Coach)', () => {
     await waitFor(() => expect(getBlob).toHaveBeenCalled());
     expect(screen.getByText('VW')).toBeTruthy();
     expect(container.querySelector('img')).toBeNull();
+  });
+});
+
+describe('UserAvatar: a face that is not lost (SPO-109)', () => {
+  it('a copy of an older revision paints at once, offline included, and a failed refresh keeps it', async () => {
+    const store = await import('../avatarStore');
+    vi.mocked(store.readAvatarBlob).mockImplementation(async (_u: string, want = 0) =>
+      want > 0 ? null : new Blob(['old'], { type: 'image/jpeg' }),
+    );
+    getBlob.mockRejectedValue(new Error('network'));
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(<UserAvatar userId="c3" name="Ola K" hasPhoto rev={9} />);
+    await waitFor(() => expect(container.querySelector('img')).not.toBeNull());
+    expect(screen.queryByText('OK')).toBeNull();
+  });
+  it('a download that fails once is tried again', async () => {
+    vi.useFakeTimers();
+    const store = await import('../avatarStore');
+    vi.mocked(store.readAvatarBlob).mockResolvedValue(null);
+    getBlob
+      .mockRejectedValueOnce(new Error('flaky'))
+      .mockResolvedValue(new Blob(['x'], { type: 'image/jpeg' }));
+    const { container } = render(<UserAvatar userId="c4" name="Ivo B" hasPhoto rev={2} />);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000);
+    });
+    expect(getBlob).toHaveBeenCalledTimes(2);
+    expect(container.querySelector('img')).not.toBeNull();
+    vi.useRealTimers();
   });
 });
