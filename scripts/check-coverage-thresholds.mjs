@@ -5,6 +5,7 @@
  * Порівнює coverage-блок двох vitest-конфігів (корінь і client) з підлогою `coverage-thresholds.json`:
  *   - жоден поріг не нижчий за підлогу;
  *   - жоден запис `include` з підлоги не зник (скоуп не звужується; ширший glob, що його вкриває, ок);
+ *     єдиний виняток: запис — конкретний шлях (без glob), а такого файлу вже немає на диску (видалили код разом із покриттям);
  *   - жодного нового запису в `exclude`, якого нема в підлозі;
  *   - сама підлога не знижена відносно бази в git (`--base <ref>`, типово HEAD).
  *
@@ -38,10 +39,19 @@ export function covers(pattern, entry) {
 }
 
 /**
- * Порівнює поточний блок з підлогою. Повертає масив повідомлень про порушення (порожній = ок).
- * `label` — що порівнюємо (ім'я конфіга або «підлога vs git»).
+ * Чи «вибув» запис `include`: це конкретний шлях (без glob-символів), і такого файлу вже немає в `baseDir`.
+ * Так дозволено прибрати покриття разом із видаленим кодом (SPO-139); glob і наявні файли звужувати не можна.
  */
-export function compareBlock(floor, current, label) {
+export function isRetiredEntry(baseDir, entry) {
+  if (/[*?{}[\]!]/.test(entry)) return false;
+  return !existsSync(join(baseDir, entry));
+}
+
+/**
+ * Порівнює поточний блок з підлогою. Повертає масив повідомлень про порушення (порожній = ок).
+ * `label` — що порівнюємо (ім'я конфіга або «підлога vs git»); `isRetired(entry)` — запис include, якого вже немає на диску.
+ */
+export function compareBlock(floor, current, label, isRetired = () => false) {
   const problems = [];
   const fT = floor.thresholds ?? {};
   const cT = current.thresholds ?? {};
@@ -63,7 +73,7 @@ export function compareBlock(floor, current, label) {
   }
   const curInc = current.include ?? [];
   for (const entry of floor.include ?? []) {
-    if (!curInc.some((p) => covers(p, entry))) {
+    if (!curInc.some((p) => covers(p, entry)) && !isRetired(entry)) {
       problems.push(
         `${label}: з «include» прибрано «${entry}» — скоуп покриття не можна звужувати.`,
       );
@@ -82,20 +92,27 @@ export function compareBlock(floor, current, label) {
 }
 
 /** Порівнює всі конфіги підлоги з поточними. `floors`/`currents`: { [configPath]: block }. */
-export function compareAll(floors, currents) {
+export function compareAll(floors, currents, opts = {}) {
   const problems = [];
   for (const name of Object.keys(floors)) {
     if (!currents[name]) {
       problems.push(`${name}: конфіг зник або не містить coverage-блока.`);
       continue;
     }
-    problems.push(...compareBlock(floors[name], currents[name], name));
+    problems.push(
+      ...compareBlock(
+        floors[name],
+        currents[name],
+        name,
+        (e) => opts.isRetired?.(name, e) ?? false,
+      ),
+    );
   }
   return problems;
 }
 
 /** Підлога не може бути нижчою за базу: ті самі правила, що й для конфігів (підлога = «поточне» для бази). */
-export function compareFloorToBase(base, next) {
+export function compareFloorToBase(base, next, opts = {}) {
   const problems = [];
   for (const name of Object.keys(base.configs ?? {})) {
     const cur = next.configs?.[name];
@@ -104,7 +121,14 @@ export function compareFloorToBase(base, next) {
       continue;
     }
     // exclude у підлозі може лише зменшуватись; нові — заборонені так само, як у конфігах
-    problems.push(...compareBlock(base.configs[name], cur, `${FLOOR_FILE} → ${name}`));
+    problems.push(
+      ...compareBlock(
+        base.configs[name],
+        cur,
+        `${FLOOR_FILE} → ${name}`,
+        (e) => opts.isRetired?.(name, e) ?? false,
+      ),
+    );
   }
   // Поріг patch-coverage (SPO-268) теж лише росте
   const bp = base.patch?.statements;
@@ -119,9 +143,9 @@ export function compareFloorToBase(base, next) {
 }
 
 /** Рішення для `--update`: або нова підлога, або список причин відмови (щось нижче за стару). */
-export function planUpdate(oldFloor, currents) {
+export function planUpdate(oldFloor, currents, opts = {}) {
   if (oldFloor) {
-    const problems = compareAll(oldFloor.configs ?? {}, currents);
+    const problems = compareAll(oldFloor.configs ?? {}, currents, opts);
     if (problems.length) return { ok: false, problems };
   }
   const configs = {};
@@ -265,6 +289,8 @@ export function main(argv) {
   const floorPath = join(root, FLOOR_FILE);
   const update = argv.includes('--update');
   const baselineFrom = arg(argv, '--baseline-from');
+  // include-записи в client/vitest.config.ts відносні до client/, у кореневому — до кореня
+  const opts = { isRetired: (cfg, entry) => isRetiredEntry(join(root, dirname(cfg)), entry) };
 
   let currents;
   try {
@@ -276,7 +302,7 @@ export function main(argv) {
   const oldFloor = existsSync(floorPath) ? JSON.parse(readFileSync(floorPath, 'utf8')) : null;
 
   if (update) {
-    const plan = planUpdate(oldFloor, currents);
+    const plan = planUpdate(oldFloor, currents, opts);
     if (!plan.ok) {
       console.error('[coverage:guard] --update відхилено: підлогу можна лише піднімати.');
       for (const p of plan.problems) console.error(`  - ${p}`);
@@ -306,12 +332,12 @@ export function main(argv) {
     );
     return 1;
   }
-  const problems = compareAll(oldFloor.configs ?? {}, currents);
+  const problems = compareAll(oldFloor.configs ?? {}, currents, opts);
 
   if (!customRoot) {
     const ref = arg(argv, '--base') ?? 'HEAD';
     const base = readFloorFromGit(root, ref);
-    if (base) problems.push(...compareFloorToBase(base, oldFloor));
+    if (base) problems.push(...compareFloorToBase(base, oldFloor, opts));
     else
       console.log(
         `[coverage:guard] підлоги в ${ref} ще нема (або нема git) — порівняння з базою пропущено.`,

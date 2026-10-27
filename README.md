@@ -8,11 +8,9 @@
 
 ```
 gym-tracker/
-├── server/     Node + Express + TypeScript + SQLite (better-sqlite3)
-│   └── /api/auth/*      — платформенна авторизація (JWT, один акаунт)
-│   └── /api/tracker/*   — сервіс №1: тренування
-├── client/     React + Vite + TypeScript, PWA (offline-first)
-├── desktop/    Electron-додаток у macOS-треї (запускає сервер + вікно)
+├── client/     React + Vite + TypeScript, PWA (offline-first), Firestore
+├── functions/  Firebase Cloud Functions (авторизація, тренерські операції)
+├── desktop/    Electron-оболонка (macOS DMG, Windows EXE, трей) навколо хостингового застосунку
 └── cloudflare/ доступ з телефона через свій домен (SETUP.md)
 ```
 
@@ -87,8 +85,7 @@ npm run dev          # server на :4477 (tsx watch) + client на :5173 (vite H
 Платформа складається з shell'а (авторизація, синк, топбар, меню) і
 сервіс-модулів. Щоб додати продукт (наприклад, «Харчування»):
 
-1. **Сервер**: створи `server/src/<service>.ts` з роутером(ами) і додай запис
-   у реєстр `server/src/services.ts` → API буде на `/api/<service>/...`
+1. **Дані й функції**: колекції Firestore (зашифровані за `security-and-data.md`) і, за потреби, Cloud Functions у `functions/src/`.
 2. **Клієнт**: створи папку `client/src/services/<service>/` з кореневим
    компонентом (внутрішню навігацію сервіс веде сам) і додай запис у реєстр
    `client/src/shell/registry.ts` → плитка з'явиться в меню автоматично.

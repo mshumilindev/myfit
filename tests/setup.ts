@@ -1,13 +1,6 @@
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
 import { cleanup } from '@testing-library/react';
 import { afterEach, beforeEach, vi } from 'vitest';
 import { setLocale } from '../client/src/i18n';
-
-process.env.GYM_DATA_DIR ??= fs.mkdtempSync(path.join(os.tmpdir(), 'gym-vitest-'));
-process.env.GYM_JWT_SECRET ??= 'test-secret';
-process.env.PORT ??= '0';
 
 // --- Firebase stubs ---------------------------------------------------------
 // Client modules import the Firebase SDK (and ./firebase, which boots the app);

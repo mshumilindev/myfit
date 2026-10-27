@@ -4,7 +4,7 @@
 
 Spotter — PWA (React 19 + Vite + TS strict) на **Firestore + Cloud Functions** (`functions/`), Firebase Hosting `spotter-64c3b`.
 Ролі `member | trainer | admin`, E2EE-дані (vault), offline-first, 5 локалей (en, uk, pl, lt, et).
-`server/` (Express+SQLite) і `desktop/` (Electron) — легасі, продукт їх не використовує (див. `.claude/rules/server-legacy.md`).
+`desktop/` — тонка Electron-оболонка навколо хостингового застосунку (збірки macOS DMG і Windows EXE, див. `.claude/rules/desktop-shell.md`). Легасі `server/` (Express+SQLite) видалено (SPO-139).
 Скоуп: `docs/MVP.md` · AC: `docs/FEATURES-AC.md` · UI-кіт: `docs/UI-KIT.md` · дизайн: `docs/DESIGN.md` · ADR: `docs/adr/`.
 
 ## Інваріанти (ламати не можна)
@@ -70,7 +70,7 @@ npm run audit:chat | audit:hero | audit:stories   # геометрія; прап
 
 ## Де що лежить і що примусове
 
-- `.claude/rules/*.md` — правила за `paths` (ui, i18n, security-and-data, tests, models-and-formulas, client-architecture, coach-and-roles, server-legacy).
+- `.claude/rules/*.md` — правила за `paths` (ui, i18n, security-and-data, tests, models-and-formulas, client-architecture, coach-and-roles, desktop-shell).
 - `.claude/skills/` — процедури за запитом (`work-issue`, `spec-first`, `new-screen-on-kit`, `add-kit-primitive`, `i18n-string`, `encrypted-collection`, `fix-layout-bug`, `verify-in-browser`, `linear-issue`, `cpd`); `.claude/agents/risk-reviewer` — незалежне рев'ю ризикових змін.
 - **Примусово (не покладайся на пам'ять моделі):** `.claude/settings.json` (deny на секрети/згенероване, hooks: блок `--no-verify`/force-push/`pkill -f`/`reset --hard`, автоформат після правок, Stop-hook з guard-тестами), `tests/kit-guard.test.ts`, `tests/hygiene-ratchet.guard.test.ts` (нові дублі кіт-примітивів, `!important`, inline `style={{}}`, hex, магічні px, файли >600 рядків, примітиви кіту без запису в UI-KIT.md блокуються; baseline `tests/hygiene-baseline.json` лише зменшується), `npm run deps:check` (цикли й кіт→data; baseline `.dependency-cruiser-known-violations.json`), блокуючий `npm audit` у CI, `.githooks/`.
 - Доки (`docs/`) — читай за потреби, не `@`-імпортом. Правило живе в одному місці; що можна перевірити машиною — переноси в guard/lint/CI.

@@ -10,14 +10,9 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json-summary'],
       // store.ts moved to Firestore I/O; re-gate it once Firebase store tests
-      // catch up (see FIREBASE.md). Until then keep the Express + i18n core.
-      include: [
-        'client/src/i18n/index.ts',
-        'server/src/auth.ts',
-        'server/src/gyms.ts',
-        'server/src/workouts.ts',
-      ],
-      exclude: ['client/src/main.tsx', 'server/src/index.ts', '**/*.d.ts', '**/dist/**'],
+      // catch up (see FIREBASE.md). Until then only the i18n core is gated here.
+      include: ['client/src/i18n/index.ts'],
+      exclude: ['client/src/main.tsx', '**/*.d.ts', '**/dist/**'],
       thresholds: {
         statements: 90,
         branches: 70,

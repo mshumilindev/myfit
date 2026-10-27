@@ -60,14 +60,12 @@ trap 'rm -rf "$log_dir"' EXIT
 base_ref=$(git merge-base HEAD origin/main 2>/dev/null || echo HEAD)
 # Root tests/** (SPO-268): only those related to the push; the full suite + coverage gate is the CI job `Unit tests + coverage gate`.
 client_changed_cmd='node scripts/patch-coverage.mjs --run --base '"$base_ref"' --budget "${PRE_PUSH_CLIENT_BUDGET:-120}"'
-names=(typecheck-client typecheck-server typecheck-desktop test-root-related lint-css validate-sql coverage-guard client-tests-changed)
+names=(typecheck-client typecheck-desktop test-root-related lint-css coverage-guard client-tests-changed)
 cmds=(
   "npm run --silent typecheck -w client -- --incremental --tsBuildInfoFile $cache_dir/tsc-client.tsbuildinfo"
-  "npm run --silent typecheck -w server -- --incremental --tsBuildInfoFile $cache_dir/tsc-server.tsbuildinfo"
   "npm run --silent typecheck -w desktop -- --incremental --tsBuildInfoFile $cache_dir/tsc-desktop.tsbuildinfo"
   "node scripts/root-tests-related.mjs --base $base_ref"
   "node scripts/stylelint-ratchet.mjs"
-  "node scripts/validate-sql.mjs"
   "npm run --silent coverage:guard -- --base $(git merge-base HEAD origin/main 2>/dev/null || echo HEAD)"
   "$client_changed_cmd"
 )

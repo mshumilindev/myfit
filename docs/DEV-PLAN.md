@@ -23,13 +23,10 @@ git add -A && git commit -m "chore: eslint+prettier+хуки, правила р�
 
 ## Крок 1 — Зелена верифікація наявного коду
 
-```bash
-GYM_DATA_DIR=$(mktemp -d) PORT=4499 npm run start -w server &
-BASE=http://localhost:4499 node scripts/smoke.mjs
-node scripts/validate-sql.mjs
-```
+> Історична примітка (SPO-139): API-смоук проти `server/` і `validate-sql` прибрано разом із легасі `server/`.
+> Продукт працює на Firestore і Cloud Functions; перевірки — `lint`, `typecheck`, тести, `test:rules`.
 
-**DoD:** смоук — 0 FAIL; validate-sql чистий. Будь-який FAIL лагодиться за
+**DoD:** усі перевірки зелені. Будь-який FAIL лагодиться за
 [tests.md](../.claude/rules/tests.md) (спершу гіпотеза
 «реграсія в коді», не «поганий тест»).
 

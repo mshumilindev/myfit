@@ -2,13 +2,8 @@
   "_doc": "Підлога покриття (SPO-47): пороги/include/exclude лише ростуть. Перевірка: npm run coverage:guard. Підняти: node scripts/check-coverage-thresholds.mjs --update. Правило: .claude/rules/tests.md.",
   "configs": {
     "vitest.config.ts": {
-      "include": [
-        "client/src/i18n/index.ts",
-        "server/src/auth.ts",
-        "server/src/gyms.ts",
-        "server/src/workouts.ts"
-      ],
-      "exclude": ["client/src/main.tsx", "server/src/index.ts", "**/*.d.ts", "**/dist/**"],
+      "include": ["client/src/i18n/index.ts"],
+      "exclude": ["client/src/main.tsx", "**/*.d.ts", "**/dist/**"],
       "thresholds": {
         "statements": 90,
         "branches": 70,

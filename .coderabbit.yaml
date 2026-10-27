@@ -21,11 +21,6 @@ reviews:
         (deps arrays, stale closures), the offline queue invariants
         (client-generated UUIDs, idempotent replay, server state replaces local),
         and i18n completeness (a new string must exist in all four locales).
-    - path: 'server/**'
-      instructions: >-
-        Express 5 + better-sqlite3 (synchronous). Focus on input validation,
-        auth (JWT HS256, brute-force limiter), SQL parameterisation, and
-        idempotent upsert semantics of every endpoint.
   auto_review:
     enabled: true
     drafts: false

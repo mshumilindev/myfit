@@ -50,7 +50,6 @@ export default tseslint.config(
   },
   {
     files: [
-      'server/src/**/*.ts',
       'desktop/src/**/*.ts',
       'functions/src/**/*.ts',
       'scripts/**/*.mjs',

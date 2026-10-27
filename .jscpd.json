@@ -1,5 +1,5 @@
 {
-  "path": ["client/src", "functions/src", "server/src"],
+  "path": ["client/src", "functions/src"],
   "minTokens": 80,
   "minLines": 10,
   "threshold": 1,

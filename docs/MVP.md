@@ -31,11 +31,9 @@ npm run tray        # 🏋️ в треї → відкрити вікно
 
 ```bash
 npm run typecheck
-GYM_DATA_DIR=$(mktemp -d) PORT=4499 npm run start -w server &
-BASE=http://localhost:4499 node scripts/smoke.mjs   # тільки проти тестової БД!
 ```
 
-Очікування: всі `ok`, нуль `FAIL`.
+Очікування: без помилок. (API-смоук проти `server/` прибрано разом із легасі, SPO-139.)
 
 ### 3. Телефон у домашній мережі — 15 хв
 

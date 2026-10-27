@@ -214,8 +214,5 @@ export default defineConfig({
   optimizeDeps: { include: ['body-muscles'] },
   server: {
     port: 5173,
-    proxy: {
-      '/api': 'http://localhost:4477',
-    },
   },
 });

@@ -49,6 +49,23 @@ describe('compareBlock', () => {
     expect(cmp(cur)[0]).toContain('thresholds.lines');
   });
 
+  it('removed include of a file that no longer exists passes (SPO-139), an existing file or a glob does not', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'cov-retired-'));
+    try {
+      writeFileSync(join(dir, 'alive.ts'), '');
+      const isRetired = (e: string) => guard.isRetiredEntry(dir, e) as boolean;
+      const base: Block = { ...floor(), include: ['alive.ts', 'gone.ts', 'src/**'] };
+      const cur: Block = { ...floor(), include: [] };
+      const out = guard.compareBlock(base, cur, 'cfg', isRetired) as string[];
+      expect(out).toHaveLength(2);
+      expect(out.join('\n')).toContain('alive.ts');
+      expect(out.join('\n')).toContain('src/**');
+      expect(out.join('\n')).not.toContain('gone.ts');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('removed include fails and names the entry', () => {
     const cur = floor();
     cur.include = ['src/i18n/**'];

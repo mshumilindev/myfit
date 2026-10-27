@@ -3,12 +3,10 @@
   "private": true,
   "version": "0.1.0",
   "workspaces": [
-    "server",
     "client",
     "desktop"
   ],
   "scripts": {
-    "dev:server": "npm run dev -w server",
     "dev:client": "npm run dev -w client",
     "storybook": "npm run storybook -w client",
     "build-storybook": "npm run build-storybook -w client",
@@ -19,11 +17,10 @@
     "audit:theme-swap": "node scripts/theme-swap-audit.mjs",
     "audit:pixels": "node scripts/pixel-diff.mjs",
     "theme:new": "node scripts/theme-new.mjs",
-    "dev": "npm run dev -w server & npm run dev -w client & wait",
-    "build": "npm run build -w server && npm run build -w client && npm run build -w desktop",
-    "start": "npm run start -w server",
+    "dev": "npm run dev -w client",
+    "build": "npm run build -w client && npm run build -w desktop",
     "tray": "npm run start -w desktop",
-    "typecheck": "npm run typecheck -w server && npm run typecheck -w client && npm run typecheck -w desktop",
+    "typecheck": "npm run typecheck -w client && npm run typecheck -w desktop",
     "lint": "eslint .",
     "i18n:check": "node scripts/check-i18n.mjs",
     "exercise-images": "tsx scripts/exercise-images/cli.ts",

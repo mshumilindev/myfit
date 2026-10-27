@@ -22,7 +22,6 @@ dist/
 dev-dist/
 client/dist/
 client/distdev/
-server/dist/
 desktop/dist/
 coverage/
 client/coverage/

@@ -42,8 +42,8 @@ in the system browser); permissions are limited to notifications, camera and geo
 
 ## Not done yet (SPO-157)
 
-Signing + notarization, auto-update and stable/beta channels, APNs push, deep links, CI release, removal of legacy
-`server/` (SPO-139), web-side use of the bridge.
+Signing + notarization, auto-update and stable/beta channels, APNs push, deep links, CI release, web-side use of the
+bridge.
 
 ## Windows (unsigned installer)
 

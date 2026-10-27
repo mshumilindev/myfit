@@ -70,14 +70,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Typecheck (server + client + desktop)
+      - name: Typecheck (client + desktop)
         run: npm run typecheck
       - name: Module boundaries (cycles, kit stays presentational; known violations may only shrink)
         run: npm run deps:check
       - name: Style tokens (stylelint ratchet; known violations may only shrink)
         run: npm run lint:css
-      - name: Validate SQL schema
-        run: node scripts/validate-sql.mjs
       # Blocking since SPO-131 (prod dependencies are at 0 high/critical). A new vulnerable package fails the build.
       - name: Dependency audit (production, high and above)
         run: npm audit --omit=dev --audit-level=high
@@ -184,7 +182,7 @@ jobs:
           exit $rc
 
   build:
-    name: Build (server + client)
+    name: Build (client)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -193,7 +191,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build -w server && npm run build -w client
+      - run: npm run build -w client
 
   # Static security analysis (replaces CodeQL, which needs a paid licence on private repos). Findings become annotations.
   security:
@@ -218,6 +216,10 @@ jobs:
     # not retrievable from the agent sandbox. Informational until the CI failure is reproduced (SPO-229).
     continue-on-error: true
     runs-on: ubuntu-latest
+    # Playwright's image (see `layout-shard`): no apt-get on the runner. Tag = locked @playwright/test (guard test).
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -227,7 +229,6 @@ jobs:
       - run: npm ci --ignore-scripts
       # passkeysCore imports @simplewebauthn/server, which lives only in functions/ (own lockfile)
       - run: npm ci --ignore-scripts --prefix functions
-      - run: npx playwright install --with-deps chromium
       - run: npx playwright test --project=mobile-chromium tests/e2e/passkeys-webauthn.e2e.ts
 
   client-e2e:
@@ -236,6 +237,10 @@ jobs:
     # (SPO-337, SPO-341, SPO-358). Not in `quality`'s needs.
     continue-on-error: true
     runs-on: ubuntu-latest
+    # Playwright's image (see `layout-shard`): no apt-get on the runner. Tag = locked @playwright/test (guard test).
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -244,7 +249,6 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm run build -w client
-      - run: npx playwright install --with-deps chromium
       - name: Serve the built client
         run: |
           (cd client && npx vite preview --host 127.0.0.1 --port 4173 --strictPort >/dev/null 2>&1 &)
@@ -283,27 +287,6 @@ jobs:
         run: |
           echo '${{ toJSON(needs) }}'
           if [ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}" = "true" ]; then exit 1; fi
-
-  smoke:
-    name: API smoke (real server + SQLite)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run build -w server
-      - name: Boot server on a throwaway DB and run the contract smoke
-        run: |
-          export GYM_DATA_DIR="$(mktemp -d)"
-          PORT=4499 node server/dist/index.js &
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:4499/api/health >/dev/null && break
-            sleep 0.5
-          done
-          BASE=http://localhost:4499 node scripts/smoke.mjs
 
   # ---- layout audit: build Storybook once, audit it in parallel shards, then prove nothing was skipped ----
   storybook:
@@ -356,6 +339,12 @@ jobs:
     # after the build costs less than the idle slots did. A failed build skips the shards and fails `layout`.
     needs: storybook
     runs-on: ubuntu-latest
+    # Playwright's own image: browsers and system libraries are baked in, so there is no `apt-get` on the runner. That step
+    # (`playwright install --with-deps`) took 10 s to 773 s at random (28 of 60 samples >= 60 s, SPO-369/370) and made the
+    # shards uneven. The tag must equal the locked @playwright/test version: tests/ci-playwright-image.guard.test.ts.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
     permissions:
       contents: read
       actions: read
@@ -371,17 +360,6 @@ jobs:
           cache: npm
       # no lifecycle scripts: the audit needs Playwright + the built Storybook, not the husky/electron hooks
       - run: npm ci --ignore-scripts
-      - name: Playwright version
-        id: pw
-        run: echo "v=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v4
-        id: pwcache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.v }}
-      - name: Playwright Chromium (browser download is cached; system libraries are always installed)
-        run: |
-          if [ "${{ steps.pwcache.outputs.cache-hit }}" = "true" ]; then npx playwright install-deps chromium; else npx playwright install --with-deps chromium; fi
       - uses: actions/download-artifact@v4
         with:
           name: storybook-static
@@ -394,8 +372,8 @@ jobs:
       - name: Story audit (no sideways scroll, no clipped text or shadow; 320 / 390, normal and large font)
         run: npm run audit:stories -- --url http://127.0.0.1:6006 --locales ${{ env.LAYOUT_LOCALES }} --widths 320,390 --fonts 1,1.5 --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out audit-reports/stories-${{ matrix.shard }}.json
       - name: Weekday rows (seven day chips in one row of equal columns; 320-1440, five locales, both themes, 1.5x font)
-        if: always() && matrix.shard == 0
-        run: npm run audit:weekdays -- --url http://127.0.0.1:6006
+        if: always()
+        run: npm run audit:weekdays -- --url http://127.0.0.1:6006 --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5
       - name: Page hero / top bar spacing (back, title, actions on one axis; 390-1920)
         if: always()
         run: npm run audit:hero -- --url http://127.0.0.1:6006 --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out audit-reports/hero-${{ matrix.shard }}.json
