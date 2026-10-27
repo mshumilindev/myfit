@@ -136,14 +136,7 @@ import {
   activeInjuries as selectActiveInjuries,
   bodyPart as findBodyPart,
 } from './injury';
-import {
-  cutOut,
-  mergeRanges,
-  overlappingPeriods,
-  validateRange,
-  type DayRange,
-  type RangeError,
-} from './health';
+import { validateRange, type DayRange, type RangeError } from './health';
 import {
   awakeMsAt,
   SLEEP_IDLE_MS,
@@ -154,6 +147,17 @@ import {
 } from './sleep';
 import { computeStreak } from './streak';
 import { currentUid, getRole, callFn } from './api';
+import {
+  UNSENT_KEY,
+  bumpWorkoutGen,
+  loadUnsent,
+  resendUnsentWorkouts,
+  saveUnsent,
+  unsentWorkouts,
+  workoutWriteGen,
+} from './unsentWorkouts';
+import { resolveRestOverlap, type RestOverlapChoice } from './restOverlap';
+
 import { readProgramMemory } from './data/programMemory';
 import { CONDITIONS_KEY, CONDITIONS_SHARE_KEY, createConditionsCache } from './conditionsCache';
 import {
@@ -1301,64 +1305,6 @@ export function workoutStats(
 }
 
 setMigrationEnricher((d) => ({ ...d, stats: workoutStats(d as unknown as Workout) }));
-
-/**
- * Finished workouts whose write is still waiting for the encryption key (SPO-269): the write is parked in memory
- * and would be lost with the tab, and the next server snapshot would then drop the workout from this device.
- * The ids are kept in localStorage (never the data: that stays in the app state), per account, until the write
- * has been handed to Firestore's own offline queue; they are re-sent on the next start.
- */
-const UNSENT_KEY = 'spotter.unsentWorkouts.v1';
-function readUnsent(uid: string): Set<string> {
-  try {
-    const raw = JSON.parse(localStorage.getItem(UNSENT_KEY) ?? 'null') as {
-      uid?: string;
-      ids?: unknown;
-    } | null;
-    if (!raw || raw.uid !== uid || !Array.isArray(raw.ids)) return new Set();
-    return new Set(raw.ids.filter((x): x is string => typeof x === 'string'));
-  } catch {
-    return new Set();
-  }
-}
-const unsentWorkouts = new Set<string>();
-let unsentUid: string | null = null;
-function saveUnsent(uid: string): void {
-  try {
-    if (unsentWorkouts.size === 0) localStorage.removeItem(UNSENT_KEY);
-    else localStorage.setItem(UNSENT_KEY, JSON.stringify({ uid, ids: [...unsentWorkouts] }));
-  } catch {
-    /* storage full or blocked: the write still goes out in this session */
-  }
-}
-function loadUnsent(uid: string): void {
-  if (unsentUid !== uid) {
-    unsentWorkouts.clear();
-    unsentUid = uid;
-  }
-  for (const id of readUnsent(uid)) unsentWorkouts.add(id);
-}
-/** Re-sends the finished workouts whose write never reached Firestore's queue (idempotent upsert). */
-function resendUnsentWorkouts(uid: string): void {
-  loadUnsent(uid);
-  for (const id of [...unsentWorkouts]) {
-    const w = state.workouts.find((x) => x.id === id);
-    if (w && w.finishedAt !== null) writeWorkoutDoc(w);
-    else unsentWorkouts.delete(id);
-  }
-  saveUnsent(uid);
-}
-
-/**
- * Latest write generation per workout id. A write parked while the vault key is missing checks it before it fires, so a
- * delete (or a newer write) made in the meantime wins and a parked setDoc cannot bring a deleted document back.
- */
-const workoutWriteGen = new Map<string, number>();
-const bumpWorkoutGen = (id: string): number => {
-  const g = (workoutWriteGen.get(id) ?? 0) + 1;
-  workoutWriteGen.set(id, g);
-  return g;
-};
 
 function writeWorkoutDoc(w: Workout): void {
   const uid = currentUid();
@@ -2854,7 +2800,7 @@ export function deleteRestPeriod(id: string): void {
 /** How a new / edited period resolves an overlap with existing periods:
  *  'merge' folds them into one (same mode only), 'replace' cuts the new dates
  *  out of them (a period cut in two keeps both halves). */
-export type RestOverlapChoice = 'merge' | 'replace';
+export type { RestOverlapChoice };
 
 export type RestSaveResult =
   | { ok: true; period: RestPeriod }
@@ -2876,61 +2822,6 @@ export interface RestPeriodInput {
   /** Scheduling full rest / active recovery (F03) may reach into the future;
    *  logging the past may not, and illness never does. */
   allowFuture?: boolean;
-}
-
-type ResolvedOverlap = {
-  list: RestPeriod[];
-  range: DayRange;
-  changed: RestPeriod[];
-  removed: string[];
-};
-
-/** Apply the overlap choice to the other periods; returns the final range and
- *  the list without the merged-away / replaced periods. */
-function resolveRestOverlap(
-  list: RestPeriod[],
-  range: DayRange,
-  mode: RestMode,
-  selfId: string | null,
-  choice: RestOverlapChoice | undefined,
-  today: number,
-): ResolvedOverlap | 'overlap' | 'merge-mode' {
-  const others = overlappingPeriods(range, list, selfId, { mode, today });
-  if (others.length === 0) return { list, range, changed: [], removed: [] };
-  if (!choice) return 'overlap';
-  if (choice === 'merge') {
-    if (others.some((o) => o.mode !== mode)) return 'merge-mode';
-    const ids = new Set(others.map((o) => o.id));
-    return {
-      list: list.filter((p) => !ids.has(p.id)),
-      range: mergeRanges(range, others),
-      changed: [],
-      removed: [...ids],
-    };
-  }
-  const changed: RestPeriod[] = [];
-  const removed: string[] = [];
-  let next = list;
-  for (const o of others) {
-    const pieces = cutOut(o, range);
-    next = next.filter((p) => p.id !== o.id);
-    if (pieces.length === 0) {
-      removed.push(o.id);
-      continue;
-    }
-    pieces.forEach((pc, i) => {
-      const piece: RestPeriod = {
-        ...o,
-        id: i === 0 ? o.id : uuid(),
-        startDay: pc.startDay,
-        endDay: pc.endDay,
-        open: pc.open === true,
-      };
-      changed.push(piece);
-      next = [piece, ...next];
-    });
-  }
-  return { list: next, range, changed, removed };
 }
 
 function normalizeRange(input: { startDay: number; endDay: number; open?: boolean }): DayRange {
@@ -5222,7 +5113,7 @@ export function startSyncLoop(): () => void {
   // Sign-out does not go through resetLocalData: a different account signing in here must not inherit the memo (SPO-219).
   if (coachShareUid !== uid) resetCoachSharePublisher();
   coachShareUid = uid;
-  resendUnsentWorkouts(uid);
+  resendUnsentWorkouts(uid, (id) => state.workouts.find((x) => x.id === id), writeWorkoutDoc);
   void initVault(uid);
 
   unsubs.push(

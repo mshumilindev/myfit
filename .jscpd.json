@@ -3,7 +3,15 @@
   "minTokens": 80,
   "minLines": 10,
   "threshold": 1,
-  "ignore": ["**/*.test.*", "**/*.cases.*", "**/*.stories.*", "**/__fixtures__/**", "**/i18n/**", "**/legal.*.ts", "**/*.json"],
+  "ignore": [
+    "**/*.test.*",
+    "**/*.cases.*",
+    "**/*.stories.*",
+    "**/__fixtures__/**",
+    "**/i18n/**",
+    "**/legal.*.ts",
+    "**/*.json"
+  ],
   "reporters": ["console"],
   "silent": true
 }
