@@ -20,8 +20,7 @@ const NON_SENSITIVE_PLAIN_KEYS: Record<string, string> = {
   REST_PREFS_KEY: 'rest timer preferences',
   REST_CLEARED_KEY: 'one-time migration marker',
   SLEEP_KIND_KEY: 'one-time migration marker',
-  POS_CACHE_KEY:
-    'last position fix, device cache removed on logout (tracked in SPO-217 follow-ups)',
+  POS_CACHE_KEY: 'last position fix, device cache removed on logout (tracked in SPO-372)',
 };
 const SEALED_PLAIN = [
   'spotter.state',
