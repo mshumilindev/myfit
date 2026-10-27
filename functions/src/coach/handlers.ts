@@ -11,7 +11,7 @@ import { createPrivateKey, createPublicKey, sign as edSign } from 'node:crypto';
 import { onCall, type CallableRequest } from 'firebase-functions/v2/https';
 import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
-import { db, HttpsError, mintToken, requireRole, type Role } from '../lib';
+import { db, HOT, HttpsError, mintToken, requireRole, type Role } from '../lib';
 import * as svc from './service';
 import * as team from './team';
 import { runDaily, runReminders } from './reminders';
@@ -102,13 +102,14 @@ export const setConsent = onCall(opts, (req) =>
   run(req, ANY, (a) => svc.setConsent(ctx(), a, body(req))),
 );
 export const coachMyLink = onCall(opts, (req) => run(req, ANY, (a) => svc.coachMyLink(ctx(), a)));
-export const coachRead = onCall(opts, (req) =>
+/** SPO-364: the Coach screens' first reads stay warm (a cold start took 6-20 s and tripped the client's 15 s timeout). */
+export const coachRead = onCall({ ...opts, ...HOT }, (req) =>
   run(req, COACH, (a) => svc.coachRead(ctx(), a, body(req))),
 );
 export const coachLogRead = onCall(opts, (req) =>
   run(req, COACH, (a) => svc.logRead(ctx(), a, body(req))),
 );
-export const coachClients = onCall(opts, (req) =>
+export const coachClients = onCall({ ...opts, ...HOT }, (req) =>
   run(req, COACH, async (a) => {
     // people already assigned to this trainer the old way (users.trainerId) join the roster the first time it is read
     const legacy = await adoptLegacyClientsOf(ctx(), a.uid);
@@ -168,7 +169,7 @@ export const teamSetActivityScope = onCall(opts, (req) =>
 );
 export const teamRead = onCall(opts, (req) => run(req, TEAM, (a) => team.teamRead(ctx(), a)));
 /** The manager's own list of the team's clients (ids, names, conversation ids; no content). */
-export const teamClients = onCall(opts, (req) =>
+export const teamClients = onCall({ ...opts, ...HOT }, (req) =>
   run(req, ['manager'], (a) => team.teamClients(ctx(), a)),
 );
 /** SPO-239: a manager asks to remove a client; the client's trainer answers (Agenda "Team requests"). */
