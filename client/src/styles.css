@@ -16924,8 +16924,9 @@ html[data-theme] .apx-streak-n {
   padding: 0 var(--s-6);
   box-sizing: border-box;
   border-radius: var(--r-ctl, var(--r-pill));
-  background: var(--color-apex);
-  color: var(--c-160f24);
+  /* every app's count is the shared feed's unread: the same red as the bell it stands in for, in every theme */
+  background: var(--color-danger-solid);
+  color: var(--color-on-solid);
   font-size: var(--fs-10);
   font-weight: 700;
   display: grid;

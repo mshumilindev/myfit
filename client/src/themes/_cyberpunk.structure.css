@@ -97,13 +97,6 @@ html[data-theme='cyberpunk'] .tabbar-wrap .tabbar-fab {
   border-radius: var(--r-round);
 }
 
-/* Launcher: every app's count is the shared feed's unread, so all badges are the same red as the bell they stand in
-   for. Only this theme: Brass Glass keeps the badge it always had. */
-html[data-theme='cyberpunk'] .shell-badge {
-  background: var(--color-danger-solid);
-  color: var(--color-on-solid);
-}
-
 /* Empty-session picks (hero photo card, tiles): the wrapper holds the photo and the ring behind a chamfered card, so
    it is cut the same way, or the photo shows through the cut corners. The diagonal strokes take the ring's colour. */
 html[data-theme='cyberpunk'] :is(.es-hero, .es-tile) {
