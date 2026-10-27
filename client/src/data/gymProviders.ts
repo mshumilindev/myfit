@@ -418,6 +418,9 @@ export async function searchNearbyGymsMerged(
   const fold = (rows: PlaceResult[]) => {
     if (signal.aborted) return;
     mergeResults(acc, rows);
+    // Nothing found (yet) must not wipe the remembered gyms that are already on screen: offline, every service answers
+    // with an error or an empty list, and the person would see the list vanish.
+    if (acc.length === 0 && seen?.length) return;
     onResults(nearestFirst());
   };
   const guarded = async (name: string, job: Promise<PlaceResult[]>) => {
@@ -435,7 +438,7 @@ export async function searchNearbyGymsMerged(
   ]);
   const fresh = nearestFirst();
   if (!signal.aborted && fresh.length > 0) writeCache(cacheQuery, coords, fresh);
-  return fresh;
+  return fresh.length === 0 && seen?.length ? seen : fresh;
 }
 
 /** Words that find gyms in Photon when Overpass is down; the same host and consent as the plain search. */

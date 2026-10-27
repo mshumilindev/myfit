@@ -204,6 +204,25 @@ describe('nearby gyms are remembered for a day', () => {
     expect(second.mock.calls[0][0].some((x: PlaceResult) => x.name === 'Google Gym')).toBe(true);
     await p;
   });
+  it('offline (every service fails or finds nothing) the remembered gyms stay: the list is never wiped', async () => {
+    m.callFn.mockResolvedValue({ places: [ROW] });
+    await searchNearbyGymsMerged(KYIV, 1500, 'gym', [], new AbortController().signal, vi.fn());
+    m.callFn.mockRejectedValue(new Error('offline'));
+    const shown = vi.fn();
+    const out = await searchNearbyGymsMerged(
+      KYIV,
+      1500,
+      'gym',
+      [],
+      new AbortController().signal,
+      shown,
+    );
+    expect(shown.mock.calls.length).toBeGreaterThan(0);
+    for (const call of shown.mock.calls) {
+      expect(call[0].some((x: PlaceResult) => x.name === 'Google Gym')).toBe(true);
+    }
+    expect(out.some((x) => x.name === 'Google Gym')).toBe(true);
+  });
 });
 
 describe('a missed photo lookup is not remembered for long', () => {
