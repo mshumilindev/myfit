@@ -388,7 +388,7 @@ jobs:
         run: npm run audit:stories -- --url http://127.0.0.1:6006 --locales ${{ env.LAYOUT_LOCALES }} --widths 320,390 --fonts 1,1.5 --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out audit-reports/stories-${{ matrix.shard }}.json
       - name: Weekday rows (seven day chips in one row of equal columns; 320-1440, five locales, both themes, 1.5x font)
         if: always() && matrix.shard == 0
-        run: npm run audit:weekdays -- http://127.0.0.1:6006
+        run: npm run audit:weekdays -- --url http://127.0.0.1:6006
       - name: Page hero / top bar spacing (back, title, actions on one axis; 390-1920)
         if: always()
         run: npm run audit:hero -- --url http://127.0.0.1:6006 --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out audit-reports/hero-${{ matrix.shard }}.json
