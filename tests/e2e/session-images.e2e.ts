@@ -51,8 +51,12 @@ for (const size of SIZES) {
     await page.goto(BASE + '/');
     await passProfileGate(page);
 
-    await page.getByRole('button', { name: /Start your first session/ }).click();
+    // on a wide screen Start already stands open on the right; the empty-state button would stack a second sheet over it
+    if (size.width < 1024)
+      await page.getByRole('button', { name: /Start your first session/ }).click();
     await page.getByRole('button', { name: /Or start from scratch/ }).click();
+    await page.getByRole('button', { name: /Without a gym/ }).waitFor();
+    await page.waitForTimeout(1200); // the sheet slides in: click when it has settled
     await page.getByRole('button', { name: /Without a gym/ }).click();
     await expect(page.getByText('Warm-up', { exact: true }).first()).toBeVisible();
     // on a wide screen the Start sheet stays open next to the session: close it like a person would
