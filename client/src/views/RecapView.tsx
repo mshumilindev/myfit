@@ -5,21 +5,16 @@
  * canvas (data/shareCard) and hands it to the native share sheet.
  */
 import { RecapHead } from './recap/RecapHead';
+import { CardShareSheet } from '../components/CardShareSheet';
 import { weekOrder } from '../weekStart';
 import { Button, IconButton } from '../components/ui/Button';
-import { Segmented } from '../components/ui/Segmented';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useT, fmtKg, type LocaleId } from '../i18n';
 import { useStore, latestWeight } from '../store';
-import { Icon, Sheet, useIsDesktop, useExerciseName } from '../ui';
+import { Icon, useExerciseName } from '../ui';
 import { FocusBodyMap, focusBodyMapSvg } from '../components/Muscle';
 import { focusToGroup } from '../data/subregions';
-import {
-  drawRecapCard,
-  cardBlob,
-  type RecapShareModel,
-  type RecapShareFormat,
-} from '../data/shareCard';
+import { drawRecapCard, type RecapShareModel, type RecapShareFormat } from '../data/shareCard';
 import { buildRecap, recapRefFromId, type Recap, type RecapRef, type RecapDelta } from '../recaps';
 import type { Strings } from '../i18n/en';
 import { Tag } from '../components/ui/Tag';
@@ -127,126 +122,20 @@ function RecapShareSheet({
   onClose: () => void;
 }) {
   const { t, locale } = useT();
-  const isDesktop = useIsDesktop();
   const { ref, recap: r } = entry;
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [format, setFormat] = useState<RecapShareFormat>(isDesktop ? 'square' : 'story');
-  const [busy, setBusy] = useState(false);
-  const [copied, setCopied] = useState(false);
   const model = useMemo(() => recapShareModel(ref, r, t, locale), [ref, r, t, locale]);
-  const fileName = `spotter-${ref.id}.png`;
-
-  useEffect(() => {
-    const cv = canvasRef.current;
-    if (cv) void drawRecapCard(cv, model, format);
-  }, [model, format]);
-
-  async function withBlob(fn: (b: Blob) => void | Promise<void>): Promise<void> {
-    const cv = canvasRef.current;
-    if (!cv) return;
-    setBusy(true);
-    try {
-      const b = await cardBlob(cv);
-      if (b) await fn(b);
-    } catch {
-      /* user cancelled the share, or unsupported */
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  function download(b: Blob): void {
-    const url = URL.createObjectURL(b);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  async function nativeShare(b: Blob): Promise<void> {
-    const file = new File([b], fileName, { type: 'image/png' });
-    if (navigator.canShare?.({ files: [file] }) && navigator.share) {
-      await navigator.share({ files: [file], title: periodTitle(ref, locale) });
-    } else {
-      download(b);
-    }
-  }
-
-  async function copy(b: Blob): Promise<void> {
-    if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
-    } else {
-      download(b);
-    }
-  }
-
+  const draw = useCallback(
+    (cv: HTMLCanvasElement, format: RecapShareFormat) => drawRecapCard(cv, model, format),
+    [model],
+  );
   return (
-    <Sheet className="share-sheet" onClose={onClose}>
-      <div className="share-head">
-        <h3>{t.rcShareCard}</h3>
-        <Segmented
-          tabs
-          className="share-format"
-          value={format}
-          onChange={setFormat}
-          options={[
-            { value: 'story', label: t.shareFormatStory },
-            { value: 'square', label: t.shareFormatSquare },
-          ]}
-        />
-      </div>
-      <div className={`share-preview ${format}`}>
-        <canvas ref={canvasRef} className="share-canvas" />
-      </div>
-      <div className="share-actions">
-        {isDesktop ? (
-          <Button
-            variant="primary"
-            className="grow"
-            disabled={busy}
-            onClick={() => withBlob(download)}
-          >
-            <Icon name="download-simple" />
-            {t.shareDownload}
-          </Button>
-        ) : (
-          <Button
-            variant="primary"
-            className="grow"
-            disabled={busy}
-            onClick={() => withBlob(nativeShare)}
-          >
-            <Icon name="export" />
-            {t.shareToStories}
-          </Button>
-        )}
-        {!isDesktop && (
-          <Button
-            variant="secondary"
-            className="share-icon-btn"
-            disabled={busy}
-            onClick={() => withBlob(download)}
-            aria-label={t.shareSaveImage}
-            title={t.shareSaveImage}
-          >
-            <Icon name="download-simple" />
-          </Button>
-        )}
-        <Button
-          variant="secondary"
-          className="share-icon-btn"
-          disabled={busy}
-          onClick={() => withBlob(copy)}
-          aria-label={copied ? t.shareCopied : t.shareCopy}
-          title={copied ? t.shareCopied : t.shareCopy}
-        >
-          <Icon name={copied ? 'check' : 'copy'} />
-        </Button>
-      </div>
-    </Sheet>
+    <CardShareSheet
+      title={t.rcShareCard}
+      fileName={`spotter-${ref.id}.png`}
+      shareTitle={periodTitle(ref, locale)}
+      draw={draw}
+      onClose={onClose}
+    />
   );
 }
 
