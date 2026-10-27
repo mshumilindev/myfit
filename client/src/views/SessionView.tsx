@@ -4708,7 +4708,7 @@ export function SessionView(props: {
                 gym={gym}
                 gyms={store.gyms}
                 offline={store.syncStatus === 'offline'}
-                queued={store.queue.length}
+                queued={store.pendingWrites}
                 mode="session"
               />
             )}

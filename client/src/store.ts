@@ -441,6 +441,10 @@ export interface StoreState {
   syncStatus: SyncStatus;
   syncError: SyncError | null;
   lastSyncAt: number | null;
+  /** Workouts written here and not yet confirmed by the server (from Firestore snapshot metadata). */
+  pendingWrites: number;
+  /** Some synced documents cannot be read yet because the vault key is not ready. */
+  dataLocked: boolean;
 }
 
 function load<T>(key: string, fallback: T): T {
@@ -499,6 +503,8 @@ let state: StoreState = {
   syncStatus: 'pending',
   syncError: null,
   lastSyncAt: null,
+  pendingWrites: 0,
+  dataLocked: false,
 };
 
 const listeners = new Set<() => void>();
@@ -5033,7 +5039,12 @@ export async function gymAtCurrentPosition(gyms: Gym[]): Promise<Gym | null> {
 let unsubs: Unsubscribe[] = [];
 let presenceTimer: ReturnType<typeof setInterval> | null = null;
 
-function markSynced(fromCache: boolean, hasPending: boolean): void {
+function markSynced(
+  fromCache: boolean,
+  hasPending: boolean,
+  pendingWrites: number,
+  locked: number,
+): void {
   const status: SyncStatus = hasPending
     ? navigator.onLine
       ? 'pending'
@@ -5043,6 +5054,8 @@ function markSynced(fromCache: boolean, hasPending: boolean): void {
       : 'synced';
   const patch: Partial<StoreState> = {
     syncStatus: state.syncStatus === 'failed' ? 'failed' : status,
+    pendingWrites,
+    dataLocked: locked > 0,
   };
   if (status === 'synced') {
     patch.lastSyncAt = Date.now();
@@ -5147,7 +5160,7 @@ export function startSyncLoop(): () => void {
 
   const workoutsMirror = mirrorCollection<
     Workout & Record<string, unknown>,
-    { fromCache: boolean; pending: boolean }
+    { fromCache: boolean; pending: boolean; pendingCount: number }
   >((serverWorkouts, { meta, locked }) => {
     if (!locked) sealedStore.markRemote('workouts');
     // A document without its exercise list is damaged: skipped, so the code below never trips over it (SPO-219).
@@ -5156,7 +5169,7 @@ export function startSyncLoop(): () => void {
       ...state,
       workouts: mergeServerWorkoutsWithLocalDrafts(usable, state.workouts),
     };
-    markSynced(meta.fromCache, meta.pending);
+    markSynced(meta.fromCache, meta.pending, meta.pendingCount, locked);
     applyAutoFinish();
     clearStoredRest();
     backfillSleepKind();
@@ -5168,7 +5181,11 @@ export function startSyncLoop(): () => void {
       (snap) =>
         workoutsMirror.push(
           snap.docs.map((d) => d.data()),
-          { fromCache: snap.metadata.fromCache, pending: snap.metadata.hasPendingWrites },
+          {
+            fromCache: snap.metadata.fromCache,
+            pending: snap.metadata.hasPendingWrites,
+            pendingCount: snap.docs.filter((d) => d.metadata.hasPendingWrites).length,
+          },
         ),
       onWriteError,
     ),
@@ -6503,6 +6520,8 @@ export function resetLocalData(): void {
     syncStatus: 'pending',
     syncError: null,
     lastSyncAt: null,
+    pendingWrites: 0,
+    dataLocked: false,
   };
   pendingSleepDeletes.clear();
   persistSleepTombstones();

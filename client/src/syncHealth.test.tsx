@@ -44,6 +44,19 @@ const base = {
 };
 
 describe('deriveSyncUi', () => {
+  it('offline with nothing of ours queued is a saved copy; with queued changes it stays offline', () => {
+    expect(deriveSyncUi({ ...base, online: false, pendingWrites: 0 })).toBe('stale');
+    expect(deriveSyncUi({ ...base, status: 'offline', pendingWrites: 0 })).toBe('stale');
+    expect(deriveSyncUi({ ...base, online: false, pendingWrites: 2 })).toBe('offline');
+    expect(deriveSyncUi({ ...base, online: false })).toBe('offline');
+  });
+
+  it('locked when the vault cannot open synced data; failed still wins; signed out is silent', () => {
+    expect(deriveSyncUi({ ...base, locked: true })).toBe('locked');
+    expect(deriveSyncUi({ ...base, locked: true, status: 'failed' })).toBe('failed');
+    expect(deriveSyncUi({ ...base, locked: true, signedIn: false })).toBe('synced');
+  });
+
   it('is silent when settled or signed out', () => {
     expect(deriveSyncUi(base)).toBe('synced');
     expect(deriveSyncUi({ ...base, signedIn: false, status: 'failed' })).toBe('synced');

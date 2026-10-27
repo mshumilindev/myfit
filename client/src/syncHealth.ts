@@ -14,6 +14,9 @@ import { getStoreState, retrySync, subscribeStore } from './store';
 import type { SyncStatus } from './types';
 import type { SyncStatusState } from './components/ui/SyncStatus';
 
+/** What the indicator can show: the chip states plus the two the icon adds (SPO-375). */
+export type SyncUiState = SyncStatusState | 'stale' | 'locked';
+
 /** A sync that has not settled after this long is "slow". */
 export const SLOW_AFTER_MS = 8_000;
 /** A plain "Syncing" chip is hidden for this long, so quick syncs never flash. */
@@ -37,13 +40,21 @@ export interface SyncUiInput {
   unsettledForMs: number;
   /** How long a mutation request has been in flight, ms (0 = none). */
   savingForMs: number;
+  /** Workouts not yet confirmed by the server. Omitted = unknown. */
+  pendingWrites?: number;
+  /** Synced documents the vault cannot open yet. */
+  locked?: boolean;
 }
 
 /** What the chip should say. `synced` means "show nothing". Pure. */
-export function deriveSyncUi(i: SyncUiInput): SyncStatusState {
+export function deriveSyncUi(i: SyncUiInput): SyncUiState {
   if (!i.signedIn) return 'synced';
   if (i.status === 'failed') return 'failed';
-  if (!i.online || i.status === 'offline') return 'offline';
+  if (i.locked) return 'locked';
+  if (!i.online || i.status === 'offline') {
+    // No network and nothing of ours waiting to be sent: what you see is the saved copy.
+    return i.pendingWrites === 0 ? 'stale' : 'offline';
+  }
   if (i.status === 'pending' || i.status === 'syncing') {
     if (i.unsettledForMs >= SLOW_AFTER_MS) return 'slow';
     if (i.savingForMs >= SAVING_SHOW_AFTER_MS) return 'saving';
@@ -104,11 +115,21 @@ function useOnline(): boolean {
  * mutations, and drives retries: exponential backoff while slow, an immediate
  * retry when the browser comes back online. Returns the state and a manual retry.
  */
-export function useSyncUi(): { state: SyncStatusState; retry: () => void } {
+export function useSyncUi(): { state: SyncUiState; retry: () => void; count: number } {
   const status = useSyncExternalStore(
     subscribeStore,
     () => getStoreState().syncStatus,
     () => getStoreState().syncStatus,
+  );
+  const pendingWrites = useSyncExternalStore(
+    subscribeStore,
+    () => getStoreState().pendingWrites,
+    () => getStoreState().pendingWrites,
+  );
+  const locked = useSyncExternalStore(
+    subscribeStore,
+    () => getStoreState().dataLocked,
+    () => getStoreState().dataLocked,
   );
   const online = useOnline();
   const unsettledSince = useSyncExternalStore(
@@ -139,6 +160,8 @@ export function useSyncUi(): { state: SyncStatusState; retry: () => void } {
     online,
     unsettledForMs: unsettledSince === null ? 0 : Math.max(0, now - unsettledSince),
     savingForMs: savingSince === null ? 0 : Math.max(0, now - savingSince),
+    pendingWrites,
+    locked,
   });
 
   const retry = useCallback(() => {
@@ -175,5 +198,5 @@ export function useSyncUi(): { state: SyncStatusState; retry: () => void } {
     };
   }, [slow]);
 
-  return { state, retry };
+  return { state, retry, count: pendingWrites };
 }

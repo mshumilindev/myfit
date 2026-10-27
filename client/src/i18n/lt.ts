@@ -123,6 +123,8 @@ export const lt: Strings = {
   syncSlow: 'Lėtas ryšys — naudojami išsaugoti duomenys',
   syncOfflineWork: 'Neprisijungta — pakeitimai bus sinchronizuoti vėliau',
   syncProblem: 'Sinchronizavimo problema',
+  syncStale: 'Išsaugota kopija — gali būti pasenusi',
+  syncLocked: 'Užrakinta — atrakinkite, kad sinchronizuotumėte',
   authSlowHint: 'Serveris atsako lėtai. Vis tiek gali bandyti prisijungti.',
   loadingApp: 'Kraunama',
   createYourAccount: 'Susikurk paskyrą',

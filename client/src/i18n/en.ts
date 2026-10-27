@@ -89,6 +89,8 @@ export const en = {
   syncSlow: 'Slow connection — using saved data',
   syncOfflineWork: 'Offline — your changes will sync later',
   syncProblem: 'Sync problem',
+  syncStale: 'Saved copy — may be out of date',
+  syncLocked: 'Locked — unlock to sync',
   authSlowHint: 'The server is slow to answer. You can still try to sign in.',
   loadingApp: 'Loading',
   createYourAccount: 'Create your account',

@@ -29,29 +29,22 @@ describe('TodayView: chrome', () => {
     expect(document.querySelector('.td-topbar-date')?.textContent).toBe(fmtDayMonth(NOW, 'en'));
   });
 
-  it.each([
-    ['synced', en.synced, 'ok'],
-    ['syncing', en.syncing, ''],
-    ['offline', en.offline, 'danger'],
-  ])('sync chip when %s', async (status, label, cls) => {
-    await openToday({ ...richState(), syncStatus: status as never });
-    const chip = document.querySelector('.sync-chip') as HTMLElement;
-    expect(chip.textContent).toBe(label);
-    if (cls) expect(chip.classList.contains(cls)).toBe(true);
-  });
-
-  it('an idle chip reads syncing without the ok mark', async () => {
-    await openToday({ ...richState(), syncStatus: 'idle' as never });
-    const chip = document.querySelector('.sync-chip') as HTMLElement;
-    expect(chip.textContent).toBe(en.syncing);
-    expect(chip.classList.contains('ok')).toBe(false);
+  // The header sync state is the kit SyncStateIcon (SPO-375). Which state it shows is derived in
+  // syncHealth (tested there); here: it replaces the old dot + word chip and is named by its state.
+  it('the header shows the sync icon, named by its state, instead of the old chip', async () => {
+    await openToday({ ...richState(), syncStatus: 'synced' as never });
+    const icon = document.querySelector('.td-topbar-actions .uisi') as HTMLElement;
+    expect(icon.getAttribute('data-state')).toBe('synced');
+    expect(icon.getAttribute('aria-label')).toBe(en.synced);
+    expect(icon.querySelector('.uisi-tip')?.textContent).toBe(en.synced);
+    expect(document.querySelector('.sync-chip')).toBeNull();
   });
 
   it('offline shows the cache note and the number of queued writes', async () => {
     await openToday({
       ...richState(),
       syncStatus: 'offline' as never,
-      queue: [{ id: 'q1' }, { id: 'q2' }] as never,
+      pendingWrites: 2,
     });
     expect(screen.getByText(en.servedFromCache)).toBeTruthy();
     expect(screen.getByText(en.offlineQueued(2))).toBeTruthy();
@@ -61,7 +54,7 @@ describe('TodayView: chrome', () => {
     await openToday({
       ...richState(),
       syncStatus: 'syncing' as never,
-      queue: [{ id: 'q1' }] as never,
+      pendingWrites: 1,
     });
     expect(screen.getByText(en.sendingQueued)).toBeTruthy();
     expect(screen.queryByText(en.servedFromCache)).toBeNull();
@@ -72,7 +65,7 @@ describe('TodayView: chrome', () => {
       ...emptyState(),
       lastSyncAt: null,
       syncStatus: 'syncing' as never,
-      queue: [] as never,
+      pendingWrites: 0,
     });
     expect(document.querySelector('.td-topbar')).toBeNull();
     expect(document.querySelectorAll('.uisk').length).toBeGreaterThan(0);

@@ -1,5 +1,6 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
 import { HubSlot } from '../components/HubSlot';
+import { SyncIndicator } from '../components/SyncIndicator';
 import { illnessState } from '../illness';
 import { illnessKindName } from './health/parts';
 import { Skeleton } from '../components/ui/Skeleton';
@@ -1074,16 +1075,16 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const banners = (
     <>
-      {store.syncStatus === 'offline' && store.queue.length > 0 && (
+      {store.syncStatus === 'offline' && store.pendingWrites > 0 && (
         <Notice tone="danger" icon="cloud-slash">
-          {t.offlineQueued(store.queue.length)}
+          {t.offlineQueued(store.pendingWrites)}
         </Notice>
       )}
-      {store.syncStatus === 'syncing' && store.queue.length > 0 && (
+      {store.syncStatus === 'syncing' && store.pendingWrites > 0 && (
         <Notice
           tone="neutral"
           icon="arrows-clockwise"
-          trail={store.queue.length}
+          trail={store.pendingWrites}
           below={<ProgressBar value={66} height={4} />}
         >
           {t.sendingQueued}
@@ -1677,7 +1678,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             <SectionLabel className="td-topbar-date">{fmtDayMonth(now, locale)}</SectionLabel>
           </div>
           <div className="td-topbar-actions">
-            <SyncChip store={store} />
+            <SyncChip />
           </div>
         </div>
 
@@ -1917,32 +1918,7 @@ function WeekPills({ cells }: { cells: WeekCell[] }) {
   );
 }
 
-export function SyncChip({ store }: { store: Store }) {
-  const { t } = useT();
-  const s = store.syncStatus;
-  if (s === 'syncing') {
-    return (
-      <div className="sync-chip">
-        <span className="sk-dot" />
-        <span>{t.syncing}</span>
-      </div>
-    );
-  }
-  if (s === 'offline') {
-    return (
-      <div className="sync-chip danger">
-        <span className="dot" />
-        <span>{t.offline}</span>
-      </div>
-    );
-  }
-  return (
-    <div className={`sync-chip${s === 'synced' ? ' ok' : ''}`}>
-      <span
-        className="dot"
-        style={s !== 'synced' ? { background: 'var(--color-neutral-600)' } : undefined}
-      />
-      <span>{s === 'synced' ? t.synced : t.syncing}</span>
-    </div>
-  );
+/** The Today header sync state: the animated kit icon (SPO-375) in place of the old dot + word chip. */
+export function SyncChip() {
+  return <SyncIndicator />;
 }

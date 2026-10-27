@@ -1,5 +1,6 @@
 import { useT } from '../i18n';
 import { useSyncUi } from '../syncHealth';
+import { useHasSyncIndicator } from '../syncIndicatorPresence';
 import { SyncStatus } from './ui/SyncStatus';
 
 /**
@@ -12,20 +13,15 @@ import { SyncStatus } from './ui/SyncStatus';
 export function SyncStatusHost() {
   const { t } = useT();
   const { state, retry } = useSyncUi();
-  if (state === 'synced') return null;
-  const label =
-    state === 'saving'
-      ? t.saving
-      : state === 'slow'
-        ? t.syncSlow
-        : state === 'offline'
-          ? t.syncOfflineWork
-          : state === 'failed'
-            ? t.syncProblem
-            : t.syncing;
+  const hasIcon = useHasSyncIndicator();
+  // Pages with the header SyncIndicator (SPO-375) show every state themselves; elsewhere this pill
+  // is the indicator, and only for the states that need a Retry.
   const canRetry = state === 'slow' || state === 'offline' || state === 'failed';
+  if (hasIcon || !canRetry) return null;
+  const label =
+    state === 'slow' ? t.syncSlow : state === 'offline' ? t.syncOfflineWork : t.syncProblem;
   return (
-    <SyncStatus state={state} floating onRetry={canRetry ? retry : undefined} retryLabel={t.retry}>
+    <SyncStatus state={state} floating onRetry={retry} retryLabel={t.retry}>
       {label}
     </SyncStatus>
   );

@@ -1013,7 +1013,7 @@ export function App() {
       setAuthed(false);
       replaceHash('#/today');
     },
-    queueLength: store.queue.length,
+    queueLength: store.pendingWrites,
   };
 
   // Every app's account block (rail avatar popover, phone More sheet) signs out through here.
@@ -1021,7 +1021,7 @@ export function App() {
   useEffect(() => {
     signOutRef.current = shell.signOut;
   });
-  const queueLen = store.queue.length;
+  const queueLen = store.pendingWrites;
   useEffect(
     () => setSuiteSession({ signOut: (o) => signOutRef.current(o), queueLength: queueLen }),
     [queueLen],
@@ -1863,7 +1863,7 @@ export function App() {
             gym={store.gyms.find((g) => g.id === open.gymId) ?? null}
             gyms={store.gyms}
             offline={store.syncStatus === 'offline'}
-            queued={store.queue.length}
+            queued={store.pendingWrites}
             onResume={() => setOverlay({ screen: 'session', workoutId: open.id })}
             mode="compact"
           />

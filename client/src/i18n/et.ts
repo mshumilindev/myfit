@@ -104,6 +104,8 @@ export const et: Strings = {
   syncSlow: 'Aeglane ühendus — kasutame salvestatud andmeid',
   syncOfflineWork: 'Võrgust väljas — muudatused sünkroonitakse hiljem',
   syncProblem: 'Sünkroonimise probleem',
+  syncStale: 'Salvestatud koopia — võib olla aegunud',
+  syncLocked: 'Lukustatud — sünkroonimiseks ava',
   authSlowHint: 'Server vastab aeglaselt. Sisselogimist võid siiski proovida.',
   loadingApp: 'Laadimine',
   createYourAccount: 'Loo oma konto',

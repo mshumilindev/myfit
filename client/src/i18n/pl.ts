@@ -115,6 +115,8 @@ export const pl: Strings = {
   syncSlow: 'Wolne połączenie — używamy zapisanych danych',
   syncOfflineWork: 'Offline — zmiany zsynchronizują się później',
   syncProblem: 'Problem z synchronizacją',
+  syncStale: 'Zapisana kopia — może być nieaktualna',
+  syncLocked: 'Zablokowane — odblokuj, aby zsynchronizować',
   authSlowHint: 'Serwer odpowiada wolno. Nadal możesz spróbować się zalogować.',
   loadingApp: 'Ładowanie',
   createYourAccount: 'Załóż swoje konto',

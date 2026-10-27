@@ -808,6 +808,11 @@ div.hist-item {
 .today-page .td-topbar .sync-chip {
   margin-top: 0;
 }
+/* The sync icon (SPO-375) is centred on the date + title block, not on the first line. */
+.today-page .td-topbar-actions {
+  align-self: center;
+  line-height: 0;
+}
 /* A little more air between the program block and the advisory deck below. */
 .today-page .today-program-card.td-week {
   margin-bottom: var(--s-8);
