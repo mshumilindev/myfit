@@ -89,6 +89,21 @@ describe('TodayView: empty account', () => {
     expect(document.querySelector('[role="dialog"], [role="alertdialog"]')).not.toBeNull();
   });
 
+  it('on desktop the start button moves focus into the standing Start panel instead of opening a second sheet', async () => {
+    const { setDesktop } = await import('./__fixtures__/viewKit');
+    setDesktop(true);
+    try {
+      const { shell } = await openToday(emptyState());
+      fireEvent.click(screen.getByRole('button', { name: en.startFirstSession }));
+      // the spy is created on first call: no spy = never called
+      expect(shell.calls.openStart?.mock.calls.length ?? 0).toBe(0);
+      const side = document.querySelector('.today-start-side') as HTMLElement;
+      expect(side.contains(document.activeElement)).toBe(true);
+    } finally {
+      setDesktop(false);
+    }
+  });
+
   it('suggests adding a gym when none exists, which jumps to the gyms tab', async () => {
     const { shell } = await openToday(emptyState());
     fireEvent.click(screen.getByText(en.addGymHint));

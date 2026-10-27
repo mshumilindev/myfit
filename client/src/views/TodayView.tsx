@@ -229,6 +229,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   /** Every "start" on Today opens the Start sheet (one entry point). */
   function startSession() {
     if (resumeLive()) return;
+    // Wide screen: Start already stands open on the right. A second sheet over it would hide the sub-flows
+    // (gym chooser, …) that the panel opens, so move focus into the panel instead.
+    if (isDesktop) {
+      document.querySelector<HTMLElement>('.today-start-side button')?.focus();
+      return;
+    }
     shell.openStart();
   }
 
