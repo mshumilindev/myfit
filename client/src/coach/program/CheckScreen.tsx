@@ -1,7 +1,6 @@
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
-import { EmptyState } from '../../components/ui/EmptyState';
 import { FailedState } from '../../components/ui/FailedState';
 import { Notice } from '../../components/ui/Notice';
 import { SectionLabel } from '../../components/ui/SectionLabel';
@@ -20,6 +19,7 @@ import {
 import { useCoachWorld, type CoachWorldPort } from '../data';
 import { Inspector, Page, Split } from '../layout/Layout';
 import { programPageBack, programPageRoute, type CoachRoute } from '../routes';
+import { NoClientPage } from './NoClientPage';
 import { useProgramDraft } from './draftStore';
 import { requestEditorFocus } from './focusRequest';
 import { firstName } from './parts';
@@ -61,34 +61,14 @@ export function CheckScreen({ cid, from = 'list', onNavigate, port, worldPort }:
   const backChrome = { label: p.ckBack, text: r.roBack, onClick: toEditor };
   const stateChrome = { back: backChrome, title: p.ckTitle };
 
-  if (!client || client.invite) {
-    if (world.world || world.error)
-      return (
-        <Page>
-          <PageFrame chrome={stateChrome}>
-            <Card>
-              <EmptyState
-                titleAs="h2"
-                icon="user-focus"
-                title={p.edNoClientTitle}
-                body={p.edNoClientBody}
-              >
-                <Button variant="primary" onClick={() => onNavigate({ screen: 'clients' })}>
-                  {p.edToClients}
-                </Button>
-              </EmptyState>
-            </Card>
-          </PageFrame>
-        </Page>
-      );
+  if (!client || client.invite)
     return (
-      <Page>
-        <PageFrame chrome={stateChrome}>
-          <SkeletonRows rows={5} />
-        </PageFrame>
-      </Page>
+      <NoClientPage
+        chrome={stateChrome}
+        settled={!!(world.world || world.error)}
+        onNavigate={onNavigate}
+      />
     );
-  }
   if (!b || !draft || !check) {
     return (
       <Page>

@@ -1,8 +1,6 @@
 import { createContext, useContext, useMemo, useState } from 'react';
 import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
 import { ConfirmEffectsDialog } from '../../components/ui/ConfirmEffectsDialog';
-import { EmptyState } from '../../components/ui/EmptyState';
 import { FailedState } from '../../components/ui/FailedState';
 import { Notice } from '../../components/ui/Notice';
 import { SkeletonRows } from '../../components/ui/Skeleton';
@@ -25,6 +23,7 @@ import { Page } from '../layout/Layout';
 import type { Dow } from '../domain/types';
 import { programPageBack, programPageRoute, type CoachRoute } from '../routes';
 import { AssignmentCard } from './editor/AssignmentCard';
+import { NoClientPage } from './NoClientPage';
 import { useProgramDraft } from './draftStore';
 import { consumeEditorFocus } from './focusRequest';
 import type { ProgramPort } from './port';
@@ -96,34 +95,14 @@ export function EditorScreen({
   const backChrome = { label: p.edBack, text: r.roBack, onClick: goBack };
   const stateChrome = { back: backChrome, title: p.edTitle };
 
-  if (!client || client.invite) {
-    if (world.world || world.error)
-      return (
-        <Page>
-          <PageFrame chrome={stateChrome}>
-            <Card>
-              <EmptyState
-                titleAs="h2"
-                icon="user-focus"
-                title={p.edNoClientTitle}
-                body={p.edNoClientBody}
-              >
-                <Button variant="primary" onClick={() => onNavigate({ screen: 'clients' })}>
-                  {p.edToClients}
-                </Button>
-              </EmptyState>
-            </Card>
-          </PageFrame>
-        </Page>
-      );
+  if (!client || client.invite)
     return (
-      <Page>
-        <PageFrame chrome={stateChrome}>
-          <SkeletonRows rows={5} />
-        </PageFrame>
-      </Page>
+      <NoClientPage
+        chrome={stateChrome}
+        settled={!!(world.world || world.error)}
+        onNavigate={onNavigate}
+      />
     );
-  }
   if (!b || !draft) {
     return (
       <Page>
