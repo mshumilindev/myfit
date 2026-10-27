@@ -4,6 +4,7 @@ import { Field } from '../../components/ui/Field';
 import { ResponsivePanel } from '../../components/ui/ResponsivePanel';
 import { Segmented } from '../../components/ui/Segmented';
 import { useTeamT } from '../../i18n/coachTeam';
+import { InviteLinkActions, InviteLinkBody, useCopyLink } from './InviteLinkPanel';
 
 export interface InviteTrainer {
   id: string;
@@ -37,7 +38,7 @@ export function InviteClientSheet({
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [link, setLink] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyLink(link ?? '');
   const trainer = trainers.find((t) => t.id === trainerId);
 
   const submit = async (e?: FormEvent) => {
@@ -51,12 +52,6 @@ export function InviteClientSheet({
     if (r.ok) return setLink(r.url);
     setError(tm.tmErrGeneric);
   };
-  const copy = () => {
-    if (!link) return;
-    void navigator.clipboard?.writeText(link).catch(() => undefined);
-    setCopied(true);
-  };
-
   if (link)
     return (
       <ResponsivePanel
@@ -66,28 +61,12 @@ export function InviteClientSheet({
         onClose={onClose}
         label={tm.icLinkTitle}
         title={tm.icLinkTitle}
-        footer={
-          <div className="tm-sheet-actions">
-            <Button variant="primary" icon={copied ? 'check' : undefined} onClick={copy}>
-              {copied ? tm.tmLinkCopied : tm.tmCopyLink}
-            </Button>
-            <Button variant="secondary" onClick={onClose}>
-              {tm.tmDone}
-            </Button>
-          </div>
-        }
+        footer={<InviteLinkActions copied={copied} onCopy={copy} onClose={onClose} />}
       >
-        <div className="tm-sheet">
-          <p className="tm-sheet-sub">
-            {tm.icLinkBody(name.trim(), shortName(trainer?.name ?? ''))}
-          </p>
-          <Field
-            label={tm.tmCopyLink}
-            value={link}
-            readOnly
-            onFocus={(e) => e.currentTarget.select()}
-          />
-        </div>
+        <InviteLinkBody
+          body={tm.icLinkBody(name.trim(), shortName(trainer?.name ?? ''))}
+          link={link}
+        />
       </ResponsivePanel>
     );
 

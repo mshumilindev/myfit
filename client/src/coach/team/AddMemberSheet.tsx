@@ -4,6 +4,7 @@ import { Field } from '../../components/ui/Field';
 import { Segmented } from '../../components/ui/Segmented';
 import { ResponsivePanel } from '../../components/ui/ResponsivePanel';
 import { useTeamT } from '../../i18n/coachTeam';
+import { InviteLinkActions, InviteLinkBody, useCopyLink } from './InviteLinkPanel';
 import type { TeamErrorCode } from './port';
 import { isEmail, type TeamRole } from './types';
 
@@ -30,7 +31,7 @@ export function AddMemberSheet({
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [link, setLink] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyLink(link ?? '');
   const [role, setRole] = useState<TeamRole>(defaultRole);
   const manager = role === 'manager';
 
@@ -56,12 +57,6 @@ export function AddMemberSheet({
     );
   };
 
-  const copy = () => {
-    if (!link) return;
-    void navigator.clipboard?.writeText(link).catch(() => undefined);
-    setCopied(true);
-  };
-
   if (link)
     return (
       <ResponsivePanel
@@ -71,26 +66,9 @@ export function AddMemberSheet({
         onClose={onClose}
         label={tm.tmLinkTitle}
         title={tm.tmLinkTitle}
-        footer={
-          <div className="tm-sheet-actions">
-            <Button variant="primary" icon={copied ? 'check' : undefined} onClick={copy}>
-              {copied ? tm.tmLinkCopied : tm.tmCopyLink}
-            </Button>
-            <Button variant="secondary" onClick={onClose}>
-              {tm.tmDone}
-            </Button>
-          </div>
-        }
+        footer={<InviteLinkActions copied={copied} onCopy={copy} onClose={onClose} />}
       >
-        <div className="tm-sheet">
-          <p className="tm-sheet-sub">{tm.tmLinkBody(email.trim())}</p>
-          <Field
-            label={tm.tmCopyLink}
-            value={link}
-            readOnly
-            onFocus={(e) => e.currentTarget.select()}
-          />
-        </div>
+        <InviteLinkBody body={tm.tmLinkBody(email.trim())} link={link} />
       </ResponsivePanel>
     );
 
