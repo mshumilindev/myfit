@@ -12,7 +12,8 @@ export const GOOGLE_ENGINE = 'google-places';
 const NEARBY_MAX_RADIUS_M = 5000;
 const SEARCH_MAX_RADIUS_M = 50000;
 const MAX_RESULTS = 20;
-const PHOTO_NAME_RE = /^places\/[A-Za-z0-9_-]{1,200}\/photos\/[A-Za-z0-9_-]{1,400}$/;
+/** Photo tokens from Places are long (several hundred characters and growing); the charset, not the length, is the guard. */
+const PHOTO_NAME_RE = /^places\/[A-Za-z0-9_-]{1,300}\/photos\/[A-Za-z0-9_-]{1,2000}$/;
 const PHOTO_WIDTH_PX = 640;
 /** An image larger than this is not sent back through a callable (the limit is 10 MB; a card needs far less). */
 export const PHOTO_MAX_BYTES = 600_000;
@@ -146,6 +147,8 @@ export function mapPlaces(data: unknown): PlacesResult[] {
     const row: PlacesResult = { id: p.id, name, lat: latitude, lng: longitude };
     if (p.formattedAddress) row.address = p.formattedAddress;
     const photo = p.photos?.[0];
+    if (photo?.name && !PHOTO_NAME_RE.test(photo.name))
+      console.warn(`gymPlaces: photo reference rejected (length ${photo.name.length})`);
     if (photo?.name && PHOTO_NAME_RE.test(photo.name)) {
       row.photoName = photo.name;
       const by = (photo.authorAttributions ?? [])

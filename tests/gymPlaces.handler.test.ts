@@ -196,6 +196,27 @@ describe('SPO-360 gymPlaces: what reaches Google', () => {
   });
 });
 
+describe('SPO-360 gymPlaces: long photo references', () => {
+  const LONG = `places/ChIJabc123/photos/${'AbC_-9'.repeat(110)}`; // 660 characters: real Places tokens are this long
+  it('a long photo reference is accepted when asked for', () => {
+    expect(parseRequest({ op: 'photo', name: LONG })).toEqual({ op: 'photo', name: LONG });
+  });
+  it('a long photo reference is passed on from a search result', () => {
+    expect(
+      mapPlaces({
+        places: [
+          {
+            id: 'p1',
+            displayName: { text: 'G' },
+            location: { latitude: 1, longitude: 2 },
+            photos: [{ name: LONG }],
+          },
+        ],
+      })[0]?.photoName,
+    ).toBe(LONG);
+  });
+});
+
 describe('SPO-360 gymPlaces: photos', () => {
   const img = (bytes: number, type = 'image/jpeg') =>
     new Response(new Uint8Array(bytes), { status: 200, headers: { 'Content-Type': type } });
