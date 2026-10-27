@@ -253,6 +253,19 @@ jobs:
         env:
           E2E_BASE_URL: http://127.0.0.1:4173
 
+  duplication:
+    name: Copy-paste detector (jscpd, threshold 1 %)
+    # Baseline 2026-10-27: 0.5 % duplicated lines, 63 clones (production code only: tests, stories, fixtures, i18n and
+    # legal texts are ignored). Informational until it has run on a CI runner; then add it to `quality`.
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npx --yes jscpd@4.3.0
+
   quality:
     name: Lint · types · tests · build
     if: always()
