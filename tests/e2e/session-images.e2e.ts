@@ -33,59 +33,59 @@ const SIZES = [
   { name: 'desktop', width: 1440, height: 900 },
 ] as const;
 
-for (const size of SIZES) {
-  test(`session start and picker pictures load: ${size.name}`, async ({ page }) => {
-    test.setTimeout(90_000);
-    await page.setViewportSize({ width: size.width, height: size.height });
-    const failedImages: string[] = [];
-    page.on('response', (r) => {
-      const t = r.request().resourceType();
-      if (t === 'image' && r.status() >= 400) failedImages.push(`${r.status()} ${r.url()}`);
-    });
-    const stub: Stub = { delayMs: 0, assignment: true };
-    await arm(page, stub, BASE, 'en');
-    await page.addInitScript(
-      (v) => localStorage.setItem('spotter.consentVerified', v),
-      CONSENT_VERIFIED,
-    );
-    await page.goto(BASE + '/');
-    await passProfileGate(page);
+for (const th of ['glass', 'cyberpunk'])
+  for (const size of SIZES) {
+    test(`session start and picker pictures load: ${size.name} ${th}`, async ({ page }) => {
+      test.setTimeout(90_000);
+      await page.setViewportSize({ width: size.width, height: size.height });
+      const failedImages: string[] = [];
+      page.on('response', (r) => {
+        const t = r.request().resourceType();
+        if (t === 'image' && r.status() >= 400) failedImages.push(`${r.status()} ${r.url()}`);
+      });
+      const stub: Stub = { delayMs: 0, assignment: true };
+      await arm(page, stub, BASE, 'en');
+      await page.addInitScript(
+        (v) => localStorage.setItem('spotter.consentVerified', v),
+        CONSENT_VERIFIED,
+      );
+      await page.addInitScript((t) => localStorage.setItem('gym.theme', t), th);
+      await page.goto(BASE + '/');
+      await passProfileGate(page);
 
-    // on a wide screen Start already stands open on the right; the empty-state button would stack a second sheet over it
-    if (size.width < 1024)
       await page.getByRole('button', { name: /Start your first session/ }).click();
-    await page.getByRole('button', { name: /Or start from scratch/ }).click();
-    await page.getByRole('button', { name: /Without a gym/ }).waitFor();
-    await page.waitForTimeout(1200); // the sheet slides in: click when it has settled
-    await page.getByRole('button', { name: /Without a gym/ }).click();
-    await expect(page.getByText('Warm-up', { exact: true }).first()).toBeVisible();
-    // on a wide screen the Start sheet stays open next to the session: close it like a person would
-    const closeSheet = page
-      .locator('.portal-layer')
-      .getByRole('button', { name: /cancel|close/i })
-      .first();
-    if (await closeSheet.isVisible().catch(() => false)) await closeSheet.click();
-    await page.waitForTimeout(500);
+      await page.getByRole('button', { name: /Or start from scratch/ }).click();
+      await page.getByRole('button', { name: /Without a gym/ }).waitFor();
+      await page.waitForTimeout(1200); // the sheet slides in: click when it has settled
+      await page.getByRole('button', { name: /Without a gym/ }).click();
+      await expect(page.getByText('Warm-up', { exact: true }).first()).toBeVisible();
+      // on a wide screen the Start sheet stays open next to the session: close it like a person would
+      const closeSheet = page
+        .locator('.portal-layer')
+        .getByRole('button', { name: /cancel|close/i })
+        .first();
+      if (await closeSheet.isVisible().catch(() => false)) await closeSheet.click();
+      await page.waitForTimeout(500);
 
-    // the Warm-up hero shows its picture
-    const hero = page.locator('img[src*="/markers/warmup"]').first();
-    await expect(hero).toBeVisible();
-    await expect
-      .poll(() => hero.evaluate((i: HTMLImageElement) => i.naturalWidth))
-      .toBeGreaterThan(0);
-    await page.waitForTimeout(800);
-    expect(await broken(page), 'start screen').toEqual([]);
-    expect(failedImages, 'image requests on the start screen').toEqual([]);
+      // the Warm-up hero shows its picture
+      const hero = page.locator('img[src*="/markers/warmup"]').first();
+      await expect(hero).toBeVisible();
+      await expect
+        .poll(() => hero.evaluate((i: HTMLImageElement) => i.naturalWidth))
+        .toBeGreaterThan(0);
+      await page.waitForTimeout(800);
+      expect(await broken(page), 'start screen').toEqual([]);
+      expect(failedImages, 'image requests on the start screen').toEqual([]);
 
-    // every tab of the picker (reopened for each: Warm-up / Cardio / Cool-down open their own list)
-    for (const tab of ['Strength', 'Warm-up', 'Cardio', 'Cool-down']) {
-      await page.getByRole('button', { name: 'Add exercise', exact: true }).first().click();
-      await page.locator('.uiseg-opt', { hasText: new RegExp(`^${tab}$`) }).click();
-      await page.waitForTimeout(900);
-      expect(await broken(page), `picker tab ${tab}`).toEqual([]);
-      expect(failedImages, `image requests on ${tab}`).toEqual([]);
-      await page.keyboard.press('Escape');
-      await page.waitForTimeout(400);
-    }
-  });
-}
+      // every tab of the picker (reopened for each: Warm-up / Cardio / Cool-down open their own list)
+      for (const tab of ['Strength', 'Warm-up', 'Cardio', 'Cool-down']) {
+        await page.getByRole('button', { name: 'Add exercise', exact: true }).first().click();
+        await page.locator('.uiseg-opt', { hasText: new RegExp(`^${tab}$`) }).click();
+        await page.waitForTimeout(900);
+        expect(await broken(page), `picker tab ${tab}`).toEqual([]);
+        expect(failedImages, `image requests on ${tab}`).toEqual([]);
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(400);
+      }
+    });
+  }
