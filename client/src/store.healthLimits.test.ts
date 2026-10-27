@@ -52,6 +52,8 @@ vi.mock('./vaultIO', async (orig) => {
 });
 
 import * as store from './store';
+import { vault } from './vaultIO';
+import { openSealedLocal } from './testVault';
 import { newAlcoholEntry } from './alcohol';
 import { newNicotineProduct } from './nicotine';
 import { newSupplementEntry } from './supplements';
@@ -295,8 +297,12 @@ describe('persistence and mirrors while off / after delete (S3/S4)', () => {
     resetHealthGateForTests(true);
   });
 
-  const lsInjuries = () =>
-    JSON.parse(localStorage.getItem('spotter.injuries') ?? '[]') as { id: string }[];
+  // The on-device copy is sealed (SPO-216): open it with the test vault's key; plaintext must not exist.
+  const lsInjuries = async () => {
+    await settle();
+    expect(localStorage.getItem('spotter.injuries')).toBeNull();
+    return (await openSealedLocal<{ id: string }[]>(vault, 'spotter.injuries')) ?? [];
+  };
   const injuryDoc = (id: string) => ({
     id,
     reason: 'injury',
@@ -314,22 +320,23 @@ describe('persistence and mirrors while off / after delete (S3/S4)', () => {
 
   it('spotter.injuries is not written while Injuries is off, even when a mirror brings an injury', async () => {
     injuredThenOff();
-    const before = localStorage.getItem('spotter.injuries');
+    await settle();
+    const before = localStorage.getItem('spotter.injuries.enc');
     fs.listeners.get('users/u1/injuries')!({ docs: [{ data: () => injuryDoc('late') }] });
     await settle();
-    expect(localStorage.getItem('spotter.injuries')).toBe(before);
-    expect(lsInjuries().some((i) => i.id === 'late')).toBe(false);
+    expect(localStorage.getItem('spotter.injuries.enc')).toBe(before);
+    expect((await lsInjuries()).some((i) => i.id === 'late')).toBe(false);
     // memory still holds it as a limit; turning the feature on writes the up-to-date copy
     expect(store.getStoredLimits().injuries.some((i) => i.id === 'late')).toBe(true);
     resetHealthGateForTests(true);
-    expect(lsInjuries().some((i) => i.id === 'late')).toBe(true);
+    expect((await lsInjuries()).some((i) => i.id === 'late')).toBe(true);
   });
 
   it('deleting while off empties the on-device copy too', async () => {
     injuredThenOff();
-    expect(lsInjuries()).toHaveLength(1);
+    expect(await lsInjuries()).toHaveLength(1);
     store.deleteStoredHealthData('injuries');
-    expect(lsInjuries()).toEqual([]);
+    expect(await lsInjuries()).toEqual([]);
     expect(store.hasStoredHealthData('injuries')).toBe(false);
   });
 
@@ -339,7 +346,7 @@ describe('persistence and mirrors while off / after delete (S3/S4)', () => {
     fs.listeners.get('users/u1/injuries')!({ docs: [{ data: () => injuryDoc(id) }] });
     await settle();
     expect(store.getStoredLimits().injuries).toEqual([]);
-    expect(lsInjuries()).toEqual([]);
+    expect(await lsInjuries()).toEqual([]);
   });
 
   it('an old cycle document that arrives after the delete does not bring the cycle back', async () => {

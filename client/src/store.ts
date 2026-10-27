@@ -160,6 +160,7 @@ import { resolveRestOverlap, type RestOverlapChoice } from './restOverlap';
 
 import { readProgramMemory } from './data/programMemory';
 import { CONDITIONS_KEY, CONDITIONS_SHARE_KEY, createConditionsCache } from './conditionsCache';
+import { createStoreSealed } from './storeSealed';
 import {
   healthSnapshot,
   healthVersion,
@@ -276,14 +277,7 @@ export {
   useNextUpOff,
 } from './activityPrefs';
 
-const STATE_KEY = 'spotter.state';
-const GYMS_KEY = 'spotter.gyms';
 const SHARED_GYMS_KEY = 'spotter.sharedGyms';
-const BODY_KEY = 'spotter.body';
-const GOALS_KEY = 'spotter.goals';
-const HOME_KEY = 'spotter.home';
-const REST_KEY = 'spotter.restPeriods';
-const INJURY_KEY = 'spotter.injuries';
 const isGeneralShare = (v: unknown): v is GeneralShare =>
   v === 'off' || v === 'effects' || v === 'full';
 const conditionsCache = createConditionsCache<ChronicCondition, GeneralShare>({
@@ -302,18 +296,12 @@ function loadShare(): GeneralShare {
     return 'effects';
   }
 }
-const ACTIVITIES_KEY = 'spotter.activities';
 const EX_UNIT_KEY = 'spotter.exerciseUnits';
 const EX_LOAD_KEY = 'spotter.exerciseLoads';
 const EX_SIDES_KEY = 'spotter.exerciseSides';
 const EX_REST_KEY = 'spotter.exerciseRest';
 const REST_PREFS_KEY = 'spotter.restPrefs';
 const WEIGHT_UNIT_KEY = 'spotter.weightUnit';
-const MASTERY_KEY = 'spotter.mastery';
-const COACH_KEY = 'spotter.coach';
-const SLEEP_KEY = 'spotter.sleeps';
-const SLEEP_SCHED_KEY = 'spotter.sleep.schedule';
-const SLEEP_SET_KEY = 'spotter.sleep.settings';
 const SLEEP_TOMB_KEY = 'spotter.sleepTombstones.v1';
 // Ids of sleep nights the user discarded, kept until the server confirms the
 // delete. Durable across reloads so stale snapshots cannot resurrect a night
@@ -463,38 +451,38 @@ function load<T>(key: string, fallback: T): T {
   }
 }
 
+const sealedStore = createStoreSealed<StoreState>({
+  vault,
+  emptyGoals: EMPTY_GOALS,
+  emptyHome: EMPTY_HOME,
+  coachFrom,
+});
+const sealedFields = sealedStore.fields;
+
 let state: StoreState = {
-  workouts: load<Workout[]>(STATE_KEY, []),
-  gyms: load<Gym[]>(GYMS_KEY, []),
+  workouts: sealedFields.workouts.load([]),
+  gyms: sealedFields.gyms.load([]),
   sharedGyms: load<Record<string, SharedGym>>(SHARED_GYMS_KEY, {}),
-  restPeriods: load<RestPeriod[]>(REST_KEY, []),
-  injuries: load<Injury[]>(INJURY_KEY, []),
+  restPeriods: sealedFields.restPeriods.load([]),
+  injuries: sealedFields.injuries.load([]),
   conditions: stripLegacyConditions(load<ChronicCondition[]>(CONDITIONS_KEY, [])),
   conditionsShare: loadShare(),
   nicotine: nicotineCache.load(),
   cycle: cycleCache.load(),
   alcohol: alcoholCache.load(),
   supplements: supplementsCache.load(),
-  activities: load<Activity[]>(ACTIVITIES_KEY, []),
+  activities: sealedFields.activities.load([]),
   weightUnit: load<DisplayUnit>(WEIGHT_UNIT_KEY, 'kg'),
   exerciseUnits: load<Record<string, DisplayUnit>>(EX_UNIT_KEY, {}),
   exerciseLoadTypes: load<Record<string, LoadType>>(EX_LOAD_KEY, {}),
   exerciseSides: load<Record<string, 'one' | 'both'>>(EX_SIDES_KEY, {}),
   exerciseRest: load<Record<string, number>>(EX_REST_KEY, {}),
   restPrefs: { ...REST_PREFS_DEFAULT, ...load<Partial<RestPrefs>>(REST_PREFS_KEY, {}) },
-  mastery: load<StoreState['mastery']>(MASTERY_KEY, {
-    sinceYear: null,
-    pattern: null,
-    seenRating: null,
-  }),
-  bodyMetrics: load<BodyMetrics>(BODY_KEY, EMPTY_BODY),
-  sleeps: load<SleepNight[]>(SLEEP_KEY, []),
-  sleepSchedule: load<SleepSchedule>(SLEEP_SCHED_KEY, {
-    sameEveryNight: true,
-    every: null,
-    byDay: {},
-  }),
-  sleepSettings: load<SleepSettings>(SLEEP_SET_KEY, {
+  mastery: sealedFields.mastery.load({ sinceYear: null, pattern: null, seenRating: null }),
+  bodyMetrics: sealedFields.bodyMetrics.load(EMPTY_BODY),
+  sleeps: sealedFields.sleeps.load([]),
+  sleepSchedule: sealedFields.sleepSchedule.load({ sameEveryNight: true, every: null, byDay: {} }),
+  sleepSettings: sealedFields.sleepSettings.load({
     autoDim: false,
     autoLog: false,
     goalMin: 480,
@@ -502,9 +490,9 @@ let state: StoreState = {
     skippedAutoSleepDates: [],
     patternOffer: 'unseen',
   }),
-  goals: load<FitGoals>(GOALS_KEY, EMPTY_GOALS),
-  coach: coachFrom(load<Partial<CoachSettings>>(COACH_KEY, {})),
-  home: { ...EMPTY_HOME, ...load<Partial<HomeState>>(HOME_KEY, {}) },
+  goals: sealedFields.goals.load(EMPTY_GOALS),
+  coach: coachFrom(sealedFields.coach.load({} as CoachSettings)),
+  home: { ...EMPTY_HOME, ...sealedFields.home.load({} as HomeState) },
   queue: [],
   liveTrainees: [],
   syncStatus: 'pending',
@@ -519,6 +507,19 @@ function emit(): void {
 }
 
 conditionsCache.boot({ conditions: state.conditions, share: state.conditionsShare });
+sealedStore.boot(state);
+/** When the vault key becomes available: open the sealed on-device copies and migrate legacy plaintext (SPO-216). */
+function hydrateSealedState(): void {
+  sealedStore.hydrate(
+    () => state,
+    (patch) => {
+      state = { ...state, ...patch };
+      emit();
+    },
+  );
+}
+vault.subscribe(hydrateSealedState);
+if (vault.materialOrNull()) hydrateSealedState();
 
 /** When the vault key becomes available: read the sealed on-device copy and migrate legacy plaintext. */
 function hydrateConditions(): void {
@@ -615,15 +616,11 @@ function withForcedPersist(f: HealthFeature, run: () => void): void {
 
 function persist(): void {
   try {
-    localStorage.setItem(STATE_KEY, JSON.stringify(state.workouts));
-    localStorage.setItem(COACH_KEY, JSON.stringify(state.coach));
-    localStorage.setItem(GYMS_KEY, JSON.stringify(state.gyms));
     localStorage.setItem(SHARED_GYMS_KEY, JSON.stringify(state.sharedGyms));
-    localStorage.setItem(REST_KEY, JSON.stringify(state.restPeriods));
     // A health key is written only while its consent is on (or while a delete empties it): a feature that is off adds
     // nothing new to this device, and a Firestore mirror cannot put data back (SPO-290 S3). What was stored before stays
     // until the person deletes it; the safety limits are read from memory, loaded from that copy at start.
-    if (mayPersist('injuries')) localStorage.setItem(INJURY_KEY, JSON.stringify(state.injuries));
+    sealedStore.persist(state, mayPersist('injuries')); // sealed on device, never plaintext (SPO-216)
     // Sealed on device once the vault key is here; plaintext only as the no-key fallback.
     if (mayPersist('chronic'))
       conditionsCache.persist({ conditions: state.conditions, share: state.conditionsShare });
@@ -631,20 +628,12 @@ function persist(): void {
     if (mayPersist('cycle')) cycleCache.persist(state.cycle);
     if (mayPersist('alcohol')) alcoholCache.persist(state.alcohol);
     if (mayPersist('supplements')) supplementsCache.persist(state.supplements);
-    localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(state.activities));
     localStorage.setItem(WEIGHT_UNIT_KEY, JSON.stringify(state.weightUnit));
     localStorage.setItem(EX_UNIT_KEY, JSON.stringify(state.exerciseUnits));
     localStorage.setItem(EX_LOAD_KEY, JSON.stringify(state.exerciseLoadTypes));
     localStorage.setItem(EX_SIDES_KEY, JSON.stringify(state.exerciseSides));
     localStorage.setItem(EX_REST_KEY, JSON.stringify(state.exerciseRest));
     localStorage.setItem(REST_PREFS_KEY, JSON.stringify(state.restPrefs));
-    localStorage.setItem(MASTERY_KEY, JSON.stringify(state.mastery));
-    localStorage.setItem(BODY_KEY, JSON.stringify(state.bodyMetrics));
-    localStorage.setItem(SLEEP_KEY, JSON.stringify(state.sleeps));
-    localStorage.setItem(SLEEP_SCHED_KEY, JSON.stringify(state.sleepSchedule));
-    localStorage.setItem(SLEEP_SET_KEY, JSON.stringify(state.sleepSettings));
-    localStorage.setItem(GOALS_KEY, JSON.stringify(state.goals));
-    localStorage.setItem(HOME_KEY, JSON.stringify(state.home));
   } catch {
     /* quota / private mode — Firestore cache is the real store */
   }
@@ -5157,7 +5146,8 @@ export function startSyncLoop(): () => void {
   const workoutsMirror = mirrorCollection<
     Workout & Record<string, unknown>,
     { fromCache: boolean; pending: boolean }
-  >((serverWorkouts, { meta }) => {
+  >((serverWorkouts, { meta, locked }) => {
+    if (!locked) sealedStore.markRemote('workouts');
     // A document without its exercise list is damaged: skipped, so the code below never trips over it (SPO-219).
     const usable = serverWorkouts.filter((w) => Array.isArray(w.exercises));
     state = {
@@ -5181,7 +5171,8 @@ export function startSyncLoop(): () => void {
       onWriteError,
     ),
   );
-  const gymsMirror = mirrorCollection<Gym & Record<string, unknown>>((items) => {
+  const gymsMirror = mirrorCollection<Gym & Record<string, unknown>>((items, { locked }) => {
+    if (!locked) sealedStore.markRemote('gyms');
     const gyms = items.map((g) => applyShared(g));
     state = { ...state, gyms };
     // Subscribe to the shared entity for every gym that has a stable id.
@@ -5196,7 +5187,8 @@ export function startSyncLoop(): () => void {
       onWriteError,
     ),
   );
-  const restMirror = mirrorCollection<RestPeriod & Record<string, unknown>>((items) => {
+  const restMirror = mirrorCollection<RestPeriod & Record<string, unknown>>((items, { locked }) => {
+    if (!locked) sealedStore.markRemote('restPeriods');
     state = { ...state, restPeriods: items };
     persist();
     emit();
@@ -5210,7 +5202,8 @@ export function startSyncLoop(): () => void {
       () => undefined,
     ),
   );
-  const injuriesMirror = mirrorCollection<Injury & Record<string, unknown>>((raw) => {
+  const injuriesMirror = mirrorCollection<Injury & Record<string, unknown>>((raw, { locked }) => {
+    if (!locked) sealedStore.markRemote('injuries');
     const items = raw.filter((i) => !deletedInjuryIds.has(i.id));
     state = { ...state, injuries: items };
     persist();
@@ -5242,14 +5235,17 @@ export function startSyncLoop(): () => void {
       () => undefined,
     ),
   );
-  const activitiesMirror = mirrorCollection<Activity & Record<string, unknown>>((items) => {
-    state = {
-      ...state,
-      activities: mergeServerActivitiesWithLocalLive(items, state.activities),
-    };
-    persist();
-    emit();
-  });
+  const activitiesMirror = mirrorCollection<Activity & Record<string, unknown>>(
+    (items, { locked }) => {
+      if (!locked) sealedStore.markRemote('activities');
+      state = {
+        ...state,
+        activities: mergeServerActivitiesWithLocalLive(items, state.activities),
+      };
+      persist();
+      emit();
+    },
+  );
   unsubs.push(activitiesMirror.dispose);
   unsubs.push(
     onSnapshot(
@@ -5260,7 +5256,10 @@ export function startSyncLoop(): () => void {
     ),
   );
   const sleepsMirror = mirrorCollection<SleepNight & Record<string, unknown>, boolean>(
-    (items, { meta }) => applySleepSnapshot(items, meta),
+    (items, { meta, locked }) => {
+      if (!locked) sealedStore.markRemote('sleeps');
+      applySleepSnapshot(items, meta);
+    },
   );
   unsubs.push(sleepsMirror.dispose);
   unsubs.push(
@@ -5416,6 +5415,7 @@ export function startSyncLoop(): () => void {
   const bodyMirror = mirrorCollection<BodyMetrics & Record<string, unknown>>((items, info) => {
     // Locked and sealed: keep what is on screen rather than flashing an empty profile.
     if (!items.length && info.locked) return;
+    if (!info.locked) sealedStore.markRemote('bodyMetrics');
     const data = items[0] ?? EMPTY_BODY;
     state = { ...state, bodyMetrics: { ...data, weights: data.weights ?? [] } };
     persist();
@@ -6418,22 +6418,12 @@ export function resetLocalData(): void {
   unsentWorkouts.clear();
   localStorage.removeItem(UNSENT_KEY);
   void initVault(null); // forget the data key on this device
-  localStorage.removeItem(STATE_KEY);
-  localStorage.removeItem(GYMS_KEY);
-  localStorage.removeItem(BODY_KEY);
-  localStorage.removeItem(REST_KEY);
-  localStorage.removeItem(COACH_KEY);
-  localStorage.removeItem(HOME_KEY);
-  localStorage.removeItem(INJURY_KEY);
+  sealedStore.clear();
   conditionsCache.clear();
   nicotineCache.clear();
   cycleCache.clear();
   alcoholCache.clear();
   supplementsCache.clear();
-  localStorage.removeItem(ACTIVITIES_KEY);
-  localStorage.removeItem(SLEEP_KEY);
-  localStorage.removeItem(SLEEP_SCHED_KEY);
-  localStorage.removeItem(SLEEP_SET_KEY);
   localStorage.removeItem(WEIGHT_UNIT_KEY);
   applyingRemotePrefs = true;
   try {

@@ -51,6 +51,19 @@ vi.mock('firebase/auth', () => ({
   signOut: vi.fn(),
 }));
 vi.mock('firebase/storage', () => ({ ref: () => ({}), getBlob: vi.fn() }));
+vi.mock('./vaultIO', async (orig) => {
+  const real = await orig<typeof import('./vaultIO')>();
+  const { readyVault } = await import('./testVault');
+  const v = await readyVault();
+  return {
+    ...real,
+    vault: v,
+    initVault: async () => undefined,
+    runKeyExchange: async () => undefined,
+    prepareWrite: (c: never, d: never) => real.prepareWrite(c, d, v),
+    mirrorCollection: (apply: never) => real.mirrorCollection(apply, v),
+  };
+});
 
 import { __getStateForTests, retrySync, startSyncLoop, updateBodyMetrics } from './store';
 
@@ -77,11 +90,17 @@ describe('offline queue', () => {
 
     updateBodyMetrics({ heightCm: 181 });
 
-    // Optimistic + local: visible at once and mirrored to localStorage (the SDK queue takes the write).
+    // Optimistic + local: visible at once and mirrored to localStorage, SEALED (SPO-216; the SDK queue takes the write).
     expect(__getStateForTests().bodyMetrics.heightCm).toBe(181);
     expect(__getStateForTests().syncStatus).toBe('offline');
+    await vi.waitFor(() => expect(localStorage.getItem('spotter.body.enc')).not.toBeNull());
     const mirrored = Object.keys(localStorage).map((k) => localStorage.getItem(k) ?? '');
-    expect(mirrored.some((v) => v.includes('"heightCm":181'))).toBe(true);
+    expect(mirrored.some((v) => v.includes('"heightCm":181'))).toBe(false);
+    const { vault } = await import('./vaultIO');
+    const { openSealedLocal } = await import('./testVault');
+    expect(await openSealedLocal<{ heightCm?: number }>(vault, 'spotter.body')).toMatchObject({
+      heightCm: 181,
+    });
 
     // Connection returns: retry re-attaches listeners, status is "pending" until the server answers.
     setOnline(true);

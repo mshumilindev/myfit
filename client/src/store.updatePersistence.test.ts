@@ -102,7 +102,11 @@ describe('state survives a new build', () => {
     await settle();
     expect(store.__getStateForTests().sleepSchedule).toEqual(SCHEDULE);
     expect(store.__getStateForTests().sleepSettings).toEqual(SETTINGS);
-    expect(JSON.parse(localStorage.getItem('spotter.sleep.schedule') ?? 'null')).toEqual(SCHEDULE);
+    // the on-device copy is sealed now (SPO-216): the legacy plaintext key was migrated away, the value kept
+    expect(localStorage.getItem('spotter.sleep.schedule')).toBeNull();
+    const { vault } = await import('./vaultIO');
+    const { openSealedLocal } = await import('./testVault');
+    expect(await openSealedLocal(vault, 'spotter.sleep.schedule')).toEqual(SCHEDULE);
     stop();
   });
 });

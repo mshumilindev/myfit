@@ -331,7 +331,9 @@ describe('sync loop plumbing', () => {
     store.addExercise(w.id, 'Squat');
     store.addWeight(80, T0);
     await settle();
-    expect(localStorage.getItem('spotter.state')).not.toBeNull();
+    // sealed at rest (SPO-216): the readable key is never written, the `.enc` one is
+    expect(localStorage.getItem('spotter.state')).toBeNull();
+    expect(localStorage.getItem('spotter.state.enc')).not.toBeNull();
     store.resetLocalData();
     expect(st().workouts).toEqual([]);
     expect(st().cycle.enabled).toBe(false);
@@ -344,8 +346,11 @@ describe('sync loop plumbing', () => {
       'spotter.injuries',
       'spotter.activities',
       'spotter.sleeps',
-    ])
+    ]) {
       expect(JSON.parse(localStorage.getItem(k) ?? 'null') ?? []).toEqual([]);
+      expect(localStorage.getItem(`${k}.enc`)).toBeNull();
+    }
+    expect(localStorage.getItem('spotter.state.enc')).toBeNull();
   });
 
   it('health data kept on the device is sealed: no condition, cycle or alcohol content in plain localStorage', async () => {

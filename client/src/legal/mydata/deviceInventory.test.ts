@@ -34,6 +34,8 @@ describe('device inventory: key groups', () => {
     ['firebase:authUser:key:[DEFAULT]', 'signin'],
     ['FCM_xyz', 'signin'],
     ['u:abc:spotter.state', 'offline'],
+    ['u:abc:spotter.state.enc', 'offline'],
+    ['spotter.goals.enc', 'offline'],
     ['spotter.sleeps', 'offline'],
     ['spotter.cache.roster', 'cache'],
     ['spotter.programMine', 'cache'],

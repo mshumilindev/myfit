@@ -129,9 +129,7 @@ describe('workout aggregates', () => {
 describe('sleep pause flow (store)', () => {
   const MIN = 60000;
   const readLive = (): SleepNight | null => {
-    const raw = localStorage.getItem('spotter.sleeps');
-    const list: SleepNight[] = raw ? JSON.parse(raw) : [];
-    return list.find((n) => n.wake === null) ?? null;
+    return __getStateForTests().sleeps.find((n) => n.wake === null) ?? null;
   };
   const fresh = (bedtime: number) => {
     cancelSleep();
@@ -319,14 +317,10 @@ describe('autoWarmupSets', () => {
 
 describe('one live mode at a time (mutual exclusion)', () => {
   const liveWorkoutId = () => {
-    const raw = localStorage.getItem('spotter.state');
-    const list = raw ? (JSON.parse(raw) as Array<{ id: string; finishedAt: number | null }>) : [];
-    return list.find((w) => w.finishedAt === null)?.id;
+    return __getStateForTests().workouts.find((w) => w.finishedAt === null)?.id;
   };
   const liveActivityId = () => {
-    const raw = localStorage.getItem('spotter.activities');
-    const list = raw ? (JSON.parse(raw) as Array<{ id: string; finishedAt: number | null }>) : [];
-    return list.find((a) => a.finishedAt === null)?.id;
+    return __getStateForTests().activities.find((a) => a.finishedAt === null)?.id;
   };
   const cleanup = () => {
     cancelSleep();

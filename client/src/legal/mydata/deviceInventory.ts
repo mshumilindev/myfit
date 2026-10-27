@@ -91,7 +91,7 @@ export function classifyKey(key: string): KeyGroup {
   if (k.startsWith('spotter.push') || k === 'spotter.quietHours' || k.startsWith('spotter.notif.'))
     return 'reminders';
   if (GYM_SEARCH.some((p) => k.startsWith(p)) || k === 'spotter.lastPos') return 'gymsearch';
-  if (OFFLINE.has(k)) return 'offline';
+  if (OFFLINE.has(k) || OFFLINE.has(k.replace(/\.enc$/, ''))) return 'offline'; // the sealed copy of a key sits next to it (SPO-216)
   if (
     k.startsWith('spotter.') ||
     k.startsWith('gym.') ||
