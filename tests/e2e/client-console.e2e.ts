@@ -17,14 +17,17 @@ const BACKEND_HOSTS = [
   '**/www.google.com/recaptcha/**',
   '**/www.gstatic.com/**',
 ];
-/** Errors that only exist because the test blocks the backend (the browser reports the failed request itself). */
+/**
+ * Errors and warnings that only exist because the test blocks the backend (the browser reports the failed request itself;
+ * the Firestore SDK logs an unreachable backend at warning level, "transport errored"). Allowlist: the network is not there.
+ */
 const BLOCKED_NOISE =
-  /ERR_BLOCKED_BY_CLIENT|ERR_INTERNET_DISCONNECTED|Failed to load resource|net::ERR_|googleapis|cloudfunctions|firebaseio|recaptcha/i;
+  /ERR_BLOCKED_BY_CLIENT|ERR_INTERNET_DISCONNECTED|Failed to load resource|net::ERR_|googleapis|cloudfunctions|firebaseio|recaptcha|@firebase\/firestore.*transport errored/i;
 
 function collectErrors(page: Page): string[] {
   const errors: string[] = [];
   page.on('console', (m: ConsoleMessage) => {
-    if (m.type() !== 'error') return;
+    if (m.type() !== 'error' && m.type() !== 'warning') return;
     const text = m.text();
     if (BLOCKED_NOISE.test(text) || BLOCKED_NOISE.test(m.location().url ?? '')) return;
     errors.push(text);

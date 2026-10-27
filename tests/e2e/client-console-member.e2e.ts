@@ -16,13 +16,13 @@ const CONSENT_VERIFIED = JSON.stringify({
 });
 /** Errors that exist only because the network is cut (the browser reports the failed request itself). */
 const NETWORK_NOISE =
-  /ERR_BLOCKED_BY_CLIENT|ERR_INTERNET_DISCONNECTED|Failed to load resource|net::ERR_|Could not reach Cloud Firestore backend|googleapis|cloudfunctions|firebaseio|recaptcha/i;
+  /ERR_BLOCKED_BY_CLIENT|ERR_INTERNET_DISCONNECTED|Failed to load resource|net::ERR_|Could not reach Cloud Firestore backend|googleapis|cloudfunctions|firebaseio|recaptcha|@firebase\/firestore.*transport errored/i;
 const SCREENS = ['/today', '/history', '/progress', '/gyms', '/settings'];
 
 function collectErrors(page: Page): string[] {
   const errors: string[] = [];
   page.on('console', (m: ConsoleMessage) => {
-    if (m.type() !== 'error') return;
+    if (m.type() !== 'error' && m.type() !== 'warning') return;
     const text = m.text();
     if (NETWORK_NOISE.test(text) || NETWORK_NOISE.test(m.location().url ?? '')) return;
     errors.push(`${text} (${m.location().url ?? ''})`);
