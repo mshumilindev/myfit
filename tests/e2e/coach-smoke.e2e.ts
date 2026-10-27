@@ -32,7 +32,12 @@ for (const hash of COACH_ROUTES) {
   });
 }
 
-test('coach shows the DEMO notice on the fixtures backend', async ({ page }) => {
+// There is no sample-data banner any more: the app never shows stand-in data (coach/BackendNotice.tsx). On the fixtures
+// build (e2e only) Coach must serve its screens: the shell is up and it is not the "not configured" state.
+test('coach serves its screens on the fixtures backend, not the not-configured state', async ({
+  page,
+}) => {
   await openCoach(page, '#/c/today');
-  await expect(page.getByText(/demo|sample/i).first()).toBeVisible();
+  await expect(page.locator('#co-main')).toBeVisible();
+  await expect(page.getByTestId('coach-not-configured')).toHaveCount(0);
 });

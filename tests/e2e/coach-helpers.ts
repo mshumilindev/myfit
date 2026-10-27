@@ -117,7 +117,9 @@ export async function seedTrainer(
 export function collectConsoleErrors(page: Page): string[] {
   const errors: string[] = [];
   const blocked =
-    /googleapis|cloudfunctions|firebaseapp|firebaseio|gstatic|google\.com|googletagmanager|ERR_BLOCKED_BY_CLIENT|ERR_TUNNEL|Failed to fetch/;
+    /googleapis|cloudfunctions|firebaseapp|firebaseio|gstatic|google\.com|googletagmanager|ERR_BLOCKED_BY_CLIENT|ERR_TUNNEL|Failed to fetch|Could not reach Cloud Firestore backend/;
+  // Allowlist (SPO-337), all of it "the network is not there": the Firestore SDK logs an unreachable backend at error
+  // level. The app is offline-first and handles that state, so on a runner without Firebase access it is expected.
   page.on('console', (m: ConsoleMessage) => {
     if (m.type() !== 'error') return;
     const where = m.location().url ?? '';
