@@ -192,6 +192,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build -w client
+      # The built client is shared with `client-e2e` (SPO-370): one build per run, not one per job.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist
+          retention-days: 1
 
   # Static security analysis (replaces CodeQL, which needs a paid licence on private repos). Findings become annotations.
   security:
@@ -236,6 +242,7 @@ jobs:
     # Informational until it has run green on a CI runner (not yet seen there); the specs pass locally on Chromium
     # (SPO-337, SPO-341, SPO-358). Not in `quality`'s needs.
     continue-on-error: true
+    needs: build
     runs-on: ubuntu-latest
     # Playwright's image (see `layout-shard`): no apt-get on the runner. Tag = locked @playwright/test (guard test).
     container:
@@ -248,7 +255,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npm run build -w client
+      - uses: actions/download-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist
       - name: Serve the built client
         run: |
           (cd client && npx vite preview --host 127.0.0.1 --port 4173 --strictPort >/dev/null 2>&1 &)
@@ -412,6 +422,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100" | node scripts/layout-shard-spread.mjs | tee -a "$GITHUB_STEP_SUMMARY"
+      # Informational (SPO-370): where the time of the whole run went, and a warning over the 7 min budget; never fails the job.
+      - name: Pipeline timeline
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100" | node scripts/ci-stage-times.mjs | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Shards must add up to the whole matrix, every probe run, no findings
         run: |
           if [ "${{ needs.storybook.result }}" != "success" ]; then echo "Storybook build: ${{ needs.storybook.result }}"; exit 1; fi
