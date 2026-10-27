@@ -73,5 +73,5 @@ jobs:
         run: |
           printf '%s' "$FIREBASE_SA" > "$RUNNER_TEMP/sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
-          npx -y firebase-tools@latest deploy --only hosting --config firebase.deploy.json --project "$FIREBASE_PROJECT" --non-interactive
+          npx -y firebase-tools@15.34.1 deploy --only hosting --config firebase.deploy.json --project "$FIREBASE_PROJECT" --non-interactive
           rm -f "$RUNNER_TEMP/sa.json"
