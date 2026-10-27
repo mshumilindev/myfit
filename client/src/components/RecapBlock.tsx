@@ -85,7 +85,7 @@ export function RecapBlock({ onOpen }: { onOpen: (period: string, story: boolean
           ) : undefined
         }
       >
-        <Icon name="sparkle" weight="fill" /> {t.rcYourRecaps}
+        {t.rcYourRecaps}
       </SectionLabel>
 
       {readyMonth ? (
