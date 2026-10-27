@@ -64,6 +64,24 @@ test('coach warm start and offline log no console errors', async ({ page, contex
   }
   await page.waitForTimeout(1500);
   expect(errors, `console errors on warm start`).toEqual([]);
+  // A slow runner is still precaching the route chunks (and their stylesheets) in the background: go offline once the
+  // worker's caches have stopped growing, otherwise the first offline visit asks for a file that is not there yet.
+  await expect
+    .poll(
+      async () => {
+        const count = () =>
+          page.evaluate(async () => {
+            let n = 0;
+            for (const k of await caches.keys()) n += (await (await caches.open(k)).keys()).length;
+            return n;
+          });
+        const before = await count();
+        await page.waitForTimeout(2500);
+        return before > 0 && before === (await count());
+      },
+      { timeout: 45_000, intervals: [0] },
+    )
+    .toBe(true);
   await context.setOffline(true);
   for (const hash of ['#/c/today', '#/c/clients']) {
     await page.goto('/' + hash).catch(() => undefined);
