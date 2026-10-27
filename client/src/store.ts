@@ -1349,14 +1349,28 @@ function resendUnsentWorkouts(uid: string): void {
   saveUnsent(uid);
 }
 
+/**
+ * Latest write generation per workout id. A write parked while the vault key is missing checks it before it fires, so a
+ * delete (or a newer write) made in the meantime wins and a parked setDoc cannot bring a deleted document back.
+ */
+const workoutWriteGen = new Map<string, number>();
+const bumpWorkoutGen = (id: string): number => {
+  const g = (workoutWriteGen.get(id) ?? 0) + 1;
+  workoutWriteGen.set(id, g);
+  return g;
+};
+
 function writeWorkoutDoc(w: Workout): void {
   const uid = currentUid();
   if (!uid) return;
   loadUnsent(uid);
   unsentWorkouts.add(w.id);
   saveUnsent(uid);
+  const gen = bumpWorkoutGen(w.id);
   prepareWrite('workouts', { ...w, stats: workoutStats(w), updatedAt: Date.now() })
     .then((d) => {
+      // Deleted or rewritten while parked: the newer operation owns the document now.
+      if (workoutWriteGen.get(w.id) !== gen) return undefined;
       const sent = setDoc(doc(db, 'users', uid, 'workouts', w.id), d);
       // setDoc has taken the document into Firestore's persistent queue: it survives a reload from here on.
       unsentWorkouts.delete(w.id);
@@ -2006,7 +2020,17 @@ export function deleteWorkout(id: string): void {
     workouts: state.workouts.filter((x) => x.id !== id),
     syncStatus: neverSynced ? state.syncStatus : bumpPending(),
   });
-  if (!neverSynced) deleteWorkoutDoc(id);
+  if (!neverSynced) {
+    // A write of this workout still parked for the vault key must not fire after the delete.
+    bumpWorkoutGen(id);
+    const uid = currentUid();
+    if (uid) {
+      loadUnsent(uid);
+      unsentWorkouts.delete(id);
+      saveUnsent(uid);
+    }
+    deleteWorkoutDoc(id);
+  }
 }
 
 /**

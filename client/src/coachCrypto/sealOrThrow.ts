@@ -1,9 +1,9 @@
 /**
  * The only way new coaching documents are sealed (R-BE-KEY-4).
  *
- * Unlike `prepareWrite` (which falls back to plaintext while the vault is not ready), this
- * throws `vault-locked`: a fallback would put chat text, notes or schedules in the database
- * in the clear. Callers show a retry state and queue the intent locally.
+ * Unlike `prepareWrite` (which now parks the write until the vault key arrives), this
+ * throws `vault-locked` at once: coaching writes are not parked, because a chat message or note
+ * must never be sent in the clear and the caller shows a retry state instead. Callers show a retry state and queue the intent locally.
  */
 import type { Vault } from '../autoVault';
 import { decryptJson, encryptJson, isEnvelope } from '../vaultCrypto';
