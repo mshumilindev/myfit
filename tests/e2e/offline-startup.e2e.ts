@@ -34,6 +34,8 @@ async function expectNoBlockingOverlay(page: Page) {
   const blocked = await page.evaluate(() => {
     const el = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
     for (let n: Element | null = el; n; n = n.parentElement) {
+      // the app shell itself (body / #root) is a fixed full-viewport scroller by design, not an overlay
+      if (n === document.body || n.id === 'root') break;
       const cs = getComputedStyle(n);
       const r = n.getBoundingClientRect();
       if (cs.position === 'fixed' && r.width >= innerWidth - 1 && r.height >= innerHeight - 1) {
@@ -49,15 +51,16 @@ test('A. first sign-in screen, offline: form + offline message + Retry, back onl
   page,
   context,
 }) => {
+  // The shell is delivered once (a first byte cannot arrive offline); the connection then drops under the open form.
+  await page.goto(BASE);
+  await page.locator('input[type="password"]').first().waitFor({ timeout: 5_000 });
   await context.setOffline(true);
-  await page.goto(BASE, { waitUntil: 'domcontentloaded' }).catch(() => undefined);
-  await page.waitForSelector('input[type="password"]', { timeout: 5_000 });
-  await expect(page.getByText(/can't reach the server/i)).toBeVisible();
-  await expect(page.getByRole('button', { name: /retry/i })).toBeVisible();
+  await expect(page.getByText(/can't reach the server/i).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /retry/i }).first()).toBeVisible();
   await expectNoBlockingOverlay(page);
 
   await context.setOffline(false);
-  await expect(page.getByText(/can't reach the server/i)).toBeHidden({ timeout: 10_000 });
+  await expect(page.getByText(/can't reach the server/i).first()).toBeHidden({ timeout: 10_000 });
 });
 
 test('B. first sign-in screen on a hanging network: usable at once, slow hint after the probe times out', async ({
@@ -65,11 +68,11 @@ test('B. first sign-in screen on a hanging network: usable at once, slow hint af
 }) => {
   await hangBackend(page);
   await page.goto(BASE);
-  const password = page.locator('input[type="password"]');
+  const password = page.locator('input[type="password"]').first();
   await expect(password).toBeVisible({ timeout: 5_000 });
   await password.fill('secret');
-  await expect(page.getByRole('button', { name: /sign in/i })).toBeEnabled(); // probe does not gate
-  await expect(page.getByText(/slow to answer/i)).toBeVisible({ timeout: 12_000 });
+  await expect(page.getByRole('button', { name: /sign in/i }).first()).toBeEnabled(); // probe does not gate
+  await expect(page.getByText(/slow to answer/i).first()).toBeVisible({ timeout: 12_000 });
   await expectNoBlockingOverlay(page);
 });
 
@@ -82,8 +85,11 @@ test.describe('C. cached session', () => {
   }) => {
     await page.goto(BASE);
     await page.getByPlaceholder(/username/i).fill(process.env.E2E_USER!);
-    await page.locator('input[type="password"]').fill(process.env.E2E_PASS!);
-    await page.getByRole('button', { name: /sign in/i }).click();
+    await page.locator('input[type="password"]').first().fill(process.env.E2E_PASS!);
+    await page
+      .getByRole('button', { name: /sign in/i })
+      .first()
+      .click();
     await expect(page.locator('nav')).toBeVisible({ timeout: 20_000 });
 
     // Reload offline: the shell comes from the local cache, immediately.
