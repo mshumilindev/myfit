@@ -249,7 +249,7 @@ jobs:
         run: |
           (cd client && npx vite preview --host 127.0.0.1 --port 4173 --strictPort >/dev/null 2>&1 &)
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
-      - run: npx playwright test --project=mobile-chromium tests/e2e/client-console.e2e.ts tests/e2e/client-console-member.e2e.ts tests/e2e/offline-startup.e2e.ts tests/e2e/session-images.e2e.ts
+      - run: npx playwright test --project=mobile-chromium tests/e2e/client-console.e2e.ts tests/e2e/client-console-member.e2e.ts tests/e2e/offline-startup.e2e.ts tests/e2e/session-images.e2e.ts --reporter=github,line
         env:
           E2E_BASE_URL: http://127.0.0.1:4173
 
@@ -258,7 +258,7 @@ jobs:
           (cd client && VITE_COACH_BACKEND=fixtures npx vite build --outDir dist-e2e --emptyOutDir)
           (cd client && npx vite preview --outDir dist-e2e --host 127.0.0.1 --port 4174 --strictPort >/dev/null 2>&1 &)
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
-          E2E_COACH_URL=http://127.0.0.1:4174 npx playwright test --project=coach-390 --project=coach-1440 tests/e2e/coach-smoke.e2e.ts
+          E2E_COACH_URL=http://127.0.0.1:4174 npx playwright test --project=coach-390 --project=coach-1440 tests/e2e/coach-smoke.e2e.ts --reporter=github,line
 
   duplication:
     name: Copy-paste detector (jscpd, threshold 1 %)
