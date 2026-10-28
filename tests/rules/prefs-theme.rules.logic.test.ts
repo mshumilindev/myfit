@@ -34,3 +34,17 @@ describe('meta/prefs theme fields', () => {
     }
   });
 });
+
+describe('meta/prefs themesSeen (SPO-355)', () => {
+  const seen = { themesSeen: ['cyberpunk'] };
+  it('the owner writes the list of themes they have seen', () => {
+    expect(run('create', au('member1'), seen)).toBe(true);
+    expect(run('update', au('member1'), { ...theme, ...seen })).toBe(true);
+  });
+  it('another user and a signed-out client cannot write it', () => {
+    for (const auth of [au('member2'), null]) {
+      expect(run('create', auth, seen)).toBe(false);
+      expect(run('update', auth, seen)).toBe(false);
+    }
+  });
+});

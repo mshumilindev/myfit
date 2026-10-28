@@ -72,4 +72,33 @@ describe('ThemePreviewHost', () => {
     expect(localStorage.getItem('gym.theme')).toBe('cyberpunk');
     expect(screen.queryByRole('region')).toBeNull();
   });
+
+  it('Esc is Keep current (theme back, previewed one seen, nothing saved)', () => {
+    act(() => syncSeenFromDoc({}, () => undefined));
+    render(<ThemePreviewHost />);
+    act(() => startPreview('cyberpunk'));
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    expect(attr()).toBe('glass');
+    expect(getPreview()).toBeNull();
+    expect(localStorage.getItem('gym.theme')).toBeNull();
+    expect(getUnseenThemes()).toEqual([]);
+  });
+
+  it('Esc inside a text field or a dialog is left to it, and other keys do nothing', () => {
+    render(
+      <>
+        <ThemePreviewHost />
+        <input aria-label="note" />
+        <div role="dialog">
+          <button>x</button>
+        </div>
+      </>,
+    );
+    act(() => startPreview('cyberpunk'));
+    fireEvent.keyDown(screen.getByLabelText('note'), { key: 'Escape' });
+    fireEvent.keyDown(screen.getByText('x'), { key: 'Escape' });
+    fireEvent.keyDown(document.body, { key: 'Enter' });
+    expect(getPreview()).toBe('cyberpunk');
+    expect(screen.getByRole('region')).toBeTruthy();
+  });
 });

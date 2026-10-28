@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ThemePreviewDock } from './ThemePreviewDock';
 
-/** The bar under a previewed theme (SPO-355). Not a modal: it never covers the screen, only Keep / Use close it. */
+/** The bar under a previewed theme (SPO-355). Not a modal: it never covers the screen, only the ✕, Esc or Use close it. */
 const meta = {
   title: 'Kit/ThemePreviewDock',
   component: ThemePreviewDock,

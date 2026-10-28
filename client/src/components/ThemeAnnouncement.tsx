@@ -16,6 +16,7 @@ import { useT } from '../i18n';
 import {
   PICKABLE_THEMES,
   endPreview,
+  getPreview,
   startPreview,
   useCommittedTheme,
   usePreview,
@@ -65,6 +66,23 @@ export function ThemePreviewHost() {
       if (quietZoneAt(currentHash())) endPreview(false, true);
     };
     check();
+    // Esc = "Keep current" (the dock is not modal, so the key is only taken when nothing else wants it: a dialog,
+    // a menu or a text field handled it first).
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      const el = e.target instanceof HTMLElement ? e.target : null;
+      if (
+        el?.closest(
+          'input, textarea, select, [contenteditable="true"], [role="dialog"], [role="menu"]',
+        )
+      )
+        return;
+      const current = getPreview();
+      if (current === null) return;
+      markThemesSeen([current]);
+      endPreview(false);
+    };
+    window.addEventListener('keydown', onKey);
     const timer = window.setInterval(check, 300);
     window.addEventListener('hashchange', check);
     window.addEventListener('popstate', check);
@@ -72,6 +90,7 @@ export function ThemePreviewHost() {
       window.clearInterval(timer);
       window.removeEventListener('hashchange', check);
       window.removeEventListener('popstate', check);
+      window.removeEventListener('keydown', onKey);
     };
   }, [previewing]);
   if (id === null) return null;
