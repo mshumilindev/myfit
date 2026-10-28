@@ -83,8 +83,10 @@ function putLocale(id: LocaleId): void {
 }
 
 export function setLocale(id: LocaleId): void {
+  const changed = id !== current;
   putLocale(id);
-  choiceListeners.forEach((fn) => fn(id));
+  // Picking the language already in use is not news for the account.
+  if (changed) choiceListeners.forEach((fn) => fn(id));
 }
 
 /** The language chosen on another device: applied and cached here, not echoed back. */

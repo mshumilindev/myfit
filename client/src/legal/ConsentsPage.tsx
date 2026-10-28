@@ -14,7 +14,8 @@ import { GroupedList } from '../components/ui/GroupedList';
 import { ConsentRow } from '../components/ui/ConsentRow';
 import { ConfirmDialog } from '../components/ui/Overlays';
 import { useFlag } from '../data/flags';
-import { uploadAtlasHistory, withdrawAtlasHistory } from '../atlas/AtlasHistoryHost';
+// Loaded on demand: the sync host pulls in the store and the vault, which this page does not otherwise need.
+const atlasHistory = () => import('../atlas/AtlasHistoryHost');
 import { ConfirmEffectsDialog } from '../components/ui/ConfirmEffectsDialog';
 import { Notice } from '../components/ui/Notice';
 import { HealthWithdrawDialog } from './HealthWithdrawDialog';
@@ -115,7 +116,9 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
         // The chat copy in the account goes with the consent; the chat on this device stays.
         if (kind === 'atlas-history') {
           // Stops syncing at once either way; the stored copy is deleted now (checkbox) or kept 30 days for undo.
-          await withdrawAtlasHistory(eraseNow ? 'now' : 'keep').catch(() => setFailed(true));
+          await atlasHistory()
+            .then((m) => m.withdrawAtlasHistory(eraseNow ? 'now' : 'keep'))
+            .catch(() => setFailed(true));
         }
         const saved = await sendConsentDurably({
           kind,
@@ -251,7 +254,7 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
           onConfirm={() => {
             setAsk(null);
             void write('atlas-history', 'grant').then((ok) =>
-              ok ? uploadAtlasHistory() : undefined,
+              ok ? atlasHistory().then((m) => m.uploadAtlasHistory()) : undefined,
             );
           }}
         />
