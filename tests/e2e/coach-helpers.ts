@@ -128,7 +128,11 @@ export function collectConsoleErrors(page: Page): string[] {
     if (/Failed to load resource/.test(text) && !where) return;
     // The build watch (src/pwaUpdate.ts) polls /version.json on its own timers; offline that request is refused and the
     // browser logs it. It is the same "network is not there" noise, so only that one file is let through.
-    if (/Failed to load resource: net::ERR_INTERNET_DISCONNECTED/.test(text) && /\/version\.json(\?|$)/.test(text + where)) return;
+    if (
+      /Failed to load resource: net::ERR_INTERNET_DISCONNECTED/.test(text) &&
+      /\/version\.json(\?|$)/.test(text + where)
+    )
+      return;
     errors.push(`${text} (${where})`);
   });
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
