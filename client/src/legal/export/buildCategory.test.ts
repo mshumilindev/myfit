@@ -143,8 +143,14 @@ describe('account and consent history', () => {
     expect(r.missing.every((m) => m.reason === 'server-only')).toBe(true);
     expect(r.missing.length).toBeGreaterThan(0);
   });
+  it('settings kept in the account travel with the export (Art. 15 / 20)', () => {
+    const j = file(r.files, 'settings.json')!.content;
+    if (j.kind !== 'json') throw new Error('json expected');
+    expect(j.value).toEqual({ 'spotter.weightUnit': 'kg', 'spotter.tw.weekly-goal': 4 });
+    expect(file(r.files, 'settings.json')!.rows).toBe(2);
+  });
   it('consents not loaded', () => {
-    const e = buildCategory('account', sources({ consents: null }), NOW);
+    const e = buildCategory('account', sources({ consents: null, settings: {} }), NOW);
     expect(e.files.map((f) => f.name)).toEqual(['account.json']);
     expect(e.missing.at(-1)).toEqual({ item: 'Consent history', reason: 'not-loaded' });
   });

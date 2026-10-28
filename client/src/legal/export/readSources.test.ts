@@ -59,6 +59,22 @@ describe('readExportSources', () => {
     expect(s.hiddenHealth).toEqual([]);
   });
 
+  it('settings synced to the account are read from the device cache; stamps and local-only keys stay out', async () => {
+    localStorage.clear();
+    localStorage.setItem('spotter.weightUnit', 'lb');
+    localStorage.setItem('spotter.challenges', JSON.stringify([{ id: 'c1' }]));
+    localStorage.setItem('spotter.tw.weekly-goal', '4');
+    localStorage.setItem('spotter.exercisePrefsAt', '123');
+    localStorage.setItem('spotter.somethingElse', 'x');
+    const s = await readExportSources(live);
+    expect(s.settings).toEqual({
+      'spotter.weightUnit': 'lb',
+      'spotter.challenges': [{ id: 'c1' }],
+      'spotter.tw.weekly-goal': 4,
+    });
+    localStorage.clear();
+  });
+
   it('a store not confirmed in step with the account is a device copy', async () => {
     h.state = { ...storeSlice(), syncStatus: 'offline' };
     expect((await readExportSources(live)).storeSynced).toBe(false);

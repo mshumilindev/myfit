@@ -104,6 +104,8 @@ export interface ExportSources {
   /** `null` = not loaded. */
   nutrition: NutritionData | null;
   chat: readonly ChatMsg[];
+  /** Settings and small values kept in the account (exercise units, widget values, challenges, …), as cached on this device. */
+  settings: Readonly<Record<string, unknown>>;
   hasTrainer: boolean;
 }
 

@@ -8,6 +8,7 @@ import {
   store as nutritionStore,
 } from '../../nutrition/store';
 import { getStoreState, getStoredHealthForExport, hasStoredHealthData } from '../../store';
+import { LOCAL_KEYS } from '../../localKeys.registry';
 import type { ConsentRecord } from '../consents';
 import type { ExportSources, HealthFeatureKey, StoreSlice } from './exportModel';
 
@@ -52,6 +53,7 @@ export async function readExportSources(live: LiveInputs): Promise<ExportSources
           hidden: !hasShown && hasNutritionData(),
         },
     chat: getChatLog(),
+    settings: readAccountSettings(),
     hasTrainer: live.hasTrainer,
   };
 }
@@ -66,4 +68,38 @@ function visible(f: HealthFeatureKey, st: ReturnType<typeof getStoreState>): boo
     default:
       return (st[f]?.updatedAt ?? 0) > 0;
   }
+}
+
+const parse = (raw: string): unknown => {
+  try {
+    return JSON.parse(raw) as unknown;
+  } catch {
+    return raw;
+  }
+};
+
+/**
+ * The settings and small values that live in the account's `meta/*` documents (SPO-385…391), read from this device's cache.
+ * Driven by the key registry, so a key registered as synced to `meta/*` is exported without touching this file. Stamps
+ * (`…At`) are bookkeeping, not the person's data, and stay out.
+ */
+export function readAccountSettings(): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  try {
+    const meta = LOCAL_KEYS.filter(
+      (e) =>
+        e.class === 'synced' &&
+        e.scope === 'account' &&
+        e.syncedTo?.startsWith('users/{uid}/meta/'),
+    );
+    for (const k of Object.keys(localStorage).sort()) {
+      if (/At$/.test(k)) continue;
+      if (!meta.some((e) => e.key === k || (e.prefix && k.startsWith(e.prefix)))) continue;
+      const raw = localStorage.getItem(k);
+      if (raw !== null) out[k] = parse(raw);
+    }
+  } catch {
+    /* storage unavailable: nothing to add */
+  }
+  return out;
 }

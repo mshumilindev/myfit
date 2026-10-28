@@ -116,6 +116,7 @@ export function sources(over: Partial<ExportSources> = {}): ExportSources {
       hidden: false,
     },
     chat: [chatMsg('c1', 'me', 'hi'), chatMsg('c2', 'atlas', 'hello')],
+    settings: { 'spotter.weightUnit': 'kg', 'spotter.tw.weekly-goal': 4 },
     hasTrainer: true,
     ...over,
   };

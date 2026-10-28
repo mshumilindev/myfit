@@ -26,6 +26,16 @@ export function buildAccount(s: ExportSources, exportedAt: string): CategoryResu
       },
     },
   ];
+  const keys = Object.keys(s.settings);
+  if (keys.length) {
+    files.push({
+      name: 'settings.json',
+      about:
+        'Settings and small values kept in your account: units and exercise settings, Today widget values, started challenges, saved lessons, theme and language, push switches.',
+      content: { kind: 'json', value: s.settings },
+      rows: keys.length,
+    });
+  }
   if (s.consents === null) {
     missing.push({ item: 'Consent history', reason: 'not-loaded' });
   } else {
