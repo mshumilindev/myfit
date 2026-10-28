@@ -17,6 +17,7 @@ import { GymThumb } from '../components/GymThumb';
 import { UserAvatar } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { GymStep } from './OnboardingGymStep';
+import { OnboardingThemeStep } from './OnboardingThemeStep';
 import { InstallShortcut } from './InstallShortcut';
 import { OnbLandingSkeleton } from './OnbLandingSkeleton';
 import { ConditionPage, ConditionsOnboardingRow } from './health/Conditions';
@@ -178,7 +179,7 @@ export function OnboardingView(props: {
     );
   }
 
-  const totalSteps = 4;
+  const totalSteps = 5;
   const railBars = (upTo: number) => (
     <div className="onb-rail" aria-hidden>
       {Array.from({ length: totalSteps }, (_, index) => index + 1).map((i) => (
@@ -186,7 +187,7 @@ export function OnboardingView(props: {
       ))}
     </div>
   );
-  const stepNames = ['', t.onbWho, t.onbFace, t.onbGymStep, t.onbBodyStep];
+  const stepNames = ['', t.onbWho, t.onbFace, t.onbGymStep, t.onbBodyStep, t.onbLook];
   const rail = (
     <div className="onb-steptop">
       {railBars(Math.min(Math.max(step, 1), totalSteps))}
@@ -431,7 +432,17 @@ export function OnboardingView(props: {
         />
       )}
 
-      {step === 5 && condOpen && (
+      {step === 5 && (
+        <OnboardingThemeStep
+          rail={rail}
+          onContinue={() => {
+            setStep(6);
+            persist({ step: 6 });
+          }}
+        />
+      )}
+
+      {step === 6 && condOpen && (
         <ConditionPage
           cond="new"
           condKey={condKey}
@@ -444,13 +455,13 @@ export function OnboardingView(props: {
         />
       )}
 
-      {step === 5 && nicOpen && <NicotineProductsView onBack={() => setNicOpen(false)} />}
+      {step === 6 && nicOpen && <NicotineProductsView onBack={() => setNicOpen(false)} />}
 
-      {step === 5 && alcOpen && <AlcoholProductsView onBack={() => setAlcOpen(false)} />}
+      {step === 6 && alcOpen && <AlcoholProductsView onBack={() => setAlcOpen(false)} />}
 
-      {step === 5 && supOpen && <SupplementProductsView onBack={() => setSupOpen(false)} />}
+      {step === 6 && supOpen && <SupplementProductsView onBack={() => setSupOpen(false)} />}
 
-      {step === 5 && !condOpen && !nicOpen && !alcOpen && !supOpen && (
+      {step === 6 && !condOpen && !nicOpen && !alcOpen && !supOpen && (
         <div className="onb-final">
           {gym?.gymName && gym.gymLat !== undefined && gym.gymLng !== undefined && (
             <div className="onb-final-bg">
@@ -506,7 +517,7 @@ export function OnboardingView(props: {
         </div>
       )}
 
-      {step === 5 && supQuick && (
+      {step === 6 && supQuick && (
         <SupplementQuickStartSheet
           onClose={() => setSupQuick(false)}
           onMore={() => {

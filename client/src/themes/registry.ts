@@ -5,6 +5,7 @@
  */
 import { useSyncExternalStore } from 'react';
 import { glitchTheme } from '../components/appGlitch';
+import { activeHoliday, dayOf, skipKey, type HolidayId, type HolidayWindow } from './holidays';
 
 export interface ThemeDef {
   id: string;
@@ -17,6 +18,11 @@ export interface ThemeDef {
    * holiday themes, SPO-321), so a user cannot pick it by hand. Default: pickable.
    */
   pickable?: boolean;
+  /**
+   * Makes this a holiday theme (SPO-321): the app puts it on by itself from a week before the holiday through the
+   * day itself (schedule: holidays.ts) and takes it off the day after. Never offered, announced or saved.
+   */
+  holiday?: HolidayId;
 }
 
 export const THEMES: readonly ThemeDef[] = [
@@ -26,7 +32,9 @@ export const THEMES: readonly ThemeDef[] = [
 ];
 
 /** The themes a user may pick by hand (everything the Themes screen and the announcement deal with). */
-export const PICKABLE_THEMES: readonly ThemeDef[] = THEMES.filter((t) => t.pickable !== false);
+export const PICKABLE_THEMES: readonly ThemeDef[] = THEMES.filter(
+  (t) => t.pickable !== false && t.holiday === undefined,
+);
 
 export const DEFAULT_THEME = 'glass';
 const KEY = 'gym.theme';
@@ -45,11 +53,17 @@ const isKnown = (id: string | null | undefined): id is string => THEMES.some((t)
 /** The theme the user has chosen (saved). While a preview runs, `<html data-theme>` shows another one. */
 let committed: string | null = null;
 let previewing: string | null = null;
+/**
+ * The holiday theme the app is wearing over the saved one, or null. It is never saved: not in `gym.theme`, not in
+ * the account, so the person's own theme is simply what shows again when the holiday ends (SPO-321).
+ */
+let holiday: string | null = null;
+const SKIP_KEY = 'gym.holidaySkip';
 
 /** The saved choice — not the look on screen during a preview. */
 export function getCommittedTheme(): string {
-  // outside a preview the attribute IS the saved theme (it is also set directly by older callers and tests)
-  return previewing !== null ? (committed ?? DEFAULT_THEME) : getTheme();
+  // outside a preview and a holiday the attribute IS the saved theme (it is also set directly by older callers and tests)
+  return previewing !== null || holiday !== null ? (committed ?? DEFAULT_THEME) : getTheme();
 }
 
 export function getTheme(): string {
@@ -84,7 +98,9 @@ export function initTheme(): void {
   }
   committed = isKnown(saved) ? saved : DEFAULT_THEME;
   previewing = null;
-  apply(committed);
+  // opening the app reads the holiday schedule: a holiday theme is on from the very first paint
+  holiday = holidayNow()?.theme ?? null;
+  apply(holiday ?? committed);
   initAxes();
 }
 
@@ -106,6 +122,8 @@ function store(id: string, animate = true): void {
 /** The user picked a theme: apply, cache it and tell the account sync (themeSync.ts). */
 export function setTheme(id: string): void {
   if (!isKnown(id)) return;
+  // a pick during a holiday is the person's own: the holiday theme stays off for the rest of this holiday
+  if (holiday !== null) skipHoliday();
   store(id);
   choiceListeners.forEach((fn) => fn(id));
 }
@@ -121,6 +139,17 @@ export function applyRemoteTheme(id: string): void {
     } catch {
       /* storage unavailable */
     }
+    return;
+  }
+  if (holiday !== null) {
+    // the holiday theme is on: the account's choice is remembered and shows when the holiday ends
+    committed = id;
+    try {
+      localStorage.setItem(KEY, id);
+    } catch {
+      /* storage unavailable */
+    }
+    listeners.forEach((fn) => fn());
     return;
   }
   store(id);
@@ -139,7 +168,7 @@ export function onThemeChoice(fn: (id: string) => void): () => void {
  */
 export function startPreview(id: string): void {
   if (!isKnown(id)) return;
-  if (previewing === null) committed = getTheme(); // what to go back to
+  if (previewing === null && holiday === null) committed = getTheme(); // what to go back to
   previewing = id;
   swap(id, true);
   listeners.forEach((fn) => fn());
@@ -153,7 +182,7 @@ export function endPreview(keep: boolean, quiet = false): void {
     setTheme(id);
     return;
   }
-  const back = committed ?? DEFAULT_THEME;
+  const back = holiday ?? committed ?? DEFAULT_THEME;
   previewing = null;
   swap(back, !quiet);
   listeners.forEach((fn) => fn());
@@ -258,5 +287,77 @@ export function useAxis(axis: AxisName): string {
     },
     () => getAxis(axis),
     () => AXES[axis].default,
+  );
+}
+
+/**
+ * Holiday themes (SPO-321). The schedule is read ON THE DEVICE when the app opens (`initTheme`), when the tab comes
+ * back and at each local midnight (holidayWatch.ts): nothing here talks to a server.
+ */
+function skipped(): string[] {
+  try {
+    const v: unknown = JSON.parse(localStorage.getItem(SKIP_KEY) ?? '[]');
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+/** The holiday theme that should be on today, if any (a holiday without a theme in the registry never comes on). */
+function holidayNow(now: Date = new Date()): { theme: string; window: HolidayWindow } | null {
+  const have = new Map(
+    THEMES.filter((t) => t.holiday !== undefined).map((t) => [t.holiday as HolidayId, t.id]),
+  );
+  if (have.size === 0) return null;
+  const lang = typeof document === 'undefined' ? 'en' : document.documentElement.lang || 'en';
+  const w = activeHoliday(dayOf(now), lang, (id) => have.has(id));
+  if (!w || skipped().includes(skipKey(w))) return null;
+  return { theme: have.get(w.id) as string, window: w };
+}
+
+/** The person chose their own theme during a holiday: leave it off until this holiday has passed. */
+function skipHoliday(): void {
+  const w = holidayNow()?.window;
+  holiday = null;
+  if (!w) return;
+  try {
+    localStorage.setItem(SKIP_KEY, JSON.stringify([...skipped(), skipKey(w)].slice(-12)));
+  } catch {
+    /* storage unavailable — the choice lasts for this session */
+  }
+}
+
+/**
+ * Put the holiday theme on or take it off to match today's date, with the transition of the theme being switched TO.
+ * Returns false when it did nothing, including while a preview is open (the caller tries again when it ends).
+ */
+export function syncHolidayTheme(now: Date = new Date()): boolean {
+  if (previewing !== null) return false;
+  const next = holidayNow(now)?.theme ?? null;
+  if (next === holiday) return false;
+  holiday = next;
+  swap(holiday ?? committed ?? DEFAULT_THEME, true);
+  listeners.forEach((fn) => fn());
+  return true;
+}
+
+/** True when today's schedule wants another theme than the one on screen (a switch is waiting). */
+export function holidaySwitchPending(now: Date = new Date()): boolean {
+  return (holidayNow(now)?.theme ?? null) !== holiday;
+}
+
+/** The holiday theme on screen right now, or null. */
+export function getHolidayTheme(): string | null {
+  return holiday;
+}
+
+export function useHolidayTheme(): string | null {
+  return useSyncExternalStore(
+    (fn) => {
+      listeners.add(fn);
+      return () => listeners.delete(fn);
+    },
+    getHolidayTheme,
+    () => null,
   );
 }

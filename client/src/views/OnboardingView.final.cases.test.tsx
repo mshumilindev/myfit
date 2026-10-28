@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, screen } from '@testing-library/react';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
+import { PICKABLE_THEMES } from '../themes';
+import { getUnseenThemes, resetSeenForTest } from '../themes/seen';
 import { emptyState, freezeClock, NOW, seed, setDesktop } from './__fixtures__/viewKit';
 import {
   agreeToTerms,
@@ -58,6 +60,10 @@ describe('OnboardingView: step 4 body', () => {
       muscleKg: null,
     });
     expect(m.addWeight).toHaveBeenCalledWith(80.5, NOW);
+    // the body step leads to the look step (SPO-355); Continue there reaches the final screen
+    expect(screen.getByText(en.onbLookLead)).toBeTruthy();
+    expect(screen.queryByText(en.onbReady)).toBeNull();
+    fireEvent.click(screen.getByText(en.onbContinue));
     expect(screen.getByText(en.onbReady)).toBeTruthy();
   });
 
@@ -76,9 +82,36 @@ describe('OnboardingView: step 4 body', () => {
   });
 });
 
+describe('OnboardingView: step 5 look (SPO-355)', () => {
+  it('shows the rail as step 5 of 5 with every pickable theme, and Continue skips without choosing', async () => {
+    await goto(5);
+    expect(screen.getByText(en.onbStepOf(5))).toBeTruthy();
+    expect(screen.getByText(en.onbLook)).toBeTruthy();
+    expect(screen.getByText(en.onbLookNote)).toBeTruthy();
+    // the theme in use is a live card; every other one is a framed card in its own document
+    expect(document.querySelectorAll('.thm-card, iframe.thm-frame').length).toBe(
+      PICKABLE_THEMES.length,
+    );
+    fireEvent.click(screen.getByText(en.onbContinue));
+    expect(screen.getByText(en.onbReady)).toBeTruthy();
+  });
+
+  it('Back from the final screen returns to the look step', async () => {
+    await goto(6);
+    fireEvent.click(screen.getByRole('button', { name: en.onbBack }));
+    expect(screen.getByText(en.onbLookLead)).toBeTruthy();
+  });
+
+  it('counts as having seen every theme, so Today does not invite right after', async () => {
+    resetSeenForTest();
+    await goto(5);
+    expect(getUnseenThemes()).toEqual([]);
+  });
+});
+
 describe('OnboardingView: final step', () => {
   it('greets the user by name and starts the first workout, clearing progress', async () => {
-    const { onDone } = await goto(5);
+    const { onDone } = await goto(6);
     expect(screen.getByText(en.onbWow)).toBeTruthy();
     expect(screen.getByText(en.onbWowBodyNoGym)).toBeTruthy();
     expect(document.querySelector('.onb-me .n')?.textContent).toBe('Ana');
@@ -111,6 +144,7 @@ describe('OnboardingView: final step', () => {
     fireEvent.change(ins[0], { target: { value: '180' } });
     fireEvent.change(ins[1], { target: { value: '80' } });
     fireEvent.click(screen.getByText(en.onbContinue));
+    fireEvent.click(screen.getByText(en.onbContinue)); // the look step
     expect(document.querySelector('.onb-ready')?.textContent).toContain('Iron Works');
     expect(screen.getByText(en.onbWowBody('Iron Works'))).toBeTruthy();
     expect(document.querySelector('.onb-final-bg [data-testid="thumb"]')?.textContent).toBe(
@@ -123,13 +157,13 @@ describe('OnboardingView: final step', () => {
 
   it('does not finish when the workout cannot be started', async () => {
     m.startWorkout.mockReturnValue(null);
-    const { onDone } = await goto(5);
+    const { onDone } = await goto(6);
     fireEvent.click(screen.getByText(en.onbStartTraining));
     expect(onDone).not.toHaveBeenCalled();
   });
 
   it('"just the app" finishes without a workout and clears progress', async () => {
-    const { onDone } = await goto(5);
+    const { onDone } = await goto(6);
     fireEvent.click(screen.getByText(en.onbJustApp));
     expect(onDone).toHaveBeenCalledWith();
     expect(m.startWorkout).not.toHaveBeenCalled();
@@ -137,7 +171,7 @@ describe('OnboardingView: final step', () => {
   });
 
   it('the health rows open their screens and Back returns to the final card', async () => {
-    await goto(5);
+    await goto(6);
     fireEvent.click(screen.getByText('row-cond'));
     expect(screen.getByTestId('cond-page')).toBeTruthy();
     expect(screen.queryByText(en.onbWow)).toBeNull();
@@ -157,7 +191,7 @@ describe('OnboardingView: final step', () => {
   });
 
   it('supplement quick start can close, or go to the full list and back', async () => {
-    await goto(5);
+    await goto(6);
     fireEvent.click(screen.getByText('row-sup'));
     fireEvent.click(screen.getByText('quick-close'));
     expect(screen.queryByTestId('sup-quick')).toBeNull();
@@ -168,7 +202,7 @@ describe('OnboardingView: final step', () => {
     expect(screen.getByText(en.onbWow)).toBeTruthy();
   });
 
-  it('Back from the final step returns to the body step', async () => {
+  it('Back from the look step returns to the body step', async () => {
     await goto(5);
     fireEvent.click(screen.getByRole('button', { name: en.onbBack }));
     expect(screen.getByText(en.onbBodyLead)).toBeTruthy();

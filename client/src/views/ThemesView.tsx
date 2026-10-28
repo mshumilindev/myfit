@@ -4,17 +4,16 @@
  * on its own atmosphere, and one button. Landscape tiles on desktop: the theme in use is the big one. The theme in use comes first and shows "Applied"; the others have
  * Apply. No user data and no screenshot: the picture is the theme's tokens (SPO-346).
  */
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PageHead } from '../components/ui/PageHead';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { useT } from '../i18n';
 import { APP_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
-import { PICKABLE_THEMES, setTheme, useCommittedTheme } from '../themes';
+import { PICKABLE_THEMES, setTheme, useCommittedTheme, useHolidayTheme } from '../themes';
 import { getUnseenThemes, markAllThemesSeen } from '../themes/seen';
-import { Tag } from '../components/ui/Tag';
-import { ThemeFrame } from './ThemeFrame';
+import { ThemeCard } from './ThemeCard';
 import './themes.css';
 
 /** Places held for the themes still to come, so the page already has its final shape (five slots in all). */
@@ -22,7 +21,9 @@ const SOON_SLOTS = 3;
 
 export function ThemesView({ onClose }: { onClose: () => void }) {
   const { t } = useT();
-  const current = useCommittedTheme();
+  const saved = useCommittedTheme();
+  // a holiday theme veils the saved one: then no card is "in use" and every card is drawn in its own frame
+  const current = useHolidayTheme() === null ? saved : null;
   // the themes that were new when the screen opened keep their tag for this visit; opening counts as seen
   const [fresh] = useState(() => new Set(getUnseenThemes().map((x) => x.id)));
   useEffect(() => {
@@ -39,45 +40,18 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
       <PageHead back={{ label: t.backAction, onClick: onClose }} title={t.themesTitle} />
       <SectionLabel>{t.themesSection}</SectionLabel>
       <div className="thm-list">
-        {list.map((th, i) => {
-          const on = th.id === current;
-          const card = (
-            <Card pad="none" emphasis="glass" className={cardCls}>
-              <div className="thm-art" aria-hidden="true">
-                <span className="thm-wm">{th.name}</span>
-              </div>
-              {fresh.has(th.id) && (
-                <Tag tone="accent" className="thm-new">
-                  {t.themeNew}
-                </Tag>
-              )}
-              <div className="thm-foot">
-                {on ? (
-                  <Button variant="secondary" icon="check" disabled fullWidth>
-                    {t.themesApplied}
-                  </Button>
-                ) : (
-                  <Button variant="primary" fullWidth onClick={() => setTheme(th.id)}>
-                    {t.themesApply}
-                  </Button>
-                )}
-              </div>
-            </Card>
-          );
-          // a card is drawn in ITS theme: the current one is already live, the others go through a frame
+        {list.map((th, i) => (
           // desktop: the first (current) theme is the big tile, the rest are small landscape tiles
-          return (
-            <div key={th.id} className={i === 0 ? 'thm-cell thm-hero' : 'thm-cell'}>
-              {on ? (
-                <Fragment>{card}</Fragment>
-              ) : (
-                <ThemeFrame themeId={th.id} title={th.name}>
-                  {card}
-                </ThemeFrame>
-              )}
-            </div>
-          );
-        })}
+          <div key={th.id} className={i === 0 ? 'thm-cell thm-hero' : 'thm-cell'}>
+            <ThemeCard
+              theme={th}
+              current={th.id === current}
+              fresh={fresh.has(th.id)}
+              land={land}
+              onApply={setTheme}
+            />
+          </div>
+        ))}
         {Array.from({ length: SOON_SLOTS }, (_, i) => (
           <div key={`soon-${i}`} className="thm-cell">
             <Card pad="none" className={`${cardCls} thm-soon`}>

@@ -143,7 +143,7 @@ export const agreeToTerms = () => {
     }
   }
 };
-export const goto = async (step: 1 | 2 | 3 | 4 | 5) => {
+export const goto = async (step: 1 | 2 | 3 | 4 | 5 | 6) => {
   const out = await open();
   fireEvent.click(screen.getByText(en.onbStart));
   if (step === 1) return out;
@@ -165,6 +165,8 @@ export const goto = async (step: 1 | 2 | 3 | 4 | 5) => {
   const ins = screen.getAllByPlaceholderText('—');
   fireEvent.change(ins[0], { target: { value: '180' } });
   fireEvent.change(ins[1], { target: { value: '80,5' } });
+  fireEvent.click(screen.getByText(en.onbContinue));
+  if (step === 5) return out; // the look step (SPO-355)
   fireEvent.click(screen.getByText(en.onbContinue));
   return out;
 };

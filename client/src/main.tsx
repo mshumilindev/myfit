@@ -48,6 +48,7 @@ import './styles.css';
 import './redesign.css';
 import './page-titles.css';
 import { initTheme } from './themes';
+import { startHolidayWatch } from './themes/holidayWatch';
 import './glass.css';
 import './glass-shape.css';
 import './glass-glitch.css';
@@ -72,8 +73,11 @@ import { HealthConsentHost } from './legal/HealthConsentHost';
 // Clean URLs (no `#`): rewrite a legacy `/#/route` link to `/route` before the app reads its route.
 installCleanUrls();
 installRouteSwitch();
-initTheme();
+// the language first: the holiday schedule (Easter) depends on it
 document.documentElement.lang = getLocale();
+initTheme();
+// a holiday theme comes on and goes off with the date, checked on this device (no server): SPO-321
+startHolidayWatch();
 lockShellHeight();
 installHorizontalScrollGuard();
 initMotion();

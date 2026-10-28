@@ -33,3 +33,7 @@
 - Обгортка, що тримає фото/ring за скошеною карткою (hero), зрізається так само (`clip-path: var(--clip-surface)`) і сама малює ring і штрихи: колір і товщина ring-а, не лише картки всередині.
 - Новий клас, що ріжеться, додається і в список `clip-path` (`glass-shape.css`), і в список штрихів `Chamfer.css`; без цього на зрізі видно фон під елементом.
 - Стилі такої теми не торкаються інших тем: селектори під `html[data-theme='<id>']`, а `--bd`/`--bd-w` у спільному кіті — лише як токени з fallback (`var(--bd, var(--corner-mark-color, transparent))`).
+
+## Святкові теми (SPO-321)
+
+Святкова тема це звичайна тема з рядком у `THEMES` і полем `holiday: '<id>'` (`valentine | easter | halloween | christmas | independence`). Вона автоматично виключається з `PICKABLE_THEMES`, анонсу й «New» і вмикається за графіком `docs/specs/SPO-321-holiday-schedule.md` (клієнт, при вході; не зберігається). Нове свято: додай запис у `HOLIDAYS` (`themes/holidays.ts`) і рядок у графік.
