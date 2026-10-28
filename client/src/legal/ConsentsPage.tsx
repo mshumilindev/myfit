@@ -13,7 +13,6 @@ import { useState } from 'react';
 import { GroupedList } from '../components/ui/GroupedList';
 import { ConsentRow } from '../components/ui/ConsentRow';
 import { ConfirmDialog } from '../components/ui/Overlays';
-import { useFlag } from '../data/flags';
 // Loaded on demand: the sync host pulls in the store and the vault, which this page does not otherwise need.
 const atlasHistory = () => import('../atlas/AtlasHistoryHost');
 import { ConfirmEffectsDialog } from '../components/ui/ConfirmEffectsDialog';
@@ -179,7 +178,6 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
     );
   }
 
-  const historyFlag = useFlag('atlasHistory');
   const atlasOn = rowModel(records, 'atlas-ai', loading).on;
   const req = requiredModel(records, loading);
   const offBody = (kind: ConsentKind): string =>
@@ -230,14 +228,13 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
           if (k === 'atlas-puter') return row(k, 'sparkle', 'atlas', t.privPuterSub, m);
           return row(k, 'map-pin', 'accent', t.privGeoSub, m);
         })}
-        {(historyFlag || rowModel(records, 'atlas-history', loading).on) &&
-          row(
-            'atlas-history',
-            'chats-circle',
-            'atlas',
-            t.privHistorySub,
-            rowModel(records, 'atlas-history', loading),
-          )}
+        {row(
+          'atlas-history',
+          'chats-circle',
+          'atlas',
+          t.privHistorySub,
+          rowModel(records, 'atlas-history', loading),
+        )}
       </GroupedList>
 
       {ask?.kind === 'history-on' && (

@@ -93,6 +93,16 @@ export const legalPl: LegalTexts = {
                   'Prawnie uzasadniony interes, art. 6 ust. 1 lit. f',
                 ],
                 [
+                  '**Ustawienia i drobne wartości na Twoim koncie:** jednostki, ustawienia ćwiczeń, wartości widżetów „Dziś”, rozpoczęte wyzwania i ich postęp, zapisane lekcje, motyw i język, przełączniki powiadomień',
+                  'Aby ustawienia i postępy były takie same na wszystkich Twoich urządzeniach',
+                  'Umowa, art. 6 ust. 1 lit. b',
+                ],
+                [
+                  '**Historia czatu Atlas na Twoim koncie (tylko jeśli ją włączysz):** wiadomości z Twojego czatu z Atlasem',
+                  'Pokazywanie tego samego czatu na wszystkich Twoich urządzeniach',
+                  'Zgoda, art. 6 ust. 1 lit. a; dane o zdrowiu wpisane w czacie — wyraźna zgoda, art. 9 ust. 2 lit. a; zob. punkty 7 i 8',
+                ],
+                [
                   '**Czat Atlas AI (tylko jeśli go włączysz):** Twoje pytanie i podsumowanie Twoich danych treningowych',
                   'Odpowiadanie na pytania w dowolnej formie',
                   'Wyraźna zgoda, art. 9 ust. 2 lit. a, gdy uwzględniono dane o zdrowiu, w pozostałych przypadkach art. 6 ust. 1 lit. a; zob. punkt 7',
@@ -169,7 +179,7 @@ export const legalPl: LegalTexts = {
               '**Co jest wysyłane (wszystko razem, nie można wybrać części):** Twoje pytanie i ostatnie wiadomości czatu; ostatnie treningi (daty, ćwiczenia, serie, powtórzenia, ciężary) i historia każdego ćwiczenia; Twój plan; Twoje notatki i to, co powiedziałeś(-aś) Atlasowi; inne aktywności; kontuzjowane mięśnie; wpływ chorób długotrwałych na trening (zanonimizowane: nigdy imię, obszar ani notatka); długość snu z ostatniej nocy; masa ciała; dzisiejsza data, dzień tygodnia i Twoja rola. Twoje imię, e-mail, data urodzenia i zdjęcia nie są wysyłane.',
               '**Do kogo:** Google (Gemini API, poziom bezpłatny). W wersji bezpłatnej Google może używać wysłanych danych do ulepszania swoich produktów, a ludzie mogą je czytać. Jeśli osobno zezwolisz, a dzienny bezpłatny limit Google zostanie wyczerpany — Puter, przez **Twoje własne konto Puter** (osobna zgoda).',
               '**Warunki:** żądanie idzie z Twojego urządzenia do dostawcy; nasze serwery nie widzą jego treści. Do tego, co dostawca z nim robi, stosuje się jego własne warunki.',
-              '**Twoje wybory:** czat Atlas AI jest wyłączony, dopóki go nie włączysz. Pytamy za każdym razem, gdy go włączasz, wszystko albo nic, a wyłączyć go możesz jednym dotknięciem (ustawienia Atlasa lub „Twoja prywatność > Zgody”); potem nic więcej nie jest wysyłane, a historię czatu można wyczyścić. Historia (ostatnie 100 wiadomości) jest przechowywana tylko na Twoim urządzeniu. Odpowiedź napisana przez model AI jest oznaczona „Odpowiedź AI”. Odpowiedzi nie są poradą medyczną.',
+              '**Twoje wybory:** czat Atlas AI jest wyłączony, dopóki go nie włączysz. Pytamy za każdym razem, gdy go włączasz, wszystko albo nic, a wyłączyć go możesz jednym dotknięciem (ustawienia Atlasa lub „Twoja prywatność > Zgody”); potem nic więcej nie jest wysyłane, a historię czatu można wyczyścić. Domyślnie historia (ostatnie 100 wiadomości) jest przechowywana tylko na Twoim urządzeniu. Jeśli osobno włączysz „Czat Atlas na wszystkich urządzeniach”, jest ona zapisywana także na Twoim koncie, zaszyfrowana tak jak inne Twoje dane (punkt 4), abyś widział(a) ten sam czat wszędzie; nie zmienia to tego, co jest wysyłane do dostawcy AI. Wyłączenie usuwa kopię zgodnie z opisem w punkcie 8. Odpowiedź napisana przez model AI jest oznaczona „Odpowiedź AI”. Odpowiedzi nie są poradą medyczną.',
             ],
           },
         ],
@@ -182,6 +192,7 @@ export const legalPl: LegalTexts = {
             ul: [
               '**Konto i dane, które wprowadzasz:** do czasu ich usunięcia lub usunięcia konta.',
               '**Zapisy współpracy z trenerem:** prywatne notatki trenera o Tobie są zapisami trenera i podlegają jego okresowi przechowywania.',
+              '**Historia czatu Atlas na Twoim koncie (tylko jeśli ją włączyłeś/-aś):** dopóki przełącznik jest włączony. Po jego wyłączeniu wybierasz: usunąć kopię od razu albo przechowywać ją nieużywaną przez 30 dni (aby można było włączyć ponownie i ją odzyskać), po czym zostaje usunięta automatycznie. Kopia na Twoim urządzeniu pozostaje, dopóki nie wyczyścisz czatu.',
               '**Dziennik „Kto widział Twoje dane”:** 400 dni. **Dziennik działań zespołu:** 90 dni. **Wpisy dziennika przypomnień:** 30 dni.',
               '**Zapisy Twoich zgód** (na co się zgodziłeś(-aś), która wersja, kiedy): do czasu usunięcia konta.',
               '**Zapisy techniczne bez automatycznego terminu:** liczniki prób logowania, dziennik wydawania kluczy, tokeny push, zaplanowane i odrzucone przypomnienia oraz powiadomienia serwisowe nie mają dziś w aplikacji automatycznego terminu, a okresów przechowywania dla nich jeszcze nie ustaliliśmy.',

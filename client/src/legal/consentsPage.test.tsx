@@ -90,15 +90,15 @@ describe('ConsentsPage', () => {
     expect(sw('Nicotine').checked).toBe(true);
     expect(sw('Alcohol').checked).toBe(false);
     expect(screen.getAllByText(new RegExp(`Given · v${V}`)).length).toBeGreaterThanOrEqual(2);
-    expect(screen.getAllByText('Not given').length).toBe(9);
-    expect(screen.getAllByRole('switch').length).toBe(11);
+    expect(screen.getAllByText('Not given').length).toBe(10);
+    expect(screen.getAllByRole('switch').length).toBe(12);
   });
 
   it('does not flash "Not given" while loading', () => {
     h.state = { records: [], loading: true, confirmed: false, error: null };
     render(<ConsentsPage />);
     expect(screen.queryByText('Not given')).toBeNull();
-    expect(screen.getAllByText('Loading…').length).toBe(11);
+    expect(screen.getAllByText('Loading…').length).toBe(12);
     expect(sw('Nicotine').disabled).toBe(true);
   });
 
@@ -217,7 +217,9 @@ describe('PrivacyHub', () => {
     expect(screen.getByText('2 of 10 on')).toBeTruthy();
     expect(screen.getByText('Privacy Policy')).toBeTruthy();
     expect(screen.getByText('Terms of Use')).toBeTruthy();
-    expect(screen.getAllByText(`Version ${V}`).length).toBe(2);
+    // the two documents are versioned apart (the policy moved on 2026-10-28), each shows its own
+    expect(screen.getByText(`Version ${LEGAL_VERSIONS.terms}`)).toBeTruthy();
+    expect(screen.getByText(`Version ${LEGAL_VERSIONS.policy}`)).toBeTruthy();
     fireEvent.click(screen.getByText('Consents'));
     expect(openConsents).toHaveBeenCalledTimes(1);
   });

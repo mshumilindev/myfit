@@ -139,7 +139,7 @@ export function buildAtlas(s: ExportSources): CategoryResult {
     {
       name: 'chat.json',
       about:
-        'The Atlas chat kept on this device (the last 100 messages). May contain health details you typed.',
+        'The Atlas chat as kept on this device (the last 100 messages); with “Atlas chat on all devices” on, the same messages as in your account. May contain health details you typed.',
       content: { kind: 'json', value: chat },
       rows: chat.length,
     },

@@ -27,6 +27,7 @@ export * from './programs';
 export * from './profile';
 export * from './vault';
 export * from './scheduled';
+export * from './atlasChatRetention';
 // Web push delivery: outbox + exact-time rest alerts.
 export * from './push';
 // Notices, mark-read, reminders and reminder-dismissals are plain Firestore

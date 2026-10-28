@@ -2289,9 +2289,6 @@ export const uk: Strings = {
   vaultPendingBody: "Воно ввімкнеться саме, щойно з'явиться зв'язок. Нічого робити не треба.",
   vaultCoachNote: 'Тренер отримує доступ автоматично.',
   flagScopeGlobal: 'Для всіх користувачів',
-  flagAtlasHistory: 'Синхронізація історії чату Atlas',
-  flagAtlasHistoryDesc:
-    'Показує згоду «Чат Atlas на всіх пристроях». Тримайте вимкненим, доки не діє нова політика конфіденційності.',
   settingsTitle: 'Налаштування',
   settingsSub: 'Прапорці функцій для цього пристрою',
   settingsFeaturesLabel: 'Функції',

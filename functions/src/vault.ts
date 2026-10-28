@@ -28,9 +28,9 @@ import { ENFORCE_APPCHECK } from './coach/runtime';
 import { firestoreKv } from './coach/firestoreKv';
 import type { Kv } from './coach/kv';
 
-const VAULT_MASTER = defineSecret('VAULT_MASTER');
+export const VAULT_MASTER = defineSecret('VAULT_MASTER');
 /** Current key version (integer >= 1). Bump at deploy to start a rotation; older versions stay derivable. */
-const VAULT_KV = defineString('VAULT_KV', { default: '1' });
+export const VAULT_KV = defineString('VAULT_KV', { default: '1' });
 
 export const MAX_KEY_VERSION = 99;
 

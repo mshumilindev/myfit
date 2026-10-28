@@ -2236,9 +2236,6 @@ export const et: Strings = {
   vaultPendingBody: 'See lülitub ise sisse, kui ühendus võimaldab. Midagi pole vaja teha.',
   vaultCoachNote: 'Treener saab juurdepääsu automaatselt.',
   flagScopeGlobal: 'Kõigile kasutajatele',
-  flagAtlasHistory: 'Atlase vestluse ajaloo sünkroonimine',
-  flagAtlasHistoryDesc:
-    'Näitab nõusolekut „Atlase vestlus kõigis seadmetes“. Hoia väljas, kuni uus privaatsuspoliitika kehtib.',
   settingsTitle: 'Seaded',
   settingsSub: 'Selle seadme funktsioonilipud',
   settingsFeaturesLabel: 'Funktsioonid',

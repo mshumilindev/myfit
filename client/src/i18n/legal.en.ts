@@ -97,6 +97,16 @@ export const legalEn: LegalTexts = {
                   'Legitimate interest, Art. 6(1)(f)',
                 ],
                 [
+                  '**Settings and small values kept in your account:** units, exercise settings, Today widget values, started challenges and their progress, saved lessons, theme and language, push switches',
+                  'Keep your settings and progress the same on all your devices',
+                  'Contract, Art. 6(1)(b)',
+                ],
+                [
+                  '**Atlas chat history in your account (only if you turn it on):** the messages of your Atlas chat',
+                  'Show the same chat on all your devices',
+                  'Consent, Art. 6(1)(a); health data you write in the chat, explicit consent, Art. 9(2)(a); see sections 7 and 8',
+                ],
+                [
                   '**Atlas AI chat (only if you turn it on):** your question and a summary of your training data',
                   'Answer free-form questions',
                   'Explicit consent, Art. 9(2)(a) where health data is included, Art. 6(1)(a) otherwise; see section 7',
@@ -173,7 +183,7 @@ export const legalEn: LegalTexts = {
               '**What is sent (all together, you cannot pick parts):** your question and the last messages of the chat; recent workouts (dates, exercises, sets, reps, weights) and your history for each exercise; your plan; your notes and what you told Atlas; other activities; injured muscles; training effects of long-term conditions (de-identified: never a name, area or note); last night’s sleep hours; body weight; today’s date, the weekday and your role. Your name, email, birth date and photos are not sent.',
               '**To whom:** Google (Gemini API, free tier). On the free tier Google may use what you send to improve its products, and people may read it. If you separately allow it, and Google’s daily free limit is used up, Puter, through **your own Puter account** (its own consent).',
               '**Conditions:** the request goes from your device to the provider; our servers do not see its content. Providers’ own terms apply to what they do with it.',
-              '**Your choices:** Atlas AI chat is off until you turn it on. You are asked each time you turn it on, all or nothing, and you can turn it off in one tap (Atlas settings or Your privacy > Consents); nothing more is sent after that, and you can clear the chat history. The history (the last 100 messages) is kept on your device only. A reply written by the AI model is marked “AI reply”. Answers are not medical advice.',
+              '**Your choices:** Atlas AI chat is off until you turn it on. You are asked each time you turn it on, all or nothing, and you can turn it off in one tap (Atlas settings or Your privacy > Consents); nothing more is sent after that, and you can clear the chat history. By default the history (the last 100 messages) is kept on your device only. If you separately turn on “Atlas chat on all devices”, it is also stored in your account, encrypted like your other data (section 4), so that you see the same chat everywhere; this does not change what is sent to the AI provider. Turning that off removes the copy as described in section 8. A reply written by the AI model is marked “AI reply”. Answers are not medical advice.',
             ],
           },
         ],
@@ -186,6 +196,7 @@ export const legalEn: LegalTexts = {
             ul: [
               '**Account and the data you enter:** until you delete it or your account.',
               '**Coaching records:** your trainer’s private notes about you are the trainer’s records and follow the trainer’s retention.',
+              '**Atlas chat history in your account (only if you turned it on):** while the switch is on. When you turn it off you choose: delete the copy now, or keep it unused for 30 days (so you can turn it on again and get it back) and then it is deleted automatically. The copy on your device stays until you clear the chat.',
               '**“Who saw your data” log:** 400 days. **Team activity log:** 90 days. **Reminder log entries:** 30 days.',
               '**Records of your consents** (what you agreed to, which version, when): until you delete your account.',
               '**Technical records without an automatic expiry:** sign-in attempt counters, the key-fetch log, push tokens, planned and dismissed reminders and service notices have no automatic expiry in the app today, and we have not yet set retention periods for them.',

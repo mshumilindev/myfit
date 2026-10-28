@@ -2232,9 +2232,6 @@ export const en = {
   vaultPendingBody: 'It turns on by itself as soon as the connection allows. Nothing to do.',
   vaultCoachNote: 'Your coach keeps access automatically.',
   flagScopeGlobal: 'For every user',
-  flagAtlasHistory: 'Atlas chat history sync',
-  flagAtlasHistoryDesc:
-    'Shows the “Atlas chat on all devices” consent. Keep it off until the new privacy policy is live.',
   settingsTitle: 'Settings',
   settingsSub: 'Feature flags for this device',
   settingsFeaturesLabel: 'Features',

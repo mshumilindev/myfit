@@ -37,7 +37,11 @@ export interface LegalChangelogEntry {
 }
 
 /** Newest last. Empty: the first versions (2026-10-21) are the baseline. */
-export const LEGAL_CHANGELOG: readonly LegalChangelogEntry[] = [];
+export const LEGAL_CHANGELOG: readonly LegalChangelogEntry[] = [
+  // SPO-391/392: settings, started challenges and (with its own consent) the Atlas chat history are now kept in the account; a
+  // withdrawn chat copy is kept unused for 30 days and then deleted.
+  { doc: 'policy', version: '2026-10-28', kind: 'material', bullets: ['category', 'retention'] },
+];
 
 /** Entries of a document after `from` (exclusive) up to `to` (inclusive). */
 export function entriesBetween(

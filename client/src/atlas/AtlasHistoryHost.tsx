@@ -1,11 +1,10 @@
 /**
- * Mounted once (main.tsx). Keeps the Atlas chat in the account (SPO-392) in step with its two switches: the global flag
- * `atlasHistory` and the person's `atlas-history` consent. Either off, or the records not yet known (fail closed), or this
+ * Mounted once (main.tsx). Keeps the Atlas chat in the account (SPO-392) in step with the person's `atlas-history` consent
+ * (no feature flag: the consent is the only switch). Off, or the records not yet known (fail closed), or this
  * device withdrew it → nothing runs and nothing is read or written.
  */
 import { useEffect } from 'react';
 import { currentUid } from '../api';
-import { useFlag } from '../data/flags';
 import { useConsentRecords } from '../legal/consentApi';
 import { optionalConsentOn } from '../legal/consents';
 import { localOffKinds } from '../legal/localOff';
@@ -41,11 +40,9 @@ export async function withdrawAtlasHistory(mode: 'keep' | 'now'): Promise<void> 
 }
 
 export function AtlasHistoryHost() {
-  const flag = useFlag('atlasHistory');
   const { records, confirmed } = useConsentRecords();
   const uid = currentUid();
   const on =
-    flag &&
     !!uid &&
     (confirmed || records.length > 0) &&
     optionalConsentOn(records, 'atlas-history') &&
@@ -69,10 +66,7 @@ export function AtlasHistoryHost() {
 
   // Consent off (and known to be): a kept copy whose time is up is deleted. Nothing is read otherwise.
   const off =
-    flag &&
-    !!uid &&
-    (confirmed || records.length > 0) &&
-    !optionalConsentOn(records, 'atlas-history');
+    !!uid && (confirmed || records.length > 0) && !optionalConsentOn(records, 'atlas-history');
   useEffect(() => {
     if (!off || !uid) return;
     sweepWithdrawn(firestoreRetentionPorts(uid, quiet)).catch(quiet);

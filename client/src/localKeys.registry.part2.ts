@@ -159,7 +159,7 @@ export const LOCAL_KEYS_2: readonly LocalKeyEntry[] = [
     class: 'gap',
     wipe: 'signout',
     issue: 'SPO-392',
-    note: 'last Atlas chat messages, plain text on the device; with the atlas-history consent (and the atlasHistory flag) also stored sealed in users/{uid}/atlasChat, this key is then the cache',
+    note: 'last Atlas chat messages, plain text on the device; with the atlas-history consent also stored sealed in users/{uid}/atlasChat, this key is then the cache',
   },
   {
     key: 'spotter.consentQueue',

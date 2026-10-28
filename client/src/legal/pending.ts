@@ -175,6 +175,13 @@ export const PENDING: readonly PendingItem[] = [
   ),
   item('pp-retention-account', 'privacy', 'p8', 'depends', 'SPO-285: account deletion.'),
   item(
+    'pp-atlas-history',
+    'privacy',
+    'p8',
+    'lawyer',
+    'SPO-391/392: texts about the Atlas chat history in the account (p3, p7, p8) and account settings/challenges (p3) are drafted from open sources, NOT checked by a lawyer; the 30-day period of the kept copy after withdrawal is a proposal (claude/SPO-391-392-legal-open-sources.md §3a).',
+  ),
+  item(
     'pp-retention-coaching',
     'privacy',
     'p8',
@@ -523,5 +530,5 @@ export const PENDING: readonly PendingItem[] = [
   ),
 ];
 
-/** The uk and pl texts are machine-prepared; the canonical text is English. Each needs a lawyer / native-speaker review. */
-export const TRANSLATION_REVIEW = ['uk', 'pl'] as const;
+/** The uk and pl texts are machine-prepared; lt and et show the English text. The canonical text is English. Each needs a lawyer / native-speaker review (lt and et: a native read before they get their own text). */
+export const TRANSLATION_REVIEW = ['uk', 'pl', 'lt', 'et'] as const;

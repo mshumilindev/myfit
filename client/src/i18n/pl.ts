@@ -2255,9 +2255,6 @@ export const pl: Strings = {
   vaultPendingBody: 'Włączy się samo, gdy tylko pozwoli na to połączenie. Nic nie trzeba robić.',
   vaultCoachNote: 'Trener dostaje dostęp automatycznie.',
   flagScopeGlobal: 'Dla wszystkich użytkowników',
-  flagAtlasHistory: 'Synchronizacja historii czatu Atlas',
-  flagAtlasHistoryDesc:
-    'Pokazuje zgodę „Czat Atlas na wszystkich urządzeniach”. Zostaw wyłączone, dopóki nie obowiązuje nowa polityka prywatności.',
   settingsTitle: 'Ustawienia',
   settingsSub: 'Flagi funkcji na tym urządzeniu',
   settingsFeaturesLabel: 'Funkcje',

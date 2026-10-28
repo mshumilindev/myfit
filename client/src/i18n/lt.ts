@@ -2270,9 +2270,6 @@ export const lt: Strings = {
   vaultPendingBody: 'Jis įsijungs pats, kai tik bus ryšys. Nieko daryti nereikia.',
   vaultCoachNote: 'Treneris prieigą gauna automatiškai.',
   flagScopeGlobal: 'Visiems naudotojams',
-  flagAtlasHistory: 'Atlas pokalbio istorijos sinchronizavimas',
-  flagAtlasHistoryDesc:
-    'Rodo sutikimą „Atlas pokalbis visuose įrenginiuose“. Laikykite išjungtą, kol neįsigaliojo nauja privatumo politika.',
   settingsTitle: 'Nustatymai',
   settingsSub: 'Šio įrenginio funkcijų vėliavėlės',
   settingsFeaturesLabel: 'Funkcijos',

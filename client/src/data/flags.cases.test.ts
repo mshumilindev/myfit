@@ -77,12 +77,9 @@ describe('device flags', () => {
     expect(fs.setDoc).not.toHaveBeenCalled();
   });
 
-  it('declares exactly the known flags: the food log per device, the Atlas chat history globally (SPO-392)', async () => {
+  it('declares exactly the known flags: the food log per device (the Atlas chat history has no flag, only its consent: SPO-392)', async () => {
     const f = await load();
-    expect(f.FEATURE_FLAGS.map((x) => [x.id, x.scope])).toEqual([
-      ['nutrition', 'device'],
-      ['atlasHistory', 'global'],
-    ]);
+    expect(f.FEATURE_FLAGS.map((x) => [x.id, x.scope])).toEqual([['nutrition', 'device']]);
   });
 });
 

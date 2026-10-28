@@ -161,7 +161,8 @@ describe('needsLegalGate', () => {
 
   it('is true when one is stale or withdrawn', () => {
     const stale = [...allRequired(), rec('policy-ack', 'grant', 9, '2025-01-01')];
-    expect(needsLegalGate(stale)).toBe(true);
+    // a stale version the changelog does not explain asks again with the full gate (the real changelog now explains it)
+    expect(needsLegalGate(stale, { versions: LEGAL_VERSIONS, changelog: [] })).toBe(true);
     const withdrawn = [...allRequired(), rec('age-18', 'withdraw', 9)];
     expect(needsLegalGate(withdrawn)).toBe(true);
   });

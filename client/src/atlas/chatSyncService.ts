@@ -1,7 +1,7 @@
 /**
  * The Atlas chat in the account (SPO-392): the controller. It holds no Firebase — everything it touches comes in through
- * `HistoryPorts` (the Firestore wiring is `chatSyncPorts.ts`), so it is tested with fakes. Runs only while the global flag
- * `atlasHistory` is on AND the person has the `atlas-history` consent (decided by the host that starts it).
+ * `HistoryPorts` (the Firestore wiring is `chatSyncPorts.ts`), so it is tested with fakes. Runs only while
+ * the person has the `atlas-history` consent (decided by the host that starts it).
  *
  * - account → device: the account's messages are merged into the chat (`mergeChat`); the device's own stay.
  * - device → account: each local edit (new, changed, removed message) is written as one sealed document; clearing the chat
