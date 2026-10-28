@@ -16,7 +16,7 @@ import { OPEN_FIELDS } from './encryptedDoc';
 const SRC = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = join(SRC, '..', '..');
 const SKIP_DIR = new Set(['node_modules', '__tests__', '__fixtures__']);
-const SKIP_FILE = /\.(test|cases|spec)\.|localKeys\.registry\.ts$/;
+const SKIP_FILE = /\.(test|cases|spec)\.|localKeys\.(registry(\.part\d)?|types)\.ts$/;
 /** Literals that look like keys but are not storage keys. */
 const NOT_STORAGE = new Map([['spotter.app', 'the app handle shown on share cards']]);
 

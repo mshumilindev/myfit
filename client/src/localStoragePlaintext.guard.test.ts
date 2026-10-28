@@ -18,6 +18,7 @@ const NON_SENSITIVE_PLAIN_KEYS: Record<string, string> = {
   EX_SIDES_KEY: 'exercise display preference',
   EX_REST_KEY: 'rest preference per exercise',
   EX_PREFS_AT_KEY: 'time of the last change to those settings',
+  PUSH_SEEN_KEY: 'a flag: this device already compared its push switches with the account',
   REST_PREFS_KEY: 'rest timer preferences',
   REST_CLEARED_KEY: 'one-time migration marker',
   SLEEP_KIND_KEY: 'one-time migration marker',

@@ -15,6 +15,8 @@ import { sweepWithdrawn, withdrawHistory } from './chatRetention';
 
 let active: AtlasHistory | null = null;
 let uploadOnStart = false;
+/** The account the pending upload was asked for. */
+let wanted: string | null = null;
 
 const quiet = (e: unknown) => {
   if (import.meta.env?.DEV) console.warn('[atlas-history]', e);
@@ -23,6 +25,7 @@ const quiet = (e: unknown) => {
 /** Sends this device's chat to the account — only called after the person's explicit yes. 0 when nothing is running. */
 export async function uploadAtlasHistory(): Promise<number> {
   if (active) return active.uploadLocal();
+  wanted = currentUid();
   uploadOnStart = true; // the consent was just recorded: the sync starts a moment later and then uploads once
   return 0;
 }
@@ -31,6 +34,9 @@ export async function uploadAtlasHistory(): Promise<number> {
 export async function withdrawAtlasHistory(mode: 'keep' | 'now'): Promise<void> {
   const uid = currentUid();
   if (!uid) return;
+  // Stop the sync first: while it runs it reads the withdrawal mark as "consent is on again" and removes it.
+  active?.stop();
+  uploadOnStart = false;
   await withdrawHistory(firestoreRetentionPorts(uid, quiet), mode);
 }
 
@@ -47,6 +53,7 @@ export function AtlasHistoryHost() {
 
   useEffect(() => {
     if (!on || !uid) return;
+    uploadOnStart = uploadOnStart && wanted === uid;
     const h = startAtlasHistory(firestoreHistoryPorts(uid, quiet));
     active = h;
     if (uploadOnStart) {

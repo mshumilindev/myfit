@@ -61,6 +61,7 @@ export interface ChallengesDecision {
 export function reconcileChallenges(
   local: { at: number; list: ActiveChallenge[] },
   remote: { at: number; raw: unknown } | null,
+  now: number = Date.now(),
 ): ChallengesDecision {
   if (!remote) return local.list.length ? { push: true } : {};
   if (local.at > remote.at) return { push: true };
@@ -71,7 +72,12 @@ export function reconcileChallenges(
   if (local.at === 0 && local.list.length) {
     const have = new Set(theirs.map((c) => c.id));
     const extra = local.list.filter((c) => !have.has(c.id));
-    if (extra.length) return { apply: { at: remote.at, list: [...theirs, ...extra] }, push: true };
+    // A new stamp: two devices merging at once must not write different lists under one stamp.
+    if (extra.length)
+      return {
+        apply: { at: Math.max(remote.at + 1, now), list: [...theirs, ...extra] },
+        push: true,
+      };
   }
   return { apply: { at: remote.at, list: theirs } };
 }

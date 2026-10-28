@@ -62,4 +62,27 @@ describe('syncing the push switches with the account', () => {
     storePrefs(off);
     expect(write).toHaveBeenCalledWith({ [PUSH_PREFS_FIELD]: off });
   });
+  it('first contact: a switch off on this device stays off even if the account says on, and the merge is written back', () => {
+    storePrefs({ requests: true, reminders: false, team: true });
+    const write = vi.fn();
+    syncPushPrefsFromDoc(
+      { [PUSH_PREFS_FIELD]: { requests: true, reminders: true, team: false } },
+      write,
+    );
+    expect(loadPrefs()).toEqual({ requests: true, reminders: false, team: false });
+    expect(write).toHaveBeenCalledWith({
+      [PUSH_PREFS_FIELD]: { requests: true, reminders: false, team: false },
+    });
+  });
+  it('after the first contact the account wins again, so a switch can be turned back on from another device', () => {
+    storePrefs({ requests: true, reminders: false, team: true });
+    syncPushPrefsFromDoc(
+      { [PUSH_PREFS_FIELD]: { requests: true, reminders: false, team: true } },
+      vi.fn(),
+    );
+    const write = vi.fn();
+    syncPushPrefsFromDoc({ [PUSH_PREFS_FIELD]: ALL_ON }, write);
+    expect(loadPrefs()).toEqual(ALL_ON);
+    expect(write).not.toHaveBeenCalled();
+  });
 });

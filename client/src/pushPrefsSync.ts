@@ -13,8 +13,10 @@ import {
   DEFAULT_PREFS,
   applyRemotePrefs,
   loadPrefs,
+  markPushPrefsSeen,
   onPrefsEdit,
   parsePrefs,
+  pushPrefsSeen,
   type PushPrefs,
 } from './pushPrefsStore';
 
@@ -30,14 +32,30 @@ export function syncPushPrefsFromDoc(data: Record<string, unknown>, write: Prefs
   const remote = data[PUSH_PREFS_FIELD];
   const local = loadPrefs();
   if (remote === undefined || remote === null) {
-    if (!same(local, DEFAULT_PREFS)) write({ [PUSH_PREFS_FIELD]: local });
+    if (!same(local, DEFAULT_PREFS)) {
+      write({ [PUSH_PREFS_FIELD]: local });
+      markPushPrefsSeen();
+    }
     return;
   }
   if (typeof remote !== 'object') return;
-  const next = parsePrefs(remote);
-  if (same(next, local)) return;
-  applyRemotePrefs(next);
-  void import('./push').then((m) => m.syncPrefsToServer(next)).catch(() => undefined);
+  const theirs = parsePrefs(remote);
+  let next = theirs;
+  if (!pushPrefsSeen()) {
+    // First contact of this device with the account's switches: a kind switched off on either side stays off, so a
+    // reminder the person turned off here never comes back on because another device wrote first.
+    next = {
+      requests: theirs.requests && local.requests,
+      reminders: theirs.reminders && local.reminders,
+      team: theirs.team && local.team,
+    };
+    markPushPrefsSeen();
+  }
+  if (!same(next, local)) {
+    applyRemotePrefs(next);
+    void import('./push').then((m) => m.syncPrefsToServer(next)).catch(() => undefined);
+  }
+  if (!same(next, theirs)) write({ [PUSH_PREFS_FIELD]: next });
 }
 
 /** Push every switch the person flips (synced values don't fire this). */

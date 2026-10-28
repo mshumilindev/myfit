@@ -1,4 +1,5 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
+import { readStoredList } from '../activityPrefs';
 import { getSyncMeta } from '../syncMeta';
 import { HubSlot } from '../components/HubSlot';
 import { SyncIndicator } from '../components/SyncIndicator';
@@ -1101,16 +1102,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // lesson actually has a recorded video — no point pointing at an empty library.
   const learnHasVideo = ALL_LESSONS.some(isReady);
   const learnProgress = (() => {
-    let done = 0;
-    try {
-      const raw = localStorage.getItem('spotter.learn.completed');
-      if (raw) {
-        const arr = JSON.parse(raw) as string[];
-        if (Array.isArray(arr)) done = Math.min(arr.length, LESSON_COUNT);
-      }
-    } catch {
-      /* ignore */
-    }
+    // Stored as {list, updatedAt} (SPO-387) or the older bare array; readStoredList takes both.
+    const done = Math.min(readStoredList('spotter.learn.completed').length, LESSON_COUNT);
     const total = LESSON_COUNT;
     return { done, total, pct: total ? Math.round((done / total) * 100) : 0 };
   })();

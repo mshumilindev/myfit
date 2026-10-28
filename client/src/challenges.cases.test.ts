@@ -232,7 +232,7 @@ describe('active-challenge store', () => {
   async function fresh(preset?: string) {
     vi.resetModules();
     // The Firebase SDK refuses a second initialisation; the challenge store never touches it.
-    vi.doMock('./firebase', () => ({ db: {} }));
+    vi.doMock('./firebase', () => ({ db: {}, auth: { currentUser: null } }));
     localStorage.clear();
     if (preset !== undefined) localStorage.setItem('spotter.challenges', preset);
     return import('./challenges');

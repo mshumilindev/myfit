@@ -210,3 +210,32 @@ export function useProgramSuggestOff(): string[] {
     programSuggestOffPref.get,
   );
 }
+
+/** Synced list prefs: their field name in `meta/prefs` and store (the doc keeps `<name>` + `<name>UpdatedAt`). */
+export const LIST_PREFS: Array<[string, ListPrefStore]> = [
+  ['activityPins', pinsPref],
+  ['nextUpOff', nextUpOffPref],
+  ['programSuggestOff', programSuggestOffPref],
+  ['learnSaved', learnSavedPref],
+  ['learnCompleted', learnCompletedPref],
+];
+export function writeListPref(
+  write: (fields: Record<string, unknown>) => void,
+  name: string,
+  pref: ListPrefStore,
+): void {
+  const cur = pref.snapshot();
+  write({ [name]: cur.list, [`${name}UpdatedAt`]: cur.updatedAt || Date.now() });
+}
+
+/** A stored list read straight from localStorage, in either format ({ list, updatedAt } or the older bare array). */
+export function readStoredList(key: string): string[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(key) ?? 'null') as unknown;
+    return cleanList(
+      v && typeof v === 'object' && !Array.isArray(v) ? (v as { list?: unknown }).list : v,
+    );
+  } catch {
+    return [];
+  }
+}

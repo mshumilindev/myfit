@@ -99,12 +99,14 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
   const [copyFirst, setCopyFirst] = useState(false);
   const [eraseNow, setEraseNow] = useState(false);
 
-  async function write(kind: ConsentKind, action: 'grant' | 'withdraw'): Promise<void> {
+  async function write(kind: ConsentKind, action: 'grant' | 'withdraw'): Promise<boolean> {
     setBusy(kind);
     setFailed(false);
+    let ok = false;
     try {
       if (action === 'grant') {
         await grantConsent({ kind });
+        ok = true;
       } else {
         // Withdrawing stops the feature on this device first (kept across a reload), whatever the network does;
         // the record follows through the persisted queue.
@@ -122,12 +124,14 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
           ...(kind === 'geo-search' && { engines: [...GEO_ENGINES] }),
         });
         if (!saved) setFailed(true);
+        ok = saved;
       }
     } catch {
       setFailed(true);
     } finally {
       setBusy(null);
     }
+    return ok;
   }
 
   function toggle(kind: ConsentKind, on: boolean): void {
@@ -246,7 +250,9 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
           }}
           onConfirm={() => {
             setAsk(null);
-            void write('atlas-history', 'grant').then(() => uploadAtlasHistory());
+            void write('atlas-history', 'grant').then((ok) =>
+              ok ? uploadAtlasHistory() : undefined,
+            );
           }}
         />
       )}

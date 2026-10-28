@@ -53,6 +53,7 @@ import type { WidgetCtx, WidgetDef } from '../registry';
 import { DAY, pct, signed } from './format';
 import { las, type LearnAtlasStrings } from './learnatlas.strings';
 import { setHash } from '../../route';
+import { readStoredList } from '../../activityPrefs';
 
 type S = LearnAtlasStrings;
 
@@ -141,21 +142,6 @@ function Empty({
 /* Learn                                                               */
 /* ------------------------------------------------------------------ */
 
-function readIds(key: string): string[] {
-  try {
-    const raw = localStorage.getItem(key);
-    const parsed = raw ? (JSON.parse(raw) as unknown) : null;
-    // the synced format is { list, updatedAt }; the older one a bare array (SPO-387)
-    const v =
-      parsed && typeof parsed === 'object' && !Array.isArray(parsed)
-        ? (parsed as { list?: unknown }).list
-        : parsed;
-    return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
-  } catch {
-    return [];
-  }
-}
-
 interface TopicProgress {
   topic: Topic;
   done: number;
@@ -178,9 +164,9 @@ function learnState(ctx: WidgetCtx): LearnState {
   const topics = localizeTopics(catalogForRole(getRole()), ctx.locale);
   const lessons = topics.flatMap((t) => t.lessons);
   const ids = new Set(lessons.map((l) => l.id));
-  const done = new Set(readIds('spotter.learn.completed').filter((id) => ids.has(id)));
+  const done = new Set(readStoredList('spotter.learn.completed').filter((id) => ids.has(id)));
   const byId = new Map(lessons.map((l) => [l.id, l]));
-  const saved = readIds('spotter.learn.saved')
+  const saved = readStoredList('spotter.learn.saved')
     .map((id) => byId.get(id))
     .filter((l): l is Lesson => !!l);
   return {

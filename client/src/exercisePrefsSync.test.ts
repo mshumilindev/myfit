@@ -72,8 +72,13 @@ describe('reconcileExercisePrefs', () => {
     expect(d.apply?.prefs.exerciseRest).toEqual({ squat: 150 });
     expect(d.push).toBeUndefined();
   });
-  it('a newer local edit not yet echoed keeps winning over the stale snapshot', () => {
-    expect(reconcileExercisePrefs({ at: 200, prefs: custom }, { at: 100, raw: {} })).toEqual({});
+  it('a newer local edit not yet echoed keeps winning over the stale snapshot, and is sent when the account differs', () => {
+    expect(reconcileExercisePrefs({ at: 200, prefs: custom }, { at: 100, raw: {} })).toEqual({
+      push: true,
+    });
+    expect(reconcileExercisePrefs({ at: 200, prefs: custom }, { at: 100, raw: custom })).toEqual(
+      {},
+    );
   });
   it('an equal stamp is the echo of our own write: applied, harmlessly', () => {
     const d = reconcileExercisePrefs({ at: 100, prefs: custom }, { at: 100, raw: custom });
@@ -95,6 +100,7 @@ describe('reconcileExercisePrefs', () => {
     expect(d.apply?.prefs.weightUnit).toBe('kg');
     expect(d.apply?.prefs.exerciseRest).toEqual({ squat: 150, bench: 90 });
     expect(d.push).toBe(true);
+    expect(d.apply?.at).toBeGreaterThan(100); // a fresh stamp, never the account's own
   });
   it('first contact with nothing to add: no write back at all', () => {
     const mine = normalizeExercisePrefs({ exerciseRest: { squat: 60 } });

@@ -66,10 +66,10 @@ describe('Atlas chat sync controller (SPO-392)', () => {
   });
 
   it('clearing sets the watermark, deletes the account copy and hides what a stale device still has', () => {
-    const { s, ports } = rig();
+    const { s, ports } = rig([m('a', 400), m('b', 500)]);
     startAtlasHistory(ports);
     s.edit(edit({ cleared: true }));
-    expect(s.state).toEqual([{ clearedAt: 1000, withdrawnAt: null }]);
+    expect(s.state).toEqual([{ clearedAt: 500, withdrawnAt: null }]); // the newest message, not the device clock
     expect(s.wipes).toBe(1);
     // a document written before the clear arrives late
     s.local = [];
@@ -149,5 +149,13 @@ describe('Atlas chat sync controller (SPO-392)', () => {
     startAtlasHistory(ports);
     s.clear({ clearedAt: 0, withdrawnAt: 777 }, { locked: 1 });
     expect(s.state).toEqual([]);
+  });
+
+  it('clearing an empty chat writes no watermark (a clock that runs ahead cannot hide later messages)', () => {
+    const { s, ports } = rig();
+    startAtlasHistory(ports);
+    s.edit(edit({ cleared: true }));
+    expect(s.state).toEqual([]);
+    expect(s.wipes).toBe(1);
   });
 });

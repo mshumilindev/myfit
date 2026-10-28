@@ -45,6 +45,12 @@ export interface AtlasHistory {
 export function startAtlasHistory(p: HistoryPorts): AtlasHistory {
   let remote: ChatMsg[] = [];
   let st: AtlasState = EMPTY_STATE;
+  // The newest message time seen so far (here or in the account). The clear-history watermark is this, never the device
+  // clock: a clock that runs ahead must not hide messages other devices write later.
+  let seenMax = p.getLocal().reduce((n, m) => Math.max(n, m.at), 0);
+  const see = (ms: ChatMsg[]) => {
+    for (const m of ms) seenMax = Math.max(seenMax, m.at);
+  };
   let docsReady = false;
   let stopped = false;
   // Resolves on the first full read of the account's chat: an upload decides what is missing only after that.
@@ -68,6 +74,7 @@ export function startAtlasHistory(p: HistoryPorts): AtlasHistory {
   const offDocs = p.watchDocs((items, { locked }) => {
     if (stopped) return;
     remote = [...items].sort((a, b) => a.at - b.at);
+    see(remote);
     docsReady = true;
     if (!locked) openReady();
     // Trim the account to the window — never while the vault is locked (a locked read is not a full read).
@@ -93,12 +100,15 @@ export function startAtlasHistory(p: HistoryPorts): AtlasHistory {
   const offEdit = p.onLocalEdit((e) => {
     if (stopped) return;
     if (e.cleared) {
-      st = { ...st, clearedAt: Math.max(st.clearedAt, p.now()) };
+      if (seenMax > 0) {
+        st = { ...st, clearedAt: Math.max(st.clearedAt, seenMax) };
+        guard(() => p.putState(st));
+      }
       remote = [];
-      guard(() => p.putState(st));
       guard(() => p.deleteAll());
       return;
     }
+    see(e.upsert);
     for (const m of e.upsert) guard(() => p.put(m));
     for (const id of e.removed) guard(() => p.del(id));
   });

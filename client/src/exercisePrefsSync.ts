@@ -91,17 +91,33 @@ export interface ExercisePrefsDecision {
 export function reconcileExercisePrefs(
   local: { at: number; prefs: ExercisePrefs },
   remote: { at: number; raw: unknown } | null,
+  now: number = Date.now(),
 ): ExercisePrefsDecision {
   if (!remote) return hasCustomExercisePrefs(local.prefs) ? { push: true } : {};
-  if (local.at > remote.at) return {};
+  if (local.at > remote.at) {
+    // A newer local edit wins; if the account still holds something else (an older write reached it last), send ours.
+    return canon(normalizeExercisePrefs(remote.raw)) === canon(local.prefs) ? {} : { push: true };
+  }
   const theirs = normalizeExercisePrefs(remote.raw);
   // First contact (this device never edited or synced these): the account's values stand untouched; only what this
   // device has and the account lacks is added, then written back. Nothing the account holds is ever overwritten.
   if (local.at === 0 && isObj(remote.raw) && hasCustomExercisePrefs(local.prefs)) {
     const merged = mergeAdditive(theirs, local.prefs);
-    if (merged) return { apply: { at: remote.at, prefs: merged }, push: true };
+    // A new stamp: two devices merging at the same moment must not write different contents under one stamp.
+    if (merged) return { apply: { at: Math.max(remote.at + 1, now), prefs: merged }, push: true };
   }
   return { apply: { at: remote.at, prefs: theirs } };
+}
+
+/** Key-order-independent text of a value, to compare two settings objects. */
+function canon(v: unknown): string {
+  return JSON.stringify(v, (_k, x: unknown) =>
+    x && typeof x === 'object' && !Array.isArray(x)
+      ? Object.fromEntries(
+          Object.entries(x as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : 1)),
+        )
+      : x,
+  );
 }
 
 /** `theirs` plus the per-exercise entries only `mine` has; null when there is nothing to add. */

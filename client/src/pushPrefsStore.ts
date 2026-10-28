@@ -14,6 +14,23 @@ export interface PushPrefs {
 }
 export const DEFAULT_PREFS: PushPrefs = { requests: true, reminders: true, team: true };
 const KEY = 'spotter.pushPrefs';
+const PUSH_SEEN_KEY = 'spotter.pushPrefsSeen';
+
+/** This device has already compared its switches with the account's (so from now on the account's value wins). */
+export function pushPrefsSeen(): boolean {
+  try {
+    return localStorage.getItem(PUSH_SEEN_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+export function markPushPrefsSeen(): void {
+  try {
+    localStorage.setItem(PUSH_SEEN_KEY, '1');
+  } catch {
+    /* private mode: the comparison simply repeats next visit */
+  }
+}
 
 /** Untrusted stored value to a safe shape: only a literal `false` switches a kind off. */
 export function parsePrefs(v: unknown): PushPrefs {
