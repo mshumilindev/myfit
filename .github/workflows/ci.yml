@@ -263,7 +263,7 @@ jobs:
         run: |
           (cd client && npx vite preview --host 127.0.0.1 --port 4173 --strictPort >/dev/null 2>&1 &)
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
-      - run: npx playwright test --project=mobile-chromium tests/e2e/client-console.e2e.ts tests/e2e/client-console-member.e2e.ts tests/e2e/offline-startup.e2e.ts tests/e2e/session-images.e2e.ts tests/e2e/gym-photos.e2e.ts --reporter=github,line
+      - run: npx playwright test --project=mobile-chromium tests/e2e/client-console.e2e.ts tests/e2e/client-console-member.e2e.ts tests/e2e/offline-startup.e2e.ts tests/e2e/session-images.e2e.ts tests/e2e/gym-photos.e2e.ts tests/e2e/theme-announcement.e2e.ts --reporter=github,line
         env:
           E2E_BASE_URL: http://127.0.0.1:4173
 
