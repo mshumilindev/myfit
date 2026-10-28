@@ -1,0 +1,104 @@
+/* Halloween bat swarm (SPO-378): pure black bats over a black veil; no glow, no eyes. Phases come from html[data-glitch]. */
+.hw-bats {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-1000) + 2);
+  pointer-events: none;
+  overflow: hidden;
+}
+.hw-veil {
+  position: absolute;
+  inset: 0;
+  background: var(--c-020102);
+  opacity: 0;
+}
+html:not([data-glitch]) .hw-bats {
+  display: none;
+}
+/* The board's flights spend their first ~27 % with every bat still off-screen (about 300 ms of nothing); start that far in
+   so the swarm shows on the first frame of the switch. */
+html[data-glitch='out'] .hwb {
+  animation-delay: -285ms;
+}
+.hw-stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+.hwb {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+.hwb svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.hwb-wi {
+  animation-name: hwb-flap;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-direction: alternate;
+  transform-box: view-box;
+  transform-origin: calc(47 * var(--sz-1)) calc(32 * var(--sz-1));
+}
+@keyframes hwb-flap {
+  from {
+    transform: scaleX(1) rotate(-4deg);
+  }
+  to {
+    transform: scaleX(0.48) rotate(10deg);
+  }
+}
+@keyframes hw-veil-in {
+  0%,
+  70% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes hw-veil-out {
+  0% {
+    opacity: 1;
+  }
+  60%,
+  100% {
+    opacity: 0;
+  }
+}
+html[data-glitch='out'] .hwb {
+  animation-name: var(--in);
+  animation-duration: 1100ms;
+}
+html[data-glitch='load'] .hwb {
+  animation-name: var(--hold);
+  animation-duration: 1800ms;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+html[data-glitch='in'] .hwb {
+  animation-name: var(--out);
+  animation-duration: 900ms;
+}
+html[data-glitch='out'] .hw-veil {
+  animation: hw-veil-in 1100ms linear -285ms both;
+}
+html[data-glitch='load'] .hw-veil {
+  opacity: 1;
+}
+html[data-glitch='in'] .hw-veil {
+  animation: hw-veil-out 900ms linear both;
+}
+.hwb path {
+  fill: var(--c-020102);
+}

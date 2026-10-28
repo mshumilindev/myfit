@@ -1,0 +1,10 @@
+/* Halloween structure (SPO-378): everything the token contract cannot say. Scoped to html[data-theme='halloween'].
+   App switch: a black bat swarm (components/HalloweenBats.tsx) over a black veil, out 1100 ms, tail 900 ms. `html[data-glitch]`
+   carries the phase (components/appGlitch.ts); the bats and the veil are drawn by that component, these rules only
+   make sure the shared photo-glitch layers (glass-glitch.css) stay quiet while the swarm plays. */
+html[data-theme='halloween'][data-glitch='out']::before,
+html[data-theme='halloween'][data-glitch='load']::before,
+html[data-theme='halloween'][data-glitch='in']::before {
+  content: none;
+  animation: none;
+}

@@ -40,6 +40,7 @@ import '@fontsource/fira-sans-condensed/cyrillic-600.css';
 import '@fontsource/fira-sans-condensed/cyrillic-700.css';
 import '../src/tokens/primitives.css';
 import '../src/tokens/primitives.cyberpunk.css';
+import '../src/tokens/primitives.halloween.css';
 import '../src/styles.css';
 import '../src/redesign.css';
 import { AXES, DEFAULT_THEME, THEMES, type AxisName } from '../src/themes';

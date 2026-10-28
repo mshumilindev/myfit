@@ -14,6 +14,9 @@ import {
   useTheme,
 } from './registry';
 import { SKIN_TOKENS_OPTIONAL, SKIN_TOKENS_REQUIRED, THEME_SKINS, THEME_TOKENS } from './contract';
+import { offSeason } from './testClock';
+
+offSeason();
 
 const html = () => document.documentElement;
 

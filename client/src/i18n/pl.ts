@@ -1416,6 +1416,7 @@ export const pl: Strings = {
   themesApply: 'Zastosuj',
   themesSoon: 'Wkrótce',
   themeNew: 'Nowy',
+  themesSeasonal: 'Sezonowy · włączony',
   themeInviteKicker: 'Nowy motyw',
   themePreviewAction: 'Podejrzyj',
   themePreviewLabel: 'Podgląd motywu',

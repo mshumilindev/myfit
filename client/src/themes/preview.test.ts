@@ -8,6 +8,9 @@ import {
   onThemeChoice,
   startPreview,
 } from './registry';
+import { offSeason } from './testClock';
+
+offSeason();
 
 const attr = () => document.documentElement.getAttribute('data-theme');
 
@@ -79,6 +82,7 @@ describe('theme change transition (SPO-355)', () => {
   const root = document.documentElement;
   beforeEach(() => {
     vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 5, 15, 12));
     root.style.setProperty('--switch-out', '100');
     root.style.setProperty('--switch-tail', '200');
     vi.stubGlobal('matchMedia', () => ({ matches: false }));

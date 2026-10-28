@@ -2,17 +2,20 @@
  * Holiday schedule (SPO-321). Pure: no DOM, no storage, no network, so it is trivial to test and nothing here is a
  * server job — the app reads the date on the device when it opens and puts the holiday theme on by itself.
  *
- * A holiday theme is ON from `LEAD_DAYS` days before the holiday through the holiday itself, and OFF the next day
- * (the person's own theme comes back). Dates are the device's local calendar dates, so the switch happens at the
+ * A holiday theme is ON from `LEAD_DAYS` days before the holiday through the holiday itself (or through `trail` days
+ * after it, Christmas: until 1 January), and OFF the next day (the person's own theme comes back). Dates are the device's local calendar dates, so the switch happens at the
  * person's own midnight.
  *
  * Calendars (assumptions, SPO-321 open question; change the table, not the code):
  *  - Easter: Western (Gregorian) date everywhere, Orthodox (Julian) date for the Ukrainian UI language.
- *  - Christmas: 25 December everywhere (Ukraine's official date since 2023; 7 January is not used).
+ *  - Christmas: 25 December everywhere (Ukraine's official date since 2023; 7 January is not used); the theme runs
+ *    from 18 December through 1 January (owner, 28.10).
+ *  - St Patrick's Day: 17 March everywhere.
  *  - Independence Day: paused (owner, 22.10: dropped from the first set; the date is region-specific).
  */
 
-export type HolidayId = 'valentine' | 'easter' | 'halloween' | 'christmas' | 'independence';
+export type HolidayId =
+  'valentine' | 'stpatrick' | 'easter' | 'halloween' | 'christmas' | 'independence';
 
 /** How many days before the holiday its theme comes on. The theme goes off the day AFTER the holiday. */
 export const LEAD_DAYS = 7;
@@ -28,6 +31,8 @@ export interface HolidayDef {
   id: HolidayId;
   /** `false` = in the schedule but never switched on (paused by the owner). */
   active: boolean;
+  /** Days the theme stays on AFTER the holiday (default 0). */
+  trail?: number;
   /** The holiday's date in `year` for a UI language. */
   on: (year: number, locale: string) => DayDate;
 }
@@ -85,6 +90,7 @@ export function dayOf(now: Date): DayDate {
 /** The schedule. Order = priority when two windows overlap and are equally close (never today). */
 export const HOLIDAYS: readonly HolidayDef[] = [
   { id: 'valentine', active: true, on: (y) => ({ y, m: 2, d: 14 }) },
+  { id: 'stpatrick', active: true, on: (y) => ({ y, m: 3, d: 17 }) },
   {
     id: 'easter',
     active: true,
@@ -92,7 +98,7 @@ export const HOLIDAYS: readonly HolidayDef[] = [
       ORTHODOX_EASTER_LOCALES.includes(locale.slice(0, 2)) ? orthodoxEaster(y) : westernEaster(y),
   },
   { id: 'halloween', active: true, on: (y) => ({ y, m: 10, d: 31 }) },
-  { id: 'christmas', active: true, on: (y) => ({ y, m: 12, d: 25 }) },
+  { id: 'christmas', active: true, trail: 7, on: (y) => ({ y, m: 12, d: 25 }) },
   { id: 'independence', active: false, on: (y) => ({ y, m: 8, d: 24 }) },
 ];
 
@@ -102,7 +108,7 @@ export interface HolidayWindow {
   day: DayDate;
   /** First day the theme is on. */
   from: DayDate;
-  /** Last day the theme is on (the holiday); it goes off the day after. */
+  /** Last day the theme is on (the holiday, or its trail); it goes off the day after. */
   to: DayDate;
 }
 
@@ -119,11 +125,14 @@ export function activeHoliday(
     // a window can straddle New Year, so look at the neighbouring years too
     for (const y of [today.y - 1, today.y, today.y + 1]) {
       const day = h.on(y, locale);
+      const trail = h.trail ?? 0;
       const left = daysBetween(today, day);
-      if (left < 0 || left > LEAD_DAYS) continue;
-      if (left < bestLeft) {
-        bestLeft = left;
-        best = { id: h.id, day, from: addDays(day, -LEAD_DAYS), to: day };
+      if (left < -trail || left > LEAD_DAYS) continue;
+      // after the day itself a window counts as "closest" only once the holidays still to come are further away
+      const dist = left < 0 ? 0 : left;
+      if (dist < bestLeft) {
+        bestLeft = dist;
+        best = { id: h.id, day, from: addDays(day, -LEAD_DAYS), to: addDays(day, trail) };
       }
     }
   }

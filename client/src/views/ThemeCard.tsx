@@ -17,6 +17,7 @@ export function ThemeCard({
   current,
   fresh = false,
   land = false,
+  seasonal = false,
   onApply,
 }: {
   theme: ThemeDef;
@@ -25,6 +26,8 @@ export function ThemeCard({
   fresh?: boolean;
   /** desktop landscape tile (the page tells the card; a framed card has its own viewport) */
   land?: boolean;
+  /** a holiday theme the schedule has switched on (SPO-321): it cannot be picked, the card only shows it */
+  seasonal?: boolean;
   onApply: (id: string) => void;
 }) {
   const { t } = useT();
@@ -33,14 +36,25 @@ export function ThemeCard({
       <div className="thm-art" aria-hidden="true">
         <span className="thm-wm">{theme.name}</span>
       </div>
-      {fresh && (
+      {seasonal && (
+        <Tag tone="accent" className="thm-new">
+          {t.themesSeasonal}
+        </Tag>
+      )}
+      {fresh && !seasonal && (
         <Tag tone="accent" className="thm-new">
           {t.themeNew}
         </Tag>
       )}
       <div className="thm-foot">
         {current ? (
-          <Button variant="secondary" icon="check" disabled fullWidth>
+          <Button
+            variant="secondary"
+            icon="check"
+            aria-disabled="true"
+            fullWidth
+            onClick={() => undefined}
+          >
             {t.themesApplied}
           </Button>
         ) : (

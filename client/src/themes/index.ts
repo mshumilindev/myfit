@@ -6,4 +6,5 @@ import './_cyberpunk.structure.css';
 import './_switch.css';
 import './_glass.page.css';
 import './_cyberpunk.route.css';
+import './_halloween.structure.css';
 export * from './registry';

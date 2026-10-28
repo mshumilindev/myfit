@@ -4,6 +4,9 @@ import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
 import { ThemesView } from './ThemesView';
 import { setTheme } from '../themes';
+import { offSeason } from '../themes/testClock';
+
+offSeason();
 
 beforeEach(() => setLocale('en'));
 afterEach(() => {
@@ -37,7 +40,9 @@ describe('ThemesView chrome', () => {
     const doc = (screen.getByTitle('Cyberpunk') as HTMLIFrameElement).contentDocument!;
     expect(doc.documentElement.getAttribute('data-theme')).toBe('cyberpunk');
     expect(
-      (screen.getByText(en.themesApplied).closest('button') as HTMLButtonElement).disabled,
+      (screen.getByText(en.themesApplied).closest('button') as HTMLButtonElement).getAttribute(
+        'aria-disabled',
+      ) === 'true',
     ).toBe(true);
   });
 

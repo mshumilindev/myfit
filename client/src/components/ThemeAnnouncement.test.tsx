@@ -3,9 +3,12 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { en } from '../i18n/en';
 import { getPreview, initTheme, startPreview } from '../themes';
 import { getUnseenThemes, resetSeenForTest, syncSeenFromDoc } from '../themes/seen';
+import { offSeason } from '../themes/testClock';
 import { ThemeInvite, ThemePreviewHost } from './ThemeAnnouncement';
 
 const attr = () => document.documentElement.getAttribute('data-theme');
+
+offSeason();
 
 beforeEach(() => {
   localStorage.clear();

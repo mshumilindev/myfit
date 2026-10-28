@@ -1451,6 +1451,7 @@ export const uk: Strings = {
   themesApply: 'Застосувати',
   themesSoon: 'Скоро',
   themeNew: 'Нова',
+  themesSeasonal: 'Святкова · зараз увімкнена',
   themeInviteKicker: 'Нова тема',
   themePreviewAction: 'Переглянути',
   themePreviewLabel: 'Перегляд теми',

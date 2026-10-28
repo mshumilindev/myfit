@@ -1,0 +1,244 @@
+/* Halloween background (SPO-378): the approved cartoon graveyard hill. Pure black silhouettes under a violet-ink sky,
+   fireflies in the app accent (--ac / --ac3), clouds, twinkling stars, swaying branches, fog. It lives in the top part
+   of the screen and fades into the plain dark; night mode (SpotterSky) replaces it, so this layer is never mounted
+   while data-sleep='night'. Everything animated stops on reduced motion and when the tab is hidden (data-paused). */
+.hw-scene {
+  --ac: var(--color-accent-500);
+  --ac3: var(--color-accent-300);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: min(78vh, 138vw);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: var(--z-0);
+  -webkit-mask-image: linear-gradient(var(--c-000000) 0, var(--c-000000) 52%, transparent 100%);
+  mask-image: linear-gradient(var(--c-000000) 0, var(--c-000000) 52%, transparent 100%);
+}
+.app > .hw-scene,
+.apex-app > .hw-scene {
+  position: fixed;
+  z-index: var(--z-0);
+}
+.hw-scene svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.hw-scene .fog {
+  position: absolute;
+  left: -40%;
+  width: 180%;
+  will-change: transform;
+}
+.hw-scene .f2 {
+  top: 41vw;
+  height: 38vw;
+  background:
+    radial-gradient(45% 50% at 40% 50%, var(--c-beb6aa-a140), transparent 70%),
+    radial-gradient(35% 45% at 80% 60%, var(--c-beb6aa-a100), transparent 70%);
+  animation: hw-fb 140s ease-in-out infinite alternate;
+}
+.hw-scene .f3 {
+  top: 52vw;
+  height: 38vw;
+  opacity: 0.6;
+  background:
+    radial-gradient(40% 50% at 25% 60%, var(--c-c8bed2-a240), transparent 70%),
+    radial-gradient(45% 55% at 70% 50%, var(--c-c8bed2-a200), transparent 70%),
+    radial-gradient(30% 40% at 95% 70%, var(--c-c8bed2-a160), transparent 70%);
+  animation: hw-fa 70s ease-in-out infinite alternate;
+}
+.hw-scene .f4 {
+  top: 63vw;
+  height: 31vw;
+  opacity: 0.6;
+  background:
+    radial-gradient(45% 55% at 15% 60%, var(--c-beb4cd-a280), transparent 70%),
+    radial-gradient(40% 50% at 60% 55%, var(--c-beb4cd-a240), transparent 70%),
+    radial-gradient(35% 45% at 100% 65%, var(--c-beb4cd-a200), transparent 70%);
+  animation: hw-fb 105s ease-in-out infinite alternate;
+}
+.hw-scene .cl {
+  animation: hw-cmove 120s linear infinite;
+  translate: var(--x0) 0;
+}
+.hw-scene .ff {
+  animation:
+    hw-ffw 12s ease-in-out infinite,
+    hw-blink 3.6s ease-in-out infinite;
+  opacity: 0.1;
+}
+.hw-scene .tw {
+  animation: hw-tw 4s ease-in-out infinite;
+}
+.hw-scene .sw {
+  animation: hw-gust 14s ease-in-out infinite;
+}
+.hw-scene .bt {
+  animation: hw-drift 38s linear infinite;
+  transform-box: fill-box;
+}
+.hw-scene .b2 {
+  animation-duration: 52s;
+  animation-delay: -14s;
+}
+.hw-scene .b3 {
+  animation-duration: 64s;
+  animation-delay: -30s;
+}
+.hw-scene .b4 {
+  animation-duration: 46s;
+  animation-delay: -8s;
+}
+.hw-scene .wg {
+  animation: hw-flap 0.9s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes hw-cmove {
+  from {
+    translate: var(--x0) 0;
+  }
+  to {
+    translate: var(--x1) 0;
+  }
+}
+@keyframes hw-ffw {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  25% {
+    translate: var(--ax) var(--ay);
+  }
+  50% {
+    translate: var(--bx) var(--by);
+  }
+  75% {
+    translate: var(--cx) var(--cy);
+  }
+}
+@keyframes hw-blink {
+  0%,
+  100% {
+    opacity: 0.08;
+  }
+  30% {
+    opacity: 1;
+  }
+  48% {
+    opacity: 0.35;
+  }
+  66% {
+    opacity: 0.95;
+  }
+}
+@keyframes hw-tw {
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes hw-gust {
+  0%,
+  52%,
+  100% {
+    rotate: 0deg;
+  }
+  60% {
+    rotate: 0.9deg;
+  }
+  68% {
+    rotate: -0.6deg;
+  }
+  76% {
+    rotate: 0.5deg;
+  }
+  84% {
+    rotate: -0.2deg;
+  }
+}
+@keyframes hw-drift {
+  0% {
+    translate: 0 0;
+  }
+  25% {
+    translate: calc(-26 * var(--sz-1)) calc(8 * var(--sz-1));
+  }
+  50% {
+    translate: calc(-8 * var(--sz-1)) calc(-6 * var(--sz-1));
+  }
+  75% {
+    translate: calc(20 * var(--sz-1)) calc(10 * var(--sz-1));
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+@keyframes hw-flap {
+  from {
+    scale: 1 1;
+  }
+  to {
+    scale: 1 0.55;
+  }
+}
+@keyframes hw-fa {
+  from {
+    transform: translateX(-9%);
+  }
+  to {
+    transform: translateX(9%);
+  }
+}
+@keyframes hw-fb {
+  from {
+    transform: translateX(8%);
+  }
+  to {
+    transform: translateX(-8%);
+  }
+}
+
+@media (min-width: 45rem) {
+  .hw-scene {
+    height: min(70vh, 40vw);
+  }
+  .hw-scene .f2 {
+    top: 33vw;
+    height: 22vw;
+  }
+  .hw-scene .f3 {
+    top: 31.6vw;
+    height: 22vw;
+  }
+  .hw-scene .f4 {
+    top: 41.9vw;
+    height: 18vw;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hw-scene .fog,
+  .hw-scene .bt,
+  .hw-scene .wg,
+  .hw-scene .cl,
+  .hw-scene .tw,
+  .hw-scene .ff,
+  .hw-scene .sw {
+    animation: none;
+  }
+  .hw-scene .ff {
+    opacity: 0.7;
+  }
+}
+.hw-scene[data-paused='true'] *,
+.hw-scene[data-paused='true'] {
+  animation-play-state: paused;
+}
+.hw-art {
+  position: absolute;
+  inset: 0;
+}

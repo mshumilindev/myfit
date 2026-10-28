@@ -11,6 +11,9 @@ import {
   syncSeenFromDoc,
   unseenThemes,
 } from './seen';
+import { offSeason } from './testClock';
+
+offSeason();
 
 const LIST: ThemeDef[] = [
   { id: 'glass', name: 'Brass Glass', since: '2026-10-01' },

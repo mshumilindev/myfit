@@ -1409,6 +1409,7 @@ export const et: Strings = {
   themesApply: 'Rakenda',
   themesSoon: 'Varsti',
   themeNew: 'Uus',
+  themesSeasonal: 'Hooajaline · praegu sees',
   themeInviteKicker: 'Uus teema',
   themePreviewAction: 'Eelvaade',
   themePreviewLabel: 'Teema eelvaade',

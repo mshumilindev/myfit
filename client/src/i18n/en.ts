@@ -1400,6 +1400,7 @@ export const en = {
   themesApply: 'Apply',
   themesSoon: 'Coming soon',
   themeNew: 'New',
+  themesSeasonal: 'Seasonal · on now',
   themeInviteKicker: 'New theme',
   themePreviewAction: 'Preview',
   themePreviewLabel: 'Theme preview',

@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { Icon } from '../../ui';
 import { Badge } from './Badge';
+import { HalloweenLantern } from './HalloweenLantern';
 import './TabBar.css';
 
 export interface TabBarItem<Id extends string = string> {
@@ -167,6 +168,7 @@ export function TabBar<Id extends string = string>({
           aria-label={fab.ariaLabel}
         >
           <Icon name="plus" weight="bold" />
+          <HalloweenLantern />
         </button>
       )}
     </div>

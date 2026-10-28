@@ -30,3 +30,6 @@ client/design-lab/
 cloudflare/config.example.yml
 client/coverage-patch/
 patch-cov/
+
+# Згенеровані з дизайн-борду (SPO-378)
+client/src/components/halloween*.generated.*

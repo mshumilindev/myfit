@@ -11,6 +11,11 @@
 export default {
   overrides: [
     {
+      // Generated from the approved design boards (SPO-378): flight paths in design pixels, not hand-written CSS.
+      files: ['client/src/components/halloween*.generated.css'],
+      rules: { 'declaration-property-unit-disallowed-list': null },
+    },
+    {
       files: ['client/src/tokens/primitives.css', 'client/src/tokens/primitives.*.css'],
       rules: { 'color-no-hex': null, 'function-disallowed-list': null },
     },

@@ -11,7 +11,7 @@ import { Card } from '../components/ui/Card';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { useT } from '../i18n';
 import { APP_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
-import { PICKABLE_THEMES, setTheme, useCommittedTheme, useHolidayTheme } from '../themes';
+import { PICKABLE_THEMES, THEMES, setTheme, useCommittedTheme, useHolidayTheme } from '../themes';
 import { getUnseenThemes, markAllThemesSeen } from '../themes/seen';
 import { ThemeCard } from './ThemeCard';
 import './themes.css';
@@ -23,7 +23,9 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
   const { t } = useT();
   const saved = useCommittedTheme();
   // a holiday theme veils the saved one: then no card is "in use" and every card is drawn in its own frame
-  const current = useHolidayTheme() === null ? saved : null;
+  const holidayId = useHolidayTheme();
+  const current = holidayId === null ? saved : null;
+  const holidayDef = holidayId === null ? undefined : THEMES.find((x) => x.id === holidayId);
   // the themes that were new when the screen opened keep their tag for this visit; opening counts as seen
   const [fresh] = useState(() => new Set(getUnseenThemes().map((x) => x.id)));
   useEffect(() => {
@@ -32,9 +34,11 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
   const land = useMinWidth(APP_BREAKPOINT);
   const cardCls = land ? 'thm-card thm-card--land' : 'thm-card';
   // the theme in use goes to the top; the registry order holds for the rest
-  const list = [...PICKABLE_THEMES].sort(
+  const picks = [...PICKABLE_THEMES].sort(
     (a, b) => Number(b.id === current) - Number(a.id === current),
   );
+  // the holiday theme the schedule has on right now is listed first, so the person sees why the app looks like this
+  const list = holidayDef ? [holidayDef, ...picks] : picks;
   return (
     <div className="screen themes-screen">
       <PageHead back={{ label: t.backAction, onClick: onClose }} title={t.themesTitle} />
@@ -45,7 +49,8 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
           <div key={th.id} className={i === 0 ? 'thm-cell thm-hero' : 'thm-cell'}>
             <ThemeCard
               theme={th}
-              current={th.id === current}
+              current={th.id === current || th.id === holidayId}
+              seasonal={th.id === holidayId}
               fresh={fresh.has(th.id)}
               land={land}
               onApply={setTheme}

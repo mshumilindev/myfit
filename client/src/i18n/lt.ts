@@ -1432,6 +1432,7 @@ export const lt: Strings = {
   themesApply: 'Taikyti',
   themesSoon: 'Netrukus',
   themeNew: 'Nauja',
+  themesSeasonal: 'Sezoninė · įjungta',
   themeInviteKicker: 'Nauja tema',
   themePreviewAction: 'Peržiūrėti',
   themePreviewLabel: 'Temos peržiūra',

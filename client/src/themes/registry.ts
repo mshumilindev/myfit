@@ -28,6 +28,13 @@ export interface ThemeDef {
 export const THEMES: readonly ThemeDef[] = [
   { id: 'glass', name: 'Brass Glass', since: '2026-10-01' },
   { id: 'cyberpunk', name: 'Cyberpunk', since: '2026-10-24' },
+  {
+    id: 'halloween',
+    name: 'Halloween',
+    since: '2026-10-31',
+    pickable: false,
+    holiday: 'halloween',
+  },
   // theme:new inserts new themes above this line
 ];
 
