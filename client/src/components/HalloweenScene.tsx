@@ -4,7 +4,7 @@
  * and this layer only exists while the Halloween theme is the active one. The SVG is generated from the design board
  * (static trusted markup), loaded lazily so other themes never download it.
  */
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense } from 'react';
 import { useTheme } from '../themes/registry';
 import './HalloweenScene.css';
 
@@ -18,17 +18,4 @@ export function HalloweenScene() {
       <Scene />
     </Suspense>
   );
-}
-
-export function useWide(): boolean {
-  const q = '(min-width: 720px)';
-  const [wide, setWide] = useState(() => typeof matchMedia === 'function' && matchMedia(q).matches);
-  useEffect(() => {
-    if (typeof matchMedia !== 'function') return;
-    const m = matchMedia(q);
-    const on = () => setWide(m.matches);
-    m.addEventListener('change', on);
-    return () => m.removeEventListener('change', on);
-  }, []);
-  return wide;
 }

@@ -36,13 +36,13 @@ html[data-theme='halloween'] {
   --body-dim: var(--c-2b2326);
   --body-dim-stroke: var(--c-cfc6b6-a200);
   /* radii (kit: card 18, hero 24, sheet 26, pills 999) */
-  --radius-lg: 4px;
-  --radius-md: 3px;
+  --radius-lg: var(--r-4);
+  --radius-md: var(--r-2);
   /* inset rows/tiles inside cards */
-  --radius-sm: 2px;
+  --radius-sm: var(--r-2);
   /* thumbs, small blocks */
-  --radius-hero: 4px;
-  --radius-sheet: 6px;
+  --radius-hero: var(--r-4);
+  --radius-sheet: var(--r-6);
   /* no --r-26 step: stays literal */
   /* type scale from P00-Type (kit .t-*) */
   --type-d1: 400 40px/1 var(--font-display);
@@ -141,9 +141,9 @@ html[data-theme='halloween'] {
   --route-tail: 0;
   --label-mark-display: inline-block;
   /* corner of text-bearing controls (buttons, badges, chips, tags); 999px = pill. Avatars, dots, rings stay round. */
-  --r-ctl: 3px;
-  --r-input: 3px;
-  --r-bar: 2px;
+  --r-ctl: var(--r-2);
+  --r-input: var(--r-2);
+  --r-bar: var(--r-2);
   --tile-k: 0.3;
   /* corner of avatars and round icon buttons as a share of their size (0.5 = circle) */
   --avatar-k: 0.5;

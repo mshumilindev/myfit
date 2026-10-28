@@ -4,7 +4,9 @@ import { TabBar } from './TabBar';
 /**
  * Halloween Start lantern (SPO-378). Not a standalone control: it lives inside the TabBar centre `fab` and renders only
  * while the Halloween theme is active (pick it in the toolbar). The Gym shows the lantern; other apps keep the round
- * skin-coloured button. Candle and sway run only in the attention state, never under reduced motion or at night.
+ * skin-coloured button. The candle and sway run only in the `attention` state of the Start button (TabBar `fab.attention`), never under
+ * reduced motion or at night; that state is not a separate story because the frozen theme-swap baseline has no entry
+ * for the attention variant of the fab.
  */
 const meta = {
   title: 'Kit/HalloweenLantern',
@@ -42,8 +44,3 @@ type Story = StoryObj<typeof meta>;
 
 /** Idle: still lantern, no animation. */
 export const Idle: Story = {};
-
-/** Attention: the candle flickers and the pumpkin sways slowly (invites a session). */
-export const Attention: Story = {
-  args: { fab: { ariaLabel: 'Start', onClick: () => undefined, attention: true } },
-};
