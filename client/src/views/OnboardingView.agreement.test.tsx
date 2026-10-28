@@ -115,7 +115,12 @@ describe('OnboardingView step 1: read-before-accept', () => {
     expect(h.callFn).toHaveBeenCalledWith('claim', expect.objectContaining({ token: 'tok' }));
     const calls = h.grant.mock.calls.map((c) => c[0]);
     expect(calls.map((c) => c.kind)).toEqual(['terms', 'policy-ack', 'age-18']);
-    expect(calls.every((c) => c.version === LEGAL_VERSIONS.terms)).toBe(true);
+    // each record carries the version of its own document (the policy was raised on its own)
+    expect(calls.map((c) => c.version)).toEqual([
+      LEGAL_VERSIONS.terms,
+      LEGAL_VERSIONS.policy,
+      LEGAL_VERSIONS.age,
+    ]);
     expect(calls[0].textHash).toMatch(/^[0-9a-f]{64}$/);
     expect(calls[1].textHash).toMatch(/^[0-9a-f]{64}$/);
   });

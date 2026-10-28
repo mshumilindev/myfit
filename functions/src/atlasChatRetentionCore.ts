@@ -35,7 +35,9 @@ export function openEnvelope(env: Envelope, keyB64: string): unknown {
   const key = Buffer.from(keyB64, 'base64');
   const ct = Buffer.from(env.ct, 'base64');
   if (key.length !== 32 || ct.length < 16) throw new Error('bad-envelope');
-  const d = createDecipheriv('aes-256-gcm', key, Buffer.from(env.iv, 'base64'));
+  const d = createDecipheriv('aes-256-gcm', key, Buffer.from(env.iv, 'base64'), {
+    authTagLength: 16,
+  });
   d.setAuthTag(ct.subarray(ct.length - 16));
   const pt = Buffer.concat([d.update(ct.subarray(0, ct.length - 16)), d.final()]);
   return JSON.parse(pt.toString('utf8'));
