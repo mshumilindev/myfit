@@ -45,10 +45,24 @@ function openDb(): Promise<IDBDatabase | null> {
 }
 
 /**
- * Read the cached blob for a user. When `wantRev` is a real revision (> 0) the
- * stored copy is only returned if its revision matches — a mismatch means the
- * photo changed server-side and the caller must refetch. When `wantRev` is 0 or
- * omitted (revision unknown to the caller) the stored copy is returned as-is.
+ * The revision is the server's `updatedAt`, which only grows: a stored copy at the asked revision OR NEWER is current.
+ * With an unknown revision (`wantRev` 0) whatever is stored is used.
+ */
+export function isStoredFresh(rec: { rev: number }, wantRev: number): boolean {
+  return wantRev <= 0 || rec.rev >= wantRev;
+}
+
+/** A write replaces an equal or older record, never a newer one; an unknown revision (0) never replaces a stored copy. */
+export function shouldReplaceStored(existing: { rev: number } | undefined, rev: number): boolean {
+  if (!existing) return true;
+  if (rev <= 0) return false;
+  return rev >= existing.rev;
+}
+
+/**
+ * Read the cached blob for a user. When `wantRev` is a real revision (> 0) the stored copy is only returned if it is at
+ * least that new (see `isStoredFresh`) — an older one means the photo changed server-side and the caller must refetch.
+ * When `wantRev` is 0 or omitted (revision unknown to the caller) the stored copy is returned as-is.
  */
 export function readAvatarBlob(uid: string, wantRev = 0): Promise<Blob | null> {
   return openDb().then(
@@ -67,7 +81,7 @@ export function readAvatarBlob(uid: string, wantRev = 0): Promise<Blob | null> {
               resolve(null);
               return;
             }
-            if (wantRev > 0 && rec.rev !== wantRev) {
+            if (!isStoredFresh(rec, wantRev)) {
               resolve(null);
               return;
             }
@@ -81,17 +95,34 @@ export function readAvatarBlob(uid: string, wantRev = 0): Promise<Blob | null> {
   );
 }
 
-/** Persist a blob for a user at a given revision (best-effort). */
-export function writeAvatarBlob(uid: string, rev: number, blob: Blob): void {
-  void openDb().then((idb) => {
-    if (!idb) return;
+function putOnce(idb: IDBDatabase, uid: string, rev: number, blob: Blob): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
     try {
       const tx = idb.transaction(STORE, 'readwrite');
-      tx.objectStore(STORE).put({ uid, rev, blob } satisfies AvatarRecord);
+      const store = tx.objectStore(STORE);
+      const get = store.get(uid);
+      get.onsuccess = () => {
+        if (shouldReplaceStored(get.result as AvatarRecord | undefined, rev)) {
+          store.put({ uid, rev, blob } satisfies AvatarRecord);
+        }
+      };
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+      tx.onabort = () => resolve(false);
     } catch {
-      /* best-effort */
+      resolve(false);
     }
   });
+}
+
+/**
+ * Persist a blob for a user at a given revision (best-effort). Resolves when the transaction has really finished;
+ * a failed one is tried once more. An older revision never replaces a newer one.
+ */
+export async function writeAvatarBlob(uid: string, rev: number, blob: Blob): Promise<void> {
+  const idb = await openDb();
+  if (!idb) return;
+  if (!(await putOnce(idb, uid, rev, blob))) await putOnce(idb, uid, rev, blob);
 }
 
 /** Drop a user's cached blob (photo removed or replaced). */

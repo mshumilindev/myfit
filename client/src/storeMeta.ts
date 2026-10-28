@@ -7,7 +7,15 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { mirrorCollection, prepareWrite } from './vaultIO';
 
-export type SealedMetaName = 'goals' | 'home' | 'mastery' | 'coach';
+export type SealedMetaName =
+  | 'goals'
+  | 'home'
+  | 'mastery'
+  | 'coach'
+  | 'exercisePrefs'
+  | 'widgetData'
+  | 'challenges'
+  | 'atlasChatState';
 
 /** A plain JSON copy of `value` carrying the integer freshness stamp the rules demand. */
 export const stampedCopy = (value: object, updatedAt: number): Record<string, unknown> =>

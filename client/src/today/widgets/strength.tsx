@@ -61,6 +61,7 @@ import type { WidgetCtx, WidgetDef } from '../registry';
 import { DAY } from './format';
 import { ss, type StrengthStrings } from './strength.strings';
 import { setHash } from '../../route';
+import { emitTwEdit, notifyTwLocal, stampTw, subscribeTwLocal } from '../widgetSync';
 
 export const WEEK = 7 * DAY;
 
@@ -115,13 +116,7 @@ const half = (n: number): number => Math.round(n * 2) / 2;
 
 /* ---- tiny localStorage-backed state (key spotter.tw.<id>), synced across instances ---- */
 
-const localSubs = new Set<() => void>();
-function subscribeLocal(cb: () => void): () => void {
-  localSubs.add(cb);
-  return () => {
-    localSubs.delete(cb);
-  };
-}
+const subscribeLocal = subscribeTwLocal;
 function readRaw(id: string): string | null {
   try {
     return localStorage.getItem(`spotter.tw.${id}`);
@@ -160,7 +155,10 @@ export function useLocal<T>(id: string, fallback: T): [T, (v: T) => void] {
     } catch {
       /* private mode — nothing persists */
     }
-    localSubs.forEach((l) => l());
+    const at = Date.now();
+    stampTw(id, at);
+    emitTwEdit(id, v, at); // the few synced widgets reach the account (widgetSync.ts)
+    notifyTwLocal();
   };
   return [value, set];
 }

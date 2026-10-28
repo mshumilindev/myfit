@@ -2232,6 +2232,9 @@ export const en = {
   vaultPendingBody: 'It turns on by itself as soon as the connection allows. Nothing to do.',
   vaultCoachNote: 'Your coach keeps access automatically.',
   flagScopeGlobal: 'For every user',
+  flagAtlasHistory: 'Atlas chat history sync',
+  flagAtlasHistoryDesc:
+    'Shows the “Atlas chat on all devices” consent. Keep it off until the new privacy policy is live.',
   settingsTitle: 'Settings',
   settingsSub: 'Feature flags for this device',
   settingsFeaturesLabel: 'Features',
@@ -3460,6 +3463,17 @@ export const en = {
     'Gym search and maps stop sending your searches and position. The rest of Spotter keeps working.',
   privOffPuterBody:
     'Atlas stops using the backup service. Your questions are no longer sent to Puter. The rest of Spotter keeps working.',
+  privHistoryLabel: 'Atlas chat on all devices',
+  privHistorySub:
+    'Saves your last 100 chat messages in your account, encrypted, so every device shows the same chat',
+  privOffHistoryBody:
+    'The chat stops syncing at once. Your saved chat stays in your account, unused, for 30 days, so you can turn this back on and get it back. After that it is deleted. The chat on this device stays.',
+  privOffHistoryCheck: 'Delete the saved chat from my account right away',
+  histUploadTitle: 'Also upload the chat from this device?',
+  histUploadBody:
+    'The chat already on this device can be saved to your account too. Choose “Only new messages” to start fresh.',
+  histUploadYes: 'Upload it',
+  histUploadNo: 'Only new messages',
   privReqTitle: 'Withdraw and delete your account?',
   privReqBody:
     'Spotter needs your agreement to the Terms and Privacy Policy to work. If you withdraw it, we delete your account and all your data. This cannot be undone.',

@@ -155,6 +155,10 @@ export function createFirestoreClientPort(d: ClientPortDeps): ClientCoachPort {
     return adoptP;
   }
 
+  // One `coachMyLink` per link key: the snapshot callbacks (coaching, grant, plan, notice) start `build()` in parallel at
+  // launch, so the call in flight is shared instead of each of them asking again (SPO-336: nine calls in ~300 ms).
+  let infoP: { key: string; p: Promise<LinkInfo> } | null = null;
+
   async function loadInfo(c: Raw | null): Promise<LinkInfo> {
     const key = c ? `${String(c.trainerId)}|${String(c.status)}|${String(c.consentVersion)}` : '';
     if (info && key === infoKey) return info;
@@ -162,13 +166,24 @@ export function createFirestoreClientPort(d: ClientPortDeps): ClientCoachPort {
       infoKey = key;
       return (info = { linked: false });
     }
-    try {
-      info = await fs.call<LinkInfo>('coachMyLink', {});
-      infoKey = key;
-    } catch (e) {
-      if (!info?.linked) throw e; // keep the previous trainer line while offline
-    }
-    return info!;
+    if (infoP?.key === key) return infoP.p;
+    const entry: { key: string; p: Promise<LinkInfo> } = {
+      key,
+      p: Promise.resolve({ linked: false }),
+    };
+    infoP = entry; // set before the call starts, so a call that fails at once is dropped below and not kept
+    entry.p = (async (): Promise<LinkInfo> => {
+      try {
+        info = await fs.call<LinkInfo>('coachMyLink', {});
+        infoKey = key;
+      } catch (e) {
+        if (!info?.linked) throw e; // keep the previous trainer line while offline
+      } finally {
+        if (infoP === entry) infoP = null; // an error is not remembered: the next build asks again
+      }
+      return info!;
+    })();
+    return entry.p;
   }
 
   async function build(
@@ -365,6 +380,7 @@ export function createFirestoreClientPort(d: ClientPortDeps): ClientCoachPort {
         const r = await fs.call<{ trainerId: string }>('coachAccept', { token, consent: grants });
         info = null;
         infoKey = '';
+        infoP = null;
         await Promise.resolve(d.afterLink?.(r.trainerId)).catch(() => undefined);
       } catch (e) {
         throw toError(e);
@@ -409,6 +425,7 @@ export function createFirestoreClientPort(d: ClientPortDeps): ClientCoachPort {
       }
       info = null;
       infoKey = '';
+      infoP = null;
       d.onLeft?.(cid);
       void d.afterLink?.(null);
     },

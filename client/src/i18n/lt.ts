@@ -2270,6 +2270,9 @@ export const lt: Strings = {
   vaultPendingBody: 'Jis įsijungs pats, kai tik bus ryšys. Nieko daryti nereikia.',
   vaultCoachNote: 'Treneris prieigą gauna automatiškai.',
   flagScopeGlobal: 'Visiems naudotojams',
+  flagAtlasHistory: 'Atlas pokalbio istorijos sinchronizavimas',
+  flagAtlasHistoryDesc:
+    'Rodo sutikimą „Atlas pokalbis visuose įrenginiuose“. Laikykite išjungtą, kol neįsigaliojo nauja privatumo politika.',
   settingsTitle: 'Nustatymai',
   settingsSub: 'Šio įrenginio funkcijų vėliavėlės',
   settingsFeaturesLabel: 'Funkcijos',
@@ -3452,6 +3455,17 @@ export const lt: Strings = {
     'Gym search and maps stop sending your searches and position. The rest of Spotter keeps working.',
   privOffPuterBody:
     'Atlas stops using the backup service. Your questions are no longer sent to Puter. The rest of Spotter keeps working.',
+  privHistoryLabel: 'Atlas pokalbis visuose įrenginiuose',
+  privHistorySub:
+    'Išsaugo paskyroje paskutines 100 pokalbio žinučių užšifruotas, kad kiekvienas įrenginys rodytų tą patį pokalbį',
+  privOffHistoryBody:
+    'Pokalbio sinchronizavimas sustoja iškart. Išsaugotas pokalbis lieka jūsų paskyroje nenaudojamas 30 dienų, tad galite vėl įjungti ir jį atgauti. Po to jis ištrinamas. Pokalbis šiame įrenginyje liks.',
+  privOffHistoryCheck: 'Iškart ištrinti išsaugotą pokalbį iš paskyros',
+  histUploadTitle: 'Įkelti ir pokalbį iš šio įrenginio?',
+  histUploadBody:
+    'Pokalbį, kuris jau yra šiame įrenginyje, galima išsaugoti ir paskyroje. Pasirinkite „Tik naujos žinutės“, jei norite pradėti iš naujo.',
+  histUploadYes: 'Įkelti',
+  histUploadNo: 'Tik naujos žinutės',
   privReqTitle: 'Atšaukti ir ištrinti paskyrą?',
   privReqBody:
     'Spotter needs your agreement to the Terms and Privacy Policy to work. If you withdraw it, we delete your account and all your data. This cannot be undone.',

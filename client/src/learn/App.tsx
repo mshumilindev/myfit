@@ -31,6 +31,7 @@ import { Icon } from '../ui';
 import { AppRail } from '../components/AppRail';
 import { NotificationsView } from '../views/NotificationsView';
 import type { Notif, NotifState } from '../notifications';
+import { learnSavedPref } from '../activityPrefs';
 import { useLearnT } from './i18n';
 import { catalogForRole, type Lesson, type Topic, type ViewerRole } from './catalog';
 import { localizeTopics, localTopicTitle } from './catalog.i18n';
@@ -39,15 +40,8 @@ import { SUITE_ICON, SUITE_TONE } from '../components/suite/suiteTone';
 type Tab = 'home' | 'topics' | 'saved' | 'feed';
 type Cut = 'phone' | 'web';
 
-const SAVED_KEY = 'spotter.learn.saved';
-
 function readSaved(): string[] {
-  try {
-    const raw = localStorage.getItem(SAVED_KEY);
-    return raw ? (JSON.parse(raw) as string[]) : [];
-  } catch {
-    return [];
-  }
+  return learnSavedPref.get();
 }
 
 /** Orientation is driven purely by the view: mobile → portrait (phone / 9:16),
@@ -534,13 +528,14 @@ export function LearnRoot({
     scrollRef.current?.scrollTo({ top: 0 });
   }, [playing, tab, topic]);
 
+  // The list lives in the synced pref (SPO-387): a local edit is stamped there, and a value that arrives from the
+  // account while this page is open replaces what is shown.
   useEffect(() => {
-    try {
-      localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
-    } catch {
-      /* ignore */
-    }
+    const cur = learnSavedPref.get();
+    if (saved.length !== cur.length || saved.some((v, i) => v !== cur[i]))
+      learnSavedPref.set(saved);
   }, [saved]);
+  useEffect(() => learnSavedPref.subscribe(() => setSaved([...learnSavedPref.get()])), []);
 
   // Role-visible catalog — trainer/admin lessons never leak to members — then
   // localised so lesson/topic titles and blurbs render in the active language.

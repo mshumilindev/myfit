@@ -12,6 +12,7 @@
  * `callFn()` (a thin wrapper over httpsCallable that preserves the old
  * HttpError shape so view-level error handling keeps working).
  */
+import { askUnsynced, drainUnsynced, unsyncedCount } from './unsynced';
 import { afterSignIn, afterSignOut } from './accounts/deviceSession';
 import { fetchAvatarThumb } from './accounts/avatarThumb';
 import { setAvatar } from './accounts/rememberedPeople';
@@ -162,8 +163,31 @@ export function registerSignOutFlush(fn: () => Promise<void>): void {
 /**
  * `forget`: the person also leaves this device's landing list ("Remember me" unticked in the sign-out dialog). Either way
  * the person's own localStorage keys are wiped here and the rest of their data by deviceWipe.ts.
+ * `discardUnsynced`: the person has said yes to losing changes that did not reach the server (or the account is being deleted).
+ * `gated`: the caller has already run `checkUnsyncedBeforeSignOut` and it was ok.
  */
-export async function signOut(opts: { forget?: boolean } = {}): Promise<void> {
+export type SignOutOpts = { forget?: boolean; discardUnsynced?: boolean; gated?: boolean };
+export type SignOutResult = { ok: true } | { ok: false; remaining: number };
+
+/** SPO-384: sign-out removes the device's offline cache, so first give unsent changes time to go out (see unsynced.ts). */
+export async function checkUnsyncedBeforeSignOut(): Promise<SignOutResult> {
+  try {
+    const d = await drainUnsynced();
+    return d.ok ? { ok: true } : { ok: false, remaining: d.remaining };
+  } catch {
+    return { ok: false, remaining: Math.max(1, unsyncedCount()) }; // cannot tell: ask, never wipe silently
+  }
+}
+
+export async function signOut(opts: SignOutOpts = {}): Promise<SignOutResult> {
+  if (!opts.discardUnsynced && !opts.gated) {
+    // While the session still works: wait for unsent changes, and if some remain ask before anything is removed.
+    const gate = await checkUnsyncedBeforeSignOut();
+    if (!gate.ok) {
+      askUnsynced(gate.remaining, () => void signOut({ ...opts, discardUnsynced: true }));
+      return gate;
+    }
+  }
   const uid = currentUid();
   // Queued consent withdrawals are sent while the token still works. Short and never blocking: the queue is device-level
   // and survives sign-out, so whatever is not sent now is sent at this account's next sign-in.
@@ -200,6 +224,7 @@ export async function signOut(opts: { forget?: boolean } = {}): Promise<void> {
   } catch {
     /* best effort: the flag it sets is honoured at the next start */
   }
+  return { ok: true };
 }
 
 /** Subscribe to sign-in / sign-out. Fires with the current user (or null). */

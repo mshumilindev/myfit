@@ -5,7 +5,8 @@
  * distinct, practical challenges without a wall of hand-written translations —
  * titles are built from a few i18n templates with the numbers filled in), and
  * an active challenge's progress is computed from training history, never
- * written to the server. Starting one is a manual, deliberate act; progress
+ * written to the server. (The list of STARTED challenges is the one exception, SPO-391: it is kept in the
+ * account, sealed — see challengesState.ts.) Starting one is a manual, deliberate act; progress
  * then tracks itself.
  *
  * Two moving parts:
@@ -15,7 +16,6 @@
  *   • ACTIVE — ActiveChallenge[]: what you've started, in localStorage. A tiny
  *     reactive store (mirrors store.ts) so views re-render on start/give-up.
  */
-import { useSyncExternalStore } from 'react';
 import {
   useStore,
   isStrengthExercise,
@@ -31,6 +31,7 @@ import {
   setTopWeight,
   uuid,
 } from './store';
+import { commitChallenges, getChallenges, type ActiveChallenge } from './challengesState';
 import { computeStandards } from './standards';
 import { computeStreak } from './streak';
 import {
@@ -485,59 +486,8 @@ export function templateById(id: string): ChallengeTemplate | undefined {
 
 // --- Active challenges (reactive localStorage store) ------------------------
 
-export interface ActiveChallenge {
-  id: string;
-  templateId: string;
-  startedAt: number;
-  endsAt: number;
-  target: number;
-  status: 'active' | 'done' | 'given-up';
-  /** When it was completed (status flips to 'done'). */
-  completedAt?: number | null;
-  /** Whether the completion screen has been acknowledged. */
-  celebrated?: boolean;
-}
-
-const CH_KEY = 'spotter.challenges';
-
-function loadActive(): ActiveChallenge[] {
-  try {
-    const raw = localStorage.getItem(CH_KEY);
-    return raw ? (JSON.parse(raw) as ActiveChallenge[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-let activeList: ActiveChallenge[] = loadActive();
-const listeners = new Set<() => void>();
-
-function persist(): void {
-  try {
-    localStorage.setItem(CH_KEY, JSON.stringify(activeList));
-  } catch {
-    /* private mode / quota — ignore */
-  }
-}
-function emit(): void {
-  listeners.forEach((l) => l());
-}
-function commit(next: ActiveChallenge[]): void {
-  activeList = next;
-  persist();
-  emit();
-}
-
-/** Reactive: the list of started challenges. */
-export function useChallenges(): ActiveChallenge[] {
-  return useSyncExternalStore(
-    (cb) => {
-      listeners.add(cb);
-      return () => listeners.delete(cb);
-    },
-    () => activeList,
-  );
-}
+export type { ActiveChallenge } from './challengesState';
+export { useChallenges } from './challengesState';
 
 export function startChallenge(
   templateId: string,
@@ -554,37 +504,37 @@ export function startChallenge(
     status: 'active',
     completedAt: null,
   };
-  commit([ac, ...activeList]);
+  commitChallenges([ac, ...getChallenges()]);
   return ac;
 }
 
 export function giveUpChallenge(id: string): void {
-  commit(activeList.filter((c) => c.id !== id));
+  commitChallenges(getChallenges().filter((c) => c.id !== id));
 }
 
 /** Persist a computed completion (idempotent). */
 export function markChallengeDone(id: string, at: number): void {
   let changed = false;
-  const next = activeList.map((c) => {
+  const next = getChallenges().map((c) => {
     if (c.id === id && c.status === 'active') {
       changed = true;
       return { ...c, status: 'done' as const, completedAt: at };
     }
     return c;
   });
-  if (changed) commit(next);
+  if (changed) commitChallenges(next);
 }
 
 export function markCelebrated(id: string): void {
   let changed = false;
-  const next = activeList.map((c) => {
+  const next = getChallenges().map((c) => {
     if (c.id === id && !c.celebrated) {
       changed = true;
       return { ...c, celebrated: true };
     }
     return c;
   });
-  if (changed) commit(next);
+  if (changed) commitChallenges(next);
 }
 
 /** Already-started template ids (so the catalog can hide/curb duplicates). */

@@ -47,6 +47,19 @@ export const OPEN_FIELDS = {
   home: ['updatedAt'],
   mastery: ['updatedAt'],
   coach: ['updatedAt'],
+  // users/{uid}/meta/exercisePrefs — the weight unit and the per-exercise unit / load type / sides / rest pins and rest-timer
+  // switches (SPO-385): no server reads, all inside, only the stamp open (last-write-wins on the client).
+  exercisePrefs: ['updatedAt'],
+  // users/{uid}/meta/widgetData — the left/right test results, the last 1RM-calculator input, PR targets and the lift last
+  // picked in Today widgets (SPO-388): no server reads, all inside, only the stamp open.
+  widgetData: ['updatedAt'],
+  // users/{uid}/meta/challenges — the challenges the person started (SPO-391): no server reads, all inside, only the stamp open.
+  challenges: ['updatedAt'],
+  // users/{uid}/atlasChat/{msgId} — one Atlas chat message per document (SPO-392, only with the `atlas-history` consent):
+  // the order and the last-write stamp stay open, the role, text, chips and chart are inside.
+  atlasChat: ['id', 'at', 'updatedAt'],
+  // users/{uid}/meta/atlasChatState — the clear-history watermark: all inside, only the stamp open.
+  atlasChatState: ['updatedAt'],
 } as const satisfies Record<string, readonly string[]>;
 
 export type SealedCollection = keyof typeof OPEN_FIELDS;

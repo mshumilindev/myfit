@@ -2255,6 +2255,9 @@ export const pl: Strings = {
   vaultPendingBody: 'Włączy się samo, gdy tylko pozwoli na to połączenie. Nic nie trzeba robić.',
   vaultCoachNote: 'Trener dostaje dostęp automatycznie.',
   flagScopeGlobal: 'Dla wszystkich użytkowników',
+  flagAtlasHistory: 'Synchronizacja historii czatu Atlas',
+  flagAtlasHistoryDesc:
+    'Pokazuje zgodę „Czat Atlas na wszystkich urządzeniach”. Zostaw wyłączone, dopóki nie obowiązuje nowa polityka prywatności.',
   settingsTitle: 'Ustawienia',
   settingsSub: 'Flagi funkcji na tym urządzeniu',
   settingsFeaturesLabel: 'Funkcje',
@@ -3430,6 +3433,17 @@ export const pl: Strings = {
     'Wyszukiwarka siłowni i mapy przestają wysyłać Twoje zapytania i pozycję. Reszta Spotter działa dalej.',
   privOffPuterBody:
     'Atlas przestaje używać usługi zapasowej. Twoje pytania nie trafiają już do Puter. Reszta Spotter działa dalej.',
+  privHistoryLabel: 'Czat Atlas na wszystkich urządzeniach',
+  privHistorySub:
+    'Zapisuje na koncie ostatnie 100 wiadomości czatu w postaci zaszyfrowanej, aby każde urządzenie pokazywało ten sam czat',
+  privOffHistoryBody:
+    'Synchronizacja czatu zatrzymuje się od razu. Zapisany czat pozostaje na Twoim koncie, nieużywany, przez 30 dni, więc możesz włączyć to ponownie i go odzyskać. Potem zostanie usunięty. Czat na tym urządzeniu zostanie.',
+  privOffHistoryCheck: 'Usuń zapisany czat z konta od razu',
+  histUploadTitle: 'Przesłać też czat z tego urządzenia?',
+  histUploadBody:
+    'Czat, który jest już na tym urządzeniu, można też zapisać na koncie. Wybierz „Tylko nowe wiadomości”, aby zacząć od zera.',
+  histUploadYes: 'Prześlij',
+  histUploadNo: 'Tylko nowe wiadomości',
   privReqTitle: 'Wycofać zgodę i usunąć konto?',
   privReqBody:
     'Spotter potrzebuje Twojej zgody na Warunki i Politykę prywatności, by działać. Jeśli ją wycofasz, usuniemy konto i wszystkie Twoje dane. Nie można tego cofnąć.',

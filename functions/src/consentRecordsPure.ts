@@ -16,6 +16,7 @@ export const CONSENT_KINDS: readonly string[] = [
   'health:nutrition',
   'atlas-ai',
   'atlas-puter',
+  'atlas-history',
   'geo-search',
   'trainer-terms',
 ];
@@ -34,6 +35,7 @@ export const RELEASED_VERSIONS = {
   health: ['2026-10-21'],
   'atlas-ai': ['2026-10-21', '2026-10-22'],
   'atlas-puter': ['2026-10-21', '2026-10-22'],
+  'atlas-history': ['2026-10-28'],
   'geo-search': ['2026-10-21', '2026-10-22', '2026-10-27'],
   'trainer-terms': ['2026-10-21', '2026-10-22'],
 } as const satisfies Record<string, readonly string[]>;

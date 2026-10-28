@@ -5,6 +5,7 @@
  * Never throws, never blocks: until the first snapshot the list is empty and `status` is 'loading'; a listener
  * error keeps the last known list ('error' is a state of the data, not a blocker).
  */
+import { registerUnsynced } from '../../unsynced';
 import type { ConversationsPort, ConversationUnreadDoc } from '../data/unreadStore';
 import type { ChatPort } from './port';
 import type { SealedLocal } from './sealedLocal';
@@ -129,6 +130,11 @@ export function createChatStore(port: ChatPort, undoMs: number = UNDO_MS): ChatS
       await (list.length ? l.set(`outbox:${cid}`, list) : l.remove(`outbox:${cid}`));
     });
   }
+
+  // sign-out waits for the unsent messages of every conversation (SPO-384)
+  registerUnsynced('coach-chat', {
+    count: () => Object.values(state.outbox).reduce((n, l) => n + l.length, 0),
+  });
 
   const patchOutbox = (
     cid: string,

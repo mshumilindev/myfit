@@ -97,3 +97,69 @@ describe('UserAvatar: a face that is not lost (SPO-109)', () => {
     vi.useRealTimers();
   });
 });
+
+// SPO-336 F2: one download per photo, and what was downloaded is kept on the device whatever the component does meanwhile.
+describe('UserAvatar: one download, always cached (SPO-336)', () => {
+  const deferred = () => {
+    let resolve!: (b: Blob) => void;
+    const promise = new Promise<Blob>((r) => (resolve = r));
+    return { promise, resolve };
+  };
+  const jpeg = () => new Blob(['x'], { type: 'image/jpeg' });
+
+  it('two faces of the same person mounted together download the photo once', async () => {
+    const d = deferred();
+    getBlob.mockReturnValue(d.promise);
+    const { container } = render(
+      <>
+        <UserAvatar userId="s1" name="Ann A" hasPhoto rev={5} />
+        <UserAvatar userId="s1" name="Ann A" hasPhoto rev={5} size={20} />
+      </>,
+    );
+    await waitFor(() => expect(getBlob).toHaveBeenCalled());
+    d.resolve(jpeg());
+    await waitFor(() => expect(container.querySelectorAll('img')).toHaveLength(2));
+    expect(getBlob).toHaveBeenCalledTimes(1);
+  });
+
+  it('a face that unmounts while the photo downloads still leaves the photo on the device', async () => {
+    const store = await import('../avatarStore');
+    vi.mocked(store.writeAvatarBlob).mockClear();
+    const d = deferred();
+    getBlob.mockReturnValue(d.promise);
+    const { unmount } = render(<UserAvatar userId="s2" name="Bo B" hasPhoto rev={3} />);
+    await waitFor(() => expect(getBlob).toHaveBeenCalled());
+    unmount();
+    const blob = jpeg();
+    d.resolve(blob);
+    await waitFor(() => expect(store.writeAvatarBlob).toHaveBeenCalledWith('s2', 3, blob));
+  });
+
+  it('the revision arriving late (0, then the real one) does not start a second download and is the one stored', async () => {
+    const store = await import('../avatarStore');
+    vi.mocked(store.writeAvatarBlob).mockClear();
+    const d = deferred();
+    getBlob.mockReturnValue(d.promise);
+    const { rerender, container } = render(<UserAvatar userId="s3" name="Cy C" hasPhoto rev={0} />);
+    await waitFor(() => expect(getBlob).toHaveBeenCalled());
+    rerender(<UserAvatar userId="s3" name="Cy C" hasPhoto rev={7} />);
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0)); // the remounted face reads the device copy, then joins the running download
+    });
+    const blob = jpeg();
+    d.resolve(blob);
+    await waitFor(() => expect(container.querySelector('img')).not.toBeNull());
+    expect(getBlob).toHaveBeenCalledTimes(1);
+    expect(store.writeAvatarBlob).toHaveBeenCalledWith('s3', 7, blob);
+  });
+
+  it('a new photo of the same person (higher revision) is one more download, not more', async () => {
+    getBlob.mockResolvedValue(jpeg());
+    const { rerender, container } = render(<UserAvatar userId="s4" name="Di D" hasPhoto rev={1} />);
+    await waitFor(() => expect(container.querySelector('img')).not.toBeNull());
+    rerender(<UserAvatar userId="s4" name="Di D" hasPhoto rev={2} />);
+    await waitFor(() => expect(getBlob).toHaveBeenCalledTimes(2));
+    await new Promise((r) => setTimeout(r, 30));
+    expect(getBlob).toHaveBeenCalledTimes(2);
+  });
+});

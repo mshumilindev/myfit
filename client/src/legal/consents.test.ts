@@ -47,6 +47,7 @@ describe('consent kinds and versions', () => {
         'atlas-ai',
         'atlas-puter',
         'geo-search',
+        'atlas-history',
         'trainer-terms',
       ].sort(),
     );

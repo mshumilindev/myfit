@@ -35,6 +35,7 @@ export type ConsentKind =
   | HealthConsentKind
   | 'atlas-ai'
   | 'atlas-puter'
+  | 'atlas-history'
   | 'geo-search'
   | 'trainer-terms';
 
@@ -45,6 +46,7 @@ export const CONSENT_KINDS: readonly ConsentKind[] = [
   ...HEALTH_FEATURES.map((f): HealthConsentKind => `health:${f}`),
   'atlas-ai',
   'atlas-puter',
+  'atlas-history',
   'geo-search',
   'trainer-terms',
 ];

@@ -14,6 +14,7 @@ export function SettingsView({ onClose }: { onClose: () => void }) {
 
   const meta: Record<string, { label: string; desc: string }> = {
     nutrition: { label: t.flagNutrition, desc: t.flagNutritionDesc },
+    atlasHistory: { label: t.flagAtlasHistory, desc: t.flagAtlasHistoryDesc },
   };
 
   return (

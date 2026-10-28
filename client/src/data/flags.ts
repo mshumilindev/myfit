@@ -19,7 +19,11 @@ import { db } from '../firebase';
 
 export type FlagScope = 'device' | 'global';
 
-const FLAG_DEFS = [{ id: 'nutrition', scope: 'device' }] as const satisfies readonly {
+const FLAG_DEFS = [
+  { id: 'nutrition', scope: 'device' },
+  // Atlas chat history in the account (SPO-392): off for everyone until the new privacy policy is live
+  { id: 'atlasHistory', scope: 'global' },
+] as const satisfies readonly {
   id: string;
   scope: FlagScope;
 }[];

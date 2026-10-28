@@ -279,10 +279,23 @@ const META_DOCS: ReadonlySet<string> = new Set<SealedCollection>([
   'home',
   'mastery',
   'coach',
+  'exercisePrefs',
+  'widgetData',
+  'challenges',
+  'atlasChatState',
 ]);
 
 /** Documents whose rules require `updatedAt is int` next to `enc` (SPO-217). */
-const STAMPED_DOCS: ReadonlySet<string> = new Set(['goals', 'home', 'mastery', 'coach']);
+const STAMPED_DOCS: ReadonlySet<string> = new Set([
+  'goals',
+  'home',
+  'mastery',
+  'coach',
+  'exercisePrefs',
+  'widgetData',
+  'challenges',
+  'atlasChatState',
+]);
 
 /**
  * Firestore ports for the one-time migration. `enrichWorkout` adds the readable `stats`

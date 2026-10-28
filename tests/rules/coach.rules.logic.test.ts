@@ -108,6 +108,7 @@ describe('rules file: static checks', () => {
         'sleepSchedules/{userId}',
         'users/{userId}',
         'users/{userId}/activities/{activityId}',
+        'users/{userId}/atlasChat/{msgId}',
         'users/{userId}/clientNotes/{noteId}',
         'users/{userId}/conditions/{conditionId}',
         'users/{userId}/decisions/{decisionId}',
@@ -116,15 +117,19 @@ describe('rules file: static checks', () => {
         'users/{userId}/gyms/{gymId}',
         'users/{userId}/injuries/{injuryId}',
         // sealed coaching documents with their own shape rules (before the generic meta/* above them)
+        'users/{userId}/meta/atlasChatState',
         'users/{userId}/meta/calendarSettings',
+        'users/{userId}/meta/challenges',
         'users/{userId}/meta/chatKeys',
         // SPO-217: the account's own goals, home sets, mastery and Atlas settings are sealed too
         'users/{userId}/meta/coach',
+        'users/{userId}/meta/exercisePrefs',
         'users/{userId}/meta/goals',
         'users/{userId}/meta/home',
         'users/{userId}/meta/mastery',
         'users/{userId}/meta/selfCoach',
         'users/{userId}/meta/signalState',
+        'users/{userId}/meta/widgetData',
         'users/{userId}/meta/{docId}',
         'users/{userId}/notices/{noticeId}',
         'users/{userId}/outbox/{messageId}',
@@ -638,7 +643,16 @@ describe('liveSessions: the writer and the allow-list', () => {
       ...extra,
     });
 
-    for (const name of ['goals', 'home', 'mastery', 'coach']) {
+    for (const name of [
+      'goals',
+      'home',
+      'mastery',
+      'coach',
+      'exercisePrefs',
+      'widgetData',
+      'challenges',
+      'atlasChatState',
+    ]) {
       it(`meta/${name}: only the owner, only a sealed document with an int stamp`, () => {
         const p = `users/${C}/meta/${name}`;
         expect(ok('create', p, sealed())).toBe(true);

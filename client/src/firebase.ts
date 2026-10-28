@@ -19,7 +19,8 @@ import {
   persistentMultipleTabManager,
 } from 'firebase/firestore';
 import { connectAuthEmulator } from 'firebase/auth';
-import { connectFirestoreEmulator } from 'firebase/firestore';
+import { connectFirestoreEmulator, waitForPendingWrites } from 'firebase/firestore';
+import { registerFirestoreDrain } from './unsynced';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { STORAGE_BUCKET } from './downloads';
@@ -79,6 +80,8 @@ export const db = initializeFirestore(app, {
 });
 
 // Cloud Functions region must match functions/src/index.ts (us-central1).
+// sign-out waits for the server to confirm local writes before it removes the offline cache (SPO-384)
+registerFirestoreDrain(() => waitForPendingWrites(db));
 export const functions = getFunctions(app, 'us-central1');
 
 export const storage = getStorage(app);

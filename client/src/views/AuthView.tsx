@@ -25,6 +25,23 @@ function lockoutEnd(): number {
   return Date.now() + 15 * 60 * 1000;
 }
 
+/**
+ * One reachability request at a time, shared by every sign-in form that is open (SPO-336: it went out twice). The shared
+ * request is dropped when the last form closes, so a hung one can never be inherited by a later screen.
+ */
+let probeInFlight: Promise<unknown> | null = null;
+let probeForms = 0;
+function reachabilityProbe(): Promise<unknown> {
+  if (probeInFlight) return probeInFlight;
+  const p: Promise<unknown> = callFn<{ registered: boolean }>('authStatus', undefined, {
+    timeoutMs: PROBE_TIMEOUT_MS,
+  }).finally(() => {
+    if (probeInFlight === p) probeInFlight = null;
+  });
+  probeInFlight = p;
+  return p;
+}
+
 export function AuthView({
   onLoggedIn,
   notice,
@@ -88,7 +105,7 @@ export function AuthView({
   };
 
   function check() {
-    callFn<{ registered: boolean }>('authStatus', undefined, { timeoutMs: PROBE_TIMEOUT_MS })
+    reachabilityProbe()
       .then(() => setUnreachable(false))
       .catch((err) => {
         // Only a genuine lack of connection blocks auth (the first sign-in needs
@@ -104,6 +121,7 @@ export function AuthView({
     check();
   }
   useEffect(() => {
+    probeForms += 1;
     check();
     // Coming back online re-checks on its own.
     const onOnline = () => {
@@ -117,6 +135,8 @@ export function AuthView({
     return () => {
       window.removeEventListener('online', onOnline);
       window.removeEventListener('offline', onOffline);
+      probeForms -= 1;
+      if (probeForms <= 0) probeInFlight = null;
     };
   }, []);
 

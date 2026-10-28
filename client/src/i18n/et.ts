@@ -2236,6 +2236,9 @@ export const et: Strings = {
   vaultPendingBody: 'See lülitub ise sisse, kui ühendus võimaldab. Midagi pole vaja teha.',
   vaultCoachNote: 'Treener saab juurdepääsu automaatselt.',
   flagScopeGlobal: 'Kõigile kasutajatele',
+  flagAtlasHistory: 'Atlase vestluse ajaloo sünkroonimine',
+  flagAtlasHistoryDesc:
+    'Näitab nõusolekut „Atlase vestlus kõigis seadmetes“. Hoia väljas, kuni uus privaatsuspoliitika kehtib.',
   settingsTitle: 'Seaded',
   settingsSub: 'Selle seadme funktsioonilipud',
   settingsFeaturesLabel: 'Funktsioonid',
@@ -3411,6 +3414,17 @@ export const et: Strings = {
     'Gym search and maps stop sending your searches and position. The rest of Spotter keeps working.',
   privOffPuterBody:
     'Atlas stops using the backup service. Your questions are no longer sent to Puter. The rest of Spotter keeps working.',
+  privHistoryLabel: 'Atlase vestlus kõigis seadmetes',
+  privHistorySub:
+    'Salvestab kontole viimased 100 vestlussõnumit krüpteeritult, et iga seade näitaks sama vestlust',
+  privOffHistoryBody:
+    'Vestluse sünkroonimine peatub kohe. Salvestatud vestlus jääb sinu kontole kasutamata 30 päevaks, nii et saad selle uuesti sisse lülitada ja vestluse tagasi saada. Pärast seda see kustutatakse. Vestlus sellel seadmel jääb alles.',
+  privOffHistoryCheck: 'Kustuta salvestatud vestlus kontolt kohe ära',
+  histUploadTitle: 'Kas laadida üles ka selle seadme vestlus?',
+  histUploadBody:
+    'Vestluse, mis on selles seadmes juba olemas, saab salvestada ka kontole. Vali „Ainult uued sõnumid“, et alustada puhtalt.',
+  histUploadYes: 'Laadi üles',
+  histUploadNo: 'Ainult uued sõnumid',
   privReqTitle: 'Tühistada ja konto kustutada?',
   privReqBody:
     'Spotter needs your agreement to the Terms and Privacy Policy to work. If you withdraw it, we delete your account and all your data. This cannot be undone.',

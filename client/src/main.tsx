@@ -81,6 +81,7 @@ import { installRouteSwitch } from './components/routeSwitch';
 import { installCleanUrls } from './route';
 import { LegalGate } from './legal/LegalGate';
 import { GeoConsentHost } from './legal/GeoConsentHost';
+import { AtlasHistoryHost } from './atlas/AtlasHistoryHost';
 import { HealthConsentHost } from './legal/HealthConsentHost';
 
 // Clean URLs (no `#`): rewrite a legacy `/#/route` link to `/route` before the app reads its route.
@@ -126,6 +127,7 @@ void Promise.race([
         <ThemePreviewHost />
         <LegalGate />
         <GeoConsentHost />
+        <AtlasHistoryHost />
         <HealthConsentHost />
       </AppCrashBoundary>
     </StrictMode>,

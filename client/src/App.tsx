@@ -27,10 +27,14 @@ import {
   onAuthChange,
   watchRoleClaim,
   signOut as apiSignOut,
+  checkUnsyncedBeforeSignOut,
 } from './api';
+import { askUnsynced, unsyncedCount } from './unsynced';
+import { UnsyncedSignOutPrompt } from './components/UnsyncedSignOutPrompt';
 import { db } from './firebase';
 import {
   getOpenWorkout,
+  isSessionStarted,
   pruneEmptyLiveWorkouts,
   startSyncLoop,
   useStore,
@@ -311,7 +315,7 @@ export interface Shell {
   openStart: () => void;
   toast: (t: ToastState) => void;
   snack: (s: SnackState) => void;
-  signOut: (opts?: { forget?: boolean }) => void;
+  signOut: (opts?: { forget?: boolean; discardUnsynced?: boolean }) => void;
   queueLength: number;
 }
 
@@ -658,6 +662,15 @@ function isLearnHash(hash: string): boolean {
 }
 
 export function App() {
+  return (
+    <>
+      <AppMain />
+      <UnsyncedSignOutPrompt />
+    </>
+  );
+}
+
+function AppMain() {
   const { t, locale } = useT();
   const store = useStore();
   const conditionLimits = useStoredConditionLimits(); // restriction: keeps capping with the feature off
@@ -1009,13 +1022,23 @@ export function App() {
       setSnack({ ...s, id: snackSeq.current });
     },
     signOut: (opts) => {
-      setOverlay(null);
-      setTab(defaultTab());
-      void apiSignOut(opts);
-      setAuthed(false);
-      replaceHash('#/today');
+      void (async () => {
+        // SPO-384: unsent changes get a few seconds to go out first; if some are left, nothing is removed until the person says so.
+        if (!opts?.discardUnsynced) {
+          const gate = await checkUnsyncedBeforeSignOut();
+          if (!gate.ok) {
+            askUnsynced(gate.remaining, () => shell.signOut({ ...opts, discardUnsynced: true }));
+            return;
+          }
+        }
+        setOverlay(null);
+        setTab(defaultTab());
+        void apiSignOut({ ...opts, gated: true });
+        setAuthed(false);
+        replaceHash('#/today');
+      })();
     },
-    queueLength: getSyncMeta().pendingWrites,
+    queueLength: unsyncedCount(),
   };
 
   // Every app's account block (rail avatar popover, phone More sheet) signs out through here.
@@ -1023,7 +1046,7 @@ export function App() {
   useEffect(() => {
     signOutRef.current = shell.signOut;
   });
-  const queueLen = getSyncMeta().pendingWrites;
+  const queueLen = unsyncedCount();
   useEffect(
     () => setSuiteSession({ signOut: (o) => signOutRef.current(o), queueLength: queueLen }),
     [queueLen],
@@ -1859,7 +1882,8 @@ export function App() {
         {liveAct && activeOverlay?.screen !== 'activity' && (
           <ActivityHero activity={liveAct} onOpen={() => setOverlay({ screen: 'activity' })} />
         )}
-        {open && activeOverlay?.screen !== 'session' && (
+        {/* an empty open session (no exercise yet) is a draft, not a live session: no banner on the other screens */}
+        {open && isSessionStarted(open) && activeOverlay?.screen !== 'session' && (
           <LiveHero
             workout={open}
             gym={store.gyms.find((g) => g.id === open.gymId) ?? null}

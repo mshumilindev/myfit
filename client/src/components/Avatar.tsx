@@ -55,6 +55,54 @@ async function downloadAvatar(uid: string, wanted: () => boolean): Promise<Blob 
   }
 }
 
+/**
+ * One download per person at a time. Every face of the same uid (roster, header, sheets…) and every remount of a face
+ * (the revision arrives late: 0, then the real one) joins the download already running, and what it brings is written
+ * to the device whether or not any face is still on screen — so the cache fills even when the screen changes meanwhile.
+ */
+interface Flight {
+  rev: number; // the highest revision any joiner asked for: what the photo is stored as
+  wanters: number;
+  cancelled: boolean;
+  promise: Promise<Blob | null>;
+}
+const flights = new Map<string, Flight>();
+
+function joinDownload(
+  uid: string,
+  rev: number,
+): { promise: Promise<Blob | null>; release: () => void } {
+  let f = flights.get(uid);
+  if (f) {
+    f.rev = Math.max(f.rev, rev);
+    f.wanters += 1;
+  } else {
+    const flight: Flight = { rev, wanters: 1, cancelled: false, promise: Promise.resolve(null) };
+    f = flight;
+    flights.set(uid, flight);
+    flight.promise = (async () => {
+      try {
+        const blob = await downloadAvatar(uid, () => flight.wanters > 0);
+        if (blob && blob.size > 0 && !flight.cancelled)
+          await writeAvatarBlob(uid, flight.rev, blob);
+        return blob;
+      } finally {
+        if (flights.get(uid) === flight) flights.delete(uid);
+      }
+    })();
+  }
+  const mine = f;
+  let released = false;
+  return {
+    promise: mine.promise,
+    release: () => {
+      if (released) return;
+      released = true;
+      mine.wanters = Math.max(0, mine.wanters - 1);
+    },
+  };
+}
+
 /** Drop cached object-URLs (all generations) and the persisted blob for a user. */
 export function invalidateAvatarCache(userId: string): void {
   for (const [key, url] of urlCache) {
@@ -62,6 +110,11 @@ export function invalidateAvatarCache(userId: string): void {
       URL.revokeObjectURL(url);
       urlCache.delete(key);
     }
+  }
+  const flight = flights.get(userId);
+  if (flight) {
+    flight.cancelled = true; // a download of the OLD photo must not land on the device after a new one was set
+    flights.delete(userId);
   }
   deleteAvatarBlob(userId);
 }
@@ -125,6 +178,7 @@ function AvatarFace({
   useEffect(() => {
     if (!cacheKey || !uid || urlCache.has(cacheKey)) return;
     let alive = true;
+    let release: () => void = () => undefined;
 
     const adopt = (blob: Blob): void => {
       const url = URL.createObjectURL(blob);
@@ -159,9 +213,10 @@ function AvatarFace({
         const stale = await readAvatarBlob(uid);
         if (!alive) return;
         if (stale && stale.size > 0) adopt(stale);
-        const blob = await downloadAvatar(uid, () => alive);
-        if (!alive || !blob || blob.size === 0) return;
-        writeAvatarBlob(uid, rev, blob);
+        const join = joinDownload(uid, rev);
+        release = join.release;
+        const blob = await join.promise;
+        if (!alive || !blob || blob.size === 0) return; // the device copy was written by the download itself
         swap(blob);
       } catch {
         /* best-effort — the initials (or the stale face) stay */
@@ -170,6 +225,7 @@ function AvatarFace({
 
     return () => {
       alive = false;
+      release();
     };
   }, [uid, cacheKey, rev]);
 

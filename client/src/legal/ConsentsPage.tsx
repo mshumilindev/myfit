@@ -13,6 +13,8 @@ import { useState } from 'react';
 import { GroupedList } from '../components/ui/GroupedList';
 import { ConsentRow } from '../components/ui/ConsentRow';
 import { ConfirmDialog } from '../components/ui/Overlays';
+import { useFlag } from '../data/flags';
+import { uploadAtlasHistory, withdrawAtlasHistory } from '../atlas/AtlasHistoryHost';
 import { ConfirmEffectsDialog } from '../components/ui/ConfirmEffectsDialog';
 import { Notice } from '../components/ui/Notice';
 import { HealthWithdrawDialog } from './HealthWithdrawDialog';
@@ -55,6 +57,7 @@ function labelOf(t: Strings, kind: ConsentKind): string {
   if (kind === 'atlas-ai') return t.privAtlasLabel;
   if (kind === 'atlas-puter') return t.privPuterLabel;
   if (kind === 'geo-search') return t.privGeoLabel;
+  if (kind === 'atlas-history') return t.privHistoryLabel;
   return t.privFeature[kind.slice('health:'.length) as HealthFeature];
 }
 
@@ -81,6 +84,8 @@ type Ask =
   | { kind: 'required' }
   | { kind: 'health-off'; feature: HealthFeature }
   | { kind: 'atlas-on' | 'atlas-off'; engine: AiEngine }
+  | { kind: 'history-on' }
+  | { kind: 'history-off' }
   | null;
 
 export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
@@ -92,6 +97,7 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
   const [failed, setFailed] = useState(false);
   const [healthNote, setHealthNote] = useState<string | null>(null);
   const [copyFirst, setCopyFirst] = useState(false);
+  const [eraseNow, setEraseNow] = useState(false);
 
   async function write(kind: ConsentKind, action: 'grant' | 'withdraw'): Promise<void> {
     setBusy(kind);
@@ -104,6 +110,11 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
         // the record follows through the persisted queue.
         markLocalOff(currentUid(), kind);
         if (kind === 'geo-search') setGeoOverride(false);
+        // The chat copy in the account goes with the consent; the chat on this device stays.
+        if (kind === 'atlas-history') {
+          // Stops syncing at once either way; the stored copy is deleted now (checkbox) or kept 30 days for undo.
+          await withdrawAtlasHistory(eraseNow ? 'now' : 'keep').catch(() => setFailed(true));
+        }
         const saved = await sendConsentDurably({
           kind,
           action: 'withdraw',
@@ -120,6 +131,11 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
   }
 
   function toggle(kind: ConsentKind, on: boolean): void {
+    if (kind === 'atlas-history') {
+      setEraseNow(false);
+      setAsk({ kind: on ? 'history-on' : 'history-off' });
+      return;
+    }
     if (kind === 'atlas-ai' || kind === 'atlas-puter') {
       setAsk({
         kind: on ? 'atlas-on' : 'atlas-off',
@@ -156,6 +172,7 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
     );
   }
 
+  const historyFlag = useFlag('atlasHistory');
   const atlasOn = rowModel(records, 'atlas-ai', loading).on;
   const req = requiredModel(records, loading);
   const offBody = (kind: ConsentKind): string =>
@@ -165,7 +182,9 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
         ? t.privOffPuterBody
         : kind === 'geo-search'
           ? t.privOffGeoBody
-          : t.privOffHealthBody;
+          : kind === 'atlas-history'
+            ? t.privOffHistoryBody
+            : t.privOffHealthBody;
 
   return (
     <>
@@ -204,8 +223,48 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
           if (k === 'atlas-puter') return row(k, 'sparkle', 'atlas', t.privPuterSub, m);
           return row(k, 'map-pin', 'accent', t.privGeoSub, m);
         })}
+        {(historyFlag || rowModel(records, 'atlas-history', loading).on) &&
+          row(
+            'atlas-history',
+            'chats-circle',
+            'atlas',
+            t.privHistorySub,
+            rowModel(records, 'atlas-history', loading),
+          )}
       </GroupedList>
 
+      {ask?.kind === 'history-on' && (
+        <ConfirmDialog
+          icon="chats-circle"
+          title={t.histUploadTitle}
+          body={t.histUploadBody}
+          confirmLabel={t.histUploadYes}
+          cancelLabel={t.histUploadNo}
+          onCancel={() => {
+            setAsk(null);
+            void write('atlas-history', 'grant');
+          }}
+          onConfirm={() => {
+            setAsk(null);
+            void write('atlas-history', 'grant').then(() => uploadAtlasHistory());
+          }}
+        />
+      )}
+      {ask?.kind === 'history-off' && (
+        <ConfirmEffectsDialog
+          icon="power"
+          title={t.privOffTitle(t.privHistoryLabel)}
+          body={t.privOffHistoryBody}
+          check={{ label: t.privOffHistoryCheck, checked: eraseNow, onChange: setEraseNow }}
+          confirmLabel={t.privOffConfirm}
+          cancelLabel={t.privOffKeep}
+          onCancel={() => setAsk(null)}
+          onConfirm={() => {
+            setAsk(null);
+            void write('atlas-history', 'withdraw');
+          }}
+        />
+      )}
       {ask?.kind === 'atlas-on' && (
         <AtlasConsentPrompt engine={ask.engine} onDone={() => setAsk(null)} />
       )}

@@ -24,6 +24,8 @@ export function kindLabel(t: Strings, m: MyDataStrings, kind: ConsentKind): stri
       return t.privPuterLabel;
     case 'geo-search':
       return t.privGeoLabel;
+    case 'atlas-history':
+      return t.privHistoryLabel;
     default:
       return t.privFeature[kind.slice('health:'.length) as HealthFeature];
   }

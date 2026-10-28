@@ -304,7 +304,7 @@ service cloud.firestore {
         allow read: if isSelf(userId);
         // the sealed documents have their own shape rules below (SPO-217: goals/home/mastery/coach are sealed too)
         allow write: if isSelf(userId) && !(docId in ['chatKeys', 'signalState', 'selfCoach', 'calendarSettings',
-          'goals', 'home', 'mastery', 'coach']);
+          'goals', 'home', 'mastery', 'coach', 'exercisePrefs', 'widgetData', 'challenges', 'atlasChatState']);
       }
       // Chat key store: every conversation key of this user, sealed under their DEK (written with encryptJson).
       match /meta/chatKeys {
@@ -360,6 +360,52 @@ service cloud.firestore {
         allow delete: if isSelf(userId);
       }
       match /meta/mastery {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 100000);
+        allow delete: if isSelf(userId);
+      }
+      // SPO-385: the weight unit and the per-exercise / rest-timer settings, sealed like the rest of the account's own settings
+      // SPO-388: the person's own numbers kept in Today widgets, sealed
+      // SPO-392: the Atlas chat, one sealed document per message. Own read/write only: no coach, manager or delegate
+      // clause may ever be added here (the chat is private). `atlasChatState` holds the clear-history watermark.
+      match /atlasChat/{msgId} {
+        allow read, delete: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['id', 'at', 'updatedAt', 'enc'])
+          && request.resource.data.id == msgId
+          && request.resource.data.at is int
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 100000);
+      }
+      match /meta/atlasChatState {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 100000);
+        allow delete: if isSelf(userId);
+      }
+      // SPO-391: the challenges the person started, sealed
+      match /meta/challenges {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 100000);
+        allow delete: if isSelf(userId);
+      }
+      match /meta/widgetData {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 100000);
+        allow delete: if isSelf(userId);
+      }
+      match /meta/exercisePrefs {
         allow read: if isSelf(userId);
         allow create, update: if isSelf(userId)
           && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])

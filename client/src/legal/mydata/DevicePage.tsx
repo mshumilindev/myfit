@@ -97,7 +97,9 @@ export function DevicePage({
   onBack,
   chat,
   env,
-  clear = () => signOut({ forget: true }),
+  clear = async () => {
+    await signOut({ forget: true });
+  },
 }: DevicePageProps) {
   const { locale } = useT();
   const m = useMyDataT();

@@ -20,6 +20,7 @@ export const MIGRATION_ORDER: SealedCollection[] = [
   'restPeriods',
   'injuries',
   'activities',
+  'atlasChat',
   'sleeps',
   'body',
   'conditions',
@@ -33,6 +34,10 @@ export const MIGRATION_ORDER: SealedCollection[] = [
   'home',
   'mastery',
   'coach',
+  'exercisePrefs',
+  'widgetData',
+  'challenges',
+  'atlasChatState',
 ];
 
 export interface MigratePorts {

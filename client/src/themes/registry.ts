@@ -275,8 +275,7 @@ export function initAxes(): void {
   }
 }
 
-export function setAxis(axis: AxisName, value: string): void {
-  if (!axisKnown(axis, value)) return;
+function putAxis(axis: AxisName, value: string): void {
   document.documentElement.setAttribute(AXES[axis].attr, value);
   try {
     localStorage.setItem(AXES[axis].key, value);
@@ -284,6 +283,35 @@ export function setAxis(axis: AxisName, value: string): void {
     /* storage unavailable — the choice lasts for this session */
   }
   listeners.forEach((fn) => fn());
+}
+
+const axisChoiceListeners = new Set<(axis: AxisName, value: string) => void>();
+/** Subscribe to the user's own axis choices only (values from the account don't fire it, SPO-389). */
+export function onAxisChoice(fn: (axis: AxisName, value: string) => void): () => void {
+  axisChoiceListeners.add(fn);
+  return () => axisChoiceListeners.delete(fn);
+}
+
+export function setAxis(axis: AxisName, value: string): void {
+  if (!axisKnown(axis, value)) return;
+  putAxis(axis, value);
+  axisChoiceListeners.forEach((fn) => fn(axis, value));
+}
+
+/** An axis value that arrived from the account: applied and cached, not echoed back. Unknown values are ignored. */
+export function applyRemoteAxis(axis: AxisName, value: string): void {
+  if (!axisKnown(axis, value)) return;
+  putAxis(axis, value);
+}
+
+/** The axis value saved on this device, if the person ever chose one (null = never). */
+export function savedAxis(axis: AxisName): string | null {
+  try {
+    const v = localStorage.getItem(AXES[axis].key);
+    return axisKnown(axis, v) ? v : null;
+  } catch {
+    return null;
+  }
 }
 
 export function useAxis(axis: AxisName): string {

@@ -2,6 +2,7 @@
  * Client chat store: the outbox of unsent messages and the single pending undoable operation (message delete / clear),
  * same rules as the trainer's store (8 s window, one toast at a time). Never throws, never blocks.
  */
+import { registerUnsynced } from '../../../unsynced';
 import { UNDO_MS, type ChatMessage, type MsgBody, type PendingUndo } from '../../chat/types';
 import type { ClientChatPort } from './chatPort';
 
@@ -47,6 +48,8 @@ export function createClientChatStore(port: ClientChatPort, undoMs = UNDO_MS): C
     state = { ...state, ...p };
     subs.forEach((f) => f());
   };
+  // sign-out waits for the unsent messages (SPO-384)
+  registerUnsynced('client-chat', { count: () => state.outbox.length });
   const quiet = (p: Promise<unknown>) => void p.catch(() => undefined);
   const settle = () => {
     if (timer) clearTimeout(timer);

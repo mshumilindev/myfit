@@ -31,7 +31,9 @@ export function DeleteAccountFlow({
   onCancel,
   onDownloadCopy,
   port,
-  finish = () => signOut({ forget: true }),
+  finish = async () => {
+    await signOut({ forget: true, discardUnsynced: true }); // the account and its data are being deleted anyway
+  },
 }: DeleteAccountFlowProps) {
   const d = useDeleteT();
   const x = useExportT();

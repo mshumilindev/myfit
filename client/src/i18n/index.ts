@@ -68,11 +68,38 @@ function detect(): LocaleId {
 let current: LocaleId = detect();
 const listeners = new Set<() => void>();
 
-export function setLocale(id: LocaleId): void {
+const choiceListeners = new Set<(id: LocaleId) => void>();
+/** The person's own language choices only (a value from the account doesn't fire it, SPO-389). */
+export function onLocaleChoice(fn: (id: LocaleId) => void): () => void {
+  choiceListeners.add(fn);
+  return () => choiceListeners.delete(fn);
+}
+
+function putLocale(id: LocaleId): void {
   current = id;
   localStorage.setItem(LOCALE_KEY, id);
   document.documentElement.lang = id;
   listeners.forEach((l) => l());
+}
+
+export function setLocale(id: LocaleId): void {
+  putLocale(id);
+  choiceListeners.forEach((fn) => fn(id));
+}
+
+/** The language chosen on another device: applied and cached here, not echoed back. */
+export function applyRemoteLocale(id: string): void {
+  if (!LOCALE_IDS.includes(id as LocaleId) || id === current) return;
+  putLocale(id as LocaleId);
+}
+
+/** True when the person picked a language on this device (not only guessed from the timezone/browser). */
+export function hasSavedLocale(): boolean {
+  try {
+    return LOCALE_IDS.includes(localStorage.getItem(LOCALE_KEY) as LocaleId);
+  } catch {
+    return false;
+  }
 }
 
 export function getLocale(): LocaleId {

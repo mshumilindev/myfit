@@ -20,6 +20,7 @@ export interface ListPref {
 }
 
 export const EMPTY_LIST_PREF: ListPref = { list: [], updatedAt: 0 };
+const LEGACY_STAMP = 1;
 
 /** Dedupe + drop non-strings, keeping first occurrence order. */
 export function cleanList(raw: unknown): string[] {
@@ -78,8 +79,15 @@ export function createListPref(storageKey: string): ListPrefStore {
     try {
       const raw = localStorage.getItem(storageKey);
       if (raw) {
-        const v = JSON.parse(raw) as Partial<ListPref>;
-        return { list: cleanList(v.list), updatedAt: Number(v.updatedAt) || 0 };
+        const v = JSON.parse(raw) as unknown;
+        // A plain array is the older on-device format (the learn lists, SPO-387): kept, and stamped 1 so it is
+        // sent to the account when the account has nothing, but loses to any real value already there.
+        if (Array.isArray(v)) {
+          const list = cleanList(v);
+          return list.length ? { list, updatedAt: LEGACY_STAMP } : EMPTY_LIST_PREF;
+        }
+        const o = (v && typeof v === 'object' ? v : {}) as Partial<ListPref>;
+        return { list: cleanList(o.list), updatedAt: Number(o.updatedAt) || 0 };
       }
     } catch {
       /* private mode / corrupt value */
@@ -135,6 +143,10 @@ export const pinsPref = createListPref('spotter.activityPins');
 export const nextUpOffPref = createListPref('spotter.nextUpOff');
 /** "Add it to your program" suggestions turned off / snoozed (see programSuggest.ts). */
 export const programSuggestOffPref = createListPref('spotter.programSuggestOff');
+
+/** Lessons the person saved / finished in Learn (SPO-387); the keys were plain id arrays before they synced. */
+export const learnSavedPref = createListPref('spotter.learn.saved');
+export const learnCompletedPref = createListPref('spotter.learn.completed');
 
 /** Pinned activity type keys, in display order. */
 export function activityPins(): string[] {

@@ -11,6 +11,7 @@
  * All the pure/derived helpers (volume, per-hand, supersets, muscles, records)
  * are unchanged — they operate on the in-memory workouts array.
  */
+import { pushPushPrefsEdits, syncPushPrefsFromDoc } from './pushPrefsSync';
 import { autoMainGymIds, isMainGym } from './mainGym';
 import {
   coachView,
@@ -162,6 +163,30 @@ import { resolveRestOverlap, type RestOverlapChoice } from './restOverlap';
 import { readProgramMemory } from './data/programMemory';
 import { CONDITIONS_KEY, CONDITIONS_SHARE_KEY, createConditionsCache } from './conditionsCache';
 import { createStoreSealed } from './storeSealed';
+import {
+  applyRemoteChallenges,
+  getChallenges,
+  getChallengesAt,
+  onChallengesEdit,
+  reconcileChallenges,
+  resetChallenges,
+} from './challengesState';
+import {
+  TW_PREFS_FIELD,
+  TW_SEALED_IDS,
+  applyTwRemote,
+  normalizeTw,
+  onTwEdit,
+  readTwAt,
+  reconcileTwBundle,
+  reconcileTwPref,
+  TW_AT_KEY,
+} from './today/widgetSync';
+import {
+  normalizeExercisePrefs,
+  reconcileExercisePrefs,
+  type ExercisePrefs,
+} from './exercisePrefsSync';
 import { stampedCopy, watchSealedMeta, writeSealedMeta, type SealedMetaName } from './storeMeta';
 import {
   healthSnapshot,
@@ -257,6 +282,8 @@ import type { GeneratedDay } from './sessionBuilder';
 import {
   listPrefFromDoc,
   nextUpOffPref,
+  learnSavedPref,
+  learnCompletedPref,
   programSuggestOffPref,
   pinsPref,
   reconcileListPref,
@@ -304,6 +331,8 @@ const EX_SIDES_KEY = 'spotter.exerciseSides';
 const EX_REST_KEY = 'spotter.exerciseRest';
 const REST_PREFS_KEY = 'spotter.restPrefs';
 const WEIGHT_UNIT_KEY = 'spotter.weightUnit';
+// When the exercise settings above were last changed on this device (SPO-385): the stamp for last-write-wins with the account.
+const EX_PREFS_AT_KEY = 'spotter.exercisePrefsAt';
 const SLEEP_TOMB_KEY = 'spotter.sleepTombstones.v1';
 // Ids of sleep nights the user discarded, kept until the server confirms the
 // delete. Durable across reloads so stale snapshots cannot resurrect a night
@@ -616,6 +645,8 @@ function withForcedPersist(f: HealthFeature, run: () => void): void {
   }
 }
 
+let exercisePrefsAt = load<number>(EX_PREFS_AT_KEY, 0);
+
 function persist(): void {
   try {
     localStorage.setItem(SHARED_GYMS_KEY, JSON.stringify(state.sharedGyms));
@@ -636,6 +667,7 @@ function persist(): void {
     localStorage.setItem(EX_SIDES_KEY, JSON.stringify(state.exerciseSides));
     localStorage.setItem(EX_REST_KEY, JSON.stringify(state.exerciseRest));
     localStorage.setItem(REST_PREFS_KEY, JSON.stringify(state.restPrefs));
+    localStorage.setItem(EX_PREFS_AT_KEY, JSON.stringify(exercisePrefsAt));
   } catch {
     /* quota / private mode — Firestore cache is the real store */
   }
@@ -4069,6 +4101,28 @@ export function discardActivity(id: string): void {
   deleteActivity(id);
 }
 
+// --- Account sync of these settings (SPO-385) -------------------------------
+function currentExercisePrefs(): ExercisePrefs {
+  return normalizeExercisePrefs({
+    weightUnit: state.weightUnit,
+    exerciseUnits: state.exerciseUnits,
+    exerciseLoadTypes: state.exerciseLoadTypes,
+    exerciseSides: state.exerciseSides,
+    exerciseRest: state.exerciseRest,
+    restPrefs: state.restPrefs,
+  });
+}
+function writeExercisePrefsDoc(): void {
+  if (!exercisePrefsAt) exercisePrefsAt = Date.now();
+  writeMetaDoc('exercisePrefs', currentExercisePrefs(), exercisePrefsAt);
+}
+/** Change one of these settings: stamp it, keep it on the device, and send it to the account. */
+function setExercisePrefs(patch: Partial<StoreState>): void {
+  exercisePrefsAt = Date.now();
+  setState(patch);
+  writeExercisePrefsDoc();
+}
+
 // --- Weight unit (Load-entry B) --------------------------------------------
 /** The account-wide weight unit (kg unless the user picked lb in their profile). */
 export function globalWeightUnit(): DisplayUnit {
@@ -4079,7 +4133,7 @@ export function globalWeightUnit(): DisplayUnit {
 export function setGlobalWeightUnit(unit: DisplayUnit): void {
   const next: Record<string, DisplayUnit> = {};
   for (const [k, v] of Object.entries(state.exerciseUnits)) if (v !== unit) next[k] = v;
-  setState({ weightUnit: unit, exerciseUnits: next });
+  setExercisePrefs({ weightUnit: unit, exerciseUnits: next });
 }
 /** The display unit for a lift/machine: its override, else the account default. */
 export function exerciseUnit(name: string): DisplayUnit {
@@ -4091,7 +4145,7 @@ export function setExerciseUnit(name: string, unit: DisplayUnit): void {
   const next = { ...(state.exerciseUnits ?? {}) };
   if (unit === state.weightUnit) delete next[key];
   else next[key] = unit;
-  setState({ exerciseUnits: next });
+  setExercisePrefs({ exerciseUnits: next });
 }
 
 // --- Rest timer ------------------------------------------------------------
@@ -4105,13 +4159,13 @@ export function setExerciseRestSec(name: string, sec: number | null): void {
   const key = name.trim().toLowerCase();
   if (sec === null) delete next[key];
   else next[key] = sec;
-  setState({ exerciseRest: next });
+  setExercisePrefs({ exerciseRest: next });
 }
 export function restPrefs(): RestPrefs {
   return state.restPrefs ?? REST_PREFS_DEFAULT;
 }
 export function setRestPrefs(patch: Partial<RestPrefs>): void {
-  setState({ restPrefs: { ...restPrefs(), ...patch } });
+  setExercisePrefs({ restPrefs: { ...restPrefs(), ...patch } });
 }
 
 // --- Per-exercise load type (Load-entry C) ---------------------------------
@@ -4129,7 +4183,7 @@ export function setExerciseLoadType(name: string, type: LoadType | null): void {
   const next = { ...(state.exerciseLoadTypes ?? {}) };
   if (type === null) delete next[key];
   else next[key] = type;
-  setState({ exerciseLoadTypes: next });
+  setExercisePrefs({ exerciseLoadTypes: next });
 }
 
 // --- Per-exercise sides / laterality (F4) ----------------------------------
@@ -4144,7 +4198,7 @@ export function setExerciseSides(name: string, sides: 'one' | 'both' | null): vo
   const next = { ...(state.exerciseSides ?? {}) };
   if (sides === null) delete next[key];
   else next[key] = sides;
-  setState({ exerciseSides: next });
+  setExercisePrefs({ exerciseSides: next });
 }
 
 /** Self-reported training history for the Mastery Experience axis. */
@@ -5052,6 +5106,7 @@ function markSynced(fromCache: boolean, hasPending: boolean): void {
 //   weekStart + updatedAt                 — first day of the training week
 //   activityPins + activityPinsUpdatedAt  — Log activity › Pinned (ordered)
 //   nextUpOff + nextUpOffUpdatedAt        — types not to suggest after workouts
+//   learnSaved / learnCompleted + …UpdatedAt — saved and finished Learn lessons (SPO-387)
 //   programSuggestOff + …UpdatedAt        — "add to program" suggestions muted / snoozed
 //   todayLayout + todayLayoutUpdatedAt    — the Today layout (today/layoutSync.ts)
 //   theme                                 — the chosen theme (themes/themeSync.ts)
@@ -5073,6 +5128,8 @@ const LIST_PREFS: Array<[string, ListPrefStore]> = [
   ['activityPins', pinsPref],
   ['nextUpOff', nextUpOffPref],
   ['programSuggestOff', programSuggestOffPref],
+  ['learnSaved', learnSavedPref],
+  ['learnCompleted', learnCompletedPref],
 ];
 function writeListPref(name: string, pref: ListPrefStore): void {
   const cur = pref.snapshot();
@@ -5091,6 +5148,56 @@ for (const [name, pref] of LIST_PREFS) {
 // Local Today-layout edits only; synced values never fire this (no echo).
 pushTodayLayoutEdits(writePrefsFields);
 pushThemeEdits(writePrefsFields);
+pushPushPrefsEdits(writePrefsFields);
+
+// Today-widget values (SPO-388): the weekly goal rides in meta/prefs, the rest in one sealed document.
+function twValue(id: string): unknown {
+  try {
+    const raw = localStorage.getItem(`spotter.tw.${id}`);
+    return raw ? normalizeTw(id, JSON.parse(raw)) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+function writeWidgetData(): void {
+  const at = readTwAt();
+  const values: Record<string, unknown> = {};
+  const stamps: Record<string, number> = {};
+  for (const id of TW_SEALED_IDS) {
+    const v = twValue(id);
+    if (v !== undefined && at[id]) {
+      values[id] = v;
+      stamps[id] = at[id];
+    }
+  }
+  writeMetaDoc('widgetData', { values, at: stamps });
+}
+function writeChallengesDoc(): void {
+  writeMetaDoc('challenges', { list: getChallenges() }, getChallengesAt() || Date.now());
+}
+onChallengesEdit(() => writeChallengesDoc());
+onTwEdit((id, value, at) => {
+  const field = TW_PREFS_FIELD[id];
+  if (field) writePrefsFields({ [field]: value ?? null, [`${field}UpdatedAt`]: at });
+  else writeWidgetData();
+});
+function syncTwPrefsFromDoc(data: Record<string, unknown>): void {
+  for (const [id, field] of Object.entries(TW_PREFS_FIELD)) {
+    const remoteAt = field + 'UpdatedAt' in data ? Number(data[field + 'UpdatedAt']) || 0 : null;
+    const hasField = field in data && remoteAt !== null;
+    const d = reconcileTwPref(readTwAt()[id] ?? 0, hasField ? remoteAt : null);
+    if (d.apply) {
+      const v = normalizeTw(id, data[field]);
+      if (v !== undefined) applyTwRemote(id, v, remoteAt ?? 0);
+    }
+    if (d.push) {
+      writePrefsFields({
+        [field]: twValue(id) ?? null,
+        [`${field}UpdatedAt`]: readTwAt()[id] ?? Date.now(),
+      });
+    }
+  }
+}
 
 export function startSyncLoop(): () => void {
   const uid = currentUid();
@@ -5135,6 +5242,8 @@ export function startSyncLoop(): () => void {
         }
         syncTodayLayoutFromDoc(data, writePrefsFields);
         syncThemePrefsFromDoc(data, writePrefsFields);
+        syncPushPrefsFromDoc(data, writePrefsFields);
+        syncTwPrefsFromDoc(data);
       },
       onWriteError,
     ),
@@ -5491,6 +5600,72 @@ export function startSyncLoop(): () => void {
         };
         persist();
         emit();
+      },
+      onWriteError,
+    ),
+  );
+  unsubs.push(
+    watchSealedMeta<Record<string, unknown>>(
+      uid,
+      'exercisePrefs',
+      (items, info) => {
+        if (!items.length && info.locked) return;
+        const data = items[0];
+        const d = reconcileExercisePrefs(
+          { at: exercisePrefsAt, prefs: currentExercisePrefs() },
+          data ? { at: typeof data.updatedAt === 'number' ? data.updatedAt : 0, raw: data } : null,
+        );
+        if (d.apply) {
+          exercisePrefsAt = d.apply.at;
+          state = { ...state, ...d.apply.prefs };
+          persist();
+          emit();
+        }
+        if (d.push) writeExercisePrefsDoc();
+      },
+      onWriteError,
+    ),
+  );
+  unsubs.push(
+    watchSealedMeta<Record<string, unknown>>(
+      uid,
+      'widgetData',
+      (items, info) => {
+        if (!items.length && info.locked) return;
+        const data = items[0];
+        const remote =
+          data &&
+          data.values &&
+          typeof data.values === 'object' &&
+          data.at &&
+          typeof data.at === 'object'
+            ? {
+                values: data.values as Record<string, unknown>,
+                at: data.at as Record<string, number>,
+              }
+            : null;
+        const d = reconcileTwBundle(readTwAt(), remote);
+        for (const [id, a] of Object.entries(d.apply)) applyTwRemote(id, a.value, a.at);
+        if (d.push) writeWidgetData();
+      },
+      onWriteError,
+    ),
+  );
+  unsubs.push(
+    watchSealedMeta<Record<string, unknown>>(
+      uid,
+      'challenges',
+      (items, info) => {
+        if (!items.length && info.locked) return;
+        const data = items[0];
+        const d = reconcileChallenges(
+          { at: getChallengesAt(), list: getChallenges() },
+          data
+            ? { at: typeof data.updatedAt === 'number' ? data.updatedAt : 0, raw: data.list }
+            : null,
+        );
+        if (d.apply) applyRemoteChallenges(d.apply.list, d.apply.at);
+        if (d.push) writeChallengesDoc();
       },
       onWriteError,
     ),
@@ -6449,6 +6624,8 @@ export function resetLocalData(): void {
     resetWeekStart();
     pinsPref.reset();
     nextUpOffPref.reset();
+    learnSavedPref.reset();
+    learnCompletedPref.reset();
     programSuggestOffPref.reset();
     resetTodayLayout();
   } finally {
@@ -6458,6 +6635,12 @@ export function resetLocalData(): void {
   localStorage.removeItem(EX_LOAD_KEY);
   localStorage.removeItem(EX_REST_KEY);
   localStorage.removeItem(REST_PREFS_KEY);
+  localStorage.removeItem(EX_PREFS_AT_KEY);
+  localStorage.removeItem(TW_AT_KEY);
+  resetChallenges();
+  for (const id of [...TW_SEALED_IDS, ...Object.keys(TW_PREFS_FIELD)])
+    localStorage.removeItem(`spotter.tw.${id}`);
+  exercisePrefsAt = 0;
   localStorage.removeItem(SHARED_GYMS_KEY);
   state = {
     workouts: [],

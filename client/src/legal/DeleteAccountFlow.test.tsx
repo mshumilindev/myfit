@@ -134,6 +134,8 @@ describe('delete account flow', () => {
     fireEvent.click(btn('Delete account'));
     fireEvent.change(await screen.findByLabelText('Password'), { target: { value: 'pw' } });
     fireEvent.click(btn('Confirm'));
-    await waitFor(() => expect(signOut).toHaveBeenCalledWith({ forget: true }));
+    await waitFor(() =>
+      expect(signOut).toHaveBeenCalledWith({ forget: true, discardUnsynced: true }),
+    );
   });
 });

@@ -75,3 +75,51 @@ describe('syncThemeFromDoc / pushThemeEdits', () => {
     expect(write).not.toHaveBeenCalled();
   });
 });
+
+describe('look axes and language (SPO-389)', () => {
+  it('writes the language the person picks, once, and not the one that came from the account', async () => {
+    const { setLocale, getLocale } = await import('../i18n');
+    const write = vi.fn();
+    stop = pushThemeEdits(write);
+    setLocale('pl');
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(write).toHaveBeenCalledWith({ locale: 'pl' });
+    syncThemeFromDoc({ locale: 'lt' } as never, write);
+    const { syncAxesAndLocaleFromDoc } = await import('./themeSync');
+    syncAxesAndLocaleFromDoc({ locale: 'lt' }, write);
+    expect(getLocale()).toBe('lt');
+    expect(write).toHaveBeenCalledTimes(1);
+    setLocale('en');
+  });
+  it('ignores an unknown language or axis value from a newer build', async () => {
+    const { getLocale } = await import('../i18n');
+    const { syncAxesAndLocaleFromDoc } = await import('./themeSync');
+    const write = vi.fn();
+    const before = getLocale();
+    syncAxesAndLocaleFromDoc({ locale: 'xx', themeMode: 'neon', themeAccent: 5 }, write);
+    expect(getLocale()).toBe(before);
+    expect(document.documentElement.getAttribute('data-mode')).not.toBe('neon');
+    expect(write).not.toHaveBeenCalled();
+  });
+  it('a device that picked a language sends it when the account has none; a default axis is not sent', async () => {
+    const { setLocale } = await import('../i18n');
+    const { syncAxesAndLocaleFromDoc } = await import('./themeSync');
+    setLocale('et');
+    localStorage.setItem('gym.mode', 'dark');
+    const write = vi.fn();
+    syncAxesAndLocaleFromDoc({}, write);
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(write).toHaveBeenCalledWith({ locale: 'et' });
+    setLocale('en');
+  });
+  it('an axis choice is written under its own field and a remote one is not echoed', async () => {
+    const { setAxis, applyRemoteAxis } = await import('./registry');
+    const write = vi.fn();
+    stop = pushThemeEdits(write);
+    setAxis('density', 'regular');
+    expect(write).toHaveBeenCalledWith({ themeDensity: 'regular' });
+    write.mockClear();
+    applyRemoteAxis('density', 'regular');
+    expect(write).not.toHaveBeenCalled();
+  });
+});
