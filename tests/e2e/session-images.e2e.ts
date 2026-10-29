@@ -8,7 +8,7 @@
  * `npx playwright test tests/e2e/session-images.e2e.ts --project=mobile-chromium`.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { arm, passProfileGate, type Stub } from './helpers/layout-shift';
+import { ASSIGNMENT_DELAY_MS, arm, passProfileGate, type Stub } from './helpers/layout-shift';
 
 const BASE = process.env.E2E_TODAY_URL ?? process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173';
 /** The legal gate lets a device that already saw the server confirm the consents straight in (offline rule). */
@@ -49,7 +49,8 @@ async function fillGateIfShown(page: Page): Promise<void> {
 }
 
 for (const th of ['glass', 'cyberpunk', 'halloween'])
-  for (const size of SIZES) {
+  // Halloween (SPO-378) once on the phone: the hero-over-photo check is theme work, not width work (CI time budget).
+  for (const size of th === 'halloween' ? SIZES.slice(0, 1) : SIZES) {
     test(`session start and picker pictures load: ${size.name} ${th}`, async ({ page }) => {
       test.setTimeout(90_000);
       await page.setViewportSize({ width: size.width, height: size.height });
@@ -69,7 +70,13 @@ for (const th of ['glass', 'cyberpunk', 'halloween'])
       await passProfileGate(page);
 
       await page.getByRole('button', { name: /Start your first session/ }).click();
-      await page.getByRole('button', { name: /Or start from scratch/ }).click();
+      // The stubbed program has training days 1-3: on those weekdays the hero starts the prefilled day and a separate
+      // "Or start from scratch" link is offered; on every other day the hero itself starts from scratch and there is no
+      // link. Wait for the program answer (ASSIGNMENT_DELAY_MS) so the sheet has its final shape, then take either way.
+      await page.waitForTimeout(ASSIGNMENT_DELAY_MS + 800);
+      const orScratch = page.getByRole('button', { name: /Or start from scratch/ });
+      if (await orScratch.isVisible()) await orScratch.click();
+      else await page.locator('button.ss-hero').click();
       await page.getByRole('button', { name: /Without a gym/ }).waitFor();
       await page.waitForTimeout(1200); // the sheet slides in: click when it has settled
       await page.getByRole('button', { name: /Without a gym/ }).click();
