@@ -25614,14 +25614,20 @@ body {
     color-mix(in srgb, var(--c-0c0d0f) 0%, transparent) 100%
   );
 }
+/* The card over the hero photo is only a text scrim. The themed hero plate (glass.css) reads --glass-hero-tint and
+   --hud-brackets, and Cyberpunk fills every card with --surface-floor: all three are the kit's hooks, so the photo
+   is never hidden under an opaque plate in any theme. */
 .es-hero-main {
-  background: linear-gradient(
+  --glass-hero-tint: linear-gradient(
     to top,
     color-mix(in srgb, var(--c-0c0d0f) 97%, transparent) 0%,
     color-mix(in srgb, var(--c-0c0d0f) 85%, transparent) 38%,
     color-mix(in srgb, var(--c-0c0d0f) 35%, transparent) 65%,
     color-mix(in srgb, var(--c-0c0d0f) 0%, transparent) 85%
   );
+  --hud-brackets: none;
+  --surface-floor: transparent;
+  background: var(--glass-hero-tint);
 }
 
 /* Cardio: sliders + Start as one row — same height, same baseline. */

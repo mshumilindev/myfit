@@ -48,7 +48,7 @@ async function fillGateIfShown(page: Page): Promise<void> {
   await page.waitForTimeout(500);
 }
 
-for (const th of ['glass', 'cyberpunk'])
+for (const th of ['glass', 'cyberpunk', 'halloween'])
   for (const size of SIZES) {
     test(`session start and picker pictures load: ${size.name} ${th}`, async ({ page }) => {
       test.setTimeout(90_000);
@@ -88,6 +88,20 @@ for (const th of ['glass', 'cyberpunk'])
       await expect
         .poll(() => hero.evaluate((i: HTMLImageElement) => i.naturalWidth))
         .toBeGreaterThan(0);
+      // ...and nothing opaque sits on it: the card over the photo is only a scrim (transparent end, no fill colour).
+      // A decoded <img> hidden under a themed plate passed the check above while the card looked empty.
+      const scrim = await page
+        .locator('.es-hero-main')
+        .first()
+        .evaluate((el) => {
+          const cs = getComputedStyle(el);
+          return {
+            clearEnd: /\/ 0\)|rgba\(\d+, \d+, \d+, 0\)/.test(cs.backgroundImage),
+            noFill:
+              cs.backgroundColor === 'rgba(0, 0, 0, 0)' || cs.backgroundColor === 'transparent',
+          };
+        });
+      expect(scrim, 'hero card must not cover the photo').toEqual({ clearEnd: true, noFill: true });
       await page.waitForTimeout(800);
       expect(await broken(page), 'start screen').toEqual([]);
       expect(failedImages, 'image requests on the start screen').toEqual([]);
