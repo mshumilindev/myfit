@@ -66,6 +66,11 @@ async function setup(delegate = true) {
   return { w, port };
 }
 
+// the delegated ring arrives asynchronously after install (the book reads the delegation); a save before that is refused
+// with `vault-locked` and writes nothing, so the first save of a delegated client is retried until the ring is there
+const savedOnceReady = (port: ReturnType<typeof getSchedulePort>, doc: ScheduleDoc) =>
+  vi.waitFor(() => port.saveDoc(doc), { timeout: 2000, interval: 10 });
+
 const marked = (status: 'done' | 'missed', rev = 0): ScheduleDoc => ({
   ...emptyDoc(C),
   rev,
@@ -77,7 +82,7 @@ const logged = (w: Awaited<ReturnType<typeof setup>>['w']) =>
 describe('manager schedule writes (installFirestoreManager)', () => {
   it('mark done and mark missed: sealed under the delegated key, pinned to the trainer, and logged by kind', async () => {
     const { w, port } = await setup();
-    const a = await port.saveDoc(marked('done'));
+    const a = await savedOnceReady(port, marked('done'));
     expect(a.rev).toBe(1);
     const stored = (await w.fs.get(`schedules/${C}`))!;
     expect(stored.trainerId).toBe(T);
@@ -97,7 +102,7 @@ describe('manager schedule writes (installFirestoreManager)', () => {
     w.fs.onCall('teamLogActivity', () => {
       throw new Error('offline');
     });
-    await expect(port.saveDoc(marked('done'))).resolves.toMatchObject({ rev: 1 });
+    await expect(savedOnceReady(port, marked('done'))).resolves.toMatchObject({ rev: 1 });
     expect(w.fs.has(`schedules/${C}`)).toBe(true);
   });
 
