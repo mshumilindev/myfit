@@ -1,8 +1,8 @@
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { initTheme } from '../themes';
+import { initTheme, setTheme } from '../themes';
 import { ThemesView } from './ThemesView';
 import { offSeason } from '../themes/testClock';
 
@@ -58,5 +58,33 @@ describe('ThemesView during a holiday theme (SPO-321)', () => {
     // every pickable theme is a framed card in its own document
     expect(container.querySelectorAll('iframe.thm-frame')).toHaveLength(2);
     expect(screen.queryAllByText(en.themesApply)).toHaveLength(0); // buttons live inside the frames
+  });
+
+  it('keeps the holiday card for the whole window after the person chose their own theme: framed, with Apply', () => {
+    initTheme();
+    act(() => setTheme('cyberpunk'));
+    const { container } = render(<ThemesView onClose={() => undefined} />);
+    expect(screen.getByTitle('Halloween')).toBeTruthy(); // a framed card: its name lives in its own document
+    // the holiday card is no longer worn: it is a framed card like the others, and the saved theme is the one in use
+    expect(container.querySelectorAll('iframe.thm-frame')).toHaveLength(2);
+    expect(screen.getAllByText(en.themesApplied)).toHaveLength(1);
+  });
+
+  it('the framed holiday card is tagged Seasonal (not "on now") and Apply on it puts the holiday theme back', async () => {
+    initTheme();
+    act(() => setTheme('cyberpunk'));
+    render(<ThemesView onClose={() => undefined} />);
+    const f = screen.getByTitle('Halloween') as HTMLIFrameElement;
+    await vi.waitFor(() =>
+      expect(f.contentDocument?.body.textContent).toContain(en.themesSeasonalOff),
+    );
+    expect(f.contentDocument?.body.textContent).not.toContain('on now');
+  });
+
+  it('shows no holiday card once the window is over', () => {
+    vi.setSystemTime(new Date(2026, 10, 1, 12));
+    initTheme();
+    render(<ThemesView onClose={() => undefined} />);
+    expect(screen.queryByText(en.themesSeasonal)).toBeNull();
   });
 });

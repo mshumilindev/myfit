@@ -26,7 +26,7 @@ export function ThemeCard({
   fresh?: boolean;
   /** desktop landscape tile (the page tells the card; a framed card has its own viewport) */
   land?: boolean;
-  /** a holiday theme the schedule has switched on (SPO-321): it cannot be picked, the card only shows it */
+  /** a holiday theme whose window is open (SPO-321): tagged "on now" while worn; chosen away from, its Apply brings it back */
   seasonal?: boolean;
   onApply: (id: string) => void;
 }) {
@@ -38,7 +38,7 @@ export function ThemeCard({
       </div>
       {seasonal && (
         <Tag tone="accent" className="thm-new">
-          {t.themesSeasonal}
+          {current ? t.themesSeasonal : t.themesSeasonalOff}
         </Tag>
       )}
       {fresh && !seasonal && (

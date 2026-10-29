@@ -1410,6 +1410,7 @@ export const et: Strings = {
   themesSoon: 'Varsti',
   themeNew: 'Uus',
   themesSeasonal: 'Hooajaline · praegu sees',
+  themesSeasonalOff: 'Hooajaline',
   themeInviteKicker: 'Uus teema',
   themePreviewAction: 'Eelvaade',
   themePreviewLabel: 'Teema eelvaade',

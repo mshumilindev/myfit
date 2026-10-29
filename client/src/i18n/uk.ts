@@ -1452,6 +1452,7 @@ export const uk: Strings = {
   themesSoon: 'Скоро',
   themeNew: 'Нова',
   themesSeasonal: 'Святкова · зараз увімкнена',
+  themesSeasonalOff: 'Святкова',
   themeInviteKicker: 'Нова тема',
   themePreviewAction: 'Переглянути',
   themePreviewLabel: 'Перегляд теми',

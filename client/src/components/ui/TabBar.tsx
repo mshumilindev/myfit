@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { Icon } from '../../ui';
 import { Badge } from './Badge';
+import { ChristmasWreath } from './ChristmasWreath';
 import { HalloweenLantern } from './HalloweenLantern';
 import './TabBar.css';
 
@@ -169,6 +170,7 @@ export function TabBar<Id extends string = string>({
         >
           <Icon name="plus" weight="bold" />
           <HalloweenLantern />
+          <ChristmasWreath />
         </button>
       )}
     </div>

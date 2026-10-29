@@ -11,7 +11,15 @@ import { Card } from '../components/ui/Card';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { useT } from '../i18n';
 import { APP_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
-import { PICKABLE_THEMES, THEMES, setTheme, useCommittedTheme, useHolidayTheme } from '../themes';
+import {
+  PICKABLE_THEMES,
+  THEMES,
+  setTheme,
+  useCommittedTheme,
+  useHolidayTheme,
+  useHolidayWindowTheme,
+  wearHoliday,
+} from '../themes';
 import { getUnseenThemes, markAllThemesSeen } from '../themes/seen';
 import { ThemeCard } from './ThemeCard';
 import './themes.css';
@@ -25,7 +33,9 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
   // a holiday theme veils the saved one: then no card is "in use" and every card is drawn in its own frame
   const holidayId = useHolidayTheme();
   const current = holidayId === null ? saved : null;
-  const holidayDef = holidayId === null ? undefined : THEMES.find((x) => x.id === holidayId);
+  // the holiday theme stays on this screen for the whole holiday window: worn now = "Applied", chosen away = Apply brings it back
+  const windowId = useHolidayWindowTheme();
+  const holidayDef = windowId === null ? undefined : THEMES.find((x) => x.id === windowId);
   // the themes that were new when the screen opened keep their tag for this visit; opening counts as seen
   const [fresh] = useState(() => new Set(getUnseenThemes().map((x) => x.id)));
   useEffect(() => {
@@ -37,7 +47,7 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
   const picks = [...PICKABLE_THEMES].sort(
     (a, b) => Number(b.id === current) - Number(a.id === current),
   );
-  // the holiday theme the schedule has on right now is listed first, so the person sees why the app looks like this
+  // the holiday theme of the open window is listed first, so the person sees why the app looks like this (or can have it back)
   const list = holidayDef ? [holidayDef, ...picks] : picks;
   return (
     <div className="screen themes-screen">
@@ -50,10 +60,10 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
             <ThemeCard
               theme={th}
               current={th.id === current || th.id === holidayId}
-              seasonal={th.id === holidayId}
+              seasonal={th.id === windowId}
               fresh={fresh.has(th.id)}
               land={land}
-              onApply={setTheme}
+              onApply={(id) => (id === windowId ? wearHoliday() : setTheme(id))}
             />
           </div>
         ))}

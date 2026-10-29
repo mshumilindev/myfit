@@ -1401,6 +1401,7 @@ export const en = {
   themesSoon: 'Coming soon',
   themeNew: 'New',
   themesSeasonal: 'Seasonal · on now',
+  themesSeasonalOff: 'Seasonal',
   themeInviteKicker: 'New theme',
   themePreviewAction: 'Preview',
   themePreviewLabel: 'Theme preview',

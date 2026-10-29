@@ -7,4 +7,6 @@ import './_switch.css';
 import './_glass.page.css';
 import './_cyberpunk.route.css';
 import './_halloween.structure.css';
+import './_christmas.fonts.css';
+import './_christmas.structure.css';
 export * from './registry';

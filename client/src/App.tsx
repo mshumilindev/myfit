@@ -48,6 +48,7 @@ import {
   useSelfCoachRole,
 } from './store';
 import { AppRoot, SpotterSky } from './components/SpotterSky';
+import { ChristmasScene } from './components/ChristmasScene';
 import { HalloweenScene } from './components/HalloweenScene';
 import { SleepAutomation, SleepPauseController } from './components/SleepAutomation';
 import { SleepHero } from './components/SleepHero';
@@ -1834,7 +1835,14 @@ function AppMain() {
 
   return (
     <div className="app">
-      {nightLive ? <SpotterSky /> : <HalloweenScene />}
+      {nightLive ? (
+        <SpotterSky />
+      ) : (
+        <>
+          <HalloweenScene />
+          <ChristmasScene />
+        </>
+      )}
       <SleepAutomation onOpenSchedule={() => setOverlay({ screen: 'sleep', mode: 'schedule' })} />
       <SleepPauseController onSleepScreen={!!nightLive && activeOverlay?.screen === 'sleep'} />
       {desktopRail && (

@@ -22,6 +22,7 @@ import './SpotterSky.css';
 import type { ReactNode } from 'react';
 import { liveSleep, useStore } from '../store';
 import { downgradeMotion, useMotionTier } from '../motion';
+import { ChristmasScene } from './ChristmasScene';
 import { HalloweenScene } from './HalloweenScene';
 
 const BAND_HUES = ['#ffffff', '#f2f6ff', '#fff4e6', '#dbe6ff', '#ffe6cc', '#cdd8ff'];
@@ -365,8 +366,15 @@ export function SpotterSky() {
 /** The sky while a night is live, nothing otherwise: drop it into any full-screen shell. */
 export function NightSky() {
   const night = liveSleep(useStore().sleeps);
-  // Night mode wins over every theme, everywhere (rule): the Halloween scene only shows by day.
-  return night ? <SpotterSky /> : <HalloweenScene />;
+  // Night mode wins over every theme, everywhere (rule): the holiday scenes only show by day.
+  return night ? (
+    <SpotterSky />
+  ) : (
+    <>
+      <HalloweenScene />
+      <ChristmasScene />
+    </>
+  );
 }
 
 /**

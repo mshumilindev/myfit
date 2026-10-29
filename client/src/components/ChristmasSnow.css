@@ -1,0 +1,13 @@
+/* Christmas snowstorm (SPO-393): one full-screen canvas above everything, drawn only while a switch runs and while the
+   snow is still blowing off the screen after it. No veil: white only where the snow is. Never takes a tap. */
+.xs-snow {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: calc(var(--z-1000) + 2);
+  pointer-events: none;
+}
+.xs-snow[data-live='false'] {
+  display: none;
+}

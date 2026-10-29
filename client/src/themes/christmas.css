@@ -1,0 +1,288 @@
+/* Christmas — theme file. Tokens only (contract: themes/contract.ts). Started from Brass Glass:
+   change the values; every token below is read by the kit, nothing else is needed. */
+html[data-theme='christmas'] {
+  /* the Themes card shows the app background: the night forest (rule in docs/ADD-A-THEME.md) */
+  --bg-photo-port: url('/backgrounds/christmas-card.webp');
+  --bg-photo-land: url('/backgrounds/christmas-card.webp');
+  /* surfaces */
+  --color-bg: var(--c-07140f);
+  /* Opaque: legacy screens stack surfaces (nudge deck, sheets over cards) and
+     must not show through. Kit cards use the translucent --glass-surface. */
+  --color-surface: var(--c-0d2219);
+  --glass-surface: var(--c-0d2219);
+  --color-control: var(--c-0d2219);
+  --color-divider: var(--c-24402f);
+  /* brass ramp is unchanged (kit.py T.brass = var(--c-d9a24f), brass3 = var(--c-eed3a5)) */
+  /* liquid glass — neutral (kit .card) and brass (kit .card.glass) */
+  --glass-backdrop: none;
+  --glass-float: 0 12px 24px -12px var(--c-000000-a700);
+  --glass-rest-tint: linear-gradient(180deg, var(--c-0d2219), var(--c-0a1a13));
+  --glass-rest-specular: inset 0 1px 0 var(--c-f4ecd8-a120), inset 0 0 0 1px var(--c-24402f);
+  /* hero (kit .card.hero) — the one focal block of a screen */
+  /* wells (kit .well) — recessed inputs and steppers */
+  --glass-well: var(--c-091a12);
+  --glass-well-ring: var(--c-24402f);
+  --glass-field: var(--c-0a1a13);
+  --glass-field-ring: var(--c-2c4d3b);
+  /* screen moods (kit .m-*) — the background glow behind a screen */
+  --mood-art: var(--c-07140f);
+  --mood-rest: var(--c-07140f);
+  --mood-sleep: var(--c-08130f);
+  --mood-ok: var(--c-07150f);
+  --mood-bad: var(--c-120d0e);
+  --mood-night: var(--c-050d0a);
+  /* Body/muscle map: on the brass glass the untrained body reads light (a soft
+     warm grey from the palette, never #fff); worked muscles stay brass. */
+  --body-dim: var(--c-1d3a2c);
+  --body-dim-stroke: var(--c-dfe8e4-a200);
+  /* radii (kit: card 18, hero 24, sheet 26, pills 999) */
+  --radius-lg: var(--r-18);
+  --radius-md: var(--r-14);
+  /* inset rows/tiles inside cards */
+  --radius-sm: var(--r-10);
+  /* thumbs, small blocks */
+  --radius-hero: var(--r-24);
+  --radius-sheet: var(--r-24);
+  /* no --r-26 step: stays literal */
+  /* type scale from P00-Type (kit .t-*) */
+  --type-d1: italic 600 40px/1 var(--font-display);
+  --type-h1: italic 600 30px/1.05 var(--font-display);
+  --type-h2: italic 600 22px/1.1 var(--font-display);
+  --type-h3: 600 17px/1.3 var(--font);
+  --type-b: 400 16px/1.45 var(--font);
+  --type-s: 400 14px/1.4 var(--font);
+  --type-m: 400 13px/1.35 var(--font);
+  --type-l: 600 11px/1.2 var(--font-label);
+  --type-num: italic 600 30px/1 var(--font-display);
+  --type-hero: italic 600 64px/0.95 var(--font-display);
+  --lava-1: transparent;
+  --lava-2: transparent;
+  --lava-3: transparent;
+  /* the base of a raised list inside a sheet: graphite-brown on the brass apps, graphite-teal on Coach (below) */
+  --glass-raised-base: var(--c-0f2419);
+  --plate-top: var(--c-12301f);
+  --plate-bot: var(--c-0a1a13);
+  --plate-rim: var(--c-2c4d3b);
+  --plate-edge: var(--c-24402f);
+  /* identity (SPO-344 stage 2): the values styles.css carried, so Brass Glass is unchanged */
+  --font-display: 'Spotter Christmas Display', Georgia, serif;
+  --heading-transform: none;
+  --heading-tracking: 0;
+  --label-tracking: 0.22em;
+  --font: 'Jost', system-ui, sans-serif;
+  --color-text: var(--c-dfe8e4);
+  --color-text-muted: var(--c-98a99b);
+  --color-text-faint: var(--c-849b8d);
+  --color-text-disabled: var(--c-5d7a66);
+  --color-accent: var(--c-c23b5a);
+  --color-accent-100: var(--c-f4e6ea);
+  --color-accent-200: var(--c-e6bcc6);
+  --color-accent-300: var(--c-eaa0b2);
+  --color-accent-400: var(--c-cd5974);
+  --color-accent-500: var(--c-c23b5a);
+  --color-accent-600: var(--c-9b2f48);
+  --color-accent-700: var(--c-742336);
+  --color-accent-800: var(--c-471d26);
+  --color-accent-900: var(--c-271216);
+  --color-accent-950: var(--c-190b0e);
+  --color-accent-line: var(--c-742336);
+  --color-neutral-100: var(--c-f4f8f6);
+  --color-neutral-200: var(--c-dfe8e4);
+  --color-neutral-300: var(--c-c4d2cb);
+  --color-neutral-400: var(--c-98a99b);
+  --color-neutral-500: var(--c-849b8d);
+  --color-neutral-600: var(--c-5d7a66);
+  --color-neutral-700: var(--c-3b5546);
+  --color-neutral-800: var(--c-24402f);
+  --color-neutral-900: var(--c-162b20);
+  --color-gym: var(--c-c23b5a);
+  --color-gym-tint: var(--c-271216);
+  --color-gym-text: var(--c-eaa0b2);
+  --color-gym-line: var(--c-742336);
+  --color-note: var(--c-d9b45a);
+  --color-note-tint: var(--c-251e0d);
+  --color-note-text: var(--c-f1d98f);
+  --color-note-line: var(--c-8a6f3a);
+  --color-on-accent: var(--c-f4ecd8);
+  /* accent-derived glass: full accent tint on a warm brown base (was inline in glass.css) */
+  --glass-accent-k: 0;
+  --glass-base-1: var(--c-0d2219);
+  --glass-base-2: var(--c-0a1a13);
+  --glass-hero-base-1: var(--c-12301f);
+  --glass-hero-base-2: var(--c-0c1c14);
+  --glass-edge: inset 0 1px 0 var(--c-f4ecd8-a120), inset 0 0 0 1px var(--c-24402f);
+  --glass-hero-edge:
+    inset 0 0 0 1px var(--c-d9b45a-a550), inset 0 0 0 3px var(--c-0c1c14),
+    inset 0 0 0 4px var(--c-d9b45a-a180);
+  /* primary / filled button: accent-outlined tint */
+  --btn-fill-mix: 100%;
+  --btn-hover-mix: 100%;
+  --btn-active-mix: 100%;
+  --btn-ring-mix: 30%;
+  --btn-ink-on: 100%;
+  --btn-glow: 0 0 18px color-mix(in srgb, var(--color-accent) 32%, transparent);
+  --glow-k: 35%;
+  --glow-size: 1;
+  --btn-disabled-filter: grayscale(1) brightness(0.55);
+  --btn-case: uppercase;
+  --btn-tracking: 0.14em;
+  /* tab bar and Start button: frosted bar, brass hairline, brass lens and plate */
+  --tabbar-bg: var(--c-050d0a);
+  --tabbar-line-mix: 0%;
+  --tabbar-line-flat: var(--c-24402f);
+  --fab-bg: radial-gradient(
+    circle at 35% 30%,
+    var(--c-f9efd5),
+    var(--c-d9b45a) 60%,
+    var(--c-8a6f3a)
+  );
+  --fab-ink: var(--c-1a1305);
+  --fab-edge: inset 0 0 0 1px var(--c-a98332);
+  --fab-lens-display: none;
+  /* marks the theme may add without moving anything: active-tab edge, square before section labels */
+  --tab-active-mark: inset 0 2px 0 0 var(--c-d9b45a);
+  --switch-out: 2800;
+  --switch-tail: 1200;
+  --route-tail: 0;
+  --label-mark-display: inline-block;
+  /* corner of text-bearing controls (buttons, badges, chips, tags); 999px = pill. Avatars, dots, rings stay round. */
+  --r-ctl: 999px;
+  --r-input: var(--r-14);
+  --r-bar: 999px;
+  --tile-k: 0.5;
+  /* corner of avatars and round icon buttons as a share of their size (0.5 = circle) */
+  --avatar-k: 0.5;
+  /* the accent top-glow and diamond lattice behind every screen */
+  --ambient-display: none;
+  --font-label: 'Jost', system-ui, sans-serif;
+  --clip-ctl: none;
+  --clip-tag: none;
+  --clip-surface: none;
+  --clip-sheet: none;
+  --clip-fab: none;
+  --label-mark-content: '';
+  --label-mark-w: 5px;
+  --label-mark-h: 5px;
+  --label-mark-bg: var(--c-d9b45a);
+  --focus-offset: 2px;
+  --backdrop:
+    radial-gradient(120% 40% at 85% -6%, var(--c-d9b45a-a100), transparent 70%),
+    radial-gradient(100% 40% at 50% 108%, var(--c-000000-a600), transparent 70%),
+    linear-gradient(180deg, var(--c-0a1c14) 0%, var(--c-07140f) 42%);
+  --hud-brackets: none;
+  --plate-tint-k: 0;
+  --tone-fill-k: 0.45;
+  --seg-on-mix: 24%;
+  --segb-on-mix: 20%;
+  --seg-on-ink-k: 0%;
+  --tone-bar-w: 2px;
+  --sheet-mark: inset 0 1px 0 0 var(--c-d9b45a-a500);
+  --color-ok: var(--c-86c9a0);
+  --color-ok-text: var(--c-b4dfc3);
+  --color-ok-tint: var(--c-0f2a1c);
+  --color-ok-line: var(--c-2f7a4f);
+  --color-danger: var(--c-e0607a);
+  --color-danger-text: var(--c-f1a3b3);
+  --color-danger-tint: var(--c-2b1219);
+  --color-danger-line: var(--c-8a3248);
+  --color-illness: var(--c-d9b45a);
+  --color-illness-tint: var(--c-251e0d);
+  --color-illness-text: var(--c-f1d98f);
+  --color-illness-line: var(--c-8a6f3a);
+  --color-rest: var(--c-8aa4dc);
+  --color-rest-tint: var(--c-1a1f2c);
+  --color-rest-text: var(--c-bccaea);
+  --color-rest-line: var(--c-3f4c70);
+  --color-sleep: var(--c-a888d8);
+  --color-sleep-tint: var(--c-231c30);
+  --color-sleep-text: var(--c-cbb7ea);
+  --color-sleep-line: var(--c-52426e);
+  --color-kcal: var(--c-e0823a);
+  --color-kcal-tint: var(--c-2f1e12);
+  --color-kcal-text: var(--c-ecaa77);
+  --color-kcal-line: var(--c-7a4a24);
+  --color-injury: var(--c-e0607a);
+  --color-injury-tint: var(--c-2b1219);
+  --color-injury-text: var(--c-f1a3b3);
+  --color-injury-line: var(--c-8a3248);
+  --color-surface-2: var(--c-12301f);
+  --surface-floor: var(--c-091a12);
+  --tag-under: var(--c-091a12);
+  --color-btn-2: var(--c-1d3a2c);
+  /* app skins (colour code): hue within 15 degrees of the base app colour */
+  --skin-apex: var(--c-8c7ad6);
+  --skin-apex-100: var(--c-e9e7f4);
+  --skin-apex-200: var(--c-c5bce6);
+  --skin-apex-300: var(--c-b8aaea);
+  --skin-apex-400: var(--c-a799e0);
+  --skin-apex-500: var(--c-8c7ad6);
+  --skin-apex-600: var(--c-6a53ca);
+  --skin-apex-700: var(--c-4f37b3);
+  --skin-apex-800: var(--c-443582);
+  --skin-apex-900: var(--c-161226);
+  --skin-learn: var(--c-c0568f);
+  --skin-learn-100: var(--c-f3e7ee);
+  --skin-learn-200: var(--c-e3bfd2);
+  --skin-learn-300: var(--c-dd9cc0);
+  --skin-learn-400: var(--c-cb74a3);
+  --skin-learn-500: var(--c-c0568f);
+  --skin-learn-600: var(--c-a53e75);
+  --skin-learn-700: var(--c-80305b);
+  --skin-learn-800: var(--c-552840);
+  --skin-learn-900: var(--c-25131d);
+  --skin-roster: var(--c-e48a3a);
+  --skin-roster-100: var(--c-f7ede4);
+  --skin-roster-200: var(--c-efcfb3);
+  --skin-roster-300: var(--c-efb27d);
+  --skin-roster-400: var(--c-e99f5e);
+  --skin-roster-500: var(--c-e48a3a);
+  --skin-roster-600: var(--c-cf701c);
+  --skin-roster-700: var(--c-a25816);
+  --skin-roster-800: var(--c-6b401a);
+  --skin-roster-900: var(--c-2b1b0d);
+  --skin-nutrition: var(--c-5b8be0);
+  --skin-nutrition-100: var(--c-e5ebf6);
+  --skin-nutrition-200: var(--c-b6caec);
+  --skin-nutrition-300: var(--c-9db8ec);
+  --skin-nutrition-400: var(--c-7da3e6);
+  --skin-nutrition-500: var(--c-5b8be0);
+  --skin-nutrition-600: var(--c-306dd8);
+  --skin-nutrition-700: var(--c-2256b3);
+  --skin-nutrition-800: var(--c-25457d);
+  --skin-nutrition-900: var(--c-0f1829);
+  --skin-coach: var(--c-55c6cf);
+  --skin-coach-100: var(--c-e6f3f4);
+  --skin-coach-200: var(--c-bbe4e7);
+  --skin-coach-300: var(--c-9adce0);
+  --skin-coach-400: var(--c-75d1d8);
+  --skin-coach-500: var(--c-55c6cf);
+  --skin-coach-600: var(--c-35b2bc);
+  --skin-coach-700: var(--c-2a8c94);
+  --skin-coach-800: var(--c-266065);
+  --skin-coach-900: var(--c-112527);
+  --skin-coach-tint: var(--c-112527);
+  --skin-coach-text: var(--c-9adce0);
+  --skin-coach-line: var(--c-2a8c94);
+}
+
+/* --- Sub-app skins: accent per app (colour code). Lava glows are not used by this theme (flat night scene). */
+html[data-theme='christmas'].theme-apex {
+  --lava-2: var(--color-accent-800);
+  --lava-3: var(--color-accent-950);
+}
+html[data-theme='christmas'].theme-learn {
+  --lava-2: var(--color-accent-800);
+  --lava-3: var(--color-accent-950);
+}
+html[data-theme='christmas'].theme-roster {
+  --lava-2: var(--color-accent-800);
+  --lava-3: var(--color-accent-950);
+}
+html[data-theme='christmas'].theme-nutrition {
+  --lava-2: var(--color-accent-800);
+  --lava-3: var(--color-accent-950);
+}
+html[data-theme='christmas'].theme-coach {
+  --lava-2: var(--color-accent-800);
+  --lava-3: var(--color-accent-950);
+}

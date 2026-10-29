@@ -53,10 +53,19 @@ import '@fontsource/spectral/cyrillic-400.css';
 import '@fontsource/spectral/cyrillic-600.css';
 import '@fontsource/cormorant-garamond/cyrillic-500.css';
 import '@fontsource/cormorant-garamond/cyrillic-600.css';
+// Christmas type (SPO-393): Jost for text (display italic lives in themes/_christmas.fonts.css). Latin + Cyrillic subsets, self-hosted.
+import '@fontsource/jost/latin-400.css';
+import '@fontsource/jost/latin-500.css';
+import '@fontsource/jost/latin-600.css';
+import '@fontsource/jost/cyrillic-400.css';
+import '@fontsource/jost/cyrillic-500.css';
+import '@fontsource/jost/cyrillic-600.css';
+import { ChristmasSnow } from './components/ChristmasSnow';
 import { HalloweenBats } from './components/HalloweenBats';
 import './tokens/primitives.css';
 import './tokens/primitives.cyberpunk.css';
 import './tokens/primitives.halloween.css';
+import './tokens/primitives.christmas.css';
 import './styles.css';
 import './redesign.css';
 import './page-titles.css';
@@ -123,6 +132,7 @@ void Promise.race([
         <LavaBackground />
         <App />
         <HalloweenBats />
+        <ChristmasSnow />
         <SyncStatusHost />
         <ThemePreviewHost />
         <LegalGate />

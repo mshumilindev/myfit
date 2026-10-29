@@ -1,0 +1,11 @@
+/* Christmas structure (SPO-393): everything the token contract cannot say. Scoped to html[data-theme='christmas'].
+   App switch: a snowstorm (components/ChristmasSnow.tsx), out 2800 ms, tail 1200 ms. `html[data-glitch]` carries the phase
+   (components/appGlitch.ts); the snow is drawn by that component on one canvas, with no veil: the screen is white only
+   where the snow is. These rules only make sure the shared photo-glitch layers (glass-glitch.css) stay quiet while the
+   storm plays. */
+html[data-theme='christmas'][data-glitch='out']::before,
+html[data-theme='christmas'][data-glitch='load']::before,
+html[data-theme='christmas'][data-glitch='in']::before {
+  content: none;
+  animation: none;
+}

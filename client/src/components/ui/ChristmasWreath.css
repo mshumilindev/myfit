@@ -1,0 +1,165 @@
+/* Christmas Start wreath (SPO-393). Gym only: other apps (html.theme-*) keep the plain round button. */
+.xw-wreath {
+  display: none;
+}
+html[data-theme='christmas']:not(
+    .theme-apex,
+    .theme-learn,
+    .theme-roster,
+    .theme-nutrition,
+    .theme-coach
+  )
+  .tabbar-fab {
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  width: calc(88 * var(--sz-1));
+  height: calc(88 * var(--sz-1));
+  margin-left: calc(-44 * var(--sz-1));
+  top: calc(-30 * var(--sz-1));
+}
+html[data-theme='christmas']:not(
+    .theme-apex,
+    .theme-learn,
+    .theme-roster,
+    .theme-nutrition,
+    .theme-coach
+  )
+  .tabbar-fab
+  > :not(.xw-wreath) {
+  display: none;
+}
+html[data-theme='christmas']:not(
+    .theme-apex,
+    .theme-learn,
+    .theme-roster,
+    .theme-nutrition,
+    .theme-coach
+  )
+  .xw-wreath {
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.xw-wreath .xw-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform-origin: 50% 50%;
+  transition: transform 0.18s ease;
+}
+.xw-wreath .xw-bl {
+  fill: var(--color-accent-500);
+  fill-opacity: 0;
+}
+html[data-theme='christmas'] .tabbar-fab:active .xw-art {
+  transform: scale(0.92);
+}
+html[data-theme='christmas'] .tabbar-fab:disabled .xw-wreath {
+  opacity: 0.38;
+}
+/* The plus must read on the dark wreath centre: a light gold plus with a dark halo, drawn over the artwork's own. */
+.xw-plus path {
+  fill: none;
+  stroke-linecap: round;
+}
+.xw-plus-halo {
+  stroke: var(--c-040b08);
+  stroke-width: 9;
+  stroke-opacity: 0.85;
+}
+.xw-plus-core {
+  stroke: var(--c-ffe9a8);
+  stroke-width: 4.6;
+}
+.xw-sp {
+  fill: var(--c-ffe9a8);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+/* Attention (replaces the shared water-ring ripple, which does not fit a wreath): sparkles twinkle around the wreath
+   one after another and the berries glow (2.4 s loop). */
+html[data-theme='christmas']:not(
+    .theme-apex,
+    .theme-learn,
+    .theme-roster,
+    .theme-nutrition,
+    .theme-coach
+  )
+  .tabbar-fab.is-attention::before,
+html[data-theme='christmas']:not(
+    .theme-apex,
+    .theme-learn,
+    .theme-roster,
+    .theme-nutrition,
+    .theme-coach
+  )
+  .tabbar-fab.is-attention::after {
+  animation: none;
+  content: none;
+}
+html[data-theme='christmas'] .tabbar-fab.is-attention .xw-sp {
+  animation: xw-twinkle 2.6s ease-in-out infinite;
+}
+html[data-theme='christmas'] .tabbar-fab.is-attention .xw-sp1 {
+  animation-delay: 0.5s;
+}
+html[data-theme='christmas'] .tabbar-fab.is-attention .xw-sp2 {
+  animation-delay: 1s;
+}
+html[data-theme='christmas'] .tabbar-fab.is-attention .xw-sp3 {
+  animation-delay: 1.5s;
+}
+html[data-theme='christmas'] .tabbar-fab.is-attention .xw-sp4 {
+  animation-delay: 2s;
+}
+@keyframes xw-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.2) rotate(0deg);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+  60% {
+    opacity: 0;
+    transform: scale(0.3) rotate(90deg);
+  }
+}
+html[data-theme='christmas'] .tabbar-fab.is-attention .xw-bl {
+  animation: xw-glow 2.4s ease-in-out infinite;
+}
+html[data-theme='christmas'] .tabbar-fab.is-attention .xw-bl2 {
+  animation-delay: 0.8s;
+}
+html[data-theme='christmas'] .tabbar-fab.is-attention .xw-bl3 {
+  animation-delay: 1.6s;
+}
+@keyframes xw-glow {
+  0%,
+  100% {
+    fill-opacity: 0;
+  }
+  35% {
+    fill-opacity: 0.55;
+  }
+  60% {
+    fill-opacity: 0;
+  }
+}
+html[data-sleep='night'] .xw-bl,
+html[data-theme='christmas'][data-sleep='night'] .tabbar-fab.is-attention .xw-bl,
+html[data-theme='christmas'][data-sleep='night'] .tabbar-fab.is-attention .xw-sp {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='christmas'] .tabbar-fab.is-attention .xw-bl,
+  html[data-theme='christmas'] .tabbar-fab.is-attention .xw-sp {
+    animation: none;
+  }
+}

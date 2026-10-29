@@ -47,7 +47,7 @@ describe('holiday themes on the device (SPO-321)', () => {
     initTheme();
     expect(html().getAttribute('data-theme')).toBe('glass');
     expect(getHolidayTheme()).toBeNull();
-    at(2026, 12, 20); // Christmas has no theme in the registry
+    at(2026, 3, 15); // St Patrick's Day has no theme in the registry
     initTheme();
     expect(html().getAttribute('data-theme')).toBe('glass');
   });
@@ -114,5 +114,27 @@ describe('holiday themes on the device (SPO-321)', () => {
     at(2027, 10, 28);
     initTheme();
     expect(html().getAttribute('data-theme')).toBe('halloween');
+  });
+});
+
+describe('Christmas (SPO-393)', () => {
+  it('is on from 18 December through 1 January and back to the saved theme on 2 January', () => {
+    localStorage.clear();
+    at(2026, 12, 17);
+    initTheme();
+    expect(getHolidayTheme()).toBeNull();
+    for (const [m, d] of [
+      [12, 18],
+      [12, 25],
+      [1, 1],
+    ] as const) {
+      at(m === 1 ? 2027 : 2026, m, d);
+      initTheme();
+      expect(getHolidayTheme()).toBe('christmas');
+      expect(document.documentElement.getAttribute('data-theme')).toBe('christmas');
+    }
+    at(2027, 1, 2);
+    initTheme();
+    expect(getHolidayTheme()).toBeNull();
   });
 });

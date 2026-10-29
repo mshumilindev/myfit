@@ -35,6 +35,13 @@ export const THEMES: readonly ThemeDef[] = [
     pickable: false,
     holiday: 'halloween',
   },
+  {
+    id: 'christmas',
+    name: 'Christmas',
+    since: '2026-12-18',
+    pickable: false,
+    holiday: 'christmas',
+  },
   // theme:new inserts new themes above this line
 ];
 
@@ -338,16 +345,21 @@ function skipped(): string[] {
   }
 }
 
-/** The holiday theme that should be on today, if any (a holiday without a theme in the registry never comes on). */
-function holidayNow(now: Date = new Date()): { theme: string; window: HolidayWindow } | null {
+/** The holiday whose window is open on `now` (a holiday without a theme in the registry never counts), skipped or not. */
+function holidayWindow(now: Date = new Date()): { theme: string; window: HolidayWindow } | null {
   const have = new Map(
     THEMES.filter((t) => t.holiday !== undefined).map((t) => [t.holiday as HolidayId, t.id]),
   );
   if (have.size === 0) return null;
   const lang = typeof document === 'undefined' ? 'en' : document.documentElement.lang || 'en';
   const w = activeHoliday(dayOf(now), lang, (id) => have.has(id));
-  if (!w || skipped().includes(skipKey(w))) return null;
-  return { theme: have.get(w.id) as string, window: w };
+  return w ? { theme: have.get(w.id) as string, window: w } : null;
+}
+
+/** The holiday theme that should be on today, if any: the open window, unless the person chose their own theme in it. */
+function holidayNow(now: Date = new Date()): { theme: string; window: HolidayWindow } | null {
+  const w = holidayWindow(now);
+  return w && !skipped().includes(skipKey(w.window)) ? w : null;
 }
 
 /** The person chose their own theme during a holiday: leave it off until this holiday has passed. */
@@ -381,6 +393,31 @@ export function holidaySwitchPending(now: Date = new Date()): boolean {
   return (holidayNow(now)?.theme ?? null) !== holiday;
 }
 
+/**
+ * The holiday theme whose window is open today, worn or not (owner, 29.10: while the holiday lasts its theme stays on
+ * the Themes screen; if the person chose their own theme, the card offers it back). null outside a window.
+ */
+export function getHolidayWindowTheme(now: Date = new Date()): string | null {
+  return holidayWindow(now)?.theme ?? null;
+}
+
+/** Put the open window's holiday theme back on after the person had chosen their own (Apply on its Themes card). */
+export function wearHoliday(now: Date = new Date()): void {
+  if (previewing !== null) return;
+  const w = holidayWindow(now);
+  if (!w) return;
+  try {
+    const rest = skipped().filter((k) => k !== skipKey(w.window));
+    localStorage.setItem(SKIP_KEY, JSON.stringify(rest));
+  } catch {
+    /* storage unavailable — the choice lasts for this session */
+  }
+  if (holiday === w.theme) return;
+  holiday = w.theme;
+  swap(w.theme, true);
+  listeners.forEach((fn) => fn());
+}
+
 /** The holiday theme on screen right now, or null. */
 export function getHolidayTheme(): string | null {
   return holiday;
@@ -393,6 +430,17 @@ export function useHolidayTheme(): string | null {
       return () => listeners.delete(fn);
     },
     getHolidayTheme,
+    () => null,
+  );
+}
+
+export function useHolidayWindowTheme(): string | null {
+  return useSyncExternalStore(
+    (fn) => {
+      listeners.add(fn);
+      return () => listeners.delete(fn);
+    },
+    () => getHolidayWindowTheme(),
     () => null,
   );
 }
