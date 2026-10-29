@@ -8,3 +8,9 @@ html[data-theme='halloween'][data-glitch='in']::before {
   content: none;
   animation: none;
 }
+
+/* The Today start card (.es-hero) clips its photo and ring with a literal 18px radius while the card inside takes the
+   theme's 4px radius, so the ring was cut off at the corners; the wrapper takes the card's radius (SPO-393). */
+html[data-theme='halloween'] .es-hero {
+  border-radius: var(--radius-lg);
+}

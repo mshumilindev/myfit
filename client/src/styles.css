@@ -6487,6 +6487,11 @@ html[data-theme] .gym-card .head .n {
 .avatar-uploader-ring .avatar.initials {
   display: grid;
 }
+/* The face is the kit disc (.uiav, a flex box that centres the initials); the rule above makes it a block, which
+   throws the initials to the top-left corner (SPO-393), so the disc keeps its own display. */
+.avatar-uploader-ring .uiav {
+  display: flex;
+}
 /* With a photo, dissolve dark values into the page, not a nested ring fill. */
 .avatar-uploader-ring:has(img.avatar) {
   background: transparent;
