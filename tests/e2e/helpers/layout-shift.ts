@@ -256,6 +256,35 @@ export async function passProfileGate(page: Page): Promise<void> {
   await expect(page.locator('.today-page')).toBeVisible({ timeout: 1000 });
 }
 
+/**
+ * Repeats `act` until `done()` holds, answering the profile gate whenever it is on screen (SPO-405). The gate can come
+ * back after Today has been stable: it only appears once the first sync has resolved, and on a slow runner that is
+ * later than `passProfileGate`'s stability window. A one-off `passProfileGate` followed by a plain click or
+ * `toBeVisible` is therefore a race; this keeps answering the gate until the step has really happened. Nothing is
+ * loosened: the caller still asserts its own outcome after `done()`.
+ */
+export async function actThroughGate(
+  page: Page,
+  done: () => Promise<boolean>,
+  act: () => Promise<void> = async () => undefined,
+  timeoutMs = 60_000,
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await done().catch(() => false)) return;
+    const gate = page.locator('.body-gate input');
+    if (await gate.first().isVisible()) {
+      await gate.nth(0).fill('180');
+      await gate.nth(1).fill('80');
+      await page.locator('.body-gate button').last().click(); // locale-independent "Done, enter the app"
+    } else {
+      await act().catch(() => undefined); // not there yet (or the gate covered it again): look again
+    }
+    await page.waitForTimeout(150);
+  }
+  throw new Error(`actThroughGate: the step did not happen within ${timeoutMs} ms`);
+}
+
 export interface Geometry {
   /** Bottom of the week card to the top of the next visible block after it (the banner / status stack), px. */
   gap: number | null;

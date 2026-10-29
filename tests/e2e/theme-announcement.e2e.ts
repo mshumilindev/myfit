@@ -7,7 +7,13 @@
  * `npx playwright test tests/e2e/theme-announcement.e2e.ts --project=mobile-chromium`.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { arm, makeHarness, passProfileGate, type Stub } from './helpers/layout-shift';
+import {
+  actThroughGate,
+  arm,
+  makeHarness,
+  passProfileGate,
+  type Stub,
+} from './helpers/layout-shift';
 
 const harness = makeHarness(4177);
 const BASE = harness.base;
@@ -24,6 +30,23 @@ const CONSENT_VERIFIED = JSON.stringify({
 });
 const theme = (page: Page) => page.evaluate(() => document.documentElement.dataset.theme);
 
+/** The invite is on Today (the profile gate may still come back first, SPO-405): press Preview until the dock is up. */
+async function openPreview(page: Page) {
+  const dock = page.getByRole('region', { name: /theme preview/i });
+  await actThroughGate(
+    page,
+    () => dock.isVisible(),
+    () =>
+      page
+        .frameLocator('.thinv iframe')
+        .getByRole('button', { name: 'Preview' })
+        .click({ timeout: 2_000 }),
+    75_000,
+  );
+  await expect(dock).toBeVisible();
+  return dock;
+}
+
 async function openToday(page: Page) {
   const stub: Stub = { delayMs: 0, assignment: true };
   await arm(page, stub, BASE, 'en');
@@ -38,13 +61,10 @@ async function openToday(page: Page) {
 test('invite → Preview → Keep current: the old look is back and nothing is saved', async ({
   page,
 }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(100_000);
   await openToday(page);
   const savedBefore = await theme(page);
-  await expect(page.locator('.thinv')).toBeVisible({ timeout: 30_000 });
-  await page.frameLocator('.thinv iframe').getByRole('button', { name: 'Preview' }).click();
-  const dock = page.getByRole('region', { name: /theme preview/i });
-  await expect(dock).toBeVisible();
+  const dock = await openPreview(page);
   expect(await theme(page)).not.toBe(savedBefore);
   await dock.getByRole('button', { name: 'Keep current' }).click();
   await expect(dock).toHaveCount(0);
@@ -54,13 +74,10 @@ test('invite → Preview → Keep current: the old look is back and nothing is s
 });
 
 test('Esc on the dock is Keep current', async ({ page }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(100_000);
   await openToday(page);
   const savedBefore = await theme(page);
-  await expect(page.locator('.thinv')).toBeVisible({ timeout: 30_000 });
-  await page.frameLocator('.thinv iframe').getByRole('button', { name: 'Preview' }).click();
-  const dock = page.getByRole('region', { name: /theme preview/i });
-  await expect(dock).toBeVisible();
+  const dock = await openPreview(page);
   await page.keyboard.press('Escape');
   await expect(dock).toHaveCount(0);
   expect(await theme(page)).toBe(savedBefore);
@@ -68,11 +85,9 @@ test('Esc on the dock is Keep current', async ({ page }) => {
 });
 
 test('Use sticks on the device, also offline, and survives a reload', async ({ page, context }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(100_000);
   await openToday(page);
-  await expect(page.locator('.thinv')).toBeVisible({ timeout: 30_000 });
-  await page.frameLocator('.thinv iframe').getByRole('button', { name: 'Preview' }).click();
-  const dock = page.getByRole('region', { name: /theme preview/i });
+  const dock = await openPreview(page);
   const previewed = await theme(page);
   await context.setOffline(true);
   await dock.getByRole('button', { name: /^Use / }).click();
