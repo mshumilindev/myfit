@@ -1,0 +1,29 @@
+# Гео-блок на краю (SPO-184 / SPO-220 / SPO-221)
+
+Cloudflare Worker перед `myspotter.fit`. Безкоштовний план. Країна береться лише з `request.cf` (Cloudflare визначає її на своєму краю за IP з'єднання; клієнт її підробити не може, заголовок `CF-IPCountry` від клієнта не читається). IP не читається, нічого не логується й не зберігається.
+
+Рішення й причини: `docs/research/SPO-184-geo-block-layer.md`. Окуповані території: `docs/research/SPO-221-occupied-areas-spike.md`.
+
+## Що робить
+
+- Країни зі списку `BLOCKED_COUNTRIES` (за замовчуванням `RU,BY,KP,IR`) отримують сторінку 451 «Сервіс недоступний у вашому регіоні» (5 локалей за `Accept-Language`, англійська за замовчуванням). Без редиректів, без скриптів, `Cache-Control: no-store`, `noindex`. API-запити (`Accept: application/json`) отримують `{"error":"region-blocked"}` зі статусом 451.
+- Невідоме розташування (немає `cf`, `XX`, `T1`) пропускається (fail-open): це комплаєнс-гейт, не межа безпеки.
+- Пусте або зіпсоване значення списку повертає список за замовчуванням, а не вимикає блок.
+- Необовʼязково: `OCCUPIED_GEOJSON` (Polygon / MultiPolygon / Feature / FeatureCollection) блокує за координатами `request.cf.latitude/longitude`. Дані меж у репо не лежать (джерело й ліцензія: рішення власника).
+
+## Активація (потрібні ваші акаунти; до цього нічого не діє)
+
+1. Акаунт Cloudflare (Free), додати зону `myspotter.fit`; у Porkbun змінити NS на ті, що покаже Cloudflare.
+2. У Cloudflare DNS відтворити записи, які Firebase Hosting показує для домену. **Спочатку лише DNS only (сіра хмара)**: так сертифікат Hosting і верифікація домену не ламаються (зафіксовані скарги на верифікацію за проксі, офіційного рішення немає).
+3. Переконатись, що `https://myspotter.fit` працює, тоді ввімкнути проксі (помаранчева хмара), режим SSL/TLS **Full** (не Flexible: є звіт про цикл редиректів).
+4. `cd edge/geo-block && npx wrangler login && npx wrangler deploy`, потім розкоментувати `routes` у `wrangler.toml` і задеплоїти знову.
+5. Перевірка: тимчасово поставити `BLOCKED_COUNTRIES = "PL"` (країна, з якої ви тестуєте), відкрити сайт: має бути сторінка 451; повернути `RU,BY,KP,IR`.
+6. Через ~2 місяці (до першого продовження сертифіката) перевірити, що Firebase не зняв верифікацію домену.
+7. **У той самий день:** додати Cloudflare в `docs/compliance/processors.md`, у Privacy Policy (підняти версію, як у SPO-391/392) і в реєстр даних; увімкнути сповіщення Cloudflare про сплеск заблокованих запитів (Security Events / Worker metrics).
+
+## Чого це не закриває (чесно)
+
+- Прямі адреси `*.web.app`, `*.firebaseapp.com`, `cloudfunctions.net`, `run.app`, а також `firestore.googleapis.com`, `identitytoolkit.googleapis.com` і Storage, які викликає клієнтський SDK. Hosting не дозволяє закрити «чорний хід», а Cloud Armor з балансувальником коштує ~$24+/міс (за опублікованими тарифами; не підтверджено мінімум).
+- Користувачі, у кого застосунок уже в кеші Service Worker.
+- VPN і невизначені IP.
+  Закриття: окремі задачі після активації (функції через домен, Auth blocking `beforeSignIn`).

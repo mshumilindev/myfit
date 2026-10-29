@@ -1,0 +1,15 @@
+# Cloudflare Worker for the country block (SPO-184 / SPO-220). Deploy: `npx wrangler deploy` from this folder.
+# Not active until myspotter.fit is proxied through Cloudflare and the routes below are enabled; see README.md.
+name = "spotter-geo-block"
+main = "src/worker.ts"
+compatibility_date = "2026-10-01"
+
+# Uncomment once the zone is proxied (orange cloud). One pattern per hostname that serves the app.
+# routes = [
+#   { pattern = "myspotter.fit/*", zone_name = "myspotter.fit" },
+#   { pattern = "www.myspotter.fit/*", zone_name = "myspotter.fit" },
+# ]
+
+[vars]
+BLOCKED_COUNTRIES = "RU,BY,KP,IR"
+# OCCUPIED_GEOJSON = ""   # optional; see README.md and docs/research/SPO-221-occupied-areas-spike.md
