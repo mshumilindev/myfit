@@ -44,10 +44,55 @@ export interface PwaUpdateDeps {
   doc: Pick<Document, 'addEventListener' | 'visibilityState'>;
   onUpdateReady: () => void;
   now: () => number;
+  /** First-ever claim of the page by the worker: the place to save what the page had already loaded without it. */
+  onFirstClaim?: () => void;
+}
+
+/** Hashed build files the page loaded itself (not through a worker), read from the resource timeline. */
+export function loadedAssetUrls(
+  entries: ReadonlyArray<Pick<PerformanceEntry, 'name'>>,
+  origin: string,
+): string[] {
+  const urls = new Set<string>();
+  for (const e of entries) {
+    let u: URL;
+    try {
+      u = new URL(e.name, origin);
+    } catch {
+      continue;
+    }
+    if (u.origin === origin && /^\/assets\/.+\.(js|css|woff2)$/.test(u.pathname))
+      urls.add(u.pathname);
+  }
+  return [...urls];
+}
+
+/**
+ * A page that was loaded before the worker took control fetched its lazy chunks without the worker, so the worker's
+ * runtime cache never saw them and the first offline visit to those screens failed (SPO-380). Once the worker controls
+ * the page, ask for the same files again: the browser's HTTP cache answers, the worker stores them. Errors are ignored:
+ * this is a best-effort warm-up and never blocks anything.
+ */
+export function warmLoadedAssets(
+  entries: ReadonlyArray<Pick<PerformanceEntry, 'name'>> = typeof performance === 'undefined'
+    ? []
+    : performance.getEntriesByType('resource'),
+  origin: string = typeof location === 'undefined' ? '' : location.origin,
+  fetchFn: typeof fetch = (...a) => fetch(...a),
+): Promise<void> {
+  if (!origin) return Promise.resolve();
+  return Promise.all(
+    loadedAssetUrls(entries, origin).map((url) =>
+      fetchFn(url).then(
+        () => undefined,
+        () => undefined,
+      ),
+    ),
+  ).then(() => undefined);
 }
 
 export async function startAutoUpdate(deps: PwaUpdateDeps): Promise<void> {
-  const { container, doc, onUpdateReady, now } = deps;
+  const { container, doc, onUpdateReady, now, onFirstClaim } = deps;
 
   // A first-ever install claims the page too. Only a *replacement* worker means
   // the page is running an outdated bundle and should offer a reload.
@@ -56,6 +101,7 @@ export async function startAutoUpdate(deps: PwaUpdateDeps): Promise<void> {
   container.addEventListener('controllerchange', () => {
     if (!hadController) {
       hadController = true;
+      onFirstClaim?.();
       return;
     }
     if (signalled) return;

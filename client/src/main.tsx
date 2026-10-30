@@ -77,7 +77,7 @@ import './glass-glitch.css';
 import './reduced-transparency.css';
 import { App } from './App';
 import { getLocale } from './i18n';
-import { startAutoUpdate, startBuildWatch, markUpdateReady } from './pwaUpdate';
+import { startAutoUpdate, startBuildWatch, markUpdateReady, warmLoadedAssets } from './pwaUpdate';
 import { lockShellHeight } from './viewportFit';
 import { installHorizontalScrollGuard } from './horizontalScrollGuard';
 import { SyncStatusHost } from './components/SyncStatusHost';
@@ -112,6 +112,7 @@ if ('serviceWorker' in navigator) {
     doc: document,
     onUpdateReady: markUpdateReady,
     now: () => Date.now(),
+    onFirstClaim: () => void warmLoadedAssets(),
   });
 }
 

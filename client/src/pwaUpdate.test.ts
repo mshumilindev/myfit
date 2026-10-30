@@ -2,6 +2,8 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import {
   FOREGROUND_CHECK_MS,
   checkBuild,
+  loadedAssetUrls,
+  warmLoadedAssets,
   reloadToLatest,
   settledBuildCheck,
   startAutoUpdate,
@@ -84,6 +86,21 @@ describe('startAutoUpdate', () => {
     // The worker that replaces it must still raise the signal.
     h.fireControllerChange();
     expect(h.onUpdateReady).toHaveBeenCalledTimes(1);
+  });
+
+  it('runs the first-claim warm-up once, and only for the first worker ever', async () => {
+    const first = harness({ controlled: false });
+    const onFirstClaim = vi.fn();
+    await startAutoUpdate({ ...first.deps, onFirstClaim });
+    first.fireControllerChange();
+    first.fireControllerChange();
+    expect(onFirstClaim).toHaveBeenCalledTimes(1);
+
+    const replaced = harness({ controlled: true });
+    const none = vi.fn();
+    await startAutoUpdate({ ...replaced.deps, onFirstClaim: none });
+    replaced.fireControllerChange();
+    expect(none).not.toHaveBeenCalled();
   });
 
   it('signals once even if control changes repeatedly', async () => {
@@ -221,5 +238,49 @@ describe('settledBuildCheck', () => {
     run();
     vi.advanceTimersByTime(100);
     expect(check).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('warmLoadedAssets (SPO-380)', () => {
+  const origin = 'https://example.test';
+  const entries = [
+    { name: 'https://example.test/assets/TodayScreen-abc.js' },
+    { name: 'https://example.test/assets/TodayScreen-abc.js' },
+    { name: 'https://example.test/assets/coach-def.css?x=1' },
+    { name: 'https://example.test/assets/inter-1.woff2' },
+    { name: 'https://example.test/assets/pic.webp' },
+    { name: 'https://other.test/assets/evil.js' },
+    { name: 'https://example.test/api/thing.js' },
+    { name: 'not a url' },
+  ];
+
+  it('lists each hashed js/css/font of this origin once', () => {
+    expect(loadedAssetUrls(entries, origin)).toEqual([
+      '/assets/TodayScreen-abc.js',
+      '/assets/coach-def.css',
+      '/assets/inter-1.woff2',
+    ]);
+  });
+
+  it('asks for every one of them again and survives a failing request', async () => {
+    const fetchFn = vi.fn((url: RequestInfo | URL) =>
+      String(url).endsWith('.css')
+        ? Promise.reject(new Error('offline'))
+        : Promise.resolve(new Response('')),
+    );
+    await expect(
+      warmLoadedAssets(entries, origin, fetchFn as unknown as typeof fetch),
+    ).resolves.toBeUndefined();
+    expect(fetchFn.mock.calls.map((c) => c[0])).toEqual([
+      '/assets/TodayScreen-abc.js',
+      '/assets/coach-def.css',
+      '/assets/inter-1.woff2',
+    ]);
+  });
+
+  it('does nothing without an origin', async () => {
+    const fetchFn = vi.fn();
+    await warmLoadedAssets(entries, '', fetchFn as unknown as typeof fetch);
+    expect(fetchFn).not.toHaveBeenCalled();
   });
 });
