@@ -13,6 +13,7 @@ export type SealedMetaName =
   | 'mastery'
   | 'coach'
   | 'exercisePrefs'
+  | 'sleepPrefs'
   | 'widgetData'
   | 'challenges'
   | 'atlasChatState';

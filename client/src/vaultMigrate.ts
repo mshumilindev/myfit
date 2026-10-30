@@ -35,6 +35,7 @@ export const MIGRATION_ORDER: SealedCollection[] = [
   'mastery',
   'coach',
   'exercisePrefs',
+  'sleepPrefs',
   'widgetData',
   'challenges',
   'atlasChatState',

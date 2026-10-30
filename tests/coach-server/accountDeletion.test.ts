@@ -113,6 +113,7 @@ const USER_SUBPATHS = [
   'meta/mastery',
   'meta/coach',
   'meta/exercisePrefs',
+  'meta/sleepPrefs',
   'meta/widgetData',
   'meta/challenges',
   'meta/atlasChatState',

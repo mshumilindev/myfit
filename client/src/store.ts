@@ -4621,12 +4621,16 @@ export function backfillSleepKind(): void {
 export function setSleepSchedule(schedule: SleepSchedule): void {
   setState({ sleepSchedule: schedule });
   syncSleepAutoQueue();
+  accountDocs.onSleepPrefsEdit();
 }
 
 /** Merge sleep settings. */
 export function setSleepSettings(patch: Partial<SleepSettings>): void {
   setState({ sleepSettings: { ...state.sleepSettings, ...patch } });
   syncSleepAutoQueue();
+  // Only the person's own choices go to the account; the nightly bookkeeping fields stay on the device (SPO-397).
+  if ('autoDim' in patch || 'autoLog' in patch || 'goalMin' in patch)
+    accountDocs.onSleepPrefsEdit();
 }
 /** Whether the Sides control makes sense for a lift — dumbbell / cable /
  *  kettlebell, single-limb machines, and one-arm/one-leg moves. Hidden for
@@ -5087,6 +5091,17 @@ const accountDocs = createAccountDocs({
   onWriteError,
   readExercisePrefs: () => state,
   patchExercisePrefs: (patch) => setState(patch),
+  readSleepPrefs: () => ({
+    schedule: state.sleepSchedule,
+    settings: state.sleepSettings,
+  }),
+  patchSleepPrefs: (prefs) => {
+    setState({
+      sleepSchedule: prefs.schedule,
+      sleepSettings: { ...state.sleepSettings, ...prefs.settings },
+    });
+    syncSleepAutoQueue();
+  },
 });
 
 export function startSyncLoop(): () => void {

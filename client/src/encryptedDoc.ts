@@ -50,6 +50,9 @@ export const OPEN_FIELDS = {
   // users/{uid}/meta/exercisePrefs — the weight unit and the per-exercise unit / load type / sides / rest pins and rest-timer
   // switches (SPO-385): no server reads, all inside, only the stamp open (last-write-wins on the client).
   exercisePrefs: ['updatedAt'],
+  // users/{uid}/meta/sleepPrefs — the sleep schedule and the auto-dim / auto-log / goal switches (SPO-397): no server reads
+  // (the server reads only the derived `sleepSchedules/{uid}` queue), all inside, only the stamp open.
+  sleepPrefs: ['updatedAt'],
   // users/{uid}/meta/widgetData — the left/right test results, the last 1RM-calculator input, PR targets and the lift last
   // picked in Today widgets (SPO-388): no server reads, all inside, only the stamp open.
   widgetData: ['updatedAt'],

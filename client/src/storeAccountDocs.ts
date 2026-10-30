@@ -29,10 +29,13 @@ import {
   reconcileExercisePrefs,
   type ExercisePrefs,
 } from './exercisePrefsSync';
+import { normalizeSleepPrefs, reconcileSleepPrefs, type SleepPrefs } from './sleepPrefsSync';
 import { watchSealedMeta, type SealedMetaName } from './storeMeta';
 
 // When the exercise settings were last changed on this device: the stamp for last-write-wins with the account.
 const EX_PREFS_AT_KEY = 'spotter.exercisePrefsAt';
+// Same for the sleep schedule and switches (SPO-397).
+const SLEEP_PREFS_AT_KEY = 'spotter.sleepPrefsAt';
 
 export interface AccountDocDeps {
   writeMetaDoc(name: SealedMetaName, value: object, stamp?: number): void;
@@ -42,19 +45,23 @@ export interface AccountDocDeps {
   readExercisePrefs(): unknown;
   /** Change them on the device (state + cache + re-render); not a user edit, nothing is written. */
   patchExercisePrefs(patch: Partial<ExercisePrefs>): void;
+  /** The sleep schedule and switches as the store holds them now. */
+  readSleepPrefs(): unknown;
+  /** Change them on the device (state + cache + auto-start queue); not a user edit, nothing is written. */
+  patchSleepPrefs(prefs: SleepPrefs): void;
 }
 
-function readStamp(): number {
+function readStamp(key: string = EX_PREFS_AT_KEY): number {
   try {
-    const n = Number(JSON.parse(localStorage.getItem(EX_PREFS_AT_KEY) ?? '0'));
+    const n = Number(JSON.parse(localStorage.getItem(key) ?? '0'));
     return Number.isFinite(n) && n > 0 ? n : 0;
   } catch {
     return 0;
   }
 }
-function saveStamp(n: number): void {
+function saveStamp(n: number, key: string = EX_PREFS_AT_KEY): void {
   try {
-    localStorage.setItem(EX_PREFS_AT_KEY, JSON.stringify(n));
+    localStorage.setItem(key, JSON.stringify(n));
   } catch {
     /* private mode: kept for this session */
   }
@@ -62,6 +69,8 @@ function saveStamp(n: number): void {
 
 export function createAccountDocs(d: AccountDocDeps) {
   let exAt = readStamp();
+  let sleepAt = readStamp(SLEEP_PREFS_AT_KEY);
+  const currentSleep = (): SleepPrefs => normalizeSleepPrefs(d.readSleepPrefs());
   const current = (): ExercisePrefs => normalizeExercisePrefs(d.readExercisePrefs());
 
   function writeExercisePrefsDoc(): void {
@@ -77,6 +86,20 @@ export function createAccountDocs(d: AccountDocDeps) {
     saveStamp(exAt);
     d.patchExercisePrefs(patch);
     writeExercisePrefsDoc();
+  }
+
+  function writeSleepPrefsDoc(): void {
+    if (!sleepAt) {
+      sleepAt = Date.now();
+      saveStamp(sleepAt, SLEEP_PREFS_AT_KEY);
+    }
+    d.writeMetaDoc('sleepPrefs', currentSleep(), sleepAt);
+  }
+  /** A change the person made to the sleep schedule or switches: stamp it and send it to the account (state is already set). */
+  function onSleepPrefsEdit(): void {
+    sleepAt = Date.now();
+    saveStamp(sleepAt, SLEEP_PREFS_AT_KEY);
+    writeSleepPrefsDoc();
   }
 
   function twValue(id: string): unknown {
@@ -156,6 +179,27 @@ export function createAccountDocs(d: AccountDocDeps) {
       ),
       watchSealedMeta<Record<string, unknown>>(
         uid,
+        'sleepPrefs',
+        (items, info) => {
+          if (!items.length && info.locked) return;
+          const data = items[0];
+          const r = reconcileSleepPrefs(
+            { at: sleepAt, prefs: currentSleep() },
+            data
+              ? { at: typeof data.updatedAt === 'number' ? data.updatedAt : 0, raw: data }
+              : null,
+          );
+          if (r.apply) {
+            sleepAt = r.apply.at;
+            saveStamp(sleepAt, SLEEP_PREFS_AT_KEY);
+            d.patchSleepPrefs(r.apply.prefs);
+          }
+          if (r.push) writeSleepPrefsDoc();
+        },
+        d.onWriteError,
+      ),
+      watchSealedMeta<Record<string, unknown>>(
+        uid,
         'widgetData',
         (items, info) => {
           if (!items.length && info.locked) return;
@@ -201,8 +245,10 @@ export function createAccountDocs(d: AccountDocDeps) {
   /** Sign-out / device wipe: forget these values and their stamps. */
   function reset(): void {
     exAt = 0;
+    sleepAt = 0;
     try {
       localStorage.removeItem(EX_PREFS_AT_KEY);
+      localStorage.removeItem(SLEEP_PREFS_AT_KEY);
       localStorage.removeItem(TW_AT_KEY);
       for (const id of [...TW_SEALED_IDS, ...Object.keys(TW_PREFS_FIELD)])
         localStorage.removeItem(`spotter.tw.${id}`);
@@ -212,5 +258,5 @@ export function createAccountDocs(d: AccountDocDeps) {
     resetChallenges();
   }
 
-  return { setExercisePrefs, syncTwPrefsFromDoc, watch, reset };
+  return { setExercisePrefs, onSleepPrefsEdit, syncTwPrefsFromDoc, watch, reset };
 }

@@ -51,6 +51,14 @@ export const LOCAL_KEYS_2: readonly LocalKeyEntry[] = [
     note: 'time of the last local change to the exercise settings (stamp for last-write-wins)',
   },
   {
+    key: 'spotter.sleepPrefsAt',
+    scope: 'account',
+    class: 'synced',
+    wipe: 'signout',
+    syncedTo: 'users/{uid}/meta/sleepPrefs',
+    note: 'time of the last local change to the sleep schedule and switches (stamp for last-write-wins)',
+  },
+  {
     prefix: 'spotter.tw.',
     scope: 'account',
     class: 'synced',
