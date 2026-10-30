@@ -30,6 +30,7 @@ import {
   type ExercisePrefs,
 } from './exercisePrefsSync';
 import { normalizeSleepPrefs, reconcileSleepPrefs, type SleepPrefs } from './sleepPrefsSync';
+import type { SleepSchedule, SleepSettings } from './types';
 import { watchSealedMeta, type SealedMetaName } from './storeMeta';
 
 // When the exercise settings were last changed on this device: the stamp for last-write-wins with the account.
@@ -43,12 +44,14 @@ export interface AccountDocDeps {
   onWriteError(e: unknown): void;
   /** The exercise settings as the store holds them now. */
   readExercisePrefs(): unknown;
-  /** Change them on the device (state + cache + re-render); not a user edit, nothing is written. */
-  patchExercisePrefs(patch: Partial<ExercisePrefs>): void;
+  /** Change the exercise or sleep settings on the device (state + cache + re-render); not a user edit, nothing is written. */
+  patchState(
+    patch: Partial<ExercisePrefs> | { sleepSchedule: SleepSchedule; sleepSettings: SleepSettings },
+  ): void;
   /** The sleep schedule and switches as the store holds them now. */
-  readSleepPrefs(): unknown;
-  /** Change them on the device (state + cache + auto-start queue); not a user edit, nothing is written. */
-  patchSleepPrefs(prefs: SleepPrefs): void;
+  readSleepPrefs(): { schedule: SleepSchedule; settings: SleepSettings };
+  /** Rebuild the server's auto-start queue after the sleep settings changed. */
+  syncSleepQueue(): void;
 }
 
 function readStamp(key: string = EX_PREFS_AT_KEY): number {
@@ -84,7 +87,7 @@ export function createAccountDocs(d: AccountDocDeps) {
   function setExercisePrefs(patch: Partial<ExercisePrefs>): void {
     exAt = Date.now();
     saveStamp(exAt);
-    d.patchExercisePrefs(patch);
+    d.patchState(patch);
     writeExercisePrefsDoc();
   }
 
@@ -96,7 +99,9 @@ export function createAccountDocs(d: AccountDocDeps) {
     d.writeMetaDoc('sleepPrefs', currentSleep(), sleepAt);
   }
   /** A change the person made to the sleep schedule or switches: stamp it and send it to the account (state is already set). */
-  function onSleepPrefsEdit(): void {
+  function onSleepPrefsEdit(patch?: Partial<SleepSettings>): void {
+    // Only the person's own choices go to the account; the nightly bookkeeping fields stay on the device (SPO-397).
+    if (patch && !('autoDim' in patch || 'autoLog' in patch || 'goalMin' in patch)) return;
     sleepAt = Date.now();
     saveStamp(sleepAt, SLEEP_PREFS_AT_KEY);
     writeSleepPrefsDoc();
@@ -171,7 +176,7 @@ export function createAccountDocs(d: AccountDocDeps) {
           if (r.apply) {
             exAt = r.apply.at;
             saveStamp(exAt);
-            d.patchExercisePrefs(r.apply.prefs);
+            d.patchState(r.apply.prefs);
           }
           if (r.push) writeExercisePrefsDoc();
         },
@@ -192,7 +197,11 @@ export function createAccountDocs(d: AccountDocDeps) {
           if (r.apply) {
             sleepAt = r.apply.at;
             saveStamp(sleepAt, SLEEP_PREFS_AT_KEY);
-            d.patchSleepPrefs(r.apply.prefs);
+            d.patchState({
+              sleepSchedule: r.apply.prefs.schedule,
+              sleepSettings: { ...d.readSleepPrefs().settings, ...r.apply.prefs.settings },
+            });
+            d.syncSleepQueue();
           }
           if (r.push) writeSleepPrefsDoc();
         },
