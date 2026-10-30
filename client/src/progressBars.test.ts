@@ -124,4 +124,24 @@ describe('progressBars', () => {
     expect(z.label).toBe('October 2026');
     expect(z.valueText).toBe('No workouts');
   });
+
+  it('labels read in every locale (week range, month, empty week)', () => {
+    const a = new Date(2026, 9, 13).getTime();
+    const b = new Date(2026, 9, 20).getTime();
+    for (const loc of ['en', 'uk', 'pl', 'lt', 'et'] as const) {
+      const [w, m] = volumeBars(
+        [
+          { a, b, monthly: false, kg: 1500 },
+          { a, b, monthly: true, kg: 0 },
+        ],
+        [],
+        'x',
+        loc,
+      );
+      expect(w.label).toMatch(/13.*19/);
+      expect(w.label).toContain(' – ');
+      expect(m.label).toContain('2026');
+      expect(w.valueText).toBe('1.5 t');
+    }
+  });
 });
