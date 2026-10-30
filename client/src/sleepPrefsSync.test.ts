@@ -81,6 +81,16 @@ describe('reconcileSleepPrefs', () => {
     expect(r.apply).toEqual({ at: 500, prefs: custom });
     expect(r.push).toBeUndefined();
   });
+  it('first contact: an empty or junk account document does not wipe values this device set', () => {
+    for (const raw of [{}, { settings: { goalMin: 'x' } }, 'junk', EMPTY_SLEEP_PREFS]) {
+      expect(reconcileSleepPrefs({ at: 0, prefs: custom }, { at: 1, raw })).toEqual({ push: true });
+    }
+    // a device that did edit (has a stamp) still follows a newer account value, even a default one
+    expect(
+      reconcileSleepPrefs({ at: 100, prefs: custom }, { at: 200, raw: EMPTY_SLEEP_PREFS }).apply
+        ?.prefs,
+    ).toEqual(EMPTY_SLEEP_PREFS);
+  });
   it('a newer local edit that has not echoed back wins and is re-sent if the account still differs', () => {
     expect(
       reconcileSleepPrefs({ at: 900, prefs: custom }, { at: 500, raw: EMPTY_SLEEP_PREFS }),

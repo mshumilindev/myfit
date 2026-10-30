@@ -90,6 +90,10 @@ export function reconcileSleepPrefs(
   if (!remote) return hasCustomSleepPrefs(local.prefs) ? { push: true } : {};
   const theirs = normalizeSleepPrefs(remote.raw);
   if (local.at > remote.at) return canon(theirs) === canon(local.prefs) ? {} : { push: true };
+  // First contact (this device never edited or synced these) with values set, while the account holds only defaults or
+  // junk: keep the device's values and send them; an empty document must not wipe a schedule nobody ever uploaded.
+  if (local.at === 0 && hasCustomSleepPrefs(local.prefs) && !hasCustomSleepPrefs(theirs))
+    return { push: true };
   return { apply: { at: remote.at, prefs: theirs } };
 }
 
