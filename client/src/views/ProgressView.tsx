@@ -5,6 +5,15 @@ import { Chip } from '../components/ui/Chip';
 import { Card } from '../components/ui/Card';
 import { Segmented } from '../components/ui/Segmented';
 import { Tag } from '../components/ui/Tag';
+import { BarChart } from '../components/ui/BarChart';
+import {
+  lastWeekStarts,
+  periodBuckets,
+  periodTones,
+  volumeBars,
+  weekBuckets,
+  WEEK_TONES,
+} from '../progressBars';
 import { useEffect, useMemo, useState } from 'react';
 import {
   estimatedOneRepMaxSet,
@@ -149,16 +158,12 @@ export function ProgressView({
     range.key === 'week' ? 7 : Math.max(7, Math.round((win.end - win.start) / DAY_MS));
   const volEnd = Math.min(win.end, nowTs);
   const volFinished = finished.filter((w) => w.startedAt < win.end);
-  const weeks: number[] = [];
-  for (let i = 9; i >= 0; i--) {
-    const start = thisWeek - i * WEEK_MS;
-    weeks.push(
-      finished
-        .filter((w) => weekStart(w.startedAt) === start)
-        .reduce((v, w) => v + workoutVolumeKg(w), 0),
-    );
-  }
-  const maxWeek = Math.max(...weeks, 1);
+  const weekStarts = lastWeekStarts(thisWeek, 10, weekStart);
+  const weeks = weekStarts.map((start) =>
+    finished
+      .filter((w) => weekStart(w.startedAt) === start)
+      .reduce((v, w) => v + workoutVolumeKg(w), 0),
+  );
   const periodVol = (a: number, b: number) =>
     finished
       .filter((w) => w.startedAt >= a && w.startedAt < b)
@@ -172,30 +177,17 @@ export function ProgressView({
         : periodVol(win.start - (win.end - win.start), win.start);
   // Bars across the selected period (weekly, or monthly past ~3 months); the
   // default week keeps its 10-week context.
-  const rangeBars = range.key === 'week' ? weeks : periodBars(finished, win);
-  const rangeBarColors =
+  const rangeBuckets =
     range.key === 'week'
-      ? null
-      : rangeBars.map((_, i) =>
-          i === rangeBars.length - 1
-            ? 'var(--color-accent)'
-            : i >= rangeBars.length - 4
-              ? 'var(--color-accent-700)'
-              : 'var(--color-neutral-800)',
-        );
+      ? weekBuckets(weekStarts, weeks, weekStart)
+      : periodBuckets(finished, win, weekStart);
+  const rangeChart = volumeBars(
+    rangeBuckets,
+    range.key === 'week' ? WEEK_TONES : periodTones(rangeBuckets.length),
+    t.weekNoWorkouts,
+    locale,
+  );
   const deltaPct = prev > 0 ? Math.round(((cur - prev) / prev) * 100) : null;
-  const barColors = [
-    'var(--color-neutral-800)',
-    'var(--color-neutral-800)',
-    'var(--color-neutral-800)',
-    'var(--color-neutral-800)',
-    'var(--color-neutral-800)',
-    'var(--color-accent-800)',
-    'var(--color-accent-700)',
-    'var(--color-accent-700)',
-    'var(--color-accent-600)',
-    'var(--color-accent)',
-  ];
 
   // Exercise stats: records + 1RM series for the two most frequent lifts.
   const byName = new Map<
@@ -551,7 +543,15 @@ export function ProgressView({
             <div className="progress-locked-layout">
               <section className="progress-weekly-panel">
                 <ProgressKpi cur={cur} deltaPct={deltaPct} label={t.volumeThisWeek} />
-                <Bars weeks={weeks} maxWeek={maxWeek} colors={barColors} />
+                <BarChart
+                  bars={volumeBars(
+                    weekBuckets(weekStarts, weeks, weekStart),
+                    WEEK_TONES,
+                    t.weekNoWorkouts,
+                    locale,
+                  )}
+                  label={t.volumeThisWeek}
+                />
               </section>
               <div className="progress-locked-empty">
                 <EmptyState
@@ -591,10 +591,9 @@ export function ProgressView({
               label={range.key === 'week' ? t.volumeThisWeek : rangeLabel}
             />
             {seg === 'total' && (
-              <Bars
-                weeks={rangeBars}
-                maxWeek={Math.max(...rangeBars, 1)}
-                colors={rangeBarColors ?? barColors}
+              <BarChart
+                bars={rangeChart}
+                label={range.key === 'week' ? t.volumeThisWeek : rangeLabel}
               />
             )}
           </Card>
@@ -1030,31 +1029,6 @@ function rangeWindow(
   }
 }
 
-/** Volume per bucket across a period: weeks up to ~3 months, months beyond. */
-function periodBars(finished: Workout[], win: { start: number; end: number }): number[] {
-  const span = win.end - win.start;
-  const monthly = span > 100 * DAY_MS;
-  const buckets: { a: number; b: number }[] = [];
-  if (monthly) {
-    const d = new Date(win.start);
-    d.setDate(1);
-    d.setHours(0, 0, 0, 0);
-    while (d.getTime() < win.end) {
-      const a = d.getTime();
-      d.setMonth(d.getMonth() + 1);
-      buckets.push({ a, b: d.getTime() });
-    }
-  } else {
-    for (let a = weekStart(win.start); a < win.end; a += WEEK_MS)
-      buckets.push({ a, b: a + WEEK_MS });
-  }
-  return buckets.map(({ a, b }) =>
-    finished
-      .filter((w) => w.startedAt >= Math.max(a, win.start) && w.startedAt < Math.min(b, win.end))
-      .reduce((v, w) => v + workoutVolumeKg(w), 0),
-  );
-}
-
 function rangeName(k: ProgRangeKey, t: T): string {
   return k === 'week'
     ? t.volRange7
@@ -1168,23 +1142,6 @@ function ProgressKpi({
           </Tag>
         )}
       </div>
-    </div>
-  );
-}
-
-function Bars({ weeks, maxWeek, colors }: { weeks: number[]; maxWeek: number; colors: string[] }) {
-  return (
-    <div className="bars">
-      {weeks.map((v, i) => (
-        <div
-          key={i}
-          className="bar"
-          style={{
-            height: `${Math.max((v / maxWeek) * 100, 4)}%`,
-            background: colors[i],
-          }}
-        />
-      ))}
     </div>
   );
 }

@@ -3182,7 +3182,7 @@ i > svg {
     gap: 0;
   }
 
-  .progress-page .bars {
+  .progress-page .uibc {
     height: var(--sz-150);
   }
 
