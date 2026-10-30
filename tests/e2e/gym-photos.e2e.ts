@@ -16,7 +16,7 @@ import { arm, passProfileGate, type Stub } from './helpers/layout-shift';
 
 const BASE = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173';
 const CONSENT_VERIFIED = JSON.stringify({
-  'e2e-m': 'terms@2026-10-21,policy-ack@2026-10-28,age-18@2026-10-21',
+  'e2e-m': 'terms@2026-10-21,policy-ack@2026-10-30,age-18@2026-10-21',
 });
 const WARSAW = { latitude: 52.19, longitude: 21.02 };
 

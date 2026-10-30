@@ -13,7 +13,7 @@ import { ASSIGNMENT_DELAY_MS, arm, passProfileGate, type Stub } from './helpers/
 const BASE = process.env.E2E_TODAY_URL ?? process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173';
 /** The legal gate lets a device that already saw the server confirm the consents straight in (offline rule). */
 const CONSENT_VERIFIED = JSON.stringify({
-  'e2e-m': 'terms@2026-10-21,policy-ack@2026-10-28,age-18@2026-10-21',
+  'e2e-m': 'terms@2026-10-21,policy-ack@2026-10-30,age-18@2026-10-21',
 });
 
 async function broken(page: Page): Promise<string[]> {

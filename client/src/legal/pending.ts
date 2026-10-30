@@ -182,6 +182,13 @@ export const PENDING: readonly PendingItem[] = [
     'SPO-391/392: texts about the Atlas chat history in the account (p3, p7, p8) and account settings/challenges (p3) are drafted from open sources, NOT checked by a lawyer; the 30-day period of the kept copy after withdrawal is a proposal (claude/SPO-391-392-legal-open-sources.md §3a).',
   ),
   item(
+    'pp-cloudflare',
+    'privacy',
+    'p5',
+    'lawyer',
+    'SPO-184/220: Cloudflare as processor (IP, request metadata, derived approximate location, request logs): the text is drafted from engineering facts, NOT checked by a lawyer. Open: Cloudflare DPA/SCC/DPF reference and transfer basis, log retention period, legal basis for the geo-restriction (sanctions/legal reasons, Terms mention).',
+  ),
+  item(
     'pp-retention-coaching',
     'privacy',
     'p8',
