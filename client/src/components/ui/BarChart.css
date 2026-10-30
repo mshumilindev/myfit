@@ -1,0 +1,95 @@
+/* BarChart — Spotter UI kit primitive. Column chart, each bar a button with a
+   period/value tip. Tokens only. */
+.uibc {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  height: var(--sz-104);
+  min-width: 0;
+}
+.uibc-cell {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 calc(var(--s-8) / 2);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.uibc-bar {
+  display: block;
+  width: 100%;
+  border-radius: var(--r-4);
+  background: var(--color-neutral-800);
+  transition: box-shadow 0.12s ease;
+}
+.uibc-bar--accent {
+  background: var(--color-accent);
+}
+.uibc-bar--accent-600 {
+  background: var(--color-accent-600);
+}
+.uibc-bar--accent-700 {
+  background: var(--color-accent-700);
+}
+.uibc-bar--accent-800 {
+  background: var(--color-accent-800);
+}
+.uibc-bar--muted {
+  background: var(--color-neutral-800);
+}
+.uibc-cell[data-active] .uibc-bar {
+  box-shadow: 0 0 0 var(--bw-2) var(--color-accent);
+}
+.uibc-cell:focus-visible {
+  outline: var(--bw-2) solid var(--color-accent);
+  outline-offset: calc(var(--bw-2) * -1);
+  border-radius: var(--r-4);
+}
+
+/* Tip: same surface as the kit popover; stays inside the chart box. */
+.uibc-tip {
+  position: absolute;
+  z-index: var(--z-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-8) var(--s-12);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+.uibc-tip[data-show] {
+  opacity: 1;
+  visibility: visible;
+  animation: uibc-in 0.12s ease both;
+}
+.uibc-tip-label {
+  font-size: var(--fs-12);
+  color: var(--color-text-muted);
+}
+.uibc-tip-value {
+  font-size: var(--fs-15);
+  font-weight: 700;
+}
+@keyframes uibc-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .uibc-tip[data-show] {
+    animation: none;
+  }
+  .uibc-bar {
+    transition: none;
+  }
+}

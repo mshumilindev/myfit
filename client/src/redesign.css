@@ -1183,7 +1183,7 @@ html[data-theme] .kpi .lab {
   font-weight: 600;
   color: var(--color-text-muted);
 }
-.pv-hero .bars {
+.pv-hero .uibc {
   height: var(--sz-104);
 }
 

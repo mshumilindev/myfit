@@ -47,7 +47,7 @@ const pick = (name: string) => {
   fireEvent.click(within(sheet).getByText(name));
 };
 const kpi = () => document.querySelector('.pv-hero .kpi .big')?.textContent;
-const bars = () => document.querySelectorAll('.pv-hero .bars .bar').length;
+const bars = () => document.querySelectorAll('.pv-hero .uibc-bar').length;
 const sumKg = (ws: Workout[]) => ws.reduce((v, w) => v + workoutVolumeKg(w), 0);
 const tonnes = (kg: number) => `${(kg / 1000).toFixed(1)} t`;
 
@@ -114,7 +114,7 @@ describe('ProgressView: hero KPI and range', () => {
     expect(kpi()).toBe(tonnes(sumKg(ws)));
     // Sep 26 minus 28 days = Aug 29 -> weeks of Aug 24 ... Sep 21
     expect(bars()).toBe(5);
-    expect(document.querySelector('.pv-hero .bars .bar:last-child')).not.toBeNull();
+    expect(document.querySelector('.pv-hero .uibc-cell:last-of-type .uibc-bar')).not.toBeNull();
   });
 
   it('3 months uses weekly buckets, 1 year switches to monthly buckets', () => {

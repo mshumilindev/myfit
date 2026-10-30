@@ -397,6 +397,7 @@
 /* stage: border */
 :root {
   --bw-1: 1px;
+  --bw-2: 2px;
 }
 
 /* stage: size */

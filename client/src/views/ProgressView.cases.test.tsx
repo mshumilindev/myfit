@@ -149,7 +149,7 @@ describe('ProgressView: locked (fewer than 3 finished workouts)', () => {
     expect(screen.getByText(en.moreSessionsTitle(3))).toBeTruthy();
     expect(screen.getByText(en.progressLocked(0))).toBeTruthy();
     expect(document.querySelector('.progress-locked-empty.solo')).not.toBeNull();
-    expect(document.querySelector('.bars')).toBeNull();
+    expect(document.querySelector('.uibc')).toBeNull();
     expect(document.querySelectorAll('.unlock .dots .on').length).toBe(0);
     expect(document.querySelector('.pv-top .uibtn, .pv-top button.uibtn-secondary')).toBeNull();
   });
@@ -162,7 +162,7 @@ describe('ProgressView: locked (fewer than 3 finished workouts)', () => {
     expect(document.querySelector('.progress-weekly-panel .kpi .lab')?.textContent).toBe(
       en.volumeThisWeek,
     );
-    expect(document.querySelectorAll('.bars .bar').length).toBe(10);
+    expect(document.querySelectorAll('.uibc .uibc-bar').length).toBe(10);
     expect(document.querySelectorAll('.unlock .dots .on').length).toBe(2);
     expect(document.querySelector('.progress-locked-empty.solo')).toBeNull();
   });
