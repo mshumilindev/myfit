@@ -177,7 +177,7 @@ describe('MuscleHistoryView', () => {
     const { container } = render(
       <MuscleHistoryView muscle="chest" shell={makeShell()} onClose={() => undefined} />,
     );
-    const bars = [...container.querySelectorAll('.mh-bars .bar')] as HTMLElement[];
+    const bars = [...container.querySelectorAll('.uibc-bar')] as HTMLElement[];
     expect(bars).toHaveLength(10);
     expect(bars[9].style.height).toBe('100%');
     expect(bars.slice(0, 9).every((b) => b.style.height === '4%')).toBe(true);

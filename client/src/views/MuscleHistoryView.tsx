@@ -3,14 +3,14 @@ import { PageHead } from '../components/ui/PageHead';
 import { ListRow } from '../components/ui/GroupedList';
 import { weekStartOf as trainingWeekStart } from '../weekStart';
 import { useState } from 'react';
+import { BarChart, type BarTone } from '../components/ui/BarChart';
+import { lastWeekStarts, volumeBars, weekBuckets } from '../progressBars';
 import { exerciseVolumeKg, resolveMuscles, topSet, useStore } from '../store';
 import { fmtDayMonth, fmtKg, fmtTonnes, useT } from '../i18n';
 import { MuscleIcon } from '../components/Muscle';
 import { type MuscleGroup } from '../data/exercises';
 import { Icon, useExerciseName } from '../ui';
 import type { Shell } from '../App';
-
-const WEEK_MS = 7 * 24 * 3600 * 1000;
 
 /** Start of the training week holding `ts` (first day: Profile › Settings). */
 function weekStart(ts: number): number {
@@ -63,13 +63,18 @@ export function MuscleHistoryView({
   const totalVolume = sessions.reduce((sum, s) => sum + s.volume, 0);
   const totalSets = sessions.reduce((sum, s) => sum + s.sets, 0);
   const last = sessions[0] ?? null;
-  const weeks = Array.from({ length: 10 }, (_, i) => {
-    const start = weekStart(nowTs) - (9 - i) * WEEK_MS;
-    return sessions
+  const weekStarts = lastWeekStarts(weekStart(nowTs), 10, weekStart);
+  const weeks = weekStarts.map((start) =>
+    sessions
       .filter((s) => weekStart(s.workout.startedAt) === start)
-      .reduce((sum, s) => sum + s.volume, 0);
-  });
-  const maxWeek = Math.max(...weeks, 1);
+      .reduce((sum, s) => sum + s.volume, 0),
+  );
+  const weekBars = volumeBars(
+    weekBuckets(weekStarts, weeks, weekStart),
+    weekStarts.map((_, i): BarTone => (i >= 5 ? 'accent' : 'accent-700')),
+    t.weekNoWorkouts,
+    locale,
+  );
 
   const byExercise = new Map<string, { sets: number; volume: number; sessions: number }>();
   for (const s of sessions) {
@@ -128,18 +133,7 @@ export function MuscleHistoryView({
 
       <div>
         <div className="section-label">{t.weeklyVolume}</div>
-        <div className="bars mh-bars">
-          {weeks.map((v, i) => (
-            <div
-              key={i}
-              className="bar"
-              style={{
-                height: `${Math.max((v / maxWeek) * 100, 4)}%`,
-                background: i >= 5 ? 'var(--color-accent)' : 'var(--color-accent-700)',
-              }}
-            />
-          ))}
-        </div>
+        <BarChart bars={weekBars} label={t.weeklyVolume} />
       </div>
 
       {topExercises.length > 0 && (
