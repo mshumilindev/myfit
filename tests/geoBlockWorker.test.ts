@@ -70,6 +70,38 @@ describe('who is refused', () => {
     expect(spoofedBlock.status).toBe(200);
   });
 
+  it.each(['/today', '/sw.js', '/version.json', '/assets/index-abc.js', '/manifest.webmanifest'])(
+    'for an allowed country the exact same request (%s, method, headers, body) reaches the origin: nothing the app needs offline or to update itself is altered',
+    async (path) => {
+      const seen: Request[] = [];
+      const fromOrigin = vi.fn(async (r: Request) => {
+        seen.push(r);
+        return new Response('ok');
+      });
+      const sent = req(
+        { method: 'POST', body: 'x', headers: { 'x-a': '1' }, cf: { country: 'UA' } },
+        `https://myspotter.fit${path}`,
+      );
+      const res = await handle(sent, {}, fromOrigin);
+      expect(res.status).toBe(200);
+      expect(seen).toHaveLength(1);
+      expect(seen[0]).toBe(sent);
+    },
+  );
+
+  it.each(['/sw.js', '/version.json', '/assets/index-abc.js'])(
+    'a refused visitor gets an uncacheable 451 for %s, so a Service Worker cannot keep the refusal as the app',
+    async (path) => {
+      const res = await handle(
+        req({ cf: { country: 'RU' } }, `https://myspotter.fit${path}`),
+        {},
+        origin(),
+      );
+      expect(res.status).toBe(451);
+      expect(res.headers.get('cache-control')).toMatch(/no-store/);
+    },
+  );
+
   it('a failing origin is passed through, not turned into a block', async () => {
     const res = await handle(
       req({ cf: { country: 'PL' } }),
