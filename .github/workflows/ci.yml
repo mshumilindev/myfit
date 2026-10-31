@@ -287,10 +287,32 @@ jobs:
           node-version: 22
       - run: npx --yes jscpd@4.3.0
 
+  # Firestore/Storage rules on the emulator (SPO-424: it was never run in CI, only by hand). Own parallel job, ADR 004.
+  rules:
+    name: Firestore rules (emulator)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ runner.os }}-firestore-1
+      - run: npm ci
+      - name: Rules tests on the Firestore emulator
+        run: npx --yes firebase-tools@15.34.1 emulators:exec --only firestore --project demo-spotter "npx vitest run --config vitest.rules.config.ts"
+
   quality:
     name: Lint · types · tests · build
     if: always()
-    needs: [static, types, tests, client-tests, patch-coverage, build, security]
+    needs: [static, types, tests, client-tests, patch-coverage, build, security, rules]
     runs-on: ubuntu-latest
     steps:
       - name: Every quality job must have succeeded (a skipped or cancelled one counts as a failure)
