@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { deleteObject, ref } from 'firebase/storage';
 import { changePassword } from '../accounts/password';
+import { EmailField } from '../accounts/EmailField';
 import { HttpError, callFn, currentUid, setUsername, trackMutation } from '../api';
 import {
   offlineHydrate,
@@ -494,6 +495,7 @@ export function ProfileView({
                     onChange={(e) => setEditUsername(e.currentTarget.value)}
                     autoComplete="username"
                   />
+                  {isSelf && <EmailField />}
                   <div className="profile-edit-actions inline">
                     <Button
                       variant="secondary"

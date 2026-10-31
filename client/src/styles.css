@@ -5845,6 +5845,7 @@ html[data-theme] .gym-card .head .n {
 }
 .profile-edit-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--s-8);
 }
