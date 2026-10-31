@@ -5,7 +5,7 @@ import type { ConsentLevelId } from '../../src/components/ui/ConsentControls';
 import { Icon } from '../../src/ui';
 import { Sheet } from '../../src/components/ui/Overlays';
 import { Tag } from '../../src/components/ui/Tag';
-import { CATS, LEVELS, ar, type CatId } from './lab';
+import { CATS, GROUPS, LEVELS, ar, type CatId } from './lab';
 
 const SHARED: Partial<Record<CatId, ConsentLevelId>> = { totals: 'full', sets: 'effects' };
 
@@ -13,7 +13,7 @@ function Body({ onClose, CLIENT }: { onClose: () => void; CLIENT: string }) {
   const s = ar();
   const noApp = s.includes('noapp');
   const cool = s.includes('cooldown');
-  const [vals, setVals] = useState<Record<string, ConsentLevelId>>({ sleep: 'effects', body: 'effects', injury: 'off', nutrition: 'off' });
+  const [vals, setVals] = useState<Record<string, ConsentLevelId>>({ sleep: 'effects', nutrition: 'effects' });
   const closed = CATS.filter((c) => !SHARED[c.id]);
   const picked = closed.filter((c) => vals[c.id] === 'effects').length;
   const disabled = noApp || cool;
@@ -44,21 +44,26 @@ function Body({ onClose, CLIENT }: { onClose: () => void; CLIENT: string }) {
           </div>
         )}
         <div className="ar-rows">
-          <fieldset className="ar-pick" disabled={disabled}>
-            <legend className="ar-legend">What do you need</legend>
-            {closed.map((c) => (
-              <label key={c.id} className="ar-pick-row">
-                <Checkbox
-                  checked={vals[c.id] === 'effects'}
-                  onChange={(v) => setVals({ ...vals, [c.id]: v ? 'effects' : 'off' })}
-                />
-                <span className="ar-note-t">
-                  <b>{c.label}</b>
-                  <small>{c.what}</small>
-                </span>
-              </label>
-            ))}
-          </fieldset>
+          {GROUPS.filter((g) => g.ids.some((i) => !SHARED[i])).map((g) => (
+            <fieldset key={g.id} className="ar-pick" disabled={disabled}>
+              <legend className="ar-legend">{g.label}</legend>
+              {g.ids.filter((i) => !SHARED[i]).map((id) => {
+                const c = CATS.find((x) => x.id === id)!;
+                return (
+                  <label key={id} className="ar-pick-row">
+                    <Checkbox checked={vals[id] === 'effects'} onChange={(v) => setVals({ ...vals, [id]: v ? 'effects' : 'off' })} />
+                    <span className="ar-note-t">
+                      <b>{c.label}</b>
+                      <small>{c.what}</small>
+                    </span>
+                  </label>
+                );
+              })}
+            </fieldset>
+          ))}
+          <Button variant="ghost" size="sm" disabled={disabled} onClick={() => setVals(Object.fromEntries(closed.map((c) => [c.id, 'effects'])))}>
+            Ask for everything
+          </Button>
           <div className="ar-have">
             <b>Already shared</b>
             {CATS.filter((c) => SHARED[c.id]).map((c) => (

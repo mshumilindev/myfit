@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../../src/components/ui/Button';
 import { ChatBubble } from '../../src/components/ui/ChatBubble';
-import { ASKED, ClientRequestForm, TRAINER, ResultTag, ar, catOf, resultOf } from './lab';
+import { askedIds, ClientRequestForm, TRAINER, ResultTag, ar, catOf, resultOf } from './lab';
 
 /** Replaces `AskCard` in both chats: one card for a request with several categories and the client's answer. */
 const CLIENT = 'Oleh';
@@ -13,7 +13,8 @@ export function AskCard({ side, mine, onOpenSharing }: { kind: string; side: 'tr
   useEffect(() => {
     if (side === 'client' && s.startsWith('client-form')) setOpen(true);
   }, [side, s]);
-  const names = ASKED.map((a) => catOf(a.id).label);
+  const ids = askedIds();
+  const names = ids.length === 10 ? ['Everything you can share (10)'] : ids.map((i) => catOf(i).label);
   const body =
     side === 'trainer' ? (
       <>
