@@ -15,6 +15,7 @@ import { fmtSessionClock, useT } from '../i18n';
 import { useLegalT } from '../i18n/legal';
 import { Icon, LanguageSelector } from '../ui';
 import { InstallShortcut } from './InstallShortcut';
+import { useEmailT } from '../i18n/emailAuth';
 import './AuthView.css';
 
 /** The reachability probe gives up after this long; sign-in is never held back by it. */
@@ -51,6 +52,7 @@ export function AuthView({
   notice?: ReactNode;
 }) {
   const { t } = useT();
+  const emailT = useEmailT();
   const { lg } = useLegalT();
   const [unreachable, setUnreachable] = useState(false);
   // The server answered slowly or not at all, but the browser is online: the
@@ -255,7 +257,7 @@ export function AuthView({
 
         {formView && (
           <Field
-            placeholder={t.username}
+            placeholder={emailT.loginIdPlaceholder}
             value={identifier}
             autoComplete="username"
             disabled={unreachable || busy || locked}

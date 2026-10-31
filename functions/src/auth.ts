@@ -4,6 +4,7 @@
  * Also: login, status, invite preview, request-new.
  */
 import { onCall } from 'firebase-functions/v2/https';
+import { usernameAllowed } from './emailAuthCore';
 import { deletePasskeysOf } from './passkeysStore';
 import { firestoreKv } from './coach/firestoreKv';
 import { EMAIL_MAX, emailLoginUser, looksLikeEmail } from './emailAuthCore';
@@ -259,6 +260,9 @@ export const claim = onCall(async (req) => {
   if (!firstName || firstName.length < 2) {
     throw new HttpsError('invalid-argument', 'First name: 2 to 64 characters.');
   }
+
+  if (!usernameAllowed(name, current.username))
+    throw new HttpsError('invalid-argument', 'A username cannot contain @.');
 
   const nameLower = name.toLowerCase();
   const updated = await db.runTransaction<UserDoc>(async (tx) => {

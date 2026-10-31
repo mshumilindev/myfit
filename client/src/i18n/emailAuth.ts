@@ -7,6 +7,8 @@ import type { EmailErrorKind } from '../accounts/emailApi';
  */
 export interface EmailAuthStrings {
   fieldLabel: string;
+  /** placeholder of the sign-in field: a username or an email */
+  loginIdPlaceholder: string;
   fieldPlaceholder: string;
   /** hint under the field per state */
   hintNone: string;
@@ -38,6 +40,7 @@ export interface EmailAuthStrings {
 }
 
 const en: EmailAuthStrings = {
+  loginIdPlaceholder: 'Username or email',
   fieldLabel: 'Email',
   fieldPlaceholder: 'name@example.com',
   hintNone: 'Add an email to sign in with it and to recover your account.',
@@ -77,6 +80,7 @@ const en: EmailAuthStrings = {
 };
 
 const uk: EmailAuthStrings = {
+  loginIdPlaceholder: 'Імʼя користувача або email',
   fieldLabel: 'Email',
   fieldPlaceholder: 'name@example.com',
   hintNone: 'Додайте email, щоб входити з ним і відновлювати акаунт.',
@@ -116,6 +120,7 @@ const uk: EmailAuthStrings = {
 };
 
 const pl: EmailAuthStrings = {
+  loginIdPlaceholder: 'Nazwa użytkownika lub e-mail',
   fieldLabel: 'E-mail',
   fieldPlaceholder: 'name@example.com',
   hintNone: 'Dodaj e-mail, aby się nim logować i odzyskać konto.',
@@ -155,6 +160,7 @@ const pl: EmailAuthStrings = {
 };
 
 const lt: EmailAuthStrings = {
+  loginIdPlaceholder: 'Naudotojo vardas arba el. paštas',
   fieldLabel: 'El. paštas',
   fieldPlaceholder: 'name@example.com',
   hintNone: 'Pridėkite el. paštą, kad galėtumėte juo prisijungti ir atkurti paskyrą.',
@@ -194,6 +200,7 @@ const lt: EmailAuthStrings = {
 };
 
 const et: EmailAuthStrings = {
+  loginIdPlaceholder: 'Kasutajanimi või e-post',
   fieldLabel: 'E-post',
   fieldPlaceholder: 'name@example.com',
   hintNone: 'Lisa e-post, et sellega sisse logida ja kontot taastada.',

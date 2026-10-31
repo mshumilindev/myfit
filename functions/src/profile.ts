@@ -8,6 +8,7 @@
  * (username uniqueness).
  */
 import { onCall } from 'firebase-functions/v2/https';
+import { usernameAllowed } from './emailAuthCore';
 import {
   db,
   requireAuth,
@@ -434,6 +435,8 @@ export const updateProfile = onCall(async (req) => {
     throw new HttpsError('invalid-argument', 'First name must be 2-64 characters.');
   if (username.length < 2)
     throw new HttpsError('invalid-argument', 'Username must be 2-64 characters.');
+  if (!usernameAllowed(username, u.username))
+    throw new HttpsError('invalid-argument', 'A username cannot contain @.');
 
   const nameLower = username.toLowerCase();
   await db.runTransaction(async (tx) => {
