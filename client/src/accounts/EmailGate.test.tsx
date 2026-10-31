@@ -10,6 +10,7 @@ const h = vi.hoisted(() => ({
   attach: vi.fn(),
   send: vi.fn(),
   refresh: vi.fn(),
+  status: vi.fn(),
   signOut: vi.fn(),
 }));
 
@@ -20,6 +21,7 @@ vi.mock('./emailApi', async (orig) => {
     attachEmail: h.attach,
     sendConfirmation: h.send,
     refreshEmailState: h.refresh,
+    emailStatus: h.status,
   };
 });
 vi.mock('../api', async (orig) => ({
@@ -40,6 +42,7 @@ const field = (type: string) => document.querySelector(`input[type=${type}]`) as
 beforeEach(() => {
   h.state = { email: null, verified: false, required: true };
   h.refresh.mockReset().mockImplementation(async () => h.state);
+  h.status.mockReset().mockImplementation(async () => h.state);
   h.attach.mockReset();
   h.send.mockReset().mockResolvedValue(undefined);
   window.history.replaceState(null, '', '/');
@@ -54,21 +57,21 @@ describe('EmailGate', () => {
   it('shows nothing while the switch is off', async () => {
     h.state = { email: null, verified: false, required: false };
     render(<EmailGate />);
-    await waitFor(() => expect(h.refresh).toHaveBeenCalled());
+    await waitFor(() => expect(h.status).toHaveBeenCalled());
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
   it('stays out of the way while the server cannot be reached', async () => {
-    h.refresh.mockRejectedValue(new HttpError(503, 'offline'));
+    h.status.mockRejectedValue(new HttpError(503, 'offline'));
     render(<EmailGate />);
-    await waitFor(() => expect(h.refresh).toHaveBeenCalled());
+    await waitFor(() => expect(h.status).toHaveBeenCalled());
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
   it('waits behind the legal gate page', async () => {
     setLegalGateUp(true);
     render(<EmailGate />);
-    await waitFor(() => expect(h.refresh).toHaveBeenCalled());
+    await waitFor(() => expect(h.status).toHaveBeenCalled());
     expect(screen.queryByRole('dialog')).toBeNull();
     act(() => setLegalGateUp(false));
     await screen.findByRole('dialog', { name: t.gateAddTitle });
@@ -132,13 +135,30 @@ describe('EmailGate', () => {
     fireEvent.change(field('password'), { target: { value: 'pw' } });
     fireEvent.click(screen.getByRole('button', { name: t.gateAddAction }));
     expect(h.attach).not.toHaveBeenCalled();
-    expect(h.refresh).not.toHaveBeenCalled();
+    expect(h.status).not.toHaveBeenCalled();
+  });
+
+  it('a send that fails still starts the cooldown, and focus events are throttled', async () => {
+    h.attach.mockResolvedValue({ email: 'ada@example.com', verified: false });
+    h.send.mockRejectedValue(new HttpError(429, 'too-many'));
+    render(<EmailGate />);
+    await screen.findByRole('dialog', { name: t.gateAddTitle });
+    expect(h.status).toHaveBeenCalledTimes(1);
+    for (let i = 0; i < 5; i++) fireEvent(window, new Event('focus'));
+    expect(h.status).toHaveBeenCalledTimes(1);
+    fireEvent.change(field('email'), { target: { value: 'ada@example.com' } });
+    fireEvent.change(field('password'), { target: { value: 'pw' } });
+    fireEvent.click(screen.getByRole('button', { name: t.gateAddAction }));
+    await screen.findByText(t.errors.tooMany);
+    expect(
+      (screen.getByRole('button', { name: /Send again in/ }) as HTMLButtonElement).disabled,
+    ).toBe(true);
   });
 
   it('does not cover the public legal pages', async () => {
     window.location.hash = '#/privacy';
     render(<EmailGate />);
-    await waitFor(() => expect(h.refresh).toHaveBeenCalled());
+    await waitFor(() => expect(h.status).toHaveBeenCalled());
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 });
