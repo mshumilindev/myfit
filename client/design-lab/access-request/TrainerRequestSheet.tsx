@@ -31,7 +31,7 @@ function Body({ onClose, CLIENT }: { onClose: () => void; CLIENT: string }) {
           </div>
         ) : (
           <p className="ar-lead">
-            {CLIENT} gets one short form with these rows highlighted. Tick what you need. They decide what to turn on and how much; nothing changes until he does.
+            {CLIENT} gets one short form with these rows highlighted. Tick what you need. They decide what to turn on and how much; nothing changes until they do.
           </p>
         )}
         {cool && (
