@@ -3532,6 +3532,11 @@ export const en = {
   adminReadyToClaim: (n: string) => `${n} is ready to claim`,
   adminSendLink:
     'Send this link. When they open it they set their own password, add a photo and pick a gym — and the data binds to this account.',
+  adminInviteEmail: 'Email',
+  adminInviteEmailHint:
+    'The invitation letter goes here. Name and username are optional — they set them when creating the account.',
+  adminMailSent: (e: string) => `Invitation sent to ${e}`,
+  adminMailFailed: 'The letter could not be sent. Share the link or QR below instead.',
   adminInviteLink: 'Invite link',
   adminCopy: 'Copy',
   adminCopied: 'Copied',

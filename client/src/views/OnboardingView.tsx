@@ -119,7 +119,9 @@ export function OnboardingView(props: {
           const invited = splitPersonName(i.name ?? '');
           setFirstName((n) => n || i.firstName || invited.firstName);
           setLastName((n) => n || i.lastName || invited.lastName);
-          setUsername((n) => n || i.username || i.name || '');
+          setUsername(
+            (n) => n || (/^invited-/.test(i.username ?? '') ? '' : i.username || i.name || ''),
+          );
         }
       })
       .catch(() => setInfo('error'));
