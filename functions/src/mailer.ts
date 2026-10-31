@@ -27,6 +27,10 @@ export async function sendMail(m: MailMessage): Promise<MailResult> {
     fetch(url, { ...init, signal: AbortSignal.timeout(8000) }),
   );
   // Outcome only: never the address, the token or the provider's text.
-  if (!res.sent) logger.warn('mail not sent', { reason: res.reason });
+  if (!res.sent)
+    logger.warn('mail not sent', {
+      reason: res.reason,
+      status: 'status' in res ? res.status : undefined,
+    });
   return res;
 }

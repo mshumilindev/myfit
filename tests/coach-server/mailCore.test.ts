@@ -57,7 +57,11 @@ describe('sendViaResend', () => {
   });
   it('reports sent only when the provider returns an id', async () => {
     expect(await sendViaResend(CFG, MSG, ok({ id: 'abc' }))).toEqual({ sent: true });
-    expect(await sendViaResend(CFG, MSG, ok({}))).toEqual({ sent: false, reason: 'rejected' });
+    expect(await sendViaResend(CFG, MSG, ok({}))).toEqual({
+      sent: false,
+      reason: 'rejected',
+      status: 200,
+    });
   });
   it('not-configured without config and never calls fetch', async () => {
     const f = vi.fn();
@@ -72,6 +76,7 @@ describe('sendViaResend', () => {
     expect(await sendViaResend(CFG, MSG, ok({ message: 'x' }, 403))).toEqual({
       sent: false,
       reason: 'rejected',
+      status: 403,
     });
   });
   it('network on a thrown fetch, without leaking the address', async () => {

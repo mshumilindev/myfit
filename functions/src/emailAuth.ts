@@ -14,6 +14,7 @@ import { asMailLocale, inviteMail } from './mailCore';
 import { MAIL_API_KEY, sendMail } from './mailer';
 import {
   attachEmail as attach,
+  claimConfirmSlot,
   emailStatus as status,
   isEmailRequired,
   type AttachPorts,
@@ -95,6 +96,9 @@ export const emailStatus = onCall(async (req) => {
 export const sendConfirmationMail = onCall({ secrets: [MAIL_API_KEY] }, async (req) => {
   const uid = uidOf(req);
   const b = (req.data ?? {}) as Record<string, unknown>;
+  const me = (await db.collection('users').doc(uid).get()).data() as
+    { status?: string } | undefined;
+  if (me?.status === 'suspended') throw new HttpsError('permission-denied', 'forbidden');
   const key = limiterKey(undefined, `confirm:${uid}`);
   if (await isLocked(key)) {
     throw new HttpsError('resource-exhausted', 'Too many attempts. Try again in 15 minutes.');
@@ -103,13 +107,27 @@ export const sendConfirmationMail = onCall({ secrets: [MAIL_API_KEY] }, async (r
   const { email, verified } = await ports.current(uid);
   if (!email) throw new HttpsError('invalid-argument', 'No email on this account.');
   if (verified) return { sent: false, verified: true };
-  const link = await authAdmin.generateEmailVerificationLink(email, {
-    url: normalizeOrigin(APP_ORIGIN.value()),
-  });
+  // One letter per minute per address, taken atomically: parallel calls cannot multiply the letters.
+  if (!(await claimConfirmSlot(kv, uid, email, Date.now()))) {
+    throw new HttpsError('resource-exhausted', 'Wait a minute before sending another letter.');
+  }
+  let link: string;
+  try {
+    link = await authAdmin.generateEmailVerificationLink(email, {
+      url: normalizeOrigin(APP_ORIGIN.value()),
+    });
+  } catch {
+    throw new HttpsError('internal', 'Could not prepare the letter.');
+  }
   const locale = typeof b.locale === 'string' ? b.locale : 'en';
   const r = await sendMail(
     inviteMail(asMailLocale(locale), email, { kind: 'verify', link, name: '', days: 0 }),
   );
-  if (!r.sent) throw new HttpsError('internal', 'Could not send the letter.');
+  if (!r.sent) {
+    throw new HttpsError(
+      r.reason === 'not-configured' ? 'failed-precondition' : 'internal',
+      'Could not send the letter.',
+    );
+  }
   return { sent: true, verified: false };
 });

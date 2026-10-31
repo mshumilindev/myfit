@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createMemoryKv } from '../../functions/src/coach/memoryKv';
 import {
   attachEmail,
+  claimConfirmSlot,
   emailLoginUser,
   emailStatus,
   isEmailRequired,
@@ -218,5 +219,15 @@ describe('usernameAllowed (no @ in new usernames)', () => {
     expect(usernameAllowed('ada@x.co')).toBe(false);
     expect(usernameAllowed('ada@x.co', 'someone')).toBe(false);
     expect(usernameAllowed('Ada@X.co', 'ada@x.co')).toBe(true);
+  });
+});
+
+describe('claimConfirmSlot', () => {
+  it('lets one letter per minute through and then waits', async () => {
+    const kv = createMemoryKv();
+    await kv.set('emails/a%40b.co', { userId: 'u1', verifiedAt: null, updatedAt: 1 });
+    expect(await claimConfirmSlot(kv, 'u1', 'a@b.co', 1_000_000)).toBe(true);
+    expect(await claimConfirmSlot(kv, 'u1', 'a@b.co', 1_030_000)).toBe(false);
+    expect(await claimConfirmSlot(kv, 'u1', 'a@b.co', 1_070_000)).toBe(true);
   });
 });

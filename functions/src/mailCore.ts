@@ -234,7 +234,12 @@ export interface MailerConfig {
 
 export type MailResult =
   | { sent: true }
-  | { sent: false; reason: 'not-configured' | 'not-verified' | 'rejected' | 'network' };
+  | {
+      sent: false;
+      reason: 'not-configured' | 'not-verified' | 'rejected' | 'network';
+      /** HTTP status of the provider's answer (never its text): tells a bad key (401) from an unverified domain (403). */
+      status?: number;
+    };
 
 type FetchLike = (
   url: string,
@@ -274,7 +279,8 @@ export async function sendViaResend(
   try {
     const res = await doFetch(url, init);
     const body = (await res.json().catch(() => null)) as { id?: string } | null;
-    if (!res.ok || typeof body?.id !== 'string') return { sent: false, reason: 'rejected' };
+    if (!res.ok || typeof body?.id !== 'string')
+      return { sent: false, reason: 'rejected', status: res.status };
     return { sent: true };
   } catch {
     return { sent: false, reason: 'network' };
