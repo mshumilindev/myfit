@@ -89,6 +89,7 @@ import { AppCrashBoundary, installCrashRecovery } from './appCrash';
 import { installRouteSwitch } from './components/routeSwitch';
 import { installCleanUrls } from './route';
 import { LegalGate } from './legal/LegalGate';
+import { EmailGate } from './accounts/EmailGate';
 import { GeoConsentHost } from './legal/GeoConsentHost';
 import { AtlasHistoryHost } from './atlas/AtlasHistoryHost';
 import { HealthConsentHost } from './legal/HealthConsentHost';
@@ -137,6 +138,7 @@ void Promise.race([
         <SyncStatusHost />
         <ThemePreviewHost />
         <LegalGate />
+        <EmailGate />
         <GeoConsentHost />
         <AtlasHistoryHost />
         <HealthConsentHost />

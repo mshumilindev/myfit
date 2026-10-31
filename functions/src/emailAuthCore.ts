@@ -116,6 +116,15 @@ export async function emailStatus(
 }
 
 /**
+ * Is a confirmed email required to use the app (`config/auth.requireVerifiedEmail`, SPO-423)? Off unless the owner
+ * switched it on: the gate ships dark and is turned on after the deploy has been checked.
+ */
+export const isEmailRequired = (cfg: unknown): boolean =>
+  !!cfg &&
+  typeof cfg === 'object' &&
+  (cfg as { requireVerifiedEmail?: unknown }).requireVerifiedEmail === true;
+
+/**
  * The account an email signs in to: only when it is confirmed. Unknown, unconfirmed and any other case look the same to
  * the caller (the sign-in answer stays "wrong username or password").
  */

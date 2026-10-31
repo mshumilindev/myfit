@@ -7,7 +7,12 @@ import { onCall } from 'firebase-functions/v2/https';
 import { isLocked, limiterKey, recordFailure } from './auth';
 import { firestoreKv } from './coach/firestoreKv';
 import { authAdmin, db, HttpsError, verifyPassword } from './lib';
-import { attachEmail as attach, emailStatus as status, type AttachPorts } from './emailAuthCore';
+import {
+  attachEmail as attach,
+  emailStatus as status,
+  isEmailRequired,
+  type AttachPorts,
+} from './emailAuthCore';
 
 const kv = firestoreKv(db);
 
@@ -73,5 +78,10 @@ export const attachEmail = onCall(async (req) => {
 });
 
 export const emailStatus = onCall(async (req) => {
-  return status(kv, ports, uidOf(req), Date.now());
+  const uid = uidOf(req);
+  const [state, cfg] = await Promise.all([
+    status(kv, ports, uid, Date.now()),
+    db.collection('config').doc('auth').get(),
+  ]);
+  return { ...state, required: isEmailRequired(cfg.data()) };
 });
