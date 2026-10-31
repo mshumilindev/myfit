@@ -13,3 +13,10 @@ compatibility_date = "2026-10-01"
 [vars]
 BLOCKED_COUNTRIES = "RU,BY,KP,IR"
 # OCCUPIED_GEOJSON = ""   # optional; see README.md and docs/research/SPO-221-occupied-areas-spike.md
+
+# Refused areas of Ukraine, kept outside the code so a freed area opens again without a deploy (SPO-408).
+# Create the namespace once (`npx wrangler kv namespace create OCCUPIED`), put its id here and uncomment.
+# The scheduled sync writes the key `occupied-geojson`; the edge only reads it (cached 5 minutes per isolate).
+# [[kv_namespaces]]
+# binding = "OCCUPIED_KV"
+# id = "<namespace id>"

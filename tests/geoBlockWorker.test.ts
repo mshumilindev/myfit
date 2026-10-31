@@ -5,9 +5,17 @@
  */
 import { describe, expect, it, vi } from 'vitest';
 import { BLOCK_LOCALES, blockPageHtml, pickLocale } from '../edge/geo-block/src/blockPage';
+import { OCCUPIED_KEY } from '../edge/geo-block/src/config';
 import { DEFAULT_BLOCKED_COUNTRIES, parseCountries } from '../edge/geo-block/src/config';
 import { inPolygon, parseAreas } from '../edge/geo-block/src/polygon';
-import worker, { blockedResponse, decide, handle } from '../edge/geo-block/src/worker';
+import worker, {
+  AREAS_TTL_MS,
+  blockedResponse,
+  decide,
+  handle,
+  loadAreas,
+  resetAreasCache,
+} from '../edge/geo-block/src/worker';
 
 const req = (
   init: RequestInit & { cf?: Record<string, string | null> } = {},
@@ -163,7 +171,9 @@ describe('the refusal', () => {
 
   it('the five locales read differently', () => {
     const titles = new Set(
-      BLOCK_LOCALES.map((l) => /<h1>([^<]+)<\/h1>/.exec(blockPageHtml(l))?.[1]),
+      BLOCK_LOCALES.map((l) =>
+        /<h1>(.+?)<\/h1>/.exec(blockPageHtml(l))?.[1]?.replace(/<[^>]+>/g, ''),
+      ),
     );
     expect(titles.size).toBe(5);
   });
@@ -347,5 +357,103 @@ describe('areas by coordinates (SPO-221 prototype)', () => {
         { OCCUPIED_GEOJSON: JSON.stringify(BOX) },
       ),
     ).toBe('allow');
+  });
+});
+
+describe('the page design and the area variant (SPO-278, SPO-408)', () => {
+  it.each(BLOCK_LOCALES)(
+    '%s: both variants show the error code and the reason, one h1, nothing active',
+    (locale) => {
+      for (const variant of ['country', 'area'] as const) {
+        const html = blockPageHtml(locale, variant);
+        expect(html).toContain('>451<');
+        expect(html.match(/<h1>/g)).toHaveLength(1);
+        expect(html).not.toMatch(/<script|<a\s|<link|<img|http-equiv|window\.location/i);
+      }
+    },
+  );
+
+  it('the area variant reads differently from the country one in every locale', () => {
+    for (const locale of BLOCK_LOCALES) {
+      expect(blockPageHtml(locale, 'area')).not.toBe(blockPageHtml(locale, 'country'));
+    }
+  });
+
+  it('a refused country gets the country page, a refused area the area page, API clients the same JSON', async () => {
+    const env = { OCCUPIED_GEOJSON: JSON.stringify(BOX) };
+    const country = await handle(req({ cf: { country: 'RU' } }), env, origin());
+    const area = await handle(
+      req({ cf: { country: 'UA', latitude: '44.95', longitude: '34.10' } }),
+      env,
+      origin(),
+    );
+    expect(await country.text()).toBe(blockPageHtml('en', 'country'));
+    expect(await area.text()).toBe(blockPageHtml('en', 'area'));
+    const json = await handle(
+      req({
+        cf: { country: 'UA', latitude: '44.95', longitude: '34.10' },
+        headers: { accept: 'application/json' },
+      }),
+      env,
+      origin(),
+    );
+    expect(json.status).toBe(451);
+  });
+});
+
+describe('the areas live outside the code (SPO-408)', () => {
+  const kv = (value: string | null | Error) => {
+    const get = vi.fn(async (key: string) => {
+      if (value instanceof Error) throw value;
+      expect(key).toBe(OCCUPIED_KEY);
+      return value;
+    });
+    return { get };
+  };
+  const inside = () => req({ cf: { country: 'UA', latitude: '44.95', longitude: '34.10' } });
+
+  it('reads the areas from KV, so an area can be added and later freed without a deploy', async () => {
+    resetAreasCache();
+    const env = { OCCUPIED_KV: kv(JSON.stringify(BOX)) };
+    expect((await handle(inside(), env, origin())).status).toBe(451);
+    // freed: the next read after the cache time gives an empty collection
+    const freed = { OCCUPIED_KV: kv(JSON.stringify({ type: 'FeatureCollection', features: [] })) };
+    expect(await loadAreas(freed, Date.now() + 1)).toHaveLength(1);
+    expect(await loadAreas(freed, Date.now() + AREAS_TTL_MS + 1)).toHaveLength(0);
+    expect((await handle(inside(), freed, origin())).status).toBe(200);
+  });
+
+  it('keeps the read for the cache time and does not ask KV on every request', async () => {
+    resetAreasCache();
+    const store = kv(JSON.stringify(BOX));
+    const t = 1_000_000;
+    await loadAreas({ OCCUPIED_KV: store }, t);
+    await loadAreas({ OCCUPIED_KV: store }, t + AREAS_TTL_MS - 1);
+    expect(store.get).toHaveBeenCalledTimes(1);
+    await loadAreas({ OCCUPIED_KV: store }, t + AREAS_TTL_MS);
+    expect(store.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('a failing KV keeps the last good areas; with none, nobody is refused (fail open)', async () => {
+    resetAreasCache();
+    const good = { OCCUPIED_KV: kv(JSON.stringify(BOX)) };
+    const t = 5_000_000;
+    expect(await loadAreas(good, t)).toHaveLength(1);
+    const broken = { OCCUPIED_KV: kv(new Error('kv down')) };
+    expect(await loadAreas(broken, t + AREAS_TTL_MS + 1)).toHaveLength(1);
+    resetAreasCache();
+    expect(await loadAreas(broken, t)).toHaveLength(0);
+    expect((await handle(inside(), broken, origin())).status).toBe(200);
+  });
+
+  it('an empty, missing or unreadable KV value refuses nobody, and the variable is the fallback', async () => {
+    resetAreasCache();
+    expect(await loadAreas({ OCCUPIED_KV: kv('not json') }, 1)).toHaveLength(0);
+    resetAreasCache();
+    expect(await loadAreas({ OCCUPIED_KV: kv(null) }, 1)).toHaveLength(0);
+    resetAreasCache();
+    expect(
+      await loadAreas({ OCCUPIED_KV: kv(null), OCCUPIED_GEOJSON: JSON.stringify(BOX) }, 1),
+    ).toHaveLength(1);
   });
 });

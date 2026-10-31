@@ -34,6 +34,12 @@ Cloudflare Worker перед `myspotter.fit`. Безкоштовний план.
 
 30.10.2026: `blockPageHtml` у 5 локалях (en, uk, pl, lt, et) відрендерено в Chromium (mobile 375 px світла тема, desktop 1280 px темна): axe-core 4.14 (wcag2a/2aa/21aa/best-practice) дає 0 порушень, горизонтального скролу немає. Живий запит із країни зі списку блокування (RU/BY/KP/IR) не робився: перевірено країною PL через змінну (див. вище).
 
+31.10.2026 (SPO-278 v3, SPO-408): нова сторінка за дизайном (`docs/design/SPO-278-geo-block-page.md`), два тексти: країна й окуповані райони (`blockPageHtml(locale, variant)`), одна темна тема. axe-core 4.14 з контрастом: 0 порушень у 20 комбінаціях (5 локалей × 2 варіанти × mobile 390 / desktop 1280), горизонтального скролу немає. Шрифти поки системні (вбудова підмножини Inter Tight/Manrope у Worker: окрема задача); лише темна тема.
+
+## Динамічні межі (SPO-408)
+
+Межі окупованих районів не лежать у коді: Worker читає GeoJSON з KV (`OCCUPIED_KV`, ключ `occupied-geojson`), кешує на 5 хв на ізолят, при збої KV лишає останню добру версію, а без неї нікого не блокує (fail-open). Звільнена територія = нова версія без неї; релізу немає. Без прив'язки KV працює змінна `OCCUPIED_GEOJSON`. Запис у KV і джерело меж: `docs/plans/SPO-408-dev-plan.md` (чекає дозволу джерела й секрету Cloudflare API).
+
 ## Чого це не закриває (чесно)
 
 - Прямі адреси `*.web.app`, `*.firebaseapp.com`, `cloudfunctions.net`, `run.app`, а також `firestore.googleapis.com`, `identitytoolkit.googleapis.com` і Storage, які викликає клієнтський SDK. Hosting не дозволяє закрити «чорний хід», а Cloud Armor з балансувальником коштує ~$24+/міс (за опублікованими тарифами; не підтверджено мінімум).

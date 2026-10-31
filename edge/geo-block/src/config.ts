@@ -5,7 +5,17 @@
  */
 export const DEFAULT_BLOCKED_COUNTRIES = ['RU', 'BY', 'KP', 'IR'] as const;
 
+/** The part of a Workers KV namespace the edge uses. */
+export interface KvLike {
+  get(key: string): Promise<string | null>;
+}
+
+/** KV key of the current GeoJSON of the refused areas; written by the scheduled sync (SPO-408), never by the edge. */
+export const OCCUPIED_KEY = 'occupied-geojson';
+
 export interface EdgeEnv {
+  /** KV namespace holding the refused areas, so they change without a deploy (SPO-408). Falls back to `OCCUPIED_GEOJSON`. */
+  OCCUPIED_KV?: KvLike;
   /** Comma / space separated ISO 3166-1 alpha-2 codes, e.g. "RU, BY, KP, IR". */
   BLOCKED_COUNTRIES?: string;
   /** Optional GeoJSON (Polygon / MultiPolygon / Feature / FeatureCollection) of areas to refuse by coordinates. */
