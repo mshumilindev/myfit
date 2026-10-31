@@ -251,19 +251,21 @@ export const claim = onCall(async (req) => {
   const userSnap = await userRef.get();
   if (!userSnap.exists) throw new HttpsError('failed-precondition', 'account gone');
   const current: UserDoc = { id: inv.userId, ...(userSnap.data() as Omit<UserDoc, 'id'>) };
-  // A reset link sets a password and nothing else: a suspended account stays suspended (no way back in through a letter).
+  // A letter never wakes a suspended account (checked again inside the transaction below).
   if (inv.kind === 'reset' && current.status === 'suspended') {
     throw new HttpsError('failed-precondition', 'link no longer valid');
   }
 
-  const names = parseNameInput(body);
+  // A reset link sets a password and nothing else: the name and username in the body are ignored for it.
+  const isReset = inv.kind === 'reset';
+  const names = isReset ? { firstName: '', lastName: '' } : parseNameInput(body);
   const firstName = names.firstName || current.firstName || '';
   const lastName = names.firstName ? names.lastName : current.lastName;
   const name =
-    typeof username === 'string' && username.trim().length >= 2
+    !isReset && typeof username === 'string' && username.trim().length >= 2
       ? username.trim().slice(0, USERNAME_MAX)
       : current.username;
-  if (!firstName || firstName.length < 2) {
+  if (!isReset && (!firstName || firstName.length < 2)) {
     throw new HttpsError('invalid-argument', 'First name: 2 to 64 characters.');
   }
 
@@ -275,6 +277,17 @@ export const claim = onCall(async (req) => {
 
   const nameLower = name.toLowerCase();
   const updated = await db.runTransaction<UserDoc>(async (tx) => {
+    // The link is used up exactly once: re-read it here so two parallel claims cannot both win.
+    const liveInv = await tx.get(invRef);
+    if (!liveInv.exists || inviteState(liveInv.data() as InviteDoc) !== 'valid') {
+      throw new HttpsError('failed-precondition', 'link no longer valid');
+    }
+    // ... and the account as it is NOW (a suspension between the read above and this write must stand).
+    const liveUser = await tx.get(userRef);
+    const liveStatus = (liveUser.data() as { status?: Status } | undefined)?.status;
+    if (isReset && liveStatus === 'suspended') {
+      throw new HttpsError('failed-precondition', 'link no longer valid');
+    }
     // Re-check uniqueness for any changed username.
     if (nameLower !== current.usernameLower) {
       const u = await tx.get(usernameRef(nameLower));
@@ -286,7 +299,7 @@ export const claim = onCall(async (req) => {
       usernameLower: nameLower,
       firstName,
       lastName,
-      status: (inv.kind === 'reset' ? current.status : 'active') as Status,
+      status: 'active' as Status,
       updatedAt: Date.now(),
     };
     const { id: _omit, ...stored } = next;
@@ -300,6 +313,26 @@ export const claim = onCall(async (req) => {
     tx.update(invRef, { claimedAt: Date.now(), email: null }); // the address lives on in the emails index
     return next;
   });
+
+  // Any other open reset link of this account dies with this one (an administrator's 7-day link included).
+  if (isReset) {
+    const open = await db
+      .collection('invites')
+      .where('userId', '==', inv.userId)
+      .where('kind', '==', 'reset')
+      .get();
+    const now = Date.now();
+    await Promise.all(
+      open.docs
+        .filter(
+          (d) =>
+            d.id !== token &&
+            !(d.data() as InviteDoc).claimedAt &&
+            !(d.data() as InviteDoc).revokedAt,
+        )
+        .map((d) => d.ref.update({ revokedAt: now })),
+    );
+  }
 
   // The password was (re)set: biometric sign-ins made under the old one end here.
   await deletePasskeysOf(updated.id);

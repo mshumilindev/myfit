@@ -20,6 +20,7 @@
  * should be kept is an open lawyer question (SPO-258).
  */
 import { HttpsError } from 'firebase-functions/v2/https';
+import { resetLimiterId } from './passwordResetCore';
 import type { Kv } from './coach/kv';
 import { purgeAccountCoaching, type PurgeReport } from './coach/lifecycle';
 import { conversationId, isUid } from './coach/logic';
@@ -188,7 +189,7 @@ export async function deleteAccountCascade(
   // The email index, and the sign-in counters typed with those addresses or from linking one (they hold the address).
   for (const r of await kv.list('emails', { where: [['userId', '==', uid]] })) {
     const address = decodeURIComponent(r.id);
-    for (const id of [address, `reset:${address}`]) {
+    for (const id of [address, resetLimiterId(address)]) {
       await del(kv, await kv.list('loginAttempts', { where: [['identifier', '==', id]] }));
     }
     await kv.del(r.path);

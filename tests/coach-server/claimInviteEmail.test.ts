@@ -38,7 +38,17 @@ vi.mock('../../functions/src/lib', () => {
     HttpsError,
     HOT: {},
     db: {
-      collection: (c: string) => ({ doc: (id: string) => ref(`${c}/${id}`) }),
+      collection: (c: string) => {
+        const query = (conds: Array<[string, unknown]>) => ({
+          where: (f: string, _op: string, v: unknown) => query([...conds, [f, v]]),
+          get: async () => ({
+            docs: [...h.store.entries()]
+              .filter(([k, d]) => k.startsWith(`${c}/`) && conds.every(([f, v]) => d[f] === v))
+              .map(([k, d]) => ({ id: k.slice(c.length + 1), ref: ref(k), data: () => d })),
+          }),
+        });
+        return { doc: (id: string) => ref(`${c}/${id}`), ...query([]) };
+      },
       runTransaction: async (fn: (tx: unknown) => Promise<unknown>) =>
         fn({
           get: (r: { get: () => Promise<unknown> }) => r.get(),
@@ -167,6 +177,20 @@ describe('claim of a self-service reset link (SPO-225)', () => {
     await expect(run({ token: 'r1', password: 'another123' })).rejects.toMatchObject({
       code: 'failed-precondition',
     });
+  });
+  it('ignores a username and names in the body, and works for an account with a short first name', async () => {
+    h.store.set('users/u1', { ...user, firstName: 'A', status: 'active' });
+    h.store.set('invites/r1', resetInvite);
+    await run({ token: 'r1', password: 'newpass123', username: 'hacked', firstName: 'Mallory' });
+    expect(h.store.get('users/u1')).toMatchObject({ username: 'ann', firstName: 'A' });
+    expect(h.store.get('usernames/hacked')).toBeUndefined();
+  });
+  it("revokes the account's other open reset links when one is used", async () => {
+    h.store.set('users/u1', { ...user, status: 'active' });
+    h.store.set('invites/r1', resetInvite);
+    h.store.set('invites/r2', { ...resetInvite, token: 'r2' });
+    await run({ token: 'r1', password: 'newpass123' });
+    expect(h.store.get('invites/r2')).toMatchObject({ revokedAt: expect.any(Number) });
   });
   it('never wakes a suspended account and leaves the link untouched', async () => {
     h.store.set('users/u1', { ...user, status: 'suspended' });

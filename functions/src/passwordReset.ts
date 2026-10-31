@@ -12,7 +12,14 @@ import { APP_ORIGIN } from './coach/runtime';
 import { authAdmin, db, HttpsError, newToken } from './lib';
 import { asMailLocale, inviteMail } from './mailCore';
 import { MAIL_API_KEY, sendMail } from './mailer';
-import { RESET_HOURS, RESET_TTL_MS, requestReset, type ResetPorts } from './passwordResetCore';
+import {
+  RESET_HOURS,
+  RESET_MIN_MS,
+  RESET_TTL_MS,
+  requestReset,
+  resetLimiterId,
+  type ResetPorts,
+} from './passwordResetCore';
 
 const kv = firestoreKv(db);
 
@@ -78,12 +85,14 @@ export const requestPasswordReset = onCall({ secrets: [MAIL_API_KEY] }, async (r
   }
   // Every request counts, known address or not: per caller (IP) and per address. Only the IP limit is told to the caller.
   const ipKey = limiterKey(req.rawRequest?.ip, 'reset');
-  const mailKey = limiterKey(undefined, `reset:${b.email}`);
+  const mailKey = limiterKey(undefined, resetLimiterId(b.email));
   if (await isLocked(ipKey)) {
     throw new HttpsError('resource-exhausted', 'Too many attempts. Try again in 15 minutes.');
   }
   const mailLocked = await isLocked(mailKey);
   await Promise.all([recordFailure(ipKey), recordFailure(mailKey)]);
+  // The work and a fixed floor run together: a known address (lookups, a letter) and an unknown one answer in the same time.
+  const floor = new Promise<void>((resolve) => setTimeout(resolve, RESET_MIN_MS));
   if (!mailLocked) {
     try {
       const out = await requestReset(kv, ports(b.locale), b.email, Date.now());
@@ -92,5 +101,6 @@ export const requestPasswordReset = onCall({ secrets: [MAIL_API_KEY] }, async (r
       logger.warn('password reset failed'); // never the address, never the cause text
     }
   }
+  await floor;
   return { ok: true };
 });

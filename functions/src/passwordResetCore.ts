@@ -4,6 +4,7 @@
  * to the caller (no enumeration). The link is a one-time token of kind `reset` that lives one hour; opening it lets the
  * person set a new password through `claim`. The data key never depends on the password (`vaultKeyFor(master, uid, kv)`).
  */
+import { createHash } from 'node:crypto';
 import type { Kv } from './coach/kv';
 import { claimConfirmSlot, emailLoginUser, normalizeEmail } from './emailAuthCore';
 
@@ -40,4 +41,16 @@ export async function requestReset(
   if (!(await claimConfirmSlot(kv, uid, email, now, 'resetAt'))) return 'skipped';
   const token = await ports.issue(uid, now);
   return (await ports.send(email, token)) ? 'sent' : 'failed';
+}
+
+/** Every request takes at least this long, so the time does not tell a known address from an unknown one. */
+export const RESET_MIN_MS = 1500;
+
+/**
+ * The limiter id of an address: a hash, so the counters never hold the address a stranger typed (and a `/` or a long
+ * address cannot break the document id). `accountDeletionCore` removes the one of the account's own addresses.
+ */
+export function resetLimiterId(rawEmail: string): string {
+  const e = (normalizeEmail(rawEmail) ?? rawEmail.trim().toLowerCase()).slice(0, 254);
+  return `reset:${createHash('sha256').update(e).digest('hex').slice(0, 16)}`;
 }

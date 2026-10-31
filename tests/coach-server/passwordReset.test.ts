@@ -2,7 +2,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMemoryKv } from '../../functions/src/coach/memoryKv';
 import { vaultKeyFor } from '../../functions/src/vault';
-import { requestReset, RESET_TTL_MS, type ResetPorts } from '../../functions/src/passwordResetCore';
+import {
+  requestReset,
+  resetLimiterId,
+  RESET_MIN_MS,
+  RESET_TTL_MS,
+  type ResetPorts,
+} from '../../functions/src/passwordResetCore';
 
 const NOW = 1_000_000;
 const setup = (
@@ -158,7 +164,7 @@ const call = (email: unknown) =>
     rawRequest: { ip: '1.1.1.1' },
   });
 
-describe('requestPasswordReset', () => {
+describe('requestPasswordReset', { timeout: 20_000 }, () => {
   beforeEach(() => {
     const kv = createMemoryKv();
     void kv.set('emails/a%40b.co', { userId: 'u1', verifiedAt: 1, updatedAt: 1 });
@@ -181,8 +187,25 @@ describe('requestPasswordReset', () => {
     h.locked.add('1.1.1.1|reset');
     await expect(call('a@b.co')).rejects.toMatchObject({ code: 'resource-exhausted' });
     h.locked.clear();
-    h.locked.add('noip|reset:a@b.co');
+    h.locked.add(`noip|${resetLimiterId('a@b.co')}`);
     await expect(call('a@b.co')).resolves.toEqual({ ok: true });
     expect(h.sent).toBe(0);
+  });
+});
+
+describe('limiter id and timing floor', () => {
+  it('hashes the address: no address, no slash, same id for the same address in any case', () => {
+    const id = resetLimiterId(' A@B.co ');
+    expect(id).toBe(resetLimiterId('a@b.co'));
+    expect(id).toMatch(/^reset:[0-9a-f]{16}$/);
+    expect(resetLimiterId('we/ird@b.co')).toMatch(/^reset:[0-9a-f]{16}$/);
+    expect(id).not.toBe(resetLimiterId('other@b.co'));
+  });
+  it('every answer takes at least the floor, known address or not', async () => {
+    for (const email of ['a@b.co', 'nobody@b.co']) {
+      const t0 = Date.now();
+      await call(email);
+      expect(Date.now() - t0).toBeGreaterThanOrEqual(RESET_MIN_MS - 50);
+    }
   });
 });
