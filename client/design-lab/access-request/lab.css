@@ -1,0 +1,19 @@
+/* SPO-99 design lab: tokens only; every rule here is a candidate kit variant (see docs). */
+.ar-body{display:flex;flex-direction:column;gap:var(--s-12);padding:var(--s-16)}
+.ar-title{font-size:var(--fs-20,20px);font-weight:600}
+.ar-lead{margin:0;color:var(--color-text-muted,var(--color-text));opacity:.85}
+.ar-fine{margin:0;font-size:var(--fs-min);opacity:.7}
+.ar-rows{display:flex;flex-direction:column;gap:var(--s-12)}
+.ar-rows .cc-pick-row{border-inline-start:var(--s-4) solid var(--color-accent);padding-inline-start:var(--s-8);border-radius:var(--s-2)}
+.ar-acts{display:flex;flex-direction:column;gap:var(--s-4)}
+.ar-note{display:flex;align-items:center;gap:var(--s-12);padding:var(--s-12);border-radius:var(--radius-md);border:var(--bw-1) solid var(--color-divider);background:var(--color-surface)}
+.ar-note--quiet{opacity:.85}
+.ar-note-t{display:flex;flex-direction:column;flex:1;min-width:0}
+.ar-note-t small{opacity:.75}
+.ar-have{display:flex;flex-direction:column;gap:var(--s-6);padding-top:var(--s-8);border-top:var(--bw-1) solid var(--color-divider)}
+.ar-have-r{display:flex;justify-content:space-between;align-items:center}
+.ar-c{display:flex;flex-direction:column;gap:var(--s-6)}
+.ar-c-h{font-weight:600}
+.ar-c-l{opacity:.85}
+.ar-c-s{display:flex;align-items:center;gap:var(--s-8);flex-wrap:wrap}
+.ar-c-n{font-size:var(--fs-min);opacity:.75}
