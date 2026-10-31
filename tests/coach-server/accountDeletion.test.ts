@@ -230,6 +230,17 @@ async function seedFull() {
   await kv.set(`schedules/${A}`, { clientId: A });
   await kv.set(`coachKeys/${A}`, { pub: 'p' });
   await kv.set(`signKeys/${A}/keys/k1`, {});
+  await kv.set('emails/s1%40example.com', { userId: A, verifiedAt: 1, updatedAt: 1 });
+  await kv.set('loginAttempts/1.2.3.4|s1@example.com', {
+    count: 1,
+    windowStart: 1,
+    identifier: 's1@example.com',
+  });
+  await kv.set(`loginAttempts/noip|attach:${A}`, {
+    count: 1,
+    windowStart: 1,
+    identifier: `attach:${A}`,
+  });
 }
 
 /** Everything that must be gone after deleting A: path by registry row. */
@@ -238,6 +249,9 @@ const GONE: [row: string, path: string][] = [
   ['R2 password hash', `credentials/${A}`],
   ['R3 username reservation', 'usernames/s1'],
   ['R3 invite', `invites/inv-${A}`],
+  ['SPO-283 email index', 'emails/s1%40example.com'],
+  ['SPO-283 counter typed with the address', 'loginAttempts/1.2.3.4|s1@example.com'],
+  ['SPO-283 attach counter', `loginAttempts/noip|attach:${A}`],
   ['R5 login counter', `loginAttempts/1.2.3.4|${A}name`],
   ['R6 passkey', `passkeys/pk-${A}`],
   ['R6 passkey challenge', `passkeyChallenges/ch-${A}`],
@@ -345,6 +359,7 @@ describe('registry empty after deletion', () => {
       'coaching',
       'conversations',
       'credentials',
+      'emails',
       'invites',
       'liveSessions',
       'plans',

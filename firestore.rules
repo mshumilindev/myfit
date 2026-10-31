@@ -883,6 +883,10 @@ service cloud.firestore {
     match /invites/{token} {
       allow read, write: if false;
     }
+    // email -> account index for signing in by email (SPO-283); written and read by functions only
+    match /emails/{emailLower} {
+      allow read, write: if false;
+    }
 
     // --- Shared exercise catalog -------------------------------------------
     // App-wide switches edited by the owner in the console (read-only here).

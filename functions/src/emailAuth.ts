@@ -1,0 +1,77 @@
+/**
+ * Callables for linking an email to an existing account (SPO-283). Logic and rules in `emailAuthCore.ts`.
+ * `attachEmail` needs a signed-in caller AND the current password (a fresh proof before the sign-in method changes);
+ * the confirmation email itself is sent by the client (`sendEmailVerification`, Firebase template) once this returns.
+ */
+import { onCall } from 'firebase-functions/v2/https';
+import { isLocked, limiterKey, recordFailure } from './auth';
+import { firestoreKv } from './coach/firestoreKv';
+import { authAdmin, db, HttpsError, verifyPassword } from './lib';
+import { attachEmail as attach, emailStatus as status, type AttachPorts } from './emailAuthCore';
+
+const kv = firestoreKv(db);
+
+const ports: AttachPorts = {
+  async current(uid) {
+    try {
+      const u = await authAdmin.getUser(uid);
+      return { email: u.email ? u.email.toLowerCase() : null, verified: u.emailVerified === true };
+    } catch (e) {
+      if ((e as { code?: string }).code === 'auth/user-not-found')
+        return { email: null, verified: false };
+      throw e;
+    }
+  },
+  async setEmail(uid, email) {
+    try {
+      await authAdmin.updateUser(uid, { email, emailVerified: false });
+    } catch (e) {
+      if ((e as { code?: string }).code === 'auth/email-already-exists')
+        throw new Error('email-taken', { cause: e });
+      throw e;
+    }
+  },
+};
+
+const uidOf = (req: { auth?: { uid: string } | null }): string => {
+  if (!req.auth?.uid) throw new HttpsError('unauthenticated', 'Sign in first.');
+  return req.auth.uid;
+};
+
+export const attachEmail = onCall(async (req) => {
+  const uid = uidOf(req);
+  const b = (req.data ?? {}) as Record<string, unknown>;
+  const password = b.password;
+  if (typeof password !== 'string' || password.length > 72) {
+    throw new HttpsError('invalid-argument', 'Password is required.');
+  }
+  const key = limiterKey(req.rawRequest?.ip, `attach:${uid}`);
+  // A second counter per account alone: rotating IPs must not multiply the attempts.
+  const accountKey = limiterKey(undefined, `attach:${uid}`);
+  if ((await isLocked(key)) || (await isLocked(accountKey))) {
+    throw new HttpsError('resource-exhausted', 'Too many attempts. Try again in 15 minutes.');
+  }
+  // Every attempt counts, right or wrong: a "taken" answer must not become a way to test addresses.
+  await Promise.all([recordFailure(key), recordFailure(accountKey)]);
+  const me = (await db.collection('users').doc(uid).get()).data() as
+    { status?: string } | undefined;
+  if (me?.status === 'suspended') throw new HttpsError('permission-denied', 'forbidden');
+  const cred = (await db.collection('credentials').doc(uid).get()).data() as
+    { passwordHash?: string } | undefined;
+  if (!cred?.passwordHash || !verifyPassword(password, cred.passwordHash)) {
+    throw new HttpsError('permission-denied', 'Wrong password.');
+  }
+  const r = await attach(kv, ports, uid, b.email, Date.now());
+  if (!r.ok) {
+    throw new HttpsError(
+      r.reason === 'taken' ? 'already-exists' : 'invalid-argument',
+      r.reason === 'taken' ? 'This email cannot be used.' : 'Enter a valid email address.',
+      { reason: r.reason },
+    );
+  }
+  return { email: r.email, verified: r.verified };
+});
+
+export const emailStatus = onCall(async (req) => {
+  return status(kv, ports, uidOf(req), Date.now());
+});

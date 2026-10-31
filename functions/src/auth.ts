@@ -5,6 +5,8 @@
  */
 import { onCall } from 'firebase-functions/v2/https';
 import { deletePasskeysOf } from './passkeysStore';
+import { firestoreKv } from './coach/firestoreKv';
+import { EMAIL_MAX, emailLoginUser, looksLikeEmail } from './emailAuthCore';
 import {
   db,
   authAdmin,
@@ -24,6 +26,9 @@ import {
 } from './lib';
 
 const USERNAME_MAX = 64;
+const kv = firestoreKv(db);
+/** A valid bcrypt hash nobody can match, compared when no account was found (equalises the timing). */
+const DUMMY_HASH = hashPassword('spotter-timing-pad');
 
 interface InviteDoc {
   token: string;
@@ -63,7 +68,7 @@ async function inviterAvatarDataUrl(userId: string, hasAvatar: boolean): Promise
 const FAIL_WINDOW_MS = 15 * 60 * 1000;
 const MAX_FAILURES = 10;
 
-async function isLocked(key: string): Promise<boolean> {
+export async function isLocked(key: string): Promise<boolean> {
   const snap = await db.collection('loginAttempts').doc(key).get();
   if (!snap.exists) return false;
   const { count, windowStart } = snap.data() as { count: number; windowStart: number };
@@ -74,7 +79,7 @@ async function isLocked(key: string): Promise<boolean> {
 function identifierOf(key: string): string {
   return key.slice(key.indexOf('|') + 1);
 }
-async function recordFailure(key: string): Promise<void> {
+export async function recordFailure(key: string): Promise<void> {
   const ref = db.collection('loginAttempts').doc(key);
   await db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
@@ -92,7 +97,7 @@ async function recordFailure(key: string): Promise<void> {
     }
   });
 }
-async function clearFailures(key: string): Promise<void> {
+export async function clearFailures(key: string): Promise<void> {
   await db
     .collection('loginAttempts')
     .doc(key)
@@ -100,7 +105,7 @@ async function clearFailures(key: string): Promise<void> {
     .catch(() => undefined);
 }
 
-function limiterKey(ip: string | undefined, identifier: string): string {
+export function limiterKey(ip: string | undefined, identifier: string): string {
   // Doc ids can't contain '/'; hash-free key is fine for our low volume.
   return `${(ip ?? 'noip').replace(/[^\w.:-]/g, '_')}|${identifier.trim().toLowerCase()}`.slice(
     0,
@@ -128,7 +133,8 @@ export const login = onCall(HOT, async (req) => {
   if (typeof identifierRaw !== 'string' || typeof password !== 'string') {
     throw new HttpsError('invalid-argument', 'Username and password are required.');
   }
-  if (password.length > 72 || identifierRaw.length > USERNAME_MAX) {
+  const byEmail = looksLikeEmail(identifierRaw);
+  if (password.length > 72 || identifierRaw.length > (byEmail ? EMAIL_MAX : USERNAME_MAX)) {
     throw new HttpsError('unauthenticated', 'Wrong username or password.');
   }
   const ip = req.rawRequest?.ip;
@@ -140,11 +146,24 @@ export const login = onCall(HOT, async (req) => {
     );
   }
   const idLower = identifierRaw.trim().toLowerCase();
-  const uSnap = await usernameRef(idLower).get();
-  const userId = (uSnap.exists ? uSnap.data() : null) as {
-    userId: string;
-  } | null;
+  // A username wins when it matches (an old username may contain `@`); otherwise an email signs in only while it is
+  // confirmed in the index AND still the confirmed email on the Auth record (the index alone could be stale if the
+  // address was changed elsewhere). Anything else looks like an unknown name (no enumeration).
+  let userId = (
+    identifierRaw.length <= USERNAME_MAX
+      ? ((await usernameRef(idLower).get()).data() ?? null)
+      : null
+  ) as { userId: string } | null;
+  if (!userId && byEmail) {
+    const uid = await emailLoginUser(kv, idLower);
+    const rec = uid ? await authAdmin.getUser(uid).catch(() => null) : null;
+    if (uid && rec && rec.emailVerified === true && rec.email?.toLowerCase() === idLower) {
+      userId = { userId: uid };
+    }
+  }
   if (!userId) {
+    // Same work as a real account, so the time does not tell a confirmed address from an unknown one.
+    verifyPassword(password, DUMMY_HASH);
     await recordFailure(key);
     throw new HttpsError('unauthenticated', 'Wrong username or password.');
   }
