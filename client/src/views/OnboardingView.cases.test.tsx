@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { HttpError } from '../api';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
 import { DAY, emptyState, freezeClock, NOW, seed, setDesktop } from './__fixtures__/viewKit';
@@ -132,47 +133,49 @@ describe('OnboardingView: reset link', () => {
     m.inviteResult = invite({ kind: 'reset', username: 'ana', name: 'Ana Kay' });
   });
 
-  it('asks only for a new password, enabled from six characters', async () => {
+  // SPO-225 (design SPO-223, approved 31.10): a reset link opens the "Choose a new password" screen with a repeat field;
+  // after saving, "Password changed" asks the person to sign in by hand (other devices were signed out).
+  it('asks only for a new password and its repeat, checked from six characters', async () => {
     await open();
-    const save = screen.getByText(en.save).closest('button') as HTMLButtonElement;
-    expect(save.disabled).toBe(true);
-    typeInto(en.passwordMin, '12345');
-    expect(save.disabled).toBe(true);
-    typeInto(en.passwordMin, '123456');
-    expect(save.disabled).toBe(false);
+    expect(screen.getByPlaceholderText('New password')).toBeTruthy();
+    typeInto('New password', '12345');
+    typeInto('Repeat the new password', '12345');
+    await act(async () => {
+      fireEvent.click(screen.getByText('Save password'));
+    });
+    expect(m.callFn).not.toHaveBeenCalledWith('claim', expect.anything());
+    expect(document.querySelector('[role="alert"]')?.textContent).toContain('6 to 72');
   });
 
-  it('claims with the reset password, signs in and finishes', async () => {
+  it('claims with the reset password, does not sign in, and sends the person to sign in', async () => {
     m.callFn.mockImplementation(async (name: string) =>
       name === 'claim' ? { token: 'jwt' } : m.inviteResult,
     );
     const { onDone } = await open();
-    typeInto(en.passwordMin, 'newpass1');
+    typeInto('New password', 'newpass1');
+    typeInto('Repeat the new password', 'newpass1');
     await act(async () => {
-      fireEvent.click(screen.getByText(en.save));
+      fireEvent.click(screen.getByText('Save password'));
     });
-    expect(m.callFn).toHaveBeenCalledWith('claim', {
-      token: TOKEN,
-      password: 'newpass1',
-      username: 'ana',
-      firstName: 'Ana',
-      lastName: 'Kay',
-    });
-    expect(m.signIn).toHaveBeenCalledWith({ token: 'jwt' });
+    expect(m.callFn).toHaveBeenCalledWith('claim', { token: TOKEN, password: 'newpass1' });
+    expect(m.signIn).not.toHaveBeenCalled();
+    expect(screen.getByText('Password changed')).toBeTruthy();
+    fireEvent.click(screen.getByText('Sign in'));
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
-  it('shows the server error and stays', async () => {
+  it('shows the dead-link screen when the server refuses the link and stays', async () => {
     m.callFn.mockImplementation(async (name: string) => {
-      if (name === 'claim') throw new Error('Link used');
+      if (name === 'claim') throw new HttpError(400, 'link no longer valid');
       return m.inviteResult;
     });
     const { onDone } = await open();
-    typeInto(en.passwordMin, 'newpass1');
+    typeInto('New password', 'newpass1');
+    typeInto('Repeat the new password', 'newpass1');
     await act(async () => {
-      fireEvent.click(screen.getByText(en.save));
+      fireEvent.click(screen.getByText('Save password'));
     });
-    expect(document.querySelector('.field-error')?.textContent).toContain('Link used');
+    expect(screen.getByText('This link no longer works')).toBeTruthy();
     expect(onDone).not.toHaveBeenCalled();
   });
 });

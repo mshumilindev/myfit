@@ -187,13 +187,15 @@ export async function deleteAccountCascade(
   }
   // The email index, and the sign-in counters typed with those addresses or from linking one (they hold the address).
   for (const r of await kv.list('emails', { where: [['userId', '==', uid]] })) {
-    await del(
-      kv,
-      await kv.list('loginAttempts', { where: [['identifier', '==', decodeURIComponent(r.id)]] }),
-    );
+    const address = decodeURIComponent(r.id);
+    for (const id of [address, `reset:${address}`]) {
+      await del(kv, await kv.list('loginAttempts', { where: [['identifier', '==', id]] }));
+    }
     await kv.del(r.path);
   }
-  await del(kv, await kv.list('loginAttempts', { where: [['identifier', '==', `attach:${uid}`]] }));
+  for (const id of [`attach:${uid}`, `confirm:${uid}`]) {
+    await del(kv, await kv.list('loginAttempts', { where: [['identifier', '==', id]] }));
+  }
   await kv.del(`credentials/${uid}`);
   await kv.del(`assignments/${uid}`);
   await kv.del(`${RATE_COLLECTION}/${RATE_PREFIX}${uid}`);

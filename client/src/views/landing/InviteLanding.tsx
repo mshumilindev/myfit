@@ -4,6 +4,7 @@ import { callFn } from '../../api';
 import { LandingView } from './LandingView';
 
 interface Preview {
+  kind?: 'invite' | 'reset';
   state: 'valid' | 'expired' | 'claimed' | 'revoked';
   inviter: string | null;
   expiresAt: number;
@@ -22,7 +23,7 @@ export function InviteLanding({ token, onStart }: { token: string; onStart: () =
       .then((i) => {
         if (!live) return;
         // A dead / used link is explained by the onboarding screen itself.
-        if (i.state === 'valid') setInfo(i);
+        if (i.state === 'valid' && i.kind !== 'reset') setInfo(i);
         else start.current();
       })
       .catch(() => live && start.current());
