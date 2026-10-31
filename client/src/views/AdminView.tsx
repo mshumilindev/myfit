@@ -16,41 +16,15 @@ import { fullPersonName } from '../name';
 import { Dialog, Icon, Sheet } from '../ui';
 import { UserAvatar } from '../components/Avatar';
 import { PersonFields } from './AdminPersonFields';
-import { Tag } from '../components/ui/Tag';
+import { NewPersonDialog, LinkDialog, ChangeEmailDialog } from './AdminInviteDialogs';
+import { type MailOutcome, type Person } from './adminTypes';
 
-interface Person {
-  id: string;
-  name: string;
-  username: string;
-  firstName: string;
-  lastName: string | null;
-  role: 'member' | 'trainer' | 'admin';
-  status: 'active' | 'invited' | 'suspended';
-  trainerId: string | null;
-  trainerName: string | null;
-  clientCount: number;
-  lastSessionAt: number | null;
-  live: boolean;
-  liveStartedAt: number | null;
-  volume30: number;
-  avatar: boolean;
-  invite: {
-    state: 'sent' | 'expired' | 'revoked' | 'claimed';
-    expiresAt: number;
-    claimedAt: number | null;
-    reRequestedAt: number | null;
-    token: string;
-  } | null;
-}
+import { Tag } from '../components/ui/Tag';
 
 type Filter = 'all' | 'members' | 'trainers' | 'pending';
 type Load = 'loading' | 'ready' | 'failed';
 
 const DAY = 24 * 60 * 60 * 1000;
-
-function inviteLink(token: string): string {
-  return `${window.location.origin}/#/join/${token}`;
-}
 
 export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => void }) {
   const { t, locale } = useT();
@@ -67,11 +41,14 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
   const [menuFor, setMenuFor] = useState<Person | null>(null);
   const [assignFor, setAssignFor] = useState<Person | null>(null);
   const [editFor, setEditFor] = useState<Person | null>(null);
+  const [emailFor, setEmailFor] = useState<Person | null>(null);
   const [deleteFor, setDeleteFor] = useState<Person | null>(null);
   const [linkFor, setLinkFor] = useState<{
     person: Person;
     token: string;
     expiresAt: number;
+    mail?: MailOutcome;
+    email?: string;
   } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
@@ -349,11 +326,13 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                             void act(async () => {
                               const r = await callFn<{
                                 invite: { token: string; expiresAt: number };
-                              }>('adminIssueInvite', { id: p.id });
+                                mail: MailOutcome;
+                              }>('adminIssueInvite', { id: p.id, locale });
                               setLinkFor({
                                 person: p,
                                 token: r.invite.token,
                                 expiresAt: r.invite.expiresAt,
+                                mail: r.mail,
                               });
                             });
                           }}
@@ -415,10 +394,10 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
           kind={creating}
           trainers={assignableTrainers}
           onClose={() => setCreating(null)}
-          onCreated={(p, token, expiresAt) => {
+          onCreated={(p, token, expiresAt, mail, email) => {
             setCreating(null);
             refresh();
-            setLinkFor({ person: p, token, expiresAt });
+            setLinkFor({ person: p, token, expiresAt, mail, email });
           }}
         />
       )}
@@ -428,6 +407,8 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
           person={linkFor.person}
           token={linkFor.token}
           expiresAt={linkFor.expiresAt}
+          mail={linkFor.mail}
+          email={linkFor.email}
           onClose={() => setLinkFor(null)}
         />
       )}
@@ -467,11 +448,16 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                 const p = menuFor;
                 setMenuFor(null);
                 void act(async () => {
-                  const r = await callFn<{ invite: { token: string; expiresAt: number } }>(
-                    'adminResetPassword',
-                    { id: p.id },
-                  );
-                  setLinkFor({ person: p, token: r.invite.token, expiresAt: r.invite.expiresAt });
+                  const r = await callFn<{
+                    invite: { token: string; expiresAt: number };
+                    mail: MailOutcome;
+                  }>('adminResetPassword', { id: p.id, locale });
+                  setLinkFor({
+                    person: p,
+                    token: r.invite.token,
+                    expiresAt: r.invite.expiresAt,
+                    mail: r.mail,
+                  });
                 });
               }}
             />
@@ -485,16 +471,26 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                   const p = menuFor;
                   setMenuFor(null);
                   void act(async () => {
-                    const r = await callFn<{ invite: { token: string; expiresAt: number } }>(
-                      'adminIssueInvite',
-                      { id: p.id },
-                    );
+                    const r = await callFn<{
+                      invite: { token: string; expiresAt: number };
+                      mail: MailOutcome;
+                    }>('adminIssueInvite', { id: p.id, locale });
                     setLinkFor({
                       person: p,
                       token: r.invite.token,
                       expiresAt: r.invite.expiresAt,
+                      mail: r.mail,
                     });
                   });
+                }}
+              />
+              <ListRow
+                icon={<Icon name="envelope" />}
+                label={t.adminChangeEmail}
+                onClick={() => {
+                  const p = menuFor;
+                  setMenuFor(null);
+                  setEmailFor(p);
                 }}
               />
               <ListRow
@@ -569,6 +565,25 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
         />
       )}
 
+      {emailFor && (
+        <ChangeEmailDialog
+          person={emailFor}
+          onClose={() => setEmailFor(null)}
+          onDone={(r, email) => {
+            const p = emailFor;
+            setEmailFor(null);
+            refresh();
+            setLinkFor({
+              person: p,
+              token: r.invite.token,
+              expiresAt: r.invite.expiresAt,
+              mail: r.mail,
+              email,
+            });
+          }}
+        />
+      )}
+
       {editFor && (
         <EditDialog
           person={editFor}
@@ -598,199 +613,6 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
 // --- Shared pieces of the person dialogs ---------------------------------------
 
 // --- New member / trainer (AD-02) -------------------------------------------
-
-function NewPersonDialog(props: {
-  kind: 'member' | 'trainer';
-  trainers: Person[];
-  onClose: () => void;
-  onCreated: (p: Person, token: string, expiresAt: number) => void;
-}) {
-  const { t } = useT();
-  const [role, setRole] = useState<Person['role']>(props.kind);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState('');
-  const [trainerId, setTrainerId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  return (
-    <Sheet onClose={props.onClose}>
-      <div className="sheet-head">
-        <span className="t">{t.adminNewMember}</span>
-      </div>
-      <PersonFields
-        firstName={firstName}
-        lastName={lastName}
-        username={username}
-        onFirstName={setFirstName}
-        onLastName={setLastName}
-        onUsername={setUsername}
-      />
-      <div className="admin-role-field">
-        <div className="field-label">{t.adminColRole}</div>
-        <div className="admin-role-options">
-          {(
-            [
-              ['member', t.roleMember, t.adminMemberRoleHint, 'user'],
-              ['trainer', t.roleTrainer, t.adminTrainerRoleHint, 'user-focus'],
-              ['admin', t.roleAdmin, t.adminAdminRoleHint, 'shield-check'],
-            ] as Array<[Person['role'], string, string, Parameters<typeof Icon>[0]['name']]>
-          ).map(([id, label, hint, icon]) => (
-            <ListRow
-              key={id}
-              icon={<Icon name={icon} />}
-              label={label}
-              sub={hint}
-              selected={role === id}
-              check={role === id}
-              onClick={() => setRole(id)}
-            />
-          ))}
-        </div>
-      </div>
-      {props.trainers.length > 0 && (
-        <div className="assign-list">
-          <div className="field-label">{t.adminAssignedTrainer}</div>
-          <ListRow
-            label={t.adminNoTrainer}
-            sub={t.adminNoTrainerNote}
-            selected={trainerId === null}
-            check={trainerId === null}
-            onClick={() => setTrainerId(null)}
-          />
-          {props.trainers.map((tr) => (
-            <ListRow
-              key={tr.id}
-              icon={<UserAvatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />}
-              label={tr.name}
-              sub={t.adminClients(tr.clientCount)}
-              selected={trainerId === tr.id}
-              check={trainerId === tr.id}
-              onClick={() => setTrainerId(tr.id)}
-            />
-          ))}
-        </div>
-      )}
-      {error && (
-        <div className="field-error">
-          <Icon name="warning-circle" />
-          {error}
-        </div>
-      )}
-      <div className="sheet-actions">
-        <Button variant="secondary" className="grow" onClick={props.onClose}>
-          {t.cancel}
-        </Button>
-        <Button
-          variant="primary"
-          className="grow"
-          disabled={busy || firstName.trim().length < 2 || username.trim().length < 2}
-          onClick={async () => {
-            setBusy(true);
-            setError(null);
-            try {
-              const r = await callFn<{
-                person: Person;
-                invite: { token: string; expiresAt: number };
-              }>('adminCreateUser', {
-                name: fullPersonName(firstName, lastName),
-                firstName: firstName.trim(),
-                lastName: lastName.trim(),
-                username: username.trim(),
-                trainerId,
-                role,
-              });
-              props.onCreated(r.person, r.invite.token, r.invite.expiresAt);
-            } catch (e) {
-              setError(e instanceof Error ? e.message : t.error);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          {t.save}
-        </Button>
-      </div>
-    </Sheet>
-  );
-}
-
-/** AD-02: link + QR in the same dialog the account was created in. */
-function LinkDialog(props: {
-  person: Person;
-  token: string;
-  expiresAt: number;
-  onClose: () => void;
-}) {
-  const { t, locale } = useT();
-  const [copied, setCopied] = useState(false);
-  const [showQr, setShowQr] = useState(false);
-  const url = inviteLink(props.token);
-  return (
-    <Sheet onClose={props.onClose}>
-      <div className="sheet-head">
-        <span className="t ut-ok">
-          <Icon name="check-circle" weight="fill" /> {t.adminCreated}
-        </span>
-      </div>
-      <div className="h1">{t.adminReadyToClaim(props.person.name)}</div>
-      <p className="detail-muted">{t.adminSendLink}</p>
-      <div className="field-label">{t.adminInviteLink}</div>
-      <div className="invite-link-line">
-        <div className="invite-link-row">
-          <Icon name="arrow-up-right" />
-          <code>{url.replace(/^https?:\/\//, '')}</code>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => {
-            void navigator.clipboard.writeText(url).then(() => setCopied(true));
-          }}
-        >
-          <Icon name="copy" /> {copied ? t.adminCopied : t.adminCopy}
-        </Button>
-        <Button variant="secondary" onClick={() => setShowQr((x) => !x)}>
-          <Icon name="qr-code" />
-          {t.adminQr}
-        </Button>
-      </div>
-      {showQr && (
-        <img
-          className="invite-qr"
-          alt="QR"
-          src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&bgcolor=1f2125&color=e9eaec&data=${encodeURIComponent(url)}`}
-        />
-      )}
-      <div className="invite-cells">
-        <div className="cell">
-          <div className="l">{t.adminExpiresLabel}</div>
-          <div className="v">{t.adminExpires(fmtDayMonth(props.expiresAt, locale))}</div>
-        </div>
-        <div className="cell">
-          <div className="l">{t.adminUsesLabel}</div>
-          <div className="v">{t.adminSingleUse}</div>
-        </div>
-        <div className="cell">
-          <div className="l">{t.adminAssignedTrainer}</div>
-          <div className="v">{props.person.trainerName ?? t.adminNoTrainer}</div>
-        </div>
-      </div>
-      <div className="info-row">
-        <Icon name="info" />
-        <span>{t.adminLinkNote}</span>
-      </div>
-      <div className="sheet-actions">
-        <Button variant="secondary" className="grow" onClick={props.onClose}>
-          {t.adminCreateAnother}
-        </Button>
-        <Button variant="primary" className="grow" onClick={props.onClose}>
-          {t.adminDone}
-        </Button>
-      </div>
-    </Sheet>
-  );
-}
 
 // --- Assign trainer (AD-04) --------------------------------------------------
 

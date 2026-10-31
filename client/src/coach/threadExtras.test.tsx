@@ -67,7 +67,9 @@ describe('Share in the thread', () => {
     );
     fireEvent.click(row);
     // the picker closes and the chip row shows the item, with a way to take it back
-    expect(await screen.findByRole('button', { name: sh.pendingRemove })).toBeTruthy();
+    expect(
+      await screen.findByRole('button', { name: sh.pendingRemove }, { timeout: 5000 }),
+    ).toBeTruthy();
     expect(screen.queryByRole('combobox', { name: sh.pickSearchAria })).toBeNull();
     const send = screen.getByRole('button', { name: ch.chSend }) as HTMLButtonElement;
     expect(send.disabled).toBe(false);

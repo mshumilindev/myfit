@@ -36,6 +36,8 @@ interface InviteDoc {
   userId: string;
   createdBy: string;
   kind: 'invite' | 'reset';
+  /** Where the letter went (set when an admin invites); becomes the account's unverified sign-in email. */
+  email?: string | null;
   createdAt: number;
   expiresAt: number;
   claimedAt: number | null;
@@ -261,6 +263,9 @@ export const claim = onCall(async (req) => {
     throw new HttpsError('invalid-argument', 'First name: 2 to 64 characters.');
   }
 
+  // `invited-…` names are the placeholder for accounts that have not picked one yet.
+  if (/^invited-/i.test(name))
+    throw new HttpsError('invalid-argument', 'Please choose your own username.');
   if (!usernameAllowed(name, current.username))
     throw new HttpsError('invalid-argument', 'A username cannot contain @.');
 
@@ -288,7 +293,7 @@ export const claim = onCall(async (req) => {
       if (current.usernameLower) tx.delete(usernameRef(current.usernameLower));
       tx.set(usernameRef(nameLower), { userId: inv.userId });
     }
-    tx.update(invRef, { claimedAt: Date.now() });
+    tx.update(invRef, { claimedAt: Date.now(), email: null }); // the address lives on in the emails index
     return next;
   });
 
@@ -301,11 +306,17 @@ export const claim = onCall(async (req) => {
   try {
     await authAdmin.getUser(updated.id);
   } catch {
-    await authAdmin.createUser({
-      uid: updated.id,
-      displayName: displayName(updated),
-      disabled: false,
-    });
+    const base = { uid: updated.id, displayName: displayName(updated), disabled: false };
+    try {
+      // The invited address becomes the account email, unverified until the person confirms it (emailGate).
+      await authAdmin.createUser(
+        inv.email ? { ...base, email: inv.email, emailVerified: false } : base,
+      );
+    } catch (e) {
+      // The address was taken in Auth meanwhile: the claim already went through, so sign in without it (the email gate asks later).
+      if (!inv.email) throw e;
+      await authAdmin.createUser(base);
+    }
   }
 
   return authPayload(updated, await mintToken(updated.id, updated.role));

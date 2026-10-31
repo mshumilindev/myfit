@@ -3482,6 +3482,12 @@ export const et: Strings = {
   adminReadyToClaim: (n) => `${n} saab konto aktiveerida`,
   adminSendLink:
     'Saada see link. Avamisel määrab inimene oma parooli, lisab foto ja valib saali — andmed seotakse selle kontoga.',
+  adminChangeEmail: 'Muuda e-posti',
+  adminInviteEmail: 'E-post',
+  adminInviteEmailHint:
+    'Kutsekiri saadetakse siia. Nimi ja kasutajanimi on valikulised — inimene lisab need konto loomisel.',
+  adminMailSent: (e) => `Kutse saadetud aadressile ${e}`,
+  adminMailFailed: 'Kirja ei õnnestunud saata. Edasta allolev link või QR-kood.',
   adminInviteLink: 'Kutse link',
   adminCopy: 'Kopeeri',
   adminCopied: 'Kopeeritud',

@@ -365,7 +365,7 @@ describe('AdminView: row menu actions', () => {
     openMenu('Ada Lovelace');
     fireEvent.click(screen.getByText(en.adminSendReset));
     expect(await screen.findByText(en.adminReadyToClaim('Ada Lovelace'))).toBeTruthy();
-    expect(m.callFn).toHaveBeenCalledWith('adminResetPassword', { id: 'a' });
+    expect(m.callFn).toHaveBeenCalledWith('adminResetPassword', { id: 'a', locale: 'en' });
     expect(screen.getByText(/#\/join\/reset-1$/)).toBeTruthy();
     expect(screen.getByText('Tina Trainer', { selector: '.invite-cells .v' })).toBeTruthy();
   });
@@ -378,7 +378,7 @@ describe('AdminView: row menu actions', () => {
     openMenu('Ivy Invited');
     fireEvent.click(screen.getByText(en.adminNewLink));
     expect(await screen.findByText(en.adminReadyToClaim('Ivy Invited'))).toBeTruthy();
-    expect(m.callFn).toHaveBeenCalledWith('adminIssueInvite', { id: 'i' });
+    expect(m.callFn).toHaveBeenCalledWith('adminIssueInvite', { id: 'i', locale: 'en' });
     expect(screen.getByText('No trainer', { selector: '.invite-cells .v' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: en.adminDone }));
     await waitFor(() => expect(screen.queryByText(en.adminReadyToClaim('Ivy Invited'))).toBeNull());
@@ -387,6 +387,29 @@ describe('AdminView: row menu actions', () => {
     await waitFor(() =>
       expect(m.callFn).toHaveBeenCalledWith('adminRevokeInvite', { token: 'tok-i' }),
     );
+  });
+
+  it('Change email fixes the address of an unclaimed invitation and shows the new letter outcome', async () => {
+    await mount(ALL, {
+      adminChangeInviteEmail: () => ({
+        invite: { token: 'moved', expiresAt: NOW + 7 * DAY },
+        mail: { sent: true },
+      }),
+    });
+    openMenu('Ivy Invited');
+    fireEvent.click(screen.getByText(en.adminChangeEmail));
+    const save = () => screen.getByRole('button', { name: en.save }) as HTMLButtonElement;
+    expect(save().disabled).toBe(true);
+    fireEvent.change(screen.getByPlaceholderText(en.adminInviteEmail), {
+      target: { value: ' fixed@example.com ' },
+    });
+    fireEvent.click(save());
+    expect(await screen.findByText(en.adminMailSent('fixed@example.com'))).toBeTruthy();
+    expect(m.callFn).toHaveBeenCalledWith('adminChangeInviteEmail', {
+      id: 'i',
+      email: 'fixed@example.com',
+      locale: 'en',
+    });
   });
 
   it('the "asked for a new link" note offers Send without opening the profile', async () => {
@@ -568,11 +591,17 @@ describe('AdminView: dialogs', () => {
       adminCreateUser: () => ({
         person: created,
         invite: { token: 'inv-new', expiresAt: NOW + 7 * DAY },
+        mail: { sent: true },
       }),
     });
     fireEvent.click(screen.getByRole('button', { name: new RegExp(en.adminNewMember) }));
     const save = () => screen.getByRole('button', { name: en.save }) as HTMLButtonElement;
     expect(save().disabled).toBe(true);
+    // email is the one required field (names and username are optional at invitation time)
+    const emailInput = screen.getByPlaceholderText(en.adminInviteEmail);
+    fireEvent.change(emailInput, { target: { value: 'not-an-email' } });
+    expect(save().disabled).toBe(true);
+    fireEvent.change(emailInput, { target: { value: ' Nina@Example.com ' } });
     fireEvent.change(screen.getByPlaceholderText(en.firstName), { target: { value: ' Nina ' } });
     fireEvent.change(screen.getByPlaceholderText(en.lastName), { target: { value: ' New ' } });
     fireEvent.change(screen.getByPlaceholderText(en.username), { target: { value: ' nina ' } });
@@ -582,7 +611,10 @@ describe('AdminView: dialogs', () => {
     expect(save().disabled).toBe(false);
     fireEvent.click(save());
     expect(await screen.findByText(en.adminReadyToClaim('Nina New'))).toBeTruthy();
+    expect(screen.getByText(en.adminMailSent('Nina@Example.com'))).toBeTruthy();
     expect(m.callFn).toHaveBeenCalledWith('adminCreateUser', {
+      email: 'Nina@Example.com',
+      locale: 'en',
       name: 'Nina New',
       firstName: 'Nina',
       lastName: 'New',
@@ -614,10 +646,28 @@ describe('AdminView: dialogs', () => {
       },
     });
     fireEvent.click(screen.getByRole('button', { name: new RegExp(en.adminNewMember) }));
-    fireEvent.change(screen.getByPlaceholderText(en.firstName), { target: { value: 'Nina' } });
-    fireEvent.change(screen.getByPlaceholderText(en.username), { target: { value: 'nina' } });
+    fireEvent.change(screen.getByPlaceholderText(en.adminInviteEmail), {
+      target: { value: 'nina@example.com' },
+    });
     fireEvent.click(screen.getByRole('button', { name: en.save }));
     expect(await screen.findByText(en.error, { selector: '.field-error' })).toBeTruthy();
+  });
+
+  it('shows that the letter was not sent but keeps the link and QR available', async () => {
+    await mount(ALL, {
+      adminCreateUser: () => ({
+        person: person({ id: 'n2', name: 'Pat' }),
+        invite: { token: 'inv-2', expiresAt: NOW + 7 * DAY },
+        mail: { sent: false, reason: 'not-configured' },
+      }),
+    });
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(en.adminNewMember) }));
+    fireEvent.change(screen.getByPlaceholderText(en.adminInviteEmail), {
+      target: { value: 'pat@example.com' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: en.save }));
+    expect(await screen.findByText(en.adminMailFailed)).toBeTruthy();
+    expect(screen.getByText(/\/#\/join\/inv-2$/)).toBeTruthy();
   });
 
   it('with no trainers the new-member form has no trainer picker', async () => {

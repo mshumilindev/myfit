@@ -5,7 +5,10 @@
  * on the next call. Cross-user reads (detail/export) are audited.
  */
 import { onCall } from 'firebase-functions/v2/https';
-import { usernameAllowed } from './emailAuthCore';
+import { normalizeEmail, usernameAllowed } from './emailAuthCore';
+import { asMailLocale, inviteMail, type MailResult } from './mailCore';
+import { CF_EMAIL_TOKEN, sendMail } from './mailer';
+import { normalizeOrigin } from './coach/inviteLink';
 import {
   db,
   requireRole,
@@ -23,7 +26,7 @@ import {
 } from './lib';
 import { listUserWorkouts, volume30d, lastSession, workoutStrengthStats } from './aggregates';
 import { aggregateWorkouts, cutWorkouts, legacyCut, type LegacyCut } from './coach/legacy';
-import { coachCallOptions, coachCtx, coachKv } from './coach/runtime';
+import { APP_ORIGIN, coachCallOptions, coachCtx, coachKv } from './coach/runtime';
 import * as lifecycle from './coach/lifecycle';
 import { deletePasskeysOf } from './passkeysStore';
 import { CoachError } from './coach/service';
@@ -48,6 +51,8 @@ interface InviteDoc {
   claimedAt: number | null;
   revokedAt: number | null;
   reRequestedAt: number | null;
+  /** Where the invite letter went (set by an admin; server-only, the user document stays free of it). */
+  email?: string | null;
 }
 
 async function usersById(id: string): Promise<UserDoc | null> {
@@ -75,6 +80,7 @@ async function issueInvite(
   userId: string,
   createdBy: string,
   kind: 'invite' | 'reset',
+  email: string | null = null,
 ): Promise<InviteDoc> {
   const now = Date.now();
   const outstanding = await db
@@ -97,6 +103,7 @@ async function issueInvite(
     claimedAt: null,
     revokedAt: null,
     reRequestedAt: null,
+    email,
   };
   batch.set(db.collection('invites').doc(inv.token), inv);
   await batch.commit();
@@ -110,6 +117,61 @@ async function latestInvite(userId: string): Promise<InviteDoc | null> {
     .filter((i) => i.kind === 'invite')
     .sort((a, b) => b.createdAt - a.createdAt);
   return invites[0] ?? null;
+}
+
+/** The address an invite letter goes to: the account's own email once it has one, else the one the admin entered. */
+async function emailForUser(userId: string): Promise<string | null> {
+  try {
+    const au = await authAdmin.getUser(userId);
+    if (au.email) return au.email.toLowerCase();
+  } catch {
+    /* no Auth record yet: the invite never claimed */
+  }
+  const snap = await db.collection('invites').where('userId', '==', userId).get();
+  const withMail = snap.docs
+    .map((d) => d.data() as InviteDoc)
+    .filter((i) => typeof i.email === 'string' && i.email)
+    .sort((a, b) => b.createdAt - a.createdAt);
+  return withMail[0]?.email ?? null;
+}
+
+/** The address a *reset* letter may go to: only one the person has confirmed (a typo'd invite address must not get a password link). */
+async function verifiedEmailFor(userId: string): Promise<string | null> {
+  const to = await emailForUser(userId);
+  if (!to) return null;
+  const idx = await db.collection('emails').doc(encodeURIComponent(to)).get();
+  const d = idx.data() as { userId?: string; verifiedAt?: number | null } | undefined;
+  return d?.userId === userId && d.verifiedAt ? to : null;
+}
+
+const RESEND_COOLDOWN_MS = 60 * 1000;
+
+/** One letter per person per minute: no mail-bombing an address through repeated resends. */
+async function assertResendCooldown(userId: string): Promise<void> {
+  const snap = await db.collection('invites').where('userId', '==', userId).get();
+  const last = Math.max(0, ...snap.docs.map((d) => (d.data() as InviteDoc).createdAt ?? 0));
+  if (Date.now() - last < RESEND_COOLDOWN_MS)
+    throw new HttpsError('resource-exhausted', 'Wait a minute before sending another letter.');
+}
+
+const INVITE_DAYS = Math.round(INVITE_TTL / (24 * 60 * 60 * 1000));
+
+/** Sends the letter for a fresh invite. Never throws: the admin always gets the link and QR, the letter is reported. */
+async function mailInvite(
+  inv: InviteDoc,
+  user: UserDoc,
+  to: string | null,
+  locale: unknown,
+): Promise<MailResult> {
+  if (!to) return { sent: false, reason: 'not-configured' };
+  const origin = normalizeOrigin(APP_ORIGIN.value());
+  const msg = inviteMail(asMailLocale(locale), to, {
+    kind: inv.kind,
+    link: `${origin}/#/join/${inv.token}`,
+    name: user.firstName ?? '',
+    days: INVITE_DAYS,
+  });
+  return sendMail(msg);
 }
 
 export interface PersonJson {
@@ -202,34 +264,55 @@ export const adminPeople = onCall(async (req) => {
 
 // --- create user + invite ---------------------------------------------------
 
-export const adminCreateUser = onCall(async (req) => {
+const MAIL_OPTS = { secrets: [CF_EMAIL_TOKEN] };
+
+/** A temporary username for an invited account; the person picks the real one when creating the account. */
+const placeholderUsername = (): string => `invited-${newId().slice(0, 8).toLowerCase()}`;
+
+export const adminCreateUser = onCall(MAIL_OPTS, async (req) => {
   const { user: admin } = await requireRole(req, ['admin']);
   const body = (req.data ?? {}) as Record<string, unknown>;
   const { trainerId = null, role = 'member' } = body;
-  const names = parseNameInput(body);
+  // Email is the one required field: the letter goes there. Names and username are optional here; the person gives
+  // their name (required) and picks a username when they create the account (OnboardingView).
+  const email = normalizeEmail(body.email);
+  if (!email) throw new HttpsError('invalid-argument', 'A valid email is required.');
+  const names = parseNameInput({ firstName: body.firstName, lastName: body.lastName });
   const explicitUsername = cleanUsername(body.username);
-  if (names.firstName.length < 2) throw new HttpsError('invalid-argument', 'first name required');
-  if (explicitUsername.length < 2)
+  if (explicitUsername && explicitUsername.length < 2)
     throw new HttpsError('invalid-argument', 'valid username required');
   if (role !== 'member' && role !== 'trainer' && role !== 'admin')
     throw new HttpsError('invalid-argument', 'role must be member, trainer or admin');
-
-  if (!usernameAllowed(explicitUsername))
+  if (explicitUsername && !usernameAllowed(explicitUsername))
     throw new HttpsError('invalid-argument', 'A username cannot contain @.');
 
   const id = newId();
   const assignedTrainerId = await validateTrainerAssignment(id, trainerId);
-  const username = explicitUsername;
+  const username = explicitUsername || placeholderUsername();
+  // An address already on another account (sign-in record) cannot be invited a second time.
+  const taken = await authAdmin.getUserByEmail(email).then(
+    () => true,
+    (e: { code?: string }) => {
+      if (e?.code === 'auth/user-not-found') return false;
+      throw new HttpsError('internal', 'could not check the address'); // never treat an outage as "free"
+    },
+  );
+  if (taken) throw new HttpsError('already-exists', 'email taken');
 
-  // Reserve identity + create the invited (password-less) account atomically.
+  // Reserve identity + email + create the invited (password-less) account atomically.
+  const emailRef = db.collection('emails').doc(encodeURIComponent(email));
   await db.runTransaction(async (tx) => {
-    const uSnap = await tx.get(usernameRef(username.toLowerCase()));
+    const [uSnap, eSnap] = await Promise.all([
+      tx.get(usernameRef(username.toLowerCase())),
+      tx.get(emailRef),
+    ]);
     if (uSnap.exists) {
       const holder = await usersById((uSnap.data() as { userId: string }).userId);
       throw new HttpsError('already-exists', 'username taken', {
         holder: holder ? displayName(holder) : null,
       });
     }
+    if (eSnap.exists) throw new HttpsError('already-exists', 'email taken');
     const doc: Omit<UserDoc, 'id'> = {
       username,
       usernameLower: username.toLowerCase(),
@@ -244,27 +327,86 @@ export const adminCreateUser = onCall(async (req) => {
     };
     tx.set(db.collection('users').doc(id), doc);
     tx.set(usernameRef(username.toLowerCase()), { userId: id });
+    tx.set(emailRef, { userId: id, verifiedAt: null, updatedAt: Date.now() });
   });
 
-  const invite = await issueInvite(id, admin.id, 'invite');
-  const person = await buildPerson((await usersById(id))!);
-  return { person, invite };
+  const invite = await issueInvite(id, admin.id, 'invite', email);
+  const user = (await usersById(id))!;
+  const person = await buildPerson(user);
+  const mail = await mailInvite(invite, user, email, body.locale);
+  return { person, invite, mail };
 });
 
-export const adminIssueInvite = onCall(async (req) => {
+export const adminIssueInvite = onCall(MAIL_OPTS, async (req) => {
   const { user: admin } = await requireRole(req, ['admin']);
   const id = (req.data ?? {}).id as unknown;
   if (!isId(id)) throw new HttpsError('invalid-argument', 'id required');
-  if (!(await usersById(id))) throw new HttpsError('not-found', 'not found');
-  return { invite: await issueInvite(id, admin.id, 'invite') };
+  const user = await usersById(id);
+  if (!user) throw new HttpsError('not-found', 'not found');
+  await assertResendCooldown(id);
+  const to = await emailForUser(id);
+  const invite = await issueInvite(id, admin.id, 'invite', to);
+  const mail = await mailInvite(invite, user, to, (req.data ?? {}).locale);
+  return { invite, mail };
 });
 
-export const adminResetPassword = onCall(async (req) => {
+export const adminResetPassword = onCall(MAIL_OPTS, async (req) => {
   const { user: admin } = await requireRole(req, ['admin']);
   const id = (req.data ?? {}).id as unknown;
   if (!isId(id)) throw new HttpsError('invalid-argument', 'id required');
-  if (!(await usersById(id))) throw new HttpsError('not-found', 'not found');
-  return { invite: await issueInvite(id, admin.id, 'reset') };
+  const user = await usersById(id);
+  if (!user) throw new HttpsError('not-found', 'not found');
+  await assertResendCooldown(id);
+  const to = await verifiedEmailFor(id);
+  const invite = await issueInvite(id, admin.id, 'reset', to);
+  const mail = to
+    ? await mailInvite(invite, user, to, (req.data ?? {}).locale)
+    : ({ sent: false, reason: 'not-verified' } as MailResult);
+  return { invite, mail };
+});
+
+/** Fixes a mistyped address of an invitation nobody has claimed yet: frees the old reservation, reserves the new one, sends a fresh letter. */
+export const adminChangeInviteEmail = onCall(MAIL_OPTS, async (req) => {
+  const { user: admin } = await requireRole(req, ['admin']);
+  const body = (req.data ?? {}) as Record<string, unknown>;
+  const id = body.id as unknown;
+  if (!isId(id)) throw new HttpsError('invalid-argument', 'id required');
+  const email = normalizeEmail(body.email);
+  if (!email) throw new HttpsError('invalid-argument', 'A valid email is required.');
+  const user = await usersById(id);
+  if (!user) throw new HttpsError('not-found', 'not found');
+  if (user.status !== 'invited')
+    throw new HttpsError(
+      'failed-precondition',
+      'Only an unclaimed invitation can change its address.',
+    );
+  await assertResendCooldown(id);
+  const old = await emailForUser(id);
+  if (old === email) throw new HttpsError('invalid-argument', 'That is already the address.');
+  const taken = await authAdmin.getUserByEmail(email).then(
+    () => true,
+    (e: { code?: string }) => {
+      if (e?.code === 'auth/user-not-found') return false;
+      throw new HttpsError('internal', 'could not check the address');
+    },
+  );
+  if (taken) throw new HttpsError('already-exists', 'email taken');
+  const newRef = db.collection('emails').doc(encodeURIComponent(email));
+  const oldRef = old ? db.collection('emails').doc(encodeURIComponent(old)) : null;
+  await db.runTransaction(async (tx) => {
+    const [n, o] = await Promise.all([
+      tx.get(newRef),
+      oldRef ? tx.get(oldRef) : Promise.resolve(null),
+    ]);
+    if (n.exists) throw new HttpsError('already-exists', 'email taken');
+    // Only our own unconfirmed reservation is released.
+    const od = o?.exists ? (o.data() as { userId?: string; verifiedAt?: number | null }) : null;
+    if (oldRef && od?.userId === id && !od.verifiedAt) tx.delete(oldRef);
+    tx.set(newRef, { userId: id, verifiedAt: null, updatedAt: Date.now() });
+  });
+  const invite = await issueInvite(id, admin.id, 'invite', email);
+  const mail = await mailInvite(invite, user, email, body.locale);
+  return { invite, mail };
 });
 
 export const adminRevokeInvite = onCall(async (req) => {
