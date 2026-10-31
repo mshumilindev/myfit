@@ -13,9 +13,13 @@ import { callFn, getUsername } from '../api';
 import { offlineHydrate, offlineLoad, offlinePeekNow } from '../offline/offlineCache';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { fullPersonName } from '../name';
+import { looksLikeEmail } from '../accounts/emailFormat';
 import { Dialog, Icon, Sheet } from '../ui';
 import { UserAvatar } from '../components/Avatar';
 import { PersonFields } from './AdminPersonFields';
+
+/** What the server reports about the invitation letter (the link and QR are always returned). */
+type MailOutcome = { sent: boolean; reason?: string };
 import { Tag } from '../components/ui/Tag';
 
 interface Person {
@@ -72,6 +76,8 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
     person: Person;
     token: string;
     expiresAt: number;
+    mail?: MailOutcome;
+    email?: string;
   } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
@@ -349,11 +355,13 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                             void act(async () => {
                               const r = await callFn<{
                                 invite: { token: string; expiresAt: number };
-                              }>('adminIssueInvite', { id: p.id });
+                                mail: MailOutcome;
+                              }>('adminIssueInvite', { id: p.id, locale });
                               setLinkFor({
                                 person: p,
                                 token: r.invite.token,
                                 expiresAt: r.invite.expiresAt,
+                                mail: r.mail,
                               });
                             });
                           }}
@@ -415,10 +423,10 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
           kind={creating}
           trainers={assignableTrainers}
           onClose={() => setCreating(null)}
-          onCreated={(p, token, expiresAt) => {
+          onCreated={(p, token, expiresAt, mail, email) => {
             setCreating(null);
             refresh();
-            setLinkFor({ person: p, token, expiresAt });
+            setLinkFor({ person: p, token, expiresAt, mail, email });
           }}
         />
       )}
@@ -428,6 +436,8 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
           person={linkFor.person}
           token={linkFor.token}
           expiresAt={linkFor.expiresAt}
+          mail={linkFor.mail}
+          email={linkFor.email}
           onClose={() => setLinkFor(null)}
         />
       )}
@@ -467,11 +477,16 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                 const p = menuFor;
                 setMenuFor(null);
                 void act(async () => {
-                  const r = await callFn<{ invite: { token: string; expiresAt: number } }>(
-                    'adminResetPassword',
-                    { id: p.id },
-                  );
-                  setLinkFor({ person: p, token: r.invite.token, expiresAt: r.invite.expiresAt });
+                  const r = await callFn<{
+                    invite: { token: string; expiresAt: number };
+                    mail: MailOutcome;
+                  }>('adminResetPassword', { id: p.id, locale });
+                  setLinkFor({
+                    person: p,
+                    token: r.invite.token,
+                    expiresAt: r.invite.expiresAt,
+                    mail: r.mail,
+                  });
                 });
               }}
             />
@@ -485,14 +500,15 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                   const p = menuFor;
                   setMenuFor(null);
                   void act(async () => {
-                    const r = await callFn<{ invite: { token: string; expiresAt: number } }>(
-                      'adminIssueInvite',
-                      { id: p.id },
-                    );
+                    const r = await callFn<{
+                      invite: { token: string; expiresAt: number };
+                      mail: MailOutcome;
+                    }>('adminIssueInvite', { id: p.id, locale });
                     setLinkFor({
                       person: p,
                       token: r.invite.token,
                       expiresAt: r.invite.expiresAt,
+                      mail: r.mail,
                     });
                   });
                 }}
@@ -603,13 +619,20 @@ function NewPersonDialog(props: {
   kind: 'member' | 'trainer';
   trainers: Person[];
   onClose: () => void;
-  onCreated: (p: Person, token: string, expiresAt: number) => void;
+  onCreated: (
+    p: Person,
+    token: string,
+    expiresAt: number,
+    mail: MailOutcome,
+    email: string,
+  ) => void;
 }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [role, setRole] = useState<Person['role']>(props.kind);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [trainerId, setTrainerId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -619,6 +642,15 @@ function NewPersonDialog(props: {
       <div className="sheet-head">
         <span className="t">{t.adminNewMember}</span>
       </div>
+      <Field
+        type="email"
+        inputMode="email"
+        autoComplete="off"
+        placeholder={t.adminInviteEmail}
+        hint={t.adminInviteEmailHint}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
       <PersonFields
         firstName={firstName}
         lastName={lastName}
@@ -685,7 +717,7 @@ function NewPersonDialog(props: {
         <Button
           variant="primary"
           className="grow"
-          disabled={busy || firstName.trim().length < 2 || username.trim().length < 2}
+          disabled={busy || !looksLikeEmail(email)}
           onClick={async () => {
             setBusy(true);
             setError(null);
@@ -693,7 +725,10 @@ function NewPersonDialog(props: {
               const r = await callFn<{
                 person: Person;
                 invite: { token: string; expiresAt: number };
+                mail: MailOutcome;
               }>('adminCreateUser', {
+                email: email.trim(),
+                locale,
                 name: fullPersonName(firstName, lastName),
                 firstName: firstName.trim(),
                 lastName: lastName.trim(),
@@ -701,7 +736,7 @@ function NewPersonDialog(props: {
                 trainerId,
                 role,
               });
-              props.onCreated(r.person, r.invite.token, r.invite.expiresAt);
+              props.onCreated(r.person, r.invite.token, r.invite.expiresAt, r.mail, email.trim());
             } catch (e) {
               setError(e instanceof Error ? e.message : t.error);
             } finally {
@@ -721,6 +756,8 @@ function LinkDialog(props: {
   person: Person;
   token: string;
   expiresAt: number;
+  mail?: MailOutcome;
+  email?: string;
   onClose: () => void;
 }) {
   const { t, locale } = useT();
@@ -735,6 +772,12 @@ function LinkDialog(props: {
         </span>
       </div>
       <div className="h1">{t.adminReadyToClaim(props.person.name)}</div>
+      {props.mail && (
+        <div className={props.mail.sent ? 'info-row' : 'field-error'}>
+          <Icon name={props.mail.sent ? 'envelope' : 'warning-circle'} />
+          {props.mail.sent ? t.adminMailSent(props.email ?? '') : t.adminMailFailed}
+        </div>
+      )}
       <p className="detail-muted">{t.adminSendLink}</p>
       <div className="field-label">{t.adminInviteLink}</div>
       <div className="invite-link-line">
