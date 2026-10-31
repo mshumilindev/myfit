@@ -19,7 +19,7 @@ import {
   type EmailErrorKind,
   type EmailState,
 } from './emailApi';
-import { cooldownLeft, emailGateView } from './emailGate';
+import { cooldownLeft, emailGateView } from './emailGateView';
 import { EmailGatePage } from './EmailGatePage';
 
 /** Focus / visibility / online events re-read the status at most this often (the switch is off for most people). */

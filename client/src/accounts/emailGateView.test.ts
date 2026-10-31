@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cooldownLeft, emailGateView, RESEND_COOLDOWN_S } from './emailGate';
+import { cooldownLeft, emailGateView, RESEND_COOLDOWN_S } from './emailGateView';
 
 describe('emailGateView', () => {
   it('stays clear while the server has not answered', () => {
