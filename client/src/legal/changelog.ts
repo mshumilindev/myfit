@@ -53,6 +53,9 @@ export const LEGAL_CHANGELOG: readonly LegalChangelogEntry[] = [
     kind: 'material',
     bullets: ['category', 'terms', 'recipient'],
   },
+  // Correction before the first send: all letters (invitations, email confirmation, password links) go out through one
+  // sender, Resend (new recipient: address, name if given, and the one-time link in the letter); Cloudflare no longer sends mail.
+  { doc: 'policy', version: '2026-11-01', kind: 'material', bullets: ['recipient'] },
 ];
 
 /** Entries of a document after `from` (exclusive) up to `to` (inclusive). */

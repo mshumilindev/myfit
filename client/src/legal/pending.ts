@@ -182,6 +182,13 @@ export const PENDING: readonly PendingItem[] = [
     'SPO-391/392: texts about the Atlas chat history in the account (p3, p7, p8) and account settings/challenges (p3) are drafted from open sources, NOT checked by a lawyer; the 30-day period of the kept copy after withdrawal is a proposal (claude/SPO-391-392-legal-open-sources.md §3a).',
   ),
   item(
+    'pp-resend',
+    'privacy',
+    'p5',
+    'lawyer',
+    'Resend as processor for all letters (recipient address, name if given, one-time link): drafted from engineering facts, NOT checked by a lawyer. Open: Resend DPA/SCC reference and transfer basis (account region EU), delivery-log retention.',
+  ),
+  item(
     'pp-cloudflare',
     'privacy',
     'p5',

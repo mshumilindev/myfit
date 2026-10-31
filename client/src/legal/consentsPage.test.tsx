@@ -217,7 +217,7 @@ describe('PrivacyHub', () => {
     expect(screen.getByText('2 of 10 on')).toBeTruthy();
     expect(screen.getByText('Privacy Policy')).toBeTruthy();
     expect(screen.getByText('Terms of Use')).toBeTruthy();
-    // the two documents are versioned apart (the policy moved on 2026-10-31), each shows its own
+    // the two documents are versioned apart (the policy moved on 2026-11-01), each shows its own
     expect(screen.getByText(`Version ${LEGAL_VERSIONS.terms}`)).toBeTruthy();
     expect(screen.getByText(`Version ${LEGAL_VERSIONS.policy}`)).toBeTruthy();
     fireEvent.click(screen.getByText('Consents'));
