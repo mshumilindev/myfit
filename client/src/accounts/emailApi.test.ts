@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const h = vi.hoisted(() => ({
   callFn: vi.fn(),
-  send: vi.fn(),
   user: { reload: vi.fn(), getIdToken: vi.fn() } as Record<string, unknown> | null,
 }));
 
@@ -18,6 +17,7 @@ vi.mock('../api', () => {
   }
   return { callFn: h.callFn, HttpError };
 });
+vi.mock('../i18n', () => ({ getLocale: () => 'uk' }));
 vi.mock('../firebase', () => ({
   auth: {
     get currentUser() {
@@ -25,7 +25,6 @@ vi.mock('../firebase', () => ({
     },
   },
 }));
-vi.mock('firebase/auth', () => ({ sendEmailVerification: h.send }));
 
 import { HttpError } from '../api';
 import { attachEmail, emailErrorKind, refreshEmailState, sendConfirmation } from './emailApi';
@@ -65,23 +64,19 @@ describe('attachEmail', () => {
 });
 
 describe('sendConfirmation', () => {
-  it('reloads the user and sends the letter', async () => {
-    h.send.mockResolvedValue(undefined);
+  it('asks the server to send the letter in the current locale', async () => {
+    h.callFn.mockResolvedValue({ sent: true });
     await sendConfirmation();
-    expect((h.user as { reload: () => void }).reload).toHaveBeenCalled();
-    expect(h.send).toHaveBeenCalledWith(h.user);
+    expect(h.callFn).toHaveBeenCalledWith('sendConfirmationMail', { locale: 'uk' });
   });
-  it('refuses when signed out', async () => {
+  it('refuses when signed out, without calling the server', async () => {
     h.user = null;
     await expect(sendConfirmation()).rejects.toMatchObject({ status: 401 });
+    expect(h.callFn).not.toHaveBeenCalled();
   });
-  it.each([
-    ['auth/too-many-requests', 429],
-    ['auth/network-request-failed', 503],
-    ['auth/other', 500],
-  ])('maps %s to %i', async (code, status) => {
-    h.send.mockRejectedValue({ code });
-    await expect(sendConfirmation()).rejects.toMatchObject({ status });
+  it('passes the server error through for the UI mapping', async () => {
+    h.callFn.mockRejectedValue(new HttpError(429, 'x'));
+    await expect(sendConfirmation()).rejects.toMatchObject({ status: 429 });
   });
 });
 

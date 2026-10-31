@@ -91,7 +91,7 @@ vi.mock('../../functions/src/lib', () => {
   };
 });
 vi.mock('../../functions/src/mailer', () => ({
-  CF_EMAIL_TOKEN: {},
+  MAIL_API_KEY: {},
   sendMail: async (m: { to: string; text: string }) => {
     h.sent.push(m);
     return h.mail;

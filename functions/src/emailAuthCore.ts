@@ -141,3 +141,26 @@ export async function emailLoginUser(kv: Kv, identifier: string): Promise<string
   const hit = (await kv.get(ref(email))) as IndexDoc | null;
   return hit && hit.verifiedAt !== null ? hit.userId : null;
 }
+
+/** Minimum pause between two confirmation letters to the same address. */
+export const CONFIRM_COOLDOWN_MS = 60_000;
+
+/**
+ * Takes the "one letter per minute" slot for this account's address in ONE transaction (parallel calls cannot both pass).
+ * Returns false while the pause is running. Uses the address index entry, so no new collection or data appears.
+ */
+export async function claimConfirmSlot(
+  kv: Kv,
+  uid: string,
+  email: string,
+  now: number,
+): Promise<boolean> {
+  return kv.tx(async (t) => {
+    const hit = (await t.get(ref(email))) as IndexDoc | null;
+    if (!hit || hit.userId !== uid) return true;
+    const last = typeof hit.mailedAt === 'number' ? hit.mailedAt : 0;
+    if (now - last < CONFIRM_COOLDOWN_MS) return false;
+    await t.set(ref(email), { ...hit, mailedAt: now });
+    return true;
+  });
+}

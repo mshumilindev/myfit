@@ -1,14 +1,20 @@
 /**
  * Callables for linking an email to an existing account (SPO-283). Logic and rules in `emailAuthCore.ts`.
  * `attachEmail` needs a signed-in caller AND the current password (a fresh proof before the sign-in method changes);
- * the confirmation email itself is sent by the client (`sendEmailVerification`, Firebase template) once this returns.
+ * the confirmation letter is sent by `sendConfirmationMail` through the same server mailer as every other letter
+ * (invitations, resets), so all mail leaves from one place.
  */
 import { onCall } from 'firebase-functions/v2/https';
 import { isLocked, limiterKey, recordFailure } from './auth';
 import { firestoreKv } from './coach/firestoreKv';
+import { normalizeOrigin } from './coach/inviteLink';
+import { APP_ORIGIN } from './coach/runtime';
 import { authAdmin, db, HttpsError, verifyPassword } from './lib';
+import { asMailLocale, inviteMail } from './mailCore';
+import { MAIL_API_KEY, sendMail } from './mailer';
 import {
   attachEmail as attach,
+  claimConfirmSlot,
   emailStatus as status,
   isEmailRequired,
   type AttachPorts,
@@ -84,4 +90,44 @@ export const emailStatus = onCall(async (req) => {
     db.collection('config').doc('auth').get(),
   ]);
   return { ...state, required: isEmailRequired(cfg.data()) };
+});
+
+/** Sends the address-confirmation letter from the server mailer. Counts every call; nothing about the result leaks the address. */
+export const sendConfirmationMail = onCall({ secrets: [MAIL_API_KEY] }, async (req) => {
+  const uid = uidOf(req);
+  const b = (req.data ?? {}) as Record<string, unknown>;
+  const me = (await db.collection('users').doc(uid).get()).data() as
+    { status?: string } | undefined;
+  if (me?.status === 'suspended') throw new HttpsError('permission-denied', 'forbidden');
+  const key = limiterKey(undefined, `confirm:${uid}`);
+  if (await isLocked(key)) {
+    throw new HttpsError('resource-exhausted', 'Too many attempts. Try again in 15 minutes.');
+  }
+  await recordFailure(key);
+  const { email, verified } = await ports.current(uid);
+  if (!email) throw new HttpsError('invalid-argument', 'No email on this account.');
+  if (verified) return { sent: false, verified: true };
+  // One letter per minute per address, taken atomically: parallel calls cannot multiply the letters.
+  if (!(await claimConfirmSlot(kv, uid, email, Date.now()))) {
+    throw new HttpsError('resource-exhausted', 'Wait a minute before sending another letter.');
+  }
+  let link: string;
+  try {
+    link = await authAdmin.generateEmailVerificationLink(email, {
+      url: normalizeOrigin(APP_ORIGIN.value()),
+    });
+  } catch {
+    throw new HttpsError('internal', 'Could not prepare the letter.');
+  }
+  const locale = typeof b.locale === 'string' ? b.locale : 'en';
+  const r = await sendMail(
+    inviteMail(asMailLocale(locale), email, { kind: 'verify', link, name: '', days: 0 }),
+  );
+  if (!r.sent) {
+    throw new HttpsError(
+      r.reason === 'not-configured' ? 'failed-precondition' : 'internal',
+      'Could not send the letter.',
+    );
+  }
+  return { sent: true, verified: false };
 });
