@@ -389,6 +389,29 @@ describe('AdminView: row menu actions', () => {
     );
   });
 
+  it('Change email fixes the address of an unclaimed invitation and shows the new letter outcome', async () => {
+    await mount(ALL, {
+      adminChangeInviteEmail: () => ({
+        invite: { token: 'moved', expiresAt: NOW + 7 * DAY },
+        mail: { sent: true },
+      }),
+    });
+    openMenu('Ivy Invited');
+    fireEvent.click(screen.getByText(en.adminChangeEmail));
+    const save = () => screen.getByRole('button', { name: en.save }) as HTMLButtonElement;
+    expect(save().disabled).toBe(true);
+    fireEvent.change(screen.getByPlaceholderText(en.adminInviteEmail), {
+      target: { value: ' fixed@example.com ' },
+    });
+    fireEvent.click(save());
+    expect(await screen.findByText(en.adminMailSent('fixed@example.com'))).toBeTruthy();
+    expect(m.callFn).toHaveBeenCalledWith('adminChangeInviteEmail', {
+      id: 'i',
+      email: 'fixed@example.com',
+      locale: 'en',
+    });
+  });
+
   it('the "asked for a new link" note offers Send without opening the profile', async () => {
     const { onOpenProfile } = await mount(ALL, {
       adminIssueInvite: () => ({ invite: { token: 'again', expiresAt: NOW + 7 * DAY } }),

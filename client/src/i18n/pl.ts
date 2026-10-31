@@ -3502,6 +3502,7 @@ export const pl: Strings = {
   adminReadyToClaim: (n) => `${n} może już aktywować konto`,
   adminSendLink:
     'Wyślij ten link. Po otwarciu ustawią własne hasło, dodadzą zdjęcie i wybiorą siłownię — dane zostaną przypisane do tego konta.',
+  adminChangeEmail: 'Zmień e-mail',
   adminInviteEmail: 'E-mail',
   adminInviteEmailHint:
     'Zaproszenie zostanie wysłane na ten adres. Imię i login są opcjonalne — osoba poda je przy zakładaniu konta.',

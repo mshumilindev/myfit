@@ -28,6 +28,9 @@ vi.mock('../../functions/src/lib', () => {
     async set(v: Doc) {
       h.store.set(path, v);
     },
+    async delete() {
+      h.store.delete(path);
+    },
     async update(v: Doc) {
       h.store.set(path, { ...h.store.get(path), ...v });
     },
@@ -70,6 +73,7 @@ vi.mock('../../functions/src/lib', () => {
         fn({
           get: (r: { get: () => Promise<unknown> }) => r.get(),
           set: (r: { set: (v: Doc) => Promise<void> }, v: Doc) => void r.set(v),
+          delete: (r: { delete: () => Promise<void> }) => void r.delete(),
         }),
     },
     authAdmin: {
@@ -115,7 +119,12 @@ vi.mock('../../functions/src/passkeysStore', () => ({ deletePasskeysOf: async ()
 vi.mock('../../functions/src/coach/service', () => ({ CoachError: class extends Error {} }));
 vi.mock('../../functions/src/accountDeletion', () => ({ adminCascade: async () => undefined }));
 
-import { adminCreateUser, adminIssueInvite, adminResetPassword } from '../../functions/src/admin';
+import {
+  adminChangeInviteEmail,
+  adminCreateUser,
+  adminIssueInvite,
+  adminResetPassword,
+} from '../../functions/src/admin';
 
 type Fn = (req: unknown) => Promise<{
   invite: { token: string; email: string | null };
@@ -217,5 +226,57 @@ describe('resend and reset', () => {
     const r = await run(adminResetPassword, { id });
     expect(r.mail.sent).toBe(true);
     expect(h.sent[0].to).toBe('ann@example.com');
+  });
+});
+
+describe('adminChangeInviteEmail', () => {
+  async function invited() {
+    const r = await run(adminCreateUser, { email: 'typo@exmaple.com' });
+    const id = [...h.store.keys()].find((p) => p.startsWith('users/id'))!.split('/')[1];
+    h.store.set(`invites/${r.invite.token}`, {
+      ...h.store.get(`invites/${r.invite.token}`),
+      createdAt: 1,
+    });
+    return id;
+  }
+
+  it('frees the mistyped reservation, reserves the new address and mails it', async () => {
+    const id = await invited();
+    h.sent.length = 0;
+    const r = await run(adminChangeInviteEmail, { id, email: 'Right@Example.com' });
+    expect(r.mail.sent).toBe(true);
+    expect(h.sent[0].to).toBe('right@example.com');
+    expect(h.store.has('emails/typo%40exmaple.com')).toBe(false);
+    expect(h.store.get('emails/right%40example.com')).toMatchObject({
+      userId: id,
+      verifiedAt: null,
+    });
+    // the old letter's link is revoked
+    const old = [...h.store.entries()].filter(([p, d]) => p.startsWith('invites/') && d.revokedAt);
+    expect(old).toHaveLength(1);
+  });
+
+  it('refuses a taken address, the same address, a claimed account and an invalid address', async () => {
+    const id = await invited();
+    h.store.set('emails/taken%40example.com', { userId: 'other', verifiedAt: null });
+    await expect(
+      run(adminChangeInviteEmail, { id, email: 'taken@example.com' }),
+    ).rejects.toMatchObject({
+      code: 'already-exists',
+    });
+    await expect(
+      run(adminChangeInviteEmail, { id, email: 'typo@exmaple.com' }),
+    ).rejects.toMatchObject({
+      code: 'invalid-argument',
+    });
+    await expect(run(adminChangeInviteEmail, { id, email: 'nope' })).rejects.toMatchObject({
+      code: 'invalid-argument',
+    });
+    h.store.set(`users/${id}`, { ...h.store.get(`users/${id}`), status: 'active' });
+    await expect(
+      run(adminChangeInviteEmail, { id, email: 'ok@example.com' }),
+    ).rejects.toMatchObject({
+      code: 'failed-precondition',
+    });
   });
 });
