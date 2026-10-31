@@ -13,6 +13,7 @@ import { useEmailT } from '../i18n/emailAuth';
 import {
   attachEmail,
   emailErrorKind,
+  emailStatus,
   refreshEmailState,
   sendConfirmation,
   type EmailErrorKind,
@@ -20,6 +21,9 @@ import {
 } from './emailApi';
 import { cooldownLeft, emailGateView } from './emailGate';
 import { EmailGatePage } from './EmailGatePage';
+
+/** Focus / visibility / online events re-read the status at most this often (the switch is off for most people). */
+const RELOAD_MIN_MS = 30_000;
 
 /** While "check your inbox" is on screen the status is re-read this often (and on every return to the tab). */
 const POLL_MS = 8000;
@@ -62,20 +66,32 @@ function GateFor() {
     [],
   );
 
-  const load = useCallback(async () => {
-    if (preview) return;
-    try {
-      const s = await refreshEmailState();
-      if (alive.current) setState(s);
-    } catch {
-      /* offline or a server hiccup: the app stays open, the next try (focus, interval, online) asks again */
-    }
-  }, [preview]);
+  // A newer write (attach, check) wins over a slower read that started before it.
+  const seq = useRef(0);
+  const lastLoad = useRef(0);
+  const load = useCallback(
+    async (force = false) => {
+      if (preview) return;
+      const at = Date.now();
+      if (!force && at - lastLoad.current < RELOAD_MIN_MS) return;
+      lastLoad.current = at;
+      const mine = ++seq.current;
+      try {
+        const s = await emailStatus();
+        if (alive.current && mine === seq.current) setState(s);
+      } catch {
+        /* offline or a server hiccup: the app stays open, the next try (focus, interval, online) asks again */
+      }
+    },
+    [preview],
+  );
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reads the server state once at mount
-    void load();
-    const again = () => void load();
+    void load(true);
+    const again = () => {
+      if (!document.hidden) void load();
+    };
     window.addEventListener('online', again);
     window.addEventListener('focus', again);
     document.addEventListener('visibilitychange', again);
@@ -92,8 +108,10 @@ function GateFor() {
   useEffect(() => {
     if (!waiting) return;
     const id = window.setInterval(() => {
+      // A forgotten background tab does not keep asking the server.
+      if (document.hidden) return;
       setNow(Date.now());
-      void load();
+      void load(true);
     }, POLL_MS);
     const tick = window.setInterval(() => setNow(Date.now()), 1000);
     return () => {
@@ -120,11 +138,13 @@ function GateFor() {
     void run(async () => {
       if (preview) return;
       const next = await attachEmail(email.trim(), password);
+      seq.current++;
       setState({ ...next, required: true });
       setOverride(null);
-      await sendConfirmation();
+      // The cooldown starts with the attempt, so a refused send cannot be hammered either.
       setSentAt(Date.now());
       setNow(Date.now());
+      await sendConfirmation();
       setNote(t.resendSent);
     });
   const onResend = () =>
@@ -137,6 +157,7 @@ function GateFor() {
   const onCheck = () =>
     void run(async () => {
       const s = await refreshEmailState();
+      seq.current++;
       setState(s);
       if (!(s.verified && s.email)) setNote(t.stillPending);
     });
