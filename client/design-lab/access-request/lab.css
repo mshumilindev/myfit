@@ -17,3 +17,6 @@
 .ar-c-l{opacity:.85}
 .ar-c-s{display:flex;align-items:center;gap:var(--s-8);flex-wrap:wrap}
 .ar-c-n{font-size:var(--fs-min);opacity:.75}
+.ar-pick{display:flex;flex-direction:column;gap:var(--s-8);border:0;padding:0;margin:0}
+.ar-legend{padding:0;margin-bottom:var(--s-4);opacity:.8}
+.ar-pick-row{display:flex;align-items:center;gap:var(--s-12);padding:var(--s-8) 0}

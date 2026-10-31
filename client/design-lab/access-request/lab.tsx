@@ -41,7 +41,7 @@ export function ClientRequestForm({ onClose }: { onClose: () => void }) {
   );
   const rows = ASKED.map((a) => {
     const c = catOf(a.id);
-    return { id: a.id, label: c.label, what: `${TRAINER} asks for ${LEVELS[a.level]}. ${c.what}`, value: vals[a.id] };
+    return { id: a.id, label: c.label, what: `${TRAINER} asks for this. ${c.what}`, value: vals[a.id] };
   });
   const chosen = Object.values(vals).filter((v) => v !== 'off').length;
   return (
@@ -49,7 +49,7 @@ export function ClientRequestForm({ onClose }: { onClose: () => void }) {
       <div className="ar-body">
         <div className="ar-title">{TRAINER} asks to see {ASKED.length} things</div>
         <p className="ar-lead">
-          Nothing is on until you choose. Pick a level for each row, or leave it Off. You can change this any time in Privacy and sharing.
+          Nothing is on until you choose. Pick how much to share for each row, or leave it Off. You can change this any time in Privacy and sharing.
         </p>
         {needHealth && (
           <div className="ar-note">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../../src/components/ui/Button';
-import { ConsentLevelPicker, type ConsentLevelId } from '../../src/components/ui/ConsentControls';
+import { Checkbox } from '../../src/components/ui/Checkbox';
+import type { ConsentLevelId } from '../../src/components/ui/ConsentControls';
 import { Icon } from '../../src/ui';
 import { Sheet } from '../../src/components/ui/Overlays';
 import { Tag } from '../../src/components/ui/Tag';
@@ -14,7 +15,7 @@ function Body({ onClose, CLIENT }: { onClose: () => void; CLIENT: string }) {
   const cool = s.includes('cooldown');
   const [vals, setVals] = useState<Record<string, ConsentLevelId>>({ sleep: 'effects', body: 'effects', injury: 'off', nutrition: 'off' });
   const closed = CATS.filter((c) => !SHARED[c.id]);
-  const picked = Object.values(vals).filter((v) => v !== 'off').length;
+  const picked = closed.filter((c) => vals[c.id] === 'effects').length;
   const disabled = noApp || cool;
   return (
     <Sheet onClose={onClose} label="Request access" closeLabel="Close" className="ar-sheet">
@@ -30,7 +31,7 @@ function Body({ onClose, CLIENT }: { onClose: () => void; CLIENT: string }) {
           </div>
         ) : (
           <p className="ar-lead">
-            {CLIENT} gets one short form with these rows highlighted. He decides what to turn on; nothing changes until he does. Pick a level to suggest, or leave a row on Don’t ask.
+            {CLIENT} gets one short form with these rows highlighted. Tick what you need. They decide what to turn on and how much; nothing changes until he does.
           </p>
         )}
         {cool && (
@@ -43,13 +44,21 @@ function Body({ onClose, CLIENT }: { onClose: () => void; CLIENT: string }) {
           </div>
         )}
         <div className="ar-rows">
-          <ConsentLevelPicker
-            legend="What to ask for"
-            rows={closed.map((c) => ({ id: c.id, label: c.label, what: c.what, value: vals[c.id] ?? 'off' }))}
-            levelLabels={{ ...LEVELS, off: 'Don’t ask' }}
-            disabled={disabled}
-            onChange={(id, l) => setVals({ ...vals, [id]: l })}
-          />
+          <fieldset className="ar-pick" disabled={disabled}>
+            <legend className="ar-legend">What do you need</legend>
+            {closed.map((c) => (
+              <label key={c.id} className="ar-pick-row">
+                <Checkbox
+                  checked={vals[c.id] === 'effects'}
+                  onChange={(v) => setVals({ ...vals, [c.id]: v ? 'effects' : 'off' })}
+                />
+                <span className="ar-note-t">
+                  <b>{c.label}</b>
+                  <small>{c.what}</small>
+                </span>
+              </label>
+            ))}
+          </fieldset>
           <div className="ar-have">
             <b>Already shared</b>
             {CATS.filter((c) => SHARED[c.id]).map((c) => (

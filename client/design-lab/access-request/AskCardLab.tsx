@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../../src/components/ui/Button';
 import { ChatBubble } from '../../src/components/ui/ChatBubble';
-import { ASKED, ClientRequestForm, LEVELS, TRAINER, ResultTag, ar, catOf, resultOf } from './lab';
+import { ASKED, ClientRequestForm, TRAINER, ResultTag, ar, catOf, resultOf } from './lab';
 
 /** Replaces `AskCard` in both chats: one card for a request with several categories and the client's answer. */
 const CLIENT = 'Oleh';
@@ -23,7 +23,7 @@ export function AskCard({ side, mine, onOpenSharing }: { kind: string; side: 'tr
     ) : (
       <>
         <span className="ar-c-h">{TRAINER} asks for access</span>
-        <span className="ar-c-l">{ASKED.map((a) => `${catOf(a.id).label}: ${LEVELS[a.level]}`).join(' · ')}</span>
+        <span className="ar-c-l">{names.join(', ')}</span>
       </>
     );
   return (
