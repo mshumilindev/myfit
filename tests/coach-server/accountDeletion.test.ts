@@ -3,6 +3,7 @@
  * no emulator, nothing real is ever deleted). "Registry empty after deletion" lists every path of the data registry
  * (SPO-252 R1-R43) and asserts it is gone, then sweeps what is left for any trace of the account.
  */
+import { resetLimiterId } from '../../functions/src/passwordResetCore';
 import { randomBytes } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -241,6 +242,17 @@ async function seedFull() {
     windowStart: 1,
     identifier: `attach:${A}`,
   });
+  // SPO-225: the confirmation-letter and forgot-password counters (the latter is typed with the address).
+  await kv.set(`loginAttempts/noip|confirm:${A}`, {
+    count: 1,
+    windowStart: 1,
+    identifier: `confirm:${A}`,
+  });
+  await kv.set(`loginAttempts/noip|${resetLimiterId('s1@example.com')}`, {
+    count: 1,
+    windowStart: 1,
+    identifier: resetLimiterId('s1@example.com'),
+  });
 }
 
 /** Everything that must be gone after deleting A: path by registry row. */
@@ -252,6 +264,11 @@ const GONE: [row: string, path: string][] = [
   ['SPO-283 email index', 'emails/s1%40example.com'],
   ['SPO-283 counter typed with the address', 'loginAttempts/1.2.3.4|s1@example.com'],
   ['SPO-283 attach counter', `loginAttempts/noip|attach:${A}`],
+  ['SPO-225 confirmation-letter counter', `loginAttempts/noip|confirm:${A}`],
+  [
+    'SPO-225 forgot-password counter typed with the address',
+    `loginAttempts/noip|${resetLimiterId('s1@example.com')}`,
+  ],
   ['R5 login counter', `loginAttempts/1.2.3.4|${A}name`],
   ['R6 passkey', `passkeys/pk-${A}`],
   ['R6 passkey challenge', `passkeyChallenges/ch-${A}`],

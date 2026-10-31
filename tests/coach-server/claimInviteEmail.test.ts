@@ -38,7 +38,17 @@ vi.mock('../../functions/src/lib', () => {
     HttpsError,
     HOT: {},
     db: {
-      collection: (c: string) => ({ doc: (id: string) => ref(`${c}/${id}`) }),
+      collection: (c: string) => {
+        const query = (conds: Array<[string, unknown]>) => ({
+          where: (f: string, _op: string, v: unknown) => query([...conds, [f, v]]),
+          get: async () => ({
+            docs: [...h.store.entries()]
+              .filter(([k, d]) => k.startsWith(`${c}/`) && conds.every(([f, v]) => d[f] === v))
+              .map(([k, d]) => ({ id: k.slice(c.length + 1), ref: ref(k), data: () => d })),
+          }),
+        });
+        return { doc: (id: string) => ref(`${c}/${id}`), ...query([]) };
+      },
       runTransaction: async (fn: (tx: unknown) => Promise<unknown>) =>
         fn({
           get: (r: { get: () => Promise<unknown> }) => r.get(),
@@ -134,5 +144,72 @@ describe('claim with an invited email', () => {
       code: 'invalid-argument',
     });
     expect(h.store.get('invites/t1')).toMatchObject({ claimedAt: null });
+  });
+});
+
+describe('claim of a self-service reset link (SPO-225)', () => {
+  const resetInvite = {
+    token: 'r1',
+    userId: 'u1',
+    createdBy: 'u1',
+    kind: 'reset',
+    createdAt: 1,
+    expiresAt: Date.now() + 1e6,
+    claimedAt: null,
+    revokedAt: null,
+    reRequestedAt: null,
+    email: null,
+  };
+  const user = {
+    username: 'ann',
+    usernameLower: 'ann',
+    firstName: 'Ann',
+    lastName: '',
+    role: 'member',
+  };
+  it('sets the password, keeps the username and uses the link up', async () => {
+    h.store.set('users/u1', { ...user, status: 'active' });
+    h.store.set('invites/r1', resetInvite);
+    await run({ token: 'r1', password: 'newpass123' });
+    expect(h.store.get('credentials/u1')).toEqual({ passwordHash: 'h:newpass123' });
+    expect(h.store.get('users/u1')).toMatchObject({ username: 'ann', status: 'active' });
+    expect(h.store.get('invites/r1')).toMatchObject({ claimedAt: expect.any(Number) });
+    await expect(run({ token: 'r1', password: 'another123' })).rejects.toMatchObject({
+      code: 'failed-precondition',
+    });
+  });
+  it('ignores a username and names in the body, and works for an account with a short first name', async () => {
+    h.store.set('users/u1', { ...user, firstName: 'A', status: 'active' });
+    h.store.set('invites/r1', resetInvite);
+    await run({ token: 'r1', password: 'newpass123', username: 'hacked', firstName: 'Mallory' });
+    expect(h.store.get('users/u1')).toMatchObject({ username: 'ann', firstName: 'A' });
+    expect(h.store.get('usernames/hacked')).toBeUndefined();
+  });
+  it("revokes the account's other open reset links when one is used", async () => {
+    h.store.set('users/u1', { ...user, status: 'active' });
+    h.store.set('invites/r1', resetInvite);
+    h.store.set('invites/r2', { ...resetInvite, token: 'r2' });
+    await run({ token: 'r1', password: 'newpass123' });
+    expect(h.store.get('invites/r2')).toMatchObject({ revokedAt: expect.any(Number) });
+  });
+  it('never wakes a suspended account and leaves the link untouched', async () => {
+    h.store.set('users/u1', { ...user, status: 'suspended' });
+    h.store.set('invites/r1', resetInvite);
+    await expect(run({ token: 'r1', password: 'newpass123' })).rejects.toMatchObject({
+      code: 'failed-precondition',
+    });
+    expect(h.store.get('users/u1')).toMatchObject({ status: 'suspended' });
+    expect(h.store.get('credentials/u1')).toBeUndefined();
+  });
+  it('refuses an expired or revoked link', async () => {
+    h.store.set('users/u1', { ...user, status: 'active' });
+    h.store.set('invites/r1', { ...resetInvite, expiresAt: Date.now() - 1 });
+    await expect(run({ token: 'r1', password: 'newpass123' })).rejects.toMatchObject({
+      code: 'failed-precondition',
+    });
+    h.store.set('invites/r1', { ...resetInvite, revokedAt: Date.now() });
+    await expect(run({ token: 'r1', password: 'newpass123' })).rejects.toMatchObject({
+      code: 'failed-precondition',
+    });
   });
 });

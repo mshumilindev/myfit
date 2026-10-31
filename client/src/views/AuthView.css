@@ -42,3 +42,8 @@
   opacity: 0;
   pointer-events: none;
 }
+
+/* "Forgot your password?" sits under the password field, left-aligned like the remember-me row. */
+.auth-card > .auth-forgot {
+  align-self: flex-start;
+}

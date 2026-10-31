@@ -28,6 +28,8 @@ import { AlcoholProductsView } from './health/alcohol/AlcoholProductsView';
 import { SupplementOnboardingRow } from './health/supplements/SupplementSection';
 import { SupplementProductsView } from './health/supplements/SupplementProductsView';
 import { SupplementQuickStartSheet } from './health/supplements/SupplementQuickStartSheet';
+import { ResetPasswordView } from './ResetPasswordView';
+import { wantForgotForm } from './forgotRoute';
 
 interface InviteInfo {
   state: 'valid' | 'expired' | 'claimed' | 'revoked';
@@ -150,6 +152,21 @@ export function OnboardingView(props: {
     return <OnbLandingSkeleton />;
   }
 
+  // A reset link (an administrator's or the person's own) is its own small flow: a new password, done (SPO-225).
+  if (info !== 'error' && info.kind === 'reset') {
+    return (
+      <ResetPasswordView
+        token={token}
+        live={info.state === 'valid'}
+        onSignIn={() => onDone()}
+        onNewLink={() => {
+          wantForgotForm();
+          onDone();
+        }}
+      />
+    );
+  }
+
   const resumable = saved !== null && !!currentUid();
   if (info === 'error' || (info.state !== 'valid' && !resumable)) {
     const when =
@@ -219,39 +236,6 @@ export function OnboardingView(props: {
     } finally {
       setBusy(false);
     }
-  }
-
-  // Reset links are a single step: set the new password, done.
-  if (info.kind === 'reset' && step === 0) {
-    return (
-      <div className="onb-shell center">
-        <div className="onb-card">
-          <h2>{t.onbWho}</h2>
-          <Field
-            type="password"
-            placeholder={t.passwordMin}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {error && (
-            <div className="field-error">
-              <Icon name="warning-circle" />
-              {error}
-            </div>
-          )}
-          <Button
-            variant="primary"
-            size="lg"
-            disabled={busy || password.length < 6}
-            onClick={async () => {
-              if (await claim()) onDone();
-            }}
-          >
-            {t.save}
-          </Button>
-        </div>
-      </div>
-    );
   }
 
   return (

@@ -16,6 +16,9 @@ import { useLegalT } from '../i18n/legal';
 import { Icon, LanguageSelector } from '../ui';
 import { InstallShortcut } from './InstallShortcut';
 import { useEmailT } from '../i18n/emailAuth';
+import { useResetT } from '../i18n/passwordReset';
+import { ForgotPasswordView } from './ForgotPasswordView';
+import { clearForgotForm, peekForgotForm } from './forgotRoute';
 import './AuthView.css';
 
 /** The reachability probe gives up after this long; sign-in is never held back by it. */
@@ -53,6 +56,10 @@ export function AuthView({
 }) {
   const { t } = useT();
   const emailT = useEmailT();
+  const resetT = useResetT();
+  // The forgot-password form replaces the sign-in form in place (SPO-225).
+  const [forgot, setForgot] = useState(peekForgotForm);
+  useEffect(() => clearForgotForm(), []);
   const { lg } = useLegalT();
   const [unreachable, setUnreachable] = useState(false);
   // The server answered slowly or not at all, but the browser is online: the
@@ -182,6 +189,8 @@ export function AuthView({
     }
   }
 
+  if (forgot) return <ForgotPasswordView onBack={() => setForgot(false)} />;
+
   return (
     <form className="auth-body" onSubmit={submit}>
       <div className="auth-card">
@@ -294,6 +303,20 @@ export function AuthView({
             disabled={unreachable || busy || locked}
             onChange={(e) => setPassword(e.target.value)}
           />
+        )}
+
+        {!wallView && !bio && (
+          <Button
+            type="button"
+            variant="link"
+            className="auth-forgot"
+            onClick={() => {
+              setError(null);
+              setForgot(true);
+            }}
+          >
+            {resetT.forgotLink}
+          </Button>
         )}
 
         {formView && (
