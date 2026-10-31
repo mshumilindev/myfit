@@ -154,13 +154,14 @@ export async function claimConfirmSlot(
   uid: string,
   email: string,
   now: number,
+  field: 'mailedAt' | 'resetAt' = 'mailedAt',
 ): Promise<boolean> {
   return kv.tx(async (t) => {
     const hit = (await t.get(ref(email))) as IndexDoc | null;
     if (!hit || hit.userId !== uid) return true;
-    const last = typeof hit.mailedAt === 'number' ? hit.mailedAt : 0;
+    const last = typeof hit[field] === 'number' ? (hit[field] as number) : 0;
     if (now - last < CONFIRM_COOLDOWN_MS) return false;
-    await t.set(ref(email), { ...hit, mailedAt: now });
+    await t.set(ref(email), { ...hit, [field]: now });
     return true;
   });
 }

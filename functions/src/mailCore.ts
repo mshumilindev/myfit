@@ -16,7 +16,8 @@ export interface MailMessage {
   html: string;
 }
 
-export type InviteKind = 'invite' | 'reset' | 'verify';
+/** `selfreset`: the person asked for the letter themselves (forgot password); `reset`: an administrator sent it. */
+export type InviteKind = 'invite' | 'reset' | 'verify' | 'selfreset';
 
 export interface InviteMailInput {
   kind: InviteKind;
@@ -24,21 +25,74 @@ export interface InviteMailInput {
   link: string;
   /** The person's name when the admin gave one. */
   name: string;
-  /** Days the link works (ignored for `verify`: Firebase decides how long its link works). */
+  /** Days the link works (ignored for `verify` and `selfreset`). */
   days: number;
+  /** Hours the link works (`selfreset`). */
+  hours?: number;
 }
 
+type WordKind = Exclude<InviteKind, 'selfreset'>;
+
+/** The letter of a person who asked to reset their own password: five short strings per locale. */
+interface SelfWords {
+  subject: string;
+  lead: string;
+  expires: (hours: number) => string;
+  ignore: string;
+  foot: string;
+}
+const SELF: Record<MailLocale, SelfWords> = {
+  en: {
+    subject: 'Reset your Spotter password',
+    lead: 'Someone (hopefully you) asked to reset the password of your Spotter account. Your training data stays as it is.',
+    expires: (h) => `The link works once and expires in ${h} hour${h === 1 ? '' : 's'}.`,
+    ignore:
+      'If you did not ask for this, ignore this letter: nothing changes until the link is opened.',
+    foot: 'Spotter · sent because a password reset was requested for this address.',
+  },
+  uk: {
+    subject: 'Скидання пароля Spotter',
+    lead: 'Хтось (сподіваємось, ви) попросив скинути пароль до акаунта Spotter. Ваші дані тренувань лишаються як є.',
+    expires: (h) => `Посилання працює один раз і діє ${h} год.`,
+    ignore:
+      'Якщо ви цього не просили, проігноруйте лист: поки посилання не відкрито, нічого не змінюється.',
+    foot: 'Spotter · лист надіслано, бо для цієї адреси попросили скинути пароль.',
+  },
+  pl: {
+    subject: 'Reset hasła do Spotter',
+    lead: 'Ktoś (mamy nadzieję, że Ty) poprosił o reset hasła do konta Spotter. Twoje dane treningowe pozostają bez zmian.',
+    expires: (h) => `Link działa jednorazowo i wygasa po ${h} godz.`,
+    ignore:
+      'Jeśli to nie Ty, zignoruj ten list: dopóki link nie zostanie otwarty, nic się nie zmienia.',
+    foot: 'Spotter · wiadomość wysłano, bo dla tego adresu poproszono o reset hasła.',
+  },
+  lt: {
+    subject: 'Spotter slaptažodžio atkūrimas',
+    lead: 'Kažkas (tikimės, kad jūs) paprašė atkurti jūsų Spotter paskyros slaptažodį. Jūsų treniruočių duomenys lieka nepakitę.',
+    expires: (h) => `Nuoroda veikia vieną kartą ir galioja ${h} val.`,
+    ignore: 'Jei to neprašėte, ignoruokite laišką: kol nuoroda neatidaryta, nieko nevyksta.',
+    foot: 'Spotter · laiškas išsiųstas, nes šiam adresui paprašyta atkurti slaptažodį.',
+  },
+  et: {
+    subject: 'Spotteri parooli lähtestamine',
+    lead: 'Keegi (loodetavasti sina) palus lähtestada sinu Spotteri konto parool. Sinu treeningandmed jäävad samaks.',
+    expires: (h) => `Link töötab ühe korra ja kehtib ${h} tundi.`,
+    ignore: 'Kui sa seda ei palunud, ignoreeri kirja: kuni linki ei avata, ei muutu midagi.',
+    foot: 'Spotter · kiri saadeti, sest sellele aadressile telliti parooli lähtestamine.',
+  },
+};
+
 interface Words {
-  subject: Record<InviteKind, string>;
+  subject: Record<WordKind, string>;
   hello: (name: string) => string;
-  lead: Record<InviteKind, string>;
-  button: Record<InviteKind, string>;
+  lead: Record<WordKind, string>;
+  button: Record<WordKind, string>;
   expires: (days: number) => string;
   fallback: string;
   qr: string;
   once: string;
-  ignore: Record<InviteKind, string>;
-  foot: Record<InviteKind, string>;
+  ignore: Record<WordKind, string>;
+  foot: Record<WordKind, string>;
 }
 
 const WORDS: Record<MailLocale, Words> = {
@@ -208,22 +262,30 @@ const esc = (s: string): string =>
 /** The invite / set-password letter in one locale: subject, plain text and HTML (the same facts in both). */
 export function inviteMail(locale: MailLocale, to: string, i: InviteMailInput): MailMessage {
   const w = WORDS[locale];
+  const own = i.kind === 'selfreset' ? SELF[locale] : null;
+  const k: WordKind = i.kind === 'selfreset' ? 'reset' : i.kind;
+  const expiry =
+    i.kind === 'verify' ? w.once : own ? own.expires(i.hours ?? 1) : `${w.expires(i.days)} ${w.qr}`;
+  const subject = own?.subject ?? w.subject[k];
+  const lead = own?.lead ?? w.lead[k];
+  const ignore = own?.ignore ?? w.ignore[k];
+  const foot = own?.foot ?? w.foot[k];
   const text = [
     w.hello(i.name),
     '',
-    w.lead[i.kind],
+    lead,
     '',
-    `${w.button[i.kind]}: ${i.link}`,
+    `${w.button[k]}: ${i.link}`,
     '',
-    ...(i.kind === 'verify' ? [w.once] : [w.expires(i.days), w.qr]),
+    ...(own || i.kind === 'verify' ? [expiry] : [w.expires(i.days), w.qr]),
     '',
-    w.ignore[i.kind],
+    ignore,
     '',
-    w.foot[i.kind],
+    foot,
   ].join('\n');
   const link = esc(i.link);
-  const html = `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"></head><body style="margin:0;background:#0b0c0e;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#e9e9ea"><div style="max-width:560px;margin:0 auto;padding:32px 16px"><div style="background:#16171a;border:1px solid #2a2c31;border-radius:16px;padding:32px 28px"><h1 style="font-size:22px;line-height:1.3;margin:0 0 12px;color:#fff">${esc(w.subject[i.kind])}</h1><p style="font-size:15px;line-height:1.55;margin:0 0 8px;color:#b8bac0">${esc(w.hello(i.name))}</p><p style="font-size:15px;line-height:1.55;margin:0 0 16px;color:#b8bac0">${esc(w.lead[i.kind])}</p><a href="${link}" style="display:inline-block;background:#d9a24f;color:#1a1204;font-weight:700;font-size:15px;text-decoration:none;padding:13px 26px;border-radius:999px;margin:8px 0 20px">${esc(w.button[i.kind])}</a><p style="font-size:13px;line-height:1.5;margin:0 0 12px;color:#b8bac0">${esc(i.kind === 'verify' ? w.once : `${w.expires(i.days)} ${w.qr}`)}</p><p style="font-size:12px;line-height:1.5;margin:0 0 16px;color:#8b8e96;word-break:break-all">${esc(w.fallback)}<br>${link}</p><p style="font-size:13px;line-height:1.5;margin:0;color:#b8bac0;border-left:3px solid #d9a24f;padding-left:12px">${esc(w.ignore[i.kind])}</p></div><p style="font-size:12px;color:#7d8088;margin:20px 8px 0;line-height:1.5;text-align:center">${esc(w.foot[i.kind])}</p></div></body></html>`;
-  return { to, subject: w.subject[i.kind], text, html };
+  const html = `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"></head><body style="margin:0;background:#0b0c0e;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#e9e9ea"><div style="max-width:560px;margin:0 auto;padding:32px 16px"><div style="background:#16171a;border:1px solid #2a2c31;border-radius:16px;padding:32px 28px"><h1 style="font-size:22px;line-height:1.3;margin:0 0 12px;color:#fff">${esc(subject)}</h1><p style="font-size:15px;line-height:1.55;margin:0 0 8px;color:#b8bac0">${esc(w.hello(i.name))}</p><p style="font-size:15px;line-height:1.55;margin:0 0 16px;color:#b8bac0">${esc(lead)}</p><a href="${link}" style="display:inline-block;background:#d9a24f;color:#1a1204;font-weight:700;font-size:15px;text-decoration:none;padding:13px 26px;border-radius:999px;margin:8px 0 20px">${esc(w.button[k])}</a><p style="font-size:13px;line-height:1.5;margin:0 0 12px;color:#b8bac0">${esc(expiry)}</p><p style="font-size:12px;line-height:1.5;margin:0 0 16px;color:#8b8e96;word-break:break-all">${esc(w.fallback)}<br>${link}</p><p style="font-size:13px;line-height:1.5;margin:0;color:#b8bac0;border-left:3px solid #d9a24f;padding-left:12px">${esc(ignore)}</p></div><p style="font-size:12px;color:#7d8088;margin:20px 8px 0;line-height:1.5;text-align:center">${esc(foot)}</p></div></body></html>`;
+  return { to, subject, text, html };
 }
 
 export interface MailerConfig {

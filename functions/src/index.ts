@@ -42,5 +42,6 @@ export * from './consentRecords';
 // Gym search and photos from Google Places, through the server (SPO-360).
 export * from './gymPlaces';
 export * from './emailAuth';
+export * from './passwordReset';
 // Self-service account deletion (SPO-285).
 export * from './accountDeletion';

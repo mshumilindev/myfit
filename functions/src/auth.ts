@@ -251,6 +251,10 @@ export const claim = onCall(async (req) => {
   const userSnap = await userRef.get();
   if (!userSnap.exists) throw new HttpsError('failed-precondition', 'account gone');
   const current: UserDoc = { id: inv.userId, ...(userSnap.data() as Omit<UserDoc, 'id'>) };
+  // A reset link sets a password and nothing else: a suspended account stays suspended (no way back in through a letter).
+  if (inv.kind === 'reset' && current.status === 'suspended') {
+    throw new HttpsError('failed-precondition', 'link no longer valid');
+  }
 
   const names = parseNameInput(body);
   const firstName = names.firstName || current.firstName || '';
@@ -282,7 +286,7 @@ export const claim = onCall(async (req) => {
       usernameLower: nameLower,
       firstName,
       lastName,
-      status: 'active' as Status,
+      status: (inv.kind === 'reset' ? current.status : 'active') as Status,
       updatedAt: Date.now(),
     };
     const { id: _omit, ...stored } = next;
