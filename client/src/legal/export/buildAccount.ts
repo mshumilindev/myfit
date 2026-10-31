@@ -8,6 +8,7 @@ export function buildAccount(s: ExportSources, exportedAt: string): CategoryResu
       item: 'Profile details held on the server (name, photo, role history, team)',
       reason: 'server-only',
     },
+    { item: 'Email address and whether it is confirmed', reason: 'server-only' },
     { item: 'Sign-in attempts, passkeys and device sessions', reason: 'server-only' },
     { item: 'Key access log and service notices', reason: 'server-only' },
   ];

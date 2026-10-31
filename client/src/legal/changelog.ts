@@ -44,6 +44,9 @@ export const LEGAL_CHANGELOG: readonly LegalChangelogEntry[] = [
   // SPO-184/220: the site is served through Cloudflare (new recipient: IP and request metadata) and access is restricted by
   // country/area; the approximate location is derived from the IP and not stored.
   { doc: 'policy', version: '2026-10-30', kind: 'material', bullets: ['recipient', 'purpose'] },
+  // SPO-224/283/423: an email address is kept for sign-in and recovery (Firebase Authentication + a server-only index);
+  // a confirmed email becomes required to use the app.
+  { doc: 'policy', version: '2026-10-31', kind: 'material', bullets: ['category', 'terms'] },
 ];
 
 /** Entries of a document after `from` (exclusive) up to `to` (inclusive). */

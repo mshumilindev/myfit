@@ -26,7 +26,7 @@ test.afterAll(() => {
 });
 
 const CONSENT_VERIFIED = JSON.stringify({
-  'e2e-m': 'terms@2026-10-21,policy-ack@2026-10-30,age-18@2026-10-21',
+  'e2e-m': 'terms@2026-10-21,policy-ack@2026-10-31,age-18@2026-10-21',
 });
 const theme = (page: Page) => page.evaluate(() => document.documentElement.dataset.theme);
 
