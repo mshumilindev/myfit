@@ -54,12 +54,21 @@ async function openPicker() {
   return screen.findByRole('combobox', { name: sh.pickSearchAria });
 }
 
+/**
+ * Types a query and waits until the debounced search is applied (the empty-query "Suggested" view is gone). Before that the
+ * rows on screen belong to the old view and are replaced when the debounce fires, so a click on one of them is lost (SPO-425).
+ */
+async function typeQuery(box: HTMLElement, value: string) {
+  fireEvent.change(box, { target: { value } });
+  await waitFor(() => expect(screen.queryByText(sh.pickSuggested)).toBeNull(), { timeout: 5000 });
+}
+
 describe('Share in the thread', () => {
   it('the composer has a Share button; picking an item shows a pending card and lets Send go without text', async () => {
     mount();
     const box = await openPicker();
     expect(await screen.findByText(sh.pickSuggested)).toBeTruthy();
-    fireEvent.change(box, { target: { value: 'upper' } });
+    await typeQuery(box, 'upper');
     const row = await screen.findByRole(
       'option',
       { name: new RegExp(`^${sh.kind.program}: Upper`) },
@@ -91,7 +100,7 @@ describe('Share in the thread', () => {
   it('the pending item can be taken back, and Send is disabled again without text', async () => {
     mount();
     const box = await openPicker();
-    fireEvent.change(box, { target: { value: 'chest' } });
+    await typeQuery(box, 'chest');
     fireEvent.click(
       (
         await screen.findAllByRole(
