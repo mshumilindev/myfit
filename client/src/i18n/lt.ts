@@ -3523,6 +3523,7 @@ export const lt: Strings = {
   adminReadyToClaim: (n) => `${n} gali aktyvuoti paskyrą`,
   adminSendLink:
     'Išsiųsk šią nuorodą. Ją atidaręs žmogus susikurs savo slaptažodį, pridės nuotrauką ir pasirinks salę — duomenys bus susieti su šia paskyra.',
+  adminChangeEmail: 'Keisti el. paštą',
   adminInviteEmail: 'El. paštas',
   adminInviteEmailHint:
     'Kvietimo laiškas bus išsiųstas čia. Vardas ir prisijungimo vardas neprivalomi — žmogus juos nurodys kurdamas paskyrą.',

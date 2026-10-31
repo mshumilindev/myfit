@@ -365,6 +365,50 @@ export const adminResetPassword = onCall(MAIL_OPTS, async (req) => {
   return { invite, mail };
 });
 
+/** Fixes a mistyped address of an invitation nobody has claimed yet: frees the old reservation, reserves the new one, sends a fresh letter. */
+export const adminChangeInviteEmail = onCall(MAIL_OPTS, async (req) => {
+  const { user: admin } = await requireRole(req, ['admin']);
+  const body = (req.data ?? {}) as Record<string, unknown>;
+  const id = body.id as unknown;
+  if (!isId(id)) throw new HttpsError('invalid-argument', 'id required');
+  const email = normalizeEmail(body.email);
+  if (!email) throw new HttpsError('invalid-argument', 'A valid email is required.');
+  const user = await usersById(id);
+  if (!user) throw new HttpsError('not-found', 'not found');
+  if (user.status !== 'invited')
+    throw new HttpsError(
+      'failed-precondition',
+      'Only an unclaimed invitation can change its address.',
+    );
+  await assertResendCooldown(id);
+  const old = await emailForUser(id);
+  if (old === email) throw new HttpsError('invalid-argument', 'That is already the address.');
+  const taken = await authAdmin.getUserByEmail(email).then(
+    () => true,
+    (e: { code?: string }) => {
+      if (e?.code === 'auth/user-not-found') return false;
+      throw new HttpsError('internal', 'could not check the address');
+    },
+  );
+  if (taken) throw new HttpsError('already-exists', 'email taken');
+  const newRef = db.collection('emails').doc(encodeURIComponent(email));
+  const oldRef = old ? db.collection('emails').doc(encodeURIComponent(old)) : null;
+  await db.runTransaction(async (tx) => {
+    const [n, o] = await Promise.all([
+      tx.get(newRef),
+      oldRef ? tx.get(oldRef) : Promise.resolve(null),
+    ]);
+    if (n.exists) throw new HttpsError('already-exists', 'email taken');
+    // Only our own unconfirmed reservation is released.
+    const od = o?.exists ? (o.data() as { userId?: string; verifiedAt?: number | null }) : null;
+    if (oldRef && od?.userId === id && !od.verifiedAt) tx.delete(oldRef);
+    tx.set(newRef, { userId: id, verifiedAt: null, updatedAt: Date.now() });
+  });
+  const invite = await issueInvite(id, admin.id, 'invite', email);
+  const mail = await mailInvite(invite, user, email, body.locale);
+  return { invite, mail };
+});
+
 export const adminRevokeInvite = onCall(async (req) => {
   await requireRole(req, ['admin']);
   const token = (req.data ?? {}).token as unknown;

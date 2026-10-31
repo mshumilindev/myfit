@@ -71,6 +71,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
   const [menuFor, setMenuFor] = useState<Person | null>(null);
   const [assignFor, setAssignFor] = useState<Person | null>(null);
   const [editFor, setEditFor] = useState<Person | null>(null);
+  const [emailFor, setEmailFor] = useState<Person | null>(null);
   const [deleteFor, setDeleteFor] = useState<Person | null>(null);
   const [linkFor, setLinkFor] = useState<{
     person: Person;
@@ -514,6 +515,15 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                 }}
               />
               <ListRow
+                icon={<Icon name="envelope" />}
+                label={t.adminChangeEmail}
+                onClick={() => {
+                  const p = menuFor;
+                  setMenuFor(null);
+                  setEmailFor(p);
+                }}
+              />
+              <ListRow
                 icon={<Icon name="eraser" />}
                 label={t.adminRevoke}
                 onClick={() => {
@@ -581,6 +591,25 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
           onDone={() => {
             setAssignFor(null);
             refresh();
+          }}
+        />
+      )}
+
+      {emailFor && (
+        <ChangeEmailDialog
+          person={emailFor}
+          onClose={() => setEmailFor(null)}
+          onDone={(r, email) => {
+            const p = emailFor;
+            setEmailFor(null);
+            refresh();
+            setLinkFor({
+              person: p,
+              token: r.invite.token,
+              expiresAt: r.invite.expiresAt,
+              mail: r.mail,
+              email,
+            });
           }}
         />
       )}
@@ -900,6 +929,69 @@ function AssignTrainerDialog(props: {
 }
 
 // --- Edit user details -------------------------------------------------------
+
+/** Fixes the address of an unclaimed invitation and sends the letter again. */
+function ChangeEmailDialog(props: {
+  person: Person;
+  onClose: () => void;
+  onDone: (
+    r: { invite: { token: string; expiresAt: number }; mail: MailOutcome },
+    email: string,
+  ) => void;
+}) {
+  const { t, locale } = useT();
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  return (
+    <Sheet onClose={props.onClose}>
+      <div className="sheet-head">
+        <span className="t">{t.adminChangeEmail}</span>
+      </div>
+      <Field
+        type="email"
+        inputMode="email"
+        autoComplete="off"
+        placeholder={t.adminInviteEmail}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      {error && (
+        <div className="field-error">
+          <Icon name="warning-circle" />
+          {error}
+        </div>
+      )}
+      <div className="sheet-actions">
+        <Button variant="secondary" className="grow" onClick={props.onClose}>
+          {t.cancel}
+        </Button>
+        <Button
+          variant="primary"
+          className="grow"
+          disabled={busy || !looksLikeEmail(email)}
+          onClick={async () => {
+            setBusy(true);
+            setError(null);
+            try {
+              const r = await callFn<{
+                invite: { token: string; expiresAt: number };
+                mail: MailOutcome;
+              }>('adminChangeInviteEmail', { id: props.person.id, email: email.trim(), locale });
+              props.onDone(r, email.trim());
+            } catch (e) {
+              setError(e instanceof Error ? e.message : t.error);
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          {t.save}
+        </Button>
+      </div>
+    </Sheet>
+  );
+}
 
 function EditDialog(props: { person: Person; onClose: () => void; onDone: () => void }) {
   const { t } = useT();
