@@ -158,6 +158,7 @@ describe('rules file: static checks', () => {
       `users/${C}/trainerNotes/n1`,
       'credentials/x',
       'usernames/x',
+      'emails/x',
       'invites/x',
       'signKeys/x/keys/k',
     ])
