@@ -2,6 +2,7 @@
 import { currentHash } from '../../route';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { clientEn as cc } from '../../i18n/coachClient.en';
 import { notesEn } from '../../i18n/coachNotes.en';
 import { rosterEn as r } from '../../i18n/coachRoster.en';
 import { safeEn as sf } from '../../i18n/coachSafe.en';
@@ -88,6 +89,24 @@ describe('the header actions point at THIS client', () => {
     await openMenu();
     expect(screen.queryByRole('menuitem', { name: r.c3MenuAsk('Oleh') })).toBeNull();
     expect(screen.getByRole('menuitem', { name: r.c3MenuMessage('Oleh') })).toBeTruthy();
+  });
+
+  it('Request access (SPO-99): opens the sheet for a client with the app, is disabled for a program-only client', async () => {
+    const { unmount } = mount();
+    fireEvent.click(await screen.findByRole('button', { name: cc.raOpen }));
+    expect(await screen.findByRole('dialog', { name: cc.raTitle('Oleh') })).toBeTruthy();
+    unmount();
+    cleanup();
+
+    const programOnly = worldPort((w) => ({
+      ...w,
+      clients: w.clients.map((c) => (c.id === OLEH ? { ...c, mode: 'program' as const } : c)),
+    }));
+    mount({}, programOnly);
+    const ask = (await screen.findByRole('button', { name: cc.raOpen })) as HTMLButtonElement;
+    expect(ask.disabled).toBe(true);
+    fireEvent.click(ask);
+    expect(screen.queryByRole('dialog', { name: cc.raTitle('Oleh') })).toBeNull();
   });
 
   it('phone: Message and Schedule are icon buttons that go to the same places', async () => {
