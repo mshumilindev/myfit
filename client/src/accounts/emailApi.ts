@@ -6,6 +6,8 @@ import { auth } from '../firebase';
 export interface EmailState {
   email: string | null;
   verified: boolean;
+  /** `config/auth.requireVerifiedEmail` (gate switch). Only `emailStatus` fills it. */
+  required?: boolean;
 }
 
 /** Why a link/resend attempt failed, as a kind the UI maps to a localized sentence (never the raw server text). */

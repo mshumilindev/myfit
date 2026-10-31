@@ -32,10 +32,9 @@ export interface EmailAuthStrings {
   gateCheckLead: string;
   gateConfirmed: string;
   gateChange: string;
-  gateOfflineTitle: string;
-  gateOffline: string;
   gateSignOut: string;
   gateNoMailbox: string;
+  resendIn: (s: number) => string;
 }
 
 const en: EmailAuthStrings = {
@@ -72,10 +71,9 @@ const en: EmailAuthStrings = {
   gateCheckLead: 'Open the link in the email we sent, then come back here.',
   gateConfirmed: 'Email confirmed',
   gateChange: 'Use another email',
-  gateOfflineTitle: 'Connect to continue',
-  gateOffline: 'We need a connection once to check your email. Your data is safe on this device.',
   gateSignOut: 'Sign out',
   gateNoMailbox: 'No access to this mailbox? Write to support and we will help.',
+  resendIn: (s) => `Send again in ${s} s`,
 };
 
 const uk: EmailAuthStrings = {
@@ -112,11 +110,9 @@ const uk: EmailAuthStrings = {
   gateCheckLead: 'Відкрийте посилання в листі, який ми надіслали, і поверніться сюди.',
   gateConfirmed: 'Email підтверджено',
   gateChange: 'Використати інший email',
-  gateOfflineTitle: 'Підключіться, щоб продовжити',
-  gateOffline:
-    'Один раз потрібне зʼєднання, щоб перевірити email. Ваші дані в безпеці на цьому пристрої.',
   gateSignOut: 'Вийти',
   gateNoMailbox: 'Немає доступу до цієї пошти? Напишіть у підтримку, ми допоможемо.',
+  resendIn: (s) => `Надіслати ще раз через ${s} с`,
 };
 
 const pl: EmailAuthStrings = {
@@ -153,11 +149,9 @@ const pl: EmailAuthStrings = {
   gateCheckLead: 'Otwórz link w wiadomości, którą wysłaliśmy, i wróć tutaj.',
   gateConfirmed: 'E-mail potwierdzony',
   gateChange: 'Użyj innego e-maila',
-  gateOfflineTitle: 'Połącz się, aby kontynuować',
-  gateOffline:
-    'Raz potrzebne jest połączenie, aby sprawdzić e-mail. Twoje dane są bezpieczne na tym urządzeniu.',
   gateSignOut: 'Wyloguj się',
   gateNoMailbox: 'Brak dostępu do tej skrzynki? Napisz do wsparcia, pomożemy.',
+  resendIn: (s) => `Wyślij ponownie za ${s} s`,
 };
 
 const lt: EmailAuthStrings = {
@@ -194,11 +188,9 @@ const lt: EmailAuthStrings = {
   gateCheckLead: 'Atidarykite nuorodą mūsų išsiųstame laiške ir grįžkite čia.',
   gateConfirmed: 'El. paštas patvirtintas',
   gateChange: 'Naudoti kitą el. paštą',
-  gateOfflineTitle: 'Prisijunkite prie tinklo, kad tęstumėte',
-  gateOffline:
-    'Vieną kartą reikia ryšio el. paštui patikrinti. Jūsų duomenys saugūs šiame įrenginyje.',
   gateSignOut: 'Atsijungti',
   gateNoMailbox: 'Neturite prieigos prie šios dėžutės? Parašykite palaikymui, padėsime.',
+  resendIn: (s) => `Siųsti dar kartą po ${s} s`,
 };
 
 const et: EmailAuthStrings = {
@@ -235,11 +227,9 @@ const et: EmailAuthStrings = {
   gateCheckLead: 'Ava saadetud kirjas olev link ja tule siia tagasi.',
   gateConfirmed: 'E-post kinnitatud',
   gateChange: 'Kasuta teist e-posti',
-  gateOfflineTitle: 'Ühendu, et jätkata',
-  gateOffline:
-    'E-posti kontrollimiseks on korra vaja ühendust. Sinu andmed on selles seadmes turvaliselt alles.',
   gateSignOut: 'Logi välja',
   gateNoMailbox: 'Pole sellele postkastile ligipääsu? Kirjuta toele, aitame.',
+  resendIn: (s) => `Saada uuesti ${s} s pärast`,
 };
 
 export const EMAIL_AUTH_LOCALES: Record<LocaleId, EmailAuthStrings> = { en, uk, pl, lt, et };

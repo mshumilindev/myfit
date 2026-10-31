@@ -5,6 +5,7 @@ import {
   attachEmail,
   emailLoginUser,
   emailStatus,
+  isEmailRequired,
   looksLikeEmail,
   normalizeEmail,
   type AttachPorts,
@@ -192,5 +193,20 @@ describe('a failed Auth write', () => {
     };
     await expect(attachEmail(kv, ports, 'u1', 'ada@example.com', NOW)).rejects.toThrow('boom');
     expect(kv.paths()).toEqual([]);
+  });
+});
+
+describe('isEmailRequired (the gate flag)', () => {
+  it('is on only for an explicit true', () => {
+    expect(isEmailRequired({ requireVerifiedEmail: true })).toBe(true);
+    for (const v of [
+      undefined,
+      null,
+      {},
+      { requireVerifiedEmail: 'true' },
+      { requireVerifiedEmail: 1 },
+      'x',
+    ])
+      expect(isEmailRequired(v)).toBe(false);
   });
 });

@@ -25,6 +25,7 @@ import { gateNeedsOf, legalGateOf, useConsentRecords } from './consentApi';
 import { REQUIRED_KINDS } from './consents';
 import { choicesShown, hasOptionalRecord, markChoicesShown } from './gateChoices';
 import { GateLoading } from './GateLoading';
+import { setLegalGateUp } from './gateUp';
 import { LegalGatePage } from './LegalGatePage';
 import { LegalGateUnverified } from './LegalGateUnverified';
 import { clearVerified, markVerifiedClear, wasVerifiedClear } from './gateVerified';
@@ -33,7 +34,7 @@ import { legalRoute } from './route';
 import { pendingConsentKinds } from './signupConsents';
 
 /** The public legal pages and the invite sign-up own the screen: the gate must not cover what is being read or signed. */
-function ownsScreen(hash: string): boolean {
+export function ownsScreen(hash: string): boolean {
   return legalRoute(hash) !== null || /^#\/join\//i.test(hash);
 }
 
@@ -129,6 +130,16 @@ function GateFor({ uid }: { uid: string }) {
     return () => window.clearTimeout(id);
   }, [opening, waitingForRecords]);
 
+  const unverifiedUp =
+    gate === 'unverified' &&
+    !ownsScreen(hash) &&
+    !(requiredQueued(uid) && (!coach || pendingConsentKinds(uid).includes('trainer-terms')));
+  const pageUp = !!flow || (opening && waitingForRecords) || unverifiedUp;
+  useEffect(() => {
+    setLegalGateUp(pageUp);
+    return () => setLegalGateUp(false);
+  }, [pageUp]);
+
   if (flow) {
     return (
       <LegalGatePage
@@ -157,11 +168,7 @@ function GateFor({ uid }: { uid: string }) {
   if (opening && waitingForRecords && !flow) return <GateLoading stage="open" withRecord />;
   // Nothing to verify the consents against yet, and this device never saw them confirmed: a loading page, never the app.
   // A device that already saw the server confirm the current versions skips this (stale-while-revalidate): no loader.
-  if (
-    gate === 'unverified' &&
-    !ownsScreen(hash) &&
-    !(requiredQueued(uid) && (!coach || pendingConsentKinds(uid).includes('trainer-terms')))
-  ) {
+  if (unverifiedUp) {
     return (
       <LegalGateUnverified
         error={state.error}
