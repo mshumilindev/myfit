@@ -8,6 +8,7 @@ import {
   isEmailRequired,
   looksLikeEmail,
   normalizeEmail,
+  usernameAllowed,
   type AttachPorts,
   type AuthEmail,
 } from '../../functions/src/emailAuthCore';
@@ -208,5 +209,14 @@ describe('isEmailRequired (the gate flag)', () => {
       'x',
     ])
       expect(isEmailRequired(v)).toBe(false);
+  });
+});
+
+describe('usernameAllowed (no @ in new usernames)', () => {
+  it('refuses a new name with @ and keeps an existing one as it is', () => {
+    expect(usernameAllowed('ada')).toBe(true);
+    expect(usernameAllowed('ada@x.co')).toBe(false);
+    expect(usernameAllowed('ada@x.co', 'someone')).toBe(false);
+    expect(usernameAllowed('Ada@X.co', 'ada@x.co')).toBe(true);
   });
 });

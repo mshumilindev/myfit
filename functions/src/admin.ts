@@ -5,6 +5,7 @@
  * on the next call. Cross-user reads (detail/export) are audited.
  */
 import { onCall } from 'firebase-functions/v2/https';
+import { usernameAllowed } from './emailAuthCore';
 import {
   db,
   requireRole,
@@ -213,6 +214,9 @@ export const adminCreateUser = onCall(async (req) => {
   if (role !== 'member' && role !== 'trainer' && role !== 'admin')
     throw new HttpsError('invalid-argument', 'role must be member, trainer or admin');
 
+  if (!usernameAllowed(explicitUsername))
+    throw new HttpsError('invalid-argument', 'A username cannot contain @.');
+
   const id = newId();
   const assignedTrainerId = await validateTrainerAssignment(id, trainerId);
   const username = explicitUsername;
@@ -289,6 +293,8 @@ export const adminEditUser = onCall(async (req) => {
   const nextFirst = names.firstName || u.firstName || '';
   const nextLast = names.firstName ? names.lastName : u.lastName;
   if (username.length < 2) throw new HttpsError('invalid-argument', 'valid username required');
+  if (!usernameAllowed(username, u.username))
+    throw new HttpsError('invalid-argument', 'A username cannot contain @.');
   if (nextFirst.length < 2) throw new HttpsError('invalid-argument', 'first name required');
 
   const nameLower = username.toLowerCase();

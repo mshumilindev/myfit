@@ -1,3 +1,4 @@
+import { EMAIL_AUTH_LOCALES } from '../i18n/emailAuth';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { setLocale } from '../i18n';
@@ -23,7 +24,8 @@ import { AuthView } from './AuthView';
 const NOW = new Date(2026, 8, 26, 12, 0).getTime();
 const signInBtn = () =>
   screen.getByRole('button', { name: new RegExp(`^(${en.signIn}|${en.signingIn})$`) });
-const user = () => screen.getByPlaceholderText(en.username) as HTMLInputElement;
+const user = () =>
+  screen.getByPlaceholderText(EMAIL_AUTH_LOCALES.en.loginIdPlaceholder) as HTMLInputElement;
 const pass = () => screen.getByPlaceholderText(en.password) as HTMLInputElement;
 const fill = (u = ' me ', p = 'secret1') => {
   fireEvent.change(user(), { target: { value: u } });
@@ -72,6 +74,16 @@ describe('AuthView: signing in', () => {
     expect(h.callFn).toHaveBeenCalledWith('login', { identifier: 'me', password: 'secret1' });
     expect(h.signIn).toHaveBeenCalledWith({ token: 't' }, false);
     expect(onLoggedIn).toHaveBeenCalledTimes(1);
+  });
+
+  it('signs in with an email in the same field (SPO-224): trimmed, sent as typed', async () => {
+    render(<AuthView onLoggedIn={vi.fn()} />);
+    fill('  Ada@Example.com ');
+    await submit();
+    expect(h.callFn).toHaveBeenCalledWith('login', {
+      identifier: 'Ada@Example.com',
+      password: 'secret1',
+    });
   });
 
   it('passes "Remember me" to the sign-in: off by default, on when ticked', async () => {

@@ -1,3 +1,4 @@
+import { EMAIL_AUTH_LOCALES } from '../i18n/emailAuth';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { setLocale } from '../i18n';
@@ -100,7 +101,9 @@ describe('AuthView: passkeys (SPO-211)', () => {
 
   it('a remembered password sign-in quietly registers a passkey and notes it on the device', async () => {
     render(<AuthView onLoggedIn={vi.fn()} />);
-    fireEvent.change(screen.getByPlaceholderText(en.username), { target: { value: 'anna' } });
+    fireEvent.change(screen.getByPlaceholderText(EMAIL_AUTH_LOCALES.en.loginIdPlaceholder), {
+      target: { value: 'anna' },
+    });
     fireEvent.change(pass()!, { target: { value: 'secret1' } });
     fireEvent.click(screen.getByRole('checkbox', { name: new RegExp(en.authRememberMe) }));
     fireEvent.click(screen.getByRole('button', { name: en.signIn }));
@@ -111,7 +114,9 @@ describe('AuthView: passkeys (SPO-211)', () => {
 
   it('a sign-in without "Remember me" creates no passkey', async () => {
     render(<AuthView onLoggedIn={vi.fn()} />);
-    fireEvent.change(screen.getByPlaceholderText(en.username), { target: { value: 'anna' } });
+    fireEvent.change(screen.getByPlaceholderText(EMAIL_AUTH_LOCALES.en.loginIdPlaceholder), {
+      target: { value: 'anna' },
+    });
     fireEvent.change(pass()!, { target: { value: 'secret1' } });
     fireEvent.click(screen.getByRole('button', { name: en.signIn }));
     await waitFor(() => expect(h.signIn).toHaveBeenCalledWith({ token: 't', userId: 'uA' }, false));

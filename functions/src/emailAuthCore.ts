@@ -36,6 +36,13 @@ export function normalizeEmail(raw: unknown): string | null {
   return e;
 }
 
+/**
+ * New usernames never contain `@` (SPO-224): the sign-in field takes a username OR an email, and `@` in a username would
+ * let someone hold another person's address as a name. Names that already have one keep working (kept as they are).
+ */
+export const usernameAllowed = (next: string, current?: string | null): boolean =>
+  !next.includes('@') || (!!current && next.toLowerCase() === current.toLowerCase());
+
 /** A sign-in identifier that is an email (usernames never contain `@`). */
 export const looksLikeEmail = (identifier: string): boolean => identifier.includes('@');
 

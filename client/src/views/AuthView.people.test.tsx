@@ -1,3 +1,4 @@
+import { EMAIL_AUTH_LOCALES } from '../i18n/emailAuth';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { setLocale } from '../i18n';
@@ -22,7 +23,8 @@ import { AuthView } from './AuthView';
 const NOW = new Date(2026, 8, 26, 12, 0).getTime();
 const signInBtn = () =>
   screen.getByRole('button', { name: new RegExp(`^(${en.signIn}|${en.signingIn})$`) });
-const user = () => screen.getByPlaceholderText(en.username) as HTMLInputElement;
+const user = () =>
+  screen.getByPlaceholderText(EMAIL_AUTH_LOCALES.en.loginIdPlaceholder) as HTMLInputElement;
 const pass = () => screen.getByPlaceholderText(en.password) as HTMLInputElement;
 const fill = (u = ' me ', p = 'secret1') => {
   fireEvent.change(user(), { target: { value: u } });
@@ -93,7 +95,7 @@ describe('AuthView: people this device remembers', () => {
     render(<AuthView onLoggedIn={vi.fn()} />);
     expect(screen.getByRole('group', { name: en.authWallLabel })).toBeTruthy();
     expect(screen.getByText(en.authWelcomeBack)).toBeTruthy();
-    expect(screen.queryByPlaceholderText(en.username)).toBeNull();
+    expect(screen.queryByPlaceholderText(EMAIL_AUTH_LOCALES.en.loginIdPlaceholder)).toBeNull();
     expect(screen.queryByPlaceholderText(en.password)).toBeNull();
   });
 
@@ -102,7 +104,7 @@ describe('AuthView: people this device remembers', () => {
     const onLoggedIn = vi.fn();
     render(<AuthView onLoggedIn={onLoggedIn} />);
     fireEvent.click(screen.getByRole('button', { name: en.authLockerLabel('Anna Koval', 1) }));
-    expect(screen.queryByPlaceholderText(en.username)).toBeNull();
+    expect(screen.queryByPlaceholderText(EMAIL_AUTH_LOCALES.en.loginIdPlaceholder)).toBeNull();
     expect(screen.getByText(en.authPersonPassword('Anna Koval'))).toBeTruthy();
     fireEvent.change(pass(), { target: { value: 'secret1' } });
     await submit();
@@ -125,6 +127,6 @@ describe('AuthView: people this device remembers', () => {
     expect(user()).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: en.authSavedAccounts }));
     expect(screen.getByRole('group', { name: en.authWallLabel })).toBeTruthy();
-    expect(screen.queryByPlaceholderText(en.username)).toBeNull();
+    expect(screen.queryByPlaceholderText(EMAIL_AUTH_LOCALES.en.loginIdPlaceholder)).toBeNull();
   });
 });
