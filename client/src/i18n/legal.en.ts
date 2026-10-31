@@ -62,7 +62,7 @@ export const legalEn: LegalTexts = {
               head: ['What', 'Why', 'Legal basis (GDPR)'],
               rows: [
                 [
-                  '**Account:** username, first and last name, role, status, profile photo, your trainer link, a password hash, the time of creation and updates',
+                  '**Account:** username, first and last name, role, status, profile photo, your trainer link, a password hash, an email address and whether it is confirmed (once you link one), the time of creation and updates',
                   'Create and run your account; sign you in; show who is who',
                   'Contract, Art. 6(1)(b)',
                 ],
@@ -218,7 +218,7 @@ export const legalEn: LegalTexts = {
             ul: [
               'In the app: **What Spotter knows about you** (see what the app holds, download a copy as a ZIP with JSON and CSV, delete by category, delete the account), **Privacy and sharing** (revoke trainer access), **Atlas AI** (turn off).',
               '**The copy** is built on your device from what the app can read and decrypt there. Data held only on our servers (for example profile details such as name and photo, sign-in attempts, passkeys and device sessions, the key-fetch log, service notices), conversations, plans and schedules not loaded on the device, and your trainer’s private records are not in it; the copy lists them in its contents file, and you can ask us for them in writing.',
-              '**Deleting your account** (in the app, after you enter your password) removes your profile, the data you entered, your coaching relationships, passkeys, sign-in counters, profile photo, username and password hash, and then your sign-in account. Entries that other people hold about you stay with them: access and sharing log entries in their records, service notices they received, and up to 90 days of activity entries of a team you belonged to. Backups follow section 8.',
+              '**Deleting your account** (in the app, after you enter your password) removes your profile, the data you entered, your coaching relationships, passkeys, sign-in counters, profile photo, username, email address and password hash, and then your sign-in account. Entries that other people hold about you stay with them: access and sharing log entries in their records, service notices they received, and up to 90 days of activity entries of a team you belonged to. Backups follow section 8.',
               'By writing to us at the address in section 14. We answer within one month; if a request is complex or numerous we may extend by up to two further months and tell you why. We may ask you to sign in again to confirm it is you; we will not ask for identity documents if you are already signed in.',
               '**Your trainer’s records about you:** you can ask your trainer for access in the app; the trainer answers for those records.',
               '**Complaint:** you can complain to the supervisory authority of your country of residence or work, or of the country of the controller: **the President of the Personal Data Protection Office (UODO), Poland**.',

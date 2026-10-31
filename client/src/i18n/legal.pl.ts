@@ -58,7 +58,7 @@ export const legalPl: LegalTexts = {
               head: ['Co', 'Po co', 'Podstawa prawna (RODO)'],
               rows: [
                 [
-                  '**Konto:** nazwa użytkownika, imię i nazwisko, rola, status, zdjęcie profilowe, powiązanie z Twoim trenerem, skrót hasła, czas utworzenia i aktualizacji',
+                  '**Konto:** nazwa użytkownika, imię i nazwisko, rola, status, zdjęcie profilowe, powiązanie z Twoim trenerem, skrót hasła, adres e-mail i informacja, czy jest potwierdzony (gdy go powiążesz), czas utworzenia i aktualizacji',
                   'Utworzenie i prowadzenie konta; logowanie; pokazanie, kto jest kim',
                   'Umowa, art. 6 ust. 1 lit. b',
                 ],
@@ -214,7 +214,7 @@ export const legalPl: LegalTexts = {
             ul: [
               'W aplikacji: **Co Spotter wie o Tobie** (zobacz, co przechowuje aplikacja, pobierz kopię jako ZIP z JSON i CSV, usuń według kategorii, usuń konto), **Prywatność i udostępnianie** (cofnij dostęp trenera), **Atlas AI** (wyłącz).',
               '**Kopia** jest tworzona na Twoim urządzeniu z tego, co aplikacja może tam odczytać i odszyfrować. Nie ma w niej danych przechowywanych tylko na naszych serwerach (na przykład szczegółów profilu, takich jak imię i zdjęcie, prób logowania, passkeys i sesji urządzeń, dziennika wydawania kluczy, powiadomień serwisowych), rozmów, planów i harmonogramów niezaładowanych na urządzeniu oraz prywatnych zapisów Twojego trenera; kopia wymienia je w pliku spisu treści, a możesz o nie poprosić nas na piśmie.',
-              '**Usunięcie konta** (w aplikacji, po podaniu hasła) usuwa Twój profil, wprowadzone dane, Twoje relacje z trenerami, passkeys, liczniki logowania, zdjęcie profilowe, nazwę użytkownika i skrót hasła, a następnie Twoje konto logowania. Wpisy, które o Tobie mają inne osoby, pozostają u nich: wpisy dzienników dostępu i udostępniania w ich zapisach, otrzymane przez nie powiadomienia serwisowe oraz do 90 dni wpisów aktywności zespołu, do którego należałeś(-aś). Kopie zapasowe podlegają punktowi 8.',
+              '**Usunięcie konta** (w aplikacji, po podaniu hasła) usuwa Twój profil, wprowadzone dane, Twoje relacje z trenerami, passkeys, liczniki logowania, zdjęcie profilowe, nazwę użytkownika, adres e-mail i skrót hasła, a następnie Twoje konto logowania. Wpisy, które o Tobie mają inne osoby, pozostają u nich: wpisy dzienników dostępu i udostępniania w ich zapisach, otrzymane przez nie powiadomienia serwisowe oraz do 90 dni wpisów aktywności zespołu, do którego należałeś(-aś). Kopie zapasowe podlegają punktowi 8.',
               'Pisząc do nas na adres z punktu 14. Odpowiadamy w ciągu miesiąca; jeśli wniosek jest złożony lub wniosków jest wiele, możemy przedłużyć ten termin o kolejne dwa miesiące i poinformujemy dlaczego. Możemy poprosić o ponowne zalogowanie, aby potwierdzić Twoją tożsamość; nie prosimy o dokumenty tożsamości, jeśli jesteś już zalogowany.',
               '**Zapisy Twojego trenera o Tobie:** możesz poprosić trenera o dostęp w aplikacji; za te zapisy odpowiada trener.',
               '**Skarga:** możesz złożyć skargę do organu nadzorczego kraju swojego zamieszkania lub pracy albo kraju administratora: **Prezesa Urzędu Ochrony Danych Osobowych (UODO), Polska**.',
