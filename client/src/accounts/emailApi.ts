@@ -1,6 +1,6 @@
-import { sendEmailVerification } from 'firebase/auth';
 import { callFn, HttpError } from '../api';
 import { auth } from '../firebase';
+import { getLocale } from '../i18n';
 
 /** What Firebase Auth knows about the account's email (SPO-283). `verified` only after the link in the letter was opened. */
 export interface EmailState {
@@ -33,21 +33,12 @@ export const attachEmail = (email: string, password: string): Promise<EmailState
   callFn<EmailState>('attachEmail', { email, password });
 
 /**
- * Sends the confirmation letter (Firebase template) to the email already on the signed-in user. The server wrote that
- * email to Auth, so the token is refreshed first. Firebase rate-limits repeats itself (`auth/too-many-requests`).
+ * Asks the server to send the confirmation letter to the email already on the signed-in user. The server mailer sends it
+ * (same sender as every other letter) and rate-limits repeats (429).
  */
 export async function sendConfirmation(): Promise<void> {
-  const user = auth.currentUser;
-  if (!user) throw new HttpError(401, 'signed-out');
-  try {
-    await user.reload();
-    await sendEmailVerification(user);
-  } catch (e) {
-    const code = (e as { code?: string }).code ?? '';
-    if (code === 'auth/too-many-requests') throw new HttpError(429, 'too-many');
-    if (code === 'auth/network-request-failed') throw new HttpError(503, 'offline');
-    throw new HttpError(500, 'send-failed');
-  }
+  if (!auth.currentUser) throw new HttpError(401, 'signed-out');
+  await callFn('sendConfirmationMail', { locale: getLocale() });
 }
 
 /** Re-reads the confirmation state from the server (and nudges the sign-in token so the new state is visible everywhere). */

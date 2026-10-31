@@ -1,18 +1,17 @@
-/** Invite letters (SPO-225/invites): text per locale, the Cloudflare request, and every send outcome without a network. */
+/** Invite letters (SPO-225/invites): text per locale, the Resend request, and every send outcome without a network. */
 import { describe, expect, it, vi } from 'vitest';
 import {
   MAIL_LOCALES,
   asMailLocale,
-  cloudflareRequest,
+  resendRequest,
   inviteMail,
-  sendViaCloudflare,
+  sendViaResend,
   type MailerConfig,
 } from '../../functions/src/mailCore';
 
 const LINK = 'https://spotter-64c3b.web.app/#/join/tok123';
 const CFG: MailerConfig = {
-  accountId: 'acc',
-  token: 'secret-token',
+  apiKey: 'secret-key',
   from: 'no-reply@example.com',
   fromName: 'Spotter',
 };
@@ -47,51 +46,45 @@ describe('inviteMail', () => {
   });
 });
 
-describe('sendViaCloudflare', () => {
-  it('builds the REST request with address/name sender and bearer token', () => {
-    const { url, init } = cloudflareRequest(CFG, MSG);
-    expect(url).toBe('https://api.cloudflare.com/client/v4/accounts/acc/email/sending/send');
-    expect(init.headers.Authorization).toBe('Bearer secret-token');
-    expect(JSON.parse(init.body).from).toEqual({
-      address: 'no-reply@example.com',
-      name: 'Spotter',
-    });
+describe('sendViaResend', () => {
+  it('builds the REST request with a named sender and bearer key', () => {
+    const { url, init } = resendRequest(CFG, MSG);
+    expect(url).toBe('https://api.resend.com/emails');
+    expect(init.headers.Authorization).toBe('Bearer secret-key');
+    const body = JSON.parse(init.body);
+    expect(body.from).toBe('Spotter <no-reply@example.com>');
+    expect(body.to).toEqual(['a@b.co']);
   });
-  it('reports sent on success', async () => {
-    expect(
-      await sendViaCloudflare(CFG, MSG, ok({ success: true, result: { delivered: ['a@b.co'] } })),
-    ).toEqual({ sent: true });
+  it('reports sent only when the provider returns an id', async () => {
+    expect(await sendViaResend(CFG, MSG, ok({ id: 'abc' }))).toEqual({ sent: true });
+    expect(await sendViaResend(CFG, MSG, ok({}))).toEqual({ sent: false, reason: 'rejected' });
   });
   it('not-configured without config and never calls fetch', async () => {
     const f = vi.fn();
-    expect(await sendViaCloudflare(null, MSG, f)).toEqual({
-      sent: false,
-      reason: 'not-configured',
-    });
-    expect(await sendViaCloudflare({ ...CFG, token: '' }, MSG, f)).toEqual({
+    expect(await sendViaResend(null, MSG, f)).toEqual({ sent: false, reason: 'not-configured' });
+    expect(await sendViaResend({ ...CFG, apiKey: '' }, MSG, f)).toEqual({
       sent: false,
       reason: 'not-configured',
     });
     expect(f).not.toHaveBeenCalled();
   });
-  it('rejected on http error, success:false and permanent bounce', async () => {
-    expect((await sendViaCloudflare(CFG, MSG, ok({ success: false }, 400))).sent).toBe(false);
-    expect(await sendViaCloudflare(CFG, MSG, ok({ success: false }))).toEqual({
+  it('rejected on http error', async () => {
+    expect(await sendViaResend(CFG, MSG, ok({ message: 'x' }, 403))).toEqual({
       sent: false,
       reason: 'rejected',
     });
-    expect(
-      await sendViaCloudflare(
-        CFG,
-        MSG,
-        ok({ success: true, result: { permanent_bounces: ['a@b.co'] } }),
-      ),
-    ).toEqual({ sent: false, reason: 'rejected' });
   });
   it('network on a thrown fetch, without leaking the address', async () => {
-    const r = await sendViaCloudflare(CFG, MSG, async () => {
+    const r = await sendViaResend(CFG, MSG, async () => {
       throw new Error('boom a@b.co');
     });
     expect(r).toEqual({ sent: false, reason: 'network' });
+  });
+  it('verify letters exist in every locale and carry the link without expiry', () => {
+    for (const l of MAIL_LOCALES) {
+      const m = inviteMail(l, 'a@b.co', { kind: 'verify', link: LINK, name: '', days: 0 });
+      expect(m.text).toContain(LINK);
+      expect(m.subject.length).toBeGreaterThan(3);
+    }
   });
 });

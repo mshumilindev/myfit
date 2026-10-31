@@ -7,7 +7,7 @@
 import { onCall } from 'firebase-functions/v2/https';
 import { normalizeEmail, usernameAllowed } from './emailAuthCore';
 import { asMailLocale, inviteMail, type MailResult } from './mailCore';
-import { CF_EMAIL_TOKEN, sendMail } from './mailer';
+import { MAIL_API_KEY, sendMail } from './mailer';
 import { normalizeOrigin } from './coach/inviteLink';
 import {
   db,
@@ -264,7 +264,7 @@ export const adminPeople = onCall(async (req) => {
 
 // --- create user + invite ---------------------------------------------------
 
-const MAIL_OPTS = { secrets: [CF_EMAIL_TOKEN] };
+const MAIL_OPTS = { secrets: [MAIL_API_KEY] };
 
 /** A temporary username for an invited account; the person picks the real one when creating the account. */
 const placeholderUsername = (): string => `invited-${newId().slice(0, 8).toLowerCase()}`;
