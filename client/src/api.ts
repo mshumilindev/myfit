@@ -309,6 +309,7 @@ const QUIET_CALLABLES = new Set([
   'athleteExerciseHistory',
   'athleteWorkout',
   'gymPlaces',
+  'emailStatus',
 ]);
 
 /** A callable that has not answered by then fails (504), so a dead network never hangs a screen. */
