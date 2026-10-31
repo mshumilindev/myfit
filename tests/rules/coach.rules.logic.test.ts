@@ -705,3 +705,94 @@ describe('liveSessions: the writer and the allow-list', () => {
     }
   });
 });
+
+// SPO-99: the open `k` / `r` of an access ask and its answer, checked against the real rules file.
+describe('SPO-99: access ask / reply message shape', () => {
+  const cid = 'conv-1';
+  const ck = { v: 1, epoch: 1, wrap: ckWrap(1) };
+  const db: Record<string, Doc> = {
+    [`conversations/${cid}`]: { clientId: C, trainerId: T, active: true, ck, keyEpoch: 1 },
+    [`coaching/${C}`]: { trainerId: T, status: 'active', keyEpoch: 1 },
+    [`users/${T}`]: { role: 'trainer', status: 'active' },
+    [`users/${C}`]: { role: 'member', status: 'active' },
+    'users/stranger': { role: 'member', status: 'active' },
+  };
+  const doc = (from: string, over: Doc = {}): Doc => ({
+    id: 'm1',
+    from,
+    at: NOW,
+    v: 1,
+    keyEpoch: 1,
+    enc: enc(120),
+    sig: 'A'.repeat(88),
+    sigKid: '0123456789abcdef',
+    ...over,
+  });
+  const create = (uid: string, role: string, data: Doc) =>
+    decide(rules, 'create', `conversations/${cid}/messages/m1`, {
+      auth: { uid, token: { role } },
+      db,
+      data,
+      time: NOW,
+    }).allowed;
+  const asTrainer = (over: Doc = {}) => create(T, 'trainer', doc(T, over));
+  const asClient = (over: Doc = {}) => create(C, 'member', doc(C, over));
+
+  it('baseline: plain messages from both sides are allowed (the new keys are optional)', () => {
+    expect(asTrainer()).toBe(true);
+    expect(asClient()).toBe(true);
+  });
+  it('the trainer may ask, the client may reply, nobody the other way round', () => {
+    expect(asTrainer({ k: 'ask' })).toBe(true);
+    expect(asClient({ k: 'reply', r: 'allowed' })).toBe(true);
+    expect(asClient({ k: 'reply', r: 'partial' })).toBe(true);
+    expect(asClient({ k: 'reply', r: 'declined' })).toBe(true);
+    expect(asClient({ k: 'ask' })).toBe(false);
+    expect(asTrainer({ k: 'reply', r: 'allowed' })).toBe(false);
+  });
+  it('exact values: unknown k, r without reply, reply without a valid r', () => {
+    expect(asTrainer({ k: 'other' })).toBe(false);
+    expect(asTrainer({ k: 'ask', r: 'allowed' })).toBe(false);
+    expect(asClient({ k: 'reply' })).toBe(false);
+    expect(asClient({ k: 'reply', r: 'maybe' })).toBe(false);
+    expect(asClient({ r: 'allowed' })).toBe(false);
+    expect(asClient({ k: 'reply', r: 'allowed', extra: 1 })).toBe(false);
+  });
+  it('a stranger cannot use them, and the old plaintext keys stay refused', () => {
+    expect(create('stranger', 'member', doc('stranger', { k: 'ask' }))).toBe(false);
+    expect(asTrainer({ text: 'hi' })).toBe(false);
+  });
+  it('k and r cannot be added to a stored message afterwards', () => {
+    const path = `conversations/${cid}/messages/m1`;
+    const r = decide(rules, 'update', path, {
+      auth: { uid: C, token: { role: 'member' } },
+      db: { ...db, [path]: doc(C) },
+      data: { ...doc(C), k: 'reply', r: 'allowed' },
+      time: NOW,
+    });
+    expect(r.allowed).toBe(false);
+  });
+  it('a delete commit keeps the open mirror unchanged (the pause still counts a deleted ask), it cannot drop or change it', () => {
+    const path = `conversations/${cid}/messages/m1`;
+    const stored = doc(T, { k: 'ask', del: { state: 'pending', at: NOW - 9000 } });
+    const stub = (over: Doc): boolean =>
+      decide(rules, 'update', path, {
+        auth: { uid: T, token: { role: 'trainer' } },
+        db: { ...db, [path]: stored },
+        data: {
+          id: 'm1',
+          from: T,
+          at: NOW,
+          v: 1,
+          keyEpoch: 1,
+          deleted: true,
+          deletedAt: NOW,
+          ...over,
+        },
+        time: NOW,
+      }).allowed;
+    expect(stub({ k: 'ask' })).toBe(true);
+    expect(stub({})).toBe(false);
+    expect(stub({ k: 'reply' })).toBe(false);
+  });
+});

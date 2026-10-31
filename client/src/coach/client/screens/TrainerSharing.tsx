@@ -58,7 +58,7 @@ export interface TrainerSharingProps {
 }
 
 /** Writes of the four on-device levels (they republish what a coach sees by themselves). */
-const writeLocal = (id: LocalCategory, l: Level): void => {
+export const writeLocal = (id: LocalCategory, l: Level): void => {
   if (id === 'conditions') setConditionsShare(l);
   else if (id === 'nicotine') setNicotineSharing(l);
   else if (id === 'alcohol') setAlcoholSharing(clampLevel('alcohol', l) as 'off' | 'effects');

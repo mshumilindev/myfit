@@ -98,3 +98,44 @@ export const Picker: Story = {
     );
   },
 };
+
+/** A trainer's request (SPO-99): the asked rows carry the accent bar, alcohol has no Full, a health row waits for consent. */
+export const PickerAsked: Story = {
+  render: function Render() {
+    const [v, setV] = useState<Record<string, ConsentLevelId>>({});
+    return (
+      <div style={{ maxWidth: 560 }}>
+        <ConsentLevelPicker
+          legend="Body"
+          levelLabels={LABELS}
+          rows={[
+            {
+              id: 'sleep',
+              label: 'Sleep',
+              what: 'How long and how well you sleep',
+              value: v.sleep ?? 'off',
+              highlight: true,
+            },
+            {
+              id: 'alcohol',
+              label: 'Alcohol',
+              what: 'Whether you drank, never amounts',
+              value: v.alcohol ?? 'off',
+              highlight: true,
+              levels: ['off', 'effects'],
+            },
+            {
+              id: 'nutrition',
+              label: 'Nutrition',
+              what: 'Needs your health-data consent first',
+              value: 'off',
+              highlight: true,
+              blocked: true,
+            },
+          ]}
+          onChange={(id, lv) => setV({ ...v, [id]: lv })}
+        />
+      </div>
+    );
+  },
+};

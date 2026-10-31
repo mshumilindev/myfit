@@ -47,7 +47,10 @@ export function buildThreadRows<N extends { id: string; at: number }>(
   let prevSender = '';
   type Entry = { at: number; m: Msg; n?: undefined } | { at: number; m?: undefined; n: N };
   const merged: Entry[] = [
-    ...a.messages.map((m): Entry => ({ at: m.at, m })),
+    // the client's answer to an access request is data for the ask card (its status), not a bubble (SPO-99)
+    ...a.messages
+      .filter((m) => m.body.kind !== 'request-reply')
+      .map((m): Entry => ({ at: m.at, m })),
     ...a.notes.map((n): Entry => ({ at: n.at, n })),
   ].sort((x, y) => x.at - y.at);
   merged.forEach((e) => {

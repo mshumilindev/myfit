@@ -31,6 +31,16 @@ export interface OpenedMessage {
   body: MsgBody;
 }
 
+/**
+ * The open mirror of an access ask / its answer (SPO-99): `k` = 'ask' | 'reply', `r` = the result. Rules and
+ * functions read ONLY these to enforce who may send what and the pauses; the content stays sealed.
+ */
+function openKind(b: MsgBody): Record<string, string> {
+  if (b.kind === 'request' && b.reqId.startsWith('access-ask:')) return { k: 'ask' };
+  if (b.kind === 'request-reply') return { k: 'reply', r: b.result };
+  return {};
+}
+
 const roundSecond = (ms: number) => Math.floor(ms / 1000) * 1000;
 
 /** The enc fields of the registry: kind, text, share, reqId, sys. */
@@ -47,7 +57,9 @@ function toFields(b: MsgBody): Record<string, unknown> {
     case 'share':
       return { kind: 'share', share: b.share, ...(b.text ? { text: b.text } : {}) };
     case 'request':
-      return { kind: 'request', reqId: b.reqId };
+      return { kind: 'request', reqId: b.reqId, ...(b.cats?.length ? { cats: b.cats } : {}) };
+    case 'request-reply':
+      return { kind: 'request-reply', reqId: b.reqId, result: b.result };
     default:
       throw new Error('unsupported-kind');
   }
@@ -71,7 +83,7 @@ export async function sealChatMessage(
   const at = roundSecond(m.at);
   const doc = await sealOrThrow(
     'messages',
-    { id: m.id, from: m.fromUid, at, v: MESSAGE_VERSION, ...toFields(m.body) },
+    { id: m.id, from: m.fromUid, at, v: MESSAGE_VERSION, ...openKind(m.body), ...toFields(m.body) },
     { ...src, ctx: { messageId: m.id, fromUid: m.fromUid, at } },
   );
   if (!signer) return doc;
@@ -105,7 +117,24 @@ export async function openChatMessage(
     ...src,
     ctx: { messageId: docId, fromUid: raw.from, at: raw.at as number },
   });
-  return { id: docId, fromUid: raw.from, at: raw.at as number, body: toBody(doc) };
+  return {
+    id: docId,
+    fromUid: raw.from,
+    at: raw.at as number,
+    body: agreeWithOpen(toBody(doc), raw),
+  };
+}
+
+/**
+ * An access ask / its answer must carry the matching OPEN mirror (`k`, `r`): rules and the server pause only read those, so
+ * a sealed ask written without `k` would dodge both. Such a message is not drawn at all (SPO-99 risk review).
+ */
+function agreeWithOpen(b: MsgBody, raw: Record<string, unknown>): MsgBody {
+  if (b.kind === 'request' && b.reqId.startsWith('access-ask:'))
+    return raw.k === 'ask' ? b : { kind: 'unsupported' };
+  if (b.kind === 'request-reply')
+    return raw.k === 'reply' && raw.r === b.result ? b : { kind: 'unsupported' };
+  return b;
 }
 
 function toBody(d: Record<string, unknown>): MsgBody {
@@ -125,7 +154,15 @@ function toBody(d: Record<string, unknown>): MsgBody {
       ...(typeof d.text === 'string' ? { text: d.text } : {}),
     };
   if (d.kind === 'request' && typeof d.reqId === 'string')
-    return { kind: 'request', reqId: d.reqId };
+    return {
+      kind: 'request',
+      reqId: d.reqId,
+      ...(Array.isArray(d.cats) && d.cats.every((c) => typeof c === 'string')
+        ? { cats: d.cats as string[] }
+        : {}),
+    };
+  if (d.kind === 'request-reply' && typeof d.reqId === 'string' && typeof d.result === 'string')
+    return { kind: 'request-reply', reqId: d.reqId, result: d.result };
   return { kind: 'unsupported' };
 }
 

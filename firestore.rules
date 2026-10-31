@@ -582,8 +582,15 @@ service cloud.firestore {
       match /messages/{mid} {
         allow read: if inConv(cid);
         allow create: if activeConv(cid)
-          && request.resource.data.keys().hasOnly(['id', 'from', 'at', 'v', 'keyEpoch', 'enc', 'sig', 'sigKid'])
+          && request.resource.data.keys().hasOnly(['id', 'from', 'at', 'v', 'keyEpoch', 'enc', 'sig', 'sigKid', 'k', 'r'])
           && request.resource.data.keys().hasAll(['id', 'from', 'at', 'v', 'keyEpoch', 'enc', 'sig', 'sigKid'])
+          // SPO-99 access ask: open `k` mirrors the sealed kind so the roles are enforced here and the pauses in the
+          // trigger. 'ask' only from the conversation's trainer; 'reply' (+ `r` result) only from its client.
+          && (!('k' in request.resource.data) || (
+            (request.resource.data.k == 'ask' && isConvTrainer(cid) && !('r' in request.resource.data))
+            || (request.resource.data.k == 'reply' && request.auth.uid == convOf(cid).clientId
+              && request.resource.data.get('r', '') in ['allowed', 'partial', 'declined'])))
+          && (!('r' in request.resource.data) || request.resource.data.get('k', '') == 'reply')
           // sender signature (C.2 no. 7) is REQUIRED: the receiver verifies it, the rules bound the size
           && request.resource.data.sig is string && request.resource.data.sig.size() <= 100
           && request.resource.data.sigKid is string && request.resource.data.sigKid.size() <= 32
@@ -603,7 +610,7 @@ service cloud.firestore {
             (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['del'])
               && (!('del' in request.resource.data) || validDel(request.resource.data.del)))
             // commit: the ciphertext is physically dropped, a stub stays for "Message deleted"
-            || (request.resource.data.keys().hasOnly(['id', 'from', 'at', 'v', 'keyEpoch', 'deleted', 'deletedAt'])
+            || (request.resource.data.keys().hasOnly(['id', 'from', 'at', 'v', 'keyEpoch', 'deleted', 'deletedAt', 'k', 'r'])
               && request.resource.data.keys().hasAll(['id', 'from', 'at', 'v', 'keyEpoch', 'deleted', 'deletedAt'])
               && request.resource.data.deleted == true
               && request.resource.data.deletedAt is int
@@ -613,7 +620,10 @@ service cloud.firestore {
               && request.resource.data.from == resource.data.from
               && request.resource.data.at == resource.data.at
               && request.resource.data.v == resource.data.v
-              && request.resource.data.keyEpoch == resource.data.keyEpoch)
+              && request.resource.data.keyEpoch == resource.data.keyEpoch
+              // the open ask / answer mirror is kept unchanged (it cannot be added or dropped by a delete)
+              && request.resource.data.get('k', '') == resource.data.get('k', '')
+              && request.resource.data.get('r', '') == resource.data.get('r', ''))
           );
         allow delete: if false;
       }

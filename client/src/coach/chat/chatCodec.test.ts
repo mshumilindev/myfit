@@ -134,4 +134,79 @@ describe('chat message codec (Part C.2 no. 6)', () => {
       reqId: 'rq1',
     });
   });
+
+  it('access ask and reply (SPO-99): sealed body, open k / r mirror, no plaintext categories', async () => {
+    const { vault, rings } = await setup();
+    const ask = await sealChatMessage(
+      { vault, ring: rings.trainer },
+      {
+        id: 'a1',
+        fromUid: 't',
+        at: 5000,
+        body: { kind: 'request', reqId: 'access-ask:1', cats: ['sleep', 'alcohol'] },
+      },
+    );
+    expect(ask.k).toBe('ask');
+    expect(ask.r).toBeUndefined();
+    expect(JSON.stringify(ask)).not.toContain('alcohol');
+    expect((await openChatMessage({ vault, ring: rings.client }, 'a1', ask)).body).toEqual({
+      kind: 'request',
+      reqId: 'access-ask:1',
+      cats: ['sleep', 'alcohol'],
+    });
+    const reply = await sealChatMessage(
+      { vault, ring: rings.client },
+      {
+        id: 'p1',
+        fromUid: 'c',
+        at: 6000,
+        body: { kind: 'request-reply', reqId: 'access-ask:1', result: 'partial' },
+      },
+    );
+    expect(reply.k).toBe('reply');
+    expect(reply.r).toBe('partial');
+    expect((await openChatMessage({ vault, ring: rings.trainer }, 'p1', reply)).body).toEqual({
+      kind: 'request-reply',
+      reqId: 'access-ask:1',
+      result: 'partial',
+    });
+    // a legacy "please share" and a schedule request carry no open kind
+    const old = await sealChatMessage(
+      { vault, ring: rings.trainer },
+      { id: 'o1', fromUid: 't', at: 5000, body: { kind: 'request', reqId: 'share-ask:program:1' } },
+    );
+    expect(old.k).toBeUndefined();
+  });
+
+  it('an access ask without its open mirror, or a reply whose r differs from the sealed result, is not drawn (SPO-99)', async () => {
+    const { vault, rings } = await setup();
+    const ask = await sealChatMessage(
+      { vault, ring: rings.trainer },
+      {
+        id: 'a2',
+        fromUid: 't',
+        at: 5000,
+        body: { kind: 'request', reqId: 'access-ask:2', cats: ['sleep'] },
+      },
+    );
+    // the pause reads only `k`: a copy without it would dodge it, so the receiver refuses to draw it
+    const { k: _k, ...noK } = ask;
+    void _k;
+    expect((await openChatMessage({ vault, ring: rings.client }, 'a2', noK)).body).toEqual({
+      kind: 'unsupported',
+    });
+    const reply = await sealChatMessage(
+      { vault, ring: rings.client },
+      {
+        id: 'p2',
+        fromUid: 'c',
+        at: 6000,
+        body: { kind: 'request-reply', reqId: 'access-ask:2', result: 'declined' },
+      },
+    );
+    expect(
+      (await openChatMessage({ vault, ring: rings.trainer }, 'p2', { ...reply, r: 'allowed' }))
+        .body,
+    ).toEqual({ kind: 'unsupported' });
+  });
 });

@@ -47,6 +47,9 @@ import type { ClientChatPort } from '../data/chatPort';
 import type { ClientCoachPort } from '../data/port';
 import { useClientThread } from '../data/useClientChat';
 import { useClientCoach } from '../data/useClientCoach';
+import { statusWord } from '../../share/AccessAskCard';
+import { replyBody, type AccessAsk } from '../../share/accessAsk';
+import { AccessAskForm } from './AccessAskForm';
 import { PushedPage } from './PushedPage';
 import { TrainerUnavailable } from './TrainerUnavailable';
 import { ClientChatBar } from './clientChat/ClientChatBar';
@@ -118,6 +121,7 @@ export function ClientChat(p: ClientChatProps) {
   const [notesOpen, setNotesOpen] = useState(p.initial?.notes ?? false);
   const [form, setForm] = useState(p.initial?.reschedule ?? false);
   const [counterId, setCounterId] = useState<string | null>(null);
+  const [reviewAsk, setReviewAsk] = useState<AccessAsk | null>(null);
   const [pickerOpen, setPickerOpen] = useState(!!p.initial?.picker);
   const [queued, setQueued] = useState<ShareRef | null>(p.initial?.pending ?? null);
   const shareAnchor = useRef<HTMLElement | null>(null);
@@ -239,6 +243,9 @@ export function ClientChat(p: ClientChatProps) {
                 setCounterId(reqId);
                 setForm(true);
               },
+              messages,
+              now,
+              onReviewAsk: setReviewAsk,
             },
             m,
             mine,
@@ -453,6 +460,23 @@ export function ClientChat(p: ClientChatProps) {
               coachFirst={first}
               side="client"
             />
+            {reviewAsk && cid && (
+              <AccessAskForm
+                first={first}
+                ask={reviewAsk}
+                offline={!online}
+                port={p.port}
+                onClose={() => setReviewAsk(null)}
+                onDone={(result) => {
+                  store.send(
+                    cid,
+                    `${cc.raKind}: ${statusWord(cc, result)}`,
+                    replyBody(reviewAsk.reqId, result),
+                  );
+                  setReviewAsk(null);
+                }}
+              />
+            )}
             {my && form && (
               <ClientRescheduleSheet
                 my={my}

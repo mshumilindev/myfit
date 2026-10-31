@@ -734,6 +734,73 @@ describe('conversations: unread, flood limit, push, rotation (plan 10, C.3)', ()
     await afterMessageCreated(ctx(), CID, 'm31');
     expect(kv.has(`conversations/${CID}/messages/m31`)).toBe(true);
   });
+  describe('SPO-99 access ask: pause and push', () => {
+    const HOUR = 3_600_000;
+    const ask = async (id: string, at: number) => {
+      await msg(id, 't1', at, { k: 'ask' });
+      pushes = [];
+      await afterMessageCreated(ctx(), CID, id);
+    };
+    const has = (id: string) => kv.has(`conversations/${CID}/messages/${id}`);
+    it('an ask pushes "request" to the client; a reply pushes "request" to the trainer; text stays "message"', async () => {
+      await ask('a1', T0 + 1000);
+      expect(pushes).toEqual([['c1', 'request']]);
+      await msg('p1', 'c1', T0 + 2000, { k: 'reply', r: 'allowed' });
+      pushes = [];
+      await afterMessageCreated(ctx(), CID, 'p1');
+      expect(pushes).toEqual([['t1', 'request']]);
+    });
+    it('a second ask within 24 h is removed and not pushed; after 24 h it passes', async () => {
+      await ask('a1', T0 + 1000);
+      expect(has('a1')).toBe(true);
+      await ask('a2', T0 + 1000 + 23 * HOUR);
+      expect(has('a2')).toBe(false);
+      expect(pushes).toEqual([]);
+      await ask('a3', T0 + 1000 + 24 * HOUR);
+      expect(has('a3')).toBe(true);
+      expect(pushes).toEqual([['c1', 'request']]);
+    });
+    it('after a "not now" the next ask waits 7 days', async () => {
+      await ask('a1', T0 + 1000);
+      await msg('p1', 'c1', T0 + 2000, { k: 'reply', r: 'declined' });
+      await ask('a2', T0 + 2000 + 3 * 24 * HOUR);
+      expect(has('a2')).toBe(false);
+      await ask('a3', T0 + 2000 + 7 * 24 * HOUR);
+      expect(has('a3')).toBe(true);
+    });
+    it('a DELETED ask still counts for the 24 h pause (deleting it does not buy another push)', async () => {
+      await ask('a1', T0 + 1000);
+      await kv.merge(`conversations/${CID}/messages/a1`, { deleted: true, deletedAt: T0 + 2000 });
+      await ask('a2', T0 + 1000 + HOUR);
+      expect(has('a2')).toBe(false);
+      expect(pushes).toEqual([]);
+    });
+    it('other answers do not extend the pause beyond 24 h; a retried trigger changes nothing', async () => {
+      await ask('a1', T0 + 1000);
+      await msg('p1', 'c1', T0 + 2000, { k: 'reply', r: 'partial' });
+      await ask('a2', T0 + 1000 + 25 * HOUR);
+      expect(has('a2')).toBe(true);
+      await afterMessageCreated(ctx(), CID, 'a2');
+      expect(has('a2')).toBe(true);
+      await afterMessageCreated(ctx(), CID, 'a1');
+      expect(has('a1')).toBe(true); // the earlier ask is never removed by a later one
+    });
+    it('only open k matters: a plain message is ignored, and a deleted "not now" is the client\'s own to remove', async () => {
+      await msg('m1', 't1', T0 + 500);
+      await ask('a1', T0 + 1000);
+      expect(has('a1')).toBe(true);
+      await kv.merge(`conversations/${CID}/messages/a1`, { deleted: true });
+      await msg('p1', 'c1', T0 + 1500, { k: 'reply', r: 'declined', deleted: true });
+      await ask('a2', T0 + 1000 + 25 * HOUR);
+      expect(has('a2')).toBe(true);
+    });
+    it('the pauses mirror the client constants', async () => {
+      const c = await import('../../client/src/coach/share/accessAsk');
+      const sv = await import('../../functions/src/coach/service');
+      expect(sv.ASK_COOLDOWN_MS).toBe(c.ASK_COOLDOWN_MS);
+      expect(sv.ASK_DECLINED_COOLDOWN_MS).toBe(c.ASK_DECLINED_COOLDOWN_MS);
+    });
+  });
   it('a published key epoch clears the rotation flags; a trainer key change flags active conversations', async () => {
     await kv.merge(`conversations/${CID}`, { rotateDue: true, keyStale: true });
     expect(await onConversationKey(ctx(), CID, { keyEpoch: 1 }, { keyEpoch: 1 })).toBe(false);

@@ -42,6 +42,9 @@ export interface ThreadExtrasCtx {
   send: (text: string, body?: MsgBody) => string;
   /** The store clock, ms. */
   now: () => number;
+  /** The client's grant levels and mode (the "Request access" sheet lists only what is not shared yet). */
+  consent?: Readonly<Record<string, string>>;
+  noApp?: boolean;
 }
 export interface ShareDeleteCopy {
   title: string;
@@ -145,6 +148,8 @@ export function ThreadView({
     messages,
     send: (text, body) => store.send(cid, text, body),
     now: () => store.port.now(),
+    consent: client?.consent,
+    noApp: client?.mode === 'program',
   });
   const { noteItems, card: drawCard, shareDelete } = x;
 

@@ -8,7 +8,7 @@ import type { ChatMessage, MsgBody } from './chat/types';
 import { createFixturesNotesPort } from './notes/__fixtures__/fixtures';
 import type { NotesPort } from './notes/port';
 import { createFixturesShareSource } from './share/__fixtures__/fixtures';
-import { ASK_REPEAT_MS, askBody } from './share/askShare';
+import { accessAskBody } from './share/accessAsk';
 import { clearRecentShares } from './share/search';
 import { setViewport } from './testViewport';
 import {
@@ -206,7 +206,9 @@ describe('asking the client to share', () => {
     expect(sent).toEqual([]);
   });
 
-  it('the default ask goes through the chat send with a request body; a repeat within 24 h is not sent', async () => {
+  // SPO-99 (owner, design gallery v4): the picker's "Ask X to share" opens the Request access sheet instead of sending
+  // the old one-kind card; the ask is one access-ask message with the ticked rows, paused for 24 h after the last one.
+  it('the default ask opens the request sheet and sends one access ask; a recent ask pauses it', async () => {
     const lowered = createFixturesShareSource({
       warm: true,
       patch: (s) => ({
@@ -220,23 +222,24 @@ describe('asking the client to share', () => {
     const opts = base({ sharePort: lowered, initial: { picker: { filter: 'results' } } });
     const { unmount } = render(<Host opts={opts} messages={[]} />);
     fireEvent.click(await screen.findByRole('button', { name: sh.pickAsk('Oleh') }));
+    fireEvent.click(await screen.findByRole('button', { name: /^Send request/ }));
     expect(sent).toHaveLength(1);
-    expect(sent[0].body).toEqual(askBody('results', NOW));
-    expect(sent[0].text).toContain(sh.kindPlural.results);
+    const b = sent[0].body;
+    expect(b?.kind).toBe('request');
+    if (b?.kind !== 'request') throw new Error('not a request');
+    expect(b.reqId).toMatch(/^access-ask:/);
+    expect(b.cats).toContain('sets');
     unmount();
 
-    // an ask 23 h ago blocks a new one; one older than a day does not
-    const fresh = msg('a', 'trainer', askBody('results', 1), {
-      at: NOW - ASK_REPEAT_MS + 3_600_000,
+    // an ask 23 h ago pauses a new one
+    const fresh = msg('a', 'trainer', accessAskBody(['sleep'], 1), {
+      at: NOW - 23 * 3_600_000,
     });
     render(<Host opts={opts} messages={[fresh]} />);
     fireEvent.click(await screen.findByRole('button', { name: sh.pickAsk('Oleh') }));
+    const send = await screen.findByRole('button', { name: /^Send request/ });
+    expect((send as HTMLButtonElement).disabled).toBe(true);
     expect(sent).toHaveLength(1);
-    cleanup();
-    const old = msg('a', 'trainer', askBody('results', 1), { at: NOW - ASK_REPEAT_MS - 1 });
-    render(<Host opts={opts} messages={[old]} />);
-    fireEvent.click(await screen.findByRole('button', { name: sh.pickAsk('Oleh') }));
-    expect(sent).toHaveLength(2);
   });
 });
 

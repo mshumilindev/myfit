@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { useClientT } from '../../i18n/coachClient';
+import { RequestAccessHost } from '../share/RequestAccessHost';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { GroupedList, ListRow } from '../../components/ui/GroupedList';
@@ -18,12 +21,12 @@ import { injuryName, restrictionLine } from './injuryLabel';
 import type { RosterStrings } from '../../i18n/coachRoster';
 import { Icon } from '../../ui';
 import type { DerivedWorld } from '../data/deriveWorld';
-import { askable, effectiveConsent } from '../domain/consent';
+import { effectiveConsent } from '../domain/consent';
 import { gateHistory } from '../domain/history';
 import { hasClient, headcount } from '../domain/slots';
 import { DAY } from '../domain/time';
 import { DOWS, type CoachClient, type Signal } from '../domain/types';
-import { chatRoute, type CoachRoute } from '../routes';
+import { type CoachRoute } from '../routes';
 import { requestsOf } from '../today/model';
 import { useScheduleRequestPort } from '../schedule/requestPort';
 import { type RescheduleRequestPort } from '../today/requestPort';
@@ -79,7 +82,8 @@ export function Overview({
   const todaySlot = slots.find(
     (s) => Math.floor(s.start / DAY) === today && hasClient(s, client.id),
   );
-  const askN = askable(client.mode, client.consent).length;
+  const [asking, setAsking] = useState(false);
+  const { cc } = useClientT();
   const gated = gateHistory(world.history[client.id], client.mode, client.consent);
   const reqs = requestsOf(world).filter((q) => q.client.id === client.id);
   const schedulePort = useScheduleRequestPort();
@@ -403,25 +407,24 @@ export function Overview({
             }
           >
             {program ? (
-              <p className="c3-m">{r.c3OfflineShares}</p>
+              <>
+                <p className="c3-m">{r.c3OfflineShares}</p>
+                <Button variant="secondary" size="sm" icon="key" disabled>
+                  {cc.raOpen}
+                </Button>
+              </>
             ) : (
               <ConsentChips
                 label={r.c3SharesList}
                 items={consentItems(r, client.name, client.consent, client.mode)}
                 action={
-                  askN > 0 ? (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      icon="key"
-                      onClick={() => onNavigate(chatRoute(client.id))}
-                    >
-                      {r.c3AskShare(first, askN)}
-                    </Button>
-                  ) : undefined
+                  <Button variant="secondary" size="sm" icon="key" onClick={() => setAsking(true)}>
+                    {cc.raOpen}
+                  </Button>
                 }
               />
             )}
+            {asking && <RequestAccessHost client={client} onClose={() => setAsking(false)} />}
           </Card>
         </div>
       </Inspector>

@@ -325,6 +325,9 @@ export function createFirestoreChatPort(d: FirestoreChatDeps): ChatPort {
         at: cur.at,
         v: cur.v,
         keyEpoch: cur.keyEpoch,
+        // the open mirror of an access ask / answer stays, so the server pause still counts a deleted ask
+        ...(typeof cur.k === 'string' ? { k: cur.k } : {}),
+        ...(typeof cur.r === 'string' ? { r: cur.r } : {}),
         deleted: true,
         deletedAt: fs.now(),
       });

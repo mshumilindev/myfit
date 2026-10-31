@@ -19,9 +19,14 @@ import type { NotesPort } from './notes/port';
 import { useClientNotes } from './notes/useNotes';
 import type { Note, NoteAnchor } from './notes/types';
 import { programPageRoute, type CoachRoute } from './routes';
+import { AccessAskCard } from './share/AccessAskCard';
+import { accessAskBody, askPause, askStatus, parseAccessAsk, sharedOf } from './share/accessAsk';
 import { AskCard } from './share/AskCard';
-import { askBody, askedRecently, parseAskReqId } from './share/askShare';
-import { useSafeT } from '../i18n/coachSafe';
+import { useClientT } from '../i18n/coachClient';
+import type { Level } from './domain/types';
+import type { ShareId } from './client/shareModel';
+import { parseAskReqId } from './share/askShare';
+import { RequestAccessSheet } from './share/RequestAccessSheet';
 import { LibraryPeek } from './share/LibraryPeek';
 import { ShareCardView, useWords } from './share/ShareCardView';
 import { ShareMessage } from './share/ShareMessage';
@@ -65,7 +70,7 @@ export function createCoachThreadExtras(opts: CoachThreadExtrasOpts = {}) {
     const w = useWords();
     const { sh } = w;
     const { nt } = useNotesT();
-    const { sf } = useSafeT();
+    const { cc } = useClientT();
     const viewer = useMemo(
       () => ({ side: 'trainer' as const, clientId: ctx.clientId }),
       [ctx.clientId],
@@ -143,9 +148,21 @@ export function createCoachThreadExtras(opts: CoachThreadExtrasOpts = {}) {
       [ctx.clientId, nt.nJumpGone],
     );
 
+    const { messages: ctxMessages, now: ctxNow } = ctx;
     const card = useCallback(
       (m: ChatMessage) => {
         if (m.body.kind === 'request') {
+          const access = parseAccessAsk(m);
+          if (access)
+            return (
+              <AccessAskCard
+                ask={access}
+                status={askStatus(m, ctxMessages, ctxNow())}
+                side="trainer"
+                mine={m.from === 'trainer'}
+                first={ctx.first}
+              />
+            );
           const k = parseAskReqId(m.body.reqId);
           return k ? <AskCard kind={k} side="trainer" mine={m.from === 'trainer'} /> : undefined;
         }
@@ -170,7 +187,7 @@ export function createCoachThreadExtras(opts: CoachThreadExtrasOpts = {}) {
           />
         );
       },
-      [sh.unsupportedShare, ctx.first, viewer, openTarget],
+      [sh.unsupportedShare, ctx.first, viewer, openTarget, ctxMessages, ctxNow],
     );
 
     const shareDelete = useCallback(
@@ -246,12 +263,17 @@ export function createCoachThreadExtras(opts: CoachThreadExtrasOpts = {}) {
       [noteMode, notesStore, ctx.clientId, anchors, nt.nModeSaved],
     );
 
-    /** The ask is a real message: sealed, in the outbox with retry, and one card per kind per day. */
+    /** "Ask to share" in the picker opens the request sheet with the workout rows ticked (SPO-99). */
+    const [reqSheet, setReqSheet] = useState<readonly ShareId[] | null>(null);
     const askShare = (k: ShareRef['kind']) => {
       if (opts.onAskShare) return opts.onAskShare(ctx.clientId, k);
+      setPickerOpen(false);
+      setReqSheet(['totals', 'sets']);
+    };
+    const sendAsk = (cats: ShareId[]) => {
       const now = ctx.now();
-      if (askedRecently(ctx.messages, k, now)) return;
-      ctx.send(sf.askMsg(sh.kindPlural[k]), askBody(k, now));
+      ctx.send(cc.raKind, accessAskBody(cats, now));
+      setReqSheet(null);
     };
 
     const body = pending ? ({ kind: 'share', share: pending } as const) : undefined;
@@ -348,6 +370,17 @@ export function createCoachThreadExtras(opts: CoachThreadExtrasOpts = {}) {
             initial={opts.initial?.notes}
             port={opts.notesPort}
           />
+          {reqSheet && (
+            <RequestAccessSheet
+              first={ctx.first}
+              shared={sharedOf(ctx.consent as Record<string, Level> | undefined)}
+              noApp={ctx.noApp}
+              pause={askPause(ctx.messages, ctx.now())}
+              initial={reqSheet}
+              onSend={sendAsk}
+              onClose={() => setReqSheet(null)}
+            />
+          )}
           {confirmNote && (
             <NoteDeleteDialog
               n={confirmNote}

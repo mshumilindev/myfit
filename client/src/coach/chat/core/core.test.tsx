@@ -114,4 +114,34 @@ describe('core behaviour', () => {
     expect(names).toHaveLength(2);
     expect(new Set(names).size).toBe(2);
   });
+
+  it("the client's answer to an access request is data for the ask card, not a bubble (SPO-99)", () => {
+    const reply = {
+      ...msg('r', 'client', Date.parse('2026-10-01T08:10:00Z')),
+      body: { kind: 'request-reply', reqId: 'access-ask:1', result: 'allowed' },
+    } as ChatMessage;
+    const seen: string[] = [];
+    buildThreadRows({
+      ch: en,
+      locale: 'en' as never,
+      now: Date.parse('2026-10-01T09:00:00Z'),
+      messages: [msg('a', 'client', Date.parse('2026-10-01T08:00:00Z')), reply],
+      notes: [] as { id: string; at: number }[],
+      firstNewId: null,
+      mineFrom: 'trainer',
+      first: 'Oleh',
+      them: 'Oleh',
+      openMenuId: null,
+      openMenu: vi.fn(),
+      onRetry: vi.fn(),
+      noteSide: 'me',
+      noteLabel: () => '',
+      renderNote: () => null,
+      renderOther: (m) => {
+        seen.push(m.id);
+        return { body: null, withMenu: false };
+      },
+    });
+    expect(seen).not.toContain('r');
+  });
 });

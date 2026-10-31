@@ -1102,9 +1102,63 @@ export async function enforceMessageRate(
   });
 }
 
-/** After a new message: rate check, unread, and a content-free push ("New message", never text or name; C.3). */
+/** SPO-99 pauses; they mirror client/src/coach/share/accessAsk.ts (a parity test keeps them equal). */
+export const ASK_COOLDOWN_MS = 24 * 3600 * 1000;
+export const ASK_DECLINED_COOLDOWN_MS = 7 * 24 * 3600 * 1000;
+
+interface AskMsg {
+  id?: string;
+  at?: number;
+  k?: string;
+  r?: string;
+  deleted?: boolean;
+}
+
+/**
+ * Pause on access asks (SPO-99). The sealed body is never read: only the open `k` ('ask' | 'reply') and `r`. An ask
+ * is removed (not counted, not pushed) when an EARLIER ask of the conversation is less than 24 h older, or when the
+ * client said "not now" less than 7 days before it. Same shape as the flood limit: the newest message loses, a retried
+ * trigger finds nothing to do.
+ */
+export async function enforceAskPause(
+  ctx: Ctx,
+  cid: string,
+  mid: string,
+): Promise<'ok' | 'removed'> {
+  const msgPath = `${convPath(cid)}/messages/${mid}`;
+  const m = (await ctx.kv.get(msgPath)) as AskMsg | null;
+  if (!m || m.k !== 'ask' || typeof m.at !== 'number') return 'ok';
+  const at = m.at;
+  const all = await ctx.kv.list(`${convPath(cid)}/messages`, {
+    orderBy: ['at', 'desc'],
+    limit: 500,
+  });
+  const before = (o: AskMsg) =>
+    typeof o.at === 'number' && (o.at < at || (o.at === at && String(o.id ?? '') < mid));
+  const blocked = all
+    .map((x) => ({ ...(x.data as AskMsg), id: x.path.split('/').pop() }))
+    .some(
+      (o) =>
+        o.id !== mid &&
+        before(o) &&
+        // a DELETED ask still counts (the client was already notified); a deleted "not now" is the client's own to remove
+        ((o.k === 'ask' && at - (o.at as number) < ASK_COOLDOWN_MS) ||
+          (o.k === 'reply' &&
+            !o.deleted &&
+            o.r === 'declined' &&
+            at - (o.at as number) < ASK_DECLINED_COOLDOWN_MS)),
+    );
+  if (!blocked) return 'ok';
+  await ctx.kv.del(msgPath);
+  return 'removed';
+}
+
+/** After a new message: rate check, ask pause, unread, and a content-free push ("New message" / "New request", never text or name; C.3). */
 export async function afterMessageCreated(ctx: Ctx, cid: string, mid: string): Promise<void> {
-  if ((await enforceMessageRate(ctx, cid, mid)) === 'removed') {
+  if (
+    (await enforceMessageRate(ctx, cid, mid)) === 'removed' ||
+    (await enforceAskPause(ctx, cid, mid)) === 'removed'
+  ) {
     await recomputeConversation(ctx, cid);
     return;
   }
@@ -1113,7 +1167,7 @@ export async function afterMessageCreated(ctx: Ctx, cid: string, mid: string): P
   const m = await ctx.kv.get(`${convPath(cid)}/messages/${mid}`);
   if (!conv || !m || conv.active !== true) return;
   const to = m.from === conv.clientId ? (conv.trainerId as string) : (conv.clientId as string);
-  await ctx.notify?.(to, 'message');
+  await ctx.notify?.(to, m.k === 'ask' || m.k === 'reply' ? 'request' : 'message');
 }
 
 export const NOTICE_RETENTION_MS = 30 * 86_400_000;
@@ -1179,6 +1233,8 @@ export async function sweep(ctx: Ctx): Promise<SweepResult> {
       at: d.at,
       v: d.v,
       keyEpoch: d.keyEpoch,
+      ...(typeof d.k === 'string' ? { k: d.k } : {}),
+      ...(typeof d.r === 'string' ? { r: d.r } : {}),
       deleted: true,
       deletedAt: now,
     });

@@ -53,6 +53,12 @@
   }
 }
 
+/* A row somebody asked for: an accent bar on the start edge (SPO-99). */
+.cc-pick-row--ask {
+  padding-inline-start: var(--s-8);
+  border-inline-start: var(--s-4) solid var(--color-accent);
+}
+
 /* ConsentChips facts: a small static mark before the name; the dimmed row is a category that is not shared. */
 .cc-fact {
   display: flex;

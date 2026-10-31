@@ -80,3 +80,35 @@ describe('ConsentLevelPicker', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 });
+
+describe('ConsentLevelPicker row options (SPO-99)', () => {
+  it('highlights an asked row, hides a level the row lacks, blocks a row', () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <ConsentLevelPicker
+        legend="L"
+        levelLabels={LV}
+        rows={[
+          { id: 'a', label: 'Alcohol', value: 'off', highlight: true, levels: ['off', 'effects'] },
+          { id: 'b', label: 'Nutrition', value: 'off', blocked: true },
+          { id: 'c', label: 'Sleep', value: 'off' },
+        ]}
+        onChange={onChange}
+      />,
+    );
+    expect(container.querySelectorAll('.cc-pick-row--ask')).toHaveLength(1);
+    const a = screen.getByRole('group', { name: 'Alcohol' });
+    expect(
+      within(a)
+        .getAllByRole('button')
+        .map((x) => x.textContent),
+    ).toEqual(['Off', 'Effects only']);
+    const b = screen.getByRole('group', { name: 'Nutrition' });
+    fireEvent.click(within(b).getByRole('button', { name: 'Full' }));
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.click(
+      within(screen.getByRole('group', { name: 'Sleep' })).getByRole('button', { name: 'Full' }),
+    );
+    expect(onChange).toHaveBeenCalledWith('c', 'full');
+  });
+});

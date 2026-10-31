@@ -3,6 +3,8 @@ import { Button } from '../../../../components/ui/Button';
 import { ChatBubble } from '../../../../components/ui/ChatBubble';
 import { ScheduleRequestCard } from '../../../schedule/ScheduleRequestCard';
 import { useWords as useShareWords } from '../../../share/ShareCardView';
+import { AccessAskCard } from '../../../share/AccessAskCard';
+import { askStatus, parseAccessAsk, type AccessAsk } from '../../../share/accessAsk';
 import { AskCard } from '../../../share/AskCard';
 import { parseAskReqId } from '../../../share/askShare';
 import { ShareMessage } from '../../../share/ShareMessage';
@@ -27,6 +29,10 @@ export interface ClientBodyCtx {
   onOpenProgram?: () => void;
   onOpenSharing: () => void;
   onCounter: (reqId: string) => void;
+  /** The thread (the card reads the client's answer from it) and the clock (expiry). */
+  messages: readonly Msg[];
+  now: number;
+  onReviewAsk: (ask: AccessAsk) => void;
 }
 
 /** Bodies the client chat draws beyond plain text: system lines, share cards, Ask and reschedule cards. */
@@ -78,6 +84,20 @@ export function renderClientBody(
           {x.shw.sh.unsupportedShare}
         </ChatBubble>
       ),
+    );
+  }
+  const access = m.body.kind === 'request' ? parseAccessAsk(m) : null;
+  if (access) {
+    const status = askStatus(m, x.messages, x.now);
+    return noMenu(
+      <AccessAskCard
+        ask={access}
+        status={status}
+        side="client"
+        mine={mine}
+        first={x.first}
+        onReview={mine ? undefined : () => x.onReviewAsk(access)}
+      />,
     );
   }
   if (m.body.kind === 'request' && parseAskReqId(m.body.reqId)) {

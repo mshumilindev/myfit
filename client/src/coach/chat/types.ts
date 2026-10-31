@@ -20,7 +20,8 @@ export type MsgBody =
   | { kind: 'text'; text: string }
   | { kind: 'system'; type: string; text?: string }
   | { kind: 'share'; share: unknown; text?: string }
-  | { kind: 'request'; reqId: string }
+  | { kind: 'request'; reqId: string; cats?: string[] }
+  | { kind: 'request-reply'; reqId: string; result: string }
   | { kind: 'unsupported' };
 
 export type SendState = 'sent' | 'sending' | 'failed';

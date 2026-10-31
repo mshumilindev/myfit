@@ -304,6 +304,31 @@ suite('coach firestore rules (needs emulator)', () => {
     ])('create denied: %s', async (_n, make) => {
       await no(fs.setDoc(msgRef(client()), make()));
     });
+    it('access ask / reply (SPO-99): open k and r are role-bound and exact', async () => {
+      await ok(fs.setDoc(msgRef(trainer(), 'a1'), msg('t1', { id: 'a1', k: 'ask' })));
+      await ok(
+        fs.setDoc(msgRef(client(), 'p1'), msg('c1', { id: 'p1', k: 'reply', r: 'partial' })),
+      );
+      await ok(
+        fs.setDoc(msgRef(client(), 'p2'), msg('c1', { id: 'p2', k: 'reply', r: 'declined' })),
+      );
+      // a client cannot ask, a trainer cannot answer on the client's behalf
+      await no(fs.setDoc(msgRef(client(), 'a2'), msg('c1', { id: 'a2', k: 'ask' })));
+      await no(
+        fs.setDoc(msgRef(trainer(), 'p3'), msg('t1', { id: 'p3', k: 'reply', r: 'allowed' })),
+      );
+      // exact values only; r only with reply; reply needs a valid r
+      await no(fs.setDoc(msgRef(trainer(), 'a3'), msg('t1', { id: 'a3', k: 'other' })));
+      await no(fs.setDoc(msgRef(trainer(), 'a4'), msg('t1', { id: 'a4', k: 'ask', r: 'allowed' })));
+      await no(fs.setDoc(msgRef(client(), 'p4'), msg('c1', { id: 'p4', k: 'reply' })));
+      await no(fs.setDoc(msgRef(client(), 'p5'), msg('c1', { id: 'p5', k: 'reply', r: 'maybe' })));
+      await no(fs.setDoc(msgRef(client(), 'p6'), msg('c1', { id: 'p6', r: 'allowed' })));
+      // a stranger and a member with the trainer's uid cannot use them either
+      await no(fs.setDoc(msgRef(stranger(), 'a5'), msg('x', { id: 'a5', k: 'ask' })));
+      await no(fs.setDoc(msgRef(as('t1', 'member'), 'a6'), msg('t1', { id: 'a6', k: 'ask' })));
+      // k / r cannot be added to an existing message later
+      await no(fs.updateDoc(msgRef(client(), 'm0'), { k: 'reply', r: 'allowed' }));
+    });
     it('trainer cannot write without a published ck; client can write epoch 1 only', async () => {
       await seed({ noCk: true });
       await no(fs.setDoc(msgRef(trainer()), msg('t1')));

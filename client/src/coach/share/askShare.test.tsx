@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { shareEn as sh } from '../../i18n/coachShare.en';
 import { safeEn as sf } from '../../i18n/coachSafe.en';
+import { clientEn } from '../../i18n/coachClient.en';
 import { ChatScreen } from '../chat/ChatScreen';
 import { createFixturesChatPort, type FixturesChatPort } from '../chat/__fixtures__/fixtures';
 import { createFixturesPort } from '../data/__fixtures__/fixtures';
@@ -84,13 +85,16 @@ describe('Ask to share (S-21)', () => {
     fireEvent.change(box, { target: { value: 'a' } });
     const ask = (await screen.findAllByRole('button', { name: sh.pickAsk('Oleh') }))[0];
     fireEvent.click(ask);
+    // SPO-99: the ask opens the Request access sheet; sending it is one access-ask message with the ticked rows
+    fireEvent.click(await screen.findByRole('button', { name: clientEn.raEverything }));
+    fireEvent.click(await screen.findByRole('button', { name: /^Send request/ }));
     await waitFor(() => expect(msgs().length).toBe(before + 1));
     const sent = msgs()[msgs().length - 1];
     expect(sent.from).toBe('trainer');
     expect(sent.body.kind).toBe('request');
-    expect(parseAskReqId(sent.body.reqId ?? '')).not.toBeNull();
+    expect(sent.body.reqId).toMatch(/^access-ask:/);
     // the card is drawn in the thread
-    expect(await screen.findByText(sf.askCardKind)).toBeTruthy();
+    expect(await screen.findByText(clientEn.raKind)).toBeTruthy();
   });
 });
 
