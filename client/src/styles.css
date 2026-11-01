@@ -21759,6 +21759,21 @@ body {
 .focus-scroll::-webkit-scrollbar {
   display: none;
 }
+/* Step transition (SPO-323, focusStepTransition.ts): the outgoing card is an inert snapshot laid over the live one.
+   The cards travel sideways, so the scroller must not grow a horizontal scroll while they do. */
+.focus-stage {
+  position: relative;
+}
+.focus-ghost {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+.focus-scroll.focus-moving {
+  overflow-x: hidden;
+}
 
 /* focus mode bar */
 .fm-modebar {

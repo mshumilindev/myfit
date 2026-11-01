@@ -284,6 +284,7 @@ import { getRole } from '../api';
 import { HomeMovePicker } from '../components/HomeMovePicker';
 import { HoldWatchSet, fmtHoldClock } from '../components/HoldWatchSet';
 import { exerciseProfile } from '../data/exerciseProfile';
+import { useFocusStepTransition } from './focusStepTransition';
 import { HoldDurationInput } from '../components/HoldDurationInput';
 import { homeTotals, isHomeWorkout, isStopwatchExercise, lastSetsOf } from '../homeSets';
 
@@ -668,6 +669,14 @@ export function SessionView(props: {
   const focusMode = true;
   const [focusStarted, setFocusStarted] = useState(false);
   const [focusIdx, setFocusIdx] = useState(0);
+  // Back/Next slide the card to its neighbour (SPO-323); jumps from other places swap it as before.
+  const focusStageRef = useRef<HTMLDivElement>(null);
+  const focusLiveRef = useRef<HTMLDivElement>(null);
+  const focusTransition = useFocusStepTransition(focusStageRef, focusLiveRef, focusIdx);
+  const goFocus = (to: number): void => {
+    focusTransition.prepare(to > focusIdx ? 1 : -1);
+    setFocusIdx(to);
+  };
   /** An exercise just added/duplicated — the focus jumps to its step. */
   const [focusJumpId, setFocusJumpId] = useState<string | null>(null);
   /** A superset member picked by hand — holds until the group's next log. */
@@ -2502,7 +2511,11 @@ export function SessionView(props: {
             </div>
           </div>
           {circuitBanner}
-          {focusGroup ? renderGroupStep(focusGroup) : renderCard(focusEx, null)}
+          <div className="focus-stage" ref={focusStageRef}>
+            <div className="focus-live" ref={focusLiveRef}>
+              {focusGroup ? renderGroupStep(focusGroup) : renderCard(focusEx, null)}
+            </div>
+          </div>
         </div>
         {renderKitTray()}
         <div className="focus-nav">
@@ -2519,17 +2532,13 @@ export function SessionView(props: {
             variant="secondary"
             className="focus-back"
             disabled={focusPos === 0}
-            onClick={() => setFocusIdx(focusPos - 1)}
+            onClick={() => goFocus(focusPos - 1)}
             aria-label={t.focusBack}
           >
             <Icon name="caret-left" />
           </Button>
           {focusHasNext ? (
-            <Button
-              variant="quiet"
-              className="focus-next"
-              onClick={() => setFocusIdx(focusPos + 1)}
-            >
+            <Button variant="quiet" className="focus-next" onClick={() => goFocus(focusPos + 1)}>
               {(() => {
                 const img = nx ? exerciseImage(nx.name, exerciseKind(nx)) : undefined;
                 return img ? <img className="fn-thumb" src={img} alt="" /> : null;
