@@ -56,6 +56,8 @@ Today/Progress/Programs/Gyms, стан синку й може змінити м�
 - Delete set/exercise має undo через idempotent restore.
 - Finish drops set-less exercises після warning і лишає filled exercises.
 - Finished workout можна редагувати.
+- Back/Next у фокус-режимі: картка вправи їде до сусідньої (обидві стиснуті до 94 % і приглушені), 340 мс, без блокування вводу;
+  наступний тап скасовує поточну анімацію; `prefers-reduced-motion` і «static» рівень motion-бюджету дають кросфейд 150 мс (SPO-323).
 
 **Статус:** OK для реалізованого ядра.
 
