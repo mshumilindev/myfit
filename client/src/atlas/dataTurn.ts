@@ -1,12 +1,12 @@
 /**
- * SPO-35: one chat turn about the log of a single lift — answer it from the log, ask "Which lift?" when only the
+ * SPO-35: one chat turn about the chat itself (metaTurn.ts) or the log of a single lift — answer it from the log, ask "Which lift?" when only the
  * metric is known, or hand the turn back (null). Kept out of intents.ts (file-size ratchet); the few helpers that live
  * there are passed in, so this file does not import intents.ts at all.
  */
+import { metaTurn, type Said } from './metaTurn';
 import {
   answerDataQuestion,
-  type DataMetric,
-  type DataWhich,
+  type DataMemo,
   readDataFollowUp,
   readDataQuestion,
 } from './dataQuestion';
@@ -20,10 +20,11 @@ interface Deps {
 }
 /** The slice of Convo this turn reads; the caller's full Convo flows through untouched (no import of intents.ts). */
 interface DConvo {
+  said?: Said[];
   pending?: boolean;
   intent?: string;
   exercise?: string | null;
-  dq?: { metric: DataMetric | null; which: DataWhich };
+  dq?: DataMemo;
 }
 interface Out<C> {
   route: Route;
@@ -41,6 +42,8 @@ export function dataTurn<C extends DConvo>(
   L: Tr,
   d: Deps,
 ): Out<C & { turn: number; q: string }> | null {
+  const meta = metaTurn(question, convo, turn, L);
+  if (meta) return meta;
   const pq = d.parse(question, c);
   const prevDq =
     convo.dq ?? (convo.intent === 'best' ? { metric: null, which: 'best' as const } : null);
@@ -53,7 +56,13 @@ export function dataTurn<C extends DConvo>(
         : null);
   if (!dq) return null;
   const intent = dq.which === 'best' ? 'best' : 'lift_last';
-  const keep = { ...convo, turn, intent, q: question, dq: { metric: dq.metric, which: dq.which } };
+  const keep = {
+    ...convo,
+    turn,
+    intent,
+    q: question,
+    dq: { metric: dq.metric, which: dq.which, skip: dq.skip },
+  };
   if (dq.exercise) {
     const text = answerDataQuestion(dq, c, pq.range, L);
     if (!text) return null;

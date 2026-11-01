@@ -48,6 +48,31 @@ export const CONV_CASES: ConvCase[] = [
   c('en', ['how many reps can I do with 70 kg bench'], /.*/, { forbid: /Which lift|8, 8, 8/ }),
   c('en', ['how do I increase my pull-up reps'], /.*/, { forbid: /8, 8, 8/ }),
   c('en', ['i do bjj 3 times a week, how many lifting days'], /.*/, { forbid: /Which lift/ }),
+  // P3 — the chat itself: memory of what was asked and said, going further back
+  c(
+    'en',
+    ['what weight did I use for pullups last time', 'what did I just ask you?'],
+    /You asked.*pullups/i,
+  ),
+  c('en', ['what weight did I use for pullups last time', 'repeat that'], /10 kg on all 3 sets/),
+  c('en', ['what weight did I use for pullups last time', 'say that again'], /10 kg on all 3 sets/),
+  c(
+    'en',
+    ['how many reps of pullups last time', 'and the time before that?'],
+    /8, 8, 8 reps|reps/,
+    {
+      forbid: /recover|48–72/,
+    },
+  ),
+  c('uk', ['з якою вагою я робив підтягування', 'що я щойно питав?'], /Ти питав.*підтягування/),
+  c('uk', ['з якою вагою я робив підтягування', 'повтори'], /10 kg на всіх 3/),
+  c('uk', ['з якою вагою я робив підтягування', 'а раніше?'], /8 kg/),
+  c(
+    'en',
+    ['what weight did I use for pullups last time', 'what was my first question'],
+    /first question.*pullups/i,
+  ),
+  c('en', ['repeat that'], /Nothing to repeat/),
   // known weaknesses found by the SPO-35 spike (fix → drop `gap`)
   c('en', ['how many sets of pullups did I do last week'], /\b[1-9]\d* sets?\b/, { gap: true }),
   c('pl', ['rekord w wyciskaniu'], /Bench/i, { gap: true }),
