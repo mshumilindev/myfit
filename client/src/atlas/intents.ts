@@ -4,6 +4,13 @@
  * built from YOUR data (history, plan, readiness, sleep). Only when nothing
  * here fits does the question go to Gemini. More intents: intentsMore.ts.
  */
+import {
+  answerDataQuestion,
+  readDataFollowUp,
+  readDataQuestion,
+  type DataMetric,
+  type DataWhich,
+} from './dataQuestion';
 import { setTypeOf } from '../store';
 import {
   findCatalogExercise,
@@ -224,6 +231,8 @@ export interface Convo {
   frame?: Frame;
   /** Two lifts just compared — for "so which one is better for me?". */
   pair?: [string, string];
+  /** The last question about one lift's log (metric and which) — "and squat?", "how about reps" keep the rest. */
+  dq?: { metric: DataMetric | null; which: DataWhich };
   /** Earlier topics, newest first — "and for squat?" can reach back past a detour. */
   prev?: { intent: string; exercise?: string | null; muscle?: MuscleGroup | null; q?: string }[];
 }
@@ -2203,6 +2212,61 @@ function answerDraft(question0: string, c: AskCtx, convo: Convo = {}): Draft | n
       chips: chipsFor(convo.intent, L, { q: convo.q ?? question, p: topic, c }),
       convo: { ...convo, turn },
     };
+  }
+  // SPO-35: a question about the log of one lift ("with what weight did I last do pull-ups") is answered from the log,
+  // for the metric and the lift asked — before any keyword topic can take it.
+  if (!convo.flow) {
+    const pq = parse(question, c);
+    const dq =
+      readDataQuestion(question, pq, c) ??
+      (convo.pending && convo.dq && pq.exercise
+        ? { ...convo.dq, exercise: pq.exercise }
+        : (convo.dq ?? (convo.intent === 'best' ? { metric: null, which: 'best' as const } : null))
+          ? readDataFollowUp(
+              question,
+              pq,
+              convo.dq ?? { metric: null, which: 'best' },
+              convo.exercise,
+            )
+          : null);
+    if (dq?.exercise) {
+      const text = answerDataQuestion(dq, c, pq.range, L);
+      if (text)
+        return {
+          route: 'query',
+          intent: dq.which === 'best' ? 'best' : 'lift_last',
+          text,
+          chips: chipsFor('lift_last', L, { q: question, p: { ...pq, exercise: dq.exercise }, c }),
+          convo: {
+            ...convo,
+            turn,
+            intent: dq.which === 'best' ? 'best' : 'lift_last',
+            exercise: dq.exercise,
+            q: question,
+            dq: { metric: dq.metric, which: dq.which },
+          },
+        };
+    } else if (dq && dq.metric && dq.which === 'last') {
+      // Which lift? — ask, with the lifts you do most as chips, instead of guessing (SPO-35, AC3).
+      const lifts = loggedLifts(c)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 4);
+      if (lifts.length)
+        return {
+          route: 'needLift',
+          intent: 'lift_last',
+          text: L('Which lift?', 'Яка вправа?'),
+          chips: lifts.map((l) => c.fmt.exercise(l.name)),
+          convo: {
+            ...convo,
+            turn,
+            intent: 'lift_last',
+            pending: true,
+            q: question,
+            dq: { metric: dq.metric, which: dq.which },
+          },
+        };
+    }
   }
   // Two-word questions made only of "small" words ("ти хто") — the retrieval can't see them.
   const bare = normalize(question);
