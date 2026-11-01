@@ -48,7 +48,7 @@ const RAW: Record<'pl' | 'lt' | 'et' | 'ru', string> = {
     uciekaj*=cave in|do środka=inward|do srodka=inward|
   `,
   lt: `
-    kiek kartų=how many|kiek=how much|kaip ilgai=how long|kaip dažnai=how often|kodėl=why|kada=when|ką=what|kas=what|kaip=how|ar=is|
+    paskutinį kartą=last time|paskutini karta=last time|paskutinį=last|kiek kartų=how many|kiek=how much|kaip ilgai=how long|kaip dažnai=how often|kodėl=why|kada=when|ką=what|kas=what|kaip=how|ar=is|
     poils*=rest|ilset*=rest|ilsė*=rest|pertrauk*=rest|
     svor*=weight|kg=kg|kit*=next|šiandien=today|siandien=today|rytoj=tomorrow|vakar=yesterday|savait*=week|mėnes*=month|
     treniruot*=workout|sportuo*=train|sporto salė*=gym|sal*=gym|
@@ -87,7 +87,7 @@ const RAW: Record<'pl' | 'lt' | 'et' | 'ru', string> = {
     ką dariau=what did i do|ka dariau=what did i do|dariau=did|pakel*=lift|daugiau=more|
   `,
   et: `
-    mitu korda=how many|mitu=how many|kui palju=how much|kui kaua=how long|kui tihti=how often|miks=why|millal=when|mida=what|mis=what|kuidas=how|kas=is|
+    viimati=last time|viimane kord=last time|mitu korda=how many|mitu=how many|kui palju=how much|kui kaua=how long|kui tihti=how often|miks=why|millal=when|mida=what|mis=what|kuidas=how|kas=is|
     puhk*=rest|puha*=rest|paus*=rest|
     raskus*=weight|kaal*=weight|kg=kg|järgmi*=next|jargmi*=next|täna=today|tana=today|homme=tomorrow|eile=yesterday|nädal*=week|nadal*=week|kuu=month|kuus=month|
     trenn*=workout|treening*=workout|treeni*=train|jõusaal*=gym|jousaal*=gym|

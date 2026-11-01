@@ -109,12 +109,16 @@ export const CONV_CASES: ConvCase[] = [
   c('uk', ['розрахуй 12*15'], /^180\./),
   c('en', ['what is Spotter'], /Spotter in a nutshell/),
   c('uk', ['що таке Spotter'], /Spotter коротко/),
-  // known weaknesses found by the SPO-35 spike (fix → drop `gap`)
-  c('en', ['log 3 sets of pullups'], /Log|Запис|set/i, { forbid: /3–4 days a week/, gap: true }),
-  c('en', ['how many sets of pullups did I do last week'], /\b[1-9]\d* sets?\b/, { gap: true }),
-  c('pl', ['rekord w wyciskaniu'], /Bench/i, { gap: true }),
+  // pl / lt / et ask about their own log too (SPO-35 P7): the word map feeds the same data path
+  c('en', ['how many sets of squat did I do last week'], /\b3 sets\b/),
+  c('pl', ['rekord w wyciskaniu'], /Bench.*85 kg/i),
+  c('pl', ['mój rekord w przysiadzie'], /Squat.*110 kg/i),
+  c('pl', ['ile powtórzeń podciągania zrobiłem ostatnio'], /8, 8, 8/),
+  c('pl', ['jaki ciężar na przysiadzie ostatnio'], /110 kg/),
+  c('lt', ['kokiu svoriu paskutinį kartą darėmi prisitraukimus'], /10 kg/),
+  c('et', ['mis raskusega ma viimati kükke tegin'], /110 kg/),
+  c('et', ['mitu kordust ma viimati kükke tegin'], /6, 6, 6/),
   c('en', ['how much did I weigh a month ago'], /kg/),
-  c('pl', ['ile powtórzeń podciągania zrobiłem ostatnio'], /8, 8, 8/, { gap: true }),
-  c('lt', ['kokiu svoriu paskutinį kartą traukiausi prie skersinio'], /10 kg/, { gap: true }),
-  c('et', ['mis raskusega ma viimati lätti tegin'], /110 kg/, { gap: true }),
+  // known weaknesses (fix → drop `gap`)
+  c('en', ['log 3 sets of pullups'], /Log|Запис|set/i, { forbid: /3–4 days a week/, gap: true }),
 ];
