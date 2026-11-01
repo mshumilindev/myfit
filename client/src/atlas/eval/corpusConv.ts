@@ -90,6 +90,17 @@ export const CONV_CASES: ConvCase[] = [
   }),
   c('en', ['my shoulder hurts', 'it is sharp'], /hurt|feel|How bad|After which/i),
   c('en', ['my elbow hurts', 'it hurts on bench'], /When does it hurt|feel|How bad/i),
+  // P5 — swearing is not an insult: a question with a curse in it is answered; an insult aimed at the app still is one
+  c('en', ['what the fuck is my bench max'], /1RM|estimated/i, { forbid: /No hard feelings/ }),
+  c('en', ['fucking hell what did I squat last time'], /110 kg/, { forbid: /No hard feelings/ }),
+  c('en', ['holy shit that is heavy, am I recovered'], /Recovery|recover/i, {
+    forbid: /No hard feelings/,
+  }),
+  c('uk', ['бляха болить коліно'], /біль|Коли болить|Після/i),
+  c('uk', ['пиздець я втомився, чи відновився я'], /Батарейка|відновл|Recovery/i, {
+    forbid: /Ой, промазав/,
+  }),
+  c('en', ['this app is shit'], /No hard feelings/),
   // known weaknesses found by the SPO-35 spike (fix → drop `gap`)
   c('en', ['how many sets of pullups did I do last week'], /\b[1-9]\d* sets?\b/, { gap: true }),
   c('pl', ['rekord w wyciskaniu'], /Bench/i, { gap: true }),

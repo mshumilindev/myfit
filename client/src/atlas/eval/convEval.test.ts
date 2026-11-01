@@ -4,7 +4,7 @@ import { richCtx } from '../testCtx';
 import { CONV_CASES } from './corpusConv';
 
 // Floors only grow (SPO-35 P0): raise them when cases are added or gaps are fixed, never lower.
-const MIN_CASES = 41;
+const MIN_CASES = 47;
 const MAX_GAPS = 5;
 
 const run = (loc: (typeof CONV_CASES)[number]['loc'], turns: string[]) => {
