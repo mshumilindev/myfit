@@ -4,13 +4,8 @@
  * built from YOUR data (history, plan, readiness, sleep). Only when nothing
  * here fits does the question go to Gemini. More intents: intentsMore.ts.
  */
-import {
-  answerDataQuestion,
-  readDataFollowUp,
-  readDataQuestion,
-  type DataMetric,
-  type DataWhich,
-} from './dataQuestion';
+import type { DataMetric, DataWhich } from './dataQuestion';
+import { dataTurn } from './dataTurn';
 import { setTypeOf } from '../store';
 import {
   findCatalogExercise,
@@ -55,7 +50,7 @@ import {
   type Route,
 } from './confidence';
 import { activityAnswer, activityReport, isComplaint } from './activityReport';
-import { parseFrame, type Frame } from './frame';
+import { mergeFrames, parseFrame, type Frame } from './frame';
 import { compareAnswer, programAnswer, variantOf, whatIfDays } from './compose';
 import { calcAnswer, offTopic, offTopicLine } from './calc';
 import {
@@ -313,20 +308,6 @@ const CHOICE_FOLLOW =
 /** Why-questions that open a follow-up: "а чому лікті…", "but why…". */
 const FOLLOW_WHY_RE =
   /^\s*(а|і|и|але|and|but|so)?\s*(чому|чого|навіщо|почему|зачем|why|how come)\s/iu;
-/** "Build me a plan" follow-ups right after one: "and 4 days?", "at home?", "30 min?". */
-function mergeFrames(a: Frame, b: Frame): Frame {
-  return {
-    ...a,
-    days: b.days ?? a.days,
-    minutes: b.minutes ?? a.minutes,
-    kit: b.kit.length ? b.kit : a.kit,
-    only: b.kit.length ? b.only : a.only,
-    without: [...new Set([...a.without, ...b.without])],
-    sore: b.sore ?? a.sore,
-    goal: b.goal ?? a.goal,
-    bar: a.bar || b.bar,
-  };
-}
 
 const MORE = [
   'more',
@@ -2213,61 +2194,11 @@ function answerDraft(question0: string, c: AskCtx, convo: Convo = {}): Draft | n
       convo: { ...convo, turn },
     };
   }
-  // SPO-35: a question about the log of one lift ("with what weight did I last do pull-ups") is answered from the log,
-  // for the metric and the lift asked — before any keyword topic can take it.
-  if (!convo.flow) {
-    const pq = parse(question, c);
-    const dq =
-      readDataQuestion(question, pq, c) ??
-      (convo.pending && convo.dq && pq.exercise
-        ? { ...convo.dq, exercise: pq.exercise }
-        : (convo.dq ?? (convo.intent === 'best' ? { metric: null, which: 'best' as const } : null))
-          ? readDataFollowUp(
-              question,
-              pq,
-              convo.dq ?? { metric: null, which: 'best' },
-              convo.exercise,
-            )
-          : null);
-    if (dq?.exercise) {
-      const text = answerDataQuestion(dq, c, pq.range, L);
-      if (text)
-        return {
-          route: 'query',
-          intent: dq.which === 'best' ? 'best' : 'lift_last',
-          text,
-          chips: chipsFor('lift_last', L, { q: question, p: { ...pq, exercise: dq.exercise }, c }),
-          convo: {
-            ...convo,
-            turn,
-            intent: dq.which === 'best' ? 'best' : 'lift_last',
-            exercise: dq.exercise,
-            q: question,
-            dq: { metric: dq.metric, which: dq.which },
-          },
-        };
-    } else if (dq && dq.metric && dq.which === 'last') {
-      // Which lift? — ask, with the lifts you do most as chips, instead of guessing (SPO-35, AC3).
-      const lifts = loggedLifts(c)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 4);
-      if (lifts.length)
-        return {
-          route: 'needLift',
-          intent: 'lift_last',
-          text: L('Which lift?', 'Яка вправа?'),
-          chips: lifts.map((l) => c.fmt.exercise(l.name)),
-          convo: {
-            ...convo,
-            turn,
-            intent: 'lift_last',
-            pending: true,
-            q: question,
-            dq: { metric: dq.metric, which: dq.which },
-          },
-        };
-    }
-  }
+  // SPO-35: a question about one lift's log is answered from the log (dataTurn.ts), before any keyword topic.
+  const dt = convo.flow
+    ? null
+    : dataTurn(question, c, convo, turn, L, { parse, chipsFor, loggedLifts });
+  if (dt) return dt;
   // Two-word questions made only of "small" words ("ти хто") — the retrieval can't see them.
   const bare = normalize(question);
   const raw1 =
