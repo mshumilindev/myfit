@@ -73,6 +73,23 @@ export const CONV_CASES: ConvCase[] = [
     /first question.*pullups/i,
   ),
   c('en', ['repeat that'], /Nothing to repeat/),
+  // P4 — a pain check-in is left when the person asks about something else, and stays for its own answers
+  c(
+    'en',
+    ['my knee hurts when I squat', 'what weight did I use for pullups last time'],
+    /10 kg on all 3 sets/,
+    {
+      forbid: /When does it hurt/,
+    },
+  ),
+  c('uk', ['болить коліно при присіді', 'з якою вагою я робив підтягування'], /10 kg на всіх 3/, {
+    forbid: /Коли болить/,
+  }),
+  c('en', ['my shoulder hurts', 'thanks'], /Happy to help|No stress/i, {
+    forbid: /How bad|When does/,
+  }),
+  c('en', ['my shoulder hurts', 'it is sharp'], /hurt|feel|How bad|After which/i),
+  c('en', ['my elbow hurts', 'it hurts on bench'], /When does it hurt|feel|How bad/i),
   // known weaknesses found by the SPO-35 spike (fix → drop `gap`)
   c('en', ['how many sets of pullups did I do last week'], /\b[1-9]\d* sets?\b/, { gap: true }),
   c('pl', ['rekord w wyciskaniu'], /Bench/i, { gap: true }),
