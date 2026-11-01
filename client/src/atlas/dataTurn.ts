@@ -3,9 +3,11 @@
  * metric is known, or hand the turn back (null). Kept out of intents.ts (file-size ratchet); the few helpers that live
  * there are passed in, so this file does not import intents.ts at all.
  */
+import { toKnownLanguage } from './lexicon';
 import { metaTurn, type Said } from './metaTurn';
 import {
   answerDataQuestion,
+  lookupSignal,
   type DataMemo,
   readDataFollowUp,
   readDataQuestion,
@@ -34,6 +36,10 @@ interface Out<C> {
   convo: C;
 }
 
+/** A word-mapped question is trusted only when it names what is wanted (a metric or the record) — not "yesterday I cycled". */
+const asLookup = <T extends { metric: unknown; which: string }>(q: T | null) =>
+  q && (q.metric || q.which === 'best') ? q : null;
+
 export function dataTurn<C extends DConvo>(
   question: string,
   c: AskCtx,
@@ -44,15 +50,30 @@ export function dataTurn<C extends DConvo>(
 ): Out<C & { turn: number; q: string }> | null {
   const meta = metaTurn(question, convo, turn, L);
   if (meta) return meta;
-  const pq = d.parse(question, c);
+  // Polish one-letter prepositions ("rekord w przysiadzie") would otherwise be read as a lift.
+  const text = question
+    .replace(/(^|\s)[wzou](?=\s|$)/giu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const pq = d.parse(text, c);
   const prevDq =
     convo.dq ?? (convo.intent === 'best' ? { metric: null, which: 'best' as const } : null);
+  // pl / lt / et ask through the word map (lexicon.ts): "mój rekord w przysiadzie" reads as "record squat".
+  const mapped = readDataQuestion(text, pq, c) ? null : toKnownLanguage(text);
+  // (one-letter leftovers like Polish "w" would be read as a lift)
+  const known =
+    mapped
+      ?.replace(/(^|\s)\p{L}(?=\s|$)/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim() ?? null;
+  const kpq = known ? d.parse(known, c) : null;
   const dq =
-    readDataQuestion(question, pq, c) ??
+    readDataQuestion(text, pq, c) ??
+    (known && kpq && lookupSignal(known) ? asLookup(readDataQuestion(known, kpq, c)) : null) ??
     (convo.pending && convo.dq && pq.exercise
       ? { ...convo.dq, exercise: pq.exercise }
       : prevDq
-        ? readDataFollowUp(question, pq, prevDq, convo.exercise)
+        ? readDataFollowUp(text, pq, prevDq, convo.exercise)
         : null);
   if (!dq) return null;
   const intent = dq.which === 'best' ? 'best' : 'lift_last';
@@ -64,7 +85,7 @@ export function dataTurn<C extends DConvo>(
     dq: { metric: dq.metric, which: dq.which, skip: dq.skip },
   };
   if (dq.exercise) {
-    const text = answerDataQuestion(dq, c, pq.range, L);
+    const text = answerDataQuestion(dq, c, (kpq ?? pq).range, L);
     if (!text) return null;
     const chips = d.chipsFor('lift_last', L, {
       q: question,

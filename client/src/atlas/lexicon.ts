@@ -13,7 +13,7 @@ const RAW: Record<'pl' | 'lt' | 'et' | 'ru', string> = {
     odpoczyn*=rest|odpoczyw*=rest|przerw*=rest|
     ciężar*=weight|ciezar*=weight|waga=weight|wagę=weight|kg=kg|następn*=next|nastepn*=next|dzisiaj=today|dziś=today|dzis=today|jutro=tomorrow|wczoraj=yesterday|tydzień=week|tygodni*=week|miesiąc*=month|miesiac*=month|
     trening*=workout|ćwicz*=train|cwicz*=train|siłowni*=gym|silowni*=gym|
-    wyciskanie na ławce=bench press|wyciskani*=press|ławk*=bench|przysiad*=squat|martwy ciąg=deadlift|martwego ciągu=deadlift|ciąg*=deadlift|podciąg*=pullups|pompk*=pushups|wiosłowani*=row|uginani*=curl|wykrok*=lunges|
+    wyciskanie na ławce=bench press|wyciskanie nad głowę=overhead press|wyciskanie żołnierskie=overhead press|wyciskani*=bench press|ławk*=bench|przysiad*=squat|martwy ciąg=deadlift|martwego ciągu=deadlift|ciąg*=deadlift|podciąg*=pullups|pompk*=pushups|wiosłowani*=row|uginani*=curl|wykrok*=lunges|
     klatk*=chest|plec*=back|plecy=back|nogi=legs|nóg=legs|ramion*=shoulders|bark*=shoulders|biceps*=biceps|triceps*=triceps|brzuch*=abs|pośladk*=glutes|łydk*=calves|
     boli=hurts|ból*=pain|bol*=pain|kontuzj*=injury|kolan*=knee|łok*=elbow|nadgarst*=wrist|
     białk*=protein|bialk*=protein|kalori*=calories|kreatyn*=creatine|sen=sleep|spać=sleep|spac=sleep|spanie=sleep|śpię=sleep|woda=water|wod*=water|
@@ -48,7 +48,7 @@ const RAW: Record<'pl' | 'lt' | 'et' | 'ru', string> = {
     uciekaj*=cave in|do środka=inward|do srodka=inward|
   `,
   lt: `
-    kiek kartų=how many|kiek=how much|kaip ilgai=how long|kaip dažnai=how often|kodėl=why|kada=when|ką=what|kas=what|kaip=how|ar=is|
+    paskutinį kartą=last time|paskutini karta=last time|paskutinį=last|kiek kartų=how many|kiek=how much|kaip ilgai=how long|kaip dažnai=how often|kodėl=why|kada=when|ką=what|kas=what|kaip=how|ar=is|
     poils*=rest|ilset*=rest|ilsė*=rest|pertrauk*=rest|
     svor*=weight|kg=kg|kit*=next|šiandien=today|siandien=today|rytoj=tomorrow|vakar=yesterday|savait*=week|mėnes*=month|
     treniruot*=workout|sportuo*=train|sporto salė*=gym|sal*=gym|
@@ -87,7 +87,7 @@ const RAW: Record<'pl' | 'lt' | 'et' | 'ru', string> = {
     ką dariau=what did i do|ka dariau=what did i do|dariau=did|pakel*=lift|daugiau=more|
   `,
   et: `
-    mitu korda=how many|mitu=how many|kui palju=how much|kui kaua=how long|kui tihti=how often|miks=why|millal=when|mida=what|mis=what|kuidas=how|kas=is|
+    viimati=last time|viimane kord=last time|mitu korda=how many|mitu=how many|kui palju=how much|kui kaua=how long|kui tihti=how often|miks=why|millal=when|mida=what|mis=what|kuidas=how|kas=is|
     puhk*=rest|puha*=rest|paus*=rest|
     raskus*=weight|kaal*=weight|kg=kg|järgmi*=next|jargmi*=next|täna=today|tana=today|homme=tomorrow|eile=yesterday|nädal*=week|nadal*=week|kuu=month|kuus=month|
     trenn*=workout|treening*=workout|treeni*=train|jõusaal*=gym|jousaal*=gym|

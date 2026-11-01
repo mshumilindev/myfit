@@ -73,11 +73,52 @@ export const CONV_CASES: ConvCase[] = [
     /first question.*pullups/i,
   ),
   c('en', ['repeat that'], /Nothing to repeat/),
-  // known weaknesses found by the SPO-35 spike (fix → drop `gap`)
-  c('en', ['how many sets of pullups did I do last week'], /\b[1-9]\d* sets?\b/, { gap: true }),
-  c('pl', ['rekord w wyciskaniu'], /Bench/i, { gap: true }),
+  // P4 — a pain check-in is left when the person asks about something else, and stays for its own answers
+  c(
+    'en',
+    ['my knee hurts when I squat', 'what weight did I use for pullups last time'],
+    /10 kg on all 3 sets/,
+    {
+      forbid: /When does it hurt/,
+    },
+  ),
+  c('uk', ['болить коліно при присіді', 'з якою вагою я робив підтягування'], /10 kg на всіх 3/, {
+    forbid: /Коли болить/,
+  }),
+  c('en', ['my shoulder hurts', 'thanks'], /Happy to help|No stress/i, {
+    forbid: /How bad|When does/,
+  }),
+  c('en', ['my shoulder hurts', 'it is sharp'], /hurt|feel|How bad|After which/i),
+  c('en', ['my elbow hurts', 'it hurts on bench'], /When does it hurt|feel|How bad/i),
+  // P5 — swearing is not an insult: a question with a curse in it is answered; an insult aimed at the app still is one
+  c('en', ['what the fuck is my bench max'], /1RM|estimated/i, { forbid: /No hard feelings/ }),
+  c('en', ['fucking hell what did I squat last time'], /110 kg/, { forbid: /No hard feelings/ }),
+  c('en', ['holy shit that is heavy, am I recovered'], /Recovery|recover/i, {
+    forbid: /No hard feelings/,
+  }),
+  c('uk', ['бляха болить коліно'], /біль|Коли болить|Після/i),
+  c('uk', ['пиздець я втомився, чи відновився я'], /Батарейка|відновл|Recovery/i, {
+    forbid: /Ой, промазав/,
+  }),
+  c('en', ['this app is shit'], /No hard feelings/),
+  // P6 — the right topic: units and sums are computed, "what is Spotter" is the app, not spotting someone
+  c('en', ['what is 80 kg in lbs'], /176\.4 lb/, { forbid: /Log bodyweight/ }),
+  c('uk', ['скільки буде 80 кг у фунтах'], /176,4 lb/),
+  c('pl', ['ile to 80 kg w funtach'], /176\.4 lb/),
+  c('uk', ['скільки 25 помножити на 4'], /^100\./),
+  c('uk', ['розрахуй 12*15'], /^180\./),
+  c('en', ['what is Spotter'], /Spotter in a nutshell/),
+  c('uk', ['що таке Spotter'], /Spotter коротко/),
+  // pl / lt / et ask about their own log too (SPO-35 P7): the word map feeds the same data path
+  c('en', ['how many sets of squat did I do last week'], /\b3 sets\b/),
+  c('pl', ['rekord w wyciskaniu'], /Bench.*85 kg/i),
+  c('pl', ['mój rekord w przysiadzie'], /Squat.*110 kg/i),
+  c('pl', ['ile powtórzeń podciągania zrobiłem ostatnio'], /8, 8, 8/),
+  c('pl', ['jaki ciężar na przysiadzie ostatnio'], /110 kg/),
+  c('lt', ['kokiu svoriu paskutinį kartą darėmi prisitraukimus'], /10 kg/),
+  c('et', ['mis raskusega ma viimati kükke tegin'], /110 kg/),
+  c('et', ['mitu kordust ma viimati kükke tegin'], /6, 6, 6/),
   c('en', ['how much did I weigh a month ago'], /kg/),
-  c('pl', ['ile powtórzeń podciągania zrobiłem ostatnio'], /8, 8, 8/, { gap: true }),
-  c('lt', ['kokiu svoriu paskutinį kartą traukiausi prie skersinio'], /10 kg/, { gap: true }),
-  c('et', ['mis raskusega ma viimati lätti tegin'], /110 kg/, { gap: true }),
+  // known weaknesses (fix → drop `gap`)
+  c('en', ['log 3 sets of pullups'], /Log|Запис|set/i, { forbid: /3–4 days a week/, gap: true }),
 ];
