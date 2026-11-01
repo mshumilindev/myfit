@@ -101,7 +101,16 @@ export const CONV_CASES: ConvCase[] = [
     forbid: /Ой, промазав/,
   }),
   c('en', ['this app is shit'], /No hard feelings/),
+  // P6 — the right topic: units and sums are computed, "what is Spotter" is the app, not spotting someone
+  c('en', ['what is 80 kg in lbs'], /176\.4 lb/, { forbid: /Log bodyweight/ }),
+  c('uk', ['скільки буде 80 кг у фунтах'], /176,4 lb/),
+  c('pl', ['ile to 80 kg w funtach'], /176\.4 lb/),
+  c('uk', ['скільки 25 помножити на 4'], /^100\./),
+  c('uk', ['розрахуй 12*15'], /^180\./),
+  c('en', ['what is Spotter'], /Spotter in a nutshell/),
+  c('uk', ['що таке Spotter'], /Spotter коротко/),
   // known weaknesses found by the SPO-35 spike (fix → drop `gap`)
+  c('en', ['log 3 sets of pullups'], /Log|Запис|set/i, { forbid: /3–4 days a week/, gap: true }),
   c('en', ['how many sets of pullups did I do last week'], /\b[1-9]\d* sets?\b/, { gap: true }),
   c('pl', ['rekord w wyciskaniu'], /Bench/i, { gap: true }),
   c('en', ['how much did I weigh a month ago'], /kg/),

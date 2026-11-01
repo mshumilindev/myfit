@@ -13,7 +13,7 @@ const RAW: Record<'pl' | 'lt' | 'et' | 'ru', string> = {
     odpoczyn*=rest|odpoczyw*=rest|przerw*=rest|
     ciężar*=weight|ciezar*=weight|waga=weight|wagę=weight|kg=kg|następn*=next|nastepn*=next|dzisiaj=today|dziś=today|dzis=today|jutro=tomorrow|wczoraj=yesterday|tydzień=week|tygodni*=week|miesiąc*=month|miesiac*=month|
     trening*=workout|ćwicz*=train|cwicz*=train|siłowni*=gym|silowni*=gym|
-    wyciskanie na ławce=bench press|wyciskani*=press|ławk*=bench|przysiad*=squat|martwy ciąg=deadlift|martwego ciągu=deadlift|ciąg*=deadlift|podciąg*=pullups|pompk*=pushups|wiosłowani*=row|uginani*=curl|wykrok*=lunges|
+    wyciskanie na ławce=bench press|wyciskanie nad głowę=overhead press|wyciskanie żołnierskie=overhead press|wyciskani*=bench press|ławk*=bench|przysiad*=squat|martwy ciąg=deadlift|martwego ciągu=deadlift|ciąg*=deadlift|podciąg*=pullups|pompk*=pushups|wiosłowani*=row|uginani*=curl|wykrok*=lunges|
     klatk*=chest|plec*=back|plecy=back|nogi=legs|nóg=legs|ramion*=shoulders|bark*=shoulders|biceps*=biceps|triceps*=triceps|brzuch*=abs|pośladk*=glutes|łydk*=calves|
     boli=hurts|ból*=pain|bol*=pain|kontuzj*=injury|kolan*=knee|łok*=elbow|nadgarst*=wrist|
     białk*=protein|bialk*=protein|kalori*=calories|kreatyn*=creatine|sen=sleep|spać=sleep|spac=sleep|spanie=sleep|śpię=sleep|woda=water|wod*=water|

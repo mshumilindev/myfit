@@ -111,12 +111,35 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
     }
   }
 
+  // Units: "80 kg in lbs", "скільки 80 кг у фунтах", "176 lb to kg", "ile to 80 kg w funtach"
+  const KG = '(?:kg|kgs|kilos?|кг|кіло\\p{L}*|kilogram\\p{L}*)';
+  const LB = '(?:lbs?|pounds?|фунт\\p{L}*|funt\\p{L}*)';
+  const toLb = new RegExp(`${NUM}\\s*${KG}(?=\\s|$).*?(?<![\\p{L}])${LB}(?![\\p{L}])`, 'u').exec(
+    ph,
+  );
+  const toKg = new RegExp(`${NUM}\\s*${LB}(?![\\p{L}]).*?(?<![\\p{L}])${KG}(?![\\p{L}])`, 'u').exec(
+    ph,
+  );
+  if (toLb || toKg) {
+    const x = num((toLb ?? toKg)![1]);
+    const v = toLb ? x * 2.20462 : x / 2.20462;
+    const [from, to] = toLb ? ['kg', 'lb'] : ['lb', 'kg'];
+    return L(
+      `${dec(x, 'en', 1)} ${from} ≈ ${dec(v, 'en', 1)} ${to}.`,
+      `${dec(x, 'uk', 1)} ${from} ≈ ${dec(v, 'uk', 1)} ${to}.`,
+    );
+  }
+
   // Plain arithmetic: "17 помножити на 23", "120 / 4"
   const ar = new RegExp(
     `${NUM}\\s*(помножити на|помножене на|множити на|умножить на|times|multiplied by|x|плюс|plus|\\+|мінус|минус|minus|-|поділити на|разделить на|divided by|/)\\s*${NUM}`,
     'u',
   ).exec(ph);
-  if (ar && /(скільки буде|сколько будет|порахуй|посчитай|what.?s|what is|calculate|=)/u.test(ph)) {
+  const asked =
+    /(скільки (буде )?|сколько (будет )?|порахуй|посчитай|розрахуй|обчисли|what.?s|what is|calculate|ile (to|jest)|policz|=)/u.test(
+      ph,
+    ) || /^\s*[\d.,\s+*/x×-]+\s*$/u.test(ph);
+  if (ar && asked) {
     const a = num(ar[1]);
     const b = num(ar[3]);
     const op = ar[2];
