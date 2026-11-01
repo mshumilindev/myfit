@@ -18,14 +18,19 @@ import * as N from './num';
 export type DataMetric = 'weight' | 'reps' | 'sets' | 'volume';
 export type DataWhich = 'last' | 'best' | 'period';
 
-export interface DataQuery {
+/** What the chat remembers of a data question, for follow-ups ("and squat?", "the time before that?"). */
+export interface DataMemo {
   metric: DataMetric | null;
   which: DataWhich;
+  /** How many sessions back from the latest ("the time before that" → 1). */
+  skip?: number;
+}
+export interface DataQuery extends DataMemo {
   exercise: string | null;
 }
 
 const WEIGHT_RE =
-  /\b(weight|weights|heavy|heaviest|kg|kilos?|load|loaded)\b|ваг[аиуе]|обтяжен|важк|важч|скільки кг|кілограм|ciężar|ciezar|ile kg|kilogram/iu;
+  /\b(weight|weights|heavy|heaviest|kg|kilos?|load|loaded)\b|ваг\p{L}*|обтяжен|важк|важч|скільки кг|кілограм|ciężar|ciezar|ile kg|kilogram/iu;
 const REPS_RE =
   /\b(reps?|repetitions?|how many (times|pull ?ups?|push ?ups?|chin ?ups?|reps)|times)\b|повтор|скільки раз|разів|раз(ів)? я|powtórz|powtorz|ile razy/iu;
 // "how heavy was my last set" asks for the weight: only a COUNT of sets is the sets metric.
@@ -86,10 +91,15 @@ export function readDataQuestion(question: string, p: Parsed, c: AskCtx): DataQu
 const working = (e: Exercise) => e.sets.filter((s) => setTypeOf(s) !== 'warmup' && s.reps > 0);
 
 /** The most recent finished session that has the lift, with its working sets. */
-export function lastSessionOf(c: AskCtx, name: string): { w: Workout; e: Exercise } | null {
+export function lastSessionOf(
+  c: AskCtx,
+  name: string,
+  skip = 0,
+): { w: Workout; e: Exercise } | null {
+  let left = skip;
   for (const w of finishedOf(c)) {
     const e = w.exercises.find((x) => x.name === name);
-    if (e && working(e).length) return { w, e };
+    if (e && working(e).length && left-- <= 0) return { w, e };
   }
   return null;
 }
@@ -124,7 +134,7 @@ export function answerDataQuestion(
   if (!name) return null;
   const nm = c.fmt.exercise(name);
   if (q.which === 'last') {
-    const hit = lastSessionOf(c, name);
+    const hit = lastSessionOf(c, name, q.skip);
     if (!hit) return L(`${nm}: not in your log yet.`, `${nm}: у журналі ще нема.`);
     const sets = working(hit.e);
     const when_ = when(c, hit.w.startedAt);
@@ -220,6 +230,8 @@ export function answerDataQuestion(
       );
 }
 
+const BEFORE_RE =
+  /^\s*(and |so )?(the )?(time|session|one) before( that| last)?\W*$|^\s*(а |і )?(раніше|перед тим|до того|попередн\p{L}*)\W*$|^\s*(a )?(wcześniej|przedtem|poprzednio)\W*$/iu;
 const FOLLOW_RE = /^\s*(and|so|what about|how about|а|і|и|та|a|a co z|co z)\b/iu;
 
 /**
@@ -229,10 +241,13 @@ const FOLLOW_RE = /^\s*(and|so|what about|how about|а|і|и|та|a|a co z|co z)
 export function readDataFollowUp(
   question: string,
   p: Parsed,
-  prev: { metric: DataMetric | null; which: DataWhich },
+  prev: DataMemo,
   exercise: string | null | undefined,
 ): DataQuery | null {
   const q = question.toLowerCase();
+  // "and the time before that?", "а раніше?" — the same lift and metric, one session further back.
+  if (exercise && prev.which === 'last' && BEFORE_RE.test(q))
+    return { metric: prev.metric, which: 'last', exercise, skip: (prev.skip ?? 0) + 1 };
   if (q.trim().split(/\s+/).length > 6 || NOT_A_LOOKUP_RE.test(q)) return null;
   const metric: DataMetric | null = VOLUME_RE.test(q)
     ? 'volume'

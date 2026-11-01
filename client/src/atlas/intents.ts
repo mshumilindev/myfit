@@ -4,8 +4,9 @@
  * built from YOUR data (history, plan, readiness, sleep). Only when nothing
  * here fits does the question go to Gemini. More intents: intentsMore.ts.
  */
-import type { DataMetric, DataWhich } from './dataQuestion';
+import type { DataMemo } from './dataQuestion';
 import { dataTurn } from './dataTurn';
+import { remember, type Said } from './metaTurn';
 import { setTypeOf } from '../store';
 import {
   findCatalogExercise,
@@ -227,7 +228,9 @@ export interface Convo {
   /** Two lifts just compared — for "so which one is better for me?". */
   pair?: [string, string];
   /** The last question about one lift's log (metric and which) — "and squat?", "how about reps" keep the rest. */
-  dq?: { metric: DataMetric | null; which: DataWhich };
+  dq?: DataMemo;
+  /** The last exchanges, newest first — "repeat that", "what did I just ask". */
+  said?: Said[];
   /** Earlier topics, newest first — "and for squat?" can reach back past a detour. */
   prev?: { intent: string; exercise?: string | null; muscle?: MuscleGroup | null; q?: string }[];
 }
@@ -2002,7 +2005,10 @@ export function answerLocally(question0: string, c: AskCtx, convo: Convo = {}): 
   featuresHere.clear();
   try {
     const d = answerDraft(question, c, convo);
-    return d && settle(d, question);
+    const a = d && settle(d, question);
+    return a && a.intent !== 'meta'
+      ? { ...a, convo: { ...a.convo, said: remember(convo.said, question0, a.text) } }
+      : a;
   } finally {
     askingCtx = null;
   }
@@ -2194,7 +2200,7 @@ function answerDraft(question0: string, c: AskCtx, convo: Convo = {}): Draft | n
       convo: { ...convo, turn },
     };
   }
-  // SPO-35: a question about one lift's log is answered from the log (dataTurn.ts), before any keyword topic.
+  // SPO-35: chat meta and one-lift log questions are answered from the chat or the log (dataTurn.ts) first.
   const dt = convo.flow
     ? null
     : dataTurn(question, c, convo, turn, L, { parse, chipsFor, loggedLifts });
