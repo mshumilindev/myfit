@@ -4,6 +4,8 @@
  * built from YOUR data (history, plan, readiness, sleep). Only when nothing
  * here fits does the question go to Gemini. More intents: intentsMore.ts.
  */
+import type { DataMetric, DataWhich } from './dataQuestion';
+import { dataTurn } from './dataTurn';
 import { setTypeOf } from '../store';
 import {
   findCatalogExercise,
@@ -48,7 +50,7 @@ import {
   type Route,
 } from './confidence';
 import { activityAnswer, activityReport, isComplaint } from './activityReport';
-import { parseFrame, type Frame } from './frame';
+import { mergeFrames, parseFrame, type Frame } from './frame';
 import { compareAnswer, programAnswer, variantOf, whatIfDays } from './compose';
 import { calcAnswer, offTopic, offTopicLine } from './calc';
 import {
@@ -224,6 +226,8 @@ export interface Convo {
   frame?: Frame;
   /** Two lifts just compared — for "so which one is better for me?". */
   pair?: [string, string];
+  /** The last question about one lift's log (metric and which) — "and squat?", "how about reps" keep the rest. */
+  dq?: { metric: DataMetric | null; which: DataWhich };
   /** Earlier topics, newest first — "and for squat?" can reach back past a detour. */
   prev?: { intent: string; exercise?: string | null; muscle?: MuscleGroup | null; q?: string }[];
 }
@@ -304,20 +308,6 @@ const CHOICE_FOLLOW =
 /** Why-questions that open a follow-up: "а чому лікті…", "but why…". */
 const FOLLOW_WHY_RE =
   /^\s*(а|і|и|але|and|but|so)?\s*(чому|чого|навіщо|почему|зачем|why|how come)\s/iu;
-/** "Build me a plan" follow-ups right after one: "and 4 days?", "at home?", "30 min?". */
-function mergeFrames(a: Frame, b: Frame): Frame {
-  return {
-    ...a,
-    days: b.days ?? a.days,
-    minutes: b.minutes ?? a.minutes,
-    kit: b.kit.length ? b.kit : a.kit,
-    only: b.kit.length ? b.only : a.only,
-    without: [...new Set([...a.without, ...b.without])],
-    sore: b.sore ?? a.sore,
-    goal: b.goal ?? a.goal,
-    bar: a.bar || b.bar,
-  };
-}
 
 const MORE = [
   'more',
@@ -2204,6 +2194,11 @@ function answerDraft(question0: string, c: AskCtx, convo: Convo = {}): Draft | n
       convo: { ...convo, turn },
     };
   }
+  // SPO-35: a question about one lift's log is answered from the log (dataTurn.ts), before any keyword topic.
+  const dt = convo.flow
+    ? null
+    : dataTurn(question, c, convo, turn, L, { parse, chipsFor, loggedLifts });
+  if (dt) return dt;
   // Two-word questions made only of "small" words ("ти хто") — the retrieval can't see them.
   const bare = normalize(question);
   const raw1 =

@@ -219,3 +219,18 @@ export function allowedKit(f: Frame, mem?: AtlasMemory): Set<EquipmentId> | null
   }
   return base;
 }
+
+/** "Build me a plan" follow-ups right after one: "and 4 days?", "at home?", "30 min?". */
+export function mergeFrames(a: Frame, b: Frame): Frame {
+  return {
+    ...a,
+    days: b.days ?? a.days,
+    minutes: b.minutes ?? a.minutes,
+    kit: b.kit.length ? b.kit : a.kit,
+    only: b.kit.length ? b.only : a.only,
+    without: [...new Set([...a.without, ...b.without])],
+    sore: b.sore ?? a.sore,
+    goal: b.goal ?? a.goal,
+    bar: a.bar || b.bar,
+  };
+}

@@ -44,7 +44,7 @@ const session = (daysAgo: number, k: number): Workout =>
     ),
   }) as unknown as Workout;
 
-export const richCtx = (locale: 'en' | 'uk'): AskCtx => ({
+export const richCtx = (locale: 'en' | 'uk' | 'pl' | 'lt' | 'et'): AskCtx => ({
   s: {
     workouts: Array.from({ length: 30 }, (_, i) => session(2 + i * 4, i % 3)),
     coach: { ...COACH_DEFAULT, enabled: true },
