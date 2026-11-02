@@ -15,6 +15,8 @@
 import type { Intent, Tr } from './intentKit';
 import { ASKS } from './asks';
 import { keyGroups } from './intentsExtra';
+import { INTENTS_P9 } from './appP9';
+import { INTENTS_P10 } from './appP10';
 
 export interface AppTopic {
   id: string;
@@ -503,18 +505,23 @@ const APP_KEYS: Record<string, string[][]> = {
   ],
 };
 
-export const INTENTS_APP_MORE: Intent[] = APP_TOPICS_MORE.map((t) => ({
-  id: t.id,
-  all: keyGroups(APP_KEYS[t.id] ?? [['__never__']]),
-  answer: (_c, _p, L) => (t.id === 'app_tips' ? tipBatch(0, L).text : L(t.answer[0], t.answer[1])),
-  // "More" after tips = the next batch (picked in withAppTips).
-  more: t.id === 'app_tips' ? (_c, _p, L) => tipBatch(0, L).text : undefined,
-  suggest: (L) =>
-    t.chips.flatMap((id) => {
-      const a = ASKS[id];
-      return a ? [L(a[0], a[1])] : [];
-    }),
-}));
+export const INTENTS_APP_MORE: Intent[] = [
+  ...APP_TOPICS_MORE.map((t): Intent => ({
+    id: t.id,
+    all: keyGroups(APP_KEYS[t.id] ?? [['__never__']]),
+    answer: (_c, _p, L) =>
+      t.id === 'app_tips' ? tipBatch(0, L).text : L(t.answer[0], t.answer[1]),
+    // "More" after tips = the next batch (picked in withAppTips).
+    more: t.id === 'app_tips' ? (_c, _p, L) => tipBatch(0, L).text : undefined,
+    suggest: (L) =>
+      t.chips.flatMap((id) => {
+        const a = ASKS[id];
+        return a ? [L(a[0], a[1])] : [];
+      }),
+  })),
+  ...INTENTS_P9,
+  ...INTENTS_P10,
+];
 
 /** Suggestions for the earlier app topics (additive: only where none are set). */
 export function appChipsFor(id: string): ((L: Tr) => string[]) | undefined {

@@ -6,7 +6,7 @@
  */
 import type { DataMemo } from './dataQuestion';
 import { dataTurn } from './dataTurn';
-import { leavesFlow } from './flowExit';
+import { freshQuestion, leavesFlow } from './flowExit';
 import { remember, type Said } from './metaTurn';
 import { setTypeOf } from '../store';
 import {
@@ -989,10 +989,10 @@ function answerOne(
       exercise: convo.exercise ?? base.exercise,
       muscle: convo.muscle ?? base.muscle,
     };
-    // A pending "which lift?" answered with just the lift/muscle — or
-    // "and deadlift?" carrying the topic (and its time window) over.
+    // A pending "which lift?" answered with just the lift/muscle, or "and deadlift?" carrying the topic over.
     const entityOnly =
       (p.exercise || p.muscle) &&
+      !(convo.pending && freshQuestion(question)) &&
       (convo.pending || groupMatches(words, phrase, FOLLOW_LEAD) || words.length <= 3);
     // Answering "which lift?" keeps the rest of the original question (numbers, window).
     const carried: Parsed = convo.pending
@@ -3009,13 +3009,13 @@ function answerParts(question: string, c: AskCtx, convo: Convo, L: Tr): Draft | 
     };
   // One part is clear, another isn't → answer it, then ask about the other.
   if (good.length === 1 && unsure.length) {
-    const u = unsure[0].part;
+    const [u, ue] = [unsure[0].part, c.fmt.echo?.(unsure[0].part) ?? unsure[0].part];
     const guess = didYouMean(u, c);
     const ask = guess.length
-      ? L(`And about “${u}” — which of these do you mean?`, `А щодо «${u}» — ти про що саме?`)
+      ? L(`And about “${ue}” — which of these do you mean?`, `А щодо «${ue}» — ти про що саме?`)
       : L(
-          `And “${u}” — say it another way and I’ll take it.`,
-          `А «${u}» — скажи інакше, і я відповім.`,
+          `And “${ue}” — say it another way and I’ll take it.`,
+          `А «${ue}» — скажи інакше, і я відповім.`,
         );
     return {
       ...good[0].a!,

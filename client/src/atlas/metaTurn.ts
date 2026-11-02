@@ -21,7 +21,8 @@ const FIRST_Q_RE =
 const RECAP_RE =
   /what did we (talk|discuss|cover)|summari[sz]e (our|the|this) (chat|conversation)|про що (ми )?(говорили|розмовляли)|підсумуй (розмову|чат)|o czym (rozmawialiśmy|mówiliśmy)/iu;
 
-const quote = (s: string) => `“${s.length > 90 ? `${s.slice(0, 87)}…` : s}”`;
+const quote = (s: string, echo: (t: string) => string) =>
+  `“${echo(s.length > 90 ? `${s.slice(0, 87)}…` : s)}”`;
 
 /** A meta turn answered, or null when the message is not about the chat. */
 export function metaTurn<C extends MConvo>(
@@ -29,6 +30,7 @@ export function metaTurn<C extends MConvo>(
   convo: C,
   turn: number,
   L: Tr,
+  echo: (t: string) => string = (t) => t,
 ): {
   route: 'ack';
   intent: 'meta';
@@ -49,14 +51,17 @@ export function metaTurn<C extends MConvo>(
   if (LAST_Q_RE.test(question))
     return mk(
       said[0]
-        ? L(`You asked: ${quote(said[0].q)}`, `Ти питав: ${quote(said[0].q)}`)
+        ? L(`You asked: ${quote(said[0].q, echo)}`, `Ти питав: ${quote(said[0].q, echo)}`)
         : L('You haven’t asked anything yet.', 'Ти ще нічого не питав.'),
     );
   if (FIRST_Q_RE.test(question)) {
     const first = said[said.length - 1];
     return mk(
       first
-        ? L(`Your first question: ${quote(first.q)}`, `Твоє перше питання: ${quote(first.q)}`)
+        ? L(
+            `Your first question: ${quote(first.q, echo)}`,
+            `Твоє перше питання: ${quote(first.q, echo)}`,
+          )
         : L('You haven’t asked anything yet.', 'Ти ще нічого не питав.'),
     );
   }
@@ -65,7 +70,7 @@ export function metaTurn<C extends MConvo>(
     const list = said
       .slice(0, 5)
       .reverse()
-      .map((s, i) => `${i + 1}. ${quote(s.q)}`)
+      .map((s, i) => `${i + 1}. ${quote(s.q, echo)}`)
       .join('\n');
     return mk(L(`So far you asked:\n${list}`, `Поки що ти питав:\n${list}`));
   }

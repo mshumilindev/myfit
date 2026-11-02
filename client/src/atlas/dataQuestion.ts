@@ -16,7 +16,7 @@ import { DAY, finishedOf, type AskCtx, type Parsed, type Range, type Tr } from '
 import * as N from './num';
 
 export type DataMetric = 'weight' | 'reps' | 'sets' | 'volume';
-export type DataWhich = 'last' | 'best' | 'period';
+export type DataWhich = 'last' | 'best' | 'period' | 'first';
 
 /** What the chat remembers of a data question, for follow-ups ("and squat?", "the time before that?"). */
 export interface DataMemo {
@@ -51,6 +51,11 @@ const SELF_RE =
 const PAST_RE =
   /\b(did|used|lifted|took|put|do|done|was|were)\b|брав|робив|ставив|жав|підтяг\p{L}*|рвав|robiłem|robilem/iu;
 
+/** "First ever", "when did I start benching" — the oldest session of the lift. */
+const FIRST_RE =
+  /\b(first( ever| time)?|earliest|(start|began|begin)(ed)?)\b|вперше|перш(ий|е|а|ого)\b|почав\p{L}*|pierwsz\p{L}*|zacząłem|zaczalem/iu;
+const FIRST_NO_RE = /\b(should|how (to|do|can)|can i|why|plan|recommend)\b|варто|як /iu;
+
 /** Which lifts-only question this is, or null when it is not about the log of one lift. */
 export function readDataQuestion(question: string, p: Parsed, c: AskCtx): DataQuery | null {
   const q = question.toLowerCase();
@@ -63,6 +68,8 @@ export function readDataQuestion(question: string, p: Parsed, c: AskCtx): DataQu
         : WEIGHT_RE.test(q)
           ? 'weight'
           : null;
+  if (p.exercise && FIRST_RE.test(q) && SELF_RE.test(q) && !FIRST_NO_RE.test(q))
+    return { metric, which: 'first', exercise: p.exercise };
   const last = LAST_RE.test(q.replace(/\blast\s+(week|month|year|\d+)\b/giu, ' '));
   const best = BEST_RE.test(q);
   const period = !!p.range && !p.range.ago;
@@ -113,10 +120,20 @@ export function lastSessionOf(
   return null;
 }
 
+/** The oldest finished session that has the lift. */
+export function firstSessionOf(c: AskCtx, name: string): { w: Workout; e: Exercise } | null {
+  const ws = finishedOf(c);
+  for (let i = ws.length - 1; i >= 0; i--) {
+    const e = ws[i].exercises.find((x) => x.name === name);
+    if (e && working(e).length) return { w: ws[i], e };
+  }
+  return null;
+}
+
 function when(c: AskCtx, ts: number): string {
   const days = Math.max(0, Math.round((c.now - ts) / DAY));
   const date = new Date(ts).toLocaleDateString(c.locale);
-  return `${N.daysAgo(c.locale, days)} (${date})`;
+  return `${N.daysAgoOf(c, days)} (${date})`;
 }
 
 /** "10 kg × 8, 10 kg × 8" grouped: "3 × 10 kg × 8". */
@@ -142,6 +159,16 @@ export function answerDataQuestion(
   const name = q.exercise;
   if (!name) return null;
   const nm = c.fmt.exercise(name);
+  if (q.which === 'first') {
+    const hit = firstSessionOf(c, name);
+    if (!hit) return L(`${nm}: not in your log yet.`, `${nm}: у журналі ще нема.`);
+    const sets = working(hit.e);
+    const w_ = when(c, hit.w.startedAt);
+    return L(
+      `${nm}, first logged ${w_}: ${setLine(c, sets, !sets.some((s) => setTopWeight(s) > 0))}.`,
+      `${nm}, вперше в журналі ${w_}: ${setLine(c, sets, !sets.some((s) => setTopWeight(s) > 0))}.`,
+    );
+  }
   if (q.which === 'last') {
     const hit = lastSessionOf(c, name, q.skip);
     if (!hit) return L(`${nm}: not in your log yet.`, `${nm}: у журналі ще нема.`);

@@ -40,9 +40,15 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
   const pm = new RegExp(`${NUM}\\s*percent\\s*(?:від|of|з|из|от)\\s*${NUM}`, 'u').exec(ph);
   if (pm) {
     const v = (num(pm[1]) * num(pm[2])) / 100;
+    // Training percentages (40–100%) or an explicit kg are a barbell load, rounded to plates;
+    // "15% of 80" is plain arithmetic and must not turn into "12.5 kg".
+    const load = /\b(kg|kgs|кг|кило)\b/u.test(ph) || (num(pm[1]) >= 40 && num(pm[1]) <= 100);
+    const shown = (loc: 'en' | 'uk') => (load ? kg(plate(v)) : dec(v, loc, 2));
+    const exact = (loc: 'en' | 'uk') =>
+      !load || plate(v) === v ? '.' : ` (${loc === 'en' ? 'exactly' : 'точно'} ${dec(v, loc, 2)}).`;
     return L(
-      `${pm[1]}% of ${pm[2]} is ${kg(plate(v))} (exactly ${dec(v, 'en', 2)}).`,
-      `${pm[1]}% від ${pm[2]} — це ${kg(plate(v))} (точно ${dec(v, 'uk', 2)}).`,
+      `${pm[1]}% of ${pm[2]} is ${shown('en')}${exact('en')}`,
+      `${pm[1]}% від ${pm[2]} — це ${shown('uk')}${exact('uk')}`,
     );
   }
 
@@ -120,10 +126,21 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
   const toKg = new RegExp(`${NUM}\\s*${LB}(?![\\p{L}]).*?(?<![\\p{L}])${KG}(?![\\p{L}])`, 'u').exec(
     ph,
   );
-  if (toLb || toKg) {
-    const x = num((toLb ?? toKg)![1]);
-    const v = toLb ? x * 2.20462 : x / 2.20462;
-    const [from, to] = toLb ? ['kg', 'lb'] : ['lb', 'kg'];
+  // The unit asked for comes first: "скільки це в фунтах 100 кг", "how many pounds is 100 kg".
+  const lbFirst = new RegExp(
+    `(?<![\\p{L}])${LB}(?![\\p{L}]).*?${NUM}\\s*${KG}(?![\\p{L}])`,
+    'u',
+  ).exec(ph);
+  const kgFirst = new RegExp(
+    `(?<![\\p{L}])${KG}(?![\\p{L}]).*?${NUM}\\s*${LB}(?![\\p{L}])`,
+    'u',
+  ).exec(ph);
+  const toLbAny = toLb ?? (toKg ? null : lbFirst);
+  const toKgAny = toKg ?? (toLb ? null : kgFirst);
+  if (toLbAny || toKgAny) {
+    const x = num((toLbAny ?? toKgAny)![1]);
+    const v = toLbAny ? x * 2.20462 : x / 2.20462;
+    const [from, to] = toLbAny ? ['kg', 'lb'] : ['lb', 'kg'];
     return L(
       `${dec(x, 'en', 1)} ${from} ≈ ${dec(v, 'en', 1)} ${to}.`,
       `${dec(x, 'uk', 1)} ${from} ≈ ${dec(v, 'uk', 1)} ${to}.`,

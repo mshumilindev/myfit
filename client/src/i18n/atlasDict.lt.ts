@@ -5574,4 +5574,313 @@ export const DICT: Record<string, string> = {
   'Hiking — that counts.': 'Žygis — tai skaičiuojasi.',
   'Rock climbing — that counts.': 'Uolų laipiojimas — tai skaičiuojasi.',
   'Climbing gym — that counts.': 'Laipiojimo sienelė — tai skaičiuojasi.',
+  '{1}-{2}-{3}: {4} sets in {5} min — {6}, {7}, {8}, {9}.':
+    '{1}-{2}-{3}: serijų – {4}, trukmė – {5} min — {6}, {7}, {8}, {9}.',
+  'Last {1} days: {2} sessions (usual {3}), {4} working sets.':
+    'Per pastarąsias {1} d.: treniruočių – {2} (įprastai {3}), darbinių serijų – {4}.',
+  '{1}: estimated max {2} → {3} (+{4}%) since {5}-{6}, {7} sessions; best set {8} × {9}.':
+    '{1}: apskaičiuotas maks. {2} → {3} (+{4}%) nuo {5}-{6}, treniruočių: {7}; geriausia serija {8} × {9}.',
+  'Your best: {1} {2} × {3} {4}(~{5} {6}RM).': 'Tavo geriausias: {1} {2} × {3} {4}(~{5} {6}RM).',
+  'Your best: {1} {2} × {3} {4}(~{5} {6}RM); {7} {8} × {9} {10}(~{11} {12}RM); {13} {14} × {15} {16}(~{17} {18}RM).':
+    'Tavo geriausi: {1} {2} × {3} {4}(~{5} {6}RM); {7} {8} × {9} {10}(~{11} {12}RM); {13} {14} × {15} {16}(~{17} {18}RM).',
+  '{1}: heaviest set — {2} × {3}, {4} ({5}-{6}-{7}).':
+    '{1}: sunkiausia serija — {2} × {3}, {4} ({5}-{6}-{7}).',
+  '{1}: most reps in a set — {2} at {3}, {4} ({5}-{6}-{7}).':
+    '{1}: daugiausia pakartojimų serijoje — {2} su {3}, {4} ({5}-{6}-{7}).',
+  '{1}: {2}% — recovered, train it.': '{1}: {2}% — atsigavo, gali treniruoti.',
+  'No streak yet — log a session today and it starts.':
+    'Dienų serijos dar nėra — užfiksuok treniruotę šiandien ir ji prasidės.',
+  '{1} sessions logged since {2}-{3}-{4}.': 'Nuo {2}-{3}-{4} užfiksuota treniruočių: {1}.',
+  'Moved {1} {2}{3} kg — this week.': 'Pakelta {1} {2}{3} kg — šią savaitę.',
+  '{1}: {2} ({3}-{4}-{5}), {6} sets.': '{1}: {2} ({3}-{4}-{5}), serijų: {6}.',
+  '{1}, {2} ({3}-{4}-{5}): {6} {7}× {8} × {9}.': '{1}, {2} ({3}-{4}-{5}): {6} {7}× {8} × {9}.',
+  'Last weigh-in: {1} on {2}-{3}-{4}.': 'Paskutinis svėrimasis: {1}, {2}-{3}-{4}.',
+  '{1} {2} × {3} {4}— {5}× bodyweight.': '{1} {2} × {3} {4}— {5}× kūno svorio.',
+  'You train most on {1}, {2}, {3}.': 'Dažniausiai treniruojiesi: {1}, {2}, {3}.',
+  'Longest: {1} min ({2}-{3}-{4}).': 'Ilgiausia: {1} min ({2}-{3}-{4}).',
+  'Shortest: {1} min ({2}-{3}-{4}).': 'Trumpiausia: {1} min ({2}-{3}-{4}).',
+  'This week: {1} session, {2} sets.': 'Šią savaitę: treniruočių – {1}, serijų – {2}.',
+  'Last week: {1} session, {2} sets.': 'Praėjusią savaitę: treniruočių – {1}, serijų – {2}.',
+  'Since June: {1} → {2} (+{3} kg).': 'Nuo birželio: {1} → {2} (+{3} kg).',
+  'Recovered: {1} (last trained {2}), {3} (last trained {4}), {5} (last trained {6}).':
+    'Atsigavę: {1} (paskutinį kartą treniruota {2}), {3} (paskutinį kartą treniruota {4}), {5} (paskutinį kartą treniruota {6}).',
+  'Still recovering: {1} ({2}, ~{3}% back) — go a bit lighter there.':
+    'Dar atsigauna: {1} ({2}, ~{3}% atsistatė) — ten verčiau pasilengvink.',
+  'Gyms saved: {1}.': 'Išsaugotos salės: {1}.',
+  '{1} ({2}-{3}-{4}): {5} {6} × {7}, {8} {9} × {10}, {11} {12} × {13}, {14} {15} × {16}, {17} {18} × {19}.':
+    '{1} ({2}-{3}-{4}): {5} {6} × {7}, {8} {9} × {10}, {11} {12} × {13}, {14} {15} × {16}, {17} {18} × {19}.',
+  '{1}: estimated max {2} → {3} (±{4}%) since {5}-{6}, {7} sessions; best set {8} × {9}.':
+    '{1}: apskaičiuotas maks. {2} → {3} (±{4}%) nuo {5}-{6}, treniruočių: {7}; geriausia serija {8} × {9}.',
+  'Reps per set, {1}, in August: {2}.': 'Pakartojimai serijoje, {1}, rugpjūtį: {2}.',
+  'Most improved, the last {1} months: {2} (+{3}%).':
+    'Didžiausias progresas pastaruoju laikotarpiu ({1} mėn.): {2} (+{3}%).',
+  '{1}.': '{1}.',
+  '{1} +{2}% ({3} → {4}); {5}.': '{1} +{2}% ({3} → {4}); {5}.',
+  '{1} +{2}% ({3} → {4}).': '{1} +{2}% ({3} → {4}).',
+  'RPE {1} {2}= nothing left, RPE {3} {4}= {5} reps left (RIR {6}).':
+    'RPE {1} {2}= nieko neliko, RPE {3} {4}= liko pakartojimų: {5} (RIR {6}).',
+  'Big breath into the belly, brace as if about to be punched, hold through the hard part, breathe out at the top.':
+    'Giliai įkvėpk į pilvą, įsitempk lyg tuoj gausi į pilvą, laikyk sunkioje dalyje, iškvėpk viršuje.',
+  'Zone {1} {2}≈ you can still talk in full sentences (~{3}–{4}% of max HR).':
+    '{1} zona {2}≈ dar gali kalbėti pilnais sakiniais (~{3}–{4}% maks. pulso).',
+  'Sudden numbness of the face or one side of the body, or numbness in the groin — call {1} {2}/ {3} now.':
+    'Staigus veido ar vienos kūno pusės tirpimas arba tirpimas kirkšnies srityje — skambink {1} {2}/ {3} dabar pat.',
+  'Let’s gooo, make it {1} {2}💪': 'Varom, tegul bus {1} {2}💪',
+  'Bench in a rack with safety pins and without collars so you can tip the plates, or use dumbbells.':
+    'Spausk gulėdamas stove su saugos kaiščiais ir be spaustukų, kad galėtum nuversti diskus, arba imk hantelius.',
+  'Set squat safeties just below your bottom position.':
+    'Pritūpimų saugiklius nustatyk kiek žemiau apatinės padėties.',
+  '{1} on a {2} kg bar: per side {3} {4}+ {5}.':
+    '{1} ant {2} kg grifo: iš kiekvienos pusės {3} {4}+ {5}.',
+  'Turn them on in the rest settings or when Atlas asks.':
+    'Įjunk juos poilsio nustatymuose arba kai Atlas paklaus.',
+  'On iPhone, first add Spotter to the Home Screen via Share, then Add to Home Screen.':
+    'iPhone: pirmiausia pridėk Spotter prie pagrindinio ekrano per „Bendrinti“, tada „Pridėti prie pagrindinio ekrano“.',
+  '{1} days a week, ~{2} min:': 'Dienų per savaitę: {1}, ~{2} min:',
+  'Day {1} {2}— full body: {3} {4}×{5}–{6} {7}· {8} {9}×{10}–{11} {12}(you: {13} × {14}) · {15} {16}×{17}–{18} {19}(you: {20} × {21}) · {22} {23}×{24}–{25} {26}(you: {27} × {28}) · {29} {30}×{31}–{32} {33}· {34} {35}×{36}–{37}.':
+    '{1} diena {2}— visas kūnas: {3} {4}×{5}–{6} {7}· {8} {9}×{10}–{11} {12}(tu: {13} × {14}) · {15} {16}×{17}–{18} {19}(tu: {20} × {21}) · {22} {23}×{24}–{25} {26}(tu: {27} × {28}) · {29} {30}×{31}–{32} {33}· {34} {35}×{36}–{37}.',
+  'Day {1} {2}— full body: {3} {4}×{5}–{6} {7}· {8} {9}×{10}–{11} {12}· {13} {14}×{15}–{16} {17}· {18} {19}×{20}–{21} {22}· {23} {24}×{25}–{26} {27}· {28} {29}×{30}–{31}.':
+    '{1} diena {2}— visas kūnas: {3} {4}×{5}–{6} {7}· {8} {9}×{10}–{11} {12}· {13} {14}×{15}–{16} {17}· {18} {19}×{20}–{21} {22}· {23} {24}×{25}–{26} {27}· {28} {29}×{30}–{31}.',
+  'Why this way: with {1} days, whole-body sessions hit every muscle {2} times a week — more often beats more per session.':
+    'Kodėl taip: kai dienų yra {1}, viso kūno treniruotės kiekvieną raumenį apkrauna dažnai (kartų per savaitę: {2}) — dažniau geriau nei daugiau per vieną kartą.',
+  'Each week: when every set hits the top of the range, add weight next time.':
+    'Kiekvieną savaitę: kai visos serijos pasiekia viršutinę diapazono ribą, kitą kartą pridėk svorio.',
+  'Day {1} {2}— upper: {3} {4}×{5}–{6} {7}(you: {8} × {9}) · {10} {11}×{12}–{13} {14}(you: {15} × {16}) · {17} {18}×{19}–{20} {21}(you: {22} × {23}) · {24} {25}×{26}–{27} {28}(you: {29} × {30}) · {31} {32}×{33}–{34} {35}· {36} {37}×{38}–{39} {40}(you: {41} × {42}).':
+    '{1} diena {2}— viršus: {3} {4}×{5}–{6} {7}(tu: {8} × {9}) · {10} {11}×{12}–{13} {14}(tu: {15} × {16}) · {17} {18}×{19}–{20} {21}(tu: {22} × {23}) · {24} {25}×{26}–{27} {28}(tu: {29} × {30}) · {31} {32}×{33}–{34} {35}· {36} {37}×{38}–{39} {40}(tu: {41} × {42}).',
+  'Day {1} {2}— lower: {3} {4}×{5}–{6} {7}· {8} {9}×{10}–{11} {12}· {13} {14}×{15}–{16} {17}· {18} {19}×{20}–{21} {22}· {23} {24}×{25}–{26} {27}· {28} {29}×{30}–{31}.':
+    '{1} diena {2}— apačia: {3} {4}×{5}–{6} {7}· {8} {9}×{10}–{11} {12}· {13} {14}×{15}–{16} {17}· {18} {19}×{20}–{21} {22}· {23} {24}×{25}–{26} {27}· {28} {29}×{30}–{31}.',
+  'Day {1} {2}— upper: {3} {4}×{5}–{6} {7}· {8} {9}×{10}–{11} {12}· {13} {14}×{15}–{16} {17}· {18} {19}×{20}–{21} {22}· {23} {24}×{25}–{26} {27}· {28} {29}×{30}–{31}.':
+    '{1} diena {2}— viršus: {3} {4}×{5}–{6} {7}· {8} {9}×{10}–{11} {12}· {13} {14}×{15}–{16} {17}· {18} {19}×{20}–{21} {22}· {23} {24}×{25}–{26} {27}· {28} {29}×{30}–{31}.',
+  'Why this way: {1} days split so each muscle gets about two sessions a week with {2} days between.':
+    'Kodėl taip: padalijus į {1} dienas, kiekvienas raumuo gauna maždaug dvi treniruotes per savaitę, o pertrauka tarp jų – dienų: {2}.',
+  '{1}: {2} (+ {3}, {4}), multi-joint, a barbell.':
+    '{1}: {2} (+ {3}, {4}), daugiasąnarinis, su štanga.',
+  '{1}: {2} (+ {3}, {4}), multi-joint, nothing but you.':
+    '{1}: {2} (+ {3}, {4}), daugiasąnarinis, tik su savo kūno svoriu.',
+  '{1} is easier to load heavy and track in kilos; {2} is easier on the joints and needs less kit.':
+    '{1} lengviau apkrauti sunkiai ir sekti kilogramais; {2} švelnesnis sąnariams ir reikalauja mažiau įrangos.',
+  'In your log: {1} {2} × {3}.': 'Tavo žurnale: {1} {2} × {3}.',
+  'No need to choose: {1} first as the main lift, {2} after it for extra volume.':
+    'Nereikia rinktis: pirma {1} kaip pagrindinis pratimas, po jo {2} papildomai apimčiai.',
+  'Now you train about {1}× a week.': 'Dabar treniruojiesi apie {1}× per savaitę.',
+  'On {1}: a push / pull / legs / upper / lower split, each muscle about {2}× a week.':
+    '{1}: stūmimo / traukimo / kojų / viršaus / apačios skaidymas, kiekvienas raumuo apie {2}× per savaitę.',
+  'Going to {1}: more weekly volume and practice — growth usually speeds up, as long as each session stays shorter and you sleep {2}+ h.':
+    'Pereinant prie {1}: daugiau savaitinės apimties ir praktikos – augimas dažniausiai pagreitėja, jei kiekviena treniruotė išlieka trumpesnė ir miegi bent {2} val.',
+  'Add one day first, keep it {1}–{2} weeks, then the next.':
+    'Pirma pridėk vieną dieną, išlaikyk {1}–{2} sav., tada kitą.',
+  'Pumped as always, man!': 'Kaip visada užsivedęs, žmogau!',
+  'You?': 'O tu?',
+  'Crash hard, man.': 'Gerai pailsėk, žmogau.',
+  'Recovery is part of the grind 🤙': 'Atsigavimas – dalis darbo 🤙',
+  'Let’s spice it up!': 'Pagyvinkim!',
+  'Big W incoming: {1} steps every day this week.':
+    'Didelė pergalė artėja: šią savaitę kasdien žingsnių – {1}.',
+  'Log them.': 'Fiksuok juos.',
+  'LOL 😄 You’re a vibe, dude.': 'LOL 😄 Tu šaunuolis, bičiuli.',
+  'Ayy, that’s what I like to hear!': 'Ei, būtent tai ir noriu girdėti!',
+  'Beast mode ON 💪 Warm up first!': 'Žvėries režimas ĮJUNGTAS 💪 Pirma apšilk!',
+  'No beef, dude — but can they count your reps?':
+    'Be pykčio, bičiuli – bet ar jie moka suskaičiuoti tavo pakartojimus?',
+  '🤙': '🤙',
+  'Young enough to hype you, old enough to read your log right.':
+    'Pakankamai jaunas, kad tave užvesčiau, ir pakankamai senas, kad tavo žurnalą perskaityčiau teisingai.',
+  '{1}:{2}.': '{1}:{2}.',
+  'Perfect time to crush it 💪': 'Puikus metas viską sutraiškyti 💪',
+  'Oops, whiffed that one 🤙 Rephrase?': 'Oi, nepataikiau 🤙 Perfrazuok?',
+  'Low battery day?': 'Išsikrovusių baterijų diena?',
+  'Easy session, still a W 🤙': 'Lengva treniruotė, bet vis tiek pergalė 🤙',
+  'Lower back: skip deadlifts, good mornings and heavy rows for now; walking and gentle movement usually help more than bed rest.':
+    'Apatinė nugaros dalis: kol kas praleisk mirties trauką, „good morning“ ir sunkias traukas; vaikščiojimas ir lengvas judėjimas dažniausiai padeda labiau nei gulėjimas lovoje.',
+  'Noted: {1} days a week.': 'Užfiksuota: dienų per savaitę – {1}.',
+  'Noted: experienced lifter.': 'Užfiksuota: tu patyręs.',
+  'Muscle memory is real: regaining lost size is much faster than building it the first time.':
+    'Raumenų atmintis tikra: prarastą masę susigrąžinti daug greičiau nei ją užsiauginti pirmą kartą.',
+  'Ask me anything about your training — or tap one of these.':
+    'Klausk bet ko apie savo treniruotes – arba spausk vieną iš šių.',
+  'Roses are red, the bar’s loaded too — one more clean rep, and I’m proud of you.':
+    'Rožės raudonos, štanga pakrauta – dar vienas švarus kartojimas, ir aš tavim didžiuojuosi.',
+  'This month: {1} sessions, {2} working sets.':
+    'Šį mėnesį: treniruočių – {1}, darbinių serijų – {2}.',
+  'Average working sets, {1}, all time: {2}.':
+    'Vidutiniškai darbinių serijų, {1}, per visą laiką: {2}.',
+  'Day {1} {2}— full body: {3} {4}×{5}–{6} {7}· {8} {9}×{10}–{11} {12}(you: {13} × {14}) · {15} {16}×{17}–{18} {19}(you: {20} × {21}) · {22} {23}×{24}–{25} {26}(you: {27} × {28}) · {29} {30}×{31}–{32}.':
+    '{1} diena {2}— visas kūnas: {3} {4}×{5}–{6} {7}· {8} {9}×{10}–{11} {12}(tu: {13} × {14}) · {15} {16}×{17}–{18} {19}(tu: {20} × {21}) · {22} {23}×{24}–{25} {26}(tu: {27} × {28}) · {29} {30}×{31}–{32}.',
+  'Day {1} {2}— full body: {3} {4}×{5}–{6} {7}· {8} {9}×{10}–{11} {12}· {13} {14}×{15}–{16} {17}· {18} {19}×{20}–{21} {22}· {23} {24}×{25}–{26}.':
+    '{1} diena {2}— visas kūnas: {3} {4}×{5}–{6} {7}· {8} {9}×{10}–{11} {12}· {13} {14}×{15}–{16} {17}· {18} {19}×{20}–{21} {22}· {23} {24}×{25}–{26}.',
+  '{1}: {2} (+ {3}, {4}, {5}), multi-joint, a barbell.':
+    '{1}: {2} (+ {3}, {4}, {5}), daugiasąnarinis, su štanga.',
+  'Both work — pick the one you can do with clean form and add weight or reps to over weeks.':
+    'Tinka abu – rinkis tą, kurį gali daryti švaria technika ir kuriam savaitėmis pridėsi svorio ar pakartojimų.',
+  '{1}: {2} (+ {3}, {4}), multi-joint, dumbbells.':
+    '{1}: {2} (+ {3}, {4}), daugiasąnarinis, su hanteliais.',
+  'On {1}: whole-body sessions, each muscle {2}× a week.':
+    '{1}: viso kūno treniruotės, kiekvienas raumuo {2}× per savaitę.',
+  '{1} a week is close to what you do — the gain is steadiness, not a new result.':
+    '{1} per savaitę – artima tam, ką jau darai; nauda – pastovumas, o ne naujas rezultatas.',
+  'Yes — to what?': 'Taip – kam?',
+  'Ask away, or tap one of these.': 'Klausk, arba spausk vieną iš šių.',
+  'Rugsėjo {1} d., {2}.': 'Rugsėjo {1} d., {2}.',
+  'Chest pain or pressure — especially with shortness of breath, sweating, nausea, or pain spreading to the arm, neck or jaw — needs a doctor immediately: call emergency services ({1} {2}/ {3}).':
+    'Skausmas ar spaudimas krūtinėje — ypač kartu su dusuliu, prakaitavimu, pykinimu ar skausmu, plintančiu į ranką, kaklą ar žandikaulį — reikalauja skubios medikų pagalbos: skambink pagalbos numeriu ({1} {2}/ {3}).',
+  'But fainting during effort, or dizziness with chest pain, palpitations, breathlessness or after a head knock — call {1} {2}/ {3}.':
+    'Bet alpimas krūvio metu arba galvos svaigimas kartu su skausmu krūtinėje, širdies plakimu, dusuliu ar po smūgio į galvą — skambink {1} {2}/ {3}.',
+  "Please don't wait on this one — get medical help today ({1} {2}/ {3} if it's severe).":
+    'Nelauk — šiandien kreipkis medicininės pagalbos (jei būklė sunki, skambink {1} {2}/ {3}).',
+  'A sudden, severe headache during a lift, numbness or drooping on one side of the face or body, slurred speech or vision loss — or a hit to the head followed by headache, confusion, vomiting or drowsiness — needs emergency care: call {1} {2}/ {3}.':
+    'Staigus, stiprus galvos skausmas keliant svorį, vienos veido ar kūno pusės tirpimas ar nusvirimas, neaiški kalba ar regėjimo praradimas — arba smūgis į galvą, po kurio atsiranda galvos skausmas, sumišimas, vėmimas ar mieguistumas — reikalauja skubios pagalbos: skambink {1} {2}/ {3}.',
+  "Without a programme there's no fixed day; the best next session is the soonest one you can make, ideally today.":
+    'Be programos nėra nustatytos dienos; geriausia kita treniruotė – artimiausia, kurią spėsi, mieliausia šiandien.',
+  'Moved {1} t — the last week.': 'Pakelta {1} t — per paskutinę savaitę.',
+  "💪 Let's go, bro!": '💪 Varom, broli!',
+  'Only if you split the load, like lifting in the morning and easy cardio in the evening, and sleep enough.':
+    'Tik jei išskaidai krūvį, pavyzdžiui, kelti svorius ryte, o lengvą kardio daryti vakare, ir pakankamai miegi.',
+  'Training is generally encouraged in pregnancy and after birth, but your doctor or midwife sets the limits.':
+    'Treniruotės nėštumo metu ir po gimdymo paprastai skatinamos, bet ribas nustato tavo gydytojas ar akušerė.',
+  "In a programme it's the last week of each block; without one I deload you when your numbers start to drop.":
+    'Programoje tai paskutinė kiekvieno bloko savaitė; be jos paskiriu tau iškrovimą, kai skaičiai pradeda kristi.',
+  'In the session, set the reps and weight on the exercise card and tap Log.':
+    'Treniruotės metu pratimo kortelėje nustatyk pakartojimus ir svorį ir bakstelėk „Fiksuoti“.',
+  'Gear icon, top right, then Turn Atlas off.':
+    'Krumpliaračio piktograma viršuje dešinėje, tada „Išjungti Atlas“.',
+  'Drop {1} and {2} from your plans for good?': 'Visam laikui išmesti {1} ir {2} iš tavo planų?',
+  '{1} days a week, ~{2} min, home kit:': 'Dienų per savaitę: {1}, ~{2} min, namų įranga:',
+  'Quads: squats or leg press deep, plus leg extensions.':
+    'Keturgalvis: gilūs pritūpimai ar kojų prispaudimas, plius kojų tiesimas.',
+  'Knees forward is fine.': 'Keliai į priekį – normalu.',
+  'Aim for {1}+ hours a night; I show last night and your {2}-night average.':
+    'Taikyk į bent {1} val. per naktį; rodau praėjusią naktį ir vidurkį (naktų: {2}).',
+  '💪 Muscles grow on the couch.': '💪 Raumenys auga ant sofos.',
+  'See a doctor right away for sharp pain, swelling, a pop, numbness or pain that gets worse.':
+    'Nedelsdamas kreipkis į gydytoją, jei skausmas aštrus, atsiranda patinimas, spragtelėjimas, tirpimas arba skausmas stiprėja.',
+  'Otherwise return to the lift once everyday movement is pain-free.':
+    'Kitu atveju prie pratimo grįžk, kai kasdieniai judesiai nebeskauda.',
+  'Keep the same bed and wake time daily, a dark cool room, no screens or caffeine late, and train earlier if evening sessions wire you.':
+    'Kasdien eik miegoti ir keltis tuo pačiu metu, miegok tamsiame vėsiame kambaryje, vakare venk ekranų ir kofeino, o jei vakarinės treniruotės tave užveda – treniruokis anksčiau.',
+  'A cluster set splits one set into mini-sets with short breaks: for example {1} {2}× {3} reps with {4}–{5} seconds between them instead of {6} reps in a row.':
+    'Klasterinė serija padalija vieną seriją į mini serijas su trumpomis pertraukomis: pavyzdžiui, {1} {2}× {3} pak. su {4}–{5} sek. pertraukomis tarp jų vietoj {6} pak. iš eilės.',
+  'You work up to one heavy “top set” — for example {1} {2}× {3} at a hard but clean effort — then drop the weight about {4}–{5}% for {6}–{7} {8}“back-off” sets of the same or slightly more reps.':
+    'Prieini prie vienos sunkios „viršutinės serijos“ – pavyzdžiui, {1} {2}× {3} sunkiai, bet švariai – tada nuleidi svorį maždaug {4}–{5}% ir darai {6}–{7} {8}„atsitraukimo“ serijas tiek pat ar šiek tiek daugiau pakartojimų.',
+  '{1}/{2}/{3} {4}(by Jim Wendler) runs in {5}-week cycles built on a “training max” set at about {6}% of your real max: week one sets of {7}, week two sets of {8}, week three a {9}/{10}/{11} wave, week four a deload.':
+    '{1}/{2}/{3} {4}(autorius Jim Wendler) vyksta {5} sav. ciklais, paremtais „darbiniu maksimumu“, nustatytu ties ~{6}% tavo tikro maksimumo: pirmą savaitę serijos po {7}, antrą – po {8}, trečią – {9}/{10}/{11} banga, ketvirtą – iškrovimas.',
+  'Build a base of easy zone {1} work ({2}–{3} sessions of {4}–{5} minutes a week), then add one session of hard intervals, like {6} {7}× {8} minutes at about {9}–{10}% of your max heart rate with {11} easy minutes between them.':
+    'Pasidaryk lengvo {1} zonos darbo bazę (treniruočių per savaitę: {2}–{3}, po {4}–{5} min.), tada pridėk vieną sunkių intervalų treniruotę, pavyzdžiui, {6} {7}× {8} min. maždaug ties {9}–{10}% maksimalaus pulso, o tarp jų lengvai – {11} min.',
+  'Keep the damper around {1}–{2} {3}— higher isn’t more useful — and aim for about {4}–{5} strokes per minute for steady work.':
+    'Slopintuvą (damper) laikyk ties {1}–{2} {3}— aukščiau nereiškia naudingiau – ir stenkis daryti maždaug {4}–{5} traukimų per minutę ramiam darbui.',
+  'Five minutes is enough: arm circles and band pull-aparts ({1} {2}× {3}), band pass-throughs or wall slides ({4} {5}× {6}), external rotations with a light band ({7} {8}× {9} per side), then scapular push-ups ({10} {11}× {12}).':
+    'Užtenka penkių minučių: rankų sukimai ir gumos išskėtimai ({1} {2}× {3}), gumos perkėlimai per galvą ar sienos slydimai ({4} {5}× {6}), išorinės rotacijos su lengva guma ({7} {8}× {9} į kiekvieną pusę), tada mentių atsispaudimai ({10} {11}× {12}).',
+  'Calves: slow reps, a full pause in the stretch at the bottom, {1}–{2} reps, {3}–{4}×/week.':
+    'Blauzdos: lėti pakartojimai, visiška pauzė apačioje tempime, {1}–{2} pak., {3}–{4}×/sav.',
+  'They respond — you just have to be patient.': 'Jos reaguoja – tiesiog reikia kantrybės.',
+  'Knees passing the toes is fine as long as they follow the direction of the toes and heels stay down.':
+    'Keliai, einantys už pirštų, – normalu, jei seka pirštų kryptį, o kulnai lieka ant žemės.',
+  'Nothing logged last {1}.': 'Nieko neužfiksuota. Laikotarpis: {1}.',
+  '{1}, the last {2} weeks: {3} sessions, estimated max {4} → {5} (+{6}%), best {7}.':
+    '{1}, per pastarąsias {2} sav.: treniruočių – {3}, apskaičiuotas maks. {4} → {5} (+{6}%), geriausia {7}.',
+  '{1} on a {2} kg bar: per side {3} {4}+ {5} {6}+ {7}.':
+    '{1} ant {2} kg grifo: iš kiekvienos pusės {3} {4}+ {5} {6}+ {7}.',
+  '{1}, since March: {2} sessions, estimated max {3} → {4} (+{5}%), best {6}.':
+    '{1}, nuo kovo: treniruočių – {2}, apskaičiuotas maks. {3} → {4} (+{5}%), geriausia {6}.',
+  "💪 At the gym, 'how much do you bench' counts as hello.":
+    '💪 Salėje „kiek spaudi gulint?“ reiškia „labas“.',
+  '{1}: nothing logged — this week.': '{1}: nieko neužfiksuota — šią savaitę.',
+  '💪 Catch you at the gym!': '💪 Iki susitikimo salėje!',
+  'Workouts (all time): ~{1} a week on average; best {2}-{3} {4}— {5}.':
+    'Treniruotės (per visą laiką): vidutiniškai ~{1} per savaitę; geriausia {2}-{3} {4}— {5}.',
+  'Latest: {1}-{2} {3}{4}, {5}-{6} {7}{8}, {9}-{10} {11}{12}, {13}-{14} {15}{16}.':
+    'Naujausi: {1}-{2} {3}{4}, {5}-{6} {7}{8}, {9}-{10} {11}{12}, {13}-{14} {15}{16}.',
+  'Last month: {1} sessions, {2} working sets — {3} a week.':
+    'Praėjusį mėnesį: treniruočių – {1}, darbinių serijų – {2} — {3} per savaitę.',
+  'The last month: {1} sessions, {2} working sets — {3} a week.':
+    'Per paskutinį mėnesį: treniruočių – {1}, darbinių serijų – {2} — {3} per savaitę.',
+  'Ask with a day or date — "what did I do on Monday" or "what did I do on {1} March" — and I\'ll pull that session.':
+    'Klausk su diena ar data – „ką veikiau pirmadienį“ ar „ką veikiau kovo {1} d.“ – ir ištrauksiu tą treniruotę.',
+  '{1}, since June: {2} sessions, estimated max {3} → {4} (±{5}%), best {6}.':
+    '{1}, nuo birželio: treniruočių – {2}, apskaičiuotas maks. {3} → {4} (±{5}%), geriausia {6}.',
+  'Total volume, this week: {1} {2}{3} kg.': 'Bendra apimtis šią savaitę: {1} {2}{3} kg.',
+  'A rep is one full lift of a movement: down and up once.':
+    'Pakartojimas – vienas pilnas judesio atlikimas: žemyn ir aukštyn vieną kartą.',
+  'A set is a run of reps without putting the weight down — “{1} {2}× {3}” means three sets of eight reps.':
+    'Serija – pakartojimų eilė nenuleidus svorio – „{1} {2}× {3}“ reiškia tris serijas po aštuonis pakartojimus.',
+  'A deload is a lighter week: fewer sets at the same weights, so fatigue drops while strength stays.':
+    'Iškrovimas – lengvesnė savaitė: mažiau serijų su tais pačiais svoriais, todėl nuovargis krenta, o jėga išlieka.',
+  '{1}, since August: {2} sessions, estimated max {3} → {4} (±{5}%), best {6}.':
+    '{1}, nuo rugpjūčio: treniruočių – {2}, apskaičiuotas maks. {3} → {4} (±{5}%), geriausia {6}.',
+  '{1}, {2} ({3}-{4}-{5}): {6} on all {7} sets.':
+    '{1}, {2} ({3}-{4}-{5}): {6} visose serijose (serijų: {7}).',
+  '{1}: nothing logged in that period.': '{1}: tuo laikotarpiu nieko neužfiksuota.',
+  'By working sets (this week), most: {1} ({2}).':
+    'Pagal darbines serijas (šią savaitę) daugiausia: {1} ({2}).',
+  'Your program is in Overview → Programs; on Today the card “Today in program” starts the day it planned.':
+    'Tavo programa yra Apžvalga → Programos; skiltyje Šiandien kortelė „Šiandien pagal programą“ pradeda suplanuotą dieną.',
+  'Then you already did the hard part.': 'Tada sunkiausią dalį jau padarei.',
+  'Go in, warm up, do just the first big lift — {1} minutes — and decide after.':
+    'Eik, apšilk, atlik tik pirmą didįjį pratimą – {1} min. – ir tada spręsk.',
+  'The money is spent either way; the session is the only thing you still control.':
+    'Pinigai išleisti bet kuriuo atveju; treniruotė – vienintelis dalykas, kurį dar valdai.',
+  'Volume (the last week): ~{1} {2}{3} kg a week on average; best {4}-{5} {6}— {7} {8}{9} kg.':
+    'Apimtis (paskutinė savaitė): vidutiniškai ~{1} {2}{3} kg per savaitę; geriausia {4}-{5} {6}— {7} {8}{9} kg.',
+  'Latest: {1}-{2} {3}{4} {5}{6} kg, {7}-{8} {9}{10} {11}{12} kg.':
+    'Naujausi: {1}-{2} {3}{4} {5}{6} kg, {7}-{8} {9}{10} {11}{12} kg.',
+  'Prices are set by your gym — I can’t see them.': 'Kainas nustato tavo salė – jų nematau.',
+  'Ask the front desk; I’m here for what happens under the bar.':
+    'Paklausk registratūroje; aš čia tam, kas vyksta po štanga.',
+  'Your sessions are on Today (“See all history”); records and progress are in Overview.':
+    'Tavo treniruotės yra skiltyje Šiandien („Visa istorija“); rekordai ir progresas – Apžvalgoje.',
+  'Everything syncs to every device you sign in on.':
+    'Viskas sinchronizuojama visuose įrenginiuose, kuriuose prisijungi.',
+  'Open Today and tap “Themes”, pick a look and tap “Apply”.':
+    'Atverk Šiandien ir bakstelėk „Temos“, pasirink išvaizdą ir bakstelėk „Taikyti“.',
+  'Sorry about that.': 'Atsiprašau dėl to.',
+  'Check the sync status at the top of Today — if it says Offline, changes wait and are sent when the network is back.':
+    'Sinchronizavimo būseną rasi Šiandien viršuje – jei rodo Neprisijungęs, pakeitimai laukia ir bus išsiųsti, kai grįš ryšys.',
+  'Reload the page or reopen the app.': 'Perkrauk puslapį arba iš naujo atidaryk programėlę.',
+  'If it still misbehaves, tell your admin or trainer what you did and what you saw — I can’t file a bug report myself.':
+    'Jei vis tiek blogai veikia, pasakyk savo administratoriui ar treniruotojui, ką darei ir ką matei – pats pranešimo apie klaidą pateikti negaliu.',
+  '{1}, {2} ({3}-{4}-{5}): {6} sets.': '{1}, {2} ({3}-{4}-{5}): serijų – {6}.',
+  '{1} kg ≈ {2} lb.': '{1} kg ≈ {2} lb.',
+  'A back day: a vertical pull (pull-ups or lat pulldown) {1} {2}× {3}–{4}, a row (barbell, cable or dumbbell) {5} {6}× {7}–{8}, a second row or a rear-delt move {9}–{10} {11}× {12}–{13}, then biceps.':
+    'Nugaros diena: vertikali trauka (prisitraukimai ar viršutinio bloko trauka) {1} {2}× {3}–{4}, trauka (su štanga, lynu ar hanteliu) {5} {6}× {7}–{8}, antra trauka ar užpakalinių deltų pratimas {9}–{10} {11}× {12}–{13}, tada bicepsas.',
+  'Start with the heaviest lift.': 'Pradėk nuo sunkiausio pratimo.',
+  '{1}% of {2} is {3}.': '{1}% nuo {2} yra {3}.',
+  '{1}, {2} ({3}-{4}-{5}): {6}, {7}, {8} reps ({9} in total).':
+    '{1}, {2} ({3}-{4}-{5}): {6}, {7}, {8} pak. (iš viso {9}).',
+  'Nothing to repeat yet.': 'Kol kas nėra ką kartoti.',
+  'Numbers I can do — now, anything about your training?':
+    'Skaičius moku – o dabar, gal ką nors apie tavo treniruotes?',
+  '{1}: {2} sets in that period.': '{1}: serijų per tą laikotarpį – {2}.',
+  'And about “{1}” — which of these do you mean?': 'O dėl „{1}“ – kurį iš šių turi omenyje?',
+  'You asked: “{1}”': 'Klausei: „{1}“',
+  'Your first question: “{1}”': 'Tavo pirmasis klausimas: „{1}“',
+  'And “{1}” — say it another way and I’ll take it.': 'O „{1}“ – pasakyk kitaip, ir atsakysiu.',
+  '{1} {2} d., {3}.': '{1} {2} d., {3}.',
+  '{1}, first logged {2} ({3}-{4}-{5}): {6} {7}× {8} × {9}.':
+    '{1}, pirmas įrašas {2} ({3}-{4}-{5}): {6} {7}× {8} × {9}.',
+  'Your last day without a session was {1} ({2}-{3}-{4}).':
+    'Paskutinė diena be treniruotės buvo {1} ({2}-{3}-{4}).',
+  'Your log starts {1}-{2}-{3} {4}({5}): {6} sessions, about {7} a week.':
+    'Tavo žurnalas prasideda {1}-{2}-{3} {4}({5}): treniruočių: {6}, vidutiniškai apie {7} per savaitę.',
+  'Last session: {1} ({2}-{3}-{4}).': 'Paskutinė treniruotė: {1} ({2}-{3}-{4}).',
+  'Yes — {1}, this month: {2} sessions, {3} sets.':
+    'Taip — {1}, šį mėnesį: treniruočių: {2}, serijų: {3}.',
+  'A mild overuse ache often settles within a couple of weeks once you stop provoking it; if it is not clearly better after {1} weeks, or it gets worse, get it looked at.':
+    'Lengvas pervargimo skausmas dažnai aprimsta per kelias savaites, jei jo nebedirgini; jei po {1} savaičių aiškiai nelengviau arba tampa blogiau, parodyk specialistui.',
+  'About {1} minutes each, as the plan is built.':
+    'Apie {1} min. kiekviena, taip sudarytas planas.',
+  'Day {1}: {2}, {3}.': 'Diena {1}: {2}, {3}.',
+  'Day {1}: {2}.': 'Diena {1}: {2}.',
+  'For more, ask for a longer session (“make it {1} minutes”) or name the exercise you want.':
+    'Nori daugiau — paprašyk ilgesnės treniruotės („padaryk {1} min.“) arba įvardink pratimą.',
+  'For shorter or longer, say “make it {1} minutes” and I’ll rebuild it.':
+    'Nori trumpiau ar ilgiau — pasakyk „padaryk {1} min.“, ir perdarysiu planą.',
+  'I can’t give a date — it depends on what it is, and I can’t examine you.':
+    'Termino pasakyti negaliu — tai priklauso nuo to, kas skauda, o ištirti tavęs negaliu.',
+  'I’m not a doctor, so take this as a rule of thumb: see one (or a physio) if the pain is sharp, there is swelling, numbness or tingling, it wakes you at night, or it has not eased after {1}–{2} weeks of leaving the trigger out.':
+    'Aš ne gydytojas, tad imk tai kaip orientyrą: pas gydytoją (ar kineziterapeutą), jei skausmas aštrus, yra patinimas, tirpimas ar dilgčiojimas, žadina naktį arba nesumažėja per {1}–{2} savaites be dirgiklio.',
+  'Until then, skip what sets it off and train around it.':
+    'Iki tol venk to, kas jį sukelia, ir treniruokis aplink.',
+  'Yes, it is in the plan.': 'Taip, tai yra plane.',
+  'That is not in this plan yet.': 'Šito plane dar nėra.',
+  'Tell me what to change — for example “make it {1} minutes” gives each day extra slots — and I’ll rebuild it.':
+    'Pasakyk, ką keisti — pavyzdžiui, „padaryk {1} min.“ suteikia kiekvienai dienai papildomų vietų — ir perdarysiu planą.',
 };

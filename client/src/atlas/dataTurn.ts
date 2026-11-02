@@ -14,6 +14,8 @@ import {
   readDataFollowUp,
   readDataQuestion,
 } from './dataQuestion';
+import { followTurn } from './followTurn';
+import type { Frame } from './frame';
 import type { AskCtx, Parsed, Tr } from './intentKit';
 import type { Route } from './confidence';
 
@@ -29,6 +31,7 @@ interface DConvo {
   intent?: string;
   exercise?: string | null;
   dq?: DataMemo;
+  frame?: Frame;
 }
 interface Out<C> {
   route: Route;
@@ -44,7 +47,7 @@ const LOG_CMD_RE =
   /^\s*(please\s+)?(log|record|add|залогуй\p{L}*|запиши|додай|zapisz|dodaj)\s+\d+\s+(sets?|підход\p{L}*|сет\p{L}*|serii?)/iu;
 
 const asLookup = <T extends { metric: unknown; which: string }>(q: T | null) =>
-  q && (q.metric || q.which === 'best') ? q : null;
+  q && (q.metric || q.which === 'best' || q.which === 'first') ? q : null;
 
 export function dataTurn<C extends DConvo>(
   question: string,
@@ -54,8 +57,10 @@ export function dataTurn<C extends DConvo>(
   L: Tr,
   d: Deps,
 ): Out<C & { turn: number; q: string }> | null {
-  const meta = metaTurn(question, convo, turn, L);
+  const meta = metaTurn(question, convo, turn, L, c.fmt.echo);
   if (meta) return meta;
+  const follow = followTurn(question, c, convo, turn, L);
+  if (follow) return follow;
   // Polish one-letter prepositions ("rekord w przysiadzie") would otherwise be read as a lift.
   const text = repairTypos(question)
     .replace(/(^|\s)[wzou](?=\s|$)/giu, ' ')

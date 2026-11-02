@@ -8,6 +8,7 @@
 import type { Fmt } from './voice';
 import { personaLinesEn } from './style';
 import * as N from './num';
+import { neutralDates } from './dateWords';
 
 export type OtherLocale = 'pl' | 'lt' | 'et';
 export const isOther = (l: string): l is OtherLocale => l === 'pl' || l === 'lt' || l === 'et';
@@ -23,6 +24,7 @@ export function markFmt(real: Fmt): Fmt {
     span: (ms) => `⟦D:${Math.round(ms)}⟧`,
     ago: (ms) => `⟦A:${Math.round(ms)}⟧`,
     daysAgo: (d) => `⟦Y:${Math.round(d)}⟧`,
+    echo: (text) => `⟦Z:${text}⟧`,
     shown: real.exercise,
   };
 }
@@ -50,7 +52,7 @@ export function template(s: string): { key: string; vals: string[] } {
  * its spans ("3 weeks ago", not "3 tygodnie temu" inside English).
  */
 function fill(v: string, fmt: Fmt, comma: boolean, l: OtherLocale | 'en'): string {
-  const m = /^⟦([KTMEDAY]):(.*)⟧$/u.exec(v);
+  const m = /^⟦([KTMEDAYZ]):(.*)⟧$/u.exec(v);
   if (!m) return comma ? v.replace('.', ',') : v;
   const [, k, x] = m;
   if (k === 'K') return fmt.kg(Number(x));
@@ -59,6 +61,7 @@ function fill(v: string, fmt: Fmt, comma: boolean, l: OtherLocale | 'en'): strin
   if (k === 'D') return N.span(l, Number(x));
   if (k === 'A') return N.ago(l, Number(x));
   if (k === 'Y') return N.daysAgo(l, Number(x));
+  if (k === 'Z') return x;
   return fmt.exercise(x);
 }
 
@@ -111,7 +114,7 @@ export function translateOut(text: string, l: OtherLocale, fmt: Fmt): string {
               // "Yo bro! " / "Real talk: " in front — translated on its own, then the answer.
               const [heads, body] = stripPersona(s);
               const one = (t: string) => {
-                const { key, vals } = template(t);
+                const { key, vals } = template(neutralDates(t, l));
                 const tr = d[key];
                 const out = tr ?? key;
                 const res = out.replace(/\{(\d+)\}/gu, (_, i) =>
@@ -126,4 +129,20 @@ export function translateOut(text: string, l: OtherLocale, fmt: Fmt): string {
             .join(' '),
     )
     .join('');
+}
+
+/** Sentence keys of an English answer that the language's dictionary lacks (the guard test lists them). */
+export function untranslated(text: string, l: OtherLocale): string[] {
+  const d = dicts[l] ?? {};
+  const out: string[] = [];
+  for (const block of text.split(/\n+/u))
+    for (const s of splitSentences(block)) {
+      const [heads, body] = stripPersona(s);
+      for (const t of [...heads, body]) {
+        if (!t) continue;
+        const { key } = template(neutralDates(t, l));
+        if (!d[key]) out.push(key);
+      }
+    }
+  return out;
 }

@@ -5583,4 +5583,276 @@ export const DICT: Record<string, string> = {
   'Hiking — that counts.': 'Wędrówka — to się liczy.',
   'Rock climbing — that counts.': 'Wspinaczka skałkowa — to się liczy.',
   'Climbing gym — that counts.': 'Ścianka wspinaczkowa — to się liczy.',
+  '{1}.{2}: {3} sets in {4} min — {5}, {6}, {7}, {8}.':
+    '{1}.{2}: serie: {3}, czas: {4} min — {5}, {6}, {7}, {8}.',
+  'Last {1} days: {2} sessions (usual {3}), {4} working sets.':
+    'Ostatnie dni ({1}): treningi: {2} (zwykle {3}), serie robocze: {4}.',
+  '{1}: estimated max {2} → {3} (+{4}%) since {5} {6}, {7} sessions; best set {8} × {9}.':
+    '{1}: szacowany max {2} → {3} (+{4}%) od {5} {6}, treningi: {7}; najlepsza seria {8} × {9}.',
+  'Your best: {1} {2} × {3} (~{4} {5}RM).': 'Twój rekord: {1} {2} × {3} (~{4} {5}RM).',
+  '{1}: heaviest set — {2} × {3}, {4} ({5}.{6}).':
+    '{1}: najcięższa seria — {2} × {3}, {4} ({5}.{6}).',
+  '{1}: most reps in a set — {2} at {3}, {4} ({5}.{6}).':
+    '{1}: najwięcej powtórzeń w serii — {2} przy {3}, {4} ({5}.{6}).',
+  '{1}: {2}% — recovered, train it.': '{1}: {2}% — zregenerowane, trenuj.',
+  'No streak yet — log a session today and it starts.':
+    'Na razie bez serii dni — zapisz dziś trening i ruszamy.',
+  '{1} sessions logged since {2}.{3}.': 'Zapisane treningi: {1} od {2}.{3}.',
+  'Moved {1} {2} kg — this week.': 'Przerzucone w tym tygodniu: {1} {2} kg.',
+  '{1}: {2} ({3}.{4}), {5} sets.': '{1}: {2} ({3}.{4}), serie: {5}.',
+  '{1}, {2} ({3}.{4}): {5} × {6} × {7}.': '{1}, {2} ({3}.{4}): {5} × {6} × {7}.',
+  'Last weigh-in: {1} on {2}.{3}.': 'Ostatnie ważenie: {1}, dnia {2}.{3}.',
+  'You train most on {1}, {2}, {3}.': 'Najczęściej trenujesz: {1}, {2}, {3}.',
+  'Longest: {1} min ({2}.{3}).': 'Najdłuższy: {1} min ({2}.{3}).',
+  'Shortest: {1} min ({2}.{3}).': 'Najkrótszy: {1} min ({2}.{3}).',
+  'This week: {1} session, {2} sets.': 'W tym tygodniu: treningi: {1}, serie: {2}.',
+  'Last week: {1} session, {2} sets.': 'W zeszłym tygodniu: treningi: {1}, serie: {2}.',
+  'Since June: {1} → {2} (+{3} kg).': 'Od czerwca: {1} → {2} (+{3} kg).',
+  'Recovered: {1} (last trained {2}), {3} (last trained {4}), {5} (last trained {6}).':
+    'Zregenerowane: {1} (ostatnio trenowane: {2}), {3} (ostatnio trenowane: {4}), {5} (ostatnio trenowane: {6}).',
+  'Still recovering: {1} ({2}, ~{3}% back) — go a bit lighter there.':
+    'Jeszcze w regeneracji: {1} ({2}, ~{3}% odzyskane) — tam idź trochę lżej.',
+  'Gyms saved: {1}.': 'Zapisane siłownie: {1}.',
+  '{1} ({2}.{3}): {4} {5} × {6}, {7} {8} × {9}, {10} {11} × {12}, {13} {14} × {15}, {16} {17} × {18}.':
+    '{1} ({2}.{3}): {4} {5} × {6}, {7} {8} × {9}, {10} {11} × {12}, {13} {14} × {15}, {16} {17} × {18}.',
+  '{1}: estimated max {2} → {3} (±{4}%) since {5} {6}, {7} sessions; best set {8} × {9}.':
+    '{1}: szacowany max {2} → {3} (±{4}%) od {5} {6}, treningi: {7}; najlepsza seria {8} × {9}.',
+  'Reps per set, {1}, in August: {2}.': 'Powtórzenia w serii, {1}, w sierpniu: {2}.',
+  'Most improved, the last {1} months: {2} (+{3}%).':
+    'Największy postęp w ostatnich miesiącach ({1}): {2} (+{3}%).',
+  '{1}.': '{1}.',
+  '{1} +{2}% ({3} → {4}); {5}.': '{1} +{2}% ({3} → {4}); {5}.',
+  '{1} +{2}% ({3} → {4}).': '{1} +{2}% ({3} → {4}).',
+  'Big breath into the belly, brace as if about to be punched, hold through the hard part, breathe out at the top.':
+    'Weź głęboki wdech w brzuch, napnij się jak przed ciosem, trzymaj napięcie przez trudną część i wydychaj na górze.',
+  'Bench in a rack with safety pins and without collars so you can tip the plates, or use dumbbells.':
+    'Wyciskaj w stojaku z bezpiecznikami i bez zacisków, żeby móc zrzucić talerze, albo użyj hantli.',
+  'Set squat safeties just below your bottom position.':
+    'Ustaw bezpieczniki do przysiadów tuż poniżej dolnej pozycji.',
+  'Turn them on in the rest settings or when Atlas asks.':
+    'Włącz je w ustawieniach odpoczynku albo gdy Atlas o to zapyta.',
+  'On iPhone, first add Spotter to the Home Screen via Share, then Add to Home Screen.':
+    'Na iPhonie najpierw dodaj Spotter do ekranu głównego przez Udostępnij, potem Dodaj do ekranu początkowego.',
+  '{1} days a week, ~{2} min:': 'Dni w tygodniu: {1}, ~{2} min:',
+  'Day {1} — full body: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} (you: {10} × {11}) · {12} {13}×{14}–{15} (you: {16} × {17}) · {18} {19}×{20}–{21} (you: {22} × {23}) · {24} {25}×{26}–{27} · {28} {29}×{30}–{31}.':
+    'Dzień {1} — całe ciało: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} (ty: {10} × {11}) · {12} {13}×{14}–{15} (ty: {16} × {17}) · {18} {19}×{20}–{21} (ty: {22} × {23}) · {24} {25}×{26}–{27} · {28} {29}×{30}–{31}.',
+  'Day {1} — full body: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21} · {22} {23}×{24}–{25}.':
+    'Dzień {1} — całe ciało: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21} · {22} {23}×{24}–{25}.',
+  'Why this way: with {1} days, whole-body sessions hit every muscle {2} times a week — more often beats more per session.':
+    'Dlaczego tak: dni treningowe: {1}; trening całego ciała trafia w każdy mięsień {2}× w tygodniu — częściej znaczy lepiej niż więcej na raz.',
+  'Each week: when every set hits the top of the range, add weight next time.':
+    'Co tydzień: gdy każda seria dobije do górnej granicy zakresu, następnym razem dodaj ciężar.',
+  'Day {1} — upper: {2} {3}×{4}–{5} (you: {6} × {7}) · {8} {9}×{10}–{11} (you: {12} × {13}) · {14} {15}×{16}–{17} (you: {18} × {19}) · {20} {21}×{22}–{23} (you: {24} × {25}) · {26} {27}×{28}–{29} · {30} {31}×{32}–{33} (you: {34} × {35}).':
+    'Dzień {1} — góra: {2} {3}×{4}–{5} (ty: {6} × {7}) · {8} {9}×{10}–{11} (ty: {12} × {13}) · {14} {15}×{16}–{17} (ty: {18} × {19}) · {20} {21}×{22}–{23} (ty: {24} × {25}) · {26} {27}×{28}–{29} · {30} {31}×{32}–{33} (ty: {34} × {35}).',
+  'Day {1} — lower: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21} · {22} {23}×{24}–{25}.':
+    'Dzień {1} — dół: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21} · {22} {23}×{24}–{25}.',
+  'Day {1} — upper: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21} · {22} {23}×{24}–{25}.':
+    'Dzień {1} — góra: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21} · {22} {23}×{24}–{25}.',
+  'Why this way: {1} days split so each muscle gets about two sessions a week with {2} days between.':
+    'Dlaczego tak: podział na dni treningowe ({1}) daje każdemu mięśniowi około dwóch treningów tygodniowo, a przerwa między nimi (dni): {2}.',
+  '{1}: {2} (+ {3}, {4}), multi-joint, a barbell.':
+    '{1}: {2} (+ {3}, {4}), wielostawowe, ze sztangą.',
+  '{1}: {2} (+ {3}, {4}), multi-joint, nothing but you.':
+    '{1}: {2} (+ {3}, {4}), wielostawowe, tylko ty i masa własnego ciała.',
+  '{1} is easier to load heavy and track in kilos; {2} is easier on the joints and needs less kit.':
+    '{1} łatwiej obciążać ciężko i śledzić w kilogramach; {2} jest łagodniejsze dla stawów i wymaga mniej sprzętu.',
+  'In your log: {1} {2} × {3}.': 'W twoim dzienniku: {1} {2} × {3}.',
+  'No need to choose: {1} first as the main lift, {2} after it for extra volume.':
+    'Nie musisz wybierać: {1} najpierw jako główne ćwiczenie, potem {2} dla dodatkowej objętości.',
+  'Now you train about {1}× a week.': 'Teraz trenujesz około {1}× w tygodniu.',
+  'On {1}: a push / pull / legs / upper / lower split, each muscle about {2}× a week.':
+    'Układ: {1} — split push / pull / legs / góra / dół, każdy mięsień około {2}× w tygodniu.',
+  'Going to {1}: more weekly volume and practice — growth usually speeds up, as long as each session stays shorter and you sleep {2}+ h.':
+    'Przejście na układ: {1} — więcej tygodniowej objętości i praktyki, wzrost zwykle przyspiesza, o ile każdy trening jest krótszy, a śpisz {2}+ h.',
+  'Add one day first, keep it {1}–{2} weeks, then the next.':
+    'Najpierw dodaj jeden dzień i utrzymaj go przez {1}–{2} tyg., potem kolejny.',
+  'Pumped as always, man!': 'Napompowany jak zawsze, stary!',
+  'You?': 'A ty?',
+  'Crash hard, man.': 'Odpocznij porządnie, stary.',
+  'Recovery is part of the grind 🤙': 'Regeneracja to część roboty 🤙',
+  'Let’s spice it up!': 'Podkręćmy to trochę!',
+  'Big W incoming: {1} steps every day this week.':
+    'Będzie grubo: kroki codziennie w tym tygodniu — {1}.',
+  'Log them.': 'Zapisuj je.',
+  'LOL 😄 You’re a vibe, dude.': 'LOL 😄 Ale z ciebie klimat, stary.',
+  'Ayy, that’s what I like to hear!': 'Ejj, to lubię słyszeć!',
+  'Beast mode ON 💪 Warm up first!': 'Tryb bestii ON 💪 Najpierw rozgrzewka!',
+  'No beef, dude — but can they count your reps?':
+    'Bez spiny, stary — ale czy umieją liczyć twoje powtórzenia?',
+  '🤙': '🤙',
+  'Young enough to hype you, old enough to read your log right.':
+    'Dość młody, żeby cię nakręcać, dość stary, żeby dobrze czytać twój dziennik.',
+  '{1}:{2}.': '{1}:{2}.',
+  'Perfect time to crush it 💪': 'Idealny moment, żeby to rozwalić 💪',
+  'Oops, whiffed that one 🤙 Rephrase?': 'Ups, nie trafiłem 🤙 Powiesz inaczej?',
+  'Low battery day?': 'Dzień niskiej baterii?',
+  'Easy session, still a W 🤙': 'Lekki trening, a i tak wygrana 🤙',
+  'Lower back: skip deadlifts, good mornings and heavy rows for now; walking and gentle movement usually help more than bed rest.':
+    'Dolny odcinek pleców: na razie odpuść martwy ciąg, good mornings i ciężkie wiosłowanie; spacer i delikatny ruch zwykle pomagają bardziej niż leżenie w łóżku.',
+  'Noted: {1} days a week.': 'Zanotowane: dni w tygodniu: {1}.',
+  'Noted: experienced lifter.': 'Zanotowane: doświadczony ćwiczący.',
+  'Muscle memory is real: regaining lost size is much faster than building it the first time.':
+    'Pamięć mięśniowa istnieje: odzyskanie utraconej masy jest dużo szybsze niż zbudowanie jej za pierwszym razem.',
+  'Ask me anything about your training — or tap one of these.':
+    'Pytaj o cokolwiek z treningu — albo stuknij jedno z tych.',
+  'Roses are red, the bar’s loaded too — one more clean rep, and I’m proud of you.':
+    'Róże czerwone, sztanga już załadowana — jeszcze jedno czyste powtórzenie i będę z ciebie dumny.',
+  'This month: {1} sessions, {2} working sets.':
+    'W tym miesiącu: treningi: {1}, serie robocze: {2}.',
+  'Average working sets, {1}, all time: {2}.': 'Średnia serii roboczych, {1}, od początku: {2}.',
+  'Day {1} — full body: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} (you: {10} × {11}) · {12} {13}×{14}–{15} (you: {16} × {17}) · {18} {19}×{20}–{21} (you: {22} × {23}) · {24} {25}×{26}–{27}.':
+    'Dzień {1} — całe ciało: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} (ty: {10} × {11}) · {12} {13}×{14}–{15} (ty: {16} × {17}) · {18} {19}×{20}–{21} (ty: {22} × {23}) · {24} {25}×{26}–{27}.',
+  'Day {1} — full body: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21}.':
+    'Dzień {1} — całe ciało: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21}.',
+  '{1}: {2} (+ {3}, {4}, {5}), multi-joint, a barbell.':
+    '{1}: {2} (+ {3}, {4}, {5}), wielostawowe, ze sztangą.',
+  'Both work — pick the one you can do with clean form and add weight or reps to over weeks.':
+    'Oba działają — wybierz to, które zrobisz czystą techniką i w którym przez tygodnie dołożysz ciężar lub powtórzenia.',
+  '{1}: {2} (+ {3}, {4}), multi-joint, dumbbells.':
+    '{1}: {2} (+ {3}, {4}), wielostawowe, z hantlami.',
+  'On {1}: whole-body sessions, each muscle {2}× a week.':
+    'Układ: {1} — treningi całego ciała, każdy mięsień {2}× w tygodniu.',
+  '{1} a week is close to what you do — the gain is steadiness, not a new result.':
+    '{1} w tygodniu to blisko tego, co robisz — zysk to regularność, a nie nowy wynik.',
+  'Yes — to what?': 'Tak — do czego?',
+  'Ask away, or tap one of these.': 'Pytaj śmiało albo stuknij jedno z tych.',
+  '{1}, {2} {3}.': '{1}, {2} {3}.',
+  "Without a programme there's no fixed day; the best next session is the soonest one you can make, ideally today.":
+    'Bez programu nie ma ustalonego dnia; najlepszy następny trening to najbliższy, na jaki możesz się wyrwać, najlepiej dziś.',
+  'Moved {1} t — the last week.': 'Przerzucone: {1} t — w ostatnim tygodniu.',
+  "💪 Let's go, bro!": '💪 Dawaj, bracie!',
+  'Only if you split the load, like lifting in the morning and easy cardio in the evening, and sleep enough.':
+    'Tylko jeśli rozdzielisz obciążenie, np. siła rano, lekkie cardio wieczorem, i dobrze się wyśpisz.',
+  'Training is generally encouraged in pregnancy and after birth, but your doctor or midwife sets the limits.':
+    'Trening w ciąży i po porodzie jest zwykle zalecany, ale granice ustala twój lekarz lub położna.',
+  "In a programme it's the last week of each block; without one I deload you when your numbers start to drop.":
+    'W programie to ostatni tydzień każdego bloku; bez programu robię ci deload, gdy wyniki zaczną spadać.',
+  'In the session, set the reps and weight on the exercise card and tap Log.':
+    'W treningu ustaw powtórzenia i ciężar na karcie ćwiczenia i stuknij „Zapisz”.',
+  'Gear icon, top right, then Turn Atlas off.':
+    'Ikona zębatki w prawym górnym rogu, potem „Wyłącz Atlasa”.',
+  'Drop {1} and {2} from your plans for good?': 'Usunąć {1} i {2} z twoich planów na dobre?',
+  '{1} days a week, ~{2} min, home kit:': 'Dni w tygodniu: {1}, ~{2} min, sprzęt domowy:',
+  'Quads: squats or leg press deep, plus leg extensions.':
+    'Czworogłowe: głębokie przysiady lub wypychanie nóg, plus prostowanie nóg na maszynie.',
+  'Knees forward is fine.': 'Kolana do przodu — spoko.',
+  'Aim for {1}+ hours a night; I show last night and your {2}-night average.':
+    'Celuj w {1}+ godzin snu na noc; pokazuję ostatnią noc i twoją średnią (liczba nocy: {2}).',
+  '💪 Muscles grow on the couch.': '💪 Mięśnie rosną na kanapie.',
+  'See a doctor right away for sharp pain, swelling, a pop, numbness or pain that gets worse.':
+    'Od razu idź do lekarza przy ostrym bólu, obrzęku, trzasku, drętwieniu albo bólu, który się nasila.',
+  'Otherwise return to the lift once everyday movement is pain-free.':
+    'W przeciwnym razie wracaj do ćwiczenia, gdy codzienne ruchy przestaną boleć.',
+  'Keep the same bed and wake time daily, a dark cool room, no screens or caffeine late, and train earlier if evening sessions wire you.':
+    'Wstawaj i chodź spać o stałych porach, śpij w ciemnym, chłodnym pokoju, bez ekranów i kofeiny późnym wieczorem, a jeśli wieczorne treningi cię nakręcają, trenuj wcześniej.',
+  'Calves: slow reps, a full pause in the stretch at the bottom, {1}–{2} reps, {3}–{4}×/week.':
+    'Łydki: wolne powtórzenia, pełna pauza w rozciągnięciu na dole, {1}–{2} powtórzeń, {3}–{4}×/tydz.',
+  'They respond — you just have to be patient.': 'Reagują — trzeba tylko cierpliwości.',
+  'Knees passing the toes is fine as long as they follow the direction of the toes and heels stay down.':
+    'Kolana wychodzące przed palce są OK, jeśli podążają w kierunku palców, a pięty zostają na ziemi.',
+  'Nothing logged last {1}.': 'Brak zapisów — ostatnie {1}.',
+  '{1}, the last {2} weeks: {3} sessions, estimated max {4} → {5} (+{6}%), best {7}.':
+    '{1}, ostatnie tygodnie ({2}): treningi: {3}, szacowany max {4} → {5} (+{6}%), najlepszy {7}.',
+  '{1}, since March: {2} sessions, estimated max {3} → {4} (+{5}%), best {6}.':
+    '{1}, od marca: treningi: {2}, szacowany max {3} → {4} (+{5}%), najlepszy {6}.',
+  "💪 At the gym, 'how much do you bench' counts as hello.":
+    '💪 Na siłowni „ile wyciskasz?” to forma powitania.',
+  '{1}: nothing logged — this week.': '{1}: nic nie zapisano — w tym tygodniu.',
+  '💪 Catch you at the gym!': '💪 Do zobaczenia na siłce!',
+  'Workouts (all time): ~{1} a week on average; best {2} {3} — {4}.':
+    'Treningi (od początku): średnio ~{1} tygodniowo; najlepszy {2} {3} — {4}.',
+  'Latest: {1} {2} {3}, {4} {5} {6}, {7} {8} {9}, {10} {11} {12}.':
+    'Ostatnio: {1} {2} {3}, {4} {5} {6}, {7} {8} {9}, {10} {11} {12}.',
+  'Last month: {1} sessions, {2} working sets — {3} a week.':
+    'W zeszłym miesiącu: treningi: {1}, serie robocze: {2} — {3} tygodniowo.',
+  'The last month: {1} sessions, {2} working sets — {3} a week.':
+    'Ostatni miesiąc: treningi: {1}, serie robocze: {2} — {3} tygodniowo.',
+  'Ask with a day or date — "what did I do on Monday" or "what did I do on {1} March" — and I\'ll pull that session.':
+    'Zapytaj z dniem lub datą — „co robiłem w poniedziałek” albo „co robiłem {1} marca” — a wyciągnę ten trening.',
+  '{1}, since June: {2} sessions, estimated max {3} → {4} (±{5}%), best {6}.':
+    '{1}, od czerwca: treningi: {2}, szacowany max {3} → {4} (±{5}%), najlepszy {6}.',
+  'Total volume, this week: {1} {2} kg.': 'Łączna objętość w tym tygodniu: {1} {2} kg.',
+  'A rep is one full lift of a movement: down and up once.':
+    'Powtórzenie to jedno pełne wykonanie ruchu: raz w dół i raz w górę.',
+  'A set is a run of reps without putting the weight down — “{1} × {2}” means three sets of eight reps.':
+    'Seria to ciąg powtórzeń bez odkładania ciężaru — „{1} × {2}” znaczy trzy serie po osiem powtórzeń.',
+  'A deload is a lighter week: fewer sets at the same weights, so fatigue drops while strength stays.':
+    'Deload to lżejszy tydzień: mniej serii z tymi samymi ciężarami, więc zmęczenie spada, a siła zostaje.',
+  '{1}, since August: {2} sessions, estimated max {3} → {4} (±{5}%), best {6}.':
+    '{1}, od sierpnia: treningi: {2}, szacowany max {3} → {4} (±{5}%), najlepszy {6}.',
+  '{1}, {2} ({3}.{4}): {5} on all {6} sets.': '{1}, {2} ({3}.{4}): {5}, wszystkie serie ({6}).',
+  '{1}: nothing logged in that period.': '{1}: nic nie zapisano w tym okresie.',
+  'By working sets (this week), most: {1} ({2}).':
+    'Według serii roboczych (w tym tygodniu), najwięcej: {1} ({2}).',
+  'Your program is in Overview → Programs; on Today the card “Today in program” starts the day it planned.':
+    'Twój program jest w Przegląd → Programy; na ekranie Dziś karta „Dziś w programie” startuje dzień, który zaplanował.',
+  'Then you already did the hard part.': 'Najtrudniejsze masz już za sobą.',
+  'Go in, warm up, do just the first big lift — {1} minutes — and decide after.':
+    'Wejdź, rozgrzej się, zrób tylko pierwsze duże ćwiczenie — to {1} min — i zdecyduj potem.',
+  'The money is spent either way; the session is the only thing you still control.':
+    'Kasa i tak wydana; trening to jedyne, co jeszcze masz pod kontrolą.',
+  'Volume (the last week): ~{1} {2} kg a week on average; best {3} {4} — {5} {6} kg.':
+    'Objętość (ostatni tydzień): średnio ~{1} {2} kg tygodniowo; najlepszy {3} {4} — {5} {6} kg.',
+  'Latest: {1} {2} {3} {4} kg, {5} {6} {7} {8} kg.':
+    'Ostatnio: {1} {2} {3} {4} kg, {5} {6} {7} {8} kg.',
+  'Prices are set by your gym — I can’t see them.': 'Ceny ustala twoja siłownia — nie widzę ich.',
+  'Ask the front desk; I’m here for what happens under the bar.':
+    'Zapytaj w recepcji; ja jestem od tego, co dzieje się pod sztangą.',
+  'Your sessions are on Today (“See all history”); records and progress are in Overview.':
+    'Twoje treningi są w Dziś („Cała historia”); rekordy i postępy w Przegląd.',
+  'Everything syncs to every device you sign in on.':
+    'Wszystko synchronizuje się na każdym urządzeniu, na którym się logujesz.',
+  'Open Today and tap “Themes”, pick a look and tap “Apply”.':
+    'Otwórz Dziś i stuknij „Motywy”, wybierz wygląd i stuknij „Zastosuj”.',
+  'Sorry about that.': 'Przepraszam za to.',
+  'Check the sync status at the top of Today — if it says Offline, changes wait and are sent when the network is back.':
+    'Sprawdź status synchronizacji u góry Dziś — jeśli widnieje Offline, zmiany czekają i wyślą się, gdy wróci sieć.',
+  'Reload the page or reopen the app.': 'Przeładuj stronę albo otwórz aplikację ponownie.',
+  'If it still misbehaves, tell your admin or trainer what you did and what you saw — I can’t file a bug report myself.':
+    'Jeśli nadal szwankuje, powiedz adminowi lub trenerowi, co zrobiłeś i co zobaczyłeś — sam nie mogę zgłosić błędu.',
+  '{1}, {2} ({3}.{4}): {5} sets.': '{1}, {2} ({3}.{4}): serie: {5}.',
+  '{1} kg ≈ {2} lb.': '{1} kg ≈ {2} lb.',
+  'A back day: a vertical pull (pull-ups or lat pulldown) {1} × {2}–{3}, a row (barbell, cable or dumbbell) {4} × {5}–{6}, a second row or a rear-delt move {7}–{8} × {9}–{10}, then biceps.':
+    'Dzień pleców: ciągnięcie pionowe (podciąganie lub ściąganie drążka) {1} × {2}–{3}, wiosłowanie (sztangą, na wyciągu lub hantlą) {4} × {5}–{6}, drugie wiosłowanie lub ruch na tylne aktony {7}–{8} × {9}–{10}, potem biceps.',
+  'Start with the heaviest lift.': 'Zacznij od najcięższego ćwiczenia.',
+  '{1}% of {2} is {3}.': '{1}% z {2} to {3}.',
+  '{1}, {2} ({3}.{4}): {5}, {6}, {7} reps ({8} in total).':
+    '{1}, {2} ({3}.{4}): powtórzenia: {5}, {6}, {7} (razem {8}).',
+  'Nothing to repeat yet.': 'Na razie nic do powtórzenia.',
+  'Numbers I can do — now, anything about your training?':
+    'Liczby to moja bajka — a co z twoim treningiem?',
+  '{1}: {2} sets in that period.': '{1}: serie w tym okresie: {2}.',
+  'And about “{1}” — which of these do you mean?': 'A co do „{1}” — o które z tych chodzi?',
+  'You asked: “{1}”': 'Zapytałeś: „{1}”',
+  'Your first question: “{1}”': 'Twoje pierwsze pytanie: „{1}”',
+  'And “{1}” — say it another way and I’ll take it.': 'A „{1}” — powiedz to inaczej, a odpowiem.',
+  '{1}, first logged {2} ({3}.{4}): {5} × {6} × {7}.':
+    '{1}, pierwszy wpis {2} ({3}.{4}): {5} × {6} × {7}.',
+  'Your last day without a session was {1} ({2}.{3}).':
+    'Ostatni dzień bez treningu był {1} ({2}.{3}).',
+  'Your log starts {1}.{2} ({3}): {4} sessions, about {5} a week.':
+    'Twój dziennik zaczyna się {1}.{2} ({3}): treningów: {4}, średnio około {5} tygodniowo.',
+  'Last session: {1} ({2}.{3}).': 'Ostatni trening: {1} ({2}.{3}).',
+  'Yes — {1}, this month: {2} sessions, {3} sets.':
+    'Tak — {1}, w tym miesiącu: treningów: {2}, serii: {3}.',
+  'A mild overuse ache often settles within a couple of weeks once you stop provoking it; if it is not clearly better after {1} weeks, or it gets worse, get it looked at.':
+    'Lekki ból przeciążeniowy często ustępuje w ciągu kilku tygodni, jeśli przestaniesz go drażnić; jeśli po {1} tygodniach nie jest wyraźnie lepiej albo robi się gorzej, pokaż go specjaliście.',
+  'About {1} minutes each, as the plan is built.':
+    'Około {1} minut każdy, tak zbudowany jest plan.',
+  'Day {1}: {2}, {3}.': 'Dzień {1}: {2}, {3}.',
+  'Day {1}: {2}.': 'Dzień {1}: {2}.',
+  'For more, ask for a longer session (“make it {1} minutes”) or name the exercise you want.':
+    'Chcesz więcej — poproś o dłuższy trening („zrób na {1} minut”) albo nazwij ćwiczenie.',
+  'For shorter or longer, say “make it {1} minutes” and I’ll rebuild it.':
+    'Chcesz krócej lub dłużej — powiedz „zrób na {1} minut”, a przebuduję plan.',
+  'I can’t give a date — it depends on what it is, and I can’t examine you.':
+    'Nie podam terminu — to zależy od tego, co dokładnie boli, a nie mogę cię zbadać.',
+  'I’m not a doctor, so take this as a rule of thumb: see one (or a physio) if the pain is sharp, there is swelling, numbness or tingling, it wakes you at night, or it has not eased after {1}–{2} weeks of leaving the trigger out.':
+    'Nie jestem lekarzem, więc potraktuj to jako zasadę ogólną: do lekarza (lub fizjoterapeuty), gdy ból jest ostry, jest obrzęk, drętwienie lub mrowienie, budzi w nocy albo nie słabnie po {1}–{2} tygodniach bez wyzwalacza.',
+  'Until then, skip what sets it off and train around it.':
+    'Do tego czasu odpuść to, co go wywołuje, i trenuj dookoła.',
+  'Yes, it is in the plan.': 'Tak, to jest w planie.',
+  'That is not in this plan yet.': 'Tego jeszcze nie ma w tym planie.',
+  'Tell me what to change — for example “make it {1} minutes” gives each day extra slots — and I’ll rebuild it.':
+    'Powiedz, co zmienić — na przykład „zrób na {1} minut” daje każdemu dniowi dodatkowe miejsca — a przebuduję plan.',
 };

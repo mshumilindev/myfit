@@ -127,6 +127,43 @@ export const CONV_CASES: ConvCase[] = [
   c('en', ['howmany sets of benchpress last time'], /3 sets/),
   // Cyrillic thanks leaves the pain flow (\b is ASCII-only in JS regexes)
   c('uk', ['болить спина', 'дякую'], /Звертайся/),
+  // P9 (turing test 2): arithmetic, units, definitions, app how-tos, flows in lt/et, pending "which lift?"
+  c('en', ['what is 15% of 80'], /is 12\./, { forbid: /kg/ }),
+  c('uk', ['скільки це в фунтах 100 кг'], /220[.,]5/),
+  c('en', ['what is a rep'], /down and up/),
+  c('en', ['where do i find my program'], /Overview → Programs/),
+  c('en', ['ok forget it, whats a good back day'], /vertical pull/),
+  c('uk', ['скільки коштує абонемент'], /Ціни встановлює/),
+  c('en', ['but i paid for the gym'], /hard part/),
+  c('uk', ['як змінити тему'], /«Теми»/),
+  c('uk', ['де мої дані'], /Уся історія/),
+  c('uk', ['застосунок глючить'], /Офлайн/),
+  c('lt', ['skauda nugarą', 'ačiū'], /No stress/),
+  c('et', ['valutab selga', 'aitäh'], /No stress/),
+  c('en', ['is 3 sets of 10 enough', 'what is progressive overload'], /Add weight/, {
+    forbid: /Which lift/,
+  }),
+  // P10: first/oldest lookups and calendar questions answered from the log
+  c('en', ['what was my first ever bench weight'], /first logged.*83 kg/),
+  c('uk', ['коли я вперше жав лежачи'], /вперше в журналі/),
+  c('en', ['when did i start benching'], /first logged/),
+  c('en', ['when was my last rest day'], /without a session/, { forbid: /walk, easy bike/ }),
+  c('en', ['how long have i been training'], /Your log starts/),
+  c('uk', ['відколи я тренуюся'], /Журнал починається/),
+  c('en', ['how many days since my last workout'], /Last session: 2 days ago/),
+  c('en', ['did i train legs this month'], /this month: \d+ sets/),
+  // P11: follow-ups after a plan and after a pain check-in
+  c('en', ['make me a 4 day plan', 'what about legs'], /Yes, it is in the plan/, {
+    forbid: /balanced, strong/,
+  }),
+  c('en', ['make me a 4 day plan', 'can you add arms'], /Yes, it is in the plan/),
+  c('en', ['make me a 3 day plan', 'how long will each session be'], /About 60 minutes each/, {
+    forbid: /Control the lowering/,
+  }),
+  c('uk', ['склади план на 4 дні', 'а що з руками'], /Так, воно є в плані/),
+  c('en', ['my elbow hurts when i bench', 'should i see a doctor'], /not a doctor/),
+  c('en', ['my elbow hurts when i bench', 'how long until it heals'], /can’t give a date/),
+  c('uk', ['болить лікоть', 'чи варто йти до лікаря'], /Я не лікар/),
   // known weaknesses (fix → drop `gap`)
   c('en', ['log 3 sets of pullups'], /tap “Log”/, { forbid: /3–4 days a week/ }),
   c('uk', ['залогуй 3 підходи підтягувань'], /«Запис»/),
