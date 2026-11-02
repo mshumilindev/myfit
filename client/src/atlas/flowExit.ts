@@ -9,7 +9,7 @@ import type { AskCtx, Parsed, Tr } from './intentKit';
 import { metaTurn } from './metaTurn';
 
 const THANKS_RE =
-  /^\s*(thanks|thank you|thx|ty|cheers|дякую|дяка|дякуємо|спасибі|dziękuję|dzięki)\b/iu;
+  /^\s*(thanks|thank you|thx|ty|cheers|дякую|дяка|дякуємо|спасибі|dziękuję|dzięki)(?!\p{L})/iu;
 const SWITCH_RE =
   /\b(what should i train|what to train|show (me )?my|how is my|how are my|what('s| is) my|when did i|how (much|many) did i)\b|що (мені )?тренувати|покажи (мій|мою|моє|мої)|як (там )?(мій|моя|моє|мої)|який (в мене|мій)|коли я (востаннє|останній раз)|co (dziś |dzisiaj )?trenować|pokaż moj\p{L}*|jak (tam )?(mój|moja|moje)/iu;
 

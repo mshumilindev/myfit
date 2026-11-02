@@ -40,7 +40,10 @@ const VOLUME_RE = /\b(volume|tonnage)\b|об['’ʼ]?єм|обсяг|objęto|obj
 const LAST_RE =
   /\b(last|latest|previous|most recent|recently|lately|yesterday)\b|востаннє|останн|минул\p{L}*\s*раз|минулого|ostatni|ostatnio|poprzedni/iu;
 const NOT_A_LOOKUP_RE =
-  /\b(change[ds]?|improv\w*|progress\w*|trend\w*|since|lately|rest|between)\b|змін\p{L}*|прогрес|останнім часом|як там|більше разів|робити|відпочин|times? (a|per) (week|month)|lifting days|days|in total|overall|all[- ]time|altogether|загалом|разом|усього|łącznie|ostatnio|zmieni\p{L}*|w tym tygodniu|kiek/iu;
+  /\b(change[ds]?|improv\w*|progress\w*|trend\w*|since|lately|rest|between)\b|змін\p{L}*|прогрес|останнім часом|як там|більше разів|робити|відпочин|times? (a|per) (week|month)|lifting days|days|in total|overall|all[- ]time|altogether|загалом|разом|усього|łącznie|zmieni\p{L}*|w tym tygodniu|kiek/iu;
+/** "Record" in the sense of a lookup (not "best shoes", "best angle"). */
+const RECORD_RE = /\b(record|pr|personal record|heaviest)\b|рекорд|найважч|rekord|najcięższ/iu;
+export const lookupSignal = (t: string) => LAST_RE.test(t) || RECORD_RE.test(t);
 const BEST_RE =
   /\b(best|heaviest|max|maximum|pr|personal record|record|top)\b|найкращ|найважч|рекорд|максим|najlepsz|najcięższ|rekord/iu;
 const SELF_RE =
@@ -65,7 +68,13 @@ export function readDataQuestion(question: string, p: Parsed, c: AskCtx): DataQu
   const period = !!p.range && !p.range.ago;
   // A metric AND a way of pointing into the log are both needed: "how much weight should I use" or "how many reps
   // are best" are advice questions, not log questions.
-  if (!metric && !last) return null;
+  // Only a short, plain "record in X" — a longer message may carry a second question; "bench max" is e1rm.
+  const plainRecord =
+    RECORD_RE.test(q) &&
+    !!p.exercise &&
+    q.trim().split(/\s+/).length <= 6 &&
+    !/\bmax|\b1\s?rm|максим|1\s?пм/iu.test(q);
+  if (!metric && !last && !plainRecord) return null;
   const short = q.trim().split(/\s+/).length <= 4 && !!p.exercise;
   // a bare "вага на підтягуваннях" / "last bench weight": the log is the only sensible reading
   if (!last && !best && !period && !(SELF_RE.test(q) && PAST_RE.test(q)) && !short) return null;
