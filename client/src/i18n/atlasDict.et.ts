@@ -5552,4 +5552,251 @@ export const DICT: Record<string, string> = {
   'Hiking — that counts.': 'Matkamine — see läheb arvesse.',
   'Rock climbing — that counts.': 'Kaljuronimine — see läheb arvesse.',
   'Climbing gym — that counts.': 'Ronimissein — see läheb arvesse.',
+  '{1}.{2}: {3} sets in {4} min — {5}, {6}, {7}, {8}.':
+    '{1}.{2}: {3} seeriat {4} min jooksul — {5}, {6}, {7}, {8}.',
+  'Last {1} days: {2} sessions (usual {3}), {4} working sets.':
+    'Viimased {1} päeva: {2} treeningut (tavaliselt {3}), {4} tööseeriat.',
+  '{1}: estimated max {2} → {3} (+{4}%) since {5}. {6}, {7} sessions; best set {8} × {9}.':
+    '{1}: hinnanguline maksimum {2} → {3} (+{4}%) alates {5}. {6}, {7} treeningut; parim seeria {8} × {9}.',
+  'Your best: {1} {2} × {3} (~{4} {5}RM).': 'Sinu parim: {1} {2} × {3} (~{4} {5}RM).',
+  '{1}: heaviest set — {2} × {3}, {4} ({5}.{6}).':
+    '{1}: raskeim seeria — {2} × {3}, {4} ({5}.{6}).',
+  '{1}: most reps in a set — {2} at {3}, {4} ({5}.{6}).':
+    '{1}: enim kordusi ühes seerias — {2} raskusega {3}, {4} ({5}.{6}).',
+  '{1}: {2}% — recovered, train it.': '{1}: {2}% — taastunud, treeni ära.',
+  'No streak yet — log a session today and it starts.':
+    'Seeriat veel pole — logi täna treening ja see algab.',
+  '{1} sessions logged since {2}.{3}.': 'Alates {2} on logitud {1} treeningut.{3}.',
+  'Moved {1} {2} kg — this week.': 'Liigutasid {1} {2} kg — sel nädalal.',
+  '{1}: {2} ({3}.{4}), {5} sets.': '{1}: {2} ({3}.{4}), {5} seeriat.',
+  '{1}, {2} ({3}.{4}): {5} × {6} × {7}.': '{1}, {2} ({3}.{4}): {5} × {6} × {7}.',
+  'Last weigh-in: {1} on {2}.{3}.': 'Viimane kaalumine: {1}, kuupäev {2}.{3}.',
+  'You train most on {1}, {2}, {3}.': 'Kõige rohkem treenid päevadel: {1}, {2}, {3}.',
+  'Longest: {1} min ({2}.{3}).': 'Pikim: {1} min ({2}.{3}).',
+  'Shortest: {1} min ({2}.{3}).': 'Lühim: {1} min ({2}.{3}).',
+  'This week: {1} session, {2} sets.': 'Sel nädalal: {1} treeningut, {2} seeriat.',
+  'Last week: {1} session, {2} sets.': 'Eelmisel nädalal: {1} treeningut, {2} seeriat.',
+  'In {1}: {2} sessions, {3} working sets — {4} a week.':
+    'Ajavahemikul {1}: {2} treeningut, {3} tööseeriat — nädalas {4}.',
+  'Since June: {1} → {2} (+{3} kg).': 'Alates juunist: {1} → {2} (+{3} kg).',
+  'Recovered: {1} (last trained {2}), {3} (last trained {4}), {5} (last trained {6}).':
+    'Taastunud: {1} (viimati treenitud {2}), {3} (viimati treenitud {4}), {5} (viimati treenitud {6}).',
+  'Still recovering: {1} ({2}, ~{3}% back) — go a bit lighter there.':
+    'Alles taastub: {1} ({2}, ~{3}% tagasi) — mine seal veidi kergemalt.',
+  'Gyms saved: {1}.': 'Salvestatud jõusaale: {1}.',
+  '{1} ({2}.{3}): {4} {5} × {6}, {7} {8} × {9}, {10} {11} × {12}, {13} {14} × {15}, {16} {17} × {18}.':
+    '{1} ({2}.{3}): {4} {5} × {6}, {7} {8} × {9}, {10} {11} × {12}, {13} {14} × {15}, {16} {17} × {18}.',
+  '{1}: estimated max {2} → {3} (±{4}%) since {5}. aug, {6} sessions; best set {7} × {8}.':
+    '{1}: hinnanguline maksimum {2} → {3} (±{4}%) alates {5}. aug, {6} treeningut; parim seeria {7} × {8}.',
+  'Reps per set, {1}, in {2}: {3}.': 'Kordusi seerias, {1}, ajavahemikus {2}: {3}.',
+  'Most improved, the last {1} months: {2} (+{3}%).':
+    'Enim arenenud viimase {1} kuu jooksul: {2} (+{3}%).',
+  '{1}.': '{1}.',
+  '{1} +{2}% ({3} → {4}); {5}.': '{1} +{2}% ({3} → {4}); {5}.',
+  '{1} +{2}% ({3} → {4}).': '{1} +{2}% ({3} → {4}).',
+  'Big breath into the belly, brace as if about to be punched, hold through the hard part, breathe out at the top.':
+    'Võta sügav hingetõmme kõhtu, pinguta keskkeha nagu ootaksid lööki, hoia rasket osa läbi ja hinga üleval välja.',
+  'Bench in a rack with safety pins and without collars so you can tip the plates, or use dumbbells.':
+    'Suru rakises pingil, turvapiirajad paigas ja ilma lukkudeta, et saaksid plaadid maha kallutada, või kasuta hantleid.',
+  'Set squat safeties just below your bottom position.':
+    'Pane kükiturvapiirajad veidi madalamale kui su alumine asend.',
+  'Turn them on in the rest settings or when Atlas asks.':
+    'Lülita need sisse puhkeseadetes või siis, kui Atlas küsib.',
+  'On iPhone, first add Spotter to the Home Screen via Share, then Add to Home Screen.':
+    "iPhone'is lisa Spotter esmalt avakuvale: Jaga, siis Lisa avakuvale.",
+  '{1} days a week, ~{2} min:': '{1} päeva nädalas, ~{2} min:',
+  'Day {1} — full body: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} (you: {10} × {11}) · {12} {13}×{14}–{15} (you: {16} × {17}) · {18} {19}×{20}–{21} (you: {22} × {23}) · {24} {25}×{26}–{27} · {28} {29}×{30}–{31}.':
+    'Päev {1} — kogu keha: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} (sina: {10} × {11}) · {12} {13}×{14}–{15} (sina: {16} × {17}) · {18} {19}×{20}–{21} (sina: {22} × {23}) · {24} {25}×{26}–{27} · {28} {29}×{30}–{31}.',
+  'Day {1} — full body: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21} · {22} {23}×{24}–{25}.':
+    'Päev {1} — kogu keha: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21} · {22} {23}×{24}–{25}.',
+  'Why this way: with {1} days, whole-body sessions hit every muscle {2} times a week — more often beats more per session.':
+    'Miks nii: kui päevi on {1}, tabavad kogu keha treeningud iga lihast {2} korda nädalas — sagedamini on parem kui rohkem korraga.',
+  'Each week: when every set hits the top of the range, add weight next time.':
+    'Iga nädal: kui kõik seeriad jõuavad vahemiku ülemisse otsa, lisa järgmisel korral raskust.',
+  'Day {1} — upper: {2} {3}×{4}–{5} (you: {6} × {7}) · {8} {9}×{10}–{11} (you: {12} × {13}) · {14} {15}×{16}–{17} (you: {18} × {19}) · {20} {21}×{22}–{23} (you: {24} × {25}) · {26} {27}×{28}–{29} · {30} {31}×{32}–{33} (you: {34} × {35}).':
+    'Päev {1} — ülakeha: {2} {3}×{4}–{5} (sina: {6} × {7}) · {8} {9}×{10}–{11} (sina: {12} × {13}) · {14} {15}×{16}–{17} (sina: {18} × {19}) · {20} {21}×{22}–{23} (sina: {24} × {25}) · {26} {27}×{28}–{29} · {30} {31}×{32}–{33} (sina: {34} × {35}).',
+  'Day {1} — lower: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21} · {22} {23}×{24}–{25}.':
+    'Päev {1} — alakeha: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21} · {22} {23}×{24}–{25}.',
+  'Day {1} — upper: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21} · {22} {23}×{24}–{25}.':
+    'Päev {1} — ülakeha: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21} · {22} {23}×{24}–{25}.',
+  'Why this way: {1} days split so each muscle gets about two sessions a week with {2} days between.':
+    'Miks nii: {1} päeva jaotus annab igale lihasele umbes kaks treeningut nädalas, nende vahel {2} päeva.',
+  '{1}: {2} (+ {3}, {4}), multi-joint, a barbell.':
+    '{1}: {2} (+ {3}, {4}), mitmeliigeseline, kangiga.',
+  '{1}: {2} (+ {3}, {4}), multi-joint, nothing but you.':
+    '{1}: {2} (+ {3}, {4}), mitmeliigeseline, ainult sina ise.',
+  '{1} is easier to load heavy and track in kilos; {2} is easier on the joints and needs less kit.':
+    '{1} on lihtsam raskelt laadida ja kilodes jälgida; {2} on liigestele leebem ja vajab vähem varustust.',
+  'In your log: {1} {2} × {3}.': 'Sinu logis: {1} {2} × {3}.',
+  'No need to choose: {1} first as the main lift, {2} after it for extra volume.':
+    'Pole vaja valida: {1} esimesena põhiharjutuseks, {2} selle järel lisamahuks.',
+  'Now you train about {1}× a week.': 'Praegu treenid umbes {1}× nädalas.',
+  'On {1}: a push / pull / legs / upper / lower split, each muscle about {2}× a week.':
+    'Päevadel {1}: tõuke / tõmbe / jalgade / ülakeha / alakeha jaotus, iga lihas umbes {2}× nädalas.',
+  'Going to {1}: more weekly volume and practice — growth usually speeds up, as long as each session stays shorter and you sleep {2}+ h.':
+    'Üleminek päevadele {1}: rohkem nädalamahtu ja harjutamist — kasv kiireneb tavaliselt, kui iga treening jääb lühemaks ja sa magad {2}+ h.',
+  'Add one day first, keep it {1}–{2} weeks, then the next.':
+    'Lisa esmalt üks päev, hoia seda {1}–{2} nädalat, siis järgmine.',
+  'Pumped as always, man!': 'Pumbatud nagu alati, mees!',
+  'You?': 'Sina?',
+  'Crash hard, man.': 'Puhka korralikult, mees.',
+  'Recovery is part of the grind 🤙': 'Taastumine kuulub rapsimise juurde 🤙',
+  'Let’s spice it up!': 'Teeme asja põnevamaks!',
+  'Big W incoming: {1} steps every day this week.':
+    'Suur võit tulemas: {1} sammu iga päev sel nädalal.',
+  'Log them.': 'Logi need.',
+  'LOL 😄 You’re a vibe, dude.': 'LOL 😄 Sa oled lahe tüüp, kutt.',
+  'Ayy, that’s what I like to hear!': 'Ohoo, just seda ma tahangi kuulda!',
+  'Beast mode ON 💪 Warm up first!': 'Metsalise režiim SEES 💪 Soojenda enne üles!',
+  'No beef, dude — but can they count your reps?':
+    'Pole pahameelt, kutt — aga kas nad oskavad su kordusi lugeda?',
+  '🤙': '🤙',
+  'Young enough to hype you, old enough to read your log right.':
+    'Piisavalt noor, et sind üles keerata, piisavalt vana, et su logi õigesti lugeda.',
+  '{1}:{2}.': '{1}:{2}.',
+  'Perfect time to crush it 💪': 'Parim aeg end välja elada 💪',
+  'Oops, whiffed that one 🤙 Rephrase?': 'Oi, see läks mööda 🤙 Ütle teisiti?',
+  'Low battery day?': 'Aku on tühi?',
+  'Easy session, still a W 🤙': 'Kerge treening, ikka võit 🤙',
+  'Lower back: skip deadlifts, good mornings and heavy rows for now; walking and gentle movement usually help more than bed rest.':
+    'Alaselg: jäta praegu vahele maast tõsted, „good morning“-harjutused ja rasked sõudmised; jalutamine ja leebe liikumine aitab tavaliselt rohkem kui voodirežiim.',
+  'Noted: {1} days a week.': 'Märgitud: {1} päeva nädalas.',
+  'Noted: experienced lifter.': 'Märgitud: kogenud tõstja.',
+  'Muscle memory is real: regaining lost size is much faster than building it the first time.':
+    'Lihasmälu on päris: kaotatud mahu tagasi saamine on palju kiirem kui selle esmakordne ehitamine.',
+  'Ask me anything about your training — or tap one of these.':
+    'Küsi minult mida iganes oma treeningu kohta — või puuduta ühte neist.',
+  'Roses are red, the bar’s loaded too — one more clean rep, and I’m proud of you.':
+    'Roosid on punased, kang on laetud — veel üks puhas kordus, ja ma olen sinu üle uhke.',
+  'This month: {1} sessions, {2} working sets.': 'Sel kuul: {1} treeningut, {2} tööseeriat.',
+  'Average working sets, {1}, all time: {2}.': 'Keskmised tööseeriad, {1}, kogu aja jooksul: {2}.',
+  'Day {1} — full body: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} (you: {10} × {11}) · {12} {13}×{14}–{15} (you: {16} × {17}) · {18} {19}×{20}–{21} (you: {22} × {23}) · {24} {25}×{26}–{27}.':
+    'Päev {1} — kogu keha: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} (sina: {10} × {11}) · {12} {13}×{14}–{15} (sina: {16} × {17}) · {18} {19}×{20}–{21} (sina: {22} × {23}) · {24} {25}×{26}–{27}.',
+  'Day {1} — full body: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21}.':
+    'Päev {1} — kogu keha: {2} {3}×{4}–{5} · {6} {7}×{8}–{9} · {10} {11}×{12}–{13} · {14} {15}×{16}–{17} · {18} {19}×{20}–{21}.',
+  '{1}: {2} (+ {3}, {4}, {5}), multi-joint, a barbell.':
+    '{1}: {2} (+ {3}, {4}, {5}), mitmeliigeseline, kangiga.',
+  'Both work — pick the one you can do with clean form and add weight or reps to over weeks.':
+    'Mõlemad sobivad — vali see, mida saad puhta tehnikaga teha ja millele nädalate jooksul raskust või kordusi lisada.',
+  '{1}: {2} (+ {3}, {4}), multi-joint, dumbbells.':
+    '{1}: {2} (+ {3}, {4}), mitmeliigeseline, hantlitega.',
+  'On {1}: whole-body sessions, each muscle {2}× a week.':
+    'Päevadel {1}: kogu keha treeningud, iga lihas {2}× nädalas.',
+  '{1} a week is close to what you do — the gain is steadiness, not a new result.':
+    '{1} nädalas on sinu praegusele lähedal — võit on järjepidevus, mitte uus tulemus.',
+  'Yes — to what?': 'Jah — mille kohta?',
+  'Ask away, or tap one of these.': 'Küsi aga, või puuduta ühte neist.',
+  '{1}, {2}. {3}.': '{1}, {2}. {3}.',
+  "Without a programme there's no fixed day; the best next session is the soonest one you can make, ideally today.":
+    'Ilma kavata pole kindlat päeva; parim järgmine treening on esimene, mille jõuad teha, ideaalis täna.',
+  'Moved {1} t — the last week.': 'Liigutasid {1} t — viimasel nädalal.',
+  "💪 Let's go, bro!": '💪 Lähme, vend!',
+  'Only if you split the load, like lifting in the morning and easy cardio in the evening, and sleep enough.':
+    'Ainult siis, kui jagad koormuse ära, näiteks hommikul tõstad ja õhtul kerget kardiot, ning magad piisavalt.',
+  'Training is generally encouraged in pregnancy and after birth, but your doctor or midwife sets the limits.':
+    'Treenimist soovitatakse üldiselt nii raseduse ajal kui pärast sünnitust, aga piirid määrab sinu arst või ämmaemand.',
+  "In a programme it's the last week of each block; without one I deload you when your numbers start to drop.":
+    'Kavas on see iga ploki viimane nädal; ilma kavata teen sulle kergema nädala, kui su numbrid hakkavad langema.',
+  'In the session, set the reps and weight on the exercise card and tap Log.':
+    'Treeningul sea harjutuse kaardil kordused ja raskus ning puuduta „Logi“.',
+  'Gear icon, top right, then Turn Atlas off.':
+    'Hammasratta ikoon üleval paremal, siis „Lülita Atlas välja“.',
+  'Drop {1} and {2} from your plans for good?': 'Kas jätad {1} ja {2} oma kavadest päriselt ära?',
+  '{1} days a week, ~{2} min, home kit:': '{1} päeva nädalas, ~{2} min, kodune varustus:',
+  'Quads: squats or leg press deep, plus leg extensions.':
+    'Nelipealihas: kükid või jalapress sügavalt, lisaks jala sirutused.',
+  'Knees forward is fine.': 'Põlved ettepoole on okei.',
+  'Aim for {1}+ hours a night; I show last night and your {2}-night average.':
+    'Eesmärgiks {1}+ tundi öö kohta; näitan eelmist ööd ja sinu {2} öö keskmist.',
+  '💪 Muscles grow on the couch.': '💪 Lihased kasvavad diivanil.',
+  'See a doctor right away for sharp pain, swelling, a pop, numbness or pain that gets worse.':
+    'Mine kohe arsti juurde, kui on terav valu, turse, plaksatus, tuimus või valu, mis läheb hullemaks.',
+  'Otherwise return to the lift once everyday movement is pain-free.':
+    'Muul juhul naase tõsteharjutuse juurde, kui igapäevane liikumine on valutu.',
+  'Keep the same bed and wake time daily, a dark cool room, no screens or caffeine late, and train earlier if evening sessions wire you.':
+    'Hoia iga päev sama voodiminekuaeg ja ärkamisaeg, pime ja jahe tuba, hilja ei mingeid ekraane ega kofeiini, ja treeni varem, kui õhtused treeningud ajavad sind üles.',
+  'Calves: slow reps, a full pause in the stretch at the bottom, {1}–{2} reps, {3}–{4}×/week.':
+    'Sääred: aeglased kordused, täielik paus venituses all, {1}–{2} kordust, {3}–{4}×/nädalas.',
+  'They respond — you just have to be patient.': 'Nad reageerivad — lihtsalt pead olema kannatlik.',
+  'Knees passing the toes is fine as long as they follow the direction of the toes and heels stay down.':
+    'Põlved varvastest kaugemale on okei, kui nad järgivad varvaste suunda ja kannad jäävad maha.',
+  '{1}: estimated max {2} → {3} (±{4}%) since {5}. {6}, {7} sessions; best set {8} × {9}.':
+    '{1}: hinnanguline maksimum {2} → {3} (±{4}%) alates {5}. {6}, {7} treeningut; parim seeria {8} × {9}.',
+  'Nothing logged last {1}.': 'Viimase {1} jooksul pole midagi logitud.',
+  '{1}, the last {2} weeks: {3} sessions, estimated max {4} → {5} (+{6}%), best {7}.':
+    '{1}, viimased {2} nädalat: {3} treeningut, hinnanguline maksimum {4} → {5} (+{6}%), parim {7}.',
+  '{1}, since March: {2} sessions, estimated max {3} → {4} (+{5}%), best {6}.':
+    '{1}, alates märtsist: {2} treeningut, hinnanguline maksimum {3} → {4} (+{5}%), parim {6}.',
+  "💪 At the gym, 'how much do you bench' counts as hello.":
+    '💪 Jõusaalis on „palju sa surud?“ sama mis tere.',
+  '{1}: nothing logged — this week.': '{1}: midagi pole logitud — sel nädalal.',
+  '💪 Catch you at the gym!': '💪 Näeme jõusaalis!',
+  'Workouts (all time): ~{1} a week on average; best {2}. {3} — {4}.':
+    'Treeningud (kogu aeg): keskmiselt ~{1} nädalas; parim {2}. {3} — {4}.',
+  'Latest: {1}. aug {2}, {3}. sept {4}, {5}. sept {6}, {7}. sept {8}.':
+    'Viimased: {1}. aug {2}, {3}. sept {4}, {5}. sept {6}, {7}. sept {8}.',
+  'Last month: {1} sessions, {2} working sets — {3} a week.':
+    'Eelmine kuu: {1} treeningut, {2} tööseeriat — nädalas {3}.',
+  'The last month: {1} sessions, {2} working sets — {3} a week.':
+    'Viimane kuu: {1} treeningut, {2} tööseeriat — nädalas {3}.',
+  'Ask with a day or date — "what did I do on Monday" or "what did I do on {1} March" — and I\'ll pull that session.':
+    'Küsi päeva või kuupäevaga — „mida ma esmaspäeval tegin“ või „mida ma {1}. märtsil tegin“ — ja toon selle treeningu välja.',
+  '{1}, since June: {2} sessions, estimated max {3} → {4} (±{5}%), best {6}.':
+    '{1}, alates juunist: {2} treeningut, hinnanguline maksimum {3} → {4} (±{5}%), parim {6}.',
+  'Total volume, this week: {1} {2} kg.': 'Kogumaht, sel nädalal: {1} {2} kg.',
+  'A rep is one full lift of a movement: down and up once.':
+    'Kordus on liigutuse üks täielik tõste: korra alla ja üles.',
+  'A set is a run of reps without putting the weight down — “{1} × {2}” means three sets of eight reps.':
+    'Seeria on kordused ilma raskust maha panemata — „{1} × {2}“ tähendab kolme seeriat kaheksa kordusega.',
+  'A deload is a lighter week: fewer sets at the same weights, so fatigue drops while strength stays.':
+    'Kergem nädal ehk deload: vähem seeriaid samade raskustega, nii et väsimus langeb, aga jõud jääb.',
+  '{1}, since {2}: {3} sessions, estimated max {4} → {5} (±{6}%), best {7}.':
+    '{1}, alates {2}: {3} treeningut, hinnanguline maksimum {4} → {5} (±{6}%), parim {7}.',
+  '{1}, {2} ({3}.{4}): {5} on all {6} sets.': '{1}, {2} ({3}.{4}): {5} kõigis {6} seerias.',
+  '{1}: nothing logged in that period.': '{1}: sel perioodil pole midagi logitud.',
+  'By working sets (this week), most: {1} ({2}).':
+    'Tööseeriate järgi (sel nädalal) kõige rohkem: {1} ({2}).',
+  'Your program is in Overview → Programs; on Today the card “Today in program” starts the day it planned.':
+    'Sinu programm on jaotises „Ülevaade“ → „Programmid“; vaates „Täna“ alustab kaart „Täna kavas“ planeeritud päeva.',
+  'Then you already did the hard part.': 'Siis tegid raske osa juba ära.',
+  'Go in, warm up, do just the first big lift — {1} minutes — and decide after.':
+    'Mine sisse, soojenda, tee ainult esimene suur tõste — {1} minutit — ja otsusta pärast.',
+  'The money is spent either way; the session is the only thing you still control.':
+    'Raha on nii või naa kulutatud; treening on ainus, mida sa veel kontrollid.',
+  'Volume (the last week): ~{1} {2} kg a week on average; best {3}. sept — {4} {5} kg.':
+    'Maht (viimane nädal): keskmiselt ~{1} {2} kg nädalas; parim {3}. sept — {4} {5} kg.',
+  'Latest: {1}. sept {2} {3} kg, {4}. sept {5} {6} kg.':
+    'Viimased: {1}. sept {2} {3} kg, {4}. sept {5} {6} kg.',
+  'Prices are set by your gym — I can’t see them.':
+    'Hinnad määrab sinu jõusaal — mina neid ei näe.',
+  'Ask the front desk; I’m here for what happens under the bar.':
+    'Küsi vastuvõtust; mina olen siin selle jaoks, mis juhtub kangi all.',
+  'Your sessions are on Today (“See all history”); records and progress are in Overview.':
+    'Sinu treeningud on vaates „Täna“ („Kogu ajalugu“); rekordid ja areng on jaotises „Ülevaade“.',
+  'Everything syncs to every device you sign in on.':
+    'Kõik sünkroonitakse igasse seadmesse, kuhu sisse logid.',
+  'Open Today and tap “Themes”, pick a look and tap “Apply”.':
+    'Ava „Täna“ ja puuduta „Teemad“, vali välimus ja puuduta „Rakenda“.',
+  'Sorry about that.': 'Vabandust selle pärast.',
+  'Check the sync status at the top of Today — if it says Offline, changes wait and are sent when the network is back.':
+    'Vaata sünkroonimise olekut vaate „Täna“ ülaosas — kui seal on „Võrguta“, ootavad muudatused ja saadetakse, kui võrk tagasi tuleb.',
+  'Reload the page or reopen the app.': 'Laadi leht uuesti või ava rakendus uuesti.',
+  'If it still misbehaves, tell your admin or trainer what you did and what you saw — I can’t file a bug report myself.':
+    'Kui see ikka jonnib, ütle oma administraatorile või treenerile, mida tegid ja mida nägid — veateadet ei saa ma ise saata.',
+  '{1}, {2} ({3}.{4}): {5} sets.': '{1}, {2} ({3}.{4}): {5} seeriat.',
+  '{1} kg ≈ {2} lb.': '{1} kg ≈ {2} lb.',
+  'A back day: a vertical pull (pull-ups or lat pulldown) {1} × {2}–{3}, a row (barbell, cable or dumbbell) {4} × {5}–{6}, a second row or a rear-delt move {7}–{8} × {9}–{10}, then biceps.':
+    'Selja päev: vertikaaltõmme (lõuatõmbed või ülemine tõmme) {1} × {2}–{3}, sõudmine (kang, kaabel või hantel) {4} × {5}–{6}, teine sõudmine või tagumise õlalihase harjutus {7}–{8} × {9}–{10}, siis biitsepsid.',
+  'Start with the heaviest lift.': 'Alusta raskeima tõstega.',
+  '{1}% of {2} is {3}.': '{1}% arvust {2} on {3}.',
+  '{1}, {2} ({3}.{4}): {5}, {6}, {7} reps ({8} in total).':
+    '{1}, {2} ({3}.{4}): {5}, {6}, {7} kordust (kokku {8}).',
+  'Nothing to repeat yet.': 'Pole veel midagi korrata.',
+  'Numbers I can do — now, anything about your training?':
+    'Numbritega saan hakkama — nüüd, mis iganes sinu treeningu kohta?',
+  '{1}: {2} sets in that period.': '{1}: {2} seeriat sel perioodil.',
+  'And about “{1}” — which of these do you mean?': 'Aga „{1}“ kohta – millist neist sa mõtled?',
+  'You asked: “{1}”': 'Sa küsisid: „{1}“',
+  'Your first question: “{1}”': 'Sinu esimene küsimus: „{1}“',
+  'And “{1}” — say it another way and I’ll take it.': 'Aga „{1}“ – ütle teisiti, siis vastan.',
 };

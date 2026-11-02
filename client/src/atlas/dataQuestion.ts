@@ -116,7 +116,7 @@ export function lastSessionOf(
 function when(c: AskCtx, ts: number): string {
   const days = Math.max(0, Math.round((c.now - ts) / DAY));
   const date = new Date(ts).toLocaleDateString(c.locale);
-  return `${N.daysAgo(c.locale, days)} (${date})`;
+  return `${N.daysAgoOf(c, days)} (${date})`;
 }
 
 /** "10 kg × 8, 10 kg × 8" grouped: "3 × 10 kg × 8". */

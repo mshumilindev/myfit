@@ -54,7 +54,7 @@ export function dataTurn<C extends DConvo>(
   L: Tr,
   d: Deps,
 ): Out<C & { turn: number; q: string }> | null {
-  const meta = metaTurn(question, convo, turn, L);
+  const meta = metaTurn(question, convo, turn, L, c.fmt.echo);
   if (meta) return meta;
   // Polish one-letter prepositions ("rekord w przysiadzie") would otherwise be read as a lift.
   const text = repairTypos(question)

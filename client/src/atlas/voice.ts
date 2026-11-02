@@ -26,6 +26,8 @@ export interface Fmt {
   ago?: (ms: number) => string;
   /** By calendar days: "today", "yesterday", "3 days ago" (num.daysAgo). */
   daysAgo?: (days: number) => string;
+  /** The person's own words quoted back: a placeholder in translated chat so the sentence around them still translates. */
+  echo?: (text: string) => string;
 }
 
 export type Line<K extends FactKind> = (f: FactOf<K>, x: Fmt) => string;
