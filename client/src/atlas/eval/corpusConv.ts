@@ -125,6 +125,8 @@ export const CONV_CASES: ConvCase[] = [
   c('en', ['whats my heviest bench'], /85 kg/),
   c('en', ['what wieght did i use for pul ups last tiem'], /10 kg/),
   c('en', ['howmany sets of benchpress last time'], /3 sets/),
+  // Cyrillic thanks leaves the pain flow (\b is ASCII-only in JS regexes)
+  c('uk', ['болить спина', 'дякую'], /Звертайся/),
   // known weaknesses (fix → drop `gap`)
   c('en', ['log 3 sets of pullups'], /tap “Log”/, { forbid: /3–4 days a week/ }),
   c('uk', ['залогуй 3 підходи підтягувань'], /«Запис»/),
