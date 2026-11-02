@@ -6,8 +6,8 @@
  * can exercise it without Firebase.
  */
 
-/** The real Firebase Hosting origin of this project (FIREBASE.md); used when no custom origin is configured. */
-export const DEFAULT_APP_ORIGIN = 'https://spotter-64c3b.web.app';
+/** The production origin (myspotter.fit; FIREBASE.md); used when no custom origin is configured. */
+export const DEFAULT_APP_ORIGIN = 'https://myspotter.fit';
 
 /** Tokens are 32 hex characters on the server; the client route accepts the wider `[A-Za-z0-9_-]{1,64}`. */
 export const INVITE_TOKEN = /^[A-Za-z0-9_-]{1,64}$/;

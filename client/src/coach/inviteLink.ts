@@ -2,13 +2,13 @@
  * The ONE place that builds and reads invite links (`<origin>/#/invite/<token>`). The route is the real client route
  * (`client/routes.ts`: `#/invite/<token>`), so a pasted link lands on the invite pages with no redirect.
  *
- * The origin is config-driven: `VITE_APP_ORIGIN` (e.g. `https://spotter-64c3b.web.app` or a custom domain), else the
+ * The origin is config-driven: `VITE_APP_ORIGIN` (e.g. a custom domain), else the
  * Firebase hosting origin of the project, else the origin the app runs on. The server (`coachInvite`) should return
  * the same shape; the SERVER-SEC helper in `functions/` mirrors it. Nothing here touches the network.
  */
 
-/** Firebase hosting origin of the project (`<projectId>.web.app`); used when `VITE_APP_ORIGIN` is not set. */
-export const FIREBASE_HOSTING_ORIGIN = 'https://spotter-64c3b.web.app';
+/** Production origin (myspotter.fit); used when `VITE_APP_ORIGIN` is not set. */
+export const FIREBASE_HOSTING_ORIGIN = 'https://myspotter.fit';
 
 const TOKEN = /^[A-Za-z0-9_-]{1,64}$/;
 
