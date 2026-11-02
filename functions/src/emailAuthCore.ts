@@ -24,6 +24,12 @@ export interface AttachPorts {
   current(uid: string): Promise<AuthEmail>;
   /** Writes the email onto the account's Auth record, unverified. Throws `email-taken` if Auth knows it elsewhere. */
   setEmail(uid: string, email: string): Promise<void>;
+  /**
+   * Frees an address that Auth holds on a leftover record no Spotter account uses (no profile, no credentials, no index
+   * entry: e.g. an old Google sign-in that never became an account). Returns true when something was freed. Never touches
+   * a record that belongs to a real account.
+   */
+  freeOrphan?(email: string, forUid: string): Promise<boolean>;
 }
 
 /** trim + lower-case; `null` when it is not a plausible address (one `@`, a dotted domain, no spaces, ≤254). */
@@ -88,7 +94,14 @@ export async function attachEmail(
   });
   if (taken) return { ok: false, reason: 'taken' };
   try {
-    await ports.setEmail(uid, email);
+    try {
+      await ports.setEmail(uid, email);
+    } catch (e) {
+      // Auth knows the address on a record no account uses: free it once and try again.
+      if (!(e instanceof Error && e.message === 'email-taken' && ports.freeOrphan)) throw e;
+      if (!(await ports.freeOrphan(email, uid))) throw e;
+      await ports.setEmail(uid, email);
+    }
   } catch (e) {
     const reason = e instanceof Error && e.message === 'email-taken' ? 'taken' : null;
     await kv.del(ref(email)).catch(() => undefined);

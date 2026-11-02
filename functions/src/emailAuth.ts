@@ -22,6 +22,16 @@ import {
 
 const kv = firestoreKv(db);
 
+/** True when Auth's record for `email` has no Spotter account behind it (no profile, no credentials, no index entry). */
+async function isOrphanAuthUser(orphanUid: string, email: string): Promise<boolean> {
+  const [profile, cred, index] = await Promise.all([
+    db.collection('users').doc(orphanUid).get(),
+    db.collection('credentials').doc(orphanUid).get(),
+    kv.get(`emails/${encodeURIComponent(email)}`),
+  ]);
+  return !profile.exists && !cred.exists && !index;
+}
+
 const ports: AttachPorts = {
   async current(uid) {
     try {
@@ -32,6 +42,18 @@ const ports: AttachPorts = {
         return { email: null, verified: false };
       throw e;
     }
+  },
+  async freeOrphan(email, forUid) {
+    let rec;
+    try {
+      rec = await authAdmin.getUserByEmail(email);
+    } catch (e) {
+      if ((e as { code?: string }).code === 'auth/user-not-found') return true;
+      throw e;
+    }
+    if (rec.uid === forUid || !(await isOrphanAuthUser(rec.uid, email))) return false;
+    await authAdmin.deleteUser(rec.uid);
+    return true;
   },
   async setEmail(uid, email) {
     try {

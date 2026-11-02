@@ -106,6 +106,39 @@ describe('attachEmail', () => {
     expect(kv.paths()).toEqual([]);
   });
 
+  it('frees an address held by a leftover Auth record no account uses, then links it', async () => {
+    const kv = createMemoryKv();
+    const auth = fakeAuth();
+    const authKnows = new Set(['ada@example.com']);
+    const ports: AttachPorts = {
+      current: auth.ports.current,
+      async setEmail(uid, email) {
+        if (authKnows.has(email)) throw new Error('email-taken');
+        return auth.ports.setEmail(uid, email);
+      },
+      async freeOrphan(email) {
+        return authKnows.delete(email);
+      },
+    };
+    expect(await attachEmail(kv, ports, 'u1', 'ada@example.com', NOW)).toEqual({
+      ok: true,
+      email: 'ada@example.com',
+      verified: false,
+    });
+    expect(auth.users.get('u1')?.email).toBe('ada@example.com');
+  });
+
+  it('keeps refusing when the holder is a real account (nothing freed)', async () => {
+    const kv = createMemoryKv();
+    const { ports } = fakeAuth({}, ['ada@example.com']);
+    const real: AttachPorts = { ...ports, freeOrphan: async () => false };
+    expect(await attachEmail(kv, real, 'u1', 'ada@example.com', NOW)).toEqual({
+      ok: false,
+      reason: 'taken',
+    });
+    expect(kv.paths()).toEqual([]);
+  });
+
   it('changing the address frees the old entry and resets the confirmation', async () => {
     const kv = createMemoryKv();
     const { ports, users } = fakeAuth();
