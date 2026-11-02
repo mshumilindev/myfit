@@ -31,20 +31,20 @@ export function appOrigin(): string {
   return (here && cleanOrigin(here)) || FIREBASE_HOSTING_ORIGIN;
 }
 
-/** `<origin>/#/invite/<token>`; throws for a token the route would not accept. */
+/** `<origin>/invite/<token>`; throws for a token the route would not accept. */
 export function inviteLink(token: string, origin: string = appOrigin()): string {
   if (!TOKEN.test(token)) throw new Error('invalid-invite-token');
-  return `${origin.replace(/\/+$/, '')}/#/invite/${token}`;
+  return `${origin.replace(/\/+$/, '')}/invite/${token}`;
 }
 
-/** The token inside an invite link (or a bare `#/invite/<token>` hash), or null. */
+/** The token inside an invite link (legacy `/#/invite/<token>` or a bare `#/invite/<token>` hash), or null. */
 export function inviteTokenOf(link: string): string | null {
-  const m = /#\/invite\/([^/?#\s]+)/.exec(link);
+  const m = /\/invite\/([^/?#\s]+)/.exec(link);
   return m && TOKEN.test(m[1]) ? m[1] : null;
 }
 
-/** A TEAM invite (SPO-196) has its own route, never the coaching one. Same format as the server (origin, hash route team-invite, token). */
+/** A TEAM invite (SPO-196) has its own route, never the coaching one. Same format as the server (origin, route team-invite, token). */
 export function teamInviteLink(token: string, origin: string = appOrigin()): string {
   if (!TOKEN.test(token)) throw new Error('invalid-invite-token');
-  return `${origin.replace(/\/+$/, '')}/#/team-invite/${token}`;
+  return `${origin.replace(/\/+$/, '')}/team-invite/${token}`;
 }

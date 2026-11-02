@@ -68,7 +68,7 @@ const ports = (locale: unknown): ResetPorts => ({
     const r = await sendMail(
       inviteMail(asMailLocale(locale), email, {
         kind: 'selfreset',
-        link: `${normalizeOrigin(APP_ORIGIN.value())}/#/join/${token}`,
+        link: `${normalizeOrigin(APP_ORIGIN.value())}/join/${token}`,
         name: '',
         days: 0,
         hours: RESET_HOURS,

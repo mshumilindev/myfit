@@ -390,10 +390,9 @@ describe('vault key version, suspension and log (item 10)', () => {
 });
 
 describe('invite link helper (item 4)', () => {
-  it('builds <origin>/#/invite/<token> and round-trips, with a safe origin', () => {
-    expect(inviteUrl('https://x.example/', 'abc_DEF-1')).toBe(
-      'https://x.example/#/invite/abc_DEF-1',
-    );
+  it('builds <origin>/invite/<token> and round-trips, with a safe origin', () => {
+    expect(inviteUrl('https://x.example/', 'abc_DEF-1')).toBe('https://x.example/invite/abc_DEF-1');
+    expect(inviteTokenOf('https://x.example/#/invite/abc_DEF-1')).toBe('abc_DEF-1'); // legacy links still read
     expect(inviteTokenOf(inviteUrl('https://x.example', 'tok1'))).toBe('tok1');
     expect(normalizeOrigin('javascript:alert(1)')).toBe(normalizeOrigin(undefined));
     expect(normalizeOrigin('http://evil.example')).toBe(normalizeOrigin(undefined));

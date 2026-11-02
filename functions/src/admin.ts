@@ -167,7 +167,7 @@ async function mailInvite(
   const origin = normalizeOrigin(APP_ORIGIN.value());
   const msg = inviteMail(asMailLocale(locale), to, {
     kind: inv.kind,
-    link: `${origin}/#/join/${inv.token}`,
+    link: `${origin}/join/${inv.token}`,
     name: user.firstName ?? '',
     days: INVITE_DAYS,
   });

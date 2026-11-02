@@ -122,7 +122,7 @@ describe('invite -> preview -> accept (R-BE-REL-1..4)', () => {
       mode: 'app',
       request: { totals: 'full', sets: 'full' },
     });
-    expect(r.url).toBe(`https://myspotter.fit/#/invite/${r.inviteId}`);
+    expect(r.url).toBe(`https://myspotter.fit/invite/${r.inviteId}`);
     expect(inviteTokenOf(r.url)).toBe(r.inviteId);
     expect(r.expiresAt).toBe(T0 + 7 * DAY);
     expect(await kv.get('coaching/c1')).toBeNull();
