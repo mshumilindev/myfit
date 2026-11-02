@@ -86,7 +86,7 @@ openssl rand -base64 48 | firebase functions:secrets:set COACH_PEPPER
 openssl genpkey -algorithm ED25519 | firebase functions:secrets:set COACH_SIGNING_KEY
 firebase functions:secrets:access VAULT_MASTER >/dev/null   # має існувати (сховище)
 # 2. Параметри (functions/.env.spotter-64c3b), за потреби
-#    APP_ORIGIN=https://spotter-64c3b.web.app
+#    APP_ORIGIN=https://myspotter.fit
 #    COACH_ENFORCE_APPCHECK=false      # true лише коли клієнт має VITE_RECAPTCHA_ENTERPRISE_KEY і консоль показує перевірений трафік
 # 3. Збірка і розгортання правил, індексів і функцій
 (cd functions && npm install && npm run build)

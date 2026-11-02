@@ -9,7 +9,7 @@ This folder is self-contained (not an npm workspace). iOS can be added next to `
 
 ## What is in the shell
 
-- `capacitor.config.json`: `server.url` points at the deployed site (`https://spotter-64c3b.web.app`), HTTPS only,
+- `capacitor.config.json`: `server.url` points at the deployed site (`https://myspotter.fit`), HTTPS only,
   no cleartext, WebView debugging off, `errorPath: error.html` (offline page packaged in `www/`).
 - `android/app/src/main/java/com/spotter/app/MainActivity.java`: injects `window.spotterNative` at document start, only
   for the app origin: `{ bridgeVersion: 1, platform: 'android', getAppVersion() }`. Same additive contract as the

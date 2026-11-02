@@ -47,7 +47,7 @@ describe('Firestore team port', () => {
     expect(p.peek()).toBeNull();
     const d = await p.load();
     expect(calls[0][0]).toBe('teamRead');
-    expect(d.invites[0].url).toMatch(/#\/team-invite\/tok1$/);
+    expect(d.invites[0].url).toMatch(/\/team-invite\/tok1$/);
     expect(p.peek()).toBe(d);
   });
 

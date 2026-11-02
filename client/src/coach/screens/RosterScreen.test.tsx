@@ -197,7 +197,7 @@ describe('Roster: invite (roster-invite, -hybrid, -program)', () => {
     fireEvent.click(screen.getByRole('button', { name: r.ivSubmitApp }));
     expect(await screen.findByText(r.ivSentApp)).toBeTruthy();
     expect((screen.getByLabelText(r.ivLink) as HTMLInputElement).value).toMatch(
-      /#\/invite\/[A-Za-z0-9_-]+$/,
+      /\/invite\/[A-Za-z0-9_-]+$/,
     );
     expect(screen.getByText('Olena Marchenko')).toBeTruthy();
     expect(screen.getByText(r.roInviteLeft(7))).toBeTruthy();

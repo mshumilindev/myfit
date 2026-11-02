@@ -58,7 +58,7 @@ describe('Team screen', () => {
     const link = (await within(await screen.findByRole('dialog')).findByLabelText(
       tm.tmCopyLink,
     )) as HTMLInputElement;
-    expect(link.value).toContain('#/team-invite/');
+    expect(link.value).toContain('/team-invite/');
     fireEvent.click(screen.getByRole('button', { name: tm.tmDone }));
     await waitFor(() => expect(screen.getByText('new@example.com')).toBeTruthy());
   });

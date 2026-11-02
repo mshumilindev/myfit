@@ -1,13 +1,13 @@
 /**
- * The ONE invite link format: `<origin>/#/invite/<token>` (a hash route of the client, parsed by
- * `parseClientRoute`). The origin comes from configuration (`APP_ORIGIN`, a deploy-time parameter), never from a
+ * The ONE invite link format: `<origin>/invite/<token>` (a clean-URL route of the client, parsed by
+ * `parseClientRoute`; legacy `/#/invite/…` links keep working). The origin comes from configuration (`APP_ORIGIN`, a deploy-time parameter), never from a
  * hard-coded foreign domain. Pure and import-free so the unit tests and the client mirror
  * (`client/src/coach/inviteLink.ts`, parity asserted in tests/coach-server/inviteLink.test.ts)
  * can exercise it without Firebase.
  */
 
-/** The real Firebase Hosting origin of this project (FIREBASE.md); used when no custom origin is configured. */
-export const DEFAULT_APP_ORIGIN = 'https://spotter-64c3b.web.app';
+/** The production origin (myspotter.fit; FIREBASE.md); used when no custom origin is configured. */
+export const DEFAULT_APP_ORIGIN = 'https://myspotter.fit';
 
 /** Tokens are 32 hex characters on the server; the client route accepts the wider `[A-Za-z0-9_-]{1,64}`. */
 export const INVITE_TOKEN = /^[A-Za-z0-9_-]{1,64}$/;
@@ -27,17 +27,17 @@ export function normalizeOrigin(raw: unknown): string {
 
 export function inviteUrl(origin: unknown, token: string): string {
   if (!INVITE_TOKEN.test(token)) throw new Error('bad-invite-token');
-  return `${normalizeOrigin(origin)}/#/invite/${token}`;
+  return `${normalizeOrigin(origin)}/invite/${token}`;
 }
 
-/** The token of an invite link (hash route only, any origin the caller already trusts), else null. */
+/** The token of an invite link (clean or legacy hash route, any origin the caller already trusts), else null. */
 export function inviteTokenOf(link: string): string | null {
-  const m = /#\/invite\/([A-Za-z0-9_-]{1,64})\/?$/.exec(link);
+  const m = /\/invite\/([A-Za-z0-9_-]{1,64})\/?$/.exec(link);
   return m ? m[1] : null;
 }
 
-/** Team invites (SPO-196) have their OWN route so they never collide with a coaching invite: `<origin>/#/team-invite/<token>`. */
+/** Team invites (SPO-196) have their OWN route so they never collide with a coaching invite: `<origin>/team-invite/<token>`. */
 export function teamInviteUrl(origin: unknown, token: string): string {
   if (!INVITE_TOKEN.test(token)) throw new Error('bad-invite-token');
-  return `${normalizeOrigin(origin)}/#/team-invite/${token}`;
+  return `${normalizeOrigin(origin)}/team-invite/${token}`;
 }

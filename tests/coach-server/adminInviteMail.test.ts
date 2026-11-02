@@ -154,7 +154,7 @@ describe('adminCreateUser', () => {
     expect(r.mail).toEqual({ sent: true });
     expect(h.sent).toHaveLength(1);
     expect(h.sent[0].to).toBe('ann@example.com');
-    expect(h.sent[0].text).toContain(`https://app.example.com/#/join/${r.invite.token}`);
+    expect(h.sent[0].text).toContain(`https://app.example.com/join/${r.invite.token}`);
     expect(h.store.get('emails/ann%40example.com')).toMatchObject({ verifiedAt: null });
     const users = [...h.store.entries()].filter(([p]) => p.startsWith('users/id'));
     expect(users[0][1]).toMatchObject({ status: 'invited', firstName: '' });

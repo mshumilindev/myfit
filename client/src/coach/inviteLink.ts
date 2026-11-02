@@ -2,13 +2,13 @@
  * The ONE place that builds and reads invite links (`<origin>/#/invite/<token>`). The route is the real client route
  * (`client/routes.ts`: `#/invite/<token>`), so a pasted link lands on the invite pages with no redirect.
  *
- * The origin is config-driven: `VITE_APP_ORIGIN` (e.g. `https://spotter-64c3b.web.app` or a custom domain), else the
+ * The origin is config-driven: `VITE_APP_ORIGIN` (e.g. a custom domain), else the
  * Firebase hosting origin of the project, else the origin the app runs on. The server (`coachInvite`) should return
  * the same shape; the SERVER-SEC helper in `functions/` mirrors it. Nothing here touches the network.
  */
 
-/** Firebase hosting origin of the project (`<projectId>.web.app`); used when `VITE_APP_ORIGIN` is not set. */
-export const FIREBASE_HOSTING_ORIGIN = 'https://spotter-64c3b.web.app';
+/** Production origin (myspotter.fit); used when `VITE_APP_ORIGIN` is not set. */
+export const FIREBASE_HOSTING_ORIGIN = 'https://myspotter.fit';
 
 const TOKEN = /^[A-Za-z0-9_-]{1,64}$/;
 
@@ -31,20 +31,20 @@ export function appOrigin(): string {
   return (here && cleanOrigin(here)) || FIREBASE_HOSTING_ORIGIN;
 }
 
-/** `<origin>/#/invite/<token>`; throws for a token the route would not accept. */
+/** `<origin>/invite/<token>`; throws for a token the route would not accept. */
 export function inviteLink(token: string, origin: string = appOrigin()): string {
   if (!TOKEN.test(token)) throw new Error('invalid-invite-token');
-  return `${origin.replace(/\/+$/, '')}/#/invite/${token}`;
+  return `${origin.replace(/\/+$/, '')}/invite/${token}`;
 }
 
-/** The token inside an invite link (or a bare `#/invite/<token>` hash), or null. */
+/** The token inside an invite link (legacy `/#/invite/<token>` or a bare `#/invite/<token>` hash), or null. */
 export function inviteTokenOf(link: string): string | null {
-  const m = /#\/invite\/([^/?#\s]+)/.exec(link);
+  const m = /\/invite\/([^/?#\s]+)/.exec(link);
   return m && TOKEN.test(m[1]) ? m[1] : null;
 }
 
-/** A TEAM invite (SPO-196) has its own route, never the coaching one. Same format as the server (origin, hash route team-invite, token). */
+/** A TEAM invite (SPO-196) has its own route, never the coaching one. Same format as the server (origin, route team-invite, token). */
 export function teamInviteLink(token: string, origin: string = appOrigin()): string {
   if (!TOKEN.test(token)) throw new Error('invalid-invite-token');
-  return `${origin.replace(/\/+$/, '')}/#/team-invite/${token}`;
+  return `${origin.replace(/\/+$/, '')}/team-invite/${token}`;
 }
