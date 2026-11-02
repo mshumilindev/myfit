@@ -6,6 +6,7 @@
  */
 import type { DataMemo } from './dataQuestion';
 import { dataTurn } from './dataTurn';
+import { leavesFlow } from './flowExit';
 import { remember, type Said } from './metaTurn';
 import { setTypeOf } from '../store';
 import {
@@ -229,7 +230,6 @@ export interface Convo {
   pair?: [string, string];
   /** The last question about one lift's log (metric and which) — "and squat?", "how about reps" keep the rest. */
   dq?: DataMemo;
-  /** The last exchanges, newest first — "repeat that", "what did I just ask". */
   said?: Said[];
   /** Earlier topics, newest first — "and for squat?" can reach back past a detour. */
   prev?: { intent: string; exercise?: string | null; muscle?: MuscleGroup | null; q?: string }[];
@@ -792,8 +792,7 @@ function answerOne(
     },
   });
   if (convo.flow) {
-    // Short replies and tapped options belong to the flow; a new long
-    // question on another subject ends it.
+    // Short replies and tapped options belong to the flow; a new long question ends it.
     const belongs =
       words.length <= (convo.flow.kind === 'pain' ? 12 : 7) ||
       (convo.flow.kind === 'find' && !painStart(question)) ||
@@ -2112,6 +2111,7 @@ function answerDraft(question0: string, c: AskCtx, convo: Convo = {}): Draft | n
   const rest = np ? question0.replace(np[0], ' ').trim() : '';
   const question = np && tokens(rest).length >= 2 ? rest : question0;
   const turn = (convo.turn ?? 0) + 1;
+  if (convo.flow && leavesFlow(question, c, L, parse)) convo = { ...convo, flow: undefined };
   if (!convo.flow && CONTINUER_RE.test(question)) {
     if (convo.intent && convo.intent !== 'did_you_mean')
       return answerDraft(L('tell me more', 'розкажи більше'), c, convo);
