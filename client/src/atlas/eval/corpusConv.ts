@@ -119,6 +119,13 @@ export const CONV_CASES: ConvCase[] = [
   c('et', ['mis raskusega ma viimati kükke tegin'], /110 kg/),
   c('et', ['mitu kordust ma viimati kükke tegin'], /6, 6, 6/),
   c('en', ['how much did I weigh a month ago'], /kg/),
+  // typos in the words a log question hangs on (SPO-35 P2)
+  c('en', ['wat wieght did i use for pullps lsat time'], /10 kg/),
+  c('en', ['hw many reps of sqaut did i do last time'], /6, 6, 6/),
+  c('en', ['whats my heviest bench'], /85 kg/),
+  c('en', ['what wieght did i use for pul ups last tiem'], /10 kg/),
+  c('en', ['howmany sets of benchpress last time'], /3 sets/),
   // known weaknesses (fix → drop `gap`)
-  c('en', ['log 3 sets of pullups'], /Log|Запис|set/i, { forbid: /3–4 days a week/, gap: true }),
+  c('en', ['log 3 sets of pullups'], /tap “Log”/, { forbid: /3–4 days a week/ }),
+  c('uk', ['залогуй 3 підходи підтягувань'], /«Запис»/),
 ];
