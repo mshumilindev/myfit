@@ -34,7 +34,7 @@ export function CallMini({
         onClick={onExpand}
         aria-label={`${expandLabel}: ${name}`}
       >
-        <CallTile name={name} photo={photo} video={video} />
+        <CallTile name={name} photo={photo} video={video} small />
         <span className="uicall-mini-time">
           <Icon name="arrows-out-simple" />
           {time}

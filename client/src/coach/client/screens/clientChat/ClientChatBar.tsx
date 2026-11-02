@@ -1,4 +1,5 @@
 import { BackButton } from '../../../../components/ui/BackButton';
+import { CallEntry } from '../../../calls/CallEntry';
 import { IconButton } from '../../../../components/ui/Button';
 import type { ChatStrings } from '../../../../i18n/coachChat';
 import type { ClientStrings } from '../../../../i18n/coachClient';
@@ -42,6 +43,7 @@ export function ClientChatBar({
         {/* "Trainer · seen 12:40", or just "Trainer" (never "Trainer · Trainer") while there is no last-seen time */}
         <small>{lastSeenAt ? cc.chRole(cc.chSeen(clock(lastSeenAt))) : cc.ccTrainer}</small>
       </div>
+      <CallEntry compact />
       <IconButton icon="eye" label={cc.chSeesBtn(first)} onClick={onOpenSharing} />
       <span className="cc-notebtn">
         <IconButton

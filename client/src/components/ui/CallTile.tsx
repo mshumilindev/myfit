@@ -14,6 +14,8 @@ export interface CallTileProps {
   micOff?: boolean;
   /** Your own preview: small, mirrored, floats over the other person. */
   self?: boolean;
+  /** The floating mini window: a small avatar so it fits the tile. */
+  small?: boolean;
   /** Corner chip over the picture (connection quality). */
   corner?: ReactNode;
   className?: string;
@@ -23,7 +25,16 @@ export interface CallTileProps {
  * One person in a call (kit group `Call`): a live picture, or the avatar on a glass plate while the camera is off,
  * with the name plate (and a crossed mic) at the foot. The remote tile fills the stage; your own is the small `self` one.
  */
-export function CallTile({ name, photo, video, micOff, self, corner, className }: CallTileProps) {
+export function CallTile({
+  name,
+  photo,
+  video,
+  micOff,
+  self,
+  small,
+  corner,
+  className,
+}: CallTileProps) {
   const cls = [
     'uicall-tile',
     self ? 'uicall-tile--self' : '',
@@ -38,7 +49,7 @@ export function CallTile({ name, photo, video, micOff, self, corner, className }
         <div className="uicall-media">{video}</div>
       ) : (
         <div className="uicall-ph">
-          <Avatar name={name} src={photo} size={self ? 56 : 112} />
+          <Avatar name={name} src={photo} size={self || small ? 56 : 112} />
         </div>
       )}
       {corner && <div className="uicall-corner">{corner}</div>}

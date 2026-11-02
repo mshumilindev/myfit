@@ -175,7 +175,7 @@
   flex-direction: row;
   justify-content: flex-start;
   gap: var(--s-12);
-  width: calc(var(--s-40) * 10);
+  width: min(calc(var(--s-40) * 10), calc(100% - var(--s-32)));
   padding: var(--s-12) var(--s-16);
   text-align: left;
   border-radius: var(--radius-xl);
@@ -406,4 +406,27 @@
     width: calc(var(--s-40) * 5);
     height: calc(var(--s-40) * 3.5);
   }
+}
+
+/* ---- end-of-call and permission states ---- */
+
+.uicall-end {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-24);
+}
+.uicall-end-act {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s-12);
+}
+
+.uicall-end .uiempty-i {
+  font-size: var(--fs-28);
 }

@@ -1,4 +1,5 @@
 import { useSafeT } from '../../../i18n/coachSafe';
+import { CallLogRows } from '../../calls/CallEntry';
 import { KeyChangeBanner } from '../../security/KeyChangeBanner';
 import { SecurityCodeDialog } from '../../security/SecurityCodeDialog';
 import { useSecurity } from '../../security/useSecurity';
@@ -530,7 +531,7 @@ export function ClientChat(p: ClientChatProps) {
           first={first}
           showLog={rows.length > 0}
           logLabel={ch.chThreadLabel(trainer.name)}
-          rows={rows}
+          rows={[...rows, <CallLogRows key="call-log" />]}
           toast={toast}
           flash={flash}
           onUndo={() => store.undo()}

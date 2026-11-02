@@ -1,4 +1,5 @@
 import { useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { CallEntry, CallLogRows } from '../calls/CallEntry';
 import { BackButton } from '../../components/ui/BackButton';
 import { IconButton } from '../../components/ui/Button';
 import { ChatShell } from '../../components/ui/ChatShell';
@@ -286,6 +287,7 @@ export function ThreadView({
               {client && <small>{client.program}</small>}
             </div>
           </div>
+          <CallEntry compact={!desktop} />
           {x.barActions}
           <IconButton
             icon="dots-three"
@@ -410,7 +412,7 @@ export function ThreadView({
         paging={{ hasMore, loadingMore, onEarlier: earlier }}
         showLog={messages.length > 0}
         logLabel={ch.chThreadLabel(name)}
-        rows={rows}
+        rows={[...rows, <CallLogRows key="call-log" />]}
         toast={toast}
         flash={flash}
         onUndo={() => store.undo()}
