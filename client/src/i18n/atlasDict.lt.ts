@@ -5854,4 +5854,13 @@ export const DICT: Record<string, string> = {
   'Your first question: “{1}”': 'Tavo pirmasis klausimas: „{1}“',
   'And “{1}” — say it another way and I’ll take it.': 'O „{1}“ – pasakyk kitaip, ir atsakysiu.',
   '{1} {2} d., {3}.': '{1} {2} d., {3}.',
+  '{1}, first logged {2} ({3}-{4}-{5}): {6} {7}× {8} × {9}.':
+    '{1}, pirmas įrašas {2} ({3}-{4}-{5}): {6} {7}× {8} × {9}.',
+  'Your last day without a session was {1} ({2}-{3}-{4}).':
+    'Paskutinė diena be treniruotės buvo {1} ({2}-{3}-{4}).',
+  'Your log starts {1}-{2}-{3} {4}({5}): {6} sessions, about {7} a week.':
+    'Tavo žurnalas prasideda {1}-{2}-{3} {4}({5}): treniruočių: {6}, vidutiniškai apie {7} per savaitę.',
+  'Last session: {1} ({2}-{3}-{4}).': 'Paskutinė treniruotė: {1} ({2}-{3}-{4}).',
+  'Yes — {1}, this month: {2} sessions, {3} sets.':
+    'Taip — {1}, šį mėnesį: treniruočių: {2}, serijų: {3}.',
 };

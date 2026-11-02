@@ -44,7 +44,7 @@ const LOG_CMD_RE =
   /^\s*(please\s+)?(log|record|add|залогуй\p{L}*|запиши|додай|zapisz|dodaj)\s+\d+\s+(sets?|підход\p{L}*|сет\p{L}*|serii?)/iu;
 
 const asLookup = <T extends { metric: unknown; which: string }>(q: T | null) =>
-  q && (q.metric || q.which === 'best') ? q : null;
+  q && (q.metric || q.which === 'best' || q.which === 'first') ? q : null;
 
 export function dataTurn<C extends DConvo>(
   question: string,

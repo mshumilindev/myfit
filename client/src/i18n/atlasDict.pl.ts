@@ -5826,4 +5826,13 @@ export const DICT: Record<string, string> = {
   'You asked: “{1}”': 'Zapytałeś: „{1}”',
   'Your first question: “{1}”': 'Twoje pierwsze pytanie: „{1}”',
   'And “{1}” — say it another way and I’ll take it.': 'A „{1}” — powiedz to inaczej, a odpowiem.',
+  '{1}, first logged {2} ({3}.{4}): {5} × {6} × {7}.':
+    '{1}, pierwszy wpis {2} ({3}.{4}): {5} × {6} × {7}.',
+  'Your last day without a session was {1} ({2}.{3}).':
+    'Ostatni dzień bez treningu był {1} ({2}.{3}).',
+  'Your log starts {1}.{2} ({3}): {4} sessions, about {5} a week.':
+    'Twój dziennik zaczyna się {1}.{2} ({3}): treningów: {4}, średnio około {5} tygodniowo.',
+  'Last session: {1} ({2}.{3}).': 'Ostatni trening: {1} ({2}.{3}).',
+  'Yes — {1}, this month: {2} sessions, {3} sets.':
+    'Tak — {1}, w tym miesiącu: treningów: {2}, serii: {3}.',
 };

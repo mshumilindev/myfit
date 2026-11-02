@@ -143,6 +143,15 @@ export const CONV_CASES: ConvCase[] = [
   c('en', ['is 3 sets of 10 enough', 'what is progressive overload'], /Add weight/, {
     forbid: /Which lift/,
   }),
+  // P10: first/oldest lookups and calendar questions answered from the log
+  c('en', ['what was my first ever bench weight'], /first logged.*83 kg/),
+  c('uk', ['коли я вперше жав лежачи'], /вперше в журналі/),
+  c('en', ['when did i start benching'], /first logged/),
+  c('en', ['when was my last rest day'], /without a session/, { forbid: /walk, easy bike/ }),
+  c('en', ['how long have i been training'], /Your log starts/),
+  c('uk', ['відколи я тренуюся'], /Журнал починається/),
+  c('en', ['how many days since my last workout'], /Last session: 2 days ago/),
+  c('en', ['did i train legs this month'], /this month: \d+ sets/),
   // known weaknesses (fix → drop `gap`)
   c('en', ['log 3 sets of pullups'], /tap “Log”/, { forbid: /3–4 days a week/ }),
   c('uk', ['залогуй 3 підходи підтягувань'], /«Запис»/),

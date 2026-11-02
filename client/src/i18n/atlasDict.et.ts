@@ -5799,4 +5799,13 @@ export const DICT: Record<string, string> = {
   'You asked: “{1}”': 'Sa küsisid: „{1}“',
   'Your first question: “{1}”': 'Sinu esimene küsimus: „{1}“',
   'And “{1}” — say it another way and I’ll take it.': 'Aga „{1}“ – ütle teisiti, siis vastan.',
+  '{1}, first logged {2} ({3}.{4}): {5} × {6} × {7}.':
+    '{1}, esimene kanne {2} ({3}.{4}): {5} × {6} × {7}.',
+  'Your last day without a session was {1} ({2}.{3}).':
+    'Viimane treeninguta päev oli {1} ({2}.{3}).',
+  'Your log starts {1}.{2} ({3}): {4} sessions, about {5} a week.':
+    'Sinu logi algab {1}.{2} ({3}): treeninguid: {4}, keskmiselt umbes {5} nädalas.',
+  'Last session: {1} ({2}.{3}).': 'Viimane treening: {1} ({2}.{3}).',
+  'Yes — {1}, this month: {2} sessions, {3} sets.':
+    'Jah — {1}, sel kuul: treeninguid: {2}, seeriaid: {3}.',
 };
