@@ -42,7 +42,7 @@ describe('team store', () => {
       error: 'exists',
     });
     const r = await s.invite('new@example.com', 'trainer');
-    expect(r.ok && r.url).toContain('#/team-invite/');
+    expect(r.ok && r.url).toContain('/team-invite/');
     expect(s.getState().data?.invites.map((i) => i.email)).toContain('new@example.com');
     expect(s.getState().data?.invites.find((i) => i.email === 'new@example.com')?.role).toBe(
       'trainer',

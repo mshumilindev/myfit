@@ -156,7 +156,7 @@ describe('sending a new invite', () => {
     expect(create).toHaveBeenCalledTimes(1);
     expect(create.mock.calls[0][0]).toMatchObject({ name: 'Olena Marchenko', mode: 'app' });
     fireEvent.click(screen.getByRole('button', { name: sf.invCopyLink }));
-    expect(writeText).toHaveBeenCalledWith(expect.stringMatching(/#\/invite\/[A-Za-z0-9_-]+$/));
+    expect(writeText).toHaveBeenCalledWith(expect.stringMatching(/\/invite\/[A-Za-z0-9_-]+$/));
   });
 
   it('when the new invite cannot be created it says so, and Cancel on the note dismisses it', async () => {

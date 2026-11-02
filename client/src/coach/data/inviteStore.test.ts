@@ -16,7 +16,7 @@ describe('local invite port', () => {
       request: defaultRequest('app'),
     });
     expect(a.name).toBe('Olena Marchenko');
-    expect(a.url).toMatch(/\/#\/invite\/[0-9a-z]{20}$/);
+    expect(a.url).toMatch(/\/invite\/[0-9a-z]{20}$/);
     expect(a.expiresAt).toBe(now + 7 * 86_400_000);
     const p = await port.create({
       name: 'Dmytro K',
