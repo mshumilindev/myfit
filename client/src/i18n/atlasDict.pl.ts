@@ -5835,4 +5835,24 @@ export const DICT: Record<string, string> = {
   'Last session: {1} ({2}.{3}).': 'Ostatni trening: {1} ({2}.{3}).',
   'Yes — {1}, this month: {2} sessions, {3} sets.':
     'Tak — {1}, w tym miesiącu: treningów: {2}, serii: {3}.',
+  'A mild overuse ache often settles within a couple of weeks once you stop provoking it; if it is not clearly better after {1} weeks, or it gets worse, get it looked at.':
+    'Lekki ból przeciążeniowy często ustępuje w ciągu kilku tygodni, jeśli przestaniesz go drażnić; jeśli po {1} tygodniach nie jest wyraźnie lepiej albo robi się gorzej, pokaż go specjaliście.',
+  'About {1} minutes each, as the plan is built.':
+    'Około {1} minut każdy, tak zbudowany jest plan.',
+  'Day {1}: {2}, {3}.': 'Dzień {1}: {2}, {3}.',
+  'Day {1}: {2}.': 'Dzień {1}: {2}.',
+  'For more, ask for a longer session (“make it {1} minutes”) or name the exercise you want.':
+    'Chcesz więcej — poproś o dłuższy trening („zrób na {1} minut”) albo nazwij ćwiczenie.',
+  'For shorter or longer, say “make it {1} minutes” and I’ll rebuild it.':
+    'Chcesz krócej lub dłużej — powiedz „zrób na {1} minut”, a przebuduję plan.',
+  'I can’t give a date — it depends on what it is, and I can’t examine you.':
+    'Nie podam terminu — to zależy od tego, co dokładnie boli, a nie mogę cię zbadać.',
+  'I’m not a doctor, so take this as a rule of thumb: see one (or a physio) if the pain is sharp, there is swelling, numbness or tingling, it wakes you at night, or it has not eased after {1}–{2} weeks of leaving the trigger out.':
+    'Nie jestem lekarzem, więc potraktuj to jako zasadę ogólną: do lekarza (lub fizjoterapeuty), gdy ból jest ostry, jest obrzęk, drętwienie lub mrowienie, budzi w nocy albo nie słabnie po {1}–{2} tygodniach bez wyzwalacza.',
+  'Until then, skip what sets it off and train around it.':
+    'Do tego czasu odpuść to, co go wywołuje, i trenuj dookoła.',
+  'Yes, it is in the plan.': 'Tak, to jest w planie.',
+  'That is not in this plan yet.': 'Tego jeszcze nie ma w tym planie.',
+  'Tell me what to change — for example “make it {1} minutes” gives each day extra slots — and I’ll rebuild it.':
+    'Powiedz, co zmienić — na przykład „zrób na {1} minut” daje każdemu dniowi dodatkowe miejsca — a przebuduję plan.',
 };

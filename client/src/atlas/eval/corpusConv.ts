@@ -152,6 +152,18 @@ export const CONV_CASES: ConvCase[] = [
   c('uk', ['відколи я тренуюся'], /Журнал починається/),
   c('en', ['how many days since my last workout'], /Last session: 2 days ago/),
   c('en', ['did i train legs this month'], /this month: \d+ sets/),
+  // P11: follow-ups after a plan and after a pain check-in
+  c('en', ['make me a 4 day plan', 'what about legs'], /Yes, it is in the plan/, {
+    forbid: /balanced, strong/,
+  }),
+  c('en', ['make me a 4 day plan', 'can you add arms'], /Yes, it is in the plan/),
+  c('en', ['make me a 3 day plan', 'how long will each session be'], /About 60 minutes each/, {
+    forbid: /Control the lowering/,
+  }),
+  c('uk', ['склади план на 4 дні', 'а що з руками'], /Так, воно є в плані/),
+  c('en', ['my elbow hurts when i bench', 'should i see a doctor'], /not a doctor/),
+  c('en', ['my elbow hurts when i bench', 'how long until it heals'], /can’t give a date/),
+  c('uk', ['болить лікоть', 'чи варто йти до лікаря'], /Я не лікар/),
   // known weaknesses (fix → drop `gap`)
   c('en', ['log 3 sets of pullups'], /tap “Log”/, { forbid: /3–4 days a week/ }),
   c('uk', ['залогуй 3 підходи підтягувань'], /«Запис»/),

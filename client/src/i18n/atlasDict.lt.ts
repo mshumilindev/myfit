@@ -5863,4 +5863,24 @@ export const DICT: Record<string, string> = {
   'Last session: {1} ({2}-{3}-{4}).': 'Paskutinė treniruotė: {1} ({2}-{3}-{4}).',
   'Yes — {1}, this month: {2} sessions, {3} sets.':
     'Taip — {1}, šį mėnesį: treniruočių: {2}, serijų: {3}.',
+  'A mild overuse ache often settles within a couple of weeks once you stop provoking it; if it is not clearly better after {1} weeks, or it gets worse, get it looked at.':
+    'Lengvas pervargimo skausmas dažnai aprimsta per kelias savaites, jei jo nebedirgini; jei po {1} savaičių aiškiai nelengviau arba tampa blogiau, parodyk specialistui.',
+  'About {1} minutes each, as the plan is built.':
+    'Apie {1} min. kiekviena, taip sudarytas planas.',
+  'Day {1}: {2}, {3}.': 'Diena {1}: {2}, {3}.',
+  'Day {1}: {2}.': 'Diena {1}: {2}.',
+  'For more, ask for a longer session (“make it {1} minutes”) or name the exercise you want.':
+    'Nori daugiau — paprašyk ilgesnės treniruotės („padaryk {1} min.“) arba įvardink pratimą.',
+  'For shorter or longer, say “make it {1} minutes” and I’ll rebuild it.':
+    'Nori trumpiau ar ilgiau — pasakyk „padaryk {1} min.“, ir perdarysiu planą.',
+  'I can’t give a date — it depends on what it is, and I can’t examine you.':
+    'Termino pasakyti negaliu — tai priklauso nuo to, kas skauda, o ištirti tavęs negaliu.',
+  'I’m not a doctor, so take this as a rule of thumb: see one (or a physio) if the pain is sharp, there is swelling, numbness or tingling, it wakes you at night, or it has not eased after {1}–{2} weeks of leaving the trigger out.':
+    'Aš ne gydytojas, tad imk tai kaip orientyrą: pas gydytoją (ar kineziterapeutą), jei skausmas aštrus, yra patinimas, tirpimas ar dilgčiojimas, žadina naktį arba nesumažėja per {1}–{2} savaites be dirgiklio.',
+  'Until then, skip what sets it off and train around it.':
+    'Iki tol venk to, kas jį sukelia, ir treniruokis aplink.',
+  'Yes, it is in the plan.': 'Taip, tai yra plane.',
+  'That is not in this plan yet.': 'Šito plane dar nėra.',
+  'Tell me what to change — for example “make it {1} minutes” gives each day extra slots — and I’ll rebuild it.':
+    'Pasakyk, ką keisti — pavyzdžiui, „padaryk {1} min.“ suteikia kiekvienai dienai papildomų vietų — ir perdarysiu planą.',
 };

@@ -5808,4 +5808,24 @@ export const DICT: Record<string, string> = {
   'Last session: {1} ({2}.{3}).': 'Viimane treening: {1} ({2}.{3}).',
   'Yes — {1}, this month: {2} sessions, {3} sets.':
     'Jah — {1}, sel kuul: treeninguid: {2}, seeriaid: {3}.',
+  'A mild overuse ache often settles within a couple of weeks once you stop provoking it; if it is not clearly better after {1} weeks, or it gets worse, get it looked at.':
+    'Kerge ülekoormusvalu taandub sageli paari nädalaga, kui seda enam ei ärrita; kui {1} nädala pärast pole selgelt parem või läheb hullemaks, näita seda spetsialistile.',
+  'About {1} minutes each, as the plan is built.':
+    'Umbes {1} minutit iga kord, nii on plaan ehitatud.',
+  'Day {1}: {2}, {3}.': 'Päev {1}: {2}, {3}.',
+  'Day {1}: {2}.': 'Päev {1}: {2}.',
+  'For more, ask for a longer session (“make it {1} minutes”) or name the exercise you want.':
+    'Tahad rohkem — palu pikemat treeningut („tee {1} minutit“) või nimeta harjutus.',
+  'For shorter or longer, say “make it {1} minutes” and I’ll rebuild it.':
+    'Tahad lühemat või pikemat — ütle „tee {1} minutit“ ja ehitan plaani ümber.',
+  'I can’t give a date — it depends on what it is, and I can’t examine you.':
+    'Kuupäeva ma ei anna — see sõltub sellest, mis täpselt valutab, ja ma ei saa sind läbi vaadata.',
+  'I’m not a doctor, so take this as a rule of thumb: see one (or a physio) if the pain is sharp, there is swelling, numbness or tingling, it wakes you at night, or it has not eased after {1}–{2} weeks of leaving the trigger out.':
+    'Ma ei ole arst, nii et võta seda rusikareeglina: arsti (või füsioterapeudi) juurde, kui valu on terav, on turse, tuimus või kipitus, see äratab öösel või ei vaibu {1}–{2} nädalaga ilma vallandajata.',
+  'Until then, skip what sets it off and train around it.':
+    'Seni jäta välja see, mis seda tekitab, ja treeni selle ümber.',
+  'Yes, it is in the plan.': 'Jah, see on plaanis.',
+  'That is not in this plan yet.': 'Seda pole selles plaanis veel.',
+  'Tell me what to change — for example “make it {1} minutes” gives each day extra slots — and I’ll rebuild it.':
+    'Ütle, mida muuta — näiteks „tee {1} minutit“ annab igale päevale lisakohti — ja ehitan plaani ümber.',
 };

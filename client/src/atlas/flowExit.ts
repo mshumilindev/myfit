@@ -6,6 +6,7 @@
  */
 import { readDataQuestion } from './dataQuestion';
 import type { AskCtx, Parsed, Tr } from './intentKit';
+import { painFollowUp } from './followTurn';
 import { metaTurn } from './metaTurn';
 
 const THANKS_RE =
@@ -25,6 +26,7 @@ export function leavesFlow(
 ): boolean {
   return (
     THANKS_RE.test(question) ||
+    painFollowUp(question) ||
     SWITCH_RE.test(question) ||
     SWITCH_X_RE.test(question) ||
     !!metaTurn(question, {}, 0, L) ||
