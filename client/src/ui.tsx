@@ -128,6 +128,19 @@ import { MagnifyingGlass } from '@phosphor-icons/react/MagnifyingGlass';
 import { MapPin } from '@phosphor-icons/react/MapPin';
 import { MapPinLine } from '@phosphor-icons/react/MapPinLine';
 import { PencilSimple } from '@phosphor-icons/react/PencilSimple';
+import { VideoCamera } from '@phosphor-icons/react/VideoCamera';
+import { VideoCameraSlash } from '@phosphor-icons/react/VideoCameraSlash';
+import { MicrophoneSlash } from '@phosphor-icons/react/MicrophoneSlash';
+import { PhoneDisconnect } from '@phosphor-icons/react/PhoneDisconnect';
+import { PhoneCall } from '@phosphor-icons/react/PhoneCall';
+import { PhoneIncoming } from '@phosphor-icons/react/PhoneIncoming';
+import { PhoneX } from '@phosphor-icons/react/PhoneX';
+import { CameraRotate } from '@phosphor-icons/react/CameraRotate';
+import { SpeakerHigh } from '@phosphor-icons/react/SpeakerHigh';
+import { WifiSlash } from '@phosphor-icons/react/WifiSlash';
+import { CellSignalLow } from '@phosphor-icons/react/CellSignalLow';
+import { ArrowsInSimple } from '@phosphor-icons/react/ArrowsInSimple';
+import { ArrowsOutSimple } from '@phosphor-icons/react/ArrowsOutSimple';
 import { Phone } from '@phosphor-icons/react/Phone';
 import { Play } from '@phosphor-icons/react/Play';
 import { Printer } from '@phosphor-icons/react/Printer';
@@ -330,6 +343,19 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'map-pin': MapPin,
   'map-pin-slash': MapPinLine,
   'pencil-simple': PencilSimple,
+  'video-camera': VideoCamera,
+  'video-camera-slash': VideoCameraSlash,
+  'microphone-slash': MicrophoneSlash,
+  'phone-disconnect': PhoneDisconnect,
+  'phone-call': PhoneCall,
+  'phone-incoming': PhoneIncoming,
+  'phone-x': PhoneX,
+  'camera-rotate': CameraRotate,
+  'speaker-high': SpeakerHigh,
+  'wifi-slash': WifiSlash,
+  'cell-signal-low': CellSignalLow,
+  'arrows-in-simple': ArrowsInSimple,
+  'arrows-out-simple': ArrowsOutSimple,
   phone: Phone,
   play: Play,
   stop: Stop,
