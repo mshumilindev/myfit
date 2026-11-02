@@ -6,7 +6,7 @@
  */
 import type { DataMemo } from './dataQuestion';
 import { dataTurn } from './dataTurn';
-import { leavesFlow } from './flowExit';
+import { freshQuestion, leavesFlow } from './flowExit';
 import { remember, type Said } from './metaTurn';
 import { setTypeOf } from '../store';
 import {
@@ -989,10 +989,10 @@ function answerOne(
       exercise: convo.exercise ?? base.exercise,
       muscle: convo.muscle ?? base.muscle,
     };
-    // A pending "which lift?" answered with just the lift/muscle — or
-    // "and deadlift?" carrying the topic (and its time window) over.
+    // A pending "which lift?" answered with just the lift/muscle, or "and deadlift?" carrying the topic over.
     const entityOnly =
       (p.exercise || p.muscle) &&
+      !(convo.pending && freshQuestion(question)) &&
       (convo.pending || groupMatches(words, phrase, FOLLOW_LEAD) || words.length <= 3);
     // Answering "which lift?" keeps the rest of the original question (numbers, window).
     const carried: Parsed = convo.pending

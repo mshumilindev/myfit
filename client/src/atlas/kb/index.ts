@@ -36,6 +36,7 @@ import { MORE_TOPICS_EX2A } from './topicsMoreEx2';
 import { MORE_TOPICS_EX2B } from './topicsMoreEx3';
 import { MORE_TOPICS_EX3 } from './topicsMoreFix';
 import { APP_MORE_EX, KB_APP_EXTRA } from './appTipsEx';
+import { P9_EX } from '../appP9';
 import type { Kb } from './types';
 
 const base: Kb = { ...KB_A, ...KB_B, ...KB_C, ...KB_D, ...KB_E };
@@ -104,7 +105,7 @@ export const KB: Kb = Object.fromEntries([
     },
   ]),
   // A hundred more topics and more app help — phrasings only (answers in topicsMore*.ts, appTips.ts).
-  ...Object.entries({ ...MORE_TOPICS_EX, ...APP_MORE_EX }).map(([id, e]) => [
+  ...Object.entries({ ...MORE_TOPICS_EX, ...APP_MORE_EX, ...P9_EX }).map(([id, e]) => [
     id,
     { ex: [...e.ex, ...(more[id]?.ex ?? [])], exUk: [...e.exUk, ...(more[id]?.exUk ?? [])] },
   ]),
