@@ -33,6 +33,7 @@ import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
 import { SignOutDialog } from '../components/SignOutDialog';
 import { SessionsRow } from '../components/SessionsRow';
+import { CallSettingsRow } from '../calls/CallSettingsRow';
 import { Icon, LanguageSelector, Sheet, useExerciseName } from '../ui';
 import { UserAvatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
@@ -631,6 +632,7 @@ export function ProfileView({
                   </Select>
                 </div>
                 <NotificationSettings />
+                <CallSettingsRow />
                 <ListRow
                   icon={<Icon name="robot" />}
                   label={`${t.atlasName}${coach.enabled ? ` · ${t.atlasTemper[temperIndex(coach.temper)]}` : ''}`}

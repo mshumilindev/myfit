@@ -95,6 +95,16 @@ export const callsPl: typeof callsEn = {
   callPreNoDevices: 'Nie znaleziono urządzeń',
   callPreStart: 'Zacznij',
 
+  // Call settings (SPO-446)
+  callSetRow: 'Połączenia',
+  callSetRowSub: 'Kamera, urządzenia, łączenie',
+  callSetTitle: 'Ustawienia połączeń',
+  callSetCamOn: 'Kamera włączona na start',
+  callSetDirect: 'Połączenie bezpośrednie',
+  callSetDirectSub:
+    'Wyłączone: połączenia idą przez przekaźnik. Włączone: Twoje urządzenie i urządzenie rozmówcy łączą się bezpośrednio, a każda strona widzi adres sieciowy (IP) drugiej.',
+  callSetNotRecorded: 'Połączenia nie są nagrywane.',
+
   callSessionLabel: 'Trening',
   callSessionOpen: 'Otwórz',
   callSessionSet: (v: string) => `Seria ${v}`,
