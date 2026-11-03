@@ -5934,4 +5934,9 @@ export const DICT: Record<string, string> = {
     'Ava Rakendused → Apex → „Auhinnad“: seal on avatud saavutused.',
   'For strength: {1}–{2} reps a set with heavy weight and full rest, every rep still clean.':
     'Jõuks: {1}–{2} kordust seerias suure raskuse ja täieliku puhkusega, iga kordus puhas.',
+  "I'm not a doctor and I can't prescribe or diagnose anything.":
+    'Ma ei ole arst ega määra ega diagnoosi midagi.',
+  'For medicine or symptoms, see a doctor or a pharmacist.':
+    'Ravimite või sümptomite puhul pöördu arsti või apteekri poole.',
+  "For training, I'm here.": 'Treeningu osas olen siin.',
 };

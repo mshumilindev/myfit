@@ -5964,4 +5964,9 @@ export const DICT: Record<string, string> = {
     'Otwórz Aplikacje → Apex → „Nagrody”: znajdziesz tam odblokowane osiągnięcia.',
   'For strength: {1}–{2} reps a set with heavy weight and full rest, every rep still clean.':
     'Na siłę: {1}–{2} powtórzeń w serii z dużym ciężarem i pełnym odpoczynkiem, każde powtórzenie czyste.',
+  "I'm not a doctor and I can't prescribe or diagnose anything.":
+    'Nie jestem lekarzem i niczego nie przepisuję ani nie diagnozuję.',
+  'For medicine or symptoms, see a doctor or a pharmacist.':
+    'W sprawie leków lub objawów idź do lekarza albo farmaceuty.',
+  "For training, I'm here.": 'W kwestii treningu jestem tutaj.',
 };

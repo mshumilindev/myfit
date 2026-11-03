@@ -144,6 +144,10 @@ const EXTRA: [SafetyKind, RegExp][] = [
         '(want|wanna|going|plan|planning|trying|thinking of) (to )?(starve|not eat|skip (all )?(my )?meals)',
         '(хочу|збираюсь|планую|думаю|мушу) (мені )?(перестати|припинити|не|більше не|кинути) (їсти|їсти взагалі|їсти зовсім)( |$)(?!(цукерк|солодк|після|перед|на ніч|вночі|хліб))',
         'не хочу (більше )?їсти (взагалі|зовсім|нічого)',
+        '(skip|skipping|skipped|miss|missing|cut) (out )?(all )?(my |most )?meals?( \\S+){0,2} (to|so i can|in order to) (lose|cut|drop|be)',
+        '(how|what) (little|few|less) (food |calories )?(can|could|do) i (eat|get by on)|eat (almost )?(nothing|as little as possible)',
+        '(want|wanna|need|trying) to be (skinny|thin|bones|a stick|tiny)',
+        'не (їм|їв|їла) по (\\S+ )?(дн|дні|днів|доб)|не їм (\\S+ )?по (два|три|\\d+) ',
         '(chce|chcę) (przestac|przestać) jesc|(noriu|noretau) (nustoti|mesti) valgyti|(tahan|tahaksin) (lopetada|lõpetada) (soomist|söömist)',
       ].join('|'),
     ),
@@ -153,7 +157,18 @@ const EXTRA: [SafetyKind, RegExp][] = [
     re(
       [
         '(i feel|feeling|i m feeling|i am feeling) (so |really |too |very |just )?(fat|ugly|disgusting|huge|gross|worthless)',
+        'hate (how|the way) (i )?look|hate (looking|seeing myself) in (the )?mirror|ненавиджу (як я виглядаю|свій вигляд|своє відображення)',
         '(відчуваю себе|почуваюся|почуваюсь|я відчуваю себе) (таким |такою |дуже |якимось )?(жирн|товст|потворн|огидн)',
+      ].join('|'),
+    ),
+  ],
+  [
+    'lifecrisis',
+    re(
+      [
+        '(nobody|no one|noone) (really )?(cares?|likes?|wants?|understands?)( about)?( me)?( at all)?( |$)',
+        '(i feel|i am|i m|feeling) (so |really |very )?(alone|lonely|isolated)',
+        'ніхто (мене )?(не розуміє|не цінує)|мені нікому (розповісти|написати)|я (дуже )?самотн|нікому до мене немає діла',
       ].join('|'),
     ),
   ],

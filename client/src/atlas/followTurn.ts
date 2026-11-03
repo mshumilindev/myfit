@@ -13,6 +13,7 @@ import { normalize } from './nlu';
 import { parseRange } from './when';
 import { bestPeriod } from './appP17';
 import { p20Topic, repsGoal } from './appP20';
+import { p21Guard } from './appP21';
 import * as N from './num';
 import type { Route } from './confidence';
 
@@ -108,6 +109,8 @@ export function followTurn<C extends FConvo>(
       ...keep('reps', rg.text),
       convo: { ...convo, intent: 'reps_goal', turn, q: question },
     };
+  const g21 = p21Guard(question, L);
+  if (g21) return keep(g21.intent, g21.text);
   const p20 = p20Topic(question, L);
   if (p20) return keep(p20.intent, p20.text);
   const bp = bestPeriod(question, c, L);

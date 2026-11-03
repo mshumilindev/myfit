@@ -5993,4 +5993,9 @@ export const DICT: Record<string, string> = {
     'Atidaryk Programos → Apex → „Apdovanojimai“: ten rasi atrakintus pasiekimus.',
   'For strength: {1}–{2} reps a set with heavy weight and full rest, every rep still clean.':
     'Jėgai: {1}–{2} pakartojimų serijoje su dideliu svoriu ir pilnu poilsiu, kiekvienas pakartojimas švarus.',
+  "I'm not a doctor and I can't prescribe or diagnose anything.":
+    'Aš ne gydytojas ir nieko neskiriu bei nediagnozuoju.',
+  'For medicine or symptoms, see a doctor or a pharmacist.':
+    'Dėl vaistų ar simptomų kreipkis į gydytoją arba vaistininką.',
+  "For training, I'm here.": 'Dėl treniruočių esu čia.',
 };
