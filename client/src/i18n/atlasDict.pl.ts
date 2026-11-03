@@ -6006,4 +6006,19 @@ export const DICT: Record<string, string> = {
   'Your last session was {1} ({2}.{3}).': 'Twój ostatni trening był {1} ({2}.{3}).',
   'Yes — {1}, last week: {2} session, {3} sets.':
     'Tak — {1}, w zeszłym tygodniu: sesji — {2}, serii — {3}.',
+  'For heavy bench or squats close to failure, yes if you can: a spotter, or safety pins in the rack.':
+    'Przy ciężkim wyciskaniu lub przysiadach blisko upadku — tak, jeśli możesz: asekurant albo bezpieczniki w stojaku.',
+  'On easy sets you do not need one.': 'Na lekkich seriach nie jest potrzebny.',
+  'Stop when you reach your goal, or earlier if strength, sleep and mood keep sliding for a couple of weeks.':
+    'Skończ, gdy osiągniesz cel, albo wcześniej, jeśli siła, sen i nastrój przez kilka tygodni stale spadają.',
+  'Then eat at maintenance for a while (a diet break) rather than cutting forever.':
+    'Potem pobądź jakiś czas na kaloriach podtrzymania (przerwa od diety), zamiast redukować bez końca.',
+  'Yes, whey is just protein from milk, so it is fine every day if it helps you reach your daily protein.':
+    'Tak, whey to po prostu białko z mleka, więc codziennie jest w porządku, jeśli pomaga dobrać białko na dzień.',
+  'If it upsets your stomach, try whey isolate or a plant protein.':
+    'Jeśli drażni żołądek, spróbuj izolatu lub białka roślinnego.',
+  'Not if you keep lifting heavy, eat enough protein and keep the deficit moderate.':
+    'Nie, jeśli dalej trenujesz ciężko, jesz dość białka i trzymasz umiarkowany deficyt.',
+  'Most of what you lose should be fat.': 'Większość tego, co tracisz, powinna być tłuszczem.',
+  'On a {1} kg bar: per side {2} + {3}.': 'Na gryfie {1} kg: z każdej strony {2} + {3}.',
 };

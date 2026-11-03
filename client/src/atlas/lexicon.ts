@@ -53,8 +53,8 @@ const RAW: Record<'pl' | 'lt' | 'et' | 'ru', string> = {
     poils*=rest|ilset*=rest|ilsė*=rest|pertrauk*=rest|
     svor*=weight|kg=kg|kit*=next|šiandien=today|siandien=today|rytoj=tomorrow|vakar=yesterday|savait*=week|mėnes*=month|
     treniruot*=workout|sportuo*=train|sporto salė*=gym|sal*=gym|
-    kiek spaudžiau=what weight did i press|kiek spaudziau=what weight did i press|
-    spaudimas gulint=bench press|spaudim*=press|pritūpim*=squat|pritupim*=squat|mirties trauk*=deadlift|trauk*=deadlift|prisitrauk*=pullups|atsispaudim*=pushups|lenkim*=curl|įtūpst*=lunges|
+    kiek prisitūpiau=what weight did i use on squat|kiek prisitupiau=what weight did i use on squat|kiek spaudžiau=what weight did i press|kiek spaudziau=what weight did i press|
+    spaudimas gulint=bench press|spaudim*=press|prisitūp*=squat|prisitup*=squat|pritūpim*=squat|pritupim*=squat|mirties trauk*=deadlift|trauk*=deadlift|prisitrauk*=pullups|atsispaudim*=pushups|lenkim*=curl|įtūpst*=lunges|
     krūtin*=chest|krutin*=chest|nugar*=back|koj*=legs|pečių=shoulders|peči*=shoulders|biceps*=biceps|triceps*=triceps|pilv*=abs|sėdmen*=glutes|blauzd*=calves|
     skauda=hurts|skausm*=pain|traum*=injury|kel*=knee|alkūn*=elbow|rieš*=wrist|
     baltym*=protein|kalorij*=calories|kreatin*=creatine|mieg*=sleep|vanden*=water|

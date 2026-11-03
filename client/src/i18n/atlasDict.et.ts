@@ -5976,4 +5976,19 @@ export const DICT: Record<string, string> = {
   'Your last session was {1} ({2}.{3}).': 'Sinu viimane treening oli {1} ({2}.{3}).',
   'Yes — {1}, last week: {2} session, {3} sets.':
     'Jah — {1}, eelmisel nädalal: treeninguid — {2}, seeriaid — {3}.',
+  'For heavy bench or squats close to failure, yes if you can: a spotter, or safety pins in the rack.':
+    'Raske rinnalt surumise või kükkide puhul ebaõnnestumise lähedal — jah, kui saad: kaaslane või turvatihvtid rekis.',
+  'On easy sets you do not need one.': 'Kergetes seeriates pole seda vaja.',
+  'Stop when you reach your goal, or earlier if strength, sleep and mood keep sliding for a couple of weeks.':
+    'Lõpeta, kui jõuad eesmärgini, või varem, kui jõud, uni ja tuju mitu nädalat järjest langevad.',
+  'Then eat at maintenance for a while (a diet break) rather than cutting forever.':
+    'Seejärel ole mõnda aega hoolduskaloritel (dieedipaus), mitte ära kuivata lõputult.',
+  'Yes, whey is just protein from milk, so it is fine every day if it helps you reach your daily protein.':
+    'Jah, vadakuvalk on lihtsalt piimavalk, nii et iga päev sobib, kui see aitab päevase valgu kätte saada.',
+  'If it upsets your stomach, try whey isolate or a plant protein.':
+    'Kui see ärritab magu, proovi isolaati või taimset valku.',
+  'Not if you keep lifting heavy, eat enough protein and keep the deficit moderate.':
+    'Mitte siis, kui jätkad rasket treeningut, sööd piisavalt valku ja hoiad mõõduka defitsiidi.',
+  'Most of what you lose should be fat.': 'Suurem osa sellest, mida kaotad, peaks olema rasv.',
+  'On a {1} kg bar: per side {2} + {3}.': '{1} kg kangil: igal küljel {2} + {3}.',
 };

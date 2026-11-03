@@ -10,6 +10,8 @@ import { weekStartOf } from '../weekStart';
 import { topHistory } from '../progression';
 import { findMuscle, normalize, tokens } from './nlu';
 import { parseRange } from './when';
+import { calcAnswer } from './calc';
+import { solvePlates } from '../plates';
 
 const DAY = 86_400_000;
 const SQUAT = /squat/i;
@@ -80,6 +82,17 @@ export function painMore(question: string, L: Tr): { intent: string; text: strin
   return null;
 }
 
+const LOSE_MUSCLE_RE = /^\s*(and )?will i (lose|burn) (muscle|my gains|strength)\s*\??\s*$/iu;
+const CUT_INTENTS = new Set([
+  'fat_loss',
+  'calories',
+  'cut_deficit',
+  'cardio',
+  'cardio_gains',
+  'k_maintenance',
+]);
+const CONVERT_PLATES_RE =
+  /^\s*(convert|calculate|work out|переведи|порахуй)\s+(\d+(?:[.,]\d+)?)\s*(kg|кг|lbs?|фунт\p{L}*)(?!\p{L})[^?]*\s(and|then|і|та)\s+(tell me|show me|give me|what(?!\p{L})|how(?!\p{L})|скажи|покажи)[^?]*(?<!\p{L})(plates?|млинц\p{L}*|блин\p{L}*)/iu;
 const STUCK_INTENTS = new Set(['progress_lift', 'plateau', 'stall', 'stalled']);
 const HIT_INTENTS = new Set(['best', 'heaviest', 'e1rm', 'range_lift', 'progress_lift']);
 const VOLUME_INTENTS = new Set(['log_query', 'tonnage', 'week', 'range_summary']);
@@ -129,6 +142,32 @@ export function p22Follow(
         'Не під 90° убік: тримай лікті приблизно під 45° до тулуба, щоб плечі почувалися добре. Зніми збоку чи спереду й перевір.',
       ),
     };
+  if (CUT_INTENTS.has(convo.intent ?? '') && LOSE_MUSCLE_RE.test(question))
+    return {
+      intent: 'cut_muscle',
+      text: L(
+        'Not if you keep lifting heavy, eat enough protein and keep the deficit moderate. Most of what you lose should be fat.',
+        'Ні, якщо тренуєшся важко, їси достатньо білка й тримаєш помірний дефіцит. Більшість того, що йде, має бути жиром.',
+      ),
+    };
+  const cp = CONVERT_PLATES_RE.exec(question);
+  if (cp) {
+    const conv = calcAnswer(question.replace(/\s(and|then|і|та)\s.*$/iu, ''), L, (n) =>
+      c.fmt.kg(n),
+    );
+    const load = /^(kg|кг)$/iu.test(cp[3]) ? Number(cp[2].replace(',', '.')) : null;
+    if (conv && load && load >= 20 && load <= 500) {
+      const sol = solvePlates(load, { barKg: 20, unit: 'kg' });
+      const per = sol.perSide.length ? sol.perSide.join(' + ') : '—';
+      return {
+        intent: 'calc',
+        text: `${conv} ${L(
+          `On a 20 kg bar: per side ${per}${sol.exact ? '' : ` (closest: ${c.fmt.kg(sol.achievedKg)})`}.`,
+          `На грифі 20 кг: з кожного боку ${per}${sol.exact ? '' : ` (найближче: ${c.fmt.kg(sol.achievedKg)})`}.`,
+        )}`,
+      };
+    }
+  }
   if (SETS_WEEK_RE.test(question))
     return {
       intent: 'sets_per_muscle',
@@ -269,7 +308,27 @@ const STALLING_RE =
   /^\s*(що|яка вправа|який рух) (застрягло|застрягла|стоїть на місці|не росте)\s*\??\s*$/iu;
 
 /** Wordings the data reader misses, said the way it reads them ("що найбільше росте" = "which lift is improving fastest"). */
+const REWRITES: [RegExp, string][] = [
+  [
+    /^\s*(give|make|write) me (a |an )?(push[ /-]pull[ /-]legs|ppl)( \w+)? (plan|programme|program|routine)\s*\.?\s*$/iu,
+    'build me a push pull legs program',
+  ],
+  [
+    /^\s*як (зв.язатись|зв.язатися|звʼязатись|звʼязатися) з тренером\s*\??\s*$/iu,
+    'як підключити тренера',
+  ],
+  [
+    /^\s*how (do|can) i (set|start|use) (a |the |my )?rest ?timer\s*\??\s*$/iu,
+    'how do i change the rest timer',
+  ],
+  [/^\s*how (do|can) i back ?up my data\s*\??\s*$/iu, 'how do i export my data'],
+  [/^\s*(wat|what)s? (is )?a gud split\s*\??\s*$/iu, 'what is a good split'],
+  [/^\s*(shud|should) i do cardo\s*\??\s*$/iu, 'should i do cardio'],
+  [/^\s*як швидко росте м.яз\p{L}*\s*\??\s*$/iu, 'how fast does muscle grow'],
+];
+
 export function canonQuestion(question: string): string {
+  for (const [re, to] of REWRITES) if (re.test(question)) return to;
   if (FASTEST_RE.test(question)) return 'which lift is improving fastest';
   if (STALLING_RE.test(question)) return 'which is stalling';
   return question;

@@ -342,6 +342,26 @@ export const CONV_CASES: ConvCase[] = [
   c('en', ['did i train legs last week'], /last week: 1 session/),
   c('en', ['how many sets per muscle a week'], /8–14 hard sets a week/, { forbid: /Last 7 days/ }),
   c('uk', ['що найбільше росте'], /Найбільше виросла/, { forbid: /білка/ }),
+  // P24: knowledge routes and how-to wordings (Turing-4)
+  c('en', ['do i need a spotter'], /safety pins/, { forbid: /bottom bar/ }),
+  c('en', ['when should i stop cutting'], /reach your goal/, { forbid: /lean/ }),
+  c('en', ['is whey ok every day'], /fine every day/, { forbid: /Timing barely/ }),
+  c('en', ['i want to lose 5 kg', 'will i lose muscle'], /keep lifting heavy/, {
+    forbid: /cardio/,
+  }),
+  c('en', ['give me a push pull legs plan'], /Day 1/, { forbid: /2–3 days a week: full body/ }),
+  c('en', ['wats a gud split'], /full body/, { forbid: /no programme yet/ }),
+  c('en', ['shud i do cardo'], /ardio after lifting/, { forbid: /Activity/ }),
+  c('en', ['how do i set a rest timer'], /./, { forbid: /Which lift|Tap “Log”/ }),
+  c('en', ['how do i back up my data'], /download a copy/),
+  c('uk', ['як зв’язатись з тренером'], /invite/, { forbid: /Суперсет/ }),
+  // P25: two orders in one message, lt squat wording (Turing-4)
+  c('en', ['convert 100 kg to lbs and tell me the plates'], /220\.5 lb\. On a 20 kg bar: per side/),
+  c('uk', ['переведи 100 кг в фунти і скажи млинці'], /На грифі 20 кг: з кожного боку/),
+  c('lt', ['koks mano rekordas prisitūpimuose'], /Full Squat: heaviest set/, {
+    forbid: /Bench Press/,
+  }),
+  c('lt', ['kiek prisitūpiau paskutinį kartą'], /Full Squat/, { forbid: /weigh-in/ }),
   // known weaknesses (fix → drop `gap`)
   c('en', ['log 3 sets of pullups'], /tap “Log”/, { forbid: /3–4 days a week/ }),
   c('uk', ['залогуй 3 підходи підтягувань'], /«Запис»/),

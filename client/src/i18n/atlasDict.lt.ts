@@ -6035,4 +6035,19 @@ export const DICT: Record<string, string> = {
   'Your last session was {1} ({2}-{3}-{4}).': 'Tavo paskutinė treniruotė buvo {1} ({2}-{3}-{4}).',
   'Yes — {1}, last week: {2} session, {3} sets.':
     'Taip — {1}, praeitą savaitę: treniruočių — {2}, serijų — {3}.',
+  'For heavy bench or squats close to failure, yes if you can: a spotter, or safety pins in the rack.':
+    'Sunkiam spaudimui gulint ar prisitūpimams arti atsisakymo — taip, jei gali: padėjėjas arba apsauginiai strypai stove.',
+  'On easy sets you do not need one.': 'Lengvose serijose jo nereikia.',
+  'Stop when you reach your goal, or earlier if strength, sleep and mood keep sliding for a couple of weeks.':
+    'Sustok, kai pasieksi tikslą, arba anksčiau, jei jėga, miegas ir nuotaika kelias savaites nuolat krenta.',
+  'Then eat at maintenance for a while (a diet break) rather than cutting forever.':
+    'Tada kurį laiką valgyk palaikymo kalorijomis (pertrauka nuo dietos), o ne dietuok be galo.',
+  'Yes, whey is just protein from milk, so it is fine every day if it helps you reach your daily protein.':
+    'Taip, išrūgų baltymai tėra pieno baltymai, todėl kasdien galima, jei jie padeda surinkti dienos baltymų normą.',
+  'If it upsets your stomach, try whey isolate or a plant protein.':
+    'Jei erzina skrandį, išbandyk izoliatą arba augalinius baltymus.',
+  'Not if you keep lifting heavy, eat enough protein and keep the deficit moderate.':
+    'Ne, jei ir toliau sunkiai treniruojiesi, valgai pakankamai baltymų ir laikai nedidelį deficitą.',
+  'Most of what you lose should be fat.': 'Didžioji dalis to, ką prarandi, turėtų būti riebalai.',
+  'On a {1} kg bar: per side {2} {3}+ {4}.': 'Ant {1} kg grifo: iš kiekvienos pusės {2} {3}+ {4}.',
 };
