@@ -5842,4 +5842,96 @@ export const DICT: Record<string, string> = {
   'The log shows the progress before the mirror does.': 'Logi näitab edu enne kui peegel.',
   'Want a plan for it?': 'Kas soovid plaani?',
   'Yes.': 'Jah.',
+  'You can download a copy of your data yourself: Profile → Settings → “What Spotter knows about you” → “Download a copy”.':
+    'Oma andmete koopia saad ise alla laadida: Profiil → Seaded → „What Spotter knows about you“ → „Download a copy“.',
+  'Your log is also stored in your account and syncs to every device you sign in on.':
+    'Sinu logi on samuti salvestatud kontol ja sünkroonitakse igasse seadmesse, kus sisened.',
+  'You can delete your account yourself: Profile → Settings → “Delete account”.':
+    'Konto saad ise kustutada: Profiil → Seaded → „Delete account“.',
+  'I only see your own training log.': 'Näen ainult sinu enda treeninglogi.',
+  "Other people's data isn't visible to me, and I can't list it.":
+    'Teiste inimeste andmed pole mulle nähtavad ja neid ma välja tuua ei saa.',
+  "I don't have any passwords, keys or admin access, and I can't share any.":
+    'Mul pole ühtegi parooli, võtit ega admini ligipääsu ning neid jagada ma ei saa.',
+  "I'm Atlas, your gym buddy, and I can't swap roles or share my instructions.":
+    'Ma olen Atlas, sinu jõusaalikaaslane, ja ma ei saa rolli vahetada ega oma juhiseid jagada.',
+  'Gentle movement and a light stretch in a comfortable range are fine; do not push into pain or stretch hard.':
+    'Õrn liikumine ja kerge venitus mugavas ulatuses sobib; ära suru valu sisse ega venita kõvasti.',
+  'Heat helps stiff muscle, but neither one heals it — easy movement and time do.':
+    'Soojus aitab jäikadel lihastel, aga kumbki ei ravi — seda teevad kerge liikumine ja aeg.',
+  'If it is sharp, or hurts during the lift, skip it until it is checked.':
+    'Kui valu on terav või tekib harjutuse ajal, jäta see vahele, kuni seda on kontrollitud.',
+  'In a session, tap the lift and choose Swap.': 'Treeningus puuduta harjutust ja vali Asenda.',
+  'Keep pain at {1}/{2} or lower.': 'Hoia valu tasemel {1}/{2} või madalamal.',
+  'Maybe, in a lighter and pain-free version: if it does not hurt while you do it and is no worse the next day, it is fine.':
+    'Võib-olla kergemas valuvabas variandis: kui harjutuse ajal ei valuta ja järgmisel päeval pole hullem, on see okei.',
+  'Swap it for a variation that does not hurt: a different angle or grip, a machine or dumbbell version, a shorter range, or another muscle today.':
+    'Asenda variandiga, mis ei valuta: teine nurk või haare, masin või hantlid, lühem ulatus või täna mõni muu lihas.',
+  'Whenever you are ready, answer the last question and we will finish the check-in.':
+    'Kui oled valmis, vasta viimasele küsimusele ja lõpetame kontrolli.',
+  'Aim for {1}–{2} hours; even an extra hour helps.':
+    'Sihi {1}–{2} tunnile; isegi üks lisatund aitab.',
+  'Calories can sit a little lower if you move less.':
+    'Kaloreid võib olla veidi vähem, kui liigud vähem.',
+  'If you feel ill or dizzy, rest instead.':
+    'Kui tunned end haigena või pea käib ringi, puhka hoopis.',
+  'It is not a disaster for a week, but fix it before you change the programme.':
+    'Nädal pole katastroof, aga paranda see enne, kui programmi muudad.',
+  'Keep protein the same on rest days — that is when the muscle is repaired and built.':
+    'Puhkepäevadel hoia valk samana — just siis lihased taastuvad ja kasvavad.',
+  'Less sleep slows recovery and strength and raises hunger.':
+    'Vähem und aeglustab taastumist ja jõudu ning suurendab nälga.',
+  'On a short night train, but keep it easier.': 'Pärast lühikest ööd treeni, aga kergemini.',
+  'That is on the short side.': 'See on pigem vähe.',
+  'That pace is for a beginner — it slows down after the first months.':
+    'Selline tempo on algajale — esimestest kuudest alates aeglustub see.',
+  'Yes, but easier: same lifts, fewer sets, leave more reps in reserve.':
+    'Jah, aga kergemini: samad harjutused, vähem seeriaid, jäta rohkem kordusi varuks.',
+  'Yes, regularly short sleep costs you: slower recovery, less strength and more hunger.':
+    'Jah, püsivalt lühike uni maksab: aeglasem taastumine, vähem jõudu ja suurem nälg.',
+  '{1} + {2} × {3} weeks = {4}.': '{1} + {2} × {3} nädalat = {4}.',
+  '{1} {2}+ {3} {4}× {5} weeks = {6}.': '{1} {2}+ {3} {4}× {5} nädalat = {6}.',
+  '{1} is {2}% of {3}.': '{1} on {2}% arvust {3}.',
+  'In August: {1} sessions, {2} working sets.': 'August: treeninguid — {1}, töösarju — {2}.',
+  'In September: {1} sessions, {2} working sets.': 'September: treeninguid — {1}, töösarju — {2}.',
+  'In October {1}: {2} sessions, {3} working sets.':
+    'Oktoober {1}: treeninguid — {2}, töösarju — {3}.',
+  'In {1}: {2} sessions, {3} working sets.': '{1}: treeninguid — {2}, töösarju — {3}.',
+  'Your busiest month: {1} — {2} sessions, {3} working sets.':
+    'Aktiivseim kuu: {1} — treeninguid: {2}, töösarju: {3}.',
+  'Your busiest month: {1}-{2} {3}— {4} sessions, {5} working sets.':
+    'Aktiivseim kuu: {1}-{2} {3}— treeninguid: {4}, töösarju: {5}.',
+  'Your busiest week started {1}-{2}-{3} {4}— {5} sessions, {6} working sets.':
+    'Aktiivseim nädal algas {1}-{2}-{3} {4}— treeninguid: {5}, töösarju: {6}.',
+  'Your busiest week started {1}.{2} — {3} sessions, {4} working sets.':
+    'Aktiivseim nädal algas {1}.{2} — treeninguid: {3}, töösarju: {4}.',
+  'For size: {1}–{2} reps a set, the last {3}–{4} hard.':
+    'Mahu jaoks: {1}–{2} kordust seerias, viimased {3}–{4} rasked.',
+  'Add weight or a rep over time.': 'Aja jooksul lisa raskust või kordus.',
+  'There is no single best exercise.': 'Üht parimat harjutust pole.',
+  'The best ones are big compound lifts you can do safely and progress on: squat, deadlift, bench or overhead press, rows and pull-ups.':
+    'Parimad on suured mitmeliigesharjutused, mida saad teha turvaliselt ja milles edeneda: kükk, jõutõmme, rinnalt või pea kohalt surumine, sõudmine ja lõua tõmbed.',
+  'Pick the variation that suits your body and stick with it.':
+    'Vali variant, mis sinu kehale sobib, ja jää selle juurde.',
+  'CrossFit mixes lifting, gymnastics and conditioning at high intensity.':
+    'CrossFit ühendab tõstmise, võimlemise ja vastupidavuse suure intensiivsusega.',
+  'It builds fitness fast, but the constant variety makes steady strength progress hard to track, and injury risk grows when speed beats technique.':
+    'See arendab vormi kiiresti, kuid pidev mitmekesisus raskendab jõu edenemise jälgimist ning vigastusrisk kasvab, kui kiirus võidab tehnika.',
+  'If you love it, keep a couple of heavy lifting days and scale the rest.':
+    'Kui see sulle meeldib, jäta paar rasket jõupäeva ja ülejäänut skaleeri.',
+  'A desk job mostly costs you movement.': 'Laua taga töö võtab peamiselt liikumise.',
+  'Stand up and walk a few minutes every hour, add rows and face pulls for the upper back, and some mobility for hips and neck.':
+    "Tõuse iga tund püsti ja kõnni paar minutit, lisa sõudmist ja face pull'i ülaselja jaoks ning veidi puusade ja kaela liikuvust.",
+  'Train as usual — sitting is not a reason to train less.':
+    'Treeni nagu tavaliselt — istumine pole põhjus vähem treenida.',
+  'There is no magic number, but a session that drags well past an hour is mostly padding.':
+    'Võlunumbrit pole, kuid treening, mis venib tunnist palju pikemaks, on enamasti täitematerjal.',
+  'Hard sets, enough rest and energy left for the rest of your life beat more hours.':
+    'Rasked seeriad, piisav puhkus ja jõud ülejäänud eluks on väärt rohkem kui lisatunnid.',
+  'If it costs you relationships, shorter and tighter sessions are a fair trade.':
+    'Kui see maksab suhteid, on lühemad ja tihedamad treeningud aus vahetus.',
+  'Open Apps → Apex → “Awards”: it lists the achievements you have unlocked.':
+    'Ava Rakendused → Apex → „Auhinnad“: seal on avatud saavutused.',
+  'For strength: {1}–{2} reps a set with heavy weight and full rest, every rep still clean.':
+    'Jõuks: {1}–{2} kordust seerias suure raskuse ja täieliku puhkusega, iga kordus puhas.',
 };

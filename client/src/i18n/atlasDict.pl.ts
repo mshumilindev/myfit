@@ -5871,4 +5871,97 @@ export const DICT: Record<string, string> = {
     'Dziennik pokazuje postęp, zanim zrobi to lustro.',
   'Want a plan for it?': 'Chcesz plan?',
   'Yes.': 'Tak.',
+  'You can download a copy of your data yourself: Profile → Settings → “What Spotter knows about you” → “Download a copy”.':
+    'Kopię swoich danych możesz pobrać sam: Profil → Ustawienia → „Co Spotter wie o Tobie” → „Pobierz kopię”.',
+  'Your log is also stored in your account and syncs to every device you sign in on.':
+    'Twój dziennik jest też przechowywany na koncie i synchronizuje się z każdym urządzeniem, na którym się logujesz.',
+  'You can delete your account yourself: Profile → Settings → “Delete account”.':
+    'Konto możesz usunąć sam: Profil → Ustawienia → „Usuń konto”.',
+  'I only see your own training log.': 'Widzę tylko twój własny dziennik treningowy.',
+  "Other people's data isn't visible to me, and I can't list it.":
+    'Dane innych osób są dla mnie niewidoczne i nie mogę ich wyświetlić.',
+  "I don't have any passwords, keys or admin access, and I can't share any.":
+    'Nie mam żadnych haseł, kluczy ani dostępu administratora i nie mogę ich udostępniać.',
+  "I'm Atlas, your gym buddy, and I can't swap roles or share my instructions.":
+    'Jestem Atlas, twój kumpel z siłowni, i nie mogę zmieniać roli ani ujawniać swoich instrukcji.',
+  'Gentle movement and a light stretch in a comfortable range are fine; do not push into pain or stretch hard.':
+    'Delikatny ruch i lekkie rozciąganie w komfortowym zakresie są w porządku; nie wchodź w ból i nie rozciągaj mocno.',
+  'Heat helps stiff muscle, but neither one heals it — easy movement and time do.':
+    'Ciepło pomaga na sztywne mięśnie, ale żadne z nich nie leczy — robi to lekki ruch i czas.',
+  'If it is sharp, or hurts during the lift, skip it until it is checked.':
+    'Jeśli ból jest ostry albo pojawia się podczas ćwiczenia, pomiń je, dopóki ktoś tego nie sprawdzi.',
+  'In a session, tap the lift and choose Swap.': 'W treningu stuknij ćwiczenie i wybierz Zamień.',
+  'Keep pain at {1}/{2} or lower.': 'Utrzymuj ból na poziomie {1}/{2} lub niższym.',
+  'Maybe, in a lighter and pain-free version: if it does not hurt while you do it and is no worse the next day, it is fine.':
+    'Może, w lżejszej wersji bez bólu: jeśli nie boli podczas ćwiczenia i następnego dnia nie jest gorzej, można.',
+  'Swap it for a variation that does not hurt: a different angle or grip, a machine or dumbbell version, a shorter range, or another muscle today.':
+    'Zamień na wariant, który nie boli: inny kąt lub chwyt, maszynę lub hantle, krótszy zakres albo dziś inny mięsień.',
+  'Whenever you are ready, answer the last question and we will finish the check-in.':
+    'Gdy będziesz gotowy, odpowiedz na ostatnie pytanie, a dokończymy sprawdzanie.',
+  'Aim for {1}–{2} hours; even an extra hour helps.':
+    'Celuj w {1}–{2} godzin; nawet dodatkowa godzina pomaga.',
+  'Calories can sit a little lower if you move less.':
+    'Kalorii może być trochę mniej, jeśli mniej się ruszasz.',
+  'If you feel ill or dizzy, rest instead.':
+    'Jeśli czujesz się chory lub masz zawroty głowy, odpocznij.',
+  'It is not a disaster for a week, but fix it before you change the programme.':
+    'Tydzień to nie katastrofa, ale popraw to, zanim zmienisz program.',
+  'Keep protein the same on rest days — that is when the muscle is repaired and built.':
+    'W dni odpoczynku białko zostaje takie samo — wtedy mięśnie się regenerują i rosną.',
+  'Less sleep slows recovery and strength and raises hunger.':
+    'Mniej snu spowalnia regenerację i siłę oraz zwiększa głód.',
+  'On a short night train, but keep it easier.': 'Po krótkiej nocy trenuj, ale lżej.',
+  'That is on the short side.': 'To trochę mało.',
+  'That pace is for a beginner — it slows down after the first months.':
+    'Takie tempo jest dla początkującego — po pierwszych miesiącach zwalnia.',
+  'Yes, but easier: same lifts, fewer sets, leave more reps in reserve.':
+    'Tak, ale lżej: te same ćwiczenia, mniej serii, zostaw więcej powtórzeń w zapasie.',
+  'Yes, regularly short sleep costs you: slower recovery, less strength and more hunger.':
+    'Tak, regularnie za krótki sen kosztuje: wolniejsza regeneracja, mniej siły i większy głód.',
+  '{1} + {2} × {3} weeks = {4}.': '{1} + {2} × {3} tygodni = {4}.',
+  '{1} {2}+ {3} {4}× {5} weeks = {6}.': '{1} {2}+ {3} {4}× {5} tygodni = {6}.',
+  '{1} is {2}% of {3}.': '{1} to {2}% z {3}.',
+  'In August: {1} sessions, {2} working sets.': 'W sierpniu: sesji — {1}, serii roboczych — {2}.',
+  'In September: {1} sessions, {2} working sets.':
+    'We wrześniu: sesji — {1}, serii roboczych — {2}.',
+  'In October {1}: {2} sessions, {3} working sets.':
+    'W październiku {1}: sesji — {2}, serii roboczych — {3}.',
+  'In {1}: {2} sessions, {3} working sets.': 'W {1}: sesji — {2}, serii roboczych — {3}.',
+  'Your busiest month: {1} — {2} sessions, {3} working sets.':
+    'Najaktywniejszy miesiąc: {1} — sesji: {2}, serii roboczych: {3}.',
+  'Your busiest month: {1}-{2} {3}— {4} sessions, {5} working sets.':
+    'Najaktywniejszy miesiąc: {1}-{2} {3}— sesji: {4}, serii roboczych: {5}.',
+  'Your busiest week started {1}-{2}-{3} {4}— {5} sessions, {6} working sets.':
+    'Najaktywniejszy tydzień zaczął się {1}-{2}-{3} {4}— sesji: {5}, serii roboczych: {6}.',
+  'Your busiest week started {1}.{2} — {3} sessions, {4} working sets.':
+    'Najaktywniejszy tydzień zaczął się {1}.{2} — sesji: {3}, serii roboczych: {4}.',
+  'For size: {1}–{2} reps a set, the last {3}–{4} hard.':
+    'Na masę: {1}–{2} powtórzeń w serii, ostatnie {3}–{4} ciężkie.',
+  'Add weight or a rep over time.': 'Z czasem dodawaj ciężar lub powtórzenie.',
+  'There is no single best exercise.': 'Nie ma jednego najlepszego ćwiczenia.',
+  'The best ones are big compound lifts you can do safely and progress on: squat, deadlift, bench or overhead press, rows and pull-ups.':
+    'Najlepsze są duże ćwiczenia wielostawowe, które możesz robić bezpiecznie i w których możesz progresować: przysiad, martwy ciąg, wyciskanie leżąc lub nad głowę, wiosłowanie i podciąganie.',
+  'Pick the variation that suits your body and stick with it.':
+    'Wybierz wariant, który pasuje do twojego ciała, i się go trzymaj.',
+  'CrossFit mixes lifting, gymnastics and conditioning at high intensity.':
+    'CrossFit łączy podnoszenie ciężarów, gimnastykę i kondycję przy dużej intensywności.',
+  'It builds fitness fast, but the constant variety makes steady strength progress hard to track, and injury risk grows when speed beats technique.':
+    'Szybko buduje formę, ale ciągła zmienność utrudnia śledzenie postępów siły, a ryzyko kontuzji rośnie, gdy tempo wygrywa z techniką.',
+  'If you love it, keep a couple of heavy lifting days and scale the rest.':
+    'Jeśli go lubisz, zostaw kilka ciężkich dni siłowych, a resztę skaluj.',
+  'A desk job mostly costs you movement.': 'Praca przy biurku głównie kosztuje cię ruch.',
+  'Stand up and walk a few minutes every hour, add rows and face pulls for the upper back, and some mobility for hips and neck.':
+    'Wstawaj i chodź kilka minut co godzinę, dodaj wiosłowanie i face pull na górę pleców oraz trochę mobilności bioder i szyi.',
+  'Train as usual — sitting is not a reason to train less.':
+    'Trenuj jak zwykle — siedzenie nie jest powodem, by trenować mniej.',
+  'There is no magic number, but a session that drags well past an hour is mostly padding.':
+    'Nie ma magicznej liczby, ale sesja ciągnąca się daleko ponad godzinę to głównie zapychacz.',
+  'Hard sets, enough rest and energy left for the rest of your life beat more hours.':
+    'Ciężkie serie, odpowiedni odpoczynek i siły na resztę życia są lepsze niż więcej godzin.',
+  'If it costs you relationships, shorter and tighter sessions are a fair trade.':
+    'Jeśli kosztuje cię to relacje, krótsze i zwięźlejsze treningi to uczciwa wymiana.',
+  'Open Apps → Apex → “Awards”: it lists the achievements you have unlocked.':
+    'Otwórz Aplikacje → Apex → „Nagrody”: znajdziesz tam odblokowane osiągnięcia.',
+  'For strength: {1}–{2} reps a set with heavy weight and full rest, every rep still clean.':
+    'Na siłę: {1}–{2} powtórzeń w serii z dużym ciężarem i pełnym odpoczynkiem, każde powtórzenie czyste.',
 };

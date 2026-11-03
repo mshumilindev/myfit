@@ -36,6 +36,38 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
     .replace(/(\d)\s*[xх×*]\s*(\d)/g, '$1 x $2')
     .replace(/\s+/g, ' ');
 
+  // "what percent of 120 is 90" / "90 is what percent of 120" / "скільки відсотків 90 від 120"
+  const wp =
+    new RegExp(`what percent(?:age)? of ${NUM} is ${NUM}`, 'u').exec(ph) ??
+    new RegExp(`${NUM} is what percent(?:age)? of ${NUM}`, 'u').exec(ph);
+  const wpFirst = /what percent(?:age)? of/u.test(ph);
+  const wpUk = new RegExp(`скільки відсотків ${NUM} (?:від|з) ${NUM}`, 'u').exec(ph);
+  if (wp || wpUk) {
+    const whole = wp ? num(wp[wpFirst ? 1 : 2]) : num(wpUk![2]);
+    const part = wp ? num(wp[wpFirst ? 2 : 1]) : num(wpUk![1]);
+    if (whole > 0)
+      return L(
+        `${part} is ${dec((part / whole) * 100, 'en', 1)}% of ${whole}.`,
+        `${part} — це ${dec((part / whole) * 100, 'uk', 1)}% від ${whole}.`,
+      );
+  }
+
+  // "add 2.5 kg a week for 8 weeks to 80 kg" → where you end up.
+  const prog = new RegExp(
+    `add ${NUM} ?(?:kg|kgs|lbs?)? (?:a|per|every|each) week (?:for|over) (\\d+) weeks? (?:to|on top of|onto) ${NUM} ?(?:kg|kgs|lbs?)?`,
+    'u',
+  ).exec(ph);
+  if (prog) {
+    const step = num(prog[1]);
+    const weeks = Number(prog[2]);
+    const start = num(prog[3]);
+    const end = start + step * weeks;
+    return L(
+      `${dec(start, 'en', 2)} + ${dec(step, 'en', 2)} × ${weeks} weeks = ${dec(end, 'en', 2)}. That pace is for a beginner — it slows down after the first months.`,
+      `${dec(start, 'uk', 2)} + ${dec(step, 'uk', 2)} × ${weeks} тижнів = ${dec(end, 'uk', 2)}. Такий темп для новачка — за кілька місяців він сповільнюється.`,
+    );
+  }
+
   // "80% від 120" / "80 percent of 120"
   const pm = new RegExp(`${NUM}\\s*percent\\s*(?:від|of|з|из|от)\\s*${NUM}`, 'u').exec(ph);
   if (pm) {

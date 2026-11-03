@@ -764,7 +764,7 @@ function answerOne(
     p.exercise = convo.exercise;
 
   // ---- the safety net: checked before anything else, in every temper ----
-  const danger = safetySignal(question);
+  const danger = safetySignal(question, convo.softUntil !== undefined && turn <= convo.softUntil);
   if (danger) {
     const r = safetyReply(danger, L);
     return {

@@ -19,12 +19,12 @@
 import type { MuscleGroup } from '../data/exercises';
 import { BUILT_IN_CATALOG, richExerciseByName } from '../data/exercises';
 import { setTopWeight, setTypeOf } from '../store';
-import type { AtlasAction, AskCtx, Tr } from './intentKit';
-import { finishedOf, loggedLifts } from './intentKit';
+import { finishedOf, loggedLifts, type AtlasAction, type AskCtx, type Tr } from './intentKit';
 import { findPart, PART_NAME, type BodyPart } from './memory';
 import { findMuscle, normalize, tokens } from './nlu';
 import { terms } from './retrieve';
 import { safetyReply, safetySignal } from './safety';
+import { painSideAnswer } from './followTurn';
 
 export type Flow =
   | {
@@ -965,6 +965,6 @@ export function continueFlow(
     /(^|\s)(стоп|скасуй|досить|забудь|cancel|stop|never ?mind|отмена|хватит)(\s|$)/u.test(` ${ph} `)
   )
     return { intent: 'flow_cancel', text: L('Okay, dropped it.', 'Добре, облишимо.'), flow: null };
-  if (f.kind === 'pain') return continuePain(f, q, c, exercise, L);
+  if (f.kind === 'pain') return painSideAnswer(q, L, f) ?? continuePain(f, q, c, exercise, L);
   return continueFind(f, q, c, L);
 }

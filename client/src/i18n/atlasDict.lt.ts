@@ -5898,4 +5898,99 @@ export const DICT: Record<string, string> = {
     'Žurnalas parodo progresą anksčiau nei veidrodis.',
   'Want a plan for it?': 'Nori plano?',
   'Yes.': 'Taip.',
+  'You can download a copy of your data yourself: Profile → Settings → “What Spotter knows about you” → “Download a copy”.':
+    'Savo duomenų kopiją gali atsisiųsti pats: Profilis → Nustatymai → „What Spotter knows about you“ → „Download a copy“.',
+  'Your log is also stored in your account and syncs to every device you sign in on.':
+    'Tavo žurnalas taip pat saugomas paskyroje ir sinchronizuojamas su kiekvienu įrenginiu, kuriame prisijungi.',
+  'You can delete your account yourself: Profile → Settings → “Delete account”.':
+    'Paskyrą gali ištrinti pats: Profilis → Nustatymai → „Delete account“.',
+  'I only see your own training log.': 'Matau tik tavo paties treniruočių žurnalą.',
+  "Other people's data isn't visible to me, and I can't list it.":
+    'Kitų žmonių duomenų nematau ir jų parodyti negaliu.',
+  "I don't have any passwords, keys or admin access, and I can't share any.":
+    'Neturiu jokių slaptažodžių, raktų ar administratoriaus prieigos ir jų dalytis negaliu.',
+  "I'm Atlas, your gym buddy, and I can't swap roles or share my instructions.":
+    'Aš Atlas, tavo draugas sporto salėje, ir negaliu keisti vaidmens ar dalytis savo instrukcijomis.',
+  'Gentle movement and a light stretch in a comfortable range are fine; do not push into pain or stretch hard.':
+    'Švelnus judėjimas ir lengvas tempimas patogiu diapazonu tinka; nespausk į skausmą ir netempk stipriai.',
+  'Heat helps stiff muscle, but neither one heals it — easy movement and time do.':
+    'Šiluma padeda sustingusiems raumenims, bet nė viena jų negydo — gydo lengvas judėjimas ir laikas.',
+  'If it is sharp, or hurts during the lift, skip it until it is checked.':
+    'Jei skausmas aštrus arba atsiranda pratimo metu, praleisk jį, kol kas nors patikrins.',
+  'In a session, tap the lift and choose Swap.':
+    'Treniruotėje bakstelėk pratimą ir pasirink Pakeisti.',
+  'Keep pain at {1}/{2} or lower.': 'Skausmą laikyk {1}/{2} arba mažesnį.',
+  'Maybe, in a lighter and pain-free version: if it does not hurt while you do it and is no worse the next day, it is fine.':
+    'Galbūt, lengvesne versija be skausmo: jei pratimo metu neskauda ir kitą dieną ne blogiau, galima.',
+  'Swap it for a variation that does not hurt: a different angle or grip, a machine or dumbbell version, a shorter range, or another muscle today.':
+    'Pakeisk variantu, kuris neskauda: kitu kampu ar sugriebimu, treniruokliu ar hanteliais, trumpesne amplitude arba šiandien kitu raumeniu.',
+  'Whenever you are ready, answer the last question and we will finish the check-in.':
+    'Kai būsi pasiruošęs, atsakyk į paskutinį klausimą ir užbaigsime patikrą.',
+  'Aim for {1}–{2} hours; even an extra hour helps.':
+    'Siek {1}–{2} valandų; net papildoma valanda padeda.',
+  'Calories can sit a little lower if you move less.':
+    'Kalorijų gali būti šiek tiek mažiau, jei mažiau judi.',
+  'If you feel ill or dizzy, rest instead.':
+    'Jei jautiesi blogai ar svaigsta galva, verčiau pailsėk.',
+  'It is not a disaster for a week, but fix it before you change the programme.':
+    'Savaitė – ne katastrofa, bet sutvarkyk tai, prieš keisdamas programą.',
+  'Keep protein the same on rest days — that is when the muscle is repaired and built.':
+    'Poilsio dienomis baltymų kiekis tas pats — tada raumenys atsistato ir auga.',
+  'Less sleep slows recovery and strength and raises hunger.':
+    'Mažiau miego lėtina atsistatymą ir jėgą bei didina alkį.',
+  'On a short night train, but keep it easier.': 'Po trumpos nakties treniruokis, bet lengviau.',
+  'That is on the short side.': 'Tai gana mažai.',
+  'That pace is for a beginner — it slows down after the first months.':
+    'Toks tempas skirtas pradedančiajam — po pirmų mėnesių jis sulėtėja.',
+  'Yes, but easier: same lifts, fewer sets, leave more reps in reserve.':
+    'Taip, bet lengviau: tie patys pratimai, mažiau serijų, palik daugiau pakartojimų atsargai.',
+  'Yes, regularly short sleep costs you: slower recovery, less strength and more hunger.':
+    'Taip, nuolat trumpas miegas kainuoja: lėtesnis atsistatymas, mažiau jėgos ir didesnis alkis.',
+  '{1} + {2} × {3} weeks = {4}.': '{1} + {2} × {3} sav. = {4}.',
+  '{1} {2}+ {3} {4}× {5} weeks = {6}.': '{1} {2}+ {3} {4}× {5} sav. = {6}.',
+  '{1} is {2}% of {3}.': '{1} yra {2}% nuo {3}.',
+  'In August: {1} sessions, {2} working sets.':
+    'Rugpjūtis: treniruočių — {1}, darbinių serijų — {2}.',
+  'In September: {1} sessions, {2} working sets.':
+    'Rugsėjis: treniruočių — {1}, darbinių serijų — {2}.',
+  'In October {1}: {2} sessions, {3} working sets.':
+    'Spalis {1}: treniruočių — {2}, darbinių serijų — {3}.',
+  'In {1}: {2} sessions, {3} working sets.': '{1}: treniruočių — {2}, darbinių serijų — {3}.',
+  'Your busiest month: {1} — {2} sessions, {3} working sets.':
+    'Aktyviausias mėnuo: {1} — treniruočių: {2}, darbinių serijų: {3}.',
+  'Your busiest month: {1}-{2} {3}— {4} sessions, {5} working sets.':
+    'Aktyviausias mėnuo: {1}-{2} {3}— treniruočių: {4}, darbinių serijų: {5}.',
+  'Your busiest week started {1}-{2}-{3} {4}— {5} sessions, {6} working sets.':
+    'Aktyviausia savaitė prasidėjo {1}-{2}-{3} {4}— treniruočių: {5}, darbinių serijų: {6}.',
+  'Your busiest week started {1}.{2} — {3} sessions, {4} working sets.':
+    'Aktyviausia savaitė prasidėjo {1}.{2} — treniruočių: {3}, darbinių serijų: {4}.',
+  'For size: {1}–{2} reps a set, the last {3}–{4} hard.':
+    'Masei: {1}–{2} pakartojimų serijoje, paskutiniai {3}–{4} sunkūs.',
+  'Add weight or a rep over time.': 'Laikui bėgant didink svorį arba pakartojimų skaičių.',
+  'There is no single best exercise.': 'Vienos geriausios pratimo nėra.',
+  'The best ones are big compound lifts you can do safely and progress on: squat, deadlift, bench or overhead press, rows and pull-ups.':
+    'Geriausi yra dideli daugiasąnariai judesiai, kuriuos gali daryti saugiai ir juose progresuoti: prisitūpimai, trauka nuo žemės, spaudimas gulint ar virš galvos, traukos ir prisitraukimai.',
+  'Pick the variation that suits your body and stick with it.':
+    'Pasirink variantą, tinkantį tavo kūnui, ir jo laikykis.',
+  'CrossFit mixes lifting, gymnastics and conditioning at high intensity.':
+    'CrossFit jungia kėlimą, gimnastiką ir ištvermę dideliu intensyvumu.',
+  'It builds fitness fast, but the constant variety makes steady strength progress hard to track, and injury risk grows when speed beats technique.':
+    'Greitai ugdo formą, bet nuolatinė įvairovė apsunkina jėgos pažangos sekimą, o traumų rizika auga, kai greitis nugali techniką.',
+  'If you love it, keep a couple of heavy lifting days and scale the rest.':
+    'Jei tau patinka, palik kelias sunkias jėgos dienas, o likusį mastelį mažink.',
+  'A desk job mostly costs you movement.': 'Biuro darbas dažniausiai atima judėjimą.',
+  'Stand up and walk a few minutes every hour, add rows and face pulls for the upper back, and some mobility for hips and neck.':
+    'Kas valandą atsistok ir pasivaikščiok kelias minutes, pridėk traukų ir face pull viršutinei nugaros daliai bei šiek tiek klubų ir kaklo mobilumo.',
+  'Train as usual — sitting is not a reason to train less.':
+    'Treniruokis kaip įprasta — sėdėjimas nėra priežastis treniruotis mažiau.',
+  'There is no magic number, but a session that drags well past an hour is mostly padding.':
+    'Stebuklingo skaičiaus nėra, bet treniruotė, kuri tęsiasi gerokai ilgiau nei valandą, daugiausia yra užpildas.',
+  'Hard sets, enough rest and energy left for the rest of your life beat more hours.':
+    'Sunkios serijos, pakankamas poilsis ir jėgos likusiam gyvenimui vertingesni už daugiau valandų.',
+  'If it costs you relationships, shorter and tighter sessions are a fair trade.':
+    'Jei tai kainuoja santykius, trumpesnės ir tikslesnės treniruotės yra sąžiningas mainas.',
+  'Open Apps → Apex → “Awards”: it lists the achievements you have unlocked.':
+    'Atidaryk Programos → Apex → „Apdovanojimai“: ten rasi atrakintus pasiekimus.',
+  'For strength: {1}–{2} reps a set with heavy weight and full rest, every rep still clean.':
+    'Jėgai: {1}–{2} pakartojimų serijoje su dideliu svoriu ir pilnu poilsiu, kiekvienas pakartojimas švarus.',
 };
