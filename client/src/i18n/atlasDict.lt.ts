@@ -5883,4 +5883,19 @@ export const DICT: Record<string, string> = {
   'That is not in this plan yet.': 'Šito plane dar nėra.',
   'Tell me what to change — for example “make it {1} minutes” gives each day extra slots — and I’ll rebuild it.':
     'Pasakyk, ką keisti — pavyzdžiui, „padaryk {1} min.“ suteikia kiekvienai dienai papildomų vietų — ir perdarysiu planą.',
+  'If you are not sure what to ask: what to train today, the next weight on a lift, or how you are progressing.':
+    'Jei nežinai, ko paklausti: ką šiandien treniruoti, kokį svorį imti kitą kartą arba kaip sekasi progresuoti.',
+  'Jacked is mostly consistency: {1}–{2} sessions a week, {3}–{4} reps close to failure, add weight or a rep over time, enough protein, a small calorie surplus and sleep.':
+    'Išvaizda daugiausia priklauso nuo nuoseklumo: {1}–{2} treniruotės per savaitę, {3}–{4} pakartojimai arti nepakankamumo, laikui bėgant didink svorį ar pakartojimą, pakankamai baltymų, nedidelis kalorijų perteklius ir miegas.',
+  'No rush.': 'Neskubėk.',
+  'Pick one or just say what is on your mind.': 'Pasirink vieną arba tiesiog pasakyk, kas galvoje.',
+  'Sleep and food do half the work.': 'Miegas ir mityba atlieka pusę darbo.',
+  'Strength comes from heavy basic lifts done often: squat, bench, row, deadlift or press {1}–{2} times a week, {3}–{4} reps, add a little weight when every set is clean.':
+    'Jėga auga nuo sunkių pagrindinių pratimų, atliekamų dažnai: prisitūpimai, spaudimas, trauka, mirties trauka ar spaudimas virš galvos {1}–{2} kartus per savaitę, {3}–{4} pakartojimai, pridėk šiek tiek svorio, kai visos serijos švarios.',
+  'Tell me which lift to push and I’ll show where you stand in your log.':
+    'Pasakyk, kurį pratimą stumiame, ir parodysiu, kur esi pagal žurnalą.',
+  'The log shows the progress before the mirror does.':
+    'Žurnalas parodo progresą anksčiau nei veidrodis.',
+  'Want a plan for it?': 'Nori plano?',
+  'Yes.': 'Taip.',
 };

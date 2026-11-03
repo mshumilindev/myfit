@@ -164,6 +164,15 @@ export const CONV_CASES: ConvCase[] = [
   c('en', ['my elbow hurts when i bench', 'should i see a doctor'], /not a doctor/),
   c('en', ['my elbow hurts when i bench', 'how long until it heals'], /can’t give a date/),
   c('uk', ['болить лікоть', 'чи варто йти до лікаря'], /Я не лікар/),
+  // P12: small talk and chaos
+  c('en', ['can you help me get stronger'], /heavy basic lifts/, { forbid: /gym buddy/ }),
+  c('en', ['i wanna get jacked'], /Jacked is mostly consistency/, {
+    forbid: /carry your whole log/,
+  }),
+  c('uk', ['хочу стати накачаним'], /Накачаний — це здебільшого/),
+  c('en', ['idk'], /No rush/),
+  c('en', ['what should i start with'], /3 full-body sessions/),
+  c('en', ['set a timer for 90 seconds'], /rest ring/, { forbid: /Which lift/ }),
   // known weaknesses (fix → drop `gap`)
   c('en', ['log 3 sets of pullups'], /tap “Log”/, { forbid: /3–4 days a week/ }),
   c('uk', ['залогуй 3 підходи підтягувань'], /«Запис»/),

@@ -5828,4 +5828,18 @@ export const DICT: Record<string, string> = {
   'That is not in this plan yet.': 'Seda pole selles plaanis veel.',
   'Tell me what to change — for example “make it {1} minutes” gives each day extra slots — and I’ll rebuild it.':
     'Ütle, mida muuta — näiteks „tee {1} minutit“ annab igale päevale lisakohti — ja ehitan plaani ümber.',
+  'If you are not sure what to ask: what to train today, the next weight on a lift, or how you are progressing.':
+    'Kui sa ei tea, mida küsida: mida täna treenida, mis on järgmine raskus harjutuses või kuidas edusammud lähevad.',
+  'Jacked is mostly consistency: {1}–{2} sessions a week, {3}–{4} reps close to failure, add weight or a rep over time, enough protein, a small calorie surplus and sleep.':
+    'Lihaseline välimus tuleb peamiselt järjepidevusest: {1}–{2} treeningut nädalas, {3}–{4} kordust ebaõnnestumise lähedal, aja jooksul lisa raskust või kordus, piisavalt valku, väike kaloriülejääk ja uni.',
+  'No rush.': 'Pole kiiret.',
+  'Pick one or just say what is on your mind.': 'Vali üks või ütle lihtsalt, mis mõttes on.',
+  'Sleep and food do half the work.': 'Uni ja toit teevad poole tööst.',
+  'Strength comes from heavy basic lifts done often: squat, bench, row, deadlift or press {1}–{2} times a week, {3}–{4} reps, add a little weight when every set is clean.':
+    'Jõud kasvab rasketest põhiharjutustest, mida teed sageli: kükk, surumine, sõudmine, jõutõmme või õlapress {1}–{2} korda nädalas, {3}–{4} kordust, lisa veidi raskust, kui iga seeria on puhas.',
+  'Tell me which lift to push and I’ll show where you stand in your log.':
+    'Ütle, millist harjutust upitame, ja näitan, kus sa logi järgi oled.',
+  'The log shows the progress before the mirror does.': 'Logi näitab edu enne kui peegel.',
+  'Want a plan for it?': 'Kas soovid plaani?',
+  'Yes.': 'Jah.',
 };

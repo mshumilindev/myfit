@@ -59,6 +59,10 @@ const DOCTOR_RE =
 const HEAL_RE =
   /how long (until|till|will it take|before)\b.*\b(heal\w*|recover\w*|go away|better|fine|settle)|when (will|does|should) (it|this) (heal|go away|get better|stop|settle)|(?<!\p{L})скільки (часу )?(буде )?(гоїт\p{L}*|проходит\p{L}*|лікуват\p{L}*|відновлюват\p{L}*)|коли (воно )?(пройде|заживе|загоїться)/iu;
 
+/** "Can you help me get stronger?" — a request for help, not the goal statement "I want to get stronger" (that is the goal topic's). */
+const STRONGER_RE =
+  /^\s*((hey|ok(ay)?|so) )?(can|could|would) you (please )?help me (get|become|be) stronger\b|^\s*help me (get|become|be) stronger\b|^\s*допоможи(ть)? (мені )?(стати|бути) сильніш/iu;
+
 /** "Should I see a doctor?" / "how long until it heals?" asked in or right after a pain check-in. */
 export const painFollowUp = (question: string): boolean =>
   DOCTOR_RE.test(question) || HEAL_RE.test(question);
@@ -92,6 +96,14 @@ export function followTurn<C extends FConvo>(
     chips,
     convo: { ...convo, turn, q: question },
   });
+  if (STRONGER_RE.test(question))
+    return keep(
+      'get_stronger',
+      L(
+        'Yes. Strength comes from heavy basic lifts done often: squat, bench, row, deadlift or press 2–3 times a week, 3–6 reps, add a little weight when every set is clean. Sleep and food do half the work. Tell me which lift to push and I’ll show where you stand in your log.',
+        'Так. Сила росте від важких базових вправ, які робиш часто: присід, жим, тяга, станова чи жим стоячи 2–3 рази на тиждень, 3–6 повторів, додавай трохи ваги, коли всі сети чисті. Сон і їжа дають половину результату. Скажи, яку вправу тягнемо, і я покажу, де ти за журналом.',
+      ),
+    );
   // Anywhere: the pain check-in clears its own state when it hands the turn over, and the answer is safe on its own.
   if (painFollowUp(question)) {
     if (DOCTOR_RE.test(question))
