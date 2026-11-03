@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { WAVE_BARS, waveSteps } from './callWave';
+import { WAVE_BARS, waveSteps } from './waveSteps';
 
 describe('waveSteps', () => {
   it('draws one step per bar, each 1..10', () => {

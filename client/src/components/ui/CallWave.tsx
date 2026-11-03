@@ -1,4 +1,4 @@
-import { WAVE_BARS, waveSteps } from './callWave';
+import { WAVE_BARS, waveSteps } from './waveSteps';
 import './Call.css';
 
 export interface CallWaveProps {
