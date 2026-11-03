@@ -7,6 +7,7 @@
 import type { DataMemo } from './dataQuestion';
 import { dataTurn } from './dataTurn';
 import { freshQuestion, leavesFlow } from './flowExit';
+import { canonQuestion, flowConvo } from './followP22';
 import { remember, type Said } from './metaTurn';
 import { setTypeOf } from '../store';
 import {
@@ -784,12 +785,7 @@ function answerOne(
     text: r.text,
     chips: r.chips,
     action: r.action,
-    convo: {
-      turn,
-      flow: r.flow ?? undefined,
-      exercise: r.flow?.kind === 'pain' ? (r.flow.lift ?? null) : p.exercise,
-      softUntil: convo.softUntil,
-    },
+    convo: flowConvo(r, turn, p.exercise, convo.softUntil),
   });
   if (convo.flow) {
     // Short replies and tapped options belong to the flow; a new long question ends it.
@@ -1998,7 +1994,7 @@ export function startChips(c: AskCtx, L: Tr): string[] {
 }
 
 export function answerLocally(question0: string, c: AskCtx, convo: Convo = {}): LocalAnswer | null {
-  const question = expandSlang(question0);
+  const question = canonQuestion(expandSlang(question0));
   askingCtx = c;
   parsedHere.clear();
   featuresHere.clear();

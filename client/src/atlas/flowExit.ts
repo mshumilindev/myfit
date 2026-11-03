@@ -14,6 +14,9 @@ const THANKS_RE =
 /** The same switches in Polish, Lithuanian and Estonian (\b is ASCII-only, so explicit boundaries). */
 const SWITCH_X_RE =
   /(?<!\p{L})(ką (šiandien )?treniruoti|kiek baltymų|kas tu|koks mano|kiek kartų|mida (täna )?treenida|kui palju valku|kes sa oled|mis on minu|mitu (korda|seeriat)|co (dziś |dzisiaj )?trenować|ile białka|kto cię|jaki jest mój|ile (serii|razy|ważyłem))(?!\p{L})/iu;
+/** Another topic named outright (food, supplements, sleep…) or "back to training": not an answer to a pain question. */
+const TOPIC_RE =
+  /(?<!\p{L})(protein|creatine|calories|carbs|caffeine|supplements?|bcaa|whey|vitamin|alcohol|білок|білка|креатин\p{L}*|калорі\p{L}*|вуглевод\p{L}*|кофеїн\p{L}*|добавк\p{L}*|алкогол\p{L}*)(?!\p{L})|(?<!\p{L})back to (training|the gym|lifting|my workout)|(?<!\p{L})повертаємось до тренувань/iu;
 const SWITCH_RE =
   /\b(what should i train|what to train|show (me )?my|how is my|how are my|what('s| is) my|when did i|how (much|many) did i)\b|що (мені )?тренувати|покажи (мій|мою|моє|мої)|як (там )?(мій|моя|моє|мої)|який (в мене|мій)|коли я (востаннє|останній раз)|co (dziś |dzisiaj )?trenować|pokaż moj\p{L}*|jak (tam )?(mój|moja|moje)/iu;
 
@@ -28,6 +31,7 @@ export function leavesFlow(
     THANKS_RE.test(question) ||
     painFollowUp(question) ||
     SWITCH_RE.test(question) ||
+    TOPIC_RE.test(question) ||
     SWITCH_X_RE.test(question) ||
     !!metaTurn(question, {}, 0, L) ||
     !!readDataQuestion(question, parse(question, c), c)

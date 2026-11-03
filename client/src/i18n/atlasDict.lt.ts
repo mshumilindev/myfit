@@ -5993,4 +5993,61 @@ export const DICT: Record<string, string> = {
     'Atidaryk Programos → Apex → „Apdovanojimai“: ten rasi atrakintus pasiekimus.',
   'For strength: {1}–{2} reps a set with heavy weight and full rest, every rep still clean.':
     'Jėgai: {1}–{2} pakartojimų serijoje su dideliu svoriu ir pilnu poilsiu, kiekvienas pakartojimas švarus.',
+  "I'm not a doctor and I can't prescribe or diagnose anything.":
+    'Aš ne gydytojas ir nieko neskiriu bei nediagnozuoju.',
+  'For medicine or symptoms, see a doctor or a pharmacist.':
+    'Dėl vaistų ar simptomų kreipkis į gydytoją arba vaistininką.',
+  "For training, I'm here.": 'Dėl treniruočių esu čia.',
+  'Most muscles do well on about {1}–{2} hard sets a week, split over two sessions.':
+    'Daugumai raumenų užtenka maždaug {1}–{2} sunkių serijų per savaitę, išskirstytų per dvi treniruotes.',
+  'Beginners need fewer; add sets only when progress stalls.':
+    'Pradedantiesiems reikia mažiau; serijas pridėk tik kai pažanga sustoja.',
+  'Hips at least to knee height is the standard; deeper is fine if your back stays flat and your heels stay down.':
+    'Standartas — klubai bent iki kelių lygio; giliau galima, jei nugara lieka tiesi, o kulnai nuo žemės nekyla.',
+  'Go only as deep as you can control.': 'Eik tik tiek giliai, kiek gali kontroliuoti.',
+  'About shoulder-width with the toes turned slightly out; a bit wider if your hips feel pinched.':
+    'Maždaug pečių plotyje, pirštai šiek tiek į šalis; truputį plačiau, jei klubus spaudžia.',
+  'The knees follow the toes.': 'Keliai seka paskui pirštus.',
+  'Not straight out at {1}°: tuck them to about {2}° from the body so the shoulders stay happy.':
+    'Ne tiesiai į šonus {1}° kampu: laikyk alkūnes maždaug {2}° kampu nuo kūno, kad pečiai jaustųsi gerai.',
+  'Film from the front to check.': 'Nufilmuok iš priekio ir patikrink.',
+  'This week so far: {1}, against ~{2} a week over the previous {3} weeks (-{4}%).':
+    'Šią savaitę kol kas: {1}, palyginti su ~{2} per savaitę ankstesnes {3} savaites (-{4}%).',
+  'The week is not over yet.': 'Savaitė dar nesibaigė.',
+  '{1}: your top weight, {2}, was first reached {3} weeks ago and has not gone up since.':
+    '{1}: tavo darbinis svoris {2} pirmą kartą pasiektas prieš {3} sav. ir nuo to laiko nepadidėjo.',
+  'Were you using a straight bar or bending your wrists?':
+    'Ar naudojai tiesų grifą, ar lenkei riešus?',
+  "Train around it for {1}–{2} weeks: cut the load on exercises for elbow by {3}–{4}% and only use the range that doesn't hurt; pain during a set should stay at {5}/{6} or lower and be gone by the next day.":
+    'Treniruokis aplink skausmą {1}–{2} savaites: sumažink alkūnei skirtų pratimų apkrovą {3}–{4}% ir naudok tik skausmo nesukeliantį amplitudės ruožą; skausmas serijos metu turi likti {5}/{6} ar mažesnis ir išnykti iki kitos dienos.',
+  'Switch to an EZ bar or dumbbells, keep the wrists straight, and slow the lowering.':
+    'Pereik prie lenkto grifo ar hantelių, laikyk riešus tiesiai ir lėtink nuleidimą.',
+  'A brace or sleeve can feel comfortable, but it does not treat the cause.':
+    'Įtvaras ar rankogalis gali teikti komfortą, bet nepašalina priežasties.',
+  'Do not use it to train through sharp pain.': 'Nenaudok jo treniruotis per aštrų skausmą.',
+  'Anything that does not hurt during or after it: skip the painful movement and range, use lighter loads, machines or another muscle group.':
+    'Viskas, kas neskauda nei metu, nei po: praleisk skausmingą judesį ir amplitudę, imk lengvesnį svorį, treniruoklį ar kitą raumenų grupę.',
+  'It depends on the cause and I cannot diagnose it.':
+    'Tai priklauso nuo priežasties, o aš negaliu diagnozuoti.',
+  'Train around it for {1}–{2} weeks; if it is not clearly better by then, or it gets worse, see a doctor or a physio.':
+    'Treniruokis aplink skausmą {1}–{2} savaites; jei per tą laiką aiškiai nepagerėja arba blogėja, kreipkis į gydytoją ar fizioterapeutą.',
+  'Nothing logged yesterday.': 'Vakar nieko neužrašyta.',
+  'Your last session was {1} ({2}-{3}-{4}).': 'Tavo paskutinė treniruotė buvo {1} ({2}-{3}-{4}).',
+  'Yes — {1}, last week: {2} session, {3} sets.':
+    'Taip — {1}, praeitą savaitę: treniruočių — {2}, serijų — {3}.',
+  'For heavy bench or squats close to failure, yes if you can: a spotter, or safety pins in the rack.':
+    'Sunkiam spaudimui gulint ar prisitūpimams arti atsisakymo — taip, jei gali: padėjėjas arba apsauginiai strypai stove.',
+  'On easy sets you do not need one.': 'Lengvose serijose jo nereikia.',
+  'Stop when you reach your goal, or earlier if strength, sleep and mood keep sliding for a couple of weeks.':
+    'Sustok, kai pasieksi tikslą, arba anksčiau, jei jėga, miegas ir nuotaika kelias savaites nuolat krenta.',
+  'Then eat at maintenance for a while (a diet break) rather than cutting forever.':
+    'Tada kurį laiką valgyk palaikymo kalorijomis (pertrauka nuo dietos), o ne dietuok be galo.',
+  'Yes, whey is just protein from milk, so it is fine every day if it helps you reach your daily protein.':
+    'Taip, išrūgų baltymai tėra pieno baltymai, todėl kasdien galima, jei jie padeda surinkti dienos baltymų normą.',
+  'If it upsets your stomach, try whey isolate or a plant protein.':
+    'Jei erzina skrandį, išbandyk izoliatą arba augalinius baltymus.',
+  'Not if you keep lifting heavy, eat enough protein and keep the deficit moderate.':
+    'Ne, jei ir toliau sunkiai treniruojiesi, valgai pakankamai baltymų ir laikai nedidelį deficitą.',
+  'Most of what you lose should be fat.': 'Didžioji dalis to, ką prarandi, turėtų būti riebalai.',
+  'On a {1} kg bar: per side {2} {3}+ {4}.': 'Ant {1} kg grifo: iš kiekvienos pusės {2} {3}+ {4}.',
 };

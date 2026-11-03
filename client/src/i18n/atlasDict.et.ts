@@ -5934,4 +5934,61 @@ export const DICT: Record<string, string> = {
     'Ava Rakendused → Apex → „Auhinnad“: seal on avatud saavutused.',
   'For strength: {1}–{2} reps a set with heavy weight and full rest, every rep still clean.':
     'Jõuks: {1}–{2} kordust seerias suure raskuse ja täieliku puhkusega, iga kordus puhas.',
+  "I'm not a doctor and I can't prescribe or diagnose anything.":
+    'Ma ei ole arst ega määra ega diagnoosi midagi.',
+  'For medicine or symptoms, see a doctor or a pharmacist.':
+    'Ravimite või sümptomite puhul pöördu arsti või apteekri poole.',
+  "For training, I'm here.": 'Treeningu osas olen siin.',
+  'Most muscles do well on about {1}–{2} hard sets a week, split over two sessions.':
+    'Enamikule lihastele piisab umbes {1}–{2} rasket seeriast nädalas, jaotatuna kahele treeningule.',
+  'Beginners need fewer; add sets only when progress stalls.':
+    'Algajatel on vaja vähem; lisa seeriaid alles siis, kui areng seisab.',
+  'Hips at least to knee height is the standard; deeper is fine if your back stays flat and your heels stay down.':
+    'Standard on puusad vähemalt põlvekõrguseni; sügavamale võib, kui selg püsib sirge ja kannad maas.',
+  'Go only as deep as you can control.': 'Mine nii sügavale, kui suudad kontrollida.',
+  'About shoulder-width with the toes turned slightly out; a bit wider if your hips feel pinched.':
+    'Umbes õlalaiuselt, varbad kergelt väljapoole; veidi laiemalt, kui puusi pitsitab.',
+  'The knees follow the toes.': 'Põlved järgivad varbaid.',
+  'Not straight out at {1}°: tuck them to about {2}° from the body so the shoulders stay happy.':
+    'Mitte otse külgedele {1}° all: hoia küünarnukke umbes {2}° all kehast, et õlad oleksid rahul.',
+  'Film from the front to check.': 'Filmi eestpoolt ja kontrolli.',
+  'This week so far: {1}, against ~{2} a week over the previous {3} weeks (-{4}%).':
+    'Sel nädalal seni: {1}, võrreldes ~{2}-ga nädalas eelnevatel {3} nädalal (-{4}%).',
+  'The week is not over yet.': 'Nädal pole veel läbi.',
+  '{1}: your top weight, {2}, was first reached {3} weeks ago and has not gone up since.':
+    '{1}: sinu töökaal {2} saavutati esimest korda {3} näd. tagasi ja pole sellest ajast tõusnud.',
+  'Were you using a straight bar or bending your wrists?':
+    'Kas kasutasid sirget kangi või painutasid randmeid?',
+  "Train around it for {1}–{2} weeks: cut the load on exercises for elbow by {3}–{4}% and only use the range that doesn't hurt; pain during a set should stay at {5}/{6} or lower and be gone by the next day.":
+    'Treeni valu ümber {1}–{2} nädalat: vähenda küünarnukile mõeldud harjutuste koormust {3}–{4}% ja kasuta ainult valuta liikumisulatust; valu seerias peaks jääma {5}/{6} või alla ja mööduma järgmiseks päevaks.',
+  'Switch to an EZ bar or dumbbells, keep the wrists straight, and slow the lowering.':
+    'Vaheta EZ-kangi või hantlite vastu, hoia randmed sirged ja aeglusta langetamist.',
+  'A brace or sleeve can feel comfortable, but it does not treat the cause.':
+    'Ortoos või side võib anda mugavust, kuid ei ravi põhjust.',
+  'Do not use it to train through sharp pain.': 'Ära kasuta seda, et treenida läbi terava valu.',
+  'Anything that does not hurt during or after it: skip the painful movement and range, use lighter loads, machines or another muscle group.':
+    'Kõik, mis ei valuta ei ajal ega pärast: jäta valus liigutus ja ulatus vahele, kasuta kergemat koormust, masinat või teist lihasgruppi.',
+  'It depends on the cause and I cannot diagnose it.':
+    'See sõltub põhjusest ja ma ei oska diagnoosida.',
+  'Train around it for {1}–{2} weeks; if it is not clearly better by then, or it gets worse, see a doctor or a physio.':
+    'Treeni valu ümber {1}–{2} nädalat; kui selleks ajaks ei ole selgelt parem või läheb hullemaks, mine arsti või füsioterapeudi juurde.',
+  'Nothing logged yesterday.': 'Eile ei ole midagi kirja pandud.',
+  'Your last session was {1} ({2}.{3}).': 'Sinu viimane treening oli {1} ({2}.{3}).',
+  'Yes — {1}, last week: {2} session, {3} sets.':
+    'Jah — {1}, eelmisel nädalal: treeninguid — {2}, seeriaid — {3}.',
+  'For heavy bench or squats close to failure, yes if you can: a spotter, or safety pins in the rack.':
+    'Raske rinnalt surumise või kükkide puhul ebaõnnestumise lähedal — jah, kui saad: kaaslane või turvatihvtid rekis.',
+  'On easy sets you do not need one.': 'Kergetes seeriates pole seda vaja.',
+  'Stop when you reach your goal, or earlier if strength, sleep and mood keep sliding for a couple of weeks.':
+    'Lõpeta, kui jõuad eesmärgini, või varem, kui jõud, uni ja tuju mitu nädalat järjest langevad.',
+  'Then eat at maintenance for a while (a diet break) rather than cutting forever.':
+    'Seejärel ole mõnda aega hoolduskaloritel (dieedipaus), mitte ära kuivata lõputult.',
+  'Yes, whey is just protein from milk, so it is fine every day if it helps you reach your daily protein.':
+    'Jah, vadakuvalk on lihtsalt piimavalk, nii et iga päev sobib, kui see aitab päevase valgu kätte saada.',
+  'If it upsets your stomach, try whey isolate or a plant protein.':
+    'Kui see ärritab magu, proovi isolaati või taimset valku.',
+  'Not if you keep lifting heavy, eat enough protein and keep the deficit moderate.':
+    'Mitte siis, kui jätkad rasket treeningut, sööd piisavalt valku ja hoiad mõõduka defitsiidi.',
+  'Most of what you lose should be fat.': 'Suurem osa sellest, mida kaotad, peaks olema rasv.',
+  'On a {1} kg bar: per side {2} + {3}.': '{1} kg kangil: igal küljel {2} + {3}.',
 };

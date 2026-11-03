@@ -114,6 +114,39 @@ const TOPICS: Topic[] = [
     suggest: SUG,
   },
   {
+    id: 'spotter_need',
+    keys: [['spotter']],
+    answer: [
+      'For heavy bench or squats close to failure, yes if you can: a spotter, or safety pins in the rack. On easy sets you do not need one.',
+      'Для важкого жиму чи присіду біля відмови — так, якщо є можливість: страхувальник або запобіжні упори в стійці. На легких підходах він не потрібен.',
+    ],
+    ex: [],
+    exUk: [],
+    suggest: SUG,
+  },
+  {
+    id: 'stop_cutting',
+    keys: [['stop cutting']],
+    answer: [
+      'Stop when you reach your goal, or earlier if strength, sleep and mood keep sliding for a couple of weeks. Then eat at maintenance for a while (a diet break) rather than cutting forever.',
+      'Зупиняйся, коли досягнеш цілі, або раніше, якщо сила, сон і настрій кілька тижнів поспіль падають. Потім побудь на підтримці (перерва від дієти), а не сушись без кінця.',
+    ],
+    ex: [],
+    exUk: [],
+    suggest: SUG,
+  },
+  {
+    id: 'whey_daily',
+    keys: [['whey']],
+    answer: [
+      'Yes, whey is just protein from milk, so it is fine every day if it helps you reach your daily protein. If it upsets your stomach, try whey isolate or a plant protein.',
+      'Так, вей — це просто білок із молока, тож щодня можна, якщо він допомагає добрати білок за день. Якщо шлунок бунтує, спробуй ізолят або рослинний протеїн.',
+    ],
+    ex: [],
+    exUk: [],
+    suggest: SUG,
+  },
+  {
     id: 'app_awards',
     keys: [
       [
@@ -203,6 +236,21 @@ export function repsGoal(
 
 const U = (re: string) => new RegExp(re, 'iu');
 const ROUTES_P20: [string, RegExp, RegExp | null][] = [
+  ['spotter_need', U('(do|should) i need a spotter|чи потрібен (мені )?страхувальник'), null],
+  [
+    'stop_cutting',
+    U(
+      'when (should|do) i (stop|end|finish) (cutting|my cut|dieting)|коли (припиняти|закінчувати) (сушку|дієту)',
+    ),
+    null,
+  ],
+  [
+    'whey_daily',
+    U(
+      '(?<!\\p{L})is (whey|protein powder|protein shakes?)( protein)? (every ?day |daily )?(ok|safe|fine|bad|okay)(?!\\p{L})',
+    ),
+    null,
+  ],
   ['crossfit', U('(?<!\\p{L})(crossfit|кросфіт|кроссфит)(?!\\p{L})'), null],
   [
     'desk_job',
