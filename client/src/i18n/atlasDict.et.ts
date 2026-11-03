@@ -5985,6 +5985,10 @@ export const DICT: Record<string, string> = {
     'Seejärel ole mõnda aega hoolduskaloritel (dieedipaus), mitte ära kuivata lõputult.',
   'Yes, whey is just protein from milk, so it is fine every day if it helps you reach your daily protein.':
     'Jah, vadakuvalk on lihtsalt piimavalk, nii et iga päev sobib, kui see aitab päevase valgu kätte saada.',
+  'A weight is too heavy if your form breaks, the bar slows down a lot, or you cannot reach the bottom of your rep range.':
+    'Raskus on liiga suur, kui tehnika laguneb, kang aeglustub tugevalt või ei saa korduste alumist piiri kätte.',
+  'Finish a set with a rep or two left in the tank.':
+    'Lõpeta seeria nii, et jääb varu kordus või paar.',
   'If it upsets your stomach, try whey isolate or a plant protein.':
     'Kui see ärritab magu, proovi isolaati või taimset valku.',
   'Not if you keep lifting heavy, eat enough protein and keep the deficit moderate.':

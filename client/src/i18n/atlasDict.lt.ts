@@ -6044,6 +6044,10 @@ export const DICT: Record<string, string> = {
     'Tada kurį laiką valgyk palaikymo kalorijomis (pertrauka nuo dietos), o ne dietuok be galo.',
   'Yes, whey is just protein from milk, so it is fine every day if it helps you reach your daily protein.':
     'Taip, išrūgų baltymai tėra pieno baltymai, todėl kasdien galima, jei jie padeda surinkti dienos baltymų normą.',
+  'A weight is too heavy if your form breaks, the bar slows down a lot, or you cannot reach the bottom of your rep range.':
+    'Svoris per sunkus, jei lūžta technika, štanga labai sulėtėja arba nepasiekiamas apatinis pakartojimų rėžis.',
+  'Finish a set with a rep or two left in the tank.':
+    'Baik seriją turėdamas atsargoje pakartojimą ar du.',
   'If it upsets your stomach, try whey isolate or a plant protein.':
     'Jei erzina skrandį, išbandyk izoliatą arba augalinius baltymus.',
   'Not if you keep lifting heavy, eat enough protein and keep the deficit moderate.':
