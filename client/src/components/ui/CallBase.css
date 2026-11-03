@@ -231,6 +231,7 @@
   gap: var(--s-8);
   min-width: 0;
   padding: var(--s-6) 0;
+  font-size: var(--fs-14);
   text-align: left;
   color: var(--color-ok-text);
   background: none;

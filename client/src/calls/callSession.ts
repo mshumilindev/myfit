@@ -147,6 +147,8 @@ export class CallSession {
     this.clearTimers();
     try {
       this.local = await this.o.devices.getMedia(kind);
+      // hung up or disposed while the permission prompt was open: do not answer a call that is gone
+      if (epoch !== this.epoch) return this.stopLocal();
     } catch (e) {
       const reason = endReasonFromMediaError(e);
       void this.o.api.answer({ callId, accept: false }).catch(() => {});
@@ -155,6 +157,7 @@ export class CallSession {
     }
     try {
       const servers = await this.iceServers(callId);
+      if (epoch !== this.epoch) return this.stopLocal();
       const pc = this.makePeer(servers, this.policy(servers));
       await pc.setRemoteDescription(this.offer);
       this.haveRemote = true;

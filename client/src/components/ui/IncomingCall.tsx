@@ -53,7 +53,13 @@ export function IncomingCall({
       aria-label={`${name}: ${kind}`}
     >
       {card ? (
-        <Avatar name={name} src={photo} size={48} className="uicall-in-av" />
+        <Avatar
+          name={name}
+          src={photo}
+          size={48}
+          className="uicall-in-av"
+          style={{ fontSize: 'var(--fs-18)' }}
+        />
       ) : (
         <CallRings name={name} photo={photo} size={120} />
       )}

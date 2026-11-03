@@ -92,3 +92,24 @@ describe('callReducer', () => {
     expect(elapsedSeconds({ ...IDLE, connectedAt: 5000 }, 1000)).toBe(0);
   });
 });
+
+describe('degrade', () => {
+  const active = (kind: 'voice' | 'video') =>
+    run([
+      { type: 'dial', callId: 'c'.repeat(20), peerId: 'u2', kind },
+      { type: 'remote-answered' },
+      { type: 'connected', at: 1 },
+    ]);
+  it('a video call drops to voice only, camera off', () => {
+    expect(run([{ type: 'degrade' }], active('video'))).toMatchObject({
+      voiceOnly: true,
+      camOn: false,
+    });
+  });
+  it('a voice call, or one that is not connected, is left as it is', () => {
+    const v = active('voice');
+    expect(run([{ type: 'degrade' }], v)).toBe(v);
+    const ringing = run([dial]);
+    expect(run([{ type: 'degrade' }], ringing)).toBe(ringing);
+  });
+});
