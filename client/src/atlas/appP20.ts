@@ -147,6 +147,17 @@ const TOPICS: Topic[] = [
     suggest: SUG,
   },
   {
+    id: 'too_heavy',
+    keys: [['too heavy']],
+    answer: [
+      'A weight is too heavy if your form breaks, the bar slows down a lot, or you cannot reach the bottom of your rep range. Finish a set with a rep or two left in the tank.',
+      'Вага завелика, якщо ламається техніка, штанга сильно сповільнюється або ти не добираєш нижню межу повторів. Закінчуй підхід із запасом у повтор-два.',
+    ],
+    ex: [],
+    exUk: [],
+    suggest: SUG,
+  },
+  {
     id: 'app_awards',
     keys: [
       [
@@ -248,6 +259,13 @@ const ROUTES_P20: [string, RegExp, RegExp | null][] = [
     'whey_daily',
     U(
       '(?<!\\p{L})is (whey|protein powder|protein shakes?)( protein)? (every ?day |daily )?(ok|safe|fine|bad|okay)(?!\\p{L})',
+    ),
+    null,
+  ],
+  [
+    'too_heavy',
+    U(
+      '(?<!\\p{L})how (do|can|would) i (know|tell|check) (if |when )?(it is|it.s|the weight is|a weight is|this is) too heavy',
     ),
     null,
   ],

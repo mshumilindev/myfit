@@ -6015,6 +6015,10 @@ export const DICT: Record<string, string> = {
     'Potem pobądź jakiś czas na kaloriach podtrzymania (przerwa od diety), zamiast redukować bez końca.',
   'Yes, whey is just protein from milk, so it is fine every day if it helps you reach your daily protein.':
     'Tak, whey to po prostu białko z mleka, więc codziennie jest w porządku, jeśli pomaga dobrać białko na dzień.',
+  'A weight is too heavy if your form breaks, the bar slows down a lot, or you cannot reach the bottom of your rep range.':
+    'Ciężar jest za duży, jeśli rozpada się technika, sztanga mocno zwalnia albo nie dobijasz do dolnej granicy powtórzeń.',
+  'Finish a set with a rep or two left in the tank.':
+    'Kończ serię z zapasem jednego lub dwóch powtórzeń.',
   'If it upsets your stomach, try whey isolate or a plant protein.':
     'Jeśli drażni żołądek, spróbuj izolatu lub białka roślinnego.',
   'Not if you keep lifting heavy, eat enough protein and keep the deficit moderate.':
