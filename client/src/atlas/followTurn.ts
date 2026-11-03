@@ -14,6 +14,7 @@ import { parseRange } from './when';
 import { bestPeriod } from './appP17';
 import { p20Topic, repsGoal } from './appP20';
 import { p21Guard } from './appP21';
+import { p22Follow, painMore } from './followP22';
 import * as N from './num';
 import type { Route } from './confidence';
 
@@ -111,6 +112,8 @@ export function followTurn<C extends FConvo>(
     };
   const g21 = p21Guard(question, L);
   if (g21) return keep(g21.intent, g21.text);
+  const f22 = p22Follow(question, c, convo, L);
+  if (f22) return keep(f22.intent, f22.text);
   const p20 = p20Topic(question, L);
   if (p20) return keep(p20.intent, p20.text);
   const bp = bestPeriod(question, c, L);
@@ -214,7 +217,9 @@ export function painSide(question: string): PainSide | null {
 /** A pain-check side question answered while the check-in stays open (null = not one). */
 export function painSideAnswer<F>(q: string, L: Tr, flow: F) {
   const side = painSide(q);
-  return side ? { intent: `pain_side_${side}`, text: painSideReply(side, L), flow } : null;
+  if (side) return { intent: `pain_side_${side}`, text: painSideReply(side, L), flow };
+  const more = painMore(q, L);
+  return more ? { ...more, flow } : null;
 }
 
 export function painSideReply(kind: PainSide, L: Tr): string {

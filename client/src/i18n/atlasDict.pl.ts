@@ -5969,4 +5969,41 @@ export const DICT: Record<string, string> = {
   'For medicine or symptoms, see a doctor or a pharmacist.':
     'W sprawie leków lub objawów idź do lekarza albo farmaceuty.',
   "For training, I'm here.": 'W kwestii treningu jestem tutaj.',
+  'Most muscles do well on about {1}–{2} hard sets a week, split over two sessions.':
+    'Większości mięśni wystarcza około {1}–{2} ciężkich serii tygodniowo, rozłożonych na dwa treningi.',
+  'Beginners need fewer; add sets only when progress stalls.':
+    'Początkujący potrzebują mniej; dodawaj serie tylko wtedy, gdy postępy stoją.',
+  'Hips at least to knee height is the standard; deeper is fine if your back stays flat and your heels stay down.':
+    'Standardem jest zejście z biodrami co najmniej do wysokości kolan; głębiej można, jeśli plecy zostają proste, a pięty na podłodze.',
+  'Go only as deep as you can control.': 'Schodź tylko tak głęboko, jak potrafisz kontrolować.',
+  'About shoulder-width with the toes turned slightly out; a bit wider if your hips feel pinched.':
+    'Mniej więcej na szerokość barków, palce lekko na zewnątrz; trochę szerzej, jeśli biodra się „zakleszczają”.',
+  'The knees follow the toes.': 'Kolana podążają za palcami.',
+  'Not straight out at {1}°: tuck them to about {2}° from the body so the shoulders stay happy.':
+    'Nie prosto na boki pod {1}°: trzymaj łokcie pod kątem około {2}° do tułowia, żeby barki były zadowolone.',
+  'Film from the front to check.': 'Nagraj się od frontu i sprawdź.',
+  'This week so far: {1}, against ~{2} a week over the previous {3} weeks (-{4}%).':
+    'W tym tygodniu na razie: {1}, wobec ~{2} tygodniowo w poprzednich {3} tygodniach (-{4}%).',
+  'The week is not over yet.': 'Tydzień jeszcze się nie skończył.',
+  '{1}: your top weight, {2}, was first reached {3} weeks ago and has not gone up since.':
+    '{1}: twój roboczy ciężar, {2}, został osiągnięty po raz pierwszy {3} tyg. temu i od tego czasu nie wzrósł.',
+  'Were you using a straight bar or bending your wrists?':
+    'Czy używałeś prostego gryfu, czy zginałeś nadgarstki?',
+  "Train around it for {1}–{2} weeks: cut the load on exercises for elbow by {3}–{4}% and only use the range that doesn't hurt; pain during a set should stay at {5}/{6} or lower and be gone by the next day.":
+    'Potrenuj w obejściu przez {1}–{2} tygodnie: zmniejsz obciążenie ćwiczeń na łokieć o {3}–{4}% i używaj tylko zakresu, który nie boli; ból w serii powinien zostać na poziomie {5}/{6} lub niżej i ustąpić do następnego dnia.',
+  'Switch to an EZ bar or dumbbells, keep the wrists straight, and slow the lowering.':
+    'Zmień na gryf łamany lub hantle, trzymaj nadgarstki prosto i spowolnij opuszczanie.',
+  'A brace or sleeve can feel comfortable, but it does not treat the cause.':
+    'Orteza lub opaska może dawać komfort, ale nie leczy przyczyny.',
+  'Do not use it to train through sharp pain.': 'Nie używaj jej, żeby trenować mimo ostrego bólu.',
+  'Anything that does not hurt during or after it: skip the painful movement and range, use lighter loads, machines or another muscle group.':
+    'Wszystko, co nie boli w trakcie ani po: pomiń bolesny ruch i zakres, weź lżejszy ciężar, maszynę lub inną partię mięśni.',
+  'It depends on the cause and I cannot diagnose it.':
+    'To zależy od przyczyny, a ja nie umiem diagnozować.',
+  'Train around it for {1}–{2} weeks; if it is not clearly better by then, or it gets worse, see a doctor or a physio.':
+    'Potrenuj w obejściu przez {1}–{2} tygodnie; jeśli do tego czasu wyraźnie nie jest lepiej albo się pogarsza, idź do lekarza lub fizjoterapeuty.',
+  'Nothing logged yesterday.': 'Wczoraj nic nie zapisano.',
+  'Your last session was {1} ({2}.{3}).': 'Twój ostatni trening był {1} ({2}.{3}).',
+  'Yes — {1}, last week: {2} session, {3} sets.':
+    'Tak — {1}, w zeszłym tygodniu: sesji — {2}, serii — {3}.',
 };
