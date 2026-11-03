@@ -5,6 +5,7 @@
  */
 import { toKnownLanguage } from './lexicon';
 import { INTENTS_MORE } from './intentsMore';
+import { INTENTS_FIFTH } from './intentsFifth';
 import { repairTypos } from './typos';
 import { metaTurn, type Said } from './metaTurn';
 import {
@@ -49,6 +50,12 @@ const LOG_CMD_RE =
 const asLookup = <T extends { metric: unknown; which: string }>(q: T | null) =>
   q && (q.metric || q.which === 'best' || q.which === 'first') ? q : null;
 
+const TWO_QUESTIONS_RE =
+  /^\s*(what|how|when|which|where|скільки|що|коли|який|яка|яке|які)(?!\p{L})(\s+\S+){2,}\s+(and|і|та)\s+(what|how|when|which|where|скільки|що|коли|який|яка|яке|які)(?!\p{L})(\s+\S+){2,}\s*\??\s*$/iu;
+
+const CMP_THAT_RE =
+  /^\s*(?:and |so |а |і )?(?:compare|порівняй|how does)\s+(?:that|it|this|це|його|її)\s+(?:compare\s+)?(?:to|with|vs|against|з|до)\s+(?:my |мій |мою |моє )?(.+?)\s*\??\s*$/iu;
+
 export function dataTurn<C extends DConvo>(
   question: string,
   c: AskCtx,
@@ -57,10 +64,31 @@ export function dataTurn<C extends DConvo>(
   L: Tr,
   d: Deps,
 ): Out<C & { turn: number; q: string }> | null {
+  // Two questions in one message ("what is my bench max and how many sets this week"): each gets its own answer
+  // (answerParts), not one data lookup that swallows the first.
+  if (TWO_QUESTIONS_RE.test(question)) return null;
   const meta = metaTurn(question, convo, turn, L, c.fmt.echo);
   if (meta) return meta;
   const follow = followTurn(question, c, convo, turn, L);
   if (follow) return follow;
+  // "compare that to my bench" right after talking about a lift: the lift in play against the one named.
+  const cmp = CMP_THAT_RE.exec(question);
+  if (cmp && convo.exercise) {
+    const other = d.parse(cmp[1], c).exercise;
+    const a = INTENTS_FIFTH.find((i) => i.id === 'compare_lifts');
+    const text =
+      other && other !== convo.exercise && a
+        ? a.answer(c, { ...d.parse(question, c), exercises: [convo.exercise, other] }, L)
+        : null;
+    if (text)
+      return {
+        route: 'ack',
+        intent: 'compare_lifts',
+        text,
+        chips: [],
+        convo: { ...convo, turn, q: question },
+      };
+  }
   // Polish one-letter prepositions ("rekord w przysiadzie") would otherwise be read as a lift.
   const text = repairTypos(question)
     .replace(/(^|\s)[wzou](?=\s|$)/giu, ' ')

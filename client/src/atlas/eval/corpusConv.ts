@@ -232,6 +232,12 @@ export const CONV_CASES: ConvCase[] = [
   c('en', ['how many sets in september', 'and in august'], /In August: 7 sessions/),
   c('en', ['which month was my best'], /busiest month/),
   c('en', ['what was my best week'], /busiest week/, { forbid: /You average/ }),
+  // P18: two questions in one message, "compare that to…", "and what is my squat max"
+  c('en', ['what is my bench max and how many sets did i do this week'], /1RM[\s\S]*Last 7 days/),
+  c('en', ['how much did i squat last time', 'compare that to my bench'], /Estimated max/, {
+    forbid: /lost you/,
+  }),
+  c('en', ['how much did i squat last time', 'and what is my squat max'], /heaviest set/),
   // known weaknesses (fix → drop `gap`)
   c('en', ['log 3 sets of pullups'], /tap “Log”/, { forbid: /3–4 days a week/ }),
   c('uk', ['залогуй 3 підходи підтягувань'], /«Запис»/),

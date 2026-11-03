@@ -296,7 +296,11 @@ export function readDataFollowUp(
           : null;
   const last = LAST_RE.test(q.replace(/\blast\s+(week|month|year|\d+)\b/giu, ' '));
   if (p.exercise && !metric && !last && FOLLOW_RE.test(q))
-    return { metric: prev.metric, which: prev.which, exercise: p.exercise };
+    return {
+      metric: BEST_RE.test(q) ? null : prev.metric,
+      which: BEST_RE.test(q) ? 'best' : prev.which,
+      exercise: p.exercise,
+    };
   if (
     !p.exercise &&
     exercise &&
