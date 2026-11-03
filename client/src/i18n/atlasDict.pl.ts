@@ -5884,4 +5884,18 @@ export const DICT: Record<string, string> = {
     'Nie mam żadnych haseł, kluczy ani dostępu administratora i nie mogę ich udostępniać.',
   "I'm Atlas, your gym buddy, and I can't swap roles or share my instructions.":
     'Jestem Atlas, twój kumpel z siłowni, i nie mogę zmieniać roli ani ujawniać swoich instrukcji.',
+  'Gentle movement and a light stretch in a comfortable range are fine; do not push into pain or stretch hard.':
+    'Delikatny ruch i lekkie rozciąganie w komfortowym zakresie są w porządku; nie wchodź w ból i nie rozciągaj mocno.',
+  'Heat helps stiff muscle, but neither one heals it — easy movement and time do.':
+    'Ciepło pomaga na sztywne mięśnie, ale żadne z nich nie leczy — robi to lekki ruch i czas.',
+  'If it is sharp, or hurts during the lift, skip it until it is checked.':
+    'Jeśli ból jest ostry albo pojawia się podczas ćwiczenia, pomiń je, dopóki ktoś tego nie sprawdzi.',
+  'In a session, tap the lift and choose Swap.': 'W treningu stuknij ćwiczenie i wybierz Zamień.',
+  'Keep pain at {1}/{2} or lower.': 'Utrzymuj ból na poziomie {1}/{2} lub niższym.',
+  'Maybe, in a lighter and pain-free version: if it does not hurt while you do it and is no worse the next day, it is fine.':
+    'Może, w lżejszej wersji bez bólu: jeśli nie boli podczas ćwiczenia i następnego dnia nie jest gorzej, można.',
+  'Swap it for a variation that does not hurt: a different angle or grip, a machine or dumbbell version, a shorter range, or another muscle today.':
+    'Zamień na wariant, który nie boli: inny kąt lub chwyt, maszynę lub hantle, krótszy zakres albo dziś inny mięsień.',
+  'Whenever you are ready, answer the last question and we will finish the check-in.':
+    'Gdy będziesz gotowy, odpowiedz na ostatnie pytanie, a dokończymy sprawdzanie.',
 };

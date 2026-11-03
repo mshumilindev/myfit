@@ -161,3 +161,46 @@ export function followTurn<C extends FConvo>(
     ),
   );
 }
+
+/** Questions people ask in the middle of a pain check-in; the check-in stays open. */
+const SIDE_CAN_RE =
+  /(?<!\p{L})(can|could|may) i (still |even )?(squat|bench|press|deadlift|row|train|lift|work out|exercise|do|use)(?!\p{L})|(?<!\p{L})чи (можна|можу|варто)( мені)? (ще |все ще )?(жати|присідати|тренувати|тягнути|тренуватись|тренуватися|робити|використовувати)(?!\p{L})/iu;
+const SIDE_INSTEAD_RE =
+  /(?<!\p{L})(what|which)( \w+){0,3} (instead of|in place of|replaces?|to replace)(?!\p{L})|(?<!\p{L})(що|яка вправа|яку вправу) (робити |можна )?(замість|натомість)(?!\p{L})|(?<!\p{L})яка вправа замість(?!\p{L})/iu;
+const SIDE_STRETCH_RE =
+  /(?<!\p{L})(should|can|do) i (stretch|massage|foam roll|ice|heat)(?!\p{L})|(?<!\p{L})чи (варто|можна|треба) (розтягувати|розтягуватись|розтягнути|масажувати|розминати|прогрівати)(?!\p{L})/iu;
+
+export type PainSide = 'can' | 'instead' | 'stretch';
+export function painSide(question: string): PainSide | null {
+  if (SIDE_INSTEAD_RE.test(question)) return 'instead';
+  if (SIDE_STRETCH_RE.test(question)) return 'stretch';
+  if (SIDE_CAN_RE.test(question)) return 'can';
+  return null;
+}
+
+export function painSideReply(kind: PainSide, L: Tr): string {
+  const tail = L(
+    ' Whenever you are ready, answer the last question and we will finish the check-in.',
+    ' Коли будеш готовий, дай відповідь на останнє питання — і завершимо перевірку.',
+  );
+  if (kind === 'can')
+    return (
+      L(
+        'Maybe, in a lighter and pain-free version: if it does not hurt while you do it and is no worse the next day, it is fine. Keep pain at 3/10 or lower. If it is sharp, or hurts during the lift, skip it until it is checked.',
+        'Можливо, у полегшеному варіанті без болю: якщо під час вправи не болить і наступного дня не гірше — можна. Тримай біль на 3/10 або нижче. Якщо біль різкий або з’являється під час вправи — пропусти її, доки не оглянуть.',
+      ) + tail
+    );
+  if (kind === 'instead')
+    return (
+      L(
+        'Swap it for a variation that does not hurt: a different angle or grip, a machine or dumbbell version, a shorter range, or another muscle today. In a session, tap the lift and choose Swap.',
+        'Заміни на варіант, що не болить: інший кут чи хват, тренажер чи гантелі, коротша амплітуда або інший м’яз сьогодні. У тренуванні тапни вправу й обери «Замінити».',
+      ) + tail
+    );
+  return (
+    L(
+      'Gentle movement and a light stretch in a comfortable range are fine; do not push into pain or stretch hard. Heat helps stiff muscle, but neither one heals it — easy movement and time do.',
+      'Легкий рух і м’яке розтягування в комфортній амплітуді — нормально; не тисни в біль і не тягни різко. Тепло допомагає затиснутим м’язам, але не лікує — це робить легкий рух і час.',
+    ) + tail
+  );
+}

@@ -25,6 +25,7 @@ import { findPart, PART_NAME, type BodyPart } from './memory';
 import { findMuscle, normalize, tokens } from './nlu';
 import { terms } from './retrieve';
 import { safetyReply, safetySignal } from './safety';
+import { painSide, painSideReply } from './followTurn';
 
 export type Flow =
   | {
@@ -965,6 +966,8 @@ export function continueFlow(
     /(^|\s)(стоп|скасуй|досить|забудь|cancel|stop|never ?mind|отмена|хватит)(\s|$)/u.test(` ${ph} `)
   )
     return { intent: 'flow_cancel', text: L('Okay, dropped it.', 'Добре, облишимо.'), flow: null };
+  const side = f.kind === 'pain' ? painSide(q) : null;
+  if (side) return { intent: `pain_side_${side}`, text: painSideReply(side, L), flow: f };
   if (f.kind === 'pain') return continuePain(f, q, c, exercise, L);
   return continueFind(f, q, c, L);
 }

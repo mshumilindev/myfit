@@ -5855,4 +5855,18 @@ export const DICT: Record<string, string> = {
     'Mul pole ühtegi parooli, võtit ega admini ligipääsu ning neid jagada ma ei saa.',
   "I'm Atlas, your gym buddy, and I can't swap roles or share my instructions.":
     'Ma olen Atlas, sinu jõusaalikaaslane, ja ma ei saa rolli vahetada ega oma juhiseid jagada.',
+  'Gentle movement and a light stretch in a comfortable range are fine; do not push into pain or stretch hard.':
+    'Õrn liikumine ja kerge venitus mugavas ulatuses sobib; ära suru valu sisse ega venita kõvasti.',
+  'Heat helps stiff muscle, but neither one heals it — easy movement and time do.':
+    'Soojus aitab jäikadel lihastel, aga kumbki ei ravi — seda teevad kerge liikumine ja aeg.',
+  'If it is sharp, or hurts during the lift, skip it until it is checked.':
+    'Kui valu on terav või tekib harjutuse ajal, jäta see vahele, kuni seda on kontrollitud.',
+  'In a session, tap the lift and choose Swap.': 'Treeningus puuduta harjutust ja vali Asenda.',
+  'Keep pain at {1}/{2} or lower.': 'Hoia valu tasemel {1}/{2} või madalamal.',
+  'Maybe, in a lighter and pain-free version: if it does not hurt while you do it and is no worse the next day, it is fine.':
+    'Võib-olla kergemas valuvabas variandis: kui harjutuse ajal ei valuta ja järgmisel päeval pole hullem, on see okei.',
+  'Swap it for a variation that does not hurt: a different angle or grip, a machine or dumbbell version, a shorter range, or another muscle today.':
+    'Asenda variandiga, mis ei valuta: teine nurk või haare, masin või hantlid, lühem ulatus või täna mõni muu lihas.',
+  'Whenever you are ready, answer the last question and we will finish the check-in.':
+    'Kui oled valmis, vasta viimasele küsimusele ja lõpetame kontrolli.',
 };

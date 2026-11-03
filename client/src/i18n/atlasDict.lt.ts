@@ -5911,4 +5911,19 @@ export const DICT: Record<string, string> = {
     'Neturiu jokių slaptažodžių, raktų ar administratoriaus prieigos ir jų dalytis negaliu.',
   "I'm Atlas, your gym buddy, and I can't swap roles or share my instructions.":
     'Aš Atlas, tavo draugas sporto salėje, ir negaliu keisti vaidmens ar dalytis savo instrukcijomis.',
+  'Gentle movement and a light stretch in a comfortable range are fine; do not push into pain or stretch hard.':
+    'Švelnus judėjimas ir lengvas tempimas patogiu diapazonu tinka; nespausk į skausmą ir netempk stipriai.',
+  'Heat helps stiff muscle, but neither one heals it — easy movement and time do.':
+    'Šiluma padeda sustingusiems raumenims, bet nė viena jų negydo — gydo lengvas judėjimas ir laikas.',
+  'If it is sharp, or hurts during the lift, skip it until it is checked.':
+    'Jei skausmas aštrus arba atsiranda pratimo metu, praleisk jį, kol kas nors patikrins.',
+  'In a session, tap the lift and choose Swap.':
+    'Treniruotėje bakstelėk pratimą ir pasirink Pakeisti.',
+  'Keep pain at {1}/{2} or lower.': 'Skausmą laikyk {1}/{2} arba mažesnį.',
+  'Maybe, in a lighter and pain-free version: if it does not hurt while you do it and is no worse the next day, it is fine.':
+    'Galbūt, lengvesne versija be skausmo: jei pratimo metu neskauda ir kitą dieną ne blogiau, galima.',
+  'Swap it for a variation that does not hurt: a different angle or grip, a machine or dumbbell version, a shorter range, or another muscle today.':
+    'Pakeisk variantu, kuris neskauda: kitu kampu ar sugriebimu, treniruokliu ar hanteliais, trumpesne amplitude arba šiandien kitu raumeniu.',
+  'Whenever you are ready, answer the last question and we will finish the check-in.':
+    'Kai būsi pasiruošęs, atsakyk į paskutinį klausimą ir užbaigsime patikrą.',
 };
