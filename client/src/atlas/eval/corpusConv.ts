@@ -346,6 +346,8 @@ export const CONV_CASES: ConvCase[] = [
   c('en', ['do i need a spotter'], /safety pins/, { forbid: /bottom bar/ }),
   c('en', ['when should i stop cutting'], /reach your goal/, { forbid: /lean/ }),
   c('en', ['is whey ok every day'], /fine every day/, { forbid: /Timing barely/ }),
+  c('en', ['is whey every day ok'], /fine every day/, { forbid: /Timing barely/ }),
+  c('en', ['i skipped dinner to lose weight'], /isn't cutting/, { forbid: /Eating late/ }),
   c('en', ['i want to lose 5 kg', 'will i lose muscle'], /keep lifting heavy/, {
     forbid: /cardio/,
   }),

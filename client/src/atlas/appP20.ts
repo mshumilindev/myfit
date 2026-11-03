@@ -247,7 +247,7 @@ const ROUTES_P20: [string, RegExp, RegExp | null][] = [
   [
     'whey_daily',
     U(
-      '(?<!\\p{L})is (whey|protein powder|protein shakes?)( protein)? (ok|safe|fine|bad|okay)(?!\\p{L})',
+      '(?<!\\p{L})is (whey|protein powder|protein shakes?)( protein)? (every ?day |daily )?(ok|safe|fine|bad|okay)(?!\\p{L})',
     ),
     null,
   ],
