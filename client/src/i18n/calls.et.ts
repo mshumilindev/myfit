@@ -100,7 +100,7 @@ export const callsEt: typeof callsEn = {
   callSetCamOn: 'Kaamera on alguses sees',
   callSetDirect: 'Otseühendus',
   callSetDirectSub:
-    'Väljas: kõned lähevad läbi vahendusserveri. Sees: sinu ja vestluspartneri seade ühenduvad otse ning kumbki näeb teise võrguaadressi (IP).',
+    'Väljas: kõned lähevad läbi vahendusserveri. Sees: sinu ja vestluspartneri seadmed ühenduvad otse ning kumbki näeb teise võrguaadressi (IP).',
   callSetNotRecorded: 'Kõnesid ei salvestata.',
 
   callSessionLabel: 'Treening',

@@ -102,7 +102,7 @@ export const callsLt: typeof callsEn = {
   callSetCamOn: 'Kamera įjungiama pradžioje',
   callSetDirect: 'Tiesioginis ryšys',
   callSetDirectSub:
-    'Išjungta: skambučiai eina per perdavimo serverį. Įjungta: jūsų ir pašnekovo įrenginiai jungiasi tiesiogiai, ir kiekvienas mato kito tinklo adresą (IP).',
+    'Išjungta: skambučiai eina per tarpinį serverį. Įjungta: jūsų ir pašnekovo įrenginiai jungiasi tiesiogiai, ir kiekvienas mato kito tinklo adresą (IP).',
   callSetNotRecorded: 'Skambučiai neįrašomi.',
 
   callSessionLabel: 'Treniruotė',
