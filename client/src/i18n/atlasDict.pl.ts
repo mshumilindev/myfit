@@ -5871,4 +5871,17 @@ export const DICT: Record<string, string> = {
     'Dziennik pokazuje postęp, zanim zrobi to lustro.',
   'Want a plan for it?': 'Chcesz plan?',
   'Yes.': 'Tak.',
+  'You can download a copy of your data yourself: Profile → Settings → “What Spotter knows about you” → “Download a copy”.':
+    'Kopię swoich danych możesz pobrać sam: Profil → Ustawienia → „Co Spotter wie o Tobie” → „Pobierz kopię”.',
+  'Your log is also stored in your account and syncs to every device you sign in on.':
+    'Twój dziennik jest też przechowywany na koncie i synchronizuje się z każdym urządzeniem, na którym się logujesz.',
+  'You can delete your account yourself: Profile → Settings → “Delete account”.':
+    'Konto możesz usunąć sam: Profil → Ustawienia → „Usuń konto”.',
+  'I only see your own training log.': 'Widzę tylko twój własny dziennik treningowy.',
+  "Other people's data isn't visible to me, and I can't list it.":
+    'Dane innych osób są dla mnie niewidoczne i nie mogę ich wyświetlić.',
+  "I don't have any passwords, keys or admin access, and I can't share any.":
+    'Nie mam żadnych haseł, kluczy ani dostępu administratora i nie mogę ich udostępniać.',
+  "I'm Atlas, your gym buddy, and I can't swap roles or share my instructions.":
+    'Jestem Atlas, twój kumpel z siłowni, i nie mogę zmieniać roli ani ujawniać swoich instrukcji.',
 };

@@ -129,11 +129,74 @@ const OTHER: [SafetyKind, RegExp][] = SIGNALS.map(([k]) => [
   PLLTET[k] ? re(PLLTET[k]!) : null,
 ]).filter((x): x is [SafetyKind, RegExp] => !!x[1]);
 
-export function safetySignal(question: string): SafetyKind | null {
+/**
+ * Wording the main table misses: wanting to stop eating, feeling fat, giving
+ * up on everything. Kept apart so the long patterns above stay untouched.
+ * "should i stop eating after 6 pm" / "can't stop eating candy" are NOT here
+ * (they carry no wish to stop eating altogether).
+ */
+const EXTRA: [SafetyKind, RegExp][] = [
+  [
+    'starving',
+    re(
+      [
+        '(want|wanna|going|plan|planning|trying|thinking of|feel like|need) (to |on )?(stop|quit|give up|cease) eating( (completely|altogether|entirely|for good|at all))?( |$)(?!(after|before|sweets|candy|junk|sugar|late|at night|carbs|bread))',
+        '(want|wanna|going|plan|planning|trying|thinking of) (to )?(starve|not eat|skip (all )?(my )?meals)',
+        '(хочу|збираюсь|планую|думаю|мушу) (мені )?(перестати|припинити|не|більше не|кинути) (їсти|їсти взагалі|їсти зовсім)( |$)(?!(цукерк|солодк|після|перед|на ніч|вночі|хліб))',
+        'не хочу (більше )?їсти (взагалі|зовсім|нічого)',
+        '(chce|chcę) (przestac|przestać) jesc|(noriu|noretau) (nustoti|mesti) valgyti|(tahan|tahaksin) (lopetada|lõpetada) (soomist|söömist)',
+      ].join('|'),
+    ),
+  ],
+  [
+    'bodyimage',
+    re(
+      [
+        '(i feel|feeling|i m feeling|i am feeling) (so |really |too |very |just )?(fat|ugly|disgusting|huge|gross|worthless)',
+        '(відчуваю себе|почуваюся|почуваюсь|я відчуваю себе) (таким |такою |дуже |якимось )?(жирн|товст|потворн|огидн)',
+      ].join('|'),
+    ),
+  ],
+  [
+    'despair',
+    re(
+      [
+        '(giving up|give up|gave up|quit) on (everything|life|all of it)',
+        'i (just )?(can t|cannot|can not) do this anymore',
+        '(everything|it all) (is|feels) (pointless|meaningless|hopeless)|nothing matters|no point in anything',
+        '(все|усе) (безглуздо|марно|втратило сенс)|я втомив(ся|лась) від усього|хочу все (кинути|покинути)|руки опускаються',
+      ].join('|'),
+    ),
+  ],
+];
+
+/**
+ * Only right after a safety turn (the soft window): short follow-ups that on
+ * their own are ordinary questions but here carry the same worry.
+ */
+const SOFT_FOLLOW: [SafetyKind, RegExp][] = [
+  [
+    'starving',
+    re(
+      '(minimum|least|lowest|fewest|min) (calories|kcal|food)|(calories|kcal) (is |are |can i )?(the )?(minimum|lowest|least|eat)|(minimum|lowest) (amount|number)|how (little|few) (calories|kcal|food) |мінімум калорій|мінімальн\\S* (кількість )?калорі|скільки (калорій )?мінімум|як мало (можна )?(їсти|калорій)',
+    ),
+  ],
+  [
+    'despair',
+    re(
+      '(мені |мене )?(все )?(набридло|дістало|осточортіло|остогидло)|sick of (it all|everything)|fed up with (it all|everything)|what do i do|що (мені )?робити',
+    ),
+  ],
+];
+
+/** `soft` = the previous turn was a safety reply (convo.softUntil still open). */
+export function safetySignal(question: string, soft = false): SafetyKind | null {
   const ph = ` ${normalize(question)} `;
   for (const [k, r] of SIGNALS) if (r.test(ph)) return k;
   // In the order of SIGNALS too (priority).
   for (const [k, r] of OTHER) if (r.test(ph)) return k;
+  for (const [k, r] of EXTRA) if (r.test(ph)) return k;
+  if (soft) for (const [k, r] of SOFT_FOLLOW) if (r.test(ph)) return k;
   return null;
 }
 

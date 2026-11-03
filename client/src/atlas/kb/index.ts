@@ -39,6 +39,7 @@ import { APP_MORE_EX, KB_APP_EXTRA } from './appTipsEx';
 import { P9_EX } from '../appP9';
 import { P10_EX } from '../appP10';
 import { P12_EX, P12_MORE } from '../appP12';
+import { P14_EX } from '../appP14';
 import type { Kb } from './types';
 
 const base: Kb = { ...KB_A, ...KB_B, ...KB_C, ...KB_D, ...KB_E };
@@ -108,12 +109,17 @@ export const KB: Kb = Object.fromEntries([
     },
   ]),
   // A hundred more topics and more app help — phrasings only (answers in topicsMore*.ts, appTips.ts).
-  ...Object.entries({ ...MORE_TOPICS_EX, ...APP_MORE_EX, ...P9_EX, ...P10_EX, ...P12_EX }).map(
-    ([id, e]) => [
-      id,
-      { ex: [...e.ex, ...(more[id]?.ex ?? [])], exUk: [...e.exUk, ...(more[id]?.exUk ?? [])] },
-    ],
-  ),
+  ...Object.entries({
+    ...MORE_TOPICS_EX,
+    ...APP_MORE_EX,
+    ...P9_EX,
+    ...P10_EX,
+    ...P12_EX,
+    ...P14_EX,
+  }).map(([id, e]) => [
+    id,
+    { ex: [...e.ex, ...(more[id]?.ex ?? [])], exUk: [...e.exUk, ...(more[id]?.exUk ?? [])] },
+  ]),
 ]);
 export type { Facet, Kb, KbEntry } from './types';
 

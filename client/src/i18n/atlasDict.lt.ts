@@ -5898,4 +5898,17 @@ export const DICT: Record<string, string> = {
     'Žurnalas parodo progresą anksčiau nei veidrodis.',
   'Want a plan for it?': 'Nori plano?',
   'Yes.': 'Taip.',
+  'You can download a copy of your data yourself: Profile → Settings → “What Spotter knows about you” → “Download a copy”.':
+    'Savo duomenų kopiją gali atsisiųsti pats: Profilis → Nustatymai → „What Spotter knows about you“ → „Download a copy“.',
+  'Your log is also stored in your account and syncs to every device you sign in on.':
+    'Tavo žurnalas taip pat saugomas paskyroje ir sinchronizuojamas su kiekvienu įrenginiu, kuriame prisijungi.',
+  'You can delete your account yourself: Profile → Settings → “Delete account”.':
+    'Paskyrą gali ištrinti pats: Profilis → Nustatymai → „Delete account“.',
+  'I only see your own training log.': 'Matau tik tavo paties treniruočių žurnalą.',
+  "Other people's data isn't visible to me, and I can't list it.":
+    'Kitų žmonių duomenų nematau ir jų parodyti negaliu.',
+  "I don't have any passwords, keys or admin access, and I can't share any.":
+    'Neturiu jokių slaptažodžių, raktų ar administratoriaus prieigos ir jų dalytis negaliu.',
+  "I'm Atlas, your gym buddy, and I can't swap roles or share my instructions.":
+    'Aš Atlas, tavo draugas sporto salėje, ir negaliu keisti vaidmens ar dalytis savo instrukcijomis.',
 };

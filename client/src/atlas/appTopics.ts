@@ -97,8 +97,8 @@ export const APP_TOPICS: {
     id: 'app_export',
     ask: ['Can I export my data?', 'Чи можна експортувати дані?'],
     answer: [
-      "There's no personal export or backup button yet — your log is stored in your account and syncs to every device you sign in on, so nothing is lost if you change phones. A trainer can export a program as CSV; an admin can export a member's data.",
-      'Особистого експорту чи резервної копії поки немає — журнал зберігається в акаунті й синхронізується на кожен пристрій, де ти входиш, тож при зміні телефона нічого не пропаде. Тренер може експортувати програму в CSV, адмін — дані учасника.',
+      "You can download a copy of your data yourself: Profile → Settings → “What Spotter knows about you” → “Download a copy”. Your log is also stored in your account and syncs to every device you sign in on. A trainer can export a program as CSV; an admin can export a member's data.",
+      'Копію своїх даних можна завантажити самому: Профіль → Налаштування → «Що Spotter знає про вас» → «Завантажити копію». Журнал також зберігається в акаунті й синхронізується на кожен пристрій, де ти входиш. Тренер може експортувати програму в CSV, адмін — дані учасника.',
     ],
     ex: [
       'how do I export my workout data',
@@ -999,8 +999,8 @@ export const APP_TOPICS: {
     id: 'app_delete_account',
     ask: ['How do I delete my account?', 'Як видалити акаунт?'],
     answer: [
-      "You can't delete the account yourself — ask your admin, they can remove it. You can delete single workouts, nights or exercises, and clear my chat in my settings.",
-      'Видалити акаунт самостійно не можна — попроси адміна, він це зробить. Окремі тренування, ночі сну чи вправи можна видаляти самому, а мій чат — очистити в моїх налаштуваннях.',
+      'You can delete your account yourself: Profile → Settings → “Delete account”. You can delete single workouts, nights or exercises, and clear my chat in my settings.',
+      'Акаунт можна видалити самому: Профіль → Налаштування → «Видалити акаунт». Окремі тренування, ночі сну чи вправи можна видаляти самому, а мій чат — очистити в моїх налаштуваннях.',
     ],
     ex: [
       'how do I delete my account',

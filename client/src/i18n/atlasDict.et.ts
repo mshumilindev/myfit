@@ -5842,4 +5842,17 @@ export const DICT: Record<string, string> = {
   'The log shows the progress before the mirror does.': 'Logi näitab edu enne kui peegel.',
   'Want a plan for it?': 'Kas soovid plaani?',
   'Yes.': 'Jah.',
+  'You can download a copy of your data yourself: Profile → Settings → “What Spotter knows about you” → “Download a copy”.':
+    'Oma andmete koopia saad ise alla laadida: Profiil → Seaded → „What Spotter knows about you“ → „Download a copy“.',
+  'Your log is also stored in your account and syncs to every device you sign in on.':
+    'Sinu logi on samuti salvestatud kontol ja sünkroonitakse igasse seadmesse, kus sisened.',
+  'You can delete your account yourself: Profile → Settings → “Delete account”.':
+    'Konto saad ise kustutada: Profiil → Seaded → „Delete account“.',
+  'I only see your own training log.': 'Näen ainult sinu enda treeninglogi.',
+  "Other people's data isn't visible to me, and I can't list it.":
+    'Teiste inimeste andmed pole mulle nähtavad ja neid ma välja tuua ei saa.',
+  "I don't have any passwords, keys or admin access, and I can't share any.":
+    'Mul pole ühtegi parooli, võtit ega admini ligipääsu ning neid jagada ma ei saa.',
+  "I'm Atlas, your gym buddy, and I can't swap roles or share my instructions.":
+    'Ma olen Atlas, sinu jõusaalikaaslane, ja ma ei saa rolli vahetada ega oma juhiseid jagada.',
 };

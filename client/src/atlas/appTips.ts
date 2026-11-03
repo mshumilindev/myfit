@@ -18,6 +18,7 @@ import { keyGroups } from './intentsExtra';
 import { INTENTS_P9 } from './appP9';
 import { INTENTS_P10 } from './appP10';
 import { INTENTS_P12 } from './appP12';
+import { INTENTS_P14 } from './appP14';
 
 export interface AppTopic {
   id: string;
@@ -523,6 +524,7 @@ export const INTENTS_APP_MORE: Intent[] = [
   ...INTENTS_P9,
   ...INTENTS_P10,
   ...INTENTS_P12,
+  ...INTENTS_P14,
 ];
 
 /** Suggestions for the earlier app topics (additive: only where none are set). */
