@@ -119,7 +119,7 @@ const SIGNALS: [SafetyKind, RegExp][] = [
   [
     'despair',
     re(
-      '(хочу все кинути|нічого не виходить|немає сенсу|нема сенсу|все марно|опускаються руки|я здаюсь|я здаюся|хочу все бросить|ничего не получается|нет смысла|опускаются руки|i want to give up|i give up|what.?s the point( anymore| of (it|anything|trying|even trying|all this|this))? $|nothing works|i want to quit everything|депрес|depress)',
+      '(хочу все кинути|нічого не виходить|немає сенсу|нема сенсу|все марно|опускаються руки|я здаюсь|я здаюся|хочу все бросить|ничего не получается|нет смысла|опускаются руки|i want to give up|i give up|what.?s the point( anymore| of (it|anything|trying|even trying|all this|this))? $|nothing works|i want to quit everything|(?<!\\p{L})(депрес|depress))',
     ),
   ],
 ];

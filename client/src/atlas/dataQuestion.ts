@@ -43,7 +43,8 @@ const NOT_A_LOOKUP_RE =
   /\b(change[ds]?|improv\w*|progress\w*|trend\w*|since|lately|rest|between)\b|змін\p{L}*|прогрес|останнім часом|як там|більше разів|робити|відпочин|times? (a|per) (week|month)|lifting days|days|in total|overall|all[- ]time|altogether|загалом|разом|усього|łącznie|zmieni\p{L}*|w tym tygodniu|kiek/iu;
 /** "Record" in the sense of a lookup (not "best shoes", "best angle"). */
 const RECORD_RE = /\b(record|pr|personal record|heaviest)\b|рекорд|найважч|rekord|najcięższ/iu;
-export const lookupSignal = (t: string) => LAST_RE.test(t) || RECORD_RE.test(t);
+export const lookupSignal = (t: string) =>
+  LAST_RE.test(t) || RECORD_RE.test(t) || /\bmy best\b/iu.test(t);
 const BEST_RE =
   /\b(best|heaviest|max|maximum|pr|personal record|record|top)\b|найкращ|найважч|рекорд|максим|najlepsz|najcięższ|rekord/iu;
 const SELF_RE =

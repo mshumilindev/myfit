@@ -17,8 +17,9 @@ const RAW: Record<'pl' | 'lt' | 'et' | 'ru', string> = {
     klatk*=chest|plec*=back|plecy=back|nogi=legs|nóg=legs|ramion*=shoulders|bark*=shoulders|biceps*=biceps|triceps*=triceps|brzuch*=abs|pośladk*=glutes|łydk*=calves|
     boli=hurts|ból*=pain|bol*=pain|kontuzj*=injury|kolan*=knee|łok*=elbow|nadgarst*=wrist|
     białk*=protein|bialk*=protein|kalori*=calories|kreatyn*=creatine|sen=sleep|spać=sleep|spac=sleep|spanie=sleep|śpię=sleep|woda=water|wod*=water|
-    rozgrzewk*=warmup|rekord*=record|najlepsz*=best|postęp*=progress|postep*=progress|plan*=plan|
+    rozgrzewk*=warmup|rekord*=record|wynik*=record|najlepsz*=best|postęp*=progress|postep*=progress|plan*=plan|
     schudnąć=lose fat|schudnac=lose fat|masa=mass|masę=mass|siła=strength|zmęczon*=tired|zmeczon*=tired|motywacj*=motivation|powtórz*=reps|powtorz*=reps|seri*=sets|
+    ile ważyłem na=what weight did i use on|ile wazylem na=what weight did i use on|ile ważyłem w=what weight did i use in|ile wazylem w=what weight did i use in|
     zamień=swap|zamien=swap|zamiast=instead|przenieś=move|przenies=move|zacznij=start|
     idzie=going|idą=going|ida=going|potrzeb*=need|nie=not|nic=nothing|bez=without|mój=my|moj=my|moja=my|moje=my|mi=me|mnie=me|ja=i|ty=you|
     zakwas*=sore|ból mięśni=sore|bol miesni=sore|mięś*=muscle|miesn*=muscle|masa mięśniowa=muscle mass|
@@ -52,11 +53,12 @@ const RAW: Record<'pl' | 'lt' | 'et' | 'ru', string> = {
     poils*=rest|ilset*=rest|ilsė*=rest|pertrauk*=rest|
     svor*=weight|kg=kg|kit*=next|šiandien=today|siandien=today|rytoj=tomorrow|vakar=yesterday|savait*=week|mėnes*=month|
     treniruot*=workout|sportuo*=train|sporto salė*=gym|sal*=gym|
+    kiek spaudžiau=what weight did i press|kiek spaudziau=what weight did i press|
     spaudimas gulint=bench press|spaudim*=press|pritūpim*=squat|pritupim*=squat|mirties trauk*=deadlift|trauk*=deadlift|prisitrauk*=pullups|atsispaudim*=pushups|lenkim*=curl|įtūpst*=lunges|
     krūtin*=chest|krutin*=chest|nugar*=back|koj*=legs|pečių=shoulders|peči*=shoulders|biceps*=biceps|triceps*=triceps|pilv*=abs|sėdmen*=glutes|blauzd*=calves|
     skauda=hurts|skausm*=pain|traum*=injury|kel*=knee|alkūn*=elbow|rieš*=wrist|
     baltym*=protein|kalorij*=calories|kreatin*=creatine|mieg*=sleep|vanden*=water|
-    apšil*=warmup|aps il*=warmup|rekord*=record|geriausi*=best|progres*=progress|plan*=plan|
+    apšil*=warmup|aps il*=warmup|rekord*=record|rezultat*=record|geriausi*=best|progres*=progress|plan*=plan|
     numesti=lose fat|mas*=mass|jėg*=strength|pavarg*=tired|motyvacij*=motivation|pakartojim*=reps|serij*=sets|priėjim*=sets|
     pakeisk=swap|vietoj=instead|perkelk=move|pradėk=start|
     reikia=need|ne=not|niekas=nothing|niekur=nowhere|be=without|mano=my|man=me|aš=i|as=i|tu=you|
@@ -91,11 +93,12 @@ const RAW: Record<'pl' | 'lt' | 'et' | 'ru', string> = {
     puhk*=rest|puha*=rest|paus*=rest|
     raskus*=weight|kaal*=weight|kg=kg|järgmi*=next|jargmi*=next|täna=today|tana=today|homme=tomorrow|eile=yesterday|nädal*=week|nadal*=week|kuu=month|kuus=month|
     trenn*=workout|treening*=workout|treeni*=train|jõusaal*=gym|jousaal*=gym|
+    jalgadepress*=leg press|jalgade surumine=leg press|
     lamades surumine=bench press|surumi*=press|kükk*=squat|kukk*=squat|jõutõmme=deadlift|joutomme=deadlift|lõuatõmb*=pullups|kätekõverd*=pushups|biitsepsikõverd*=curl|väljaast*=lunges|
     rind*=chest|selg*=back|jalg*=legs|jalad=legs|õla*=shoulders|ola*=shoulders|biitseps*=biceps|triitseps*=triceps|kõht*=abs|tuhar*=glutes|sääre*=calves|
     valutab=hurts|valu*=pain|vigastus*=injury|põlv*=knee|polv*=knee|küünar*=elbow|rand*=wrist|
     valk*=protein|kalor*=calories|kreatiin*=creatine|uni=sleep|und=sleep|magami*=sleep|vesi=water|vett=water|
-    soojendus*=warmup|rekord*=record|parim*=best|areng*=progress|progress*=progress|kava*=plan|plaan*=plan|
+    soojendus*=warmup|rekord*=record|tulemus*=record|parim*=best|areng*=progress|progress*=progress|kava*=plan|plaan*=plan|
     kaalust alla=lose fat|lihasmass*=mass|jõud*=strength|väsinud=tired|vasinud=tired|motivats*=motivation|kordus*=reps|seeria*=sets|
     vaheta=swap|asemel=instead|liiguta=move|alusta=start|
     laheb=going|läheb=going|areneb=progress|edeneb=progress|vaja=need|ei=not|pole=not|midagi=anything|ilma=without|minu=my|mu=my|mulle=me|mind=me|ma=i|mina=i|sa=you|sina=you|

@@ -238,6 +238,9 @@ export const CONV_CASES: ConvCase[] = [
     forbid: /lost you/,
   }),
   c('en', ['how much did i squat last time', 'and what is my squat max'], /heaviest set/),
+  // P19: pl / lt / et wording that was misread
+  c('pl', ['jaki jest mój najlepszy wynik w przysiadzie'], /Full Squat: heaviest set/),
+  c('et', ['mis on minu parim jalgadepress'], /Your best|best/, { forbid: /Rough patch/ }),
   // known weaknesses (fix → drop `gap`)
   c('en', ['log 3 sets of pullups'], /tap “Log”/, { forbid: /3–4 days a week/ }),
   c('uk', ['залогуй 3 підходи підтягувань'], /«Запис»/),
