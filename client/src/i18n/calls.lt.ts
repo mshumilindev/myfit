@@ -95,6 +95,16 @@ export const callsLt: typeof callsEn = {
   callPreNoDevices: 'Įrenginių nerasta',
   callPreStart: 'Pradėti',
 
+  // Call settings (SPO-446)
+  callSetRow: 'Skambučiai',
+  callSetRowSub: 'Kamera, įrenginiai, ryšys',
+  callSetTitle: 'Skambučių nustatymai',
+  callSetCamOn: 'Kamera įjungiama pradžioje',
+  callSetDirect: 'Tiesioginis ryšys',
+  callSetDirectSub:
+    'Išjungta: skambučiai eina per tarpinį serverį. Įjungta: jūsų ir pašnekovo įrenginiai jungiasi tiesiogiai, ir kiekvienas mato kito tinklo adresą (IP).',
+  callSetNotRecorded: 'Skambučiai neįrašomi.',
+
   callSessionLabel: 'Treniruotė',
   callSessionOpen: 'Atidaryti',
   callSessionSet: (v: string) => `Serija ${v}`,

@@ -107,6 +107,16 @@ export const callsEn = {
   callPreNoDevices: 'No devices found',
   callPreStart: 'Start',
 
+  // Call settings (SPO-446)
+  callSetRow: 'Calls',
+  callSetRowSub: 'Camera, devices, connection',
+  callSetTitle: 'Call settings',
+  callSetCamOn: 'Camera starts on',
+  callSetDirect: 'Direct connection',
+  callSetDirectSub:
+    "Off: calls go through a relay. On: your phone and the other person's device connect directly, and each can see the other's network address (IP).",
+  callSetNotRecorded: 'Calls are not recorded.',
+
   // Workout session strip
   callSessionLabel: 'Workout',
   callSessionOpen: 'Open',

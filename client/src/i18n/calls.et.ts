@@ -93,6 +93,16 @@ export const callsEt: typeof callsEn = {
   callPreNoDevices: 'Seadmeid ei leitud',
   callPreStart: 'Alusta',
 
+  // Call settings (SPO-446)
+  callSetRow: 'Kõned',
+  callSetRowSub: 'Kaamera, seadmed, ühendus',
+  callSetTitle: 'Kõneseaded',
+  callSetCamOn: 'Kaamera on alguses sees',
+  callSetDirect: 'Otseühendus',
+  callSetDirectSub:
+    'Väljas: kõned lähevad läbi vahendusserveri. Sees: sinu ja vestluspartneri seadmed ühenduvad otse ning kumbki näeb teise võrguaadressi (IP).',
+  callSetNotRecorded: 'Kõnesid ei salvestata.',
+
   callSessionLabel: 'Treening',
   callSessionOpen: 'Ava',
   callSessionSet: (v: string) => `Seeria ${v}`,

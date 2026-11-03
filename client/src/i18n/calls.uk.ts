@@ -95,6 +95,16 @@ export const callsUk: typeof callsEn = {
   callPreNoDevices: 'Пристроїв не знайдено',
   callPreStart: 'Почати',
 
+  // Call settings (SPO-446)
+  callSetRow: 'Дзвінки',
+  callSetRowSub: "Камера, пристрої, з'єднання",
+  callSetTitle: 'Налаштування дзвінків',
+  callSetCamOn: 'Камера вмикається на початку',
+  callSetDirect: "Пряме з'єднання",
+  callSetDirectSub:
+    "Вимкнено: дзвінки йдуть через ретранслятор. Увімкнено: ваш пристрій і пристрій співрозмовника з'єднуються напряму, і кожен бачить мережеву адресу (IP) іншого.",
+  callSetNotRecorded: 'Дзвінки не записуються.',
+
   callSessionLabel: 'Тренування',
   callSessionOpen: 'Відкрити',
   callSessionSet: (v: string) => `Підхід ${v}`,
