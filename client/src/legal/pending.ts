@@ -76,6 +76,13 @@ export const PENDING: readonly PendingItem[] = [
     'Add the desktop and Android apps to the description only when they are released.',
   ),
   item(
+    'pp-calls-turn',
+    'privacy',
+    'p5',
+    'lawyer',
+    'SPO-22/SPO-443: voice and video calls use Cloudflare STUN/TURN (participant IP addresses and technical WebRTC packets; relayed media is DTLS-SRTP encrypted; nothing is recorded). Needs a recipient paragraph in all texts, a lawyer decision on role, basis and transfer, a new policy version with a material changelog entry (and the server copy of the versions), before calls reach real users. Call features stay switched off by a flag by default until the lawyer decides. Do not describe it as end-to-end. See docs/compliance/processors.md.',
+  ),
+  item(
     'pp-roles-allocation',
     'privacy',
     'p2',

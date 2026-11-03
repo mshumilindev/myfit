@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react';
+import { Icon } from '../../ui';
 import { Avatar } from './Avatar';
+import { CallRings } from './CallRings';
+import { CallRoundButton } from './CallRoundButton';
 import { Button } from './Button';
 import './Call.css';
 
@@ -19,6 +22,8 @@ export interface IncomingCallProps {
   onVoiceOnly?: () => void;
   /** `screen`: a whole phone screen; `card`: a floating card over the app on desktop. */
   variant?: 'screen' | 'card';
+  /** false for a voice call: the kind chip shows a phone, not a camera. */
+  video?: boolean;
 }
 
 /**
@@ -38,6 +43,7 @@ export function IncomingCall({
   onDecline,
   onVoiceOnly,
   variant = 'screen',
+  video = true,
 }: IncomingCallProps) {
   const card = variant === 'card';
   return (
@@ -46,34 +52,48 @@ export function IncomingCall({
       role="alertdialog"
       aria-label={`${name}: ${kind}`}
     >
-      <Avatar name={name} src={photo} size={card ? 48 : 120} className="uicall-in-av" />
+      {card ? (
+        <Avatar name={name} src={photo} size={48} className="uicall-in-av" />
+      ) : (
+        <CallRings name={name} photo={photo} size={120} />
+      )}
       <div className="uicall-in-t">
-        <small className="uicall-in-kind">{kind}</small>
+        <span className="uicall-in-kind">
+          <Icon name={video ? 'video-camera' : 'phone'} />
+          {kind}
+        </span>
         <b>{name}</b>
         {sub && <span className="uicall-in-sub">{sub}</span>}
       </div>
-      <div className="uicall-in-act">
-        <Button
-          variant="danger"
-          shape="round"
-          size={card ? 'md' : 'lg'}
-          icon="phone-x"
-          onClick={onDecline}
-        >
-          {declineLabel}
-        </Button>
-        <Button
-          variant="ok-fill"
-          shape="round"
-          size={card ? 'md' : 'lg'}
-          icon="phone-call"
-          onClick={onAnswer}
-        >
-          {answerLabel}
-        </Button>
-      </div>
+      {card ? (
+        <div className="uicall-in-act">
+          <Button variant="danger" icon="phone-x" onClick={onDecline}>
+            {declineLabel}
+          </Button>
+          <Button variant="ok-fill" icon="phone-call" onClick={onAnswer}>
+            {answerLabel}
+          </Button>
+        </div>
+      ) : (
+        <div className="uicall-in-act">
+          <CallRoundButton
+            tone="danger"
+            size="lg"
+            icon="phone-x"
+            label={declineLabel}
+            onClick={onDecline}
+          />
+          <CallRoundButton
+            tone="ok"
+            size="lg"
+            icon="phone-call"
+            label={answerLabel}
+            onClick={onAnswer}
+          />
+        </div>
+      )}
       {voiceOnlyLabel && onVoiceOnly && (
-        <Button variant="link" size="sm" onClick={onVoiceOnly}>
+        <Button variant="secondary" size="sm" icon="phone" onClick={onVoiceOnly}>
           {voiceOnlyLabel}
         </Button>
       )}

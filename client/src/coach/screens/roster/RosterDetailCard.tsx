@@ -34,7 +34,7 @@ export function RosterDetailCard(p: {
           {row.client.goal ? <small>{row.client.goal}</small> : null}
         </span>
         <span className="ro-det-btns">
-          <CallEntry labeled />
+          <CallEntry labeled peerId={row.client.id} peerName={row.client.name} />
           <Button variant="ghost" icon="envelope" onClick={p.onChat}>
             {p.r.roMessage}
           </Button>

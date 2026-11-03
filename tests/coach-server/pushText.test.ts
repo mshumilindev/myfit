@@ -94,6 +94,32 @@ describe('push texts in five locales', () => {
   });
 });
 
+describe('incoming-call push (SPO-440)', () => {
+  it('uses the call kind, a content-free localized text and a 45 s TTL; other pushes keep the 3600 s default', async () => {
+    devices.push({ token: 't1', locale: 'uk' });
+    await sendToUser('u1', {
+      title: 'Spotter',
+      body: 'Incoming call',
+      text: defaultTextKey('call'),
+      tag: pushTag('call'),
+      kind: 'call',
+      ttl: 45,
+    });
+    const m = sent[0] as unknown as {
+      data: Record<string, string>;
+      webpush: { headers: Record<string, string> };
+    };
+    expect(m.data.body).toBe(PUSH_TEXTS.uk.call);
+    expect(m.data.tag).toBe('coach-call');
+    expect(m.webpush.headers.TTL).toBe('45');
+    sent.length = 0;
+    await sendToUser('u1', { title: 'x', body: 'y', kind: 'message' });
+    expect(
+      (sent[0] as unknown as { webpush: { headers: Record<string, string> } }).webpush.headers.TTL,
+    ).toBe('3600');
+  });
+});
+
 describe('push tags and categories per role (SPO-237)', () => {
   it('requests, team and reminders carry the three coach tags; each kind has exactly one category', () => {
     expect(pushTag('request')).toBe('coach-request');

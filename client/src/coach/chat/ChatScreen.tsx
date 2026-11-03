@@ -11,6 +11,7 @@ import { useCoachWorld } from '../data/useCoachWorld';
 import type { CoachWorldPort } from '../data/port';
 import { Header, Page, Split } from '../layout/Layout';
 import type { CoachRoute } from '../routes';
+import { currentHash } from '../../route';
 import { chatHash, readWith } from './format';
 import type { ChatPort } from './port';
 import { ThreadList } from './ThreadList';
@@ -54,9 +55,9 @@ function useOnline(): boolean {
 }
 
 function useWithParam(): [string | null, (id: string | null, push: boolean) => void] {
-  const [id, setId] = useState(() => readWith(window.location.hash));
+  const [id, setId] = useState(() => readWith(currentHash()));
   useEffect(() => {
-    const f = () => setId(readWith(window.location.hash));
+    const f = () => setId(readWith(currentHash()));
     window.addEventListener('hashchange', f);
     return () => window.removeEventListener('hashchange', f);
   }, []);

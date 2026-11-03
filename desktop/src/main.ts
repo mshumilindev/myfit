@@ -7,6 +7,7 @@ import {
   Notification,
   session,
   shell,
+  systemPreferences,
   Tray,
 } from 'electron';
 import path from 'node:path';
@@ -24,6 +25,18 @@ const APP_ORIGIN = new URL(APP_URL).origin;
 
 /** Permissions the hosted app may use (camera/geolocation per Permissions-Policy in firebase.json; web notifications). */
 const ALLOWED_PERMISSIONS = new Set(['notifications', 'media', 'geolocation']);
+
+/** macOS only: the system prompt (NSMicrophone/NSCameraUsageDescription) must be answered before getUserMedia works. */
+async function askMediaAccess(types: string[]): Promise<boolean> {
+  if (process.platform !== 'darwin') return true;
+  const kinds = (['audio', 'video'] as const).filter((t) => types.includes(t));
+  for (const kind of kinds) {
+    const name = kind === 'audio' ? 'microphone' : 'camera';
+    if (systemPreferences.getMediaAccessStatus(name) === 'granted') continue;
+    if (!(await systemPreferences.askForMediaAccess(name))) return false;
+  }
+  return true;
+}
 
 let win: BrowserWindow | null = null;
 let tray: Tray | null = null;
@@ -233,8 +246,21 @@ if (!app.requestSingleInstanceLock()) {
   if (process.platform === 'win32') app.setAppUserModelId('com.spotter.desktop');
 
   void app.whenReady().then(() => {
-    session.defaultSession.setPermissionRequestHandler((wc, permission, callback) => {
-      callback(ALLOWED_PERMISSIONS.has(permission) && isAppUrl(wc.getURL()));
+    session.defaultSession.setPermissionRequestHandler((wc, permission, callback, details) => {
+      // Both the page and the requesting frame must be the app's own origin (an embedded frame must not inherit it).
+      const requesting = (details as { requestingUrl?: string }).requestingUrl ?? '';
+      if (!ALLOWED_PERMISSIONS.has(permission) || !isAppUrl(wc.getURL()) || !isAppUrl(requesting)) {
+        return callback(false);
+      }
+      if (permission !== 'media') return callback(true);
+      // Calls (SPO-442): on macOS ask the OS for microphone/camera access before the page's getUserMedia proceeds.
+      const types = (details as { mediaTypes?: string[] }).mediaTypes ?? [];
+      askMediaAccess(types)
+        .then(callback)
+        .catch((err: unknown) => {
+          console.warn('[media]', err instanceof Error ? err.message : err);
+          callback(false);
+        });
     });
     buildMenu();
     registerIpc();

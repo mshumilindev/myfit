@@ -372,6 +372,7 @@ describe('registry empty after deletion', () => {
     const top = [...rules.matchAll(/^ {4}match \/([A-Za-z]+)\//gm)].map((m) => m[1]).sort();
     const CLEANED = [
       'assignments',
+      'calls',
       'coachKeys',
       'coaching',
       'conversations',
@@ -394,6 +395,20 @@ describe('registry empty after deletion', () => {
     expect(top.filter((c) => !CLEANED.includes(c) && !SHARED_NO_PERSONAL_DATA.includes(c))).toEqual(
       [],
     );
+  });
+
+  it('removes the calls the account took part in, with their ICE candidates, and keeps other calls (SPO-440)', async () => {
+    await seedFull();
+    await kv.set('calls/call-as-caller-0001', { callerId: A, calleeId: 'c1', state: 'ended' });
+    await kv.set('calls/call-as-caller-0001/ice/i1', { from: A, candidate: { candidate: 'x' } });
+    await kv.set('calls/call-as-callee-0001', { callerId: 'c1', calleeId: A, state: 'active' });
+    await kv.set('calls/call-as-callee-0001/ice/i1', { from: 'c1', candidate: { candidate: 'y' } });
+    await kv.set('calls/call-others-000001', { callerId: 'c1', calleeId: B, state: 'ringing' });
+    await kv.set('calls/call-others-000001/ice/i1', { from: 'c1', candidate: { candidate: 'z' } });
+    expect(await code(call(A, body))).toBe('ok');
+    expect(kv.paths().filter((p) => p.startsWith('calls/call-as-'))).toEqual([]);
+    expect(kv.has('calls/call-others-000001')).toBe(true);
+    expect(kv.has('calls/call-others-000001/ice/i1')).toBe(true);
   });
 
   it('adminDeleteUser uses the same cascade (no second copy)', () => {

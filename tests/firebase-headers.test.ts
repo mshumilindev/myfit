@@ -25,6 +25,10 @@ describe('hosting security headers (iteration 14 item 3)', () => {
     expect(h('Strict-Transport-Security')).toMatch(/max-age=\d{8,}/);
     expect(h('Referrer-Policy')).toBe('strict-origin-when-cross-origin');
     expect(h('Permissions-Policy')).toMatch(/payment=\(\)/);
+    // SPO-442 (calls): camera and microphone only for our own origin, never for embedded third parties.
+    expect(h('Permissions-Policy')).toMatch(/camera=\(self\)/);
+    expect(h('Permissions-Policy')).toMatch(/microphone=\(self\)/);
+    expect(h('Permissions-Policy')).not.toMatch(/microphone=\(\)|microphone=\*/);
     expect(h('Cross-Origin-Opener-Policy')).toMatch(/same-origin/);
     expect(h('X-Content-Type-Options')).toBe('nosniff');
   });

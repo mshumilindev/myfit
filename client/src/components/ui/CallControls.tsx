@@ -1,4 +1,4 @@
-import { IconButton } from './Button';
+import { CallRoundButton } from './CallRoundButton';
 import './Call.css';
 
 export interface CallControlsLabels {
@@ -43,55 +43,33 @@ export function CallControls({
 }: CallControlsProps) {
   return (
     <div className="uicall-ctl" role="toolbar" aria-label={labels.end}>
-      <IconButton
-        shape="round"
-        size="lg"
-        variant={micOn ? 'secondary' : 'danger-soft'}
+      <CallRoundButton
+        tone={micOn ? 'neutral' : 'light'}
         icon={micOn ? 'microphone' : 'microphone-slash'}
         label={micOn ? labels.mic : labels.micOn}
         aria-pressed={!micOn}
         onClick={onMic}
       />
       {onCam && (
-        <IconButton
-          shape="round"
-          size="lg"
-          variant={camOn ? 'secondary' : 'danger-soft'}
+        <CallRoundButton
+          tone={camOn ? 'neutral' : 'light'}
           icon={camOn ? 'video-camera' : 'video-camera-slash'}
           label={camOn ? labels.cam : labels.camOn}
           aria-pressed={!camOn}
           onClick={onCam}
         />
       )}
-      {onFlip && (
-        <IconButton
-          shape="round"
-          size="lg"
-          variant="secondary"
-          icon="camera-rotate"
-          label={labels.flip}
-          onClick={onFlip}
-        />
-      )}
+      {onFlip && <CallRoundButton icon="camera-rotate" label={labels.flip} onClick={onFlip} />}
       {onSpeaker && (
-        <IconButton
-          shape="round"
-          size="lg"
-          variant={speakerOn ? 'fill' : 'secondary'}
+        <CallRoundButton
+          tone={speakerOn ? 'light' : 'neutral'}
           icon="speaker-high"
           label={labels.speaker}
           aria-pressed={!!speakerOn}
           onClick={onSpeaker}
         />
       )}
-      <IconButton
-        shape="round"
-        size="lg"
-        variant="danger"
-        icon="phone-disconnect"
-        label={labels.end}
-        onClick={onEnd}
-      />
+      <CallRoundButton tone="danger" icon="phone-disconnect" label={labels.end} onClick={onEnd} />
     </div>
   );
 }

@@ -1,0 +1,96 @@
+/* ---- modes ---- */
+:root {
+  /* width of the call side panel; the app shifts by the same amount (redesign.css, [data-call-dock]) */
+  --call-dock-w: calc(var(--s-40) * 9);
+}
+@media (min-width: 45em) {
+  .uicall-full {
+    display: inline-flex;
+  }
+  .uicall.uicall--full {
+    padding: 0;
+    background: var(--color-bg);
+  }
+  .uicall.uicall--full > * {
+    max-width: none;
+  }
+  .uicall.uicall--full .uicall-head,
+  .uicall.uicall--full .uicall-notice,
+  .uicall.uicall--full .uicall-foot {
+    border-radius: 0;
+  }
+  .uicall.uicall--full .uicall-stage {
+    flex: 1;
+    height: auto;
+    margin: 0 var(--s-8);
+    border-radius: var(--radius-xl);
+  }
+}
+.uicall.uicall--dock {
+  inset: 0 0 0 auto;
+  align-items: stretch;
+  justify-content: flex-start;
+  width: var(--call-dock-w);
+  padding: var(--safe-top) 0 0;
+  border-left: var(--bw-1) solid var(--color-divider);
+  box-shadow: var(--shadow-lg);
+  background: var(--color-bg);
+}
+.uicall.uicall--dock > * {
+  max-width: none;
+}
+.uicall.uicall--dock .uicall-head,
+.uicall.uicall--dock .uicall-notice,
+.uicall.uicall--dock .uicall-foot {
+  border-radius: 0;
+}
+.uicall.uicall--dock .uicall-stage {
+  flex: 1;
+  height: auto;
+  margin: 0 var(--s-8);
+  border-radius: var(--radius-xl);
+}
+.uicall.uicall--dock .uicall-tile--self {
+  width: calc(var(--s-40) * 2.5);
+  height: calc(var(--s-40) * 3.5);
+}
+.uicall.uicall--dock .uicall-ctl {
+  gap: var(--s-8);
+}
+
+/* live equaliser: every bar is full height, scaled to its step */
+.uicall-wave--live .uicall-wave-b {
+  height: var(--s-40);
+  transform-origin: center;
+  transition: transform 0.08s linear;
+}
+.uicall-wave--live .uicall-wave-b[data-step='1'] {
+  transform: scaleY(0.1);
+}
+.uicall-wave--live .uicall-wave-b[data-step='2'] {
+  transform: scaleY(0.2);
+}
+.uicall-wave--live .uicall-wave-b[data-step='3'] {
+  transform: scaleY(0.3);
+}
+.uicall-wave--live .uicall-wave-b[data-step='4'] {
+  transform: scaleY(0.4);
+}
+.uicall-wave--live .uicall-wave-b[data-step='5'] {
+  transform: scaleY(0.5);
+}
+.uicall-wave--live .uicall-wave-b[data-step='6'] {
+  transform: scaleY(0.6);
+}
+.uicall-wave--live .uicall-wave-b[data-step='7'] {
+  transform: scaleY(0.7);
+}
+.uicall-wave--live .uicall-wave-b[data-step='8'] {
+  transform: scaleY(0.8);
+}
+.uicall-wave--live .uicall-wave-b[data-step='9'] {
+  transform: scaleY(0.9);
+}
+.uicall-wave--live .uicall-wave-b[data-step='10'] {
+  transform: scaleY(1);
+}

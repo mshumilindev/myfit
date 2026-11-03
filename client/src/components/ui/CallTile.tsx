@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { Icon } from '../../ui';
 import { Avatar } from './Avatar';
+import { CallRings } from './CallRings';
+import { CallWave } from './CallWave';
 import './Call.css';
 
 export interface CallTileProps {
@@ -16,6 +18,13 @@ export interface CallTileProps {
   self?: boolean;
   /** The floating mini window: a small avatar so it fits the tile. */
   small?: boolean;
+  /** The phone is ringing: the avatar gets ripples (outgoing call). */
+  ringing?: boolean;
+  /** Voice-only call: voice bars under the avatar. */
+  wave?: boolean;
+  /** With `wave`: the live voice level 0..1 (see `CallWave`). */
+  waveLevel?: number;
+  wavePhase?: number;
   /** Corner chip over the picture (connection quality). */
   corner?: ReactNode;
   className?: string;
@@ -32,6 +41,10 @@ export function CallTile({
   micOff,
   self,
   small,
+  ringing,
+  wave,
+  waveLevel,
+  wavePhase,
   corner,
   className,
 }: CallTileProps) {
@@ -49,7 +62,12 @@ export function CallTile({
         <div className="uicall-media">{video}</div>
       ) : (
         <div className="uicall-ph">
-          <Avatar name={name} src={photo} size={self || small ? 56 : 112} />
+          {self || small ? (
+            <Avatar name={name} src={photo} size={56} />
+          ) : (
+            <CallRings name={name} photo={photo} size={112} ringing={!!ringing} />
+          )}
+          {wave && !self && !small && <CallWave level={waveLevel} phase={wavePhase} />}
         </div>
       )}
       {corner && <div className="uicall-corner">{corner}</div>}

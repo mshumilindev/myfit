@@ -286,6 +286,7 @@ describe('push matrix: content-free', () => {
       'team',
       'reminder',
       'sync',
+      'call',
     ];
     for (const k of kinds) {
       expect(pushTag(k)).toMatch(/^coach-/);

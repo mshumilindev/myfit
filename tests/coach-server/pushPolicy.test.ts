@@ -7,6 +7,7 @@ import {
   categoryOf,
   parsePushPrefs,
   parseQuietWindow,
+  pushLink,
   pushTag,
   shouldDeliver,
   type CoachNoticeKind,
@@ -70,6 +71,7 @@ describe('categories, switches and what quiet hours hold (SPO-237)', () => {
       team: 'team',
       reminder: 'reminders',
       sync: null,
+      call: 'calls',
     };
     for (const [k, c] of Object.entries(cats)) expect(categoryOf(k as CoachNoticeKind)).toBe(c);
   });
@@ -85,6 +87,15 @@ describe('categories, switches and what quiet hours hold (SPO-237)', () => {
       reminders: false,
       team: true,
     });
+  });
+  it('an incoming call has no switch but quiet hours hold it (SPO-440); its tag and link carry no data', () => {
+    expect(
+      shouldDeliver('call', dev({ requests: false, reminders: false, team: false }), noon),
+    ).toBe(true);
+    expect(shouldDeliver('call', dev(), inNight)).toBe(false);
+    expect(pushTag('call')).toBe('coach-call');
+    expect(pushLink('call', false)).toBe('/#/');
+    expect(pushLink('call', true)).toBe('/#/');
   });
   it('quiet hours hold chat and reminders, never requests or team', () => {
     expect(shouldDeliver('message', dev(), inNight)).toBe(false);

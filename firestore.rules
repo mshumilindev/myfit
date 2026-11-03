@@ -987,6 +987,23 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Trainer <-> client calls (SPO-22 / SPO-440): signalling documents only (state, SDP, ICE: technical data with IP
+    // addresses, short TTL on `expiresAt`). Created and changed ONLY by the call functions (Admin SDK): the pair check
+    // (active coaching, no managers), busy, quiet hours and rate limits live there. The two participants read; nobody
+    // writes from a client.
+    match /calls/{callId} {
+      allow read: if isSignedIn() && notSuspended()
+        && (resource.data.get('callerId', '') == request.auth.uid
+            || resource.data.get('calleeId', '') == request.auth.uid);
+      allow write: if false;
+      match /ice/{iceId} {
+        allow read: if isSignedIn() && notSuspended()
+          && (get(/databases/$(database)/documents/calls/$(callId)).data.get('callerId', '') == request.auth.uid
+              || get(/databases/$(database)/documents/calls/$(callId)).data.get('calleeId', '') == request.auth.uid);
+        allow write: if false;
+      }
+    }
+
     // Anything not matched above is denied by default.
   }
 }

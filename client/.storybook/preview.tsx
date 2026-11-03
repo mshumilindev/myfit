@@ -3,6 +3,10 @@ import { CallEntryProvider } from '../src/coach/calls/CallEntry';
 import { IncomingCall } from '../src/components/ui/IncomingCall';
 import { CallBar } from '../src/components/ui/CallBar';
 import { CallMini } from '../src/components/ui/CallMini';
+import { CallScreen } from '../src/components/ui/CallScreen';
+import { CallTile } from '../src/components/ui/CallTile';
+import { CallControls } from '../src/components/ui/CallControls';
+import { CallSessionChip } from '../src/components/ui/CallSessionChip';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 // Cyberpunk type (SPO-344, ADR 007): Barlow / Barlow Condensed for latin, Fira Sans / Fira Sans Condensed for
@@ -143,6 +147,46 @@ const withCalls: Decorator = (Story) => {
             onReturn={() => undefined}
           />
         </div>
+      )}
+      {mode === 'dock' && (
+        <CallScreen
+          mode="dock"
+          name="Iryna Melnyk"
+          status="12:41"
+          note="Not recorded"
+          session={
+            <CallSessionChip
+              title="Barbell Bench Press"
+              detail="Set 2 of 4 · rest"
+              time="1:32"
+              openLabel="Back to your workout"
+              onOpen={() => undefined}
+            />
+          }
+          foot={
+            <CallControls
+              labels={{
+                mic: 'Mute',
+                micOn: 'Unmute',
+                cam: 'Camera off',
+                camOn: 'Camera on',
+                flip: 'Flip',
+                speaker: 'Speaker',
+                end: 'End call',
+                minimize: 'Minimise',
+              }}
+              micOn
+              onMic={() => undefined}
+              camOn
+              onCam={() => undefined}
+              onEnd={() => undefined}
+            />
+          }
+          onToggleFull={() => undefined}
+          fullLabel="Full screen"
+        >
+          <CallTile name="Iryna Melnyk" />
+        </CallScreen>
       )}
       {mode === 'mini' && (
         <CallMini

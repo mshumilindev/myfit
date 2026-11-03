@@ -1,5 +1,6 @@
 import { useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { CallEntry, CallLogRows } from '../calls/CallEntry';
+import { CallLogLine, isCallLog, useCallLogWriter } from '../calls/CallLogLine';
 import { BackButton } from '../../components/ui/BackButton';
 import { IconButton } from '../../components/ui/Button';
 import { ChatShell } from '../../components/ui/ChatShell';
@@ -165,6 +166,7 @@ export function ThreadView({
   }
 
   useMarkRead(status, store, cid, messages.filter((m) => m.from === 'client').length);
+  useCallLogWriter(clientId, (preview, body) => store.send(cid, preview, body));
   const { scroller, earlier } = useThreadScroll({
     status,
     ready: firstNewId !== undefined,
@@ -211,6 +213,12 @@ export function ThreadView({
         noteLabel: (n) => `${ch.chYou}, ${clock(n.at)}`,
         renderNote: (n) => n.node,
         renderOther: (m, mine) => {
+          if (m.body.kind === 'system' && isCallLog(m.body)) {
+            return {
+              withMenu: false,
+              body: <CallLogLine text={m.body.text} at={m.at} mine={mine} peerId={clientId} />,
+            };
+          }
           if (m.body.kind === 'system') {
             return {
               withMenu: false,
@@ -287,7 +295,7 @@ export function ThreadView({
               {client && <small>{client.program}</small>}
             </div>
           </div>
-          <CallEntry compact={!desktop} />
+          <CallEntry compact={!desktop} peerId={clientId} peerName={name} />
           {x.barActions}
           <IconButton
             icon="dots-three"

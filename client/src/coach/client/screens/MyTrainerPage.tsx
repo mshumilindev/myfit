@@ -106,7 +106,7 @@ export function MyTrainerPage(p: MyTrainerPageProps) {
           <Button variant="primary" size="md" icon="envelope" onClick={p.onChat}>
             {cc.mtChat}
           </Button>
-          <CallEntry labeled />
+          <CallEntry labeled peerId={trainer.id} peerName={trainer.name} />
         </div>
       </Card>
 

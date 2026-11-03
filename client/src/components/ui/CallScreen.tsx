@@ -17,8 +17,16 @@ export interface CallScreenProps {
   foot: ReactNode;
   onMinimize?: () => void;
   minimizeLabel?: string;
-  /** Lets the page behind the call stay readable on desktop: the call is a panel, not the whole screen. */
-  panel?: boolean;
+  /** The live workout (`CallSessionChip`) shown under the header while a session is open. */
+  session?: ReactNode;
+  /**
+   * `auto`: the whole screen on a phone, a centred panel from 720 px. `full`: the whole screen on desktop too.
+   * `dock`: a side panel on the right, the page beside it stays usable (a workout open next to the call).
+   */
+  mode?: 'auto' | 'full' | 'dock';
+  /** Panel / full-screen toggle, desktop only. */
+  onToggleFull?: () => void;
+  fullLabel?: string;
 }
 
 /**
@@ -35,10 +43,13 @@ export function CallScreen({
   foot,
   onMinimize,
   minimizeLabel,
-  panel,
+  session,
+  mode = 'auto',
+  onToggleFull,
+  fullLabel,
 }: CallScreenProps) {
   return (
-    <section className={panel ? 'uicall uicall--panel' : 'uicall'} aria-label={name}>
+    <section className={mode === 'auto' ? 'uicall' : `uicall uicall--${mode}`} aria-label={name}>
       <header className="uicall-head">
         {onMinimize && (
           <IconButton
@@ -58,7 +69,17 @@ export function CallScreen({
             {note}
           </span>
         )}
+        {onToggleFull && (
+          <IconButton
+            className="uicall-full"
+            icon={mode === 'full' ? 'arrows-in-simple' : 'arrows-out-simple'}
+            label={fullLabel ?? ''}
+            variant="ghost"
+            onClick={onToggleFull}
+          />
+        )}
       </header>
+      {session && <div className="uicall-session">{session}</div>}
       {notice && <div className="uicall-notice">{notice}</div>}
       <div className="uicall-stage">{children}</div>
       <footer className="uicall-foot">{foot}</footer>

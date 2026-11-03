@@ -55,6 +55,7 @@ import { PushedPage } from './PushedPage';
 import { TrainerUnavailable } from './TrainerUnavailable';
 import { ClientChatBar } from './clientChat/ClientChatBar';
 import { renderClientBody } from './clientChat/renderClientBody';
+import { useCallLogWriter } from '../../calls/CallLogLine';
 import { ClientRescheduleSheet, useMySessions } from './ClientSchedule';
 import '../../chat/Chat.css';
 import '../ClientCoach.css';
@@ -157,6 +158,9 @@ export function ClientChat(p: ClientChatProps) {
     messages.filter((m) => m.from === 'trainer' && !m.deleted).length,
   );
   useEffect(() => () => store.settle(), [store]);
+  useCallLogWriter(trainer?.id ?? '', (preview, body) => {
+    if (cid) store.send(cid, preview, body);
+  });
   const { scroller } = useThreadScroll({
     status,
     ready: openedWith !== null,
@@ -230,6 +234,7 @@ export function ClientChat(p: ClientChatProps) {
         renderOther: (m, mine) =>
           renderClientBody(
             {
+              peerId: trainer?.id ?? '',
               ch,
               cc,
               shw,

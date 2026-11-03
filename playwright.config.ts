@@ -12,15 +12,29 @@ import { defineConfig, devices } from '@playwright/test';
 const COACH_PORT = 4174;
 const coachUrl = process.env.E2E_COACH_URL ?? `http://127.0.0.1:${COACH_PORT}`;
 // privacy-sharing (SPO-107/108) runs on the same fixtures build: the member-side sample trainer
+// calls-* (SPO-434): real WebRTC between two pages on the fixtures build made with client/vite.config.qa.ts (sample world)
 const coachFiles = ['**/coach-*.e2e.ts', '**/privacy-sharing.e2e.ts'];
+// Calls specs run on exactly two widths (phone + desktop): real WebRTC is slow and the box is small.
+const callsFiles = ['**/calls-*.e2e.ts'];
 
-const coachProject = (width: number, height: number) => ({
-  name: `coach-${width}`,
-  testMatch: coachFiles,
+// Calls e2e: Chromium fake camera + microphone (no prompt), WebRTC on loopback host candidates without mDNS masking,
+// audio that starts without a user gesture. Harmless for the other coach specs.
+const CALLS_CHROMIUM_ARGS = [
+  '--use-fake-ui-for-media-stream',
+  '--use-fake-device-for-media-stream',
+  '--allow-loopback-in-peer-connection',
+  '--disable-features=WebRtcHideLocalIpsWithMdns',
+  '--autoplay-policy=no-user-gesture-required',
+];
+
+const coachProject = (width: number, height: number, prefix = 'coach', files = coachFiles) => ({
+  name: `${prefix}-${width}`,
+  testMatch: files,
   use: {
     ...devices['Desktop Chrome'],
     viewport: { width, height },
     baseURL: coachUrl,
+    launchOptions: { args: CALLS_CHROMIUM_ARGS },
     // Phone widths behave like a phone: touch + mobile UA bits the app keys off.
     ...(width < 768 ? { isMobile: true, hasTouch: true } : {}),
   },
@@ -39,13 +53,15 @@ export default defineConfig({
   projects: [
     {
       name: 'mobile-chromium',
-      testIgnore: coachFiles,
+      testIgnore: [...coachFiles, ...callsFiles],
       use: { ...devices['Pixel 5'] },
     },
     coachProject(390, 844),
     coachProject(768, 1024),
     coachProject(1024, 768),
     coachProject(1440, 900),
+    coachProject(390, 844, 'calls', callsFiles),
+    coachProject(1440, 900, 'calls', callsFiles),
   ],
   webServer:
     process.env.E2E_COACH_URL || process.env.E2E_COACH !== '1'

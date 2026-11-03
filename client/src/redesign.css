@@ -1525,3 +1525,6 @@ html[data-theme] .wlib-top .wlib-title {
     grid-template-columns: 1fr;
   }
 }
+html[data-call-dock] .app {
+  padding-right: var(--call-dock-w); /* SPO-445: dock overlays the edge */
+}

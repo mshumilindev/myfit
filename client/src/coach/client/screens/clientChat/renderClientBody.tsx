@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { Button } from '../../../../components/ui/Button';
 import { ChatBubble } from '../../../../components/ui/ChatBubble';
+import { CallLogLine, isCallLog } from '../../../calls/CallLogLine';
 import { ScheduleRequestCard } from '../../../schedule/ScheduleRequestCard';
 import { useWords as useShareWords } from '../../../share/ShareCardView';
 import { AccessAskCard } from '../../../share/AccessAskCard';
@@ -18,6 +19,8 @@ import type { ChatMessage as Msg } from '../../../chat/types';
 
 /** What the client-side renderer of the non-text bodies needs from the chat screen. */
 export interface ClientBodyCtx {
+  /** The trainer's account id (the other side of a call line). */
+  peerId: string;
   ch: ChatStrings;
   cc: ClientStrings;
   shw: ReturnType<typeof useShareWords>;
@@ -42,6 +45,9 @@ export function renderClientBody(
   mine: boolean,
 ): { body: ReactNode; withMenu: boolean } {
   const noMenu = (body: ReactNode) => ({ body, withMenu: false });
+  if (m.body.kind === 'system' && isCallLog(m.body)) {
+    return noMenu(<CallLogLine text={m.body.text} at={m.at} mine={mine} peerId={x.peerId} />);
+  }
   if (m.body.kind === 'system') {
     return noMenu(
       <ChatBubble

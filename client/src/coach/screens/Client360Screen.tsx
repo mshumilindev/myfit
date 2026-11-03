@@ -277,7 +277,7 @@ export function Client360Screen({
         {r.c3Message}
         {unread > 0 && <Badge n={unread} tone="danger" anchor="none" />}
       </Button>
-      <CallEntry labeled />
+      <CallEntry labeled peerId={client.id} peerName={client.name} />
       <ActionMenu label={r.c3MenuLabel} items={items} note={r.c3ReadsNamed(first)} />
     </>
   ) : (
@@ -293,7 +293,7 @@ export function Client360Screen({
         label={r.c3Schedule}
         onClick={() => setHash(scheduleHref({ form: 'plan', client: cid }))}
       />
-      <CallEntry compact />
+      <CallEntry compact peerId={client.id} peerName={client.name} />
       <ActionMenu
         label={r.c3MenuLabel}
         items={items}
