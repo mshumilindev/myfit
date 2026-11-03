@@ -38,6 +38,7 @@ import { MORE_TOPICS_EX3 } from './topicsMoreFix';
 import { APP_MORE_EX, KB_APP_EXTRA } from './appTipsEx';
 import { P9_EX } from '../appP9';
 import { P10_EX } from '../appP10';
+import { P12_EX, P12_MORE } from '../appP12';
 import type { Kb } from './types';
 
 const base: Kb = { ...KB_A, ...KB_B, ...KB_C, ...KB_D, ...KB_E };
@@ -58,6 +59,7 @@ const rounds: More[] = [
   MORE_TOPICS_EX2A,
   MORE_TOPICS_EX2B,
   MORE_TOPICS_EX3,
+  P12_MORE,
   // Other languages ride in the English list — the matcher doesn't care.
   Object.fromEntries(Object.entries(KB_PLLTET).map(([id, ex]) => [id, { ex, exUk: [] }])),
   ...[KB_PLLTET_2A, KB_PLLTET_2B, KB_PLLTET_2C].map((r) =>
@@ -106,10 +108,12 @@ export const KB: Kb = Object.fromEntries([
     },
   ]),
   // A hundred more topics and more app help — phrasings only (answers in topicsMore*.ts, appTips.ts).
-  ...Object.entries({ ...MORE_TOPICS_EX, ...APP_MORE_EX, ...P9_EX, ...P10_EX }).map(([id, e]) => [
-    id,
-    { ex: [...e.ex, ...(more[id]?.ex ?? [])], exUk: [...e.exUk, ...(more[id]?.exUk ?? [])] },
-  ]),
+  ...Object.entries({ ...MORE_TOPICS_EX, ...APP_MORE_EX, ...P9_EX, ...P10_EX, ...P12_EX }).map(
+    ([id, e]) => [
+      id,
+      { ex: [...e.ex, ...(more[id]?.ex ?? [])], exUk: [...e.exUk, ...(more[id]?.exUk ?? [])] },
+    ],
+  ),
 ]);
 export type { Facet, Kb, KbEntry } from './types';
 

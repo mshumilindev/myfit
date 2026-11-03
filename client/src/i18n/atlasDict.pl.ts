@@ -5855,4 +5855,20 @@ export const DICT: Record<string, string> = {
   'That is not in this plan yet.': 'Tego jeszcze nie ma w tym planie.',
   'Tell me what to change — for example “make it {1} minutes” gives each day extra slots — and I’ll rebuild it.':
     'Powiedz, co zmienić — na przykład „zrób na {1} minut” daje każdemu dniowi dodatkowe miejsca — a przebuduję plan.',
+  'If you are not sure what to ask: what to train today, the next weight on a lift, or how you are progressing.':
+    'Jeśli nie wiesz, o co zapytać: co dziś trenować, jaki następny ciężar w ćwiczeniu albo jak idą postępy.',
+  'Jacked is mostly consistency: {1}–{2} sessions a week, {3}–{4} reps close to failure, add weight or a rep over time, enough protein, a small calorie surplus and sleep.':
+    'Wyrzeźbiona sylwetka to głównie regularność: {1}–{2} treningów w tygodniu, {3}–{4} powtórzeń blisko upadku mięśniowego, z czasem dokładaj ciężar lub powtórzenie, dość białka, niewielka nadwyżka kalorii i sen.',
+  'No rush.': 'Spokojnie.',
+  'Pick one or just say what is on your mind.':
+    'Wybierz jedno albo po prostu powiedz, co masz na myśli.',
+  'Sleep and food do half the work.': 'Sen i jedzenie robią połowę roboty.',
+  'Strength comes from heavy basic lifts done often: squat, bench, row, deadlift or press {1}–{2} times a week, {3}–{4} reps, add a little weight when every set is clean.':
+    'Siła rośnie od ciężkich, podstawowych ćwiczeń robionych często: przysiad, wyciskanie, wiosłowanie, martwy ciąg lub wyciskanie nad głowę {1}–{2} razy w tygodniu, {3}–{4} powtórzeń, dokładaj trochę ciężaru, gdy każda seria jest czysta.',
+  'Tell me which lift to push and I’ll show where you stand in your log.':
+    'Powiedz, które ćwiczenie podkręcamy, a pokażę, gdzie jesteś w dzienniku.',
+  'The log shows the progress before the mirror does.':
+    'Dziennik pokazuje postęp, zanim zrobi to lustro.',
+  'Want a plan for it?': 'Chcesz plan?',
+  'Yes.': 'Tak.',
 };
