@@ -5892,4 +5892,17 @@ export const DICT: Record<string, string> = {
   '{1} + {2} × {3} weeks = {4}.': '{1} + {2} × {3} nädalat = {4}.',
   '{1} {2}+ {3} {4}× {5} weeks = {6}.': '{1} {2}+ {3} {4}× {5} nädalat = {6}.',
   '{1} is {2}% of {3}.': '{1} on {2}% arvust {3}.',
+  'In August: {1} sessions, {2} working sets.': 'August: treeninguid — {1}, töösarju — {2}.',
+  'In September: {1} sessions, {2} working sets.': 'September: treeninguid — {1}, töösarju — {2}.',
+  'In October {1}: {2} sessions, {3} working sets.':
+    'Oktoober {1}: treeninguid — {2}, töösarju — {3}.',
+  'In {1}: {2} sessions, {3} working sets.': '{1}: treeninguid — {2}, töösarju — {3}.',
+  'Your busiest month: {1} — {2} sessions, {3} working sets.':
+    'Aktiivseim kuu: {1} — treeninguid: {2}, töösarju: {3}.',
+  'Your busiest month: {1}-{2} {3}— {4} sessions, {5} working sets.':
+    'Aktiivseim kuu: {1}-{2} {3}— treeninguid: {4}, töösarju: {5}.',
+  'Your busiest week started {1}-{2}-{3} {4}— {5} sessions, {6} working sets.':
+    'Aktiivseim nädal algas {1}-{2}-{3} {4}— treeninguid: {5}, töösarju: {6}.',
+  'Your busiest week started {1}.{2} — {3} sessions, {4} working sets.':
+    'Aktiivseim nädal algas {1}.{2} — treeninguid: {3}, töösarju: {4}.',
 };

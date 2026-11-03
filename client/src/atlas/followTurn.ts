@@ -7,7 +7,12 @@
  */
 import { programAnswer } from './compose';
 import type { Frame } from './frame';
-import type { AskCtx, Tr } from './intentKit';
+import { finishedOf, type AskCtx, type Tr } from './intentKit';
+import { setTypeOf } from '../store';
+import { normalize } from './nlu';
+import { parseRange } from './when';
+import { bestPeriod } from './appP17';
+import * as N from './num';
 import type { Route } from './confidence';
 
 interface FConvo {
@@ -96,6 +101,14 @@ export function followTurn<C extends FConvo>(
     chips,
     convo: { ...convo, turn, q: question },
   });
+  const bp = bestPeriod(question, c, L);
+  if (bp) return keep(bp.intent, bp.text);
+  const mf = monthFollow(question, c, convo.intent, L);
+  if (mf)
+    return {
+      ...keep(mf.intent, mf.text),
+      convo: { ...convo, intent: convo.intent, turn, q: question },
+    };
   const ctx = ctxFollow(question, convo.intent, L);
   if (ctx) {
     const o = keep(ctx.intent, ctx.text);
@@ -283,4 +296,37 @@ export function ctxFollow(
       ),
     };
   return null;
+}
+
+const MONTH_ONLY_RE =
+  /^\s*((and|so|а|і) )?(how about |what about |а що |а як )?(in|during|за|у|в|на) \p{L}+\s*\??\s*$/iu;
+
+/** "and in August?" right after a count for a month: the same count for the other month. */
+export function monthFollow(
+  question: string,
+  c: AskCtx,
+  intent: string | undefined,
+  L: Tr,
+): { intent: string; text: string } | null {
+  if ((intent !== 'month' && intent !== 'range_count') || !MONTH_ONLY_RE.test(question))
+    return null;
+  const r = parseRange(normalize(question), c.now);
+  if (!r || !/^(in|since) /u.test(r.label[0])) return null;
+  const ws = finishedOf(c).filter((w) => w.startedAt >= r.from && w.startedAt < r.to);
+  const sets = ws.reduce(
+    (n, w) =>
+      n +
+      w.exercises.reduce((m, e) => m + e.sets.filter((x) => setTypeOf(x) !== 'warmup').length, 0),
+    0,
+  );
+  const y = new Date(r.from).getFullYear();
+  const yr = y === new Date(c.now).getFullYear() ? '' : ` ${y}`;
+  const cap = (t: string) => `${t[0].toUpperCase()}${t.slice(1)}`;
+  return {
+    intent: 'range_count',
+    text: L(
+      `${cap(r.label[0])}${yr}: ${N.sessions('en', ws.length)}, ${N.workingSets('en', sets)}.`,
+      `${cap(r.label[1])}${yr}: ${N.sessions('uk', ws.length)}, ${N.workingSets('uk', sets)}.`,
+    ),
+  };
 }

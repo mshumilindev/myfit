@@ -5921,4 +5921,18 @@ export const DICT: Record<string, string> = {
   '{1} + {2} × {3} weeks = {4}.': '{1} + {2} × {3} tygodni = {4}.',
   '{1} {2}+ {3} {4}× {5} weeks = {6}.': '{1} {2}+ {3} {4}× {5} tygodni = {6}.',
   '{1} is {2}% of {3}.': '{1} to {2}% z {3}.',
+  'In August: {1} sessions, {2} working sets.': 'W sierpniu: sesji — {1}, serii roboczych — {2}.',
+  'In September: {1} sessions, {2} working sets.':
+    'We wrześniu: sesji — {1}, serii roboczych — {2}.',
+  'In October {1}: {2} sessions, {3} working sets.':
+    'W październiku {1}: sesji — {2}, serii roboczych — {3}.',
+  'In {1}: {2} sessions, {3} working sets.': 'W {1}: sesji — {2}, serii roboczych — {3}.',
+  'Your busiest month: {1} — {2} sessions, {3} working sets.':
+    'Najaktywniejszy miesiąc: {1} — sesji: {2}, serii roboczych: {3}.',
+  'Your busiest month: {1}-{2} {3}— {4} sessions, {5} working sets.':
+    'Najaktywniejszy miesiąc: {1}-{2} {3}— sesji: {4}, serii roboczych: {5}.',
+  'Your busiest week started {1}-{2}-{3} {4}— {5} sessions, {6} working sets.':
+    'Najaktywniejszy tydzień zaczął się {1}-{2}-{3} {4}— sesji: {5}, serii roboczych: {6}.',
+  'Your busiest week started {1}.{2} — {3} sessions, {4} working sets.':
+    'Najaktywniejszy tydzień zaczął się {1}.{2} — sesji: {3}, serii roboczych: {4}.',
 };

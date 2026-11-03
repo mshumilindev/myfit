@@ -5949,4 +5949,19 @@ export const DICT: Record<string, string> = {
   '{1} + {2} × {3} weeks = {4}.': '{1} + {2} × {3} sav. = {4}.',
   '{1} {2}+ {3} {4}× {5} weeks = {6}.': '{1} {2}+ {3} {4}× {5} sav. = {6}.',
   '{1} is {2}% of {3}.': '{1} yra {2}% nuo {3}.',
+  'In August: {1} sessions, {2} working sets.':
+    'Rugpjūtis: treniruočių — {1}, darbinių serijų — {2}.',
+  'In September: {1} sessions, {2} working sets.':
+    'Rugsėjis: treniruočių — {1}, darbinių serijų — {2}.',
+  'In October {1}: {2} sessions, {3} working sets.':
+    'Spalis {1}: treniruočių — {2}, darbinių serijų — {3}.',
+  'In {1}: {2} sessions, {3} working sets.': '{1}: treniruočių — {2}, darbinių serijų — {3}.',
+  'Your busiest month: {1} — {2} sessions, {3} working sets.':
+    'Aktyviausias mėnuo: {1} — treniruočių: {2}, darbinių serijų: {3}.',
+  'Your busiest month: {1}-{2} {3}— {4} sessions, {5} working sets.':
+    'Aktyviausias mėnuo: {1}-{2} {3}— treniruočių: {4}, darbinių serijų: {5}.',
+  'Your busiest week started {1}-{2}-{3} {4}— {5} sessions, {6} working sets.':
+    'Aktyviausia savaitė prasidėjo {1}-{2}-{3} {4}— treniruočių: {5}, darbinių serijų: {6}.',
+  'Your busiest week started {1}.{2} — {3} sessions, {4} working sets.':
+    'Aktyviausia savaitė prasidėjo {1}.{2} — treniruočių: {3}, darbinių serijų: {4}.',
 };

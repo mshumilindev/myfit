@@ -224,6 +224,14 @@ export const CONV_CASES: ConvCase[] = [
   c('en', ['i sleep 5 hours', 'will that hurt my gains'], /costs you/, { forbid: /cardio/ }),
   c('en', ['should i train if i slept badly'], /Yes, but easier/, { forbid: /No sleep logged/ }),
   c('uk', ['я сплю 5 годин'], /замало/),
+  // P17: calendar months, busiest month / week
+  c('en', ['how many workouts did i do in october'], /In October 2025: 0 sessions/, {
+    forbid: /This month/,
+  }),
+  c('en', ['how many sets in september'], /In September: 6 sessions/, { forbid: /This month/ }),
+  c('en', ['how many sets in september', 'and in august'], /In August: 7 sessions/),
+  c('en', ['which month was my best'], /busiest month/),
+  c('en', ['what was my best week'], /busiest week/, { forbid: /You average/ }),
   // known weaknesses (fix → drop `gap`)
   c('en', ['log 3 sets of pullups'], /tap “Log”/, { forbid: /3–4 days a week/ }),
   c('uk', ['залогуй 3 підходи підтягувань'], /«Запис»/),
