@@ -5869,4 +5869,27 @@ export const DICT: Record<string, string> = {
     'Asenda variandiga, mis ei valuta: teine nurk või haare, masin või hantlid, lühem ulatus või täna mõni muu lihas.',
   'Whenever you are ready, answer the last question and we will finish the check-in.':
     'Kui oled valmis, vasta viimasele küsimusele ja lõpetame kontrolli.',
+  'Aim for {1}–{2} hours; even an extra hour helps.':
+    'Sihi {1}–{2} tunnile; isegi üks lisatund aitab.',
+  'Calories can sit a little lower if you move less.':
+    'Kaloreid võib olla veidi vähem, kui liigud vähem.',
+  'If you feel ill or dizzy, rest instead.':
+    'Kui tunned end haigena või pea käib ringi, puhka hoopis.',
+  'It is not a disaster for a week, but fix it before you change the programme.':
+    'Nädal pole katastroof, aga paranda see enne, kui programmi muudad.',
+  'Keep protein the same on rest days — that is when the muscle is repaired and built.':
+    'Puhkepäevadel hoia valk samana — just siis lihased taastuvad ja kasvavad.',
+  'Less sleep slows recovery and strength and raises hunger.':
+    'Vähem und aeglustab taastumist ja jõudu ning suurendab nälga.',
+  'On a short night train, but keep it easier.': 'Pärast lühikest ööd treeni, aga kergemini.',
+  'That is on the short side.': 'See on pigem vähe.',
+  'That pace is for a beginner — it slows down after the first months.':
+    'Selline tempo on algajale — esimestest kuudest alates aeglustub see.',
+  'Yes, but easier: same lifts, fewer sets, leave more reps in reserve.':
+    'Jah, aga kergemini: samad harjutused, vähem seeriaid, jäta rohkem kordusi varuks.',
+  'Yes, regularly short sleep costs you: slower recovery, less strength and more hunger.':
+    'Jah, püsivalt lühike uni maksab: aeglasem taastumine, vähem jõudu ja suurem nälg.',
+  '{1} + {2} × {3} weeks = {4}.': '{1} + {2} × {3} nädalat = {4}.',
+  '{1} {2}+ {3} {4}× {5} weeks = {6}.': '{1} {2}+ {3} {4}× {5} nädalat = {6}.',
+  '{1} is {2}% of {3}.': '{1} on {2}% arvust {3}.',
 };

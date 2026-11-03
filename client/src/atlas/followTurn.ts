@@ -96,6 +96,14 @@ export function followTurn<C extends FConvo>(
     chips,
     convo: { ...convo, turn, q: question },
   });
+  const ctx = ctxFollow(question, convo.intent, L);
+  if (ctx) {
+    const o = keep(ctx.intent, ctx.text);
+    // The sleep answer is the topic the next question ("will that hurt my gains?") hangs on.
+    return ctx.intent === 'sleep_short'
+      ? { ...o, convo: { ...o.convo, intent: 'sleep_short' } }
+      : o;
+  }
   if (STRONGER_RE.test(question))
     return keep(
       'get_stronger',
@@ -203,4 +211,76 @@ export function painSideReply(kind: PainSide, L: Tr): string {
       'Легкий рух і м’яке розтягування в комфортній амплітуді — нормально; не тисни в біль і не тягни різко. Тепло допомагає затиснутим м’язам, але не лікує — це робить легкий рух і час.',
     ) + tail
   );
+}
+
+/** Short follow-ups that only make sense after the previous topic (nutrition, sleep). */
+const AFTER_RE =
+  /^\s*((and|so|а|і) )?(after|after (it|that|training|a workout|the gym)|після( цього| тренування)?)\s*\??\s*$/iu;
+const REST_DAYS_RE =
+  /(?<!\p{L})(on |for )?rest days?(?!\p{L})|(?<!\p{L})(у |на )?(вихідн\p{L}*|дні відпочинку|дні без тренувань)(?!\p{L})/iu;
+const SLEEP_HOURS_RE =
+  /(?<!\p{L})(i )?(only )?(sleep|slept|get)( only| about| around| just)? (\d(?:[.,]\d)?) ?(h|hrs?|hours?)(?!\p{L})|(?<!\p{L})я (сплю|спав|спала)( лише| тільки| приблизно)? (\d(?:[.,]\d)?) (год|годин\p{L}*)/iu;
+const SLEEP_COST_RE =
+  /(?<!\p{L})(will|does|would|is) (that|it|this)( \w+)? (hurt|kill|ruin|affect|hinder|stop)( my)? (gains|progress|muscle|growth|results)|(?<!\p{L})(це|то) (пошкодить|зашкодить|вплине на)( мій)? (ріст|результат|прогрес|м’язи)/iu;
+const SLEEP_TRAIN_RE =
+  /(?<!\p{L})(should|can|may) i (still )?(train|work ?out|lift|go to the gym)( \w+)? if i (slept|sleep) (badly|poorly|little|bad|not much)|(?<!\p{L})чи (варто|можна)( мені)? тренуватись?( \p{L}+)? якщо (я )?(погано спав|мало спав|не виспався)/iu;
+
+export function ctxFollow(
+  question: string,
+  intent: string | undefined,
+  L: Tr,
+): { intent: string; text: string } | null {
+  if (intent === 'pre_meal' && AFTER_RE.test(question))
+    return {
+      intent: 'post_meal',
+      text: L(
+        'Within a few hours after: 25–40 g protein and some carbs. The “30-minute window” is mostly a myth — the day’s total matters more.',
+        'Протягом кількох годин після: 25–40 г білка й трохи вуглеводів. «Вікно 30 хвилин» — здебільшого міф; важливіший підсумок за день.',
+      ),
+    };
+  if ((intent === 'protein' || intent === 'protein_need') && REST_DAYS_RE.test(question))
+    return {
+      intent: 'protein_rest',
+      text: L(
+        'Keep protein the same on rest days — that is when the muscle is repaired and built. Calories can sit a little lower if you move less.',
+        'У дні відпочинку білок той самий — саме тоді м’язи відновлюються й ростуть. Калорій можна трохи менше, якщо рухаєшся менше.',
+      ),
+    };
+  // Only the bare statement ("i sleep 5 hours"); a longer message carries its own question.
+  const m = question.trim().split(/\s+/).length <= 6 ? SLEEP_HOURS_RE.exec(question) : null;
+  if (m) {
+    const h = Number((m[5] ?? m[9]).replace(',', '.'));
+    if (h < 7)
+      return {
+        intent: 'sleep_short',
+        text: L(
+          'That is on the short side. Less sleep slows recovery and strength and raises hunger. Aim for 7–9 hours; even an extra hour helps. On a short night train, but keep it easier.',
+          'Це замало. Менше сну сповільнює відновлення й силу та підвищує голод. Цілься в 7–9 годин; навіть додаткова година допомагає. Після короткої ночі тренуйся, але легше.',
+        ),
+      };
+    return {
+      intent: 'sleep_ok',
+      text: L(
+        'That is in a good range. Keep the bedtime steady — it matters as much as the hours.',
+        'Це хороший діапазон. Тримай стабільний час відбою — він важить стільки ж, скільки години.',
+      ),
+    };
+  }
+  if ((intent === 'sleep_short' || intent === 'sleep') && SLEEP_COST_RE.test(question))
+    return {
+      intent: 'sleep_cost',
+      text: L(
+        'Yes, regularly short sleep costs you: slower recovery, less strength and more hunger. It is not a disaster for a week, but fix it before you change the programme.',
+        'Так, постійно короткий сон коштує: повільніше відновлення, менше сили, більший голод. Тиждень — не катастрофа, але виправ це, перш ніж міняти програму.',
+      ),
+    };
+  if (SLEEP_TRAIN_RE.test(question))
+    return {
+      intent: 'sleep_train',
+      text: L(
+        'Yes, but easier: same lifts, fewer sets, leave more reps in reserve. If you feel ill or dizzy, rest instead.',
+        'Так, але легше: ті самі вправи, менше підходів, лишай більше повторів у запасі. Якщо почуваєшся хворим чи паморочиться — краще відпочинь.',
+      ),
+    };
+  return null;
 }

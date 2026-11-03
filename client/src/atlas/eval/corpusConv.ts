@@ -210,6 +210,20 @@ export const CONV_CASES: ConvCase[] = [
     ['my lower back hurts after deadlifts', 'can i still squat', 'it is a dull ache'],
     /How bad|When|What/,
   ),
+  // P16: follow-ups, numbers, sleep
+  c('en', ['how much protein should i eat', 'and on rest days'], /Keep protein the same/, {
+    forbid: /walk, easy bike/,
+  }),
+  c('en', ['what should i eat before training', 'and after'], /Within a few hours after/),
+  c('en', ['what percent of 120 is 90'], /75/),
+  c('en', ['what is 80 kg in lbs', 'what percent of 120 is 90'], /75/, { forbid: /176/ }),
+  c('en', ['if i add 2.5 kg a week for 8 weeks to 80 kg how much'], /100/, {
+    forbid: /top of your rep range/,
+  }),
+  c('en', ['i sleep 5 hours'], /short side/, { forbid: /No sleep logged/ }),
+  c('en', ['i sleep 5 hours', 'will that hurt my gains'], /costs you/, { forbid: /cardio/ }),
+  c('en', ['should i train if i slept badly'], /Yes, but easier/, { forbid: /No sleep logged/ }),
+  c('uk', ['я сплю 5 годин'], /замало/),
   // known weaknesses (fix → drop `gap`)
   c('en', ['log 3 sets of pullups'], /tap “Log”/, { forbid: /3–4 days a week/ }),
   c('uk', ['залогуй 3 підходи підтягувань'], /«Запис»/),

@@ -5898,4 +5898,27 @@ export const DICT: Record<string, string> = {
     'Zamień na wariant, który nie boli: inny kąt lub chwyt, maszynę lub hantle, krótszy zakres albo dziś inny mięsień.',
   'Whenever you are ready, answer the last question and we will finish the check-in.':
     'Gdy będziesz gotowy, odpowiedz na ostatnie pytanie, a dokończymy sprawdzanie.',
+  'Aim for {1}–{2} hours; even an extra hour helps.':
+    'Celuj w {1}–{2} godzin; nawet dodatkowa godzina pomaga.',
+  'Calories can sit a little lower if you move less.':
+    'Kalorii może być trochę mniej, jeśli mniej się ruszasz.',
+  'If you feel ill or dizzy, rest instead.':
+    'Jeśli czujesz się chory lub masz zawroty głowy, odpocznij.',
+  'It is not a disaster for a week, but fix it before you change the programme.':
+    'Tydzień to nie katastrofa, ale popraw to, zanim zmienisz program.',
+  'Keep protein the same on rest days — that is when the muscle is repaired and built.':
+    'W dni odpoczynku białko zostaje takie samo — wtedy mięśnie się regenerują i rosną.',
+  'Less sleep slows recovery and strength and raises hunger.':
+    'Mniej snu spowalnia regenerację i siłę oraz zwiększa głód.',
+  'On a short night train, but keep it easier.': 'Po krótkiej nocy trenuj, ale lżej.',
+  'That is on the short side.': 'To trochę mało.',
+  'That pace is for a beginner — it slows down after the first months.':
+    'Takie tempo jest dla początkującego — po pierwszych miesiącach zwalnia.',
+  'Yes, but easier: same lifts, fewer sets, leave more reps in reserve.':
+    'Tak, ale lżej: te same ćwiczenia, mniej serii, zostaw więcej powtórzeń w zapasie.',
+  'Yes, regularly short sleep costs you: slower recovery, less strength and more hunger.':
+    'Tak, regularnie za krótki sen kosztuje: wolniejsza regeneracja, mniej siły i większy głód.',
+  '{1} + {2} × {3} weeks = {4}.': '{1} + {2} × {3} tygodni = {4}.',
+  '{1} {2}+ {3} {4}× {5} weeks = {6}.': '{1} {2}+ {3} {4}× {5} tygodni = {6}.',
+  '{1} is {2}% of {3}.': '{1} to {2}% z {3}.',
 };

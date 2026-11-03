@@ -5926,4 +5926,27 @@ export const DICT: Record<string, string> = {
     'Pakeisk variantu, kuris neskauda: kitu kampu ar sugriebimu, treniruokliu ar hanteliais, trumpesne amplitude arba šiandien kitu raumeniu.',
   'Whenever you are ready, answer the last question and we will finish the check-in.':
     'Kai būsi pasiruošęs, atsakyk į paskutinį klausimą ir užbaigsime patikrą.',
+  'Aim for {1}–{2} hours; even an extra hour helps.':
+    'Siek {1}–{2} valandų; net papildoma valanda padeda.',
+  'Calories can sit a little lower if you move less.':
+    'Kalorijų gali būti šiek tiek mažiau, jei mažiau judi.',
+  'If you feel ill or dizzy, rest instead.':
+    'Jei jautiesi blogai ar svaigsta galva, verčiau pailsėk.',
+  'It is not a disaster for a week, but fix it before you change the programme.':
+    'Savaitė – ne katastrofa, bet sutvarkyk tai, prieš keisdamas programą.',
+  'Keep protein the same on rest days — that is when the muscle is repaired and built.':
+    'Poilsio dienomis baltymų kiekis tas pats — tada raumenys atsistato ir auga.',
+  'Less sleep slows recovery and strength and raises hunger.':
+    'Mažiau miego lėtina atsistatymą ir jėgą bei didina alkį.',
+  'On a short night train, but keep it easier.': 'Po trumpos nakties treniruokis, bet lengviau.',
+  'That is on the short side.': 'Tai gana mažai.',
+  'That pace is for a beginner — it slows down after the first months.':
+    'Toks tempas skirtas pradedančiajam — po pirmų mėnesių jis sulėtėja.',
+  'Yes, but easier: same lifts, fewer sets, leave more reps in reserve.':
+    'Taip, bet lengviau: tie patys pratimai, mažiau serijų, palik daugiau pakartojimų atsargai.',
+  'Yes, regularly short sleep costs you: slower recovery, less strength and more hunger.':
+    'Taip, nuolat trumpas miegas kainuoja: lėtesnis atsistatymas, mažiau jėgos ir didesnis alkis.',
+  '{1} + {2} × {3} weeks = {4}.': '{1} + {2} × {3} sav. = {4}.',
+  '{1} {2}+ {3} {4}× {5} weeks = {6}.': '{1} {2}+ {3} {4}× {5} sav. = {6}.',
+  '{1} is {2}% of {3}.': '{1} yra {2}% nuo {3}.',
 };
