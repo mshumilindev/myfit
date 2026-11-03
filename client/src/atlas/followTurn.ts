@@ -208,6 +208,12 @@ export function painSide(question: string): PainSide | null {
   return null;
 }
 
+/** A pain-check side question answered while the check-in stays open (null = not one). */
+export function painSideAnswer<F>(q: string, L: Tr, flow: F) {
+  const side = painSide(q);
+  return side ? { intent: `pain_side_${side}`, text: painSideReply(side, L), flow } : null;
+}
+
 export function painSideReply(kind: PainSide, L: Tr): string {
   const tail = L(
     ' Whenever you are ready, answer the last question and we will finish the check-in.',

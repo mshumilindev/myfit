@@ -2,7 +2,7 @@
  * SPO-35 P17 — "which month was my best", "what was my best week": the busiest calendar month / Monday-start
  * week in the log, by sessions (ties → more working sets). Answers come from the log only.
  */
-import { date, finishedOf, type AskCtx, type Tr } from './intentKit';
+import { date, finishedOf, type AskCtx, type Parsed, type Tr } from './intentKit';
 import * as N from './num';
 import { setTypeOf } from '../store';
 
@@ -85,4 +85,26 @@ export function bestPeriod(
       `Найактивніший тиждень почався ${date(c, b.start)} — ${N.sessions('uk', b.sessions)}, ${N.workingSets('uk', b.sets)}.`,
     ),
   };
+}
+
+/** The `month` intent: this month, or the month named ("…in September"). */
+export function monthAnswer(c: AskCtx, p: Parsed, L: Tr): string {
+  const d = new Date(c.now);
+  // "…in September" names a month: count that window, not just this month.
+  const named = p.range && /^(in|since) /u.test(p.range.label[0]) ? p.range : null;
+  const start = named?.from ?? new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+  const end = named?.to ?? Infinity;
+  const f = finishedOf(c).filter((w) => w.startedAt >= start && w.startedAt < end);
+  const sets = f.reduce(
+    (a, w) =>
+      a + w.exercises.flatMap((e) => e.sets.filter((s) => setTypeOf(s) !== 'warmup')).length,
+    0,
+  );
+  const yr = (t: number) =>
+    new Date(t).getFullYear() === d.getFullYear() ? '' : ` ${new Date(t).getFullYear()}`;
+  const cap = (t: string) => `${t[0].toUpperCase()}${t.slice(1)}`;
+  return L(
+    `${named ? cap(named.label[0]) + yr(named.from) : 'This month'}: ${N.sessions('en', f.length)}, ${N.workingSets('en', sets)}.`,
+    `${named ? cap(named.label[1]) + yr(named.from) : 'Цього місяця'}: ${N.sessions('uk', f.length)}, ${N.workingSets('uk', sets)}.`,
+  );
 }

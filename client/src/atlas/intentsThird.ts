@@ -5,6 +5,7 @@
  * muscle, progression mechanics, recovery tools, safety, age, gym nerves, the
  * app's corners — and a bit more small talk.
  */
+import { monthAnswer } from './appP17';
 import * as N from './num';
 import {
   latestWeight,
@@ -377,26 +378,7 @@ export const INTENTS_THIRD: Intent[] = [
   {
     id: 'month',
     all: [['month', 'monthly', 'this month', 'місяць', 'місяця', 'за місяць', 'в цьому місяці']],
-    answer: (c, p, L) => {
-      const d = new Date(c.now);
-      // "…in September" names a month: count that window, not just this month.
-      const named = p.range && /^(in|since) /u.test(p.range.label[0]) ? p.range : null;
-      const start = named?.from ?? new Date(d.getFullYear(), d.getMonth(), 1).getTime();
-      const end = named?.to ?? Infinity;
-      const f = finishedOf(c).filter((w) => w.startedAt >= start && w.startedAt < end);
-      const sets = f.reduce(
-        (a, w) =>
-          a + w.exercises.flatMap((e) => e.sets.filter((s) => setTypeOf(s) !== 'warmup')).length,
-        0,
-      );
-      const yr = (t: number) =>
-        new Date(t).getFullYear() === d.getFullYear() ? '' : ` ${new Date(t).getFullYear()}`;
-      const cap = (t: string) => `${t[0].toUpperCase()}${t.slice(1)}`;
-      return L(
-        `${named ? cap(named.label[0]) + yr(named.from) : 'This month'}: ${N.sessions('en', f.length)}, ${N.workingSets('en', sets)}.`,
-        `${named ? cap(named.label[1]) + yr(named.from) : 'Цього місяця'}: ${N.sessions('uk', f.length)}, ${N.workingSets('uk', sets)}.`,
-      );
-    },
+    answer: monthAnswer,
   },
   {
     id: 'longest_session',
