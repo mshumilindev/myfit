@@ -277,6 +277,28 @@ Variants of each live in its Storybook stories (`Kit/<Name>`); props above are t
 
 **Guards (tests/kit-guard.test.ts):** no raw `<button>`, no legacy `.btn` class, no raw `<select>` / `<textarea>`, and `<input>` only with a `// kit-ok` comment (hidden file / range inputs) outside `components/ui/`.
 
+## Calls (SPO-432 / SPO-441)
+
+Group `Call`, one file set (`Call.css` imports `CallBase` · `CallVoice` · `CallModes`). Tokens only, so every theme (Brass Glass, Cyberpunk, Halloween, Christmas) re-skins it; flat chips (`CallLogRow`, the kind chip) take the theme's tag cut. The call screen itself is always dark (video sits on it). Without a call provider nothing renders. Props are the contract; stories: `Kit/Call`.
+
+| Primitive         | Purpose and props                                                                                                                                                      | Not for                                     |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `CallScreen`      | call frame: `name`, `status`, `note`, `children`, `notice`, `session`, `foot`, `onMinimize`, `minimizeLabel`, `mode` (auto · full · dock), `onToggleFull`, `fullLabel` | a regular page or sheet                     |
+| `CallTile`        | one participant: `name`, `photo`, `video`, `micOff`, `self`, `small`, `ringing`, `wave`, `waveLevel`, `wavePhase`, `corner`                                            | a profile avatar (use `Avatar`)             |
+| `CallVideo`       | the live picture of a call: `stream` (a `MediaStream`), `self` (mirrored, muted), `label`; put it in `CallTile video`                                                  | a recorded or uploaded clip (use `<video>`) |
+| `CallRings`       | avatar with three ripple rings: `name`, `photo`, `size`, `ringing`                                                                                                     | decoration elsewhere                        |
+| `CallWave`        | voice bars like an equaliser: `level` (0–1, live) or breathing when omitted, `phase`, `active`                                                                         | a level meter for settings                  |
+| `CallRoundButton` | round call button with caption: `icon`, `label`, `tone` (neutral · light · ok · danger), `size` (md · lg)                                                              | an ordinary action (use `Button`)           |
+| `CallControls`    | mic · camera · flip · speaker · hang-up row: `labels`, `micOn`, `onMic`, `camOn`, `onCam`, `onFlip`, `speakerOn`, `onSpeaker`, `onEnd`                                 | other toolbars                              |
+| `IncomingCall`    | incoming call: `variant` (screen · card), `video`, round Decline/Answer, secondary voice-only                                                                          | notifications of other kinds (use `Banner`) |
+| `CallBar`         | strip while the app shows another screen: name, time, mute, end                                                                                                        | a page header                               |
+| `CallMini`        | small floating call window: tap expands, red button ends                                                                                                               | a modal                                     |
+| `CallSessionChip` | the workout inside a call: `title`, `detail`, `time`, `openLabel`, `onOpen`                                                                                            | a general link                              |
+| `CallLogRow`      | chat record of a call (took place · missed · declined · no answer · failed) with a call-back action                                                                    | a chat bubble                               |
+| `CallActions`     | voice and video entry buttons: `compact` (one phone menu), `labeled` (two buttons), `callLabel`, `disabledReason`, `size`                                              | other menus                                 |
+| `CallPreflight`   | device check before the first call: mic level, camera preview, device selects                                                                                          | settings screens                            |
+| `CallState`       | end-of-call, no-access and permission states: `name`, `photo`, `icon`, `title`, `body`, `children`                                                                     | empty lists (use `EmptyState`)              |
+
 ## Primitive backlog & prop shapes
 
 Extraction order and initial prop shapes live in `docs/UI-REFACTOR-PLAN.md §5 and §9`.

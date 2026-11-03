@@ -1,4 +1,5 @@
 import { Button } from '../../../components/ui/Button';
+import { CallEntry } from '../../calls/CallEntry';
 import { Card } from '../../../components/ui/Card';
 import type { LocaleId } from '../../../i18n';
 import type { RosterStrings } from '../../../i18n/coachRoster';
@@ -33,6 +34,7 @@ export function RosterDetailCard(p: {
           {row.client.goal ? <small>{row.client.goal}</small> : null}
         </span>
         <span className="ro-det-btns">
+          <CallEntry labeled peerId={row.client.id} peerName={row.client.name} />
           <Button variant="ghost" icon="envelope" onClick={p.onChat}>
             {p.r.roMessage}
           </Button>

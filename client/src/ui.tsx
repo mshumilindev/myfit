@@ -128,7 +128,6 @@ import { MagnifyingGlass } from '@phosphor-icons/react/MagnifyingGlass';
 import { MapPin } from '@phosphor-icons/react/MapPin';
 import { MapPinLine } from '@phosphor-icons/react/MapPinLine';
 import { PencilSimple } from '@phosphor-icons/react/PencilSimple';
-import { Phone } from '@phosphor-icons/react/Phone';
 import { Play } from '@phosphor-icons/react/Play';
 import { Printer } from '@phosphor-icons/react/Printer';
 import { PlayCircle } from '@phosphor-icons/react/PlayCircle';
@@ -247,6 +246,7 @@ import { Orange } from '@phosphor-icons/react/Orange';
 import { Grains } from '@phosphor-icons/react/Grains';
 import { HourglassMedium } from '@phosphor-icons/react/HourglassMedium';
 import type { IconProps } from '@phosphor-icons/react/dist/lib/types';
+import { CALL_ICONS } from './uiCallIcons';
 import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from './i18n';
 import { exerciseDisplay, localizedExerciseName } from './data/exerciseNames';
 
@@ -257,6 +257,7 @@ import { exerciseDisplay, localizedExerciseName } from './data/exerciseNames';
  * CSS contract: the SVG is sized 1em.
  */
 const ICONS: Record<string, ComponentType<IconProps>> = {
+  ...CALL_ICONS,
   'moon-stars': MoonStars,
   'android-logo': AndroidLogo,
   'apple-logo': AppleLogo,
@@ -330,7 +331,6 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'map-pin': MapPin,
   'map-pin-slash': MapPinLine,
   'pencil-simple': PencilSimple,
-  phone: Phone,
   play: Play,
   stop: Stop,
   'play-circle': PlayCircle,

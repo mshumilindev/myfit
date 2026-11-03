@@ -4,10 +4,10 @@
  * prefix `coach-chat`: a chat push is the only coach push that quiet hours apply to.
  */
 export type CoachNoticeKind =
-  'message' | 'invite' | 'request' | 'program' | 'team' | 'reminder' | 'sync';
+  'message' | 'invite' | 'request' | 'program' | 'team' | 'reminder' | 'sync' | 'call';
 
 /** The notification categories a person can switch (boards C6 / U1-U3); `sync` is silent and has no switch. */
-export type PushCategory = 'chat' | 'requests' | 'team' | 'reminders';
+export type PushCategory = 'chat' | 'requests' | 'team' | 'reminders' | 'calls';
 export const categoryOf = (kind: CoachNoticeKind): PushCategory | null =>
   kind === 'message'
     ? 'chat'
@@ -17,7 +17,9 @@ export const categoryOf = (kind: CoachNoticeKind): PushCategory | null =>
         ? 'reminders'
         : kind === 'sync'
           ? null
-          : 'requests';
+          : kind === 'call'
+            ? 'calls'
+            : 'requests';
 
 /** Prefix of every chat push tag (must equal CHAT_PUSH_TAG in the client). */
 export const CHAT_PUSH_TAG = 'coach-chat';
@@ -115,6 +117,8 @@ export function parsePushPrefs(v: unknown): PushPrefs {
  *  - chat: held inside the device's quiet window (unchanged);
  *  - reminders: off when switched off, held inside the quiet window;
  *  - requests and team: off only when switched off; quiet hours never hold them (a request with an action must arrive);
+ *  - calls (SPO-440): an incoming call has NO switch (the client cannot turn calls off) but is held inside the quiet window;
+ *    the server then answers the caller with a neutral "unavailable" and never rings;
  *  - sync: silent data push, always.
  */
 export function shouldDeliver(
@@ -124,7 +128,7 @@ export function shouldDeliver(
 ): boolean {
   const cat = categoryOf(kind);
   if (cat === null) return true;
-  if (cat === 'chat') return !isQuietNow(device.quiet, device.tz, at);
+  if (cat === 'chat' || cat === 'calls') return !isQuietNow(device.quiet, device.tz, at);
   const prefs = parsePushPrefs(device.prefs);
   if (cat === 'reminders') return prefs.reminders && !isQuietNow(device.quiet, device.tz, at);
   return prefs[cat];
@@ -135,6 +139,6 @@ export function shouldDeliver(
  * app, a client on the client's Spotter thread; chat messages and silent syncs keep the home page.
  */
 export function pushLink(kind: CoachNoticeKind, staff: boolean): string {
-  if (kind === 'message' || kind === 'sync') return '/#/';
+  if (kind === 'message' || kind === 'sync' || kind === 'call') return '/#/';
   return staff ? '/#/c/spotter' : '/#/trainer/spotter';
 }

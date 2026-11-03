@@ -54,6 +54,22 @@ self.addEventListener('push', (event) => {
     );
     return;
   }
+  // SPO-442: an incoming call (`kind:'call'`, server TTL 45 s). One notification slot (tag 'call') that a repeat replaces
+  // with a new alert; no requireInteraction, so a missed call does not linger. Not a chat: quiet hours are decided
+  // server-side. A tap opens the app at the url the server sent.
+  if (d.kind === 'call') {
+    event.waitUntil(
+      self.registration.showNotification(d.title || 'Spotter', {
+        body: d.body || '',
+        tag: 'call',
+        renotify: true,
+        icon: '/brand/v2/icon-192.png',
+        badge: '/brand/v2/icon-192.png',
+        data: { url: d.url || '/', kind: 'call' },
+      }),
+    );
+    return;
+  }
   event.waitUntil(
     (async () => {
       const chat = typeof d.tag === 'string' && d.tag.indexOf('coach-chat') === 0;

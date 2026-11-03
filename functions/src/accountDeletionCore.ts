@@ -162,6 +162,10 @@ export async function deleteAccountCascade(
     await del(kv, await kv.list('assignments', { where: [['programId', '==', p.id]] }));
     await kv.del(p.path);
   }
+  // calls the account took part in (SPO-22 / SPO-440): the document and its ICE candidates (they hold IP addresses)
+  for (const field of ['callerId', 'calleeId'])
+    for (const c of await kv.list('calls', { where: [[field, '==', uid]] }))
+      await ports.deleteTree(c.path);
   await del(kv, await kv.list('invites', { where: [['userId', '==', uid]] }));
   await del(kv, await kv.list('passkeys', { where: [['userId', '==', uid]] }));
   await del(kv, await kv.list('passkeyChallenges', { where: [['userId', '==', uid]] }));

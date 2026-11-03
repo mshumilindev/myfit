@@ -274,6 +274,37 @@ jobs:
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
           E2E_COACH_URL=http://127.0.0.1:4174 npx playwright test --project=coach-390 --project=coach-1440 tests/e2e/coach-smoke.e2e.ts --reporter=github,line
 
+  calls-e2e:
+    name: Calls e2e (${{ matrix.project }}, shard ${{ matrix.shard }}/2)
+    # SPO-434: real WebRTC between two pages (Chromium fake camera/microphone) against the in-process fake server; no
+    # network leaves the runner, so no Cloudflare TURN/STUN is ever asked. Informational like `client-e2e` until it has
+    # run green on a CI runner; then add it to `quality`'s needs.
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [calls-390, calls-1440]
+        shard: [1, 2]
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Fixtures build with the sample world
+        run: |
+          (cd client && VITE_COACH_BACKEND=fixtures npx vite build --config vite.config.qa.ts --outDir dist-e2e --emptyOutDir)
+          (cd client && npx vite preview --outDir dist-e2e --host 127.0.0.1 --port 4174 --strictPort >/dev/null 2>&1 &)
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
+      - run: npx playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}/2 --workers=1 tests/e2e/calls-*.e2e.ts --reporter=github,line
+        env:
+          E2E_COACH_URL: http://127.0.0.1:4174
+
   duplication:
     name: Copy-paste detector (jscpd, threshold 1 %)
     # Baseline 2026-10-27: 0.5 % duplicated lines, 63 clones (production code only: tests, stories, fixtures, i18n and

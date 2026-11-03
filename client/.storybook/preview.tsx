@@ -1,4 +1,12 @@
 import type { Decorator, Preview } from '@storybook/react-vite';
+import { CallEntryProvider } from '../src/coach/calls/CallEntry';
+import { IncomingCall } from '../src/components/ui/IncomingCall';
+import { CallBar } from '../src/components/ui/CallBar';
+import { CallMini } from '../src/components/ui/CallMini';
+import { CallScreen } from '../src/components/ui/CallScreen';
+import { CallTile } from '../src/components/ui/CallTile';
+import { CallControls } from '../src/components/ui/CallControls';
+import { CallSessionChip } from '../src/components/ui/CallSessionChip';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 // Cyberpunk type (SPO-344, ADR 007): Barlow / Barlow Condensed for latin, Fira Sans / Fira Sans Condensed for
@@ -80,8 +88,122 @@ const withTheme: Decorator = (Story, ctx) => {
 };
 document.documentElement.setAttribute('data-theme', DEFAULT_THEME);
 
+/** SPO-433 design review: `?calls=on|offline` in the iframe URL shows the call entry buttons on real screens. */
+const withCalls: Decorator = (Story) => {
+  const mode =
+    typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('calls');
+  if (!mode) return <Story />;
+  return (
+    <CallEntryProvider
+      value={{
+        voiceLabel: 'Voice call',
+        videoLabel: 'Video call',
+        callLabel: 'Call',
+        disabledReason: mode === 'offline' ? 'Offline' : undefined,
+        onVoice: () => undefined,
+        onVideo: () => undefined,
+        showLog: true,
+      }}
+    >
+      <Story />
+      {mode === 'incoming' && (
+        <IncomingCall
+          name="Anna Kovalenko"
+          kind="Video call"
+          sub="Your client"
+          answerLabel="Answer"
+          declineLabel="Decline"
+          voiceOnlyLabel="Answer with voice only"
+          onAnswer={() => undefined}
+          onDecline={() => undefined}
+          onVoiceOnly={() => undefined}
+        />
+      )}
+      {mode === 'card' && (
+        <IncomingCall
+          variant="card"
+          name="Anna Kovalenko"
+          kind="Video call"
+          sub="Your client"
+          answerLabel="Answer"
+          declineLabel="Decline"
+          voiceOnlyLabel="Voice only"
+          onAnswer={() => undefined}
+          onDecline={() => undefined}
+          onVoiceOnly={() => undefined}
+        />
+      )}
+      {mode === 'bar' && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 70 }}>
+          <CallBar
+            title="Call with Anna"
+            time="12:41"
+            returnLabel="Back to the call"
+            micOn
+            micLabel="Mute"
+            onMic={() => undefined}
+            endLabel="End call"
+            onEnd={() => undefined}
+            onReturn={() => undefined}
+          />
+        </div>
+      )}
+      {mode === 'dock' && (
+        <CallScreen
+          mode="dock"
+          name="Iryna Melnyk"
+          status="12:41"
+          note="Not recorded"
+          session={
+            <CallSessionChip
+              title="Barbell Bench Press"
+              detail="Set 2 of 4 · rest"
+              time="1:32"
+              openLabel="Back to your workout"
+              onOpen={() => undefined}
+            />
+          }
+          foot={
+            <CallControls
+              labels={{
+                mic: 'Mute',
+                micOn: 'Unmute',
+                cam: 'Camera off',
+                camOn: 'Camera on',
+                flip: 'Flip',
+                speaker: 'Speaker',
+                end: 'End call',
+                minimize: 'Minimise',
+              }}
+              micOn
+              onMic={() => undefined}
+              camOn
+              onCam={() => undefined}
+              onEnd={() => undefined}
+            />
+          }
+          onToggleFull={() => undefined}
+          fullLabel="Full screen"
+        >
+          <CallTile name="Iryna Melnyk" />
+        </CallScreen>
+      )}
+      {mode === 'mini' && (
+        <CallMini
+          name="Anna Kovalenko"
+          time="12:41"
+          expandLabel="Expand the call"
+          endLabel="End call"
+          onExpand={() => undefined}
+          onEnd={() => undefined}
+        />
+      )}
+    </CallEntryProvider>
+  );
+};
+
 const preview: Preview = {
-  decorators: [withLocale, withTheme],
+  decorators: [withCalls, withLocale, withTheme],
   globalTypes: {
     theme: {
       description: 'Theme',

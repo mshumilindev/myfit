@@ -10,6 +10,7 @@ files:
   - dist/**
   - assets/**
   - '!assets/AppIcon.iconset/**'
+  - '!assets/entitlements.mac.plist'
   - package.json
 artifactName: Spotter-${version}-${arch}.${ext}
 mac:
@@ -18,8 +19,12 @@ mac:
   identity: null
   target:
     - dmg
+  # Hardened-runtime entitlements for camera and microphone (calls, SPO-442). Applied when the build is signed (SPO-157).
+  entitlementsInherit: assets/entitlements.mac.plist
+  entitlements: assets/entitlements.mac.plist
   extendInfo:
-    NSCameraUsageDescription: Spotter uses the camera to scan food and take progress photos.
+    NSCameraUsageDescription: Spotter uses the camera to scan food, take progress photos and for video calls.
+    NSMicrophoneUsageDescription: Spotter uses the microphone for voice and video calls.
     NSLocationWhenInUseUsageDescription: Spotter uses your location to find gyms and plan routes.
 publish:
   # Repo owner/name are taken from the CI environment / git remote. Releases are created as drafts (publish by hand).

@@ -14,6 +14,7 @@ export const PUSH_TEXT_KEYS = [
   'reminder',
   'request',
   'access',
+  'call',
 ] as const;
 export type PushTextKey = (typeof PUSH_TEXT_KEYS)[number];
 
@@ -26,6 +27,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     reminder: 'Reminder',
     request: 'New request',
     access: 'Access updated',
+    call: 'Incoming call',
   },
   uk: {
     message: 'Нове повідомлення',
@@ -35,6 +37,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     reminder: 'Нагадування',
     request: 'Новий запит',
     access: 'Доступ оновлено',
+    call: 'Вхідний дзвінок',
   },
   pl: {
     message: 'Nowa wiadomość',
@@ -44,6 +47,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     reminder: 'Przypomnienie',
     request: 'Nowa prośba',
     access: 'Dostęp zaktualizowany',
+    call: 'Połączenie przychodzące',
   },
   lt: {
     message: 'Nauja žinutė',
@@ -53,6 +57,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     reminder: 'Priminimas',
     request: 'Nauja užklausa',
     access: 'Prieiga atnaujinta',
+    call: 'Gaunamas skambutis',
   },
   et: {
     message: 'Uus sõnum',
@@ -62,6 +67,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     reminder: 'Meeldetuletus',
     request: 'Uus taotlus',
     access: 'Juurdepääs uuendatud',
+    call: 'Sissetulev kõne',
   },
 };
 
@@ -80,6 +86,7 @@ export const defaultTextKey = (kind: string): PushTextKey =>
   kind === 'invite' ||
   kind === 'program' ||
   kind === 'team' ||
-  kind === 'reminder'
+  kind === 'reminder' ||
+  kind === 'call'
     ? kind
     : 'request';

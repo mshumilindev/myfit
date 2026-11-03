@@ -73,6 +73,19 @@ describe('push deep link (SPO-236)', () => {
     expect(shown[0].opts.data.url).toBe('/');
   });
 
+  it('an incoming call push shows one replaceable "call" notification that does not linger (SPO-442)', async () => {
+    const { handlers, shown } = boot([]);
+    const p = pushEvent({ kind: 'call', title: 'Anna', body: 'Calling', url: '/#/c/spotter' });
+    handlers.push(p.e);
+    await p.done();
+    expect(shown).toHaveLength(1);
+    const o = shown[0].opts as Record<string, unknown>;
+    expect(o.tag).toBe('call');
+    expect(o.renotify).toBe(true);
+    expect(o.requireInteraction).toBeUndefined();
+    expect((o.data as { url: string }).url).toBe('/#/c/spotter');
+  });
+
   it('a tap with no open window opens the Spotter hash', async () => {
     const { handlers, openWindow } = boot([]);
     const c = clickEvent('/#/trainer/spotter');

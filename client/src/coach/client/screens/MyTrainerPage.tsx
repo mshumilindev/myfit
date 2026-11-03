@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CallEntry } from '../../calls/CallEntry';
 import { navigateHash } from '../../../navigateHash';
 import { Button } from '../../../components/ui/Button';
 import { useSafeT } from '../../../i18n/coachSafe';
@@ -105,6 +106,7 @@ export function MyTrainerPage(p: MyTrainerPageProps) {
           <Button variant="primary" size="md" icon="envelope" onClick={p.onChat}>
             {cc.mtChat}
           </Button>
+          <CallEntry labeled peerId={trainer.id} peerName={trainer.name} />
         </div>
       </Card>
 

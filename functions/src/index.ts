@@ -45,3 +45,5 @@ export * from './emailAuth';
 export * from './passwordReset';
 // Self-service account deletion (SPO-285).
 export * from './accountDeletion';
+// Trainer <-> client calls: signalling only, no media, no recording (SPO-22 / SPO-440).
+export { callStart, callAnswer, callActive, callEnd, callIce, callTurn } from './calls';

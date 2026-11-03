@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { CallEntry } from '../calls/CallEntry';
 import { ActionMenu, type ActionMenuItem } from '../../components/ui/ActionMenu';
 import { ClientAvatar } from '../ClientAvatar';
 import { BackButton } from '../../components/ui/BackButton';
@@ -276,6 +277,7 @@ export function Client360Screen({
         {r.c3Message}
         {unread > 0 && <Badge n={unread} tone="danger" anchor="none" />}
       </Button>
+      <CallEntry labeled peerId={client.id} peerName={client.name} />
       <ActionMenu label={r.c3MenuLabel} items={items} note={r.c3ReadsNamed(first)} />
     </>
   ) : (
@@ -291,6 +293,7 @@ export function Client360Screen({
         label={r.c3Schedule}
         onClick={() => setHash(scheduleHref({ form: 'plan', client: cid }))}
       />
+      <CallEntry compact peerId={client.id} peerName={client.name} />
       <ActionMenu
         label={r.c3MenuLabel}
         items={items}

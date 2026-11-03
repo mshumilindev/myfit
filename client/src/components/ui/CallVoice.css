@@ -1,0 +1,200 @@
+/* ---- round call buttons ---- */
+.uicall-rb {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-8);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-size: var(--fs-12);
+  cursor: pointer;
+}
+.uicall-rb-c {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--s-8) * 7);
+  height: calc(var(--s-8) * 7);
+  border-radius: 50%;
+  font-size: var(--fs-24);
+  background: color-mix(in srgb, var(--c-ffffff) 14%, transparent);
+  transition: transform 0.12s ease;
+}
+.uicall-rb--lg .uicall-rb-c {
+  width: calc(var(--s-8) * 9);
+  height: calc(var(--s-8) * 9);
+  font-size: var(--fs-28);
+}
+.uicall-rb:active .uicall-rb-c {
+  transform: scale(0.94);
+}
+.uicall-rb:focus-visible .uicall-rb-c {
+  outline: var(--bw-2) solid var(--color-accent);
+  outline-offset: var(--s-2);
+}
+.uicall-rb--light .uicall-rb-c {
+  color: var(--color-bg);
+  background: var(--color-text);
+}
+.uicall-rb--ok .uicall-rb-c {
+  color: var(--color-bg);
+  background: var(--color-ok);
+}
+.uicall-rb--danger .uicall-rb-c {
+  color: var(--c-ffffff);
+  background: var(--color-danger-solid);
+}
+.uicall-rb:disabled {
+  opacity: 0.5;
+}
+
+/* ---- avatar ripples and voice bars ---- */
+.uicall-rings {
+  position: relative;
+  display: inline-flex;
+}
+.uicall-rings-r {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: var(--bw-1) solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+  opacity: 0.35;
+  transform: scale(1.35);
+}
+.uicall-rings-r--2 {
+  transform: scale(1.7);
+  opacity: 0.2;
+}
+.uicall-rings-r--3 {
+  transform: scale(2.05);
+  opacity: 0.1;
+}
+.uicall-rings--on .uicall-rings-r {
+  animation: uicallRipple 2.4s ease-out infinite;
+}
+.uicall-rings--on .uicall-rings-r--2 {
+  animation-delay: 0.8s;
+}
+.uicall-rings--on .uicall-rings-r--3 {
+  animation-delay: 1.6s;
+}
+@keyframes uicallRipple {
+  from {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+.uicall-wave {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-4);
+  height: var(--s-40);
+  margin-top: var(--s-24);
+}
+.uicall-wave-b {
+  display: block;
+  width: var(--s-4);
+  height: var(--s-12);
+  border-radius: var(--r-pill);
+  background: var(--color-accent);
+  opacity: 0.8;
+}
+.uicall-wave-b--2,
+.uicall-wave-b--8 {
+  height: var(--s-24);
+}
+.uicall-wave-b--3,
+.uicall-wave-b--7 {
+  height: var(--s-32);
+}
+.uicall-wave-b--4,
+.uicall-wave-b--6 {
+  height: var(--s-24);
+}
+.uicall-wave-b--5 {
+  height: var(--s-40);
+}
+.uicall-wave--on .uicall-wave-b {
+  animation: uicallBreathe 1.2s ease-in-out infinite;
+}
+.uicall-wave--on .uicall-wave-b--2,
+.uicall-wave--on .uicall-wave-b--6 {
+  animation-delay: 0.15s;
+}
+.uicall-wave--on .uicall-wave-b--3,
+.uicall-wave--on .uicall-wave-b--7 {
+  animation-delay: 0.3s;
+}
+.uicall-wave--on .uicall-wave-b--4,
+.uicall-wave--on .uicall-wave-b--8 {
+  animation-delay: 0.45s;
+}
+@keyframes uicallBreathe {
+  50% {
+    transform: scaleY(0.45);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .uicall-rings--on .uicall-rings-r,
+  .uicall-wave--on .uicall-wave-b {
+    animation: none;
+  }
+}
+.uicall-in--card .uicall-in-kind {
+  align-self: flex-start;
+}
+
+/* ---- the workout inside a call ---- */
+.uicall-session {
+  padding: 0 var(--s-8) var(--s-8);
+}
+.uicall-sess {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  width: 100%;
+  padding: var(--s-8) var(--s-12);
+  text-align: left;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: var(--bw-1) solid var(--color-divider);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+.uicall-sess-i {
+  font-size: var(--fs-20);
+  color: var(--color-accent);
+}
+.uicall-sess-t {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.uicall-sess-t b {
+  font-size: var(--fs-15);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.uicall-sess-t small {
+  font-size: var(--fs-12);
+  color: var(--color-neutral-400);
+}
+.uicall-sess-time {
+  font-size: var(--fs-17);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent);
+}
+.uicall-sess-go {
+  color: var(--color-neutral-400);
+}
+.uicall-full {
+  display: none;
+}

@@ -94,6 +94,7 @@ import { useFlag, isFlagOn, startGlobalFlags } from './data/flags';
 import { isClientHead } from './coach/client/routes';
 import { useClientShared } from './coach/client/shared';
 import { ClientBridgeLazy, ClientRoutesLazy } from './coach/client/lazy';
+import { CallsHostLazy } from './calls/lazy';
 import { GymBrandBar, GymTabBar } from './components/suite/GymChrome';
 import { ConditionsShield, useActiveConditions } from './views/health/ConditionsShield';
 import { AppRail } from './components/AppRail';
@@ -1412,6 +1413,10 @@ function AppMain() {
             notifUnread={notifUnread}
           />
         </Suspense>
+        {/* the Coach dashboard replaces the whole shell, so the calls host (incoming calls, call buttons) mounts here too */}
+        <Suspense fallback={null}>
+          <CallsHostLazy />
+        </Suspense>
         {shellOpen && (
           <ShellLauncher
             store={store}
@@ -1943,6 +1948,11 @@ function AppMain() {
           />
         )}
         {authed && <ClientBridgeLazy />}
+        {authed && (
+          <Suspense fallback={null}>
+            <CallsHostLazy />
+          </Suspense>
+        )}
         <div className="toast-holder">
           {authed && notices.some((n) => !n.read) && (
             <NoticeStrip notices={notices.filter((n) => !n.read)} onDismiss={dismissNotice} />

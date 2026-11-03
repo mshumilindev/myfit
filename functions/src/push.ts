@@ -29,6 +29,8 @@ export interface PushMessage {
   kind?: CoachNoticeKind;
   /** A fixed, content-free text key: the body is then chosen per device language (SPO-263). */
   text?: PushTextKey;
+  /** Push-service TTL in seconds (default 3600). An incoming call uses 45: a ring that old is not a ring (SPO-440). */
+  ttl?: number;
 }
 
 /** The messaging client; a seam so the unit tests can see exactly what would be sent. */
@@ -87,7 +89,7 @@ export async function sendToUser(uid: string, msg: PushMessage): Promise<number>
     return pushDeps.messaging().sendEachForMulticast({
       tokens: toks,
       data,
-      webpush: { headers: { Urgency: 'high', TTL: '3600' } },
+      webpush: { headers: { Urgency: 'high', TTL: String(msg.ttl ?? 3600) } },
     });
   });
   const results = await Promise.all(sends);

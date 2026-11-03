@@ -282,4 +282,11 @@ export const LOCAL_KEYS_3: readonly LocalKeyEntry[] = [
     wipe: 'signout',
     note: 'IndexedDB name: quiet-hours copy for the service worker',
   },
+  {
+    key: 'gym.callPrefs',
+    scope: 'account',
+    class: 'ephemeral',
+    wipe: 'signout',
+    note: 'call device choices (microphone, camera, direct connection) and whether the pre-call check was done; device-local, no personal content (SPO-446)',
+  },
 ];
