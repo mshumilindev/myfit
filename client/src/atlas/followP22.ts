@@ -31,6 +31,10 @@ const MUSCLE_WEEK_RE =
   /(?<!\p{L})did i (train|hit|work)\b.*\b(last|previous) week|(?<!\p{L})чи (я )?(тренув\p{L}*|качав\p{L}*)\b.*\bминулого тижня/iu;
 const WHEN_HIT_RE =
   /^\s*(and )?(when|what day|which day) (did i|was it|was that)( hit| set| lift| do| make)?( it| that| this)?\s*\??\s*$|^\s*коли (я )?(його |це )?(поставив|поставила|зробив|зробила)\s*\??\s*$/iu;
+/** Standalone: "how much volume vs usual this week". */
+const VOLUME_USUAL_RE =
+  /(?<!\p{L})(volume|tonnage|обсяг)\p{L}* .*(vs|versus|compared (to|with)|than|проти|порівня\p{L}* з) (usual|normal|average|зазвичай|звичайн\p{L}*)/iu;
+
 const MORE_USUAL_RE =
   /^\s*(and )?is (that|this|it) (more|less|higher|lower|bigger|better|worse) than (usual|normal|average|before|last week)\s*\??\s*$|^\s*це (більше|менше) (ніж )?зазвичай\s*\??\s*$/iu;
 const STUCK_RE =
@@ -245,7 +249,10 @@ export function p22Follow(
         ),
       };
   }
-  if (VOLUME_INTENTS.has(convo.intent ?? '') && MORE_USUAL_RE.test(question)) {
+  if (
+    (VOLUME_INTENTS.has(convo.intent ?? '') && MORE_USUAL_RE.test(question)) ||
+    VOLUME_USUAL_RE.test(question)
+  ) {
     const start = weekStartOf(c.now);
     const now = tonnage(c, start, c.now + 1);
     const before = tonnage(c, start - 28 * DAY, start) / 4;

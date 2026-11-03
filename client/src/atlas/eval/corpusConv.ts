@@ -292,6 +292,7 @@ export const CONV_CASES: ConvCase[] = [
     ['how many total kg this week', 'is that more than usual'],
     /This week so far: 7410 kg[\s\S]*not over/,
   ),
+  c('en', ['how much volume vs usual this week'], /This week so far: 7410 kg[\s\S]*not over/),
   c('en', ['my bench is stuck', 'how long have i been stuck'], /first reached \d+ weeks ago/, {
     forbid: /Break a plateau/,
   }),
