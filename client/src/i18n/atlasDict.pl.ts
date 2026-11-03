@@ -5935,4 +5935,33 @@ export const DICT: Record<string, string> = {
     'Najaktywniejszy tydzień zaczął się {1}-{2}-{3} {4}— sesji: {5}, serii roboczych: {6}.',
   'Your busiest week started {1}.{2} — {3} sessions, {4} working sets.':
     'Najaktywniejszy tydzień zaczął się {1}.{2} — sesji: {3}, serii roboczych: {4}.',
+  'For size: {1}–{2} reps a set, the last {3}–{4} hard.':
+    'Na masę: {1}–{2} powtórzeń w serii, ostatnie {3}–{4} ciężkie.',
+  'Add weight or a rep over time.': 'Z czasem dodawaj ciężar lub powtórzenie.',
+  'There is no single best exercise.': 'Nie ma jednego najlepszego ćwiczenia.',
+  'The best ones are big compound lifts you can do safely and progress on: squat, deadlift, bench or overhead press, rows and pull-ups.':
+    'Najlepsze są duże ćwiczenia wielostawowe, które możesz robić bezpiecznie i w których możesz progresować: przysiad, martwy ciąg, wyciskanie leżąc lub nad głowę, wiosłowanie i podciąganie.',
+  'Pick the variation that suits your body and stick with it.':
+    'Wybierz wariant, który pasuje do twojego ciała, i się go trzymaj.',
+  'CrossFit mixes lifting, gymnastics and conditioning at high intensity.':
+    'CrossFit łączy podnoszenie ciężarów, gimnastykę i kondycję przy dużej intensywności.',
+  'It builds fitness fast, but the constant variety makes steady strength progress hard to track, and injury risk grows when speed beats technique.':
+    'Szybko buduje formę, ale ciągła zmienność utrudnia śledzenie postępów siły, a ryzyko kontuzji rośnie, gdy tempo wygrywa z techniką.',
+  'If you love it, keep a couple of heavy lifting days and scale the rest.':
+    'Jeśli go lubisz, zostaw kilka ciężkich dni siłowych, a resztę skaluj.',
+  'A desk job mostly costs you movement.': 'Praca przy biurku głównie kosztuje cię ruch.',
+  'Stand up and walk a few minutes every hour, add rows and face pulls for the upper back, and some mobility for hips and neck.':
+    'Wstawaj i chodź kilka minut co godzinę, dodaj wiosłowanie i face pull na górę pleców oraz trochę mobilności bioder i szyi.',
+  'Train as usual — sitting is not a reason to train less.':
+    'Trenuj jak zwykle — siedzenie nie jest powodem, by trenować mniej.',
+  'There is no magic number, but a session that drags well past an hour is mostly padding.':
+    'Nie ma magicznej liczby, ale sesja ciągnąca się daleko ponad godzinę to głównie zapychacz.',
+  'Hard sets, enough rest and energy left for the rest of your life beat more hours.':
+    'Ciężkie serie, odpowiedni odpoczynek i siły na resztę życia są lepsze niż więcej godzin.',
+  'If it costs you relationships, shorter and tighter sessions are a fair trade.':
+    'Jeśli kosztuje cię to relacje, krótsze i zwięźlejsze treningi to uczciwa wymiana.',
+  'Open Apps → Apex → “Awards”: it lists the achievements you have unlocked.':
+    'Otwórz Aplikacje → Apex → „Nagrody”: znajdziesz tam odblokowane osiągnięcia.',
+  'For strength: {1}–{2} reps a set with heavy weight and full rest, every rep still clean.':
+    'Na siłę: {1}–{2} powtórzeń w serii z dużym ciężarem i pełnym odpoczynkiem, każde powtórzenie czyste.',
 };

@@ -12,6 +12,7 @@ import { setTypeOf } from '../store';
 import { normalize } from './nlu';
 import { parseRange } from './when';
 import { bestPeriod } from './appP17';
+import { p20Topic, repsGoal } from './appP20';
 import * as N from './num';
 import type { Route } from './confidence';
 
@@ -101,6 +102,14 @@ export function followTurn<C extends FConvo>(
     chips,
     convo: { ...convo, turn, q: question },
   });
+  const rg = repsGoal(question, convo.intent, L);
+  if (rg)
+    return {
+      ...keep('reps', rg.text),
+      convo: { ...convo, intent: 'reps_goal', turn, q: question },
+    };
+  const p20 = p20Topic(question, L);
+  if (p20) return keep(p20.intent, p20.text);
   const bp = bestPeriod(question, c, L);
   if (bp) return keep(bp.intent, bp.text);
   const mf = monthFollow(question, c, convo.intent, L);

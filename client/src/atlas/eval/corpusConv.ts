@@ -241,6 +241,18 @@ export const CONV_CASES: ConvCase[] = [
   // P19: pl / lt / et wording that was misread
   c('pl', ['jaki jest mój najlepszy wynik w przysiadzie'], /Full Squat: heaviest set/),
   c('et', ['mis on minu parim jalgadepress'], /Your best|best/, { forbid: /Rough patch/ }),
+  // P20: opinions, lifestyle, app pointers, reps by goal
+  c('en', ['what do you think about crossfit'], /CrossFit mixes lifting/, {
+    forbid: /beta-alanine/i,
+  }),
+  c('uk', ['що думаєш про кросфіт'], /CrossFit поєднує/),
+  c('en', ['i have a desk job'], /costs you movement/),
+  c('en', ['my girlfriend says i spend too much time at the gym'], /no magic number/),
+  c('en', ['what is the best exercise ever'], /no single best exercise/),
+  c('en', ['where are my achievements'], /Apex → “Awards”/),
+  c('en', ['where are my badges'], /Apex → “Awards”/, { forbid: /feeling low/i }),
+  c('en', ['how many reps for strength', 'and for size'], /For size: 6–12/),
+  c('en', ['how many reps for strength'], /For strength: 3–6/),
   // known weaknesses (fix → drop `gap`)
   c('en', ['log 3 sets of pullups'], /tap “Log”/, { forbid: /3–4 days a week/ }),
   c('uk', ['залогуй 3 підходи підтягувань'], /«Запис»/),

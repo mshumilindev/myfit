@@ -5964,4 +5964,33 @@ export const DICT: Record<string, string> = {
     'Aktyviausia savaitė prasidėjo {1}-{2}-{3} {4}— treniruočių: {5}, darbinių serijų: {6}.',
   'Your busiest week started {1}.{2} — {3} sessions, {4} working sets.':
     'Aktyviausia savaitė prasidėjo {1}.{2} — treniruočių: {3}, darbinių serijų: {4}.',
+  'For size: {1}–{2} reps a set, the last {3}–{4} hard.':
+    'Masei: {1}–{2} pakartojimų serijoje, paskutiniai {3}–{4} sunkūs.',
+  'Add weight or a rep over time.': 'Laikui bėgant didink svorį arba pakartojimų skaičių.',
+  'There is no single best exercise.': 'Vienos geriausios pratimo nėra.',
+  'The best ones are big compound lifts you can do safely and progress on: squat, deadlift, bench or overhead press, rows and pull-ups.':
+    'Geriausi yra dideli daugiasąnariai judesiai, kuriuos gali daryti saugiai ir juose progresuoti: prisitūpimai, trauka nuo žemės, spaudimas gulint ar virš galvos, traukos ir prisitraukimai.',
+  'Pick the variation that suits your body and stick with it.':
+    'Pasirink variantą, tinkantį tavo kūnui, ir jo laikykis.',
+  'CrossFit mixes lifting, gymnastics and conditioning at high intensity.':
+    'CrossFit jungia kėlimą, gimnastiką ir ištvermę dideliu intensyvumu.',
+  'It builds fitness fast, but the constant variety makes steady strength progress hard to track, and injury risk grows when speed beats technique.':
+    'Greitai ugdo formą, bet nuolatinė įvairovė apsunkina jėgos pažangos sekimą, o traumų rizika auga, kai greitis nugali techniką.',
+  'If you love it, keep a couple of heavy lifting days and scale the rest.':
+    'Jei tau patinka, palik kelias sunkias jėgos dienas, o likusį mastelį mažink.',
+  'A desk job mostly costs you movement.': 'Biuro darbas dažniausiai atima judėjimą.',
+  'Stand up and walk a few minutes every hour, add rows and face pulls for the upper back, and some mobility for hips and neck.':
+    'Kas valandą atsistok ir pasivaikščiok kelias minutes, pridėk traukų ir face pull viršutinei nugaros daliai bei šiek tiek klubų ir kaklo mobilumo.',
+  'Train as usual — sitting is not a reason to train less.':
+    'Treniruokis kaip įprasta — sėdėjimas nėra priežastis treniruotis mažiau.',
+  'There is no magic number, but a session that drags well past an hour is mostly padding.':
+    'Stebuklingo skaičiaus nėra, bet treniruotė, kuri tęsiasi gerokai ilgiau nei valandą, daugiausia yra užpildas.',
+  'Hard sets, enough rest and energy left for the rest of your life beat more hours.':
+    'Sunkios serijos, pakankamas poilsis ir jėgos likusiam gyvenimui vertingesni už daugiau valandų.',
+  'If it costs you relationships, shorter and tighter sessions are a fair trade.':
+    'Jei tai kainuoja santykius, trumpesnės ir tikslesnės treniruotės yra sąžiningas mainas.',
+  'Open Apps → Apex → “Awards”: it lists the achievements you have unlocked.':
+    'Atidaryk Programos → Apex → „Apdovanojimai“: ten rasi atrakintus pasiekimus.',
+  'For strength: {1}–{2} reps a set with heavy weight and full rest, every rep still clean.':
+    'Jėgai: {1}–{2} pakartojimų serijoje su dideliu svoriu ir pilnu poilsiu, kiekvienas pakartojimas švarus.',
 };
