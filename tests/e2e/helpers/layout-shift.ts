@@ -100,6 +100,10 @@ export const ASSIGNMENT = {
   adherence: null,
 };
 
+/** Synthetic test key + salt (32 / 16 zero-ish bytes, base64); never a real account's. */
+const E2E_VAULT_KEY = Buffer.alloc(32, 7).toString('base64');
+const E2E_VAULT_SALT = Buffer.alloc(16, 3).toString('base64');
+
 /** How the stubbed `programMine` callable answers; changeable between page loads. */
 export interface Stub {
   delayMs: number;
@@ -209,8 +213,19 @@ export async function arm(page: Page, stub: Stub, base: string, locale = 'en'): 
     (url) => !['127.0.0.1', 'localhost'].includes(url.hostname),
     async (route) => {
       const req = route.request();
-      if (!req.url().endsWith('/programMine')) return route.abort('blockedbyclient');
+      const isKey = req.url().endsWith('/vaultKey');
+      if (!isKey && !req.url().endsWith('/programMine')) return route.abort('blockedbyclient');
       if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+      // A synthetic data key: without one the vault stays unset and every write is parked, so nothing the person
+      // enters (profile, sessions) would reach Firestore's local cache and a reload would forget it.
+      if (isKey)
+        return route
+          .fulfill({
+            status: 200,
+            headers: { ...cors, 'content-type': 'application/json' },
+            body: JSON.stringify({ result: { key: E2E_VAULT_KEY, salt: E2E_VAULT_SALT } }),
+          })
+          .catch(() => undefined);
       await new Promise((r) => setTimeout(r, stub.delayMs));
       return route
         .fulfill({
