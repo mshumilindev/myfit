@@ -11,7 +11,7 @@ import {
 } from '../accounts/sessions';
 import { Button } from './ui/Button';
 import { Chip } from './ui/Chip';
-import { ListPanel, ListRow } from './ui/GroupedList';
+import { GroupedList, ListRow } from './ui/GroupedList';
 import { Sheet } from './ui/Overlays';
 import { Banner } from './ui/Banner';
 import { DeviceImage } from './ui/DeviceImage';
@@ -86,7 +86,7 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
         />
       )}
       {rows !== null && (
-        <ListPanel>
+        <GroupedList surface="raised" label={t.sessionsTitle}>
           {rows.map((r) => {
             const here = r.deviceId === me;
             const place = placeText(r);
@@ -116,7 +116,7 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
             );
           })}
           {rows.length <= 1 && <ListRow label={t.sessionsEmpty} dim />}
-        </ListPanel>
+        </GroupedList>
       )}
       {others.length > 0 && (
         <Button variant="danger" disabled={busy} onClick={() => void revokeOthers()}>
