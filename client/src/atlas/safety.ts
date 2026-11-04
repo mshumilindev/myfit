@@ -137,6 +137,17 @@ const OTHER: [SafetyKind, RegExp][] = SIGNALS.map(([k]) => [
  */
 const EXTRA: [SafetyKind, RegExp][] = [
   [
+    'selfharm',
+    re(
+      [
+        '(nobody|no one|noone) (would|will|d) (even )?(miss|notice|care if i)( me)?',
+        '(everyone|everybody|they|my family) (would|d|will) be (better|happier) (off )?without me',
+        'i wish i (was|were) (dead|never born)|wish i (could|would) (just )?(disappear|vanish|not wake up)',
+        'ніхто (б )?(не )?(сумував|помітив|помітить) (б )?(за мною|без мене)?|всім було б (краще|легше) без мене|краще б мене не було',
+      ].join('|'),
+    ),
+  ],
+  [
     'starving',
     re(
       [
@@ -146,6 +157,8 @@ const EXTRA: [SafetyKind, RegExp][] = [
         'не хочу (більше )?їсти (взагалі|зовсім|нічого)',
         '(skip|skipping|skipped|miss|missing|cut) (out )?(all )?(my |most )?meals?( \\S+){0,2} (to|so i can|in order to) (lose|cut|drop|be)',
         '(skip|skipped|skipping|miss|missed|missing) (a |my |the |every )?(dinner|lunch|breakfast|supper)s?( \\S+){0,2} (to|so i can|in order to) (lose|cut|drop|be)',
+        '(dont|don t|do not|never|stopped|quit|stop) eat(ing)? (dinner|lunch|breakfast|supper|after \\S+)( \\S+){0,3} (to|so i can|so i) (get lean|lose|cut|drop|be)',
+        'не (їм|їв|їла) (вечер\\S*|обід\\S*|сніданок|сніданк\\S*)( \\S+){0,2} (щоб|аби) (схуд|худн|сушит|скинути)',
         '(how|what) (little|few|less) (food |calories )?(can|could|do) i (eat|get by on)|eat (almost )?(nothing|as little as possible)',
         '(want|wanna|need|trying) to be (skinny|thin|bones|a stick|tiny)',
         'не (їм|їв|їла) по (\\S+ )?(дн|дні|днів|доб)|не їм (\\S+ )?по (два|три|\\d+) ',
@@ -195,6 +208,12 @@ const SOFT_FOLLOW: [SafetyKind, RegExp][] = [
     'starving',
     re(
       '(minimum|least|lowest|fewest|min) (calories|kcal|food)|(calories|kcal) (is |are |can i )?(the )?(minimum|lowest|least|eat)|(minimum|lowest) (amount|number)|how (little|few) (calories|kcal|food) |мінімум калорій|мінімальн\\S* (кількість )?калорі|скільки (калорій )?мінімум|як мало (можна )?(їсти|калорій)',
+    ),
+  ],
+  [
+    'faint',
+    re(
+      '^ ?(so |ok |okay )?(should i|do i need to|must i|can i) (stop|quit|end|rest)( training| the workout| the session| now)? ?$',
     ),
   ],
   [
