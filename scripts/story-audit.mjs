@@ -6,6 +6,8 @@
  *   page-hscroll    the page scrolls sideways (document wider than the viewport)
  *   drawer-overflow a drawer / dialog scrolls sideways or a child sticks out of it (outside a deliberate scroller)
  *   text-clipped    text cut off by overflow:hidden without an ellipsis or a line clamp (a label that does not fit)
+ *   label-wrapped   a button / tab / chip / segmented label (--headings 1: also h1-h3) that falls onto a second line (SPO-62: translated
+ *                   strings are longer; a label meant for one line must still fit on it)
  *   shadow-clipped  a box-shadow cut off by an ancestor with overflow (SPO-11: the edge of the shadow looks sawn off)
  * Exit code 1 when anything is found, so CI can gate on it.
  *
@@ -29,6 +31,8 @@ const filter = arg('filter', '');
 const partSpec = parsePart(arg('part', '0/1'));
 const concurrency = Number(arg('concurrency', '1'));
 const out = arg('out', '');
+/** Headings wrap by nature (a long translated or user-written title); report them only on request: --headings 1. */
+const withHeadings = arg('headings', '0') === '1';
 
 const index = await (await fetch(`${url}/index.json`)).json();
 const allIds = Object.entries(index.entries)
@@ -37,7 +41,7 @@ const allIds = Object.entries(index.entries)
 const ids = shard(allIds, partSpec);
 
 /** Runs in the page. */
-const probe = () => {
+const probe = (withHeadings) => {
   const found = [];
   const skip = /sr-only|visually-hidden|uistage-sr/;
   const inScroller = (el, stop) => {
@@ -83,6 +87,43 @@ const probe = () => {
       found.push([
         'text-clipped',
         `${String(el.className).slice(0, 40)} "${el.textContent.trim().slice(0, 40)}"`,
+      ]);
+  }
+  const LABELS =
+    '.uibtn:not(.uibtn--link) .uibtn-label, .uichip-l, .uiseg-l, [role=tab]:not(.uicard), .tabbar button > span:not(.tabbar-ico)';
+  // Labels meant for one line. A deliberate wrap (a link, a multi-line option) is marked data-wrap on the element or its ancestor.
+  const ONE_LINE = withHeadings ? `${LABELS}, h1, h2, h3` : LABELS;
+  for (const el of document.querySelectorAll(ONE_LINE)) {
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden' || el.closest('[data-wrap]')) continue;
+    if (skip.test(String(el.className))) continue;
+    // Only text counts (an icon or badge next to it sits at its own height). Each element that owns text is measured on its
+    // own: two stacked spans (a date over "This week") are two deliberate lines, a label that breaks inside one is a defect.
+    let lines = 1;
+    for (const owner of [el, ...el.querySelectorAll('*')]) {
+      const rects = [];
+      for (const n of owner.childNodes) {
+        if (n.nodeType !== 3 || !n.textContent.trim()) continue;
+        const range = document.createRange();
+        range.selectNodeContents(n);
+        for (const r of range.getClientRects()) if (r.width > 0 && r.height > 0) rects.push(r);
+      }
+      rects.sort((x, y) => x.top - y.top);
+      // A line's rect can be taller than the line pitch (tight line-height), so compare vertical centres, not edges.
+      let count = 0;
+      let centre = -Infinity;
+      for (const r of rects) {
+        const c = r.top + r.height / 2;
+        if (c - centre > r.height * 0.6) count += 1;
+        centre = c;
+      }
+      lines = Math.max(lines, count);
+    }
+    const tops = { size: lines };
+    if (tops.size > 1)
+      found.push([
+        'label-wrapped',
+        `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 30)} "${el.textContent.trim().slice(0, 40)}" on ${tops.size} lines`,
       ]);
   }
   // A shadow reaches `blur + spread` beyond the box; an ancestor that clips (overflow) closer than that saws it off.
@@ -223,7 +264,7 @@ await runPool(items, concurrency, async ({ w, loc, id }, worker) => {
     try {
       await setScale(page, f);
       await page.waitForTimeout(400);
-      const found = await page.evaluate(probe);
+      const found = await page.evaluate(probe, withHeadings);
       probes++;
       for (const [kind, detail] of found)
         report.push({ id, width: w, font: f, locale: loc, kind, detail });
