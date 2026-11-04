@@ -24,6 +24,9 @@ export interface SessionStore {
 /** Records one person may keep; the least recently seen ones go first, so a script can't grow the collection without bound. */
 export const MAX_SESSIONS = 50;
 
+/** After a new device appears, the next one inside this window is not announced again. */
+export const NEW_DEVICE_QUIET_MS = 10 * 60_000;
+
 export type SessionInfo = Pick<SessionDoc, 'label' | 'kind' | 'city' | 'country'>;
 
 /** Refreshes (or adopts) the device's record; `active:false` when it was signed out from another device. */
@@ -40,7 +43,11 @@ export async function checkCore(
   else {
     const all = await store.list();
     // The very first device of an account is not news; any later one is (SPO-436).
-    newDevice = all.some((r) => !r.doc.revokedAt);
+    // Only records the SPO-436 server has seen count (they carry `kind`), so the rollout does not announce every old
+    // device; and one new device per NEW_DEVICE_QUIET_MS, so cycling device ids cannot turn this into push spam.
+    newDevice =
+      all.some((r) => !r.doc.revokedAt && r.doc.kind) &&
+      !all.some((r) => now - r.doc.createdAt < NEW_DEVICE_QUIET_MS);
     const excess = all.length + 1 - MAX_SESSIONS;
     if (excess > 0) {
       const oldest = all

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   checkCore,
   MAX_SESSIONS,
+  NEW_DEVICE_QUIET_MS,
   listCore,
   revokeCore,
   revokeOthersCore,
@@ -93,18 +94,20 @@ describe('session rules', () => {
     expect(m.get('dev-laptop-1')).toMatchObject({ createdAt: 10, lastSeenAt: 10, revokedAt: null });
   });
 
-  it('flags a later device as news (push), never the first one, an old one, or one adopted into an empty list', async () => {
+  it('flags a later device as news (push), never the first one or one already known', async () => {
     const { store } = memorySessions();
-    expect((await checkCore(store, 'dev-laptop-1', info('Chrome · macOS'), 10)).newDevice).toBe(
-      false,
-    );
-    expect((await checkCore(store, 'dev-phone-01', info('Safari · iOS'), 11)).newDevice).toBe(true);
-    expect((await checkCore(store, 'dev-phone-01', info('Safari · iOS'), 12)).newDevice).toBe(
-      false,
-    );
-    await revokeOthersCore(store, 'dev-phone-01', 20);
+    const first = await checkCore(store, 'dev-laptop-1', info('Chrome · macOS'), 10);
+    expect(first.newDevice).toBe(false);
+    const later = 10 + NEW_DEVICE_QUIET_MS + 1;
+    const phone = await checkCore(store, 'dev-phone-01', info('Safari · iOS'), later);
+    expect(phone.newDevice).toBe(true);
+    const again = await checkCore(store, 'dev-phone-01', info('Safari · iOS'), later + 1);
+    expect(again.newDevice).toBe(false);
+    await revokeOthersCore(store, 'dev-phone-01', later + 2);
     // the only live device is the phone; a new tablet is still news
-    expect((await checkCore(store, 'dev-tablet-1', info('Safari · iOS'), 30)).newDevice).toBe(true);
+    const after = later + NEW_DEVICE_QUIET_MS + 3;
+    const tablet = await checkCore(store, 'dev-tablet-1', info('Safari · iOS'), after);
+    expect(tablet.newDevice).toBe(true);
   });
 
   it('signing a device out makes its next check inactive; the others stay active', async () => {

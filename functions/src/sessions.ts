@@ -46,6 +46,7 @@ function storeFor(uid: string): SessionStore {
     },
     async set(id, doc) {
       await col.doc(id).set(doc);
+      await sessionState(uid).doc(id).delete(); // a fresh registration starts without a stale flag
     },
     async update(id, patch) {
       await col.doc(id).update(patch);

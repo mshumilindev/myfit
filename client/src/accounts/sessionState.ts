@@ -12,7 +12,9 @@ export function watchRevokedFlag(uid: string, deviceId: string, onRevoked: () =>
   return onSnapshot(
     doc(db, 'users', uid, 'sessionState', deviceId),
     (snap) => {
-      if (done || !snap.exists() || !snap.data()?.revokedAt) return;
+      // A cached copy may hold an old flag: only the server's word ends a device.
+      // A cached copy may hold an old flag: only the server's word ends a device.
+      if (done || snap.metadata?.fromCache || !snap.exists() || !snap.data()?.revokedAt) return;
       done = true;
       onRevoked();
     },
