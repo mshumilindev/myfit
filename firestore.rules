@@ -266,6 +266,13 @@ service cloud.firestore {
         && (request.resource.data.get('lastName', null) == null
             || (request.resource.data.lastName is string && request.resource.data.lastName.size() <= 60));
 
+      // Which of my devices were signed out elsewhere (SPO-436): a device reads its own flag and ends itself at once.
+      // Written only by the session functions; no listing.
+      match /sessionState/{deviceId} {
+        allow get: if isSelf(userId);
+        allow list, write: if false;
+      }
+
       // Tracker data — a workout is one document with nested exercises/sets.
       match /workouts/{workoutId} {
         allow read, write: if isSelf(userId);

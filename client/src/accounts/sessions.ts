@@ -12,6 +12,8 @@ const CHECK_EVERY_MS = 60_000;
 export interface SessionRow {
   deviceId: string;
   label: string;
+  /** Absent on records the server has not refreshed since SPO-436. */
+  kind?: 'phone' | 'tablet' | 'computer' | 'unknown';
   city: string | null;
   country: string | null;
   lastSeenAt: number;

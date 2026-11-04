@@ -33,6 +33,17 @@ export function describeClient(ua: unknown): string {
   return os ? `${browser} · ${os}` : browser;
 }
 
+export type DeviceKind = 'phone' | 'tablet' | 'computer' | 'unknown';
+
+/** What kind of device a user-agent describes. A browser can't tell a laptop from a desktop, so both are `computer`. Pure, for tests. */
+export function deviceKind(ua: unknown): DeviceKind {
+  const s = typeof ua === 'string' ? ua : '';
+  if (/iPad/i.test(s) || (/Android/i.test(s) && !/Mobile/i.test(s))) return 'tablet';
+  if (/iPhone|iPod|Android/i.test(s)) return 'phone';
+  if (/Windows|Mac OS X|Macintosh|Linux|X11|CrOS/i.test(s)) return 'computer';
+  return 'unknown';
+}
+
 function header(h: Record<string, unknown> | undefined, name: string): string | null {
   const v = h?.[name];
   const s = Array.isArray(v) ? v[0] : v;
