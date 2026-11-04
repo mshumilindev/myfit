@@ -18,7 +18,8 @@ describe('placeFromIp', () => {
   it('finds a country (and a city) in the offline database, IPv4 and IPv6', () => {
     expect(placeFromIp('8.8.8.8').country).toBe('US');
     expect(placeFromIp('2001:4860:4860::8888').country).toMatch(/^[A-Z]{2}$/);
-  });
+    // The first lookup reads the ~130 MB database synchronously: seconds on a loaded runner, so the default 5 s is too tight.
+  }, 30_000);
   it('gives nothing for private, unknown or missing addresses', () => {
     const none = { city: null, country: null };
     expect(placeFromIp('10.0.0.1')).toEqual(none);
