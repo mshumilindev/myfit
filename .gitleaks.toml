@@ -1,4 +1,5 @@
-# Secret scan config (SPO-58, ADR 014). The default ruleset stays on; only paths that hold NON-secret look-alikes are listed.
+# Secret scan config (SPO-58, ADR 014). The default ruleset stays on; the entries below are the reviewed false positives
+# of the first full-history scan (40 findings, all checked by hand).
 title = "Spotter gitleaks"
 
 [extend]
@@ -7,3 +8,17 @@ useDefault = true
 [allowlist]
 description = "Lock files hold integrity hashes that look like keys"
 paths = ['''(^|/)package-lock\.json$''']
+
+# `generic-api-key` fires on localStorage key NAMES (`spotter.sleepTombstones.v1`, the local-keys registry), landing-page
+# copy and mock ids in tests (`sk_0123456789abcdef`). It is limited to the client source; every vendor-specific rule
+# (AWS, GCP service accounts, private keys, tokens) stays active there.
+[[allowlists]]
+description = "generic-api-key false positives in client source"
+targetRules = ['generic-api-key']
+paths = ['''^client/src/''']
+
+# The Firebase WEB api key is public by design (it ships in every bundle; access is controlled by rules and App Check).
+[[allowlists]]
+description = "public Firebase web config"
+targetRules = ['gcp-api-key']
+paths = ['''^client/src/firebase\.ts$''']
