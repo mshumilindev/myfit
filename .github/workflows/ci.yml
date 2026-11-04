@@ -228,6 +228,10 @@ jobs:
           GITLEAKS_CONFIG: .gitleaks.toml
           GITLEAKS_ENABLE_COMMENTS: 'false'
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: 'false'
+      # On a push the action scans only the last commit (`--log-opts=-1`), and we push several at once: scan the whole history
+      # with the binary the action just installed, so no commit can slip through.
+      - name: Scan the whole history
+        run: /tmp/gitleaks-8.24.3/gitleaks detect --config .gitleaks.toml --redact -v --exit-code=2 --log-level=info
 
   # Passkeys against a software authenticator (SPO-211/229): a local server runs the real passkeysCore rules, Chromium has a
   # CDP virtual authenticator. No app build needed, so it runs in parallel and takes about a minute.
