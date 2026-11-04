@@ -1,24 +1,23 @@
-# Secret scan config (SPO-58, ADR 014). The default ruleset stays on; the entries below are the reviewed false positives
-# of the first full-history scan (40 findings, all checked by hand).
+# Secret scan config (SPO-58, ADR 014). The default ruleset stays on. The files below are the reviewed false positives of the
+# first full-history scan (40 findings, every one checked by hand): `generic-api-key` fires on localStorage key NAMES
+# (`spotter.sleepTombstones.v1`, the local-keys registry), landing-page copy and mock ids in tests (`sk_0123456789abcdef`);
+# `gcp-api-key` fires on the Firebase WEB key, which is public by design (it ships in every bundle; rules and App Check guard access).
+# The pinned gitleaks of the CI action (8.24) has no per-rule allowlists, so these are exact file paths, not folders.
 title = "Spotter gitleaks"
 
 [extend]
 useDefault = true
 
 [allowlist]
-description = "Lock files hold integrity hashes that look like keys"
-paths = ['''(^|/)package-lock\.json$''']
-
-# `generic-api-key` fires on localStorage key NAMES (`spotter.sleepTombstones.v1`, the local-keys registry), landing-page
-# copy and mock ids in tests (`sk_0123456789abcdef`). It is limited to the client source; every vendor-specific rule
-# (AWS, GCP service accounts, private keys, tokens) stays active there.
-[[allowlists]]
-description = "generic-api-key false positives in client source"
-targetRules = ['generic-api-key']
-paths = ['''^client/src/''']
-
-# The Firebase WEB api key is public by design (it ships in every bundle; access is controlled by rules and App Check).
-[[allowlists]]
-description = "public Firebase web config"
-targetRules = ['gcp-api-key']
-paths = ['''^client/src/firebase\.ts$''']
+description = "Reviewed false positives (lock file hashes, key names, copy, mock ids, the public Firebase web key)"
+paths = [
+  '''(^|/)package-lock\.json$''',
+  '''^client/src/firebase\.ts$''',
+  '''^client/src/store\.ts$''',
+  '''^client/src/unsynced\.ts$''',
+  '''^client/src/localKeys\.registry(\.part\d)?\.ts$''',
+  '''^client/src/views/landing/LandingDesign\.tsx$''',
+  '''^client/src/coach/schedule/scheduleCodec\.test\.ts$''',
+  '''^client/src/coach/data/firestore/adapters2\.test\.ts$''',
+  '''^client/src/coach/data/firestore/install\.cases\.test\.tsx$''',
+]
