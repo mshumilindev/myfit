@@ -70,3 +70,56 @@ describe('hosting security headers (iteration 14 item 3)', () => {
     }
   });
 });
+
+describe('hosting security headers: extra guarantees (SPO-58)', () => {
+  const csp = h('Content-Security-Policy');
+  const ro = h('Content-Security-Policy-Report-Only');
+  const rules = fb.hosting.headers as {
+    source: string;
+    headers: { key: string; value: string }[];
+  }[];
+  const cache = (source: string) =>
+    rules.find((r) => r.source === source)?.headers.find((x) => x.key === 'Cache-Control')?.value;
+
+  it('HSTS lasts at least a year and covers sub-domains', () => {
+    const hsts = h('Strict-Transport-Security');
+    expect(Number(/max-age=(\d+)/.exec(hsts)?.[1])).toBeGreaterThanOrEqual(31_536_000);
+    expect(hsts).toMatch(/includeSubDomains/);
+  });
+
+  it('no policy allows plain http, a bare wildcard or data/blob scripts, and every one upgrades requests', () => {
+    for (const policy of [csp, ro]) {
+      for (const d of policy.split(';').map((x) => x.trim())) {
+        expect(d, d).not.toMatch(/(^|\s)(\*|http:|https:\/\/\*)(\s|$)/);
+      }
+      expect(directive(policy, 'script-src')).not.toMatch(/data:|blob:|unsafe-hashes/);
+      expect(directive(policy, 'form-action')).toBe("form-action 'self'");
+      expect(directive(policy, 'frame-ancestors')).toBe("frame-ancestors 'none'");
+      expect(policy).toContain('upgrade-insecure-requests');
+    }
+  });
+
+  it('the report-only policy is never looser than the enforced one for scripts, frames and workers', () => {
+    for (const name of ['frame-src', 'worker-src', 'object-src', 'base-uri', 'default-src']) {
+      expect(directive(ro, name), name).toBe(directive(csp, name));
+    }
+  });
+
+  it('the service worker, its helpers, the shell and the manifest are never cached for long, the version probe never', () => {
+    for (const source of [
+      '/sw.js',
+      '/sw-refresh.js',
+      '/sw-push.js',
+      '/manifest.webmanifest',
+      '/',
+      '/index.html',
+    ]) {
+      expect(cache(source), source).toBe('no-cache');
+    }
+    expect(cache('/version.json')).toBe('no-store');
+  });
+
+  it('hashed build files are immutable (a deploy ships new names, so this is safe and fast)', () => {
+    expect(cache('**/*.@(js|css|woff2|svg|webp)')).toMatch(/max-age=31536000.*immutable/);
+  });
+});
