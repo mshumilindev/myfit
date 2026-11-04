@@ -21,7 +21,7 @@ import {
   stripLegacyConditions,
   type GeneralShare,
 } from './conditions';
-import { COACH_DEFAULT, normalizeTemper, type CoachSettings } from './atlas/types';
+import { COACH_DEFAULT, clampForAge, normalizeTemper, type CoachSettings } from './atlas/types';
 import { useSyncExternalStore } from 'react';
 import {
   arrayRemove,
@@ -2660,6 +2660,7 @@ export function deleteGym(id: string): void {
 function commitBody(patch: Partial<BodyMetrics>): void {
   setState({ bodyMetrics: { ...state.bodyMetrics, ...patch }, syncStatus: bumpPending() });
   writeBodyDoc();
+  if (patch.dob !== undefined && state.coach.temper === 5) setCoach({ temper: 5 }); // 18+ re-check
 }
 
 // --- Goals (My Fit) --------------------------------------------------------
@@ -4158,7 +4159,8 @@ export function setMasterySeenRating(rating: number): void {
 }
 
 /** Atlas settings (temper, role, read mark…); synced to users/{uid}/meta/coach. */
-export function setCoach(patch: Partial<CoachSettings>): void {
+export function setCoach(input: Partial<CoachSettings>): void {
+  const patch = clampForAge(input, state.bodyMetrics.dob); // Savage is 18+ (SPO-124)
   const updatedAt = Math.max(Date.now(), coachServerAt + 1, (state.coach.updatedAt ?? 0) + 1);
   setState({ coach: { ...state.coach, ...patch, updatedAt } });
   for (const k of Object.keys(patch)) coachDirty.add(k);

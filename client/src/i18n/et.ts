@@ -2775,6 +2775,8 @@ export const et: Strings = {
   atlasName: 'Atlas',
   /** Title of a push that carries an AI-written reply (marks it as AI; EU AI Act Art. 50). */
   atlasAiPushTitle: 'Atlas · TI',
+  /** Push body for a reply that must not show its text on the lock screen (Savage swearing). */
+  atlasPushReplyNeutral: 'Atlas vastas. Ava vestlus.',
   atlasTemper: ['Semu', 'Neutraalne', 'Julm'],
   atlasTemperTag: ['su jõusaalisõber', 'otse ja ilustamata', 'irvitab iga laisa seeria üle'],
   atlasTemperQuote: [
@@ -2863,6 +2865,8 @@ export const et: Strings = {
   atlasTurnOffSub: 'Ilma märkmete ja kavata — tagasi millal tahes',
   atlasRuleHardOnly: 'Ainult Julm',
   atlasRuleMercilessOnly: 'Ainult Julm',
+  /** Savage picker, locked for users whose date of birth shows they are under 18. */
+  atlasSavageAdultOnly: 'Julm ainult 18+',
   atlasLocalUnknown:
     'Seda ma veel ei tea. Küsi trenni kohta: mida täna teha, puhkus, järgmine raskus, rekordid, taastumine, uni, programm.',
   /** Off-topic warnings by temper (green / white / red) and try (1…3); the third starts a 30-minute block. */

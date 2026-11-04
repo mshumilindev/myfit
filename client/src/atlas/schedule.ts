@@ -83,7 +83,8 @@ export function planOutbox(p: OutboxInput): OutboxMessage[] {
           dayName: planned?.name ?? play?.name ?? null,
         },
         p.temper,
-        { locale: p.locale, fmt: p.fmt, yoMama: p.coach.yoMama },
+        // A push preview shows on the lock screen: never swear there (SPO-124).
+        { locale: p.locale, fmt: p.fmt, yoMama: p.coach.yoMama, swearing: false },
       ),
       tag: 'atlas-skipped',
       url: noteUrl(`skipped:${key}`),

@@ -821,7 +821,14 @@ function AppMain() {
             planNotePushes({
               coach: store.coach,
               now,
-              notesAt: (at) => buildNotes(store, at, locale, atlasFmt).notes,
+              // Push previews show on the lock screen: no swearing there (SPO-124).
+              notesAt: (at) =>
+                buildNotes(
+                  { ...store, coach: { ...store.coach, swearing: false } },
+                  at,
+                  locale,
+                  atlasFmt,
+                ).notes,
               title: t.atlasName,
             }),
           )

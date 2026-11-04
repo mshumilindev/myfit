@@ -499,6 +499,22 @@ describe('setCoach', () => {
     expect(c.temper).toBe(5);
     expect(c.updatedAt ?? 0).toBeGreaterThan(a);
   });
+
+  it('Savage is 18+ only: under 18 cannot set it, and a young date of birth takes it away (SPO-124)', async () => {
+    const { setCoach, updateBodyMetrics, __getStateForTests: getState } = await import('./store');
+    const year = new Date().getFullYear();
+    updateBodyMetrics({ dob: `${year - 15}-06-15` });
+    setCoach({ temper: 5, swearing: true, yoMama: true });
+    expect(getState().coach.temper).toBe(3);
+    expect(getState().coach.swearing).toBe(false);
+    expect(getState().coach.yoMama).toBe(false);
+    updateBodyMetrics({ dob: `${year - 30}-06-15` });
+    setCoach({ temper: 5 });
+    expect(getState().coach.temper).toBe(5);
+    updateBodyMetrics({ dob: `${year - 15}-06-15` });
+    expect(getState().coach.temper).toBe(3);
+    updateBodyMetrics({ dob: null });
+  });
 });
 
 describe('conditions store', () => {

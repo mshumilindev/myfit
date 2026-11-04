@@ -6,10 +6,11 @@
  */
 import type { Injury, RestPeriod, SleepNight, Workout } from '../types';
 import { activeInjuries } from '../injury';
-import { dayKey } from '../store';
+import { dayKey, type StoreState } from '../store';
 import { finishedNights, nightDurationMin } from '../sleep';
 import type { CoachFact, CoachSettings, Temper } from './types';
 import { COMEBACK_DAYS } from './facts';
+import { capTemperForAge } from './age';
 
 /** Nights shorter than this soften him for the day. */
 export const SOFTEN_SLEEP_H = 5;
@@ -24,6 +25,8 @@ export interface GuardContext {
   sleeps: SleepNight[];
   finished: Workout[];
   now: number;
+  /** Date of birth (ISO) — Savage is 18+ only; unknown = allowed (SPO-124). */
+  dob?: string | null;
 }
 
 /** Why today should be gentle (null = a normal day). */
@@ -49,7 +52,21 @@ export function effectiveTemper(settings: CoachSettings, ctx: GuardContext): Tem
   if (settings.mutedUntil && settings.mutedUntil > ctx.now) return 1;
   const reason = softenReason(ctx);
   if (reason && !settings.keepTemper && settings.temper > SOFT_TEMPER) return SOFT_TEMPER;
-  return settings.temper;
+  return capTemperForAge(settings.temper, ctx.dob, ctx.now);
+}
+
+/** Swearing is off whenever a sensitive situation is on — even with "keep my temper". */
+export function swearingNow(settings: CoachSettings, ctx: GuardContext): boolean {
+  return settings.swearing && softenReason(ctx) === null;
+}
+
+/** `swearingNow` for a store snapshot (chat answers). */
+export function swearingFor(
+  s: Pick<StoreState, 'coach' | 'injuries' | 'sleeps' | 'restPeriods' | 'workouts'>,
+  now: number,
+): boolean {
+  const finished = s.workouts.filter((w) => w.finishedAt !== null);
+  return swearingNow(s.coach, { ...s, finished, now });
 }
 
 /** Facts a temper voices neutrally no matter what (the body is off-limits). */
@@ -72,6 +89,39 @@ const BODY_WORDS = [
   /гидк/i,
   /потвор/i,
   /худющ/i,
+  // SPO-124: slurs / protected traits are never allowed in a hard temper, whether the
+  // line is canned or comes from the AI. Unicode-aware word starts (\b is ASCII-only).
+  ...[
+    'n[i1]gg',
+    'fag(?:s|got|gots|gy)?(?![\\p{L}])',
+    'retard',
+    'trann',
+    'kike(?![\\p{L}])',
+    'spic(?![\\p{L}])',
+    'chink',
+    'cripple',
+    'whore(?![\\p{L}])',
+    'slut(?![\\p{L}])',
+    'homo(?![\\p{L}])',
+    'підор',
+    'педик',
+    'пидор',
+    'хохол',
+    'москал',
+    'кацап',
+    'жид(?![\\p{L}])|жиди(?![\\p{L}])|жида(?![\\p{L}])',
+    'негр(?![\\p{L}])|негри(?![\\p{L}])',
+    'даун(?![\\p{L}])',
+    'дебіл(?![\\p{L}])|дебил(?![\\p{L}])',
+    'шлюх',
+    'murzyn',
+    'żyd(?![\\p{L}])|żyda(?![\\p{L}])|żydy(?![\\p{L}])',
+    'pidaras',
+    'negras',
+    'žyd(?![\\p{L}])|žydas(?![\\p{L}])',
+    'neeger',
+    'negro(?![\\p{L}])',
+  ].map((w) => new RegExp(`(?<![\\p{L}])(?:${w})`, 'iu')),
 ];
 
 /** False when a generated line talks about the body in a hard temper. */

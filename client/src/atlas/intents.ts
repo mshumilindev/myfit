@@ -142,6 +142,7 @@ import {
 
 export { PAIN_WORDS, INTENTS } from './intentsBase';
 export type { AskCtx } from './intentKit';
+import { swearingFor } from './guard';
 
 const SMALL_NEW = new Set(INTENTS_SMALL.map((i) => i.id));
 
@@ -704,7 +705,7 @@ function dress(
     temper: c.temper,
     locale: c.locale,
     yoMama: !!c.s.coach.yoMama,
-    swearing: !!c.s.coach.swearing,
+    swearing: swearingFor(c.s, c.now),
     topic,
     // Right after a hard moment (safety net) he stays plain for a few answers.
     neutral: neutral || (convo.softUntil !== undefined && turn <= convo.softUntil),

@@ -124,7 +124,7 @@ describe('systemPrompt variants', () => {
   it('allows mom jokes and swearing only for temper 5 with the switches on', () => {
     const on = p({ temper: 5, coach: { ...coach, yoMama: true, swearing: true } });
     expect(on).toMatch(/"Your mom" jokes about effort are allowed/);
-    expect(on).toMatch(/Swearing is allowed/);
+    expect(on).toMatch(/Swearing is ON/);
     const soft = p({ temper: 3, coach: { ...coach, yoMama: true, swearing: true } });
     expect(soft).toMatch(/No "your mom" jokes/);
     expect(soft).toMatch(/No swearing/);

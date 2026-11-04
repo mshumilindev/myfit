@@ -13,7 +13,7 @@ import { localizedExerciseName } from '../data/exerciseNames';
 import type { StoreState } from '../store';
 import type { LocaleId } from '../i18n';
 import { dayFacts, isWeekEnd, sessionFacts, weekFact } from './facts';
-import { effectiveTemper, softenReason, type SoftenReason } from './guard';
+import { effectiveTemper, softenReason, swearingNow, type SoftenReason } from './guard';
 import { say, type Fmt } from './voice';
 import { spanFmt } from './num';
 import type { CoachFact, Temper } from './types';
@@ -78,13 +78,16 @@ export function buildNotes(
     if (wf.kind === 'week' && wf.planned > 0) facts.push(wf);
   }
 
-  const temper = effectiveTemper(s.coach, {
+  const gctx = {
     injuries: s.injuries,
     restPeriods: s.restPeriods,
     sleeps: s.sleeps,
     finished,
     now,
-  });
+    dob: s.bodyMetrics?.dob,
+  };
+  const temper = effectiveTemper(s.coach, gctx);
+  const swearing = swearingNow(s.coach, gctx);
   const seen = new Set<string>();
   const notes = facts
     // "Clear chat" hides everything before it.
@@ -96,7 +99,12 @@ export function buildNotes(
       at: fact.at,
       kind: fact.kind,
       fact,
-      text: say(fact, temper, { locale, fmt, yoMama: s.coach.yoMama }),
+      text: say(fact, temper, {
+        locale,
+        fmt,
+        yoMama: s.coach.yoMama,
+        swearing,
+      }),
     }));
   const unread = notes.filter((n) => n.at > s.coach.readAt).length;
   return { notes, temper, unread };
@@ -105,20 +113,23 @@ export function buildNotes(
 /** One fact voiced right now (mid-session jab), or null when Atlas is off/muted. */
 export function voiceNow(
   fact: CoachFact,
-  s: Pick<StoreState, 'workouts' | 'sleeps' | 'injuries' | 'restPeriods' | 'coach'>,
+  s: Pick<StoreState, 'workouts' | 'sleeps' | 'injuries' | 'restPeriods' | 'coach' | 'bodyMetrics'>,
   now: number,
   locale: LocaleId,
   fmt: Fmt,
 ): { text: string; temper: Temper } | null {
   if (!s.coach.enabled || (s.coach.mutedUntil ?? 0) > now) return null;
-  const temper = effectiveTemper(s.coach, {
+  const gctx = {
     injuries: s.injuries,
     restPeriods: s.restPeriods,
     sleeps: s.sleeps,
     finished: s.workouts.filter((w) => w.finishedAt !== null),
     now,
-  });
-  return { temper, text: say(fact, temper, { locale, fmt, yoMama: s.coach.yoMama }) };
+    dob: s.bodyMetrics?.dob,
+  };
+  const temper = effectiveTemper(s.coach, gctx);
+  const swearing = swearingNow(s.coach, gctx);
+  return { temper, text: say(fact, temper, { locale, fmt, yoMama: s.coach.yoMama, swearing }) };
 }
 
 /** Formatters for the phrase book in the current locale. */

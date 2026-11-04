@@ -3,6 +3,7 @@
  * "Do it". Each action returns the line Atlas says afterwards.
  */
 import * as N from './num';
+import { isUnderSavageAge, UNDERAGE_REPLY } from './age';
 import {
   addWeight,
   getOpenWorkout,
@@ -167,6 +168,8 @@ export function runAction(
           };
     }
     case 'temper':
+      if (a.temper === 5 && isUnderSavageAge(s.bodyMetrics.dob, now))
+        return { text: UNDERAGE_REPLY(L) };
       setCoach({ temper: a.temper });
       return { text: L('Done. Better?', 'Готово. Так краще?') };
     case 'mute': {

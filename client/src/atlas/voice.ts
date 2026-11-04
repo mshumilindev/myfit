@@ -36,6 +36,11 @@ export type PhraseBook = {
 } & {
   /** "Your mom…" variants, mixed in for red when enabled. */
   mom: { [K in FactKind]?: Line<K>[] };
+  /**
+   * Real swearing (red only, SPO-124): about the effort, never the body, never a slur.
+   * Mixed in for red when `swearing` is on; never in push previews (lock screen).
+   */
+  swear: { [K in FactKind]?: Line<K>[] };
 };
 
 const BOOKS: Partial<Record<LocaleId, PhraseBook>> = { en: EN, uk: UK, pl: PL, lt: LT, et: ET };
@@ -58,23 +63,41 @@ export interface SayOptions {
   locale: LocaleId;
   fmt: Fmt;
   yoMama: boolean;
+  /** Swearing switched on (red only). Off by default; push previews never set it. */
+  swearing?: boolean;
 }
 
 type AnyLine = (f: CoachFact, x: Fmt) => string;
 
-function variants(book: PhraseBook, kind: FactKind, temper: Temper, mom: boolean): AnyLine[] {
+/** Share (%) of facts that get a swear line when swearing is on. */
+const SWEAR_SHARE = 35;
+
+function variants(
+  book: PhraseBook,
+  kind: FactKind,
+  temper: Temper,
+  mom: boolean,
+  swear: boolean,
+  id: string,
+): AnyLine[] {
   const byTemper = book[kind] as unknown as Record<Temper, AnyLine[]>;
-  const extra =
+  const extraMom =
     mom && temper === 5 ? ((book.mom[kind] as unknown as AnyLine[] | undefined) ?? []) : [];
-  return [...(byTemper[temper] ?? []), ...extra];
+  const extraSwear =
+    swear && temper === 5 ? ((book.swear?.[kind] as unknown as AnyLine[] | undefined) ?? []) : [];
+  // Swearing is the seasoning, not the dish: only about SWEAR_SHARE% of facts get a
+  // swear line (picked by the fact id, so it is stable), the rest use the plain pool.
+  if (extraSwear.length && hashId(`sw${id}`) % 100 < SWEAR_SHARE) return extraSwear;
+  return [...(byTemper[temper] ?? []), ...extraMom];
 }
 
 /** One line for a fact in the given (already guarded) temper. */
 export function say(fact: CoachFact, temper: Temper, opts: SayOptions): string {
   const t: Temper = neutralFact(fact) ? (Math.min(temper, SOFT_TEMPER) as Temper) : temper;
   const book = phraseBook(opts.locale);
+  const swear = !!opts.swearing;
   const pick = (tt: Temper, mom: boolean): string | null => {
-    const list = variants(book, fact.kind, tt, mom);
+    const list = variants(book, fact.kind, tt, mom, swear, fact.id);
     if (list.length === 0) return null;
     return list[hashId(fact.id) % list.length](fact, opts.fmt);
   };

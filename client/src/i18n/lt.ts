@@ -2808,6 +2808,8 @@ export const lt: Strings = {
   atlasName: 'Atlas',
   /** Title of a push that carries an AI-written reply (marks it as AI; EU AI Act Art. 50). */
   atlasAiPushTitle: 'Atlas · DI',
+  /** Push body for a reply that must not show its text on the lock screen (Savage swearing). */
+  atlasPushReplyNeutral: 'Atlas atsakė. Atidaryk pokalbį.',
   atlasTemper: ['Brolis', 'Neutralus', 'Žiaurus'],
   atlasTemperTag: [
     'tavo sporto salės bičiulis',
@@ -2900,6 +2902,8 @@ export const lt: Strings = {
   atlasTurnOffSub: 'Be pastabų ir plano — grąžinsi bet kada',
   atlasRuleHardOnly: 'Tik Žiaurus',
   atlasRuleMercilessOnly: 'Tik Žiaurus',
+  /** Savage picker, locked for users whose date of birth shows they are under 18. */
+  atlasSavageAdultOnly: 'Žiaurus tik 18+',
   atlasLocalUnknown:
     'To dar nežinau. Klausk apie treniruotes: ką daryti šiandien, poilsį, kitą svorį, rekordus, atsigavimą, miegą, programą.',
   /** Off-topic warnings by temper (green / white / red) and try (1…3); the third starts a 30-minute block. */

@@ -129,3 +129,5 @@ export interface CoachMessage {
   /** Temper it was said in (after the guard). */
   temper?: Temper;
 }
+
+export { clampForAge } from './age';

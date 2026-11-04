@@ -8,7 +8,7 @@ import { useT } from '../i18n';
 import { setCoach, useStore } from '../store';
 import type { Workout } from '../types';
 import { sessionFacts } from '../atlas/facts';
-import { effectiveTemper } from '../atlas/guard';
+import { effectiveTemper, swearingNow } from '../atlas/guard';
 import { say } from '../atlas/voice';
 import { useAtlasFmt } from '../atlas/notes';
 import { TEMPER_COLOR } from '../atlas/types';
@@ -22,18 +22,31 @@ export function AtlasDebrief({ workout, onOpen }: { workout: Workout; onOpen: ()
     if (!s.coach.enabled) return null;
     const finished = s.workouts.filter((w) => w.finishedAt !== null);
     const now = workout.finishedAt ?? workout.startedAt;
-    const temper = effectiveTemper(s.coach, {
+    const gctx = {
       injuries: s.injuries,
       restPeriods: s.restPeriods,
       sleeps: s.sleeps,
       finished: finished.filter((w) => w.id !== workout.id),
       now,
-    });
+      dob: s.bodyMetrics?.dob,
+    };
+    const temper = effectiveTemper(s.coach, gctx);
+    const swearing = swearingNow(s.coach, gctx);
     const texts = sessionFacts(workout, finished).map((f) =>
-      say(f, temper, { locale, fmt, yoMama: s.coach.yoMama }),
+      say(f, temper, { locale, fmt, yoMama: s.coach.yoMama, swearing }),
     );
     return { temper, texts };
-  }, [s.coach, s.workouts, s.injuries, s.restPeriods, s.sleeps, workout, locale, fmt]);
+  }, [
+    s.coach,
+    s.workouts,
+    s.injuries,
+    s.restPeriods,
+    s.sleeps,
+    s.bodyMetrics,
+    workout,
+    locale,
+    fmt,
+  ]);
   if (!lines || lines.texts.length === 0) return null;
   const { temper, texts } = lines;
   const endOfDay = new Date(workout.finishedAt ?? workout.startedAt).setHours(23, 59, 59, 999);

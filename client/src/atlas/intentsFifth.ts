@@ -9,6 +9,7 @@
  *  - reasons behind the plan: why today, why this weight, why this split.
  */
 import * as N from './num';
+import { isUnderSavageAge, UNDERAGE_REPLY } from './age';
 import { muscleSetsInWorkout, setTopWeight, setTypeOf } from '../store';
 import type { Workout } from '../types';
 import { muscleReadiness } from '../recovery';
@@ -485,12 +486,17 @@ export const INTENTS_FIFTH: Intent[] = [
     ],
     answer: (c, p, L) => {
       const t = temperOf(c, p);
+      if (t === 5 && isUnderSavageAge(c.s.bodyMetrics.dob, c.now)) return UNDERAGE_REPLY(L);
       if (!t || t === c.s.coach.temper) return L('That’s already me.', 'Я вже такий.');
       return L(`Switch me to ${TEMPER_NAME[t][0]}?`, `Перемкнути мене на «${TEMPER_NAME[t][1]}»?`);
     },
     action: (c, p) => {
       const t = temperOf(c, p);
-      return t && t !== c.s.coach.temper ? { type: 'temper', temper: t } : null;
+      return t &&
+        t !== c.s.coach.temper &&
+        !(t === 5 && isUnderSavageAge(c.s.bodyMetrics.dob, c.now))
+        ? { type: 'temper', temper: t }
+        : null;
     },
   },
   {

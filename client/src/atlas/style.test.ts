@@ -52,7 +52,7 @@ describe('voice constructor — the temper changes how, never what', () => {
   it('swearing only in Merciless and only when on', () => {
     const sw = (t: Temper, on: boolean) =>
       seeds.some((s) =>
-        /Блін|Чорт|Бляха|Трясця|Хрін|капець|блін|трясця/.test(
+        /блядь|нахуй|пиздець|хуй|сука|срак|їбат|йоб/i.test(
           styled(ANSWER, base(t, s, { swearing: on })).text,
         ),
       );
@@ -64,7 +64,7 @@ describe('voice constructor — the temper changes how, never what', () => {
   it('pain, health and the body stay plain', () => {
     for (const s of seeds.slice(0, 50)) {
       const out = styled('Зменш вагу й покажи коліно лікарю.', base(5, s, { topic: 'pain' })).text;
-      expect(out).not.toMatch(/Твоя мама|Блін|Чорт|Бляха|Трясця|Хрін|капець/);
+      expect(out).not.toMatch(/Твоя мама|блядь|нахуй|пиздець|хуй|сука|срак|їбат|йоб/i);
       expect(styled('80 kg.', base(5, s, { neutral: true })).text).toBe('80 kg.');
     }
   });

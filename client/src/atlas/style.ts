@@ -13,6 +13,7 @@
  */
 import { lineAllowed } from './guard';
 import type { Temper } from './types';
+import { SWEAR_CLOSE, SWEAR_OPEN, swearLang } from './swearWords';
 
 type Pair = [string[], string[]];
 
@@ -294,34 +295,6 @@ const MOM: Pair = [
   ],
 ];
 
-/** Swearing — red only, and only when it's switched on. */
-const SWEAR_OPEN: Pair = [
-  ['Damn. ', 'Oh, hell. ', 'Bloody hell. ', 'Crap. ', 'For crying out loud. ', 'Freaking hell. '],
-  [
-    'Блін. ',
-    'Бляха. ',
-    'Твою ж дивізію. ',
-    'Трясця. ',
-    'Якого біса. ',
-    'Капець. ',
-    'Хай йому грець. ',
-  ],
-];
-const SWEAR_CLOSE: Pair = [
-  [
-    ' Damn it.',
-    ' Now move your lazy ass.',
-    " And quit whining, for hell's sake.",
-    ' Crap, just do it.',
-  ],
-  [
-    ' Дідько.',
-    ' А тепер ворушись, лінива дупо.',
-    ' І не скигли, хай тобі грець.',
-    ' Бляха, просто зроби це.',
-  ],
-];
-
 /** Topic jokes: by answer topic (intent id / words). */
 const TOPIC_JOKES: [RegExp, Pair][] = [
   [
@@ -503,7 +476,7 @@ export function styled(text: string, s: StyleCtx): Styled {
   // One opener at most — "Yo! Yo bro!" reads like a stutter — and none when
   // the talk simply goes on about the same thing.
   if (s.followUp) void r();
-  else if (swear && r() < 0.45) head += pick(SWEAR_OPEN[li]);
+  else if (swear && r() < 0.2) head += pick(SWEAR_OPEN[swearLang(s.locale)]);
   else if (r() < v.rate.tic) head += pick(v.tic[li]);
   else if (r() < v.rate.open * PACE.open) head += fill(pick(v.open[li]));
   // An opener ending in ", " / ": " flows into the answer — lower its first
@@ -537,7 +510,7 @@ export function styled(text: string, s: StyleCtx): Styled {
   }
 
   let end = '';
-  if (swear && r() < 0.35) end = pick(SWEAR_CLOSE[li]);
+  if (swear && !head && r() < 0.18) end = pick(SWEAR_CLOSE[swearLang(s.locale)]);
   else if (!long && r() < v.rate.close * PACE.close) end = fill(pick(v.close[li]));
 
   const main = `${head}${body}`.replace(/\s+$/, '');
@@ -596,8 +569,8 @@ export function personaLinesEn(): string[] {
   }
   for (const t of [
     ...MOM[0],
-    ...SWEAR_OPEN[0],
-    ...SWEAR_CLOSE[0],
+    ...SWEAR_OPEN.en,
+    ...SWEAR_CLOSE.en,
     ...TOPIC_JOKES.flatMap(([, p]) => p[0]),
   ])
     out.add(t);

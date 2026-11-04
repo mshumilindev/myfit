@@ -2826,6 +2826,8 @@ export const uk: Strings = {
   atlasName: 'Atlas',
   /** Title of a push that carries an AI-written reply (marks it as AI; EU AI Act Art. 50). */
   atlasAiPushTitle: 'Atlas · ШІ',
+  /** Push body for a reply that must not show its text on the lock screen (Savage swearing). */
+  atlasPushReplyNeutral: 'Atlas відповів. Відкрий чат.',
   atlasTemper: ['Бро', 'Нейтральний', 'Жорсткий'],
   atlasTemperTag: ['свій бро', 'прямо в лоб, без соплів', 'стібеться з кожного лінивого сету'],
   atlasTemperQuote: [
@@ -2914,6 +2916,8 @@ export const uk: Strings = {
   atlasTurnOffSub: 'Без нотаток і плану — повернути можна будь-коли',
   atlasRuleHardOnly: 'Лише Жорсткий',
   atlasRuleMercilessOnly: 'Лише Жорсткий',
+  /** Savage picker, locked for users whose date of birth shows they are under 18. */
+  atlasSavageAdultOnly: 'Жорсткий лише для 18+',
   atlasLocalUnknown:
     'Цього я поки не знаю. Питай про тренування: що робити сьогодні, відпочинок, наступну вагу, рекорди, відновлення, сон, програму.',
   /** Off-topic warnings by temper (green / white / red) and try (1…3); the third starts a 30-minute block. */

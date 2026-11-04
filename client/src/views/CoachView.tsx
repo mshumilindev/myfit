@@ -30,6 +30,7 @@ import {
   type CoachRole,
   type Temper,
 } from '../atlas/types';
+import { isUnderSavageAge } from '../atlas/age';
 import { enablePush, pushState } from '../push';
 import { computePlaybook } from '../playbook';
 import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/plan';
@@ -111,6 +112,8 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
   const store = useStore();
   const [step, setStep] = useState<Step>('meet');
   const [temper, setTemper] = useState<Temper>(store.coach.temper);
+  // Savage is 18+ only (SPO-124).
+  const underage = isUnderSavageAge(store.bodyMetrics.dob);
   // With a human coach Atlas is the extra coach, otherwise the main one.
   const role: CoachRole = useSelfCoachRole() ?? store.coach.role;
   const [yoMama, setYoMama] = useState(store.coach.yoMama);
@@ -185,6 +188,8 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
                 tone={temper === i ? 'accent' : 'neutral'}
                 role="radio"
                 aria-checked={temper === i}
+                aria-disabled={i === 5 && underage}
+                disabled={i === 5 && underage}
                 className={`atl-temper${temper === i ? ' on' : ''}`}
                 style={{ ['--tc' as string]: TEMPER_COLOR[i] }}
                 onClick={() => {
@@ -201,7 +206,11 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
                     <b>{t.atlasTemper[temperIndex(i)]}</b>
                     <TemperHeat temper={i} />
                   </span>
-                  <span className="atl-temper-tag">{t.atlasTemperTag[temperIndex(i)]}</span>
+                  <span className="atl-temper-tag">
+                    {i === 5 && underage
+                      ? t.atlasSavageAdultOnly
+                      : t.atlasTemperTag[temperIndex(i)]}
+                  </span>
                   <span className="atl-temper-quote">{t.atlasTemperQuote[temperIndex(i)]}</span>
                 </span>
               </Card>
@@ -662,7 +671,10 @@ function CoachThread({
    */
   const pushIfAway = (text: string, ai = false) => {
     if (document.visibilityState !== 'hidden' || pushState() !== 'on') return;
-    void pushReplyNow(ai ? t.atlasAiPushTitle : t.atlasName, text, wallClock()).catch((err) =>
+    // The lock screen never shows swearing (SPO-124): a Savage reply is announced, not quoted.
+    const body =
+      swearAllowed(store.coach.temper) && store.coach.swearing ? t.atlasPushReplyNeutral : text;
+    void pushReplyNow(ai ? t.atlasAiPushTitle : t.atlasName, body, wallClock()).catch((err) =>
       console.warn('atlas: reply push failed', err),
     );
   };
@@ -1395,6 +1407,8 @@ function CoachSettingsSheet({ onClose, ai }: { onClose: () => void; ai: AiRow | 
   const edit = (patch: Partial<typeof draft>) => setDraft((d) => ({ ...d, ...patch }));
   const [confirm, setConfirm] = useState<'off' | 'clear' | null>(null);
   const hard = momAllowed(draft.temper);
+  // Savage is 18+ only (SPO-124).
+  const underage = isUnderSavageAge(useStore().bodyMetrics.dob);
 
   if (confirm)
     return (
@@ -1447,6 +1461,8 @@ function CoachSettingsSheet({ onClose, ai }: { onClose: () => void; ai: AiRow | 
             tone={draft.temper === i ? 'accent' : 'neutral'}
             role="radio"
             aria-checked={draft.temper === i}
+            aria-disabled={i === 5 && underage}
+            disabled={i === 5 && underage}
             className={draft.temper === i ? 'on' : ''}
             style={{ ['--tc' as string]: TEMPER_COLOR[i] }}
             onClick={() => edit(i === draft.temper ? {} : { temper: i, ...extrasFor(i) })}
@@ -1454,7 +1470,9 @@ function CoachSettingsSheet({ onClose, ai }: { onClose: () => void; ai: AiRow | 
             <AtlasFace temper={i} size={64} />
             <span className="atl-tp-text">
               <b>{t.atlasTemper[temperIndex(i)]}</b>
-              <span>{t.atlasTemperTag[temperIndex(i)]}</span>
+              <span>
+                {i === 5 && underage ? t.atlasSavageAdultOnly : t.atlasTemperTag[temperIndex(i)]}
+              </span>
             </span>
             <span className="atl-tp-radio" aria-hidden>
               {draft.temper === i && <Icon name="check" />}

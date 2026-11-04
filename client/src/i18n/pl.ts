@@ -2791,6 +2791,8 @@ export const pl: Strings = {
   atlasName: 'Atlas',
   /** Title of a push that carries an AI-written reply (marks it as AI; EU AI Act Art. 50). */
   atlasAiPushTitle: 'Atlas · SI',
+  /** Push body for a reply that must not show its text on the lock screen (Savage swearing). */
+  atlasPushReplyNeutral: 'Atlas odpowiedział. Otwórz czat.',
   atlasTemper: ['Ziomek', 'Neutralny', 'Brutalny'],
   atlasTemperTag: ['kumpel z siłowni', 'prosto z mostu', 'jedzie po każdej leniwej serii'],
   atlasTemperQuote: [
@@ -2879,6 +2881,8 @@ export const pl: Strings = {
   atlasTurnOffSub: 'Bez notatek i planu — wrócisz w każdej chwili',
   atlasRuleHardOnly: 'Tylko Brutalny',
   atlasRuleMercilessOnly: 'Tylko Brutalny',
+  /** Savage picker, locked for users whose date of birth shows they are under 18. */
+  atlasSavageAdultOnly: 'Brutalny tylko dla 18+',
   atlasLocalUnknown:
     'Tego jeszcze nie wiem. Pytaj o trening: co dziś robić, przerwy, następny ciężar, rekordy, regenerację, sen, program.',
   /** Off-topic warnings by temper (green / white / red) and try (1…3); the third starts a 30-minute block. */
