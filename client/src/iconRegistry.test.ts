@@ -17,7 +17,10 @@ describe('icon registry', () => {
   it('every literal icon name used in coach/** and components/ui/** exists in ICONS', () => {
     const ui = readFileSync(join(SRC, 'ui.tsx'), 'utf8');
     const block = /const ICONS[^=]*=\s*\{([\s\S]*?)\n\};/.exec(ui)?.[1] ?? '';
-    const keys = new Set([...block.matchAll(/^\s*'?([\w-]+)'?\s*:/gm)].map((m) => m[1]));
+    const callIcons = readFileSync(join(SRC, 'uiCallIcons.ts'), 'utf8'); // call-kit icons live beside ICONS (SPO-432)
+    const keys = new Set(
+      [...(block + '\n' + callIcons).matchAll(/^\s*'?([\w-]+)'?\s*:/gm)].map((m) => m[1]),
+    );
     expect(keys.size).toBeGreaterThan(100);
     const pats = [
       /<Icon[^>]*?\bname=(?:"([\w-]+)"|\{?'([\w-]+)'\}?)/g,

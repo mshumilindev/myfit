@@ -4,29 +4,26 @@
   --call-dock-w: calc(var(--s-40) * 9);
 }
 @media (min-width: 45em) {
-  .uicall-full {
-    display: inline-flex;
-  }
-  .uicall.uicall--full {
+  .uicall--full.uicall {
     padding: 0;
     background: var(--color-bg);
   }
-  .uicall.uicall--full > * {
+  .uicall--full.uicall > * {
     max-width: none;
   }
-  .uicall.uicall--full .uicall-head,
-  .uicall.uicall--full .uicall-notice,
-  .uicall.uicall--full .uicall-foot {
+  .uicall--full.uicall .uicall-head,
+  .uicall--full.uicall .uicall-notice,
+  .uicall--full.uicall .uicall-foot {
     border-radius: 0;
   }
-  .uicall.uicall--full .uicall-stage {
+  .uicall--full.uicall .uicall-stage {
     flex: 1;
     height: auto;
     margin: 0 var(--s-8);
     border-radius: var(--radius-xl);
   }
 }
-.uicall.uicall--dock {
+.uicall--dock.uicall {
   inset: 0 0 0 auto;
   align-items: stretch;
   justify-content: flex-start;
@@ -36,25 +33,25 @@
   box-shadow: var(--shadow-lg);
   background: var(--color-bg);
 }
-.uicall.uicall--dock > * {
+.uicall--dock.uicall > * {
   max-width: none;
 }
-.uicall.uicall--dock .uicall-head,
-.uicall.uicall--dock .uicall-notice,
-.uicall.uicall--dock .uicall-foot {
+.uicall--dock.uicall .uicall-head,
+.uicall--dock.uicall .uicall-notice,
+.uicall--dock.uicall .uicall-foot {
   border-radius: 0;
 }
-.uicall.uicall--dock .uicall-stage {
+.uicall--dock.uicall .uicall-stage {
   flex: 1;
   height: auto;
   margin: 0 var(--s-8);
   border-radius: var(--radius-xl);
 }
-.uicall.uicall--dock .uicall-tile--self {
+.uicall--dock.uicall .uicall-tile--self {
   width: calc(var(--s-40) * 2.5);
   height: calc(var(--s-40) * 3.5);
 }
-.uicall.uicall--dock .uicall-ctl {
+.uicall--dock.uicall .uicall-ctl {
   gap: var(--s-8);
 }
 

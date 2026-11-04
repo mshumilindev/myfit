@@ -198,3 +198,8 @@
 .uicall-full {
   display: none;
 }
+@media (min-width: 45em) {
+  .uicall-full {
+    display: inline-flex;
+  }
+}
