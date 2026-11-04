@@ -77,7 +77,13 @@ import './glass-glitch.css';
 import './reduced-transparency.css';
 import { App } from './App';
 import { getLocale } from './i18n';
-import { startAutoUpdate, startBuildWatch, markUpdateReady, warmLoadedAssets } from './pwaUpdate';
+import {
+  startAutoUpdate,
+  startBuildWatch,
+  markUpdateReady,
+  warmLoadedAssets,
+  raiseResourceTimingBuffer,
+} from './pwaUpdate';
 import { lockShellHeight } from './viewportFit';
 import { installHorizontalScrollGuard } from './horizontalScrollGuard';
 import { SyncStatusHost } from './components/SyncStatusHost';
@@ -107,6 +113,7 @@ installHorizontalScrollGuard();
 initMotion();
 installCrashRecovery();
 
+raiseResourceTimingBuffer();
 if ('serviceWorker' in navigator) {
   void startAutoUpdate({
     container: navigator.serviceWorker,

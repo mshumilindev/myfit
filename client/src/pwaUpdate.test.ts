@@ -4,6 +4,8 @@ import {
   checkBuild,
   loadedAssetUrls,
   warmLoadedAssets,
+  raiseResourceTimingBuffer,
+  RESOURCE_TIMING_BUFFER,
   reloadToLatest,
   settledBuildCheck,
   startAutoUpdate,
@@ -282,5 +284,17 @@ describe('warmLoadedAssets (SPO-380)', () => {
     const fetchFn = vi.fn();
     await warmLoadedAssets(entries, '', fetchFn as unknown as typeof fetch);
     expect(fetchFn).not.toHaveBeenCalled();
+  });
+});
+
+describe('raiseResourceTimingBuffer (SPO-428)', () => {
+  it('raises the resource-timing buffer so lazy chunks are not dropped', () => {
+    const set = vi.fn();
+    raiseResourceTimingBuffer({ setResourceTimingBufferSize: set });
+    expect(set).toHaveBeenCalledWith(RESOURCE_TIMING_BUFFER);
+    expect(RESOURCE_TIMING_BUFFER).toBeGreaterThan(250);
+  });
+  it('does nothing without a Performance object', () => {
+    expect(() => raiseResourceTimingBuffer(undefined)).not.toThrow();
   });
 });

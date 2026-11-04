@@ -68,6 +68,21 @@ export function loadedAssetUrls(
 }
 
 /**
+ * The browser keeps only the first 250 resource-timing entries and drops the rest. A page that loads many fonts and
+ * icons fills that buffer, so `warmLoadedAssets` never learns about the lazy chunks that came later and the worker
+ * never stores them (SPO-428). Raise the limit once, before the page starts loading screens.
+ */
+export const RESOURCE_TIMING_BUFFER = 1000;
+export function raiseResourceTimingBuffer(
+  perf: Pick<Performance, 'setResourceTimingBufferSize'> | undefined = typeof performance ===
+  'undefined'
+    ? undefined
+    : performance,
+): void {
+  perf?.setResourceTimingBufferSize?.(RESOURCE_TIMING_BUFFER);
+}
+
+/**
  * A page that was loaded before the worker took control fetched its lazy chunks without the worker, so the worker's
  * runtime cache never saw them and the first offline visit to those screens failed (SPO-380). Once the worker controls
  * the page, ask for the same files again: the browser's HTTP cache answers, the worker stores them. Errors are ignored:
