@@ -214,6 +214,21 @@ jobs:
       - name: Report findings
         run: node scripts/semgrep-annotate.mjs semgrep.json
 
+  # Secret scan over the whole git history (SPO-58, ADR 014). Blocking: part of the `quality` gate.
+  secrets:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+          GITLEAKS_ENABLE_COMMENTS: 'false'
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: 'false'
+
   # Passkeys against a software authenticator (SPO-211/229): a local server runs the real passkeysCore rules, Chromium has a
   # CDP virtual authenticator. No app build needed, so it runs in parallel and takes about a minute.
   passkeys-e2e:
@@ -343,7 +358,7 @@ jobs:
   quality:
     name: Lint · types · tests · build
     if: always()
-    needs: [static, types, tests, client-tests, patch-coverage, build, security, rules]
+    needs: [static, types, tests, client-tests, patch-coverage, build, security, secrets, rules]
     runs-on: ubuntu-latest
     steps:
       - name: Every quality job must have succeeded (a skipped or cancelled one counts as a failure)

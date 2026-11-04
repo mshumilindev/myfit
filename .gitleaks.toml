@@ -1,0 +1,9 @@
+# Secret scan config (SPO-58, ADR 014). The default ruleset stays on; only paths that hold NON-secret look-alikes are listed.
+title = "Spotter gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Lock files hold integrity hashes that look like keys"
+paths = ['''(^|/)package-lock\.json$''']
