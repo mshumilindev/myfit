@@ -11,16 +11,16 @@ export function useSessionWatch(
   authed: boolean,
   signOutRef: MutableRefObject<(opts?: { forget?: boolean }) => void>,
 ): void {
+  const uid = authed ? auth.currentUser?.uid : undefined;
   useEffect(() => {
     if (!authed) return;
     void refreshRememberedAvatar();
     const out = () => signOutRef.current({ forget: false });
     const stopCheck = watchSession(out);
-    const uid = auth.currentUser?.uid;
     const stopFlag = uid ? watchRevokedFlag(uid, sessionDeviceId(), out) : () => undefined;
     return () => {
       stopCheck();
       stopFlag();
     };
-  }, [authed, signOutRef]);
+  }, [authed, uid, signOutRef]);
 }

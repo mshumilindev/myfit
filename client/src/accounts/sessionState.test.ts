@@ -14,9 +14,10 @@ vi.mock('../firebase', () => ({ db: {} }));
 
 import { watchRevokedFlag } from './sessionState';
 
-const snap = (data: Record<string, unknown> | null) => ({
+const snap = (data: Record<string, unknown> | null, fromCache = false) => ({
   exists: () => data !== null,
   data: () => data,
+  metadata: { fromCache },
 });
 
 describe('watchRevokedFlag', () => {
@@ -28,6 +29,15 @@ describe('watchRevokedFlag', () => {
     expect(onRevoked).not.toHaveBeenCalled();
     h.next(snap({ revokedAt: 1700000000000 }));
     h.next(snap({ revokedAt: 1700000000001 }));
+    expect(onRevoked).toHaveBeenCalledTimes(1);
+  });
+  it('ignores a flag that only a stale cache holds', () => {
+    const onRevoked = vi.fn();
+    watchRevokedFlag('u1', 'dev-00000001', onRevoked);
+    const h = fs.handlers.at(-1)!;
+    h.next(snap({ revokedAt: 1700000000000 }, true));
+    expect(onRevoked).not.toHaveBeenCalled();
+    h.next(snap({ revokedAt: 1700000000000 }, false));
     expect(onRevoked).toHaveBeenCalledTimes(1);
   });
   it('a document without the flag, or a listener error, does nothing', () => {
