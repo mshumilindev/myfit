@@ -257,9 +257,15 @@ export async function passProfileGate(page: Page): Promise<void> {
     const gate = page.locator('.body-gate input');
     if (await gate.first().isVisible()) {
       todaySince = 0;
-      await gate.nth(0).fill('180');
-      await gate.nth(1).fill('80');
-      await page.locator('.body-gate button').last().click(); // locale-independent "Done, enter the app"
+      // The gate can vanish between the check and the fill (the profile arrived meanwhile): a short timeout and
+      // another pass of the loop instead of waiting for the whole test budget on an input that is gone.
+      try {
+        await gate.nth(0).fill('180', { timeout: 3000 });
+        await gate.nth(1).fill('80', { timeout: 3000 });
+        await page.locator('.body-gate button').last().click({ timeout: 3000 }); // locale-independent "Done, enter the app"
+      } catch {
+        /* the gate went away or re-rendered: look again */
+      }
     } else if (await page.locator('.today-page').isVisible()) {
       todaySince ||= Date.now();
       if (Date.now() - todaySince > 1500) return;
