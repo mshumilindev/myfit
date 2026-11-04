@@ -1,0 +1,254 @@
+{
+  "activities": {
+    "id": "a-legacy-1",
+    "shape": {
+      "$": "object",
+      "id": "string",
+      "startedAt": "number",
+      "updatedAt": "number",
+      "type": "string",
+      "durationMin": "number",
+      "distanceKm": "number"
+    }
+  },
+  "alcohol": {
+    "id": "alcohol",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "enabled": "boolean",
+      "drinks": "array",
+      "drinks[]": "object",
+      "drinks[].name": "string"
+    }
+  },
+  "atlasChat": {
+    "id": "m-legacy-1",
+    "shape": {
+      "$": "object",
+      "id": "string",
+      "at": "number",
+      "updatedAt": "number",
+      "role": "string",
+      "text": "string"
+    }
+  },
+  "atlasChatState": {
+    "id": "atlasChatState",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "clearedAt": "number"
+    }
+  },
+  "body": {
+    "id": "body",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "weightKg": "number",
+      "heightCm": "number"
+    }
+  },
+  "challenges": {
+    "id": "challenges",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "active": "array",
+      "active[]": "object",
+      "active[].id": "string",
+      "active[].title": "string"
+    }
+  },
+  "coach": {
+    "id": "coach",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "temper": "number"
+    }
+  },
+  "coachShare": {
+    "id": "coachShare",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "sections": "array",
+      "sections[]": "string"
+    }
+  },
+  "conditionPrefs": {
+    "id": "conditionPrefs",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "share": "string"
+    }
+  },
+  "conditions": {
+    "id": "c-legacy-1",
+    "shape": {
+      "$": "object",
+      "id": "string",
+      "updatedAt": "number",
+      "name": "string",
+      "share": "string"
+    }
+  },
+  "cycle": {
+    "id": "cycle",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "mode": "string",
+      "lengthDays": "number"
+    }
+  },
+  "exercisePrefs": {
+    "id": "exercisePrefs",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "unit": "string",
+      "perExercise": "object",
+      "perExercise.barbell-back-squat": "object",
+      "perExercise.barbell-back-squat.rest": "number"
+    }
+  },
+  "goals": {
+    "id": "goals",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "physique": "string",
+      "focus": "array",
+      "focus[]": "string"
+    }
+  },
+  "gyms": {
+    "id": "g-legacy-1",
+    "shape": {
+      "$": "object",
+      "id": "string",
+      "updatedAt": "number",
+      "name": "string",
+      "city": "string"
+    }
+  },
+  "home": {
+    "id": "home",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "sets": "array",
+      "sets[]": "object",
+      "sets[].name": "string"
+    }
+  },
+  "injuries": {
+    "id": "i-legacy-1",
+    "shape": {
+      "$": "object",
+      "id": "string",
+      "updatedAt": "number",
+      "area": "string",
+      "side": "string",
+      "severity": "number"
+    }
+  },
+  "mastery": {
+    "id": "mastery",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "level": "string"
+    }
+  },
+  "nicotine": {
+    "id": "nicotine",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "enabled": "boolean",
+      "products": "array",
+      "products[]": "object",
+      "products[].name": "string"
+    }
+  },
+  "restPeriods": {
+    "id": "r-legacy-1",
+    "shape": {
+      "$": "object",
+      "id": "string",
+      "updatedAt": "number",
+      "from": "string",
+      "to": "string",
+      "reason": "string"
+    }
+  },
+  "sleepPrefs": {
+    "id": "sleepPrefs",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "bedtime": "string",
+      "wake": "string",
+      "autoLog": "boolean"
+    }
+  },
+  "sleeps": {
+    "id": "s-legacy-1",
+    "shape": {
+      "$": "object",
+      "id": "string",
+      "date": "string",
+      "bedtime": "number",
+      "wake": "number",
+      "kind": "string",
+      "source": "string",
+      "updatedAt": "number",
+      "quality": "number"
+    }
+  },
+  "supplements": {
+    "id": "supplements",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "entries": "array",
+      "entries[]": "object",
+      "entries[].name": "string",
+      "entries[].dose": "number"
+    }
+  },
+  "widgetData": {
+    "id": "widgetData",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "oneRm": "object",
+      "oneRm.weight": "number",
+      "oneRm.reps": "number"
+    }
+  },
+  "workouts": {
+    "id": "w-legacy-1",
+    "shape": {
+      "$": "object",
+      "id": "string",
+      "startedAt": "number",
+      "finishedAt": "number",
+      "updatedAt": "number",
+      "note": "string",
+      "exercises": "array",
+      "exercises[]": "object",
+      "exercises[].exerciseId": "string",
+      "exercises[].sets": "array",
+      "exercises[].sets[]": "object",
+      "exercises[].sets[].reps": "number",
+      "exercises[].sets[].weight": "number",
+      "exercises[].sets[].done": "boolean"
+    }
+  }
+}
