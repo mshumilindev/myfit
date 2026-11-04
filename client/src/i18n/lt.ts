@@ -162,7 +162,9 @@ export const lt: Strings = {
   authPersonPassword: (n) => `${n}, įveskite slaptažodį`,
   sessionsRow: 'Sesijos',
   sessionsTitle: 'Sesijos',
-  sessionsHint: 'Įrenginiai, kuriuose esate prisijungę.',
+  sessionsHint:
+    'Naršyklės ir programos, kuriose esate prisijungę. Išvalius naršyklės duomenis, ji vėl atsiras kaip naujas įrašas.',
+  sessionsLikelySame: 'Greičiausiai tas pats įrenginys kaip naujesnis įrašas',
   sessionsThis: 'Šis įrenginys',
   sessionsSignOutDevice: 'Atsijungti',
   sessionsSignOutOthers: 'Atsijungti visuose kituose įrenginiuose',

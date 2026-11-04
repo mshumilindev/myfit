@@ -202,7 +202,7 @@ export const legalEn: LegalTexts = {
               '**Atlas chat history in your account (only if you turned it on):** while the switch is on. When you turn it off you choose: delete the copy now, or keep it unused for 30 days (so you can turn it on again and get it back) and then it is deleted automatically. The copy on your device stays until you clear the chat.',
               '**“Who saw your data” log:** 400 days. **Team activity log:** 90 days. **Reminder log entries:** 30 days.',
               '**Records of your consents** (what you agreed to, which version, when): until you delete your account.',
-              '**Device sessions** (device type, browser and system, approximate city and country, first and last activity): until you sign that device out or delete your account; at most 50 are kept, the least recently active are dropped first.',
+              '**Device sessions** (device type, browser and system, approximate city and country, first and last activity): until you sign that device out or delete your account, or until it has been inactive for 30 days; at most 50 are kept, the least recently active are dropped first.',
               '**Technical records without an automatic expiry:** sign-in attempt counters, the key-fetch log, push tokens, planned and dismissed reminders and service notices have no automatic expiry in the app today, and we have not yet set retention periods for them.',
               '**Backups and Google’s deletion:** after you delete data, Google completes deletion from its systems within the period stated in the Firebase terms (up to 180 days unless law requires storage).',
               'Legal obligations may require us to keep specific records longer; we will tell you which when that happens.',

@@ -143,7 +143,9 @@ export const et: Strings = {
   authPersonPassword: (n) => `${n}, sisesta parool`,
   sessionsRow: 'Seansid',
   sessionsTitle: 'Seansid',
-  sessionsHint: 'Seadmed, kus oled sisse logitud.',
+  sessionsHint:
+    'Brauserid ja rakendused, kus oled sisse logitud. Brauseri andmete tühjendamisel ilmub see uuesti uue kirjena.',
+  sessionsLikelySame: 'Tõenäoliselt sama seade mis uuem kirje',
   sessionsThis: 'See seade',
   sessionsSignOutDevice: 'Logi välja',
   sessionsSignOutOthers: 'Logi välja kõigis teistes seadmetes',

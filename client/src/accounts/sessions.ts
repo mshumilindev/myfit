@@ -99,3 +99,21 @@ export function placeText(r: Pick<SessionRow, 'city' | 'country'>): string {
   const city = r.city ? r.city.replace(/\b\w/g, (c) => c.toUpperCase()) : '';
   return [city, r.country ?? ''].filter(Boolean).join(', ');
 }
+
+/**
+ * Rows that are probably an older copy of a newer one: same client, kind and place, and the older one went quiet before
+ * the newer one appeared (so they were never used side by side). Browsers that lose their storage leave such copies (SPO-436).
+ */
+export function likelyReplacedIds(rows: SessionRow[]): Set<string> {
+  const key = (r: SessionRow) => [r.label, r.kind ?? '', r.city ?? '', r.country ?? ''].join('|');
+  const out = new Set<string>();
+  for (const r of rows)
+    if (
+      rows.some(
+        (n) =>
+          n !== r && key(n) === key(r) && n.createdAt > r.createdAt && r.lastSeenAt < n.createdAt,
+      )
+    )
+      out.add(r.deviceId);
+  return out;
+}

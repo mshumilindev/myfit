@@ -27,6 +27,20 @@ export const MAX_SESSIONS = 50;
 /** After a new device appears, the next one inside this window is not announced again. */
 export const NEW_DEVICE_QUIET_MS = 10 * 60_000;
 
+/** A record nobody has used for this long is dropped: browsers that lost their storage leave such ghosts behind (SPO-436). */
+export const STALE_SESSION_MS = 30 * 24 * 3600_000;
+
+/** Drops live records idle past STALE_SESSION_MS (never a revoked one: removing it would let that device re-adopt itself). */
+async function purgeStale(
+  store: SessionStore,
+  all: { deviceId: string; doc: SessionDoc }[],
+  now: number,
+): Promise<{ deviceId: string; doc: SessionDoc }[]> {
+  const stale = all.filter((r) => !r.doc.revokedAt && now - r.doc.lastSeenAt > STALE_SESSION_MS);
+  for (const r of stale) await store.remove(r.deviceId);
+  return stale.length ? all.filter((r) => !stale.includes(r)) : all;
+}
+
 export type SessionInfo = Pick<SessionDoc, 'label' | 'kind' | 'city' | 'country'>;
 
 /** Refreshes (or adopts) the device's record; `active:false` when it was signed out from another device. */
@@ -41,7 +55,7 @@ export async function checkCore(
   let newDevice = false;
   if (cur) await store.update(deviceId, { ...info, lastSeenAt: now });
   else {
-    const all = await store.list();
+    const all = await purgeStale(store, await store.list(), now);
     // The very first device of an account is not news; any later one is (SPO-436).
     // Only records the SPO-436 server has seen count (they carry `kind`), so the rollout does not announce every old
     // device; and one new device per NEW_DEVICE_QUIET_MS, so cycling device ids cannot turn this into push spam.
@@ -63,8 +77,10 @@ export async function checkCore(
 
 export async function listCore(
   store: SessionStore,
+  now?: number,
 ): Promise<(SessionDoc & { deviceId: string })[]> {
-  return (await store.list())
+  const all = await store.list();
+  return (now === undefined ? all : await purgeStale(store, all, now))
     .filter((r) => !r.doc.revokedAt)
     .map((r) => ({ deviceId: r.deviceId, ...r.doc }))
     .sort((a, b) => b.lastSeenAt - a.lastSeenAt);

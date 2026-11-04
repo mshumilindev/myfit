@@ -154,7 +154,9 @@ export const pl: Strings = {
   authPersonPassword: (n) => `${n}, wpisz hasło`,
   sessionsRow: 'Sesje',
   sessionsTitle: 'Sesje',
-  sessionsHint: 'Urządzenia, na których jesteś zalogowany.',
+  sessionsHint:
+    'Przeglądarki i aplikacje, w których jesteś zalogowany. Po wyczyszczeniu danych przeglądarki pojawi się ona ponownie jako nowy wpis.',
+  sessionsLikelySame: 'Prawdopodobnie to samo urządzenie co nowszy wpis',
   sessionsThis: 'To urządzenie',
   sessionsSignOutDevice: 'Wyloguj',
   sessionsSignOutOthers: 'Wyloguj na wszystkich innych urządzeniach',

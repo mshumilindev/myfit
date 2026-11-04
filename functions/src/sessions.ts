@@ -97,7 +97,7 @@ export const sessionCheck = onCall({ ...HOT, memory: '512MiB' }, async (req) => 
 });
 
 export const sessionList = onCall(async (req) => ({
-  sessions: await listCore(storeFor(mustUid(req))),
+  sessions: await listCore(storeFor(mustUid(req)), Date.now()),
 }));
 
 /** Signs another device out (its next check ends its session). */

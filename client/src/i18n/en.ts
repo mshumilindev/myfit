@@ -129,7 +129,9 @@ export const en = {
   authPersonPassword: (n: string) => `${n}, enter your password`,
   sessionsRow: 'Sessions',
   sessionsTitle: 'Sessions',
-  sessionsHint: 'Devices where you are signed in.',
+  sessionsHint:
+    "Browsers and apps where you are signed in. Clearing a browser's data makes it show up again as a new entry.",
+  sessionsLikelySame: 'Likely the same device as a newer entry',
   sessionsThis: 'This device',
   sessionsSignOutDevice: 'Sign out',
   sessionsSignOutOthers: 'Sign out all other devices',

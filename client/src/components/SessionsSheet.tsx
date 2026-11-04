@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useT } from '../i18n';
 import {
+  likelyReplacedIds,
   listSessions,
   placeText,
   relativeTime,
@@ -64,6 +65,7 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
     }
   }
 
+  const replaced = likelyReplacedIds(rows ?? []);
   const others = (rows ?? []).filter((r) => r.deviceId !== me);
   const fresh = others.find((r) => openedAt - r.createdAt < NEW_SIGN_IN_MS);
   return (
@@ -95,7 +97,13 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
                 key={r.deviceId}
                 icon={<DeviceImage kind={kindOfRow(r)} tone={here ? 'ok' : 'neutral'} />}
                 label={r.label}
-                sub={[place, relativeTime(r.lastSeenAt, locale)].filter(Boolean).join(' · ')}
+                sub={[
+                  place,
+                  relativeTime(r.lastSeenAt, locale),
+                  replaced.has(r.deviceId) ? t.sessionsLikelySame : '',
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
                 trailing={
                   here ? (
                     <Chip tone="ok" size="xs">

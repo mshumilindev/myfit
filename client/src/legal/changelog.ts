@@ -59,6 +59,8 @@ export const LEGAL_CHANGELOG: readonly LegalChangelogEntry[] = [
   // SPO-436 «Мої пристрої»: device sessions now also hold the device type and an approximate city and country looked up
   // offline from the IP (the IP itself is not stored or sent anywhere); a push tells you a new device signed in.
   { doc: 'policy', version: '2026-11-04', kind: 'material', bullets: ['category'] },
+  // SPO-436: device sessions idle for 30 days are now deleted (shorter retention, wording only; {{ЮРИСТ}} confirms it is editorial).
+  { doc: 'policy', version: '2026-11-05', kind: 'editorial', bullets: [] },
 ];
 
 /** Entries of a document after `from` (exclusive) up to `to` (inclusive). */

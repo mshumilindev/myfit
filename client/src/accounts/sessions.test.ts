@@ -6,6 +6,7 @@ vi.mock('../api', () => ({ callFn, renewSessionWithToken }));
 
 import {
   checkSession,
+  likelyReplacedIds,
   placeText,
   relativeTime,
   revokeOtherSessions,
@@ -74,5 +75,32 @@ describe('sessions client', () => {
     expect(placeText({ city: null, country: 'UA' })).toBe('UA');
     expect(placeText({ city: null, country: null })).toBe('');
     expect(relativeTime(1_000_000 - 3_600_000, 'en', 1_000_000)).toMatch(/hour/);
+  });
+});
+
+describe('likelyReplacedIds', () => {
+  const row = (
+    deviceId: string,
+    createdAt: number,
+    lastSeenAt: number,
+    label = 'Safari · iOS',
+  ) => ({
+    deviceId,
+    label,
+    kind: 'phone' as const,
+    city: null,
+    country: 'PL',
+    createdAt,
+    lastSeenAt,
+  });
+  it('marks an older copy that went quiet before the newer one appeared', () => {
+    const ids = likelyReplacedIds([row('new', 100, 200), row('old', 10, 50)]);
+    expect([...ids]).toEqual(['old']);
+  });
+  it('never marks two entries used side by side, or different clients/places', () => {
+    expect(likelyReplacedIds([row('a', 10, 300), row('b', 100, 200)]).size).toBe(0);
+    expect(
+      likelyReplacedIds([row('new', 100, 200), row('old', 10, 50, 'Chrome · macOS')]).size,
+    ).toBe(0);
   });
 });

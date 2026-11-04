@@ -3,6 +3,7 @@ import {
   checkCore,
   MAX_SESSIONS,
   NEW_DEVICE_QUIET_MS,
+  STALE_SESSION_MS,
   listCore,
   revokeCore,
   revokeOthersCore,
@@ -190,5 +191,40 @@ describe('session rules', () => {
       active: false,
       newDevice: false,
     });
+  });
+  it('drops live records idle for over 30 days (ghosts of cleared browser storage), keeps recent ones and every revocation', async () => {
+    const { store, m } = memorySessions();
+    const day = 24 * 3600_000;
+    const now = 100 * day;
+    m.set('ghost', {
+      ...info('Safari · iOS'),
+      lastSeenAt: now - STALE_SESSION_MS - 1,
+      createdAt: 1,
+      revokedAt: null,
+    });
+    m.set('recent', {
+      ...info('Safari · iOS'),
+      lastSeenAt: now - 29 * day,
+      createdAt: 1,
+      revokedAt: null,
+    });
+    m.set('revoked-old', { ...info('Safari · iOS'), lastSeenAt: 1, createdAt: 1, revokedAt: 5 });
+    expect((await listCore(store, now)).map((r) => r.deviceId)).toEqual(['recent']);
+    expect([...m.keys()].sort()).toEqual(['recent', 'revoked-old']);
+  });
+
+  it('registering a new device also sweeps the ghosts, and they no longer count as known devices', async () => {
+    const { store, m } = memorySessions();
+    const now = 100 * 24 * 3600_000;
+    m.set('ghost', { ...info('Safari · iOS'), lastSeenAt: 1, createdAt: 1, revokedAt: null });
+    const r = await checkCore(store, 'fresh', info('Chrome · macOS'), now);
+    expect(m.has('ghost')).toBe(false);
+    expect(r.newDevice).toBe(false); // the only other record was a ghost, so this is effectively the first device
+  });
+
+  it('listing without a clock never purges (callers that only read)', async () => {
+    const { store, m } = memorySessions();
+    m.set('old', { ...info('Safari · iOS'), lastSeenAt: 1, createdAt: 1, revokedAt: null });
+    expect((await listCore(store)).length).toBe(1);
   });
 });

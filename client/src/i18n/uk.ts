@@ -188,7 +188,9 @@ export const uk: Strings = {
   authPersonPassword: (n) => `${n}, введіть пароль`,
   sessionsRow: 'Сесії',
   sessionsTitle: 'Сесії',
-  sessionsHint: 'Пристрої, на яких ви ввійшли.',
+  sessionsHint:
+    "Браузери й застосунки, де ви ввійшли. Якщо очистити дані браузера, він з'явиться знову як новий запис.",
+  sessionsLikelySame: 'Імовірно, той самий пристрій, що й новіший запис',
   sessionsThis: 'Цей пристрій',
   sessionsSignOutDevice: 'Вийти',
   sessionsSignOutOthers: 'Вийти на всіх інших пристроях',

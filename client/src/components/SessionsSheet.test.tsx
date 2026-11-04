@@ -93,4 +93,32 @@ describe('SessionsSheet', () => {
     render(<SessionsSheet onClose={() => undefined} />);
     expect(await screen.findByRole('alert')).toBeTruthy();
   });
+
+  it('says an older entry is likely the same device as a newer one', async () => {
+    const day = 86_400_000;
+    api.listSessions.mockResolvedValue([
+      rows[0],
+      {
+        deviceId: 'new-phone',
+        label: 'Safari · iOS',
+        kind: 'phone',
+        city: null,
+        country: 'UA',
+        lastSeenAt: now - 60_000,
+        createdAt: now - 2 * day,
+      },
+      {
+        deviceId: 'old-phone',
+        label: 'Safari · iOS',
+        kind: 'phone',
+        city: null,
+        country: 'UA',
+        lastSeenAt: now - 5 * day,
+        createdAt: now - 9 * day,
+      },
+    ]);
+    render(<SessionsSheet onClose={() => undefined} />);
+    await screen.findByText('Chrome · macOS');
+    expect(screen.getAllByText(/Likely the same device as a newer entry/)).toHaveLength(1);
+  });
 });
