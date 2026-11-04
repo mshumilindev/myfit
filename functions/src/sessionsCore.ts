@@ -1,7 +1,11 @@
 /** Session rules (SPO-212) over a storage interface, so they can be tested without Firebase. sessions.ts wires Firestore. */
 
+import type { DeviceKind } from './sessionsPure';
+
 export interface SessionDoc {
   label: string;
+  /** Absent on records made before SPO-436; the next check fills it in. */
+  kind?: DeviceKind;
   city: string | null;
   country: string | null;
   lastSeenAt: number;
@@ -20,7 +24,7 @@ export interface SessionStore {
 /** Records one person may keep; the least recently seen ones go first, so a script can't grow the collection without bound. */
 export const MAX_SESSIONS = 50;
 
-export type SessionInfo = Pick<SessionDoc, 'label' | 'city' | 'country'>;
+export type SessionInfo = Pick<SessionDoc, 'label' | 'kind' | 'city' | 'country'>;
 
 /** Refreshes (or adopts) the device's record; `active:false` when it was signed out from another device. */
 export async function checkCore(
@@ -28,12 +32,15 @@ export async function checkCore(
   deviceId: string,
   info: SessionInfo,
   now: number,
-): Promise<{ active: boolean }> {
+): Promise<{ active: boolean; newDevice: boolean }> {
   const cur = await store.get(deviceId);
-  if (cur?.revokedAt) return { active: false };
+  if (cur?.revokedAt) return { active: false, newDevice: false };
+  let newDevice = false;
   if (cur) await store.update(deviceId, { ...info, lastSeenAt: now });
   else {
     const all = await store.list();
+    // The very first device of an account is not news; any later one is (SPO-436).
+    newDevice = all.some((r) => !r.doc.revokedAt);
     const excess = all.length + 1 - MAX_SESSIONS;
     if (excess > 0) {
       const oldest = all
@@ -44,7 +51,7 @@ export async function checkCore(
     }
     await store.set(deviceId, { ...info, lastSeenAt: now, createdAt: now, revokedAt: null });
   }
-  return { active: true };
+  return { active: true, newDevice };
 }
 
 export async function listCore(

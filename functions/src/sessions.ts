@@ -15,8 +15,9 @@
  */
 import { onCall } from 'firebase-functions/v2/https';
 import { authAdmin, db, HttpsError, mintToken, type UserDoc, HOT } from './lib';
+import { sendToUser } from './push';
 import { deletePasskeysOf, deletePasskeysOfDevice } from './passkeysStore';
-import { describeClient, placeFromHeaders, validDeviceId } from './sessionsPure';
+import { describeClient, deviceKind, placeFromHeaders, validDeviceId } from './sessionsPure';
 import {
   checkCore,
   listCore,
@@ -28,6 +29,11 @@ import {
 
 function sessions(uid: string) {
   return db.collection('users').doc(uid).collection('sessions');
+}
+
+/** The one-field mirror a device listens to (SPO-436): `revokedAt` only, so the listener sees nothing about other devices. */
+function sessionState(uid: string) {
+  return db.collection('users').doc(uid).collection('sessionState');
 }
 
 /** Firestore storage for one person's session records. */
@@ -43,12 +49,14 @@ function storeFor(uid: string): SessionStore {
     },
     async update(id, patch) {
       await col.doc(id).update(patch);
+      if (patch.revokedAt) await sessionState(uid).doc(id).set({ revokedAt: patch.revokedAt });
     },
     async list() {
       return (await col.get()).docs.map((d) => ({ deviceId: d.id, doc: d.data() as SessionDoc }));
     },
     async remove(id) {
       await col.doc(id).delete();
+      await sessionState(uid).doc(id).delete();
     },
   };
 }
@@ -68,8 +76,19 @@ function deviceIdOf(data: unknown): string {
 export const sessionCheck = onCall(HOT, async (req) => {
   const uid = mustUid(req);
   const headers = req.rawRequest?.headers as Record<string, unknown> | undefined;
-  const info = { label: describeClient(headers?.['user-agent']), ...placeFromHeaders(headers) };
-  return checkCore(storeFor(uid), deviceIdOf(req.data), info, Date.now());
+  const ua = headers?.['user-agent'];
+  const info = { label: describeClient(ua), kind: deviceKind(ua), ...placeFromHeaders(headers) };
+  const r = await checkCore(storeFor(uid), deviceIdOf(req.data), info, Date.now());
+  if (r.newDevice) {
+    // Content-free: the lock screen learns only that a sign-in happened; the place and the device are inside the app.
+    await sendToUser(uid, {
+      title: 'Spotter',
+      body: 'New sign-in', // English fallback; the device language text is chosen in sendToUser
+      text: 'signin',
+      tag: 'signin',
+    }).catch(() => 0);
+  }
+  return { active: r.active };
 });
 
 export const sessionList = onCall(async (req) => ({

@@ -15,6 +15,7 @@ export const PUSH_TEXT_KEYS = [
   'request',
   'access',
   'call',
+  'signin',
 ] as const;
 export type PushTextKey = (typeof PUSH_TEXT_KEYS)[number];
 
@@ -28,6 +29,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     request: 'New request',
     access: 'Access updated',
     call: 'Incoming call',
+    signin: 'New sign-in',
   },
   uk: {
     message: 'Нове повідомлення',
@@ -38,6 +40,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     request: 'Новий запит',
     access: 'Доступ оновлено',
     call: 'Вхідний дзвінок',
+    signin: 'Новий вхід',
   },
   pl: {
     message: 'Nowa wiadomość',
@@ -48,6 +51,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     request: 'Nowa prośba',
     access: 'Dostęp zaktualizowany',
     call: 'Połączenie przychodzące',
+    signin: 'Nowe logowanie',
   },
   lt: {
     message: 'Nauja žinutė',
@@ -58,6 +62,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     request: 'Nauja užklausa',
     access: 'Prieiga atnaujinta',
     call: 'Gaunamas skambutis',
+    signin: 'Naujas prisijungimas',
   },
   et: {
     message: 'Uus sõnum',
@@ -68,6 +73,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     request: 'Uus taotlus',
     access: 'Juurdepääs uuendatud',
     call: 'Sissetulev kõne',
+    signin: 'Uus sisselogimine',
   },
 };
 

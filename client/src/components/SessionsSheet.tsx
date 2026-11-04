@@ -13,7 +13,14 @@ import { Button } from './ui/Button';
 import { Chip } from './ui/Chip';
 import { ListPanel, ListRow } from './ui/GroupedList';
 import { Sheet } from './ui/Overlays';
-import { Icon } from '../ui';
+import { Banner } from './ui/Banner';
+import { DeviceImage } from './ui/DeviceImage';
+
+/** A sign-in on another device this recent is called out at the top. */
+const NEW_SIGN_IN_MS = 24 * 3_600_000;
+
+/** Records made before SPO-436 have no kind yet: guess it from the label until the next check fills it in. */
+const kindOfRow = (r: SessionRow) => r.kind ?? (/iOS|Android/.test(r.label) ? 'phone' : 'computer');
 
 /** Profile → Settings → Sessions (SPO-212): the devices the person is signed in on; sign one out, or all except this one. */
 export function SessionsSheet({ onClose }: { onClose: () => void }) {
@@ -21,6 +28,7 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
   const [rows, setRows] = useState<SessionRow[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [openedAt] = useState(Date.now);
   const me = sessionDeviceId();
 
   useEffect(() => {
@@ -57,6 +65,7 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
   }
 
   const others = (rows ?? []).filter((r) => r.deviceId !== me);
+  const fresh = others.find((r) => openedAt - r.createdAt < NEW_SIGN_IN_MS);
   return (
     <Sheet onClose={onClose} label={t.sessionsTitle} padded>
       <h2 className="uf-1">{t.sessionsTitle}</h2>
@@ -66,6 +75,16 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
           {t.sessionsError}
         </p>
       )}
+      {fresh && (
+        <Banner
+          tone="danger"
+          icon="warning"
+          sheen={false}
+          kicker={t.sessionsNewKicker}
+          title={fresh.label}
+          body={[placeText(fresh), t.sessionsNewBody].filter(Boolean).join(' · ')}
+        />
+      )}
       {rows !== null && (
         <ListPanel>
           {rows.map((r) => {
@@ -74,11 +93,9 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
             return (
               <ListRow
                 key={r.deviceId}
-                icon={<Icon name={/iOS|Android/.test(r.label) ? 'device-mobile' : 'monitor'} />}
+                icon={<DeviceImage kind={kindOfRow(r)} tone={here ? 'ok' : 'neutral'} />}
                 label={r.label}
-                sub={[place, t.sessionsSeen(relativeTime(r.lastSeenAt, locale))]
-                  .filter(Boolean)
-                  .join(' · ')}
+                sub={[place, relativeTime(r.lastSeenAt, locale)].filter(Boolean).join(' · ')}
                 trailing={
                   here ? (
                     <Chip tone="ok" size="xs">

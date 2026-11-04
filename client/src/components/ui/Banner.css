@@ -4,6 +4,7 @@
    tones map to token families only, no raw hex. Absorbs .prog-banner. */
 
 .uibanner {
+  flex-shrink: 0; /* stays whole inside a flex column (a Sheet) */
   --gem: var(--color-accent);
   --gem-kicker: var(--color-accent-300);
   --gem-title: var(--color-accent-100);

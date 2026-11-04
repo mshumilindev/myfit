@@ -30,7 +30,7 @@ const rows = [
     city: null,
     country: 'UA',
     lastSeenAt: now - 3_600_000,
-    createdAt: now,
+    createdAt: now - 30 * 86_400_000,
   },
 ];
 
@@ -48,6 +48,30 @@ describe('SessionsSheet', () => {
     expect(screen.getByText('This device')).toBeTruthy();
     expect(screen.getByText(/Warsaw, PL/)).toBeTruthy();
     expect(screen.getAllByRole('button', { name: 'Sign out' })).toHaveLength(1);
+  });
+
+  it('draws each device by its kind, guessing for records that have none yet', async () => {
+    api.listSessions.mockResolvedValue([
+      { ...rows[0], kind: 'tablet' },
+      { ...rows[1], label: 'Safari · iOS' },
+    ]);
+    render(<SessionsSheet onClose={() => undefined} />);
+    await screen.findByText('Chrome · macOS');
+    const drawn = [...document.querySelectorAll('svg[data-device]')].map((e) =>
+      e.getAttribute('data-device'),
+    );
+    expect(drawn).toEqual(['tablet', 'phone']);
+  });
+
+  it('calls out a sign-in on another device from the last day, not an old one', async () => {
+    api.listSessions.mockResolvedValue([rows[0], { ...rows[1], createdAt: Date.now() - 60_000 }]);
+    render(<SessionsSheet onClose={() => undefined} />);
+    expect(await screen.findByText('New sign-in')).toBeTruthy();
+    cleanup();
+    api.listSessions.mockResolvedValue(rows);
+    render(<SessionsSheet onClose={() => undefined} />);
+    await screen.findByText('Chrome · macOS');
+    expect(screen.queryByText('New sign-in')).toBeNull();
   });
 
   it('signs a device out and removes its row', async () => {

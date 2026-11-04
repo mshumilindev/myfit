@@ -8,7 +8,12 @@ import {
   type SessionDoc,
   type SessionStore,
 } from '../functions/src/sessionsCore';
-import { describeClient, placeFromHeaders, validDeviceId } from '../functions/src/sessionsPure';
+import {
+  describeClient,
+  deviceKind,
+  placeFromHeaders,
+  validDeviceId,
+} from '../functions/src/sessionsPure';
 
 describe('sessions helpers', () => {
   it('describes the client from a user-agent', () => {
@@ -28,6 +33,26 @@ describe('sessions helpers', () => {
       ),
     ).toBe('Edge · Windows');
     expect(describeClient(undefined)).toBe('Browser');
+  });
+  it('tells the kind of device from a user-agent', () => {
+    const iphone =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile Safari/604.1';
+    const ipad =
+      'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Safari/604.1';
+    const pixel =
+      'Mozilla/5.0 (Linux; Android 15; Pixel 10) AppleWebKit/537.36 Chrome/131.0 Mobile Safari/537.36';
+    const tab =
+      'Mozilla/5.0 (Linux; Android 15; SM-X900) AppleWebKit/537.36 Chrome/131.0 Safari/537.36';
+    expect(deviceKind(iphone)).toBe('phone');
+    expect(deviceKind(pixel)).toBe('phone');
+    expect(deviceKind(ipad)).toBe('tablet');
+    expect(deviceKind(tab)).toBe('tablet');
+    expect(deviceKind('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/131.0')).toBe('computer');
+    expect(deviceKind('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605')).toBe(
+      'computer',
+    );
+    expect(deviceKind(undefined)).toBe('unknown');
+    expect(deviceKind('curl/8')).toBe('unknown');
   });
   it('takes the place from edge headers only, nothing invented', () => {
     expect(placeFromHeaders({ 'x-appengine-country': 'PL', 'x-appengine-city': 'warsaw' })).toEqual(
@@ -56,15 +81,30 @@ function memorySessions() {
   };
   return { store, m };
 }
-const info = (label: string) => ({ label, city: null, country: 'PL' });
+const info = (label: string) => ({ label, kind: 'computer' as const, city: null, country: 'PL' });
 
 describe('session rules', () => {
   it('a device with no record yet is adopted, never signed out (migration)', async () => {
     const { store, m } = memorySessions();
     expect(await checkCore(store, 'dev-laptop-1', info('Chrome · macOS'), 10)).toEqual({
       active: true,
+      newDevice: false,
     });
     expect(m.get('dev-laptop-1')).toMatchObject({ createdAt: 10, lastSeenAt: 10, revokedAt: null });
+  });
+
+  it('flags a later device as news (push), never the first one, an old one, or one adopted into an empty list', async () => {
+    const { store } = memorySessions();
+    expect((await checkCore(store, 'dev-laptop-1', info('Chrome · macOS'), 10)).newDevice).toBe(
+      false,
+    );
+    expect((await checkCore(store, 'dev-phone-01', info('Safari · iOS'), 11)).newDevice).toBe(true);
+    expect((await checkCore(store, 'dev-phone-01', info('Safari · iOS'), 12)).newDevice).toBe(
+      false,
+    );
+    await revokeOthersCore(store, 'dev-phone-01', 20);
+    // the only live device is the phone; a new tablet is still news
+    expect((await checkCore(store, 'dev-tablet-1', info('Safari · iOS'), 30)).newDevice).toBe(true);
   });
 
   it('signing a device out makes its next check inactive; the others stay active', async () => {
@@ -74,9 +114,11 @@ describe('session rules', () => {
     await revokeCore(store, 'dev-phone-01', 20);
     expect(await checkCore(store, 'dev-phone-01', info('Safari · iOS'), 30)).toEqual({
       active: false,
+      newDevice: false,
     });
     expect(await checkCore(store, 'dev-laptop-1', info('Chrome · macOS'), 31)).toEqual({
       active: true,
+      newDevice: false,
     });
     expect((await listCore(store)).map((r) => r.deviceId)).toEqual(['dev-laptop-1']);
   });
@@ -86,9 +128,18 @@ describe('session rules', () => {
     for (const [i, id] of ['dev-laptop-1', 'dev-phone-01', 'dev-tablet-1'].entries())
       await checkCore(store, id, info(id), i);
     expect(await revokeOthersCore(store, 'dev-laptop-1', 50)).toBe(2);
-    expect(await checkCore(store, 'dev-laptop-1', info('x'), 60)).toEqual({ active: true });
-    expect(await checkCore(store, 'dev-phone-01', info('x'), 60)).toEqual({ active: false });
-    expect(await checkCore(store, 'dev-tablet-1', info('x'), 60)).toEqual({ active: false });
+    expect(await checkCore(store, 'dev-laptop-1', info('x'), 60)).toEqual({
+      active: true,
+      newDevice: false,
+    });
+    expect(await checkCore(store, 'dev-phone-01', info('x'), 60)).toEqual({
+      active: false,
+      newDevice: false,
+    });
+    expect(await checkCore(store, 'dev-tablet-1', info('x'), 60)).toEqual({
+      active: false,
+      newDevice: false,
+    });
     expect(await revokeOthersCore(store, 'dev-laptop-1', 70)).toBe(0);
   });
 
@@ -132,6 +183,9 @@ describe('session rules', () => {
     for (let i = 0; i < MAX_SESSIONS; i++)
       await checkCore(store, `dev-${String(i).padStart(8, '0')}`, info('x'), 10 + i);
     expect(m.get('dev-revoked-1')?.revokedAt).toBe(2);
-    expect(await checkCore(store, 'dev-revoked-1', info('x'), 999)).toEqual({ active: false });
+    expect(await checkCore(store, 'dev-revoked-1', info('x'), 999)).toEqual({
+      active: false,
+      newDevice: false,
+    });
   });
 });

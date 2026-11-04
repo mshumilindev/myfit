@@ -192,7 +192,8 @@ export const uk: Strings = {
   sessionsThis: 'Цей пристрій',
   sessionsSignOutDevice: 'Вийти',
   sessionsSignOutOthers: 'Вийти на всіх інших пристроях',
-  sessionsSeen: (w) => `Остання активність: ${w}`,
+  sessionsNewKicker: 'Новий вхід',
+  sessionsNewBody: 'Це були не ви? Вийдіть на цьому пристрої нижче.',
   sessionsEmpty: 'Інших пристроїв немає.',
   sessionsError: 'Не вдалося завантажити сесії. Спробуйте ще раз.',
   sessionsRevokedNote:

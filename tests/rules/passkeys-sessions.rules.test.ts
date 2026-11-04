@@ -44,3 +44,19 @@ describe('passkeys and session records are closed to every client', () => {
     expect(run('list', 'users/member1/sessions', au('member1', 'member'))).toBe(false);
   });
 });
+
+describe('the revoked-device flag (SPO-436)', () => {
+  const path = 'users/member1/sessionState/dev-00000001';
+  const flag = { revokedAt: NOW };
+  it('the owner may read their own flag, one document at a time', () => {
+    expect(run('get', path, au('member1', 'member'))).toBe(true);
+  });
+  it('nobody else reads it, and nobody lists or writes it', () => {
+    expect(run('get', path, au('member2', 'member'))).toBe(false);
+    expect(run('get', path, au('admin1', 'admin'))).toBe(false);
+    expect(run('get', path, null)).toBe(false);
+    expect(run('list', 'users/member1/sessionState', au('member1', 'member'))).toBe(false);
+    for (const op of ['create', 'update', 'delete'] as Op[])
+      expect(run(op, path, au('member1', 'member'), flag)).toBe(false);
+  });
+});
