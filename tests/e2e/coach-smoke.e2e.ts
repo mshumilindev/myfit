@@ -38,13 +38,14 @@ test('coach serves its screens on the fixtures backend, not the not-configured s
   page,
 }) => {
   await openCoach(page, '#/c/today');
-  await expect(page.locator('#co-main')).toBeVisible();
+  await expect(page.locator('main h1').first()).toBeVisible();
   await expect(page.getByTestId('coach-not-configured')).toHaveCount(0);
 });
 
 // SPO-337: warm start (reload with everything on the device) and offline keep the console clean on the main Coach routes.
 test('coach warm start and offline log no console errors', async ({ page, context }) => {
-  test.setTimeout(90_000);
+  // The test itself waits up to 60 s for the precache; the budget matches the member warm-start test (150 s).
+  test.setTimeout(150_000);
   const errors = collectConsoleErrors(page);
   for (const hash of ['#/c/today', '#/c/clients', '#/c/schedule']) {
     await openCoach(page, hash);
@@ -61,6 +62,9 @@ test('coach warm start and offline log no console errors', async ({ page, contex
   for (const hash of ['#/c/today', '#/c/clients']) {
     await page.goto('/' + hash);
     await page.waitForLoadState('networkidle').catch(() => undefined);
+    // SPO-428: the screen's lazy chunks are fetched (and stored by the worker) only once the screen has rendered;
+    // leave for offline only after it has, not while a chunk request is still in flight.
+    await expect(page.locator('main h1').first()).toBeVisible();
   }
   await page.waitForTimeout(1500);
   expect(errors, `console errors on warm start`).toEqual([]);
