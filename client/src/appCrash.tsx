@@ -90,8 +90,10 @@ async function recover(): Promise<void> {
 }
 
 export function installCrashRecovery(): void {
-  window.addEventListener('vite:preloadError', (e) => {
-    e.preventDefault();
+  // Not `preventDefault()`: that makes Vite's preload wrapper resolve the dynamic import with `undefined`, and every
+  // `.then((m) => ({ default: m.Screen }))` then throws "Cannot read properties of undefined" (SPO-428). Left alone,
+  // the import rejects with the real error, the boundary shows its screen and `recover()` reloads or updates.
+  window.addEventListener('vite:preloadError', () => {
     void recover();
   });
   window.addEventListener('unhandledrejection', (e) => {

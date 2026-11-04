@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { AppCrashBoundary } from './appCrash';
+import { AppCrashBoundary, installCrashRecovery } from './appCrash';
 import { updateNow } from './pwaUpdate';
 
 function Boom(): never {
@@ -64,5 +64,14 @@ describe('AppCrashBoundary', () => {
       </AppCrashBoundary>,
     );
     expect(screen.getByText('fine')).toBeTruthy();
+  });
+});
+
+describe('installCrashRecovery: vite:preloadError (SPO-428)', () => {
+  it('does not swallow the error: a failed preload must not turn the import into `undefined`', () => {
+    installCrashRecovery();
+    const e = new Event('vite:preloadError', { cancelable: true });
+    window.dispatchEvent(e);
+    expect(e.defaultPrevented).toBe(false);
   });
 });
