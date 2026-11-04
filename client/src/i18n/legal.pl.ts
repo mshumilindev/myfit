@@ -83,12 +83,12 @@ export const legalPl: LegalTexts = {
                   'Umowa; prawnie uzasadniony interes w rozliczalności, art. 6 ust. 1 lit. f',
                 ],
                 [
-                  '**Powiadomienia push:** token urządzenia, zaplanowany tekst przypomnienia, godziny ciszy',
+                  '**Powiadomienia push:** token urządzenia, zaplanowany tekst przypomnienia, godziny ciszy; powiadomienie, że na Twoim koncie zalogowało się nowe urządzenie (bez miejsca i nazwy urządzenia)',
                   'Wysyłanie przypomnień i alertów, o które prosisz',
                   'Zgoda wyrażona przez uprawnienie przeglądarki lub systemu, art. 6 ust. 1 lit. a',
                 ],
                 [
-                  '**Dane bezpieczeństwa:** liczniki prób logowania (w tym adres IP i wpisana nazwa), sesje urządzeń i passkeys, dziennik pobrań kluczy',
+                  '**Dane bezpieczeństwa:** liczniki prób logowania (w tym adres IP i wpisana nazwa), sesje urządzeń (typ urządzenia, przeglądarka i system, przybliżone miasto i kraj podczas logowania, czas) i passkeys, dziennik pobrań kluczy',
                   'Ochrona kont przed odgadywaniem haseł i nadużyciami',
                   'Prawnie uzasadniony interes, art. 6 ust. 1 lit. f',
                 ],
@@ -146,6 +146,7 @@ export const legalPl: LegalTexts = {
             ul: [
               '**Twój trener i jego zespół** — w granicach tego, co udostępniasz, i tego, na co pozwala ich rola. Udostępnianiem kategorii zdrowotnych zarządzasz w „Prywatność i udostępnianie” i możesz je cofnąć.',
               '**Google (Firebase / Google Cloud)** jako nasz podmiot przetwarzający: uwierzytelnianie, baza danych, funkcje w chmurze (region us-central1), przechowywanie plików, hosting, dostarczanie powiadomień push i atestacja aplikacji (App Check z reCAPTCHA Enterprise). Google działa jako podmiot przetwarzający na podstawie Warunków przetwarzania danych i bezpieczeństwa Firebase; transfery międzynarodowe opierają się na mechanizmach z tych warunków (decyzje o odpowiednim stopniu ochrony, EU-US Data Privacy Framework lub standardowe klauzule umowne). Firebase Authentication jest przetwarzane w Stanach Zjednoczonych.',
+              '**Przybliżone miejsce logowania:** na podstawie Twojego adresu IP nasz serwer ustala przybliżone miasto i kraj w bazie offline, będącej częścią oprogramowania serwera (IP Geolocation by DB-IP, db-ip.com, licencja CC BY 4.0). Twój adres IP nie jest w tym celu wysyłany do DB-IP ani nikogo innego i nie jest zapisywany; w sesjach Twoich urządzeń zostają tylko miasto i kraj, abyś mógł(-a) rozpoznać logowanie.',
               '**Cloudflare, Inc.** jako nasz podmiot przetwarzający do dostarczania serwisu i ograniczania dostępu: każde żądanie do myspotter.fit przechodzi przez Cloudflare, który widzi Twój adres IP i metadane żądania. Na podstawie adresu IP Cloudflare ustala przybliżoną lokalizację (kraj i region); używamy jej wyłącznie do ustalenia, czy aplikacja jest dostępna tam, gdzie jesteś, ponieważ z powodów prawnych dostęp jest ograniczony z niektórych krajów i obszarów. Nie zapisujemy tej lokalizacji na Twoim koncie. Cloudflare może przechowywać techniczne logi żądań przez ograniczony czas na podstawie własnych warunków.',
               '**Resend (Resend, Inc.)** jako nasz podmiot przetwarzający do wysyłania listów: zaproszenia tworzone przez administratorów, listy potwierdzające adres e-mail i linki do hasła. Otrzymuje adres e-mail odbiorcy, imię (jeśli je podano) i jednorazowy link w liście oraz przechowuje logi doręczeń przez ograniczony czas na podstawie własnych warunków.',
               '**Dostawcy Atlas AI (tylko jeśli włączysz Atlas AI):** Google (Gemini przez Firebase AI Logic) oraz, jeśli na to zezwolisz, Puter (puter.com) przez Twoje własne konto Puter. Zob. punkt 7.',
@@ -197,6 +198,7 @@ export const legalPl: LegalTexts = {
               '**Historia czatu Atlas na Twoim koncie (tylko jeśli ją włączyłeś/-aś):** dopóki przełącznik jest włączony. Po jego wyłączeniu wybierasz: usunąć kopię od razu albo przechowywać ją nieużywaną przez 30 dni (aby można było włączyć ponownie i ją odzyskać), po czym zostaje usunięta automatycznie. Kopia na Twoim urządzeniu pozostaje, dopóki nie wyczyścisz czatu.',
               '**Dziennik „Kto widział Twoje dane”:** 400 dni. **Dziennik działań zespołu:** 90 dni. **Wpisy dziennika przypomnień:** 30 dni.',
               '**Zapisy Twoich zgód** (na co się zgodziłeś(-aś), która wersja, kiedy): do czasu usunięcia konta.',
+              '**Sesje urządzeń** (typ urządzenia, przeglądarka i system, przybliżone miasto i kraj, pierwsza i ostatnia aktywność): do wylogowania tego urządzenia lub usunięcia konta; przechowywanych jest najwyżej 50, najdawniej aktywne są usuwane jako pierwsze.',
               '**Zapisy techniczne bez automatycznego terminu:** liczniki prób logowania, dziennik wydawania kluczy, tokeny push, zaplanowane i odrzucone przypomnienia oraz powiadomienia serwisowe nie mają dziś w aplikacji automatycznego terminu, a okresów przechowywania dla nich jeszcze nie ustaliliśmy.',
               '**Kopie zapasowe i usuwanie przez Google:** po usunięciu danych Google kończy ich usuwanie ze swoich systemów w okresie podanym w warunkach Firebase (do 180 dni, chyba że prawo wymaga przechowywania).',
               'Obowiązki prawne mogą wymagać dłuższego przechowywania niektórych zapisów; poinformujemy Cię, których, gdy to nastąpi.',

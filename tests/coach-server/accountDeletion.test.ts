@@ -135,6 +135,7 @@ const USER_SUBPATHS = [
   'consentLog/cl1',
   'consentRecords/cr1',
   'sessions/dev1',
+  'sessionState/dev1', // SPO-436: the revoked-device flag
   'keyLog/2026-10-22-1',
 ];
 
@@ -273,6 +274,7 @@ const GONE: [row: string, path: string][] = [
   ['R6 passkey', `passkeys/pk-${A}`],
   ['R6 passkey challenge', `passkeyChallenges/ch-${A}`],
   ['R6 sessions', `users/${A}/sessions/dev1`],
+  ['R7 sessionState (SPO-436)', `users/${A}/sessionState/dev1`],
   ['R24 sleep queue', `sleepSchedules/${A}`],
   ['R25 own program', `programs/prg-${A}`],
   ['R25 assignment of the account', `assignments/${A}`],

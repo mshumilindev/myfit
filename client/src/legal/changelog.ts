@@ -56,6 +56,9 @@ export const LEGAL_CHANGELOG: readonly LegalChangelogEntry[] = [
   // Correction before the first send: all letters (invitations, email confirmation, password links) go out through one
   // sender, Resend (new recipient: address, name if given, and the one-time link in the letter); Cloudflare no longer sends mail.
   { doc: 'policy', version: '2026-11-01', kind: 'material', bullets: ['recipient'] },
+  // SPO-436 «Мої пристрої»: device sessions now also hold the device type and an approximate city and country looked up
+  // offline from the IP (the IP itself is not stored or sent anywhere); a push tells you a new device signed in.
+  { doc: 'policy', version: '2026-11-04', kind: 'material', bullets: ['category'] },
 ];
 
 /** Entries of a document after `from` (exclusive) up to `to` (inclusive). */
