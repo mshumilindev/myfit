@@ -10,6 +10,7 @@ import { HttpError } from '../api';
 import { createDeleteAccountPort } from './deleteAccount';
 import { localOffKinds, markLocalOff } from './localOff';
 import { CONSENT_QUEUE_KEY, enqueueConsents } from './signupConsents';
+import { ackedVersion, markAcked } from './updateAcked';
 
 const GEO = { kind: 'geo-search', action: 'withdraw', version: 'v1' } as const;
 
@@ -20,6 +21,8 @@ beforeEach(() => {
   enqueueConsents('u2', [GEO]);
   markLocalOff('u1', 'geo-search');
   markLocalOff('u2', 'geo-search');
+  markAcked('u1', 'policy-ack', '2026-11-05');
+  markAcked('u2', 'policy-ack', '2026-11-05');
 });
 
 const queuedUids = () =>
@@ -34,6 +37,8 @@ describe("delete account prunes the account's device-level consent data", () => 
     expect(queuedUids()).toEqual(['u2']);
     expect(localOffKinds('u1')).toEqual([]);
     expect(localOffKinds('u2')).toEqual(['geo-search']);
+    expect(ackedVersion('u1', 'policy-ack')).toBe('');
+    expect(ackedVersion('u2', 'policy-ack')).toBe('2026-11-05');
   });
 
   it('a failed deletion (wrong password) prunes nothing', async () => {

@@ -46,6 +46,7 @@ export const DEVICE_KEYS: ReadonlySet<string> = new Set([
   'spotter.consentQueue', // unsent consents/withdrawals: uid-bound, kinds and versions only; must outlive sign-out (legal/signupConsents)
   'spotter.consentRevokeQueue', // unsent "Stop sharing" revoke: uid + grant kinds only; must outlive sign-out (coach/client/revokeQueue)
   'spotter.consentVerified', // server-confirmed "required consents in order" per uid (kinds@versions only): lets an offline start fail open (legal/gateVerified)
+  'spotter.consentAcked', // which policy/terms version this account confirmed on this device: uid -> kind -> version only (legal/updateAcked)
   'spotter.consentLocalOff', // "withdrawn on this device" flags, uid-bound, kinds only; keeps the feature off until recorded
 ]);
 

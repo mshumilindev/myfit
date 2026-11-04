@@ -45,6 +45,7 @@ describe('device inventory: key groups', () => {
     ['spotter.consentRevokeQueue', 'consent'],
     ['spotter.consentLocalOff', 'consent'],
     ['spotter.consentVerified', 'consent'],
+    ['spotter.consentAcked', 'consent'],
     ['spotter.pushOn', 'reminders'],
     ['spotter.quietHours', 'reminders'],
     ['gym.search.london', 'gymsearch'],

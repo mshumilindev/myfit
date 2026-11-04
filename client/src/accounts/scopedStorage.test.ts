@@ -198,6 +198,7 @@ describe('wipeAccountKeys', () => {
       'spotter.consentRevokeQueue': '[]',
       'spotter.consentLocalOff': '{}',
       'spotter.consentVerified': '{}',
+      'spotter.consentAcked': '{}',
     });
     expect(wipeAccountKeys(b)).toBe(3);
     expect(Object.keys(b.dump()).sort()).toEqual(
@@ -206,6 +207,7 @@ describe('wipeAccountKeys', () => {
         'gym.flags',
         'gym.locale',
         'spotter.accounts',
+        'spotter.consentAcked', // which policy version was confirmed here must outlive sign-out
         'spotter.consentLocalOff', // unsent withdrawals must outlive sign-out
         'spotter.consentQueue',
         'spotter.consentRevokeQueue', // an unsent Stop sharing revoke too

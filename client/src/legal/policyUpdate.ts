@@ -7,7 +7,6 @@ import {
   UPDATE_DOCS,
   UPDATE_KIND,
   entriesBetween,
-  updateLevel,
   type ChangeBullet,
   type ChangeKind,
   type UpdateDoc,
@@ -43,11 +42,12 @@ export function pendingUpdates(
     if (!isStale(records, kind, ctx.versions)) continue;
     const from = latestRecord(records, kind)?.version ?? '';
     const to = ctx.versions[doc];
-    const level = updateLevel(ctx.changelog, doc, from, to);
-    if (level === 'unknown') continue;
-    const bullets = [
-      ...new Set(entriesBetween(ctx.changelog, doc, from, to).flatMap((e) => e.bullets)),
-    ];
+    // Only the NEWEST revision is shown (owner decision 04.11.2026): its own level and its own "what is new". Older revisions
+    // the person never saw are not repeated. `unknown` (the changelog does not know the move) still asks for the full gate.
+    const latest = entriesBetween(ctx.changelog, doc, from, to).at(-1);
+    if (!latest) continue;
+    const level: ChangeKind = latest.kind;
+    const bullets = [...new Set(latest.bullets)];
     out.push({ doc, kind, level, version: to, bullets });
   }
   return out;

@@ -31,6 +31,7 @@ import type { ConsentRecordsState } from './consentApi';
 import { PolicyUpdateHost } from './PolicyUpdateHost';
 import { pendingUpdates } from './policyUpdate';
 import { CONSENT_QUEUE_KEY } from './signupConsents';
+import { ackedVersion, markAcked } from './updateAcked';
 
 const OLD = '2026-10-21';
 const NEW = '2026-12-01';
@@ -91,7 +92,8 @@ describe('pendingUpdates (pure)', () => {
     expect(u.map((x) => x.doc)).toEqual(['terms']);
   });
 
-  it('any material step on the way makes the whole move material; bullets are merged without repeats', () => {
+  // Owner decision 04.11.2026: "одразу показуємо тільки найостаннішу ревізію, а не ті, які перед нею могли бути".
+  it('only the newest revision is shown: its own level and its own bullets, not the earlier ones', () => {
     const later: LegalChangelogEntry = {
       doc: 'policy',
       version: NEWER,
@@ -99,8 +101,14 @@ describe('pendingUpdates (pure)', () => {
       bullets: ['recipient', 'transfer'],
     };
     const u = pendingUpdates(REQUIRED, ctxOf(NEWER, [material, later]));
-    expect(u[0].level).toBe('material');
-    expect(u[0].bullets).toEqual(['recipient', 'retention', 'transfer']);
+    expect(u).toHaveLength(1);
+    expect(u[0].level).toBe('editorial');
+    expect(u[0].bullets).toEqual(['recipient', 'transfer']);
+    // and when the newest one is the material one, the earlier editorial steps are not mixed in
+    const earlier: LegalChangelogEntry = { ...later, version: '2026-11-20', kind: 'editorial' };
+    const v = pendingUpdates(REQUIRED, ctxOf(NEW, [earlier, material]));
+    expect(v[0].level).toBe('material');
+    expect(v[0].bullets).toEqual(['recipient', 'retention']);
   });
 
   it('nothing when current, and nothing for a withdrawn or missing document (the full gate owns those)', () => {
@@ -180,6 +188,36 @@ describe('PolicyUpdateHost', () => {
     );
     host(state(), ctxOf(NEW, [material]));
     expect(screen.queryByRole('alertdialog')).toBeNull();
+  });
+
+  it('the confirmation is remembered on this device: a server that refuses it for good does not bring the sheet back', async () => {
+    h.grant.mockRejectedValue(Object.assign(new Error('bad version'), { status: 400 }));
+    const first = host(state(), ctxOf(NEW, [material]));
+    fireEvent.click(screen.getByText('Privacy Policy'));
+    fireEvent.click(
+      screen.getByRole('switch', { name: 'I have read the updated Privacy Policy and agree.' }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'I have read it, continue' }));
+    await waitFor(() => expect(h.grant).toHaveBeenCalled());
+    expect(ackedVersion('u1', 'policy-ack')).toBe(NEW);
+    first.unmount();
+    // the next start: the queue dropped the refused grant, the server still shows the old version
+    localStorage.removeItem(CONSENT_QUEUE_KEY);
+    host(state(), ctxOf(NEW, [material]));
+    expect(screen.queryByRole('alertdialog')).toBeNull();
+    expect(screen.queryByText(BANNER)).toBeNull();
+  });
+
+  it('a newer version asks again even though an older one was confirmed here', () => {
+    markAcked('u1', 'policy-ack', OLD);
+    host(state(), ctxOf(NEW, [material]));
+    expect(screen.getByRole('alertdialog', { name: BANNER })).toBeTruthy();
+  });
+
+  it('a confirmation of another account on this device does not count', () => {
+    markAcked('u2', 'policy-ack', NEW);
+    host(state(), ctxOf(NEW, [material]));
+    expect(screen.getByRole('alertdialog', { name: BANNER })).toBeTruthy();
   });
 
   it('editorial: a non-blocking banner; dismiss records the acknowledgement at the new version with the text hash', async () => {

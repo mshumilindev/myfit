@@ -191,6 +191,13 @@ export const LOCAL_KEYS_2: readonly LocalKeyEntry[] = [
     note: 'consent bookkeeping that must outlive sign-out (kinds and versions only)',
   },
   {
+    key: 'spotter.consentAcked',
+    scope: 'device',
+    class: 'diag',
+    wipe: 'keep',
+    note: 'consent bookkeeping that must outlive sign-out: which policy/terms version this account confirmed on this device (kinds and versions only)',
+  },
+  {
     key: 'spotter.consentLocalOff',
     scope: 'device',
     class: 'diag',

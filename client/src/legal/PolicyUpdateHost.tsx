@@ -1,7 +1,7 @@
 /**
  * Tells an existing user about a new version of the Terms / Privacy Policy (SPO-295 N8). Mounted by the legal gate when no
  * full gate is due. Editorial change: a dismissible banner. Material change: a blocking confirm sheet. Either way the
- * acknowledgement / consent is recorded for the new version (queued first, so offline is fine; never waits for the network).
+ * acknowledgement / consent is remembered on this device at once (`updateAcked`) and recorded for the new version on the server (queued first, so offline is fine; never waits for the network).
  * Shows nothing while the records are loading, errored or unconfirmed by the server (a cache miss must not nag or lock out),
  * on the public legal pages and the invite sign-up, and for a document whose grant is already queued on this device.
  */
@@ -13,6 +13,7 @@ import { DEFAULT_LEGAL_CTX, type LegalCtx } from './consents';
 import { PolicyUpdateBanner } from './PolicyUpdateBanner';
 import { PolicyUpdateSheet } from './PolicyUpdateSheet';
 import { pendingUpdates, type PendingUpdate } from './policyUpdate';
+import { markAcked, wasAcked } from './updateAcked';
 import {
   buildUpdateGrant,
   enqueueConsents,
@@ -37,12 +38,15 @@ export function PolicyUpdateHost({
   if (hidden || state.loading || state.error || !state.confirmed) return null;
   const queued = pendingConsentKinds(uid, ctx.versions);
   const todo = pendingUpdates(state.records, ctx).filter(
-    (x) => !answered.includes(x.kind) && !queued.includes(x.kind),
+    (x) =>
+      !answered.includes(x.kind) && !queued.includes(x.kind) && !wasAcked(uid, x.kind, x.version),
   );
   if (todo.length === 0) return null;
 
   const record = async (list: readonly PendingUpdate[]) => {
     setAnswered((a) => [...a, ...list.map((x) => x.kind)]);
+    // Remembered on this device first: a send the server refuses must never bring the sheet back on every start.
+    for (const x of list) markAcked(uid, x.kind, x.version);
     const grants = await Promise.all(
       list.map((x) => buildUpdateGrant(x.kind, x.version, getLocale())),
     );
