@@ -87,12 +87,12 @@ export const legalEn: LegalTexts = {
                   'Contract; legitimate interest in accountability, Art. 6(1)(f)',
                 ],
                 [
-                  '**Push notifications:** device token, planned reminder text, quiet hours',
+                  '**Push notifications:** device token, planned reminder text, quiet hours; a notice that a new device signed in to your account (it names no place or device)',
                   'Send reminders and alerts you asked for',
                   'Consent through the browser or OS permission, Art. 6(1)(a)',
                 ],
                 [
-                  '**Security data:** sign-in attempt counters (including IP address and the name you typed), device sessions and passkeys, key-fetch log',
+                  '**Security data:** sign-in attempt counters (including IP address and the name you typed), device sessions (device type, browser and system, approximate city and country at sign-in, times) and passkeys, key-fetch log',
                   'Protect accounts against guessing and abuse',
                   'Legitimate interest, Art. 6(1)(f)',
                 ],
@@ -150,6 +150,7 @@ export const legalEn: LegalTexts = {
             ul: [
               '**Your trainer and their team**, within what you share and what their role allows. You control sharing for health categories in Privacy and sharing and can revoke it.',
               '**Google (Firebase / Google Cloud)** as our processor: authentication, database, cloud functions (region us-central1), file storage, hosting, push delivery and app attestation (App Check with reCAPTCHA Enterprise). Google acts as a processor under the Firebase Data Processing and Security Terms; international transfers rely on the mechanisms in those terms (adequacy decisions, the EU-US Data Privacy Framework, or Standard Contractual Clauses). Firebase Authentication is processed in the United States.',
+              '**Approximate place of sign-in:** from your IP address our server looks up an approximate city and country in an offline database that is part of our server software (IP Geolocation by DB-IP, db-ip.com, licensed CC BY 4.0). Your IP address is not sent to DB-IP or anyone else for this and is not stored; only the city and country are kept, in your device sessions, so you can recognise a sign-in.',
               '**Cloudflare, Inc.** as our processor for delivering the site and restricting access: every request to myspotter.fit passes through Cloudflare, which sees your IP address and request metadata. From your IP address Cloudflare derives an approximate location (country and region); we use it only to decide whether the app is available where you are, because access is restricted from certain countries and areas for legal reasons. We do not store this location in your account. Cloudflare may keep technical request logs for a limited period under its own terms.',
               '**Resend (Resend, Inc.)** as our processor for sending letters: invitations created by our administrators, email confirmation letters and password links. It receives the recipient email address, the name if one was given, and the one-time link in the letter, and keeps delivery logs for a limited period under its own terms.',
               '**Atlas AI providers (only if you turn Atlas AI on):** Google (Gemini via Firebase AI Logic) and, if you allow it, Puter (puter.com) through your own Puter account. See section 7.',
@@ -201,6 +202,7 @@ export const legalEn: LegalTexts = {
               '**Atlas chat history in your account (only if you turned it on):** while the switch is on. When you turn it off you choose: delete the copy now, or keep it unused for 30 days (so you can turn it on again and get it back) and then it is deleted automatically. The copy on your device stays until you clear the chat.',
               '**“Who saw your data” log:** 400 days. **Team activity log:** 90 days. **Reminder log entries:** 30 days.',
               '**Records of your consents** (what you agreed to, which version, when): until you delete your account.',
+              '**Device sessions** (device type, browser and system, approximate city and country, first and last activity): until you sign that device out or delete your account; at most 50 are kept, the least recently active are dropped first.',
               '**Technical records without an automatic expiry:** sign-in attempt counters, the key-fetch log, push tokens, planned and dismissed reminders and service notices have no automatic expiry in the app today, and we have not yet set retention periods for them.',
               '**Backups and Google’s deletion:** after you delete data, Google completes deletion from its systems within the period stated in the Firebase terms (up to 180 days unless law requires storage).',
               'Legal obligations may require us to keep specific records longer; we will tell you which when that happens.',

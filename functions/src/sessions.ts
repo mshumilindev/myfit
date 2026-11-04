@@ -17,6 +17,7 @@ import { onCall } from 'firebase-functions/v2/https';
 import { authAdmin, db, HttpsError, mintToken, type UserDoc, HOT } from './lib';
 import { sendToUser } from './push';
 import { deletePasskeysOf, deletePasskeysOfDevice } from './passkeysStore';
+import { clientIp, placeFromIp } from './geoip';
 import { describeClient, deviceKind, placeFromHeaders, validDeviceId } from './sessionsPure';
 import {
   checkCore,
@@ -74,11 +75,14 @@ function deviceIdOf(data: unknown): string {
 }
 
 /** Called by the app at start and on focus. Creates / adopts the record, refreshes it, and says whether this device was signed out elsewhere. */
-export const sessionCheck = onCall(HOT, async (req) => {
+export const sessionCheck = onCall({ ...HOT, memory: '512MiB' }, async (req) => {
   const uid = mustUid(req);
   const headers = req.rawRequest?.headers as Record<string, unknown> | undefined;
   const ua = headers?.['user-agent'];
-  const info = { label: describeClient(ua), kind: deviceKind(ua), ...placeFromHeaders(headers) };
+  const edge = placeFromHeaders(headers);
+  // Edge headers when the host gives them; otherwise the offline IP database (the IP is not kept).
+  const place = edge.country ? edge : placeFromIp(clientIp(headers, req.rawRequest?.ip));
+  const info = { label: describeClient(ua), kind: deviceKind(ua), ...place };
   const r = await checkCore(storeFor(uid), deviceIdOf(req.data), info, Date.now());
   if (r.newDevice) {
     // Content-free: the lock screen learns only that a sign-in happened; the place and the device are inside the app.
