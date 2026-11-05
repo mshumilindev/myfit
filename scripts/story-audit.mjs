@@ -187,7 +187,13 @@ const probe = (withHeadings) => {
         clipY &&
         !atWin(ar.bottom, innerHeight) &&
         ar.bottom - r.bottom >= -1 &&
-        ar.bottom - r.bottom < ext.b - 3
+        ar.bottom - r.bottom < ext.b - 3 &&
+        // Still scrollable downwards and padded below the content by at least the glow: the shadow is only
+        // cut by the window of the scroller until it is scrolled, and the padding leaves it room at the end.
+        !(
+          a.scrollTop + a.clientHeight < a.scrollHeight - 1 &&
+          parseFloat(ac.paddingBottom) >= ext.b - 3
+        )
       )
         cut.push('bottom');
       if (cut.length) {

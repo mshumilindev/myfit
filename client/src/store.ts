@@ -11,7 +11,7 @@
  * All the pure/derived helpers (volume, per-hand, supersets, muscles, records)
  * are unchanged — they operate on the in-memory workouts array.
  */
-import { pushPushPrefsEdits, syncPushPrefsFromDoc } from './pushPrefsSync';
+import { pushUiPrefsEdits, syncUiPrefsFromDoc } from './uiPrefsSync';
 import { autoMainGymIds, isMainGym } from './mainGym';
 import {
   coachView,
@@ -5082,7 +5082,7 @@ for (const [name, pref] of LIST_PREFS) {
 // Local Today-layout edits only; synced values never fire this (no echo).
 pushTodayLayoutEdits(writePrefsFields);
 pushThemeEdits(writePrefsFields);
-pushPushPrefsEdits(writePrefsFields);
+pushUiPrefsEdits(writePrefsFields);
 
 // Exercise settings, Today-widget values and challenges in the account (SPO-385/388/391): storeAccountDocs.ts.
 const accountDocs = createAccountDocs({
@@ -5138,7 +5138,7 @@ export function startSyncLoop(): () => void {
         }
         syncTodayLayoutFromDoc(data, writePrefsFields);
         syncThemePrefsFromDoc(data, writePrefsFields);
-        syncPushPrefsFromDoc(data, writePrefsFields);
+        syncUiPrefsFromDoc(data, writePrefsFields);
         accountDocs.syncTwPrefsFromDoc(data);
       },
       onWriteError,

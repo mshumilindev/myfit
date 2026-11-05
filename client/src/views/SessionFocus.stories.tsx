@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useEffect, type ReactNode } from 'react';
 import { SessionView } from './SessionView';
+import { applyRemoteInputMode } from '../inputModeStore';
 import { seedStore, storyShell, workoutOn } from '../stories/fixtures';
 import { PageFrame } from '../stories/PageFrame';
 
@@ -54,3 +56,21 @@ type Story = StoryObj<typeof meta>;
 
 /** Set-entry panel with Log, between the step line and the nav. */
 export const SetEntry: Story = {};
+
+/** Shows the wheel entry for the story and puts the default (− / +) back when it unmounts, so other stories are unaffected. */
+function WheelMode({ children }: { children: ReactNode }) {
+  applyRemoteInputMode('wheel');
+  useEffect(() => () => applyRemoteInputMode('stepper'), []);
+  return <>{children}</>;
+}
+
+/** Same panel with the scroll wheels instead of − / + (SPO-318: Reps and Weight with the unit in the band). */
+export const SetEntryWheel: Story = {
+  decorators: [
+    (Story) => (
+      <WheelMode>
+        <Story />
+      </WheelMode>
+    ),
+  ],
+};

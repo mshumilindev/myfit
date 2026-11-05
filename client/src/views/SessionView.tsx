@@ -19,6 +19,7 @@ import {
 } from 'react';
 import { Field } from '../components/ui/Field';
 import { NumberStepper } from '../components/ui/NumberStepper';
+import { InputModeRow, SetNumberInput } from './SetNumberInput';
 import { ProgReturnNote, progActionLabel } from '../components/ProgReturnNote';
 import { sessionLiftTarget } from './sessionTarget';
 import { Notice } from '../components/ui/Notice';
@@ -6744,13 +6745,12 @@ function GhostSetRow(props: {
           <div className="gset-part">
             <div className="gset-part-lab">{t.startLabel}</div>
             <div className="gset-steppers">
-              <NumberStepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />
-              <NumberStepper
+              <SetNumberInput field="reps" label={t.reps} value={reps} onChange={setReps} />
+              <SetNumberInput
+                field="weight"
+                unit={unit}
                 label={unit === 'lb' ? t.weightLb : t.weightKg}
                 value={toDisp(weightKg ?? 0)}
-                step={unit === 'lb' ? 5 : 2.5}
-                min={0}
-                decimals={unit === 'lb' ? 1 : 2}
                 disabled={bw}
                 placeholder={t.bodyweightShort}
                 onChange={(x) => setStartWeight(fromDisp(x))}
@@ -6761,19 +6761,17 @@ function GhostSetRow(props: {
             <div className="gset-part" key={i}>
               <div className="gset-part-lab">{t.dropRowN(i + 1)}</div>
               <div className="gset-steppers">
-                <NumberStepper
+                <SetNumberInput
+                  field="reps"
                   label={t.reps}
                   value={d.reps}
-                  step={1}
-                  min={0}
                   onChange={(n) => patchDrop(i, { reps: n })}
                 />
-                <NumberStepper
+                <SetNumberInput
+                  field="weight"
+                  unit={unit}
                   label={unit === 'lb' ? t.weightLb : t.weightKg}
                   value={toDisp(d.weight ?? 0)}
-                  step={unit === 'lb' ? 5 : 2.5}
-                  min={0}
-                  decimals={unit === 'lb' ? 1 : 2}
                   disabled={d.weight === null}
                   placeholder={t.bodyweightShort}
                   onChange={(x) => patchDrop(i, { weight: fromDisp(x) })}
@@ -6784,16 +6782,13 @@ function GhostSetRow(props: {
         </div>
       ) : (
         <div className="gset-steppers">
-          {!isSd && (
-            <NumberStepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />
-          )}
-          <NumberStepper
+          {!isSd && <SetNumberInput field="reps" label={t.reps} value={reps} onChange={setReps} />}
+          <SetNumberInput
+            field="weight"
+            unit={unit}
             className={isSd ? 'hold-w' : undefined}
             label={unit === 'lb' ? t.weightLb : t.weightKg}
             value={toDisp(weightKg ?? 0)}
-            step={unit === 'lb' ? 5 : 2.5}
-            min={0}
-            decimals={unit === 'lb' ? 1 : 2}
             disabled={bw}
             placeholder={t.bodyweightShort}
             onChange={(x) => setWeightKg(fromDisp(x))}
@@ -7119,21 +7114,19 @@ function SetEditorSheet(props: {
   ) {
     return (
       <div className="steppers">
-        <NumberStepper
+        <SetNumberInput
+          field="reps"
           label={t.reps}
           value={partReps}
-          step={1}
-          min={0}
           focused={focusKey === 'reps'}
           onFocus={() => setFocused('reps')}
           onChange={onReps}
         />
-        <NumberStepper
+        <SetNumberInput
+          field="weight"
+          unit={unit}
           label={unit === 'lb' ? t.weightLb : t.weightKg}
           value={toDisp(partWeight ?? 0)}
-          step={unit === 'lb' ? 5 : 2.5}
-          min={0}
-          decimals={unit === 'lb' ? 1 : 2}
           focused={focusKey === 'weight'}
           disabled={bw}
           placeholder={t.bodyweightShort}
@@ -7635,6 +7628,7 @@ function SetEditorSheet(props: {
                   weight > 0 && (
                     <div className="unit-equiv">{t.unitStoredKg(fmtWeightValue(weight))}</div>
                   )}
+                {!holdOnly && !isAssist && !isBand && <InputModeRow />}
                 {isBarbell && !holdOnly && !isAssist && !isBand && !bw && (
                   <ListRow
                     icon={<Icon name="barbell" />}

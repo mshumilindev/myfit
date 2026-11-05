@@ -290,6 +290,14 @@ export const LOCAL_KEYS_1: readonly LocalKeyEntry[] = [
     note: 'push switches (SPO-386)',
   },
   {
+    key: 'spotter.inputMode',
+    scope: 'account',
+    class: 'synced',
+    wipe: 'signout',
+    syncedTo: 'users/{uid}/meta/prefs#inputMode',
+    note: 'set entry: wheel or − / + (SPO-318)',
+  },
+  {
     key: 'spotter.pushPrefsSeen',
     scope: 'account',
     class: 'diag',

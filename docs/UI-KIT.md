@@ -278,6 +278,23 @@ Variants of each live in its Storybook stories (`Kit/<Name>`); props above are t
 
 **Guards (tests/kit-guard.test.ts):** no raw `<button>`, no legacy `.btn` class, no raw `<select>` / `<textarea>`, and `<input>` only with a `// kit-ok` comment (hidden file / range inputs) outside `components/ui/`.
 
+## WheelPicker / WheelColumn (SPO-318)
+
+The wheel counterpart of `NumberStepper`: a native scroll-snap drum (CSS `scroll-snap-type: y mandatory`, `scrollend` + 120 ms debounce fallback), so the browser does inertia, snap and touch / wheel / drag. Same value contract as the stepper (`label`, `value`, `onChange`, `step`, `min`, `max`, `decimals`, `unit`, `placeholder`, `focused`, `disabled`, `onFocus`) plus:
+
+| Prop      | Values                                                     | Notes                                                                                                                                                                                                    |
+| --------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `input`   | `manual` (default) · `wheel` · `stepper` · `native`        | `manual` = tap the centre value to type it; `wheel` = drum only; `stepper` = typing + − / + beside it; `native` = a plain `<select>` (iOS opens its own system wheel). The session editor uses `manual`. |
+| `columns` | `single` · `split`                                         | `split` = whole \| fraction drums.                                                                                                                                                                       |
+| `size`    | `compact` (3 rows, the set editor) · `md` · `big` (5 rows) | row height `--sz-40`.                                                                                                                                                                                    |
+
+- **Unit** sits inside the selection band right after the number, on the number's baseline; the number stays centred. The column must be wide enough for number + unit (the session editor gives each picker half the card).
+- **Off-grid values** (61.25 on a 0.5 grid) are inserted into the drum so it never shows a different number than the set holds.
+- **A11y:** each drum is `role="spinbutton"` with `aria-valuetext` ("60 kg"); arrows, Page Up/Down (±5), Home/End; `prefers-reduced-motion` turns snapping smoothing off. No haptics (iOS Safari has no Vibration API) — a known limit.
+- **Range:** every row is rendered (no windowing); keep the range ≤ ~1000 rows (the session weight drum is 0–400 kg at 0.5).
+- **Themes:** colour comes from the same well as `NumberStepper` (`--glass-well*`) and the selection band is an accent-tinted `--glass-surface` (rules next to `.uistep` in `glass.css`). Not for: choosing between a few options (`Segmented`), dates (`Calendar`).
+- Stories: `Kit/WheelPicker` (Playground, InlineVariants, SharedBench, InSheet, States, ChosenA1Units, SessionPair).
+
 ## Calls (SPO-432 / SPO-441)
 
 Group `Call`, one file set (`Call.css` imports `CallBase` · `CallVoice` · `CallModes`). Tokens only, so every theme (Brass Glass, Cyberpunk, Halloween, Christmas) re-skins it; flat chips (`CallLogRow`, the kind chip) take the theme's tag cut. The call screen itself is always dark (video sits on it). Without a call provider nothing renders. Props are the contract; stories: `Kit/Call`.
