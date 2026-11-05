@@ -1,24 +1,37 @@
 import { describe, expect, it } from 'vitest';
-import { isStoreHash, storeHash, storeTabFromHash } from './storeRoute';
+import { isStoreHash, parseStoreHash, storeHash, storeTabFromHash } from './storeRoute';
 
 describe('store route', () => {
   it('recognises the store address only', () => {
     expect(isStoreHash('#/store')).toBe(true);
-    expect(isStoreHash('#/store/browse')).toBe(true);
+    expect(isStoreHash('#/store/apps')).toBe(true);
     expect(isStoreHash('/store/installed?x=1')).toBe(true);
     expect(isStoreHash('#/storefront')).toBe(false);
     expect(isStoreHash('#/learn')).toBe(false);
     expect(isStoreHash('')).toBe(false);
   });
-  it('reads the tab; anything unknown is Discover', () => {
+  it('reads the tab; anything unknown is Discover; the old Browse is Apps', () => {
     expect(storeTabFromHash('#/store')).toBe('discover');
-    expect(storeTabFromHash('#/store/browse')).toBe('browse');
+    expect(storeTabFromHash('#/store/apps')).toBe('apps');
+    expect(storeTabFromHash('#/store/browse')).toBe('apps');
+    expect(storeTabFromHash('#/store/addons')).toBe('addons');
+    expect(storeTabFromHash('#/store/selected')).toBe('selected');
     expect(storeTabFromHash('#/store/installed?a=b')).toBe('installed');
     expect(storeTabFromHash('#/store/nope')).toBe('discover');
   });
+  it('item and search belong to no tab', () => {
+    expect(parseStoreHash('#/store/item/health')).toEqual({ view: 'item', id: 'health' });
+    expect(parseStoreHash('#/store/search')).toEqual({ view: 'search' });
+    expect(storeTabFromHash('#/store/item/health')).toBeNull();
+    expect(storeTabFromHash('#/store/search')).toBeNull();
+  });
   it('builds addresses that parse back', () => {
-    for (const tab of ['discover', 'browse', 'installed'] as const)
-      expect(storeTabFromHash(storeHash(tab))).toBe(tab);
+    for (const tab of ['discover', 'apps', 'addons', 'selected', 'installed', 'search'] as const)
+      expect(parseStoreHash(storeHash(tab))).toEqual({ view: tab });
+    expect(parseStoreHash(storeHash('item', 'sleep-sounds'))).toEqual({
+      view: 'item',
+      id: 'sleep-sounds',
+    });
     expect(storeHash('discover')).toBe('#/store');
   });
 });

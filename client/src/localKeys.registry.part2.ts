@@ -170,6 +170,14 @@ export const LOCAL_KEYS_2: readonly LocalKeyEntry[] = [
     note: 'enabled add-ons ({ list, updatedAt }); the sealed account-synced copy lands in the next SPO-511 step',
   },
   {
+    key: 'spotter.addons.queue',
+    scope: 'account',
+    class: 'gap',
+    wipe: 'signout',
+    issue: 'SPO-511',
+    note: 'add-ons selected but not installed yet ({ list, updatedAt }); synced together with spotter.addons',
+  },
+  {
     key: 'spotter.atlasChat',
     scope: 'account',
     class: 'gap',
