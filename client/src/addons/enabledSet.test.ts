@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { ADDONS } from './manifest';
 import {
   addonsPref,
-  allowedIds,
   closeDependencies,
   disableAddons,
   enableAddons,
@@ -40,10 +39,8 @@ describe('isAddonAllowed', () => {
 });
 
 describe('resolveEnabled', () => {
-  it('grandfathers an account that never chose: all allowed items are on', () => {
-    expect([...resolveEnabled({ list: [], updatedAt: 0 }, 'member')].sort()).toEqual(
-      allowedIds('member').sort(),
-    );
+  it('has nothing on when nothing is stored (base only, existing accounts too)', () => {
+    expect(resolveEnabled({ list: [], updatedAt: 0 }, 'member').size).toBe(0);
   });
   it('treats an explicit empty list as base only', () => {
     expect(resolveEnabled({ list: [], updatedAt: 5 }, 'member').size).toBe(0);
@@ -67,7 +64,9 @@ describe('dependencies', () => {
 });
 
 describe('enable / disable', () => {
-  it('starts grandfathered, then a first removal writes an explicit list', () => {
+  it('starts with nothing on; the first choice writes an explicit list', () => {
+    expect(isAddonEnabled('cycle', 'member')).toBe(false);
+    enableAddons(['cycle', 'supplements'], 'member');
     expect(isAddonEnabled('cycle', 'member')).toBe(true);
     disableAddons(['cycle'], 'member');
     expect(isAddonEnabled('cycle', 'member')).toBe(false);

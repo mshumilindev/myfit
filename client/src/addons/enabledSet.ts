@@ -1,8 +1,8 @@
 /**
  * Which add-ons are on for this person (SPO-511). Pure rules + a device store.
  *
- * - An account that never chose (`updatedAt === 0`) is grandfathered: everything its role may use is on, so
- *   nothing disappears on update. The first choice (onboarding or the store) writes an explicit list.
+ * - No special modes (owner decision 05.11.2026): the enabled set is exactly what is stored for the account.
+ *   An account with nothing stored — new or existing — has the base only.
  * - Enabling an add-on enables its parent app; removing an app removes its add-ons. Removing never deletes data.
  * - A role only ever gets items that list it; stored ids a role may not use are ignored, never errors.
  */
@@ -39,7 +39,6 @@ export function closeDependencies(ids: Iterable<string>, role: Role): string[] {
 }
 
 export function resolveEnabled(pref: ListPref, role: Role): Set<string> {
-  if (pref.updatedAt === 0) return new Set(allowedIds(role));
   return new Set(closeDependencies(pref.list, role));
 }
 
