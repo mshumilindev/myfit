@@ -27,8 +27,9 @@ describe('store search', () => {
     expect(searchItems('member', 'ATLAS', st)).toContain('atlas');
   });
   it('shows a role only its own items', () => {
-    expect(searchItems('trainer', 'gym', st)).toContain('gyms');
+    expect(searchItems('trainer', 'gyms', st)).not.toContain('gyms');
     expect(searchItems('member', 'gyms', st)).not.toContain('gyms');
+    expect(searchItems('member', 'atlas', st)).toContain('atlas');
     expect(searchItems('manager', 'sleep', st)).toEqual([]);
   });
   it('splits text around every match for highlighting', () => {

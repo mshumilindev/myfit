@@ -25,7 +25,6 @@ export interface AddonManifest {
 
 const ALL: readonly StoreRole[] = ['member', 'trainer', 'admin'];
 const MEMBER: readonly StoreRole[] = ['member'];
-const COACH: readonly StoreRole[] = ['trainer', 'admin'];
 
 export const ADDONS: readonly AddonManifest[] = [
   { id: 'health', kind: 'app', tone: 4, roles: MEMBER, category: 'recovery' },
@@ -74,9 +73,7 @@ export const ADDONS: readonly AddonManifest[] = [
   { id: 'atlas', kind: 'app', tone: 6, roles: ALL, category: 'insights' },
   { id: 'mastery', kind: 'app', tone: 8, roles: MEMBER, category: 'insights' },
   { id: 'themes', kind: 'app', tone: 7, roles: ALL, category: 'look' },
-  { id: 'exercise-media', kind: 'app', tone: 3, roles: ALL, category: 'look' },
   // Gyms is core for a member and an add-on for trainer and admin.
-  { id: 'gyms', kind: 'addon', tone: 5, roles: COACH, category: 'coach' },
   // Not available yet (the store shows them as Coming soon).
   { id: 'nutrition', kind: 'app', tone: 0, roles: MEMBER, soon: true, category: 'food' },
   { id: 'music', kind: 'app', tone: 5, roles: MEMBER, soon: true, category: 'food' },

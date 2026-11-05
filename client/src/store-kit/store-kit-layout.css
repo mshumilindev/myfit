@@ -48,8 +48,26 @@
   padding: 0;
   height: auto;
 }
-.sk-hdr .sk-avbtn {
+.sk-hdr-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-left: auto;
+}
+.sk-exit {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sk-fill, rgba(120, 120, 128, 0.16));
+  color: inherit;
+  cursor: pointer;
+}
+.sk-exit svg {
+  width: 18px;
+  height: 18px;
 }
 .sk-scroll {
   flex: 1;
@@ -158,8 +176,7 @@
   .sk-side {
     display: flex;
   }
-  .sk-tabbar,
-  .sk-hdr .sk-avbtn {
+  .sk-tabbar {
     display: none;
   }
   .sk-hdr {

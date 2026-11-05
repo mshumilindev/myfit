@@ -62,7 +62,12 @@ export function Discover({
   go: (v: string) => void;
 }) {
   const { st, enabled, queued } = ctx;
-  const rec = useMemo(() => recommend(role, enabled, queued), [role, enabled, queued]);
+  // Picking an item must not make it vanish: the list is built as if nothing were picked (stable order, a picked item
+  // keeps its place and shows "Selected ✓"); add-ons that only appear because of a pick are appended.
+  const rec = useMemo(() => {
+    const stable = recommend(role, enabled, []);
+    return [...stable, ...recommend(role, enabled, queued).filter((id) => !stable.includes(id))];
+  }, [role, enabled, queued]);
   const soon = comingSoonForRole(role);
   const total = availableForRole(role).length;
   const done = total > 0 && rec.length === 0;
@@ -82,8 +87,7 @@ export function Discover({
       )}
       <Section title={st.yourSpotter}>
         <SkCard className="sk-p20">
-          <div className="sk-t-e">{st.tabInstalled}</div>
-          <div className="sk-rowf sk-g12 sk-mt8" style={{ alignItems: 'baseline' }}>
+          <div className="sk-rowf sk-g12" style={{ alignItems: 'baseline' }}>
             <div className="sk-big">{enabled.size}</div>
             <div className="sk-t-s">{st.progress(enabled.size, total)}</div>
           </div>

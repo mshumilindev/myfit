@@ -11,15 +11,7 @@ import { isAddonAllowed } from '../addons/enabledSet';
 import { addonById } from '../addons/manifest';
 import { availableForRole } from './storeCatalog';
 
-export const APP_ORDER = [
-  'health',
-  'atlas',
-  'sleep',
-  'mastery',
-  'themes',
-  'exercise-media',
-  'gyms',
-];
+export const APP_ORDER = ['health', 'atlas', 'sleep', 'mastery', 'themes'];
 
 export function recommend(
   role: Role,

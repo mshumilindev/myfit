@@ -20,9 +20,8 @@ describe('isAddonAllowed', () => {
   it('lets each role see only its own items', () => {
     expect(isAddonAllowed('health', 'member')).toBe(true);
     expect(isAddonAllowed('health', 'trainer')).toBe(false);
-    expect(isAddonAllowed('gyms', 'member')).toBe(false);
-    expect(isAddonAllowed('gyms', 'trainer')).toBe(true);
-    expect(isAddonAllowed('gyms', 'admin')).toBe(true);
+    expect(isAddonAllowed('gyms', 'member')).toBe(false); // Gyms is base, not an add-on
+    expect(isAddonAllowed('gyms', 'trainer')).toBe(false);
   });
   it('gives a manager no store and never allows coming-soon or unknown ids', () => {
     for (const a of ADDONS) expect(isAddonAllowed(a.id, 'manager')).toBe(false);

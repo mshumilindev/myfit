@@ -38,7 +38,7 @@ describe('recommendations', () => {
   });
   it('respects the limit and the role', () => {
     expect(recommend('member', new Set(), [], { limit: 2 })).toHaveLength(2);
-    expect(recommend('trainer', new Set(), [])).toContain('gyms');
+    expect(recommend('trainer', new Set(), [])).not.toContain('gyms'); // base
     expect(recommend('manager', new Set(), [])).toEqual([]);
   });
 });

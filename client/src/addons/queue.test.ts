@@ -21,7 +21,7 @@ describe('selected list', () => {
   });
   it('is idempotent and ignores what a role may not use', () => {
     queueAdd(['sleep', 'sleep'], 'member');
-    queueAdd(['gyms', 'nutrition', 'nope'], 'member');
+    queueAdd(['nutrition', 'nope'], 'member');
     expect(addonsQueuePref.get()).toEqual(['sleep']);
   });
   it('un-picking an app takes its picked add-ons with it', () => {

@@ -9,9 +9,8 @@ describe('role-visible catalog', () => {
     expect(catalogForRole('manager')).toEqual([]);
   });
   it('shows Gyms to a trainer and an admin, never to a member', () => {
-    expect(ids(catalogForRole('trainer'))).toContain('gyms');
-    expect(ids(catalogForRole('admin'))).toContain('gyms');
-    expect(ids(catalogForRole('member'))).not.toContain('gyms');
+    for (const r of ['member', 'trainer', 'admin'] as const)
+      expect(ids(catalogForRole(r))).not.toContain('gyms');
   });
   it('keeps member-only items away from a trainer', () => {
     expect(ids(catalogForRole('trainer'))).not.toContain('health');

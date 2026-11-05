@@ -19,6 +19,7 @@ import {
   parseStoreHash,
   STORE_FALLBACK_HASH,
   storeHash,
+  storeTabFromHash,
   type StoreTab,
   type StoreView,
 } from './storeRoute';
@@ -35,10 +36,17 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
   const { st } = useAddonStoreT();
   const [route, setRoute] = useState<StoreView>(() => parseStoreHash(currentHash()));
   const [query, setQuery] = useState('');
+  const [lastTab, setLastTab] = useState<StoreTab>(
+    () => storeTabFromHash(currentHash()) ?? 'discover',
+  );
   const enabled = useEnabledAddons();
   const queued = useQueuedAddons();
   useEffect(() => {
-    const on = () => setRoute(parseStoreHash(currentHash()));
+    const on = () => {
+      setRoute(parseStoreHash(currentHash()));
+      const t = storeTabFromHash(currentHash());
+      if (t) setLastTab(t);
+    };
     window.addEventListener('hashchange', on);
     return () => window.removeEventListener('hashchange', on);
   }, []);
@@ -139,7 +147,18 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
                 <span>{st.back}</span>
               </button>
             )}
-            <SkAvatar initials={initials} label={name || st.title} onClick={onOpenProfile} />
+            <div className="sk-hdr-end">
+              <button
+                type="button"
+                className="sk-exit"
+                aria-label={st.backToSpotter}
+                title={st.backToSpotter}
+                onClick={() => setHash(STORE_FALLBACK_HASH)}
+              >
+                <SkIcon name="x" />
+              </button>
+              <SkAvatar initials={initials} label={name || st.title} onClick={onOpenProfile} />
+            </div>
           </header>
           <div className="sk-scroll">
             {view !== 'item' && (
@@ -151,8 +170,9 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
                     <SkBtn
                       kind="ghost"
                       onClick={() => {
+                        // Cancel closes the search and returns to the store place it was opened from — never out of the store.
                         setQuery('');
-                        window.history.back();
+                        setHash(storeHash(lastTab), true);
                       }}
                     >
                       {st.cancel}

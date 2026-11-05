@@ -21,6 +21,6 @@ describe('addon store dictionary', () => {
       expect(it?.desc.length, `${id}.${a.id}.desc`).toBeGreaterThan(0);
     }
     expect(Object.keys(d.items).sort()).toEqual(Object.keys(addonStoreEn.items).sort());
-    expect(d.progress(2, 9)).toMatch(/2/);
+    expect(d.progress(2, 9)).toMatch(/9/);
   });
 });
