@@ -3,11 +3,10 @@
  * so an unknown date of birth is allowed; a known one under 18 is not.
  */
 import { ageFromDob } from '../energy';
-import type { Temper } from './types';
 
 export const SAVAGE_MIN_AGE = 18;
 /** The temper an under-18 user falls back to. */
-export const UNDERAGE_TEMPER: Temper = 3;
+export const UNDERAGE_TEMPER = 3 as const;
 
 /** True when the date of birth shows the person is under 18. Unknown dob → false. */
 export function isUnderSavageAge(
@@ -28,16 +27,16 @@ export function savageAllowedFor(
 }
 
 /** A temper capped for the person's age: Savage becomes Neutral under 18. */
-export function capTemperForAge(
-  temper: Temper,
+export function capTemperForAge<T extends number>(
+  temper: T,
   dob: string | null | undefined,
   now: number = Date.now(),
-): Temper {
+): T | typeof UNDERAGE_TEMPER {
   return temper === 5 && isUnderSavageAge(dob, now) ? UNDERAGE_TEMPER : temper;
 }
 
 /** A coach-settings patch with Savage taken out when the person is under 18. */
-export function clampForAge<T extends { temper?: Temper }>(
+export function clampForAge<T extends { temper?: number }>(
   input: T,
   dob: string | null | undefined,
   now: number = Date.now(),
