@@ -11,10 +11,17 @@
   touch-action: none; /* the drag is read in WheelColumn */
   user-select: none;
   scrollbar-width: none;
-  padding: calc(var(--wheel-row) * (var(--wheel-rows) - 1) / 2) 0;
   /* alpha-only mask: the colour is irrelevant, so no palette token is needed */
   mask-image: linear-gradient(transparent, black 30%, black 70%, transparent);
   outline: 0;
+}
+.uiwheel-i:first-child {
+  margin-top: calc(
+    var(--wheel-row) * (var(--wheel-rows) - 1) / 2
+  ); /* room so the first row can reach the band */
+}
+.uiwheel-i:last-child {
+  margin-bottom: calc(var(--wheel-row) * (var(--wheel-rows) - 1) / 2);
 }
 .uiwheel::-webkit-scrollbar {
   display: none;
@@ -172,6 +179,7 @@
   font-weight: 600;
   color: transparent;
   caret-color: var(--color-accent);
+  padding: 0;
   pointer-events: none; /* taps and drags go to the drum; a tap on the number focuses this */
   background: none;
   border: 0;

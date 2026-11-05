@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { WheelPicker, type WheelPickerProps } from './WheelPicker';
 import { Sheet } from './Overlays';
 import { Button } from './Button';
+import { SectionLabel } from './SectionLabel';
 import { Row, Stack } from '../../stories/LocaleMatrix';
 
 const meta = {
@@ -82,16 +83,7 @@ export const InlineVariants: Story = {
     <Stack>
       {VARIANTS.map(([name, v, size]) => (
         <div key={name}>
-          <p
-            style={{
-              margin: '0 0 6px',
-              font: '600 11px var(--font)',
-              letterSpacing: '0.08em',
-              color: 'var(--color-text-faint)',
-            }}
-          >
-            {name}
-          </p>
+          <SectionLabel>{name}</SectionLabel>
           <Pair v={v} size={size} />
         </div>
       ))}
