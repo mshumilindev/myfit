@@ -1949,7 +1949,9 @@ function AppMain() {
             onSelect={goTab}
             fab={{
               ariaLabel: t.startNew,
-              onClick: () => setStartOpen(true),
+              closeLabel: t.close,
+              open: startOpen,
+              onClick: () => setStartOpen((v) => !v),
               attention: !trainedToday,
             }}
           />

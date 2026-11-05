@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { TabBar, type TabBarItem } from './TabBar';
 
 afterEach(cleanup);
@@ -157,5 +157,84 @@ describe('TabBar', () => {
     const { container } = render(<TabBar items={items} onSelect={() => {}} breakpoint="coach" />);
     expect(container.querySelector('.tabbar-wrap--coach')).not.toBeNull();
     expect(container.querySelector('nav')?.className).toContain('tabbar--coach');
+  });
+
+  describe('Start fab → × (SPO-470)', () => {
+    const fab = (open: boolean, onClick = () => {}) => ({
+      ariaLabel: 'Start',
+      closeLabel: 'Close',
+      open,
+      onClick,
+    });
+
+    it('closed: a "Start" button, collapsed, no open classes', () => {
+      const { container } = render(<TabBar items={items} onSelect={() => {}} fab={fab(false)} />);
+      const b = screen.getByRole('button', { name: 'Start' });
+      expect(b.getAttribute('aria-expanded')).toBe('false');
+      expect(b.className).not.toContain('is-open');
+      expect(container.querySelector('.tabbar-wrap--fab-open')).toBeNull();
+    });
+
+    it('open: renamed "Close", expanded; a twin above the drawer turns while the bar button hides', async () => {
+      const { container } = render(<TabBar items={items} onSelect={() => {}} fab={fab(true)} />);
+      const b = screen.getByRole('button', { name: 'Close' });
+      expect(b.getAttribute('aria-expanded')).toBe('true');
+      expect(container.querySelector('.tabbar-wrap--fab-open')).not.toBeNull();
+      expect(container.querySelector('.tabbar-fab')?.getAttribute('aria-hidden')).toBe('true');
+      const twin = document.body.querySelector('.tabbar-fab-layer .tabbar-fab');
+      expect(twin).not.toBeNull();
+      await waitFor(() => expect(twin?.className).toContain('is-open'));
+    });
+
+    it('closing turns the twin back first, then removes it', async () => {
+      const { rerender, container } = render(
+        <TabBar items={items} onSelect={() => {}} fab={fab(true)} />,
+      );
+      const twin = document.body.querySelector('.tabbar-fab-layer .tabbar-fab');
+      await waitFor(() => expect(twin?.className).toContain('is-open'));
+      rerender(<TabBar items={items} onSelect={() => {}} fab={fab(false)} />);
+      await waitFor(() => expect(twin?.className).not.toContain('is-open'));
+      await waitFor(() => expect(document.body.querySelector('.tabbar-fab-layer')).toBeNull(), {
+        timeout: 1500,
+      });
+      expect(container.querySelector('.tabbar-wrap--fab-open')).toBeNull();
+    });
+
+    it('steps back while another drawer is open on top of the Start drawer', async () => {
+      render(<TabBar items={items} onSelect={() => {}} fab={fab(true)} />);
+      const layer = () => document.body.querySelector('.tabbar-fab-layer');
+      expect(layer()?.className).not.toContain('is-covered');
+      const over = document.createElement('div');
+      over.className = 'portal-layer';
+      over.innerHTML = '<div class="sheet"></div>';
+      document.body.appendChild(over);
+      await waitFor(() => expect(layer()?.className).toContain('is-covered'));
+      over.remove();
+      await waitFor(() => expect(layer()?.className).not.toContain('is-covered'));
+    });
+
+    it('the same button opens and closes: it only reports the click', () => {
+      const onClick = vi.fn();
+      const { rerender } = render(
+        <TabBar items={items} onSelect={() => {}} fab={fab(false, onClick)} />,
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }));
+      rerender(<TabBar items={items} onSelect={() => {}} fab={fab(true, onClick)} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+      expect(onClick).toHaveBeenCalledTimes(2);
+    });
+
+    it('without a closeLabel the name stays "Start" (older callers)', () => {
+      render(
+        <TabBar
+          items={items}
+          onSelect={() => {}}
+          fab={{ ariaLabel: 'Start', onClick: () => {}, open: true }}
+        />,
+      );
+      expect(screen.getByRole('button', { name: 'Start' }).getAttribute('aria-expanded')).toBe(
+        'true',
+      );
+    });
   });
 });

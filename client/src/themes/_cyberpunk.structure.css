@@ -93,7 +93,8 @@ html[data-theme='cyberpunk'] .tabbar[data-ind]::after {
 }
 
 /* The Start button stays a true circle: it sits in the circular notch of the bar. */
-html[data-theme='cyberpunk'] .tabbar-wrap .tabbar-fab {
+html[data-theme='cyberpunk'] .tabbar-wrap .tabbar-fab,
+html[data-theme='cyberpunk'] .tabbar-fab-layer .tabbar-fab {
   border-radius: var(--r-round);
 }
 

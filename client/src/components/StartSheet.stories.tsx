@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { TabBar } from './ui/TabBar';
 import { StartSheet } from './StartSheet';
 import { atDay, seedStore, storyShell, workoutOn } from '../stories/fixtures';
 import { PageFrame } from '../stories/PageFrame';
@@ -53,6 +55,43 @@ export const DoneToday: Story = {
 
 /** Not trained today: arrow hero, no ring. */
 export const NotToday: Story = {
+  loaders: [
+    () => {
+      seedStore({ workouts: [workoutOn('start-sheet-past', 3)] });
+      return {};
+    },
+  ],
+};
+
+function DrawerWithFab() {
+  const [open, setOpen] = useState(true);
+  return (
+    <>
+      <div className="screen" />
+      <TabBar
+        items={[
+          { id: 'today', label: 'Today', icon: 'house', active: true },
+          { id: 'overview', label: 'Overview', icon: 'chart-line-up' },
+          { id: 'gyms', label: 'Gyms', icon: 'map-pin' },
+        ]}
+        onSelect={() => undefined}
+        apps={{ label: 'Apps', ariaLabel: 'Apps', onClick: () => undefined }}
+        fab={{
+          ariaLabel: 'Start',
+          closeLabel: 'Close',
+          open,
+          onClick: () => setOpen((v) => !v),
+        }}
+      />
+      {open && <StartSheet shell={storyShell} inline={false} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
+/** SPO-470: the drawer is up — the Start button has turned into a × above it and closes it; tap it to turn it back. */
+export const DrawerOpenFab: Story = {
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  render: () => <DrawerWithFab />,
   loaders: [
     () => {
       seedStore({ workouts: [workoutOn('start-sheet-past', 3)] });

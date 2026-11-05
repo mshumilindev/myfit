@@ -1,5 +1,13 @@
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { Icon } from '../../ui';
+import { Portal } from './overlays/Portal';
 import { Badge } from './Badge';
 import { ChristmasWreath } from './ChristmasWreath';
 import { HalloweenLantern } from './HalloweenLantern';
@@ -46,7 +54,14 @@ export interface TabBarProps<Id extends string = string> {
   activeFill?: boolean;
   /** The floating Start "+" in the notch. */
   /** `attention` pulses a slow ripple to invite a session; turn it off once one is done today. */
-  fab?: { ariaLabel: string; onClick: () => void; attention?: boolean };
+  /** `open`: the Start drawer is up — the plus turns into a ×, stays above the drawer and closes it (`closeLabel`). */
+  fab?: {
+    ariaLabel: string;
+    onClick: () => void;
+    attention?: boolean;
+    open?: boolean;
+    closeLabel?: string;
+  };
   /**
    * Which width swaps this bar for the rail. `app` (default) keeps the real
    * app's 720; `coach` keeps the bar up to 767 (see breakpoints.ts).
@@ -123,12 +138,15 @@ export function TabBar<Id extends string = string>({
       </button>
     );
   };
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const { shown, turned, covered, layerRef } = useFabLayer(wrapRef, !!fab?.open);
   const cols = items.length + (apps ? 1 : 0) + (more ? 1 : 0) + (fab ? 1 : 0);
   // A bar with a single destination navigates nowhere (the admin Users app): no bar at all.
   if (cols <= 1) return null;
   return (
     <div
-      className={`tabbar-wrap${fab ? ' tabbar-wrap--fab' : ''}${breakpoint === 'coach' ? ' tabbar-wrap--coach' : ''}`}
+      ref={wrapRef}
+      className={`tabbar-wrap${fab ? ' tabbar-wrap--fab' : ''}${shown ? ' tabbar-wrap--fab-open' : ''}${breakpoint === 'coach' ? ' tabbar-wrap--coach' : ''}`}
     >
       <nav
         ref={navRef}
@@ -161,18 +179,111 @@ export function TabBar<Id extends string = string>({
           </button>
         )}
       </nav>
-      {fab && (
-        <button
-          type="button"
-          className={`tabbar-fab${fab.attention ? ' is-attention' : ''}`}
-          onClick={fab.onClick}
-          aria-label={fab.ariaLabel}
-        >
-          <Icon name="plus" weight="bold" />
-          <HalloweenLantern />
-          <ChristmasWreath />
-        </button>
+      {fab && <FabButton fab={fab} open={false} hidden={shown} />}
+      {fab && shown && (
+        <Portal>
+          <div className={`tabbar-fab-layer${covered ? ' is-covered' : ''}`} ref={layerRef}>
+            <FabButton fab={fab} open={turned} twin />
+          </div>
+        </Portal>
       )}
     </div>
   );
 }
+
+function FabButton({
+  fab,
+  open,
+  hidden,
+  twin,
+}: {
+  fab: NonNullable<TabBarProps['fab']>;
+  open: boolean;
+  hidden?: boolean;
+  /** The portal twin: no attention ripple of its own (the real button's keeps running underneath). */
+  twin?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className={`tabbar-fab${fab.attention && !twin ? ' is-attention' : ''}${open ? ' is-open' : ''}`}
+      onClick={fab.onClick}
+      aria-label={fab.open && fab.closeLabel ? fab.closeLabel : fab.ariaLabel}
+      aria-expanded={fab.open ?? false}
+      aria-hidden={hidden || undefined}
+      tabIndex={hidden ? -1 : undefined}
+    >
+      <Icon name="plus" weight="bold" />
+      <HalloweenLantern />
+      <ChristmasWreath />
+    </button>
+  );
+}
+
+/**
+ * While the Start drawer is up the button must sit above it, and the drawer lives in a portal on <body> — a
+ * button inside the bar can never outrank it when any ancestor makes its own stacking layer. So the open button is
+ * drawn by a twin in the same portal layer, fixed over the real one (which hides meanwhile). It mounts as a plus,
+ * turns on the next frame, and on close turns back before it is removed.
+ */
+function useFabLayer(wrapRef: RefObject<HTMLDivElement | null>, open: boolean) {
+  const [shown, setShown] = useState(false);
+  const [turned, setTurned] = useState(false);
+  const [covered, setCovered] = useState(false);
+  const [wasOpen, setWasOpen] = useState(false);
+  const layerRef = useRef<HTMLDivElement>(null);
+  // opening mounts the twin as a plus; closing turns it back (state follows the prop, adjusted while rendering)
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setShown(true);
+    else setTurned(false);
+  }
+  useEffect(() => {
+    if (open) {
+      const id = requestAnimationFrame(() => requestAnimationFrame(() => setTurned(true)));
+      return () => cancelAnimationFrame(id);
+    }
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const id = window.setTimeout(() => setShown(false), reduce ? 0 : FAB_TURN_MS);
+    return () => window.clearTimeout(id);
+  }, [open]);
+  // the twin sits exactly over the bar (re-measured on resize / rotation)
+  useLayoutEffect(() => {
+    if (!shown) return;
+    const place = () => {
+      const w = wrapRef.current;
+      const l = layerRef.current;
+      if (!w || !l) return;
+      const r = w.getBoundingClientRect();
+      l.style.setProperty('--fab-layer-left', `${r.left}px`);
+      l.style.setProperty('--fab-layer-top', `${r.top}px`);
+      l.style.setProperty('--fab-layer-w', `${r.width}px`);
+      l.style.setProperty('--fab-layer-h', `${r.height}px`);
+    };
+    place();
+    window.addEventListener('resize', place);
+    return () => window.removeEventListener('resize', place);
+  }, [shown, wrapRef]);
+  // The button belongs to the Start drawer only: a drawer / page opened on top of it (gym picker, activity, …)
+  // is a later layer in <body>, and then the button steps back instead of floating over it.
+  useEffect(() => {
+    if (!shown) return;
+    const check = () => {
+      let n = layerRef.current?.parentElement?.nextElementSibling ?? null;
+      let over = false;
+      for (; n; n = n.nextElementSibling)
+        if (n.matches('.uifp-layer') || n.querySelector('.scrim, .sheet')) over = true;
+      setCovered(over);
+    };
+    const first = requestAnimationFrame(check);
+    const mo = new MutationObserver(check);
+    mo.observe(document.body, { childList: true });
+    return () => {
+      cancelAnimationFrame(first);
+      mo.disconnect();
+    };
+  }, [shown]);
+  return { shown, turned, covered, layerRef };
+}
+/** Longer than the turn itself (TabBar.css `--fab-turn-dur`), so the twin is removed once it is a plus again. */
+const FAB_TURN_MS = 360;

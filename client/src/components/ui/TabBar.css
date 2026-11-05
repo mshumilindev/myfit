@@ -50,6 +50,10 @@
   display: block;
 }
 .tabbar-fab {
+  /* the plus turns by this much and how fast; the same pair turns it back */
+  --fab-turn: 135deg;
+  --fab-turn-dur: 0.32s;
+  --fab-turn-ease: cubic-bezier(0.34, 1.3, 0.44, 1);
   position: absolute;
   left: 50%;
   top: -14px;
@@ -67,6 +71,43 @@
   cursor: pointer;
   z-index: var(--z-31);
   -webkit-tap-highlight-color: transparent;
+}
+/* Only the plus turns (the button stays put). Themes that draw their own artwork hide this icon and keep it. */
+.tabbar-fab > .ui-icon {
+  transition: transform var(--fab-turn-dur) var(--fab-turn-ease);
+}
+.tabbar-fab.is-open > .ui-icon {
+  transform: rotate(var(--fab-turn));
+}
+/* Open: a twin of the button (TabBar.tsx `useFabLayer`) is drawn in the portal layer, fixed over the bar, above
+   the drawer and its scrim; the real one hides meanwhile. */
+.tabbar-wrap--fab-open > .tabbar-fab {
+  visibility: hidden;
+}
+.tabbar-fab-layer {
+  position: fixed;
+  left: var(--fab-layer-left, 0);
+  top: var(--fab-layer-top, 0);
+  width: var(--fab-layer-w, 100%);
+  height: var(--fab-layer-h, 0);
+  /* level with the drawers, and later in <body> than the Start drawer: above it, below whatever opens on top of it */
+  z-index: var(--z-51);
+  pointer-events: none;
+  transition: opacity 0.16s ease;
+}
+.tabbar-fab-layer.is-covered {
+  opacity: 0;
+}
+.tabbar-fab-layer.is-covered > .tabbar-fab {
+  pointer-events: none;
+}
+.tabbar-fab-layer > .tabbar-fab {
+  pointer-events: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tabbar-fab > .ui-icon {
+    transition: none;
+  }
 }
 /* Attention ripple: two slow rings radiate from the Start button while `is-attention` (transform +
    opacity only, staggered, off for reduced-motion users). */

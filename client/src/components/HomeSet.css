@@ -156,6 +156,10 @@
   width: 100%;
 }
 
+/* The Start button stays over the drawer as its × (TabBar `fab.open`): keep the content clear of it. */
+.sheet.start-sheet {
+  padding-bottom: calc(var(--sz-64) + var(--s-40) + var(--safe-bottom));
+}
 /* Start sheet rhythm: hero → grid spaced like the grid itself, same radius. */
 .start-sheet .ss-hero {
   border-radius: var(--r-20);
