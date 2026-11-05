@@ -5,7 +5,7 @@ import { Segmented } from '../components/ui/Segmented';
 import { WheelPicker } from '../components/ui/WheelPicker';
 import { storeInputMode, useInputMode, type InputMode } from '../inputModeStore';
 import { useT } from '../i18n';
-import { wheelDetent } from '../wheelFeedback';
+import { wheelDetent, wheelGrab } from '../wheelFeedback';
 
 /** What a set's number is: the wheel and the stepper use different ranges / steps for each (SPO-318). */
 export type SetField = 'reps' | 'weight';
@@ -41,6 +41,7 @@ export function SetNumberInput(props: {
     return (
       <WheelPicker
         onDetent={wheelDetent}
+        onGrab={wheelGrab}
         {...rest}
         label={field === 'reps' ? t.reps : t.weightCol}
         value={value}

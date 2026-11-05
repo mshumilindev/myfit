@@ -1,12 +1,13 @@
 /**
  * What a wheel picker does when a row passes the selection band: a haptic tick (the iOS picker's detent) and, when a
  * sound is plugged in, its click. The kit's WheelPicker only exposes `onDetent`; the screen wires this in, so the kit
- * stays free of platform code. Nothing is stored or sent — the sound is off until something calls `setWheelSound`.
+ * stays free of platform code. Nothing is stored or sent — a quiet tick plays by default; `setWheelSound(null)` mutes it.
  */
 import { haptic } from './haptics';
 
 type Sound = (() => void) | null;
-let sound: Sound = null;
+/** A quiet tick by default; `setWheelSound(null)` mutes it. */
+let sound: Sound = () => tickSound();
 let last = 0;
 /** Fast flicks pass dozens of rows a second; one pulse per frame is already more than a finger can tell apart. */
 const MIN_GAP_MS = 28;
@@ -35,6 +36,20 @@ export function tickSound(): void {
     osc.connect(gain).connect(ctx.destination);
     osc.start(t);
     osc.stop(t + 0.015);
+  } catch {
+    /* best effort */
+  }
+}
+
+/** Call on touch: a browser starts audio only after a gesture, so the context is created / resumed here. */
+export function wheelGrab(): void {
+  try {
+    const Ctor =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctor) return;
+    ctx ??= new Ctor();
+    if (ctx.state === 'suspended') void ctx.resume();
   } catch {
     /* best effort */
   }

@@ -22,6 +22,8 @@ export interface WheelColumnProps {
   onTapSelected?: () => void;
   /** Fires each time a row passes the selection band while the user spins the drum (haptic / sound hook). */
   onDetent?: () => void;
+  /** The pointer went down on the drum — a user gesture, where a browser lets audio start (see `wheelFeedback.ts`). */
+  onGrab?: () => void;
 }
 
 /** Movement under this is a tap, over it a drag (the usual touch slop). */
@@ -51,6 +53,7 @@ export function WheelColumn({
   onFocus,
   onTapSelected,
   onDetent,
+  onGrab,
 }: WheelColumnProps) {
   const detent = useRef(-1);
   /** The row under the band right now — follows the drum while it moves; `index` is what is committed. */
@@ -152,6 +155,7 @@ export function WheelColumn({
     const el = ref.current;
     if (!el) return;
     stopAnim();
+    onGrab?.();
     drag.current = {
       id: e.pointerId,
       y0: e.clientY,
@@ -174,6 +178,7 @@ export function WheelColumn({
       el.setPointerCapture?.(e.pointerId);
     }
     el.scrollTop = clampTop(d.top0 + dy);
+    checkDetent(el);
     const now = performance.now();
     d.samples.push({ t: now, top: el.scrollTop });
     while (d.samples.length > 2 && now - d.samples[0].t > VELOCITY_WINDOW) d.samples.shift();
@@ -228,6 +233,15 @@ export function WheelColumn({
     for (const r of painted.current) if (!next.includes(r)) r.style.removeProperty('--o');
     painted.current = next;
   }
+  /** A row crossed the band. Also called from the drag itself: iOS only gives a haptic inside a user gesture. */
+  function checkDetent(el: HTMLElement): void {
+    if (!onDetent) return;
+    const i = Math.round(el.scrollTop / rowH());
+    if (detent.current !== i) {
+      if (detent.current !== -1) onDetent();
+      detent.current = i;
+    }
+  }
   function onScroll(): void {
     userScrolling.current = true;
     const el = ref.current;
@@ -236,13 +250,7 @@ export function WheelColumn({
       const l = Math.min(items.length - 1, Math.max(0, Math.round(el.scrollTop / rowH())));
       setLive(l);
     }
-    if (el && onDetent) {
-      const i = Math.round(el.scrollTop / rowH());
-      if (detent.current !== i) {
-        if (detent.current !== -1) onDetent();
-        detent.current = i;
-      }
-    }
+    if (el) checkDetent(el);
     window.clearTimeout(settle.current);
     // a drag or glide commits itself when it ends; the debounce is for native scrolls (wheel, scrollbar)
     if (!moving.current) settle.current = window.setTimeout(read, 120);

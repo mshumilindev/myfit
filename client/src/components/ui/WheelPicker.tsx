@@ -27,6 +27,8 @@ export interface WheelPickerProps extends Omit<HTMLAttributes<HTMLDivElement>, '
   onFocus?: () => void;
   /** A row passed the selection band while spinning — wire a haptic / sound here (see `wheelFeedback.ts`). */
   onDetent?: () => void;
+  /** The drum was touched (a user gesture): unlock audio here. */
+  onGrab?: () => void;
 }
 
 function fmt(n: number, decimals: number): string {
@@ -52,6 +54,7 @@ export function WheelPicker({
   disabled,
   onFocus,
   onDetent,
+  onGrab,
   className,
   ...rest
 }: WheelPickerProps) {
@@ -207,6 +210,7 @@ export function WheelPicker({
               onFocus={onFocus}
               onTapSelected={openKeyboard}
               onDetent={onDetent}
+              onGrab={onGrab}
             />
           ) : (
             <>
@@ -220,6 +224,7 @@ export function WheelPicker({
                 onFocus={onFocus}
                 onTapSelected={openKeyboard}
                 onDetent={onDetent}
+                onGrab={onGrab}
               />
               {decimals > 0 && (
                 <span className="uiwp-dot" aria-hidden="true">
@@ -238,6 +243,7 @@ export function WheelPicker({
                   onFocus={onFocus}
                   onTapSelected={openKeyboard}
                   onDetent={onDetent}
+                  onGrab={onGrab}
                 />
               )}
             </>
