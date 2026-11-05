@@ -1397,6 +1397,7 @@ export const en = {
   // Today configurator (Bento sections)
   todayCustomize: 'Customize Today',
   todayThemes: 'Themes',
+  todayAddons: 'Add-ons',
   themesTitle: 'Themes',
   themesSection: 'Pick a theme',
   themesApplied: 'Applied',

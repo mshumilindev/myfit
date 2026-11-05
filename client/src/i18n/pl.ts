@@ -1413,6 +1413,7 @@ export const pl: Strings = {
   // Today configurator (Bento sections)
   todayCustomize: 'Dostosuj Today',
   todayThemes: 'Motywy',
+  todayAddons: 'Dodatki',
   themesTitle: 'Motywy',
   themesSection: 'Wybierz motyw',
   themesApplied: 'Zastosowano',

@@ -1715,6 +1715,17 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             >
               {t.todayThemes}
             </Button>
+            {getRole() !== 'manager' && (
+              <Button
+                variant="ghost"
+                fullWidth
+                icon="squares-four"
+                className="td-addons"
+                onClick={() => setHash('#/store')}
+              >
+                {t.todayAddons}
+              </Button>
+            )}
           </>
         )}
         {dayDrawer != null && (

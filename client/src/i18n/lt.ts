@@ -1429,6 +1429,7 @@ export const lt: Strings = {
   // Today configurator (Bento sections)
   todayCustomize: 'Tinkinti Today',
   todayThemes: 'Temos',
+  todayAddons: 'Papildiniai',
   themesTitle: 'Temos',
   themesSection: 'Pasirinkite temą',
   themesApplied: 'Pritaikyta',

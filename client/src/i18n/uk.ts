@@ -1448,6 +1448,7 @@ export const uk: Strings = {
   // Today configurator (Bento sections)
   todayCustomize: 'Налаштувати Today',
   todayThemes: 'Теми',
+  todayAddons: 'Додатки',
   themesTitle: 'Теми',
   themesSection: 'Оберіть тему',
   themesApplied: 'Застосовано',

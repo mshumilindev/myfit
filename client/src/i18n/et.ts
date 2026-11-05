@@ -1406,6 +1406,7 @@ export const et: Strings = {
   // Today configurator (Bento sections)
   todayCustomize: 'Kohanda Today',
   todayThemes: 'Teemad',
+  todayAddons: 'Lisad',
   themesTitle: 'Teemad',
   themesSection: 'Vali teema',
   themesApplied: 'Rakendatud',
