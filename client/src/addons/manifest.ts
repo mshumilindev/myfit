@@ -76,7 +76,6 @@ export const ADDONS: readonly AddonManifest[] = [
   { id: 'themes', kind: 'app', tone: 7, roles: ALL, category: 'look' },
   { id: 'exercise-media', kind: 'app', tone: 3, roles: ALL, category: 'look' },
   { id: 'learn', kind: 'app', tone: 1, roles: MEMBER, category: 'learn' },
-  { id: 'calls', kind: 'app', tone: 9, roles: ALL, category: 'coach' },
   // Gyms is core for a member and an add-on for trainer and admin.
   { id: 'gyms', kind: 'addon', tone: 5, roles: COACH, category: 'coach' },
   // Not available yet (the store shows them as Coming soon).
