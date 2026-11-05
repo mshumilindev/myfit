@@ -45,11 +45,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
         <div className="apex-body">
           <div className="apex-scroll">
             <div className="as-page">
-              <PageHead
-                back={{ label: st.back, onClick: close }}
-                title={st.title}
-                sub={tab === 'installed' ? st.installedSub : undefined}
-              />
+              <PageHead back={{ label: st.back, onClick: close }} title={st.title} />
               <Segmented<StoreTab>
                 tabs
                 fill

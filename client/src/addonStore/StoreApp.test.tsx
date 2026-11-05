@@ -54,7 +54,6 @@ describe('StoreApp tabs', () => {
     setHash('#/store/installed', true);
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
     expect(screen.getByText('Only the base so far')).toBeTruthy();
-    expect(screen.getByText('Same on all your devices')).toBeTruthy();
   });
 
   it('switches tabs through the address', () => {

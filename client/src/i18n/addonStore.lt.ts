@@ -23,7 +23,6 @@ export const addonStoreLt: typeof addonStoreEn = {
   kindAddon: 'Priedas',
   usesParent: (name) => `Veikia su: ${name}`,
   turnOn: (name) => `Įjungti: ${name}`,
-  installedSub: 'Vienodai visuose jūsų įrenginiuose',
   installedEmptyTitle: 'Kol kas tik pagrindas',
   installedEmptyBody: 'Čia atsiras įjungtos programos ir priedai.',
   installedStatus: 'Įjungta',

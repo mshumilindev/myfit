@@ -23,7 +23,6 @@ export const addonStoreUk: typeof addonStoreEn = {
   kindAddon: 'Додаток',
   usesParent: (name) => `Працює з: ${name}`,
   turnOn: (name) => `Увімкнути: ${name}`,
-  installedSub: 'Однаково на всіх ваших пристроях',
   installedEmptyTitle: 'Поки лише основа',
   installedEmptyBody: 'Застосунки й додатки, які ви ввімкнете, з’являться тут.',
   installedStatus: 'Увімкнено',

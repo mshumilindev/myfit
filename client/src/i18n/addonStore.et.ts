@@ -23,7 +23,6 @@ export const addonStoreEt: typeof addonStoreEn = {
   kindAddon: 'Lisa',
   usesParent: (name) => `Kasutab: ${name}`,
   turnOn: (name) => `Lülita sisse: ${name}`,
-  installedSub: 'Ühtemoodi kõigis sinu seadmetes',
   installedEmptyTitle: 'Praegu ainult alus',
   installedEmptyBody: 'Sisse lülitatud rakendused ja lisad ilmuvad siia.',
   installedStatus: 'Sees',

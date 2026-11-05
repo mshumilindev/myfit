@@ -25,7 +25,6 @@ export const addonStoreEn = {
   kindAddon: 'Add-on',
   usesParent: (name: string) => `Uses ${name}`,
   turnOn: (name: string) => `Turn on ${name}`,
-  installedSub: 'Same on all your devices',
   installedEmptyTitle: 'Only the base so far',
   installedEmptyBody: 'Apps and add-ons you turn on appear here.',
   installedStatus: 'Turned on',

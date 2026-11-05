@@ -23,7 +23,6 @@ export const addonStorePl: typeof addonStoreEn = {
   kindAddon: 'Dodatek',
   usesParent: (name) => `Działa z: ${name}`,
   turnOn: (name) => `Włącz: ${name}`,
-  installedSub: 'Tak samo na wszystkich Twoich urządzeniach',
   installedEmptyTitle: 'Na razie tylko podstawa',
   installedEmptyBody: 'Włączone aplikacje i dodatki pojawią się tutaj.',
   installedStatus: 'Włączone',
