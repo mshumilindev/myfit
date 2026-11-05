@@ -17,7 +17,7 @@ if (typeof localStorage !== 'undefined') {
   const { resetOverlayBackForTest, overlayBackPendingForTest } =
     await import('../../components/ui/overlays/overlayBack');
   afterEach(async () => {
-    if (overlayBackPendingForTest() && !vi.isFakeTimers())
+    for (let n = 0; n < 5 && overlayBackPendingForTest() && !vi.isFakeTimers(); n += 1)
       await new Promise((r) => setTimeout(r, 10));
     resetOverlayBackForTest();
   });
