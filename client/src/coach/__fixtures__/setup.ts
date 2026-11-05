@@ -2,7 +2,7 @@
  * Vitest setup: the sample Coach world is available to every test through the test hooks (never in an app build).
  * Node-environment test files (no DOM, no localStorage) do not load it: they test adapters and codecs, not screens.
  */
-import { beforeEach } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 
 if (typeof localStorage !== 'undefined') {
   const { setLocale } = await import('../../i18n');
@@ -12,5 +12,14 @@ if (typeof localStorage !== 'undefined') {
   // appears) and does not weaken an assertion: a missing element still fails, only later.
   const { configure } = await import('@testing-library/dom');
   configure({ asyncUtilTimeout: 5000 });
+  // A drawer that unmounts gives its history entry back with history.back() (SPO-466). jsdom delivers that traversal
+  // asynchronously, so without this it lands inside the NEXT test and moves its hash. Let it arrive, then reset the module.
+  const { resetOverlayBackForTest, overlayBackPendingForTest } =
+    await import('../../components/ui/overlays/overlayBack');
+  afterEach(async () => {
+    if (overlayBackPendingForTest() && !vi.isFakeTimers())
+      await new Promise((r) => setTimeout(r, 10));
+    resetOverlayBackForTest();
+  });
 }
 export {};

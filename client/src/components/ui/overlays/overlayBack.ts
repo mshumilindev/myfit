@@ -61,6 +61,11 @@ export function useOverlayBack(close: () => void, enabled: boolean): void {
   }, [enabled]);
 }
 
+/** Tests only: a drawer gave its history entry back and the popstate has not arrived yet. */
+export function overlayBackPendingForTest(): boolean {
+  return swallow > 0;
+}
+
 /** Tests only: a popstate that a faked timer never delivered must not stay counted as "swallow". */
 export function resetOverlayBackForTest(): void {
   swallow = 0;
