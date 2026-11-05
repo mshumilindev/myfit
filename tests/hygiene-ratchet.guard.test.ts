@@ -25,7 +25,12 @@ function walk(dir: string, out: string[] = []): string[] {
 const rel = (f: string) => relative(SRC, f).split('\\').join('/');
 /** The public landing page is its own design (docs/adr/006-landing-outside-kit.md), not an app screen. */
 const LANDING = 'views/landing/';
-const all = walk(SRC).filter((f) => !relative(SRC, f).split('\\').join('/').startsWith(LANDING));
+/** The add-on store has its own kit and look (docs/adr/015-addon-store-kit.md). */
+const STORE = ['store-kit/', 'addonStore/'];
+const all = walk(SRC).filter((f) => {
+  const r = relative(SRC, f).split('\\').join('/');
+  return !r.startsWith(LANDING) && !STORE.some((d) => r.startsWith(d));
+});
 const isTest = (f: string) => /\.(test|stories|guard\.test)\.[tj]sx?$/.test(f);
 const inKit = (f: string) => rel(f).startsWith('components/ui/');
 const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');

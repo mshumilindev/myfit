@@ -38,7 +38,11 @@ if (only && only.length === 0) {
 const result = await stylelint.lint({
   cwd: root,
   configFile: join(root, 'stylelint.config.mjs'),
-  files: only ?? ['client/src/**/*.css'],
+  // The add-on store has its own kit and look (docs/adr/015-addon-store-kit.md).
+  files: (only ?? ['client/src/**/*.css']).concat([
+    '!client/src/store-kit/**',
+    '!client/src/addonStore/**',
+  ]),
   ignoreDisables: false,
 });
 

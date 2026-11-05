@@ -98,6 +98,7 @@ import { REHAB_STAGES, stageIndex, inFullRest, nextStage } from '../injury';
 import { useGymStep } from '../components/useGymStep';
 import { Tag } from '../components/ui/Tag';
 import { setHash } from '../route';
+import '../today/todayAddons.css';
 
 type Store = ReturnType<typeof useStore>;
 
