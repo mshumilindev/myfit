@@ -61,8 +61,8 @@
   height: 36px;
   border: 0;
   border-radius: 50%;
-  background: var(--sk-fill, rgba(120, 120, 128, 0.16));
-  color: inherit;
+  background: var(--chip);
+  color: var(--fg);
   cursor: pointer;
 }
 .sk-exit svg {
@@ -248,4 +248,69 @@
     display: flex;
     width: 100%;
   }
+}
+
+/* Discover bento (design 01) */
+.sk-bento-2 {
+  grid-template-columns: 1fr 1fr;
+}
+.sk-span2 {
+  grid-column: span 2;
+}
+.sk-mta {
+  margin-top: auto;
+}
+.sk-bn {
+  min-height: 168px;
+}
+.sk-bn.sk-bn-hero {
+  min-height: 216px;
+}
+.sk-bn.sk-span2:not(.sk-bn-hero) {
+  min-height: 128px;
+}
+.sk-bn-btn {
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+.sk-bn-title,
+.sk-bn-name {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sk-bn-title {
+  margin-top: 12px;
+  font-size: 34px;
+  line-height: 38px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.sk-bn-name {
+  font-size: 17px;
+  font-weight: 600;
+}
+.sk-bn-link {
+  display: inline-flex;
+  white-space: nowrap;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+}
+.sk-bn-w .sk-bn-link {
+  color: var(--acc-t);
 }

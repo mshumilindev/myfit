@@ -4,6 +4,7 @@ import type { Role } from '../api';
 import { ADDONS, addonById, type AddonManifest } from '../addons/manifest';
 import { installQueue, queueRemove } from '../addons/queue';
 import { SkBtn, SkCard, SkChip, SkIcon, SkList, SkBadge } from '../store-kit/parts';
+import { DiscoverBento } from './DiscoverBento';
 import { recommend } from './recommend';
 import { MIN_QUERY, searchItems } from './search';
 import { availableForRole, comingSoonForRole, STORE_CATEGORIES } from './storeCatalog';
@@ -68,11 +69,11 @@ export function Discover({
     const stable = recommend(role, enabled, []);
     return [...stable, ...recommend(role, enabled, queued).filter((id) => !stable.includes(id))];
   }, [role, enabled, queued]);
-  const soon = comingSoonForRole(role);
   const total = availableForRole(role).length;
   const done = total > 0 && rec.length === 0;
   return (
     <>
+      <DiscoverBento role={role} ctx={ctx} go={go} />
       {!done && (
         <Section
           title={st.recommended}
@@ -85,21 +86,11 @@ export function Discover({
           <Rows ids={rec.slice(0, 4)} ctx={ctx} />
         </Section>
       )}
-      <Section title={st.yourSpotter}>
-        <SkCard className="sk-p20">
-          <div className="sk-rowf sk-g12" style={{ alignItems: 'baseline' }}>
-            <div className="sk-big">{enabled.size}</div>
-            <div className="sk-t-s">{st.progress(enabled.size, total)}</div>
-          </div>
-          <div className="sk-pg sk-mt16">
-            <i style={{ width: `${total ? Math.round((enabled.size / total) * 100) : 0}%` }} />
-          </div>
-          {done && <div className="sk-t-h3 sk-mt16">{st.allTurnedOn}</div>}
-        </SkCard>
-      </Section>
-      {soon.length > 0 && (
-        <Section title={st.comingSoon}>
-          <Rows ids={soon.map((m) => m.id)} ctx={ctx} />
+      {done && (
+        <Section title={st.yourSpotter}>
+          <SkCard className="sk-p20">
+            <div className="sk-t-h3">{st.allTurnedOn}</div>
+          </SkCard>
         </Section>
       )}
     </>

@@ -148,6 +148,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
               </button>
             )}
             <div className="sk-hdr-end">
+              <SkAvatar initials={initials} label={name || st.title} onClick={onOpenProfile} />
               <button
                 type="button"
                 className="sk-exit"
@@ -157,7 +158,6 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
               >
                 <SkIcon name="x" />
               </button>
-              <SkAvatar initials={initials} label={name || st.title} onClick={onOpenProfile} />
             </div>
           </header>
           <div className="sk-scroll">
