@@ -18,7 +18,6 @@ import { Ring } from './ui/Ring';
 import { IconTile } from './ui/IconTile';
 import type { Shell } from '../App';
 import type { Gym } from '../types';
-import type { Tone } from './ui/tones';
 import { HOME_BACKFILL_MIN, type HomeSet } from '../homeSets';
 import { currentUid } from '../api';
 import {
@@ -51,6 +50,7 @@ import { useLiveLock } from '../views/home/homeHooks';
 import { DateField, TimePickerField, DurationField } from './PickerFields';
 import { GymPicker } from './GymPicker';
 import { GymThumb } from './GymThumb';
+import { StartFrame } from './StartFrame';
 
 type Sub = null | 'gym' | 'past';
 
@@ -58,9 +58,12 @@ export function StartSheet({
   shell,
   onClose: closeProp,
   inline = false,
+  closeRequested = false,
 }: {
   shell: Shell;
   onClose: () => void;
+  /** Closed from outside (the Start button's ×): the drawer slides out like on a swipe, then calls `onClose`. */
+  closeRequested?: boolean;
   /** Desktop Today: the same content as a standing side panel, not a sheet —
    *  its sub-flows (gym, activity, home set, health, log past) still open as
    *  sheets over the page. */
@@ -261,7 +264,13 @@ export function StartSheet({
   const offerScratch = !busy && (programToday ? !programToday.empty : !!usual);
 
   return (
-    <StartFrame inline={inline} onClose={closeProp} sub={subEl} tone={doneToday ? 'ok' : undefined}>
+    <StartFrame
+      inline={inline}
+      onClose={closeProp}
+      closeRequested={closeRequested}
+      sub={subEl}
+      tone={doneToday ? 'ok' : undefined}
+    >
       <div className="ss-title">{t.startSheetTitle}</div>
       {illSt.phase === 'sick' || illSt.phase === 'returning' || illSt.phase === 'mental' ? (
         <Notice tone="illness" icon="thermometer-simple">
@@ -405,28 +414,6 @@ export function StartSheet({
         </Card>
       </div>
     </StartFrame>
-  );
-}
-
-/** The Start content as a sheet (mobile) or a standing side panel (desktop). */
-function StartFrame(props: {
-  inline: boolean;
-  tone?: Tone;
-  onClose: () => void;
-  sub: ReactNode;
-  children: ReactNode;
-}) {
-  if (!props.inline)
-    return (
-      <Sheet onClose={props.onClose} className="start-sheet" tone={props.tone}>
-        {props.children}
-      </Sheet>
-    );
-  return (
-    <>
-      <div className="start-inline">{props.children}</div>
-      {props.sub}
-    </>
   );
 }
 

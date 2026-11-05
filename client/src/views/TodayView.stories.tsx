@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TodayView } from './TodayView';
 import { useStore } from '../store';
 import { PageFrame } from '../stories/PageFrame';
+import { Sheet } from '../components/ui/Overlays';
+import { SectionLabel } from '../components/ui/SectionLabel';
+import { Button } from '../components/ui/Button';
 import { seedPage, storyShell } from '../stories/fixtures';
 import { ThemePreviewHost } from '../components/ThemeAnnouncement';
 import { resetSeenForTest, syncSeenFromDoc } from '../themes/seen';
@@ -53,4 +57,34 @@ export const NewThemeInvite: Story = {
       return {};
     },
   ],
+};
+
+function DrawersOverToday({ depth }: { depth: number }) {
+  const store = useStore();
+  const [open, setOpen] = useState(depth);
+  const names = ['Start a workout', 'Plate calculator', 'Barbell Bench Press'];
+  return (
+    <>
+      <TodayView shell={storyShell} store={store} />
+      {names.slice(0, open).map((name, i) => (
+        <Sheet key={name} onClose={() => setOpen((n) => Math.min(n, i))} label={name}>
+          <SectionLabel>{name}</SectionLabel>
+          {i === open - 1 && i < names.length - 1 && (
+            <Button onClick={() => setOpen(i + 2)}>Open next drawer</Button>
+          )}
+        </Sheet>
+      ))}
+    </>
+  );
+}
+
+/** SPO-466: the real Today under one / two / three stacked drawers — one scrim, only the top drawer closes, the page takes no click. */
+export const OneDrawer: StoryObj<typeof DrawersOverToday> = {
+  render: () => <DrawersOverToday depth={1} />,
+};
+export const TwoDrawers: StoryObj<typeof DrawersOverToday> = {
+  render: () => <DrawersOverToday depth={2} />,
+};
+export const ThreeDrawers: StoryObj<typeof DrawersOverToday> = {
+  render: () => <DrawersOverToday depth={3} />,
 };

@@ -348,6 +348,14 @@ Every literal in feature CSS is a token; `tests/kit-guard.test.ts` fails on raw 
 - Overlays live in `components/ui/Overlays.tsx` (+ `.css`): `Sheet`, `Dialog`, `ConfirmDialog`, `Toast`, `UndoSnackbar`, `UpdatePlate` (re-exported from `ui.tsx`). Skeletons: `Skeleton`, `Skeletons.tsx`. Empty states: `EmptyState` only.
 - Guards: no feature CSS (outside `components/ui`, `glass.css`) sets background/colour/radius/shadow/border-colour on a kit element; no static layout inline styles; no raw px/colour/z literals.
 
+## Drawer stack and scrim (SPO-466)
+
+- One overlay on the page at a time. Every `Sheet` / `Dialog` / centred confirm registers in `components/ui/overlays/overlayStack.ts` (`useOverlay`): it gets a `level` (z-index `+2` per level, `.scrim[data-level]` / `.sheet[data-level]` in `Overlays.css`), and only the TOP overlay draws a scrim (`.scrim[data-covered]` fades the lower ones out, so the top scrim dims the drawers under it too) and handles Escape.
+- Modal by default: the page and the drawers under the top one are `inert` (`useBlockingSheetTrap`, focus cycles inside), a tap on the dimmed page closes only the top drawer and is not delivered to the page. Only a panel that hands the scrim click to the page (`onScrimClick`, e.g. the coach schedule's `SidePanel`) stays non-modal. Chat sheets are not `Sheet`s and stay interactive.
+- The scrim is one frosted pane in every theme: `--scrim-bg` = a faint tint of `--color-accent` (so it follows the app and the theme) over a dark veil, plus a short blur. `backdrop-filter` is the `--bf-scrim` token (off under `prefers-reduced-transparency`). A theme tunes the tint with `--scrim-tint`; it does not redraw the scrim.
+- `Sheet closeRequested`: the parent closes the drawer from outside (the Start button's ×) and the drawer plays its slide-out first.
+- A drawer scrolls vertically only when it has reached the full screen height: no fixed `max-height` + `overflow` on a list inside a drawer (`.sheet .gym-pick-list` is the fixed case). Guards: `npm run audit:drawer-stack` (CI layout shard 0), `Overlays.stack.test.tsx`.
+
 ## Sheet chrome & page headers (consistency rules)
 
 - Every sheet: chrome (grabber centred, round × top-right) → exactly 16px → first block. Enforced by `.sheet > .sheet-chrome` margin + `.sheet > .sheet-chrome + * { margin-top: 0 }` in `Overlays.css`; feature CSS must not add top margin to a sheet's first block.

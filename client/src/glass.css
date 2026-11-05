@@ -448,9 +448,6 @@ html[data-theme] .dialog {
 html[data-theme] .dialog-title i {
   color: var(--t-base);
 }
-html[data-theme] .dialog-scrim {
-  background: var(--c-060608-a620);
-}
 html[data-theme] .toast {
   background: linear-gradient(
     180deg,

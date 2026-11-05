@@ -182,7 +182,12 @@ export function TabBar<Id extends string = string>({
       {fab && <FabButton fab={fab} open={false} hidden={shown} />}
       {fab && shown && (
         <Portal>
-          <div className={`tabbar-fab-layer${covered ? ' is-covered' : ''}`} ref={layerRef}>
+          {/* data-over-trap: a drawer's focus trap must not make the × inert when the drawer mounts after it */}
+          <div
+            className={`tabbar-fab-layer${covered ? ' is-covered' : ''}`}
+            ref={layerRef}
+            data-over-trap=""
+          >
             <FabButton fab={fab} open={turned} twin />
           </div>
         </Portal>

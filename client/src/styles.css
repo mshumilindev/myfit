@@ -4419,6 +4419,12 @@ html[data-theme] .gym-card .head .n {
   max-height: 52vh;
   overflow-y: auto;
 }
+/* In a drawer the drawer itself scrolls, and only once it has reached the full screen height; a fixed cap here made the
+   list scroll while the drawer was still at its minimum height (SPO-466). */
+.sheet .gym-pick-list {
+  max-height: none;
+  overflow-y: visible;
+}
 
 /* Gym select button inside the backfill sheet */
 

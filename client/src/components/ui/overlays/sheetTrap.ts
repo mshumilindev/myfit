@@ -80,6 +80,9 @@ export function useBlockingSheetTrap(
     const made: Element[] = [];
     for (const el of Array.from(document.body.children)) {
       if (el === layer || el.contains(layer)) continue;
+      // Portals are appended in opening order, so anything after this layer was mounted later (or in the same commit,
+      // as a drawer opened over this one): it is newer, not "the page", and stays usable.
+      if (layer.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) continue;
       if (el.querySelector('[data-over-trap]')) continue; // a consent prompt above the gate stays usable
       if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE') continue;
       if (makeInert(el)) made.push(el);

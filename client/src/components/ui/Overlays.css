@@ -78,16 +78,59 @@
 
 /* --- Sheets & dialogs ----------------------------------------------------- */
 
+.scrim,
+.dialog-scrim {
+  /* resolved on the element, so a theme's own --scrim-tint wins */
+  --scrim-bg: color-mix(
+    in srgb,
+    var(--color-accent) var(--scrim-tint, 9%),
+    color-mix(in srgb, var(--c-0a0b0d) 46%, transparent)
+  );
+}
+
 .scrim {
+  /* The one underlay of every drawer and dialog (SPO-466): a frosted pane — a short blur plus a faint tint of the
+     accent of the app (--color-accent follows the app and the theme). A theme may change the tint with
+     --scrim-tint; the blur is the --bf-scrim token (off under prefers-reduced-transparency). */
+  --scrim-tint: 9%;
   position: fixed;
   inset: 0;
-  background: color-mix(in srgb, var(--c-0a0b0d) 60%, transparent);
+  background: var(--scrim-bg);
+  -webkit-backdrop-filter: var(--bf-scrim);
+  backdrop-filter: var(--bf-scrim);
   z-index: var(--z-50);
-  animation: scrimIn 0.22s ease both;
+  animation: scrimIn 0.22s ease backwards;
+  transition: opacity 0.22s ease;
   will-change: opacity;
 }
 .scrim.scrim--light {
-  background: color-mix(in srgb, var(--c-0a0b0d) 22%, transparent);
+  background: color-mix(in srgb, var(--scrim-bg) 45%, transparent);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+/* One overlay on the page: a drawer under a newer one hides its own scrim (the newer one dims everything, this
+   drawer included), and drawers opened over each other stack in order. Levels come from overlays/overlayStack.ts. */
+.scrim[data-covered] {
+  opacity: 0;
+  pointer-events: none;
+}
+.scrim[data-level='2'] {
+  z-index: calc(var(--z-50) + 2);
+}
+.scrim[data-level='3'] {
+  z-index: calc(var(--z-50) + 4);
+}
+.scrim[data-level='4'] {
+  z-index: calc(var(--z-50) + 6);
+}
+.sheet[data-level='2'] {
+  z-index: calc(var(--z-51) + 2);
+}
+.sheet[data-level='3'] {
+  z-index: calc(var(--z-51) + 4);
+}
+.sheet[data-level='4'] {
+  z-index: calc(var(--z-51) + 6);
 }
 .scrim.scrim-closing {
   animation: scrimOut 0.22s ease forwards;
@@ -281,9 +324,12 @@
 }
 
 .dialog-scrim {
+  --scrim-tint: 9%;
   position: fixed;
   inset: 0;
-  background: color-mix(in srgb, var(--c-0a0b0d) 66%, transparent);
+  background: var(--scrim-bg);
+  -webkit-backdrop-filter: var(--bf-scrim);
+  backdrop-filter: var(--bf-scrim);
   display: grid;
   place-items: center;
   padding: var(--s-24);

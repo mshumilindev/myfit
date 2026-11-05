@@ -6,6 +6,7 @@
 import {
   useEffect,
   useId,
+  useState,
   useRef,
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
@@ -25,6 +26,8 @@ import { useMobileSheetKeyboardMode } from './overlays/useSheetKeyboard';
 import { useSheetGesture } from './overlays/useSheetGesture';
 import { useSheetOverflowGuard } from './overlays/sheetOverflow';
 import { useBlockingSheetTrap } from './overlays/sheetTrap';
+import { useOverlay } from './overlays/overlayStack';
+import { useOverlayBack } from './overlays/overlayBack';
 import { toneClass, type Tone } from './tones';
 
 import './Overlays.css';
@@ -50,6 +53,7 @@ export function Dialog(props: {
   const tone: Tone = props.tone ?? (props.danger ? 'danger' : 'accent');
   const icon = props.icon ?? (props.danger ? 'trash' : undefined);
   const uid = useId();
+  useOverlay(); // joins the stack: the drawer under it hides its own scrim, this one dims the page
   return (
     <Portal>
       <div className="dialog-scrim" onClick={props.onClose}>
@@ -145,6 +149,8 @@ export function Sheet(props: {
    * for a blocking prompt the person must answer through its own buttons (the legal gate). Default `true`.
    */
   dismissible?: boolean;
+  /** The parent asks the drawer to close from outside (a button that is not inside it): it plays its closing slide, then calls `onClose`. */
+  closeRequested?: boolean;
   /** A consent prompt that must stay usable above a blocking sheet even when it mounted in the same commit (not made inert). */
   overTrap?: boolean;
 }) {
@@ -153,8 +159,11 @@ export function Sheet(props: {
   const sheetRef = useRef<HTMLDivElement>(null);
   const keyboardMode = useMobileSheetKeyboardMode(sheetRef);
   useSheetOverflowGuard(sheetRef);
-  // A blocking sheet is modal for the keyboard and assistive tech too: focus cycles inside, the page behind is inert.
-  useBlockingSheetTrap(sheetRef, !dismissible);
+  // Every drawer is modal for the keyboard and assistive tech: focus cycles inside, the page and the drawers under it are
+  // inert (SPO-466). Only a panel that deliberately lets the page behind take the click (`onScrimClick`) stays non-modal.
+  const modal = props.onScrimClick === undefined;
+  useBlockingSheetTrap(sheetRef, modal);
+  const { level, top, isTop } = useOverlay();
   const style = useFixedPanelPosition(
     'sheet',
     undefined,
@@ -163,6 +172,13 @@ export function Sheet(props: {
 
   const g = useSheetGesture(sheetRef, props.onClose);
   const { mode, heightPx, liveH, drag, dragging, closing, requestClose } = g;
+  useOverlayBack(requestClose, dismissible); // the Back button / back swipe closes the top drawer
+  // closed from outside (the Start button's ×): the same slide-out as a swipe or a scrim tap
+  const [askedClose, setAskedClose] = useState(false);
+  if (props.closeRequested && !askedClose) setAskedClose(true);
+  useEffect(() => {
+    if (askedClose) requestClose();
+  }, [askedClose, requestClose]);
   const { onGrabStart, onGrabMove, onGrabEnd } = g;
 
   // Touch drags are handled by the touch events below. A mouse or pen (the desktop app, a laptop) sends no touch
@@ -195,9 +211,11 @@ export function Sheet(props: {
   // which blurred the field after each character. So the effect reads the latest callback through a ref.
   const requestCloseRef = useRef(requestClose);
   const dismissibleRef = useRef(dismissible);
+  const isTopRef = useRef(isTop);
   useEffect(() => {
     requestCloseRef.current = requestClose;
     dismissibleRef.current = dismissible;
+    isTopRef.current = isTop;
   });
   useEffect(() => {
     const target = returnFocusRef;
@@ -206,6 +224,8 @@ export function Sheet(props: {
     if (el && !el.contains(document.activeElement)) el.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape' || e.defaultPrevented || !dismissibleRef.current) return;
+      // Only the top overlay closes: a drawer opened over this one owns Escape.
+      if (!isTopRef.current()) return;
       // A confirm dialog opened over the sheet owns Escape.
       if (document.querySelector('.dialog-scrim')) return;
       requestCloseRef.current();
@@ -259,6 +279,8 @@ export function Sheet(props: {
     <Portal>
       <div
         className={`scrim${closing ? ' scrim-closing' : ''}${props.scrim === 'light' ? ' scrim--light' : ''}`}
+        data-level={level || undefined}
+        data-covered={level > 0 && !top ? '' : undefined}
         onClick={dismissible ? (props.onScrimClick ?? requestClose) : undefined}
       />
       <div
@@ -268,6 +290,7 @@ export function Sheet(props: {
         aria-modal="true"
         aria-label={props.label}
         tabIndex={-1}
+        data-level={level || undefined}
         style={baseStyle}
         data-over-trap={props.overTrap ? '' : undefined}
       >

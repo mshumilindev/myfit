@@ -863,6 +863,12 @@ function AppMain() {
   const [shellOpen, setShellOpen] = useState(false);
   // The Start sheet behind the notched "+" (and the desktop rail's Start).
   const [startOpen, setStartOpen] = useState(false);
+  // the Start button closes the drawer from outside: the drawer plays its slide-out, then unmounts (SPO-466)
+  const [startClosing, setStartClosing] = useState(false);
+  const closeStart = () => {
+    setStartOpen(false);
+    setStartClosing(false);
+  };
 
   // Deep-link focus: a notification can ask a screen to scroll to a specific
   // card (id) and, when it's interactive (a feat cell), open its existing
@@ -1950,8 +1956,8 @@ function AppMain() {
             fab={{
               ariaLabel: t.startNew,
               closeLabel: t.close,
-              open: startOpen,
-              onClick: () => setStartOpen((v) => !v),
+              open: startOpen && !startClosing,
+              onClick: () => (startOpen ? setStartClosing(true) : setStartOpen(true)),
               attention: !trainedToday,
             }}
           />
@@ -1987,7 +1993,7 @@ function AppMain() {
       </div>
       {startOpen && (
         <Suspense fallback={null}>
-          <StartSheet shell={shell} onClose={() => setStartOpen(false)} />
+          <StartSheet shell={shell} closeRequested={startClosing} onClose={closeStart} />
         </Suspense>
       )}
       {shellOpen && (

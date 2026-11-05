@@ -12,6 +12,7 @@
   --bf-glass-strong: blur(24px) saturate(1.5);
   --bf-dock: blur(32px) saturate(1.4);
   --bf-banner: blur(12px) saturate(1.3);
+  --bf-scrim: blur(8px) saturate(1.15);
   --bf-chat: blur(14px);
   --bf-dim: blur(9px) saturate(1.05) brightness(0.78);
   --bf-soft: blur(6px);
@@ -32,6 +33,7 @@
     --bf-glass-strong: none;
     --bf-dock: none;
     --bf-banner: none;
+    --bf-scrim: none;
     --bf-chat: none;
     --bf-dim: none;
     --bf-soft: none;

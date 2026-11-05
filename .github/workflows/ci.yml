@@ -468,6 +468,9 @@ jobs:
       - name: Start fab (the × is topmost over the Start drawer, turns 135°, closes it; both mount orders, four themes)
         if: always() && matrix.shard == 0
         run: npm run audit:start-fab -- --url http://127.0.0.1:6006
+      - name: Drawer stack (one scrim, only the top drawer closes, page inert and unclickable; 1-3 drawers, four themes)
+        if: always() && matrix.shard == 0
+        run: npm run audit:drawer-stack -- --url http://127.0.0.1:6006
       - uses: actions/upload-artifact@v4
         if: always()
         with:

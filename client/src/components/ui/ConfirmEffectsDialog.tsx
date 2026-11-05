@@ -1,3 +1,4 @@
+import { useOverlay } from './overlays/overlayStack';
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { Icon } from '../../ui';
 import { useT } from '../../i18n';
@@ -149,6 +150,7 @@ export function ConfirmEffectsDialog(p: ConfirmEffectsDialogProps) {
   return (
     <Portal>
       <div className="dialog-scrim" onClick={() => dismissable.current && p.onCancel()}>
+        <StackMarker />
         <div
           className={`dialog uicfx-dialog ${toneClass(p.tone ?? 'accent')}`}
           role="alertdialog"
@@ -161,4 +163,10 @@ export function ConfirmEffectsDialog(p: ConfirmEffectsDialogProps) {
       </div>
     </Portal>
   );
+}
+
+/** Puts the centred dialog on the overlay stack (the drawer under it hides its scrim; this one dims the page). */
+function StackMarker() {
+  useOverlay();
+  return null;
 }

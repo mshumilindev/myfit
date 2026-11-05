@@ -198,11 +198,27 @@ describe('Sheet dismissible={false}: focus trap and inert page', () => {
     page.remove();
   });
 
-  it('a dismissible sheet changes nothing about the page or Tab', () => {
+  // SPO-466: "під відкритим дровером нічого не можна натиснути … фокус не виходить з верхнього дровера" — every
+  // drawer is modal now; only a panel that passes the scrim click on to the page (onScrimClick) stays non-modal.
+  it('a dismissible sheet is modal too: the page behind it is inert and comes back on close', () => {
+    const page = document.createElement('div');
+    document.body.appendChild(page);
+    const { unmount } = render(
+      <Sheet onClose={() => undefined}>
+        <button>A</button>
+      </Sheet>,
+    );
+    expect(page.hasAttribute('inert')).toBe(true);
+    unmount();
+    expect(page.hasAttribute('inert')).toBe(false);
+    page.remove();
+  });
+
+  it('a panel that hands the scrim click to the page (onScrimClick) leaves the page usable', () => {
     const page = document.createElement('div');
     document.body.appendChild(page);
     render(
-      <Sheet onClose={() => undefined}>
+      <Sheet onClose={() => undefined} onScrimClick={() => undefined} scrim="light">
         <button>A</button>
       </Sheet>,
     );
