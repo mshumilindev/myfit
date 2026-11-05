@@ -162,6 +162,14 @@ export const LOCAL_KEYS_2: readonly LocalKeyEntry[] = [
     note: 'time of the last local change to the challenges (stamp for last-write-wins)',
   },
   {
+    key: 'spotter.addons',
+    scope: 'account',
+    class: 'gap',
+    wipe: 'signout',
+    issue: 'SPO-511',
+    note: 'enabled add-ons ({ list, updatedAt }); the sealed account-synced copy lands in the next SPO-511 step',
+  },
+  {
     key: 'spotter.atlasChat',
     scope: 'account',
     class: 'gap',
