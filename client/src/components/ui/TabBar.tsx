@@ -268,13 +268,7 @@ function useFabLayer(wrapRef: RefObject<HTMLDivElement | null>, open: boolean) {
   // is a later layer in <body>, and then the button steps back instead of floating over it.
   useEffect(() => {
     if (!shown) return;
-    const check = () => {
-      let n = layerRef.current?.parentElement?.nextElementSibling ?? null;
-      let over = false;
-      for (; n; n = n.nextElementSibling)
-        if (n.matches('.uifp-layer') || n.querySelector('.scrim, .sheet')) over = true;
-      setCovered(over);
-    };
+    const check = () => setCovered(coversStartDrawer(layerRef.current?.parentElement ?? null));
     const first = requestAnimationFrame(check);
     const mo = new MutationObserver(check);
     mo.observe(document.body, { childList: true });
@@ -284,6 +278,19 @@ function useFabLayer(wrapRef: RefObject<HTMLDivElement | null>, open: boolean) {
     };
   }, [shown]);
   return { shown, turned, covered, layerRef };
+}
+/**
+ * True when a drawer / dialog / page other than the Start drawer is open. Order in <body> does not matter: the
+ * Start drawer's chunk may load after the button's twin was mounted (the app lazy-loads it), so "a later layer"
+ * would wrongly count the Start drawer itself. The Start drawer is recognised by its own class.
+ */
+export function coversStartDrawer(own: Element | null): boolean {
+  for (const n of Array.from(document.body.children)) {
+    if (n === own || n.querySelector('.start-sheet')) continue;
+    if (n.matches('.uifp-layer') || n.querySelector('.scrim, .sheet, .dialog-scrim, .uifp-layer'))
+      return true;
+  }
+  return false;
 }
 /** Longer than the turn itself (TabBar.css `--fab-turn-dur`), so the twin is removed once it is a plus again. */
 const FAB_TURN_MS = 360;

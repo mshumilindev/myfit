@@ -80,18 +80,16 @@
   transform: rotate(var(--fab-turn));
 }
 /* Open: a twin of the button (TabBar.tsx `useFabLayer`) is drawn in the portal layer, fixed over the bar, above
-   the drawer and its scrim; the real one hides meanwhile. */
-.tabbar-wrap--fab-open > .tabbar-fab {
-  visibility: hidden;
-}
+   the drawer and its scrim. The real button is NOT hidden: it stays in the bar under the scrim with its attention
+   ripple still running, so the ripple is simply covered by the drawer instead of vanishing and reappearing. */
 .tabbar-fab-layer {
   position: fixed;
   left: var(--fab-layer-left, 0);
   top: var(--fab-layer-top, 0);
   width: var(--fab-layer-w, 100%);
   height: var(--fab-layer-h, 0);
-  /* level with the drawers, and later in <body> than the Start drawer: above it, below whatever opens on top of it */
-  z-index: var(--z-51);
+  /* above the Start drawer (z-51) wherever it sits in <body>; the twin hides itself when another layer opens (`is-covered`) */
+  z-index: var(--z-60);
   pointer-events: none;
   transition: opacity 0.16s ease;
 }

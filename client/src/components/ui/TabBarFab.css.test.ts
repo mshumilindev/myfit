@@ -12,12 +12,13 @@ describe('Start fab → × stylesheet (SPO-470)', () => {
     expect(css).toMatch(/\.tabbar-fab\.is-open > \.ui-icon\s*\{[^}]*rotate\(var\(--fab-turn\)\)/);
   });
 
-  it('draws the open button as a twin in the portal layer, level with the drawers (z-51), hidden when something opens on top', () => {
+  it('draws the open button as a twin in the portal layer, above the Start drawer (z-60), hidden when something opens on top', () => {
     expect(css).toMatch(
-      /\.tabbar-fab-layer\s*\{[^}]*position:\s*fixed[^}]*z-index:\s*var\(--z-51\)/,
+      /\.tabbar-fab-layer\s*\{[^}]*position:\s*fixed[^}]*z-index:\s*var\(--z-60\)/,
     );
     expect(css).toMatch(/\.tabbar-fab-layer\.is-covered\s*\{[^}]*opacity:\s*0/);
-    expect(css).toMatch(/\.tabbar-wrap--fab-open > \.tabbar-fab\s*\{[^}]*visibility:\s*hidden/);
+    // the real button (and its ripple) keeps existing under the drawer — hiding it made the ripple vanish and reappear
+    expect(css).not.toMatch(/\.tabbar-wrap--fab-open > \.tabbar-fab\s*\{[^}]*visibility/);
   });
 
   it('switches the turn off for reduced motion', () => {

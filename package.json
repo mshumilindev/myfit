@@ -15,6 +15,7 @@
     "audit:chat": "node scripts/chat-layout-audit.mjs",
     "audit:hero": "node scripts/hero-audit.mjs",
     "audit:theme-swap": "node scripts/theme-swap-audit.mjs",
+    "audit:start-fab": "node scripts/start-fab-audit.mjs",
     "audit:pixels": "node scripts/pixel-diff.mjs",
     "theme:new": "node scripts/theme-new.mjs",
     "dev": "npm run dev -w client",

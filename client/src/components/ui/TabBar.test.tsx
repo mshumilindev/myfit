@@ -186,6 +186,26 @@ describe('TabBar', () => {
       await waitFor(() => expect(twin?.className).toContain('is-open'));
     });
 
+    it('open: the bar button keeps its attention ripple under the drawer; the twin has none', () => {
+      const { container } = render(
+        <TabBar
+          items={items}
+          onSelect={() => {}}
+          fab={{
+            ariaLabel: 'Start',
+            closeLabel: 'Close',
+            onClick: () => {},
+            attention: true,
+            open: true,
+          }}
+        />,
+      );
+      expect(container.querySelector('.tabbar-fab')?.className).toContain('is-attention');
+      expect(document.body.querySelector('.tabbar-fab-layer .tabbar-fab')?.className).not.toContain(
+        'is-attention',
+      );
+    });
+
     it('closing turns the twin back first, then removes it', async () => {
       const { rerender, container } = render(
         <TabBar items={items} onSelect={() => {}} fab={fab(true)} />,

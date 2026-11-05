@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TabBar } from './ui/TabBar';
 import { StartSheet } from './StartSheet';
@@ -63,8 +63,15 @@ export const NotToday: Story = {
   ],
 };
 
-function DrawerWithFab() {
+function DrawerWithFab({ late = false }: { late?: boolean }) {
   const [open, setOpen] = useState(true);
+  // the app lazy-loads the Start drawer, so it lands in <body> AFTER the button: `late` reproduces that order
+  const [ready, setReady] = useState(!late);
+  useEffect(() => {
+    if (!late) return;
+    const id = window.setTimeout(() => setReady(true), 400);
+    return () => window.clearTimeout(id);
+  }, [late]);
   return (
     <>
       <div className="screen" />
@@ -83,7 +90,9 @@ function DrawerWithFab() {
           onClick: () => setOpen((v) => !v),
         }}
       />
-      {open && <StartSheet shell={storyShell} inline={false} onClose={() => setOpen(false)} />}
+      {open && ready && (
+        <StartSheet shell={storyShell} inline={false} onClose={() => setOpen(false)} />
+      )}
     </>
   );
 }
@@ -92,6 +101,18 @@ function DrawerWithFab() {
 export const DrawerOpenFab: Story = {
   parameters: { viewport: { defaultViewport: 'mobile1' } },
   render: () => <DrawerWithFab />,
+  loaders: [
+    () => {
+      seedStore({ workouts: [workoutOn('start-sheet-past', 3)] });
+      return {};
+    },
+  ],
+};
+
+/** Same, with the Start drawer arriving after the button (the app's lazy chunk): the × must still be above it. */
+export const DrawerOpenFabLateDrawer: Story = {
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  render: () => <DrawerWithFab late />,
   loaders: [
     () => {
       seedStore({ workouts: [workoutOn('start-sheet-past', 3)] });

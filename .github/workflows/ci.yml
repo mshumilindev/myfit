@@ -465,6 +465,9 @@ jobs:
       - name: Theme swap (hostile token edit re-themes every story; hard-coded values are frozen in a baseline that only shrinks)
         if: always()
         run: npm run audit:theme-swap -- --url http://127.0.0.1:6006 --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out audit-reports/swap-${{ matrix.shard }}.json --shots audit-reports/swap-shots
+      - name: Start fab (the × is topmost over the Start drawer, turns 135°, closes it; both mount orders, four themes)
+        if: always() && matrix.shard == 0
+        run: npm run audit:start-fab -- --url http://127.0.0.1:6006
       - uses: actions/upload-artifact@v4
         if: always()
         with:
