@@ -16,6 +16,7 @@
 }
 .as-main-head {
   padding-top: var(--sk-sp-4);
+  padding-bottom: var(--sk-sp-2);
 }
 .as-desk-title {
   display: none;
@@ -23,6 +24,7 @@
 @media (min-width: 45rem) {
   .as-desk-title {
     display: block;
+    margin: 0 0 var(--sk-sp-6);
   }
   .as-search-wrap {
     width: var(--sk-search-w);
