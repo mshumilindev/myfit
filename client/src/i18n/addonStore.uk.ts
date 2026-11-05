@@ -31,7 +31,6 @@ export const addonStoreUk: typeof addonStoreEn = {
   catFood: 'Їжа',
   catInsights: 'Аналітика',
   catLook: 'Вигляд',
-  catLearn: 'Навчання',
   catCoach: 'Тренер',
   items: {
     health: { name: 'Здоров’я', desc: 'Травми, цикл, добавки та інше в одному місці.' },
@@ -52,7 +51,6 @@ export const addonStoreUk: typeof addonStoreEn = {
     mastery: { name: 'Майстерність', desc: 'Рівні навичок і довгостроковий прогрес.' },
     themes: { name: 'Теми', desc: 'Змініть вигляд Spotter.' },
     'exercise-media': { name: 'Медіа вправ', desc: 'Фото й анімації для вправ.' },
-    learn: { name: 'Навчання', desc: 'Короткі відео про те, як користуватися Spotter.' },
     calls: { name: 'Дзвінки', desc: 'Голосові й відеодзвінки з тренером або клієнтами.' },
     gyms: { name: 'Зали', desc: 'Ваші зали та місця для тренувань.' },
     nutrition: { name: 'Харчування', desc: 'Облік їжі та макроелементів.' },

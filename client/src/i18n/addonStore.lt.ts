@@ -31,7 +31,6 @@ export const addonStoreLt: typeof addonStoreEn = {
   catFood: 'Maistas',
   catInsights: 'Įžvalgos',
   catLook: 'Išvaizda',
-  catLearn: 'Mokymasis',
   catCoach: 'Treneris',
   items: {
     health: { name: 'Sveikata', desc: 'Traumos, ciklas, papildai ir kita vienoje vietoje.' },
@@ -52,7 +51,6 @@ export const addonStoreLt: typeof addonStoreEn = {
     mastery: { name: 'Meistriškumas', desc: 'Įgūdžių lygiai ir ilgalaikė pažanga.' },
     themes: { name: 'Temos', desc: 'Pakeiskite Spotter išvaizdą.' },
     'exercise-media': { name: 'Pratimų medija', desc: 'Pratimų nuotraukos ir animacijos.' },
-    learn: { name: 'Mokymasis', desc: 'Trumpi vaizdo įrašai, kaip naudotis Spotter.' },
     calls: { name: 'Skambučiai', desc: 'Balso ir vaizdo skambučiai su treneriu ar klientais.' },
     gyms: { name: 'Sporto klubai', desc: 'Jūsų sporto klubai ir treniruočių vietos.' },
     nutrition: { name: 'Mityba', desc: 'Maisto ir makroelementų sekimas.' },

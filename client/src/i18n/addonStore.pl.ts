@@ -31,7 +31,6 @@ export const addonStorePl: typeof addonStoreEn = {
   catFood: 'Jedzenie',
   catInsights: 'Analizy',
   catLook: 'Wygląd',
-  catLearn: 'Nauka',
   catCoach: 'Trener',
   items: {
     health: { name: 'Zdrowie', desc: 'Urazy, cykl, suplementy i więcej w jednym miejscu.' },
@@ -49,7 +48,6 @@ export const addonStorePl: typeof addonStoreEn = {
     mastery: { name: 'Mistrzostwo', desc: 'Poziomy umiejętności i długofalowy postęp.' },
     themes: { name: 'Motywy', desc: 'Zmień wygląd Spottera.' },
     'exercise-media': { name: 'Media ćwiczeń', desc: 'Zdjęcia i animacje do ćwiczeń.' },
-    learn: { name: 'Nauka', desc: 'Krótkie filmy o tym, jak korzystać ze Spottera.' },
     calls: { name: 'Połączenia', desc: 'Rozmowy głosowe i wideo z trenerem lub podopiecznymi.' },
     gyms: { name: 'Siłownie', desc: 'Twoje siłownie i miejsca treningu.' },
     nutrition: { name: 'Odżywianie', desc: 'Śledzenie jedzenia i makroskładników.' },

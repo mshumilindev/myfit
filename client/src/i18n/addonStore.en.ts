@@ -33,7 +33,6 @@ export const addonStoreEn = {
   catFood: 'Food',
   catInsights: 'Insights',
   catLook: 'Look',
-  catLearn: 'Learn',
   catCoach: 'Coach',
   items: {
     health: { name: 'Health', desc: 'Injuries, cycle, supplements and more in one place.' },
@@ -54,7 +53,6 @@ export const addonStoreEn = {
     mastery: { name: 'Mastery', desc: 'Track skill levels and long-term progress.' },
     themes: { name: 'Themes', desc: 'Change how Spotter looks.' },
     'exercise-media': { name: 'Exercise media', desc: 'Photos and animations for exercises.' },
-    learn: { name: 'Learn', desc: 'Short how-to videos for Spotter.' },
     calls: { name: 'Calls', desc: 'Voice and video calls with your coach or clients.' },
     gyms: { name: 'Gyms', desc: 'Your gyms and places to train.' },
     nutrition: { name: 'Nutrition', desc: 'Food and macros tracking.' },

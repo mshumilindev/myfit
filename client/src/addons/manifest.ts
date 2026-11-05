@@ -20,7 +20,7 @@ export interface AddonManifest {
   roles: readonly StoreRole[];
   /** Not available yet: shown under "Coming soon", never enabled. */
   soon?: boolean;
-  category: 'recovery' | 'food' | 'insights' | 'look' | 'learn' | 'coach';
+  category: 'recovery' | 'food' | 'insights' | 'look' | 'coach';
 }
 
 const ALL: readonly StoreRole[] = ['member', 'trainer', 'admin'];
@@ -75,7 +75,6 @@ export const ADDONS: readonly AddonManifest[] = [
   { id: 'mastery', kind: 'app', tone: 8, roles: MEMBER, category: 'insights' },
   { id: 'themes', kind: 'app', tone: 7, roles: ALL, category: 'look' },
   { id: 'exercise-media', kind: 'app', tone: 3, roles: ALL, category: 'look' },
-  { id: 'learn', kind: 'app', tone: 1, roles: MEMBER, category: 'learn' },
   // Gyms is core for a member and an add-on for trainer and admin.
   { id: 'gyms', kind: 'addon', tone: 5, roles: COACH, category: 'coach' },
   // Not available yet (the store shows them as Coming soon).

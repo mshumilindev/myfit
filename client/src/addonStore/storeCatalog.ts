@@ -9,7 +9,6 @@ export const STORE_CATEGORIES: readonly StoreCategory[] = [
   'food',
   'insights',
   'look',
-  'learn',
   'coach',
 ];
 

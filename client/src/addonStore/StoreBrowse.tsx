@@ -14,7 +14,6 @@ const CAT_ICON: Record<StoreCategory, string> = {
   food: 'fork-knife',
   insights: 'chart-line-up',
   look: 'palette',
-  learn: 'graduation-cap',
   coach: 'chalkboard-teacher',
 };
 
@@ -24,7 +23,6 @@ function catLabel(st: AddonStoreStrings, c: StoreCategory): string {
     food: st.catFood,
     insights: st.catInsights,
     look: st.catLook,
-    learn: st.catLearn,
     coach: st.catCoach,
   };
   return map[c];

@@ -31,7 +31,6 @@ export const addonStoreEt: typeof addonStoreEn = {
   catFood: 'Toit',
   catInsights: 'Ülevaated',
   catLook: 'Välimus',
-  catLearn: 'Õppimine',
   catCoach: 'Treener',
   items: {
     health: { name: 'Tervis', desc: 'Vigastused, tsükkel, toidulisandid ja muu ühes kohas.' },
@@ -49,7 +48,6 @@ export const addonStoreEt: typeof addonStoreEn = {
     mastery: { name: 'Meisterlikkus', desc: 'Oskuste tasemed ja pikaajaline areng.' },
     themes: { name: 'Teemad', desc: 'Muuda Spotteri välimust.' },
     'exercise-media': { name: 'Harjutuste meedia', desc: 'Harjutuste fotod ja animatsioonid.' },
-    learn: { name: 'Õppimine', desc: 'Lühikesed videod Spotteri kasutamisest.' },
     calls: { name: 'Kõned', desc: 'Hääl- ja videokõned treeneri või klientidega.' },
     gyms: { name: 'Jõusaalid', desc: 'Sinu jõusaalid ja treeningkohad.' },
     nutrition: { name: 'Toitumine', desc: 'Toidu ja makrode jälgimine.' },

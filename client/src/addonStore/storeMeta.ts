@@ -32,7 +32,6 @@ export const STORE_ICON: Record<ItemId, string> = {
   mastery: 'medal',
   themes: 'palette',
   'exercise-media': 'image-square',
-  learn: 'graduation-cap',
   calls: 'chat-circle',
   gyms: 'barbell',
   nutrition: 'fork-knife',
