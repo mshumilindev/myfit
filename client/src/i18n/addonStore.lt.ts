@@ -60,6 +60,8 @@ export const addonStoreLt: typeof addonStoreEn = {
   browseAddons: 'Naršyti papildinius',
   forApp: (name: string) => `Skirta ${name}`,
   addonsSub: 'Priedai, veikiantys programėlės viduje.',
+  addonsEmptyTitle: 'Priedų dar nėra',
+  addonsEmptyBody: 'Čia atsiras jūsų programėlių priedai.',
   required: 'Būtina',
   itemsCount: (n: number) => `Pasirinkta: ${n}`,
   searchTitle: 'Paieška',

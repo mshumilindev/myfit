@@ -59,6 +59,8 @@ export const addonStorePl: typeof addonStoreEn = {
   browseAddons: 'Przeglądaj dodatki',
   forApp: (name: string) => `Dla ${name}`,
   addonsSub: 'Rozszerzenia działające wewnątrz aplikacji.',
+  addonsEmptyTitle: 'Brak dodatków',
+  addonsEmptyBody: 'Dodatki do Twoich aplikacji pojawią się tutaj.',
   required: 'Wymagane',
   itemsCount: (n: number) => `Wybrano: ${n}`,
   searchTitle: 'Szukaj',

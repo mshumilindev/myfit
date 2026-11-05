@@ -59,6 +59,8 @@ export const addonStoreEt: typeof addonStoreEn = {
   browseAddons: 'Sirvi lisasid',
   forApp: (name: string) => `Rakendusele ${name}`,
   addonsSub: 'Lisad, mis töötavad rakenduse sees.',
+  addonsEmptyTitle: 'Lisasid pole veel',
+  addonsEmptyBody: 'Siia ilmuvad sinu rakenduste lisad.',
   required: 'Vajalik',
   itemsCount: (n: number) => `Valitud: ${n}`,
   searchTitle: 'Otsing',

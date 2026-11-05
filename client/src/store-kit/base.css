@@ -13,6 +13,12 @@
   isolation: isolate;
   min-height: 100%;
 }
+/* The host app styles h1/h2 with its theme face and case; the store keeps its own (zero specificity: kit classes win). */
+:where(.sk-root) :is(h1, h2, h3, h4) {
+  font-family: var(--sk-font);
+  text-transform: none;
+  letter-spacing: normal;
+}
 :where(.sk-root) button {
   font-family: inherit;
   border: 0;

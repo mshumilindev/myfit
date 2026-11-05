@@ -113,7 +113,7 @@ export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   const soon = comingSoonForRole(role);
   return (
     <>
-      <div className="sk-rowf sk-g8 sk-wrap sk-mt12">
+      <div className="sk-rowf sk-g8 sk-wrap">
         <SkChip on={cat === 'all'} onClick={() => setCat('all')}>
           {st.catAll}
         </SkChip>
@@ -140,6 +140,19 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   const { st } = ctx;
   const addons = availableForRole(role).filter((m) => m.kind === 'addon');
   const parents = [...new Set(addons.map((m) => m.parent as string))];
+  if (!parents.length) {
+    return (
+      <SkEmpty
+        icon={
+          <SkTile letter="" tone={5} size={64}>
+            <SkIcon name="addons" />
+          </SkTile>
+        }
+        title={st.addonsEmptyTitle}
+        body={st.addonsEmptyBody}
+      />
+    );
+  }
   return (
     <>
       <div className="sk-t-s sk-mt4">{st.addonsSub}</div>

@@ -61,6 +61,8 @@ export const addonStoreEn = {
   browseAddons: 'Browse add-ons',
   forApp: (name: string) => `For ${name}`,
   addonsSub: 'Extras that work inside an app.',
+  addonsEmptyTitle: 'No add-ons yet',
+  addonsEmptyBody: 'Add-ons for your apps will show up here.',
   required: 'Required',
   itemsCount: (n: number) => `${n} selected`,
   searchTitle: 'Search',
