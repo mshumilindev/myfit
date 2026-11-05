@@ -620,3 +620,4 @@ has CSS, a story and a test. Source of truth for look and states: the approved d
 | `SkToast`          | Transient message above the tab bar, tones info/ok/warn/bad, optional action and dismiss                              |
 | `SkOfflineBar`     | Calm offline banner (warn tone, status role, never an alert)                                                          |
 | `SkBackground`     | Animated three-layer wave background, reduced-motion safe, aria-hidden                                                |
+| `SkHighlight` | Search match mark: renders text parts, matched ones highlighted |

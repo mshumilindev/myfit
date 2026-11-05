@@ -1,0 +1,7 @@
+/* SkHighlight — the part of a text that matched the search query. */
+.sk-hl {
+  background: var(--btn-bg);
+  color: var(--acc-t);
+  border-radius: var(--sk-r-xs);
+  padding-inline: var(--sk-sp-1);
+}

@@ -20,4 +20,13 @@ describe('SkTile', () => {
     render(<SkTile letter="Z" tone={42} />);
     expect(screen.getByText('Z').className).toContain('sk-i9');
   });
+  it('shows an icon child instead of the letter', () => {
+    const { container } = render(
+      <SkTile letter="" tone={5} size={64}>
+        <svg data-testid="ic" />
+      </SkTile>,
+    );
+    expect(container.querySelector('[data-testid="ic"]')).not.toBeNull();
+    expect(container.textContent).toBe('');
+  });
 });

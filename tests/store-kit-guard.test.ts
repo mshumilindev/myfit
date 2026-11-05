@@ -12,12 +12,7 @@ const DIRS = ['store-kit', 'addonStore'].map((d) => join(SRC, d));
 const TOKENS = join(SRC, 'store-kit', 'tokens.css');
 
 /** Migration debt (SPO-512): shrink to []. */
-const LEGACY: string[] = [
-  'store-kit/parts.tsx',
-  'store-kit/store-kit-layout.css',
-  'store-kit/store-kit.css',
-  'addonStore/StoreApp.tsx',
-];
+const LEGACY: string[] = [];
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const n of readdirSync(dir)) {

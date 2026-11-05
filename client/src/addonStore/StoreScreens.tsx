@@ -3,7 +3,19 @@ import { useMemo, useState } from 'react';
 import type { Role } from '../api';
 import { ADDONS, addonById, type AddonManifest } from '../addons/manifest';
 import { installQueue, queueRemove } from '../addons/queue';
-import { SkBtn, SkCard, SkChip, SkIcon, SkList, SkBadge } from '../store-kit/parts';
+import {
+  SkBadge,
+  SkBtn,
+  SkCard,
+  SkChip,
+  SkEmpty,
+  SkIcon,
+  SkList,
+  SkSectionHeader,
+  SkSectionLink,
+  SkTile,
+} from '../store-kit';
+import './screens.css';
 import { DiscoverBento } from './DiscoverBento';
 import { recommend } from './recommend';
 import { MIN_QUERY, searchItems } from './search';
@@ -31,10 +43,7 @@ function Section({
 }) {
   return (
     <section className="sk-mt24">
-      <div className="sk-rowf sk-sb sk-mb12">
-        <h2 className="sk-t-h2">{title}</h2>
-        {aside}
-      </div>
+      <SkSectionHeader title={title} aside={aside} />
       {children}
     </section>
   );
@@ -77,11 +86,7 @@ export function Discover({
       {!done && (
         <Section
           title={st.recommended}
-          aside={
-            <button type="button" className="sk-link" onClick={() => go('apps')}>
-              {st.seeAll}
-            </button>
-          }
+          aside={<SkSectionLink onClick={() => go('apps')}>{st.seeAll}</SkSectionLink>}
         >
           <Rows ids={rec.slice(0, 4)} ctx={ctx} />
         </Section>
@@ -138,7 +143,7 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   return (
     <>
       <div className="sk-t-s sk-mt4">{st.addonsSub}</div>
-      <div className="sk-grid2">
+      <div className="as-cols">
         {parents.map((p) => {
           const pm = addonById(p);
           return (
@@ -161,21 +166,25 @@ export function Selected({ ctx, go }: { ctx: StoreCtx; go: (v: string) => void }
   const { st, queued } = ctx;
   if (!queued.length) {
     return (
-      <div className="sk-empty">
-        <span className="sk-ic sk-ic64 sk-i5">
-          <SkIcon name="queue" />
-        </span>
-        <h2 className="sk-t-h2 sk-mt16">{st.selectedEmptyTitle}</h2>
-        <p className="sk-t-s sk-mute sk-mt4">{st.selectedEmptyBody}</p>
-        <div className="sk-rowf sk-g12 sk-mt24 sk-wrap sk-cen">
-          <SkBtn kind="pri" onClick={() => go('apps')}>
-            {st.browseApps}
-          </SkBtn>
-          <SkBtn kind="ghost" onClick={() => go('addons')}>
-            {st.browseAddons}
-          </SkBtn>
-        </div>
-      </div>
+      <SkEmpty
+        icon={
+          <SkTile letter="" tone={5} size={64}>
+            <SkIcon name="queue" />
+          </SkTile>
+        }
+        title={st.selectedEmptyTitle}
+        body={st.selectedEmptyBody}
+        actions={
+          <>
+            <SkBtn kind="pri" onClick={() => go('apps')}>
+              {st.browseApps}
+            </SkBtn>
+            <SkBtn kind="ghost" onClick={() => go('addons')}>
+              {st.browseAddons}
+            </SkBtn>
+          </>
+        }
+      />
     );
   }
   const items = queued.map((id) => addonById(id)).filter((m): m is AddonManifest => !!m);
@@ -227,18 +236,20 @@ export function Installed({ ctx, go }: { ctx: StoreCtx; go: (v: string) => void 
   const items = ADDONS.filter((m) => enabled.has(m.id));
   if (!items.length) {
     return (
-      <div className="sk-empty">
-        <span className="sk-ic sk-ic64 sk-i5">
-          <SkIcon name="inst" />
-        </span>
-        <h2 className="sk-t-h2 sk-mt16">{st.installedEmptyTitle}</h2>
-        <p className="sk-t-s sk-mute sk-mt4">{st.installedEmptyBody}</p>
-        <div className="sk-mt24">
+      <SkEmpty
+        icon={
+          <SkTile letter="" tone={5} size={64}>
+            <SkIcon name="inst" />
+          </SkTile>
+        }
+        title={st.installedEmptyTitle}
+        body={st.installedEmptyBody}
+        actions={
           <SkBtn kind="pri" onClick={() => go('discover')}>
             {st.tabDiscover}
           </SkBtn>
-        </div>
-      </div>
+        }
+      />
     );
   }
   return (
@@ -285,9 +296,9 @@ export function ItemPage({
           <div className="sk-f1">
             <div className="sk-t-b sk-b6">{relOf(m, ctx)}</div>
           </div>
-          <button type="button" className="sk-link" onClick={() => go('item', parent.id)}>
+          <SkSectionLink onClick={() => go('item', parent.id)}>
             <SkBadge kind="app">{st.kindApp}</SkBadge>
-          </button>
+          </SkSectionLink>
         </SkCard>
       )}
       <Section title={st.about}>
@@ -318,12 +329,8 @@ export function Search({
   return (
     <>
       {short ? (
-        <div className="sk-empty">
-          <div className="sk-rowf sk-g8 sk-cen sk-t-s">
-            <SkIcon name="search" small />
-            <span>{st.searchHint}</span>
-          </div>
-          <div className="sk-t-e sk-mt32">{st.tryFor}</div>
+        <SkEmpty icon={<SkIcon name="search" />} body={st.searchHint}>
+          <div className="sk-t-e sk-mt16">{st.tryFor}</div>
           <div className="sk-rowf sk-g8 sk-wrap sk-cen sk-mt12">
             {suggestions.map((id) => (
               <SkChip key={id} onClick={() => setQuery(itemName(st, id))}>
@@ -331,21 +338,23 @@ export function Search({
               </SkChip>
             ))}
           </div>
-        </div>
+        </SkEmpty>
       ) : ids.length === 0 ? (
-        <div className="sk-empty">
-          <span className="sk-ic sk-ic64 sk-i5">
-            <SkIcon name="search" />
-          </span>
-          <h2 className="sk-t-h2 sk-mt16">{st.noResultsFor(query.trim())}</h2>
-          <p className="sk-t-s sk-mute sk-mt4">{st.noResultsHint}</p>
-        </div>
+        <SkEmpty
+          icon={
+            <SkTile letter="" tone={5} size={64}>
+              <SkIcon name="search" />
+            </SkTile>
+          }
+          title={st.noResultsFor(query.trim())}
+          body={st.noResultsHint}
+        />
       ) : (
         <>
           <div className="sk-t-s sk-mt16" aria-live="polite">
             {st.resultsCount(ids.length)}
           </div>
-          <div className="sk-grid2">
+          <div className="as-cols">
             {apps.length > 0 && (
               <Section title={st.appsTitle}>
                 <Rows ids={apps} ctx={ctx} query={query.trim()} />

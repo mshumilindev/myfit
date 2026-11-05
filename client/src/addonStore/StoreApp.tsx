@@ -11,8 +11,22 @@ import { useQueuedAddons } from '../addons/queue';
 import { initialsOf } from '../components/ui/Avatar';
 import { useAddonStoreT } from '../i18n/addonStore';
 import { currentHash, setHash } from '../route';
-import { SkAvatar, SkBtn, SkIcon, SkSearchField, cx } from '../store-kit/parts';
-import type { SkIconName } from '../store-kit/icons';
+import {
+  SkAvatar,
+  SkBackground,
+  SkBtn,
+  SkHeader,
+  SkIcon,
+  SkNavItem,
+  SkSearchField,
+  SkShell,
+  SkSidebar,
+  SkSidebarUser,
+  SkTabBar,
+  SkTray,
+  type SkIconName,
+} from '../store-kit';
+import './screens.css';
 import { Addons, Apps, Discover, Installed, ItemPage, Search, Selected } from './StoreScreens';
 import type { StoreCtx } from './storeItems';
 import {
@@ -88,136 +102,124 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
     />
   );
 
+  const icon = (n: SkIconName) => <SkIcon name={n} />;
+  const exit = () => setHash(STORE_FALLBACK_HASH);
+  const avatar = <SkAvatar initials={initials} label={name || st.title} onClick={onOpenProfile} />;
+
   return (
-    <div className="sk-root" data-store-role={role || getRole()}>
-      <div className="sk-shell">
-        <aside className="sk-side" aria-label={st.tabsLabel}>
-          <div className="sk-rowf sk-g12 sk-mb16" style={{ height: 44, padding: '0 12px' }}>
-            <span className="sk-t-h2">{st.title}</span>
-          </div>
-          <nav>
+    <div className="sk-root sk-app" data-store-role={role || getRole()}>
+      <SkBackground />
+      <SkShell
+        sidebar={
+          <SkSidebar
+            title={st.title}
+            label={st.tabsLabel}
+            back={<SkNavItem icon={icon('back')} label={st.backToSpotter} onClick={exit} />}
+            user={
+              <SkSidebarUser
+                avatar={
+                  <SkAvatar
+                    initials={initials}
+                    label={name || st.title}
+                    onClick={onOpenProfile}
+                    size={40}
+                  />
+                }
+                name={name}
+                role={getRole()}
+              />
+            }
+          >
             {NAV.map((n) => (
-              <button
+              <SkNavItem
                 key={n.tab}
-                type="button"
-                className={cx('sk-sn', tab === n.tab && 'sk-on')}
-                aria-current={tab === n.tab ? 'page' : undefined}
+                icon={icon(n.icon)}
+                label={label[n.tab]}
+                active={tab === n.tab}
+                count={
+                  n.tab === 'selected'
+                    ? queued.length
+                    : n.tab === 'installed'
+                      ? enabled.size
+                      : undefined
+                }
                 onClick={() => go(n.tab)}
-                style={{ width: '100%' }}
-              >
-                <SkIcon name={n.icon} />
-                <span>{label[n.tab]}</span>
-                {n.tab === 'selected' && queued.length > 0 && (
-                  <span className="sk-cnt">{queued.length}</span>
-                )}
-                {n.tab === 'installed' && enabled.size > 0 && (
-                  <span className="sk-cnt">{enabled.size}</span>
-                )}
-              </button>
+              />
             ))}
-          </nav>
-          <button
-            type="button"
-            className="sk-sn sk-mt16"
-            onClick={() => setHash(STORE_FALLBACK_HASH)}
-          >
-            <SkIcon name="back" />
-            <span>{st.backToSpotter}</span>
-          </button>
-          <div className="sk-usr">
-            <SkAvatar
-              initials={initials}
-              label={name || st.title}
-              onClick={onOpenProfile}
-              size={40}
+          </SkSidebar>
+        }
+        header={
+          isRoot || view === 'search' ? (
+            <SkHeader
+              title={title}
+              avatar={avatar}
+              onExit={exit}
+              exitLabel={st.backToSpotter}
+              exitIcon={icon('x')}
             />
-            <div className="sk-f1">
-              <div className="sk-t-b sk-b6">{name}</div>
-              <div className="sk-t-c">{getRole()}</div>
+          ) : (
+            <SkHeader
+              onBack={() => window.history.back()}
+              backLabel={st.back}
+              backIcon={icon('back')}
+              avatar={avatar}
+              onExit={exit}
+              exitLabel={st.backToSpotter}
+              exitIcon={icon('x')}
+            />
+          )
+        }
+        tabBar={
+          <SkTabBar
+            label={st.tabsLabel}
+            active={tab}
+            onSelect={(id) => go(id)}
+            tabs={NAV.map((n) => ({
+              id: n.tab,
+              label: label[n.tab],
+              icon: icon(n.icon),
+              dot: n.tab === 'selected' && queued.length > 0,
+            }))}
+          />
+        }
+        tray={
+          showTray ? (
+            <SkTray
+              label={st.itemsCount(queued.length)}
+              actionLabel={st.review}
+              onAction={() => go('selected')}
+            />
+          ) : undefined
+        }
+      >
+        {view !== 'item' && (
+          <div className="as-main-head">
+            <h1 className="sk-t-h1d as-desk-title">{title}</h1>
+            <div className="as-search-wrap">
+              {search}
+              {view === 'search' && (
+                <SkBtn
+                  kind="ghost"
+                  onClick={() => {
+                    // Cancel closes the search and returns to the store place it was opened from — never out of the store.
+                    setQuery('');
+                    setHash(storeHash(lastTab), true);
+                  }}
+                >
+                  {st.cancel}
+                </SkBtn>
+              )}
             </div>
           </div>
-        </aside>
-        <main className="sk-main">
-          <header className="sk-hdr">
-            {isRoot || view === 'search' ? (
-              <h1 className="sk-t-h1">{title}</h1>
-            ) : (
-              <button type="button" className="sk-nav" onClick={() => window.history.back()}>
-                <SkIcon name="back" />
-                <span>{st.back}</span>
-              </button>
-            )}
-            <div className="sk-hdr-end">
-              <SkAvatar initials={initials} label={name || st.title} onClick={onOpenProfile} />
-              <button
-                type="button"
-                className="sk-exit"
-                aria-label={st.backToSpotter}
-                title={st.backToSpotter}
-                onClick={() => setHash(STORE_FALLBACK_HASH)}
-              >
-                <SkIcon name="x" />
-              </button>
-            </div>
-          </header>
-          <div className="sk-scroll">
-            {view !== 'item' && (
-              <div className="sk-main-head">
-                <h1 className="sk-t-h1d sk-desk-title">{title}</h1>
-                <div className="sk-search-wrap sk-rowf sk-g12">
-                  {search}
-                  {view === 'search' && (
-                    <SkBtn
-                      kind="ghost"
-                      onClick={() => {
-                        // Cancel closes the search and returns to the store place it was opened from — never out of the store.
-                        setQuery('');
-                        setHash(storeHash(lastTab), true);
-                      }}
-                    >
-                      {st.cancel}
-                    </SkBtn>
-                  )}
-                </div>
-              </div>
-            )}
-            {view === 'discover' && <Discover role={role} ctx={ctx} go={go} />}
-            {view === 'apps' && <Apps role={role} ctx={ctx} />}
-            {view === 'addons' && <Addons role={role} ctx={ctx} />}
-            {view === 'selected' && <Selected ctx={ctx} go={go} />}
-            {view === 'installed' && <Installed ctx={ctx} go={go} />}
-            {view === 'item' && <ItemPage id={route.id} ctx={ctx} go={go} />}
-            {view === 'search' && (
-              <Search role={role} ctx={ctx} query={query} setQuery={setQuery} />
-            )}
-          </div>
-        </main>
-      </div>
-      {showTray && (
-        <div className="sk-tray" role="status">
-          <div className="sk-f1">
-            <b>{st.itemsCount(queued.length)}</b>
-          </div>
-          <SkBtn kind="inv" onClick={() => go('selected')}>
-            {st.review}
-          </SkBtn>
-        </div>
-      )}
-      <nav className="sk-tabbar" aria-label={st.tabsLabel}>
-        {NAV.map((n) => (
-          <button
-            key={n.tab}
-            type="button"
-            className={cx('sk-tab', tab === n.tab && 'sk-on')}
-            aria-current={tab === n.tab ? 'page' : undefined}
-            onClick={() => go(n.tab)}
-          >
-            <SkIcon name={n.icon} />
-            {n.tab === 'selected' && queued.length > 0 && <i className="sk-dot" />}
-            <span>{label[n.tab]}</span>
-          </button>
-        ))}
-      </nav>
+        )}
+        {view === 'discover' && <Discover role={role} ctx={ctx} go={go} />}
+        {view === 'apps' && <Apps role={role} ctx={ctx} />}
+        {view === 'addons' && <Addons role={role} ctx={ctx} />}
+        {view === 'selected' && <Selected ctx={ctx} go={go} />}
+        {view === 'installed' && <Installed ctx={ctx} go={go} />}
+        {view === 'item' && <ItemPage id={route.id} ctx={ctx} go={go} />}
+        {view === 'search' && <Search role={role} ctx={ctx} query={query} setQuery={setQuery} />}
+      </SkShell>
     </div>
   );
 }

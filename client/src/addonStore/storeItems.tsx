@@ -3,9 +3,8 @@ import { addonById, type AddonManifest } from '../addons/manifest';
 import { disableAddons } from '../addons/enabledSet';
 import { queueAdd, queueRemove } from '../addons/queue';
 import type { AddonStoreStrings } from '../i18n/addonStore';
-import { SkBadge, SkBtn, SkInstalledLabel, SkRow, SkTile } from '../store-kit/parts';
+import { SkBadge, SkBtn, SkHighlight, SkIcon, SkInstalledLabel, SkRow, SkTile } from '../store-kit';
 import { highlightParts } from './search';
-import { cx } from '../store-kit/parts';
 
 export interface StoreCtx {
   st: AddonStoreStrings;
@@ -80,19 +79,7 @@ export function relOf(m: AddonManifest, ctx: StoreCtx): string | null {
 }
 
 export function Highlight({ text, query }: { text: string; query: string }) {
-  return (
-    <>
-      {highlightParts(text, query).map((p, i) =>
-        p.hit ? (
-          <span key={i} className="sk-hl">
-            {p.text}
-          </span>
-        ) : (
-          <span key={i}>{p.text}</span>
-        ),
-      )}
-    </>
-  );
+  return <SkHighlight parts={highlightParts(text, query)} />;
 }
 
 export function ItemRow({
@@ -109,14 +96,22 @@ export function ItemRow({
   className?: string;
 }) {
   const { st } = ctx;
+  const rel = relOf(m, ctx);
   return (
-    <div className={cx(className)}>
+    <div className={className}>
       <SkRow
         tile={<TileOf st={st} m={m} />}
         name={<Highlight text={itemName(st, m.id)} query={query} />}
         desc={<Highlight text={itemDesc(st, m.id)} query={query} />}
         badge={kindBadge(st, m)}
-        rel={relOf(m, ctx)}
+        rel={
+          rel && (
+            <>
+              <SkIcon name="link" small />
+              {rel}
+            </>
+          )
+        }
         action={action === undefined ? <ItemAction m={m} ctx={ctx} /> : action}
         onOpen={m.soon ? undefined : () => ctx.open(m.id)}
       />

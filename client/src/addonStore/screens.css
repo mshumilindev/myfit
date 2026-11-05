@@ -1,0 +1,42 @@
+/* Store screens: layout of the screen compositions (tokens only). */
+.as-cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: var(--sk-sp-8);
+}
+@media (min-width: 45rem) {
+  .as-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.as-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-sp-5);
+}
+.as-main-head {
+  padding-top: var(--sk-sp-4);
+}
+.as-desk-title {
+  display: none;
+}
+@media (min-width: 45rem) {
+  .as-desk-title {
+    display: block;
+  }
+  .as-search-wrap {
+    width: var(--sk-search-w);
+  }
+}
+@media (max-width: 44.99rem) {
+  .as-search-wrap {
+    width: 100%;
+  }
+}
+.sk-app {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
