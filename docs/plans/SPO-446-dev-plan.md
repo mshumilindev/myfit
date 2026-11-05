@@ -9,7 +9,7 @@
 | D6: камера за замовчуванням, пристрої                    | шухляда «Call settings»                        | `CallSettingsSheet` | перемикач камери, вибір мікрофона/камери зберігаються в `gym.callPrefs`                        |
 | D6/D6-рішення: «Пряме з'єднання», relay за замовчуванням | рядок у шухляді з поясненням IP                | `CallSettingsSheet` | за замовчуванням вимкнено; увімкнення пише `direct:true`; `CallsHost.preferRelay` це вже читає |
 | D6: «не записується»                                     | підпис під заголовком                          | `CallSettingsSheet` | рядок видно на мобільному й десктопі                                                           |
-| Вхід у налаштування                                      | рядок «Calls» у Profile → Settings перед Atlas | `CallSettingsRow`   | видно лише коли `config/flags.calls` увімкнено для користувача                                 |
+| Вхід у налаштування                                      | рядок «Calls» у Profile → Settings перед Atlas | `CallSettingsRow`   | видно завжди, крім менеджера (прапора немає)                                                   |
 
 ## Екрани → код
 

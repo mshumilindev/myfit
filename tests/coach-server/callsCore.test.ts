@@ -13,7 +13,6 @@ import {
   TURN_PER_CALL_PER_HOUR,
   UNAVAILABLE_PER_PAIR_PER_HOUR,
   isRelayCandidate,
-  requireCallsEnabled,
   ICE_TTL_MS,
   RING_GRACE_MS,
   RING_MS,
@@ -78,7 +77,6 @@ beforeEach(async () => {
   reachable = true;
   pushed.length = 0;
   n = 0;
-  await kv.set('config/flags', { calls: true });
   await kv.set('users/t1', { role: 'trainer', status: 'active' });
   await kv.set('users/t2', { role: 'trainer', status: 'active' });
   await kv.set('users/c1', { role: 'member', status: 'active' });
@@ -573,38 +571,6 @@ describe('M1: heartbeat (callActive) keeps an active call alive', () => {
     await callActive(kv, ports(), T, { callId: ID });
     now += 20_000;
     expect(await code(start(T, { callId: ID2 }))).toBe('failed-precondition:already-in-call');
-  });
-});
-
-describe('M2: server-side kill switch config/flags.calls (default OFF)', () => {
-  const all = (a = T) => [
-    () => start(a),
-    () => callAnswer(kv, ports(), C, { callId: ID, accept: false }),
-    () => callActive(kv, ports(), C, { callId: ID }),
-    () => callIce(kv, ports(), a, { callId: ID, candidate: { candidate: 'a' } }),
-    () => callTurn(kv, ports(), a, { callId: ID }),
-  ];
-  it.each([[null], [{}], [{ calls: false }], [{ calls: 'true' }], [{ calls: 1 }]])(
-    'refuses every callable but callEnd while the flag is %j',
-    async (flags) => {
-      await start(); // a call in progress
-      if (flags === null) await kv.del('config/flags');
-      else await kv.set('config/flags', flags);
-      for (const f of all()) expect(await code(f())).toBe('failed-precondition:calls-disabled');
-      expect(await callEnd(kv, ports(), T, { callId: ID, reason: 'hangup' })).toEqual({
-        state: 'ended',
-        endReason: 'hangup',
-      }); // ending always works
-      await expect(requireCallsEnabled(kv)).rejects.toThrow('calls-disabled');
-    },
-  );
-  it('switches on with exactly calls === true, and writes nothing while off', async () => {
-    await kv.del('config/flags');
-    expect(await code(start())).toBe('failed-precondition:calls-disabled');
-    expect(await kv.list('calls')).toEqual([]);
-    expect(pushed).toEqual([]);
-    await kv.set('config/flags', { calls: true });
-    expect(await start()).toEqual({ state: 'ringing' });
   });
 });
 

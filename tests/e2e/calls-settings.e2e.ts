@@ -109,11 +109,3 @@ test('the Calls row opens the settings drawer; choices are saved on this device'
 
   await client.screenshot({ path: `test-results/calls-settings-${info.project.name}.png` });
 });
-
-test('the row is not offered to someone who cannot call', async ({ context, baseURL }) => {
-  const pair = await openPair(context, baseURL!, { prepare: (s) => s.off.add('e2e-member') });
-  await serveOwnProfile(pair.client);
-  await gotoApp(pair.client, pair.clientUrl('#/profile/me'));
-  await pair.client.getByRole('button', { name: 'Settings', exact: true }).click();
-  await expect(pair.client.getByRole('button', { name: /^Calls/ })).toHaveCount(0);
-});

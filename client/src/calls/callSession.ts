@@ -324,7 +324,7 @@ export class CallSession {
     const err = e as CallError;
     // `already-in-call` also arrives as failed-precondition, so it is told apart by its reason first
     if (err?.reason === 'already-in-call') return 'busy';
-    if (err?.reason === 'calls-disabled' || err?.code === 'failed-precondition') return 'disabled';
+    if (err?.code === 'failed-precondition') return 'disabled';
     if (err?.code === 'unavailable' || err?.code === 'deadline-exceeded') return 'offline';
     return 'failed';
   }

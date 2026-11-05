@@ -198,10 +198,10 @@ describe('outgoing call', () => {
     expect(t.api.start).not.toHaveBeenCalled();
   });
 
-  it('calls-disabled flag maps to the disabled reason', async () => {
+  it('a failed-precondition refusal maps to the disabled reason', async () => {
     const t = setup();
     vi.mocked(t.api.start).mockRejectedValueOnce(
-      Object.assign(new Error('x'), { code: 'failed-precondition', reason: 'calls-disabled' }),
+      Object.assign(new Error('x'), { code: 'failed-precondition', reason: 'other' }),
     );
     await t.session.dial('peer', 'voice', ID);
     expect(t.session.getState().endReason).toBe('disabled');

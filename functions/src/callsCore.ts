@@ -100,17 +100,6 @@ const fail = (code: ConstructorParameters<typeof HttpsError>[0], reason: string)
   throw new HttpsError(code, reason, { reason });
 };
 
-/* ---- kill switch (config/flags.calls) ------------------------------------------------------------------------------ */
-/**
- * Server-side switch, OFF unless an admin sets `config/flags.calls = true` (the existing flags document; its rules let
- * only an admin write it). Every call callable except `callEnd` is refused with `failed-precondition/calls-disabled`
- * while it is off, so ending a call that is in progress always works.
- */
-export async function requireCallsEnabled(kv: Kv): Promise<void> {
-  const flags = (await kv.get('config/flags')) as { calls?: unknown } | null;
-  if (flags?.calls !== true) fail('failed-precondition', 'calls-disabled');
-}
-
 /* ---- input ---------------------------------------------------------------------------------------------------- */
 function asObject(data: unknown, allowed: string[]): Record<string, unknown> {
   if (!data || typeof data !== 'object' || Array.isArray(data))
@@ -251,7 +240,6 @@ export async function callStart(
   actor: CallActor,
   data: unknown,
 ): Promise<CallResult> {
-  await requireCallsEnabled(kv);
   const d = asObject(data, ['callId', 'peerId', 'kind', 'offer', 'relayOnly']);
   const callId = callIdOf(d.callId);
   const peerId = uidOf(d.peerId);
@@ -368,7 +356,6 @@ export async function callAnswer(
   actor: CallActor,
   data: unknown,
 ): Promise<CallResult> {
-  await requireCallsEnabled(kv);
   const d = asObject(data, ['callId', 'accept', 'answer']);
   const callId = callIdOf(d.callId);
   if (typeof d.accept !== 'boolean') return fail('invalid-argument', 'bad-input');
@@ -410,7 +397,6 @@ export async function callActive(
   actor: CallActor,
   data: unknown,
 ): Promise<CallResult> {
-  await requireCallsEnabled(kv);
   const d = asObject(data, ['callId']);
   const callId = callIdOf(d.callId);
   const now = ports.now();
@@ -463,7 +449,6 @@ export async function callIce(
   actor: CallActor,
   data: unknown,
 ): Promise<{ ok: true }> {
-  await requireCallsEnabled(kv);
   const d = asObject(data, ['callId', 'candidate']);
   const callId = callIdOf(d.callId);
   const candidate = iceOf(d.candidate);
@@ -495,7 +480,6 @@ export async function callTurn(
   actor: CallActor,
   data: unknown,
 ): Promise<{ iceServers: IceServer[] }> {
-  await requireCallsEnabled(kv);
   const d = asObject(data, ['callId']);
   const callId = callIdOf(d.callId);
   const now = ports.now();

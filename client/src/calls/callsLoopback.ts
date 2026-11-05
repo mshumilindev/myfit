@@ -55,8 +55,6 @@ export interface LoopbackPorts {
   api: CallApi;
   wire: CallWire;
   devices: CallDevices;
-  /** The server switch for this user (`config/flags.calls`). */
-  watchFlag(uid: string, cb: (on: boolean) => void): Unsubscribe;
 }
 
 let ports: LoopbackPorts | null | undefined;
@@ -208,14 +206,5 @@ export function loopbackPorts(): LoopbackPorts | null {
     api,
     wire,
     devices,
-    watchFlag: (myUid, cb) => {
-      let last: boolean | undefined;
-      return poll(async () => {
-        const on = await ask<boolean>('flag', { uid: myUid });
-        if (on === last) return;
-        last = on;
-        cb(on);
-      });
-    },
   });
 }

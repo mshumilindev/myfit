@@ -1,7 +1,5 @@
-import { doc, onSnapshot } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { currentUid, getRole } from '../api';
-import { db } from '../firebase';
 import { CallLayer } from './CallLayer';
 import { CallSession } from './callSession';
 import { browserCallDevices, firebaseCallApi, firebaseCallWire } from './callsFirebase';
@@ -11,9 +9,9 @@ import { readCallPrefs } from './callPrefs';
 import { publishCalls, queueCallLog, useCallsPublished } from './callsStore';
 
 /**
- * The one place the call code runs (SPO-445): mounted lazily at the app root once someone is signed in. It watches the
- * server switch (`config/flags.calls`), starts listening for incoming calls and publishes the session for the call
- * buttons. Managers never get calls (the server refuses them too).
+ * The one place the call code runs (SPO-445): mounted lazily at the app root once someone is signed in. It starts
+ * listening for incoming calls and publishes the session for the call buttons. Managers never get calls (the server
+ * refuses them too). There is no feature flag: calls are always on.
  */
 export default function CallsHost() {
   const uid = currentUid();
@@ -21,21 +19,10 @@ export default function CallsHost() {
   const allowed = !!uid && role !== 'manager';
   // E2E only (SPO-434): the fixtures build, when the test exposed its in-process server. Constant `null` in every other build.
   const lb = import.meta.env.VITE_COACH_BACKEND === 'fixtures' ? loopbackPorts() : null;
-  const [flag, setFlag] = useState(false);
   const { session } = useCallsPublished();
 
   useEffect(() => {
-    if (!allowed) return;
-    if (lb && uid) return lb.watchFlag(uid, setFlag);
-    return onSnapshot(
-      doc(db, 'config', 'flags'),
-      (s) => setFlag(s.data()?.calls === true),
-      () => setFlag(false),
-    );
-  }, [allowed, lb, uid]);
-
-  useEffect(() => {
-    if (!allowed || !flag || !uid) return;
+    if (!allowed || !uid) return;
     const sess = new CallSession({
       uid,
       api: lb?.api ?? firebaseCallApi,
@@ -57,7 +44,7 @@ export default function CallsHost() {
       publishCalls({ session: null, enabled: false });
       sess.dispose();
     };
-  }, [allowed, flag, uid, lb]);
+  }, [allowed, uid, lb]);
 
   return session ? <CallLayer session={session} /> : null;
 }

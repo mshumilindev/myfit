@@ -194,21 +194,6 @@ describe('wire polling', () => {
     expect(cb).toHaveBeenCalledTimes(1);
     off();
   });
-
-  it('watchFlag emits when the switch changes', async () => {
-    let on = false;
-    const rpc = vi.fn<Rpc>(async () => ok(on));
-    const p = (await load(rpc)) as LoopbackPorts;
-    const cb = vi.fn();
-    const off = p.watchFlag('me', cb);
-    await tick(0);
-    await tick();
-    expect(cb.mock.calls).toEqual([[false]]);
-    on = true;
-    await tick();
-    expect(cb.mock.calls).toEqual([[false], [true]]);
-    off();
-  });
 });
 
 describe('devices and the e2e hook', () => {

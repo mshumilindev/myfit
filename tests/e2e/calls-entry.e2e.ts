@@ -192,35 +192,6 @@ test.describe('when the buttons are off or absent', () => {
     }
   });
 
-  test('server switch off: no call buttons anywhere; switched on, they appear without a reload', async ({
-    context,
-    baseURL,
-  }) => {
-    const pair = await openPair(context, baseURL!, {
-      prepare: (s) => {
-        s.off.add('e2e-trainer');
-        s.off.add('e2e-member');
-      },
-    });
-    const { trainer, client, server } = pair;
-    await openChats(pair);
-    await trainer.waitForTimeout(1200);
-    await client.waitForTimeout(300);
-    for (const p of [trainer, client]) {
-      await expect(p.getByRole('button', { name: 'Voice', exact: true })).toHaveCount(0);
-      await expect(p.getByRole('button', { name: 'Video', exact: true })).toHaveCount(0);
-      await expect(p.getByRole('button', { name: /^Call / })).toHaveCount(0);
-    }
-    await gotoApp(trainer, pair.trainerUrl('c/clients/c1'));
-    await trainer.waitForTimeout(800);
-    await expect(trainer.locator('.uicall-act')).toHaveCount(0);
-    await expect(trainer.getByRole('button', { name: /^Call / })).toHaveCount(0);
-    expect(server.log.filter(([, n]) => n === 'start')).toHaveLength(0);
-
-    server.off.clear();
-    await expectCallButtons(trainer, isCompact(trainer));
-  });
-
   test('manager: no call buttons and the calls code never listens', async ({
     context,
     baseURL,

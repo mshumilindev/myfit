@@ -44,12 +44,10 @@ export class CallsServer {
   private readonly ice = new Map<string, { n: number; from: string; candidate: unknown }[]>();
   /** Everything the pages asked for, in order: `[uid, method]`. Tests assert on it (idempotence, who never connected). */
   readonly log: [string, string][] = [];
-  /** Users whose page is watching the server (flag / incoming polls): a manager's page must never appear here. */
+  /** Users whose page is watching the server (incoming polls): a manager's page must never appear here. */
   readonly polled = new Set<string>();
   /** Quiet hours (the callee's devices would not ring): `unavailable`, nothing is written. */
   readonly quiet = new Set<string>();
-  /** Users for whom the server switch `config/flags.calls` is off. */
-  readonly off = new Set<string>();
   /** Rejections sent back to a page, `[uid, method, reason]`. */
   readonly rejected: [string, string, string][] = [];
 
@@ -103,10 +101,9 @@ export class CallsServer {
 
   handle(name: string, a: Record<string, unknown>): unknown {
     const uid = a.uid as string;
-    if (['flag', 'incoming', 'getCall', 'ice-since'].includes(name)) this.polled.add(uid);
+    if (['incoming', 'getCall', 'ice-since'].includes(name)) this.polled.add(uid);
     else if (name !== 'ice') this.log.push([uid, name]);
     const now = Date.now();
-    if (name === 'flag') return !this.off.has(uid);
     if (name === 'incoming') {
       return [...this.calls.values()]
         .filter((d) => d.calleeId === uid && d.state === 'ringing' && now - d.createdAt < 60_000)
@@ -120,7 +117,6 @@ export class CallsServer {
       const list = this.ice.get(a.callId as string) ?? [];
       return list.filter((c) => c.from !== uid && c.n > (a.after as number));
     }
-    if (this.off.has(uid) && name !== 'end') fail('failed-precondition', 'calls-disabled');
 
     const callId = a.callId as string;
     switch (name) {

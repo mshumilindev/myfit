@@ -37,11 +37,11 @@
 | `callIce`                                              | `{callId, candidate}`                                | `{ok:true}`; лише учасник, лише поки дзвінок живий                                                                                                                                                                                                          |
 | `callTurn`                                             | `{callId}`                                           | `{iceServers:[{urls, username?, credential?}]}`; без токена Cloudflare: `stun:stun.cloudflare.com:3478`                                                                                                                                                     |
 
-Помилки: `HttpsError(code, reason, {reason})`. Коди reason: `bad-input`, `bad-call-id`, `bad-peer`, `bad-kind`, `bad-sdp`, `bad-candidate`, `bad-reason`, `call-id-taken`, `no-active-coaching`, `not-allowed` (manager), `not-a-participant` (чужий і неіснуючий дзвінок не розрізняються), `only-callee`, `not-answered`, `call-ended`, `already-in-call`, `too-many-calls`, `too-many-candidates`, `too-many-turn-requests`, `call-stale`, `calls-disabled`.
+Помилки: `HttpsError(code, reason, {reason})`. Коди reason: `bad-input`, `bad-call-id`, `bad-peer`, `bad-kind`, `bad-sdp`, `bad-candidate`, `bad-reason`, `call-id-taken`, `no-active-coaching`, `not-allowed` (manager), `not-a-participant` (чужий і неіснуючий дзвінок не розрізняються), `only-callee`, `not-answered`, `call-ended`, `already-in-call`, `too-many-calls`, `too-many-candidates`, `too-many-turn-requests`, `call-stale`.
 
-## Вимикач на сервері (`calls-disabled`)
+## Без прапора
 
-Усі callables, **крім `callEnd`**, повертають `HttpsError('failed-precondition','calls-disabled')`, доки в існуючому документі прапорів `config/flags` поле `calls` не дорівнює рівно `true`. За замовчуванням **вимкнено** (документа чи поля немає = вимкнено). `callEnd` працює завжди, щоб розпочатий дзвінок можна було завершити. Увімкнути: адмін ставить `config/flags.calls = true` (rules: читає кожен вхідний, пише лише адмін; клієнт може читати той самий прапор для UI); вимкнути: `false` або видалити поле. Поки вимкнено, нічого не пишеться.
+Дзвінки не ховаються за прапором (рішення власника 05.11): жодного `config/flags.calls`, коду `calls-disabled` немає. Усі callables працюють завжди; обмеження лише за ролями, активним `coaching.status`, лімітами й тихими годинами.
 
 ## Relay (політика IP)
 
