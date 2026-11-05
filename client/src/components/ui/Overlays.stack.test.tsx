@@ -290,4 +290,19 @@ describe('the Back button', () => {
       'number',
     ); // a's entry is on top again
   });
+
+  it('a drawer that closes because the app navigates does not pull the page back afterwards (Start -> session)', async () => {
+    window.history.replaceState(null, '', '#/today');
+    const { rerender } = render(
+      <Sheet onClose={vi.fn()}>
+        <p>a</p>
+      </Sheet>,
+    );
+    rerender(<p>gone</p>); // the drawer unmounts ...
+    window.history.replaceState(window.history.state, '', '#/session'); // ... and the app moves on in the same tick
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 100));
+    });
+    expect(window.location.hash).toBe('#/session');
+  });
 });

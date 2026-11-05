@@ -18,6 +18,8 @@ const entries: Entry[] = [];
 let swallow = 0;
 let seq = 0;
 let listening = false;
+/** Deferred give-backs that have not run yet (see the cleanup below). */
+const timers = new Set<ReturnType<typeof setTimeout>>();
 
 function onPop(): void {
   if (swallow > 0) {
@@ -48,26 +50,37 @@ export function useOverlayBack(close: () => void, enabled: boolean): void {
     }
     entries.push(entry);
     window.history.pushState({ ...(window.history.state ?? {}), spotterOverlay: entry.marker }, '');
+    const href = window.location.href;
     return () => {
       const i = entries.indexOf(entry);
       if (i >= 0) entries.splice(i, 1);
-      // closed by something other than Back: give its history entry back
-      const st = window.history.state as { spotterOverlay?: number } | null;
-      if (!entry.done && st?.spotterOverlay === entry.marker) {
-        swallow += 1;
-        window.history.back();
-      }
+      if (entry.done) return;
+      // Closed by something other than Back: give its history entry back. NOT in the same tick: a drawer that closes
+      // because the app is navigating (Start -> the session screen) would otherwise have its history.back() land after
+      // the navigation and throw the person back to the previous screen. Next task: give it back only if the page is
+      // still on this very entry; if the app has moved on, the entry stays (one harmless extra Back press).
+      const timer = setTimeout(() => {
+        timers.delete(timer);
+        const st = window.history.state as { spotterOverlay?: number } | null;
+        if (window.location.href === href && st?.spotterOverlay === entry.marker) {
+          swallow += 1;
+          window.history.back();
+        }
+      }, 0);
+      timers.add(timer);
     };
   }, [enabled]);
 }
 
 /** Tests only: a drawer gave its history entry back and the popstate has not arrived yet. */
 export function overlayBackPendingForTest(): boolean {
-  return swallow > 0;
+  return swallow > 0 || timers.size > 0;
 }
 
 /** Tests only: a popstate that a faked timer never delivered must not stay counted as "swallow". */
 export function resetOverlayBackForTest(): void {
   swallow = 0;
   entries.length = 0;
+  timers.forEach(clearTimeout);
+  timers.clear();
 }
