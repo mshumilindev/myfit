@@ -1,0 +1,31 @@
+/* SkEmpty — centred stack with generous top space. */
+.sk-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: var(--sk-empty-top);
+  margin-inline: auto;
+  max-width: var(--sk-empty-max);
+}
+.sk-empty-title {
+  margin: var(--sk-sp-6) 0 0;
+  font-size: var(--sk-fs-h2);
+  line-height: var(--sk-lh-title);
+  font-weight: var(--sk-fw-bold);
+  letter-spacing: var(--sk-ls-snug);
+  overflow-wrap: anywhere;
+}
+.sk-empty-body {
+  margin: var(--sk-sp-2) 0 0;
+  font-size: var(--sk-fs-small);
+  line-height: var(--sk-lh-body);
+  color: var(--mute);
+}
+.sk-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sk-sp-5);
+  margin-top: var(--sk-sp-8);
+}

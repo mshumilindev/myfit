@@ -1,0 +1,73 @@
+/* SkToast — transient message above the tab bar. */
+.sk-toast {
+  position: fixed;
+  inset-inline: var(--sk-sp-6);
+  bottom: calc(var(--sk-tabbar-h) + var(--sk-sp-5));
+  z-index: var(--sk-z-toast);
+  display: flex;
+  align-items: center;
+  gap: var(--sk-sp-5);
+  max-width: var(--sk-toast-w);
+  margin-inline: auto;
+  padding: var(--sk-sp-5) var(--sk-sp-6);
+  border-radius: var(--sk-r-md);
+  background: var(--dark);
+  color: var(--on-tone);
+  font-size: var(--sk-fs-small);
+  line-height: var(--sk-lh-body);
+  box-shadow: var(--sk-shadow-toast);
+  animation: sk-toast-rise var(--sk-dur) var(--sk-ease);
+}
+.sk-toast-in {
+  position: absolute;
+}
+.sk-toast-ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.sk-toast-warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.sk-toast-bad {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+.sk-toast-msg {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.sk-toast-ic {
+  flex: none;
+  width: var(--sk-icon);
+  height: var(--sk-icon);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sk-toast-x {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sk-tap);
+  height: var(--sk-tap);
+  margin-block: calc(var(--sk-sp-4) * -1);
+  margin-inline-end: calc(var(--sk-sp-5) * -1);
+  border-radius: var(--sk-r-md);
+  color: inherit;
+}
+@keyframes sk-toast-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--sk-sp-5));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-toast {
+    animation: none;
+  }
+}

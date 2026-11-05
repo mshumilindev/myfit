@@ -1,0 +1,57 @@
+/* SkAvatar — circle, sizes 24/32/36(default)/40; button variant gets a 44px hit area. */
+.sk-av {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 var(--sk-avatar);
+  inline-size: var(--sk-avatar);
+  block-size: var(--sk-avatar);
+  border-radius: 50%;
+  background: var(--ic-5);
+  color: var(--on-tone);
+  font-size: var(--sk-av-fs-32);
+  font-weight: var(--sk-fw-bold);
+  overflow: hidden;
+}
+.sk-av-24 {
+  flex-basis: var(--sk-av-24);
+  inline-size: var(--sk-av-24);
+  block-size: var(--sk-av-24);
+  font-size: var(--sk-av-fs-24);
+}
+.sk-av-32 {
+  flex-basis: var(--sk-av-32);
+  inline-size: var(--sk-av-32);
+  block-size: var(--sk-av-32);
+}
+.sk-av-40 {
+  flex-basis: var(--sk-av-40);
+  inline-size: var(--sk-av-40);
+  block-size: var(--sk-av-40);
+  font-size: var(--sk-av-fs-40);
+}
+.sk-av-img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+.sk-avbtn {
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  overflow: visible;
+}
+.sk-avbtn::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: var(--sk-tap);
+  block-size: var(--sk-tap);
+  transform: translate(-50%, -50%);
+}
+.sk-avbtn:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}

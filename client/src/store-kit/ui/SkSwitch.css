@@ -1,0 +1,49 @@
+/* SkSwitch — 51x31 track + knob inside a 44px-tall button. */
+.sk-swb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  block-size: var(--sk-tap);
+  min-inline-size: var(--sk-tap);
+  flex: 0 0 auto;
+}
+.sk-swb:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.sk-sw {
+  position: relative;
+  inline-size: var(--sk-sw-w);
+  block-size: var(--sk-sw-h);
+  flex: 0 0 var(--sk-sw-w);
+  border-radius: var(--sk-r-pill);
+  background: var(--chip);
+  transition: background var(--sk-dur) var(--sk-ease);
+}
+.sk-sw::after {
+  content: '';
+  position: absolute;
+  inset-block-start: var(--sk-sw-gap);
+  inset-inline-start: var(--sk-sw-gap);
+  inline-size: var(--sk-sw-knob);
+  block-size: var(--sk-sw-knob);
+  border-radius: 50%;
+  background: var(--on-tone);
+  box-shadow: var(--sk-sw-shadow);
+  transition: transform var(--sk-dur) var(--sk-ease);
+}
+.sk-sw.sk-on {
+  background: var(--acc);
+}
+.sk-sw.sk-on::after {
+  transform: translateX(calc(var(--sk-sw-w) - var(--sk-sw-knob) - 2 * var(--sk-sw-gap)));
+}
+[dir='rtl'] .sk-sw.sk-on::after {
+  transform: translateX(calc(-1 * (var(--sk-sw-w) - var(--sk-sw-knob) - 2 * var(--sk-sw-gap))));
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-sw,
+  .sk-sw::after {
+    transition: none;
+  }
+}

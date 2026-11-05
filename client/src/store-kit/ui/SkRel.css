@@ -1,0 +1,10 @@
+/* SkRel — muted caption with a link icon. */
+.sk-rel {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-sp-2);
+  white-space: nowrap;
+  font-size: var(--sk-rel-fs);
+  line-height: var(--sk-lh-small);
+  color: var(--mute);
+}

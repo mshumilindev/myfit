@@ -1,0 +1,27 @@
+/* SkNote — info (default) / ok / warn / bad. */
+.sk-note {
+  display: flex;
+  gap: var(--sk-sp-5);
+  padding: var(--sk-sp-5);
+  border-radius: var(--sk-r-note);
+  background: var(--btn-bg);
+  color: var(--fg);
+  font-size: var(--sk-fs-small);
+  line-height: var(--sk-lh-note);
+}
+.sk-note-b {
+  flex: 1;
+  min-inline-size: 0;
+}
+.sk-note.sk-warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.sk-note.sk-ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.sk-note.sk-bad {
+  background: var(--bad-bg);
+  color: var(--bad);
+}

@@ -1,0 +1,20 @@
+/* SkBar — bottom action bar. */
+.sk-act {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-sp-4);
+  padding: var(--sk-sp-5) var(--sk-sp-6) calc(var(--sk-sp-5) + env(safe-area-inset-bottom));
+  background: var(--card);
+  border-top: var(--sk-line-w) solid var(--line);
+}
+.sk-act-note {
+  text-align: center;
+}
+.sk-act-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-sp-4);
+}
+.sk-act-row > * {
+  flex: 1;
+}

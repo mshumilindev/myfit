@@ -1,0 +1,56 @@
+/* SkRow — tile | name, desc, badge + relation | action. Hairline below, none on the last row. */
+.sk-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-sp-5);
+  min-height: var(--sk-row-min);
+  padding-block: var(--sk-row-py);
+  border-bottom: var(--sk-line-w) solid var(--line);
+}
+.sk-row:last-child,
+.sk-row.sk-nb {
+  border-bottom: 0;
+}
+.sk-row-main {
+  flex: 1;
+  min-width: 0;
+}
+.sk-row-open {
+  cursor: pointer;
+  border-radius: var(--sk-r-xs);
+}
+.sk-row-name {
+  font-size: var(--sk-fs-body);
+  line-height: var(--sk-lh-body);
+  font-weight: var(--sk-fw-semibold);
+  overflow-wrap: anywhere;
+}
+.sk-row-desc {
+  font-size: var(--sk-fs-small);
+  line-height: var(--sk-lh-small);
+  color: var(--mute);
+  overflow-wrap: anywhere;
+}
+.sk-row-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sk-sp-4);
+  margin-top: var(--sk-sp-2);
+}
+.sk-row-meta:empty {
+  display: none;
+}
+.sk-rel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sk-sp-2);
+  font-size: var(--sk-fs-caption);
+  line-height: var(--sk-lh-small);
+  color: var(--mute);
+  white-space: nowrap;
+}
+.sk-row-open:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}

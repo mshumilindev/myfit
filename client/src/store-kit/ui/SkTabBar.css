@@ -1,0 +1,51 @@
+/* SkTabBar — bottom tabs; bottom safe-area inset added to the padding. */
+.sk-tbr {
+  display: flex;
+  padding: var(--sk-sp-4) var(--sk-sp-4) calc(var(--sk-sp-4) + env(safe-area-inset-bottom));
+  background: var(--card);
+  border-top: var(--sk-line-w) solid var(--line);
+}
+.sk-tbr-tab {
+  flex: 1;
+  min-width: 0;
+  height: var(--sk-tap);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sk-sp-1);
+  color: var(--mute);
+  font-size: var(--sk-fs-eyebrow);
+  line-height: var(--sk-lh-eyebrow);
+  font-weight: var(--sk-fw-semibold);
+}
+.sk-tbr-on {
+  color: var(--acc-t);
+}
+.sk-tbr-ic {
+  position: relative;
+  display: inline-flex;
+}
+.sk-tbr-dot {
+  position: absolute;
+  top: 0;
+  inset-inline-end: calc(var(--sk-dot) * -0.5);
+  width: var(--sk-dot);
+  height: var(--sk-dot);
+  border-radius: 50%;
+  background: var(--acc);
+}
+.sk-tbr-lbl {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sk-tbr-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

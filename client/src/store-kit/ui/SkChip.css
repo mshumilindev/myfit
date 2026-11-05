@@ -1,0 +1,38 @@
+/* SkChip — pill filter; 36px visual, hit area extended to the 44px tap size. */
+.sk-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  block-size: var(--sk-chip-h);
+  padding-inline: var(--sk-sp-6);
+  border-radius: var(--sk-r-lg);
+  background: var(--chip);
+  color: var(--fg);
+  font-size: var(--sk-fs-small);
+  font-weight: var(--sk-fw-semibold);
+  white-space: nowrap;
+  transition: background var(--sk-dur-fast) var(--sk-ease);
+}
+.sk-chip::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block: calc((var(--sk-chip-h) - var(--sk-tap)) / 2);
+}
+.sk-chip.sk-on {
+  background: var(--fg);
+  color: var(--bg);
+}
+.sk-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.sk-chip:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-chip {
+    transition: none;
+  }
+}

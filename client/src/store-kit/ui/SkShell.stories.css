@@ -1,0 +1,12 @@
+/* Story-only: a fixed-height frame so the shell has a parent height. */
+.sk-shl-frame {
+  height: var(--sk-shell-frame-h);
+  width: 100%;
+  border: var(--sk-line-w) solid var(--line);
+  border-radius: var(--sk-r-lg);
+  overflow: hidden;
+}
+.sk-shl-frame-phone {
+  width: 24.375rem;
+  max-width: 100%;
+}

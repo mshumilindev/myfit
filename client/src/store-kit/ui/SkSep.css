@@ -1,0 +1,11 @@
+/* SkSep — 1px hairline in the line colour. */
+.sk-sep {
+  height: var(--sk-line-w);
+  background: var(--line);
+  flex: none;
+}
+.sk-sep-v {
+  height: auto;
+  align-self: stretch;
+  width: var(--sk-line-w);
+}

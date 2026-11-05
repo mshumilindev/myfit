@@ -1,0 +1,20 @@
+/* SkTray — accent pill with a count and one action. */
+.sk-try {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-sp-5);
+  height: var(--sk-tray-h);
+  padding-block: 0;
+  padding-inline: var(--sk-sp-6) var(--sk-sp-3);
+  border-radius: var(--sk-r-xl);
+  background: var(--acc);
+  color: var(--acc-fg);
+  font-size: var(--sk-fs-body);
+}
+.sk-try-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

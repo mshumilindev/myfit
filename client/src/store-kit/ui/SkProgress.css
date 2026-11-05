@@ -1,0 +1,20 @@
+/* SkProgress — 8px track, fill width from --sk-pg-value. */
+.sk-pg {
+  block-size: var(--sk-pg-h);
+  border-radius: var(--sk-r-xs);
+  background: var(--chip);
+  overflow: hidden;
+}
+.sk-pg i {
+  display: block;
+  block-size: 100%;
+  inline-size: var(--sk-pg-value, 0%);
+  background: var(--acc);
+  border-radius: var(--sk-r-xs);
+  transition: inline-size var(--sk-dur) var(--sk-ease);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-pg i {
+    transition: none;
+  }
+}

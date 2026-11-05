@@ -1,0 +1,38 @@
+/* SkBadge — kinds app (filled dark), add (outlined accent), soon (dashed), ok, warn, new (filled accent). */
+.sk-bd {
+  display: inline-block;
+  font-size: var(--sk-fs-badge);
+  line-height: var(--sk-lh-badge);
+  font-weight: var(--sk-fw-heavy);
+  letter-spacing: var(--sk-ls-badge);
+  padding: var(--sk-sp-1) var(--sk-sp-3);
+  border-radius: var(--sk-r-badge);
+  text-transform: uppercase;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.sk-bd-app {
+  background: var(--dark);
+  color: var(--on-tone);
+}
+.sk-bd-add {
+  box-shadow: inset 0 0 0 var(--sk-line-w) var(--acc-t);
+  color: var(--acc-t);
+}
+.sk-bd-soon {
+  outline: var(--sk-line-w) dashed var(--mute);
+  outline-offset: calc(-1 * var(--sk-line-w));
+  color: var(--mute);
+}
+.sk-bd-ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.sk-bd-warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.sk-bd-new {
+  background: var(--acc);
+  color: var(--acc-fg);
+}

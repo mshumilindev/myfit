@@ -1,0 +1,26 @@
+/* SkSectionHeader — title left, aside right. */
+.sk-sec-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sk-sp-5);
+  margin-bottom: var(--sk-sp-5);
+}
+.sk-sec-title {
+  margin: 0;
+  min-width: 0;
+  font-size: var(--sk-fs-h2);
+  line-height: var(--sk-lh-title);
+  font-weight: var(--sk-fw-bold);
+  letter-spacing: var(--sk-ls-snug);
+}
+.sk-sec-aside {
+  flex: none;
+}
+.sk-link {
+  min-height: var(--sk-tap);
+  padding-inline: var(--sk-sp-2);
+  color: var(--acc-t);
+  font-size: var(--sk-fs-body);
+  font-weight: var(--sk-fw-semibold);
+}

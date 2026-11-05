@@ -1,0 +1,5 @@
+/* SkList — a card whose SkRow children are separated by hairlines (the row draws its own bottom border). */
+.sk-list {
+  padding-inline: var(--sk-sp-6);
+  padding-block: 0;
+}

@@ -1,0 +1,16 @@
+/* SkIcon — 24x24 stroke icon, 16 when small; colour follows currentColor. */
+.sk-svg {
+  inline-size: var(--sk-icon);
+  block-size: var(--sk-icon);
+  flex: 0 0 var(--sk-icon);
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sk-svg-s {
+  inline-size: var(--sk-icon-s);
+  block-size: var(--sk-icon-s);
+  flex-basis: var(--sk-icon-s);
+}

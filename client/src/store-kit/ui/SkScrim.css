@@ -1,0 +1,26 @@
+/* SkScrim — the dim layer under overlays; colour comes from --scrim (light/dark aware). */
+.sk-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--sk-z-sheet);
+  background: var(--scrim);
+  animation: sk-scrim-in var(--sk-dur) var(--sk-ease);
+}
+.sk-scrim-in {
+  position: absolute;
+}
+@keyframes sk-scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-scrim {
+    animation: none;
+  }
+}
+/* Helper: a positioned host so a contained scrim / sheet covers it. */
+.sk-scrim-host {
+  position: relative;
+  overflow: hidden;
+}

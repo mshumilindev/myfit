@@ -1,0 +1,69 @@
+/* SkHero — Discover progress card: figure, bar, headline. State only changes the bar colour (complete = ok). */
+.sk-hero {
+  padding: var(--sk-sp-7);
+  border-radius: var(--sk-r-lg);
+  background: var(--card);
+  border: var(--sk-line-w) solid var(--line);
+  color: var(--fg);
+}
+.sk-hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sk-sp-4);
+}
+.sk-hero-eyebrow {
+  font-size: var(--sk-fs-eyebrow);
+  line-height: var(--sk-lh-eyebrow);
+  font-weight: var(--sk-fw-bold);
+  letter-spacing: var(--sk-ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.sk-hero-big {
+  margin-top: var(--sk-sp-4);
+  font-size: var(--sk-fs-display);
+  line-height: var(--sk-lh-display);
+  font-weight: var(--sk-fw-bold);
+  letter-spacing: var(--sk-ls-tight);
+}
+.sk-hero-of {
+  font-size: var(--sk-fs-h2);
+  line-height: var(--sk-lh-title);
+  font-weight: var(--sk-fw-semibold);
+  letter-spacing: var(--sk-ls-snug);
+}
+.sk-hero-bar {
+  margin-top: var(--sk-sp-6);
+  height: var(--sk-prog-h);
+  border-radius: var(--sk-sp-2);
+  background: var(--chip);
+  overflow: hidden;
+}
+.sk-hero-bar i {
+  display: block;
+  height: 100%;
+  width: var(--sk-hero-pct);
+  border-radius: var(--sk-sp-2);
+  background: var(--acc);
+  transition: width var(--sk-dur-slow) var(--sk-ease);
+}
+.sk-hero-complete .sk-hero-bar i {
+  background: var(--ok);
+}
+.sk-hero-title {
+  margin-top: var(--sk-sp-6);
+  font-size: var(--sk-fs-title);
+  line-height: var(--sk-lh-title);
+  font-weight: var(--sk-fw-semibold);
+}
+.sk-hero-body {
+  font-size: var(--sk-fs-small);
+  line-height: var(--sk-lh-small);
+  color: var(--mute);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-hero-bar i {
+    transition: none;
+  }
+}

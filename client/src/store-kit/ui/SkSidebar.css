@@ -1,0 +1,50 @@
+/* SkSidebar — desktop navigation column. */
+.sk-sdb {
+  display: flex;
+  flex-direction: column;
+  width: var(--sk-sidebar-w);
+  height: 100%;
+  padding: var(--sk-sp-8) var(--sk-sp-6);
+  background: var(--card);
+  border-inline-end: var(--sk-line-w) solid var(--line);
+  overflow-y: auto;
+}
+.sk-sdb-head {
+  display: flex;
+  align-items: center;
+  height: var(--sk-header-h);
+  padding-inline: var(--sk-sp-5);
+  margin-bottom: var(--sk-sp-6);
+}
+.sk-sdb-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-sp-1);
+}
+.sk-sdb-back {
+  margin-top: var(--sk-sp-6);
+}
+.sk-sdb-user {
+  margin-top: auto;
+  padding-top: var(--sk-sp-6);
+}
+.sk-sdb-who {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-sp-5);
+  padding: var(--sk-sp-4) var(--sk-sp-5);
+}
+.sk-sdb-who-txt {
+  flex: 1;
+  min-width: 0;
+}
+.sk-sdb-ell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Story-only wrapper: gives the sidebar a height. */
+.sk-sdb-demo {
+  height: var(--sk-shell-frame-h);
+  width: var(--sk-sidebar-w);
+}

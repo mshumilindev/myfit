@@ -1,0 +1,62 @@
+/* SkBackground — three drifting wave layers. Colours: --wave-1..3 (light/dark aware); durations: --sk-wave-dur-*. */
+.sk-bg {
+  position: fixed;
+  inset: 0;
+  z-index: var(--sk-z-bg);
+  overflow: hidden;
+  pointer-events: none;
+}
+.sk-bg-in {
+  position: absolute;
+}
+.sk-wv {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  animation: sk-wave-drift linear infinite;
+}
+.sk-wv > svg {
+  display: block;
+  flex: none;
+  width: var(--sk-wave-tile);
+}
+.sk-wv-1 {
+  color: var(--wave-1);
+  animation-duration: var(--sk-wave-dur-a);
+}
+.sk-wv-1 > svg {
+  height: var(--sk-wave-h-1);
+}
+.sk-wv-2 {
+  color: var(--wave-2);
+  animation-duration: var(--sk-wave-dur-b);
+}
+.sk-wv-2 > svg {
+  height: var(--sk-wave-h-2);
+}
+.sk-wv-3 {
+  color: var(--wave-3);
+  animation-duration: var(--sk-wave-dur-c);
+}
+.sk-wv-3 > svg {
+  height: var(--sk-wave-h-3);
+}
+/* exactly one tile per cycle so the loop is seamless */
+@keyframes sk-wave-drift {
+  to {
+    transform: translateX(calc(var(--sk-wave-tile) * -1));
+  }
+}
+[dir='rtl'] .sk-wv {
+  animation-direction: reverse;
+}
+.sk-bg-still .sk-wv {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-wv {
+    animation: none;
+  }
+}

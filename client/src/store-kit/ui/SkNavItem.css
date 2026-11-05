@@ -1,0 +1,54 @@
+/* SkNavItem — sidebar row. */
+.sk-nvi {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-sp-5);
+  width: 100%;
+  height: var(--sk-tap);
+  padding-inline: var(--sk-sp-5);
+  border-radius: var(--sk-r-sm);
+  font-size: var(--sk-fs-body);
+  font-weight: var(--sk-fw-semibold);
+  color: var(--fg);
+  text-align: start;
+  transition: background var(--sk-dur-fast) var(--sk-ease);
+}
+.sk-nvi:hover {
+  background: var(--chip);
+}
+.sk-nvi-on,
+.sk-nvi-on:hover {
+  background: var(--btn-bg);
+  color: var(--acc-t);
+}
+.sk-nvi-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sk-nvi svg {
+  flex: none;
+}
+.sk-nvi-cnt {
+  flex: none;
+  min-width: var(--sk-count-min);
+  padding-inline: var(--sk-sp-3);
+  border-radius: var(--sk-r-pill);
+  background: var(--chip);
+  color: var(--mute);
+  font-size: var(--sk-fs-caption);
+  line-height: var(--sk-lh-body);
+  font-weight: var(--sk-fw-semibold);
+  text-align: center;
+}
+.sk-nvi-on .sk-nvi-cnt {
+  background: var(--card);
+  color: var(--acc-t);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-nvi {
+    transition: none;
+  }
+}

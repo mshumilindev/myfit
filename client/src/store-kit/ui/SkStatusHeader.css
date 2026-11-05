@@ -1,0 +1,68 @@
+/* SkStatusHeader — icon without a background + title, coloured ok / warn / bad / progress. */
+.sk-sth {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sk-sp-5);
+}
+.sk-sth-main {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-sp-5);
+  min-width: 0;
+}
+.sk-sth-ok {
+  color: var(--ok);
+}
+.sk-sth-warn {
+  color: var(--warn);
+}
+.sk-sth-bad {
+  color: var(--bad);
+}
+.sk-sth-progress {
+  color: var(--acc-t);
+}
+.sk-sth-icon {
+  display: flex;
+  flex: 0 0 var(--sk-sth-icon);
+}
+.sk-sth-icon svg {
+  width: var(--sk-sth-icon);
+  height: var(--sk-sth-icon);
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sk-sth-progress .sk-sth-icon {
+  animation: sk-sth-spin 1.6s linear infinite;
+}
+.sk-sth-title {
+  margin: 0;
+  color: inherit;
+  font-size: var(--sk-fs-h1);
+  line-height: var(--sk-lh-h1);
+  font-weight: var(--sk-fw-bold);
+  letter-spacing: var(--sk-ls-tight);
+  overflow-wrap: anywhere;
+}
+.sk-sth-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@keyframes sk-sth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-sth-progress .sk-sth-icon {
+    animation: none;
+  }
+}

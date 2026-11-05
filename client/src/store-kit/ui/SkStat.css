@@ -1,0 +1,25 @@
+/* SkStat — large figure over a muted caption. */
+.sk-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-sp-1);
+  min-width: 0;
+}
+.sk-stat-v {
+  font-size: var(--sk-fs-h1);
+  line-height: var(--sk-lh-h1);
+  font-weight: var(--sk-fw-bold);
+  letter-spacing: var(--sk-ls-tight);
+  font-variant-numeric: tabular-nums;
+}
+.sk-stat-acc .sk-stat-v {
+  color: var(--acc-t);
+}
+.sk-stat-ok .sk-stat-v {
+  color: var(--ok);
+}
+.sk-stat-c {
+  font-size: var(--sk-fs-small);
+  line-height: var(--sk-lh-small);
+  color: var(--mute);
+}

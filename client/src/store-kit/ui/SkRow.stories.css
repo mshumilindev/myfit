@@ -1,0 +1,22 @@
+/* Story-only stand-in for the SkTile slot. */
+.sk-demo-tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--sk-tile-40);
+  height: var(--sk-tile-40);
+  border-radius: var(--sk-r-md);
+  background: var(--demo-bg);
+  color: var(--on-tone);
+  font-weight: var(--sk-fw-semibold);
+}
+.sk-demo-empty-ic {
+  width: var(--sk-tile-64);
+  height: var(--sk-tile-64);
+  padding: var(--sk-sp-5);
+  border-radius: var(--sk-r-2xl);
+  background: var(--ic-5);
+  stroke: var(--on-tone);
+  fill: none;
+  stroke-width: 1.8;
+}

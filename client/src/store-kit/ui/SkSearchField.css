@@ -1,0 +1,55 @@
+/* SkSearchField — 44px pill; accent border once it has text, focus ring on the label. */
+.sk-search {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-sp-4);
+  height: var(--sk-tap);
+  padding-inline: var(--sk-sp-6);
+  border-radius: var(--sk-r-xl);
+  background: var(--card);
+  border: var(--sk-line-w) solid var(--line);
+  color: var(--mute);
+  font-size: var(--sk-fs-body);
+}
+.sk-search.sk-on {
+  border-color: var(--acc);
+  color: var(--fg);
+}
+.sk-search:focus-within {
+  border-color: var(--acc);
+}
+.sk-search-ic {
+  width: var(--sk-search-ic);
+  height: var(--sk-search-ic);
+  flex: none;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sk-search-ic-s {
+  width: var(--sk-search-ic-s);
+  height: var(--sk-search-ic-s);
+}
+.sk-search-in {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--fg);
+  outline: none;
+}
+.sk-search-in::placeholder {
+  color: var(--mute);
+}
+.sk-search-x {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--sk-tap-s);
+  height: var(--sk-tap-s);
+  border-radius: var(--sk-r-pill);
+  color: var(--mute);
+}

@@ -1,0 +1,12 @@
+/* SkInstalledLabel — non-clickable green status, same height as a button so rows do not jump. */
+.sk-inst-lbl {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sk-sp-3);
+  block-size: var(--sk-tap);
+  padding-inline: var(--sk-sp-2);
+  font-size: var(--sk-inst-fs);
+  font-weight: var(--sk-fw-semibold);
+  color: var(--ok);
+  white-space: nowrap;
+}

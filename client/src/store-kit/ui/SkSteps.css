@@ -1,0 +1,97 @@
+/* SkSteps — installing stages list: pending / active / done / failed. Tokens only. */
+.sk-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--sk-sp-6);
+  background: var(--card);
+  border: var(--sk-line-w) solid var(--line);
+  border-radius: var(--sk-r-lg);
+}
+.sk-step {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-sp-5);
+  min-height: var(--sk-tap-l);
+  padding-block: var(--sk-sp-5);
+}
+.sk-step + .sk-step {
+  border-top: var(--sk-line-w) solid var(--line);
+}
+.sk-step-main {
+  flex: 1;
+  min-width: 0;
+}
+.sk-step-name {
+  font-size: var(--sk-fs-body);
+  line-height: var(--sk-lh-body);
+  font-weight: var(--sk-fw-semibold);
+  overflow-wrap: anywhere;
+}
+.sk-step-pending .sk-step-name {
+  color: var(--mute);
+}
+.sk-step-detail {
+  font-size: var(--sk-fs-small);
+  line-height: var(--sk-lh-small);
+  color: var(--mute);
+  margin-top: var(--sk-sp-1);
+}
+.sk-step-failed .sk-step-detail {
+  color: var(--bad);
+}
+.sk-step-bar {
+  height: var(--sk-step-bar-h);
+  margin-top: var(--sk-sp-4);
+  border-radius: var(--sk-r-xs);
+  background: var(--chip);
+  overflow: hidden;
+}
+.sk-step-bar > i {
+  display: block;
+  height: 100%;
+  width: var(--sk-step-pct, 0%);
+  background: var(--acc);
+  border-radius: var(--sk-r-xs);
+  transition: width var(--sk-dur-slow) var(--sk-ease);
+}
+.sk-step-end {
+  display: flex;
+  align-items: center;
+  flex: none;
+  min-height: var(--sk-tap);
+  color: var(--mute);
+}
+.sk-step-status {
+  font-size: var(--sk-fs-small);
+  line-height: var(--sk-lh-small);
+  font-weight: var(--sk-fw-semibold);
+  color: var(--mute);
+}
+.sk-step-done .sk-step-end {
+  color: var(--acc-t);
+}
+.sk-step-failed .sk-step-end {
+  color: var(--bad);
+}
+.sk-step-glyph {
+  width: var(--sk-step-glyph);
+  height: var(--sk-step-glyph);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sk-sr {
+  position: absolute;
+  width: var(--sk-line-w);
+  height: var(--sk-line-w);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-step-bar > i {
+    transition: none;
+  }
+}

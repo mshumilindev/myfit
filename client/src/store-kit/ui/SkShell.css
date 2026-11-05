@@ -1,0 +1,65 @@
+/* SkShell — responsive frame. Container queries (45rem must equal --sk-bp-wide; vars are not allowed in queries). */
+.sk-shl {
+  container-type: size;
+  container-name: sk-shl;
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.sk-shl-side {
+  display: none;
+  flex: none;
+}
+.sk-shl-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.sk-shl-hd,
+.sk-shl-tabs,
+.sk-shl-bar {
+  flex: none;
+}
+.sk-shl-main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-inline: var(--sk-sp-6);
+  padding-bottom: var(--sk-scroll-pad-b);
+}
+.sk-shl-in {
+  max-width: var(--sk-content-max);
+  margin-inline: auto;
+}
+.sk-shl-tray {
+  position: absolute;
+  z-index: var(--sk-z-tray);
+  inset-inline: var(--sk-sp-6);
+  bottom: calc(var(--sk-tabbar-core) + env(safe-area-inset-bottom) + var(--sk-sp-5));
+}
+.sk-shl-tray-bar {
+  bottom: calc(var(--sk-tabbar-core) + env(safe-area-inset-bottom) + var(--sk-sp-10));
+}
+@container sk-shl (min-width: 45rem) {
+  .sk-shl-side {
+    display: block;
+  }
+  .sk-shl-hd,
+  .sk-shl-tabs {
+    display: none;
+  }
+  .sk-shl-main {
+    padding: var(--sk-sp-8) var(--sk-sp-10) var(--sk-scroll-pad-b);
+  }
+  .sk-shl-tray,
+  .sk-shl-tray-bar {
+    inset-inline: auto var(--sk-sp-8);
+    bottom: var(--sk-sp-8);
+    width: var(--sk-tray-w);
+  }
+}

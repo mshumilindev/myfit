@@ -1,0 +1,81 @@
+/* SkPreviewPhone — mini-phone illustration made of placeholder blocks. */
+.sk-phone {
+  flex: 0 0 var(--sk-pv-w);
+  width: var(--sk-pv-w);
+  height: var(--sk-pv-h);
+  padding: var(--sk-sp-4);
+  border-radius: var(--sk-pv-r);
+  background: var(--bg);
+  border: var(--sk-line-w) solid var(--line);
+  color: var(--fg);
+  overflow: hidden;
+  position: relative;
+}
+.sk-phone-d {
+  flex-basis: var(--sk-pv-wd);
+  width: var(--sk-pv-wd);
+  height: var(--sk-pv-hd);
+  padding: var(--sk-sp-5);
+  border-radius: var(--sk-r-2xl);
+}
+.sk-phone-cap {
+  font-size: var(--sk-pv-cap-fs);
+  line-height: var(--sk-lh-small);
+  font-weight: var(--sk-fw-bold);
+  margin-bottom: var(--sk-sp-3);
+}
+.sk-phone-bx {
+  display: flex;
+  flex-direction: column;
+  padding: var(--sk-sp-4);
+  margin-bottom: var(--sk-sp-3);
+  border-radius: var(--sk-r-sm);
+  background: var(--card);
+  border: var(--sk-line-w) solid var(--line);
+}
+.sk-phone-bx-plot {
+  height: var(--sk-pv-plot-h);
+  align-items: center;
+  justify-content: center;
+}
+.sk-phone-bx-chart {
+  height: var(--sk-pv-chart-h);
+  flex-direction: row;
+  align-items: flex-end;
+  gap: var(--sk-sp-2);
+}
+.sk-phone-l {
+  height: var(--sk-sp-4);
+  margin-bottom: var(--sk-sp-3);
+  border-radius: var(--sk-sp-2);
+  background: var(--chip);
+}
+.sk-phone-l-s {
+  width: 60%;
+}
+.sk-phone-dot {
+  width: var(--sk-pv-dot);
+  height: var(--sk-pv-dot);
+  border-radius: 50%;
+  background: var(--ic-4);
+}
+.sk-phone-col {
+  display: block;
+  width: 10%;
+  height: var(--sk-pv-h);
+  border-radius: var(--sk-pv-bar-r);
+  background: var(--acc);
+}
+.sk-phone-bar {
+  height: var(--sk-sp-3);
+  margin-top: var(--sk-sp-3);
+  border-radius: var(--sk-pv-bar-r);
+  background: var(--chip);
+  overflow: hidden;
+}
+.sk-phone-bar i {
+  display: block;
+  height: 100%;
+  width: var(--sk-pv-pct);
+  background: var(--acc);
+}

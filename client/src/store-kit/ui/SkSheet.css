@@ -1,0 +1,81 @@
+/* SkSheet — bottom sheet on mobile, centred modal from the wide breakpoint. Tokens: tokens-e.css. */
+.sk-sheet {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: var(--sk-z-sheet);
+  max-height: var(--sk-sheet-max-h);
+  overflow-y: auto;
+  background: var(--card);
+  color: var(--fg);
+  border-radius: var(--sk-r-2xl) var(--sk-r-2xl) 0 0;
+  padding: var(--sk-sp-5) var(--sk-sp-6) var(--sk-sheet-pad-bottom);
+  box-shadow: var(--shadow-sheet);
+  outline: none;
+  animation: sk-sheet-up var(--sk-dur-slow) var(--sk-ease);
+}
+.sk-sheet-in {
+  position: absolute;
+}
+.sk-grab {
+  width: var(--sk-grab-w);
+  height: var(--sk-grab-h);
+  border-radius: var(--sk-r-xs);
+  background: var(--line);
+  margin: 0 auto var(--sk-sp-6);
+}
+@keyframes sk-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes sk-modal-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* modal geometry; no grabber */
+.sk-sheet-modal {
+  inset-inline: auto;
+  inset-inline-start: 50%;
+  bottom: auto;
+  top: 50%;
+  width: min(var(--sk-modal-w), 100%);
+  transform: translate(-50%, -50%);
+  border-radius: var(--sk-r-2xl);
+  padding: var(--sk-sp-8);
+  box-shadow: var(--sk-shadow-modal);
+  animation: sk-modal-in var(--sk-dur) var(--sk-ease);
+}
+.sk-sheet-modal > .sk-grab {
+  display: none;
+}
+@media (min-width: 45rem) {
+  .sk-sheet-auto {
+    inset-inline: auto;
+    inset-inline-start: 50%;
+    bottom: auto;
+    top: 50%;
+    width: min(var(--sk-modal-w), 100%);
+    transform: translate(-50%, -50%);
+    border-radius: var(--sk-r-2xl);
+    padding: var(--sk-sp-8);
+    box-shadow: var(--sk-shadow-modal);
+    animation: sk-modal-in var(--sk-dur) var(--sk-ease);
+  }
+  .sk-sheet-auto > .sk-grab {
+    display: none;
+  }
+}
+[dir='rtl'] .sk-sheet-modal,
+[dir='rtl'] .sk-sheet-auto {
+  transform: translate(50%, -50%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-sheet,
+  .sk-sheet-modal,
+  .sk-sheet-auto {
+    animation: none;
+  }
+}

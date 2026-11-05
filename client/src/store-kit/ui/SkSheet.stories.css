@@ -1,0 +1,26 @@
+/* Story-only frames for SkSheet. */
+.sk-sheet-frame {
+  min-height: 28rem;
+  background: var(--bg);
+  border-radius: var(--sk-r-lg);
+}
+.sk-sheet-frame-modal {
+  min-height: 24rem;
+}
+/* Story-only frame for SkToast. */
+.sk-toast-frame {
+  min-height: 12rem;
+  background: var(--bg);
+  border-radius: var(--sk-r-lg);
+}
+/* Story-only frame for SkBackground. */
+.sk-bg-frame {
+  isolation: isolate;
+  min-height: 24rem;
+  padding: var(--sk-sp-6);
+  background: var(--bg);
+  border-radius: var(--sk-r-lg);
+}
+.sk-bg-demo-card {
+  position: relative;
+}

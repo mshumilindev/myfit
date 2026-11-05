@@ -1,0 +1,9 @@
+/* Batch D (chrome) tokens: only sizes with no home in tokens.css. */
+.sk-root {
+  --sk-tabbar-core: 3.75rem;
+  --sk-tray-w: 25rem;
+  --sk-dot: 0.5rem;
+  --sk-count-min: 1.5rem;
+  --sk-scroll-pad-b: 7.5rem;
+  --sk-shell-frame-h: 44rem;
+}

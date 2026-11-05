@@ -1,0 +1,36 @@
+/* Batch A (primitives) tokens: sizes and values that have no token in tokens.css. */
+.sk-root {
+  --sk-tile-48: 3rem;
+  --sk-tile-radius: 22%;
+  --sk-tile-radius-32: 24%;
+  --sk-tile-fs-32: 0.8125rem;
+  --sk-tile-fs-40: 1rem;
+  --sk-tile-fs-48: 1.25rem;
+  --sk-tile-fs-64: 1.75rem;
+  --sk-tile-fs-96: 2.5rem;
+  --sk-fw-heavy: 800;
+  --sk-fs-badge: 0.625rem;
+  --sk-lh-badge: 0.75rem;
+  --sk-ls-badge: 0.07em;
+  --sk-r-badge: 0.3125rem;
+  --sk-chip-h: 2.25rem;
+  --sk-av-24: 1.5rem;
+  --sk-av-32: 2rem;
+  --sk-av-40: 2.5rem;
+  --sk-av-fs-24: 0.625rem;
+  --sk-av-fs-32: 0.75rem;
+  --sk-av-fs-40: 0.9375rem;
+  --sk-sw-w: 3.1875rem;
+  --sk-sw-h: 1.9375rem;
+  --sk-sw-knob: 1.6875rem;
+  --sk-sw-gap: 0.125rem;
+  --sk-sw-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+  --sk-pg-h: 0.5rem;
+  --sk-seg-h: 3rem;
+  --sk-r-seg: 1.625rem;
+  --sk-r-seg-item: 1.5rem;
+  --sk-r-note: 0.75rem;
+  --sk-lh-note: 1rem;
+  --sk-rel-fs: 0.75rem;
+  --sk-inst-fs: 0.9375rem;
+}

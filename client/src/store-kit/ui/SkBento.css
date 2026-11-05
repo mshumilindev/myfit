@@ -1,0 +1,14 @@
+/* SkBento — the grid that holds SkBentoTile cells. */
+.sk-bgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sk-sp-5);
+}
+@media (min-width: 45rem) {
+  .sk-bgrid-c3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .sk-bgrid-c4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

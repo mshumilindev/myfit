@@ -1,0 +1,69 @@
+/* SkTile — coloured rounded-square app tile; sizes 32/40/48(default)/64/96, tones 0..9. */
+.sk-ic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--on-tone);
+  font-weight: var(--sk-fw-heavy);
+  flex: 0 0 var(--sk-tile-48);
+  inline-size: var(--sk-tile-48);
+  block-size: var(--sk-tile-48);
+  border-radius: var(--sk-tile-radius);
+  font-size: var(--sk-tile-fs-48);
+  text-transform: uppercase;
+}
+.sk-ic32 {
+  inline-size: var(--sk-tile-32);
+  block-size: var(--sk-tile-32);
+  flex-basis: var(--sk-tile-32);
+  font-size: var(--sk-tile-fs-32);
+  border-radius: var(--sk-tile-radius-32);
+}
+.sk-ic40 {
+  inline-size: var(--sk-tile-40);
+  block-size: var(--sk-tile-40);
+  flex-basis: var(--sk-tile-40);
+  font-size: var(--sk-tile-fs-40);
+}
+.sk-ic64 {
+  inline-size: var(--sk-tile-64);
+  block-size: var(--sk-tile-64);
+  flex-basis: var(--sk-tile-64);
+  font-size: var(--sk-tile-fs-64);
+}
+.sk-ic96 {
+  inline-size: var(--sk-tile-96);
+  block-size: var(--sk-tile-96);
+  flex-basis: var(--sk-tile-96);
+  font-size: var(--sk-tile-fs-96);
+}
+.sk-i0 {
+  background: var(--ic-0);
+}
+.sk-i1 {
+  background: var(--ic-1);
+}
+.sk-i2 {
+  background: var(--ic-2);
+}
+.sk-i3 {
+  background: var(--ic-3);
+}
+.sk-i4 {
+  background: var(--ic-4);
+}
+.sk-i5 {
+  background: var(--ic-5);
+}
+.sk-i6 {
+  background: var(--ic-6);
+}
+.sk-i7 {
+  background: var(--ic-7);
+}
+.sk-i8 {
+  background: var(--ic-8);
+}
+.sk-i9 {
+  background: var(--ic-9);
+}

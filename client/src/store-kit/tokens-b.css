@@ -1,0 +1,9 @@
+/* Batch B (containers) tokens: sizes with no home in tokens.css. */
+.sk-root {
+  --sk-row-min: 4.25rem;
+  --sk-row-py: 0.625rem;
+  --sk-empty-top: 4rem;
+  --sk-empty-max: 26rem;
+  --sk-search-ic: 1.5rem;
+  --sk-search-ic-s: 1rem;
+}

@@ -1,0 +1,13 @@
+/* Story-only tile stand-in (SkTile is a separate component). */
+.sk-step-demo-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--sk-step-tile);
+  height: var(--sk-step-tile);
+  border-radius: 22%;
+  color: var(--on-tone);
+  background: var(--sk-demo-bg);
+  font-weight: var(--sk-fw-bold);
+}

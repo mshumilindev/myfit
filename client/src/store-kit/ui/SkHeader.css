@@ -1,0 +1,46 @@
+/* SkHeader — mobile app header, uniform height; safe-area top inset added on top. */
+.sk-hd {
+  box-sizing: content-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sk-sp-5);
+  height: var(--sk-header-h);
+  padding: env(safe-area-inset-top) var(--sk-sp-6) 0;
+}
+.sk-hd-title {
+  min-width: 0;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sk-hd-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sk-sp-2);
+  height: var(--sk-header-h);
+  color: var(--acc-t);
+  font-size: var(--sk-fs-body);
+  font-weight: var(--sk-fw-semibold);
+}
+.sk-hd-end {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-sp-4);
+  margin-inline-start: auto;
+  flex: none;
+}
+.sk-hd-exit {
+  display: grid;
+  place-items: center;
+  width: var(--sk-avatar);
+  height: var(--sk-avatar);
+  border-radius: 50%;
+  background: var(--chip);
+  color: var(--fg);
+}
+.sk-hd-exit svg {
+  width: var(--sk-icon-s);
+  height: var(--sk-icon-s);
+}

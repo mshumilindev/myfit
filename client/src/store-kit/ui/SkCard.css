@@ -1,0 +1,9 @@
+/* SkCard — surface: card colour, 1px line, large radius. */
+.sk-card {
+  background: var(--card);
+  border: var(--sk-line-w) solid var(--line);
+  border-radius: var(--sk-r-lg);
+}
+.sk-card-pad {
+  padding: var(--sk-sp-6);
+}

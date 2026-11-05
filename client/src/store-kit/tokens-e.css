@@ -1,0 +1,28 @@
+/* Batch E tokens (overlays and motion): sheet, modal, toast, steps, waves. Raw values live here only. */
+.sk-root {
+  --sk-sheet-pad-bottom: 2.125rem;
+  --sk-sheet-max-h: 85vh;
+  --sk-modal-w: 30rem;
+  --sk-grab-w: 2.25rem;
+  --sk-grab-h: 0.3125rem;
+  --sk-toast-w: 26rem;
+  --sk-step-bar-h: 0.5rem;
+  --sk-step-tile: 3rem;
+  --sk-step-glyph: 1.5rem;
+  --sk-shadow-modal: 0 1.5rem 4rem rgb(17 17 17 / 0.24);
+  --sk-shadow-toast: 0 0.5rem 1.5rem rgb(17 17 17 / 0.2);
+  --sk-wave-tile: 25rem;
+  --sk-wave-h-1: 10.625rem;
+  --sk-wave-h-2: 13.125rem;
+  --sk-wave-h-3: 15.625rem;
+}
+.sk-root.sk-dark {
+  --sk-shadow-modal: 0 1.5rem 4rem rgb(0 0 0 / 0.5);
+  --sk-shadow-toast: 0 0.5rem 1.5rem rgb(0 0 0 / 0.5);
+}
+@media (prefers-color-scheme: dark) {
+  .sk-root:not(.sk-light) {
+    --sk-shadow-modal: 0 1.5rem 4rem rgb(0 0 0 / 0.5);
+    --sk-shadow-toast: 0 0.5rem 1.5rem rgb(0 0 0 / 0.5);
+  }
+}
