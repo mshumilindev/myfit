@@ -101,6 +101,7 @@ import { AppRail } from './components/AppRail';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 import { currentHash, replaceHash, setHash } from './route';
+import { isStoreHash, StoreScreen, useRoleWithStore } from './addonStore/StoreEntry';
 import { legalRoute, useJoinLinkSync, useLegalRoute } from './legal/route';
 import { usePendingConsentFlush } from './legal/signupConsents';
 import { usePendingRevokeFlush } from './coach/client/revokeQueue';
@@ -1086,7 +1087,7 @@ function AppMain() {
     d0.setHours(0, 0, 0, 0);
     return store.workouts.some((w) => w.startedAt >= d0.getTime());
   }, [store.workouts]);
-  const role = getRole();
+  const [role, storeOpen] = useRoleWithStore(authed); // + whether the Add-on Store (#/store) is open
   const tabs = tabsForRole(role, t);
   // Header controls the BrandBar had no room for; they continue in the More menu.
   const [headerHidden, setHeaderHidden] = useState<MoreMenuItem[]>([]);
@@ -1140,7 +1141,7 @@ function AppMain() {
 
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
-    if (!authed || joinToken || coachOpen || legalPage) return;
+    if (!authed || joinToken || coachOpen || legalPage || isStoreHash(currentHash())) return;
     const next = learnOpen
       ? '#/learn'
       : nutritionOpen
@@ -1490,6 +1491,7 @@ function AppMain() {
     );
   }
 
+  if (storeOpen) return <StoreScreen role={role} onOpenProfile={() => openRoster('me')} />;
   // Learn (how-to videos) takes over the whole screen — its own rubellite skin.
   if (learnOpen) {
     return (

@@ -1,0 +1,24 @@
+/* Add-on Store (SPO-513): layout only; every look comes from the kit. */
+.app-store .apex-scroll {
+  padding: var(--s-12) var(--s-16) calc(var(--s-40) + env(safe-area-inset-bottom));
+}
+.app-store .as-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+  max-width: 45rem;
+  margin: 0 auto;
+}
+.app-store .as-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-16);
+}
+.app-store .as-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+}
+.app-store .as-progress {
+  margin: 0;
+}
