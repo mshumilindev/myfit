@@ -1,0 +1,26 @@
+/* Story-only layout (not shipped): theme panes side by side. */
+.sk-stage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sk-sp-6);
+}
+.sk-stage-pane {
+  flex: 1 1 var(--sk-stage-pane, 22rem);
+  min-width: 0;
+  padding: var(--sk-sp-6);
+  border-radius: var(--sk-r-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-sp-5);
+}
+.sk-stage-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-sp-8);
+}
+.sk-stage-w-phone {
+  flex: 0 0 24.375rem;
+}
+.sk-stage-w-wide {
+  flex: 1 1 60rem;
+}

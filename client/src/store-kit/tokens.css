@@ -1,0 +1,175 @@
+/*
+ * Add-on Store tokens (ADR 015, docs/UI-KIT-STORE.md). The ONLY place with raw values: colours, sizes, durations.
+ * Components use var(--sk-*) (or the semantic colour aliases below); a guard test (tests/store-kit-guard.test.ts)
+ * rejects hex / rgb() / raw px anywhere else in store-kit/ and addonStore/.
+ */
+.sk-root {
+  /* space (4-pt) */
+  --sk-sp-0: 0;
+  --sk-sp-1: 0.125rem;
+  --sk-sp-2: 0.25rem;
+  --sk-sp-3: 0.375rem;
+  --sk-sp-4: 0.5rem;
+  --sk-sp-5: 0.75rem;
+  --sk-sp-6: 1rem;
+  --sk-sp-7: 1.25rem;
+  --sk-sp-8: 1.5rem;
+  --sk-sp-10: 2rem;
+  --sk-sp-12: 2.5rem;
+  --sk-sp-16: 3.5rem;
+  /* radius */
+  --sk-r-xs: 0.375rem;
+  --sk-r-sm: 0.625rem;
+  --sk-r-md: 0.875rem;
+  --sk-r-lg: 1.125rem;
+  --sk-r-xl: 1.375rem;
+  --sk-r-2xl: 1.5rem;
+  --sk-r-3xl: 1.75rem;
+  --sk-r-pill: 62.5rem;
+  /* type */
+  --sk-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --sk-fs-eyebrow: 0.6875rem;
+  --sk-fs-caption: 0.75rem;
+  --sk-fs-small: 0.8125rem;
+  --sk-fs-body: 0.9375rem;
+  --sk-fs-title: 1.0625rem;
+  --sk-fs-h2: 1.25rem;
+  --sk-fs-h1: 1.875rem;
+  --sk-fs-h1-desktop: 2.5rem;
+  --sk-fs-display: 3.5rem;
+  --sk-lh-eyebrow: 1rem;
+  --sk-lh-small: 1rem;
+  --sk-lh-body: 1.25rem;
+  --sk-lh-title: 1.5rem;
+  --sk-lh-h1: 2.25rem;
+  --sk-lh-h1-desktop: 2.75rem;
+  --sk-lh-display: 3.5rem;
+  --sk-fw-regular: 400;
+  --sk-fw-semibold: 600;
+  --sk-fw-bold: 700;
+  --sk-ls-tight: -0.02em;
+  --sk-ls-snug: -0.01em;
+  --sk-ls-eyebrow: 0.08em;
+  /* sizes */
+  --sk-tap: 2.75rem;
+  --sk-tap-s: 2rem;
+  --sk-tap-l: 3.25rem;
+  --sk-btn-min: 4.5rem;
+  --sk-icon: 1.5rem;
+  --sk-icon-s: 1rem;
+  --sk-tile-32: 2rem;
+  --sk-tile-40: 2.5rem;
+  --sk-tile-64: 4rem;
+  --sk-tile-96: 6rem;
+  --sk-avatar: 2.25rem;
+  --sk-tabbar-h: 5.1875rem;
+  --sk-tray-h: 3.5rem;
+  --sk-header-h: 2.75rem;
+  --sk-sidebar-w: 15rem;
+  --sk-content-max: 60rem;
+  --sk-search-w: 30rem;
+  --sk-bento-h: 10.5rem;
+  --sk-bento-hero-h: 13.5rem;
+  --sk-bento-wide-h: 8rem;
+  --sk-line-w: 1px;
+  --sk-bp-wide: 45rem;
+  /* motion */
+  --sk-dur-fast: 120ms;
+  --sk-dur: 200ms;
+  --sk-dur-slow: 360ms;
+  --sk-ease: cubic-bezier(0.2, 0, 0, 1);
+  --sk-wave-dur-a: 38s;
+  --sk-wave-dur-b: 56s;
+  --sk-wave-dur-c: 80s;
+  /* layers */
+  --sk-z-bg: -1;
+  --sk-z-bar: 10;
+  --sk-z-tray: 20;
+  --sk-z-sheet: 30;
+  --sk-z-toast: 40;
+  /* colour — light */
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --line: #e6e6ec;
+  --fg: #111111;
+  --mute: #62626c;
+  --acc: #0a64f0;
+  --acc-fg: #ffffff;
+  --acc-t: #0856d6;
+  --btn-bg: #eaf0ff;
+  --chip: #e9e9ef;
+  --dark: #111111;
+  --on-tone: #ffffff;
+  --inv-bg: #ffffff;
+  --inv-fg: #0856d6;
+  --scrim: rgb(17 17 17 / 0.4);
+  --shadow-sheet: 0 -0.5rem 2rem rgb(17 17 17 / 0.24);
+  --ok: #126c3f;
+  --ok-bg: #e4f4ea;
+  --warn: #7a4e00;
+  --warn-bg: #fff1d6;
+  --bad: #b42318;
+  --bad-bg: #fdeae8;
+  --wave-1: rgb(10 100 240 / 0.07);
+  --wave-2: rgb(124 58 237 / 0.06);
+  --wave-3: rgb(13 127 80 / 0.05);
+  /* app colour families (tone 0..9) */
+  --ic-0: linear-gradient(150deg, #a63307, #c2410c);
+  --ic-1: linear-gradient(150deg, #2f4bc4, #4263eb);
+  --ic-2: linear-gradient(150deg, #4c2fd6, #7c3aed);
+  --ic-3: linear-gradient(150deg, #a04f00, #bd5a0b);
+  --ic-4: linear-gradient(150deg, #0a7046, #0d7f50);
+  --ic-5: linear-gradient(150deg, #4b4b55, #6b6b76);
+  --ic-6: linear-gradient(150deg, #0a6b7a, #0e7c8f);
+  --ic-7: linear-gradient(150deg, #a3135f, #be185d);
+  --ic-8: linear-gradient(150deg, #4a6a08, #587d0a);
+  --ic-9: linear-gradient(150deg, #0a5fa0, #0f74c4);
+}
+
+/* colour — dark (explicit .sk-dark, or the system preference unless .sk-light) */
+.sk-root.sk-dark {
+  --bg: #0f1325;
+  --card: #181d33;
+  --line: #29304d;
+  --fg: #f2f4fc;
+  --mute: #a6adc8;
+  --acc-t: #7daaff;
+  --btn-bg: #1f2e5c;
+  --chip: #242b48;
+  --dark: #252c4a;
+  --ok: #6fd39b;
+  --ok-bg: #12301f;
+  --warn: #f2c265;
+  --warn-bg: #3a2a07;
+  --bad: #ff8b80;
+  --bad-bg: #3a1512;
+  --scrim: rgb(0 0 0 / 0.6);
+  --wave-1: rgb(125 170 255 / 0.08);
+  --wave-2: rgb(167 139 250 / 0.07);
+  --wave-3: rgb(111 211 155 / 0.05);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  .sk-root:not(.sk-light) {
+    --bg: #0f1325;
+    --card: #181d33;
+    --line: #29304d;
+    --fg: #f2f4fc;
+    --mute: #a6adc8;
+    --acc-t: #7daaff;
+    --btn-bg: #1f2e5c;
+    --chip: #242b48;
+    --dark: #252c4a;
+    --ok: #6fd39b;
+    --ok-bg: #12301f;
+    --warn: #f2c265;
+    --warn-bg: #3a2a07;
+    --bad: #ff8b80;
+    --bad-bg: #3a1512;
+    --scrim: rgb(0 0 0 / 0.6);
+    --wave-1: rgb(125 170 255 / 0.08);
+    --wave-2: rgb(167 139 250 / 0.07);
+    --wave-3: rgb(111 211 155 / 0.05);
+    color-scheme: dark;
+  }
+}

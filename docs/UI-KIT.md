@@ -572,3 +572,14 @@ Per step there are also `--ctl-px-*` (side padding), `--ctl-gap-*` (icon to labe
 - **LiveWidget ("Training now" popover)** is a kit `Popover` (400 px) with a flat `GroupedList` per group (no card inside the card), `ListRow` per person (avatar, one-line name, one-line meta "place · since HH:MM", no chevron: the whole row is the hover/press target and only exists as a button when it navigates) and a `SeverityDot` with the elapsed time on the right (live = ok, offline = illness, finished = neutral). Group heads are `SectionLabel`s; the privacy footer is `--fs-12`, muted.
 - **Agenda** is the new name of the trainer's Today (`#/c/agenda`; `#/c/today` still opens it). Icon `calendar-check` from the kit registry. The member app's Today is unchanged.
 - **No sample data in runtime code.** `tests/kit-guard.test.ts` fails if a runtime file imports a `__fixtures__` module or a fixture file, or mentions the removed demo switches. See `docs/COACH-BACKEND.md` section 8.
+
+## Store kit (add-on store, ADR 015)
+
+Own kit under `client/src/store-kit/` (tokens in `tokens.css`, base type/layout in `base.css`, components in `ui/`, one
+component = `SkName.tsx` + `SkName.css` + `SkName.stories.tsx` (`Store/SkName`, light + dark) + `SkName.test.tsx`).
+Only `tokens.css` holds raw values (hex, rgb, px); `tests/store-kit-guard.test.ts` enforces it and that each `Sk*` below
+has CSS, a story and a test. Source of truth for look and states: the approved design boards s01–s32 (SPO-500).
+
+| Component | Role |
+| --------- | ---- |
+| `SkBtn`   | The one button: kinds pri / tint / ghost / dash / bad / inv / ok; sizes default / s / l |

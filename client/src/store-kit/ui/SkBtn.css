@@ -1,0 +1,60 @@
+/* SkBtn — the store's one button: kinds pri / tint / ghost / dash / bad / inv / ok, sizes default / s / l. */
+.sk-bt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sk-sp-4);
+  height: var(--sk-tap);
+  min-width: var(--sk-btn-min);
+  padding-inline: var(--sk-sp-6);
+  border-radius: var(--sk-r-xl);
+  font-size: var(--sk-fs-small);
+  font-weight: var(--sk-fw-bold);
+  white-space: nowrap;
+  transition: opacity var(--sk-dur-fast) var(--sk-ease);
+}
+.sk-bt:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.sk-bt-pri {
+  background: var(--acc);
+  color: var(--acc-fg);
+}
+.sk-bt-tint {
+  background: var(--btn-bg);
+  color: var(--acc-t);
+}
+.sk-bt-ghost {
+  background: var(--chip);
+  color: var(--fg);
+}
+.sk-bt-dash {
+  border: var(--sk-line-w) dashed var(--mute);
+  color: var(--mute);
+}
+.sk-bt-bad {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+.sk-bt-inv {
+  background: var(--inv-bg);
+  color: var(--inv-fg);
+}
+.sk-bt-ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.sk-bt-l {
+  height: var(--sk-tap-l);
+  font-size: var(--sk-fs-body);
+  border-radius: var(--sk-r-3xl);
+  width: 100%;
+}
+.sk-bt-s {
+  height: var(--sk-tap-s);
+  min-width: 0;
+  padding-inline: var(--sk-sp-5);
+  font-size: var(--sk-fs-caption);
+  border-radius: var(--sk-r-md);
+}
