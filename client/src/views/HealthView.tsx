@@ -18,6 +18,7 @@ import type { Shell } from '../App';
 import { useT } from '../i18n';
 import { illnessState } from '../illness';
 import { sleepBlockedBy, SLEEP_BLOCK_KEY } from '../sleepGuard';
+import { useAddonOrBase } from '../addons/enabledSet';
 import { dayKey, endRestPeriod, liveSleep, startSleep, useStore } from '../store';
 import { activeInjuries, inFullRest } from '../injury';
 import { lastNight, nightDurationMin } from '../sleep';
@@ -286,10 +287,11 @@ export function HealthView(props: HealthViewProps) {
   }
 
   // --- Sleep ----------------------------------------------------------------------
+  const sleepOn = useAddonOrBase('sleep');
   const live = liveSleep(store.sleeps);
   const last = lastNight(store.sleeps);
   const sleepBlock = sleepBlockedBy(store);
-  const sleepGroup = (
+  const sleepGroup = !sleepOn ? null : (
     <GroupedList key="sleep" header={t.sleepTitle}>
       <ListRow
         icon={<Ic tone="slp" name="moon" />}
@@ -558,15 +560,17 @@ export function HealthView(props: HealthViewProps) {
               ) : (
                 <>
                   <HistoryTimeline now={now} filter={filter} web={false} />
-                  <GroupedList header={t.hlNotOnTimeline}>
-                    <ListRow
-                      icon={<Ic tone="slp" name="calClock" />}
-                      label={t.hlSleepDetails}
-                      sub={t.hlSleepOwnHistory}
-                      chevron
-                      onClick={() => shell.openOverlay({ screen: 'sleep' })}
-                    />
-                  </GroupedList>
+                  {sleepOn && (
+                    <GroupedList header={t.hlNotOnTimeline}>
+                      <ListRow
+                        icon={<Ic tone="slp" name="calClock" />}
+                        label={t.hlSleepDetails}
+                        sub={t.hlSleepOwnHistory}
+                        chevron
+                        onClick={() => shell.openOverlay({ screen: 'sleep' })}
+                      />
+                    </GroupedList>
+                  )}
                 </>
               )}
             </div>

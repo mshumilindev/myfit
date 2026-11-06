@@ -1,4 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { addonsPref } from './addons/enabledSet';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+beforeEach(() => addonsPref.set(['sleep']));
+afterEach(() => addonsPref.reset());
 import {
   AXIS_WEIGHT,
   MASTERY_RANKS,
@@ -609,6 +613,12 @@ describe('practice: recovery cadence', () => {
     const r = calc(w, noBody, undefined, { sleeps: nights(10, 6) });
     expect(sig(r, 'recovery').facts).toEqual({ perWeek: 3, sleepAvgMin: 360 });
     expect(sig(r, 'recovery').score).toBe(93); // 0.55 + 0.45 * (0.6*0.75 + 0.4)
+  });
+
+  it('without the Sleep add-on the stored nights are ignored (the data stays)', () => {
+    addonsPref.reset();
+    const r = calc(spread(24), noBody, undefined, { sleeps: nights(10, 6) });
+    expect(sig(r, 'recovery').facts).toEqual({ perWeek: 3, sleepAvgMin: null });
   });
 
   it('full-goal sleep keeps recovery at 100; the goal comes from sleep settings', () => {

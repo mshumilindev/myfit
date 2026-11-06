@@ -1,4 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
+import { useSleepsForCalc } from '../addons/useSleeps';
 import { getSyncMeta } from '../syncMeta';
 import { ClientTargetStripLazy } from '../coach/client/lazy';
 import { useStoredConditionLimits } from '../healthBuild';
@@ -554,6 +555,7 @@ export function SessionView(props: {
   const { t, locale } = useT();
   const exName = useExerciseName();
   const store = useStore();
+  const sleepsForCalc = useSleepsForCalc();
   const conditionLimits = useStoredConditionLimits(); // restriction: RPE cap / no-failure / rest scale stay on with the feature off
   // Day-aware suggestions & muscle readouts are always on (not flagged).
   const suggestOn = true;
@@ -1261,7 +1263,7 @@ export function SessionView(props: {
           cachedPersonalLandmarks(store.workouts, at),
         ).get(primary)?.score ?? 0)
       : 0;
-    const night = lastNight(store.sleeps, at);
+    const night = lastNight(sleepsForCalc, at);
     const slept =
       night && night.wake !== null && at - night.wake < 18 * 3600000
         ? (night.wake - night.bedtime) / 3600000

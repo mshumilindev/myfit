@@ -1,3 +1,4 @@
+import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { setLocale } from '../i18n';
@@ -80,9 +81,11 @@ beforeEach(() => {
   rest = null;
   prescribed = new Set();
   dayName = null;
+  addonsPref.set(['sleep']);
   setState({});
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
 });
@@ -116,6 +119,18 @@ describe('DayHistorySheet', () => {
     expect(
       [...document.querySelectorAll('.hist-timeline button')].map((b) => b.textContent),
     ).toEqual(['sleep night', 'activity early', 'workout late']);
+  });
+
+  it('leaves the sleep rows out without the Sleep add-on', () => {
+    addonsPref.reset();
+    setState({
+      activities: [act('early', at(28, 7))],
+      sleeps: [sleep('night', at(28, 6))],
+    });
+    sheet();
+    expect(
+      [...document.querySelectorAll('.hist-timeline button')].map((b) => b.textContent),
+    ).toEqual(['activity early']);
   });
 
   it('includes the first and excludes the last instant of the day boundary', () => {

@@ -1,3 +1,4 @@
+import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
@@ -322,6 +323,7 @@ describe('the rest of the app without the consents', () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date(2026, 8, 26, 12, 0).getTime());
+    addonsPref.set(['sleep']);
     window.matchMedia = ((q: string) => ({
       matches: false,
       media: q,
@@ -333,7 +335,10 @@ describe('the rest of the app without the consents', () => {
       dispatchEvent: () => false,
     })) as unknown as typeof window.matchMedia;
   });
-  afterEach(() => vi.useRealTimers());
+  afterEach(() => {
+    addonsPref.reset();
+    vi.useRealTimers();
+  });
   const shell = (): Shell =>
     ({
       openOverlay: vi.fn(),

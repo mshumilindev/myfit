@@ -14,6 +14,7 @@
  * The number reflects the whole picture and moves as your training does.
  * Everything is derived from data already logged — nothing new is stored.
  */
+import { sleepAvailable } from './addons/useSleeps';
 import type { Workout, Exercise, SleepNight } from './types';
 import type { MuscleGroup } from './data/exercises';
 import {
@@ -562,7 +563,7 @@ export function computeMastery(
   const signals = practiceSignals(
     finished,
     now,
-    state.sleeps ?? [],
+    sleepAvailable() ? (state.sleeps ?? []) : [],
     state.sleepSettings?.goalMin ?? 480,
   );
   const practiceScore = signals.length

@@ -1,4 +1,5 @@
 /** Progress — design S-34…S-36 + MG-3/MG-4 (by muscle, enriched detail). */
+import { useSleepsForCalc } from '../addons/useSleeps';
 import { weekStartOf as trainingWeekStart } from '../weekStart';
 import { Button, IconButton } from '../components/ui/Button';
 import { Chip } from '../components/ui/Chip';
@@ -107,6 +108,7 @@ export function ProgressView({
   onLens: (l: 'volume' | 'fatigue' | 'readiness') => void;
 }) {
   const { t, locale } = useT();
+  const sleepsForCalc = useSleepsForCalc();
   const exName = useExerciseName();
   const [nowTs] = useState(() => Date.now());
   const [selectedName, setSelectedName] = useState<string | null>(null);
@@ -351,7 +353,7 @@ export function ProgressView({
     activityRecoveryBias(store.activities, nowTs) +
       0.6 *
         sleepReadinessBias(
-          store.sleeps,
+          sleepsForCalc,
           nowTs,
           store.sleepSettings?.goalMin ?? 480,
           sleepNeedExtraMin(nowTs),

@@ -1113,7 +1113,12 @@ function AppMain() {
   // current user may not open is treated as absent, so the tab behind shows
   // through instead of a blank screen. Settings requires admin. The exercise
   // library and detail are always available (no longer flag-gated).
-  const overlayBlocked = overlay?.screen === 'settings' && role !== 'admin';
+  // Same for an overlay of an add-on the user has not installed (a stale #/sleep link, say): Today shows through.
+  const overlayBlocked =
+    (overlay?.screen === 'settings' && role !== 'admin') ||
+    (overlay?.screen === 'sleep' && !sleepOn && !nightLive) ||
+    (overlay?.screen === 'themes' && !themesOn) ||
+    (overlay?.screen === 'mastery' && !apexOn);
   const activeOverlay = overlayBlocked ? null : overlay;
   // The live session is a focused mode with its own action dock and a back
   // caret (the workout stays live, resumable from Today) — no global tab bar,

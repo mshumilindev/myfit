@@ -1,3 +1,4 @@
+import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { HealthView, type HealthViewProps } from './HealthView';
@@ -64,11 +65,23 @@ beforeEach(() => {
   localStorage.clear();
   setLocale('en');
   setDesktop(false);
+  addonsPref.set(['sleep']);
   seed();
 });
-afterEach(() => cleanup());
+afterEach(() => {
+  addonsPref.reset();
+  cleanup();
+});
 
 describe('Health home: sleep group', () => {
+  it('is not shown without the Sleep add-on (the nights stay stored)', () => {
+    addonsPref.reset();
+    seed({ sleeps: [night()] });
+    view();
+    expect(screen.queryByText(en.hlLastNight)).toBeNull();
+    expect(screen.queryByText(en.sleepStart)).toBeNull();
+  });
+
   it('shows last night and opens its details', () => {
     seed({ sleeps: [night()] });
     const { shell } = view();

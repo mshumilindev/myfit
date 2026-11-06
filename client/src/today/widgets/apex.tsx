@@ -1,4 +1,5 @@
 import { useMemo, type ReactNode } from 'react';
+import { sleepAvailable } from '../../addons/useSleeps';
 import {
   Widget,
   WidgetBar,
@@ -77,6 +78,7 @@ function masteryOf(store: StoreState, now: number): MasteryRead {
     store.workouts,
     store.bodyMetrics,
     store.sleeps,
+    sleepAvailable(),
     store.sleepSettings,
     store.mastery,
     hour,

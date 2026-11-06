@@ -3,6 +3,7 @@
  * in his temper — the same facts that land in his notes feed.
  */
 import { useAddonOrBase } from '../addons/enabledSet';
+import { useSleepsForCalc } from '../addons/useSleeps';
 import { Chip } from './ui/Chip';
 import { useMemo } from 'react';
 import { useT } from '../i18n';
@@ -20,6 +21,7 @@ export function AtlasDebrief({ workout, onOpen }: { workout: Workout; onOpen: ()
   const s = useStore();
   const fmt = useAtlasFmt();
   const atlasOn = useAddonOrBase('atlas');
+  const sleeps = useSleepsForCalc();
   const lines = useMemo(() => {
     if (!atlasOn || !s.coach.enabled) return null;
     const finished = s.workouts.filter((w) => w.finishedAt !== null);
@@ -27,7 +29,7 @@ export function AtlasDebrief({ workout, onOpen }: { workout: Workout; onOpen: ()
     const gctx = {
       injuries: s.injuries,
       restPeriods: s.restPeriods,
-      sleeps: s.sleeps,
+      sleeps,
       finished: finished.filter((w) => w.id !== workout.id),
       now,
       dob: s.bodyMetrics?.dob,
@@ -38,17 +40,7 @@ export function AtlasDebrief({ workout, onOpen }: { workout: Workout; onOpen: ()
       say(f, temper, { locale, fmt, yoMama: s.coach.yoMama, swearing }),
     );
     return { temper, texts };
-  }, [
-    s.coach,
-    s.workouts,
-    s.injuries,
-    s.restPeriods,
-    s.sleeps,
-    s.bodyMetrics,
-    workout,
-    locale,
-    fmt,
-  ]);
+  }, [s.coach, s.workouts, s.injuries, s.restPeriods, sleeps, s.bodyMetrics, workout, locale, fmt]);
   if (!lines || lines.texts.length === 0) return null;
   const { temper, texts } = lines;
   const endOfDay = new Date(workout.finishedAt ?? workout.startedAt).setHours(23, 59, 59, 999);

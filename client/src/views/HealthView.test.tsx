@@ -1,3 +1,4 @@
+import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { HealthView, type HealthViewProps } from './HealthView';
@@ -92,8 +93,10 @@ beforeEach(() => {
   localStorage.clear();
   setLocale('en');
   setDesktop(false);
+  addonsPref.set(['sleep']);
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
 });

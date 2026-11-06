@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
+import { useSleepsForCalc } from '../../addons/useSleeps';
 import {
   Widget,
   WidgetBar,
@@ -1177,6 +1178,7 @@ const LEVEL_TONE: Record<FatigueLevel, Tone> = {
 
 function FatigueWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const { store, now, t, locale } = ctx;
+  const sleepsForCalc = useSleepsForCalc();
   const s = trs(locale);
   const hour = Math.floor(now / HOUR);
   const finished = useMemo(() => finishedOf(store.workouts), [store.workouts]);
@@ -1203,7 +1205,7 @@ function FatigueWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       activityRecoveryBias(store.activities, at) +
         0.6 *
           sleepReadinessBias(
-            store.sleeps,
+            sleepsForCalc,
             at,
             store.sleepSettings?.goalMin ?? 480,
             sleepNeedExtraMin(at),
@@ -1228,7 +1230,7 @@ function FatigueWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       hottest: muscles.filter((f) => f.sets > 0).sort((a, b) => b.score - a.score)[0] ?? null,
       recent: finished.some((w) => w.startedAt >= at - 14 * DAY),
     };
-  }, [finished, hour, store.activities, store.sleeps, store.sleepSettings]);
+  }, [finished, hour, store.activities, sleepsForCalc, store.sleepSettings]);
   const open = () => goHash('#/progress/volume/fatigue');
   const level = levelOfIdx(data.idx);
   const tone = LEVEL_TONE[level];

@@ -5,6 +5,7 @@
  * detail — plus a note when the day was rest / vacation / illness, or a "missed
  * session" note when a program day was skipped.
  */
+import { useAddonOrBase } from '../addons/enabledSet';
 import { useState, type ReactNode } from 'react';
 import { Button } from './ui/Button';
 import type { Tone } from './ui/tones';
@@ -58,6 +59,7 @@ export function DayHistorySheet({
 }) {
   const { t, locale } = useT();
   const store = useStore();
+  const sleepOn = useAddonOrBase('sleep');
   const end = day + 24 * 3600 * 1000;
   const [todayKey] = useState(() => dayKey(Date.now()));
   const [nowMs] = useState(() => Date.now());
@@ -93,7 +95,7 @@ export function DayHistorySheet({
         ts: a.startedAt,
         node: <ActivityRow key={a.id} a={a} bodyKg={bodyKg} onOpen={wrap(onOpenActivity)} />,
       });
-  for (const n of store.sleeps)
+  for (const n of sleepOn ? store.sleeps : [])
     if (n.wake !== null && n.wake >= day && n.wake < end)
       rows.push({
         ts: n.wake,
