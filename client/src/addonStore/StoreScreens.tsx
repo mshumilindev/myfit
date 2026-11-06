@@ -2,7 +2,8 @@
 import { useMemo, useState } from 'react';
 import type { Role } from '../api';
 import { addonById, type AddonManifest } from '../addons/manifest';
-import { installQueue, queueRemove } from '../addons/queue';
+import { startInstall } from '../addons/installRun';
+import { queueRemove } from '../addons/queue';
 import {
   SkBtn,
   SkCard,
@@ -192,8 +193,8 @@ export function Selected({ ctx, go }: { ctx: StoreCtx; go: (v: string) => void }
           kind="pri"
           size="l"
           onClick={() => {
-            installQueue();
-            go('installed');
+            void startInstall();
+            go('installing');
           }}
         >
           {st.installN(items.length)}

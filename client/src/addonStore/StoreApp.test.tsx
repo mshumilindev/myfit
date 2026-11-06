@@ -1,14 +1,16 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { addonsPref } from '../addons/enabledSet';
-import { addonsQueuePref } from '../addons/queue';
+import { resetInstall } from '../addons/installRun';
+import { addonsQueuePref, queueAdd } from '../addons/queue';
 import { currentHash } from '../route';
 import { StoreApp } from './StoreApp';
 
 beforeEach(() => {
   addonsPref.reset();
   addonsQueuePref.reset();
+  resetInstall();
   window.location.hash = '#/store';
 });
 afterEach(cleanup);
@@ -44,5 +46,23 @@ describe('StoreApp', () => {
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
     fireEvent.click(screen.getAllByRole('button', { name: 'Back to Spotter' })[0]!);
     expect(currentHash()).toBe('#/today');
+  });
+  it('Install runs the picked list, lands on All set, and Undo puts it back in Selected', async () => {
+    queueAdd(['atlas'], 'member');
+    window.location.hash = '#/store/selected';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    fireEvent.click(screen.getAllByRole('button', { name: /Install 1 item/ })[0]!);
+    expect(currentHash()).toBe('#/store/installing');
+    await waitFor(() => expect(currentHash()).toBe('#/store/done'), { timeout: 3000 });
+    expect(addonsPref.get()).toContain('atlas');
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    expect(addonsPref.get()).not.toContain('atlas');
+    expect(addonsQueuePref.get()).toEqual(['atlas']);
+    expect(currentHash()).toBe('#/store/selected');
+  });
+  it('the install screens are left for Discover when nothing is running', async () => {
+    window.location.hash = '#/store/done';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    await waitFor(() => expect(currentHash()).toBe('#/store'));
   });
 });

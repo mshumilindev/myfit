@@ -8,6 +8,7 @@ import { currentUid, getRole, getUsername } from '../api';
 import { addonById } from '../addons/manifest';
 import type { Role } from '../api';
 import { useEnabledAddons } from '../addons/enabledSet';
+import { undoInstall, useInstallRun } from '../addons/installRun';
 import { useQueuedAddons } from '../addons/queue';
 import { initialsOf, useOwnAvatarUrl } from '../components/Avatar';
 import { useAddonStoreT } from '../i18n/addonStore';
@@ -16,6 +17,7 @@ import {
   SkAvatar,
   SkBackground,
   SkBar,
+  SkBtn,
   SkHeader,
   SkIcon,
   SkNavItem,
@@ -30,6 +32,7 @@ import {
 } from '../store-kit';
 import './screens.css';
 import { Installed } from './InstalledScreen';
+import { InstallDone, Installing } from './InstallFlow';
 import { ItemPage } from './ItemPage';
 import { Addons, Apps, Discover, Search, Selected } from './StoreScreens';
 import { ItemAction, RemoveButton, type StoreCtx } from './storeItems';
@@ -60,6 +63,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
     () => storeTabFromHash(currentHash()) ?? 'discover',
   );
   const enabled = useEnabledAddons();
+  const run = useInstallRun();
   const queued = useQueuedAddons();
   useEffect(() => {
     const on = () => {
@@ -70,6 +74,14 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
     window.addEventListener('hashchange', on);
     return () => window.removeEventListener('hashchange', on);
   }, []);
+
+  // The run moves the screen on: finished → All set; nothing running (a reload, or after Undo) → back to Discover.
+  useEffect(() => {
+    const v = route.view;
+    if (v === 'installing' && run.status === 'done') setHash(storeHash('done'), true);
+    else if ((v === 'installing' || v === 'done') && run.status === 'idle')
+      setHash(storeHash('discover'), true);
+  }, [route.view, run.status]);
 
   // Moving by a tab or the sidebar replaces the place; opening something from a screen pushes it, so Back can return.
   const goTab = (v: string) => {
@@ -94,12 +106,13 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
     installed: st.tabInstalled,
   };
   const view = route.view;
-  const tab: StoreTab | null = view === 'item' || view === 'search' ? null : view;
-  const title = view === 'search' ? st.searchTitle : view === 'item' ? '' : label[view];
+  const runView = view === 'installing' || view === 'done';
+  const tab: StoreTab | null = view === 'item' || view === 'search' || runView ? null : view;
+  const title = view === 'search' ? st.searchTitle : tab ? label[tab] : '';
   const name = getUsername() ?? '';
   const initials = initialsOf(name || '?');
   const photo = useOwnAvatarUrl(currentUid() ?? undefined) ?? undefined;
-  const showTray = queued.length > 0 && view !== 'selected' && view !== 'search';
+  const showTray = queued.length > 0 && view !== 'selected' && view !== 'search' && !runView;
   const isRoot = tab !== null;
   const itemM = view === 'item' ? addonById(route.id) : undefined;
 
@@ -168,7 +181,15 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
           </SkSidebar>
         }
         header={
-          (isRoot || view === 'search') && !(pushed && pushed.target === view) ? (
+          runView ? (
+            <SkHeader
+              title=""
+              avatar={avatar}
+              onExit={exit}
+              exitLabel={st.backToSpotter}
+              exitIcon={icon('x')}
+            />
+          ) : (isRoot || view === 'search') && !(pushed && pushed.target === view) ? (
             <SkHeader
               title={title}
               avatar={avatar}
@@ -205,7 +226,29 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
           />
         }
         bar={
-          itemM && !itemM.soon ? (
+          view === 'installing' ? (
+            <SkBar>
+              <SkBtn kind="ghost" size="l" onClick={() => goTab('discover')}>
+                {st.keepBrowsing}
+              </SkBtn>
+            </SkBar>
+          ) : view === 'done' ? (
+            <SkBar>
+              <SkBtn
+                kind="ghost"
+                size="l"
+                onClick={() => {
+                  undoInstall();
+                  goTab('selected');
+                }}
+              >
+                {st.undo}
+              </SkBtn>
+              <SkBtn kind="pri" size="l" onClick={exit}>
+                {st.goToToday}
+              </SkBtn>
+            </SkBar>
+          ) : itemM && !itemM.soon ? (
             <SkBar>
               {enabled.has(itemM.id) && <RemoveButton id={itemM.id} st={st} />}
               <ItemAction m={itemM} ctx={ctx} size="l" lead />
@@ -222,7 +265,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
           ) : undefined
         }
       >
-        {view !== 'item' && (
+        {view !== 'item' && !runView && (
           <div className="as-main-head">
             <h1
               className={`sk-t-h1d as-desk-title${pushed && pushed.target === view ? ' as-title-pushed' : ''}`}
@@ -254,6 +297,8 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
         {view === 'addons' && <Addons role={role} ctx={ctx} />}
         {view === 'selected' && <Selected ctx={ctx} go={go} />}
         {view === 'installed' && <Installed ctx={ctx} go={go} />}
+        {view === 'installing' && <Installing ctx={ctx} run={run} />}
+        {view === 'done' && <InstallDone ctx={ctx} ids={run.ids} />}
         {view === 'item' && <ItemPage id={route.id} ctx={ctx} go={go} />}
         {view === 'search' && <Search role={role} ctx={ctx} query={query} setQuery={setQuery} />}
       </SkShell>

@@ -25,8 +25,23 @@ describe('store route', () => {
     expect(storeTabFromHash('#/store/item/health')).toBeNull();
     expect(storeTabFromHash('#/store/search')).toBeNull();
   });
+  it('the install run screens belong to no tab', () => {
+    expect(parseStoreHash('#/store/installing')).toEqual({ view: 'installing' });
+    expect(parseStoreHash('#/store/done')).toEqual({ view: 'done' });
+    expect(storeTabFromHash('#/store/installing')).toBeNull();
+    expect(storeTabFromHash('#/store/done')).toBeNull();
+  });
   it('builds addresses that parse back', () => {
-    for (const tab of ['discover', 'apps', 'addons', 'selected', 'installed', 'search'] as const)
+    for (const tab of [
+      'discover',
+      'apps',
+      'addons',
+      'selected',
+      'installed',
+      'search',
+      'installing',
+      'done',
+    ] as const)
       expect(parseStoreHash(storeHash(tab))).toEqual({ view: tab });
     expect(parseStoreHash(storeHash('item', 'sleep-sounds'))).toEqual({
       view: 'item',
