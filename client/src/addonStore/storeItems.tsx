@@ -109,23 +109,22 @@ export function ItemRow({
   const { st } = ctx;
   const rel = relOf(m, ctx);
   return (
-    <div className={className}>
-      <SkRow
-        tile={<TileOf st={st} m={m} />}
-        name={<Highlight text={itemName(st, m.id)} query={query} />}
-        desc={<Highlight text={itemDesc(st, m.id)} query={query} />}
-        badge={kindBadge(st, m)}
-        rel={
-          rel && (
-            <>
-              <SkIcon name="link" small />
-              {rel}
-            </>
-          )
-        }
-        action={action === undefined ? <ItemAction m={m} ctx={ctx} /> : action}
-        onOpen={m.soon ? undefined : () => ctx.open(m.id)}
-      />
-    </div>
+    <SkRow
+      className={className}
+      tile={<TileOf st={st} m={m} />}
+      name={<Highlight text={itemName(st, m.id)} query={query} />}
+      desc={<Highlight text={itemDesc(st, m.id)} query={query} />}
+      badge={kindBadge(st, m)}
+      rel={
+        rel && (
+          <>
+            <SkIcon name="link" small />
+            {rel}
+          </>
+        )
+      }
+      action={action === undefined ? <ItemAction m={m} ctx={ctx} /> : action}
+      onOpen={m.soon ? undefined : () => ctx.open(m.id)}
+    />
   );
 }

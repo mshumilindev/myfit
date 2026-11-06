@@ -67,12 +67,15 @@ export function Discover({
         <DiscoverBento role={role} ctx={ctx} go={go} />
       )}
       {rec.length > 0 && (
-        <Section
-          title={st.recommended}
-          aside={<SkSectionLink onClick={() => go('apps')}>{st.seeAll}</SkSectionLink>}
-        >
-          <Rows ids={rec.slice(0, 4)} ctx={ctx} />
-        </Section>
+        <section className="sk-mt24">
+          <SkList>
+            <div className="as-rec-head">
+              <h2 className="sk-t-h2">{st.recommended}</h2>
+              <SkSectionLink onClick={() => go('apps')}>{st.seeAll}</SkSectionLink>
+            </div>
+            <Rows ids={rec.slice(0, 4)} ctx={ctx} bare />
+          </SkList>
+        </section>
       )}
       {nextMode === 'progress' && prog.left === 0 && soonItems.length > 0 && (
         <Section title={st.comingSoon}>
@@ -279,7 +282,7 @@ export function Search({
   const { st } = ctx;
   const ids = useMemo(() => searchItems(role, query, st), [role, query, st]);
   const short = query.trim().length < MIN_QUERY;
-  const suggestions = ['health', 'sleep', 'atlas', 'themes'].filter((id) => addonById(id));
+  const suggestions = ['sleep', 'injury-log', 'themes', 'atlas'].filter((id) => addonById(id));
   const categories = STORE_CATEGORIES.filter((cat) =>
     availableForRole(role).some((m) => m.kind === 'app' && m.category === cat),
   );
@@ -292,16 +295,20 @@ export function Search({
   return (
     <>
       {short ? (
-        <SkEmpty icon={<SkIcon name="search" />} body={st.searchHint}>
-          <div className="sk-t-e sk-mt16">{st.tryFor}</div>
-          <div className="sk-rowf sk-g8 sk-wrap sk-cen sk-mt12">
+        <>
+          <div className="as-hint sk-t-s" role="status">
+            <SkIcon name="search" small />
+            {st.searchHint}
+          </div>
+          <div className="sk-t-e sk-mt24">{st.tryFor}</div>
+          <div className="sk-rowf sk-g8 sk-wrap sk-mt12">
             {suggestions.map((id) => (
               <SkChip key={id} onClick={() => setQuery(itemName(st, id))}>
                 {itemName(st, id)}
               </SkChip>
             ))}
           </div>
-        </SkEmpty>
+        </>
       ) : ids.length === 0 ? (
         <SkEmpty
           icon={

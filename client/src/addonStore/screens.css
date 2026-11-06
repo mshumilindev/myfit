@@ -121,3 +121,18 @@
 .as-modules-head {
   padding: var(--sk-sp-6) var(--sk-sp-6) var(--sk-sp-2);
 }
+
+.as-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sk-sp-4);
+  margin-top: var(--sk-sp-8);
+}
+
+.as-rec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: var(--sk-sp-6) var(--sk-sp-2);
+}
