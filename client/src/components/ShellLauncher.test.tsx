@@ -1,9 +1,15 @@
 import { cleanup, render } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { ShellLauncher } from './ShellLauncher';
 import type { StoreState } from '../store';
 
-afterEach(cleanup);
+// The Apex tile is the Mastery add-on's (SPO-518): these specs are about every tile, so it is installed.
+beforeEach(() => addonsPref.set(['mastery']));
+afterEach(() => {
+  addonsPref.reset();
+  cleanup();
+});
 // SPO-141: the Users tile is admin-only; these contracts are about every tile, so they run as an admin.
 vi.mock('../api', async (orig) => ({
   ...(await orig<typeof import('../api')>()),

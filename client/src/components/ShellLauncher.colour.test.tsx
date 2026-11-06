@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { ShellLauncher } from './ShellLauncher';
 import { stylesCss, glassCss } from './ui/readCss';
 import type { StoreState } from '../store';
@@ -12,7 +13,12 @@ vi.mock('../api', async (orig) => ({
   ...(await orig<typeof import('../api')>()),
   getRole: () => 'admin',
 }));
-afterEach(cleanup);
+// The Apex tile is the Mastery add-on's (SPO-518): these specs are about every tile, so it is installed.
+beforeEach(() => addonsPref.set(['mastery']));
+afterEach(() => {
+  addonsPref.reset();
+  cleanup();
+});
 
 type Current = 'gym' | 'apex' | 'roster' | 'nutrition' | 'learn' | 'coach';
 /** Current app -> the fixed family of its tile (Nutrition is the kcal / lazurite family). */

@@ -75,7 +75,7 @@ export const ADDONS: readonly AddonManifest[] = [
     category: 'recovery',
   },
   { id: 'atlas', kind: 'app', tone: 6, roles: ALL, category: 'insights' },
-  { id: 'mastery', kind: 'app', tone: 8, roles: MEMBER, category: 'insights' },
+  { id: 'mastery', kind: 'app', tone: 8, roles: ALL, category: 'insights' },
   { id: 'themes', kind: 'app', tone: 7, roles: ALL, category: 'look' },
   // Gyms is core for a member and an add-on for trainer and admin.
   // Not available yet (the store shows them as Coming soon).

@@ -53,8 +53,12 @@ describe('ShellLauncher: the Apex tile follows the Mastery add-on (SPO-518)', ()
     open('apex');
     expect(apexTile()).not.toBeNull();
   });
-  it('a trainer keeps Apex as part of the base (the store does not offer it to them)', () => {
+  it('a trainer is offered Mastery too: no Apex tile until it is installed', () => {
     role.value = 'trainer';
+    open();
+    expect(apexTile()).toBeNull();
+    cleanup();
+    addonsPref.set(['mastery']);
     open();
     expect(apexTile()).not.toBeNull();
   });

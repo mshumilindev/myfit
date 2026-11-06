@@ -98,9 +98,9 @@ describe('useAddonOrBase', () => {
     const api = await import('../api');
     const spy = vi.spyOn(api, 'getRole');
     spy.mockReturnValue('member');
-    expect(renderHook(() => useAddonOrBase('mastery')).result.current).toBe(false);
+    expect(renderHook(() => useAddonOrBase('health')).result.current).toBe(false);
     spy.mockReturnValue('trainer');
-    expect(renderHook(() => useAddonOrBase('mastery')).result.current).toBe(true);
+    expect(renderHook(() => useAddonOrBase('health')).result.current).toBe(true);
     spy.mockRestore();
   });
 });

@@ -32,8 +32,10 @@ describe('Today widgets follow the Mastery add-on (SPO-518)', () => {
     addonsPref.set(['mastery']);
     expect(avail('apex-rank')).toBe(true);
   });
-  it('a trainer keeps them (the store does not offer Mastery to trainers)', () => {
+  it('a trainer is offered Mastery too: no Apex widgets until it is installed', () => {
     role.value = 'trainer';
+    expect(avail('apex-rank')).toBe(false);
+    addonsPref.set(['mastery']);
     expect(avail('apex-rank')).toBe(true);
   });
 });
@@ -42,13 +44,15 @@ describe('Sleep widgets follow the Sleep add-on (SPO-518)', () => {
   it('every id in the Sleep set is a real widget', () => {
     for (const id of SLEEP_WIDGET_IDS) expect(widgetById(id), id).toBeDefined();
   });
-  it('hidden for a member without Sleep, back once installed, always for a trainer', () => {
+  it('hidden without Sleep for every role, back once installed', () => {
     expect(avail('sleep')).toBe(false);
     expect(avail('sleep-debt')).toBe(false);
     addonsPref.set(['sleep']);
     expect(avail('sleep')).toBe(true);
     addonsPref.reset();
     role.value = 'trainer';
+    expect(avail('sleep')).toBe(false);
+    addonsPref.set(['sleep']);
     expect(avail('sleep')).toBe(true);
   });
 });
