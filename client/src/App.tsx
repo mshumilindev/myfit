@@ -5,10 +5,10 @@ import { useStoredConditionLimits } from './healthBuild';
 import { setProgressionEffects } from './progression';
 import { ScreenSkeleton } from './components/ui/Skeletons';
 import { Button } from './components/ui/Button';
-import { buildNotes, useAtlasFmt, useAtlasNotes } from './atlas/notes';
+import { useAtlasFmt, useAtlasNotes } from './atlas/notes';
 import { setOverrideUid } from './accountOverrides';
-import { chatBacked, planNotePushes, planOutbox, syncOutbox } from './atlas/schedule';
-import { computePlaybook } from './playbook';
+import { syncOutbox } from './atlas/schedule';
+import { planAtlasMessages } from './atlas/outboxPlan';
 import {
   lazy,
   Suspense,
@@ -46,7 +46,6 @@ import {
   liveSleep,
   setCoach,
   useSelfCoachRole,
-  syncSleepAutoQueue,
 } from './store';
 import { AppRoot, SpotterSky } from './components/SpotterSky';
 import { ChristmasScene } from './components/ChristmasScene';
@@ -104,15 +103,16 @@ import type { MoreMenuItem } from './components/ui/MoreMenu';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 import { currentHash, replaceHash, setHash } from './route';
 import { useAddonOrBase } from './addons/enabledSet';
-import { setAllowedThemes } from './themes/registry';
-import { useInstalledThemeIds, useThemesOn } from './themes/useThemeAccess';
-import { setAtlasInstalled } from './atlas/aiConsent';
-import { reconcileAtlasConsent, watchAtlasRemoval } from './atlas/withdrawOnRemove';
+import { useAddonRuntime } from './addons/useAddonRuntime';
+import { masteryRailItem } from './components/suite/masteryRailItem';
 import { isStoreHash, StoreScreen, useRoleWithStore } from './addonStore/StoreEntry';
 import { legalRoute, useJoinLinkSync, useLegalRoute } from './legal/route';
 import { usePendingConsentFlush } from './legal/signupConsents';
 import { usePendingRevokeFlush } from './coach/client/revokeQueue';
 
+const MasteryBadge = lazy(() =>
+  import('./views/MasteryView').then((module) => ({ default: module.MasteryBadge })),
+);
 const LegalPage = lazy(() =>
   import('./views/LegalPage').then((module) => ({ default: module.LegalPage })),
 );
@@ -228,9 +228,6 @@ const WidgetLibraryScreen = import.meta.env.DEV
       import('./today/WidgetLibraryScreen').then((m) => ({ default: m.WidgetLibraryScreen })),
     )
   : null;
-const MasteryBadge = lazy(() =>
-  import('./views/MasteryView').then((module) => ({ default: module.MasteryBadge })),
-);
 const SleepView = lazy(() =>
   import('./views/SleepView').then((module) => ({ default: module.SleepView })),
 );
@@ -554,12 +551,10 @@ export function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
     return { tab: 'today', overlay: { screen: 'client-coach', route: parts.join('/') } };
   if (head === 'injury') return { tab: 'today', overlay: { screen: 'injury' } };
   // Privacy and sharing lives in More now; the old Health links (#/health/privacy, #/health/nicotine/privacy) land there.
-  if (head === 'more' && parts[1] === 'privacy')
-    return { tab: 'today', overlay: { screen: 'privacy' } };
-  if (
+  const oldPrivacy =
     head === 'health' &&
-    (parts[1] === 'privacy' || (parts[1] === 'nicotine' && parts[2] === 'privacy'))
-  )
+    (parts[1] === 'privacy' || parts.slice(1, 3).join() === 'nicotine,privacy');
+  if ((head === 'more' && parts[1] === 'privacy') || oldPrivacy)
     return { tab: 'today', overlay: { screen: 'privacy' } };
   if (head === 'health') return { tab: 'today', overlay: healthFromHash(parts.slice(1)) };
   if (head === 'home') return { tab: 'today', overlay: homeSetFromHash(parts.slice(1)) };
@@ -761,19 +756,7 @@ function AppMain() {
   // the result (stable timestamps + seen flags, so nothing stale re-surfaces).
   const [notifNow] = useState(() => Date.now());
   const [rankUp, setRankUp] = useState<MasteryResult | null>(null);
-  // Apex / Mastery is an add-on (SPO-518): not installed = no screen, no rank-up moment, no background rating work.
-  const apexOn = useAddonOrBase('apex');
-  // Themes are installed one by one (SPO-518): the Themes screen needs a second look next to the base one.
-  const themesOn = useThemesOn();
-  const installedThemes = useInstalledThemeIds();
-  const sleepOn = useAddonOrBase('sleep');
-  // Install or removal of Sleep (auto-start is part of it): the server night queue follows (cleared without them, rebuilt with them).
-  useEffect(() => syncSleepAutoQueue(), [sleepOn]);
-  const atlasOn = useAddonOrBase('atlas');
-  useEffect(() => setAtlasInstalled(atlasOn), [atlasOn]);
-  useEffect(() => watchAtlasRemoval(), []);
-  useEffect(() => (atlasOn ? undefined : reconcileAtlasConsent()), [atlasOn]);
-  useEffect(() => setAllowedThemes(installedThemes), [installedThemes]);
+  const { apexOn, themesOn, sleepOn, atlasOn, healthOn, injuryOn } = useAddonRuntime();
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
     if (!apexOn) return;
@@ -825,41 +808,15 @@ function AppMain() {
   useEffect(() => {
     if (!authed || pushState() !== 'on') return;
     const id = window.setTimeout(() => {
-      const finished = store.workouts.filter((w) => w.finishedAt !== null);
-      const now = Date.now();
-      // Atlas is an add-on (SPO-518): without it nothing is planned and an empty list clears what was queued.
-      const msgs =
-        store.coach.enabled && atlasOn
-          ? chatBacked(
-              planOutbox({
-                coach: store.coach,
-                temper: atlas.temper,
-                finished,
-                plays: computePlaybook(finished, now).plays,
-                now,
-                locale,
-                fmt: atlasFmt,
-                title: t.atlasName,
-                reviewBody: t.atlasPushReview,
-              }),
-              (at) => buildNotes(store, at, locale, atlasFmt).notes,
-            ).concat(
-              // New notes that will appear while the app is closed → pushes.
-              planNotePushes({
-                coach: store.coach,
-                now,
-                // Push previews show on the lock screen: no swearing there (SPO-124).
-                notesAt: (at) =>
-                  buildNotes(
-                    { ...store, coach: { ...store.coach, swearing: false } },
-                    at,
-                    locale,
-                    atlasFmt,
-                  ).notes,
-                title: t.atlasName,
-              }),
-            )
-          : [];
+      const msgs = planAtlasMessages({
+        store,
+        atlasOn,
+        temper: atlas.temper,
+        locale,
+        fmt: atlasFmt,
+        t,
+        now: Date.now(),
+      });
       void syncOutbox(msgs).catch((err) => console.warn('atlas: outbox sync failed', err));
     }, 3000);
     return () => window.clearTimeout(id);
@@ -1139,7 +1096,9 @@ function AppMain() {
     (overlay?.screen === 'settings' && role !== 'admin') ||
     (overlay?.screen === 'sleep' && !sleepOn && !nightLive) ||
     (overlay?.screen === 'themes' && !themesOn) ||
-    (overlay?.screen === 'mastery' && !apexOn);
+    (overlay?.screen === 'mastery' && !apexOn) ||
+    (overlay?.screen === 'health' && !healthOn) ||
+    (overlay?.screen === 'injury' && !injuryOn);
   const activeOverlay = overlayBlocked ? null : overlay;
   // The live session is a focused mode with its own action dock and a back
   // caret (the workout stays live, resumable from Today) — no global tab bar,
@@ -2142,7 +2101,8 @@ export function GymRail(props: {
     props.syncStatus === 'offline' || props.syncStatus === 'failed'
       ? 'var(--color-danger)'
       : undefined;
-  const conditions = useActiveConditions();
+  const activeConditions = useActiveConditions();
+  const conditions = useAddonOrBase('health') ? activeConditions : 0; // shield belongs to Health (SPO-518)
   const masteryOn = useAddonOrBase('mastery');
 
   return (
@@ -2179,19 +2139,11 @@ export function GymRail(props: {
           : []),
         ...(masteryOn
           ? [
-              {
-                id: 'mastery',
-                label: t.masteryTitle,
-                icon: 'medal',
-                onSelect: props.onOpenMastery,
-                node: (
-                  <div className="rail-mastery">
-                    <Suspense fallback={null}>
-                      <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />
-                    </Suspense>
-                  </div>
-                ),
-              },
+              masteryRailItem(
+                t.masteryTitle,
+                props.onOpenMastery,
+                <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />,
+              ),
             ]
           : []),
       ]}

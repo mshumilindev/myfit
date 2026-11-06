@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { addonsPref } from '../addons/enabledSet';
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Shell } from '../App';
 import type { ProgramAssignment } from '../data/programMine';
@@ -150,6 +151,7 @@ const liveWorkouts = () => __getStateForTests().workouts.filter((w) => w.finishe
 
 beforeEach(() => {
   localStorage.clear();
+  addonsPref.set(['health']);
   programState.assignment = null;
   programState.active = true;
   gps(null);
@@ -464,6 +466,13 @@ describe('StartSheet · tiles', () => {
       programMode: 'own',
       programDays: [1, 5],
     });
+  });
+
+  it('offers no Health tile until the Health add-on is installed (SPO-518)', () => {
+    addonsPref.reset();
+    render(<StartSheet shell={shell()} onClose={vi.fn()} />);
+    expect(screen.queryByText('Health')).toBeNull();
+    expect(screen.getByText('Activity')).toBeTruthy();
   });
 
   it('Activity, Health, Programs and Home set each open their screen and close the sheet', async () => {

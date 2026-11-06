@@ -1200,16 +1200,11 @@ function FatigueWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
     };
     const cur = indexAt(at);
     const trend = [5, 4, 3, 2, 1].map((k) => indexAt(at - k * WEEK).idx).concat(cur.idx);
+    const goal = store.sleepSettings?.goalMin ?? 480;
+    const sleepBias = sleepReadinessBias(sleepsForCalc, at, goal, sleepNeedExtraMin(at));
     const deload = deloadSuggestion(
       cur.fat,
-      activityRecoveryBias(store.activities, at) +
-        0.6 *
-          sleepReadinessBias(
-            sleepsForCalc,
-            at,
-            store.sleepSettings?.goalMin ?? 480,
-            sleepNeedExtraMin(at),
-          ),
+      activityRecoveryBias(store.activities, at) + 0.6 * sleepBias,
     );
     const vol = (a: number, b: number) =>
       finished

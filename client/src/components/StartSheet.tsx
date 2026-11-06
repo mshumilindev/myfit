@@ -20,6 +20,7 @@ import type { Shell } from '../App';
 import type { Gym } from '../types';
 import { HOME_BACKFILL_MIN, type HomeSet } from '../homeSets';
 import { currentUid } from '../api';
+import { useAddonOrBase } from '../addons/enabledSet';
 import {
   activeRestPeriod,
   backfillHomeSet,
@@ -70,6 +71,8 @@ export function StartSheet({
   inline?: boolean;
 }) {
   const { t, locale } = useT();
+  // Health is an add-on (SPO-518): its tile is offered only while it is installed.
+  const healthOn = useAddonOrBase('health');
   const store = useStore();
   const { assignment, active: assignedActive } = useProgramMine();
   const [sub, setSub] = useState<Sub>(null);
@@ -376,13 +379,15 @@ export function StartSheet({
             </span>
           </span>
         </Card>
-        <Card as="button" className="ss-tile" onClick={openHealth}>
-          <IconTile tone="rest" size={40} icon="clock-countdown" className="ss-ic" />
-          <span className="ss-tile-text">
-            <span className="ss-tt">{t.startHealthTitle}</span>
-            <span className="ss-ts">{t.startHealthSub}</span>
-          </span>
-        </Card>
+        {healthOn && (
+          <Card as="button" className="ss-tile" onClick={openHealth}>
+            <IconTile tone="rest" size={40} icon="clock-countdown" className="ss-ic" />
+            <span className="ss-tile-text">
+              <span className="ss-tt">{t.startHealthTitle}</span>
+              <span className="ss-ts">{t.startHealthSub}</span>
+            </span>
+          </Card>
+        )}
         <Card as="button" className="ss-tile" onClick={() => setSub('past')}>
           <IconTile tone="neutral" size={40} icon="arrow-counter-clockwise" className="ss-ic" />
           <span className="ss-tile-text">

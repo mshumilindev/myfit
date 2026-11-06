@@ -149,7 +149,7 @@ import {
 } from './sleep';
 import { computeStreak } from './streak';
 import { currentUid, getRole, callFn } from './api';
-import { addonAvailable } from './addons/enabledSet';
+import { addonAvailable } from './addons/queue'; // importing it also registers the add-on lists for account sync
 import {
   UNSENT_KEY,
   bumpWorkoutGen,
@@ -257,7 +257,6 @@ import {
   type IsoDay,
 } from './weekStart';
 import type { GeneratedDay } from './sessionBuilder';
-import './addons/queue'; // registers the add-on lists for account sync (imports enabledSet too)
 import { listPrefFromDoc, LIST_PREFS, writeListPref, reconcileListPref } from './activityPrefs';
 import { resetTodayLayout } from './today/layout';
 import { pushTodayLayoutEdits, syncTodayLayoutFromDoc } from './today/layoutSync';
@@ -4223,18 +4222,15 @@ function saveLiveSleep(): void {
 /** Keep the server auto-start queue (sleepSchedules/{uid}) in step with the
  *  schedule + settings. The client — which knows the timezone — lays out the
  *  upcoming bedtimes as absolute instants, so the scheduled function stays pure
- *  UTC. Removed entirely when auto-log is off or nothing is scheduled. */
+ *  UTC. Removed entirely when auto-log is off, nothing is scheduled or Sleep (an add-on, SPO-518) is not installed. */
 export function syncSleepAutoQueue(): void {
   const uid = currentUid();
   if (!uid) return;
   const ref = doc(db, 'sleepSchedules', uid);
-  // Sleep is an add-on (SPO-518), auto-start is part of it: without it the server queue is cleared, so no night is created for a
-  // feature the person does not have. The schedule and settings stay stored, so a re-install picks the queue up again.
-  if (!state.sleepSettings.autoLog || !addonAvailable('sleep')) {
-    deleteDoc(ref).catch(onWriteError);
-    return;
-  }
-  const upcoming = computeUpcomingNights(state.sleepSchedule, state.sleeps, Date.now(), 14);
+  const off = !state.sleepSettings.autoLog || !addonAvailable('sleep');
+  const upcoming = off
+    ? []
+    : computeUpcomingNights(state.sleepSchedule, state.sleeps, Date.now(), 14);
   if (upcoming.length === 0) {
     deleteDoc(ref).catch(onWriteError);
     return;

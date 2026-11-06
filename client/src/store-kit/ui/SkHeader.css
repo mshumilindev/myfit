@@ -49,14 +49,3 @@
   width: var(--sk-icon-s);
   height: var(--sk-icon-s);
 }
-/* Exit with a visible word: a pill that names where it goes (the bare icon disc did not say what it does). */
-.sk-hd-exit-text {
-  display: inline-flex;
-  gap: var(--sk-sp-2);
-  width: auto;
-  flex: none;
-  padding: 0 var(--sk-sp-6);
-  border-radius: var(--sk-r-3xl);
-  font-size: var(--sk-fs-body);
-  font-weight: var(--sk-fw-semibold);
-}

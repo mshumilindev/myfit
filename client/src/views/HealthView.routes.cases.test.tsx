@@ -1,3 +1,4 @@
+import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { HealthView, type HealthViewProps } from './HealthView';
@@ -113,6 +114,7 @@ beforeEach(() => {
   localStorage.clear();
   setLocale('en');
   setDesktop(false);
+  addonsPref.set(['health', 'injury-log', 'nicotine-alcohol', 'supplements', 'cycle']);
   seed();
 });
 afterEach(() => cleanup());

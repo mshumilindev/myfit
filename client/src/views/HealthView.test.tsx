@@ -93,7 +93,7 @@ beforeEach(() => {
   localStorage.clear();
   setLocale('en');
   setDesktop(false);
-  addonsPref.set(['sleep']);
+  addonsPref.set(['health', 'injury-log', 'nicotine-alcohol', 'supplements', 'cycle', 'sleep']);
 });
 afterEach(() => {
   addonsPref.reset();
@@ -102,6 +102,17 @@ afterEach(() => {
 });
 
 describe('Health home (mobile)', () => {
+  it('shows only the rows of the installed Health add-ons (SPO-518)', () => {
+    addonsPref.set(['health', 'sleep']);
+    seed([]);
+    view();
+    expect(screen.queryByText('Injury rehab')).toBeNull();
+    expect(screen.queryByText('I got hurt')).toBeNull();
+    expect(screen.queryByText('Nicotine')).toBeNull();
+    expect(screen.queryByText('Supplements')).toBeNull();
+    expect(screen.getByText('I was unwell')).toBeTruthy();
+  });
+
   it('f01: nothing active — status, sleep, start, log the past, history', () => {
     // An illness that ended within RETURN_WINDOW_DAYS (21) shows the "Easing back in"
     // return plan instead of "All clear" (Unwell 2.0), so this one is well past it.

@@ -65,7 +65,7 @@ beforeEach(() => {
   localStorage.clear();
   setLocale('en');
   setDesktop(false);
-  addonsPref.set(['sleep']);
+  addonsPref.set(['health', 'injury-log', 'nicotine-alcohol', 'supplements', 'cycle', 'sleep']);
   seed();
 });
 afterEach(() => {

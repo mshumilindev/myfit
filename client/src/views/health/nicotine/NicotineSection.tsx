@@ -16,22 +16,27 @@ import { useNicotineText } from './text';
  */
 export function NicotineHealthGroup({
   onOpen,
+  hideNicotine,
   children,
 }: {
   onOpen: () => void;
+  /** The Nicotine and alcohol add-on is not installed: the group keeps only its other rows. */
+  hideNicotine?: boolean;
   children?: ReactNode;
 }) {
   const { t, summary } = useNicotineText();
   const { products } = useNicotine();
   return (
     <GroupedList header={t.nicLifestyle}>
-      <ListRow
-        icon={<IconTile tone="neutral" size={30} icon={FEATURE_ICON.nicotine} />}
-        label={t.nicTitle}
-        sub={summary(products) ?? t.nicRowEmpty}
-        chevron
-        onClick={onOpen}
-      />
+      {!hideNicotine && (
+        <ListRow
+          icon={<IconTile tone="neutral" size={30} icon={FEATURE_ICON.nicotine} />}
+          label={t.nicTitle}
+          sub={summary(products) ?? t.nicRowEmpty}
+          chevron
+          onClick={onOpen}
+        />
+      )}
       {children}
     </GroupedList>
   );

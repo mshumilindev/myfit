@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
 import { ShortcutTile, type ShortcutState } from '../components/ui/ShortcutTile';
 import type { Tone } from '../components/ui/tones';
 import { ACTIVITY_TYPES, activityType } from '../activities';
-import { dayKey } from '../store';
+import { dayKey, type StoreState } from '../store';
 import type { WidgetCtx } from './registry';
 import { setHash } from '../route';
 import { useAddonAvailable } from '../addons/enabledSet';
@@ -209,4 +209,21 @@ export const SHORTCUT_ADDON: Readonly<Record<string, string>> = {
 export function useShortcuts(): readonly ShortcutDef[] {
   const available = useAddonAvailable();
   return SHORTCUTS.filter((x) => !SHORTCUT_ADDON[x.id] || available(SHORTCUT_ADDON[x.id]));
+}
+
+/** Activity shortcuts by how often the type was logged, the chosen ids (if any) first. */
+export function sortedActs(
+  shortcuts: readonly ShortcutDef[],
+  activities: StoreState['activities'],
+  chosen: readonly string[] = [],
+): ShortcutDef[] {
+  const freq = new Map<string, number>();
+  for (const a of activities) freq.set(a.type, (freq.get(a.type) ?? 0) + 1);
+  const rank = (id: string) => (chosen.includes(id) ? 1 : 0);
+  return shortcuts
+    .filter((x) => x.group === 'activity')
+    .sort(
+      (a, b) =>
+        rank(b.id) - rank(a.id) || (freq.get(b.id.slice(7)) ?? 0) - (freq.get(a.id.slice(7)) ?? 0),
+    );
 }

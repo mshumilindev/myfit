@@ -140,3 +140,15 @@ export function useWidgetAvailable(): (w: WidgetDef) => boolean {
     (!HEALTH_WIDGET_ADDON[w.id] || available(HEALTH_WIDGET_ADDON[w.id])) &&
     (w.group !== 'atlas' || available('atlas'));
 }
+
+/** The widgets this person can use now, with an id lookup that skips the ones their add-ons leave out. */
+export function useWidgetCatalog() {
+  const available = useWidgetAvailable();
+  return {
+    widgets: WIDGETS.filter(available),
+    widgetById: (id: string) => {
+      const w = widgetById(id);
+      return w && available(w) ? w : undefined;
+    },
+  };
+}

@@ -38,7 +38,7 @@ describe('SkHeader', () => {
 });
 
 describe('SkHeader exitText', () => {
-  it('shows the label beside the exit icon and keeps it a single button', () => {
+  it('draws a labelled exit as the Back link, before the avatar', () => {
     render(
       <SkHeader
         title="Discover"
@@ -49,6 +49,6 @@ describe('SkHeader exitText', () => {
     );
     const btn = screen.getByRole('button', { name: 'Back to Spotter' });
     expect(btn.textContent).toContain('Spotter');
-    expect(btn.className).toContain('sk-hd-exit-text');
+    expect(btn.className).toContain('sk-hd-back');
   });
 });

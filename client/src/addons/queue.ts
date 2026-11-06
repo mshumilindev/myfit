@@ -15,6 +15,7 @@ import {
   addonsPref,
 } from './enabledSet';
 
+export { addonAvailable } from './enabledSet';
 export const addonsQueuePref = createListPref('spotter.addons.queue');
 registerListPref('addonsQueue', addonsQueuePref);
 

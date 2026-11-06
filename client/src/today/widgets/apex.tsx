@@ -77,8 +77,7 @@ function masteryOf(store: StoreState, now: number): MasteryRead {
   const deps = [
     store.workouts,
     store.bodyMetrics,
-    store.sleeps,
-    sleepAvailable(),
+    sleepAvailable() ? store.sleeps : null,
     store.sleepSettings,
     store.mastery,
     hour,

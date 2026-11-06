@@ -11,8 +11,7 @@
  *   - Practice & programming — how deliberately you build and run sessions
  *     (nine data-driven signals: coverage, progression, volume, warm-up,
  *      cooldown, rest, recovery, cardio, structure)
- * The number reflects the whole picture and moves as your training does.
- * Everything is derived from data already logged — nothing new is stored.
+ * The number reflects the whole picture and moves as your training does. Everything is derived from logged data.
  */
 import { sleepAvailable } from './addons/useSleeps';
 import type { Workout, Exercise, SleepNight } from './types';

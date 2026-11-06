@@ -20,6 +20,7 @@ import { illnessState } from '../illness';
 import { sleepBlockedBy, SLEEP_BLOCK_KEY } from '../sleepGuard';
 import { useAddonOrBase } from '../addons/enabledSet';
 import { dayKey, endRestPeriod, liveSleep, startSleep, useStore } from '../store';
+import { useAddonAvailable } from '../addons/enabledSet';
 import { activeInjuries, inFullRest } from '../injury';
 import { lastNight, nightDurationMin } from '../sleep';
 import { fmtDurationHuman } from '../i18n';
@@ -91,6 +92,8 @@ export function HealthView(props: HealthViewProps) {
   const { shell } = props;
   const { t, locale } = useT();
   const store = useStore();
+  // The pieces of Health are add-ons (SPO-518): a row only shows while its add-on is installed.
+  const available = useAddonAvailable();
   const web = useIsDesktop();
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -133,7 +136,7 @@ export function HealthView(props: HealthViewProps) {
   const upcoming = store.restPeriods
     .filter((p) => p.startDay > today)
     .sort((a, b) => a.startDay - b.startDay);
-  const injuries = activeInjuries(store.injuries);
+  const injuries = available('injury-log') ? activeInjuries(store.injuries) : [];
   const ill = illnessState(store.restPeriods, store.workouts, now);
   const ret = illness || ill.phase !== 'returning' ? null : ill;
   const lastIll = ret ? (store.restPeriods.find((r) => r.id === ret.periodId) ?? null) : null;
@@ -360,34 +363,41 @@ export function HealthView(props: HealthViewProps) {
       ) : (
         startRow({ kind: 'new', ctx: 'start', type: 'illness' }, t.restModeIllness, t.hlUnwellSub)
       )}
-      <ListRow
-        icon={<Ic tone="inj" name="bandage" />}
-        label={t.hlInjuryRehab}
-        sub={t.hlInjuryRehabSub}
-        chevron
-        onClick={() => shell.openOverlay({ screen: 'injury' })}
-      />
+      {available('injury-log') && (
+        <ListRow
+          icon={<Ic tone="inj" name="bandage" />}
+          label={t.hlInjuryRehab}
+          sub={t.hlInjuryRehabSub}
+          chevron
+          onClick={() => shell.openOverlay({ screen: 'injury' })}
+        />
+      )}
     </GroupedList>
   );
   const pastGroup = (
     <GroupedList key="past" header={t.hlLogPast} footer={t.hlLogPastNote}>
       {startRow({ kind: 'new', ctx: 'past', type: 'illness' }, t.hlWasUnwell, '')}
       {startRow({ kind: 'new', ctx: 'past', type: 'off' }, t.hlTookBreak, t.hlTookBreakSub)}
-      {startRow({ kind: 'new', ctx: 'past', type: 'injury' }, t.hlGotHurt, '')}
+      {available('injury-log') &&
+        startRow({ kind: 'new', ctx: 'past', type: 'injury' }, t.hlGotHurt, '')}
     </GroupedList>
   );
   const conditionsGroup = <ConditionsSection key="cond" onOpen={(cond) => go({ cond })} />;
-  const lifestyleGroup = (
-    <NicotineHealthGroup key="life" onOpen={() => go({ nic: 'hub' })}>
-      <AlcoholHealthRow onOpen={() => go({ alc: 'hub' })} />
-      <SupplementHealthRow
-        onOpen={() =>
-          hasSupplementData(store.supplements) ? go({ sup: 'hub' }) : setSupQuick(true)
-        }
-      />
-      <CycleHealthRow onOpen={() => go({ cyc: 'hub' })} />
-    </NicotineHealthGroup>
-  );
+  const nicAlcOn = available('nicotine-alcohol');
+  const lifestyleGroup =
+    nicAlcOn || available('supplements') || available('cycle') ? (
+      <NicotineHealthGroup key="life" hideNicotine={!nicAlcOn} onOpen={() => go({ nic: 'hub' })}>
+        {nicAlcOn && <AlcoholHealthRow onOpen={() => go({ alc: 'hub' })} />}
+        {available('supplements') && (
+          <SupplementHealthRow
+            onOpen={() =>
+              hasSupplementData(store.supplements) ? go({ sup: 'hub' }) : setSupQuick(true)
+            }
+          />
+        )}
+        {available('cycle') && <CycleHealthRow onOpen={() => go({ cyc: 'hub' })} />}
+      </NicotineHealthGroup>
+    ) : null;
   const historyGroup = (
     <GroupedList key="hist" header={t.hlHistory}>
       {recent.map((it) => (
