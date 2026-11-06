@@ -11,7 +11,7 @@
 
 ## Найризикованіші звʼязки
 
-1. Обмеження Health обходять маску (`progression.ts` `activeEffects`, `healthBuild.ts`, `SessionView` RPE-ліміт, `streak`): при вимкненні Health не можна ні стерти, ні замаскувати ці дані. Тесту «add-on вимкнено, обмеження діє» немає.
+1. Обмеження Health обходять маску (`progression.ts` `activeEffects`, `healthBuild.ts`, `SessionView` RPE-ліміт, `streak`): при вимкненні Health не можна ні стерти, ні замаскувати ці дані. Поведінку «функція вимкнена, обмеження діє» уже закріплено тестами SPO-290 (`store.healthLimits.test.ts`, 97–160); відкрите лише повторити її для стану «add-on не встановлено», коли цей стан зʼявиться в `exposed()`.
 2. Мости `calcMods`/`*Apply` імпортують `store.ts`, а їх імпортують `recovery`, `fatigue`, `progression` (цикл у рантаймі). Прапор «модуль вимкнено» має дійти до `exposed()`/`maskHealth`. Поріг продубльовано в `today/widgets/training.tsx:1165` і `fatigue.ts:82`.
 3. Sleep не маскується, а читається в `ProgressView.tsx:349`, `training.tsx:1201`, `SessionView.tsx:1264` (RPE), `mastery.ts:388`. Виклики без юніт-тестів.
 4. Підсумок сесії показує картки без перевірки встановлення: `AtlasDebrief` (лише `coach.enabled`), `FuelCard`, `NicotineCard`, `AlcoholCard`, `SupplementsCard` (`SessionView.tsx:4436-4460`).
@@ -46,7 +46,7 @@
 ## Прогалини в тестах (закрити першими)
 
 - Виклики `sleepReadinessBias` (ProgressView, `training.tsx`), `rpe.ts` `sleepShortH`, `AtlasDebrief`, ефект Mastery в `App.tsx`.
-- Регресія «add-on вимкнено, обмеження Health діє» (рядки 14, 16, 24).
+- «Add-on не встановлено, обмеження Health діють» — після зʼєднання enabledSet з `exposed()`; для «згоди немає» вже покрито `store.healthLimits.test.ts`.
 
 ## Відкрите питання власнику
 
