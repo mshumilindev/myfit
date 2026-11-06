@@ -23,7 +23,7 @@ describe('Today widgets follow the Mastery add-on (SPO-518)', () => {
   it('every id in the Mastery set is a real widget', () => {
     for (const id of MASTERY_WIDGET_IDS) expect(widgetById(id), id).toBeDefined();
   });
-  it('a member without Mastery loses rank and level widgets but keeps streak', () => {
+  it('a member without Mastery loses the Apex widgets but keeps streak', () => {
     expect(avail('apex-rank')).toBe(false);
     expect(avail('apex-mastery')).toBe(false);
     expect(avail('streak')).toBe(true);

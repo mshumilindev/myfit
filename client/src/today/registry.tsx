@@ -104,15 +104,20 @@ export function widgetById(id: string): WidgetDef | undefined {
 }
 
 /**
- * Widgets that belong to the Mastery add-on (SPO-518): rank and level. The rest of the Apex group (streak, challenges,
- * awards, feed, feats) stays until the owner says which of them leave with Mastery. Roles the store does not offer
+ * Widgets that belong to the Apex app, i.e. the Mastery add-on (SPO-518): everything in the Apex group except `streak`,
+ * which is core training. (Decision taken under the owner's rule 21.10: decide by best practice and finish.) Roles the store does not offer
  * Mastery to keep everything. A hook: call it before any early return; saved layouts keep their items either way.
  */
 export const MASTERY_WIDGET_IDS: ReadonlySet<string> = new Set([
+  'apex-challenge',
   'apex-rank',
+  'apex-awards',
+  'apex-feed',
   'apex-mastery',
   'apex-level-up',
   'apex-next-feat',
+  'apex-feats-board',
+  'apex-year-feats',
 ]);
 export function useWidgetAvailable(): (w: WidgetDef) => boolean {
   const mastery = useAddonOrBase('mastery');
