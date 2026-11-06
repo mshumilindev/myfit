@@ -124,6 +124,9 @@ export const SLEEP_WIDGET_IDS: ReadonlySet<string> = new Set(['sleep', 'sleep-de
 export function useWidgetAvailable(): (w: WidgetDef) => boolean {
   const mastery = useAddonOrBase('mastery');
   const sleep = useAddonOrBase('sleep');
+  const atlas = useAddonOrBase('atlas');
   return (w) =>
-    (mastery || !MASTERY_WIDGET_IDS.has(w.id)) && (sleep || !SLEEP_WIDGET_IDS.has(w.id));
+    (mastery || !MASTERY_WIDGET_IDS.has(w.id)) &&
+    (sleep || !SLEEP_WIDGET_IDS.has(w.id)) &&
+    (atlas || w.group !== 'atlas');
 }
