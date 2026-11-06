@@ -1,6 +1,11 @@
 /** Add-on Store strings (Polish). See `addonStore.en.ts`. */
 import type { addonStoreEn } from './addonStore.en';
 
+const listOf = (names: string[]): string =>
+  names.length > 1
+    ? `${names.slice(0, -1).join(', ')} i ${names[names.length - 1]}`
+    : (names[0] ?? '');
+
 export const addonStorePl: typeof addonStoreEn = {
   title: 'Dodatki',
   back: 'Wstecz',
@@ -116,6 +121,13 @@ export const addonStorePl: typeof addonStoreEn = {
   tryAgain: 'Spróbuj ponownie',
   almostDone: 'Prawie gotowe',
   installedOf: (n: number, total: number) => `Zainstalowano ${n} z ${total}.`,
+  removeTitle: (name: string) => `Usunąć ${name}?`,
+  removeWith: (names: string[]) => `${listOf(names)} zostanie usunięte razem z nim.`,
+  removeKept: (name: string) =>
+    `Twoje wpisy zostają zapisane. Wrócą, jeśli ponownie dodasz ${name}.`,
+  removeName: (name: string) => `Usuń ${name}`,
+  chooseWhat: 'Wybierz, co pokazywać',
+  modules: 'Moduły',
   items: {
     health: { name: 'Zdrowie', desc: 'Urazy, cykl, suplementy i więcej w jednym miejscu.' },
     'injury-log': { name: 'Dziennik urazów', desc: 'Zapisuj urazy i to, jak się goją.' },

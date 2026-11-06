@@ -1,6 +1,11 @@
 /** Add-on Store strings (Lithuanian). See `addonStore.en.ts`. */
 import type { addonStoreEn } from './addonStore.en';
 
+const listOf = (names: string[]): string =>
+  names.length > 1
+    ? `${names.slice(0, -1).join(', ')} ir ${names[names.length - 1]}`
+    : (names[0] ?? '');
+
 export const addonStoreLt: typeof addonStoreEn = {
   title: 'Priedai',
   back: 'Atgal',
@@ -117,6 +122,13 @@ export const addonStoreLt: typeof addonStoreEn = {
   tryAgain: 'Bandyti dar kartą',
   almostDone: 'Beveik baigta',
   installedOf: (n: number, total: number) => `Įdiegta ${n} iš ${total}.`,
+  removeTitle: (name: string) => `Pašalinti ${name}?`,
+  removeWith: (names: string[]) => `${listOf(names)} bus pašalinta kartu.`,
+  removeKept: (name: string) =>
+    `Jūsų įrašai lieka išsaugoti. Jie sugrįš, jei vėl pridėsite ${name}.`,
+  removeName: (name: string) => `Pašalinti ${name}`,
+  chooseWhat: 'Pasirinkite, ką rodyti',
+  modules: 'Moduliai',
   items: {
     health: { name: 'Sveikata', desc: 'Traumos, ciklas, papildai ir kita vienoje vietoje.' },
     'injury-log': { name: 'Traumų žurnalas', desc: 'Žymėkite traumas ir kaip jos gyja.' },

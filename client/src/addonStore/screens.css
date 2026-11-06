@@ -117,3 +117,7 @@
   margin-top: var(--sk-sp-2);
   color: var(--acc-t);
 }
+
+.as-modules-head {
+  padding: var(--sk-sp-6) var(--sk-sp-6) var(--sk-sp-2);
+}

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { addonsPref } from '../addons/enabledSet';
+import { addonsPref, enableAddons } from '../addons/enabledSet';
 import { resetInstall } from '../addons/installRun';
 import { addonsQueuePref, queueAdd } from '../addons/queue';
 import { currentHash } from '../route';
@@ -80,5 +80,25 @@ describe('StoreApp', () => {
     expect(pills.length).toBeGreaterThan(0);
     expect((pills[0] as HTMLButtonElement).disabled).toBe(true);
     net.mockRestore();
+  });
+  it('Manage shows the modules as switches; Remove asks first, then removes the app with its add-ons', () => {
+    enableAddons(['injury-log', 'sleep'], 'member');
+    window.location.hash = '#/store/manage/health';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    expect(screen.getAllByRole('switch').length).toBeGreaterThan(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Health' }));
+    expect(addonsPref.get()).toContain('health');
+    expect(screen.getByText(/Your entries stay saved/)).toBeTruthy();
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Remove' }));
+    expect(addonsPref.get()).toEqual(['sleep']);
+    expect(currentHash()).toBe('#/store/installed');
+  });
+  it('Cancel in the remove sheet changes nothing', () => {
+    enableAddons(['health'], 'member');
+    window.location.hash = '#/store/manage/health';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Health' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancel' }));
+    expect(addonsPref.get()).toContain('health');
   });
 });

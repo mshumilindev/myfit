@@ -1,6 +1,11 @@
 /** Add-on Store strings (Estonian). See `addonStore.en.ts`. */
 import type { addonStoreEn } from './addonStore.en';
 
+const listOf = (names: string[]): string =>
+  names.length > 1
+    ? `${names.slice(0, -1).join(', ')} ja ${names[names.length - 1]}`
+    : (names[0] ?? '');
+
 export const addonStoreEt: typeof addonStoreEn = {
   title: 'Lisad',
   back: 'Tagasi',
@@ -116,6 +121,13 @@ export const addonStoreEt: typeof addonStoreEn = {
   tryAgain: 'Proovi uuesti',
   almostDone: 'Peaaegu valmis',
   installedOf: (n: number, total: number) => `Paigaldatud ${n} / ${total}.`,
+  removeTitle: (name: string) => `Eemalda ${name}?`,
+  removeWith: (names: string[]) => `${listOf(names)} eemaldatakse koos sellega.`,
+  removeKept: (name: string) =>
+    `Sinu kirjed jäävad salvestatuks. Need tulevad tagasi, kui lisad ${name} uuesti.`,
+  removeName: (name: string) => `Eemalda ${name}`,
+  chooseWhat: 'Vali, mida näidata',
+  modules: 'Moodulid',
   items: {
     health: { name: 'Tervis', desc: 'Vigastused, tsükkel, toidulisandid ja muu ühes kohas.' },
     'injury-log': { name: 'Vigastuste logi', desc: 'Märgi vigastused ja nende paranemine.' },

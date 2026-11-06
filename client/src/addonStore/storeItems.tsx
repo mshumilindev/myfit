@@ -1,6 +1,5 @@
 /** Shared bits of the store screens: one item row, its action, the grouped lists. */
 import { addonById, type AddonManifest } from '../addons/manifest';
-import { disableAddons } from '../addons/enabledSet';
 import { queueAdd, queueRemove } from '../addons/queue';
 import type { AddonStoreStrings } from '../i18n/addonStore';
 import { SkBadge, SkBtn, SkHighlight, SkIcon, SkInstalledLabel, SkRow, SkTile } from '../store-kit';
@@ -128,13 +127,5 @@ export function ItemRow({
         onOpen={m.soon ? undefined : () => ctx.open(m.id)}
       />
     </div>
-  );
-}
-
-export function RemoveButton({ id, st }: { id: string; st: AddonStoreStrings }) {
-  return (
-    <SkBtn kind="ghost" onClick={() => disableAddons([id])}>
-      {st.remove}
-    </SkBtn>
   );
 }

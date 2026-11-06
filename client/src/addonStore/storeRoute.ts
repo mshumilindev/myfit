@@ -1,6 +1,6 @@
 /**
  * Add-on Store routes: `#/store` (Discover), `#/store/apps`, `#/store/addons`, `#/store/selected`,
- * `#/store/installed`, `#/store/search`, `#/store/installing`, `#/store/done`, `#/store/item/<id>`. Pure parsing; the hook that follows the address is
+ * `#/store/installed`, `#/store/search`, `#/store/installing`, `#/store/done`, `#/store/item/<id>`, `#/store/manage/<id>`. Pure parsing; the hook that follows the address is
  * in `useStoreOpen.ts`.
  */
 export type StoreTab = 'discover' | 'apps' | 'addons' | 'selected' | 'installed';
@@ -14,7 +14,7 @@ export const STORE_TABS: readonly StoreTab[] = [
 
 /** Places with no tab: search, the install run (installing → done) and an item page. */
 export type StoreOff = 'search' | 'installing' | 'done';
-export type StoreView = { view: StoreTab | StoreOff } | { view: 'item'; id: string };
+export type StoreView = { view: StoreTab | StoreOff } | { view: 'item' | 'manage'; id: string };
 
 function segments(hash: string): string[] {
   return hash
@@ -29,7 +29,7 @@ export function isStoreHash(hash: string): boolean {
 
 export function parseStoreHash(hash: string): StoreView {
   const [, a, b] = segments(hash);
-  if (a === 'item' && b) return { view: 'item', id: decodeURIComponent(b) };
+  if ((a === 'item' || a === 'manage') && b) return { view: a, id: decodeURIComponent(b) };
   if (a === 'search' || a === 'installing' || a === 'done') return { view: a };
   if (a === 'browse') return { view: 'apps' }; // the old Browse tab
   return {
@@ -40,14 +40,18 @@ export function parseStoreHash(hash: string): StoreView {
 /** The tab a view belongs to (an item page and search belong to none). */
 export function storeTabFromHash(hash: string): StoreTab | null {
   const v = parseStoreHash(hash);
-  return v.view === 'item' || v.view === 'search' || v.view === 'installing' || v.view === 'done'
+  return v.view === 'item' ||
+    v.view === 'manage' ||
+    v.view === 'search' ||
+    v.view === 'installing' ||
+    v.view === 'done'
     ? null
     : v.view;
 }
 
 export function storeHash(v: StoreView['view'], id?: string): string {
   if (v === 'discover') return '#/store';
-  if (v === 'item') return `#/store/item/${encodeURIComponent(id ?? '')}`;
+  if (v === 'item' || v === 'manage') return `#/store/${v}/${encodeURIComponent(id ?? '')}`;
   return `#/store/${v}`;
 }
 

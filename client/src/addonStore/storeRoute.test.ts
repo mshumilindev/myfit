@@ -31,6 +31,11 @@ describe('store route', () => {
     expect(storeTabFromHash('#/store/installing')).toBeNull();
     expect(storeTabFromHash('#/store/done')).toBeNull();
   });
+  it('manage belongs to no tab and carries the app id', () => {
+    expect(parseStoreHash('#/store/manage/health')).toEqual({ view: 'manage', id: 'health' });
+    expect(storeTabFromHash('#/store/manage/health')).toBeNull();
+    expect(storeHash('manage', 'health')).toBe('#/store/manage/health');
+  });
   it('builds addresses that parse back', () => {
     for (const tab of [
       'discover',

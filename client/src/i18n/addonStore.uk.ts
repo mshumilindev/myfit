@@ -1,6 +1,11 @@
 /** Add-on Store strings (Ukrainian). See `addonStore.en.ts`. */
 import type { addonStoreEn } from './addonStore.en';
 
+const listOf = (names: string[]): string =>
+  names.length > 1
+    ? `${names.slice(0, -1).join(', ')} і ${names[names.length - 1]}`
+    : (names[0] ?? '');
+
 export const addonStoreUk: typeof addonStoreEn = {
   title: 'Додатки',
   back: 'Назад',
@@ -116,6 +121,13 @@ export const addonStoreUk: typeof addonStoreEn = {
   tryAgain: 'Спробувати ще',
   almostDone: 'Майже готово',
   installedOf: (n: number, total: number) => `Встановлено ${n} із ${total}.`,
+  removeTitle: (name: string) => `Видалити ${name}?`,
+  removeWith: (names: string[]) => `${listOf(names)} видаляється разом із ним.`,
+  removeKept: (name: string) =>
+    `Ваші записи залишаються. Вони повернуться, якщо ви знову додасте ${name}.`,
+  removeName: (name: string) => `Видалити ${name}`,
+  chooseWhat: 'Оберіть, що показувати',
+  modules: 'Модулі',
   items: {
     health: { name: 'Здоров’я', desc: 'Травми, цикл, добавки та інше в одному місці.' },
     'injury-log': { name: 'Журнал травм', desc: 'Записуйте травми й те, як вони гояться.' },

@@ -3,6 +3,11 @@
  * Every key is mirrored in uk / pl / lt / et (enforced by `typeof addonStoreEn`). Item names and descriptions are
  * keyed by add-on id under `items`. No claims about data protection here.
  */
+const listOf = (names: string[]): string =>
+  names.length > 1
+    ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
+    : (names[0] ?? '');
+
 export const addonStoreEn = {
   title: 'Add-ons',
   back: 'Back',
@@ -118,6 +123,13 @@ export const addonStoreEn = {
   tryAgain: 'Try again',
   almostDone: 'Almost done',
   installedOf: (n: number, total: number) => `${n} of ${total} installed.`,
+  removeTitle: (name: string) => `Remove ${name}?`,
+  removeWith: (names: string[]) =>
+    `${listOf(names)} ${names.length === 1 ? 'is' : 'are'} removed with it.`,
+  removeKept: (name: string) => `Your entries stay saved. They come back if you add ${name} again.`,
+  removeName: (name: string) => `Remove ${name}`,
+  chooseWhat: 'Choose what to show',
+  modules: 'Modules',
   items: {
     health: { name: 'Health', desc: 'Injuries, cycle, supplements and more in one place.' },
     'injury-log': { name: 'Injury log', desc: 'Log injuries and how they heal.' },

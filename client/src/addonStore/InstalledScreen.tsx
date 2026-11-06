@@ -69,7 +69,7 @@ export function Installed({ ctx, go }: { ctx: StoreCtx; go: (v: string, id?: str
                 }
               />
             ))}
-            <button type="button" className="as-manage" onClick={() => go('item', app.id)}>
+            <button type="button" className="as-manage" onClick={() => go('manage', app.id)}>
               <span>{st.manage}</span>
               <SkIcon name="chev" />
             </button>

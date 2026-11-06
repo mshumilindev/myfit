@@ -35,9 +35,11 @@ import {
 import './screens.css';
 import { Installed } from './InstalledScreen';
 import { InstallDone, Installing } from './InstallFlow';
+import { ManageScreen } from './ManageScreen';
 import { ItemPage } from './ItemPage';
 import { Addons, Apps, Discover, Search, Selected } from './StoreScreens';
-import { ItemAction, RemoveButton, type StoreCtx } from './storeItems';
+import { RemoveButton } from './RemoveSheet';
+import { ItemAction, itemName, type StoreCtx } from './storeItems';
 import {
   parseStoreHash,
   STORE_FALLBACK_HASH,
@@ -86,13 +88,17 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
       setHash(storeHash('discover'), true);
   }, [route.view, run.status]);
 
+  useEffect(() => {
+    if (route.view === 'manage' && !enabled.has(route.id)) setHash(storeHash('installed'), true);
+  }, [route, enabled]);
+
   // Moving by a tab or the sidebar replaces the place; opening something from a screen pushes it, so Back can return.
   const goTab = (v: string) => {
     setPushed(null);
     setHash(storeHash(v as StoreView['view']), true);
   };
   const go = (v: string, id?: string) => {
-    if (v !== 'item' && v !== 'search' && storeTabFromHash(currentHash()))
+    if (v !== 'item' && v !== 'manage' && v !== 'search' && storeTabFromHash(currentHash()))
       setPushed({ target: v, from: storeTabFromHash(currentHash()) as StoreTab });
     setHash(storeHash(v as StoreView['view'], id), false);
   };
@@ -110,7 +116,8 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
   };
   const view = route.view;
   const runView = view === 'installing' || view === 'done';
-  const tab: StoreTab | null = view === 'item' || view === 'search' || runView ? null : view;
+  const tab: StoreTab | null =
+    view === 'item' || view === 'manage' || view === 'search' || runView ? null : view;
   const title = view === 'search' ? st.searchTitle : tab ? label[tab] : '';
   const name = getUsername() ?? '';
   const initials = initialsOf(name || '?');
@@ -118,6 +125,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
   const showTray = queued.length > 0 && view !== 'selected' && view !== 'search' && !runView;
   const isRoot = tab !== null;
   const itemM = view === 'item' ? addonById(route.id) : undefined;
+  const manageM = view === 'manage' ? addonById(route.id) : undefined;
 
   const search = (
     <SkSearchField
@@ -251,9 +259,20 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
                 {st.goToToday}
               </SkBtn>
             </SkBar>
+          ) : manageM ? (
+            <SkBar>
+              <RemoveButton
+                id={manageM.id}
+                ctx={ctx}
+                kind="bad"
+                size="l"
+                label={st.removeName(itemName(st, manageM.id))}
+                onRemoved={() => goTab('installed')}
+              />
+            </SkBar>
           ) : itemM && !itemM.soon ? (
             <SkBar>
-              {enabled.has(itemM.id) && <RemoveButton id={itemM.id} st={st} />}
+              {enabled.has(itemM.id) && <RemoveButton id={itemM.id} ctx={ctx} />}
               <ItemAction m={itemM} ctx={ctx} size="l" lead />
             </SkBar>
           ) : undefined
@@ -268,7 +287,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
           ) : undefined
         }
       >
-        {view !== 'item' && !runView && (
+        {view !== 'item' && view !== 'manage' && !runView && (
           <div className="as-main-head">
             <h1
               className={`sk-t-h1d as-desk-title${pushed && pushed.target === view ? ' as-title-pushed' : ''}`}
@@ -309,6 +328,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
           <Installing ctx={ctx} run={run} onRetry={() => void retryInstall()} />
         )}
         {view === 'done' && <InstallDone ctx={ctx} ids={run.ids} />}
+        {view === 'manage' && <ManageScreen id={route.id} ctx={ctx} />}
         {view === 'item' && <ItemPage id={route.id} ctx={ctx} go={go} />}
         {view === 'search' && <Search role={role} ctx={ctx} query={query} setQuery={setQuery} />}
       </SkShell>
