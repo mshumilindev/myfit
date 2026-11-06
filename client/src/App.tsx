@@ -101,6 +101,7 @@ import { AppRail } from './components/AppRail';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 import { currentHash, replaceHash, setHash } from './route';
+import { useAddonOrBase } from './addons/enabledSet';
 import { isStoreHash, StoreScreen, useRoleWithStore } from './addonStore/StoreEntry';
 import { legalRoute, useJoinLinkSync, useLegalRoute } from './legal/route';
 import { usePendingConsentFlush } from './legal/signupConsents';
@@ -751,8 +752,11 @@ function AppMain() {
   // the result (stable timestamps + seen flags, so nothing stale re-surfaces).
   const [notifNow] = useState(() => Date.now());
   const [rankUp, setRankUp] = useState<MasteryResult | null>(null);
+  // Apex / Mastery is an add-on (SPO-518): not installed = no screen, no rank-up moment, no background rating work.
+  const apexOn = useAddonOrBase('mastery');
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
+    if (!apexOn) return;
     const m = computeMastery(store, Date.now(), {
       trainingSinceYear: store.mastery.sinceYear,
       trainingPattern: store.mastery.pattern,
@@ -1575,7 +1579,7 @@ function AppMain() {
   }
 
   // Apex takes over the whole screen (its own header, nav and amethyst skin).
-  if (apexOpen) {
+  if (apexOpen && apexOn) {
     return (
       <AppRoot>
         <Suspense fallback={<ScreenFallback />}>

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ADDONS } from './manifest';
 import {
   addonsPref,
@@ -82,5 +82,20 @@ describe('enable / disable', () => {
     addonsPref.set(['health', 'cycle'], 1);
     disableAddons(['health'], 'member');
     expect(addonsPref.get()).toEqual([]);
+  });
+});
+
+describe('useAddonOrBase', () => {
+  it('is on for a role the store does not offer the item to, off for a member who has not installed it', async () => {
+    const { renderHook } = await import('@testing-library/react');
+    const { useAddonOrBase, addonsPref } = await import('./enabledSet');
+    addonsPref.reset();
+    const api = await import('../api');
+    const spy = vi.spyOn(api, 'getRole');
+    spy.mockReturnValue('member');
+    expect(renderHook(() => useAddonOrBase('mastery')).result.current).toBe(false);
+    spy.mockReturnValue('trainer');
+    expect(renderHook(() => useAddonOrBase('mastery')).result.current).toBe(true);
+    spy.mockRestore();
   });
 });

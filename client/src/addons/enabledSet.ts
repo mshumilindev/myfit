@@ -104,3 +104,13 @@ export function useEnabledAddons(): ReadonlySet<string> {
 export function useAddonEnabled(id: string): boolean {
   return useEnabledAddons().has(id);
 }
+
+/**
+ * Gate for code that moves out of the core: on when installed, and always on for a role the store does not offer the
+ * item to (it is then part of that role's base, e.g. Apex for a trainer). Nothing disappears with no way to get it back.
+ */
+export function useAddonOrBase(id: string): boolean {
+  const on = useEnabledAddons().has(id);
+  const role = getRole();
+  return on || !isAddonAllowed(id, role);
+}

@@ -20,6 +20,7 @@ import { consistencyStreak, type StoreState } from '../store';
 import { setHash } from '../route';
 import { getRole } from '../api';
 import { canUsePeople } from '../views/rosterAccess';
+import { useAddonOrBase } from '../addons/enabledSet';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -115,6 +116,8 @@ export function ShellLauncher({
 }) {
   const { t } = useT();
   const { c } = useCoachT();
+  // Apex belongs to the Mastery add-on (SPO-518): no tile until it is installed.
+  const apexEnabled = useAddonOrBase('mastery');
   // Coach dashboard entry: trainer or admin, flag on (coach/access.ts). Hidden otherwise.
   const coachEnabled = useCoachAccess();
   const peopleEnabled = canUsePeople(getRole());
@@ -149,20 +152,22 @@ export function ShellLauncher({
           onSelect={onGym}
           currentLabel={t.shellCurrent}
         />
-        <AppTile
-          tone="apex"
-          icon="trophy"
-          name={t.apexName}
-          badge={
-            notifUnread > 0 ? (
-              <span className="shell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
-            ) : undefined
-          }
-          sub={t.shellActiveNew(activeChallenges, notifUnread)}
-          current={current === 'apex'}
-          onSelect={onApex}
-          currentLabel={t.shellCurrent}
-        />
+        {(apexEnabled || current === 'apex') && (
+          <AppTile
+            tone="apex"
+            icon="trophy"
+            name={t.apexName}
+            badge={
+              notifUnread > 0 ? (
+                <span className="shell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
+              ) : undefined
+            }
+            sub={t.shellActiveNew(activeChallenges, notifUnread)}
+            current={current === 'apex'}
+            onSelect={onApex}
+            currentLabel={t.shellCurrent}
+          />
+        )}
         <AppTile
           tone="kcal"
           icon="fork-knife"
