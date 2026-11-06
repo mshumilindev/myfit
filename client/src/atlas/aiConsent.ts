@@ -57,8 +57,22 @@ export function subscribeAiOverride(cb: () => void): () => void {
 }
 export const getAiOverride = (): Override => override;
 
+/**
+ * Atlas is an add-on (SPO-518): while it is not installed nothing may reach an AI provider, whatever the consent
+ * records say (fail closed). The app shell sets this from the installed set; the default keeps tests and the first
+ * paint on.
+ */
+let atlasInstalled = true;
+export function setAtlasInstalled(on: boolean): void {
+  if (atlasInstalled === on) return;
+  atlasInstalled = on;
+  override = { ...override }; // a new identity, so readers that compare it re-render
+  emit();
+}
+
 /** Records plus the local override; the override is forgotten once the records say the same thing. */
 export function effectiveAiState(records: readonly ConsentRecord[], ov: Override): AiState {
+  if (!atlasInstalled) return { gemini: false, puter: false };
   const base = aiStateOf(records);
   const gemini = ov.gemini ?? base.gemini;
   return { gemini, puter: gemini && (ov.puter ?? base.puter) };

@@ -114,3 +114,18 @@ export function useAddonOrBase(id: string): boolean {
   const role = getRole();
   return on || !isAddonAllowed(id, role);
 }
+
+/**
+ * Run `fn` with the ids that just left the installed set, however they left: the Remove button, a change synced from
+ * another device, or a role change that no longer offers them. Compares the set before and after every change.
+ * Returns the unsubscribe.
+ */
+export function onAddonsRemoved(fn: (removed: ReadonlySet<string>) => void): () => void {
+  let prev = snapshot();
+  return subscribe(() => {
+    const now = snapshot();
+    const removed = new Set([...prev].filter((id) => !now.has(id)));
+    prev = now;
+    if (removed.size > 0) fn(removed);
+  });
+}

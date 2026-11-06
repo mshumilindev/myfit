@@ -103,6 +103,8 @@ import type { ProgramsPeer } from './components/ProgramsTabs';
 import { currentHash, replaceHash, setHash } from './route';
 import { useAddonOrBase } from './addons/enabledSet';
 import { setThemesAllowed } from './themes/registry';
+import { setAtlasInstalled } from './atlas/aiConsent';
+import { reconcileAtlasConsent, watchAtlasRemoval } from './atlas/withdrawOnRemove';
 import { isStoreHash, StoreScreen, useRoleWithStore } from './addonStore/StoreEntry';
 import { legalRoute, useJoinLinkSync, useLegalRoute } from './legal/route';
 import { usePendingConsentFlush } from './legal/signupConsents';
@@ -757,6 +759,10 @@ function AppMain() {
   const apexOn = useAddonOrBase('mastery');
   const themesOn = useAddonOrBase('themes');
   const sleepOn = useAddonOrBase('sleep');
+  const atlasOn = useAddonOrBase('atlas');
+  useEffect(() => setAtlasInstalled(atlasOn), [atlasOn]);
+  useEffect(() => watchAtlasRemoval(), []);
+  useEffect(() => (atlasOn ? undefined : reconcileAtlasConsent()), [atlasOn]);
   useEffect(() => setThemesAllowed(themesOn), [themesOn]);
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
