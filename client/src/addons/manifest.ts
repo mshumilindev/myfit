@@ -1,6 +1,6 @@
 /**
- * Add-on registry (SPO-511). One entry per store item. Owner rule (06.11): the apps are Nutrition, Apex (`mastery`), Users,
- * Gym, Coach and Learn; everything else in the store — Health, Sleep, Atlas, Themes and their extras — is an add-on.
+ * Add-on registry (SPO-511). One entry per store item. Owner rule (06.11): the apps are Nutrition, Apex, Users,
+ * Gym, Coach and Learn; everything else in the store — Health, Sleep, Atlas and their extras — is an add-on; looks are single `theme` items.
  * `parent` is a dependency (enabling the item enables its parent), not a claim that the parent is an app.
  * The store (`store-kit/`) and the shell read this list; features stay in the core until each one is stripped
  * into its own module (SPO-518/519). `roles` says who may see and enable the item — a role never sees the
@@ -9,13 +9,16 @@
 import type { Role } from '../api';
 
 export type StoreRole = Exclude<Role, 'manager'>;
-export type AddonKind = 'app' | 'addon';
+/** `theme` = one installable look (Cyberpunk…): its own store block and tab; Brass Glass and the holiday themes are base. */
+export type AddonKind = 'app' | 'addon' | 'theme';
 /** App colour family (design: add-ons inherit their parent's colour). */
 export type AddonTone = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export interface AddonManifest {
   id: string;
   kind: AddonKind;
+  /** For `kind: 'theme'`: the id in themes/registry.ts this item unlocks. */
+  themeId?: string;
   /** Parent app id for an add-on. Enabling the add-on enables the parent too. */
   parent?: string;
   tone: AddonTone;
@@ -60,25 +63,18 @@ export const ADDONS: readonly AddonManifest[] = [
     category: 'recovery',
   },
   { id: 'sleep', kind: 'addon', tone: 2, roles: ALL, category: 'recovery' },
-  {
-    id: 'sleep-auto-start',
-    kind: 'addon',
-    parent: 'sleep',
-    tone: 2,
-    roles: ALL,
-    category: 'recovery',
-  },
-  {
-    id: 'sleep-sounds',
-    kind: 'addon',
-    parent: 'sleep',
-    tone: 2,
-    roles: ALL,
-    category: 'recovery',
-  },
   { id: 'atlas', kind: 'addon', tone: 6, roles: ALL, category: 'insights' },
-  { id: 'mastery', kind: 'app', tone: 8, roles: ALL, category: 'insights' },
-  { id: 'themes', kind: 'addon', tone: 7, roles: ALL, category: 'look' },
+  { id: 'apex', kind: 'app', tone: 8, roles: ALL, category: 'insights' },
+  { id: 'mastery', kind: 'addon', parent: 'apex', tone: 3, roles: ALL, category: 'insights' },
+  // Themes are installed one by one (owner rule 06.11): Brass Glass and the holiday themes are part of the base.
+  {
+    id: 'theme-cyberpunk',
+    kind: 'theme',
+    themeId: 'cyberpunk',
+    tone: 7,
+    roles: ALL,
+    category: 'look',
+  },
   // Gyms is core for a member and an add-on for trainer and admin.
   // Not available yet (the store shows them as Coming soon).
   { id: 'nutrition', kind: 'app', tone: 0, roles: MEMBER, soon: true, category: 'food' },

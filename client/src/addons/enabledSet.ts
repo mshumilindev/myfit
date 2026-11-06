@@ -42,6 +42,13 @@ export function resolveEnabled(pref: ListPref, role: Role): Set<string> {
   return new Set(closeDependencies(pref.list, role));
 }
 
+/** The theme ids (themes/registry.ts) unlocked by the installed `theme` items. Pure: pass the enabled set. */
+export function themeIdsOf(enabled: ReadonlySet<string>): string[] {
+  return ADDONS.filter((a) => a.kind === 'theme' && a.themeId && enabled.has(a.id)).map(
+    (a) => a.themeId as string,
+  );
+}
+
 /** Items that have to go when `id` is removed: itself and (for an app) its add-ons. */
 export function removalSet(id: string): string[] {
   return ADDONS.filter((a) => a.id === id || a.parent === id).map((a) => a.id);

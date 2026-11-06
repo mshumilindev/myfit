@@ -11,6 +11,10 @@
 .sk-row.sk-nb {
   border-bottom: 0;
 }
+.sk-row-tile {
+  display: flex;
+  flex: none;
+}
 .sk-row-main {
   flex: 1;
   min-width: 0;

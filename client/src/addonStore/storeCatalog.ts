@@ -29,6 +29,11 @@ export function availableForRole(role: Role): AddonManifest[] {
   return catalogForRole(role).filter((a) => isAddonAllowed(a.id, role));
 }
 
+/** The installable looks this role may use (their own store block and tab). */
+export function themesForRole(role: Role): AddonManifest[] {
+  return availableForRole(role).filter((a) => a.kind === 'theme');
+}
+
 export function comingSoonForRole(role: Role): AddonManifest[] {
   return catalogForRole(role).filter((a) => a.soon);
 }

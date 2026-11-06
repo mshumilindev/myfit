@@ -4,6 +4,7 @@
  * on its own atmosphere, and one button. Landscape tiles on desktop: the theme in use is the big one. The theme in use comes first and shows "Applied"; the others have
  * Apply. No user data and no screenshot: the picture is the theme's tokens (SPO-346).
  */
+import { useMyThemes } from '../themes/useThemeAccess';
 import { useEffect, useState } from 'react';
 import { PageHead } from '../components/ui/PageHead';
 import { Button } from '../components/ui/Button';
@@ -12,7 +13,6 @@ import { SectionLabel } from '../components/ui/SectionLabel';
 import { useT } from '../i18n';
 import { APP_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
 import {
-  PICKABLE_THEMES,
   THEMES,
   setTheme,
   useCommittedTheme,
@@ -44,9 +44,8 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
   const land = useMinWidth(APP_BREAKPOINT);
   const cardCls = land ? 'thm-card thm-card--land' : 'thm-card';
   // the theme in use goes to the top; the registry order holds for the rest
-  const picks = [...PICKABLE_THEMES].sort(
-    (a, b) => Number(b.id === current) - Number(a.id === current),
-  );
+  const mine = useMyThemes();
+  const picks = [...mine].sort((a, b) => Number(b.id === current) - Number(a.id === current));
   // the holiday theme of the open window is listed first, so the person sees why the app looks like this (or can have it back)
   const list = holidayDef ? [holidayDef, ...picks] : picks;
   return (

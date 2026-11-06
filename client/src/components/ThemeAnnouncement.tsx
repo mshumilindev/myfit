@@ -22,13 +22,16 @@ import {
   usePreview,
 } from '../themes';
 import { markThemesSeen, useUnseenThemes } from '../themes/seen';
+import { useMyThemes } from '../themes/useThemeAccess';
 import { ThemeFrame } from '../views/ThemeFrame';
 import '../views/themes.css';
 import './ThemeAnnouncement.css';
 
 export function ThemeInvite() {
   const { t } = useT();
-  const unseen = useUnseenThemes();
+  // Only looks the person has installed are offered here; a new one they do not have is announced in the store.
+  const mine = useMyThemes();
+  const unseen = useUnseenThemes().filter((x) => mine.some((m) => m.id === x.id));
   const previewing = usePreview();
   // the unseen list depends on the saved theme too: re-render when it changes
   useCommittedTheme();

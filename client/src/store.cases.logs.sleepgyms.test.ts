@@ -208,7 +208,7 @@ describe('sleep', () => {
   });
 
   it('schedule and settings changes keep the server auto-start queue in step', async () => {
-    addonsPref.set(['sleep', 'sleep-auto-start']);
+    addonsPref.set(['sleep']);
     store.setSleepSettings({ autoLog: false });
     await settle();
     expect(fs.deletes).toContain('sleepSchedules/u1'); // auto-log off: queue removed

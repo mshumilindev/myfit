@@ -69,7 +69,8 @@ import './tokens/primitives.christmas.css';
 import './styles.css';
 import './redesign.css';
 import './page-titles.css';
-import { initTheme } from './themes';
+import { initTheme, setAllowedThemes } from './themes';
+import { addonsPref, themeIdsOf } from './addons/enabledSet';
 import { startHolidayWatch } from './themes/holidayWatch';
 import './glass.css';
 import './glass-shape.css';
@@ -105,6 +106,9 @@ installCleanUrls();
 installRouteSwitch();
 // the language first: the holiday schedule (Easter) depends on it
 document.documentElement.lang = getLocale();
+// The installed looks are read from the device before the first paint, so a saved or scheduled theme that is not
+// installed never flashes.
+setAllowedThemes(themeIdsOf(new Set(addonsPref.snapshot().list)));
 initTheme();
 // a holiday theme comes on and goes off with the date, checked on this device (no server): SPO-321
 startHolidayWatch();

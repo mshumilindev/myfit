@@ -16,6 +16,8 @@ export interface SkHeaderProps {
   onExit?: () => void;
   exitLabel?: string;
   exitIcon?: ReactNode;
+  /** Visible word on the exit button (it names where the button goes). Without it the button is the bare icon disc. */
+  exitText?: string;
   className?: string;
 }
 
@@ -29,6 +31,7 @@ export function SkHeader({
   onExit,
   exitLabel,
   exitIcon,
+  exitText,
   className,
 }: SkHeaderProps) {
   return (
@@ -46,12 +49,13 @@ export function SkHeader({
         {onExit && (
           <button
             type="button"
-            className="sk-hd-exit"
+            className={cx('sk-hd-exit', exitText && 'sk-hd-exit-text')}
             aria-label={exitLabel}
             title={exitLabel}
             onClick={onExit}
           >
             {exitIcon}
+            {exitText && <span>{exitText}</span>}
           </button>
         )}
       </div>

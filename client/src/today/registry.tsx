@@ -135,7 +135,7 @@ export const HEALTH_WIDGET_ADDON: Readonly<Record<string, string>> = {
 export function useWidgetAvailable(): (w: WidgetDef) => boolean {
   const available = useAddonAvailable();
   return (w) =>
-    (!MASTERY_WIDGET_IDS.has(w.id) || available('mastery')) &&
+    (!MASTERY_WIDGET_IDS.has(w.id) || available('apex')) &&
     (!SLEEP_WIDGET_IDS.has(w.id) || available('sleep')) &&
     (!HEALTH_WIDGET_ADDON[w.id] || available(HEALTH_WIDGET_ADDON[w.id])) &&
     (w.group !== 'atlas' || available('atlas'));

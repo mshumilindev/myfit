@@ -14,7 +14,7 @@ vi.mock('../api', async (orig) => ({
   getRole: () => 'admin',
 }));
 // The Apex tile is the Mastery add-on's (SPO-518): these specs are about every tile, so it is installed.
-beforeEach(() => addonsPref.set(['mastery']));
+beforeEach(() => addonsPref.set(['apex']));
 afterEach(() => {
   addonsPref.reset();
   cleanup();

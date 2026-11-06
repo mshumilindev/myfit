@@ -19,7 +19,7 @@ import {
 
 beforeEach(() => {
   // The look step and the health rows belong to add-ons (SPO-518): installed here, so the full flow is covered.
-  addonsPref.set(['themes', 'health', 'nicotine-alcohol', 'supplements']);
+  addonsPref.set(['theme-cyberpunk', 'health', 'nicotine-alcohol', 'supplements']);
   freezeClock(NOW);
   setLocale('en');
   setDesktop(false);

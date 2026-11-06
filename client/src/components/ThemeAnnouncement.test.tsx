@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { addonsPref } from '../addons/enabledSet';
 import { en } from '../i18n/en';
 import { getPreview, initTheme, startPreview } from '../themes';
 import { getUnseenThemes, resetSeenForTest, syncSeenFromDoc } from '../themes/seen';
@@ -12,6 +13,7 @@ offSeason();
 
 beforeEach(() => {
   localStorage.clear();
+  addonsPref.set(['theme-cyberpunk']);
   resetSeenForTest();
   initTheme();
 });

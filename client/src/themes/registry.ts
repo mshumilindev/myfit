@@ -87,21 +87,39 @@ export function getTheme(): string {
 }
 
 /**
- * Themes is an add-on (SPO-518): without it the app wears the base theme whatever was saved or scheduled (holidays
- * included). Nothing saved is touched, so the choice comes back the moment the add-on does.
+ * Themes are installed one by one (SPO-518, owner rule 06.11): Brass Glass and the holiday themes are the base, every
+ * other look is a store item. A theme that is not allowed is never worn — the app shows the base theme whatever was
+ * saved, scheduled or previewed. Nothing saved is touched, so the choice comes back the moment the theme does.
+ * `null` = no restriction yet (before the shell has read the installed set).
  */
-let themesAllowed = true;
-const shown = (id: string): string => (themesAllowed ? id : DEFAULT_THEME);
+let allowedThemes: ReadonlySet<string> | null = null;
+const isBase = (id: string): boolean =>
+  id === DEFAULT_THEME || THEMES.some((t) => t.id === id && !!t.holiday);
+const themeAllowed = (id: string): boolean =>
+  allowedThemes === null || isBase(id) || allowedThemes.has(id);
+const shown = (id: string): string => (themeAllowed(id) ? id : DEFAULT_THEME);
 
 function apply(id: string): void {
   document.documentElement.setAttribute('data-theme', shown(id));
 }
 
-/** Called by the app shell when the Themes add-on is installed (or not offered to the role). Re-dresses the app. */
-export function setThemesAllowed(allowed: boolean): void {
-  if (themesAllowed === allowed) return;
-  themesAllowed = allowed;
+/** Called by the app shell with the installed theme ids (`cyberpunk`…). Re-dresses the app. */
+export function setAllowedThemes(ids: Iterable<string>): void {
+  const next = new Set(ids);
+  if (
+    allowedThemes &&
+    allowedThemes.size === next.size &&
+    [...next].every((x) => allowedThemes!.has(x))
+  )
+    return;
+  allowedThemes = next;
   swap(holiday ?? previewing ?? committed ?? DEFAULT_THEME, false);
+  listeners.forEach((fn) => fn());
+}
+
+/** The themes this person can pick right now: the base one plus every installed one (holiday themes are never picked by hand). */
+export function availablePickableThemes(): readonly ThemeDef[] {
+  return PICKABLE_THEMES.filter((t) => themeAllowed(t.id));
 }
 
 /**

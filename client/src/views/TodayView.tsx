@@ -1,4 +1,5 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
+import { useThemesOn } from '../themes/useThemeAccess';
 import { useAddonOrBase } from '../addons/enabledSet';
 import { storeHash } from '../addonStore/storeRoute';
 import { readStoredList } from '../activityPrefs';
@@ -147,7 +148,7 @@ const PROGRAM_MODE_TONE: Record<WeekMode, Tone> = {
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { withGym, gymPicker } = useGymStep();
   const isDesktop = useIsDesktop();
-  const themesOn = useAddonOrBase('themes');
+  const themesOn = useThemesOn();
   const atlasOn = useAddonOrBase('atlas');
   const sleepOn = useAddonOrBase('sleep');
   const nicAlcOn = useAddonOrBase('nicotine-alcohol');

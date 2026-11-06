@@ -1,4 +1,5 @@
 /** Onboarding — design O-01…O-09. Steps end inside a live session. */
+import { useThemesOn } from '../themes/useThemeAccess';
 import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useAddonAvailable } from '../addons/enabledSet';
@@ -83,7 +84,7 @@ export function OnboardingView(props: {
   const { token, onDone, skipLanding = false } = props;
   const { t, locale } = useT();
   const available = useAddonAvailable();
-  const themesOn = available('themes');
+  const themesOn = useThemesOn();
   const [info, setInfo] = useState<InviteInfo | null | 'error'>(null);
   const saved = useMemo(() => loadResume(token), [token]);
   const savedName = splitPersonName(saved?.name ?? '');

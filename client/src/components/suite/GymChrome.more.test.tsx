@@ -45,7 +45,7 @@ describe('GymTabBar: More is always the last tab', () => {
     fireEvent.click(screen.getByRole('button', { name: /more/i }));
     expect(screen.queryByText(t.masteryTitle)).toBeNull();
     cleanup();
-    addonsPref.set(['mastery']);
+    addonsPref.set(['apex', 'mastery']);
     bar();
     fireEvent.click(screen.getByRole('button', { name: /more/i }));
     expect(screen.getByText(t.masteryTitle)).toBeTruthy();

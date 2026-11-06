@@ -23,7 +23,12 @@ import { DiscoverBento } from './DiscoverBento';
 import { recommend } from './recommend';
 import { MIN_QUERY, searchItems } from './search';
 import { catalogProgress, heroMode, heroState, type HeroMode } from './discoverPicks';
-import { availableForRole, comingSoonForRole, STORE_CATEGORIES } from './storeCatalog';
+import {
+  availableForRole,
+  comingSoonForRole,
+  STORE_CATEGORIES,
+  themesForRole,
+} from './storeCatalog';
 import { currentHash, setHash } from '../route';
 import { storeHash } from './storeRoute';
 import { ItemRow, itemName, TileOf, type StoreCtx } from './storeItems';
@@ -50,6 +55,7 @@ export function Discover({
   const nextMode = heroMode(mode, prog);
   if (nextMode !== mode) setMode(nextMode);
   const soonItems = comingSoonForRole(role);
+  const themeIds = themesForRole(role).map((m) => m.id);
   return (
     <>
       {nextMode === 'progress' ? (
@@ -74,6 +80,17 @@ export function Discover({
               <SkSectionLink onClick={() => go('apps')}>{st.seeAll}</SkSectionLink>
             </div>
             <Rows ids={rec.slice(0, 4)} ctx={ctx} bare />
+          </SkList>
+        </section>
+      )}
+      {themeIds.length > 0 && (
+        <section className="sk-mt24">
+          <SkList>
+            <div className="as-rec-head">
+              <h2 className="sk-t-h2">{st.discoverThemes}</h2>
+              <SkSectionLink onClick={() => go('themes')}>{st.seeAll}</SkSectionLink>
+            </div>
+            <Rows ids={themeIds.slice(0, 4)} ctx={ctx} bare />
           </SkList>
         </section>
       )}
@@ -185,6 +202,30 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   );
 }
 
+/** Themes: every installable look, one by one. */
+export function Themes({ role, ctx }: { role: Role; ctx: StoreCtx }) {
+  const { st } = ctx;
+  const ids = themesForRole(role).map((m) => m.id);
+  if (!ids.length) {
+    return (
+      <SkEmpty
+        icon={
+          <SkTile letter="" tone={7} size={64}>
+            <SkIcon name="brush" />
+          </SkTile>
+        }
+        title={st.themesEmptyTitle}
+        body={st.themesEmptyBody}
+      />
+    );
+  }
+  return (
+    <div className="sk-mt16">
+      <Rows ids={ids} ctx={ctx} />
+    </div>
+  );
+}
+
 /** Selected: what was added but not installed yet. */
 export function Selected({ ctx, go }: { ctx: StoreCtx; go: (v: string) => void }) {
   const { st, queued } = ctx;
@@ -288,7 +329,9 @@ export function Search({
   const { st } = ctx;
   const ids = useMemo(() => searchItems(role, query, st), [role, query, st]);
   const short = query.trim().length < MIN_QUERY;
-  const suggestions = ['sleep', 'injury-log', 'themes', 'atlas'].filter((id) => addonById(id));
+  const suggestions = ['sleep', 'injury-log', 'theme-cyberpunk', 'atlas'].filter((id) =>
+    addonById(id),
+  );
   const categories = STORE_CATEGORIES.filter((cat) =>
     availableForRole(role).some((m) => m.kind === 'app' && m.category === cat),
   );

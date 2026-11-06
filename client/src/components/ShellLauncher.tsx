@@ -116,8 +116,8 @@ export function ShellLauncher({
 }) {
   const { t } = useT();
   const { c } = useCoachT();
-  // Apex belongs to the Mastery add-on (SPO-518): no tile until it is installed.
-  const apexEnabled = useAddonOrBase('mastery');
+  // Apex is its own app (SPO-518): no tile until it is installed.
+  const apexEnabled = useAddonOrBase('apex');
   // Coach dashboard entry: trainer or admin, flag on (coach/access.ts). Hidden otherwise.
   const coachEnabled = useCoachAccess();
   const peopleEnabled = canUsePeople(getRole());

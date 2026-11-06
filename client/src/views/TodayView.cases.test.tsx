@@ -136,13 +136,13 @@ describe('TodayView: footer actions', () => {
     expect(screen.getByRole('button', { name: en.todayEditCancel })).toBeTruthy();
   });
 
-  it('Themes is offered only once the Themes add-on is installed (SPO-518)', async () => {
+  it('Themes is offered only once a theme besides the base one is installed (SPO-518)', async () => {
     await openToday();
     expect(screen.queryByRole('button', { name: en.todayThemes })).toBeNull();
   });
 
   it('Themes freezes the screen and opens the themes page', async () => {
-    addonsPref.set(['themes']);
+    addonsPref.set(['theme-cyberpunk']);
     const { shell } = await openToday();
     fireEvent.click(screen.getByRole('button', { name: en.todayThemes }));
     expect(shell.calls.openOverlay).toHaveBeenCalledWith({ screen: 'themes' });

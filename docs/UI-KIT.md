@@ -607,7 +607,7 @@ has CSS, a story and a test. Source of truth for look and states: the approved d
 | `SkHero`           | Discover progress hero (boards 22–24): figure, progress bar, headline; states progress/almost/complete/new            |
 | `SkStatusHeader`   | Outcome-screen heading (boards 09–11, 15, 16): bare icon + title coloured ok/warn/bad/progress                        |
 | `SkPreviewPhone`   | Mini-phone preview of placeholder blocks on app pages; m and d sizes (exports `SkPv*` helpers)                        |
-| `SkHeader`         | Mobile app header, uniform 44px: title or back on the left, avatar + labelled exit icon button on the right           |
+| `SkHeader`         | Mobile app header, uniform 44px: title or back on the left, avatar + exit button on the right (`exitText` adds a visible label, e.g. “Spotter”) |
 | `SkNavItem`        | Sidebar row: icon, label, count chip, active state (`aria-current`)                                                   |
 | `SkSidebar`        | Desktop sidebar: title, nav items, back-to-Spotter slot, user block (exports `SkSidebarUser`)                         |
 | `SkTabBar`         | Mobile bottom tab bar with icons, active state and a dot indicator                                                    |

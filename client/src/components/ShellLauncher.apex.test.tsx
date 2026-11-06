@@ -45,7 +45,7 @@ describe('ShellLauncher: the Apex tile follows the Mastery add-on (SPO-518)', ()
     expect(apexTile()).toBeNull();
   });
   it('a member with the add-on installed sees it', () => {
-    addonsPref.set(['mastery']);
+    addonsPref.set(['apex']);
     open();
     expect(apexTile()).not.toBeNull();
   });
@@ -58,7 +58,7 @@ describe('ShellLauncher: the Apex tile follows the Mastery add-on (SPO-518)', ()
     open();
     expect(apexTile()).toBeNull();
     cleanup();
-    addonsPref.set(['mastery']);
+    addonsPref.set(['apex']);
     open();
     expect(apexTile()).not.toBeNull();
   });

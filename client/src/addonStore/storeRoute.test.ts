@@ -15,7 +15,8 @@ describe('store route', () => {
     expect(storeTabFromHash('#/store/apps')).toBe('apps');
     expect(storeTabFromHash('#/store/browse')).toBe('apps');
     expect(storeTabFromHash('#/store/addons')).toBe('addons');
-    expect(storeTabFromHash('#/store/selected')).toBe('selected');
+    expect(storeTabFromHash('#/store/themes')).toBe('themes');
+    expect(storeTabFromHash('#/store/selected')).toBeNull();
     expect(storeTabFromHash('#/store/installed?a=b')).toBe('installed');
     expect(storeTabFromHash('#/store/nope')).toBe('discover');
   });
@@ -41,6 +42,7 @@ describe('store route', () => {
       'discover',
       'apps',
       'addons',
+      'themes',
       'selected',
       'installed',
       'search',
@@ -48,9 +50,9 @@ describe('store route', () => {
       'done',
     ] as const)
       expect(parseStoreHash(storeHash(tab))).toEqual({ view: tab });
-    expect(parseStoreHash(storeHash('item', 'sleep-sounds'))).toEqual({
+    expect(parseStoreHash(storeHash('item', 'atlas'))).toEqual({
       view: 'item',
-      id: 'sleep-sounds',
+      id: 'atlas',
     });
     expect(storeHash('discover')).toBe('#/store');
   });

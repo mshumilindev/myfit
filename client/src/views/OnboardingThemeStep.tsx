@@ -8,7 +8,8 @@ import { useEffect, type ReactNode } from 'react';
 import { Button } from '../components/ui/Button';
 import { Icon } from '../ui';
 import { useT } from '../i18n';
-import { PICKABLE_THEMES, setTheme, useCommittedTheme, useHolidayTheme } from '../themes';
+import { setTheme, useCommittedTheme, useHolidayTheme } from '../themes';
+import { useMyThemes } from '../themes/useThemeAccess';
 import { markAllThemesSeen } from '../themes/seen';
 import { ThemeCard } from './ThemeCard';
 import './themes.css';
@@ -23,6 +24,7 @@ export function OnboardingThemeStep({
   const { t } = useT();
   const saved = useCommittedTheme();
   const current = useHolidayTheme() === null ? saved : null; // a holiday theme veils the saved one
+  const mine = useMyThemes();
   useEffect(() => {
     markAllThemesSeen();
   }, []);
@@ -31,7 +33,7 @@ export function OnboardingThemeStep({
       {rail}
       <h2 className="display sm">{t.onbLookLead}</h2>
       <div className="thm-list">
-        {PICKABLE_THEMES.map((th) => (
+        {mine.map((th) => (
           <ThemeCard key={th.id} theme={th} current={th.id === current} onApply={setTheme} />
         ))}
       </div>

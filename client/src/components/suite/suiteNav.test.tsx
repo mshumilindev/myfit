@@ -237,7 +237,7 @@ beforeEach(() => {
   window.history.replaceState(null, '', '/');
   localStorage.clear();
   // Mastery is an add-on (SPO-518): these navigation contracts are about the app with it installed.
-  addonsPref.set(['mastery']);
+  addonsPref.set(['apex', 'mastery']);
   installRailMeasure(900);
 });
 afterEach(() => {

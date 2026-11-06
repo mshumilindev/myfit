@@ -41,7 +41,12 @@ export function SkRow({
   };
   return (
     <div className={cx('sk-row', noBorder && 'sk-nb', className)}>
-      {tile}
+      {tile && (
+        // Pointer shortcut only: the text block is the keyboard-focusable opener.
+        <div className={cx('sk-row-tile', onOpen && 'sk-row-open')} onClick={onOpen}>
+          {tile}
+        </div>
+      )}
       <div
         className={cx('sk-row-main', onOpen && 'sk-row-open')}
         role={onOpen ? 'button' : undefined}

@@ -104,7 +104,8 @@ import type { MoreMenuItem } from './components/ui/MoreMenu';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 import { currentHash, replaceHash, setHash } from './route';
 import { useAddonOrBase } from './addons/enabledSet';
-import { setThemesAllowed } from './themes/registry';
+import { setAllowedThemes } from './themes/registry';
+import { useInstalledThemeIds, useThemesOn } from './themes/useThemeAccess';
 import { setAtlasInstalled } from './atlas/aiConsent';
 import { reconcileAtlasConsent, watchAtlasRemoval } from './atlas/withdrawOnRemove';
 import { isStoreHash, StoreScreen, useRoleWithStore } from './addonStore/StoreEntry';
@@ -761,17 +762,18 @@ function AppMain() {
   const [notifNow] = useState(() => Date.now());
   const [rankUp, setRankUp] = useState<MasteryResult | null>(null);
   // Apex / Mastery is an add-on (SPO-518): not installed = no screen, no rank-up moment, no background rating work.
-  const apexOn = useAddonOrBase('mastery');
-  const themesOn = useAddonOrBase('themes');
+  const apexOn = useAddonOrBase('apex');
+  // Themes are installed one by one (SPO-518): the Themes screen needs a second look next to the base one.
+  const themesOn = useThemesOn();
+  const installedThemes = useInstalledThemeIds();
   const sleepOn = useAddonOrBase('sleep');
-  const autoStartOn = useAddonOrBase('sleep-auto-start');
-  // Install or removal of Sleep / its auto-start: the server night queue follows (cleared without them, rebuilt with them).
-  useEffect(() => syncSleepAutoQueue(), [sleepOn, autoStartOn]);
+  // Install or removal of Sleep (auto-start is part of it): the server night queue follows (cleared without them, rebuilt with them).
+  useEffect(() => syncSleepAutoQueue(), [sleepOn]);
   const atlasOn = useAddonOrBase('atlas');
   useEffect(() => setAtlasInstalled(atlasOn), [atlasOn]);
   useEffect(() => watchAtlasRemoval(), []);
   useEffect(() => (atlasOn ? undefined : reconcileAtlasConsent()), [atlasOn]);
-  useEffect(() => setThemesAllowed(themesOn), [themesOn]);
+  useEffect(() => setAllowedThemes(installedThemes), [installedThemes]);
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
     if (!apexOn) return;

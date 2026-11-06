@@ -29,7 +29,7 @@ export interface HubAnnouncement {
 
 /** In order of appearance. */
 export const HUB_ANNOUNCEMENTS: readonly HubAnnouncement[] = [
-  { id: 'new-theme', surfaces: ['today', 'coachAgenda'], Component: ThemeInvite, addon: 'themes' },
+  { id: 'new-theme', surfaces: ['today', 'coachAgenda'], Component: ThemeInvite },
 ];
 
 export function HubSlot({ surface }: { surface: HubSurface }) {

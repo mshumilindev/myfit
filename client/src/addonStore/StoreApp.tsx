@@ -1,6 +1,6 @@
 /**
  * Add-on Store (SPO-513) — full-screen sub-app at `#/store`, on its own kit (`store-kit/`, ADR 015): header +
- * tab bar on a phone, sidebar on a wide screen. Five places: Discover, Apps, Add-ons, Selected, Installed, plus an
+ * tab bar on a phone, sidebar on a wide screen. Five places: Discover, Apps, Add-ons, Themes, Installed, plus an
  * item page and live search.
  */
 import { useEffect, useMemo, useState } from 'react';
@@ -37,7 +37,7 @@ import { Installed } from './InstalledScreen';
 import { InstallDone, Installing } from './InstallFlow';
 import { ManageScreen } from './ManageScreen';
 import { ItemPage } from './ItemPage';
-import { Addons, Apps, Discover, Search, Selected } from './StoreScreens';
+import { Addons, Apps, Discover, Search, Selected, Themes } from './StoreScreens';
 import { RemoveButton } from './RemoveSheet';
 import { ItemAction, itemName, type StoreCtx } from './storeItems';
 import {
@@ -53,7 +53,7 @@ const NAV: Array<{ tab: StoreTab; icon: SkIconName }> = [
   { tab: 'discover', icon: 'disc' },
   { tab: 'apps', icon: 'apps' },
   { tab: 'addons', icon: 'addons' },
-  { tab: 'selected', icon: 'queue' },
+  { tab: 'themes', icon: 'brush' },
   { tab: 'installed', icon: 'inst' },
 ];
 
@@ -111,14 +111,23 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
     discover: st.tabDiscover,
     apps: st.tabApps,
     addons: st.tabAddons,
-    selected: st.tabSelected,
+    themes: st.tabThemes,
     installed: st.tabInstalled,
   };
   const view = route.view;
   const runView = view === 'installing' || view === 'done';
   const tab: StoreTab | null =
-    view === 'item' || view === 'manage' || view === 'search' || runView ? null : view;
-  const title = view === 'search' ? st.searchTitle : tab ? label[tab] : '';
+    view === 'item' || view === 'manage' || view === 'search' || view === 'selected' || runView
+      ? null
+      : view;
+  const title =
+    view === 'search'
+      ? st.searchTitle
+      : view === 'selected'
+        ? st.tabSelected
+        : tab
+          ? label[tab]
+          : '';
   const name = getUsername() ?? '';
   const initials = initialsOf(name || '?');
   const photo = useOwnAvatarUrl(currentUid() ?? undefined) ?? undefined;
@@ -179,13 +188,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
                 icon={icon(n.icon)}
                 label={label[n.tab]}
                 active={tab === n.tab}
-                count={
-                  n.tab === 'selected'
-                    ? queued.length
-                    : n.tab === 'installed'
-                      ? enabled.size
-                      : undefined
-                }
+                count={n.tab === 'installed' ? enabled.size : undefined}
                 onClick={() => goTab(n.tab)}
               />
             ))}
@@ -198,7 +201,8 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
               avatar={avatar}
               onExit={exit}
               exitLabel={st.backToSpotter}
-              exitIcon={icon('x')}
+              exitIcon={icon('back')}
+              exitText="Spotter"
             />
           ) : (isRoot || view === 'search') && !(pushed && pushed.target === view) ? (
             <SkHeader
@@ -206,7 +210,8 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
               avatar={avatar}
               onExit={exit}
               exitLabel={st.backToSpotter}
-              exitIcon={icon('x')}
+              exitIcon={icon('back')}
+              exitText="Spotter"
             />
           ) : (
             <SkHeader
@@ -219,7 +224,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
               avatar={avatar}
               onExit={exit}
               exitLabel={st.backToSpotter}
-              exitIcon={icon('x')}
+              exitText="Spotter"
             />
           )
         }
@@ -232,7 +237,6 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
               id: n.tab,
               label: label[n.tab],
               icon: icon(n.icon),
-              dot: n.tab === 'selected' && queued.length > 0,
             }))}
           />
         }
@@ -322,6 +326,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
         {view === 'discover' && <Discover role={role} ctx={ctx} go={go} />}
         {view === 'apps' && <Apps role={role} ctx={ctx} />}
         {view === 'addons' && <Addons role={role} ctx={ctx} />}
+        {view === 'themes' && <Themes role={role} ctx={ctx} />}
         {view === 'selected' && <Selected ctx={ctx} go={go} />}
         {view === 'installed' && <Installed ctx={ctx} go={go} />}
         {view === 'installing' && (

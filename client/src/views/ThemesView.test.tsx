@@ -3,6 +3,7 @@ import { en } from '../i18n/en';
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initTheme, setTheme } from '../themes';
+import { addonsPref } from '../addons/enabledSet';
 import { ThemesView } from './ThemesView';
 import { offSeason } from '../themes/testClock';
 
@@ -11,6 +12,8 @@ offSeason();
 beforeEach(() => {
   setLocale('en');
   localStorage.clear();
+  // The page exists from two looks on: the base one plus one installed theme.
+  addonsPref.set(['theme-cyberpunk']);
   document.documentElement.removeAttribute('data-theme');
 });
 afterEach(cleanup);

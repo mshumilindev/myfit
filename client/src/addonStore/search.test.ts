@@ -13,8 +13,6 @@ describe('store search', () => {
   it('ranks a name that starts with the query first, then names, parents, descriptions', () => {
     const ids = searchItems('member', 'sle', st);
     expect(ids[0]).toBe('sleep');
-    expect(ids).toContain('sleep-sounds');
-    expect(ids).toContain('sleep-auto-start');
   });
   it('finds through the parent app name and the category', () => {
     expect(searchItems('member', 'health', st)).toEqual(

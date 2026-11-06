@@ -59,7 +59,8 @@ export type HeroMode = 'bento' | 'progress';
 
 /** How much of the role's catalog is installed. */
 export function catalogProgress(role: Role, enabled: ReadonlySet<string>) {
-  const all = availableForRole(role);
+  // Looks are a collection of their own (their block in Discover), not part of "setting Spotter up".
+  const all = availableForRole(role).filter((m) => m.kind !== 'theme');
   const done = all.filter((m) => enabled.has(m.id)).length;
   return { done, total: all.length, left: all.length - done };
 }

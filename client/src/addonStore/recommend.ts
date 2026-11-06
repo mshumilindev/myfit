@@ -11,7 +11,7 @@ import { isAddonAllowed } from '../addons/enabledSet';
 import { addonById } from '../addons/manifest';
 import { availableForRole } from './storeCatalog';
 
-export const APP_ORDER = ['health', 'atlas', 'sleep', 'mastery', 'themes'];
+export const APP_ORDER = ['health', 'atlas', 'sleep', 'mastery'];
 
 export function recommend(
   role: Role,
@@ -22,7 +22,7 @@ export function recommend(
   const have = new Set([...enabled, ...queued]);
   const skip = new Set(opts.skip ?? []);
   const pool = availableForRole(role).filter(
-    (m) => isAddonAllowed(m.id, role) && !have.has(m.id) && !skip.has(m.id),
+    (m) => m.kind !== 'theme' && isAddonAllowed(m.id, role) && !have.has(m.id) && !skip.has(m.id),
   );
   const addons = pool
     .filter((m) => m.kind === 'addon' && m.parent && have.has(m.parent))

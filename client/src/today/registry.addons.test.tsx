@@ -30,13 +30,13 @@ describe('Today widgets follow the Mastery add-on (SPO-518)', () => {
     expect(avail('streak')).toBe(true);
   });
   it('installing Mastery brings them back', () => {
-    addonsPref.set(['mastery']);
+    addonsPref.set(['apex']);
     expect(avail('apex-rank')).toBe(true);
   });
   it('a trainer is offered Mastery too: no Apex widgets until it is installed', () => {
     role.value = 'trainer';
     expect(avail('apex-rank')).toBe(false);
-    addonsPref.set(['mastery']);
+    addonsPref.set(['apex']);
     expect(avail('apex-rank')).toBe(true);
   });
 });
@@ -81,7 +81,7 @@ describe('Health module widgets and shortcuts follow their add-ons (SPO-518)', (
   it('standards and challenge-to-try need Mastery', () => {
     expect(avail('standards')).toBe(false);
     expect(avail('challenge-to-try')).toBe(false);
-    addonsPref.set(['mastery']);
+    addonsPref.set(['apex']);
     expect(avail('standards')).toBe(true);
   });
   it('shortcuts: sleep, injury and Atlas need their add-ons, rest and illness are core', () => {

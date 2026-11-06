@@ -36,3 +36,19 @@ describe('SkHeader', () => {
     expect(screen.queryByRole('button')).toBeNull();
   });
 });
+
+describe('SkHeader exitText', () => {
+  it('shows the label beside the exit icon and keeps it a single button', () => {
+    render(
+      <SkHeader
+        title="Discover"
+        onExit={() => undefined}
+        exitLabel="Back to Spotter"
+        exitText="Spotter"
+      />,
+    );
+    const btn = screen.getByRole('button', { name: 'Back to Spotter' });
+    expect(btn.textContent).toContain('Spotter');
+    expect(btn.className).toContain('sk-hd-exit-text');
+  });
+});

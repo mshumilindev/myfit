@@ -2,13 +2,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
+import { addonsPref } from '../addons/enabledSet';
 import { ThemesView } from './ThemesView';
 import { setTheme } from '../themes';
 import { offSeason } from '../themes/testClock';
 
 offSeason();
 
-beforeEach(() => setLocale('en'));
+beforeEach(() => {
+  setLocale('en');
+  addonsPref.set(['theme-cyberpunk']);
+});
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();

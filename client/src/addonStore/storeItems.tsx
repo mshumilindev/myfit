@@ -37,7 +37,7 @@ export function kindBadge(st: AddonStoreStrings, m: AddonManifest) {
   if (m.soon) return <SkBadge kind="soon">{st.soon}</SkBadge>;
   return (
     <SkBadge kind={m.kind === 'app' ? 'app' : 'add'}>
-      {m.kind === 'app' ? st.kindApp : st.kindAddon}
+      {m.kind === 'app' ? st.kindApp : m.kind === 'theme' ? st.kindTheme : st.kindAddon}
     </SkBadge>
   );
 }

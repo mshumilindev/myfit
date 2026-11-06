@@ -4228,13 +4228,9 @@ export function syncSleepAutoQueue(): void {
   const uid = currentUid();
   if (!uid) return;
   const ref = doc(db, 'sleepSchedules', uid);
-  // Sleep and its auto-start are add-ons (SPO-518): without them the server queue is cleared, so no night is created for a
+  // Sleep is an add-on (SPO-518), auto-start is part of it: without it the server queue is cleared, so no night is created for a
   // feature the person does not have. The schedule and settings stay stored, so a re-install picks the queue up again.
-  if (
-    !state.sleepSettings.autoLog ||
-    !addonAvailable('sleep') ||
-    !addonAvailable('sleep-auto-start')
-  ) {
+  if (!state.sleepSettings.autoLog || !addonAvailable('sleep')) {
     deleteDoc(ref).catch(onWriteError);
     return;
   }
