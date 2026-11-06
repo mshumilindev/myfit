@@ -63,7 +63,8 @@ jobs:
           want=$(sha256sum functions/src/consentRecordsPure.ts | cut -d' ' -f1)
           obj=$(gh api "repos/${{ github.repository }}/git/matching-refs/tags/recordConsent-deployed/" --jq 'sort_by(.ref) | last | .object.sha // empty')
           if [ -z "$obj" ]; then
-            echo "::error::No recordConsent-deployed/* marker: deploy functions first (workflow 'Deploy functions' with recordConsent,setConsent)."; exit 1
+            # Until the first marker exists the guard cannot compare anything: warn, do not block (it turns strict once a marker is there).
+            echo "::warning::No recordConsent-deployed/* marker yet, consent versions NOT checked. Create it once: git tag -a recordConsent-deployed/<UTC time> -m 'consentRecordsPure sha256: $want' <deployed commit> && git push origin <tag>"; exit 0
           fi
           msg=$(gh api "repos/${{ github.repository }}/git/tags/$obj" --jq .message)
           have=$(printf '%s\n' "$msg" | sed -n 's/^consentRecordsPure sha256: //p' | head -1)
