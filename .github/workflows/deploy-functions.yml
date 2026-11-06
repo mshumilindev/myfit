@@ -1,0 +1,106 @@
+name: Deploy functions
+
+# Cloud Functions are shared by both Hosting sites (one Firebase project, spotter-64c3b), so there is a single target.
+# Rule (owner, 03.11.2026, SPO-351): never a bare `--only functions` (all ~105 functions at once -> 429 on the
+# 2nd-gen write quota of 60 requests / 60 s per region). Deploy only the named functions, in batches of at most
+# 10, with a pause of at least 60 s between batches; a failed batch is retried (only that batch).
+# `login`, `authStatus`, `sessionCheck` and `vaultKey` always go in the last batch.
+#
+# Secret: FIREBASE_SERVICE_ACCOUNT (same as Deploy hosting). Its service account needs the roles
+# "Cloud Functions Admin" and "Service Account User" on top of "Firebase Hosting Admin".
+on:
+  workflow_dispatch:
+    inputs:
+      functions:
+        description: 'Comma-separated function names, e.g. recordConsent,setConsent (no spaces)'
+        type: string
+        required: true
+      pause:
+        description: 'Seconds between batches (at least 60)'
+        type: string
+        default: '60'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-functions
+  cancel-in-progress: false
+
+env:
+  FIREBASE_PROJECT: spotter-64c3b
+  BATCH_SIZE: '10'
+  LAST_BATCH: login,authStatus,sessionCheck,vaultKey
+
+jobs:
+  deploy:
+    name: Deploy functions
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Deploy in batches
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FUNCTIONS_INPUT: ${{ github.event.inputs.functions }}
+          PAUSE_INPUT: ${{ github.event.inputs.pause }}
+        run: |
+          set -euo pipefail
+
+          if ! [[ "$FUNCTIONS_INPUT" =~ ^[A-Za-z0-9_]+(,[A-Za-z0-9_]+)*$ ]]; then
+            echo "::error::functions must be a comma-separated list of names, got: $FUNCTIONS_INPUT"; exit 1
+          fi
+          pause="${PAUSE_INPUT:-60}"
+          if ! [[ "$pause" =~ ^[0-9]+$ ]] || [ "$pause" -lt 60 ]; then pause=60; fi
+
+          # Move the auth-critical functions to the end, keep the rest in the given order.
+          IFS=',' read -r -a requested <<< "$FUNCTIONS_INPUT"
+          IFS=',' read -r -a last <<< "$LAST_BATCH"
+          ordered=(); tail=()
+          for fn in "${requested[@]}"; do
+            is_last=0
+            for l in "${last[@]}"; do [ "$fn" = "$l" ] && is_last=1; done
+            if [ "$is_last" = 1 ]; then tail+=("$fn"); else ordered+=("$fn"); fi
+          done
+          ordered+=("${tail[@]}")
+
+          npm ci --ignore-scripts --prefix functions
+
+          printf '%s' "$FIREBASE_SA" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          trap 'rm -f "$RUNNER_TEMP/sa.json"' EXIT
+
+          total=${#ordered[@]}
+          batch_no=0
+          for ((i = 0; i < total; i += BATCH_SIZE)); do
+            batch_no=$((batch_no + 1))
+            only=""
+            for fn in "${ordered[@]:i:BATCH_SIZE}"; do only="${only:+$only,}functions:$fn"; done
+
+            if [ "$batch_no" -gt 1 ]; then
+              echo "Pause ${pause}s before batch ${batch_no}"
+              sleep "$pause"
+            fi
+
+            ok=0
+            for attempt in 1 2 3; do
+              echo "::group::Batch ${batch_no}, attempt ${attempt}: ${only}"
+              if npx -y firebase-tools@15.34.1 deploy --only "$only" --project "$FIREBASE_PROJECT" --non-interactive; then
+                ok=1
+              fi
+              echo "::endgroup::"
+              [ "$ok" = 1 ] && break
+              echo "Batch ${batch_no} failed (attempt ${attempt}); waiting ${pause}s before retrying only this batch"
+              sleep "$pause"
+            done
+            if [ "$ok" != 1 ]; then
+              echo "::error::Batch ${batch_no} failed after 3 attempts: ${only}"; exit 1
+            fi
+          done
+          echo "Deployed ${total} function(s) in ${batch_no} batch(es)."
