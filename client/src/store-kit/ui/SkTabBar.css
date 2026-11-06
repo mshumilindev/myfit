@@ -8,6 +8,7 @@
 .sk-tbr-tab {
   flex: 1;
   min-width: 0;
+  padding-inline: 0;
   height: var(--sk-tap);
   display: flex;
   flex-direction: column;
@@ -48,4 +49,10 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+/* Narrow phones (320px): five labels share the row, so the type steps down one notch. */
+@media (max-width: 23.75rem) {
+  .sk-tbr-tab {
+    font-size: var(--sk-fs-tab-narrow);
+  }
 }

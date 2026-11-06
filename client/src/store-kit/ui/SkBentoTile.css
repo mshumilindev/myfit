@@ -174,3 +174,15 @@ button.sk-btile-title {
     transition: none;
   }
 }
+/* A tile with a title button AND an action: the title button's hit area covers the whole tile, the action stays on top. */
+button.sk-btile-title::after,
+.sk-btile-stretch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.sk-btile-foot,
+.sk-btile-actions {
+  position: relative;
+  z-index: 1;
+}

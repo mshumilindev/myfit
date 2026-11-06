@@ -90,14 +90,20 @@ export function DiscoverBento({
             <SkTile letter={itemName(st, sug.item.id)} tone={sug.item.tone} size={40} />
             <div className="sk-f1">
               <div className="sk-rowf sk-g8">
-                <button type="button" className="sk-t-h3" onClick={() => ctx.open(sug.item.id)}>
+                <button
+                  type="button"
+                  className="sk-t-h3 sk-btile-stretch"
+                  onClick={() => ctx.open(sug.item.id)}
+                >
                   {itemName(st, sug.item.id)}
                 </button>
                 {kindBadge(st, sug.item)}
               </div>
               <SkRel>{relOf(sug.item, ctx)}</SkRel>
             </div>
-            <ItemAction m={sug.item} ctx={ctx} />
+            <span className="sk-btile-actions">
+              <ItemAction m={sug.item} ctx={ctx} />
+            </span>
           </div>
         </SkBentoTile>
       )}
@@ -106,6 +112,7 @@ export function DiscoverBento({
           variant="dark"
           eyebrow={st.comingSoon}
           title={itemName(st, soon.id)}
+          onTitle={() => ctx.open(soon.id)}
           titleSize="h2"
           body={itemDesc(st, soon.id)}
         />

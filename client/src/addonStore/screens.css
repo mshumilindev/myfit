@@ -1,12 +1,12 @@
 /* Store screens: layout of the screen compositions (tokens only). */
 .as-cols {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   column-gap: var(--sk-sp-8);
 }
 @media (min-width: 45rem) {
   .as-cols {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 .as-search-wrap {
@@ -103,4 +103,11 @@
 }
 .as-sticky-act {
   margin-top: auto;
+}
+/* A place opened from another one has no title in its header (it shows Back), so the title moves into the page. */
+@media (max-width: 44.99rem) {
+  .as-title-pushed {
+    display: block;
+    margin: 0 0 var(--sk-sp-6);
+  }
 }

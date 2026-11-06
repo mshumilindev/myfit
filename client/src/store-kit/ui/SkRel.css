@@ -1,10 +1,14 @@
 /* SkRel — muted caption with a link icon. */
 .sk-rel {
-  display: flex;
+  display: inline-flex;
+  max-width: 100%;
   align-items: center;
   gap: var(--sk-sp-2);
-  white-space: nowrap;
+  min-width: 0;
   font-size: var(--sk-rel-fs);
   line-height: var(--sk-lh-small);
   color: var(--mute);
+}
+.sk-rel > span {
+  min-width: 0;
 }

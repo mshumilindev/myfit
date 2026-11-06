@@ -54,6 +54,8 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
   const { st } = useAddonStoreT();
   const [route, setRoute] = useState<StoreView>(() => parseStoreHash(currentHash()));
   const [query, setQuery] = useState('');
+  /** A root place opened from another one (a tile or link): shows Back to where it came from. */
+  const [pushed, setPushed] = useState<{ target: string; from: StoreTab } | null>(null);
   const [lastTab, setLastTab] = useState<StoreTab>(
     () => storeTabFromHash(currentHash()) ?? 'discover',
   );
@@ -69,8 +71,16 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
     return () => window.removeEventListener('hashchange', on);
   }, []);
 
-  const go = (v: string, id?: string) =>
-    setHash(storeHash(v as StoreView['view'], id), v !== 'item');
+  // Moving by a tab or the sidebar replaces the place; opening something from a screen pushes it, so Back can return.
+  const goTab = (v: string) => {
+    setPushed(null);
+    setHash(storeHash(v as StoreView['view']), true);
+  };
+  const go = (v: string, id?: string) => {
+    if (v !== 'item' && v !== 'search' && storeTabFromHash(currentHash()))
+      setPushed({ target: v, from: storeTabFromHash(currentHash()) as StoreTab });
+    setHash(storeHash(v as StoreView['view'], id), false);
+  };
   const ctx: StoreCtx = useMemo(
     () => ({ st, enabled, queued, open: (id) => go('item', id) }),
     [st, enabled, queued],
@@ -148,13 +158,13 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
                       ? enabled.size
                       : undefined
                 }
-                onClick={() => go(n.tab)}
+                onClick={() => goTab(n.tab)}
               />
             ))}
           </SkSidebar>
         }
         header={
-          isRoot || view === 'search' ? (
+          (isRoot || view === 'search') && !(pushed && pushed.target === view) ? (
             <SkHeader
               title={title}
               avatar={avatar}
@@ -164,8 +174,11 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
             />
           ) : (
             <SkHeader
-              onBack={() => window.history.back()}
-              backLabel={label[lastTab]}
+              onBack={() => {
+                setPushed(null);
+                window.history.back();
+              }}
+              backLabel={pushed && pushed.target === view ? label[pushed.from] : label[lastTab]}
               backIcon={icon('back')}
               avatar={avatar}
               onExit={exit}
@@ -178,7 +191,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
           <SkTabBar
             label={st.tabsLabel}
             active={tab}
-            onSelect={(id) => go(id)}
+            onSelect={(id) => goTab(id)}
             tabs={NAV.map((n) => ({
               id: n.tab,
               label: label[n.tab],
@@ -207,7 +220,11 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
       >
         {view !== 'item' && (
           <div className="as-main-head">
-            <h1 className="sk-t-h1d as-desk-title">{title}</h1>
+            <h1
+              className={`sk-t-h1d as-desk-title${pushed && pushed.target === view ? ' as-title-pushed' : ''}`}
+            >
+              {title}
+            </h1>
             {view !== 'installed' && (
               <div
                 className={`as-search-wrap${view === 'discover' || view === 'search' ? '' : ' as-search-wide'}`}

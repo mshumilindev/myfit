@@ -1,4 +1,4 @@
-/* SkHeader — mobile app header, uniform height; safe-area top inset added on top. */
+/* SkHeader — mobile app header, uniform height; the status-bar zone sits above it. */
 .sk-hd {
   box-sizing: content-box;
   display: flex;
@@ -6,7 +6,8 @@
   justify-content: space-between;
   gap: var(--sk-sp-5);
   height: var(--sk-header-h);
-  padding: env(safe-area-inset-top) var(--sk-sp-6) 0;
+  /* Room for the system status bar like the boards (44px); a notched phone's own inset wins when it is larger. */
+  padding: max(env(safe-area-inset-top), var(--sk-status-h)) var(--sk-sp-6) 0;
 }
 .sk-hd-title {
   min-width: 0;

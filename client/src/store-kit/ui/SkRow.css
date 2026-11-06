@@ -41,15 +41,6 @@
 .sk-row-meta:empty {
   display: none;
 }
-.sk-rel {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sk-sp-2);
-  font-size: var(--sk-fs-caption);
-  line-height: var(--sk-lh-small);
-  color: var(--mute);
-  white-space: nowrap;
-}
 .sk-row-open:focus-visible {
   outline: 2px solid var(--acc);
   outline-offset: 2px;

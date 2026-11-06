@@ -30,6 +30,10 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding-inline: var(--sk-sp-6);
+  padding-bottom: var(--sk-sp-6);
+}
+/* Only a floating tray needs room under the content; without one the page ends where its content ends. */
+.sk-shl-tray-on .sk-shl-main {
   padding-bottom: var(--sk-scroll-pad-b);
 }
 .sk-shl-in {
@@ -54,7 +58,10 @@
     display: none;
   }
   .sk-shl-main {
-    padding: var(--sk-sp-8) var(--sk-sp-10) var(--sk-scroll-pad-b);
+    padding: var(--sk-sp-8) var(--sk-sp-10);
+  }
+  .sk-shl-tray-on .sk-shl-main {
+    padding-bottom: var(--sk-scroll-pad-b);
   }
   .sk-shl-tray,
   .sk-shl-tray-bar {

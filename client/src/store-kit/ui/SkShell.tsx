@@ -25,7 +25,7 @@ export interface SkShellProps {
  */
 export function SkShell({ sidebar, header, tabBar, bar, tray, children, className }: SkShellProps) {
   return (
-    <div className={cx('sk-shl', className)}>
+    <div className={cx('sk-shl', !!tray && 'sk-shl-tray-on', className)}>
       {sidebar && <div className="sk-shl-side">{sidebar}</div>}
       <div className="sk-shl-col">
         {header && <div className="sk-shl-hd">{header}</div>}
