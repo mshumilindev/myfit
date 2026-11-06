@@ -7,6 +7,7 @@
  * groups; each group registers here.
  */
 import type { ReactNode } from 'react';
+import { useAddonOrBase } from '../addons/enabledSet';
 import type { WidgetSize } from '../components/ui/Widget';
 import type { Tone } from '../components/ui/tones';
 import type { Shell } from '../App';
@@ -100,4 +101,20 @@ export const WIDGETS: WidgetDef[] = WIDGET_GROUPS.flatMap((g) => ALL.filter((w) 
 const BY_ID = new Map(WIDGETS.map((w) => [w.id, w]));
 export function widgetById(id: string): WidgetDef | undefined {
   return BY_ID.get(id);
+}
+
+/**
+ * Widgets that belong to the Mastery add-on (SPO-518): rank and level. The rest of the Apex group (streak, challenges,
+ * awards, feed, feats) stays until the owner says which of them leave with Mastery. Roles the store does not offer
+ * Mastery to keep everything. A hook: call it before any early return; saved layouts keep their items either way.
+ */
+export const MASTERY_WIDGET_IDS: ReadonlySet<string> = new Set([
+  'apex-rank',
+  'apex-mastery',
+  'apex-level-up',
+  'apex-next-feat',
+]);
+export function useWidgetAvailable(): (w: WidgetDef) => boolean {
+  const mastery = useAddonOrBase('mastery');
+  return (w) => mastery || !MASTERY_WIDGET_IDS.has(w.id);
 }

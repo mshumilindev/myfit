@@ -58,7 +58,13 @@ import {
   type CustomSection,
   type TodayLayout,
 } from './layout';
-import { WIDGETS, WIDGET_GROUPS, widgetById, type WidgetGroup } from './registry';
+import {
+  WIDGETS,
+  WIDGET_GROUPS,
+  widgetById as rawWidgetById,
+  useWidgetAvailable,
+  type WidgetGroup,
+} from './registry';
 import { SHORTCUTS, renderShortcut, shortcutById, type ShortcutCtx } from './shortcuts';
 import { useTw } from './strings';
 import './today.css';
@@ -100,6 +106,11 @@ export function TodayCustomize({
   side?: HTMLElement | null;
   onClose: () => void;
 }) {
+  const available = useWidgetAvailable();
+  const widgetById = (id: string) => {
+    const w = rawWidgetById(id);
+    return w && available(w) ? w : undefined;
+  };
   const { t } = useT();
   const tw = useTw();
   const desk = !!side;
@@ -858,6 +869,8 @@ function AddPanel({
   onAddWidget: (id: string) => void;
   onAddShortcut: (id: string) => void;
 }) {
+  const available = useWidgetAvailable();
+  const widgets = WIDGETS.filter(available);
   const { t } = useT();
   const tw = useTw();
   const [group, setGroup] = useState<string>('all');
@@ -895,7 +908,7 @@ function AddPanel({
     </div>
   );
 
-  const widgetGroups = WIDGET_GROUPS.filter((g: WidgetGroup) => WIDGETS.some((w) => w.group === g));
+  const widgetGroups = WIDGET_GROUPS.filter((g: WidgetGroup) => widgets.some((w) => w.group === g));
   const freq = new Map<string, number>();
   for (const a of ctx.store.activities) freq.set(a.type, (freq.get(a.type) ?? 0) + 1);
   const added = new Set(scTarget?.items.map((w) => w.widget) ?? []);
@@ -905,7 +918,7 @@ function AddPanel({
   );
   const actsShown = allActs || searching ? acts : acts.slice(0, 9);
   const scHit = (sc: (typeof SHORTCUTS)[number]) => matches(query, sc.label(ctx));
-  const wHits = WIDGETS.filter((w) =>
+  const wHits = widgets.filter((w) =>
     matches(query, w.name(tw), tw.groups[w.group], w.id.replace(/-/g, ' ')),
   );
   const search = (placeholder: string) => (
@@ -1178,6 +1191,8 @@ function PickerSheet({
   onClose: () => void;
   onPick: (id: string) => void;
 }) {
+  const available = useWidgetAvailable();
+  const widgets = WIDGETS.filter(available);
   const { t } = useT();
   const tw = useTw();
   const [group, setGroup] = useState<string>('all');
@@ -1194,7 +1209,7 @@ function PickerSheet({
           name: sc.label(ctx),
           node: renderShortcut(sc, ctx, chosen === sc.id, () => undefined),
         }))
-      : WIDGETS.map((w) => ({
+      : widgets.map((w) => ({
           id: w.id,
           group: w.group,
           name: w.name(tw),
@@ -1203,7 +1218,7 @@ function PickerSheet({
   const groupIds: string[] =
     size === 'XS'
       ? ['train', 'health', 'activity']
-      : WIDGET_GROUPS.filter((g: WidgetGroup) => WIDGETS.some((w) => w.group === g));
+      : WIDGET_GROUPS.filter((g: WidgetGroup) => widgets.some((w) => w.group === g));
   const searching = query.trim() !== '';
   const groupName = (g: string) => tw.groups[g as keyof typeof tw.groups] ?? g;
   // While searching, look through every group (the chips don't narrow it).
