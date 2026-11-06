@@ -42,9 +42,9 @@ function set(next: RunState): void {
 const mark = (id: string, r: StepResult, progress = 0) =>
   set({ ...state, result: { ...state.result, [id]: r }, progress });
 
-/** Apps first, so an add-on never starts before the app it needs. */
+/** What an item needs first: items with no parent, then the ones that need another item, so nothing starts before its parent. */
 export function installOrder(ids: readonly string[]): string[] {
-  const rank = (id: string) => (addonById(id)?.kind === 'app' ? 0 : 1);
+  const rank = (id: string) => (addonById(id)?.parent ? 1 : 0);
   return [...ids].sort((a, b) => rank(a) - rank(b));
 }
 

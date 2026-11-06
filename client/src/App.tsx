@@ -1975,6 +1975,7 @@ function AppMain() {
             hidden={headerHidden}
             mastery={onMastery}
             onMastery={() => setOverlay({ screen: 'mastery' })}
+            onPrivacy={() => setOverlay({ screen: 'health', priv: true })}
             onSelect={goTab}
             fab={{
               ariaLabel: t.startNew,

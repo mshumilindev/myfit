@@ -17,9 +17,9 @@ export interface DiscoverState {
 /** Starter packs: ids in order; only the ones the role may use. */
 export const STARTER_PACKS = [{ id: 'recovery', ids: ['health', 'injury-log', 'sleep'] }] as const;
 
-/** "App of the week": the best app not yet installed — picked or not, so it stays after "Add". */
+/** "App of the week": the best top-level item (an app, or an add-on that needs no other) not yet installed — picked or not, so it stays after "Add". */
 export function appOfTheWeek({ role, enabled }: DiscoverState): AddonManifest | null {
-  const id = recommend(role, enabled, []).find((x) => addonById(x)?.kind === 'app');
+  const id = recommend(role, enabled, []).find((x) => !addonById(x)?.parent);
   return id ? (addonById(id) ?? null) : null;
 }
 

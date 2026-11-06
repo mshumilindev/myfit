@@ -1,5 +1,7 @@
 /**
- * Add-on registry (SPO-511). One entry per store item: an app (a whole area) or an add-on (a part of an app).
+ * Add-on registry (SPO-511). One entry per store item. Owner rule (06.11): the apps are Nutrition, Apex (`mastery`), Users,
+ * Gym, Coach and Learn; everything else in the store — Health, Sleep, Atlas, Themes and their extras — is an add-on.
+ * `parent` is a dependency (enabling the item enables its parent), not a claim that the parent is an app.
  * The store (`store-kit/`) and the shell read this list; features stay in the core until each one is stripped
  * into its own module (SPO-518/519). `roles` says who may see and enable the item — a role never sees the
  * rest, and `manager` has no store at all.
@@ -31,7 +33,7 @@ const ALL: readonly StoreRole[] = ['member', 'trainer', 'admin'];
 const MEMBER: readonly StoreRole[] = ['member'];
 
 export const ADDONS: readonly AddonManifest[] = [
-  { id: 'health', kind: 'app', tone: 4, roles: MEMBER, category: 'recovery' },
+  { id: 'health', kind: 'addon', tone: 4, roles: MEMBER, category: 'recovery' },
   {
     id: 'injury-log',
     kind: 'addon',
@@ -57,7 +59,7 @@ export const ADDONS: readonly AddonManifest[] = [
     roles: MEMBER,
     category: 'recovery',
   },
-  { id: 'sleep', kind: 'app', tone: 2, roles: ALL, category: 'recovery' },
+  { id: 'sleep', kind: 'addon', tone: 2, roles: ALL, category: 'recovery' },
   {
     id: 'sleep-auto-start',
     kind: 'addon',
@@ -74,9 +76,9 @@ export const ADDONS: readonly AddonManifest[] = [
     roles: ALL,
     category: 'recovery',
   },
-  { id: 'atlas', kind: 'app', tone: 6, roles: ALL, category: 'insights' },
+  { id: 'atlas', kind: 'addon', tone: 6, roles: ALL, category: 'insights' },
   { id: 'mastery', kind: 'app', tone: 8, roles: ALL, category: 'insights' },
-  { id: 'themes', kind: 'app', tone: 7, roles: ALL, category: 'look' },
+  { id: 'themes', kind: 'addon', tone: 7, roles: ALL, category: 'look' },
   // Gyms is core for a member and an add-on for trainer and admin.
   // Not available yet (the store shows them as Coming soon).
   { id: 'nutrition', kind: 'app', tone: 0, roles: MEMBER, soon: true, category: 'food' },

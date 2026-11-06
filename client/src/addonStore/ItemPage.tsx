@@ -30,7 +30,7 @@ export function ItemPage({
   const m = addonById(id);
   if (!m) return <div className="sk-t-s sk-mt16">{st.noResults}</div>;
   const parent = m.parent ? addonById(m.parent) : undefined;
-  const children = m.kind === 'app' ? ADDONS.filter((a) => a.parent === m.id && !a.soon) : [];
+  const children = ADDONS.filter((a) => a.parent === m.id && !a.soon);
   const name = itemName(st, m.id);
   if (m.soon) return <ComingSoon id={m.id} ctx={ctx} />;
   return (
@@ -74,7 +74,9 @@ export function ItemPage({
         </SkPreviewPhone>
       </div>
       <SkCard className="sk-p16 sk-mt24 as-stats">
-        {m.kind === 'app' && <SkStat spec value={children.length} caption={st.statAddons} />}
+        {(m.kind === 'app' || children.length > 0) && (
+          <SkStat spec value={children.length} caption={st.statAddons} />
+        )}
         <SkStat spec value={st.yes} caption={st.statOffline} />
         <SkStat spec value={st.kept} caption={st.statData} />
       </SkCard>

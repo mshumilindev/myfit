@@ -64,6 +64,7 @@ export function GymTabBar<Id extends string>({
   hidden,
   mastery,
   onMastery,
+  onPrivacy,
   onSelect,
   fab,
 }: {
@@ -73,31 +74,37 @@ export function GymTabBar<Id extends string>({
   /** Mastery page open (its tab is lit). */
   mastery: boolean;
   onMastery: () => void;
+  /** Opens "Privacy and sharing" (consents, documents, sharing, health-data deletion) — it lives in More, not in Health. */
+  onPrivacy: () => void;
   onSelect: (id: Id) => void;
   fab: TabBarProps<Id>['fab'];
 }) {
   const { t } = useT();
   // Mastery is an add-on (SPO-518): its tab and menu entry only exist when it is installed (or not offered to the role).
   const masteryOn = useAddonOrBase('mastery');
-  const tab = hidden.length === 0;
+  // More is always the last tab (it keeps the slot, so the bar never changes shape): Privacy and sharing, then Mastery when
+  // it is installed, then the header controls that collapsed.
   return (
     <SuiteTabBar<Id | 'mastery'>
       app="gym"
       noAccount
-      noMore={tab}
       moreItems={[
+        { id: 'privacy', icon: 'lock', label: t.hlPrivRow, onSelect: onPrivacy },
         ...(masteryOn
-          ? [{ id: 'mastery', icon: 'medal', label: t.masteryTitle, onSelect: onMastery }]
+          ? [
+              {
+                id: 'mastery',
+                icon: 'medal',
+                label: t.masteryTitle,
+                onSelect: onMastery,
+                active: mastery,
+              },
+            ]
           : []),
         ...hidden,
       ]}
-      items={[
-        ...items,
-        ...(tab && masteryOn
-          ? [{ id: 'mastery' as const, icon: 'medal', label: t.masteryTitle, active: mastery }]
-          : []),
-      ]}
-      onSelect={(id) => (id === 'mastery' ? !mastery && onMastery() : onSelect(id as Id))}
+      items={items}
+      onSelect={(id) => onSelect(id as Id)}
       fab={fab}
     />
   );
