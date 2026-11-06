@@ -10,6 +10,18 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+export const Spec: Story = {
+  render: () => (
+    <SkStage width="phone">
+      <div className="sk-rowf sk-g8">
+        <SkStat spec value="4" caption="Add-ons" />
+        <SkStat spec value="Yes" caption="Offline" />
+        <SkStat spec value="Kept" caption="Data" />
+      </div>
+    </SkStage>
+  ),
+};
+
 export const Tones: Story = {
   render: () => (
     <SkStage width="phone">

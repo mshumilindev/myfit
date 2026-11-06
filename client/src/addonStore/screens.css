@@ -15,7 +15,7 @@
   gap: var(--sk-sp-5);
 }
 .as-main-head {
-  padding-top: var(--sk-sp-4);
+  padding-top: var(--sk-sp-7);
   padding-bottom: var(--sk-sp-6);
 }
 .as-desk-title {
@@ -45,4 +45,62 @@
 /* The search field fills the row (its Cancel button sits beside it). */
 .as-search-wrap .sk-search {
   flex: 1;
+  min-width: 0;
+}
+.as-search-wrap > :not(.sk-search) {
+  flex: none;
+}
+/* Item page (boards 05, 06): hero spacing, preview row scrolls sideways, stats share the card equally. */
+.as-item-head {
+  padding-top: var(--sk-sp-4);
+}
+.as-previews {
+  overflow-x: auto;
+}
+.as-stats {
+  display: flex;
+  justify-content: space-around;
+}
+/* Boards 02, 30, 31: on a phone only Discover and Search carry the field; on a wide screen the other places do too. */
+@media (max-width: 44.99rem) {
+  .as-search-wide {
+    display: none;
+  }
+}
+/* Installed (board 12): one card per app — header row, a switch row per add-on, a manage link. */
+.as-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-sp-6);
+}
+.as-group {
+  padding: var(--sk-sp-2) var(--sk-sp-6);
+}
+.as-manage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: var(--sk-tap);
+  color: var(--acc-t);
+  font-size: var(--sk-fs-body);
+  font-weight: var(--sk-fw-semibold);
+}
+.as-manage .sk-svg {
+  flex: none;
+}
+/* Selected (board 31): the install button stays at the bottom of the scroll area, above the tab bar. */
+.as-sticky-act {
+  position: sticky;
+  bottom: 0;
+  padding-block: var(--sk-sp-6);
+  background: var(--bg);
+}
+.sk-shl-in:has(.as-sticky-act) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+.as-sticky-act {
+  margin-top: auto;
 }

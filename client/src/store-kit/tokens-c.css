@@ -1,7 +1,7 @@
 /* Batch C tokens (bento, hero, status header, preview phone). Rem units; no colour needs dark overrides. */
 .sk-root {
-  --sk-bn-title-fs: 2.125rem;
-  --sk-bn-title-lh: 2.375rem;
+  --sk-bn-title-fs: 1.875rem;
+  --sk-bn-title-lh: 2.25rem;
   --sk-bn-dim: 0.9;
   --sk-prog-h: 0.5rem;
   --sk-sth-icon: 2rem;

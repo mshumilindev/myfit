@@ -23,3 +23,23 @@
   line-height: var(--sk-lh-small);
   color: var(--mute);
 }
+.sk-stat-spec {
+  align-items: center;
+  text-align: center;
+  flex: 1;
+}
+.sk-stat-spec .sk-stat-v {
+  order: 2;
+  font-size: var(--sk-fs-title);
+  line-height: var(--sk-lh-title);
+  font-weight: var(--sk-fw-semibold);
+  letter-spacing: normal;
+}
+.sk-stat-spec .sk-stat-c {
+  order: 1;
+  font-size: var(--sk-fs-eyebrow);
+  line-height: var(--sk-lh-eyebrow);
+  font-weight: var(--sk-fw-bold);
+  letter-spacing: var(--sk-ls-eyebrow);
+  text-transform: uppercase;
+}

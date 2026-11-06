@@ -1,65 +1,25 @@
 /** Store screens on the store kit: Discover, Apps, Add-ons, Selected, Installed, item page, search. */
 import { useMemo, useState } from 'react';
 import type { Role } from '../api';
-import { ADDONS, addonById, type AddonManifest } from '../addons/manifest';
+import { addonById, type AddonManifest } from '../addons/manifest';
 import { installQueue, queueRemove } from '../addons/queue';
 import {
-  SkBadge,
   SkBtn,
   SkCard,
   SkChip,
   SkEmpty,
   SkIcon,
   SkList,
-  SkSectionHeader,
   SkSectionLink,
   SkTile,
 } from '../store-kit';
 import './screens.css';
+import { Rows, Section } from './storeLists';
 import { DiscoverBento } from './DiscoverBento';
 import { recommend } from './recommend';
 import { MIN_QUERY, searchItems } from './search';
 import { availableForRole, comingSoonForRole, STORE_CATEGORIES } from './storeCatalog';
-import {
-  ItemAction,
-  ItemRow,
-  itemDesc,
-  itemName,
-  kindBadge,
-  RemoveButton,
-  TileOf,
-  relOf,
-  type StoreCtx,
-} from './storeItems';
-
-function Section({
-  title,
-  aside,
-  children,
-}: {
-  title: string;
-  aside?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="sk-mt24">
-      <SkSectionHeader title={title} aside={aside} />
-      {children}
-    </section>
-  );
-}
-
-function Rows({ ids, ctx, query }: { ids: string[]; ctx: StoreCtx; query?: string }) {
-  const items = ids.map((id) => addonById(id)).filter((m): m is AddonManifest => !!m);
-  if (!items.length) return null;
-  return (
-    <SkList>
-      {items.map((m) => (
-        <ItemRow key={m.id} m={m} ctx={ctx} query={query} />
-      ))}
-    </SkList>
-  );
-}
+import { ItemRow, itemName, TileOf, type StoreCtx } from './storeItems';
 
 /** Discover: the recommendation queue, a nudge for the next app, what is coming. */
 export function Discover({
@@ -227,7 +187,7 @@ export function Selected({ ctx, go }: { ctx: StoreCtx; go: (v: string) => void }
           ))}
         </SkList>
       </div>
-      <div className="sk-mt24">
+      <div className="as-sticky-act">
         <SkBtn
           kind="pri"
           size="l"
@@ -243,81 +203,22 @@ export function Selected({ ctx, go }: { ctx: StoreCtx; go: (v: string) => void }
   );
 }
 
-/** Installed: what is on, with Remove. Removing keeps data. */
-export function Installed({ ctx, go }: { ctx: StoreCtx; go: (v: string) => void }) {
-  const { st, enabled } = ctx;
-  const items = ADDONS.filter((m) => enabled.has(m.id));
-  if (!items.length) {
-    return (
-      <SkEmpty
-        icon={
-          <SkTile letter="" tone={5} size={64}>
-            <SkIcon name="inst" />
-          </SkTile>
-        }
-        title={st.installedEmptyTitle}
-        body={st.installedEmptyBody}
-        actions={
-          <SkBtn kind="pri" onClick={() => go('discover')}>
-            {st.tabDiscover}
-          </SkBtn>
-        }
-      />
-    );
-  }
-  return (
-    <div className="sk-mt16">
-      <SkList>
-        {items.map((m) => (
-          <ItemRow key={m.id} m={m} ctx={ctx} action={<RemoveButton id={m.id} st={st} />} />
-        ))}
-      </SkList>
-    </div>
-  );
-}
-
-/** One item: what it is, what it needs, the action. */
-export function ItemPage({
-  id,
+function Group({
+  label,
+  ids,
   ctx,
-  go,
+  query,
 }: {
-  id: string;
+  label: string;
+  ids: string[];
   ctx: StoreCtx;
-  go: (v: string, id?: string) => void;
+  query: string;
 }) {
-  const { st } = ctx;
-  const m = addonById(id);
-  if (!m) return <div className="sk-t-s sk-mt16">{st.noResults}</div>;
-  const parent = m.parent ? addonById(m.parent) : undefined;
   return (
-    <>
-      <div className="sk-rowf sk-g16 sk-start sk-mt16">
-        <TileOf st={st} m={m} size={96} />
-        <div className="sk-f1">
-          <div>{kindBadge(st, m)}</div>
-          <h1 className="sk-t-h1 sk-mt4">{itemName(st, m.id)}</h1>
-          {parent && <div className="sk-t-s sk-mt4">{st.forApp(itemName(st, parent.id))}</div>}
-          <div className="sk-mt16">
-            <ItemAction m={m} ctx={ctx} size="l" />
-          </div>
-        </div>
-      </div>
-      {parent && (
-        <SkCard className="sk-p12 sk-mt16 sk-rowf sk-g12">
-          <TileOf st={st} m={parent} size={40} />
-          <div className="sk-f1">
-            <div className="sk-t-b sk-b6">{relOf(m, ctx)}</div>
-          </div>
-          <SkSectionLink onClick={() => go('item', parent.id)}>
-            <SkBadge kind="app">{st.kindApp}</SkBadge>
-          </SkSectionLink>
-        </SkCard>
-      )}
-      <Section title={st.about}>
-        <p className="sk-t-b sk-mute">{itemDesc(st, m.id)}</p>
-      </Section>
-    </>
+    <section className="sk-mt24">
+      <div className="sk-t-e sk-mb8">{label}</div>
+      <Rows ids={ids} ctx={ctx} query={query} />
+    </section>
   );
 }
 
@@ -337,8 +238,12 @@ export function Search({
   const ids = useMemo(() => searchItems(role, query, st), [role, query, st]);
   const short = query.trim().length < MIN_QUERY;
   const suggestions = ['health', 'sleep', 'atlas', 'themes'].filter((id) => addonById(id));
-  const apps = ids.filter((id) => addonById(id)?.kind === 'app');
-  const adds = ids.filter((id) => addonById(id)?.kind === 'addon');
+  const best = ids[0];
+  const bestM = best ? addonById(best) : undefined;
+  const rest = ids.slice(1);
+  const ofBest = bestM?.kind === 'app' ? rest.filter((id) => addonById(id)?.parent === best) : [];
+  const others = rest.filter((id) => !ofBest.includes(id));
+  const q = query.trim();
   return (
     <>
       {short ? (
@@ -368,15 +273,17 @@ export function Search({
             {st.resultsCount(ids.length)}
           </div>
           <div className="as-cols">
-            {apps.length > 0 && (
-              <Section title={st.appsTitle}>
-                <Rows ids={apps} ctx={ctx} query={query.trim()} />
-              </Section>
+            <Group label={st.searchBest} ids={[best]} ctx={ctx} query={q} />
+            {ofBest.length > 0 && (
+              <Group
+                label={st.searchAddonsFor(itemName(st, best))}
+                ids={ofBest}
+                ctx={ctx}
+                query={q}
+              />
             )}
-            {adds.length > 0 && (
-              <Section title={st.addonsTitle}>
-                <Rows ids={adds} ctx={ctx} query={query.trim()} />
-              </Section>
+            {others.length > 0 && (
+              <Group label={st.searchAlso(q)} ids={others} ctx={ctx} query={q} />
             )}
           </div>
         </>

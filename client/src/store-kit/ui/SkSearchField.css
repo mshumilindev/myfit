@@ -53,3 +53,12 @@
   border-radius: var(--sk-r-pill);
   color: var(--mute);
 }
+/* The host app styles focused inputs; the field draws its own ring on the pill. */
+.sk-search .sk-search-in:focus,
+.sk-search .sk-search-in:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.sk-search .sk-search-in::-webkit-search-cancel-button {
+  display: none;
+}

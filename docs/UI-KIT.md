@@ -600,7 +600,7 @@ has CSS, a story and a test. Source of truth for look and states: the approved d
 | `SkRow`            | List item: tile, name, description, badge, relation, trailing action, optional keyboard-open                          |
 | `SkSectionHeader`  | Section title with trailing aside (SkSectionLink "See all")                                                           |
 | `SkEmpty`          | Empty state: icon tile, title, body, extra content, actions (boards 17, 18, 32)                                       |
-| `SkStat`           | Big number with caption, optional accent or ok tone                                                                   |
+| `SkStat`           | Big number with caption, optional accent or ok tone; `spec` = small label over value (boards 05, 06)                  |
 | `SkSearchField`    | Pill search input with leading icon and clear button                                                                  |
 | `SkBento`          | Bento grid (2 columns, 3/4 on wide) that holds SkBentoTile cells                                                      |
 | `SkBentoTile`      | Bento cell: white/dark/accent/tone 0..9, default/hero/wide, slots; whole tile can be a button (exports `SkBentoLink`) |
@@ -620,4 +620,4 @@ has CSS, a story and a test. Source of truth for look and states: the approved d
 | `SkToast`          | Transient message above the tab bar, tones info/ok/warn/bad, optional action and dismiss                              |
 | `SkOfflineBar`     | Calm offline banner (warn tone, status role, never an alert)                                                          |
 | `SkBackground`     | Animated three-layer wave background, reduced-motion safe, aria-hidden                                                |
-| `SkHighlight` | Search match mark: renders text parts, matched ones highlighted |
+| `SkHighlight`      | Search match mark: renders text parts, matched ones highlighted                                                       |

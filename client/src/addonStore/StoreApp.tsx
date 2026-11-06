@@ -5,6 +5,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { getRole, getUsername } from '../api';
+import { addonById } from '../addons/manifest';
 import type { Role } from '../api';
 import { useEnabledAddons } from '../addons/enabledSet';
 import { useQueuedAddons } from '../addons/queue';
@@ -14,11 +15,12 @@ import { currentHash, setHash } from '../route';
 import {
   SkAvatar,
   SkBackground,
-  SkBtn,
+  SkBar,
   SkHeader,
   SkIcon,
   SkNavItem,
   SkSearchField,
+  SkSectionLink,
   SkShell,
   SkSidebar,
   SkSidebarUser,
@@ -27,8 +29,10 @@ import {
   type SkIconName,
 } from '../store-kit';
 import './screens.css';
-import { Addons, Apps, Discover, Installed, ItemPage, Search, Selected } from './StoreScreens';
-import type { StoreCtx } from './storeItems';
+import { Installed } from './InstalledScreen';
+import { ItemPage } from './ItemPage';
+import { Addons, Apps, Discover, Search, Selected } from './StoreScreens';
+import { ItemAction, RemoveButton, type StoreCtx } from './storeItems';
 import {
   parseStoreHash,
   STORE_FALLBACK_HASH,
@@ -86,6 +90,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
   const initials = initialsOf(name || '?');
   const showTray = queued.length > 0 && view !== 'selected' && view !== 'search';
   const isRoot = tab !== null;
+  const itemM = view === 'item' ? addonById(route.id) : undefined;
 
   const search = (
     <SkSearchField
@@ -160,7 +165,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
           ) : (
             <SkHeader
               onBack={() => window.history.back()}
-              backLabel={st.back}
+              backLabel={label[lastTab]}
               backIcon={icon('back')}
               avatar={avatar}
               onExit={exit}
@@ -182,6 +187,14 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
             }))}
           />
         }
+        bar={
+          itemM && !itemM.soon ? (
+            <SkBar>
+              {enabled.has(itemM.id) && <RemoveButton id={itemM.id} st={st} />}
+              <ItemAction m={itemM} ctx={ctx} size="l" lead />
+            </SkBar>
+          ) : undefined
+        }
         tray={
           showTray ? (
             <SkTray
@@ -195,21 +208,24 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
         {view !== 'item' && (
           <div className="as-main-head">
             <h1 className="sk-t-h1d as-desk-title">{title}</h1>
-            <div className="as-search-wrap">
-              {search}
-              {view === 'search' && (
-                <SkBtn
-                  kind="ghost"
-                  onClick={() => {
-                    // Cancel closes the search and returns to the store place it was opened from — never out of the store.
-                    setQuery('');
-                    setHash(storeHash(lastTab), true);
-                  }}
-                >
-                  {st.cancel}
-                </SkBtn>
-              )}
-            </div>
+            {view !== 'installed' && (
+              <div
+                className={`as-search-wrap${view === 'discover' || view === 'search' ? '' : ' as-search-wide'}`}
+              >
+                {search}
+                {view === 'search' && (
+                  <SkSectionLink
+                    onClick={() => {
+                      // Cancel closes the search and returns to the store place it was opened from — never out of the store.
+                      setQuery('');
+                      setHash(storeHash(lastTab), true);
+                    }}
+                  >
+                    {st.cancel}
+                  </SkSectionLink>
+                )}
+              </div>
+            )}
           </div>
         )}
         {view === 'discover' && <Discover role={role} ctx={ctx} go={go} />}

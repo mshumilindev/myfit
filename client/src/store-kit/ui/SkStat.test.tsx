@@ -15,4 +15,8 @@ describe('SkStat', () => {
     const { container } = render(<SkStat value="3" caption="c" tone="acc" />);
     expect(container.firstElementChild?.className).toContain('sk-stat-acc');
   });
+  it('maps spec to a class', () => {
+    const { container } = render(<SkStat spec value="Yes" caption="Offline" />);
+    expect(container.firstElementChild?.className).toContain('sk-stat-spec');
+  });
 });

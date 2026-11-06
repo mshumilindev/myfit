@@ -27,7 +27,8 @@
   --sk-r-3xl: 1.75rem;
   --sk-r-pill: 62.5rem;
   /* type */
-  --sk-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --sk-font:
+    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --sk-fs-eyebrow: 0.6875rem;
   --sk-fs-caption: 0.75rem;
   --sk-fs-small: 0.8125rem;

@@ -46,17 +46,20 @@ export function ItemAction({
   m,
   ctx,
   size,
+  lead,
 }: {
   m: AddonManifest;
   ctx: StoreCtx;
   size?: 'l' | 's';
+  /** The add action is the screen's main one (item page bar): solid instead of tinted. */
+  lead?: boolean;
 }) {
   const { st, enabled, queued } = ctx;
   if (m.soon) return null;
   if (enabled.has(m.id)) return <SkInstalledLabel>{st.installedLabel}</SkInstalledLabel>;
   if (queued.includes(m.id)) {
     return (
-      <SkBtn kind="pri" size={size} onClick={() => queueRemove([m.id])}>
+      <SkBtn kind={lead ? 'tint' : 'pri'} size={size} onClick={() => queueRemove([m.id])}>
         {st.pending}
       </SkBtn>
     );
@@ -64,7 +67,7 @@ export function ItemAction({
   const parent = m.parent ? addonById(m.parent) : undefined;
   const parentReady = !parent || enabled.has(parent.id) || queued.includes(parent.id);
   return (
-    <SkBtn kind="tint" size={size} onClick={() => queueAdd([m.id])}>
+    <SkBtn kind={lead ? 'pri' : 'tint'} size={size} onClick={() => queueAdd([m.id])}>
       {parentReady ? st.add : st.addWith(itemName(st, parent!.id))}
     </SkBtn>
   );
