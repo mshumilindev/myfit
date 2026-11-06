@@ -149,6 +149,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const themesOn = useAddonOrBase('themes');
   const atlasOn = useAddonOrBase('atlas');
   const sleepOn = useAddonOrBase('sleep');
+  const sleeps = sleepOn ? store.sleeps : NO_SLEEPS;
   const { t, locale } = useT();
   const tw = useTw();
   const layout = useTodayLayout();
@@ -259,7 +260,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const afterToday = (day: number) => weekPos(day, weekStart) > weekPos(todayWeekday, weekStart);
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const hasHistory = finished.length > 0;
-  const historyDayCount = buildHistoryDays(finished, store.activities, store.sleeps).length;
+  const historyDayCount = buildHistoryDays(finished, store.activities, sleeps).length;
   const [pbNow] = useState(() => Date.now());
   const playbook = useMemo(
     () =>
@@ -816,7 +817,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return (
       finished.some((w) => dayKey(w.startedAt) === dk) ||
       store.activities.some((x) => x.finishedAt !== null && dayKey(x.startedAt) === dk) ||
-      store.sleeps.some((n) => n.wake !== null && dayKey(n.wake) === dk)
+      sleeps.some((n) => n.wake !== null && dayKey(n.wake) === dk)
     );
   };
   const todayHasItems = dayHasItems(dayStartOf(todayWeekday));
@@ -1055,7 +1056,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         logged ||
         !!rest ||
         store.activities.some((x) => x.finishedAt !== null && dayKey(x.startedAt) === dk) ||
-        store.sleeps.some((n) => n.wake !== null && dayKey(n.wake) === dk);
+        sleeps.some((n) => n.wake !== null && dayKey(n.wake) === dk);
       return {
         day,
         state,
@@ -1608,7 +1609,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   <HistoryTimeline
                     workouts={finished}
                     activities={store.activities}
-                    sleeps={sleepOn ? store.sleeps : NO_SLEEPS}
+                    sleeps={sleeps}
                     allWorkouts={store.workouts}
                     bodyKg={bodyKg}
                     maxDays={days}

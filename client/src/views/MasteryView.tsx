@@ -3,6 +3,7 @@
  * Reads computeMastery() and renders design MT-03…MT-08. Mastery is a live
  * measure of how well you train, never an achievements/points board.
  */
+import { sleepAvailable } from '../addons/useSleeps';
 import { PageHead } from '../components/ui/PageHead';
 import { useMemo, useState } from 'react';
 import { RailItem } from '../components/ui/Rail';
@@ -206,13 +207,16 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose?: () => 
   const { t } = useT();
   const store = useStore();
   const [now] = useState(() => Date.now());
+  const sleepOk = sleepAvailable();
   const m = useMemo(
     () =>
       computeMastery(store, now, {
         trainingSinceYear: store.mastery.sinceYear,
         trainingPattern: store.mastery.pattern,
       }),
-    [store, now],
+    // sleepOk: the rating reads the stored nights only while the Sleep add-on is installed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [store, now, sleepOk],
   );
 
   const [page, setPage] = useState<'detail' | 'shortfall' | 'ladder' | 'calibrate'>(
@@ -667,13 +671,16 @@ export function MasteryBadge({
   const { t } = useT();
   const store = useStore();
   const [now] = useState(() => Date.now());
+  const sleepOk = sleepAvailable();
   const m = useMemo(
     () =>
       computeMastery(store, now, {
         trainingSinceYear: store.mastery.sinceYear,
         trainingPattern: store.mastery.pattern,
       }),
-    [store, now],
+    // sleepOk: the rating reads the stored nights only while the Sleep add-on is installed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [store, now, sleepOk],
   );
   // Rail variant: a compact vertical badge that reads like a nav item — the
   // progress ring with the rank insignia, the rating tucked beneath.
