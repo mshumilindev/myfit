@@ -96,6 +96,7 @@ import { useClientShared } from './coach/client/shared';
 import { ClientBridgeLazy, ClientRoutesLazy } from './coach/client/lazy';
 import { CallsHostLazy } from './calls/lazy';
 import { GymBrandBar, GymTabBar } from './components/suite/GymChrome';
+import { HealthPrivacyView } from './views/health/HealthPrivacyView';
 import { ConditionsShield, useActiveConditions } from './views/health/ConditionsShield';
 import { AppRail } from './components/AppRail';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
@@ -278,6 +279,7 @@ export type Overlay =
   | { screen: 'settings' }
   | { screen: 'history' }
   | { screen: 'themes' }
+  | { screen: 'privacy' }
   | { screen: 'notifications' }
   | { screen: 'recap'; period: string }
   | { screen: 'recap-story'; period: string }
@@ -421,6 +423,7 @@ export function toHash(
   if (overlay?.screen === 'settings') return '#/settings';
   if (overlay?.screen === 'history') return '#/history';
   if (overlay?.screen === 'themes') return '#/themes';
+  if (overlay?.screen === 'privacy') return '#/more/privacy';
   if (overlay?.screen === 'builder') return '#/builder';
   if (overlay?.screen === 'injury') return '#/injury';
   if (overlay?.screen === 'health') return healthHash(overlay);
@@ -476,14 +479,7 @@ export function overlayBack(n: { cur: Overlay; stack: Overlay[] }): {
     return { cur: { screen: 'health', sup: 'hub' }, stack: [] };
   if (
     n.cur?.screen === 'health' &&
-    (n.cur.view ||
-      n.cur.form ||
-      n.cur.cond ||
-      n.cur.nic ||
-      n.cur.alc ||
-      n.cur.sup ||
-      n.cur.cyc ||
-      n.cur.priv)
+    (n.cur.view || n.cur.form || n.cur.cond || n.cur.nic || n.cur.alc || n.cur.sup || n.cur.cyc)
   )
     return { cur: { screen: 'health' }, stack: [] };
   // A Home set page reached by a link or a refresh goes up to the Home set page.
@@ -555,6 +551,14 @@ export function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (isClientHead(head))
     return { tab: 'today', overlay: { screen: 'client-coach', route: parts.join('/') } };
   if (head === 'injury') return { tab: 'today', overlay: { screen: 'injury' } };
+  // Privacy and sharing lives in More now; the old Health links (#/health/privacy, #/health/nicotine/privacy) land there.
+  if (head === 'more' && parts[1] === 'privacy')
+    return { tab: 'today', overlay: { screen: 'privacy' } };
+  if (
+    head === 'health' &&
+    (parts[1] === 'privacy' || (parts[1] === 'nicotine' && parts[2] === 'privacy'))
+  )
+    return { tab: 'today', overlay: { screen: 'privacy' } };
   if (head === 'health') return { tab: 'today', overlay: healthFromHash(parts.slice(1)) };
   if (head === 'home') return { tab: 'today', overlay: homeSetFromHash(parts.slice(1)) };
   if (head === 'widgets' && import.meta.env.DEV)
@@ -1712,6 +1716,7 @@ function AppMain() {
         <SettingsView onClose={closeOverlay} />
       )}
       {activeOverlay?.screen === 'themes' && themesOn && <ThemesView onClose={closeOverlay} />}
+      {activeOverlay?.screen === 'privacy' && <HealthPrivacyView onBack={closeOverlay} />}
       {activeOverlay?.screen === 'history' && (
         <HistoryListView shell={shell} onClose={closeOverlay} />
       )}
@@ -1797,7 +1802,6 @@ function AppMain() {
           alc={activeOverlay.alc}
           sup={activeOverlay.sup}
           cyc={activeOverlay.cyc}
-          priv={activeOverlay.priv}
           onClose={closeOverlay}
         />
       )}
@@ -1975,7 +1979,7 @@ function AppMain() {
             hidden={headerHidden}
             mastery={onMastery}
             onMastery={() => setOverlay({ screen: 'mastery' })}
-            onPrivacy={() => setOverlay({ screen: 'health', priv: true })}
+            onPrivacy={() => setOverlay({ screen: 'privacy' })}
             onSelect={goTab}
             fab={{
               ariaLabel: t.startNew,

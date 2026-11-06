@@ -33,12 +33,14 @@ vi.mock('../../coach/client/lazy', async (orig) => ({
 }));
 
 import { HealthPrivacyView } from './HealthPrivacyView';
+import { addonsPref } from '../../addons/enabledSet';
 
 const dlg = () => document.querySelector('[role="alertdialog"], [role="dialog"]') as HTMLElement;
 
 beforeEach(() => {
   setLocale('en');
   resetLocalData();
+  addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol', 'sleep']);
   deleteNicotineData();
   deleteAlcoholData();
   deleteSupplementData();

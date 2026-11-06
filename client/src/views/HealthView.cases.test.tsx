@@ -327,23 +327,12 @@ describe('Health home: start, lifestyle, privacy and history rows', () => {
     expect(shell.openOverlay).toHaveBeenLastCalledWith({ screen: 'health', sup: 'products' });
   });
 
-  it('the privacy row summarises the sharing level or says mixed, and opens the privacy page', () => {
-    const a = base();
-    const allOff = {
-      conditionsShare: 'off',
-      nicotine: { ...a.nicotine, settings: { ...a.nicotine.settings, sharing: 'off' } },
-      alcohol: { ...a.alcohol, settings: { ...a.alcohol.settings, sharing: 'off' } },
-      supplements: { ...a.supplements, settings: { ...a.supplements.settings, sharing: 'off' } },
-    };
-    seed(allOff);
-    const { shell, unmount } = view();
-    expect(screen.getByText(en.hlPrivCoach(en.nicPrivOff))).toBeTruthy();
-    fireEvent.click(screen.getByText(en.hlPrivRow));
-    expect(shell.openOverlay).toHaveBeenLastCalledWith({ screen: 'health', priv: true });
-    unmount();
-    seed({ ...allOff, conditionsShare: 'full' });
+  it('has no Privacy group: Privacy and sharing moved to More (owner, 06.11)', () => {
+    seed(base());
     view();
-    expect(screen.getByText(en.hlPrivMixed)).toBeTruthy();
+    expect(screen.queryByText(en.hlPrivRow)).toBeNull();
+    const heads = [...document.querySelectorAll('.uigl-h')].map((e) => e.textContent);
+    expect(heads).not.toContain(en.hlPrivacy);
   });
 
   it('"see all" opens the history list; recent items open their editor or the injury plan', () => {
@@ -399,7 +388,6 @@ describe('Health sub-screens by props', () => {
     ['alc', { alc: 'hub' as const }],
     ['sup', { sup: 'hub' as const }],
     ['cyc', { cyc: 'hub' as const }],
-    ['priv', { priv: true }],
   ])('%s replaces the whole overview and its back closes', (_n, props) => {
     const { onClose } = view(props);
     expect(screen.queryByText(en.startHealthTitle)).toBeNull();

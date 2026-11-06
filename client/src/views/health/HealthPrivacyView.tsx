@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { PageHead } from '../../components/ui/PageHead';
 import { GroupedList, ListRow } from '../../components/ui/GroupedList';
 import { ConfirmDialog } from '../../components/ui/Overlays';
+import { useAddonAvailable } from '../../addons/enabledSet';
 import { useT } from '../../i18n';
 import { ClientTrainerSharing } from '../../coach/client/lazy';
 import {
@@ -27,7 +28,8 @@ export interface HealthPrivacyViewProps {
 
 export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
   const { t } = useT();
-  const cycleOn = useCycle().enabled;
+  const available = useAddonAvailable();
+  const cycleOn = useCycle().enabled && available('cycle');
   const [confirmCycle, setConfirmCycle] = useState(false);
   const [confirm, setConfirm] = useState<'nicotine' | 'alcohol' | 'supplements' | null>(null);
   // The same "Your privacy" block as Profile → Settings (one component, `PrivacyHub`), so Consents, the two documents and
@@ -58,34 +60,43 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
             onOpenMyData={myData.open}
             onOpenExport={myData.openExport}
           />
-          <GroupedList header={t.nicPrivData} footer={t.hlPrivNote}>
-            <ListRow
-              action
-              tone="danger"
-              label={t.nicPrivDelete}
-              onClick={() => setConfirm('nicotine')}
-            />
-            <ListRow
-              action
-              tone="danger"
-              label={t.alcPrivDelete}
-              onClick={() => setConfirm('alcohol')}
-            />
-            <ListRow
-              action
-              tone="danger"
-              label={t.supPrivDelete}
-              onClick={() => setConfirm('supplements')}
-            />
-            {cycleOn && (
-              <ListRow
-                action
-                tone="danger"
-                label={t.cycDelete}
-                onClick={() => setConfirmCycle(true)}
-              />
-            )}
-          </GroupedList>
+          {/* Deleting an add-on's data is offered only while the add-on is installed (its data stays when it is removed). */}
+          {(available('nicotine-alcohol') || available('supplements') || cycleOn) && (
+            <GroupedList header={t.nicPrivData} footer={t.hlPrivNote}>
+              {available('nicotine-alcohol') && (
+                <>
+                  <ListRow
+                    action
+                    tone="danger"
+                    label={t.nicPrivDelete}
+                    onClick={() => setConfirm('nicotine')}
+                  />
+                  <ListRow
+                    action
+                    tone="danger"
+                    label={t.alcPrivDelete}
+                    onClick={() => setConfirm('alcohol')}
+                  />
+                </>
+              )}
+              {available('supplements') && (
+                <ListRow
+                  action
+                  tone="danger"
+                  label={t.supPrivDelete}
+                  onClick={() => setConfirm('supplements')}
+                />
+              )}
+              {cycleOn && (
+                <ListRow
+                  action
+                  tone="danger"
+                  label={t.cycDelete}
+                  onClick={() => setConfirmCycle(true)}
+                />
+              )}
+            </GroupedList>
+          )}
         </div>
       </div>
       {confirmCycle && (

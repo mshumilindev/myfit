@@ -35,7 +35,6 @@ import {
   type HistFilter,
 } from './health/HealthHistory';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
-import { IconTile } from '../components/ui/IconTile';
 import { StickyActionBar } from '../components/ui/StickyActionBar';
 import { ToneText } from '../components/ui/ToneText';
 import {
@@ -65,7 +64,6 @@ import { AlcoholHealthRow } from './health/alcohol/AlcoholSection';
 import { SupplementHealthRow } from './health/supplements/SupplementSection';
 import { SupplementQuickStartSheet } from './health/supplements/SupplementQuickStartSheet';
 import { hasSupplementData } from '../supplements';
-import { HealthPrivacyView } from './health/HealthPrivacyView';
 import { HealthGate } from '../legal/HealthOff';
 import { HealthDisclaimer } from '../legal/HealthDisclaimer';
 import './Health.css';
@@ -86,8 +84,6 @@ export interface HealthViewProps {
   sup?: 'hub' | 'products' | 'calc';
   /** A Cycle page: the hub or its settings. */
   cyc?: CycleScreen;
-  /** Health › Privacy and sharing (all health privacy in one place). */
-  priv?: boolean;
   onClose: () => void;
 }
 
@@ -392,29 +388,6 @@ export function HealthView(props: HealthViewProps) {
       <CycleHealthRow onOpen={() => go({ cyc: 'hub' })} />
     </NicotineHealthGroup>
   );
-  const sharingLabel = (l: 'off' | 'effects' | 'full') =>
-    ({ off: t.nicPrivOff, effects: t.nicPrivEffects, full: t.nicPrivFull })[l];
-  const levels = [
-    store.conditionsShare,
-    store.nicotine.settings.sharing,
-    store.alcohol.settings.sharing,
-    store.supplements?.settings.sharing ?? 'off',
-  ];
-  const privacyGroup = (
-    <GroupedList key="priv" header={t.hlPrivacy}>
-      <ListRow
-        icon={<IconTile tone="neutral" size={30} icon="lock" />}
-        label={t.hlPrivRow}
-        value={
-          levels.every((l) => l === levels[0])
-            ? t.hlPrivCoach(sharingLabel(levels[0]))
-            : t.hlPrivMixed
-        }
-        chevron
-        onClick={() => go({ priv: true })}
-      />
-    </GroupedList>
-  );
   const historyGroup = (
     <GroupedList key="hist" header={t.hlHistory}>
       {recent.map((it) => (
@@ -525,7 +498,6 @@ export function HealthView(props: HealthViewProps) {
     ) : null;
 
   // Privacy and Nicotine pages replace the whole Health overview (mobile and web).
-  if (props.priv) return <HealthPrivacyView onBack={props.onClose} />;
   if (props.nic || props.cyc || props.alc || props.sup)
     return (
       <HealthFeatureScreen
@@ -603,7 +575,6 @@ export function HealthView(props: HealthViewProps) {
             {conditionsGroup}
             {lifestyleGroup}
             {historyGroup}
-            {privacyGroup}
           </div>
         </div>
         {overlays}
@@ -626,7 +597,6 @@ export function HealthView(props: HealthViewProps) {
             {pastGroup}
             {conditionsGroup}
             {lifestyleGroup}
-            {privacyGroup}
           </>
         ) : (
           <div className="hl-cols">
@@ -639,7 +609,6 @@ export function HealthView(props: HealthViewProps) {
               {pastGroup}
               {conditionsGroup}
               {lifestyleGroup}
-              {privacyGroup}
             </div>
           </div>
         )}

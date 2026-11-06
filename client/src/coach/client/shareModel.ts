@@ -22,6 +22,16 @@ export const SHARE_GROUPS: readonly { id: ShareGroupId; ids: readonly ShareId[] 
   { id: 'life', ids: ['injury', 'conditions', 'nicotine', 'alcohol', 'supplements'] },
 ];
 
+/** The add-on a sharing row belongs to: with it not installed the row is not shown (nothing to share, and no way to turn it on). */
+export const ADDON_OF: Partial<Record<ShareId, string>> = {
+  sleep: 'sleep',
+  injury: 'injury-log',
+  conditions: 'health',
+  nicotine: 'nicotine-alcohol',
+  alcohol: 'nicotine-alcohol',
+  supplements: 'supplements',
+};
+
 export const isLocalCategory = (id: ShareId): id is LocalCategory =>
   (LOCAL_CATEGORIES as readonly string[]).includes(id);
 

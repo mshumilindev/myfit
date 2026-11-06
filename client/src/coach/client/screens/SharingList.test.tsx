@@ -10,6 +10,7 @@ import { setConditionsShare, setNicotineSharing } from '../../../store';
 import { setViewport } from '../../testViewport';
 import { createFixturesClientPort } from '../data/__fixtures__/fixtures';
 import { TrainerSharing } from './TrainerSharing';
+import { addonsPref } from '../../../addons/enabledSet';
 
 const ALL = {
   injuries: true,
@@ -31,6 +32,7 @@ const gate = (on: Partial<typeof ALL>, ready = true) =>
 const row = (title: string) => screen.findByRole('button', { name: new RegExp(`^${title},`) });
 
 beforeEach(() => {
+  addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol', 'sleep']);
   setViewport(390);
   setConditionsShare('off');
   setNicotineSharing('off');

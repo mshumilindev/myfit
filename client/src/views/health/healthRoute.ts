@@ -18,8 +18,6 @@ export type HealthOverlay = {
   sup?: 'hub' | 'products' | 'calc';
   /** Cycle pages (hub, settings). */
   cyc?: 'hub' | 'settings' | 'patterns';
-  /** Health › Privacy and sharing. */
-  priv?: boolean;
 };
 
 /** Health hash: #/health, then optionally /history (+ /timeline), then a form:
@@ -54,7 +52,6 @@ export function healthHash(o: HealthOverlay): string {
     parts.push('supplements');
     if (o.sup !== 'hub') parts.push(o.sup);
   }
-  if (o.priv) parts.push('privacy');
   return parts.join('/');
 }
 
@@ -79,17 +76,13 @@ export function healthFromHash(rest: string[]): HealthOverlay {
     o.cond = decodeURIComponent(a);
     if (b) o.condKey = decodeURIComponent(b);
   } else if (k === 'nicotine') {
-    // The old #/health/nicotine/privacy page now lives in Health › Privacy and sharing.
-    if (a === 'privacy') o.priv = true;
-    else o.nic = a === 'products' || a === 'calc' ? a : 'hub';
+    o.nic = a === 'products' || a === 'calc' ? a : 'hub';
   } else if (k === 'cycle') {
     o.cyc = a === 'settings' || a === 'patterns' ? a : 'hub';
   } else if (k === 'alcohol') {
     o.alc = a === 'products' || a === 'days' || a === 'calc' ? a : 'hub';
   } else if (k === 'supplements') {
     o.sup = a === 'products' || a === 'calc' ? a : 'hub';
-  } else if (k === 'privacy') {
-    o.priv = true;
   }
   return o;
 }

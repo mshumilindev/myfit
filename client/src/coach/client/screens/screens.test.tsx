@@ -7,6 +7,7 @@ import { MyTrainerPage } from './MyTrainerPage';
 import type { ClientCoachPort } from '../data/port';
 import { setViewport } from '../../testViewport';
 import { createFixturesClientPort } from '../data/__fixtures__/fixtures';
+import { addonsPref } from '../../../addons/enabledSet';
 import { InvitePages } from './InvitePages';
 import { TrainerSharing } from './TrainerSharing';
 import { AccessLogPage } from './AccessLogPage';
@@ -20,7 +21,10 @@ import {
 import { resetHealthGateForTests, withdrawHealthLocally } from '../../../data/healthConsentGate';
 import type { ClientSnapshot } from '../data/types';
 
-beforeEach(() => setViewport(390));
+beforeEach(() => {
+  setViewport(390);
+  addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol', 'sleep']);
+});
 afterEach(cleanup);
 
 describe('invite pages', () => {

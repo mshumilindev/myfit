@@ -9,14 +9,14 @@ import {
   deleteAlcoholData,
   deleteNicotineData,
   saveNicotineProduct,
-  setAlcoholSharing,
   setConditionsShare,
   setNicotineSharing,
-  setSupplementSharing,
 } from '../../store';
 import { newNicotineProduct } from '../../nicotine';
+import { addonsPref } from '../../addons/enabledSet';
 
 beforeEach(() => {
+  addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol', 'sleep']);
   setLocale('en');
   deleteNicotineData();
   deleteAlcoholData();
@@ -164,38 +164,20 @@ describe('HealthPrivacyView', () => {
 });
 
 describe('Health overview', () => {
-  it('has a Privacy group at the bottom with a coach summary; no share-default control or conditions footer', () => {
-    const shell = shellMock();
-    render(<HealthView shell={shell} onClose={() => undefined} />);
+  it('has no Privacy group any more: no share-default control, no conditions footer, no privacy row', () => {
+    render(<HealthView shell={shellMock()} onClose={() => undefined} />);
     expect(screen.queryByText('Share with my coach by default')).toBeNull();
     expect(screen.queryByText(/Private and encrypted\. Adjusts your plans/)).toBeNull();
     const heads = [...document.querySelectorAll('.uigl-h')].map((e) => e.textContent);
-    expect(heads[heads.length - 1]).toBe('Privacy');
-    expect(screen.getByText('Coach: Off')).toBeTruthy();
-    fireEvent.click(screen.getByText('Privacy and sharing'));
-    expect(shell.openOverlay).toHaveBeenCalledWith({ screen: 'health', priv: true });
+    expect(heads).not.toContain('Privacy');
+    expect(screen.queryByText('Privacy and sharing')).toBeNull();
   });
 
-  it('the summary follows the levels, and says mixed when the categories differ', () => {
-    setConditionsShare('effects');
-    setNicotineSharing('effects');
-    setAlcoholSharing('effects');
-    setSupplementSharing('effects');
-    const a = render(<HealthView shell={shellMock()} onClose={() => undefined} />);
-    expect(screen.getByText('Coach: Effects only')).toBeTruthy();
-    a.unmount();
-    setNicotineSharing('full');
-    render(<HealthView shell={shellMock()} onClose={() => undefined} />);
-    expect(screen.getByText('Coach: mixed')).toBeTruthy();
-    setConditionsShare('off');
-    setNicotineSharing('off');
-    setAlcoholSharing('off');
-    setSupplementSharing('off');
-  });
-
-  it('the priv route renders the privacy screen instead of the overview', () => {
-    render(<HealthView shell={shellMock()} priv onClose={() => undefined} />);
+  it('the privacy screen is its own page with a heading and a back', () => {
+    const onBack = vi.fn();
+    render(<HealthPrivacyView onBack={onBack} />);
     expect(screen.getByRole('heading', { name: 'Privacy and sharing' })).toBeTruthy();
-    expect(screen.queryByText('Log the past')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /back/i }));
+    expect(onBack).toHaveBeenCalled();
   });
 });

@@ -17,9 +17,11 @@ import {
   setNicotineSharing,
 } from '../../store';
 import { newNicotineProduct } from '../../nicotine';
+import { addonsPref } from '../../addons/enabledSet';
 
 beforeEach(() => {
   setLocale('en');
+  addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol', 'sleep']);
   deleteNicotineData();
   deleteAlcoholData();
   setConditionsShare('off');
@@ -134,14 +136,5 @@ describe('Health overview: Alcohol', () => {
     expect(labels).toEqual(['Nicotine', 'Alcohol', 'Supplements', 'Cycle']);
     fireEvent.click(within(group).getByText('Beer · ≈ 59 g a week'));
     expect(shell.openOverlay).toHaveBeenCalledWith({ screen: 'health', alc: 'hub' });
-  });
-
-  it('the privacy summary row says mixed when alcohol differs from the rest', () => {
-    const a = render(<HealthView shell={shellMock()} onClose={() => undefined} />);
-    expect(screen.getByText('Coach: Off')).toBeTruthy();
-    a.unmount();
-    setAlcoholSharing('effects');
-    render(<HealthView shell={shellMock()} onClose={() => undefined} />);
-    expect(screen.getByText('Coach: mixed')).toBeTruthy();
   });
 });

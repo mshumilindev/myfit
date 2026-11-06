@@ -169,7 +169,7 @@ export function ProfileView({
   const [avatarRefresh, setAvatarRefresh] = useState(0);
   const [profileEditing, setProfileEditing] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
-  const myData = useMyDataPage(() => shell.openOverlay({ screen: 'health', priv: true }));
+  const myData = useMyDataPage(() => shell.openOverlay({ screen: 'privacy' }));
   const consents = useConsentsPage(() => myData.openExport(true));
   const [assignTrainerOpen, setAssignTrainerOpen] = useState(false);
   const [assignClientsOpen, setAssignClientsOpen] = useState(false);

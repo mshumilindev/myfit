@@ -8,6 +8,7 @@ import { Notice } from '../../../components/ui/Notice';
 import { OptionCard, OptionCardGrid } from '../../../components/ui/OptionCard';
 import { Sheet } from '../../../components/ui/Overlays';
 import { ToneText } from '../../../components/ui/ToneText';
+import { useAddonAvailable } from '../../../addons/enabledSet';
 import { useT } from '../../../i18n';
 import { useClientT, type ClientStrings } from '../../../i18n/coachClient';
 import { ClientAvatar } from '../../ClientAvatar';
@@ -17,6 +18,7 @@ import { LEVEL_ICON } from '../domain';
 import { levelWord, sinceDate } from '../labels';
 import { shareRowMeta } from '../shareLabels';
 import {
+  ADDON_OF,
   SHARE_GROUPS,
   allowedLevels,
   buildSummary,
@@ -82,10 +84,16 @@ export interface SharingListProps {
 export function SharingList(p: SharingListProps) {
   const { cc, locale } = useClientT();
   const { t } = useT();
+  const available = useAddonAvailable();
+  // A row whose add-on is not installed is not listed, and counts as not shared in the summary (the stored level stays).
+  const shown = (id: ShareId) => !ADDON_OF[id] || available(ADDON_OF[id]!);
   const first = p.trainer ? p.trainer.name.split(' ')[0] : '';
   const waiting = p.linkState === 'waiting';
-  const nothing = sharesNothingAll(p.levels, p.blocks);
-  const sum = buildSummary(p.levels, p.blocks);
+  const levels = Object.fromEntries(
+    Object.entries(p.levels).map(([id, l]) => [id, shown(id as ShareId) ? l : 'off']),
+  ) as ShareLevels;
+  const nothing = sharesNothingAll(levels, p.blocks);
+  const sum = buildSummary(levels, p.blocks);
   const title = (id: ShareId) => shareRowMeta(id, cc, t).title;
   const status = waiting ? 'waiting' : nothing ? 'none' : 'active';
   const groupHead: Record<ShareGroupId, string> = {
@@ -96,7 +104,7 @@ export function SharingList(p: SharingListProps) {
   // without a trainer the six grant rows have no meaning: only the on-device ones stay
   const groups = SHARE_GROUPS.map((g) => ({
     ...g,
-    ids: p.trainer ? g.ids : g.ids.filter((id) => LOCAL.has(id)),
+    ids: (p.trainer ? g.ids : g.ids.filter((id) => LOCAL.has(id))).filter(shown),
   })).filter((g) => g.ids.length > 0);
 
   return (
@@ -146,7 +154,7 @@ export function SharingList(p: SharingListProps) {
             label={p.trainer.name}
             sub={
               status === 'active'
-                ? `${cc.shSince(sinceDate(p.trainer.since, locale))} · ${cc.shOfTen(sharedCountAll(p.levels, p.blocks))}`
+                ? `${cc.shSince(sinceDate(p.trainer.since, locale))} · ${cc.shOfTen(sharedCountAll(levels, p.blocks))}`
                 : status === 'waiting'
                   ? cc.shWaitingSub(first)
                   : cc.shNoneSub

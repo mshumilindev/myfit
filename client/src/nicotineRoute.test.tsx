@@ -52,9 +52,9 @@ describe('#/health/nicotine routes', () => {
     expect(fromHash('#/health/nicotine').overlay).toEqual({ screen: 'health', nic: 'hub' });
   });
 
-  it('#/health/privacy parses and formats; the old #/health/nicotine/privacy redirects to it', () => {
+  it('#/health/privacy is the standalone Privacy page and formats as #/more/privacy; the old nicotine link redirects to it', () => {
     const { overlay } = fromHash('#/health/privacy');
-    expect(overlay).toEqual({ screen: 'health', priv: true });
+    expect(overlay).toEqual({ screen: 'privacy' });
     expect(
       toHash(
         'today',
@@ -65,8 +65,8 @@ describe('#/health/nicotine routes', () => {
         'total' as never,
         'volume' as never,
       ),
-    ).toBe('#/health/privacy');
-    expect(fromHash('#/health/nicotine/privacy').overlay).toEqual({ screen: 'health', priv: true });
+    ).toBe('#/more/privacy');
+    expect(fromHash('#/health/nicotine/privacy').overlay).toEqual({ screen: 'privacy' });
   });
 
   it('the calc route renders the "Use in calculations" screen', () => {
@@ -83,15 +83,15 @@ describe('Back from a deep link', () => {
     expect(b).toEqual({ cur: { screen: 'health' }, stack: [] });
     expect(overlayBack(b)).toEqual({ cur: null, stack: [] });
   });
-  it('calc goes to the hub too; the privacy page goes to the Health overview', () => {
+  it('calc goes to the hub too; Privacy and sharing is its own page: back leaves it, and old Health links land on it', () => {
     expect(overlayBack(state({ screen: 'health', nic: 'calc' })).cur).toEqual({
       screen: 'health',
       nic: 'hub',
     });
-    expect(overlayBack(state({ screen: 'health', priv: true }))).toEqual({
-      cur: { screen: 'health' },
-      stack: [],
-    });
+    expect(overlayBack(state({ screen: 'privacy' }))).toEqual({ cur: null, stack: [] });
+    expect(fromHash('#/more/privacy').overlay).toEqual({ screen: 'privacy' });
+    expect(fromHash('#/health/privacy').overlay).toEqual({ screen: 'privacy' });
+    expect(fromHash('#/health/nicotine/privacy').overlay).toEqual({ screen: 'privacy' });
   });
   it('opened from the session summary, Back returns to that summary', () => {
     const session: Overlay = { screen: 'session', workoutId: 'w' };

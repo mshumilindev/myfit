@@ -115,6 +115,13 @@ export function useAddonOrBase(id: string): boolean {
   return on || !isAddonAllowed(id, role);
 }
 
+/** The same gate as `useAddonOrBase`, for code that asks about many ids (a list of rows): installed, or not offered to the role. */
+export function useAddonAvailable(): (id: string) => boolean {
+  const on = useEnabledAddons();
+  const role = getRole();
+  return (id) => on.has(id) || !isAddonAllowed(id, role);
+}
+
 /**
  * Run `fn` with the ids that just left the installed set, however they left: the Remove button, a change synced from
  * another device, or a role change that no longer offers them. Compares the set before and after every change.
