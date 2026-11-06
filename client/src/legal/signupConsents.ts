@@ -21,6 +21,7 @@ import {
   type LegalCtx,
 } from './consents';
 import { grantConsent, withdrawConsent } from './consentApi';
+import { isStaleVersionRefusal, refreshBuildOnStale } from './staleVersion';
 import { clearVerified } from './gateVerified';
 import { clearLocalOff, forgetLocalOff } from './localOff';
 import { docPlainText, sha256Hex } from './textHash';
@@ -222,6 +223,8 @@ async function passKind(uid: string, chain: readonly QueuedConsent[]): Promise<v
           e instanceof Error ? e.message.slice(0, 120) : ''
         }`.trim();
         if (withdraw && (status === 403 || status === 404) && noteRefusal(uid, item)) return; // maybe not ready yet: retried on the next passes, up to the limit
+        // This build may be the old side of a new document version: look for the newest build once (SPO-533).
+        if (isStaleVersionRefusal(e)) void refreshBuildOnStale();
         if (refusedForGood(e)) {
           if (item.qid) droppedQids.add(item.qid);
           removeItem(uid, item);
