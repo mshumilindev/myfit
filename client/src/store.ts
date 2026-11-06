@@ -256,6 +256,7 @@ import {
   type IsoDay,
 } from './weekStart';
 import type { GeneratedDay } from './sessionBuilder';
+import './addons/queue'; // registers the add-on lists for account sync (imports enabledSet too)
 import { listPrefFromDoc, LIST_PREFS, writeListPref, reconcileListPref } from './activityPrefs';
 import { resetTodayLayout } from './today/layout';
 import { pushTodayLayoutEdits, syncTodayLayoutFromDoc } from './today/layoutSync';

@@ -219,6 +219,10 @@ export const LIST_PREFS: Array<[string, ListPrefStore]> = [
   ['learnSaved', learnSavedPref],
   ['learnCompleted', learnCompletedPref],
 ];
+/** Lets a module that imports this file (so it can't be listed above) join the account sync. Idempotent by name. */
+export function registerListPref(name: string, pref: ListPrefStore): void {
+  if (!LIST_PREFS.some(([n]) => n === name)) LIST_PREFS.push([name, pref]);
+}
 export function writeListPref(
   write: (fields: Record<string, unknown>) => void,
   name: string,

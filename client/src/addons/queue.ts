@@ -4,7 +4,7 @@
  * store; the account-synced copy lands with the enabled set.
  */
 import { useSyncExternalStore } from 'react';
-import { createListPref } from '../activityPrefs';
+import { createListPref, registerListPref } from '../activityPrefs';
 import { getRole, onRoleChange, type Role } from '../api';
 import { ADDONS, addonById } from './manifest';
 import {
@@ -16,6 +16,7 @@ import {
 } from './enabledSet';
 
 export const addonsQueuePref = createListPref('spotter.addons.queue');
+registerListPref('addonsQueue', addonsQueuePref);
 
 /** The queue for a role: allowed ids with their parents, minus what is already installed. */
 export function resolveQueue(

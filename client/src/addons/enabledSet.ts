@@ -7,7 +7,7 @@
  * - A role only ever gets items that list it; stored ids a role may not use are ignored, never errors.
  */
 import { useSyncExternalStore } from 'react';
-import { createListPref, type ListPref } from '../activityPrefs';
+import { createListPref, registerListPref, type ListPref } from '../activityPrefs';
 import { getRole, onRoleChange, type Role } from '../api';
 import { ADDONS, addonById, type StoreRole } from './manifest';
 
@@ -48,6 +48,8 @@ export function removalSet(id: string): string[] {
 }
 
 export const addonsPref = createListPref('spotter.addons');
+// Synced into meta/prefs as `addons` + `addonsUpdatedAt` (last write wins, like the Learn lists).
+registerListPref('addons', addonsPref);
 
 function current(role: Role): Set<string> {
   return resolveEnabled(addonsPref.snapshot(), role);
