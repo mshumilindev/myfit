@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { addonsPref } from '../addons/enabledSet';
 import { resetInstall } from '../addons/installRun';
 import { addonsQueuePref, queueAdd } from '../addons/queue';
@@ -71,5 +71,14 @@ describe('StoreApp', () => {
     expect(screen.getByText('Not available yet.')).toBeTruthy();
     expect(screen.getByText('Playlist per session')).toBeTruthy();
     expect(screen.queryByRole('button', { name: /^Add$|^Add with/ })).toBeNull();
+  });
+  it('offline: a bar says so and adding is replaced by a disabled Offline pill; installed items stay', () => {
+    const net = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    expect(screen.getByText('You are offline.')).toBeTruthy();
+    const pills = screen.getAllByRole('button', { name: 'Offline' });
+    expect(pills.length).toBeGreaterThan(0);
+    expect((pills[0] as HTMLButtonElement).disabled).toBe(true);
+    net.mockRestore();
   });
 });

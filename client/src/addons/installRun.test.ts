@@ -1,7 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { addonsPref, resolveEnabled } from './enabledSet';
 import { addonsQueuePref, queueAdd } from './queue';
-import { installOrder, resetInstall, startInstall, undoInstall, useInstallRun } from './installRun';
+import {
+  installOrder,
+  resetInstall,
+  retryInstall,
+  startInstall,
+  undoInstall,
+  useInstallRun,
+} from './installRun';
 import { act, renderHook } from '@testing-library/react';
 
 describe('install run', () => {
@@ -63,5 +70,30 @@ describe('install run', () => {
     undoInstall('member');
     expect(resolveEnabled(addonsPref.snapshot(), 'member').has('atlas')).toBe(false);
     expect(addonsQueuePref.get()).toEqual(['atlas']);
+  });
+
+  it('offline: items fail, an add-on fails with its app, nothing is turned on; retry works once online', async () => {
+    queueAdd(['injury-log', 'sleep'], 'member');
+    const net = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    const { result } = renderHook(() => useInstallRun());
+    await act(async () => {
+      const run = startInstall('member');
+      await vi.runAllTimersAsync();
+      await run;
+    });
+    expect(result.current.status).toBe('partial');
+    expect(Object.values(result.current.result)).toEqual(['failed', 'failed', 'failed']);
+    expect(resolveEnabled(addonsPref.snapshot(), 'member').size).toBe(0);
+    expect(addonsQueuePref.get().length).toBe(3);
+    net.mockReturnValue(true);
+    await act(async () => {
+      const run = retryInstall('member');
+      await vi.runAllTimersAsync();
+      await run;
+    });
+    expect(result.current.status).toBe('done');
+    expect(resolveEnabled(addonsPref.snapshot(), 'member').has('injury-log')).toBe(true);
+    expect(addonsQueuePref.get()).toEqual([]);
+    net.mockRestore();
   });
 });

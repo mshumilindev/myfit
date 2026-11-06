@@ -109,6 +109,13 @@ export const addonStorePl: typeof addonStoreEn = {
       { name: 'Odtwarzacz w Dziś', desc: 'Pauza i pomijanie bez wychodzenia' },
     ],
   },
+  offlineAction: 'Offline',
+  offlineTitle: 'Jesteś offline.',
+  offlineBody: 'Zainstalowane elementy działają. Dodawanie wymaga internetu.',
+  installFailed: 'Nie udało się zainstalować. Sprawdź połączenie.',
+  tryAgain: 'Spróbuj ponownie',
+  almostDone: 'Prawie gotowe',
+  installedOf: (n: number, total: number) => `Zainstalowano ${n} z ${total}.`,
   items: {
     health: { name: 'Zdrowie', desc: 'Urazy, cykl, suplementy i więcej w jednym miejscu.' },
     'injury-log': { name: 'Dziennik urazów', desc: 'Zapisuj urazy i to, jak się goją.' },

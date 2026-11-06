@@ -109,6 +109,13 @@ export const addonStoreEt: typeof addonStoreEn = {
       { name: 'Mängija vaates Täna', desc: 'Paus ja vahelejätmine ilma lahkumata' },
     ],
   },
+  offlineAction: 'Võrguühenduseta',
+  offlineTitle: 'Oled võrguühenduseta.',
+  offlineBody: 'Paigaldatud asjad töötavad. Lisamiseks on vaja internetti.',
+  installFailed: 'Paigaldamine ebaõnnestus. Kontrolli ühendust.',
+  tryAgain: 'Proovi uuesti',
+  almostDone: 'Peaaegu valmis',
+  installedOf: (n: number, total: number) => `Paigaldatud ${n} / ${total}.`,
   items: {
     health: { name: 'Tervis', desc: 'Vigastused, tsükkel, toidulisandid ja muu ühes kohas.' },
     'injury-log': { name: 'Vigastuste logi', desc: 'Märgi vigastused ja nende paranemine.' },

@@ -8,7 +8,8 @@ import { currentUid, getRole, getUsername } from '../api';
 import { addonById } from '../addons/manifest';
 import type { Role } from '../api';
 import { useEnabledAddons } from '../addons/enabledSet';
-import { undoInstall, useInstallRun } from '../addons/installRun';
+import { retryInstall, undoInstall, useInstallRun } from '../addons/installRun';
+import { useOnline } from '../addons/useOnline';
 import { useQueuedAddons } from '../addons/queue';
 import { initialsOf, useOwnAvatarUrl } from '../components/Avatar';
 import { useAddonStoreT } from '../i18n/addonStore';
@@ -21,6 +22,7 @@ import {
   SkHeader,
   SkIcon,
   SkNavItem,
+  SkOfflineBar,
   SkSearchField,
   SkSectionLink,
   SkShell,
@@ -64,6 +66,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
   );
   const enabled = useEnabledAddons();
   const run = useInstallRun();
+  const online = useOnline();
   const queued = useQueuedAddons();
   useEffect(() => {
     const on = () => {
@@ -94,8 +97,8 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
     setHash(storeHash(v as StoreView['view'], id), false);
   };
   const ctx: StoreCtx = useMemo(
-    () => ({ st, enabled, queued, open: (id) => go('item', id) }),
-    [st, enabled, queued],
+    () => ({ st, enabled, queued, online, open: (id) => go('item', id) }),
+    [st, enabled, queued, online],
   );
 
   const label: Record<StoreTab, string> = {
@@ -292,12 +295,19 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
             )}
           </div>
         )}
+        {!online && !runView && (
+          <SkOfflineBar className="sk-mb16" icon={<SkIcon name="bell" />} title={st.offlineTitle}>
+            {st.offlineBody}
+          </SkOfflineBar>
+        )}
         {view === 'discover' && <Discover role={role} ctx={ctx} go={go} />}
         {view === 'apps' && <Apps role={role} ctx={ctx} />}
         {view === 'addons' && <Addons role={role} ctx={ctx} />}
         {view === 'selected' && <Selected ctx={ctx} go={go} />}
         {view === 'installed' && <Installed ctx={ctx} go={go} />}
-        {view === 'installing' && <Installing ctx={ctx} run={run} />}
+        {view === 'installing' && (
+          <Installing ctx={ctx} run={run} onRetry={() => void retryInstall()} />
+        )}
         {view === 'done' && <InstallDone ctx={ctx} ids={run.ids} />}
         {view === 'item' && <ItemPage id={route.id} ctx={ctx} go={go} />}
         {view === 'search' && <Search role={role} ctx={ctx} query={query} setQuery={setQuery} />}

@@ -111,6 +111,13 @@ export const addonStoreEn = {
       { name: 'Player on Today', desc: 'Pause and skip without leaving' },
     ],
   },
+  offlineAction: 'Offline',
+  offlineTitle: 'You are offline.',
+  offlineBody: 'Installed items work. Adding needs internet.',
+  installFailed: 'Could not install. Check your connection.',
+  tryAgain: 'Try again',
+  almostDone: 'Almost done',
+  installedOf: (n: number, total: number) => `${n} of ${total} installed.`,
   items: {
     health: { name: 'Health', desc: 'Injuries, cycle, supplements and more in one place.' },
     'injury-log': { name: 'Injury log', desc: 'Log injuries and how they heal.' },

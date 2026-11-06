@@ -109,6 +109,13 @@ export const addonStoreUk: typeof addonStoreEn = {
       { name: 'Плеєр на «Сьогодні»', desc: 'Пауза й перемикання, не виходячи з екрана' },
     ],
   },
+  offlineAction: 'Офлайн',
+  offlineTitle: 'Ви офлайн.',
+  offlineBody: 'Установлене працює. Щоб додати, потрібен інтернет.',
+  installFailed: 'Не вдалося встановити. Перевірте з’єднання.',
+  tryAgain: 'Спробувати ще',
+  almostDone: 'Майже готово',
+  installedOf: (n: number, total: number) => `Встановлено ${n} із ${total}.`,
   items: {
     health: { name: 'Здоров’я', desc: 'Травми, цикл, добавки та інше в одному місці.' },
     'injury-log': { name: 'Журнал травм', desc: 'Записуйте травми й те, як вони гояться.' },

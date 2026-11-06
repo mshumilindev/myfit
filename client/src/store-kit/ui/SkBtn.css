@@ -33,6 +33,9 @@
   border: var(--sk-line-w) dashed var(--mute);
   color: var(--mute);
 }
+.sk-bt-dash:disabled {
+  opacity: 1;
+}
 .sk-bt-bad {
   background: var(--bad-bg);
   color: var(--bad);

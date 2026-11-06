@@ -110,6 +110,13 @@ export const addonStoreLt: typeof addonStoreEn = {
       { name: 'Grotuvas skiltyje „Šiandien“', desc: 'Pauzė ir perjungimas neišeinant' },
     ],
   },
+  offlineAction: 'Neprisijungus',
+  offlineTitle: 'Esate neprisijungę.',
+  offlineBody: 'Įdiegti elementai veikia. Norint pridėti, reikia interneto.',
+  installFailed: 'Nepavyko įdiegti. Patikrinkite ryšį.',
+  tryAgain: 'Bandyti dar kartą',
+  almostDone: 'Beveik baigta',
+  installedOf: (n: number, total: number) => `Įdiegta ${n} iš ${total}.`,
   items: {
     health: { name: 'Sveikata', desc: 'Traumos, ciklas, papildai ir kita vienoje vietoje.' },
     'injury-log': { name: 'Traumų žurnalas', desc: 'Žymėkite traumas ir kaip jos gyja.' },

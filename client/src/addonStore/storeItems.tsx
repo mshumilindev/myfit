@@ -10,6 +10,8 @@ export interface StoreCtx {
   st: AddonStoreStrings;
   enabled: ReadonlySet<string>;
   queued: readonly string[];
+  /** False while the device is offline: adding needs the network, installed items keep working. */
+  online: boolean;
   open: (id: string) => void;
 }
 
@@ -61,6 +63,13 @@ export function ItemAction({
     return (
       <SkBtn kind={lead ? 'tint' : 'pri'} size={size} onClick={() => queueRemove([m.id])}>
         {st.pending}
+      </SkBtn>
+    );
+  }
+  if (!ctx.online) {
+    return (
+      <SkBtn kind="dash" size={size} disabled>
+        {st.offlineAction}
       </SkBtn>
     );
   }

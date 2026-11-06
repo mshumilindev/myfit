@@ -37,6 +37,7 @@ export * from './ui/SkShell';
 export * from './ui/SkScrim';
 export * from './ui/SkSheet';
 export * from './ui/SkSteps';
+export * from './ui/SkOfflineBar';
 export * from './ui/SkToast';
 export * from './ui/SkBackground';
 export * from './ui/SkHighlight';
