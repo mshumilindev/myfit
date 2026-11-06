@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { TodayCustomize } from './TodayCustomize';
+import { addonsPref } from '../addons/enabledSet';
 import {
   CORE_IDS,
   DEFAULT_LAYOUT,
@@ -77,6 +78,8 @@ const ids = () => getTodayLayout().sections.map((s) => s.id);
 const save = () => fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
 beforeEach(() => {
+  // the widget catalogue is searched with the add-ons installed (SPO-518: Sleep/Mastery widgets are add-on content)
+  addonsPref.set(['sleep', 'mastery']);
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
   localStorage.clear();

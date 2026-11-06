@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { addonsPref } from '../addons/enabledSet';
-import { MASTERY_WIDGET_IDS, useWidgetAvailable, widgetById } from './registry';
+import { MASTERY_WIDGET_IDS, SLEEP_WIDGET_IDS, useWidgetAvailable, widgetById } from './registry';
 
 const role = vi.hoisted(() => ({ value: 'member' as string }));
 vi.mock('../api', async (orig) => ({
@@ -35,5 +35,20 @@ describe('Today widgets follow the Mastery add-on (SPO-518)', () => {
   it('a trainer keeps them (the store does not offer Mastery to trainers)', () => {
     role.value = 'trainer';
     expect(avail('apex-rank')).toBe(true);
+  });
+});
+
+describe('Sleep widgets follow the Sleep add-on (SPO-518)', () => {
+  it('every id in the Sleep set is a real widget', () => {
+    for (const id of SLEEP_WIDGET_IDS) expect(widgetById(id), id).toBeDefined();
+  });
+  it('hidden for a member without Sleep, back once installed, always for a trainer', () => {
+    expect(avail('sleep')).toBe(false);
+    expect(avail('sleep-debt')).toBe(false);
+    addonsPref.set(['sleep']);
+    expect(avail('sleep')).toBe(true);
+    addonsPref.reset();
+    role.value = 'trainer';
+    expect(avail('sleep')).toBe(true);
   });
 });

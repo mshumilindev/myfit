@@ -119,7 +119,11 @@ export const MASTERY_WIDGET_IDS: ReadonlySet<string> = new Set([
   'apex-feats-board',
   'apex-year-feats',
 ]);
+/** Widgets of the Sleep add-on (SPO-518). */
+export const SLEEP_WIDGET_IDS: ReadonlySet<string> = new Set(['sleep', 'sleep-debt']);
 export function useWidgetAvailable(): (w: WidgetDef) => boolean {
   const mastery = useAddonOrBase('mastery');
-  return (w) => mastery || !MASTERY_WIDGET_IDS.has(w.id);
+  const sleep = useAddonOrBase('sleep');
+  return (w) =>
+    (mastery || !MASTERY_WIDGET_IDS.has(w.id)) && (sleep || !SLEEP_WIDGET_IDS.has(w.id));
 }

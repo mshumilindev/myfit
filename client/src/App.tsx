@@ -756,6 +756,7 @@ function AppMain() {
   // Apex / Mastery is an add-on (SPO-518): not installed = no screen, no rank-up moment, no background rating work.
   const apexOn = useAddonOrBase('mastery');
   const themesOn = useAddonOrBase('themes');
+  const sleepOn = useAddonOrBase('sleep');
   useEffect(() => setThemesAllowed(themesOn), [themesOn]);
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
@@ -1647,7 +1648,7 @@ function AppMain() {
           onClose={closeOverlay}
         />
       )}
-      {activeOverlay?.screen === 'sleep' && (
+      {activeOverlay?.screen === 'sleep' && (sleepOn || !!nightLive) && (
         <Suspense fallback={null}>
           <SleepView
             wake={activeOverlay.wake}
@@ -1870,7 +1871,9 @@ function AppMain() {
           <ChristmasScene />
         </>
       )}
-      <SleepAutomation onOpenSchedule={() => setOverlay({ screen: 'sleep', mode: 'schedule' })} />
+      {sleepOn && (
+        <SleepAutomation onOpenSchedule={() => setOverlay({ screen: 'sleep', mode: 'schedule' })} />
+      )}
       <SleepPauseController onSleepScreen={!!nightLive && activeOverlay?.screen === 'sleep'} />
       {desktopRail && (
         <GymRail
