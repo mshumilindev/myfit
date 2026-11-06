@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { addonsPref } from '../../addons/enabledSet';
-import { LOCALES } from '../../i18n';
+import { LOCALES, setLocale } from '../../i18n';
 import { GymTabBar } from './GymChrome';
 
 vi.mock('../../api', async (orig) => ({
@@ -49,5 +49,14 @@ describe('GymTabBar: More is always the last tab', () => {
     bar();
     fireEvent.click(screen.getByRole('button', { name: /more/i }));
     expect(screen.getByText(t.masteryTitle)).toBeTruthy();
+  });
+
+  it('lists Language in More and switching it changes the locale', () => {
+    bar();
+    fireEvent.click(screen.getByRole('button', { name: /more/i }));
+    fireEvent.click(screen.getByText(t.language));
+    fireEvent.click(screen.getByText(LOCALES.uk.locale));
+    expect(document.documentElement.lang).toBe('uk');
+    setLocale('en');
   });
 });
