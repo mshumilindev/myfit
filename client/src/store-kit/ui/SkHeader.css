@@ -37,9 +37,13 @@
   place-items: center;
   width: var(--sk-avatar);
   height: var(--sk-avatar);
+  flex: 0 0 var(--sk-avatar);
+  border: 0;
+  padding: 0;
   border-radius: 50%;
-  background: var(--chip);
-  color: var(--fg);
+  /* Same disc as the avatar next to it, so the two read as one size. */
+  background: var(--ic-5);
+  color: var(--on-tone);
 }
 .sk-hd-exit svg {
   width: var(--sk-icon-s);
