@@ -1753,7 +1753,7 @@ function AppMain() {
           <ClientRoutesLazy route={activeOverlay.route} onClose={closeOverlay} />
         </Suspense>
       )}
-      {activeOverlay?.screen === 'mastery' && (
+      {activeOverlay?.screen === 'mastery' && apexOn && (
         <MasteryView shell={shell} onClose={masteryTab ? undefined : closeOverlay} />
       )}
       {activeOverlay?.screen === 'coach' && (
@@ -2104,6 +2104,7 @@ export function GymRail(props: {
       ? 'var(--color-danger)'
       : undefined;
   const conditions = useActiveConditions();
+  const masteryOn = useAddonOrBase('mastery');
 
   return (
     <AppRail
@@ -2137,19 +2138,23 @@ export function GymRail(props: {
               },
             ]
           : []),
-        {
-          id: 'mastery',
-          label: t.masteryTitle,
-          icon: 'medal',
-          onSelect: props.onOpenMastery,
-          node: (
-            <div className="rail-mastery">
-              <Suspense fallback={null}>
-                <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />
-              </Suspense>
-            </div>
-          ),
-        },
+        ...(masteryOn
+          ? [
+              {
+                id: 'mastery',
+                label: t.masteryTitle,
+                icon: 'medal',
+                onSelect: props.onOpenMastery,
+                node: (
+                  <div className="rail-mastery">
+                    <Suspense fallback={null}>
+                      <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />
+                    </Suspense>
+                  </div>
+                ),
+              },
+            ]
+          : []),
       ]}
       extrasAfter={
         role === 'admin'

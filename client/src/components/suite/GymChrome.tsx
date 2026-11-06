@@ -12,6 +12,7 @@ import { BrandAccount } from './BrandAccount';
 import { SUITE_ICON, SUITE_TONE } from './suiteTone';
 import { SuiteTabBar } from '../SuiteTabBar';
 import type { TabBarItem, TabBarProps } from '../ui/TabBar';
+import { useAddonOrBase } from '../../addons/enabledSet';
 import './GymChrome.css';
 
 export function GymBrandBar({
@@ -76,6 +77,8 @@ export function GymTabBar<Id extends string>({
   fab: TabBarProps<Id>['fab'];
 }) {
   const { t } = useT();
+  // Mastery is an add-on (SPO-518): its tab and menu entry only exist when it is installed (or not offered to the role).
+  const masteryOn = useAddonOrBase('mastery');
   const tab = hidden.length === 0;
   return (
     <SuiteTabBar<Id | 'mastery'>
@@ -83,12 +86,14 @@ export function GymTabBar<Id extends string>({
       noAccount
       noMore={tab}
       moreItems={[
-        { id: 'mastery', icon: 'medal', label: t.masteryTitle, onSelect: onMastery },
+        ...(masteryOn
+          ? [{ id: 'mastery', icon: 'medal', label: t.masteryTitle, onSelect: onMastery }]
+          : []),
         ...hidden,
       ]}
       items={[
         ...items,
-        ...(tab
+        ...(tab && masteryOn
           ? [{ id: 'mastery' as const, icon: 'medal', label: t.masteryTitle, active: mastery }]
           : []),
       ]}

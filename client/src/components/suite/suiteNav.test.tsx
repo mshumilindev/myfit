@@ -9,6 +9,7 @@ import type { ReactElement } from 'react';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { LOCALES } from '../../i18n';
+import { addonsPref } from '../../addons/enabledSet';
 import { coachEn } from '../../i18n/coach.en';
 import { coachEntryHash } from '../../coach/routes';
 import { setViewport } from '../../coach/testViewport';
@@ -235,6 +236,8 @@ beforeEach(() => {
   session.role = 'member';
   window.history.replaceState(null, '', '/');
   localStorage.clear();
+  // Mastery is an add-on (SPO-518): these navigation contracts are about the app with it installed.
+  addonsPref.set(['mastery']);
   installRailMeasure(900);
 });
 afterEach(() => {
@@ -289,6 +292,19 @@ describe.each(CASES)('$name: desktop rail', (k) => {
         .map((b) => b.getAttribute('aria-label'))
         .slice(-2),
     ).toEqual([c.navApps, c.railProfile]);
+  });
+
+  it('without the Mastery add-on a member has no Mastery entry in More (SPO-518)', () => {
+    if (k.extras[0] !== t.masteryTitle) return; // only the Gym kit carries Mastery
+    addonsPref.reset();
+    setViewport(1440);
+    render(k.rail(cb()));
+    setRailHeight(60);
+    fireEvent.click(within(rail()).getByRole('button', { name: c.navMore }));
+    const menu = screen.getByRole('dialog', { name: c.navMore });
+    const rows = [...menu.querySelectorAll('button.uirow')].map((b) => b.textContent);
+    expect(rows).not.toContain(t.masteryTitle);
+    expect(rows).toEqual([...k.nav(session.role), ...k.extras.slice(1)]);
   });
 
   it('More appears only when the destinations do not fit, and lists only the overflow', () => {
