@@ -23,6 +23,11 @@ describe('isAddonAllowed', () => {
     expect(isAddonAllowed('gyms', 'member')).toBe(false); // Gyms is base, not an add-on
     expect(isAddonAllowed('gyms', 'trainer')).toBe(false);
   });
+  it('offers Sleep and its extras to every role, so it is out of every base (owner, 06.11)', () => {
+    for (const role of ['member', 'trainer', 'admin'] as const)
+      for (const id of ['sleep', 'sleep-auto-start', 'sleep-sounds'])
+        expect(isAddonAllowed(id, role), `${id} ${role}`).toBe(true);
+  });
   it('gives a manager no store and never allows coming-soon or unknown ids', () => {
     for (const a of ADDONS) expect(isAddonAllowed(a.id, 'manager')).toBe(false);
     expect(isAddonAllowed('nutrition', 'member')).toBe(false);
