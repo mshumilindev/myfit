@@ -6,8 +6,8 @@
   justify-content: space-between;
   gap: var(--sk-sp-5);
   height: var(--sk-header-h);
-  /* Room for the system status bar like the boards (44px); a notched phone's own inset wins when it is larger. */
-  padding: max(env(safe-area-inset-top), var(--sk-status-h)) var(--sk-sp-6) 0;
+  /* Device inset (status bar / notch) plus a small gap, so the visible top gap matches the gap below the title. */
+  padding: calc(env(safe-area-inset-top) + var(--sk-sp-5)) var(--sk-sp-6) 0;
 }
 .sk-hd-title {
   min-width: 0;
