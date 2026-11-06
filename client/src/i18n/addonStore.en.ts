@@ -102,6 +102,15 @@ export const addonStoreEn = {
   goToToday: 'Go to Today',
   keepBrowsing: 'Keep browsing',
   stepDone: 'Done',
+  notAvailableLead: 'Not available yet.',
+  notAvailableRest: 'It will appear in the store when it is ready.',
+  planned: 'Planned',
+  plans: {
+    music: [
+      { name: 'Playlist per session', desc: 'Starts with your workout' },
+      { name: 'Player on Today', desc: 'Pause and skip without leaving' },
+    ],
+  },
   items: {
     health: { name: 'Health', desc: 'Injuries, cycle, supplements and more in one place.' },
     'injury-log': { name: 'Injury log', desc: 'Log injuries and how they heal.' },

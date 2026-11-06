@@ -65,4 +65,11 @@ describe('StoreApp', () => {
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
     await waitFor(() => expect(currentHash()).toBe('#/store'));
   });
+  it('a coming-soon item shows the note and what is planned, with no add action', () => {
+    window.location.hash = '#/store/item/music';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    expect(screen.getByText('Not available yet.')).toBeTruthy();
+    expect(screen.getByText('Playlist per session')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /^Add$|^Add with/ })).toBeNull();
+  });
 });

@@ -100,6 +100,15 @@ export const addonStoreEt: typeof addonStoreEn = {
   goToToday: 'Mine vaatesse Täna',
   keepBrowsing: 'Sirvi edasi',
   stepDone: 'Valmis',
+  notAvailableLead: 'Pole veel saadaval.',
+  notAvailableRest: 'Ilmub poes, kui on valmis.',
+  planned: 'Plaanis',
+  plans: {
+    music: [
+      { name: 'Esitusloend treeningu jaoks', desc: 'Algab koos treeninguga' },
+      { name: 'Mängija vaates Täna', desc: 'Paus ja vahelejätmine ilma lahkumata' },
+    ],
+  },
   items: {
     health: { name: 'Tervis', desc: 'Vigastused, tsükkel, toidulisandid ja muu ühes kohas.' },
     'injury-log': { name: 'Vigastuste logi', desc: 'Märgi vigastused ja nende paranemine.' },

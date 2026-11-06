@@ -111,3 +111,9 @@
     margin: 0 0 var(--sk-sp-6);
   }
 }
+
+.as-plan-ic {
+  display: inline-flex;
+  margin-top: var(--sk-sp-2);
+  color: var(--acc-t);
+}

@@ -3,12 +3,15 @@ import { ADDONS, addonById } from '../addons/manifest';
 import {
   SkBadge,
   SkCard,
+  SkIcon,
+  SkNote,
   SkPreviewPhone,
   SkPvBox,
   SkPvDot,
   SkPvLines,
   SkSectionLink,
   SkStat,
+  type SkIconName,
 } from '../store-kit';
 import './screens.css';
 import { Rows, Section } from './storeLists';
@@ -29,6 +32,7 @@ export function ItemPage({
   const parent = m.parent ? addonById(m.parent) : undefined;
   const children = m.kind === 'app' ? ADDONS.filter((a) => a.parent === m.id && !a.soon) : [];
   const name = itemName(st, m.id);
+  if (m.soon) return <ComingSoon id={m.id} ctx={ctx} />;
   return (
     <>
       <div className="sk-rowf sk-g16 sk-start as-item-head">
@@ -80,6 +84,47 @@ export function ItemPage({
       {children.length > 0 && (
         <Section title={st.addonsForApp(name)}>
           <Rows ids={children.map((a) => a.id)} ctx={ctx} />
+        </Section>
+      )}
+    </>
+  );
+}
+
+const PLAN_ICONS: Record<string, SkIconName[]> = { music: ['play', 'today'] };
+
+/** An item that is not available yet (board 07): what it is, a note, and what is planned. */
+function ComingSoon({ id, ctx }: { id: string; ctx: StoreCtx }) {
+  const { st } = ctx;
+  const m = addonById(id)!;
+  const plan = (st.plans as Record<string, ReadonlyArray<{ name: string; desc: string }>>)[id];
+  return (
+    <>
+      <div className="sk-rowf sk-g16 sk-start as-item-head">
+        <TileOf st={st} m={m} size={96} />
+        <div className="sk-f1">
+          <div>{kindBadge(st, m)}</div>
+          <h1 className="sk-t-h1 sk-mt4">{itemName(st, id)}</h1>
+          <div className="sk-t-s sk-mt4">{itemDesc(st, id)}</div>
+        </div>
+      </div>
+      <SkNote icon="shield" className="sk-mt16">
+        <b>{st.notAvailableLead}</b> {st.notAvailableRest}
+      </SkNote>
+      {plan && (
+        <Section title={st.planned}>
+          <div className="sk-col sk-g12">
+            {plan.map((p, i) => (
+              <div key={p.name} className="sk-rowf sk-g12 sk-start">
+                <span className="as-plan-ic">
+                  <SkIcon name={PLAN_ICONS[id]?.[i] ?? 'check'} />
+                </span>
+                <div className="sk-f1">
+                  <div className="sk-t-b sk-b6">{p.name}</div>
+                  <div className="sk-t-s">{p.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </Section>
       )}
     </>

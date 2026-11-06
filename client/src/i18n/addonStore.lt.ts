@@ -101,6 +101,15 @@ export const addonStoreLt: typeof addonStoreEn = {
   goToToday: 'Į „Šiandien“',
   keepBrowsing: 'Toliau naršyti',
   stepDone: 'Baigta',
+  notAvailableLead: 'Dar nepasiekiama.',
+  notAvailableRest: 'Atsiras parduotuvėje, kai bus paruošta.',
+  planned: 'Planuojama',
+  plans: {
+    music: [
+      { name: 'Grojaraštis treniruotei', desc: 'Pasileidžia kartu su treniruote' },
+      { name: 'Grotuvas skiltyje „Šiandien“', desc: 'Pauzė ir perjungimas neišeinant' },
+    ],
+  },
   items: {
     health: { name: 'Sveikata', desc: 'Traumos, ciklas, papildai ir kita vienoje vietoje.' },
     'injury-log': { name: 'Traumų žurnalas', desc: 'Žymėkite traumas ir kaip jos gyja.' },

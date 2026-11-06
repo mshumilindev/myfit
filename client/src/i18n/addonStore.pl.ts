@@ -100,6 +100,15 @@ export const addonStorePl: typeof addonStoreEn = {
   goToToday: 'Przejdź do Dziś',
   keepBrowsing: 'Wróć do przeglądania',
   stepDone: 'Gotowe',
+  notAvailableLead: 'Jeszcze niedostępne.',
+  notAvailableRest: 'Pojawi się w sklepie, gdy będzie gotowe.',
+  planned: 'W planach',
+  plans: {
+    music: [
+      { name: 'Playlista na trening', desc: 'Włącza się razem z treningiem' },
+      { name: 'Odtwarzacz w Dziś', desc: 'Pauza i pomijanie bez wychodzenia' },
+    ],
+  },
   items: {
     health: { name: 'Zdrowie', desc: 'Urazy, cykl, suplementy i więcej w jednym miejscu.' },
     'injury-log': { name: 'Dziennik urazów', desc: 'Zapisuj urazy i to, jak się goją.' },

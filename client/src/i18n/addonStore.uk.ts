@@ -100,6 +100,15 @@ export const addonStoreUk: typeof addonStoreEn = {
   goToToday: 'До «Сьогодні»',
   keepBrowsing: 'Продовжити перегляд',
   stepDone: 'Готово',
+  notAvailableLead: 'Поки недоступно.',
+  notAvailableRest: 'З’явиться в магазині, коли буде готово.',
+  planned: 'У планах',
+  plans: {
+    music: [
+      { name: 'Плейлист на тренування', desc: 'Запускається разом із тренуванням' },
+      { name: 'Плеєр на «Сьогодні»', desc: 'Пауза й перемикання, не виходячи з екрана' },
+    ],
+  },
   items: {
     health: { name: 'Здоров’я', desc: 'Травми, цикл, добавки та інше в одному місці.' },
     'injury-log': { name: 'Журнал травм', desc: 'Записуйте травми й те, як вони гояться.' },
