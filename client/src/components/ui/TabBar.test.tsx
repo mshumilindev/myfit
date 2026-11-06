@@ -94,6 +94,28 @@ describe('TabBar', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
+  it('with the notch the bar stays symmetric: fewer tabs leave empty slots, the notch is always in the middle', () => {
+    const three = items.slice(0, 3);
+    const { container } = render(
+      <TabBar items={three} onSelect={() => {}} fab={{ ariaLabel: 'Start', onClick: () => {} }} />,
+    );
+    const nav = container.querySelector('nav.tabbar') as HTMLElement;
+    expect(nav.style.gridTemplateColumns).toBe('repeat(5, minmax(0, 1fr))');
+    const kids = [...nav.children];
+    expect(kids).toHaveLength(5);
+    expect(kids[2].classList.contains('tabbar-gap')).toBe(true); // the notch is the 3rd of 5
+    expect(kids[4].classList.contains('tabbar-pad')).toBe(true); // the missing right tab is an empty slot
+    cleanup();
+    const two = render(
+      <TabBar
+        items={items.slice(0, 2)}
+        onSelect={() => {}}
+        fab={{ ariaLabel: 'Start', onClick: () => {} }}
+      />,
+    );
+    expect((two.container.querySelector('nav.tabbar') as HTMLElement).children).toHaveLength(5);
+  });
+
   it('fab attention adds the pulse class', () => {
     render(
       <TabBar items={items} onSelect={() => {}} fab={{ ariaLabel: 'Start', onClick: () => {} }} />,

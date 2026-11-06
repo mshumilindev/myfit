@@ -140,7 +140,15 @@ export function TabBar<Id extends string = string>({
   };
   const wrapRef = useRef<HTMLDivElement>(null);
   const { shown, turned, covered, layerRef } = useFabLayer(wrapRef, !!fab?.open);
-  const cols = items.length + (apps ? 1 : 0) + (more ? 1 : 0) + (fab ? 1 : 0);
+  // With the notch the bar is symmetric: as many slots left of it as right of it, so the "+" (always at 50%) never
+  // lands on a tab and the slots keep one size however many tabs there are (a hidden add-on tab leaves an empty slot).
+  const trailing = (apps ? 1 : 0) + (more ? 1 : 0);
+  const left = fab ? items.slice(0, 2) : items;
+  const right = fab ? items.slice(2) : [];
+  const slots = fab ? Math.max(2, left.length, right.length + trailing) : 0;
+  const padLeft = fab ? slots - left.length : 0;
+  const padRight = fab ? slots - right.length - trailing : 0;
+  const cols = fab ? slots * 2 + 1 : items.length + trailing;
   // A bar with a single destination navigates nowhere (the admin Users app): no bar at all.
   if (cols <= 1) return null;
   return (
@@ -154,11 +162,17 @@ export function TabBar<Id extends string = string>({
         role={tabs ? 'tablist' : undefined}
         style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
       >
-        {fab ? items.slice(0, 2).map(btn) : items.map(btn)}
+        {Array.from({ length: padLeft }, (_, i) => (
+          <span key={`pl${i}`} className="tabbar-pad" aria-hidden />
+        ))}
+        {left.map(btn)}
         {/* The notch — the Start "+" floats in it (sibling below, so the
             notch mask doesn't clip it). */}
         {fab && <span className="tabbar-gap" aria-hidden />}
-        {fab && items.slice(2).map(btn)}
+        {right.map(btn)}
+        {Array.from({ length: padRight }, (_, i) => (
+          <span key={`pr${i}`} className="tabbar-pad" aria-hidden />
+        ))}
         {apps && (
           <button onClick={apps.onClick} aria-label={apps.ariaLabel}>
             <Icon name="squares-four" />
