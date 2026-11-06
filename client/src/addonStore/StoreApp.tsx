@@ -4,12 +4,12 @@
  * item page and live search.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { getRole, getUsername } from '../api';
+import { currentUid, getRole, getUsername } from '../api';
 import { addonById } from '../addons/manifest';
 import type { Role } from '../api';
 import { useEnabledAddons } from '../addons/enabledSet';
 import { useQueuedAddons } from '../addons/queue';
-import { initialsOf } from '../components/ui/Avatar';
+import { initialsOf, useOwnAvatarUrl } from '../components/Avatar';
 import { useAddonStoreT } from '../i18n/addonStore';
 import { currentHash, setHash } from '../route';
 import {
@@ -98,6 +98,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
   const title = view === 'search' ? st.searchTitle : view === 'item' ? '' : label[view];
   const name = getUsername() ?? '';
   const initials = initialsOf(name || '?');
+  const photo = useOwnAvatarUrl(currentUid() ?? undefined) ?? undefined;
   const showTray = queued.length > 0 && view !== 'selected' && view !== 'search';
   const isRoot = tab !== null;
   const itemM = view === 'item' ? addonById(route.id) : undefined;
@@ -119,7 +120,9 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
 
   const icon = (n: SkIconName) => <SkIcon name={n} />;
   const exit = () => setHash(STORE_FALLBACK_HASH);
-  const avatar = <SkAvatar initials={initials} label={name || st.title} onClick={onOpenProfile} />;
+  const avatar = (
+    <SkAvatar initials={initials} src={photo} label={name || st.title} onClick={onOpenProfile} />
+  );
 
   return (
     <div className="sk-root sk-app" data-store-role={role || getRole()}>
@@ -135,6 +138,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
                 avatar={
                   <SkAvatar
                     initials={initials}
+                    src={photo}
                     label={name || st.title}
                     onClick={onOpenProfile}
                     size={40}

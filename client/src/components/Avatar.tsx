@@ -125,6 +125,12 @@ export function seedAvatarCache(userId: string, objectUrl: string, refreshKey = 
   urlCache.set(`${userId}#${refreshKey}#${rev}`, objectUrl);
 }
 
+/** The signed-in person's own photo (or null → initials) for kit avatars that take a plain `src`. */
+export function useOwnAvatarUrl(userId: string | undefined, hasPhoto = true): string | null {
+  const uid = userId && userId !== 'me' ? userId : undefined;
+  return useAvatarUrl(uid, uid && hasPhoto ? `${uid}#0#0` : null, 0);
+}
+
 export function UserAvatar({
   userId,
   name,
@@ -158,19 +164,12 @@ export function UserAvatar({
   );
 }
 
-function AvatarFace({
-  uid,
-  cacheKey,
-  rev,
-  name,
-  size,
-}: {
-  uid?: string;
-  cacheKey: string | null;
-  rev: number;
-  name: string;
-  size: number;
-}) {
+/** The photo for one person (device copy first, then Storage); `null` until it is there or when there is none. */
+export function useAvatarUrl(
+  uid: string | undefined,
+  cacheKey: string | null,
+  rev: number,
+): string | null {
   const [src, setSrc] = useState<string | null>(() =>
     cacheKey ? (urlCache.get(cacheKey) ?? null) : null,
   );
@@ -228,6 +227,23 @@ function AvatarFace({
       release();
     };
   }, [uid, cacheKey, rev]);
+  return src;
+}
+
+function AvatarFace({
+  uid,
+  cacheKey,
+  rev,
+  name,
+  size,
+}: {
+  uid?: string;
+  cacheKey: string | null;
+  rev: number;
+  name: string;
+  size: number;
+}) {
+  const src = useAvatarUrl(uid, cacheKey, rev);
 
   // The disc itself is the kit primitive; this component only finds the photo.
   return <AvatarDisc src={src} name={name} size={size} className="avatar" aria-hidden />;
