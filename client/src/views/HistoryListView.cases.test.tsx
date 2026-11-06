@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { addonsPref } from '../addons/enabledSet';
 import { HistoryListView } from './HistoryListView';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
@@ -16,9 +17,11 @@ import {
 beforeEach(() => {
   freezeClock();
   setLocale('en');
+  addonsPref.set(['sleep']);
   seed(richState());
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
   localStorage.clear();
@@ -158,5 +161,13 @@ describe('HistoryListView', () => {
     expect(shell.openOverlay).toHaveBeenLastCalledWith(
       expect.objectContaining({ screen: 'sleep', mode: 'edit' }),
     );
+  });
+
+  it('without the Sleep add-on the history has no sleep rows (the data stays)', () => {
+    addonsPref.reset();
+    const { container } = render(<HistoryListView shell={makeShell()} onClose={() => undefined} />);
+    fireEvent.click(next());
+    expect(container.querySelector('.hist-workout')).not.toBeNull();
+    expect(container.querySelector('.hist-item.cat-sleep')).toBeNull();
   });
 });

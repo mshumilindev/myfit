@@ -1,4 +1,5 @@
 import { currentHash } from '../route';
+import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { setLocale, fmtDayMonth } from '../i18n';
@@ -39,10 +40,12 @@ beforeEach(() => {
   freezeClock(NOW);
   setLocale('en');
   resetTodayMocks();
+  addonsPref.set(['sleep']);
   learn.ready = false;
   installIntersectionObserver();
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
   vi.restoreAllMocks();
@@ -358,6 +361,12 @@ describe('TodayView: sleep cards', () => {
     const { shell } = await openToday(yesterdayOn());
     fireEvent.click(await screen.findByRole('button', { name: en.sleepEnterManually }));
     expect(shell.calls.openOverlay).toHaveBeenCalledWith({ screen: 'sleep', mode: 'backfill' });
+  });
+
+  it('without the Sleep add-on there are no sleep cards (the data stays)', async () => {
+    addonsPref.reset();
+    await openToday(yesterdayOn());
+    expect(screen.queryByRole('button', { name: en.sleepEnterManually })).toBeNull();
   });
 
   it('an auto-filled night asks to adjust the times', async () => {

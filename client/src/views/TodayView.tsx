@@ -40,7 +40,7 @@ import { useTw } from '../today/strings';
 import type { ShortcutCtx } from '../today/shortcuts';
 import '../today/today.css';
 import type { Shell } from '../App';
-import type { LiveSession } from '../types';
+import type { LiveSession, SleepNight } from '../types';
 import { computeTrends } from '../trends';
 import { computePlaybook, type Play } from '../playbook';
 import { getRole } from '../api';
@@ -129,6 +129,9 @@ const SUGGEST_COOLDOWN_MS = 12 * 24 * 60 * 60 * 1000;
 
 /** Program card colour family by the day's mode: brass while pending, green when
  *  trained, blue for rest / vacation, amber for illness, warm red for injury. */
+/** Stable empty list: history shows no sleep rows while the Sleep add-on is not installed (data stays). */
+const NO_SLEEPS: SleepNight[] = [];
+
 const PROGRAM_MODE_TONE: Record<WeekMode, Tone> = {
   train: 'accent',
   done: 'ok',
@@ -145,6 +148,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const isDesktop = useIsDesktop();
   const themesOn = useAddonOrBase('themes');
   const atlasOn = useAddonOrBase('atlas');
+  const sleepOn = useAddonOrBase('sleep');
   const { t, locale } = useT();
   const tw = useTw();
   const layout = useTodayLayout();
@@ -1582,7 +1586,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           <AlcoholCheckinCard />
           <SupplementCheckinCard />
           <ProgramActivitySuggest />
-          {shows('sleep') && (
+          {shows('sleep') && sleepOn && (
             <>
               <SleepForgotBanner
                 onOpenBackfill={() => shell.openOverlay({ screen: 'sleep', mode: 'backfill' })}
@@ -1604,7 +1608,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   <HistoryTimeline
                     workouts={finished}
                     activities={store.activities}
-                    sleeps={store.sleeps}
+                    sleeps={sleepOn ? store.sleeps : NO_SLEEPS}
                     allWorkouts={store.workouts}
                     bodyKg={bodyKg}
                     maxDays={days}

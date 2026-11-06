@@ -9,6 +9,8 @@ import { useMemo, useState } from 'react';
 import type { Shell } from '../App';
 import { dayKey, latestWeight, useStore } from '../store';
 import { useT } from '../i18n';
+import { useAddonOrBase } from '../addons/enabledSet';
+import type { SleepNight } from '../types';
 import { useMinuteClock } from '../atlas/notes';
 import { HistoryTimeline, buildHistoryDays, useDayBars } from '../components/HistoryTimeline';
 import { PageHead } from '../components/ui/PageHead';
@@ -18,6 +20,8 @@ import { WeekStepper } from '../components/ui/WeekStepper';
 import { useWeekStartDay, weekStartOf } from '../weekStart';
 
 const WEEK_MS = 7 * 86_400_000;
+/** Stable empty list: no sleep rows in history while the Sleep add-on is not installed (data stays). */
+const NO_SLEEPS: SleepNight[] = [];
 
 /** Local midnight `n` weeks after `ts` (n < 0 = earlier), DST-safe. */
 function addWeeks(ts: number, n: number): number {
@@ -35,10 +39,12 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
   const [week, setWeek] = useState(0); // 0 = the current week
   const [picking, setPicking] = useState(false);
 
+  const sleepOn = useAddonOrBase('sleep');
+  const sleeps = sleepOn ? store.sleeps : NO_SLEEPS;
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const workoutCount = finished.length;
-  const dayBar = useDayBars(finished, store.activities, store.sleeps);
-  const days = buildHistoryDays(finished, store.activities, store.sleeps);
+  const dayBar = useDayBars(finished, store.activities, sleeps);
+  const days = buildHistoryDays(finished, store.activities, sleeps);
 
   const thisWeek = weekStartOf(now, weekStart);
   const oldest = days.length ? weekStartOf(days[days.length - 1].ts, weekStart) : thisWeek;
@@ -121,7 +127,7 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
           <HistoryTimeline
             workouts={finished}
             activities={store.activities}
-            sleeps={store.sleeps}
+            sleeps={sleeps}
             allWorkouts={store.workouts}
             bodyKg={bodyKg}
             range={range}
