@@ -1766,7 +1766,7 @@ function AppMain() {
       {activeOverlay?.screen === 'mastery' && apexOn && (
         <MasteryView shell={shell} onClose={masteryTab ? undefined : closeOverlay} />
       )}
-      {activeOverlay?.screen === 'coach' && (
+      {activeOverlay?.screen === 'coach' && (atlasOn || getRole() !== 'member') && (
         <CoachView
           onClose={closeOverlay}
           onOpenSession={(workoutId) => shell.openOverlay({ screen: 'session', workoutId })}

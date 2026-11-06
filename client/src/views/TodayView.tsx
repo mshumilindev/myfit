@@ -144,6 +144,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { withGym, gymPicker } = useGymStep();
   const isDesktop = useIsDesktop();
   const themesOn = useAddonOrBase('themes');
+  const atlasOn = useAddonOrBase('atlas');
   const { t, locale } = useT();
   const tw = useTw();
   const layout = useTodayLayout();
@@ -1188,16 +1189,18 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const allClients = () => {
     setHash(coachHash({ screen: 'clients' }));
   };
-  const renderAtlas = (ao: AtlasOpts): ReactNode => (
-    <AtlasClientsBlock
-      opts={ao}
-      withClients={getRole() !== 'member'}
-      onOpenCoach={openCoach}
-      onOpenClient={openClient}
-      onWatch={watchClient}
-      onAllClients={allClients}
-    />
-  );
+  // The member's Atlas card belongs to the Atlas add-on; a trainer's or admin's clients block is their core (SPO-518).
+  const renderAtlas = (ao: AtlasOpts): ReactNode =>
+    getRole() === 'member' && !atlasOn ? null : (
+      <AtlasClientsBlock
+        opts={ao}
+        withClients={getRole() !== 'member'}
+        onOpenCoach={openCoach}
+        onOpenClient={openClient}
+        onWatch={watchClient}
+        onAllClients={allClients}
+      />
+    );
 
   // A trainer's Today is just Atlas and their clients — nothing else, to avoid
   // clutter (the block with its defaults).

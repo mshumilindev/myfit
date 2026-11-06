@@ -2,6 +2,7 @@
  * Atlas's debrief on the session summary: what this session says about you,
  * in his temper — the same facts that land in his notes feed.
  */
+import { useAddonOrBase } from '../addons/enabledSet';
 import { Chip } from './ui/Chip';
 import { useMemo } from 'react';
 import { useT } from '../i18n';
@@ -18,8 +19,9 @@ export function AtlasDebrief({ workout, onOpen }: { workout: Workout; onOpen: ()
   const { t, locale } = useT();
   const s = useStore();
   const fmt = useAtlasFmt();
+  const atlasOn = useAddonOrBase('atlas');
   const lines = useMemo(() => {
-    if (!s.coach.enabled) return null;
+    if (!atlasOn || !s.coach.enabled) return null;
     const finished = s.workouts.filter((w) => w.finishedAt !== null);
     const now = workout.finishedAt ?? workout.startedAt;
     const gctx = {

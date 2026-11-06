@@ -52,3 +52,12 @@ describe('Sleep widgets follow the Sleep add-on (SPO-518)', () => {
     expect(avail('sleep')).toBe(true);
   });
 });
+
+describe('Atlas widgets follow the Atlas add-on (SPO-518)', () => {
+  it('a member without Atlas has none of the Atlas group, with it they are back', () => {
+    expect(avail('ask-atlas')).toBe(false);
+    expect(avail('atlas-insight')).toBe(false);
+    addonsPref.set(['atlas']);
+    expect(avail('ask-atlas')).toBe(true);
+  });
+});
