@@ -20,6 +20,8 @@ import { DiscoverBento } from './DiscoverBento';
 import { recommend } from './recommend';
 import { MIN_QUERY, searchItems } from './search';
 import { availableForRole, comingSoonForRole, STORE_CATEGORIES } from './storeCatalog';
+import { currentHash, setHash } from '../route';
+import { storeHash } from './storeRoute';
 import { ItemRow, itemName, TileOf, type StoreCtx } from './storeItems';
 
 /** Discover: the recommendation queue, a nudge for the next app, what is coming. */
@@ -63,13 +65,25 @@ export function Discover({
   );
 }
 
+function catLabel(st: StoreCtx['st'], c: string): string {
+  return st[`cat${c[0].toUpperCase()}${c.slice(1)}` as 'catRecovery'];
+}
+
+/** `#/store/apps?cat=recovery` opens Apps with that category on. */
+function catFromHash(): AddonManifest['category'] | 'all' {
+  const v = new URLSearchParams(currentHash().split('?')[1] ?? '').get('cat');
+  return (STORE_CATEGORIES as readonly string[]).includes(v ?? '')
+    ? (v as AddonManifest['category'])
+    : 'all';
+}
+
 /** Apps, filtered by category chips; coming-soon apps close the list. */
 export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   const { st } = ctx;
-  const [cat, setCat] = useState<AddonManifest['category'] | 'all'>('all');
+  const [cat, setCat] = useState<AddonManifest['category'] | 'all'>(catFromHash);
   const apps = availableForRole(role).filter((m) => m.kind === 'app');
   const cats = STORE_CATEGORIES.filter((c) => apps.some((m) => m.category === c));
-  const label = (c: string) => st[`cat${c[0].toUpperCase()}${c.slice(1)}` as 'catRecovery'];
+  const label = (c: string) => catLabel(st, c);
   const shown = apps.filter((m) => cat === 'all' || m.category === cat);
   const soon = comingSoonForRole(role);
   return (
@@ -239,6 +253,9 @@ export function Search({
   const ids = useMemo(() => searchItems(role, query, st), [role, query, st]);
   const short = query.trim().length < MIN_QUERY;
   const suggestions = ['health', 'sleep', 'atlas', 'themes'].filter((id) => addonById(id));
+  const categories = STORE_CATEGORIES.filter((cat) =>
+    availableForRole(role).some((m) => m.kind === 'app' && m.category === cat),
+  );
   const best = ids[0];
   const bestM = best ? addonById(best) : undefined;
   const rest = ids.slice(1);
@@ -267,7 +284,24 @@ export function Search({
           }
           title={st.noResultsFor(query.trim())}
           body={st.noResultsHint}
-        />
+        >
+          <div className="sk-t-e sk-mt24">{st.tryFor}</div>
+          <div className="sk-rowf sk-g8 sk-wrap sk-cen sk-mt12">
+            {suggestions.map((id) => (
+              <SkChip key={id} onClick={() => setQuery(itemName(st, id))}>
+                {itemName(st, id)}
+              </SkChip>
+            ))}
+          </div>
+          <div className="sk-t-e sk-mt24">{st.browseCats}</div>
+          <div className="sk-rowf sk-g8 sk-wrap sk-cen sk-mt12">
+            {categories.map((cat) => (
+              <SkChip key={cat} onClick={() => setHash(`${storeHash('apps')}?cat=${cat}`)}>
+                {catLabel(st, cat)}
+              </SkChip>
+            ))}
+          </div>
+        </SkEmpty>
       ) : (
         <>
           <div className="sk-t-s sk-mt16" aria-live="polite">

@@ -37,7 +37,7 @@ export const addonStoreEt: typeof addonStoreEn = {
   usesParent: (name) => `Kasutab: ${name}`,
   turnOn: (name) => `Lülita sisse: ${name}`,
   installedEmptyTitle: 'Praegu ainult alus',
-  installedEmptyBody: 'Sisse lülitatud rakendused ja lisad ilmuvad siia.',
+  installedEmptyBody: 'Treening, Täna ja Vestlus on alati sees.',
   installedStatus: 'Paigaldatud',
   catAll: 'Kõik',
   catRecovery: 'Taastumine',

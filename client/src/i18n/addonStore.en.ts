@@ -39,7 +39,7 @@ export const addonStoreEn = {
   usesParent: (name: string) => `Uses ${name}`,
   turnOn: (name: string) => `Turn on ${name}`,
   installedEmptyTitle: 'Only the base so far',
-  installedEmptyBody: 'Apps and add-ons you turn on appear here.',
+  installedEmptyBody: 'Training, Today and Chat are always on.',
   installedStatus: 'Installed',
   catAll: 'All',
   catRecovery: 'Recovery',

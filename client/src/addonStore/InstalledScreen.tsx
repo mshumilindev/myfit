@@ -19,20 +19,22 @@ export function Installed({ ctx, go }: { ctx: StoreCtx; go: (v: string, id?: str
   const items = ADDONS.filter((m) => enabled.has(m.id));
   if (!items.length) {
     return (
-      <SkEmpty
-        icon={
-          <SkTile letter="" tone={5} size={64}>
-            <SkIcon name="inst" />
-          </SkTile>
-        }
-        title={st.installedEmptyTitle}
-        body={st.installedEmptyBody}
-        actions={
-          <SkBtn kind="pri" onClick={() => go('discover')}>
-            {st.tabDiscover}
-          </SkBtn>
-        }
-      />
+      <SkCard className="sk-mt16 sk-p20">
+        <SkEmpty
+          icon={
+            <SkTile letter="" tone={5} size={64}>
+              <SkIcon name="inst" />
+            </SkTile>
+          }
+          title={st.installedEmptyTitle}
+          body={st.installedEmptyBody}
+          actions={
+            <SkBtn kind="pri" onClick={() => go('addons')}>
+              {st.browseAddons}
+            </SkBtn>
+          }
+        />
+      </SkCard>
     );
   }
   const apps = items.filter((m) => m.kind === 'app');

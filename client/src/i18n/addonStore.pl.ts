@@ -37,7 +37,7 @@ export const addonStorePl: typeof addonStoreEn = {
   usesParent: (name) => `Działa z: ${name}`,
   turnOn: (name) => `Włącz: ${name}`,
   installedEmptyTitle: 'Na razie tylko podstawa',
-  installedEmptyBody: 'Włączone aplikacje i dodatki pojawią się tutaj.',
+  installedEmptyBody: 'Trening, Dziś i Czat są zawsze włączone.',
   installedStatus: 'Zainstalowane',
   catAll: 'Wszystko',
   catRecovery: 'Regeneracja',

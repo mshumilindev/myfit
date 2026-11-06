@@ -37,7 +37,7 @@ export const addonStoreUk: typeof addonStoreEn = {
   usesParent: (name) => `Працює з: ${name}`,
   turnOn: (name) => `Увімкнути: ${name}`,
   installedEmptyTitle: 'Поки лише основа',
-  installedEmptyBody: 'Застосунки й додатки, які ви ввімкнете, з’являться тут.',
+  installedEmptyBody: 'Тренування, «Сьогодні» і Чат завжди ввімкнені.',
   installedStatus: 'Встановлено',
   catAll: 'Усі',
   catRecovery: 'Відновлення',

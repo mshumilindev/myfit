@@ -101,4 +101,19 @@ describe('StoreApp', () => {
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancel' }));
     expect(addonsPref.get()).toContain('health');
   });
+  it('No results offers suggestions and categories; a category opens Apps on it', () => {
+    window.location.hash = '#/store/search';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    fireEvent.change(screen.getAllByRole('searchbox')[0]!, { target: { value: 'zzzz' } });
+    expect(screen.getByText(/Nothing for/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Insights' }));
+    expect(currentHash()).toBe('#/store/apps?cat=insights');
+  });
+  it('an empty Installed points to Add-ons', () => {
+    window.location.hash = '#/store/installed';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    expect(screen.getByText('Training, Today and Chat are always on.')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Browse add-ons' }));
+    expect(currentHash()).toBe('#/store/addons');
+  });
 });

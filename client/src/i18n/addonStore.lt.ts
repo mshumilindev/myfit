@@ -37,7 +37,7 @@ export const addonStoreLt: typeof addonStoreEn = {
   usesParent: (name) => `Veikia su: ${name}`,
   turnOn: (name) => `Įjungti: ${name}`,
   installedEmptyTitle: 'Kol kas tik pagrindas',
-  installedEmptyBody: 'Čia atsiras įjungtos programos ir priedai.',
+  installedEmptyBody: 'Treniruotės, „Šiandien“ ir pokalbiai visada įjungti.',
   installedStatus: 'Įdiegta',
   catAll: 'Visi',
   catRecovery: 'Atsigavimas',
