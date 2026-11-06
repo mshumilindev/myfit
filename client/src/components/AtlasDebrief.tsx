@@ -40,7 +40,18 @@ export function AtlasDebrief({ workout, onOpen }: { workout: Workout; onOpen: ()
       say(f, temper, { locale, fmt, yoMama: s.coach.yoMama, swearing }),
     );
     return { temper, texts };
-  }, [s.coach, s.workouts, s.injuries, s.restPeriods, sleeps, s.bodyMetrics, workout, locale, fmt]);
+  }, [
+    atlasOn,
+    s.coach,
+    s.workouts,
+    s.injuries,
+    s.restPeriods,
+    sleeps,
+    s.bodyMetrics,
+    workout,
+    locale,
+    fmt,
+  ]);
   if (!lines || lines.texts.length === 0) return null;
   const { temper, texts } = lines;
   const endOfDay = new Date(workout.finishedAt ?? workout.startedAt).setHours(23, 59, 59, 999);
