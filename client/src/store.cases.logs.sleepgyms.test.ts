@@ -1,3 +1,4 @@
+import { addonsPref } from './addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const fs = vi.hoisted(() => ({
@@ -207,6 +208,7 @@ describe('sleep', () => {
   });
 
   it('schedule and settings changes keep the server auto-start queue in step', async () => {
+    addonsPref.set(['sleep', 'sleep-auto-start']);
     store.setSleepSettings({ autoLog: false });
     await settle();
     expect(fs.deletes).toContain('sleepSchedules/u1'); // auto-log off: queue removed
@@ -221,6 +223,20 @@ describe('sleep', () => {
     expect(q).toBeDefined();
     expect(Array.isArray(q!.data.upcoming)).toBe(true);
     expect(q!.data.nextStartAt).toBe((q!.data.upcoming as { startAt: number }[])[0].startAt);
+  });
+
+  it('without the Sleep add-on the server auto-start queue is cleared, whatever the settings say', async () => {
+    addonsPref.reset();
+    store.setSleepSchedule({
+      sameEveryNight: true,
+      every: { bedtime: 23 * 60, wake: 7 * 60 },
+      byDay: {},
+    } as never);
+    fs.deletes.length = 0;
+    store.setSleepSettings({ autoLog: true });
+    await settle();
+    expect(fs.deletes).toContain('sleepSchedules/u1');
+    expect(at('sleepSchedules/u1').filter((w) => w.data.upcoming)).toHaveLength(0);
   });
 
   it('backfillSleepKind stamps old nights once and writes them', async () => {

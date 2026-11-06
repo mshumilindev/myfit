@@ -63,7 +63,6 @@ export const addonStoreUk: typeof addonStoreEn = {
   browseApps: 'До застосунків',
   browseAddons: 'До додатків',
   forApp: (name: string) => `Для ${name}`,
-  addonsSub: 'Доповнення, що працюють усередині застосунку.',
   searchBest: 'Найкращий збіг',
   searchAddonsFor: (n: string) => `Доповнення для ${n}`,
   searchAlso: (q: string) => `Також згадують ${q}`,

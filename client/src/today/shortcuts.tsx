@@ -10,6 +10,7 @@ import { ACTIVITY_TYPES, activityType } from '../activities';
 import { dayKey } from '../store';
 import type { WidgetCtx } from './registry';
 import { setHash } from '../route';
+import { useAddonAvailable } from '../addons/enabledSet';
 
 export interface ShortcutCtx extends WidgetCtx {
   startToday: (() => void) | null;
@@ -193,4 +194,19 @@ export function renderShortcut(
       onClick={onClick ?? (() => def.run(ctx))}
     />
   );
+}
+
+/**
+ * Shortcuts that belong to an add-on (SPO-518); everything else (rest, day off, illness, training, Learn…) is core. Rest, illness
+ * and day-off forms stay available without Health: they are base per the owner's rule.
+ */
+export const SHORTCUT_ADDON: Readonly<Record<string, string>> = {
+  'sc:sleep': 'sleep',
+  'sc:injury': 'injury-log',
+  'sc:ask-atlas': 'atlas',
+};
+/** The shortcuts this person can use now. A hook: call it before any early return. Saved layouts keep their items either way. */
+export function useShortcuts(): readonly ShortcutDef[] {
+  const available = useAddonAvailable();
+  return SHORTCUTS.filter((x) => !SHORTCUT_ADDON[x.id] || available(SHORTCUT_ADDON[x.id]));
 }

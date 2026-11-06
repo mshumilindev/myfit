@@ -65,7 +65,7 @@ import {
   useWidgetAvailable,
   type WidgetGroup,
 } from './registry';
-import { SHORTCUTS, renderShortcut, shortcutById, type ShortcutCtx } from './shortcuts';
+import { renderShortcut, useShortcuts, type ShortcutCtx, type ShortcutDef } from './shortcuts';
 import { useTw } from './strings';
 import './today.css';
 
@@ -107,6 +107,8 @@ export function TodayCustomize({
   onClose: () => void;
 }) {
   const available = useWidgetAvailable();
+  const shortcuts = useShortcuts();
+  const shortcutById = (id: string) => shortcuts.find((x) => x.id === id);
   const widgetById = (id: string) => {
     const w = rawWidgetById(id);
     return w && available(w) ? w : undefined;
@@ -870,6 +872,7 @@ function AddPanel({
   onAddShortcut: (id: string) => void;
 }) {
   const available = useWidgetAvailable();
+  const shortcuts = useShortcuts();
   const widgets = WIDGETS.filter(available);
   const { t } = useT();
   const tw = useTw();
@@ -913,11 +916,11 @@ function AddPanel({
   for (const a of ctx.store.activities) freq.set(a.type, (freq.get(a.type) ?? 0) + 1);
   const added = new Set(scTarget?.items.map((w) => w.widget) ?? []);
   const full = !!scTarget && scTarget.items.length >= slotCount('shortcuts');
-  const acts = SHORTCUTS.filter((x) => x.group === 'activity').sort(
-    (a, b) => (freq.get(b.id.slice(7)) ?? 0) - (freq.get(a.id.slice(7)) ?? 0),
-  );
+  const acts = shortcuts
+    .filter((x) => x.group === 'activity')
+    .sort((a, b) => (freq.get(b.id.slice(7)) ?? 0) - (freq.get(a.id.slice(7)) ?? 0));
   const actsShown = allActs || searching ? acts : acts.slice(0, 9);
-  const scHit = (sc: (typeof SHORTCUTS)[number]) => matches(query, sc.label(ctx));
+  const scHit = (sc: ShortcutDef) => matches(query, sc.label(ctx));
   const wHits = widgets.filter((w) =>
     matches(query, w.name(tw), tw.groups[w.group], w.id.replace(/-/g, ' ')),
   );
@@ -930,7 +933,7 @@ function AddPanel({
       clearLabel={t.todayClear}
     />
   );
-  const scTile = (sc: (typeof SHORTCUTS)[number]) =>
+  const scTile = (sc: ShortcutDef) =>
     tile(
       sc.id,
       { kind: 'shortcut', widget: sc.id },
@@ -1031,14 +1034,14 @@ function AddPanel({
       {tab === 'shortcuts' && (
         <>
           {search(t.todaySearchShortcuts)}
-          {!SHORTCUTS.some(scHit) && (
+          {!shortcuts.some(scHit) && (
             <EmptyState icon="magnifying-glass" title={t.todayNoResults} />
           )}
           {(['train', 'activity', 'health'] as const).map((g) => {
             const list =
               g === 'activity'
                 ? actsShown.filter(scHit)
-                : SHORTCUTS.filter((x) => x.group === g && scHit(x));
+                : shortcuts.filter((x) => x.group === g && scHit(x));
             if (list.length === 0) return null;
             return (
               <Fragment key={g}>
@@ -1192,6 +1195,7 @@ function PickerSheet({
   onPick: (id: string) => void;
 }) {
   const available = useWidgetAvailable();
+  const shortcuts = useShortcuts();
   const widgets = WIDGETS.filter(available);
   const { t } = useT();
   const tw = useTw();
@@ -1203,7 +1207,7 @@ function PickerSheet({
   type Item = { id: string; group: string; name: string; node: ReactNode };
   const items: Item[] =
     size === 'XS'
-      ? SHORTCUTS.map((sc) => ({
+      ? shortcuts.map((sc) => ({
           id: sc.id,
           group: sc.group,
           name: sc.label(ctx),
@@ -1307,12 +1311,13 @@ function ShortcutsSheet({
 }) {
   const { t } = useT();
   const tw = useTw();
+  const shortcuts = useShortcuts();
   const [ids, setIds] = useState<string[]>(initial);
   const [group, setGroup] = useState<'all' | 'train' | 'activity' | 'health'>('all');
   const [allActs, setAllActs] = useState(false);
   const [query, setQuery] = useState('');
   const searching = query.trim() !== '';
-  const hit = (sc: (typeof SHORTCUTS)[number]) => matches(query, sc.label(ctx));
+  const hit = (sc: ShortcutDef) => matches(query, sc.label(ctx));
 
   const toggle = (id: string) =>
     setIds((cur) =>
@@ -1322,16 +1327,18 @@ function ShortcutsSheet({
   // Favourites: activity types by how often they were logged, chosen ones first.
   const freq = new Map<string, number>();
   for (const a of ctx.store.activities) freq.set(a.type, (freq.get(a.type) ?? 0) + 1);
-  const acts = SHORTCUTS.filter((s) => s.group === 'activity').sort((a, b) => {
-    const sa = ids.includes(a.id) ? 1 : 0;
-    const sb = ids.includes(b.id) ? 1 : 0;
-    if (sa !== sb) return sb - sa;
-    return (freq.get(b.id.slice(7)) ?? 0) - (freq.get(a.id.slice(7)) ?? 0);
-  });
+  const acts = shortcuts
+    .filter((s) => s.group === 'activity')
+    .sort((a, b) => {
+      const sa = ids.includes(a.id) ? 1 : 0;
+      const sb = ids.includes(b.id) ? 1 : 0;
+      if (sa !== sb) return sb - sa;
+      return (freq.get(b.id.slice(7)) ?? 0) - (freq.get(a.id.slice(7)) ?? 0);
+    });
   const collapsed = group === 'all' && !allActs && !searching;
   const actsShown = collapsed ? acts.slice(0, 7) : acts;
 
-  const tile = (sc: (typeof SHORTCUTS)[number]) => (
+  const tile = (sc: ShortcutDef) => (
     <div key={sc.id} className="tdc-sc">
       {renderShortcut(sc, ctx, ids.includes(sc.id), () => toggle(sc.id))}
     </div>
@@ -1365,19 +1372,19 @@ function ShortcutsSheet({
         placeholder={t.todaySearchShortcuts}
         clearLabel={t.todayClear}
       />
-      {groups.every((g) => !SHORTCUTS.some((s) => s.group === g.key && hit(s))) && (
+      {groups.every((g) => !shortcuts.some((s) => s.group === g.key && hit(s))) && (
         <EmptyState icon="magnifying-glass" title={t.todayNoResults} />
       )}
       {groups
         .filter((g) => searching || group === 'all' || group === g.key)
-        .filter((g) => SHORTCUTS.some((s) => s.group === g.key && hit(s)))
+        .filter((g) => shortcuts.some((s) => s.group === g.key && hit(s)))
         .map((g) => (
           <Fragment key={g.key}>
             <div className="tdc-pick-group">{g.title}</div>
             <div className="tdc-pick-grid">
               {g.key === 'activity'
                 ? actsShown.filter(hit).map(tile)
-                : SHORTCUTS.filter((s) => s.group === g.key && hit(s)).map(tile)}
+                : shortcuts.filter((s) => s.group === g.key && hit(s)).map(tile)}
               {g.key === 'activity' && collapsed && acts.length > 7 && (
                 <Button
                   variant="secondary"

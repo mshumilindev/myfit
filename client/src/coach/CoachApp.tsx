@@ -15,6 +15,7 @@ import { MoreMenu, type MoreMenuItem } from '../components/ui/MoreMenu';
 import type { RailEntry } from '../components/ui/railOverflow';
 import { SkeletonRows } from '../components/ui/Skeleton';
 import { TabBar } from '../components/ui/TabBar';
+import { useCommonMoreItems } from '../components/suite/commonMore';
 import { COACH_BREAKPOINT, COACH_WIDE_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
 import { useT } from '../i18n';
 import { useCoachT } from '../i18n/coach';
@@ -172,9 +173,14 @@ export function CoachShell({
   const moreScreens: readonly ScreenId[] = manager
     ? []
     : [...(MORE_SCREENS as readonly ScreenId[]), 'team'];
-  // Header controls the bar had no room for (the language) continue in More; the account is the avatar's drawer.
+  // Header controls the bar had no room for continue in More (with Privacy and the language, which every app's More holds); the account is the avatar's drawer.
   const [headerHidden, setHeaderHidden] = useState<MoreMenuItem[]>([]);
-  const moreItems: MoreMenuItem[] = [...moreScreens.map(entryOf), ...(manager ? [] : headerHidden)];
+  const common = useCommonMoreItems();
+  const moreItems: MoreMenuItem[] = [
+    ...moreScreens.map(entryOf),
+    ...common,
+    ...(manager ? [] : headerHidden),
+  ];
   // Desktop rail nav: exactly the seven design items. When the rail is too short the trailing
   // ones collapse into More (Rail `overflow`); Apps is NOT among them: it is pinned in the foot.
   // Live and Signals are not rail items (phone More sheet only until the foot widgets land).

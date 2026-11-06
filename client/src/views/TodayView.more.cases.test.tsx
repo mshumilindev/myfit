@@ -467,6 +467,7 @@ describe('TodayView: Atlas and clients', () => {
 
   it('a trainer\'s Today: Atlas opens the coach, a client opens their profile, "+N more" opens the clients area', async () => {
     setRole('trainer');
+    addonsPref.set(['atlas']);
     m.roster = roster(14);
     const { shell } = await openToday(richState());
     fireEvent.click(
@@ -478,5 +479,17 @@ describe('TodayView: Atlas and clients', () => {
     fireEvent.click(screen.getByRole('button', { name: new RegExp(en.todayMore) }));
     // the clients area lives in the Coach dashboard (People is the admin-only Users app, SPO-141)
     expect(currentHash()).toBe('#/c/clients');
+  });
+
+  it('Atlas not installed: its card on Today takes the person to Atlas in the store, not to the chat', async () => {
+    setRole('trainer');
+    addonsPref.reset();
+    m.roster = roster(2);
+    const { shell } = await openToday(richState());
+    fireEvent.click(
+      screen.getByRole('button', { name: new RegExp(`^${en.atlasName}|${en.atlasInvite}`) }),
+    );
+    expect(shell.calls.openOverlay?.mock.calls.length ?? 0).toBe(0);
+    expect(currentHash()).toBe('#/store/item/atlas');
   });
 });

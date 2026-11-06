@@ -7,6 +7,7 @@
  * per screen, and `hubSlot.guard.test.ts` fails if a surface has no slot or a slot names an unknown surface.
  */
 import type { ComponentType } from 'react';
+import { useAddonAvailable } from '../addons/enabledSet';
 import { ThemeInvite } from './ThemeAnnouncement';
 
 /** Screens with the hub navigation on a phone. The value says where the slot sits (for the guard and the next reader). */
@@ -22,17 +23,22 @@ export interface HubAnnouncement {
   surfaces: readonly HubSurface[];
   /** Renders nothing when there is nothing to say (it owns its own "show once" rule). */
   Component: ComponentType;
+  /** Add-on the announcement is about: it is not shown without it (nothing to preview or open). */
+  addon?: string;
 }
 
 /** In order of appearance. */
 export const HUB_ANNOUNCEMENTS: readonly HubAnnouncement[] = [
-  { id: 'new-theme', surfaces: ['today', 'coachAgenda'], Component: ThemeInvite },
+  { id: 'new-theme', surfaces: ['today', 'coachAgenda'], Component: ThemeInvite, addon: 'themes' },
 ];
 
 export function HubSlot({ surface }: { surface: HubSurface }) {
+  const available = useAddonAvailable();
   return (
     <>
-      {HUB_ANNOUNCEMENTS.filter((a) => a.surfaces.includes(surface)).map(({ id, Component }) => (
+      {HUB_ANNOUNCEMENTS.filter(
+        (a) => a.surfaces.includes(surface) && (!a.addon || available(a.addon)),
+      ).map(({ id, Component }) => (
         <Component key={id} />
       ))}
     </>

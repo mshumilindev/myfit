@@ -6,6 +6,7 @@
 import type { ReactNode } from 'react';
 import { AppRail, type RailNavItem } from '../AppRail';
 import { SuiteTabBar } from '../SuiteTabBar';
+import { useCommonMoreItems } from './commonMore';
 import { BrandBar, BellButton } from '../ui/BrandBar';
 import { BrandAccount } from './BrandAccount';
 import { SUITE_ICON, SUITE_TONE } from './suiteTone';
@@ -58,6 +59,7 @@ export function SuiteAppFrame({
   afterBody?: ReactNode;
   overlays?: ReactNode;
 }) {
+  const common = useCommonMoreItems();
   return (
     <div className={`${className} apex-app`}>
       {desktop && (
@@ -115,7 +117,8 @@ export function SuiteAppFrame({
         {!desktop && (
           <SuiteTabBar
             app={app}
-            noMore
+            moreItems={common}
+            noAccount
             tabs
             activeFill
             items={nav.map((x) => ({ ...x, active: tab === x.id }))}

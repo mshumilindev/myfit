@@ -319,6 +319,9 @@ describe('phone More sheet', () => {
       c.navLive,
       c.navSignals,
       c.navTeam,
+      // every app's More ends with Privacy and sharing and the language (owner rule 06.11.2026)
+      LOCALES.en.hlPrivRow,
+      LOCALES.en.language,
     ]);
     // no Apps row (the BrandBar chip is the switcher) and no account block (the avatar owns it)
     expect(within(sheet).queryByRole('button', { name: c.navApps })).toBeNull();

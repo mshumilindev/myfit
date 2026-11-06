@@ -1,3 +1,4 @@
+import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { TodayCustomize } from './TodayCustomize';
@@ -74,6 +75,7 @@ const ids = () => getTodayLayout().sections.map((s) => s.id);
 const save = () => fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
 beforeEach(() => {
+  addonsPref.set(['sleep']); // the Sleep shortcut belongs to the Sleep add-on (SPO-518)
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
   localStorage.clear();

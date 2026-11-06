@@ -1,5 +1,6 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
 import { useAddonOrBase } from '../addons/enabledSet';
+import { storeHash } from '../addonStore/storeRoute';
 import { readStoredList } from '../activityPrefs';
 import { getSyncMeta } from '../syncMeta';
 import { HubSlot } from '../components/HubSlot';
@@ -149,6 +150,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const themesOn = useAddonOrBase('themes');
   const atlasOn = useAddonOrBase('atlas');
   const sleepOn = useAddonOrBase('sleep');
+  const nicAlcOn = useAddonOrBase('nicotine-alcohol');
+  const supplementsOn = useAddonOrBase('supplements');
   const sleeps = sleepOn ? store.sleeps : NO_SLEEPS;
   const { t, locale } = useT();
   const tw = useTw();
@@ -1176,7 +1179,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   // Atlas & clients block (settings A2, designs A1 / T5): Atlas is always
   // here — alone for members, beside the clients of anyone who coaches.
-  const openCoach = () => shell.openOverlay({ screen: 'coach' });
+  // Atlas is an add-on: not installed yet, a tap on its card takes the person straight to its page in the store.
+  const openCoach = () =>
+    atlasOn ? shell.openOverlay({ screen: 'coach' }) : setHash(storeHash('item', 'atlas'));
   // a client opens in the Coach Dashboard (their profile there), not in a Gym screen of its own; without Coach access
   // (role or flag) the old Coach screen is the nearest place
   const openClient = (id: string) =>
@@ -1584,8 +1589,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         <>
           {shows('learn') && learnHasVideo && learnProgress.done === 0 && learnBanner}
           <NudgeStack nudges={nudges.filter((n) => shows(n.id as NudgeKind))} />
-          <AlcoholCheckinCard />
-          <SupplementCheckinCard />
+          {nicAlcOn && <AlcoholCheckinCard />}
+          {supplementsOn && <SupplementCheckinCard />}
           <ProgramActivitySuggest />
           {shows('sleep') && sleepOn && (
             <>

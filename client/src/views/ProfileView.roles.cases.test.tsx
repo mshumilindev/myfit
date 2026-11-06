@@ -1,3 +1,4 @@
+import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { setLocale } from '../i18n';
@@ -495,7 +496,13 @@ describe('ProfileView: my settings', () => {
     fireEvent.change(sel, { target: { value: '1' } });
   });
 
+  it('the Atlas row is there only with the Atlas add-on installed', async () => {
+    await settings();
+    expect(screen.queryByText(new RegExp(`^${en.atlasName}`))).toBeNull();
+  });
+
   it('the Atlas row names the coach and its temper only when enabled, and opens it', async () => {
+    addonsPref.set(['atlas']);
     const { shell } = await settings();
     fireEvent.click(screen.getByText(new RegExp(`^${en.atlasName}`)));
     expect(shell.openOverlay).toHaveBeenCalledWith({ screen: 'coach' });

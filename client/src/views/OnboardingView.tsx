@@ -1,6 +1,7 @@
 /** Onboarding — design O-01…O-09. Steps end inside a live session. */
 import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useAddonAvailable } from '../addons/enabledSet';
 import { Field } from '../components/ui/Field';
 import { Button } from '../components/ui/Button';
 import { callFn, signInWithPayload, currentUid, type AuthPayload } from '../api';
@@ -81,6 +82,8 @@ export function OnboardingView(props: {
 }) {
   const { token, onDone, skipLanding = false } = props;
   const { t, locale } = useT();
+  const available = useAddonAvailable();
+  const themesOn = available('themes');
   const [info, setInfo] = useState<InviteInfo | null | 'error'>(null);
   const saved = useMemo(() => loadResume(token), [token]);
   const savedName = splitPersonName(saved?.name ?? '');
@@ -198,7 +201,8 @@ export function OnboardingView(props: {
     );
   }
 
-  const totalSteps = 5;
+  // Themes, Health modules are add-ons (SPO-518): a new account has none, so the look step and the health rows only appear once installed.
+  const totalSteps = themesOn ? 5 : 4;
   const railBars = (upTo: number) => (
     <div className="onb-rail" aria-hidden>
       {Array.from({ length: totalSteps }, (_, index) => index + 1).map((i) => (
@@ -412,13 +416,14 @@ export function OnboardingView(props: {
         <BodyStep
           rail={rail}
           onContinue={() => {
-            setStep(5);
-            persist({ step: 5 });
+            const next = themesOn ? 5 : 6;
+            setStep(next);
+            persist({ step: next });
           }}
         />
       )}
 
-      {step === 5 && (
+      {step === 5 && themesOn && (
         <OnboardingThemeStep
           rail={rail}
           onContinue={() => {
@@ -473,10 +478,16 @@ export function OnboardingView(props: {
             </div>
             <h2 className="display">{t.onbWow}</h2>
             <p className="lead">{gym?.gymName ? t.onbWowBody(gym.gymName) : t.onbWowBodyNoGym}</p>
-            <ConditionsOnboardingRow onOpen={() => setCondOpen(true)} />
-            <NicotineOnboardingRow onOpen={() => setNicOpen(true)} />
-            <AlcoholOnboardingRow onOpen={() => setAlcOpen(true)} />
-            <SupplementOnboardingRow onOpen={() => setSupQuick(true)} />
+            {available('health') && <ConditionsOnboardingRow onOpen={() => setCondOpen(true)} />}
+            {available('nicotine-alcohol') && (
+              <>
+                <NicotineOnboardingRow onOpen={() => setNicOpen(true)} />
+                <AlcoholOnboardingRow onOpen={() => setAlcOpen(true)} />
+              </>
+            )}
+            {available('supplements') && (
+              <SupplementOnboardingRow onOpen={() => setSupQuick(true)} />
+            )}
             <Button
               variant="primary"
               size="lg"

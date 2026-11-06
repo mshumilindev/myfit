@@ -1,3 +1,4 @@
+import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, screen } from '@testing-library/react';
 import { setLocale } from '../i18n';
@@ -17,6 +18,8 @@ import {
 } from './__fixtures__/onboardingMocks';
 
 beforeEach(() => {
+  // The look step and the health rows belong to add-ons (SPO-518): installed here, so the full flow is covered.
+  addonsPref.set(['themes', 'health', 'nicotine-alcohol', 'supplements']);
   freezeClock(NOW);
   setLocale('en');
   setDesktop(false);

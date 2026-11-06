@@ -1,6 +1,5 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { Icon, LanguageSelector } from '../../ui';
-import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from '../../i18n';
+import { Icon } from '../../ui';
 import { badgeText } from './Badge';
 import { IconTile } from './IconTile';
 import type { MoreMenuItem } from './MoreMenu';
@@ -76,24 +75,8 @@ export function BrandBar({
 }: BrandBarProps) {
   const Tag = header ? 'header' : 'div';
   const chip = Boolean(tone && icon);
-  const { locale } = useT();
-  const language: BrandEntry = {
-    id: 'language',
-    label: LOCALES[locale].language,
-    icon: 'globe',
-    node: <LanguageSelector compact />,
-    submenu: {
-      title: LOCALES[locale].language,
-      value: locale,
-      options: LOCALE_IDS.map((id) => ({
-        id,
-        label: LOCALES[id].locale,
-        icon: <span aria-hidden>{FLAGS[id]}</span>,
-      })),
-      onChange: (id) => setLocale(id as (typeof LOCALE_IDS)[number]),
-    },
-  };
-  const all = [...(entries ?? []), language];
+  // Language is no longer a header control: it lives in More (every app's tab bar) and in the desktop rail.
+  const all = entries ?? [];
   const barRef = useRef<HTMLElement>(null);
   const leadRef = useRef<HTMLDivElement>(null);
   const fixedRef = useRef<HTMLDivElement>(null);

@@ -65,7 +65,6 @@ export const addonStoreEn = {
   browseApps: 'Browse apps',
   browseAddons: 'Browse add-ons',
   forApp: (name: string) => `For ${name}`,
-  addonsSub: 'Extras that work inside an app.',
   searchBest: 'Best match',
   searchAddonsFor: (n: string) => `Add-ons for ${n}`,
   searchAlso: (q: string) => `Also mentions ${q}`,

@@ -46,6 +46,7 @@ import {
   liveSleep,
   setCoach,
   useSelfCoachRole,
+  syncSleepAutoQueue,
 } from './store';
 import { AppRoot, SpotterSky } from './components/SpotterSky';
 import { ChristmasScene } from './components/ChristmasScene';
@@ -763,6 +764,9 @@ function AppMain() {
   const apexOn = useAddonOrBase('mastery');
   const themesOn = useAddonOrBase('themes');
   const sleepOn = useAddonOrBase('sleep');
+  const autoStartOn = useAddonOrBase('sleep-auto-start');
+  // Install or removal of Sleep / its auto-start: the server night queue follows (cleared without them, rebuilt with them).
+  useEffect(() => syncSleepAutoQueue(), [sleepOn, autoStartOn]);
   const atlasOn = useAddonOrBase('atlas');
   useEffect(() => setAtlasInstalled(atlasOn), [atlasOn]);
   useEffect(() => watchAtlasRemoval(), []);
@@ -799,9 +803,9 @@ function AppMain() {
   // Atlas's notes live in his own thread (unread count on his bubble in the
   // stories strip) — not in the bell.
   const rawNotifs = useMemo(
-    () => computeNotifs(store, notifNow, t, challenges),
+    () => computeNotifs(store, notifNow, t, challenges, apexOn),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [store.workouts, store.bodyMetrics, store.exerciseLoadTypes, challenges, notifNow, t],
+    [store.workouts, store.bodyMetrics, store.exerciseLoadTypes, challenges, notifNow, t, apexOn],
   );
   // Rows from my trainer (M7) come from the lazy client bridge; empty unless the `coach` flag is on and I have a trainer.
   const clientShared = useClientShared();
@@ -821,42 +825,53 @@ function AppMain() {
     const id = window.setTimeout(() => {
       const finished = store.workouts.filter((w) => w.finishedAt !== null);
       const now = Date.now();
-      const msgs = store.coach.enabled
-        ? chatBacked(
-            planOutbox({
-              coach: store.coach,
-              temper: atlas.temper,
-              finished,
-              plays: computePlaybook(finished, now).plays,
-              now,
-              locale,
-              fmt: atlasFmt,
-              title: t.atlasName,
-              reviewBody: t.atlasPushReview,
-            }),
-            (at) => buildNotes(store, at, locale, atlasFmt).notes,
-          ).concat(
-            // New notes that will appear while the app is closed → pushes.
-            planNotePushes({
-              coach: store.coach,
-              now,
-              // Push previews show on the lock screen: no swearing there (SPO-124).
-              notesAt: (at) =>
-                buildNotes(
-                  { ...store, coach: { ...store.coach, swearing: false } },
-                  at,
-                  locale,
-                  atlasFmt,
-                ).notes,
-              title: t.atlasName,
-            }),
-          )
-        : [];
+      // Atlas is an add-on (SPO-518): without it nothing is planned and an empty list clears what was queued.
+      const msgs =
+        store.coach.enabled && atlasOn
+          ? chatBacked(
+              planOutbox({
+                coach: store.coach,
+                temper: atlas.temper,
+                finished,
+                plays: computePlaybook(finished, now).plays,
+                now,
+                locale,
+                fmt: atlasFmt,
+                title: t.atlasName,
+                reviewBody: t.atlasPushReview,
+              }),
+              (at) => buildNotes(store, at, locale, atlasFmt).notes,
+            ).concat(
+              // New notes that will appear while the app is closed → pushes.
+              planNotePushes({
+                coach: store.coach,
+                now,
+                // Push previews show on the lock screen: no swearing there (SPO-124).
+                notesAt: (at) =>
+                  buildNotes(
+                    { ...store, coach: { ...store.coach, swearing: false } },
+                    at,
+                    locale,
+                    atlasFmt,
+                  ).notes,
+                title: t.atlasName,
+              }),
+            )
+          : [];
       void syncOutbox(msgs).catch((err) => console.warn('atlas: outbox sync failed', err));
     }, 3000);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed, store.workouts, store.sleeps, store.bodyMetrics, store.coach, atlas.temper, locale]);
+  }, [
+    authed,
+    atlasOn,
+    store.workouts,
+    store.sleeps,
+    store.bodyMetrics,
+    store.coach,
+    atlas.temper,
+    locale,
+  ]);
   // Keep this device's push token fresh (FCM rotates it; iOS can drop it).
   useEffect(() => {
     if (authed) void refreshPush(locale);

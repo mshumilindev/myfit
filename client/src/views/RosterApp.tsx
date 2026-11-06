@@ -11,6 +11,7 @@
  * who lands on `users` (typed URL, saved route) is redirected to Me and the admin view is never rendered.
  */
 import { SuiteTabBar } from '../components/SuiteTabBar';
+import { useCommonMoreItems } from '../components/suite/commonMore';
 import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
 import { BrandBar } from '../components/ui/BrandBar';
 import { BrandAccount } from '../components/suite/BrandAccount';
@@ -55,6 +56,7 @@ export function RosterApp({
   onNotifSeen: (ids: string[]) => void;
   onNotifMarkAll: () => void;
 }) {
+  const common = useCommonMoreItems();
   const { t } = useT();
   const desktop = useMinWidth(APP_BREAKPOINT);
   // A specific person's profile, opened from the Clients / Users list.
@@ -135,7 +137,8 @@ export function RosterApp({
         {!desktop && (
           <SuiteTabBar
             app="roster"
-            noMore
+            moreItems={common}
+            noAccount
             tabs
             activeFill
             items={nav.map((x) => ({ ...x, active: tab === x.id }))}

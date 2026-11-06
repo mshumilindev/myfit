@@ -4,7 +4,8 @@
  * continue in the bottom bar's More. The bottom bar has a Mastery tab while the header has room; once something
  * has collapsed, that slot is More = Mastery + the collapsed controls. The account is the avatar's drawer.
  */
-import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from '../../i18n';
+import { useCommonMoreItems } from './commonMore';
+import { useT } from '../../i18n';
 import { ConditionsShield, useActiveConditions } from '../../views/health/ConditionsShield';
 import { BrandBar, BellButton } from '../ui/BrandBar';
 import type { MoreMenuItem } from '../ui/MoreMenu';
@@ -79,7 +80,8 @@ export function GymTabBar<Id extends string>({
   onSelect: (id: Id) => void;
   fab: TabBarProps<Id>['fab'];
 }) {
-  const { t, locale } = useT();
+  const { t } = useT();
+  const common = useCommonMoreItems(onPrivacy);
   // Mastery is an add-on (SPO-518): its tab and menu entry only exist when it is installed (or not offered to the role).
   const masteryOn = useAddonOrBase('mastery');
   // More is always the last tab (it keeps the slot, so the bar never changes shape): Privacy and sharing, then Mastery when
@@ -89,7 +91,7 @@ export function GymTabBar<Id extends string>({
       app="gym"
       noAccount
       moreItems={[
-        { id: 'privacy', icon: 'lock', label: t.hlPrivRow, onSelect: onPrivacy },
+        ...common,
         ...(masteryOn
           ? [
               {
@@ -101,27 +103,6 @@ export function GymTabBar<Id extends string>({
               },
             ]
           : []),
-        // Language lives in More too (same submenu as the header's); skipped when the header already collapsed it in.
-        ...(hidden.some((h) => h.id === 'language')
-          ? []
-          : [
-              {
-                id: 'language',
-                icon: 'globe',
-                label: LOCALES[locale].language,
-                onSelect: () => undefined,
-                submenu: {
-                  title: LOCALES[locale].language,
-                  value: locale,
-                  options: LOCALE_IDS.map((id) => ({
-                    id,
-                    label: LOCALES[id].locale,
-                    icon: <span aria-hidden>{FLAGS[id]}</span>,
-                  })),
-                  onChange: (id: string) => setLocale(id as (typeof LOCALE_IDS)[number]),
-                },
-              },
-            ]),
         ...hidden,
       ]}
       items={items}

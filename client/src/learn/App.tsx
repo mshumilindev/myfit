@@ -13,6 +13,7 @@
  * - Localised UI via useLearnT.
  */
 import { SuiteTabBar } from '../components/SuiteTabBar';
+import { useCommonMoreItems } from '../components/suite/commonMore';
 import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
 import { BackButton } from '../components/ui/BackButton';
 import { PageHead } from '../components/ui/PageHead';
@@ -513,6 +514,7 @@ export function LearnRoot({
   onNotifSeen: (ids: string[]) => void;
   onNotifMarkAll: () => void;
 }) {
+  const common = useCommonMoreItems();
   const { L, locale } = useLearnT();
   const desktop = useMinWidth(APP_BREAKPOINT);
   const [tab, setTab] = useState<Tab>('home');
@@ -661,7 +663,8 @@ export function LearnRoot({
         {!desktop && (
           <SuiteTabBar
             app="learn"
-            noMore
+            moreItems={common}
+            noAccount
             tabs
             activeFill
             items={nav.map((x) => ({ ...x, active: !playing && tab === x.id }))}

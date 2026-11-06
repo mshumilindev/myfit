@@ -1,3 +1,4 @@
+import { addonsPref } from '../../../addons/enabledSet';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -27,6 +28,7 @@ const gate = (on: Partial<typeof ALL>) =>
 const ask = (cats: AccessAsk['cats']): AccessAsk => ({ reqId: 'access-ask:1', cats });
 
 beforeEach(() => {
+  addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol', 'sleep']);
   setViewport(390);
   setConditionsShare('off');
 });

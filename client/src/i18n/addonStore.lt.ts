@@ -64,7 +64,6 @@ export const addonStoreLt: typeof addonStoreEn = {
   browseApps: 'Naršyti programėles',
   browseAddons: 'Naršyti papildinius',
   forApp: (name: string) => `Skirta ${name}`,
-  addonsSub: 'Priedai, veikiantys programėlės viduje.',
   searchBest: 'Geriausias atitikmuo',
   searchAddonsFor: (n: string) => `Priedai: ${n}`,
   searchAlso: (q: string) => `Taip pat mini ${q}`,

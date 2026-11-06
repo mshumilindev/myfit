@@ -7,7 +7,7 @@
  * groups; each group registers here.
  */
 import type { ReactNode } from 'react';
-import { useAddonOrBase } from '../addons/enabledSet';
+import { useAddonAvailable } from '../addons/enabledSet';
 import type { WidgetSize } from '../components/ui/Widget';
 import type { Tone } from '../components/ui/tones';
 import type { Shell } from '../App';
@@ -118,15 +118,25 @@ export const MASTERY_WIDGET_IDS: ReadonlySet<string> = new Set([
   'apex-next-feat',
   'apex-feats-board',
   'apex-year-feats',
+  // Standards and challenges are Apex content (they deep-link into it).
+  'standards',
+  'challenge-to-try',
 ]);
 /** Widgets of the Sleep add-on (SPO-518). */
 export const SLEEP_WIDGET_IDS: ReadonlySet<string> = new Set(['sleep', 'sleep-debt']);
+/**
+ * Single widgets that belong to a Health module (the Health group mixes them with core rest/illness widgets, so ids decide, not
+ * the group). Rest and illness stay core.
+ */
+export const HEALTH_WIDGET_ADDON: Readonly<Record<string, string>> = {
+  rehab: 'injury-log',
+  cycle: 'cycle',
+};
 export function useWidgetAvailable(): (w: WidgetDef) => boolean {
-  const mastery = useAddonOrBase('mastery');
-  const sleep = useAddonOrBase('sleep');
-  const atlas = useAddonOrBase('atlas');
+  const available = useAddonAvailable();
   return (w) =>
-    (mastery || !MASTERY_WIDGET_IDS.has(w.id)) &&
-    (sleep || !SLEEP_WIDGET_IDS.has(w.id)) &&
-    (atlas || w.group !== 'atlas');
+    (!MASTERY_WIDGET_IDS.has(w.id) || available('mastery')) &&
+    (!SLEEP_WIDGET_IDS.has(w.id) || available('sleep')) &&
+    (!HEALTH_WIDGET_ADDON[w.id] || available(HEALTH_WIDGET_ADDON[w.id])) &&
+    (w.group !== 'atlas' || available('atlas'));
 }

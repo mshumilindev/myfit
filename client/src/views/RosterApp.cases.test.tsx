@@ -86,22 +86,28 @@ describe('rosterHomeTab', () => {
   });
 });
 
+/** The phone bar: the app's own tab(s), then the trailing More (Privacy and Language live there in every app). */
+const tabLabels = (container: HTMLElement) =>
+  [...(container.querySelector('.tabbar')?.querySelectorAll('button:not(.tabbar-fab)') ?? [])].map(
+    (b) => b.textContent,
+  );
+
 describe('RosterApp on a phone', () => {
   it('a trainer has only Me: no Users, no Clients, the app is named Me', () => {
     const { container } = app('trainer', 'me');
     expect(screen.getByTestId('profile')).toBeTruthy();
-    // One destination: no bottom bar at all; the app is named in the header chip.
-    expect(container.querySelector('.tabbar')).toBeNull();
+    // One destination plus More; the app is named in the header chip.
+    expect(tabLabels(container)).toEqual([en.navMe, coachEn.navMore]);
     expect(container.querySelector('.uibrand-chip-name')?.textContent).toBe(en.navMe);
     expect(screen.queryByText(en.adminPeople)).toBeNull();
     expect(screen.queryByText(en.trClientsTab)).toBeNull();
     expect(screen.queryByTestId('admin')).toBeNull();
   });
 
-  it('an admin on Users has only Users (Me is a separate screen), so no bottom bar', () => {
+  it('an admin on Users has only Users (Me is a separate screen), so its bar is Users and More', () => {
     const { container } = app('admin', 'users');
     expect(screen.getByTestId('admin')).toBeTruthy();
-    expect(container.querySelector('.tabbar')).toBeNull();
+    expect(tabLabels(container)).toEqual([en.adminPeople, coachEn.navMore]);
     expect(container.querySelector('.uibrand-chip-name')?.textContent).toBe(en.adminPeople);
     expect(screen.queryByText(en.navMe)).toBeNull();
     expect(screen.queryByText(en.trClientsTab)).toBeNull();

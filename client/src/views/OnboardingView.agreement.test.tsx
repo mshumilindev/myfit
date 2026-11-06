@@ -7,6 +7,8 @@ const h = vi.hoisted(() => ({
   grant: vi.fn(),
 }));
 vi.mock('../api', () => ({
+  getRole: () => 'member',
+  onRoleChange: () => () => undefined,
   registerSignOutFlush: () => undefined, // signupConsents registers its queues with api.ts at import
   callFn: h.callFn,
   currentUid: () => h.uid,

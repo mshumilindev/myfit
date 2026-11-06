@@ -1,4 +1,5 @@
 import { useState, useSyncExternalStore } from 'react';
+import { useAddonAvailable } from '../../../addons/enabledSet';
 import { Button } from '../../../components/ui/Button';
 import { ConsentLevelPicker, type ConsentLevelId } from '../../../components/ui/ConsentControls';
 import { Notice } from '../../../components/ui/Notice';
@@ -20,6 +21,7 @@ import {
   isLocalCategory,
   rowBlock,
   type ShareId,
+  ADDON_OF,
 } from '../shareModel';
 import { writeLocal } from './TrainerSharing';
 import '../ClientCoach.css';
@@ -63,12 +65,15 @@ export function AccessAskForm(p: AccessAskFormProps) {
       : link && link.state !== 'none'
         ? link.grants[id]
         : 'off';
+  // A category whose add-on is not installed is not offered (the trainer asked for something this client does not use).
+  const available = useAddonAvailable();
+  const cats = p.ask.cats.filter((id) => !ADDON_OF[id] || available(ADDON_OF[id]));
   const [draft, setDraft] = useState<Partial<Record<ShareId, Level>>>({});
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const blockOf = (id: ShareId) => rowBlock(id, health.on, health.ready);
   const level = (id: ShareId): Level => (blockOf(id) ? 'off' : (draft[id] ?? current(id)));
-  const rows = p.ask.cats.map((id) => {
+  const rows = cats.map((id) => {
     const m = shareRowMeta(id, cc, t);
     const b = blockOf(id);
     return {
@@ -81,14 +86,14 @@ export function AccessAskForm(p: AccessAskFormProps) {
       blocked: !!b,
     };
   });
-  const gated = p.ask.cats.filter((id) => blockOf(id) === 'off');
-  const chosen = p.ask.cats.filter((id) => level(id) !== 'off').length;
+  const gated = cats.filter((id) => blockOf(id) === 'off');
+  const chosen = cats.filter((id) => level(id) !== 'off').length;
   const save = async () => {
     setBusy(true);
     setFailed(false);
     const after: Partial<Record<ShareId, Level>> = {};
     let ok = true;
-    for (const id of p.ask.cats) {
+    for (const id of cats) {
       // a row without its health consent is never touched (and never counts as allowed)
       if (blockOf(id)) {
         after[id] = 'off';
@@ -112,10 +117,9 @@ export function AccessAskForm(p: AccessAskFormProps) {
     setBusy(false);
     // the trainer must never be told "allowed" for something that was not saved: stay open, let the client retry
     if (!ok) return setFailed(true);
-    p.onDone(resultOf(p.ask.cats, after));
+    p.onDone(resultOf(cats, after));
   };
-  const title =
-    p.ask.cats.length === 10 ? cc.rfTitleAll(p.first) : cc.rfTitle(p.first, p.ask.cats.length);
+  const title = cats.length === 10 ? cc.rfTitleAll(p.first) : cc.rfTitle(p.first, cats.length);
   return (
     <Sheet onClose={p.onClose} label={title} closeLabel={cc.ccBack} padded>
       <div className="cc-stack">

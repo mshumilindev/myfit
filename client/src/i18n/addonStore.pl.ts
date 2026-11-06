@@ -63,7 +63,6 @@ export const addonStorePl: typeof addonStoreEn = {
   browseApps: 'Przeglądaj aplikacje',
   browseAddons: 'Przeglądaj dodatki',
   forApp: (name: string) => `Dla ${name}`,
-  addonsSub: 'Rozszerzenia działające wewnątrz aplikacji.',
   searchBest: 'Najlepsze dopasowanie',
   searchAddonsFor: (n: string) => `Dodatki dla ${n}`,
   searchAlso: (q: string) => `Także wspomina ${q}`,

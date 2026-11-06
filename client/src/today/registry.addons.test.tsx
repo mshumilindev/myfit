@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { addonsPref } from '../addons/enabledSet';
+import { useShortcuts } from './shortcuts';
 import { MASTERY_WIDGET_IDS, SLEEP_WIDGET_IDS, useWidgetAvailable, widgetById } from './registry';
 
 const role = vi.hoisted(() => ({ value: 'member' as string }));
@@ -63,5 +64,34 @@ describe('Atlas widgets follow the Atlas add-on (SPO-518)', () => {
     expect(avail('atlas-insight')).toBe(false);
     addonsPref.set(['atlas']);
     expect(avail('ask-atlas')).toBe(true);
+  });
+});
+
+describe('Health module widgets and shortcuts follow their add-ons (SPO-518)', () => {
+  it('rehab needs the Injury log and cycle needs Cycle; rest and illness stay core', () => {
+    expect(avail('rehab')).toBe(false);
+    expect(avail('cycle')).toBe(false);
+    expect(avail('rest-illness-log')).toBe(true);
+    addonsPref.set(['injury-log']);
+    expect(avail('rehab')).toBe(true);
+    expect(avail('cycle')).toBe(false);
+    addonsPref.set(['cycle']);
+    expect(avail('cycle')).toBe(true);
+  });
+  it('standards and challenge-to-try need Mastery', () => {
+    expect(avail('standards')).toBe(false);
+    expect(avail('challenge-to-try')).toBe(false);
+    addonsPref.set(['mastery']);
+    expect(avail('standards')).toBe(true);
+  });
+  it('shortcuts: sleep, injury and Atlas need their add-ons, rest and illness are core', () => {
+    const ids = () => renderHook(() => useShortcuts()).result.current.map((x) => x.id);
+    expect(ids()).not.toContain('sc:sleep');
+    expect(ids()).not.toContain('sc:injury');
+    expect(ids()).not.toContain('sc:ask-atlas');
+    expect(ids()).toContain('sc:unwell');
+    expect(ids()).toContain('sc:day-off');
+    addonsPref.set(['sleep', 'injury-log', 'atlas']);
+    expect(ids()).toEqual(expect.arrayContaining(['sc:sleep', 'sc:injury', 'sc:ask-atlas']));
   });
 });

@@ -149,6 +149,7 @@ import {
 } from './sleep';
 import { computeStreak } from './streak';
 import { currentUid, getRole, callFn } from './api';
+import { addonAvailable } from './addons/enabledSet';
 import {
   UNSENT_KEY,
   bumpWorkoutGen,
@@ -4227,7 +4228,13 @@ export function syncSleepAutoQueue(): void {
   const uid = currentUid();
   if (!uid) return;
   const ref = doc(db, 'sleepSchedules', uid);
-  if (!state.sleepSettings.autoLog) {
+  // Sleep and its auto-start are add-ons (SPO-518): without them the server queue is cleared, so no night is created for a
+  // feature the person does not have. The schedule and settings stay stored, so a re-install picks the queue up again.
+  if (
+    !state.sleepSettings.autoLog ||
+    !addonAvailable('sleep') ||
+    !addonAvailable('sleep-auto-start')
+  ) {
     deleteDoc(ref).catch(onWriteError);
     return;
   }

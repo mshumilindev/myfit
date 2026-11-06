@@ -1,4 +1,5 @@
 /** Full user profile page: direct-link safe, data-rich, role-aware. */
+import { useAddonOrBase } from '../addons/enabledSet';
 import { ProfileSkeleton } from '../components/ui/Skeletons';
 import { EmptyState } from '../components/ui/EmptyState';
 import { BackButton } from '../components/ui/BackButton';
@@ -146,6 +147,7 @@ export function ProfileView({
   embedded?: boolean;
 }) {
   const { t, locale } = useT();
+  const atlasOn = useAddonOrBase('atlas');
   const exName = useExerciseName();
   const { weightUnit, coach } = useStore();
   const weekStart = useWeekStartDay();
@@ -633,12 +635,14 @@ export function ProfileView({
                 </div>
                 <NotificationSettings />
                 <CallSettingsRow />
-                <ListRow
-                  icon={<Icon name="robot" />}
-                  label={`${t.atlasName}${coach.enabled ? ` · ${t.atlasTemper[temperIndex(coach.temper)]}` : ''}`}
-                  chevron
-                  onClick={() => shell.openOverlay({ screen: 'coach' })}
-                />
+                {atlasOn && (
+                  <ListRow
+                    icon={<Icon name="robot" />}
+                    label={`${t.atlasName}${coach.enabled ? ` · ${t.atlasTemper[temperIndex(coach.temper)]}` : ''}`}
+                    chevron
+                    onClick={() => shell.openOverlay({ screen: 'coach' })}
+                  />
+                )}
                 <ListRow
                   icon={<Icon name="key" />}
                   label={t.password}

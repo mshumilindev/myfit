@@ -115,6 +115,11 @@ export function useAddonOrBase(id: string): boolean {
   return on || !isAddonAllowed(id, role);
 }
 
+/** The same gate as `useAddonOrBase`, for pure code (no hook): installed, or not offered to the role. */
+export function addonAvailable(id: string, role: Role = getRole()): boolean {
+  return isAddonEnabled(id, role) || !isAddonAllowed(id, role);
+}
+
 /** The same gate as `useAddonOrBase`, for code that asks about many ids (a list of rows): installed, or not offered to the role. */
 export function useAddonAvailable(): (id: string) => boolean {
   const on = useEnabledAddons();

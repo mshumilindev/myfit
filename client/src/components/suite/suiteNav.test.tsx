@@ -407,17 +407,19 @@ describe.each(CASES)('$name: desktop rail', (k) => {
 });
 
 describe.each(CASES)('$name: phone (< 720)', (k) => {
-  it('keeps its tabs, no rail, no More tab (the account is the avatar drawer)', () => {
+  it('keeps its tabs, no rail, and a trailing More tab with Privacy and Language (the account is the avatar drawer)', () => {
     setViewport(390);
     const { container } = render(k.phone({ onShell: vi.fn(), onProfile: vi.fn() }));
     expect(screen.queryByRole('complementary')).toBeNull();
     const bar = container.querySelector('.tabbar') as HTMLElement;
-    // One destination (People for a member): no bar at all.
-    if (k.tabs(session.role).length <= 1) return expect(bar).toBeNull();
     expect(bar).not.toBeNull();
     const labels = [...bar.querySelectorAll('button:not(.tabbar-fab)')].map((b) => b.textContent);
-    expect(labels).toEqual(k.tabs(session.role));
-    expect(within(bar).queryByRole('button', { name: c.navMore })).toBeNull();
+    // Every app's More holds Privacy and sharing and the language (owner rule 06.11.2026), so every bar ends with More.
+    const own = k.tabs(session.role);
+    // (The Gym harness above renders the bare bar; its real More tab is covered in GymChrome.more.test.tsx.)
+    const hasMore = k.name !== 'Gym' && !own.includes(c.navMore);
+    expect(labels).toEqual(hasMore ? [...own, c.navMore] : own);
+    if (k.name !== 'Gym') expect(within(bar).getByRole('button', { name: c.navMore })).toBeTruthy();
     expect(within(bar).queryByRole('button', { name: c.navApps })).toBeNull();
     expect(within(bar).queryByRole('button', { name: t.shellSwitch })).toBeNull();
   });

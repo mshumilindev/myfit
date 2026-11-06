@@ -8,17 +8,18 @@ import { Fragment } from 'react';
 import { WIDGET_SIZES } from '../components/ui/Widget';
 import { WidgetGrid } from '../components/ui/WidgetGrid';
 import { WIDGETS, WIDGET_GROUPS } from './registry';
-import { SHORTCUTS, renderShortcut, type ShortcutCtx } from './shortcuts';
+import { renderShortcut, useShortcuts, type ShortcutCtx } from './shortcuts';
 import { useTw } from './strings';
 import './library.css';
 
 export function WidgetLibrary({ ctx }: { ctx: ShortcutCtx }) {
+  const shortcuts = useShortcuts();
   const tw = useTw();
   const groups = WIDGET_GROUPS.filter((g) => WIDGETS.some((w) => w.group === g));
   return (
     <div className="wlib">
       <div className="wlib-count">
-        {WIDGETS.length} widgets × 4 sizes · {SHORTCUTS.length} shortcuts
+        {WIDGETS.length} widgets × 4 sizes · {shortcuts.length} shortcuts
       </div>
       {groups.map((g) => (
         <section key={g} className="wlib-group">
@@ -46,9 +47,11 @@ export function WidgetLibrary({ ctx }: { ctx: ShortcutCtx }) {
           <Fragment key={g}>
             <div className="wlib-name">{tw.groups[g]}</div>
             <div className="wlib-shortcuts">
-              {SHORTCUTS.filter((s) => s.group === g).map((s) => (
-                <Fragment key={s.id}>{renderShortcut(s, ctx, false, () => undefined)}</Fragment>
-              ))}
+              {shortcuts
+                .filter((s) => s.group === g)
+                .map((s) => (
+                  <Fragment key={s.id}>{renderShortcut(s, ctx, false, () => undefined)}</Fragment>
+                ))}
             </div>
           </Fragment>
         ))}

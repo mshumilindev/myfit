@@ -69,12 +69,14 @@ export function computeNotifs(
   now: number,
   t: T,
   challenges: ActiveChallenge[] = [],
+  /** Mastery add-on installed (SPO-518): off = no challenge, standard or feat rows (they all open Apex). */
+  mastery = true,
 ): Notif[] {
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const out: Notif[] = [];
 
   // --- Completed challenges (posted when a challenge is finished).
-  for (const ac of challenges) {
+  for (const ac of mastery ? challenges : []) {
     if (ac.status !== 'done') continue;
     const tmpl = templateById(ac.templateId);
     if (!tmpl) continue;
@@ -128,7 +130,7 @@ export function computeNotifs(
   // --- Strength standards: current tier per trained discipline.
   const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? 0;
   const sex = store.bodyMetrics.sex === 'female' ? 'F' : 'M';
-  for (const r of computeStandards(finished, bodyKg, sex).results) {
+  for (const r of mastery ? computeStandards(finished, bodyKg, sex).results : []) {
     if (!r.trained || r.achievedIdx < 0) continue;
     const tierId = r.tierIds[r.achievedIdx];
     const tierLabel = r.system === 'rank' ? t.rankShort[tierId] : t.lvlShort[tierId];
@@ -143,8 +145,8 @@ export function computeNotifs(
   }
 
   // --- Achievements: every unlocked feat, dated by its unlock time.
-  const feats = computeFeats(finished);
-  for (const ach of Object.values(feats.byGroup).flat()) {
+  const feats = mastery ? computeFeats(finished) : null;
+  for (const ach of Object.values(feats?.byGroup ?? {}).flat()) {
     if (!ach.unlocked) continue;
     out.push({
       id: `feat:${ach.key}`,

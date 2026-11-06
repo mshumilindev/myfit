@@ -144,8 +144,10 @@ export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
 export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   const { st } = ctx;
   const addons = availableForRole(role).filter((m) => m.kind === 'addon');
-  const parents = [...new Set(addons.map((m) => m.parent as string))];
-  if (!parents.length) {
+  // Add-ons of an app are grouped under it; those that need no app (Sleep, Atlas…) come first, with no heading.
+  const standalone = addons.filter((m) => !m.parent);
+  const parents = [...new Set(addons.flatMap((m) => (m.parent ? [m.parent] : [])))];
+  if (!parents.length && !standalone.length) {
     return (
       <SkEmpty
         icon={
@@ -160,8 +162,12 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   }
   return (
     <>
-      <div className="sk-t-s sk-mt4">{st.addonsSub}</div>
       <div className="as-cols">
+        {standalone.length > 0 && (
+          <section className="sk-mt24">
+            <Rows ids={standalone.map((m) => m.id)} ctx={ctx} />
+          </section>
+        )}
         {parents.map((p) => {
           const pm = addonById(p);
           return (
