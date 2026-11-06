@@ -5,8 +5,8 @@
   margin-top: var(--s-4);
   margin-bottom: var(--s-28);
 }
-/* Themes sits right under Customize Today: pull it up under it. */
-.td-customize:has(+ .td-themes) {
+/* Themes (or Add-ons, when Themes is not installed) sits right under Customize Today: pull it up under it. */
+.td-customize:has(+ .td-themes, + .td-addons) {
   margin-bottom: 0;
 }
 .td-themes {
