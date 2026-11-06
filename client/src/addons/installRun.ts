@@ -7,6 +7,10 @@
 import { useSyncExternalStore } from 'react';
 import { getRole, type Role } from '../api';
 import { addonById } from './manifest';
+import { prefetchChunks } from './prefetch';
+
+declare const __BUILD_ID__: string | undefined;
+const BUILD = typeof __BUILD_ID__ === 'string' ? __BUILD_ID__ : 'dev';
 import {
   disableAddons,
   enableAddons,
@@ -48,10 +52,15 @@ const STEP_PAUSE_MS = 130;
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 /**
- * Get one item ready. Nothing to download yet, so it reports progress and needs only the network to be there;
- * the offline prefetch (I4) replaces the body. Throws when it cannot.
+ * Get one item ready: its chunks go into the add-on's own offline cache (prefetch.ts). An add-on with no chunks yet
+ * (still inside the core bundle) only needs the network to be there and shows a short progress. Throws when it cannot.
  */
-export async function prepareAddon(_id: string, onProgress: (pct: number) => void): Promise<void> {
+export async function prepareAddon(id: string, onProgress: (pct: number) => void): Promise<void> {
+  const m = addonById(id);
+  if (m?.chunks?.length) {
+    await prefetchChunks(id, BUILD, m.chunks, onProgress, m.sizeHint);
+    return;
+  }
   if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new Error('offline');
   for (const p of [25, 60, 100]) {
     onProgress(p);

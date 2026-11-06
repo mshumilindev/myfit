@@ -21,6 +21,10 @@ export interface AddonManifest {
   /** Not available yet: shown under "Coming soon", never enabled. */
   soon?: boolean;
   category: 'recovery' | 'food' | 'insights' | 'look' | 'coach';
+  /** Built chunk URLs kept offline on install (prefetch.ts). Empty until the add-on is split out of the core bundle. */
+  chunks?: readonly string[];
+  /** Rough download size in bytes, for the storage-quota check. */
+  sizeHint?: number;
 }
 
 const ALL: readonly StoreRole[] = ['member', 'trainer', 'admin'];
