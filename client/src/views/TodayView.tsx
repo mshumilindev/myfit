@@ -1,4 +1,5 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
+import { useAddonOrBase } from '../addons/enabledSet';
 import { readStoredList } from '../activityPrefs';
 import { getSyncMeta } from '../syncMeta';
 import { HubSlot } from '../components/HubSlot';
@@ -142,6 +143,7 @@ const PROGRAM_MODE_TONE: Record<WeekMode, Tone> = {
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { withGym, gymPicker } = useGymStep();
   const isDesktop = useIsDesktop();
+  const themesOn = useAddonOrBase('themes');
   const { t, locale } = useT();
   const tw = useTw();
   const layout = useTodayLayout();
@@ -1707,15 +1709,17 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             >
               {t.todayCustomize}
             </Button>
-            <Button
-              variant="ghost"
-              fullWidth
-              icon="palette"
-              className="td-themes"
-              onClick={() => shell.openOverlay({ screen: 'themes' })}
-            >
-              {t.todayThemes}
-            </Button>
+            {themesOn && (
+              <Button
+                variant="ghost"
+                fullWidth
+                icon="palette"
+                className="td-themes"
+                onClick={() => shell.openOverlay({ screen: 'themes' })}
+              >
+                {t.todayThemes}
+              </Button>
+            )}
             {getRole() !== 'manager' && (
               <Button
                 variant="ghost"

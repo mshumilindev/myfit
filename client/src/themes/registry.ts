@@ -86,8 +86,22 @@ export function getTheme(): string {
   return isKnown(attr) ? attr : DEFAULT_THEME;
 }
 
+/**
+ * Themes is an add-on (SPO-518): without it the app wears the base theme whatever was saved or scheduled (holidays
+ * included). Nothing saved is touched, so the choice comes back the moment the add-on does.
+ */
+let themesAllowed = true;
+const shown = (id: string): string => (themesAllowed ? id : DEFAULT_THEME);
+
 function apply(id: string): void {
-  document.documentElement.setAttribute('data-theme', id);
+  document.documentElement.setAttribute('data-theme', shown(id));
+}
+
+/** Called by the app shell when the Themes add-on is installed (or not offered to the role). Re-dresses the app. */
+export function setThemesAllowed(allowed: boolean): void {
+  if (themesAllowed === allowed) return;
+  themesAllowed = allowed;
+  swap(holiday ?? previewing ?? committed ?? DEFAULT_THEME, false);
 }
 
 /**
@@ -97,7 +111,7 @@ function apply(id: string): void {
  * ones: the first paint (`initTheme`) and a preview cut short by a workout, a document or a chat (`endPreview` quiet).
  */
 function swap(id: string, animate: boolean): void {
-  if (document.documentElement.getAttribute('data-theme') === id) return;
+  if (document.documentElement.getAttribute('data-theme') === shown(id)) return;
   if (animate) glitchTheme(() => apply(id));
   else apply(id);
 }

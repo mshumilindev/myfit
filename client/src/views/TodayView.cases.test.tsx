@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { setSyncMeta } from '../syncMeta';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { fmtDayMonth, fmtWeekday, setLocale } from '../i18n';
@@ -13,6 +14,7 @@ import {
 } from './__fixtures__/viewKit';
 
 beforeEach(() => {
+  addonsPref.reset();
   freezeClock(NOW);
   setLocale('en');
   resetTodayMocks();
@@ -134,7 +136,13 @@ describe('TodayView: footer actions', () => {
     expect(screen.getByRole('button', { name: en.todayEditCancel })).toBeTruthy();
   });
 
+  it('Themes is offered only once the Themes add-on is installed (SPO-518)', async () => {
+    await openToday();
+    expect(screen.queryByRole('button', { name: en.todayThemes })).toBeNull();
+  });
+
   it('Themes freezes the screen and opens the themes page', async () => {
+    addonsPref.set(['themes']);
     const { shell } = await openToday();
     fireEvent.click(screen.getByRole('button', { name: en.todayThemes }));
     expect(shell.calls.openOverlay).toHaveBeenCalledWith({ screen: 'themes' });

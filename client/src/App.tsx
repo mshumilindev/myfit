@@ -102,6 +102,7 @@ import type { MoreMenuItem } from './components/ui/MoreMenu';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 import { currentHash, replaceHash, setHash } from './route';
 import { useAddonOrBase } from './addons/enabledSet';
+import { setThemesAllowed } from './themes/registry';
 import { isStoreHash, StoreScreen, useRoleWithStore } from './addonStore/StoreEntry';
 import { legalRoute, useJoinLinkSync, useLegalRoute } from './legal/route';
 import { usePendingConsentFlush } from './legal/signupConsents';
@@ -754,6 +755,8 @@ function AppMain() {
   const [rankUp, setRankUp] = useState<MasteryResult | null>(null);
   // Apex / Mastery is an add-on (SPO-518): not installed = no screen, no rank-up moment, no background rating work.
   const apexOn = useAddonOrBase('mastery');
+  const themesOn = useAddonOrBase('themes');
+  useEffect(() => setThemesAllowed(themesOn), [themesOn]);
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
     if (!apexOn) return;
@@ -1696,7 +1699,7 @@ function AppMain() {
       {activeOverlay?.screen === 'settings' && role === 'admin' && (
         <SettingsView onClose={closeOverlay} />
       )}
-      {activeOverlay?.screen === 'themes' && <ThemesView onClose={closeOverlay} />}
+      {activeOverlay?.screen === 'themes' && themesOn && <ThemesView onClose={closeOverlay} />}
       {activeOverlay?.screen === 'history' && (
         <HistoryListView shell={shell} onClose={closeOverlay} />
       )}
