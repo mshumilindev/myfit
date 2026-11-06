@@ -17,6 +17,10 @@ on:
         type: choice
         options: [test, prod]
         default: test
+      skip_consent_guard:
+        description: 'Skip the check that the server has the consent versions of this build (only if you know why)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -45,6 +49,28 @@ jobs:
       - run: npm ci --ignore-scripts
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+      # SPO-533: the build sends the newest consent versions, and the server (recordConsent) refuses a grant that is not
+      # its newest (400 stale-version), so a hosting deploy without the matching functions deploy locks every user on
+      # the consent screen. The marker tag `recordConsent-deployed/*` is created by "Deploy functions" (or by hand, see
+      # .claude/skills/cpd/SKILL.md) and carries the sha256 of consentRecordsPure.ts that the server was deployed with.
+      - name: Guard - the server has this build's consent versions
+        if: ${{ github.event.inputs.skip_consent_guard != 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          want=$(sha256sum functions/src/consentRecordsPure.ts | cut -d' ' -f1)
+          obj=$(gh api "repos/${{ github.repository }}/git/matching-refs/tags/recordConsent-deployed/" --jq 'sort_by(.ref) | last | .object.sha // empty')
+          if [ -z "$obj" ]; then
+            echo "::error::No recordConsent-deployed/* marker: deploy functions first (workflow 'Deploy functions' with recordConsent,setConsent)."; exit 1
+          fi
+          msg=$(gh api "repos/${{ github.repository }}/git/tags/$obj" --jq .message)
+          have=$(printf '%s\n' "$msg" | sed -n 's/^consentRecordsPure sha256: //p' | head -1)
+          if [ "$have" != "$want" ]; then
+            echo "::error::functions/src/consentRecordsPure.ts changed since recordConsent was last deployed (marker $have, this build $want). Run 'Deploy functions' with recordConsent,setConsent first, then deploy hosting."; exit 1
+          fi
+          echo "Consent versions match the deployed server ($want)."
 
       - name: Pick site
         id: site

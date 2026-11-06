@@ -21,7 +21,7 @@ on:
         default: '60'
 
 permissions:
-  contents: read
+  contents: write # only to push the `recordConsent-deployed/*` marker tag below
 
 concurrency:
   group: deploy-functions
@@ -104,3 +104,17 @@ jobs:
             fi
           done
           echo "Deployed ${total} function(s) in ${batch_no} batch(es)."
+
+      # Marker for the "Deploy hosting" guard (SPO-533): the consent rules the server runs are the ones in this file.
+      # A hosting build whose consentRecordsPure.ts differs from the last marker would send versions the server refuses.
+      - name: Mark the consent server version as deployed
+        if: success() && contains(format(',{0},', github.event.inputs.functions), ',recordConsent,')
+        run: |
+          set -euo pipefail
+          sum=$(sha256sum functions/src/consentRecordsPure.ts | cut -d' ' -f1)
+          tag="recordConsent-deployed/$(date -u +%Y%m%d-%H%M%S)"
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git tag -a "$tag" -m "consentRecordsPure sha256: $sum" "$GITHUB_SHA"
+          git push origin "$tag"
+          echo "Marked $tag ($sum)"
