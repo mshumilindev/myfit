@@ -128,6 +128,11 @@ export const addonStoreEt: typeof addonStoreEn = {
   removeName: (name: string) => `Eemalda ${name}`,
   chooseWhat: 'Vali, mida näidata',
   modules: 'Moodulid',
+  leftToComplete: (n: number) => `Jäänud on ${n}, et Spotter oleks täielik`,
+  finishSetup: 'Lisa need, et seadistus lõpule viia.',
+  heroComplete: 'Valmis',
+  allAdded: 'Kõik on lisatud',
+  nothingElse: 'Praegu pole midagi muud paigaldada.',
   items: {
     health: { name: 'Tervis', desc: 'Vigastused, tsükkel, toidulisandid ja muu ühes kohas.' },
     'injury-log': { name: 'Vigastuste logi', desc: 'Märgi vigastused ja nende paranemine.' },

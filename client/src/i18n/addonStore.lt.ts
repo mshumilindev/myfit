@@ -129,6 +129,11 @@ export const addonStoreLt: typeof addonStoreEn = {
   removeName: (name: string) => `Pašalinti ${name}`,
   chooseWhat: 'Pasirinkite, ką rodyti',
   modules: 'Moduliai',
+  leftToComplete: (n: number) => `Liko ${n}, kad Spotter būtų pilnas`,
+  finishSetup: 'Pridėkite juos, kad užbaigtumėte sąranką.',
+  heroComplete: 'Baigta',
+  allAdded: 'Viskas pridėta',
+  nothingElse: 'Šiuo metu daugiau nėra ką diegti.',
   items: {
     health: { name: 'Sveikata', desc: 'Traumos, ciklas, papildai ir kita vienoje vietoje.' },
     'injury-log': { name: 'Traumų žurnalas', desc: 'Žymėkite traumas ir kaip jos gyja.' },

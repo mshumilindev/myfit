@@ -5,10 +5,13 @@ import { addonById, type AddonManifest } from '../addons/manifest';
 import { startInstall } from '../addons/installRun';
 import { queueRemove } from '../addons/queue';
 import {
+  SkBadge,
+  SkBento,
+  SkBentoTile,
   SkBtn,
-  SkCard,
   SkChip,
   SkEmpty,
+  SkHero,
   SkIcon,
   SkList,
   SkSectionLink,
@@ -19,6 +22,7 @@ import { Rows, Section } from './storeLists';
 import { DiscoverBento } from './DiscoverBento';
 import { recommend } from './recommend';
 import { MIN_QUERY, searchItems } from './search';
+import { catalogProgress, heroMode, heroState, type HeroMode } from './discoverPicks';
 import { availableForRole, comingSoonForRole, STORE_CATEGORIES } from './storeCatalog';
 import { currentHash, setHash } from '../route';
 import { storeHash } from './storeRoute';
@@ -41,12 +45,28 @@ export function Discover({
     const stable = recommend(role, enabled, []);
     return [...stable, ...recommend(role, enabled, queued).filter((id) => !stable.includes(id))];
   }, [role, enabled, queued]);
-  const total = availableForRole(role).length;
-  const done = total > 0 && rec.length === 0;
+  const prog = catalogProgress(role, enabled);
+  const [mode, setMode] = useState<HeroMode>(() => heroMode('bento', prog));
+  const nextMode = heroMode(mode, prog);
+  if (nextMode !== mode) setMode(nextMode);
+  const soonItems = comingSoonForRole(role);
   return (
     <>
-      <DiscoverBento role={role} ctx={ctx} go={go} />
-      {!done && (
+      {nextMode === 'progress' ? (
+        <SkHero
+          state={heroState(prog.left)}
+          eyebrow={st.yourSpotter}
+          done={prog.done}
+          total={prog.total}
+          badge={prog.left === 0 ? <SkBadge kind="ok">{st.heroComplete}</SkBadge> : undefined}
+          title={prog.left === 0 ? st.allAdded : st.leftToComplete(prog.left)}
+          body={prog.left === 0 ? st.nothingElse : st.finishSetup}
+          progressLabel={st.yourSpotter}
+        />
+      ) : (
+        <DiscoverBento role={role} ctx={ctx} go={go} />
+      )}
+      {rec.length > 0 && (
         <Section
           title={st.recommended}
           aside={<SkSectionLink onClick={() => go('apps')}>{st.seeAll}</SkSectionLink>}
@@ -54,11 +74,18 @@ export function Discover({
           <Rows ids={rec.slice(0, 4)} ctx={ctx} />
         </Section>
       )}
-      {done && (
-        <Section title={st.yourSpotter}>
-          <SkCard className="sk-p20">
-            <div className="sk-t-h3">{st.allTurnedOn}</div>
-          </SkCard>
+      {nextMode === 'progress' && prog.left === 0 && soonItems.length > 0 && (
+        <Section title={st.comingSoon}>
+          <SkBento>
+            <SkBentoTile
+              variant="dark"
+              size="wide"
+              span={2}
+              eyebrow={st.comingSoon}
+              title={soonItems.map((m) => itemName(st, m.id)).join(', ')}
+              titleSize="h2"
+            />
+          </SkBento>
         </Section>
       )}
     </>

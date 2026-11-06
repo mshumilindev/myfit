@@ -1,5 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { appOfTheWeek, categoryCount, nextSoon, starterPack, suggestion } from './discoverPicks';
+import {
+  appOfTheWeek,
+  catalogProgress,
+  categoryCount,
+  heroMode,
+  heroState,
+  nextSoon,
+  starterPack,
+  suggestion,
+} from './discoverPicks';
 
 const none = { role: 'member' as const, enabled: new Set<string>(), queued: [] as string[] };
 beforeEach(() => undefined);
@@ -30,5 +39,27 @@ describe('discover picks', () => {
     expect(categoryCount('member')).toBeGreaterThan(2);
     expect(nextSoon('manager')).toBeNull();
     expect(categoryCount('manager')).toBe(0);
+  });
+});
+
+describe('progress hero', () => {
+  it('takes over at 70% or 3 left and hands back only at 6 or more left', () => {
+    expect(heroMode('bento', { done: 7, total: 10, left: 3 })).toBe('progress');
+    expect(heroMode('bento', { done: 8, total: 20, left: 12 })).toBe('bento');
+    expect(heroMode('bento', { done: 15, total: 20, left: 5 })).toBe('progress');
+    expect(heroMode('progress', { done: 3, total: 10, left: 7 })).toBe('bento');
+    expect(heroMode('progress', { done: 6, total: 11, left: 5 })).toBe('progress');
+    expect(heroMode('bento', { done: 6, total: 11, left: 5 })).toBe('bento');
+    expect(heroMode('bento', { done: 0, total: 0, left: 0 })).toBe('bento');
+  });
+  it('picks the hero look from what is left', () => {
+    expect(heroState(0)).toBe('complete');
+    expect(heroState(2)).toBe('almost');
+    expect(heroState(5)).toBe('progress');
+  });
+  it('counts the installed part of the role catalog', () => {
+    const p = catalogProgress('member', new Set(['health']));
+    expect(p.done).toBe(1);
+    expect(p.left).toBe(p.total - 1);
   });
 });

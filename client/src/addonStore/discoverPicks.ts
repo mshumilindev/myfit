@@ -54,3 +54,31 @@ export function nextSoon(role: Role): AddonManifest | null {
 export function categoryCount(role: Role): number {
   return new Set(availableForRole(role).map((m) => m.category)).size;
 }
+
+export type HeroMode = 'bento' | 'progress';
+
+/** How much of the role's catalog is installed. */
+export function catalogProgress(role: Role, enabled: ReadonlySet<string>) {
+  const all = availableForRole(role);
+  const done = all.filter((m) => enabled.has(m.id)).length;
+  return { done, total: all.length, left: all.length - done };
+}
+
+/**
+ * Bento or the progress hero (boards 22–24): the hero takes over once 70% of the catalog is installed or 3 or fewer
+ * remain; the bento comes back only when 6 or more remain (in between, whatever was shown stays — no flicker).
+ */
+export function heroMode(
+  prev: HeroMode,
+  p: { done: number; total: number; left: number },
+): HeroMode {
+  if (p.total === 0) return 'bento';
+  if (p.left <= 3 || p.done / p.total >= 0.7) return 'progress';
+  if (p.left >= 6) return 'bento';
+  return prev;
+}
+
+/** The hero's look: nothing left → complete, a few left → almost, otherwise plain progress. */
+export function heroState(left: number): 'progress' | 'almost' | 'complete' {
+  return left === 0 ? 'complete' : left <= 3 ? 'almost' : 'progress';
+}

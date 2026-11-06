@@ -128,6 +128,11 @@ export const addonStorePl: typeof addonStoreEn = {
   removeName: (name: string) => `Usuń ${name}`,
   chooseWhat: 'Wybierz, co pokazywać',
   modules: 'Moduły',
+  leftToComplete: (n: number) => `Zostało ${n}, aby uzupełnić Spotter`,
+  finishSetup: 'Dodaj je, aby dokończyć konfigurację.',
+  heroComplete: 'Gotowe',
+  allAdded: 'Wszystko dodane',
+  nothingElse: 'Na razie nie ma nic więcej do zainstalowania.',
   items: {
     health: { name: 'Zdrowie', desc: 'Urazy, cykl, suplementy i więcej w jednym miejscu.' },
     'injury-log': { name: 'Dziennik urazów', desc: 'Zapisuj urazy i to, jak się goją.' },

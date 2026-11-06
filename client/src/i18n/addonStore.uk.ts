@@ -128,6 +128,11 @@ export const addonStoreUk: typeof addonStoreEn = {
   removeName: (name: string) => `Видалити ${name}`,
   chooseWhat: 'Оберіть, що показувати',
   modules: 'Модулі',
+  leftToComplete: (n: number) => `Лишилось ${n}, щоб завершити Spotter`,
+  finishSetup: 'Додайте їх, щоб завершити налаштування.',
+  heroComplete: 'Готово',
+  allAdded: 'Усе додано',
+  nothingElse: 'Зараз більше нічого встановлювати.',
   items: {
     health: { name: 'Здоров’я', desc: 'Травми, цикл, добавки та інше в одному місці.' },
     'injury-log': { name: 'Журнал травм', desc: 'Записуйте травми й те, як вони гояться.' },

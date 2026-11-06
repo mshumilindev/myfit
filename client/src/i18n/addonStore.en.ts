@@ -130,6 +130,11 @@ export const addonStoreEn = {
   removeName: (name: string) => `Remove ${name}`,
   chooseWhat: 'Choose what to show',
   modules: 'Modules',
+  leftToComplete: (n: number) => `${n} left to complete Spotter`,
+  finishSetup: 'Add them to finish your setup.',
+  heroComplete: 'Complete',
+  allAdded: 'Everything is added',
+  nothingElse: 'Nothing else to install right now.',
   items: {
     health: { name: 'Health', desc: 'Injuries, cycle, supplements and more in one place.' },
     'injury-log': { name: 'Injury log', desc: 'Log injuries and how they heal.' },
