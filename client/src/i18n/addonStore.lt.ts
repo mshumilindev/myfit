@@ -160,6 +160,10 @@ export const addonStoreLt: typeof addonStoreEn = {
       name: 'Veiklos',
       desc: 'Žymėkite sportą, kardio ir atsigavimą ne sporto salėje.',
     },
+    'home-sets': {
+      name: 'Treniruotės namuose',
+      desc: 'Sudarykite namų rinkinius iš savo pratimų ir atlikite bet kur.',
+    },
     atlas: { name: 'Atlas', desc: 'Klauskite DI padėjėjo apie savo treniruotes.' },
     apex: { name: 'Apex', desc: 'Žaidybinė Spotter dalis: iššūkiai, lygiai ir apdovanojimai.' },
     mastery: { name: 'Meistriškumas', desc: 'Įgūdžių lygiai ir ilgalaikė pažanga.' },

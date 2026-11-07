@@ -162,6 +162,10 @@ export const addonStoreEt: typeof addonStoreEn = {
       name: 'Tegevused',
       desc: 'Märgi sport, kardio ja taastumine väljaspool jõusaali.',
     },
+    'home-sets': {
+      name: 'Kodused treeningud',
+      desc: 'Koosta kodused komplektid oma harjutustest ja tee neid kus iganes.',
+    },
     atlas: { name: 'Atlas', desc: 'Küsi tehisintellekti abilisest oma treeningute kohta.' },
     apex: { name: 'Apex', desc: 'Spotteri mänguline pool: väljakutsed, tasemed ja auhinnad.' },
     mastery: { name: 'Meisterlikkus', desc: 'Oskuste tasemed ja pikaajaline areng.' },

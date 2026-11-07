@@ -164,6 +164,10 @@ export const addonStoreEn = {
       name: 'Activities',
       desc: 'Log sport, cardio and recovery sessions beyond the gym.',
     },
+    'home-sets': {
+      name: 'Home workouts',
+      desc: 'Build home sets from your own moves and run them anywhere.',
+    },
     atlas: { name: 'Atlas', desc: 'Ask the AI assistant about your training.' },
     apex: { name: 'Apex', desc: 'The game side of Spotter: challenges, levels and rewards.' },
     mastery: { name: 'Mastery', desc: 'Track skill levels and long-term progress.' },

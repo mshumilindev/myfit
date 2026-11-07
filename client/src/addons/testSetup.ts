@@ -27,7 +27,10 @@ export const APEX_ADDONS = ['apex', 'apex-challenges', 'apex-ranks', 'apex-award
 try {
   localStorage.setItem(
     'spotter.addons',
-    JSON.stringify({ list: [...HEALTH_ADDONS, ...APEX_ADDONS, 'activities'], updatedAt: 1 }),
+    JSON.stringify({
+      list: [...HEALTH_ADDONS, ...APEX_ADDONS, 'activities', 'home-sets'],
+      updatedAt: 1,
+    }),
   );
 } catch {
   /* no storage in this environment: the test world starts without add-ons */

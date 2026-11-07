@@ -756,6 +756,7 @@ function AppMain() {
   const [notifNow] = useState(() => Date.now());
   const [rankUp, setRankUp] = useState<MasteryResult | null>(null);
   const activitiesOn = useActivitiesOn();
+  const homeSetsOn = useAddonOrBase('home-sets');
   const { apexOn, masteryOn, challenges, themesOn, sleepOn, atlasOn, healthOn, injuryOn } =
     useAddonRuntime();
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
@@ -1092,6 +1093,7 @@ function AppMain() {
     (overlay?.screen === 'themes' && !themesOn) ||
     (overlay?.screen === 'mastery' && !apexOn) ||
     ((overlay?.screen === 'log-activity' || overlay?.screen === 'activity') && !activitiesOn) ||
+    (overlay?.screen === 'home-set' && !homeSetsOn) ||
     (overlay?.screen === 'health' && !healthOn) ||
     (overlay?.screen === 'injury' && !injuryOn);
   const activeOverlay = overlayBlocked ? null : overlay;

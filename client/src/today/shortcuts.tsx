@@ -202,6 +202,7 @@ export function renderShortcut(
  */
 export const SHORTCUT_ADDON: Readonly<Record<string, string>> = {
   'sc:sleep': 'sleep',
+  'sc:home-set': 'home-sets',
   'sc:injury': 'injury-log',
   // Rest days and being unwell are Health too (owner 07.11: Health leaves the base entirely).
   'sc:active-rest': 'rest',

@@ -115,3 +115,14 @@ describe('Activities widgets and shortcuts follow the Activities add-on (SPO-500
     expect(ids().some((id) => id.startsWith('sc:act:'))).toBe(true);
   });
 });
+
+describe('Home workouts follow the Home workouts add-on (SPO-500)', () => {
+  it('the home sets widget and the home set shortcut need it', () => {
+    const ids = () => renderHook(() => useShortcuts()).result.current.map((x) => x.id);
+    expect(avail('home-sets')).toBe(false);
+    expect(ids()).not.toContain('sc:home-set');
+    addonsPref.set(['home-sets']);
+    expect(avail('home-sets')).toBe(true);
+    expect(ids()).toContain('sc:home-set');
+  });
+});

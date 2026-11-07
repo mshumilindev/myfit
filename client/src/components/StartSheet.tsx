@@ -77,6 +77,7 @@ export function StartSheet({
   const healthOn = useAddonOrBase('health');
   const sleepOn = useAddonOrBase('sleep');
   const activitiesOn = useActivitiesOn();
+  const homeOn = useAddonOrBase('home-sets');
   const store = useStore();
   const { assignment, active: assignedActive } = useProgramMine();
   const [sub, setSub] = useState<Sub>(null);
@@ -421,21 +422,25 @@ export function StartSheet({
             <span className="ss-ts">{t.startProgramsSub}</span>
           </span>
         </Card>
-        <Card
-          as="button"
-          className={`ss-tile${locked ? ' locked' : ''}`}
-          aria-disabled={locked}
-          onClick={locked ? undefined : openHome}
-        >
-          <span className="ss-tile-top">
-            <IconTile tone="home" size={40} icon="house" className="ss-ic" />
-            {locked && <Icon name="lock-simple" className="ss-lock" />}
-          </span>
-          <span className="ss-tile-text">
-            <span className="ss-tt">{t.startHomeTitle}</span>
-            <span className="ss-ts">{locked ? t.startFinishFirst(liveName) : t.startHomeSub}</span>
-          </span>
-        </Card>
+        {homeOn && (
+          <Card
+            as="button"
+            className={`ss-tile${locked ? ' locked' : ''}`}
+            aria-disabled={locked}
+            onClick={locked ? undefined : openHome}
+          >
+            <span className="ss-tile-top">
+              <IconTile tone="home" size={40} icon="house" className="ss-ic" />
+              {locked && <Icon name="lock-simple" className="ss-lock" />}
+            </span>
+            <span className="ss-tile-text">
+              <span className="ss-tt">{t.startHomeTitle}</span>
+              <span className="ss-ts">
+                {locked ? t.startFinishFirst(liveName) : t.startHomeSub}
+              </span>
+            </span>
+          </Card>
+        )}
       </div>
     </StartFrame>
   );

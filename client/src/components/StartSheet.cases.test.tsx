@@ -151,7 +151,7 @@ const liveWorkouts = () => __getStateForTests().workouts.filter((w) => w.finishe
 
 beforeEach(() => {
   localStorage.clear();
-  addonsPref.set(['health', 'activities']);
+  addonsPref.set(['health', 'activities', 'home-sets']);
   programState.assignment = null;
   programState.active = true;
   gps(null);
@@ -487,6 +487,12 @@ describe('StartSheet · tiles', () => {
     render(<StartSheet shell={shell()} onClose={vi.fn()} />);
     expect(screen.queryByText('Health')).toBeNull();
     expect(screen.getByText('Activity')).toBeTruthy();
+  });
+
+  it('offers no Home set tile until the Home workouts add-on is installed (SPO-500)', () => {
+    addonsPref.set(['health']);
+    render(<StartSheet shell={shell()} onClose={vi.fn()} />);
+    expect(screen.queryByText('Home set')).toBeNull();
   });
 
   it('offers no Activity tile until the Activities add-on is installed (SPO-500)', () => {

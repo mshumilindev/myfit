@@ -1,6 +1,7 @@
 /** Store screens on the store kit: Discover, Apps, Add-ons, Selected, Installed, item page, search. */
 import { useMemo, useState } from 'react';
 import type { Role } from '../api';
+import { APP_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
 import { ADDONS, addonById, type AddonManifest } from '../addons/manifest';
 import { startInstall } from '../addons/installRun';
 import { queueRemove, setModulePick, useModulePicks } from '../addons/queue';
@@ -126,6 +127,13 @@ function catFromHash(): AddonManifest['category'] | 'all' {
     : 'all';
 }
 
+/** One list on a phone; two halves (two cards side by side) on a wide screen. */
+function halves<T>(items: readonly T[], wide: boolean): T[][] {
+  if (!wide) return [[...items]];
+  const cut = Math.ceil(items.length / 2);
+  return [items.slice(0, cut), items.slice(cut)];
+}
+
 /** Apps, filtered by category chips; coming-soon apps close the list. */
 export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   const { st } = ctx;
@@ -135,6 +143,7 @@ export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   const label = (c: string) => catLabel(st, c);
   const shown = apps.filter((m) => cat === 'all' || m.category === cat);
   const soon = comingSoonForRole(role);
+  const wide = useMinWidth(APP_BREAKPOINT);
   return (
     <>
       <div className="sk-rowf sk-g8 sk-wrap">
@@ -148,14 +157,16 @@ export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
         ))}
       </div>
       <div className="sk-mt16 as-apps-cols">
-        <Rows ids={shown.slice(0, Math.ceil(shown.length / 2)).map((m) => m.id)} ctx={ctx} />
-        <Rows ids={shown.slice(Math.ceil(shown.length / 2)).map((m) => m.id)} ctx={ctx} />
+        {halves(shown, wide).map((part, i) => (
+          <Rows key={i} ids={part.map((m) => m.id)} ctx={ctx} />
+        ))}
       </div>
       {cat === 'all' && soon.length > 0 && (
         <Section title={st.comingSoon}>
           <div className="as-apps-cols">
-            <Rows ids={soon.slice(0, Math.ceil(soon.length / 2)).map((m) => m.id)} ctx={ctx} />
-            <Rows ids={soon.slice(Math.ceil(soon.length / 2)).map((m) => m.id)} ctx={ctx} />
+            {halves(soon, wide).map((part, i) => (
+              <Rows key={i} ids={part.map((m) => m.id)} ctx={ctx} />
+            ))}
           </div>
         </Section>
       )}
@@ -173,6 +184,7 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   const cats = addonCategories(role);
   const shown = addons.filter((m) => cat === 'all' || m.category === cat);
   const standalone = shown.filter((m) => !m.parent);
+  const wide = useMinWidth(APP_BREAKPOINT);
   const parents = [...new Set(shown.flatMap((m) => (m.parent ? [m.parent] : [])))];
   if (!parents.length && !standalone.length) {
     return (
@@ -203,17 +215,14 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
       )}
       <div className="as-cols">
         {standalone.length > 0 &&
-          // With no app groups the standalone rows fill both columns (first half, second half).
-          (parents.length === 0 ? [0, 1] : [-1]).map((half) => {
-            const cut = Math.ceil(standalone.length / 2);
-            const part =
-              half < 0 ? standalone : half === 0 ? standalone.slice(0, cut) : standalone.slice(cut);
-            return part.length > 0 ? (
-              <section key={half} className="sk-mt24">
+          // With no app groups the standalone rows fill both columns on a wide screen (first half, second half).
+          halves(standalone, parents.length === 0 && wide).map((part, i) =>
+            part.length > 0 ? (
+              <section key={i} className="sk-mt24">
                 <Rows ids={part.map((m) => m.id)} ctx={ctx} />
               </section>
-            ) : null;
-          })}
+            ) : null,
+          )}
         {parents.map((p) => {
           const pm = addonById(p);
           return (
