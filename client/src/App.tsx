@@ -104,15 +104,12 @@ import type { ProgramsPeer } from './components/ProgramsTabs';
 import { currentHash, replaceHash, setHash } from './route';
 import { useAddonOrBase } from './addons/enabledSet';
 import { useAddonRuntime } from './addons/useAddonRuntime';
-import { masteryRailItem } from './components/suite/masteryRailItem';
+import { apexMastery } from './views/apexMastery';
 import { isStoreHash, StoreScreen, useRoleWithStore } from './addonStore/StoreEntry';
 import { legalRoute, useJoinLinkSync, useLegalRoute } from './legal/route';
 import { usePendingConsentFlush } from './legal/signupConsents';
 import { usePendingRevokeFlush } from './coach/client/revokeQueue';
 
-const MasteryBadge = lazy(() =>
-  import('./views/MasteryView').then((module) => ({ default: module.MasteryBadge })),
-);
 const LegalPage = lazy(() =>
   import('./views/LegalPage').then((module) => ({ default: module.LegalPage })),
 );
@@ -210,6 +207,9 @@ const CoachView = lazy(() =>
 );
 const MasteryView = lazy(() =>
   import('./views/MasteryView').then((module) => ({ default: module.MasteryView })),
+);
+const MasteryBadge = lazy(() =>
+  import('./views/MasteryView').then((module) => ({ default: module.MasteryBadge })),
 );
 const HealthView = lazy(() =>
   import('./views/HealthView').then((module) => ({ default: module.HealthView })),
@@ -632,7 +632,14 @@ function focusFromHash(hash: string): string | null {
 }
 
 // --- Apex (the gamification sub-app) is a full-screen mode at #/apex[/<tab>].
-const APEX_TAB_IDS: readonly string[] = ['home', 'challenges', 'ranks', 'awards', 'feed'];
+const APEX_TAB_IDS: readonly string[] = [
+  'home',
+  'challenges',
+  'ranks',
+  'awards',
+  'feed',
+  'mastery',
+];
 function isApexHash(hash: string): boolean {
   return hash.split('?')[0].replace(/^#\/?/, '').split('/')[0] === 'apex';
 }
@@ -756,7 +763,7 @@ function AppMain() {
   // the result (stable timestamps + seen flags, so nothing stale re-surfaces).
   const [notifNow] = useState(() => Date.now());
   const [rankUp, setRankUp] = useState<MasteryResult | null>(null);
-  const { apexOn, themesOn, sleepOn, atlasOn, healthOn, injuryOn } = useAddonRuntime();
+  const { apexOn, masteryOn, themesOn, sleepOn, atlasOn, healthOn, injuryOn } = useAddonRuntime();
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
     if (!apexOn) return;
@@ -1590,6 +1597,13 @@ function AppMain() {
             notifUnread={notifUnread}
             onNotifSeen={markNotifsSeen}
             onNotifMarkAll={markAllNotifsSeen}
+            {...apexMastery(
+              masteryOn,
+              t.masteryTitle,
+              setApexTab,
+              () => <MasteryView shell={shell} onClose={() => setApexTab('home')} />,
+              () => <MasteryBadge onOpen={() => setApexTab('mastery')} variant="rail" />,
+            )}
           />
         </Suspense>
         {shellOpen && (
@@ -1879,7 +1893,6 @@ function AppMain() {
           onOpenNotifications={() => setOverlay({ screen: 'notifications' })}
           onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
           onOpenSettings={() => setOverlay({ screen: 'settings' })}
-          onOpenMastery={() => setOverlay({ screen: 'mastery' })}
           onOpenHealth={() => setOverlay({ screen: 'health' })}
         />
       )}
@@ -1953,8 +1966,6 @@ function AppMain() {
                 : {}),
             }))}
             hidden={headerHidden}
-            mastery={onMastery}
-            onMastery={() => setOverlay({ screen: 'mastery' })}
             onPrivacy={() => setOverlay({ screen: 'privacy' })}
             onSelect={goTab}
             fab={{
@@ -2086,7 +2097,6 @@ export function GymRail(props: {
   onOpenNotifications: () => void;
   onOpenProfile: () => void;
   onOpenSettings: () => void;
-  onOpenMastery: () => void;
   onOpenHealth: () => void;
 }) {
   const { t } = useT();
@@ -2103,7 +2113,6 @@ export function GymRail(props: {
       : undefined;
   const activeConditions = useActiveConditions();
   const conditions = useAddonOrBase('health') ? activeConditions : 0; // shield belongs to Health (SPO-518)
-  const masteryOn = useAddonOrBase('mastery');
 
   return (
     <AppRail
@@ -2135,15 +2144,6 @@ export function GymRail(props: {
                 onSelect: props.onOpenHealth,
                 node: <ConditionsShield variant="rail" onOpen={props.onOpenHealth} />,
               },
-            ]
-          : []),
-        ...(masteryOn
-          ? [
-              masteryRailItem(
-                t.masteryTitle,
-                props.onOpenMastery,
-                <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />,
-              ),
             ]
           : []),
       ]}

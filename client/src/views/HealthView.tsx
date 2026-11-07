@@ -2,13 +2,13 @@
  * Health — the full page behind Start › Health (design docs/design/health,
  * F01–F10 mobile, W01–W03 web). It replaced the old "Rest & recovery" drawer.
  *
- *   Home     Now (active illness / rest / injuries, welcome back), Sleep, Start,
+ *   Home     Now (active illness / rest / injuries, welcome back), Start,
  *            Log the past, History preview.
  *   Forms    one grouped-list form for start / backfill / edit (HealthForm).
  *   History  List (edit, swipe to delete) | Timeline (view-only).
  *
- * Sleep details and the injury rehab plan stay their existing screens
- * (overlays 'sleep' and 'injury'). Web (≥720px): lists left, History (timeline
+ * Sleep has its own screen and its own Start tile (SPO-518); the injury rehab plan stays its own screen
+ * (overlay 'injury'). Web (≥720px): lists left, History (timeline
  * by default) right; forms and edits open in the right panel.
  */
 import { BackButton } from '../components/ui/BackButton';
@@ -17,13 +17,9 @@ import { useEffect, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
 import { useT } from '../i18n';
 import { illnessState } from '../illness';
-import { sleepBlockedBy, SLEEP_BLOCK_KEY } from '../sleepGuard';
-import { useAddonOrBase } from '../addons/enabledSet';
-import { dayKey, endRestPeriod, liveSleep, startSleep, useStore } from '../store';
+import { dayKey, endRestPeriod, useStore } from '../store';
 import { useAddonAvailable } from '../addons/enabledSet';
 import { activeInjuries, inFullRest } from '../injury';
-import { lastNight, nightDurationMin } from '../sleep';
-import { fmtDurationHuman } from '../i18n';
 import { rangeEnd, type HealthFormSpec, type HealthItem } from '../health';
 import type { RestPeriod } from '../types';
 import { ConfirmDialog, useIsDesktop } from '../ui';
@@ -45,7 +41,6 @@ import {
   fmtDay,
   fmtRange,
   fmtRangeWd,
-  hhmm,
   iconOf,
   injuryLabel,
   itemLabel,
@@ -285,50 +280,6 @@ export function HealthView(props: HealthViewProps) {
     );
   }
 
-  // --- Sleep ----------------------------------------------------------------------
-  const sleepOn = useAddonOrBase('sleep');
-  const live = liveSleep(store.sleeps);
-  const last = lastNight(store.sleeps);
-  const sleepBlock = sleepBlockedBy(store);
-  const sleepGroup = !sleepOn ? null : (
-    <GroupedList key="sleep" header={t.sleepTitle}>
-      <ListRow
-        icon={<Ic tone="slp" name="moon" />}
-        label={t.hlLastNight}
-        sub={last && last.wake ? `${hhmm(last.bedtime)}–${hhmm(last.wake)}` : t.sleepNoLastNight}
-        value={last && last.wake ? fmtDurationHuman(nightDurationMin(last) * 60000) : undefined}
-        chevron
-        // Last night's own details (same screen History opens for a night);
-        // no night yet → the sleep page, where one can be logged.
-        onClick={() =>
-          shell.openOverlay(
-            last ? { screen: 'sleep', mode: 'edit', nightId: last.id } : { screen: 'sleep' },
-          )
-        }
-      />
-      <ListRow
-        icon={<Ic tone="slp" name="clock" />}
-        label={
-          <ToneText tone="sleep" strong>
-            {live ? t.sleepAsleepSince(hhmm(live.bedtime)) : t.sleepStart}
-          </ToneText>
-        }
-        sub={!live && sleepBlock ? t[SLEEP_BLOCK_KEY[sleepBlock]] : undefined}
-        disabled={!live && !!sleepBlock}
-        onClick={() => {
-          if (live || startSleep()) shell.openOverlay({ screen: 'sleep' });
-        }}
-      />
-      <ListRow
-        icon={<Ic tone="slp" name="calClock" />}
-        label={t.hlSleepDetails}
-        sub={t.hlSleepDetailsSub}
-        chevron
-        onClick={() => shell.openOverlay({ screen: 'sleep' })}
-      />
-    </GroupedList>
-  );
-
   // --- Start / Log the past -----------------------------------------------------------
   const isSel = (f: HealthFormSpec) =>
     web &&
@@ -542,17 +493,6 @@ export function HealthView(props: HealthViewProps) {
               ) : (
                 <>
                   <HistoryTimeline now={now} filter={filter} web={false} />
-                  {sleepOn && (
-                    <GroupedList header={t.hlNotOnTimeline}>
-                      <ListRow
-                        icon={<Ic tone="slp" name="calClock" />}
-                        label={t.hlSleepDetails}
-                        sub={t.hlSleepOwnHistory}
-                        chevron
-                        onClick={() => shell.openOverlay({ screen: 'sleep' })}
-                      />
-                    </GroupedList>
-                  )}
                 </>
               )}
             </div>
@@ -579,7 +519,6 @@ export function HealthView(props: HealthViewProps) {
           <div className="hl-cnt">
             <HealthDisclaimer />
             {nowGroups}
-            {sleepGroup}
             {startGroup}
             {pastGroup}
             {conditionsGroup}
@@ -602,7 +541,6 @@ export function HealthView(props: HealthViewProps) {
         {form || condPage ? (
           <>
             {nowGroups}
-            {sleepGroup}
             {startGroup}
             {pastGroup}
             {conditionsGroup}
@@ -610,10 +548,7 @@ export function HealthView(props: HealthViewProps) {
           </>
         ) : (
           <div className="hl-cols">
-            <div className="hl-col">
-              {nowGroups}
-              {sleepGroup}
-            </div>
+            <div className="hl-col">{nowGroups}</div>
             <div className="hl-col">
               {startGroup}
               {pastGroup}

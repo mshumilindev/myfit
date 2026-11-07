@@ -1,3 +1,5 @@
+import { addonsPref } from '../../../addons/enabledSet';
+import { HEALTH_ADDONS } from '../../../addons/testSetup';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { CycleSessionNote } from './CycleSessionNote';
@@ -18,6 +20,7 @@ beforeEach(() => {
   cleanup();
   setLocale('en');
   resetLocalData();
+  addonsPref.set(HEALTH_ADDONS);
 });
 
 describe('cycleToday', () => {

@@ -1,3 +1,5 @@
+import { addonsPref } from '../addons/enabledSet';
+import { HEALTH_ADDONS } from '../addons/testSetup';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useEffect } from 'react';
 import { act, render } from '@testing-library/react';
@@ -19,6 +21,7 @@ const setup = () =>
 
 beforeEach(() => {
   resetLocalData();
+  addonsPref.set(HEALTH_ADDONS);
   box.tint = null;
 });
 

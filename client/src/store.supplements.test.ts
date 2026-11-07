@@ -47,6 +47,8 @@ vi.mock('./vaultIO', async (orig) => {
 });
 
 import * as store from './store';
+import { addonsPref } from './addons/enabledSet';
+import { HEALTH_ADDONS } from './addons/testSetup';
 import { vault } from './vaultIO';
 import { isSealed, unsealDoc } from './encryptedDoc';
 import { MAX_CHECKIN_DAYS, addDays, newSupplementEntry } from './supplements';
@@ -93,6 +95,7 @@ describe('supplements store', () => {
     fs.docs.clear();
     fs.listeners.clear();
     store.deleteSupplementData();
+    addonsPref.set(HEALTH_ADDONS); // supplements live in the Supplements module of Health
     stop = store.startSyncLoop();
     await tick();
     fs.writes.length = 0;

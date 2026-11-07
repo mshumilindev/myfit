@@ -1,0 +1,10 @@
+/* Bento rhythm: two columns; with an odd count the last tile runs across both, so the grid never ends on a lone
+   half-width tile. The kit grid cannot count its cells, hence this layout rule. */
+.ss-grid > .ss-tile:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+}
+.ss-grid > .ss-tile:last-child:nth-child(odd) .ss-tile-top {
+  width: auto;
+}

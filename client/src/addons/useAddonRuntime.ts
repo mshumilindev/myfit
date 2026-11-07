@@ -18,6 +18,7 @@ export function useAddonRuntime() {
   const installedThemes = useInstalledThemeIds();
   const sleepOn = useAddonOrBase('sleep');
   const atlasOn = useAddonOrBase('atlas');
+  const masteryOn = useAddonOrBase('mastery');
   const healthOn = useAddonOrBase('health');
   const injuryOn = useAddonOrBase('injury-log');
   useEffect(() => syncSleepAutoQueue(), [sleepOn]);
@@ -25,5 +26,5 @@ export function useAddonRuntime() {
   useEffect(() => watchAtlasRemoval(), []);
   useEffect(() => (atlasOn ? undefined : reconcileAtlasConsent()), [atlasOn]);
   useEffect(() => setAllowedThemes(installedThemes), [installedThemes]);
-  return { apexOn, themesOn, sleepOn, atlasOn, healthOn, injuryOn };
+  return { apexOn, masteryOn, themesOn, sleepOn, atlasOn, healthOn, injuryOn };
 }

@@ -11,7 +11,9 @@
  */
 import { IconButton } from '../components/ui/Button';
 import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { useAddonAvailable } from '../addons/enabledSet';
+import type { RailFootEntry } from '../components/ui/railOverflow';
 import { fmtDayMonth, useT } from '../i18n';
 import type { StoreState } from '../store';
 import { SuiteAppFrame } from '../components/suite/SuiteAppFrame';
@@ -26,9 +28,17 @@ import type { StatShareModel } from '../data/shareCard';
 import type { BodyMetrics } from '../types';
 import type { Notif, NotifState } from '../notifications';
 
-export type ApexTab = 'home' | 'challenges' | 'ranks' | 'awards' | 'feed';
+/** `mastery` is Apex's Mastery module: a screen of its own, reached from More (phone) or the rail's foot (desktop), never a tab. */
+export type ApexTab = 'home' | 'challenges' | 'ranks' | 'awards' | 'feed' | 'mastery';
 
-export const APEX_TABS: ApexTab[] = ['home', 'challenges', 'ranks', 'awards', 'feed'];
+export const APEX_TABS: ApexTab[] = ['home', 'challenges', 'ranks', 'awards', 'feed', 'mastery'];
+
+/** The module that owns each Apex tab (Home and the feed are Apex itself). */
+const TAB_MODULE: Partial<Record<ApexTab, string>> = {
+  challenges: 'apex-challenges',
+  ranks: 'apex-ranks',
+  awards: 'apex-awards',
+};
 
 function apxLatestWeight(body: BodyMetrics): number {
   if (!body?.weights?.length) return 0;
@@ -47,6 +57,8 @@ export function ApexApp({
   notifUnread,
   onNotifSeen,
   onNotifMarkAll,
+  mastery,
+  masteryRail,
 }: {
   store: StoreState;
   now: number;
@@ -59,6 +71,10 @@ export function ApexApp({
   notifUnread: number;
   onNotifSeen: (ids: string[]) => void;
   onNotifMarkAll: () => void;
+  /** The Mastery screen, given only while the Mastery module is on. */
+  mastery?: ReactNode;
+  /** Its entry in the desktop rail's foot. */
+  masteryRail?: RailFootEntry;
 }) {
   const { t, locale } = useT();
   const desktop = useMinWidth(APP_BREAKPOINT);
@@ -131,12 +147,22 @@ export function ApexApp({
   };
 
   // Four primary tabs; Apps closes the set on mobile, Feed lives on the bell.
+  // Each part of Apex is a module of it: a tab only exists while its module is on (Configure in the store).
+  const available = useAddonAvailable();
   const nav: { id: ApexTab; icon: string; label: string }[] = [
-    { id: 'home', icon: 'house', label: t.apexHomeTab },
-    { id: 'challenges', icon: 'flag-banner', label: t.challengesTab },
-    { id: 'ranks', icon: 'trophy', label: t.apexRanksTab },
-    { id: 'awards', icon: 'medal', label: t.apexAwardsTab },
-  ];
+    { id: 'home' as const, icon: 'house', label: t.apexHomeTab },
+    { id: 'challenges' as const, icon: 'flag-banner', label: t.challengesTab },
+    { id: 'ranks' as const, icon: 'trophy', label: t.apexRanksTab },
+    { id: 'awards' as const, icon: 'medal', label: t.apexAwardsTab },
+  ].filter((x) => !TAB_MODULE[x.id] || available(TAB_MODULE[x.id]!));
+  // A tab whose module was just turned off (or an old address) falls back to Home.
+  const shown: ApexTab =
+    tab === 'feed' ||
+    tab === 'home' ||
+    nav.some((x) => x.id === tab) ||
+    (tab === 'mastery' && mastery)
+      ? tab
+      : 'home';
 
   return (
     <SuiteAppFrame
@@ -144,12 +170,26 @@ export function ApexApp({
       className="app-apex"
       desktop={desktop}
       nav={nav}
-      tab={tab}
+      tab={shown}
       homeTab="home"
       onTab={(id) => onTab(id as ApexTab)}
       names={{ appName: t.apexName, apps: t.shellSwitch, feed: t.feedTitle }}
       onOpenShell={onOpenShell}
       onOpenProfile={onOpenProfile}
+      moreExtra={
+        mastery
+          ? [
+              {
+                id: 'mastery',
+                icon: 'medal',
+                label: t.masteryTitle,
+                onSelect: () => onTab('mastery'),
+                active: shown === 'mastery',
+              },
+            ]
+          : []
+      }
+      railExtras={masteryRail ? [masteryRail] : undefined}
       notifs={notifs}
       notifState={notifState}
       notifUnread={notifUnread}
@@ -168,9 +208,9 @@ export function ApexApp({
         </>
       }
     >
-      {tab === 'home' && <ApexHome store={store} now={now} notifs={notifs} onTab={onTab} />}
-      {tab === 'challenges' && <ChallengesView store={store} />}
-      {tab === 'ranks' && (
+      {shown === 'home' && <ApexHome store={store} now={now} notifs={notifs} onTab={onTab} />}
+      {shown === 'challenges' && <ChallengesView store={store} />}
+      {shown === 'ranks' && (
         <div className="apex-page">
           <div className="apex-title">
             <div className="apex-title-txt">
@@ -182,7 +222,8 @@ export function ApexApp({
           <StandardsView finished={finished} body={store.bodyMetrics} />
         </div>
       )}
-      {tab === 'awards' && (
+      {shown === 'mastery' && mastery}
+      {shown === 'awards' && (
         <div className="apex-page">
           <div className="apex-title">
             <h2 className="title-26">{t.awardsTitle}</h2>

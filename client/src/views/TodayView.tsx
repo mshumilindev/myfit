@@ -1,5 +1,4 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
-import { useThemesOn } from '../themes/useThemeAccess';
 import { useAddonOrBase } from '../addons/enabledSet';
 import { storeHash } from '../addonStore/storeRoute';
 import { readStoredList } from '../activityPrefs';
@@ -101,7 +100,6 @@ import { REHAB_STAGES, stageIndex, inFullRest, nextStage } from '../injury';
 import { useGymStep } from '../components/useGymStep';
 import { Tag } from '../components/ui/Tag';
 import { setHash } from '../route';
-import '../today/todayAddons.css';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -148,7 +146,6 @@ const PROGRAM_MODE_TONE: Record<WeekMode, Tone> = {
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { withGym, gymPicker } = useGymStep();
   const isDesktop = useIsDesktop();
-  const themesOn = useThemesOn();
   const atlasOn = useAddonOrBase('atlas');
   const sleepOn = useAddonOrBase('sleep');
   const nicAlcOn = useAddonOrBase('nicotine-alcohol');
@@ -1723,28 +1720,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             >
               {t.todayCustomize}
             </Button>
-            {themesOn && (
-              <Button
-                variant="ghost"
-                fullWidth
-                icon="palette"
-                className="td-themes"
-                onClick={() => shell.openOverlay({ screen: 'themes' })}
-              >
-                {t.todayThemes}
-              </Button>
-            )}
-            {getRole() !== 'manager' && (
-              <Button
-                variant="ghost"
-                fullWidth
-                icon="squares-four"
-                className="td-addons"
-                onClick={() => setHash('#/store')}
-              >
-                {t.todayAddons}
-              </Button>
-            )}
           </>
         )}
         {dayDrawer != null && (

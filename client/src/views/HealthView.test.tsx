@@ -121,8 +121,7 @@ describe('Health home (mobile)', () => {
     ]);
     const { shell } = view();
     expect(screen.getByText('All clear')).toBeTruthy();
-    expect(screen.getByText('Sleep details & schedule')).toBeTruthy();
-    expect(screen.getByText('Start sleep')).toBeTruthy();
+    expect(screen.queryByText('Start sleep')).toBeNull(); // Sleep has its own screen
     expect(screen.getByText('Full rest')).toBeTruthy();
     expect(screen.getByText('Injury rehab')).toBeTruthy();
     expect(screen.getByText('I was unwell')).toBeTruthy();
@@ -130,8 +129,6 @@ describe('Health home (mobile)', () => {
     expect(screen.getByText('I got hurt')).toBeTruthy();
     expect(screen.getByText('Flu')).toBeTruthy();
     expect(screen.getByText('12–18 Aug')).toBeTruthy();
-    fireEvent.click(screen.getByText('Sleep details & schedule'));
-    expect(shell.openOverlay).toHaveBeenCalledWith({ screen: 'sleep' });
     fireEvent.click(screen.getByText('Injury rehab'));
     expect(shell.openOverlay).toHaveBeenCalledWith({ screen: 'injury' });
     fireEvent.click(screen.getByText('I was unwell'));
@@ -419,7 +416,8 @@ describe('Health history (mobile)', () => {
     expect(screen.getByText('Rehab · Reintroduce')).toBeTruthy();
     expect(screen.getByText('Free day')).toBeTruthy();
     expect(screen.getByText('11 Aug – 11 Sep · free')).toBeTruthy();
-    expect(screen.getByText('Not on the timeline')).toBeTruthy();
+    // Sleep moved out of Health into its own screen (owner: "sleep звідти витягнути"): no Sleep row here.
+    expect(screen.queryByText('Not on the timeline')).toBeNull();
     // View-only: no edit affordances on timeline rows.
     expect(screen.queryByText('Log the past')).toBeNull();
     expect(document.querySelectorAll('.uitl button')).toHaveLength(0);

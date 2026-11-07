@@ -422,6 +422,7 @@ describe('TodayView: quick shortcuts', () => {
 describe('TodayView: status banners, remaining actions', () => {
   const dk = Math.floor(NOW / DAY);
   it('rehab: "View plan" opens the injury', async () => {
+    addonsPref.set(['sleep', 'health', 'injury-log']); // the rehab banner belongs to Health's Injury log module
     const inj = {
       id: 'inj',
       reason: 'injury',

@@ -136,16 +136,11 @@ describe('TodayView: footer actions', () => {
     expect(screen.getByRole('button', { name: en.todayEditCancel })).toBeTruthy();
   });
 
-  it('Themes is offered only once a theme besides the base one is installed (SPO-518)', async () => {
+  it('Themes and Add-ons are not on Today: they live in More of every app', async () => {
+    addonsPref.set(['theme-cyberpunk']);
     await openToday();
     expect(screen.queryByRole('button', { name: en.todayThemes })).toBeNull();
-  });
-
-  it('Themes freezes the screen and opens the themes page', async () => {
-    addonsPref.set(['theme-cyberpunk']);
-    const { shell } = await openToday();
-    fireEvent.click(screen.getByRole('button', { name: en.todayThemes }));
-    expect(shell.calls.openOverlay).toHaveBeenCalledWith({ screen: 'themes' });
+    expect(screen.queryByRole('button', { name: en.todayAddons })).toBeNull();
   });
 
   it('on desktop the Start sheet stands open on the right', async () => {

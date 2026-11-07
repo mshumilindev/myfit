@@ -10,12 +10,13 @@ import { ADDONS, addonById } from './manifest';
 import {
   closeDependencies,
   enableAddons,
+  moduleIdsOf,
   isAddonAllowed,
   resolveEnabled,
   addonsPref,
 } from './enabledSet';
 
-export { addonAvailable } from './enabledSet';
+export { addonAvailable, addonsPref } from './enabledSet';
 export const addonsQueuePref = createListPref('spotter.addons.queue');
 registerListPref('addonsQueue', addonsQueuePref);
 
@@ -59,7 +60,11 @@ export function installQueue(role: Role = getRole()): string[] {
   const ids = resolveQueue(addonsQueuePref.get(), enabled, role).filter((id) =>
     isAddonAllowed(id, role),
   );
-  if (ids.length) enableAddons(ids, role);
+  if (ids.length)
+    enableAddons(
+      ids.flatMap((id) => [id, ...moduleIdsOf(id)]),
+      role,
+    );
   queueClear();
   return ids;
 }

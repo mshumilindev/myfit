@@ -323,7 +323,7 @@ describe('the rest of the app without the consents', () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date(2026, 8, 26, 12, 0).getTime());
-    addonsPref.set(['sleep']);
+    addonsPref.set(['health', 'injury-log']); // Health with its Injury log module (Sleep is its own screen now)
     window.matchMedia = ((q: string) => ({
       matches: false,
       media: q,
@@ -368,7 +368,8 @@ describe('the rest of the app without the consents', () => {
     __replaceStateForTests({ ...__getStateForTests(), injuries: [knee] });
     render(<HealthView shell={shell()} onClose={vi.fn()} />);
     expect(screen.getByText(en.disclaimer)).toBeTruthy();
-    expect(screen.getByText('Sleep details & schedule')).toBeTruthy();
+    // Sleep has its own screen now (it is not part of Health), so Health shows none of it.
+    expect(screen.queryByText('Sleep details & schedule')).toBeNull();
     expect(screen.queryByText('Rehab plan')).toBeNull();
     expect(__getStateForTests().injuries).toHaveLength(1); // kept, not deleted
   });

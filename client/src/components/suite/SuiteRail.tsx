@@ -1,7 +1,7 @@
 /**
  * The desktop rail of every app in the suite (Gym, Apex, People, Nutrition, Learn and Coach): the kit `Rail`
  * with ONE shared foot (SPO-234 / SPO-235). Top to bottom: the app's own extras (`footBefore`), the notifications
- * bell (client apps only), more app extras (`footAfter`), the language, Apps, the avatar. Apps and the avatar are
+ * bell (client apps only), more app extras (`footAfter`), Add-ons (not for a manager), the language, Apps, the avatar. Apps and the avatar are
  * pinned and never collapse; everything above them collapses into the rail's More item first (all at once), then
  * the nav entries from the end. The language row in More opens a language list (SPO-186).
  *
@@ -11,7 +11,11 @@
 import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from '../../i18n';
 import { useCoachT } from '../../i18n/coach';
 import { LanguageSelector } from '../../ui';
+import { getRole } from '../../api';
 import { SpotterMark } from '../../brand/SpotterMark';
+import { storeHash } from '../../addonStore/storeRoute';
+import { setHash } from '../../route';
+import { useThemesOn } from '../../themes/useThemeAccess';
 import { badgeText } from '../ui/Badge';
 import { COACH_WIDE_BREAKPOINT, useMinWidth } from '../ui/breakpoints';
 import { MoreMenu } from '../ui/MoreMenu';
@@ -80,6 +84,7 @@ export function SuiteRail({
   const { c } = useCoachT();
   const wide = useMinWidth(COACH_WIDE_BREAKPOINT);
   const language = useLanguageFootEntry();
+  const themesOn = useThemesOn();
 
   const footEntries: RailFootEntry[] = [
     ...(footBefore ?? []),
@@ -98,6 +103,27 @@ export function SuiteRail({
         ]
       : []),
     ...(footAfter ?? []),
+    // Add-ons (the store) live in More of every app; a manager has no store.
+    ...(getRole() === 'manager'
+      ? []
+      : [
+          {
+            id: 'addons',
+            label: t.todayAddons,
+            icon: 'squares-four',
+            onSelect: () => setHash(storeHash('discover')),
+          },
+        ]),
+    ...(themesOn
+      ? [
+          {
+            id: 'themes',
+            label: t.todayThemes,
+            icon: 'palette',
+            onSelect: () => setHash('#/themes'),
+          },
+        ]
+      : []),
     language,
   ];
 

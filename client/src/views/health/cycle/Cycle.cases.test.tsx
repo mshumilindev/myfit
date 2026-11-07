@@ -1,3 +1,5 @@
+import { addonsPref } from '../../../addons/enabledSet';
+import { HEALTH_ADDONS } from '../../../addons/testSetup';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { dayOfTimestamp, timestampOfDay } from '../../../components/ui/calendarDays';
@@ -30,6 +32,7 @@ beforeEach(() => {
   vi.setSystemTime(NOW);
   setLocale('en');
   resetLocalData();
+  addonsPref.set(HEALTH_ADDONS);
 });
 afterEach(() => {
   cleanup();

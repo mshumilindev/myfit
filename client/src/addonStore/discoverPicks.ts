@@ -6,7 +6,7 @@ import type { Role } from '../api';
 import { addonById, type AddonManifest } from '../addons/manifest';
 import { isAddonAllowed } from '../addons/enabledSet';
 import { recommend } from './recommend';
-import { availableForRole, comingSoonForRole } from './storeCatalog';
+import { STORE_CATEGORIES, availableForRole } from './storeCatalog';
 
 export interface DiscoverState {
   role: Role;
@@ -47,12 +47,18 @@ export function suggestion({
   return item && parent ? { item, parent } : null;
 }
 
-export function nextSoon(role: Role): AddonManifest | null {
-  return comingSoonForRole(role)[0] ?? null;
+/** Categories that hold at least one add-on this role can install, in store order (never a hard-coded count). */
+export function addonCategories(role: Role): AddonManifest['category'][] {
+  const used = new Set(
+    availableForRole(role)
+      .filter((m) => m.kind === 'addon')
+      .map((m) => m.category),
+  );
+  return STORE_CATEGORIES.filter((c) => used.has(c));
 }
 
 export function categoryCount(role: Role): number {
-  return new Set(availableForRole(role).map((m) => m.category)).size;
+  return addonCategories(role).length;
 }
 
 export type HeroMode = 'bento' | 'progress';

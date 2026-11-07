@@ -468,6 +468,20 @@ describe('StartSheet · tiles', () => {
     });
   });
 
+  it('has a Sleep tile (own screen) only while the Sleep add-on is installed (SPO-518)', async () => {
+    addonsPref.reset();
+    const none = render(<StartSheet shell={shell()} onClose={vi.fn()} />);
+    expect(screen.queryByText('Sleep')).toBeNull();
+    none.unmount();
+    addonsPref.set(['sleep']);
+    const sh = shell();
+    const onClose = vi.fn();
+    render(<StartSheet shell={sh} onClose={onClose} />);
+    await userEvent.click(tile('Sleep'));
+    expect(sh.openOverlay).toHaveBeenLastCalledWith({ screen: 'sleep' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('offers no Health tile until the Health add-on is installed (SPO-518)', () => {
     addonsPref.reset();
     render(<StartSheet shell={shell()} onClose={vi.fn()} />);

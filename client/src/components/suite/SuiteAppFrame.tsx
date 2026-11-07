@@ -5,6 +5,8 @@
  */
 import type { ReactNode } from 'react';
 import { AppRail, type RailNavItem } from '../AppRail';
+import type { MoreMenuItem } from '../ui/MoreMenu';
+import type { RailFootEntry } from '../ui/railOverflow';
 import { SuiteTabBar } from '../SuiteTabBar';
 import { useCommonMoreItems } from './commonMore';
 import { BrandBar, BellButton } from '../ui/BrandBar';
@@ -34,6 +36,8 @@ export function SuiteAppFrame({
   children,
   afterBody,
   overlays,
+  moreExtra = [],
+  railExtras,
 }: {
   app: Extract<SuiteApp, 'apex' | 'nutrition'>;
   /** The app's own root class, next to `apex-app`. */
@@ -58,6 +62,10 @@ export function SuiteAppFrame({
   children: ReactNode;
   afterBody?: ReactNode;
   overlays?: ReactNode;
+  /** The app's own entries in the phone More sheet, after Add-ons, Privacy and Language. */
+  moreExtra?: MoreMenuItem[];
+  /** The app's own entries in the rail's foot (desktop). */
+  railExtras?: RailFootEntry[];
 }) {
   const common = useCommonMoreItems();
   return (
@@ -72,6 +80,7 @@ export function SuiteAppFrame({
           onOpenNotifications={() => onTab('feed')}
           onOpenProfile={onOpenProfile}
           notifUnread={notifUnread}
+          extrasBefore={railExtras}
         />
       )}
       <div className="apex-col">
@@ -117,7 +126,7 @@ export function SuiteAppFrame({
         {!desktop && (
           <SuiteTabBar
             app={app}
-            moreItems={common}
+            moreItems={[...common, ...moreExtra]}
             noAccount
             tabs
             activeFill

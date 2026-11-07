@@ -100,6 +100,8 @@ const navLabels = () =>
   );
 /** The language chip every foot carries (SPO-234). */
 const LANGUAGE = 'Language';
+/** Add-ons (the store) sits right above the language in every app's foot (owner rule 07.11.2026). */
+const ADDONS = LOCALES.en.todayAddons;
 const footLabels = () =>
   [...screen.getByRole('complementary').querySelectorAll('.rail-foot button')].map((b) =>
     b.getAttribute('aria-label'),
@@ -114,7 +116,7 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     const onShell = vi.fn();
     render(<Harness onShell={onShell} />);
     expect(navLabels()).toEqual(EIGHT);
-    expect(footLabels()).toEqual([LANGUAGE, c.navApps, c.railProfile]);
+    expect(footLabels()).toEqual([ADDONS, LANGUAGE, c.navApps, c.railProfile]);
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
     for (const l of [c.navLive, c.navSignals])
       expect(screen.queryByRole('complementary')?.textContent).not.toContain(l);
@@ -125,21 +127,22 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     expect(onShell).toHaveBeenCalledTimes(1);
   });
 
-  it('exact fit (8 x 69.6 - 5.6 + the language 49.6 = 600.8) shows no More; one px less moves the language and the trailing entry into More', () => {
+  it('exact fit (8 x 69.6 - 5.6 + Add-ons and the language 99.2 = 650.4) shows no More; one px less moves both foot extras into More, the nav keeps its eight', () => {
     setViewport(1440);
     render(<Harness />);
-    setRailHeight(601);
+    setRailHeight(651);
     expect(navLabels()).toEqual(EIGHT);
-    expect(footLabels()).toEqual([LANGUAGE, c.navApps, c.railProfile]);
-    setRailHeight(600);
-    setRailHeight(600); // the foot extra leaves, the column is measured again (a real ResizeObserver does it)
-    expect(navLabels()).toEqual(EIGHT.slice(0, 7));
-    // More sits in the nav column, right below the last visible nav item; the foot is only Apps + avatar.
+    expect(footLabels()).toEqual([ADDONS, LANGUAGE, c.navApps, c.railProfile]);
+    setRailHeight(650);
+    setRailHeight(650); // the foot extras leave, the column is measured again (a real ResizeObserver does it)
+    // 8 nav + the More item = 620.8 still fits, so the nav is whole and More sits right below it; the foot is Apps + avatar.
+    expect(navLabels()).toEqual(EIGHT);
     expect(footLabels()).toEqual([c.navApps, c.railProfile]);
     const kids = [...document.querySelectorAll('.rail-nav > *')];
-    expect(kids).toHaveLength(8);
-    expect(kids[7].classList.contains('rail-more')).toBe(true);
-    expect(kids[5].textContent).toContain(c.navPrograms);
+    expect(kids).toHaveLength(9);
+    expect(kids[8].classList.contains('rail-more')).toBe(true);
+    setRailHeight(620);
+    expect(navLabels()).toEqual(EIGHT.slice(0, 7));
     setRailHeight(551);
     expect(navLabels()).toEqual(EIGHT.slice(0, 6));
     expect(footLabels()).toEqual([c.navApps, c.railProfile]);
@@ -154,8 +157,9 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     fireEvent.click(screen.getByRole('button', { name: c.navMore }));
     const dlg = screen.getByRole('dialog', { name: c.navMore });
     const rows = [...dlg.querySelectorAll('button.uirow')].map((b) => b.textContent);
-    // the overflowed nav items in order, then the foot extra that collapsed first: the language
-    expect(rows.slice(0, -1)).toEqual(EIGHT.slice(3));
+    // the overflowed nav items in order, then the foot extras that collapsed first: Add-ons, the language
+    expect(rows.slice(0, -2)).toEqual(EIGHT.slice(3));
+    expect(rows.at(-2)).toContain(ADDONS);
     expect(rows.at(-1)).toContain(LANGUAGE);
     expect(within(dlg).queryByRole('button', { name: c.navApps })).toBeNull();
     expect(within(dlg).queryByText('Iryna Koval')).toBeNull();
@@ -167,6 +171,7 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     setRailHeight(60);
     const onShell = vi.fn();
     render(<Harness onShell={onShell} />);
+    setRailHeight(60); // measured again once mounted (a real ResizeObserver does it), as in the tests above
     expect(navLabels()).toEqual([]);
     expect(footLabels()).toEqual([c.navApps, c.railProfile]);
     expect(document.querySelectorAll('.rail-nav > .rail-more')).toHaveLength(1);
@@ -235,15 +240,15 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
     expect(
       within(rail).getByRole('button', { name: c.navApps }).querySelector('.rail-tip')?.textContent,
     ).toBe(c.navApps);
-    setRailHeight(441); // 8 x 49.6 - 5.6 + the language 49.6 = 440.8
+    setRailHeight(491); // 8 x 49.6 - 5.6 + Add-ons and the language 99.2 = 490.4
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
   });
 
-  it('tile heights never change with viewport height: same fixed 72x64 tiles at 1000/720/640/610', () => {
+  it('tile heights never change with viewport height: same fixed 72x64 tiles at 1000/720/660/640', () => {
     setViewport(1440);
     const seen: number[] = [];
     render(<Harness />);
-    for (const h of [1000, 720, 640, 610]) {
+    for (const h of [1000, 720, 660, 640]) {
       setRailHeight(h);
       const tiles = [
         ...screen.getByRole('complementary').querySelectorAll('.rail-nav > .rail-item'),
@@ -252,7 +257,7 @@ describe('rail: exactly the eight design items (seven + Team); Apps pinned in th
       for (const t of tiles) expect(t.getAttribute('style')).toBeNull();
       seen.push(tiles.length);
     }
-    // ...the count is the only thing that follows the height (610 still fits 8 + the language: 600.8).
+    // ...the count is the only thing that follows the height (660 fits 8 + both foot extras: 650.4; at 640 they sit in More and the 8 stay: 620.8).
     expect(seen).toEqual([8, 8, 8, 8]);
     setRailHeight(200);
     setRailHeight(200);
@@ -320,6 +325,7 @@ describe('phone More sheet', () => {
       c.navSignals,
       c.navTeam,
       // every app's More ends with Privacy and sharing and the language (owner rule 06.11.2026)
+      LOCALES.en.todayAddons,
       LOCALES.en.hlPrivRow,
       LOCALES.en.language,
     ]);

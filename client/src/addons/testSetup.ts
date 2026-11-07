@@ -1,0 +1,24 @@
+/**
+ * Vitest setup (SPO-518): the existing suites exercise the health features themselves, so every test file starts with the
+ * Health add-ons installed (as the consents are, see legal/testSetup.ts). Done once per file, before the test file loads the
+ * store: setting it later would sync the list to the account and trip suites that mock the database. A test about what the
+ * base app is without them clears or sets the list itself (`addonsPref.reset()` / `addonsPref.set([...])`); a suite that
+ * calls `resetLocalData()` (which clears the list) sets what it needs after it.
+ */
+
+/** Every Health add-on: what a test world has installed unless it says otherwise. */
+export const HEALTH_ADDONS = ['health', 'injury-log', 'nicotine-alcohol', 'supplements', 'cycle'];
+
+// Seeded in storage, not through `addonsPref`: importing the add-on code here would load api/firebase before a test
+// file's own mocks apply. The list is read from storage when the add-on code first loads.
+/** Apex with all its modules: the Apex screens exercise every tab. */
+export const APEX_ADDONS = ['apex', 'apex-challenges', 'apex-ranks', 'apex-awards', 'mastery'];
+
+try {
+  localStorage.setItem(
+    'spotter.addons',
+    JSON.stringify({ list: [...HEALTH_ADDONS, ...APEX_ADDONS], updatedAt: 1 }),
+  );
+} catch {
+  /* no storage in this environment: the test world starts without add-ons */
+}

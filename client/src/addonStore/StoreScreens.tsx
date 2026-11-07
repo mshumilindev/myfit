@@ -6,8 +6,6 @@ import { startInstall } from '../addons/installRun';
 import { queueRemove } from '../addons/queue';
 import {
   SkBadge,
-  SkBento,
-  SkBentoTile,
   SkBtn,
   SkChip,
   SkEmpty,
@@ -22,7 +20,13 @@ import { Rows, Section } from './storeLists';
 import { DiscoverBento } from './DiscoverBento';
 import { recommend } from './recommend';
 import { MIN_QUERY, searchItems } from './search';
-import { catalogProgress, heroMode, heroState, type HeroMode } from './discoverPicks';
+import {
+  addonCategories,
+  catalogProgress,
+  heroMode,
+  heroState,
+  type HeroMode,
+} from './discoverPicks';
 import {
   availableForRole,
   comingSoonForRole,
@@ -30,6 +34,7 @@ import {
   themesForRole,
 } from './storeCatalog';
 import { currentHash, setHash } from '../route';
+import { catLabel } from './storeCategories';
 import { storeHash } from './storeRoute';
 import { ItemRow, itemName, TileOf, type StoreCtx } from './storeItems';
 
@@ -94,26 +99,13 @@ export function Discover({
           </SkList>
         </section>
       )}
-      {nextMode === 'progress' && prog.left === 0 && soonItems.length > 0 && (
+      {soonItems.length > 0 && (
         <Section title={st.comingSoon}>
-          <SkBento>
-            <SkBentoTile
-              variant="dark"
-              size="wide"
-              span={2}
-              eyebrow={st.comingSoon}
-              title={soonItems.map((m) => itemName(st, m.id)).join(', ')}
-              titleSize="h2"
-            />
-          </SkBento>
+          <Rows ids={soonItems.map((m) => m.id)} ctx={ctx} />
         </Section>
       )}
     </>
   );
-}
-
-function catLabel(st: StoreCtx['st'], c: string): string {
-  return st[`cat${c[0].toUpperCase()}${c.slice(1)}` as 'catRecovery'];
 }
 
 /** `#/store/apps?cat=recovery` opens Apps with that category on. */
@@ -162,8 +154,12 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   const { st } = ctx;
   const addons = availableForRole(role).filter((m) => m.kind === 'addon');
   // Add-ons of an app are grouped under it; those that need no app (Sleep, Atlas…) come first, with no heading.
-  const standalone = addons.filter((m) => !m.parent);
-  const parents = [...new Set(addons.flatMap((m) => (m.parent ? [m.parent] : [])))];
+  const [cat, setCat] = useState<AddonManifest['category'] | 'all'>(catFromHash);
+  // Category chips only exist for categories that really hold an add-on, and only when there is a choice to make.
+  const cats = addonCategories(role);
+  const shown = addons.filter((m) => cat === 'all' || m.category === cat);
+  const standalone = shown.filter((m) => !m.parent);
+  const parents = [...new Set(shown.flatMap((m) => (m.parent ? [m.parent] : [])))];
   if (!parents.length && !standalone.length) {
     return (
       <SkEmpty
@@ -179,6 +175,18 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   }
   return (
     <>
+      {cats.length > 1 && (
+        <div className="sk-rowf sk-g8 sk-wrap">
+          <SkChip on={cat === 'all'} onClick={() => setCat('all')}>
+            {st.catAll}
+          </SkChip>
+          {cats.map((c) => (
+            <SkChip key={c} on={cat === c} onClick={() => setCat(c)}>
+              {catLabel(st, c)}
+            </SkChip>
+          ))}
+        </div>
+      )}
       <div className="as-cols">
         {standalone.length > 0 && (
           <section className="sk-mt24">
@@ -193,7 +201,7 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
                 {pm && <TileOf st={st} m={pm} size={32} />}
                 <h2 className="sk-t-h2">{st.forApp(itemName(st, p))}</h2>
               </div>
-              <Rows ids={addons.filter((m) => m.parent === p).map((m) => m.id)} ctx={ctx} />
+              <Rows ids={shown.filter((m) => m.parent === p).map((m) => m.id)} ctx={ctx} />
             </section>
           );
         })}

@@ -14,6 +14,7 @@ const BUILD = typeof __BUILD_ID__ === 'string' ? __BUILD_ID__ : 'dev';
 import {
   disableAddons,
   enableAddons,
+  moduleIdsOf,
   isAddonAllowed,
   resolveEnabled,
   addonsPref,
@@ -80,7 +81,7 @@ async function runIds(ids: readonly string[], role: Role): Promise<void> {
     mark(id, 'active');
     try {
       await prepareAddon(id, (progress) => set({ ...state, progress }));
-      enableAddons([id], role);
+      enableAddons([id, ...moduleIdsOf(id)], role);
       mark(id, 'done');
     } catch {
       mark(id, 'failed');

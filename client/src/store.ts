@@ -149,7 +149,8 @@ import {
 } from './sleep';
 import { computeStreak } from './streak';
 import { currentUid, getRole, callFn } from './api';
-import { addonAvailable } from './addons/queue'; // importing it also registers the add-on lists for account sync
+import { addonAvailable, addonsPref } from './addons/queue'; // importing it also registers the add-on lists for account sync
+import { healthAddonsKey, healthAddonsOn } from './healthAddons';
 import {
   UNSENT_KEY,
   bumpWorkoutGen,
@@ -643,15 +644,15 @@ function setState(patch: Partial<StoreState>): void {
   emit();
 }
 
-let exposedMemo: { raw: StoreState; v: number; out: StoreState } | null = null;
+let exposedMemo: { raw: StoreState; v: string; out: StoreState } | null = null;
 /**
  * What the rest of the app may see (SPO-290): the state, with every health feature that has no consent replaced by its
  * empty value. Stable between changes. Writers inside this file keep using the raw `state`.
  */
 function exposed(): StoreState {
-  const v = healthVersion();
+  const v = `${healthVersion()}:${healthAddonsKey()}`;
   if (exposedMemo === null || exposedMemo.raw !== state || exposedMemo.v !== v)
-    exposedMemo = { raw: state, v, out: maskHealth(state, healthSnapshot().on) };
+    exposedMemo = { raw: state, v, out: maskHealth(state, healthAddonsOn(healthSnapshot().on)) };
   return exposedMemo.out;
 }
 
@@ -868,11 +869,10 @@ subscribeHealth(() => {
   if (uid) publishCoachShare(uid, state.conditions);
 });
 
+addonsPref.subscribe(emit); // an add-on installed or removed re-masks the health view for every reader (healthAddons.ts)
+
 export function useStore(): StoreState {
-  return useSyncExternalStore((cb) => {
-    listeners.add(cb);
-    return () => listeners.delete(cb);
-  }, exposed);
+  return useSyncExternalStore(subscribeStore, exposed);
 }
 
 export const uuid = (): string => crypto.randomUUID();

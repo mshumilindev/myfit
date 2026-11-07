@@ -65,48 +65,26 @@ export function GymBrandBar({
 export function GymTabBar<Id extends string>({
   items,
   hidden,
-  mastery,
-  onMastery,
   onPrivacy,
   onSelect,
   fab,
 }: {
   items: TabBarItem<Id>[];
-  /** Header controls that collapsed out of the BrandBar (the More menu lists them after Mastery). */
+  /** Header controls that collapsed out of the BrandBar (the More menu lists them after the common entries). */
   hidden: MoreMenuItem[];
-  /** Mastery page open (its tab is lit). */
-  mastery: boolean;
-  onMastery: () => void;
   /** Opens "Privacy and sharing" (consents, documents, sharing, health-data deletion) — it lives in More, not in Health. */
   onPrivacy: () => void;
   onSelect: (id: Id) => void;
   fab: TabBarProps<Id>['fab'];
 }) {
-  const { t } = useT();
   const common = useCommonMoreItems(onPrivacy);
-  // Mastery is an add-on (SPO-518): its tab and menu entry only exist when it is installed (or not offered to the role).
-  const masteryOn = useAddonOrBase('mastery');
-  // More is always the last tab (it keeps the slot, so the bar never changes shape): Privacy and sharing, then Mastery when
-  // it is installed, then the header controls that collapsed.
+  // More is always the last tab (it keeps the slot, so the bar never changes shape): Privacy and sharing, Language, then the
+  // header controls that collapsed. Mastery is a module of Apex: it lives in Apex, not here.
   return (
-    <SuiteTabBar<Id | 'mastery'>
+    <SuiteTabBar<Id>
       app="gym"
       noAccount
-      moreItems={[
-        ...common,
-        ...(masteryOn
-          ? [
-              {
-                id: 'mastery',
-                icon: 'medal',
-                label: t.masteryTitle,
-                onSelect: onMastery,
-                active: mastery,
-              },
-            ]
-          : []),
-        ...hidden,
-      ]}
+      moreItems={[...common, ...hidden]}
       items={items}
       onSelect={(id) => onSelect(id as Id)}
       fab={fab}

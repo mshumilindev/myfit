@@ -63,6 +63,8 @@ vi.mock('./vaultIO', async (orig) => {
 });
 import { act, renderHook } from '@testing-library/react';
 import * as store from './store';
+import { addonsPref } from './addons/enabledSet';
+import { HEALTH_ADDONS } from './addons/testSetup';
 import { setRole } from './api';
 import type { SetEntry, Workout } from './types';
 
@@ -92,6 +94,8 @@ beforeEach(() => {
   fs.uid = 'u1';
   setRole('member');
   store.resetLocalData();
+  addonsPref.set(HEALTH_ADDONS);
+  fs.writes.length = 0; // the add-on list syncs to the account: not part of what these tests count
 });
 afterEach(async () => {
   vi.useRealTimers();

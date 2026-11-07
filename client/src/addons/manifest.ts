@@ -10,7 +10,8 @@ import type { Role } from '../api';
 
 export type StoreRole = Exclude<Role, 'manager'>;
 /** `theme` = one installable look (Cyberpunk…): its own store block and tab; Brass Glass and the holiday themes are base. */
-export type AddonKind = 'app' | 'addon' | 'theme';
+/** `module` = a switch inside its parent (Health's Injury log…): never a store item of its own, only toggled in Configure. */
+export type AddonKind = 'app' | 'addon' | 'theme' | 'module';
 /** App colour family (design: add-ons inherit their parent's colour). */
 export type AddonTone = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
@@ -25,7 +26,7 @@ export interface AddonManifest {
   roles: readonly StoreRole[];
   /** Not available yet: shown under "Coming soon", never enabled. */
   soon?: boolean;
-  category: 'recovery' | 'food' | 'insights' | 'look' | 'coach';
+  category: 'health' | 'recovery' | 'food' | 'insights' | 'look' | 'coach';
   /** Built chunk URLs kept offline on install (prefetch.ts). Empty until the add-on is split out of the core bundle. */
   chunks?: readonly string[];
   /** Rough download size in bytes, for the storage-quota check. */
@@ -36,36 +37,47 @@ const ALL: readonly StoreRole[] = ['member', 'trainer', 'admin'];
 const MEMBER: readonly StoreRole[] = ['member'];
 
 export const ADDONS: readonly AddonManifest[] = [
-  { id: 'health', kind: 'addon', tone: 4, roles: MEMBER, category: 'recovery' },
+  { id: 'health', kind: 'addon', tone: 4, roles: MEMBER, category: 'health' },
   {
     id: 'injury-log',
-    kind: 'addon',
+    kind: 'module',
     parent: 'health',
     tone: 4,
     roles: MEMBER,
-    category: 'recovery',
+    category: 'health',
   },
-  { id: 'cycle', kind: 'addon', parent: 'health', tone: 4, roles: MEMBER, category: 'recovery' },
+  { id: 'cycle', kind: 'module', parent: 'health', tone: 4, roles: MEMBER, category: 'health' },
   {
     id: 'supplements',
-    kind: 'addon',
+    kind: 'module',
     parent: 'health',
     tone: 4,
     roles: MEMBER,
-    category: 'recovery',
+    category: 'health',
   },
   {
     id: 'nicotine-alcohol',
-    kind: 'addon',
+    kind: 'module',
     parent: 'health',
     tone: 4,
     roles: MEMBER,
-    category: 'recovery',
+    category: 'health',
   },
   { id: 'sleep', kind: 'addon', tone: 2, roles: ALL, category: 'recovery' },
   { id: 'atlas', kind: 'addon', tone: 6, roles: ALL, category: 'insights' },
   { id: 'apex', kind: 'app', tone: 8, roles: ALL, category: 'insights' },
-  { id: 'mastery', kind: 'addon', parent: 'apex', tone: 3, roles: ALL, category: 'insights' },
+  // Apex's own parts are modules of it (owner rule 07.11): switched on with Apex, each one off in Configure.
+  {
+    id: 'apex-challenges',
+    kind: 'module',
+    parent: 'apex',
+    tone: 8,
+    roles: ALL,
+    category: 'insights',
+  },
+  { id: 'apex-ranks', kind: 'module', parent: 'apex', tone: 8, roles: ALL, category: 'insights' },
+  { id: 'apex-awards', kind: 'module', parent: 'apex', tone: 8, roles: ALL, category: 'insights' },
+  { id: 'mastery', kind: 'module', parent: 'apex', tone: 3, roles: ALL, category: 'insights' },
   // Themes are installed one by one (owner rule 06.11): Brass Glass and the holiday themes are part of the base.
   {
     id: 'theme-cyberpunk',

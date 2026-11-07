@@ -11,7 +11,8 @@ import {
   SkRel,
   SkTile,
 } from '../store-kit';
-import { appOfTheWeek, categoryCount, nextSoon, starterPack, suggestion } from './discoverPicks';
+import { addonCategories, appOfTheWeek, starterPack, suggestion } from './discoverPicks';
+import { catLabel } from './storeCategories';
 import { ItemAction, itemDesc, itemName, kindBadge, relOf, type StoreCtx } from './storeItems';
 
 function PickButton({ ids, picked, ctx }: { ids: string[]; picked: boolean; ctx: StoreCtx }) {
@@ -41,7 +42,7 @@ export function DiscoverBento({
   const week = appOfTheWeek(state);
   const pack = starterPack(state);
   const sug = suggestion(state);
-  const soon = nextSoon(role);
+  const cats = addonCategories(role);
   return (
     <SkBento>
       {week && (
@@ -107,27 +108,17 @@ export function DiscoverBento({
           </div>
         </SkBentoTile>
       )}
-      {soon && (
-        <SkBentoTile
-          variant="dark"
-          eyebrow={st.comingSoon}
-          title={itemName(st, soon.id)}
-          onTitle={() => ctx.open(soon.id)}
-          titleSize="h2"
-          body={itemDesc(st, soon.id)}
-        />
-      )}
       <SkBentoTile
         tone={5}
         eyebrow={st.browse}
         title={st.byGoal}
         titleSize="h2"
-        body={st.categoriesHint}
-        onClick={() => go('apps')}
+        body={st.categoriesHint(cats.map((c) => catLabel(st, c)))}
+        onClick={() => go('addons')}
         label={st.browse}
         footer={
           <SkBentoLink>
-            {st.categoriesN(categoryCount(role))} <SkIcon name="chev" small />
+            {st.categoriesN(cats.length)} <SkIcon name="chev" small />
           </SkBentoLink>
         }
       />

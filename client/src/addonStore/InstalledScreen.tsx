@@ -37,7 +37,9 @@ export function Installed({ ctx, go }: { ctx: StoreCtx; go: (v: string, id?: str
       </SkCard>
     );
   }
-  const apps = items.filter((m) => m.kind === 'app');
+  const apps = items.filter(
+    (m) => m.kind === 'app' || ADDONS.some((a) => a.kind === 'module' && a.parent === m.id),
+  );
   return (
     <div className="sk-mt16 as-groups">
       {apps.map((app) => {

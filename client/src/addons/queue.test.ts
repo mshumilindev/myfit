@@ -36,10 +36,18 @@ describe('selected list', () => {
     expect(resolveQueue(['health', 'cycle'], new Set(['health']), 'member')).toEqual(['cycle']);
   });
   it('installing turns the picked items on and empties the list', () => {
-    queueAdd(['cycle', 'sleep'], 'member');
-    expect(installQueue('member')).toEqual(['health', 'cycle', 'sleep']);
+    queueAdd(['health', 'sleep'], 'member');
+    expect(installQueue('member')).toEqual(['health', 'sleep']);
     expect(addonsQueuePref.get()).toEqual([]);
-    expect([...addonsPref.get()].sort()).toEqual(['cycle', 'health', 'sleep']);
+    // Health brings its modules with it (they are switches, not separate picks).
+    expect([...addonsPref.get()].sort()).toEqual([
+      'cycle',
+      'health',
+      'injury-log',
+      'nicotine-alcohol',
+      'sleep',
+      'supplements',
+    ]);
     expect(installQueue('member')).toEqual([]);
   });
   it('clears', () => {

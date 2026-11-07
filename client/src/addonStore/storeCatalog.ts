@@ -5,6 +5,7 @@ import { isAddonAllowed, storeRole } from '../addons/enabledSet';
 
 export type StoreCategory = AddonManifest['category'];
 export const STORE_CATEGORIES: readonly StoreCategory[] = [
+  'health',
   'recovery',
   'food',
   'insights',
@@ -21,7 +22,8 @@ export function hasStore(role: Role): boolean {
 export function catalogForRole(role: Role): AddonManifest[] {
   const r = storeRole(role);
   if (!r) return [];
-  return ADDONS.filter((a) => a.roles.includes(r));
+  // Modules are switches inside their parent (Configure), not items to browse, search or count.
+  return ADDONS.filter((a) => a.kind !== 'module' && a.roles.includes(r));
 }
 
 /** Items that can actually be turned on. */

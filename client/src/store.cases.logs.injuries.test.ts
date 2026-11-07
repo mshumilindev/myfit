@@ -1,3 +1,5 @@
+import { addonsPref } from './addons/enabledSet';
+import { HEALTH_ADDONS } from './addons/testSetup';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const fs = vi.hoisted(() => ({
@@ -101,6 +103,8 @@ beforeEach(() => {
   fs.failWith = null;
   fs.uid = 'u1';
   store.resetLocalData();
+  addonsPref.set(HEALTH_ADDONS);
+  fs.writes.length = 0; // the add-on list syncs to the account: not part of what these tests count
 });
 afterEach(async () => {
   vi.useRealTimers();

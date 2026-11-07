@@ -9,9 +9,10 @@ describe('recommendations', () => {
     expect(all).not.toContain('nutrition'); // coming soon
   });
   it('puts add-ons of an installed or picked app first', () => {
-    const r = recommend('member', new Set(['health']), []);
-    expect(r.slice(0, 4)).toEqual(['injury-log', 'cycle', 'supplements', 'nicotine-alcohol']);
-    expect(recommend('member', new Set(), ['health'])[0]).toBe('injury-log');
+    expect(recommend('member', new Set(['apex']), [])).not.toContain('mastery');
+    expect(recommend('member', new Set(), ['apex'])).not.toContain('apex-ranks');
+    // Health's and Apex's modules are switches inside them, never recommended on their own.
+    expect(recommend('member', new Set(['health']), [])).not.toContain('injury-log');
   });
   it('drops what is installed, picked or skipped and ends when nothing is left', () => {
     const r = recommend('member', new Set(['health']), ['atlas'], { skip: ['sleep'] });

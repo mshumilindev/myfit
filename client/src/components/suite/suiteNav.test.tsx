@@ -10,6 +10,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { LOCALES } from '../../i18n';
 import { addonsPref } from '../../addons/enabledSet';
+import { APEX_ADDONS } from '../../addons/testSetup';
 import { coachEn } from '../../i18n/coach.en';
 import { coachEntryHash } from '../../coach/routes';
 import { setViewport } from '../../coach/testViewport';
@@ -115,7 +116,7 @@ const rosterNav = (r: typeof session.role) => (r === 'admin' ? [t.adminPeople] :
 const CASES: Case[] = [
   {
     name: 'Gym',
-    extras: [t.masteryTitle, t.notifTitle, t.language],
+    extras: [t.notifTitle, t.todayAddons, t.language],
     nav: () => gymNav,
     tabs: () => gymNav,
     rail: ({ onShell, onProfile }) => (
@@ -130,7 +131,6 @@ const CASES: Case[] = [
         onOpenNotifications={noop}
         onOpenProfile={onProfile}
         onOpenSettings={noop}
-        onOpenMastery={noop}
         onOpenHealth={noop}
       />
     ),
@@ -151,7 +151,7 @@ const CASES: Case[] = [
   },
   {
     name: 'Apex',
-    extras: [t.notifTitle, t.language],
+    extras: [t.notifTitle, t.todayAddons, t.language],
     nav: () => [t.apexHomeTab, t.challengesTab, t.apexRanksTab, t.apexAwardsTab],
     tabs: () => [t.apexHomeTab, t.challengesTab, t.apexRanksTab, t.apexAwardsTab],
     rail: (cb) => apex(cb),
@@ -160,7 +160,7 @@ const CASES: Case[] = [
   {
     name: 'People',
     // client apps only have the bell (SPO-234); People shows the unread on Apps
-    extras: [t.language],
+    extras: [t.todayAddons, t.language],
     nav: rosterNav,
     tabs: rosterNav,
     rail: (cb) => roster(cb),
@@ -168,7 +168,7 @@ const CASES: Case[] = [
   },
   {
     name: 'Nutrition',
-    extras: [t.notifTitle, t.language],
+    extras: [t.notifTitle, t.todayAddons, t.language],
     nav: () => nutritionLabels,
     tabs: () => nutritionLabels,
     rail: (cb) => nutrition(cb),
@@ -176,7 +176,7 @@ const CASES: Case[] = [
   },
   {
     name: 'Learn',
-    extras: [t.notifTitle, t.language],
+    extras: [t.notifTitle, t.todayAddons, t.language],
     nav: () => learnLabels,
     tabs: () => learnLabels,
     rail: (cb) => learn(cb),
@@ -236,8 +236,8 @@ beforeEach(() => {
   session.role = 'member';
   window.history.replaceState(null, '', '/');
   localStorage.clear();
-  // Mastery is an add-on (SPO-518): these navigation contracts are about the app with it installed.
-  addonsPref.set(['apex', 'mastery']);
+  // Apex and its modules are add-ons (SPO-518): these navigation contracts are about the app with them installed.
+  addonsPref.set(APEX_ADDONS);
   installRailMeasure(900);
 });
 afterEach(() => {
@@ -294,9 +294,7 @@ describe.each(CASES)('$name: desktop rail', (k) => {
     ).toEqual([c.navApps, c.railProfile]);
   });
 
-  it('without the Mastery add-on a member has no Mastery entry in More (SPO-518)', () => {
-    if (k.extras[0] !== t.masteryTitle) return; // only the Gym kit carries Mastery
-    addonsPref.reset();
+  it("Mastery is Apex's: no Gym rail or More ever lists it", () => {
     setViewport(1440);
     render(k.rail(cb()));
     setRailHeight(60);
@@ -304,7 +302,6 @@ describe.each(CASES)('$name: desktop rail', (k) => {
     const menu = screen.getByRole('dialog', { name: c.navMore });
     const rows = [...menu.querySelectorAll('button.uirow')].map((b) => b.textContent);
     expect(rows).not.toContain(t.masteryTitle);
-    expect(rows).toEqual([...k.nav(session.role), ...k.extras.slice(1)]);
   });
 
   it('More appears only when the destinations do not fit, and lists only the overflow', () => {
@@ -541,7 +538,6 @@ describe('Gym specifics', () => {
         onOpenNotifications={noop}
         onOpenProfile={noop}
         onOpenSettings={noop}
-        onOpenMastery={noop}
         onOpenHealth={noop}
       />,
     );
@@ -569,7 +565,6 @@ describe('Gym specifics', () => {
         onOpenNotifications={noop}
         onOpenProfile={noop}
         onOpenSettings={noop}
-        onOpenMastery={noop}
         onOpenHealth={noop}
       />,
     );
@@ -595,7 +590,6 @@ describe('Gym specifics', () => {
         onOpenNotifications={noop}
         onOpenProfile={noop}
         onOpenSettings={noop}
-        onOpenMastery={noop}
         onOpenHealth={noop}
       />,
     );
@@ -617,6 +611,7 @@ describe('Apex: partial overflow keeps the leading destinations', () => {
       t.apexRanksTab,
       t.apexAwardsTab,
       t.notifTitle,
+      t.todayAddons,
       t.language,
     ]);
     // A hidden destination selected from More navigates (and the menu closes).
@@ -637,7 +632,7 @@ describe('real-app CSS does not fight the shared rail geometry', () => {
 
 describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)', () => {
   // Labelled rail: nav tile 64 (pitch 69.6, 3 entries = 203.2), foot extra 44 (pitch 49.6).
-  // Admin with an active condition: shield, mastery, bell, gear, language (SPO-164) = 5 extras = 248.
+  // Admin with an active condition: shield, bell, gear, Add-ons, language = 5 extras = 248.
   const gym = (unread = 0) => (
     <GymRail
       tab="today"
@@ -650,7 +645,6 @@ describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)',
       onOpenNotifications={noop}
       onOpenProfile={noop}
       onOpenSettings={noop}
-      onOpenMastery={noop}
       onOpenHealth={noop}
     />
   );
@@ -686,12 +680,12 @@ describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)',
       expect(extraCount(), String(h)).toBe(0);
       expect(navLabels(), String(h)).toEqual(gymNav);
     }
-    // in the order of the rail: conditions shield, mastery, bell, settings, language
+    // in the order of the rail: conditions shield, bell, settings, Add-ons, language
     expect(menuRows()).toEqual([
       t.cndTodayTitle(1),
-      t.masteryTitle,
       t.notifTitle,
       t.settingsTitle,
+      t.todayAddons,
       t.language,
     ]);
   });
@@ -769,7 +763,6 @@ describe('no online / presence dot on navigation avatars', () => {
         onOpenNotifications={noop}
         onOpenProfile={noop}
         onOpenSettings={noop}
-        onOpenMastery={noop}
         onOpenHealth={noop}
       />,
     );

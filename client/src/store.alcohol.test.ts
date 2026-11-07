@@ -47,6 +47,8 @@ vi.mock('./vaultIO', async (orig) => {
 });
 
 import * as store from './store';
+import { addonsPref } from './addons/enabledSet';
+import { HEALTH_ADDONS } from './addons/testSetup';
 import { vault } from './vaultIO';
 import { isSealed, unsealDoc } from './encryptedDoc';
 import { newAlcoholEntry, weekdayIndex } from './alcohol';
@@ -85,6 +87,7 @@ describe('alcohol store', () => {
     fs.docs.clear();
     fs.listeners.clear();
     store.deleteAlcoholData();
+    addonsPref.set(HEALTH_ADDONS); // alcohol lives in the Nicotine & alcohol add-on
     stop = store.startSyncLoop();
     await tick();
     fs.writes.length = 0;

@@ -61,6 +61,8 @@ import {
   type HealthWriteDenied,
 } from './data/healthConsentGate';
 import * as store from './store';
+import { addonsPref } from './addons/enabledSet';
+import { HEALTH_ADDONS } from './addons/testSetup';
 import { vault } from './vaultIO';
 import { isSealed, unsealDoc } from './encryptedDoc';
 import { CONDITION_CATALOG } from './data/conditionCatalog';
@@ -100,6 +102,8 @@ beforeEach(() => {
   fs.failWith = null;
   fs.uid = 'u1';
   store.resetLocalData();
+  addonsPref.set(HEALTH_ADDONS);
+  fs.writes.length = 0; // the add-on list syncs to the account: not part of what these tests count
 });
 afterEach(async () => {
   vi.useRealTimers();

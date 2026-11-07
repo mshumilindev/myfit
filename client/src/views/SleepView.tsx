@@ -29,6 +29,7 @@ import {
 import { useT, fmtDurationHuman } from '../i18n';
 import { ConfirmDialog, Icon } from '../ui';
 import { MoonGlyph } from '../components/MoonGlyph';
+import { SleepStart } from './SleepStart';
 import { moonInfo, illumPct } from '../moon';
 import { TimePickerField } from '../components/PickerFields';
 import {
@@ -95,7 +96,8 @@ export function SleepView({
   const moon = moonInfo(new Date(now));
   const goalMin = store.sleepSettings.goalMin || 480;
 
-  if (mode === 'night' && live) {
+  // The hub never shows over a live night (starting one from the hub flips straight to it).
+  if ((mode === 'night' || mode === 'hub') && live) {
     const mins = nightDurationMin(live, tick);
     return (
       <div className="screen sleep-night">
@@ -267,6 +269,7 @@ function SleepHub({
   return (
     <div className="screen sleep-hub">
       <SleepTopbar title={t.sleepTitle} onBack={onClose} />
+      <SleepStart />
       {stats.nights === 0 ? (
         <p className="muted">{t.sleepEmptyHistory}</p>
       ) : (
@@ -283,7 +286,6 @@ function SleepHub({
               <div className="slh-stat-d">{t.sleepBedWithin(30)}</div>
             </div>
           </div>
-
           <div className="slh-sec-label">{t.sleepLast14}</div>
           <div className="slh-bars">
             {last14.map((n) => {
@@ -303,7 +305,6 @@ function SleepHub({
           <div className="slh-goalmet">
             {t.sleepGoalMet(stats.goalMet, stats.nights, dur(goalMin))}
           </div>
-
           <div className="slh-sec-label">{t.sleepRhythmWeekday}</div>
           <div className="slh-rhythm">
             {WD_ORDER.map((d, i) => {
@@ -326,7 +327,6 @@ function SleepHub({
           </div>
         </>
       )}
-
       <GroupedList className="slh-toggles">
         <ListRow
           label={t.sleepAutoDimLabel}

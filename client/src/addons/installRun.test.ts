@@ -32,21 +32,22 @@ describe('install run', () => {
   });
 
   it('installs the picked list in order, empties it, and reports each step', async () => {
-    queueAdd(['injury-log', 'sleep'], 'member');
+    queueAdd(['health', 'sleep'], 'member');
     const { result } = renderHook(() => useInstallRun());
     let run = Promise.resolve();
     act(() => {
       run = startInstall('member');
     });
     expect(result.current.status).toBe('running');
-    expect(result.current.ids).toEqual(['health', 'sleep', 'injury-log']);
+    expect(result.current.ids).toEqual(['health', 'sleep']);
     await act(async () => {
       await vi.runAllTimersAsync();
     });
     await run;
     expect(result.current.status).toBe('done');
+    // Health comes with its modules (Injury log, Cycle, Supplements, Nicotine and alcohol), each switchable later.
     expect(resolveEnabled(addonsPref.snapshot(), 'member')).toEqual(
-      new Set(['health', 'sleep', 'injury-log']),
+      new Set(['health', 'sleep', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol']),
     );
     expect(addonsQueuePref.get()).toEqual([]);
   });

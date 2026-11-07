@@ -1,3 +1,5 @@
+import { addonsPref } from '../../addons/enabledSet';
+import { HEALTH_ADDONS } from '../../addons/testSetup';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { setLocale } from '../../i18n';
@@ -26,6 +28,7 @@ import { supplementItem } from '../../supplementCatalog';
 beforeEach(() => {
   setLocale('en');
   resetLocalData();
+  addonsPref.set(HEALTH_ADDONS);
   deleteAlcoholData();
 });
 afterEach(cleanup);

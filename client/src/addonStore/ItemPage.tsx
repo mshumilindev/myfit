@@ -9,6 +9,7 @@ import {
   SkPvBox,
   SkPvDot,
   SkPvLines,
+  SkRow,
   SkSectionLink,
   SkStat,
   type SkIconName,
@@ -30,7 +31,8 @@ export function ItemPage({
   const m = addonById(id);
   if (!m) return <div className="sk-t-s sk-mt16">{st.noResults}</div>;
   const parent = m.parent ? addonById(m.parent) : undefined;
-  const children = ADDONS.filter((a) => a.parent === m.id && !a.soon);
+  const children = ADDONS.filter((a) => a.parent === m.id && !a.soon && a.kind !== 'module');
+  const modules = ADDONS.filter((a) => a.parent === m.id && a.kind === 'module');
   const name = itemName(st, m.id);
   if (m.soon) return <ComingSoon id={m.id} ctx={ctx} />;
   return (
@@ -83,6 +85,20 @@ export function ItemPage({
       <Section title={st.about}>
         <p className="sk-t-b sk-mute">{itemDesc(st, m.id)}</p>
       </Section>
+      {modules.length > 0 && (
+        <Section title={st.modules}>
+          <SkCard className="as-group">
+            {modules.map((k) => (
+              <SkRow
+                key={k.id}
+                tile={<TileOf st={st} m={k} size={40} />}
+                name={itemName(st, k.id)}
+                desc={itemDesc(st, k.id)}
+              />
+            ))}
+          </SkCard>
+        </Section>
+      )}
       {children.length > 0 && (
         <Section title={st.addonsForApp(name)}>
           <Rows ids={children.map((a) => a.id)} ctx={ctx} />

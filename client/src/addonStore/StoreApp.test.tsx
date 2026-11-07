@@ -117,40 +117,13 @@ describe('StoreApp', () => {
     expect(currentHash()).toBe('#/store/addons');
   });
   it('Discover turns into the progress hero when most of the catalog is installed', () => {
-    enableAddons(
-      [
-        'health',
-        'injury-log',
-        'supplements',
-        'nicotine-alcohol',
-        'sleep',
-        'atlas',
-        'apex',
-        'mastery',
-        'theme-cyberpunk',
-      ],
-      'member',
-    );
+    enableAddons(['health', 'sleep', 'theme-cyberpunk'], 'member');
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
     expect(screen.getByText(/left to complete Spotter/)).toBeTruthy();
     expect(screen.queryByText('App of the week')).toBeNull();
   });
   it('and says everything is added when nothing is left', () => {
-    enableAddons(
-      [
-        'health',
-        'injury-log',
-        'cycle',
-        'supplements',
-        'nicotine-alcohol',
-        'sleep',
-        'atlas',
-        'apex',
-        'mastery',
-        'theme-cyberpunk',
-      ],
-      'member',
-    );
+    enableAddons(['health', 'sleep', 'atlas', 'apex', 'theme-cyberpunk'], 'member');
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
     expect(screen.getByText('Everything is added')).toBeTruthy();
   });

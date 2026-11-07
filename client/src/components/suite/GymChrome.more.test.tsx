@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { addonsPref } from '../../addons/enabledSet';
 import { LOCALES, setLocale } from '../../i18n';
+import { currentHash } from '../../route';
 import { GymTabBar } from './GymChrome';
 
 vi.mock('../../api', async (orig) => ({
@@ -20,8 +21,6 @@ const bar = (onPrivacy = vi.fn()) =>
     <GymTabBar
       items={items}
       hidden={[]}
-      mastery={false}
-      onMastery={() => undefined}
       onPrivacy={onPrivacy}
       onSelect={() => undefined}
       fab={{ ariaLabel: 'Start', onClick: () => undefined }}
@@ -40,15 +39,24 @@ describe('GymTabBar: More is always the last tab', () => {
     expect(onPrivacy).toHaveBeenCalledTimes(1);
   });
 
-  it('lists Mastery in More only once it is installed', () => {
-    bar();
-    fireEvent.click(screen.getByRole('button', { name: /more/i }));
-    expect(screen.queryByText(t.masteryTitle)).toBeNull();
-    cleanup();
+  it('lists Add-ons first and never Mastery (Mastery belongs to Apex)', () => {
     addonsPref.set(['apex', 'mastery']);
     bar();
     fireEvent.click(screen.getByRole('button', { name: /more/i }));
-    expect(screen.getByText(t.masteryTitle)).toBeTruthy();
+    expect(screen.getByText(t.todayAddons)).toBeTruthy();
+    expect(screen.queryByText(t.masteryTitle)).toBeNull();
+  });
+
+  it('lists Themes in More only once a second look is installed, and it opens the themes page', () => {
+    bar();
+    fireEvent.click(screen.getByRole('button', { name: /more/i }));
+    expect(screen.queryByText(t.todayThemes)).toBeNull();
+    cleanup();
+    addonsPref.set(['theme-cyberpunk']);
+    bar();
+    fireEvent.click(screen.getByRole('button', { name: /more/i }));
+    fireEvent.click(screen.getByText(t.todayThemes));
+    expect(currentHash()).toBe('#/themes');
   });
 
   it('lists Language in More and switching it changes the locale', () => {

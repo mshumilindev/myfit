@@ -52,6 +52,7 @@ import { DateField, TimePickerField, DurationField } from './PickerFields';
 import { GymPicker } from './GymPicker';
 import { GymThumb } from './GymThumb';
 import { StartFrame } from './StartFrame';
+import './StartSheetBento.css';
 
 type Sub = null | 'gym' | 'past';
 
@@ -73,6 +74,7 @@ export function StartSheet({
   const { t, locale } = useT();
   // Health is an add-on (SPO-518): its tile is offered only while it is installed.
   const healthOn = useAddonOrBase('health');
+  const sleepOn = useAddonOrBase('sleep');
   const store = useStore();
   const { assignment, active: assignedActive } = useProgramMine();
   const [sub, setSub] = useState<Sub>(null);
@@ -202,6 +204,10 @@ export function StartSheet({
     // Programs is a tab, not an overlay; nothing starts, so it stays open while something is live.
     onClose();
     shell.goTab('programs');
+  }
+  function openSleep() {
+    onClose();
+    shell.openOverlay({ screen: 'sleep' });
   }
   function openHealth() {
     // The full Health page (design docs/design/health) replaced the old
@@ -385,6 +391,15 @@ export function StartSheet({
             <span className="ss-tile-text">
               <span className="ss-tt">{t.startHealthTitle}</span>
               <span className="ss-ts">{t.startHealthSub}</span>
+            </span>
+          </Card>
+        )}
+        {sleepOn && (
+          <Card as="button" className="ss-tile" onClick={openSleep}>
+            <IconTile tone="sleep" size={40} icon="moon" className="ss-ic" />
+            <span className="ss-tile-text">
+              <span className="ss-tt">{t.sleepTitle}</span>
+              <span className="ss-ts">{t.startSleepSub}</span>
             </span>
           </Card>
         )}

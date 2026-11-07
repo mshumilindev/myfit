@@ -1,3 +1,5 @@
+import { addonsPref } from '../../addons/enabledSet';
+import { HEALTH_ADDONS } from '../../addons/testSetup';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { effectText } from '../../conditionText';
@@ -38,6 +40,7 @@ beforeEach(() => {
   vi.setSystemTime(NOW);
   setLocale('en');
   resetLocalData();
+  addonsPref.set(HEALTH_ADDONS);
 });
 afterEach(() => {
   cleanup();

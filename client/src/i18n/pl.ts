@@ -4447,7 +4447,8 @@ export const pl: Strings = {
   startActivityTitle: 'Aktywność',
   startActivitySub: 'Bieg, rower, sport',
   startHealthTitle: 'Zdrowie',
-  startHealthSub: 'Sen, regeneracja, kontuzja, choroba',
+  startHealthSub: 'Regeneracja, kontuzja, choroba',
+  startSleepSub: 'Zapisz noc, ustaw harmonogram',
   startPastTitle: 'Przeszły',
   startPastSub: 'Trening, o którym zapomniałeś',
   ovTrendsRisks: (n: number) =>

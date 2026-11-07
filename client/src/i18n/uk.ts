@@ -4475,7 +4475,8 @@ export const uk: Strings = {
   startActivityTitle: 'Активність',
   startActivitySub: 'Біг, велосипед, спорт',
   startHealthTitle: 'Здоров’я',
-  startHealthSub: 'Сон, відновлення, травма, хвороба',
+  startHealthSub: 'Відновлення, травма, хвороба',
+  startSleepSub: 'Запиши ніч, склади графік',
   startPastTitle: 'Минуле',
   startPastSub: 'Тренування, яке забув записати',
   ovTrendsRisks: (n: number) => {

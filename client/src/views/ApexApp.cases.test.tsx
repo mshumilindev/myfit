@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { ApexApp, APEX_TABS, type ApexTab } from './ApexApp';
 import { __getStateForTests } from '../store';
+import { addonsPref } from '../addons/enabledSet';
+import { APEX_ADDONS } from '../addons/testSetup';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
 import type { Notif, NotifState } from '../notifications';
@@ -49,6 +51,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
+  addonsPref.set(APEX_ADDONS);
 });
 
 function app(tab: ApexTab, over: Partial<Parameters<typeof ApexApp>[0]> = {}) {
@@ -69,9 +72,36 @@ function app(tab: ApexTab, over: Partial<Parameters<typeof ApexApp>[0]> = {}) {
   return { ...render(<ApexApp {...props} />), props };
 }
 
+describe('ApexApp modules', () => {
+  it('a module that is off takes its tab away, and its address falls back to Home', () => {
+    addonsPref.set(['apex', 'apex-ranks']);
+    const { container } = app('challenges');
+    expect(container.querySelector('.apx-home')).toBeTruthy();
+    const bar = document.querySelector('.suite-tabbar, nav') as HTMLElement;
+    expect(within(bar).queryByText(en.challengesTab)).toBeNull();
+    expect(within(bar).queryByText(en.apexAwardsTab)).toBeNull();
+    expect(within(bar).getByText(en.apexRanksTab)).toBeTruthy();
+  });
+
+  it('Mastery is not a tab: More carries it, and only while its screen is given', () => {
+    const { props } = app('home', { mastery: <div data-testid="mastery-screen" /> });
+    const bar = document.querySelector('.suite-tabbar, nav') as HTMLElement;
+    expect(within(bar).queryByText(en.masteryTitle)).toBeNull();
+    fireEvent.click(within(bar).getByRole('button', { name: /more/i }));
+    fireEvent.click(screen.getByText(en.masteryTitle));
+    expect(props.onTab).toHaveBeenCalledWith('mastery');
+    cleanup();
+    app('mastery', { mastery: <div data-testid="mastery-screen" /> });
+    expect(screen.getByTestId('mastery-screen')).toBeTruthy();
+    cleanup();
+    app('mastery');
+    expect(screen.queryByTestId('mastery-screen')).toBeNull();
+  });
+});
+
 describe('ApexApp', () => {
-  it('exposes the five tabs in order', () => {
-    expect(APEX_TABS).toEqual(['home', 'challenges', 'ranks', 'awards', 'feed']);
+  it('exposes the tabs in order (Mastery is a screen of its own, reached from More)', () => {
+    expect(APEX_TABS).toEqual(['home', 'challenges', 'ranks', 'awards', 'feed', 'mastery']);
   });
 
   it('home tab: the overview, four nav items on a phone, the bell badge and the apps switch', () => {

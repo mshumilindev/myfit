@@ -73,98 +73,13 @@ afterEach(() => {
   cleanup();
 });
 
-describe('Health home: sleep group', () => {
-  it('is not shown without the Sleep add-on (the nights stay stored)', () => {
-    addonsPref.reset();
+describe('Health home: sleep moved out (SPO-518)', () => {
+  it('has no sleep group any more: Sleep is its own screen and its own Start tile', () => {
     seed({ sleeps: [night()] });
     view();
     expect(screen.queryByText(en.hlLastNight)).toBeNull();
     expect(screen.queryByText(en.sleepStart)).toBeNull();
-  });
-
-  it('shows last night and opens its details', () => {
-    seed({ sleeps: [night()] });
-    const { shell } = view();
-    expect(screen.getByText('23:00–07:00')).toBeTruthy();
-    expect(screen.getByText('8h 0m')).toBeTruthy();
-    fireEvent.click(screen.getByText(en.hlLastNight));
-    expect(shell.openOverlay).toHaveBeenCalledWith({
-      screen: 'sleep',
-      mode: 'edit',
-      nightId: 'n1',
-    });
-  });
-
-  it('with no night logged it says so and opens the sleep page', () => {
-    const { shell } = view();
-    expect(screen.getByText(en.sleepNoLastNight)).toBeTruthy();
-    fireEvent.click(screen.getByText(en.hlLastNight));
-    expect(shell.openOverlay).toHaveBeenCalledWith({ screen: 'sleep' });
-  });
-
-  it('Start sleep begins a live night and opens the sleep overlay', () => {
-    const { shell } = view();
-    fireEvent.click(screen.getByText(en.sleepStart));
-    expect(__getStateForTests().sleeps.some((s) => s.wake === null)).toBe(true);
-    expect(shell.openOverlay).toHaveBeenCalledWith({ screen: 'sleep' });
-  });
-
-  it('while asleep the row says since when and just opens the overlay', () => {
-    seed({
-      sleeps: [night({ id: 'live', wake: null, bedtime: new Date(2026, 8, 26, 2, 30).getTime() })],
-    });
-    const { shell } = view();
-    fireEvent.click(screen.getByText(en.sleepAsleepSince('02:30')));
-    expect(__getStateForTests().sleeps).toHaveLength(1);
-    expect(shell.openOverlay).toHaveBeenCalledWith({ screen: 'sleep' });
-  });
-
-  it('"Sleep details" opens the sleep page', () => {
-    const { shell } = view();
-    fireEvent.click(screen.getByText(en.hlSleepDetails));
-    expect(shell.openOverlay).toHaveBeenLastCalledWith({ screen: 'sleep' });
-  });
-
-  it.each([
-    [
-      'workout',
-      { workouts: [{ id: 'w', startedAt: NOW - 3600_000, finishedAt: null, exercises: [] }] },
-      en.slpBlockWorkout,
-    ],
-    [
-      'live activity',
-      {
-        activities: [
-          {
-            id: 'a',
-            type: 'run',
-            category: 'conditioning',
-            startedAt: NOW - 3600_000,
-            finishedAt: null,
-          },
-        ],
-      },
-      en.slpBlockActivity,
-    ],
-    [
-      'home set',
-      {
-        workouts: [
-          { id: 'h', kind: 'home', startedAt: NOW - 3600_000, finishedAt: null, exercises: [] },
-        ],
-      },
-      en.slpBlockHomeSet,
-    ],
-  ])('sleep cannot be started during a live %s, and says why', (_n, over, hint) => {
-    seed(over);
-    const { shell } = view();
-    expect(screen.getByText(hint)).toBeTruthy();
-    expect((screen.getByText(en.sleepStart).closest('button') as HTMLButtonElement).disabled).toBe(
-      true,
-    );
-    fireEvent.click(screen.getByText(en.sleepStart));
-    expect(__getStateForTests().sleeps).toHaveLength(0);
-    expect(shell.openOverlay).not.toHaveBeenCalledWith({ screen: 'sleep' });
+    expect(screen.queryByText(en.hlSleepDetails)).toBeNull();
   });
 });
 
@@ -422,10 +337,8 @@ describe('Health sub-screens by props', () => {
       form: { kind: 'new', ctx: 'past', type: 'illness' },
     });
     unmount();
-    const t = view({ view: 'history', hist: 'timeline' });
-    expect(screen.getByText(en.hlNotOnTimeline)).toBeTruthy();
-    fireEvent.click(screen.getByText(en.hlSleepOwnHistory));
-    expect(t.shell.openOverlay).toHaveBeenLastCalledWith({ screen: 'sleep' });
+    view({ view: 'history', hist: 'timeline' });
+    expect(screen.queryByText(en.hlNotOnTimeline)).toBeNull();
     expect(screen.queryByRole('button', { name: en.hlLogPast })).toBeNull();
   });
 

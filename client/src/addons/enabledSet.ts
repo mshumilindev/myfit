@@ -49,6 +49,11 @@ export function themeIdsOf(enabled: ReadonlySet<string>): string[] {
   );
 }
 
+/** The modules an item comes with: they switch on together with it, then each can be turned off in Configure. */
+export function moduleIdsOf(id: string): string[] {
+  return ADDONS.filter((a) => a.kind === 'module' && a.parent === id).map((a) => a.id);
+}
+
 /** Items that have to go when `id` is removed: itself and (for an app) its add-ons. */
 export function removalSet(id: string): string[] {
   return ADDONS.filter((a) => a.id === id || a.parent === id).map((a) => a.id);
