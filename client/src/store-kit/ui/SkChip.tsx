@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, HTMLAttributes } from 'react';
 import { cx } from '../cx';
 import '../tokens-a.css';
 import './SkChip.css';
@@ -18,4 +18,9 @@ export function SkChip({
       {...rest}
     />
   );
+}
+
+/** A row of chips on one line; it scrolls sideways when they do not fit (the scrollbar is hidden). */
+export function SkChips({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
+  return <div className={cx('sk-chips', className)} {...rest} />;
 }

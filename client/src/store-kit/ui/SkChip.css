@@ -36,3 +36,19 @@
     transition: none;
   }
 }
+
+/* SkChips — one line of chips, scrolls sideways; chips keep their size. */
+.sk-chips {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--sk-sp-4);
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.sk-chips::-webkit-scrollbar {
+  display: none;
+}
+.sk-chips > .sk-chip {
+  flex: none;
+}

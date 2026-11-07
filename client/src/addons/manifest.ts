@@ -47,7 +47,7 @@ export interface AddonManifest {
 const ALL: readonly StoreRole[] = ['member', 'trainer', 'admin'];
 
 export const ADDONS: readonly AddonManifest[] = [
-  { id: 'health', kind: 'addon', tone: 4, roles: ALL, category: 'health' },
+  { id: 'health', kind: 'addon', requires: 'gym', tone: 4, roles: ALL, category: 'health' },
   {
     id: 'injury-log',
     kind: 'module',
@@ -105,7 +105,7 @@ export const ADDONS: readonly AddonManifest[] = [
     roles: ALL,
     category: 'health',
   },
-  { id: 'sleep', kind: 'addon', tone: 2, roles: ALL, category: 'recovery' },
+  { id: 'sleep', kind: 'addon', requires: 'gym', tone: 2, roles: ALL, category: 'recovery' },
   { id: 'activities', kind: 'addon', requires: 'gym', tone: 9, roles: ALL, category: 'workouts' },
   { id: 'home-sets', kind: 'addon', requires: 'gym', tone: 3, roles: ALL, category: 'workouts' },
   { id: 'goals', kind: 'addon', requires: 'gym', tone: 5, roles: ALL, category: 'workouts' },

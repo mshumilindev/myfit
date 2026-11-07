@@ -110,7 +110,7 @@ export function SuiteRail({
           {
             id: 'addons',
             label: t.todayAddons,
-            icon: 'squares-four',
+            icon: 'addons',
             onSelect: () => setHash(storeHash('discover')),
           },
         ]),

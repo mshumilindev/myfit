@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { addonsPref } from './enabledSet';
+import { queueAdd, installQueue, addonsQueuePref } from './queue';
 import {
   closeDependencies,
   isAddonAllowed,
@@ -35,7 +37,16 @@ describe('Gym and Coach by role', () => {
 });
 
 describe('what needs Gym', () => {
-  const needs = ['activities', 'home-sets', 'goals', 'playbook', 'atlas', 'apex'];
+  const needs = [
+    'activities',
+    'home-sets',
+    'goals',
+    'playbook',
+    'atlas',
+    'apex',
+    'health',
+    'sleep',
+  ];
   it('is locked for a trainer and an admin until Gym is installed, never for a member', () => {
     for (const id of needs) {
       expect(isAddonUnlocked(id, new Set(), 'admin')).toBe(false);
@@ -45,7 +56,9 @@ describe('what needs Gym', () => {
     }
   });
   it('does not count as installed without Gym, modules included, even if stored', () => {
-    expect(closeDependencies([...needs, 'mastery', 'health'], 'admin')).toEqual(['health']);
+    expect(closeDependencies([...needs, 'mastery', 'theme-cyberpunk'], 'admin')).toEqual([
+      'theme-cyberpunk',
+    ]);
     expect(closeDependencies([...needs, 'gym'], 'trainer').sort()).toEqual(
       [...needs, 'gym'].sort(),
     );
@@ -54,7 +67,25 @@ describe('what needs Gym', () => {
   it('goes away with Gym, with the modules of Apex', () => {
     const gone = removalSet('gym');
     for (const id of [...needs, 'gym', 'mastery', 'apex-ranks']) expect(gone).toContain(id);
-    expect(gone).not.toContain('health');
-    expect(gone).not.toContain('sleep');
+    expect(gone).not.toContain('theme-cyberpunk');
+  });
+});
+
+// Regression (owner 07.11): "Add" did nothing for Apex, Atlas, Goals... with Gym already installed, because the queue
+// was closed without the installed set and dropped everything that requires Gym.
+describe('queueing what needs Gym when Gym is already installed', () => {
+  beforeEach(() => {
+    addonsPref.reset();
+    addonsQueuePref.reset();
+  });
+  it('an admin with Gym installed can queue and install Apex, Health and Sleep', () => {
+    addonsPref.set(['gym']);
+    queueAdd(['apex', 'health', 'sleep'], 'admin');
+    expect(addonsQueuePref.get().sort()).toEqual(['apex', 'health', 'sleep']);
+    expect(installQueue('admin').sort()).toEqual(['apex', 'health', 'sleep']);
+  });
+  it('without Gym nothing that needs it is queued', () => {
+    queueAdd(['apex', 'health'], 'admin');
+    expect(addonsQueuePref.get()).toEqual([]);
   });
 });

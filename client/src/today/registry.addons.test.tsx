@@ -59,6 +59,8 @@ describe('Sleep widgets follow the Sleep add-on (SPO-518)', () => {
     role.value = 'trainer';
     expect(avail('sleep')).toBe(false);
     addonsPref.set(['sleep']);
+    expect(avail('sleep')).toBe(false); // Sleep needs Gym, which a trainer installs (owner 07.11)
+    addonsPref.set(['gym', 'sleep']);
     expect(avail('sleep')).toBe(true);
   });
 });

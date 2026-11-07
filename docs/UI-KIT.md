@@ -580,44 +580,45 @@ component = `SkName.tsx` + `SkName.css` + `SkName.stories.tsx` (`Store/SkName`, 
 Only `tokens.css` holds raw values (hex, rgb, px); `tests/store-kit-guard.test.ts` enforces it and that each `Sk*` below
 has CSS, a story and a test. Source of truth for look and states: the approved design boards s01–s32 (SPO-500).
 
-| Component          | Role                                                                                                                  |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| `SkBtn`            | The one button: kinds pri / tint / ghost / dash / bad / inv / ok; sizes default / s / l                               |
-| `SkIcon`           | 24px stroke icon from the store set (16 when small), follows currentColor                                             |
-| `SkBadge`          | Small uppercase label: app / add-on / soon / ok / warn / new                                                          |
-| `SkTile`           | Coloured app tile with a letter, tones 0..9, sizes 32/40/48/64/96                                                     |
-| `SkChip`           | Filter toggle chip (aria-pressed, 44px hit area)                                                                      |
-| `SkAvatar`         | Round avatar: image or initials, 4 sizes, optional button                                                             |
-| `SkInstalledLabel` | Non-clickable "✓ Installed" status                                                                                    |
-| `SkRel`            | Relation line: link icon + muted caption                                                                              |
-| `SkProgress`       | Determinate progress bar driven by --sk-pg-value                                                                      |
-| `SkSwitch`         | On/off toggle switch (role=switch)                                                                                    |
-| `SkSegmented`      | Segmented control, one selected option                                                                                |
-| `SkNote`           | Inline note box: info / ok / warn / bad                                                                               |
-| `SkCard`           | Store surface: card colour, hairline border, large radius; optional padding                                           |
-| `SkSep`            | Hairline separator, horizontal or vertical                                                                            |
-| `SkList`           | Grouped card of SkRow items with hairline separators                                                                  |
-| `SkRow`            | List item: tile, name, description, badge, relation, trailing action, optional keyboard-open                          |
-| `SkSectionHeader`  | Section title with trailing aside (SkSectionLink "See all")                                                           |
-| `SkEmpty`          | Empty state: icon tile, title, body, extra content, actions (boards 17, 18, 32)                                       |
-| `SkStat`           | Big number with caption, optional accent or ok tone; `spec` = small label over value (boards 05, 06)                  |
-| `SkSearchField`    | Pill search input with leading icon and clear button                                                                  |
-| `SkBento`          | Bento grid (2 columns, 3/4 on wide) that holds SkBentoTile cells                                                      |
-| `SkBentoTile`      | Bento cell: white/dark/accent/tone 0..9, default/hero/wide, slots; whole tile can be a button (exports `SkBentoLink`) |
-| `SkHero`           | Discover progress hero (boards 22–24): figure, progress bar, headline; states progress/almost/complete/new            |
-| `SkStatusHeader`   | Outcome-screen heading (boards 09–11, 15, 16): bare icon + title coloured ok/warn/bad/progress                        |
-| `SkPreviewPhone`   | Mini-phone preview of placeholder blocks on app pages; m and d sizes (exports `SkPv*` helpers)                        |
+| Component          | Role                                                                                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SkBtn`            | The one button: kinds pri / tint / ghost / dash / bad / inv / ok; sizes default / s / l                                                                                         |
+| `SkIcon`           | 24px stroke icon from the store set (16 when small), follows currentColor                                                                                                       |
+| `SkBadge`          | Small uppercase label: app / add-on / soon / ok / warn / new                                                                                                                    |
+| `SkTile`           | Coloured app tile with a letter, tones 0..9, sizes 32/40/48/64/96                                                                                                               |
+| `SkChip`           | Filter toggle chip (aria-pressed, 44px hit area)                                                                                                                                |
+| `SkChips`          | One line of `SkChip`s that scrolls sideways (scrollbar hidden); the chips keep their size                                                                                       |
+| `SkAvatar`         | Round avatar: image or initials, 4 sizes, optional button                                                                                                                       |
+| `SkInstalledLabel` | Non-clickable "✓ Installed" status                                                                                                                                              |
+| `SkRel`            | Relation line: link icon + muted caption                                                                                                                                        |
+| `SkProgress`       | Determinate progress bar driven by --sk-pg-value                                                                                                                                |
+| `SkSwitch`         | On/off toggle switch (role=switch)                                                                                                                                              |
+| `SkSegmented`      | Segmented control, one selected option                                                                                                                                          |
+| `SkNote`           | Inline note box: info / ok / warn / bad                                                                                                                                         |
+| `SkCard`           | Store surface: card colour, hairline border, large radius; optional padding                                                                                                     |
+| `SkSep`            | Hairline separator, horizontal or vertical                                                                                                                                      |
+| `SkList`           | Grouped card of SkRow items with hairline separators                                                                                                                            |
+| `SkRow`            | List item: tile, name, description, badge, relation, trailing action, optional keyboard-open                                                                                    |
+| `SkSectionHeader`  | Section title with trailing aside (SkSectionLink "See all")                                                                                                                     |
+| `SkEmpty`          | Empty state: icon tile, title, body, extra content, actions (boards 17, 18, 32)                                                                                                 |
+| `SkStat`           | Big number with caption, optional accent or ok tone; `spec` = small label over value (boards 05, 06)                                                                            |
+| `SkSearchField`    | Pill search input with leading icon and clear button                                                                                                                            |
+| `SkBento`          | Bento grid (2 columns, 3/4 on wide) that holds SkBentoTile cells                                                                                                                |
+| `SkBentoTile`      | Bento cell: white/dark/accent/tone 0..9, default/hero/wide, slots; whole tile can be a button (exports `SkBentoLink`)                                                           |
+| `SkHero`           | Discover progress hero (boards 22–24): figure, progress bar, headline; states progress/almost/complete/new                                                                      |
+| `SkStatusHeader`   | Outcome-screen heading (boards 09–11, 15, 16): bare icon + title coloured ok/warn/bad/progress                                                                                  |
+| `SkPreviewPhone`   | Mini-phone preview of placeholder blocks on app pages; m and d sizes (exports `SkPv*` helpers)                                                                                  |
 | `SkHeader`         | Mobile app header, uniform 44px: title or back on the left, avatar + exit button on the right (`exitText` draws it as the Back link: accent chevron + word, left of the avatar) |
-| `SkNavItem`        | Sidebar row: icon, label, count chip, active state (`aria-current`)                                                   |
-| `SkSidebar`        | Desktop sidebar: title, nav items, back-to-Spotter slot, user block (exports `SkSidebarUser`)                         |
-| `SkTabBar`         | Mobile bottom tab bar with icons, active state and a dot indicator                                                    |
-| `SkTray`           | Floating "N selected · Review" bar; full width on a phone, narrow and right-aligned on desktop                        |
-| `SkBar`            | Bottom action bar: card surface, hairline, safe-area padding, optional note                                           |
-| `SkShell`          | Responsive layout: sidebar on wide, header + tab bar on narrow, scroll area, tray, bottom bar                         |
-| `SkScrim`          | Dim layer under overlays (--scrim, light/dark); click dismisses                                                       |
-| `SkSheet`          | Dialog: bottom sheet with grabber on mobile, centred modal from 45rem; focus trap, Escape, aria-modal                 |
-| `SkSteps`          | Installing list with pending/active/done/failed rows, progress bar and retry action (boards 10, 11, 16)               |
-| `SkToast`          | Transient message above the tab bar, tones info/ok/warn/bad, optional action and dismiss                              |
-| `SkOfflineBar`     | Calm offline banner (warn tone, status role, never an alert)                                                          |
-| `SkBackground`     | Animated three-layer wave background, reduced-motion safe, aria-hidden                                                |
-| `SkHighlight`      | Search match mark: renders text parts, matched ones highlighted                                                       |
+| `SkNavItem`        | Sidebar row: icon, label, count chip, active state (`aria-current`)                                                                                                             |
+| `SkSidebar`        | Desktop sidebar: title, nav items, back-to-Spotter slot, user block (exports `SkSidebarUser`)                                                                                   |
+| `SkTabBar`         | Mobile bottom tab bar with icons, active state and a dot indicator                                                                                                              |
+| `SkTray`           | Floating "N selected · Review" bar; full width on a phone, narrow and right-aligned on desktop                                                                                  |
+| `SkBar`            | Bottom action bar: card surface, hairline, safe-area padding, optional note                                                                                                     |
+| `SkShell`          | Responsive layout: sidebar on wide, header + tab bar on narrow, scroll area, tray, bottom bar                                                                                   |
+| `SkScrim`          | Dim layer under overlays (--scrim, light/dark); click dismisses                                                                                                                 |
+| `SkSheet`          | Dialog: bottom sheet with grabber on mobile, centred modal from 45rem; focus trap, Escape, aria-modal                                                                           |
+| `SkSteps`          | Installing list with pending/active/done/failed rows, progress bar and retry action (boards 10, 11, 16)                                                                         |
+| `SkToast`          | Transient message above the tab bar, tones info/ok/warn/bad, optional action and dismiss                                                                                        |
+| `SkOfflineBar`     | Calm offline banner (warn tone, status role, never an alert)                                                                                                                    |
+| `SkBackground`     | Animated three-layer wave background, reduced-motion safe, aria-hidden                                                                                                          |
+| `SkHighlight`      | Search match mark: renders text parts, matched ones highlighted                                                                                                                 |

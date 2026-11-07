@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 afterEach(cleanup);
-import { SkChip } from './SkChip';
+import { SkChip, SkChips } from './SkChip';
 
 describe('SkChip', () => {
   it('is a toggle button reflecting on', () => {
@@ -25,5 +25,14 @@ describe('SkChip', () => {
     );
     fireEvent.click(screen.getByRole('button'));
     expect(on).toHaveBeenCalledTimes(1);
+  });
+  it('SkChips keeps the chips on one line that scrolls', () => {
+    const { container } = render(
+      <SkChips>
+        <SkChip>A</SkChip>
+        <SkChip>B</SkChip>
+      </SkChips>,
+    );
+    expect(container.querySelector('.sk-chips')?.children).toHaveLength(2);
   });
 });

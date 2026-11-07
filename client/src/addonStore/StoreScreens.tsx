@@ -9,6 +9,7 @@ import {
   SkBadge,
   SkBtn,
   SkChip,
+  SkChips,
   SkEmpty,
   SkHero,
   SkIcon,
@@ -146,7 +147,7 @@ export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   const wide = useMinWidth(APP_BREAKPOINT);
   return (
     <>
-      <div className="sk-rowf sk-g8 sk-wrap">
+      <SkChips>
         <SkChip on={cat === 'all'} onClick={() => setCat('all')}>
           {st.catAll}
         </SkChip>
@@ -155,7 +156,7 @@ export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
             {label(c)}
           </SkChip>
         ))}
-      </div>
+      </SkChips>
       <div className="sk-mt16 as-apps-cols">
         {halves(shown, wide).map((part, i) => (
           <Rows key={i} ids={part.map((m) => m.id)} ctx={ctx} />
@@ -202,7 +203,7 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   return (
     <>
       {cats.length > 1 && (
-        <div className="sk-rowf sk-g8 sk-wrap">
+        <SkChips>
           <SkChip on={cat === 'all'} onClick={() => setCat('all')}>
             {st.catAll}
           </SkChip>
@@ -211,7 +212,7 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
               {catLabel(st, c)}
             </SkChip>
           ))}
-        </div>
+        </SkChips>
       )}
       <div className="as-cols">
         {standalone.length > 0 &&

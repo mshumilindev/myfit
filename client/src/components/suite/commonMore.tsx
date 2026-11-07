@@ -19,7 +19,7 @@ export function useCommonMoreItems(onPrivacy?: () => void): MoreMenuItem[] {
       : [
           {
             id: 'addons',
-            icon: 'squares-four',
+            icon: 'addons',
             label: t.todayAddons,
             onSelect: () => setHash(storeHash('discover')),
           },

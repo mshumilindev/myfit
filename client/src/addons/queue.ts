@@ -41,7 +41,8 @@ export function resolveQueue(
   enabled: ReadonlySet<string>,
   role: Role,
 ): string[] {
-  return closeDependencies(queue, role).filter((id) => !enabled.has(id));
+  // The installed set counts as context: Apex still goes in when its Gym is already installed (not in the queue).
+  return closeDependencies([...queue, ...enabled], role).filter((id) => !enabled.has(id));
 }
 
 /** Pick items (with the parents they need). Idempotent. */

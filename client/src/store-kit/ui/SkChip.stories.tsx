@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SkStage, SkStageRow } from '../stories/SkStage';
-import { SkChip } from './SkChip';
+import { SkChip, SkChips } from './SkChip';
 
 const meta = {
   title: 'Store/SkChip',
@@ -27,6 +27,22 @@ export const States: Story = {
         <SkChip disabled>Disabled</SkChip>
         <SkChip>Nutrition and recovery tools</SkChip>
       </SkStageRow>
+    </SkStage>
+  ),
+};
+
+export const OneLineScrolls: Story = {
+  render: () => (
+    <SkStage width="phone">
+      <SkChips>
+        <SkChip on>All</SkChip>
+        <SkChip>Health</SkChip>
+        <SkChip>Workouts</SkChip>
+        <SkChip>Recovery</SkChip>
+        <SkChip>Insights</SkChip>
+        <SkChip>Look</SkChip>
+        <SkChip>Coach</SkChip>
+      </SkChips>
     </SkStage>
   ),
 };
