@@ -12,8 +12,10 @@ import {
   SkRel,
   SkTile,
 } from '../store-kit';
+import { comingSoonForRole } from './storeCatalog';
 import { addonCategories, appOfTheWeek, starterPack, suggestion } from './discoverPicks';
 import { catLabel } from './storeCategories';
+import { Rows } from './storeLists';
 import { ItemAction, itemDesc, itemName, kindBadge, relOf, type StoreCtx } from './storeItems';
 
 function PickButton({ ids, picked, ctx }: { ids: string[]; picked: boolean; ctx: StoreCtx }) {
@@ -44,6 +46,7 @@ export function DiscoverBento({
   const pack = starterPack(state);
   const sug = suggestion(state);
   const cats = addonCategories(role);
+  const soon = comingSoonForRole(role);
   // The small cells fill the grid two by two; with an odd count the last one stretches across both columns,
   // so the block never ends with a hole.
   const small: ((span?: 2) => ReactElement)[] = [
@@ -137,6 +140,12 @@ export function DiscoverBento({
       )}
       {small.map((tile, i) =>
         tile(i === small.length - 1 && small.length % 2 === 1 ? 2 : undefined),
+      )}
+      {soon.length > 0 && (
+        <SkBentoTile size="wide" span={2} eyebrow={st.comingSoon}>
+          {/* Not installable: the rows carry the Soon badge and no action. */}
+          <Rows ids={soon.map((m) => m.id)} ctx={ctx} bare />
+        </SkBentoTile>
       )}
       {sug && (
         <SkBentoTile size="wide" span={2} eyebrow={st.suggestedFor(itemName(st, sug.parent.id))}>

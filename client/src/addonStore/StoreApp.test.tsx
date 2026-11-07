@@ -50,6 +50,15 @@ describe('StoreApp', () => {
     fireEvent.click(tile);
     expect(currentHash()).toBe('#/store/themes');
   });
+  it('Coming soon sits in the bento with Music and Nutrition, and neither can be picked or installed', () => {
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    expect(screen.getAllByText('Coming soon').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Music').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Nutrition').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Soon').length).toBe(2);
+    queueAdd(['music', 'nutrition'], 'member');
+    expect(addonsQueuePref.get()).toEqual([]);
+  });
   it('Cancel in search returns to the tab it was opened from, not out of the store', () => {
     window.location.hash = '#/store/apps';
     render(<StoreApp role="member" onOpenProfile={() => {}} />);

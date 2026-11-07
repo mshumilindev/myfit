@@ -102,7 +102,7 @@ export function Discover({
           </SkList>
         </section>
       )}
-      {soonItems.length > 0 && (
+      {nextMode === 'progress' && soonItems.length > 0 && (
         <Section title={st.comingSoon}>
           <Rows ids={soonItems.map((m) => m.id)} ctx={ctx} />
         </Section>
