@@ -212,7 +212,11 @@ export const SHORTCUT_ADDON: Readonly<Record<string, string>> = {
 /** The shortcuts this person can use now. A hook: call it before any early return. Saved layouts keep their items either way. */
 export function useShortcuts(): readonly ShortcutDef[] {
   const available = useAddonAvailable();
-  return SHORTCUTS.filter((x) => !SHORTCUT_ADDON[x.id] || available(SHORTCUT_ADDON[x.id]));
+  return SHORTCUTS.filter((x) => {
+    // Every `sc:act:*` shortcut belongs to Activities.
+    const addon = x.id.startsWith('sc:act:') ? 'activities' : SHORTCUT_ADDON[x.id];
+    return !addon || available(addon);
+  });
 }
 
 /** Activity shortcuts by how often the type was logged, the chosen ids (if any) first. */

@@ -6,6 +6,7 @@
  * Health (sleep, rest, illness, injury — the full Health page) and Log past.
  * The backfill sub-sheet lives here too so Today can reuse it.
  */
+import { useActivitiesOn } from '../addons/activitiesGate';
 import { illnessState } from '../illness';
 import { Notice } from './ui/Notice';
 import { Chip } from '../components/ui/Chip';
@@ -75,6 +76,7 @@ export function StartSheet({
   // Health is an add-on (SPO-518): its tile is offered only while it is installed.
   const healthOn = useAddonOrBase('health');
   const sleepOn = useAddonOrBase('sleep');
+  const activitiesOn = useActivitiesOn();
   const store = useStore();
   const { assignment, active: assignedActive } = useProgramMine();
   const [sub, setSub] = useState<Sub>(null);
@@ -368,23 +370,25 @@ export function StartSheet({
             <span className="ss-ts">{locked ? t.startFinishFirst(liveName) : t.startAutoSub}</span>
           </span>
         </Card>
-        <Card
-          as="button"
-          className={`ss-tile${locked ? ' locked' : ''}`}
-          aria-disabled={locked}
-          onClick={locked ? undefined : openActivity}
-        >
-          <span className="ss-tile-top">
-            <IconTile tone="conditioning" size={40} icon="heartbeat" className="ss-ic" />
-            {locked && <Icon name="lock-simple" className="ss-lock" />}
-          </span>
-          <span className="ss-tile-text">
-            <span className="ss-tt">{t.startActivityTitle}</span>
-            <span className="ss-ts">
-              {locked ? t.startFinishFirst(liveName) : t.startActivitySub}
+        {activitiesOn && (
+          <Card
+            as="button"
+            className={`ss-tile${locked ? ' locked' : ''}`}
+            aria-disabled={locked}
+            onClick={locked ? undefined : openActivity}
+          >
+            <span className="ss-tile-top">
+              <IconTile tone="conditioning" size={40} icon="heartbeat" className="ss-ic" />
+              {locked && <Icon name="lock-simple" className="ss-lock" />}
             </span>
-          </span>
-        </Card>
+            <span className="ss-tile-text">
+              <span className="ss-tt">{t.startActivityTitle}</span>
+              <span className="ss-ts">
+                {locked ? t.startFinishFirst(liveName) : t.startActivitySub}
+              </span>
+            </span>
+          </Card>
+        )}
         {healthOn && (
           <Card as="button" className="ss-tile" onClick={openHealth}>
             <IconTile tone="rest" size={40} icon="clock-countdown" className="ss-ic" />

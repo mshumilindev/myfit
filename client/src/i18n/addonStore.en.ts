@@ -160,6 +160,10 @@ export const addonStoreEn = {
     nicotine: { name: 'Nicotine', desc: 'Log nicotine to see the effect on recovery.' },
     alcohol: { name: 'Alcohol', desc: 'Log alcohol to see the effect on recovery.' },
     sleep: { name: 'Sleep', desc: 'Log your sleep and see how rested you are.' },
+    activities: {
+      name: 'Activities',
+      desc: 'Log sport, cardio and recovery sessions beyond the gym.',
+    },
     atlas: { name: 'Atlas', desc: 'Ask the AI assistant about your training.' },
     apex: { name: 'Apex', desc: 'The game side of Spotter: challenges, levels and rewards.' },
     mastery: { name: 'Mastery', desc: 'Track skill levels and long-term progress.' },

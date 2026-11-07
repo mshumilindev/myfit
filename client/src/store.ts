@@ -151,6 +151,7 @@ import { computeStreak } from './streak';
 import { currentUid, getRole, callFn } from './api';
 import { addonAvailable, addonsPref } from './addons/queue'; // importing it also registers the add-on lists for account sync
 import { healthAddonsKey, healthAddonsOn } from './healthAddons';
+import { activitiesAvailable } from './addons/activitiesGate';
 import {
   UNSENT_KEY,
   bumpWorkoutGen,
@@ -650,9 +651,13 @@ let exposedMemo: { raw: StoreState; v: string; out: StoreState } | null = null;
  * empty value. Stable between changes. Writers inside this file keep using the raw `state`.
  */
 function exposed(): StoreState {
-  const v = `${healthVersion()}:${healthAddonsKey()}`;
-  if (exposedMemo === null || exposedMemo.raw !== state || exposedMemo.v !== v)
-    exposedMemo = { raw: state, v, out: maskHealth(state, healthAddonsOn(healthSnapshot().on)) };
+  const actOn = activitiesAvailable();
+  const v = `${healthVersion()}:${healthAddonsKey()}:${actOn ? 1 : 0}`;
+  if (exposedMemo === null || exposedMemo.raw !== state || exposedMemo.v !== v) {
+    const masked = maskHealth(state, healthAddonsOn(healthSnapshot().on));
+    // Activities add-on not installed: no activities for any reader (the data stays stored).
+    exposedMemo = { raw: state, v, out: actOn ? masked : { ...masked, activities: [] } };
+  }
   return exposedMemo.out;
 }
 

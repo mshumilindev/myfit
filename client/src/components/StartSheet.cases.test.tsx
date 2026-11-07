@@ -151,7 +151,7 @@ const liveWorkouts = () => __getStateForTests().workouts.filter((w) => w.finishe
 
 beforeEach(() => {
   localStorage.clear();
-  addonsPref.set(['health']);
+  addonsPref.set(['health', 'activities']);
   programState.assignment = null;
   programState.active = true;
   gps(null);
@@ -483,10 +483,17 @@ describe('StartSheet · tiles', () => {
   });
 
   it('offers no Health tile until the Health add-on is installed (SPO-518)', () => {
-    addonsPref.reset();
+    addonsPref.set(['activities']);
     render(<StartSheet shell={shell()} onClose={vi.fn()} />);
     expect(screen.queryByText('Health')).toBeNull();
     expect(screen.getByText('Activity')).toBeTruthy();
+  });
+
+  it('offers no Activity tile until the Activities add-on is installed (SPO-500)', () => {
+    addonsPref.set(['health']);
+    render(<StartSheet shell={shell()} onClose={vi.fn()} />);
+    expect(screen.queryByText('Activity')).toBeNull();
+    expect(screen.getByText('Health')).toBeTruthy();
   });
 
   it('Activity, Health, Programs and Home set each open their screen and close the sheet', async () => {

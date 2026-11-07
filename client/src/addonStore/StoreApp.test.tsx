@@ -149,7 +149,7 @@ describe('StoreApp', () => {
     expect(screen.queryByText('App of the week')).toBeNull();
   });
   it('and says everything is added when nothing is left', () => {
-    enableAddons(['health', 'sleep', 'atlas', 'apex', 'theme-cyberpunk'], 'member');
+    enableAddons(['health', 'sleep', 'activities', 'atlas', 'apex', 'theme-cyberpunk'], 'member');
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
     expect(screen.getByText('Everything is added')).toBeTruthy();
   });

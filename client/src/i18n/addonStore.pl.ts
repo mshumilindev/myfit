@@ -155,6 +155,7 @@ export const addonStorePl: typeof addonStoreEn = {
     nicotine: { name: 'Nikotyna', desc: 'Zapisuj nikotynę, by widzieć wpływ na regenerację.' },
     alcohol: { name: 'Alkohol', desc: 'Zapisuj alkohol, by widzieć wpływ na regenerację.' },
     sleep: { name: 'Sen', desc: 'Zapisuj sen i sprawdzaj, jak bardzo jesteś wypoczęty.' },
+    activities: { name: 'Aktywności', desc: 'Zapisuj sport, cardio i regenerację poza siłownią.' },
     atlas: { name: 'Atlas', desc: 'Zapytaj asystenta AI o swoje treningi.' },
     apex: { name: 'Apex', desc: 'Growa część Spottera: wyzwania, poziomy i nagrody.' },
     mastery: { name: 'Mistrzostwo', desc: 'Poziomy umiejętności i długofalowy postęp.' },

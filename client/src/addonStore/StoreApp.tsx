@@ -216,14 +216,17 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
           ) : (
             <SkHeader
               onBack={() => {
+                // Back goes exactly where its label says (never to whatever the history happens to hold).
+                const target = pushed && pushed.target === view ? pushed.from : lastTab;
                 setPushed(null);
-                window.history.back();
+                setHash(storeHash(target), true);
               }}
               backLabel={pushed && pushed.target === view ? label[pushed.from] : label[lastTab]}
               backIcon={icon('back')}
               avatar={avatar}
               onExit={exit}
               exitLabel={st.backToSpotter}
+              exitIcon={icon('back')}
               exitText="Spotter"
             />
           )

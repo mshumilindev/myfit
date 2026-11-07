@@ -40,7 +40,7 @@ beforeEach(() => {
   freezeClock(NOW);
   setLocale('en');
   resetTodayMocks();
-  addonsPref.set(['sleep']);
+  addonsPref.set(['sleep', 'activities']);
   learn.ready = false;
   installIntersectionObserver();
 });

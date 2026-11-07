@@ -1,3 +1,4 @@
+import { useActivitiesOn } from './addons/activitiesGate';
 import { isProgramsEditorHash } from './views/programs/programsRoute';
 import { getSyncMeta } from './syncMeta';
 import { pushState, refreshPush, setAppBadge } from './push';
@@ -754,6 +755,7 @@ function AppMain() {
   // the result (stable timestamps + seen flags, so nothing stale re-surfaces).
   const [notifNow] = useState(() => Date.now());
   const [rankUp, setRankUp] = useState<MasteryResult | null>(null);
+  const activitiesOn = useActivitiesOn();
   const { apexOn, masteryOn, challenges, themesOn, sleepOn, atlasOn, healthOn, injuryOn } =
     useAddonRuntime();
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
@@ -1089,6 +1091,7 @@ function AppMain() {
     (overlay?.screen === 'sleep' && !sleepOn && !nightLive) ||
     (overlay?.screen === 'themes' && !themesOn) ||
     (overlay?.screen === 'mastery' && !apexOn) ||
+    ((overlay?.screen === 'log-activity' || overlay?.screen === 'activity') && !activitiesOn) ||
     (overlay?.screen === 'health' && !healthOn) ||
     (overlay?.screen === 'injury' && !injuryOn);
   const activeOverlay = overlayBlocked ? null : overlay;

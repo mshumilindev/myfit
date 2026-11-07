@@ -95,6 +95,7 @@ export const ADDONS: readonly AddonManifest[] = [
     category: 'health',
   },
   { id: 'sleep', kind: 'addon', tone: 2, roles: ALL, category: 'recovery' },
+  { id: 'activities', kind: 'addon', tone: 9, roles: ALL, category: 'recovery' },
   { id: 'atlas', kind: 'addon', tone: 6, roles: ALL, category: 'insights' },
   { id: 'apex', kind: 'app', tone: 8, roles: ALL, category: 'insights' },
   // Apex's own parts are modules of it (owner rule 07.11): switched on with Apex, each one off in Configure.

@@ -158,6 +158,10 @@ export const addonStoreEt: typeof addonStoreEn = {
     nicotine: { name: 'Nikotiin', desc: 'Märgi nikotiin, et näha mõju taastumisele.' },
     alcohol: { name: 'Alkohol', desc: 'Märgi alkohol, et näha mõju taastumisele.' },
     sleep: { name: 'Uni', desc: 'Märgi uni ja vaata, kui puhanud oled.' },
+    activities: {
+      name: 'Tegevused',
+      desc: 'Märgi sport, kardio ja taastumine väljaspool jõusaali.',
+    },
     atlas: { name: 'Atlas', desc: 'Küsi tehisintellekti abilisest oma treeningute kohta.' },
     apex: { name: 'Apex', desc: 'Spotteri mänguline pool: väljakutsed, tasemed ja auhinnad.' },
     mastery: { name: 'Meisterlikkus', desc: 'Oskuste tasemed ja pikaajaline areng.' },

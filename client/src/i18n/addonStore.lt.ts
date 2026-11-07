@@ -156,6 +156,10 @@ export const addonStoreLt: typeof addonStoreEn = {
     nicotine: { name: 'Nikotinas', desc: 'Žymėkite nikotiną, kad matytumėte poveikį atsigavimui.' },
     alcohol: { name: 'Alkoholis', desc: 'Žymėkite alkoholį, kad matytumėte poveikį atsigavimui.' },
     sleep: { name: 'Miegas', desc: 'Žymėkite miegą ir matykite, kiek pailsėjote.' },
+    activities: {
+      name: 'Veiklos',
+      desc: 'Žymėkite sportą, kardio ir atsigavimą ne sporto salėje.',
+    },
     atlas: { name: 'Atlas', desc: 'Klauskite DI padėjėjo apie savo treniruotes.' },
     apex: { name: 'Apex', desc: 'Žaidybinė Spotter dalis: iššūkiai, lygiai ir apdovanojimai.' },
     mastery: { name: 'Meistriškumas', desc: 'Įgūdžių lygiai ir ilgalaikė pažanga.' },

@@ -19,6 +19,7 @@
  * return); the small components below render the pieces where the summary
  * layout puts them. What to suggest is decided by the pure `nextUp.ts`.
  */
+import { useActivitiesOn } from '../../addons/activitiesGate';
 import { useMemo, useState } from 'react';
 import type { Shell } from '../../App';
 import {
@@ -146,6 +147,7 @@ export function useNextUp(
 ): NextUpModel | null {
   const { t } = useT();
   const store = useStore();
+  const activitiesOn = useActivitiesOn();
   const off = useNextUpOff();
   const [, setTick] = useState(0);
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -172,7 +174,7 @@ export function useNextUp(
   const result = useMemo(() => (input ? nextUpSuggestions(input) : null), [input]);
   const lookback = useMemo(() => (input ? nextUpLookbackCount(input) : 0), [input]);
 
-  if (!workout || end === null || !input || !result || !active) return null;
+  if (!activitiesOn || !workout || end === null || !input || !result || !active) return null;
 
   const live = liveAny && liveAny.startedAt >= end ? liveAny : null;
   const logged =

@@ -142,6 +142,8 @@ export const APEX_WIDGET_MODULE: Readonly<Record<string, string>> = {
   'apex-mastery': 'mastery',
   'apex-level-up': 'mastery',
 };
+/** Widgets outside the cardio group that read or log activities. */
+const ACTIVITY_WIDGET_IDS: ReadonlySet<string> = new Set(['activities-week', 'rest-day-idea']);
 export function useWidgetAvailable(): (w: WidgetDef) => boolean {
   const available = useAddonAvailable();
   return (w) =>
@@ -149,7 +151,9 @@ export function useWidgetAvailable(): (w: WidgetDef) => boolean {
     (!SLEEP_WIDGET_IDS.has(w.id) || available('sleep')) &&
     (!HEALTH_WIDGET_ADDON[w.id] || available(HEALTH_WIDGET_ADDON[w.id])) &&
     (!APEX_WIDGET_MODULE[w.id] || available(APEX_WIDGET_MODULE[w.id])) &&
-    (w.group !== 'atlas' || available('atlas'));
+    (w.group !== 'atlas' || available('atlas')) &&
+    // The whole cardio group and the week's activities are Activities.
+    ((w.group !== 'cardio' && !ACTIVITY_WIDGET_IDS.has(w.id)) || available('activities'));
 }
 
 /** The widgets this person can use now, with an id lookup that skips the ones their add-ons leave out. */

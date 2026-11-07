@@ -101,3 +101,17 @@ describe('Health module widgets and shortcuts follow their add-ons (SPO-518)', (
     expect(ids()).toEqual(expect.arrayContaining(['sc:sleep', 'sc:injury', 'sc:ask-atlas']));
   });
 });
+
+describe('Activities widgets and shortcuts follow the Activities add-on (SPO-500)', () => {
+  it('the cardio group, the week of activities and every activity shortcut need Activities', () => {
+    const ids = () => renderHook(() => useShortcuts()).result.current.map((x) => x.id);
+    expect(avail('distance-week')).toBe(false);
+    expect(avail('activities-week')).toBe(false);
+    expect(avail('rest-day-idea')).toBe(false);
+    expect(ids().some((id) => id.startsWith('sc:act:'))).toBe(false);
+    addonsPref.set(['activities']);
+    expect(avail('distance-week')).toBe(true);
+    expect(avail('activities-week')).toBe(true);
+    expect(ids().some((id) => id.startsWith('sc:act:'))).toBe(true);
+  });
+});

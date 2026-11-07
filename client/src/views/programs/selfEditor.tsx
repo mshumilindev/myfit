@@ -6,6 +6,7 @@
  * `ProgramPage` (the Programs screen and the member's review of a trainer's program) is the only user of
  * `SelfProgramEditor`: there is no other program editor in the app.
  */
+import { useActivitiesOn } from '../../addons/activitiesGate';
 import { useMemo } from 'react';
 import type { Shell } from '../../App';
 import { getRole } from '../../api';
@@ -132,7 +133,9 @@ export function useSelfEditorHost(o: SelfHostOptions = {}): ProgramEditorHost {
   const { t, locale } = useT();
   const start = useWeekStartDay();
   const limits = useConditionLimits();
-  const { shell, readOnly, activitiesLocked } = o;
+  const activitiesOn = useActivitiesOn();
+  const { shell, readOnly } = o;
+  const activitiesLocked = o.activitiesLocked || !activitiesOn;
   return useMemo(() => {
     // Only for the person training it: a coach building a client's plan has their own limits.
     const flagOf = (name: string): ExerciseFlag | null => {
