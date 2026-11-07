@@ -142,8 +142,9 @@ export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
           </SkChip>
         ))}
       </div>
-      <div className="sk-mt16">
-        <Rows ids={shown.map((m) => m.id)} ctx={ctx} />
+      <div className="sk-mt16 as-apps-cols">
+        <Rows ids={shown.slice(0, Math.ceil(shown.length / 2)).map((m) => m.id)} ctx={ctx} />
+        <Rows ids={shown.slice(Math.ceil(shown.length / 2)).map((m) => m.id)} ctx={ctx} />
       </div>
       {cat === 'all' && soon.length > 0 && (
         <Section title={st.comingSoon}>

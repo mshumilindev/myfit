@@ -16,7 +16,16 @@ import {
 } from '../store-kit';
 import './screens.css';
 import { Rows, Section } from './storeLists';
-import { itemDesc, itemName, kindBadge, relOf, TileOf, type StoreCtx } from './storeItems';
+import { RemoveButton } from './RemoveSheet';
+import {
+  ItemAction,
+  itemDesc,
+  itemName,
+  kindBadge,
+  relOf,
+  TileOf,
+  type StoreCtx,
+} from './storeItems';
 
 export function ItemPage({
   id,
@@ -45,6 +54,11 @@ export function ItemPage({
           <div className="sk-t-s sk-mt4">
             {parent ? st.forApp(itemName(st, parent.id)) : itemDesc(st, m.id)}
           </div>
+          {/* Board 05, desktop: the action sits in the hero (the bottom bar is the phone's). */}
+          <div className="as-item-act sk-rowf sk-g8 sk-mt12">
+            <ItemAction m={m} ctx={ctx} lead />
+            {ctx.enabled.has(m.id) && <RemoveButton id={m.id} ctx={ctx} />}
+          </div>
         </div>
       </div>
       {parent && (
@@ -58,52 +72,68 @@ export function ItemPage({
           </SkSectionLink>
         </SkCard>
       )}
-      <div className="sk-t-e sk-mt24">{st.preview}</div>
-      <div className="sk-rowf sk-g12 sk-mt12 as-previews">
-        <SkPreviewPhone caption={name}>
-          <SkPvBox tall="plot">
-            <SkPvDot />
-          </SkPvBox>
-          <SkPvBox>
-            <SkPvLines />
-          </SkPvBox>
-        </SkPreviewPhone>
-        <SkPreviewPhone caption={name}>
-          <SkPvBox tall="chart" />
-          <SkPvBox>
-            <SkPvLines />
-          </SkPvBox>
-        </SkPreviewPhone>
+      <div className="as-item-grid">
+        <div className="as-item-main">
+          <div className="as-o1">
+            <div className="sk-t-e sk-mt24">{st.preview}</div>
+            <div className="sk-rowf sk-g12 sk-mt12 as-previews">
+              <SkPreviewPhone caption={name}>
+                <SkPvBox tall="plot">
+                  <SkPvDot />
+                </SkPvBox>
+                <SkPvBox>
+                  <SkPvLines />
+                </SkPvBox>
+              </SkPreviewPhone>
+              <SkPreviewPhone caption={name}>
+                <SkPvBox tall="chart" />
+                <SkPvBox>
+                  <SkPvLines />
+                </SkPvBox>
+              </SkPreviewPhone>
+            </div>
+          </div>
+          <div className="as-o3">
+            <Section title={st.about}>
+              <p className="sk-t-b sk-mute">{itemDesc(st, m.id)}</p>
+            </Section>
+          </div>
+        </div>
+        <div className="as-item-aside">
+          <div className="as-o2">
+            <SkCard className="sk-p16 sk-mt24 as-stats">
+              {(m.kind === 'app' || children.length > 0) && (
+                <SkStat spec value={children.length} caption={st.statAddons} />
+              )}
+              <SkStat spec value={st.yes} caption={st.statOffline} />
+              <SkStat spec value={st.kept} caption={st.statData} />
+            </SkCard>
+          </div>
+          <div className="as-o4">
+            {modules.length > 0 && (
+              <Section title={st.modules}>
+                <SkCard className="as-group">
+                  {modules.map((k) => (
+                    <SkRow
+                      key={k.id}
+                      tile={<TileOf st={st} m={k} size={40} />}
+                      name={itemName(st, k.id)}
+                      desc={itemDesc(st, k.id)}
+                    />
+                  ))}
+                </SkCard>
+              </Section>
+            )}
+          </div>
+          <div className="as-o5">
+            {children.length > 0 && (
+              <Section title={st.addonsForApp(name)}>
+                <Rows ids={children.map((a) => a.id)} ctx={ctx} />
+              </Section>
+            )}
+          </div>
+        </div>
       </div>
-      <SkCard className="sk-p16 sk-mt24 as-stats">
-        {(m.kind === 'app' || children.length > 0) && (
-          <SkStat spec value={children.length} caption={st.statAddons} />
-        )}
-        <SkStat spec value={st.yes} caption={st.statOffline} />
-        <SkStat spec value={st.kept} caption={st.statData} />
-      </SkCard>
-      <Section title={st.about}>
-        <p className="sk-t-b sk-mute">{itemDesc(st, m.id)}</p>
-      </Section>
-      {modules.length > 0 && (
-        <Section title={st.modules}>
-          <SkCard className="as-group">
-            {modules.map((k) => (
-              <SkRow
-                key={k.id}
-                tile={<TileOf st={st} m={k} size={40} />}
-                name={itemName(st, k.id)}
-                desc={itemDesc(st, k.id)}
-              />
-            ))}
-          </SkCard>
-        </Section>
-      )}
-      {children.length > 0 && (
-        <Section title={st.addonsForApp(name)}>
-          <Rows ids={children.map((a) => a.id)} ctx={ctx} />
-        </Section>
-      )}
     </>
   );
 }

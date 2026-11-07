@@ -29,6 +29,16 @@
   .as-search-wrap {
     width: var(--sk-search-w);
   }
+  /* Boards 01, 02, 30, 31: the title and the search field share one row, the field on the right. */
+  .as-main-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sk-sp-8);
+  }
+  .as-main-head .as-desk-title {
+    margin: 0;
+  }
 }
 @media (max-width: 44.99rem) {
   .as-search-wrap {
@@ -143,5 +153,71 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: var(--sk-sp-10);
+  }
+}
+
+/* Board 02, desktop: the apps list runs in two cards side by side (the first half, then the second). */
+@media (min-width: 45rem) {
+  .as-apps-cols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--sk-sp-8);
+    align-items: start;
+  }
+}
+
+/* Boards 05, 06: on a phone the blocks run in one column (order below); on a wide screen the page has a main column and an aside. */
+.as-item-grid,
+.as-item-main,
+.as-item-aside {
+  display: contents;
+}
+.as-item-grid {
+  display: flex;
+  flex-direction: column;
+}
+.as-o1 {
+  order: 1;
+}
+.as-o2 {
+  order: 2;
+}
+.as-o3 {
+  order: 3;
+}
+.as-o4 {
+  order: 4;
+}
+.as-o5 {
+  order: 5;
+}
+.as-item-act {
+  display: none;
+}
+@media (min-width: 45rem) {
+  .as-item-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    column-gap: var(--sk-sp-8);
+    align-items: start;
+  }
+  .as-item-main,
+  .as-item-aside {
+    display: block;
+  }
+  .as-item-act {
+    display: flex;
+  }
+  .as-item-bar {
+    display: none;
+  }
+}
+
+/* Board 12, desktop: the app cards sit in two columns. */
+@media (min-width: 45rem) {
+  .as-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
   }
 }

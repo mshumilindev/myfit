@@ -275,7 +275,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
               />
             </SkBar>
           ) : itemM && !itemM.soon ? (
-            <SkBar>
+            <SkBar className="as-item-bar">
               {enabled.has(itemM.id) && <RemoveButton id={itemM.id} ctx={ctx} />}
               <ItemAction m={itemM} ctx={ctx} size="l" lead />
             </SkBar>

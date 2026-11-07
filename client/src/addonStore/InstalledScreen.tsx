@@ -37,9 +37,9 @@ export function Installed({ ctx, go }: { ctx: StoreCtx; go: (v: string, id?: str
       </SkCard>
     );
   }
-  const apps = items.filter(
-    (m) => m.kind === 'app' || ADDONS.some((a) => a.kind === 'module' && a.parent === m.id),
-  );
+  // One card per installed item that stands on its own: an app, a standalone add-on (Sleep, Atlas…), a theme. An add-on of an
+  // installed app is a switch inside that app's card instead.
+  const apps = items.filter((m) => m.kind !== 'module' && !(m.parent && enabled.has(m.parent)));
   return (
     <div className="sk-mt16 as-groups">
       {apps.map((app) => {
