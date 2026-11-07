@@ -1,4 +1,5 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
+import { usePlaybookOn } from '../addons/featureGates';
 import { useAddonOrBase } from '../addons/enabledSet';
 import { storeHash } from '../addonStore/storeRoute';
 import { readStoredList } from '../activityPrefs';
@@ -263,13 +264,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const hasHistory = finished.length > 0;
   const historyDayCount = buildHistoryDays(finished, store.activities, sleeps).length;
   const [pbNow] = useState(() => Date.now());
+  const playbookOn = usePlaybookOn();
   const playbook = useMemo(
     () =>
       computePlaybook(
-        store.workouts.filter((w) => w.finishedAt !== null),
+        // Without the Playbook add-on there are no plays (the history still counts everywhere else).
+        playbookOn ? store.workouts.filter((w) => w.finishedAt !== null) : [],
         pbNow,
       ),
-    [store.workouts, pbNow],
+    [playbookOn, store.workouts, pbNow],
   );
   const activeRest = activeRestPeriod(pbNow);
   const activeInj = activeInjury();

@@ -103,7 +103,7 @@ beforeEach(() => {
   fs.failWith = null;
   fs.uid = 'u1';
   store.resetLocalData();
-  addonsPref.set(HEALTH_ADDONS);
+  addonsPref.set([...HEALTH_ADDONS, 'activities']);
   fs.writes.length = 0; // the add-on list syncs to the account: not part of what these tests count
 });
 afterEach(async () => {

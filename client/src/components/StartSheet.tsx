@@ -6,6 +6,7 @@
  * Health (sleep, rest, illness, injury — the full Health page) and Log past.
  * The backfill sub-sheet lives here too so Today can reuse it.
  */
+import { usePlaybookOn } from '../addons/featureGates';
 import { useActivitiesOn } from '../addons/activitiesGate';
 import { illnessState } from '../illness';
 import { Notice } from './ui/Notice';
@@ -96,7 +97,11 @@ export function StartSheet({
     () => store.workouts.filter((w) => w.finishedAt !== null),
     [store.workouts],
   );
-  const plays = useMemo(() => computePlaybook(finished, now).plays, [finished, now]);
+  const playbookOn = usePlaybookOn();
+  const plays = useMemo(
+    () => (playbookOn ? computePlaybook(finished, now).plays : []),
+    [playbookOn, finished, now],
+  );
 
   const todayWeekday = ((new Date(now).getDay() + 6) % 7) + 1;
   const weekdayName = fmtWeekday(now, locale);

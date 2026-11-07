@@ -164,6 +164,14 @@ export const addonStoreLt: typeof addonStoreEn = {
       name: 'Treniruotės namuose',
       desc: 'Sudarykite namų rinkinius iš savo pratimų ir atlikite bet kur.',
     },
+    goals: {
+      name: 'Tikslai',
+      desc: 'Pasirinkite figūrą ir raumenis augti; treniruotės prisitaikys.',
+    },
+    playbook: {
+      name: 'Playbook',
+      desc: 'Jūsų įprastos treniruotės pagal savaitės dieną, paruoštos kartoti.',
+    },
     atlas: { name: 'Atlas', desc: 'Klauskite DI padėjėjo apie savo treniruotes.' },
     apex: { name: 'Apex', desc: 'Žaidybinė Spotter dalis: iššūkiai, lygiai ir apdovanojimai.' },
     mastery: { name: 'Meistriškumas', desc: 'Įgūdžių lygiai ir ilgalaikė pažanga.' },

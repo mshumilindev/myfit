@@ -74,7 +74,7 @@ const custom = (id: string) =>
 
 let side: HTMLElement;
 beforeEach(() => {
-  addonsPref.set(['sleep']); // the Sleep shortcut belongs to the Sleep add-on (SPO-518)
+  addonsPref.set(['sleep', 'home-sets', 'activities']); // the Sleep shortcut belongs to the Sleep add-on (SPO-518)
   localStorage.clear();
   setLocale('en');
   let l = addSection(DEFAULT_LAYOUT, { id: 'sc', title: 'Shortcuts', layout: 'shortcuts' });

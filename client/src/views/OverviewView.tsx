@@ -6,6 +6,7 @@
  * and the Exercises library. Each tile drills into that page, which carries a
  * "‹ Overview" back link.
  */
+import { useGoalsOn, usePlaybookOn } from '../addons/featureGates';
 import { PageHead } from '../components/ui/PageHead';
 import { Card } from '../components/ui/Card';
 import { dateInWeek, useWeekStartDay, weekOrder, weekStartOf } from '../weekStart';
@@ -113,7 +114,12 @@ export function OverviewView({
     return seen.length ? seen : (['conditioning'] as Array<'conditioning'>);
   }, [store.activities, now]);
 
-  const plays = useMemo(() => computePlaybook(finished, now).plays, [finished, now]);
+  const goalsOn = useGoalsOn();
+  const playbookOn = usePlaybookOn();
+  const plays = useMemo(
+    () => (playbookOn ? computePlaybook(finished, now).plays : []),
+    [playbookOn, finished, now],
+  );
   const focus = focusCounts(store.goals);
   const focusN = focus.grow + focus.ease;
   const physique = store.goals.physique;
@@ -234,30 +240,36 @@ export function OverviewView({
       )}
 
       <div className="ov-grid">
-        <Card as="button" className="ov-tile ov-sq" onClick={() => onPrograms('goals')}>
-          <span className="ov-hd">
-            <span className="ov-k">{t.goalsTab}</span>
-            <Icon name="crosshair" />
-          </span>
-          <span>
-            <span className="ov-tt">
-              {physique ? (t.archetypes[physique.archetype]?.name ?? t.goalsTab) : t.goalsTab}
+        {goalsOn && (
+          <Card as="button" className="ov-tile ov-sq" onClick={() => onPrograms('goals')}>
+            <span className="ov-hd">
+              <span className="ov-k">{t.goalsTab}</span>
+              <Icon name="crosshair" />
             </span>
-            <span className="ov-ts">{focusN > 0 ? t.ovGoalsFocus(focusN) : t.ovGoalsNone}</span>
-          </span>
-        </Card>
-        <Card as="button" className="ov-tile ov-sq" onClick={() => onPrograms('playbook')}>
-          <span className="ov-hd">
-            <span className="ov-k">{t.playbook}</span>
-            <Icon name="cards" />
-          </span>
-          <span>
-            <span className="ov-tt">
-              {plays.length > 0 ? t.ovPlaybookPlays(plays.length) : t.playbook}
+            <span>
+              <span className="ov-tt">
+                {physique ? (t.archetypes[physique.archetype]?.name ?? t.goalsTab) : t.goalsTab}
+              </span>
+              <span className="ov-ts">{focusN > 0 ? t.ovGoalsFocus(focusN) : t.ovGoalsNone}</span>
             </span>
-            <span className="ov-ts">{plays.length > 0 ? t.ovPlaybookSub : t.ovPlaybookEmpty}</span>
-          </span>
-        </Card>
+          </Card>
+        )}
+        {playbookOn && (
+          <Card as="button" className="ov-tile ov-sq" onClick={() => onPrograms('playbook')}>
+            <span className="ov-hd">
+              <span className="ov-k">{t.playbook}</span>
+              <Icon name="cards" />
+            </span>
+            <span>
+              <span className="ov-tt">
+                {plays.length > 0 ? t.ovPlaybookPlays(plays.length) : t.playbook}
+              </span>
+              <span className="ov-ts">
+                {plays.length > 0 ? t.ovPlaybookSub : t.ovPlaybookEmpty}
+              </span>
+            </span>
+          </Card>
+        )}
       </div>
 
       <Card as="button" className="ov-tile ov-row" onClick={() => onPrograms('exercises')}>

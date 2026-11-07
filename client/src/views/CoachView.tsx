@@ -3,6 +3,7 @@
  * the Merciless fine print → only the data that's missing → push).
  * After that: his notes as a chat thread, newest at the bottom, plus settings.
  */
+import { usePlaybookOn } from '../addons/featureGates';
 import { Chip } from '../components/ui/Chip';
 import { BackButton } from '../components/ui/BackButton';
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -1322,12 +1323,13 @@ function CoachThread({
 function PlanCard({ temper, now }: { temper: Temper; now: number }) {
   const { t, locale } = useT();
   const store = useStore();
+  const playbookOn = usePlaybookOn();
   const plan = store.coach.plan ?? null;
   const write = () => {
     const finished = store.workouts.filter((w) => w.finishedAt !== null);
     const next: CoachPlan = proposePlan({
       finished,
-      plays: computePlaybook(finished, now).plays,
+      plays: playbookOn ? computePlaybook(finished, now).plays : [],
       now,
     });
     setCoach({ plan: next });

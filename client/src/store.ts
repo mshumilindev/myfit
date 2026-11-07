@@ -152,6 +152,7 @@ import { currentUid, getRole, callFn } from './api';
 import { addonAvailable, addonsPref } from './addons/queue'; // importing it also registers the add-on lists for account sync
 import { healthAddonsKey, healthAddonsOn } from './healthAddons';
 import { activitiesAvailable } from './addons/activitiesGate';
+import { goalsAvailable } from './addons/featureGates';
 import {
   UNSENT_KEY,
   bumpWorkoutGen,
@@ -652,11 +653,20 @@ let exposedMemo: { raw: StoreState; v: string; out: StoreState } | null = null;
  */
 function exposed(): StoreState {
   const actOn = activitiesAvailable();
-  const v = `${healthVersion()}:${healthAddonsKey()}:${actOn ? 1 : 0}`;
+  const goalsOn = goalsAvailable();
+  const v = `${healthVersion()}:${healthAddonsKey()}:${actOn ? 1 : 0}${goalsOn ? 1 : 0}`;
   if (exposedMemo === null || exposedMemo.raw !== state || exposedMemo.v !== v) {
     const masked = maskHealth(state, healthAddonsOn(healthSnapshot().on));
-    // Activities add-on not installed: no activities for any reader (the data stays stored).
-    exposedMemo = { raw: state, v, out: actOn ? masked : { ...masked, activities: [] } };
+    // Activities / Goals add-on not installed: no activities / empty goals for any reader (the data stays stored).
+    exposedMemo = {
+      raw: state,
+      v,
+      out: {
+        ...masked,
+        ...(actOn ? {} : { activities: [] }),
+        ...(goalsOn ? {} : { goals: EMPTY_GOALS }),
+      },
+    };
   }
   return exposedMemo.out;
 }
@@ -817,7 +827,7 @@ export function getSupplementTrainingFacts(now: number = Date.now()): {
     if (k) days.add(k);
     starts.push(w.startedAt);
   }
-  for (const a of state.activities ?? []) {
+  for (const a of calcActivities()) {
     if (a.category !== 'conditioning' || a.finishedAt === null) continue;
     const k = supplementDayKey(a.startedAt);
     if (k) days.add(k);
@@ -1661,7 +1671,7 @@ export function startWorkout(
 ): Workout | null {
   // One live mode at a time — never start a workout while an activity or a
   // sleep is running.
-  if ((state.activities ?? []).some((a) => a.finishedAt === null)) return null;
+  if (calcActivities().some((a) => a.finishedAt === null)) return null;
   if (liveSleep(state.sleeps)) return null;
   applyAutoFinish();
   // An earlier draft that never got an exercise is replaced, not closed.
@@ -3907,9 +3917,14 @@ function deleteActivityDoc(id: string): void {
   deleteDoc(doc(db, 'users', uid, 'activities', id)).catch(onWriteError);
 }
 
+/** Activities that may enter calculations: none while the Activities add-on is off, even if data exists. */
+function calcActivities(): Activity[] {
+  return activitiesAvailable() ? (state.activities ?? []) : [];
+}
+
 /** The live (unfinished) activity, if one is running or paused. */
 export function liveActivity(): Activity | null {
-  return (state.activities ?? []).find((a) => a.finishedAt === null) ?? null;
+  return calcActivities().find((a) => a.finishedAt === null) ?? null;
 }
 
 /** Begin a live activity (design feature 6): a persisted, resumable timer that
@@ -4364,7 +4379,7 @@ export function normalizeSleeps(now: number = Date.now()): void {
 
 /** Why a sleep can't be started right now (null = free). */
 export function sleepStartBlock(): SleepBlock | null {
-  return sleepBlockedBy(state);
+  return sleepBlockedBy({ ...state, activities: calcActivities() });
 }
 
 /** Begin a live night (idempotent — returns the existing one if already asleep).
@@ -4379,7 +4394,7 @@ export function startSleep(
   if (existing) return existing;
   // One live mode at a time — never start a sleep while a workout, an
   // activity or a home set is running (a quiet no-op; callers show the reason).
-  if (sleepBlockedBy(state)) return null;
+  if (sleepBlockedBy({ ...state, activities: calcActivities() })) return null;
   const night: SleepNight = {
     id: uuid(),
     // A night's identity is the morning it ends — set it from the start, so a
@@ -4808,7 +4823,7 @@ export function setGymEquipment(gymId: string, itemIds: string[]): void {
 }
 
 /** Activities whose start falls on the given local day key. */
-export function activitiesOnDay(day: number, list: Activity[] = state.activities): Activity[] {
+export function activitiesOnDay(day: number, list: Activity[] = calcActivities()): Activity[] {
   return list.filter((a) => dayKey(a.startedAt) === day);
 }
 
@@ -4841,7 +4856,7 @@ export function streakProtectedPredicate(now: number = Date.now()): (day: number
 /** Day keys with a finished workout or activity. */
 export function trainedDayKeys(
   workouts: Workout[] = state.workouts,
-  activities: Activity[] = state.activities,
+  activities: Activity[] = calcActivities(),
 ): Set<number> {
   const days = new Set<number>();
   for (const w of workouts) if (w.finishedAt !== null) days.add(dayKey(w.startedAt));

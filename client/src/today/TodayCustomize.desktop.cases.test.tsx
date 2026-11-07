@@ -79,7 +79,7 @@ const save = () => fireEvent.click(screen.getByRole('button', { name: 'Save' }))
 
 beforeEach(() => {
   // the widget catalogue is searched with the add-ons installed (SPO-518: Sleep/Mastery widgets are add-on content)
-  addonsPref.set(['sleep', 'apex']);
+  addonsPref.set(['sleep', 'apex', 'home-sets', 'activities']);
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
   localStorage.clear();

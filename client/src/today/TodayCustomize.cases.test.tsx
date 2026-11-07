@@ -75,7 +75,7 @@ const ids = () => getTodayLayout().sections.map((s) => s.id);
 const save = () => fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
 beforeEach(() => {
-  addonsPref.set(['sleep']); // the Sleep shortcut belongs to the Sleep add-on (SPO-518)
+  addonsPref.set(['sleep', 'home-sets', 'activities']); // the Sleep shortcut belongs to the Sleep add-on (SPO-518)
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
   localStorage.clear();

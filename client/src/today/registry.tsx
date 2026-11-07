@@ -143,7 +143,11 @@ export const APEX_WIDGET_MODULE: Readonly<Record<string, string>> = {
   'apex-level-up': 'mastery',
 };
 /** Widgets of other add-ons that sit in a core group. */
-const OTHER_WIDGET_ADDON: Readonly<Record<string, string>> = { 'home-sets': 'home-sets' };
+const OTHER_WIDGET_ADDON: Readonly<Record<string, string>> = {
+  'home-sets': 'home-sets',
+  goals: 'goals',
+  playbook: 'playbook',
+};
 /** Widgets outside the cardio group that read or log activities. */
 const ACTIVITY_WIDGET_IDS: ReadonlySet<string> = new Set(['activities-week', 'rest-day-idea']);
 export function useWidgetAvailable(): (w: WidgetDef) => boolean {

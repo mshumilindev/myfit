@@ -1,4 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
+import { usePlaybookOn } from '../addons/featureGates';
 import { useSleepsForCalc } from '../addons/useSleeps';
 import { getSyncMeta } from '../syncMeta';
 import { ClientTargetStripLazy } from '../coach/client/lazy';
@@ -556,6 +557,7 @@ export function SessionView(props: {
   const exName = useExerciseName();
   const store = useStore();
   const sleepsForCalc = useSleepsForCalc();
+  const playbookOn = usePlaybookOn();
   const conditionLimits = useStoredConditionLimits(); // restriction: RPE cap / no-failure / rest scale stay on with the feature off
   // Day-aware suggestions & muscle readouts are always on (not flagged).
   const suggestOn = true;
@@ -1948,10 +1950,9 @@ export function SessionView(props: {
                 onClick={() => {
                   // Enough history for this weekday → offer the whole day;
                   // otherwise just start with this (the custom scenario).
-                  const play = playForWeekday(
-                    computePlaybook(finished, now).plays,
-                    new Date(at).getDay(),
-                  );
+                  const play = playbookOn
+                    ? playForWeekday(computePlaybook(finished, now).plays, new Date(at).getDay())
+                    : null;
                   if (play) setPlaySheet({ play, hero: hero! });
                   else openPick(hero!);
                 }}

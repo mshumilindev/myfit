@@ -166,6 +166,14 @@ export const addonStoreEt: typeof addonStoreEn = {
       name: 'Kodused treeningud',
       desc: 'Koosta kodused komplektid oma harjutustest ja tee neid kus iganes.',
     },
+    goals: {
+      name: 'Eesmärgid',
+      desc: 'Vali kehatüüp ja kasvatatavad lihased; treeningud kohanduvad.',
+    },
+    playbook: {
+      name: 'Playbook',
+      desc: 'Sinu tavapärased treeningud nädalapäeva järgi, valmis kordamiseks.',
+    },
     atlas: { name: 'Atlas', desc: 'Küsi tehisintellekti abilisest oma treeningute kohta.' },
     apex: { name: 'Apex', desc: 'Spotteri mänguline pool: väljakutsed, tasemed ja auhinnad.' },
     mastery: { name: 'Meisterlikkus', desc: 'Oskuste tasemed ja pikaajaline areng.' },

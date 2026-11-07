@@ -28,7 +28,7 @@ try {
   localStorage.setItem(
     'spotter.addons',
     JSON.stringify({
-      list: [...HEALTH_ADDONS, ...APEX_ADDONS, 'activities', 'home-sets'],
+      list: [...HEALTH_ADDONS, ...APEX_ADDONS, 'activities', 'home-sets', 'goals', 'playbook'],
       updatedAt: 1,
     }),
   );

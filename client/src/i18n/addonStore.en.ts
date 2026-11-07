@@ -168,6 +168,8 @@ export const addonStoreEn = {
       name: 'Home workouts',
       desc: 'Build home sets from your own moves and run them anywhere.',
     },
+    goals: { name: 'Goals', desc: 'Pick a physique and the muscles to grow; sessions follow it.' },
+    playbook: { name: 'Playbook', desc: 'Your usual sessions by weekday, ready to repeat.' },
     atlas: { name: 'Atlas', desc: 'Ask the AI assistant about your training.' },
     apex: { name: 'Apex', desc: 'The game side of Spotter: challenges, levels and rewards.' },
     mastery: { name: 'Mastery', desc: 'Track skill levels and long-term progress.' },

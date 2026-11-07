@@ -1,4 +1,5 @@
 import { useActivitiesOn } from './addons/activitiesGate';
+import { useGoalsOn, usePlaybookOn } from './addons/featureGates';
 import { isProgramsEditorHash } from './views/programs/programsRoute';
 import { getSyncMeta } from './syncMeta';
 import { pushState, refreshPush, setAppBadge } from './push';
@@ -756,6 +757,8 @@ function AppMain() {
   const [notifNow] = useState(() => Date.now());
   const [rankUp, setRankUp] = useState<MasteryResult | null>(null);
   const activitiesOn = useActivitiesOn();
+  const goalsOn = useGoalsOn();
+  const playbookOn = usePlaybookOn();
   const homeSetsOn = useAddonOrBase('home-sets');
   const { apexOn, masteryOn, challenges, themesOn, sleepOn, atlasOn, healthOn, injuryOn } =
     useAddonRuntime();
@@ -1772,9 +1775,9 @@ function AppMain() {
             libTab={libMine ? 'mine' : 'library'}
             onLibTab={(next) => setLibMine(next === 'mine')}
           />
-        ) : programsPeer === 'playbook' ? (
+        ) : programsPeer === 'playbook' && playbookOn ? (
           <PlaybookView shell={shell} />
-        ) : programsPeer === 'goals' ? (
+        ) : programsPeer === 'goals' && goalsOn ? (
           <GoalsView />
         ) : (
           <ProgramsView shell={shell} onProgramsTab={goProgramsPeer} />

@@ -1,3 +1,4 @@
+import { useGoalsOn } from '../addons/featureGates';
 /**
  * Session Builder wizard. It opens on step 1 and walks the whole flow — physique
  * goal (only if unset), intent, muscles, the day's extras — regenerating the plan
@@ -81,7 +82,8 @@ export function SessionBuilderView({
   const [cardio, setCardio] = useState(false);
   const [cooldown, setCooldown] = useState(true);
 
-  const goalNeeded = !store.goals.physique;
+  const goalsOn = useGoalsOn();
+  const goalNeeded = goalsOn && !store.goals.physique;
   const steps = goalNeeded
     ? (['goal', 'intent', 'muscles', 'day', 'review'] as const)
     : (['intent', 'muscles', 'day', 'review'] as const);

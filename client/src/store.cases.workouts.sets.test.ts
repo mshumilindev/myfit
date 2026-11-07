@@ -1,3 +1,4 @@
+import { addonsPref } from './addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const fs = vi.hoisted(() => ({
@@ -79,6 +80,7 @@ beforeEach(() => {
   fs.failWith = null;
   fs.uid = 'u1';
   store.resetLocalData();
+  addonsPref.set(['activities']); // Activities is an add-on: without it no activity counts (owner 2026-11-07)
 });
 afterEach(async () => {
   vi.useRealTimers();

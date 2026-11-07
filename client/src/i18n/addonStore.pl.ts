@@ -160,6 +160,14 @@ export const addonStorePl: typeof addonStoreEn = {
       name: 'Treningi w domu',
       desc: 'Układaj domowe zestawy z własnych ćwiczeń i rób je gdziekolwiek.',
     },
+    goals: {
+      name: 'Cele',
+      desc: 'Wybierz sylwetkę i mięśnie do rozwoju; sesje się do tego dostosują.',
+    },
+    playbook: {
+      name: 'Playbook',
+      desc: 'Twoje zwykłe sesje według dni tygodnia, gotowe do powtórki.',
+    },
     atlas: { name: 'Atlas', desc: 'Zapytaj asystenta AI o swoje treningi.' },
     apex: { name: 'Apex', desc: 'Growa część Spottera: wyzwania, poziomy i nagrody.' },
     mastery: { name: 'Mistrzostwo', desc: 'Poziomy umiejętności i długofalowy postęp.' },
