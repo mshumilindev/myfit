@@ -33,6 +33,7 @@ export const addonStorePl: typeof addonStoreEn = {
   categoriesN: (n) => `Kategorie: ${n}`,
   comingSoon: 'Wkrótce',
   soon: 'Wkrótce',
+  soonBody: 'Jeszcze niedostępne.',
   kindApp: 'Aplikacja',
   kindAddon: 'Dodatek',
   kindTheme: 'Motyw',

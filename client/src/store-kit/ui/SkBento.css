@@ -5,6 +5,24 @@
   gap: var(--sk-sp-5);
 }
 @media (min-width: 45rem) {
+  /* Design 01, desktop: 12 columns, fixed rows. A hero is 8x2, a cell 4x1, a wide tile the full row. */
+  .sk-bgrid-c12 {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-auto-rows: var(--sk-bento-row-h);
+    gap: var(--sk-sp-6);
+  }
+  .sk-bgrid-c12 > .sk-btile {
+    grid-column: span 4;
+    block-size: auto;
+    min-height: 0;
+  }
+  .sk-bgrid-c12 > .sk-btile-hero {
+    grid-column: span 8;
+    grid-row: span 2;
+  }
+  .sk-bgrid-c12 > .sk-btile-wide {
+    grid-column: span 12;
+  }
   .sk-bgrid-c3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

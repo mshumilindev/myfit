@@ -15,7 +15,6 @@ import {
 import { comingSoonForRole } from './storeCatalog';
 import { addonCategories, appOfTheWeek, starterPack, suggestion } from './discoverPicks';
 import { catLabel } from './storeCategories';
-import { Rows } from './storeLists';
 import { ItemAction, itemDesc, itemName, kindBadge, relOf, type StoreCtx } from './storeItems';
 
 function PickButton({ ids, picked, ctx }: { ids: string[]; picked: boolean; ctx: StoreCtx }) {
@@ -122,8 +121,20 @@ export function DiscoverBento({
       />
     ),
   );
+  if (soon.length)
+    small.push((span) => (
+      <SkBentoTile
+        key="soon"
+        span={span}
+        eyebrow={st.comingSoon}
+        title={soon.map((m) => itemName(st, m.id)).join(', ')}
+        titleSize="h3"
+        body={st.soonBody}
+        footer={<SkBadge kind="soon">{st.soon}</SkBadge>}
+      />
+    ));
   return (
-    <SkBento>
+    <SkBento cols={12}>
       {week && (
         <SkBentoTile
           tone={week.tone}
@@ -140,12 +151,6 @@ export function DiscoverBento({
       )}
       {small.map((tile, i) =>
         tile(i === small.length - 1 && small.length % 2 === 1 ? 2 : undefined),
-      )}
-      {soon.length > 0 && (
-        <SkBentoTile size="wide" span={2} eyebrow={st.comingSoon}>
-          {/* Not installable: the rows carry the Soon badge and no action. */}
-          <Rows ids={soon.map((m) => m.id)} ctx={ctx} bare />
-        </SkBentoTile>
       )}
       {sug && (
         <SkBentoTile size="wide" span={2} eyebrow={st.suggestedFor(itemName(st, sug.parent.id))}>

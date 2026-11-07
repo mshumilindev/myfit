@@ -33,6 +33,7 @@ export const addonStoreLt: typeof addonStoreEn = {
   categoriesN: (n) => `Kategorijos: ${n}`,
   comingSoon: 'Netrukus',
   soon: 'Netrukus',
+  soonBody: 'Dar neprieinama.',
   kindApp: 'Programa',
   kindAddon: 'Priedas',
   kindTheme: 'Tema',

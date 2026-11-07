@@ -53,9 +53,8 @@ describe('StoreApp', () => {
   it('Coming soon sits in the bento with Music and Nutrition, and neither can be picked or installed', () => {
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
     expect(screen.getAllByText('Coming soon').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Music').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Nutrition').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Soon').length).toBe(2);
+    expect(screen.getAllByText('Nutrition, Music').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Soon').length).toBeGreaterThan(0);
     queueAdd(['music', 'nutrition'], 'member');
     expect(addonsQueuePref.get()).toEqual([]);
   });

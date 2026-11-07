@@ -86,7 +86,9 @@ export function Discover({
               <h2 className="sk-t-h2">{st.recommended}</h2>
               <SkSectionLink onClick={() => go('apps')}>{st.seeAll}</SkSectionLink>
             </div>
-            <Rows ids={rec.slice(0, 4)} ctx={ctx} bare />
+            <div className="as-rec-cols">
+              <Rows ids={rec.slice(0, 4)} ctx={ctx} bare />
+            </div>
           </SkList>
         </section>
       )}

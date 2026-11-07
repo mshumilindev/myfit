@@ -33,6 +33,7 @@ export const addonStoreUk: typeof addonStoreEn = {
   categoriesN: (n) => `Категорій: ${n}`,
   comingSoon: 'Незабаром',
   soon: 'Скоро',
+  soonBody: 'Ще недоступно.',
   kindApp: 'Застосунок',
   kindAddon: 'Додаток',
   kindTheme: 'Тема',

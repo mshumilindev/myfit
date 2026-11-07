@@ -35,6 +35,7 @@ export const addonStoreEn = {
   categoriesN: (n: number) => (n === 1 ? '1 category' : `${n} categories`),
   comingSoon: 'Coming soon',
   soon: 'Soon',
+  soonBody: 'Not available yet.',
   kindApp: 'App',
   kindAddon: 'Add-on',
   kindTheme: 'Theme',

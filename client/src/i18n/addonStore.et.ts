@@ -33,6 +33,7 @@ export const addonStoreEt: typeof addonStoreEn = {
   categoriesN: (n) => `Kategooriaid: ${n}`,
   comingSoon: 'Varsti tulekul',
   soon: 'Varsti',
+  soonBody: 'Pole veel saadaval.',
   kindApp: 'Rakendus',
   kindAddon: 'Lisa',
   kindTheme: 'Teema',
