@@ -80,7 +80,15 @@ export const ADDONS: readonly AddonManifest[] = [
     category: 'health',
   },
   {
-    id: 'nicotine-alcohol',
+    id: 'nicotine',
+    kind: 'module',
+    parent: 'health',
+    tone: 4,
+    roles: ALL,
+    category: 'health',
+  },
+  {
+    id: 'alcohol',
     kind: 'module',
     parent: 'health',
     tone: 4,

@@ -16,7 +16,18 @@ import { newNicotineProduct } from '../../nicotine';
 import { addonsPref } from '../../addons/enabledSet';
 
 beforeEach(() => {
-  addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol', 'sleep']);
+  addonsPref.set([
+    'health',
+    'injury-log',
+    'cycle',
+    'supplements',
+    'nicotine',
+    'alcohol',
+    'conditions',
+    'rest',
+    'unwell',
+    'sleep',
+  ]);
   setLocale('en');
   deleteNicotineData();
   deleteAlcoholData();

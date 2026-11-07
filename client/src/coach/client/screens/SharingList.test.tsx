@@ -32,7 +32,18 @@ const gate = (on: Partial<typeof ALL>, ready = true) =>
 const row = (title: string) => screen.findByRole('button', { name: new RegExp(`^${title},`) });
 
 beforeEach(() => {
-  addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol', 'sleep']);
+  addonsPref.set([
+    'health',
+    'injury-log',
+    'cycle',
+    'supplements',
+    'nicotine',
+    'alcohol',
+    'conditions',
+    'rest',
+    'unwell',
+    'sleep',
+  ]);
   setViewport(390);
   setConditionsShare('off');
   setNicotineSharing('off');

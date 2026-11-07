@@ -61,23 +61,26 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
             onOpenExport={myData.openExport}
           />
           {/* Deleting an add-on's data is offered only while the add-on is installed (its data stays when it is removed). */}
-          {(available('nicotine-alcohol') || available('supplements') || cycleOn) && (
+          {(available('nicotine') ||
+            available('alcohol') ||
+            available('supplements') ||
+            cycleOn) && (
             <GroupedList header={t.nicPrivData} footer={t.hlPrivNote}>
-              {available('nicotine-alcohol') && (
-                <>
-                  <ListRow
-                    action
-                    tone="danger"
-                    label={t.nicPrivDelete}
-                    onClick={() => setConfirm('nicotine')}
-                  />
-                  <ListRow
-                    action
-                    tone="danger"
-                    label={t.alcPrivDelete}
-                    onClick={() => setConfirm('alcohol')}
-                  />
-                </>
+              {available('nicotine') && (
+                <ListRow
+                  action
+                  tone="danger"
+                  label={t.nicPrivDelete}
+                  onClick={() => setConfirm('nicotine')}
+                />
+              )}
+              {available('alcohol') && (
+                <ListRow
+                  action
+                  tone="danger"
+                  label={t.alcPrivDelete}
+                  onClick={() => setConfirm('alcohol')}
+                />
               )}
               {available('supplements') && (
                 <ListRow

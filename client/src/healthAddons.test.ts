@@ -32,7 +32,7 @@ describe('healthAddonsOn (consent AND add-on)', () => {
   });
 
   it('keeps a feature on when both the consent and its add-on are there', () => {
-    addonsPref.set(['health', 'conditions', 'nicotine-alcohol']);
+    addonsPref.set(['health', 'conditions', 'nicotine', 'alcohol']);
     const on = healthAddonsOn(ALL_ON);
     expect(on).toMatchObject({ chronic: true, nicotine: true, alcohol: true, injuries: false });
   });

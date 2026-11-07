@@ -19,13 +19,9 @@ describe('discover picks', () => {
     expect(appOfTheWeek({ ...none, queued: ['health'] })?.id).toBe('health');
     expect(appOfTheWeek({ ...none, enabled: new Set(['health']) })?.id).toBe('atlas');
   });
-  it('starter pack: the Recovery trio until fewer than two are left', () => {
-    expect(starterPack(none)?.left).toEqual(['health', 'injury-log', 'sleep']);
-    expect(starterPack({ ...none, enabled: new Set(['health']) })?.left).toEqual([
-      'injury-log',
-      'sleep',
-    ]);
-    expect(starterPack({ ...none, enabled: new Set(['health', 'injury-log']) })).toBeNull();
+  it('starter pack: the Recovery pair until fewer than two are left', () => {
+    expect(starterPack(none)?.left).toEqual(['health', 'sleep']);
+    expect(starterPack({ ...none, enabled: new Set(['health']) })).toBeNull();
     expect(starterPack({ ...none, role: 'manager' })).toBeNull();
   });
   it('suggests an add-on only of an installed app', () => {
@@ -44,7 +40,16 @@ describe('discover picks', () => {
   it('health modules are switches inside Health, never store items or categories', () => {
     const ids = availableForRole('member').map((m) => m.id);
     expect(ids).toContain('health');
-    for (const m of ['injury-log', 'cycle', 'supplements', 'nicotine-alcohol'])
+    for (const m of [
+      'injury-log',
+      'cycle',
+      'supplements',
+      'nicotine',
+      'alcohol',
+      'conditions',
+      'rest',
+      'unwell',
+    ])
       expect(ids).not.toContain(m);
   });
 });

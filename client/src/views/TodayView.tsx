@@ -148,7 +148,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const isDesktop = useIsDesktop();
   const atlasOn = useAddonOrBase('atlas');
   const sleepOn = useAddonOrBase('sleep');
-  const nicAlcOn = useAddonOrBase('nicotine-alcohol');
+  const alcoholOn = useAddonOrBase('alcohol');
   const supplementsOn = useAddonOrBase('supplements');
   const sleeps = sleepOn ? store.sleeps : NO_SLEEPS;
   const { t, locale } = useT();
@@ -1587,7 +1587,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         <>
           {shows('learn') && learnHasVideo && learnProgress.done === 0 && learnBanner}
           <NudgeStack nudges={nudges.filter((n) => shows(n.id as NudgeKind))} />
-          {nicAlcOn && <AlcoholCheckinCard />}
+          {alcoholOn && <AlcoholCheckinCard />}
           {supplementsOn && <SupplementCheckinCard />}
           <ProgramActivitySuggest />
           {shows('sleep') && sleepOn && (

@@ -7,6 +7,7 @@
   position: relative;
   overflow: hidden;
   min-height: var(--sk-bento-h);
+  block-size: var(--sk-bento-cell-h);
   padding: var(--sk-sp-6);
   border-radius: var(--sk-r-2xl);
   font-family: inherit;
@@ -14,9 +15,11 @@
   min-width: 0;
 }
 .sk-btile-hero {
+  block-size: auto;
   min-height: var(--sk-bento-hero-h);
 }
 .sk-btile-wide {
+  block-size: auto;
   min-height: var(--sk-bento-wide-h);
 }
 .sk-btile-span2 {

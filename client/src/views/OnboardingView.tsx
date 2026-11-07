@@ -479,13 +479,11 @@ export function OnboardingView(props: {
             </div>
             <h2 className="display">{t.onbWow}</h2>
             <p className="lead">{gym?.gymName ? t.onbWowBody(gym.gymName) : t.onbWowBodyNoGym}</p>
-            {available('health') && <ConditionsOnboardingRow onOpen={() => setCondOpen(true)} />}
-            {available('nicotine-alcohol') && (
-              <>
-                <NicotineOnboardingRow onOpen={() => setNicOpen(true)} />
-                <AlcoholOnboardingRow onOpen={() => setAlcOpen(true)} />
-              </>
+            {available('conditions') && (
+              <ConditionsOnboardingRow onOpen={() => setCondOpen(true)} />
             )}
+            {available('nicotine') && <NicotineOnboardingRow onOpen={() => setNicOpen(true)} />}
+            {available('alcohol') && <AlcoholOnboardingRow onOpen={() => setAlcOpen(true)} />}
             {available('supplements') && (
               <SupplementOnboardingRow onOpen={() => setSupQuick(true)} />
             )}

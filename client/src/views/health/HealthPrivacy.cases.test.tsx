@@ -40,7 +40,18 @@ const dlg = () => document.querySelector('[role="alertdialog"], [role="dialog"]'
 beforeEach(() => {
   setLocale('en');
   resetLocalData();
-  addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol', 'sleep']);
+  addonsPref.set([
+    'health',
+    'injury-log',
+    'cycle',
+    'supplements',
+    'nicotine',
+    'alcohol',
+    'conditions',
+    'rest',
+    'unwell',
+    'sleep',
+  ]);
   deleteNicotineData();
   deleteAlcoholData();
   deleteSupplementData();

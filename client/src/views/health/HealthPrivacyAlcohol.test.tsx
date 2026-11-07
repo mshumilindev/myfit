@@ -21,7 +21,18 @@ import { addonsPref } from '../../addons/enabledSet';
 
 beforeEach(() => {
   setLocale('en');
-  addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol', 'sleep']);
+  addonsPref.set([
+    'health',
+    'injury-log',
+    'cycle',
+    'supplements',
+    'nicotine',
+    'alcohol',
+    'conditions',
+    'rest',
+    'unwell',
+    'sleep',
+  ]);
   deleteNicotineData();
   deleteAlcoholData();
   setConditionsShare('off');

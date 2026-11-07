@@ -34,7 +34,18 @@ import { supEntryId } from './text';
 import { addonsPref } from '../../../addons/enabledSet';
 
 beforeEach(() => {
-  addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol', 'sleep']);
+  addonsPref.set([
+    'health',
+    'injury-log',
+    'cycle',
+    'supplements',
+    'nicotine',
+    'alcohol',
+    'conditions',
+    'rest',
+    'unwell',
+    'sleep',
+  ]);
   setLocale('en');
   deleteSupplementData();
   window.matchMedia = ((q: string) => ({

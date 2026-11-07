@@ -15,7 +15,7 @@ export interface DiscoverState {
 }
 
 /** Starter packs: ids in order; only the ones the role may use. */
-export const STARTER_PACKS = [{ id: 'recovery', ids: ['health', 'injury-log', 'sleep'] }] as const;
+export const STARTER_PACKS = [{ id: 'recovery', ids: ['health', 'sleep'] }] as const;
 
 /** "App of the week": the best top-level item (an app, or an add-on that needs no other) not yet installed — picked or not, so it stays after "Add". */
 export function appOfTheWeek({ role, enabled }: DiscoverState): AddonManifest | null {

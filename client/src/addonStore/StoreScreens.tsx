@@ -90,7 +90,8 @@ export function Discover({
           </SkList>
         </section>
       )}
-      {themeIds.length > 0 && (
+      {/* The Themes tile lives in the bento; the list stays only under the progress hero, which has no bento. */}
+      {nextMode === 'progress' && themeIds.length > 0 && (
         <section className="sk-mt24">
           <SkList>
             <div className="as-rec-head">

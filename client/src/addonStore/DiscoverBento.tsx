@@ -1,4 +1,5 @@
 /** The Discover bento (design 01): App of the week, Installed, Starter pack, Suggested, Coming soon, Browse. */
+import type { ReactElement } from 'react';
 import type { Role } from '../api';
 import { queueAdd, queueRemove } from '../addons/queue';
 import {
@@ -43,6 +44,81 @@ export function DiscoverBento({
   const pack = starterPack(state);
   const sug = suggestion(state);
   const cats = addonCategories(role);
+  // The small cells fill the grid two by two; with an odd count the last one stretches across both columns,
+  // so the block never ends with a hole.
+  const small: ((span?: 2) => ReactElement)[] = [
+    (span) => (
+      <SkBentoTile
+        key="installed"
+        span={span}
+        eyebrow={st.tabInstalled}
+        big={enabled.size}
+        body={st.appsAndAddons}
+        footer={
+          <SkBentoLink onClick={() => go('installed')}>
+            {st.seeAll} <SkIcon name="chev" small />
+          </SkBentoLink>
+        }
+      />
+    ),
+  ];
+  if (pack)
+    small.push((span) => (
+      <SkBentoTile
+        key="pack"
+        span={span}
+        variant="accent"
+        eyebrow={st.startPack}
+        title={st.packRecovery}
+        titleSize="h3"
+        body={pack.ids.map((id) => itemName(st, id)).join(', ')}
+        footer={
+          <PickButton
+            ids={pack.left}
+            picked={pack.left.every((id) => queued.includes(id))}
+            ctx={ctx}
+          />
+        }
+      />
+    ));
+  small.push(
+    (span) => (
+      <SkBentoTile
+        key="goal"
+        span={span}
+        tone={5}
+        eyebrow={st.browse}
+        title={st.byGoal}
+        titleSize="h2"
+        body={st.categoriesHint(cats.map((c) => catLabel(st, c)))}
+        onClick={() => go('addons')}
+        label={st.browse}
+        footer={
+          <SkBentoLink>
+            {st.categoriesN(cats.length)} <SkIcon name="chev" small />
+          </SkBentoLink>
+        }
+      />
+    ),
+    (span) => (
+      <SkBentoTile
+        key="themes"
+        span={span}
+        tone={6}
+        eyebrow={st.tabThemes}
+        title={st.themesTileTitle}
+        titleSize="h2"
+        body={st.themesTileBody}
+        onClick={() => go('themes')}
+        label={st.tabThemes}
+        footer={
+          <SkBentoLink>
+            {st.seeAll} <SkIcon name="chev" small />
+          </SkBentoLink>
+        }
+      />
+    ),
+  );
   return (
     <SkBento>
       {week && (
@@ -59,31 +135,8 @@ export function DiscoverBento({
           footer={<PickButton ids={[week.id]} picked={queued.includes(week.id)} ctx={ctx} />}
         />
       )}
-      <SkBentoTile
-        eyebrow={st.tabInstalled}
-        big={enabled.size}
-        body={st.appsAndAddons}
-        footer={
-          <SkBentoLink onClick={() => go('installed')}>
-            {st.seeAll} <SkIcon name="chev" small />
-          </SkBentoLink>
-        }
-      />
-      {pack && (
-        <SkBentoTile
-          variant="accent"
-          eyebrow={st.startPack}
-          title={st.packRecovery}
-          titleSize="h3"
-          body={pack.ids.map((id) => itemName(st, id)).join(', ')}
-          footer={
-            <PickButton
-              ids={pack.left}
-              picked={pack.left.every((id) => queued.includes(id))}
-              ctx={ctx}
-            />
-          }
-        />
+      {small.map((tile, i) =>
+        tile(i === small.length - 1 && small.length % 2 === 1 ? 2 : undefined),
       )}
       {sug && (
         <SkBentoTile size="wide" span={2} eyebrow={st.suggestedFor(itemName(st, sug.parent.id))}>
@@ -108,20 +161,6 @@ export function DiscoverBento({
           </div>
         </SkBentoTile>
       )}
-      <SkBentoTile
-        tone={5}
-        eyebrow={st.browse}
-        title={st.byGoal}
-        titleSize="h2"
-        body={st.categoriesHint(cats.map((c) => catLabel(st, c)))}
-        onClick={() => go('addons')}
-        label={st.browse}
-        footer={
-          <SkBentoLink>
-            {st.categoriesN(cats.length)} <SkIcon name="chev" small />
-          </SkBentoLink>
-        }
-      />
     </SkBento>
   );
 }

@@ -26,9 +26,9 @@ export const SHARE_GROUPS: readonly { id: ShareGroupId; ids: readonly ShareId[] 
 export const ADDON_OF: Partial<Record<ShareId, string>> = {
   sleep: 'sleep',
   injury: 'injury-log',
-  conditions: 'health',
-  nicotine: 'nicotine-alcohol',
-  alcohol: 'nicotine-alcohol',
+  conditions: 'conditions',
+  nicotine: 'nicotine',
+  alcohol: 'alcohol',
   supplements: 'supplements',
 };
 

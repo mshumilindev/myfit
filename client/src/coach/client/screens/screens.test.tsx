@@ -23,7 +23,18 @@ import type { ClientSnapshot } from '../data/types';
 
 beforeEach(() => {
   setViewport(390);
-  addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol', 'sleep']);
+  addonsPref.set([
+    'health',
+    'injury-log',
+    'cycle',
+    'supplements',
+    'nicotine',
+    'alcohol',
+    'conditions',
+    'rest',
+    'unwell',
+    'sleep',
+  ]);
 });
 afterEach(cleanup);
 

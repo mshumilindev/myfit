@@ -24,8 +24,8 @@ export function healthAddonsOn(on: HealthOnMap): HealthOnMap {
     ...on,
     injuries: on.injuries && addonAvailable('injury-log'),
     chronic: on.chronic && addonAvailable('conditions'),
-    nicotine: on.nicotine && addonAvailable('nicotine-alcohol'),
-    alcohol: on.alcohol && addonAvailable('nicotine-alcohol'),
+    nicotine: on.nicotine && addonAvailable('nicotine'),
+    alcohol: on.alcohol && addonAvailable('alcohol'),
     supplements: on.supplements && addonAvailable('supplements'),
     cycle: on.cycle && addonAvailable('cycle'),
   };
@@ -33,7 +33,7 @@ export function healthAddonsOn(on: HealthOnMap): HealthOnMap {
 
 /** Changes when any of those add-ons is installed or removed (a cache key for the masked view). */
 export function healthAddonsKey(): string {
-  return ['injury-log', 'health', 'conditions', 'nicotine-alcohol', 'supplements', 'cycle']
+  return ['injury-log', 'health', 'conditions', 'nicotine', 'alcohol', 'supplements', 'cycle']
     .map((id) => (addonAvailable(id) ? '1' : '0'))
     .join('');
 }

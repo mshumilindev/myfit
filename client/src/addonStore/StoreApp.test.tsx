@@ -43,6 +43,13 @@ describe('StoreApp', () => {
     fireEvent.click(sw);
     expect(modulePickPref.get()).toEqual(['cycle']);
   });
+  it('Discover has a Themes tile in the bento next to the other small tiles', () => {
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    const tile = screen.getAllByText('Looks')[0]!.closest('.sk-btile')!;
+    expect(tile.classList.contains('sk-btile-span2')).toBe(false); // four small tiles: a 2x2 block
+    fireEvent.click(tile);
+    expect(currentHash()).toBe('#/store/themes');
+  });
   it('Cancel in search returns to the tab it was opened from, not out of the store', () => {
     window.location.hash = '#/store/apps';
     render(<StoreApp role="member" onOpenProfile={() => {}} />);

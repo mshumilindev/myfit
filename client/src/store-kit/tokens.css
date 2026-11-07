@@ -71,6 +71,7 @@
   --sk-content-max: 60rem;
   --sk-search-w: 30rem;
   --sk-bento-h: 10.5rem;
+  --sk-bento-cell-h: 12rem; /* the small cells share one height, so a 2x2 block reads as a grid */
   --sk-bento-hero-h: 13.5rem;
   --sk-bento-wide-h: 8rem;
   --sk-line-w: 1px;

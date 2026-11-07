@@ -343,11 +343,12 @@ export function HealthView(props: HealthViewProps) {
   const conditionsGroup = conditionsOn ? (
     <ConditionsSection key="cond" onOpen={(cond) => go({ cond })} />
   ) : null;
-  const nicAlcOn = available('nicotine-alcohol');
+  const nicOn = available('nicotine');
+  const alcOn = available('alcohol');
   const lifestyleGroup =
-    nicAlcOn || available('supplements') || available('cycle') ? (
-      <NicotineHealthGroup key="life" hideNicotine={!nicAlcOn} onOpen={() => go({ nic: 'hub' })}>
-        {nicAlcOn && <AlcoholHealthRow onOpen={() => go({ alc: 'hub' })} />}
+    nicOn || alcOn || available('supplements') || available('cycle') ? (
+      <NicotineHealthGroup key="life" hideNicotine={!nicOn} onOpen={() => go({ nic: 'hub' })}>
+        {alcOn && <AlcoholHealthRow onOpen={() => go({ alc: 'hub' })} />}
         {available('supplements') && (
           <SupplementHealthRow
             onOpen={() =>

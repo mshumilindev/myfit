@@ -13,7 +13,8 @@ export const HEALTH_ADDONS = [
   'unwell',
   'conditions',
   'injury-log',
-  'nicotine-alcohol',
+  'nicotine',
+  'alcohol',
   'supplements',
   'cycle',
 ];
