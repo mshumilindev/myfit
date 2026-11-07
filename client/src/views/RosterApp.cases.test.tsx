@@ -97,17 +97,24 @@ describe('RosterApp on a phone', () => {
     const { container } = app('trainer', 'me');
     expect(screen.getByTestId('profile')).toBeTruthy();
     // One destination plus More; the app is named in the header chip.
-    expect(tabLabels(container)).toEqual([en.navMe, coachEn.navMore]);
+    // A bar under 5 buttons pulls Add-ons and Privacy out of More (owner 07.11); Language stays in More.
+    expect(tabLabels(container)).toEqual([en.navMe, en.todayAddons, en.hlPrivRow, coachEn.navMore]);
     expect(container.querySelector('.uibrand-chip-name')?.textContent).toBe(en.navMe);
     expect(screen.queryByText(en.adminPeople)).toBeNull();
     expect(screen.queryByText(en.trClientsTab)).toBeNull();
     expect(screen.queryByTestId('admin')).toBeNull();
   });
 
-  it('an admin on Users has only Users (Me is a separate screen), so its bar is Users and More', () => {
+  it('an admin on Users has only Users (Me is a separate screen), so its bar is Users, the two destinations promoted out of More, and More', () => {
     const { container } = app('admin', 'users');
     expect(screen.getByTestId('admin')).toBeTruthy();
-    expect(tabLabels(container)).toEqual([en.adminPeople, coachEn.navMore]);
+    // A bar under 5 buttons pulls Add-ons and Privacy out of More (owner 07.11); Language stays in More.
+    expect(tabLabels(container)).toEqual([
+      en.adminPeople,
+      en.todayAddons,
+      en.hlPrivRow,
+      coachEn.navMore,
+    ]);
     expect(container.querySelector('.uibrand-chip-name')?.textContent).toBe(en.adminPeople);
     expect(screen.queryByText(en.navMe)).toBeNull();
     expect(screen.queryByText(en.trClientsTab)).toBeNull();

@@ -126,17 +126,13 @@ export function ShellLauncher({
   const apexEnabled = useAddonOrBase('apex');
   // Gym is an app a trainer or an admin installs (a member always has it); no tile until then.
   const gymEnabled = useAddonOrBase('gym');
-  // Apps the person can still install (not installed, offered to the role, with what they need): tiles under the list.
+  // Every app of the store the person has not installed (coming-soon ones excluded), under the list; one that still
+  // lacks an app it needs (Apex without Gym) is shown too, marked, and opens its store page.
   const installed = useEnabledAddons();
   const { st } = useAddonStoreT();
   const role = getRole();
   const installable = ADDONS.filter(
-    (m) =>
-      m.kind === 'app' &&
-      !m.soon &&
-      !installed.has(m.id) &&
-      isAddonAllowed(m.id, role) &&
-      isAddonUnlocked(m.id, installed, role),
+    (m) => m.kind === 'app' && !m.soon && !installed.has(m.id) && isAddonAllowed(m.id, role),
   );
   // Coach dashboard entry: trainer or admin, flag on (coach/access.ts). Hidden otherwise.
   const coachEnabled = useCoachAccess();
@@ -254,23 +250,39 @@ export function ShellLauncher({
       <div className="shell-tiles">{order.map((k) => tiles[k])}</div>
       {installable.length > 0 && (
         <>
-          <div className="shell-head">{t.shellMoreApps}</div>
-          <div className="shell-tiles">
-            {installable.map((m) => (
-              <AppTile
-                key={m.id}
-                tone={(SUITE_TONE as Record<string, Tone>)[m.id] ?? 'neutral'}
-                icon={(SUITE_ICON as Record<string, string>)[m.id] ?? 'squares-four'}
-                name={itemName(st, m.id)}
-                sub={itemDesc(st, m.id)}
-                current={false}
-                onSelect={() => {
-                  onClose();
-                  setHash(storeHash('item', m.id));
-                }}
-                currentLabel={t.shellCurrent}
-              />
-            ))}
+          <div className="shell-head shell-head--more">{t.shellMoreApps}</div>
+          <div className="shell-more">
+            {installable.map((m) => {
+              const tone = (SUITE_TONE as Record<string, Tone>)[m.id] ?? 'neutral';
+              const locked = !isAddonUnlocked(m.id, installed, role);
+              return (
+                <Card
+                  as="button"
+                  pad="none"
+                  key={m.id}
+                  className={`shell-more-tile ${toneClass(tone)}`}
+                  onClick={() => {
+                    onClose();
+                    setHash(storeHash('item', m.id));
+                  }}
+                >
+                  <IconTile
+                    tone={tone}
+                    size={40}
+                    icon={(SUITE_ICON as Record<string, string>)[m.id] ?? 'squares-four'}
+                  />
+                  <div className="shell-more-name">{itemName(st, m.id)}</div>
+                  <div className="shell-more-sub">
+                    {locked && m.requires
+                      ? st.installFirst(itemName(st, m.requires))
+                      : itemDesc(st, m.id)}
+                  </div>
+                  <span className="shell-more-add">
+                    <Icon name="plus" />
+                  </span>
+                </Card>
+              );
+            })}
           </div>
         </>
       )}

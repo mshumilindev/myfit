@@ -415,7 +415,9 @@ describe.each(CASES)('$name: phone (< 720)', (k) => {
     const own = k.tabs(session.role);
     // (The Gym harness above renders the bare bar; its real More tab is covered in GymChrome.more.test.tsx.)
     const hasMore = k.name !== 'Gym' && !own.includes(c.navMore);
-    expect(labels).toEqual(hasMore ? [...own, c.navMore] : own);
+    // A bar under 5 buttons (More included) pulls Add-ons, then Privacy, out of More (owner 07.11); Language stays in More.
+    const promoted = [t.todayAddons, t.hlPrivRow].slice(0, Math.max(0, 5 - (own.length + 1)));
+    expect(labels).toEqual(hasMore ? [...own, ...promoted, c.navMore] : own);
     if (k.name !== 'Gym') expect(within(bar).getByRole('button', { name: c.navMore })).toBeTruthy();
     expect(within(bar).queryByRole('button', { name: c.navApps })).toBeNull();
     expect(within(bar).queryByRole('button', { name: t.shellSwitch })).toBeNull();

@@ -15,6 +15,9 @@ import { SUITE_TONE } from './suite/suiteTone';
 import { OPEN_MORE_EVENT } from './suite/openMore';
 import { useSuiteAccount, type SuiteApp, type SuiteMode } from './suite/useSuiteAccount';
 
+/** Buttons a phone tab bar holds, More included. */
+const MAX_TABS = 5;
+
 export function SuiteTabBar<Id extends string = string>({
   app,
   moreItems = [],
@@ -33,6 +36,26 @@ export function SuiteTabBar<Id extends string = string>({
   onOpenProfile?: () => void;
 }) {
   const { c } = useCoachT();
+  // A bar with fewer than 5 buttons (More included) pulls destinations out of More and shows them as tabs, so the bar is
+  // not half empty (owner 07.11). Rows that open a submenu (Language) stay in More. Bars with the Start "+" keep their shape.
+  const room = noMore || bar.fab ? 0 : Math.max(0, MAX_TABS - (bar.items.length + 1));
+  const promoted = moreItems.filter((i) => !i.submenu).slice(0, room);
+  const rest = moreItems.filter((i) => !promoted.includes(i));
+  const items = [
+    ...bar.items,
+    ...promoted.map((i) => ({
+      id: i.id as Id,
+      label: i.label,
+      icon: i.icon,
+      active: i.active,
+      badge: i.count,
+    })),
+  ];
+  const onSelect = (id: Id) => {
+    const hit = promoted.find((i) => i.id === id);
+    if (hit) hit.onSelect();
+    else bar.onSelect(id);
+  };
   const { account, dialog } = useSuiteAccount({ app, onOpenProfile });
   const [open, setOpen] = useState(false);
   useEffect(() => {
@@ -44,13 +67,15 @@ export function SuiteTabBar<Id extends string = string>({
     <>
       <TabBar<Id>
         {...bar}
+        items={items}
+        onSelect={onSelect}
         more={
           noMore
             ? undefined
             : {
                 label: c.navMore,
                 open,
-                active: open || moreItems.some((i) => i.active),
+                active: open || rest.some((i) => i.active),
                 onClick: () => setOpen(true),
               }
         }
@@ -62,7 +87,7 @@ export function SuiteTabBar<Id extends string = string>({
           open={open}
           onClose={() => setOpen(false)}
           title={c.navMore}
-          items={moreItems}
+          items={rest}
           account={noAccount ? undefined : account}
         />
       )}
