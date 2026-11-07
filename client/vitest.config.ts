@@ -35,7 +35,11 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     // `--shard i/N` splits by measured weight, not by file count (see vitest.sequencer.ts).
     sequence: { sequencer: WeightedShardSequencer },
-    setupFiles: ['src/coach/__fixtures__/setup.ts', 'src/legal/testSetup.ts'],
+    setupFiles: [
+      'src/coach/__fixtures__/setup.ts',
+      'src/legal/testSetup.ts',
+      'src/addons/testSetup.ts',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
