@@ -70,9 +70,11 @@ describe('Atlas widgets follow the Atlas add-on (SPO-518)', () => {
 });
 
 describe('Health module widgets and shortcuts follow their add-ons (SPO-518)', () => {
-  it('rehab needs the Injury log and cycle needs Cycle; rest and illness stay core', () => {
+  it('rehab needs the Injury log and cycle needs Cycle; rest and illness need Health', () => {
     expect(avail('rehab')).toBe(false);
     expect(avail('cycle')).toBe(false);
+    expect(avail('rest-illness-log')).toBe(false);
+    addonsPref.set(['health']);
     expect(avail('rest-illness-log')).toBe(true);
     addonsPref.set(['injury-log']);
     expect(avail('rehab')).toBe(true);
@@ -86,13 +88,15 @@ describe('Health module widgets and shortcuts follow their add-ons (SPO-518)', (
     addonsPref.set(['apex']);
     expect(avail('standards')).toBe(true);
   });
-  it('shortcuts: sleep, injury and Atlas need their add-ons, rest and illness are core', () => {
+  it('shortcuts: sleep, injury and Atlas need their add-ons, rest and illness need Health', () => {
     const ids = () => renderHook(() => useShortcuts()).result.current.map((x) => x.id);
     expect(ids()).not.toContain('sc:sleep');
     expect(ids()).not.toContain('sc:injury');
     expect(ids()).not.toContain('sc:ask-atlas');
-    expect(ids()).toContain('sc:unwell');
-    expect(ids()).toContain('sc:day-off');
+    expect(ids()).not.toContain('sc:unwell');
+    expect(ids()).not.toContain('sc:day-off');
+    addonsPref.set(['health']);
+    expect(ids()).toEqual(expect.arrayContaining(['sc:unwell', 'sc:day-off', 'sc:active-rest']));
     addonsPref.set(['sleep', 'injury-log', 'atlas']);
     expect(ids()).toEqual(expect.arrayContaining(['sc:sleep', 'sc:injury', 'sc:ask-atlas']));
   });

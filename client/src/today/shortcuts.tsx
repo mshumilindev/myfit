@@ -203,6 +203,10 @@ export function renderShortcut(
 export const SHORTCUT_ADDON: Readonly<Record<string, string>> = {
   'sc:sleep': 'sleep',
   'sc:injury': 'injury-log',
+  // Rest days and being unwell are Health too (owner 07.11: Health leaves the base entirely).
+  'sc:active-rest': 'health',
+  'sc:day-off': 'health',
+  'sc:unwell': 'health',
   'sc:ask-atlas': 'atlas',
 };
 /** The shortcuts this person can use now. A hook: call it before any early return. Saved layouts keep their items either way. */
