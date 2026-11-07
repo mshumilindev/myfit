@@ -237,7 +237,7 @@ beforeEach(() => {
   window.history.replaceState(null, '', '/');
   localStorage.clear();
   // Apex and its modules are add-ons (SPO-518): these navigation contracts are about the app with them installed.
-  addonsPref.set([...APEX_ADDONS, ...HEALTH_ADDONS]);
+  addonsPref.set([...APEX_ADDONS, ...HEALTH_ADDONS, 'gym', 'coach']); // the Coach | My workouts switch needs both apps (owner 07.11)
   installRailMeasure(900);
 });
 afterEach(() => {

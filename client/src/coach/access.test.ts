@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { canUseCoach, coachScreenOpen, isCoachRole } from './access';
 
 const ROLES = ['member', 'trainer', 'admin'] as const;
@@ -23,9 +24,16 @@ describe('Coach role gate (trainer OR admin)', () => {
     }
   });
 
-  it('routes: a coach hash opens only for an allowed role', () => {
+  beforeEach(() => addonsPref.reset());
+
+  // Owner rule 07.11: Coach is base for a trainer; an admin has it only once installed from the store.
+  it('routes: a coach hash opens for a trainer, and for an admin only once Coach is installed', () => {
+    expect(coachScreenOpen('#/c/agenda', 'admin')).toBe(false);
+    addonsPref.set(['coach']);
+    expect(coachScreenOpen('#/c/agenda', 'admin')).toBe(true);
+    addonsPref.reset();
     for (const role of ROLES) {
-      const allowed = role !== 'member';
+      const allowed = role === 'trainer';
       expect(coachScreenOpen('#/c/agenda', role)).toBe(allowed);
       expect(coachScreenOpen('#/c/clients/x/live', role)).toBe(allowed);
       // The advice view prefix is never the dashboard.

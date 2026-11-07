@@ -5,7 +5,7 @@ import { ShellLauncher } from './ShellLauncher';
 import type { StoreState } from '../store';
 
 // The Apex tile is the Mastery add-on's (SPO-518): these specs are about every tile, so it is installed.
-beforeEach(() => addonsPref.set(['apex']));
+beforeEach(() => addonsPref.set(['gym', 'coach', 'apex']));
 afterEach(() => {
   addonsPref.reset();
   cleanup();

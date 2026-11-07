@@ -103,6 +103,8 @@ import { AppRail } from './components/AppRail';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 import { currentHash, replaceHash, setHash } from './route';
+import { coachEntryHash } from './coach/routes';
+import { defaultApp } from './addons/defaultApp';
 import { useAddonOrBase } from './addons/enabledSet';
 import { useAddonRuntime } from './addons/useAddonRuntime';
 import { apexMastery } from './views/apexMastery';
@@ -760,6 +762,8 @@ function AppMain() {
   const goalsOn = useGoalsOn();
   const playbookOn = usePlaybookOn();
   const homeSetsOn = useAddonOrBase('home-sets');
+  const gymOn = useAddonOrBase('gym');
+  const coachApp = useAddonOrBase('coach');
   const { apexOn, masteryOn, challenges, themesOn, sleepOn, atlasOn, healthOn, injuryOn } =
     useAddonRuntime();
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
@@ -845,8 +849,10 @@ function AppMain() {
   useState(redirectLegacyPeopleClients); // before any state below reads the URL (SPO-141)
   const [apexOpen, setApexOpen] = useState<boolean>(() => isApexHash(currentHash()));
   const [apexTab, setApexTab] = useState<ApexTab>(() => apexTabFromHash(currentHash()));
-  const [rosterOpen, setRosterOpen] = useState<boolean>(() => isRosterHash(currentHash()));
-  const [rosterTab, setRosterTab] = useState<RosterTab>(() => rosterTabFromHash(currentHash()));
+  const [rosterOpenState, setRosterOpen] = useState<boolean>(() => isRosterHash(currentHash()));
+  const [rosterTabState, setRosterTab] = useState<RosterTab>(() =>
+    rosterTabFromHash(currentHash()),
+  );
   const [learnOpen, setLearnOpen] = useState<boolean>(() => isLearnHash(currentHash()));
   const [coachWanted, setCoachWanted] = useState<boolean>(() =>
     coachScreenOpen(currentHash(), getRole()),
@@ -1082,7 +1088,25 @@ function AppMain() {
   // Header controls the BrandBar had no room for; they continue in the More menu.
   const [headerHidden, setHeaderHidden] = useState<MoreMenuItem[]>([]);
   // Coach dashboard: trainer OR admin, only while the flag is on (access.ts).
-  const coachOpen = coachWanted && canUseCoach(role);
+  const coachOpenRaw = coachWanted && canUseCoach(role) && coachApp;
+  // Gym is an app a trainer or an admin installs. Without it (and with no other app open) the person lands in the app
+  // they do have: Coach for a trainer, Users for an admin; the Gym tabs are never shown, whatever the URL says.
+  // Derived in render (no setState in an effect): opening another app turns the landing off by itself.
+  const landApp =
+    authed &&
+    !joinToken &&
+    !gymOn &&
+    !storeOpen &&
+    !legalPage &&
+    !coachOpenRaw &&
+    !apexOpen &&
+    !rosterOpenState &&
+    !learnOpen
+      ? defaultApp(role)
+      : null;
+  const coachOpen = coachOpenRaw || landApp === 'coach';
+  const rosterOpen = rosterOpenState || landApp === 'roster';
+  const rosterTab = rosterOpenState ? rosterTabState : guardRosterTab(rosterHomeFor(role), role);
   const tabAllowed = TABS.includes(tab);
   const effectiveTab = tabAllowed ? tab : defaultTab();
   // Role guards, applied in render (no setState-in-effect): an overlay the
@@ -1249,6 +1273,11 @@ function AppMain() {
     else el.classList.remove('theme-learn');
     return () => el.classList.remove('theme-learn');
   }, [learnOpen]);
+
+  // The landing in Coach has no URL of its own yet: give it the Coach entry hash (an address change only, no state).
+  useEffect(() => {
+    if (landApp === 'coach') replaceHash(coachEntryHash());
+  }, [landApp]);
 
   if (legalPage) {
     return (

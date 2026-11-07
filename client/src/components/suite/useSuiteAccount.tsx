@@ -20,6 +20,7 @@ import { useT } from '../../i18n';
 import { useCoachT } from '../../i18n/coach';
 import { coachEntryHash } from '../../coach/routes';
 import { useCoachAccess } from '../../coach/useCoachAccess';
+import { useAddonOrBase } from '../../addons/enabledSet';
 import { UserAvatar } from '../Avatar';
 import type { AccountPanelProps } from '../ui/AccountPanel';
 import { SignOutDialog } from '../SignOutDialog';
@@ -64,7 +65,9 @@ export function useSuiteAccount({
   const { c } = useCoachT();
   const flag = useCoachAccess();
   // Coach is only reachable with access, so its switch is always there.
-  const canCoach = flag || app === 'coach';
+  // The switch needs both sides: Coach and Gym (each can be an app the person has not installed).
+  const gymApp = useAddonOrBase('gym');
+  const canCoach = (flag || app === 'coach') && gymApp;
   const role = identity?.role ?? getRole();
   const stored = identity?.name ?? getUsername() ?? '';
   const uid = identity?.userId ?? currentUid() ?? undefined;

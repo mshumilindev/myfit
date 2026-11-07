@@ -38,7 +38,10 @@ describe('Today widgets follow the Mastery add-on (SPO-518)', () => {
   it('a trainer is offered Mastery too: no Apex widgets until it is installed', () => {
     role.value = 'trainer';
     expect(avail('apex-rank')).toBe(false);
+    // Apex needs Gym, which a trainer installs from the store (owner 07.11): without it the Apex ids are dropped.
     addonsPref.set(['apex', 'apex-ranks']);
+    expect(avail('apex-rank')).toBe(false);
+    addonsPref.set(['gym', 'apex', 'apex-ranks']);
     expect(avail('apex-rank')).toBe(true);
   });
 });

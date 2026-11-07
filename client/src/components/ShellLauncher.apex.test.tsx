@@ -35,12 +35,20 @@ function open(current: 'gym' | 'apex' = 'gym') {
     />,
   );
 }
-const apexTile = () => screen.queryByText(/apex/i);
+// The app list (first block of tiles); the "More apps" block below it offers what is not installed yet.
+const apexTile = () =>
+  /apex/i.test(document.querySelector('.shell-tiles')?.textContent ?? '') ? true : null;
 
 describe('ShellLauncher: the Apex tile follows the Mastery add-on (SPO-518)', () => {
   it('a member without the add-on has no Apex tile', () => {
     open();
     expect(apexTile()).toBeNull();
+  });
+  it('a member without it is offered Apex under "More apps", linking to the store item', () => {
+    open();
+    const more = screen.getByText('More apps');
+    expect(more).toBeTruthy();
+    expect(screen.getAllByText('Apex').length).toBeGreaterThan(0);
   });
   it('a member with the add-on installed sees it', () => {
     addonsPref.set(['apex']);
@@ -56,7 +64,7 @@ describe('ShellLauncher: the Apex tile follows the Mastery add-on (SPO-518)', ()
     open();
     expect(apexTile()).toBeNull();
     cleanup();
-    addonsPref.set(['apex']);
+    addonsPref.set(['gym', 'apex']); // Apex needs Gym, which a trainer installs (owner 07.11)
     open();
     expect(apexTile()).not.toBeNull();
   });

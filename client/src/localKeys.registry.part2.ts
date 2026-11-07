@@ -170,12 +170,27 @@ export const LOCAL_KEYS_2: readonly LocalKeyEntry[] = [
     note: 'enabled add-ons ({ list, updatedAt }); catalog ids only (SPO-511)',
   },
   {
+    key: 'spotter.addons.modules.v1',
+    scope: 'account',
+    class: 'diag',
+    wipe: 'signout',
+    note: 'this device already switched on the modules of the installed Health / Apex once (SPO-500); no data',
+  },
+  {
     key: 'spotter.addons.queue',
     scope: 'account',
     class: 'synced',
     wipe: 'signout',
     syncedTo: 'users/{uid}/meta/prefs#addonsQueue',
     note: 'add-ons selected but not installed yet ({ list, updatedAt }); catalog ids only (SPO-511)',
+  },
+  {
+    key: 'spotter.addons.queue.modules',
+    scope: 'account',
+    class: 'synced',
+    wipe: 'signout',
+    syncedTo: 'users/{uid}/meta/prefs#addonsQueueModules',
+    note: 'modules ticked on the Selected screen, installed with their add-on ({ list, updatedAt }); catalog ids only (SPO-500)',
   },
   {
     key: 'spotter.atlasChat',

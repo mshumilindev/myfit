@@ -4178,6 +4178,7 @@ export const en = {
   shellNutritionDesc: 'Fuel your training.',
   shellLearn: 'Learn',
   shellLearnDesc: 'How-to videos.',
+  shellMoreApps: 'More apps',
   learnBannerKicker: 'Learn',
   learnBannerTitleStart: 'Learn how to master Spotter',
   learnBannerTitleGoing: 'Keep learning Spotter',

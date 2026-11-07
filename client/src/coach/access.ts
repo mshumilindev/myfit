@@ -5,6 +5,7 @@
  * rights). Everything else — a member — never sees an entry point and cannot
  * reach the routes. Pure, so App.tsx, the shell launcher and the tests share it.
  */
+import { addonAvailable } from '../addons/enabledSet';
 import { isCoachDashHash } from './routes';
 
 export type CoachRoleInput = 'member' | 'trainer' | 'admin' | string | null | undefined;
@@ -24,5 +25,5 @@ export function canUseCoach(role: CoachRoleInput): boolean {
 
 /** Is the Coach dashboard the screen to render for this hash? */
 export function coachScreenOpen(hash: string, role: CoachRoleInput): boolean {
-  return canUseCoach(role) && isCoachDashHash(hash);
+  return canUseCoach(role) && addonAvailable('coach', role as never) && isCoachDashHash(hash);
 }

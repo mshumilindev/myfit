@@ -2,6 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { setRole } from '../../api';
+import { addonsPref } from '../../addons/enabledSet';
 import { pgEn } from '../../i18n/coachProgram.en';
 import { buildFixtureWorld } from '../data/__fixtures__/fixtures';
 import { configureCoachData } from '../data/config';
@@ -18,10 +19,12 @@ const bundle = () => buildBundle(oleh, fixtureWorldLite());
 beforeEach(() => {
   setViewport(1440);
   setRole('trainer');
+  addonsPref.set(['gym']); // the "My workouts" exit needs Gym, which a trainer installs (owner 07.11)
 });
 afterEach(() => {
   cleanup();
   setRole('member');
+  addonsPref.reset();
   configureCoachData();
   configureProgramData();
 });

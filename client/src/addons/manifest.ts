@@ -22,11 +22,22 @@ export interface AddonManifest {
   themeId?: string;
   /** Parent app id for an add-on. Enabling the add-on enables the parent too. */
   parent?: string;
+  /**
+   * An app this item cannot work without (owner rule 07.11: everything that depends on Gym is blocked until Gym is
+   * installed). Unlike `parent` it is never installed for the person: the item stays locked until the app is there,
+   * and removing the app removes the item.
+   */
+  requires?: string;
+  /**
+   * Roles for whom the item is part of the base: always on, not in the store, cannot be removed. When it is set it is
+   * the whole answer (a role outside it, and outside `roles`, never has the item). `manager` is not a store role.
+   */
+  baseFor?: readonly (StoreRole | 'manager')[];
   tone: AddonTone;
   roles: readonly StoreRole[];
   /** Not available yet: shown under "Coming soon", never enabled. */
   soon?: boolean;
-  category: 'health' | 'recovery' | 'food' | 'insights' | 'look' | 'coach';
+  category: 'health' | 'workouts' | 'recovery' | 'food' | 'insights' | 'look' | 'coach';
   /** Built chunk URLs kept offline on install (prefetch.ts). Empty until the add-on is split out of the core bundle. */
   chunks?: readonly string[];
   /** Rough download size in bytes, for the storage-quota check. */
@@ -95,12 +106,12 @@ export const ADDONS: readonly AddonManifest[] = [
     category: 'health',
   },
   { id: 'sleep', kind: 'addon', tone: 2, roles: ALL, category: 'recovery' },
-  { id: 'activities', kind: 'addon', tone: 9, roles: ALL, category: 'recovery' },
-  { id: 'home-sets', kind: 'addon', tone: 3, roles: ALL, category: 'recovery' },
-  { id: 'goals', kind: 'addon', tone: 5, roles: ALL, category: 'insights' },
-  { id: 'playbook', kind: 'addon', tone: 7, roles: ALL, category: 'insights' },
-  { id: 'atlas', kind: 'addon', tone: 6, roles: ALL, category: 'insights' },
-  { id: 'apex', kind: 'app', tone: 8, roles: ALL, category: 'insights' },
+  { id: 'activities', kind: 'addon', requires: 'gym', tone: 9, roles: ALL, category: 'workouts' },
+  { id: 'home-sets', kind: 'addon', requires: 'gym', tone: 3, roles: ALL, category: 'workouts' },
+  { id: 'goals', kind: 'addon', requires: 'gym', tone: 5, roles: ALL, category: 'workouts' },
+  { id: 'playbook', kind: 'addon', requires: 'gym', tone: 7, roles: ALL, category: 'workouts' },
+  { id: 'atlas', kind: 'addon', requires: 'gym', tone: 6, roles: ALL, category: 'insights' },
+  { id: 'apex', kind: 'app', requires: 'gym', tone: 8, roles: ALL, category: 'insights' },
   // Apex's own parts are modules of it (owner rule 07.11): switched on with Apex, each one off in Configure.
   {
     id: 'apex-challenges',
@@ -122,7 +133,24 @@ export const ADDONS: readonly AddonManifest[] = [
     roles: ALL,
     category: 'look',
   },
-  // Gyms is core for a member and an add-on for trainer and admin.
+  // Gym is the base of a member (not in the store, cannot be removed) and an app a trainer or an admin installs.
+  // Coach is the base of a trainer (and of a manager, who has no store) and an app an admin installs.
+  {
+    id: 'gym',
+    kind: 'app',
+    tone: 1,
+    roles: ['trainer', 'admin'],
+    baseFor: ['member'],
+    category: 'workouts',
+  },
+  {
+    id: 'coach',
+    kind: 'app',
+    tone: 6,
+    roles: ['admin'],
+    baseFor: ['trainer', 'manager'],
+    category: 'coach',
+  },
   // Not available yet (the store shows them as Coming soon).
   { id: 'nutrition', kind: 'app', tone: 0, roles: ALL, soon: true, category: 'food' },
   { id: 'music', kind: 'app', tone: 5, roles: ALL, soon: true, category: 'food' },

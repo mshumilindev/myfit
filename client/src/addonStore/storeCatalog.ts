@@ -6,6 +6,7 @@ import { isAddonAllowed, storeRole } from '../addons/enabledSet';
 export type StoreCategory = AddonManifest['category'];
 export const STORE_CATEGORIES: readonly StoreCategory[] = [
   'health',
+  'workouts',
   'recovery',
   'food',
   'insights',

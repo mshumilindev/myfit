@@ -468,7 +468,7 @@ describe('TodayView: Atlas and clients', () => {
 
   it('a trainer\'s Today: Atlas opens the coach, a client opens their profile, "+N more" opens the clients area', async () => {
     setRole('trainer');
-    addonsPref.set(['atlas']);
+    addonsPref.set(['gym', 'atlas']);
     m.roster = roster(14);
     const { shell } = await openToday(richState());
     fireEvent.click(

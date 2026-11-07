@@ -4211,6 +4211,7 @@ export const uk: Strings = {
   shellNutritionDesc: 'Заправ свої тренування.',
   shellLearn: 'Навчання',
   shellLearnDesc: 'Відео-інструкції.',
+  shellMoreApps: 'Більше застосунків',
   learnBannerKicker: 'Навчання',
   learnBannerTitleStart: 'Навчіться користуватись Spotter',
   learnBannerTitleGoing: 'Продовжуйте навчання Spotter',

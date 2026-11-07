@@ -4182,6 +4182,7 @@ export const pl: Strings = {
   shellNutritionDesc: 'Zasil swój trening.',
   shellLearn: 'Nauka',
   shellLearnDesc: 'Filmy instruktażowe.',
+  shellMoreApps: 'Więcej aplikacji',
   learnBannerKicker: 'Nauka',
   learnBannerTitleStart: 'Naucz się obsługi Spotter',
   learnBannerTitleGoing: 'Kontynuuj naukę Spotter',

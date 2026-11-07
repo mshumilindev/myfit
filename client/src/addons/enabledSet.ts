@@ -22,11 +22,21 @@ export function isAddonAllowed(id: string, role: Role): boolean {
   return !!r && !!m && !m.soon && m.roles.includes(r);
 }
 
+/** Is the item part of this role's base (always on, never in the store)? Ids the store does not know count as base. */
+export function isAddonBase(id: string, role: Role): boolean {
+  const m = addonById(id);
+  if (m?.baseFor) return m.baseFor.includes(role as StoreRole);
+  return !isAddonAllowed(id, role);
+}
+
 export function allowedIds(role: Role): string[] {
   return ADDONS.filter((a) => isAddonAllowed(a.id, role)).map((a) => a.id);
 }
 
-/** Add the parent apps an add-on needs, and drop add-ons whose parent is off. */
+/**
+ * Add the parent apps an add-on needs; drop what lacks an app it `requires` (unless that app is base for the role) and
+ * the modules of anything dropped.
+ */
 export function closeDependencies(ids: Iterable<string>, role: Role): string[] {
   const on = new Set<string>();
   for (const id of ids) {
@@ -35,7 +45,25 @@ export function closeDependencies(ids: Iterable<string>, role: Role): string[] {
     const parent = addonById(id)?.parent;
     if (parent && isAddonAllowed(parent, role)) on.add(parent);
   }
+  for (let changed = true; changed;) {
+    changed = false;
+    for (const id of [...on]) {
+      const m = addonById(id);
+      const lacks = m?.requires && !on.has(m.requires) && !isAddonBase(m.requires, role);
+      const orphan = m?.kind === 'module' && m.parent && !on.has(m.parent);
+      if (lacks || orphan) {
+        on.delete(id);
+        changed = true;
+      }
+    }
+  }
   return ADDONS.filter((a) => on.has(a.id)).map((a) => a.id);
+}
+
+/** Can this item be installed right now: does it have the app it requires (installed, or base for the role)? */
+export function isAddonUnlocked(id: string, enabled: ReadonlySet<string>, role: Role): boolean {
+  const req = addonById(id)?.requires;
+  return !req || enabled.has(req) || isAddonBase(req, role);
 }
 
 export function resolveEnabled(pref: ListPref, role: Role): Set<string> {
@@ -54,9 +82,22 @@ export function moduleIdsOf(id: string): string[] {
   return ADDONS.filter((a) => a.kind === 'module' && a.parent === id).map((a) => a.id);
 }
 
-/** Items that have to go when `id` is removed: itself and (for an app) its add-ons. */
+/** Items that have to go when `id` is removed: itself, its add-ons and whatever requires it (and their modules). */
 export function removalSet(id: string): string[] {
-  return ADDONS.filter((a) => a.id === id || a.parent === id).map((a) => a.id);
+  const gone = new Set([id]);
+  for (let changed = true; changed;) {
+    changed = false;
+    for (const a of ADDONS) {
+      if (
+        !gone.has(a.id) &&
+        ((a.parent && gone.has(a.parent)) || (a.requires && gone.has(a.requires)))
+      ) {
+        gone.add(a.id);
+        changed = true;
+      }
+    }
+  }
+  return ADDONS.filter((a) => gone.has(a.id)).map((a) => a.id);
 }
 
 export const addonsPref = createListPref('spotter.addons');
@@ -142,19 +183,19 @@ export function useAddonEnabled(id: string): boolean {
 export function useAddonOrBase(id: string): boolean {
   const on = useEnabledAddons().has(id);
   const role = getRole();
-  return on || !isAddonAllowed(id, role);
+  return on || isAddonBase(id, role);
 }
 
 /** The same gate as `useAddonOrBase`, for pure code (no hook): installed, or not offered to the role. */
 export function addonAvailable(id: string, role: Role = getRole()): boolean {
-  return isAddonEnabled(id, role) || !isAddonAllowed(id, role);
+  return isAddonEnabled(id, role) || isAddonBase(id, role);
 }
 
 /** The same gate as `useAddonOrBase`, for code that asks about many ids (a list of rows): installed, or not offered to the role. */
 export function useAddonAvailable(): (id: string) => boolean {
   const on = useEnabledAddons();
   const role = getRole();
-  return (id) => on.has(id) || !isAddonAllowed(id, role);
+  return (id) => on.has(id) || isAddonBase(id, role);
 }
 
 /**

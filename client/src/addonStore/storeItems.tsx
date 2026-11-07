@@ -1,5 +1,7 @@
 /** Shared bits of the store screens: one item row, its action, the grouped lists. */
+import { isAddonUnlocked } from '../addons/enabledSet';
 import { addonById, type AddonManifest } from '../addons/manifest';
+import { getRole } from '../api';
 import { queueAdd, queueRemove } from '../addons/queue';
 import type { AddonStoreStrings } from '../i18n/addonStore';
 import { SkBadge, SkBtn, SkHighlight, SkIcon, SkInstalledLabel, SkRow, SkTile } from '../store-kit';
@@ -72,6 +74,13 @@ export function ItemAction({
       </SkBtn>
     );
   }
+  if (!isAddonUnlocked(m.id, enabled, getRole())) {
+    return (
+      <SkBtn kind="dash" size={size} disabled>
+        {st.installFirst(itemName(st, m.requires!))}
+      </SkBtn>
+    );
+  }
   const parent = m.parent ? addonById(m.parent) : undefined;
   const parentReady = !parent || enabled.has(parent.id) || queued.includes(parent.id);
   return (
@@ -82,6 +91,8 @@ export function ItemAction({
 }
 
 export function relOf(m: AddonManifest, ctx: StoreCtx): string | null {
+  if (m.requires && !isAddonUnlocked(m.id, ctx.enabled, getRole()))
+    return ctx.st.needs(itemName(ctx.st, m.requires));
   if (!m.parent) return null;
   const parentName = itemName(ctx.st, m.parent);
   return ctx.enabled.has(m.parent) || ctx.queued.includes(m.parent)

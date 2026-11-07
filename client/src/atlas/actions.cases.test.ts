@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 
 // Boundaries only: Firestore, the uid and the vault key. The real store and runAction run.
 vi.mock('../firebase', () => ({ db: {} }));
@@ -57,6 +58,7 @@ beforeEach(() => {
   vi.setSystemTime(T0);
   localStorage.clear();
   store.resetLocalData();
+  addonsPref.set(['activities']); // Activities is an add-on: without it no activity counts (owner 2026-11-07)
 });
 afterEach(() => {
   vi.useRealTimers();

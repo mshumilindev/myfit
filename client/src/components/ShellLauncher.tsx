@@ -6,21 +6,31 @@
  * of the current tile).
  */
 import { glitchSwitch } from './appGlitch';
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { useT } from '../i18n';
 import { useCoachT } from '../i18n/coach';
 import { coachEntryHash } from '../coach/routes';
 import { useCoachAccess } from '../coach/useCoachAccess';
 import { Card } from './ui/Card';
 import { IconTile } from './ui/IconTile';
-import { SUITE_TONE } from './suite/suiteTone';
+import { SUITE_ICON, SUITE_TONE } from './suite/suiteTone';
 import { toneClass, type Tone } from './ui/tones';
 import { Icon, Sheet } from '../ui';
 import { consistencyStreak, type StoreState } from '../store';
 import { setHash } from '../route';
 import { getRole } from '../api';
 import { canUsePeople } from '../views/rosterAccess';
-import { useAddonOrBase } from '../addons/enabledSet';
+import {
+  isAddonAllowed,
+  isAddonUnlocked,
+  useAddonOrBase,
+  useEnabledAddons,
+} from '../addons/enabledSet';
+import { ADDONS } from '../addons/manifest';
+import { defaultApp } from '../addons/defaultApp';
+import { itemDesc, itemName } from '../addonStore/storeItems';
+import { useAddonStoreT } from '../i18n/addonStore';
+import { storeHash } from '../addonStore/storeRoute';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -114,6 +124,20 @@ export function ShellLauncher({
   const { c } = useCoachT();
   // Apex is its own app (SPO-518): no tile until it is installed.
   const apexEnabled = useAddonOrBase('apex');
+  // Gym is an app a trainer or an admin installs (a member always has it); no tile until then.
+  const gymEnabled = useAddonOrBase('gym');
+  // Apps the person can still install (not installed, offered to the role, with what they need): tiles under the list.
+  const installed = useEnabledAddons();
+  const { st } = useAddonStoreT();
+  const role = getRole();
+  const installable = ADDONS.filter(
+    (m) =>
+      m.kind === 'app' &&
+      !m.soon &&
+      !installed.has(m.id) &&
+      isAddonAllowed(m.id, role) &&
+      isAddonUnlocked(m.id, installed, role),
+  );
   // Coach dashboard entry: trainer or admin, flag on (coach/access.ts). Hidden otherwise.
   const coachEnabled = useCoachAccess();
   const peopleEnabled = canUsePeople(getRole());
@@ -122,32 +146,33 @@ export function ShellLauncher({
   ).length;
   const streak = consistencyStreak(now);
 
-  return (
-    <Sheet
-      onClose={onClose}
-      className="shell-sheet"
-      tone={SUITE_TONE[current === 'me' ? 'roster' : current]}
-      label={t.shellSwitch}
-    >
-      <div className="shell-head">{t.shellSwitch}</div>
-      <div className="shell-tiles">
-        <AppTile
-          tone="gym"
-          icon="barbell"
-          name={t.shellGym}
-          // People and Coach have no bell: the shared feed's unread is flagged on Gym, where the bell is.
-          badge={
-            notifUnread > 0 && (current === 'roster' || current === 'me' || current === 'coach') ? (
-              <span className="shell-badge shell-badge--feed">
-                {notifUnread > 9 ? '9+' : notifUnread}
-              </span>
-            ) : undefined
-          }
-          sub={`${t.shellSessionsWeek(sessionsWeek)} · ${t.shellDayStreak(streak)}`}
-          current={current === 'gym'}
-          onSelect={onGym}
-          currentLabel={t.shellCurrent}
-        />
+  const tiles: Record<string, ReactNode> = {
+    gym: (
+      <Fragment key="gym">
+        {(gymEnabled || current === 'gym') && (
+          <AppTile
+            tone="gym"
+            icon="barbell"
+            name={t.shellGym}
+            // People and Coach have no bell: the shared feed's unread is flagged on Gym, where the bell is.
+            badge={
+              notifUnread > 0 &&
+              (current === 'roster' || current === 'me' || current === 'coach') ? (
+                <span className="shell-badge shell-badge--feed">
+                  {notifUnread > 9 ? '9+' : notifUnread}
+                </span>
+              ) : undefined
+            }
+            sub={`${t.shellSessionsWeek(sessionsWeek)} · ${t.shellDayStreak(streak)}`}
+            current={current === 'gym'}
+            onSelect={onGym}
+            currentLabel={t.shellCurrent}
+          />
+        )}
+      </Fragment>
+    ),
+    apex: (
+      <Fragment key="apex">
         {(apexEnabled || current === 'apex') && (
           <AppTile
             tone="apex"
@@ -164,6 +189,10 @@ export function ShellLauncher({
             currentLabel={t.shellCurrent}
           />
         )}
+      </Fragment>
+    ),
+    roster: (
+      <Fragment key="roster">
         {/* Users (user management) is admin-only; Me is reached from the avatar, not from a tile. */}
         {(peopleEnabled || current === 'roster') && (
           <AppTile
@@ -176,6 +205,10 @@ export function ShellLauncher({
             currentLabel={t.shellCurrent}
           />
         )}
+      </Fragment>
+    ),
+    coach: (
+      <Fragment key="coach">
         {(coachEnabled || current === 'coach') && (
           <AppTile
             tone="coach"
@@ -190,6 +223,10 @@ export function ShellLauncher({
             currentLabel={t.shellCurrent}
           />
         )}
+      </Fragment>
+    ),
+    learn: (
+      <Fragment key="learn">
         <AppTile
           tone="learn"
           icon="graduation-cap"
@@ -199,7 +236,44 @@ export function ShellLauncher({
           onSelect={onLearn}
           currentLabel={t.shellCurrent}
         />
-      </div>
+      </Fragment>
+    ),
+  };
+  // The app the person lands on goes first (addons/defaultApp.ts); the rest keep their order.
+  const first = defaultApp(getRole());
+  const order = [first, ...['gym', 'apex', 'roster', 'coach', 'learn'].filter((k) => k !== first)];
+
+  return (
+    <Sheet
+      onClose={onClose}
+      className="shell-sheet"
+      tone={SUITE_TONE[current === 'me' ? 'roster' : current]}
+      label={t.shellSwitch}
+    >
+      <div className="shell-head">{t.shellSwitch}</div>
+      <div className="shell-tiles">{order.map((k) => tiles[k])}</div>
+      {installable.length > 0 && (
+        <>
+          <div className="shell-head">{t.shellMoreApps}</div>
+          <div className="shell-tiles">
+            {installable.map((m) => (
+              <AppTile
+                key={m.id}
+                tone={(SUITE_TONE as Record<string, Tone>)[m.id] ?? 'neutral'}
+                icon={(SUITE_ICON as Record<string, string>)[m.id] ?? 'squares-four'}
+                name={itemName(st, m.id)}
+                sub={itemDesc(st, m.id)}
+                current={false}
+                onSelect={() => {
+                  onClose();
+                  setHash(storeHash('item', m.id));
+                }}
+                currentLabel={t.shellCurrent}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </Sheet>
   );
 }

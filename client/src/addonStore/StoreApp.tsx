@@ -5,6 +5,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { currentUid, getRole, getUsername } from '../api';
+import { defaultAppHash } from '../addons/defaultApp';
 import { addonById } from '../addons/manifest';
 import type { Role } from '../api';
 import { useEnabledAddons } from '../addons/enabledSet';
@@ -42,7 +43,6 @@ import { RemoveButton } from './RemoveSheet';
 import { ItemAction, itemName, type StoreCtx } from './storeItems';
 import {
   parseStoreHash,
-  STORE_FALLBACK_HASH,
   storeHash,
   storeTabFromHash,
   type StoreTab,
@@ -152,7 +152,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
   );
 
   const icon = (n: SkIconName) => <SkIcon name={n} />;
-  const exit = () => setHash(STORE_FALLBACK_HASH);
+  const exit = () => setHash(defaultAppHash(getRole()));
   const avatar = (
     <SkAvatar initials={initials} src={photo} label={name || st.title} onClick={onOpenProfile} />
   );

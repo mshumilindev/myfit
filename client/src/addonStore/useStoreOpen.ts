@@ -6,7 +6,9 @@ import { useEffect, useState } from 'react';
 import type { Role } from '../api';
 import { currentHash, setHash } from '../route';
 import { hasStore } from './storeCatalog';
-import { isStoreHash, STORE_FALLBACK_HASH } from './storeRoute';
+import { defaultAppHash } from '../addons/defaultApp';
+import { getRole } from '../api';
+import { isStoreHash } from './storeRoute';
 
 export function useStoreOpen(authed: boolean, role: Role): boolean {
   const [wanted, setWanted] = useState<boolean>(() => isStoreHash(currentHash()));
@@ -17,7 +19,7 @@ export function useStoreOpen(authed: boolean, role: Role): boolean {
   }, []);
   const allowed = hasStore(role);
   useEffect(() => {
-    if (authed && wanted && !allowed) setHash(STORE_FALLBACK_HASH, true);
+    if (authed && wanted && !allowed) setHash(defaultAppHash(getRole()), true);
   }, [authed, wanted, allowed]);
   return authed && wanted && allowed;
 }

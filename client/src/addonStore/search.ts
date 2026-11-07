@@ -15,6 +15,7 @@ export function fold(s: string): string {
 
 const CAT_KEY = {
   health: 'catHealth',
+  workouts: 'catWorkouts',
   recovery: 'catRecovery',
   food: 'catFood',
   insights: 'catInsights',
