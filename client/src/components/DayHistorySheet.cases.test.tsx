@@ -81,7 +81,7 @@ beforeEach(() => {
   rest = null;
   prescribed = new Set();
   dayName = null;
-  addonsPref.set(['sleep']);
+  addonsPref.set(['sleep', 'activities']);
   setState({});
 });
 afterEach(() => {
@@ -122,7 +122,7 @@ describe('DayHistorySheet', () => {
   });
 
   it('leaves the sleep rows out without the Sleep add-on', () => {
-    addonsPref.reset();
+    addonsPref.set(['activities']);
     setState({
       activities: [act('early', at(28, 7))],
       sleeps: [sleep('night', at(28, 6))],
