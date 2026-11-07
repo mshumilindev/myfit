@@ -148,18 +148,17 @@ export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
         ))}
       </div>
       <div className="sk-mt16 as-apps-cols">
-        <div>
-          <Rows ids={shown.slice(0, Math.ceil(shown.length / 2)).map((m) => m.id)} ctx={ctx} />
-        </div>
-        <div>
-          <Rows ids={shown.slice(Math.ceil(shown.length / 2)).map((m) => m.id)} ctx={ctx} />
-          {cat === 'all' && soon.length > 0 && (
-            <Section title={st.comingSoon}>
-              <Rows ids={soon.map((m) => m.id)} ctx={ctx} />
-            </Section>
-          )}
-        </div>
+        <Rows ids={shown.slice(0, Math.ceil(shown.length / 2)).map((m) => m.id)} ctx={ctx} />
+        <Rows ids={shown.slice(Math.ceil(shown.length / 2)).map((m) => m.id)} ctx={ctx} />
       </div>
+      {cat === 'all' && soon.length > 0 && (
+        <Section title={st.comingSoon}>
+          <div className="as-apps-cols">
+            <Rows ids={soon.slice(0, Math.ceil(soon.length / 2)).map((m) => m.id)} ctx={ctx} />
+            <Rows ids={soon.slice(Math.ceil(soon.length / 2)).map((m) => m.id)} ctx={ctx} />
+          </div>
+        </Section>
+      )}
     </>
   );
 }
