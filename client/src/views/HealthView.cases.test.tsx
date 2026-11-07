@@ -1,3 +1,4 @@
+import { HEALTH_ADDONS } from '../addons/testSetup';
 import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
@@ -65,7 +66,7 @@ beforeEach(() => {
   localStorage.clear();
   setLocale('en');
   setDesktop(false);
-  addonsPref.set(['health', 'injury-log', 'nicotine-alcohol', 'supplements', 'cycle', 'sleep']);
+  addonsPref.set([...HEALTH_ADDONS, 'sleep']);
   seed();
 });
 afterEach(() => {

@@ -1,4 +1,5 @@
 import { addonsPref } from '../addons/enabledSet';
+import { HEALTH_ADDONS } from '../addons/testSetup';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { HealthView, type HealthViewProps } from './HealthView';
@@ -93,7 +94,7 @@ beforeEach(() => {
   localStorage.clear();
   setLocale('en');
   setDesktop(false);
-  addonsPref.set(['health', 'injury-log', 'nicotine-alcohol', 'supplements', 'cycle', 'sleep']);
+  addonsPref.set([...HEALTH_ADDONS, 'sleep']);
 });
 afterEach(() => {
   addonsPref.reset();
@@ -110,6 +111,12 @@ describe('Health home (mobile)', () => {
     expect(screen.queryByText('I got hurt')).toBeNull();
     expect(screen.queryByText('Nicotine')).toBeNull();
     expect(screen.queryByText('Supplements')).toBeNull();
+    // Rest days, being unwell and long-term conditions are modules too: off until ticked (owner 07.11).
+    expect(screen.queryByText('I was unwell')).toBeNull();
+    expect(screen.queryByText('Full rest')).toBeNull();
+    cleanup();
+    addonsPref.set(['health', 'sleep', 'unwell']);
+    view();
     expect(screen.getByText('I was unwell')).toBeTruthy();
   });
 

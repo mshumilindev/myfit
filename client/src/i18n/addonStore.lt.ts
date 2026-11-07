@@ -74,6 +74,7 @@ export const addonStoreLt: typeof addonStoreEn = {
   searchBest: 'Geriausias atitikmuo',
   searchAddonsFor: (n: string) => `Priedai: ${n}`,
   searchAlso: (q: string) => `Taip pat mini ${q}`,
+  modulesPick: 'Moduliai: visi išjungti, įjunkite reikiamus.',
   modulesOn: (on: number, total: number) => `${on} iš ${total} modulių įjungta`,
   manage: 'Tvarkyti arba pašalinti',
   preview: 'Peržiūra',
@@ -144,6 +145,9 @@ export const addonStoreLt: typeof addonStoreEn = {
     health: { name: 'Sveikata', desc: 'Traumos, ciklas, papildai ir kita vienoje vietoje.' },
     'injury-log': { name: 'Traumų žurnalas', desc: 'Žymėkite traumas ir kaip jos gyja.' },
     cycle: { name: 'Ciklas', desc: 'Žymėkite ciklą ir matykite, kaip jis dera su treniruotėmis.' },
+    rest: { name: 'Poilsis', desc: 'Pilno ir aktyvaus poilsio dienos.' },
+    unwell: { name: 'Liga', desc: 'Ligos dienos ir sugrįžimas.' },
+    conditions: { name: 'Ilgalaikės būklės', desc: 'Lėtinės būklės ir jų poveikis treniruotėms.' },
     supplements: { name: 'Papildai', desc: 'Ką vartojate ir kada.' },
     'nicotine-alcohol': {
       name: 'Nikotinas ir alkoholis',

@@ -45,10 +45,8 @@ describe('install run', () => {
     });
     await run;
     expect(result.current.status).toBe('done');
-    // Health comes with its modules (Injury log, Cycle, Supplements, Nicotine and alcohol), each switchable later.
-    expect(resolveEnabled(addonsPref.snapshot(), 'member')).toEqual(
-      new Set(['health', 'sleep', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol']),
-    );
+    // Modules start off (owner 07.11): with nothing ticked only Health and Sleep go on.
+    expect(resolveEnabled(addonsPref.snapshot(), 'member')).toEqual(new Set(['health', 'sleep']));
     expect(addonsQueuePref.get()).toEqual([]);
   });
 

@@ -14,12 +14,11 @@ const BUILD = typeof __BUILD_ID__ === 'string' ? __BUILD_ID__ : 'dev';
 import {
   disableAddons,
   enableAddons,
-  moduleIdsOf,
   isAddonAllowed,
   resolveEnabled,
   addonsPref,
 } from './enabledSet';
-import { addonsQueuePref, queueAdd, queueClear, resolveQueue } from './queue';
+import { addonsQueuePref, pickedModulesOf, queueAdd, queueClear, resolveQueue } from './queue';
 
 export type RunStatus = 'idle' | 'running' | 'done' | 'partial';
 export type StepResult = 'pending' | 'active' | 'done' | 'failed';
@@ -81,7 +80,7 @@ async function runIds(ids: readonly string[], role: Role): Promise<void> {
     mark(id, 'active');
     try {
       await prepareAddon(id, (progress) => set({ ...state, progress }));
-      enableAddons([id, ...moduleIdsOf(id)], role);
+      enableAddons([id, ...pickedModulesOf(id)], role);
       mark(id, 'done');
     } catch {
       mark(id, 'failed');

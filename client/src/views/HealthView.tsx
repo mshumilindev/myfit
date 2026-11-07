@@ -89,6 +89,10 @@ export function HealthView(props: HealthViewProps) {
   const store = useStore();
   // The pieces of Health are add-ons (SPO-518): a row only shows while its add-on is installed.
   const available = useAddonAvailable();
+  // Rest days, being unwell and long-term conditions are separate Health modules.
+  const restOn = available('rest');
+  const unwellOn = available('unwell');
+  const conditionsOn = available('conditions');
   const web = useIsDesktop();
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -142,7 +146,7 @@ export function HealthView(props: HealthViewProps) {
 
   // --- Now ----------------------------------------------------------------------
   const nowGroups: ReactNode[] = [];
-  if (illness) {
+  if (illness && unwellOn) {
     const dayN = today - illness.startDay + 1;
     nowGroups.push(
       <GroupedList key="ill" header={t.hlNowWhat(t.restModeIllness)} footer={t.hlIllnessFoot}>
@@ -301,9 +305,11 @@ export function HealthView(props: HealthViewProps) {
   );
   const startGroup = (
     <GroupedList key="start" header={t.hlStart} footer={t.hlStartFoot}>
-      {startRow({ kind: 'new', ctx: 'start', type: 'off' }, t.hlFullRest, t.hlFullRestSub)}
-      {startRow({ kind: 'new', ctx: 'start', type: 'active' }, t.restModeActive, t.hlActiveSub)}
-      {illness ? (
+      {restOn &&
+        startRow({ kind: 'new', ctx: 'start', type: 'off' }, t.hlFullRest, t.hlFullRestSub)}
+      {restOn &&
+        startRow({ kind: 'new', ctx: 'start', type: 'active' }, t.restModeActive, t.hlActiveSub)}
+      {!unwellOn ? null : illness ? (
         <ListRow
           dim
           icon={<Ic tone="ill" name="thermo" />}
@@ -327,13 +333,16 @@ export function HealthView(props: HealthViewProps) {
   );
   const pastGroup = (
     <GroupedList key="past" header={t.hlLogPast} footer={t.hlLogPastNote}>
-      {startRow({ kind: 'new', ctx: 'past', type: 'illness' }, t.hlWasUnwell, '')}
-      {startRow({ kind: 'new', ctx: 'past', type: 'off' }, t.hlTookBreak, t.hlTookBreakSub)}
+      {unwellOn && startRow({ kind: 'new', ctx: 'past', type: 'illness' }, t.hlWasUnwell, '')}
+      {restOn &&
+        startRow({ kind: 'new', ctx: 'past', type: 'off' }, t.hlTookBreak, t.hlTookBreakSub)}
       {available('injury-log') &&
         startRow({ kind: 'new', ctx: 'past', type: 'injury' }, t.hlGotHurt, '')}
     </GroupedList>
   );
-  const conditionsGroup = <ConditionsSection key="cond" onOpen={(cond) => go({ cond })} />;
+  const conditionsGroup = conditionsOn ? (
+    <ConditionsSection key="cond" onOpen={(cond) => go({ cond })} />
+  ) : null;
   const nicAlcOn = available('nicotine-alcohol');
   const lifestyleGroup =
     nicAlcOn || available('supplements') || available('cycle') ? (

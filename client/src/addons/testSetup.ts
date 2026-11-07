@@ -7,7 +7,16 @@
  */
 
 /** Every Health add-on: what a test world has installed unless it says otherwise. */
-export const HEALTH_ADDONS = ['health', 'injury-log', 'nicotine-alcohol', 'supplements', 'cycle'];
+export const HEALTH_ADDONS = [
+  'health',
+  'rest',
+  'unwell',
+  'conditions',
+  'injury-log',
+  'nicotine-alcohol',
+  'supplements',
+  'cycle',
+];
 
 // Seeded in storage, not through `addonsPref`: importing the add-on code here would load api/firebase before a test
 // file's own mocks apply. The list is read from storage when the add-on code first loads.

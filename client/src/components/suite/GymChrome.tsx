@@ -34,7 +34,7 @@ export function GymBrandBar({
   const { t } = useT();
   // The conditions shield belongs to the Health add-on (SPO-518).
   const conditions = useActiveConditions();
-  const healthOn = useAddonOrBase('health');
+  const healthOn = useAddonOrBase('conditions');
   return (
     <BrandBar
       avatar={<BrandAccount app="gym" onOpenProfile={onProfile} />}

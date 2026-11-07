@@ -73,6 +73,7 @@ export const addonStoreEt: typeof addonStoreEn = {
   searchBest: 'Parim vaste',
   searchAddonsFor: (n: string) => `Lisad: ${n}`,
   searchAlso: (q: string) => `Mainib ka: ${q}`,
+  modulesPick: 'Moodulid: kõik väljas, lülita sisse vajalikud.',
   modulesOn: (on: number, total: number) => `${on} / ${total} moodulit sees`,
   manage: 'Halda või eemalda',
   preview: 'Eelvaade',
@@ -143,6 +144,12 @@ export const addonStoreEt: typeof addonStoreEn = {
     health: { name: 'Tervis', desc: 'Vigastused, tsükkel, toidulisandid ja muu ühes kohas.' },
     'injury-log': { name: 'Vigastuste logi', desc: 'Märgi vigastused ja nende paranemine.' },
     cycle: { name: 'Tsükkel', desc: 'Märgi tsükkel ja vaata, kuidas see treeninguga sobib.' },
+    rest: { name: 'Puhkus', desc: 'Täieliku ja aktiivse puhkuse päevad.' },
+    unwell: { name: 'Haigus', desc: 'Haiguspäevad ja tagasitulek.' },
+    conditions: {
+      name: 'Pikaajalised seisundid',
+      desc: 'Krooniliste seisundite jälgimine ja mõju treeningule.',
+    },
     supplements: { name: 'Toidulisandid', desc: 'Nimekiri sellest, mida tarvitad ja millal.' },
     'nicotine-alcohol': {
       name: 'Nikotiin ja alkohol',

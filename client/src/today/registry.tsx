@@ -130,7 +130,7 @@ export const SLEEP_WIDGET_IDS: ReadonlySet<string> = new Set(['sleep', 'sleep-de
  */
 export const HEALTH_WIDGET_ADDON: Readonly<Record<string, string>> = {
   rehab: 'injury-log',
-  'rest-illness-log': 'health',
+  'rest-illness-log': 'rest',
   cycle: 'cycle',
 };
 /** Widgets that belong to an Apex module: they follow the module switch as well as Apex itself. */

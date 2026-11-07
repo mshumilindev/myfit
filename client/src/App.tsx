@@ -2111,7 +2111,7 @@ export function GymRail(props: {
       ? 'var(--color-danger)'
       : undefined;
   const activeConditions = useActiveConditions();
-  const conditions = useAddonOrBase('health') ? activeConditions : 0; // shield belongs to Health (SPO-518)
+  const conditions = useAddonOrBase('conditions') ? activeConditions : 0; // shield belongs to Health (SPO-518)
 
   return (
     <AppRail

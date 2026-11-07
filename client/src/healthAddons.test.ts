@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { HEALTH_ADDONS } from './addons/testSetup';
 import { addonsPref } from './addons/enabledSet';
 import type { HealthOnMap } from './data/healthConsentGate';
 import { healthAddonsKey, healthAddonsOn } from './healthAddons';
@@ -31,13 +32,13 @@ describe('healthAddonsOn (consent AND add-on)', () => {
   });
 
   it('keeps a feature on when both the consent and its add-on are there', () => {
-    addonsPref.set(['health', 'nicotine-alcohol']);
+    addonsPref.set(['health', 'conditions', 'nicotine-alcohol']);
     const on = healthAddonsOn(ALL_ON);
     expect(on).toMatchObject({ chronic: true, nicotine: true, alcohol: true, injuries: false });
   });
 
   it('never turns on what has no consent, installed or not', () => {
-    addonsPref.set(['health', 'injury-log', 'cycle', 'supplements', 'nicotine-alcohol']);
+    addonsPref.set([...HEALTH_ADDONS]);
     const on = healthAddonsOn({ ...ALL_ON, injuries: false, cycle: false });
     expect(on).toMatchObject({ injuries: false, cycle: false, chronic: true });
   });

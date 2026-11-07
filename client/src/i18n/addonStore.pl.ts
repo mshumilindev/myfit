@@ -73,6 +73,7 @@ export const addonStorePl: typeof addonStoreEn = {
   searchBest: 'Najlepsze dopasowanie',
   searchAddonsFor: (n: string) => `Dodatki dla ${n}`,
   searchAlso: (q: string) => `Także wspomina ${q}`,
+  modulesPick: 'Moduły: wszystkie wyłączone, włącz te, które chcesz.',
   modulesOn: (on: number, total: number) => `${on} z ${total} modułów włączone`,
   manage: 'Zarządzaj lub usuń',
   preview: 'Podgląd',
@@ -143,6 +144,9 @@ export const addonStorePl: typeof addonStoreEn = {
     health: { name: 'Zdrowie', desc: 'Urazy, cykl, suplementy i więcej w jednym miejscu.' },
     'injury-log': { name: 'Dziennik urazów', desc: 'Zapisuj urazy i to, jak się goją.' },
     cycle: { name: 'Cykl', desc: 'Notuj cykl i zobacz, jak wpływa na trening.' },
+    rest: { name: 'Odpoczynek', desc: 'Dni pełnego i aktywnego odpoczynku.' },
+    unwell: { name: 'Choroba', desc: 'Dni choroby i powrót do formy.' },
+    conditions: { name: 'Choroby przewlekłe', desc: 'Stany przewlekłe i ich wpływ na trening.' },
     supplements: { name: 'Suplementy', desc: 'Lista tego, co bierzesz, i kiedy.' },
     'nicotine-alcohol': {
       name: 'Nikotyna i alkohol',

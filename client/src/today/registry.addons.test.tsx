@@ -74,7 +74,7 @@ describe('Health module widgets and shortcuts follow their add-ons (SPO-518)', (
     expect(avail('rehab')).toBe(false);
     expect(avail('cycle')).toBe(false);
     expect(avail('rest-illness-log')).toBe(false);
-    addonsPref.set(['health']);
+    addonsPref.set(['health', 'rest']);
     expect(avail('rest-illness-log')).toBe(true);
     addonsPref.set(['injury-log']);
     expect(avail('rehab')).toBe(true);
@@ -95,7 +95,7 @@ describe('Health module widgets and shortcuts follow their add-ons (SPO-518)', (
     expect(ids()).not.toContain('sc:ask-atlas');
     expect(ids()).not.toContain('sc:unwell');
     expect(ids()).not.toContain('sc:day-off');
-    addonsPref.set(['health']);
+    addonsPref.set(['health', 'rest', 'unwell']);
     expect(ids()).toEqual(expect.arrayContaining(['sc:unwell', 'sc:day-off', 'sc:active-rest']));
     addonsPref.set(['sleep', 'injury-log', 'atlas']);
     expect(ids()).toEqual(expect.arrayContaining(['sc:sleep', 'sc:injury', 'sc:ask-atlas']));

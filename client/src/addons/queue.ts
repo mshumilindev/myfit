@@ -19,6 +19,21 @@ import {
 export { addonAvailable, addonsPref } from './enabledSet';
 export const addonsQueuePref = createListPref('spotter.addons.queue');
 registerListPref('addonsQueue', addonsQueuePref);
+/** Modules ticked on the Selected screen. Every module starts off: only the ticked ones are switched on with their parent. */
+export const modulePickPref = createListPref('spotter.addons.queue.modules');
+registerListPref('addonsQueueModules', modulePickPref);
+
+/** The modules of `id` that were ticked for the install. */
+export function pickedModulesOf(id: string): string[] {
+  const picked = modulePickPref.get();
+  return moduleIdsOf(id).filter((m) => picked.includes(m));
+}
+
+/** Tick or untick one module of a picked item. */
+export function setModulePick(moduleId: string, on: boolean): void {
+  const rest = modulePickPref.get().filter((m) => m !== moduleId);
+  modulePickPref.set(on ? [...rest, moduleId] : rest);
+}
 
 /** The queue for a role: allowed ids with their parents, minus what is already installed. */
 export function resolveQueue(
@@ -40,6 +55,7 @@ export function queueRemove(ids: string[], role: Role = getRole()): void {
   const gone = new Set(
     ids.flatMap((id) => ADDONS.filter((a) => a.id === id || a.parent === id).map((a) => a.id)),
   );
+  modulePickPref.set(modulePickPref.get().filter((m) => !gone.has(m)));
   const enabled = resolveEnabled(addonsPref.snapshot(), role);
   addonsQueuePref.set(
     resolveQueue(
@@ -52,6 +68,7 @@ export function queueRemove(ids: string[], role: Role = getRole()): void {
 
 export function queueClear(): void {
   addonsQueuePref.set([]);
+  modulePickPref.set([]);
 }
 
 /** Turn on everything picked and empty the list. Returns what was installed. */
@@ -62,7 +79,7 @@ export function installQueue(role: Role = getRole()): string[] {
   );
   if (ids.length)
     enableAddons(
-      ids.flatMap((id) => [id, ...moduleIdsOf(id)]),
+      ids.flatMap((id) => [id, ...pickedModulesOf(id)]),
       role,
     );
   queueClear();
@@ -96,6 +113,10 @@ function subscribe(fn: () => void): () => void {
     b();
     c();
   };
+}
+/** React: the modules ticked for the install. */
+export function useModulePicks(): readonly string[] {
+  return useSyncExternalStore(modulePickPref.subscribe, modulePickPref.get, modulePickPref.get);
 }
 /** React: the picked-but-not-installed ids. */
 export function useQueuedAddons(): readonly string[] {

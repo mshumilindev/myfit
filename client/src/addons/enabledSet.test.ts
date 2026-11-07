@@ -61,7 +61,16 @@ describe('dependencies', () => {
   });
   it('removes add-ons together with their app', () => {
     expect(removalSet('health').sort()).toEqual(
-      ['cycle', 'health', 'injury-log', 'nicotine-alcohol', 'supplements'].sort(),
+      [
+        'conditions',
+        'cycle',
+        'health',
+        'injury-log',
+        'nicotine-alcohol',
+        'rest',
+        'supplements',
+        'unwell',
+      ].sort(),
     );
   });
 });

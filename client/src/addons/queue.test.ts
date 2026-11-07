@@ -3,15 +3,18 @@ import { addonsPref, enableAddons } from './enabledSet';
 import {
   addonsQueuePref,
   installQueue,
+  modulePickPref,
   queueAdd,
   queueClear,
   queueRemove,
   resolveQueue,
+  setModulePick,
 } from './queue';
 
 beforeEach(() => {
   addonsPref.reset();
   addonsQueuePref.reset();
+  modulePickPref.reset();
 });
 
 describe('selected list', () => {
@@ -39,16 +42,18 @@ describe('selected list', () => {
     queueAdd(['health', 'sleep'], 'member');
     expect(installQueue('member')).toEqual(['health', 'sleep']);
     expect(addonsQueuePref.get()).toEqual([]);
-    // Health brings its modules with it (they are switches, not separate picks).
-    expect([...addonsPref.get()].sort()).toEqual([
-      'cycle',
-      'health',
-      'injury-log',
-      'nicotine-alcohol',
-      'sleep',
-      'supplements',
-    ]);
+    // Modules start off: nothing ticked, so only the items themselves go on.
+    expect([...addonsPref.get()].sort()).toEqual(['health', 'sleep']);
     expect(installQueue('member')).toEqual([]);
+  });
+  it('switches on only the modules ticked on the Selected screen', () => {
+    queueAdd(['health'], 'member');
+    setModulePick('cycle', true);
+    setModulePick('unwell', true);
+    setModulePick('unwell', false);
+    expect(installQueue('member')).toEqual(['health']);
+    expect([...addonsPref.get()].sort()).toEqual(['cycle', 'health']);
+    expect(modulePickPref.get()).toEqual([]);
   });
   it('clears', () => {
     queueAdd(['sleep'], 'member');

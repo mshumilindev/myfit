@@ -1,9 +1,9 @@
 /** Store screens on the store kit: Discover, Apps, Add-ons, Selected, Installed, item page, search. */
 import { useMemo, useState } from 'react';
 import type { Role } from '../api';
-import { addonById, type AddonManifest } from '../addons/manifest';
+import { ADDONS, addonById, type AddonManifest } from '../addons/manifest';
 import { startInstall } from '../addons/installRun';
-import { queueRemove } from '../addons/queue';
+import { queueRemove, setModulePick, useModulePicks } from '../addons/queue';
 import {
   SkBadge,
   SkBtn,
@@ -12,7 +12,9 @@ import {
   SkHero,
   SkIcon,
   SkList,
+  SkRow,
   SkSectionLink,
+  SkSwitch,
   SkTile,
 } from '../store-kit';
 import './screens.css';
@@ -36,7 +38,7 @@ import {
 import { currentHash, setHash } from '../route';
 import { catLabel } from './storeCategories';
 import { storeHash } from './storeRoute';
-import { ItemRow, itemName, TileOf, type StoreCtx } from './storeItems';
+import { ItemRow, itemDesc, itemName, TileOf, type StoreCtx } from './storeItems';
 
 /** Discover: the recommendation queue, a nudge for the next app, what is coming. */
 export function Discover({
@@ -237,6 +239,7 @@ export function Themes({ role, ctx }: { role: Role; ctx: StoreCtx }) {
 /** Selected: what was added but not installed yet. */
 export function Selected({ ctx, go }: { ctx: StoreCtx; go: (v: string) => void }) {
   const { st, queued } = ctx;
+  const picked = useModulePicks();
   if (!queued.length) {
     return (
       <SkEmpty
@@ -267,24 +270,45 @@ export function Selected({ ctx, go }: { ctx: StoreCtx; go: (v: string) => void }
       <div className="sk-t-s sk-mt4">{st.selectedSub}</div>
       <div className="sk-mt16">
         <SkList>
-          {items.map((m) => (
-            <ItemRow
-              key={m.id}
-              m={m}
-              ctx={ctx}
-              action={
-                required(m.id) ? (
-                  <SkBtn kind="ghost" disabled>
-                    {st.required}
-                  </SkBtn>
-                ) : (
-                  <SkBtn kind="ghost" onClick={() => queueRemove([m.id])}>
-                    {st.remove}
-                  </SkBtn>
-                )
-              }
-            />
-          ))}
+          {items.map((m) => {
+            // Modules start off: only the ones ticked here are switched on with the item.
+            const kids = ADDONS.filter((a) => a.kind === 'module' && a.parent === m.id && !a.soon);
+            return (
+              <div key={m.id}>
+                <ItemRow
+                  m={m}
+                  ctx={ctx}
+                  action={
+                    required(m.id) ? (
+                      <SkBtn kind="ghost" disabled>
+                        {st.required}
+                      </SkBtn>
+                    ) : (
+                      <SkBtn kind="ghost" onClick={() => queueRemove([m.id])}>
+                        {st.remove}
+                      </SkBtn>
+                    )
+                  }
+                />
+                {kids.length > 0 && <div className="sk-t-s sk-mt8">{st.modulesPick}</div>}
+                {kids.map((k) => (
+                  <SkRow
+                    key={k.id}
+                    tile={<TileOf st={st} m={k} size={40} />}
+                    name={itemName(st, k.id)}
+                    desc={itemDesc(st, k.id)}
+                    action={
+                      <SkSwitch
+                        on={picked.includes(k.id)}
+                        label={itemName(st, k.id)}
+                        onChange={(next) => setModulePick(k.id, next)}
+                      />
+                    }
+                  />
+                ))}
+              </div>
+            );
+          })}
         </SkList>
       </div>
       <div className="as-sticky-act">

@@ -3,13 +3,14 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { addonsPref, enableAddons } from '../addons/enabledSet';
 import { resetInstall } from '../addons/installRun';
-import { addonsQueuePref, queueAdd } from '../addons/queue';
+import { addonsQueuePref, modulePickPref, queueAdd } from '../addons/queue';
 import { currentHash } from '../route';
 import { StoreApp } from './StoreApp';
 
 beforeEach(() => {
   addonsPref.reset();
   addonsQueuePref.reset();
+  modulePickPref.reset();
   resetInstall();
   window.location.hash = '#/store';
 });
@@ -31,6 +32,16 @@ describe('StoreApp', () => {
     window.location.hash = '#/store/selected';
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
     expect(screen.getAllByText(/Nothing waiting/i).length).toBeGreaterThan(0);
+  });
+  it('Selected lists the modules of a picked item, all off, and ticking one picks it', () => {
+    queueAdd(['health'], 'member');
+    window.location.hash = '#/store/selected';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    const sw = screen.getAllByRole('switch', { name: 'Cycle' })[0]!;
+    expect(sw.getAttribute('aria-checked')).toBe('false');
+    expect(screen.getAllByRole('switch', { name: 'Unwell' }).length).toBeGreaterThan(0);
+    fireEvent.click(sw);
+    expect(modulePickPref.get()).toEqual(['cycle']);
   });
   it('Cancel in search returns to the tab it was opened from, not out of the store', () => {
     window.location.hash = '#/store/apps';

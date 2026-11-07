@@ -75,6 +75,7 @@ export const addonStoreEn = {
   searchBest: 'Best match',
   searchAddonsFor: (n: string) => `Add-ons for ${n}`,
   searchAlso: (q: string) => `Also mentions ${q}`,
+  modulesPick: 'Modules: all off, switch on what you want.',
   modulesOn: (on: number, total: number) => `${on} of ${total} modules on`,
   manage: 'Manage or remove',
   preview: 'Preview',
@@ -145,6 +146,12 @@ export const addonStoreEn = {
     health: { name: 'Health', desc: 'Injuries, cycle, supplements and more in one place.' },
     'injury-log': { name: 'Injury log', desc: 'Log injuries and how they heal.' },
     cycle: { name: 'Cycle', desc: 'Note your cycle and see how it fits training.' },
+    rest: { name: 'Rest days', desc: 'Log full rest and active rest days.' },
+    unwell: { name: 'Unwell', desc: 'Log the days you are unwell and your return.' },
+    conditions: {
+      name: 'Long-term conditions',
+      desc: 'Keep track of chronic conditions and how they affect training.',
+    },
     supplements: { name: 'Supplements', desc: 'Keep a list of what you take and when.' },
     'nicotine-alcohol': {
       name: 'Nicotine and alcohol',

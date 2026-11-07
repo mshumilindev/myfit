@@ -73,6 +73,7 @@ export const addonStoreUk: typeof addonStoreEn = {
   searchBest: 'Найкращий збіг',
   searchAddonsFor: (n: string) => `Доповнення для ${n}`,
   searchAlso: (q: string) => `Також згадують ${q}`,
+  modulesPick: 'Модулі: усі вимкнені, увімкніть потрібні.',
   modulesOn: (on: number, total: number) => `${on} з ${total} модулів увімкнено`,
   manage: 'Керувати або видалити',
   preview: 'Попередній перегляд',
@@ -143,6 +144,9 @@ export const addonStoreUk: typeof addonStoreEn = {
     health: { name: 'Здоров’я', desc: 'Травми, цикл, добавки та інше в одному місці.' },
     'injury-log': { name: 'Журнал травм', desc: 'Записуйте травми й те, як вони гояться.' },
     cycle: { name: 'Цикл', desc: 'Відмічайте цикл і дивіться, як він пов’язаний із тренуваннями.' },
+    rest: { name: 'Відпочинок', desc: 'Дні повного й активного відпочинку.' },
+    unwell: { name: 'Хвороба', desc: 'Дні, коли ви хворієте, і повернення.' },
+    conditions: { name: 'Довготривалі стани', desc: 'Хронічні стани та їх вплив на тренування.' },
     supplements: { name: 'Добавки', desc: 'Список того, що ви приймаєте, і коли.' },
     'nicotine-alcohol': {
       name: 'Нікотин і алкоголь',
