@@ -20,6 +20,7 @@ import {
   getStoreState,
   logActivity,
 } from '../store';
+import { activitiesAvailable } from '../addons/activitiesGate';
 import { activityType, estimateCalories } from '../activities';
 import { bodyPart as bodyPartOf } from '../injury';
 import { isHealthOn, isHealthWriteDenied } from '../data/healthConsentGate';
@@ -253,6 +254,13 @@ export function runAction(
       };
     }
     case 'activity': {
+      if (!activitiesAvailable())
+        return {
+          text: L(
+            'Activities is not installed, so I did not log it. Add it in the store and tell me again.',
+            'Activities не встановлено, тому я не записав. Додай його в сторі й скажи ще раз.',
+          ),
+        };
       const t = activityType(a.kind);
       logActivity({
         type: a.kind,

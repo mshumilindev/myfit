@@ -7,7 +7,12 @@ import {
   storedNutrition,
   store as nutritionStore,
 } from '../../nutrition/store';
-import { getStoreState, getStoredHealthForExport, hasStoredHealthData } from '../../store';
+import {
+  getStoreState,
+  getStoredHealthForExport,
+  getStoredTrainingForExport,
+  hasStoredHealthData,
+} from '../../store';
 import { LOCAL_KEYS } from '../../localKeys.registry';
 import type { ConsentRecord } from '../consents';
 import type { ExportSources, HealthFeatureKey, StoreSlice } from './exportModel';
@@ -29,7 +34,7 @@ export interface LiveInputs {
 /** Reads the stores now. Waits briefly for the food log's first snapshots (never longer than its own timeout). */
 export async function readExportSources(live: LiveInputs): Promise<ExportSources> {
   const st = getStoreState();
-  const slice: StoreSlice = st;
+  const slice: StoreSlice = { ...st, ...getStoredTrainingForExport() };
   const loaded = await nutritionLoaded();
   const shown = nutritionStore.get();
   const hasShown =

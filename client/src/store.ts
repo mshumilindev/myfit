@@ -3854,6 +3854,11 @@ export type StoreHealthFeature = Exclude<HealthFeature, 'nutrition'>;
  * RAW (unmasked) stored health state, for the data copy only (GDPR Art. 15 / 20: giving a person their own stored data
  * back to their own device is not processing for the feature, so it needs no consent). NEVER read this for anything shown.
  */
+/** Activities and goals as stored, whatever the add-ons say: the person's own data goes back to them (Art. 15 / 20). */
+export function getStoredTrainingForExport(): Pick<StoreState, 'activities' | 'goals'> {
+  return { activities: state.activities ?? [], goals: state.goals };
+}
+
 export function getStoredHealthForExport(): Pick<
   StoreState,
   'injuries' | 'conditions' | 'conditionsShare' | 'cycle' | 'nicotine' | 'alcohol' | 'supplements'
@@ -3930,6 +3935,7 @@ export function liveActivity(): Activity | null {
 /** Begin a live activity (design feature 6): a persisted, resumable timer that
  *  survives closing the page — mirrors how an open workout works. */
 export function startActivity(type: string, category: ActivityCategory): Activity | null {
+  if (!activitiesAvailable()) return null;
   // One live mode at a time — never start an activity while a workout or a
   // sleep is running.
   if ((state.workouts ?? []).some((w) => w.finishedAt === null)) return null;

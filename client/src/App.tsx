@@ -1099,7 +1099,7 @@ function AppMain() {
     !storeOpen &&
     !legalPage &&
     !coachOpenRaw &&
-    !apexOpen &&
+    !(apexOpen && apexOn) &&
     !rosterOpenState &&
     !learnOpen
       ? defaultApp(role)
@@ -1714,7 +1714,7 @@ function AppMain() {
       {activeOverlay?.screen === 'mastery' && apexOn && (
         <MasteryView shell={shell} onClose={masteryTab ? undefined : closeOverlay} />
       )}
-      {activeOverlay?.screen === 'coach' && (atlasOn || getRole() !== 'member') && (
+      {activeOverlay?.screen === 'coach' && atlasOn && (
         <CoachView
           onClose={closeOverlay}
           onOpenSession={(workoutId) => shell.openOverlay({ screen: 'session', workoutId })}

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { addonsPref } from './enabledSet';
+import { addonsPref, enableAddons, disableAddons } from './enabledSet';
 import { queueAdd, installQueue, addonsQueuePref } from './queue';
 import {
   closeDependencies,
@@ -87,5 +87,21 @@ describe('queueing what needs Gym when Gym is already installed', () => {
   it('without Gym nothing that needs it is queued', () => {
     queueAdd(['apex', 'health'], 'admin');
     expect(addonsQueuePref.get()).toEqual([]);
+  });
+});
+
+// Review SPO-500: a write must not erase ids this client cannot judge (newer manifest, other role, role not set yet).
+describe('writes keep ids the client does not know', () => {
+  beforeEach(() => addonsPref.reset());
+  it('enable and disable keep foreign ids in the synced list', () => {
+    addonsPref.set(['from-a-newer-client', 'gym']);
+    enableAddons(['activities'], 'member');
+    expect(addonsPref.snapshot().list).toEqual(
+      expect.arrayContaining(['from-a-newer-client', 'gym', 'activities']),
+    );
+    disableAddons(['activities'], 'member');
+    const list = addonsPref.snapshot().list;
+    expect(list).toEqual(expect.arrayContaining(['from-a-newer-client', 'gym']));
+    expect(list).not.toContain('activities');
   });
 });

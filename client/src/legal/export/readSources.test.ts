@@ -5,6 +5,7 @@ const h = vi.hoisted(() => ({
   state: null as unknown,
   raw: { injuries: [{ id: 'raw-i' }], cycle: { updatedAt: 3 } } as unknown,
   stored: {} as Record<string, boolean>,
+  training: { activities: [{ id: 'raw-a' }], goals: { raw: true } } as unknown,
   loaded: true,
   rawFood: false,
   food: { entries: [] as unknown[], customFoods: [] as unknown[], goal: null, profile: null },
@@ -33,6 +34,7 @@ vi.mock('../../store', () => ({
   getStoreState: () => h.state,
   hasStoredHealthData: (f: string) => h.stored[f] ?? false,
   getStoredHealthForExport: () => h.raw,
+  getStoredTrainingForExport: () => h.training,
 }));
 
 import { readExportSources } from './readSources';
@@ -57,6 +59,13 @@ describe('readExportSources', () => {
     expect(s.chat).toHaveLength(1);
     expect(s.hasTrainer).toBe(true);
     expect(s.hiddenHealth).toEqual([]);
+  });
+
+  it('activities and goals go back as stored, even while their add-ons hide them from the app (Art. 15 / 20)', async () => {
+    h.state = { ...storeSlice(), syncStatus: 'synced', activities: [], goals: {} };
+    const s = await readExportSources(live);
+    expect(s.store.activities).toEqual([{ id: 'raw-a' }]);
+    expect(s.store.goals).toEqual({ raw: true });
   });
 
   it('settings synced to the account are read from the device cache; stamps and local-only keys stay out', async () => {

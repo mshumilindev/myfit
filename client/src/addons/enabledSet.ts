@@ -114,18 +114,27 @@ export function isAddonEnabled(id: string, role: Role = getRole()): boolean {
 
 /** Turn items on together with what they need. Idempotent. */
 export function enableAddons(ids: string[], role: Role = getRole()): void {
-  addonsPref.set(closeDependencies([...current(role), ...ids], role));
+  addonsPref.set([...closeDependencies([...current(role), ...ids], role), ...foreign(role)]);
+}
+
+/**
+ * Stored ids this client cannot judge (newer manifest, or another role's items): kept on every write so a stale client
+ * or a not-yet-known role never erases them from the synced list. They are ignored when reading.
+ */
+function foreign(role: Role): string[] {
+  return addonsPref.snapshot().list.filter((id) => !isAddonAllowed(id, role));
 }
 
 /** Turn items off (an app takes its add-ons with it). Idempotent; data stays. */
 export function disableAddons(ids: string[], role: Role = getRole()): void {
   const gone = new Set(ids.flatMap(removalSet));
-  addonsPref.set(
-    closeDependencies(
+  addonsPref.set([
+    ...closeDependencies(
       [...current(role)].filter((i) => !gone.has(i)),
       role,
     ),
-  );
+    ...foreign(role),
+  ]);
 }
 
 const MODULES_MIGRATED = 'spotter.addons.modules.v1';
