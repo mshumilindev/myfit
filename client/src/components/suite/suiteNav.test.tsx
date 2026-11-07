@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { LOCALES } from '../../i18n';
 import { addonsPref } from '../../addons/enabledSet';
-import { APEX_ADDONS } from '../../addons/testSetup';
+import { APEX_ADDONS, HEALTH_ADDONS } from '../../addons/testSetup';
 import { coachEn } from '../../i18n/coach.en';
 import { coachEntryHash } from '../../coach/routes';
 import { setViewport } from '../../coach/testViewport';
@@ -237,7 +237,7 @@ beforeEach(() => {
   window.history.replaceState(null, '', '/');
   localStorage.clear();
   // Apex and its modules are add-ons (SPO-518): these navigation contracts are about the app with them installed.
-  addonsPref.set(APEX_ADDONS);
+  addonsPref.set([...APEX_ADDONS, ...HEALTH_ADDONS]);
   installRailMeasure(900);
 });
 afterEach(() => {

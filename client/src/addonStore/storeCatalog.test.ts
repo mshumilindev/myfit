@@ -12,9 +12,9 @@ describe('role-visible catalog', () => {
     for (const r of ['member', 'trainer', 'admin'] as const)
       expect(ids(catalogForRole(r))).not.toContain('gyms');
   });
-  it('keeps member-only items away from a trainer', () => {
-    expect(ids(catalogForRole('trainer'))).not.toContain('health');
-    expect(ids(catalogForRole('member'))).toContain('health');
+  it('offers Health to every role as an add-on (owner 07.11)', () => {
+    for (const role of ['member', 'trainer', 'admin'] as const)
+      expect(ids(catalogForRole(role)), role).toContain('health');
   });
   it('lists coming-soon items apart from what can be turned on', () => {
     expect(ids(comingSoonForRole('member')).sort()).toEqual(['music', 'nutrition']);

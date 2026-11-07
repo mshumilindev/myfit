@@ -37,22 +37,22 @@ const ALL: readonly StoreRole[] = ['member', 'trainer', 'admin'];
 const MEMBER: readonly StoreRole[] = ['member'];
 
 export const ADDONS: readonly AddonManifest[] = [
-  { id: 'health', kind: 'addon', tone: 4, roles: MEMBER, category: 'health' },
+  { id: 'health', kind: 'addon', tone: 4, roles: ALL, category: 'health' },
   {
     id: 'injury-log',
     kind: 'module',
     parent: 'health',
     tone: 4,
-    roles: MEMBER,
+    roles: ALL,
     category: 'health',
   },
-  { id: 'cycle', kind: 'module', parent: 'health', tone: 4, roles: MEMBER, category: 'health' },
+  { id: 'cycle', kind: 'module', parent: 'health', tone: 4, roles: ALL, category: 'health' },
   {
     id: 'supplements',
     kind: 'module',
     parent: 'health',
     tone: 4,
-    roles: MEMBER,
+    roles: ALL,
     category: 'health',
   },
   {
@@ -60,7 +60,7 @@ export const ADDONS: readonly AddonManifest[] = [
     kind: 'module',
     parent: 'health',
     tone: 4,
-    roles: MEMBER,
+    roles: ALL,
     category: 'health',
   },
   { id: 'sleep', kind: 'addon', tone: 2, roles: ALL, category: 'recovery' },

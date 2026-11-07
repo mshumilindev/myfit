@@ -19,7 +19,7 @@ beforeEach(() => {
 describe('isAddonAllowed', () => {
   it('lets each role see only its own items', () => {
     expect(isAddonAllowed('health', 'member')).toBe(true);
-    expect(isAddonAllowed('health', 'trainer')).toBe(false);
+    expect(isAddonAllowed('health', 'trainer')).toBe(true); // Health is an add-on for every role
     expect(isAddonAllowed('gyms', 'member')).toBe(false); // Gyms is base, not an add-on
     expect(isAddonAllowed('gyms', 'trainer')).toBe(false);
   });
@@ -90,7 +90,7 @@ describe('enable / disable', () => {
 });
 
 describe('useAddonOrBase', () => {
-  it('is on for a role the store does not offer the item to, off for a member who has not installed it', async () => {
+  it('is on for a role the store does not offer the item to, off for a member or trainer who has not installed it', async () => {
     const { renderHook } = await import('@testing-library/react');
     const { useAddonOrBase, addonsPref } = await import('./enabledSet');
     addonsPref.reset();
@@ -99,6 +99,8 @@ describe('useAddonOrBase', () => {
     spy.mockReturnValue('member');
     expect(renderHook(() => useAddonOrBase('health')).result.current).toBe(false);
     spy.mockReturnValue('trainer');
+    expect(renderHook(() => useAddonOrBase('health')).result.current).toBe(false);
+    spy.mockReturnValue('manager');
     expect(renderHook(() => useAddonOrBase('health')).result.current).toBe(true);
     spy.mockRestore();
   });
