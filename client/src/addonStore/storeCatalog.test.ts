@@ -19,6 +19,8 @@ describe('role-visible catalog', () => {
   it('lists coming-soon items apart from what can be turned on', () => {
     expect(ids(comingSoonForRole('member')).sort()).toEqual(['music', 'nutrition']);
     expect(ids(availableForRole('member'))).not.toContain('nutrition');
-    expect(comingSoonForRole('trainer')).toEqual([]);
+    // every role sees what is coming (nothing of it can be installed yet)
+    expect(ids(comingSoonForRole('trainer')).sort()).toEqual(['music', 'nutrition']);
+    expect(comingSoonForRole('manager')).toEqual([]);
   });
 });

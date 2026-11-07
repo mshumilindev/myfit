@@ -34,7 +34,6 @@ export interface AddonManifest {
 }
 
 const ALL: readonly StoreRole[] = ['member', 'trainer', 'admin'];
-const MEMBER: readonly StoreRole[] = ['member'];
 
 export const ADDONS: readonly AddonManifest[] = [
   { id: 'health', kind: 'addon', tone: 4, roles: ALL, category: 'health' },
@@ -121,8 +120,8 @@ export const ADDONS: readonly AddonManifest[] = [
   },
   // Gyms is core for a member and an add-on for trainer and admin.
   // Not available yet (the store shows them as Coming soon).
-  { id: 'nutrition', kind: 'app', tone: 0, roles: MEMBER, soon: true, category: 'food' },
-  { id: 'music', kind: 'app', tone: 5, roles: MEMBER, soon: true, category: 'food' },
+  { id: 'nutrition', kind: 'app', tone: 0, roles: ALL, soon: true, category: 'food' },
+  { id: 'music', kind: 'app', tone: 5, roles: ALL, soon: true, category: 'food' },
 ];
 
 const BY_ID = new Map(ADDONS.map((a) => [a.id, a]));
