@@ -16,10 +16,10 @@ vi.mock('../api', async (orig) => ({
   getRole: () => 'admin',
 }));
 
-type Current = 'gym' | 'apex' | 'roster' | 'nutrition' | 'learn';
-const CURRENTS: Current[] = ['gym', 'apex', 'roster', 'nutrition', 'learn'];
+type Current = 'gym' | 'apex' | 'roster' | 'learn';
+const CURRENTS: Current[] = ['gym', 'apex', 'roster', 'learn'];
 /** Fixed identity tone of each app's row, whatever app is active (an admin sees Users and Coach). */
-const ROW_TONES = ['gym', 'apex', 'kcal', 'people', 'coach', 'learn'];
+const ROW_TONES = ['gym', 'apex', 'people', 'coach', 'learn'];
 
 function tileClasses(current: Current): string[] {
   const noop = () => undefined;
@@ -35,8 +35,6 @@ function tileClasses(current: Current): string[] {
       onGym={noop}
       onApex={noop}
       onRoster={noop}
-      onNutrition={noop}
-      nutritionEnabled
       onLearn={noop}
       onClose={noop}
     />,

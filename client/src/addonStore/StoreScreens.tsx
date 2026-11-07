@@ -55,7 +55,12 @@ export function Discover({
   // keeps its place and shows "Selected ✓"); add-ons that only appear because of a pick are appended.
   const rec = useMemo(() => {
     const stable = recommend(role, enabled, []);
-    return [...stable, ...recommend(role, enabled, queued).filter((id) => !stable.includes(id))];
+    const all = [
+      ...stable,
+      ...recommend(role, enabled, queued).filter((id) => !stable.includes(id)),
+    ];
+    // Recommendations are add-ons only (apps and themes have their own places).
+    return all.filter((id) => addonById(id)?.kind === 'addon');
   }, [role, enabled, queued]);
   const prog = catalogProgress(role, enabled);
   const [mode, setMode] = useState<HeroMode>(() => heroMode('bento', prog));
@@ -84,7 +89,7 @@ export function Discover({
           <SkList>
             <div className="as-rec-head">
               <h2 className="sk-t-h2">{st.recommended}</h2>
-              <SkSectionLink onClick={() => go('apps')}>{st.seeAll}</SkSectionLink>
+              <SkSectionLink onClick={() => go('addons')}>{st.seeAll}</SkSectionLink>
             </div>
             <div className="as-rec-cols">
               <Rows ids={rec.slice(0, 4)} ctx={ctx} bare />
@@ -143,14 +148,18 @@ export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
         ))}
       </div>
       <div className="sk-mt16 as-apps-cols">
-        <Rows ids={shown.slice(0, Math.ceil(shown.length / 2)).map((m) => m.id)} ctx={ctx} />
-        <Rows ids={shown.slice(Math.ceil(shown.length / 2)).map((m) => m.id)} ctx={ctx} />
+        <div>
+          <Rows ids={shown.slice(0, Math.ceil(shown.length / 2)).map((m) => m.id)} ctx={ctx} />
+        </div>
+        <div>
+          <Rows ids={shown.slice(Math.ceil(shown.length / 2)).map((m) => m.id)} ctx={ctx} />
+          {cat === 'all' && soon.length > 0 && (
+            <Section title={st.comingSoon}>
+              <Rows ids={soon.map((m) => m.id)} ctx={ctx} />
+            </Section>
+          )}
+        </div>
       </div>
-      {cat === 'all' && soon.length > 0 && (
-        <Section title={st.comingSoon}>
-          <Rows ids={soon.map((m) => m.id)} ctx={ctx} />
-        </Section>
-      )}
     </>
   );
 }
@@ -194,11 +203,18 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
         </div>
       )}
       <div className="as-cols">
-        {standalone.length > 0 && (
-          <section className="sk-mt24">
-            <Rows ids={standalone.map((m) => m.id)} ctx={ctx} />
-          </section>
-        )}
+        {standalone.length > 0 &&
+          // With no app groups the standalone rows fill both columns (first half, second half).
+          (parents.length === 0 ? [0, 1] : [-1]).map((half) => {
+            const cut = Math.ceil(standalone.length / 2);
+            const part =
+              half < 0 ? standalone : half === 0 ? standalone.slice(0, cut) : standalone.slice(cut);
+            return part.length > 0 ? (
+              <section key={half} className="sk-mt24">
+                <Rows ids={part.map((m) => m.id)} ctx={ctx} />
+              </section>
+            ) : null;
+          })}
         {parents.map((p) => {
           const pm = addonById(p);
           return (

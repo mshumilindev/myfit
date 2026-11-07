@@ -25,8 +25,6 @@ function open(current: 'gym' | 'roster' | 'me' | 'coach', notifUnread: number) {
       onGym={noop}
       onApex={noop}
       onRoster={noop}
-      onNutrition={noop}
-      nutritionEnabled
       onLearn={noop}
       onClose={noop}
     />,

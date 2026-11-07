@@ -14,10 +14,24 @@ const none = { role: 'member' as const, enabled: new Set<string>(), queued: [] a
 beforeEach(() => undefined);
 
 describe('discover picks', () => {
-  it('App of the week is the best app not installed — and stays when picked', () => {
-    expect(appOfTheWeek(none)?.id).toBe('health');
-    expect(appOfTheWeek({ ...none, queued: ['health'] })?.id).toBe('health');
-    expect(appOfTheWeek({ ...none, enabled: new Set(['health']) })?.id).toBe('atlas');
+  it('the item of the week rotates every week (an app or an add-on), stays within a week, skips an installed item', () => {
+    const WEEK = 7 * 86_400_000;
+    const t0 = Date.UTC(2026, 10, 2);
+    const first = appOfTheWeek(none, t0);
+    expect(first).not.toBeNull();
+    expect(appOfTheWeek(none, t0 + 86_400_000)?.id).toBe(first?.id);
+    const ids = new Set(Array.from({ length: 6 }, (_, i) => appOfTheWeek(none, t0 + i * WEEK)?.id));
+    expect(ids.size).toBeGreaterThan(1);
+    // Picking keeps it; installing moves on to another item.
+    expect(appOfTheWeek({ ...none, queued: [first!.id] }, t0)?.id).toBe(first?.id);
+    const next = appOfTheWeek({ ...none, enabled: new Set([first!.id]) }, t0);
+    expect(next?.id).not.toBe(first?.id);
+    // Only top-level apps or add-ons: never a module, a theme or a coming-soon item.
+    for (let i = 0; i < 8; i++) {
+      const m = appOfTheWeek(none, t0 + i * WEEK)!;
+      expect(['app', 'addon']).toContain(m.kind);
+      expect(m.soon).toBeFalsy();
+    }
   });
   it('starter pack: the Recovery pair until fewer than two are left', () => {
     expect(starterPack(none)?.left).toEqual(['health', 'sleep']);

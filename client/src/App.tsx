@@ -89,7 +89,7 @@ import { isActivityLive } from './activities';
 import type { SyncError, Notice, InjurySide } from './types';
 import { healthFromHash, healthHash, type HealthOverlay } from './views/health/healthRoute';
 import type { MuscleGroup } from './data/exercises';
-import { useFlag, isFlagOn, startGlobalFlags } from './data/flags';
+import { startGlobalFlags } from './data/flags';
 import { isClientHead } from './coach/client/routes';
 import { useClientShared } from './coach/client/shared';
 import { ClientBridgeLazy, ClientRoutesLazy } from './coach/client/lazy';
@@ -242,9 +242,6 @@ const RosterApp = lazy(() =>
 // Coach dashboard (flag `coach`, trainer or admin): code-split, own prefix #/c/… (not #/coach, the advice view).
 const CoachApp = lazy(() =>
   import('./coach/CoachApp').then((module) => ({ default: module.CoachApp })),
-);
-const NutritionApp = lazy(() =>
-  import('./NutritionApp').then((module) => ({ default: module.NutritionApp })),
 );
 const LearnApp = lazy(() => import('./LearnApp').then((module) => ({ default: module.LearnApp })));
 const ProfileView = lazy(() =>
@@ -665,11 +662,6 @@ function rosterHash(tab: RosterTab): string {
   return `#/people/${tab}`;
 }
 
-// --- Nutrition (food & macros sub-app) is a full-screen mode at #/nutrition.
-function isNutritionHash(hash: string): boolean {
-  return hash.split('?')[0].replace(/^#\/?/, '').split('/')[0] === 'nutrition';
-}
-
 // --- Learn (how-to videos sub-app) is a full-screen mode at #/learn.
 function isLearnHash(hash: string): boolean {
   return hash.split('?')[0].replace(/^#\/?/, '').split('/')[0] === 'learn';
@@ -849,16 +841,10 @@ function AppMain() {
   const [apexTab, setApexTab] = useState<ApexTab>(() => apexTabFromHash(currentHash()));
   const [rosterOpen, setRosterOpen] = useState<boolean>(() => isRosterHash(currentHash()));
   const [rosterTab, setRosterTab] = useState<RosterTab>(() => rosterTabFromHash(currentHash()));
-  const [nutritionOpen, setNutritionOpen] = useState<boolean>(
-    () => isNutritionHash(currentHash()) && isFlagOn('nutrition'),
-  );
   const [learnOpen, setLearnOpen] = useState<boolean>(() => isLearnHash(currentHash()));
   const [coachWanted, setCoachWanted] = useState<boolean>(() =>
     coachScreenOpen(currentHash(), getRole()),
   );
-  // Nutrition is behind a feature flag (admin-only toggle in Settings); default
-  // OFF → the Shell shows it as "coming soon" and it cannot be opened.
-  const nutritionEnabled = useFlag('nutrition');
   const [shellOpen, setShellOpen] = useState(false);
   // The Start sheet behind the notched "+" (and the desktop rail's Start).
   const [startOpen, setStartOpen] = useState(false);
@@ -1149,21 +1135,19 @@ function AppMain() {
     if (!authed || joinToken || coachOpen || legalPage || isStoreHash(currentHash())) return;
     const next = learnOpen
       ? '#/learn'
-      : nutritionOpen
-        ? '#/nutrition'
-        : rosterOpen
-          ? rosterHash(rosterTab)
-          : apexOpen
-            ? apexHash(apexTab)
-            : toHash(
-                effectiveTab,
-                activeOverlay,
-                programsPeer,
-                libMine,
-                progressSub,
-                progressSeg,
-                volumeLens,
-              );
+      : rosterOpen
+        ? rosterHash(rosterTab)
+        : apexOpen
+          ? apexHash(apexTab)
+          : toHash(
+              effectiveTab,
+              activeOverlay,
+              programsPeer,
+              libMine,
+              progressSub,
+              progressSeg,
+              volumeLens,
+            );
     // The program editor owns its address under programs (`#/programs/<id>/edit`, `#/programs/new`).
     const keep =
       effectiveTab === 'programs' &&
@@ -1180,7 +1164,6 @@ function AppMain() {
     apexTab,
     rosterOpen,
     rosterTab,
-    nutritionOpen,
     learnOpen,
     effectiveTab,
     activeOverlay,
@@ -1201,7 +1184,6 @@ function AppMain() {
       redirectLegacyPeopleClients();
       setRosterOpen(isRosterHash(currentHash()));
       setRosterTab(rosterTabFromHash(currentHash()));
-      setNutritionOpen(isNutritionHash(currentHash()) && isFlagOn('nutrition'));
       setLearnOpen(isLearnHash(currentHash()));
       setCoachWanted(coachScreenOpen(currentHash(), getRole()));
       const { tab: ht, overlay: ho } = fromHash(currentHash());
@@ -1251,15 +1233,6 @@ function AppMain() {
     else el.classList.remove('theme-roster');
     return () => el.classList.remove('theme-roster');
   }, [rosterOpen]);
-
-  // Same for Nutrition — lazurite accent on the root while its app is open (so
-  // portaled sheets/menus pick up the blue accent too).
-  useEffect(() => {
-    const el = document.documentElement;
-    if (nutritionOpen) el.classList.add('theme-nutrition');
-    else el.classList.remove('theme-nutrition');
-    return () => el.classList.remove('theme-nutrition');
-  }, [nutritionOpen]);
 
   // Same for Learn — rubellite accent on the root while its app is open.
   useEffect(() => {
@@ -1360,14 +1333,13 @@ function AppMain() {
   const peopleLabel = peopleLabelFor(t);
   const peopleDesc = peopleDescFor(t);
   // Switching apps always lands on that app's home screen — never the tab or
-  // overlay you left behind. (Apex/Learn/Nutrition also reset their entry tab.)
+  // overlay you left behind. (Apex/Learn also reset their entry tab.)
   const openGym = () => {
     setShellOpen(false); // the apps drawer goes at once, before the glitch
     glitchSwitch(() => {
       setCoachWanted(false);
       setApexOpen(false);
       setRosterOpen(false);
-      setNutritionOpen(false);
       setLearnOpen(false);
       setOverlay(null);
       setTab('today');
@@ -1378,7 +1350,6 @@ function AppMain() {
     glitchSwitch(() => {
       setCoachWanted(false);
       setRosterOpen(false);
-      setNutritionOpen(false);
       setLearnOpen(false);
       setApexTab('home');
       setApexOpen(true);
@@ -1389,21 +1360,9 @@ function AppMain() {
     glitchSwitch(() => {
       setCoachWanted(false);
       setApexOpen(false);
-      setNutritionOpen(false);
       setLearnOpen(false);
       setRosterTab(guardRosterTab(rtab, role));
       setRosterOpen(true);
-    });
-  };
-  const openNutrition = () => {
-    if (!nutritionEnabled) return;
-    setShellOpen(false); // the apps drawer goes at once, before the glitch
-    glitchSwitch(() => {
-      setCoachWanted(false);
-      setApexOpen(false);
-      setRosterOpen(false);
-      setLearnOpen(false);
-      setNutritionOpen(true);
     });
   };
   const openLearn = () => {
@@ -1412,7 +1371,6 @@ function AppMain() {
       setCoachWanted(false);
       setApexOpen(false);
       setRosterOpen(false);
-      setNutritionOpen(false);
       setLearnOpen(true);
     });
   };
@@ -1448,51 +1406,11 @@ function AppMain() {
             onGym={openGym}
             onApex={openApex}
             onRoster={() => openRoster(rosterHomeFor(role))}
-            onNutrition={openNutrition}
-            nutritionEnabled={nutritionEnabled}
             onLearn={openLearn}
             onClose={() => setShellOpen(false)}
           />
         )}
       </>
-    );
-  }
-
-  // Nutrition takes over the whole screen — its own lazurite skin & store.
-  if (nutritionOpen && nutritionEnabled) {
-    return (
-      <AppRoot>
-        <Suspense fallback={<ScreenFallback />}>
-          <NutritionApp
-            now={notifNow}
-            onOpenShell={() => setShellOpen(true)}
-            onOpenProfile={() => openRoster('me')}
-            notifs={notifs}
-            notifState={notifState}
-            notifUnread={notifUnread}
-            onNotifSeen={markNotifsSeen}
-            onNotifMarkAll={markAllNotifsSeen}
-          />
-        </Suspense>
-        {shellOpen && (
-          <ShellLauncher
-            store={store}
-            now={notifNow}
-            current="nutrition"
-            peopleLabel={peopleLabel}
-            peopleDesc={peopleDesc}
-            activeChallenges={activeChallengeCount}
-            notifUnread={notifUnread}
-            onGym={openGym}
-            onApex={openApex}
-            onRoster={() => openRoster(rosterHomeFor(role))}
-            onNutrition={() => setShellOpen(false)}
-            nutritionEnabled={nutritionEnabled}
-            onLearn={openLearn}
-            onClose={() => setShellOpen(false)}
-          />
-        )}
-      </AppRoot>
     );
   }
 
@@ -1526,8 +1444,6 @@ function AppMain() {
             onGym={openGym}
             onApex={openApex}
             onRoster={() => openRoster(rosterHomeFor(role))}
-            onNutrition={openNutrition}
-            nutritionEnabled={nutritionEnabled}
             onLearn={() => setShellOpen(false)}
             onClose={() => setShellOpen(false)}
           />
@@ -1569,8 +1485,6 @@ function AppMain() {
             onRoster={() =>
               rosterMode(rosterTab, role) === 'users' ? setShellOpen(false) : openRoster('users')
             }
-            onNutrition={openNutrition}
-            nutritionEnabled={nutritionEnabled}
             onLearn={openLearn}
             onClose={() => setShellOpen(false)}
           />
@@ -1617,8 +1531,6 @@ function AppMain() {
             onGym={openGym}
             onApex={() => setShellOpen(false)}
             onRoster={() => openRoster(rosterHomeFor(role))}
-            onNutrition={openNutrition}
-            nutritionEnabled={nutritionEnabled}
             onLearn={openLearn}
             onClose={() => setShellOpen(false)}
           />
@@ -2025,8 +1937,6 @@ function AppMain() {
             openApex();
           }}
           onRoster={() => openRoster(rosterHomeFor(role))}
-          onNutrition={openNutrition}
-          nutritionEnabled={nutritionEnabled}
           onLearn={openLearn}
           onClose={() => setShellOpen(false)}
         />

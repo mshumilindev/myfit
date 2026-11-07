@@ -1,7 +1,7 @@
 /**
  * Shell — the suite launcher. A bottom sheet, opened from the header app icon,
  * that switches between the Spotter apps: Gym (the tracker), Apex (gamification),
- * Nutrition, People, Learn and Coach. Silver, neutral chrome — the apps supply the
+ * People, Learn and Coach. Silver, neutral chrome — the apps supply the
  * colour: every tile wears its own app's accent (IconTile, caret, and the outline + tint + check
  * of the current tile).
  */
@@ -93,15 +93,13 @@ export function ShellLauncher({
   onGym,
   onApex,
   onRoster,
-  onNutrition,
-  nutritionEnabled,
   onLearn,
   onClose,
 }: {
   store: StoreState;
   now: number;
   /** `me` = the own-account screen (People chrome, but not the Users app: no tile is current). */
-  current: 'gym' | 'apex' | 'roster' | 'me' | 'nutrition' | 'learn' | 'coach';
+  current: 'gym' | 'apex' | 'roster' | 'me' | 'learn' | 'coach';
   peopleLabel: string;
   peopleDesc: string;
   activeChallenges: number;
@@ -109,8 +107,6 @@ export function ShellLauncher({
   onGym: () => void;
   onApex: () => void;
   onRoster: () => void;
-  onNutrition: () => void;
-  nutritionEnabled: boolean;
   onLearn: () => void;
   onClose: () => void;
 }) {
@@ -168,25 +164,6 @@ export function ShellLauncher({
             currentLabel={t.shellCurrent}
           />
         )}
-        <AppTile
-          tone="kcal"
-          icon="fork-knife"
-          name={t.shellNutrition}
-          sub={
-            nutritionEnabled ? (
-              t.shellNutritionDesc
-            ) : (
-              <>
-                <Icon name="clock" /> {t.shellComingSoon}
-              </>
-            )
-          }
-          soon={!nutritionEnabled}
-          locked={!nutritionEnabled}
-          current={current === 'nutrition'}
-          onSelect={onNutrition}
-          currentLabel={t.shellCurrent}
-        />
         {/* Users (user management) is admin-only; Me is reached from the avatar, not from a tile. */}
         {(peopleEnabled || current === 'roster') && (
           <AppTile

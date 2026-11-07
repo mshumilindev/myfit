@@ -20,12 +20,11 @@ afterEach(() => {
   cleanup();
 });
 
-type Current = 'gym' | 'apex' | 'roster' | 'nutrition' | 'learn' | 'coach';
-/** Current app -> the fixed family of its tile (Nutrition is the kcal / lazurite family). */
+type Current = 'gym' | 'apex' | 'roster' | 'learn' | 'coach';
+/** Current app -> the fixed family of its tile. */
 const APPS: Record<Current, string> = {
   gym: 'gym',
   apex: 'apex',
-  nutrition: 'kcal',
   roster: 'people',
   coach: 'coach',
   learn: 'learn',
@@ -45,8 +44,6 @@ function open(current: Current) {
       onGym={noop}
       onApex={noop}
       onRoster={noop}
-      onNutrition={noop}
-      nutritionEnabled
       onLearn={noop}
       onClose={noop}
     />,
@@ -64,13 +61,11 @@ describe('ShellLauncher: colour coding', () => {
   it('every tile wears its own app family on the tile itself (caret, outline, tint read --t-*)', () => {
     open('gym');
     const all = tiles();
-    expect(all).toHaveLength(6);
+    expect(all).toHaveLength(5);
     const fam = all.map(
       (t) => [...t.classList].find((c) => c.startsWith('uit--') && c !== 'uit--neutral') ?? '',
     );
-    expect(fam).toEqual(
-      ['gym', 'apex', 'kcal', 'people', 'coach', 'learn'].map((f) => `uit--${f}`),
-    );
+    expect(fam).toEqual(['gym', 'apex', 'people', 'coach', 'learn'].map((f) => `uit--${f}`));
   });
 
   it.each(Object.keys(APPS) as Current[])(

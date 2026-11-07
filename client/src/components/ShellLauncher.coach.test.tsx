@@ -28,8 +28,6 @@ function open(current: 'gym' | 'coach', onClose: () => void = noop) {
       onGym={noop}
       onApex={noop}
       onRoster={noop}
-      onNutrition={noop}
-      nutritionEnabled
       onLearn={noop}
       onClose={onClose}
     />,

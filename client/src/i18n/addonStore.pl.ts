@@ -17,6 +17,7 @@ export const addonStorePl: typeof addonStoreEn = {
   searchClear: 'Wyczyść wyszukiwanie',
   noResults: 'Nic nie znaleziono',
   weekTitle: 'Aplikacja tygodnia',
+  weekTitleAddon: 'Dodatek tygodnia',
   yourSpotter: 'Twój Spotter',
   progress: (_on, total) => `z ${total} zainstalowano`,
   notTurnedOn: 'Jeszcze nie zainstalowane',

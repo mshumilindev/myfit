@@ -25,8 +25,6 @@ const meta = {
     onGym: noop,
     onApex: noop,
     onRoster: noop,
-    onNutrition: noop,
-    nutritionEnabled: true,
     onLearn: noop,
     onClose: noop,
   },
@@ -37,6 +35,5 @@ type Story = StoryObj<typeof meta>;
 export const InGym: Story = {};
 export const InApex: Story = { args: { current: 'apex' } };
 export const InPeople: Story = { args: { current: 'roster' } };
-export const InNutrition: Story = { args: { current: 'nutrition' } };
 export const InLearn: Story = { args: { current: 'learn' } };
 export const InCoach: Story = { args: { current: 'coach' } };

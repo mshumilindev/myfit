@@ -17,6 +17,7 @@ export const addonStoreLt: typeof addonStoreEn = {
   searchClear: 'Išvalyti paiešką',
   noResults: 'Nieko nerasta',
   weekTitle: 'Savaitės programa',
+  weekTitleAddon: 'Savaitės priedas',
   yourSpotter: 'Jūsų Spotter',
   progress: (_on, total) => `iš ${total} įdiegta`,
   notTurnedOn: 'Dar neįdiegta',

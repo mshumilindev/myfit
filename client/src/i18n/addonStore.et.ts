@@ -17,6 +17,7 @@ export const addonStoreEt: typeof addonStoreEn = {
   searchClear: 'Tühjenda otsing',
   noResults: 'Midagi ei leitud',
   weekTitle: 'Nädala rakendus',
+  weekTitleAddon: 'Nädala lisandmoodul',
   yourSpotter: 'Sinu Spotter',
   progress: (_on, total) => `${total}-st paigaldatud`,
   notTurnedOn: 'Veel paigaldamata',

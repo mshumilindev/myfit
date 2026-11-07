@@ -30,8 +30,6 @@ function open(current: 'gym' | 'apex' = 'gym') {
       onGym={noop}
       onApex={noop}
       onRoster={noop}
-      onNutrition={noop}
-      nutritionEnabled={false}
       onLearn={noop}
       onClose={noop}
     />,

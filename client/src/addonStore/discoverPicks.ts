@@ -17,10 +17,30 @@ export interface DiscoverState {
 /** Starter packs: ids in order; only the ones the role may use. */
 export const STARTER_PACKS = [{ id: 'recovery', ids: ['health', 'sleep'] }] as const;
 
-/** "App of the week": the best top-level item (an app, or an add-on that needs no other) not yet installed — picked or not, so it stays after "Add". */
-export function appOfTheWeek({ role, enabled }: DiscoverState): AddonManifest | null {
-  const id = recommend(role, enabled, []).find((x) => !addonById(x)?.parent);
-  return id ? (addonById(id) ?? null) : null;
+/** The week number since 1970 (a Thursday-based week is fine: it only has to change once a week, the same for everyone). */
+export function weekIndex(now: number): number {
+  return Math.floor((now / 86_400_000 + 4) / 7);
+}
+
+/**
+ * "App / Add-on of the week": one top-level item (an app, or an add-on that needs no other) the role can install, rotating
+ * every week through the catalog in a fixed order. An installed item is skipped to the next; it stays while picked, so it
+ * does not vanish after "Add". `now` is a parameter so the rule is testable.
+ */
+export function appOfTheWeek(
+  { role, enabled }: DiscoverState,
+  now: number = Date.now(),
+): AddonManifest | null {
+  const pool = availableForRole(role).filter(
+    (m) => (m.kind === 'app' || (m.kind === 'addon' && !m.parent)) && isAddonAllowed(m.id, role),
+  );
+  if (!pool.length) return null;
+  const start = weekIndex(now) % pool.length;
+  for (let i = 0; i < pool.length; i++) {
+    const m = pool[(start + i) % pool.length];
+    if (!enabled.has(m.id)) return m;
+  }
+  return null;
 }
 
 /** A starter pack still worth offering: the ids the role may use that are not installed (≥2 left). */

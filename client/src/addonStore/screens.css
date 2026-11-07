@@ -30,11 +30,16 @@
     width: var(--sk-search-w);
   }
   /* Boards 01, 02, 30, 31: the title and the search field share one row, the field on the right. */
+  /* The field starts where the second column of the lists below starts. */
   .as-main-head {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: center;
-    justify-content: space-between;
-    gap: var(--sk-sp-8);
+    column-gap: var(--sk-sp-8);
+  }
+  .as-main-head .as-search-wrap {
+    grid-column: 2;
+    width: auto;
   }
   .as-main-head .as-desk-title {
     margin: 0;
@@ -152,7 +157,7 @@
   .as-rec-cols {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: var(--sk-sp-10);
+    column-gap: var(--sk-sp-8);
   }
 }
 
@@ -218,6 +223,7 @@
   .as-groups {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sk-sp-6) var(--sk-sp-8);
     align-items: start;
   }
 }

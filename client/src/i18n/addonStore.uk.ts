@@ -17,6 +17,7 @@ export const addonStoreUk: typeof addonStoreEn = {
   searchClear: 'Очистити пошук',
   noResults: 'Нічого не знайдено',
   weekTitle: 'Застосунок тижня',
+  weekTitleAddon: 'Додаток тижня',
   yourSpotter: 'Ваш Spotter',
   progress: (_on, total) => `із ${total} встановлено`,
   notTurnedOn: 'Ще не встановлено',

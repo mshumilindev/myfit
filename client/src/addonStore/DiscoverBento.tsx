@@ -140,8 +140,8 @@ export function DiscoverBento({
           tone={week.tone}
           size="hero"
           span={2}
-          eyebrow={st.weekTitle}
-          aside={<SkBadge kind="app">{st.kindApp}</SkBadge>}
+          eyebrow={week.kind === 'app' ? st.weekTitle : st.weekTitleAddon}
+          aside={kindBadge(st, week)}
           title={itemName(st, week.id)}
           titleSize="hero"
           onTitle={() => ctx.open(week.id)}

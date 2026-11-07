@@ -19,6 +19,7 @@ export const addonStoreEn = {
   searchClear: 'Clear search',
   noResults: 'Nothing found',
   weekTitle: 'App of the week',
+  weekTitleAddon: 'Add-on of the week',
   yourSpotter: 'Your Spotter',
   progress: (_on: number, total: number) => `of ${total} installed`,
   notTurnedOn: 'Not installed yet',

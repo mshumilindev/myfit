@@ -96,8 +96,6 @@ export const LauncherInCoach: Story = {
           onGym={noop}
           onApex={noop}
           onRoster={noop}
-          onNutrition={noop}
-          nutritionEnabled
           onLearn={noop}
           onClose={noop}
         />
