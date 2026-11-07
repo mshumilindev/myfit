@@ -31,12 +31,14 @@ describe('Today widgets follow the Mastery add-on (SPO-518)', () => {
   });
   it('installing Mastery brings them back', () => {
     addonsPref.set(['apex']);
+    expect(avail('apex-rank')).toBe(false); // the rank widget is the Ranks module of Apex
+    addonsPref.set(['apex', 'apex-ranks']);
     expect(avail('apex-rank')).toBe(true);
   });
   it('a trainer is offered Mastery too: no Apex widgets until it is installed', () => {
     role.value = 'trainer';
     expect(avail('apex-rank')).toBe(false);
-    addonsPref.set(['apex']);
+    addonsPref.set(['apex', 'apex-ranks']);
     expect(avail('apex-rank')).toBe(true);
   });
 });

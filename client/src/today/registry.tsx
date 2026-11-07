@@ -132,12 +132,22 @@ export const HEALTH_WIDGET_ADDON: Readonly<Record<string, string>> = {
   rehab: 'injury-log',
   cycle: 'cycle',
 };
+/** Widgets that belong to an Apex module: they follow the module switch as well as Apex itself. */
+export const APEX_WIDGET_MODULE: Readonly<Record<string, string>> = {
+  'apex-challenge': 'apex-challenges',
+  'challenge-to-try': 'apex-challenges',
+  'apex-rank': 'apex-ranks',
+  'apex-awards': 'apex-awards',
+  'apex-mastery': 'mastery',
+  'apex-level-up': 'mastery',
+};
 export function useWidgetAvailable(): (w: WidgetDef) => boolean {
   const available = useAddonAvailable();
   return (w) =>
     (!MASTERY_WIDGET_IDS.has(w.id) || available('apex')) &&
     (!SLEEP_WIDGET_IDS.has(w.id) || available('sleep')) &&
     (!HEALTH_WIDGET_ADDON[w.id] || available(HEALTH_WIDGET_ADDON[w.id])) &&
+    (!APEX_WIDGET_MODULE[w.id] || available(APEX_WIDGET_MODULE[w.id])) &&
     (w.group !== 'atlas' || available('atlas'));
 }
 

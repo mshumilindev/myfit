@@ -65,7 +65,6 @@ import {
   markAllNotifsSeen,
   unreadCount,
 } from './notifications';
-import { useChallenges } from './challenges';
 import { ShellLauncher } from './components/ShellLauncher';
 import { glitchHold, glitchSwitch } from './components/appGlitch';
 import { setSuiteSession } from './components/suite/suiteSession';
@@ -763,7 +762,8 @@ function AppMain() {
   // the result (stable timestamps + seen flags, so nothing stale re-surfaces).
   const [notifNow] = useState(() => Date.now());
   const [rankUp, setRankUp] = useState<MasteryResult | null>(null);
-  const { apexOn, masteryOn, themesOn, sleepOn, atlasOn, healthOn, injuryOn } = useAddonRuntime();
+  const { apexOn, masteryOn, challenges, themesOn, sleepOn, atlasOn, healthOn, injuryOn } =
+    useAddonRuntime();
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
     if (!apexOn) return;
@@ -790,7 +790,6 @@ function AppMain() {
       delete el.dataset.sleep;
     };
   }, [nightLive]);
-  const challenges = useChallenges();
   const atlas = useAtlasNotes();
   // Atlas's notes live in his own thread (unread count on his bubble in the
   // stories strip) — not in the bell.

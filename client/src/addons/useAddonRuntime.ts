@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { setAtlasInstalled } from '../atlas/aiConsent';
 import { reconcileAtlasConsent, watchAtlasRemoval } from '../atlas/withdrawOnRemove';
+import { useChallenges } from '../challenges';
 import { syncSleepAutoQueue } from '../store';
 import { setAllowedThemes } from '../themes/registry';
 import { useInstalledThemeIds, useThemesOn } from '../themes/useThemeAccess';
@@ -19,6 +20,13 @@ export function useAddonRuntime() {
   const sleepOn = useAddonOrBase('sleep');
   const atlasOn = useAddonOrBase('atlas');
   const masteryOn = useAddonOrBase('mastery');
+  // Challenges are an Apex module: with it off they leave the bell and the launcher count.
+  const allChallenges = useChallenges();
+  const challengesOn = useAddonOrBase('apex-challenges');
+  const challenges = useMemo(
+    () => (challengesOn ? allChallenges : []),
+    [challengesOn, allChallenges],
+  );
   const healthOn = useAddonOrBase('health');
   const injuryOn = useAddonOrBase('injury-log');
   useEffect(() => migrateModules(), []);
@@ -27,5 +35,5 @@ export function useAddonRuntime() {
   useEffect(() => watchAtlasRemoval(), []);
   useEffect(() => (atlasOn ? undefined : reconcileAtlasConsent()), [atlasOn]);
   useEffect(() => setAllowedThemes(installedThemes), [installedThemes]);
-  return { apexOn, masteryOn, themesOn, sleepOn, atlasOn, healthOn, injuryOn };
+  return { apexOn, masteryOn, challenges, themesOn, sleepOn, atlasOn, healthOn, injuryOn };
 }
