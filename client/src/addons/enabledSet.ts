@@ -87,6 +87,24 @@ export function disableAddons(ids: string[], role: Role = getRole()): void {
   );
 }
 
+const MODULES_MIGRATED = 'spotter.addons.modules.v1';
+
+/**
+ * One time per device: an account that installed Apex or Health before they had modules keeps everything it
+ * saw, so each installed parent gets its modules switched on (they can be turned off in Configure afterwards).
+ */
+export function migrateModules(role: Role = getRole()): void {
+  try {
+    if (localStorage.getItem(MODULES_MIGRATED)) return;
+    const on = current(role);
+    const add = ['apex', 'health'].filter((id) => on.has(id)).flatMap(moduleIdsOf);
+    if (add.length) enableAddons(add, role);
+    localStorage.setItem(MODULES_MIGRATED, '1');
+  } catch {
+    // Storage blocked: skip, the modules stay as they are and the user can switch them in Configure.
+  }
+}
+
 let cachedRole: Role | null = null;
 let cachedKey = '';
 let cachedSet: ReadonlySet<string> = new Set();

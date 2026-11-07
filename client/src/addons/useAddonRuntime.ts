@@ -4,7 +4,7 @@ import { reconcileAtlasConsent, watchAtlasRemoval } from '../atlas/withdrawOnRem
 import { syncSleepAutoQueue } from '../store';
 import { setAllowedThemes } from '../themes/registry';
 import { useInstalledThemeIds, useThemesOn } from '../themes/useThemeAccess';
-import { useAddonOrBase } from './enabledSet';
+import { migrateModules, useAddonOrBase } from './enabledSet';
 
 /**
  * What the shell reads from the installed add-ons, plus the effects that follow an install or removal (SPO-518):
@@ -21,6 +21,7 @@ export function useAddonRuntime() {
   const masteryOn = useAddonOrBase('mastery');
   const healthOn = useAddonOrBase('health');
   const injuryOn = useAddonOrBase('injury-log');
+  useEffect(() => migrateModules(), []);
   useEffect(() => syncSleepAutoQueue(), [sleepOn]);
   useEffect(() => setAtlasInstalled(atlasOn), [atlasOn]);
   useEffect(() => watchAtlasRemoval(), []);
