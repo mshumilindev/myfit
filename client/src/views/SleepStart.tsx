@@ -14,12 +14,7 @@ export function SleepStart() {
   const block = sleepBlockedBy(useStore());
   return (
     <>
-      <Button
-        variant="sleep-fill"
-        className="sleep-wide"
-        disabled={!!block}
-        onClick={() => void startSleep()}
-      >
+      <Button variant="sleep-fill" fullWidth disabled={!!block} onClick={() => void startSleep()}>
         <Icon name="moon" /> {t.sleepStart}
       </Button>
       {block && <p className="muted">{t[SLEEP_BLOCK_KEY[block]]}</p>}
