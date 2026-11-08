@@ -443,6 +443,9 @@ export function BackfillSheet(props: {
   /** Prefill the date (YYYY-MM-DD) — e.g. "Log for Sep 29" on the History calendar. */
   initialDate?: string;
 }) {
+  // without the Home sets add-on a past session can only be a gym one (hard guard)
+  const homeSetsInstalled = useAddonOrBase('home-sets');
+  const onCreateHome = homeSetsInstalled ? props.onCreateHome : undefined;
   const { t } = useT();
   const homeSets = useStore().home.sets;
   const [kind, setKind] = useState<'gym' | 'home'>('gym');
@@ -478,7 +481,7 @@ export function BackfillSheet(props: {
         <Icon name="arrow-counter-clockwise" />
         <span className="t">{t.logPastSession}</span>
       </div>
-      {props.onCreateHome && (
+      {onCreateHome && (
         <Segmented
           tabs
           className="backfill-kind"
@@ -574,8 +577,8 @@ export function BackfillSheet(props: {
           className="grow"
           disabled={invalid}
           onClick={() =>
-            kind === 'home' && props.onCreateHome
-              ? props.onCreateHome(
+            kind === 'home' && onCreateHome
+              ? onCreateHome(
                   startedAt,
                   duration * 60000,
                   homeSets.find((x) => x.id === homeSetId) ?? null,

@@ -102,3 +102,26 @@ export function formExists(
 /** The form edits or starts an injury (its own consent, SPO-290). */
 export const isInjuryForm = (form: HealthFormSpec | undefined): boolean =>
   form?.kind === 'edit-injury' || (form?.kind === 'new' && form.type === 'injury');
+
+/**
+ * The Health module a page or form belongs to, or null for the Health overview itself (hard guard, SPO-500): a link to a
+ * module that is not installed shows nothing, whatever the hash says. `available` is the add-on gate.
+ */
+export function routeAddon(route: {
+  form?: HealthFormSpec;
+  cond?: string;
+  nic?: unknown;
+  alc?: unknown;
+  sup?: unknown;
+  cyc?: unknown;
+}): string | null {
+  if (route.nic) return 'nicotine';
+  if (route.alc) return 'alcohol';
+  if (route.sup) return 'supplements';
+  if (route.cyc) return 'cycle';
+  if (route.cond) return 'conditions';
+  const f = route.form;
+  if (f?.kind === 'edit-injury' || (f?.kind === 'new' && f.type === 'injury')) return 'injury-log';
+  if (f?.kind === 'new') return f.type === 'illness' ? 'unwell' : 'rest';
+  return null;
+}

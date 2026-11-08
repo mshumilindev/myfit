@@ -123,7 +123,12 @@ export const MASTERY_WIDGET_IDS: ReadonlySet<string> = new Set([
   'challenge-to-try',
 ]);
 /** Widgets of the Sleep add-on (SPO-518). */
-export const SLEEP_WIDGET_IDS: ReadonlySet<string> = new Set(['sleep', 'sleep-debt']);
+export const SLEEP_WIDGET_IDS: ReadonlySet<string> = new Set([
+  'sleep',
+  'sleep-debt',
+  'bedtime-consistency',
+  'naps',
+]);
 /**
  * Single widgets that belong to a Health module (the Health group mixes them with core rest/illness widgets, so ids decide, not
  * the group). Rest and illness stay core.
@@ -141,12 +146,18 @@ export const APEX_WIDGET_MODULE: Readonly<Record<string, string>> = {
   'apex-awards': 'apex-awards',
   'apex-mastery': 'mastery',
   'apex-level-up': 'mastery',
+  // Standards are ranks, feats are awards (hard guard: each module switches its own widgets off)
+  standards: 'apex-ranks',
+  'apex-next-feat': 'apex-awards',
+  'apex-feats-board': 'apex-awards',
+  'apex-year-feats': 'apex-awards',
 };
 /** Widgets of other add-ons that sit in a core group. */
 const OTHER_WIDGET_ADDON: Readonly<Record<string, string>> = {
   'home-sets': 'home-sets',
   goals: 'goals',
   playbook: 'playbook',
+  'physique-goal': 'goals',
 };
 /** Widgets outside the cardio group that read or log activities. */
 const ACTIVITY_WIDGET_IDS: ReadonlySet<string> = new Set(['activities-week', 'rest-day-idea']);

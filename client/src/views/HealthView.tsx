@@ -54,7 +54,7 @@ import { ConditionPage, ConditionsSection } from './health/Conditions';
 import { NicotineHealthGroup } from './health/nicotine/NicotineSection';
 import { CycleHealthRow } from './health/cycle/CycleSection';
 import type { CycleScreen } from './health/cycle/CycleScreens';
-import { formExists, isInjuryForm } from './health/healthRoute';
+import { formExists, isInjuryForm, routeAddon } from './health/healthRoute';
 import { HealthFeatureScreen } from './health/HealthFeatureScreen';
 import { AlcoholHealthRow } from './health/alcohol/AlcoholSection';
 import { SupplementHealthRow } from './health/supplements/SupplementSection';
@@ -94,6 +94,13 @@ export function HealthView(props: HealthViewProps) {
   const unwellOn = available('unwell');
   const conditionsOn = available('conditions');
   const web = useIsDesktop();
+  // A direct link to a module that is not installed opens nothing (hard guard, SPO-500).
+  const routeNeeds = routeAddon(props);
+  const routeBlocked = routeNeeds !== null && !available(routeNeeds);
+  const { onClose } = props;
+  useEffect(() => {
+    if (routeBlocked) onClose();
+  }, [routeBlocked, onClose]);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 60_000);
@@ -468,6 +475,7 @@ export function HealthView(props: HealthViewProps) {
       </HealthGate>
     ) : null;
 
+  if (routeBlocked) return null;
   // Privacy and Nicotine pages replace the whole Health overview (mobile and web).
   if (props.nic || props.cyc || props.alc || props.sup)
     return (
