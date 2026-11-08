@@ -1,27 +1,36 @@
 /**
- * DESIGN DRAFT (SPO-500 I5/I8, awaiting approval): the Today card that offers the add-ons and a look after onboarding,
- * so onboarding itself stays short. Sits in the hub announcements (HubSlot) like the new-theme invite. Inert until the
- * owner approves the design: `inviteDraft.shown` is only switched on by its story.
+ * Today card "Make it yours" (SPO-500 I5): onboarding stays one short question, and whatever the person skipped is offered
+ * here, once, as a card in the hub announcements (HubSlot) like the new-theme invite. It opens the store and is gone for good
+ * (`addons/startInvite.ts`).
  */
+import { storeHash } from '../addonStore/storeRoute';
+import { markInviteSeen, useMakeItYoursInvite } from '../addons/startInvite';
+import { useT } from '../i18n';
+import { setHash } from '../route';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
-import { Tag } from './ui/Tag';
 import './ThemeAnnouncement.css';
 
-export const inviteDraft = { shown: false };
-
 export function MakeItYoursInvite() {
-  if (!inviteDraft.shown) return null;
+  const { t } = useT();
+  const due = useMakeItYoursInvite();
+  if (!due) return null;
   return (
     <div className="thinv">
       <Card emphasis="glass" pad="md" className="thinv-card">
         <div className="thinv-text">
-          <span className="thinv-kicker">
-            Make it yours <Tag tone="accent">2 ideas</Tag>
-          </span>
-          <span className="thinv-name">Sleep and a new look</span>
+          <span className="thinv-kicker">{t.miyKicker}</span>
+          <span className="thinv-name">{t.miyTitle}</span>
         </div>
-        <Button variant="primary">Take a look</Button>
+        <Button
+          variant="primary"
+          onClick={() => {
+            markInviteSeen();
+            setHash(storeHash('discover'));
+          }}
+        >
+          {t.miyCta}
+        </Button>
       </Card>
     </div>
   );
