@@ -24,7 +24,6 @@ import type { TeamPort } from '../team/port';
 import './Chat.css';
 import { CoachProblemState } from '../BackendNotice';
 import { navigateHash } from '../../navigateHash';
-import { useAddonOrBase } from '../../addons/enabledSet';
 
 export interface ChatScreenProps {
   onNavigate: (r: CoachRoute) => void;
@@ -91,7 +90,6 @@ export function ChatScreen({
   const chat = useChat({ port: chatPort, uid });
   const world = useCoachWorld(worldPort);
   const spotter = useSpotter(teamPort);
-  const teamOn = useAddonOrBase('coach-team');
   const [withId, setWith] = useWithParam();
 
   // ONE unread source: the same hook the rail / tab bar badge reads, over the same chat store.
@@ -162,7 +160,7 @@ export function ChatScreen({
       />
     );
 
-  const pinned = spotter.feed && teamOn && (
+  const pinned = spotter.feed && (
     <SpotterRow feed={spotter.feed} onOpen={() => onNavigate({ screen: 'spotter' })} />
   );
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TabBar } from './ui/TabBar';
+import { addonsPref } from '../addons/enabledSet';
 import { StartSheet } from './StartSheet';
 import { atDay, seedStore, storyShell, workoutOn } from '../stories/fixtures';
 import { PageFrame } from '../stories/PageFrame';
@@ -96,6 +97,20 @@ function DrawerWithFab({ late = false }: { late?: boolean }) {
     </>
   );
 }
+
+/** A workout is running: the other starters are locked; the lock sits at the far end of the tile that runs across both columns. */
+export const LockedWhileLive: Story = {
+  loaders: [
+    () => {
+      const live = trainedToday();
+      live.id = 'start-sheet-live';
+      live.finishedAt = null;
+      addonsPref.set(['activities', 'home-sets']);
+      seedStore({ workouts: [workoutOn('start-sheet-past', 3), live] });
+      return {};
+    },
+  ],
+};
 
 /** SPO-470: the drawer is up — the Start button has turned into a × above it and closes it; tap it to turn it back. */
 export const DrawerOpenFab: Story = {

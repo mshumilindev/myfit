@@ -2,7 +2,6 @@
  * "Next up" on the Session summary (design docs/design/log-activity/BRIEF3.md,
  * artboards p01–p05): when history shows the athlete usually does something
  * right after lifting, the summary offers to start it at once.
- *
  *   • p01 — the card right after the headline / Atlas debrief: icon in its
  *     colour family, "Sauna · 20 min", the reason, an evidence strip, Start
  *     (live timer) / Log N min (logged from the workout's finish), up to two
@@ -15,9 +14,8 @@
  *   • p04 — no pattern: a quiet "Anything after this? Log activity ›" row.
  *   • p05 — web (≥720px): the same pieces in a right-hand panel with Today.
  *
- * `useNextUp` holds the state (called once by SessionView, above its early
- * return); the small components below render the pieces where the summary
- * layout puts them. What to suggest is decided by the pure `nextUp.ts`.
+ * `useNextUp` holds the state (called once by SessionView, above its early return); the small components below
+ * render the pieces where the summary layout puts them. What to suggest is decided by the pure `nextUp.ts`.
  */
 import { useActivitiesOn } from '../../addons/activitiesGate';
 import { useMemo, useState } from 'react';
@@ -147,8 +145,8 @@ export function useNextUp(
 ): NextUpModel | null {
   const { t } = useT();
   const store = useStore();
-  const activitiesOn = useActivitiesOn();
   const off = useNextUpOff();
+  const activitiesOn = useActivitiesOn();
   const [, setTick] = useState(0);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const liveAny = store.activities.find((a) => a.finishedAt === null) ?? null;

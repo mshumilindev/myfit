@@ -8,3 +8,16 @@
 .ss-grid > .ss-tile:last-child:nth-child(odd) .ss-tile-top {
   width: auto;
 }
+/* A tile that runs across both columns lays icon, text and lock in one row: the lock sits at the far end, not
+   squeezed beside the icon. `contents` lets the lock be ordered after the text; the half-width tile keeps its stack. */
+.ss-grid > .ss-tile:last-child:nth-child(odd) .ss-tile-top {
+  display: contents;
+}
+.ss-grid > .ss-tile:last-child:nth-child(odd) .ss-tile-text {
+  min-width: 0;
+}
+.ss-grid > .ss-tile:last-child:nth-child(odd) .ss-lock {
+  order: 1;
+  margin-left: auto;
+  flex-shrink: 0;
+}

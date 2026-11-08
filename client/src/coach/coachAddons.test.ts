@@ -14,9 +14,11 @@ describe('Coach extras', () => {
   it('a route needs its add-on only for Live, Signals and Team (and the client Live tab)', () => {
     expect(coachRouteAddon({ screen: 'live' })).toBe('coach-live');
     expect(coachRouteAddon({ screen: 'signals' })).toBe('coach-signals');
-    for (const s of ['team', 'activity', 'roles', 'spotter'] as const)
+    for (const s of ['team', 'activity', 'roles'] as const)
       expect(coachRouteAddon({ screen: s })).toBe('coach-team');
     expect(coachRouteAddon({ screen: 'client', cid: 'c1', tab: 'live' })).toBe('coach-live');
+    // the platform's own messages are never behind an add-on
+    expect(coachRouteAddon({ screen: 'spotter' })).toBeNull();
     for (const s of [
       'agenda',
       'clients',

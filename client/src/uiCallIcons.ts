@@ -14,9 +14,11 @@ import { CellSignalLow } from '@phosphor-icons/react/CellSignalLow';
 import { ArrowsInSimple } from '@phosphor-icons/react/ArrowsInSimple';
 import { ArrowsOutSimple } from '@phosphor-icons/react/ArrowsOutSimple';
 import { Phone } from '@phosphor-icons/react/Phone';
+import { AddonsGlyph } from './addonsGlyph';
 
-/** Icons of the call kit (SPO-432), kept out of ui.tsx so that file stays under the size ratchet. */
+/** Icons of the call kit (SPO-432) and the store's Add-ons glyph, kept out of ui.tsx so that file stays under the size ratchet. */
 export const CALL_ICONS: Record<string, ComponentType<IconProps>> = {
+  addons: AddonsGlyph,
   'video-camera': VideoCamera,
   'video-camera-slash': VideoCameraSlash,
   'microphone-slash': MicrophoneSlash,

@@ -264,10 +264,10 @@ export function coachRouteAddon(route: CoachRoute): string | null {
       return 'coach-live';
     case 'signals':
       return 'coach-signals';
+    // `spotter` is the platform's own messages (and the push deep link): never behind an optional add-on.
     case 'team':
     case 'activity':
     case 'roles':
-    case 'spotter':
       return 'coach-team';
     case 'client':
       return route.tab === 'live' ? 'coach-live' : null;

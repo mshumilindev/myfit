@@ -9,8 +9,17 @@ import { addonsPref, enableAddons, moduleIdsOf } from './enabledSet';
  * unknown ids, so an old client does not erase it.
  */
 export const ROLES_MIGRATED = 'migrated:roles-v1';
-/** Accounts created before this moment are existing ones. */
-export const STORE_RELEASE_AT = Date.parse('2026-11-08T00:00:00Z');
+declare const __BUILD_ID__: string | undefined;
+/**
+ * Accounts created before this moment are existing ones: the time this build was made (`__BUILD_ID__` is the build time
+ * in base 36), so nothing has to be edited at release. Tests and tools without a build id use the date the store landed.
+ * A later build moves the line forward only for accounts that have no marker, and every trainer or admin who opened a
+ * build since this one already has it.
+ */
+export const STORE_RELEASE_AT = ((): number => {
+  const id = typeof __BUILD_ID__ === 'string' ? parseInt(__BUILD_ID__, 36) : NaN;
+  return Number.isFinite(id) && id > 0 ? id : Date.parse('2026-11-08T00:00:00Z');
+})();
 export const COACH_EXTRAS = ['coach-live', 'coach-signals', 'coach-notes', 'coach-team'];
 
 export interface StoredUsage {

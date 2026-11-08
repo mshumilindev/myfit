@@ -54,6 +54,7 @@ import { DateField, TimePickerField, DurationField } from './PickerFields';
 import { GymPicker } from './GymPicker';
 import { GymThumb } from './GymThumb';
 import { StartFrame } from './StartFrame';
+import { StartTile } from './StartTile';
 import './StartSheetBento.css';
 
 type Sub = null | 'gym' | 'past';
@@ -361,90 +362,71 @@ export function StartSheet({
         </Button>
       )}
       <div className="ss-grid">
-        <Card
-          as="button"
-          className={`ss-tile${locked ? ' locked' : ''}`}
-          aria-disabled={locked}
-          onClick={locked ? undefined : autoBuild}
-        >
-          <span className="ss-tile-top">
-            <IconTile tone="accent" size={40} icon="robot" className="ss-ic" />
-            {locked && <Icon name="lock-simple" className="ss-lock" />}
-          </span>
-          <span className="ss-tile-text">
-            <span className="ss-tt">{t.startAutoTitle}</span>
-            <span className="ss-ts">{locked ? t.startFinishFirst(liveName) : t.startAutoSub}</span>
-          </span>
-        </Card>
+        <StartTile
+          lockable
+          locked={locked}
+          tone="accent"
+          icon="robot"
+          title={t.startAutoTitle}
+          sub={t.startAutoSub}
+          lockedSub={t.startFinishFirst(liveName)}
+          onClick={autoBuild}
+        />
         {activitiesOn && (
-          <Card
-            as="button"
-            className={`ss-tile${locked ? ' locked' : ''}`}
-            aria-disabled={locked}
-            onClick={locked ? undefined : openActivity}
-          >
-            <span className="ss-tile-top">
-              <IconTile tone="conditioning" size={40} icon="heartbeat" className="ss-ic" />
-              {locked && <Icon name="lock-simple" className="ss-lock" />}
-            </span>
-            <span className="ss-tile-text">
-              <span className="ss-tt">{t.startActivityTitle}</span>
-              <span className="ss-ts">
-                {locked ? t.startFinishFirst(liveName) : t.startActivitySub}
-              </span>
-            </span>
-          </Card>
+          <StartTile
+            lockable
+            locked={locked}
+            tone="conditioning"
+            icon="heartbeat"
+            title={t.startActivityTitle}
+            sub={t.startActivitySub}
+            lockedSub={t.startFinishFirst(liveName)}
+            onClick={openActivity}
+          />
         )}
         {healthOn && (
-          <Card as="button" className="ss-tile" onClick={openHealth}>
-            <IconTile tone="rest" size={40} icon="clock-countdown" className="ss-ic" />
-            <span className="ss-tile-text">
-              <span className="ss-tt">{t.startHealthTitle}</span>
-              <span className="ss-ts">{t.startHealthSub}</span>
-            </span>
-          </Card>
+          <StartTile
+            tone="rest"
+            icon="clock-countdown"
+            title={t.startHealthTitle}
+            sub={t.startHealthSub}
+            onClick={openHealth}
+          />
         )}
         {sleepOn && (
-          <Card as="button" className="ss-tile" onClick={openSleep}>
-            <IconTile tone="sleep" size={40} icon="moon" className="ss-ic" />
-            <span className="ss-tile-text">
-              <span className="ss-tt">{t.sleepTitle}</span>
-              <span className="ss-ts">{t.startSleepSub}</span>
-            </span>
-          </Card>
+          <StartTile
+            tone="sleep"
+            icon="moon"
+            title={t.sleepTitle}
+            sub={t.startSleepSub}
+            onClick={openSleep}
+          />
         )}
-        <Card as="button" className="ss-tile" onClick={() => setSub('past')}>
-          <IconTile tone="neutral" size={40} icon="arrow-counter-clockwise" className="ss-ic" />
-          <span className="ss-tile-text">
-            <span className="ss-tt">{t.startPastTitle}</span>
-            <span className="ss-ts">{t.startPastSub}</span>
-          </span>
-        </Card>
-        <Card as="button" className="ss-tile" onClick={openPrograms}>
-          <IconTile tone="accent" size={40} icon="list-checks" className="ss-ic" />
-          <span className="ss-tile-text">
-            <span className="ss-tt">{t.startProgramsTitle}</span>
-            <span className="ss-ts">{t.startProgramsSub}</span>
-          </span>
-        </Card>
+        <StartTile
+          tone="neutral"
+          icon="arrow-counter-clockwise"
+          title={t.startPastTitle}
+          sub={t.startPastSub}
+          onClick={() => setSub('past')}
+        />
+        <StartTile
+          tone="accent"
+          icon="list-checks"
+          title={t.startProgramsTitle}
+          sub={t.startProgramsSub}
+          onClick={openPrograms}
+        />
         {homeOn && (
-          <Card
-            as="button"
-            className={`ss-tile${locked ? ' locked' : ''}`}
-            aria-disabled={locked}
-            onClick={locked ? undefined : openHome}
-          >
-            <span className="ss-tile-top">
-              <IconTile tone="home" size={40} icon="house" className="ss-ic" />
-              {locked && <Icon name="lock-simple" className="ss-lock" />}
-            </span>
-            <span className="ss-tile-text">
-              <span className="ss-tt">{t.startHomeTitle}</span>
-              <span className="ss-ts">
-                {locked ? t.startFinishFirst(liveName) : t.startHomeSub}
-              </span>
-            </span>
-          </Card>
+          <StartTile
+            lockable
+            locked={locked}
+            tone="home"
+            icon="house"
+            title={t.startHomeTitle}
+            sub={t.startHomeSub}
+            lockedSub={t.startFinishFirst(liveName)}
+            onClick={openHome}
+          />
         )}
       </div>
     </StartFrame>
