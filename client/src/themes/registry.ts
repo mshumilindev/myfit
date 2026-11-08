@@ -90,12 +90,13 @@ export function getTheme(): string {
  * Themes are installed one by one (SPO-518, owner rule 06.11): only Brass Glass is the base, every
  * other look is a store item; the holiday themes are one item together (owner 08.11). A theme that is not allowed is never worn — the app shows the base theme whatever was
  * saved, scheduled or previewed. Nothing saved is touched, so the choice comes back the moment the theme does.
- * `null` = no restriction yet (before the shell has read the installed set).
+ * `null` = the installed set is not read yet: only the base look is allowed, so nothing that is not installed is ever
+ * worn, not even for a frame (owner 08.11: a hard guard). The app reads the set from the device before the first paint.
  */
 let allowedThemes: ReadonlySet<string> | null = null;
 const isBase = (id: string): boolean => id === DEFAULT_THEME;
 const themeAllowed = (id: string): boolean =>
-  allowedThemes === null || isBase(id) || allowedThemes.has(id);
+  isBase(id) || (allowedThemes !== null && allowedThemes.has(id));
 const shown = (id: string): string => (themeAllowed(id) ? id : DEFAULT_THEME);
 
 function apply(id: string): void {

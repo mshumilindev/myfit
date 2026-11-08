@@ -22,6 +22,7 @@ afterEach(() => setAllowedThemes(THEMES.map((t) => t.id)));
 describe('Themes are installed one by one (SPO-518)', () => {
   it('a theme that is not installed shows the base look, and the saved choice comes back with the install', () => {
     localStorage.setItem('gym.theme', other);
+    setAllowedThemes([other]);
     initTheme();
     expect(getTheme()).toBe(other);
     setAllowedThemes([]);

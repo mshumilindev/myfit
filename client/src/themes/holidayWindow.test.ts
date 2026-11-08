@@ -6,11 +6,14 @@ import {
   setTheme,
   syncHolidayTheme,
   wearHoliday,
+  setAllowedThemes,
+  THEMES,
 } from './registry';
 
 const at = (m: number, d: number, h = 12) => new Date(2026, m - 1, d, h);
 
 beforeEach(() => {
+  setAllowedThemes(THEMES.map((t) => t.id)); // every look installed: these tests are about wearing, not installing (SPO-500)
   localStorage.clear();
   document.documentElement.removeAttribute('data-theme');
   document.documentElement.lang = 'en';

@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { THEMES, getHolidayTheme, initTheme, setTheme, startPreview, endPreview } from './registry';
+import {
+  THEMES,
+  getHolidayTheme,
+  initTheme,
+  setTheme,
+  startPreview,
+  endPreview,
+  setAllowedThemes,
+} from './registry';
 import type { ThemeDef } from './registry';
 import { startHolidayWatch } from './holidayWatch';
 
@@ -11,6 +19,7 @@ const at = (y: number, m: number, d: number, hh = 12) =>
   vi.setSystemTime(new Date(y, m - 1, d, hh));
 
 beforeEach(() => {
+  setAllowedThemes(THEMES.map((t) => t.id)); // every look installed: these tests are about wearing, not installing (SPO-500)
   vi.useFakeTimers();
   vi.stubGlobal('matchMedia', () => ({ matches: false })); // jsdom has none; motion is not reduced
   localStorage.clear();

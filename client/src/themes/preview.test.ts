@@ -7,6 +7,8 @@ import {
   initTheme,
   onThemeChoice,
   startPreview,
+  setAllowedThemes,
+  THEMES,
 } from './registry';
 import { offSeason } from './testClock';
 
@@ -15,6 +17,7 @@ offSeason();
 const attr = () => document.documentElement.getAttribute('data-theme');
 
 beforeEach(() => {
+  setAllowedThemes(THEMES.map((t) => t.id)); // every look installed: these tests are about wearing, not installing (SPO-500)
   localStorage.clear();
   initTheme();
 });

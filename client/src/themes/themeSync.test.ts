@@ -1,9 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_THEME, applyRemoteTheme, getTheme, setTheme } from './registry';
+import {
+  DEFAULT_THEME,
+  applyRemoteTheme,
+  getTheme,
+  setTheme,
+  setAllowedThemes,
+  THEMES,
+} from './registry';
 import { THEME_FIELD, pushThemeEdits, syncThemeFromDoc } from './themeSync';
 
 let stop: (() => void) | null = null;
 beforeEach(() => {
+  setAllowedThemes(THEMES.map((t) => t.id)); // every look installed: these tests are about wearing, not installing (SPO-500)
   localStorage.clear();
   document.documentElement.setAttribute('data-theme', DEFAULT_THEME);
 });
