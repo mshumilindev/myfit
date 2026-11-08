@@ -55,4 +55,5 @@
 ## Статус на 08.11.2026
 
 - Закрито тестами «add-on немає = рівно нейтрально, є = модель рухається»: рядки 1–4, 5–7, 9 (нікотин, алкоголь: `addons/models.noAddon.test.ts`), маска Health-функцій і періодів відпочинку (`healthAddons.test.ts`, `addons/restMask.test.ts`), активності й цілі (`activitiesGate.test.ts`, `featureGates.test.ts`). Дані після вимкнення лишаються в сторі (асерт у тесті).
+- Sleep стрипається (I8, `store.ts exposed()`): рядки 10–12, 22, 29–30, 34–35 закриті тестами `addons/sleepGate.test.ts` і `addons/sleepModels.noAddon.test.ts` (немає Sleep = нейтрально; Atlas-guard і Mastery читають замасковані ночі).
 - Не відкрито, бо модулі ще не стрипаються (I7/I8: Sleep, Learn, Apex, Nutrition, Atlas): рядки 10–12, 22, 29–30, 34–35, 37–40. Тести на них пишуться разом зі стрипінгом кожного модуля; формули не чіпаємо (інваріант 8).
