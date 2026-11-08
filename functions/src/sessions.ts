@@ -75,7 +75,7 @@ function deviceIdOf(data: unknown): string {
 }
 
 /** Called by the app at start and on focus. Creates / adopts the record, refreshes it, and says whether this device was signed out elsewhere. */
-export const sessionCheck = onCall({ ...HOT, memory: '512MiB' }, async (req) => {
+export const sessionCheck = onCall({ memory: '512MiB' }, async (req) => {
   const uid = mustUid(req);
   const headers = req.rawRequest?.headers as Record<string, unknown> | undefined;
   const ua = headers?.['user-agent'];
