@@ -33,6 +33,7 @@ import {
   MANAGER_HOME_ROUTE,
   MANAGER_RAIL_SCREENS,
   managerMayOpen,
+  coachRouteAddon,
   TAB_SCREENS,
   navScreenOf,
   type CoachRoute,
@@ -45,6 +46,7 @@ import type { CoachProblem } from './data/problem';
 import { ChatDock } from './chat/ChatDock';
 import { useLiveWidget } from './screens/live/useLiveWidget';
 import { useCoachRoute } from './useCoachRoute';
+import { useAddonOrBase } from '../addons/enabledSet';
 import { useBackButtonEdgeSwipe } from '../edgeSwipeBack';
 import { useCoachUnread } from './unread';
 import { useTeamT } from '../i18n/coachTeam';
@@ -95,6 +97,9 @@ export function CoachShell({
 }: CoachShellProps) {
   const { c } = useCoachT();
   const { tm } = useTeamT();
+  const liveOn = useAddonOrBase('coach-live');
+  const signalsOn = useAddonOrBase('coach-signals');
+  const teamOn = useAddonOrBase('coach-team');
   const { t } = useT();
   const desktop = useMinWidth(COACH_BREAKPOINT);
   const wide = useMinWidth(COACH_WIDE_BREAKPOINT);
@@ -131,7 +136,7 @@ export function CoachShell({
   // Header slots (live pill, search, bell, avatar): what sits at the right edge of every page header.
   const { r } = useRosterT();
   const liveRawWidget = useLiveWidget(onNavigate);
-  const liveWidget = ready ? liveRawWidget : null;
+  const liveWidget = ready && liveOn ? liveRawWidget : null;
   const chrome = useMemo<CoachChrome>(
     () => ({
       desktop,
@@ -170,9 +175,11 @@ export function CoachShell({
   });
   // Phone More sheet: every secondary destination, then Apps (last, via the `apps` row).
   const manager = role === 'manager';
+  const shown = (s: ScreenId) =>
+    (s !== 'live' || liveOn) && (s !== 'signals' || signalsOn) && (s !== 'team' || teamOn);
   const moreScreens: readonly ScreenId[] = manager
     ? []
-    : [...(MORE_SCREENS as readonly ScreenId[]), 'team'];
+    : ([...(MORE_SCREENS as readonly ScreenId[]), 'team'] as ScreenId[]).filter(shown);
   // Header controls the bar had no room for continue in More (with Privacy and the language, which every app's More holds); the account is the avatar's drawer.
   const [headerHidden, setHeaderHidden] = useState<MoreMenuItem[]>([]);
   const common = useCommonMoreItems();
@@ -186,7 +193,7 @@ export function CoachShell({
   // Live and Signals are not rail items (phone More sheet only until the foot widgets land).
   const railScreens: readonly ScreenId[] = manager
     ? (MANAGER_RAIL_SCREENS as readonly ScreenId[])
-    : [...(RAIL_SCREENS as readonly ScreenId[]), 'team'];
+    : ([...(RAIL_SCREENS as readonly ScreenId[]), 'team'] as ScreenId[]).filter(shown);
   const railEntries: RailEntry[] = railScreens.map((s) => ({
     ...entryOf(s),
     ...(s === 'chat' ? { count: unread, countLabel: c.unread(unread) } : {}),
@@ -327,6 +334,15 @@ export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
   useEffect(() => {
     if (outOfBounds) navigate(MANAGER_HOME_ROUTE);
   }, [outOfBounds, navigate]);
+  // A route to Live, Signals or Team without its add-on goes home (Agenda; a manager's home is Clients).
+  const routeAddon = coachRouteAddon(route);
+  const routeAddonOn = useAddonOrBase(routeAddon ?? 'coach');
+  const addonMissing = routeAddon !== null && !routeAddonOn;
+  const homeRoute = props.role === 'manager' ? MANAGER_HOME_ROUTE : ({ screen: 'agenda' } as const);
+  useEffect(() => {
+    if (addonMissing) navigate(homeRoute);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addonMissing, navigate]);
   // A production build with no backend configured: say so, render no client data (never the sample fixtures).
   if (coachIsUnconfigured())
     return (
@@ -341,7 +357,7 @@ export function CoachApp(props: Omit<CoachShellProps, 'route' | 'onNavigate'>) {
   return (
     <CoachShell
       {...props}
-      route={outOfBounds ? MANAGER_HOME_ROUTE : route}
+      route={outOfBounds ? MANAGER_HOME_ROUTE : addonMissing ? homeRoute : route}
       onNavigate={navigate}
       backend={{ status, problem, retry }}
     />

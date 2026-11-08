@@ -13,6 +13,7 @@ import { useNotesT } from '../i18n/coachNotes';
 import type { ThreadExtras, ThreadExtrasCtx } from './chat/ThreadView';
 import type { ChatMessage } from './chat/types';
 import { NoteDeleteDialog } from './notes/NotesPanel';
+import { useAddonOrBase } from '../addons/enabledSet';
 import { NotesHost } from './notes/NotesHost';
 import type { NotesPanelProps } from './notes/NotesPanel';
 import type { NotesPort } from './notes/port';
@@ -70,6 +71,7 @@ export function createCoachThreadExtras(opts: CoachThreadExtrasOpts = {}) {
     const w = useWords();
     const { sh } = w;
     const { nt } = useNotesT();
+    const notesOn = useAddonOrBase('coach-notes');
     const { cc } = useClientT();
     const viewer = useMemo(
       () => ({ side: 'trainer' as const, clientId: ctx.clientId }),
@@ -315,7 +317,7 @@ export function createCoachThreadExtras(opts: CoachThreadExtrasOpts = {}) {
         if (pending) rememberShare(pending);
         setPending(null);
       },
-      barActions: (
+      barActions: notesOn ? (
         <IconButton
           icon="pencil-simple"
           variant="ghost"
@@ -326,8 +328,8 @@ export function createCoachThreadExtras(opts: CoachThreadExtrasOpts = {}) {
             setNotesOpen(true);
           }}
         />
-      ),
-      noteItems,
+      ) : undefined,
+      noteItems: notesOn ? noteItems : [],
       card,
       shareDelete,
       overlay: (

@@ -253,3 +253,25 @@ export function coachClientHash(cid: string): string {
   rememberCoachRoute(route);
   return coachHash(route);
 }
+
+/**
+ * The store add-on a route needs (owner 08.11): Live, Signals, Notes and Team are add-ons of Coach, the rest of it is
+ * base. A route to one of them opens only while it is installed; a manager has Team as base.
+ */
+export function coachRouteAddon(route: CoachRoute): string | null {
+  switch (route.screen) {
+    case 'live':
+      return 'coach-live';
+    case 'signals':
+      return 'coach-signals';
+    case 'team':
+    case 'activity':
+    case 'roles':
+    case 'spotter':
+      return 'coach-team';
+    case 'client':
+      return route.tab === 'live' ? 'coach-live' : null;
+    default:
+      return null;
+  }
+}

@@ -1,3 +1,4 @@
+import { useAddonOrBase } from '../../addons/enabledSet';
 import { useNotesT } from '../../i18n/coachNotes';
 import { SidePanel } from '../layout/SidePanel';
 import { NotesPanel, type NotesPanelProps } from './NotesPanel';
@@ -9,7 +10,8 @@ export function NotesHost({
   ...p
 }: Omit<NotesPanelProps, 'variant' | 'onClose'> & { open: boolean; onClose: () => void }) {
   const { nt } = useNotesT();
-  if (!open) return null;
+  const notesOn = useAddonOrBase('coach-notes');
+  if (!open || !notesOn) return null;
   return (
     <SidePanel
       open

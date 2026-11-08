@@ -24,11 +24,22 @@ export const HEALTH_ADDONS = [
 /** Apex with all its modules: the Apex screens exercise every tab. */
 export const APEX_ADDONS = ['apex', 'apex-challenges', 'apex-ranks', 'apex-awards', 'mastery'];
 
+/** The Coach extras (owner 08.11): the coach screens exercise Live, Signals, Notes and Team. */
+export const COACH_ADDONS = ['coach-live', 'coach-signals', 'coach-notes', 'coach-team'];
+
 try {
   localStorage.setItem(
     'spotter.addons',
     JSON.stringify({
-      list: [...HEALTH_ADDONS, ...APEX_ADDONS, 'activities', 'home-sets', 'goals', 'playbook'],
+      list: [
+        ...HEALTH_ADDONS,
+        ...APEX_ADDONS,
+        'activities',
+        'home-sets',
+        'goals',
+        'playbook',
+        ...COACH_ADDONS,
+      ],
       updatedAt: 1,
     }),
   );

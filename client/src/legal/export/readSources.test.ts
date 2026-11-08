@@ -64,8 +64,8 @@ describe('readExportSources', () => {
   it('activities and goals go back as stored, even while their add-ons hide them from the app (Art. 15 / 20)', async () => {
     h.state = { ...storeSlice(), syncStatus: 'synced', activities: [], goals: {} };
     const s = await readExportSources(live);
-    expect(s.store.activities).toEqual([{ id: 'raw-a' }]);
-    expect(s.store.goals).toEqual({ raw: true });
+    expect(s.store?.activities).toEqual([{ id: 'raw-a' }]);
+    expect(s.store?.goals).toEqual({ raw: true });
   });
 
   it('settings synced to the account are read from the device cache; stamps and local-only keys stay out', async () => {

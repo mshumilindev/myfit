@@ -42,6 +42,7 @@ import { firstName } from './format';
 import './Client360.css';
 import { WorldFailed } from '../today/WorldNotices';
 import { setHash } from '../../route';
+import { useAddonOrBase } from '../../addons/enabledSet';
 
 export const CLIENT_TABS = [
   'overview',
@@ -96,7 +97,8 @@ export function Client360Screen({
   const unread = (unreadByClient ?? live.byClient)[cid] ?? 0;
   const world = api.world;
   const now = nowProp ?? world?.now ?? 0;
-  const tab = tabOf(tabRaw);
+  const notesOn = useAddonOrBase('coach-notes');
+  const tab = tabOf(tabRaw) === 'notes' && !notesOn ? 'overview' : tabOf(tabRaw);
 
   const row = useMemo(() => world?.rows.find((x) => x.client.id === cid), [world, cid]);
   const client = row?.client;
@@ -304,7 +306,10 @@ export function Client360Screen({
     </>
   );
 
-  const tabs = CLIENT_TABS.map((id) => ({ id, label: r.c3Tabs[id] }));
+  const tabs = CLIENT_TABS.filter((id) => id !== 'notes' || notesOn).map((id) => ({
+    id,
+    label: r.c3Tabs[id],
+  }));
 
   return (
     <Page>

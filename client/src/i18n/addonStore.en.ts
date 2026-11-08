@@ -175,6 +175,13 @@ export const addonStoreEn = {
     atlas: { name: 'Atlas', desc: 'Ask the AI assistant about your training.' },
     gym: { name: 'Gym', desc: 'Workouts, programs and progress: the training side of Spotter.' },
     coach: { name: 'Coach', desc: 'Your clients, plans and schedule in one place.' },
+    'coach-live': { name: 'Live', desc: 'Follow your clients’ workouts as they happen.' },
+    'coach-signals': {
+      name: 'Signals',
+      desc: 'Fatigue and readiness signals across your clients.',
+    },
+    'coach-notes': { name: 'Notes', desc: 'Private notes on each client.' },
+    'coach-team': { name: 'Team', desc: 'Your team, its activity and roles.' },
     apex: { name: 'Apex', desc: 'The game side of Spotter: challenges, levels and rewards.' },
     mastery: { name: 'Mastery', desc: 'Track skill levels and long-term progress.' },
     'apex-challenges': {

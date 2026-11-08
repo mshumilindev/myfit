@@ -45,6 +45,7 @@ export interface AddonManifest {
 }
 
 const ALL: readonly StoreRole[] = ['member', 'trainer', 'admin'];
+const COACHES: readonly StoreRole[] = ['trainer', 'admin'];
 
 export const ADDONS: readonly AddonManifest[] = [
   { id: 'health', kind: 'addon', requires: 'gym', tone: 4, roles: ALL, category: 'health' },
@@ -149,6 +150,46 @@ export const ADDONS: readonly AddonManifest[] = [
     tone: 6,
     roles: ['admin'],
     baseFor: ['trainer', 'manager'],
+    category: 'coach',
+  },
+  // Coach extras (owner 08.11): the base Coach is clients, chat, agenda, decisions, schedule, week and programs.
+  {
+    id: 'coach-live',
+    kind: 'addon',
+    requires: 'coach',
+    // A member never opens the coach screens; they only see what a trainer shared (notes), so for them it is never gated.
+    baseFor: ['member'],
+    tone: 6,
+    roles: COACHES,
+    category: 'coach',
+  },
+  {
+    id: 'coach-signals',
+    kind: 'addon',
+    requires: 'coach',
+    // A member never opens the coach screens; they only see what a trainer shared (notes), so for them it is never gated.
+    baseFor: ['member'],
+    tone: 6,
+    roles: COACHES,
+    category: 'coach',
+  },
+  {
+    id: 'coach-notes',
+    kind: 'addon',
+    requires: 'coach',
+    // A member never opens the coach screens; they only see what a trainer shared (notes), so for them it is never gated.
+    baseFor: ['member'],
+    tone: 6,
+    roles: COACHES,
+    category: 'coach',
+  },
+  {
+    id: 'coach-team',
+    kind: 'addon',
+    requires: 'coach',
+    tone: 6,
+    roles: COACHES,
+    baseFor: ['member', 'manager'],
     category: 'coach',
   },
   // Not available yet (the store shows them as Coming soon).
