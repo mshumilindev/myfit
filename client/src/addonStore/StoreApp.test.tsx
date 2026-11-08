@@ -91,6 +91,19 @@ describe('StoreApp', () => {
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
     await waitFor(() => expect(currentHash()).toBe('#/store'));
   });
+  it('"Add with <App>" on an add-on of a not-yet-picked app queues the add-on and its app together, once', () => {
+    window.location.hash = '#/store/item/cycle';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    const btn = screen.getAllByRole('button', { name: /^Add with / })[0]!;
+    fireEvent.click(btn);
+    const queued = addonsQueuePref.get();
+    expect(queued).toContain('cycle');
+    expect(queued.length).toBeGreaterThan(1); // the app comes along
+    expect(new Set(queued).size).toBe(queued.length); // no duplicates
+    const before = [...queued];
+    queueAdd(['cycle'], 'member'); // a repeat is a no-op
+    expect(addonsQueuePref.get()).toEqual(before);
+  });
   it('an item of another role opened by a link has no add action', () => {
     window.location.hash = '#/store/item/gym';
     render(<StoreApp role="member" onOpenProfile={() => {}} />);

@@ -126,7 +126,7 @@ export const ADDONS: readonly AddonManifest[] = [
   },
   { id: 'apex-ranks', kind: 'module', parent: 'apex', tone: 8, roles: ALL, category: 'insights' },
   { id: 'apex-awards', kind: 'module', parent: 'apex', tone: 8, roles: ALL, category: 'insights' },
-  { id: 'mastery', kind: 'module', parent: 'apex', tone: 3, roles: ALL, category: 'insights' },
+  { id: 'mastery', kind: 'module', parent: 'apex', tone: 8, roles: ALL, category: 'insights' },
   // Themes are installed one by one (owner rule 06.11): only Brass Glass is part of the base. The holiday themes
   // (Halloween, Christmas…) are ONE item (owner 08.11): they put themselves on around their holiday once it is installed.
   // Brass Glass is an add-on too (owner 08.11) and is installed for everyone by default (`migrateBrassGlass`), so nothing
