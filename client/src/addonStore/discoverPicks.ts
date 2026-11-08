@@ -2,6 +2,7 @@
  * What the Discover bento shows (SPO-500, design 01): pure picks from the role's catalog and the person's state.
  * No React, no storage — so every rule is testable.
  */
+import { packsFor } from '../addons/starterPacks';
 import type { Role } from '../api';
 import { addonById, type AddonManifest } from '../addons/manifest';
 import { isAddonAllowed } from '../addons/enabledSet';
@@ -45,7 +46,14 @@ export function appOfTheWeek(
 
 /** A starter pack still worth offering: the ids the role may use that are not installed (≥2 left). */
 export function starterPack({ role, enabled }: DiscoverState) {
-  for (const p of STARTER_PACKS) {
+  // Coaches get their own set (Live, Notes, Gym...), the same one onboarding offers them; members get Recovery.
+  const packs =
+    role === 'member'
+      ? STARTER_PACKS
+      : packsFor(role)
+          .filter((p) => p.id === 'coach')
+          .map((p) => ({ id: p.id, ids: p.ids }));
+  for (const p of packs) {
     const ids = p.ids.filter((x) => isAddonAllowed(x, role));
     const left = ids.filter((x) => !enabled.has(x));
     if (left.length >= 2) return { id: p.id, ids, left };

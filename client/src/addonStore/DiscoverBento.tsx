@@ -1,6 +1,7 @@
 /** The Discover bento (design 01): App of the week, Installed, Starter pack, Suggested, Coming soon, Browse. */
 import type { ReactElement } from 'react';
 import type { Role } from '../api';
+import { useT } from '../i18n';
 import { queueAdd, queueRemove } from '../addons/queue';
 import {
   SkBadge,
@@ -40,6 +41,7 @@ export function DiscoverBento({
   go: (v: string) => void;
 }) {
   const { st, enabled, queued } = ctx;
+  const { t } = useT();
   const state = { role, enabled, queued };
   const week = appOfTheWeek(state);
   const pack = starterPack(state);
@@ -71,7 +73,7 @@ export function DiscoverBento({
         span={span}
         variant="accent"
         eyebrow={st.startPack}
-        title={st.packRecovery}
+        title={pack.id === 'recovery' ? st.packRecovery : t.onbPack_coach}
         titleSize="h3"
         body={pack.ids.map((id) => itemName(st, id)).join(', ')}
         footer={

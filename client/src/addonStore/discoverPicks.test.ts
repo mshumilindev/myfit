@@ -38,6 +38,12 @@ describe('discover picks', () => {
     expect(starterPack({ ...none, enabled: new Set(['health']) })).toBeNull();
     expect(starterPack({ ...none, role: 'manager' })).toBeNull();
   });
+  it('starter pack for a trainer is the coach set with Gym, not Recovery', () => {
+    const p = starterPack({ ...none, role: 'trainer' });
+    expect(p?.id).toBe('coach');
+    expect(p?.ids).toContain('gym');
+    expect(p?.ids).not.toContain('sleep');
+  });
   it('suggests an add-on only of an installed app', () => {
     expect(suggestion(none)).toBeNull();
     // Health's and Apex's parts are modules (switches in Configure), so nothing is suggested for them.
