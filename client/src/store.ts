@@ -150,7 +150,7 @@ import {
 import { computeStreak } from './streak';
 import { currentUid, getRole, callFn } from './api';
 import { addonAvailable, addonsPref } from './addons/queue'; // importing it also registers the add-on lists for account sync
-import { healthAddonsKey, healthAddonsOn } from './healthAddons';
+import { healthAddonsKey, healthAddonsOn, restPeriodShown } from './healthAddons';
 import { activitiesAvailable } from './addons/activitiesGate';
 import { goalsAvailable } from './addons/featureGates';
 import {
@@ -663,6 +663,7 @@ function exposed(): StoreState {
       v,
       out: {
         ...masked,
+        restPeriods: masked.restPeriods.filter((r) => restPeriodShown(r.mode)),
         ...(actOn ? {} : { activities: [] }),
         ...(goalsOn ? {} : { goals: EMPTY_GOALS }),
       },
@@ -2892,6 +2893,7 @@ export function activeRestPeriod(now: number = Date.now()): RestPeriod | null {
   const d = dayKey(now);
   return (
     [...state.restPeriods]
+      .filter((r) => restPeriodShown(r.mode))
       .filter((r) => r.startDay <= d && (r.open === true || d <= r.endDay))
       .sort((a, b) => b.createdAt - a.createdAt)[0] ?? null
   );
@@ -2899,7 +2901,7 @@ export function activeRestPeriod(now: number = Date.now()): RestPeriod | null {
 
 /** Every day key covered by any rest period. */
 export function restDayKeys(
-  periods: RestPeriod[] = state.restPeriods,
+  periods: RestPeriod[] = state.restPeriods.filter((r) => restPeriodShown(r.mode)),
   now: number = Date.now(),
 ): Set<number> {
   const today = dayKey(now);
@@ -4845,6 +4847,8 @@ function isoWeekdayOfDay(day: number): number {
  *  illness), active injury or surgery rehab, and weekdays the assigned program leaves free. */
 export function streakProtectedPredicate(now: number = Date.now()): (day: number) => boolean {
   const today = dayKey(now);
+  // Raw periods on purpose (restriction path, like the injuries below): a stored illness window still protects the streak
+  // while its module is off; nothing about it is shown or sent.
   const rests = restDayKeys(state.restPeriods, now);
   // RESTRICTION path (SPO-290 owner decision): the stored injuries protect the streak even with the Injuries consent
   // off. Raw state on purpose; it only decides which days count, and nothing about the injury is shown or sent.

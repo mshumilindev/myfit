@@ -6,18 +6,10 @@
 - Gym/Coach як застосунки за ролями: member — Gym base; trainer — Coach base, Gym ставиться; admin — нічого base, обидва ставляться (`baseFor`, `requires:'gym'`).
 - Усе, що залежить від Gym, заблоковане до його встановлення.
 
-## Пропозиція: коуч-add-on-и (`requires: 'coach'`, категорія `coach`)
-| Вкладка коуча (`coach/routes`) | Add-on | Примітка |
-| --- | --- | --- |
-| clients, chat, agenda, decisions | базові Coach | ядро, не знімаються |
-| schedule, week | `coach-schedule` | розклад і тиждень |
-| notes (нотатки в картці клієнта) | `coach-notes` | дані лишаються, ховається вхід |
-| live | `coach-live` | живі тренування клієнтів |
-| signals | `coach-signals` | сигнали/втома клієнтів |
-| programs | `coach-programs` | конструктор програм |
-| team, activity, roles | `coach-team` | команда; лише admin/manager-керування |
-
-Правило власника лишається: без add-on — не враховується в розрахунках і не показується, дані лишаються. Для coach-share і Atlas payload — те саме маскування, що для Activities/Goals.
+## Рішення власника 08.11: add-on-ами лише чотири
+База Coach (не знімається): clients (+картка клієнта), chat, agenda, decisions, **schedule, week, programs** (бібліотека, конструктор, Check before sending), запрошення й shared-доступ.
+Add-on-и (`requires: 'coach'`, категорія `coach`): **Live** (`coach-live`), **Signals** (`coach-signals`), **Notes** (`coach-notes`), **Team** (`coach-team`: team, activity, roles; admin/manager-керування).
+Правило: без add-on вхід прихований, не враховується в розрахунках і не віддається в coach-share/Atlas; дані лишаються.
 
 ## Gyms для trainer/admin
 Збережені зали (`gyms`) читає Gym-застосунок. Trainer/admin без Gym їх не бачать (дані лишаються); окремої сутності «Gyms» не вводимо.
@@ -30,7 +22,7 @@
 Ціна: один виклик при старті, без запитів (дані вже в пам'яті). Ризик: прихована зміна списку add-on-ів → `risk-reviewer`.
 
 ## Відкриті питання власнику
-1. Згода на розбиття коуча саме так (7 add-on-ів)? Чи лишити коуч цілим (як «лишимо все як є» для модулів)?
+1. ~~Розбиття~~ — вирішено: Live, Signals, Notes, Team.
 2. Міграція за наявністю даних — підходить?
 3. Дизайн: потрібен шард кіту? Нових примітивів не потрібно (картки стору вже є) — лише макети Coach без вкладок/із «Add in store».
 4. `restPeriods` (rest/unwell) маскувати як injuries? manager — чи вважати Gym-залежні функції ввімкненими?

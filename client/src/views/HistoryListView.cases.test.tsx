@@ -17,7 +17,7 @@ import {
 beforeEach(() => {
   freezeClock();
   setLocale('en');
-  addonsPref.set(['sleep', 'activities']);
+  addonsPref.set(['sleep', 'activities', 'health', 'rest', 'unwell']);
   seed(richState());
 });
 afterEach(() => {

@@ -81,7 +81,7 @@ beforeEach(() => {
   rest = null;
   prescribed = new Set();
   dayName = null;
-  addonsPref.set(['sleep', 'activities']);
+  addonsPref.set(['sleep', 'activities', 'health', 'rest', 'unwell']);
   setState({});
 });
 afterEach(() => {

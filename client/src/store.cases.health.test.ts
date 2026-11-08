@@ -56,6 +56,7 @@ vi.mock('./vaultIO', async (orig) => {
 });
 
 import * as store from './store';
+import { addonsPref } from './addons/enabledSet';
 import { vault } from './vaultIO';
 import { isSealed, unsealDoc } from './encryptedDoc';
 
@@ -86,6 +87,8 @@ beforeEach(() => {
   fs.failWith = null;
   fs.uid = 'u1';
   store.resetLocalData();
+  // Rest periods follow the Rest and Unwell modules (owner 08.11): this suite is about the periods themselves.
+  addonsPref.set(['health', 'rest', 'unwell']);
 });
 afterEach(async () => {
   vi.useRealTimers();

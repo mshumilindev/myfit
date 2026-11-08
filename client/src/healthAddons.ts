@@ -5,6 +5,7 @@
  */
 import { addonAvailable as installed } from './addons/enabledSet';
 import type { HealthOnMap } from './data/healthConsentGate';
+import type { RestMode } from './types';
 
 /**
  * The add-on gate is a product switch (consent still masks on its own), and this runs while rendering: if the device
@@ -31,9 +32,27 @@ export function healthAddonsOn(on: HealthOnMap): HealthOnMap {
   };
 }
 
+/**
+ * Rest periods follow their modules: illness windows need Unwell, planned rest and active rest need Rest. Hidden from
+ * every reader (and from calculations) while the module is off; the data stays stored.
+ */
+export function restPeriodShown(mode: RestMode): boolean {
+  return addonAvailable(mode === 'illness' ? 'unwell' : 'rest');
+}
+
 /** Changes when any of those add-ons is installed or removed (a cache key for the masked view). */
 export function healthAddonsKey(): string {
-  return ['injury-log', 'health', 'conditions', 'nicotine', 'alcohol', 'supplements', 'cycle']
+  return [
+    'injury-log',
+    'health',
+    'conditions',
+    'nicotine',
+    'alcohol',
+    'supplements',
+    'cycle',
+    'rest',
+    'unwell',
+  ]
     .map((id) => (addonAvailable(id) ? '1' : '0'))
     .join('');
 }
