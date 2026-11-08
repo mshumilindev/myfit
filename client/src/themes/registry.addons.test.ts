@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   DEFAULT_THEME,
   THEMES,
@@ -56,5 +56,38 @@ describe('Themes are installed one by one (SPO-518)', () => {
     expect(pickableFor([other]).map((t) => t.id)).toEqual([DEFAULT_THEME, other]);
     setAllowedThemes([other]);
     expect(availablePickableThemes()).toHaveLength(2);
+  });
+});
+
+describe('The holiday themes are one add-on (owner 08.11)', () => {
+  const holidayIds = THEMES.filter((t) => t.holiday).map((t) => t.id);
+
+  it('the add-on lists exactly the registry holiday themes', async () => {
+    const { addonById } = await import('../addons/manifest');
+    expect([...(addonById('holiday-themes')?.themeIds ?? [])].sort()).toEqual(
+      [...holidayIds].sort(),
+    );
+  });
+
+  it('installing the add-on allows every holiday theme, removing it allows none', async () => {
+    const { themeIdsOf } = await import('../addons/enabledSet');
+    expect(themeIdsOf(new Set(['holiday-themes'])).sort()).toEqual([...holidayIds].sort());
+    expect(themeIdsOf(new Set())).toEqual([]);
+  });
+
+  it('without the add-on a holiday never puts its theme on, even on the day itself', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 9, 31, 12)); // Halloween
+    try {
+      setAllowedThemes([]);
+      initTheme();
+      expect(getTheme()).toBe(DEFAULT_THEME);
+      setAllowedThemes(holidayIds);
+      expect(getTheme()).toBe('halloween'); // installed in the middle of the window: on at once
+      setAllowedThemes([]);
+      expect(getTheme()).toBe(DEFAULT_THEME); // removed: off at once
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

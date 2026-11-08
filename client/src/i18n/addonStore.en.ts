@@ -191,6 +191,10 @@ export const addonStoreEn = {
     'apex-ranks': { name: 'Ranks', desc: 'Where your lifts stand against strength standards.' },
     'apex-awards': { name: 'Awards', desc: 'Achievements you unlock as you train.' },
     'theme-cyberpunk': { name: 'Cyberpunk', desc: 'A neon look with sharp corners.' },
+    'holiday-themes': {
+      name: 'Holiday themes',
+      desc: 'Halloween, Christmas and more: they switch on by themselves around the holiday.',
+    },
     calls: { name: 'Calls', desc: 'Voice and video calls with your coach or clients.' },
     nutrition: { name: 'Nutrition', desc: 'Food and macros tracking.' },
     music: { name: 'Music', desc: 'Music for your workouts.' },

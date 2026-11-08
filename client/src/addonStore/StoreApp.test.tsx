@@ -91,6 +91,11 @@ describe('StoreApp', () => {
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
     await waitFor(() => expect(currentHash()).toBe('#/store'));
   });
+  it('an item of another role opened by a link has no add action', () => {
+    window.location.hash = '#/store/item/gym';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    expect(screen.queryByRole('button', { name: /^Add$|^Add with/ })).toBeNull();
+  });
   it('a coming-soon item shows the note and what is planned, with no add action', () => {
     window.location.hash = '#/store/item/music';
     render(<StoreApp role="member" onOpenProfile={() => {}} />);

@@ -9,7 +9,7 @@
 import type { Role } from '../api';
 
 export type StoreRole = Exclude<Role, 'manager'>;
-/** `theme` = one installable look (Cyberpunk…): its own store block and tab; Brass Glass and the holiday themes are base. */
+/** `theme` = an installable look (Cyberpunk…) or the whole set of holiday themes: its own store block and tab; only Brass Glass is base. */
 /** `module` = a switch inside its parent (Health's Injury log…): never a store item of its own, only toggled in Configure. */
 export type AddonKind = 'app' | 'addon' | 'theme' | 'module';
 /** App colour family (design: add-ons inherit their parent's colour). */
@@ -20,6 +20,8 @@ export interface AddonManifest {
   kind: AddonKind;
   /** For `kind: 'theme'`: the id in themes/registry.ts this item unlocks. */
   themeId?: string;
+  /** For `kind: 'theme'` that unlocks several looks at once (the holiday themes): their ids in themes/registry.ts. */
+  themeIds?: readonly string[];
   /** Parent app id for an add-on. Enabling the add-on enables the parent too. */
   parent?: string;
   /**
@@ -125,12 +127,21 @@ export const ADDONS: readonly AddonManifest[] = [
   { id: 'apex-ranks', kind: 'module', parent: 'apex', tone: 8, roles: ALL, category: 'insights' },
   { id: 'apex-awards', kind: 'module', parent: 'apex', tone: 8, roles: ALL, category: 'insights' },
   { id: 'mastery', kind: 'module', parent: 'apex', tone: 3, roles: ALL, category: 'insights' },
-  // Themes are installed one by one (owner rule 06.11): Brass Glass and the holiday themes are part of the base.
+  // Themes are installed one by one (owner rule 06.11): only Brass Glass is part of the base. The holiday themes
+  // (Halloween, Christmas…) are ONE item (owner 08.11): they put themselves on around their holiday once it is installed.
   {
     id: 'theme-cyberpunk',
     kind: 'theme',
     themeId: 'cyberpunk',
     tone: 7,
+    roles: ALL,
+    category: 'look',
+  },
+  {
+    id: 'holiday-themes',
+    kind: 'theme',
+    themeIds: ['halloween', 'christmas'],
+    tone: 5,
     roles: ALL,
     category: 'look',
   },

@@ -1,5 +1,5 @@
 /** Shared bits of the store screens: one item row, its action, the grouped lists. */
-import { isAddonUnlocked } from '../addons/enabledSet';
+import { isAddonAllowed, isAddonUnlocked } from '../addons/enabledSet';
 import { addonById, type AddonManifest } from '../addons/manifest';
 import { getRole } from '../api';
 import { queueAdd, queueRemove } from '../addons/queue';
@@ -59,6 +59,8 @@ export function ItemAction({
 }) {
   const { st, enabled, queued } = ctx;
   if (m.soon) return null;
+  // an item of another role (reached by a link) has no action: the queue would drop it anyway
+  if (!isAddonAllowed(m.id, getRole())) return null;
   if (enabled.has(m.id)) return <SkInstalledLabel>{st.installedLabel}</SkInstalledLabel>;
   if (queued.includes(m.id)) {
     return (

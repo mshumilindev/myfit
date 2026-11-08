@@ -114,7 +114,13 @@ export interface Stub {
  * A returning member (restored from localStorage like the SDK does). Nothing leaves localhost except `programMine`, which
  * is answered by us after `stub.delayMs`: the late arrival of the week card is exactly what SPO-102 is about.
  */
-export async function arm(page: Page, stub: Stub, base: string, locale = 'en'): Promise<void> {
+export async function arm(
+  page: Page,
+  stub: Stub,
+  base: string,
+  locale = 'en',
+  role: 'member' | 'trainer' | 'admin' = 'member',
+): Promise<void> {
   const apiKey = await bundleApiKey(page, base);
   const now = Math.floor(Date.now() / 1000);
   const jwt = [
@@ -124,20 +130,20 @@ export async function arm(page: Page, stub: Stub, base: string, locale = 'en'): 
       aud: 'e2e',
       sub: 'e2e-m',
       user_id: 'e2e-m',
-      role: 'member',
+      role,
       iat: now,
       exp: now + 86_400 * 30,
     }),
     'sig',
   ].join('.');
   await page.addInitScript(
-    ({ apiKey, jwt, locale }) => {
+    ({ apiKey, jwt, locale, role }) => {
       // Seed once per tab: a reload keeps what the app stored itself (e.g. the week-card height hint).
       if (sessionStorage.getItem('e2e.seeded')) return;
       sessionStorage.setItem('e2e.seeded', '1');
       localStorage.setItem('gym.locale', locale);
       localStorage.setItem('spotter.uid', 'e2e-m');
-      localStorage.setItem('spotter.role', 'member');
+      localStorage.setItem('spotter.role', role);
       // A complete profile (no setup gate). History is logged through the UI in visit 1 (Firestore's offline cache keeps it).
       const day = 86_400_000;
       localStorage.setItem(
@@ -167,7 +173,7 @@ export async function arm(page: Page, stub: Stub, base: string, locale = 'en'): 
         }),
       );
     },
-    { apiKey, jwt, locale },
+    { apiKey, jwt, locale, role },
   );
   // CLS collector, live from the first script on (`buffered` also replays entries from before it was created).
   await page.addInitScript(() => {

@@ -72,9 +72,10 @@ export function resolveEnabled(pref: ListPref, role: Role): Set<string> {
 
 /** The theme ids (themes/registry.ts) unlocked by the installed `theme` items. Pure: pass the enabled set. */
 export function themeIdsOf(enabled: ReadonlySet<string>): string[] {
-  return ADDONS.filter((a) => a.kind === 'theme' && a.themeId && enabled.has(a.id)).map(
-    (a) => a.themeId as string,
-  );
+  return ADDONS.filter((a) => a.kind === 'theme' && enabled.has(a.id)).flatMap((a) => [
+    ...(a.themeId ? [a.themeId] : []),
+    ...(a.themeIds ?? []),
+  ]);
 }
 
 /** The modules an item comes with: they switch on together with it, then each can be turned off in Configure. */

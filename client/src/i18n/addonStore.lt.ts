@@ -187,6 +187,10 @@ export const addonStoreLt: typeof addonStoreEn = {
     'apex-ranks': { name: 'Reitingai', desc: 'Kur jūsų pratimai palyginti su jėgos standartais.' },
     'apex-awards': { name: 'Apdovanojimai', desc: 'Pasiekimai, atrakinami treniruojantis.' },
     'theme-cyberpunk': { name: 'Cyberpunk', desc: 'Neoninė išvaizda su aštriais kampais.' },
+    'holiday-themes': {
+      name: 'Šventinės temos',
+      desc: 'Helovinas, Kalėdos ir kitos: įsijungia pačios prieš šventę.',
+    },
     calls: { name: 'Skambučiai', desc: 'Balso ir vaizdo skambučiai su treneriu ar klientais.' },
     nutrition: { name: 'Mityba', desc: 'Maisto ir makroelementų sekimas.' },
     music: { name: 'Muzika', desc: 'Muzika treniruotėms.' },

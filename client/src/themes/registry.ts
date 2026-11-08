@@ -87,14 +87,13 @@ export function getTheme(): string {
 }
 
 /**
- * Themes are installed one by one (SPO-518, owner rule 06.11): Brass Glass and the holiday themes are the base, every
- * other look is a store item. A theme that is not allowed is never worn — the app shows the base theme whatever was
+ * Themes are installed one by one (SPO-518, owner rule 06.11): only Brass Glass is the base, every
+ * other look is a store item; the holiday themes are one item together (owner 08.11). A theme that is not allowed is never worn — the app shows the base theme whatever was
  * saved, scheduled or previewed. Nothing saved is touched, so the choice comes back the moment the theme does.
  * `null` = no restriction yet (before the shell has read the installed set).
  */
 let allowedThemes: ReadonlySet<string> | null = null;
-const isBase = (id: string): boolean =>
-  id === DEFAULT_THEME || THEMES.some((t) => t.id === id && !!t.holiday);
+const isBase = (id: string): boolean => id === DEFAULT_THEME;
 const themeAllowed = (id: string): boolean =>
   allowedThemes === null || isBase(id) || allowedThemes.has(id);
 const shown = (id: string): string => (themeAllowed(id) ? id : DEFAULT_THEME);
@@ -113,6 +112,8 @@ export function setAllowedThemes(ids: Iterable<string>): void {
   )
     return;
   allowedThemes = next;
+  // installing or removing the holiday add-on inside a window dresses or undresses the app at once
+  if (previewing === null) holiday = holidayNow()?.theme ?? null;
   swap(holiday ?? previewing ?? committed ?? DEFAULT_THEME, false);
   listeners.forEach((fn) => fn());
 }
@@ -379,8 +380,12 @@ function skipped(): string[] {
 
 /** The holiday whose window is open on `now` (a holiday without a theme in the registry never counts), skipped or not. */
 function holidayWindow(now: Date = new Date()): { theme: string; window: HolidayWindow } | null {
+  // a holiday theme that is not allowed (its add-on is not installed) never counts: nothing switches itself on
   const have = new Map(
-    THEMES.filter((t) => t.holiday !== undefined).map((t) => [t.holiday as HolidayId, t.id]),
+    THEMES.filter((t) => t.holiday !== undefined && themeAllowed(t.id)).map((t) => [
+      t.holiday as HolidayId,
+      t.id,
+    ]),
   );
   if (have.size === 0) return null;
   const lang = typeof document === 'undefined' ? 'en' : document.documentElement.lang || 'en';

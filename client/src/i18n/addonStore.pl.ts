@@ -183,6 +183,10 @@ export const addonStorePl: typeof addonStoreEn = {
     'apex-ranks': { name: 'Rankingi', desc: 'Gdzie są Twoje ćwiczenia na tle norm siły.' },
     'apex-awards': { name: 'Nagrody', desc: 'Osiągnięcia odblokowywane w miarę treningów.' },
     'theme-cyberpunk': { name: 'Cyberpunk', desc: 'Neonowy wygląd z ostrymi rogami.' },
+    'holiday-themes': {
+      name: 'Motywy świąteczne',
+      desc: 'Halloween, Boże Narodzenie i inne: włączają się same przed świętem.',
+    },
     calls: { name: 'Połączenia', desc: 'Rozmowy głosowe i wideo z trenerem lub podopiecznymi.' },
     nutrition: { name: 'Odżywianie', desc: 'Śledzenie jedzenia i makroskładników.' },
     music: { name: 'Muzyka', desc: 'Muzyka na treningi.' },

@@ -189,6 +189,10 @@ export const addonStoreEt: typeof addonStoreEn = {
     'apex-ranks': { name: 'Edetabelid', desc: 'Kus on su harjutused jõustandardite suhtes.' },
     'apex-awards': { name: 'Auhinnad', desc: 'Saavutused, mis avanevad treenides.' },
     'theme-cyberpunk': { name: 'Cyberpunk', desc: 'Neoonilooks teravate nurkadega.' },
+    'holiday-themes': {
+      name: 'Pühadeteemad',
+      desc: 'Halloween, jõulud ja muud: lülituvad pühade ajal ise sisse.',
+    },
     calls: { name: 'Kõned', desc: 'Hääl- ja videokõned treeneri või klientidega.' },
     nutrition: { name: 'Toitumine', desc: 'Toidu ja makrode jälgimine.' },
     music: { name: 'Muusika', desc: 'Muusika treeninguteks.' },

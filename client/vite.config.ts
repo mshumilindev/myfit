@@ -134,7 +134,10 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         // Atlas's understanding worker (~2.8 MB, the whole knowledge base) must be
         // precached or the chat can't understand anything offline.
-        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        // 5 MiB (08.11): the main chunk grew past 4 MiB (4.26 MB: legal texts, five locale dictionaries, Atlas, add-ons).
+        // It is fetched on the first visit anyway, so precaching it costs no extra download; the real fix (lazy legal
+        // and per-locale dictionaries) is a separate task. Raise again only with a measurement, not by habit.
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         // Sends already-open pages to the new build (public/sw-refresh.js).
         importScripts: ['/sw-refresh.js', '/sw-push.js'],
         // Not for everyone: the no-worker fallback base, and the pl / lt / et answer
