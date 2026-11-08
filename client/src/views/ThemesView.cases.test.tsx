@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { THEMES, setAllowedThemes } from '../themes/registry';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
@@ -10,6 +11,7 @@ import { offSeason } from '../themes/testClock';
 offSeason();
 
 beforeEach(() => {
+  setAllowedThemes(THEMES.map((t) => t.id)); // every look installed: these tests are about wearing (SPO-500)
   setLocale('en');
   addonsPref.set(['theme-cyberpunk']);
 });

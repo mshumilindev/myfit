@@ -1,4 +1,5 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
@@ -25,6 +26,7 @@ const sleepMs = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 beforeAll(() => warmAtlas(), 60_000);
 beforeEach(() => {
+  addonsPref.set(['atlas']); // the Atlas screen needs the add-on (SPO-500 hard guard)
   freezeClock(NOW);
   setLocale('en');
   resetCoachMocks();

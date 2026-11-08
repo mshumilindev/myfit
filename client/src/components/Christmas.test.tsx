@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, render } from '@testing-library/react';
-import { setTheme } from '../themes/registry';
+import { THEMES, setAllowedThemes, setTheme } from '../themes/registry';
 import { ChristmasScene } from './ChristmasScene';
 import ChristmasSceneView from './ChristmasScene.view';
 import { BOKEH } from './christmasBokeh';
@@ -8,6 +8,7 @@ import { ChristmasSnow } from './ChristmasSnow';
 import ChristmasSnowView from './ChristmasSnow.view';
 import { ChristmasWreath } from './ui/ChristmasWreath';
 
+setAllowedThemes(THEMES.map((t) => t.id)); // every look installed: these tests are about the scene (SPO-500)
 afterEach(() => {
   cleanup();
   setTheme('glass');

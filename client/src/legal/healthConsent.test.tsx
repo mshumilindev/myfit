@@ -384,6 +384,7 @@ describe('the rest of the app without the consents', () => {
 
   it('each feature page without its consent says "X is off" instead of opening', async () => {
     setRecords(required());
+    addonsPref.set(['health', 'nicotine', 'alcohol', 'supplements', 'cycle']); // the pages open only with their modules (SPO-500)
     for (const [p, name] of [
       [{ nic: 'hub' }, 'Nicotine'],
       [{ alc: 'hub' }, 'Alcohol'],
@@ -400,5 +401,6 @@ describe('the rest of the app without the consents', () => {
       view.unmount();
       act(() => resetHealthGateForTests(false));
     }
+    addonsPref.reset();
   });
 });

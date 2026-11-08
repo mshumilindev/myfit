@@ -1,4 +1,5 @@
 import { currentHash } from '../route';
+import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { AtlasClientsBlock, type AtlasClientsProps } from './AtlasClientsBlock';
@@ -75,6 +76,7 @@ function wideColumn(px: number) {
 }
 
 beforeEach(() => {
+  addonsPref.set(['atlas']); // the Atlas screen needs the add-on (SPO-500 hard guard)
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
   localStorage.clear();
@@ -108,6 +110,7 @@ describe('Atlas block alone (no clients)', () => {
   });
 
   it('softens to Bro while an injury is open, unless the temper is kept', () => {
+    addonsPref.set(['atlas', 'health', 'injury-log']); // an injury counts only with its add-on (SPO-500)
     seed(coachOn(richState(), { readAt: NOW + 1 }));
     view({ atlasView: 'compact' });
     expect(document.querySelector('.tac-solo-temper')!.textContent).toBe(' · Bro');

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, screen, within } from '@testing-library/react';
+import { addonsPref } from '../addons/enabledSet';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
 import { coach, coachState, openThread, resetCoachMocks } from './__fixtures__/coachMocks';
@@ -9,8 +10,10 @@ beforeEach(() => {
   freezeClock(NOW);
   setLocale('en');
   resetCoachMocks();
+  addonsPref.set(['atlas', 'health', 'injury-log']); // the Atlas screen needs the add-on (SPO-500 hard guard)
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
 });

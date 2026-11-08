@@ -1,4 +1,5 @@
 import { setLocale } from '../i18n';
+import { THEMES, setAllowedThemes } from '../themes/registry';
 import { en } from '../i18n/en';
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,6 +11,7 @@ import { offSeason } from '../themes/testClock';
 offSeason();
 
 beforeEach(() => {
+  setAllowedThemes(THEMES.map((t) => t.id)); // every look installed: these tests are about wearing (SPO-500)
   setLocale('en');
   localStorage.clear();
   // The page exists from two looks on: the base one plus one installed theme.

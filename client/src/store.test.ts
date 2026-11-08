@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { addonsPref } from './addons/enabledSet';
 import {
   est1rm,
   topSet,
@@ -348,12 +349,14 @@ describe('one live mode at a time (mutual exclusion)', () => {
     cleanup();
   });
 
-  it('a live sleep blocks starting a workout or an activity', () => {
+  it('a live sleep blocks starting a workout or an activity (while Sleep is installed)', () => {
     cleanup();
+    addonsPref.set(['sleep', 'activities']);
     const n = startSleep();
     expect(n).not.toBeNull();
     expect(startWorkout(null)).toBeNull();
     expect(startActivity('run', 'conditioning')).toBeNull();
+    addonsPref.reset();
     cleanup();
   });
 });

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../../addons/enabledSet';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { setLocale } from '../../i18n';
 import { en } from '../../i18n/en';
@@ -41,10 +42,14 @@ beforeEach(() => {
   freezeClock(NOW);
   setLocale('en');
   localStorage.clear();
+  addonsPref.set(['activities']); // Activities installed (SPO-500)
   pinsPref.reset();
   put();
 });
-afterEach(cleanup);
+afterEach(() => {
+  addonsPref.reset();
+  cleanup();
+});
 
 describe('QuickLog: duration', () => {
   it('opens on 30 minutes by default, and on the rounded length of the last one when there is one', () => {
@@ -184,6 +189,7 @@ describe('QuickLog: the timer', () => {
   });
 
   it('a refused start (another session is already open) does not hand over', () => {
+    addonsPref.set(['sleep', 'activities']); // a live night blocks a start only while Sleep is installed (SPO-500)
     seed({
       ...__getStateForTests(),
       sleeps: [

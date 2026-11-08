@@ -28,7 +28,7 @@ const chipTexts = () =>
 vi.setConfig({ testTimeout: 40_000 });
 beforeAll(() => warmAtlas(), 60_000);
 beforeEach(() => {
-  addonsPref.set(['sleep', 'activities']); // installed: without them nothing is read (SPO-500 I8)
+  addonsPref.set(['sleep', 'activities', 'atlas']); // installed: without them nothing is read (SPO-500 I8)
   freezeClock(NOW);
   setLocale('en');
   resetCoachMocks();

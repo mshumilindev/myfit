@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { setLocale } from '../i18n';
 import { fmtWeekday } from '../i18n';
@@ -77,8 +78,12 @@ beforeEach(() => {
   setLocale('en');
   m.mine = { assignment: null, active: true };
   seed(richState());
+  addonsPref.set(['atlas', 'activities', 'goals', 'playbook']); // the coach name shows only with the Atlas add-on (SPO-500)
 });
-afterEach(() => cleanup());
+afterEach(() => {
+  addonsPref.reset();
+  cleanup();
+});
 
 describe('Overview: progress, records and trends tiles', () => {
   it("shows this week's volume in tonnes and eight bars with the current one marked", () => {

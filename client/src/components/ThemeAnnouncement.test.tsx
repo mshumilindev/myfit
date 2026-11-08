@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { THEMES, setAllowedThemes } from '../themes/registry';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { addonsPref } from '../addons/enabledSet';
 import { en } from '../i18n/en';
@@ -12,6 +13,7 @@ const attr = () => document.documentElement.getAttribute('data-theme');
 offSeason();
 
 beforeEach(() => {
+  setAllowedThemes(THEMES.map((t) => t.id)); // every look installed: these tests are about wearing (SPO-500)
   localStorage.clear();
   addonsPref.set(['theme-cyberpunk']);
   resetSeenForTest();

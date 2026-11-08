@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, render } from '@testing-library/react';
-import { setTheme } from '../themes/registry';
+import { THEMES, setAllowedThemes, setTheme } from '../themes/registry';
 import { offSeason } from '../themes/testClock';
 import { HalloweenScene } from './HalloweenScene';
 import HalloweenSceneView from './HalloweenScene.view';
@@ -9,6 +9,7 @@ import { HalloweenBats } from './HalloweenBats';
 import { HalloweenLantern } from './ui/HalloweenLantern';
 
 offSeason();
+setAllowedThemes(THEMES.map((t) => t.id)); // every look installed: these tests are about the scene (SPO-500)
 afterEach(() => {
   cleanup();
   setTheme('glass');

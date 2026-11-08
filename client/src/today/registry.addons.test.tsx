@@ -91,6 +91,8 @@ describe('Health module widgets and shortcuts follow their add-ons (SPO-518)', (
     expect(avail('standards')).toBe(false);
     expect(avail('challenge-to-try')).toBe(false);
     addonsPref.set(['apex']);
+    expect(avail('standards')).toBe(false); // Standards are the Ranks module's
+    addonsPref.set(['apex', 'apex-ranks']);
     expect(avail('standards')).toBe(true);
   });
   it('shortcuts: sleep, injury and Atlas need their add-ons, rest and illness need Health', () => {

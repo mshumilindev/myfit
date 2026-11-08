@@ -1,4 +1,5 @@
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ConsentRecord } from '../legal/consents';
 import { currentVersion } from '../legal/consents';
@@ -63,6 +64,7 @@ async function ask(text: string) {
 }
 
 beforeEach(() => {
+  addonsPref.set(['atlas']); // the Atlas screen needs the add-on (SPO-500 hard guard)
   vi.stubGlobal(
     'IntersectionObserver',
     class {

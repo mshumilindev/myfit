@@ -23,6 +23,15 @@ export function sleepAvailable(): boolean {
   }
 }
 
+/** Atlas: without it every reader of the store sees Atlas as off (store.ts `exposed()`), so none of its UI or voice shows. */
+export function atlasAvailable(): boolean {
+  try {
+    return addonAvailable('atlas');
+  } catch {
+    return false;
+  }
+}
+
 export function useGoalsOn(): boolean {
   return useAddonOrBase('goals');
 }
