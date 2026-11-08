@@ -3,6 +3,7 @@
  * (no feature flag: the consent is the only switch). Off, or the records not yet known (fail closed), or this
  * device withdrew it → nothing runs and nothing is read or written.
  */
+import { useAddonOrBase } from '../addons/enabledSet';
 import { useEffect } from 'react';
 import { currentUid } from '../api';
 import { useConsentRecords } from '../legal/consentApi';
@@ -42,7 +43,10 @@ export async function withdrawAtlasHistory(mode: 'keep' | 'now'): Promise<void> 
 export function AtlasHistoryHost() {
   const { records, confirmed } = useConsentRecords();
   const uid = currentUid();
+  // The chat copy syncs only while Atlas is installed (hard guard, SPO-500); the consent and the copy stay as they are.
+  const atlasInstalled = useAddonOrBase('atlas');
   const on =
+    atlasInstalled &&
     !!uid &&
     (confirmed || records.length > 0) &&
     optionalConsentOn(records, 'atlas-history') &&
