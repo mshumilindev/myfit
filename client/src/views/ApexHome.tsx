@@ -23,6 +23,7 @@ import {
 } from '../challenges';
 import { computeStandards } from '../standards';
 import { computeFeats } from '../feats';
+import { useAddonOrBase } from '../addons/enabledSet';
 import type { Notif } from '../notifications';
 import type { ApexTab } from './ApexApp';
 
@@ -38,7 +39,12 @@ export function ApexHome({
   onTab: (t: ApexTab) => void;
 }) {
   const { t, locale } = useT();
-  const active = useChallenges();
+  const allChallenges = useChallenges();
+  // each Apex module switches its own part of Home off (SPO-500 hard guard)
+  const challengesOn = useAddonOrBase('apex-challenges');
+  const ranksOn = useAddonOrBase('apex-ranks');
+  const awardsOn = useAddonOrBase('apex-awards');
+  const active = useMemo(() => (challengesOn ? allChallenges : []), [challengesOn, allChallenges]);
   const finished = useMemo(
     () => store.workouts.filter((w) => w.finishedAt !== null),
     [store.workouts],
@@ -77,6 +83,7 @@ export function ApexHome({
 
   // Closest strength rank (trained lift with the smallest gap to its next tier).
   const nextRank = useMemo(() => {
+    if (!ranksOn) return null;
     const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? 0;
     const sex = store.bodyMetrics.sex === 'female' ? 'F' : 'M';
     if (!bodyKg || (store.bodyMetrics.sex !== 'male' && store.bodyMetrics.sex !== 'female'))
@@ -91,10 +98,11 @@ export function ApexHome({
         best = { name: r.name, tier: label, toGo, progress: r.progress };
     }
     return best;
-  }, [finished, store.bodyMetrics, t]);
+  }, [finished, store.bodyMetrics, t, ranksOn]);
 
   // Latest unlocked achievement.
   const latestAward = useMemo(() => {
+    if (!awardsOn) return null;
     const feats = computeFeats(finished);
     let best: { title: string; emoji: string; at: number } | null = null;
     for (const a of Object.values(feats.byGroup).flat()) {
@@ -102,7 +110,7 @@ export function ApexHome({
       if (!best || a.unlockAt > best.at) best = { title: a.title, emoji: a.emoji, at: a.unlockAt };
     }
     return best;
-  }, [finished]);
+  }, [finished, awardsOn]);
 
   const recent = notifs.slice(0, 3);
   const RECENT_ICON: Record<string, string> = {

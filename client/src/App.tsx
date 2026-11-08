@@ -764,11 +764,21 @@ function AppMain() {
   const homeSetsOn = useAddonOrBase('home-sets');
   const gymOn = useAddonOrBase('gym');
   const coachApp = useAddonOrBase('coach');
-  const { apexOn, masteryOn, challenges, themesOn, sleepOn, atlasOn, healthOn, injuryOn } =
-    useAddonRuntime();
+  const {
+    apexOn,
+    masteryOn,
+    ranksOn,
+    awardsOn,
+    challenges,
+    themesOn,
+    sleepOn,
+    atlasOn,
+    healthOn,
+    injuryOn,
+  } = useAddonRuntime();
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
-    if (!apexOn) return;
+    if (!apexOn || !masteryOn) return;
     const m = computeMastery(store, Date.now(), {
       trainingSinceYear: store.mastery.sinceYear,
       trainingPattern: store.mastery.pattern,
@@ -796,9 +806,20 @@ function AppMain() {
   // Atlas's notes live in his own thread (unread count on his bubble in the
   // stories strip) — not in the bell.
   const rawNotifs = useMemo(
-    () => computeNotifs(store, notifNow, t, challenges, apexOn),
+    () =>
+      computeNotifs(store, notifNow, t, challenges, apexOn, { ranks: ranksOn, awards: awardsOn }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [store.workouts, store.bodyMetrics, store.exerciseLoadTypes, challenges, notifNow, t, apexOn],
+    [
+      store.workouts,
+      store.bodyMetrics,
+      store.exerciseLoadTypes,
+      challenges,
+      notifNow,
+      t,
+      apexOn,
+      ranksOn,
+      awardsOn,
+    ],
   );
   // Rows from my trainer (M7) come from the lazy client bridge; empty unless the `coach` flag is on and I have a trainer.
   const clientShared = useClientShared();
@@ -1118,7 +1139,7 @@ function AppMain() {
     (overlay?.screen === 'settings' && role !== 'admin') ||
     (overlay?.screen === 'sleep' && !sleepOn && !nightLive) ||
     (overlay?.screen === 'themes' && !themesOn) ||
-    (overlay?.screen === 'mastery' && !apexOn) ||
+    (overlay?.screen === 'mastery' && (!apexOn || !masteryOn)) ||
     ((overlay?.screen === 'log-activity' || overlay?.screen === 'activity') && !activitiesOn) ||
     (overlay?.screen === 'home-set' && !homeSetsOn) ||
     (overlay?.screen === 'health' && !healthOn) ||
@@ -1711,7 +1732,7 @@ function AppMain() {
           <ClientRoutesLazy route={activeOverlay.route} onClose={closeOverlay} />
         </Suspense>
       )}
-      {activeOverlay?.screen === 'mastery' && apexOn && (
+      {activeOverlay?.screen === 'mastery' && apexOn && masteryOn && (
         <MasteryView shell={shell} onClose={masteryTab ? undefined : closeOverlay} />
       )}
       {activeOverlay?.screen === 'coach' && atlasOn && (

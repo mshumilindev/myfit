@@ -26,6 +26,8 @@ export function useAddonRuntime() {
   // Challenges are an Apex module: with it off they leave the bell and the launcher count.
   const allChallenges = useChallenges();
   const challengesOn = useAddonOrBase('apex-challenges');
+  const ranksOn = useAddonOrBase('apex-ranks');
+  const awardsOn = useAddonOrBase('apex-awards');
   const challenges = useMemo(
     () => (challengesOn ? allChallenges : []),
     [challengesOn, allChallenges],
@@ -48,5 +50,16 @@ export function useAddonRuntime() {
   useEffect(() => watchAtlasRemoval(), []);
   useEffect(() => (atlasOn ? undefined : reconcileAtlasConsent()), [atlasOn]);
   useEffect(() => setAllowedThemes(installedThemes), [installedThemes]);
-  return { apexOn, masteryOn, challenges, themesOn, sleepOn, atlasOn, healthOn, injuryOn };
+  return {
+    apexOn,
+    masteryOn,
+    ranksOn,
+    awardsOn,
+    challenges,
+    themesOn,
+    sleepOn,
+    atlasOn,
+    healthOn,
+    injuryOn,
+  };
 }
