@@ -1717,7 +1717,7 @@ export function startWorkout(
   // One live mode at a time — never start a workout while an activity or a
   // sleep is running.
   if (calcActivities().some((a) => a.finishedAt === null)) return null;
-  if (liveSleep(state.sleeps)) return null;
+  if (liveSleep(exposed().sleeps)) return null; // a night of a removed Sleep add-on blocks nothing
   applyAutoFinish();
   // An earlier draft that never got an exercise is replaced, not closed.
   pruneEmptyLiveWorkouts(null);
@@ -3003,7 +3003,8 @@ function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): 
   if (!healthSnapshot().ready) return;
   const vis = exposed();
   // The general level Off is a MASTER off: a per-condition override (Full / Effects) never outlives it (B1).
-  const items = isHealthOn('chronic') && state.conditionsShare !== 'off' ? rawItems : [];
+  const items =
+    healthAddonsOn(healthSnapshot().on).chronic && state.conditionsShare !== 'off' ? rawItems : [];
   const nic = nicotineCoachView(vis.nicotine);
   const alc = alcoholCoachView(vis.alcohol);
   const facts = getSupplementTrainingFacts();
@@ -4006,7 +4007,7 @@ export function startActivity(type: string, category: ActivityCategory): Activit
   // One live mode at a time — never start an activity while a workout or a
   // sleep is running.
   if ((state.workouts ?? []).some((w) => w.finishedAt === null)) return null;
-  if (liveSleep(state.sleeps)) return null;
+  if (liveSleep(exposed().sleeps)) return null;
   const now = Date.now();
   const activity: Activity = {
     id: uuid(),

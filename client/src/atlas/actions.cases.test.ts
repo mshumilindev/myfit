@@ -59,7 +59,7 @@ beforeEach(() => {
   localStorage.clear();
   store.resetLocalData();
   // Activities is an add-on: without it no activity counts (owner 2026-11-07); rest periods follow Rest and Unwell (08.11)
-  addonsPref.set(['activities', 'health', 'rest', 'unwell']);
+  addonsPref.set(['activities', 'health', 'rest', 'unwell', 'injury-log']);
 });
 afterEach(() => {
   vi.useRealTimers();
@@ -330,5 +330,15 @@ describe('runAction: many', () => {
   it('surfaces the first workout to open', () => {
     const r = run({ type: 'many', actions: [{ type: 'temper', temper: 3 }, { type: 'start' }] });
     expect(r.openWorkoutId).toBeTruthy();
+  });
+});
+
+describe('runAction: injury needs the Injury log add-on (SPO-500 hard guard)', () => {
+  it('without it nothing is logged and Atlas says why', () => {
+    addonsPref.set(['health']);
+    const before = st().injuries.length;
+    const r = run({ type: 'injury', part: 'knee', stage: 'protect' } as unknown as AtlasAction);
+    expect(r.text).toMatch(/Injury log is not installed/);
+    expect(st().injuries.length).toBe(before);
   });
 });

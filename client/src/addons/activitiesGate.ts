@@ -5,12 +5,12 @@
  */
 import { addonAvailable, useAddonOrBase } from './enabledSet';
 
-/** Pure code (no hook): true while Activities is installed or not offered to this role. Never throws (blocked storage = on). */
+/** Pure code (no hook): true while Activities is installed or not offered to this role. Never throws (a storage error = off: a hard guard). */
 export function activitiesAvailable(): boolean {
   try {
     return addonAvailable('activities');
   } catch {
-    return true;
+    return false;
   }
 }
 

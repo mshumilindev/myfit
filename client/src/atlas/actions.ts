@@ -21,7 +21,7 @@ import {
   logActivity,
 } from '../store';
 import { activitiesAvailable } from '../addons/activitiesGate';
-import { restPeriodShown } from '../healthAddons';
+import { healthAddonInstalled, restPeriodShown } from '../healthAddons';
 import { activityType, estimateCalories } from '../activities';
 import { bodyPart as bodyPartOf } from '../injury';
 import { isHealthOn, isHealthWriteDenied } from '../data/healthConsentGate';
@@ -227,6 +227,13 @@ export function runAction(
     }
     case 'injury': {
       // No consent for Injuries (SPO-290): nothing is logged, and Atlas says why instead of claiming it did.
+      if (!healthAddonInstalled('injury-log'))
+        return {
+          text: L(
+            'Injury log is not installed, so I did not log that. Add it in the store and tell me again.',
+            'Журнал травм не встановлено, тому я цього не записав. Додай його в сторі й скажи ще раз.',
+          ),
+        };
       if (!isHealthOn('injuries'))
         return {
           text: L(

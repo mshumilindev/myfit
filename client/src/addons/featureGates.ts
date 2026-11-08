@@ -5,12 +5,12 @@
  */
 import { addonAvailable, useAddonOrBase } from './enabledSet';
 
-/** Pure code (no hook): true while Goals is installed or not offered to this role. Never throws (blocked storage = on). */
+/** Pure code (no hook): true while Goals is installed or not offered to this role. Never throws (a storage error = off: a hard guard). */
 export function goalsAvailable(): boolean {
   try {
     return addonAvailable('goals');
   } catch {
-    return true;
+    return false;
   }
 }
 
@@ -19,7 +19,7 @@ export function sleepAvailable(): boolean {
   try {
     return addonAvailable('sleep');
   } catch {
-    return true;
+    return false;
   }
 }
 

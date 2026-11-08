@@ -15,8 +15,15 @@ function addonAvailable(id: string): boolean {
   try {
     return installed(id);
   } catch {
-    return true;
+    return false;
   }
+}
+
+/** Whether one health add-on is installed (or not offered to this role): the add-on half of `healthAddonsOn`. */
+export function healthAddonInstalled(
+  id: 'injury-log' | 'conditions' | 'nicotine' | 'alcohol' | 'supplements' | 'cycle',
+): boolean {
+  return addonAvailable(id);
 }
 
 /** Consent AND add-on: what the app may use of each health feature. */
