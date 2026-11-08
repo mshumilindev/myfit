@@ -14,7 +14,7 @@ const short: SleepNight = {
   date: '2026-11-08',
   bedtime: NOW - 6 * H,
   wake: NOW - 2 * H,
-  source: 'manual',
+  source: 'backfill',
 } as SleepNight;
 
 beforeEach(() => {
