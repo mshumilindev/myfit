@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { pinsPref } from '../activityPrefs';
 import { setLocale } from '../i18n';
+import { addonsPref } from '../addons/enabledSet';
 import { en } from '../i18n/en';
 import { emptyState, setDesktop } from './__fixtures__/viewKit';
 import {
@@ -25,6 +26,7 @@ beforeEach(() => {
   });
   vi.setSystemTime(NOW);
   localStorage.clear();
+  addonsPref.set(['sleep', 'activities']); // installed: without them nothing is read (SPO-500 I8)
   pinsPref.reset();
   setLocale('en');
   setDesktop(false);
@@ -32,6 +34,7 @@ beforeEach(() => {
   put(history());
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
 });

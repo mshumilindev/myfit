@@ -5,8 +5,10 @@ import { en } from '../i18n/en';
 import { __getStateForTests } from '../store';
 import { emptyState, freezeClock, NOW, seed, setDesktop } from './__fixtures__/viewKit';
 import { SleepView } from './SleepView';
+import { addonsPref } from '../addons/enabledSet';
 
 beforeEach(() => {
+  addonsPref.set(['sleep']); // the Sleep add-on is installed: without it no nights are read (SPO-500 I8)
   freezeClock(NOW);
   setLocale('en');
   setDesktop(false);

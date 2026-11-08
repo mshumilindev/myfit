@@ -18,6 +18,7 @@ import {
   summaryReturnFor,
   useNextUp,
 } from './NextUp';
+import { addonsPref } from '../../addons/enabledSet';
 
 const MIN = 60_000;
 const DAY = 24 * 60 * MIN;
@@ -144,6 +145,7 @@ const acts = () => __getStateForTests().activities;
 const click = (el: Element | null) => act(() => void fireEvent.click(el as Element));
 
 beforeEach(() => {
+  addonsPref.set(['sleep', 'activities']); // Sleep and Activities installed: without them nothing is read (SPO-500 I8)
   freezeClock(NOW);
   setLocale('en');
   localStorage.clear();

@@ -151,7 +151,7 @@ const liveWorkouts = () => __getStateForTests().workouts.filter((w) => w.finishe
 
 beforeEach(() => {
   localStorage.clear();
-  addonsPref.set(['health', 'rest', 'unwell', 'activities', 'home-sets', 'playbook']);
+  addonsPref.set(['health', 'rest', 'unwell', 'activities', 'home-sets', 'playbook', 'sleep']);
   programState.assignment = null;
   programState.active = true;
   gps(null);

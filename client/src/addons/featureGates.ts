@@ -14,6 +14,15 @@ export function goalsAvailable(): boolean {
   }
 }
 
+/** Sleep: without it every reader of the store sees no nights (store.ts `exposed()`), so no model or card uses them. */
+export function sleepAvailable(): boolean {
+  try {
+    return addonAvailable('sleep');
+  } catch {
+    return true;
+  }
+}
+
 export function useGoalsOn(): boolean {
   return useAddonOrBase('goals');
 }

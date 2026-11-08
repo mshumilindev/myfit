@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
@@ -46,6 +47,7 @@ const hh = (ms: number) => {
 };
 
 beforeEach(() => {
+  addonsPref.set(['sleep', 'activities']); // installed: without them nothing is read (SPO-500 I8)
   freezeClock(NOW);
   setLocale('en');
   Object.values(m).forEach((f) => typeof f === 'function' && 'mockReset' in f && f.mockReset());
@@ -54,6 +56,7 @@ beforeEach(() => {
   seed(richState());
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
 });

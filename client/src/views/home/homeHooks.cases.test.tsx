@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { addonsPref } from '../../addons/enabledSet';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { setLocale } from '../../i18n';
 import { en } from '../../i18n/en';
@@ -18,11 +19,13 @@ import {
 } from './homeSetDraft';
 
 beforeEach(() => {
+  addonsPref.set(['sleep', 'activities']); // installed: without them nothing is read (SPO-500 I8)
   freezeClock(NOW);
   setLocale('en');
   seed(emptyState());
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   pruneHomeSetDrafts([]);
 });

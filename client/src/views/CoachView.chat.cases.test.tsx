@@ -1,4 +1,5 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { FLAGS, LOCALES, setLocale } from '../i18n';
 import { en } from '../i18n/en';
@@ -27,11 +28,13 @@ const chipTexts = () =>
 vi.setConfig({ testTimeout: 40_000 });
 beforeAll(() => warmAtlas(), 60_000);
 beforeEach(() => {
+  addonsPref.set(['sleep', 'activities']); // installed: without them nothing is read (SPO-500 I8)
   freezeClock(NOW);
   setLocale('en');
   resetCoachMocks();
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
 });

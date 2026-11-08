@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { act, cleanup, render } from '@testing-library/react';
 import { __getStateForTests, __replaceStateForTests } from '../store';
 import type { SleepNight, Workout } from '../types';
@@ -77,6 +78,7 @@ const canvas = () => document.querySelector('canvas.spotter-sky') as HTMLCanvasE
 
 let nowMs = 0;
 beforeEach(() => {
+  addonsPref.set(['sleep', 'activities']); // installed: without them nothing is read (SPO-500 I8)
   tier = 'full';
   nullContext = false;
   ctxs.clear();
@@ -101,6 +103,7 @@ beforeEach(() => {
   vi.spyOn(Math, 'random').mockReturnValue(0.9);
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   vi.useRealTimers();
   vi.unstubAllGlobals();

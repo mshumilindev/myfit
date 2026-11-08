@@ -153,7 +153,7 @@ import { addonAvailable, addonsPref } from './addons/queue'; // importing it als
 import { geolocationGranted, getCurrentPositionOnce, readPosCache } from './geoPosition';
 import { healthAddonsKey, healthAddonsOn, restPeriodShown } from './healthAddons';
 import { activitiesAvailable } from './addons/activitiesGate';
-import { goalsAvailable } from './addons/featureGates';
+import { goalsAvailable, sleepAvailable } from './addons/featureGates';
 import {
   UNSENT_KEY,
   bumpWorkoutGen,
@@ -655,7 +655,8 @@ let exposedMemo: { raw: StoreState; v: string; out: StoreState } | null = null;
 function exposed(): StoreState {
   const actOn = activitiesAvailable();
   const goalsOn = goalsAvailable();
-  const v = `${healthVersion()}:${healthAddonsKey()}:${actOn ? 1 : 0}${goalsOn ? 1 : 0}`;
+  const sleepOn = sleepAvailable();
+  const v = `${healthVersion()}:${healthAddonsKey()}:${actOn ? 1 : 0}${goalsOn ? 1 : 0}${sleepOn ? 1 : 0}`;
   if (exposedMemo === null || exposedMemo.raw !== state || exposedMemo.v !== v) {
     const masked = maskHealth(state, healthAddonsOn(healthSnapshot().on));
     // Activities / Goals add-on not installed: no activities / empty goals for any reader (the data stays stored).
@@ -667,6 +668,8 @@ function exposed(): StoreState {
         restPeriods: masked.restPeriods.filter((r) => restPeriodShown(r.mode)),
         ...(actOn ? {} : { activities: [] }),
         ...(goalsOn ? {} : { goals: EMPTY_GOALS }),
+        // Sleep add-on not installed: no nights for any reader, so readiness, RPE, Mastery and the cards stay neutral
+        ...(sleepOn ? {} : { sleeps: [] }),
       },
     };
   }

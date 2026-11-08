@@ -24,6 +24,7 @@ vi.mock('../store', async (orig) => ({
 vi.mock('./MoonGlyph', () => ({ MoonGlyph: () => <span data-testid="moon" /> }));
 
 import { SleepAutomation, planFor } from './SleepAutomation';
+import { addonsPref } from '../addons/enabledSet';
 
 const MIN = 60000;
 const at = (d: number, h: number, m = 0) => new Date(2026, 8, d, h, m).getTime(); // Sept 2026 (30th = Wed)
@@ -74,6 +75,7 @@ const regular = (count: number, endDay = 29): SleepNight[] =>
   });
 
 beforeEach(() => {
+  addonsPref.set(['sleep']); // the Sleep add-on is installed: without it no nights are read (SPO-500 I8)
   setLocale('en');
   [
     startSleep,

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { HistorySection } from './HistoryCalendar';
 import { CORE_DEFAULTS, type HistoryOpts } from './layout';
@@ -52,6 +53,7 @@ function mockMedia(matches: boolean) {
 }
 
 beforeEach(() => {
+  addonsPref.set(['sleep', 'activities', 'health', 'unwell']); // installed: without them nothing is read (SPO-500 I8)
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(NOW);
   localStorage.clear();
@@ -63,6 +65,7 @@ beforeEach(() => {
   onLogFor.mockClear();
 });
 afterEach(() => {
+  addonsPref.reset();
   setProgramMemory(null);
   cleanup();
   vi.useRealTimers();
