@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import type { StoreState } from '../client/src/store';
+import { addonsPref } from '../client/src/addons/queue';
 import type { Exercise, SetEntry, SleepNight, Workout } from '../client/src/types';
 import {
   __applySleepSnapshotForTests,
@@ -98,6 +99,10 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date('2026-07-31T12:00:00Z'));
   resetLocalData();
+});
+
+afterEach(() => {
+  addonsPref.set([]); // a test that installs an add-on removes it again
 });
 
 describe('F-03 Workout store (local state)', () => {
@@ -311,6 +316,7 @@ describe('F-05 Gyms and reminders store', () => {
       finishedAt: Date.now() - 1000,
       durationMin: 3,
     };
+    addonsPref.set(['activities']); // no Activities add-on, no activities for any reader
     const live = startActivity('run', 'conditioning');
     const merged = mergeServerActivitiesWithLocalLive([server], __getStateForTests().activities);
 

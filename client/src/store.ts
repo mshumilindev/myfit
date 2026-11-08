@@ -152,6 +152,14 @@ import { currentUid, getRole, callFn } from './api';
 import { addonAvailable, addonsPref } from './addons/queue'; // importing it also registers the add-on lists for account sync
 import { geolocationGranted, getCurrentPositionOnce, readPosCache } from './geoPosition';
 import { healthAddonsKey, healthAddonsOn, restPeriodShown } from './healthAddons';
+import { maskAddons } from './addons/maskStore';
+import {
+  markPrefsLoaded,
+  markUsage,
+  markWorkoutsLoaded,
+  resetAccountLoaded,
+} from './accountLoaded';
+export { whenAccountLoaded, whenPrefsLoaded } from './accountLoaded';
 import { activitiesAvailable } from './addons/activitiesGate';
 import { atlasAvailable, goalsAvailable, sleepAvailable } from './addons/featureGates';
 import {
@@ -660,63 +668,18 @@ function exposed(): StoreState {
   const v = `${healthVersion()}:${healthAddonsKey()}:${actOn ? 1 : 0}${goalsOn ? 1 : 0}${sleepOn ? 1 : 0}${atlasOn ? 1 : 0}`;
   if (exposedMemo === null || exposedMemo.raw !== state || exposedMemo.v !== v) {
     const masked = maskHealth(state, healthAddonsOn(healthSnapshot().on));
-    // Activities / Goals add-on not installed: no activities / empty goals for any reader (the data stays stored).
     exposedMemo = {
       raw: state,
       v,
-      out: {
-        ...masked,
-        restPeriods: masked.restPeriods.filter((r) => restPeriodShown(r.mode)),
-        ...(actOn ? {} : { activities: [] }),
-        ...(goalsOn ? {} : { goals: EMPTY_GOALS }),
-        // Sleep add-on not installed: no nights for any reader, so readiness, RPE, Mastery and the cards stay neutral
-        ...(sleepOn ? {} : { sleeps: [] }),
-        // Atlas add-on not installed: Atlas is off for every reader (its voice, notes, plan card), the setup stays stored
-        ...(atlasOn ? {} : { coach: { ...masked.coach, enabled: false } }),
-      },
+      out: maskAddons(masked, {
+        activities: actOn,
+        goals: goalsOn,
+        sleep: sleepOn,
+        atlas: atlasOn,
+      }),
     };
   }
   return exposedMemo.out;
-}
-
-let accountLoaded = { prefs: false, workouts: false };
-/** Collections the one-time role migration counts (`getStoredUsage`) that have delivered a first snapshot. */
-const USAGE_SOURCES = ['sleeps', 'restPeriods', 'injuries', 'conditions'] as const;
-let usageLoaded = new Set<string>();
-const loadedListeners = new Set<() => void>();
-function usageReady(): boolean {
-  return USAGE_SOURCES.every((n) => usageLoaded.has(n));
-}
-function checkAccountLoaded(): void {
-  if (accountLoaded.prefs && accountLoaded.workouts && usageReady())
-    for (const f of [...loadedListeners]) f();
-}
-const prefsListeners = new Set<() => void>();
-/** Runs `cb` once the account's synced preferences have arrived from the server (not the cache); data that is locked or slow does not matter. */
-export function whenPrefsLoaded(cb: () => void): () => void {
-  if (accountLoaded.prefs) {
-    cb();
-    return () => undefined;
-  }
-  prefsListeners.add(cb);
-  return () => prefsListeners.delete(cb);
-}
-function markUsage(name: (typeof USAGE_SOURCES)[number]): void {
-  if (usageLoaded.has(name)) return;
-  usageLoaded.add(name);
-  checkAccountLoaded();
-}
-/**
- * Runs `cb` once the account's synced preferences, the (unlocked) workouts and the nights, rest periods, injuries and
- * conditions have arrived: what a one-time migration that counts stored data (`getStoredUsage`) must wait for. Returns a cancel function.
- */
-export function whenAccountLoaded(cb: () => void): () => void {
-  if (accountLoaded.prefs && accountLoaded.workouts && usageReady()) {
-    cb();
-    return () => undefined;
-  }
-  loadedListeners.add(cb);
-  return () => loadedListeners.delete(cb);
 }
 
 /** The current state, outside React (for chained actions). */
@@ -5129,9 +5092,7 @@ export function startSyncLoop(): () => void {
         syncUiPrefsFromDoc(data, writePrefsFields);
         accountDocs.syncTwPrefsFromDoc(data);
         if (!snap.metadata.fromCache) {
-          accountLoaded.prefs = true;
-          for (const f of [...prefsListeners]) f();
-          checkAccountLoaded();
+          markPrefsLoaded();
         }
       },
       onWriteError,
@@ -5142,8 +5103,7 @@ export function startSyncLoop(): () => void {
     (serverWorkouts, { meta, locked }) => {
       if (!locked) {
         sealedStore.markRemote('workouts');
-        accountLoaded.workouts = true;
-        checkAccountLoaded();
+        markWorkoutsLoaded();
       }
       // A document without its exercise list is damaged: skipped, so the code below never trips over it (SPO-219).
       const usable = serverWorkouts.filter((w) => Array.isArray(w.exercises));
@@ -5570,8 +5530,7 @@ export function startSyncLoop(): () => void {
 }
 
 function stopListeners(): void {
-  accountLoaded = { prefs: false, workouts: false };
-  usageLoaded = new Set();
+  resetAccountLoaded();
   for (const u of unsubs) u();
   unsubs = [];
   if (presenceTimer) {

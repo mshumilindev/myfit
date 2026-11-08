@@ -38,7 +38,8 @@ import { Installed } from './InstalledScreen';
 import { InstallDone, Installing } from './InstallFlow';
 import { ManageScreen } from './ManageScreen';
 import { ItemPage } from './ItemPage';
-import { Addons, Apps, Discover, Search, Selected, Themes } from './StoreScreens';
+import { Addons, Apps, Discover, Search, Themes } from './StoreScreens';
+import { Selected } from './SelectedScreen';
 import { RemoveButton } from './RemoveSheet';
 import { ItemAction, itemName, type StoreCtx } from './storeItems';
 import {
