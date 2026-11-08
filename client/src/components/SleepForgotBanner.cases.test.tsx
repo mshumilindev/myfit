@@ -26,6 +26,9 @@ vi.mock('./MoonGlyph', () => ({ MoonGlyph: () => <span data-testid="moon" /> }))
 import { SleepAutoFilledCard, SleepForgotBanner, SleepPauseController } from './SleepAutomation';
 import { addonsPref } from '../addons/enabledSet';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const MIN = 60000;
 const at = (d: number, h: number, m = 0) => new Date(2026, 8, d, h, m).getTime(); // Sept 2026 (30th = Wed)
 const dayId = (d: number) => `2026-09-${String(d).padStart(2, '0')}`;

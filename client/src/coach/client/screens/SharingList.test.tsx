@@ -12,6 +12,9 @@ import { createFixturesClientPort } from '../data/__fixtures__/fixtures';
 import { TrainerSharing } from './TrainerSharing';
 import { addonsPref } from '../../../addons/enabledSet';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const ALL = {
   injuries: true,
   chronic: true,

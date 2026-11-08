@@ -22,6 +22,9 @@ import { deloadMult, progressionMult, readinessMult, sleepNeedExtraMin } from '.
 import { nicRpeShift } from '../nicotineApply';
 import { computeReadiness } from '../recovery';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const SAT_NOON = new Date(2026, 9, 3, 12).getTime();
 
 function seed(): void {

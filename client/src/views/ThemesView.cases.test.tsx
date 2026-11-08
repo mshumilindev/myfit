@@ -8,6 +8,12 @@ import { ThemesView } from './ThemesView';
 import { setTheme } from '../themes';
 import { offSeason } from '../themes/testClock';
 
+// the looks a test installs it removes again (SPO-500)
+afterEach(() => setAllowedThemes([]));
+
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 offSeason();
 
 beforeEach(() => {

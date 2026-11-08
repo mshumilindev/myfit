@@ -17,6 +17,9 @@ import {
   typeInto,
 } from './__fixtures__/onboardingMocks';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 beforeEach(() => {
   // The look step and the health rows belong to add-ons (SPO-518): installed here, so the full flow is covered.
   addonsPref.set([

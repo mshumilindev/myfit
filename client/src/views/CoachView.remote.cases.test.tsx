@@ -16,6 +16,9 @@ import {
 } from './__fixtures__/coachMocks';
 import { freezeClock, NOW, richState } from './__fixtures__/viewKit';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 vi.setConfig({ testTimeout: 40_000 });
 const UNKNOWN = 'asdf qwerty zzz';
 const last = () => bubbles()[bubbles().length - 1];

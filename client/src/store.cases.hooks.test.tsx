@@ -68,6 +68,9 @@ import { HEALTH_ADDONS } from './addons/testSetup';
 import { setRole } from './api';
 import type { SetEntry, Workout } from './types';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const T0 = new Date('2026-03-04T10:00:00Z').getTime();
 const DAY = 86_400_000;
 const st = () => store.__getStateForTests();

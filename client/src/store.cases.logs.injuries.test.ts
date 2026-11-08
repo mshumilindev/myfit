@@ -65,6 +65,9 @@ import * as store from './store';
 import { vault } from './vaultIO';
 import { isSealed, unsealDoc } from './encryptedDoc';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const T0 = new Date('2026-03-04T10:00:00Z').getTime();
 const DAY = 86_400_000;
 const stub = vault as unknown as import('./autoVault').Vault;

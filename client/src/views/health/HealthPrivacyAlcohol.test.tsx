@@ -19,6 +19,9 @@ import {
 import { newNicotineProduct } from '../../nicotine';
 import { addonsPref } from '../../addons/enabledSet';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 beforeEach(() => {
   setLocale('en');
   addonsPref.set([

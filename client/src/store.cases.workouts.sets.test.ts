@@ -60,6 +60,9 @@ import * as store from './store';
 import { setProgramMemory } from './data/programMemory';
 import type { Gym, SetEntry, Workout } from './types';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const T0 = new Date('2026-03-04T10:00:00Z').getTime(); // a Wednesday
 const st = () => store.__getStateForTests();
 const wk = (id: string) => st().workouts.find((w) => w.id === id)!;

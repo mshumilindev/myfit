@@ -33,6 +33,9 @@ import {
 import { supEntryId } from './text';
 import { addonsPref } from '../../../addons/enabledSet';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 beforeEach(() => {
   addonsPref.set([
     'health',

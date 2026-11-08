@@ -18,6 +18,9 @@ import { __getStateForTests } from '../store';
 import { setLocale, useT } from '../i18n';
 import type { Shell } from '../App';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 // A fixed clock: render must stay pure.
 const NOW = new Date(2026, 8, 29, 12, 0).getTime();
 

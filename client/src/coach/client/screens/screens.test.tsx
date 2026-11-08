@@ -21,6 +21,9 @@ import {
 import { resetHealthGateForTests, withdrawHealthLocally } from '../../../data/healthConsentGate';
 import type { ClientSnapshot } from '../data/types';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 beforeEach(() => {
   setViewport(390);
   addonsPref.set([

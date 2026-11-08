@@ -11,6 +11,9 @@ import {
 import type { ThemeDef } from './registry';
 import { startHolidayWatch } from './holidayWatch';
 
+// the looks a test installs it removes again (SPO-500)
+afterEach(() => setAllowedThemes([]));
+
 const list = THEMES as ThemeDef[];
 const html = () => document.documentElement;
 let stop: (() => void) | null = null;

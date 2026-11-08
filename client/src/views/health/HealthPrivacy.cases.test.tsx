@@ -35,6 +35,9 @@ vi.mock('../../coach/client/lazy', async (orig) => ({
 import { HealthPrivacyView } from './HealthPrivacyView';
 import { addonsPref } from '../../addons/enabledSet';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const dlg = () => document.querySelector('[role="alertdialog"], [role="dialog"]') as HTMLElement;
 
 beforeEach(() => {

@@ -20,6 +20,9 @@ import {
 } from './NextUp';
 import { addonsPref } from '../../addons/enabledSet';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const MIN = 60_000;
 const DAY = 24 * 60 * MIN;
 const END = new Date(2026, 8, 26, 19, 48).getTime();

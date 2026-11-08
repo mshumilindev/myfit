@@ -26,6 +26,9 @@ import {
 } from './__fixtures__/widgetHarness';
 import { __getStateForTests } from '../store';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const shell = makeShell();
 
 function Harness({

@@ -1,6 +1,6 @@
 import { addonsPref } from '../../../addons/enabledSet';
 import { HEALTH_ADDONS } from '../../../addons/testSetup';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, afterEach } from 'vitest';
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { CycleSessionNote } from './CycleSessionNote';
 import { CyclePatternsView } from './CyclePatternsView';
@@ -14,6 +14,9 @@ import {
   setCycleSurface,
   updateCycleAnchor,
 } from '../../../store';
+
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
 
 const today = dayOfTimestamp(Date.now());
 beforeEach(() => {

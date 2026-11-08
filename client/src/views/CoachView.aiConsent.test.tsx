@@ -42,6 +42,9 @@ vi.mock('../atlas/puter', () => ({
 
 import { CoachView } from './CoachView';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 let n = 0;
 const rec = (
   kind: ConsentRecord['kind'],

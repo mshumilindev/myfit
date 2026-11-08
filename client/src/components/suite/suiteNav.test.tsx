@@ -29,6 +29,9 @@ import type { StoreState } from '../../store';
 import type { Shell } from '../../App';
 import { currentHash } from '../../route';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const t = LOCALES.en;
 const c = coachEn;
 

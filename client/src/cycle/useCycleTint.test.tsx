@@ -1,11 +1,14 @@
 import { addonsPref } from '../addons/enabledSet';
 import { HEALTH_ADDONS } from '../addons/testSetup';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, afterEach } from 'vitest';
 import { useEffect } from 'react';
 import { act, render } from '@testing-library/react';
 import { useCycleTint } from './useCycleTint';
 import { dayOfTimestamp } from '../components/ui/calendarDays';
 import { addCondition, resetLocalData, saveCycleSettings, setCycleSurface } from '../store';
+
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
 
 const box: { tint: ReturnType<typeof useCycleTint> } = { tint: null };
 function Probe() {

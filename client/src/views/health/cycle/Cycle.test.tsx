@@ -21,6 +21,9 @@ import {
 } from '../../../data/healthConsentGate';
 import { HEALTH_FEATURES } from '../../../legal/consents';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const nop = () => undefined;
 const today = () => dayOfTimestamp(Date.now());
 const mount = () =>

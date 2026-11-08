@@ -55,6 +55,9 @@ import { MAX_CHECKIN_DAYS, addDays, newSupplementEntry } from './supplements';
 import { SUPPLEMENTS_ENC_KEY, SUPPLEMENTS_KEY } from './supplementsCache';
 import type { SupplementEntry, SupplementState } from './types';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const PATH = 'users/u1/meta/supplements';
 // Waits until the Firestore write count stops changing (a fixed delay was flaky under load).
 const tick = async () => {

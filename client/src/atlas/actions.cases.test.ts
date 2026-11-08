@@ -45,6 +45,9 @@ import { runAction } from './actions';
 import { richCtx } from './testCtx';
 import type { Tr, AtlasAction } from './intentKit';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const T0 = new Date(2026, 9, 7, 15, 30).getTime(); // Wed 7 Oct 2026, local
 const DAY = 86_400_000;
 const en: Tr = (e) => e;

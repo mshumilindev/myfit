@@ -17,6 +17,9 @@ import {
   setDesktop,
 } from './__fixtures__/viewKit';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const drawn: Array<{
   headline: string;
   kicker: string;
@@ -40,6 +43,7 @@ const feedNotif: Notif = {
 };
 
 beforeEach(() => {
+  addonsPref.set(APEX_ADDONS); // installed for the test, removed again after it
   freezeClock();
   setLocale('en');
   localStorage.clear();
@@ -51,7 +55,6 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
-  addonsPref.set(APEX_ADDONS);
 });
 
 function app(tab: ApexTab, over: Partial<Parameters<typeof ApexApp>[0]> = {}) {

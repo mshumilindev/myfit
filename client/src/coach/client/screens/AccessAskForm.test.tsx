@@ -13,6 +13,9 @@ import type { AccessAsk } from '../../share/accessAsk';
 import { createFixturesClientPort } from '../data/__fixtures__/fixtures';
 import { AccessAskForm } from './AccessAskForm';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const ALL = {
   injuries: true,
   chronic: true,

@@ -101,6 +101,9 @@ vi.mock('../data/gymProviders', async (orig) => ({
 
 import { ProfileView } from './ProfileView';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const open = (userId = 'me', embedded = false) => {
   const shell = makeShell();
   const onClose = vi.fn();

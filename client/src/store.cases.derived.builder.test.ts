@@ -66,6 +66,9 @@ import { registerCustomExercises } from './data/exercises';
 import { EQUIPMENT_CATALOG } from './data/equipmentCatalog';
 import type { GeneratedDay, PlannedExercise } from './sessionBuilder';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const T0 = new Date('2026-03-04T10:00:00Z').getTime();
 const st = () => store.__getStateForTests();
 const settle = async () => {

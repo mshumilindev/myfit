@@ -57,6 +57,9 @@ import { MAX_CHECKIN_DAYS, addDays } from './alcohol';
 import { ALCOHOL_ENC_KEY, ALCOHOL_KEY } from './alcoholCache';
 import type { AlcoholEntry, AlcoholState } from './types';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const PATH = 'users/u1/meta/alcohol';
 // Waits until the Firestore write count stops changing (a fixed delay was flaky under load).
 const tick = async () => {

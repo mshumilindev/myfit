@@ -9,6 +9,9 @@ import {
 } from './registry';
 import { THEME_FIELD, pushThemeEdits, syncThemeFromDoc } from './themeSync';
 
+// the looks a test installs it removes again (SPO-500)
+afterEach(() => setAllowedThemes([]));
+
 let stop: (() => void) | null = null;
 beforeEach(() => {
   setAllowedThemes(THEMES.map((t) => t.id)); // every look installed: these tests are about wearing, not installing (SPO-500)

@@ -1,5 +1,8 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, afterEach } from 'vitest';
 import { addonsPref, isAddonEnabled, migrateModules } from './enabledSet';
+
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
 
 describe('migrateModules', () => {
   beforeEach(() => {

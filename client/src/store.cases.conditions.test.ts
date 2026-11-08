@@ -67,6 +67,9 @@ import { vault } from './vaultIO';
 import { isSealed, unsealDoc } from './encryptedDoc';
 import { CONDITION_CATALOG } from './data/conditionCatalog';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const KEY = CONDITION_CATALOG[0].key;
 
 const T0 = new Date('2026-03-04T10:00:00Z').getTime();

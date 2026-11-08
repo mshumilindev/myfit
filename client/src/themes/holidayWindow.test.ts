@@ -10,6 +10,9 @@ import {
   THEMES,
 } from './registry';
 
+// the looks a test installs it removes again (SPO-500)
+afterEach(() => setAllowedThemes([]));
+
 const at = (m: number, d: number, h = 12) => new Date(2026, m - 1, d, h);
 
 beforeEach(() => {

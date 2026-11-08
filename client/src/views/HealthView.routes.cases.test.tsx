@@ -11,6 +11,9 @@ import type { Injury, RestPeriod } from '../types';
 import { injuryLabel } from './health/parts';
 import { freezeClock, makeShell, NOW, PRISTINE, setDesktop } from './__fixtures__/viewKit';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 // The sub-screens have their own tests; here only HealthView's routing of them is under test.
 vi.mock('./health/nicotine/NicotineScreens', () => ({
   NicotineScreens: (p: {

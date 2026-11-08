@@ -25,6 +25,9 @@ import {
 import { supplementContext } from '../../supplementsApply';
 import { supplementItem } from '../../supplementCatalog';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 beforeEach(() => {
   setLocale('en');
   resetLocalData();

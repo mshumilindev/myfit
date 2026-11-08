@@ -24,6 +24,9 @@ import { CycleHealthRow } from './CycleSection';
 import { CycleSessionNote } from './CycleSessionNote';
 import { CycleSetupView } from './CycleSetupView';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const NOW = new Date(2026, 8, 26, 12, 0).getTime();
 const TODAY = dayOfTimestamp(NOW);
 

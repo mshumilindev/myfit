@@ -28,6 +28,9 @@ import {
   ConditionsSection,
 } from './Conditions';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 const DAY = 86_400_000;
 const NOW = new Date(2026, 8, 26, 12, 0).getTime();
 const ymd = (ms: number) => {

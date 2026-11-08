@@ -12,6 +12,9 @@ import {
 } from './registry';
 import { offSeason } from './testClock';
 
+// the looks a test installs it removes again (SPO-500)
+afterEach(() => setAllowedThemes([]));
+
 offSeason();
 
 const attr = () => document.documentElement.getAttribute('data-theme');

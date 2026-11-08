@@ -7,6 +7,9 @@ import { emptyState, freezeClock, NOW, seed, setDesktop } from './__fixtures__/v
 import { SleepView } from './SleepView';
 import { addonsPref } from '../addons/enabledSet';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 beforeEach(() => {
   addonsPref.set(['sleep']); // the Sleep add-on is installed: without it no nights are read (SPO-500 I8)
   freezeClock(NOW);

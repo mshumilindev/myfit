@@ -20,6 +20,9 @@ import {
 } from './__fixtures__/widgetHarness';
 import type { LiveSession } from '../types';
 
+// what a test installs it removes again (SPO-500)
+afterEach(() => addonsPref.reset());
+
 let mockRoster: RosterClient[] | null = null;
 let mockTrainer: MyTrainer | null = null;
 vi.mock('./myTrainer', async (orig) => ({
