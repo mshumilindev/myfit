@@ -44,7 +44,8 @@ const BASELINE = join(
 
 const index = await (await fetch(`${url}/index.json`)).json();
 const allIds = Object.entries(index.entries)
-  .filter(([id, e]) => e.type === 'story' && id.includes(filter))
+  // The add-on store does not wear the app theme and has its own token model (ADR 015), so "a re-theme is a token edit" does not apply to it.
+  .filter(([id, e]) => e.type === 'story' && id.includes(filter) && !id.startsWith('store-'))
   .map(([id]) => id);
 const ids = shard(allIds, partSpec);
 

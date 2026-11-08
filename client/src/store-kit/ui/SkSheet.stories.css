@@ -4,8 +4,20 @@
   background: var(--bg);
   border-radius: var(--sk-r-lg);
 }
+/* The product sheet is fixed at the window edge, so nothing clips its shadow there; the story frame must not either. */
+.sk-scrim-host.sk-sheet-frame {
+  overflow: visible;
+  margin-block-end: var(--sk-sp-8);
+}
 .sk-sheet-frame-modal {
   min-height: 24rem;
+}
+/* The modal is the desktop variant (the product uses "auto": a sheet on a phone), yet the audit opens it at phone width. */
+.sk-sheet-frame-modal .sk-rowf {
+  flex-wrap: wrap;
+}
+.sk-sheet-frame-modal .sk-rowf > .sk-f1 {
+  flex: 1 1 auto;
 }
 /* Story-only frame for SkToast. */
 .sk-toast-frame {
