@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { addonsPref } from './enabledSet';
 import { sleepAvailable } from './featureGates';
-import { __getStateForTests, __replaceStateForTests, getStoreState } from '../store';
+import {
+  __getStateForTests,
+  __replaceStateForTests,
+  getStoreState,
+  getStoredTrainingForExport,
+} from '../store';
 import type { SleepNight } from '../types';
 
 const night = { id: 'n1', source: 'live', start: 1_000, end: 30_000_000 } as unknown as SleepNight;
@@ -27,5 +32,10 @@ describe('Sleep add-on gate (SPO-500 I8)', () => {
     expect(getStoreState().sleeps).toHaveLength(1);
     addonsPref.reset();
     expect(getStoreState().sleeps).toEqual([]);
+  });
+  it('the data copy (Art. 15 / 20) still holds the nights while Sleep is off', () => {
+    addonsPref.reset();
+    expect(getStoreState().sleeps).toEqual([]);
+    expect(getStoredTrainingForExport().sleeps).toHaveLength(1);
   });
 });

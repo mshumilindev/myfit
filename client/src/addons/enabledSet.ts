@@ -137,8 +137,17 @@ export function isAddonEnabled(id: string, role: Role = getRole()): boolean {
 }
 
 /** Turn items on together with what they need. Idempotent. */
-export function enableAddons(ids: string[], role: Role = getRole()): void {
-  addonsPref.set([...closeDependencies([...current(role), ...ids], role), ...foreign(role)]);
+export function enableAddons(
+  ids: string[],
+  role: Role = getRole(),
+  /** Service markers written in the same save (one write: nothing can land without the other). */
+  markers: readonly string[] = [],
+): void {
+  addonsPref.set([
+    ...closeDependencies([...current(role), ...ids], role),
+    ...foreign(role),
+    ...markers,
+  ]);
 }
 
 /**

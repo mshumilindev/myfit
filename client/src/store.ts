@@ -677,16 +677,38 @@ function exposed(): StoreState {
 }
 
 let accountLoaded = { prefs: false, workouts: false };
+/** Collections the one-time role migration counts (`getStoredUsage`) that have delivered a first snapshot. */
+const USAGE_SOURCES = ['sleeps', 'restPeriods', 'injuries', 'conditions'] as const;
+let usageLoaded = new Set<string>();
 const loadedListeners = new Set<() => void>();
+function usageReady(): boolean {
+  return USAGE_SOURCES.every((n) => usageLoaded.has(n));
+}
 function checkAccountLoaded(): void {
-  if (accountLoaded.prefs && accountLoaded.workouts) for (const f of [...loadedListeners]) f();
+  if (accountLoaded.prefs && accountLoaded.workouts && usageReady())
+    for (const f of [...loadedListeners]) f();
+}
+const prefsListeners = new Set<() => void>();
+/** Runs `cb` once the account's synced preferences have arrived from the server (not the cache); data that is locked or slow does not matter. */
+export function whenPrefsLoaded(cb: () => void): () => void {
+  if (accountLoaded.prefs) {
+    cb();
+    return () => undefined;
+  }
+  prefsListeners.add(cb);
+  return () => prefsListeners.delete(cb);
+}
+function markUsage(name: (typeof USAGE_SOURCES)[number]): void {
+  if (usageLoaded.has(name)) return;
+  usageLoaded.add(name);
+  checkAccountLoaded();
 }
 /**
- * Runs `cb` once the account's synced preferences and the (unlocked) workouts have arrived from the server, not from the
- * cache: what a one-time migration must wait for. Returns a cancel function.
+ * Runs `cb` once the account's synced preferences, the (unlocked) workouts and the nights, rest periods, injuries and
+ * conditions have arrived: what a one-time migration that counts stored data (`getStoredUsage`) must wait for. Returns a cancel function.
  */
 export function whenAccountLoaded(cb: () => void): () => void {
-  if (accountLoaded.prefs && accountLoaded.workouts) {
+  if (accountLoaded.prefs && accountLoaded.workouts && usageReady()) {
     cb();
     return () => undefined;
   }
@@ -3878,12 +3900,17 @@ export type StoreHealthFeature = Exclude<HealthFeature, 'nutrition'>;
  * RAW (unmasked) stored health state, for the data copy only (GDPR Art. 15 / 20: giving a person their own stored data
  * back to their own device is not processing for the feature, so it needs no consent). NEVER read this for anything shown.
  */
-/** Activities and goals as stored, whatever the add-ons say: the person's own data goes back to them (Art. 15 / 20). */
+/** Activities, goals, rest periods and nights as stored, whatever the add-ons say: the person's own data goes back to them (Art. 15 / 20). */
 export function getStoredTrainingForExport(): Pick<
   StoreState,
-  'activities' | 'goals' | 'restPeriods'
+  'activities' | 'goals' | 'restPeriods' | 'sleeps'
 > {
-  return { activities: state.activities ?? [], goals: state.goals, restPeriods: state.restPeriods };
+  return {
+    activities: state.activities ?? [],
+    goals: state.goals,
+    restPeriods: state.restPeriods,
+    sleeps: state.sleeps,
+  };
 }
 
 export function getStoredHealthForExport(): Pick<
@@ -5099,6 +5126,7 @@ export function startSyncLoop(): () => void {
         accountDocs.syncTwPrefsFromDoc(data);
         if (!snap.metadata.fromCache) {
           accountLoaded.prefs = true;
+          for (const f of [...prefsListeners]) f();
           checkAccountLoaded();
         }
       },
@@ -5155,7 +5183,10 @@ export function startSyncLoop(): () => void {
     ),
   );
   const restMirror = mirrorCollection<RestPeriod & Record<string, unknown>>((items, { locked }) => {
-    if (!locked) sealedStore.markRemote('restPeriods');
+    if (!locked) {
+      sealedStore.markRemote('restPeriods');
+      markUsage('restPeriods');
+    }
     state = { ...state, restPeriods: items };
     persist();
     emit();
@@ -5170,7 +5201,10 @@ export function startSyncLoop(): () => void {
     ),
   );
   const injuriesMirror = mirrorCollection<Injury & Record<string, unknown>>((raw, { locked }) => {
-    if (!locked) sealedStore.markRemote('injuries');
+    if (!locked) {
+      sealedStore.markRemote('injuries');
+      markUsage('injuries');
+    }
     const items = raw.filter((i) => !deletedInjuryIds.has(i.id));
     state = { ...state, injuries: items };
     persist();
@@ -5186,6 +5220,7 @@ export function startSyncLoop(): () => void {
     ),
   );
   const conditionsMirror = mirrorCollection<ChronicCondition & Record<string, unknown>>((raw) => {
+    markUsage('conditions');
     const items = raw.filter((c) => !deletedConditionIds.has(c.id));
     conditionsCache.markRemote('conditions');
     state = { ...state, conditions: stripLegacyConditions(items) };
@@ -5224,7 +5259,10 @@ export function startSyncLoop(): () => void {
   );
   const sleepsMirror = mirrorCollection<SleepNight & Record<string, unknown>, boolean>(
     (items, { meta, locked }) => {
-      if (!locked) sealedStore.markRemote('sleeps');
+      if (!locked) {
+        sealedStore.markRemote('sleeps');
+        markUsage('sleeps');
+      }
       applySleepSnapshot(items, meta);
     },
   );
@@ -5529,6 +5567,7 @@ export function startSyncLoop(): () => void {
 
 function stopListeners(): void {
   accountLoaded = { prefs: false, workouts: false };
+  usageLoaded = new Set();
   for (const u of unsubs) u();
   unsubs = [];
   if (presenceTimer) {

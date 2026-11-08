@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { setAtlasInstalled } from '../atlas/aiConsent';
 import { reconcileAtlasConsent, watchAtlasRemoval } from '../atlas/withdrawOnRemove';
 import { useChallenges } from '../challenges';
-import { getStoredUsage, syncSleepAutoQueue, whenAccountLoaded } from '../store';
+import { getStoredUsage, syncSleepAutoQueue, whenAccountLoaded, whenPrefsLoaded } from '../store';
 import { getRole } from '../api';
 import { auth } from '../firebase';
 import { migrateBrassGlass, migrateRoleAddons } from './migrateRoles';
@@ -42,7 +42,7 @@ export function useAddonRuntime() {
       }),
     [],
   );
-  useEffect(() => whenAccountLoaded(migrateBrassGlass), []);
+  useEffect(() => whenPrefsLoaded(migrateBrassGlass), []);
   useEffect(() => syncSleepAutoQueue(), [sleepOn]);
   useEffect(() => setAtlasInstalled(atlasOn), [atlasOn]);
   useEffect(() => watchAtlasRemoval(), []);

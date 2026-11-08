@@ -1,4 +1,4 @@
-import type { Role } from '../api';
+import { getRole, type Role } from '../api';
 import { addonsPref, enableAddons, moduleIdsOf } from './enabledSet';
 
 /**
@@ -46,8 +46,9 @@ export function migrateRoleAddons(role: Role, usage: StoredUsage, createdAt: num
   if (createdAt === null) return;
   const list = addonsPref.snapshot().list;
   if (list.includes(ROLES_MIGRATED)) return;
-  if (createdAt < STORE_RELEASE_AT) enableAddons(roleMigration(role, usage), role);
-  addonsPref.set([...addonsPref.snapshot().list, ROLES_MIGRATED]);
+  enableAddons(createdAt < STORE_RELEASE_AT ? roleMigration(role, usage) : [], role, [
+    ROLES_MIGRATED,
+  ]);
 }
 
 /** Marker: Brass Glass was put in the installed set once. After that it is the person's choice (Remove sticks). */
@@ -60,6 +61,6 @@ export const BRASS_GLASS_MIGRATED = 'migrated:brass-glass-v1';
 export function migrateBrassGlass(): void {
   const list = addonsPref.snapshot().list;
   if (list.includes(BRASS_GLASS_MIGRATED)) return;
-  enableAddons(['theme-brass-glass']);
-  addonsPref.set([...addonsPref.snapshot().list, BRASS_GLASS_MIGRATED]);
+  // one write: a tab closed in between cannot leave the theme on without the marker (it would come back after a Remove)
+  enableAddons(['theme-brass-glass'], getRole(), [BRASS_GLASS_MIGRATED]);
 }
