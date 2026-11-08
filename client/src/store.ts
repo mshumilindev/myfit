@@ -676,6 +676,8 @@ function exposed(): StoreState {
         goals: goalsOn,
         sleep: sleepOn,
         atlas: atlasOn,
+        restShown: restPeriodShown,
+        emptyGoals: EMPTY_GOALS,
       }),
     };
   }

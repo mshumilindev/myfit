@@ -1,12 +1,13 @@
-import { EMPTY_GOALS } from '../goals';
-import { restPeriodShown } from '../healthAddons';
-import type { RestPeriod } from '../types';
+import type { RestMode, RestPeriod } from '../types';
 
 export interface AddonFlags {
   activities: boolean;
   goals: boolean;
   sleep: boolean;
   atlas: boolean;
+  /** Passed in (not imported) so this file stays a leaf: importing the store's own helpers here would form import cycles. */
+  restShown: (mode: RestMode) => boolean;
+  emptyGoals: unknown;
 }
 
 /**
@@ -20,9 +21,9 @@ export function maskAddons<T extends { restPeriods: RestPeriod[]; coach: { enabl
 ): T {
   return {
     ...masked,
-    restPeriods: (masked.restPeriods ?? []).filter((r) => restPeriodShown(r.mode)),
+    restPeriods: (masked.restPeriods ?? []).filter((r) => on.restShown(r.mode)),
     ...(on.activities ? {} : { activities: [] }),
-    ...(on.goals ? {} : { goals: EMPTY_GOALS }),
+    ...(on.goals ? {} : { goals: on.emptyGoals }),
     // no nights: readiness, RPE, Mastery and the cards stay neutral
     ...(on.sleep ? {} : { sleeps: [] }),
     // Atlas is off for every reader (its voice, notes, plan card), the setup stays stored

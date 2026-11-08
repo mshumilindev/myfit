@@ -65,6 +65,8 @@ import '../src/glass-glitch.css';
 import '../src/reduced-transparency.css';
 import { LOCALE_IDS, setLocale, type LocaleId } from '../src/i18n';
 import '../src/coach/__fixtures__/register';
+import { ADDONS } from '../src/addons/manifest';
+import { addonsPref } from '../src/addons/enabledSet';
 
 /** Toolbar locale (en/uk/pl/lt/et) → the app's own i18n switch. */
 const withLocale: Decorator = (Story, ctx) => {
@@ -87,6 +89,15 @@ const withTheme: Decorator = (Story, ctx) => {
   return <Story />;
 };
 document.documentElement.setAttribute('data-theme', DEFAULT_THEME);
+
+/**
+ * SPO-500 hard guard: an add-on that is not installed is invisible to every screen. Stories show the product with every
+ * add-on installed (what a member who installed all of them sees); the Store stories reset the list in their own decorator.
+ */
+const withAllAddons: Decorator = (Story) => {
+  addonsPref.set(ADDONS.map((a) => a.id));
+  return <Story />;
+};
 
 /** SPO-433 design review: `?calls=on|offline` in the iframe URL shows the call entry buttons on real screens. */
 const withCalls: Decorator = (Story) => {
@@ -203,7 +214,7 @@ const withCalls: Decorator = (Story) => {
 };
 
 const preview: Preview = {
-  decorators: [withCalls, withLocale, withTheme],
+  decorators: [withCalls, withLocale, withTheme, withAllAddons],
   globalTypes: {
     theme: {
       description: 'Theme',
