@@ -3869,6 +3869,17 @@ export function getStoredHealthForExport(): Pick<
   return { injuries, conditions, conditionsShare, cycle, nicotine, alcohol, supplements };
 }
 
+/** What is stored, whatever the add-ons say: counts only, for the one-time role migration (nothing is shown or sent). */
+export function getStoredUsage(): { workouts: number; sleeps: number; health: boolean } {
+  return {
+    workouts: state.workouts.length,
+    sleeps: state.sleeps.length,
+    health: (['injuries', 'chronic', 'cycle', 'nicotine', 'alcohol', 'supplements'] as const).some(
+      (f) => hasStoredHealthData(f),
+    ),
+  };
+}
+
 /** Whether anything of a feature is stored, whatever the consent says (the withdrawal flow offers to delete it). */
 export function hasStoredHealthData(f: StoreHealthFeature): boolean {
   const s = getStoredHealthForExport();

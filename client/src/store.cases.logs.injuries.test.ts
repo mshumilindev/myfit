@@ -412,6 +412,8 @@ describe('activities', () => {
     const sealed = at(`users/u1/activities/${done.id}`)[0].data;
 
     store.resetLocalData();
+    // resetLocalData clears the add-on list, and a live activity needs Activities installed (it is not written without it).
+    addonsPref.set([...HEALTH_ADDONS, 'activities']);
     const live = store.startActivity('Run', 'conditioning')!;
     const stop = store.startSyncLoop();
     fs.listeners.get('users/u1/activities')!(snap([sealed]));
