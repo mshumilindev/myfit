@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { setAtlasInstalled } from '../atlas/aiConsent';
-import { reconcileAtlasConsent, watchAtlasRemoval } from '../atlas/withdrawOnRemove';
+import { reconcileAtlasConsentAfter, watchAtlasRemoval } from '../atlas/withdrawOnRemove';
 import { useChallenges } from '../challenges';
 import { getStoredUsage, syncSleepAutoQueue, whenAccountLoaded, whenPrefsLoaded } from '../store';
 import { getRole } from '../api';
@@ -48,7 +48,7 @@ export function useAddonRuntime() {
   useEffect(() => syncSleepAutoQueue(), [sleepOn]);
   useEffect(() => setAtlasInstalled(atlasOn), [atlasOn]);
   useEffect(() => watchAtlasRemoval(), []);
-  useEffect(() => (atlasOn ? undefined : reconcileAtlasConsent()), [atlasOn]);
+  useEffect(() => (atlasOn ? undefined : reconcileAtlasConsentAfter(whenPrefsLoaded)), [atlasOn]);
   useEffect(() => setAllowedThemes(installedThemes), [installedThemes]);
   return {
     apexOn,

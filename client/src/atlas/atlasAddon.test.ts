@@ -25,7 +25,11 @@ vi.mock('../legal/consentApi', async (orig) => ({
 }));
 
 import { effectiveAiState, resetAiOverride, setAtlasInstalled } from './aiConsent';
-import { reconcileAtlasConsent, watchAtlasRemoval } from './withdrawOnRemove';
+import {
+  reconcileAtlasConsent,
+  reconcileAtlasConsentAfter,
+  watchAtlasRemoval,
+} from './withdrawOnRemove';
 import { addonsPref, disableAddons, enableAddons } from '../addons/enabledSet';
 
 const rec = (kind: string): ConsentRecord =>
@@ -113,6 +117,45 @@ describe('an account that holds AI consent without the add-on', () => {
     enableAddons(['atlas'], 'member'); // reinstalled before the answer came
     await Promise.resolve();
     off();
+    expect(sent).toEqual([]);
+  });
+});
+
+describe('a new device whose add-on list has not arrived yet', () => {
+  it('does not withdraw the AI consent before the list is known, and not at all once Atlas turns out installed', async () => {
+    snapshot.records = [rec('atlas-ai')]; // the server's consent answer comes first
+    let ready: () => void = () => undefined;
+    const off = reconcileAtlasConsentAfter((cb) => {
+      ready = cb;
+      return () => undefined;
+    });
+    await Promise.resolve();
+    expect(sent).toEqual([]); // nothing is decided while the list is unknown
+    enableAddons(['atlas'], 'member'); // the list arrives: Atlas is installed
+    ready();
+    await Promise.resolve();
+    off();
+    expect(sent).toEqual([]);
+    expect(marked).toEqual([]);
+  });
+  it('still withdraws once the list is known and Atlas really is not installed', async () => {
+    snapshot.records = [rec('atlas-ai')];
+    let ready: () => void = () => undefined;
+    const off = reconcileAtlasConsentAfter((cb) => {
+      ready = cb;
+      return () => undefined;
+    });
+    ready();
+    await Promise.resolve();
+    off();
+    expect(sent).toHaveLength(2);
+  });
+  it('cancel before the list arrives subscribes to nothing', async () => {
+    snapshot.records = [rec('atlas-ai')];
+    const cancel = vi.fn();
+    const off = reconcileAtlasConsentAfter(() => cancel);
+    off();
+    expect(cancel).toHaveBeenCalledTimes(1);
     expect(sent).toEqual([]);
   });
 });

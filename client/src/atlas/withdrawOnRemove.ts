@@ -51,6 +51,22 @@ export function reconcileAtlasConsent(): () => void {
   return () => off();
 }
 
+/**
+ * The add-on list reaches a new device (empty local storage) only after `meta/prefs` has answered. Until then "Atlas is
+ * not installed" may just mean "not loaded yet", and a consent answer that came first would wrongly withdraw the AI
+ * consent of someone who has Atlas. So the check starts only once the list is known (`whenReady` = `whenPrefsLoaded`).
+ */
+export function reconcileAtlasConsentAfter(whenReady: (cb: () => void) => () => void): () => void {
+  let stop = (): void => undefined;
+  const cancel = whenReady(() => {
+    stop = reconcileAtlasConsent();
+  });
+  return () => {
+    cancel();
+    stop();
+  };
+}
+
 /** Wire it once at start-up; returns the unsubscribe. */
 export function watchAtlasRemoval(): () => void {
   return onAddonsRemoved((removed) => {
