@@ -188,6 +188,10 @@ export const addonStoreEt: typeof addonStoreEn = {
     'apex-challenges': { name: 'Väljakutsed', desc: 'Iganädalased eesmärgid üksi või teistega.' },
     'apex-ranks': { name: 'Edetabelid', desc: 'Kus on su harjutused jõustandardite suhtes.' },
     'apex-awards': { name: 'Auhinnad', desc: 'Saavutused, mis avanevad treenides.' },
+    'theme-brass-glass': {
+      name: 'Brass Glass',
+      desc: 'Klaasilook, mida rakendus vaikimisi kannab.',
+    },
     'theme-cyberpunk': { name: 'Cyberpunk', desc: 'Neoonilooks teravate nurkadega.' },
     'holiday-themes': {
       name: 'Pühadeteemad',

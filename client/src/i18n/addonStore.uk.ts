@@ -179,6 +179,10 @@ export const addonStoreUk: typeof addonStoreEn = {
     'apex-challenges': { name: 'Челенджі', desc: 'Тижневі цілі: самому чи з іншими.' },
     'apex-ranks': { name: 'Рейтинги', desc: 'Де ваші вправи щодо стандартів сили.' },
     'apex-awards': { name: 'Нагороди', desc: 'Досягнення, які відкриваються з тренуваннями.' },
+    'theme-brass-glass': {
+      name: 'Brass Glass',
+      desc: 'Скляний вигляд, у якому застосунок за замовчуванням.',
+    },
     'theme-cyberpunk': { name: 'Cyberpunk', desc: 'Неоновий вигляд зі скошеними кутами.' },
     'holiday-themes': {
       name: 'Святкові теми',

@@ -182,6 +182,10 @@ export const addonStorePl: typeof addonStoreEn = {
     'apex-challenges': { name: 'Wyzwania', desc: 'Cotygodniowe cele: samemu lub z innymi.' },
     'apex-ranks': { name: 'Rankingi', desc: 'Gdzie są Twoje ćwiczenia na tle norm siły.' },
     'apex-awards': { name: 'Nagrody', desc: 'Osiągnięcia odblokowywane w miarę treningów.' },
+    'theme-brass-glass': {
+      name: 'Brass Glass',
+      desc: 'Szklany wygląd, w którym aplikacja działa domyślnie.',
+    },
     'theme-cyberpunk': { name: 'Cyberpunk', desc: 'Neonowy wygląd z ostrymi rogami.' },
     'holiday-themes': {
       name: 'Motywy świąteczne',

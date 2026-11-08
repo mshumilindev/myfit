@@ -5,7 +5,7 @@ import { useChallenges } from '../challenges';
 import { getStoredUsage, syncSleepAutoQueue, whenAccountLoaded } from '../store';
 import { getRole } from '../api';
 import { auth } from '../firebase';
-import { migrateRoleAddons } from './migrateRoles';
+import { migrateBrassGlass, migrateRoleAddons } from './migrateRoles';
 import { setAllowedThemes } from '../themes/registry';
 import { useInstalledThemeIds, useThemesOn } from '../themes/useThemeAccess';
 import { migrateModules, useAddonOrBase } from './enabledSet';
@@ -42,6 +42,7 @@ export function useAddonRuntime() {
       }),
     [],
   );
+  useEffect(() => whenAccountLoaded(migrateBrassGlass), []);
   useEffect(() => syncSleepAutoQueue(), [sleepOn]);
   useEffect(() => setAtlasInstalled(atlasOn), [atlasOn]);
   useEffect(() => watchAtlasRemoval(), []);

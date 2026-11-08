@@ -186,6 +186,10 @@ export const addonStoreLt: typeof addonStoreEn = {
     'apex-challenges': { name: 'Iššūkiai', desc: 'Savaitiniai tikslai vieniems ar su kitais.' },
     'apex-ranks': { name: 'Reitingai', desc: 'Kur jūsų pratimai palyginti su jėgos standartais.' },
     'apex-awards': { name: 'Apdovanojimai', desc: 'Pasiekimai, atrakinami treniruojantis.' },
+    'theme-brass-glass': {
+      name: 'Brass Glass',
+      desc: 'Stiklinė išvaizda, kuria programa rodoma pagal numatytuosius nustatymus.',
+    },
     'theme-cyberpunk': { name: 'Cyberpunk', desc: 'Neoninė išvaizda su aštriais kampais.' },
     'holiday-themes': {
       name: 'Šventinės temos',

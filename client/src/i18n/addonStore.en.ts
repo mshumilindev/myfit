@@ -190,6 +190,7 @@ export const addonStoreEn = {
     },
     'apex-ranks': { name: 'Ranks', desc: 'Where your lifts stand against strength standards.' },
     'apex-awards': { name: 'Awards', desc: 'Achievements you unlock as you train.' },
+    'theme-brass-glass': { name: 'Brass Glass', desc: 'The glass look the app wears by default.' },
     'theme-cyberpunk': { name: 'Cyberpunk', desc: 'A neon look with sharp corners.' },
     'holiday-themes': {
       name: 'Holiday themes',

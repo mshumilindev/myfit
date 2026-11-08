@@ -49,3 +49,17 @@ export function migrateRoleAddons(role: Role, usage: StoredUsage, createdAt: num
   if (createdAt < STORE_RELEASE_AT) enableAddons(roleMigration(role, usage), role);
   addonsPref.set([...addonsPref.snapshot().list, ROLES_MIGRATED]);
 }
+
+/** Marker: Brass Glass was put in the installed set once. After that it is the person's choice (Remove sticks). */
+export const BRASS_GLASS_MIGRATED = 'migrated:brass-glass-v1';
+
+/**
+ * One time per account (owner 08.11): Brass Glass became an add-on and is installed by default, for new and existing
+ * accounts, so no one loses their look. Runs once the account's data has loaded; the marker is a synced id.
+ */
+export function migrateBrassGlass(): void {
+  const list = addonsPref.snapshot().list;
+  if (list.includes(BRASS_GLASS_MIGRATED)) return;
+  enableAddons(['theme-brass-glass']);
+  addonsPref.set([...addonsPref.snapshot().list, BRASS_GLASS_MIGRATED]);
+}

@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { addonsPref } from './enabledSet';
 import { moduleIdsOf } from './enabledSet';
-import { COACH_EXTRAS, ROLES_MIGRATED, migrateRoleAddons, roleMigration } from './migrateRoles';
+import {
+  BRASS_GLASS_MIGRATED,
+  COACH_EXTRAS,
+  ROLES_MIGRATED,
+  migrateBrassGlass,
+  migrateRoleAddons,
+  roleMigration,
+} from './migrateRoles';
 
 const none = { workouts: 0, sleeps: 0, health: false };
 const old = Date.parse('2026-01-01T00:00:00Z');
@@ -45,5 +52,21 @@ describe('role migration (owner 08.11)', () => {
   it('waits while the creation time is unknown', () => {
     migrateRoleAddons('admin', none, null);
     expect(addonsPref.snapshot().list).toEqual([]);
+  });
+});
+
+describe('Brass Glass is installed by default, once (owner 08.11)', () => {
+  beforeEach(() => addonsPref.reset());
+  it('puts the add-on and the marker in the list for any account', () => {
+    migrateBrassGlass();
+    const list = addonsPref.snapshot().list;
+    expect(list).toContain('theme-brass-glass');
+    expect(list).toContain(BRASS_GLASS_MIGRATED);
+  });
+  it('runs only once: a person who removed it does not get it back', () => {
+    migrateBrassGlass();
+    addonsPref.set(addonsPref.snapshot().list.filter((id) => id !== 'theme-brass-glass'));
+    migrateBrassGlass();
+    expect(addonsPref.snapshot().list).not.toContain('theme-brass-glass');
   });
 });
