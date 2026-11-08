@@ -1,11 +1,12 @@
 /**
  * The Today card "Make it yours" (SPO-500 I5): offers the add-ons after onboarding, when the person chose nothing or skipped.
  * "Seen" is a marker in the synced add-ons list (like `migrated:roles-v1`): it rides the existing sync, is kept by
- * `foreign()` on every write and is ignored when reading the enabled set. Shown at most until the person opens the store
- * from the card, picks a set in onboarding, or installs anything themselves.
+ * `foreign()` on every write and is ignored when reading the enabled set. Shown only while at least two substantial items remain to install; hidden for good once the person opens the store from
+ * the card or picks a set in onboarding, and for a month after "Not interested".
  */
 import { useSyncExternalStore } from 'react';
 import { getRole, type Role } from '../api';
+import { addonById } from './manifest';
 import { addonsPref, allowedIds, isAddonBase, storeRole, useEnabledAddons } from './enabledSet';
 
 export const INVITE_SEEN = 'seen:make-it-yours';
@@ -13,6 +14,18 @@ export const INVITE_SEEN = 'seen:make-it-yours';
 const LATER = 'later:make-it-yours:';
 export const INVITE_REMIND_MS = 30 * 24 * 3600 * 1000;
 export const INVITE_MAX_NOS = 3;
+/** The card is worth showing only while at least this many substantial items could still be installed. */
+export const INVITE_MIN_LEFT = 2;
+
+/** Substantial items a person could install right now: apps and add-ons (not modules, looks or "coming soon") whose app is there. */
+export function offerable(role: Role, enabled: ReadonlySet<string>): string[] {
+  return allowedIds(role).filter((id) => {
+    const m = addonById(id);
+    if (!m || (m.kind !== 'app' && m.kind !== 'addon') || enabled.has(id) || isAddonBase(id, role))
+      return false;
+    return !m.requires || isAddonBase(m.requires, role) || enabled.has(m.requires);
+  });
+}
 
 function laterOf(list: readonly string[]): { at: number; n: number } | null {
   const m = list.find((x) => x.startsWith(LATER));
@@ -31,7 +44,7 @@ export function inviteDue(
   if (!storeRole(role) || list.includes(INVITE_SEEN)) return false;
   const later = laterOf(list);
   if (later && (later.n >= INVITE_MAX_NOS || now - later.at < INVITE_REMIND_MS)) return false;
-  return !allowedIds(role).some((id) => !isAddonBase(id, role) && enabled.has(id));
+  return offerable(role, enabled).length >= INVITE_MIN_LEFT;
 }
 
 export function markInviteSeen(): void {

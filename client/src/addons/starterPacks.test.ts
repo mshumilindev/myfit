@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { addonsPref, enableAddons, resolveEnabled } from './enabledSet';
-import { INVITE_SEEN, inviteDue, markInviteSeen, snoozeInvite } from './startInvite';
+import { INVITE_SEEN, inviteDue, markInviteSeen, offerable, snoozeInvite } from './startInvite';
 import { headlineOf, packsFor } from './starterPacks';
 
 beforeEach(() => addonsPref.reset());
@@ -37,10 +37,25 @@ describe('Today invite', () => {
   it('is due while nothing optional is installed and the card was not seen', () => {
     expect(inviteDue([], new Set(), 'member')).toBe(true);
   });
-  it('is not due for a manager, after it was seen, or once anything is installed', () => {
+  it('is not due for a manager or after it was seen', () => {
     expect(inviteDue([], new Set(), 'manager')).toBe(false);
     expect(inviteDue([INVITE_SEEN], new Set(), 'member')).toBe(false);
-    expect(inviteDue([], new Set(['sleep']), 'member')).toBe(false);
+  });
+  it('stays due after a first install while substantial items remain, and goes once less than two are left', () => {
+    expect(inviteDue([], new Set(['sleep']), 'member')).toBe(true);
+    const all = new Set(offerable('member', new Set()));
+    expect(inviteDue([], all, 'member')).toBe(false);
+    const nearlyAll = new Set([...all].slice(1));
+    expect(offerable('member', nearlyAll)).toHaveLength(1);
+    expect(inviteDue([], nearlyAll, 'member')).toBe(false);
+  });
+  it('offers apps and add-ons only: no modules, looks or coming-soon items, none that lack their app', () => {
+    const ids = offerable('trainer', new Set());
+    expect(ids).not.toContain('nutrition');
+    expect(ids).not.toContain('theme-cyberpunk');
+    expect(ids).not.toContain('injury-log');
+    expect(ids).not.toContain('sleep'); // needs Gym, which a trainer has not installed
+    expect(offerable('trainer', new Set(['gym']))).toContain('sleep');
   });
   it('the seen marker survives later installs and never counts as an add-on', () => {
     markInviteSeen();
