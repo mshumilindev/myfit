@@ -54,6 +54,11 @@ async function openToday(page: Page) {
     (v) => localStorage.setItem('spotter.consentVerified', v),
     CONSENT_VERIFIED,
   );
+  // Looks are store items (owner rule 06.11): the invite offers only installed ones, so Cyberpunk is installed here.
+  await page.addInitScript(
+    (v) => localStorage.setItem('spotter.addons', v),
+    JSON.stringify({ list: ['theme-brass-glass', 'theme-cyberpunk'], updatedAt: Date.now() }),
+  );
   await page.goto(BASE + '/');
   await passProfileGate(page);
 }
@@ -70,7 +75,7 @@ test('invite → Preview → Keep current: the old look is back and nothing is s
   await expect(dock).toHaveCount(0);
   expect(await theme(page)).toBe(savedBefore);
   expect(await page.evaluate(() => localStorage.getItem('gym.theme'))).toBeNull();
-  await expect(page.locator('.thinv')).toHaveCount(0); // answered: not offered again
+  await expect(page.locator('.thinv iframe')).toHaveCount(0); // answered: not offered again
 });
 
 test('Esc on the dock is Keep current', async ({ page }) => {
@@ -98,5 +103,5 @@ test('Use sticks on the device, also offline, and survives a reload', async ({ p
   await page.reload();
   await passProfileGate(page);
   expect(await theme(page)).toBe(previewed);
-  await expect(page.locator('.thinv')).toHaveCount(0);
+  await expect(page.locator('.thinv iframe')).toHaveCount(0);
 });
