@@ -19,6 +19,7 @@ export function ThemeCard({
   land = false,
   seasonal = false,
   onApply,
+  cta,
 }: {
   theme: ThemeDef;
   /** the theme in use: already live, so it is drawn without a frame and shows "Applied" */
@@ -29,6 +30,8 @@ export function ThemeCard({
   /** a holiday theme whose window is open (SPO-321): tagged "on now" while worn; chosen away from, its Apply brings it back */
   seasonal?: boolean;
   onApply: (id: string) => void;
+  /** the button's label for a look that is not installed yet (onboarding: pick from the store); defaults to Apply */
+  cta?: string;
 }) {
   const { t } = useT();
   const card = (
@@ -59,7 +62,7 @@ export function ThemeCard({
           </Button>
         ) : (
           <Button variant="primary" fullWidth onClick={() => onApply(theme.id)}>
-            {t.themesApply}
+            {cta ?? t.themesApply}
           </Button>
         )}
       </div>
