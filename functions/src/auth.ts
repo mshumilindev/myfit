@@ -128,6 +128,7 @@ export const register = onCall(async () => {
 
 // --- login ------------------------------------------------------------------
 
+// Not HOT on purpose (owner, 08.11.2026, SPO-533): no reserved instance, ~$7/month each is not worth it for login.
 export const login = onCall(async (req) => {
   const body = (req.data ?? {}) as Record<string, unknown>;
   const identifierRaw = (body.identifier ?? body.username) as unknown;
