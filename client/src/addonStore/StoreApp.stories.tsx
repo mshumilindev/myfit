@@ -4,7 +4,7 @@ import { seedPage } from '../stories/fixtures';
 import { setRole } from '../api';
 import { addonsPref } from '../addons/enabledSet';
 import { StoreApp } from './StoreApp';
-import type { Role } from '../types';
+import type { Role } from '../api';
 
 const meta = {
   title: 'Pages/Add-on store',

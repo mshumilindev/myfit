@@ -100,7 +100,30 @@ export function removalSet(id: string): string[] {
   return ADDONS.filter((a) => gone.has(a.id)).map((a) => a.id);
 }
 
-export const addonsPref = createListPref('spotter.addons');
+/**
+ * Service markers (`migrated:`, `seen:`, `later:`) live in the synced list. A device that was offline must not erase the
+ * ones another device wrote: after a sync conflict the winner keeps the loser's markers. Of the `later:` snooze records
+ * the one with the highest count (then latest tap) stays, so "at most three times" cannot be dodged.
+ */
+export function mergeServiceMarkers(winner: string[], loser: string[]): string[] {
+  const isMarker = (id: string) => /^(migrated|seen|later):/.test(id);
+  const laterKey = (id: string) => {
+    const m = /^later:[^:]+:(\d+):(\d+)$/.exec(id);
+    return m ? [Number(m[2]), Number(m[1])] : [0, 0];
+  };
+  const markers = [...new Set([...winner, ...loser].filter(isMarker))];
+  const laters = markers.filter((id) => id.startsWith('later:'));
+  const best = laters.reduce<string | null>((b, id) => {
+    if (!b) return id;
+    const [bn, bt] = laterKey(b);
+    const [n, t] = laterKey(id);
+    return n > bn || (n === bn && t > bt) ? id : b;
+  }, null);
+  const keep = markers.filter((id) => !id.startsWith('later:') || id === best);
+  return [...winner.filter((id) => !isMarker(id)), ...keep];
+}
+
+export const addonsPref = createListPref('spotter.addons', mergeServiceMarkers);
 // Synced into meta/prefs as `addons` + `addonsUpdatedAt` (last write wins, like the Learn lists).
 registerListPref('addons', addonsPref);
 

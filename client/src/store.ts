@@ -5075,7 +5075,11 @@ export function startSyncLoop(): () => void {
           }
         }
         for (const [name, pref] of LIST_PREFS) {
-          const { apply, push } = reconcileListPref(pref.snapshot(), listPrefFromDoc(data, name));
+          const { apply, push } = reconcileListPref(
+            pref.snapshot(),
+            listPrefFromDoc(data, name),
+            pref.merge,
+          );
           if (apply) {
             applyingRemotePrefs = true;
             try {

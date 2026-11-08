@@ -42,8 +42,31 @@ function sameList(a: string[], b: string[]): boolean {
 export function reconcileListPref(
   local: ListPref,
   remote: ListPref | null,
+  /**
+   * Service entries that must survive a last-write-wins loss (e.g. one-time markers in the add-ons list): the winner's
+   * list is united with the loser's entries and, when that changed anything, written back at the same stamp.
+   */
+  merge?: (winner: string[], loser: string[]) => string[],
 ): { apply: ListPref | null; push: boolean } {
   if (!remote) return { apply: null, push: local.updatedAt > 0 };
+  if (!merge) return reconcileBasic(local, remote);
+  const stamp = Math.max(local.updatedAt, remote.updatedAt);
+  const localWins = local.updatedAt > remote.updatedAt;
+  const winner = localWins ? local : remote;
+  const loser = localWins ? remote : local;
+  const list = cleanList(merge(winner.list, loser.list));
+  const changedForLocal = !sameList(list, local.list);
+  const changedForRemote = !sameList(list, remote.list);
+  return {
+    apply: changedForLocal ? { list, updatedAt: stamp } : null,
+    push: changedForRemote,
+  };
+}
+
+function reconcileBasic(
+  local: ListPref,
+  remote: ListPref,
+): { apply: ListPref | null; push: boolean } {
   if (remote.updatedAt > local.updatedAt) return { apply: remote, push: false };
   if (local.updatedAt > remote.updatedAt) return { apply: null, push: true };
   // Same stamp: identical writes, or a tie — the synced copy wins for stability.
@@ -65,6 +88,8 @@ export function placeInList(list: string[], key: string, index: number): string[
 }
 
 export interface ListPrefStore {
+  /** See `reconcileListPref`: service entries that survive a sync conflict. */
+  merge?: (winner: string[], loser: string[]) => string[];
   get: () => string[];
   updatedAt: () => number;
   snapshot: () => ListPref;
@@ -74,7 +99,10 @@ export interface ListPrefStore {
   reset: () => void;
 }
 
-export function createListPref(storageKey: string): ListPrefStore {
+export function createListPref(
+  storageKey: string,
+  merge?: (winner: string[], loser: string[]) => string[],
+): ListPrefStore {
   const load = (): ListPref => {
     try {
       const raw = localStorage.getItem(storageKey);
@@ -107,6 +135,7 @@ export function createListPref(storageKey: string): ListPrefStore {
     for (const fn of listeners) fn();
   };
   return {
+    merge,
     get: () => current.list,
     updatedAt: () => current.updatedAt,
     snapshot: () => current,
