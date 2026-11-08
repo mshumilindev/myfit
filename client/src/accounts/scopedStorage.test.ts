@@ -217,3 +217,20 @@ describe('wipeAccountKeys', () => {
     );
   });
 });
+
+describe('sign-out wipes the add-on lists (SPO-511, Art. 17)', () => {
+  it('removes every registered add-on key, whatever it holds', () => {
+    const keys = [
+      'spotter.addons',
+      'spotter.addons.modules.v1',
+      'spotter.addons.queue',
+      'spotter.addons.queue.modules',
+    ];
+    const b = memoryBackend({
+      ...Object.fromEntries(keys.map((k) => [k, '{}'])),
+      'gym.locale': 'uk',
+    });
+    expect(wipeAccountKeys(b)).toBe(keys.length);
+    expect(Object.keys(b.dump())).toEqual(['gym.locale']);
+  });
+});
