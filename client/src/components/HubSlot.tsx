@@ -8,6 +8,7 @@
  */
 import type { ComponentType } from 'react';
 import { useAddonAvailable } from '../addons/enabledSet';
+import { MakeItYoursInvite } from './MakeItYoursInvite';
 import { ThemeInvite } from './ThemeAnnouncement';
 
 /** Screens with the hub navigation on a phone. The value says where the slot sits (for the guard and the next reader). */
@@ -30,6 +31,7 @@ export interface HubAnnouncement {
 /** In order of appearance. */
 export const HUB_ANNOUNCEMENTS: readonly HubAnnouncement[] = [
   { id: 'new-theme', surfaces: ['today', 'coachAgenda'], Component: ThemeInvite },
+  { id: 'make-it-yours', surfaces: ['today'], Component: MakeItYoursInvite },
 ];
 
 export function HubSlot({ surface }: { surface: HubSurface }) {
