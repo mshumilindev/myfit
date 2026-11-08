@@ -45,6 +45,16 @@ vi.mock('../../api', async (orig) => ({
   getUsername: () => 'Iryna Koval',
   currentUid: () => 'u-1',
 }));
+// The test signs in as 'u-1', so the add-on list it sets would sync to the account: keep every Firestore call local.
+vi.mock('firebase/firestore', async (orig) => ({
+  ...(await orig<typeof import('firebase/firestore')>()),
+  setDoc: vi.fn(async () => undefined),
+  updateDoc: vi.fn(async () => undefined),
+  deleteDoc: vi.fn(async () => undefined),
+  getDoc: vi.fn(async () => ({ exists: () => false, data: () => undefined })),
+  getDocs: vi.fn(async () => ({ docs: [], empty: true, forEach: () => undefined })),
+  onSnapshot: () => () => undefined,
+}));
 vi.mock('../Avatar', () => ({
   UserAvatar: (p: { userId?: string; name: string; size?: number }) => (
     <span data-testid="real-avatar" data-uid={p.userId ?? ''} data-size={p.size} />
