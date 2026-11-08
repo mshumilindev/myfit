@@ -20,8 +20,13 @@ test.afterAll(() => {
   harness.stop();
 });
 
-const CONSENT_VERIFIED = (uid: string) =>
-  JSON.stringify({ [uid]: 'terms@2026-10-21,policy-ack@2026-11-05,age-18@2026-10-21' });
+// a trainer / admin's clear also vouches for `trainer-terms` (legal/gateVerified.ts); the versions are the released ones
+const CONSENT_VERIFIED = (uid: string, coach: boolean) =>
+  JSON.stringify({
+    [uid]:
+      'terms@2026-10-21,policy-ack@2026-11-05,age-18@2026-10-21' +
+      (coach ? ',trainer-terms@2026-10-22' : ''),
+  });
 
 type Role = 'member' | 'trainer' | 'admin';
 
@@ -30,7 +35,7 @@ async function openStore(page: Page, role: Role, hash = '#/store') {
   await arm(page, stub, BASE, 'en', role);
   await page.addInitScript(
     (v) => localStorage.setItem('spotter.consentVerified', v),
-    CONSENT_VERIFIED('e2e-m'),
+    CONSENT_VERIFIED('e2e-m', role !== 'member'),
   );
   await page.goto(BASE + '/');
   if (role === 'member') await passProfileGate(page);
@@ -91,7 +96,7 @@ test.describe('Themes tab', () => {
       await openStore(page, role, '#/store/themes');
       await expect(root(page).getByText('Cyberpunk').first()).toBeVisible();
       await expect(root(page).getByText('Holiday themes').first()).toBeVisible();
-      await expect(root(page).getByText('Halloween')).toHaveCount(0); // one item, not one per holiday
+      await expect(root(page).getByText('Halloween', { exact: true })).toHaveCount(0); // one item, not one per holiday
     });
   }
 });
@@ -101,15 +106,15 @@ test.describe('search', () => {
     page,
   }) => {
     test.setTimeout(100_000);
-    await openStore(page, 'member', '#/store/apps');
-    await page.getByPlaceholder('Search apps and add-ons').first().click();
+    await openStore(page, 'member');
+    await page.locator('input.sk-search-in:visible').first().click();
     await expect(page).toHaveURL(/\/store\/search$/);
-    await page.getByPlaceholder('Search apps and add-ons').first().fill('sleep');
+    await page.locator('input.sk-search-in:visible').first().fill('sleep');
     await expect(root(page).getByText('Sleep').first()).toBeVisible();
-    await page.getByPlaceholder('Search apps and add-ons').first().fill('zzzz');
+    await page.locator('input.sk-search-in:visible').first().fill('zzzz');
     await expect(root(page).getByText(/Nothing for/)).toBeVisible();
     await page.getByRole('button', { name: 'Cancel' }).click();
-    await expect(page).toHaveURL(/\/store\/apps$/);
+    await expect(page).toHaveURL(/\/store$/);
   });
 });
 
