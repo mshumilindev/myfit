@@ -672,6 +672,24 @@ function exposed(): StoreState {
   return exposedMemo.out;
 }
 
+let accountLoaded = { prefs: false, workouts: false };
+const loadedListeners = new Set<() => void>();
+function checkAccountLoaded(): void {
+  if (accountLoaded.prefs && accountLoaded.workouts) for (const f of [...loadedListeners]) f();
+}
+/**
+ * Runs `cb` once the account's synced preferences and the (unlocked) workouts have arrived from the server, not from the
+ * cache: what a one-time migration must wait for. Returns a cancel function.
+ */
+export function whenAccountLoaded(cb: () => void): () => void {
+  if (accountLoaded.prefs && accountLoaded.workouts) {
+    cb();
+    return () => undefined;
+  }
+  loadedListeners.add(cb);
+  return () => loadedListeners.delete(cb);
+}
+
 /** The current state, outside React (for chained actions). */
 export function getStoreState(): StoreState {
   return exposed();
@@ -3857,8 +3875,11 @@ export type StoreHealthFeature = Exclude<HealthFeature, 'nutrition'>;
  * back to their own device is not processing for the feature, so it needs no consent). NEVER read this for anything shown.
  */
 /** Activities and goals as stored, whatever the add-ons say: the person's own data goes back to them (Art. 15 / 20). */
-export function getStoredTrainingForExport(): Pick<StoreState, 'activities' | 'goals'> {
-  return { activities: state.activities ?? [], goals: state.goals };
+export function getStoredTrainingForExport(): Pick<
+  StoreState,
+  'activities' | 'goals' | 'restPeriods'
+> {
+  return { activities: state.activities ?? [], goals: state.goals, restPeriods: state.restPeriods };
 }
 
 export function getStoredHealthForExport(): Pick<
@@ -3874,9 +3895,11 @@ export function getStoredUsage(): { workouts: number; sleeps: number; health: bo
   return {
     workouts: state.workouts.length,
     sleeps: state.sleeps.length,
-    health: (['injuries', 'chronic', 'cycle', 'nicotine', 'alcohol', 'supplements'] as const).some(
-      (f) => hasStoredHealthData(f),
-    ),
+    health:
+      state.restPeriods.length > 0 ||
+      (['injuries', 'chronic', 'cycle', 'nicotine', 'alcohol', 'supplements'] as const).some((f) =>
+        hasStoredHealthData(f),
+      ),
   };
 }
 
@@ -4858,9 +4881,9 @@ function isoWeekdayOfDay(day: number): number {
  *  illness), active injury or surgery rehab, and weekdays the assigned program leaves free. */
 export function streakProtectedPredicate(now: number = Date.now()): (day: number) => boolean {
   const today = dayKey(now);
-  // Raw periods on purpose (restriction path, like the injuries below): a stored illness window still protects the streak
-  // while its module is off; nothing about it is shown or sent.
-  const rests = restDayKeys(state.restPeriods, now);
+  // Only the periods whose module is installed (owner 08.11: not installed, not used), so the streak reads the same
+  // everywhere; nothing is protected by a window the person cannot see or end.
+  const rests = restDayKeys(undefined, now);
   // RESTRICTION path (SPO-290 owner decision): the stored injuries protect the streak even with the Injuries consent
   // off. Raw state on purpose; it only decides which days count, and nothing about the injury is shown or sent.
   const rehab = state.injuries.filter(
@@ -5181,6 +5204,10 @@ export function startSyncLoop(): () => void {
         syncThemePrefsFromDoc(data, writePrefsFields);
         syncUiPrefsFromDoc(data, writePrefsFields);
         accountDocs.syncTwPrefsFromDoc(data);
+        if (!snap.metadata.fromCache) {
+          accountLoaded.prefs = true;
+          checkAccountLoaded();
+        }
       },
       onWriteError,
     ),
@@ -5188,7 +5215,11 @@ export function startSyncLoop(): () => void {
 
   const workoutsMirror = mirrorCollection<Workout & Record<string, unknown>, SnapMeta>(
     (serverWorkouts, { meta, locked }) => {
-      if (!locked) sealedStore.markRemote('workouts');
+      if (!locked) {
+        sealedStore.markRemote('workouts');
+        accountLoaded.workouts = true;
+        checkAccountLoaded();
+      }
       // A document without its exercise list is damaged: skipped, so the code below never trips over it (SPO-219).
       const usable = serverWorkouts.filter((w) => Array.isArray(w.exercises));
       state = {
@@ -5604,6 +5635,7 @@ export function startSyncLoop(): () => void {
 }
 
 function stopListeners(): void {
+  accountLoaded = { prefs: false, workouts: false };
   for (const u of unsubs) u();
   unsubs = [];
   if (presenceTimer) {

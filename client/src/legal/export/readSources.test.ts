@@ -5,7 +5,11 @@ const h = vi.hoisted(() => ({
   state: null as unknown,
   raw: { injuries: [{ id: 'raw-i' }], cycle: { updatedAt: 3 } } as unknown,
   stored: {} as Record<string, boolean>,
-  training: { activities: [{ id: 'raw-a' }], goals: { raw: true } } as unknown,
+  training: {
+    activities: [{ id: 'raw-a' }],
+    goals: { raw: true },
+    restPeriods: [{ id: 'raw-r' }],
+  } as unknown,
   loaded: true,
   rawFood: false,
   food: { entries: [] as unknown[], customFoods: [] as unknown[], goal: null, profile: null },
@@ -66,6 +70,7 @@ describe('readExportSources', () => {
     const s = await readExportSources(live);
     expect(s.store?.activities).toEqual([{ id: 'raw-a' }]);
     expect(s.store?.goals).toEqual({ raw: true });
+    expect(s.store?.restPeriods).toEqual([{ id: 'raw-r' }]);
   });
 
   it('settings synced to the account are read from the device cache; stamps and local-only keys stay out', async () => {

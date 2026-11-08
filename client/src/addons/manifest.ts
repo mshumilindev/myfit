@@ -178,7 +178,7 @@ export const ADDONS: readonly AddonManifest[] = [
     kind: 'addon',
     requires: 'coach',
     // A member never opens the coach screens; they only see what a trainer shared (notes), so for them it is never gated.
-    baseFor: ['member'],
+    baseFor: ['member', 'manager'], // a manager keeps the notes on the team's clients
     tone: 6,
     roles: COACHES,
     category: 'coach',

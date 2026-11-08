@@ -11,7 +11,7 @@ export function NotesHost({
 }: Omit<NotesPanelProps, 'variant' | 'onClose'> & { open: boolean; onClose: () => void }) {
   const { nt } = useNotesT();
   const notesOn = useAddonOrBase('coach-notes');
-  if (!open || !notesOn) return null;
+  if (!open || (!notesOn && p.side !== 'client')) return null;
   return (
     <SidePanel
       open

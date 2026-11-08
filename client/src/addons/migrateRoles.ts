@@ -1,5 +1,5 @@
 import type { Role } from '../api';
-import { addonsPref, enableAddons } from './enabledSet';
+import { addonsPref, enableAddons, moduleIdsOf } from './enabledSet';
 
 /**
  * One time per account (SPO-500, owner 08.11): accounts made before the add-on store keep what they could see.
@@ -26,7 +26,7 @@ export function roleMigration(role: Role, usage: StoredUsage): string[] {
   if (usage.workouts > 0) {
     add.push('gym');
     if (usage.sleeps > 0) add.push('sleep');
-    if (usage.health) add.push('health');
+    if (usage.health) add.push('health', ...moduleIdsOf('health'));
   }
   return add;
 }

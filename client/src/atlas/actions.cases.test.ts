@@ -58,7 +58,8 @@ beforeEach(() => {
   vi.setSystemTime(T0);
   localStorage.clear();
   store.resetLocalData();
-  addonsPref.set(['activities']); // Activities is an add-on: without it no activity counts (owner 2026-11-07)
+  // Activities is an add-on: without it no activity counts (owner 2026-11-07); rest periods follow Rest and Unwell (08.11)
+  addonsPref.set(['activities', 'health', 'rest', 'unwell']);
 });
 afterEach(() => {
   vi.useRealTimers();
@@ -193,6 +194,12 @@ describe('runAction: health and body', () => {
     expect(r.text).toBe('Logged 81.5 kg.');
     expect(store.latestWeight(st().bodyMetrics)).toMatchObject({ weight: 81.5, at: T0 });
     expect(run({ type: 'bodyweight', kg: 80 }, uk).text).toBe('Записав 80 кг.');
+  });
+  it('pause and illness are not written without the Rest and Unwell modules (owner 08.11)', () => {
+    addonsPref.set(['activities']);
+    expect(run({ type: 'pause', days: 3 }).text).toMatch(/Rest is not installed/);
+    expect(run({ type: 'illness' }).text).toMatch(/Unwell is not installed/);
+    expect(st().restPeriods).toEqual([]);
   });
   it('pause rests N days starting today, inclusive', () => {
     const r = run({ type: 'pause', days: 3 });

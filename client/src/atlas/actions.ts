@@ -21,6 +21,7 @@ import {
   logActivity,
 } from '../store';
 import { activitiesAvailable } from '../addons/activitiesGate';
+import { restPeriodShown } from '../healthAddons';
 import { activityType, estimateCalories } from '../activities';
 import { bodyPart as bodyPartOf } from '../injury';
 import { isHealthOn, isHealthWriteDenied } from '../data/healthConsentGate';
@@ -185,6 +186,13 @@ export function runAction(
       addWeight(a.kg, now);
       return { text: L(`Logged ${a.kg} kg.`, `Записав ${a.kg} кг.`) };
     case 'pause': {
+      if (!restPeriodShown('off'))
+        return {
+          text: L(
+            'Rest is not installed, so I did not pause the plan. Add it in the store and tell me again.',
+            'Rest не встановлено, тому я не ставив план на паузу. Додай його в сторі й скажи ще раз.',
+          ),
+        };
       const today = dayKey(now);
       startRestPeriod({ mode: 'off', startDay: today, endDay: today + a.days - 1, note: 'Atlas' });
       return {
@@ -195,6 +203,13 @@ export function runAction(
       };
     }
     case 'illness': {
+      if (!restPeriodShown('illness'))
+        return {
+          text: L(
+            'Unwell is not installed, so I did not log it. Add it in the store and tell me again.',
+            'Unwell не встановлено, тому я не записав. Додай його в сторі й скажи ще раз.',
+          ),
+        };
       const today = dayKey(now);
       startRestPeriod({
         mode: 'illness',

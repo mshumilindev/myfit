@@ -167,7 +167,7 @@ export const LOCAL_KEYS_2: readonly LocalKeyEntry[] = [
     class: 'synced',
     wipe: 'signout',
     syncedTo: 'users/{uid}/meta/prefs#addons',
-    note: 'enabled add-ons ({ list, updatedAt }); catalog ids only (SPO-511)',
+    note: 'enabled add-ons ({ list, updatedAt }); catalog ids plus the one-time migration marker (SPO-511, SPO-500)',
   },
   {
     key: 'spotter.addons.modules.v1',

@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { setAtlasInstalled } from '../atlas/aiConsent';
 import { reconcileAtlasConsent, watchAtlasRemoval } from '../atlas/withdrawOnRemove';
 import { useChallenges } from '../challenges';
-import { getStoredUsage, syncSleepAutoQueue } from '../store';
+import { getStoredUsage, syncSleepAutoQueue, whenAccountLoaded } from '../store';
 import { getRole } from '../api';
 import { auth } from '../firebase';
 import { migrateRoleAddons } from './migrateRoles';
@@ -16,7 +16,7 @@ import { migrateModules, useAddonOrBase } from './enabledSet';
  * Sleep (auto-start is part of it) rebuilds or clears the server night queue; Atlas tells the consent module and
  * withdraws consent on removal.
  */
-export function useAddonRuntime(synced = false) {
+export function useAddonRuntime() {
   const apexOn = useAddonOrBase('apex');
   const themesOn = useThemesOn();
   const installedThemes = useInstalledThemeIds();
@@ -34,11 +34,14 @@ export function useAddonRuntime(synced = false) {
   const injuryOn = useAddonOrBase('injury-log');
   useEffect(() => migrateModules(), []);
   // Existing trainers and admins keep what they had (once their data has loaded; the marker makes it one time).
-  useEffect(() => {
-    if (!synced) return;
-    const t = auth.currentUser?.metadata.creationTime;
-    migrateRoleAddons(getRole(), getStoredUsage(), t ? Date.parse(t) : null);
-  }, [synced]);
+  useEffect(
+    () =>
+      whenAccountLoaded(() => {
+        const t = auth.currentUser?.metadata.creationTime;
+        migrateRoleAddons(getRole(), getStoredUsage(), t ? Date.parse(t) : null);
+      }),
+    [],
+  );
   useEffect(() => syncSleepAutoQueue(), [sleepOn]);
   useEffect(() => setAtlasInstalled(atlasOn), [atlasOn]);
   useEffect(() => watchAtlasRemoval(), []);

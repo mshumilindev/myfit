@@ -765,7 +765,7 @@ function AppMain() {
   const gymOn = useAddonOrBase('gym');
   const coachApp = useAddonOrBase('coach');
   const { apexOn, masteryOn, challenges, themesOn, sleepOn, atlasOn, healthOn, injuryOn } =
-    useAddonRuntime(store.syncStatus === 'synced');
+    useAddonRuntime();
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
     if (!apexOn) return;

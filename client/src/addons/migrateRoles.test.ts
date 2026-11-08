@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { addonsPref } from './enabledSet';
+import { moduleIdsOf } from './enabledSet';
 import { COACH_EXTRAS, ROLES_MIGRATED, migrateRoleAddons, roleMigration } from './migrateRoles';
 
 const none = { workouts: 0, sleeps: 0, health: false };
@@ -23,6 +24,10 @@ describe('role migration (owner 08.11)', () => {
     const all = roleMigration('admin', { workouts: 3, sleeps: 2, health: true });
     expect(all).toEqual(expect.arrayContaining(['gym', 'sleep', 'health']));
     expect(roleMigration('trainer', { ...none, sleeps: 2, health: true })).not.toContain('sleep');
+  });
+  it('Health comes with its modules, so the stored data is visible again', () => {
+    const add = roleMigration('trainer', { ...none, workouts: 1, health: true });
+    expect(add).toEqual(expect.arrayContaining(['health', ...moduleIdsOf('health')]));
   });
   it('an existing admin is switched on once; a later uninstall sticks', () => {
     migrateRoleAddons('admin', { workouts: 1, sleeps: 0, health: false }, old);

@@ -30,6 +30,7 @@ import './Today.css';
 import { RequestsSection, CardsSection } from './TodaySections';
 import { TeamRequestsSection } from '../team/TeamRequestsSection';
 import { StageView, TodayLoading } from './TodayStage';
+import { useAddonOrBase } from '../../addons/enabledSet';
 
 export interface TodayScreenProps {
   onNavigate: (route: CoachRoute) => void;
@@ -68,6 +69,7 @@ function TodayView({
   onNavigate: (r: CoachRoute) => void;
   requestPort: RescheduleRequestPort;
 }) {
+  const signalsOn = useAddonOrBase('coach-signals');
   const { t, locale } = useTodayT();
   const { c } = useCoachT();
   const desktop = useMinWidth(COACH_BREAKPOINT);
@@ -133,13 +135,15 @@ function TodayView({
             fill={!desktop}
           />
           <div className="td-pills">
-            <Button
-              variant="secondary"
-              icon="pulse"
-              onClick={() => onNavigate({ screen: 'signals' })}
-            >
-              {t.allSignals}
-            </Button>
+            {signalsOn && (
+              <Button
+                variant="secondary"
+                icon="pulse"
+                onClick={() => onNavigate({ screen: 'signals' })}
+              >
+                {t.allSignals}
+              </Button>
+            )}
             <Button
               variant="secondary"
               icon="list-checks"
