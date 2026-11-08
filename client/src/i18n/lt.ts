@@ -3292,6 +3292,7 @@ export const lt: Strings = {
   miyKicker: 'Pritaikykite sau',
   miyTitle: 'Pridėkite tai, kas tinka jūsų treniruotėms',
   miyCta: 'Peržiūrėti',
+  miyLater: 'Nedomina',
   onbBodyLead: 'Keli kūno rodikliai',
   onbBodyNote: 'Ūgis ir svoris duoda KMI ir svėrimosi tendenciją. Kita — pasirinktinai.',
   onbGymLead: 'Kur treniruojiesi?',

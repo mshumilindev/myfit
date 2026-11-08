@@ -3300,6 +3300,7 @@ export const en = {
   miyKicker: 'Make it yours',
   miyTitle: 'Add what fits your training',
   miyCta: 'Take a look',
+  miyLater: 'Not interested',
   onbBodyLead: 'A couple of body numbers',
   onbBodyNote: 'Height and weight power your BMI and weigh-in trend. The rest is optional.',
   onbGymLead: 'Where do you train?',

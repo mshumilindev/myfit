@@ -3270,6 +3270,7 @@ export const pl: Strings = {
   miyKicker: 'Dopasuj do siebie',
   miyTitle: 'Dodaj to, co pasuje do Twojego treningu',
   miyCta: 'Zobacz',
+  miyLater: 'Nie interesuje mnie',
   onbBodyLead: 'Kilka parametrów ciała',
   onbBodyNote: 'Wzrost i waga zasilają BMI i trend ważeń. Reszta jest opcjonalna.',
   onbGymLead: 'Gdzie trenujesz?',

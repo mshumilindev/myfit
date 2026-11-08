@@ -1,10 +1,10 @@
 /**
  * Today card "Make it yours" (SPO-500 I5): onboarding stays one short question, and whatever the person skipped is offered
  * here, once, as a card in the hub announcements (HubSlot) like the new-theme invite. It opens the store and is gone for good
- * (`addons/startInvite.ts`).
+ * (`addons/startInvite.ts`). "Not interested" hides it for a month; it comes back at most twice more.
  */
 import { storeHash } from '../addonStore/storeRoute';
-import { markInviteSeen, useMakeItYoursInvite } from '../addons/startInvite';
+import { markInviteSeen, snoozeInvite, useMakeItYoursInvite } from '../addons/startInvite';
 import { useT } from '../i18n';
 import { setHash } from '../route';
 import { Button } from './ui/Button';
@@ -30,6 +30,9 @@ export function MakeItYoursInvite() {
           }}
         >
           {t.miyCta}
+        </Button>
+        <Button variant="ghost" onClick={() => snoozeInvite()}>
+          {t.miyLater}
         </Button>
       </Card>
     </div>

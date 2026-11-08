@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { addonsPref, enableAddons, resolveEnabled } from './enabledSet';
-import { INVITE_SEEN, inviteDue, markInviteSeen } from './startInvite';
+import { INVITE_SEEN, inviteDue, markInviteSeen, snoozeInvite } from './startInvite';
 import { headlineOf, packsFor } from './starterPacks';
 
 beforeEach(() => addonsPref.reset());
@@ -48,5 +48,28 @@ describe('Today invite', () => {
     const list = addonsPref.snapshot().list;
     expect(list).toContain(INVITE_SEEN);
     expect(resolveEnabled(addonsPref.snapshot(), 'member').has(INVITE_SEEN)).toBe(false);
+  });
+});
+
+describe('Today invite: not interested', () => {
+  const DAY = 24 * 3600 * 1000;
+  it('hides for a month, returns, and stops after the third no', () => {
+    const t0 = Date.UTC(2026, 10, 8);
+    snoozeInvite(t0);
+    const list = () => addonsPref.snapshot().list;
+    expect(inviteDue(list(), new Set(), 'member', t0 + 29 * DAY)).toBe(false);
+    expect(inviteDue(list(), new Set(), 'member', t0 + 31 * DAY)).toBe(true);
+    snoozeInvite(t0 + 31 * DAY);
+    snoozeInvite(t0 + 62 * DAY);
+    expect(list().filter((x) => x.startsWith('later:'))).toHaveLength(1);
+    expect(inviteDue(list(), new Set(), 'member', t0 + 400 * DAY)).toBe(false);
+  });
+  it('the snooze marker survives installs and is never an add-on', () => {
+    snoozeInvite(1);
+    enableAddons(['sleep'], 'member');
+    expect(addonsPref.snapshot().list.some((x) => x.startsWith('later:'))).toBe(true);
+    expect(
+      [...resolveEnabled(addonsPref.snapshot(), 'member')].some((x) => x.startsWith('later:')),
+    ).toBe(false);
   });
 });

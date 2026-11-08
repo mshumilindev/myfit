@@ -3254,6 +3254,7 @@ export const et: Strings = {
   miyKicker: 'Tee see enda omaks',
   miyTitle: 'Lisa see, mis sobib sinu treeninguga',
   miyCta: 'Vaata',
+  miyLater: 'Ei huvita',
   onbBodyLead: 'Paar keha näitajat',
   onbBodyNote: 'Pikkus ja kaal annavad KMI ja kaalumise trendi. Ülejäänu on valikuline.',
   onbGymLead: 'Kus sa treenid?',
