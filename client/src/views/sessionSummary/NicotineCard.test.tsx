@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../../addons/enabledSet';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { NicotineCard } from './NicotineCard';
 import { __getStateForTests, __replaceStateForTests } from '../../store';
@@ -94,8 +95,10 @@ beforeEach(() => {
     /* no storage */
   }
   setLocale('en');
+  addonsPref.set(['sleep', 'health', 'nicotine']); // installed: the card reads the nights and the nicotine log (SPO-500 I8)
 });
 afterEach(() => {
+  addonsPref.reset();
   cleanup();
   __replaceStateForTests({ ...__getStateForTests(), nicotine: emptyNicotineState() });
 });
