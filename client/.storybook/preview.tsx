@@ -69,6 +69,7 @@ import '../src/styles.css';
 import '../src/redesign.css';
 import { AXES, DEFAULT_THEME, THEMES, type AxisName } from '../src/themes';
 import '../src/glass.css';
+import '../src/glass-tail.css';
 import '../src/glass-shape.css';
 import '../src/glass-glitch.css';
 import '../src/reduced-transparency.css';

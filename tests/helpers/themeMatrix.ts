@@ -29,6 +29,7 @@ const FILES = [
   'redesign.css',
   ...THEME_FILES,
   'glass.css',
+  'glass-tail.css',
   'glass-shape.css',
   'themes/_axes.css',
   ...readdirSync(join(SRC, 'themes'))

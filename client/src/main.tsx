@@ -84,6 +84,7 @@ import { initModePref } from './themes/modePref';
 import { initTidalWaves } from './components/tidalWaves';
 import { startHolidayWatch } from './themes/holidayWatch';
 import './glass.css';
+import './glass-tail.css';
 import './glass-shape.css';
 import './glass-glitch.css';
 import './reduced-transparency.css';

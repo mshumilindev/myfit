@@ -960,31 +960,6 @@ html[data-theme] .focus-view .gset::after {
   pointer-events: none;
 }
 
-/* Set-type plate: full family wash + ring + glow, like a status-family hero card. */
-html[data-theme] .focus-view .gset.kind-warmup {
-  --gk: var(--set-warmup);
-}
-html[data-theme]
-  .focus-view
-  .gset:is(
-    .kind-warmup,
-    .kind-drop,
-    .kind-reverse-drop,
-    .kind-static-dynamic,
-    .pr,
-    .fail-on
-  )::after {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--gk) 30%, var(--kit-c-1e1a16-a700, var(--c-1e1a16-a700))),
-    color-mix(in srgb, var(--gk) 10%, var(--kit-c-100f0e-a660, var(--c-100f0e-a660)))
-  );
-  box-shadow:
-    inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1)) var(--c-ffffff-a220),
-    inset 0 0 0 var(--sz-1) color-mix(in srgb, var(--gk) 75%, transparent),
-    0 0 var(--sz-34) color-mix(in srgb, var(--gk) 14%, transparent);
-}
-
 /* Set-type chips: the selected one wears its set-type hue (--kc from .se-kind-*). */
 html[data-theme] .se-types .uichip.is-selected {
   background: color-mix(in srgb, var(--kc) 16%, transparent);
@@ -1000,21 +975,4 @@ html[data-theme] .uit--chronic.uinotice {
     var(--kit-c-100f0d-a400, var(--c-100f0d-a400))
   );
   box-shadow: inset 0 0 0 var(--sz-1) var(--color-chronic-line);
-}
-
-/* Flagged by a long-term condition: midnight-blue shield, never red. */
-.pg-care {
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-chronic-text);
-}
-
-/* Coach Today (phone): the sticky action row above the tab bar is a frosted bar. Surface recipe lives here, not in coach/today. */
-@media (max-width: 767px) {
-  html[data-theme] .td-actions {
-    background: color-mix(in srgb, var(--color-bg) 72%, transparent);
-    backdrop-filter: var(--bf-glass-mid);
-    -webkit-backdrop-filter: var(--bf-glass-mid);
-    box-shadow: inset 0 var(--sz-1) 0 var(--t-line);
-  }
 }
