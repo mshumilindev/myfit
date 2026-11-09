@@ -9,7 +9,13 @@
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { expect, test } from '@playwright/test';
-import { arm, logPastSession, passProfileGate, type Stub } from './helpers/layout-shift';
+import {
+  arm,
+  logPastSession,
+  passProfileGate,
+  showLoggedWeek,
+  type Stub,
+} from './helpers/layout-shift';
 
 const ORIGIN = process.env.E2E_TODAY_URL ?? process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173';
 const CONSENT_VERIFIED = JSON.stringify({
@@ -76,6 +82,7 @@ test('a new service worker takes over without losing the logged session', async 
     await page.evaluate(() => {
       window.location.hash = '#/history';
     });
+    await showLoggedWeek(page);
     await expect(page.getByText(/1 sets/)).toHaveCount(1, { timeout: 15_000 });
 
     // a deploy happens: the browser finds different bytes at /sw.js and the replacement takes control
@@ -104,6 +111,7 @@ test('a new service worker takes over without losing the logged session', async 
     await page.evaluate(() => {
       window.location.hash = '#/history';
     });
+    await showLoggedWeek(page);
     await expect(page.getByText(/1 sets/)).toHaveCount(1, { timeout: 20_000 });
     expect(pageErrors, pageErrors.join('\n')).toEqual([]);
   } finally {

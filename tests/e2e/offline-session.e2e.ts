@@ -8,7 +8,13 @@
  * Run: `npx playwright test tests/e2e/offline-session.e2e.ts --project=mobile-chromium`.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { arm, logPastSession, passProfileGate, type Stub } from './helpers/layout-shift';
+import {
+  arm,
+  logPastSession,
+  passProfileGate,
+  showLoggedWeek,
+  type Stub,
+} from './helpers/layout-shift';
 
 const BASE = process.env.E2E_TODAY_URL ?? process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173';
 const CONSENT_VERIFIED = JSON.stringify({
@@ -54,6 +60,7 @@ test('a workout started offline survives the return of the network and a reload'
   // So the person has used the log flow and the history once while online, as a returning member has.
   await logPastSession(page);
   await goTo(page, '#/history');
+  await showLoggedWeek(page);
   await expect(page.getByText(/1 sets/)).toHaveCount(1, { timeout: 15_000 });
   await goTo(page, '#/today');
 
@@ -84,6 +91,7 @@ test('a workout started offline survives the return of the network and a reload'
   await passProfileGate(page);
   await expect(page.getByText(/^live/i).first()).toBeVisible({ timeout: 20_000 });
   await goTo(page, '#/history');
+  await showLoggedWeek(page);
   await expect(page.getByText(/1 sets/).first()).toBeVisible();
   expect(pageErrors, pageErrors.join('\n')).toEqual([]);
 });

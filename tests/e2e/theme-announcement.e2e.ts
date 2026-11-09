@@ -57,7 +57,7 @@ async function openToday(page: Page) {
   // Looks are store items (owner rule 06.11): the invite offers only installed ones, so Cyberpunk is installed here.
   await page.addInitScript(
     (v) => localStorage.setItem('spotter.addons', v),
-    JSON.stringify({ list: ['theme-brass-glass', 'theme-cyberpunk'], updatedAt: Date.now() }),
+    JSON.stringify({ list: ['theme-cyberpunk'], updatedAt: Date.now() }),
   );
   await page.goto(BASE + '/');
   await passProfileGate(page);

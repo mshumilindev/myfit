@@ -254,6 +254,19 @@ export async function logPastSession(page: Page): Promise<void> {
   await expect(page.getByText(/1 sets/)).toBeVisible();
 }
 
+/**
+ * The past session is logged for yesterday; on a Monday that is the previous week, and History opens on this one.
+ * Step back a week in that case so the check does not depend on the weekday the suite runs on.
+ */
+export async function showLoggedWeek(page: Page): Promise<void> {
+  const empty = page.getByText('Nothing was logged this week');
+  const emptyWeek = await empty.waitFor({ timeout: 3_000 }).then(
+    () => true,
+    () => false,
+  );
+  if (emptyWeek) await page.getByRole('button', { name: 'Previous week' }).click();
+}
+
 /** First run of an account asks for height + weight before the app; fill it like a person would. */
 export async function passProfileGate(page: Page): Promise<void> {
   const deadline = Date.now() + 120_000;
