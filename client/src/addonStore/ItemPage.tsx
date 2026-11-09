@@ -1,5 +1,6 @@
 /** One item (boards 05, 06): hero, what it needs, preview, facts, about, its add-ons. */
 import { ADDONS, addonById } from '../addons/manifest';
+import { disableAddons, enableAddons } from '../addons/enabledSet';
 import {
   SkBadge,
   SkCard,
@@ -12,6 +13,7 @@ import {
   SkRow,
   SkSectionLink,
   SkStat,
+  SkSwitch,
   type SkIconName,
 } from '../store-kit';
 import './screens.css';
@@ -119,6 +121,18 @@ export function ItemPage({
                       tile={<TileOf st={st} m={k} size={40} />}
                       name={itemName(st, k.id)}
                       desc={itemDesc(st, k.id)}
+                      // an installed app: each module is a switch, on or off whenever the person likes (data stays)
+                      action={
+                        ctx.enabled.has(m.id) ? (
+                          <SkSwitch
+                            on={ctx.enabled.has(k.id)}
+                            label={itemName(st, k.id)}
+                            onChange={(next) =>
+                              next ? enableAddons([k.id]) : disableAddons([k.id])
+                            }
+                          />
+                        ) : undefined
+                      }
                     />
                   ))}
                 </SkCard>

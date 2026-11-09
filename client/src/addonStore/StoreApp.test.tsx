@@ -104,6 +104,24 @@ describe('StoreApp', () => {
     queueAdd(['cycle'], 'member'); // a repeat is a no-op
     expect(addonsQueuePref.get()).toEqual(before);
   });
+  it("an installed app's page has a switch per module: off and on again any time, the app and the other modules untouched", () => {
+    enableAddons(['health', 'cycle', 'rest'], 'member');
+    window.location.hash = '#/store/item/health';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    const sw = () => screen.getAllByRole('switch', { name: 'Cycle' })[0]!;
+    expect(sw().getAttribute('aria-checked')).toBe('true');
+    fireEvent.click(sw());
+    expect(addonsPref.get()).not.toContain('cycle');
+    expect(addonsPref.get()).toEqual(expect.arrayContaining(['health', 'rest']));
+    fireEvent.click(sw());
+    expect(addonsPref.get()).toContain('cycle');
+    expect(addonsPref.get()).toContain('health');
+  });
+  it("a not-installed app's page lists its modules without switches", () => {
+    window.location.hash = '#/store/item/health';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    expect(screen.queryAllByRole('switch', { name: 'Cycle' })).toHaveLength(0);
+  });
   it('an item of another role opened by a link has no add action', () => {
     window.location.hash = '#/store/item/gym';
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
