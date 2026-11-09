@@ -97,7 +97,10 @@ describe('TodayView program card: today', () => {
       `${en.progWeekN(2)} · ${en.progSessions(2, 3)}`,
     );
     expect(card().querySelector('.pch-pct')?.textContent).toBe('67%');
-    expect((card().querySelector('.pch-bar-fill') as HTMLElement).style.width).toBe('67%');
+    // the level is the real percentage: a thin bar in the other themes, the water tank in Studio
+    const bar = card().querySelector('.pch-bar-fill') as HTMLElement | null;
+    const water = card().querySelector('[role="progressbar"]');
+    expect(bar ? bar.style.width : `${water?.getAttribute('aria-valuenow')}%`).toBe('67%');
     expect(card().querySelector('.pch-status')?.textContent).toContain('Pull — ');
   });
 
