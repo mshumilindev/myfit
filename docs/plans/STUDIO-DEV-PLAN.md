@@ -4,16 +4,16 @@
 
 ## Стан за кроками ADD-A-THEME
 
-| Крок | Стан |
-|---|---|
-| 1 Файл теми, реєстр | Готово (`studio.css`, `primitives.studio.css`, запис у `registry.ts`, `since 2026-11-09`) |
-| 2 Токени, світлий режим, 9 акцентів | Готово (генератор `studio-gen.mjs`, акценти окремими файлами `_studio.axes.*.css`) |
-| 3 Гарди contract, contrast, studio, hygiene | Зелені |
-| 4 Storybook, аудити | Кіт: ThemeSwatch, WaterProgress, ProgramProgress; `audit:stories`, `audit:theme-swap` 0 проблем; `lint:css` без нових порушень |
-| 5 Перемикання додатків (Tidal) | Готово, `theme-switch` guard зелений |
-| 6 Перехід між екранами | Не потрібен (`--route-tail: 0`) |
-| 7 Налаштування теми | Готово: сторінка, шестерня в Themes, картки-запрошення, діалог виходу без Save |
-| Фон Waves, Start-ореол, вода на Today | Готово |
+| Крок                                        | Стан                                                                                                                           |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 1 Файл теми, реєстр                         | Готово (`studio.css`, `primitives.studio.css`, запис у `registry.ts`, `since 2026-11-09`)                                      |
+| 2 Токени, світлий режим, 9 акцентів         | Готово (генератор `studio-gen.mjs`, акценти окремими файлами `_studio.axes.*.css`)                                             |
+| 3 Гарди contract, contrast, studio, hygiene | Зелені                                                                                                                         |
+| 4 Storybook, аудити                         | Кіт: ThemeSwatch, WaterProgress, ProgramProgress; `audit:stories`, `audit:theme-swap` 0 проблем; `lint:css` без нових порушень |
+| 5 Перемикання додатків (Tidal)              | Готово, `theme-switch` guard зелений                                                                                           |
+| 6 Перехід між екранами                      | Не потрібен (`--route-tail: 0`)                                                                                                |
+| 7 Налаштування теми                         | Готово: сторінка, шестерня в Themes, картки-запрошення, діалог виходу без Save                                                 |
+| Фон Waves, Start-ореол, вода на Today       | Готово                                                                                                                         |
 
 ## Лишилось (поза можливостями середовища розробки)
 
