@@ -1483,7 +1483,7 @@ export const uk: Strings = {
   accentOlive: 'Оливка',
   accentTiffany: 'Тіффані',
   accentIndigo: 'Індиго',
-  accentDeepPurple: 'Deep Purple',
+  accentDeepPurple: 'Глибокий фіолетовий',
   themeNew: 'Нова',
   themesSeasonal: 'Святкова · зараз увімкнена',
   themesSeasonalOff: 'Святкова',
