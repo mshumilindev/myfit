@@ -4,7 +4,7 @@
   position: relative;
   width: var(--wp-size);
   height: calc(var(--wp-size) * 4 / 3);
-  border-radius: calc(var(--wp-size) * 0.187);
+  border-radius: var(--r-10);
   overflow: hidden;
   background: color-mix(in srgb, var(--color-bg) 55%, transparent);
   border: var(--bw-2) solid color-mix(in srgb, var(--wp-ink) 55%, transparent);
