@@ -1,0 +1,46 @@
+/* WaterProgress: tokens only. A rounded tank (3:4, corner 18.7 % of the width, as in the prototype); the water is drawn on a canvas. */
+.uiwater {
+  --wp-ink: var(--color-accent);
+  position: relative;
+  width: var(--wp-size);
+  height: calc(var(--wp-size) * 4 / 3);
+  border-radius: calc(var(--wp-size) * 0.187);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+  border: var(--bw-2) solid color-mix(in srgb, var(--wp-ink) 55%, transparent);
+  isolation: isolate;
+}
+.uiwater--low {
+  --wp-ink: var(--color-danger);
+}
+.uiwater--warn {
+  --wp-ink: var(--c-e8933f);
+}
+.uiwater--mid {
+  --wp-ink: var(--c-e0b24a);
+}
+.uiwater--high {
+  --wp-ink: var(--color-ok);
+}
+.uiwater-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.uiwater-mid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 700 var(--fs-20) var(--font);
+  color: var(--color-text);
+}
+.uiwater-allow {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}

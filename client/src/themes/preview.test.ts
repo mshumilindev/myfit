@@ -32,7 +32,7 @@ describe('theme preview (SPO-355)', () => {
     startPreview('cyberpunk');
     expect(attr()).toBe('cyberpunk');
     expect(getPreview()).toBe('cyberpunk');
-    expect(getCommittedTheme()).toBe('glass');
+    expect(getCommittedTheme()).toBe('studio');
     expect(localStorage.getItem('gym.theme')).toBeNull();
     expect(chosen).toEqual([]);
     off();
@@ -41,7 +41,7 @@ describe('theme preview (SPO-355)', () => {
   it('Keep current goes back to the saved theme and saves nothing', () => {
     startPreview('cyberpunk');
     endPreview(false);
-    expect(attr()).toBe('glass');
+    expect(attr()).toBe('studio');
     expect(getPreview()).toBeNull();
     expect(localStorage.getItem('gym.theme')).toBeNull();
   });
@@ -64,22 +64,22 @@ describe('theme preview (SPO-355)', () => {
     expect(getPreview()).toBeNull();
     startPreview('cyberpunk');
     initTheme();
-    expect(attr()).toBe('glass');
+    expect(attr()).toBe('studio');
     expect(getPreview()).toBeNull();
   });
 
   it('a theme arriving from another device does not pull the preview away', () => {
     startPreview('cyberpunk');
-    applyRemoteTheme('glass');
+    applyRemoteTheme('studio');
     expect(attr()).toBe('cyberpunk');
-    expect(getCommittedTheme()).toBe('glass');
+    expect(getCommittedTheme()).toBe('studio');
     endPreview(false);
-    expect(attr()).toBe('glass');
+    expect(attr()).toBe('studio');
   });
 
   it('endPreview with no preview does nothing', () => {
     endPreview(true);
-    expect(attr()).toBe('glass');
+    expect(attr()).toBe('studio');
     expect(localStorage.getItem('gym.theme')).toBeNull();
   });
 });
@@ -115,7 +115,7 @@ describe('theme change transition (SPO-355)', () => {
     startPreview('cyberpunk');
     vi.advanceTimersByTime(400);
     endPreview(false);
-    expect(attr()).toBe('glass');
+    expect(attr()).toBe('studio');
     expect(root.dataset.glitch).toBe('out');
   });
 
@@ -123,7 +123,7 @@ describe('theme change transition (SPO-355)', () => {
     startPreview('cyberpunk');
     vi.advanceTimersByTime(400);
     endPreview(false, true);
-    expect(attr()).toBe('glass');
+    expect(attr()).toBe('studio');
     expect(root.dataset.glitch).toBeUndefined();
   });
 

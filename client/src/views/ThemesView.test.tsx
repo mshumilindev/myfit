@@ -29,7 +29,7 @@ afterEach(cleanup);
 describe('ThemesView', () => {
   it('draws each theme as its name set as a wordmark, with no screenshot and no user data', () => {
     const { container } = render(<ThemesView onClose={() => undefined} />);
-    expect(container.querySelector('.thm-wm')?.textContent).toBe('Brass Glass');
+    expect(container.querySelector('.thm-wm')?.textContent).toBe('Studio');
     expect(container.querySelector('img, .thm-pv, .thm-pv-in')).toBeNull();
   });
 

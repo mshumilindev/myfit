@@ -31,6 +31,8 @@ const filter = arg('filter', '');
 const partSpec = parsePart(arg('part', '0/1'));
 const concurrency = Number(arg('concurrency', '1'));
 const out = arg('out', '');
+/** Extra Storybook globals, e.g. --globals "theme:studio;mode:light" (default: the app's default theme). */
+const extraGlobals = arg('globals', '');
 /** Headings wrap by nature (a long translated or user-written title); report them only on request: --headings 1. */
 const withHeadings = arg('headings', '0') === '1';
 
@@ -247,10 +249,13 @@ await runPool(items, concurrency, async ({ w, loc, id }, worker) => {
   let loaded = false;
   try {
     await page.setViewportSize({ width: w, height: 800 });
-    await page.goto(`${url}/iframe.html?id=${id}&viewMode=story&globals=locale:${loc}`, {
-      waitUntil: 'load',
-      timeout: 20000,
-    });
+    await page.goto(
+      `${url}/iframe.html?id=${id}&viewMode=story&globals=locale:${loc}${extraGlobals ? ';' + extraGlobals : ''}`,
+      {
+        waitUntil: 'load',
+        timeout: 20000,
+      },
+    );
     loaded = true;
   } catch (e) {
     for (const f of fonts) {

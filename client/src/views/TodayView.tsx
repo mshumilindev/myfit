@@ -35,6 +35,7 @@ import { toneClass, type Tone } from '../components/ui/tones';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { Notice } from '../components/ui/Notice';
 import { ProgressBar } from '../components/ui/ProgressBar';
+import { ProgramProgress } from '../components/ProgramProgress';
 import { localizedExerciseName } from '../data/exerciseNames';
 import { CustomSectionView } from '../today/CustomSectionView';
 import { TodayCustomize } from '../today/TodayCustomize';
@@ -996,12 +997,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 </div>
               )}
             </div>
-            <div className="pch-progress">
+            <ProgramProgress pct={programWeek.pct} label={t.progPlanProgress}>
               <span className="pch-pct num">{programWeek.pct}%</span>
               <span className="pch-bar">
                 <span className="pch-bar-fill" style={{ width: `${programWeek.pct}%` }} />
               </span>
-            </div>
+            </ProgramProgress>
           </div>
           {status && !compact && <div className="pch-status">{status}</div>}
           {detailed && todayMuscles.length > 0 && todayItems.length > 0 && (

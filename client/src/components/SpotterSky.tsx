@@ -24,6 +24,7 @@ import { liveSleep, useStore } from '../store';
 import { downgradeMotion, useMotionTier } from '../motion';
 import { ChristmasScene } from './ChristmasScene';
 import { HalloweenScene } from './HalloweenScene';
+import { StudioWaves } from './StudioWaves';
 
 const BAND_HUES = ['#ffffff', '#f2f6ff', '#fff4e6', '#dbe6ff', '#ffe6cc', '#cdd8ff'];
 const BRIGHT_HUES = ['#ffffff', '#eaf0ff', '#fff3e2', '#d6e2ff'];
@@ -373,6 +374,7 @@ export function NightSky() {
     <>
       <HalloweenScene />
       <ChristmasScene />
+      <StudioWaves />
     </>
   );
 }

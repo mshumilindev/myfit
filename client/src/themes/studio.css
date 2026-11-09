@@ -1,0 +1,379 @@
+/* Studio — theme file (base: Anthracite; accent default: Titan). Tokens only (contract: themes/contract.ts).
+   Dark is the base block; light is the [data-mode='light'] block; the other ten accents live in _axes.css.
+   Generated from the approved palette, then maintained by hand. */
+
+html[data-theme='studio'] {
+  --color-bg: var(--c-0f1417);
+  --color-surface: var(--c-192024);
+  --color-surface-2: var(--c-252b2f);
+  --glass-surface: var(--c-192024);
+  --color-control: var(--c-252b2f);
+  --color-divider: var(--c-313537);
+  --color-text: var(--c-e8eef0);
+  --color-text-muted: var(--c-9eacb2);
+  --color-text-faint: var(--c-909da3);
+  --color-text-disabled: var(--c-656f74);
+  --color-neutral-100: var(--c-e8eef0);
+  --color-neutral-200: var(--c-d8dee0);
+  --color-neutral-300: var(--c-c1c7c9);
+  --color-neutral-400: var(--c-a0a5a8);
+  --color-neutral-500: var(--c-9eacb2);
+  --color-neutral-600: var(--c-909da3);
+  --color-neutral-700: var(--c-404548);
+  --color-neutral-800: var(--c-252a2d);
+  --color-neutral-900: var(--c-0f1417);
+  --color-ok: var(--c-4cbe8c);
+  --color-ok-tint: var(--c-182c27);
+  --color-ok-text: var(--c-b7e5d1);
+  --color-ok-line: var(--c-275846);
+  --color-danger: var(--c-ff7a73);
+  --color-danger-tint: var(--c-312224);
+  --color-danger-text: var(--c-ffcac7);
+  --color-danger-line: var(--c-6f3d3c);
+  --glass-backdrop: none;
+  --glass-float: 0 14px 30px -14px var(--c-000000-a600);
+  --glass-rest-tint: linear-gradient(180deg, var(--c-192024), var(--c-141a1e));
+  --glass-rest-specular: inset 0 0 0 1px var(--c-272c2e);
+  --glass-well: var(--c-0a0d0f);
+  --glass-well-ring: var(--c-272c2e);
+  --glass-field: var(--c-141a1e);
+  --glass-field-ring: var(--c-3f4345);
+  --glass-raised-base: var(--c-192024);
+  --plate-top: var(--c-192024);
+  --plate-bot: var(--c-141a1e);
+  --plate-edge: var(--c-272c2e);
+  --glass-accent-k: 0.35;
+  --glass-base-1: var(--c-192024);
+  --glass-base-2: var(--c-151b1f);
+  --glass-edge: 0 0 0 0 transparent;
+  --glass-hero-edge: 0 0 0 0 transparent;
+  --mood-art:
+    radial-gradient(110% 55% at 20% 0%, var(--c-1d262b), transparent 72%), var(--c-0f1417);
+  --mood-rest:
+    radial-gradient(110% 55% at 80% 100%, var(--c-23647e), transparent 72%), var(--c-0f1417);
+  --mood-sleep:
+    radial-gradient(110% 55% at 75% 0%, var(--c-3b317e), transparent 72%), var(--c-0f1417);
+  --mood-ok:
+    radial-gradient(110% 55% at 50% 20%, var(--c-1b6146), transparent 72%), var(--c-0f1417);
+  --mood-bad:
+    radial-gradient(110% 55% at 80% 100%, var(--c-5f2524), transparent 72%), var(--c-0f1417);
+  --mood-night:
+    radial-gradient(110% 55% at 50% 0%, var(--c-1d262b), transparent 72%), var(--c-0f1417);
+  --lava-1: transparent;
+  --lava-2: transparent;
+  --lava-3: transparent;
+  --body-dim: var(--c-3f4345);
+  --body-dim-stroke: var(--c-666b6e);
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --radius-hero: 28px;
+  --radius-sheet: 28px;
+  --r-ctl: 16px;
+  --r-input: 14px;
+  --r-bar: 999px;
+  --tile-k: 1;
+  --avatar-k: 0.5;
+  --font: 'Figtree', 'Onest', 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: var(--font);
+  --font-label: var(--font);
+  --heading-transform: none;
+  --heading-tracking: normal;
+  --label-tracking: 0.06em;
+  --ambient-display: none;
+  --label-mark-display: none;
+  --btn-fill-mix: 100%;
+  --btn-hover-mix: 92%;
+  --btn-active-mix: 84%;
+  --btn-ring-mix: 0%;
+  --btn-ink-on: 100%;
+  --glow-k: 0%;
+  --glow-size: 0;
+  --btn-disabled-filter: grayscale(1) opacity(0.5);
+  --btn-case: none;
+  --btn-tracking: normal;
+  --seg-on-mix: 22%;
+  --segb-on-mix: 18%;
+  --seg-on-ink-k: 0%;
+  --tone-fill-k: 0.55;
+  --tone-bar-w: 0px;
+  --plate-tint-k: 0;
+  --tabbar-bg: var(--c-181e22);
+  --tabbar-line-mix: 0%;
+  --tabbar-line-flat: var(--c-272c2e);
+  --fab-lens-display: none;
+  --tab-active-mark: none;
+  --sheet-mark: 0 0 0 0 transparent;
+  --color-accent-100: var(--c-fafbfc);
+  --color-accent-200: var(--c-f2f5f8);
+  --color-accent-300: var(--c-eaeff4);
+  --color-accent-400: var(--c-e3eaf0);
+  --color-accent-500: var(--c-dbe4ec);
+  --color-accent-600: var(--c-b0b8bf);
+  --color-accent-700: var(--c-858c92);
+  --color-accent-800: var(--c-5a6065);
+  --color-accent-900: var(--c-2f3438);
+  --color-accent-950: var(--c-1f2528);
+  --color-accent: var(--c-dbe4ec);
+  --color-accent-line: var(--c-6b7277);
+  --color-on-accent: var(--c-10161c);
+  --color-gym: var(--c-dbe4ec);
+  --color-gym-tint: var(--c-2f3438);
+  --color-gym-text: var(--c-eaeff4);
+  --color-gym-line: var(--c-6b7277);
+  --color-note: var(--c-dbe4ec);
+  --color-note-tint: var(--c-2f3438);
+  --color-note-text: var(--c-f2f5f8);
+  --color-note-line: var(--c-5a6065);
+  --glass-hero-base-1: var(--c-2c3438);
+  --glass-hero-base-2: var(--c-40474c);
+  --plate-rim: var(--c-757c82);
+  --btn-glow: 0 0 0 0 transparent;
+  --fab-bg: var(--c-dbe4ec);
+  --fab-ink: var(--c-10161c);
+  --fab-edge: 0 0 0 0 transparent;
+  --skin-apex: var(--c-dbe4ec);
+  --skin-apex-100: var(--c-fafbfc);
+  --skin-apex-200: var(--c-f2f5f8);
+  --skin-apex-300: var(--c-eaeff4);
+  --skin-apex-400: var(--c-e3eaf0);
+  --skin-apex-500: var(--c-dbe4ec);
+  --skin-apex-600: var(--c-b0b8bf);
+  --skin-apex-700: var(--c-858c92);
+  --skin-apex-800: var(--c-5a6065);
+  --skin-apex-900: var(--c-2f3438);
+  --skin-learn: var(--c-dbe4ec);
+  --skin-learn-100: var(--c-fafbfc);
+  --skin-learn-200: var(--c-f2f5f8);
+  --skin-learn-300: var(--c-eaeff4);
+  --skin-learn-400: var(--c-e3eaf0);
+  --skin-learn-500: var(--c-dbe4ec);
+  --skin-learn-600: var(--c-b0b8bf);
+  --skin-learn-700: var(--c-858c92);
+  --skin-learn-800: var(--c-5a6065);
+  --skin-learn-900: var(--c-2f3438);
+  --skin-roster: var(--c-dbe4ec);
+  --skin-roster-100: var(--c-fafbfc);
+  --skin-roster-200: var(--c-f2f5f8);
+  --skin-roster-300: var(--c-eaeff4);
+  --skin-roster-400: var(--c-e3eaf0);
+  --skin-roster-500: var(--c-dbe4ec);
+  --skin-roster-600: var(--c-b0b8bf);
+  --skin-roster-700: var(--c-858c92);
+  --skin-roster-800: var(--c-5a6065);
+  --skin-roster-900: var(--c-2f3438);
+  --skin-nutrition: var(--c-dbe4ec);
+  --skin-nutrition-100: var(--c-fafbfc);
+  --skin-nutrition-200: var(--c-f2f5f8);
+  --skin-nutrition-300: var(--c-eaeff4);
+  --skin-nutrition-400: var(--c-e3eaf0);
+  --skin-nutrition-500: var(--c-dbe4ec);
+  --skin-nutrition-600: var(--c-b0b8bf);
+  --skin-nutrition-700: var(--c-858c92);
+  --skin-nutrition-800: var(--c-5a6065);
+  --skin-nutrition-900: var(--c-2f3438);
+  --skin-coach: var(--c-dbe4ec);
+  --skin-coach-100: var(--c-fafbfc);
+  --skin-coach-200: var(--c-f2f5f8);
+  --skin-coach-300: var(--c-eaeff4);
+  --skin-coach-400: var(--c-e3eaf0);
+  --skin-coach-500: var(--c-dbe4ec);
+  --skin-coach-600: var(--c-b0b8bf);
+  --skin-coach-700: var(--c-858c92);
+  --skin-coach-800: var(--c-5a6065);
+  --skin-coach-900: var(--c-2f3438);
+  --color-apex: var(--c-dbe4ec);
+  --color-apex-tint: var(--c-2f3438);
+  --color-apex-text: var(--c-eaeff4);
+  --color-apex-line: var(--c-6b7277);
+  --color-learn: var(--c-dbe4ec);
+  --color-learn-tint: var(--c-2f3438);
+  --color-learn-text: var(--c-eaeff4);
+  --color-learn-line: var(--c-6b7277);
+  --color-coach: var(--c-dbe4ec);
+  --color-coach-tint: var(--c-2f3438);
+  --color-coach-text: var(--c-eaeff4);
+  --color-coach-line: var(--c-6b7277);
+  --color-atlas: var(--c-dbe4ec);
+  --color-atlas-tint: var(--c-2f3438);
+  --color-atlas-text: var(--c-eaeff4);
+  --color-atlas-line: var(--c-6b7277);
+  --skin-coach-tint: var(--c-2f3438);
+  --skin-coach-text: var(--c-eaeff4);
+  --skin-coach-line: var(--c-6b7277);
+  --type-d1: 600 34px/1.08 var(--font);
+  --type-h1: 600 26px/1.15 var(--font);
+  --type-h2: 600 20px/1.2 var(--font);
+  --type-h3: 600 16px/1.3 var(--font);
+  --type-b: 400 15px/1.45 var(--font);
+  --type-s: 400 13px/1.4 var(--font);
+  --type-m: 400 12px/1.35 var(--font);
+  --type-l: 600 10.5px/1.2 var(--font);
+  --type-num: 600 28px/1.05 var(--font);
+  --type-hero: 600 56px/1 var(--font);
+  --switch-out: 760;
+  --switch-tail: 820;
+  --route-tail: 0;
+  --clip-ctl: none;
+  --clip-tag: none;
+  --clip-surface: none;
+  --clip-sheet: none;
+  --clip-fab: none;
+  --label-mark-content: '';
+  --label-mark-w: var(--s-6);
+  --label-mark-h: var(--s-6);
+  --label-mark-bg: var(--color-accent);
+  --focus-offset: 2px;
+  --backdrop: none;
+  --hud-brackets: none;
+}
+
+html[data-theme='studio'][data-mode='light'] {
+  --color-bg: var(--c-e3e8ea);
+  --color-surface: var(--c-f6f9fa);
+  --glass-surface: var(--c-f6f9fa);
+  --color-control: var(--c-edf0f1);
+  --color-divider: var(--c-c6cbcd);
+  --color-text: var(--c-12181b);
+  --color-text-muted: var(--c-4c585d);
+  --color-text-faint: var(--c-4c585d);
+  --color-text-disabled: var(--c-889295);
+  --color-neutral-100: var(--c-12181b);
+  --color-neutral-200: var(--c-21272a);
+  --color-neutral-300: var(--c-373d40);
+  --color-neutral-400: var(--c-585d60);
+  --color-neutral-500: var(--c-4c585d);
+  --color-neutral-600: var(--c-4c585d);
+  --color-neutral-700: var(--c-b4b9bb);
+  --color-neutral-800: var(--c-ced3d5);
+  --color-neutral-900: var(--c-e3e8ea);
+  --glass-backdrop: none;
+  --glass-float: 0 14px 30px -16px var(--c-141e28-a280);
+  --glass-rest-tint: linear-gradient(180deg, var(--c-f6f9fa), var(--c-edf1f2));
+  --glass-rest-specular: inset 0 0 0 1px var(--c-ced3d5);
+  --glass-well: var(--c-d6dcde);
+  --glass-well-ring: var(--c-ced3d5);
+  --glass-field: var(--c-edf1f2);
+  --glass-field-ring: var(--c-b9bec1);
+  --glass-raised-base: var(--c-f6f9fa);
+  --plate-top: var(--c-f6f9fa);
+  --plate-bot: var(--c-edf1f2);
+  --plate-edge: var(--c-ced3d5);
+  --glass-accent-k: 0.35;
+  --glass-base-1: var(--c-f6f9fa);
+  --glass-base-2: var(--c-eef2f4);
+  --glass-edge: 0 0 0 0 transparent;
+  --glass-hero-edge: 0 0 0 0 transparent;
+  --mood-art:
+    radial-gradient(110% 55% at 20% 0%, var(--c-d9dfe2), transparent 72%), var(--c-e3e8ea);
+  --mood-rest:
+    radial-gradient(110% 55% at 80% 100%, var(--c-83b8cc), transparent 72%), var(--c-e3e8ea);
+  --mood-sleep:
+    radial-gradient(110% 55% at 75% 0%, var(--c-b2aae5), transparent 72%), var(--c-e3e8ea);
+  --mood-ok:
+    radial-gradient(110% 55% at 50% 20%, var(--c-a3dbc1), transparent 72%), var(--c-e3e8ea);
+  --mood-bad:
+    radial-gradient(110% 55% at 80% 100%, var(--c-eac0be), transparent 72%), var(--c-e3e8ea);
+  --mood-night:
+    radial-gradient(110% 55% at 50% 0%, var(--c-d9dfe2), transparent 72%), var(--c-e3e8ea);
+  --lava-1: transparent;
+  --lava-2: transparent;
+  --lava-3: transparent;
+  --body-dim: var(--c-bdc3c5);
+  --body-dim-stroke: var(--c-8f9597);
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --radius-hero: 28px;
+  --radius-sheet: 28px;
+  --r-ctl: 16px;
+  --r-input: 14px;
+  --r-bar: 999px;
+  --tile-k: 1;
+  --avatar-k: 0.5;
+  --font: 'Figtree', 'Onest', 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: var(--font);
+  --font-label: var(--font);
+  --heading-transform: none;
+  --heading-tracking: normal;
+  --label-tracking: 0.06em;
+  --ambient-display: none;
+  --label-mark-display: none;
+  --btn-fill-mix: 100%;
+  --btn-hover-mix: 92%;
+  --btn-active-mix: 84%;
+  --btn-ring-mix: 0%;
+  --btn-ink-on: 100%;
+  --glow-k: 0%;
+  --glow-size: 0;
+  --btn-disabled-filter: grayscale(1) opacity(0.5);
+  --btn-case: none;
+  --btn-tracking: normal;
+  --seg-on-mix: 16%;
+  --segb-on-mix: 12%;
+  --seg-on-ink-k: 0%;
+  --tone-fill-k: 0.7;
+  --tone-bar-w: 0px;
+  --plate-tint-k: 0;
+  --tabbar-bg: var(--c-f3f6f8);
+  --tabbar-line-mix: 0%;
+  --tabbar-line-flat: var(--c-ced3d5);
+  --fab-lens-display: none;
+  --tab-active-mark: none;
+  --sheet-mark: 0 0 0 0 transparent;
+  --color-accent-100: var(--c-13181d);
+  --color-accent-200: var(--c-192026);
+  --color-accent-300: var(--c-1f272e);
+  --color-accent-400: var(--c-252f37);
+  --color-accent-500: var(--c-2b3640);
+  --color-accent-600: var(--c-576169);
+  --color-accent-700: var(--c-838b92);
+  --color-accent-800: var(--c-afb6ba);
+  --color-accent-900: var(--c-dce1e3);
+  --color-accent-950: var(--c-dce1e3);
+  --color-accent: var(--c-2b3640);
+  --color-accent-line: var(--c-90989e);
+  --color-on-accent: var(--c-ffffff);
+  --color-gym: var(--c-2b3640);
+  --color-gym-tint: var(--c-dce1e3);
+  --color-gym-text: var(--c-1f272e);
+  --color-gym-line: var(--c-90989e);
+  --color-note: var(--c-2b3640);
+  --color-note-tint: var(--c-dce1e3);
+  --color-note-text: var(--c-192026);
+  --color-note-line: var(--c-afb6ba);
+  --glass-hero-base-1: var(--c-eaedef);
+  --glass-hero-base-2: var(--c-dadee0);
+  --plate-rim: var(--c-878f95);
+  --btn-glow: 0 0 0 0 transparent;
+  --fab-bg: var(--c-2b3640);
+  --fab-ink: var(--c-ffffff);
+  --fab-edge: 0 0 0 0 transparent;
+}
+
+/* --- Sub-app skins: Studio does not colour-code apps; every skin keeps the theme accent (--skin-* are set with the accent) --- */
+
+html[data-theme='studio'].theme-apex {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}
+
+html[data-theme='studio'].theme-learn {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}
+
+html[data-theme='studio'].theme-roster {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}
+
+html[data-theme='studio'].theme-nutrition {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}
+
+html[data-theme='studio'].theme-coach {
+  --lava-2: transparent;
+  --lava-3: transparent;
+}

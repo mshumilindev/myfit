@@ -499,8 +499,16 @@ html[data-theme] .uicard--atlas,
 html[data-theme] .uicard--people {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base) calc(22% * var(--tone-fill-k)), var(--c-14120e-a400)),
-    color-mix(in srgb, var(--t-base) calc(6% * var(--tone-fill-k)), var(--c-100f0d-a600))
+    color-mix(
+      in srgb,
+      var(--t-base) calc(22% * var(--tone-fill-k)),
+      var(--kit-c-14120e-a400, var(--c-14120e-a400))
+    ),
+    color-mix(
+      in srgb,
+      var(--t-base) calc(6% * var(--tone-fill-k)),
+      var(--kit-c-100f0d-a600, var(--c-100f0d-a600))
+    )
   );
   border-color: transparent;
   box-shadow:
@@ -522,8 +530,16 @@ html[data-theme] .uicard--e-hero {
 html[data-theme] .uicard--e-hero[class*='uit--']:not(.uicard--accent) {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--t-base) calc(17% * var(--tone-fill-k)), var(--c-28221a-a620)),
-    color-mix(in srgb, var(--t-base) calc(5% * var(--tone-fill-k)), var(--c-121110-a580))
+    color-mix(
+      in srgb,
+      var(--t-base) calc(17% * var(--tone-fill-k)),
+      var(--kit-c-28221a-a620, var(--c-28221a-a620))
+    ),
+    color-mix(
+      in srgb,
+      var(--t-base) calc(5% * var(--tone-fill-k)),
+      var(--kit-c-121110-a580, var(--c-121110-a580))
+    )
   );
   box-shadow:
     inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1)) var(--c-ffffff-a260),
@@ -763,11 +779,11 @@ html[data-theme] .uicard--e-hero .uistep--big .uistep-v {
 /* --- Kit primitives: notices ------------------------------------------------ */
 html[data-theme] .uinotice {
   border-radius: var(--r-14);
-  background: color-mix(in srgb, var(--t-base) 12%, var(--c-100f0d-a550));
+  background: color-mix(in srgb, var(--t-base) 12%, var(--kit-c-100f0d-a550, var(--c-100f0d-a550)));
   box-shadow: inset 0 0 0 var(--sz-1) color-mix(in srgb, var(--t-base) 30%, transparent);
 }
 html[data-theme] .uit--neutral.uinotice {
-  background: var(--c-0a0a0c-a350);
+  background: var(--kit-c-0a0a0c-a350, var(--c-0a0a0c-a350));
   box-shadow: inset 0 0 0 var(--sz-1) var(--color-ink-ring);
 }
 html[data-theme] .uinotice.uinotice--nested,
@@ -802,7 +818,7 @@ html[data-theme] .uidt-node {
   height: var(--sz-34);
   border-radius: var(--r-12);
   color: var(--t-base);
-  background: color-mix(in srgb, var(--t-base) 16%, var(--c-100f0d-a600));
+  background: color-mix(in srgb, var(--t-base) 16%, var(--kit-c-100f0d-a600, var(--c-100f0d-a600)));
   box-shadow: inset 0 0 0 var(--sz-1) color-mix(in srgb, var(--t-base) 30%, transparent);
 }
 html[data-theme] .uidt-node i {
@@ -816,12 +832,16 @@ html[data-theme] .uidt-dot {
   height: var(--sz-9);
   margin-top: var(--s-12);
   background: var(--t-base);
-  box-shadow: 0 0 0 var(--sz-4) var(--c-e9eaec-a60);
+  box-shadow: 0 0 0 var(--sz-4) var(--kit-c-e9eaec-a60, var(--c-e9eaec-a60));
 }
 html[data-theme] .uidt-line {
   width: calc(2 * var(--sz-1));
   margin: var(--s-6) 0;
-  background: linear-gradient(180deg, var(--c-e9eaec-a140), var(--c-e9eaec-a50));
+  background: linear-gradient(
+    180deg,
+    var(--kit-c-e9eaec-a140, var(--c-e9eaec-a140)),
+    var(--kit-c-e9eaec-a50, var(--c-e9eaec-a50))
+  );
 }
 html[data-theme] .uidt-head {
   min-height: var(--sz-34);
@@ -863,7 +883,7 @@ html[data-theme] .uiback {
   box-shadow: inset 0 0 0 var(--sz-1) var(--glass-well-ring);
 }
 html[data-theme] .uiback--overlay {
-  background: var(--c-0a0b0d-a550);
+  background: var(--kit-c-0a0b0d-a550, var(--c-0a0b0d-a550));
   box-shadow: none;
 }
 
@@ -904,7 +924,7 @@ html[data-theme] .uiopt {
   border-color: var(--color-divider);
 }
 html[data-theme] .uiopt.is-on {
-  background: color-mix(in srgb, var(--t-base) 14%, var(--c-14120e-a700));
+  background: color-mix(in srgb, var(--t-base) 14%, var(--kit-c-14120e-a700, var(--c-14120e-a700)));
   border-color: color-mix(in srgb, var(--t-base) 55%, transparent);
 }
 html[data-theme] .uisearch {
@@ -956,8 +976,8 @@ html[data-theme]
   )::after {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--gk) 30%, var(--c-1e1a16-a700)),
-    color-mix(in srgb, var(--gk) 10%, var(--c-100f0e-a660))
+    color-mix(in srgb, var(--gk) 30%, var(--kit-c-1e1a16-a700, var(--c-1e1a16-a700))),
+    color-mix(in srgb, var(--gk) 10%, var(--kit-c-100f0e-a660, var(--c-100f0e-a660)))
   );
   box-shadow:
     inset 0 calc(1.2 * var(--sz-1)) calc(0.5 * var(--sz-1)) var(--c-ffffff-a220),
@@ -974,7 +994,11 @@ html[data-theme] .se-types .uichip.is-selected {
 
 /* Midnight-blue notices (long-term conditions): the navy tint, not a grey wash. */
 html[data-theme] .uit--chronic.uinotice {
-  background: color-mix(in srgb, var(--color-chronic-tint) 88%, var(--c-100f0d-a400));
+  background: color-mix(
+    in srgb,
+    var(--color-chronic-tint) 88%,
+    var(--kit-c-100f0d-a400, var(--c-100f0d-a400))
+  );
   box-shadow: inset 0 0 0 var(--sz-1) var(--color-chronic-line);
 }
 

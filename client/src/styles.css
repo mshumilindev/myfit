@@ -27303,3 +27303,12 @@ html[data-theme] .apx-recent {
 :where(.ctl-row--end) {
   align-items: flex-end;
 }
+
+.program-card-head .pch-progress--water {
+  width: auto;
+  align-items: center;
+}
+.program-card-head .pch-progress--water .pch-pct {
+  font-size: var(--fs-13);
+  color: var(--color-text);
+}

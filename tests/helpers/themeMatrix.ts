@@ -30,6 +30,11 @@ const FILES = [
   ...THEME_FILES,
   'glass.css',
   'glass-shape.css',
+  'themes/_axes.css',
+  ...readdirSync(join(SRC, 'themes'))
+    .filter((f) => /^_studio\.axes\..+\.css$/.test(f))
+    .sort()
+    .map((f) => `themes/${f}`),
 ];
 
 /** Theme ids found on disk (client/src/themes/<id>.css). */

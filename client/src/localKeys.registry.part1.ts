@@ -266,6 +266,13 @@ export const LOCAL_KEYS_1: readonly LocalKeyEntry[] = [
     note: 'look axis (SPO-389)',
   },
   {
+    key: 'gym.modePref',
+    scope: 'account',
+    class: 'ephemeral',
+    wipe: 'signout',
+    note: 'Studio colour-mode preference (Auto by the sun / Light / Dark), kept on the device; the light|dark result it picks is the synced gym.mode',
+  },
+  {
     key: 'gym.density',
     scope: 'account',
     class: 'synced',

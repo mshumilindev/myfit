@@ -40,7 +40,7 @@ describe('ThemeInvite', () => {
   });
 
   it('shows nothing once the theme was seen, or while a preview is running', () => {
-    act(() => syncSeenFromDoc({ themesSeen: ['cyberpunk'] }, () => undefined));
+    act(() => syncSeenFromDoc({ themesSeen: ['cyberpunk', 'studio', 'glass'] }, () => undefined));
     const { container, rerender } = render(<ThemeInvite />);
     expect(container.querySelector('.thinv')).toBeNull();
     act(() => syncSeenFromDoc({ themesSeen: [] }, () => undefined));
@@ -56,12 +56,12 @@ describe('ThemePreviewHost', () => {
   });
 
   it('Keep current: theme back, the previewed one counts as seen, nothing saved', () => {
-    act(() => syncSeenFromDoc({}, () => undefined));
+    act(() => syncSeenFromDoc({ themesSeen: ['studio', 'glass'] }, () => undefined));
     render(<ThemePreviewHost />);
     act(() => startPreview('cyberpunk'));
     expect(attr()).toBe('cyberpunk');
     fireEvent.click(screen.getByRole('button', { name: en.themePreviewKeep }));
-    expect(attr()).toBe('glass');
+    expect(attr()).toBe('studio');
     expect(getPreview()).toBeNull();
     expect(localStorage.getItem('gym.theme')).toBeNull();
     expect(getUnseenThemes()).toEqual([]);
@@ -71,7 +71,7 @@ describe('ThemePreviewHost', () => {
     window.history.pushState(null, '', '/session');
     render(<ThemePreviewHost />);
     act(() => startPreview('cyberpunk'));
-    expect(attr()).toBe('glass');
+    expect(attr()).toBe('studio');
     expect(getPreview()).toBeNull();
     expect(localStorage.getItem('gym.theme')).toBeNull();
     window.history.pushState(null, '', '/');
@@ -87,11 +87,11 @@ describe('ThemePreviewHost', () => {
   });
 
   it('Esc is Keep current (theme back, previewed one seen, nothing saved)', () => {
-    act(() => syncSeenFromDoc({}, () => undefined));
+    act(() => syncSeenFromDoc({ themesSeen: ['studio', 'glass'] }, () => undefined));
     render(<ThemePreviewHost />);
     act(() => startPreview('cyberpunk'));
     fireEvent.keyDown(document.body, { key: 'Escape' });
-    expect(attr()).toBe('glass');
+    expect(attr()).toBe('studio');
     expect(getPreview()).toBeNull();
     expect(localStorage.getItem('gym.theme')).toBeNull();
     expect(getUnseenThemes()).toEqual([]);

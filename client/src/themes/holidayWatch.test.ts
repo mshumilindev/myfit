@@ -57,11 +57,11 @@ describe('holiday themes on the device (SPO-321)', () => {
   it('outside the window the saved theme is on; a holiday without a theme does nothing', () => {
     at(2026, 10, 23);
     initTheme();
-    expect(html().getAttribute('data-theme')).toBe('glass');
+    expect(html().getAttribute('data-theme')).toBe('studio');
     expect(getHolidayTheme()).toBeNull();
     at(2026, 3, 15); // St Patrick's Day has no theme in the registry
     initTheme();
-    expect(html().getAttribute('data-theme')).toBe('glass');
+    expect(html().getAttribute('data-theme')).toBe('studio');
   });
 
   it('comes on a week before and goes back to the saved theme the day after, via the transition', () => {
@@ -89,9 +89,9 @@ describe('holiday themes on the device (SPO-321)', () => {
     window.history.replaceState(null, '', '/session/abc');
     at(2026, 10, 25);
     window.dispatchEvent(new Event('focus'));
-    expect(html().getAttribute('data-theme')).toBe('glass');
+    expect(html().getAttribute('data-theme')).toBe('studio');
     vi.advanceTimersByTime(3_100);
-    expect(html().getAttribute('data-theme')).toBe('glass');
+    expect(html().getAttribute('data-theme')).toBe('studio');
     window.history.replaceState(null, '', '/today');
     vi.advanceTimersByTime(3_100);
     expect(html().getAttribute('data-theme')).toBe('halloween');

@@ -100,7 +100,7 @@ describe('the worn theme counts as seen', () => {
     const write = vi.fn();
     syncSeenFromDoc({}, write);
     expect(write).not.toHaveBeenCalled(); // nothing the account lacks that we decided: no write just for this
-    expect(getUnseenThemes().map((t) => t.id)).toEqual(['glass']);
+    expect(getUnseenThemes().map((t) => t.id)).toEqual(['glass', 'studio']); // Studio is a new theme too
   });
 });
 
@@ -112,6 +112,6 @@ describe('moving off an unannounced theme', () => {
     setTheme('glass');
     const stored = JSON.parse(localStorage.getItem('gym.themesSeen') ?? '[]') as string[];
     expect(stored).toEqual(expect.arrayContaining(['cyberpunk', 'glass']));
-    expect(getUnseenThemes()).toEqual([]);
+    expect(getUnseenThemes().map((t) => t.id)).toEqual([]); // Studio is the base look: nothing left to announce
   });
 });

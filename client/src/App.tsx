@@ -51,6 +51,7 @@ import {
 } from './store';
 import { AppRoot, SpotterSky } from './components/SpotterSky';
 import { ChristmasScene } from './components/ChristmasScene';
+import { StudioWaves } from './components/StudioWaves';
 import { HalloweenScene } from './components/HalloweenScene';
 import { SleepAutomation, SleepPauseController } from './components/SleepAutomation';
 import { SleepHero } from './components/SleepHero';
@@ -183,6 +184,9 @@ const NotificationsView = lazy(() =>
     default: module.NotificationsView,
   })),
 );
+const ThemeSettingsView = lazy(() =>
+  import('./views/ThemeSettingsView').then((m) => ({ default: m.ThemeSettingsView })),
+);
 const ThemesView = lazy(() =>
   import('./views/ThemesView').then((module) => ({ default: module.ThemesView })),
 );
@@ -279,6 +283,7 @@ export type Overlay =
   | { screen: 'history' }
   | { screen: 'themes' }
   | { screen: 'privacy' }
+  | { screen: 'theme-settings' }
   | { screen: 'notifications' }
   | { screen: 'recap'; period: string }
   | { screen: 'recap-story'; period: string }
@@ -423,6 +428,7 @@ export function toHash(
   if (overlay?.screen === 'history') return '#/history';
   if (overlay?.screen === 'themes') return '#/themes';
   if (overlay?.screen === 'privacy') return '#/more/privacy';
+  if (overlay?.screen === 'theme-settings') return '#/theme-settings';
   if (overlay?.screen === 'builder') return '#/builder';
   if (overlay?.screen === 'injury') return '#/injury';
   if (overlay?.screen === 'health') return healthHash(overlay);
@@ -564,6 +570,7 @@ export function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
     return { tab: 'today', overlay: { screen: 'uikit' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'themes') return { tab: 'today', overlay: { screen: 'themes' } };
+  if (head === 'theme-settings') return { tab: 'today', overlay: { screen: 'theme-settings' } };
   if (head === 'builder') return { tab: 'today', overlay: { screen: 'builder' } };
   if (head === 'notifications') return { tab: 'today', overlay: { screen: 'notifications' } };
   if (head === 'recap' && parts[1])
@@ -1674,7 +1681,14 @@ function AppMain() {
       {activeOverlay?.screen === 'settings' && role === 'admin' && (
         <SettingsView onClose={closeOverlay} />
       )}
-      {activeOverlay?.screen === 'themes' && themesOn && <ThemesView onClose={closeOverlay} />}
+      {activeOverlay?.screen === 'themes' && themesOn && (
+        <ThemesView
+          onClose={closeOverlay}
+          onSettings={() => shell.openOverlay({ screen: 'theme-settings' })}
+          settingsIds={['studio']}
+        />
+      )}
+      {activeOverlay?.screen === 'theme-settings' && <ThemeSettingsView onClose={closeOverlay} />}
       {activeOverlay?.screen === 'privacy' && <HealthPrivacyView onBack={closeOverlay} />}
       {activeOverlay?.screen === 'history' && (
         <HistoryListView shell={shell} onClose={closeOverlay} />
@@ -1843,6 +1857,7 @@ function AppMain() {
         <>
           <HalloweenScene />
           <ChristmasScene />
+          <StudioWaves />
         </>
       )}
       {sleepOn && (

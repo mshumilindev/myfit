@@ -42,6 +42,7 @@ export const THEMES: readonly ThemeDef[] = [
     pickable: false,
     holiday: 'christmas',
   },
+  { id: 'studio', name: 'Studio', since: '2026-11-09' },
   // theme:new inserts new themes above this line
 ];
 
@@ -50,7 +51,7 @@ export const PICKABLE_THEMES: readonly ThemeDef[] = THEMES.filter(
   (t) => t.pickable !== false && t.holiday === undefined,
 );
 
-export const DEFAULT_THEME = 'glass';
+export const DEFAULT_THEME = 'studio';
 const KEY = 'gym.theme';
 const listeners = new Set<() => void>();
 const choiceListeners = new Set<(id: string) => void>();
@@ -87,7 +88,7 @@ export function getTheme(): string {
 }
 
 /**
- * Themes are installed one by one (SPO-518, owner rule 06.11): only Brass Glass is the base, every
+ * Themes are installed one by one (SPO-518, owner rule 06.11): only Studio is the base (Brass Glass is an add-on too since 09.11), every
  * other look is a store item; the holiday themes are one item together (owner 08.11). A theme that is not allowed is never worn — the app shows the base theme whatever was
  * saved, scheduled or previewed. Nothing saved is touched, so the choice comes back the moment the theme does.
  * `null` = the installed set is not read yet: only the base look is allowed, so nothing that is not installed is ever
@@ -282,8 +283,24 @@ export function useTheme(): string {
  * `data-sleep=night` (the automatic night dimming) is a separate runtime state and stays as is.
  */
 export const AXES = {
-  mode: { attr: 'data-mode', key: 'gym.mode', values: ['dark'], default: 'dark' },
-  accent: { attr: 'data-accent', key: 'gym.accent', values: ['brass'], default: 'brass' },
+  mode: { attr: 'data-mode', key: 'gym.mode', values: ['dark', 'light'], default: 'dark' },
+  accent: {
+    attr: 'data-accent',
+    key: 'gym.accent',
+    values: [
+      'brass',
+      'titan',
+      'lime',
+      'crimson',
+      'fuchsia',
+      'amber',
+      'olive',
+      'tiffany',
+      'indigo',
+      'deeppurple',
+    ],
+    default: 'brass',
+  },
   density: { attr: 'data-density', key: 'gym.density', values: ['regular'], default: 'regular' },
 } as const satisfies Record<
   string,
@@ -323,6 +340,13 @@ function putAxis(axis: AxisName, value: string): void {
   } catch {
     /* storage unavailable — the choice lasts for this session */
   }
+  listeners.forEach((fn) => fn());
+}
+
+/** Put an axis value on <html> for a draft: nothing is saved and nothing is synced (the settings page's Save does that). */
+export function previewAxis(axis: AxisName, value: string): void {
+  if (!axisKnown(axis, value)) return;
+  document.documentElement.setAttribute(AXES[axis].attr, value);
   listeners.forEach((fn) => fn());
 }
 

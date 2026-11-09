@@ -45,7 +45,7 @@ describe('ThemesView chrome', () => {
     render(<ThemesView onClose={onClose} />);
     fireEvent.click(screen.getByRole('button', { name: en.backAction }));
     expect(onClose).toHaveBeenCalledTimes(1);
-    expect(screen.getByText('Brass Glass')).toBeTruthy();
+    expect(screen.getByText('Studio')).toBeTruthy();
     const cyber = await frameOf('Cyberpunk');
     expect(cyber.getByText(en.themesApply)).toBeTruthy();
     // the card is drawn in ITS theme, not the page's
@@ -64,10 +64,10 @@ describe('ThemesView chrome', () => {
     fireEvent.click(cyber.getByText(en.themesApply));
     expect(document.documentElement.getAttribute('data-theme')).toBe('cyberpunk');
     expect(localStorage.getItem('gym.theme')).toBe('cyberpunk');
-    // the roles swap: Brass Glass is now the framed card with Apply, Cyberpunk the live one
-    const glass = await frameOf('Brass Glass');
+    // the roles swap: Studio is now the framed card with Apply, Cyberpunk the live one
+    const glass = await frameOf('Studio');
     expect(glass.getByText(en.themesApply)).toBeTruthy();
     expect(document.querySelector('.thm-hero')?.textContent).toContain('Cyberpunk');
-    act(() => setTheme('glass'));
+    act(() => setTheme('studio'));
   });
 });

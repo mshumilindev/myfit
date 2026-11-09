@@ -114,3 +114,43 @@ html[data-theme] .thm-soon .thm-art {
   left: var(--s-12);
   z-index: var(--z-20);
 }
+
+/* The gear of an installed theme: the corner of its picture. */
+.thm-card {
+  position: relative;
+}
+.thm-gear {
+  position: absolute;
+  top: var(--s-12);
+  right: var(--s-12);
+  z-index: var(--z-20);
+}
+/* A theme not installed yet: a half-screen card (phone), so the page reads as an offer, not a list item. */
+.thm-invite {
+  min-height: 50dvh;
+}
+.thm-invite .thm-art {
+  background: radial-gradient(
+    70% 90% at 50% 0%,
+    color-mix(in srgb, var(--color-text) 8%, transparent),
+    transparent 70%
+  );
+}
+.thm-invite .thm-wm {
+  background: none;
+  filter: none;
+  color: var(--color-text-muted);
+}
+@media (min-width: 45em) {
+  .thm-invite {
+    min-height: 0;
+    aspect-ratio: 16 / 10;
+  }
+  .thm-invite .thm-art {
+    min-height: 0;
+    padding: var(--s-12);
+  }
+  .thm-invite .thm-foot {
+    padding: 0 var(--s-12) var(--s-12);
+  }
+}

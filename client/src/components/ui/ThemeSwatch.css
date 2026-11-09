@@ -1,0 +1,84 @@
+.uithsw-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-10);
+}
+@media (min-width: 45rem) {
+  .uithsw-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.uithsw {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: var(--bw-1) solid var(--color-divider);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: 500 var(--fs-13) var(--font);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.uithsw:focus-visible {
+  outline: var(--bw-2) solid var(--color-accent);
+  outline-offset: var(--focus-offset);
+}
+.uithsw.is-selected {
+  border-color: var(--color-text);
+  box-shadow:
+    0 0 0 var(--bw-2) var(--color-surface),
+    0 0 0 var(--s-4) var(--color-text);
+}
+/* the swatch: light and dark halves split along a 120deg line */
+.uithsw-chip {
+  position: relative;
+  display: block;
+  height: calc(4 * var(--s-16));
+  background: linear-gradient(120deg, var(--sw-light) 50%, var(--sw-dark) 50%);
+}
+.uithsw-check {
+  position: absolute;
+  top: var(--s-8);
+  right: var(--s-8);
+  display: grid;
+  place-items: center;
+  width: calc(2 * var(--s-12));
+  height: calc(2 * var(--s-12));
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--fs-14);
+}
+.uithsw-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+  padding: var(--s-8) var(--s-10) var(--s-10);
+}
+.uithsw-name {
+  overflow: hidden;
+  font: 700 var(--fs-15) var(--font);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.uithsw-code {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--s-6);
+  font: 500 var(--fs-12) var(--font);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+.uithsw-code i {
+  flex: none;
+  min-width: var(--s-12);
+  font-style: normal;
+  font-weight: 700;
+  color: var(--color-text-faint);
+}

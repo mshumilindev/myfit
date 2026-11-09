@@ -14,6 +14,7 @@ import { useT } from '../i18n';
 import { APP_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
 import {
   THEMES,
+  type ThemeDef,
   setTheme,
   useCommittedTheme,
   useHolidayTheme,
@@ -22,12 +23,28 @@ import {
 } from '../themes';
 import { getUnseenThemes, markAllThemesSeen } from '../themes/seen';
 import { ThemeCard } from './ThemeCard';
+import { ThemeInviteCard } from './ThemeInviteCard';
 import './themes.css';
 
 /** Places held for the themes still to come, so the page already has its final shape (five slots in all). */
 const SOON_SLOTS = 3;
 
-export function ThemesView({ onClose }: { onClose: () => void }) {
+export function ThemesView({
+  onClose,
+  onSettings,
+  settingsIds,
+  notInstalled,
+  onInstall,
+}: {
+  onClose: () => void;
+  /** opens a theme's settings page: every installed card gets the gear */
+  onSettings?: (id: string) => void;
+  /** which themes have a settings page (default: all of them) */
+  settingsIds?: readonly string[];
+  /** themes still to install: half-screen invitations instead of the held places */
+  notInstalled?: readonly ThemeDef[];
+  onInstall?: (id: string) => void;
+}) {
   const { t } = useT();
   const saved = useCommittedTheme();
   // a holiday theme veils the saved one: then no card is "in use" and every card is drawn in its own frame
@@ -63,10 +80,16 @@ export function ThemesView({ onClose }: { onClose: () => void }) {
               fresh={fresh.has(th.id)}
               land={land}
               onApply={(id) => (id === windowId ? wearHoliday() : setTheme(id))}
+              onSettings={settingsIds && !settingsIds.includes(th.id) ? undefined : onSettings}
             />
           </div>
         ))}
-        {Array.from({ length: SOON_SLOTS }, (_, i) => (
+        {(notInstalled ?? []).map((th) => (
+          <div key={`inv-${th.id}`} className="thm-cell">
+            <ThemeInviteCard theme={th} onInstall={(id) => onInstall?.(id)} />
+          </div>
+        ))}
+        {(notInstalled ? [] : Array.from({ length: SOON_SLOTS }, (_, i) => i)).map((i) => (
           <div key={`soon-${i}`} className="thm-cell">
             <Card pad="none" className={`${cardCls} thm-soon`}>
               {/* same parts as a real tile (picture + button), so it is exactly as big */}

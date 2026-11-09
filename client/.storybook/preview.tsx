@@ -9,6 +9,14 @@ import { CallControls } from '../src/components/ui/CallControls';
 import { CallSessionChip } from '../src/components/ui/CallSessionChip';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
+import '@fontsource/figtree/latin-400.css';
+import '@fontsource/figtree/latin-600.css';
+import '@fontsource/figtree/latin-700.css';
+import '@fontsource/figtree/latin-800.css';
+import '@fontsource/onest/cyrillic-400.css';
+import '@fontsource/onest/cyrillic-600.css';
+import '@fontsource/onest/cyrillic-700.css';
+import '@fontsource/onest/cyrillic-800.css';
 // Cyberpunk type (SPO-344, ADR 007): Barlow / Barlow Condensed for latin, Fira Sans / Fira Sans Condensed for
 // Cyrillic (Barlow has none). Subsets only, self-hosted.
 import '@fontsource/barlow/latin-400.css';
@@ -50,6 +58,7 @@ import '../src/tokens/primitives.css';
 import '../src/tokens/primitives.cyberpunk.css';
 import '../src/tokens/primitives.halloween.css';
 import '../src/tokens/primitives.christmas.css';
+import '../src/tokens/primitives.studio.css';
 import '@fontsource/jost/latin-400.css';
 import '@fontsource/jost/latin-500.css';
 import '@fontsource/jost/latin-600.css';

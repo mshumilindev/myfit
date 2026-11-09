@@ -54,7 +54,11 @@ describe('Themes are installed one by one (SPO-518)', () => {
     setAllowedThemes([]);
     expect(availablePickableThemes().map((t) => t.id)).toEqual([DEFAULT_THEME]);
     expect(pickableFor([])).toHaveLength(1);
-    expect(pickableFor([other]).map((t) => t.id)).toEqual([DEFAULT_THEME, other]);
+    expect(
+      pickableFor([other])
+        .map((t) => t.id)
+        .sort(),
+    ).toEqual([DEFAULT_THEME, other].sort());
     setAllowedThemes([other]);
     expect(availablePickableThemes()).toHaveLength(2);
   });

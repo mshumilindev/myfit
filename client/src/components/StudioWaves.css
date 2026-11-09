@@ -1,0 +1,67 @@
+/* Studio Waves: three accent wave layers across the top of the screen (flipped), below every screen (z 0). Tokens only.
+   Opacity: dark 10 / 8 / 6 %, light 5 / 4 / 3.5 %. */
+.sw-waves {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  transform: scaleY(-1);
+  height: min(46vh, 70vw);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: var(--z-0);
+}
+.sw-layer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 200%;
+  height: 100%;
+  fill: var(--color-accent);
+  will-change: transform;
+}
+.sw-l1 {
+  opacity: 0.1;
+  height: 100%;
+  animation: sw-drift 34s linear infinite;
+}
+.sw-l2 {
+  opacity: 0.08;
+  height: 78%;
+  animation: sw-drift 52s linear infinite reverse;
+}
+.sw-l3 {
+  opacity: 0.06;
+  height: 56%;
+  animation: sw-drift 74s linear infinite;
+}
+@keyframes sw-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (min-width: 45rem) {
+  .sw-waves {
+    height: min(40vh, 34vw);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sw-layer {
+    animation: none;
+  }
+}
+.sw-waves[data-paused='true'] .sw-layer {
+  animation-play-state: paused;
+}
+html[data-mode='light'] .sw-l1 {
+  opacity: 0.05;
+}
+html[data-mode='light'] .sw-l2 {
+  opacity: 0.04;
+}
+html[data-mode='light'] .sw-l3 {
+  opacity: 0.035;
+}

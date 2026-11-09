@@ -22,12 +22,12 @@
     color-mix(
       in srgb,
       var(--gem) calc(20% * var(--tone-fill-k, 1)),
-      color-mix(in srgb, var(--c-18181c) 42%, transparent)
+      color-mix(in srgb, var(--kit-c-18181c, var(--c-18181c)) 42%, transparent)
     ),
     color-mix(
         in srgb,
         var(--gem) calc(8% * var(--tone-fill-k, 1)),
-        color-mix(in srgb, var(--c-121216) 52%, transparent)
+        color-mix(in srgb, var(--kit-c-121216, var(--c-121216)) 52%, transparent)
       )
       62%
   );
@@ -133,7 +133,7 @@
   width: var(--sz-38);
   height: var(--sz-38);
   border-radius: var(--r-12);
-  background: color-mix(in srgb, var(--c-0a0b0d) 40%, transparent);
+  background: color-mix(in srgb, var(--kit-c-0a0b0d, var(--c-0a0b0d)) 40%, transparent);
   display: grid;
   place-items: center;
   box-shadow: inset 0 0 0 var(--sz-1) var(--gem-line);

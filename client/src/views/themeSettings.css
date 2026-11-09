@@ -1,0 +1,17 @@
+/* Theme settings page. Tokens only; the kit draws every control. */
+.theme-settings .uipagehead {
+  margin-bottom: var(--s-4);
+}
+.theme-settings .uigl,
+.theme-settings .uithsw-grid {
+  margin-bottom: var(--s-16);
+}
+/* Mobile: Save / Reset stay pinned to the bottom edge, full width (the screen's own side and bottom padding is cancelled). */
+@media (max-width: 44.99rem) {
+  .theme-settings .uiab {
+    position: sticky;
+    bottom: calc(var(--s-20) * -1);
+    margin: auto calc(var(--s-20) * -1) calc(var(--s-20) * -1);
+    z-index: var(--z-20);
+  }
+}

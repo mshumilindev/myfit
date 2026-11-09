@@ -1,0 +1,78 @@
+/* Studio structure: the Start button. A circle in the accent with a quiet static halo (7 and 14 px) and an unchanged
+   "+". No hover effect. While the kit's `is-attention` is on (the same logic as every theme: invite a session until one
+   is done today) two soft rings radiate outward from the button and fade, staggered, smoothly and endlessly (transform +
+   opacity only, off for reduced motion). Pressed scale .93 with the colour ~12 % darker, disabled opacity .45. */
+@keyframes studio-ripple-third {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 32%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 var(--s-32) color-mix(in srgb, var(--color-accent) 0%, transparent);
+  }
+}
+@keyframes studio-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+html[data-theme='studio'] .tabbar-fab {
+  isolation: isolate;
+  box-shadow:
+    0 0 0 calc(var(--s-14) / 2) color-mix(in srgb, var(--color-accent) 26%, transparent),
+    0 0 0 var(--s-14) color-mix(in srgb, var(--color-accent) 12%, transparent);
+  transition:
+    transform 0.12s ease,
+    background-color 0.12s ease,
+    opacity 0.2s ease;
+}
+html[data-theme='studio'] .tabbar-fab::before,
+html[data-theme='studio'] .tabbar-fab::after {
+  display: none;
+}
+html[data-theme='studio'] .tabbar-fab.is-attention::before,
+html[data-theme='studio'] .tabbar-fab.is-attention::after {
+  display: block;
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-round);
+  border: 0;
+  background: color-mix(in srgb, var(--color-accent) 32%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  z-index: calc(var(--z-30) * -1);
+  animation: studio-ripple 3.6s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+html[data-theme='studio'] .tabbar-fab.is-attention::after {
+  animation-delay: -1.2s;
+}
+/* The third wave is the button's own halo spreading, so three waves follow each other 1.2 s apart. */
+html[data-theme='studio'] .tabbar-fab.is-attention {
+  animation: studio-ripple-third 3.6s cubic-bezier(0.2, 0.6, 0.3, 1) -2.4s infinite;
+}
+html[data-theme='studio'] .tabbar-fab:active:not(:disabled) {
+  transform: scale(0.93);
+  background: color-mix(in srgb, var(--color-accent) 88%, black);
+}
+html[data-theme='studio'] .tabbar-fab:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='studio'] .tabbar-fab.is-attention {
+    animation: none;
+  }
+  html[data-theme='studio'] .tabbar-fab.is-attention::before,
+  html[data-theme='studio'] .tabbar-fab.is-attention::after {
+    animation: none;
+    display: none;
+  }
+}

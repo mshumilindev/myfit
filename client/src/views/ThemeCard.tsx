@@ -4,7 +4,7 @@
  * theme looks the same wherever it is offered (SPO-346, SPO-355).
  */
 import { Fragment } from 'react';
-import { Button } from '../components/ui/Button';
+import { Button, IconButton } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Tag } from '../components/ui/Tag';
 import { useT } from '../i18n';
@@ -19,6 +19,7 @@ export function ThemeCard({
   land = false,
   seasonal = false,
   onApply,
+  onSettings,
 }: {
   theme: ThemeDef;
   /** the theme in use: already live, so it is drawn without a frame and shows "Applied" */
@@ -29,6 +30,8 @@ export function ThemeCard({
   /** a holiday theme whose window is open (SPO-321): tagged "on now" while worn; chosen away from, its Apply brings it back */
   seasonal?: boolean;
   onApply: (id: string) => void;
+  /** opens this theme's own settings page; an installed theme shows the gear, a theme without settings shows none */
+  onSettings?: (id: string) => void;
 }) {
   const { t } = useT();
   const card = (
@@ -45,6 +48,17 @@ export function ThemeCard({
         <Tag tone="accent" className="thm-new">
           {t.themeNew}
         </Tag>
+      )}
+      {onSettings && (
+        <IconButton
+          icon="gear"
+          label={`${t.themesSettings}: ${theme.name}`}
+          variant="secondary"
+          size="sm"
+          shape="round"
+          className="thm-gear"
+          onClick={() => onSettings(theme.id)}
+        />
       )}
       <div className="thm-foot">
         {current ? (
