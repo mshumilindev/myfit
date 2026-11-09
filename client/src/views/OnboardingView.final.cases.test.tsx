@@ -24,6 +24,7 @@ beforeEach(() => {
   // The look step and the health rows belong to add-ons (SPO-518): installed here, so the full flow is covered.
   addonsPref.set([
     'theme-cyberpunk',
+    'theme-brass-glass',
     'health',
     'nicotine',
     'alcohol',
