@@ -518,7 +518,7 @@
   --chip-fg: var(--color-neutral-300);
   --chip-on-mix: 22%;
   --chip-on-ring-mix: 70%;
-  --chip-on-fg: var(--color-accent-300);
+  --chip-on-fg: var(--color-accent-text);
 
   /* Tabs (ScrollTabs): underline tabs of a page */
   --tab-h: var(--ctl-h-md);
@@ -773,7 +773,7 @@ i > svg {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   line-height: 1;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 /* Right-side header actions: the notifications bell + the dumbbell mark. The
    group carries the optical nudge onto the script wordmark; the barbell must not

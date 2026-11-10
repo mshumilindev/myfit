@@ -11,7 +11,7 @@ describe('ToneText', () => {
     const el = screen.getByText('Unwell');
     expect(el.tagName).toBe('SPAN');
     expect(el.className).toBe('uit--illness');
-    expect(el.style.color).toBe('var(--t-base)');
+    expect(el.style.color).toBe('var(--t-text)');
   });
 
   it('is not bold by default and bold 600 when strong', () => {

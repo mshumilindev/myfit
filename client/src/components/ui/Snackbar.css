@@ -55,7 +55,7 @@
   border: 0;
   border-radius: var(--r-10);
   background: transparent;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   font: 700 var(--fs-14) var(--font);
   cursor: pointer;
 }

@@ -190,7 +190,7 @@
 .uicall-sess-time {
   font-size: var(--fs-17);
   font-variant-numeric: tabular-nums;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 .uicall-sess-go {
   color: var(--color-neutral-400);

@@ -166,7 +166,7 @@
   padding: var(--s-4) var(--s-12);
   border-radius: var(--r-pill);
   font-size: var(--fs-13);
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   background: color-mix(in srgb, var(--color-accent) 14%, transparent);
 }
 .uicall-in-sub {

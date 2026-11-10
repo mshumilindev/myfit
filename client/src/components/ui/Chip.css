@@ -36,7 +36,7 @@ button.uichip {
 .uichip--accent {
   background: color-mix(in srgb, var(--color-accent) var(--chip-on-mix), transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 60%, transparent);
-  color: var(--color-accent-300);
+  color: var(--color-accent-text);
 }
 .uichip--danger {
   background: var(--color-danger-tint);
@@ -101,6 +101,10 @@ button.uichip {
   flex: none;
   font-variant-numeric: tabular-nums;
   opacity: 0.88;
+}
+/* The picked chip's count keeps full ink: the dimmed one fell below 4.5:1 on the accent tint (SPO-60). */
+.uichip.is-selected .uichip-n {
+  opacity: 1;
 }
 
 /* Wrapping group; `--scroll` = one row that scrolls sideways (fades at the end), `--fill` = equal columns */
@@ -175,7 +179,7 @@ button.uichip {
 }
 .uichip--accent .uichip-lead {
   background: var(--color-accent);
-  color: var(--color-accent-950);
+  color: var(--color-on-accent);
 }
 .uichip--rest .uichip-lead {
   background: var(--color-rest-300);

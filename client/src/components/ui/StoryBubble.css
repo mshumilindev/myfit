@@ -200,7 +200,7 @@ button.uistory:focus-visible {
   white-space: nowrap;
 }
 .uistory--atlas .uistory-label {
-  color: color-mix(in srgb, var(--color-atlas) 55%, var(--color-atlas-text));
+  color: var(--color-atlas-text);
 }
 .uistory--alert .uistory-label {
   color: var(--color-neutral-400);

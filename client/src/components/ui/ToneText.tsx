@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { toneClass, type Tone } from './tones';
 
-/** Inline text in a colour family's base colour ("Unwell · day 3"). */
+/** Inline text in a colour family's text colour (readable on the page) ("Unwell · day 3"). */
 export function ToneText({
   tone,
   strong = false,
@@ -14,7 +14,7 @@ export function ToneText({
   return (
     <span
       className={toneClass(tone)}
-      style={{ color: 'var(--t-base)', fontWeight: strong ? 600 : undefined }}
+      style={{ color: 'var(--t-text)', fontWeight: strong ? 600 : undefined }}
     >
       {children}
     </span>

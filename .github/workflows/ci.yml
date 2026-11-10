@@ -498,6 +498,15 @@ jobs:
       - name: Theme swap (hostile token edit re-themes every story; hard-coded values are frozen in a baseline that only shrinks)
         if: always()
         run: npm run audit:theme-swap -- --url http://127.0.0.1:6006 --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out audit-reports/swap-${{ matrix.shard }}.json --shots audit-reports/swap-shots
+      - name: Contrast (axe color-contrast 4.5:1 / 3:1 on every kit story; studio dark and light, brass and lime accents; zero findings allowed)
+        if: always()
+        run: |
+          rc=0
+          for look in "dark brass" "light brass" "light lime"; do
+            set -- $look
+            node scripts/contrast-audit.mjs --url http://127.0.0.1:6006 --themes studio --modes "$1" --accents "$2" --filter kit- --part ${{ matrix.shard }}/${{ env.LAYOUT_SHARDS }} --concurrency 5 --out "audit-reports/contrast-${{ matrix.shard }}-$1-$2.json" || rc=1
+          done
+          exit $rc
       - name: Start fab (the × is topmost over the Start drawer, turns 135°, closes it; both mount orders, four themes)
         if: always() && matrix.shard == 0
         run: npm run audit:start-fab -- --url http://127.0.0.1:6006
