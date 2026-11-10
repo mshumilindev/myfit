@@ -37,10 +37,3 @@
   font: 700 var(--fs-20) var(--font);
   color: var(--color-text);
 }
-.uiwater-allow {
-  position: absolute;
-  inset: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}

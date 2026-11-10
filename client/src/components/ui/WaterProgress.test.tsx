@@ -29,18 +29,26 @@ describe('WaterProgress', () => {
     render(<WaterProgress value={50} label="x" angle={30} />);
     expect(screen.getByRole('progressbar').style.getPropertyValue('--wp-tilt')).toBe('-30deg');
   });
-  it('asks for motion access on the first tap anywhere (iOS), then follows the phone (turned over = water at the top)', async () => {
+  it('never asks for motion access on iOS (the prompt came back on every launch): the water stays level', async () => {
     const request = vi.fn().mockResolvedValue('granted');
     vi.stubGlobal(
       'DeviceOrientationEvent',
       Object.assign(function () {}, { requestPermission: request }),
     );
     render(<WaterProgress value={50} label="x" />);
-    expect(request).not.toHaveBeenCalled();
     await act(async () => {
       fireEvent.pointerUp(document.body);
     });
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(request).not.toHaveBeenCalled();
+    await act(async () => {
+      window.dispatchEvent(Object.assign(new Event('deviceorientation'), { gamma: 0, beta: -90 }));
+    });
+    expect(screen.getByRole('progressbar').style.getPropertyValue('--wp-tilt')).toBe('0deg');
+    expect(screen.queryAllByRole('button')).toHaveLength(0);
+  });
+  it('follows the phone where no permission is needed (turned over = water at the top)', async () => {
+    vi.stubGlobal('DeviceOrientationEvent', function () {});
+    render(<WaterProgress value={50} label="x" />);
     await act(async () => {
       window.dispatchEvent(Object.assign(new Event('deviceorientation'), { gamma: 0, beta: -90 }));
     });

@@ -43,21 +43,21 @@ type OrientationCtor = {
 
 /**
  * The direction of gravity in the screen plane, in radians (0 = phone upright, +-PI = upside down), from the device's
- * roll and pitch (the prototype's formula). `null` until a reading arrives; `needsPermission` on iOS until the person
- * taps (the permission can only be asked from a gesture).
+ * roll and pitch (the prototype's formula). `null` until a reading arrives. iOS only delivers motion after a system
+ * prompt ("Would Like to Access Motion and Orientation") and does not keep the answer between launches, so the prompt
+ * came back on every open (owner 10.11.2026): there the water stays level and nothing is ever asked. Android and
+ * desktop need no permission and keep the tilt.
  */
 export function useGravityAngle(enabled: boolean) {
   const [angle, setAngle] = useState<number | null>(null);
-  const [on, setOn] = useState(false);
-  const ask =
+  const needsPermission =
     typeof window !== 'undefined' &&
     'DeviceOrientationEvent' in window &&
     typeof (window.DeviceOrientationEvent as unknown as OrientationCtor).requestPermission ===
       'function';
-  const needsPermission = enabled && ask && !on;
   useEffect(() => {
-    if (!enabled || typeof window === 'undefined' || !('DeviceOrientationEvent' in window)) return;
-    if (ask && !on) return;
+    if (!enabled || needsPermission || typeof window === 'undefined') return;
+    if (!('DeviceOrientationEvent' in window)) return;
     const h = (e: DeviceOrientationEvent) => {
       if (e.gamma == null || e.beta == null) return;
       const a = gravityAngle(e.gamma, e.beta);
@@ -65,26 +65,8 @@ export function useGravityAngle(enabled: boolean) {
     };
     window.addEventListener('deviceorientation', h);
     return () => window.removeEventListener('deviceorientation', h);
-  }, [enabled, on, ask]);
-  const request = async () => {
-    const ctor = (window as unknown as { DeviceOrientationEvent?: OrientationCtor })
-      .DeviceOrientationEvent;
-    try {
-      const r = await ctor?.requestPermission?.();
-      if (r === 'granted') setOn(true);
-    } catch {
-      /* denied: the water stays level */
-    }
-  };
-  // iOS (also the installed app) only asks from a tap, and the tank itself is a tiny target nobody knows to press:
-  // the first tap anywhere on the page is the gesture (the system prompt for motion access shows once).
-  useEffect(() => {
-    if (!needsPermission) return;
-    const onTap = () => void request();
-    document.addEventListener('pointerup', onTap, { once: true, capture: true });
-    return () => document.removeEventListener('pointerup', onTap, { capture: true });
-  }, [needsPermission]);
-  return { angle, needsPermission, request };
+  }, [enabled, needsPermission]);
+  return { angle };
 }
 
 const W = 300;
@@ -253,9 +235,6 @@ export function WaterProgress({
     >
       <canvas ref={cv} className="uiwater-canvas" aria-hidden="true" />
       <span className="uiwater-mid">{children}</span>
-      {g.needsPermission && (
-        <button type="button" className="uiwater-allow" aria-label={label} onClick={g.request} />
-      )}
     </div>
   );
 }
