@@ -110,7 +110,7 @@ import { installCleanUrls } from './route';
 import { LegalGate } from './legal/LegalGate';
 import { EmailGate } from './accounts/EmailGate';
 import { GeoConsentHost } from './legal/GeoConsentHost';
-import { AtlasHistoryHost } from './atlas/AtlasHistoryHost';
+import { AtlasHistoryGate } from './atlas/AtlasHistoryGate';
 import { HealthConsentHost } from './legal/HealthConsentHost';
 
 // Clean URLs (no `#`): rewrite a legacy `/#/route` link to `/route` before the app reads its route.
@@ -165,7 +165,7 @@ void Promise.race([
         <LegalGate />
         <EmailGate />
         <GeoConsentHost />
-        <AtlasHistoryHost />
+        <AtlasHistoryGate />
         <HealthConsentHost />
       </AppCrashBoundary>
     </StrictMode>,

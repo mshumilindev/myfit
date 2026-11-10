@@ -7,10 +7,7 @@ import { useStoredConditionLimits } from './healthBuild';
 import { setProgressionEffects } from './progression';
 import { ScreenSkeleton } from './components/ui/Skeletons';
 import { Button } from './components/ui/Button';
-import { useAtlasFmt, useAtlasNotes } from './atlas/notes';
 import { setOverrideUid } from './accountOverrides';
-import { syncOutbox } from './atlas/schedule';
-import { planAtlasMessages } from './atlas/outboxPlan';
 import {
   lazy,
   Suspense,
@@ -137,6 +134,9 @@ const SessionView = lazy(() =>
 );
 const SessionBuilderView = lazy(() =>
   import('./views/SessionBuilderView').then((module) => ({ default: module.SessionBuilderView })),
+);
+const AtlasOutboxHost = lazy(() =>
+  import('./atlas/AtlasOutboxHost').then((module) => ({ default: module.AtlasOutboxHost })),
 );
 const ActivityView = lazy(() =>
   import('./views/ActivityView').then((module) => ({ default: module.ActivityView })),
@@ -809,7 +809,6 @@ function AppMain() {
       delete el.dataset.sleep;
     };
   }, [nightLive]);
-  const atlas = useAtlasNotes();
   // Atlas's notes live in his own thread (unread count on his bubble in the
   // stories strip) — not in the bell.
   const rawNotifs = useMemo(
@@ -840,33 +839,16 @@ function AppMain() {
     setAppBadge(notifUnread);
   }, [notifUnread]);
   // Atlas's planned pushes (skipped day, Sunday review) → the server outbox.
-  const atlasFmt = useAtlasFmt();
+  // Atlas not installed: nothing is planned and what was queued is cleared (an empty list), once, without loading Atlas.
   useEffect(() => {
-    if (!authed || pushState() !== 'on') return;
+    if (atlasOn || !authed || pushState() !== 'on') return;
     const id = window.setTimeout(() => {
-      const msgs = planAtlasMessages({
-        store,
-        atlasOn,
-        temper: atlas.temper,
-        locale,
-        fmt: atlasFmt,
-        t,
-        now: Date.now(),
-      });
-      void syncOutbox(msgs).catch((err) => console.warn('atlas: outbox sync failed', err));
+      void import('./atlas/schedule')
+        .then((m) => m.syncOutbox([]))
+        .catch((err) => console.warn('atlas: outbox sync failed', err));
     }, 3000);
     return () => window.clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    authed,
-    atlasOn,
-    store.workouts,
-    store.sleeps,
-    store.bodyMetrics,
-    store.coach,
-    atlas.temper,
-    locale,
-  ]);
+  }, [authed, atlasOn]);
   // Keep this device's push token fresh (FCM rotates it; iOS can drop it).
   useEffect(() => {
     if (authed) void refreshPush(locale);
@@ -1851,6 +1833,11 @@ function AppMain() {
 
   return (
     <div className="app">
+      {atlasOn && (
+        <Suspense fallback={null}>
+          <AtlasOutboxHost authed={authed} store={store} locale={locale} t={t} />
+        </Suspense>
+      )}
       {nightLive ? (
         <SpotterSky />
       ) : (

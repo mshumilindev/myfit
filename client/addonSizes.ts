@@ -62,6 +62,18 @@ export function computeAddonSizes(
   return Object.fromEntries(Object.entries(out).map(([id, v]) => [id, Math.round(v)]));
 }
 
+/** Add-on that owns a module path (longest matching prefix), or undefined. */
+export function ownerOf(
+  path: string,
+  parts: Readonly<Record<string, SizePart>>,
+): string | undefined {
+  let best: { id: string; len: number } | undefined;
+  for (const [id, p] of Object.entries(parts))
+    for (const x of p.js ?? [])
+      if (path.startsWith(x) && (!best || x.length > best.len)) best = { id, len: x.length };
+  return best?.id;
+}
+
 export function addonSizes(): Plugin {
   let root = process.cwd();
   return {
@@ -128,6 +140,38 @@ export function addonSizes(): Plugin {
         () => 0,
         false,
       );
+      // Which modules keep each add-on in the first download: the worklist for splitting it out.
+      const eagerOwned: Record<string, string[]> = {};
+      for (const c of eagerChunks)
+        for (const m of Object.keys(c.modules)) {
+          const id = ownerOf(m, entries as Record<string, SizePart>);
+          if (id) (eagerOwned[id] ??= []).push(m);
+        }
+      // The edges that matter: an eager module outside the add-on that imports into it (cut these and the add-on leaves).
+      const rel = (id: string) => relative(src, id).replace(/\\/g, '/');
+      const edges: string[] = [];
+      for (const c of Object.values(bundle)) {
+        if (c.type !== 'chunk' || !eager.has(c.fileName)) continue;
+        for (const id of Object.keys(c.modules)) {
+          const owner = ownerOf(rel(id), entries as Record<string, SizePart>);
+          if (!owner) continue;
+          for (const imp of this.getModuleInfo(id)?.importers ?? []) {
+            const from = rel(imp);
+            if (ownerOf(from, entries as Record<string, SizePart>) !== owner)
+              edges.push(`${owner}: ${from} -> ${rel(id)}`);
+          }
+        }
+      }
+      this.emitFile({
+        type: 'asset',
+        fileName: 'addon-eager-edges.txt',
+        source: edges.sort().join('\n'),
+      });
+      this.emitFile({
+        type: 'asset',
+        fileName: 'addon-eager-modules.json',
+        source: JSON.stringify(eagerOwned, null, 1),
+      });
       this.emitFile({
         type: 'asset',
         fileName: 'addon-eager.json',
