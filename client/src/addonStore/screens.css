@@ -227,3 +227,8 @@
     align-items: start;
   }
 }
+
+/* Item bottom bar: the "Installed" status takes the free half beside Remove; centre its content in it (layout only). */
+.as-item-bar .sk-inst-lbl {
+  justify-content: center;
+}
