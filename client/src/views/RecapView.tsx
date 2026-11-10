@@ -764,7 +764,7 @@ export function RecapStory({ period, onClose }: { period: string; onClose: () =>
 
   return (
     <div
-      className="rc-story dk-island"
+      className="rc-story"
       style={{ background: panels[i].bg === 'replay' ? 'var(--rc-replay)' : 'var(--rc-wash-cool)' }}
       onPointerDown={() => {
         paused.current = true;
