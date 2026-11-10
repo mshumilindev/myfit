@@ -1,10 +1,13 @@
-/* SkInstalledLabel — non-clickable green status, same height as a button so rows do not jump. */
+/* SkInstalledLabel — non-clickable status pill (soft tint of the theme's "ok" tone), same height as a button so rows do not jump. */
 .sk-inst-lbl {
   display: inline-flex;
   align-items: center;
   gap: var(--sk-sp-3);
   block-size: var(--sk-tap);
   padding-inline: var(--sk-sp-2);
+  border-radius: var(--sk-r-seg);
+  border: 1px solid color-mix(in srgb, var(--ok) 38%, transparent);
+  background: color-mix(in srgb, var(--ok) 14%, transparent);
   font-size: var(--sk-inst-fs);
   font-weight: var(--sk-fw-semibold);
   color: var(--ok);
