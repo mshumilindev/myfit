@@ -170,7 +170,7 @@
   background: var(--color-divider);
 }
 .uichat-new {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 .uichat-new::before,
 .uichat-new::after {

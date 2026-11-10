@@ -197,6 +197,6 @@ html[data-theme='studio'][data-mode='light'][data-accent='lime']:not([data-sleep
   --color-atlas-text: var(--c-466000);
   --color-atlas-line: var(--c-c3e081);
   --skin-coach-tint: var(--c-e0e7e1);
-  --skin-coach-text: var(--c-506e00);
+  --skin-coach-text: var(--c-466000);
   --skin-coach-line: var(--c-c3e081);
 }

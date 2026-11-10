@@ -6395,7 +6395,7 @@ html[data-theme] .gym-card .head .n {
   font-size: var(--fs-10);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 .onb-steptop .k.right {
   color: var(--color-neutral-600);
@@ -17861,7 +17861,7 @@ html[data-theme] .apx-streak-n {
   font-variant-numeric: tabular-nums;
 }
 .eqd-sub {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   margin: var(--s-10) 0 var(--s-6);
 }
 .eqd-chips {
