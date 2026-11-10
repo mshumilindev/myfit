@@ -144,8 +144,8 @@
   --color-sleep-tint: var(--c-211d38);
   --color-sleep-text: var(--c-d6cffa);
   --color-sleep-line: var(--c-45397a);
-  /* Illness — amber (warmer and softer than the gold accent). */
-  --color-illness: var(--c-f0a35e);
+  /* Illness — orange-amber, kept apart from the gold accent so the Today program block tells "ill" from "training day" (SPO-529). */
+  --color-illness: var(--c-f27d3a);
   --color-illness-tint: var(--c-33200f);
   --color-illness-text: var(--c-f9d7b6);
   --color-illness-line: var(--c-6e4622);
