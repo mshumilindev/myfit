@@ -81,7 +81,7 @@ for (const look of looks) {
         await page.evaluate((s) => document.documentElement.setAttribute('data-sleep', s), sleep);
       // Storybook paints the canvas a fixed dark #16171a (backgrounds addon): in the light mode that is not the app's page, so the real page colour goes back
       await page.evaluate(() => {
-        document.body.style.background = 'var(--color-bg)';
+        document.body.style.setProperty('background', 'var(--color-bg)', 'important');
       });
       // long enough for the theme swap animation and colour transitions to finish: axe would measure a colour half-way
       await page.waitForTimeout(1300);
