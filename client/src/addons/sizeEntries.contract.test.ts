@@ -3,7 +3,7 @@ import { join, dirname, basename } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import entries from './sizeEntries.json';
 import { ADDONS } from './manifest';
-import { computeAddonSizes, type SizePart } from '../../addonSizes';
+import { computeAddonSizes, type SizeChunk, type SizePart } from '../../addonSizes';
 import { formatSize } from './useAddonSizes';
 
 const SRC = join(__dirname, '..');
@@ -30,7 +30,7 @@ describe('add-on size entries', () => {
 });
 
 describe('computeAddonSizes', () => {
-  const chunks = [
+  const chunks: SizeChunk[] = [
     { bytes: 1000, modules: { 'a/x.ts': 300, 'a/y/z.ts': 100, 'b.ts': 600 } },
     { bytes: 200, modules: { 'a/q.ts': 50 } },
   ];
