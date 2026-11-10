@@ -74,7 +74,7 @@ export function SleepView({
 }: {
   onClose: () => void;
   wake?: boolean;
-  mode?: 'backfill' | 'schedule' | 'edit';
+  mode?: 'backfill' | 'schedule' | 'edit' | 'logged';
   nightId?: string;
 }) {
   const { t } = useT();

@@ -68,7 +68,7 @@ export function SleepHero({
           title={t.sleepReturnToNight}
           onClick={onResume}
         />
-        <Button variant="sleep" size="sm" onClick={onStop}>
+        <Button variant="sleep" size="md" onClick={onStop}>
           {t.sleepStopAction}
         </Button>
       </div>

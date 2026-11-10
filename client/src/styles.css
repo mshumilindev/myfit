@@ -20497,6 +20497,8 @@ body {
 .sleep-q-row {
   display: flex;
   gap: var(--s-8);
+  /* The hugging Segmented is content-wide; centre it on the screen axis like the text above. */
+  justify-content: center;
 }
 .sleep-feeds {
   color: var(--s-fainter);
