@@ -115,7 +115,7 @@ function LiveRouteMap({ from, to }: { from: Coords | null; to: Coords }) {
   const on = useGeoSearchOn();
   if (!on)
     return (
-      <div className="gym-map route-map">
+      <div className="gym-map route-map route-map-off">
         <GeoOffNotice map />
       </div>
     );

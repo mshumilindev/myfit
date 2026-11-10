@@ -4761,6 +4761,11 @@ html[data-theme] .gym-card .head .n {
   position: relative;
   overflow: hidden;
 }
+/* Maps are off: only the notice strip stands where the map would be (no dark map plate behind theme-coloured text). */
+.gym-map.route-map-off {
+  height: auto;
+  background: none;
+}
 .route-map-fallback,
 .route-map-live {
   position: absolute;
@@ -7499,7 +7504,7 @@ html[data-theme] .gym-card .head .n {
     padding: var(--s-32) var(--s-28);
     overflow-y: auto;
     border-right: var(--bw-1) solid var(--color-divider);
-    background: var(--c-151619);
+    background: var(--color-bg);
   }
 
   .gyms-list-pane .section-label {
