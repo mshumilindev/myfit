@@ -9,6 +9,9 @@
  */
 import type { Taught } from './teach';
 import { groupMatches, normalize } from './nlu';
+import { SAID_KEY, clearSaid } from './said';
+
+export { clearSaid };
 import type { Tr } from './intentKit';
 
 export const DAY_MS = 86_400_000;
@@ -772,7 +775,6 @@ export function consistent(
 
 // ---- device storage for "said" ------------------------------------------------------
 
-const SAID_KEY = 'spotter.atlasSaid';
 const SAID_MAX = 80;
 
 export function loadSaid(): SaidRec[] {
@@ -790,11 +792,4 @@ export function rememberSaid(rec: SaidRec): SaidRec[] {
     /* private mode — consistency holds for this visit only */
   }
   return next;
-}
-export function clearSaid(): void {
-  try {
-    localStorage.removeItem(SAID_KEY);
-  } catch {
-    /* ignore */
-  }
 }
