@@ -19385,7 +19385,7 @@ html[data-theme] .apx-streak-n {
 }
 .mst-bal-bar {
   flex: 1;
-  background: var(--c-241b0e);
+  background: color-mix(in srgb, var(--color-text) 12%, transparent);
 }
 .mst-bal-num {
   width: var(--sz-30);
@@ -19472,7 +19472,7 @@ html[data-theme] .apx-streak-n {
   background: var(--loopwash);
 }
 .mst-practice .mst-tile-bar {
-  background: var(--c-241b0e);
+  background: color-mix(in srgb, var(--color-text) 12%, transparent);
 }
 .mst-practice-more {
   display: flex;
@@ -19739,7 +19739,7 @@ html[data-theme] .apx-streak-n {
   flex: 1;
   height: var(--sz-4);
   border-radius: var(--r-2);
-  background: var(--c-241b0e);
+  background: color-mix(in srgb, var(--color-text) 12%, transparent);
 }
 .mst-pips span.on {
   background: var(--color-accent);

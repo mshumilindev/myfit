@@ -8,7 +8,7 @@ import { AppRail, type RailNavItem } from '../AppRail';
 import type { MoreMenuItem } from '../ui/MoreMenu';
 import type { RailFootEntry } from '../ui/railOverflow';
 import { SuiteTabBar } from '../SuiteTabBar';
-import { useCommonMoreItems } from './commonMore';
+import { orderMoreItems, useCommonMoreItems } from './commonMore';
 import { BrandBar, BellButton } from '../ui/BrandBar';
 import { BrandAccount } from './BrandAccount';
 import { SUITE_ICON, SUITE_TONE } from './suiteTone';
@@ -126,7 +126,7 @@ export function SuiteAppFrame({
         {!desktop && (
           <SuiteTabBar
             app={app}
-            moreItems={[...common, ...moreExtra]}
+            moreItems={orderMoreItems(common, moreExtra)}
             noAccount
             tabs
             activeFill

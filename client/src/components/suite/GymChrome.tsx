@@ -4,7 +4,7 @@
  * continue in the bottom bar's More. The bottom bar has a Mastery tab while the header has room; once something
  * has collapsed, that slot is More = Mastery + the collapsed controls. The account is the avatar's drawer.
  */
-import { useCommonMoreItems } from './commonMore';
+import { orderMoreItems, useCommonMoreItems } from './commonMore';
 import { useT } from '../../i18n';
 import { ConditionsShield, useActiveConditions } from '../../views/health/ConditionsShield';
 import { BrandBar, BellButton } from '../ui/BrandBar';
@@ -84,7 +84,7 @@ export function GymTabBar<Id extends string>({
     <SuiteTabBar<Id>
       app="gym"
       noAccount
-      moreItems={[...common, ...hidden]}
+      moreItems={orderMoreItems(common, hidden)}
       items={items}
       onSelect={(id) => onSelect(id as Id)}
       fab={fab}

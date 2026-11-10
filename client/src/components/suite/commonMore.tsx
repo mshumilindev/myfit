@@ -59,3 +59,13 @@ export function useCommonMoreItems(onPrivacy?: () => void): MoreMenuItem[] {
     },
   ];
 }
+
+/** Settings-like rows go last in More; destinations (pages) come first (owner 10.11.2026). */
+const SETTINGS_IDS = new Set(['privacy', 'language', 'settings']);
+export function orderMoreItems(common: MoreMenuItem[], extra: MoreMenuItem[]): MoreMenuItem[] {
+  const all = [...common, ...extra];
+  return [
+    ...all.filter((i) => !SETTINGS_IDS.has(i.id)),
+    ...all.filter((i) => SETTINGS_IDS.has(i.id)),
+  ];
+}

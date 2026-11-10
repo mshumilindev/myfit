@@ -1946,7 +1946,7 @@ export function SessionView(props: {
                 as="button"
                 pad="none"
                 emphasis="hero"
-                className="es-hero-main"
+                className="es-hero-main dk-island"
                 onClick={() => {
                   // Enough history for this weekday → offer the whole day;
                   // otherwise just start with this (the custom scenario).
@@ -1981,7 +1981,7 @@ export function SessionView(props: {
                       as="button"
                       pad="none"
                       emphasis="quiet"
-                      className="es-tile-main"
+                      className="es-tile-main dk-island"
                       onClick={() => openPick(p)}
                     >
                       <PickPhoto src={p.img} kind={p.kind} fallbackClassName="es-noimg" />
