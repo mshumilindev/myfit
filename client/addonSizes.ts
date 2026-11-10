@@ -101,6 +101,8 @@ export function addonSizes(): Plugin {
         }
         chunks.push({ bytes, modules });
       }
+      // Only the app's own build: Storybook and other builds reuse this config but have none of the app's modules.
+      if (!chunks.some((c) => 'main.tsx' in c.modules)) return;
       const sizes = computeAddonSizes(chunks, entries as Record<string, SizePart>, (f) =>
         gz(readFileSync(join(src, f))),
       );

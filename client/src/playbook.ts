@@ -18,6 +18,7 @@
  */
 import { isStrengthExercise, warmupHabit, resolveMuscles, setTopWeight, setTypeOf } from './store';
 import type { Exercise, Workout } from './types';
+import { playbookAvailable } from './addons/featureGates';
 import type { MuscleGroup } from './data/exercises';
 import { describeDay, exerciseDay, type DayReadout, type TrainingDay } from './data/daySuggest';
 
@@ -162,6 +163,9 @@ function readoutDayType(readout: DayReadout | null): TrainingDay | null {
 }
 
 export function computePlaybook(finished: Workout[], now: number): PlaybookResult {
+  // Playbook is an add-on (owner 10.11): not installed = no play, nudge or suggestion for ANY reader (Atlas, widgets, the
+  // session builder, summary). The history stays; screens also gate themselves with usePlaybookOn.
+  if (!playbookAvailable()) return { ready: false, plays: [], recent: [] };
   const done = finished
     .filter((w) => w.finishedAt !== null)
     .sort((a, b) => b.startedAt - a.startedAt);

@@ -1,5 +1,5 @@
 import type { LocaleId } from '../i18n';
-import { computePlaybookGated } from '../playbookGated';
+import { computePlaybook } from '../playbook';
 import type { StoreState } from '../store';
 import { buildNotes } from './notes';
 import { chatBacked, planNotePushes, planOutbox, type OutboxMessage } from './schedule';
@@ -27,7 +27,7 @@ export function planAtlasMessages(a: {
       coach: store.coach,
       temper: a.temper,
       finished,
-      plays: computePlaybookGated(finished, now).plays,
+      plays: computePlaybook(finished, now).plays,
       now,
       locale,
       fmt,

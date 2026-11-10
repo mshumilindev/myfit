@@ -27,7 +27,7 @@ import { bodyPart as bodyPartOf } from '../injury';
 import { isHealthOn, isHealthWriteDenied } from '../data/healthConsentGate';
 import { healthBuildCtx } from '../healthBuild';
 import { buildPlanDay, planDayFor, proposePlan } from './plan';
-import { computePlaybookGated } from '../playbookGated';
+import { computePlaybook } from '../playbook';
 import { clearSaid, mergeMemory } from './memory';
 import { memoryBuildHints } from './memoryPlan';
 import type { AtlasAction, Tr } from './intentKit';
@@ -61,7 +61,7 @@ export function runAction(
       const finished = s.workouts.filter((w) => w.finishedAt !== null);
       const plan = proposePlan({
         finished,
-        plays: computePlaybookGated(finished, now).plays,
+        plays: computePlaybook(finished, now).plays,
         now,
         daysPerWeek: a.days,
         lengthMin: a.lengthMin,

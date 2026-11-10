@@ -7,8 +7,7 @@ import type { LocaleId } from '../i18n';
 import type { MuscleGroup } from '../data/exercises';
 import { muscleReadiness } from '../recovery';
 import { VOLUME_MUSCLES } from '../volume';
-import { playForWeekday } from '../playbook';
-import { computePlaybookGated } from '../playbookGated';
+import { computePlaybook, playForWeekday } from '../playbook';
 import { planDayFor } from './plan';
 import { conditionLimits, isAutoExcluded, NO_LIMITS } from '../conditions';
 import type { Fmt } from './voice';
@@ -152,7 +151,7 @@ export function todayLine(c: AskCtx, L: Tr, at: number): string {
     return `${day.name ?? day.split}: ${ms}.`;
   }
   const finished = finishedOf(c);
-  const play = playForWeekday(computePlaybookGated(finished, at).plays, new Date(at).getDay());
+  const play = playForWeekday(computePlaybook(finished, at).plays, new Date(at).getDay());
   if (play) {
     const ms = play.coverage.filter((x) => x.primary).map((x) => c.fmt.muscle(x.muscle));
     // Limits from long-term conditions: never suggest a lift they rule out (effect-level note only).
