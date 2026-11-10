@@ -1,11 +1,64 @@
 {
-  "health": ["src/views/HealthView.tsx", "src/views/InjuryGate.tsx"],
-  "sleep": ["src/views/SleepView.tsx"],
-  "activities": ["src/views/ActivityView.tsx", "src/views/LogActivityView.tsx"],
-  "goals": ["src/views/GoalsView.tsx"],
-  "playbook": ["src/views/PlaybookView.tsx"],
-  "home-sets": ["src/views/home/HomeSetView.tsx"],
-  "atlas": ["src/views/CoachView.tsx"],
-  "apex": ["src/views/ApexApp.tsx", "src/views/MasteryView.tsx"],
-  "coach": ["src/coach/CoachApp.tsx"]
+  "gym": {
+    "js": [
+      "views/SessionView",
+      "views/SessionBuilderView",
+      "views/ProgramsView",
+      "views/ExerciseLibraryView",
+      "views/ExerciseDetailView",
+      "views/GymsView",
+      "views/ProgressView",
+      "views/TodayView",
+      "views/OverviewView"
+    ]
+  },
+  "health": { "js": ["views/HealthView", "views/health/", "healthAddons", "healthMask"] },
+  "injury-log": {
+    "js": ["views/InjuryGate", "views/InjuryView", "views/InjurySetupStepper", "injury"]
+  },
+  "rest": { "js": ["restOverlap"] },
+  "unwell": { "js": ["illness"] },
+  "conditions": {
+    "js": ["conditions", "conditionText", "useConditionName", "views/health/Conditions"]
+  },
+  "cycle": { "js": ["cycle", "views/health/cycle/"] },
+  "supplements": {
+    "js": ["supplement", "views/health/supplements/", "views/sessionSummary/SupplementsCard"]
+  },
+  "nicotine": { "js": ["nicotine", "views/health/nicotine/", "views/sessionSummary/NicotineCard"] },
+  "alcohol": { "js": ["alcohol", "views/health/alcohol/", "views/sessionSummary/AlcoholCard"] },
+  "sleep": { "js": ["views/SleepView", "views/SleepStart", "sleep"] },
+  "activities": { "js": ["views/ActivityView", "views/LogActivityView", "views/logActivity/"] },
+  "goals": { "js": ["views/GoalsView", "goals"] },
+  "playbook": { "js": ["views/PlaybookView", "playbook"] },
+  "home-sets": { "js": ["views/home/", "homeSets", "components/HomeMove"] },
+  "atlas": { "js": ["atlas/", "views/CoachView", "components/Atlas"] },
+  "apex": { "js": ["views/ApexApp", "views/ApexHome", "views/apexMastery"] },
+  "apex-challenges": { "js": ["challenges", "views/ChallengesView"] },
+  "apex-ranks": { "js": ["standards", "components/StandardsView"] },
+  "apex-awards": { "js": ["feats", "components/FeatsView"] },
+  "mastery": { "js": ["mastery", "views/MasteryView"] },
+  "coach": { "js": ["coach/"] },
+  "coach-live": { "js": ["coach/screens/live/", "coach/data/firestore/live"] },
+  "coach-signals": {
+    "js": ["coach/domain/signal", "coach/today/Signal", "coach/screens/SignalsScreen"]
+  },
+  "coach-notes": { "js": ["coach/notes/", "coach/threadExtras"] },
+  "coach-team": { "js": ["coach/team/"] },
+  "theme-brass-glass": { "css": ["themes/glass.css", "themes/_glass.page.css"] },
+  "theme-cyberpunk": {
+    "css": [
+      "themes/cyberpunk.css",
+      "themes/_cyberpunk.structure.css",
+      "themes/_cyberpunk.route.css"
+    ]
+  },
+  "holiday-themes": {
+    "css": [
+      "themes/christmas.css",
+      "themes/_christmas.structure.css",
+      "themes/halloween.css",
+      "themes/_halloween.structure.css"
+    ]
+  }
 }

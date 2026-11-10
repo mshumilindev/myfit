@@ -79,7 +79,10 @@
 }
 .as-stats {
   display: flex;
-  justify-content: space-around;
+}
+/* Owner 10.11: a fixed third of the bar whatever is in it (one, two or three cells); a fourth cell would make it a quarter. */
+.as-stats > .sk-stat {
+  flex: 0 0 calc(100% / 3);
 }
 /* Boards 02, 30, 31: on a phone only Discover and Search carry the field; on a wide screen the other places do too. */
 @media (max-width: 44.99rem) {

@@ -107,10 +107,8 @@ export function ItemPage({
         </div>
         <div className="as-item-aside">
           <div className="as-o2">
-            {(m.kind === 'app' ||
-              children.length > 0 ||
-              modules.length > 0 ||
-              sizeBytes != null) && (
+            {/* Same card on every item: counts where it has them and Size, each cell a fixed third of the width. */}
+            {
               <SkCard className="sk-p16 as-stats">
                 {(m.kind === 'app' || children.length > 0) && (
                   <SkStat spec value={children.length} caption={st.statAddons} />
@@ -118,11 +116,13 @@ export function ItemPage({
                 {(m.kind === 'app' || modules.length > 0) && (
                   <SkStat spec value={modules.length} caption={st.modules} />
                 )}
-                {sizeBytes != null && (
-                  <SkStat spec value={formatSize(sizeBytes)} caption={st.statSize} />
-                )}
+                <SkStat
+                  spec
+                  value={sizeBytes != null ? formatSize(sizeBytes) : '—'}
+                  caption={st.statSize}
+                />
               </SkCard>
-            )}
+            }
           </div>
           <div className="as-o4">
             {modules.length > 0 && (

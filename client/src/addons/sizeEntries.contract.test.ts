@@ -1,48 +1,53 @@
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readdirSync } from 'node:fs';
+import { join, dirname, basename } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import entries from './sizeEntries.json';
 import { ADDONS } from './manifest';
-import { computeAddonSizes, type ChunkNode } from '../../addonSizes';
+import { computeAddonSizes, type SizePart } from '../../addonSizes';
 import { formatSize } from './useAddonSizes';
 
-const CLIENT = join(__dirname, '..', '..');
+const SRC = join(__dirname, '..');
+
+/** A prefix is a directory (`coach/notes/`) or a file stem (`sleep` = a file or folder whose name starts so). */
+function matches(prefix: string): boolean {
+  if (prefix.endsWith('/')) return existsSync(join(SRC, prefix));
+  const dir = join(SRC, dirname(prefix));
+  return existsSync(dir) && readdirSync(dir).some((f) => f.startsWith(basename(prefix)));
+}
 
 describe('add-on size entries', () => {
-  it('name real add-ons and real screen files', () => {
-    for (const [id, files] of Object.entries(entries)) {
-      expect(
-        ADDONS.some((a) => a.id === id),
-        id,
-      ).toBe(true);
-      for (const f of files) expect(existsSync(join(CLIENT, f)), f).toBe(true);
+  it('every shown add-on or module has an entry, and no entry is for something unknown', () => {
+    const shown = ADDONS.filter((a) => !a.soon).map((a) => a.id);
+    expect(Object.keys(entries).sort()).toEqual(shown.sort());
+  });
+  it('every path it lists exists', () => {
+    for (const [id, p] of Object.entries(entries as Record<string, SizePart>)) {
+      expect((p.js?.length ?? 0) + (p.css?.length ?? 0), `${id} has no paths`).toBeGreaterThan(0);
+      for (const x of p.js ?? []) expect(matches(x), `${id}: ${x}`).toBe(true);
+      for (const f of p.css ?? []) expect(existsSync(join(SRC, f)), `${id}: ${f}`).toBe(true);
     }
   });
 });
 
 describe('computeAddonSizes', () => {
-  const node = (n: Partial<ChunkNode>): ChunkNode => ({
-    imports: [],
-    sources: [],
-    isEntry: false,
-    bytes: 0,
-    ...n,
+  const chunks = [
+    { bytes: 1000, modules: { 'a/x.ts': 300, 'a/y/z.ts': 100, 'b.ts': 600 } },
+    { bytes: 200, modules: { 'a/q.ts': 50 } },
+  ];
+  it('gives each add-on its share of each chunk, the longest prefix owning a module', () => {
+    expect(
+      computeAddonSizes(chunks, {
+        app: { js: ['a/'] },
+        mod: { js: ['a/y/'] },
+        other: { js: ['b'] },
+      }),
+    ).toEqual({ app: 500, mod: 100, other: 600 });
   });
-  const graph = {
-    'main.js': node({ isEntry: true, imports: ['vendor.js'], bytes: 500 }),
-    'vendor.js': node({ bytes: 300 }),
-    'a.js': node({ sources: ['src/a.tsx'], imports: ['vendor.js', 'shared.js'], bytes: 100 }),
-    'b.js': node({ sources: ['src/b.tsx'], imports: ['shared.js'], bytes: 40 }),
-    'shared.js': node({ bytes: 25 }),
-  };
-  it('counts what loads with the add-on and not what the shell already has; shared counts for each', () => {
-    expect(computeAddonSizes(graph, { a: ['src/a.tsx'], b: ['src/b.tsx'] })).toEqual({
-      a: 125,
-      b: 65,
-    });
+  it('adds the gzip of plain CSS files', () => {
+    expect(computeAddonSizes(chunks, { t: { css: ['t.css'] } }, () => 77)).toEqual({ t: 77 });
   });
-  it('fails loudly when an entry screen is in no chunk', () => {
-    expect(() => computeAddonSizes(graph, { a: ['src/gone.tsx'] })).toThrow(/in no chunk/);
+  it('fails loudly when a path matches no module', () => {
+    expect(() => computeAddonSizes(chunks, { a: { js: ['gone/'] } })).toThrow(/matches no module/);
   });
   it('formats KB and MB', () => {
     expect(formatSize(8000)).toBe('8 KB');
