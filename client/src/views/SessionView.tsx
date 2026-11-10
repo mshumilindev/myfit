@@ -2000,7 +2000,7 @@ export function SessionView(props: {
               </div>
             </div>
           )}
-          <div className="es-circuit dk-island">
+          <div className="es-circuit">
             <span className="es-loop" aria-hidden>
               <Icon name="arrows-clockwise" />
             </span>
