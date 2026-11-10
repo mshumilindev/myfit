@@ -500,3 +500,21 @@ html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) :is(.rc-r
 html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) .rc-progress > i {
   background: color-mix(in srgb, var(--color-text) 16%, transparent);
 }
+
+/* A dark island keeps the dark washes: its text is the dark-mode token set, so the light page wash must not reach it. */
+html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) .dk-island {
+  --loopwash:
+    radial-gradient(
+      120% 100% at 15% 0%,
+      color-mix(in srgb, var(--c-e9c07a) 16%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(160deg, var(--c-211c13) 0%, var(--c-191a1d) 62%);
+  --rc-wash:
+    radial-gradient(
+      120% 90% at 20% 0%,
+      color-mix(in srgb, var(--c-e9c07a) 22%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(160deg, var(--c-221d13) 0%, var(--c-191a1d) 62%);
+}

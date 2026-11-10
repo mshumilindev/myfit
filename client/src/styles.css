@@ -809,7 +809,7 @@ i > svg {
   box-sizing: border-box;
   border-radius: var(--r-pill);
   background: var(--color-accent);
-  color: var(--c-201a0e);
+  color: var(--color-on-accent);
   font-size: var(--fs-10);
   font-weight: 700;
   line-height: 16px;
@@ -3944,7 +3944,7 @@ html[data-theme] .gym-card .head .n {
   box-sizing: border-box;
   border-radius: var(--r-pill);
   background: var(--color-accent);
-  color: var(--c-201a0e);
+  color: var(--color-on-accent);
   font-size: var(--fs-9);
   font-weight: 700;
   line-height: 15px;
@@ -4343,7 +4343,7 @@ html[data-theme] .gym-card .head .n {
 }
 .cal-day.sel {
   background: var(--color-accent);
-  color: var(--c-201a0e);
+  color: var(--color-on-accent);
   font-weight: 600;
 }
 .cal-day.sel:hover {
@@ -4390,7 +4390,7 @@ html[data-theme] .gym-card .head .n {
 }
 .time-opt.sel {
   background: var(--color-accent);
-  color: var(--c-201a0e);
+  color: var(--color-on-accent);
   font-weight: 600;
 }
 
@@ -14893,7 +14893,7 @@ button.badge {
   border-radius: var(--r-pill);
   border: none;
   background: var(--color-accent);
-  color: var(--c-1a130a);
+  color: var(--color-on-accent);
   font-size: var(--fs-13);
   font-weight: 500;
   display: inline-flex;
@@ -14903,7 +14903,7 @@ button.badge {
 }
 .fix-add:disabled {
   background: var(--color-ok);
-  color: var(--c-0c1a13);
+  color: var(--color-ok-tint);
   cursor: default;
 }
 
@@ -17041,7 +17041,7 @@ html[data-theme] .apx-streak-n {
   box-sizing: border-box;
   border-radius: var(--r-pill);
   background: var(--color-apex);
-  color: var(--c-160f24);
+  color: var(--color-on-accent);
   font-size: var(--fs-9);
   font-weight: 700;
   display: grid;
@@ -17615,7 +17615,7 @@ html[data-theme] .apx-streak-n {
   justify-content: center;
   border-radius: var(--r-pill);
   background: var(--color-accent-500);
-  color: var(--c-1a1206);
+  color: var(--color-on-accent);
   font-size: var(--fs-13);
   box-shadow: 0 1px 4px color-mix(in srgb, var(--c-000000) 40%, transparent);
 }
@@ -18011,7 +18011,7 @@ html[data-theme] .apx-streak-n {
   padding: 0 var(--s-4);
   border-radius: var(--r-pill);
   background: var(--color-accent-500);
-  color: var(--c-1a1206);
+  color: var(--color-on-accent);
   font-size: var(--fs-10);
   font-weight: 700;
   display: grid;
@@ -18034,7 +18034,7 @@ html[data-theme] .apx-streak-n {
 }
 .eq-tile-toggle.on {
   background: var(--color-accent-500);
-  color: var(--c-1a1206);
+  color: var(--color-on-accent);
   box-shadow: 0 1px 4px color-mix(in srgb, var(--c-000000) 40%, transparent);
 }
 
@@ -22725,11 +22725,11 @@ body {
 }
 .rx .step .s.on .n {
   background: var(--g500);
-  color: var(--c-1a1204);
+  color: var(--color-on-accent);
 }
 .rx .step .s.done .n {
   background: var(--ok);
-  color: var(--c-08130d);
+  color: var(--color-ok-tint);
 }
 .rx .step .line {
   flex: 1;
@@ -22931,7 +22931,7 @@ body {
 }
 .rx .slist .r.done .kn {
   background: var(--ok);
-  color: var(--c-08130d);
+  color: var(--color-ok-tint);
   border-color: var(--ok);
 }
 .rx .slist .r.now .kn {
@@ -22941,7 +22941,7 @@ body {
 }
 .rx .slist .r.rest .kn {
   background: var(--rest);
-  color: var(--c-052231);
+  color: var(--color-rest-tint);
   border-color: var(--rest);
 }
 .rx .dots {
@@ -23085,7 +23085,7 @@ body {
 }
 .rx-track .node.done .kn {
   background: var(--ok);
-  color: var(--c-08130d);
+  color: var(--color-ok-tint);
   border-color: var(--ok);
 }
 .rx-track .node.now .kn {
@@ -23331,7 +23331,7 @@ body {
 }
 .focus-view .gset.kind-warmup .gset-log {
   background: var(--set-warmup);
-  color: var(--c-0c1826);
+  color: var(--color-warmup-tint);
 }
 .set-row .kind.twarm {
   color: var(--set-warmup);
@@ -23413,7 +23413,7 @@ body {
 }
 .se-rpe button.on {
   background: var(--color-accent);
-  color: var(--c-1b1407);
+  color: var(--color-on-accent);
   font-weight: 700;
 }
 .se-load {
@@ -23867,7 +23867,7 @@ body {
 /* ---- Set editor cards: selected states win over the card's dark fills ---- */
 .se-card .se-rpe button.on {
   background: var(--color-accent);
-  color: var(--c-1b1407);
+  color: var(--color-on-accent);
 }
 .se-rpe button:first-child {
   font-size: var(--fs-13);
@@ -24257,7 +24257,7 @@ body {
   height: var(--sz-52);
   border-radius: var(--r-16);
   background: var(--color-accent);
-  color: var(--c-1b1407);
+  color: var(--color-on-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25055,7 +25055,7 @@ body {
   display: grid;
   place-items: center;
   background: var(--color-accent);
-  color: var(--c-1c1406);
+  color: var(--color-on-accent);
   font-size: var(--fs-20);
 }
 /* Info (i) on the exercise cards: one corner, one inset, on hero and tiles.
@@ -25281,7 +25281,7 @@ body {
 }
 .es-hero.warm .es-play {
   background: var(--set-warmup);
-  color: var(--c-0b1a2a);
+  color: var(--color-warmup-tint);
 }
 .es-tile.warm .es-tile-main {
   border-color: color-mix(in srgb, var(--set-warmup) 55%, transparent);
