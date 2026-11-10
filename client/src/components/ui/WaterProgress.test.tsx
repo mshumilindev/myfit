@@ -53,6 +53,38 @@ describe('WaterProgress', () => {
     // rolled a quarter turn in the screen plane (gamma 90, beta 0): gravity along the screen's side
     expect(Math.abs(gravityAngle(90, 0) ?? 0)).toBeCloseTo(Math.PI / 2);
   });
+  it('draws the water on the canvas; 0 % is an empty tank', () => {
+    const fill = vi.fn();
+    const ctx = {
+      setTransform: vi.fn(),
+      clearRect: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      closePath: vi.fn(),
+      fill,
+      globalAlpha: 1,
+      fillStyle: '',
+    };
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+      ctx as unknown as CanvasRenderingContext2D,
+    );
+    const frames: FrameRequestCallback[] = [];
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => frames.push(cb));
+    vi.stubGlobal('cancelAnimationFrame', () => undefined);
+    const run = () => frames.splice(0).forEach((cb) => cb(16));
+    const full = render(<WaterProgress value={40} label="x" tilt={false} />);
+    run();
+    expect(fill).toHaveBeenCalledTimes(2); // two wave layers
+    full.unmount();
+    frames.length = 0; // the first tank's next frame is gone with it
+    fill.mockClear();
+    render(<WaterProgress value={0} label="x" tilt={false} />);
+    run();
+    expect(ctx.clearRect).toHaveBeenCalled();
+    expect(fill).not.toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
   it('shows no permission button without a sensor', () => {
     render(<WaterProgress value={50} label="x" />);
     expect(screen.queryAllByRole('button')).toHaveLength(0);
