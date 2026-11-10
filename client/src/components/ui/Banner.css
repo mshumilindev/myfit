@@ -11,7 +11,7 @@
   --gem-body: var(--color-accent-200);
   --gem-line: var(--color-accent-700);
   --gem-icon: var(--color-accent);
-  --gem-cta-text: var(--color-accent-900);
+  --gem-cta-text: var(--color-on-accent);
 
   position: relative;
   border-radius: var(--radius-lg);

@@ -103,7 +103,7 @@ html[data-theme='halloween'] {
   --color-note-tint: var(--c-322818);
   --color-note-text: var(--c-ddbc75);
   --color-note-line: var(--c-7b622d);
-  --color-on-accent: var(--c-f4e9de);
+  --color-on-accent: var(--c-ffffff);
   /* accent-derived glass: full accent tint on a warm brown base (was inline in glass.css) */
   --glass-accent-k: 0;
   --glass-base-1: var(--c-171316);

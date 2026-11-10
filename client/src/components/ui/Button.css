@@ -52,7 +52,7 @@
 
 /* Variants — colours from token families only */
 .uibtn--primary {
-  color: var(--t-base, var(--color-accent));
+  color: var(--t-text, var(--color-accent-text));
   border-color: var(--t-base, var(--color-accent));
   --bd: var(--t-base, var(--color-accent));
 }
@@ -72,7 +72,7 @@
   padding: var(--s-4) var(--s-12);
   border-color: transparent;
   --bd: initial;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   font-size: var(--fs-13);
   font-weight: 500;
   /* A link is text: a long (translated) one wraps inside its container instead of pushing the page wide (SPO-28). */

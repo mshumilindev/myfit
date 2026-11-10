@@ -100,7 +100,7 @@ button.uichip {
 .uichip-n {
   flex: none;
   font-variant-numeric: tabular-nums;
-  opacity: 0.75;
+  opacity: 0.88;
 }
 
 /* Wrapping group; `--scroll` = one row that scrolls sideways (fades at the end), `--fill` = equal columns */

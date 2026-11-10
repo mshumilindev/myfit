@@ -12,7 +12,7 @@
   --t-tint: var(--color-accent-tint);
   --t-text: var(--color-accent-text);
   --t-line: var(--color-accent-line);
-  --t-on: var(--color-bg);
+  --t-on: var(--color-on-accent);
 }
 .uit--rest {
   --t-base: var(--color-rest);
@@ -110,21 +110,21 @@
   --t-tint: var(--color-apex-tint);
   --t-text: var(--color-apex-text);
   --t-line: var(--color-apex-line);
-  --t-on: var(--color-apex-tint);
+  --t-on: var(--color-on-accent);
 }
 .uit--learn {
   --t-base: var(--color-learn);
   --t-tint: var(--color-learn-tint);
   --t-text: var(--color-learn-text);
   --t-line: var(--color-learn-line);
-  --t-on: var(--color-learn-tint);
+  --t-on: var(--color-on-accent);
 }
 .uit--atlas {
   --t-base: var(--color-atlas);
   --t-tint: var(--color-atlas-tint);
   --t-text: var(--color-atlas-text);
   --t-line: var(--color-atlas-line);
-  --t-on: var(--color-atlas-tint);
+  --t-on: var(--color-on-accent);
 }
 
 /* Sub-app identity families — fixed, never follow the active app's accent re-skin. */
@@ -133,7 +133,7 @@
   --t-tint: var(--color-gym-tint);
   --t-text: var(--color-gym-text);
   --t-line: var(--color-gym-line);
-  --t-on: var(--color-bg);
+  --t-on: var(--color-on-accent);
 }
 .uit--people {
   --t-base: var(--color-people);
@@ -156,7 +156,7 @@
   --t-tint: var(--color-note-tint);
   --t-text: var(--color-note-text);
   --t-line: var(--color-note-line);
-  --t-on: var(--color-bg);
+  --t-on: var(--color-on-accent);
 }
 
 /* Coach app identity — fixed tourmaline, never follows the active app's accent re-skin. */
@@ -165,5 +165,5 @@
   --t-tint: var(--color-coach-tint);
   --t-text: var(--color-coach-text);
   --t-line: var(--color-coach-line);
-  --t-on: var(--color-bg);
+  --t-on: var(--color-on-accent);
 }

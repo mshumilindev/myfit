@@ -1541,7 +1541,7 @@ export function SessionView(props: {
               as="button"
               pad="none"
               emphasis="quiet"
-              className={`tb-tile-main${photoTintClass}${tintOf(p)}`}
+              className={`tb-tile-main dk-island${photoTintClass}${tintOf(p)}`}
               onClick={() => openPick(p)}
             >
               <span className="tb-img-wrap">
@@ -2000,7 +2000,7 @@ export function SessionView(props: {
               </div>
             </div>
           )}
-          <div className="es-circuit">
+          <div className="es-circuit dk-island">
             <span className="es-loop" aria-hidden>
               <Icon name="arrows-clockwise" />
             </span>

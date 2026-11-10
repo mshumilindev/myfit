@@ -91,7 +91,7 @@ html[data-theme='christmas'] {
   --color-neutral-300: var(--c-c4d2cb);
   --color-neutral-400: var(--c-98a99b);
   --color-neutral-500: var(--c-849b8d);
-  --color-neutral-600: var(--c-5d7a66);
+  --color-neutral-600: var(--c-88a592);
   --color-neutral-700: var(--c-3b5546);
   --color-neutral-800: var(--c-24402f);
   --color-neutral-900: var(--c-162b20);
@@ -103,7 +103,7 @@ html[data-theme='christmas'] {
   --color-note-tint: var(--c-251e0d);
   --color-note-text: var(--c-f1d98f);
   --color-note-line: var(--c-8a6f3a);
-  --color-on-accent: var(--c-f4ecd8);
+  --color-on-accent: var(--c-ffffff);
   /* accent-derived glass: full accent tint on a warm brown base (was inline in glass.css) */
   --glass-accent-k: 0;
   --glass-base-1: var(--c-0d2219);

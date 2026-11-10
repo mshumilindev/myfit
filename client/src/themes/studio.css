@@ -2,7 +2,8 @@
    Dark is the base block; light is the [data-mode='light'] block; the other ten accents live in _axes.css.
    Generated from the approved palette, then maintained by hand. */
 
-html[data-theme='studio'] {
+html[data-theme='studio'],
+html[data-theme='studio'] .dk-island {
   --color-bg: var(--c-0f1417);
   --color-surface: var(--c-192024);
   --color-surface-2: var(--c-252b2f);
@@ -436,4 +437,23 @@ html[data-theme='studio'].theme-nutrition {
 html[data-theme='studio'].theme-coach {
   --lava-2: transparent;
   --lava-3: transparent;
+}
+
+/* A dark island on a light page (a photo tile under a dark scrim, a fixed night card): the class re-applies the
+   dark token set above to its subtree, so text, tones and kit controls inside read as in dark mode. */
+.dk-island {
+  color: var(--color-text);
+}
+
+/* The app launcher plate is "darker than the page" so the tiles stand out; on the light page that is a slightly
+   darker light grey (the dark plate left the title and sub-lines unreadable). */
+html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) :is(.shell-sheet, .uimore) {
+  --shell-sheet-base: color-mix(in srgb, var(--color-bg) 94%, black);
+}
+
+/* Photographs and avatars are blended with `lighten` (a dark-page effect): on a light page the lighter of
+   photo and page wins, so the picture vanishes. A light page shows them as they are. */
+html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) .lighten,
+html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) .session-top.live-toolbar::before {
+  mix-blend-mode: normal;
 }

@@ -1,5 +1,6 @@
 /* Studio — generated (studio-gen): titan */
-html[data-theme='studio'][data-accent='titan'] {
+html[data-theme='studio'][data-accent='titan'],
+html[data-theme='studio'][data-accent='titan'] .dk-island {
   --color-accent-100: var(--c-fafbfc);
   --color-accent-200: var(--c-f2f5f8);
   --color-accent-300: var(--c-eaeff4);

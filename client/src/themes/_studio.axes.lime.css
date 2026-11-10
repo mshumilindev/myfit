@@ -1,5 +1,6 @@
 /* Studio — generated (studio-gen): lime */
-html[data-theme='studio'][data-accent='lime'] {
+html[data-theme='studio'][data-accent='lime'],
+html[data-theme='studio'][data-accent='lime'] .dk-island {
   --color-accent-100: var(--c-f7ffe0);
   --color-accent-200: var(--c-ebffb3);
   --color-accent-300: var(--c-dfff87);
@@ -111,15 +112,16 @@ html[data-theme='studio'][data-mode='light'][data-accent='lime']:not([data-sleep
   --color-accent-900: var(--c-e0e7e1);
   --color-accent-950: var(--c-e0e7e1);
   --color-accent: var(--c-9bd600);
+  --color-accent-text: var(--c-466000);
   --color-accent-line: var(--c-c3e081);
   --color-on-accent: var(--c-10140a);
   --color-gym: var(--c-9bd600);
   --color-gym-tint: var(--c-e0e7e1);
-  --color-gym-text: var(--c-506e00);
+  --color-gym-text: var(--c-466000);
   --color-gym-line: var(--c-c3e081);
   --color-note: var(--c-9bd600);
   --color-note-tint: var(--c-e0e7e1);
-  --color-note-text: var(--c-5b7e00);
+  --color-note-text: var(--c-466000);
   --color-note-line: var(--c-cfe3a8);
   --glass-hero-base-1: var(--c-f1f7eb);
   --glass-hero-base-2: var(--c-e9f4d7);
@@ -180,19 +182,19 @@ html[data-theme='studio'][data-mode='light'][data-accent='lime']:not([data-sleep
   --skin-coach-900: var(--c-e0e7e1);
   --color-apex: var(--c-9bd600);
   --color-apex-tint: var(--c-e0e7e1);
-  --color-apex-text: var(--c-506e00);
+  --color-apex-text: var(--c-466000);
   --color-apex-line: var(--c-c3e081);
   --color-learn: var(--c-9bd600);
   --color-learn-tint: var(--c-e0e7e1);
-  --color-learn-text: var(--c-506e00);
+  --color-learn-text: var(--c-466000);
   --color-learn-line: var(--c-c3e081);
   --color-coach: var(--c-9bd600);
   --color-coach-tint: var(--c-e0e7e1);
-  --color-coach-text: var(--c-506e00);
+  --color-coach-text: var(--c-466000);
   --color-coach-line: var(--c-c3e081);
   --color-atlas: var(--c-9bd600);
   --color-atlas-tint: var(--c-e0e7e1);
-  --color-atlas-text: var(--c-506e00);
+  --color-atlas-text: var(--c-466000);
   --color-atlas-line: var(--c-c3e081);
   --skin-coach-tint: var(--c-e0e7e1);
   --skin-coach-text: var(--c-506e00);

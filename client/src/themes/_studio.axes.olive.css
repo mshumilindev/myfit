@@ -1,5 +1,6 @@
 /* Studio — generated (studio-gen): olive */
-html[data-theme='studio'][data-accent='olive'] {
+html[data-theme='studio'][data-accent='olive'],
+html[data-theme='studio'][data-accent='olive'] .dk-island {
   --color-accent-100: var(--c-f2f4e9);
   --color-accent-200: var(--c-e0e3c9);
   --color-accent-300: var(--c-ced3aa);
@@ -111,15 +112,16 @@ html[data-theme='studio'][data-mode='light'][data-accent='olive']:not([data-slee
   --color-accent-900: var(--c-dee3e3);
   --color-accent-950: var(--c-dee3e3);
   --color-accent: var(--c-5f6b2f);
+  --color-accent-text: var(--c-2b3015);
   --color-accent-line: var(--c-a8b096);
   --color-on-accent: var(--c-ffffff);
   --color-gym: var(--c-5f6b2f);
   --color-gym-tint: var(--c-dee3e3);
-  --color-gym-text: var(--c-454e22);
+  --color-gym-text: var(--c-2b3015);
   --color-gym-line: var(--c-a8b096);
   --color-note: var(--c-5f6b2f);
   --color-note-tint: var(--c-dee3e3);
-  --color-note-text: var(--c-383f1c);
+  --color-note-text: var(--c-2b3015);
   --color-note-line: var(--c-bec5b6);
   --glass-hero-base-1: var(--c-edf0ee);
   --glass-hero-base-2: var(--c-e1e5de);
@@ -180,19 +182,19 @@ html[data-theme='studio'][data-mode='light'][data-accent='olive']:not([data-slee
   --skin-coach-900: var(--c-dee3e3);
   --color-apex: var(--c-5f6b2f);
   --color-apex-tint: var(--c-dee3e3);
-  --color-apex-text: var(--c-454e22);
+  --color-apex-text: var(--c-2b3015);
   --color-apex-line: var(--c-a8b096);
   --color-learn: var(--c-5f6b2f);
   --color-learn-tint: var(--c-dee3e3);
-  --color-learn-text: var(--c-454e22);
+  --color-learn-text: var(--c-2b3015);
   --color-learn-line: var(--c-a8b096);
   --color-coach: var(--c-5f6b2f);
   --color-coach-tint: var(--c-dee3e3);
-  --color-coach-text: var(--c-454e22);
+  --color-coach-text: var(--c-2b3015);
   --color-coach-line: var(--c-a8b096);
   --color-atlas: var(--c-5f6b2f);
   --color-atlas-tint: var(--c-dee3e3);
-  --color-atlas-text: var(--c-454e22);
+  --color-atlas-text: var(--c-2b3015);
   --color-atlas-line: var(--c-a8b096);
   --skin-coach-tint: var(--c-dee3e3);
   --skin-coach-text: var(--c-454e22);
