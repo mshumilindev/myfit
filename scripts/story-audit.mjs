@@ -9,6 +9,8 @@
  *   label-wrapped   a button / tab / chip / segmented label (--headings 1: also h1-h3) that falls onto a second line (SPO-62: translated
  *                   strings are longer; a label meant for one line must still fit on it)
  *   shadow-clipped  a box-shadow cut off by an ancestor with overflow (SPO-11: the edge of the shadow looks sawn off)
+ *   row-off-centre  the Restless/OK/Good row is not on the centre axis of the screen's centred text (SPO-472/473)
+ *   tile-clipped    a muscle-group tile whose muscle list is cut with an ellipsis, or whose TODAY tab is cut by an ancestor (SPO-485)
  * Exit code 1 when anything is found, so CI can gate on it.
  *
  *   npm run build-storybook && npx http-server client/storybook-static -p 6006 &
@@ -90,6 +92,33 @@ const probe = (withHeadings) => {
         'text-clipped',
         `${String(el.className).slice(0, 40)} "${el.textContent.trim().slice(0, 40)}"`,
       ]);
+  }
+  // SPO-473: on the centred "Sleep logged" screen the quality row shares the centre axis with the title above it.
+  for (const row of document.querySelectorAll('.sleep-screen .sleep-q-row .uiseg')) {
+    const h = document.querySelector('.sleep-screen .sleep-h1');
+    if (!h) continue;
+    const a = row.getBoundingClientRect();
+    const b = h.getBoundingClientRect();
+    const off = Math.abs(a.left + a.width / 2 - (b.left + b.width / 2));
+    if (off > 1)
+      found.push(['row-off-centre', `quality row is ${Math.round(off)}px off the title axis`]);
+  }
+  // SPO-485: the muscle list in a group tile is content (it wraps, the tile grows); the TODAY tab sits above the tile's edge.
+  for (const el of document.querySelectorAll('.xp-fam .xp-fam-subs')) {
+    if (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)
+      found.push(['tile-clipped', `muscle list "${el.textContent.trim().slice(0, 40)}" is cut`]);
+  }
+  for (const el of document.querySelectorAll('.xp-fam .xp-today')) {
+    const r = el.getBoundingClientRect();
+    for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+      const ac = getComputedStyle(a);
+      if (ac.overflowY === 'visible' && ac.overflowX === 'visible') continue;
+      const ar = a.getBoundingClientRect();
+      if (r.top < ar.top - 1 || r.left < ar.left - 1 || r.right > ar.right + 1) {
+        found.push(['tile-clipped', `TODAY tab cut by .${String(a.className).slice(0, 30)}`]);
+        break;
+      }
+    }
   }
   const LABELS =
     '.uibtn:not(.uibtn--link) .uibtn-label, .uichip-l, .uiseg-l, [role=tab]:not(.uicard), .tabbar button > span:not(.tabbar-ico)';

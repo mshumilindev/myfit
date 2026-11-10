@@ -251,16 +251,9 @@ span.xp-noimg {
   font-weight: 600;
   white-space: nowrap;
 }
-.xp-today.corner {
-  /* a tab on the tile's (brass) top edge — never collides with the name */
-  position: absolute;
-  top: -8px;
-  right: 10px;
-  font-size: var(--fs-10);
-  padding: var(--s-2) var(--s-6);
-  box-shadow: 0 0 0 2px var(--color-bg);
-}
 .xp-today {
+  /* A line of its own above the name inside the tile (SPO-485): a tab hanging over the edge was cut by a tile's
+     own clip (Cyberpunk's cut corners), and one in the corner covered the name in longer locales. */
   padding: var(--s-2) var(--s-6);
   border-radius: var(--r-6);
   background: var(--color-accent-900);
@@ -269,6 +262,9 @@ span.xp-noimg {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+.xp-fam-body > .xp-today {
+  align-self: flex-start;
 }
 .xp-fam-state {
   display: flex;
@@ -286,9 +282,9 @@ span.xp-noimg {
 .xp-fam-subs {
   font-size: var(--fs-12);
   color: var(--color-neutral-600);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* The whole muscle list is content, not a label: it wraps and the tile grows (SPO-485), never "Upper chest · Lower …". */
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* group screen */

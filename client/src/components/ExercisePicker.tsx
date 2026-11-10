@@ -531,7 +531,6 @@ export function ExercisePicker(props: ExercisePickerProps) {
         key={f.id}
         onClick={() => openFamily(f.id)}
       >
-        {today && <span className="xp-today corner">{t.pickToday}</span>}
         <FamilyFigure
           groups={f.groups}
           color={color}
@@ -542,6 +541,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
           zoom
         />
         <span className="xp-fam-body">
+          {today && <span className="xp-today">{t.pickToday}</span>}
           <span className="xp-fam-name">{t.pickFamilies[f.id]}</span>
           {!noFatigue && (
             <span className="xp-fam-state" title={whyLine(f.groups)}>
