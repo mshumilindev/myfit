@@ -17107,7 +17107,11 @@ html[data-theme] .apx-streak-n {
       color-mix(in srgb, var(--color-accent) 22%, transparent),
       transparent 60%
     ),
-    linear-gradient(160deg, color-mix(in srgb, var(--color-accent) 8%, var(--color-surface)) 0%, var(--color-bg) 62%);
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-accent) 8%, var(--color-surface)) 0%,
+      var(--color-bg) 62%
+    );
   --rc-replay:
     radial-gradient(
       130% 90% at 82% 4%,
@@ -18393,7 +18397,11 @@ html[data-theme] .apx-streak-n {
       color-mix(in srgb, var(--color-accent) 16%, transparent),
       transparent 60%
     ),
-    linear-gradient(160deg, color-mix(in srgb, var(--color-accent) 8%, var(--color-surface)) 0%, var(--color-bg) 62%);
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-accent) 8%, var(--color-surface)) 0%,
+      var(--color-bg) 62%
+    );
 }
 
 /* --- shared marks --------------------------------------------------------- */

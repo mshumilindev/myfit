@@ -454,6 +454,7 @@ html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) :is(.shel
 /* Photographs and avatars are blended with `lighten` (a dark-page effect): on a light page the lighter of
    photo and page wins, so the picture vanishes. A light page shows them as they are. */
 html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) .lighten,
-html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) .session-top.live-toolbar::before {
+html[data-theme='studio'][data-mode='light']:not([data-sleep='night'])
+  .session-top.live-toolbar::before {
   mix-blend-mode: normal;
 }
