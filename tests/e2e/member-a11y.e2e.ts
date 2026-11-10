@@ -41,6 +41,14 @@ for (const theme of THEMES) {
           localStorage.setItem('spotter.consentVerified', consent!);
           localStorage.setItem('gym.theme', t!);
           localStorage.setItem('gym.modePref', m!);
+          // looks other than Brass Glass are installed add-ons (SPO-500): the harness installs them
+          localStorage.setItem(
+            'spotter.addons',
+            JSON.stringify({
+              list: ['theme-brass-glass', 'theme-cyberpunk', 'holiday-themes'],
+              updatedAt: 1,
+            }),
+          );
         },
         [CONSENT_VERIFIED, theme, mode],
       );

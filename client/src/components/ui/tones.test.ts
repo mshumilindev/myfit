@@ -1,8 +1,12 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { TONES, toneClass } from './tones';
 import { kitCss, stylesCss } from './readCss';
 
-const STYLES = stylesCss();
+// the base look's tokens live in its theme file (themes/glass.css), after the :root block of styles.css
+const GLASS = readFileSync(join(__dirname, '..', '..', 'themes', 'glass.css'), 'utf8');
+const STYLES = `${stylesCss()}\n${GLASS}`;
 const TONES_CSS = kitCss('tones');
 const BADGE_CSS = kitCss('Badge');
 
@@ -95,8 +99,8 @@ describe('coach tone family', () => {
 describe('badge colours (R-FE-010)', () => {
   const pairs: Record<string, [string, string]> = {
     danger: ['--color-on-solid', '--color-danger-solid'],
-    accent: ['#201a0e', '--color-accent'],
-    neutral: ['--color-on-solid', '--color-neutral-700'],
+    accent: ['--color-on-accent', '--color-accent'],
+    neutral: ['--color-text', '--color-neutral-700'],
   };
   it.each(Object.entries(pairs))('%s badge ink on fill is >= 4.5:1', (_n, [ink, bg]) => {
     expect(contrast(ink.startsWith('#') ? ink : token(ink), token(bg))).toBeGreaterThanOrEqual(4.5);
@@ -105,7 +109,7 @@ describe('badge colours (R-FE-010)', () => {
   it('badge CSS uses exactly these tokens (so the test checks the real colours)', () => {
     expect(BADGE_CSS).toContain('var(--color-danger-solid)');
     expect(BADGE_CSS).toContain('var(--color-on-solid)');
-    expect(BADGE_CSS).toContain('#201a0e');
+    expect(BADGE_CSS).toContain('var(--color-on-accent)');
     expect(BADGE_CSS).toContain('var(--color-neutral-700)');
   });
 
