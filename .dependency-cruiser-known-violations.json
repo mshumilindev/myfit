@@ -3154,31 +3154,6 @@
   {
     "type": "cycle",
     "from": "client/src/sessionBuilder.ts",
-    "to": "client/src/playbook.ts",
-    "unresolvedTo": "./playbook",
-    "dependencyTypes": ["local", "import"],
-    "rule": {
-      "severity": "error",
-      "name": "no-circular"
-    },
-    "cycle": [
-      {
-        "name": "client/src/playbook.ts",
-        "dependencyTypes": ["local", "import"]
-      },
-      {
-        "name": "client/src/store.ts",
-        "dependencyTypes": ["local", "import"]
-      },
-      {
-        "name": "client/src/sessionBuilder.ts",
-        "dependencyTypes": ["local", "type-only", "import"]
-      }
-    ]
-  },
-  {
-    "type": "cycle",
-    "from": "client/src/sessionBuilder.ts",
     "to": "client/src/progression.ts",
     "unresolvedTo": "./progression",
     "dependencyTypes": ["local", "import"],
