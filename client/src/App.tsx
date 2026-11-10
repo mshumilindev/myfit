@@ -2,7 +2,7 @@ import { useActivitiesOn } from './addons/activitiesGate';
 import { useGoalsOn, usePlaybookOn } from './addons/featureGates';
 import { isProgramsEditorHash } from './views/programs/programsRoute';
 import { getSyncMeta } from './syncMeta';
-import { pushState, refreshPush, setAppBadge } from './push';
+import { refreshPush, setAppBadge } from './push';
 import { useStoredConditionLimits } from './healthBuild';
 import { setProgressionEffects } from './progression';
 import { ScreenSkeleton } from './components/ui/Skeletons';
@@ -104,6 +104,8 @@ import { currentHash, replaceHash, setHash } from './route';
 import { coachEntryHash } from './coach/routes';
 import { defaultApp } from './addons/defaultApp';
 import { useAddonOrBase } from './addons/enabledSet';
+import { AtlasOutboxLazy } from './atlas/AtlasOutboxLazy';
+import { useAtlasOutboxClear } from './atlas/useAtlasOutboxClear';
 import { useAddonRuntime } from './addons/useAddonRuntime';
 import { apexMastery } from './views/apexMastery';
 import { isStoreHash, StoreScreen, useRoleWithStore } from './addonStore/StoreEntry';
@@ -134,9 +136,6 @@ const SessionView = lazy(() =>
 );
 const SessionBuilderView = lazy(() =>
   import('./views/SessionBuilderView').then((module) => ({ default: module.SessionBuilderView })),
-);
-const AtlasOutboxHost = lazy(() =>
-  import('./atlas/AtlasOutboxHost').then((module) => ({ default: module.AtlasOutboxHost })),
 );
 const ActivityView = lazy(() =>
   import('./views/ActivityView').then((module) => ({ default: module.ActivityView })),
@@ -838,17 +837,8 @@ function AppMain() {
   useEffect(() => {
     setAppBadge(notifUnread);
   }, [notifUnread]);
-  // Atlas's planned pushes (skipped day, Sunday review) → the server outbox.
-  // Atlas not installed: nothing is planned and what was queued is cleared (an empty list), once, without loading Atlas.
-  useEffect(() => {
-    if (atlasOn || !authed || pushState() !== 'on') return;
-    const id = window.setTimeout(() => {
-      void import('./atlas/schedule')
-        .then((m) => m.syncOutbox([]))
-        .catch((err) => console.warn('atlas: outbox sync failed', err));
-    }, 3000);
-    return () => window.clearTimeout(id);
-  }, [authed, atlasOn]);
+  // Atlas's planned pushes → the server outbox: planned by the lazy AtlasOutboxLazy below while installed, cleared here when not.
+  useAtlasOutboxClear(atlasOn, authed);
   // Keep this device's push token fresh (FCM rotates it; iOS can drop it).
   useEffect(() => {
     if (authed) void refreshPush(locale);
@@ -1833,11 +1823,7 @@ function AppMain() {
 
   return (
     <div className="app">
-      {atlasOn && (
-        <Suspense fallback={null}>
-          <AtlasOutboxHost authed={authed} store={store} locale={locale} t={t} />
-        </Suspense>
-      )}
+      {atlasOn && <AtlasOutboxLazy authed={authed} store={store} locale={locale} t={t} />}
       {nightLive ? (
         <SpotterSky />
       ) : (
