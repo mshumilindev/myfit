@@ -17,7 +17,8 @@ import type { LocaleId } from '../i18n';
 import type { TodayStrings } from './strings';
 import { BODY_WIDGETS } from './widgets/body';
 import { TRAINING_WIDGETS } from './widgets/training';
-import { APEX_WIDGETS } from './widgets/apex';
+import { APEX_WIDGET_META } from './widgets/apex.meta';
+import { lazyWidgets } from './lazyWidgets';
 import { BODY_PLUS_WIDGETS } from './widgets/bodyplus';
 import { LEARN_ATLAS_WIDGETS } from './widgets/learnatlas';
 import { DISCOVER_WIDGETS } from './widgets/discover';
@@ -79,6 +80,11 @@ export interface WidgetDef {
   name: (tw: TodayStrings) => string;
   render: (size: WidgetSize, ctx: WidgetCtx) => ReactNode;
 }
+
+/** Apex widgets: metadata here, bodies in the lazy `widgets/apex` chunk (only with Apex installed). */
+const APEX_WIDGETS: WidgetDef[] = lazyWidgets(APEX_WIDGET_META, () =>
+  import('./widgets/apex').then((m) => m.APEX_WIDGETS),
+);
 
 const ALL: WidgetDef[] = [
   ...TRAINING_WIDGETS,

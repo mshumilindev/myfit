@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { setAtlasInstalled } from '../atlas/aiConsent';
 import { reconcileAtlasConsentAfter, watchAtlasRemoval } from '../atlas/withdrawOnRemove';
-import { useChallenges } from '../challenges';
+import { useChallenges } from '../challengesState';
 import { getStoredUsage, syncSleepAutoQueue, whenAccountLoaded, whenPrefsLoaded } from '../store';
 import { getRole } from '../api';
 import { auth } from '../firebase';

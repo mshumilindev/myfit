@@ -53,7 +53,8 @@ import { HalloweenScene } from './components/HalloweenScene';
 import { SleepAutomation, SleepPauseController } from './components/SleepAutomation';
 import { SleepHero } from './components/SleepHero';
 import { useT } from './i18n';
-import { computeMastery, rankIndexForRating, type MasteryResult } from './mastery';
+import type { MasteryResult } from './mastery';
+import { useApexNotifRows } from './notificationsApexLazy';
 import { Icon, UndoSnackbar, Toast, UpdatePlate, type SnackState, type ToastState } from './ui';
 import { useEdgeSwipeBack } from './edgeSwipeBack';
 import { isUpdateReady, subscribeUpdateReady, reloadToLatest } from './pwaUpdate';
@@ -785,18 +786,10 @@ function AppMain() {
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
     if (!apexOn || !masteryOn) return;
-    const m = computeMastery(store, Date.now(), {
-      trainingSinceYear: store.mastery.sinceYear,
-      trainingPattern: store.mastery.pattern,
+    void import('./masteryRankUp').then(({ checkRankUp }) => {
+      const m = checkRankUp(store, setMasterySeenRating);
+      if (m) queueMicrotask(() => setRankUp(m));
     });
-    if (m.calibrating) return;
-    const seen = store.mastery.seenRating;
-    if (seen == null) {
-      setMasterySeenRating(m.rating);
-      return;
-    }
-    if (m.rankIndex > rankIndexForRating(seen)) queueMicrotask(() => setRankUp(m));
-    if (m.rating !== seen) setMasterySeenRating(m.rating);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const nightLive = liveSleep(store.sleeps);
@@ -810,21 +803,15 @@ function AppMain() {
   }, [nightLive]);
   // Atlas's notes live in his own thread (unread count on his bubble in the
   // stories strip) — not in the bell.
+  const apexRows = useApexNotifRows(apexOn, store, notifNow, t, challenges, {
+    mastery: apexOn,
+    ranks: ranksOn,
+    awards: awardsOn,
+  });
   const rawNotifs = useMemo(
-    () =>
-      computeNotifs(store, notifNow, t, challenges, apexOn, { ranks: ranksOn, awards: awardsOn }),
+    () => computeNotifs(store, notifNow, t, apexRows),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      store.workouts,
-      store.bodyMetrics,
-      store.exerciseLoadTypes,
-      challenges,
-      notifNow,
-      t,
-      apexOn,
-      ranksOn,
-      awardsOn,
-    ],
+    [store.workouts, store.bodyMetrics, store.exerciseLoadTypes, notifNow, t, apexRows],
   );
   // Rows from my trainer (M7) come from the lazy client bridge; empty unless the `coach` flag is on and I have a trainer.
   const clientShared = useClientShared();

@@ -10,23 +10,13 @@
  */
 import { weekStartOf as trainingWeekStart } from './weekStart';
 import { useSyncExternalStore } from 'react';
-import {
-  useStore,
-  isStrengthExercise,
-  topSet,
-  setTopWeight,
-  latestWeight,
-  consistencyStreak,
-} from './store';
-import { computeStandards } from './standards';
-import { computeFeats } from './feats';
+import { useStore, isStrengthExercise, topSet, setTopWeight, consistencyStreak } from './store';
 import { computeTrends } from './trends';
 import { VOLUME_MUSCLES, classifyZone } from './volume';
 import { recentLoadSets } from './recovery';
 import { landmarkFor } from './personalize';
 import { fmtKg, fmtShortDate, fmtWeekday, type LocaleId } from './i18n';
 import type { useT } from './i18n';
-import { templateById, type ActiveChallenge } from './challenges';
 
 type T = ReturnType<typeof useT>['t'];
 
@@ -63,34 +53,13 @@ function weekKey(ts: number): number {
 
 type Store = ReturnType<typeof useStore>;
 
-/** Compute the current milestone feed, newest first (capped). */
-export function computeNotifs(
-  store: Store,
-  now: number,
-  t: T,
-  challenges: ActiveChallenge[] = [],
-  /** Mastery add-on installed (SPO-518): off = no challenge, standard or feat rows (they all open Apex). */
-  mastery = true,
-  /** Apex modules: ranks and awards each switch their own rows off (default: follow `mastery`). */
-  modules: { ranks?: boolean; awards?: boolean } = {},
-): Notif[] {
+/**
+ * Compute the current milestone feed, newest first (capped). The Apex rows (challenges, standards, feats) come from
+ * `notificationsApex` (lazy chunk, loaded only with Apex installed) and arrive as `apexRows`.
+ */
+export function computeNotifs(store: Store, now: number, t: T, apexRows: Notif[] = []): Notif[] {
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
-  const out: Notif[] = [];
-
-  // --- Completed challenges (posted when a challenge is finished).
-  for (const ac of mastery ? challenges : []) {
-    if (ac.status !== 'done') continue;
-    const tmpl = templateById(ac.templateId);
-    if (!tmpl) continue;
-    out.push({
-      id: `challenge:${ac.id}`,
-      kind: 'challenge',
-      ts: ac.completedAt ?? now,
-      title: t.notifChallengeTitle(tmpl.title(t, ac.target)),
-      subtitle: t.notifChallengeSub,
-      nav: '#/apex/challenges',
-    });
-  }
+  const out: Notif[] = [...apexRows];
 
   if (finished.length === 0) {
     out.sort((a, b) => b.ts - a.ts);
@@ -127,39 +96,6 @@ export function computeNotifs(
         bestByName.set(key, wgt);
       }
     }
-  }
-
-  // --- Strength standards: current tier per trained discipline.
-  const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? 0;
-  const sex = store.bodyMetrics.sex === 'female' ? 'F' : 'M';
-  for (const r of mastery && (modules.ranks ?? true)
-    ? computeStandards(finished, bodyKg, sex).results
-    : []) {
-    if (!r.trained || r.achievedIdx < 0) continue;
-    const tierId = r.tierIds[r.achievedIdx];
-    const tierLabel = r.system === 'rank' ? t.rankShort[tierId] : t.lvlShort[tierId];
-    out.push({
-      id: `std:${r.key}:${tierId}`,
-      kind: 'standard',
-      ts: lastWorkoutTs,
-      title: `${r.name} → ${tierLabel}`,
-      subtitle: `${fmtKg(r.best)} · ${t.notifStandardSub}`,
-      nav: `#/apex/ranks?f=std-${encodeURIComponent(r.key)}`,
-    });
-  }
-
-  // --- Achievements: every unlocked feat, dated by its unlock time.
-  const feats = mastery && (modules.awards ?? true) ? computeFeats(finished) : null;
-  for (const ach of Object.values(feats?.byGroup ?? {}).flat()) {
-    if (!ach.unlocked) continue;
-    out.push({
-      id: `feat:${ach.key}`,
-      kind: 'feat',
-      ts: ach.unlockAt ?? lastWorkoutTs,
-      title: ach.title,
-      subtitle: t.notifFeatSub,
-      nav: `#/apex/awards?f=feat-${encodeURIComponent(ach.key)}`,
-    });
   }
 
   // --- Positive trends (the good-news insights only). Dated at the last session

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setLocale, t as currentT } from './i18n';
 import { __getStateForTests, __replaceStateForTests, getStoreState } from './store';
 import type { ActiveChallenge } from './challenges';
+import { computeApexNotifs } from './notificationsApex';
 import type { Exercise, SetEntry, Workout } from './types';
 import {
   computeNotifs,
@@ -45,7 +46,16 @@ const wk = (id: string, daysAgo: number, exercises: Exercise[]): Workout => {
 const seed = (workouts: Workout[], extra: Record<string, unknown> = {}) =>
   __replaceStateForTests({ ...__getStateForTests(), workouts, activities: [], ...extra });
 const compute = (challenges: ActiveChallenge[] = []) =>
-  computeNotifs(getStoreState(), NOW, t, challenges);
+  computeNotifs(
+    getStoreState(),
+    NOW,
+    t,
+    computeApexNotifs(getStoreState(), NOW, t, challenges, {
+      mastery: true,
+      ranks: true,
+      awards: true,
+    }),
+  );
 
 let backup: StoreSnapshot;
 type StoreSnapshot = ReturnType<typeof __getStateForTests>;
