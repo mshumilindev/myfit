@@ -196,7 +196,7 @@ import { maskHealth } from './healthMask';
 import type { HealthFeature } from './legal/consents';
 import { createAlcoholCache } from './alcoholCache';
 import { alc } from './alcoholRt';
-import { onTrackerReady } from './trackerRt';
+import { isTrackerReady, onTrackerReady } from './trackerRt';
 import type { PendingCheckin, WeekActual, AlcoholEffects, AlcoholLoad, DayInput } from './alcohol';
 import { createSupplementsCache } from './supplementsCache';
 import { sup } from './supplementsRt';
@@ -567,6 +567,10 @@ onTrackerReady((id) => {
   else if (id === 'nicotine') state = { ...state, nicotine: nic.normalize(state.nicotine) };
   else return;
   emit();
+  if (id !== 'cycle') {
+    const uid = currentUid();
+    if (uid) publishCoachShare(uid, state.conditions);
+  }
 });
 /** When the vault key becomes available: open the sealed on-device supplements copy. */
 function hydrateSupplements(): void {
@@ -2963,6 +2967,23 @@ function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): 
   // Until the consent records are known nothing is published (a cold start must not blank what the coach sees), and a
   // feature without consent contributes nothing (SPO-290).
   if (!healthSnapshot().ready) return;
+  // A tracker whose code has not arrived answers neutral: publishing now would drop its section from the coach's view.
+  // Hold back while a stored sharing level is on; `onTrackerReady` re-publishes.
+  const installed = (id: string): boolean => {
+    try {
+      return addonAvailable(id);
+    } catch {
+      return false;
+    }
+  };
+  const pending = (id: string, sharing: string | undefined) =>
+    sharing !== undefined && sharing !== 'off' && !isTrackerReady(id) && installed(id);
+  if (
+    pending('alcohol', state.alcohol?.settings?.sharing) ||
+    pending('nicotine', state.nicotine?.settings?.sharing) ||
+    pending('supplements', state.supplements?.settings?.sharing)
+  )
+    return;
   const vis = exposed();
   // The general level Off is a MASTER off: a per-condition override (Full / Effects) never outlives it (B1).
   const items =

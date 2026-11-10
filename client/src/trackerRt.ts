@@ -20,7 +20,30 @@ export function onTrackerReady(cb: Listener): () => void {
   return () => listeners.delete(cb);
 }
 
+const readyIds = new Set<string>();
+
+/** Has the tracker's real code arrived? (Before that the facade answers neutral and must not be published as data.) */
+export function isTrackerReady(id: string): boolean {
+  return readyIds.has(id);
+}
+
 /** The boot module of a tracker finished importing all its modules. */
 export function trackerReady(id: string): void {
+  readyIds.add(id);
   listeners.forEach((l) => l(id));
+}
+
+/**
+ * Fetch a tracker's lazy chunk. A failed import (offline, stale deploy) is logged and retried once when the
+ * connection returns; the facade stays neutral meanwhile, and the coach share is held back (see `isTrackerReady`).
+ */
+export function loadTracker(id: string, importer: () => Promise<unknown>): void {
+  const attempt = (retry: boolean): void => {
+    importer().catch((e: unknown) => {
+      console.warn(`[tracker:${id}] chunk failed to load`, e);
+      if (retry && typeof window !== 'undefined')
+        window.addEventListener('online', () => attempt(false), { once: true });
+    });
+  };
+  attempt(true);
 }

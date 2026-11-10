@@ -1,3 +1,4 @@
+import { loadTracker } from '../trackerRt';
 import { useEffect, useMemo } from 'react';
 import { setAtlasInstalled } from '../atlas/aiConsent';
 import { reconcileAtlasConsentAfter, watchAtlasRemoval } from '../atlas/withdrawOnRemove';
@@ -35,19 +36,19 @@ export function useAddonRuntime() {
   const alcoholOn = useAddonOrBase('alcohol');
   // The Alcohol modules are a lazy chunk fetched only while the add-on is installed (SPO-500 I8).
   useEffect(() => {
-    if (alcoholOn) void import('../alcoholBoot').catch(() => undefined);
+    if (alcoholOn) loadTracker('alcohol', () => import('../alcoholBoot'));
   }, [alcoholOn]);
   const nicotineOn = useAddonOrBase('nicotine');
   useEffect(() => {
-    if (nicotineOn) void import('../nicotineBoot').catch(() => undefined);
+    if (nicotineOn) loadTracker('nicotine', () => import('../nicotineBoot'));
   }, [nicotineOn]);
   const supplementsOn = useAddonOrBase('supplements');
   useEffect(() => {
-    if (supplementsOn) void import('../supplementsBoot').catch(() => undefined);
+    if (supplementsOn) loadTracker('supplements', () => import('../supplementsBoot'));
   }, [supplementsOn]);
   const cycleOn = useAddonOrBase('cycle');
   useEffect(() => {
-    if (cycleOn) void import('../cycleBoot').catch(() => undefined);
+    if (cycleOn) loadTracker('cycle', () => import('../cycleBoot'));
   }, [cycleOn]);
   const healthOn = useAddonOrBase('health');
   const injuryOn = useAddonOrBase('injury-log');
