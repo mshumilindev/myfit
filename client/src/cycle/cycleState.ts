@@ -3,6 +3,8 @@
  * Atlas facts, never in any note feed. Typical values only — the log is automatic, nothing is
  * entered per day.
  */
+import { cyc } from '../cycleRt';
+import { provide } from '../trackerRt';
 import { normalizeSettings, type CycleMode, type CycleSettings } from './cycleCore';
 
 /** Where a soft hint may appear. Each can be turned off on its own. */
@@ -77,3 +79,6 @@ export function withStart(starts: readonly number[], day: number): number[] {
   const next = last === undefined || day > last ? [...starts, day] : [...starts.slice(0, -1), day];
   return next.slice(-40);
 }
+
+// Late-bound runtime (SPO-500 I8): importing this module puts the real functions into the facade the store reads.
+provide(cyc, { empty: emptyCycleState, normalize: normalizeCycle, withStart, normalizeSettings });

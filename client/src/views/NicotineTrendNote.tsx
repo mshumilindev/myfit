@@ -8,8 +8,9 @@
  */
 import { Hint } from '../components/ui/Hint';
 import { useT } from '../i18n';
-import { surfaceOn } from '../nicotine';
+
 import { alc as alcRt } from '../alcoholRt';
+import { nic as nicRt } from '../nicotineRt';
 import { useAlcohol, useAlcoholEffects, useNicotine, useNicotineEffects } from '../store';
 import { SupplementTrendNote } from './SupplementNotes';
 
@@ -19,7 +20,7 @@ export function NicotineTrendNote() {
   const nicEffects = useNicotineEffects();
   const alc = useAlcohol();
   const alcEffects = useAlcoholEffects();
-  const nicOn = !!nicEffects && surfaceOn(nic.settings, 'trends');
+  const nicOn = !!nicEffects && nicRt.surfaceOn(nic.settings, 'trends');
   const alcOn = !!alcEffects && alcRt.surfaceOn(alc.settings, 'trends');
   const text = nicOn && alcOn ? t.alcFxTrendBoth : alcOn ? t.alcFxTrendNote : t.nicFxTrendNote;
   return (

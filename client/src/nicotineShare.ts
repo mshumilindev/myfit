@@ -6,6 +6,8 @@
  * It rides inside the sealed `meta/coachShare` doc next to the conditions view, so it is
  * encrypted like everything else and the server only forwards ciphertext.
  */
+import { nic } from './nicotineRt';
+import { provide } from './trackerRt';
 import {
   activeNicotineProducts,
   nicotineEffects,
@@ -84,3 +86,5 @@ export function nicotineCoachView(
     },
   };
 }
+
+provide(nic, { coachView: nicotineCoachView });

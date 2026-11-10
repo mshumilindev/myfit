@@ -199,45 +199,21 @@ import { alc } from './alcoholRt';
 import { onTrackerReady } from './trackerRt';
 import type { PendingCheckin, WeekActual, AlcoholEffects, AlcoholLoad, DayInput } from './alcohol';
 import { createSupplementsCache } from './supplementsCache';
-import { supplementsCoachView } from './supplementsShare';
-import {
-  dayKey as supplementDayKey,
-  emptySupplementState,
-  isSupplementSharing,
-  normalizeSupplementCheckins,
-  normalizeSupplementEntry,
-  normalizeSupplements,
-  pendingSupplementCheckin,
-  supplementEffectsFor,
-  supplementProteinGramsFor,
-  supplementWarnings,
-  usualTrainingStartMin,
-  type PendingSupplementCheckin,
-  type SupplementContext,
-  type SupplementEffects,
-  type SupplementWarning,
+import { sup } from './supplementsRt';
+import { dayKey as supplementDayKey } from './healthDays';
+import type {
+  PendingSupplementCheckin,
+  SupplementContext,
+  SupplementEffects,
+  SupplementWarning,
 } from './supplements';
 import { createNicotineCache } from './nicotineCache';
 import { createCycleCache } from './cycleCache';
-import {
-  emptyCycleState,
-  normalizeCycle,
-  withStart,
-  type CycleState,
-  type CycleSurface,
-} from './cycle/cycleState';
-import { MENOPAUSE_KEY, normalizeSettings, type CycleSettings } from './cycle/cycleCore';
-import { nicotineCoachView } from './nicotineShare';
-import {
-  emptyNicotineState,
-  isNicotineSharing,
-  nicotineEffects,
-  nicotineLoad,
-  normalizeNicotine,
-  normalizeNicotineProduct,
-  type NicotineEffects,
-  type NicotineLoad,
-} from './nicotine';
+import { cyc, MENOPAUSE_KEY } from './cycleRt';
+import type { CycleState, CycleSurface } from './cycle/cycleState';
+import type { CycleSettings } from './cycle/cycleCore';
+import { nic } from './nicotineRt';
+import type { NicotineEffects, NicotineLoad } from './nicotine';
 import {
   vault,
   initVault,
@@ -584,8 +560,12 @@ vault.subscribe(hydrateAlcohol);
 if (vault.materialOrNull()) hydrateAlcohol();
 // The alcohol modules are a lazy chunk (SPO-500 I8): when they arrive, rebuild the copy through the real normaliser.
 onTrackerReady((id) => {
-  if (id !== 'alcohol') return;
-  state = { ...state, alcohol: alc.normalize(state.alcohol) };
+  if (id === 'alcohol') state = { ...state, alcohol: alc.normalize(state.alcohol) };
+  else if (id === 'cycle') state = { ...state, cycle: cyc.normalize(state.cycle) };
+  else if (id === 'supplements')
+    state = { ...state, supplements: sup.normalize(state.supplements) };
+  else if (id === 'nicotine') state = { ...state, nicotine: nic.normalize(state.nicotine) };
+  else return;
   emit();
 });
 /** When the vault key becomes available: open the sealed on-device supplements copy. */
@@ -747,7 +727,7 @@ export function getNicotineLoad(): NicotineLoad {
   if (nicotineMemo === null || nicotineMemo.n !== exposed().nicotine)
     nicotineMemo = {
       n: exposed().nicotine,
-      load: nicotineLoad(exposed().nicotine?.products ?? []),
+      load: nic.load(exposed().nicotine?.products ?? []),
     };
   return nicotineMemo.load;
 }
@@ -761,7 +741,7 @@ export function getNicotineEffects(): NicotineEffects | null {
   if (effectsMemo === null || effectsMemo.n !== exposed().nicotine)
     effectsMemo = {
       n: exposed().nicotine,
-      e: exposed().nicotine ? nicotineEffects(exposed().nicotine) : null,
+      e: exposed().nicotine ? nic.effects(exposed().nicotine) : null,
     };
   return effectsMemo.e;
 }
@@ -832,8 +812,7 @@ export function useSupplements(): SupplementState {
   return useSyncExternalStore(subscribeStore, () => exposed().supplements);
 }
 /** The current supplements document, outside React (an old / missing state counts as empty). */
-export const getSupplements = (): SupplementState =>
-  exposed().supplements ?? emptySupplementState();
+export const getSupplements = (): SupplementState => exposed().supplements ?? sup.empty();
 
 /**
  * What the model needs from the rest of the store to tell a training day: today, the days with
@@ -874,13 +853,13 @@ export function getSupplementEffectsFor(
   day: DayInput,
   ctx: SupplementContext,
 ): SupplementEffects | null {
-  return supplementEffectsFor(exposed().supplements, day, ctx);
+  return sup.effectsFor(exposed().supplements, day, ctx);
 }
 export function getSupplementProteinGramsFor(day: DayInput, ctx: SupplementContext): number {
-  return supplementProteinGramsFor(exposed().supplements, day, ctx);
+  return sup.proteinGramsFor(exposed().supplements, day, ctx);
 }
 export function getSupplementWarnings(ctx: SupplementContext): SupplementWarning[] {
-  return supplementWarnings(exposed().supplements, ctx);
+  return sup.warnings(exposed().supplements, ctx);
 }
 
 /**
@@ -891,7 +870,7 @@ export function getPendingSupplementCheckin(
   ctx: SupplementContext,
   now: number = Date.now(),
 ): PendingSupplementCheckin | null {
-  return pendingSupplementCheckin(now, exposed().supplements, ctx);
+  return sup.pending(now, exposed().supplements, ctx);
 }
 
 export function subscribeStore(cb: () => void): () => void {
@@ -2988,23 +2967,23 @@ function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): 
   // The general level Off is a MASTER off: a per-condition override (Full / Effects) never outlives it (B1).
   const items =
     healthAddonsOn(healthSnapshot().on).chronic && state.conditionsShare !== 'off' ? rawItems : [];
-  const nic = nicotineCoachView(vis.nicotine);
+  const nicView = nic.coachView(vis.nicotine);
   const alcView = alc.coachView(vis.alcohol);
   const facts = getSupplementTrainingFacts();
-  const sup = supplementsCoachView(
+  const supView = sup.coachView(
     vis.supplements,
     {
       isTrainingDay: () => true,
       bodyWeightKg: facts.bodyWeightKg,
-      usualTrainingStartMin: usualTrainingStartMin(facts.workoutStarts, Date.now()),
+      usualTrainingStartMin: sup.usualStartMin(facts.workoutStarts, Date.now()),
     },
     Date.now(),
   );
   const view = {
     ...coachView(items, state.conditionsShare),
-    ...(nic ? { nicotine: nic } : {}),
+    ...(nicView ? { nicotine: nicView } : {}),
     ...(alcView ? { alcohol: alcView } : {}),
-    ...(sup ? { supplements: sup } : {}),
+    ...(supView ? { supplements: supView } : {}),
   };
   const json = JSON.stringify(view);
   if (json === lastCoachShare) return;
@@ -3121,12 +3100,12 @@ export const getCycle = (): CycleState => exposed().cycle;
 /** First setup / Save in settings: turns the feature on with these typical values. */
 export function saveCycleSettings(input: CycleSettings): HealthWriteResult {
   if (!isHealthOn('cycle')) return healthWriteDenied('cycle');
-  const settings = normalizeSettings(input);
+  const settings = cyc.normalizeSettings(input);
   commitCycle({
     enabled: true,
     settings,
     pendingDate: false,
-    starts: withStart(state.cycle.starts, settings.anchor),
+    starts: cyc.withStart(state.cycle.starts, settings.anchor),
   });
   return { ok: true };
 }
@@ -3136,9 +3115,9 @@ export function updateCycleAnchor(day: number): void {
   const cur = state.cycle.settings;
   if (!cur) return;
   commitCycle({
-    settings: normalizeSettings({ ...cur, anchor: day }),
+    settings: cyc.normalizeSettings({ ...cur, anchor: day }),
     pendingDate: false,
-    starts: withStart(state.cycle.starts, day),
+    starts: cyc.withStart(state.cycle.starts, day),
   });
 }
 
@@ -3175,7 +3154,7 @@ export function markMenopauseFromCycle(): ChronicCondition | HealthWriteDenied {
 export function deleteCycleData(): void {
   wipedAt.cycle = Math.max(Date.now(), state.cycle?.updatedAt ?? 0);
   cycleCache.clear();
-  state = { ...state, cycle: emptyCycleState(), syncStatus: bumpPending() };
+  state = { ...state, cycle: cyc.empty(), syncStatus: bumpPending() };
   persist();
   emit();
   const uid = currentUid();
@@ -3219,7 +3198,7 @@ export function saveNicotineProduct(
   input: NicotineProduct,
 ): NicotineProduct | null | HealthWriteDenied {
   if (!isHealthOn('nicotine')) return healthWriteDenied('nicotine');
-  const p = normalizeNicotineProduct(input);
+  const p = nic.normalizeProduct(input);
   if (!p) return null;
   const has = state.nicotine.products.some((x) => x.id === p.id);
   commitNicotine({
@@ -3237,7 +3216,7 @@ export function updateNicotineProduct(
 ): void {
   const cur = state.nicotine.products.find((x) => x.id === id);
   if (!cur) return;
-  const next = normalizeNicotineProduct({ ...cur, ...patch });
+  const next = nic.normalizeProduct({ ...cur, ...patch });
   if (!next || JSON.stringify(next) === JSON.stringify(cur)) return;
   commitNicotine({ products: state.nicotine.products.map((x) => (x.id === id ? next : x)) });
 }
@@ -3267,7 +3246,7 @@ export function setNicotineSurface(surface: NicotineSurface, on: boolean): void 
 
 /** What a coach may see: off (default), effects or full. */
 export function setNicotineSharing(v: NicotineSettings['sharing']): void {
-  if (!isNicotineSharing(v)) return;
+  if (!nic.isSharing(v)) return;
   updateNicotineSettings({ sharing: v });
 }
 
@@ -3275,7 +3254,7 @@ export function setNicotineSharing(v: NicotineSettings['sharing']): void {
 export function deleteNicotineData(): void {
   wipedAt.nicotine = Math.max(Date.now(), state.nicotine?.updatedAt ?? 0);
   nicotineCache.clear();
-  state = { ...state, nicotine: emptyNicotineState(), syncStatus: bumpPending() };
+  state = { ...state, nicotine: nic.empty(), syncStatus: bumpPending() };
   persist();
   emit();
   const uid = currentUid();
@@ -3454,7 +3433,7 @@ function commitSupplements(
   patch: Partial<Pick<SupplementState, 'entries' | 'settings' | 'checkins'>>,
 ): void {
   if (!isHealthOn('supplements')) return;
-  const cur = state.supplements ?? emptySupplementState();
+  const cur = state.supplements ?? sup.empty();
   const next: SupplementState = {
     ...cur,
     ...patch,
@@ -3476,9 +3455,9 @@ export function saveSupplementEntry(
   input: SupplementEntry,
 ): SupplementEntry | null | HealthWriteDenied {
   if (!isHealthOn('supplements')) return healthWriteDenied('supplements');
-  const e = normalizeSupplementEntry(input, Date.now());
+  const e = sup.normalizeEntry(input, Date.now());
   if (!e) return null;
-  const cur = (state.supplements ?? emptySupplementState()).entries;
+  const cur = (state.supplements ?? sup.empty()).entries;
   const old = cur.find((x) => x.id === e.id);
   const saved: SupplementEntry = old ? { ...e, startedAt: old.startedAt } : e;
   commitSupplements({
@@ -3495,7 +3474,7 @@ export function removeSupplementEntry(id: string): void {
 }
 
 function updateSupplementSettings(patch: Partial<SupplementSettings>): void {
-  const cur = (state.supplements ?? emptySupplementState()).settings;
+  const cur = (state.supplements ?? sup.empty()).settings;
   const settings = { ...cur, ...patch };
   if (JSON.stringify(settings) === JSON.stringify(cur)) return;
   commitSupplements({ settings });
@@ -3509,13 +3488,13 @@ export function setSupplementUseInCalculations(v: boolean): void {
 /** One per-surface switch. */
 export function setSupplementSurface(surface: SupplementSurface, on: boolean): void {
   updateSupplementSettings({
-    surfaces: { ...(state.supplements ?? emptySupplementState()).settings.surfaces, [surface]: on },
+    surfaces: { ...(state.supplements ?? sup.empty()).settings.surfaces, [surface]: on },
   });
 }
 
 /** What a coach may see: off (default), effects only, or full (names and doses). */
 export function setSupplementSharing(v: SupplementSettings['sharing']): void {
-  if (!isSupplementSharing(v)) return;
+  if (!sup.isSharing(v)) return;
   updateSupplementSettings({ sharing: v });
 }
 
@@ -3538,7 +3517,7 @@ export function answerSupplementDay(
   answer: SupplementDayAnswer,
 ): boolean {
   const key = supplementDayKey(day);
-  const cur = state.supplements ?? emptySupplementState();
+  const cur = state.supplements ?? sup.empty();
   if (!key || !isHealthOn('supplements')) return false; // false = nothing stored (never a fake "logged")
   let raw: Record<string, unknown>;
   if (answer.kind === 'none') raw = { taken: false };
@@ -3547,7 +3526,7 @@ export function answerSupplementDay(
     const known = new Set(cur.entries.map((e) => e.id));
     raw = { taken: true, entryIds: answer.entryIds.filter((id) => known.has(id)) };
   }
-  const next = normalizeSupplementCheckins({ ...cur.checkins, [key]: raw });
+  const next = sup.normalizeCheckins({ ...cur.checkins, [key]: raw });
   if (JSON.stringify(next) === JSON.stringify(cur.checkins ?? {})) return true;
   commitSupplements({ checkins: next });
   return true;
@@ -3567,7 +3546,7 @@ export function clearSupplementDay(day: string | number | Date): void {
 export function deleteSupplementData(): void {
   wipedAt.supplements = Math.max(Date.now(), state.supplements?.updatedAt ?? 0);
   supplementsCache.clear();
-  state = { ...state, supplements: emptySupplementState(), syncStatus: bumpPending() };
+  state = { ...state, supplements: sup.empty(), syncStatus: bumpPending() };
   persist();
   emit();
   const uid = currentUid();
@@ -3629,7 +3608,7 @@ export function forgetShareLevel(kind: ForgettableShare): void {
     withForcedPersist('alcohol', () => setState({ alcohol: next, syncStatus: bumpPending() }));
     writeAlcoholDoc(next);
   } else {
-    const cur = state.supplements ?? emptySupplementState();
+    const cur = state.supplements ?? sup.empty();
     if (cur.settings.sharing === 'off') return;
     const next: SupplementState = {
       ...cur,
@@ -5319,7 +5298,7 @@ export function startSyncLoop(): () => void {
   const cycleMirror = mirrorCollection<Record<string, unknown>>((items) => {
     if (!items.length) return; // locked, absent or wiped: keep what is on screen
     cycleCache.markRemote();
-    const remote = normalizeCycle(items[0]);
+    const remote = cyc.normalize(items[0]);
     if (remote.updatedAt <= wipeFloor('cycle')) return; // deleted since: this is the old document
     if (remote.updatedAt < state.cycle.updatedAt) return;
     if (JSON.stringify(remote) === JSON.stringify(state.cycle)) return;
@@ -5338,7 +5317,7 @@ export function startSyncLoop(): () => void {
   const nicotineMirror = mirrorCollection<Record<string, unknown>>((items) => {
     if (!items.length) return; // locked, absent or wiped: keep what is on screen
     nicotineCache.markRemote();
-    const remote = normalizeNicotine(items[0]);
+    const remote = nic.normalize(items[0]);
     if (remote.updatedAt <= wipeFloor('nicotine')) return; // deleted since: this is the old document
     // Last-write-wins: a newer local edit (not yet echoed back) beats the snapshot.
     if (remote.updatedAt < state.nicotine.updatedAt) return;
@@ -5372,7 +5351,7 @@ export function startSyncLoop(): () => void {
   const supplementsMirror = mirrorCollection<Record<string, unknown>>((items) => {
     if (!items.length) return; // locked, absent or wiped: keep what is on screen
     supplementsCache.markRemote();
-    const remote = normalizeSupplements(items[0]);
+    const remote = sup.normalize(items[0]);
     if (remote.updatedAt <= wipeFloor('supplements')) return; // deleted since: this is the old document
     // Last-write-wins: a newer local edit (not yet echoed back) beats the snapshot.
     if (remote.updatedAt < (state.supplements?.updatedAt ?? 0)) return;
@@ -6457,10 +6436,10 @@ export function resetLocalData(): void {
     injuries: [],
     conditions: [],
     conditionsShare: 'effects',
-    nicotine: emptyNicotineState(),
-    cycle: emptyCycleState(),
+    nicotine: nic.empty(),
+    cycle: cyc.empty(),
     alcohol: alc.empty(),
-    supplements: emptySupplementState(),
+    supplements: sup.empty(),
     activities: [],
     weightUnit: 'kg',
     exerciseUnits: {},

@@ -13,7 +13,7 @@
  *                      user changed something meanwhile; the sealed copy is never dropped.
  */
 import type { Vault } from './autoVault';
-import { emptyNicotineState, normalizeNicotine } from './nicotine';
+import { nic } from './nicotineRt';
 import type { NicotineState } from './types';
 import { decryptJson, encryptJson, isEnvelope, type VaultEnvelope } from './vaultCrypto';
 
@@ -68,9 +68,9 @@ export function createNicotineCache(deps: {
     load(): NicotineState {
       try {
         const raw = st()?.getItem(NICOTINE_KEY);
-        return raw ? normalizeNicotine(JSON.parse(raw)) : emptyNicotineState();
+        return raw ? nic.normalize(JSON.parse(raw)) : nic.empty();
       } catch {
-        return emptyNicotineState();
+        return nic.empty();
       }
     },
     /** Call once with the state loaded at boot. */
@@ -120,7 +120,7 @@ export function createNicotineCache(deps: {
         if (raw) {
           const enc = JSON.parse(raw) as unknown;
           if (isEnvelope(enc))
-            stored = normalizeNicotine(await decryptJson(m.key, enc as VaultEnvelope));
+            stored = nic.normalize(await decryptJson(m.key, enc as VaultEnvelope));
         }
       } catch {
         stored = null; // wrong key / corrupted: keep what we have, never throw

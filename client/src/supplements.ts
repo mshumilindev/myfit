@@ -27,6 +27,8 @@
  * Day check-ins: with check-ins on, Today asks once a day, in one grouped card, whether the
  * due supplements were taken; the answer replaces the "everything due was taken" assumption.
  */
+import { sup } from './supplementsRt';
+import { provide } from './trackerRt';
 import { addDays, dayKey, MAX_CHECKIN_DAYS, weekdayIndex, type DayInput } from './healthDays';
 import type { Range } from './alcohol';
 import {
@@ -739,3 +741,18 @@ export const hasSupplementData = (s: SupplementState | null | undefined): boolea
 
 /** Keeps `isCountedEntry` reachable for the UI next to the rest of the model. */
 export { isCountedEntry };
+
+// Late-bound runtime (SPO-500 I8): importing this module puts the real functions into the facade the store reads.
+provide(sup, {
+  empty: emptySupplementState,
+  normalize: normalizeSupplements,
+  normalizeEntry: normalizeSupplementEntry,
+  normalizeCheckins: normalizeSupplementCheckins,
+  isSharing: isSupplementSharing,
+  effectsFor: supplementEffectsFor,
+  proteinGramsFor: supplementProteinGramsFor,
+  warnings: supplementWarnings,
+  pending: pendingSupplementCheckin,
+  usualStartMin: usualTrainingStartMin,
+  trainingDayResolver,
+});

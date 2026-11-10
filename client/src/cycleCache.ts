@@ -13,7 +13,8 @@
  *                      user changed something meanwhile; the sealed copy is never dropped.
  */
 import type { Vault } from './autoVault';
-import { emptyCycleState, normalizeCycle, type CycleState } from './cycle/cycleState';
+import { cyc } from './cycleRt';
+import type { CycleState } from './cycle/cycleState';
 import { decryptJson, encryptJson, isEnvelope, type VaultEnvelope } from './vaultCrypto';
 
 export const CYCLE_KEY = 'spotter.cycle';
@@ -67,9 +68,9 @@ export function createCycleCache(deps: {
     load(): CycleState {
       try {
         const raw = st()?.getItem(CYCLE_KEY);
-        return raw ? normalizeCycle(JSON.parse(raw)) : emptyCycleState();
+        return raw ? cyc.normalize(JSON.parse(raw)) : cyc.empty();
       } catch {
-        return emptyCycleState();
+        return cyc.empty();
       }
     },
     /** Call once with the state loaded at boot. */
@@ -119,7 +120,7 @@ export function createCycleCache(deps: {
         if (raw) {
           const enc = JSON.parse(raw) as unknown;
           if (isEnvelope(enc))
-            stored = normalizeCycle(await decryptJson(m.key, enc as VaultEnvelope));
+            stored = cyc.normalize(await decryptJson(m.key, enc as VaultEnvelope));
         }
       } catch {
         stored = null; // wrong key / corrupted: keep what we have, never throw

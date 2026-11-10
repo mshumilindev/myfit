@@ -21,16 +21,13 @@ import {
   getSupplementTrainingFacts,
   getSupplementWarnings,
 } from './store';
-import {
-  addDays,
-  dayKey,
-  SUPPLEMENT_NEUTRAL,
-  trainingDayResolver,
-  usualTrainingStartMin,
-  type DayInput,
-  type SupplementContext,
-  type SupplementEffectKey,
-  type SupplementWarning,
+import { addDays, dayKey } from './healthDays';
+import { sup, SUPPLEMENT_NEUTRAL } from './supplementsRt';
+import type {
+  DayInput,
+  SupplementContext,
+  SupplementEffectKey,
+  SupplementWarning,
 } from './supplements';
 
 /** The context for "now", built from the plan, the workouts and the body weight. */
@@ -39,14 +36,14 @@ export function supplementContext(now: number = Date.now()): SupplementContext {
   const plan = readProgramCache();
   const planned = plan ? [1, 2, 3, 4, 5, 6, 7].filter((d) => programDayHasPlan(plan, d)) : null;
   return {
-    isTrainingDay: trainingDayResolver({
+    isTrainingDay: sup.trainingDayResolver({
       todayKey: facts.todayKey,
       // A plan with no training weekday at all is no plan.
       plannedWeekdays: planned && planned.length ? planned : null,
       trainedDays: facts.trainedDays,
     }),
     bodyWeightKg: facts.bodyWeightKg,
-    usualTrainingStartMin: usualTrainingStartMin(facts.workoutStarts, now),
+    usualTrainingStartMin: sup.usualStartMin(facts.workoutStarts, now),
   };
 }
 

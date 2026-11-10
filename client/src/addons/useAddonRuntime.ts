@@ -37,6 +37,18 @@ export function useAddonRuntime() {
   useEffect(() => {
     if (alcoholOn) void import('../alcoholBoot').catch(() => undefined);
   }, [alcoholOn]);
+  const nicotineOn = useAddonOrBase('nicotine');
+  useEffect(() => {
+    if (nicotineOn) void import('../nicotineBoot').catch(() => undefined);
+  }, [nicotineOn]);
+  const supplementsOn = useAddonOrBase('supplements');
+  useEffect(() => {
+    if (supplementsOn) void import('../supplementsBoot').catch(() => undefined);
+  }, [supplementsOn]);
+  const cycleOn = useAddonOrBase('cycle');
+  useEffect(() => {
+    if (cycleOn) void import('../cycleBoot').catch(() => undefined);
+  }, [cycleOn]);
   const healthOn = useAddonOrBase('health');
   const injuryOn = useAddonOrBase('injury-log');
   useEffect(() => migrateModules(), []);

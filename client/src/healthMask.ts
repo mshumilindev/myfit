@@ -4,10 +4,10 @@
  * data is not touched (it is deleted only when the person asks); writers keep the raw state.
  */
 import type { HealthOnMap } from './data/healthConsentGate';
-import { emptyCycleState } from './cycle/cycleState';
-import { emptyNicotineState } from './nicotine';
+import { cyc } from './cycleRt';
+import { nic } from './nicotineRt';
 import { alc } from './alcoholRt';
-import { emptySupplementState } from './supplements';
+import { sup } from './supplementsRt';
 import type {
   AlcoholState,
   ChronicCondition,
@@ -19,10 +19,10 @@ import type { CycleState } from './cycle/cycleState';
 
 /** One shared empty value per feature, so an unchanged mask keeps its references (no needless re-render). */
 const EMPTY = {
-  nicotine: emptyNicotineState(),
-  cycle: emptyCycleState(),
+  nicotine: nic.empty(),
+  cycle: cyc.empty(),
   alcohol: alc.empty(),
-  supplements: emptySupplementState(),
+  supplements: sup.empty(),
   injuries: [] as Injury[],
   conditions: [] as ChronicCondition[],
 };

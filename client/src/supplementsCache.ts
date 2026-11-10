@@ -13,7 +13,7 @@
  *                      user changed something meanwhile; the sealed copy is never dropped.
  */
 import type { Vault } from './autoVault';
-import { emptySupplementState, normalizeSupplements } from './supplements';
+import { sup } from './supplementsRt';
 import type { SupplementState } from './types';
 import { decryptJson, encryptJson, isEnvelope, type VaultEnvelope } from './vaultCrypto';
 
@@ -68,9 +68,9 @@ export function createSupplementsCache(deps: {
     load(): SupplementState {
       try {
         const raw = st()?.getItem(SUPPLEMENTS_KEY);
-        return raw ? normalizeSupplements(JSON.parse(raw)) : emptySupplementState();
+        return raw ? sup.normalize(JSON.parse(raw)) : sup.empty();
       } catch {
-        return emptySupplementState();
+        return sup.empty();
       }
     },
     /** Call once with the state loaded at boot. */
@@ -120,7 +120,7 @@ export function createSupplementsCache(deps: {
         if (raw) {
           const enc = JSON.parse(raw) as unknown;
           if (isEnvelope(enc))
-            stored = normalizeSupplements(await decryptJson(m.key, enc as VaultEnvelope));
+            stored = sup.normalize(await decryptJson(m.key, enc as VaultEnvelope));
         }
       } catch {
         stored = null; // wrong key / corrupted: keep what we have, never throw

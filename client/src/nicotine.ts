@@ -19,6 +19,8 @@
  * their caps are guesses, they are OFF by default and only run when the user switches them
  * on. Nothing here is medical advice, and all results are ranges (`low`..`high`).
  */
+import { nic } from './nicotineRt';
+import { provide } from './trackerRt';
 import type {
   NicotineKind,
   NicotineProduct,
@@ -830,3 +832,15 @@ export function normalizeNicotine(raw: unknown): NicotineState {
 
 /** Is there anything saved at all (products, or a non-default setting)? */
 export const hasNicotineData = (n: NicotineState): boolean => n.products.length > 0;
+
+// Late-bound runtime (SPO-500 I8): importing this module puts the real functions into the facade the store reads.
+provide(nic, {
+  empty: emptyNicotineState,
+  normalize: normalizeNicotine,
+  normalizeProduct: normalizeNicotineProduct,
+  load: nicotineLoad,
+  effects: nicotineEffects,
+  isSharing: isNicotineSharing,
+  surfaceOn,
+  rpeCap: () => SURFACE_COEFFS.rpe.cap,
+});

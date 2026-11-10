@@ -8,11 +8,12 @@
  * surface's own switch is off. So "off" means zero behaviour change, by construction.
  */
 import { getNicotineEffects } from './store';
-import { NEUTRAL, SURFACE_COEFFS, type NicotineEffectKey } from './nicotine';
+import { nic, NEUTRAL_MID } from './nicotineRt';
+import type { NicotineEffectKey } from './nicotine';
 
 /** Midpoint of one surface's range, or its neutral value (x1 / +0) when nothing applies. */
 export function nicMid(key: NicotineEffectKey): number {
-  const neutral = NEUTRAL[SURFACE_COEFFS[key].mode];
+  const neutral = NEUTRAL_MID[key];
   const r = getNicotineEffects()?.[key];
   if (!r) return neutral;
   return Math.round(((r.low + r.high) / 2) * 10000) / 10000;
@@ -28,5 +29,5 @@ export function nicRpeShift(): number {
   const r = getNicotineEffects()?.rpe;
   if (!r) return 0;
   const half = Math.round(((r.low + r.high) / 2) * 2) / 2;
-  return Math.max(-SURFACE_COEFFS.rpe.cap, Math.min(0, half)) || 0;
+  return Math.max(-nic.rpeCap(), Math.min(0, half)) || 0;
 }
