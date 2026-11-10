@@ -98,6 +98,45 @@ describe('WaterProgress', () => {
     expect(fill).not.toHaveBeenCalled();
     vi.restoreAllMocks();
   });
+  it('sways gently by itself where there is no sensor (iOS), but stays level with tilt off or reduced motion', () => {
+    const moves: number[][] = [];
+    const ctx = {
+      setTransform: vi.fn(),
+      clearRect: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: (x: number, y: number) => moves.push([x, y]),
+      lineTo: vi.fn(),
+      closePath: vi.fn(),
+      fill: vi.fn(),
+      globalAlpha: 1,
+      fillStyle: '',
+    };
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+      ctx as unknown as CanvasRenderingContext2D,
+    );
+    const frames: FrameRequestCallback[] = [];
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => frames.push(cb));
+    vi.stubGlobal('cancelAnimationFrame', () => undefined);
+    vi.stubGlobal(
+      'DeviceOrientationEvent',
+      Object.assign(function () {}, { requestPermission: vi.fn() }),
+    );
+    const at = (times: number[]) => {
+      moves.length = 0;
+      for (const t of times) frames.splice(0).forEach((cb) => cb(t));
+      // the x of the first point only moves when the surface turns (the wave changes y alone)
+      return moves.map((m) => m[0].toFixed(3));
+    };
+    const sway = render(<WaterProgress value={50} label="x" />);
+    const a1 = at([16, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000]);
+    expect(new Set(a1).size).toBeGreaterThan(2);
+    sway.unmount();
+    frames.length = 0;
+    render(<WaterProgress value={50} label="x" tilt={false} />);
+    const a2 = at([16, 2000, 4000, 6000]);
+    expect(new Set(a2).size).toBe(1);
+    vi.restoreAllMocks();
+  });
   it('shows no permission button without a sensor', () => {
     render(<WaterProgress value={50} label="x" />);
     expect(screen.queryAllByRole('button')).toHaveLength(0);

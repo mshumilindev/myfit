@@ -88,7 +88,7 @@ function offset(gx: number, gy: number, frac: number) {
  * Program progress as water in a rounded 3:4 tank (Studio), the prototype's water. The level is the real percentage
  * (never below a 12 % film); the colour steps with it (red / orange / yellow / green). Two translucent wave layers; the
  * surface is a damped spring that follows the phone's tilt through a full turn (gravity direction from the device's
- * orientation); the wave grows a little while it swings. Without a sensor (or without the iOS permission) the water
+ * orientation); the wave grows a little while it swings. Without a sensor (iOS never asks) the water sways gently by itself, like the background waves; with `tilt={false}` it
  * rests level and calm; with reduced motion it is level, flat and still. Decorative: the number is in `children` and in
  * `aria-valuenow`.
  */
@@ -107,7 +107,9 @@ export function WaterProgress({
   const root = useRef<HTMLDivElement | null>(null);
   const cv = useRef<HTMLCanvasElement | null>(null);
   const kickRef = useRef<(() => void) | null>(null);
-  const live = useRef({ pct, target });
+  // `tilt={false}` asks for a still level; otherwise, with no sensor reading, the water sways by itself
+  const sensor = !tilt || angle !== undefined || g.angle !== null;
+  const live = useRef({ pct, target, sensor });
   useEffect(() => {
     const el = cv.current;
     const host = root.current;
@@ -131,7 +133,10 @@ export function WaterProgress({
       if (document.hidden || !visible) return;
       const dt = Math.min(0.033, (t - t0) / 1000 || 0.016);
       t0 = t;
-      const { pct: level, target: tg } = live.current;
+      const { pct: level, target: tgSensor, sensor: hasSensor } = live.current;
+      // no sensor (iOS never asks, a desktop): the surface sways on its own, slowly, like the background waves
+      const idle = !hasSensor && !reduce;
+      const tg = idle ? 0.07 * Math.sin(t / 1700) : tgSensor;
       const k = 22;
       const c = reduce ? 14 : 3;
       om += (-k * wrap(th - tg) - c * om) * dt;
@@ -146,7 +151,7 @@ export function WaterProgress({
       const d = offset(gx, gy, frac);
       const tx = Math.cos(th);
       const ty = -Math.sin(th);
-      const amp = reduce ? 0 : 2 + Math.min(9, Math.abs(om) * 5);
+      const amp = reduce ? 0 : (idle ? 4.5 : 2) + Math.min(9, Math.abs(om) * 5);
       const ph = t / 520;
       const R = 420;
       const cx = W / 2;
@@ -215,9 +220,9 @@ export function WaterProgress({
   }, []);
   useEffect(() => {
     // the loop reads the latest level and tilt from here; a new one also wakes a loop asleep under reduced motion
-    live.current = { pct, target };
+    live.current = { pct, target, sensor };
     kickRef.current?.();
-  }, [pct, target]);
+  }, [pct, target, sensor]);
   const style = {
     '--wp-size': `${size}px`,
     '--wp-tilt': `${Math.round(((-target * 180) / Math.PI) * 100) / 100}deg`,
