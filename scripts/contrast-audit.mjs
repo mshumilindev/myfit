@@ -79,11 +79,8 @@ for (const look of looks) {
       });
       if (sleep)
         await page.evaluate((s) => document.documentElement.setAttribute('data-sleep', s), sleep);
-      // transitions and animations are frozen: axe would measure a colour half-way through a fade
-      await page.addStyleTag({
-        content: '*,*::before,*::after{transition:none!important;animation:none!important}',
-      });
-      await page.waitForTimeout(400);
+      // long enough for the theme swap animation and colour transitions to finish: axe would measure a colour half-way
+      await page.waitForTimeout(1300);
       await page.addScriptTag({ content: AXE });
       const nodes = await page.evaluate(async () => {
         const r = await window.axe.run(document, { runOnly: ['color-contrast'] });
