@@ -30,11 +30,14 @@ const filter = arg('filter', '');
 const partSpec = parsePart(arg('part', '0/1'));
 const concurrency = Number(arg('concurrency', '2'));
 const out = arg('out', '');
+/** --ids-file: a JSON array of story ids to re-check (the ones a previous --out report listed). */
+const idsFile = arg('ids-file', '');
 
 const index = await (await fetch(`${url}/index.json`)).json();
+const only = idsFile ? new Set(JSON.parse(fs.readFileSync(idsFile, 'utf8'))) : null;
 const ids = shard(
   Object.entries(index.entries)
-    .filter(([id, e]) => e.type === 'story' && id.includes(filter))
+    .filter(([id, e]) => e.type === 'story' && id.includes(filter) && (!only || only.has(id)))
     .map(([id]) => id),
   partSpec,
 );
