@@ -84,6 +84,7 @@ export const addonStoreEt: typeof addonStoreEn = {
   manage: 'Halda või eemalda',
   preview: 'Eelvaade',
   statAddons: 'Lisad',
+  statSize: 'Suurus',
   addonsForApp: (n: string) => `Lisad: ${n}`,
   addonsEmptyTitle: 'Lisasid pole veel',
   addonsEmptyBody: 'Siia ilmuvad sinu rakenduste lisad.',

@@ -1,0 +1,11 @@
+{
+  "health": ["src/views/HealthView.tsx", "src/views/InjuryGate.tsx"],
+  "sleep": ["src/views/SleepView.tsx"],
+  "activities": ["src/views/ActivityView.tsx", "src/views/LogActivityView.tsx"],
+  "goals": ["src/views/GoalsView.tsx"],
+  "playbook": ["src/views/PlaybookView.tsx"],
+  "home-sets": ["src/views/home/HomeSetView.tsx"],
+  "atlas": ["src/views/CoachView.tsx"],
+  "apex": ["src/views/ApexApp.tsx", "src/views/MasteryView.tsx"],
+  "coach": ["src/coach/CoachApp.tsx"]
+}

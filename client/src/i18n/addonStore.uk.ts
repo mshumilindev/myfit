@@ -84,6 +84,7 @@ export const addonStoreUk: typeof addonStoreEn = {
   manage: 'Керувати або видалити',
   preview: 'Попередній перегляд',
   statAddons: 'Доповнення',
+  statSize: 'Розмір',
   addonsForApp: (n: string) => `Доповнення для ${n}`,
   addonsEmptyTitle: 'Доповнень поки немає',
   addonsEmptyBody: 'Тут з’являться доповнення до ваших застосунків.',

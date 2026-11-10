@@ -85,6 +85,7 @@ export const addonStoreLt: typeof addonStoreEn = {
   manage: 'Tvarkyti arba pašalinti',
   preview: 'Peržiūra',
   statAddons: 'Priedai',
+  statSize: 'Dydis',
   addonsForApp: (n: string) => `Priedai: ${n}`,
   addonsEmptyTitle: 'Priedų dar nėra',
   addonsEmptyBody: 'Čia atsiras jūsų programėlių priedai.',

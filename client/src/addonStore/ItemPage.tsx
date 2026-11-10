@@ -1,6 +1,7 @@
 /** One item (boards 05, 06): hero, what it needs, preview, facts, about, its add-ons. */
 import { addonById, itemsOfApp } from '../addons/manifest';
 import { disableAddons, enableAddons } from '../addons/enabledSet';
+import { formatSize, useAddonSizes } from '../addons/useAddonSizes';
 import {
   SkBadge,
   SkCard,
@@ -39,11 +40,14 @@ export function ItemPage({
   go: (v: string, id?: string) => void;
 }) {
   const { st } = ctx;
+  const sizes = useAddonSizes(); // a hook: before the early returns
   const m = addonById(id);
   if (!m) return <div className="sk-t-s">{st.noResults}</div>;
   const parent = m.parent ? addonById(m.parent) : undefined;
   const children = itemsOfApp(m.id).filter((a) => !a.soon && a.kind !== 'module');
   const modules = itemsOfApp(m.id).filter((a) => a.kind === 'module');
+  // Real size from the last build; an app is the whole of it, and an item whose code is its parent's has none of its own.
+  const sizeBytes = sizes?.[m.id] ?? null;
   const name = itemName(st, m.id);
   if (m.soon) return <ComingSoon id={m.id} ctx={ctx} />;
   return (
@@ -103,13 +107,19 @@ export function ItemPage({
         </div>
         <div className="as-item-aside">
           <div className="as-o2">
-            {(m.kind === 'app' || children.length > 0 || modules.length > 0) && (
+            {(m.kind === 'app' ||
+              children.length > 0 ||
+              modules.length > 0 ||
+              sizeBytes != null) && (
               <SkCard className="sk-p16 as-stats">
                 {(m.kind === 'app' || children.length > 0) && (
                   <SkStat spec value={children.length} caption={st.statAddons} />
                 )}
                 {(m.kind === 'app' || modules.length > 0) && (
                   <SkStat spec value={modules.length} caption={st.modules} />
+                )}
+                {sizeBytes != null && (
+                  <SkStat spec value={formatSize(sizeBytes)} caption={st.statSize} />
                 )}
               </SkCard>
             )}

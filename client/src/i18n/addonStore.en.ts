@@ -86,6 +86,7 @@ export const addonStoreEn = {
   manage: 'Manage or remove',
   preview: 'Preview',
   statAddons: 'Add-ons',
+  statSize: 'Size',
   addonsForApp: (n: string) => `Add-ons for ${n}`,
   addonsEmptyTitle: 'No add-ons yet',
   addonsEmptyBody: 'Add-ons for your apps will show up here.',

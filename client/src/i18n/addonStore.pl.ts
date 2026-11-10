@@ -84,6 +84,7 @@ export const addonStorePl: typeof addonStoreEn = {
   manage: 'Zarządzaj lub usuń',
   preview: 'Podgląd',
   statAddons: 'Dodatki',
+  statSize: 'Rozmiar',
   addonsForApp: (n: string) => `Dodatki dla ${n}`,
   addonsEmptyTitle: 'Brak dodatków',
   addonsEmptyBody: 'Dodatki do Twoich aplikacji pojawią się tutaj.',
