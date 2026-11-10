@@ -3,7 +3,7 @@
  * `light | dark` (it is what the CSS reads and what the account syncs); Auto only decides which of the two to put on
  * <html>, now and at every sunrise / sunset. The preference is kept on this device.
  */
-import { applyRemoteAxis, getAxis, getTheme, setAxis } from './registry';
+import { applyRemoteAxis, getAxis, getTheme, setAxis, setSunFollower } from './registry';
 import { isDaylight } from './sun';
 
 export type ModePref = 'auto' | 'light' | 'dark';
@@ -50,11 +50,13 @@ export function initModePref(): () => void {
     // only Studio follows the sun; other looks keep the mode the person set
     if (getTheme() === 'studio' && getModePref() === 'auto') previewModePref('auto');
   };
+  setSunFollower(tick);
   tick();
   window.clearInterval(timer);
   timer = window.setInterval(tick, CHECK_MS);
   document.addEventListener('visibilitychange', tick);
   return () => {
+    setSunFollower(null);
     window.clearInterval(timer);
     document.removeEventListener('visibilitychange', tick);
   };

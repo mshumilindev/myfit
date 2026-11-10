@@ -102,6 +102,16 @@ const shown = (id: string): string => (themeAllowed(id) ? id : DEFAULT_THEME);
 
 function apply(id: string): void {
   document.documentElement.setAttribute('data-theme', shown(id));
+  followSun?.();
+}
+
+/**
+ * The sun rule of `modePref.ts` (Studio on Auto: day = light, night = dark). It runs after every change of look and
+ * after an account value for the mode, so the mode is right at once and not only at the next 5-minute check.
+ */
+let followSun: (() => void) | null = null;
+export function setSunFollower(fn: (() => void) | null): void {
+  followSun = fn;
 }
 
 /** Called by the app shell with the installed theme ids (`cyberpunk`…). Re-dresses the app. */
@@ -367,6 +377,7 @@ export function setAxis(axis: AxisName, value: string): void {
 export function applyRemoteAxis(axis: AxisName, value: string): void {
   if (!axisKnown(axis, value)) return;
   putAxis(axis, value);
+  if (axis === 'mode') followSun?.();
 }
 
 /** The axis value saved on this device, if the person ever chose one (null = never). */

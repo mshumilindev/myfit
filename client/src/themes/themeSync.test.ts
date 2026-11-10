@@ -3,11 +3,18 @@ import {
   DEFAULT_THEME,
   applyRemoteTheme,
   getTheme,
+  initTheme,
   setTheme,
   setAllowedThemes,
   THEMES,
 } from './registry';
-import { THEME_FIELD, pushThemeEdits, syncThemeFromDoc } from './themeSync';
+import {
+  THEME_FIELD,
+  pushThemeEdits,
+  syncAxesAndLocaleFromDoc,
+  syncThemeFromDoc,
+} from './themeSync';
+import { initModePref } from './modePref';
 
 // the looks a test installs it removes again (SPO-500)
 afterEach(() => setAllowedThemes([]));
@@ -132,5 +139,48 @@ describe('look axes and language (SPO-389)', () => {
     write.mockClear();
     applyRemoteAxis('density', 'regular');
     expect(write).not.toHaveBeenCalled();
+  });
+});
+
+// The sun decides the colour mode of Studio on Auto from the first paint; an account value must not flip it back for minutes.
+describe('Studio on Auto follows the sun when the account syncs', () => {
+  const mode = () => document.documentElement.getAttribute('data-mode');
+  let off: (() => void) | null = null;
+  afterEach(() => {
+    off?.();
+    off = null;
+    vi.useRealTimers();
+  });
+
+  it('a stale themeMode from the account does not turn a day into night', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-10T11:30:00Z')); // midday
+    localStorage.setItem('gym.theme', 'studio');
+    initTheme();
+    off = initModePref();
+    expect(mode()).toBe('light');
+    syncAxesAndLocaleFromDoc({ themeMode: 'dark' }, vi.fn());
+    expect(mode()).toBe('light');
+  });
+
+  it('the account switching the look to Studio gets the sun mode at once', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-10T11:30:00Z'));
+    initTheme(); // cached look is not Studio
+    off = initModePref();
+    applyRemoteTheme('studio');
+    syncAxesAndLocaleFromDoc({ themeMode: 'dark' }, vi.fn());
+    expect(mode()).toBe('light');
+  });
+
+  it('a manual Light/Dark preference still takes the account value', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-10T11:30:00Z'));
+    localStorage.setItem('gym.theme', 'studio');
+    localStorage.setItem('gym.modePref', 'dark');
+    initTheme();
+    off = initModePref();
+    syncAxesAndLocaleFromDoc({ themeMode: 'dark' }, vi.fn());
+    expect(mode()).toBe('dark');
   });
 });
