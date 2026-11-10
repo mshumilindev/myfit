@@ -1,7 +1,7 @@
 /** Remove with confirmation (board 14): what goes with it, and that the person's entries stay saved. */
 import { useState } from 'react';
 import { disableAddons } from '../addons/enabledSet';
-import { ADDONS, addonById } from '../addons/manifest';
+import { addonById, itemsOfApp } from '../addons/manifest';
 import { SkBtn, SkNote, SkSheet, type SkBtnKind } from '../store-kit';
 import { itemName, TileOf, type StoreCtx } from './storeItems';
 
@@ -25,9 +25,9 @@ export function RemoveButton({
   const m = addonById(id);
   const name = itemName(st, id);
   // An app takes its installed add-ons with it.
-  const withIt = ADDONS.filter((a) => a.parent === id && enabled.has(a.id)).map((a) =>
-    itemName(st, a.id),
-  );
+  const withIt = itemsOfApp(id)
+    .filter((a) => enabled.has(a.id))
+    .map((a) => itemName(st, a.id));
   const close = () => setOpen(false);
   return (
     <>

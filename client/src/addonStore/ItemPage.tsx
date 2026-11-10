@@ -1,5 +1,5 @@
 /** One item (boards 05, 06): hero, what it needs, preview, facts, about, its add-ons. */
-import { ADDONS, addonById } from '../addons/manifest';
+import { addonById, itemsOfApp } from '../addons/manifest';
 import { disableAddons, enableAddons } from '../addons/enabledSet';
 import {
   SkBadge,
@@ -42,8 +42,8 @@ export function ItemPage({
   const m = addonById(id);
   if (!m) return <div className="sk-t-s sk-mt16">{st.noResults}</div>;
   const parent = m.parent ? addonById(m.parent) : undefined;
-  const children = ADDONS.filter((a) => a.parent === m.id && !a.soon && a.kind !== 'module');
-  const modules = ADDONS.filter((a) => a.parent === m.id && a.kind === 'module');
+  const children = itemsOfApp(m.id).filter((a) => !a.soon && a.kind !== 'module');
+  const modules = itemsOfApp(m.id).filter((a) => a.kind === 'module');
   const name = itemName(st, m.id);
   if (m.soon) return <ComingSoon id={m.id} ctx={ctx} />;
   return (
@@ -103,13 +103,16 @@ export function ItemPage({
         </div>
         <div className="as-item-aside">
           <div className="as-o2">
-            <SkCard className="sk-p16 sk-mt24 as-stats">
-              {(m.kind === 'app' || children.length > 0) && (
-                <SkStat spec value={children.length} caption={st.statAddons} />
-              )}
-              <SkStat spec value={st.yes} caption={st.statOffline} />
-              <SkStat spec value={st.kept} caption={st.statData} />
-            </SkCard>
+            {(m.kind === 'app' || children.length > 0 || modules.length > 0) && (
+              <SkCard className="sk-p16 sk-mt24 as-stats">
+                {(m.kind === 'app' || children.length > 0) && (
+                  <SkStat spec value={children.length} caption={st.statAddons} />
+                )}
+                {(m.kind === 'app' || modules.length > 0) && (
+                  <SkStat spec value={modules.length} caption={st.modules} />
+                )}
+              </SkCard>
+            )}
           </div>
           <div className="as-o4">
             {modules.length > 0 && (

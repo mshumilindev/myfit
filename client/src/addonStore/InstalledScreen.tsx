@@ -1,5 +1,5 @@
 /** Installed (board 12): one card per app with a switch per add-on. Removing keeps data. */
-import { ADDONS } from '../addons/manifest';
+import { ADDONS, appOfItem, itemsOfApp } from '../addons/manifest';
 import { disableAddons, enableAddons } from '../addons/enabledSet';
 import {
   SkBtn,
@@ -39,11 +39,13 @@ export function Installed({ ctx, go }: { ctx: StoreCtx; go: (v: string, id?: str
   }
   // One card per installed item that stands on its own: an app, a standalone add-on (Sleep, Atlas…), a theme. An add-on of an
   // installed app is a switch inside that app's card instead.
-  const apps = items.filter((m) => m.kind !== 'module' && !(m.parent && enabled.has(m.parent)));
+  const apps = items.filter(
+    (m) => m.kind !== 'module' && !(appOfItem(m) && enabled.has(appOfItem(m)!)),
+  );
   return (
     <div className="sk-mt16 as-groups">
       {apps.map((app) => {
-        const kids = ADDONS.filter((a) => a.parent === app.id && !a.soon);
+        const kids = itemsOfApp(app.id).filter((a) => !a.soon);
         const on = kids.filter((k) => enabled.has(k.id)).length;
         return (
           <SkCard key={app.id} className="as-group">

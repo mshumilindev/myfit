@@ -223,3 +223,18 @@ const BY_ID = new Map(ADDONS.map((a) => [a.id, a]));
 export function addonById(id: string): AddonManifest | undefined {
   return BY_ID.get(id);
 }
+
+/**
+ * The app an item belongs to: its `parent`, or — for the Coach extras, which have no `parent` — the Coach app they
+ * require. (Other `requires` links, e.g. Gym extras, are dependencies, not membership: they stay standalone cards.)
+ */
+export function appOfItem(m: AddonManifest): string | undefined {
+  if (m.parent) return m.parent;
+  const r = m.requires && m.category === 'coach' ? BY_ID.get(m.requires) : undefined;
+  return r?.kind === 'app' ? r.id : undefined;
+}
+
+/** Add-ons and modules that belong to an app (by `parent` or by the app they require). */
+export function itemsOfApp(id: string): AddonManifest[] {
+  return ADDONS.filter((a) => appOfItem(a) === id);
+}

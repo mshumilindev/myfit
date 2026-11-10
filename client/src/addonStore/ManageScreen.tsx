@@ -1,5 +1,5 @@
 /** Configure an installed app (board 13): its modules as switches. Turning one off keeps its data. */
-import { ADDONS, addonById } from '../addons/manifest';
+import { addonById, itemsOfApp } from '../addons/manifest';
 import { disableAddons, enableAddons } from '../addons/enabledSet';
 import { SkCard, SkRow, SkSwitch } from '../store-kit';
 import './screens.css';
@@ -9,7 +9,7 @@ export function ManageScreen({ id, ctx }: { id: string; ctx: StoreCtx }) {
   const { st, enabled } = ctx;
   const app = addonById(id);
   if (!app) return null;
-  const kids = ADDONS.filter((a) => a.parent === id && !a.soon);
+  const kids = itemsOfApp(id).filter((a) => !a.soon);
   return (
     <>
       <div className="sk-rowf sk-g16 as-item-head">
