@@ -21066,6 +21066,17 @@ body {
   box-shadow: inset 0 0 0 1px var(--s-line);
   margin-bottom: var(--s-12);
 }
+.sleep-forgot,
+.sleep-autofill {
+  /* A fixed night plate on any page: its sleep tones are the night ones, so the Tag and the buttons
+     read on it in a light mode as well (the page's light sleep tones are dark inks). */
+  --color-sleep: var(--c-9d8cf0);
+  --color-sleep-tint: var(--c-211d38);
+  --color-sleep-text: var(--c-d6cffa);
+  --color-sleep-line: var(--c-45397a);
+  --color-accent-200: var(--s-moon-lt);
+  --color-accent-300: var(--s-moon);
+}
 .sleep-autofill .sky-mini {
   position: absolute;
   inset: 0;
@@ -21116,7 +21127,7 @@ body {
   width: var(--sz-40);
   height: var(--sz-40);
   border-radius: var(--r-12);
-  background: var(--color-accent-900);
+  background: var(--s-surface2);
   display: grid;
   place-items: center;
   flex: none;
@@ -21995,7 +22006,7 @@ body {
   margin-left: auto;
   font-size: var(--fs-28);
   font-weight: 700;
-  color: var(--c-e6f4fc);
+  color: var(--color-text);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
 }
@@ -26167,7 +26178,7 @@ body {
   font-size: var(--fs-16);
 }
 .atl-temper-inline {
-  color: color-mix(in srgb, var(--atl) 70%, var(--color-text));
+  color: color-mix(in srgb, var(--atl) 45%, var(--color-text));
   font-weight: 600;
 }
 .atl-head-text > span {

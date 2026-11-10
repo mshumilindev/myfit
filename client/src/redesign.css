@@ -210,7 +210,7 @@
   color: var(--c-f0a39a);
 }
 .ov-trends.is-risk .ov-tt {
-  color: var(--c-f6c3bc);
+  color: var(--color-danger-text);
 }
 /* Brass Glass: the big number carries the type scale's bold. */
 html[data-theme] .ov-big {
@@ -267,7 +267,7 @@ html[data-theme] .ov-unit {
   color: var(--color-accent);
 }
 .ov-day.is-today .ov-dn {
-  color: var(--c-e9c07a);
+  color: var(--color-accent-text);
 }
 .ov-program .ov-ts {
   margin-top: 0;
@@ -495,7 +495,7 @@ html[data-theme] .rx .topbar .tt {
   padding: var(--s-10) var(--s-12);
   border-radius: var(--r-12);
   background: color-mix(in srgb, var(--acc) 12%, transparent);
-  color: var(--c-e7e2d8);
+  color: var(--color-text);
 }
 .wk-pills {
   display: grid;
@@ -672,7 +672,7 @@ div.hist-item {
   place-items: center;
   font-size: var(--fs-20);
   background: var(--c-3a2f1c);
-  color: var(--c-e9c07a);
+  color: var(--color-accent-text);
 }
 .hist-activity .hist-ic {
   background: var(--c-173a2a);
