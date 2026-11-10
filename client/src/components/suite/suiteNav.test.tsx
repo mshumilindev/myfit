@@ -433,7 +433,7 @@ describe.each(CASES)('$name: phone (< 720)', (k) => {
     expect(labels).toEqual(hasMore ? [...own, ...promoted, c.navMore] : own);
     if (k.name !== 'Gym') expect(within(bar).getByRole('button', { name: c.navMore })).toBeTruthy();
     expect(within(bar).queryByRole('button', { name: c.navApps })).toBeNull();
-    expect(within(bar).queryByRole('button', { name: t.shellSwitch })).toBeNull();
+    expect(within(bar).queryByRole('button', { name: new RegExp(t.shellSwitch) })).toBeNull();
   });
 
   it('avatar drawer: the account block (avatar 40, Profile); no Apps row, the BrandBar chip switches apps', () => {

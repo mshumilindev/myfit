@@ -293,6 +293,39 @@ jobs:
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:4174/ >/dev/null && break; sleep 1; done
           E2E_COACH_URL=http://127.0.0.1:4174 npx playwright test --project=coach-390 --project=coach-1440 tests/e2e/coach-smoke.e2e.ts --reporter=github,line
 
+  a11y-e2e:
+    name: Accessibility (axe, ${{ matrix.theme }})
+    # SPO-60: axe WCAG 2 A/AA on the member screens in light and dark; a serious/critical finding fails the run.
+    # One parallel job per theme (ADR 004: a new check is its own job, not the tail of an existing one).
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        theme: [glass, studio, cyberpunk, christmas, halloween]
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - uses: actions/download-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist
+      - name: Serve the built client
+        run: |
+          (cd client && npx vite preview --host 127.0.0.1 --port 4173 --strictPort >/dev/null 2>&1 &)
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+      - run: npx playwright test --project=mobile-chromium tests/e2e/member-a11y.e2e.ts --reporter=github,line
+        env:
+          E2E_BASE_URL: http://127.0.0.1:4173
+          A11Y_THEMES: ${{ matrix.theme }}
+
   calls-e2e:
     name: Calls e2e (${{ matrix.project }}, shard ${{ matrix.shard }}/2)
     # SPO-434: real WebRTC between two pages (Chromium fake camera/microphone) against the in-process fake server; no

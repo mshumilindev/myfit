@@ -115,7 +115,7 @@ describe('ApexApp', () => {
     expect(screen.getByRole('button', { name: new RegExp(en.feedTitle) }).textContent).toContain(
       '3',
     );
-    fireEvent.click(screen.getByRole('button', { name: en.shellSwitch }));
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(en.shellSwitch) }));
     expect(props.onOpenShell).toHaveBeenCalled();
   });
 

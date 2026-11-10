@@ -55,7 +55,7 @@ describe('ScheduleStoryFrame exits', () => {
       <ScheduleStoryFrame makePort={() => createFixturesSchedulePort()} hash="#/c/schedule" />,
     );
     await screen.findAllByText(t.scTitle);
-    fireEvent.click(screen.getByRole('button', { name: 'Switch app' }));
+    fireEvent.click(screen.getByRole('button', { name: /Switch app/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Profile and mode' }));
     fireEvent.click(await screen.findByText('My workouts'));
     fireEvent.click(screen.getByRole('button', { name: 'Profile and mode' }));

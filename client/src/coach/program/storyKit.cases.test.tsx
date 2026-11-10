@@ -99,7 +99,7 @@ describe('ProgramStoryFrame', () => {
     setViewport(390);
     render(<ProgramStoryFrame route={edit} />);
     await screen.findByRole('button', { name: pgEn.edSendShort });
-    fireEvent.click(screen.getByRole('button', { name: 'Switch app' }));
+    fireEvent.click(screen.getByRole('button', { name: /Switch app/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Profile and mode' }));
     fireEvent.click(await screen.findByText('My workouts'));
     fireEvent.click(screen.getByRole('button', { name: 'Profile and mode' }));

@@ -165,7 +165,7 @@ describe('RosterApp on a phone', () => {
 
   it('the app switcher in the header opens the suite shell', () => {
     const { props } = app('admin', 'users');
-    fireEvent.click(screen.getByRole('button', { name: en.shellSwitch }));
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(en.shellSwitch) }));
     expect(props.onOpenShell).toHaveBeenCalled();
   });
 });

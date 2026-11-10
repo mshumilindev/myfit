@@ -123,12 +123,13 @@ export function BrandBar({
     >
       <div className="uibrand-lead app-brand-lead" ref={leadRef}>
         <span className="uibrand-word app-brand-word">spotter</span>
+        {/* WCAG 2.5.3 (axe label-content-name-mismatch): the accessible name starts with the visible app name. */}
         {chip && tone && icon ? (
           <button
             type="button"
             className={`uibrand-chip ${toneClass(tone)}`}
             onClick={onApp}
-            aria-label={appLabel}
+            aria-label={`${app}, ${appLabel}`}
             aria-haspopup="dialog"
           >
             <IconTile tone="inherit" size={22} icon={icon} />
@@ -140,7 +141,7 @@ export function BrandBar({
             type="button"
             className="uibrand-app app-brand-app"
             onClick={onApp}
-            aria-label={appLabel}
+            aria-label={`${app}, ${appLabel}`}
           >
             {app}
           </button>

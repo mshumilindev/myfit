@@ -341,7 +341,7 @@ describe('phone More sheet', () => {
     ]);
     expect(within(acct).getByTestId('real-avatar').dataset.size).toBe('40');
     // the chip in the top bar opens the launcher (one tap)
-    fireEvent.click(screen.getByRole('button', { name: LOCALES.en.shellSwitch }));
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(LOCALES.en.shellSwitch) }));
     expect(onShell).toHaveBeenCalledTimes(1);
   });
 });
