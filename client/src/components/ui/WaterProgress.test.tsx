@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { WaterProgress, waterLevel } from './WaterProgress';
+import { WaterProgress, gravityAngle, waterLevel } from './WaterProgress';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 describe('WaterProgress', () => {
   it('is a progressbar with the real percentage and a name', () => {
@@ -26,7 +29,7 @@ describe('WaterProgress', () => {
     render(<WaterProgress value={50} label="x" angle={30} />);
     expect(screen.getByRole('progressbar').style.getPropertyValue('--wp-tilt')).toBe('-30deg');
   });
-  it('asks for motion access on the first tap anywhere (iOS), then follows the phone', async () => {
+  it('asks for motion access on the first tap anywhere (iOS), then follows the phone (turned over = water at the top)', async () => {
     const request = vi.fn().mockResolvedValue('granted');
     vi.stubGlobal(
       'DeviceOrientationEvent',
@@ -39,10 +42,16 @@ describe('WaterProgress', () => {
     });
     expect(request).toHaveBeenCalledTimes(1);
     await act(async () => {
-      window.dispatchEvent(Object.assign(new Event('deviceorientation'), { gamma: 30, beta: 0 }));
+      window.dispatchEvent(Object.assign(new Event('deviceorientation'), { gamma: 0, beta: -90 }));
     });
-    expect(screen.getByRole('progressbar').style.getPropertyValue('--wp-tilt')).toBe('-30deg');
-    vi.unstubAllGlobals();
+    expect(screen.getByRole('progressbar').style.getPropertyValue('--wp-tilt')).toBe('-180deg');
+  });
+  it('turns the water with gravity: upright = bottom, turned over = top, flat = no direction', () => {
+    expect(gravityAngle(0, 90)).toBeCloseTo(0);
+    expect(Math.abs(gravityAngle(0, -90) ?? 0)).toBeCloseTo(Math.PI);
+    expect(gravityAngle(0, 0)).toBeNull();
+    // rolled a quarter turn in the screen plane (gamma 90, beta 0): gravity along the screen's side
+    expect(Math.abs(gravityAngle(90, 0) ?? 0)).toBeCloseTo(Math.PI / 2);
   });
   it('shows no permission button without a sensor', () => {
     render(<WaterProgress value={50} label="x" />);

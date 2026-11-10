@@ -22,6 +22,21 @@ export function waterLevel(value: number): 'low' | 'warn' | 'mid' | 'high' {
   return value < 25 ? 'low' : value < 50 ? 'warn' : value < 75 ? 'mid' : 'high';
 }
 
+/**
+ * Where gravity points on the screen, in radians (0 = phone upright, the water at the bottom; +-PI = phone turned over,
+ * the water at the TOP of the screen), from the device's gamma and beta in degrees. The gravity vector in the screen
+ * plane is (sin(gamma)cos(beta), sin(beta)) with y down. Lying flat there is no direction (null): the water keeps its
+ * last one.
+ */
+export function gravityAngle(gammaDeg: number, betaDeg: number): number | null {
+  const g = (gammaDeg * Math.PI) / 180;
+  const b = (betaDeg * Math.PI) / 180;
+  const x = Math.sin(g) * Math.cos(b);
+  const y = Math.sin(b);
+  if (Math.hypot(x, y) < 0.15) return null;
+  return Math.atan2(x, y);
+}
+
 type OrientationCtor = {
   requestPermission?: () => Promise<'granted' | 'denied'>;
 };
@@ -45,9 +60,8 @@ export function useGravityAngle(enabled: boolean) {
     if (ask && !on) return;
     const h = (e: DeviceOrientationEvent) => {
       if (e.gamma == null || e.beta == null) return;
-      const g = (e.gamma * Math.PI) / 180;
-      const b = (e.beta * Math.PI) / 180;
-      setAngle(Math.atan2(Math.sin(g) * Math.cos(b), Math.cos(g) * Math.cos(b)));
+      const a = gravityAngle(e.gamma, e.beta);
+      if (a !== null) setAngle(a);
     };
     window.addEventListener('deviceorientation', h);
     return () => window.removeEventListener('deviceorientation', h);
@@ -142,7 +156,8 @@ export function WaterProgress({
       th = wrap(th + om * dt);
       ctx.setTransform(el.width / W, 0, 0, el.height / H, 0, 0);
       ctx.clearRect(0, 0, W, H);
-      const frac = Math.max(level, 12) / 100;
+      // 0 % is an empty tank; anything above it keeps at least a thin film so a low level still reads as water
+      const frac = level <= 0 ? 0 : Math.max(level, 12) / 100;
       const gx = Math.sin(th);
       const gy = Math.cos(th);
       const d = offset(gx, gy, frac);
@@ -154,7 +169,7 @@ export function WaterProgress({
       const cx = W / 2;
       const cy = H / 2;
       const ink = getComputedStyle(host).getPropertyValue('--wp-ink').trim() || '#888';
-      for (let layer = 0; layer < 2; layer++) {
+      for (let layer = 0; layer < (frac === 0 ? 0 : 2); layer++) {
         ctx.beginPath();
         for (let s = -R; s <= R; s += 6) {
           const w =
