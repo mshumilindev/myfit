@@ -28,7 +28,8 @@ import { LANDMARKS, VOLUME_MUSCLES } from './volume';
 import { recentLoadSets } from './loadWindow';
 import { personalLandmarks } from './personalize';
 import { focusAdjustLandmarks, groupEmphasis, type Emphasis, type FitGoals } from './goals';
-import { computePlaybook, type Play } from './playbook';
+import { type Play } from './playbook';
+import { computePlaybookGated } from './playbookGated';
 import { deriveLoadType, type LoadType } from './loads';
 import { pickCardioMachine } from './cardio';
 import { equipmentById } from './data/equipmentCatalog';
@@ -311,7 +312,7 @@ function dayNameFor(muscles: MuscleGroup[]): string {
 }
 
 function playForMuscles(finished: Workout[], now: number, muscles: MuscleGroup[]): Play | null {
-  const pb = computePlaybook(finished, now);
+  const pb = computePlaybookGated(finished, now);
   if (!pb.ready) return null;
   let best: { play: Play; overlap: number } | null = null;
   for (const play of pb.plays) {

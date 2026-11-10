@@ -13,7 +13,8 @@ import { isUnderSavageAge, UNDERAGE_REPLY } from './age';
 import { muscleSetsInWorkout, setTopWeight, setTypeOf } from '../store';
 import type { Workout } from '../types';
 import { muscleReadiness } from '../recovery';
-import { computePlaybook, playForWeekday } from '../playbook';
+import { playForWeekday } from '../playbook';
+import { computePlaybookGated } from '../playbookGated';
 import { usualSessionsPerWeek } from './facts';
 import { isDeloadWeek, planDayFor } from './plan';
 import { describeMemory, soreFor } from './memory';
@@ -931,7 +932,7 @@ export const INTENTS_FIFTH: Intent[] = [
         );
       const muscles =
         day?.muscles ??
-        playForWeekday(computePlaybook(finished, c.now).plays, new Date(c.now).getDay())
+        playForWeekday(computePlaybookGated(finished, c.now).plays, new Date(c.now).getDay())
           ?.coverage.filter((x) => x.primary)
           .map((x) => x.muscle) ??
         [];

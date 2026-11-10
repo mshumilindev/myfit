@@ -39,7 +39,8 @@ import { haversineM } from '../../data/gymProviders';
 import { startPlaySession } from '../../data/programMine';
 import { equipmentLabel } from '../../components/Muscle';
 import { useGymStep } from '../../components/useGymStep';
-import { computePlaybook, playForWeekday, type Play, type PlaySuggestion } from '../../playbook';
+import { playForWeekday, type Play, type PlaySuggestion } from '../../playbook';
+import { computePlaybookGated } from '../../playbookGated';
 import { volumeWeakPoints } from '../../weakpoints';
 import { activeGym, fixCandidates, type FixCandidate } from '../../fixit';
 import { deloadSuggestion, muscleFatigue, type FatigueLevel } from '../../fatigue';
@@ -890,7 +891,7 @@ function PlaybookWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const s = trs(locale);
   const hour = Math.floor(now / HOUR);
   const finished = useMemo(() => finishedOf(store.workouts), [store.workouts]);
-  const plays = useMemo(() => computePlaybook(finished, hour * HOUR).plays, [finished, hour]);
+  const plays = useMemo(() => computePlaybookGated(finished, hour * HOUR).plays, [finished, hour]);
   const { withGym, gymPicker } = useGymStep();
   const open = () => shell.goPlaybook();
   if (!plays.length)
@@ -1377,7 +1378,7 @@ function GymWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   // XL only: does today's usual play fit this gym's kit?
   const fit = useMemo(() => {
     if (size !== 'XL' || !gym) return null;
-    const plays = computePlaybook(finished, hour * HOUR).plays;
+    const plays = computePlaybookGated(finished, hour * HOUR).plays;
     const play = playForWeekday(plays, new Date(hour * HOUR).getDay()) ?? plays[0];
     if (!play) return null;
     const lifts = play.exercises.filter((e) => e.kind === 'strength');

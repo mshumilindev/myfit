@@ -65,7 +65,8 @@ import {
   workoutVolumeKg,
 } from '../../store';
 import type { Exercise, SetEntry, Workout } from '../../types';
-import { computePlaybook, playForWeekday, type Play, type PlaybookResult } from '../../playbook';
+import { playForWeekday, type Play, type PlaybookResult } from '../../playbook';
+import { computePlaybookGated } from '../../playbookGated';
 import { buildDay, warmupRamp, type GeneratedDay } from '../../sessionBuilder';
 import { healthBuildCtx } from '../../healthBuild';
 import { workoutCalories } from '../../activities';
@@ -179,7 +180,7 @@ let PB_CACHE: { src: Workout[]; day: number; res: PlaybookResult } | null = null
 function playbookOf(ctx: WidgetCtx): PlaybookResult {
   const day = dayKey(ctx.now);
   if (PB_CACHE && PB_CACHE.src === ctx.store.workouts && PB_CACHE.day === day) return PB_CACHE.res;
-  const res = computePlaybook(finishedOf(ctx), ctx.now);
+  const res = computePlaybookGated(finishedOf(ctx), ctx.now);
   PB_CACHE = { src: ctx.store.workouts, day, res };
   return res;
 }

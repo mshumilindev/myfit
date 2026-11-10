@@ -32,6 +32,15 @@ export function atlasAvailable(): boolean {
   }
 }
 
+/** Playbook: without it nothing reads the learned plays (`playbookGated.ts`); screens use `usePlaybookOn`. */
+export function playbookAvailable(): boolean {
+  try {
+    return addonAvailable('playbook');
+  } catch {
+    return false;
+  }
+}
+
 export function useGoalsOn(): boolean {
   return useAddonOrBase('goals');
 }

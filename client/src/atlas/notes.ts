@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { useT, fmtBodyWeightKg } from '../i18n';
-import { computePlaybook } from '../playbook';
+import { computePlaybookGated } from '../playbookGated';
 import { planDayFor } from './plan';
 import { fmtCountdown } from '../restTimer';
 import { localizedExerciseName } from '../data/exerciseNames';
@@ -60,7 +60,7 @@ export function buildNotes(
   facts.push(
     ...dayFacts({
       finished,
-      plays: computePlaybook(finished, now).plays,
+      plays: computePlaybookGated(finished, now).plays,
       sleeps: s.sleeps,
       body: s.bodyMetrics,
       now,

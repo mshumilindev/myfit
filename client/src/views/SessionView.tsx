@@ -240,7 +240,8 @@ import { EQUIPMENT_IDS } from '../data/equipment';
 import { finishedLiftTarget } from '../liftTarget';
 import { fmtWeightKg, fmtWeightValue } from '../fmtWeight';
 import { starterPlan } from '../starterPlan';
-import { computePlaybook, playForWeekday, type Play } from '../playbook';
+import { playForWeekday, type Play } from '../playbook';
+import { computePlaybookGated } from '../playbookGated';
 import { equipmentById } from '../data/equipmentCatalog';
 import { muscleTintClass, photoTintClass } from '../photoTint';
 import { GymKitCard, GymKitTray, GymKitUndo } from '../components/GymKit';
@@ -1951,7 +1952,10 @@ export function SessionView(props: {
                   // Enough history for this weekday → offer the whole day;
                   // otherwise just start with this (the custom scenario).
                   const play = playbookOn
-                    ? playForWeekday(computePlaybook(finished, now).plays, new Date(at).getDay())
+                    ? playForWeekday(
+                        computePlaybookGated(finished, now).plays,
+                        new Date(at).getDay(),
+                      )
                     : null;
                   if (play) setPlaySheet({ play, hero: hero! });
                   else openPick(hero!);
