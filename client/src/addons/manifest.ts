@@ -1,6 +1,7 @@
 /**
- * Add-on registry (SPO-511). One entry per store item. Owner rule (06.11): the apps are Nutrition, Apex, Users,
- * Gym, Coach and Learn; everything else in the store — Health, Sleep, Atlas and their extras — is an add-on; looks are single `theme` items.
+ * Add-on registry (SPO-511). One entry per store item. Owner rule (10.11): the apps are Gym, Apex, Coach, plus Nutrition
+ * and Music (coming soon). Users and Learn are not apps or add-ons. Everything else in the store — Health, Sleep, Activities,
+ * Home workouts, Goals, Playbook, Atlas and the Coach extras (Live, Signals, Notes, Team) — is an add-on (Mastery is a module of Apex); looks are single `theme` items.
  * `parent` is a dependency (enabling the item enables its parent), not a claim that the parent is an app.
  * The store (`store-kit/`) and the shell read this list; features stay in the core until each one is stripped
  * into its own module (SPO-518/519). `roles` says who may see and enable the item — a role never sees the
