@@ -82,7 +82,7 @@ export function Discover({
         <DiscoverBento role={role} ctx={ctx} go={go} />
       )}
       {rec.length > 0 && (
-        <section className="sk-mt24">
+        <section>
           <SkList>
             <div className="as-rec-head">
               <h2 className="sk-t-h2">{st.recommended}</h2>
@@ -96,7 +96,7 @@ export function Discover({
       )}
       {/* The Themes tile lives in the bento; the list stays only under the progress hero, which has no bento. */}
       {nextMode === 'progress' && themeIds.length > 0 && (
-        <section className="sk-mt24">
+        <section>
           <SkList>
             <div className="as-rec-head">
               <h2 className="sk-t-h2">{st.discoverThemes}</h2>
@@ -152,7 +152,7 @@ export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
           </SkChip>
         ))}
       </SkChips>
-      <div className="sk-mt16 as-apps-cols">
+      <div className="as-apps-cols">
         {halves(shown, wide).map((part, i) => (
           <Rows key={i} ids={part.map((m) => m.id)} ctx={ctx} />
         ))}
@@ -214,7 +214,7 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
           // With no app groups the standalone rows fill both columns on a wide screen (first half, second half).
           halves(standalone, parents.length === 0 && wide).map((part, i) =>
             part.length > 0 ? (
-              <section key={i} className="sk-mt24">
+              <section key={i}>
                 <Rows ids={part.map((m) => m.id)} ctx={ctx} />
               </section>
             ) : null,
@@ -222,7 +222,7 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
         {parents.map((p) => {
           const pm = addonById(p);
           return (
-            <section key={p} className="sk-mt24">
+            <section key={p}>
               <div className="sk-rowf sk-g8 sk-mb8">
                 {pm && <TileOf st={st} m={pm} size={32} />}
                 <h2 className="sk-t-h2">{st.forApp(itemName(st, p))}</h2>
@@ -253,11 +253,7 @@ export function Themes({ role, ctx }: { role: Role; ctx: StoreCtx }) {
       />
     );
   }
-  return (
-    <div className="sk-mt16">
-      <Rows ids={ids} ctx={ctx} />
-    </div>
-  );
+  return <Rows ids={ids} ctx={ctx} />;
 }
 
 function Group({
@@ -272,7 +268,7 @@ function Group({
   query: string;
 }) {
   return (
-    <section className="sk-mt24">
+    <section>
       <div className="sk-t-e sk-mb8">{label}</div>
       <Rows ids={ids} ctx={ctx} query={query} />
     </section>
@@ -314,8 +310,8 @@ export function Search({
             <SkIcon name="search" small />
             {st.searchHint}
           </div>
-          <div className="sk-t-e sk-mt24">{st.tryFor}</div>
-          <div className="sk-rowf sk-g8 sk-wrap sk-mt12">
+          <div className="sk-t-e">{st.tryFor}</div>
+          <div className="sk-rowf sk-g8 sk-wrap">
             {suggestions.map((id) => (
               <SkChip key={id} onClick={() => setQuery(itemName(st, id))}>
                 {itemName(st, id)}
@@ -352,7 +348,7 @@ export function Search({
         </SkEmpty>
       ) : (
         <>
-          <div className="sk-t-s sk-mt16" aria-live="polite">
+          <div className="sk-t-s" aria-live="polite">
             {st.resultsCount(ids.length)}
           </div>
           <div className="as-cols">

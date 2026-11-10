@@ -296,7 +296,13 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
         }
       >
         {view !== 'item' && view !== 'manage' && !runView && (
-          <div className="as-main-head">
+          <div
+            className={`as-main-head${
+              view === 'discover' || view === 'search' || (pushed && pushed.target === view)
+                ? ''
+                : ' as-head-wide'
+            }`}
+          >
             <h1
               className={`sk-t-h1d as-desk-title${pushed && pushed.target === view ? ' as-title-pushed' : ''}`}
             >
@@ -323,7 +329,7 @@ export function StoreApp({ role, onOpenProfile }: { role: Role; onOpenProfile: (
           </div>
         )}
         {!online && !runView && (
-          <SkOfflineBar className="sk-mb16" icon={<SkIcon name="bell" />} title={st.offlineTitle}>
+          <SkOfflineBar icon={<SkIcon name="bell" />} title={st.offlineTitle}>
             {st.offlineBody}
           </SkOfflineBar>
         )}

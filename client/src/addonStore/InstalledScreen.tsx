@@ -19,7 +19,7 @@ export function Installed({ ctx, go }: { ctx: StoreCtx; go: (v: string, id?: str
   const items = ADDONS.filter((m) => enabled.has(m.id));
   if (!items.length) {
     return (
-      <SkCard className="sk-mt16 sk-p20">
+      <SkCard className="sk-p20">
         <SkEmpty
           icon={
             <SkTile letter="" tone={5} size={64}>
@@ -43,7 +43,7 @@ export function Installed({ ctx, go }: { ctx: StoreCtx; go: (v: string, id?: str
     (m) => m.kind !== 'module' && !(appOfItem(m) && enabled.has(appOfItem(m)!)),
   );
   return (
-    <div className="sk-mt16 as-groups">
+    <div className="as-groups">
       {apps.map((app) => {
         const kids = itemsOfApp(app.id).filter((a) => !a.soon);
         const on = kids.filter((k) => enabled.has(k.id)).length;

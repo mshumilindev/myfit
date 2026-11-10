@@ -17,6 +17,9 @@
   --sk-sp-10: 2rem;
   --sk-sp-12: 2.5rem;
   --sk-sp-16: 3.5rem;
+  /* One gap between the blocks of a page (chips, lists, sections, cards) and one space under the header. */
+  --sk-gap-block: var(--sk-sp-8);
+  --sk-pad-top: var(--sk-sp-5);
   /* radius */
   --sk-r-xs: 0.375rem;
   --sk-r-sm: 0.625rem;

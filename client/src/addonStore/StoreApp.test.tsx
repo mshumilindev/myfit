@@ -180,7 +180,17 @@ describe('StoreApp', () => {
   });
   it('Discover turns into the progress hero when most of the catalog is installed', () => {
     enableAddons(
-      ['health', 'sleep', 'activities', 'goals', 'playbook', 'theme-cyberpunk'],
+      [
+        'health',
+        'sleep',
+        'activities',
+        'goals',
+        'playbook',
+        'home-sets',
+        'atlas',
+        'theme-cyberpunk',
+        'theme-brass-glass',
+      ],
       'member',
     );
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
@@ -199,6 +209,8 @@ describe('StoreApp', () => {
         'atlas',
         'apex',
         'theme-cyberpunk',
+        'theme-brass-glass',
+        'holiday-themes',
       ],
       'member',
     );

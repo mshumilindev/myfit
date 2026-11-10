@@ -13,7 +13,7 @@ export function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="sk-mt24">
+    <section>
       <SkSectionHeader title={title} aside={aside} />
       {children}
     </section>

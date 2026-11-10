@@ -45,15 +45,17 @@ export function Installing({
   });
   return (
     <>
-      <SkStatusHeader
-        status={partial ? 'bad' : 'progress'}
-        icon={<SkIcon name={partial ? 'alert' : 'sync'} />}
-        title={partial ? st.almostDone : st.installingTitle}
-      />
-      <div className="sk-t-s sk-mt8">
-        {partial ? st.installedOf(doneCount, run.ids.length) : st.installingSub}
+      <div className="sk-col sk-g8">
+        <SkStatusHeader
+          status={partial ? 'bad' : 'progress'}
+          icon={<SkIcon name={partial ? 'alert' : 'sync'} />}
+          title={partial ? st.almostDone : st.installingTitle}
+        />
+        <div className="sk-t-s">
+          {partial ? st.installedOf(doneCount, run.ids.length) : st.installingSub}
+        </div>
       </div>
-      <div className="sk-mt16">
+      <div>
         <SkSteps
           items={steps}
           label={st.installingTitle}
@@ -73,9 +75,11 @@ export function InstallDone({ ctx, ids }: { ctx: StoreCtx; ids: readonly string[
   const { st } = ctx;
   return (
     <>
-      <SkStatusHeader status="ok" icon={<SkIcon name="check" />} title={st.doneTitle} />
-      <div className="sk-t-s sk-mt8">{st.doneSub}</div>
-      <div className="sk-mt16">
+      <div className="sk-col sk-g8">
+        <SkStatusHeader status="ok" icon={<SkIcon name="check" />} title={st.doneTitle} />
+        <div className="sk-t-s">{st.doneSub}</div>
+      </div>
+      <div>
         <SkList>
           {ids.map((id) => {
             const m = addonById(id);

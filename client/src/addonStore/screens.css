@@ -2,7 +2,7 @@
 .as-cols {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  column-gap: var(--sk-sp-8);
+  gap: var(--sk-gap-block) var(--sk-sp-8);
 }
 @media (min-width: 45rem) {
   .as-cols {
@@ -15,8 +15,13 @@
   gap: var(--sk-sp-5);
 }
 .as-main-head {
-  padding-top: var(--sk-sp-5);
-  padding-bottom: var(--sk-sp-6);
+  padding: 0;
+}
+/* On a phone the title lives in the app header and only Discover and Search carry the field: nothing else to show. */
+@media (max-width: 44.99rem) {
+  .as-head-wide {
+    display: none;
+  }
 }
 .as-desk-title {
   display: none;
@@ -24,7 +29,7 @@
 @media (min-width: 45rem) {
   .as-desk-title {
     display: block;
-    margin: 0 0 var(--sk-sp-6);
+    margin: 0;
   }
   .as-search-wrap {
     width: var(--sk-search-w);
@@ -67,7 +72,7 @@
 }
 /* Item page (boards 05, 06): hero spacing, preview row scrolls sideways, stats share the card equally. */
 .as-item-head {
-  padding-top: var(--sk-sp-4);
+  padding: 0;
 }
 .as-previews {
   overflow-x: auto;
@@ -116,14 +121,14 @@
   flex-direction: column;
   min-height: 100%;
 }
-.as-sticky-act {
+.sk-shl-in.sk-shl-in > .as-sticky-act {
   margin-top: auto;
 }
 /* A place opened from another one has no title in its header (it shows Back), so the title moves into the page. */
 @media (max-width: 44.99rem) {
   .as-title-pushed {
     display: block;
-    margin: 0 0 var(--sk-sp-6);
+    margin: 0;
   }
 }
 
@@ -142,7 +147,6 @@
   align-items: center;
   justify-content: center;
   gap: var(--sk-sp-4);
-  margin-top: var(--sk-sp-8);
 }
 
 .as-rec-head {
@@ -180,6 +184,7 @@
 .as-item-grid {
   display: flex;
   flex-direction: column;
+  gap: var(--sk-gap-block);
 }
 .as-o1 {
   order: 1;
@@ -208,7 +213,9 @@
   }
   .as-item-main,
   .as-item-aside {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sk-gap-block);
   }
   .as-item-act {
     display: flex;

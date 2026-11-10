@@ -20,7 +20,7 @@ export function ManageScreen({ id, ctx }: { id: string; ctx: StoreCtx }) {
         </div>
       </div>
       {kids.length > 0 && (
-        <SkCard className="as-group sk-mt24">
+        <SkCard className="as-group">
           <div className="sk-t-e as-modules-head">{st.modules}</div>
           {kids.map((k) => (
             <SkRow

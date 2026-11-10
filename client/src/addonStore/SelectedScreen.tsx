@@ -37,7 +37,7 @@ export function Selected({ ctx, go }: { ctx: StoreCtx; go: (v: string) => void }
   return (
     <>
       <div className="sk-t-s sk-mt4">{st.selectedSub}</div>
-      <div className="sk-mt16">
+      <div>
         <SkList>
           {items.map((m) => {
             // Modules start off: only the ones ticked here are switched on with the item.

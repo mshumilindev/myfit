@@ -40,7 +40,7 @@ export function ItemPage({
 }) {
   const { st } = ctx;
   const m = addonById(id);
-  if (!m) return <div className="sk-t-s sk-mt16">{st.noResults}</div>;
+  if (!m) return <div className="sk-t-s">{st.noResults}</div>;
   const parent = m.parent ? addonById(m.parent) : undefined;
   const children = itemsOfApp(m.id).filter((a) => !a.soon && a.kind !== 'module');
   const modules = itemsOfApp(m.id).filter((a) => a.kind === 'module');
@@ -64,7 +64,7 @@ export function ItemPage({
         </div>
       </div>
       {parent && (
-        <SkCard className="sk-p12 sk-mt16 sk-rowf sk-g12">
+        <SkCard className="sk-p12 sk-rowf sk-g12">
           <TileOf st={st} m={parent} size={40} />
           <div className="sk-f1">
             <div className="sk-t-b sk-b6">{relOf(m, ctx)}</div>
@@ -77,7 +77,7 @@ export function ItemPage({
       <div className="as-item-grid">
         <div className="as-item-main">
           <div className="as-o1">
-            <div className="sk-t-e sk-mt24">{st.preview}</div>
+            <div className="sk-t-e">{st.preview}</div>
             <div className="sk-rowf sk-g12 sk-mt12 as-previews">
               <SkPreviewPhone caption={name}>
                 <SkPvBox tall="plot">
@@ -104,7 +104,7 @@ export function ItemPage({
         <div className="as-item-aside">
           <div className="as-o2">
             {(m.kind === 'app' || children.length > 0 || modules.length > 0) && (
-              <SkCard className="sk-p16 sk-mt24 as-stats">
+              <SkCard className="sk-p16 as-stats">
                 {(m.kind === 'app' || children.length > 0) && (
                   <SkStat spec value={children.length} caption={st.statAddons} />
                 )}
@@ -172,7 +172,7 @@ function ComingSoon({ id, ctx }: { id: string; ctx: StoreCtx }) {
           <div className="sk-t-s sk-mt4">{itemDesc(st, id)}</div>
         </div>
       </div>
-      <SkNote icon="shield" className="sk-mt16">
+      <SkNote icon="shield">
         <b>{st.notAvailableLead}</b> {st.notAvailableRest}
       </SkNote>
       {plan && (

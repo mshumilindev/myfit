@@ -30,15 +30,22 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding-inline: var(--sk-sp-6);
-  padding-bottom: var(--sk-sp-6);
+  padding-block: var(--sk-pad-top) var(--sk-sp-6);
 }
 /* Only a floating tray needs room under the content; without one the page ends where its content ends. */
 .sk-shl-tray-on .sk-shl-main {
   padding-bottom: var(--sk-scroll-pad-b);
 }
+/* The blocks of a page sit in one column with one gap; a block never brings its own top margin. */
 .sk-shl-in {
   max-width: var(--sk-content-max);
   margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-gap-block);
+}
+.sk-shl-in.sk-shl-in > * {
+  margin-block: 0;
 }
 .sk-shl-tray {
   position: absolute;
