@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { WaterProgress, waterLevel } from './WaterProgress';
 
 afterEach(cleanup);
@@ -25,6 +25,24 @@ describe('WaterProgress', () => {
   it('turns the water against the phone: the tilt goes into --wp-tilt', () => {
     render(<WaterProgress value={50} label="x" angle={30} />);
     expect(screen.getByRole('progressbar').style.getPropertyValue('--wp-tilt')).toBe('-30deg');
+  });
+  it('asks for motion access on the first tap anywhere (iOS), then follows the phone', async () => {
+    const request = vi.fn().mockResolvedValue('granted');
+    vi.stubGlobal(
+      'DeviceOrientationEvent',
+      Object.assign(function () {}, { requestPermission: request }),
+    );
+    render(<WaterProgress value={50} label="x" />);
+    expect(request).not.toHaveBeenCalled();
+    await act(async () => {
+      fireEvent.pointerUp(document.body);
+    });
+    expect(request).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      window.dispatchEvent(Object.assign(new Event('deviceorientation'), { gamma: 30, beta: 0 }));
+    });
+    expect(screen.getByRole('progressbar').style.getPropertyValue('--wp-tilt')).toBe('-30deg');
+    vi.unstubAllGlobals();
   });
   it('shows no permission button without a sensor', () => {
     render(<WaterProgress value={50} label="x" />);

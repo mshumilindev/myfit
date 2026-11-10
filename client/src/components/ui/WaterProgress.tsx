@@ -62,6 +62,14 @@ export function useGravityAngle(enabled: boolean) {
       /* denied: the water stays level */
     }
   };
+  // iOS (also the installed app) only asks from a tap, and the tank itself is a tiny target nobody knows to press:
+  // the first tap anywhere on the page is the gesture (the system prompt for motion access shows once).
+  useEffect(() => {
+    if (!needsPermission) return;
+    const onTap = () => void request();
+    document.addEventListener('pointerup', onTap, { once: true, capture: true });
+    return () => document.removeEventListener('pointerup', onTap, { capture: true });
+  }, [needsPermission]);
   return { angle, needsPermission, request };
 }
 
