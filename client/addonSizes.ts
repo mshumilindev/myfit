@@ -6,8 +6,9 @@
  * app shell already loads. Shared chunks count for every add-on that needs them. Modules live inside their app's chunks.
  */
 import { gzipSync } from 'node:zlib';
-import { relative } from 'node:path';
-import { build, type Plugin } from 'vite';
+import { existsSync, readFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import type { Plugin } from 'vite';
 import entries from './src/addons/sizeEntries.json';
 
 export interface ChunkNode {
@@ -50,9 +51,6 @@ export function computeAddonSizes(
   return out;
 }
 
-/** The last measurement of this process: a build sets it; the dev server serves it (`/addon-sizes.json`). */
-let measured: Record<string, number> | null = null;
-
 export function addonSizes(): Plugin {
   let root = process.cwd();
   return {
@@ -61,45 +59,19 @@ export function addonSizes(): Plugin {
       root = c.root;
     },
     /**
-     * Dev server: there are no chunks in dev, so it measures with a silent in-memory production build (once at start, and again
-     * a minute after the last source change), and serves the result at the same URL the built app reads.
+     * Dev server: no chunks exist in dev and a measuring build inside the dev server ate 26 GB of RAM (10.11), so dev never
+     * builds. It serves the file of the last `npm run build` (dist/addon-sizes.json) when there is one; otherwise no size shows.
      */
     configureServer(server) {
-      let running = false;
-      let failure = '';
-      let timer: ReturnType<typeof setTimeout> | undefined;
-      const run = async () => {
-        if (running) return;
-        running = true;
-        failure = '';
-        try {
-          await build({
-            configFile: server.config.configFile,
-            mode: 'production',
-            logLevel: 'silent',
-            build: { write: false },
-          });
-        } catch (e) {
-          // A broken source file mid-edit: keep the last measurement and say why there is none (read at the URL below).
-          failure = e instanceof Error ? e.message : String(e);
-        } finally {
-          running = false;
-        }
-      };
       server.middlewares.use('/addon-sizes.json', (_req, res) => {
-        if (!measured) {
+        const file = join(root, 'dist', 'addon-sizes.json');
+        if (!existsSync(file)) {
           res.statusCode = 404;
-          res.end(failure || (running ? 'measuring' : ''));
+          res.end();
           return;
         }
         res.setHeader('content-type', 'application/json');
-        res.end(JSON.stringify(measured));
-      });
-      void run();
-      server.watcher.on('change', (f) => {
-        if (!f.replace(/\\/g, '/').includes('/src/')) return;
-        clearTimeout(timer);
-        timer = setTimeout(() => void run(), 60_000);
+        res.end(readFileSync(file));
       });
     },
     generateBundle(_, bundle) {
@@ -119,11 +91,11 @@ export function addonSizes(): Plugin {
           bytes,
         };
       }
-      measured = computeAddonSizes(graph, entries);
+      const sizes = computeAddonSizes(graph, entries);
       this.emitFile({
         type: 'asset',
         fileName: 'addon-sizes.json',
-        source: JSON.stringify(measured),
+        source: JSON.stringify(sizes),
       });
     },
   };
