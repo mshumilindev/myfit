@@ -4,6 +4,8 @@
  * Story geometry audit (SPO-103 / SPO-28 / SPO-113): opens every Storybook story in a real browser across locales,
  * phone widths and a large system font, and reports layout that breaks:
  *   page-hscroll    the page scrolls sideways (document wider than the viewport)
+ *   body-hscroll    <body> content is wider than the window although <html> hides it (overflow-x:hidden); known stories are listed in
+ *                   scripts/story-audit-baseline.json (a ratchet: it only shrinks), a new one fails (SPO-144)
  *   drawer-overflow a drawer / dialog scrolls sideways or a child sticks out of it (outside a deliberate scroller)
  *   text-clipped    text cut off by overflow:hidden without an ellipsis or a line clamp (a label that does not fit)
  *   label-wrapped   a button / tab / chip / segmented label (--headings 1: also h1-h3) that falls onto a second line (SPO-62: translated
@@ -38,6 +40,11 @@ const extraGlobals = arg('globals', '');
 /** Headings wrap by nature (a long translated or user-written title); report them only on request: --headings 1. */
 const withHeadings = arg('headings', '0') === '1';
 
+/** Known body-hscroll stories (ratchet): `<story id>` → why. A story that no longer overflows must be removed from the file. */
+const BASELINE = JSON.parse(
+  fs.readFileSync(new URL('./story-audit-baseline.json', import.meta.url), 'utf8'),
+);
+
 const index = await (await fetch(`${url}/index.json`)).json();
 const allIds = Object.entries(index.entries)
   .filter(([id, e]) => e.type === 'story' && id.includes(filter))
@@ -57,6 +64,10 @@ const probe = (withHeadings) => {
   };
   if (document.documentElement.scrollWidth > innerWidth + 1)
     found.push(['page-hscroll', `${document.documentElement.scrollWidth} > ${innerWidth}`]);
+  // SPO-144: the app sets overflow-x:hidden on <html>, which pins documentElement.scrollWidth to the window, so content
+  // wider than the screen only shows in <body>'s scrollWidth.
+  else if (document.body.scrollWidth > innerWidth + 1)
+    found.push(['body-hscroll', `body ${document.body.scrollWidth} > ${innerWidth}`]);
   for (const root of document.querySelectorAll('.sheet, .dialog, [role=dialog], .sdp, .uipanel')) {
     const rb = root.getBoundingClientRect();
     if (root.scrollWidth > root.clientWidth + 1)
@@ -306,8 +317,10 @@ await runPool(items, concurrency, async ({ w, loc, id }, worker) => {
       await page.waitForTimeout(400);
       const found = await page.evaluate(probe, withHeadings);
       probes++;
-      for (const [kind, detail] of found)
+      for (const [kind, detail] of found) {
+        if (kind === 'body-hscroll' && BASELINE.bodyHscroll?.[id]) continue;
         report.push({ id, width: w, font: f, locale: loc, kind, detail });
+      }
     } catch (e) {
       probes++;
       report.push({
