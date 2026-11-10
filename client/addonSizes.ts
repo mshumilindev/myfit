@@ -66,10 +66,12 @@ export function addonSizes(): Plugin {
      */
     configureServer(server) {
       let running = false;
+      let failure = '';
       let timer: ReturnType<typeof setTimeout> | undefined;
       const run = async () => {
         if (running) return;
         running = true;
+        failure = '';
         try {
           await build({
             configFile: server.config.configFile,
@@ -77,8 +79,9 @@ export function addonSizes(): Plugin {
             logLevel: 'silent',
             build: { write: false },
           });
-        } catch {
-          // A broken source file mid-edit: keep the last measurement.
+        } catch (e) {
+          // A broken source file mid-edit: keep the last measurement and say why there is none (read at the URL below).
+          failure = e instanceof Error ? e.message : String(e);
         } finally {
           running = false;
         }
@@ -86,7 +89,7 @@ export function addonSizes(): Plugin {
       server.middlewares.use('/addon-sizes.json', (_req, res) => {
         if (!measured) {
           res.statusCode = 404;
-          res.end();
+          res.end(failure || (running ? 'measuring' : ''));
           return;
         }
         res.setHeader('content-type', 'application/json');
