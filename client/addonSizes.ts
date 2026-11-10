@@ -33,6 +33,8 @@ export function computeAddonSizes(
   chunks: readonly SizeChunk[],
   parts: Readonly<Record<string, SizePart>>,
   cssBytes: (file: string) => number = () => 0,
+  /** false: a part may match nothing (used for the eager-only view, where most add-on code is absent by design). */
+  strict = true,
 ): Record<string, number> {
   const prefixes = Object.entries(parts).flatMap(([id, p]) => (p.js ?? []).map((x) => ({ id, x })));
   const owner = (path: string): string | undefined =>
@@ -49,11 +51,12 @@ export function computeAddonSizes(
       for (const p of prefixes) if (p.id === id && path.startsWith(p.x)) hit.add(`${id}:${p.x}`);
     }
   }
-  for (const p of prefixes) {
+  for (const p of strict ? prefixes : []) {
     if (!hit.has(`${p.id}:${p.x}`))
       throw new Error(`addon-sizes: ${p.id}: "${p.x}" matches no module`);
   }
   for (const [id, p] of Object.entries(parts)) {
+    if (!strict) break; // theme CSS is never part of the eager JS view
     for (const f of p.css ?? []) out[id] += cssBytes(f);
   }
   return Object.fromEntries(Object.entries(out).map(([id, v]) => [id, Math.round(v)]));
@@ -86,6 +89,17 @@ export function addonSizes(): Plugin {
       const gz = (s: string | Uint8Array) => gzipSync(s, { level: 9 }).length;
       const src = join(root, 'src');
       const chunks: SizeChunk[] = [];
+      const eagerChunks: SizeChunk[] = [];
+      // Chunks the first paint pulls in: the entry and everything it imports statically (not `import()`).
+      const eager = new Set<string>();
+      const walk = (f: string) => {
+        const c = bundle[f];
+        if (!c || c.type !== 'chunk' || eager.has(f)) return;
+        eager.add(f);
+        c.imports.forEach(walk);
+      };
+      for (const item of Object.values(bundle))
+        if (item.type === 'chunk' && item.isEntry) walk(item.fileName);
       for (const item of Object.values(bundle)) {
         if (item.type !== 'chunk') continue;
         // The main-thread Atlas knowledge base exists only for browsers without module workers (the service worker skips it).
@@ -100,12 +114,25 @@ export function addonSizes(): Plugin {
           modules[relative(src, id).replace(/\\/g, '/')] = m.renderedLength;
         }
         chunks.push({ bytes, modules });
+        if (eager.has(item.fileName)) eagerChunks.push({ bytes, modules });
       }
       // Only the app's own build: Storybook and other builds reuse this config but have none of the app's modules.
       if (!chunks.some((c) => 'main.tsx' in c.modules)) return;
       const sizes = computeAddonSizes(chunks, entries as Record<string, SizePart>, (f) =>
         gz(readFileSync(join(src, f))),
       );
+      // What each add-on keeps in the code every user downloads at start (it must trend to 0 as the code splits out).
+      const eagerSizes = computeAddonSizes(
+        eagerChunks,
+        entries as Record<string, SizePart>,
+        () => 0,
+        false,
+      );
+      this.emitFile({
+        type: 'asset',
+        fileName: 'addon-eager.json',
+        source: JSON.stringify(eagerSizes),
+      });
       this.emitFile({ type: 'asset', fileName: 'addon-sizes.json', source: JSON.stringify(sizes) });
     },
   };
