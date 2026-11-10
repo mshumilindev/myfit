@@ -151,7 +151,12 @@ import { computeStreak } from './streak';
 import { currentUid, getRole, callFn } from './api';
 import { addonAvailable, addonsPref } from './addons/queue'; // importing it also registers the add-on lists for account sync
 import { geolocationGranted, getCurrentPositionOnce, readPosCache } from './geoPosition';
-import { healthAddonsKey, healthAddonsOn, restPeriodShown } from './healthAddons';
+import {
+  healthAddonInstalled,
+  healthAddonsKey,
+  healthAddonsOn,
+  restPeriodShown,
+} from './healthAddons';
 import { maskAddons } from './addons/maskStore';
 import {
   markPrefsLoaded,
@@ -694,23 +699,46 @@ export interface StoredLimits {
   injuries: readonly Injury[];
   conditions: readonly ChronicCondition[];
 }
-let limitsMemo: { i: Injury[]; c: ChronicCondition[]; out: StoredLimits } | null = null;
+let limitsMemo: {
+  i: Injury[];
+  c: ChronicCondition[];
+  inj: boolean;
+  con: boolean;
+  out: StoredLimits;
+} | null = null;
 /**
- * RESTRICTION path (SPO-290 owner decision): the stored injuries and conditions, whatever the consent says. An active
- * injury needing rest, a pregnancy or a limiting condition the person once entered keep capping workout generation,
- * protecting the streak and pausing the cycle even when the feature is off or its consent is unknown. They only ever
- * restrict: this is for `healthBuildCtx`, `cycleSuppressedBy` and the like, NEVER for anything shown, shared or sent
- * (those read `useStore()` / `getStoreState()`, the masked view). Stable between changes.
+ * RESTRICTION path (SPO-290): the stored injuries and conditions, whatever the CONSENT says. An active injury needing rest,
+ * a pregnancy or a limiting condition the person once entered keep capping workout generation, protecting the streak and
+ * pausing the cycle even when consent is unknown. They only ever restrict: this is for `healthBuildCtx`, `cycleSuppressedBy`
+ * and the like, NEVER for anything shown, shared or sent (those read `useStore()` / `getStoreState()`, the masked view).
+ * Owner 10.11: an add-on that is not installed counts for nothing anywhere, limits included: without Injury log its injuries
+ * are empty here, without Conditions its conditions are. The data stays stored and the limits return on re-install.
+ * Stable between changes.
  */
 export function getStoredLimits(): StoredLimits {
-  if (limitsMemo === null || limitsMemo.i !== state.injuries || limitsMemo.c !== state.conditions)
+  const inj = healthAddonInstalled('injury-log');
+  const con = healthAddonInstalled('conditions');
+  if (
+    limitsMemo === null ||
+    limitsMemo.i !== state.injuries ||
+    limitsMemo.c !== state.conditions ||
+    limitsMemo.inj !== inj ||
+    limitsMemo.con !== con
+  )
     limitsMemo = {
       i: state.injuries,
       c: state.conditions,
-      out: { injuries: state.injuries, conditions: state.conditions },
+      inj,
+      con,
+      out: {
+        injuries: inj ? state.injuries : EMPTY_INJURIES,
+        conditions: con ? state.conditions : EMPTY_CONDITIONS,
+      },
     };
   return limitsMemo.out;
 }
+const EMPTY_INJURIES: readonly Injury[] = [];
+const EMPTY_CONDITIONS: readonly ChronicCondition[] = [];
 export function useStoredLimits(): StoredLimits {
   return useSyncExternalStore(subscribeStore, getStoredLimits);
 }
@@ -4886,7 +4914,7 @@ export function streakProtectedPredicate(now: number = Date.now()): (day: number
   const rests = restDayKeys(undefined, now);
   // RESTRICTION path (SPO-290 owner decision): the stored injuries protect the streak even with the Injuries consent
   // off. Raw state on purpose; it only decides which days count, and nothing about the injury is shown or sent.
-  const rehab = state.injuries.filter(
+  const rehab = getStoredLimits().injuries.filter(
     (i) => (i.reason === 'injury' || i.reason === 'surgery') && i.startDay <= today,
   );
   const program = prescribedTrainingDays();

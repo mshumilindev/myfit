@@ -52,6 +52,7 @@ vi.mock('./vaultIO', async (orig) => {
 });
 
 import * as store from './store';
+import { disableAddons, enableAddons } from './addons/enabledSet';
 import { vault } from './vaultIO';
 import { openSealedLocal } from './testVault';
 import { newAlcoholEntry } from './alcohol';
@@ -98,6 +99,11 @@ describe('safety limits keep restricting while the feature is off (SPO-290 owner
   let stop: () => void;
   beforeEach(async () => {
     localStorage?.clear?.();
+    // clear() drops the seeded add-on list; these contracts are about the consent being off, so the add-ons are installed.
+    enableAddons(
+      ['health', 'injury-log', 'conditions', 'cycle', 'nicotine', 'alcohol', 'supplements'],
+      'member',
+    );
     resetHealthGateForTests(true);
     for (const f of ['injuries', 'chronic', 'cycle', 'nicotine', 'alcohol', 'supplements'] as const)
       store.deleteStoredHealthData(f);
@@ -120,6 +126,19 @@ describe('safety limits keep restricting while the feature is off (SPO-290 owner
     expect(store.activeInjury()).toBeNull();
     expect(store.activeInjuryList()).toEqual([]);
     expect(store.getStoreState().injuries).toEqual([]);
+  });
+
+  it('OWNER 10.11: with the Injury log add-on NOT installed even the stored limit counts for nothing; it returns on re-install', () => {
+    const now = Date.now();
+    const today = dayKey(now);
+    injuredThenOff();
+    expect(store.getStoredLimits().injuries.length).toBe(1);
+    disableAddons(['injury-log'], 'member');
+    expect(store.getStoredLimits().injuries).toEqual([]);
+    expect(store.streakProtectedPredicate(now)(today - 2)).toBe(false);
+    enableAddons(['injury-log'], 'member');
+    expect(store.getStoredLimits().injuries.length).toBe(1);
+    expect(store.streakProtectedPredicate(now)(today - 2)).toBe(true);
   });
 
   it('RESTRICTION: the stored injury still protects the streak (and nothing is displayed)', () => {
