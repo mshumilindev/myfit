@@ -195,28 +195,9 @@ import {
 import { maskHealth } from './healthMask';
 import type { HealthFeature } from './legal/consents';
 import { createAlcoholCache } from './alcoholCache';
-import { alcoholCoachView } from './alcoholShare';
-import {
-  alcoholEffects,
-  alcoholEffectsFor,
-  alcoholLoad,
-  alcoholWeekActual,
-  dayKey as alcoholDayKey,
-  normalizeCheckins,
-  pendingAlcoholCheckin,
-  usualOccasionGrams,
-  type PendingCheckin,
-  type WeekActual,
-  emptyAlcoholState,
-  isAlcoholSharing,
-  cleanUsualDays,
-  normalizeAlcohol,
-  normalizeAlcoholEntry,
-  type AlcoholEffects,
-  type AlcoholLoad,
-  type DayInput,
-} from './alcohol';
-import { isAlcoholRegion, resolveAlcoholRegion } from './alcoholRegion';
+import { alc } from './alcoholRt';
+import { onTrackerReady } from './trackerRt';
+import type { PendingCheckin, WeekActual, AlcoholEffects, AlcoholLoad, DayInput } from './alcohol';
 import { createSupplementsCache } from './supplementsCache';
 import { supplementsCoachView } from './supplementsShare';
 import {
@@ -601,6 +582,12 @@ function hydrateAlcohol(): void {
 }
 vault.subscribe(hydrateAlcohol);
 if (vault.materialOrNull()) hydrateAlcohol();
+// The alcohol modules are a lazy chunk (SPO-500 I8): when they arrive, rebuild the copy through the real normaliser.
+onTrackerReady((id) => {
+  if (id !== 'alcohol') return;
+  state = { ...state, alcohol: alc.normalize(state.alcohol) };
+  emit();
+});
 /** When the vault key becomes available: open the sealed on-device supplements copy. */
 function hydrateSupplements(): void {
   void supplementsCache
@@ -791,7 +778,7 @@ let alcoholMemo: { a: AlcoholState; load: AlcoholLoad } | null = null;
 /** Weekly grams of pure alcohol, memoised on the state object (an old / missing state counts as empty). */
 export function getAlcoholLoad(): AlcoholLoad {
   if (alcoholMemo === null || alcoholMemo.a !== exposed().alcohol)
-    alcoholMemo = { a: exposed().alcohol, load: alcoholLoad(exposed().alcohol?.entries ?? []) };
+    alcoholMemo = { a: exposed().alcohol, load: alc.load(exposed().alcohol?.entries ?? []) };
   return alcoholMemo.load;
 }
 export function useAlcoholLoad(): AlcoholLoad {
@@ -804,7 +791,7 @@ export function getAlcoholEffects(): AlcoholEffects | null {
   if (alcoholEffectsMemo === null || alcoholEffectsMemo.a !== exposed().alcohol)
     alcoholEffectsMemo = {
       a: exposed().alcohol,
-      e: exposed().alcohol ? alcoholEffects(exposed().alcohol) : null,
+      e: exposed().alcohol ? alc.effects(exposed().alcohol) : null,
     };
   return alcoholEffectsMemo.e;
 }
@@ -813,7 +800,7 @@ export function useAlcoholEffects(): AlcoholEffects | null {
 }
 /** Effects for one calendar day, honouring "usually drink on" (null = nothing to apply). */
 export function getAlcoholEffectsFor(day: DayInput): AlcoholEffects | null {
-  return alcoholEffectsFor(exposed().alcohol, day);
+  return alc.effectsFor(exposed().alcohol, day);
 }
 
 let pendingMemo: { a: AlcoholState; hour: number; p: PendingCheckin | null } | null = null;
@@ -821,7 +808,7 @@ let pendingMemo: { a: AlcoholState; hour: number; p: PendingCheckin | null } | n
 export function getPendingAlcoholCheckin(now: number = Date.now()): PendingCheckin | null {
   const hour = Math.floor(now / 3_600_000);
   if (pendingMemo === null || pendingMemo.a !== exposed().alcohol || pendingMemo.hour !== hour)
-    pendingMemo = { a: exposed().alcohol, hour, p: pendingAlcoholCheckin(now, exposed().alcohol) };
+    pendingMemo = { a: exposed().alcohol, hour, p: alc.pending(now, exposed().alcohol) };
   return pendingMemo.p;
 }
 export function usePendingAlcoholCheckin(): PendingCheckin | null {
@@ -829,12 +816,12 @@ export function usePendingAlcoholCheckin(): PendingCheckin | null {
 }
 /** The week so far from the check-ins; `weekStart` = ISO weekday the week begins on (default Monday). */
 export function getAlcoholWeekActual(now: number = Date.now(), weekStart = 1): WeekActual | null {
-  return alcoholWeekActual(exposed().alcohol, now, weekStart);
+  return alc.weekActual(exposed().alcohol, now, weekStart);
 }
 
 /** The region in force: the manual choice, else detected from position / time zone / language. */
 export function getAlcoholRegion(): AlcoholRegion {
-  return resolveAlcoholRegion(exposed().alcohol?.settings?.regionOverride);
+  return alc.resolveRegion(exposed().alcohol?.settings?.regionOverride);
 }
 export function useAlcoholRegion(): AlcoholRegion {
   return useSyncExternalStore(subscribeStore, getAlcoholRegion);
@@ -3002,7 +2989,7 @@ function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): 
   const items =
     healthAddonsOn(healthSnapshot().on).chronic && state.conditionsShare !== 'off' ? rawItems : [];
   const nic = nicotineCoachView(vis.nicotine);
-  const alc = alcoholCoachView(vis.alcohol);
+  const alcView = alc.coachView(vis.alcohol);
   const facts = getSupplementTrainingFacts();
   const sup = supplementsCoachView(
     vis.supplements,
@@ -3016,7 +3003,7 @@ function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): 
   const view = {
     ...coachView(items, state.conditionsShare),
     ...(nic ? { nicotine: nic } : {}),
-    ...(alc ? { alcohol: alc } : {}),
+    ...(alcView ? { alcohol: alcView } : {}),
     ...(sup ? { supplements: sup } : {}),
   };
   const json = JSON.stringify(view);
@@ -3314,7 +3301,7 @@ function commitAlcohol(
   patch: Partial<Pick<AlcoholState, 'entries' | 'settings' | 'checkins'>>,
 ): void {
   if (!isHealthOn('alcohol')) return;
-  const cur = state.alcohol ?? emptyAlcoholState();
+  const cur = state.alcohol ?? alc.empty();
   const next: AlcoholState = {
     ...cur,
     ...patch,
@@ -3335,9 +3322,9 @@ export const getAlcohol = (): AlcoholState => exposed().alcohol;
  */
 export function saveAlcoholEntry(input: AlcoholEntry): AlcoholEntry | null | HealthWriteDenied {
   if (!isHealthOn('alcohol')) return healthWriteDenied('alcohol');
-  const e = normalizeAlcoholEntry(input);
+  const e = alc.normalizeEntry(input);
   if (!e) return null;
-  const cur = (state.alcohol ?? emptyAlcoholState()).entries;
+  const cur = (state.alcohol ?? alc.empty()).entries;
   const has = cur.some((x) => x.id === e.id);
   commitAlcohol({ entries: has ? cur.map((x) => (x.id === e.id ? e : x)) : [...cur, e] });
   return e;
@@ -3351,7 +3338,7 @@ export function removeAlcoholEntry(id: string): void {
 }
 
 function updateAlcoholSettings(patch: Partial<AlcoholSettings>): void {
-  const cur = (state.alcohol ?? emptyAlcoholState()).settings;
+  const cur = (state.alcohol ?? alc.empty()).settings;
   const settings = { ...cur, ...patch };
   if (JSON.stringify(settings) === JSON.stringify(cur)) return;
   commitAlcohol({ settings });
@@ -3365,13 +3352,13 @@ export function setAlcoholUseInCalculations(v: boolean): void {
 /** One per-surface switch. */
 export function setAlcoholSurface(surface: AlcoholSurface, on: boolean): void {
   updateAlcoholSettings({
-    surfaces: { ...(state.alcohol ?? emptyAlcoholState()).settings.surfaces, [surface]: on },
+    surfaces: { ...(state.alcohol ?? alc.empty()).settings.surfaces, [surface]: on },
   });
 }
 
 /** What a coach may see: off (default) or effects only. */
 export function setAlcoholSharing(v: AlcoholSettings['sharing']): void {
-  if (!isAlcoholSharing(v)) return;
+  if (!alc.isSharing(v)) return;
   updateAlcoholSettings({ sharing: v });
 }
 
@@ -3382,13 +3369,13 @@ export function setAlcoholCheckinsOn(v: boolean): void {
 
 /** "Usually drink on": weekdays 0 = Monday ... 6 = Sunday; empty = no pattern. */
 export function setAlcoholUsualDays(days: readonly number[]): void {
-  updateAlcoholSettings({ usualDays: cleanUsualDays(days) });
+  updateAlcoholSettings({ usualDays: alc.cleanUsualDays(days) });
 }
 
 /** Manual region; null / undefined = detect again. */
 export function setAlcoholRegionOverride(r: AlcoholRegion | null | undefined): void {
-  const settings = { ...(state.alcohol ?? emptyAlcoholState()).settings };
-  if (isAlcoholRegion(r)) settings.regionOverride = r;
+  const settings = { ...(state.alcohol ?? alc.empty()).settings };
+  if (alc.isRegion(r)) settings.regionOverride = r;
   else delete settings.regionOverride;
   if (JSON.stringify(settings) === JSON.stringify(state.alcohol?.settings)) return;
   commitAlcohol({ settings });
@@ -3404,8 +3391,8 @@ export type AlcoholDayAnswer =
  * Returns false when nothing was stored (bad day, or 'usual' with no usual days / entries).
  */
 export function answerAlcoholDay(day: string | number | Date, answer: AlcoholDayAnswer): boolean {
-  const key = alcoholDayKey(day);
-  const cur = state.alcohol ?? emptyAlcoholState();
+  const key = alc.dayKey(day);
+  const cur = state.alcohol ?? alc.empty();
   if (!key || !isHealthOn('alcohol')) return false; // false = nothing stored (never a fake "logged")
   let c: AlcoholCheckin;
   if (answer.kind === 'none') c = { drank: false };
@@ -3413,7 +3400,7 @@ export function answerAlcoholDay(day: string | number | Date, answer: AlcoholDay
     if (!Number.isFinite(answer.grams)) return false;
     c = answer.grams > 0 ? { drank: true, grams: answer.grams } : { drank: false };
   } else {
-    const grams = usualOccasionGrams(cur.entries, cur.settings.usualDays);
+    const grams = alc.usualGrams(cur.entries, cur.settings.usualDays);
     if (grams <= 0) return false;
     c = {
       drank: true,
@@ -3421,7 +3408,7 @@ export function answerAlcoholDay(day: string | number | Date, answer: AlcoholDay
       entryIds: cur.entries.filter((e) => e.active).map((e) => e.id),
     };
   }
-  const next = normalizeCheckins({ ...cur.checkins, [key]: c });
+  const next = alc.normalizeCheckins({ ...cur.checkins, [key]: c });
   if (JSON.stringify(next) === JSON.stringify(cur.checkins ?? {})) return true;
   commitAlcohol({ checkins: next });
   return true;
@@ -3429,7 +3416,7 @@ export function answerAlcoholDay(day: string | number | Date, answer: AlcoholDay
 
 /** Takes an answer back (the day becomes unanswered again). */
 export function clearAlcoholDay(day: string | number | Date): void {
-  const key = alcoholDayKey(day);
+  const key = alc.dayKey(day);
   const cur = state.alcohol?.checkins ?? {};
   if (!key || !(key in cur)) return;
   const next = { ...cur };
@@ -3441,7 +3428,7 @@ export function clearAlcoholDay(day: string | number | Date): void {
 export function deleteAlcoholData(): void {
   wipedAt.alcohol = Math.max(Date.now(), state.alcohol?.updatedAt ?? 0);
   alcoholCache.clear();
-  state = { ...state, alcohol: emptyAlcoholState(), syncStatus: bumpPending() };
+  state = { ...state, alcohol: alc.empty(), syncStatus: bumpPending() };
   persist();
   emit();
   const uid = currentUid();
@@ -3632,7 +3619,7 @@ export function forgetShareLevel(kind: ForgettableShare): void {
     withForcedPersist('nicotine', () => setState({ nicotine: next, syncStatus: bumpPending() }));
     writeNicotineDoc(next);
   } else if (kind === 'alcohol') {
-    const cur = state.alcohol ?? emptyAlcoholState();
+    const cur = state.alcohol ?? alc.empty();
     if (cur.settings.sharing === 'off') return;
     const next: AlcoholState = {
       ...cur,
@@ -5372,7 +5359,7 @@ export function startSyncLoop(): () => void {
   const alcoholMirror = mirrorCollection<Record<string, unknown>>((items) => {
     if (!items.length) return; // locked, absent or wiped: keep what is on screen
     alcoholCache.markRemote();
-    const remote = normalizeAlcohol(items[0]);
+    const remote = alc.normalize(items[0]);
     if (remote.updatedAt <= wipeFloor('alcohol')) return; // deleted since: this is the old document
     // Last-write-wins: a newer local edit (not yet echoed back) beats the snapshot.
     if (remote.updatedAt < (state.alcohol?.updatedAt ?? 0)) return;
@@ -6472,7 +6459,7 @@ export function resetLocalData(): void {
     conditionsShare: 'effects',
     nicotine: emptyNicotineState(),
     cycle: emptyCycleState(),
-    alcohol: emptyAlcoholState(),
+    alcohol: alc.empty(),
     supplements: emptySupplementState(),
     activities: [],
     weightUnit: 'kg',

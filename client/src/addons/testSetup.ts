@@ -6,6 +6,9 @@
  * calls `resetLocalData()` (which clears the list) sets what it needs after it.
  */
 
+// Tracker runtimes (SPO-500 I8): the tests run with the trackers' code loaded, as it is once the add-on is installed.
+import '../alcoholBoot';
+
 /** Every Health add-on: what a test world has installed unless it says otherwise. */
 export const HEALTH_ADDONS = [
   'health',

@@ -13,7 +13,7 @@
  *                      user changed something meanwhile; the sealed copy is never dropped.
  */
 import type { Vault } from './autoVault';
-import { emptyAlcoholState, normalizeAlcohol } from './alcohol';
+import { alc } from './alcoholRt';
 import type { AlcoholState } from './types';
 import { decryptJson, encryptJson, isEnvelope, type VaultEnvelope } from './vaultCrypto';
 
@@ -68,9 +68,9 @@ export function createAlcoholCache(deps: {
     load(): AlcoholState {
       try {
         const raw = st()?.getItem(ALCOHOL_KEY);
-        return raw ? normalizeAlcohol(JSON.parse(raw)) : emptyAlcoholState();
+        return raw ? alc.normalize(JSON.parse(raw)) : alc.empty();
       } catch {
-        return emptyAlcoholState();
+        return alc.empty();
       }
     },
     /** Call once with the state loaded at boot. */
@@ -120,7 +120,7 @@ export function createAlcoholCache(deps: {
         if (raw) {
           const enc = JSON.parse(raw) as unknown;
           if (isEnvelope(enc))
-            stored = normalizeAlcohol(await decryptJson(m.key, enc as VaultEnvelope));
+            stored = alc.normalize(await decryptJson(m.key, enc as VaultEnvelope));
         }
       } catch {
         stored = null; // wrong key / corrupted: keep what we have, never throw

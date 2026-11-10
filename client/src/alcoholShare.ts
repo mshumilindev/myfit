@@ -14,6 +14,8 @@ import {
   type AlcoholEffectKey,
 } from './alcohol';
 import type { AlcoholState } from './types';
+import { alc } from './alcoholRt';
+import { provide } from './trackerRt';
 
 export interface CoachAlcoholEffect {
   key: AlcoholEffectKey;
@@ -41,3 +43,5 @@ export function alcoholCoachView(
   }
   return effects.length ? { mode: 'effects', effects } : null;
 }
+
+provide(alc, { coachView: alcoholCoachView });

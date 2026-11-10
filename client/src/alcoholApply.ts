@@ -12,11 +12,12 @@
  * the flat weekly smoothing applies.
  */
 import { getAlcoholEffects, getAlcoholEffectsFor } from './store';
-import { NEUTRAL, SURFACE_COEFFS, type AlcoholEffectKey, type DayInput } from './alcohol';
+import { NEUTRAL_MID } from './alcoholRt';
+import type { AlcoholEffectKey, DayInput } from './alcohol';
 
 /** Midpoint of one surface's range, or its neutral value (x1 / +0) when nothing applies. */
 export function alcMid(key: AlcoholEffectKey, day?: DayInput): number {
-  const neutral = NEUTRAL[SURFACE_COEFFS[key].mode];
+  const neutral = NEUTRAL_MID[key];
   const r = (day === undefined ? getAlcoholEffects() : getAlcoholEffectsFor(day))?.[key];
   if (!r) return neutral;
   return Math.round(((r.low + r.high) / 2) * 10000) / 10000;

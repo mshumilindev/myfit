@@ -35,6 +35,16 @@ import {
   weeklyGrams,
 } from './alcoholCatalog';
 import { isAlcoholRegion } from './alcoholRegion';
+import { alc } from './alcoholRt';
+import {
+  dayKey,
+  weekdayIndex,
+  addDays,
+  MAX_CHECKIN_DAYS,
+  toLocalDate,
+  type DayInput,
+} from './healthDays';
+import { provide } from './trackerRt';
 import type {
   AlcoholCheckin,
   AlcoholEntry,
@@ -275,38 +285,6 @@ export function effectsForLoad(
 /** 0 = Monday ... 6 = Sunday (ISO weekday - 1; NOT JavaScript's Sunday-first getDay). */
 export const WEEKDAYS: readonly number[] = [0, 1, 2, 3, 4, 5, 6];
 
-/** A calendar day: a Date, a ms timestamp, or a 'YYYY-MM-DD' string (read as a local day). */
-export type DayInput = Date | number | string;
-
-function toLocalDate(day: DayInput): Date | null {
-  if (day instanceof Date) return Number.isNaN(day.getTime()) ? null : day;
-  if (typeof day === 'number') return Number.isFinite(day) ? new Date(day) : null;
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(day);
-  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
-  const d = new Date(day);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-/** Weekday of a day, 0 = Monday ... 6 = Sunday; null when the input is not a date. */
-export function weekdayIndex(day: DayInput): number | null {
-  const d = toLocalDate(day);
-  return d ? (d.getDay() + 6) % 7 : null;
-}
-
-/** The local calendar day as 'YYYY-MM-DD'; null when the input is not a date. */
-export function dayKey(day: DayInput): string | null {
-  const d = toLocalDate(day);
-  if (!d) return null;
-  const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
-
-/** A 'YYYY-MM-DD' key `n` calendar days later (negative = earlier). DST-safe. */
-export function addDays(key: string, n: number): string {
-  const [y, m, d] = key.split('-').map(Number);
-  return dayKey(new Date(y, m - 1, d + n))!;
-}
-
 const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/;
 const isDayKey = (k: unknown): k is string =>
   typeof k === 'string' && DAY_KEY.test(k) && dayKey(k) === k;
@@ -327,8 +305,6 @@ export function usualOccasionGrams(
   return n ? round(weeklyGrams(entries) / n, 1) : 0;
 }
 
-/** Keeps the 60 newest check-ins (by day) and drops invalid ones. */
-export const MAX_CHECKIN_DAYS = 60;
 /** Sanity ceiling for a typed amount of one evening, grams. */
 export const MAX_CHECKIN_GRAMS = 1000;
 
@@ -664,3 +640,23 @@ export function normalizeAlcohol(raw: unknown): AlcoholState {
 /** Is there anything saved at all? */
 export const hasAlcoholData = (a: AlcoholState | null | undefined): boolean =>
   !!a && Array.isArray(a.entries) && a.entries.length > 0;
+
+// Late-bound runtime (SPO-500 I8): importing this module puts the real functions into the facade the store reads.
+export { weekdayIndex, dayKey, addDays, MAX_CHECKIN_DAYS, type DayInput };
+
+provide(alc, {
+  empty: emptyAlcoholState,
+  normalize: normalizeAlcohol,
+  normalizeEntry: normalizeAlcoholEntry,
+  load: alcoholLoad,
+  effects: alcoholEffects,
+  effectsFor: alcoholEffectsFor,
+  weekActual: alcoholWeekActual,
+  pending: pendingAlcoholCheckin,
+  dayKey,
+  surfaceOn,
+  usualGrams: usualOccasionGrams,
+  normalizeCheckins,
+  cleanUsualDays,
+  isSharing: isAlcoholSharing,
+});

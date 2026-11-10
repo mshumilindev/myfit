@@ -9,7 +9,7 @@
 import { Hint } from '../components/ui/Hint';
 import { useT } from '../i18n';
 import { surfaceOn } from '../nicotine';
-import { surfaceOn as alcoholSurfaceOn } from '../alcohol';
+import { alc as alcRt } from '../alcoholRt';
 import { useAlcohol, useAlcoholEffects, useNicotine, useNicotineEffects } from '../store';
 import { SupplementTrendNote } from './SupplementNotes';
 
@@ -20,7 +20,7 @@ export function NicotineTrendNote() {
   const alc = useAlcohol();
   const alcEffects = useAlcoholEffects();
   const nicOn = !!nicEffects && surfaceOn(nic.settings, 'trends');
-  const alcOn = !!alcEffects && alcoholSurfaceOn(alc.settings, 'trends');
+  const alcOn = !!alcEffects && alcRt.surfaceOn(alc.settings, 'trends');
   const text = nicOn && alcOn ? t.alcFxTrendBoth : alcOn ? t.alcFxTrendNote : t.nicFxTrendNote;
   return (
     <>

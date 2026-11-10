@@ -17,7 +17,7 @@ import {
   weekPos,
   weekStartOf,
 } from '../weekStart';
-import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Fragment, Suspense, lazy, useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   CORE_DEFAULTS,
   coreOpts,
@@ -92,7 +92,9 @@ import { activityWeek, workoutCalories } from '../activities';
 import { restingForDay } from '../dayEnergy';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
-import { AlcoholCheckinCard } from '../components/AlcoholCheckinCard';
+const AlcoholCheckinCard = lazy(() =>
+  import('../components/AlcoholCheckinCard').then((m) => ({ default: m.AlcoholCheckinCard })),
+);
 import { SupplementCheckinCard } from '../components/SupplementCheckinCard';
 import { SleepForgotBanner, SleepAutoFilledCard } from '../components/SleepAutomation';
 import { ProgramActivitySuggest } from '../components/ProgramActivitySuggest';
@@ -1591,7 +1593,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         <>
           {shows('learn') && learnHasVideo && learnProgress.done === 0 && learnBanner}
           <NudgeStack nudges={nudges.filter((n) => shows(n.id as NudgeKind))} />
-          {alcoholOn && <AlcoholCheckinCard />}
+          {alcoholOn && (
+            <Suspense fallback={null}>
+              <AlcoholCheckinCard />
+            </Suspense>
+          )}
           {supplementsOn && <SupplementCheckinCard />}
           <ProgramActivitySuggest />
           {shows('sleep') && sleepOn && (

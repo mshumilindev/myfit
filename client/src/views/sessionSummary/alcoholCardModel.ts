@@ -5,7 +5,8 @@
  * whose strong end rounds to nothing (< 1 %, < 1 min) is dropped; null when no line is left,
  * or the "After a workout" switch is off.
  */
-import { surfaceOn, type AlcoholEffects, type Range } from '../../alcohol';
+import { alc } from '../../alcoholRt';
+import type { AlcoholEffects, Range } from '../../alcohol';
 import type { AlcoholSettings } from '../../types';
 
 export interface AlcoholCardModel {
@@ -19,7 +20,7 @@ export function alcoholCardModel(
   effects: AlcoholEffects | null,
   settings: Pick<AlcoholSettings, 'useInCalculations' | 'surfaces'>,
 ): AlcoholCardModel | null {
-  if (!effects || !surfaceOn(settings as AlcoholSettings, 'afterWorkoutHints')) return null;
+  if (!effects || !alc.surfaceOn(settings as AlcoholSettings, 'afterWorkoutHints')) return null;
   // Readiness is a factor <= 1 (1 = no change): the strong end is the lower factor.
   let recoveryPct: Range | null = {
     low: Math.round((1 - effects.readiness.high) * 100),

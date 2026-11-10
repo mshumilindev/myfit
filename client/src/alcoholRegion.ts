@@ -1,3 +1,5 @@
+import { alc } from './alcoholRt';
+import { provide } from './trackerRt';
 /**
  * Alcohol: which region's conventions to use (pure, no store). The region decides
  *  - the size of one "standard drink" in grams of pure alcohol (US 14 g, UK unit 8 g, ...),
@@ -215,3 +217,5 @@ export const guidelineFor = (r: AlcoholRegion): AlcoholGuideline => GUIDELINES[r
 export const heavyThresholdGrams = (r: AlcoholRegion): number => GUIDELINES[r].weeklyGrams;
 export const isAboveGuideline = (weeklyGrams: number, r: AlcoholRegion): boolean =>
   weeklyGrams > heavyThresholdGrams(r);
+
+provide(alc, { isRegion: isAlcoholRegion, resolveRegion: resolveAlcoholRegion });

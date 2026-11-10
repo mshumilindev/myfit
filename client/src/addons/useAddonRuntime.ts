@@ -32,6 +32,11 @@ export function useAddonRuntime() {
     () => (challengesOn ? allChallenges : []),
     [challengesOn, allChallenges],
   );
+  const alcoholOn = useAddonOrBase('alcohol');
+  // The Alcohol modules are a lazy chunk fetched only while the add-on is installed (SPO-500 I8).
+  useEffect(() => {
+    if (alcoholOn) void import('../alcoholBoot').catch(() => undefined);
+  }, [alcoholOn]);
   const healthOn = useAddonOrBase('health');
   const injuryOn = useAddonOrBase('injury-log');
   useEffect(() => migrateModules(), []);

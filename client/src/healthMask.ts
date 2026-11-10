@@ -6,7 +6,7 @@
 import type { HealthOnMap } from './data/healthConsentGate';
 import { emptyCycleState } from './cycle/cycleState';
 import { emptyNicotineState } from './nicotine';
-import { emptyAlcoholState } from './alcohol';
+import { alc } from './alcoholRt';
 import { emptySupplementState } from './supplements';
 import type {
   AlcoholState,
@@ -21,7 +21,7 @@ import type { CycleState } from './cycle/cycleState';
 const EMPTY = {
   nicotine: emptyNicotineState(),
   cycle: emptyCycleState(),
-  alcohol: emptyAlcoholState(),
+  alcohol: alc.empty(),
   supplements: emptySupplementState(),
   injuries: [] as Injury[],
   conditions: [] as ChronicCondition[],

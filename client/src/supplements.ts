@@ -27,14 +27,8 @@
  * Day check-ins: with check-ins on, Today asks once a day, in one grouped card, whether the
  * due supplements were taken; the answer replaces the "everything due was taken" assumption.
  */
-import {
-  addDays,
-  dayKey,
-  MAX_CHECKIN_DAYS,
-  weekdayIndex,
-  type DayInput,
-  type Range,
-} from './alcohol';
+import { addDays, dayKey, MAX_CHECKIN_DAYS, weekdayIndex, type DayInput } from './healthDays';
+import type { Range } from './alcohol';
 import {
   activeSupplementEntries,
   caffeineMgOf,
