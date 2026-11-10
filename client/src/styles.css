@@ -11471,7 +11471,7 @@ button.badge {
   width: var(--sz-38);
   height: var(--sz-38);
   border-radius: var(--r-12);
-  background: color-mix(in srgb, var(--c-0a0b0d) 40%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 50%, transparent);
   display: grid;
   place-items: center;
   box-shadow: inset 0 0 0 1px var(--color-accent-700);
@@ -17098,18 +17098,20 @@ html[data-theme] .apx-streak-n {
 }
 
 /* ═══════════ Recaps (My Fit — Recaps; live in Notifications) ═══════════ */
-:root {
+:root,
+.dk-island {
+  /* Washes come from the theme tokens (accent, surface, bg), so every theme, mode and accent gets its own; .dk-island re-resolves them for its dark set. */
   --rc-wash:
     radial-gradient(
       120% 90% at 20% 0%,
-      color-mix(in srgb, var(--c-e9c07a) 22%, transparent),
+      color-mix(in srgb, var(--color-accent) 22%, transparent),
       transparent 60%
     ),
-    linear-gradient(160deg, var(--c-221d13) 0%, var(--c-191a1d) 62%);
+    linear-gradient(160deg, color-mix(in srgb, var(--color-accent) 8%, var(--color-surface)) 0%, var(--color-bg) 62%);
   --rc-replay:
     radial-gradient(
       130% 90% at 82% 4%,
-      color-mix(in srgb, var(--c-e9c07a) 34%, transparent),
+      color-mix(in srgb, var(--color-accent) 30%, transparent),
       transparent 52%
     ),
     radial-gradient(
@@ -17117,7 +17119,12 @@ html[data-theme] .apx-streak-n {
       color-mix(in srgb, var(--color-kcal) 14%, transparent),
       transparent 55%
     ),
-    linear-gradient(160deg, var(--c-2a2113) 0%, var(--c-1a1a1e) 60%, var(--c-141518) 100%);
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-accent) 12%, var(--color-surface)) 0%,
+      var(--color-surface) 60%,
+      var(--color-bg) 100%
+    );
   --rc-wash-cool:
     radial-gradient(
       120% 80% at 85% 6%,
@@ -17126,10 +17133,10 @@ html[data-theme] .apx-streak-n {
     ),
     radial-gradient(
       120% 90% at 8% 100%,
-      color-mix(in srgb, var(--c-e9c07a) 8%, transparent),
+      color-mix(in srgb, var(--color-accent) 8%, transparent),
       transparent 55%
     ),
-    linear-gradient(165deg, var(--c-1c1f24) 0%, var(--c-16171b) 55%, var(--c-131417) 100%);
+    linear-gradient(165deg, var(--color-surface) 0%, var(--color-bg) 100%);
 }
 .rc-lbl {
   font-size: var(--fs-11);
@@ -17287,7 +17294,7 @@ html[data-theme] .apx-streak-n {
   display: flex;
   align-items: center;
   gap: var(--s-12);
-  background: color-mix(in srgb, var(--c-000000) 22%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 40%, transparent);
   border-radius: var(--r-12);
   padding: var(--s-12) var(--s-14);
 }
@@ -17371,7 +17378,7 @@ html[data-theme] .apx-streak-n {
   flex: 1;
   height: var(--sz-3);
   border-radius: var(--r-2);
-  background: color-mix(in srgb, var(--c-ffffff) 20%, transparent);
+  background: color-mix(in srgb, var(--color-text) 18%, transparent);
   overflow: hidden;
 }
 .rc-progress > i > b {
@@ -17410,7 +17417,7 @@ html[data-theme] .apx-streak-n {
 }
 .rc-mini {
   flex: 1;
-  background: color-mix(in srgb, var(--c-000000) 22%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 40%, transparent);
   border-radius: var(--r-12);
   padding: var(--s-12) var(--s-12);
 }
@@ -18376,16 +18383,17 @@ html[data-theme] .apx-streak-n {
 /* ===========================================================================
    F3 · Circuit (design CR-02 … CR-07) — matched to "My Fit - Circuit and Sides"
    =========================================================================== */
-:root {
+:root,
+.dk-island {
   --gold-lt: var(--c-e9c07a);
-  /* The warm brass wash that marks a circuit apart from a superset. */
+  /* The accent wash that marks a circuit apart from a superset: from the theme tokens, not a fixed brass. */
   --loopwash:
     radial-gradient(
       120% 100% at 15% 0%,
-      color-mix(in srgb, var(--c-e9c07a) 16%, transparent),
+      color-mix(in srgb, var(--color-accent) 16%, transparent),
       transparent 60%
     ),
-    linear-gradient(160deg, var(--c-211c13) 0%, var(--c-191a1d) 62%);
+    linear-gradient(160deg, color-mix(in srgb, var(--color-accent) 8%, var(--color-surface)) 0%, var(--color-bg) 62%);
 }
 
 /* --- shared marks --------------------------------------------------------- */
@@ -18671,7 +18679,7 @@ html[data-theme] .apx-streak-n {
 .circuit-block .cb-list {
   margin-top: var(--s-14);
   border-radius: var(--r-12);
-  background: color-mix(in srgb, var(--c-000000) 25%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 45%, transparent);
   padding: var(--s-2) var(--s-12);
 }
 .circuit-block .cb-row {
@@ -18735,7 +18743,7 @@ html[data-theme] .apx-streak-n {
 }
 .circuit-block .cb-srow {
   border-radius: var(--r-12);
-  background: color-mix(in srgb, var(--c-000000) 22%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 40%, transparent);
   padding: var(--s-12) var(--s-12);
 }
 .circuit-block .cb-sline {
@@ -18991,7 +18999,7 @@ html[data-theme] .apx-streak-n {
   height: var(--sz-28);
   flex: none;
   border-radius: var(--r-8);
-  background: color-mix(in srgb, var(--c-000000) 30%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 50%, transparent);
   display: grid;
   place-items: center;
   color: var(--color-accent);
@@ -19493,7 +19501,7 @@ html[data-theme] .apx-streak-n {
   margin-top: var(--s-4);
 }
 .mst-cta i {
-  color: var(--c-1a1305);
+  color: var(--color-on-accent);
 }
 
 /* --- MT-08 practice sheet ------------------------------------------------ */
@@ -19852,7 +19860,7 @@ html[data-theme] .apx-streak-n {
   color: var(--color-accent-100);
   padding: var(--s-12);
   border-radius: var(--r-10);
-  background: var(--c-191712);
+  background: var(--color-control);
   box-shadow: inset 0 0 0 1px var(--color-accent-800);
 }
 .mst-patq {
@@ -19873,7 +19881,7 @@ html[data-theme] .apx-streak-n {
   width: 100%;
 }
 .mst-save i {
-  color: var(--c-1a1305);
+  color: var(--color-on-accent);
 }
 
 /* --- MT-01 / MT-02 header seal badge ------------------------------------- */
@@ -19951,7 +19959,11 @@ html[data-theme] .apx-streak-n {
   position: relative;
   width: min(350px, 92vw);
   border-radius: var(--r-20);
-  background: linear-gradient(165deg, var(--c-231d13), var(--c-191a1d) 70%);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-accent) 10%, var(--color-surface)),
+    var(--color-bg) 70%
+  );
   box-shadow:
     var(--shadow-md),
     0 20px 50px color-mix(in srgb, var(--c-000000) 60%, transparent);
@@ -20004,7 +20016,7 @@ html[data-theme] .apx-streak-n {
   width: 100%;
   margin-top: var(--s-20);
   border-radius: var(--r-12);
-  background: color-mix(in srgb, var(--c-0a0b0d) 40%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 50%, transparent);
   box-shadow: inset 0 0 0 1px var(--color-accent-800);
   padding: var(--s-14);
   text-align: left;
@@ -20032,7 +20044,7 @@ html[data-theme] .apx-streak-n {
   gap: var(--s-10);
   padding: var(--s-12) var(--s-14);
   border-radius: var(--r-12);
-  background: color-mix(in srgb, var(--c-0a0b0d) 35%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 45%, transparent);
   box-shadow: inset 0 0 0 1px var(--color-neutral-800);
   font-size: var(--fs-12);
   color: var(--color-neutral-300);
@@ -24287,7 +24299,7 @@ body {
   align-items: center;
   padding: var(--s-10) var(--s-4);
   border-radius: var(--r-12);
-  background: color-mix(in srgb, var(--c-000000) 25%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 45%, transparent);
 }
 .pr-tile .uistat-v {
   font-size: var(--fs-16);
@@ -24554,7 +24566,7 @@ body {
   padding: 0 var(--s-12);
   border: none;
   border-radius: var(--r-10);
-  background: color-mix(in srgb, var(--c-000000) 25%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 45%, transparent);
   color: var(--color-text);
   font: inherit;
   font-size: var(--fs-13);

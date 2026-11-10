@@ -53,3 +53,4 @@
 3. **Гард** `tests/fixed-light-ink.guard.test.ts`: жорсткий світлий колір тексту лише на поверхнях, темних в усіх режимах.
 4. **Фіксовані темні плашки** (нічні картки сну тощо) на світлій сторінці мають перевизначати свої тони (див. `.sleep-autofill`), а не брати токени сторінки. Фон плашки з токена, а не з фіксованого темного hex.
 5. Знайшов проблему на живому екрані, якої не було в історіях: спершу додай історію/стан, що її відтворює, потім виправ.
+- **Washes and plates come from tokens.** `--loopwash`, `--rc-wash`, `--rc-wash-cool`, `--rc-replay` (circuit, recap, mastery) are built from `--color-accent`, `--color-surface`, `--color-bg` in `styles.css` (`:root` and `.dk-island`), never from a fixed brass hex; ink on a solid fill is `--color-on-accent` / the tone `--t-on`, never a dark hex.
