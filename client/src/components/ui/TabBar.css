@@ -34,11 +34,11 @@
   background: none;
   border: none;
   border-radius: var(--radius-md);
-  color: var(--color-neutral-600);
+  color: var(--color-text-muted);
   cursor: pointer;
 }
 .tabbar button.active {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 .tabbar i {
   font-size: var(--fs-20);

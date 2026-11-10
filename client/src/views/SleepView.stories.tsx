@@ -1,8 +1,21 @@
+import { useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SleepView } from './SleepView';
 import { PageFrame } from '../stories/PageFrame';
 import { seedPage } from '../stories/fixtures';
 import { __getStateForTests, __replaceStateForTests } from '../store';
+
+/** The Sleep overlay only ever shows while the app is in night mode (App.tsx sets `data-sleep`). */
+function NightFrame({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    const el = document.documentElement;
+    el.dataset.sleep = 'night';
+    return () => {
+      delete el.dataset.sleep;
+    };
+  }, []);
+  return <PageFrame>{children}</PageFrame>;
+}
 
 /** The Sleep screen with a few weeks of seeded training data. */
 const meta = {
@@ -11,9 +24,9 @@ const meta = {
   parameters: { layout: 'fullscreen' },
   decorators: [
     (Story) => (
-      <PageFrame>
+      <NightFrame>
         <Story />
-      </PageFrame>
+      </NightFrame>
     ),
   ],
   loaders: [

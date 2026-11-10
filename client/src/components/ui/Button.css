@@ -95,7 +95,7 @@
   text-decoration: underline;
 }
 .uibtn--danger {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   border-color: var(--color-danger);
   --bd: var(--color-danger);
 }
@@ -252,7 +252,7 @@ a.uibtn:hover {
 /* ok-fill: the solid positive action (finish / confirm), a filled `ok`. */
 .uibtn--ok-fill {
   background: var(--color-ok);
-  color: var(--c-0d1f16);
+  color: var(--color-ok-tint);
   border-color: transparent;
   --bd: var(--color-ok);
 }

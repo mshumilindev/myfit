@@ -99,7 +99,7 @@ html[data-theme='studio'][data-accent='indigo'] {
   --skin-coach-line: var(--c-484f7f);
 }
 
-html[data-theme='studio'][data-mode='light'][data-accent='indigo'] {
+html[data-theme='studio'][data-mode='light'][data-accent='indigo']:not([data-sleep='night']) {
   --color-accent-100: var(--c-21265e);
   --color-accent-200: var(--c-2b327a);
   --color-accent-300: var(--c-363e97);

@@ -88,19 +88,28 @@ for (const look of looks) {
       await page.addScriptTag({ content: AXE });
       const nodes = await page.evaluate(async () => {
         const r = await window.axe.run(document, { runOnly: ['color-contrast'] });
+        // WCAG 1.4.3 exempts inactive controls: skip anything inside a disabled control or its group.
+        const inactive = (n) =>
+          Boolean(
+            document
+              .querySelector(n.target[n.target.length - 1])
+              ?.closest('.is-disabled, [disabled], [aria-disabled="true"], :disabled'),
+          );
         return r.violations.flatMap((v) =>
-          v.nodes.map((n) => {
-            const d = n.any[0]?.data ?? {};
-            return {
-              target: n.target.join(' '),
-              ratio: d.contrastRatio,
-              need: d.expectedContrastRatio,
-              fg: d.fgColor,
-              bg: d.bgColor,
-              size: d.fontSize,
-              text: (n.html.match(/>([^<]{1,40})</) ?? [])[1] ?? '',
-            };
-          }),
+          v.nodes
+            .filter((n) => !inactive(n))
+            .map((n) => {
+              const d = n.any[0]?.data ?? {};
+              return {
+                target: n.target.join(' '),
+                ratio: d.contrastRatio,
+                need: d.expectedContrastRatio,
+                fg: d.fgColor,
+                bg: d.bgColor,
+                size: d.fontSize,
+                text: (n.html.match(/>([^<]{1,40})</) ?? [])[1] ?? '',
+              };
+            }),
         );
       });
       probes++;

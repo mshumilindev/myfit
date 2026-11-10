@@ -29,6 +29,7 @@ html[data-theme='studio'] {
   --color-danger: var(--c-ff7a73);
   --color-danger-tint: var(--c-312224);
   --color-danger-text: var(--c-ffcac7);
+  --color-chronic: var(--c-6987e0);
   --color-danger-line: var(--c-6f3d3c);
   --glass-backdrop: none;
   --glass-float: 0 14px 30px -14px var(--c-000000-a600);
@@ -228,7 +229,7 @@ html[data-theme='studio'] {
   --hud-brackets: none;
 }
 
-html[data-theme='studio'][data-mode='light'] {
+html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) {
   --color-bg: var(--c-e3e8ea);
   --color-surface: var(--c-f6f9fa);
   --glass-surface: var(--c-f6f9fa);
@@ -311,6 +312,9 @@ html[data-theme='studio'][data-mode='light'] {
   --btn-tracking: normal;
   --seg-on-mix: 16%;
   --segb-on-mix: 12%;
+  /* the dark-theme plate under the selected segment would turn it grey on a light page */
+  --seg-on-base: transparent;
+  --segb-on-base: transparent;
   --seg-on-ink-k: 0%;
   --tone-fill-k: 0.7;
   --tone-bar-w: 0px;

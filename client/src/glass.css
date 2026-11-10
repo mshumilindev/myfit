@@ -221,7 +221,7 @@ html[data-theme] .uibell-badge {
   top: calc(-3 * var(--sz-1));
   right: calc(-3 * var(--sz-1));
   background: var(--color-danger);
-  color: var(--color-text);
+  color: var(--color-danger-tint);
   box-shadow: 0 0 0 calc(2 * var(--sz-1)) var(--glass-surface);
 }
 
@@ -714,7 +714,8 @@ html[data-theme] .uisec-a {
   color: var(--color-accent-400);
   font-weight: 600;
 }
-html[data-theme] .uitag {
+/* A solid tag keeps its --t-base fill: --t-on ink is only legible on the full tone, not on the 16% wash. */
+html[data-theme] .uitag:not(.uitag--solid) {
   background: color-mix(in srgb, var(--t-base) 16%, var(--tag-under, transparent));
   box-shadow: none;
 }

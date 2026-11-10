@@ -43,7 +43,7 @@ export const Ramp: Story = {
                 borderRadius: 12,
                 background: `var(--color-accent-${n})`,
                 // the lighter half of the ramp takes dark ink; labels are large text (>= 18.7px bold)
-                color: n >= 700 ? 'var(--color-text)' : 'var(--color-bg)',
+                color: n >= 800 ? 'var(--color-text)' : 'var(--color-bg)',
                 display: 'grid',
                 placeItems: 'center',
                 fontSize: 20,

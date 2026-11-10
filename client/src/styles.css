@@ -12787,7 +12787,7 @@ button.badge {
 }
 /* logical text tints */
 .ai-card .ai-kicker {
-  color: color-mix(in srgb, var(--lvl) 70%, var(--color-neutral-400));
+  color: color-mix(in srgb, var(--lvl) 55%, var(--color-text));
 }
 .ai-card .ai-tip-icon {
   color: var(--lvl);
@@ -14998,13 +14998,13 @@ button.badge {
   font-variant-numeric: tabular-nums;
 }
 .prog-hint .ph-action {
-  color: var(--color-neutral-300);
+  color: var(--color-text);
 }
 .prog-hint.st-progress .ph-action {
   color: var(--color-ok-text);
 }
 .prog-hint.st-stall .ph-action {
-  color: var(--color-accent-200);
+  color: var(--color-accent-text);
 }
 .prog-hint .ph-prev {
   color: var(--color-neutral-500);
@@ -20491,7 +20491,7 @@ body {
   margin-bottom: var(--s-8);
 }
 .sleep-q-opt {
-  color: var(--s-fainter);
+  color: var(--s-faint);
   font-size: var(--fs-11);
 }
 .sleep-q-row {
@@ -22023,7 +22023,7 @@ body {
 }
 .focus-view .gset .gset-log {
   background: var(--color-accent);
-  color: var(--c-1b1710);
+  color: var(--color-on-accent, var(--c-1b1710));
   border: none;
   box-shadow: none;
   font-weight: 700;
@@ -23338,8 +23338,8 @@ body {
   border-radius: var(--r-8);
   font-size: var(--fs-12);
   font-weight: 600;
-  background: color-mix(in srgb, var(--c-8fb3d9) 16%, transparent);
-  color: var(--c-a9c6e6);
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+  color: var(--color-text);
 }
 .focus-view .prog-hint.st-progress .ph-action {
   background: color-mix(in srgb, var(--color-ok) 18%, transparent);
@@ -23347,11 +23347,11 @@ body {
 }
 .focus-view .prog-hint.st-stall .ph-action {
   background: color-mix(in srgb, var(--color-illness) 18%, transparent);
-  color: var(--c-f5c08e);
+  color: var(--color-illness-text);
 }
 .focus-view .prog-hint.st-first .ph-action {
   background: color-mix(in srgb, var(--set-drop) 18%, transparent);
-  color: var(--c-d4bdf6);
+  color: var(--color-text);
 }
 /* Readiness dot on a muscle chip (focus mode) */
 .mrow-item {
@@ -26167,7 +26167,7 @@ body {
   font-size: var(--fs-16);
 }
 .atl-temper-inline {
-  color: var(--atl);
+  color: color-mix(in srgb, var(--atl) 70%, var(--color-text));
   font-weight: 600;
 }
 .atl-head-text > span {
@@ -26527,7 +26527,7 @@ body {
   --chat-accent: var(--atl);
   --t-base: var(--atl);
   --t-tint: color-mix(in srgb, var(--atl) 16%, transparent);
-  --t-text: color-mix(in srgb, var(--atl) 70%, white);
+  --t-text: color-mix(in srgb, var(--atl) 70%, var(--color-text));
   --t-line: color-mix(in srgb, var(--atl) 50%, transparent);
   --t-on: var(--color-bg);
 }
@@ -26544,7 +26544,7 @@ body {
   background: color-mix(
     in srgb,
     var(--atl) 9%,
-    color-mix(in srgb, var(--c-121316) 90%, transparent)
+    color-mix(in srgb, var(--color-bg) 90%, transparent)
   );
   border-bottom: var(--bw-1) solid color-mix(in srgb, var(--atl) 26%, transparent);
 }
