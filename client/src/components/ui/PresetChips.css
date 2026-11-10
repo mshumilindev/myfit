@@ -62,7 +62,7 @@
 .uipc-chip.is-on {
   border-color: var(--t-base);
   background: var(--t-tint);
-  color: var(--t-base);
+  color: var(--t-text);
   font-weight: 600;
 }
 .uipc-chip:disabled {

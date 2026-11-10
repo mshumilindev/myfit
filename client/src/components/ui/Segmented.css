@@ -124,7 +124,7 @@
   font-weight: 700;
 }
 .uiseg.uiseg--stack .uiseg-opt.is-on .ui-icon {
-  color: var(--t-base);
+  color: var(--t-text);
 }
 
 /* hug: chip-like row — each option is as wide as its label plus even padding. */

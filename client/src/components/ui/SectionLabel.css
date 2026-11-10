@@ -15,7 +15,7 @@
   color: var(--color-neutral-600);
 }
 .uisec--toned .uisec-l {
-  color: var(--t-base);
+  color: var(--t-text);
 }
 .uisec-a {
   flex: none;

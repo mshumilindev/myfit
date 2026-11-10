@@ -150,7 +150,7 @@ label.uirow {
   overflow-wrap: anywhere;
 }
 .uirow-v.is-toned {
-  color: var(--t-base);
+  color: var(--t-text);
 }
 .uirow-v.is-strong {
   font-weight: 600;
@@ -165,7 +165,7 @@ label.uirow {
   flex-shrink: 0;
   display: inline-flex;
   font-size: var(--fs-18);
-  color: var(--t-base);
+  color: var(--t-text);
 }
 .uirow-check .ui-icon {
   display: inline-flex;
@@ -176,7 +176,7 @@ label.uirow {
   font-weight: 600;
 }
 .uirow--action.is-toned {
-  color: var(--t-base);
+  color: var(--t-text);
 }
 .uirow-panel {
   padding: var(--sp-3) var(--sp-4) var(--sp-4);

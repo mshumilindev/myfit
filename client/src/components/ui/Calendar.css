@@ -170,7 +170,7 @@
 .uical-cell.is-band .uical-num,
 .uical-cell.is-band .uical-day:hover:not(:disabled) .uical-num {
   background: var(--t-tint);
-  color: var(--t-base);
+  color: var(--t-text);
 }
 .uical-cell.is-solid .uical-num,
 .uical-cell.is-solid .uical-day:hover:not(:disabled) .uical-num {

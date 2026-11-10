@@ -107,7 +107,7 @@
 }
 .uimg-day.is-tint .uimg-num,
 .uimg-day.is-tint.is-out .uimg-num {
-  color: var(--t-base);
+  color: var(--t-text);
 }
 .uimg-day.is-today {
   background: var(--color-accent-tint);
@@ -210,7 +210,7 @@
 .uimg-chip.is-planned {
   background: transparent;
   box-shadow: inset 0 0 0 1px var(--t-line);
-  color: var(--t-base);
+  color: var(--t-text);
 }
 .uimg-note {
   font-size: var(--fs-min);
@@ -222,7 +222,7 @@
 .uimg-note.is-toned {
   font-size: var(--fs-min);
   font-weight: 600;
-  color: var(--t-base);
+  color: var(--t-text);
 }
 
 /* Legend */

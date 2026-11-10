@@ -35,7 +35,7 @@
   font-size: var(--fs-15);
   font-weight: 600;
   line-height: 1.2;
-  color: var(--t-base);
+  color: var(--t-text);
 }
 .uicat-n {
   color: var(--color-text-muted);
@@ -68,7 +68,7 @@
   gap: var(--sp-1);
 }
 .uicat.is-selected .uicat-m {
-  color: var(--t-base);
+  color: var(--t-text);
 }
 .uicat--inline .uicat-minis {
   gap: var(--s-6);

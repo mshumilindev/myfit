@@ -30,11 +30,11 @@
 }
 .uibadge.uibadge--accent {
   --badge-bg: var(--color-accent);
-  --badge-ink: var(--c-201a0e);
+  --badge-ink: var(--color-on-accent);
 }
 .uibadge.uibadge--neutral {
   --badge-bg: var(--color-neutral-700);
-  --badge-ink: var(--color-on-solid);
+  --badge-ink: var(--color-text);
 }
 .uibadge.uibadge--corner {
   position: absolute;

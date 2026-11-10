@@ -403,6 +403,8 @@ html[data-theme='studio'][data-mode='light'] {
   --skin-coach-tint: var(--c-dce1e3);
   --skin-coach-text: var(--c-1f272e);
   --skin-coach-line: var(--c-90989e);
+  /* The red now-line / agenda divider text: the dark-mode red is 2.4:1 on a light page (SPO-60) */
+  --color-now: var(--c-b02c26);
 }
 
 /* --- Sub-app skins: Studio does not colour-code apps; every skin keeps the theme accent (--skin-* are set with the accent) --- */

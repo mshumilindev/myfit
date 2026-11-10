@@ -90,7 +90,7 @@
   color: var(--color-danger-text);
 }
 .ut-tone.ut-tone {
-  color: var(--t-base);
+  color: var(--t-text);
 }
 
 /* corner radius */

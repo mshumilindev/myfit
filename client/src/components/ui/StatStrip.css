@@ -32,7 +32,7 @@
   white-space: nowrap;
 }
 .uiss-val.is-toned {
-  color: var(--t-base);
+  color: var(--t-text);
 }
 .uiss-unit {
   margin-left: var(--s-2);
