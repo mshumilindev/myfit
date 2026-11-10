@@ -76,3 +76,85 @@ html[data-theme='studio'] .tabbar-fab:disabled {
     display: none;
   }
 }
+
+/* A dark island on a light page (a photo tile under a dark scrim, a fixed night card): the class re-applies the
+   dark token set above to its subtree, so text, tones and kit controls inside read as in dark mode. */
+.dk-island {
+  color: var(--color-text);
+}
+
+/* The app launcher plate is "darker than the page" so the tiles stand out; on the light page that is a slightly
+   darker light grey (the dark plate left the title and sub-lines unreadable). */
+html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) :is(.shell-sheet, .uimore) {
+  --shell-sheet-base: color-mix(in srgb, var(--color-bg) 94%, black);
+}
+
+/* Photographs and avatars are blended with `lighten` (a dark-page effect): on a light page the lighter of
+   photo and page wins, so the picture vanishes. A light page shows them as they are. */
+html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) .lighten,
+html[data-theme='studio'][data-mode='light']:not([data-sleep='night'])
+  .session-top.live-toolbar::before {
+  mix-blend-mode: normal;
+}
+
+/* Studio light: sub-app skin ramps, the "now" colour and the selected-segment plate (extras outside the theme contract, SPO-60). */
+html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) {
+  --color-now: var(--c-b02c26);
+  /* the dark-theme plate under the selected segment would turn it grey on a light page */
+  --seg-on-base: transparent;
+  --segb-on-base: transparent;
+  /* Sub-app skins in light: the accent ramp of the light mode (the dark values above would make light-on-light text, SPO-60) */
+  --skin-apex: var(--c-2b3640);
+  --skin-apex-100: var(--c-13181d);
+  --skin-apex-200: var(--c-192026);
+  --skin-apex-300: var(--c-1f272e);
+  --skin-apex-400: var(--c-252f37);
+  --skin-apex-500: var(--c-2b3640);
+  --skin-apex-600: var(--c-576169);
+  --skin-apex-700: var(--c-838b92);
+  --skin-apex-800: var(--c-afb6ba);
+  --skin-apex-900: var(--c-dce1e3);
+  --skin-learn: var(--c-2b3640);
+  --skin-learn-100: var(--c-13181d);
+  --skin-learn-200: var(--c-192026);
+  --skin-learn-300: var(--c-1f272e);
+  --skin-learn-400: var(--c-252f37);
+  --skin-learn-500: var(--c-2b3640);
+  --skin-learn-600: var(--c-576169);
+  --skin-learn-700: var(--c-838b92);
+  --skin-learn-800: var(--c-afb6ba);
+  --skin-learn-900: var(--c-dce1e3);
+  --skin-roster: var(--c-2b3640);
+  --skin-roster-100: var(--c-13181d);
+  --skin-roster-200: var(--c-192026);
+  --skin-roster-300: var(--c-1f272e);
+  --skin-roster-400: var(--c-252f37);
+  --skin-roster-500: var(--c-2b3640);
+  --skin-roster-600: var(--c-576169);
+  --skin-roster-700: var(--c-838b92);
+  --skin-roster-800: var(--c-afb6ba);
+  --skin-roster-900: var(--c-dce1e3);
+  --skin-nutrition: var(--c-2b3640);
+  --skin-nutrition-100: var(--c-13181d);
+  --skin-nutrition-200: var(--c-192026);
+  --skin-nutrition-300: var(--c-1f272e);
+  --skin-nutrition-400: var(--c-252f37);
+  --skin-nutrition-500: var(--c-2b3640);
+  --skin-nutrition-600: var(--c-576169);
+  --skin-nutrition-700: var(--c-838b92);
+  --skin-nutrition-800: var(--c-afb6ba);
+  --skin-nutrition-900: var(--c-dce1e3);
+  --skin-coach: var(--c-2b3640);
+  --skin-coach-100: var(--c-13181d);
+  --skin-coach-200: var(--c-192026);
+  --skin-coach-300: var(--c-1f272e);
+  --skin-coach-400: var(--c-252f37);
+  --skin-coach-500: var(--c-2b3640);
+  --skin-coach-600: var(--c-576169);
+  --skin-coach-700: var(--c-838b92);
+  --skin-coach-800: var(--c-afb6ba);
+  --skin-coach-900: var(--c-dce1e3);
+  --skin-coach-tint: var(--c-dce1e3);
+  --skin-coach-text: var(--c-1f272e);
+  --skin-coach-line: var(--c-90989e);
+}

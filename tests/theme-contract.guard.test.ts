@@ -34,7 +34,15 @@ describe('theme contract', () => {
       const stray: string[] = [];
       const base = `html[data-theme=${id}]`;
       root.walkRules((r) => {
-        const sel = r.selector.replace(/["']/g, '').trim();
+        // Two documented forms are part of the contract: the dark token set re-applied to `.dk-island`
+        // (a dark subtree on a light page) and the light block qualified with `:not([data-sleep=night])`
+        // (night sleep mode is dark). Declarations stay token-only either way.
+        const sel = r.selector
+          .replace(/["']/g, '')
+          .replace(/\s+/g, ' ')
+          .replace(`, ${`html[data-theme=${id}]`} .dk-island`, '')
+          .replace(':not([data-sleep=night])', '')
+          .trim();
         if (sel === base) {
           r.walkDecls((d) => {
             if (d.prop.startsWith('--')) set.add(d.prop);
