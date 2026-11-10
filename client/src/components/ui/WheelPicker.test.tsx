@@ -76,13 +76,14 @@ describe('WheelPicker', () => {
     expect(drum().getAttribute('aria-valuetext')).toBe('61.25');
   });
 
-  it('typing commits on blur, clamps to the range and snaps to the grid', () => {
+  // SPO-484 (owner AC): "typing allows any value, 1.25 and 0.5 included" — so a typed number is clamped, no longer snapped to the drum's grid.
+  it('typing commits on blur and clamps to the range, without snapping to the grid', () => {
     const { onChange } = setup({ max: 100 });
     const edit = screen.getByLabelText('Weight (type)') as HTMLInputElement;
     fireEvent.focus(edit);
     fireEvent.change(edit, { target: { value: '82,3' } });
     fireEvent.blur(edit);
-    expect(onChange).toHaveBeenLastCalledWith(82.5);
+    expect(onChange).toHaveBeenLastCalledWith(82.3);
     fireEvent.focus(edit);
     fireEvent.change(edit, { target: { value: '9999' } });
     fireEvent.blur(edit);

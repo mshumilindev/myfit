@@ -155,7 +155,7 @@ describe('SessionView · set entry mode (wheel | − / +, SPO-318)', () => {
     ).toHaveLength(2);
   });
 
-  it('a drum edits the set: keys move reps, a typed weight lands on the grid, Save stores both', async () => {
+  it('a drum edits the set: keys move reps, a typed weight is kept exactly (SPO-484), Save stores both', async () => {
     wheelMode();
     seed([benchLive()]);
     mount();
@@ -166,7 +166,7 @@ describe('SessionView · set entry mode (wheel | − / +, SPO-318)', () => {
     fireEvent.change(typed, { target: { value: '82,3' } });
     fireEvent.blur(typed);
     await save(dlg);
-    expect(only()).toMatchObject({ reps: 9, weight: 82.5 });
+    expect(only()).toMatchObject({ reps: 9, weight: 82.3 });
   });
 
   it('opening and saving in wheel mode changes nothing (a stored 80 kg is not re-rounded)', async () => {

@@ -12,6 +12,8 @@ export type SetField = 'reps' | 'weight';
 
 const REPS_MAX = 200;
 const WEIGHT_MAX = { kg: 400, lb: 900 } as const;
+/** The drum's step for a weight: one smallest plate pair (2.5 kg), and its lb twin (5 lb, same as the − / + stepper). Typing stays free (1.25, 0.5…). */
+export const WEIGHT_WHEEL_STEP = { kg: 2.5, lb: 5 } as const;
 
 /**
  * One number of the set editor — reps or weight — as the person chose to enter it (Session sheet › More › Input):
@@ -47,7 +49,7 @@ export function SetNumberInput(props: {
         value={value}
         input="manual"
         size="compact"
-        step={field === 'reps' ? 1 : isLb ? 1 : 0.5}
+        step={field === 'reps' ? 1 : WEIGHT_WHEEL_STEP[unit]}
         min={0}
         // A stored value above the usual range is never cut off by the drum.
         max={Math.max(field === 'reps' ? REPS_MAX : WEIGHT_MAX[unit], Math.ceil(value))}

@@ -117,7 +117,9 @@ export function WheelPicker({
     setDraft(null);
     const n = Number(raw.replace(',', '.'));
     // Tapping into the field and leaving it untouched must not re-round a stored value that sits off the step grid.
-    if (raw.trim() !== '' && Number.isFinite(n) && n !== cur) onChange(snap(n));
+    // Typing is free (1.25, a 0.5 plate): clamped to the range, never pulled onto the drum's step grid.
+    if (raw.trim() !== '' && Number.isFinite(n) && n !== cur)
+      onChange(Math.min(max, Math.max(min, n)));
   }
   const bump = (d: -1 | 1): void => onChange(snap(cur + d * step));
   const typeable = input === 'manual' || input === 'stepper';
