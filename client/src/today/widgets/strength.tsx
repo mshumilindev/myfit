@@ -34,6 +34,7 @@ import {
   type Sex,
   type StandardsResult,
 } from '../../standards';
+import { apexRanksAvailable } from '../../addons/featureGates';
 import { nextTarget, topHistory, type Target } from '../../progression';
 import { targetFor } from './strengthTarget';
 import { solvePlates } from '../../plates';
@@ -398,6 +399,8 @@ export function bodyKg(bm: BodyMetrics | null | undefined): number {
 }
 
 function standardsOf(workouts: Workout[], bm: BodyMetrics): StandardsResult {
+  // Ranks are an Apex module: with it off no tier or class is derived here (pl-total, strength-balance read it too).
+  if (!apexRanksAvailable()) return { bodyKg: 0, results: [] };
   const bw = bodyKg(bm);
   const sex: Sex = bm.sex === 'female' ? 'F' : 'M';
   return memoOn(workouts, `std:${bw}:${sex}`, () =>

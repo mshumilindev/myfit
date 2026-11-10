@@ -6,6 +6,13 @@ import { join } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ADDONS } from './manifest';
 import { EXCLUSION } from './exclusion';
+import {
+  apexRanksAvailable,
+  atlasAvailable,
+  goalsAvailable,
+  playbookAvailable,
+  sleepAvailable,
+} from './featureGates';
 import { addonAvailable, addonsPref, isAddonBase } from './enabledSet';
 
 const SRC = join(__dirname, '..');
@@ -45,4 +52,15 @@ describe('with nothing installed, nothing optional is available', () => {
       expect(leaking, 'available although not installed').toEqual([]);
     });
   }
+});
+
+describe('the gates answer "off" with nothing installed', () => {
+  beforeEach(() => addonsPref.reset());
+  it('feature gates for Playbook, Apex ranks, Goals, Sleep and Atlas are all false', () => {
+    expect(playbookAvailable()).toBe(false);
+    expect(apexRanksAvailable()).toBe(false);
+    expect(goalsAvailable()).toBe(false);
+    expect(sleepAvailable()).toBe(false);
+    expect(atlasAvailable()).toBe(false);
+  });
 });

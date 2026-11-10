@@ -41,6 +41,15 @@ export function playbookAvailable(): boolean {
   }
 }
 
+/** Apex ranks (standards tiers): without the module nothing derives a rank or tier, not even inside other widgets. */
+export function apexRanksAvailable(): boolean {
+  try {
+    return addonAvailable('apex-ranks');
+  } catch {
+    return false;
+  }
+}
+
 export function useGoalsOn(): boolean {
   return useAddonOrBase('goals');
 }
