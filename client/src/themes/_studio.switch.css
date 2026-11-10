@@ -1,195 +1,107 @@
-/* Studio app switch: Tidal Displacement. Water rises from the bottom over the old app (out), holds while the next app
-   loads (load), then the level drops from the top and uncovers the ready screen (in). Two fixed layers on <html>:
-   ::before is the water (tinted, strongly blurred backdrop, so only a refracted blur of the app is visible and it
-   changes from old to new on its own), ::after is the 3 px surface line. Both wear the same wavy top edge (a mask) and
-   the same transform. Colour: the theme accent; the accents in the yellow range (20-80 deg: Lime, Amber, Olive) do not
-   tint the water and use the neutral text colour instead. `html[data-glitch]` carries the phase, see
-   components/appGlitch.ts (out 760 ms and tail 820 ms are --switch-out / --switch-tail in studio.css). Reduced motion
-   never sets the attribute, so it switches at once. No glare, no circles on the water. */
-/* The surface changes shape as the water travels: the wave is shallow at the start and the end of the run and at its
-   fullest in the middle (the tile height is what scales the amplitude). */
-@property --tidal-h {
-  syntax: '<length>';
-  inherits: false;
-  initial-value: 0;
+/* Studio app switch: Water Gate. A gate of tinted, strongly blurred glass (the old app shows through it as a refracted
+   blur, like seen through water) slides in from the right over the screen (out), stands while the next app loads and
+   shows the word "Loading" (load), then slides off to the left and uncovers the ready screen (in). Two fixed layers on
+   <html>: ::before is the glass (its edges are feathered, so the gate has a soft watery edge), ::after carries the
+   label and moves with it. `html[data-glitch]` holds the phase, see components/appGlitch.ts (out 760 ms and tail
+   820 ms are --switch-out / --switch-tail in studio.css); the label text is `html[data-switch-label]`, set from the
+   locale by components/switchLabel.ts. Reduced motion never sets the attribute, so it switches at once. Only
+   transform is animated. Colours come from the theme tokens. */
+@keyframes gate-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
-@keyframes tidal-morph {
+@keyframes gate-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+@keyframes gate-pulse {
   0%,
   100% {
-    --tidal-h: calc(var(--s-48) * 0.2);
+    opacity: 0.55;
   }
   50% {
-    --tidal-h: calc(var(--s-48) * 1.9);
+    opacity: 1;
   }
-}
-@keyframes tidal-rise {
-  from {
-    transform: translateY(calc(100% + var(--tidal-wave)));
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-@keyframes tidal-drop {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(calc(100% + var(--tidal-wave)));
-  }
-}
-@keyframes tidal-drift {
-  from {
-    -webkit-mask-position:
-      0 0,
-      0 calc(var(--tidal-h) - var(--bw-1));
-    mask-position:
-      0 0,
-      0 calc(var(--tidal-h) - var(--bw-1));
-  }
-  to {
-    -webkit-mask-position:
-      var(--tidal-wave-len) 0,
-      0 calc(var(--tidal-h) - var(--bw-1));
-    mask-position:
-      var(--tidal-wave-len) 0,
-      0 calc(var(--tidal-h) - var(--bw-1));
-  }
-}
-html[data-theme='studio'][data-glitch] {
-  --tidal: var(--color-accent);
-  --tidal-wave: var(--s-48);
-  --tidal-wave-len: 100vw;
-  --tidal-fill: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='390' height='48' viewBox='0 0 390 48' preserveAspectRatio='none'%3E%3Cpath d='M0 24C65-6 130-6 195 24S325 54 390 24V48H0Z'/%3E%3C/svg%3E");
-  --tidal-stroke: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='390' height='48' viewBox='0 0 390 48' preserveAspectRatio='none'%3E%3Cpath d='M0 24C65-6 130-6 195 24S325 54 390 24' fill='none' stroke='%23000' stroke-opacity='.22' stroke-width='6'/%3E%3Cpath d='M0 24C65-6 130-6 195 24S325 54 390 24' fill='none' stroke='%23000' stroke-width='3'/%3E%3C/svg%3E");
-}
-html[data-theme='studio'][data-accent='lime'][data-glitch],
-html[data-theme='studio'][data-accent='amber'][data-glitch],
-html[data-theme='studio'][data-accent='olive'][data-glitch] {
-  --tidal: var(--color-text-muted);
 }
 html[data-theme='studio'][data-glitch]::before,
 html[data-theme='studio'][data-glitch]::after {
   content: '';
   position: fixed;
-  inset: calc(-1 * var(--tidal-wave)) 0 0;
+  /* wider than the screen by the feathered edge on each side, so the gate covers it edge to edge */
+  inset: 0 calc(-1 * var(--s-48));
   pointer-events: none;
   will-change: transform;
-  transform: translateY(calc(100% + var(--tidal-wave)));
-  -webkit-mask-repeat: repeat-x, no-repeat;
-  mask-repeat: repeat-x, no-repeat;
+  transform: translateX(100%);
 }
 html[data-theme='studio'][data-glitch]::before {
   z-index: var(--z-1000);
-  /* almost clear water: a light cool tint, a soft highlight under the surface and a deeper tone toward the bottom; the
-     blurred app shows through (refraction), the accent only draws the line */
   background:
     linear-gradient(
-      to bottom,
-      color-mix(in srgb, var(--color-text) 22%, transparent) 0,
-      transparent calc(var(--tidal-wave) + var(--s-40))
+      to right,
+      color-mix(in srgb, var(--color-text) 14%, transparent) 0,
+      transparent var(--s-48)
     ),
-    linear-gradient(
-      to bottom,
-      transparent,
-      color-mix(in srgb, var(--color-bg) 45%, transparent) 90%
-    ),
-    color-mix(in srgb, var(--color-surface) 42%, transparent);
+    linear-gradient(to bottom, transparent, color-mix(in srgb, var(--color-bg) 45%, transparent) 90%),
+    color-mix(in srgb, var(--color-surface) 46%, transparent);
   /* the base glass-glitch pseudo (html[data-theme]::before) sets opacity 0, screen blending and a filter: undo them */
   opacity: 1;
   mix-blend-mode: normal;
   filter: none;
   backdrop-filter: var(--bf-tidal);
   -webkit-backdrop-filter: var(--bf-tidal);
-  -webkit-mask-image: var(--tidal-fill), linear-gradient(canvastext, canvastext);
-  mask-image: var(--tidal-fill), linear-gradient(canvastext, canvastext);
-  -webkit-mask-size:
-    var(--tidal-wave-len) var(--tidal-h),
-    100% calc(100% - var(--tidal-h) + var(--bw-1));
-  mask-size:
-    var(--tidal-wave-len) var(--tidal-h),
-    100% calc(100% - var(--tidal-h) + var(--bw-1));
-  -webkit-mask-position:
-    0 0,
-    0 calc(var(--tidal-h) - var(--bw-1));
-  mask-position:
-    0 0,
-    0 calc(var(--tidal-h) - var(--bw-1));
-}
-html[data-theme='studio'][data-glitch]::after {
-  z-index: var(--z-1001);
-  background: var(--tidal);
-  -webkit-mask-image: var(--tidal-stroke);
-  mask-image: var(--tidal-stroke);
-  -webkit-mask-size: var(--tidal-wave-len) var(--tidal-h);
-  mask-size: var(--tidal-wave-len) var(--tidal-h);
-  -webkit-mask-repeat: repeat-x;
-  mask-repeat: repeat-x;
-  -webkit-mask-position: 0 0;
-  mask-position: 0 0;
-}
-html[data-theme='studio'][data-glitch='out']::before,
-html[data-theme='studio'][data-glitch='out']::after {
-  animation:
-    tidal-rise 0.76s cubic-bezier(0.45, 0, 0.25, 1) both,
-    tidal-morph 0.76s ease-in-out both,
-    tidal-drift 5.2s linear infinite;
-}
-html[data-theme='studio'][data-glitch='load']::before,
-html[data-theme='studio'][data-glitch='load']::after {
-  transform: translateY(0);
-  --tidal-h: calc(var(--s-48) * 0.6);
-  animation: tidal-drift 5.2s linear infinite;
-}
-html[data-theme='studio'][data-glitch='in']::before,
-html[data-theme='studio'][data-glitch='in']::after {
-  animation:
-    tidal-drop 0.82s cubic-bezier(0.45, 0, 0.25, 1) both,
-    tidal-morph 0.82s ease-in-out both,
-    tidal-drift 5.2s linear infinite;
-}
-/* extra waves during the hold (tidalWaves.ts): a soft band and its accent line rise one after another, slower than the
-   first wave, each tilted; the script removes a wave once it leaves the top. */
-.tidal-wave {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: calc(var(--tidal-wave) + var(--s-40) * 5);
-  pointer-events: none;
-  z-index: var(--z-1000);
-  will-change: transform;
-  --tidal-wave: var(--s-48);
-  -webkit-mask-image: var(--tidal-fill), linear-gradient(canvastext, canvastext);
-  mask-image: var(--tidal-fill), linear-gradient(canvastext, canvastext);
-  -webkit-mask-size:
-    100% var(--tidal-wave),
-    100% calc(100% - var(--tidal-wave) + var(--bw-1));
-  mask-size:
-    100% var(--tidal-wave),
-    100% calc(100% - var(--tidal-wave) + var(--bw-1));
-  -webkit-mask-position:
-    0 0,
-    0 calc(var(--tidal-wave) - var(--bw-1));
-  mask-position:
-    0 0,
-    0 calc(var(--tidal-wave) - var(--bw-1));
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--color-text) 30%, transparent),
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    canvastext var(--s-48),
+    canvastext calc(100% - var(--s-48)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    canvastext var(--s-48),
+    canvastext calc(100% - var(--s-48)),
     transparent
   );
 }
-.tidal-wave--line {
-  background: var(--tidal-line, var(--color-accent));
-  opacity: var(--tidal-la, 0.45);
-  -webkit-mask-image: var(--tidal-stroke);
-  mask-image: var(--tidal-stroke);
-  -webkit-mask-size: 100% var(--tidal-wave);
-  mask-size: 100% var(--tidal-wave);
-  -webkit-mask-position: 0 0;
-  mask-position: 0 0;
-  height: var(--tidal-wave);
+html[data-theme='studio'][data-glitch]::after {
+  z-index: var(--z-1001);
+  content: attr(data-switch-label);
+  display: grid;
+  place-items: center;
+  color: var(--color-text);
+  font-family: var(--font);
+  font-size: var(--fs-15);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: none;
+  opacity: 1;
+  mix-blend-mode: normal;
+  filter: none;
+}
+html[data-theme='studio'][data-glitch='out']::before,
+html[data-theme='studio'][data-glitch='out']::after {
+  animation: gate-in 0.76s cubic-bezier(0.45, 0, 0.25, 1) both;
+}
+html[data-theme='studio'][data-glitch='load']::before,
+html[data-theme='studio'][data-glitch='load']::after {
+  transform: translateX(0);
+  /* the base glitch animation (bg-glitch-edge) would keep the glass at opacity 0 */
+  animation: none;
+}
+html[data-theme='studio'][data-glitch='load']::after {
+  animation: gate-pulse 1.4s ease-in-out infinite;
+}
+html[data-theme='studio'][data-glitch='in']::before,
+html[data-theme='studio'][data-glitch='in']::after {
+  animation: gate-out 0.82s cubic-bezier(0.45, 0, 0.25, 1) both;
 }

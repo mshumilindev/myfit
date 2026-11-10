@@ -81,7 +81,7 @@ import './page-titles.css';
 import { initTheme, setAllowedThemes } from './themes';
 import { addonsPref, themeIdsOf } from './addons/enabledSet';
 import { initModePref } from './themes/modePref';
-import { initTidalWaves } from './components/tidalWaves';
+import { initSwitchLabel } from './components/switchLabel';
 import { startHolidayWatch } from './themes/holidayWatch';
 import './glass.css';
 import './glass-tail.css';
@@ -123,7 +123,7 @@ document.documentElement.lang = getLocale();
 setAllowedThemes(themeIdsOf(new Set(addonsPref.snapshot().list)));
 initTheme();
 initModePref();
-initTidalWaves();
+initSwitchLabel();
 // a holiday theme comes on and goes off with the date, checked on this device (no server): SPO-321
 startHolidayWatch();
 lockShellHeight();

@@ -156,8 +156,9 @@ export function WaterProgress({
       th = wrap(th + om * dt);
       ctx.setTransform(el.width / W, 0, 0, el.height / H, 0, 0);
       ctx.clearRect(0, 0, W, H);
-      // 0 % is an empty tank; anything above it keeps at least a thin film so a low level still reads as water
-      const frac = level <= 0 ? 0 : Math.max(level, 12) / 100;
+      // what the number shows is what the tank shows: a level that rounds to 0 % is an empty tank; anything above it keeps at
+      // least a thin film so a low level still reads as water
+      const frac = Math.round(level) <= 0 ? 0 : Math.max(level, 12) / 100;
       const gx = Math.sin(th);
       const gy = Math.cos(th);
       const d = offset(gx, gy, frac);

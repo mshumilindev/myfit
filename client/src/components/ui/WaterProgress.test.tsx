@@ -83,6 +83,11 @@ describe('WaterProgress', () => {
     run();
     expect(ctx.clearRect).toHaveBeenCalled();
     expect(fill).not.toHaveBeenCalled();
+    // a level that only ROUNDS to 0 % (the number reads "0 %") is empty too, not a 12 % film
+    frames.length = 0;
+    render(<WaterProgress value={0.4} label="x" tilt={false} />);
+    run();
+    expect(fill).not.toHaveBeenCalled();
     vi.restoreAllMocks();
   });
   it('shows no permission button without a sensor', () => {
