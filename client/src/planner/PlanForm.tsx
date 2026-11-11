@@ -7,7 +7,7 @@ import { Hint } from '../components/ui/Hint';
 import { IconTile } from '../components/ui/IconTile';
 import { PageHead } from '../components/ui/PageHead';
 import { PresetChips } from '../components/ui/PresetChips';
-import { ResponsivePanel } from '../components/ui/ResponsivePanel';
+import { Sheet } from '../components/ui/Overlays';
 import { SearchField } from '../components/ui/SearchField';
 import { Segmented } from '../components/ui/Segmented';
 import { StickyActionBar } from '../components/ui/StickyActionBar';
@@ -475,24 +475,20 @@ export function PlanForm(p: {
         </Button>
       </StickyActionBar>
       {dr && (
-        <ResponsivePanel
-          open
-          onClose={closeDrawer}
-          anchorRef={anchor}
-          mode="sheet"
-          label={dr.title}
-          title={dr.title}
-          footer={
-            <div className="pl-dfoot">
-              <Button variant="secondary" onClick={closeDrawer}>
+        <Sheet onClose={closeDrawer} label={dr.title} returnFocusRef={anchor}>
+          <div className="ul-flex ul-col ug-12">
+            <h2 className="ut-xl ut-w7">{dr.title}</h2>
+            {dr.node}
+            <div className="ul-flex ug-8">
+              <Button fullWidth variant="secondary" onClick={closeDrawer}>
                 {s.cancel}
               </Button>
-              <Button onClick={commit}>{s.save}</Button>
+              <Button fullWidth onClick={commit}>
+                {s.save}
+              </Button>
             </div>
-          }
-        >
-          {dr.node}
-        </ResponsivePanel>
+          </div>
+        </Sheet>
       )}
     </>
   );

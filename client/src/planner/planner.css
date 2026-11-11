@@ -49,9 +49,6 @@
 .pl-page {
   width: 100%;
 }
-.pl-ag [class*='-time'] {
-  white-space: nowrap;
-}
 .pl-ip {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
@@ -189,19 +186,6 @@
   --t-on: var(--color-bg);
 }
 
-/* Cancel / Save in a Planner drawer share the whole width, Save wider (same ratio as the page's StickyActionBar) */
-.pl-dfoot {
-  display: flex;
-  gap: var(--s-8);
-  flex: 1 1 100%;
-}
-.pl-dfoot > .uibtn {
-  flex: 1 1 0;
-  min-width: 0;
-}
-.pl-dfoot > .uibtn:last-child:not(:only-child) {
-  flex-grow: 1.6;
-}
 /* in the icon drawer only the grid scrolls; the title, search and Cancel / Save stay in view (owner 11.11) */
 .pl-ip--scroll {
   max-height: max(200px, min(60dvh, calc(100dvh - 330px)));
