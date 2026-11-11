@@ -255,3 +255,250 @@
   cursor: pointer;
   font-weight: 600;
 }
+
+/* SPO-556 "of the week" hero */
+.wk-tile {
+  position: relative;
+  overflow: hidden;
+}
+.wk-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+/* Phone: Add is the main action of the hero, a full-width bar right under the text; dots centred under it */
+.wk-foot .sk-bt {
+  flex: 1 0 100%;
+  min-height: 52px;
+  font-size: 17px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+}
+/* Art: the real preview, flush with the tile's bottom edge (a deliberate bleed, no fade, no tilt). */
+.wk-art {
+  display: flex;
+  justify-content: center;
+  margin: 20px calc(-1 * var(--sk-sp-6)) calc(-1 * var(--sk-sp-6));
+  height: 230px;
+  overflow: hidden;
+}
+.wk-phone {
+  width: 190px;
+  height: 100%;
+  border: 6px solid rgba(255, 255, 255, 0.92);
+  border-bottom: 0;
+  border-radius: 28px 28px 0 0;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.28);
+}
+.wk-phone img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.wk-win {
+  display: none;
+}
+@media (min-width: 45rem) {
+  .wk-tile {
+    min-height: 300px;
+  }
+  .wk-tile .sk-btile-body {
+    max-width: 40%;
+  }
+  .wk-art {
+    position: absolute;
+    right: 36px;
+    bottom: -16px;
+    top: auto;
+    margin: 0;
+    height: 262px;
+    width: 500px;
+    display: block;
+  }
+  .wk-phone {
+    display: none;
+  }
+  .wk-win {
+    display: block;
+    width: 500px;
+    height: 100%;
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 -6px 30px rgba(0, 0, 0, 0.3);
+  }
+  .wk-bar {
+    height: 26px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    background: #e9ecef;
+    color: #5b6770;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .wk-bar i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #c3cad0;
+  }
+  .wk-bar span {
+    margin-left: 10px;
+  }
+  .wk-win img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
+.sk-btile.wk-tile .sk-btile-foot {
+  display: block;
+}
+
+/* Theme skins: the theme's own background and text colour */
+.sk-btile.wk-tile.wk-skin-cyberpunk {
+  background: linear-gradient(135deg, #0d1008, #2a300c);
+  color: #f1ffd0;
+}
+.sk-btile.wk-tile.wk-skin-glass {
+  background: linear-gradient(135deg, #201c24, #4a3b22);
+  color: #f3e6c8;
+}
+.sk-btile.wk-tile.wk-skin-halloween {
+  background: linear-gradient(135deg, #0c0b10, #3a1710);
+  color: #ffe3d0;
+}
+.sk-btile.wk-tile.wk-skin-christmas {
+  background: linear-gradient(135deg, #050c09, #0f281b 55%, #6b1620);
+  color: #fff2e0;
+}
+
+/* Slider: stacked previews cross-fade; dots switch them (Holiday themes also auto-advance every 7 s) */
+.wk-stack {
+  position: relative;
+}
+.wk-stack img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.wk-stack img:not(:first-child) {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.wk-stack img {
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+.wk-stack img.on {
+  opacity: 1;
+}
+.wk-dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px auto 0;
+}
+.wk-dots button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.4;
+  cursor: pointer;
+  transition:
+    width 0.25s,
+    opacity 0.25s;
+}
+.wk-dots button.on {
+  width: 22px;
+  opacity: 1;
+}
+.wk-dots button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+/* Holiday themes: the hero background follows the slide */
+.sk-btile.wk-tile.wk-holiday {
+  isolation: isolate;
+  background: #0c0b10;
+  color: #fff2e0;
+}
+.wk-holiday::before,
+.wk-holiday::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+}
+.wk-holiday::before {
+  background: linear-gradient(135deg, #0c0b10, #3a1710);
+  opacity: 1;
+}
+.wk-holiday::after {
+  background: linear-gradient(135deg, #050c09, #0f281b 55%, #6b1620);
+  opacity: 0;
+}
+.wk-holiday.wk-at-1::before {
+  opacity: 0;
+}
+.wk-holiday.wk-at-1::after {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wk-stack img,
+  .wk-holiday::before,
+  .wk-holiday::after {
+    transition: none;
+  }
+}
+
+@media (min-width: 45rem) {
+  .wk-foot {
+    flex-wrap: nowrap;
+    max-width: 36%;
+  }
+  .wk-foot .sk-bt {
+    flex: 0 0 auto;
+    min-height: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    box-shadow: none;
+  }
+  .wk-dots {
+    margin: 0 0 0 auto;
+  }
+}
+
+.wk-dots button {
+  flex: 0 0 auto;
+}
+.wk-dots {
+  flex: 0 0 auto;
+}
+.wk-dots button {
+  color: inherit;
+  background: currentColor;
+}
+
+/* Coming-soon / all-installed banner on the dark tile: a readable SOON badge and the item's icon beside its name */
+.wk-empty .sk-bd-soon {
+  color: #fff;
+  outline-color: rgba(255, 255, 255, 0.75);
+}
+.wk-ttl {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}

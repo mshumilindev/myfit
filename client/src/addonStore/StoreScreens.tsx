@@ -36,6 +36,7 @@ import { currentHash, setHash } from '../route';
 import { catLabel } from './storeCategories';
 import { storeHash } from './storeRoute';
 import { itemName, TileOf, type StoreCtx } from './storeItems';
+import { WeekHero } from './WeekHero';
 
 /** Discover: the recommendation queue, a nudge for the next app, what is coming. */
 export function Discover({
@@ -142,6 +143,7 @@ export function Apps({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   const wide = useMinWidth(APP_BREAKPOINT);
   return (
     <>
+      <WeekHero kind="app" ctx={ctx} />
       <SkChips>
         <SkChip on={cat === 'all'} onClick={() => setCat('all')}>
           {st.catAll}
@@ -197,6 +199,7 @@ export function Addons({ role, ctx }: { role: Role; ctx: StoreCtx }) {
   }
   return (
     <>
+      <WeekHero kind="addon" ctx={ctx} />
       {cats.length > 1 && (
         <SkChips>
           <SkChip on={cat === 'all'} onClick={() => setCat('all')}>
@@ -253,7 +256,12 @@ export function Themes({ role, ctx }: { role: Role; ctx: StoreCtx }) {
       />
     );
   }
-  return <Rows ids={ids} ctx={ctx} />;
+  return (
+    <>
+      <WeekHero kind="theme" ctx={ctx} />
+      <Rows ids={ids} ctx={ctx} />
+    </>
+  );
 }
 
 function Group({

@@ -1,5 +1,5 @@
 /** The Discover bento (design 01): App of the week, Installed, Starter pack, Suggested, Coming soon, Browse. */
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import type { Role } from '../api';
 import { useT } from '../i18n';
 import { queueAdd, queueRemove } from '../addons/queue';
@@ -15,16 +15,9 @@ import {
 } from '../store-kit';
 import { comingSoonForRole } from './storeCatalog';
 import { addonCategories, appOfTheWeek, starterPack, suggestion } from './discoverPicks';
+import { WeekTile } from './WeekHero';
 import { catLabel } from './storeCategories';
-import {
-  iconUrl,
-  ItemAction,
-  itemDesc,
-  itemName,
-  kindBadge,
-  relOf,
-  type StoreCtx,
-} from './storeItems';
+import { iconUrl, ItemAction, itemName, kindBadge, relOf, type StoreCtx } from './storeItems';
 
 function PickButton({ ids, picked, ctx }: { ids: string[]; picked: boolean; ctx: StoreCtx }) {
   const { st } = ctx;
@@ -51,7 +44,8 @@ export function DiscoverBento({
   const { st, enabled, queued } = ctx;
   const { t } = useT();
   const state = { role, enabled, queued };
-  const week = appOfTheWeek(state);
+  const [mountedAt] = useState(() => Date.now());
+  const week = appOfTheWeek(state, mountedAt);
   const pack = starterPack(state);
   const sug = suggestion(state);
   const cats = addonCategories(role);
@@ -145,20 +139,7 @@ export function DiscoverBento({
     ));
   return (
     <SkBento cols={12}>
-      {week && (
-        <SkBentoTile
-          tone={week.tone}
-          size="hero"
-          span={2}
-          eyebrow={week.kind === 'app' ? st.weekTitle : st.weekTitleAddon}
-          aside={kindBadge(st, week)}
-          title={itemName(st, week.id)}
-          titleSize="hero"
-          onTitle={() => ctx.open(week.id)}
-          body={itemDesc(st, week.id)}
-          footer={<PickButton ids={[week.id]} picked={queued.includes(week.id)} ctx={ctx} />}
-        />
-      )}
+      {week && <WeekTile m={week} ctx={ctx} now={mountedAt} span={2} />}
       {small.map((tile, i) =>
         tile(i === small.length - 1 && small.length % 2 === 1 ? 2 : undefined),
       )}

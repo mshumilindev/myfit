@@ -5,6 +5,10 @@ import {
   categoryCount,
   heroMode,
   heroState,
+  holidayOn,
+  weekIndex,
+  weekPick,
+  weekPool,
   starterPack,
   suggestion,
 } from './discoverPicks';
@@ -12,6 +16,53 @@ import { availableForRole, comingSoonForRole } from './storeCatalog';
 
 const none = { role: 'member' as const, enabled: new Set<string>(), queued: [] as string[] };
 beforeEach(() => undefined);
+
+describe('of the week slots (SPO-556)', () => {
+  const WEEK = 7 * 86_400_000;
+  const t0 = Date.UTC(2026, 10, 11);
+  const empty = new Set<string>();
+  it('the week turns over on Sunday 00:00 UTC', () => {
+    const sun = Date.UTC(2026, 10, 15);
+    expect(weekIndex(sun)).toBe(weekIndex(sun - 1) + 1);
+    expect(weekIndex(sun + 6 * 86_400_000)).toBe(weekIndex(sun));
+  });
+  it('each slot draws only its own kind, in catalog order', () => {
+    for (const [kind, k] of [
+      ['app', 'app'],
+      ['addon', 'addon'],
+      ['theme', 'theme'],
+    ] as const) {
+      const pool = weekPool(kind, 'member');
+      expect(pool.length).toBeGreaterThan(0);
+      expect(pool.every((m) => m.kind === k && !m.soon)).toBe(true);
+      expect(weekPick(kind, 'member', empty, t0)?.kind).toBe(k);
+    }
+  });
+  it('installing the pick moves to the next one; everything installed leaves the slot empty', () => {
+    const first = weekPick('addon', 'member', empty, t0)!;
+    const next = weekPick('addon', 'member', new Set([first.id]), t0)!;
+    expect(next.id).not.toBe(first.id);
+    const all = new Set(weekPool('theme', 'member').map((m) => m.id));
+    expect(weekPick('theme', 'member', all, t0)).toBeNull();
+  });
+  it('a different week gives a different pick while the pool has more than one item', () => {
+    const ids = new Set(
+      Array.from({ length: 5 }, (_, i) => weekPick('addon', 'member', empty, t0 + i * WEEK)?.id),
+    );
+    expect(ids.size).toBeGreaterThan(1);
+  });
+  it('inside the holiday window an uninstalled Holiday pack is the Theme of the week', () => {
+    expect(holidayOn(Date.UTC(2026, 11, 20, 12))).toBe(true);
+    expect(holidayOn(Date.UTC(2026, 5, 10, 12))).toBe(false);
+    expect(weekPick('theme', 'member', empty, new Date(2026, 11, 20, 12).getTime())?.id).toBe(
+      'holiday-themes',
+    );
+    const installed = new Set(['holiday-themes']);
+    expect(
+      weekPick('theme', 'member', installed, new Date(2026, 11, 20, 12).getTime())?.id,
+    ).not.toBe('holiday-themes');
+  });
+});
 
 describe('discover picks', () => {
   it('the item of the week rotates every week (an app or an add-on), stays within a week, skips an installed item', () => {

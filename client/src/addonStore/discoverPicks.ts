@@ -7,7 +7,7 @@ import type { Role } from '../api';
 import { addonById, type AddonManifest } from '../addons/manifest';
 import { isAddonAllowed } from '../addons/enabledSet';
 import { recommend } from './recommend';
-import { STORE_CATEGORIES, availableForRole } from './storeCatalog';
+import { STORE_CATEGORIES, availableForRole, themesForRole } from './storeCatalog';
 
 export interface DiscoverState {
   role: Role;
@@ -18,30 +18,62 @@ export interface DiscoverState {
 /** Starter packs: ids in order; only the ones the role may use. */
 export const STARTER_PACKS = [{ id: 'recovery', ids: ['health', 'sleep'] }] as const;
 
-/** The week number since 1970 (a Thursday-based week is fine: it only has to change once a week, the same for everyone). */
+/** The week number since 1970. Weeks turn over on Sunday 00:00 UTC (the epoch's day 3); it only has to change once a week, the same for everyone. */
 export function weekIndex(now: number): number {
   return Math.floor((now / 86_400_000 + 4) / 7);
 }
 
+/** The three "of the week" slots; `mix` is the Discover tile (an app or a top-level add-on). */
+export type WeekKind = 'app' | 'addon' | 'theme' | 'mix';
+
+/** The pool a slot rotates through: everything of that kind the role can install, in catalog order (installs never move the cursor). */
+export function weekPool(kind: WeekKind, role: Role): AddonManifest[] {
+  if (kind === 'theme') return themesForRole(role);
+  const all = availableForRole(role);
+  if (kind === 'mix')
+    return all.filter((m) => m.kind === 'app' || (m.kind === 'addon' && !m.parent));
+  return all.filter((m) => m.kind === kind);
+}
+
+/** Holiday looks have a window: Halloween 24-31 Oct, Christmas 18 Dec - 1 Jan (local time). */
+export function holidayOn(now: number): boolean {
+  const d = new Date(now);
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  return (m === 10 && day >= 24) || (m === 12 && day >= 18) || (m === 1 && day <= 1);
+}
+
 /**
- * "App / Add-on of the week": one top-level item (an app, or an add-on that needs no other) the role can install, rotating
- * every week through the catalog in a fixed order. An installed item is skipped to the next; it stays while picked, so it
- * does not vanish after "Add". `now` is a parameter so the rule is testable.
+ * The pick of a slot: start at weekIndex % pool.length and take the first item that is not installed (a picked, still
+ * queued item stays). Inside a holiday window an uninstalled Holiday pack is the Theme of the week. `now` is a
+ * parameter so the rule is testable. Null when everything in the slot is installed.
  */
-export function appOfTheWeek(
-  { role, enabled }: DiscoverState,
+export function weekPick(
+  kind: WeekKind,
+  role: Role,
+  enabled: ReadonlySet<string>,
   now: number = Date.now(),
 ): AddonManifest | null {
-  const pool = availableForRole(role).filter(
-    (m) => (m.kind === 'app' || (m.kind === 'addon' && !m.parent)) && isAddonAllowed(m.id, role),
-  );
+  const pool = weekPool(kind, role);
   if (!pool.length) return null;
+  if (kind === 'theme' && holidayOn(now)) {
+    const h = pool.find((m) => m.id === 'holiday-themes');
+    if (h && !enabled.has(h.id)) return h;
+  }
   const start = weekIndex(now) % pool.length;
   for (let i = 0; i < pool.length; i++) {
     const m = pool[(start + i) % pool.length];
     if (!enabled.has(m.id)) return m;
   }
   return null;
+}
+
+/** Discover's tile: the same rule over apps and top-level add-ons. */
+export function appOfTheWeek(
+  { role, enabled }: DiscoverState,
+  now: number = Date.now(),
+): AddonManifest | null {
+  return weekPick('mix', role, enabled, now);
 }
 
 /** A starter pack still worth offering: the ids the role may use that are not installed (≥2 left). */
