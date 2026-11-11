@@ -143,7 +143,7 @@ export function WeekTile({
   m: AddonManifest;
   ctx: StoreCtx;
   now: number;
-  span?: number;
+  span?: 2;
 }) {
   const { st } = ctx;
   const name = itemName(st, m.id);
