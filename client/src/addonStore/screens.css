@@ -222,7 +222,7 @@
   }
   /* The right column starts level with the previews (below their "Preview" label), not with the label. */
   .as-item-aside {
-    padding-block-start: 32px;
+    padding-block-start: 28px;
   }
   .as-item-act {
     display: flex;
