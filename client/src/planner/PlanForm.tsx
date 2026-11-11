@@ -1,21 +1,67 @@
-import { useState } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { Button } from '../components/ui/Button';
 import { Calendar } from '../components/ui/Calendar';
-import { dayKeyOf, ymdOf } from '../components/ui/calendarDays';
 import { Field } from '../components/ui/Field';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
+import { Hint } from '../components/ui/Hint';
 import { IconTile } from '../components/ui/IconTile';
-import { PageHead } from '../components/ui/PageHead';
 import { PresetChips } from '../components/ui/PresetChips';
+import { ResponsivePanel } from '../components/ui/ResponsivePanel';
+import { SearchField } from '../components/ui/SearchField';
 import { Segmented } from '../components/ui/Segmented';
+import { StickyActionBar } from '../components/ui/StickyActionBar';
 import { WheelPicker } from '../components/ui/WheelPicker';
 import { useT } from '../i18n';
-import { COLOURS, REPEAT_KINDS, type Draft } from './draft';
-import { STRINGS } from './strings';
-import { dayFromNumber, dayNumber } from './zoned';
-import type { Tone } from '../components/ui/tones';
+import { Icon, ICON_NAMES } from '../ui';
+import { PTONES, type Draft, type PTone, type RepeatKind } from './draft';
+import { clock, dayFull, dayLong, dayMonth, durText, leadText, weekdayShorts } from './fmt';
+import { fill, STRINGS } from './strings';
+import { dayFromNumber, dayNumber, parseDay, weekday } from './zoned';
+import './planner.css';
 
-/** Add / edit one plan. Pure form: the page saves and deletes. */
+/** The pickers open as kit drawers over the form (owner 11.11), each with Cancel / Save on a staged copy. */
+type Drawer = 'icon' | 'start' | 'duration' | 'lead' | 'repeat' | 'date';
+
+const DURATIONS = [15, 30, 45, 60, 90, 120];
+const LEADS = [0, 10, 30, 60, 120, 1440];
+const KINDS: RepeatKind[] = ['none', 'daily', 'weekly', 'weekdays', 'biweekly', 'monthly'];
+
+const HM = (p: {
+  h: number;
+  m: number;
+  hl: string;
+  ml: string;
+  hMax: number;
+  onChange: (h: number, m: number) => void;
+  hUnit?: string;
+  mUnit?: string;
+}) => (
+  <div className="pl-hm">
+    <WheelPicker
+      label={p.hl}
+      value={p.h}
+      onChange={(h) => p.onChange(h, p.m)}
+      min={0}
+      max={p.hMax}
+      unit={p.hUnit}
+      input="manual"
+      size="compact"
+    />
+    <WheelPicker
+      label={p.ml}
+      value={p.m}
+      onChange={(m) => p.onChange(p.h, m)}
+      min={0}
+      max={55}
+      step={5}
+      unit={p.mUnit}
+      input="manual"
+      size="compact"
+    />
+  </div>
+);
+
+/** Add / edit one plan, from kit parts (design SPO-555). Pure form: the page saves and deletes. */
 export function PlanForm(p: {
   initial: Draft;
   editing: boolean;
@@ -23,141 +69,429 @@ export function PlanForm(p: {
   onDelete?: () => void;
   onClose: () => void;
 }) {
-  const { t, locale } = useT();
+  const { locale } = useT();
   const s = STRINGS[locale];
   const [d, setD] = useState<Draft>(p.initial);
-  const [pickDate, setPickDate] = useState(false);
+  const [drawer, setDrawer] = useState<Drawer | null>(null);
+  /** The drawer edits this copy; Save moves it into the form, Cancel drops it. */
+  const [st, setSt] = useState<Draft>(p.initial);
+  const [q, setQ] = useState('');
+  const anchor = useRef<HTMLButtonElement>(null);
   const set = (patch: Partial<Draft>) => setD((x) => ({ ...x, ...patch }));
-  const dateText = new Date(
-    ymdOf(dayNumber(d.start)).y,
-    ymdOf(dayNumber(d.start)).m,
-    ymdOf(dayNumber(d.start)).d,
-  ).toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
-  return (
-    <div className="screen pl-form">
-      <PageHead
-        back={{ label: t.backAction, onClick: p.onClose }}
-        title={p.editing ? s.editPlan : s.newPlan}
-      />
-      <GroupedList>
-        <ListRow
-          as="div"
-          icon={<IconTile icon={d.icon} tone={d.color as Tone} size={36} />}
-          label={
-            <Field
-              bare
-              aria-label={s.titleLabel}
-              placeholder={s.titleHint}
-              value={d.title}
-              maxLength={80}
-              onChange={(e) => set({ title: e.target.value })}
-            />
-          }
-        />
-      </GroupedList>
-      <GroupedList header={s.colour}>
-        <ListRow as="div" label="">
-          <PresetChips
-            label={s.colour}
-            items={COLOURS.map((c) => ({
-              id: c,
-              label: s.colours[c],
-              selected: d.color === c,
-              onClick: () => set({ color: c }),
-            }))}
-          />
-        </ListRow>
-      </GroupedList>
-      <GroupedList>
-        <ListRow label={s.date} value={dateText} chevron onClick={() => setPickDate((v) => !v)} />
-        {pickDate && (
-          <ListRow as="div" label="">
+  const setS = (patch: Partial<Draft>) => setSt((x) => ({ ...x, ...patch }));
+  const openDrawer = (k: Drawer) => {
+    setSt(d);
+    setQ('');
+    setDrawer(k);
+  };
+  const closeDrawer = () => setDrawer(null);
+  const commit = () => {
+    setD(st);
+    closeDrawer();
+  };
+  const startMin = d.hour * 60 + d.minute;
+  const hint = (m: number, from = startMin) => fill(s.ends, { t: clock(from + m) });
+  const dn = weekdayShorts(locale);
+  const repLabel: Record<RepeatKind, string> = {
+    none: s.sn,
+    daily: s.sd,
+    weekly: s.sw,
+    weekdays: s.swd,
+    biweekly: s.sb,
+    monthly: s.sm,
+  };
+  const icons = useMemo(() => {
+    const k = q.trim().toLowerCase().replace(/\s+/g, '-');
+    return ICON_NAMES.filter((n) => !k || n.includes(k));
+  }, [q]);
+  const iconName = d.icon.charAt(0).toUpperCase() + d.icon.slice(1).replace(/-/g, ' ');
+  const dayChips = (x: Draft, put: (p: Partial<Draft>) => void, layout: 'wrap' | 'grid') => (
+    <PresetChips
+      layout={layout}
+      label={s.days}
+      tone="accent"
+      items={dn.map((l, i) => ({
+        id: String(i),
+        label: l,
+        selected: x.days.includes(i),
+        onClick: () =>
+          put({
+            days: x.days.includes(i)
+              ? x.days.length > 1
+                ? x.days.filter((v) => v !== i)
+                : x.days
+              : [...x.days, i],
+          }),
+      }))}
+    />
+  );
+  const weekly = (x: Draft) => x.repeat === 'weekly' || x.repeat === 'biweekly';
+
+  const body = (): { title: string; node: ReactNode } => {
+    switch (drawer) {
+      case 'icon':
+        return {
+          title: s.icon,
+          node: (
+            <>
+              <SearchField
+                value={q}
+                onChange={setQ}
+                placeholder={s.searchIcons}
+                clearLabel={s.clearSearch}
+              />
+              {icons.length ? (
+                <div className="pl-ip" role="radiogroup" aria-label={s.icon}>
+                  {icons.map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      role="radio"
+                      aria-checked={n === st.icon}
+                      aria-label={n.replace(/-/g, ' ')}
+                      title={n.replace(/-/g, ' ')}
+                      className={`pl-ip-b${n === st.icon ? ' is-on' : ''}`}
+                      onClick={() => setS({ icon: n })}
+                    >
+                      <Icon name={n} />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <Hint>{fill(s.noIcon, { q })}</Hint>
+              )}
+            </>
+          ),
+        };
+      case 'start':
+        return {
+          title: s.starts,
+          node: (
+            <>
+              <HM
+                h={st.hour}
+                m={st.minute}
+                hl={s.hour}
+                ml={s.minutes}
+                hMax={23}
+                onChange={(hour, minute) => setS({ hour, minute })}
+              />
+              <Hint>{s.startHint}</Hint>
+            </>
+          ),
+        };
+      case 'duration':
+        return {
+          title: s.duration,
+          node: (
+            <>
+              <HM
+                h={Math.floor(st.durationMin / 60)}
+                m={st.durationMin % 60}
+                hl={s.hours}
+                ml={s.minutes}
+                hMax={12}
+                hUnit={s.h}
+                mUnit={s.min}
+                onChange={(h, m) => setS({ durationMin: Math.max(5, h * 60 + m) })}
+              />
+              <Hint>{`${durText(s, st.durationMin)}. ${hint(st.durationMin, st.hour * 60 + st.minute)}`}</Hint>
+            </>
+          ),
+        };
+      case 'lead':
+        return {
+          title: s.remindMe,
+          node: (
+            <>
+              <HM
+                h={Math.floor(st.lead / 60)}
+                m={st.lead % 60}
+                hl={s.hours}
+                ml={s.minutes}
+                hMax={48}
+                hUnit={s.h}
+                mUnit={s.min}
+                onChange={(h, m) => setS({ lead: Math.min(2880, h * 60 + m) })}
+              />
+              <Hint>{`${leadText(s, st.lead)}. ${s.leadHint}`}</Hint>
+            </>
+          ),
+        };
+      case 'date':
+        return {
+          title: s.date,
+          node: (
             <Calendar
-              value={dayNumber(d.start)}
+              mode="single"
+              value={dayNumber(st.start)}
               onSelect={(n) => {
-                set({ start: dayFromNumber(n) });
-                setPickDate(false);
+                const day = dayFromNumber(n);
+                setS({ start: day, days: weekly(st) ? st.days : [weekday(day)] });
               }}
             />
-          </ListRow>
-        )}
-        <ListRow as="div" label={s.starts}>
-          <div className="pl-time">
-            <WheelPicker
-              label={s.hour}
-              value={d.hour}
-              min={0}
-              max={23}
-              input="manual"
-              size="compact"
-              onChange={(hour) => set({ hour })}
+          ),
+        };
+      case 'repeat': {
+        const names: Record<RepeatKind, string> = {
+          none: s.rn,
+          daily: s.rd,
+          weekly: s.rw,
+          weekdays: s.rwd,
+          biweekly: s.rb,
+          monthly: s.rm,
+        };
+        const sub = (k: RepeatKind): string | undefined =>
+          k === 'weekly' || k === 'biweekly'
+            ? fill(s.onDay, { d: dayLong(locale, st.start) })
+            : k === 'weekdays'
+              ? s.monFri
+              : k === 'monthly'
+                ? fill(s.onNth, { n: String(parseDay(st.start).d) })
+                : undefined;
+        return {
+          title: s.repeats,
+          node: (
+            <>
+              <GroupedList>
+                {KINDS.map((k) => (
+                  <ListRow
+                    key={k}
+                    label={names[k]}
+                    sub={sub(k)}
+                    check={st.repeat === k}
+                    onClick={() => setS({ repeat: k })}
+                  />
+                ))}
+              </GroupedList>
+              {weekly(st) && dayChips(st, setS, 'wrap')}
+              {st.repeat !== 'none' && (
+                <GroupedList header={s.endsHdr}>
+                  <ListRow
+                    label={s.never}
+                    check={st.ends.kind === 'never'}
+                    onClick={() => setS({ ends: { kind: 'never' } })}
+                  />
+                  <ListRow
+                    label={s.onDate}
+                    check={st.ends.kind === 'on'}
+                    value={st.ends.kind === 'on' ? dayMonth(locale, st.ends.day) : undefined}
+                    onClick={() =>
+                      setS({
+                        ends: { kind: 'on', day: st.ends.kind === 'on' ? st.ends.day : st.start },
+                      })
+                    }
+                  />
+                  <ListRow
+                    label={s.afterN}
+                    check={st.ends.kind === 'count'}
+                    value={st.ends.kind === 'count' ? String(st.ends.count) : undefined}
+                    onClick={() =>
+                      setS({
+                        ends: {
+                          kind: 'count',
+                          count: st.ends.kind === 'count' ? st.ends.count : 10,
+                        },
+                      })
+                    }
+                  />
+                </GroupedList>
+              )}
+              {st.ends.kind === 'on' && st.repeat !== 'none' && (
+                <Calendar
+                  mode="single"
+                  value={dayNumber(st.ends.day)}
+                  onSelect={(n) => setS({ ends: { kind: 'on', day: dayFromNumber(n) } })}
+                />
+              )}
+              {st.ends.kind === 'count' && st.repeat !== 'none' && (
+                <WheelPicker
+                  label={s.afterN}
+                  value={st.ends.count}
+                  onChange={(count) => setS({ ends: { kind: 'count', count } })}
+                  min={1}
+                  max={99}
+                  input="manual"
+                  size="compact"
+                />
+              )}
+            </>
+          ),
+        };
+      }
+      default:
+        return { title: '', node: null };
+    }
+  };
+  const dr = drawer ? body() : null;
+
+  const durCustom = !DURATIONS.includes(d.durationMin);
+  const leadCustom = !LEADS.includes(d.lead);
+  return (
+    <>
+      <div className="screen pl-screen">
+        <div className="pl-form">
+          <header className="pl-page-h">
+            <h1>{p.editing ? s.editPlan : s.newPlan}</h1>
+          </header>
+          <GroupedList header={s.basedOn} footer={s.basedOnFooter}>
+            <ListRow
+              icon={<IconTile icon="calendar-plus" tone="accent" size={32} />}
+              label={s.own}
+              sub={s.ownSub}
             />
-            <span aria-hidden>:</span>
-            <WheelPicker
-              label={s.minute}
-              value={d.minute}
-              min={0}
-              max={59}
-              step={5}
-              input="manual"
-              size="compact"
-              onChange={(minute) => set({ minute })}
+          </GroupedList>
+          <GroupedList header={s.what}>
+            <ListRow
+              icon={<IconTile icon={d.icon} tone={d.color as never} size={32} />}
+              label={s.icon}
+              value={iconName}
+              chevron
+              onClick={() => openDrawer('icon')}
             />
+            <ListRow as="label" label={s.titleLabel} labelFixed>
+              <Field
+                bare
+                value={d.title}
+                aria-label={s.titleLabel}
+                placeholder={s.titlePlaceholder}
+                maxLength={80}
+                onChange={(e) => set({ title: e.target.value })}
+              />
+            </ListRow>
+          </GroupedList>
+          <div className="pl-form-g">
+            <span className="ut-xs ut-faint">{s.color}</span>
+            <div className="pl-sw" role="radiogroup" aria-label={s.color}>
+              {PTONES.map((c: PTone, i) => (
+                <button
+                  key={c}
+                  type="button"
+                  role="radio"
+                  aria-checked={c === d.color}
+                  aria-label={s.cols[i]}
+                  className={`pl-sw-b uit--${c}${c === d.color ? ' is-on' : ''}`}
+                  onClick={() => set({ color: c })}
+                >
+                  <span />
+                </button>
+              ))}
+            </div>
+            <Hint>{s.colorHint}</Hint>
           </div>
-        </ListRow>
-      </GroupedList>
-      <GroupedList header={s.repeats}>
-        <ListRow as="div" label="">
+          <GroupedList header={s.when}>
+            <ListRow
+              label={s.repeats}
+              value={repLabel[d.repeat]}
+              chevron
+              onClick={() => openDrawer('repeat')}
+            />
+            {d.repeat === 'none' && (
+              <ListRow
+                label={s.date}
+                value={dayFull(locale, d.start)}
+                chevron
+                onClick={() => openDrawer('date')}
+              />
+            )}
+            <ListRow
+              label={s.starts}
+              value={clock(startMin)}
+              chevron
+              onClick={() => openDrawer('start')}
+            />
+          </GroupedList>
+          <span className="ut-xs ut-faint">{s.duration}</span>
           <PresetChips
-            label={s.repeats}
-            items={REPEAT_KINDS.map((k) => ({
-              id: k,
-              label: s.repeat[k],
-              selected: d.repeat === k,
-              onClick: () => set({ repeat: k }),
-            }))}
-          />
-        </ListRow>
-      </GroupedList>
-      <GroupedList header={s.remind}>
-        <ListRow as="div" label="">
-          <Segmented
-            label={s.remind}
-            value={d.mode}
-            onChange={(mode) => set({ mode })}
-            options={[
-              { value: 'quiet', label: s.quiet },
-              { value: 'ring', label: s.ring },
+            layout="wrap"
+            label={s.duration}
+            tone="accent"
+            items={[
+              ...DURATIONS.map((m) => ({
+                id: String(m),
+                label: durText(s, m),
+                selected: m === d.durationMin,
+                onClick: () => set({ durationMin: m }),
+              })),
+              {
+                id: 'c',
+                label: durCustom ? durText(s, d.durationMin) : s.custom,
+                selected: durCustom,
+                onClick: () => openDrawer('duration'),
+              },
             ]}
           />
-        </ListRow>
-        <ListRow as="div" label="">
+          <Hint>{hint(d.durationMin)}</Hint>
+          {weekly(d) && dayChips(d, set, 'grid')}
+          <div className="pl-form-g">
+            <span className="ut-xs ut-faint">{s.reminder}</span>
+            <Segmented
+              value={d.mode}
+              onChange={(mode) => set({ mode })}
+              label={s.reminder}
+              fill
+              options={[
+                { value: 'quiet', label: s.quiet },
+                { value: 'ring', label: s.ring },
+              ]}
+            />
+            <Hint>{d.mode === 'ring' ? s.ringHint : s.quietHint}</Hint>
+          </div>
+          <span className="ut-xs ut-faint">{s.remindMe}</span>
           <PresetChips
-            label={s.lead}
-            items={s.leadOptions.map((o) => ({
-              id: String(o.min),
-              label: o.label,
-              selected: d.lead === o.min,
-              onClick: () => set({ lead: o.min }),
-            }))}
+            layout="wrap"
+            label={s.remindMe}
+            tone="accent"
+            items={[
+              ...LEADS.map((m) => ({
+                id: String(m),
+                label: leadText(s, m),
+                selected: m === d.lead,
+                onClick: () => set({ lead: m }),
+              })),
+              {
+                id: 'c',
+                label: leadCustom ? leadText(s, d.lead) : s.custom,
+                selected: leadCustom,
+                onClick: () => openDrawer('lead'),
+              },
+            ]}
           />
-        </ListRow>
-      </GroupedList>
-      <div className="pl-actions">
-        <Button fullWidth disabled={!d.title.trim()} onClick={() => p.onSave(d)}>
-          {s.save}
-        </Button>
-        <Button variant="ghost" fullWidth onClick={p.onClose}>
+          {p.onDelete && (
+            <Button variant="danger" fullWidth onClick={p.onDelete}>
+              {s.del}
+            </Button>
+          )}
+        </div>
+      </div>
+      <StickyActionBar>
+        <Button variant="secondary" onClick={p.onClose}>
           {s.cancel}
         </Button>
-        {p.onDelete && (
-          <Button variant="danger" fullWidth onClick={p.onDelete}>
-            {s.del}
-          </Button>
-        )}
-      </div>
-    </div>
+        <Button disabled={!d.title.trim()} onClick={() => p.onSave(d)}>
+          {s.save}
+        </Button>
+      </StickyActionBar>
+      {dr && (
+        <ResponsivePanel
+          open
+          onClose={closeDrawer}
+          anchorRef={anchor}
+          mode="sheet"
+          label={dr.title}
+          title={dr.title}
+          footer={
+            <StickyActionBar surface="surface">
+              <Button variant="secondary" onClick={closeDrawer}>
+                {s.cancel}
+              </Button>
+              <Button onClick={commit}>{s.save}</Button>
+            </StickyActionBar>
+          }
+        >
+          {dr.node}
+        </ResponsivePanel>
+      )}
+    </>
   );
 }
-
-export { dayKeyOf };

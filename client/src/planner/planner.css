@@ -1,11 +1,144 @@
-/* Planner screens. Only layout; colours, type and surfaces come from the kit. */
-.pl-time {
+/* Planner screens, ported 1:1 from the approved design (design-lab/variants/v17/planner.css). Tokens only. */
+.pl-page,
+.pl-form {
   display: flex;
-  align-items: center;
-  gap: var(--space-2, 8px);
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 16px 110px;
+  box-sizing: border-box;
 }
-.pl-actions {
+.pl-page-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pl-page-h h1 {
+  margin: 0;
+  font-size: var(--fs-24, 24px);
+}
+.pl-ag {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.pl-ag-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 4px 6px;
+}
+.pl-ag-h span {
+  font-size: var(--fs-12, 12px);
+  color: var(--color-text-muted);
+}
+.pl-ag-d.is-today .pl-ag-h b {
+  color: var(--color-accent);
+}
+.pl-ag-free {
+  margin: 0 4px;
+}
+.pl-form-g {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pl-form-act {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.pl-form {
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+}
+.pl-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+.pl-ag [class*='-time'] {
+  white-space: nowrap;
+}
+.pl-ip {
   display: grid;
-  gap: var(--space-2, 8px);
-  padding: var(--space-4, 16px) 0;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 6px;
+}
+.pl-ip-b {
+  display: grid;
+  place-items: center;
+  height: 52px;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 26px;
+  cursor: pointer;
+}
+.pl-ip-b:hover {
+  background: var(--color-surface);
+}
+.pl-ip-b.is-on {
+  background: var(--color-surface);
+  box-shadow: 0 0 0 2px var(--color-accent);
+  color: var(--color-accent);
+}
+.pl-sw {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  justify-items: center;
+}
+.pl-sw-b {
+  /* owner 11.11: two full rows across the phone width, no empty space on the right */
+  width: 100%;
+  max-width: 64px;
+  aspect-ratio: 1;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: none;
+  padding: 3px;
+  cursor: pointer;
+}
+.pl-sw-b span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--t-base);
+}
+.pl-sw-b.is-on {
+  border-color: var(--t-base);
+}
+.pl-hm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* new kit tones for event colours: --t-* like every uit--* tone, derived from one hue so every theme re-skins them */
+.uit--red { --t-base: oklch(0.62 0.2 25); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
+.uit--orange { --t-base: oklch(0.72 0.17 55); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
+.uit--yellow { --t-base: oklch(0.84 0.16 92); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
+.uit--lime { --t-base: oklch(0.76 0.19 128); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
+.uit--green { --t-base: oklch(0.62 0.17 152); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
+.uit--teal { --t-base: oklch(0.64 0.12 190); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
+.uit--blue { --t-base: oklch(0.6 0.18 255); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
+.uit--indigo { --t-base: oklch(0.55 0.2 278); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
+.uit--purple { --t-base: oklch(0.58 0.2 310); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
+.uit--pink { --t-base: oklch(0.68 0.2 355); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
+.uit--gray { --t-base: oklch(0.62 0.01 250); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
+
+/* the app's scroll container (.screen) without its own padding: the page carries the design's 16px */
+.pl-screen {
+  padding: 0;
+  gap: 0;
+}
+/* Cancel / Save in a Planner drawer share the whole width (owner 11.11) */
+.rpanel-f > .uiab {
+  flex: 1 1 100%;
+  border-top: 0;
+  padding: 0;
 }

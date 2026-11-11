@@ -19,6 +19,12 @@ const subscribe = (f: () => void) => {
   return () => subs.delete(f);
 };
 
+/** Design-comparison harness only (design-lab/cmp.tsx): fill the store without Firestore. */
+export function seedPlannerPreview(next: PlanDoc[]): void {
+  plans = next;
+  emit();
+}
+
 export const getPlans = (): PlanDoc[] => plans;
 export const getPrefs = (): PlannerPrefs => prefs;
 /** Plans that exist but cannot be opened yet (no vault key on this device). */

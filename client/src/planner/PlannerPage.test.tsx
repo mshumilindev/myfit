@@ -13,6 +13,6 @@ describe('PlannerPage', () => {
   it('shows the empty state with an Add button when there are no plans', () => {
     render(<PlannerPage onClose={() => {}} />);
     expect(screen.getByText('No plans yet')).toBeTruthy();
-    expect(screen.getAllByText('Add plan').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Add a plan').length).toBeGreaterThan(0);
   });
 });
