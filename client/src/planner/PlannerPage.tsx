@@ -3,6 +3,7 @@ import { Button } from '../components/ui/Button';
 import { dayKeyOf } from '../components/ui/calendarDays';
 import { EmptyState } from '../components/ui/EmptyState';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
+import { PageHead } from '../components/ui/PageHead';
 import { IconTile } from '../components/ui/IconTile';
 import { MonthGrid, type MonthGridDay } from '../components/ui/MonthGrid';
 import { ConfirmDialog } from '../components/ui/Overlays';
@@ -39,7 +40,7 @@ interface Occ {
 
 /** The Planner page (design SPO-555): Week / Month, stepper, agenda of real plans, add / edit / delete. */
 export function PlannerPage({ onClose }: { onClose: () => void }) {
-  const { locale } = useT();
+  const { t, locale } = useT();
   const s = STRINGS[locale];
   const plans = usePlans();
   const ws = useWeekStartDay();
@@ -149,12 +150,15 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
   return (
     <div className="screen pl-screen">
       <div className="pl-page">
-        <header className="pl-page-h">
-          <h1>{s.name}</h1>
-          <Button icon="plus" size="sm" onClick={add}>
-            {s.add}
-          </Button>
-        </header>
+        <PageHead
+          back={{ label: t.backAction, onClick: onClose }}
+          title={s.name}
+          actions={
+            <Button icon="plus" size="sm" onClick={add}>
+              {s.add}
+            </Button>
+          }
+        />
         <Segmented
           value={view}
           onChange={setView}

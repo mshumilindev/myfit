@@ -5,6 +5,7 @@ import { Field } from '../components/ui/Field';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { Hint } from '../components/ui/Hint';
 import { IconTile } from '../components/ui/IconTile';
+import { PageHead } from '../components/ui/PageHead';
 import { PresetChips } from '../components/ui/PresetChips';
 import { ResponsivePanel } from '../components/ui/ResponsivePanel';
 import { SearchField } from '../components/ui/SearchField';
@@ -69,7 +70,7 @@ export function PlanForm(p: {
   onDelete?: () => void;
   onClose: () => void;
 }) {
-  const { locale } = useT();
+  const { t, locale } = useT();
   const s = STRINGS[locale];
   const [d, setD] = useState<Draft>(p.initial);
   const [drawer, setDrawer] = useState<Drawer | null>(null);
@@ -331,9 +332,10 @@ export function PlanForm(p: {
     <>
       <div className="screen pl-screen">
         <div className="pl-form">
-          <header className="pl-page-h">
-            <h1>{p.editing ? s.editPlan : s.newPlan}</h1>
-          </header>
+          <PageHead
+            back={{ label: t.backAction, onClick: p.onClose }}
+            title={p.editing ? s.editPlan : s.newPlan}
+          />
           <GroupedList header={s.basedOn} footer={s.basedOnFooter}>
             <ListRow
               icon={<IconTile icon="calendar-plus" tone="accent" size={32} />}
@@ -481,12 +483,12 @@ export function PlanForm(p: {
           label={dr.title}
           title={dr.title}
           footer={
-            <StickyActionBar surface="surface">
+            <div className="pl-dfoot">
               <Button variant="secondary" onClick={closeDrawer}>
                 {s.cancel}
               </Button>
               <Button onClick={commit}>{s.save}</Button>
-            </StickyActionBar>
+            </div>
           }
         >
           {dr.node}

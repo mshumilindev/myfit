@@ -3,8 +3,7 @@
 .pl-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px 16px 110px;
+  gap: var(--space-4);
   box-sizing: border-box;
 }
 .pl-page-h {
@@ -19,13 +18,13 @@
 .pl-ag {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-4);
 }
 .pl-ag-h {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin: 0 4px 6px;
+  margin: 0 var(--s-4) var(--s-6);
 }
 .pl-ag-h span {
   font-size: var(--fs-12, 12px);
@@ -35,17 +34,12 @@
   color: var(--color-accent);
 }
 .pl-ag-free {
-  margin: 0 4px;
+  margin: 0 var(--s-4);
 }
 .pl-form-g {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-.pl-form-act {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
+  gap: var(--s-8);
 }
 .pl-form {
   max-width: 640px;
@@ -53,8 +47,6 @@
   width: 100%;
 }
 .pl-page {
-  max-width: 1100px;
-  margin: 0 auto;
   width: 100%;
 }
 .pl-ag [class*='-time'] {
@@ -63,7 +55,7 @@
 .pl-ip {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
-  gap: 6px;
+  gap: var(--s-6);
 }
 .pl-ip-b {
   display: grid;
@@ -73,7 +65,7 @@
   border-radius: var(--radius-lg);
   background: transparent;
   color: var(--color-text);
-  font-size: 26px;
+  font-size: var(--fs-26);
   cursor: pointer;
 }
 .pl-ip-b:hover {
@@ -87,7 +79,7 @@
 .pl-sw {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+  gap: var(--s-10);
   justify-items: center;
 }
 .pl-sw-b {
@@ -115,7 +107,7 @@
 .pl-hm {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: var(--s-12);
 }
 
 /* new kit tones for event colours: --t-* like every uit--* tone, derived from one hue so every theme re-skins them */
@@ -197,16 +189,18 @@
   --t-on: var(--color-bg);
 }
 
-/* the app's scroll container (.screen) without its own padding: the page carries the design's 16px */
-.pl-screen {
-  padding: 0;
-  gap: 0;
-}
-/* Cancel / Save in a Planner drawer share the whole width (owner 11.11) */
-.rpanel-f > .uiab {
+/* Cancel / Save in a Planner drawer share the whole width, Save wider (same ratio as the page's StickyActionBar) */
+.pl-dfoot {
+  display: flex;
+  gap: var(--s-8);
   flex: 1 1 100%;
-  border-top: 0;
-  padding: 0;
+}
+.pl-dfoot > .uibtn {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.pl-dfoot > .uibtn:last-child:not(:only-child) {
+  flex-grow: 1.6;
 }
 /* in the icon drawer only the grid scrolls; the title, search and Cancel / Save stay in view (owner 11.11) */
 .pl-ip--scroll {
