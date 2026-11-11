@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   MAX_AHEAD_MS,
-  RING_MAX_REPEATS,
   STALE_MS,
   nextAfter,
-  repeatAction,
   ringable,
   taskId,
   validFires,
@@ -31,29 +29,13 @@ describe('planner moments from a document', () => {
 });
 
 describe('planner task names', () => {
-  const base = { uid: 'u1', id: 'p1', dueAt: 123, step: 'repeat' as const };
-  it('are the same for the same moment and step, and differ per repeat and per ring round', () => {
-    expect(taskId({ ...base, n: 1, r: 1 })).toBe(taskId({ ...base, n: 1, r: 1 }));
-    expect(taskId({ ...base, n: 1, r: 1 })).not.toBe(taskId({ ...base, n: 2, r: 1 }));
-    expect(taskId({ ...base, n: 1, r: 1 })).not.toBe(taskId({ ...base, n: 1, r: 2 }));
+  const base = { uid: 'u1', id: 'p1', dueAt: 123 };
+  it('are the same for the same moment and differ per moment', () => {
+    expect(taskId(base)).toBe(taskId({ ...base }));
+    expect(taskId(base)).not.toBe(taskId({ ...base, dueAt: 124 }));
   });
   it('contain only allowed characters and carry no text of the plan', () => {
-    expect(taskId({ ...base, uid: 'a/b c', n: 1 })).toMatch(/^[A-Za-z0-9_-]+$/);
-  });
-});
-
-describe('a persistent reminder repeats until answered', () => {
-  const now = 1000;
-  it('rings while ringing, stops when dismissed or gone, waits through a snooze', () => {
-    expect(repeatAction({ state: 'ringing' }, 1, now)).toBe('ring');
-    expect(repeatAction({ state: 'dismissed' }, 1, now)).toBe('stop');
-    expect(repeatAction(undefined, 1, now)).toBe('stop');
-    expect(repeatAction({ state: 'snoozed', snoozeUntil: now + 5000 }, 1, now)).toBe('wait');
-    expect(repeatAction({ state: 'snoozed', snoozeUntil: now - 1 }, 1, now)).toBe('stop');
-  });
-  it('stops after the last repeat', () => {
-    expect(repeatAction({ state: 'ringing' }, RING_MAX_REPEATS, now)).toBe('ring');
-    expect(repeatAction({ state: 'ringing' }, RING_MAX_REPEATS + 1, now)).toBe('stop');
+    expect(taskId({ ...base, uid: 'a/b c' })).toMatch(/^[A-Za-z0-9_-]+$/);
   });
 });
 
