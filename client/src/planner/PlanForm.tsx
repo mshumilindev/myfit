@@ -4,6 +4,7 @@ import { Button } from '../components/ui/Button';
 import { Calendar } from '../components/ui/Calendar';
 import { Field } from '../components/ui/Field';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
+import { GUIDE_OUTLINE_CLASS, SaveGuide } from '../components/ui/SaveGuide';
 import { Hint } from '../components/ui/Hint';
 import { IconTile } from '../components/ui/IconTile';
 import { PageHead } from '../components/ui/PageHead';
@@ -80,6 +81,19 @@ export function PlanForm(p: {
   const s = STRINGS[locale];
   const [d, setD] = useState<Draft>(p.initial);
   const [drawer, setDrawer] = useState<Drawer | null>(null);
+  /** The first missing required field while the Save flag is up (outlined). */
+  const [missingId, setMissingId] = useState<string | null>(null);
+  const needs = [{ id: 'title', label: s.titleLabel, done: !!d.title.trim() }];
+  const saveBtn = (full: boolean) => (
+    <SaveGuide
+      fullWidth={full}
+      label={s.save}
+      heading={s.stillNeeded}
+      items={needs}
+      onSave={() => p.onSave(d)}
+      onReveal={setMissingId}
+    />
+  );
   /** The drawer edits this copy; Save moves it into the form, Cancel drops it. */
   const [st, setSt] = useState<Draft>(p.initial);
   const [q, setQ] = useState('');
@@ -469,7 +483,12 @@ export function PlanForm(p: {
           chevron
           onClick={() => openDrawer('color')}
         />
-        <ListRow as="label" label={s.titleLabel} labelFixed>
+        <ListRow
+          as="label"
+          label={s.titleLabel}
+          labelFixed
+          className={missingId === 'title' ? GUIDE_OUTLINE_CLASS : undefined}
+        >
           <Field
             bare
             value={d.title}
@@ -632,9 +651,7 @@ export function PlanForm(p: {
               <Button fullWidth variant="secondary" onClick={leave}>
                 {s.cancel}
               </Button>
-              <Button fullWidth disabled={!d.title.trim()} onClick={() => p.onSave(d)}>
-                {s.save}
-              </Button>
+              {saveBtn(true)}
             </div>
           </div>
         </Sheet>
@@ -654,9 +671,7 @@ export function PlanForm(p: {
         <Button variant="secondary" onClick={leave}>
           {s.cancel}
         </Button>
-        <Button disabled={!d.title.trim()} onClick={() => p.onSave(d)}>
-          {s.save}
-        </Button>
+        {saveBtn(false)}
       </StickyActionBar>
       {nested}
       {leaveDialog}

@@ -87,6 +87,10 @@ html[data-theme='studio'][data-accent='olive'] .dk-island {
   --color-learn-tint: var(--c-272d24);
   --color-learn-text: var(--c-ced3aa);
   --color-learn-line: var(--c-545c3d);
+  --color-guide: var(--c-e5537e);
+  --color-guide-tint: color-mix(in srgb, var(--c-e5537e) 16%, var(--color-surface));
+  --color-guide-text: var(--c-f9c4d3);
+  --color-guide-line: color-mix(in srgb, var(--c-e5537e) 45%, var(--color-divider));
   --color-coach: var(--c-a9b36b);
   --color-coach-tint: var(--c-272d24);
   --color-coach-text: var(--c-ced3aa);
@@ -188,6 +192,10 @@ html[data-theme='studio'][data-mode='light'][data-accent='olive']:not([data-slee
   --color-learn-tint: var(--c-dee3e3);
   --color-learn-text: var(--c-2b3015);
   --color-learn-line: var(--c-a8b096);
+  --color-guide: var(--c-e5537e);
+  --color-guide-tint: color-mix(in srgb, var(--c-e5537e) 16%, var(--color-surface));
+  --color-guide-text: color-mix(in srgb, var(--c-e5537e) 45%, var(--color-text));
+  --color-guide-line: color-mix(in srgb, var(--c-e5537e) 45%, var(--color-divider));
   --color-coach: var(--c-5f6b2f);
   --color-coach-tint: var(--c-dee3e3);
   --color-coach-text: var(--c-2b3015);

@@ -192,6 +192,10 @@ html[data-theme='studio'] .dk-island {
   --color-learn-tint: var(--c-2f3438);
   --color-learn-text: var(--c-eaeff4);
   --color-learn-line: var(--c-6b7277);
+  --color-guide: var(--c-e5537e);
+  --color-guide-tint: color-mix(in srgb, var(--c-e5537e) 16%, var(--color-surface));
+  --color-guide-text: var(--c-f9c4d3);
+  --color-guide-line: color-mix(in srgb, var(--c-e5537e) 45%, var(--color-divider));
   --color-coach: var(--c-dbe4ec);
   --color-coach-tint: var(--c-2f3438);
   --color-coach-text: var(--c-eaeff4);

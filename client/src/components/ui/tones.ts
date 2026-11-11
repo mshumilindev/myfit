@@ -17,6 +17,7 @@
  *   home     khaki — Home set (no-gym sessions, their moves)
  *   ok / danger / kcal — status families
  *   apex / learn / atlas — sub-app families (Today widgets)
+ *   guide    the Learn colour of the active theme (pink #e5537e when that is monochrome) — hints that teach how to use the app (SaveGuide, field outlines, flags, tours); never orange, never the plain accent
  *   gym / people — fixed identity of the Gym and People apps (app switcher); unlike
  *   `accent` they do not follow the active app's accent re-skin
  *   coach    tourmaline — fixed identity of the Coach app (launcher tile, chips); not the accent re-skin
@@ -47,6 +48,7 @@ export type Tone =
   | 'kcal'
   | 'apex'
   | 'learn'
+  | 'guide'
   | 'atlas'
   | 'gym'
   | 'people'
@@ -72,6 +74,7 @@ export const TONES: Tone[] = [
   'kcal',
   'apex',
   'learn',
+  'guide',
   'atlas',
   'gym',
   'people',

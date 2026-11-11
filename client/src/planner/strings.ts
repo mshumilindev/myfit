@@ -63,6 +63,7 @@ export interface PlannerStrings {
   remindMe: string;
   cancel: string;
   save: string;
+  stillNeeded: string;
   done: string;
   del: string;
   delTitle: string;
@@ -168,6 +169,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     remindMe: 'Remind me',
     cancel: 'Cancel',
     save: 'Save',
+    stillNeeded: 'Still needed',
     done: 'Done',
     del: 'Delete',
     delTitle: 'Delete this plan?',
@@ -284,6 +286,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     remindMe: 'Нагадати',
     cancel: 'Скасувати',
     save: 'Зберегти',
+    stillNeeded: 'Ще потрібно',
     done: 'Готово',
     del: 'Видалити',
     delTitle: 'Видалити цей план?',
@@ -400,6 +403,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     remindMe: 'Przypomnij',
     cancel: 'Anuluj',
     save: 'Zapisz',
+    stillNeeded: 'Jeszcze potrzeba',
     done: 'Gotowe',
     del: 'Usuń',
     delTitle: 'Usunąć ten plan?',
@@ -516,6 +520,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     remindMe: 'Priminti',
     cancel: 'Atšaukti',
     save: 'Išsaugoti',
+    stillNeeded: 'Dar reikia',
     done: 'Atlikta',
     del: 'Ištrinti',
     delTitle: 'Ištrinti šį planą?',
@@ -632,6 +637,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     remindMe: 'Tuleta meelde',
     cancel: 'Tühista',
     save: 'Salvesta',
+    stillNeeded: 'Veel vaja',
     done: 'Valmis',
     del: 'Kustuta',
     delTitle: 'Kas kustutada see plaan?',

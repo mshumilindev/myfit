@@ -119,6 +119,13 @@
   --t-line: var(--color-learn-line);
   --t-on: var(--color-on-accent);
 }
+.uit--guide {
+  --t-base: var(--color-guide);
+  --t-tint: var(--color-guide-tint);
+  --t-text: var(--color-guide-text);
+  --t-line: var(--color-guide-line);
+  --t-on: var(--color-on-accent);
+}
 .uit--atlas {
   --t-base: var(--color-atlas);
   --t-tint: var(--color-atlas-tint);

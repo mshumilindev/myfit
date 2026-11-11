@@ -1,0 +1,70 @@
+.uisg {
+  position: relative;
+  display: inline-flex;
+}
+.uisg-btn.is-off {
+  background: color-mix(in srgb, var(--color-text) 46%, var(--color-surface));
+  color: var(--color-bg);
+  cursor: pointer;
+}
+.uisg-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: 8px;
+}
+.uisg-dots i {
+  width: 7px;
+  height: 7px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: color-mix(in srgb, currentColor 32%, transparent);
+}
+.uisg-dots i.is-done {
+  background: currentColor;
+}
+.uisg-dots i.is-next {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+.uisg-flag {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: max-content;
+  min-width: 140px;
+  max-width: 220px;
+  padding: 11px 13px;
+  border-radius: 14px 14px 4px 14px;
+  background: var(--t-base);
+  color: var(--color-guide-on, #1f0a12);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.uisg-flag::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: 12px;
+  height: 8px;
+  background: inherit;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+.uisg-head {
+  margin-bottom: 3px;
+  font-size: 10px;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+/* On the first missing field: the Guide outline (no text under it). */
+.uisg-hit {
+  outline: 2px solid var(--color-guide);
+  outline-offset: -2px;
+  background: var(--color-guide-tint);
+}

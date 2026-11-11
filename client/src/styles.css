@@ -232,6 +232,11 @@
   --color-learn-tint: var(--c-34151f);
   --color-learn-text: var(--c-f9c4d3);
   --color-learn-line: var(--c-6e2a3e);
+  /* Guide family (hints teaching how to use the app): Learn colour of the theme; monochrome themes override with the reserved pink. */
+  --color-guide: var(--color-learn);
+  --color-guide-tint: var(--color-learn-tint);
+  --color-guide-text: var(--color-learn-text);
+  --color-guide-line: var(--color-learn-line);
   --color-atlas: var(--c-d96a60);
   --color-atlas-tint: var(--c-2e1a18);
   --color-atlas-text: var(--c-f3c1bb);
