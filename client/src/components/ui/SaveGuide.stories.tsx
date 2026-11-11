@@ -27,7 +27,7 @@ function Demo({ done }: { done: boolean[] }) {
   );
 }
 
-/** Press the grey Save: the flag lists what is missing. Tick everything: the dots vanish. */
+/** Press the grey Save: the flag lists what is missing. Tick everything: Save turns on. */
 export const Playground: Story = {
   args: {
     guide: undefined as never,

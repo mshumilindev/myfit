@@ -10,26 +10,6 @@
   /* the kit's own disabled look (dimmed, theme-native) via aria-disabled; it stays pressable */
   cursor: pointer;
 }
-.uisg-dots {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-inline-start: 8px;
-}
-.uisg-dots i {
-  width: 7px;
-  height: 7px;
-  box-sizing: border-box;
-  border-radius: 50%;
-  background: color-mix(in srgb, currentColor 32%, transparent);
-}
-.uisg-dots i.is-done {
-  background: currentColor;
-}
-.uisg-dots i.is-next {
-  background: transparent;
-  box-shadow: inset 0 0 0 1.5px currentColor;
-}
 .uisg-flag {
   position: absolute;
   right: 14px;
@@ -48,7 +28,7 @@
   font-weight: 600;
   line-height: 1.2;
 }
-/* The list echoes the dots in Save: the next item is a ring, the rest are open dots. */
+/* The next item is a ring, the rest are open dots. */
 .uisg-flag > span {
   display: flex;
   align-items: center;

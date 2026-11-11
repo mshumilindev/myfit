@@ -19,7 +19,7 @@ import './SaveGuide.css';
  * pressable (`aria-disabled`). A press raises the flag with what is still needed and dashes the first
  * missing field. Only a press on that dashed field (or Esc) dismisses it, and the field gets focus;
  * a press anywhere else does nothing. The flag and the dashes follow the form live and vanish for good
- * when everything is filled.
+ * when everything is filled (Save is then enabled).
  */
 export interface GuideItem {
   id: string;
@@ -117,7 +117,7 @@ export interface SaveGuideProps extends Omit<ButtonProps, 'disabled' | 'onClick'
 
 export function SaveGuide({ guide, label, heading, onSave, className, ...rest }: SaveGuideProps) {
   const flagId = useId();
-  const { items, missing, ready, active, firstId } = guide;
+  const { missing, ready, active } = guide;
   return (
     <div className="uisg">
       {active && (
@@ -138,16 +138,6 @@ export function SaveGuide({ guide, label, heading, onSave, className, ...rest }:
         }}
       >
         {label}
-        {!ready && (
-          <span className="uisg-dots" aria-hidden>
-            {items.map((i) => (
-              <i
-                key={i.id}
-                className={i.done ? 'is-done' : i.id === firstId ? 'is-next' : undefined}
-              />
-            ))}
-          </span>
-        )}
       </Button>
     </div>
   );

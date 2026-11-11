@@ -57,11 +57,12 @@ describe('SaveGuide', () => {
     expect(screen.queryByRole('status')).toBeNull();
   });
 
-  it('drops the dots and saves when everything is filled', () => {
+  it('is enabled and saves when everything is filled', () => {
     const onSave = vi.fn();
-    const { container } = render(<Form done={[true, true]} onSave={onSave} />);
-    expect(container.querySelector('.uisg-dots')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    render(<Form done={[true, true]} onSave={onSave} />);
+    const btn = screen.getByRole('button', { name: 'Save' });
+    expect(btn.getAttribute('aria-disabled')).toBeNull();
+    fireEvent.click(btn);
     expect(onSave).toHaveBeenCalledOnce();
   });
 });
