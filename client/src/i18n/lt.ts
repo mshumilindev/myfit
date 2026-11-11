@@ -3746,7 +3746,6 @@ export const lt: Strings = {
   plannerSrcHomeSet: 'Namų rinkinys',
   plannerSrcHomeAny: 'Namų treniruotė',
   plannerSrcWorkout: 'Treniruotė',
-  plannerSrcActivity: 'Veikla',
   plannerSrcAllHome: 'Visi namų rinkiniai',
   plannerSrcAllActivities: 'Visos veiklos',
   plannerSrcActivities: 'Veiklos',

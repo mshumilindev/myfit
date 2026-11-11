@@ -11,7 +11,7 @@ import {
   type PlannerSourceProps,
 } from '../plannerSources';
 import { Icon } from '../ui';
-import { kitTone, typeName } from '../views/logActivity/shared';
+import { catName, catOf, kitTone, typeName } from '../views/logActivity/shared';
 
 const SHOWN = 3;
 /** The plan colour that matches an activity family. */
@@ -33,7 +33,7 @@ function Row(p: {
     <ListRow
       icon={<IconTile icon={p.icon} tone={kitTone(p.k)} size={32} />}
       label={name}
-      sub={t.plannerSrcActivity}
+      sub={catName(catOf(p.k), t)}
       trailing={p.selectedId === `activity:${p.k}` ? <Icon name="check" /> : undefined}
       onClick={() =>
         p.onPick({

@@ -3709,7 +3709,6 @@ export const et: Strings = {
   plannerSrcHomeSet: 'Kodune komplekt',
   plannerSrcHomeAny: 'Kodune trenging',
   plannerSrcWorkout: 'Trenn',
-  plannerSrcActivity: 'Tegevus',
   plannerSrcAllHome: 'Kõik kodused komplektid',
   plannerSrcAllActivities: 'Kõik tegevused',
   plannerSrcActivities: 'Tegevused',

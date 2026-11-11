@@ -3758,7 +3758,6 @@ export const en = {
   plannerSrcHomeSet: 'Home set',
   plannerSrcHomeAny: 'Home workout',
   plannerSrcWorkout: 'Workout',
-  plannerSrcActivity: 'Activity',
   plannerSrcAllHome: 'All home sets',
   plannerSrcAllActivities: 'All activities',
   plannerSrcActivities: 'Activities',
