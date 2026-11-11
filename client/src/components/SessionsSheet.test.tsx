@@ -77,6 +77,9 @@ describe('SessionsSheet', () => {
   it('signs a device out and removes its row', async () => {
     render(<SessionsSheet onClose={() => undefined} />);
     fireEvent.click(await screen.findByRole('button', { name: 'Sign out' }));
+    expect(api.revokeSession).not.toHaveBeenCalled();
+    const ask = document.querySelector('.uicfx') as HTMLElement;
+    fireEvent.click(within(ask).getByRole('button', { name: 'Sign out' }));
     await waitFor(() => expect(api.revokeSession).toHaveBeenCalledWith('phone-device-1'));
     await waitFor(() => expect(screen.queryByText('Safari · iOS')).toBeNull());
   });

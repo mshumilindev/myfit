@@ -29,6 +29,7 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
   const [rows, setRows] = useState<SessionRow[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [askOthers, setAskOthers] = useState(false);
+  const [askOne, setAskOne] = useState<SessionRow | null>(null);
   const [busy, setBusy] = useState(false);
   const [openedAt] = useState(Date.now);
   const me = sessionDeviceId();
@@ -116,7 +117,7 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
                       size="sm"
                       variant="secondary"
                       disabled={busy}
-                      onClick={() => void revoke(r.deviceId)}
+                      onClick={() => setAskOne(r)}
                     >
                       {t.sessionsSignOutDevice}
                     </Button>
@@ -134,6 +135,22 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
         </Button>
       )}
       <p className="detail-muted">{t.sessionsRevokedNote}</p>
+      {askOne && (
+        <ConfirmDialog
+          danger
+          icon="sign-out"
+          title={t.sessionsSignOutDevice}
+          body={askOne.label}
+          confirmLabel={t.sessionsSignOutDevice}
+          cancelLabel={t.cancel}
+          onCancel={() => setAskOne(null)}
+          onConfirm={() => {
+            const id = askOne.deviceId;
+            setAskOne(null);
+            void revoke(id);
+          }}
+        />
+      )}
       {askOthers && (
         <ConfirmDialog
           danger
