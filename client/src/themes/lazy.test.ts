@@ -62,4 +62,44 @@ describe('looks load on demand (SPO-500 I8)', () => {
     await vi.waitFor(() => expect(warn).toHaveBeenCalled());
     expect(r.getTheme()).toBe('studio');
   });
+
+  it('every bundled look has a loader, and marking all ready skips the wait', async () => {
+    for (const id of ['glass', 'halloween', 'christmas'])
+      vi.doMock(`./bundles/${id}`, () => ({ BUNDLE: id }));
+    const l = await import('./lazy');
+    expect(l.lazyThemeIds().sort()).toEqual(['christmas', 'cyberpunk', 'glass', 'halloween']);
+    for (const id of ['glass', 'halloween', 'christmas']) {
+      expect(l.themeCssReady(id)).toBe(false);
+      await l.loadThemeCss(id);
+      expect(l.themeCssReady(id)).toBe(true);
+    }
+    expect(l.themeCssReady('cyberpunk')).toBe(false);
+    l.markAllThemeCssReady();
+    expect(l.themeCssReady('cyberpunk')).toBe(true);
+  });
+
+  it('tries a failed look again when the device comes back online, and dresses the app then', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const r = await import('./registry');
+    r.initTheme();
+    r.setAllowedThemes(['cyberpunk']);
+    r.setTheme('cyberpunk');
+    fail(new Error('offline'));
+    await vi.waitFor(() => expect(console.warn).toHaveBeenCalled());
+    // the second attempt gets a bundle that loads
+    vi.resetModules();
+    vi.doMock('./bundles/cyberpunk', () => ({ BUNDLE: 'cyberpunk' }));
+    window.dispatchEvent(new Event('online'));
+    await vi.waitFor(() => expect(r.getTheme()).toBe('cyberpunk'));
+  });
+
+  it('a saved look that is already installed at start is fetched, not worn before its styles', async () => {
+    localStorage.setItem('gym.theme', 'cyberpunk');
+    const r = await import('./registry');
+    r.setAllowedThemes(['cyberpunk']);
+    r.initTheme();
+    expect(r.getTheme()).toBe('studio');
+    release();
+    await vi.waitFor(() => expect(r.getTheme()).toBe('cyberpunk'));
+  });
 });

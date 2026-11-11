@@ -6,11 +6,6 @@
  * calls `resetLocalData()` (which clears the list) sets what it needs after it.
  */
 
-// Every look's styles are "in the page" for tests (the real loader is async, the suites expect the look to go on at once).
-import { markAllThemeCssReady } from '../themes/lazy';
-
-markAllThemeCssReady();
-
 // Tracker runtimes (SPO-500 I8): the tests run with the trackers' code loaded, as it is once the add-on is installed.
 // Not in a node-environment suite (no DOM/storage there: the engines reach i18n, which reads `localStorage`).
 if (typeof window !== 'undefined') {

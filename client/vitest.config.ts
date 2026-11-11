@@ -39,6 +39,7 @@ export default defineConfig({
       'src/coach/__fixtures__/setup.ts',
       'src/legal/testSetup.ts',
       'src/addons/testSetup.ts',
+      'src/themes/__mocks__/themeCssReady.ts',
     ],
     coverage: {
       provider: 'v8',
