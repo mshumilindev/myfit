@@ -6,7 +6,7 @@ import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { PageHead } from '../components/ui/PageHead';
 import { IconTile } from '../components/ui/IconTile';
 import { MonthGrid, type MonthGridDay } from '../components/ui/MonthGrid';
-import { ConfirmDialog } from '../components/ui/Overlays';
+import { ConfirmDialog, Sheet } from '../components/ui/Overlays';
 import { Segmented } from '../components/ui/Segmented';
 import { WeekStepper } from '../components/ui/WeekStepper';
 import { useT } from '../i18n';
@@ -15,7 +15,7 @@ import { useWeekStartDay } from '../weekStart';
 import { draftToPlan, newDraft, planToDraft, type Draft } from './draft';
 import { clock, dayFull, dayLong, dayMonth, leadText, monthYear, weekRange } from './fmt';
 import { PlanForm } from './PlanForm';
-import { occurrencesBetween } from './recurrence';
+import { nextFire, occurrencesBetween, skipDay } from './recurrence';
 import { fill, STRINGS } from './strings';
 import { deletePlan, savePlan, usePlans } from './sync';
 import type { PlanDoc } from './types';
@@ -44,8 +44,9 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
   const s = STRINGS[locale];
   const plans = usePlans();
   const ws = useWeekStartDay();
-  const [form, setForm] = useState<{ draft: Draft; editing: boolean } | null>(null);
+  const [form, setForm] = useState<{ draft: Draft; editing: boolean; day?: DayKey } | null>(null);
   const [asking, setAsking] = useState<PlanDoc | null>(null);
+  const [choosing, setChoosing] = useState<PlanDoc | null>(null);
   const [view, setView] = useState<'week' | 'month'>('week');
   const [weekOff, setWeekOff] = useState(0);
   const [monthOff, setMonthOff] = useState(0);
@@ -81,7 +82,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
 
   const sub = (p: PlanDoc) =>
     `${p.mode === 'ring' ? s.ring : s.quiet} · ${leadText(s, p.timing.lead)}`;
-  const open = (p: PlanDoc) => setForm({ draft: planToDraft(p), editing: true });
+  const open = (p: PlanDoc, day?: DayKey) => setForm({ draft: planToDraft(p), editing: true, day });
   const add = () =>
     setForm({
       draft: newDraft(
@@ -105,9 +106,52 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
           initial={form.draft}
           editing={form.editing}
           onSave={save}
-          onDelete={p ? () => setAsking(p) : undefined}
+          onDelete={
+            p
+              ? () => (p.timing.repeat.kind !== 'none' && form.day ? setChoosing(p) : setAsking(p))
+              : undefined
+          }
           onClose={() => setForm(null)}
         />
+        {choosing && (
+          <Sheet onClose={() => setChoosing(null)} label={s.delRepTitle}>
+            <div className="ul-flex ul-col ug-12">
+              <h2 className="ut-xl ut-w7">{s.delRepTitle}</h2>
+              <Button
+                variant="secondary"
+                fullWidth
+                onClick={async () => {
+                  const now = Date.now();
+                  const timing = skipDay(choosing.timing, form.day as DayKey);
+                  await savePlan({
+                    ...choosing,
+                    timing,
+                    nextFireAt: nextFire(timing, now)?.fireAt ?? null,
+                    updatedAt: now,
+                  });
+                  setChoosing(null);
+                  setForm(null);
+                }}
+              >
+                {s.delOne}
+              </Button>
+              <Button
+                variant="danger"
+                fullWidth
+                onClick={async () => {
+                  await deletePlan(choosing.id);
+                  setChoosing(null);
+                  setForm(null);
+                }}
+              >
+                {s.delSeries}
+              </Button>
+              <Button variant="secondary" fullWidth onClick={() => setChoosing(null)}>
+                {s.cancel}
+              </Button>
+            </div>
+          </Sheet>
+        )}
         {asking && (
           <ConfirmDialog
             danger
@@ -135,7 +179,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
       label={o.plan.title}
       sub={withEnd ? undefined : sub(o.plan)}
       chevron
-      onClick={() => open(o.plan)}
+      onClick={() => open(o.plan, o.day)}
     />
   );
 
@@ -254,7 +298,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
                     label={o.plan.title}
                     sub={`${o.plan.timing.time}–${clock(Number(o.plan.timing.time.slice(0, 2)) * 60 + Number(o.plan.timing.time.slice(3)) + (o.plan.durationMin ?? 60))} · ${fill(s.remindAt, { t: clock(Number(o.plan.timing.time.slice(0, 2)) * 60 + Number(o.plan.timing.time.slice(3)) - o.plan.timing.lead) })}`}
                     chevron
-                    onClick={() => open(o.plan)}
+                    onClick={() => open(o.plan, o.day)}
                   />
                 ))
               ) : (

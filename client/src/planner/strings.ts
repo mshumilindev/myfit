@@ -80,6 +80,9 @@ export interface PlannerStrings {
   never: string;
   onDate: string;
   afterN: string;
+  delRepTitle: string;
+  delOne: string;
+  delSeries: string;
 }
 
 /** Planner's own words live in its chunk, not in the core i18n (add-on boundary). `{x}` marks a placeholder filled by `fill`. */
@@ -178,6 +181,9 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     never: 'Never',
     onDate: 'On a date',
     afterN: 'After a number of plans',
+    delRepTitle: 'Delete a repeating plan',
+    delOne: 'Only this day',
+    delSeries: 'All events in the series',
   },
   uk: {
     name: 'Планувальник',
@@ -273,6 +279,9 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     never: 'Ніколи',
     onDate: 'У дату',
     afterN: 'Після певної кількості планів',
+    delRepTitle: 'Видалити повторюваний план',
+    delOne: 'Лише цей день',
+    delSeries: 'Усі події серії',
   },
   pl: {
     name: 'Planer',
@@ -368,6 +377,9 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     never: 'Nigdy',
     onDate: 'W dniu',
     afterN: 'Po określonej liczbie planów',
+    delRepTitle: 'Usuń plan cykliczny',
+    delOne: 'Tylko ten dzień',
+    delSeries: 'Wszystkie wydarzenia w serii',
   },
   lt: {
     name: 'Planuoklis',
@@ -463,6 +475,9 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     never: 'Niekada',
     onDate: 'Datą',
     afterN: 'Po tam tikro planų skaičiaus',
+    delRepTitle: 'Ištrinti pasikartojantį planą',
+    delOne: 'Tik šią dieną',
+    delSeries: 'Visus serijos įvykius',
   },
   et: {
     name: 'Planeerija',
@@ -558,6 +573,9 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     never: 'Mitte kunagi',
     onDate: 'Kuupäeval',
     afterN: 'Pärast kindlat arvu plaane',
+    delRepTitle: 'Kustuta korduv plaan',
+    delOne: 'Ainult see päev',
+    delSeries: 'Kõik seeria sündmused',
   },
 };
 
