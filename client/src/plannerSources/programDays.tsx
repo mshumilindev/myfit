@@ -16,14 +16,14 @@ import { Icon } from '../ui';
 const weekdayShort = (locale: string, day: number) =>
   new Date(2026, 10, 8 + day).toLocaleDateString(locale, { weekday: 'short' });
 
-function Group({ selectedId, onPick }: PlannerSourceProps) {
+function Group({ selectedId, onPick, weekdays }: PlannerSourceProps) {
   const { t, locale } = useT();
   const gymOn = useAddonOrBase('gym');
   const { assignment, active } = useProgramMine();
   const days = useMemo(
     () =>
       gymOn && assignment && active
-        ? [1, 2, 3, 4, 5, 6, 7]
+        ? weekdays
             .filter((day) => programDayHasPlan(assignment, day))
             .map((day) => ({
               day,
@@ -31,7 +31,7 @@ function Group({ selectedId, onPick }: PlannerSourceProps) {
               n: programDayItems(assignment, day).length,
             }))
         : [],
-    [gymOn, assignment, active, t],
+    [gymOn, assignment, active, weekdays, t],
   );
   if (!gymOn) return null;
   const todayDay = ((new Date().getDay() + 6) % 7) + 1;

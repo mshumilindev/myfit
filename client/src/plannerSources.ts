@@ -22,6 +22,8 @@ export interface PlannerSourceProps {
   /** Id of the pick the form is based on now (null: own plan). */
   selectedId: string | null;
   onPick: (pick: PlannerPick) => void;
+  /** Weekdays the plan lands on, 1 = Monday … 7 = Sunday (a source about days, like a program, shows only those). */
+  weekdays: number[];
   /** Opens this source's full list (`All`), when it has one. */
   onAll: () => void;
 }

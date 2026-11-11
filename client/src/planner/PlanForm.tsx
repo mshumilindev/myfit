@@ -91,6 +91,12 @@ export function PlanForm(p: {
   } | null>(null);
   const [allOf, setAllOf] = useState<string | null>(null);
   const srcs = plannerSources();
+  /** The weekdays this plan lands on (1 = Monday), for sources about days (the program). */
+  const planWeekdays = (() => {
+    if (d.repeat === 'weekly' || d.repeat === 'biweekly') return d.days.map((x) => x + 1);
+    if (d.repeat === 'weekdays') return [1, 2, 3, 4, 5];
+    return [weekday(d.start) + 1];
+  })();
   const pick = (x: PlannerPick) => {
     set({ title: x.title, icon: x.icon });
     setBased({ id: x.id, label: x.title, sub: x.sub, icon: x.icon });
@@ -183,6 +189,7 @@ export function PlanForm(p: {
                 <x.Group
                   key={x.id}
                   selectedId={sel}
+                  weekdays={planWeekdays}
                   onPick={pick}
                   onAll={() => {
                     setQ('');
