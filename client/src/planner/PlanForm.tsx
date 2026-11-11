@@ -21,7 +21,7 @@ import { dayFromNumber, dayNumber, parseDay, weekday } from './zoned';
 import './planner.css';
 
 /** The pickers open as kit drawers over the form (owner 11.11), each with Cancel / Save on a staged copy. */
-type Drawer = 'icon' | 'start' | 'duration' | 'lead' | 'repeat' | 'date';
+type Drawer = 'icon' | 'color' | 'start' | 'duration' | 'lead' | 'repeat' | 'date';
 
 const DURATIONS = [15, 30, 45, 60, 90, 120];
 const LEADS = [0, 10, 30, 60, 120, 1440];
@@ -91,7 +91,6 @@ export function PlanForm(p: {
     closeDrawer();
   };
   const startMin = d.hour * 60 + d.minute;
-  const hint = (m: number, from = startMin) => fill(s.ends, { t: clock(from + m) });
   const dn = weekdayShorts(locale);
   const repLabel: Record<RepeatKind, string> = {
     none: s.sn,
@@ -164,6 +163,27 @@ export function PlanForm(p: {
             </>
           ),
         };
+      case 'color':
+        return {
+          title: s.color,
+          node: (
+            <div className="pl-sw" role="radiogroup" aria-label={s.color}>
+              {PTONES.map((c: PTone, i) => (
+                <button
+                  key={c}
+                  type="button"
+                  role="radio"
+                  aria-checked={c === st.color}
+                  aria-label={s.cols[i]}
+                  className={`pl-sw-b uit--${c}${c === st.color ? ' is-on' : ''}`}
+                  onClick={() => setS({ color: c })}
+                >
+                  <span />
+                </button>
+              ))}
+            </div>
+          ),
+        };
       case 'start':
         return {
           title: s.starts,
@@ -177,7 +197,6 @@ export function PlanForm(p: {
                 hMax={23}
                 onChange={(hour, minute) => setS({ hour, minute })}
               />
-              <Hint>{s.startHint}</Hint>
             </>
           ),
         };
@@ -196,7 +215,6 @@ export function PlanForm(p: {
                 mUnit={s.min}
                 onChange={(h, m) => setS({ durationMin: Math.max(5, h * 60 + m) })}
               />
-              <Hint>{`${durText(s, st.durationMin)}. ${hint(st.durationMin, st.hour * 60 + st.minute)}`}</Hint>
             </>
           ),
         };
@@ -215,7 +233,6 @@ export function PlanForm(p: {
                 mUnit={s.min}
                 onChange={(h, m) => setS({ lead: Math.min(2880, h * 60 + m) })}
               />
-              <Hint>{`${leadText(s, st.lead)}. ${s.leadHint}`}</Hint>
             </>
           ),
         };
@@ -336,7 +353,7 @@ export function PlanForm(p: {
             back={{ label: t.backAction, onClick: p.onClose }}
             title={p.editing ? s.editPlan : s.newPlan}
           />
-          <GroupedList header={s.basedOn} footer={s.basedOnFooter}>
+          <GroupedList header={s.basedOn}>
             <ListRow
               icon={<IconTile icon="calendar-plus" tone="accent" size={32} />}
               label={s.own}
@@ -351,6 +368,13 @@ export function PlanForm(p: {
               chevron
               onClick={() => openDrawer('icon')}
             />
+            <ListRow
+              icon={<IconTile icon="palette" tone={d.color as never} size={32} />}
+              label={s.color}
+              value={s.cols[PTONES.indexOf(d.color)]}
+              chevron
+              onClick={() => openDrawer('color')}
+            />
             <ListRow as="label" label={s.titleLabel} labelFixed>
               <Field
                 bare
@@ -362,32 +386,7 @@ export function PlanForm(p: {
               />
             </ListRow>
           </GroupedList>
-          <div className="pl-form-g">
-            <span className="ut-xs ut-faint">{s.color}</span>
-            <div className="pl-sw" role="radiogroup" aria-label={s.color}>
-              {PTONES.map((c: PTone, i) => (
-                <button
-                  key={c}
-                  type="button"
-                  role="radio"
-                  aria-checked={c === d.color}
-                  aria-label={s.cols[i]}
-                  className={`pl-sw-b uit--${c}${c === d.color ? ' is-on' : ''}`}
-                  onClick={() => set({ color: c })}
-                >
-                  <span />
-                </button>
-              ))}
-            </div>
-            <Hint>{s.colorHint}</Hint>
-          </div>
           <GroupedList header={s.when}>
-            <ListRow
-              label={s.repeats}
-              value={repLabel[d.repeat]}
-              chevron
-              onClick={() => openDrawer('repeat')}
-            />
             {d.repeat === 'none' && (
               <ListRow
                 label={s.date}
@@ -402,31 +401,38 @@ export function PlanForm(p: {
               chevron
               onClick={() => openDrawer('start')}
             />
+            <ListRow
+              label={s.repeats}
+              value={repLabel[d.repeat]}
+              chevron
+              onClick={() => openDrawer('repeat')}
+            />
           </GroupedList>
-          <span className="ut-xs ut-faint">{s.duration}</span>
-          <PresetChips
-            layout="wrap"
-            label={s.duration}
-            tone="accent"
-            items={[
-              ...DURATIONS.map((m) => ({
-                id: String(m),
-                label: durText(s, m),
-                selected: m === d.durationMin,
-                onClick: () => set({ durationMin: m }),
-              })),
-              {
-                id: 'c',
-                label: durCustom ? durText(s, d.durationMin) : s.custom,
-                selected: durCustom,
-                onClick: () => openDrawer('duration'),
-              },
-            ]}
-          />
-          <Hint>{hint(d.durationMin)}</Hint>
+          <div className="pl-form-g">
+            <div className="uigl-h">{s.duration}</div>
+            <PresetChips
+              layout="wrap"
+              label={s.duration}
+              tone="accent"
+              items={[
+                ...DURATIONS.map((m) => ({
+                  id: String(m),
+                  label: durText(s, m),
+                  selected: m === d.durationMin,
+                  onClick: () => set({ durationMin: m }),
+                })),
+                {
+                  id: 'c',
+                  label: durCustom ? durText(s, d.durationMin) : s.custom,
+                  selected: durCustom,
+                  onClick: () => openDrawer('duration'),
+                },
+              ]}
+            />
+          </div>
           {weekly(d) && dayChips(d, set, 'grid')}
           <div className="pl-form-g">
-            <span className="ut-xs ut-faint">{s.reminder}</span>
+            <div className="uigl-h">{s.reminder}</div>
             <Segmented
               value={d.mode}
               onChange={(mode) => set({ mode })}
@@ -439,26 +445,28 @@ export function PlanForm(p: {
             />
             <Hint>{d.mode === 'ring' ? s.ringHint : s.quietHint}</Hint>
           </div>
-          <span className="ut-xs ut-faint">{s.remindMe}</span>
-          <PresetChips
-            layout="wrap"
-            label={s.remindMe}
-            tone="accent"
-            items={[
-              ...LEADS.map((m) => ({
-                id: String(m),
-                label: leadText(s, m),
-                selected: m === d.lead,
-                onClick: () => set({ lead: m }),
-              })),
-              {
-                id: 'c',
-                label: leadCustom ? leadText(s, d.lead) : s.custom,
-                selected: leadCustom,
-                onClick: () => openDrawer('lead'),
-              },
-            ]}
-          />
+          <div className="pl-form-g">
+            <div className="uigl-h">{s.remindMe}</div>
+            <PresetChips
+              layout="wrap"
+              label={s.remindMe}
+              tone="accent"
+              items={[
+                ...LEADS.map((m) => ({
+                  id: String(m),
+                  label: leadText(s, m),
+                  selected: m === d.lead,
+                  onClick: () => set({ lead: m }),
+                })),
+                {
+                  id: 'c',
+                  label: leadCustom ? leadText(s, d.lead) : s.custom,
+                  selected: leadCustom,
+                  onClick: () => openDrawer('lead'),
+                },
+              ]}
+            />
+          </div>
           {p.onDelete && (
             <Button variant="danger" fullWidth onClick={p.onDelete}>
               {s.del}

@@ -6,6 +6,9 @@
   gap: var(--space-4);
   box-sizing: border-box;
 }
+.pl-form {
+  gap: var(--s-20);
+}
 .pl-page-h {
   display: flex;
   justify-content: space-between;
@@ -39,7 +42,6 @@
 .pl-form-g {
   display: flex;
   flex-direction: column;
-  gap: var(--s-8);
 }
 .pl-form {
   max-width: 640px;

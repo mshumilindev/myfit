@@ -25,7 +25,6 @@ export interface PlannerStrings {
   newPlan: string;
   editPlan: string;
   basedOn: string;
-  basedOnFooter: string;
   own: string;
   ownSub: string;
   what: string;
@@ -33,18 +32,16 @@ export interface PlannerStrings {
   titleLabel: string;
   titlePlaceholder: string;
   color: string;
-  colorHint: string;
+  ringHint: string;
+  quietHint: string;
   when: string;
   repeats: string;
   starts: string;
   date: string;
   duration: string;
-  ends: string;
   custom: string;
   days: string;
   reminder: string;
-  ringHint: string;
-  quietHint: string;
   remindMe: string;
   cancel: string;
   save: string;
@@ -74,8 +71,6 @@ export interface PlannerStrings {
   hour: string;
   hours: string;
   minutes: string;
-  startHint: string;
-  leadHint: string;
   endsHdr: string;
   never: string;
   onDate: string;
@@ -113,26 +108,23 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     newPlan: 'New plan',
     editPlan: 'Edit plan',
     basedOn: 'Based on',
-    basedOnFooter: 'A plan only reminds you. Nothing is added to your history.',
     own: 'Own plan',
     ownSub: 'Your own title and icon',
-    what: 'What',
+    what: 'Details',
     icon: 'Icon',
     titleLabel: 'Title',
     titlePlaceholder: 'Name this plan',
     color: 'Color',
-    colorHint: 'Used for the week, the Today widget and the reminder.',
-    when: 'When',
+    ringHint: 'Rings until you dismiss it. Snooze for 5, 10 or 30 min.',
+    quietHint: 'A silent notification; respects quiet hours.',
+    when: 'Schedule',
     repeats: 'Repeats',
     starts: 'Starts',
     date: 'Date',
     duration: 'Duration',
-    ends: 'Ends {t}.',
     custom: 'Custom…',
     days: 'Days',
     reminder: 'Reminder',
-    ringHint: 'Rings until you dismiss it. Snooze for 5, 10 or 30 min.',
-    quietHint: 'A silent notification; respects quiet hours.',
     remindMe: 'Remind me',
     cancel: 'Cancel',
     save: 'Save',
@@ -175,8 +167,6 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     hour: 'Hour',
     hours: 'Hours',
     minutes: 'Minutes',
-    startHint: 'The reminder is set from this time.',
-    leadHint: 'Up to 2 days ahead.',
     endsHdr: 'Ends',
     never: 'Never',
     onDate: 'On a date',
@@ -211,26 +201,23 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     newPlan: 'Новий план',
     editPlan: 'Редагувати план',
     basedOn: 'На основі',
-    basedOnFooter: 'План лише нагадує. Нічого не додається до вашої історії.',
     own: 'Власний план',
     ownSub: 'Власна назва та іконка',
-    what: 'Що',
+    what: 'Деталі',
     icon: 'Іконка',
     titleLabel: 'Назва',
     titlePlaceholder: 'Назвіть план',
     color: 'Колір',
-    colorHint: 'Використовується в тижні, віджеті «Сьогодні» та нагадуванні.',
-    when: 'Коли',
+    ringHint: 'Дзвонить, доки ви не закриєте. Відкласти на 5, 10 або 30 хв.',
+    quietHint: 'Беззвучне сповіщення; поважає тихі години.',
+    when: 'Розклад',
     repeats: 'Повторення',
     starts: 'Початок',
     date: 'Дата',
     duration: 'Тривалість',
-    ends: 'Закінчується о {t}.',
     custom: 'Свій…',
     days: 'Дні',
     reminder: 'Нагадування',
-    ringHint: 'Дзвонить, доки ви не закриєте. Відкласти на 5, 10 або 30 хв.',
-    quietHint: 'Беззвучне сповіщення; поважає тихі години.',
     remindMe: 'Нагадати',
     cancel: 'Скасувати',
     save: 'Зберегти',
@@ -273,8 +260,6 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     hour: 'Година',
     hours: 'Години',
     minutes: 'Хвилини',
-    startHint: 'Нагадування рахується від цього часу.',
-    leadHint: 'До 2 днів наперед.',
     endsHdr: 'Закінчення',
     never: 'Ніколи',
     onDate: 'У дату',
@@ -309,26 +294,23 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     newPlan: 'Nowy plan',
     editPlan: 'Edytuj plan',
     basedOn: 'Na podstawie',
-    basedOnFooter: 'Plan tylko przypomina. Nic nie trafia do Twojej historii.',
     own: 'Własny plan',
     ownSub: 'Własna nazwa i ikona',
-    what: 'Co',
+    what: 'Szczegóły',
     icon: 'Ikona',
     titleLabel: 'Nazwa',
     titlePlaceholder: 'Nazwij plan',
     color: 'Kolor',
-    colorHint: 'Używany w tygodniu, widżecie Dziś i przypomnieniu.',
-    when: 'Kiedy',
+    ringHint: 'Dzwoni, aż go zamkniesz. Odłóż o 5, 10 lub 30 min.',
+    quietHint: 'Ciche powiadomienie; respektuje ciche godziny.',
+    when: 'Harmonogram',
     repeats: 'Powtarzanie',
     starts: 'Start',
     date: 'Data',
     duration: 'Czas trwania',
-    ends: 'Koniec {t}.',
     custom: 'Własny…',
     days: 'Dni',
     reminder: 'Przypomnienie',
-    ringHint: 'Dzwoni, aż go zamkniesz. Odłóż o 5, 10 lub 30 min.',
-    quietHint: 'Ciche powiadomienie; respektuje ciche godziny.',
     remindMe: 'Przypomnij',
     cancel: 'Anuluj',
     save: 'Zapisz',
@@ -371,8 +353,6 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     hour: 'Godzina',
     hours: 'Godziny',
     minutes: 'Minuty',
-    startHint: 'Przypomnienie liczy się od tej godziny.',
-    leadHint: 'Do 2 dni wcześniej.',
     endsHdr: 'Koniec',
     never: 'Nigdy',
     onDate: 'W dniu',
@@ -407,26 +387,23 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     newPlan: 'Naujas planas',
     editPlan: 'Redaguoti planą',
     basedOn: 'Remiantis',
-    basedOnFooter: 'Planas tik primena. Niekas nepridedama prie jūsų istorijos.',
     own: 'Savas planas',
     ownSub: 'Jūsų pavadinimas ir piktograma',
-    what: 'Kas',
+    what: 'Detalės',
     icon: 'Piktograma',
     titleLabel: 'Pavadinimas',
     titlePlaceholder: 'Pavadinkite planą',
     color: 'Spalva',
-    colorHint: 'Naudojama savaitėje, „Šiandien“ valdiklyje ir priminime.',
-    when: 'Kada',
+    ringHint: 'Skamba, kol uždarysite. Atidėkite 5, 10 arba 30 min.',
+    quietHint: 'Tylus pranešimas; gerbia tylos valandas.',
+    when: 'Tvarkaraštis',
     repeats: 'Kartojasi',
     starts: 'Pradžia',
     date: 'Data',
     duration: 'Trukmė',
-    ends: 'Baigiasi {t}.',
     custom: 'Kita…',
     days: 'Dienos',
     reminder: 'Priminimas',
-    ringHint: 'Skamba, kol uždarysite. Atidėkite 5, 10 arba 30 min.',
-    quietHint: 'Tylus pranešimas; gerbia tylos valandas.',
     remindMe: 'Priminti',
     cancel: 'Atšaukti',
     save: 'Išsaugoti',
@@ -469,8 +446,6 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     hour: 'Valanda',
     hours: 'Valandos',
     minutes: 'Minutės',
-    startHint: 'Priminimas skaičiuojamas nuo šio laiko.',
-    leadHint: 'Iki 2 dienų iš anksto.',
     endsHdr: 'Pabaiga',
     never: 'Niekada',
     onDate: 'Datą',
@@ -505,26 +480,23 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     newPlan: 'Uus plaan',
     editPlan: 'Muuda plaani',
     basedOn: 'Aluseks',
-    basedOnFooter: 'Plaan ainult tuletab meelde. Midagi ei lisata sinu ajalukku.',
     own: 'Oma plaan',
     ownSub: 'Sinu enda pealkiri ja ikoon',
-    what: 'Mis',
+    what: 'Üksikasjad',
     icon: 'Ikoon',
     titleLabel: 'Pealkiri',
     titlePlaceholder: 'Pane plaanile nimi',
     color: 'Värv',
-    colorHint: 'Kasutatakse nädalas, vidinas Täna ja meeldetuletuses.',
-    when: 'Millal',
+    ringHint: 'Heliseb, kuni sa selle sulged. Lükka edasi 5, 10 või 30 min.',
+    quietHint: 'Vaikne teavitus; arvestab vaikseid tunde.',
+    when: 'Ajakava',
     repeats: 'Kordub',
     starts: 'Algus',
     date: 'Kuupäev',
     duration: 'Kestus',
-    ends: 'Lõpeb {t}.',
     custom: 'Muu…',
     days: 'Päevad',
     reminder: 'Meeldetuletus',
-    ringHint: 'Heliseb, kuni sa selle sulged. Lükka edasi 5, 10 või 30 min.',
-    quietHint: 'Vaikne teavitus; arvestab vaikseid tunde.',
     remindMe: 'Tuleta meelde',
     cancel: 'Tühista',
     save: 'Salvesta',
@@ -567,8 +539,6 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     hour: 'Tund',
     hours: 'Tunnid',
     minutes: 'Minutid',
-    startHint: 'Meeldetuletus arvestatakse sellest ajast.',
-    leadHint: 'Kuni 2 päeva ette.',
     endsHdr: 'Lõpp',
     never: 'Mitte kunagi',
     onDate: 'Kuupäeval',
