@@ -224,4 +224,19 @@ describe('StoreApp', () => {
     render(<StoreApp role="member" onOpenProfile={() => {}} />);
     expect(screen.getByText('Everything is added')).toBeTruthy();
   });
+  it('opens Module details in a drawer from a module row: description, preview, and a switch when the app is installed', () => {
+    enableAddons(['apex']);
+    window.location.hash = '#/store/item/apex';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    fireEvent.click(screen.getAllByText('Mastery')[0]!);
+    const dlg = screen.getByRole('dialog', { name: 'Mastery' });
+    expect(within(dlg).getAllByText(/Apex/).length).toBeGreaterThan(0);
+    expect(dlg.querySelectorAll('.as-mod-shots img').length).toBe(1);
+    const sw = within(dlg).getByRole('switch', { name: 'Mastery' });
+    const before = sw.getAttribute('aria-checked');
+    fireEvent.click(sw);
+    expect(sw.getAttribute('aria-checked')).toBe(before === 'true' ? 'false' : 'true');
+    fireEvent.click(within(dlg).getByRole('button', { name: 'Close' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
 });

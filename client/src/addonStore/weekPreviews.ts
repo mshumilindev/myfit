@@ -18,3 +18,11 @@ export const WEEK_SHOTS: Readonly<Record<string, readonly string[]>> = {
 
 export const previewUrl = (shot: string, kind: 'm' | 'd') =>
   `${import.meta.env.BASE_URL ?? '/'}store-previews/${shot}-${kind}.webp`;
+
+/** Previews of a module (a switch inside its app); a module without any shows no gallery. */
+export const MODULE_SHOTS: Readonly<Record<string, readonly string[]>> = {
+  'apex-challenges': ['apex-challenges'],
+  'apex-ranks': ['apex-ranks'],
+  'apex-awards': ['apex-awards'],
+  mastery: ['apex-mastery'],
+};

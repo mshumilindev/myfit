@@ -492,20 +492,23 @@
   background: currentColor;
 }
 
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.wk-ttl-txt {
+/* Module details drawer */
+.as-mod-shots {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-inline-size: 0;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-block-end: 4px;
 }
-.wk-ttl-desc {
-  font-size: var(--sk-fs-body, 15px);
-  font-weight: 400;
-  line-height: 1.35;
-  opacity: 0.85;
+.as-mod-shots img {
+  flex: 0 0 auto;
+  inline-size: 160px;
+  block-size: auto;
+  border-radius: 16px;
+  scroll-snap-align: start;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+.as-mod-state {
+  padding-block: 8px;
+  border-block-start: 1px solid var(--line);
 }

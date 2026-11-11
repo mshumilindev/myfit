@@ -4,14 +4,14 @@ import { SkScrim } from './SkScrim';
 import '../tokens-e.css';
 import './SkSheet.css';
 
-export type SkSheetVariant = 'auto' | 'sheet' | 'modal';
+export type SkSheetVariant = 'auto' | 'sheet' | 'modal' | 'drawer';
 
 const FOCUSABLE =
   'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
 /**
  * Dialog surface: bottom sheet (with grabber) on mobile, centred modal from the wide breakpoint (`auto`),
- * or forced with `variant`. Scrim, focus trap, Escape, aria-modal; focus returns to the opener on close.
+ * or forced with `variant`. `drawer`: bottom sheet on mobile, a side panel (end edge, full height) from the wide breakpoint. Scrim, focus trap, Escape, aria-modal; focus returns to the opener on close.
  */
 export function SkSheet({
   open,

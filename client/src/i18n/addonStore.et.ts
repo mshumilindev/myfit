@@ -146,6 +146,7 @@ export const addonStoreEt: typeof addonStoreEn = {
   removeName: (name: string) => `Eemalda ${name}`,
   chooseWhat: 'Vali, mida näidata',
   modules: 'Moodulid',
+  close: 'Sulge',
   leftToComplete: (n: number) => `Jäänud on ${n}, et Spotter oleks täielik`,
   finishSetup: 'Lisa need, et seadistus lõpule viia.',
   heroComplete: 'Valmis',

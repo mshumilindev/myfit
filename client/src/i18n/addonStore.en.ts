@@ -148,6 +148,7 @@ export const addonStoreEn = {
   removeName: (name: string) => `Remove ${name}`,
   chooseWhat: 'Choose what to show',
   modules: 'Modules',
+  close: 'Close',
   leftToComplete: (n: number) => `${n} left to complete Spotter`,
   finishSetup: 'Add them to finish your setup.',
   heroComplete: 'Complete',

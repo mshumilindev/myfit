@@ -147,6 +147,7 @@ export const addonStoreLt: typeof addonStoreEn = {
   removeName: (name: string) => `Pašalinti ${name}`,
   chooseWhat: 'Pasirinkite, ką rodyti',
   modules: 'Moduliai',
+  close: 'Uždaryti',
   leftToComplete: (n: number) => `Liko ${n}, kad Spotter būtų pilnas`,
   finishSetup: 'Pridėkite juos, kad užbaigtumėte sąranką.',
   heroComplete: 'Baigta',

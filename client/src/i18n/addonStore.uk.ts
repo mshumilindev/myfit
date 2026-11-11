@@ -146,6 +146,7 @@ export const addonStoreUk: typeof addonStoreEn = {
   removeName: (name: string) => `Видалити ${name}`,
   chooseWhat: 'Оберіть, що показувати',
   modules: 'Модулі',
+  close: 'Закрити',
   leftToComplete: (n: number) => `Лишилось ${n}, щоб завершити Spotter`,
   finishSetup: 'Додайте їх, щоб завершити налаштування.',
   heroComplete: 'Готово',

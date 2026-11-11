@@ -68,6 +68,31 @@
     display: none;
   }
 }
+/* drawer: bottom sheet on mobile, side panel on the end edge from the wide breakpoint */
+@keyframes sk-drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+@media (min-width: 45rem) {
+  .sk-sheet-drawer {
+    inset-inline: auto;
+    inset-inline-end: 0;
+    top: 0;
+    bottom: 0;
+    width: min(440px, 100%);
+    max-height: none;
+    border-radius: var(--sk-r-2xl) 0 0 var(--sk-r-2xl);
+    padding: var(--sk-sp-8);
+    animation: sk-drawer-in var(--sk-dur-slow) var(--sk-ease);
+  }
+  .sk-sheet-drawer > .sk-grab {
+    display: none;
+  }
+}
+[dir='rtl'] .sk-sheet-drawer {
+  border-radius: 0 var(--sk-r-2xl) var(--sk-r-2xl) 0;
+}
 [dir='rtl'] .sk-sheet-modal,
 [dir='rtl'] .sk-sheet-auto {
   transform: translate(50%, -50%);
@@ -75,6 +100,7 @@
 @media (prefers-reduced-motion: reduce) {
   .sk-sheet,
   .sk-sheet-modal,
+  .sk-sheet-drawer,
   .sk-sheet-auto {
     animation: none;
   }
