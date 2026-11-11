@@ -3756,6 +3756,8 @@ export const uk: Strings = {
   plannerSrcProgram: 'Програма',
   plannerSrcHome: 'Домашні набори',
   plannerSrcHomeSet: 'Домашній набір',
+  plannerSrcHomeAny: 'Домашнє тренування',
+  plannerSrcWorkout: 'Тренування',
   plannerSrcActivity: 'Активність',
   plannerSrcAllHome: 'Усі домашні набори',
   plannerSrcAllActivities: 'Усі активності',

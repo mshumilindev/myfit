@@ -13,10 +13,12 @@ import { Icon } from '../ui';
 
 const SHOWN = 3;
 
+function useOn() {
+  return useAddonOrBase('home-sets');
+}
 function useSets() {
-  const on = useAddonOrBase('home-sets');
   const sets = useStore().home.sets;
-  return on ? sets : [];
+  return useOn() ? sets : [];
 }
 
 function Row(p: {
@@ -42,9 +44,23 @@ function Row(p: {
 function Group({ selectedId, onPick, onAll }: PlannerSourceProps) {
   const { t } = useT();
   const sets = useSets();
-  if (!sets.length) return null;
+  if (!useOn()) return null;
   return (
     <GroupedList surface="raised" header={t.plannerSrcHome}>
+      <ListRow
+        icon={<IconTile icon="house" tone="home" size={32} />}
+        label={t.plannerSrcHomeAny}
+        sub={t.plannerSrcHomeSet}
+        trailing={selectedId === 'home:any' ? <Icon name="check" /> : undefined}
+        onClick={() =>
+          onPick({
+            id: 'home:any',
+            title: t.plannerSrcHomeAny,
+            icon: 'house',
+            sub: t.plannerSrcHome,
+          })
+        }
+      />
       {sets.slice(0, SHOWN).map((h) => (
         <Row key={h.id} id={h.id} name={h.name} selectedId={selectedId} onPick={onPick} />
       ))}

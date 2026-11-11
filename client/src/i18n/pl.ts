@@ -3724,6 +3724,8 @@ export const pl: Strings = {
   plannerSrcProgram: 'Program',
   plannerSrcHome: 'Zestawy domowe',
   plannerSrcHomeSet: 'Zestaw domowy',
+  plannerSrcHomeAny: 'Trening domowy',
+  plannerSrcWorkout: 'Trening',
   plannerSrcActivity: 'Aktywność',
   plannerSrcAllHome: 'Wszystkie zestawy domowe',
   plannerSrcAllActivities: 'Wszystkie aktywności',

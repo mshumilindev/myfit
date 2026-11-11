@@ -20,9 +20,9 @@ describe('PlannerNotice', () => {
     render(<PlannerNotice />);
     expect(screen.getByText('Notifications are off')).toBeTruthy();
   });
-  it('iPhone not on the Home Screen', () => {
+  it('no banner for an iPhone that is not on the Home Screen', () => {
     state.v = 'needs-install';
-    render(<PlannerNotice />);
-    expect(screen.getByText('Add Spotter to your Home Screen')).toBeTruthy();
+    const { container } = render(<PlannerNotice />);
+    expect(container.textContent).toBe('');
   });
 });

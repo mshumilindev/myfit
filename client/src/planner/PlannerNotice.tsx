@@ -4,13 +4,12 @@ import { useT } from '../i18n';
 import { pushState } from '../push';
 import { STRINGS } from './strings';
 
-type Kind = 'perm' | 'ios' | 'offline';
+type Kind = 'perm' | 'offline';
 
-/** The one thing that stops reminders right now (design SPO-555 notices): notifications blocked, iPhone not on the Home Screen, or offline. */
+/** The one thing that stops reminders right now (design SPO-555 notices): notifications blocked or offline. */
 function current(): Kind | null {
   const ps = pushState();
   if (ps === 'denied') return 'perm';
-  if (ps === 'needs-install') return 'ios';
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'offline';
   return null;
 }
@@ -35,7 +34,6 @@ export function PlannerNotice() {
   if (!kind) return null;
   const m = {
     perm: { tone: 'danger', icon: 'warning-circle', title: s.notePermT, body: s.notePermB },
-    ios: { tone: 'accent', icon: 'device-mobile', title: s.noteIosT, body: s.noteIosB },
     offline: { tone: 'rest', icon: 'cloud-slash', title: s.noteOffT, body: s.noteOffB },
   } as const;
   const n = m[kind];

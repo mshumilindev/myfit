@@ -28,7 +28,25 @@ function Group({ selectedId, onPick }: PlannerSourceProps) {
         : [],
     [gymOn, assignment, active, t],
   );
-  if (!assignment || !days.length) return null;
+  if (!gymOn) return null;
+  if (!assignment || !days.length)
+    return (
+      <GroupedList surface="raised" header={t.plannerSrcProgram}>
+        <ListRow
+          icon={<IconTile icon="barbell" tone="active" size={32} />}
+          label={t.plannerSrcWorkout}
+          trailing={selectedId === 'workout:any' ? <Icon name="check" /> : undefined}
+          onClick={() =>
+            onPick({
+              id: 'workout:any',
+              title: t.plannerSrcWorkout,
+              icon: 'barbell',
+              sub: t.plannerSrcProgram,
+            })
+          }
+        />
+      </GroupedList>
+    );
   return (
     <GroupedList surface="raised" header={`${t.plannerSrcProgram} · ${assignment.program.name}`}>
       {days.map((d) => (
