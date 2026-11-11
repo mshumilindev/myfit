@@ -10,12 +10,14 @@ import { MonthGrid, type MonthGridDay } from '../components/ui/MonthGrid';
 import { ConfirmDialog, Sheet } from '../components/ui/Overlays';
 import { Segmented } from '../components/ui/Segmented';
 import { WeekStepper } from '../components/ui/WeekStepper';
+import { COACH_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
 import { useT } from '../i18n';
 import { uuid } from '../store';
 import { useWeekStartDay } from '../weekStart';
 import { draftToPlan, newDraft, planToDraft, type Draft } from './draft';
 import { clock, dayFull, dayLong, dayMonth, leadText, monthYear, weekRange } from './fmt';
 import { PlanForm } from './PlanForm';
+import { PlannerDesk, type DeskView, type Occ } from './PlannerDesk';
 import { PlannerNotice } from './PlannerNotice';
 import { nextFire, occurrencesBetween, skipDay } from './recurrence';
 import { fill, STRINGS } from './strings';
@@ -34,12 +36,6 @@ import './planner.css';
 
 const zone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-interface Occ {
-  day: DayKey;
-  plan: PlanDoc;
-  at: number;
-}
-
 /** The Planner page (design SPO-555): Week / Month, stepper, agenda of real plans, add / edit / delete. */
 export function PlannerPage({ onClose }: { onClose: () => void }) {
   const { t, locale } = useT();
@@ -49,7 +45,11 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
   const [form, setForm] = useState<{ draft: Draft; editing: boolean; day?: DayKey } | null>(null);
   const [asking, setAsking] = useState<PlanDoc | null>(null);
   const [choosing, setChoosing] = useState<PlanDoc | null>(null);
-  const [view, setView] = useState<'week' | 'month'>('week');
+  const desk = useMinWidth(COACH_BREAKPOINT);
+  const [deskView, setDeskView] = useState<DeskView>('week');
+  const view = desk ? deskView : deskView === 'month' ? 'month' : 'week';
+  const setView = (v: DeskView) => setDeskView(v);
+  const [dayOff, setDayOff] = useState(0);
   const [weekOff, setWeekOff] = useState(0);
   const [monthOff, setMonthOff] = useState(0);
   const [openedAt] = useState(() => Date.now());
@@ -73,6 +73,8 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
     return out.sort((a, b) => a.at - b.at);
   };
   const weekOcc = useMemo(() => between(weekStart, weekEnd), [plans, weekStart]); // eslint-disable-line react-hooks/exhaustive-deps
+  const oneDay = addDays(today, dayOff);
+  const dayOcc = useMemo(() => between(oneDay, oneDay), [plans, oneDay]); // eslint-disable-line react-hooks/exhaustive-deps
   const monthDays = useMemo(() => {
     const first = new Date(Date.UTC(1970, 0, 1) + monthFirst * 86_400_000);
     const from = addDays(
@@ -89,7 +91,11 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
     setForm({
       draft: newDraft(
         uuid(),
-        view === 'month' ? new Date(selected * 86_400_000).toISOString().slice(0, 10) : today,
+        view === 'month'
+          ? new Date(selected * 86_400_000).toISOString().slice(0, 10)
+          : view === 'day'
+            ? oneDay
+            : today,
       ),
       editing: false,
     });
@@ -100,78 +106,83 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
     setForm(null);
   };
 
-  if (form) {
-    const p = plans.find((x) => x.id === form.draft.id);
-    return (
-      <>
-        <PlanForm
-          initial={form.draft}
-          editing={form.editing}
-          onSave={save}
-          onDelete={
-            p
-              ? () => (p.timing.repeat.kind !== 'none' && form.day ? setChoosing(p) : setAsking(p))
-              : undefined
-          }
-          onClose={() => setForm(null)}
-        />
-        {choosing && (
-          <Sheet onClose={() => setChoosing(null)} label={s.delRepTitle}>
-            <div className="ul-flex ul-col ug-12">
-              <h2 className="ut-xl ut-w7">{s.delRepTitle}</h2>
-              <Button
-                variant="secondary"
-                fullWidth
-                onClick={async () => {
-                  const now = Date.now();
-                  const timing = skipDay(choosing.timing, form.day as DayKey);
-                  await savePlan({
-                    ...choosing,
-                    timing,
-                    nextFireAt: nextFire(timing, now)?.fireAt ?? null,
-                    updatedAt: now,
-                  });
-                  setChoosing(null);
+  const formEl = form
+    ? (() => {
+        const p = plans.find((x) => x.id === form.draft.id);
+        return (
+          <>
+            <PlanForm
+              drawer={desk}
+              initial={form.draft}
+              editing={form.editing}
+              onSave={save}
+              onDelete={
+                p
+                  ? () =>
+                      p.timing.repeat.kind !== 'none' && form.day ? setChoosing(p) : setAsking(p)
+                  : undefined
+              }
+              onClose={() => setForm(null)}
+            />
+            {choosing && (
+              <Sheet onClose={() => setChoosing(null)} label={s.delRepTitle}>
+                <div className="ul-flex ul-col ug-12">
+                  <h2 className="ut-xl ut-w7">{s.delRepTitle}</h2>
+                  <Button
+                    variant="secondary"
+                    fullWidth
+                    onClick={async () => {
+                      const now = Date.now();
+                      const timing = skipDay(choosing.timing, form.day as DayKey);
+                      await savePlan({
+                        ...choosing,
+                        timing,
+                        nextFireAt: nextFire(timing, now)?.fireAt ?? null,
+                        updatedAt: now,
+                      });
+                      setChoosing(null);
+                      setForm(null);
+                    }}
+                  >
+                    {s.delOne}
+                  </Button>
+                  <Button
+                    variant="danger"
+                    fullWidth
+                    onClick={async () => {
+                      await deletePlan(choosing.id);
+                      setChoosing(null);
+                      setForm(null);
+                    }}
+                  >
+                    {s.delSeries}
+                  </Button>
+                  <Button variant="secondary" fullWidth onClick={() => setChoosing(null)}>
+                    {s.cancel}
+                  </Button>
+                </div>
+              </Sheet>
+            )}
+            {asking && (
+              <ConfirmDialog
+                danger
+                title={s.delTitle}
+                body={s.delBody}
+                confirmLabel={s.del}
+                cancelLabel={s.cancel}
+                onCancel={() => setAsking(null)}
+                onConfirm={async () => {
+                  await deletePlan(asking.id);
+                  setAsking(null);
                   setForm(null);
                 }}
-              >
-                {s.delOne}
-              </Button>
-              <Button
-                variant="danger"
-                fullWidth
-                onClick={async () => {
-                  await deletePlan(choosing.id);
-                  setChoosing(null);
-                  setForm(null);
-                }}
-              >
-                {s.delSeries}
-              </Button>
-              <Button variant="secondary" fullWidth onClick={() => setChoosing(null)}>
-                {s.cancel}
-              </Button>
-            </div>
-          </Sheet>
-        )}
-        {asking && (
-          <ConfirmDialog
-            danger
-            title={s.delTitle}
-            body={s.delBody}
-            confirmLabel={s.del}
-            cancelLabel={s.cancel}
-            onCancel={() => setAsking(null)}
-            onConfirm={async () => {
-              await deletePlan(asking.id);
-              setAsking(null);
-              setForm(null);
-            }}
-          />
-        )}
-      </>
-    );
-  }
+              />
+            )}
+          </>
+        );
+      })()
+    : null;
+  if (formEl && !desk) return formEl;
 
   const row = (o: Occ, withEnd?: boolean) => (
     <ListRow
@@ -192,6 +203,109 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
     return `${x.getUTCFullYear()}-${String(x.getUTCMonth() + 1).padStart(2, '0')}-${String(x.getUTCDate()).padStart(2, '0')}`;
   })();
   const selOcc = monthDays.filter((o) => o.day === selKey);
+
+  const monthBody = (
+    <>
+      <MonthGrid
+        month={monthFirst}
+        day={monthGridDay}
+        selected={selected}
+        onSelect={setSelected}
+        size="sm"
+        today={dayNumber(today)}
+        weekStart={ws}
+        label={s.month}
+      />
+      <GroupedList header={dayFull(locale, selKey)}>
+        {selOcc.length ? (
+          selOcc.map((o) => (
+            <ListRow
+              key={`${o.plan.id}:${o.day}`}
+              icon={<IconTile icon={o.plan.icon} tone={o.plan.color as never} size={32} />}
+              label={o.plan.title}
+              sub={`${o.plan.timing.time}–${clock(Number(o.plan.timing.time.slice(0, 2)) * 60 + Number(o.plan.timing.time.slice(3)) + (o.plan.durationMin ?? 60))} · ${fill(s.remindAt, { t: clock(Number(o.plan.timing.time.slice(0, 2)) * 60 + Number(o.plan.timing.time.slice(3)) - o.plan.timing.lead) })}`}
+              chevron
+              onClick={() => open(o.plan, o.day)}
+            />
+          ))
+        ) : (
+          <ListRow label={s.freeDay} />
+        )}
+      </GroupedList>
+    </>
+  );
+
+  if (desk) {
+    const days =
+      view === 'day' ? [oneDay] : Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+    const monthLabel = monthYear(
+      locale,
+      (() => {
+        const d = new Date(mDay.y, mDay.m - 1 + monthOff, 1);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+      })(),
+    );
+    const slotDraft = (day: DayKey, minutes: number) => {
+      const d = newDraft(uuid(), day);
+      setForm({
+        draft: { ...d, hour: Math.floor(minutes / 60), minute: minutes % 60 },
+        editing: false,
+      });
+    };
+    return (
+      <div className="screen pl-screen">
+        <PlannerNotice />
+        <PlannerDesk
+          view={view}
+          onView={setView}
+          label={
+            view === 'month'
+              ? monthLabel
+              : view === 'day'
+                ? dayFull(locale, oneDay)
+                : weekRange(locale, weekStart, weekEnd)
+          }
+          sub={
+            view === 'week' && weekOff === 0
+              ? s.thisWeek
+              : view === 'day' && dayOff === 0
+                ? s.today
+                : undefined
+          }
+          onPrev={() =>
+            view === 'month'
+              ? setMonthOff((x) => x - 1)
+              : view === 'day'
+                ? setDayOff((x) => x - 1)
+                : setWeekOff((x) => x - 1)
+          }
+          onNext={() =>
+            view === 'month'
+              ? setMonthOff((x) => x + 1)
+              : view === 'day'
+                ? setDayOff((x) => x + 1)
+                : setWeekOff((x) => x + 1)
+          }
+          onToday={() => {
+            setDayOff(0);
+            setWeekOff(0);
+            setMonthOff(0);
+            setSelected(dayNumber(today));
+          }}
+          onAdd={add}
+          days={days}
+          occ={view === 'day' ? dayOcc : weekOcc}
+          today={today}
+          tz={tz}
+          onSlot={slotDraft}
+          onOpen={(o) => open(o.plan, o.day)}
+        >
+          {monthBody}
+        </PlannerDesk>
+        {formEl}
+      </div>
+    );
+  }
 
   return (
     <div className="screen pl-screen">
@@ -284,32 +398,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
               prevLabel={s.prevWeek}
               nextLabel={s.nextWeek}
             />
-            <MonthGrid
-              month={monthFirst}
-              day={monthGridDay}
-              selected={selected}
-              onSelect={setSelected}
-              size="sm"
-              today={dayNumber(today)}
-              weekStart={ws}
-              label={s.month}
-            />
-            <GroupedList header={dayFull(locale, selKey)}>
-              {selOcc.length ? (
-                selOcc.map((o) => (
-                  <ListRow
-                    key={`${o.plan.id}:${o.day}`}
-                    icon={<IconTile icon={o.plan.icon} tone={o.plan.color as never} size={32} />}
-                    label={o.plan.title}
-                    sub={`${o.plan.timing.time}–${clock(Number(o.plan.timing.time.slice(0, 2)) * 60 + Number(o.plan.timing.time.slice(3)) + (o.plan.durationMin ?? 60))} · ${fill(s.remindAt, { t: clock(Number(o.plan.timing.time.slice(0, 2)) * 60 + Number(o.plan.timing.time.slice(3)) - o.plan.timing.lead) })}`}
-                    chevron
-                    onClick={() => open(o.plan, o.day)}
-                  />
-                ))
-              ) : (
-                <ListRow label={s.freeDay} />
-              )}
-            </GroupedList>
+            {monthBody}
           </>
         )}
         <span hidden onClick={onClose} />

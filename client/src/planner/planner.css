@@ -178,3 +178,122 @@
   --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
   --t-on: var(--color-bg);
 }
+
+/* Desktop Planner (design SPO-555, PlannerDesk): header tools and the Day / Week time grid. Tokens only. */
+.pl-desk {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-14);
+  padding: var(--s-16);
+  box-sizing: border-box;
+  min-width: 0;
+}
+.pl-page-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-12);
+  flex-wrap: wrap;
+}
+.pl-page-h h1 {
+  margin: 0;
+  font-size: var(--fs-24, 24px);
+}
+.pl-desk-tools {
+  display: flex;
+  gap: var(--s-10);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.pl-g {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl, 20px);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.pl-g-hd,
+.pl-g-body {
+  display: grid;
+}
+.pl-g-hd {
+  border-bottom: 1px solid var(--color-border);
+}
+.pl-g-hd div {
+  display: flex;
+  gap: var(--s-6);
+  justify-content: center;
+  align-items: baseline;
+  padding: var(--s-8) 0;
+  font-size: var(--fs-13, 13px);
+  color: var(--color-text-muted);
+}
+.pl-g-hd div b {
+  color: var(--color-text);
+}
+.pl-g-hd div.is-today b {
+  color: var(--color-accent);
+}
+.pl-g-body {
+  position: relative;
+}
+.pl-g-hrs {
+  position: relative;
+}
+.pl-g-hrs span {
+  position: absolute;
+  right: var(--s-8);
+  transform: translateY(-50%);
+  font-size: var(--fs-11, 11px);
+  color: var(--color-text-muted);
+}
+.pl-g-col {
+  position: relative;
+  border-left: 1px solid var(--color-border);
+  cursor: cell;
+}
+.pl-g-col.is-today {
+  background: color-mix(in srgb, var(--color-accent) 4%, transparent);
+}
+.pl-g-col > i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--color-border);
+  opacity: 0.6;
+  pointer-events: none;
+}
+.pl-g-e {
+  position: absolute;
+  display: flex;
+  gap: var(--s-6);
+  align-items: flex-start;
+  padding: var(--s-6) var(--s-8);
+  border-radius: var(--radius-lg);
+  background: var(--t-tint);
+  color: var(--t-text);
+  border-left: 3px solid var(--t-base);
+  box-sizing: border-box;
+  overflow: hidden;
+  font-size: var(--fs-12, 12px);
+  z-index: 1;
+  cursor: pointer;
+}
+.pl-g-e svg {
+  flex: none;
+  margin-top: 1px;
+}
+.pl-g-e span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.pl-g-e b {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pl-g-e i {
+  font-style: normal;
+  opacity: 0.8;
+}
