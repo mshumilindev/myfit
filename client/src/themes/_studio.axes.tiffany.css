@@ -87,6 +87,10 @@ html[data-theme='studio'][data-accent='tiffany'] .dk-island {
   --color-learn-tint: var(--c-0e2e30);
   --color-learn-text: var(--c-72d7d4);
   --color-learn-line: var(--c-0d5f5e);
+  --color-guide: var(--color-learn);
+  --color-guide-tint: var(--color-learn-tint);
+  --color-guide-text: var(--color-learn-text);
+  --color-guide-line: var(--color-learn-line);
   --color-coach: var(--c-0abab5);
   --color-coach-tint: var(--c-0e2e30);
   --color-coach-text: var(--c-72d7d4);
@@ -188,6 +192,10 @@ html[data-theme='studio'][data-mode='light'][data-accent='tiffany']:not([data-sl
   --color-learn-tint: var(--c-dae6e8);
   --color-learn-text: var(--c-055451);
   --color-learn-line: var(--c-81d3d2);
+  --color-guide: var(--color-learn);
+  --color-guide-tint: var(--color-learn-tint);
+  --color-guide-text: var(--color-learn-text);
+  --color-guide-line: var(--color-learn-line);
   --color-coach: var(--c-0abab5);
   --color-coach-tint: var(--c-dae6e8);
   --color-coach-text: var(--c-055451);
