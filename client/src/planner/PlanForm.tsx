@@ -459,12 +459,7 @@ export function PlanForm(p: {
         />
         <ListRow
           label={s.color}
-          value={
-            <span className="ul-flex ua-center ug-8">
-              {s.cols[PTONES.indexOf(d.color)]}
-              <IconTile icon="palette" tone={d.color as never} size={32} />
-            </span>
-          }
+          value={s.cols[PTONES.indexOf(d.color)]}
           chevron
           onClick={() => openDrawer('color')}
         />
