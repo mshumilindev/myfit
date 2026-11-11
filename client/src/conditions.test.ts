@@ -14,7 +14,6 @@ import {
   effectLines,
   exerciseFlag,
   exerciseRisk,
-  isAutoExcluded,
   isActive,
   isTemporary,
   pregnancyKeyAt,
@@ -25,6 +24,7 @@ import {
   resolveShare,
   stripLegacyCondition,
 } from './conditions';
+import { isAutoExcluded } from './conditionsRt';
 import type { ChronicCondition } from './types';
 
 const mk = (

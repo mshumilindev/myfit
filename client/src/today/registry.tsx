@@ -9,12 +9,13 @@
 import type { ReactNode } from 'react';
 import { useAddonAvailable } from '../addons/enabledSet';
 import type { WidgetSize } from '../components/ui/Widget';
-import type { Tone } from '../components/ui/tones';
 import type { Shell } from '../App';
 import type { StoreState } from '../store';
 import type { Strings } from '../i18n/en';
 import type { LocaleId } from '../i18n';
 import type { TodayStrings } from './strings';
+import type { WidgetGroup, WidgetMeta } from './widgetMeta';
+export type { WidgetGroup, WidgetMeta };
 import { BODY_WIDGETS } from './widgets/body';
 import { TRAINING_WIDGETS } from './widgets/training';
 import { APEX_WIDGET_META } from './widgets/apex.meta';
@@ -41,19 +42,9 @@ export interface WidgetCtx {
   openWeight: () => void;
 }
 
-export type WidgetGroup =
-  | 'training'
-  | 'plan'
-  | 'strength'
-  | 'muscles'
-  | 'body'
-  | 'cardio'
-  | 'apex'
-  | 'learn'
-  | 'atlas'
-  | 'discover'
-  | 'fun'
-  | 'calendar';
+export interface WidgetDef extends WidgetMeta {
+  render: (size: WidgetSize, ctx: WidgetCtx) => ReactNode;
+}
 
 /** Display order of the groups in pickers and the library. */
 export const WIDGET_GROUPS: WidgetGroup[] = [
@@ -71,18 +62,8 @@ export const WIDGET_GROUPS: WidgetGroup[] = [
   'calendar',
 ];
 
-export interface WidgetDef {
-  id: string;
-  group: WidgetGroup;
-  icon: string;
-  tone: Tone;
-  /** Picker label. */
-  name: (tw: TodayStrings) => string;
-  render: (size: WidgetSize, ctx: WidgetCtx) => ReactNode;
-}
-
 /** Apex widgets: metadata here, bodies in the lazy `widgets/apex` chunk (only with Apex installed). */
-const APEX_WIDGETS: WidgetDef[] = lazyWidgets(APEX_WIDGET_META, () =>
+const APEX_WIDGETS: WidgetDef[] = lazyWidgets<WidgetCtx, WidgetDef>(APEX_WIDGET_META, () =>
   import('./widgets/apex').then((m) => m.APEX_WIDGETS),
 );
 

@@ -5,8 +5,7 @@
  * strings live in i18n.
  */
 import type { SleepNight, SleepSchedule, SleepDayPlan } from './types';
-import { AUTO_START_WINDOW_MS, SLEEP_IDLE_MS, provideSleep } from './sleepRt';
-import { sleepBlockedBy } from './sleepGuard';
+import { AUTO_START_WINDOW_MS, SLEEP_IDLE_MS } from './sleepConsts';
 
 export { AUTO_START_WINDOW_MS, SLEEP_IDLE_MS };
 
@@ -426,25 +425,3 @@ export function duplicateSleepIds(list: SleepNight[], now: number = Date.now()):
 }
 
 // The real engine goes into the facade the moment this module is imported (the Sleep add-on is installed).
-provideSleep({
-  minutesOfDay,
-  awakeMsAt,
-  nightDurationMin,
-  classifySleepKind,
-  sleepKindOf,
-  finishedNights,
-  lastNight,
-  sleepStats,
-  weekdayPattern,
-  sleepReadinessBias,
-  planForWeekday,
-  planDurationMin,
-  resolvePlan,
-  usualPlan,
-  nightEndingOn,
-  dueBedtime,
-  computeUpcomingNights,
-  sameSleep,
-  duplicateSleepIds,
-  sleepBlockedBy,
-});

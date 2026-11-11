@@ -11,7 +11,7 @@ describe('lazyWidgets', () => {
     const load = vi.fn(async () => [
       { id: 'w1', render: () => <p>real body</p> } as unknown as WidgetDef,
     ]);
-    const [w] = lazyWidgets(meta, load);
+    const [w] = lazyWidgets<WidgetCtx, WidgetDef>(meta, load);
     expect(load).not.toHaveBeenCalled();
     const { container } = render(<>{w.render('S', ctx)}</>);
     expect(container.textContent).toBe('');

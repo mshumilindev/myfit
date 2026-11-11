@@ -1,12 +1,12 @@
 import { axs } from './apex.strings';
 import { getLocale } from '../../i18n';
-import type { WidgetDef } from '../registry';
+import type { WidgetMeta } from '../widgetMeta';
 
 /**
  * Picker metadata of the Apex widgets (id, icon, tone, name) — light and eager; the render bodies live in `apex.tsx`,
  * a lazy chunk fetched only with Apex installed (SPO-500 I8). `apex.meta.test.ts` keeps this list equal to `apex.tsx`.
  */
-export const APEX_WIDGET_META: Pick<WidgetDef, 'id' | 'group' | 'icon' | 'tone' | 'name'>[] = [
+export const APEX_WIDGET_META: WidgetMeta[] = [
   { id: 'streak', group: 'apex', icon: 'flame', tone: 'apex', name: (tw) => tw.streak },
   {
     id: 'apex-challenge',

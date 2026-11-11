@@ -35,7 +35,6 @@ import {
   weeklyGrams,
 } from './alcoholCatalog';
 import { isAlcoholRegion } from './alcoholRegion';
-import { alc } from './alcoholRt';
 import {
   dayKey,
   weekdayIndex,
@@ -44,7 +43,6 @@ import {
   toLocalDate,
   type DayInput,
 } from './healthDays';
-import { provide } from './trackerRt';
 import type {
   AlcoholCheckin,
   AlcoholEntry,
@@ -643,20 +641,3 @@ export const hasAlcoholData = (a: AlcoholState | null | undefined): boolean =>
 
 // Late-bound runtime (SPO-500 I8): importing this module puts the real functions into the facade the store reads.
 export { weekdayIndex, dayKey, addDays, MAX_CHECKIN_DAYS, type DayInput };
-
-provide(alc, {
-  empty: emptyAlcoholState,
-  normalize: normalizeAlcohol,
-  normalizeEntry: normalizeAlcoholEntry,
-  load: alcoholLoad,
-  effects: alcoholEffects,
-  effectsFor: alcoholEffectsFor,
-  weekActual: alcoholWeekActual,
-  pending: pendingAlcoholCheckin,
-  dayKey,
-  surfaceOn,
-  usualGrams: usualOccasionGrams,
-  normalizeCheckins,
-  cleanUsualDays,
-  isSharing: isAlcoholSharing,
-});

@@ -5,12 +5,19 @@
  * Owner 11.11: an add-on that is not installed counts for nothing anywhere, limits included, so the code is not even loaded.
  */
 import type { ChronicCondition } from './types';
-import type { ConditionCategory, ConditionEffects } from './data/conditionCatalog';
+import type { ConditionEffects } from './data/conditionCatalog';
 import type { RichExercise } from './data/exercises';
-import type { CoachView, EffectLine, ExerciseFlag, GeneralShare, Limits } from './conditions';
+import type { CoachView, EffectLine, ExerciseFlag, GeneralShare } from './conditions';
 import { provide } from './trackerRt';
-
-export const NO_LIMITS: Limits = { effects: {}, avoidBy: {}, cautionBy: {}, capBy: {}, keys: [] };
+import {
+  NO_LIMITS,
+  OTHER_TAB_CATEGORIES,
+  isActive,
+  isOtherTab,
+  stripLegacyCondition,
+  stripLegacyConditions,
+  type Limits,
+} from './conditionsBase';
 
 const NEUTRAL_FLAG: ExerciseFlag = { level: 'ok', tags: [], because: [], cap: 1 };
 
@@ -59,30 +66,11 @@ export const suggestedEnd: Impl['suggestedEnd'] = (k, s) => cndRt.suggestedEnd(k
 export const isAutoExcluded = (name: string, limits: Limits): boolean =>
   exerciseFlag(name, limits).level === 'avoid';
 
-/** Not started yet, or past its end: no effects. Permanent conditions are always active. */
-export function isActive(c: ChronicCondition, now: number): boolean {
-  if (c.startedAt != null && c.startedAt > now) return false;
-  return !(c.endsAt != null && c.endsAt <= now);
-}
-
-/** Older builds stored a free-text `note` on a condition; it no longer exists. Drop it on read. */
-export function stripLegacyCondition<T extends object>(c: T): T {
-  if (!('note' in c)) return c;
-  const rest: Record<string, unknown> = { ...c };
-  delete rest.note;
-  return rest as T;
-}
-export const stripLegacyConditions = <T extends object>(list: readonly T[]): T[] =>
-  list.map(stripLegacyCondition);
-
-/** Body map "Other" tab: what cannot be pinned to a body part (see `conditions.ts` for the full story). */
-export const OTHER_TAB_CATEGORIES: ConditionCategory[] = [
-  'neuro',
-  'cardio',
-  'respiratory',
-  'metabolic',
-  'pregnancy',
-  'other',
-];
-export const isOtherTab = (c: { region: string; category: ConditionCategory }): boolean =>
-  c.region === 'whole' || OTHER_TAB_CATEGORIES.includes(c.category);
+export {
+  NO_LIMITS,
+  OTHER_TAB_CATEGORIES,
+  isActive,
+  isOtherTab,
+  stripLegacyCondition,
+  stripLegacyConditions,
+};

@@ -10,8 +10,6 @@
  * alcohol views, so it is encrypted like everything else and the server only forwards
  * ciphertext.
  */
-import { sup } from './supplementsRt';
-import { provide } from './trackerRt';
 import {
   isNeutralRange,
   SUPPLEMENT_EFFECT_KEYS,
@@ -105,5 +103,3 @@ export function supplementsCoachView(
     },
   };
 }
-
-provide(sup, { coachView: supplementsCoachView });

@@ -23,18 +23,16 @@ import {
   NO_LIMITS,
   OTHER_TAB_CATEGORIES,
   isActive,
-  isAutoExcluded,
   isOtherTab,
-  provideConditions,
   stripLegacyCondition,
   stripLegacyConditions,
-} from './conditionsRt';
+  type Limits,
+} from './conditionsBase';
 
 export {
   NO_LIMITS,
   OTHER_TAB_CATEGORIES,
   isActive,
-  isAutoExcluded,
   isOtherTab,
   stripLegacyCondition,
   stripLegacyConditions,
@@ -155,15 +153,7 @@ export function exerciseRisk(
 // Stacked limits
 // ---------------------------------------------------------------------------
 
-export interface Limits {
-  /** Stricter-wins merge of every condition's effects at its severity. */
-  effects: ConditionEffects;
-  /** Condition keys behind each restriction (for "why" lines; never sent off-device). */
-  avoidBy: Partial<Record<RiskTag, string[]>>;
-  cautionBy: Partial<Record<RiskTag, string[]>>;
-  capBy: Partial<Record<MuscleGroup, string[]>>;
-  keys: string[];
-}
+export type { Limits } from './conditionsBase';
 
 const DAY = 86_400_000;
 
@@ -440,13 +430,3 @@ export function deidentifiedEffects(
 }
 
 // The real engine goes into the facade the moment this module is imported (the Conditions add-on is installed).
-provideConditions({
-  exerciseFlag,
-  conditionLimits,
-  effectLines,
-  coachView,
-  deidentifiedEffects,
-  effectiveKey,
-  pregnancyKeyAt,
-  suggestedEnd,
-});
