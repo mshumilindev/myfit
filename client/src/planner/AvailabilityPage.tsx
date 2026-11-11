@@ -195,7 +195,10 @@ function DayEditor(p: {
   const [week, setWeek] = useState(p.week);
   const [askLeave, setAskLeave] = useState(false);
   const dirty = JSON.stringify(week) !== JSON.stringify(p.week);
-  const guide = useSaveGuide([{ id: 'hours', label: s.needChange, done: dirty }]);
+  const guide = useSaveGuide([
+    { id: 'hours', label: s.needChange, done: dirty },
+    { id: 'scope', label: s.needScope, done: scope !== null },
+  ]);
   const leave = () => (dirty ? setAskLeave(true) : p.onClose());
   const ranges = dayRanges(week, p.day);
   const reach = [...new Set([p.day, ...(scope ? SCOPE_DAYS[scope] : [])])];
@@ -264,21 +267,29 @@ function DayEditor(p: {
             <ListRow
               label={fill(s.onlyDay, { d: name })}
               check={scope === 'only'}
+              guide={guide.field('scope')}
               onClick={() => pick('only')}
             />
             <ListRow
               label={s.weekdaysL}
               sub={s.weekdaysSub}
               check={scope === 'weekdays'}
+              guide={guide.field('scope')}
               onClick={() => pick('weekdays')}
             />
             <ListRow
               label={s.weekendsL}
               sub={s.weekendsSub}
               check={scope === 'weekends'}
+              guide={guide.field('scope')}
               onClick={() => pick('weekends')}
             />
-            <ListRow label={s.everyDay} check={scope === 'every'} onClick={() => pick('every')} />
+            <ListRow
+              label={s.everyDay}
+              check={scope === 'every'}
+              guide={guide.field('scope')}
+              onClick={() => pick('every')}
+            />
           </GroupedList>
         </div>
       </div>

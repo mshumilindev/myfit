@@ -52,6 +52,7 @@ export interface PlannerStrings {
   keepEditing: string;
   discardHoursB: string;
   needChange: string;
+  needScope: string;
   more: string;
   fewer: string;
   when: string;
@@ -191,6 +192,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     keepEditing: 'Keep editing',
     discardHoursB: 'Your changes to these hours will be lost.',
     needChange: 'Add hours',
+    needScope: 'Pick where it applies',
     more: 'More options',
     fewer: 'Fewer options',
     when: 'Schedule',
@@ -341,6 +343,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     keepEditing: 'Продовжити',
     discardHoursB: 'Ваші зміни цих годин буде втрачено.',
     needChange: 'Додайте години',
+    needScope: 'Оберіть, на які дні',
     more: 'Більше опцій',
     fewer: 'Менше опцій',
     when: 'Розклад',
@@ -491,6 +494,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     keepEditing: 'Edytuj dalej',
     discardHoursB: 'Zmiany w tych godzinach zostaną utracone.',
     needChange: 'Dodaj godziny',
+    needScope: 'Wybierz, na które dni',
     more: 'Więcej opcji',
     fewer: 'Mniej opcji',
     when: 'Harmonogram',
@@ -641,6 +645,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     keepEditing: 'Tęsti redagavimą',
     discardHoursB: 'Šių valandų pakeitimai bus prarasti.',
     needChange: 'Pridėkite valandas',
+    needScope: 'Pasirinkite, kurioms dienoms',
     more: 'Daugiau parinkčių',
     fewer: 'Mažiau parinkčių',
     when: 'Tvarkaraštis',
@@ -791,6 +796,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     keepEditing: 'Jätka muutmist',
     discardHoursB: 'Selle aja muudatused lähevad kaotsi.',
     needChange: 'Lisage ajad',
+    needScope: 'Valige, millistele päevadele',
     more: 'Rohkem valikuid',
     fewer: 'Vähem valikuid',
     when: 'Ajakava',

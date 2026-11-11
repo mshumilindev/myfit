@@ -107,6 +107,7 @@ describe('AvailabilityPage', () => {
     fireEvent.click(
       within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Remove these hours' }),
     );
+    fireEvent.click(screen.getByText('Only Monday'));
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(lastSaved().availability[0]).toEqual([[1080, 1260]]);
   });
@@ -123,6 +124,7 @@ describe('AvailabilityPage', () => {
     // the sheet's Save is the last one in the page (it is a portal); then the page's own Save writes
     fireEvent.click(screen.getAllByRole('button', { name: 'Save' }).at(-1)!);
     expect(state.saved).toHaveLength(0);
+    fireEvent.click(screen.getByText('Only Monday'));
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(lastSaved().availability[0]).toEqual([
       [360, 480],
@@ -191,5 +193,13 @@ describe('AvailabilityPage', () => {
     fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Discard'));
     expect(screen.getByText('Weekly hours')).toBeTruthy();
     expect(state.saved).toHaveLength(0);
+  });
+
+  it('the ‹ Back button asks too when something changed', () => {
+    render(<AvailabilityPage onBack={() => {}} />);
+    fireEvent.click(screen.getByText('Monday'));
+    fireEvent.click(screen.getByText('Weekdays'));
+    fireEvent.click(screen.getAllByRole('button', { name: /back/i })[0]);
+    expect(screen.getByRole('alertdialog')).toBeTruthy();
   });
 });
