@@ -36,6 +36,12 @@ export interface PlannerStrings {
   quietHint: string;
   search: string;
   basedNone: string;
+  noteIosT: string;
+  noteIosB: string;
+  notePermT: string;
+  notePermB: string;
+  noteOffT: string;
+  noteOffB: string;
   more: string;
   fewer: string;
   when: string;
@@ -123,6 +129,12 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     quietHint: 'A silent notification; respects quiet hours.',
     search: 'Search',
     basedNone: 'Nothing to base it on',
+    noteIosT: 'Add Spotter to your Home Screen',
+    noteIosB: 'On iPhone, reminders only ring for an app on the Home Screen.',
+    notePermT: 'Notifications are off',
+    notePermB: 'Spotter cannot remind you. Turn them on in your device settings.',
+    noteOffT: 'You are offline',
+    noteOffB: 'Plans are saved on this device and sync when you are back. Reminders still ring.',
     more: 'More options',
     fewer: 'Fewer options',
     when: 'Schedule',
@@ -220,6 +232,13 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     quietHint: 'Беззвучне сповіщення; поважає тихі години.',
     search: 'Пошук',
     basedNone: 'Без основи',
+    noteIosT: 'Додайте Spotter на головний екран',
+    noteIosB: 'На iPhone нагадування спрацьовують лише для застосунку на головному екрані.',
+    notePermT: 'Сповіщення вимкнено',
+    notePermB: 'Spotter не зможе нагадати. Увімкніть їх у налаштуваннях пристрою.',
+    noteOffT: 'Ви офлайн',
+    noteOffB:
+      'Плани зберігаються на цьому пристрої й синхронізуються, коли зʼявиться звʼязок. Нагадування працюють.',
     more: 'Більше опцій',
     fewer: 'Менше опцій',
     when: 'Розклад',
@@ -317,6 +336,13 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     quietHint: 'Ciche powiadomienie; respektuje ciche godziny.',
     search: 'Szukaj',
     basedNone: 'Bez podstawy',
+    noteIosT: 'Dodaj Spottera do ekranu głównego',
+    noteIosB: 'Na iPhonie przypomnienia działają tylko dla aplikacji na ekranie głównym.',
+    notePermT: 'Powiadomienia są wyłączone',
+    notePermB: 'Spotter nie przypomni. Włącz je w ustawieniach urządzenia.',
+    noteOffT: 'Jesteś offline',
+    noteOffB:
+      'Plany są zapisane na tym urządzeniu i zsynchronizują się po powrocie sieci. Przypomnienia nadal dzwonią.',
     more: 'Więcej opcji',
     fewer: 'Mniej opcji',
     when: 'Harmonogram',
@@ -414,6 +440,13 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     quietHint: 'Tylus pranešimas; gerbia tylos valandas.',
     search: 'Ieškoti',
     basedNone: 'Be pagrindo',
+    noteIosT: 'Pridėkite Spotter prie pagrindinio ekrano',
+    noteIosB: 'iPhone priminimai skamba tik programai, esančiai pagrindiniame ekrane.',
+    notePermT: 'Pranešimai išjungti',
+    notePermB: 'Spotter negali jums priminti. Įjunkite juos įrenginio nustatymuose.',
+    noteOffT: 'Esate neprisijungę',
+    noteOffB:
+      'Planai saugomi šiame įrenginyje ir sinchronizuojami grįžus ryšiui. Priminimai vis tiek skamba.',
     more: 'Daugiau parinkčių',
     fewer: 'Mažiau parinkčių',
     when: 'Tvarkaraštis',
@@ -511,6 +544,13 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     quietHint: 'Vaikne teavitus; arvestab vaikseid tunde.',
     search: 'Otsi',
     basedNone: 'Ilma aluseta',
+    noteIosT: 'Lisa Spotter avaekraanile',
+    noteIosB: "iPhone'is helisevad meeldetuletused ainult avaekraanil oleva rakenduse puhul.",
+    notePermT: 'Teavitused on välja lülitatud',
+    notePermB: 'Spotter ei saa sind meelde tuletada. Lülita need sisse seadme seadetes.',
+    noteOffT: 'Oled võrgust väljas',
+    noteOffB:
+      'Plaanid salvestatakse sellesse seadmesse ja sünkroonitakse, kui ühendus taastub. Meeldetuletused heliseb endiselt.',
     more: 'Rohkem valikuid',
     fewer: 'Vähem valikuid',
     when: 'Ajakava',

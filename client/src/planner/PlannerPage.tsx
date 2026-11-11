@@ -16,6 +16,7 @@ import { useWeekStartDay } from '../weekStart';
 import { draftToPlan, newDraft, planToDraft, type Draft } from './draft';
 import { clock, dayFull, dayLong, dayMonth, leadText, monthYear, weekRange } from './fmt';
 import { PlanForm } from './PlanForm';
+import { PlannerNotice } from './PlannerNotice';
 import { nextFire, occurrencesBetween, skipDay } from './recurrence';
 import { fill, STRINGS } from './strings';
 import { deletePlan, savePlan, usePlans } from './sync';
@@ -204,6 +205,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
             </Button>
           }
         />
+        <PlannerNotice />
         <Segmented
           value={view}
           onChange={setView}
