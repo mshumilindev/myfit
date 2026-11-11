@@ -34,7 +34,7 @@
 }
 .uisg-flag {
   position: absolute;
-  right: 6px;
+  right: 14px;
   bottom: calc(100% + 16px);
   display: flex;
   flex-direction: column;
