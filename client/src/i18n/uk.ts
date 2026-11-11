@@ -3755,7 +3755,6 @@ export const uk: Strings = {
   progDay: (n) => `День ${n}`,
   plannerSrcProgram: 'Програма',
   plannerSrcHome: 'Домашні набори',
-  plannerSrcHomeSet: 'Домашній набір',
   plannerSrcHomeAny: 'Домашнє тренування',
   plannerSrcWorkout: 'Тренування',
   plannerSrcAllHome: 'Усі домашні набори',

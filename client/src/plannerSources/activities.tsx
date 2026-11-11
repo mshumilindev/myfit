@@ -70,7 +70,7 @@ function All({ query, selectedId, onPick }: PlannerAllProps) {
     : [];
   if (!shown.length) return null;
   return (
-    <GroupedList surface="raised" header={t.plannerSrcActivities}>
+    <GroupedList surface="raised">
       {shown.map((a) => (
         <Row key={a.key} k={a.key} icon={a.icon} selectedId={selectedId} onPick={onPick} />
       ))}
@@ -84,5 +84,4 @@ registerPlannerSource({
   Group,
   All,
   allTitle: () => tr().plannerSrcActivities,
-  searchPlaceholder: () => tr().plannerSrcActivities,
 });

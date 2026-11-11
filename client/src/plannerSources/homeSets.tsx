@@ -32,7 +32,6 @@ function Row(p: {
     <ListRow
       icon={<IconTile icon="house" tone="home" size={32} />}
       label={p.name}
-      sub={t.plannerSrcHomeSet}
       trailing={p.selectedId === `home:${p.id}` ? <Icon name="check" /> : undefined}
       onClick={() =>
         p.onPick({
@@ -56,7 +55,6 @@ function Group({ selectedId, onPick, onAll }: PlannerSourceProps) {
       <ListRow
         icon={<IconTile icon="house" tone="home" size={32} />}
         label={t.plannerSrcHomeAny}
-        sub={t.plannerSrcHomeSet}
         trailing={selectedId === 'home:any' ? <Icon name="check" /> : undefined}
         onClick={() =>
           onPick({
@@ -77,12 +75,11 @@ function Group({ selectedId, onPick, onAll }: PlannerSourceProps) {
 }
 
 function All({ query, selectedId, onPick }: PlannerAllProps) {
-  const { t } = useT();
   const q = query.trim().toLowerCase();
   const sets = useSets().filter((h) => !q || h.name.toLowerCase().includes(q));
   if (!sets.length) return null;
   return (
-    <GroupedList surface="raised" header={t.plannerSrcHome}>
+    <GroupedList surface="raised">
       {sets.map((h) => (
         <Row key={h.id} id={h.id} name={h.name} selectedId={selectedId} onPick={onPick} />
       ))}
@@ -96,5 +93,4 @@ registerPlannerSource({
   Group,
   All,
   allTitle: () => tr().plannerSrcHome,
-  searchPlaceholder: () => tr().plannerSrcHome,
 });

@@ -3706,7 +3706,6 @@ export const et: Strings = {
   progDay: (n) => `${n}. päev`,
   plannerSrcProgram: 'Programm',
   plannerSrcHome: 'Kodused komplektid',
-  plannerSrcHomeSet: 'Kodune komplekt',
   plannerSrcHomeAny: 'Kodune trenging',
   plannerSrcWorkout: 'Trenn',
   plannerSrcAllHome: 'Kõik kodused komplektid',

@@ -3755,7 +3755,6 @@ export const en = {
   progDay: (n: number) => `Day ${n}`,
   plannerSrcProgram: 'Program',
   plannerSrcHome: 'Home sets',
-  plannerSrcHomeSet: 'Home set',
   plannerSrcHomeAny: 'Home workout',
   plannerSrcWorkout: 'Workout',
   plannerSrcAllHome: 'All home sets',

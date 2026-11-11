@@ -8,7 +8,7 @@ import { Hint } from '../components/ui/Hint';
 import { IconTile } from '../components/ui/IconTile';
 import { PageHead } from '../components/ui/PageHead';
 import { PresetChips } from '../components/ui/PresetChips';
-import { ConfirmDialog, Sheet } from '../components/ui/Overlays';
+import { ConfirmDialog, Sheet, SheetFoot, SheetPin } from '../components/ui/Overlays';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { SearchField } from '../components/ui/SearchField';
 import { Segmented } from '../components/ui/Segmented';
@@ -161,7 +161,7 @@ export function PlanForm(p: {
   );
   const weekly = (x: Draft) => x.repeat === 'weekly' || x.repeat === 'biweekly';
 
-  const body = (): { title: string; node: ReactNode } => {
+  const body = (): { title: string; node: ReactNode; back?: () => void; pin?: ReactNode } => {
     switch (drawer) {
       case 'based': {
         const all = srcs.find((x) => x.id === allOf);
@@ -169,15 +169,17 @@ export function PlanForm(p: {
         if (all?.All)
           return {
             title: all.allTitle?.() ?? s.basedOn,
+            back: () => setAllOf(null),
+            pin: (
+              <SearchField
+                value={q}
+                onChange={setQ}
+                placeholder={s.search}
+                clearLabel={s.clearSearch}
+              />
+            ),
             node: (
               <>
-                <BackButton label={t.backAction} onClick={() => setAllOf(null)} />
-                <SearchField
-                  value={q}
-                  onChange={setQ}
-                  placeholder={all.searchPlaceholder?.() ?? s.search}
-                  clearLabel={s.clearSearch}
-                />
                 <all.All query={q} selectedId={sel} onPick={pick} />
               </>
             ),
@@ -581,24 +583,29 @@ export function PlanForm(p: {
     />
   );
   const nested = dr && (
-    <Sheet
-      onClose={closeDrawer}
-      label={dr.title}
-      returnFocusRef={anchor}
-      startFull={drawer === 'based'}
-    >
-      <div className="ul-flex ul-col ug-12">
-        <h2 className="ut-xl ut-w7">{dr.title}</h2>
+    <Sheet onClose={closeDrawer} label={dr.title} returnFocusRef={anchor}>
+      <div className="ul-flex ul-col ug-20">
+        <SheetPin>
+          {dr.back ? (
+            <div className="ul-flex ua-center ug-12">
+              <BackButton label={t.backAction} onClick={dr.back} />
+              <h2 className="ut-xl ut-w7">{dr.title}</h2>
+            </div>
+          ) : (
+            <h2 className="ut-xl ut-w7">{dr.title}</h2>
+          )}
+          {dr.pin}
+        </SheetPin>
         {dr.node}
         {drawer !== 'based' && (
-          <div className="ul-flex ug-8">
+          <SheetFoot>
             <Button fullWidth variant="secondary" onClick={closeDrawer}>
               {s.cancel}
             </Button>
             <Button fullWidth onClick={commit}>
               {s.save}
             </Button>
-          </div>
+          </SheetFoot>
         )}
       </div>
     </Sheet>

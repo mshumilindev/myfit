@@ -8,8 +8,14 @@ export interface PlannerStrings {
   add: string;
   week: string;
   month: string;
+  day: string;
   view: string;
   prevWeek: string;
+  prevDay: string;
+  nextDay: string;
+  prevMonth: string;
+  nextMonth: string;
+  todayBtn: string;
   nextWeek: string;
   thisWeek: string;
   freeDay: string;
@@ -103,8 +109,14 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     add: 'Add',
     week: 'Week',
     month: 'Month',
+    day: 'Day',
     view: 'View',
     prevWeek: 'Previous week',
+    prevDay: 'Previous day',
+    nextDay: 'Next day',
+    prevMonth: 'Previous month',
+    nextMonth: 'Next month',
+    todayBtn: 'Today',
     nextWeek: 'Next week',
     thisWeek: 'This week',
     freeDay: 'Free day',
@@ -208,8 +220,14 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     add: 'Додати',
     week: 'Тиждень',
     month: 'Місяць',
+    day: 'День',
     view: 'Вигляд',
     prevWeek: 'Попередній тиждень',
+    prevDay: 'Попередній день',
+    nextDay: 'Наступний день',
+    prevMonth: 'Попередній місяць',
+    nextMonth: 'Наступний місяць',
+    todayBtn: 'Сьогодні',
     nextWeek: 'Наступний тиждень',
     thisWeek: 'Цей тиждень',
     freeDay: 'Вільний день',
@@ -314,8 +332,14 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     add: 'Dodaj',
     week: 'Tydzień',
     month: 'Miesiąc',
+    day: 'Dzień',
     view: 'Widok',
     prevWeek: 'Poprzedni tydzień',
+    prevDay: 'Poprzedni dzień',
+    nextDay: 'Następny dzień',
+    prevMonth: 'Poprzedni miesiąc',
+    nextMonth: 'Następny miesiąc',
+    todayBtn: 'Dziś',
     nextWeek: 'Następny tydzień',
     thisWeek: 'Ten tydzień',
     freeDay: 'Wolny dzień',
@@ -420,8 +444,14 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     add: 'Pridėti',
     week: 'Savaitė',
     month: 'Mėnuo',
+    day: 'Diena',
     view: 'Rodinys',
     prevWeek: 'Ankstesnė savaitė',
+    prevDay: 'Ankstesnė diena',
+    nextDay: 'Kita diena',
+    prevMonth: 'Ankstesnis mėnuo',
+    nextMonth: 'Kitas mėnuo',
+    todayBtn: 'Šiandien',
     nextWeek: 'Kita savaitė',
     thisWeek: 'Ši savaitė',
     freeDay: 'Laisva diena',
@@ -526,8 +556,14 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     add: 'Lisa',
     week: 'Nädal',
     month: 'Kuu',
+    day: 'Päev',
     view: 'Vaade',
     prevWeek: 'Eelmine nädal',
+    prevDay: 'Eelmine päev',
+    nextDay: 'Järgmine päev',
+    prevMonth: 'Eelmine kuu',
+    nextMonth: 'Järgmine kuu',
+    todayBtn: 'Täna',
     nextWeek: 'Järgmine nädal',
     thisWeek: 'See nädal',
     freeDay: 'Vaba päev',

@@ -1,15 +1,21 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
+import { APP_BREAKPOINT } from '../breakpoints';
 
 /**
  * Drag-to-resize / dismiss of a bottom sheet: grow to full height, snap back, or slide away on a pull or flick.
  * `requestClose` plays the closing slide (240 ms) and then calls `onClose`.
  */
-export function useSheetGesture(
-  sheetRef: RefObject<HTMLElement | null>,
-  onClose: () => void,
-  startFull = false,
-) {
+/** The bottom-drawer layout (the desktop panel is always full height already). */
+const isPhone = () =>
+  typeof window === 'undefined' ||
+  !window.matchMedia ||
+  window.matchMedia(`(max-width: ${APP_BREAKPOINT - 0.02}px)`).matches;
+
+/**
+ * Drag-to-resize / dismiss of a bottom sheet (see below).
+ */
+export function useSheetGesture(sheetRef: RefObject<HTMLElement | null>, onClose: () => void) {
   // The sheet is bottom-anchored, so dragging the grabber UP grows its HEIGHT
   // (top edge rises, bottom stays put); dragging DOWN first shrinks the height
   // back toward the default, and only once it's below the default does the whole
@@ -17,11 +23,20 @@ export function useSheetGesture(
   // snap height (set after the first drag so height transitions can animate),
   // `liveH` the height while a finger is down, `drag` the dismiss-zone offset.
   const [mode, setMode] = useState<'default' | 'full'>('default');
-  // `startFull`: open at full height only when the content does not fit the default height (a long list), so a short one stays compact.
+  // Every phone drawer follows its content: full height while it does not fit the default height (a long list), compact when it
+  // does (a short one, or a list filtered down), until the user drags the grabber. Measured every render, before paint:
+  // the full class is lifted for the reading so the natural height is what is compared.
+  const userSized = useRef(false);
   useLayoutEffect(() => {
     const el = sheetRef.current;
-    if (startFull && el && el.scrollHeight > el.clientHeight + 1) setMode('full');
-  }, [startFull, sheetRef]);
+    if (!el || userSized.current || !isPhone()) return;
+    const was = el.classList.contains('sheet-full');
+    if (was) el.classList.remove('sheet-full');
+    const over = el.scrollHeight > el.clientHeight + 1;
+    if (was && over) el.classList.add('sheet-full');
+    setMode(over ? 'full' : 'default');
+    // no deps on purpose: the content changes without the hook knowing; setMode bails out when the value is unchanged
+  });  
   const [heightPx, setHeightPx] = useState<number | null>(null);
   const [liveH, setLiveH] = useState<number | null>(null);
   const [drag, setDrag] = useState(0);
@@ -50,6 +65,7 @@ export function useSheetGesture(
   const onGrabStart = (clientY: number) => {
     const el = sheetRef.current;
     if (!el) return;
+    userSized.current = true;
     const startH = el.getBoundingClientRect().height;
     if (mode === 'default') defaultHRef.current = startH;
     const defaultH = defaultHRef.current || startH;

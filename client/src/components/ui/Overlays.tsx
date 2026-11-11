@@ -151,8 +151,6 @@ export function Sheet(props: {
   dismissible?: boolean;
   /** The parent asks the drawer to close from outside (a button that is not inside it): it plays its closing slide, then calls `onClose`. */
   closeRequested?: boolean;
-  /** Opens at full height only when its content does not fit (a long list that scrolls); a short one stays compact. Dragging down still closes it. */
-  startFull?: boolean;
   /** A consent prompt that must stay usable above a blocking sheet even when it mounted in the same commit (not made inert). */
   overTrap?: boolean;
 }) {
@@ -172,7 +170,7 @@ export function Sheet(props: {
     props.className?.split(/\s+/).includes('assign-sheet') ? 760 : undefined,
   );
 
-  const g = useSheetGesture(sheetRef, props.onClose, props.startFull);
+  const g = useSheetGesture(sheetRef, props.onClose);
   const { mode, heightPx, liveH, drag, dragging, closing, requestClose } = g;
   useOverlayBack(requestClose, dismissible); // the Back button / back swipe closes the top drawer
   // closed from outside (the Start button's ×): the same slide-out as a swipe or a scrim tap
@@ -316,4 +314,18 @@ export function Sheet(props: {
       </div>
     </Portal>
   );
+}
+
+/**
+ * The part of a drawer that never scrolls away: its title, a ‹ Back row, a search field. Put it first inside `Sheet`;
+ * the rest scrolls beneath it. Everything a person needs to keep seeing or reach while the list moves goes here, not in
+ * the body (kit rule, `.claude/rules/ui.md`).
+ */
+export function SheetPin({ children }: { children: ReactNode }) {
+  return <div className="sheet-pin">{children}</div>;
+}
+
+/** The drawer's action row (Cancel · Save), pinned to the bottom edge while the body scrolls. Put it last inside `Sheet`. */
+export function SheetFoot({ children }: { children: ReactNode }) {
+  return <div className="sheet-foot">{children}</div>;
 }

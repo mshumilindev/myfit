@@ -3723,7 +3723,6 @@ export const pl: Strings = {
   progDay: (n) => `Dzień ${n}`,
   plannerSrcProgram: 'Program',
   plannerSrcHome: 'Zestawy domowe',
-  plannerSrcHomeSet: 'Zestaw domowy',
   plannerSrcHomeAny: 'Trening domowy',
   plannerSrcWorkout: 'Trening',
   plannerSrcAllHome: 'Wszystkie zestawy domowe',

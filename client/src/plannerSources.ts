@@ -62,7 +62,6 @@ export interface PlannerSource {
   All?: ComponentType<PlannerAllProps>;
   /** Title of the full list. */
   allTitle?: () => string;
-  searchPlaceholder?: () => string;
 }
 
 const sources = new Map<string, PlannerSource>();

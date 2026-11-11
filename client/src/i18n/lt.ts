@@ -3743,7 +3743,6 @@ export const lt: Strings = {
   progDay: (n) => `${n} diena`,
   plannerSrcProgram: 'Programa',
   plannerSrcHome: 'Namų rinkiniai',
-  plannerSrcHomeSet: 'Namų rinkinys',
   plannerSrcHomeAny: 'Namų treniruotė',
   plannerSrcWorkout: 'Treniruotė',
   plannerSrcAllHome: 'Visi namų rinkiniai',

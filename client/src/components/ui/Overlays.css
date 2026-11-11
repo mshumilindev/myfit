@@ -446,9 +446,29 @@
   padding-top: 0 !important;
 }
 
+/* `SheetPin`: whatever must stay visible while the body scrolls (title, Back, a search field) goes in one pinned block. */
+.sheet .sheet-pin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-12);
+  /* air under the pinned block, so rows scrolling beneath it do not touch it */
+  padding-bottom: var(--s-12);
+}
+/* `SheetFoot`: the action row (Cancel · Save) stays at the bottom edge while a long body scrolls above it. */
+.sheet .sheet-foot {
+  position: sticky;
+  /* flush with the sheet's bottom edge: cancels the sheet's own bottom padding, then repeats it inside */
+  bottom: calc(-1 * (var(--space-8) + var(--safe-bottom)));
+  z-index: var(--z-20);
+  display: flex;
+  gap: var(--s-8);
+  margin-inline: calc(-1 * var(--gutter));
+  padding: var(--s-16) var(--gutter) calc(var(--space-8) + var(--safe-bottom));
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+}
 /* A sheet that carries a ‹ Back row keeps that row (back button + whatever
    shares its line: title, actions) pinned while the body scrolls beneath. */
-.sheet :is(div, header):has(> .uiback) {
+.sheet :is(div, header):is(.sheet-pin, :has(> .uiback)) {
   position: sticky;
   top: calc(var(--s-28) - var(--space-4));
   z-index: var(--z-20);
@@ -465,14 +485,14 @@
   }
 }
 @supports (animation-timeline: scroll()) {
-  .sheet :is(div, header):has(> .uiback) {
+  .sheet :is(div, header):is(.sheet-pin, :has(> .uiback)) {
     animation: sheet-pin-fill linear both;
     animation-timeline: scroll(nearest block);
     animation-range: 0 var(--s-16);
   }
 }
 /* Under the grabber: the strip above a pinned row takes the same fill. */
-.sheet :is(div, header):has(> .uiback)::before {
+.sheet :is(div, header):is(.sheet-pin, :has(> .uiback))::before {
   content: '';
   position: absolute;
   left: 0;
@@ -495,7 +515,7 @@
   .sheet,
   .sheet.sheet-dragging,
   .sheet.sheet-closing,
-  .sheet :is(div, header):has(> .uiback) {
+  .sheet :is(div, header):is(.sheet-pin, :has(> .uiback)) {
     animation-duration: 0.01ms;
     animation-delay: 0s;
     animation-iteration-count: 1;
