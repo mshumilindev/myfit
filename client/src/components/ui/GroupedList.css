@@ -38,11 +38,11 @@ ul.uigl-rows {
   padding: 0;
   list-style: none;
 }
-/* Hairlines between rows, inset to the text column. */
+/* Hairlines between rows: edge to edge, or inset to the text column when the rows carry icons (`--row-inset`). */
 .uigl-rows > * + *::before {
   content: '';
   position: absolute;
-  left: var(--row-inset, var(--sp-4));
+  left: var(--row-inset, 0);
   right: 0;
   top: 0;
   height: var(--sz-1);
