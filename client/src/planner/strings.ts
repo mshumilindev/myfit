@@ -35,6 +35,7 @@ export interface PlannerStrings {
   ringHint: string;
   quietHint: string;
   search: string;
+  basedNone: string;
   more: string;
   fewer: string;
   when: string;
@@ -121,6 +122,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     ringHint: 'Rings until you dismiss it. Snooze for 5, 10 or 30 min.',
     quietHint: 'A silent notification; respects quiet hours.',
     search: 'Search',
+    basedNone: 'Nothing to base it on',
     more: 'More options',
     fewer: 'Fewer options',
     when: 'Schedule',
@@ -217,6 +219,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     ringHint: 'Дзвонить, доки ви не закриєте. Відкласти на 5, 10 або 30 хв.',
     quietHint: 'Беззвучне сповіщення; поважає тихі години.',
     search: 'Пошук',
+    basedNone: 'Без основи',
     more: 'Більше опцій',
     fewer: 'Менше опцій',
     when: 'Розклад',
@@ -313,6 +316,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     ringHint: 'Dzwoni, aż go zamkniesz. Odłóż o 5, 10 lub 30 min.',
     quietHint: 'Ciche powiadomienie; respektuje ciche godziny.',
     search: 'Szukaj',
+    basedNone: 'Bez podstawy',
     more: 'Więcej opcji',
     fewer: 'Mniej opcji',
     when: 'Harmonogram',
@@ -409,6 +413,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     ringHint: 'Skamba, kol uždarysite. Atidėkite 5, 10 arba 30 min.',
     quietHint: 'Tylus pranešimas; gerbia tylos valandas.',
     search: 'Ieškoti',
+    basedNone: 'Be pagrindo',
     more: 'Daugiau parinkčių',
     fewer: 'Mažiau parinkčių',
     when: 'Tvarkaraštis',
@@ -505,6 +510,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     ringHint: 'Heliseb, kuni sa selle sulged. Lükka edasi 5, 10 või 30 min.',
     quietHint: 'Vaikne teavitus; arvestab vaikseid tunde.',
     search: 'Otsi',
+    basedNone: 'Ilma aluseta',
     more: 'Rohkem valikuid',
     fewer: 'Vähem valikuid',
     when: 'Ajakava',

@@ -185,9 +185,3 @@
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-/* the activity list in the Based on drawer scrolls on its own; the rest stays in view */
-.pl-based-scroll {
-  max-height: max(160px, min(40dvh, calc(100dvh - 520px)));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}

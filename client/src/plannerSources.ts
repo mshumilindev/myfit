@@ -8,6 +8,8 @@ import type { ComponentType } from 'react';
 
 /** What choosing a row puts into the new plan. */
 export interface PlannerPick {
+  /** Stable id of the thing (marks the chosen row with a check). */
+  id: string;
   /** Plan title. */
   title: string;
   /** Kit icon name. */
@@ -17,8 +19,17 @@ export interface PlannerPick {
 }
 
 export interface PlannerSourceProps {
-  /** What the person typed in the picker's search field (empty: everything). */
+  /** Id of the pick the form is based on now (null: own plan). */
+  selectedId: string | null;
+  onPick: (pick: PlannerPick) => void;
+  /** Opens this source's full list (`All`), when it has one. */
+  onAll: () => void;
+}
+
+export interface PlannerAllProps {
+  /** What the person typed in the search field above the full list (empty: everything). */
   query: string;
+  selectedId: string | null;
   onPick: (pick: PlannerPick) => void;
 }
 
@@ -26,9 +37,13 @@ export interface PlannerSource {
   id: string;
   /** Groups are listed by ascending order. */
   order: number;
-  /** True when the picker should offer a search field for this source. */
-  searchable?: boolean;
+  /** The few rows shown in the picker (draw a `GroupedList surface="raised"`; null when the add-on is off or empty). */
   Group: ComponentType<PlannerSourceProps>;
+  /** The full list behind an "All …" row, with search. */
+  All?: ComponentType<PlannerAllProps>;
+  /** Title of the full list. */
+  allTitle?: () => string;
+  searchPlaceholder?: () => string;
 }
 
 const sources = new Map<string, PlannerSource>();

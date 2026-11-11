@@ -5,14 +5,18 @@ import type { RefObject } from 'react';
  * Drag-to-resize / dismiss of a bottom sheet: grow to full height, snap back, or slide away on a pull or flick.
  * `requestClose` plays the closing slide (240 ms) and then calls `onClose`.
  */
-export function useSheetGesture(sheetRef: RefObject<HTMLElement | null>, onClose: () => void) {
+export function useSheetGesture(
+  sheetRef: RefObject<HTMLElement | null>,
+  onClose: () => void,
+  startFull = false,
+) {
   // The sheet is bottom-anchored, so dragging the grabber UP grows its HEIGHT
   // (top edge rises, bottom stays put); dragging DOWN first shrinks the height
   // back toward the default, and only once it's below the default does the whole
   // drawer translate down into the dismiss zone. `heightPx` is the committed
   // snap height (set after the first drag so height transitions can animate),
   // `liveH` the height while a finger is down, `drag` the dismiss-zone offset.
-  const [mode, setMode] = useState<'default' | 'full'>('default');
+  const [mode, setMode] = useState<'default' | 'full'>(startFull ? 'full' : 'default');
   const [heightPx, setHeightPx] = useState<number | null>(null);
   const [liveH, setLiveH] = useState<number | null>(null);
   const [drag, setDrag] = useState(0);

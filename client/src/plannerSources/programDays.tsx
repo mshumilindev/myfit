@@ -2,12 +2,17 @@ import { useMemo } from 'react';
 import { useAddonOrBase } from '../addons/enabledSet';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { IconTile } from '../components/ui/IconTile';
-import { programDayName, useProgramMine } from '../data/programMine';
+import { programDayItems, programDayName, useProgramMine } from '../data/programMine';
 import { useT } from '../i18n';
 import { registerPlannerSource, type PlannerSourceProps } from '../plannerSources';
+import { Icon } from '../ui';
 
-function Group({ query, onPick }: PlannerSourceProps) {
-  const { t } = useT();
+/** Day 1 = Monday (2026-11-09 is a Monday). */
+const weekdayShort = (locale: string, day: number) =>
+  new Date(2026, 10, 8 + day).toLocaleDateString(locale, { weekday: 'short' });
+
+function Group({ selectedId, onPick }: PlannerSourceProps) {
+  const { t, locale } = useT();
   const gymOn = useAddonOrBase('gym');
   const { assignment, active } = useProgramMine();
   const days = useMemo(
@@ -15,25 +20,36 @@ function Group({ query, onPick }: PlannerSourceProps) {
       gymOn && assignment && active
         ? [...new Set(assignment.program.items.map((i) => i.day))]
             .sort((a, b) => a - b)
-            .map((day) => programDayName(assignment, day, t.progDay))
+            .map((day) => ({
+              day,
+              name: programDayName(assignment, day, t.progDay),
+              n: programDayItems(assignment, day).length,
+            }))
         : [],
     [gymOn, assignment, active, t],
   );
-  const q = query.trim().toLowerCase();
-  const shown = days.filter((n) => !q || n.toLowerCase().includes(q));
-  if (!shown.length) return null;
+  if (!assignment || !days.length) return null;
   return (
-    <GroupedList surface="raised" header={t.plannerSrcProgram}>
-      {shown.map((name) => (
+    <GroupedList surface="raised" header={`${t.plannerSrcProgram} · ${assignment.program.name}`}>
+      {days.map((d) => (
         <ListRow
-          key={name}
-          icon={<IconTile icon="list-checks" tone="accent" size={32} />}
-          label={name}
-          onClick={() => onPick({ title: name, icon: 'barbell', sub: t.plannerSrcProgram })}
+          key={d.day}
+          icon={<IconTile icon="barbell" tone="active" size={32} />}
+          label={d.name}
+          sub={`${weekdayShort(locale, d.day)} · ${t.nExercises(d.n)}`}
+          trailing={selectedId === `program:${d.day}` ? <Icon name="check" /> : undefined}
+          onClick={() =>
+            onPick({
+              id: `program:${d.day}`,
+              title: d.name,
+              icon: 'barbell',
+              sub: t.plannerSrcProgram,
+            })
+          }
         />
       ))}
     </GroupedList>
   );
 }
 
-registerPlannerSource({ id: 'program-days', order: 10, searchable: true, Group });
+registerPlannerSource({ id: 'program-days', order: 10, Group });

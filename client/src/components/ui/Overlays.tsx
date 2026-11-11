@@ -151,6 +151,8 @@ export function Sheet(props: {
   dismissible?: boolean;
   /** The parent asks the drawer to close from outside (a button that is not inside it): it plays its closing slide, then calls `onClose`. */
   closeRequested?: boolean;
+  /** Opens at full height (a long list that scrolls); dragging down still closes it. */
+  startFull?: boolean;
   /** A consent prompt that must stay usable above a blocking sheet even when it mounted in the same commit (not made inert). */
   overTrap?: boolean;
 }) {
@@ -170,7 +172,7 @@ export function Sheet(props: {
     props.className?.split(/\s+/).includes('assign-sheet') ? 760 : undefined,
   );
 
-  const g = useSheetGesture(sheetRef, props.onClose);
+  const g = useSheetGesture(sheetRef, props.onClose, props.startFull);
   const { mode, heightPx, liveH, drag, dragging, closing, requestClose } = g;
   useOverlayBack(requestClose, dismissible); // the Back button / back swipe closes the top drawer
   // closed from outside (the Start button's ×): the same slide-out as a swipe or a scrim tap

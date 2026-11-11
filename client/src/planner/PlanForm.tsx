@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState, type ReactNode } from 'react';
+import { BackButton } from '../components/ui/BackButton';
 import { Button } from '../components/ui/Button';
 import { Calendar } from '../components/ui/Calendar';
 import { Field } from '../components/ui/Field';
@@ -15,7 +16,7 @@ import { StickyActionBar } from '../components/ui/StickyActionBar';
 import { WeekdayToggle } from '../components/ui/WeekdayToggle';
 import { WheelPicker } from '../components/ui/WheelPicker';
 import { useT } from '../i18n';
-import { plannerSources } from '../plannerSources';
+import { plannerSources, type PlannerPick } from '../plannerSources';
 import { Icon, ICON_NAMES } from '../ui';
 import { PTONES, type Draft, type PTone, type RepeatKind } from './draft';
 import { clock, dayFull, dayLong, dayMonth, durText, leadText, weekdayShorts } from './fmt';
@@ -82,11 +83,17 @@ export function PlanForm(p: {
   const [q, setQ] = useState('');
   const [adv, setAdv] = useState(false);
   const anchor = useRef<HTMLButtonElement>(null);
-  const [based, setBased] = useState<{ label: string; sub: string; icon: string } | null>(null);
+  const [based, setBased] = useState<{
+    id: string;
+    label: string;
+    sub: string;
+    icon: string;
+  } | null>(null);
+  const [allOf, setAllOf] = useState<string | null>(null);
   const srcs = plannerSources();
-  const pick = (title: string, icon: string, sub: string) => {
-    set({ title, icon });
-    setBased({ label: title, sub, icon });
+  const pick = (x: PlannerPick) => {
+    set({ title: x.title, icon: x.icon });
+    setBased({ id: x.id, label: x.title, sub: x.sub, icon: x.icon });
     setDrawer(null);
   };
   const set = (patch: Partial<Draft>) => setD((x) => ({ ...x, ...patch }));
@@ -94,6 +101,7 @@ export function PlanForm(p: {
   const openDrawer = (k: Drawer) => {
     setSt(d);
     setQ('');
+    setAllOf(null);
     setDrawer(k);
   };
   const closeDrawer = () => setDrawer(null);
@@ -136,38 +144,56 @@ export function PlanForm(p: {
 
   const body = (): { title: string; node: ReactNode } => {
     switch (drawer) {
-      case 'based':
+      case 'based': {
+        const all = srcs.find((x) => x.id === allOf);
+        const sel = based?.id ?? null;
+        if (all?.All)
+          return {
+            title: all.allTitle?.() ?? s.basedOn,
+            node: (
+              <>
+                <BackButton label={t.backAction} onClick={() => setAllOf(null)} />
+                <SearchField
+                  value={q}
+                  onChange={setQ}
+                  placeholder={all.searchPlaceholder?.() ?? s.search}
+                  clearLabel={s.clearSearch}
+                />
+                <all.All query={q} selectedId={sel} onPick={pick} />
+              </>
+            ),
+          };
         return {
           title: s.basedOn,
           node: (
             <>
-              <GroupedList surface="raised">
+              <GroupedList surface="raised" header={s.basedNone}>
                 <ListRow
                   icon={<IconTile icon="calendar-plus" tone="accent" size={32} />}
                   label={s.own}
                   sub={s.ownSub}
+                  trailing={sel === null ? <Icon name="check" /> : undefined}
                   onClick={() => {
                     setBased(null);
                     setDrawer(null);
                   }}
                 />
               </GroupedList>
-              {srcs.some((x) => x.searchable) && (
-                <SearchField
-                  value={q}
-                  onChange={setQ}
-                  placeholder={s.search}
-                  clearLabel={s.clearSearch}
+              {srcs.map((x) => (
+                <x.Group
+                  key={x.id}
+                  selectedId={sel}
+                  onPick={pick}
+                  onAll={() => {
+                    setQ('');
+                    setAllOf(x.id);
+                  }}
                 />
-              )}
-              <div className="pl-based-scroll">
-                {srcs.map((x) => (
-                  <x.Group key={x.id} query={q} onPick={(p) => pick(p.title, p.icon, p.sub)} />
-                ))}
-              </div>
+              ))}
             </>
           ),
         };
+      }
       case 'icon':
         return {
           title: s.icon,
@@ -537,7 +563,12 @@ export function PlanForm(p: {
         </Button>
       </StickyActionBar>
       {dr && (
-        <Sheet onClose={closeDrawer} label={dr.title} returnFocusRef={anchor}>
+        <Sheet
+          onClose={closeDrawer}
+          label={dr.title}
+          returnFocusRef={anchor}
+          startFull={drawer === 'based'}
+        >
           <div className="ul-flex ul-col ug-12">
             <h2 className="ut-xl ut-w7">{dr.title}</h2>
             {dr.node}
