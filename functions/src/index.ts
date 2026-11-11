@@ -30,6 +30,8 @@ export * from './scheduled';
 export * from './atlasChatRetention';
 // Web push delivery: outbox + exact-time rest alerts.
 export * from './push';
+// Planner reminders (SPO-552): content-free pushes from the open moments of a sealed plan.
+export * from './planner';
 // Notices, mark-read, reminders and reminder-dismissals are plain Firestore
 // reads/writes on the client (guarded by rules) — no functions needed.
 

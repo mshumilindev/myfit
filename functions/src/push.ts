@@ -74,6 +74,8 @@ export async function sendToUser(uid: string, msg: PushMessage): Promise<number>
   const base: Record<string, string> = {};
   if (msg.tag) base.tag = clip(msg.tag, 60);
   if (msg.url) base.url = clip(msg.url, 200);
+  // a persistent Planner reminder: the service worker keeps it on screen and re-alerts on each repeat
+  if (msg.kind === 'planner-ring') base.ring = '1';
   // one multicast per language: the text is the device's own language, never the sender's or any content
   const byLocale = new Map<string, string[]>();
   for (const t of targets) byLocale.set(t.locale, [...(byLocale.get(t.locale) ?? []), t.token]);

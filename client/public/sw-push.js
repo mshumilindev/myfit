@@ -70,6 +70,23 @@ self.addEventListener('push', (event) => {
     );
     return;
   }
+  // A persistent Planner reminder (`ring`): stays until it is acted on and alerts again on every repeat (same tag). iOS and
+  // Safari ignore requireInteraction and vibrate; there it is a normal repeated notification.
+  if (d.ring === '1') {
+    event.waitUntil(
+      self.registration.showNotification(d.title || 'Spotter', {
+        body: d.body || '',
+        tag: d.tag || 'planner-ring',
+        renotify: true,
+        requireInteraction: true,
+        vibrate: [300, 150, 300, 150, 300],
+        icon: '/brand/v2/icon-192.png',
+        badge: '/brand/v2/icon-192.png',
+        data: { url: d.url || '/', kind: 'planner-ring' },
+      }),
+    );
+    return;
+  }
   event.waitUntil(
     (async () => {
       const chat = typeof d.tag === 'string' && d.tag.indexOf('coach-chat') === 0;

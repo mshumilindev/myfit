@@ -16,6 +16,7 @@ export const PUSH_TEXT_KEYS = [
   'access',
   'call',
   'signin',
+  'planner',
 ] as const;
 export type PushTextKey = (typeof PUSH_TEXT_KEYS)[number];
 
@@ -30,6 +31,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     access: 'Access updated',
     call: 'Incoming call',
     signin: 'New sign-in',
+    planner: 'Planner reminder',
   },
   uk: {
     message: 'Нове повідомлення',
@@ -41,6 +43,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     access: 'Доступ оновлено',
     call: 'Вхідний дзвінок',
     signin: 'Новий вхід',
+    planner: 'Нагадування з Planner',
   },
   pl: {
     message: 'Nowa wiadomość',
@@ -52,6 +55,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     access: 'Dostęp zaktualizowany',
     call: 'Połączenie przychodzące',
     signin: 'Nowe logowanie',
+    planner: 'Przypomnienie z Planner',
   },
   lt: {
     message: 'Nauja žinutė',
@@ -63,6 +67,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     access: 'Prieiga atnaujinta',
     call: 'Gaunamas skambutis',
     signin: 'Naujas prisijungimas',
+    planner: 'Planner priminimas',
   },
   et: {
     message: 'Uus sõnum',
@@ -74,6 +79,7 @@ export const PUSH_TEXTS: Record<PushLocale, Record<PushTextKey, string>> = {
     access: 'Juurdepääs uuendatud',
     call: 'Sissetulev kõne',
     signin: 'Uus sisselogimine',
+    planner: 'Planner meeldetuletus',
   },
 };
 

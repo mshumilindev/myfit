@@ -4,7 +4,16 @@
  * prefix `coach-chat`: a chat push is the only coach push that quiet hours apply to.
  */
 export type CoachNoticeKind =
-  'message' | 'invite' | 'request' | 'program' | 'team' | 'reminder' | 'sync' | 'call';
+  | 'message'
+  | 'invite'
+  | 'request'
+  | 'program'
+  | 'team'
+  | 'reminder'
+  | 'sync'
+  | 'call'
+  | 'planner'
+  | 'planner-ring';
 
 /** The notification categories a person can switch (boards C6 / U1-U3); `sync` is silent and has no switch. */
 export type PushCategory = 'chat' | 'requests' | 'team' | 'reminders' | 'calls';
@@ -13,7 +22,7 @@ export const categoryOf = (kind: CoachNoticeKind): PushCategory | null =>
     ? 'chat'
     : kind === 'team'
       ? 'team'
-      : kind === 'reminder'
+      : kind === 'reminder' || kind === 'planner' || kind === 'planner-ring'
         ? 'reminders'
         : kind === 'sync'
           ? null
@@ -130,6 +139,8 @@ export function shouldDeliver(
   if (cat === null) return true;
   if (cat === 'chat' || cat === 'calls') return !isQuietNow(device.quiet, device.tz, at);
   const prefs = parsePushPrefs(device.prefs);
+  // a persistent Planner reminder rings through quiet hours (that is what the person chose it for); the switch still wins
+  if (kind === 'planner-ring') return prefs.reminders;
   if (cat === 'reminders') return prefs.reminders && !isQuietNow(device.quiet, device.tz, at);
   return prefs[cat];
 }
@@ -139,6 +150,13 @@ export function shouldDeliver(
  * app, a client on the client's Spotter thread; chat messages and silent syncs keep the home page.
  */
 export function pushLink(kind: CoachNoticeKind, staff: boolean): string {
-  if (kind === 'message' || kind === 'sync' || kind === 'call') return '/#/';
+  if (
+    kind === 'message' ||
+    kind === 'sync' ||
+    kind === 'call' ||
+    kind === 'planner' ||
+    kind === 'planner-ring'
+  )
+    return '/#/';
   return staff ? '/#/c/spotter' : '/#/trainer/spotter';
 }
