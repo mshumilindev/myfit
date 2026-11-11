@@ -5,6 +5,7 @@ import { COACH_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
 import type { Tone } from '../components/ui/tones';
 import { useT } from '../i18n';
 import { dueRings, nextWake } from './alertsCore';
+import { useSharedAlerts, writeAlert } from './alertsSync';
 import { fill, STRINGS } from './strings';
 import { usePlans } from './sync';
 import { localParts } from './zoned';
@@ -50,10 +51,21 @@ export function RingLayer() {
   const wide = useMinWidth(COACH_BREAKPOINT);
   const [st, setSt] = useState<Store>(load);
   const [now, setNow] = useState(() => Date.now());
+  // What the owner's other devices already did (dismissed / snoozed there) counts here too.
+  const shared = useSharedAlerts();
+  const handled = useMemo(
+    () => new Set([...st.handled, ...shared.handled]),
+    [st.handled, shared.handled],
+  );
+  const snoozed = useMemo(() => {
+    const out = { ...st.snoozed };
+    for (const [k, t] of Object.entries(shared.snoozed)) out[k] = Math.max(out[k] ?? 0, t);
+    return out;
+  }, [st.snoozed, shared.snoozed]);
 
   // Wake exactly when something changes (a moment, a window end, a snooze end); never a polling tick.
   useEffect(() => {
-    const at = nextWake(plans, now, st.snoozed);
+    const at = nextWake(plans, now, snoozed);
     if (at === null) return;
     const id = window.setTimeout(() => setNow(Date.now()), Math.min(at - now, 2 ** 31 - 1) + 50);
     const wake = () => setNow(Date.now());
@@ -62,11 +74,11 @@ export function RingLayer() {
       window.clearTimeout(id);
       document.removeEventListener('visibilitychange', wake);
     };
-  }, [plans, now, st.snoozed]);
+  }, [plans, now, snoozed]);
 
   const ring = useMemo(
-    () => dueRings(plans, now, new Set(st.handled), st.snoozed)[0],
-    [plans, now, st.handled, st.snoozed],
+    () => dueRings(plans, now, handled, snoozed)[0],
+    [plans, now, handled, snoozed],
   );
   const ringKeyNow = ring?.key;
   useEffect(() => {
@@ -86,9 +98,15 @@ export function RingLayer() {
   const day = localParts(startAt, plan.timing.tz).day;
   const today = localParts(now, plan.timing.tz).day;
   const set = (patch: Partial<Store>) => setSt((cur) => save({ ...cur, ...patch }, Date.now()));
-  const dismiss = () => set({ handled: [...st.handled, ring.key] });
-  const snooze = (m: number) =>
-    set({ snoozed: { ...st.snoozed, [ring.key]: Date.now() + m * 60_000 } });
+  const dismiss = () => {
+    set({ handled: [...st.handled, ring.key] });
+    void writeAlert(ring.key, plan.id, ring.at, { state: 'dismissed' });
+  };
+  const snooze = (m: number) => {
+    const until = Date.now() + m * 60_000;
+    set({ snoozed: { ...st.snoozed, [ring.key]: until } });
+    void writeAlert(ring.key, plan.id, ring.at, { state: 'snoozed', snoozeUntil: until });
+  };
   return createPortal(
     <div className={`plr${wide ? ' plr--card' : ''}`}>
       <ReminderAlert

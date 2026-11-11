@@ -4,6 +4,17 @@ import type { PlanDoc } from './types';
 
 const plans = vi.hoisted(() => ({ v: [] as PlanDoc[] }));
 vi.mock('./sync', () => ({ usePlans: () => plans.v }));
+const shared = vi.hoisted(() => ({
+  v: { handled: new Set<string>(), snoozed: {} as Record<string, number> },
+  writes: [] as unknown[],
+}));
+vi.mock('./alertsSync', () => ({
+  useSharedAlerts: () => shared.v,
+  writeAlert: (...a: unknown[]) => {
+    shared.writes.push(a);
+    return Promise.resolve();
+  },
+}));
 import { RingLayer } from './RingLayer';
 
 const NOW = Date.UTC(2026, 10, 11, 12, 0, 0);
@@ -29,6 +40,8 @@ beforeEach(() => {
   vi.setSystemTime(NOW + 1000);
   localStorage.clear();
   plans.v = [plan()];
+  shared.v = { handled: new Set(), snoozed: {} };
+  shared.writes = [];
 });
 afterEach(() => {
   cleanup();
@@ -70,6 +83,25 @@ describe('RingLayer', () => {
       vi.advanceTimersByTime(11 * 60_000);
     });
     // the ring window (10 min from the moment) is over by then, so a snooze never outlives it
+    expect(document.body.querySelector('[role=alertdialog]')).toBeNull();
+  });
+
+  it('writes the dismiss / snooze for the other devices', () => {
+    render(<RingLayer />);
+    fireEvent.click(screen.getByRole('button', { name: /Dismiss/ }));
+    expect(shared.writes).toHaveLength(1);
+    expect((shared.writes[0] as unknown[])[3]).toEqual({ state: 'dismissed' });
+  });
+
+  it('stops ringing when another device dismissed it', () => {
+    shared.v = { handled: new Set([`p1:${NOW}`]), snoozed: {} };
+    render(<RingLayer />);
+    expect(document.body.querySelector('[role=alertdialog]')).toBeNull();
+  });
+
+  it('stays quiet while another device has it snoozed', () => {
+    shared.v = { handled: new Set(), snoozed: { [`p1:${NOW}`]: NOW + 5 * 60_000 } };
+    render(<RingLayer />);
     expect(document.body.querySelector('[role=alertdialog]')).toBeNull();
   });
 });

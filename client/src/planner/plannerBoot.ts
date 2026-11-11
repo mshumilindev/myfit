@@ -10,6 +10,7 @@ import { provide, trackerReady } from '../trackerRt';
 import.meta.glob('../plannerSources/*.tsx', { eager: true });
 import { PlannerPage } from './PlannerPage';
 import { RingLayer } from './RingLayer';
+import { startAlertsSync } from './alertsSync';
 import { getPlans, getPrefs, startPlannerSync } from './sync';
 import { STRINGS } from './strings';
 
@@ -42,5 +43,14 @@ trackerReady('planner');
 let stop: (() => void) | undefined;
 onAuthStateChanged(auth, (u) => {
   stop?.();
-  stop = u ? startPlannerSync(u.uid) : undefined;
+  if (!u) {
+    stop = undefined;
+    return;
+  }
+  const stopPlans = startPlannerSync(u.uid);
+  const stopAlerts = startAlertsSync(u.uid);
+  stop = () => {
+    stopPlans();
+    stopAlerts();
+  };
 });

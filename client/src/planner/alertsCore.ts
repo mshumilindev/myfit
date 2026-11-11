@@ -59,3 +59,46 @@ export function nextWake(
   for (const t of Object.values(snoozed)) take(t);
   return best;
 }
+
+/** The shared state of one ring (`users/{uid}/plannerAlerts/{ringKey}`): no content, so it needs no sealing. */
+export interface AlertState {
+  state: 'ringing' | 'snoozed' | 'dismissed';
+  /** UTC ms the ring comes back (snoozed only). */
+  snoozeUntil?: number;
+  /** Bumped on every accepted write: a write that read an older one is retried, never applied blindly. */
+  rev: number;
+}
+
+/**
+ * Race rule across devices (SPO-552 spike): `dismissed` is final and beats everything; of two snoozes the later `snoozeUntil`
+ * wins; otherwise the newer write (the incoming one) wins. Returns the state to store, or null when the stored one already says it.
+ */
+export function mergeAlert(
+  current: AlertState | undefined,
+  incoming: Pick<AlertState, 'state' | 'snoozeUntil'>,
+): AlertState | null {
+  const rev = (current?.rev ?? 0) + 1;
+  if (current?.state === 'dismissed') return null;
+  if (incoming.state === 'dismissed') return { state: 'dismissed', rev };
+  if (incoming.state === 'snoozed') {
+    const until = incoming.snoozeUntil ?? 0;
+    if (current?.state === 'snoozed' && (current.snoozeUntil ?? 0) >= until) return null;
+    return { state: 'snoozed', snoozeUntil: until, rev };
+  }
+  if (current?.state === 'ringing') return null;
+  return { state: 'ringing', rev };
+}
+
+/** What the open ring list should treat as handled / snoozed, from the shared states of all devices. */
+export function foldAlerts(states: Readonly<Record<string, AlertState>>): {
+  handled: Set<string>;
+  snoozed: Record<string, number>;
+} {
+  const handled = new Set<string>();
+  const snoozed: Record<string, number> = {};
+  for (const [key, a] of Object.entries(states)) {
+    if (a.state === 'dismissed') handled.add(key);
+    else if (a.state === 'snoozed' && a.snoozeUntil !== undefined) snoozed[key] = a.snoozeUntil;
+  }
+  return { handled, snoozed };
+}
