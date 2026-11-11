@@ -34,6 +34,27 @@ describe('add-on size entries', () => {
   });
 });
 
+/** Public media that belongs to the core app (brand, icons, landing, the store's own pictures). Everything else needs an owner. */
+const CORE_PUBLIC =
+  /^(brand|favicon|icons|landing|store-icons|store-previews|home-hero\.webp|apple-touch|icon-|favicon|sw-)/;
+
+describe('media ownership (SPO-556 I6)', () => {
+  it('every public folder or picture is core or listed by an add-on, so the base build carries no add-on media', () => {
+    const owned = new Set(
+      Object.values(entries as Record<string, SizePart>).flatMap((p) =>
+        (p.assets ?? []).map((a) => a.split('/')[0]),
+      ),
+    );
+    const orphans = readdirSync(join(SRC, '..', 'public')).filter(
+      (f) => !CORE_PUBLIC.test(f) && !owned.has(f),
+    );
+    expect(
+      orphans,
+      `public/ files with no owner in sizeEntries.json: ${orphans.join(', ')}`,
+    ).toEqual([]);
+  });
+});
+
 describe('computeAddonSizes', () => {
   const chunks: SizeChunk[] = [
     { bytes: 1000, modules: { 'a/x.ts': 300, 'a/y/z.ts': 100, 'b.ts': 600 } },
