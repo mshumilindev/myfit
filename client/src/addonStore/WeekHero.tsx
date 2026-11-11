@@ -208,11 +208,13 @@ export function WeekHero({
         title={
           <span className="wk-ttl">
             <TileOf st={st} m={soon} size={64} />
-            {itemName(st, soon.id)}
+            <span className="wk-ttl-txt">
+              {itemName(st, soon.id)}
+              <span className="wk-ttl-desc">{itemDesc(st, soon.id)}</span>
+            </span>
           </span>
         }
         titleSize="h2"
-        body={itemDesc(st, soon.id)}
       />
     </SkBento>
   );

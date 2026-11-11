@@ -502,3 +502,16 @@
   align-items: center;
   gap: 14px;
 }
+
+.wk-ttl-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-inline-size: 0;
+}
+.wk-ttl-desc {
+  font-size: var(--sk-fs-body, 15px);
+  font-weight: 400;
+  line-height: 1.35;
+  opacity: 0.85;
+}
