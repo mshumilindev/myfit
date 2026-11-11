@@ -638,7 +638,7 @@ export function PlanForm(p: {
           <div className="ul-flex ul-col ug-12">
             <h2 className="ut-xl ut-w7">{title}</h2>
             {fields}
-            <div className="ul-flex ug-8">
+            <div className="ul-grid ul-eq ug-8">
               <Button fullWidth variant="secondary" onClick={leave}>
                 {s.cancel}
               </Button>
