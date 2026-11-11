@@ -178,10 +178,3 @@
   --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
   --t-on: var(--color-bg);
 }
-
-/* in the icon drawer only the grid scrolls; the title, search and Cancel / Save stay in view (owner 11.11) */
-.pl-ip--scroll {
-  max-height: max(200px, min(60dvh, calc(100dvh - 330px)));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}

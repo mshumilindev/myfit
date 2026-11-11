@@ -219,16 +219,18 @@ export function PlanForm(p: {
       case 'icon':
         return {
           title: s.icon,
+          pin: (
+            <SearchField
+              value={q}
+              onChange={setQ}
+              placeholder={s.searchIcons}
+              clearLabel={s.clearSearch}
+            />
+          ),
           node: (
             <>
-              <SearchField
-                value={q}
-                onChange={setQ}
-                placeholder={s.searchIcons}
-                clearLabel={s.clearSearch}
-              />
               {icons.length ? (
-                <div className="pl-ip pl-ip--scroll" role="radiogroup" aria-label={s.icon}>
+                <div className="pl-ip" role="radiogroup" aria-label={s.icon}>
                   {icons.map((n) => (
                     <button
                       key={n}
