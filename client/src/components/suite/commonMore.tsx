@@ -67,7 +67,10 @@ export function useCommonMoreItems(onPrivacy?: () => void): MoreMenuItem[] {
 /** The app's own pages come first, then Add-ons / Themes, settings-like rows last (owner 10.11.2026). */
 const SETTINGS_IDS = new Set(['privacy', 'language', 'settings']);
 export function orderMoreItems(common: MoreMenuItem[], extra: MoreMenuItem[]): MoreMenuItem[] {
-  const all = [...extra, ...common];
+  // Planner is the first row of More, above the app's own pages (owner 11.11.2026).
+  const all = [...extra, ...common].sort(
+    (a, b) => Number(b.id === 'planner') - Number(a.id === 'planner'),
+  );
   return [
     ...all.filter((i) => !SETTINGS_IDS.has(i.id)),
     ...all.filter((i) => SETTINGS_IDS.has(i.id)),
