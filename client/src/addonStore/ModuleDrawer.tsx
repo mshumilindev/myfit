@@ -2,8 +2,10 @@
 import { addonById } from '../addons/manifest';
 import { disableAddons, enableAddons } from '../addons/enabledSet';
 import { SkBtn, SkNote, SkSheet, SkSwitch } from '../store-kit';
+import { useState } from 'react';
 import { AboutText } from './AboutText';
 import { itemName, TileOf, type StoreCtx } from './storeItems';
+import { PreviewViewer } from './PreviewViewer';
 import { MODULE_SHOTS, previewUrl } from './weekPreviews';
 
 export function ModuleDrawer({
@@ -16,6 +18,7 @@ export function ModuleDrawer({
   onClose: () => void;
 }) {
   const { st, enabled } = ctx;
+  const [view, setView] = useState<number | null>(null);
   const m = id ? addonById(id) : undefined;
   const parent = m?.parent ? addonById(m.parent) : undefined;
   const name = m ? itemName(st, m.id) : '';
@@ -37,8 +40,14 @@ export function ModuleDrawer({
           </div>
           {shots.length > 0 && (
             <div className="as-mod-shots sk-mt16">
-              {shots.map((sh) => (
-                <img key={sh} src={previewUrl(sh, 'm')} alt="" loading="lazy" />
+              {shots.map((sh, i) => (
+                <img
+                  key={sh}
+                  src={previewUrl(sh, 'm')}
+                  alt={st.previewN(i + 1, shots.length)}
+                  loading="lazy"
+                  onClick={() => setView(i)}
+                />
               ))}
             </div>
           )}
@@ -64,6 +73,15 @@ export function ModuleDrawer({
             </SkBtn>
           </div>
         </>
+      )}
+      {view != null && (
+        <PreviewViewer
+          shots={shots}
+          start={view}
+          title={name}
+          ctx={ctx}
+          onClose={() => setView(null)}
+        />
       )}
     </SkSheet>
   );

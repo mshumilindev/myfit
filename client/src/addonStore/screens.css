@@ -512,3 +512,119 @@
   padding-block: 8px;
   border-block-start: 1px solid var(--line);
 }
+
+/* Full-screen preview slider */
+.as-pv {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: rgba(8, 10, 14, 0.94);
+  color: #fff;
+  outline: none;
+}
+.as-pv-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+.as-pv-title {
+  font-weight: 700;
+}
+.as-pv-x,
+.as-pv-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  cursor: pointer;
+}
+.as-pv-nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.as-pv-stage {
+  flex: 1;
+  min-block-size: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 12px;
+}
+.as-pv-img {
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  inline-size: auto;
+  block-size: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  animation: as-pv-in 0.25s ease;
+}
+@keyframes as-pv-in {
+  from {
+    opacity: 0;
+  }
+}
+.as-pv-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 0 22px;
+}
+.as-pv-dots button {
+  inline-size: 8px;
+  block-size: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  opacity: 0.4;
+  cursor: pointer;
+}
+.as-pv-dots button.on {
+  inline-size: 22px;
+  opacity: 1;
+}
+@media (max-width: 44.99rem) {
+  .as-pv-nav {
+    position: absolute;
+    inset-block-end: 14px;
+  }
+  .as-pv-prev {
+    inset-inline-start: 16px;
+  }
+  .as-pv-next {
+    inset-inline-end: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .as-pv-img {
+    animation: none;
+  }
+}
+.wk-art,
+.as-mod-shots img,
+.as-prev-th {
+  cursor: zoom-in;
+}
+.as-prev-th {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.as-prev-th img {
+  display: block;
+  inline-size: 150px;
+  block-size: auto;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+}

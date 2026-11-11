@@ -23,6 +23,8 @@ import { Rows, Section } from './storeLists';
 import { RemoveButton } from './RemoveSheet';
 import { AboutText } from './AboutText';
 import { ModuleDrawer } from './ModuleDrawer';
+import { PreviewViewer } from './PreviewViewer';
+import { MODULE_SHOTS, previewUrl, WEEK_SHOTS } from './weekPreviews';
 import {
   ItemAction,
   itemDesc,
@@ -45,6 +47,7 @@ export function ItemPage({
   const { st } = ctx;
   const sizes = useAddonSizes(); // a hook: before the early returns
   const [modId, setModId] = useState<string | null>(null);
+  const [view, setView] = useState<number | null>(null);
   const m = addonById(id);
   if (!m) return <div className="sk-t-s">{st.noResults}</div>;
   const parent = m.parent ? addonById(m.parent) : undefined;
@@ -53,6 +56,7 @@ export function ItemPage({
   // Real size from the last build; an app is the whole of it, and an item whose code is its parent's has none of its own.
   const sizeBytes = sizes?.[m.id] ?? null;
   const name = itemName(st, m.id);
+  const shots = WEEK_SHOTS[m.id] ?? MODULE_SHOTS[m.id] ?? [];
   if (m.soon) return <ComingSoon id={m.id} ctx={ctx} />;
   return (
     <>
@@ -86,22 +90,38 @@ export function ItemPage({
         <div className="as-item-main">
           <div className="as-o1">
             <div className="sk-t-e">{st.preview}</div>
-            <div className="sk-rowf sk-g12 sk-mt12 as-previews">
-              <SkPreviewPhone caption={name}>
-                <SkPvBox tall="plot">
-                  <SkPvDot />
-                </SkPvBox>
-                <SkPvBox>
-                  <SkPvLines />
-                </SkPvBox>
-              </SkPreviewPhone>
-              <SkPreviewPhone caption={name}>
-                <SkPvBox tall="chart" />
-                <SkPvBox>
-                  <SkPvLines />
-                </SkPvBox>
-              </SkPreviewPhone>
-            </div>
+            {shots.length > 0 ? (
+              <div className="sk-rowf sk-g12 sk-mt12 as-previews">
+                {shots.map((sh, i) => (
+                  <button
+                    key={sh}
+                    type="button"
+                    className="as-prev-th"
+                    aria-label={st.previewN(i + 1, shots.length)}
+                    onClick={() => setView(i)}
+                  >
+                    <img src={previewUrl(sh, 'm')} alt="" loading="lazy" />
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="sk-rowf sk-g12 sk-mt12 as-previews">
+                <SkPreviewPhone caption={name}>
+                  <SkPvBox tall="plot">
+                    <SkPvDot />
+                  </SkPvBox>
+                  <SkPvBox>
+                    <SkPvLines />
+                  </SkPvBox>
+                </SkPreviewPhone>
+                <SkPreviewPhone caption={name}>
+                  <SkPvBox tall="chart" />
+                  <SkPvBox>
+                    <SkPvLines />
+                  </SkPvBox>
+                </SkPreviewPhone>
+              </div>
+            )}
           </div>
           <div className="as-o3">
             <Section title={st.about}>
@@ -166,6 +186,15 @@ export function ItemPage({
           </div>
         </div>
       </div>
+      {view != null && (
+        <PreviewViewer
+          shots={shots}
+          start={view}
+          title={name}
+          ctx={ctx}
+          onClose={() => setView(null)}
+        />
+      )}
       <ModuleDrawer id={modId} ctx={ctx} onClose={() => setModId(null)} />
     </>
   );

@@ -7,6 +7,7 @@ import { queueAdd, queueRemove } from '../addons/queue';
 import { SkBento, SkBentoTile, SkBtn } from '../store-kit';
 import { weekPick, type WeekKind } from './discoverPicks';
 import { itemDesc, itemName, kindBadge, type StoreCtx } from './storeItems';
+import { PreviewViewer } from './PreviewViewer';
 import { previewUrl, WEEK_SHOTS } from './weekPreviews';
 
 /** The theme's own look on the hero: a new theme needs no extra design here, only a skin class. */
@@ -20,7 +21,17 @@ export function themeSkin(m: AddonManifest, now: number): string {
   return '';
 }
 
-function Art({ m, name, idx }: { m: AddonManifest; name: string; idx: number }) {
+function Art({
+  m,
+  name,
+  idx,
+  onOpen,
+}: {
+  m: AddonManifest;
+  name: string;
+  idx: number;
+  onOpen: () => void;
+}) {
   const shots = WEEK_SHOTS[m.id];
   if (!shots) return null;
   const stack = (t: 'm' | 'd') =>
@@ -34,7 +45,7 @@ function Art({ m, name, idx }: { m: AddonManifest; name: string; idx: number }) 
       />
     ));
   return (
-    <div className="wk-art" aria-hidden="true">
+    <div className="wk-art" onClick={onOpen}>
       <div className="wk-phone">
         <div className="wk-stack">{stack('m')}</div>
       </div>
@@ -138,7 +149,8 @@ export function WeekTile({
   const name = itemName(st, m.id);
   const n = WEEK_SHOTS[m.id]?.length ?? 0;
   const [idx, setIdx] = useState(0);
-  const auto = m.id === 'holiday-themes' && n > 1;
+  const [full, setFull] = useState(false);
+  const auto = m.id === 'holiday-themes' && n > 1 && !full;
   useEffect(() => {
     if (!auto) return;
     const t = window.setInterval(() => setIdx((i) => (i + 1) % n), 7000);
@@ -146,27 +158,38 @@ export function WeekTile({
   }, [auto, n, idx]);
   const skin = m.kind === 'theme' ? themeSkin(m, now) : '';
   return (
-    <SkBentoTile
-      tone={m.tone}
-      size="hero"
-      span={span}
-      className={`wk-tile ${skin}${auto ? ` wk-holiday wk-at-${idx}` : ''}`}
-      eyebrow={labelOf(m, ctx)}
-      aside={m.kind === 'theme' ? undefined : kindBadge(st, m)}
-      title={name}
-      titleSize="hero"
-      onTitle={() => ctx.open(m.id)}
-      body={itemDesc(st, m.id)}
-      footer={
-        <>
-          <div className="wk-foot">
-            <Pick m={m} ctx={ctx} />
-            <Dots n={n} idx={idx} set={setIdx} ctx={ctx} />
-          </div>
-          <Art m={m} name={name} idx={idx} />
-        </>
-      }
-    />
+    <>
+      {full && (
+        <PreviewViewer
+          shots={WEEK_SHOTS[m.id] ?? []}
+          start={idx}
+          title={name}
+          ctx={ctx}
+          onClose={() => setFull(false)}
+        />
+      )}
+      <SkBentoTile
+        tone={m.tone}
+        size="hero"
+        span={span}
+        className={`wk-tile ${skin}${auto ? ` wk-holiday wk-at-${idx}` : ''}`}
+        eyebrow={labelOf(m, ctx)}
+        aside={m.kind === 'theme' ? undefined : kindBadge(st, m)}
+        title={name}
+        titleSize="hero"
+        onTitle={() => ctx.open(m.id)}
+        body={itemDesc(st, m.id)}
+        footer={
+          <>
+            <div className="wk-foot">
+              <Pick m={m} ctx={ctx} />
+              <Dots n={n} idx={idx} set={setIdx} ctx={ctx} />
+            </div>
+            <Art m={m} name={name} idx={idx} onOpen={() => setFull(true)} />
+          </>
+        }
+      />
+    </>
   );
 }
 

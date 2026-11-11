@@ -239,4 +239,17 @@ describe('StoreApp', () => {
     fireEvent.click(within(dlg).getByRole('button', { name: 'Close' }));
     expect(screen.queryByRole('dialog')).toBeNull();
   });
+  it('opens previews full screen from the item page and moves with the arrows and Escape', () => {
+    window.location.hash = '#/store/item/apex';
+    render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    const thumbs = document.querySelectorAll('.as-prev-th');
+    expect(thumbs.length).toBe(5);
+    fireEvent.click(thumbs[0]!);
+    const dlg = screen.getByRole('dialog', { name: 'Apex' });
+    expect(dlg.querySelector('img')!.getAttribute('src')).toContain('apex-home');
+    fireEvent.keyDown(dlg, { key: 'ArrowRight' });
+    expect(dlg.querySelector('img')!.getAttribute('src')).toContain('apex-challenges');
+    fireEvent.keyDown(dlg, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
 });
