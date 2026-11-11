@@ -185,6 +185,16 @@ describe('a stack of drawers', () => {
 });
 
 describe('a dialog over a drawer', () => {
+  beforeEach(() => {
+    // desktop: a centred dialog (a phone shows the same prompt as a bottom sheet)
+    vi.stubGlobal('matchMedia', (q: string) => ({
+      matches: q.includes('min-width'),
+      media: q,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    }));
+  });
+  afterEach(() => vi.unstubAllGlobals());
   it('takes over the dimming: the drawer hides its own scrim; Escape is left to the dialog', () => {
     const onSheet = vi.fn();
     const onDialog = vi.fn();

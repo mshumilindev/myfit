@@ -5,7 +5,6 @@
  */
 import {
   useEffect,
-  useId,
   useState,
   useRef,
   type CSSProperties,
@@ -15,7 +14,6 @@ import {
   type RefObject,
   type ReactNode,
 } from 'react';
-import { Icon } from '../../ui';
 import { useT } from '../../i18n';
 import { IconButton } from './Button';
 import { ConfirmEffectsDialog } from './ConfirmEffectsDialog';
@@ -39,42 +37,32 @@ export { Portal, useFixedPanelPosition };
 export { Toast, UndoSnackbar, UpdatePlate } from './overlays/Toasts';
 export type { SnackState, ToastState } from './overlays/Toasts';
 
+/**
+ * A prompt with your own buttons. It is presented exactly like `ConfirmDialog` (a bottom sheet on a phone, a centred
+ * dialog from the Coach breakpoint up): one look for every prompt in the app. Prefer `ConfirmDialog` when the buttons
+ * are just Cancel / Confirm.
+ */
 export function Dialog(props: {
   title: ReactNode;
   danger?: boolean;
   /** Colour family of the prompt (defaults to danger when `danger`, else accent). */
   tone?: Tone;
-  /** Title icon (defaults to a trash can for danger, none otherwise). */
+  /** Title icon (defaults to a trash can for danger, a question mark otherwise). */
   icon?: string;
   children: ReactNode;
   actions: ReactNode;
   onClose: () => void;
 }) {
-  const tone: Tone = props.tone ?? (props.danger ? 'danger' : 'accent');
-  const icon = props.icon ?? (props.danger ? 'trash' : undefined);
-  const uid = useId();
-  useOverlay(); // joins the stack: the drawer under it hides its own scrim, this one dims the page
   return (
-    <Portal>
-      <div className="dialog-scrim" onClick={props.onClose}>
-        <div
-          className={`dialog ${toneClass(tone)}`}
-          role="alertdialog"
-          aria-labelledby={`${uid}-t`}
-          aria-describedby={`${uid}-b`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <h2 className="dialog-title" id={`${uid}-t`}>
-            {icon && <Icon name={icon} />}
-            {props.title}
-          </h2>
-          <p className="dialog-body" id={`${uid}-b`}>
-            {props.children}
-          </p>
-          <div className="dialog-actions">{props.actions}</div>
-        </div>
-      </div>
-    </Portal>
+    <ConfirmEffectsDialog
+      title={props.title}
+      body={props.children}
+      icon={props.icon ?? (props.danger ? 'trash' : 'question')}
+      iconTone={props.danger || props.tone === 'danger' ? 'danger' : 'accent'}
+      tone={props.tone ?? (props.danger ? 'danger' : 'accent')}
+      actions={props.actions}
+      onCancel={props.onClose}
+    />
   );
 }
 

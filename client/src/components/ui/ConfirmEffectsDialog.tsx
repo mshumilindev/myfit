@@ -26,7 +26,9 @@ export interface ConfirmEffectsDialogProps {
   tone?: Tone;
   /** Absent = an information dialog with only the cancel / close button (security code, re-auth result). */
   confirmLabel?: string;
-  cancelLabel: string;
+  cancelLabel?: string;
+  /** Own buttons instead of the cancel / confirm pair (the plain `Dialog` wrapper); focus starts on the first. */
+  actions?: ReactNode;
   /** Free content after the effects and the choice (a security code, a re-authentication field). */
   children?: ReactNode;
   /** Colour of the title icon: `danger` (default, something goes away) or `accent` (a calm question). */
@@ -58,6 +60,7 @@ export function ConfirmEffectsDialog(p: ConfirmEffectsDialogProps) {
   const { t } = useT();
   const desktop = useMinWidth(COACH_BREAKPOINT);
   const titleId = useId();
+  const bodyId = useId();
   const actRef = useRef<HTMLDivElement>(null);
   const focusConfirm = useRef(p.initialFocus === 'confirm');
   const cancelFn = useRef(p.onCancel);
@@ -85,7 +88,11 @@ export function ConfirmEffectsDialog(p: ConfirmEffectsDialogProps) {
         <Icon name={p.icon ?? 'trash'} />
         {p.title}
       </h2>
-      {p.body != null && <p className="uicfx-body">{p.body}</p>}
+      {p.body != null && (
+        <p className="uicfx-body" id={bodyId}>
+          {p.body}
+        </p>
+      )}
       {p.quote && (
         <blockquote className="uicfx-quote">
           <span className="uicfx-quote-t">{p.quote}</span>
@@ -115,18 +122,22 @@ export function ConfirmEffectsDialog(p: ConfirmEffectsDialogProps) {
         </p>
       )}
       <div className="uicfx-act" ref={actRef}>
-        <Button variant={p.cancelVariant ?? 'primary'} onClick={p.onCancel}>
-          {p.cancelLabel}
-        </Button>
-        {p.confirmLabel && p.onConfirm && (
-          <Button
-            variant={p.confirmVariant ?? 'danger'}
-            loading={p.loading}
-            disabled={p.loading || p.confirmDisabled}
-            onClick={p.onConfirm}
-          >
-            {p.confirmLabel}
-          </Button>
+        {p.actions ?? (
+          <>
+            <Button variant={p.cancelVariant ?? 'primary'} onClick={p.onCancel}>
+              {p.cancelLabel}
+            </Button>
+            {p.confirmLabel && p.onConfirm && (
+              <Button
+                variant={p.confirmVariant ?? 'danger'}
+                loading={p.loading}
+                disabled={p.loading || p.confirmDisabled}
+                onClick={p.onConfirm}
+              >
+                {p.confirmLabel}
+              </Button>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -156,6 +167,7 @@ export function ConfirmEffectsDialog(p: ConfirmEffectsDialogProps) {
           role="alertdialog"
           aria-modal="true"
           aria-labelledby={titleId}
+          aria-describedby={p.body != null ? bodyId : undefined}
           onClick={(e) => e.stopPropagation()}
         >
           {content}

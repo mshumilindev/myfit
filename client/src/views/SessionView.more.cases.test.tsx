@@ -399,8 +399,10 @@ describe('SessionView · sheets and dialogs close cleanly', () => {
     mount();
     await userEvent.click(screen.getByRole('button', { name: 'Delete set' }));
     expect(screen.getByRole('alertdialog')).toBeTruthy();
-    await userEvent.click(document.querySelector('.dialog-scrim') as HTMLElement);
-    expect(screen.queryByRole('alertdialog')).toBeNull();
+    // a phone shows the prompt as a sheet (its own scrim), a desktop as a dialog
+    const scrims = document.querySelectorAll('.dialog-scrim, .scrim');
+    await userEvent.click(scrims[scrims.length - 1] as HTMLElement);
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
     expect(mine().exercises[0].sets).toHaveLength(1);
   });
 

@@ -1,10 +1,20 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { ConfirmDialog, Dialog, Sheet } from './Overlays';
 
 afterEach(cleanup);
 
 describe('Dialog', () => {
+  beforeEach(() => {
+    // desktop: a centred dialog (a phone shows the same prompt as a bottom sheet)
+    vi.stubGlobal('matchMedia', (q: string) => ({
+      matches: q.includes('min-width'),
+      media: q,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    }));
+  });
+  afterEach(() => vi.unstubAllGlobals());
   it('is an alertdialog named by its title and described by its body', () => {
     render(
       <Dialog title="Discard?" actions={<button>Yes</button>} onClose={() => undefined}>
@@ -177,5 +187,18 @@ describe('Sheet drag with a mouse (desktop app)', () => {
     fireEvent.click(x);
     vi.advanceTimersByTime(300);
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('Dialog on a phone', () => {
+  it('is presented as a bottom sheet, like every other prompt', () => {
+    render(
+      <Dialog title="Discard?" actions={<button>Yes</button>} onClose={() => undefined}>
+        Changes are lost.
+      </Dialog>,
+    );
+    expect(document.querySelector('.sheet')).not.toBeNull();
+    expect(document.querySelector('.dialog-scrim')).toBeNull();
+    expect(screen.getByRole('alertdialog')).toBeTruthy();
   });
 });

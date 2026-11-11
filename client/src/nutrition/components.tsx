@@ -1,6 +1,6 @@
 import type { ComponentType, CSSProperties, ReactNode } from 'react';
 import { Skeleton } from '../components/ui/Skeleton';
-import { Sheet as KitSheet } from '../components/ui/Overlays';
+import { ConfirmDialog as KitConfirm, Sheet as KitSheet } from '../components/ui/Overlays';
 import { useState } from 'react';
 import { House } from '@phosphor-icons/react/House';
 import { ChartLineUp } from '@phosphor-icons/react/ChartLineUp';
@@ -247,20 +247,15 @@ export function ConfirmDialog({
 }) {
   const { t } = useT();
   return (
-    <div className="scrim center" onClick={onCancel}>
-      <div className="dialog" onClick={(e) => e.stopPropagation()}>
-        <h2>{title}</h2>
-        <p>{body}</p>
-        <div className="rowflex">
-          <Button variant="secondary" className="grow" onClick={onCancel}>
-            {t('cancel')}
-          </Button>
-          <Button variant="danger" className="grow" onClick={onConfirm}>
-            {confirmLabel}
-          </Button>
-        </div>
-      </div>
-    </div>
+    <KitConfirm
+      danger
+      title={title}
+      body={body}
+      confirmLabel={confirmLabel}
+      cancelLabel={t('cancel')}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+    />
   );
 }
 

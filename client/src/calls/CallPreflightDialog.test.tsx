@@ -39,6 +39,13 @@ function mount(r: PreflightRequest = req) {
 let play: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
   localStorage.clear();
+  // desktop: the centred dialog (a phone shows the same prompt as a bottom sheet)
+  vi.stubGlobal('matchMedia', (q: string) => ({
+    matches: q.includes('min-width'),
+    media: q,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+  }));
   getUserMedia.mockReset();
   enumerateDevices.mockReset();
   dial.mockClear();
@@ -57,6 +64,7 @@ afterEach(() => {
   cleanup();
   act(() => openPreflight(null));
   play.mockRestore();
+  vi.unstubAllGlobals();
 });
 
 const probe = () => screen.getByTestId('probe').textContent;

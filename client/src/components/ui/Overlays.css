@@ -462,7 +462,8 @@
   z-index: var(--z-20);
   display: flex;
   gap: var(--s-8);
-  margin-inline: calc(-1 * var(--gutter));
+  /* takes the sheet's own bottom padding over, so at the end of the scroll nothing is left under the bar */
+  margin: 0 calc(-1 * var(--gutter)) calc(-1 * (var(--space-8) + var(--safe-bottom)));
   padding: var(--s-16) var(--gutter) calc(var(--space-8) + var(--safe-bottom));
   background: color-mix(in srgb, var(--color-surface) 94%, transparent);
 }
