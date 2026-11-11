@@ -2,6 +2,7 @@
  * "X is off" (SPO-290): what a health screen shows without the feature's consent. Kit pieces only. `Turn on` opens the
  * consent prompt (`HealthConsentHost`). Nothing here reads or writes the feature's data.
  */
+import '../views/Health.css';
 import type { ReactNode } from 'react';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';

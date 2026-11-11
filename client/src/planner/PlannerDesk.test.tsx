@@ -14,6 +14,8 @@ const plan = draftToPlan(
 
 vi.mock('./sync', () => ({
   usePlans: () => [plan],
+  usePrefs: () => ({ availability: {}, shareAvailability: false }),
+  savePrefs: vi.fn(),
   savePlan: vi.fn(),
   deletePlan: vi.fn(),
 }));

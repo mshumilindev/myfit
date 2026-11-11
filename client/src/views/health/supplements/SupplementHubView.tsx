@@ -3,6 +3,7 @@
  * "Ask me on Today" and "Use in calculations", then the safety Notices of what is saved.
  * Sharing and delete live in Health › Privacy and sharing. Kit primitives only.
  */
+import '../../Health.css';
 import { useMemo } from 'react';
 import { PageHead } from '../../../components/ui/PageHead';
 import { HealthDisclaimer } from '../../../legal/HealthDisclaimer';

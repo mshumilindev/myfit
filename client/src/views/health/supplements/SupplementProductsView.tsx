@@ -4,6 +4,7 @@
  * pressed there. A check marks a group that has something saved. No counters, no logging by
  * day. Kit primitives only.
  */
+import '../../Health.css';
 import { useState } from 'react';
 import { PageHead } from '../../../components/ui/PageHead';
 import { Button } from '../../../components/ui/Button';

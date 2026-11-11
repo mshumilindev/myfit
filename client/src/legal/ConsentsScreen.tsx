@@ -1,4 +1,5 @@
 /** The Consents page as its own screen (SPO-295 N4), like Privacy and sharing: it replaces the host view until Back. */
+import '../views/Health.css';
 import { PageHead } from '../components/ui/PageHead';
 import { useT } from '../i18n';
 import { ConsentsPage, type ConsentsPageProps } from './ConsentsPage';

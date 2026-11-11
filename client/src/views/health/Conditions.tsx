@@ -3,6 +3,7 @@
  * the catalogue, severity, coach sharing, dates for temporary ones) and
  * delete with confirmation. Kit primitives only.
  */
+import '../Health.css';
 import { useMemo, useState, type ReactNode } from 'react';
 import { effectText } from '../../conditionText';
 import type { CoachView } from '../../conditions';

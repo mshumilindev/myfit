@@ -1,4 +1,5 @@
 /** The Cycle hub (docs mockups): today card, calendar tinted by phase, actions, states. */
+import '../../Health.css';
 import { useState } from 'react';
 import { PageHead } from '../../../components/ui/PageHead';
 import { HealthDisclaimer } from '../../../legal/HealthDisclaimer';

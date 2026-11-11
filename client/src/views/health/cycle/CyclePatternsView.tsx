@@ -1,4 +1,5 @@
 /** Patterns: the person's own rated effort by phase, with honest intervals (docs: «Закономірності»). */
+import '../../Health.css';
 import { useMemo } from 'react';
 import { PageHead } from '../../../components/ui/PageHead';
 import { Card } from '../../../components/ui/Card';

@@ -4,6 +4,7 @@
  * "delete nicotine / alcohol / supplement / cycle data" rows sit behind a danger confirm with the universal encryption
  * note as the group footer. Sharing applies at once (like the other settings screens). Kit primitives only.
  */
+import '../Health.css';
 import { useState } from 'react';
 import { PageHead } from '../../components/ui/PageHead';
 import { GroupedList, ListRow } from '../../components/ui/GroupedList';

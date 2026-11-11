@@ -4,6 +4,7 @@
  * happened. Save is disabled until the choice changed; with nothing picked the weekly amount
  * is spread evenly. Kit primitives only.
  */
+import '../../Health.css';
 import { useState } from 'react';
 import { PageHead } from '../../../components/ui/PageHead';
 import { Button } from '../../../components/ui/Button';

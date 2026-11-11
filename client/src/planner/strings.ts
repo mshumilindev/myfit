@@ -64,7 +64,39 @@ export interface PlannerStrings {
   cancel: string;
   save: string;
   stillNeeded: string;
+  onlyDay: string;
+  availTitle: string;
+  weeklyHours: string;
+  clearAll: string;
+  overriding: string;
+  unwell: string;
+  fullRest: string;
+  activeNow: string;
+  sharing: string;
+  shareTitle: string;
+  fromL: string;
+  toL: string;
+  addHours: string;
+  removeHours: string;
+  applyTo: string;
+  weekdaysL: string;
+  weekdaysSub: string;
+  weekendsL: string;
+  weekendsSub: string;
+  nextL: string;
+  everyDay: string;
   done: string;
+  resetTitle: string;
+  resetBody: string;
+  resetBtn: string;
+  sumWeekdays: string;
+  sumEvery: string;
+  sumDays: string;
+  sumNone: string;
+  sharedTail: string;
+  plannerHead: string;
+  freeBar: string;
+  notFreeBar: string;
   del: string;
   delTitle: string;
   delBody: string;
@@ -108,8 +140,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
   en: {
     name: 'Planner',
     emptyTitle: 'No plans yet',
-    emptyBody:
-      'Add a plan and Spotter reminds you before it starts. Nothing is added to your history.',
+    emptyBody: 'Add a plan and Spotter reminds you before it starts.',
     addPlan: 'Add a plan',
     add: 'Add',
     week: 'Week',
@@ -170,6 +201,38 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     cancel: 'Cancel',
     save: 'Save',
     stillNeeded: 'Still needed',
+    onlyDay: 'Only {d}',
+    availTitle: 'My availability',
+    weeklyHours: 'Weekly hours',
+    clearAll: 'Clear all',
+    overriding: 'Overriding your hours',
+    unwell: 'Unwell',
+    fullRest: 'Full rest',
+    activeNow: 'active now',
+    sharing: 'Sharing',
+    shareTitle: 'Show free hours to my trainer',
+    fromL: 'From',
+    toL: 'To',
+    addHours: 'Add hours',
+    removeHours: 'Remove these hours',
+    applyTo: 'Apply to',
+    weekdaysL: 'Weekdays',
+    weekdaysSub: 'Mon – Fri',
+    weekendsL: 'Weekends',
+    weekendsSub: 'Sat – Sun',
+    nextL: 'Next',
+    everyDay: 'Every day',
+    resetTitle: 'Reset the week?',
+    resetBody: 'Every day will have no free hours.',
+    resetBtn: 'Reset',
+    sumWeekdays: 'Weekdays {t}',
+    sumEvery: 'Every day {t}',
+    sumDays: '{n} days a week',
+    sumNone: 'No hours set',
+    sharedTail: 'shared with your trainer',
+    plannerHead: 'Settings',
+    freeBar: 'Free {t}',
+    notFreeBar: 'Not free',
     done: 'Done',
     del: 'Delete',
     delTitle: 'Delete this plan?',
@@ -224,8 +287,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
   uk: {
     name: 'Планувальник',
     emptyTitle: 'Планів ще немає',
-    emptyBody:
-      'Додайте план, і Spotter нагадає перед його початком. Нічого не додається до вашої історії.',
+    emptyBody: 'Додайте план, і Spotter нагадає перед його початком.',
     addPlan: 'Додати план',
     add: 'Додати',
     week: 'Тиждень',
@@ -287,6 +349,38 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     cancel: 'Скасувати',
     save: 'Зберегти',
     stillNeeded: 'Ще потрібно',
+    onlyDay: 'Лише {d}',
+    availTitle: 'Моя доступність',
+    weeklyHours: 'Тижневі години',
+    clearAll: 'Очистити все',
+    overriding: 'Що перекриває ваші години',
+    unwell: 'Нездужання',
+    fullRest: 'Повний відпочинок',
+    activeNow: 'триває зараз',
+    sharing: 'Доступ',
+    shareTitle: 'Показувати вільні години тренеру',
+    fromL: 'Від',
+    toL: 'До',
+    addHours: 'Додати години',
+    removeHours: 'Прибрати ці години',
+    applyTo: 'Застосувати до',
+    weekdaysL: 'Будні',
+    weekdaysSub: 'Пн – Пт',
+    weekendsL: 'Вихідні',
+    weekendsSub: 'Сб – Нд',
+    nextL: 'Далі',
+    everyDay: 'Щодня',
+    resetTitle: 'Скинути тиждень?',
+    resetBody: 'У жодного дня не буде вільних годин.',
+    resetBtn: 'Скинути',
+    sumWeekdays: 'Будні {t}',
+    sumEvery: 'Щодня {t}',
+    sumDays: '{n} дн. на тиждень',
+    sumNone: 'Годин не задано',
+    sharedTail: 'показано тренеру',
+    plannerHead: 'Налаштування',
+    freeBar: 'Вільно {t}',
+    notFreeBar: 'Не вільно',
     done: 'Готово',
     del: 'Видалити',
     delTitle: 'Видалити цей план?',
@@ -341,8 +435,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
   pl: {
     name: 'Planer',
     emptyTitle: 'Nie ma jeszcze planów',
-    emptyBody:
-      'Dodaj plan, a Spotter przypomni o nim przed startem. Nic nie trafia do Twojej historii.',
+    emptyBody: 'Dodaj plan, a Spotter przypomni o nim przed startem.',
     addPlan: 'Dodaj plan',
     add: 'Dodaj',
     week: 'Tydzień',
@@ -404,6 +497,38 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     cancel: 'Anuluj',
     save: 'Zapisz',
     stillNeeded: 'Jeszcze potrzeba',
+    onlyDay: 'Tylko {d}',
+    availTitle: 'Moja dostępność',
+    weeklyHours: 'Godziny tygodniowe',
+    clearAll: 'Wyczyść wszystko',
+    overriding: 'Co nadpisuje twoje godziny',
+    unwell: 'Choroba',
+    fullRest: 'Pełny odpoczynek',
+    activeNow: 'trwa teraz',
+    sharing: 'Udostępnianie',
+    shareTitle: 'Pokazuj wolne godziny trenerowi',
+    fromL: 'Od',
+    toL: 'Do',
+    addHours: 'Dodaj godziny',
+    removeHours: 'Usuń te godziny',
+    applyTo: 'Zastosuj do',
+    weekdaysL: 'Dni robocze',
+    weekdaysSub: 'Pn – Pt',
+    weekendsL: 'Weekendy',
+    weekendsSub: 'Sb – Nd',
+    nextL: 'Dalej',
+    everyDay: 'Codziennie',
+    resetTitle: 'Zresetować tydzień?',
+    resetBody: 'Żaden dzień nie będzie miał wolnych godzin.',
+    resetBtn: 'Resetuj',
+    sumWeekdays: 'Dni robocze {t}',
+    sumEvery: 'Codziennie {t}',
+    sumDays: '{n} dni w tygodniu',
+    sumNone: 'Brak godzin',
+    sharedTail: 'udostępnione trenerowi',
+    plannerHead: 'Ustawienia',
+    freeBar: 'Wolne {t}',
+    notFreeBar: 'Niedostępne',
     done: 'Gotowe',
     del: 'Usuń',
     delTitle: 'Usunąć ten plan?',
@@ -458,8 +583,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
   lt: {
     name: 'Planuoklis',
     emptyTitle: 'Planų dar nėra',
-    emptyBody:
-      'Pridėkite planą, o Spotter primins prieš jam prasidedant. Niekas nepridedama prie jūsų istorijos.',
+    emptyBody: 'Pridėkite planą, o Spotter primins prieš jam prasidedant.',
     addPlan: 'Pridėti planą',
     add: 'Pridėti',
     week: 'Savaitė',
@@ -521,6 +645,38 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     cancel: 'Atšaukti',
     save: 'Išsaugoti',
     stillNeeded: 'Dar reikia',
+    onlyDay: 'Tik {d}',
+    availTitle: 'Mano prieinamumas',
+    weeklyHours: 'Savaitės valandos',
+    clearAll: 'Išvalyti viską',
+    overriding: 'Kas viršija jūsų valandas',
+    unwell: 'Negalavimas',
+    fullRest: 'Visiškas poilsis',
+    activeNow: 'vyksta dabar',
+    sharing: 'Dalijimasis',
+    shareTitle: 'Rodyti laisvas valandas treneriui',
+    fromL: 'Nuo',
+    toL: 'Iki',
+    addHours: 'Pridėti valandas',
+    removeHours: 'Pašalinti šias valandas',
+    applyTo: 'Taikyti',
+    weekdaysL: 'Darbo dienos',
+    weekdaysSub: 'Pr – Pn',
+    weekendsL: 'Savaitgaliai',
+    weekendsSub: 'Št – Sk',
+    nextL: 'Toliau',
+    everyDay: 'Kasdien',
+    resetTitle: 'Atstatyti savaitę?',
+    resetBody: 'Nė viena diena neturės laisvų valandų.',
+    resetBtn: 'Atstatyti',
+    sumWeekdays: 'Darbo dienos {t}',
+    sumEvery: 'Kasdien {t}',
+    sumDays: '{n} d. per savaitę',
+    sumNone: 'Valandų nenustatyta',
+    sharedTail: 'rodoma treneriui',
+    plannerHead: 'Nustatymai',
+    freeBar: 'Laisva {t}',
+    notFreeBar: 'Neprieinama',
     done: 'Atlikta',
     del: 'Ištrinti',
     delTitle: 'Ištrinti šį planą?',
@@ -575,8 +731,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
   et: {
     name: 'Planeerija',
     emptyTitle: 'Plaane pole veel',
-    emptyBody:
-      'Lisa plaan ja Spotter tuletab seda enne algust meelde. Midagi ei lisata sinu ajalukku.',
+    emptyBody: 'Lisa plaan ja Spotter tuletab seda enne algust meelde.',
     addPlan: 'Lisa plaan',
     add: 'Lisa',
     week: 'Nädal',
@@ -638,6 +793,38 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     cancel: 'Tühista',
     save: 'Salvesta',
     stillNeeded: 'Veel vaja',
+    onlyDay: 'Ainult {d}',
+    availTitle: 'Minu saadavus',
+    weeklyHours: 'Nädala tunnid',
+    clearAll: 'Tühjenda kõik',
+    overriding: 'Mis sinu tunde tühistab',
+    unwell: 'Haigus',
+    fullRest: 'Täielik puhkus',
+    activeNow: 'praegu aktiivne',
+    sharing: 'Jagamine',
+    shareTitle: 'Näita vabu tunde treenerile',
+    fromL: 'Alates',
+    toL: 'Kuni',
+    addHours: 'Lisa tunde',
+    removeHours: 'Eemalda need tunnid',
+    applyTo: 'Rakenda',
+    weekdaysL: 'Tööpäevad',
+    weekdaysSub: 'E – R',
+    weekendsL: 'Nädalavahetus',
+    weekendsSub: 'L – P',
+    nextL: 'Edasi',
+    everyDay: 'Iga päev',
+    resetTitle: 'Lähtestada nädal?',
+    resetBody: 'Ühelgi päeval ei ole vabu tunde.',
+    resetBtn: 'Lähtesta',
+    sumWeekdays: 'Tööpäevad {t}',
+    sumEvery: 'Iga päev {t}',
+    sumDays: '{n} päeva nädalas',
+    sumNone: 'Tunde pole seatud',
+    sharedTail: 'jagatud treeneriga',
+    plannerHead: 'Seaded',
+    freeBar: 'Vaba {t}',
+    notFreeBar: 'Pole vaba',
     done: 'Valmis',
     del: 'Kustuta',
     delTitle: 'Kas kustutada see plaan?',

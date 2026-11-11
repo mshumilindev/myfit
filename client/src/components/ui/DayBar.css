@@ -1,0 +1,23 @@
+.uidb {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 164px;
+  height: 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+  overflow: hidden;
+}
+.uidb--wide {
+  display: block;
+  width: 100%;
+  height: 12px;
+}
+.uidb-on {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  min-width: 14px;
+  border-radius: var(--radius-pill);
+  background: var(--t-base);
+}

@@ -1,4 +1,5 @@
 /** First setup and Settings: mode, typical dates, where hints show, delete. One form, dirty-checked Save. */
+import '../../Health.css';
 import { useState } from 'react';
 import { PageHead } from '../../../components/ui/PageHead';
 import { Button } from '../../../components/ui/Button';

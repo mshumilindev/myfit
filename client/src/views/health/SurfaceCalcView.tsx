@@ -4,6 +4,7 @@
  * apply immediately (like the other settings screens), so there is no Save; Done just leaves the page. Kit primitives
  * only. The tracker supplies its surfaces, icons, labels and setters.
  */
+import '../Health.css';
 import type { ReactNode } from 'react';
 import { PageHead } from '../../components/ui/PageHead';
 import { Button } from '../../components/ui/Button';

@@ -2,6 +2,7 @@
  * Nicotine hub (board 1B): two rows, "What I use" and "Use in calculations". Each opens its
  * own page. Sharing and delete live in Health › Privacy and sharing. Kit primitives only.
  */
+import '../../Health.css';
 import { PageHead } from '../../../components/ui/PageHead';
 import { HealthDisclaimer } from '../../../legal/HealthDisclaimer';
 import { GroupedList, ListRow } from '../../../components/ui/GroupedList';

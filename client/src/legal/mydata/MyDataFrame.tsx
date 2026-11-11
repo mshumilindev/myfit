@@ -1,4 +1,5 @@
 /** One page of "What Spotter knows about you": the screen frame the Consents page uses (header with Back, scrolling body). */
+import '../../views/Health.css';
 import type { ReactNode } from 'react';
 import { PageHead } from '../../components/ui/PageHead';
 import { useT } from '../../i18n';

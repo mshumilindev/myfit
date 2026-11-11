@@ -4,6 +4,7 @@
  * after-workout hints), each with its evidence tag; then the disclaimer and the sources.
  * Switches apply immediately, so there is no Save; Done just leaves the page. Kit only.
  */
+import '../../Health.css';
 import { PageHead } from '../../../components/ui/PageHead';
 import { Button } from '../../../components/ui/Button';
 import { GroupedList, ListRow } from '../../../components/ui/GroupedList';

@@ -3,6 +3,7 @@
  * region row. Each opens its own page (the region one a picker sheet). Sharing and delete
  * live in Health › Privacy and sharing. Kit primitives only.
  */
+import '../../Health.css';
 import { useState } from 'react';
 import { PageHead } from '../../../components/ui/PageHead';
 import { HealthDisclaimer } from '../../../legal/HealthDisclaimer';

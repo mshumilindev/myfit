@@ -4,6 +4,7 @@
  * there. A check marks a product that is already saved. Remove (behind a confirm) lives in
  * the sheet. No counters, no logging. Kit primitives only.
  */
+import '../../Health.css';
 import { useState } from 'react';
 import { PageHead } from '../../../components/ui/PageHead';
 import { GroupedList, ListRow } from '../../../components/ui/GroupedList';

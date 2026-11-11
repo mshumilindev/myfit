@@ -7,6 +7,7 @@ import type { Vault } from '../autoVault';
 import { prepareWrite, readDocs, vault } from '../vaultIO';
 import { upcomingFires } from './recurrence';
 import type { PlanDoc, PlannerPrefs } from './types';
+import { dropHourEra } from './availability';
 
 /** The plan as it will be stored: `nextFireAt`, `fireAts` and `updatedAt` are refreshed, then it is sealed. */
 export async function sealPlan(
@@ -39,12 +40,14 @@ export async function openPrefs(
   v: Vault = vault,
 ): Promise<PlannerPrefs | null> {
   const { items } = await readDocs<PlannerPrefs>([raw], v);
-  return items[0] ?? null;
+  const got = items[0] ?? null;
+  return got ? { ...got, availability: dropHourEra(got.availability ?? {}) } : null;
 }
 
 export const DEFAULT_PREFS: PlannerPrefs = {
   updatedAt: 0,
-  availability: { 0: [[18, 21]], 1: [[18, 21]], 2: [[18, 21]], 3: [[18, 21]], 4: [[18, 21]] },
+  // Nothing is assumed: no hours set means no data, and nothing is suggested or shared until the person sets some.
+  availability: {},
   shareAvailability: false,
   defaults: { lead: 60, mode: 'quiet', durationMin: 60 },
 };

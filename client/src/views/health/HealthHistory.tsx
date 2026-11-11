@@ -5,6 +5,7 @@
  * view-only — a vertical rail with a "Now" marker and concurrent periods side
  * by side. Sleep is not on it (it has its own history).
  */
+import '../Health.css';
 import {
   Fragment,
   useRef,

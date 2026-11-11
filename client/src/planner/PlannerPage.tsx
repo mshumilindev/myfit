@@ -16,12 +16,14 @@ import { uuid } from '../store';
 import { useWeekStartDay } from '../weekStart';
 import { draftToPlan, newDraft, planToDraft, type Draft } from './draft';
 import { clock, dayFull, dayLong, dayMonth, leadText, monthYear, weekRange } from './fmt';
+import { AvailabilityPage } from './AvailabilityPage';
+import { weekSummary } from './availability';
 import { PlanForm } from './PlanForm';
 import { PlannerDesk, type DeskView, type Occ } from './PlannerDesk';
 import { PlannerNotice } from './PlannerNotice';
 import { nextFire, occurrencesBetween, skipDay } from './recurrence';
 import { fill, STRINGS } from './strings';
-import { deletePlan, savePlan, usePlans } from './sync';
+import { deletePlan, savePlan, usePlans, usePrefs } from './sync';
 import type { PlanDoc } from './types';
 import {
   addDays,
@@ -44,6 +46,8 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
   const ws = useWeekStartDay();
   const [form, setForm] = useState<{ draft: Draft; editing: boolean; day?: DayKey } | null>(null);
   const [asking, setAsking] = useState<PlanDoc | null>(null);
+  const [availOpen, setAvailOpen] = useState(false);
+  const prefs = usePrefs();
   const [choosing, setChoosing] = useState<PlanDoc | null>(null);
   const desk = useMinWidth(COACH_BREAKPOINT);
   const [deskView, setDeskView] = useState<DeskView>('week');
@@ -235,6 +239,22 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
     </>
   );
 
+  const sum = weekSummary(prefs.availability);
+  const availSummary = [
+    sum.kind === 'weekdays'
+      ? fill(s.sumWeekdays, { t: sum.text })
+      : sum.kind === 'every'
+        ? fill(s.sumEvery, { t: sum.text })
+        : sum.kind === 'days'
+          ? fill(s.sumDays, { n: String(sum.count) })
+          : s.sumNone,
+    prefs.shareAvailability ? s.sharedTail : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  if (availOpen) return <AvailabilityPage onBack={() => setAvailOpen(false)} />;
+
   if (desk) {
     const days =
       view === 'day' ? [oneDay] : Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -293,6 +313,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
             setSelected(dayNumber(today));
           }}
           onAdd={add}
+          onAvailability={() => setAvailOpen(true)}
           days={days}
           occ={view === 'day' ? dayOcc : weekOcc}
           today={today}
@@ -401,6 +422,15 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
             {monthBody}
           </>
         )}
+        <GroupedList header={s.plannerHead}>
+          <ListRow
+            icon={<IconTile tone="accent" size={40} icon="clock" />}
+            label={s.availTitle}
+            sub={availSummary}
+            chevron
+            onClick={() => setAvailOpen(true)}
+          />
+        </GroupedList>
         <span hidden onClick={onClose} />
       </div>
     </div>

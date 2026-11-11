@@ -30,7 +30,7 @@ export interface PlanDoc extends Record<string, unknown> {
   updatedAt: number;
 }
 
-/** Weekly free hours: day 0 = Monday … 6 = Sunday, ranges of whole hours [from, to). */
+/** Weekly free hours: day 0 = Monday … 6 = Sunday, ranges in minutes since midnight [from, to). */
 export type WeeklyHours = Record<number, [number, number][]>;
 
 export interface PlannerPrefs extends Record<string, unknown> {

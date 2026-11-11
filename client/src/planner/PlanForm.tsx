@@ -32,7 +32,7 @@ const DURATIONS = [15, 30, 45, 60, 90, 120];
 const LEADS = [0, 10, 30, 60, 120, 1440];
 const KINDS: RepeatKind[] = ['none', 'daily', 'weekly', 'weekdays', 'biweekly', 'monthly'];
 
-const HM = (p: {
+export const HM = (p: {
   h: number;
   m: number;
   hl: string;
