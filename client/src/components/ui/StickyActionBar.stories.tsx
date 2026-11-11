@@ -12,7 +12,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Pinned under a scrolling page: Cancel · wider primary, safe-area padding. */
+/** Pinned under a scrolling page: Cancel · primary of equal width, safe-area padding. */
 export const Page: Story = {
   render: () => (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>

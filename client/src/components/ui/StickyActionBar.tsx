@@ -5,8 +5,8 @@ export interface StickyActionBarProps {
   children: ReactNode;
   /**
    * `page` — full-width bar pinned under a scrolling page (mobile), clears
-   * the home indicator (safe area). Buttons share the width, the last
-   * (primary) one wider. `panel` — right-aligned buttons at a side panel's foot.
+   * the home indicator (safe area). Buttons on the same level share the width
+   * equally (owner rule 11.11.2026: footer buttons of one row are always the same size). `panel` — right-aligned buttons at a side panel's foot.
    */
   variant?: 'page' | 'panel';
   /** Surface behind the bar (match what it sits on). */
