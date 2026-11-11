@@ -5,7 +5,7 @@
  * Size = the add-on's own code (by source path, see sizeEntries.json), its share of the gzip of every chunk it sits in.
  */
 import { gzipSync } from 'node:zlib';
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import type { Plugin } from 'vite';
 import entries from './src/addons/sizeEntries.json';
@@ -21,7 +21,7 @@ export interface SizePart {
   js?: readonly string[];
   /** Plain CSS files, gzip of the file itself. */
   css?: readonly string[];
-  /** Files under `public/` the add-on shows (theme backgrounds, pictures): their size as served. */
+  /** Files under `public/` the add-on shows (theme backgrounds, pictures): their size as served. A path ending in `/` is a whole directory (the add-on's media pack: downloaded when it is installed). */
   assets?: readonly string[];
 }
 
@@ -66,6 +66,38 @@ export function computeAddonSizes(
   return Object.fromEntries(Object.entries(out).map(([id, v]) => [id, Math.round(v)]));
 }
 
+const MEDIA = /\.(png|webp|jpe?g|svg|gif|ico|mp4|webm|json)$/i;
+
+/** The public files an `assets` entry stands for: a file, or every media file under a directory (`exercise-img/`). Paths use `/`. */
+export function listAssetFiles(
+  publicDir: string,
+  entry: string,
+): { path: string; bytes: number }[] {
+  const out: { path: string; bytes: number }[] = [];
+  const walk = (rel: string) => {
+    const abs = join(publicDir, rel);
+    const st = statSync(abs);
+    if (st.isDirectory()) {
+      for (const f of readdirSync(abs).sort()) walk(`${rel.replace(/\/$/, '')}/${f}`);
+    } else if (MEDIA.test(rel)) out.push({ path: rel, bytes: st.size });
+  };
+  if (existsSync(join(publicDir, entry))) walk(entry.replace(/\/$/, ''));
+  return out;
+}
+
+/** Each add-on's media pack: its files and their sizes (what the app downloads on install and drops on removal). */
+export function mediaPacks(
+  publicDir: string,
+  parts: Readonly<Record<string, SizePart>>,
+): Record<string, { path: string; bytes: number }[]> {
+  const out: Record<string, { path: string; bytes: number }[]> = {};
+  for (const [id, p] of Object.entries(parts)) {
+    const files = (p.assets ?? []).flatMap((e) => listAssetFiles(publicDir, e));
+    if (files.length) out[id] = files;
+  }
+  return out;
+}
+
 /** Add-on that owns a module path (longest matching prefix), or undefined. */
 export function ownerOf(
   path: string,
@@ -97,8 +129,27 @@ export function addonSizes(): Plugin {
           res.end();
           return;
         }
+        const sizes = JSON.parse(readFileSync(file, 'utf8')) as Record<string, number>;
+        // A build older than the media packs lacks their bytes: add them from public/ so the number is real in dev too.
+        if (!existsSync(join(root, 'dist', 'addon-packs.json')))
+          for (const [id, fs] of Object.entries(
+            mediaPacks(join(root, 'public'), entries as Record<string, SizePart>),
+          ))
+            for (const f of fs) if (f.path.includes('/')) sizes[id] = (sizes[id] ?? 0) + f.bytes;
         res.setHeader('content-type', 'application/json');
-        res.end(readFileSync(file));
+        res.end(JSON.stringify(sizes));
+      });
+      server.middlewares.use('/addon-packs.json', (_req, res) => {
+        res.setHeader('content-type', 'application/json');
+        res.end(
+          JSON.stringify(
+            Object.fromEntries(
+              Object.entries(
+                mediaPacks(join(root, 'public'), entries as Record<string, SizePart>),
+              ).map(([id, fs]) => [id, fs.map((f) => [f.path, f.bytes])]),
+            ),
+          ),
+        );
       });
     },
     generateBundle(_, bundle) {
@@ -146,7 +197,7 @@ export function addonSizes(): Plugin {
         entries as Record<string, SizePart>,
         (f) => gz(readFileSync(join(src, f))),
         true,
-        (f) => statSync(join(root, 'public', f)).size,
+        (f) => listAssetFiles(join(root, 'public'), f).reduce((a, x) => a + x.bytes, 0),
       );
       // What each add-on keeps in the code every user downloads at start (it must trend to 0 as the code splits out).
       const eagerSizes = computeAddonSizes(
@@ -193,6 +244,17 @@ export function addonSizes(): Plugin {
         source: JSON.stringify(eagerSizes),
       });
       this.emitFile({ type: 'asset', fileName: 'addon-sizes.json', source: JSON.stringify(sizes) });
+      this.emitFile({
+        type: 'asset',
+        fileName: 'addon-packs.json',
+        source: JSON.stringify(
+          Object.fromEntries(
+            Object.entries(
+              mediaPacks(join(root, 'public'), entries as Record<string, SizePart>),
+            ).map(([id, fs]) => [id, fs.map((f) => [f.path, f.bytes])]),
+          ),
+        ),
+      });
     },
   };
 }

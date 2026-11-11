@@ -9,8 +9,14 @@
       "views/GymsView",
       "views/ProgressView",
       "views/TodayView",
-      "views/OverviewView"
-    ]
+      "views/OverviewView",
+      "data/exercises",
+      "data/exerciseNames",
+      "data/exerciseProfile",
+      "data/exerciseImage",
+      "data/subregion"
+    ],
+    "assets": ["exercise-img/", "equipment/", "anatomy/", "markers/", "gyms/"]
   },
   "health": {
     "js": ["views/HealthView", "views/health/", "healthAddons", "healthMask"]
@@ -43,10 +49,16 @@
     "js": ["views/SleepView", "views/SleepStart", "sleep"]
   },
   "activities": {
-    "js": ["views/ActivityView", "views/LogActivityView", "views/logActivity/"]
+    "js": ["views/ActivityView", "views/LogActivityView", "views/logActivity/"],
+    "assets": [
+      "activity-conditioning-hero.webp",
+      "activity-recovery-hero.webp",
+      "activity-sport-hero.webp"
+    ]
   },
   "goals": {
-    "js": ["views/GoalsView", "goals"]
+    "js": ["views/GoalsView", "goals"],
+    "assets": ["physiques/"]
   },
   "playbook": {
     "js": ["views/PlaybookView", "playbook"]
@@ -55,7 +67,8 @@
     "js": ["views/home/", "homeSets", "components/HomeMove"]
   },
   "atlas": {
-    "js": ["atlas/", "views/CoachView", "components/Atlas"]
+    "js": ["atlas/", "views/CoachView", "components/Atlas"],
+    "assets": ["atlas/"]
   },
   "apex": {
     "js": ["views/ApexApp", "views/ApexHome", "views/apexMastery"]

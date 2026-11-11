@@ -66,47 +66,45 @@ export function PreviewViewer({
         </button>
       </div>
       <div className="as-pv-stage" onClick={(e) => e.target === e.currentTarget && onClose()}>
-        {n > 1 && (
-          <button
-            type="button"
-            className="as-pv-nav as-pv-prev"
-            aria-label={st.previewN(idx, n)}
-            disabled={idx === 0}
-            onClick={() => go(idx - 1)}
-          >
-            <SkIcon name="back" />
-          </button>
-        )}
         <img
           key={shots[idx]}
           className="as-pv-img"
           src={previewUrl(shots[idx]!, wide ? 'd' : 'm')}
           alt={st.previewN(idx + 1, n)}
         />
-        {n > 1 && (
+      </div>
+      {n > 1 && (
+        <div className="as-pv-ctl">
           <button
             type="button"
-            className="as-pv-nav as-pv-next"
+            className="as-pv-nav"
+            aria-label={st.previewN(idx, n)}
+            disabled={idx === 0}
+            onClick={() => go(idx - 1)}
+          >
+            <SkIcon name="back" />
+          </button>
+          <div className="as-pv-dots" role="group" aria-label={st.previewsLabel}>
+            {shots.map((sh, i) => (
+              <button
+                key={sh}
+                type="button"
+                className={i === idx ? 'on' : ''}
+                aria-label={st.previewN(i + 1, n)}
+                aria-current={i === idx}
+                onClick={() => setIdx(i)}
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            className="as-pv-nav"
             aria-label={st.previewN(idx + 2, n)}
             disabled={idx === n - 1}
             onClick={() => go(idx + 1)}
           >
             <SkIcon name="chev" />
           </button>
-        )}
-      </div>
-      {n > 1 && (
-        <div className="as-pv-dots" role="group" aria-label={st.previewsLabel}>
-          {shots.map((sh, i) => (
-            <button
-              key={sh}
-              type="button"
-              className={i === idx ? 'on' : ''}
-              aria-label={st.previewN(i + 1, n)}
-              aria-current={i === idx}
-              onClick={() => setIdx(i)}
-            />
-          ))}
         </div>
       )}
     </div>
