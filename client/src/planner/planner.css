@@ -1,0 +1,11 @@
+/* Planner screens. Only layout; colours, type and surfaces come from the kit. */
+.pl-time {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+}
+.pl-actions {
+  display: grid;
+  gap: var(--space-2, 8px);
+  padding: var(--space-4, 16px) 0;
+}

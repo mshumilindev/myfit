@@ -482,6 +482,9 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'hourglass-medium': HourglassMedium,
 };
 
+/** Every icon name the kit can draw (the Planner icon picker lists them). */
+export const ICON_NAMES: string[] = Object.keys(ICONS).sort();
+
 export function Icon({
   name,
   className,
