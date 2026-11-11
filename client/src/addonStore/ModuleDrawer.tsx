@@ -3,6 +3,7 @@ import { addonById } from '../addons/manifest';
 import { disableAddons, enableAddons } from '../addons/enabledSet';
 import { SkBtn, SkNote, SkSheet, SkSwitch } from '../store-kit';
 import { useState } from 'react';
+import { APP_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
 import { AboutText } from './AboutText';
 import { itemName, TileOf, type StoreCtx } from './storeItems';
 import { PreviewViewer } from './PreviewViewer';
@@ -19,6 +20,7 @@ export function ModuleDrawer({
 }) {
   const { st, enabled } = ctx;
   const [view, setView] = useState<number | null>(null);
+  const wide = useMinWidth(APP_BREAKPOINT);
   const m = id ? addonById(id) : undefined;
   const parent = m?.parent ? addonById(m.parent) : undefined;
   const name = m ? itemName(st, m.id) : '';
@@ -43,7 +45,7 @@ export function ModuleDrawer({
               {shots.map((sh, i) => (
                 <img
                   key={sh}
-                  src={previewUrl(sh, 'm')}
+                  src={previewUrl(sh, wide ? 'd' : 'm')}
                   alt={st.previewN(i + 1, shots.length)}
                   loading="lazy"
                   onClick={() => setView(i)}

@@ -644,3 +644,26 @@
     inset: auto;
   }
 }
+
+/* Previews: a scrolling row; desktop shots are wide, so they get more room than the phone ones */
+.as-previews {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-block-end: 6px;
+}
+.as-previews .as-prev-th {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+@media (min-width: 45rem) {
+  .as-prev-th img {
+    inline-size: 360px;
+  }
+  .as-mod-shots img {
+    inline-size: 100%;
+  }
+  .as-mod-shots {
+    flex-direction: column;
+    overflow: visible;
+  }
+}

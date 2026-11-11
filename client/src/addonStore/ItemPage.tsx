@@ -1,5 +1,6 @@
 /** One item (boards 05, 06): hero, what it needs, preview, facts, about, its add-ons. */
 import { useState } from 'react';
+import { APP_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
 import { addonById, itemsOfApp } from '../addons/manifest';
 import { disableAddons, enableAddons } from '../addons/enabledSet';
 import { formatSize, useAddonSizes } from '../addons/useAddonSizes';
@@ -48,6 +49,7 @@ export function ItemPage({
   const sizes = useAddonSizes(); // a hook: before the early returns
   const [modId, setModId] = useState<string | null>(null);
   const [view, setView] = useState<number | null>(null);
+  const wide = useMinWidth(APP_BREAKPOINT);
   const m = addonById(id);
   if (!m) return <div className="sk-t-s">{st.noResults}</div>;
   const parent = m.parent ? addonById(m.parent) : undefined;
@@ -100,7 +102,7 @@ export function ItemPage({
                     aria-label={st.previewN(i + 1, shots.length)}
                     onClick={() => setView(i)}
                   >
-                    <img src={previewUrl(sh, 'm')} alt="" loading="lazy" />
+                    <img src={previewUrl(sh, wide ? 'd' : 'm')} alt="" loading="lazy" />
                   </button>
                 ))}
               </div>
