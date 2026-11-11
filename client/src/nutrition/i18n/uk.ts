@@ -100,6 +100,8 @@ export const uk: Strings = {
 
   edit: 'Редагувати',
   delete: 'Видалити',
+  deleteEntryTitle: 'Видалити цей запис?',
+  deleteEntryBody: 'Його буде прибрано з вашого дня.',
   undo: 'Скасувати',
   undoCountdown: 'Скасувати можна протягом 8 секунд',
   deleted: 'Запис видалено',

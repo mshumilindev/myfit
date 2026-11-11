@@ -221,22 +221,6 @@
   gap: var(--sp-3);
 }
 
-/* --- inline destructive confirm -------------------------------------------- */
-.hl-cexp {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-}
-.hl-cexp p {
-  font-size: var(--fs-13);
-  color: var(--color-text-muted);
-  line-height: 1.45;
-}
-.hl-cexp .row2 {
-  display: flex;
-  gap: var(--sp-3);
-}
-
 /* --- web (≥720px): W01–W03 -------------------------------------------------- */
 .hl-web {
   display: flex;

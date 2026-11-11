@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 
 const api = vi.hoisted(() => ({
   listSessions: vi.fn(),
@@ -84,6 +84,10 @@ describe('SessionsSheet', () => {
   it('signs out all other devices', async () => {
     render(<SessionsSheet onClose={() => undefined} />);
     fireEvent.click(await screen.findByRole('button', { name: 'Sign out all other devices' }));
+    // a prompt first: nothing is signed out until it is confirmed
+    expect(api.revokeOtherSessions).not.toHaveBeenCalled();
+    const ask = document.querySelector('.uicfx') as HTMLElement;
+    fireEvent.click(within(ask).getByRole('button', { name: 'Sign out all other devices' }));
     await waitFor(() => expect(api.revokeOtherSessions).toHaveBeenCalled());
     await waitFor(() => expect(screen.queryByText('Safari · iOS')).toBeNull());
   });

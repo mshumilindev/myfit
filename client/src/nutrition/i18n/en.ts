@@ -98,6 +98,8 @@ export const en = {
 
   edit: 'Edit',
   delete: 'Delete',
+  deleteEntryTitle: 'Delete this entry?',
+  deleteEntryBody: 'It is removed from your day.',
   undo: 'Undo',
   undoCountdown: 'Undo is available for 8 seconds',
   deleted: 'Entry deleted',

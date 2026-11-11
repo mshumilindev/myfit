@@ -100,6 +100,8 @@ export const et: Strings = {
 
   edit: 'Muuda',
   delete: 'Kustuta',
+  deleteEntryTitle: 'Kas kustutada see kanne?',
+  deleteEntryBody: 'See eemaldatakse sinu päevast.',
   undo: 'Võta tagasi',
   undoCountdown: 'Tagasivõtmine on võimalik 8 sekundit',
   deleted: 'Kirje kustutatud',

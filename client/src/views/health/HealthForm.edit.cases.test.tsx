@@ -170,7 +170,7 @@ describe('HealthForm: edit a period', () => {
 });
 
 describe('HealthForm: delete', () => {
-  it('asks inline with the range and length; "Keep it" closes the question, Delete removes the period', () => {
+  it('asks with the range and length; "Keep it" closes the question, Delete removes the period', () => {
     seed({ ...emptyState(), restPeriods: [rest()] });
     const { onDone } = form({ kind: 'edit', periodId: 'p1' });
     click(row(en.hlDeletePeriod));
@@ -180,7 +180,7 @@ describe('HealthForm: delete', () => {
     expect(periods()).toHaveLength(1);
     click(row(en.hlDeletePeriod));
     click(
-      within(document.querySelector('.hl-cexp') as HTMLElement).getByRole('button', {
+      within(document.querySelector('.uicfx') as HTMLElement).getByRole('button', {
         name: en.delete,
       }),
     );
@@ -192,7 +192,7 @@ describe('HealthForm: delete', () => {
     seed({ ...emptyState(), restPeriods: [rest()], workouts: [workoutOn(T - 18, 'w1')] });
     form({ kind: 'edit', periodId: 'p1' });
     click(row(en.hlDeletePeriod));
-    expect(document.querySelector('.hl-cexp p')?.textContent).toMatch(/kept|stay|workout/i);
+    expect(document.querySelector('.uicfx-body')?.textContent).toMatch(/kept|stay|workout/i);
   });
 
   it('an injury is deleted with the injury wording', () => {
@@ -200,7 +200,7 @@ describe('HealthForm: delete', () => {
     const { onDone } = form({ kind: 'edit-injury', injuryId: 'i1' });
     click(row(en.hlDeleteInjury));
     click(
-      within(document.querySelector('.hl-cexp') as HTMLElement).getByRole('button', {
+      within(document.querySelector('.uicfx') as HTMLElement).getByRole('button', {
         name: en.delete,
       }),
     );

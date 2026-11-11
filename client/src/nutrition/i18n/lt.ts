@@ -100,6 +100,8 @@ export const lt: Strings = {
 
   edit: 'Redaguoti',
   delete: 'Ištrinti',
+  deleteEntryTitle: 'Ištrinti šį įrašą?',
+  deleteEntryBody: 'Jis bus pašalintas iš jūsų dienos.',
   undo: 'Atšaukti',
   undoCountdown: 'Atšaukti galima 8 sekundes',
   deleted: 'Įrašas ištrintas',

@@ -100,6 +100,8 @@ export const pl: Strings = {
 
   edit: 'Edytuj',
   delete: 'Usuń',
+  deleteEntryTitle: 'Usunąć ten wpis?',
+  deleteEntryBody: 'Zostanie usunięty z Twojego dnia.',
   undo: 'Cofnij',
   undoCountdown: 'Cofnięcie możliwe przez 8 sekund',
   deleted: 'Wpis usunięty',

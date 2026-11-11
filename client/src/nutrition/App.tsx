@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useMinWidth, APP_BREAKPOINT } from '../components/ui/breakpoints';
 import { Button } from '../components/ui/Button';
 import { Field } from '../components/ui/Field';
+import { ConfirmDialog } from '../components/ui/Overlays';
 import { UndoToast } from '../components/ui/UndoToast';
 import { SuiteAppFrame } from '../components/suite/SuiteAppFrame';
 import { UNDO_MS } from '../coach/domain/signalConfig';
@@ -32,6 +33,7 @@ function EntryDetail({
   const { t } = useT();
   const single = entry.items.length === 1 ? entry.items[0] : null;
   const [amount, setAmount] = useState(single?.amount ?? 0);
+  const [ask, setAsk] = useState(false);
 
   function save() {
     if (!single) return;
@@ -95,9 +97,20 @@ function EntryDetail({
         </div>
       )}
 
-      <Button variant="danger" fullWidth className="mt4" onClick={() => onDelete(entry)}>
+      <Button variant="danger" fullWidth className="mt4" onClick={() => setAsk(true)}>
         {t('delete')}
       </Button>
+      {ask && (
+        <ConfirmDialog
+          danger
+          title={t('deleteEntryTitle')}
+          body={t('deleteEntryBody')}
+          confirmLabel={t('delete')}
+          cancelLabel={t('cancel')}
+          onCancel={() => setAsk(false)}
+          onConfirm={() => onDelete(entry)}
+        />
+      )}
     </Sheet>
   );
 }

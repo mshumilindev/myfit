@@ -44,6 +44,7 @@ import { Button, IconButton } from '../../components/ui/Button';
 import { Calendar } from '../../components/ui/Calendar';
 import { Field } from '../../components/ui/Field';
 import { GroupedList, ListPanel, ListRow } from '../../components/ui/GroupedList';
+import { ConfirmDialog } from '../../components/ui/Overlays';
 import { PresetChips } from '../../components/ui/PresetChips';
 import { Segmented } from '../../components/ui/Segmented';
 import { Notice } from '../../components/ui/Notice';
@@ -935,13 +936,14 @@ export function HealthForm(props: {
           action
           tone="danger"
           label={editing ? t.hlDeletePeriod : t.hlDeleteInjury}
-          aria-expanded={delOpen}
           onClick={() => setDelOpen(!delOpen)}
         />
         {delOpen && (
-          <ListPanel className="hl-cexp">
-            <p>
-              {editingInj
+          <ConfirmDialog
+            danger
+            title={editing ? t.hlDeletePeriod : t.hlDeleteInjury}
+            body={
+              editingInj
                 ? t.hlDeleteInjuryBody(delName)
                 : delWorkouts.length > 0 && modeSkipsWorkouts(editing!.mode)
                   ? t.hlDeleteBodyKept(
@@ -950,17 +952,13 @@ export function HealthForm(props: {
                       delDays,
                       fmtDM(dayOfTs(delWorkouts[0].startedAt), locale, today),
                     )
-                  : t.hlDeleteBody(delName, delRange, delDays)}
-            </p>
-            <div className="row2">
-              <Button variant="secondary" fullWidth onClick={() => setDelOpen(false)}>
-                {t.hlKeepIt}
-              </Button>
-              <Button variant="danger" fullWidth onClick={doDelete}>
-                {t.delete}
-              </Button>
-            </div>
-          </ListPanel>
+                  : t.hlDeleteBody(delName, delRange, delDays)
+            }
+            confirmLabel={t.delete}
+            cancelLabel={t.hlKeepIt}
+            onCancel={() => setDelOpen(false)}
+            onConfirm={doDelete}
+          />
         )}
       </GroupedList>
     ) : null;

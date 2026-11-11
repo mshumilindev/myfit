@@ -13,7 +13,7 @@ import {
 import { Button } from './ui/Button';
 import { Chip } from './ui/Chip';
 import { GroupedList, ListRow } from './ui/GroupedList';
-import { Sheet } from './ui/Overlays';
+import { ConfirmDialog, Sheet } from './ui/Overlays';
 import { Banner } from './ui/Banner';
 import { DeviceImage } from './ui/DeviceImage';
 
@@ -28,6 +28,7 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
   const { t, locale } = useT();
   const [rows, setRows] = useState<SessionRow[] | null>(null);
   const [failed, setFailed] = useState(false);
+  const [askOthers, setAskOthers] = useState(false);
   const [busy, setBusy] = useState(false);
   const [openedAt] = useState(Date.now);
   const me = sessionDeviceId();
@@ -54,6 +55,7 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
     }
   }
   async function revokeOthers() {
+    setAskOthers(false);
     setBusy(true);
     try {
       await revokeOtherSessions();
@@ -127,11 +129,23 @@ export function SessionsSheet({ onClose }: { onClose: () => void }) {
         </GroupedList>
       )}
       {others.length > 0 && (
-        <Button variant="danger" disabled={busy} onClick={() => void revokeOthers()}>
+        <Button variant="danger" disabled={busy} onClick={() => setAskOthers(true)}>
           {t.sessionsSignOutOthers}
         </Button>
       )}
       <p className="detail-muted">{t.sessionsRevokedNote}</p>
+      {askOthers && (
+        <ConfirmDialog
+          danger
+          icon="sign-out"
+          title={t.sessionsSignOutOthers}
+          body={t.sessionsRevokedNote}
+          confirmLabel={t.sessionsSignOutOthers}
+          cancelLabel={t.cancel}
+          onCancel={() => setAskOthers(false)}
+          onConfirm={() => void revokeOthers()}
+        />
+      )}
     </Sheet>
   );
 }
