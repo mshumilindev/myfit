@@ -7,6 +7,7 @@ import { useSyncExternalStore } from 'react';
 import { auth, db } from '../firebase';
 import { mirrorCollection } from '../vaultIO';
 import { DEFAULT_PREFS, openPrefs, sealPlan, sealPrefs } from './data';
+import { upcomingFires } from './recurrence';
 import type { PlanDoc, PlannerPrefs } from './types';
 
 let plans: PlanDoc[] = [];
@@ -52,12 +53,35 @@ export async function savePrefs(next: PlannerPrefs): Promise<void> {
   await setDoc(doc(db, 'users', u, 'meta', 'planner'), await sealPrefs(next, Date.now()));
 }
 
+/** Plans already refreshed this session, so a snapshot of our own write never starts another. */
+const refreshed = new Set<string>();
+
+/**
+ * The server sends reminders from the open list of upcoming moments (it cannot read the sealed repeat rule). When time has
+ * moved on, or the list is missing (a plan saved before it existed), save the plan again to refill it.
+ */
+export async function refreshFireAts(items: PlanDoc[], now = Date.now()): Promise<number> {
+  let n = 0;
+  for (const p of items) {
+    if (!p.enabled) continue;
+    const fresh = upcomingFires(p.timing, now);
+    if (JSON.stringify(fresh) === JSON.stringify(p.fireAts ?? [])) continue;
+    const key = `${p.id}:${fresh.join(',')}`;
+    if (refreshed.has(key)) continue;
+    refreshed.add(key);
+    await savePlan(p);
+    n++;
+  }
+  return n;
+}
+
 /** Start the listeners for a signed-in person. Returns the stop function (sign-out, add-on removed). */
 export function startPlannerSync(u: string): () => void {
   const mirror = mirrorCollection<PlanDoc>((items, info) => {
     plans = items;
     locked = info.locked;
     emit();
+    void refreshFireAts(items).catch((e) => console.warn('[planner] refresh', e));
   });
   const stopPlans = onSnapshot(
     collection(db, 'users', u, 'plannerEvents'),

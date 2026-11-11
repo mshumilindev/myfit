@@ -8,7 +8,7 @@ export type PlanSource =
 
 export type PlanMode = 'quiet' | 'ring';
 
-/** One plan. Everything but `id`, `mode`, `nextFireAt`, `enabled`, `v`, `updatedAt` is sealed in the vault (encryptedDoc OPEN_FIELDS). */
+/** One plan. Everything but `id`, `mode`, `nextFireAt`, `fireAts`, `enabled`, `v`, `updatedAt` is sealed in the vault (encryptedDoc OPEN_FIELDS). */
 export interface PlanDoc extends Record<string, unknown> {
   id: string;
   title: string;
@@ -24,6 +24,8 @@ export interface PlanDoc extends Record<string, unknown> {
   enabled: boolean;
   /** Open: UTC ms of the next reminder, or null when the plan is over. The only time the server learns. */
   nextFireAt: number | null;
+  /** Open: the next reminder moments (UTC ms, up to 28 days, at most 32; one document per plan, the list is a cache of it): the server sends them in turn; the repeat rule stays sealed. */
+  fireAts?: number[];
   v: 1;
   updatedAt: number;
 }

@@ -111,6 +111,33 @@ export function fireFor(p: PlanTiming, day: DayKey): Fire {
   return { day, startAt, fireAt: startAt - Math.min(Math.max(0, p.lead), MAX_LEAD) * 60_000 };
 }
 
+/** How far ahead the open list of reminder moments reaches, and its size limit. */
+export const FIRE_HORIZON_DAYS = 28;
+export const FIRE_MAX = 32;
+
+/**
+ * The reminder moments (UTC ms, ascending) after `now` within the horizon: what the server is given in the open, because it
+ * cannot read the sealed repeat rule. Refreshed whenever the plan is saved and when the app opens.
+ */
+export function upcomingFires(
+  p: PlanTiming,
+  now: number,
+  horizonDays = FIRE_HORIZON_DAYS,
+  max = FIRE_MAX,
+): number[] {
+  const until = now + horizonDays * 86_400_000;
+  const from = dayNumber(localParts(now, p.tz).day) - 3;
+  const out: number[] = [];
+  for (const d of occurrences(p)) {
+    if (dayNumber(d) < from) continue;
+    const f = fireFor(p, d);
+    if (f.fireAt > until) break;
+    if (f.fireAt > now) out.push(f.fireAt);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
 /** The next reminder strictly after `now` (the open `nextFireAt`), or null when the plan is over. */
 export function nextFire(p: PlanTiming, now: number): Fire | null {
   // Start two days before today in the plan's zone: a long lead can reach back from a later day.

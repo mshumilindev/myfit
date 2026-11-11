@@ -33,7 +33,7 @@ describe('Planner data is sealed (SPO-552 I2)', () => {
     const now = zonedToUtc('2026-11-10', '09:00', 'Europe/Warsaw');
     const raw = await sealPlan(plan, now, v);
     expect(Object.keys(raw).sort()).toEqual(
-      ['enc', 'enabled', 'id', 'mode', 'nextFireAt', 'updatedAt', 'v'].sort(),
+      ['enc', 'enabled', 'fireAts', 'id', 'mode', 'nextFireAt', 'updatedAt', 'v'].sort(),
     );
     expect(raw.nextFireAt).toBe(zonedToUtc('2026-11-12', '17:00', 'Europe/Warsaw'));
     expect(raw.mode).toBe('ring');

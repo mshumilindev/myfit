@@ -5,19 +5,19 @@
  */
 import type { Vault } from '../autoVault';
 import { prepareWrite, readDocs, vault } from '../vaultIO';
-import { nextFire } from './recurrence';
+import { upcomingFires } from './recurrence';
 import type { PlanDoc, PlannerPrefs } from './types';
 
-/** The plan as it will be stored: `nextFireAt` and `updatedAt` are refreshed, then it is sealed. */
+/** The plan as it will be stored: `nextFireAt`, `fireAts` and `updatedAt` are refreshed, then it is sealed. */
 export async function sealPlan(
   plan: PlanDoc,
   now: number,
   v: Vault = vault,
 ): Promise<Record<string, unknown>> {
-  const next = plan.enabled ? nextFire(plan.timing, now) : null;
+  const fireAts = plan.enabled ? upcomingFires(plan.timing, now) : [];
   return prepareWrite(
     'plannerEvents',
-    { ...plan, nextFireAt: next?.fireAt ?? null, updatedAt: now },
+    { ...plan, nextFireAt: fireAts[0] ?? null, fireAts, updatedAt: now },
     v,
   );
 }
