@@ -78,7 +78,7 @@ describe('repeat rules', () => {
     expect(take(p, 3)).toEqual(['2026-01-31', '2026-02-28', '2026-03-31']);
   });
   it('ends on a date (inclusive) or after N plans', () => {
-    const w = { kind: 'weekly', every: 1, days: [3] } as const;
+    const w: PlanTiming['repeat'] = { kind: 'weekly', every: 1, days: [3] };
     expect(take({ ...base, repeat: w, ends: { kind: 'on', day: '2026-11-19' } }, 9)).toEqual([
       '2026-11-12',
       '2026-11-19',

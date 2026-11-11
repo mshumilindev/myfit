@@ -71,6 +71,11 @@ export function useAddonRuntime() {
   useEffect(() => {
     if (sleepOn) loadTracker('sleep', () => import('../sleepBoot'));
   }, [sleepOn]);
+  // Planner is a separate lazy package: its chunk is fetched only while it is installed (addons.md item 14).
+  const plannerOn = useAddonOrBase('planner');
+  useEffect(() => {
+    if (plannerOn) loadTracker('planner', () => import('../planner/plannerBoot'));
+  }, [plannerOn]);
   const healthOn = useAddonOrBase('health');
   const injuryOn = useAddonOrBase('injury-log');
   useEffect(() => migrateModules(), []);

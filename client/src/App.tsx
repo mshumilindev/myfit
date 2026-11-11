@@ -105,6 +105,7 @@ import { useAddonOrBase } from './addons/enabledSet';
 import { AtlasOutboxLazy } from './atlas/AtlasOutboxLazy';
 import { useAtlasOutboxClear } from './atlas/useAtlasOutboxClear';
 import { useAddonRuntime } from './addons/useAddonRuntime';
+import { usePlannerHost } from './plannerRt';
 import { apexMastery } from './views/apexMastery';
 import { isStoreHash, StoreScreen, useRoleWithStore } from './addonStore/StoreEntry';
 import { legalRoute, useJoinLinkSync, useLegalRoute } from './legal/route';
@@ -288,6 +289,7 @@ export type Overlay =
   | { screen: 'history' }
   | { screen: 'themes' }
   | { screen: 'privacy' }
+  | { screen: 'planner' }
   | { screen: 'theme-settings' }
   | { screen: 'notifications' }
   | { screen: 'recap'; period: string }
@@ -433,6 +435,7 @@ export function toHash(
   if (overlay?.screen === 'history') return '#/history';
   if (overlay?.screen === 'themes') return '#/themes';
   if (overlay?.screen === 'privacy') return '#/more/privacy';
+  if (overlay?.screen === 'planner') return '#/planner';
   if (overlay?.screen === 'theme-settings') return '#/theme-settings';
   if (overlay?.screen === 'builder') return '#/builder';
   if (overlay?.screen === 'injury') return '#/injury';
@@ -575,6 +578,7 @@ export function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
     return { tab: 'today', overlay: { screen: 'uikit' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'themes') return { tab: 'today', overlay: { screen: 'themes' } };
+  if (head === 'planner') return { tab: 'today', overlay: { screen: 'planner' } };
   if (head === 'theme-settings') return { tab: 'today', overlay: { screen: 'theme-settings' } };
   if (head === 'builder') return { tab: 'today', overlay: { screen: 'builder' } };
   if (head === 'notifications') return { tab: 'today', overlay: { screen: 'notifications' } };
@@ -788,6 +792,7 @@ function AppMain() {
     healthOn,
     injuryOn,
   } = useAddonRuntime();
+  const plannerHost = usePlannerHost();
   // Rank-up moment: once per crossing, compared against the last surfaced rating.
   useEffect(() => {
     if (!apexOn || !masteryOn) return;
@@ -1113,6 +1118,7 @@ function AppMain() {
     (overlay?.screen === 'settings' && role !== 'admin') ||
     (overlay?.screen === 'sleep' && !sleepOn && !nightLive) ||
     (overlay?.screen === 'themes' && !themesOn) ||
+    (overlay?.screen === 'planner' && !plannerHost?.Page) ||
     (overlay?.screen === 'mastery' && (!apexOn || !masteryOn)) ||
     ((overlay?.screen === 'log-activity' || overlay?.screen === 'activity') && !activitiesOn) ||
     (overlay?.screen === 'home-set' && !homeSetsOn) ||
@@ -1660,6 +1666,9 @@ function AppMain() {
         />
       )}
       {activeOverlay?.screen === 'theme-settings' && <ThemeSettingsView onClose={closeOverlay} />}
+      {activeOverlay?.screen === 'planner' && plannerHost?.Page && (
+        <plannerHost.Page onClose={closeOverlay} />
+      )}
       {activeOverlay?.screen === 'privacy' && (
         <Suspense fallback={<ScreenFallback />}>
           <HealthPrivacyView onBack={closeOverlay} />
