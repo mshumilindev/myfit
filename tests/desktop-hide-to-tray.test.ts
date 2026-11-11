@@ -37,7 +37,14 @@ describe('hideToTray', () => {
 });
 
 describe('closeBehavior', () => {
-  it('quits on macOS and hides to the tray elsewhere', async () => {
+  it('keeps running while an icon shows (tray / menu bar) and quits when nothing can bring the app back', async () => {
+    const { closeBehavior } = await import('../desktop/src/hideWindow');
+    expect(closeBehavior('darwin', true)).toBe('hide');
+    expect(closeBehavior('win32', true)).toBe('hide');
+    expect(closeBehavior('win32', false)).toBe('quit');
+    expect(closeBehavior('darwin', false)).toBe('quit');
+  });
+  it('without the icon state: macOS quits (SPO-277), Windows and Linux hide', async () => {
     const { closeBehavior } = await import('../desktop/src/hideWindow');
     expect(closeBehavior('darwin')).toBe('quit');
     expect(closeBehavior('win32')).toBe('hide');

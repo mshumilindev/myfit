@@ -20,10 +20,13 @@ export function hideToTray(win: HideableWindow): void {
 }
 
 /**
- * What the window's close button does. On macOS closing the window quits the app: hiding it to the menu bar left a
- * black screen / a zombie process the owner could not get rid of (SPO-277). Windows and Linux keep the tray: there the
- * tray icon is the only way to bring the app back and to receive notifications while the window is closed.
+ * What the window's close button does. The app keeps running only where something can bring it back: the tray icon (Windows,
+ * Linux) or the menu bar icon (macOS, since SPO-552: Spotter lives there, so a reminder can still ring). With no icon showing,
+ * closing quits: on macOS hiding without an icon left a black screen / a zombie process the owner could not get rid of (SPO-277).
  */
-export function closeBehavior(platform: string): 'quit' | 'hide' {
-  return platform === 'darwin' ? 'quit' : 'hide';
+export function closeBehavior(
+  platform: string,
+  trayShown = platform !== 'darwin',
+): 'quit' | 'hide' {
+  return trayShown ? 'hide' : 'quit';
 }

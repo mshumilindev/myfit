@@ -5,15 +5,20 @@ import {
   Menu,
   nativeImage,
   Notification,
+  powerMonitor,
   session,
   shell,
   systemPreferences,
   Tray,
 } from 'electron';
+import fs from 'node:fs';
 import path from 'node:path';
 import { autoUpdater } from 'electron-updater';
+import { createAlarmScheduler, parseAlarms } from './alarms';
 import { closeBehavior, hideToTray } from './hideWindow';
+import { DEFAULT_PREFS, parsePrefs, patchPrefs, type ShellPrefs } from './prefs';
 import { CHANNEL, DEFAULT_APP_URL } from './shared';
+import { parseTrayState, trayItems, type TrayState } from './trayMenu';
 
 /**
  * Thin shell around the hosted Spotter web app. All product code lives in `client/`; this process only opens the
@@ -41,6 +46,49 @@ async function askMediaAccess(types: string[]): Promise<boolean> {
 let win: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let quitting = false;
+let prefs: ShellPrefs = DEFAULT_PREFS;
+let trayState: TrayState = { next: null };
+/** Started by the system at login (or with --hidden): stay in the tray / menu bar, no window. */
+const startHidden = process.argv.includes('--hidden');
+
+const prefsFile = (): string => path.join(app.getPath('userData'), 'shell-prefs.json');
+function loadPrefs(): ShellPrefs {
+  try {
+    return parsePrefs(JSON.parse(fs.readFileSync(prefsFile(), 'utf8')));
+  } catch {
+    return DEFAULT_PREFS;
+  }
+}
+function savePrefs(): void {
+  try {
+    fs.writeFileSync(prefsFile(), JSON.stringify(prefs));
+  } catch (err) {
+    console.warn('[prefs]', err instanceof Error ? err.message : err);
+  }
+}
+function applyLoginItem(): void {
+  // Unsupported on Linux; on a packaged build only (a dev run must not register the electron binary).
+  if (!app.isPackaged || process.platform === 'linux') return;
+  app.setLoginItemSettings({
+    openAtLogin: prefs.openAtLogin,
+    openAsHidden: true,
+    args: ['--hidden'],
+  });
+}
+
+// Planner reminders (SPO-552 I8): the main process keeps the timers, the page owns the text.
+const alarms = createAlarmScheduler(
+  {
+    now: () => Date.now(),
+    setTimer: (fn, ms) => setTimeout(fn, ms),
+    clearTimer: (h) => clearTimeout(h as NodeJS.Timeout),
+  },
+  (alarm) => {
+    // The page may be hidden but is alive; if it is gone, the window is recreated hidden so the ring can show.
+    if (!win) createWindow(true);
+    win?.webContents.send(CHANNEL.alarmDue, alarm);
+  },
+);
 
 const assetPath = (name: string): string => path.resolve(__dirname, '../assets', name);
 
@@ -69,8 +117,9 @@ const OFFLINE_PAGE =
 <button onclick="location.href='${APP_URL}'" style="font:inherit;padding:8px 16px">Спробувати ще</button></div>`,
   );
 
-function createWindow(): void {
+function createWindow(hidden = false): void {
   win = new BrowserWindow({
+    show: !hidden,
     width: 1100,
     height: 800,
     minWidth: 480,
@@ -104,11 +153,11 @@ function createWindow(): void {
   });
 
   win.on('close', (event) => {
-    // Windows/Linux: closing the window hides it; the app keeps running in the tray. macOS: closing quits (closeBehavior).
+    // While the tray / menu bar icon shows, closing the window hides it and the app keeps running there; with no icon it quits (closeBehavior).
     // Real quit: tray menu / app menu (sets `quitting`).
     if (quitting) return;
-    if (closeBehavior(process.platform) === 'quit') {
-      // macOS: the close button really quits (no hidden window, no black screen). Let the close go through.
+    if (closeBehavior(process.platform, tray !== null) === 'quit') {
+      // No icon to bring the app back: the close button really quits (no hidden window, no black screen). Let the close go through.
       quitting = true;
       app.quit();
       return;
@@ -133,28 +182,29 @@ let updateReady = false;
 
 function refreshTrayMenu(): void {
   tray?.setContextMenu(
-    Menu.buildFromTemplate([
-      { label: 'Відкрити Spotter', click: showWindow },
-      ...(updateReady
-        ? [
-            {
-              label: 'Перезапустити й оновити',
-              click: () => {
-                quitting = true;
-                autoUpdater.quitAndInstall();
-              },
+    Menu.buildFromTemplate(
+      trayItems(trayState, updateReady).map((i): Electron.MenuItemConstructorOptions => {
+        if (i.kind === 'separator') return { type: 'separator' };
+        if (i.kind === 'text') return { label: i.label, enabled: false };
+        if (i.id === 'open') return { label: i.label, click: showWindow };
+        if (i.id === 'update') {
+          return {
+            label: i.label,
+            click: () => {
+              quitting = true;
+              autoUpdater.quitAndInstall();
             },
-          ]
-        : []),
-      { type: 'separator' as const },
-      {
-        label: 'Вийти',
-        click: () => {
-          quitting = true;
-          app.quit();
-        },
-      },
-    ]),
+          };
+        }
+        return {
+          label: i.label,
+          click: () => {
+            quitting = true;
+            app.quit();
+          },
+        };
+      }),
+    ),
   );
 }
 
@@ -181,6 +231,7 @@ function setupAutoUpdate(): void {
 }
 
 function createTray(): void {
+  if (tray) return;
   const icon = nativeImage.createFromPath(
     assetPath(
       process.platform === 'darwin'
@@ -195,6 +246,16 @@ function createTray(): void {
   tray.setToolTip('Spotter');
   refreshTrayMenu();
   tray.on('click', showWindow);
+}
+
+/** "Show the icon" off: the icon goes, and a hidden window comes back so the app is never left running with no way to reach it. */
+function syncTray(): void {
+  if (prefs.trayIcon) createTray();
+  else if (tray) {
+    tray.destroy();
+    tray = null;
+    if (win && !win.isVisible()) showWindow();
+  }
 }
 
 function buildMenu(): void {
@@ -225,6 +286,38 @@ function registerIpc(): void {
     if (typeof count === 'number' && Number.isFinite(count) && count >= 0) {
       app.setBadgeCount(Math.floor(count));
     }
+  });
+  ipcMain.handle(CHANNEL.scheduleAlarms, (_e, list: unknown) => alarms.schedule(parseAlarms(list)));
+  ipcMain.handle(CHANNEL.cancelAlarms, (_e, ids: unknown) => {
+    if (Array.isArray(ids)) alarms.cancel(ids.filter((i): i is string => typeof i === 'string'));
+  });
+  ipcMain.handle(
+    CHANNEL.showAlarm,
+    (_e, p: { id?: unknown; title?: unknown; body?: unknown; mode?: unknown }) => {
+      if (typeof p?.title !== 'string' || !Notification.isSupported()) return;
+      const ring = p.mode === 'ring';
+      const n = new Notification({
+        title: p.title.slice(0, 120),
+        body: typeof p.body === 'string' ? p.body.slice(0, 500) : undefined,
+        // Windows / Linux: a ring stays until it is dealt with; macOS ignores these (and unsigned builds show nothing, SPO-162).
+        urgency: ring ? 'critical' : 'normal',
+        timeoutType: ring ? 'never' : 'default',
+      });
+      n.on('click', showWindow);
+      n.show();
+    },
+  );
+  ipcMain.handle(CHANNEL.setTray, (_e, state: unknown) => {
+    trayState = parseTrayState(state);
+    refreshTrayMenu();
+  });
+  ipcMain.handle(CHANNEL.getPrefs, () => prefs);
+  ipcMain.handle(CHANNEL.setPrefs, (_e, patch: unknown) => {
+    prefs = patchPrefs(prefs, patch);
+    savePrefs();
+    applyLoginItem();
+    syncTray();
+    return prefs;
   });
   ipcMain.handle(CHANNEL.openExternal, (_e, url: unknown) => {
     if (typeof url === 'string' && isHttps(url)) void shell.openExternal(url);
@@ -262,10 +355,14 @@ if (!app.requestSingleInstanceLock()) {
           callback(false);
         });
     });
+    prefs = loadPrefs();
     buildMenu();
     registerIpc();
-    createTray();
-    createWindow();
+    syncTray();
+    applyLoginItem();
+    // Hidden start only makes sense with an icon to bring the window back.
+    createWindow(startHidden && tray !== null);
+    powerMonitor.on('resume', () => alarms.recheck());
     setupAutoUpdate();
   });
 }

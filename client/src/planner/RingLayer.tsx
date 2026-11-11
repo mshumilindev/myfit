@@ -7,6 +7,7 @@ import { useT } from '../i18n';
 import { PLAN_SOUND, useLoopSound } from '../sound/useLoopSound';
 import { dueRings, nextWake } from './alertsCore';
 import { useSharedAlerts, writeAlert } from './alertsSync';
+import { useDesktopEngine } from './useDesktopEngine';
 import { fill, STRINGS } from './strings';
 import { usePlans } from './sync';
 import { localParts } from './zoned';
@@ -76,6 +77,8 @@ export function RingLayer() {
       document.removeEventListener('visibilitychange', wake);
     };
   }, [plans, now, snoozed]);
+
+  useDesktopEngine(plans, now, handled, snoozed, locale, () => setNow(Date.now()));
 
   const ring = useMemo(
     () => dueRings(plans, now, handled, snoozed)[0],
