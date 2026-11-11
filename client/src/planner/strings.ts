@@ -96,6 +96,10 @@ export interface PlannerStrings {
   delRepTitle: string;
   delOne: string;
   delSeries: string;
+  alertKind: string;
+  alertSub: string;
+  snooze: string;
+  dismiss: string;
 }
 
 /** Planner's own words live in its chunk, not in the core i18n (add-on boundary). `{x}` marks a placeholder filled by `fill`. */
@@ -210,6 +214,10 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     delRepTitle: 'Delete a repeating plan',
     delOne: 'Only this day',
     delSeries: 'All events in the series',
+    alertKind: 'Reminder',
+    alertSub: 'Today at {t}',
+    snooze: 'Snooze',
+    dismiss: 'Dismiss',
   },
   uk: {
     name: 'Планувальник',
@@ -322,6 +330,10 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     delRepTitle: 'Видалити повторюваний план',
     delOne: 'Лише цей день',
     delSeries: 'Усі події серії',
+    alertKind: 'Нагадування',
+    alertSub: 'Сьогодні о {t}',
+    snooze: 'Відкласти',
+    dismiss: 'Закрити',
   },
   pl: {
     name: 'Planer',
@@ -434,6 +446,10 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     delRepTitle: 'Usuń plan cykliczny',
     delOne: 'Tylko ten dzień',
     delSeries: 'Wszystkie wydarzenia w serii',
+    alertKind: 'Przypomnienie',
+    alertSub: 'Dziś o {t}',
+    snooze: 'Drzemka',
+    dismiss: 'Zamknij',
   },
   lt: {
     name: 'Planuoklis',
@@ -546,6 +562,10 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     delRepTitle: 'Ištrinti pasikartojantį planą',
     delOne: 'Tik šią dieną',
     delSeries: 'Visus serijos įvykius',
+    alertKind: 'Priminimas',
+    alertSub: 'Šiandien {t}',
+    snooze: 'Atidėti',
+    dismiss: 'Atmesti',
   },
   et: {
     name: 'Planeerija',
@@ -658,6 +678,10 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     delRepTitle: 'Kustuta korduv plaan',
     delOne: 'Ainult see päev',
     delSeries: 'Kõik seeria sündmused',
+    alertKind: 'Meeldetuletus',
+    alertSub: 'Täna kell {t}',
+    snooze: 'Edasta',
+    dismiss: 'Sulge',
   },
 };
 

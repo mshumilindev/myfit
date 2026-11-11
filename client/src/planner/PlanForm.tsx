@@ -190,9 +190,9 @@ export function PlanForm(p: {
             <>
               <GroupedList surface="raised" header={s.basedNone}>
                 <ListRow
-                  icon={<IconTile icon="calendar-plus" tone="accent" size={32} />}
                   label={s.own}
                   sub={s.ownSub}
+                  value={<IconTile icon="calendar-plus" tone="accent" size={32} />}
                   trailing={sel === null ? <Icon name="check" /> : undefined}
                   onClick={() => {
                     setBased(null);
@@ -438,25 +438,33 @@ export function PlanForm(p: {
     <>
       <GroupedList header={s.basedOn}>
         <ListRow
-          icon={<IconTile icon={based?.icon ?? 'calendar-plus'} tone="accent" size={32} />}
           label={based?.label ?? s.own}
           sub={based?.sub ?? s.ownSub}
+          value={<IconTile icon={based?.icon ?? 'calendar-plus'} tone="accent" size={32} />}
           chevron
           onClick={() => openDrawer('based')}
         />
       </GroupedList>
       <GroupedList header={s.what}>
         <ListRow
-          icon={<IconTile icon={d.icon} tone={d.color as never} size={32} />}
           label={s.icon}
-          value={iconName}
+          value={
+            <span className="ul-flex ua-center ug-8">
+              {iconName}
+              <IconTile icon={d.icon} tone={d.color as never} size={32} />
+            </span>
+          }
           chevron
           onClick={() => openDrawer('icon')}
         />
         <ListRow
-          icon={<IconTile icon="palette" tone={d.color as never} size={32} />}
           label={s.color}
-          value={s.cols[PTONES.indexOf(d.color)]}
+          value={
+            <span className="ul-flex ua-center ug-8">
+              {s.cols[PTONES.indexOf(d.color)]}
+              <IconTile icon="palette" tone={d.color as never} size={32} />
+            </span>
+          }
           chevron
           onClick={() => openDrawer('color')}
         />

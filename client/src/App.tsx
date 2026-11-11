@@ -1666,6 +1666,7 @@ function AppMain() {
         />
       )}
       {activeOverlay?.screen === 'theme-settings' && <ThemeSettingsView onClose={closeOverlay} />}
+      {plannerHost?.Layer && <plannerHost.Layer />}
       {activeOverlay?.screen === 'planner' && plannerHost?.Page && (
         <plannerHost.Page onClose={closeOverlay} />
       )}

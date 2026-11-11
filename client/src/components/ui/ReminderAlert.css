@@ -1,0 +1,137 @@
+.uira {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 72px 24px 36px;
+  text-align: center;
+  min-height: 100%;
+  box-sizing: border-box;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+.uira-rings {
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  margin: 60px 0 56px;
+  color: var(--t-base);
+}
+.uira-ic {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  font-size: 72px;
+  line-height: 1;
+}
+.uira-r {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--t-base);
+  opacity: 0;
+  animation: uiraRipple 2.4s ease-out infinite;
+}
+.uira-r--2 {
+  animation-delay: 0.8s;
+}
+.uira-r--3 {
+  animation-delay: 1.6s;
+}
+@keyframes uiraRipple {
+  from {
+    transform: scale(0.6);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .uira-r {
+    animation: none;
+    opacity: 0.25;
+  }
+}
+.uira-rings .uicall-rings-r {
+  display: none;
+}
+.uira-t {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+.uira-t b {
+  font-size: var(--fs-24, 24px);
+  line-height: 1.2;
+}
+.uira-k {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: var(--fs-13, 13px);
+  color: var(--color-text-muted);
+}
+.uira-snz {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+.uira-act {
+  display: flex;
+  gap: 36px;
+  margin-top: auto;
+  width: 100%;
+  justify-content: center;
+}
+.uira .uibanner {
+  align-self: stretch;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  text-align: left;
+}
+.uira--card {
+  flex-direction: row;
+  padding: 14px 16px;
+  text-align: left;
+  gap: 14px;
+  min-height: 0;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl, 20px);
+  background: var(--color-surface);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+.uira--card .uira-rings {
+  margin: 0;
+  width: 48px;
+  height: 48px;
+  flex: none;
+}
+.uira--card .uira-ic {
+  font-size: 36px;
+}
+.uira--card .uira-t {
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+.uira--card .uira-t b {
+  font-size: var(--fs-16, 16px);
+}
+.uira--card .uira-k {
+  font-size: var(--fs-12, 12px);
+}
+.uira--card .uira-act {
+  margin: 0;
+  gap: 8px;
+  width: auto;
+  flex: none;
+}

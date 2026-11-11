@@ -9,11 +9,13 @@ import { provide, trackerReady } from '../trackerRt';
 // Every add-on's "Based on" source: one file each in plannerSources/, picked up here (no list to edit).
 import.meta.glob('../plannerSources/*.tsx', { eager: true });
 import { PlannerPage } from './PlannerPage';
+import { RingLayer } from './RingLayer';
 import { getPlans, getPrefs, startPlannerSync } from './sync';
 import { STRINGS } from './strings';
 
 provide(plannerHost, {
   Page: PlannerPage,
+  Layer: RingLayer,
   exportFiles: () => [
     {
       name: 'planner-plans.json',

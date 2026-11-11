@@ -15,13 +15,20 @@ import { isTrackerReady, onTrackerReady } from './trackerRt';
 export interface PlannerHost {
   /** The Planner screen (an overlay of Gym). */
   Page: ComponentType<{ onClose: () => void }> | null;
+  /** Always mounted while Planner is installed: the persistent reminders that ring over the app. */
+  Layer: ComponentType | null;
   /** The one plain row in More. */
   moreItem: ((locale: LocaleId, open: () => void) => MoreMenuItem) | null;
   /** The plans and availability, decrypted on this device, for the data export. */
   exportFiles: (() => ExportFile[]) | null;
 }
 
-export const plannerHost: PlannerHost = { Page: null, moreItem: null, exportFiles: null };
+export const plannerHost: PlannerHost = {
+  Page: null,
+  Layer: null,
+  moreItem: null,
+  exportFiles: null,
+};
 
 // The data export always names Planner: its files when the chunk is loaded, otherwise "not included" (the data stays stored).
 registerAddonExport('planner', () =>
