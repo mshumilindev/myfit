@@ -2,7 +2,12 @@ import { useMemo } from 'react';
 import { useAddonOrBase } from '../addons/enabledSet';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { IconTile } from '../components/ui/IconTile';
-import { programDayItems, programDayName, useProgramMine } from '../data/programMine';
+import {
+  programDayHasPlan,
+  programDayItems,
+  programDayName,
+  useProgramMine,
+} from '../data/programMine';
 import { useT } from '../i18n';
 import { registerPlannerSource, type PlannerSourceProps } from '../plannerSources';
 import { Icon } from '../ui';
@@ -18,8 +23,8 @@ function Group({ selectedId, onPick }: PlannerSourceProps) {
   const days = useMemo(
     () =>
       gymOn && assignment && active
-        ? [...new Set(assignment.program.items.map((i) => i.day))]
-            .sort((a, b) => a - b)
+        ? [1, 2, 3, 4, 5, 6, 7]
+            .filter((day) => programDayHasPlan(assignment, day))
             .map((day) => ({
               day,
               name: programDayName(assignment, day, t.progDay),
@@ -29,6 +34,7 @@ function Group({ selectedId, onPick }: PlannerSourceProps) {
     [gymOn, assignment, active, t],
   );
   if (!gymOn) return null;
+  const todayDay = ((new Date().getDay() + 6) % 7) + 1;
   if (!assignment || !days.length)
     return (
       <GroupedList surface="raised" header={t.plannerSrcProgram}>
@@ -54,7 +60,12 @@ function Group({ selectedId, onPick }: PlannerSourceProps) {
           key={d.day}
           icon={<IconTile icon="barbell" tone="active" size={32} />}
           label={d.name}
-          sub={`${weekdayShort(locale, d.day)} · ${t.nExercises(d.n)}`}
+          sub={[
+            d.day === todayDay ? t.today : weekdayShort(locale, d.day),
+            d.n ? t.nExercises(d.n) : '',
+          ]
+            .filter(Boolean)
+            .join(' · ')}
           trailing={selectedId === `program:${d.day}` ? <Icon name="check" /> : undefined}
           onClick={() =>
             onPick({
