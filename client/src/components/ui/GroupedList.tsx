@@ -8,6 +8,7 @@
 import type { AriaAttributes, MouseEvent, ReactNode } from 'react';
 import { Icon } from '../../ui';
 import { toneClass, type Tone } from './tones';
+import type { GuideFieldProps } from './SaveGuide';
 import './GroupedList.css';
 import './Chamfer.css';
 import './Floor.css';
@@ -150,6 +151,8 @@ export interface ListRowProps extends RowAria {
   /** Bold label (Brass Glass): the row's name outweighs its sub-line. */
   strong?: boolean;
   className?: string;
+  /** `useSaveGuide().field(id)` of a required field: the reserved dashed frame and its dismiss press. */
+  guide?: GuideFieldProps;
 }
 
 export function ListRow(props: ListRowProps) {
@@ -179,9 +182,14 @@ export function ListRow(props: ListRowProps) {
     id,
     dense,
     strong,
-    className,
+    className: classNameProp,
+    guide,
     ...aria
   } = props;
+  const className = [classNameProp, guide?.className].filter(Boolean).join(' ') || undefined;
+  const guideAttrs = guide
+    ? { onClickCapture: guide.onClickCapture, 'data-guide-hit': guide['data-guide-hit'] }
+    : {};
   const cls = [
     'uirow',
     icon ? 'has-icon' : '',
@@ -239,6 +247,7 @@ export function ListRow(props: ListRowProps) {
         className={cls}
         onClick={onClick}
         disabled={disabled}
+        {...guideAttrs}
         {...aria}
       >
         {inner}
@@ -246,12 +255,12 @@ export function ListRow(props: ListRowProps) {
     );
   if (as === 'label')
     return (
-      <label className={cls} id={id} role={role} {...aria}>
+      <label className={cls} id={id} role={role} {...guideAttrs} {...aria}>
         {inner}
       </label>
     );
   return (
-    <div className={cls} id={id} role={role} {...aria}>
+    <div className={cls} id={id} role={role} {...guideAttrs} {...aria}>
       {inner}
     </div>
   );

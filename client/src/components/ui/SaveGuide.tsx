@@ -1,81 +1,127 @@
-import { useEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 
 import { Button } from './Button';
 import type { ButtonProps } from './Button';
 
 import './SaveGuide.css';
 
-/** Put this class on the first unfilled field: the Guide outline (tone `guide`, no text). */
-export const GUIDE_OUTLINE_CLASS = 'uisg-hit';
-
-export interface SaveGuideItem {
+/**
+ * SaveGuide: a Save that explains itself (Guide family, tone `guide`).
+ *
+ * Use it wherever Save is blocked until required values are filled (never a bare `disabled` Save):
+ *
+ *   const guide = useSaveGuide([{ id: 'title', label: 'Title', done: !!title.trim() }]);
+ *   <ListRow {...} guide={guide.field('title')} />        // or spread guide.field('x') on any element
+ *   <SaveGuide guide={guide} label="Save" heading="Still needed" onSave={save} />
+ *
+ * Flow: while something is missing Save carries one dot per item (done / next / open) and stays
+ * pressable (`aria-disabled`). A press raises the flag with what is still needed and dashes the first
+ * missing field. Only a press on that dashed field (or Esc) dismisses it, and the field gets focus;
+ * a press anywhere else does nothing. The flag and the dashes follow the form live and vanish for good
+ * when everything is filled.
+ */
+export interface GuideItem {
   id: string;
   /** What is still needed, as the flag lists it. */
   label: string;
   done: boolean;
+  /** How to put the cursor in this item; default: the first input / button inside the field element. */
+  focus?: () => void;
+}
+
+/** Props for the element of a required field: the reserved dashed frame + the dismiss/focus press. */
+export interface GuideFieldProps {
+  className: string;
+  onClickCapture: (e: MouseEvent<HTMLElement>) => void;
+  'data-guide-hit'?: '';
+}
+
+export interface SaveGuideApi {
+  items: GuideItem[];
+  missing: GuideItem[];
+  ready: boolean;
+  /** The flag is up and something is still missing. */
+  active: boolean;
+  /** The first missing item (the one that is dashed). */
+  firstId: string | null;
+  /** A press on Save: returns true when nothing is missing (the caller saves), otherwise raises the flag. */
+  press: () => boolean;
+  dismiss: () => void;
+  /** Spread on the element of the required field `id` (ListRow takes it as its `guide` prop). */
+  field: (id: string) => GuideFieldProps;
+}
+
+const FOCUSABLE = 'input, textarea, select, button, [tabindex]:not([tabindex="-1"])';
+
+export function useSaveGuide(items: GuideItem[]): SaveGuideApi {
+  const [open, setOpen] = useState(false);
+  const missing = useMemo(() => items.filter((i) => !i.done), [items]);
+  const ready = missing.length === 0;
+  const active = open && !ready;
+  const first = missing[0];
+  const firstId = first?.id ?? null;
+
+  // Everything filled: the guide is over (a later edit that empties a field starts from a calm form).
+  if (ready && open) setOpen(false);
+
+  const dismiss = useCallback(() => setOpen(false), []);
+  const press = useCallback(() => {
+    if (ready) return true;
+    setOpen(true);
+    return false;
+  }, [ready]);
+
+  useEffect(() => {
+    if (!active) return;
+    const esc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', esc);
+    return () => document.removeEventListener('keydown', esc);
+  }, [active]);
+
+  const field = useCallback(
+    (id: string): GuideFieldProps => {
+      const hit = active && id === firstId;
+      return {
+        className: `uisg-f${hit ? ' is-hit' : ''}`,
+        ...(hit ? { 'data-guide-hit': '' as const } : {}),
+        onClickCapture: (e) => {
+          if (!hit) return;
+          setOpen(false);
+          const el = e.currentTarget;
+          const item = items.find((i) => i.id === id);
+          // after the press itself has settled, so a label / button row does not steal the focus back
+          queueMicrotask(() => {
+            if (item?.focus) item.focus();
+            else el.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+          });
+        },
+      };
+    },
+    [active, firstId, items],
+  );
+
+  return { items, missing, ready, active, firstId, press, dismiss, field };
 }
 
 export interface SaveGuideProps extends Omit<ButtonProps, 'disabled' | 'onClick' | 'children'> {
+  guide: SaveGuideApi;
   label: ReactNode;
-  /** One entry per required thing, in form order. */
-  items: SaveGuideItem[];
   /** Header of the flag (localised by the caller). */
   heading: string;
   /** Runs only when nothing is missing. */
   onSave: () => void;
-  /** Press on the unavailable Save: the id of the first missing item (the form outlines that field). */
-  onReveal?: (firstMissingId: string | null) => void;
 }
 
-/**
- * A Save that explains itself. While something required is missing it carries one dot per item
- * (done / next / open), stays pressable (`aria-disabled`) and, on press, raises a flag with what is
- * still needed; the form outlines the first missing field. All dots vanish when everything is filled.
- * Signal colour = the `guide` tone: Learn colour of the theme, reserved pink when that is monochrome.
- */
-export function SaveGuide({
-  label,
-  items,
-  heading,
-  onSave,
-  onReveal,
-  className,
-  ...rest
-}: SaveGuideProps) {
-  const missing = items.filter((i) => !i.done);
-  const ready = missing.length === 0;
-  const [open, setOpen] = useState(false);
-  const wrap = useRef<HTMLDivElement>(null);
-  const firstId = missing[0]?.id ?? null;
-
-  // The flag follows the form: it closes (and the outline goes) when everything is filled.
-  if (ready && open) setOpen(false);
-  useEffect(() => {
-    if (ready) onReveal?.(null);
-  }, [ready, onReveal]);
-  useEffect(() => {
-    if (!open) return;
-    const away = (e: PointerEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) {
-        setOpen(false);
-        onReveal?.(null);
-      }
-    };
-    document.addEventListener('pointerdown', away);
-    return () => document.removeEventListener('pointerdown', away);
-  }, [open, onReveal]);
-
-  const press = () => {
-    if (ready) return onSave();
-    setOpen(true);
-    onReveal?.(firstId);
-  };
-
+export function SaveGuide({ guide, label, heading, onSave, className, ...rest }: SaveGuideProps) {
+  const flagId = useId();
+  const { items, missing, ready, active, firstId } = guide;
   return (
-    <div ref={wrap} className="uisg uit--guide">
-      {open && !ready && (
-        <div className="uisg-flag" role="status">
+    <div className="uisg uit--guide">
+      {active && (
+        <div className="uisg-flag" role="status" id={flagId}>
           <b className="uisg-head">{heading}</b>
           {missing.map((i) => (
             <span key={i.id}>{i.label}</span>
@@ -86,7 +132,10 @@ export function SaveGuide({
         {...rest}
         className={['uisg-btn', ready ? '' : 'is-off', className ?? ''].filter(Boolean).join(' ')}
         aria-disabled={ready ? undefined : true}
-        onClick={press}
+        aria-describedby={active ? flagId : undefined}
+        onClick={() => {
+          if (guide.press()) onSave();
+        }}
       >
         {label}
         {!ready && (
