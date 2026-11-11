@@ -96,37 +96,28 @@
    The dashes are an animated SVG used as a mask: the colour stays the token, the corners are round. */
 .uisg-f {
   position: relative;
-  isolation: isolate;
+  transition: background-color 0.18s ease;
 }
-.uisg-f::before,
 .uisg-f::after {
   content: '';
   position: absolute;
+  inset: 2px;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.18s ease;
-}
-.uisg-f::before {
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background: var(--color-guide-tint);
-}
-.uisg-f::after {
-  inset: 2px;
   background: var(--color-guide);
   -webkit-mask: url('data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3Crect%20x%3D%271%27%20y%3D%271%27%20rx%3D%2711%27%20ry%3D%2711%27%20style%3D%27width%3Acalc%28100%25%20-%202px%29%3Bheight%3Acalc%28100%25%20-%202px%29%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%272%27%20stroke-dasharray%3D%278%206%27%3E%3Canimate%20attributeName%3D%27stroke-dashoffset%27%20from%3D%2714%27%20to%3D%270%27%20dur%3D%270.8s%27%20repeatCount%3D%27indefinite%27/%3E%3C/rect%3E%3C/svg%3E') 0 0 / 100% 100% no-repeat;
   mask: url('data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3Crect%20x%3D%271%27%20y%3D%271%27%20rx%3D%2711%27%20ry%3D%2711%27%20style%3D%27width%3Acalc%28100%25%20-%202px%29%3Bheight%3Acalc%28100%25%20-%202px%29%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%272%27%20stroke-dasharray%3D%278%206%27%3E%3Canimate%20attributeName%3D%27stroke-dashoffset%27%20from%3D%2714%27%20to%3D%270%27%20dur%3D%270.8s%27%20repeatCount%3D%27indefinite%27/%3E%3C/rect%3E%3C/svg%3E') 0 0 / 100% 100% no-repeat;
 }
 .uisg-f.is-hit {
   cursor: pointer;
+  background-color: color-mix(in srgb, var(--color-guide) 14%, transparent);
 }
-.uisg-f.is-hit::before,
 .uisg-f.is-hit::after {
   opacity: 1;
 }
 @media (prefers-reduced-motion: reduce) {
-  .uisg-f::before,
+  .uisg-f,
   .uisg-f::after {
     transition: none;
   }
