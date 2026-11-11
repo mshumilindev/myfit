@@ -119,9 +119,9 @@ export function SaveGuide({ guide, label, heading, onSave, className, ...rest }:
   const flagId = useId();
   const { items, missing, ready, active, firstId } = guide;
   return (
-    <div className="uisg uit--guide">
+    <div className="uisg">
       {active && (
-        <div className="uisg-flag" role="status" id={flagId}>
+        <div className="uisg-flag uit--guide" role="status" id={flagId}>
           <b className="uisg-head">{heading}</b>
           {missing.map((i) => (
             <span key={i.id}>{i.label}</span>
