@@ -41,6 +41,18 @@ export function playbookAvailable(): boolean {
   }
 }
 
+/**
+ * Planner: the whole feature (screens, More row, widgets, reminders, trainer availability) sits in a lazy chunk that loads only
+ * while it is installed; the core keeps nothing but this gate. Its data stays stored and comes back on re-install.
+ */
+export function plannerAvailable(): boolean {
+  try {
+    return addonAvailable('planner');
+  } catch {
+    return false;
+  }
+}
+
 /** Apex ranks (standards tiers): without the module nothing derives a rank or tier, not even inside other widgets. */
 export function apexRanksAvailable(): boolean {
   try {
@@ -56,4 +68,9 @@ export function useGoalsOn(): boolean {
 
 export function usePlaybookOn(): boolean {
   return useAddonOrBase('playbook');
+}
+
+/** The same Planner gate for components. */
+export function usePlannerOn(): boolean {
+  return useAddonOrBase('planner');
 }

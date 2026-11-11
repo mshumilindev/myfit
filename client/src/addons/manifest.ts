@@ -113,6 +113,7 @@ export const ADDONS: readonly AddonManifest[] = [
   { id: 'activities', kind: 'addon', requires: 'gym', tone: 9, roles: ALL, category: 'workouts' },
   { id: 'home-sets', kind: 'addon', requires: 'gym', tone: 3, roles: ALL, category: 'workouts' },
   { id: 'goals', kind: 'addon', requires: 'gym', tone: 5, roles: ALL, category: 'workouts' },
+  { id: 'planner', kind: 'addon', requires: 'gym', tone: 1, roles: ALL, category: 'workouts' },
   { id: 'playbook', kind: 'addon', requires: 'gym', tone: 7, roles: ALL, category: 'workouts' },
   { id: 'atlas', kind: 'addon', requires: 'gym', tone: 6, roles: ALL, category: 'insights' },
   { id: 'apex', kind: 'app', requires: 'gym', tone: 8, roles: ALL, category: 'insights' },

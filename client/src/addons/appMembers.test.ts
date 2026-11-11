@@ -41,7 +41,7 @@ describe('app members come from `parent` / `requires`', () => {
   });
   it('a new item joins its app by itself (no list to edit)', () => {
     const extra: AddonManifest = {
-      id: 'planner',
+      id: 'fake-addon',
       kind: 'addon',
       requires: 'gym',
       tone: 1,
@@ -49,16 +49,16 @@ describe('app members come from `parent` / `requires`', () => {
       category: 'workouts',
     };
     const extraMod: AddonManifest = {
-      id: 'planner-x',
+      id: 'fake-addon-x',
       kind: 'module',
-      parent: 'planner',
+      parent: 'fake-addon',
       tone: 1,
       roles: ['member'],
       category: 'workouts',
     };
     const list = [...ADDONS, extra, extraMod];
-    expect(itemsOfApp('gym', list).map((a) => a.id)).toContain('planner');
-    expect(itemsOfApp('planner', list).map((a) => a.id)).toContain('planner-x');
-    expect(itemsOfApp('gym').map((a) => a.id)).not.toContain('planner');
+    expect(itemsOfApp('gym', list).map((a) => a.id)).toContain('fake-addon');
+    expect(itemsOfApp('fake-addon', list).map((a) => a.id)).toContain('fake-addon-x');
+    expect(itemsOfApp('gym').map((a) => a.id)).not.toContain('fake-addon');
   });
 });

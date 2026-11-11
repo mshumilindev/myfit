@@ -45,6 +45,11 @@ export const EXCLUSION: Readonly<Record<string, Exclusion>> = {
     files: ['addons/maskStore.ts', 'addons/activitiesGate.ts'],
     names: ['activities'],
   },
+  planner: {
+    via: ['gate'],
+    files: ['addons/featureGates.ts'],
+    names: ['plannerAvailable', 'usePlannerOn'],
+  },
   goals: {
     via: ['state-mask', 'gate'],
     files: ['addons/maskStore.ts', 'addons/featureGates.ts'],
