@@ -141,7 +141,7 @@ export function PlanForm(p: {
                 clearLabel={s.clearSearch}
               />
               {icons.length ? (
-                <div className="pl-ip" role="radiogroup" aria-label={s.icon}>
+                <div className="pl-ip pl-ip--scroll" role="radiogroup" aria-label={s.icon}>
                   {icons.map((n) => (
                     <button
                       key={n}

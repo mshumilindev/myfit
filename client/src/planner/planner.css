@@ -119,17 +119,83 @@
 }
 
 /* new kit tones for event colours: --t-* like every uit--* tone, derived from one hue so every theme re-skins them */
-.uit--red { --t-base: oklch(0.62 0.2 25); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
-.uit--orange { --t-base: oklch(0.72 0.17 55); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
-.uit--yellow { --t-base: oklch(0.84 0.16 92); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
-.uit--lime { --t-base: oklch(0.76 0.19 128); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
-.uit--green { --t-base: oklch(0.62 0.17 152); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
-.uit--teal { --t-base: oklch(0.64 0.12 190); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
-.uit--blue { --t-base: oklch(0.6 0.18 255); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
-.uit--indigo { --t-base: oklch(0.55 0.2 278); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
-.uit--purple { --t-base: oklch(0.58 0.2 310); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
-.uit--pink { --t-base: oklch(0.68 0.2 355); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
-.uit--gray { --t-base: oklch(0.62 0.01 250); --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface)); --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text)); --t-line: color-mix(in srgb, var(--t-base) 40%, transparent); --t-on: var(--color-bg); }
+.uit--red {
+  --t-base: oklch(0.62 0.2 25);
+  --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface));
+  --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text));
+  --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
+  --t-on: var(--color-bg);
+}
+.uit--orange {
+  --t-base: oklch(0.72 0.17 55);
+  --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface));
+  --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text));
+  --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
+  --t-on: var(--color-bg);
+}
+.uit--yellow {
+  --t-base: oklch(0.84 0.16 92);
+  --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface));
+  --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text));
+  --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
+  --t-on: var(--color-bg);
+}
+.uit--lime {
+  --t-base: oklch(0.76 0.19 128);
+  --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface));
+  --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text));
+  --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
+  --t-on: var(--color-bg);
+}
+.uit--green {
+  --t-base: oklch(0.62 0.17 152);
+  --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface));
+  --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text));
+  --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
+  --t-on: var(--color-bg);
+}
+.uit--teal {
+  --t-base: oklch(0.64 0.12 190);
+  --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface));
+  --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text));
+  --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
+  --t-on: var(--color-bg);
+}
+.uit--blue {
+  --t-base: oklch(0.6 0.18 255);
+  --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface));
+  --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text));
+  --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
+  --t-on: var(--color-bg);
+}
+.uit--indigo {
+  --t-base: oklch(0.55 0.2 278);
+  --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface));
+  --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text));
+  --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
+  --t-on: var(--color-bg);
+}
+.uit--purple {
+  --t-base: oklch(0.58 0.2 310);
+  --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface));
+  --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text));
+  --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
+  --t-on: var(--color-bg);
+}
+.uit--pink {
+  --t-base: oklch(0.68 0.2 355);
+  --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface));
+  --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text));
+  --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
+  --t-on: var(--color-bg);
+}
+.uit--gray {
+  --t-base: oklch(0.62 0.01 250);
+  --t-tint: color-mix(in srgb, var(--t-base) 18%, var(--color-surface));
+  --t-text: color-mix(in srgb, var(--t-base) 55%, var(--color-text));
+  --t-line: color-mix(in srgb, var(--t-base) 40%, transparent);
+  --t-on: var(--color-bg);
+}
 
 /* the app's scroll container (.screen) without its own padding: the page carries the design's 16px */
 .pl-screen {
@@ -141,4 +207,10 @@
   flex: 1 1 100%;
   border-top: 0;
   padding: 0;
+}
+/* in the icon drawer only the grid scrolls; the title, search and Cancel / Save stay in view (owner 11.11) */
+.pl-ip--scroll {
+  max-height: max(200px, min(60dvh, calc(100dvh - 330px)));
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
