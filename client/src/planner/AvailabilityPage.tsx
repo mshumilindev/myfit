@@ -5,6 +5,8 @@ import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { IconTile } from '../components/ui/IconTile';
 import { PageHead } from '../components/ui/PageHead';
 import { ConfirmDialog, Sheet, SheetFoot, SheetPin } from '../components/ui/Overlays';
+import { SaveGuide, useSaveGuide } from '../components/ui/SaveGuide';
+import { StickyActionBar } from '../components/ui/StickyActionBar';
 import { Switch } from '../components/ui/Switch';
 import { restPeriodShown } from '../healthAddons';
 import { useT } from '../i18n';
@@ -77,8 +79,11 @@ export function AvailabilityPage({ onBack }: { onBack: () => void }) {
       <DayEditor
         day={day}
         week={week}
-        onChange={(w) => write({ availability: w })}
-        onDone={() => setDayOpen(null)}
+        onSave={(w) => {
+          write({ availability: w });
+          setDayOpen(null);
+        }}
+        onClose={() => setDayOpen(null)}
       />
     );
   }
@@ -177,8 +182,8 @@ const SCOPE_DAYS: Record<Scope, readonly number[]> = {
 function DayEditor(p: {
   day: number;
   week: PlannerPrefs['availability'];
-  onChange: (w: PlannerPrefs['availability']) => void;
-  onDone: () => void;
+  onSave: (w: PlannerPrefs['availability']) => void;
+  onClose: () => void;
 }) {
   const { t, locale } = useT();
   const s = STRINGS[locale];
@@ -186,14 +191,20 @@ function DayEditor(p: {
   const [removing, setRemoving] = useState<number | null>(null);
   // Nothing is picked until the person picks: an edit then only changes this day.
   const [scope, setScope] = useState<Scope | null>(null);
-  const ranges = dayRanges(p.week, p.day);
+  // Edits go to a copy; Save writes it, Back / Cancel drop it (after asking when something changed).
+  const [week, setWeek] = useState(p.week);
+  const [askLeave, setAskLeave] = useState(false);
+  const dirty = JSON.stringify(week) !== JSON.stringify(p.week);
+  const guide = useSaveGuide([{ id: 'hours', label: s.needChange, done: dirty }]);
+  const leave = () => (dirty ? setAskLeave(true) : p.onClose());
+  const ranges = dayRanges(week, p.day);
   const reach = [...new Set([p.day, ...(scope ? SCOPE_DAYS[scope] : [])])];
-  const commit = (next: Range[]) => p.onChange(reach.reduce((w, d) => setDay(w, d, next), p.week));
+  const commit = (next: Range[]) => setWeek(reach.reduce((w, d) => setDay(w, d, next), week));
 
   const pick = (next: Scope) => {
     setScope(next);
     const days = [...new Set([p.day, ...SCOPE_DAYS[next]])];
-    if (next !== 'only') p.onChange(copyDay(p.week, p.day, days));
+    if (next !== 'only') setWeek(copyDay(week, p.day, days));
   };
 
   const save = (e: Editing) => {
@@ -212,69 +223,87 @@ function DayEditor(p: {
   const name = weekdayName(locale, p.day);
 
   return (
-    <div className="screen pl-screen">
-      <div className="pl-page">
-        <PageHead
-          title={name}
-          actions={
-            <Button variant="secondary" size="sm" onClick={p.onDone}>
-              {s.done}
-            </Button>
-          }
-        />
-        <DayBar
-          wide
-          ranges={ranges}
-          label={ranges.length ? fill(s.freeBar, { t: rangesText(ranges) }) : s.notFreeBar}
-        />
-        {ranges.map(([a, b], i) => (
-          <GroupedList key={`${a}-${b}`} header={rangesText([[a, b]])}>
+    <>
+      <div className="screen pl-screen">
+        <div className="pl-page">
+          <PageHead back={{ label: t.backAction, onClick: leave }} title={name} />
+          <DayBar
+            wide
+            ranges={ranges}
+            label={ranges.length ? fill(s.freeBar, { t: rangesText(ranges) }) : s.notFreeBar}
+          />
+          {ranges.map(([a, b], i) => (
+            <GroupedList key={`${a}-${b}`} header={rangesText([[a, b]])}>
+              <ListRow
+                label={s.fromL}
+                value={timeText(a)}
+                valueStrong
+                chevron
+                onClick={() => setEditing({ index: i, from: a, to: b, step: 'from', chain: false })}
+              />
+              <ListRow
+                label={s.toL}
+                value={timeText(b)}
+                valueStrong
+                chevron
+                onClick={() => setEditing({ index: i, from: a, to: b, step: 'to', chain: false })}
+              />
+              <ListRow action tone="danger" label={s.removeHours} onClick={() => setRemoving(i)} />
+            </GroupedList>
+          ))}
+          <GroupedList>
             <ListRow
-              label={s.fromL}
-              value={timeText(a)}
-              valueStrong
+              icon={<IconTile tone="accent" size={32} icon="plus" />}
+              label={s.addHours}
+              guide={guide.field('hours')}
               chevron
-              onClick={() => setEditing({ index: i, from: a, to: b, step: 'from', chain: false })}
+              onClick={() => setEditing(fresh())}
             />
-            <ListRow
-              label={s.toL}
-              value={timeText(b)}
-              valueStrong
-              chevron
-              onClick={() => setEditing({ index: i, from: a, to: b, step: 'to', chain: false })}
-            />
-            <ListRow action tone="danger" label={s.removeHours} onClick={() => setRemoving(i)} />
           </GroupedList>
-        ))}
-        <GroupedList>
-          <ListRow
-            icon={<IconTile tone="accent" size={32} icon="plus" />}
-            label={s.addHours}
-            chevron
-            onClick={() => setEditing(fresh())}
-          />
-        </GroupedList>
-        <GroupedList header={s.applyTo}>
-          <ListRow
-            label={fill(s.onlyDay, { d: name })}
-            check={scope === 'only'}
-            onClick={() => pick('only')}
-          />
-          <ListRow
-            label={s.weekdaysL}
-            sub={s.weekdaysSub}
-            check={scope === 'weekdays'}
-            onClick={() => pick('weekdays')}
-          />
-          <ListRow
-            label={s.weekendsL}
-            sub={s.weekendsSub}
-            check={scope === 'weekends'}
-            onClick={() => pick('weekends')}
-          />
-          <ListRow label={s.everyDay} check={scope === 'every'} onClick={() => pick('every')} />
-        </GroupedList>
+          <GroupedList header={s.applyTo}>
+            <ListRow
+              label={fill(s.onlyDay, { d: name })}
+              check={scope === 'only'}
+              onClick={() => pick('only')}
+            />
+            <ListRow
+              label={s.weekdaysL}
+              sub={s.weekdaysSub}
+              check={scope === 'weekdays'}
+              onClick={() => pick('weekdays')}
+            />
+            <ListRow
+              label={s.weekendsL}
+              sub={s.weekendsSub}
+              check={scope === 'weekends'}
+              onClick={() => pick('weekends')}
+            />
+            <ListRow label={s.everyDay} check={scope === 'every'} onClick={() => pick('every')} />
+          </GroupedList>
+        </div>
       </div>
+      <StickyActionBar>
+        <Button variant="secondary" onClick={leave}>
+          {t.cancel}
+        </Button>
+        <SaveGuide
+          guide={guide}
+          label={t.save}
+          heading={s.stillNeeded}
+          onSave={() => p.onSave(week)}
+        />
+      </StickyActionBar>
+      {askLeave && (
+        <ConfirmDialog
+          danger
+          title={s.discardT}
+          body={s.discardHoursB}
+          confirmLabel={s.discardOk}
+          cancelLabel={s.keepEditing}
+          onConfirm={p.onClose}
+          onCancel={() => setAskLeave(false)}
+        />
+      )}
       {editing && (
         <TimeSheet
           value={editing}
@@ -305,7 +334,7 @@ function DayEditor(p: {
           onCancel={() => setRemoving(null)}
         />
       )}
-    </div>
+    </>
   );
 }
 

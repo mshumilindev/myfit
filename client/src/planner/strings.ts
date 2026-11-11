@@ -50,6 +50,8 @@ export interface PlannerStrings {
   discardB: string;
   discardOk: string;
   keepEditing: string;
+  discardHoursB: string;
+  needChange: string;
   more: string;
   fewer: string;
   when: string;
@@ -187,6 +189,8 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     discardB: 'Your changes to this plan will be lost.',
     discardOk: 'Discard',
     keepEditing: 'Keep editing',
+    discardHoursB: 'Your changes to these hours will be lost.',
+    needChange: 'Add hours',
     more: 'More options',
     fewer: 'Fewer options',
     when: 'Schedule',
@@ -335,6 +339,8 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     discardB: 'Зміни в цьому плані буде втрачено.',
     discardOk: 'Скасувати',
     keepEditing: 'Продовжити',
+    discardHoursB: 'Ваші зміни цих годин буде втрачено.',
+    needChange: 'Додайте години',
     more: 'Більше опцій',
     fewer: 'Менше опцій',
     when: 'Розклад',
@@ -483,6 +489,8 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     discardB: 'Zmiany w tym planie zostaną utracone.',
     discardOk: 'Odrzuć',
     keepEditing: 'Edytuj dalej',
+    discardHoursB: 'Zmiany w tych godzinach zostaną utracone.',
+    needChange: 'Dodaj godziny',
     more: 'Więcej opcji',
     fewer: 'Mniej opcji',
     when: 'Harmonogram',
@@ -631,6 +639,8 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     discardB: 'Šio plano pakeitimai bus prarasti.',
     discardOk: 'Atmesti',
     keepEditing: 'Tęsti redagavimą',
+    discardHoursB: 'Šių valandų pakeitimai bus prarasti.',
+    needChange: 'Pridėkite valandas',
     more: 'Daugiau parinkčių',
     fewer: 'Mažiau parinkčių',
     when: 'Tvarkaraštis',
@@ -779,6 +789,8 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     discardB: 'Selle plaani muudatused lähevad kaotsi.',
     discardOk: 'Loobu',
     keepEditing: 'Jätka muutmist',
+    discardHoursB: 'Selle aja muudatused lähevad kaotsi.',
+    needChange: 'Lisage ajad',
     more: 'Rohkem valikuid',
     fewer: 'Vähem valikuid',
     when: 'Ajakava',

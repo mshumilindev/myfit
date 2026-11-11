@@ -107,6 +107,7 @@ describe('AvailabilityPage', () => {
     fireEvent.click(
       within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Remove these hours' }),
     );
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(lastSaved().availability[0]).toEqual([[1080, 1260]]);
   });
 
@@ -118,6 +119,9 @@ describe('AvailabilityPage', () => {
     expect(screen.getByText('Minutes')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     expect(screen.getByRole('heading', { name: 'To' })).toBeTruthy();
+    expect(state.saved).toHaveLength(0);
+    // the sheet's Save is the last one in the page (it is a portal); then the page's own Save writes
+    fireEvent.click(screen.getAllByRole('button', { name: 'Save' }).at(-1)!);
     expect(state.saved).toHaveLength(0);
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(lastSaved().availability[0]).toEqual([
@@ -131,6 +135,7 @@ describe('AvailabilityPage', () => {
     render(<AvailabilityPage onBack={() => {}} />);
     fireEvent.click(screen.getByText('Monday'));
     fireEvent.click(screen.getByText('Weekends'));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     const a = lastSaved().availability;
     for (const d of [5, 6])
       expect(a[d]).toEqual([
@@ -144,6 +149,7 @@ describe('AvailabilityPage', () => {
     render(<AvailabilityPage onBack={() => {}} />);
     fireEvent.click(screen.getByText('Monday'));
     fireEvent.click(screen.getByText('Weekdays'));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     const a = lastSaved().availability;
     for (const d of [0, 1, 2, 3, 4])
       expect(a[d]).toEqual([
@@ -153,10 +159,37 @@ describe('AvailabilityPage', () => {
     expect(a[5]).toEqual([[540, 780]]);
   });
 
-  it('Done goes back to the week', () => {
+  it('nothing is written until Save; with no change Save only explains itself (SaveGuide)', () => {
     render(<AvailabilityPage onBack={() => {}} />);
     fireEvent.click(screen.getByText('Monday'));
-    fireEvent.click(screen.getByText('Done'));
+    const save = () => screen.getByRole('button', { name: 'Save' });
+    expect(save().getAttribute('aria-disabled')).toBe('true');
+    fireEvent.click(save());
+    expect(screen.getAllByText('Add hours').length).toBeGreaterThan(1);
+    expect(state.saved).toHaveLength(0);
+    fireEvent.click(screen.getByText('Weekdays'));
+    expect(state.saved).toHaveLength(0);
+    expect(save().getAttribute('aria-disabled')).not.toBe('true');
+  });
+
+  it('Back with no changes goes straight to the week', () => {
+    render(<AvailabilityPage onBack={() => {}} />);
+    fireEvent.click(screen.getByText('Monday'));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(screen.getByText('Weekly hours')).toBeTruthy();
+  });
+
+  it('Cancel with changes asks first; Discard drops them, Keep editing stays', () => {
+    render(<AvailabilityPage onBack={() => {}} />);
+    fireEvent.click(screen.getByText('Monday'));
+    fireEvent.click(screen.getByText('Every day'));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    const dialog = screen.getByRole('alertdialog');
+    fireEvent.click(within(dialog).getByText('Keep editing'));
+    expect(screen.queryByRole('alertdialog')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Discard'));
+    expect(screen.getByText('Weekly hours')).toBeTruthy();
+    expect(state.saved).toHaveLength(0);
   });
 });
