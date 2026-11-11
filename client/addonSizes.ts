@@ -5,7 +5,7 @@
  * Size = the add-on's own code (by source path, see sizeEntries.json), its share of the gzip of every chunk it sits in.
  */
 import { gzipSync } from 'node:zlib';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import type { Plugin } from 'vite';
 import entries from './src/addons/sizeEntries.json';
@@ -19,8 +19,10 @@ export interface SizeChunk {
 export interface SizePart {
   /** Path prefixes under `src/`: a directory (`coach/notes/`) or a file stem (`sleep` = sleep.ts, sleepGuard.ts). */
   js?: readonly string[];
-  /** Plain CSS files (themes), gzip of the file itself. */
+  /** Plain CSS files, gzip of the file itself. */
   css?: readonly string[];
+  /** Files under `public/` the add-on shows (theme backgrounds, pictures): their size as served. */
+  assets?: readonly string[];
 }
 
 /**
@@ -35,6 +37,7 @@ export function computeAddonSizes(
   cssBytes: (file: string) => number = () => 0,
   /** false: a part may match nothing (used for the eager-only view, where most add-on code is absent by design). */
   strict = true,
+  assetBytes: (file: string) => number = () => 0,
 ): Record<string, number> {
   const prefixes = Object.entries(parts).flatMap(([id, p]) => (p.js ?? []).map((x) => ({ id, x })));
   const owner = (path: string): string | undefined =>
@@ -58,6 +61,7 @@ export function computeAddonSizes(
   for (const [id, p] of Object.entries(parts)) {
     if (!strict) break; // theme CSS is never part of the eager JS view
     for (const f of p.css ?? []) out[id] += cssBytes(f);
+    for (const f of p.assets ?? []) out[id] += assetBytes(f);
   }
   return Object.fromEntries(Object.entries(out).map(([id, v]) => [id, Math.round(v)]));
 }
@@ -121,6 +125,13 @@ export function addonSizes(): Plugin {
           const a = bundle[css];
           if (a?.type === 'asset') bytes += gz(a.source);
         }
+        // Fonts a look's CSS pulls in: already compressed, counted as served. Only for the look bundles, so no other
+        // add-on's number moves.
+        if (Object.keys(item.modules).some((m) => m.includes('/themes/bundles/')))
+          for (const f of item.viteMetadata?.importedAssets ?? []) {
+            const a = bundle[f];
+            if (a?.type === 'asset') bytes += a.source.length;
+          }
         const modules: Record<string, number> = {};
         for (const [id, m] of Object.entries(item.modules)) {
           modules[relative(src, id).replace(/\\/g, '/')] = m.renderedLength;
@@ -130,8 +141,12 @@ export function addonSizes(): Plugin {
       }
       // Only the app's own build: Storybook and other builds reuse this config but have none of the app's modules.
       if (!chunks.some((c) => 'main.tsx' in c.modules)) return;
-      const sizes = computeAddonSizes(chunks, entries as Record<string, SizePart>, (f) =>
-        gz(readFileSync(join(src, f))),
+      const sizes = computeAddonSizes(
+        chunks,
+        entries as Record<string, SizePart>,
+        (f) => gz(readFileSync(join(src, f))),
+        true,
+        (f) => statSync(join(root, 'public', f)).size,
       );
       // What each add-on keeps in the code every user downloads at start (it must trend to 0 as the code splits out).
       const eagerSizes = computeAddonSizes(

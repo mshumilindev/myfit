@@ -22,9 +22,14 @@ describe('add-on size entries', () => {
   });
   it('every path it lists exists', () => {
     for (const [id, p] of Object.entries(entries as Record<string, SizePart>)) {
-      expect((p.js?.length ?? 0) + (p.css?.length ?? 0), `${id} has no paths`).toBeGreaterThan(0);
+      expect(
+        (p.js?.length ?? 0) + (p.css?.length ?? 0) + (p.assets?.length ?? 0),
+        `${id} has no paths`,
+      ).toBeGreaterThan(0);
       for (const x of p.js ?? []) expect(matches(x), `${id}: ${x}`).toBe(true);
       for (const f of p.css ?? []) expect(existsSync(join(SRC, f)), `${id}: ${f}`).toBe(true);
+      for (const f of p.assets ?? [])
+        expect(existsSync(join(SRC, '..', 'public', f)), `${id}: public/${f}`).toBe(true);
     }
   });
 });
@@ -45,6 +50,17 @@ describe('computeAddonSizes', () => {
   });
   it('adds the gzip of plain CSS files', () => {
     expect(computeAddonSizes(chunks, { t: { css: ['t.css'] } }, () => 77)).toEqual({ t: 77 });
+  });
+  it('adds the size of the public files an add-on shows', () => {
+    expect(
+      computeAddonSizes(
+        chunks,
+        { t: { assets: ['a.webp', 'b.webp'] } },
+        () => 0,
+        true,
+        () => 40,
+      ),
+    ).toEqual({ t: 80 });
   });
   it('fails loudly when a path matches no module', () => {
     expect(() => computeAddonSizes(chunks, { a: { js: ['gone/'] } })).toThrow(/matches no module/);

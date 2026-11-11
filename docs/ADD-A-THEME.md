@@ -2,7 +2,7 @@
 
 Тема = один файл `client/src/themes/<id>.css` із токенами контракту (`client/src/themes/contract.ts`) на `html[data-theme='<id>']`. Весь UI читає лише токени, тож більше нічого міняти не треба.
 
-1. `npm run theme:new <id> "<Назва>"` — створює файл (стартові значення з Brass Glass) і додає тему в `themes/registry.ts`.
+1. `npm run theme:new <id> "<Назва>"` — створює файл (стартові значення з Brass Glass) і додає тему в `themes/registry.ts`, а також ліниві пакети `themes/bundles/<id>.ts` + `themes/lazy.ts` (CSS, токени й шрифти теми вантажаться лише коли тема встановлена й потрібна; база — Studio — іде разом із застосунком; шрифти та токени теми кладіть у її `bundles/<id>.ts`, не в `main.tsx`).
 2. Відредагуйте значення: ідентичність (`--font*`, `--color-text*`, рамп акценту `--color-accent-*` і `--color-on-accent`, нейтралі, родини gym/note), стиль головної кнопки (`--btn-*`), скло (`--glass-accent-k`, бази й краї), таббар і кнопку Start (`--tabbar-*`, `--fab-*`), поверхні (`--color-bg`, `--color-surface`, `--glass-*`), настрої (`--mood-*`), радіуси (`--radius-*`), типографіку (`--type-*`), лаву (`--lava-*`), пластини (`--plate-*`).
    Скіни застосунків — блоки `html[data-theme='<id>'].theme-<apex|learn|roster|nutrition|coach>` у тому ж файлі: обов'язково `--lava-2`, `--lava-3`; за потреби `--lava-1`, `--glass-raised-base`, `--plate-*`, `--t-*` (контракт: `THEME_SKINS` у `contract.ts`, guard перевіряє всі п'ять).
    Світлий режим цієї теми — блок `html[data-theme='<id>'][data-mode='light'] { …токени контракту… }` (і значення `light` у `AXES.mode` у `registry.ts`).

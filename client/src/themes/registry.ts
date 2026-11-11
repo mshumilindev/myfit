@@ -5,6 +5,7 @@
  */
 import { useSyncExternalStore } from 'react';
 import { glitchTheme } from '../components/appGlitch';
+import { loadThemeCss, onThemeCssRetried, themeCssReady } from './lazy';
 import { activeHoliday, dayOf, skipKey, type HolidayId, type HolidayWindow } from './holidays';
 
 export interface ThemeDef {
@@ -105,6 +106,10 @@ function apply(id: string): void {
   followSun?.();
 }
 
+/** The look the app should be wearing now: a holiday, else a preview, else the saved choice. */
+const wantedTheme = (): string => holiday ?? previewing ?? committed ?? DEFAULT_THEME;
+onThemeCssRetried(() => swap(wantedTheme(), false));
+
 /**
  * The sun rule of `modePref.ts` (Studio on Auto: day = light, night = dark). It runs after every change of look and
  * after an account value for the mode, so the mode is right at once and not only at the next 5-minute check.
@@ -143,6 +148,15 @@ export function availablePickableThemes(): readonly ThemeDef[] {
  */
 function swap(id: string, animate: boolean): void {
   if (document.documentElement.getAttribute('data-theme') === shown(id)) return;
+  if (!themeCssReady(shown(id))) {
+    // the look's styles ship on demand: wear it once they are in, and only if it is still the one wanted
+    void loadThemeCss(shown(id))
+      .then(() => {
+        if (shown(wantedTheme()) === shown(id)) swap(id, animate);
+      })
+      .catch(() => undefined);
+    return;
+  }
   if (animate) glitchTheme(() => apply(id));
   else apply(id);
 }
@@ -159,7 +173,10 @@ export function initTheme(): void {
   previewing = null;
   // opening the app reads the holiday schedule: a holiday theme is on from the very first paint
   holiday = holidayNow()?.theme ?? null;
-  apply(holiday ?? committed);
+  // the first paint wears the look at once when it ships with the app; otherwise its styles are fetched now, in
+  // parallel with the rest of the start-up, and the look goes on the moment they are in
+  if (themeCssReady(shown(holiday ?? committed))) apply(holiday ?? committed);
+  else swap(holiday ?? committed, false);
   initAxes();
 }
 

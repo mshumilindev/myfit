@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // A fresh registry per test: its installed set is "not read yet" (null), as at the very start of the app.
 async function fresh() {
   vi.resetModules();
+  // the look files are "in the page" here (the real loader is async; the lazy loading itself is covered in lazy.test.ts)
+  (await import('./lazy')).markAllThemeCssReady();
   return import('./registry');
 }
 

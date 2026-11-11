@@ -12,53 +12,108 @@
       "views/OverviewView"
     ]
   },
-  "health": { "js": ["views/HealthView", "views/health/", "healthAddons", "healthMask"] },
+  "health": {
+    "js": ["views/HealthView", "views/health/", "healthAddons", "healthMask"]
+  },
   "injury-log": {
     "js": ["views/InjuryGate", "views/InjuryView", "views/InjurySetupStepper", "injury"]
   },
-  "rest": { "js": ["restOverlap"] },
-  "unwell": { "js": ["illness"] },
+  "rest": {
+    "js": ["restOverlap"]
+  },
+  "unwell": {
+    "js": ["illness"]
+  },
   "conditions": {
     "js": ["conditions", "conditionText", "useConditionName", "views/health/Conditions"]
   },
-  "cycle": { "js": ["cycle", "views/health/cycle/"] },
+  "cycle": {
+    "js": ["cycle", "views/health/cycle/"]
+  },
   "supplements": {
     "js": ["supplement", "views/health/supplements/", "views/sessionSummary/SupplementsCard"]
   },
-  "nicotine": { "js": ["nicotine", "views/health/nicotine/", "views/sessionSummary/NicotineCard"] },
-  "alcohol": { "js": ["alcohol", "views/health/alcohol/", "views/sessionSummary/AlcoholCard"] },
-  "sleep": { "js": ["views/SleepView", "views/SleepStart", "sleep"] },
-  "activities": { "js": ["views/ActivityView", "views/LogActivityView", "views/logActivity/"] },
-  "goals": { "js": ["views/GoalsView", "goals"] },
-  "playbook": { "js": ["views/PlaybookView", "playbook"] },
-  "home-sets": { "js": ["views/home/", "homeSets", "components/HomeMove"] },
-  "atlas": { "js": ["atlas/", "views/CoachView", "components/Atlas"] },
-  "apex": { "js": ["views/ApexApp", "views/ApexHome", "views/apexMastery"] },
-  "apex-challenges": { "js": ["challenges", "views/ChallengesView"] },
-  "apex-ranks": { "js": ["standards", "components/StandardsView"] },
-  "apex-awards": { "js": ["feats", "components/FeatsView"] },
-  "mastery": { "js": ["mastery", "views/MasteryView"] },
-  "coach": { "js": ["coach/"] },
-  "coach-live": { "js": ["coach/screens/live/", "coach/data/firestore/live"] },
+  "nicotine": {
+    "js": ["nicotine", "views/health/nicotine/", "views/sessionSummary/NicotineCard"]
+  },
+  "alcohol": {
+    "js": ["alcohol", "views/health/alcohol/", "views/sessionSummary/AlcoholCard"]
+  },
+  "sleep": {
+    "js": ["views/SleepView", "views/SleepStart", "sleep"]
+  },
+  "activities": {
+    "js": ["views/ActivityView", "views/LogActivityView", "views/logActivity/"]
+  },
+  "goals": {
+    "js": ["views/GoalsView", "goals"]
+  },
+  "playbook": {
+    "js": ["views/PlaybookView", "playbook"]
+  },
+  "home-sets": {
+    "js": ["views/home/", "homeSets", "components/HomeMove"]
+  },
+  "atlas": {
+    "js": ["atlas/", "views/CoachView", "components/Atlas"]
+  },
+  "apex": {
+    "js": ["views/ApexApp", "views/ApexHome", "views/apexMastery"]
+  },
+  "apex-challenges": {
+    "js": ["challenges", "views/ChallengesView"]
+  },
+  "apex-ranks": {
+    "js": ["standards", "components/StandardsView"]
+  },
+  "apex-awards": {
+    "js": ["feats", "components/FeatsView"]
+  },
+  "mastery": {
+    "js": ["mastery", "views/MasteryView"]
+  },
+  "coach": {
+    "js": ["coach/"]
+  },
+  "coach-live": {
+    "js": ["coach/screens/live/", "coach/data/firestore/live"]
+  },
   "coach-signals": {
     "js": ["coach/domain/signal", "coach/today/Signal", "coach/screens/SignalsScreen"]
   },
-  "coach-notes": { "js": ["coach/notes/", "coach/threadExtras"] },
-  "coach-team": { "js": ["coach/team/"] },
-  "theme-brass-glass": { "css": ["themes/glass.css", "themes/_glass.page.css"] },
+  "coach-notes": {
+    "js": ["coach/notes/", "coach/threadExtras"]
+  },
+  "coach-team": {
+    "js": ["coach/team/"]
+  },
+  "theme-brass-glass": {
+    "js": ["themes/bundles/glass"]
+  },
   "theme-cyberpunk": {
-    "css": [
-      "themes/cyberpunk.css",
-      "themes/_cyberpunk.structure.css",
-      "themes/_cyberpunk.route.css"
+    "js": ["themes/bundles/cyberpunk"],
+    "assets": [
+      "backgrounds/gym-land.webp",
+      "backgrounds/gym-port.webp",
+      "backgrounds/apex-land.webp",
+      "backgrounds/apex-port.webp",
+      "backgrounds/learn-land.webp",
+      "backgrounds/learn-port.webp",
+      "backgrounds/roster-land.webp",
+      "backgrounds/roster-port.webp",
+      "backgrounds/nutrition-land.webp",
+      "backgrounds/nutrition-port.webp",
+      "backgrounds/coach-land.webp",
+      "backgrounds/coach-port.webp"
     ]
   },
   "holiday-themes": {
-    "css": [
-      "themes/christmas.css",
-      "themes/_christmas.structure.css",
-      "themes/halloween.css",
-      "themes/_halloween.structure.css"
+    "js": ["themes/bundles/halloween", "themes/bundles/christmas"],
+    "assets": [
+      "backgrounds/christmas-card.webp",
+      "backgrounds/halloween-card.webp",
+      "christmas/wreath.webp",
+      "halloween/pumpkin.webp"
     ]
   }
 }

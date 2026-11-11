@@ -44,6 +44,31 @@ fs.writeFileSync(
     `  { id: '${id}', name: '${name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}' },\n${marker}`,
   ),
 );
+// A new look is a lazy bundle (client/src/themes/lazy.ts): its file loads only once the look is installed and worn.
+const bundle = `${DIR}/bundles/${id}.ts`;
+fs.mkdirSync(`${DIR}/bundles`, { recursive: true });
+fs.writeFileSync(
+  bundle,
+  `/** Lazy look bundle: loads only once the look is installed and worn (themes/lazy.ts). */\nimport '../${id}.css';\n`,
+);
+const patch = (file, marker, line) => {
+  const text = fs.readFileSync(file, 'utf8');
+  if (!text.includes(marker)) {
+    console.error(`could not find the marker in ${file}; add \`${line.trim()}\` by hand`);
+    return;
+  }
+  fs.writeFileSync(file, text.replace(marker, `${line}${marker}`));
+};
+patch(
+  `${DIR}/lazy.ts`,
+  '  // theme:new inserts new looks above this line',
+  `  ${/^[a-z]+$/.test(id) ? id : `'${id}'`}: () => import('./bundles/${id}'),\n`,
+);
+patch(
+  `${DIR}/all.ts`,
+  '// theme:new inserts new looks above this line',
+  `import './bundles/${id}';\n`,
+);
 console.log(
   `created ${target} and registered "${name}".\nNext: edit the values, then \`npx vitest run tests/theme-contract.guard.test.ts tests/contrast-matrix.guard.test.ts\`.`,
 );

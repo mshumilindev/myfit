@@ -151,6 +151,8 @@ export default defineConfig({
           'assets/atlasDict.*.js',
           // Landing-page fonts (jetbrains-mono is precached, see globPatterns): loaded by the lazy landing chunk, cached on first use (runtimeCaching below).
           'assets/{inter-tight,manrope}-*.woff2',
+          // Fonts of the looks that are not the base: fetched (and kept, see runtimeCaching) only when the look is worn.
+          'assets/{barlow,barlow-condensed,chakra-petch,exo-2,fira-sans,fira-sans-condensed,cormorant-garamond,crimson-pro,im-fell-english,spectral,jost,christmas-display}-*.woff2',
         ],
         // App shell is precached; API goes network-only (the app has its own
         // offline queue in localStorage, so we must never serve stale API data).
@@ -166,8 +168,6 @@ export default defineConfig({
           'assets/index-*.{js,css}',
           'assets/vendor-*.js',
           'assets/*.woff2',
-          // The offline state and the Coach shell use these before they are ever online-visited (SPO-428): ~130 KB.
-          'backgrounds/gym-land.webp',
           'icon-*.png',
           'favicon*',
           'apple-touch-icon.png',

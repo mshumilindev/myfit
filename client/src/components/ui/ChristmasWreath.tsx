@@ -5,7 +5,6 @@
  * attention state (`.is-attention`) and never under reduced motion or at night.
  */
 import { useTheme } from '../../themes/registry';
-import './ChristmasWreath.css';
 
 const SPARK = 'M0 -8L2 -2L8 0L2 2L0 8L-2 2L-8 0L-2 -2Z';
 const ART =
