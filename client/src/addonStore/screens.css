@@ -220,6 +220,10 @@
     flex-direction: column;
     gap: var(--sk-gap-block);
   }
+  /* The right column starts level with the previews (below their "Preview" label), not with the label. */
+  .as-item-aside {
+    padding-block-start: 32px;
+  }
   .as-item-act {
     display: flex;
   }
