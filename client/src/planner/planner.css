@@ -297,3 +297,12 @@
   font-style: normal;
   opacity: 0.8;
 }
+
+/* the chosen colour in a form row */
+.pl-dot {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--t-base);
+}

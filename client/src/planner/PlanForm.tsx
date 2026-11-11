@@ -459,7 +459,13 @@ export function PlanForm(p: {
         />
         <ListRow
           label={s.color}
-          value={s.cols[PTONES.indexOf(d.color)]}
+          value={
+            <span
+              className={`pl-dot uit--${d.color}`}
+              role="img"
+              aria-label={s.cols[PTONES.indexOf(d.color)]}
+            />
+          }
           chevron
           onClick={() => openDrawer('color')}
         />
