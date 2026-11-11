@@ -301,9 +301,10 @@
 
 /* the chosen colour in a form row */
 .pl-dot {
+  /* the same 32px box as the icon tile in the row above, the disc centred in it: both share one axis */
   display: inline-block;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--t-base);
+  flex: none;
+  width: 32px;
+  height: 32px;
+  background: radial-gradient(circle 12px at 50% 50%, var(--t-base) 11.5px, transparent 12px);
 }
