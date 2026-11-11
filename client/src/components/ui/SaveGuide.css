@@ -48,12 +48,12 @@
 .uisg-flag::after {
   content: '';
   position: absolute;
-  right: 0;
+  right: -8px;
   top: calc(100% - 1px);
-  width: 16px;
-  height: 11px;
+  width: 34px;
+  height: 20px;
   background: inherit;
-  clip-path: path('M0 0H16V11C11 11 7 5 0 0Z');
+  clip-path: path('M0 0H26C26 8 29 14 34 18C22 19.5 13 13 5 0Z');
 }
 .uisg-head {
   margin-bottom: 3px;
