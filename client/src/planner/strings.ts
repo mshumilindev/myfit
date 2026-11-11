@@ -40,6 +40,10 @@ export interface PlannerStrings {
   notePermB: string;
   noteOffT: string;
   noteOffB: string;
+  discardT: string;
+  discardB: string;
+  discardOk: string;
+  keepEditing: string;
   more: string;
   fewer: string;
   when: string;
@@ -131,6 +135,10 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     notePermB: 'Spotter cannot remind you. Turn them on in your device settings.',
     noteOffT: 'You are offline',
     noteOffB: 'Plans are saved on this device and sync when you are back. Reminders still ring.',
+    discardT: 'Discard changes?',
+    discardB: 'Your changes to this plan will be lost.',
+    discardOk: 'Discard',
+    keepEditing: 'Keep editing',
     more: 'More options',
     fewer: 'Fewer options',
     when: 'Schedule',
@@ -233,6 +241,10 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     noteOffT: 'Ви офлайн',
     noteOffB:
       'Плани зберігаються на цьому пристрої й синхронізуються, коли зʼявиться звʼязок. Нагадування працюють.',
+    discardT: 'Скасувати зміни?',
+    discardB: 'Зміни в цьому плані буде втрачено.',
+    discardOk: 'Скасувати',
+    keepEditing: 'Продовжити',
     more: 'Більше опцій',
     fewer: 'Менше опцій',
     when: 'Розклад',
@@ -335,6 +347,10 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     noteOffT: 'Jesteś offline',
     noteOffB:
       'Plany są zapisane na tym urządzeniu i zsynchronizują się po powrocie sieci. Przypomnienia nadal dzwonią.',
+    discardT: 'Odrzucić zmiany?',
+    discardB: 'Zmiany w tym planie zostaną utracone.',
+    discardOk: 'Odrzuć',
+    keepEditing: 'Edytuj dalej',
     more: 'Więcej opcji',
     fewer: 'Mniej opcji',
     when: 'Harmonogram',
@@ -437,6 +453,10 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     noteOffT: 'Esate neprisijungę',
     noteOffB:
       'Planai saugomi šiame įrenginyje ir sinchronizuojami grįžus ryšiui. Priminimai vis tiek skamba.',
+    discardT: 'Atmesti pakeitimus?',
+    discardB: 'Šio plano pakeitimai bus prarasti.',
+    discardOk: 'Atmesti',
+    keepEditing: 'Tęsti redagavimą',
     more: 'Daugiau parinkčių',
     fewer: 'Mažiau parinkčių',
     when: 'Tvarkaraštis',
@@ -539,6 +559,10 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     noteOffT: 'Oled võrgust väljas',
     noteOffB:
       'Plaanid salvestatakse sellesse seadmesse ja sünkroonitakse, kui ühendus taastub. Meeldetuletused heliseb endiselt.',
+    discardT: 'Kas loobuda muudatustest?',
+    discardB: 'Selle plaani muudatused lähevad kaotsi.',
+    discardOk: 'Loobu',
+    keepEditing: 'Jätka muutmist',
     more: 'Rohkem valikuid',
     fewer: 'Vähem valikuid',
     when: 'Ajakava',

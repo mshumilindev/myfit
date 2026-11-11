@@ -35,7 +35,13 @@ function Row(p: {
       sub={t.plannerSrcHomeSet}
       trailing={p.selectedId === `home:${p.id}` ? <Icon name="check" /> : undefined}
       onClick={() =>
-        p.onPick({ id: `home:${p.id}`, title: p.name, icon: 'house', sub: t.plannerSrcHome })
+        p.onPick({
+          id: `home:${p.id}`,
+          title: p.name,
+          icon: 'house',
+          color: 'yellow',
+          sub: t.plannerSrcHome,
+        })
       }
     />
   );
@@ -57,6 +63,7 @@ function Group({ selectedId, onPick, onAll }: PlannerSourceProps) {
             id: 'home:any',
             title: t.plannerSrcHomeAny,
             icon: 'house',
+            color: 'yellow',
             sub: t.plannerSrcHome,
           })
         }

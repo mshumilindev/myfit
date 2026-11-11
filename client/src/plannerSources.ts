@@ -6,6 +6,21 @@
  */
 import type { ComponentType } from 'react';
 
+/** The colours of a plan (the colour drawer of the form). */
+export type PlannerColor =
+  | 'accent'
+  | 'red'
+  | 'orange'
+  | 'yellow'
+  | 'lime'
+  | 'green'
+  | 'teal'
+  | 'blue'
+  | 'indigo'
+  | 'purple'
+  | 'pink'
+  | 'gray';
+
 /** What choosing a row puts into the new plan. */
 export interface PlannerPick {
   /** Stable id of the thing (marks the chosen row with a check). */
@@ -14,6 +29,8 @@ export interface PlannerPick {
   title: string;
   /** Kit icon name. */
   icon: string;
+  /** Plan colour that goes with the thing (an activity's family, a program day, a home set). */
+  color?: PlannerColor;
   /** Short line shown in the form's "Based on" row (usually the source name). */
   sub: string;
 }

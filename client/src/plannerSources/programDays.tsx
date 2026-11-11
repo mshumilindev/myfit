@@ -47,6 +47,7 @@ function Group({ selectedId, onPick, weekdays }: PlannerSourceProps) {
               id: 'workout:any',
               title: t.plannerSrcWorkout,
               icon: 'barbell',
+              color: 'teal',
               sub: t.plannerSrcProgram,
             })
           }
@@ -72,6 +73,7 @@ function Group({ selectedId, onPick, weekdays }: PlannerSourceProps) {
               id: `program:${d.day}`,
               title: d.name,
               icon: 'barbell',
+              color: 'teal',
               sub: t.plannerSrcProgram,
             })
           }

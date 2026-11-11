@@ -6,6 +6,7 @@ import { t as tr, useT } from '../i18n';
 import {
   registerPlannerSource,
   type PlannerAllProps,
+  type PlannerColor,
   type PlannerPick,
   type PlannerSourceProps,
 } from '../plannerSources';
@@ -13,6 +14,12 @@ import { Icon } from '../ui';
 import { kitTone, typeName } from '../views/logActivity/shared';
 
 const SHOWN = 3;
+/** The plan colour that matches an activity family. */
+const COLOR: Partial<Record<string, PlannerColor>> = {
+  conditioning: 'purple',
+  sport: 'green',
+  rest: 'blue',
+};
 
 function Row(p: {
   k: string;
@@ -29,7 +36,13 @@ function Row(p: {
       sub={t.plannerSrcActivity}
       trailing={p.selectedId === `activity:${p.k}` ? <Icon name="check" /> : undefined}
       onClick={() =>
-        p.onPick({ id: `activity:${p.k}`, title: name, icon: p.icon, sub: t.plannerSrcActivities })
+        p.onPick({
+          id: `activity:${p.k}`,
+          title: name,
+          icon: p.icon,
+          color: COLOR[kitTone(p.k)] ?? 'purple',
+          sub: t.plannerSrcActivities,
+        })
       }
     />
   );

@@ -8,7 +8,7 @@ import { Hint } from '../components/ui/Hint';
 import { IconTile } from '../components/ui/IconTile';
 import { PageHead } from '../components/ui/PageHead';
 import { PresetChips } from '../components/ui/PresetChips';
-import { Sheet } from '../components/ui/Overlays';
+import { ConfirmDialog, Sheet } from '../components/ui/Overlays';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { SearchField } from '../components/ui/SearchField';
 import { Segmented } from '../components/ui/Segmented';
@@ -73,6 +73,8 @@ export function PlanForm(p: {
   onSave: (d: Draft) => void;
   onDelete?: () => void;
   onClose: () => void;
+  /** Desktop: the form is a kit drawer over the page, not a page of its own. */
+  drawer?: boolean;
 }) {
   const { t, locale } = useT();
   const s = STRINGS[locale];
@@ -82,6 +84,17 @@ export function PlanForm(p: {
   const [st, setSt] = useState<Draft>(p.initial);
   const [q, setQ] = useState('');
   const [adv, setAdv] = useState(false);
+  const [askLeave, setAskLeave] = useState(false);
+  /** Anything changed from what the form opened with (the defaults do not count). */
+  const dirty = JSON.stringify(d) !== JSON.stringify(p.initial);
+  const [sheetKey, setSheetKey] = useState(0);
+  const leave = () => (dirty ? setAskLeave(true) : p.onClose());
+  /** A swipe / scrim tap already slid the drawer away: bring it back under the question. */
+  const leaveFromSheet = () => {
+    if (!dirty) return p.onClose();
+    setSheetKey((k) => k + 1);
+    setAskLeave(true);
+  };
   const anchor = useRef<HTMLButtonElement>(null);
   const [based, setBased] = useState<{
     id: string;
@@ -98,7 +111,7 @@ export function PlanForm(p: {
     return [weekday(d.start) + 1];
   })();
   const pick = (x: PlannerPick) => {
-    set({ title: x.title, icon: x.icon });
+    set({ title: x.title, icon: x.icon, ...(x.color ? { color: x.color } : {}) });
     setBased({ id: x.id, label: x.title, sub: x.sub, icon: x.icon });
     setDrawer(null);
   };
@@ -417,181 +430,218 @@ export function PlanForm(p: {
 
   const durCustom = !DURATIONS.includes(d.durationMin);
   const leadCustom = !LEADS.includes(d.lead);
+  const fields = (
+    <>
+      <GroupedList header={s.basedOn}>
+        <ListRow
+          icon={<IconTile icon={based?.icon ?? 'calendar-plus'} tone="accent" size={32} />}
+          label={based?.label ?? s.own}
+          sub={based?.sub ?? s.ownSub}
+          chevron
+          onClick={() => openDrawer('based')}
+        />
+      </GroupedList>
+      <GroupedList header={s.what}>
+        <ListRow
+          icon={<IconTile icon={d.icon} tone={d.color as never} size={32} />}
+          label={s.icon}
+          value={iconName}
+          chevron
+          onClick={() => openDrawer('icon')}
+        />
+        <ListRow
+          icon={<IconTile icon="palette" tone={d.color as never} size={32} />}
+          label={s.color}
+          value={s.cols[PTONES.indexOf(d.color)]}
+          chevron
+          onClick={() => openDrawer('color')}
+        />
+        <ListRow as="label" label={s.titleLabel} labelFixed>
+          <Field
+            bare
+            value={d.title}
+            aria-label={s.titleLabel}
+            placeholder={s.titlePlaceholder}
+            maxLength={80}
+            onChange={(e) => set({ title: e.target.value })}
+          />
+        </ListRow>
+      </GroupedList>
+      <GroupedList header={s.when}>
+        {d.repeat === 'none' && (
+          <ListRow
+            label={s.date}
+            value={dayFull(locale, d.start)}
+            chevron
+            onClick={() => openDrawer('date')}
+          />
+        )}
+        <ListRow
+          label={s.starts}
+          value={clock(startMin)}
+          chevron
+          onClick={() => openDrawer('start')}
+        />
+        <ListRow
+          label={s.repeats}
+          value={repLabel[d.repeat]}
+          chevron
+          onClick={() => openDrawer('repeat')}
+        />
+      </GroupedList>
+      {weekly(d) && dayChips(d, set)}
+      <Button
+        variant="ghost"
+        fullWidth
+        icon={adv ? 'caret-up' : 'caret-down'}
+        aria-expanded={adv}
+        onClick={() => setAdv((x) => !x)}
+      >
+        {adv ? s.fewer : s.more}
+      </Button>
+      {adv && (
+        <>
+          <div className="pl-form-g">
+            <SectionLabel>{s.duration}</SectionLabel>
+            <PresetChips
+              layout="wrap"
+              label={s.duration}
+              tone="accent"
+              items={[
+                ...DURATIONS.map((m) => ({
+                  id: String(m),
+                  label: durText(s, m),
+                  selected: m === d.durationMin,
+                  onClick: () => set({ durationMin: m }),
+                })),
+                {
+                  id: 'c',
+                  label: durCustom ? durText(s, d.durationMin) : s.custom,
+                  selected: durCustom,
+                  onClick: () => openDrawer('duration'),
+                },
+              ]}
+            />
+          </div>
+          <div className="pl-form-g">
+            <SectionLabel>{s.reminder}</SectionLabel>
+            <Segmented
+              value={d.mode}
+              onChange={(mode) => set({ mode })}
+              label={s.reminder}
+              fill
+              options={[
+                { value: 'quiet', label: s.quiet },
+                { value: 'ring', label: s.ring },
+              ]}
+            />
+            <Hint>{d.mode === 'ring' ? s.ringHint : s.quietHint}</Hint>
+          </div>
+          <div className="pl-form-g">
+            <SectionLabel>{s.remindMe}</SectionLabel>
+            <PresetChips
+              layout="wrap"
+              label={s.remindMe}
+              tone="accent"
+              items={[
+                ...LEADS.map((m) => ({
+                  id: String(m),
+                  label: leadText(s, m),
+                  selected: m === d.lead,
+                  onClick: () => set({ lead: m }),
+                })),
+                {
+                  id: 'c',
+                  label: leadCustom ? leadText(s, d.lead) : s.custom,
+                  selected: leadCustom,
+                  onClick: () => openDrawer('lead'),
+                },
+              ]}
+            />
+          </div>
+        </>
+      )}
+      {p.onDelete && (
+        <Button variant="danger" fullWidth onClick={p.onDelete}>
+          {s.del}
+        </Button>
+      )}
+    </>
+  );
+  const title = p.editing ? s.editPlan : s.newPlan;
+  const leaveDialog = askLeave && (
+    <ConfirmDialog
+      danger
+      title={s.discardT}
+      body={s.discardB}
+      confirmLabel={s.discardOk}
+      cancelLabel={s.keepEditing}
+      onCancel={() => setAskLeave(false)}
+      onConfirm={p.onClose}
+    />
+  );
+  const nested = dr && (
+    <Sheet
+      onClose={closeDrawer}
+      label={dr.title}
+      returnFocusRef={anchor}
+      startFull={drawer === 'based'}
+    >
+      <div className="ul-flex ul-col ug-12">
+        <h2 className="ut-xl ut-w7">{dr.title}</h2>
+        {dr.node}
+        {drawer !== 'based' && (
+          <div className="ul-flex ug-8">
+            <Button fullWidth variant="secondary" onClick={closeDrawer}>
+              {s.cancel}
+            </Button>
+            <Button fullWidth onClick={commit}>
+              {s.save}
+            </Button>
+          </div>
+        )}
+      </div>
+    </Sheet>
+  );
+  if (p.drawer)
+    return (
+      <>
+        <Sheet key={sheetKey} onClose={leaveFromSheet} label={title}>
+          <div className="ul-flex ul-col ug-12">
+            <h2 className="ut-xl ut-w7">{title}</h2>
+            {fields}
+            <div className="ul-flex ug-8">
+              <Button fullWidth variant="secondary" onClick={leave}>
+                {s.cancel}
+              </Button>
+              <Button fullWidth disabled={!d.title.trim()} onClick={() => p.onSave(d)}>
+                {s.save}
+              </Button>
+            </div>
+          </div>
+        </Sheet>
+        {nested}
+        {leaveDialog}
+      </>
+    );
   return (
     <>
       <div className="screen pl-screen">
         <div className="pl-form">
-          <PageHead
-            back={{ label: t.backAction, onClick: p.onClose }}
-            title={p.editing ? s.editPlan : s.newPlan}
-          />
-          <GroupedList header={s.basedOn}>
-            <ListRow
-              icon={<IconTile icon={based?.icon ?? 'calendar-plus'} tone="accent" size={32} />}
-              label={based?.label ?? s.own}
-              sub={based?.sub ?? s.ownSub}
-              chevron
-              onClick={() => openDrawer('based')}
-            />
-          </GroupedList>
-          <GroupedList header={s.what}>
-            <ListRow
-              icon={<IconTile icon={d.icon} tone={d.color as never} size={32} />}
-              label={s.icon}
-              value={iconName}
-              chevron
-              onClick={() => openDrawer('icon')}
-            />
-            <ListRow
-              icon={<IconTile icon="palette" tone={d.color as never} size={32} />}
-              label={s.color}
-              value={s.cols[PTONES.indexOf(d.color)]}
-              chevron
-              onClick={() => openDrawer('color')}
-            />
-            <ListRow as="label" label={s.titleLabel} labelFixed>
-              <Field
-                bare
-                value={d.title}
-                aria-label={s.titleLabel}
-                placeholder={s.titlePlaceholder}
-                maxLength={80}
-                onChange={(e) => set({ title: e.target.value })}
-              />
-            </ListRow>
-          </GroupedList>
-          <GroupedList header={s.when}>
-            {d.repeat === 'none' && (
-              <ListRow
-                label={s.date}
-                value={dayFull(locale, d.start)}
-                chevron
-                onClick={() => openDrawer('date')}
-              />
-            )}
-            <ListRow
-              label={s.starts}
-              value={clock(startMin)}
-              chevron
-              onClick={() => openDrawer('start')}
-            />
-            <ListRow
-              label={s.repeats}
-              value={repLabel[d.repeat]}
-              chevron
-              onClick={() => openDrawer('repeat')}
-            />
-          </GroupedList>
-          {weekly(d) && dayChips(d, set)}
-          <Button
-            variant="ghost"
-            fullWidth
-            icon={adv ? 'caret-up' : 'caret-down'}
-            aria-expanded={adv}
-            onClick={() => setAdv((x) => !x)}
-          >
-            {adv ? s.fewer : s.more}
-          </Button>
-          {adv && (
-            <>
-              <div className="pl-form-g">
-                <SectionLabel>{s.duration}</SectionLabel>
-                <PresetChips
-                  layout="wrap"
-                  label={s.duration}
-                  tone="accent"
-                  items={[
-                    ...DURATIONS.map((m) => ({
-                      id: String(m),
-                      label: durText(s, m),
-                      selected: m === d.durationMin,
-                      onClick: () => set({ durationMin: m }),
-                    })),
-                    {
-                      id: 'c',
-                      label: durCustom ? durText(s, d.durationMin) : s.custom,
-                      selected: durCustom,
-                      onClick: () => openDrawer('duration'),
-                    },
-                  ]}
-                />
-              </div>
-              <div className="pl-form-g">
-                <SectionLabel>{s.reminder}</SectionLabel>
-                <Segmented
-                  value={d.mode}
-                  onChange={(mode) => set({ mode })}
-                  label={s.reminder}
-                  fill
-                  options={[
-                    { value: 'quiet', label: s.quiet },
-                    { value: 'ring', label: s.ring },
-                  ]}
-                />
-                <Hint>{d.mode === 'ring' ? s.ringHint : s.quietHint}</Hint>
-              </div>
-              <div className="pl-form-g">
-                <SectionLabel>{s.remindMe}</SectionLabel>
-                <PresetChips
-                  layout="wrap"
-                  label={s.remindMe}
-                  tone="accent"
-                  items={[
-                    ...LEADS.map((m) => ({
-                      id: String(m),
-                      label: leadText(s, m),
-                      selected: m === d.lead,
-                      onClick: () => set({ lead: m }),
-                    })),
-                    {
-                      id: 'c',
-                      label: leadCustom ? leadText(s, d.lead) : s.custom,
-                      selected: leadCustom,
-                      onClick: () => openDrawer('lead'),
-                    },
-                  ]}
-                />
-              </div>
-            </>
-          )}
-          {p.onDelete && (
-            <Button variant="danger" fullWidth onClick={p.onDelete}>
-              {s.del}
-            </Button>
-          )}
+          <PageHead back={{ label: t.backAction, onClick: leave }} title={title} />
+          {fields}
         </div>
       </div>
       <StickyActionBar>
-        <Button variant="secondary" onClick={p.onClose}>
+        <Button variant="secondary" onClick={leave}>
           {s.cancel}
         </Button>
         <Button disabled={!d.title.trim()} onClick={() => p.onSave(d)}>
           {s.save}
         </Button>
       </StickyActionBar>
-      {dr && (
-        <Sheet
-          onClose={closeDrawer}
-          label={dr.title}
-          returnFocusRef={anchor}
-          startFull={drawer === 'based'}
-        >
-          <div className="ul-flex ul-col ug-12">
-            <h2 className="ut-xl ut-w7">{dr.title}</h2>
-            {dr.node}
-            {drawer !== 'based' && (
-              <div className="ul-flex ug-8">
-                <Button fullWidth variant="secondary" onClick={closeDrawer}>
-                  {s.cancel}
-                </Button>
-                <Button fullWidth onClick={commit}>
-                  {s.save}
-                </Button>
-              </div>
-            )}
-          </div>
-        </Sheet>
-      )}
+      {nested}
+      {leaveDialog}
     </>
   );
 }
