@@ -57,10 +57,9 @@ describe('preview files', () => {
       }
   });
   it('a new app, add-on or theme has previews or is listed as having none on purpose', () => {
-    const NONE = ['gym', 'coach', 'coach-live', 'coach-signals', 'coach-notes', 'coach-team'];
     const missing = ADDONS.filter((a) => a.kind !== 'module' && !a.soon)
       .map((a) => a.id)
-      .filter((id) => !WEEK_SHOTS[id] && !NONE.includes(id));
+      .filter((id) => !WEEK_SHOTS[id]);
     expect(missing).toEqual([]);
   });
   it('store icons are real 320 px pictures', () => {
