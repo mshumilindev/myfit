@@ -33,17 +33,40 @@
   bottom: calc(100% + 10px);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 7px;
   width: max-content;
-  min-width: 140px;
-  max-width: 220px;
-  padding: 11px 13px;
+  min-width: 150px;
+  max-width: 230px;
+  padding: 12px 15px 13px;
   border-radius: 14px;
   background: var(--t-base);
-  color: var(--color-guide-on, #1f0a12);
-  font-size: 13px;
+  color: var(--color-guide-on, #fff);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+/* The list echoes the dots in Save: the next item is a ring, the rest are open dots. */
+.uisg-flag > span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: color-mix(in srgb, currentColor 88%, transparent);
+}
+.uisg-flag > span::before {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: color-mix(in srgb, currentColor 42%, transparent);
+}
+.uisg-head + span {
+  color: currentColor;
   font-weight: 700;
-  line-height: 1.35;
+}
+.uisg-head + span::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px currentColor;
 }
 .uisg-flag::after {
   content: '';
@@ -56,11 +79,13 @@
   clip-path: path('M0 0H18.2C18.2 5.6 20.3 9.8 23.8 12.6C15.4 13.7 9.1 9.1 3.5 0Z');
 }
 .uisg-head {
-  margin-bottom: 3px;
+  margin-bottom: -1px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 30%, transparent);
   font-size: 10px;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
-  opacity: 0.7;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, currentColor 78%, transparent);
 }
 /* On the first missing field: the Guide outline (no text under it). */
 .uisg-hit {
