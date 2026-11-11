@@ -38,7 +38,7 @@
   min-width: 140px;
   max-width: 220px;
   padding: 11px 13px;
-  border-radius: 14px 14px 0 14px;
+  border-radius: 14px;
   background: var(--t-base);
   color: var(--color-guide-on, #1f0a12);
   font-size: 13px;
@@ -48,7 +48,7 @@
 .uisg-flag::after {
   content: '';
   position: absolute;
-  right: 30px;
+  right: 16px;
   top: calc(100% - 1px);
   width: 24px;
   height: 14px;
