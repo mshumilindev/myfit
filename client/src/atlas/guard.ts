@@ -7,7 +7,7 @@
 import type { Injury, RestPeriod, SleepNight, Workout } from '../types';
 import { activeInjuries } from '../injury';
 import { dayKey, type StoreState } from '../store';
-import { finishedNights, nightDurationMin } from '../sleep';
+import { finishedNights, nightDurationMin } from '../sleepRt';
 import type { CoachFact, CoachSettings, Temper } from './types';
 import { COMEBACK_DAYS } from './facts';
 import { capTemperForAge } from './age';

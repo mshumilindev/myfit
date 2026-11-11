@@ -13,7 +13,8 @@
  * (loadable reality). No store mutation, no React — it returns a plan the UI
  * renders, edits and materialises.
  */
-import { exerciseFlag, isAutoExcluded, type Limits } from './conditions';
+import { exerciseFlag, isAutoExcluded } from './conditionsRt';
+import type { Limits } from './conditions';
 import type { Activity, BodyMetrics, Gym, Workout } from './types';
 import {
   BUILT_IN_CATALOG,

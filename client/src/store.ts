@@ -19,8 +19,8 @@ import {
   suggestedEnd,
   stripLegacyCondition,
   stripLegacyConditions,
-  type GeneralShare,
-} from './conditions';
+} from './conditionsRt';
+import type { GeneralShare } from './conditions';
 import { COACH_DEFAULT, clampForAge, normalizeTemper, type CoachSettings } from './atlas/types';
 import { useSyncExternalStore } from 'react';
 import {
@@ -110,7 +110,8 @@ import {
   type HomeSet,
   type HomeState,
 } from './homeSets';
-import { sleepBlockedBy, type SleepBlock } from './sleepGuard';
+import { sleepBlockedBy } from './sleepRt';
+import { type SleepBlock } from './sleepGuard';
 import { setTypeOf, setDrops, setVolumeKg, topSet, autoWarmupSets } from './setMath';
 import { resolveSidesMode, ONE_ARM_NAME, type SidesMode } from './sidesMode';
 import { groupRounds } from './supersetBlocks';
@@ -146,7 +147,7 @@ import {
   classifySleepKind,
   sleepKindOf,
   duplicateSleepIds,
-} from './sleep';
+} from './sleepRt';
 import { computeStreak } from './streak';
 import { currentUid, getRole, callFn } from './api';
 import { addonAvailable, addonsPref } from './addons/queue'; // importing it also registers the add-on lists for account sync
@@ -565,9 +566,15 @@ onTrackerReady((id) => {
   else if (id === 'supplements')
     state = { ...state, supplements: sup.normalize(state.supplements) };
   else if (id === 'nicotine') state = { ...state, nicotine: nic.normalize(state.nicotine) };
+  else if (id === 'conditions')
+    // a new array: memos keyed on the list (healthBuild limits) recompute with the real engine
+    state = { ...state, conditions: [...state.conditions] };
+  else if (id === 'sleep')
+    // a new array: memos keyed on the list recompute with the real engine
+    state = { ...state, sleeps: [...state.sleeps] };
   else return;
   emit();
-  if (id !== 'cycle') {
+  if (id !== 'cycle' && id !== 'sleep') {
     const uid = currentUid();
     if (uid) publishCoachShare(uid, state.conditions);
   }
@@ -2981,7 +2988,8 @@ function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): 
   if (
     pending('alcohol', state.alcohol?.settings?.sharing) ||
     pending('nicotine', state.nicotine?.settings?.sharing) ||
-    pending('supplements', state.supplements?.settings?.sharing)
+    pending('supplements', state.supplements?.settings?.sharing) ||
+    pending('conditions', state.conditions.length ? state.conditionsShare : 'off')
   )
     return;
   const vis = exposed();

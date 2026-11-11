@@ -4,7 +4,7 @@
  *  - sleep: the average night over the last two weeks.
  * Pure. A baseline is null when there is too little data to call it "yours".
  */
-import { sleepStats } from '../../sleep';
+import { sleepStats } from '../../sleepRt';
 import { workoutDayType } from '../../sessionProfile';
 import {
   summaryHints,

@@ -51,7 +51,7 @@ import {
   activityType,
   durationMin,
 } from '../../activities';
-import { sleepReadinessBias } from '../../sleep';
+import { sleepReadinessBias } from '../../sleepRt';
 import { deloadMult, sleepNeedExtraMin } from '../../calcMods';
 import { personalLandmarks } from '../../personalize';
 import { FOCUS_MAV_DELTA, focusLists, groupEmphasis } from '../../goals';

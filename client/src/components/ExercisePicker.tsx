@@ -7,7 +7,7 @@
  * this session are marked, never blocked. On desktop the same pieces sit in one
  * modal: family rail · suggestions + grid · live preview.
  */
-import { exerciseFlag } from '../conditions';
+import { exerciseFlag } from '../conditionsRt';
 import { healthBuildCtx, useConditionLimits, useStoredConditionLimits } from '../healthBuild';
 import { warmupProposal } from '../warmupFor';
 import { BackButton } from '../components/ui/BackButton';

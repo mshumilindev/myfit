@@ -23,7 +23,7 @@ import type { ChronicCondition, Gym, Workout } from './types';
 import { sessionProfile, type SessionProfile } from './sessionProfile';
 import { hasAmenity } from './data/gymAmenities';
 import { catalogCondition } from './data/conditionCatalog';
-import { effectiveKey, isActive } from './conditions';
+import { effectiveKey, isActive } from './conditionsRt';
 
 export type FuelKind = 'carbMeal' | 'proteinShake' | 'hydrate' | 'smoothie' | 'snack';
 /** Why it fits — picks the one-line rationale. */

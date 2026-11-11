@@ -77,7 +77,7 @@ import { useSetBars } from './useSetBars';
 import { MuscleStatePanel } from '../components/MuscleStatePanel';
 import { cachedPersonalLandmarks } from '../personalize';
 import { SPLIT_GROUPS } from '../data/subregions';
-import { lastNight } from '../sleep';
+import { lastNight } from '../sleepRt';
 import {
   REST_PRESETS,
   REST_PREFS_DEFAULT,

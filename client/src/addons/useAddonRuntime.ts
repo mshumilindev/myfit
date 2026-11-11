@@ -50,6 +50,13 @@ export function useAddonRuntime() {
   useEffect(() => {
     if (cycleOn) loadTracker('cycle', () => import('../cycleBoot'));
   }, [cycleOn]);
+  const conditionsOn = useAddonOrBase('conditions');
+  useEffect(() => {
+    if (conditionsOn) loadTracker('conditions', () => import('../conditionsBoot'));
+  }, [conditionsOn]);
+  useEffect(() => {
+    if (sleepOn) loadTracker('sleep', () => import('../sleepBoot'));
+  }, [sleepOn]);
   const healthOn = useAddonOrBase('health');
   const injuryOn = useAddonOrBase('injury-log');
   useEffect(() => migrateModules(), []);

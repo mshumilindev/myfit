@@ -26,7 +26,7 @@ import type { Workout, Exercise } from '../types';
 import type { MuscleGroup } from '../data/exercises';
 import { Tag } from './ui/Tag';
 import { Notice } from './ui/Notice';
-import { effectLines } from '../conditions';
+import { effectLines } from '../conditionsRt';
 import { effectText } from '../conditionText';
 import { useConditionLimits } from '../healthBuild';
 

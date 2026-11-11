@@ -3,7 +3,8 @@
  * Privacy: a condition is never named in chat text. Wording stays at the level of effects
  * ("your limits say ..."); the limits themselves come from conditions.ts on this device.
  */
-import { conditionLimits, exerciseFlag, NO_LIMITS, type Limits } from '../conditions';
+import { conditionLimits, exerciseFlag, NO_LIMITS } from '../conditionsRt';
+import type { Limits } from '../conditions';
 import { muscleInfoByName, searchCatalog, type MuscleGroup } from '../data/exercises';
 import type { RiskTag } from '../data/conditionCatalog';
 import { isSupported, swapCandidates } from '../swaps';

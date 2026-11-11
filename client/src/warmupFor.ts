@@ -17,7 +17,8 @@
  * the day's muscles are unknown or no station can give MIN_ITEMS, the result is
  * null and the warm-up stays a plain, generic block (no exercises).
  */
-import { exerciseFlag, NO_LIMITS, type Limits } from './conditions';
+import { exerciseFlag, NO_LIMITS } from './conditionsRt';
+import type { Limits } from './conditions';
 import {
   BUILT_IN_CATALOG,
   richExerciseById,

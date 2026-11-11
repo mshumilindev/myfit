@@ -6,7 +6,8 @@
  * primary=1 / secondary=0.5 weighting) and rank the gym-available ones first.
  * Pure over the catalog + gym inventory.
  */
-import { exerciseFlag, type Limits } from './conditions';
+import { exerciseFlag } from './conditionsRt';
+import type { Limits } from './conditions';
 import { exerciseNeeds, missingAtGym } from './store';
 import { searchCatalog, muscleInfoByName, richExerciseByName } from './data/exercises';
 import type { MuscleGroup } from './data/exercises';

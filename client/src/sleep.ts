@@ -5,6 +5,10 @@
  * strings live in i18n.
  */
 import type { SleepNight, SleepSchedule, SleepDayPlan } from './types';
+import { AUTO_START_WINDOW_MS, SLEEP_IDLE_MS, provideSleep } from './sleepRt';
+import { sleepBlockedBy } from './sleepGuard';
+
+export { AUTO_START_WINDOW_MS, SLEEP_IDLE_MS };
 
 const DAY = 86400000;
 const clamp = (x: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, x));
@@ -16,15 +20,6 @@ export function minutesOfDay(ms: number): number {
 }
 
 /** A night's duration in minutes (live nights measure up to `now`). */
-/** After this long with no activity off the sleep screen (or with the app
- *  closed), we take it that you actually fell asleep: the gap stops counting
- *  as "awake" and counts as sleep from your last activity onward. */
-export const SLEEP_IDLE_MS = 5 * 60 * 1000;
-
-/** How long after the scheduled bedtime the app may still auto-start tonight's
- *  night (beyond this we leave it to retroactive auto-log after wake). */
-export const AUTO_START_WINDOW_MS = 45 * 60 * 1000;
-
 /** The most recent clock occurrence of `bedMin` (minutes from midnight) at or
  *  before `now`, as epoch ms — today's if it has passed, else yesterday's. */
 export function lastBedtimeAt(now: number, bedMin: number): number {
@@ -429,3 +424,27 @@ export function duplicateSleepIds(list: SleepNight[], now: number = Date.now()):
   }
   return drop;
 }
+
+// The real engine goes into the facade the moment this module is imported (the Sleep add-on is installed).
+provideSleep({
+  minutesOfDay,
+  awakeMsAt,
+  nightDurationMin,
+  classifySleepKind,
+  sleepKindOf,
+  finishedNights,
+  lastNight,
+  sleepStats,
+  weekdayPattern,
+  sleepReadinessBias,
+  planForWeekday,
+  planDurationMin,
+  resolvePlan,
+  usualPlan,
+  nightEndingOn,
+  dueBedtime,
+  computeUpcomingNights,
+  sameSleep,
+  duplicateSleepIds,
+  sleepBlockedBy,
+});

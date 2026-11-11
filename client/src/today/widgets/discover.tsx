@@ -53,7 +53,7 @@ import {
 import type { Gym, Workout } from '../../types';
 import { rankExercisesForMuscle } from '../../sessionBuilder';
 import { illumPct, moonInfo } from '../../moon';
-import { resolvePlan, usualPlan } from '../../sleep';
+import { resolvePlan, usualPlan } from '../../sleepRt';
 import {
   activeTemplateIds,
   challengeCatalog,

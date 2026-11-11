@@ -9,7 +9,7 @@ import * as N from './num';
 import { isBodyweightLift, liftPoints } from './liftStats';
 import { muscleSetsInWorkout, setTopWeight, setTypeOf, topSet } from '../store';
 import { activeInjuries } from '../injury';
-import { finishedNights, nightDurationMin } from '../sleep';
+import { finishedNights, nightDurationMin } from '../sleepRt';
 import { topHistory } from '../progression';
 import { LANDMARKS, VOLUME_MUSCLES, recentLoadSets } from '../volume';
 import type { MuscleGroup } from '../data/exercises';

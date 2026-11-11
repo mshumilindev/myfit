@@ -7,7 +7,7 @@
  */
 import { dayOfTimestamp } from '../components/ui/calendarDays';
 import { isStrengthExercise, setBestE1rm, workoutVolumeKg, type StoreState } from '../store';
-import { nightDurationMin, sleepKindOf } from '../sleep';
+import { nightDurationMin, sleepKindOf } from '../sleepRt';
 import type { Activity, Workout } from '../types';
 
 export interface PrRecord {

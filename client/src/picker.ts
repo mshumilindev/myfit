@@ -6,7 +6,8 @@
  * weak point, good fit) with a progression target. Pure over its inputs (the
  * workouts, the gym, "now"), so it unit-tests without React.
  */
-import { isAutoExcluded, type Limits } from './conditions';
+import { isAutoExcluded } from './conditionsRt';
+import type { Limits } from './conditions';
 import { landmarkFor, personalLandmarks } from './personalize';
 import type { Gym, Workout } from './types';
 import {

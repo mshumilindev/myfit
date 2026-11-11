@@ -11,7 +11,7 @@ import {
 } from '../../components/ui/Widget';
 import { Button } from '../../components/ui/Button';
 import { muscleReadiness } from '../../recovery';
-import { finishedNights, nightDurationMin, lastNight } from '../../sleep';
+import { finishedNights, nightDurationMin, lastNight } from '../../sleepRt';
 import { fmtDayMonth, fmtWeekdayDayMonth, fmtWeekdayShort, getLocale } from '../../i18n';
 import { restingForDay } from '../../dayEnergy';
 import { activityCalories, durationMin, workoutCalories } from '../../activities';

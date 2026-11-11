@@ -40,7 +40,7 @@ import {
   weekdayPattern,
   planDurationMin,
   sleepKindOf,
-} from '../sleep';
+} from '../sleepRt';
 import { getUsername } from '../api';
 import { bmrKcal } from '../energy';
 import type { SleepQuality, SleepDayPlan } from '../types';

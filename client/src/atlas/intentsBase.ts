@@ -5,7 +5,7 @@ import * as N from './num';
 import { consistencyStreak, latestWeight, setTypeOf } from '../store';
 import { muscleReadiness, recentLoadSets } from '../recovery';
 import { LANDMARKS, VOLUME_MUSCLES, weeklyMuscleSets } from '../volume';
-import { finishedNights, nightDurationMin } from '../sleep';
+import { finishedNights, nightDurationMin } from '../sleepRt';
 import { activeInjuries } from '../injury';
 import { blockWeek, isDeloadWeek, planDayFor } from './plan';
 import { groupMatches } from './nlu';

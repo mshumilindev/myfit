@@ -20,7 +20,7 @@ import {
   type CatalogCondition,
   type ConditionRegion,
 } from '../../data/conditionCatalog';
-import { OTHER_TAB_CATEGORIES, isOtherTab } from '../../conditions';
+import { OTHER_TAB_CATEGORIES, isOtherTab } from '../../conditionsRt';
 import { useT } from '../../i18n';
 import { useConditionName } from '../../useConditionName';
 import type { Strings } from '../../i18n/en';

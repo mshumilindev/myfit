@@ -24,7 +24,7 @@ import {
   sleepKindOf,
   sleepStats,
   usualPlan,
-} from '../../sleep';
+} from '../../sleepRt';
 import { bmrKcal } from '../../energy';
 import { autoLifestyle, restingDayKcal, weightAsOfKg } from '../../dayEnergy';
 import { activityCalories, workoutCalories } from '../../activities';

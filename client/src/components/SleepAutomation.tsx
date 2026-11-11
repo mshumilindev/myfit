@@ -14,7 +14,8 @@
 import { useEffect, useState } from 'react';
 import { Button, IconButton } from './ui/Button';
 import { useT, fmtDurationHuman } from '../i18n';
-import { sleepBlockedBy, SLEEP_BLOCK_KEY } from '../sleepGuard';
+import { sleepBlockedBy } from '../sleepRt';
+import { SLEEP_BLOCK_KEY } from '../sleepGuard';
 import {
   useStore,
   liveSleep,
@@ -35,7 +36,7 @@ import {
   finishedNights,
   dueBedtime,
   nightEndingOn,
-} from '../sleep';
+} from '../sleepRt';
 import { Icon } from '../ui';
 import { MoonGlyph } from './MoonGlyph';
 import { moonInfo, illumPct } from '../moon';

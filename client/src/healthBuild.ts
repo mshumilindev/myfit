@@ -6,7 +6,8 @@
 import { useMemo } from 'react';
 import { getStoredLimits, useStore, useStoredLimits, type StoredLimits } from './store';
 import type { MuscleGroup } from './data/exercises';
-import { conditionLimits, type Limits } from './conditions';
+import { conditionLimits } from './conditionsRt';
+import type { Limits } from './conditions';
 import { loadCaps as injuryLoadCaps, protectedMuscles as injuryProtected } from './injury';
 
 export interface HealthBuild {

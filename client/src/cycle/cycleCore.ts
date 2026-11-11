@@ -10,7 +10,7 @@
  *   valid only while k ≤ MAX_PROJECTED_CYCLES, then the schedule is "stale".
  * Four coarse phase buckets only; no ovulation or fertility estimate is ever produced.
  */
-import { effectiveKey, isActive } from '../conditions';
+import { effectiveKey, isActive } from '../conditionsRt';
 import type { ChronicCondition } from '../types';
 
 export type CycleMode = 'regular' | 'irregular' | 'log';

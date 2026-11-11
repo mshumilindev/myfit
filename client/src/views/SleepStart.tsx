@@ -1,5 +1,6 @@
 import { Button } from '../components/ui/Button';
-import { sleepBlockedBy, SLEEP_BLOCK_KEY } from '../sleepGuard';
+import { sleepBlockedBy } from '../sleepRt';
+import { SLEEP_BLOCK_KEY } from '../sleepGuard';
 import { startSleep, useStore } from '../store';
 import { useT } from '../i18n';
 import { Icon } from '../ui';

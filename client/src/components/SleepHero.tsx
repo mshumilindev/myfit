@@ -12,7 +12,7 @@ import { useT, fmtDurationHuman } from '../i18n';
 import { Card } from './ui/Card';
 import { IconButton, Button } from './ui/Button';
 import { MoonGlyph } from './MoonGlyph';
-import { nightDurationMin, SLEEP_IDLE_MS } from '../sleep';
+import { nightDurationMin, SLEEP_IDLE_MS } from '../sleepRt';
 
 function hhmm(ms: number): string {
   const d = new Date(ms);

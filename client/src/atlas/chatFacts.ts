@@ -6,8 +6,8 @@
 import type { StoreState } from '../store';
 import { est1rm, setTopWeight, topSet, setTypeOf } from '../store';
 import { activeInjuries } from '../injury';
-import { deidentifiedEffects, isActive } from '../conditions';
-import { finishedNights, nightDurationMin } from '../sleep';
+import { deidentifiedEffects, isActive } from '../conditionsRt';
+import { finishedNights, nightDurationMin } from '../sleepRt';
 import { latestWeight } from '../store';
 import { blockWeek, planDayFor } from './plan';
 import type { AtlasNote } from './notes';

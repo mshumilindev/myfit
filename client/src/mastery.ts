@@ -27,7 +27,7 @@ import {
 } from './store';
 import { computeStandards, LEVELS, type Sex } from './standards';
 import { topHistory, nextTarget } from './progression';
-import { sleepStats, finishedNights } from './sleep';
+import { sleepStats, finishedNights } from './sleepRt';
 import { foldedWeekly } from './masteryBack';
 
 // --- Ranks -----------------------------------------------------------------

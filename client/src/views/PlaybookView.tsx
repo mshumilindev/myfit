@@ -13,7 +13,7 @@ import { useMemo, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import type { Shell } from '../App';
 import { useConditionLimits } from '../healthBuild';
-import { exerciseFlag } from '../conditions';
+import { exerciseFlag } from '../conditionsRt';
 import type { Workout } from '../types';
 import { programDayNameFor, repeatWorkout, useStore, workoutDayReadout } from '../store';
 import { startPlaySession } from '../data/programMine';

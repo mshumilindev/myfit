@@ -70,7 +70,7 @@ import {
   type DeloadSuggestion,
 } from '../fatigue';
 import { activityRecoveryBias } from '../activities';
-import { sleepReadinessBias } from '../sleep';
+import { sleepReadinessBias } from '../sleepRt';
 import { sleepNeedExtraMin } from '../calcMods';
 import {
   personalLandmarks,

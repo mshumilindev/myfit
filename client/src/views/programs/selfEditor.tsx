@@ -13,7 +13,7 @@ import { getRole } from '../../api';
 import { machineIcon } from '../../components/CardioMachineList';
 import { CARDIO_PROFILES } from '../../cardio';
 import { ClientTrainerDayTagLazy } from '../../coach/client/lazy';
-import { exerciseFlag } from '../../conditions';
+import { exerciseFlag } from '../../conditionsRt';
 import { defaultWarmupValue, warmupUsesWeight } from '../../warmupLog';
 import { exerciseUnit } from '../../store';
 import { EQUIPMENT_CATALOG } from '../../data/equipmentCatalog';

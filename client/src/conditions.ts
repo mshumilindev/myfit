@@ -8,7 +8,6 @@
  */
 import {
   catalogCondition,
-  type ConditionCategory,
   effectsAt,
   mergeEffects,
   type CardioCap,
@@ -20,6 +19,26 @@ import type { ChronicCondition, ConditionShare } from './types';
 import type { CoachAlcoholView } from './alcoholShare';
 import type { CoachSupplementsView } from './supplementsShare';
 import type { CoachNicotineView } from './nicotineShare';
+import {
+  NO_LIMITS,
+  OTHER_TAB_CATEGORIES,
+  isActive,
+  isAutoExcluded,
+  isOtherTab,
+  provideConditions,
+  stripLegacyCondition,
+  stripLegacyConditions,
+} from './conditionsRt';
+
+export {
+  NO_LIMITS,
+  OTHER_TAB_CATEGORIES,
+  isActive,
+  isAutoExcluded,
+  isOtherTab,
+  stripLegacyCondition,
+  stripLegacyConditions,
+};
 
 // ---------------------------------------------------------------------------
 // Exercise risk tagging (heuristic, by name, category and muscles)
@@ -28,19 +47,6 @@ import type { CoachNicotineView } from './nicotineShare';
 const has = (n: string, ...words: string[]) => words.some((w) => n.includes(w));
 
 /** Movement-risk tags for an exercise. Conservative: only clear signals. */
-/**
- * Older builds stored a free-text `note` on a condition; it no longer exists. Drop it on
- * read so it never resurfaces, and so the next write to the store omits it.
- */
-export function stripLegacyCondition<T extends object>(c: T): T {
-  if (!('note' in c)) return c;
-  const rest: Record<string, unknown> = { ...c };
-  delete rest.note;
-  return rest as T;
-}
-export const stripLegacyConditions = <T extends object>(list: readonly T[]): T[] =>
-  list.map(stripLegacyCondition);
-
 export function exerciseRisk(
   name: string,
   rich: RichExercise | null = richExerciseByName(name),
@@ -159,8 +165,6 @@ export interface Limits {
   keys: string[];
 }
 
-export const NO_LIMITS: Limits = { effects: {}, avoidBy: {}, cautionBy: {}, capBy: {}, keys: [] };
-
 const DAY = 86_400_000;
 
 /**
@@ -215,11 +219,6 @@ export function effectiveKey(c: ChronicCondition, now: number): string {
     : c.key;
 }
 
-/** Not started yet, or past its end: no effects. Permanent conditions are always active. */
-export function isActive(c: ChronicCondition, now: number): boolean {
-  if (c.startedAt != null && c.startedAt > now) return false;
-  return !(c.endsAt != null && c.endsAt <= now);
-}
 export const isEnded = (c: ChronicCondition, now: number): boolean =>
   c.endsAt != null && c.endsAt <= now;
 
@@ -240,23 +239,6 @@ export function temporaryProgress(c: ChronicCondition, now: number): TemporaryPr
     fraction: Math.min(1, Math.max(0, (now - c.startedAt) / (c.endsAt - c.startedAt))),
   };
 }
-
-/**
- * Body map "Other" tab: what cannot be pinned to a body part. Everything whose region is
- * `whole`, plus whole-system categories, is reachable here so nothing is unmappable.
- */
-export const OTHER_TAB_CATEGORIES: ConditionCategory[] = [
-  'neuro',
-  'cardio',
-  'respiratory',
-  'metabolic',
-  'pregnancy',
-  'other',
-];
-
-/** Shown in the Body map "Other" tab: no single body part, or a whole-system category. */
-export const isOtherTab = (c: { region: string; category: ConditionCategory }): boolean =>
-  c.region === 'whole' || OTHER_TAB_CATEGORIES.includes(c.category);
 
 /** Stack all known, currently active conditions. Unknown keys are ignored, never thrown on. */
 export function conditionLimits(
@@ -341,10 +323,6 @@ export function exerciseFlag(
   if (level === 'ok' && cap < 1) level = 'info';
   return { level, tags, because: [...because], cap };
 }
-
-/** Auto-builder filter: drops only 'avoid'. */
-export const isAutoExcluded = (name: string, limits: Limits): boolean =>
-  exerciseFlag(name, limits).level === 'avoid';
 
 // ---------------------------------------------------------------------------
 // Sharing (coach / LLM)
@@ -460,3 +438,15 @@ export function deidentifiedEffects(
   }
   return any ? effectLines(merged) : [];
 }
+
+// The real engine goes into the facade the moment this module is imported (the Conditions add-on is installed).
+provideConditions({
+  exerciseFlag,
+  conditionLimits,
+  effectLines,
+  coachView,
+  deidentifiedEffects,
+  effectiveKey,
+  pregnancyKeyAt,
+  suggestedEnd,
+});

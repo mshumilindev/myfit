@@ -76,9 +76,7 @@ import { ROSTER_TAB_IDS, guardRosterTab, rosterHomeTab, rosterMode } from './vie
 import { redirectLegacyPeopleClients } from './views/legacyPeopleRedirect';
 import { canUseCoach, coachScreenOpen } from './coach/access';
 import type { HomeSetRoute } from './views/home/HomeSetView';
-import { pruneHomeSetDrafts } from './views/home/homeSetDraft';
 import { AuthView } from './views/AuthView';
-import { TeamInviteSignInNotice } from './coach/team/TeamInviteSignInNotice';
 import { NoticeStrip } from './components/NoticeStrip';
 import { LandingView } from './views/landing/LandingView';
 import { InviteLanding } from './views/landing/InviteLanding';
@@ -96,7 +94,6 @@ import { useClientShared } from './coach/client/shared';
 import { ClientBridgeLazy, ClientRoutesLazy } from './coach/client/lazy';
 import { CallsHostLazy } from './calls/lazy';
 import { GymBrandBar, GymTabBar } from './components/suite/GymChrome';
-import { HealthPrivacyView } from './views/health/HealthPrivacyView';
 import { ConditionsShield, useActiveConditions } from './views/health/ConditionsShield';
 import { AppRail } from './components/AppRail';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
@@ -114,6 +111,14 @@ import { legalRoute, useJoinLinkSync, useLegalRoute } from './legal/route';
 import { usePendingConsentFlush } from './legal/signupConsents';
 import { usePendingRevokeFlush } from './coach/client/revokeQueue';
 
+const HealthPrivacyView = lazy(() =>
+  import('./views/health/HealthPrivacyView').then((m) => ({ default: m.HealthPrivacyView })),
+);
+const TeamInviteSignInNotice = lazy(() =>
+  import('./coach/team/TeamInviteSignInNotice').then((m) => ({
+    default: m.TeamInviteSignInNotice,
+  })),
+);
 const LegalPage = lazy(() =>
   import('./views/LegalPage').then((module) => ({ default: module.LegalPage })),
 );
@@ -930,8 +935,11 @@ function AppMain() {
   }, [draftKeepId]);
   // Home set drafts (an unsaved set, the picker's ticks) live only while the screen is open.
   useEffect(() => {
-    pruneHomeSetDrafts([overlayNav.cur, ...overlayNav.stack]);
-  }, [overlayNav]);
+    if (!homeSetsOn) return;
+    void import('./views/home/homeSetDraft')
+      .then((m) => m.pruneHomeSetDrafts([overlayNav.cur, ...overlayNav.stack]))
+      .catch((e: unknown) => console.warn('[home-sets] draft cleanup skipped', e));
+  }, [overlayNav, homeSetsOn]);
   /** Open an overlay, remembering the current one as its logical parent.
    * Passing null resets the whole overlay stack (used when switching tabs). */
   const setOverlay = useCallback((o: Overlay) => {
@@ -1303,7 +1311,11 @@ function AppMain() {
 
   if (!authed) {
     const teamToken = /^#\/team-invite\/([A-Za-z0-9_-]{1,64})/.exec(currentHash())?.[1];
-    const teamNotice = teamToken ? <TeamInviteSignInNotice token={teamToken} /> : undefined;
+    const teamNotice = teamToken ? (
+      <Suspense fallback={null}>
+        <TeamInviteSignInNotice token={teamToken} />
+      </Suspense>
+    ) : undefined;
     return (
       <div className={shouldShowLanding() ? 'app app-landing' : 'app'}>
         {shouldShowLanding() ? (
@@ -1648,7 +1660,11 @@ function AppMain() {
         />
       )}
       {activeOverlay?.screen === 'theme-settings' && <ThemeSettingsView onClose={closeOverlay} />}
-      {activeOverlay?.screen === 'privacy' && <HealthPrivacyView onBack={closeOverlay} />}
+      {activeOverlay?.screen === 'privacy' && (
+        <Suspense fallback={<ScreenFallback />}>
+          <HealthPrivacyView onBack={closeOverlay} />
+        </Suspense>
+      )}
       {activeOverlay?.screen === 'history' && (
         <HistoryListView shell={shell} onClose={closeOverlay} />
       )}

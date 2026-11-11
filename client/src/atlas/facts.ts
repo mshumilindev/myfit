@@ -15,7 +15,7 @@ import {
 } from '../store';
 import { VOLUME_MUSCLES, weeklyMuscleSets } from '../volume';
 import { recentLoadSets } from '../loadWindow';
-import { finishedNights, nightDurationMin } from '../sleep';
+import { finishedNights, nightDurationMin } from '../sleepRt';
 import { playForWeekday, type Play } from '../playbook';
 import { isoWeekday, weekStartDay, weekStartOf, type IsoDay } from '../weekStart';
 import type { CoachFact } from './types';

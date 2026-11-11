@@ -9,7 +9,7 @@ import { muscleReadiness } from '../recovery';
 import { VOLUME_MUSCLES } from '../volume';
 import { computePlaybook, playForWeekday } from '../playbook';
 import { planDayFor } from './plan';
-import { conditionLimits, isAutoExcluded, NO_LIMITS } from '../conditions';
+import { conditionLimits, isAutoExcluded, NO_LIMITS } from '../conditionsRt';
 import type { Fmt } from './voice';
 import type { Temper } from './types';
 import type { AtlasMemory, SaidRec } from './memory';
