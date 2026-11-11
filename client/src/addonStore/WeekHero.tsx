@@ -4,10 +4,9 @@ import { getRole } from '../api';
 import { addonById, type AddonManifest } from '../addons/manifest';
 import { isAddonAllowed, isAddonUnlocked } from '../addons/enabledSet';
 import { queueAdd, queueRemove } from '../addons/queue';
-import { SkBadge, SkBento, SkBentoTile, SkBtn } from '../store-kit';
-import { comingSoonForRole } from './storeCatalog';
+import { SkBento, SkBentoTile, SkBtn } from '../store-kit';
 import { weekPick, type WeekKind } from './discoverPicks';
-import { itemDesc, itemName, kindBadge, TileOf, type StoreCtx } from './storeItems';
+import { itemDesc, itemName, kindBadge, type StoreCtx } from './storeItems';
 import { previewUrl, WEEK_SHOTS } from './weekPreviews';
 
 /** The theme's own look on the hero: a new theme needs no extra design here, only a skin class. */
@@ -171,7 +170,7 @@ export function WeekTile({
   );
 }
 
-/** The slot on a page. Everything installed: only Apps keeps the slot (the next Coming soon app, with its icon); add-ons and themes show nothing. */
+/** The slot on a page. Everything installed: the slot shows nothing (a Coming soon item never takes it). */
 export function WeekHero({
   kind,
   ctx,
@@ -181,7 +180,7 @@ export function WeekHero({
   ctx: StoreCtx;
   now?: number;
 }) {
-  const { st, enabled } = ctx;
+  const { enabled } = ctx;
   const [mounted] = useState(() => Date.now());
   const now = nowProp ?? mounted;
   const role = getRole();
@@ -192,32 +191,8 @@ export function WeekHero({
         <WeekTile m={m} ctx={ctx} now={now} span={2} />
       </SkBento>
     );
-  const soon = kind === 'app' ? comingSoonForRole(role)[0] : undefined;
-  if (!soon) return null;
-  const label =
-    kind === 'app' ? st.weekTitle : kind === 'theme' ? st.weekTitleTheme : st.weekTitleAddon;
-  return (
-    <SkBento>
-      <SkBentoTile
-        variant="dark"
-        size="wide"
-        span={2}
-        className="wk-empty"
-        eyebrow={label}
-        aside={<SkBadge kind="soon">{st.soon}</SkBadge>}
-        title={
-          <span className="wk-ttl">
-            <TileOf st={st} m={soon} size={64} />
-            <span className="wk-ttl-txt">
-              {itemName(st, soon.id)}
-              <span className="wk-ttl-desc">{itemDesc(st, soon.id)}</span>
-            </span>
-          </span>
-        }
-        titleSize="h2"
-      />
-    </SkBento>
-  );
+  // Everything installed (or nothing to offer): no banner. Coming-soon items never take the slot.
+  return null;
 }
 
 export type { WeekKind };

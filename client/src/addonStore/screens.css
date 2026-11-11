@@ -492,12 +492,6 @@
   background: currentColor;
 }
 
-/* Coming-soon / all-installed banner on the dark tile: a readable SOON badge and the item's icon beside its name */
-.wk-empty .sk-bd-soon {
-  color: #fff;
-  outline-color: rgba(255, 255, 255, 0.75);
-}
-.wk-ttl {
   display: inline-flex;
   align-items: center;
   gap: 14px;
