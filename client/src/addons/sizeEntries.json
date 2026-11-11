@@ -16,7 +16,15 @@
       "data/exerciseImage",
       "data/subregion"
     ],
-    "assets": ["exercise-img/", "equipment/", "anatomy/", "markers/", "gyms/"]
+    "assets": [
+      "exercise-img/",
+      "equipment/",
+      "anatomy/",
+      "markers/",
+      "gyms/",
+      "sounds/spotter_call.ogg",
+      "sounds/spotter_call.mp3"
+    ]
   },
   "health": {
     "js": ["views/HealthView", "views/health/", "healthAddons", "healthMask"]
@@ -86,7 +94,8 @@
     "js": ["mastery", "views/MasteryView"]
   },
   "coach": {
-    "js": ["coach/"]
+    "js": ["coach/"],
+    "assets": ["sounds/spotter_call.ogg", "sounds/spotter_call.mp3"]
   },
   "coach-live": {
     "js": ["coach/screens/live/", "coach/data/firestore/live"]
@@ -128,5 +137,9 @@
       "christmas/wreath.webp",
       "halloween/pumpkin.webp"
     ]
+  },
+  "planner": {
+    "js": ["planner/"],
+    "assets": ["sounds/spotter_plan.ogg", "sounds/spotter_plan.mp3"]
   }
 }

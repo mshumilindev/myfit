@@ -28,6 +28,10 @@ function Probe({ on }: { on: boolean }) {
 beforeEach(() => {
   made.length = 0;
   vi.stubGlobal('Audio', FakeAudio);
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(() => Promise.reject(new Error('offline'))),
+  );
 });
 afterEach(() => {
   cleanup();
@@ -37,8 +41,7 @@ afterEach(() => {
 describe('useLoopSound', () => {
   it('loops while active and stops when it ends', async () => {
     const { rerender } = render(<Probe on />);
-    await act(async () => {});
-    expect(made).toHaveLength(1);
+    await vi.waitFor(() => expect(made).toHaveLength(1));
     expect(made[0].loop).toBe(true);
     expect(made[0].paused).toBe(false);
     rerender(<Probe on={false} />);
@@ -57,8 +60,7 @@ describe('useLoopSound', () => {
     }
     vi.stubGlobal('Audio', Blocked);
     render(<Probe on />);
-    await act(async () => {});
-    expect(reject).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(reject).toHaveBeenCalledTimes(1));
     await act(async () => {
       document.dispatchEvent(new Event('pointerdown'));
     });

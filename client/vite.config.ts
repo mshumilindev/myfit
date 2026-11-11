@@ -6,7 +6,7 @@ import { addonSizes } from './addonSizes';
 
 // Folders whose files belong to an app's media pack (see src/addons/sizeEntries.json assets).
 const PACK_PATH =
-  /^\/(exercise-img|equipment|anatomy|markers|gyms|physiques|atlas|backgrounds|christmas|halloween|activity-[a-z]+-hero)[/.]/;
+  /^\/(exercise-img|equipment|anatomy|markers|gyms|physiques|atlas|backgrounds|christmas|halloween|sounds|activity-[a-z]+-hero)[/.]/;
 
 /** Identifies this build; the page compares it with /version.json to learn that a newer one is live. */
 const BUILD_ID = Date.now().toString(36);

@@ -4,9 +4,7 @@ import { ReminderAlert } from '../components/ui/ReminderAlert';
 import { COACH_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
 import type { Tone } from '../components/ui/tones';
 import { useT } from '../i18n';
-import { useLoopSound, type RingSound } from '../sound/useLoopSound';
-import planOgg from './sounds/spotter_plan.ogg?url';
-import planMp3 from './sounds/spotter_plan.mp3?url';
+import { PLAN_SOUND, useLoopSound } from '../sound/useLoopSound';
 import { dueRings, nextWake } from './alertsCore';
 import { useSharedAlerts, writeAlert } from './alertsSync';
 import { fill, STRINGS } from './strings';
@@ -14,7 +12,6 @@ import { usePlans } from './sync';
 import { localParts } from './zoned';
 import './RingLayer.css';
 
-const PLAN_SOUND: RingSound = { ogg: planOgg, mp3: planMp3 };
 const KEY = 'planner.ring.v1';
 interface Store {
   handled: string[];

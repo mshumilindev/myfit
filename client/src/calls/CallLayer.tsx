@@ -10,7 +10,7 @@ import { CallTile } from '../components/ui/CallTile';
 import { CallVideo } from '../components/ui/CallVideo';
 import { IncomingCall } from '../components/ui/IncomingCall';
 import { useAddonOrBase } from '../addons/enabledSet';
-import { useLoopSound, type RingSound } from '../sound/useLoopSound';
+import { CALL_SOUND, useLoopSound } from '../sound/useLoopSound';
 import { Notice } from '../components/ui/Notice';
 import { useCallsT } from '../i18n/calls';
 import { elapsedSeconds, isLive, type CallEndReason, type CallState } from './callMachine';
@@ -115,20 +115,10 @@ function CallLayerView({ session }: { session: CallSession }) {
   }, [s.phase, s.endReason, session]);
 
   const ringingIn = s.phase === 'ringing-in';
-  // The ringtone belongs to Gym and Coach: an account with neither (an admin in Users only) never fetches it.
+  // The ringtone belongs to Gym and Coach (their offline media pack carries it): an account with neither never plays or fetches it.
   const gymOn = useAddonOrBase('gym');
   const coachOn = useAddonOrBase('coach');
-  const hasRingtone = gymOn || coachOn;
-  const [tone, setTone] = useState<RingSound | null>(null);
-  useEffect(() => {
-    if (!ringingIn || !hasRingtone || tone) return;
-    let live = true;
-    void import('./sounds/callSound').then((m) => live && setTone(m.CALL_SOUND)).catch(() => {});
-    return () => {
-      live = false;
-    };
-  }, [ringingIn, hasRingtone, tone]);
-  useLoopSound(tone, ringingIn);
+  useLoopSound(gymOn || coachOn ? CALL_SOUND : null, ringingIn);
   useEffect(() => {
     if (!ringingIn) return;
     // a keyboard or screen-reader user lands on the primary action of the alert dialog
