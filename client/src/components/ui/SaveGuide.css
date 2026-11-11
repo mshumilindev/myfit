@@ -109,33 +109,6 @@
   -webkit-mask: url('data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3Crect%20x%3D%271%27%20y%3D%271%27%20rx%3D%2711%27%20ry%3D%2711%27%20style%3D%27width%3Acalc%28100%25%20-%202px%29%3Bheight%3Acalc%28100%25%20-%202px%29%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%272%27%20stroke-dasharray%3D%278%206%27%3E%3Canimate%20attributeName%3D%27stroke-dashoffset%27%20from%3D%2714%27%20to%3D%270%27%20dur%3D%270.8s%27%20repeatCount%3D%27indefinite%27/%3E%3C/rect%3E%3C/svg%3E') 0 0 / 100% 100% no-repeat;
   mask: url('data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27100%25%27%20height%3D%27100%25%27%3E%3Crect%20x%3D%271%27%20y%3D%271%27%20rx%3D%2711%27%20ry%3D%2711%27%20style%3D%27width%3Acalc%28100%25%20-%202px%29%3Bheight%3Acalc%28100%25%20-%202px%29%27%20fill%3D%27none%27%20stroke%3D%27%23000%27%20stroke-width%3D%272%27%20stroke-dasharray%3D%278%206%27%3E%3Canimate%20attributeName%3D%27stroke-dashoffset%27%20from%3D%2714%27%20to%3D%270%27%20dur%3D%270.8s%27%20repeatCount%3D%27indefinite%27/%3E%3C/rect%3E%3C/svg%3E') 0 0 / 100% 100% no-repeat;
 }
-/* Chamfer themes: the cut corners keep a stroke (same recipe as Chamfer.css, in the guide colour). */
-.uisg-f::before {
-  content: var(--corner-mark-content, none);
-  position: absolute;
-  inset: 2px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.18s ease;
-  background:
-    linear-gradient(
-        to top right,
-        transparent calc(50% - 1px),
-        var(--color-guide) calc(50% - 1px) 50%,
-        transparent 50%
-      )
-      top right / var(--cut-ctl, 7px) var(--cut-ctl, 7px) no-repeat,
-    linear-gradient(
-        to top right,
-        transparent 50%,
-        var(--color-guide) 50% calc(50% + 1px),
-        transparent calc(50% + 1px)
-      )
-      bottom left / var(--cut-ctl, 7px) var(--cut-ctl, 7px) no-repeat;
-}
-.uisg-f.is-hit::before {
-  opacity: 1;
-}
 .uisg-f.is-hit {
   cursor: pointer;
   background-color: color-mix(in srgb, var(--color-guide) 14%, transparent);
@@ -145,7 +118,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .uisg-f,
-  .uisg-f::before,
   .uisg-f::after {
     transition: none;
   }

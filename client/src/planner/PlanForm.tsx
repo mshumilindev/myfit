@@ -460,8 +460,7 @@ export function PlanForm(p: {
         <ListRow
           label={s.icon}
           value={
-            <span className="ul-flex ua-center ug-8">
-              {iconName}
+            <span role="img" aria-label={iconName} className="ul-flex ua-center">
               <IconTile icon={d.icon} tone={d.color as never} size={32} />
             </span>
           }

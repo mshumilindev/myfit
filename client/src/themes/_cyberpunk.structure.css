@@ -399,3 +399,25 @@ html[data-theme='cyberpunk'] .uisg-flag::after {
   height: 12px;
   clip-path: none;
 }
+/* The cut corners of the dashed frame keep a stroke (the row's own ::before is its hairline, so the strokes are
+   background layers of the row itself). */
+html[data-theme='cyberpunk'] .uisg-f.is-hit {
+  background-image:
+    linear-gradient(
+      to top right,
+      transparent calc(50% - 1px),
+      var(--color-guide) calc(50% - 1px) 50%,
+      transparent 50%
+    ),
+    linear-gradient(
+      to top right,
+      transparent 50%,
+      var(--color-guide) 50% calc(50% + 1px),
+      transparent calc(50% + 1px)
+    );
+  background-repeat: no-repeat;
+  background-size: 7px 7px;
+  background-position:
+    top 2px right 2px,
+    bottom 2px left 2px;
+}
