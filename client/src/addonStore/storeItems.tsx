@@ -23,6 +23,9 @@ export function itemDesc(st: AddonStoreStrings, id: string): string {
   return st.items[id as keyof typeof st.items]?.desc ?? '';
 }
 
+/** The item's rendered icon (Blender, public/store-icons/<id>.webp); an item without one falls back to its letter tile. */
+export const iconUrl = (id: string) => `${import.meta.env.BASE_URL ?? '/'}store-icons/${id}.webp`;
+
 export function TileOf({
   st,
   m,
@@ -32,7 +35,14 @@ export function TileOf({
   m: AddonManifest;
   size?: 32 | 40 | 64 | 96;
 }) {
-  return <SkTile letter={itemName(st, m.id).charAt(0).toUpperCase()} tone={m.tone} size={size} />;
+  return (
+    <SkTile
+      letter={itemName(st, m.id).charAt(0).toUpperCase()}
+      tone={m.tone}
+      size={size}
+      image={iconUrl(m.id)}
+    />
+  );
 }
 
 export function kindBadge(st: AddonStoreStrings, m: AddonManifest) {

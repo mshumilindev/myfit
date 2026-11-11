@@ -67,3 +67,14 @@
 .sk-i9 {
   background: var(--ic-9);
 }
+/* The item's own rendered icon replaces the coloured square (it carries its own tile, layers and shadow). */
+.sk-ic-img {
+  background: none;
+  border-radius: 0;
+}
+.sk-ic-img img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}

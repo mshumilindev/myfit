@@ -16,7 +16,15 @@ import {
 import { comingSoonForRole } from './storeCatalog';
 import { addonCategories, appOfTheWeek, starterPack, suggestion } from './discoverPicks';
 import { catLabel } from './storeCategories';
-import { ItemAction, itemDesc, itemName, kindBadge, relOf, type StoreCtx } from './storeItems';
+import {
+  iconUrl,
+  ItemAction,
+  itemDesc,
+  itemName,
+  kindBadge,
+  relOf,
+  type StoreCtx,
+} from './storeItems';
 
 function PickButton({ ids, picked, ctx }: { ids: string[]; picked: boolean; ctx: StoreCtx }) {
   const { st } = ctx;
@@ -157,7 +165,12 @@ export function DiscoverBento({
       {sug && (
         <SkBentoTile size="wide" span={2} eyebrow={st.suggestedFor(itemName(st, sug.parent.id))}>
           <div className="sk-rowf sk-g12 sk-mt12">
-            <SkTile letter={itemName(st, sug.item.id)} tone={sug.item.tone} size={40} />
+            <SkTile
+              letter={itemName(st, sug.item.id)}
+              tone={sug.item.tone}
+              size={40}
+              image={iconUrl(sug.item.id)}
+            />
             <div className="sk-f1">
               <div className="sk-rowf sk-g8">
                 <button
