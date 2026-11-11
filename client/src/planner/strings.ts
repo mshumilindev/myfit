@@ -35,6 +35,8 @@ export interface PlannerStrings {
   ringHint: string;
   quietHint: string;
   search: string;
+  more: string;
+  fewer: string;
   when: string;
   repeats: string;
   starts: string;
@@ -119,6 +121,8 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     ringHint: 'Rings until you dismiss it. Snooze for 5, 10 or 30 min.',
     quietHint: 'A silent notification; respects quiet hours.',
     search: 'Search',
+    more: 'More options',
+    fewer: 'Fewer options',
     when: 'Schedule',
     repeats: 'Repeats',
     starts: 'Starts',
@@ -213,6 +217,8 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     ringHint: 'Дзвонить, доки ви не закриєте. Відкласти на 5, 10 або 30 хв.',
     quietHint: 'Беззвучне сповіщення; поважає тихі години.',
     search: 'Пошук',
+    more: 'Більше опцій',
+    fewer: 'Менше опцій',
     when: 'Розклад',
     repeats: 'Повторення',
     starts: 'Початок',
@@ -307,6 +313,8 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     ringHint: 'Dzwoni, aż go zamkniesz. Odłóż o 5, 10 lub 30 min.',
     quietHint: 'Ciche powiadomienie; respektuje ciche godziny.',
     search: 'Szukaj',
+    more: 'Więcej opcji',
+    fewer: 'Mniej opcji',
     when: 'Harmonogram',
     repeats: 'Powtarzanie',
     starts: 'Start',
@@ -401,6 +409,8 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     ringHint: 'Skamba, kol uždarysite. Atidėkite 5, 10 arba 30 min.',
     quietHint: 'Tylus pranešimas; gerbia tylos valandas.',
     search: 'Ieškoti',
+    more: 'Daugiau parinkčių',
+    fewer: 'Mažiau parinkčių',
     when: 'Tvarkaraštis',
     repeats: 'Kartojasi',
     starts: 'Pradžia',
@@ -495,6 +505,8 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     ringHint: 'Heliseb, kuni sa selle sulged. Lükka edasi 5, 10 või 30 min.',
     quietHint: 'Vaikne teavitus; arvestab vaikseid tunde.',
     search: 'Otsi',
+    more: 'Rohkem valikuid',
+    fewer: 'Vähem valikuid',
     when: 'Ajakava',
     repeats: 'Kordub',
     starts: 'Algus',

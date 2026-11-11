@@ -80,6 +80,7 @@ export function PlanForm(p: {
   /** The drawer edits this copy; Save moves it into the form, Cancel drops it. */
   const [st, setSt] = useState<Draft>(p.initial);
   const [q, setQ] = useState('');
+  const [adv, setAdv] = useState(false);
   const anchor = useRef<HTMLButtonElement>(null);
   const [based, setBased] = useState<{ label: string; sub: string; icon: string } | null>(null);
   const srcs = plannerSources();
@@ -448,65 +449,78 @@ export function PlanForm(p: {
               onClick={() => openDrawer('repeat')}
             />
           </GroupedList>
-          <div className="pl-form-g">
-            <SectionLabel>{s.duration}</SectionLabel>
-            <PresetChips
-              layout="wrap"
-              label={s.duration}
-              tone="accent"
-              items={[
-                ...DURATIONS.map((m) => ({
-                  id: String(m),
-                  label: durText(s, m),
-                  selected: m === d.durationMin,
-                  onClick: () => set({ durationMin: m }),
-                })),
-                {
-                  id: 'c',
-                  label: durCustom ? durText(s, d.durationMin) : s.custom,
-                  selected: durCustom,
-                  onClick: () => openDrawer('duration'),
-                },
-              ]}
-            />
-          </div>
           {weekly(d) && dayChips(d, set)}
-          <div className="pl-form-g">
-            <SectionLabel>{s.reminder}</SectionLabel>
-            <Segmented
-              value={d.mode}
-              onChange={(mode) => set({ mode })}
-              label={s.reminder}
-              fill
-              options={[
-                { value: 'quiet', label: s.quiet },
-                { value: 'ring', label: s.ring },
-              ]}
-            />
-            <Hint>{d.mode === 'ring' ? s.ringHint : s.quietHint}</Hint>
-          </div>
-          <div className="pl-form-g">
-            <SectionLabel>{s.remindMe}</SectionLabel>
-            <PresetChips
-              layout="wrap"
-              label={s.remindMe}
-              tone="accent"
-              items={[
-                ...LEADS.map((m) => ({
-                  id: String(m),
-                  label: leadText(s, m),
-                  selected: m === d.lead,
-                  onClick: () => set({ lead: m }),
-                })),
-                {
-                  id: 'c',
-                  label: leadCustom ? leadText(s, d.lead) : s.custom,
-                  selected: leadCustom,
-                  onClick: () => openDrawer('lead'),
-                },
-              ]}
-            />
-          </div>
+          <Button
+            variant="ghost"
+            fullWidth
+            icon={adv ? 'caret-up' : 'caret-down'}
+            aria-expanded={adv}
+            onClick={() => setAdv((x) => !x)}
+          >
+            {adv ? s.fewer : s.more}
+          </Button>
+          {adv && (
+            <>
+              <div className="pl-form-g">
+                <SectionLabel>{s.duration}</SectionLabel>
+                <PresetChips
+                  layout="wrap"
+                  label={s.duration}
+                  tone="accent"
+                  items={[
+                    ...DURATIONS.map((m) => ({
+                      id: String(m),
+                      label: durText(s, m),
+                      selected: m === d.durationMin,
+                      onClick: () => set({ durationMin: m }),
+                    })),
+                    {
+                      id: 'c',
+                      label: durCustom ? durText(s, d.durationMin) : s.custom,
+                      selected: durCustom,
+                      onClick: () => openDrawer('duration'),
+                    },
+                  ]}
+                />
+              </div>
+              <div className="pl-form-g">
+                <SectionLabel>{s.reminder}</SectionLabel>
+                <Segmented
+                  value={d.mode}
+                  onChange={(mode) => set({ mode })}
+                  label={s.reminder}
+                  fill
+                  options={[
+                    { value: 'quiet', label: s.quiet },
+                    { value: 'ring', label: s.ring },
+                  ]}
+                />
+                <Hint>{d.mode === 'ring' ? s.ringHint : s.quietHint}</Hint>
+              </div>
+              <div className="pl-form-g">
+                <SectionLabel>{s.remindMe}</SectionLabel>
+                <PresetChips
+                  layout="wrap"
+                  label={s.remindMe}
+                  tone="accent"
+                  items={[
+                    ...LEADS.map((m) => ({
+                      id: String(m),
+                      label: leadText(s, m),
+                      selected: m === d.lead,
+                      onClick: () => set({ lead: m }),
+                    })),
+                    {
+                      id: 'c',
+                      label: leadCustom ? leadText(s, d.lead) : s.custom,
+                      selected: leadCustom,
+                      onClick: () => openDrawer('lead'),
+                    },
+                  ]}
+                />
+              </div>
+            </>
+          )}
           {p.onDelete && (
             <Button variant="danger" fullWidth onClick={p.onDelete}>
               {s.del}
