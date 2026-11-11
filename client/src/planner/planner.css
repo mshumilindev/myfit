@@ -9,15 +9,6 @@
 .pl-form {
   gap: var(--s-20);
 }
-.pl-page-h {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.pl-page-h h1 {
-  margin: 0;
-  font-size: var(--fs-24, 24px);
-}
 .pl-ag {
   display: flex;
   flex-direction: column;
@@ -191,6 +182,12 @@
 /* in the icon drawer only the grid scrolls; the title, search and Cancel / Save stay in view (owner 11.11) */
 .pl-ip--scroll {
   max-height: max(200px, min(60dvh, calc(100dvh - 330px)));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* the activity list in the Based on drawer scrolls on its own; the rest stays in view */
+.pl-based-scroll {
+  max-height: max(160px, min(40dvh, calc(100dvh - 520px)));
   overflow-y: auto;
   overscroll-behavior: contain;
 }

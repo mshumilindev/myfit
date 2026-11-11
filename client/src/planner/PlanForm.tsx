@@ -8,11 +8,14 @@ import { IconTile } from '../components/ui/IconTile';
 import { PageHead } from '../components/ui/PageHead';
 import { PresetChips } from '../components/ui/PresetChips';
 import { Sheet } from '../components/ui/Overlays';
+import { SectionLabel } from '../components/ui/SectionLabel';
 import { SearchField } from '../components/ui/SearchField';
 import { Segmented } from '../components/ui/Segmented';
 import { StickyActionBar } from '../components/ui/StickyActionBar';
+import { WeekdayToggle } from '../components/ui/WeekdayToggle';
 import { WheelPicker } from '../components/ui/WheelPicker';
 import { useT } from '../i18n';
+import { plannerSources } from '../plannerSources';
 import { Icon, ICON_NAMES } from '../ui';
 import { PTONES, type Draft, type PTone, type RepeatKind } from './draft';
 import { clock, dayFull, dayLong, dayMonth, durText, leadText, weekdayShorts } from './fmt';
@@ -21,7 +24,7 @@ import { dayFromNumber, dayNumber, parseDay, weekday } from './zoned';
 import './planner.css';
 
 /** The pickers open as kit drawers over the form (owner 11.11), each with Cancel / Save on a staged copy. */
-type Drawer = 'icon' | 'color' | 'start' | 'duration' | 'lead' | 'repeat' | 'date';
+type Drawer = 'based' | 'icon' | 'color' | 'start' | 'duration' | 'lead' | 'repeat' | 'date';
 
 const DURATIONS = [15, 30, 45, 60, 90, 120];
 const LEADS = [0, 10, 30, 60, 120, 1440];
@@ -78,6 +81,13 @@ export function PlanForm(p: {
   const [st, setSt] = useState<Draft>(p.initial);
   const [q, setQ] = useState('');
   const anchor = useRef<HTMLButtonElement>(null);
+  const [based, setBased] = useState<{ label: string; sub: string; icon: string } | null>(null);
+  const srcs = plannerSources();
+  const pick = (title: string, icon: string, sub: string) => {
+    set({ title, icon });
+    setBased({ label: title, sub, icon });
+    setDrawer(null);
+  };
   const set = (patch: Partial<Draft>) => setD((x) => ({ ...x, ...patch }));
   const setS = (patch: Partial<Draft>) => setSt((x) => ({ ...x, ...patch }));
   const openDrawer = (k: Drawer) => {
@@ -105,30 +115,58 @@ export function PlanForm(p: {
     return ICON_NAMES.filter((n) => !k || n.includes(k));
   }, [q]);
   const iconName = d.icon.charAt(0).toUpperCase() + d.icon.slice(1).replace(/-/g, ' ');
-  const dayChips = (x: Draft, put: (p: Partial<Draft>) => void, layout: 'wrap' | 'grid') => (
-    <PresetChips
-      layout={layout}
+  const dayChips = (x: Draft, put: (p: Partial<Draft>) => void) => (
+    <WeekdayToggle
       label={s.days}
-      tone="accent"
-      items={dn.map((l, i) => ({
-        id: String(i),
-        label: l,
-        selected: x.days.includes(i),
-        onClick: () =>
-          put({
-            days: x.days.includes(i)
-              ? x.days.length > 1
-                ? x.days.filter((v) => v !== i)
-                : x.days
-              : [...x.days, i],
-          }),
-      }))}
+      days={dn.map((l, i) => ({ id: String(i), label: l, ariaLabel: l, on: x.days.includes(i) }))}
+      onToggle={(id) => {
+        const i = Number(id);
+        put({
+          days: x.days.includes(i)
+            ? x.days.length > 1
+              ? x.days.filter((v) => v !== i)
+              : x.days
+            : [...x.days, i],
+        });
+      }}
     />
   );
   const weekly = (x: Draft) => x.repeat === 'weekly' || x.repeat === 'biweekly';
 
   const body = (): { title: string; node: ReactNode } => {
     switch (drawer) {
+      case 'based':
+        return {
+          title: s.basedOn,
+          node: (
+            <>
+              <GroupedList surface="raised">
+                <ListRow
+                  icon={<IconTile icon="calendar-plus" tone="accent" size={32} />}
+                  label={s.own}
+                  sub={s.ownSub}
+                  onClick={() => {
+                    setBased(null);
+                    setDrawer(null);
+                  }}
+                />
+              </GroupedList>
+              {srcs.some((x) => x.searchable) && (
+                <SearchField
+                  value={q}
+                  onChange={setQ}
+                  placeholder={s.search}
+                  clearLabel={s.clearSearch}
+                />
+              )}
+              <div className="pl-based-scroll">
+                {srcs.map((x) => (
+                  <x.Group key={x.id} query={q} onPick={(p) => pick(p.title, p.icon, p.sub)} />
+                ))}
+              </div>
+            </>
+          ),
+        };
       case 'icon':
         return {
           title: s.icon,
@@ -282,7 +320,7 @@ export function PlanForm(p: {
                   />
                 ))}
               </GroupedList>
-              {weekly(st) && dayChips(st, setS, 'wrap')}
+              {weekly(st) && dayChips(st, setS)}
               {st.repeat !== 'none' && (
                 <GroupedList surface="raised" header={s.endsHdr}>
                   <ListRow
@@ -355,9 +393,11 @@ export function PlanForm(p: {
           />
           <GroupedList header={s.basedOn}>
             <ListRow
-              icon={<IconTile icon="calendar-plus" tone="accent" size={32} />}
-              label={s.own}
-              sub={s.ownSub}
+              icon={<IconTile icon={based?.icon ?? 'calendar-plus'} tone="accent" size={32} />}
+              label={based?.label ?? s.own}
+              sub={based?.sub ?? s.ownSub}
+              chevron
+              onClick={() => openDrawer('based')}
             />
           </GroupedList>
           <GroupedList header={s.what}>
@@ -409,7 +449,7 @@ export function PlanForm(p: {
             />
           </GroupedList>
           <div className="pl-form-g">
-            <div className="uigl-h">{s.duration}</div>
+            <SectionLabel>{s.duration}</SectionLabel>
             <PresetChips
               layout="wrap"
               label={s.duration}
@@ -430,9 +470,9 @@ export function PlanForm(p: {
               ]}
             />
           </div>
-          {weekly(d) && dayChips(d, set, 'grid')}
+          {weekly(d) && dayChips(d, set)}
           <div className="pl-form-g">
-            <div className="uigl-h">{s.reminder}</div>
+            <SectionLabel>{s.reminder}</SectionLabel>
             <Segmented
               value={d.mode}
               onChange={(mode) => set({ mode })}
@@ -446,7 +486,7 @@ export function PlanForm(p: {
             <Hint>{d.mode === 'ring' ? s.ringHint : s.quietHint}</Hint>
           </div>
           <div className="pl-form-g">
-            <div className="uigl-h">{s.remindMe}</div>
+            <SectionLabel>{s.remindMe}</SectionLabel>
             <PresetChips
               layout="wrap"
               label={s.remindMe}
@@ -487,14 +527,16 @@ export function PlanForm(p: {
           <div className="ul-flex ul-col ug-12">
             <h2 className="ut-xl ut-w7">{dr.title}</h2>
             {dr.node}
-            <div className="ul-flex ug-8">
-              <Button fullWidth variant="secondary" onClick={closeDrawer}>
-                {s.cancel}
-              </Button>
-              <Button fullWidth onClick={commit}>
-                {s.save}
-              </Button>
-            </div>
+            {drawer !== 'based' && (
+              <div className="ul-flex ug-8">
+                <Button fullWidth variant="secondary" onClick={closeDrawer}>
+                  {s.cancel}
+                </Button>
+                <Button fullWidth onClick={commit}>
+                  {s.save}
+                </Button>
+              </div>
+            )}
           </div>
         </Sheet>
       )}

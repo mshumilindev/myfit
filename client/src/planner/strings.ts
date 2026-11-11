@@ -34,6 +34,7 @@ export interface PlannerStrings {
   color: string;
   ringHint: string;
   quietHint: string;
+  search: string;
   when: string;
   repeats: string;
   starts: string;
@@ -117,6 +118,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     color: 'Color',
     ringHint: 'Rings until you dismiss it. Snooze for 5, 10 or 30 min.',
     quietHint: 'A silent notification; respects quiet hours.',
+    search: 'Search',
     when: 'Schedule',
     repeats: 'Repeats',
     starts: 'Starts',
@@ -210,6 +212,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     color: 'Колір',
     ringHint: 'Дзвонить, доки ви не закриєте. Відкласти на 5, 10 або 30 хв.',
     quietHint: 'Беззвучне сповіщення; поважає тихі години.',
+    search: 'Пошук',
     when: 'Розклад',
     repeats: 'Повторення',
     starts: 'Початок',
@@ -303,6 +306,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     color: 'Kolor',
     ringHint: 'Dzwoni, aż go zamkniesz. Odłóż o 5, 10 lub 30 min.',
     quietHint: 'Ciche powiadomienie; respektuje ciche godziny.',
+    search: 'Szukaj',
     when: 'Harmonogram',
     repeats: 'Powtarzanie',
     starts: 'Start',
@@ -396,6 +400,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     color: 'Spalva',
     ringHint: 'Skamba, kol uždarysite. Atidėkite 5, 10 arba 30 min.',
     quietHint: 'Tylus pranešimas; gerbia tylos valandas.',
+    search: 'Ieškoti',
     when: 'Tvarkaraštis',
     repeats: 'Kartojasi',
     starts: 'Pradžia',
@@ -489,6 +494,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     color: 'Värv',
     ringHint: 'Heliseb, kuni sa selle sulged. Lükka edasi 5, 10 või 30 min.',
     quietHint: 'Vaikne teavitus; arvestab vaikseid tunde.',
+    search: 'Otsi',
     when: 'Ajakava',
     repeats: 'Kordub',
     starts: 'Algus',

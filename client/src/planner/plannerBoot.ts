@@ -6,6 +6,8 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase';
 import { plannerHost } from '../plannerRt';
 import { provide, trackerReady } from '../trackerRt';
+// Every add-on's "Based on" source: one file each in plannerSources/, picked up here (no list to edit).
+import.meta.glob('../plannerSources/*.tsx', { eager: true });
 import { PlannerPage } from './PlannerPage';
 import { getPlans, getPrefs, startPlannerSync } from './sync';
 import { STRINGS } from './strings';

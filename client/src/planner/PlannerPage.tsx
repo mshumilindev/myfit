@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { dayKeyOf } from '../components/ui/calendarDays';
+import { Card } from '../components/ui/Card';
 import { EmptyState } from '../components/ui/EmptyState';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
 import { PageHead } from '../components/ui/PageHead';
@@ -214,17 +215,19 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
           ]}
         />
         {plans.length === 0 ? (
-          <EmptyState
-            icon="calendar-plus"
-            centered
-            titleAs="h2"
-            title={s.emptyTitle}
-            body={s.emptyBody}
-          >
-            <Button icon="plus" onClick={add}>
-              {s.addPlan}
-            </Button>
-          </EmptyState>
+          <Card>
+            <EmptyState
+              icon="calendar-plus"
+              centered
+              titleAs="h2"
+              title={s.emptyTitle}
+              body={s.emptyBody}
+            >
+              <Button icon="plus" onClick={add}>
+                {s.addPlan}
+              </Button>
+            </EmptyState>
+          </Card>
         ) : view === 'week' ? (
           <>
             <WeekStepper
