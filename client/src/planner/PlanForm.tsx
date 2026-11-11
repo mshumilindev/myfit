@@ -254,7 +254,7 @@ export function PlanForm(p: {
           title: s.repeats,
           node: (
             <>
-              <GroupedList>
+              <GroupedList surface="raised">
                 {KINDS.map((k) => (
                   <ListRow
                     key={k}
@@ -267,7 +267,7 @@ export function PlanForm(p: {
               </GroupedList>
               {weekly(st) && dayChips(st, setS, 'wrap')}
               {st.repeat !== 'none' && (
-                <GroupedList header={s.endsHdr}>
+                <GroupedList surface="raised" header={s.endsHdr}>
                   <ListRow
                     label={s.never}
                     check={st.ends.kind === 'never'}

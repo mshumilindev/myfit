@@ -84,8 +84,10 @@ describe('Start fab twin vs the Start drawer (SPO-470)', () => {
     const own = document.createElement('div');
     own.className = 'portal-layer';
     const start = document.createElement('div');
+    start.className = 'portal-layer';
     start.innerHTML = '<div class="scrim"></div><div class="sheet start-sheet"></div>';
     const other = document.createElement('div');
+    other.className = 'portal-layer';
     other.innerHTML = '<div class="scrim"></div><div class="sheet"></div>';
     document.body.append(own, start);
     expect(coversStartDrawer(own)).toBe(false);
@@ -107,5 +109,34 @@ describe('Start fab twin vs the Start drawer (SPO-470)', () => {
     rerender(bar(false));
     await waitFor(() => expect(twin()?.querySelector('.is-open')).toBeNull());
     await waitFor(() => expect(twin()).toBeNull(), { timeout: 1500 });
+  });
+});
+
+describe('the × never hides for a stray element (owner rule: it must not disappear)', () => {
+  it('a .sheet / .scrim inside the app root does not cover the twin', async () => {
+    render(
+      <>
+        {bar(true)}
+        <div className="sheet scrim">stray, not an overlay layer</div>
+        <Sheet className="start-sheet" onClose={() => {}}>
+          start
+        </Sheet>
+      </>,
+    );
+    await waitFor(() => expect(twin()).not.toBeNull());
+    await new Promise((r) => setTimeout(r, 30));
+    expect(twin()?.className).not.toContain('is-covered');
+  });
+
+  it('a foreign layer that is already closing does not cover the twin', () => {
+    const layer = document.createElement('div');
+    layer.className = 'portal-layer';
+    layer.innerHTML =
+      '<div class="scrim scrim-closing"></div><div class="sheet sheet-closing"></div>';
+    document.body.appendChild(layer);
+    expect(coversStartDrawer(null)).toBe(false);
+    layer.innerHTML = '<div class="scrim"></div><div class="sheet"></div>';
+    expect(coversStartDrawer(null)).toBe(true);
+    layer.remove();
   });
 });

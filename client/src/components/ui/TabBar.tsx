@@ -290,7 +290,12 @@ function useFabLayer(wrapRef: RefObject<HTMLDivElement | null>, open: boolean) {
     const check = () => setCovered(coversStartDrawer(layerRef.current?.parentElement ?? null));
     const first = requestAnimationFrame(check);
     const mo = new MutationObserver(check);
-    mo.observe(document.body, { childList: true });
+    mo.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class'],
+    });
     return () => {
       cancelAnimationFrame(first);
       mo.disconnect();
@@ -306,8 +311,15 @@ function useFabLayer(wrapRef: RefObject<HTMLDivElement | null>, open: boolean) {
 export function coversStartDrawer(own: Element | null): boolean {
   for (const n of Array.from(document.body.children)) {
     if (n === own || n.querySelector('.start-sheet')) continue;
-    if (n.matches('.uifp-layer') || n.querySelector('.scrim, .sheet, .dialog-scrim, .uifp-layer'))
-      return true;
+    // Only a real overlay layer counts (a portal layer or a floating panel layer), never the app root or a stray
+    // `.sheet` / `.scrim` inside it, and never a layer that is already sliding out.
+    if (!n.matches('.portal-layer, .uifp-layer') && !n.querySelector('.uifp-layer')) continue;
+    const live = n.matches('.uifp-layer')
+      ? [n]
+      : Array.from(n.querySelectorAll('.scrim, .sheet, .dialog-scrim, .uifp-layer')).filter(
+          (e) => !e.matches('.sheet-closing, .scrim-closing'),
+        );
+    if (live.length) return true;
   }
   return false;
 }
