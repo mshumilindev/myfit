@@ -1,0 +1,29 @@
+/* Store screens colours (SPO-556): raw colour values of the of-the-week hero, theme skins and the preview slider. */
+:root {
+  --sk-wk-c1: #2b5bd7;
+  --sk-wk-c2: rgba(0, 0, 0, 0.22);
+  --sk-wk-c3: rgba(255, 255, 255, 0.92);
+  --sk-wk-c4: #fff;
+  --sk-wk-c5: rgba(0, 0, 0, 0.28);
+  --sk-wk-c6: rgba(0, 0, 0, 0.3);
+  --sk-wk-c7: #e9ecef;
+  --sk-wk-c8: #5b6770;
+  --sk-wk-c9: #c3cad0;
+  --sk-wk-c10: #0d1008;
+  --sk-wk-c11: #2a300c;
+  --sk-wk-c12: #f1ffd0;
+  --sk-wk-c13: #201c24;
+  --sk-wk-c14: #4a3b22;
+  --sk-wk-c15: #f3e6c8;
+  --sk-wk-c16: #0c0b10;
+  --sk-wk-c17: #3a1710;
+  --sk-wk-c18: #ffe3d0;
+  --sk-wk-c19: #050c09;
+  --sk-wk-c20: #0f281b;
+  --sk-wk-c21: #6b1620;
+  --sk-wk-c22: #fff2e0;
+  --sk-wk-c23: rgba(0, 0, 0, 0.12);
+  --sk-wk-c24: rgba(8, 10, 14, 0.94);
+  --sk-wk-c25: rgba(255, 255, 255, 0.14);
+  --sk-wk-c26: rgba(0, 0, 0, 0.14);
+}

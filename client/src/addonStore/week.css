@@ -1,0 +1,236 @@
+/* Store "of the week" hero (SPO-556): tile, art, theme skins, slider. Split from screens.css (store kit guard: ≤400 lines). */
+/* SPO-556 "of the week" hero */
+.wk-tile {
+  position: relative;
+  overflow: hidden;
+}
+.wk-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.875rem;
+}
+/* Phone: Add is the main action of the hero, a full-width bar right under the text; dots centred under it */
+.wk-foot .sk-bt {
+  flex: 1 0 100%;
+  min-height: 3.25rem;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  box-shadow: 0 0.25rem 0.875rem var(--sk-wk-c2);
+}
+/* Art: the real preview, flush with the tile's bottom edge (a deliberate bleed, no fade, no tilt). */
+.wk-art {
+  display: flex;
+  justify-content: center;
+  margin: 1.25rem calc(-1 * var(--sk-sp-6)) calc(-1 * var(--sk-sp-6));
+  height: 14.375rem;
+  overflow: hidden;
+}
+.wk-phone {
+  width: 11.875rem;
+  height: 100%;
+  border: 0.375rem solid var(--sk-wk-c3);
+  border-bottom: 0;
+  border-radius: 1.75rem 1.75rem 0 0;
+  overflow: hidden;
+  background: var(--sk-wk-c4);
+  box-shadow: 0 -0.375rem 1.75rem var(--sk-wk-c5);
+}
+.wk-phone img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.wk-win {
+  display: none;
+}
+@media (min-width: 45rem) {
+  .wk-tile {
+    min-height: 18.75rem;
+  }
+  .wk-tile .sk-btile-body {
+    max-width: 40%;
+  }
+  .wk-art {
+    position: absolute;
+    right: 2.25rem;
+    bottom: -1rem;
+    top: auto;
+    margin: 0;
+    height: 16.375rem;
+    width: 31.25rem;
+    display: block;
+  }
+  .wk-phone {
+    display: none;
+  }
+  .wk-win {
+    display: block;
+    width: 31.25rem;
+    height: 100%;
+    border-radius: 0.75rem 0.75rem 0 0;
+    overflow: hidden;
+    background: var(--sk-wk-c4);
+    box-shadow: 0 -0.375rem 1.875rem var(--sk-wk-c6);
+  }
+  .wk-bar {
+    height: 1.625rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0 0.625rem;
+    background: var(--sk-wk-c7);
+    color: var(--sk-wk-c8);
+    font-size: 0.6875rem;
+    font-weight: 600;
+  }
+  .wk-bar i {
+    width: 0.5625rem;
+    height: 0.5625rem;
+    border-radius: 50%;
+    background: var(--sk-wk-c9);
+  }
+  .wk-bar span {
+    margin-left: 0.625rem;
+  }
+  .wk-win img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
+.sk-btile.wk-tile .sk-btile-foot {
+  display: block;
+}
+
+/* Theme skins: the theme's own background and text colour */
+.sk-btile.wk-tile.wk-skin-cyberpunk {
+  background: linear-gradient(135deg, var(--sk-wk-c10), var(--sk-wk-c11));
+  color: var(--sk-wk-c12);
+}
+.sk-btile.wk-tile.wk-skin-glass {
+  background: linear-gradient(135deg, var(--sk-wk-c13), var(--sk-wk-c14));
+  color: var(--sk-wk-c15);
+}
+.sk-btile.wk-tile.wk-skin-halloween {
+  background: linear-gradient(135deg, var(--sk-wk-c16), var(--sk-wk-c17));
+  color: var(--sk-wk-c18);
+}
+.sk-btile.wk-tile.wk-skin-christmas {
+  background: linear-gradient(135deg, var(--sk-wk-c19), var(--sk-wk-c20) 55%, var(--sk-wk-c21));
+  color: var(--sk-wk-c22);
+}
+
+/* Slider: stacked previews cross-fade; dots switch them (Holiday themes also auto-advance every 7 s) */
+.wk-stack {
+  position: relative;
+}
+.wk-stack img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.wk-stack img:not(:first-child) {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.wk-stack img {
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+.wk-stack img.on {
+  opacity: 1;
+}
+.wk-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 2px auto 0;
+}
+.wk-dots button {
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 62.5rem;
+  background: currentColor;
+  opacity: 0.4;
+  cursor: pointer;
+  transition:
+    width 0.25s,
+    opacity 0.25s;
+}
+.wk-dots button.on {
+  width: 1.375rem;
+  opacity: 1;
+}
+.wk-dots button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 0.1875rem;
+}
+/* Holiday themes: the hero background follows the slide */
+.sk-btile.wk-tile.wk-holiday {
+  isolation: isolate;
+  background: var(--sk-wk-c16);
+  color: var(--sk-wk-c22);
+}
+.wk-holiday::before,
+.wk-holiday::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+}
+.wk-holiday::before {
+  background: linear-gradient(135deg, var(--sk-wk-c16), var(--sk-wk-c17));
+  opacity: 1;
+}
+.wk-holiday::after {
+  background: linear-gradient(135deg, var(--sk-wk-c19), var(--sk-wk-c20) 55%, var(--sk-wk-c21));
+  opacity: 0;
+}
+.wk-holiday.wk-at-1::before {
+  opacity: 0;
+}
+.wk-holiday.wk-at-1::after {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wk-stack img,
+  .wk-holiday::before,
+  .wk-holiday::after {
+    transition: none;
+  }
+}
+
+@media (min-width: 45rem) {
+  .wk-foot {
+    flex-wrap: nowrap;
+    max-width: 36%;
+  }
+  .wk-foot .sk-bt {
+    flex: 0 0 auto;
+    min-height: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    box-shadow: none;
+  }
+  .wk-dots {
+    margin: 0 0 0 auto;
+  }
+}
+
+.wk-dots button {
+  flex: 0 0 auto;
+}
+.wk-dots {
+  flex: 0 0 auto;
+}
+.wk-dots button {
+  color: inherit;
+  background: currentColor;
+}

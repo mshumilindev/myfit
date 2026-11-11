@@ -1,4 +1,5 @@
 /** "Of the week" hero (SPO-556): three independent slots (app / add-on / theme) on their pages, one mixed tile on Discover. */
+import './week.css';
 import { useEffect, useState } from 'react';
 import { getRole } from '../api';
 import { addonById, type AddonManifest } from '../addons/manifest';

@@ -1,4 +1,5 @@
 /** Full-screen preview slider (SPO-556): opens from any preview in the store; arrows, swipe, dots and the keyboard move between shots. */
+import './viewer.css';
 import { useEffect, useRef, useState } from 'react';
 import { APP_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
 import { SkIcon } from '../store-kit';

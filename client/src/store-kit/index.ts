@@ -1,5 +1,6 @@
 /** Public surface of the add-on store kit (ADR 015). Import components from here, never from `ui/*` paths. */
 import './tokens.css';
+import './tokens-week.css';
 import './base.css';
 export { cx } from './cx';
 export * from './ui/SkIcon';

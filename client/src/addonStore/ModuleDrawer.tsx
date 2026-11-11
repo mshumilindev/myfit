@@ -1,4 +1,5 @@
 /** Module details (SPO-556): a drawer (bottom sheet on a phone, side panel on a wide screen) for one module of an app. */
+import './viewer.css';
 import { addonById } from '../addons/manifest';
 import { disableAddons, enableAddons } from '../addons/enabledSet';
 import { SkBtn, SkNote, SkSheet, SkSwitch } from '../store-kit';

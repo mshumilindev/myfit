@@ -1,4 +1,5 @@
 /** The Discover bento (design 01): App of the week, Installed, Starter pack, Suggested, Coming soon, Browse. */
+import './week.css';
 import { useState, type ReactElement } from 'react';
 import type { Role } from '../api';
 import { useT } from '../i18n';

@@ -1,4 +1,5 @@
 /** One item (boards 05, 06): hero, what it needs, preview, facts, about, its add-ons. */
+import './viewer.css';
 import { useState } from 'react';
 import { APP_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
 import { addonById, itemsOfApp } from '../addons/manifest';
