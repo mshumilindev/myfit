@@ -226,16 +226,23 @@ export function addonById(id: string): AddonManifest | undefined {
 }
 
 /**
- * The app an item belongs to: its `parent`, or — for the Coach extras, which have no `parent` — the Coach app they
- * require. (Other `requires` links, e.g. Gym extras, are dependencies, not membership: they stay standalone cards.)
+ * The app an item belongs to: its `parent`, or the app it `requires` (owner rule 11.11: everything that depends on an app
+ * counts as that app's, always and everywhere — Coach extras and Gym extras alike). An app never belongs to another app
+ * (Apex requires Gym but stays an app of its own). Computed from the registry, never listed by hand: a new item with
+ * `parent`/`requires` joins its app's counts, lists, Installed card and Remove sheet by itself.
  */
-export function appOfItem(m: AddonManifest): string | undefined {
+export function appOfItem(
+  m: AddonManifest,
+  byId: ReadonlyMap<string, AddonManifest> = BY_ID,
+): string | undefined {
   if (m.parent) return m.parent;
-  const r = m.requires && m.category === 'coach' ? BY_ID.get(m.requires) : undefined;
+  if (!m.requires || m.kind === 'app') return undefined;
+  const r = byId.get(m.requires);
   return r?.kind === 'app' ? r.id : undefined;
 }
 
 /** Add-ons and modules that belong to an app (by `parent` or by the app they require). */
-export function itemsOfApp(id: string): AddonManifest[] {
-  return ADDONS.filter((a) => appOfItem(a) === id);
+export function itemsOfApp(id: string, list: readonly AddonManifest[] = ADDONS): AddonManifest[] {
+  const byId = list === ADDONS ? BY_ID : new Map(list.map((a) => [a.id, a]));
+  return list.filter((a) => appOfItem(a, byId) === id);
 }

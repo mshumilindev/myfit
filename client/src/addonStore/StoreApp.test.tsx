@@ -124,8 +124,15 @@ describe('StoreApp', () => {
   });
   it('an item of another role opened by a link has no add action', () => {
     window.location.hash = '#/store/item/gym';
-    render(<StoreApp role="member" onOpenProfile={() => {}} />);
-    expect(screen.queryByRole('button', { name: /^Add$|^Add with/ })).toBeNull();
+    const { container } = render(<StoreApp role="member" onOpenProfile={() => {}} />);
+    // Gym's own action row (the add-ons listed under it keep theirs: they depend on Gym, owner rule 11.11).
+    expect(container.querySelector('.as-item-act button')).toBeNull();
+  });
+  it("an app's page lists every add-on that requires it and counts them from the registry", () => {
+    window.location.hash = '#/store/item/gym';
+    render(<StoreApp role="admin" onOpenProfile={() => {}} />);
+    for (const n of ['Health', 'Sleep', 'Activities', 'Atlas'])
+      expect(screen.getAllByText(n).length).toBeGreaterThan(0);
   });
   it('a coming-soon item shows the note and what is planned, with no add action', () => {
     window.location.hash = '#/store/item/music';
