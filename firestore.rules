@@ -288,6 +288,21 @@ service cloud.firestore {
       match /injuries/{injuryId} {
         allow read, write: if isSelf(userId);
       }
+      // Planner plans (SPO-552): sealed in the vault; only when/how-loud is open for the reminder server. Own read/write only.
+      match /plannerEvents/{eventId} {
+        allow read, write: if isSelf(userId);
+      }
+      // Planner reminder state (ringing / snoozed / dismissed): no content, one doc per firing; the server creates it,
+      // any device of the owner changes it.
+      match /plannerAlerts/{alertId} {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['state', 'snoozeUntil', 'by', 'rev', 'updatedAt', 'eventId', 'dueAt'])
+          && request.resource.data.state in ['ringing', 'snoozed', 'dismissed']
+          && request.resource.data.rev is int
+          && request.resource.data.updatedAt is int;
+        allow delete: if isSelf(userId);
+      }
       // Chronic health conditions — sealed in the vault; own read/write only.
       match /conditions/{conditionId} {
         allow read, write: if isSelf(userId);
@@ -311,7 +326,7 @@ service cloud.firestore {
         allow read: if isSelf(userId);
         // the sealed documents have their own shape rules below (SPO-217: goals/home/mastery/coach are sealed too)
         allow write: if isSelf(userId) && !(docId in ['chatKeys', 'signalState', 'selfCoach', 'calendarSettings',
-          'goals', 'home', 'mastery', 'coach', 'exercisePrefs', 'sleepPrefs', 'widgetData', 'challenges', 'atlasChatState']);
+          'goals', 'home', 'mastery', 'coach', 'exercisePrefs', 'sleepPrefs', 'widgetData', 'challenges', 'atlasChatState', 'planner']);
       }
       // Chat key store: every conversation key of this user, sealed under their DEK (written with encryptJson).
       match /meta/chatKeys {
@@ -337,6 +352,15 @@ service cloud.firestore {
           && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
           && request.resource.data.updatedAt is int
           && dekEnc(request.resource.data, 100000);
+        allow delete: if isSelf(userId);
+      }
+      // Planner: availability, defaults and sharing, sealed under the owner's DEK (SPO-552).
+      match /meta/planner {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.keys().hasOnly(['updatedAt', 'enc'])
+          && request.resource.data.updatedAt is int
+          && dekEnc(request.resource.data, 60000);
         allow delete: if isSelf(userId);
       }
       // The trainer's calendar settings (working hours, gyms, range), sealed under their DEK.

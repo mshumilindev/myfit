@@ -21,6 +21,11 @@ export const OPEN_FIELDS = {
   sleeps: ['id', 'date', 'bedtime', 'wake', 'autoWakeAt', 'source', 'kind', 'updatedAt'],
   // users/{uid}/activities — history is ordered by startedAt.
   activities: ['id', 'startedAt', 'updatedAt'],
+  // users/{uid}/plannerEvents — the reminder server needs only WHEN and HOW (nextFireAt, mode, enabled); the title, note, icon,
+  // repeat rule and lead time are inside (SPO-552). `v` is the document version.
+  plannerEvents: ['id', 'mode', 'nextFireAt', 'enabled', 'v', 'updatedAt'],
+  // users/{uid}/meta/planner — weekly availability, defaults, what is shared with the trainer: all inside, only the stamp open.
+  planner: ['updatedAt'],
   // No server reads: everything inside.
   gyms: ['id', 'updatedAt'],
   restPeriods: ['id', 'updatedAt'],

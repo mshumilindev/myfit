@@ -1,4 +1,5 @@
 /** Export builders: training and the Atlas chat. Pure. */
+import { addonExportParts } from './addonExport';
 import { isoTime } from './csv';
 import type { CategoryResult, ExportSources, Missing } from './exportModel';
 
@@ -31,9 +32,10 @@ export function buildTraining(s: ExportSources): CategoryResult {
   const missing: Missing[] = [
     { item: 'Programs and plans a trainer assigned to you', reason: 'not-loaded' },
   ];
+  const extra = addonExportParts();
   return {
     id: 'training',
-    missing,
+    missing: [...missing, ...extra.missing],
     files: [
       {
         name: 'workouts.json',
@@ -119,6 +121,7 @@ export function buildTraining(s: ExportSources): CategoryResult {
           value: { goals: st.goals, home: st.home, mastery: st.mastery, weightUnit: st.weightUnit },
         },
       },
+      ...extra.files,
     ],
   };
 }

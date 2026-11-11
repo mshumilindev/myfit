@@ -88,6 +88,18 @@ export const LEGACY_DOCS = {
     'supplements',
     { updatedAt: 1_700_000_000_000, entries: [{ name: 'Test supplement', dose: 5 }] },
   ],
+  plannerEvents: [
+    'p-legacy-1',
+    {
+      id: 'p-legacy-1',
+      updatedAt: 1_700_000_000_000,
+      mode: 'quiet',
+      nextFireAt: 1_800_000_000_000,
+      enabled: true,
+      title: 'Synthetic plan',
+    },
+  ],
+  planner: ['planner', { updatedAt: 1_700_000_000_000, availability: { mon: [[18, 21]] } }],
   goals: ['goals', { updatedAt: 1_700_000_000_000, physique: 'lean', focus: ['legs'] }],
   home: ['home', { updatedAt: 1_700_000_000_000, sets: [{ name: 'Home set' }] }],
   mastery: ['mastery', { updatedAt: 1_700_000_000_000, level: 'intermediate' }],

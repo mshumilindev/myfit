@@ -39,6 +39,8 @@ export const MIGRATION_ORDER: SealedCollection[] = [
   'widgetData',
   'challenges',
   'atlasChatState',
+  'plannerEvents',
+  'planner',
 ];
 
 export interface MigratePorts {
