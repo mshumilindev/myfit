@@ -151,7 +151,7 @@ export function Sheet(props: {
   dismissible?: boolean;
   /** The parent asks the drawer to close from outside (a button that is not inside it): it plays its closing slide, then calls `onClose`. */
   closeRequested?: boolean;
-  /** Opens at full height (a long list that scrolls); dragging down still closes it. */
+  /** Opens at full height only when its content does not fit (a long list that scrolls); a short one stays compact. Dragging down still closes it. */
   startFull?: boolean;
   /** A consent prompt that must stay usable above a blocking sheet even when it mounted in the same commit (not made inert). */
   overTrap?: boolean;

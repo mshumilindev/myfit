@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 
 /**
@@ -16,7 +16,12 @@ export function useSheetGesture(
   // drawer translate down into the dismiss zone. `heightPx` is the committed
   // snap height (set after the first drag so height transitions can animate),
   // `liveH` the height while a finger is down, `drag` the dismiss-zone offset.
-  const [mode, setMode] = useState<'default' | 'full'>(startFull ? 'full' : 'default');
+  const [mode, setMode] = useState<'default' | 'full'>('default');
+  // `startFull`: open at full height only when the content does not fit the default height (a long list), so a short one stays compact.
+  useLayoutEffect(() => {
+    const el = sheetRef.current;
+    if (startFull && el && el.scrollHeight > el.clientHeight + 1) setMode('full');
+  }, [startFull, sheetRef]);
   const [heightPx, setHeightPx] = useState<number | null>(null);
   const [liveH, setLiveH] = useState<number | null>(null);
   const [drag, setDrag] = useState(0);
