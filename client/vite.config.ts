@@ -4,6 +4,10 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { imageCacheGuard } from './swImageCacheGuard';
 import { addonSizes } from './addonSizes';
 
+// Folders whose files belong to an app's media pack (see src/addons/sizeEntries.json assets).
+const PACK_PATH =
+  /^\/(exercise-img|equipment|anatomy|markers|gyms|physiques|atlas|backgrounds|christmas|halloween|activity-[a-z]+-hero)[/.]/;
+
 /** Identifies this build; the page compares it with /version.json to learn that a newer one is live. */
 const BUILD_ID = Date.now().toString(36);
 
@@ -195,6 +199,13 @@ export default defineConfig({
                 purgeOnQuotaError: true,
               },
             },
+          },
+          // Media packs (SPO-556 I6): pictures of installed apps and add-ons live in their own cache, downloaded on install
+          // and dropped on removal (src/addons/packs.ts); a picture not downloaded yet is fetched and kept there too.
+          {
+            urlPattern: ({ url, sameOrigin }) => sameOrigin && PACK_PATH.test(url.pathname),
+            handler: 'CacheFirst',
+            options: { cacheName: 'spotter-packs', plugins: [imageCacheGuard] },
           },
           // Pictures keep their names across deploys: show the saved one, refresh it in the background.
           {

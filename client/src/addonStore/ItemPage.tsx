@@ -4,6 +4,7 @@ import { APP_BREAKPOINT, useMinWidth } from '../components/ui/breakpoints';
 import { addonById, itemsOfApp } from '../addons/manifest';
 import { disableAddons, enableAddons } from '../addons/enabledSet';
 import { formatSize, useAddonSizes } from '../addons/useAddonSizes';
+import { installPack, usePackState } from '../addons/packs';
 import {
   SkBadge,
   SkCard,
@@ -47,6 +48,7 @@ export function ItemPage({
 }) {
   const { st } = ctx;
   const sizes = useAddonSizes(); // a hook: before the early returns
+  const pack = usePackState(id);
   const [modId, setModId] = useState<string | null>(null);
   const [view, setView] = useState<number | null>(null);
   const wide = useMinWidth(APP_BREAKPOINT);
@@ -149,6 +151,24 @@ export function ItemPage({
                 />
               </SkCard>
             }
+            {ctx.enabled.has(m.id) && pack.status !== 'idle' && pack.status !== 'ready' && (
+              <p className="as-pack-note" role="status">
+                {pack.status === 'loading'
+                  ? `${st.packLoading}${Math.round((pack.done / Math.max(1, pack.total)) * 100)}%`
+                  : pack.status === 'paused'
+                    ? st.packPaused
+                    : st.packError}
+                {pack.status !== 'loading' && (
+                  <button
+                    type="button"
+                    className="as-pack-btn"
+                    onClick={() => void installPack(m.id, true)}
+                  >
+                    {st.packNow}
+                  </button>
+                )}
+              </p>
+            )}
           </div>
           <div className="as-o4">
             {modules.length > 0 && (

@@ -9,7 +9,8 @@ import { auth } from '../firebase';
 import { migrateBrassGlass, migrateRoleAddons } from './migrateRoles';
 import { setAllowedThemes } from '../themes/registry';
 import { useInstalledThemeIds, useThemesOn } from '../themes/useThemeAccess';
-import { migrateModules, useAddonOrBase } from './enabledSet';
+import { migrateModules, onAddonsRemoved, useAddonAvailable, useAddonOrBase } from './enabledSet';
+import { installPack, PACK_IDS, removePack } from './packs';
 
 /**
  * What the shell reads from the installed add-ons, plus the effects that follow an install or removal (SPO-518):
@@ -18,6 +19,19 @@ import { migrateModules, useAddonOrBase } from './enabledSet';
  * withdraws consent on removal.
  */
 export function useAddonRuntime() {
+  // Media packs: an installed item downloads its pictures once (a little after start, so the first screen is not slowed),
+  // and a removed one drops them from the cache.
+  const available = useAddonAvailable();
+  const packKey = PACK_IDS.filter(available).join(',');
+  useEffect(() => {
+    if (!packKey) return;
+    const t = window.setTimeout(
+      () => packKey.split(',').forEach((id) => void installPack(id)),
+      3000,
+    );
+    return () => window.clearTimeout(t);
+  }, [packKey]);
+  useEffect(() => onAddonsRemoved((ids) => ids.forEach((id) => void removePack(id))), []);
   const apexOn = useAddonOrBase('apex');
   const themesOn = useThemesOn();
   const installedThemes = useInstalledThemeIds();

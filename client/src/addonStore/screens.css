@@ -671,3 +671,20 @@
     overflow: visible;
   }
 }
+
+/* Media pack download status under the stats card (SPO-556 I6). */
+.as-pack-note {
+  margin: 8px 4px 0;
+  font-size: 13px;
+  color: var(--sk-text-secondary, inherit);
+}
+.as-pack-btn {
+  margin-inline-start: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sk-accent, currentColor);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
