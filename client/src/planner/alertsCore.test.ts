@@ -43,9 +43,7 @@ describe('dueRings', () => {
 describe('nextWake', () => {
   it('returns the earliest future moment, window end or snooze end', () => {
     expect(nextWake([plan({})], 0)).toBe(1000);
-    expect(nextWake([plan({})], 1000)).toBe(
-      1000 + RING_WINDOW_MS > 5000 ? 5000 : 1000 + RING_WINDOW_MS,
-    );
+    expect(nextWake([plan({})], 1000)).toBe(1000 + RING_WINDOW_MS);
     expect(nextWake([plan({ mode: 'quiet' })], 0)).toBeNull();
     expect(nextWake([plan({})], 1000, { k: 1500 })).toBe(1500);
   });
