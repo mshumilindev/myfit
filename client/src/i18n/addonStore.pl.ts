@@ -100,6 +100,8 @@ export const addonStorePl: typeof addonStoreEn = {
   needs: (name: string) => `Wymaga ${name}`,
   usesOn: (name: string) => `Używa ${name}, już włączone`,
   about: 'O aplikacji',
+  showMore: 'Pokaż więcej',
+  showLess: 'Pokaż mniej',
   addsHead: 'Co dodaje do Spottera',
   backTo: (name: string) => `${name}`,
   browseCats: 'Lub wybierz kategorię',
@@ -144,7 +146,20 @@ export const addonStorePl: typeof addonStoreEn = {
   allAdded: 'Wszystko dodane',
   nothingElse: 'Na razie nie ma nic więcej do zainstalowania.',
   items: {
-    health: { name: 'Zdrowie', desc: 'Urazy, cykl, suplementy i więcej w jednym miejscu.' },
+    health: {
+      name: 'Zdrowie',
+      tagline: 'Trening dopasowany do życia',
+      desc: 'Zapisuj urazy, choroby, odpoczynek i codzienne nawyki, aby Spotter mógł uwzględniać je w treningu.',
+      about:
+        'Zapisz kontuzję, przerwę w treningach lub przewlekłą dolegliwość, a Spotter uwzględni te informacje przy planowaniu wysiłku. Health obejmuje też cykl, suplementy i nawyki. Każdą z tych części możesz włączyć osobno.\n\nInjury log prowadzi przez etapy Protect, Reintroduce, Rebuild i Return to full. Przejście do kolejnego etapu zależy od samopoczucia podczas kontroli, a nie od samej daty. Powrót do dawnych ciężarów odbywa się stopniowo.\n\nW Rest days zaplanujesz wolne lub aktywną regenerację. Unwell pozwala odnotować chorobę. W obu przypadkach plan czeka na Twój powrót, a seria treningowa pozostaje zachowana.\n\nLong-term conditions uwzględnia ograniczenia i pomaga dopasować intensywność. Cycle służy do śledzenia cyklu, a Supplements, Nicotine i Alcohol dodają kontekst do szacunków regeneracji.\n\nSamodzielnie wybierasz zakres danych i to, które informacje może zobaczyć trener.',
+      highlights: [
+        'Cztery etapy powrotu po kontuzji',
+        'Przerwy bez utraty serii treningowej',
+        'Dostosowanie do przewlekłych dolegliwości',
+        'Cykl, suplementy i codzienne nawyki',
+        'Kontrola prywatności i udostępniania',
+      ],
+    },
     'injury-log': { name: 'Dziennik urazów', desc: 'Zapisuj urazy i to, jak się goją.' },
     cycle: { name: 'Cykl', desc: 'Notuj cykl i zobacz, jak wpływa na trening.' },
     rest: { name: 'Odpoczynek', desc: 'Dni pełnego i aktywnego odpoczynku.' },
@@ -153,40 +168,225 @@ export const addonStorePl: typeof addonStoreEn = {
     supplements: { name: 'Suplementy', desc: 'Lista tego, co bierzesz, i kiedy.' },
     nicotine: { name: 'Nikotyna', desc: 'Zapisuj nikotynę, by widzieć wpływ na regenerację.' },
     alcohol: { name: 'Alkohol', desc: 'Zapisuj alkohol, by widzieć wpływ na regenerację.' },
-    sleep: { name: 'Sen', desc: 'Zapisuj sen i sprawdzaj, jak bardzo jesteś wypoczęty.' },
-    activities: { name: 'Aktywności', desc: 'Zapisuj sport, cardio i regenerację poza siłownią.' },
+    sleep: {
+      name: 'Sen',
+      tagline: 'Sen, który liczy się w treningu',
+      desc: 'Zapisuj sen ręcznie lub automatycznie, sprawdzaj regularność nocy i uwzględniaj odpoczynek w regeneracji.',
+      about:
+        'Sleep pokazuje, ile śpisz, jak oceniasz noc i czy udaje Ci się trzymać stałych godzin. Te informacje trafiają do szacunków gotowości i regeneracji w Spotterze. Możesz samodzielnie rejestrować noce albo użyć Auto-log.\n\nWieczorem wybierz Start sleep, a rano I’m awake. Możesz też dopisać zapomnianą noc, zarejestrować drzemkę, wstrzymać pomiar po przebudzeniu i ocenić sen jako Restless, OK lub Good.\n\nUstaw zwykłe godziny zasypiania i wstawania — takie same na cały tydzień albo inne dla poszczególnych dni. Auto-log korzysta z planu lub wzorca rozpoznanego w historii.\n\nSleep hub zbiera ostatnie 14 nocy, średni czas snu, regularność pór kładzenia się oraz liczbę nocy zgodnych z celem. W Your rhythm by weekday zobaczysz różnice między dniami tygodnia.\n\nNight mode, Auto-dim i Wind down pomagają korzystać z aplikacji wieczorem bez zbędnego rozpraszania.',
+      highlights: [
+        'Ręczne zapisywanie lub Auto-log',
+        'Drzemki i ocena jakości snu',
+        'Historia 14 nocy i regularność',
+        'Osobny harmonogram na każdy dzień',
+        'Sen uwzględniany w regeneracji',
+      ],
+    },
+    activities: {
+      name: 'Aktywności',
+      tagline: 'Nie tylko trening na siłowni',
+      desc: 'Bieganie, sport i regeneracja w jednym miejscu, z uwzględnieniem ich wpływu na obciążenie całego tygodnia.',
+      about:
+        'Bieganie w poniedziałek czy mecz w weekend mają wpływ na kolejny trening. Activities pozwala rejestrować aktywności poza siłownią i uwzględnia je przy szacowaniu zmęczenia oraz regeneracji. Widzisz więcej niż same ciężary.\n\nWybierz jeden z 34 rodzajów aktywności w grupach Conditioning, Recovery i Sports. Możesz uruchomić stoper lub wpisać aktywność później, podając czas, wysiłek i w razie potrzeby dystans.\n\nSpotter szacuje spalone kalorie na podstawie rodzaju aktywności, czasu, wysiłku i masy ciała. Trening kondycyjny zwiększa obciążenie, a aktywności regeneracyjne są rozliczane osobno.\n\nActivities rozpoznaje powtarzające się zwyczaje i może zaproponować dodanie aktywności do tygodniowego planu. Sugestie można odrzucić lub całkiem wyłączyć.\n\nW Activities trends porównasz ostatnie cztery tygodnie, czas ruchu, najczęstsze aktywności i zmianę tempa.',
+      highlights: [
+        '34 rodzaje aktywności i sportów',
+        'Stoper lub wpis po zakończeniu',
+        'Wpływ na zmęczenie i regenerację',
+        'Sugestie na podstawie nawyków',
+        'Statystyki z ostatnich czterech tygodni',
+      ],
+    },
     'home-sets': {
       name: 'Treningi w domu',
-      desc: 'Układaj domowe zestawy z własnych ćwiczeń i rób je gdziekolwiek.',
+      tagline: 'Krótki trening zawsze pod ręką',
+      desc: 'Zapisz własne zestawy ćwiczeń do domu lub podróży, uruchamiaj je jednym dotknięciem i śledź wyniki.',
+      about:
+        'Nie zawsze potrzebujesz siłowni. Home workouts pozwala mieć gotowe zestawy pompek, podciągnięć czy ćwiczeń na brzuch, które uruchomisz w kilka sekund. Każdy wykonany zestaw trafi do tej samej historii co trening na siłowni.\n\nW Sets ułożysz własny zestaw z dostępnych ćwiczeń lub ruchów utworzonych przez siebie. Ustal kolejność, nazwę i sposób pomiaru: Reps, Hold albo Time. Możesz go zapisać lub wykonać jednorazowo.\n\nPo wybraniu Play działa zwykły dziennik serii, licznik przerw i model zmęczenia. Przy ćwiczeniach statycznych stoper mierzy czas od Start hold do Release, pokazując też ostatni wynik.\n\nW Moves znajdziesz ćwiczenia z opisami i zdjęciami oraz własne ruchy. Sets pokazuje, kiedy ostatnio korzystano z danego zestawu.\n\nZmieniaj i usuwaj rutyny bez obawy o starsze wyniki — wykonane sesje pozostają w History.',
+      highlights: [
+        'Gotowe zestawy na jedno dotknięcie',
+        'Własne ruchy i ćwiczenia z katalogu',
+        'Serie, czas i pozycje statyczne',
+        'Ten sam dziennik co na siłowni',
+        'Wyniki zachowane w History',
+      ],
     },
     goals: {
       name: 'Cele',
-      desc: 'Wybierz sylwetkę i mięśnie do rozwoju; sesje się do tego dostosują.',
+      tagline: 'Cel, który zmienia Twój plan',
+      desc: 'Wybierz kierunek rozwoju sylwetki i zdecyduj, które mięśnie wymagają większej, mniejszej lub stałej uwagi.',
+      about:
+        'Plan treningowy mówi, co masz dziś zrobić. Goals pozwala ustalić, po co to robisz: wybrać docelową sylwetkę, wskazać priorytetowe mięśnie i określić mierzalny wynik. Spotter wykorzysta te decyzje podczas planowania ćwiczeń.\n\nW Physique target znajdziesz osiem sylwetek, między innymi V-Taper, Classic, Hourglass i Strong Athlete. Każda proponuje początkowe priorytety, które możesz potem zmienić.\n\nW Focus this block oznacz mięśnie i ich mniejsze obszary jako Grow, Hold albo Ease. To wpływa na tygodniową objętość i sugerowane ćwiczenia. Zobaczysz też podsumowanie wprowadzonych zmian.\n\nW Long-term goals zapiszesz wartość początkową, obecną i docelową oraz horyzont w miesiącach. Mięśnie związane z celem dostają większy priorytet w propozycjach.\n\nPrograms, Auto session i kreator sesji korzystają z Twoich ustawień. Podsumowanie bloku pokazuje wykonany wysiłek.',
+      highlights: [
+        'Osiem kierunków rozwoju sylwetki',
+        'Grow, Hold i Ease dla mięśni',
+        'Priorytety dla mniejszych obszarów',
+        'Mierzalne cele długoterminowe',
+        'Zmiany w objętości i doborze ćwiczeń',
+      ],
     },
     playbook: {
       name: 'Playbook',
-      desc: 'Twoje zwykłe sesje według dni tygodnia, gotowe do powtórki.',
+      tagline: 'Twoje sprawdzone dni treningowe',
+      desc: 'Spotter rozpoznaje powtarzane treningi i tworzy z nich gotowe sesje z ćwiczeniami, seriami i ciężarami.',
+      about:
+        'Jeśli regularnie wykonujesz podobne treningi, nie musisz za każdym razem odtwarzać ich od zera. Playbook uczy się na podstawie ukończonych sesji i zapisuje typowe ćwiczenia, kolejność, liczbę serii i ciężary.\n\nPo kilku podobnych treningach powstaje play dla danego dnia — na przykład Chest 2 albo rozpoznanego dnia push, pull czy legs. Najczęściej wykonywane ćwiczenia dostają oznaczenie Staple.\n\nWybierz Start, aby uruchomić cały zestaw, zbudować własną wersję lub powtórzyć konkretną sesję z przeszłości. Ćwiczenia, serie i docelowe ciężary będą już uzupełnione.\n\nMuscle mix pokazuje, jakie partie mięśniowe obejmuje zestaw. W Ideas znajdziesz wskazówki dotyczące brakujących mięśni, pominiętych ulubionych ćwiczeń i zamian przy zatrzymanym postępie.\n\nKażdy play pokazuje również, z ilu treningów został wyciągnięty.',
+      highlights: [
+        'Zestawy tworzone z historii treningów',
+        'Typowa kolejność, serie i ciężary',
+        'Powtórzenie sesji lub własna wersja',
+        'Stałe ćwiczenia oznaczone Staple',
+        'Ideas dla braków i zastoju',
+      ],
     },
-    atlas: { name: 'Atlas', desc: 'Zapytaj asystenta AI o swoje treningi.' },
-    gym: { name: 'Gym', desc: 'Treningi, programy i postępy: część treningowa Spotter.' },
-    coach: { name: 'Coach', desc: 'Klienci, plany i grafik w jednym miejscu.' },
-    'coach-live': { name: 'Live', desc: 'Śledź treningi klientów na żywo.' },
-    'coach-signals': { name: 'Sygnały', desc: 'Sygnały zmęczenia i gotowości klientów.' },
-    'coach-notes': { name: 'Notatki', desc: 'Prywatne notatki o każdym kliencie.' },
-    'coach-team': { name: 'Zespół', desc: 'Twój zespół, jego aktywność i role.' },
-    apex: { name: 'Apex', desc: 'Growa część Spottera: wyzwania, poziomy i nagrody.' },
+    atlas: {
+      name: 'Atlas',
+      tagline: 'Odpowiedzi z Twoich treningów',
+      desc: 'Zapytaj o ciężar, postęp lub odpoczynek, otrzymuj uwagi po sesji i zmieniaj plan bez opuszczania czatu.',
+      about:
+        'Nie wiesz, jaki ciężar wybrać albo dlaczego wynik stoi w miejscu? Zapytaj Atlas. Odpowiedzi opierają się na zapisanych treningach, obciążeniu, odpoczynku i postępach, więc dotyczą Twoich liczb, a nie ogólnych porad.\n\nW Chat zapytasz o technikę, objętość, regenerację, zamianę ćwiczenia czy porównanie dwóch okresów. Atlas potrafi też wyjaśnić, skąd wzięła się dana sugestia. Jeśli nie zrozumie pytania, poprosi o doprecyzowanie.\n\nNotes wyłapuje rekordy, pominięte sesje, zbyt krótkie przerwy, stagnację i tygodniowe podsumowania. Uwagi pojawiają się bez potrzeby zadawania pytania.\n\nPrzez czat możesz przesunąć sesję, zmienić ćwiczenie, zaplanować odpoczynek lub zapisać masę ciała. Każda zmiana wymaga potwierdzenia.\n\nWybierz ton Bro, Neutral lub Savage. Możesz też kontrolować pamięć Atlas, powiadomienia i zgodę na wykorzystanie AI.',
+      highlights: [
+        'Odpowiedzi z własnych danych treningowych',
+        'Uwagi o rekordach i stagnacji',
+        'Zmiany w planie po potwierdzeniu',
+        'Trzy style: Bro, Neutral, Savage',
+        'Kontrola pamięci i powiadomień',
+      ],
+    },
+    gym: {
+      name: 'Gym',
+      tagline: 'Trening i postępy w jednym miejscu',
+      desc: 'Zobacz dzisiejszy plan, rozpocznij sesję w kilka sekund i zachowaj całą historię ćwiczeń w jednym miejscu.',
+      about:
+        'Otwórz Gym i od razu zobacz, co ćwiczysz dziś, jak idzie realizacja tygodnia i jakie ćwiczenia są przed Tobą. Wybierz zaplanowany trening, rozpocznij pustą sesję lub pozwól, aby Auto session ułożył ją według celu i regeneracji.\n\nEkran Today pokazuje nazwę dnia, program, postęp tygodnia i listę ćwiczeń. Pasek dni odróżnia trening, odpoczynek i dzisiejszą datę. Jeśli współpracujesz z trenerem, zobaczysz też kolejne spotkanie i prośby o zmianę terminu.\n\nPodczas sesji zapisujesz ciężar i powtórzenia prostymi przyciskami. Masz podgląd czasu, liczby serii i tonażu. Poprzedni wynik oraz sugestia obciążenia ułatwiają wybór kolejnego ciężaru. Dodawaj rozgrzewkowe serie i oceniaj wysiłek.\n\nKatalog obejmuje 874 ćwiczenia, prawie wszystkie z instrukcjami i zdjęciami. Filtruj je według mięśni, sprzętu, poziomu i rodzaju ruchu. W My exercises zachowasz własne ćwiczenia.\n\nW History wrócisz do ukończonych treningów. Overview, Progress i Programs zbierają plan oraz wyniki. W Gyms zapiszesz miejsca treningów i rozpoczniesz sesję w wybranej siłowni.\n\nChat pozwala rozmawiać z trenerem i ustalać zmiany spotkań bez przełączania aplikacji.',
+      highlights: [
+        'Plan dnia i postęp tygodnia w Today',
+        'Start zaplanowany, pusty lub Auto session',
+        'Ciężary, serie i podpowiedzi progresji',
+        'Katalog 874 ćwiczeń',
+        'Historia, wyniki i kontakt z trenerem',
+      ],
+    },
+    coach: {
+      name: 'Coach',
+      tagline: 'Klienci i terminarz bez chaosu',
+      desc: 'Prowadź klientów, układaj plany i kontroluj spotkania w jednym miejscu, zaczynając od spraw na dziś.',
+      about:
+        'Coach łączy codzienną pracę trenera: klientów, programy, spotkania i wiadomości. Otwórz Agenda, aby od razu zobaczyć prośby wymagające decyzji. Stamtąd przejdziesz do odpowiedniego klienta, planu lub rozmowy.\n\nAgenda pokazuje, kto chce przełożyć spotkanie, którego terminu dotyczy prośba i jaki nowy czas zaproponowano. Akceptujesz lub odrzucasz bez szukania informacji w wiadomościach.\n\nW Clients znajdziesz wszystkich podopiecznych. Profil pokazuje ostatnie treningi i krótki sygnał dotyczący realizacji planu. Z tej samej listy zaprosisz nowe osoby.\n\nSchedule to tygodniowy kalendarz sesji. Możesz przenieść lub anulować spotkanie oraz oznaczyć, czy się odbyło, czy klient był nieobecny. Historia pozostaje zgodna ze stanem faktycznym. Przy każdym spotkaniu zachowujesz informację o jego faktycznym statusie.\n\nW Programs przygotujesz plany i przypiszesz je klientom. Po rozpoczęciu sesji zobaczą ustalone przez Ciebie cele, na przykład 3 × 6 dla ćwiczenia.\n\nChat przechowuje rozmowy i prośby o zmianę terminu w tym samym miejscu.',
+      highlights: [
+        'Agenda z prośbami wymagającymi decyzji',
+        'Lista klientów i ich ostatnie treningi',
+        'Tygodniowy kalendarz w Schedule',
+        'Tworzenie i przypisywanie Programs',
+        'Chat ze zmianami terminów',
+      ],
+    },
+    'coach-live': {
+      name: 'Live',
+      tagline: 'Sprawdź, kto trenuje teraz',
+      desc: 'Widzisz, kto zaczął lub zakończył trening i kto jest offline. Szczegóły sesji i wiadomości masz pod ręką.',
+      about:
+        'Przy większej liczbie klientów trudno pamiętać, kto trenuje o której godzinie. Live pokazuje trwające, zakończone i nieaktywne sesje bez wysyłania każdemu pytania. Wystarczy otworzyć listę Training now.\n\nPrzy aktywnej sesji zobaczysz czas od startu, siłownię i informację o ostatnim połączeniu telefonu. Statusy offline i finished pozwalają szybko sprawdzić, co dzieje się u pozostałych osób.\n\nOtwórz szczegóły, aby zobaczyć nazwę sesji, liczbę ćwiczeń, poprzedni trening oraz obecny cel i plan klienta. Z tego samego widoku wyślesz wiadomość lub przejdziesz do profilu.\n\nLive nie pokazuje na bieżąco ciężarów, powtórzeń ani serii. Te dane są dostępne po zakończeniu treningu.\n\nNiewielki wskaźnik statusu znajduje się także w nagłówku Coach.',
+      highlights: [
+        'Sesje live, offline i finished',
+        'Czas sesji i ostatnie połączenie',
+        'Plan i poprzedni trening klienta',
+        'Wiadomość bez wychodzenia z Live',
+        'Wskaźnik aktywności w Coach',
+      ],
+    },
+    'coach-signals': {
+      name: 'Sygnały',
+      tagline: 'Zmiany, na które warto reagować',
+      desc: 'Wychwytuj przestoje, opuszczone sesje i skoki obciążenia. Przy każdym sygnale zobaczysz dane i możliwe kroki.',
+      about:
+        'Klient przestaje trenować regularnie, wynik stoi od kilku tygodni albo objętość nagle rośnie. Signals wyciąga takie zmiany na wierzch i pokazuje liczby, na których opiera się wniosek. Dzięki temu szybciej zdecydujesz, co sprawdzić.\n\nSystem rozpoznaje między innymi stagnację, zaburzony rytm, konflikt z ograniczeniem po urazie, nagły wzrost objętości czy gotowość do progresji. Zmiana maszyny jest traktowana osobno, aby nie tworzyć fałszywego alarmu.\n\nKażdy sygnał zawiera wyjaśnienie, poziom pewności High, Medium lub Low oraz dane z sesji lub tygodni. Dostępne szczegóły zależą od tego, co klient udostępnia.\n\nOtwórz sygnał, aby wybrać krok: zwiększyć ciężar, zamienić ćwiczenie, zaplanować lżejsze tygodnie, poczekać albo odrzucić zgłoszenie.\n\nPo 14 dniach Spotter pokaże, czy decyzja przyniosła efekt.',
+      highlights: [
+        'Stagnacja, absencje i skoki objętości',
+        'Dane i poziom pewności sygnału',
+        'Gotowe opcje dalszego działania',
+        'Filtry według klienta i statusu',
+        'Ocena decyzji po 14 dniach',
+      ],
+    },
+    'coach-notes': {
+      name: 'Notatki',
+      tagline: 'Notatki z pełnym kontekstem',
+      desc: 'Zapisuj obserwacje przy wiadomościach, ćwiczeniach i decyzjach, a potem znajduj je bez przeszukiwania czatów.',
+      about:
+        'Ważna uwaga z rozmowy łatwo ginie w historii wiadomości. Notes zapisuje ją przy konkretnym kliencie, a jeśli chcesz, również przy ćwiczeniu, decyzji lub dniu. Po kilku tygodniach odnajdziesz ją przez wyszukiwarkę.\n\nUtwórz notatkę General lub podepnij ją do wiadomości, otwartej decyzji, dnia czy ćwiczenia. Jump to message przenosi do właściwego fragmentu rozmowy.\n\nKażda notatka jest domyślnie Private. Po wybraniu Share with the client klient zobaczy ją w My trainer, ale nie będzie mógł jej zmienić ani usunąć. Udostępnianie można cofnąć.\n\nWyszukiwarka sprawdza treść i kontekst, a nowsze notatki wyświetlają się na górze. Zmienione wpisy otrzymują oznaczenie edycji.\n\nPrzy usuwaniu zobaczysz też informację, czy klient zdążył przeczytać udostępnioną notatkę.',
+      highlights: [
+        'Notatki przy rozmowach i ćwiczeniach',
+        'Domyślnie prywatne wpisy',
+        'Udostępnianie tylko do odczytu',
+        'Wyszukiwanie treści i kontekstu',
+        'Powrót do wiadomości jednym kliknięciem',
+      ],
+    },
+    'coach-team': {
+      name: 'Zespół',
+      tagline: 'Zespół i dostęp pod kontrolą',
+      desc: 'Zapraszaj trenerów i menedżerów, zarządzaj uprawnieniami oraz sprawdzaj historię działań w jednym miejscu.',
+      about:
+        'Gdy do zespołu dołącza kolejna osoba, nie musi otrzymywać dostępu do wszystkich danych klientów. Team pozwala zapraszać współpracowników, przypisywać im określone uprawnienia i sprawdzać, kto wykonał daną zmianę.\n\nZaproś osobę jednorazowym linkiem ważnym siedem dni. Możesz powiązać go z adresem e-mail, śledzić oczekujące zaproszenia i unieważnić link przed użyciem.\n\nTrenerzy pracują z własnymi klientami. Menedżerowie zajmują się kalendarzem i listą klientów bez wglądu w treningi, zdrowie, notatki czy czat. Szczegóły wyjaśnia What each role can do.\n\nNa stronie Team znajdziesz listę członków, ich aktywność i oczekujące zaproszenia. Activity log pokazuje, kto i kiedy działał.\n\nPo usunięciu członka jego dostęp wygasa na wszystkich urządzeniach, a wcześniejsze działania pozostają w historii.',
+      highlights: [
+        'Jednorazowe zaproszenia na siedem dni',
+        'Różne uprawnienia dla członków zespołu',
+        'Lista aktywnych osób i zaproszeń',
+        'Activity log ze zmianami',
+        'Natychmiastowe odebranie dostępu',
+      ],
+    },
+    apex: {
+      name: 'Apex',
+      tagline: 'Kolejne cele po każdym treningu',
+      desc: 'Zamień zapisane treningi w wyzwania, rankingi siłowe i osiągnięcia, których postęp możesz śledzić na bieżąco.',
+      about:
+        'Apex daje konkretne cele pomiędzy kolejnymi sesjami. Podejmuj wyzwania, sprawdzaj swoje wyniki na tle norm siłowych i zdobywaj osiągnięcia na podstawie treningów, które już zapisujesz w Spotterze. Nie musisz prowadzić drugiego dziennika.\n\nW Challenges wybierzesz cel dotyczący liczby sesji, serii, tonażu, rekordów, cardio, regularności lub wyniku w konkretnym ćwiczeniu. Zobaczysz postęp, pozostały czas i dzienne tempo potrzebne do ukończenia. Zaplanowany odpoczynek nie zrywa serii.\n\nRanks porównuje szacowane maksima z normami dla kategorii masy ciała. Śledź poziom od Beginner do Elite, sprawdzaj dystans do następnej rangi i udostępniaj własne wyniki.\n\nAchievements zapisuje nie tylko rekordy ciężaru, lecz także liczbę sesji, czas ćwiczeń, różnorodność ruchów i regularność. Feed pokazuje kolejne kamienie milowe.\n\nMastery ocenia również sposób trenowania: siłę, konsekwencję, doświadczenie i praktykę. Wskazuje elementy do poprawy, takie jak rozkład pracy mięśni, rozgrzewka czy odpoczynek.\n\nPoszczególne części Apex możesz niezależnie włączać i wyłączać w Configure.',
+      highlights: [
+        'Wyzwania z terminem i postępem',
+        'Rangi siłowe według masy ciała',
+        'Osiągnięcia za regularność i rekordy',
+        'Mastery ocenia sposób trenowania',
+        'Osobne ustawienia części w Configure',
+      ],
+    },
     mastery: { name: 'Mistrzostwo', desc: 'Poziomy umiejętności i długofalowy postęp.' },
     'apex-challenges': { name: 'Wyzwania', desc: 'Cotygodniowe cele: samemu lub z innymi.' },
     'apex-ranks': { name: 'Rankingi', desc: 'Gdzie są Twoje ćwiczenia na tle norm siły.' },
     'apex-awards': { name: 'Nagrody', desc: 'Osiągnięcia odblokowywane w miarę treningów.' },
     'theme-brass-glass': {
       name: 'Brass Glass',
-      desc: 'Szklany wygląd, w którym aplikacja działa domyślnie.',
+      tagline: 'Ciepły mosiądz i matowe szkło',
+      desc: 'Półprzezroczyste panele, delikatne rozmycie i mosiężne akcenty nadają Spotterowi spokojny, dopracowany wygląd.',
+      about:
+        'Brass Glass łączy ciemne, półprzezroczyste panele z delikatnym rozmyciem tła. Cienkie, jasne krawędzie oddzielają elementy interfejsu, a ciepły mosiężny kolor wskazuje aktywne przyciski, wybrane opcje i najważniejsze liczby.\n\nTen sam materiał pojawia się na kartach, panelach, w nawigacji i dolnych zakładkach. Dzięki temu poszczególne ekrany zachowują spójny wygląd, bez wizualnego bałaganu.\n\nJasne nagłówki i przygaszone etykiety mają wyraźną hierarchię. Brass Glass ma też wersję jasną, w której szkło staje się blade, ale mosiężny akcent pozostaje.\n\nUkład wszystkich ekranów pozostaje taki sam.',
+      highlights: [
+        'Rozmyte, półprzezroczyste panele',
+        'Ciepłe mosiężne akcenty',
+        'Spójne karty i nawigacja',
+        'Czytelny kontrast tekstu',
+        'Wersja ciemna i jasna',
+      ],
     },
-    'theme-cyberpunk': { name: 'Cyberpunk', desc: 'Neonowy wygląd z ostrymi rogami.' },
+    'theme-cyberpunk': {
+      name: 'Cyberpunk',
+      tagline: 'Neonowy charakter po zmroku',
+      desc: 'Czarne tło, limonkowe światło i ostre krawędzie zmieniają wygląd Spottera, nie zmieniając sposobu pracy.',
+      about:
+        'Cyberpunk zastępuje miękkie zaokrąglenia ostrymi, ściętymi kształtami. Niemal czarne powierzchnie zestawia z elektrycznym limonkowym akcentem, dzięki czemu aktywne elementy i postęp są łatwe do zauważenia.\n\nKarty, przyciski i znaczniki mają cienkie, świecące obramowania. Za panelami widać ciemny miejski krajobraz, ale treść pozostaje na pierwszym planie.\n\nNeon pojawia się na aktywnych zakładkach, przyciskach i pierścieniach postępu. To motyw wyłącznie ciemny — przełączenie trybu dziennego nie zmienia jego wyglądu.\n\nWszystkie funkcje i układ ekranów pozostają znajome.',
+      highlights: [
+        'Niemal czarne tło i limonkowy neon',
+        'Ścięte narożniki i ostre kształty',
+        'Delikatnie świecące obramowania',
+        'Miasto w tle interfejsu',
+        'Wyłącznie ciemna wersja',
+      ],
+    },
     'holiday-themes': {
       name: 'Motywy świąteczne',
       desc: 'Halloween, Boże Narodzenie i inne: włączają się same przed świętem.',
+      about:
+        'Halloween wprowadza nocny krajobraz z księżycem, nagimi gałęziami, nietoperzami i niską mgłą. Karmazynowy akcent wyróżnia przyciski oraz aktywne elementy, a szeryfowe nagłówki przypominają stare ilustracje książkowe.\n\nTło wypełnia cały ekran na telefonie i komputerze. Zmienia się także paleta interfejsu, dlatego widok jest spójny na każdej stronie.\n\nMotyw uruchamia się sam w okolicach Halloween i wyłącza po zakończeniu okresu świątecznego. Nie trzeba go potem ręcznie odinstalowywać ani przełączać.\n\nEkrany i ich funkcje pozostają bez zmian.\n\nChristmas nadaje Spotterowi świąteczną oprawę bez zmieniania znanych ekranów. Głęboka zieleń łączy się z rozmytymi złotymi światełkami w tle, a miękki róż podkreśla aktywne przyciski i wybrane opcje. Całość tworzy spójny wygląd.\n\nNagłówki otrzymują pochyloną szeryfową czcionkę. Tło rozciąga się na cały ekran telefonu i komputera, a kolory poszczególnych widoków są dopasowane do motywu.\n\nWygląd włącza się automatycznie w okresie Bożego Narodzenia i znika, kiedy święta się kończą. Nie musisz niczego ustawiać ponownie.\n\nTo te same funkcje, tylko w świątecznej oprawie.',
     },
     calls: { name: 'Połączenia', desc: 'Rozmowy głosowe i wideo z trenerem lub podopiecznymi.' },
     nutrition: { name: 'Odżywianie', desc: 'Śledzenie jedzenia i makroskładników.' },

@@ -23,6 +23,17 @@ export function itemDesc(st: AddonStoreStrings, id: string): string {
   return st.items[id as keyof typeof st.items]?.desc ?? '';
 }
 
+type ItemCopy = { tagline?: string; about?: string; highlights?: readonly string[] };
+const copyOf = (st: AddonStoreStrings, id: string): ItemCopy =>
+  (st.items as Record<string, ItemCopy>)[id] ?? {};
+/** Longer store copy (SPO-556): About paragraphs, tagline and highlights; empty when an item has none. */
+export const itemAbout = (st: AddonStoreStrings, id: string): string[] =>
+  (copyOf(st, id).about ?? '').split('\n\n').filter(Boolean);
+export const itemTagline = (st: AddonStoreStrings, id: string): string =>
+  copyOf(st, id).tagline ?? '';
+export const itemHighlights = (st: AddonStoreStrings, id: string): readonly string[] =>
+  copyOf(st, id).highlights ?? [];
+
 /** The item's rendered icon (Blender, public/store-icons/<id>.webp); an item without one falls back to its letter tile. */
 export const iconUrl = (id: string) => `${import.meta.env.BASE_URL ?? '/'}store-icons/${id}.webp`;
 
@@ -134,7 +145,7 @@ export function ItemRow({
   return (
     <SkRow
       className={className}
-      tile={<TileOf st={st} m={m} />}
+      tile={<TileOf st={st} m={m} size={64} />}
       name={<Highlight text={itemName(st, m.id)} query={query} />}
       desc={<Highlight text={itemDesc(st, m.id)} query={query} />}
       badge={kindBadge(st, m)}

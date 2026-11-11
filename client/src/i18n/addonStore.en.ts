@@ -102,6 +102,8 @@ export const addonStoreEn = {
   needs: (name: string) => `Needs ${name}`,
   usesOn: (name: string) => `Uses ${name}, already on`,
   about: 'About',
+  showMore: 'Show more',
+  showLess: 'Show less',
   addsHead: 'Adds to your Spotter',
   backTo: (name: string) => `${name}`,
   browseCats: 'Or browse a category',
@@ -146,7 +148,20 @@ export const addonStoreEn = {
   allAdded: 'Everything is added',
   nothingElse: 'Nothing else to install right now.',
   items: {
-    health: { name: 'Health', desc: 'Injuries, cycle, supplements and more in one place.' },
+    health: {
+      name: 'Health',
+      tagline: 'Make room for real-life changes',
+      desc: 'Log injuries, rest, illness and habits so your training can take them into account without losing your place.',
+      about:
+        'Log an injury, a week off or a long-term condition, and Spotter can take it into account when planning your training. Health also covers your cycle, supplements and everyday habits, with separate controls for each section.\n\nInjury log takes you through Protect, Reintroduce, Rebuild and Return to full. Check-ins guide each step, including a gradual return to previous working weights. If a clinician has set a no-load period, you can record that too.\n\nRest days and Unwell pause your plan while keeping your streak intact. When you return, your training can ease back in rather than jumping straight to the old targets.\n\nLong-term conditions can affect exercise suggestions and effort limits. Cycle gives you regular, irregular and log-only tracking. Supplements, Nicotine and Alcohol add context to recovery estimates, with evidence and sharing options where available.\n\nSwitch off anything you do not need, and choose how much of your sensitive information your coach can see.',
+      highlights: [
+        'Four-stage return to training after injury',
+        'Rest and illness without losing your streak',
+        'Training changes for long-term conditions',
+        'Cycle, supplements and habit tracking',
+        'Individual privacy and sharing controls',
+      ],
+    },
     'injury-log': { name: 'Injury log', desc: 'Log injuries and how they heal.' },
     cycle: { name: 'Cycle', desc: 'Note your cycle and see how it fits training.' },
     rest: { name: 'Rest days', desc: 'Log full rest and active rest days.' },
@@ -158,28 +173,188 @@ export const addonStoreEn = {
     supplements: { name: 'Supplements', desc: 'Keep a list of what you take and when.' },
     nicotine: { name: 'Nicotine', desc: 'Log nicotine to see the effect on recovery.' },
     alcohol: { name: 'Alcohol', desc: 'Log alcohol to see the effect on recovery.' },
-    sleep: { name: 'Sleep', desc: 'Log your sleep and see how rested you are.' },
+    sleep: {
+      name: 'Sleep',
+      tagline: 'Better training starts at bedtime',
+      desc: 'Record your nights, spot changes in your sleep routine and give Spotter a clearer picture of your recovery.',
+      about:
+        'Your sleep affects what a demanding session feels like. Sleep lets you record how long and how well you rested, then uses that information in Spotter’s readiness and recovery estimates. You can log nights yourself or set up Auto-log.\n\nTap Start sleep at bedtime and I’m awake when you get up. You can also add a missing night, pause a night, record a nap and rate your sleep as Restless, OK or Good.\n\nSet the hours you usually sleep, either for every night or separately by weekday. Auto-log uses that schedule or the pattern learned from your history. Night mode, Auto-dim and Wind down make the app less intrusive late in the evening.\n\nThe Sleep hub shows your last 14 nights, average duration, consistency, nights meeting your goal and Your rhythm by weekday. Compare recent nights with the previous period to see what has changed.\n\nSleep records also inform readiness, recovery and calorie estimates, so those numbers can reflect more than your workouts.',
+      highlights: [
+        'Start sleep manually or use Auto-log',
+        'Record naps, missed nights and sleep quality',
+        'See 14 nights and bedtime consistency',
+        'Different schedules for different weekdays',
+        'Sleep-aware readiness and recovery',
+      ],
+    },
     activities: {
       name: 'Activities',
-      desc: 'Log sport, cardio and recovery sessions beyond the gym.',
+      tagline: 'Count the work beyond the weights',
+      desc: 'Keep runs, sports and recovery sessions alongside your gym work so Spotter can account for your full week.',
+      about:
+        'A run on Monday and a match on Saturday both affect the rest of your training week. Activities records movement outside the gym and brings it into Spotter’s fatigue and recovery estimates, instead of leaving it out of the picture.\n\nChoose from 34 types across Conditioning, Recovery and Sports, including walking, cycling, yoga, football and climbing. Start a timer or enter an activity afterwards, with duration, effort and distance where relevant.\n\nSpotter estimates calories from the activity, duration, effort and your weight. Conditioning contributes to training load; recovery activities are treated differently in the recovery model.\n\nRegular habits are easier to keep. Activities suggests what you tend to do at a given time and can offer to add recurring activities to your weekly plan. You can dismiss or turn off those suggestions.\n\nUse Activities trends to compare the past four weeks, see which activities you do most and track changes in active time and momentum.',
+      highlights: [
+        '34 conditioning, recovery and sport types',
+        'Start a timer or log an activity later',
+        'Activity load included in recovery estimates',
+        'Suggestions based on your own routine',
+        'Four-week trends and active minutes',
+      ],
     },
     'home-sets': {
       name: 'Home workouts',
-      desc: 'Build home sets from your own moves and run them anywhere.',
+      tagline: 'Keep a workout ready anywhere',
+      desc: 'Save short routines for home or travel, start them in one tap and keep every set in your training history.',
+      about:
+        'Some sessions only need a doorway bar, a bit of floor space or a few minutes between other plans. Home workouts keeps those routines ready to start, and records them with the same logger and history as your gym sessions.\n\nBuild a home set from existing exercises or create your own moves. Choose how each move is measured — Reps, Hold or Time — then arrange the order and save it. Tap Play to get straight into it.\n\nA home session includes the familiar set logger, rest timer and fatigue tracking. Timed holds have a stopwatch, with your previous result shown when you start.\n\nFind saved routines in Sets, including when you last completed each one. Moves holds Spotter exercises with photos alongside the moves you have created. You can also start a one-off routine without saving it.\n\nChange or delete a routine whenever you like. Completed sessions remain in History, so small workouts still count towards your record.',
+      highlights: [
+        'Start a saved home set with one tap',
+        'Make routines from built-in or custom moves',
+        'Track reps, holds and timed work',
+        'Same logger and rest timer as the gym',
+        'Keep completed sessions in History',
+      ],
     },
-    goals: { name: 'Goals', desc: 'Pick a physique and the muscles to grow; sessions follow it.' },
-    playbook: { name: 'Playbook', desc: 'Your usual sessions by weekday, ready to repeat.' },
-    atlas: { name: 'Atlas', desc: 'Ask the AI assistant about your training.' },
-    gym: { name: 'Gym', desc: 'Workouts, programs and progress: the training side of Spotter.' },
-    coach: { name: 'Coach', desc: 'Your clients, plans and schedule in one place.' },
-    'coach-live': { name: 'Live', desc: 'Follow your clients’ workouts as they happen.' },
+    goals: {
+      name: 'Goals',
+      tagline: 'Make your training more specific',
+      desc: 'Choose the physique you want to work towards and adjust which muscles get more, less or steady attention.',
+      about:
+        'A programme can tell you what to do without knowing which results matter most to you. Goals lets you set a physique direction, choose where to focus this block and give those choices a place in your training plan.\n\nChoose a Physique target from eight options, including V-Taper, Classic, Hourglass and Strong Athlete. Each suggests a starting muscle focus that you can adjust for yourself.\n\nUnder Focus this block, mark each muscle or smaller region as Grow, Hold or Ease. Spotter uses those choices to change weekly volume targets and exercise suggestions, while showing you exactly what changed.\n\nLong-term goals give you room for a measurable target. Enter where you started, where you are now, where you want to get to and your timeframe. The relevant muscles receive more attention in suggestions and the weak-point radar.\n\nPrograms, Auto session and the session builder use your chosen focus. The block recap shows how much work you have put towards it.',
+      highlights: [
+        'Eight starting Physique targets',
+        'Grow, Hold or Ease individual muscles',
+        'Adjust smaller muscle regions',
+        'Track measurable Long-term goals',
+        'See focus reflected in exercise suggestions',
+      ],
+    },
+    playbook: {
+      name: 'Playbook',
+      tagline: 'Your regular sessions, ready to go',
+      desc: 'Turn the sessions you already repeat into ready-made workouts, with exercises, sets and weights filled in.',
+      about:
+        'If you keep returning to the same training days, Playbook can learn them from your workout history. It picks up the exercises, order, reps and weights you tend to use, then prepares the session without asking you to build a template.\n\nAfter several similar sessions, Playbook creates a play for that day — whether you call it Chest 2 or it recognises a push, pull or legs session. Regular exercises appear as Staple, with the number of sessions behind each play shown clearly.\n\nTap Start to apply the play, make a custom version as you go or repeat a previous workout exactly. Your session opens with the exercises and targets already filled in.\n\nMuscle mix shows which areas the play covers. Under Ideas, Spotter can flag a missed muscle, a favourite exercise you have dropped or a variation worth considering when progress stalls.\n\nThe plays come from what you actually train, not what you once intended to put in a template.',
+      highlights: [
+        'Routines learned from completed sessions',
+        'Typical exercise order, reps and weights',
+        'Start a play or repeat a past workout',
+        'Staple exercises and muscle coverage',
+        'Ideas for gaps and stalled lifts',
+      ],
+    },
+    atlas: {
+      name: 'Atlas',
+      tagline: 'Answers based on your own training',
+      desc: 'Ask about your progress, get feedback on completed sessions and make training changes through a simple chat.',
+      about:
+        'Wondering what weight to use next, why a lift has stalled or whether you should rest? Ask Atlas. It works from the sessions you have logged, so the answer can refer to your own lifts, volume, schedule and recovery.\n\nChat covers training plans, exercise swaps, technique, progression, rest, bodyweight, sleep and more. It can compare two periods or explain why a weight or workout was suggested. If your question is unclear, it asks what you mean.\n\nNotes picks up useful details without a prompt: a new record, a missed session, a short rest, a change in volume or your Sunday review.\n\nYou can also ask Atlas to move a session, swap or avoid an exercise, start a rest or log your weight. It shows the proposed change before you confirm it.\n\nChoose Bro, Neutral or Savage for the tone you prefer. Atlas can soften its approach after a difficult night or during illness or injury. You control its memory, notifications and consent to AI use.',
+      highlights: [
+        'Training answers drawn from your own logs',
+        'Notes on records, stalls and weekly progress',
+        'Confirm changes before they are made',
+        'Choose Bro, Neutral or Savage',
+        'Control memory, notifications and AI consent',
+      ],
+    },
+    gym: {
+      name: 'Gym',
+      tagline: 'Plan, train and track every set',
+      desc: 'See today’s workout, start a session in seconds and keep your training history together in one place.',
+      about:
+        'Open Gym and see what you are training today, how much of the week is complete and what comes next. Start the planned workout, build your own session or let Auto session put a day together from your goal and recovery.\n\nToday shows your day name, programme, week progress and planned exercises. The week strip distinguishes training days, rest days and today. If you train with a coach, your next meeting and reschedule requests appear here as well.\n\nDuring a session, log sets with simple weight and rep controls. See the timer, sets completed and tonnage lifted. Previous results and load suggestions help you choose the next weight; add warm-up sets or change the set type and effort when you need to.\n\nThe exercise library includes 874 movements, with photos and instructions for almost all of them. Filter by muscle, equipment, experience or exercise type, and keep your own moves in My exercises.\n\nHistory keeps every completed workout. Overview, Progress and Programs put your records and plan within reach. Save your gyms, see where you last trained and start a session there. Chat with your trainer and handle session changes without leaving Gym.\n\nWhether you follow a programme or decide on the day, your next session starts from what you have actually done.',
+      highlights: [
+        'Today shows your workout and weekly progress',
+        'Planned, empty and Auto session starts',
+        'Set logging with previous results and load hints',
+        '874 exercises, with filters and photos',
+        'History, Progress and trainer chat',
+      ],
+    },
+    coach: {
+      name: 'Coach',
+      tagline: 'Keep your coaching day organised',
+      desc: 'Manage clients, programmes and sessions together, with today’s requests and decisions ready when you open the app.',
+      about:
+        'Coach keeps client work in one place, from today’s reschedule requests to next week’s sessions. Open Agenda to see what needs a decision, then move straight to the client, programme or conversation involved.\n\nAgenda brings session changes to the top. See who has asked to move, which appointment it affects and the proposed new time. Accept or decline without digging through messages.\n\nClients puts everyone you train in one list. Open a profile for recent workouts and a quick indication of whether the client is following their plan. Invite new clients from the same screen.\n\nSchedule shows the working week as a timetable. Move or cancel an appointment, or mark it held or missed so your records reflect what really happened.\n\nBuild and assign training programmes in Programs. Clients see the exercise targets you set when they start their sessions. Chat keeps each conversation in Coach, with reschedule requests displayed alongside the messages that explain them.\n\nYou can organise your day, follow client progress and keep plans up to date without jumping between separate calendars and conversations.',
+      highlights: [
+        'Agenda collects requests needing a decision',
+        'Client list with recent workout progress',
+        'Weekly timetable for your sessions',
+        'Create and assign training programmes',
+        'Chat and rescheduling in one place',
+      ],
+    },
+    'coach-live': {
+      name: 'Live',
+      tagline: 'See who is training right now',
+      desc: 'Check which clients have started, finished or gone offline, with session details and messaging close by.',
+      about:
+        'When several clients train at different times, Live shows who has started and who has finished without asking anyone for an update. Open the list for session status, then go straight to a client when something needs attention.\n\nTraining now separates live, offline and finished sessions. For someone training, you can see how long the session has been running, the gym and when the phone last checked in.\n\nOpen their live page for the session name, start time, exercise count and recent connection status. Their last workout, current goal, programme and week are there for context. Message them or open their profile from the same view.\n\nLive does not display sets, weights or reps during a session; those appear in the completed workout afterwards. A small status widget in Coach keeps you informed when you move elsewhere.\n\nIf nobody is training, the list stays empty until someone starts.',
+      highlights: [
+        'Live, offline and finished session status',
+        'Session clocks and last connection time',
+        'Goal, programme and previous workout',
+        'Message clients directly from Live',
+        'Status widget inside Coach',
+      ],
+    },
     'coach-signals': {
       name: 'Signals',
-      desc: 'Fatigue and readiness signals across your clients.',
+      tagline: 'Spot the changes that need action',
+      desc: 'Find stalled lifts, missed sessions and sharp load changes, with the evidence and next steps in one place.',
+      about:
+        'A client misses two weeks, a lift stops progressing or training volume suddenly jumps. Signals draws your attention to changes like these, with the relevant numbers beside them so you can decide what deserves a response.\n\nIt can flag stalled lifts, broken routines, injury restrictions, volume spikes, new records and clients ready to progress. A machine change is recognised separately, so unlike-for-like numbers do not become a false stall.\n\nEach signal includes a short explanation, High, Medium or Low confidence and the sessions or weekly totals behind it. The detail available depends on what the client shares.\n\nOpen a signal for practical options: adjust a weight, swap an exercise, plan lighter weeks, wait or dismiss it. Filter All signals by client, severity and state when your list gets busy.\n\nAfter 14 days, Spotter shows whether your decision helped. You have a record of the change and what you chose to do about it.',
+      highlights: [
+        'Detect stalls, missed sessions and volume spikes',
+        'Evidence and confidence for each change',
+        'Ready-to-use next steps for decisions',
+        'Filter by client, severity and state',
+        'Review your decision after 14 days',
+      ],
     },
-    'coach-notes': { name: 'Notes', desc: 'Private notes on each client.' },
-    'coach-team': { name: 'Team', desc: 'Your team, its activity and roles.' },
-    apex: { name: 'Apex', desc: 'The game side of Spotter: challenges, levels and rewards.' },
+    'coach-notes': {
+      name: 'Notes',
+      tagline: 'Keep the detail with the client',
+      desc: 'Save observations beside messages, exercises and decisions, then find them again without searching through chats.',
+      about:
+        'You remember a technique issue during a call, then need it six weeks later. Notes keeps observations with the right client and, when useful, the message, exercise or decision they relate to. Search gets you back to them quickly.\n\nCreate a General note or attach one to a message, decision, day or exercise. Jump to message takes you straight back to the original conversation, so the context stays with what you wrote.\n\nNotes are Private by default. Choose Share with the client and it appears under My trainer in their app, where they can read it but not edit or remove it. You can make a shared note private again.\n\nFind notes by their text or context — searching for “bench” can pick up both. Newer entries appear first, and edited notes are marked accordingly.\n\nYou can delete a note when it is no longer needed. The confirmation also tells you whether the client has already seen a shared note.',
+      highlights: [
+        'Attach notes to messages and exercises',
+        'Private by default, share when useful',
+        'Jump back to the original context',
+        'Search both note text and context',
+        'Know when a shared note has been seen',
+      ],
+    },
+    'coach-team': {
+      name: 'Team',
+      tagline: 'Manage the people around your clients',
+      desc: 'Invite trainers and managers, organise shared work and keep each person’s access clear and controlled.',
+      about:
+        'Bringing another trainer or manager into your business should not mean giving them access to everything. Team keeps the people, invitations and activity in one place, with clear boundaries around what each person can see.\n\nInvite someone using a one-use link that expires after seven days. You can limit the invitation to an email address, see what is still pending or revoke an unused link.\n\nTrainers work with their own clients and schedules. Managers can help organise clients and sessions without accessing workouts, health details, notes or chat. What each role can do explains those boundaries.\n\nThe Team page shows members, recent activity and pending invitations. Open a member to check their access and scheduling information. Activity log shows who made changes and when.\n\nWhen someone leaves, remove their access across devices while keeping a record of past actions. They can be invited again later if needed.',
+      highlights: [
+        'Single-use invitations valid for seven days',
+        'Separate trainer and manager permissions',
+        'Members, invites and recent activity',
+        'Activity log with a record of changes',
+        'Remove access across devices',
+      ],
+    },
+    apex: {
+      name: 'Apex',
+      tagline: 'Give every session a new target',
+      desc: 'Turn your logged training into challenges, strength ranks and achievements you can follow over time.',
+      about:
+        'Apex gives your training more to work towards than the next workout. Take on challenges, see how your lifts compare with strength standards and collect milestones from the sessions you already record in Spotter.\n\nChallenges lets you choose specific goals: sessions, sets, tonnage, personal records, cardio, streaks or lifts at a target weight. Each active challenge shows your progress, time left and the pace needed to finish. Planned rest days do not break a streak.\n\nRanks compares your estimated maximums with published strength standards for your bodyweight class. Follow your level from Beginner to Elite, see what separates you from the next rank and share a result when you want.\n\nAchievements covers more than weight on the bar. It tracks training time, consistency, exercise variety, records and even the occasional early-morning or late-night session. Your Feed collects milestones as they happen.\n\nMastery looks at how you train as well as how strong you are. It brings together strength, consistency, experience and practice, then points to habits worth improving — from muscle coverage to warm-ups and recovery.\n\nEverything works from your existing training logs. Choose the parts of Apex you want to use in Configure.',
+      highlights: [
+        'Challenges with progress and time remaining',
+        'Strength ranks by bodyweight class',
+        'Achievements for more than lifting records',
+        'Mastery tracks training habits and consistency',
+        'Enable or disable parts in Configure',
+      ],
+    },
     mastery: { name: 'Mastery', desc: 'Track skill levels and long-term progress.' },
     'apex-challenges': {
       name: 'Challenges',
@@ -187,11 +362,39 @@ export const addonStoreEn = {
     },
     'apex-ranks': { name: 'Ranks', desc: 'Where your lifts stand against strength standards.' },
     'apex-awards': { name: 'Awards', desc: 'Achievements you unlock as you train.' },
-    'theme-brass-glass': { name: 'Brass Glass', desc: 'The glass look the app wears by default.' },
-    'theme-cyberpunk': { name: 'Cyberpunk', desc: 'A neon look with sharp corners.' },
+    'theme-brass-glass': {
+      name: 'Brass Glass',
+      tagline: 'Warm brass on translucent glass',
+      desc: 'Give Spotter a quieter, polished look with softly blurred glass panels and a restrained golden accent.',
+      about:
+        'Brass Glass gives Spotter its understated glass finish. Dark, translucent panels let the background show through softly, while fine edges and a warm brass accent keep the important controls easy to pick out.\n\nThe same glass treatment carries across cards, sheets, navigation and tabs. Buttons, selected options, progress rings and key figures use brass, so the interface stays consistent from screen to screen.\n\nHeadings remain clear against lighter secondary labels, without making every element compete for attention. Prefer a brighter screen? Brass Glass also has a light version, with pale glass surfaces and the same warm accent.\n\nIt is a change in atmosphere that leaves the layout familiar.',
+      highlights: [
+        'Softly blurred, translucent panels',
+        'Warm brass accents for key controls',
+        'Consistent cards, tabs and navigation',
+        'Careful contrast and clear hierarchy',
+        'Dark and light versions',
+      ],
+    },
+    'theme-cyberpunk': {
+      name: 'Cyberpunk',
+      tagline: 'Neon edges for the dark side',
+      desc: 'Switch to angular controls, near-black surfaces and electric lime accents set against a dark city backdrop.',
+      about:
+        'Cyberpunk changes the mood of Spotter without changing what you do in it. Near-black surfaces, electric lime highlights and sharp, cut corners replace the softer look of the standard interface. The layout stays familiar.\n\nCards, buttons and chips use angular shapes with fine glowing outlines around important elements. A dark city scene sits behind the panels, visible without taking over the content.\n\nThe same neon accent marks active tabs, buttons, progress rings and selected options. It is a dark-only theme, so changing the app to day mode will not wash out the design.\n\nA more graphic look for the same familiar screens.',
+      highlights: [
+        'Near-black base with neon lime accents',
+        'Angular cards, buttons and chips',
+        'Fine glowing outlines',
+        'Dark city background behind panels',
+        'Dark-only appearance',
+      ],
+    },
     'holiday-themes': {
       name: 'Holiday themes',
       desc: 'Halloween, Christmas and more: they switch on by themselves around the holiday.',
+      about:
+        'Halloween gives Spotter a seasonal night scene, with a moon, bare branches, bats and low fog across the background. Crimson accents draw attention to controls without losing the atmosphere. The design extends across the app.\n\nHeadings use a serif style with an old-storybook feel. The full-screen background works on both phones and desktops, while the colours of the interface shift to match the scene.\n\nThe theme switches on around Halloween and off again afterwards, so the seasonal look arrives when it belongs and does not need to be changed back by hand.\n\nAll your usual screens remain in place, with a different atmosphere for the season.\n\nChristmas brings a warmer seasonal look to Spotter. Deep green surfaces sit against drifting golden bokeh lights, while soft rose accents highlight the controls you use most. The changes apply throughout the app on phone and desktop.\n\nItalic serif headings give the screens a festive character without changing their layout. The background fills the screen on phone and desktop, and the full palette is adjusted so each view shares the same mood.\n\nThe theme turns on around Christmas and switches off when the holiday period ends. There is nothing to install or change back each time the season comes around.\n\nYour usual training screens, with a little more warmth for the holidays.',
     },
     calls: { name: 'Calls', desc: 'Voice and video calls with your coach or clients.' },
     nutrition: { name: 'Nutrition', desc: 'Food and macros tracking.' },

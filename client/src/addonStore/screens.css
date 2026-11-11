@@ -242,3 +242,16 @@
 .as-item-bar .sk-inst-lbl {
   justify-content: center;
 }
+
+.as-about-hl {
+  padding-inline-start: 18px;
+  margin-block-end: 0;
+}
+.as-about-toggle {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--sk-accent, #2b5bd7);
+  cursor: pointer;
+  font-weight: 600;
+}

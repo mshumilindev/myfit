@@ -101,6 +101,8 @@ export const addonStoreLt: typeof addonStoreEn = {
   needs: (name: string) => `Reikia ${name}`,
   usesOn: (name: string) => `Naudoja ${name}, jau įjungta`,
   about: 'Apie',
+  showMore: 'Rodyti daugiau',
+  showLess: 'Rodyti mažiau',
   addsHead: 'Ką prideda prie Spotter',
   backTo: (name: string) => `${name}`,
   browseCats: 'Arba pasirinkite kategoriją',
@@ -145,7 +147,20 @@ export const addonStoreLt: typeof addonStoreEn = {
   allAdded: 'Viskas pridėta',
   nothingElse: 'Šiuo metu daugiau nėra ką diegti.',
   items: {
-    health: { name: 'Sveikata', desc: 'Traumos, ciklas, papildai ir kita vienoje vietoje.' },
+    health: {
+      name: 'Sveikata',
+      tagline: 'Treniruotės pagal tavo savijautą',
+      desc: 'Fiksuok traumas, ligas, poilsį ir įpročius, kad Spotter galėtų į juos atsižvelgti planuodamas krūvį.',
+      about:
+        'Užfiksuok traumą, pertrauką ar ilgalaikę sveikatos būklę, ir Spotter galės atsižvelgti į ją planuodamas treniruotes. Health taip pat apima ciklą, papildus ir kasdienius įpročius. Kiekvieną dalį gali įjungti atskirai.\n\nInjury log padeda grįžti prie krūvio keturiais etapais: Protect, Reintroduce, Rebuild ir Return to full. Pereiti toliau leidžia savijautos patikros, o ne vien praėjęs laikas. Prie įprastų svorių grįžtama palaipsniui.\n\nRest days leidžia iš anksto suplanuoti poilsį, o Unwell – pažymėti ligos dienas. Planas tuo metu sustoja, tačiau treniruočių serija nenutrūksta. Grįžus krūvis gali būti sumažintas.\n\nLong-term conditions padeda atsižvelgti į apribojimus. Cycle seka ciklą, o Supplements, Nicotine ir Alcohol suteikia papildomos informacijos atsistatymo vertinimams.\n\nPats pasirenki, ką sekti ir kokius duomenis gali matyti treneris.',
+      highlights: [
+        'Keturi grįžimo po traumos etapai',
+        'Poilsis neprarandant treniruočių serijos',
+        'Krūvio pritaikymas pagal apribojimus',
+        'Ciklas, papildai ir kasdieniai įpročiai',
+        'Asmeniniai privatumo nustatymai',
+      ],
+    },
     'injury-log': { name: 'Traumų žurnalas', desc: 'Žymėkite traumas ir kaip jos gyja.' },
     cycle: { name: 'Ciklas', desc: 'Žymėkite ciklą ir matykite, kaip jis dera su treniruotėmis.' },
     rest: { name: 'Poilsis', desc: 'Pilno ir aktyvaus poilsio dienos.' },
@@ -154,43 +169,225 @@ export const addonStoreLt: typeof addonStoreEn = {
     supplements: { name: 'Papildai', desc: 'Ką vartojate ir kada.' },
     nicotine: { name: 'Nikotinas', desc: 'Žymėkite nikotiną, kad matytumėte poveikį atsigavimui.' },
     alcohol: { name: 'Alkoholis', desc: 'Žymėkite alkoholį, kad matytumėte poveikį atsigavimui.' },
-    sleep: { name: 'Miegas', desc: 'Žymėkite miegą ir matykite, kiek pailsėjote.' },
+    sleep: {
+      name: 'Miegas',
+      tagline: 'Miegas svarbus ir treniruotėms',
+      desc: 'Žymėk nakties miegą ir snaudulius, stebėk režimą ir leisk Spotter atsižvelgti į poilsį vertinant atsistatymą.',
+      about:
+        'Sleep parodo, kiek laiko miegi, kaip vertini savo poilsį ir ar laikaisi įprasto grafiko. Spotter šiuos duomenis naudoja pasirengimo treniruotei ir atsistatymo įverčiams. Naktis gali registruoti pats arba pasirinkti Auto-log.\n\nPrieš miegą spausk Start sleep, o atsikėlęs – I’m awake. Gali pridėti praleistą naktį, užfiksuoti snaudulį, pristabdyti miegą ir įvertinti jį kaip Restless, OK arba Good.\n\nNustatyk įprastą gulimosi ir kėlimosi laiką visai savaitei arba kiekvienai dienai atskirai. Auto-log vadovaujasi grafiku ar iš ankstesnių įrašų atpažintu ritmu.\n\nSleep hub rodo paskutines 14 naktų, vidutinę trukmę, gulimosi laiko pastovumą ir kiek naktų pasiekei tikslą. Your rhythm by weekday padeda pastebėti savaitės dienų skirtumus.\n\nNight mode, Auto-dim ir Wind down sumažina ekrano ryškumą vakare.',
+      highlights: [
+        'Rankinis įrašymas arba Auto-log',
+        'Snauduliai ir miego kokybės įvertinimas',
+        '14 naktų istorija ir pastovumas',
+        'Atskiras grafikas savaitės dienoms',
+        'Miegas atsistatymo įverčiuose',
+      ],
+    },
     activities: {
       name: 'Veiklos',
-      desc: 'Žymėkite sportą, kardio ir atsigavimą ne sporto salėje.',
+      tagline: 'Visas judėjimas vienoje vietoje',
+      desc: 'Bėgimas, sportas ir atsistatymo veiklos prisideda prie bendro savaitės krūvio, ne vien treniruotės salėje.',
+      about:
+        'Pirmadienio bėgimas ar savaitgalio varžybos veikia kitą treniruotę. Activities registruoja judėjimą už sporto salės ribų ir įtraukia jį į nuovargio bei atsistatymo vertinimus. Taip savaitės krūvis neapsiriboja vien svarmenimis.\n\nRinkis iš 34 veiklų grupėse Conditioning, Recovery ir Sports. Paleisk laikmatį arba įrašyk veiklą vėliau, nurodydamas trukmę, intensyvumą ir, kur reikia, atstumą.\n\nSpotter apskaičiuoja apytiksles kalorijas pagal veiklos tipą, laiką, intensyvumą ir kūno svorį. Kondicijos treniruotės didina krūvį, o atsistatymo veiklos vertinamos atskirai.\n\nActivities atpažįsta pasikartojančius įpročius ir gali pasiūlyti įtraukti veiklą į savaitės planą. Pasiūlymus gali atmesti arba išjungti.\n\nActivities trends leidžia palyginti keturias savaites, aktyvų laiką, dažniausias veiklas ir pokyčius.',
+      highlights: [
+        '34 veiklų ir sporto rūšių',
+        'Laikmatis arba įrašas po veiklos',
+        'Poveikis nuovargiui ir atsistatymui',
+        'Pasiūlymai pagal tavo įpročius',
+        'Keturių savaičių tendencijos',
+      ],
     },
     'home-sets': {
       name: 'Treniruotės namuose',
-      desc: 'Sudarykite namų rinkinius iš savo pratimų ir atlikite bet kur.',
+      tagline: 'Trumpa treniruotė, kur bebūtum',
+      desc: 'Išsaugok trumpus pratimus namams ar kelionei, pradėk vienu paspaudimu ir matyk rezultatus bendroje istorijoje.',
+      about:
+        'Atsispaudimams, prisitraukimams ar trumpai pilvo raumenų treniruotei sporto salė nebūtina. Home workouts leidžia susikurti paruoštus pratimų rinkinius ir pradėti juos akimirksniu. Rezultatai lieka toje pačioje History.\n\nSkiltyje Sets sudėk rinkinį iš Spotter pratimų arba savo sukurtų judesių. Pasirink tvarką, pavadinimą ir matavimo būdą: Reps, Hold ar Time. Gali išsaugoti arba atlikti vienkartinę treniruotę.\n\nPaspaudus Play veikia įprastas serijų žurnalas, poilsio laikmatis ir nuovargio apskaita. Statiniams pratimams naudojamas Start hold ir Release laikmatis, rodantis ir ankstesnį rezultatą.\n\nMoves rodo pratimus su aprašymais bei nuotraukomis ir tavo sukurtus judesius. Sets primena, kada paskutinį kartą atlikai rinkinį.\n\nRinkinius keisk ar ištrink kada nori. Ankstesni rezultatai lieka History.',
+      highlights: [
+        'Paruoštas rinkinys vienu paspaudimu',
+        'Pratimai iš katalogo ir savi judesiai',
+        'Pakartojimai, laikas ir statiniai pratimai',
+        'Tas pats serijų ir poilsio žurnalas',
+        'Rezultatai išlieka History',
+      ],
     },
     goals: {
       name: 'Tikslai',
-      desc: 'Pasirinkite figūrą ir raumenis augti; treniruotės prisitaikys.',
+      tagline: 'Tikslai, kurie keičia planą',
+      desc: 'Pasirink norimą kūno sudėjimą ir nuspręsk, kuriems raumenims reikia daugiau, mažiau ar tiek pat dėmesio.',
+      about:
+        'Programa nurodo, ką treniruoti šiandien. Goals leidžia nuspręsti, kokio rezultato sieki: pasirinkti kūno sudėjimo kryptį, svarbiausias raumenų grupes ir pamatuojamus tikslus. Spotter į tai atsižvelgia siūlydamas pratimus.\n\nPhysique target siūlo aštuonis variantus, tarp jų V-Taper, Classic, Hourglass ir Strong Athlete. Kiekvienas turi pradinį raumenų prioritetų rinkinį, kurį gali keisti.\n\nSkiltyje Focus this block pažymėk raumenis ar jų sritis kaip Grow, Hold arba Ease. Šie pasirinkimai veikia savaitės krūvio tikslus ir pratimų pasiūlymus. Santrauka parodo pakeitimus.\n\nLong-term goals leidžia įvesti pradinę, dabartinę ir siekiamą reikšmę bei laikotarpį mėnesiais. Su tikslu susiję raumenys gauna aukštesnį prioritetą.\n\nPrograms, Auto session ir treniruočių kūrimo įrankis skaito šiuos nustatymus. Bloko apžvalga rodo nuveiktą darbą.',
+      highlights: [
+        'Aštuonios kūno sudėjimo kryptys',
+        'Grow, Hold ir Ease raumenims',
+        'Atskirų raumenų sričių prioritetai',
+        'Pamatuojami ilgalaikiai tikslai',
+        'Pratimai pagal pasirinktą kryptį',
+      ],
     },
     playbook: {
       name: 'Playbook',
-      desc: 'Jūsų įprastos treniruotės pagal savaitės dieną, paruoštos kartoti.',
+      tagline: 'Įprastos treniruotės jau paruoštos',
+      desc: 'Spotter mokosi iš pasikartojančių treniruočių ir sudeda pratimus, serijas bei įprastus svorius į paruoštą planą.',
+      about:
+        'Jeigu dažnai kartoji panašias treniruočių dienas, nereikia kiekvieną kartą jų kurti iš naujo. Playbook iš užbaigtų sesijų atpažįsta pratimus, jų tvarką, įprastą serijų skaičių, pakartojimus ir naudotus svorius.\n\nPo kelių panašių treniruočių atsiranda tos dienos play – pavyzdžiui, Chest 2 arba atpažinta push, pull ar legs diena. Dažniausiai kartojami pratimai pažymimi kaip Staple.\n\nSpausk Start ir pritaikyk visą rinkinį, keisk jį pradėdamas arba tiksliai pakartok ankstesnę sesiją. Pratimai, serijos ir numatyti svoriai bus jau įrašyti.\n\nMuscle mix rodo, kokiems raumenims skiriamas krūvis. Skiltyje Ideas rasi pasiūlymų dėl praleistų raumenų, pamėgtų pratimų ar pakeitimų užstrigus progresui.\n\nKiekvienas play nurodo, iš kiek sesijų jis sudarytas.',
+      highlights: [
+        'Rinkiniai pagal tikrą treniruočių istoriją',
+        'Įprasta pratimų tvarka ir svoriai',
+        'Pradėk play arba pakartok sesiją',
+        'Dažni pratimai pažymėti Staple',
+        'Ideas dėl spragų ir progreso',
+      ],
     },
-    atlas: { name: 'Atlas', desc: 'Klauskite DI padėjėjo apie savo treniruotes.' },
-    gym: { name: 'Gym', desc: 'Treniruotės, programos ir pažanga: Spotter treniruočių dalis.' },
-    coach: { name: 'Coach', desc: 'Klientai, planai ir tvarkaraštis vienoje vietoje.' },
-    'coach-live': { name: 'Live', desc: 'Sekite klientų treniruotes realiu laiku.' },
-    'coach-signals': { name: 'Signalai', desc: 'Klientų nuovargio ir pasirengimo signalai.' },
-    'coach-notes': { name: 'Užrašai', desc: 'Privatūs užrašai apie kiekvieną klientą.' },
-    'coach-team': { name: 'Komanda', desc: 'Jūsų komanda, jos veikla ir vaidmenys.' },
-    apex: { name: 'Apex', desc: 'Žaidybinė Spotter dalis: iššūkiai, lygiai ir apdovanojimai.' },
+    atlas: {
+      name: 'Atlas',
+      tagline: 'Atsakymai iš tavo treniruočių',
+      desc: 'Paklausk apie krūvį, progresą ar poilsį, gauk pastabų po sesijų ir keisk planą tiesiai pokalbyje.',
+      about:
+        'Nežinai, kokį svorį rinktis kitą kartą ar kodėl sustojo progresas? Paklausk Atlas. Jis remiasi tavo užregistruotais pratimais, treniruočių apimtimi ir poilsiu, todėl atsakymai susiję su tavo rezultatais, o ne bendromis taisyklėmis.\n\nChat leidžia klausti apie techniką, krūvį, pratimų keitimą, miegą ar palyginti du laikotarpius. Atlas paaiškina, kodėl siūlo konkretų sprendimą, o neaiškų klausimą patikslina.\n\nNotes automatiškai atkreipia dėmesį į rekordus, praleistas sesijas, per trumpas pertraukas, užstrigusį progresą ir savaitės apžvalgą.\n\nPer pokalbį gali perkelti treniruotę, pakeisti pratimą, pradėti poilsį ar įrašyti kūno svorį. Atlas parodo pakeitimą prieš tau jį patvirtinant.\n\nPasirink Bro, Neutral arba Savage toną. Atmintį, pranešimus ir sutikimą naudoti AI valdai pats.',
+      highlights: [
+        'Atsakymai pagal tavo treniruočių įrašus',
+        'Pastabos apie rekordus ir progresą',
+        'Pakeitimai tik tau patvirtinus',
+        'Trys tonai: Bro, Neutral ir Savage',
+        'Atminties ir pranešimų valdymas',
+      ],
+    },
+    gym: {
+      name: 'Gym',
+      tagline: 'Visa treniruotė vienoje vietoje',
+      desc: 'Matyk šios dienos planą, pradėk sesiją per kelias sekundes ir išsaugok kiekvieną seriją istorijoje.',
+      about:
+        'Atidaręs Gym iškart matai, ką šiandien treniruosi, kiek savaitės plano jau įvykdei ir kokie pratimai laukia. Gali pradėti suplanuotą treniruotę, kurti tuščią sesiją arba naudoti Auto session, kuris atsižvelgia į tikslą ir atsistatymą.\n\nToday rodo dienos pavadinimą, programą, savaitės eigą ir pratimus. Savaitės juostoje atskiriamos treniruočių, poilsio ir dabartinė dienos. Jei dirbi su treneriu, čia matysi kitą susitikimą ir prašymus perkelti laiką.\n\nTreniruotės metu registruok svorį ir pakartojimus paprastais valdikliais. Matyk laikmatį, serijų skaičių ir bendrą tonažą. Ankstesni rezultatai bei svorio pasiūlymai padeda rinktis kitą krūvį. Gali įtraukti apšilimo serijas ir pastangų vertinimą.\n\nBibliotekoje yra 874 pratimai, beveik visi su nuotraukomis ir instrukcijomis. Filtruok pagal raumenis, įrangą, lygį ar pratimo tipą. Savus judesius laikyk My exercises.\n\nHistory išsaugo visas sesijas. Overview, Progress ir Programs pateikia planą bei rezultatus. Gyms leidžia išsaugoti sporto sales ir pradėti treniruotę pasirinktoje vietoje.\n\nChat leidžia rašyti treneriui ir derinti susitikimų pakeitimus neišeinant iš Gym.',
+      highlights: [
+        'Dienos planas ir savaitės eiga Today',
+        'Suplanuota sesija arba Auto session',
+        'Svorio, serijų ir progreso pasiūlymai',
+        '874 pratimų biblioteka',
+        'History, Progress ir trenerio Chat',
+      ],
+    },
+    coach: {
+      name: 'Coach',
+      tagline: 'Klientai ir tvarkaraštis kartu',
+      desc: 'Tvarkyk klientus, programas ir susitikimus vienoje vietoje, o dieną pradėk nuo sprendimų, kurių reikia šiandien.',
+      about:
+        'Coach sujungia kasdienius trenerio darbus: klientus, programas, susitikimus ir žinutes. Atidaręs Agenda iškart matai prašymus, kuriems reikia sprendimo. Iš ten gali pereiti prie kliento, jo plano ar susijusio pokalbio.\n\nAgenda rodo, kas prašo perkelti sesiją, kurį susitikimą tai liečia ir kokį laiką siūlo. Priimk arba atmesk prašymą neieškodamas duomenų žinutėse.\n\nClients pateikia visų klientų sąrašą. Profilyje matysi paskutines treniruotes ir ar žmogus laikosi plano. Iš to paties sąrašo gali pakviesti naują klientą.\n\nSchedule rodo savaitę kaip sesijų tvarkaraštį. Perkelk ar atšauk susitikimą, pažymėk jį kaip įvykusį arba praleistą, kad įrašai išliktų tikslūs. Kiekvienos sesijos būsena lieka užfiksuota, todėl lengviau patikrinti, kas iš tiesų įvyko per savaitę.\n\nPrograms leidžia kurti treniruočių programas ir priskirti jas klientams. Pradėję sesiją jie matys tavo nustatytą kiekvieno pratimo tikslą, pavyzdžiui, 3 × 6. Užduotis ir pakartojimų skaičius matomi kliento treniruotėje.\n\nChat laiko pokalbius ir sesijos perkėlimo prašymus vienoje vietoje.',
+      highlights: [
+        'Agenda su prašymais dėl sesijų',
+        'Clients ir naujausios treniruotės',
+        'Savaitės tvarkaraštis Schedule',
+        'Programų kūrimas ir priskyrimas',
+        'Chat ir sesijų perkėlimas',
+      ],
+    },
+    'coach-live': {
+      name: 'Live',
+      tagline: 'Matyk, kas treniruojasi dabar',
+      desc: 'Stebėk vykstančias, baigtas ir neprisijungusias klientų sesijas, jų laiką bei svarbią informaciją.',
+      about:
+        'Kai klientai treniruojasi skirtingu metu, nebūtina kiekvienam rašyti dėl būsenos. Live parodo, kas jau pradėjo treniruotę, kas baigė ir kieno telefonas neprisijungęs. Training now pateikia visų sesijų būseną viename sąraše.\n\nAktyvioje sesijoje matysi nuo pradžios praėjusį laiką, sporto salę ir paskutinio telefono ryšio laiką. Atskirai rodomos baigtos ir neprisijungusios sesijos.\n\nAtidaręs sesiją rasi jos pavadinimą, pradžios laiką, pratimų skaičių, ankstesnę treniruotę, kliento tikslą ir programą. Iš ten pat gali išsiųsti žinutę ar atverti profilį.\n\nLive nerodo svorių, pakartojimų ir serijų realiuoju laiku. Jie atsiranda treniruotės įraše sesijai pasibaigus.\n\nNedidelis būsenos valdiklis matomas ir Coach antraštėje.',
+      highlights: [
+        'Vykstančios ir baigtos sesijos',
+        'Sesijos trukmė ir paskutinis ryšys',
+        'Kliento tikslas ir ankstesnė sesija',
+        'Žinutės tiesiai iš Live',
+        'Būsenos valdiklis Coach lange',
+      ],
+    },
+    'coach-signals': {
+      name: 'Signalai',
+      tagline: 'Pastebėk svarbius pokyčius',
+      desc: 'Rask progreso sustojimą, praleistas treniruotes ir staigius krūvio šuolius su aiškiais duomenimis ir veiksmų pasirinkimais.',
+      about:
+        'Klientas praleido kelias treniruotes, rezultatas nebeauga ar savaitės krūvis staiga pašoko. Signals iškelia tokius pokyčius ir pateikia juos pagrindžiančius skaičius. Gali greičiau nuspręsti, kurią situaciją reikia peržiūrėti.\n\nSistema pastebi užstrigusį progresą, ritmo pokyčius, traumų apribojimus, krūvio šuolius, rekordus ir pasirengimą didinti svorį. Treniruoklio pakeitimas vertinamas atskirai, kad nebūtų klaidingų įspėjimų.\n\nKiekvienas signalas turi paaiškinimą, High, Medium arba Low patikimumo lygį ir susijusių sesijų ar savaičių duomenis. Detalumas priklauso nuo kliento suteikto leidimo.\n\nAtidaryk signalą ir pasirink: padidinti svorį, pakeisti pratimą, suplanuoti lengvesnes savaites, palaukti arba atmesti. All signals turi filtrus pagal klientą ir būseną.\n\nPo 14 dienų Spotter parodo, ar pasirinktas veiksmas padėjo.',
+      highlights: [
+        'Progreso, ritmo ir krūvio pokyčiai',
+        'Duomenys ir patikimumo lygis',
+        'Siūlomi tolesni veiksmai',
+        'Filtrai pagal klientą ir būseną',
+        'Sprendimo įvertinimas po 14 dienų',
+      ],
+    },
+    'coach-notes': {
+      name: 'Užrašai',
+      tagline: 'Pastabos su visu kontekstu',
+      desc: 'Pridėk pastabas prie žinučių, pratimų ar sprendimų ir greitai jas rask neieškodamas visame pokalbyje.',
+      about:
+        'Svarbi detalė iš pokalbio gali praversti tik po mėnesio. Notes laiko ją prie tinkamo kliento, o prireikus ir prie konkrečios žinutės, pratimo ar sprendimo. Paieška padeda grįžti prie pastabos kartu su visu kontekstu.\n\nSukurk General pastabą arba pridėk ją prie žinutės, atviro sprendimo, dienos ar pratimo. Jump to message atveria susijusį pokalbį tiksliai reikiamoje vietoje.\n\nPagal numatymą visos pastabos yra Private. Pasirink Share with the client, ir klientas matys jas My trainer skiltyje, tačiau negalės taisyti ar trinti. Bendrinimą gali bet kada atšaukti.\n\nPaieška tikrina ir tekstą, ir kontekstą. Naujausi įrašai rodomi pirmi, pakeisti įrašai pažymimi.\n\nTrinant pastabą matysi, ar klientas jau buvo ją perskaitęs.',
+      highlights: [
+        'Pastabos prie žinučių ir pratimų',
+        'Privatumas pagal numatymą',
+        'Bendrinimas tik skaitymui',
+        'Paieška tekste ir kontekste',
+        'Grįžimas prie susijusio pokalbio',
+      ],
+    },
+    'coach-team': {
+      name: 'Komanda',
+      tagline: 'Komanda ir aiškios prieigos',
+      desc: 'Kviesk trenerius ir vadybininkus, valdyk jų prieigą ir matyk atliktus veiksmus vienoje vietoje.',
+      about:
+        'Priėmus naują trenerį ar vadybininką, jam nebūtina rodyti visų klientų duomenų. Team leidžia pakviesti kolegas, suteikti konkrečias teises ir patikrinti, kas ką pakeitė. Kiekvienas gali matyti tik savo darbui reikalingus duomenis.\n\nSukurk vienkartinę kvietimo nuorodą, galiojančią septynias dienas. Ją galima susieti su el. pašto adresu, stebėti laukiančius kvietimus ar nuorodą atšaukti.\n\nTreneriai dirba su savo klientais. Vadybininkai tvarko tvarkaraščius ir klientų sąrašą, bet nemato treniruočių, sveikatos duomenų, pastabų ar pokalbių. Teisės aprašytos What each role can do.\n\nTeam rodo narius ir laukiančius kvietimus. Activity log pateikia veiksmų istoriją ir jų autorius.\n\nPašalinus narį, prieiga uždaroma visuose įrenginiuose, o ankstesni veiksmai išlieka žurnale.',
+      highlights: [
+        'Vienkartiniai septynių dienų kvietimai',
+        'Skirtingos narių prieigos teisės',
+        'Nariai ir laukiantys kvietimai',
+        'Veiksmų istorija Activity log',
+        'Prieigos atšaukimas visuose įrenginiuose',
+      ],
+    },
+    apex: {
+      name: 'Apex',
+      tagline: 'Daugiau tikslų kiekvienai sesijai',
+      desc: 'Paversk užregistruotas treniruotes iššūkiais, jėgos reitingais ir pasiekimais, kurių pažangą gali stebėti.',
+      about:
+        'Apex suteikia konkrečių tikslų tarp įprastų treniruočių. Išbandyk iššūkius, palygink rezultatus su jėgos standartais ir kaupk pasiekimus. Visa tai remiasi įrašais, kuriuos jau turi Spotter, todėl nieko nereikia registruoti du kartus.\n\nChallenges leidžia siekti sesijų, serijų, tonažo, rekordų, kardio, treniruočių serijos ar konkretaus svorio. Matysi pažangą, likusį laiką ir reikiamą dienos tempą. Suplanuotas poilsis nenutraukia serijos.\n\nRanks palygina apskaičiuotą maksimumą su tavo svorio kategorijos standartais. Stebėk lygį nuo Beginner iki Elite ir sužinok, kiek trūksta iki kito laiptelio.\n\nAchievements apima ne tik rekordus, bet ir treniruočių laiką, reguliarumą, pratimų įvairovę bei užbaigtas sesijas. Feed surenka naujus pasiekimus.\n\nMastery atskirai vertina, kaip treniruojiesi: jėgą, nuoseklumą, patirtį ir praktikos įpročius. Jis parodo, kur galima pagerinti raumenų balansą, apšilimą ar poilsį. Kiekvienas vertinimas rodo, kas svarbu kitam lygiui pasiekti.\n\nKiekvieną Apex dalį gali įjungti ar išjungti per Configure.',
+      highlights: [
+        'Iššūkiai su terminais ir pažanga',
+        'Jėgos reitingai pagal svorio kategoriją',
+        'Pasiekimai už rekordus ir reguliarumą',
+        'Mastery vertina treniravimosi įpročius',
+        'Atskiri jungikliai Configure',
+      ],
+    },
     mastery: { name: 'Meistriškumas', desc: 'Įgūdžių lygiai ir ilgalaikė pažanga.' },
     'apex-challenges': { name: 'Iššūkiai', desc: 'Savaitiniai tikslai vieniems ar su kitais.' },
     'apex-ranks': { name: 'Reitingai', desc: 'Kur jūsų pratimai palyginti su jėgos standartais.' },
     'apex-awards': { name: 'Apdovanojimai', desc: 'Pasiekimai, atrakinami treniruojantis.' },
     'theme-brass-glass': {
       name: 'Brass Glass',
-      desc: 'Stiklinė išvaizda, kuria programa rodoma pagal numatytuosius nustatymus.',
+      tagline: 'Matinis stiklas ir šiltas žalvaris',
+      desc: 'Permatomos plokštės, švelnus suliejimas ir žalvario akcentai suteikia Spotter santūrią išvaizdą.',
+      about:
+        'Brass Glass naudoja tamsias permatomas plokštes, pro kurias subtiliai matyti fonas. Šviesūs kraštai atskiria elementus, o šiltas žalvario atspalvis žymi aktyvius skirtukus, mygtukus, pažangos žiedus ir svarbiausius skaičius.\n\nTas pats stiklo efektas naudojamas kortelėse, išskleidžiamuose languose, naršymo juostoje ir apačios skirtukuose. Skirtingi ekranai atrodo nuosekliai, o pagrindiniai veiksmai išlieka aiškūs.\n\nAntraštės ir prislopinti paaiškinimai turi aiškią hierarchiją. Yra ir šviesi versija su blyškesniu stiklu bei tuo pačiu žalvario akcentu.\n\nEkranų išdėstymas nesikeičia.',
+      highlights: [
+        'Permatomos, švelniai sulietos plokštės',
+        'Šilti žalvario akcentai',
+        'Nuoseklios kortelės ir naršymas',
+        'Aiškus teksto kontrastas',
+        'Tamsi ir šviesi versijos',
+      ],
     },
-    'theme-cyberpunk': { name: 'Cyberpunk', desc: 'Neoninė išvaizda su aštriais kampais.' },
+    'theme-cyberpunk': {
+      name: 'Cyberpunk',
+      tagline: 'Neono linijos tamsiame ekrane',
+      desc: 'Beveik juodas fonas, ryškiai žali akcentai ir kampuotos formos suteikia Spotter naktinio miesto nuotaiką.',
+      about:
+        'Cyberpunk pakeičia suapvalintus kampus aštriomis, nukirstomis formomis. Beveik juodi paviršiai derinami su elektrine neonine žaluma, kuri išryškina aktyvius mygtukus, skirtukus ir pažangos rodiklius. Visame ekrane.\n\nKortelės, mygtukai ir žymos turi plonus švytinčius kontūrus. Už skydelių matomas tamsus miesto fonas, tačiau tekstas ir valdikliai lieka gerai pastebimi.\n\nNeoninis akcentas naudojamas pasirinkimuose ir pažangos žieduose. Tema veikia tik tamsiu režimu, todėl perjungimas į dienos režimą jos nepakeičia.\n\nVisi ekranai ir jų funkcijos lieka tie patys.',
+      highlights: [
+        'Beveik juodas fonas ir žalias neonas',
+        'Aštrūs, nukirsti kampai',
+        'Ploni švytintys kontūrai',
+        'Tamsaus miesto fonas',
+        'Tik tamsus režimas',
+      ],
+    },
     'holiday-themes': {
       name: 'Šventinės temos',
       desc: 'Helovinas, Kalėdos ir kitos: įsijungia pačios prieš šventę.',
+      about:
+        'Halloween suteikia Spotter naktinį vaizdą: mėnulį, belapius medžius, šikšnosparnius ir žemai tvyrantį rūką. Tamsiai raudoni akcentai išskiria svarbius valdiklius, o antraštės su serifais primena senos pasakų knygos šriftą.\n\nFonas užpildo visą telefono ar kompiuterio ekraną. Keičiasi ir sąsajos spalvų paletė, kad visi puslapiai atitiktų tą pačią nuotaiką.\n\nTema automatiškai įsijungia apie Halloween ir išsijungia šventei pasibaigus. Nereikia jos įjungti ar grąžinti rankiniu būdu.\n\nĮprasti ekranai bei funkcijos lieka vietoje.\n\nChristmas papuošia Spotter sodria žaluma ir šiltomis auksinėmis švieselėmis fone. Švelnūs rausvi akcentai išskiria mygtukus ir pasirinktus elementus, tačiau nekeičia pažįstamo išdėstymo ar naudojimo tvarkos.\n\nAntraštėms naudojamas pasviręs šriftas su serifais. Fonas dengia visą telefono ar kompiuterio ekraną, o kortelių ir langų spalvos priderintos prie bendros šventinės paletės.\n\nTema pati įsijungia per Kalėdas ir išsijungia po švenčių, tad nereikia ieškoti nustatymų ar ranka grąžinti ankstesnės išvaizdos.\n\nVisos įprastos funkcijos lieka pasiekiamos.',
     },
     calls: { name: 'Skambučiai', desc: 'Balso ir vaizdo skambučiai su treneriu ar klientais.' },
     nutrition: { name: 'Mityba', desc: 'Maisto ir makroelementų sekimas.' },

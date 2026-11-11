@@ -49,3 +49,12 @@
   outline: 2px solid var(--acc);
   outline-offset: 2px;
 }
+
+/* Two lines at most; the full text lives on the item page. */
+.sk-row-desc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}

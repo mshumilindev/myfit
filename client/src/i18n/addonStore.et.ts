@@ -100,6 +100,8 @@ export const addonStoreEt: typeof addonStoreEn = {
   needs: (name: string) => `Vajab: ${name}`,
   usesOn: (name: string) => `Kasutab: ${name}, juba sees`,
   about: 'Kirjeldus',
+  showMore: 'Näita rohkem',
+  showLess: 'Näita vähem',
   addsHead: 'Mida see Spotterisse lisab',
   backTo: (name: string) => `${name}`,
   browseCats: 'Või vali kategooria',
@@ -144,7 +146,20 @@ export const addonStoreEt: typeof addonStoreEn = {
   allAdded: 'Kõik on lisatud',
   nothingElse: 'Praegu pole midagi muud paigaldada.',
   items: {
-    health: { name: 'Tervis', desc: 'Vigastused, tsükkel, toidulisandid ja muu ühes kohas.' },
+    health: {
+      name: 'Tervis',
+      tagline: 'Treening, mis arvestab enesetunnet',
+      desc: 'Märgi üles vigastused, haigused, puhkepäevad ja harjumused, et Spotter saaks neid treeningu planeerimisel arvestada.',
+      about:
+        'Märgi üles vigastus, pikem paus või püsiv tervisemure ning Spotter saab sellega treeningu planeerimisel arvestada. Health hõlmab ka tsükli, toidulisandite ja harjumuste jälgimist. Iga osa saad eraldi sisse või välja lülitada.\n\nInjury log juhendab koormuse juurde naasmist neljas etapis: Protect, Reintroduce, Rebuild ja Return to full. Edasi liigutakse enesetunde kontrolli põhjal, mitte lihtsalt kuupäeva järgi. Endiste tööraskusteni jõutakse sammhaaval.\n\nRest days võimaldab puhkust ette planeerida ning Unwell märkida haiguspäevad. Treeningplaan jääb pausile, treeningute järjepidevus säilib ja naasmisel saab koormust kergendada.\n\nLong-term conditions aitab arvestada piirangutega. Cycle jälgib tsüklit ning Supplements, Nicotine ja Alcohol lisavad taastumishinnangutele vajalikku taustainfot.\n\nSina otsustad, mida jälgida ja milliseid andmeid treeneriga jagada.',
+      highlights: [
+        'Neli etappi vigastusest naasmiseks',
+        'Puhkus ilma treeninguseeriat kaotamata',
+        'Koormuse kohandamine piirangutega',
+        'Tsükkel, toidulisandid ja harjumused',
+        'Privaatsuse ja jagamise sätted',
+      ],
+    },
     'injury-log': { name: 'Vigastuste logi', desc: 'Märgi vigastused ja nende paranemine.' },
     cycle: { name: 'Tsükkel', desc: 'Märgi tsükkel ja vaata, kuidas see treeninguga sobib.' },
     rest: { name: 'Puhkus', desc: 'Täieliku ja aktiivse puhkuse päevad.' },
@@ -156,43 +171,225 @@ export const addonStoreEt: typeof addonStoreEn = {
     supplements: { name: 'Toidulisandid', desc: 'Nimekiri sellest, mida tarvitad ja millal.' },
     nicotine: { name: 'Nikotiin', desc: 'Märgi nikotiin, et näha mõju taastumisele.' },
     alcohol: { name: 'Alkohol', desc: 'Märgi alkohol, et näha mõju taastumisele.' },
-    sleep: { name: 'Uni', desc: 'Märgi uni ja vaata, kui puhanud oled.' },
+    sleep: {
+      name: 'Uni',
+      tagline: 'Uni kuulub ka treeningplaani',
+      desc: 'Pane kirja ööuni ja uinakud, jälgi unerütmi ning lase Spotteril puhkamist taastumise hindamisel arvestada.',
+      about:
+        'Sleep näitab, kui kaua sa magasid, kuidas oma und hindad ja kui korrapärane on sinu unerütm. Spotter kasutab neid andmeid treeningvalmiduse ja taastumise hinnangutes. Öid saad salvestada käsitsi või kasutada Auto-log funktsiooni.\n\nEnne magamaminekut vali Start sleep ja ärgates I’m awake. Saad lisada ununenud öö, märkida uinaku, une ajutiselt peatada ning hinnata seda valikutega Restless, OK või Good.\n\nMäära tavapärane magamamineku- ja ärkamisaeg kogu nädalaks või igaks nädalapäevaks eraldi. Auto-log kasutab seda kava või varasemate kirjete põhjal õpitud rütmi.\n\nSleep hub näitab viimast 14 ööd, keskmist uneaega, magamamineku järjepidevust ja eesmärgini jõudnud öid. Your rhythm by weekday toob esile nädalapäevade erinevused.\n\nNight mode, Auto-dim ja Wind down muudavad rakenduse õhtul vähem eredaks.',
+      highlights: [
+        'Käsitsi salvestamine või Auto-log',
+        'Uinakud ja une kvaliteedi hinnang',
+        '14 öö ajalugu ja korrapärasus',
+        'Erinev ajakava igaks nädalapäevaks',
+        'Uni taastumise hinnangutes',
+      ],
+    },
     activities: {
       name: 'Tegevused',
-      desc: 'Märgi sport, kardio ja taastumine väljaspool jõusaali.',
+      tagline: 'Arvesta ka jõusaalivälist liikumist',
+      desc: 'Jooksmine, sport ja taastavad tegevused lisanduvad nädala koormusele, mitte ei jää jõutreeningust eraldi.',
+      about:
+        'Esmaspäevane jooks või nädalavahetuse pallimäng mõjutab järgmist treeningut. Activities salvestab jõusaalivälise liikumise ning arvestab seda väsimuse ja taastumise hinnangutes. Nii ei piirdu nädala koormus ainult raskuste tõstmisega.\n\nVali 34 tegevuse hulgast rühmades Conditioning, Recovery ja Sports. Käivita taimer või lisa tegevus hiljem koos kestuse, pingutuse ja vajadusel läbitud vahemaaga.\n\nSpotter hindab kulutatud kaloreid tegevuse, aja, pingutuse ja kehakaalu põhjal. Vastupidavustreening suurendab koormust, taastavad tegevused lähevad arvesse teisiti.\n\nActivities märkab korduvaid harjumusi ja võib pakkuda tegevuse lisamist nädala kavasse. Soovitusi saab tagasi lükata või välja lülitada.\n\nActivities trends võrdleb viimast nelja nädalat ning näitab aktiivset aega, lemmiktegevusi ja muutusi.',
+      highlights: [
+        '34 tegevus- ja spordiliiki',
+        'Taimer või hilisem sissekanne',
+        'Mõju väsimusele ja taastumisele',
+        'Soovitused sinu harjumuste järgi',
+        'Nelja nädala võrdlus',
+      ],
     },
     'home-sets': {
       name: 'Kodused treeningud',
-      desc: 'Koosta kodused komplektid oma harjutustest ja tee neid kus iganes.',
+      tagline: 'Lühitreening alati käepärast',
+      desc: 'Koosta kodu või reisi jaoks harjutuste komplektid, käivita need ühe puudutusega ja säilita tulemused treeninguajaloos.',
+      about:
+        'Kätekõverduste, lõuatõmmete või lühikese kerelihaste treeningu jaoks pole alati jõusaali vaja. Home workouts laseb salvestada valmis harjutuste komplekte ja need kiiresti käivitada. Tulemused jäävad ühisesse History vaatesse.\n\nKoosta Sets jaotises komplekt olemasolevatest harjutustest või enda loodud liigutustest. Määra järjekord, nimi ja mõõtmisviis: Reps, Hold või Time. Võid komplekti salvestada või teha ühekordse trenni.\n\nPlay käivitab tuttava seerialogi, puhkeaja taimeri ja koormuse arvestuse. Staatiliste harjutuste jaoks on Start hold ja Release stopper, mis näitab ka eelmist tulemust.\n\nMoves sisaldab fotode ja juhistega harjutusi ning sinu lisatud liigutusi. Sets näitab, millal viimati komplekti tegid.\n\nKomplekte saad muuta või kustutada; juba tehtud treeningud jäävad History vaatesse alles.',
+      highlights: [
+        'Valmis komplekt ühe puudutusega',
+        'Kataloogi harjutused ja enda liigutused',
+        'Kordused, aeg ja staatilised hoidud',
+        'Tuttav seerialogi ja puhkeaja taimer',
+        'Tulemused säilivad History vaates',
+      ],
     },
     goals: {
       name: 'Eesmärgid',
-      desc: 'Vali kehatüüp ja kasvatatavad lihased; treeningud kohanduvad.',
+      tagline: 'Selged eesmärgid treeningkavas',
+      desc: 'Vali soovitud kehakuju ning otsusta, millised lihased vajavad rohkem, vähem või sama palju tähelepanu.',
+      about:
+        'Treeningkava ütleb, mida täna teha. Goals aitab määrata, millise tulemuse poole liigud: soovitud kehakuju, tähtsamad lihasgrupid ja mõõdetavad eesmärgid. Spotter arvestab neid valikuid harjutuste ja koormuse soovitamisel.\n\nPhysique target pakub kaheksat suunda, sealhulgas V-Taper, Classic, Hourglass ja Strong Athlete. Igaühel on algsed lihaste prioriteedid, mida saad ise muuta.\n\nFocus this block jaotises märgi lihased või nende väiksemad osad valikutega Grow, Hold või Ease. Valik mõjutab nädala koormuseesmärke ja harjutuste soovitusi. Kokkuvõte näitab, mis muutus.\n\nLong-term goals võimaldab sisestada algse, praeguse ja soovitud näitaja ning ajavahemiku kuudes. Eesmärgiga seotud lihased saavad suurema tähelepanu.\n\nPrograms, Auto session ja treeningu koostaja kasutavad sinu eelistusi. Treeningploki kokkuvõte näitab tehtud tööd.',
+      highlights: [
+        'Kaheksa kehakuju suunda',
+        'Grow, Hold või Ease lihasgruppidele',
+        'Täpsemad lihaspiirkondade valikud',
+        'Mõõdetavad pikaajalised eesmärgid',
+        'Harjutused vastavalt sinu fookusele',
+      ],
     },
     playbook: {
       name: 'Playbook',
-      desc: 'Sinu tavapärased treeningud nädalapäeva järgi, valmis kordamiseks.',
+      tagline: 'Sinu tuttavad treeningud on valmis',
+      desc: 'Spotter õpib korduvatest treeningutest ning loob harjutuste, seeriate ja raskustega valmis kavad.',
+      about:
+        'Kui teed sageli sarnaseid treeningpäevi, ei pea sa neid iga kord otsast koostama. Playbook õpib lõpetatud trennidest harjutuste järjekorra, tavapärase seeriate arvu, korduste vahemiku ja kasutatud raskused.\n\nPärast mitut sarnast treeningut tekib päeva play, näiteks Chest 2 või tuvastatud push, pull või legs. Enamasti korduvad harjutused saavad märgise Staple.\n\nVajuta Start, et avada valmis treening, koostada selle põhjal oma versioon või korrata täpselt varasemat sessiooni. Harjutused, seeriad ja sihtraskused on juba täidetud.\n\nMuscle mix näitab, millised lihased koormust saavad. Ideas pakub puuduvaid lihasgruppe, ununenud lemmikharjutusi ja vaheldust harjutusele, mille areng on seisma jäänud.\n\nIga play juures näed ka, mitme treeningu põhjal see loodi.',
+      highlights: [
+        'Valmis kavad sinu treeninguajaloost',
+        'Tavaline harjutuste järjestus ja raskused',
+        'Alusta play või korda vana trenni',
+        'Püsiharjutused märgisega Staple',
+        'Ideas puudujääkide ja seisaku jaoks',
+      ],
     },
-    atlas: { name: 'Atlas', desc: 'Küsi tehisintellekti abilisest oma treeningute kohta.' },
-    gym: { name: 'Gym', desc: 'Treeningud, programmid ja edusammud: Spotteri treeningupool.' },
-    coach: { name: 'Coach', desc: 'Kliendid, plaanid ja ajakava ühes kohas.' },
-    'coach-live': { name: 'Live', desc: 'Jälgi klientide treeninguid reaalajas.' },
-    'coach-signals': { name: 'Signaalid', desc: 'Klientide väsimuse ja valmisoleku signaalid.' },
-    'coach-notes': { name: 'Märkmed', desc: 'Privaatsed märkmed iga kliendi kohta.' },
-    'coach-team': { name: 'Meeskond', desc: 'Sinu meeskond, selle tegevus ja rollid.' },
-    apex: { name: 'Apex', desc: 'Spotteri mänguline pool: väljakutsed, tasemed ja auhinnad.' },
+    atlas: {
+      name: 'Atlas',
+      tagline: 'Vastused sinu treeninguandmetest',
+      desc: 'Küsi raskuste, arengu või puhkuse kohta, saa trennijärgset tagasisidet ja tee muudatusi vestluses.',
+      about:
+        'Millist raskust järgmisel korral kasutada? Miks edasiminek peatus? Küsi Atlaselt. Ta lähtub sinu salvestatud seeriatest, koormusest, ajakavast ja taastumisest, nii et vastus puudutab sinu tegelikke tulemusi, mitte üldist nõuannet.\n\nChat võimaldab küsida tehnika, koormuse, harjutuste vahetamise ja une kohta või võrrelda kahte perioodi. Atlas oskab selgitada ka soovituse põhjust ning täpsustab ebaselget küsimust.\n\nNotes toob ilma küsimata esile uued rekordid, vahele jäänud trennid, liiga lühikesed pausid, seisaku ja nädala kokkuvõtte.\n\nVestluses saad treeningut ümber tõsta, harjutust muuta, puhkust alustada või kehakaalu kirja panna. Atlas näitab muudatust enne sinu kinnitust.\n\nVali sobiv toon: Bro, Neutral või Savage. Mälu, teavitusi ja AI kasutamise nõusolekut saad ise juhtida.',
+      highlights: [
+        'Vastused sinu enda treeningupäevikust',
+        'Märkused rekordite ja seisaku kohta',
+        'Muudatused alles pärast kinnitust',
+        'Kolm tooni: Bro, Neutral ja Savage',
+        'Mälu ja teavituste sätted',
+      ],
+    },
+    gym: {
+      name: 'Gym',
+      tagline: 'Treening ja tulemused ühes kohas',
+      desc: 'Vaata tänast kava, alusta treeningut sekunditega ja säilita iga seeria koos kogu treeninguajalooga.',
+      about:
+        'Ava Gym ja näed kohe, mida täna treenid, kui palju nädala plaanist on tehtud ning millised harjutused ees ootavad. Saad alustada plaanitud treeningut, luua tühja sessiooni või lasta Auto session funktsioonil kava eesmärgi ja taastumise järgi kokku panna.\n\nToday näitab päeva nime, programmi, nädala edenemist ja harjutuste loendit. Nädalariba eristab treeningu-, puhke- ja tänast päeva. Treeneriga töötades näed siin ka järgmist kohtumist ning aja muutmise taotlusi.\n\nTreeningu ajal märgi raskused ja kordused lihtsate nuppudega. Jälgi taimerit, seeriate arvu ja kogutonaaži. Eelmised tulemused ning soovitatud raskus aitavad valida järgmist koormust. Lisa soojendusseeriaid ja pingutuse hinnang.\n\nHarjutuste kogus on 874 liigutust, peaaegu kõigil fotod ja juhised. Filtreeri lihase, varustuse, taseme või harjutuse tüübi järgi. Oma harjutused salvesta My exercises alla.\n\nHistory koondab tehtud treeningud. Overview, Progress ja Programs hoiavad kava ning tulemused käepärast. Gyms lubab salvestada spordisaale ja alustada treeningut valitud kohas.\n\nChat hoiab treeneriga suhtluse ja kohtumiste muutmise samas rakenduses.',
+      highlights: [
+        'Tänane kava ja nädala edenemine',
+        'Plaanitud või Auto session treening',
+        'Seeriad, raskused ja koormuse soovitused',
+        '874 harjutuse kogu',
+        'History, Progress ja vestlus treeneriga',
+      ],
+    },
+    coach: {
+      name: 'Coach',
+      tagline: 'Kliendid ja ajakava ühes kohas',
+      desc: 'Halda kliente, programme ja kohtumisi koos ning alusta päeva nendest otsustest, mis vajavad praegu tähelepanu.',
+      about:
+        'Coach koondab personaaltreeneri igapäevatöö: kliendid, programmid, kohtumised ja sõnumid. Ava Agenda, et näha kohe tähelepanu vajavaid soove. Sealt jõuad sobiva kliendi, kava või vestluse juurde. Kõik on samas vaates.\n\nAgenda näitab, kes soovib kohtumist muuta, millise sessiooniga on tegu ja millist uut aega pakutakse. Kinnita või lükka tagasi ilma sõnumeid läbi otsimata.\n\nClients kuvab kõigi klientide nimekirja. Profiilis näed viimaseid trenne ning märget, kas klient püsib kavas. Samast vaatest saad kutsuda uusi kliente.\n\nSchedule näitab nädala treeninguid tunniplaanina. Tõsta kohtumine ümber, tühista see või märgi toimunuks või vahelejäänuks, et ajalugu jääks õigeks. Iga kohtumise olek jääb alles, nii et saad hiljem vaadata, millised sessioonid päriselt toimusid ja millised ära jäid.\n\nPrograms võimaldab luua programme ja need klientidele määrata. Trenni alustades näevad nad sinu seatud harjutuse eesmärki, näiteks 3 × 6. Kliendi vaates on eesmärgid näha juba enne iga harjutuse alustamist, seega ei pea neid eraldi sõnumiga saatma.\n\nChat hoiab vestlused ja aja muutmise taotlused koos.',
+      highlights: [
+        'Agenda otsustamist vajavate soovidega',
+        'Clients ja hiljutised treeningud',
+        "Nädala tunniplaan Schedule'is",
+        'Programmide loomine ja määramine',
+        'Chat ja kohtumiste ümbertõstmine',
+      ],
+    },
+    'coach-live': {
+      name: 'Live',
+      tagline: 'Vaata, kes praegu treenib',
+      desc: 'Näed pooleliolevaid, lõpetatud ja võrguühenduseta klientide treeninguid, nende aega ning olulisi üksikasju.',
+      about:
+        'Kui kliendid treenivad eri aegadel, ei pea sa kõigilt eraldi seisundit küsima. Live näitab, kes on alustanud, kes lõpetanud ja kelle telefon on võrguühenduseta. Training now koondab kõik treeningute olekud ühte nimekirja.\n\nPoolelioleva treeningu juures näed algusest möödunud aega, jõusaali ja viimast telefoniga ühenduse loomist. Lõpetatud ja võrguühenduseta sessioonid on eraldi märgitud.\n\nAva treening, et vaadata selle nime, algusaega, harjutuste arvu, eelmist treeningut ning kliendi eesmärki ja programmi. Samast kohast saad saata sõnumi või avada profiili.\n\nLive ei kuva treeningu ajal seeriaid, raskusi ega kordusi. Need ilmuvad pärast lõpetamist treeninguandmetesse.\n\nVäike olekuvidin asub ka Coach päises.',
+      highlights: [
+        'Pooleliolevad ja lõpetatud trennid',
+        'Treeningu kestus ja viimane ühendus',
+        'Kliendi eesmärk ja eelmine sessioon',
+        'Sõnumid otse Live vaatest',
+        'Olekute vidin Coach päises',
+      ],
+    },
+    'coach-signals': {
+      name: 'Signaalid',
+      tagline: 'Märka muutusi, mis vajavad otsust',
+      desc: 'Leia arenguseisakud, vahele jäänud trennid ja järsud koormuse muutused koos andmete ja valikutega.',
+      about:
+        'Klient jätab trenne vahele, tõsteraskus ei kasva või nädalane koormus hüppab järsult üles. Signals toob sellised muutused esile koos arvudega, millel tähelepanek põhineb. Nii saad kiiremini otsustada, mida tuleb kontrollida.\n\nSüsteem märkab arenguseisakut, rütmi muutust, vigastuspiirangut, koormuse hüpet, uut rekordit ja valmisolekut raskust tõsta. Masina vahetust hinnatakse eraldi, et erinevaid näitajaid ei võrreldaks ekslikult.\n\nIgal signaalil on selgitus, kindlustase High, Medium või Low ning seotud treeningute või nädalate andmed. Üksikasjad sõltuvad kliendi andmete jagamise valikust.\n\nAva signaal, et valida järgmine samm: suurenda raskust, vaheta harjutus, planeeri kergemaid nädalaid, oota või lükka märguanne tagasi. All signals võimaldab filtreerida kliendi ja oleku järgi.\n\n14 päeva pärast näitab Spotter, kas otsus aitas.',
+      highlights: [
+        'Seisakud, puudumised ja koormushüpped',
+        'Selgitused ja kindlustase',
+        'Valmis järgmiste sammude valikud',
+        'Filtrid kliendi ja oleku järgi',
+        'Otsuse mõju 14 päeva pärast',
+      ],
+    },
+    'coach-notes': {
+      name: 'Märkmed',
+      tagline: 'Märkmed koos õige taustaga',
+      desc: 'Lisa tähelepanekud sõnumite, harjutuste ja otsuste juurde ning leia need hiljem ilma vestlusi läbi otsimata.',
+      about:
+        'Vestluses mainitud oluline detail võib vajalikuks osutuda alles nädalaid hiljem. Notes hoiab märkme õige kliendi ning soovi korral ka sõnumi, harjutuse või otsuse juures. Otsinguga leiad selle koos kontekstiga kiiresti üles.\n\nKoosta General märge või seo see sõnumi, avatud otsuse, päeva või harjutusega. Jump to message viib otse seotud vestluse õigesse kohta.\n\nKõik märkmed on vaikimisi Private. Share with the client näitab märget kliendile My trainer jaotises, kuid ta ei saa seda muuta ega kustutada. Jagamise saad igal ajal lõpetada.\n\nOtsing leiab nii märkme teksti kui ka seotud teema. Uuemad kirjed on eespool, muudetud kirjed saavad tähise.\n\nKustutamisel näed, kas klient on jagatud märget juba lugenud.',
+      highlights: [
+        'Märkmed sõnumite ja harjutuste juures',
+        'Vaikimisi privaatsed märkmed',
+        'Jagamine üksnes lugemiseks',
+        'Otsing teksti ja konteksti järgi',
+        'Hüpe seotud vestluse juurde',
+      ],
+    },
+    'coach-team': {
+      name: 'Meeskond',
+      tagline: 'Tiim ja ligipääsud on kontrolli all',
+      desc: 'Kutsu treenereid ja haldureid, määra ligipääsuõigused ning vaata tegevuste ajalugu ühest kohast.',
+      about:
+        'Uus treener või haldur ei pea nägema kõiki klientide andmeid. Team võimaldab kolleegid kutsuda, määrata neile kindlad õigused ja kontrollida, kes mida muutis. Iga inimene pääseb ligi ainult oma tööks vajalikule.\n\nLoo ühekordne kutselink, mis kehtib seitse päeva. Soovi korral seo see e-posti aadressiga, vaata ootel kutseid või tühista kasutamata link.\n\nTreenerid töötavad oma klientidega. Haldurid korraldavad ajakava ja klientide loendit, kuid ei näe treeninguid, terviseandmeid, märkmeid ega vestlusi. Õigusi selgitab What each role can do.\n\nTeam vaates on liikmed, viimased tegevused ja ootel kutsed. Activity log näitab, kes ja millal muudatusi tegi.\n\nLiikme eemaldamine lõpetab ligipääsu kõigis seadmetes, kuid varasemad tegevused jäävad ajalukku.',
+      highlights: [
+        'Ühekordsed seitsmepäevased kutsed',
+        'Eri ligipääsud treeneritele ja halduritele',
+        'Liikmed ja ootel kutsed',
+        'Activity log muudatuste ajalooga',
+        'Ligipääsu lõpetamine kõigis seadmetes',
+      ],
+    },
+    apex: {
+      name: 'Apex',
+      tagline: 'Iga treeninguga uus eesmärk',
+      desc: 'Muuda salvestatud treeningud väljakutseteks, jõutasemeteks ja saavutusteks, mille edenemist saad jälgida.',
+      about:
+        "Apex lisab tavapärastele trennidele konkreetsed eesmärgid. Võta vastu väljakutseid, võrdle tõstetulemusi jõunormidega ja kogu saavutusi. Kõik põhineb juba Spotterisse salvestatud treeningutel, nii et eraldi päevikut pole vaja.\n\nChallenges võimaldab seada eesmärgi seeriate, sessioonide, tonnaaži, rekordite, vastupidavuse või järjepidevuse järgi. Näed edenemist, jäänud aega ja vajalikku päevast tempot. Plaanitud puhkepäev ei katkesta seeriat.\n\nRanks võrdleb hinnangulist maksimumi sinu kaaluklassi jõunormidega. Jälgi tasemeid Beginnerist Elite'ini ning vaata, kui palju järgmise astmeni puudu jääb.\n\nAchievements tunnustab lisaks rekorditele treeninguaega, järjepidevust, harjutuste mitmekesisust ja tehtud sessioone. Feed koondab uued verstapostid.\n\nMastery hindab eraldi treenimisviisi: jõudu, järjepidevust, kogemust ja harjumusi. See näitab, kus parandada lihaste tasakaalu, soojendust või taastumist. Näed ka seda, mis järgmise tasemeni jõudmist takistab.\n\nIga Apex osa saab Configure kaudu eraldi sisse või välja lülitada.",
+      highlights: [
+        'Väljakutsed tähtaja ja edenemisega',
+        'Jõutasemed kaaluklassi järgi',
+        'Saavutused rekordite ja püsivuse eest',
+        'Mastery hindab treeninguharjumusi',
+        "Osade eraldi juhtimine Configure'is",
+      ],
+    },
     mastery: { name: 'Meisterlikkus', desc: 'Oskuste tasemed ja pikaajaline areng.' },
     'apex-challenges': { name: 'Väljakutsed', desc: 'Iganädalased eesmärgid üksi või teistega.' },
     'apex-ranks': { name: 'Edetabelid', desc: 'Kus on su harjutused jõustandardite suhtes.' },
     'apex-awards': { name: 'Auhinnad', desc: 'Saavutused, mis avanevad treenides.' },
     'theme-brass-glass': {
       name: 'Brass Glass',
-      desc: 'Klaasilook, mida rakendus vaikimisi kannab.',
+      tagline: 'Soe messing ja matt klaas',
+      desc: 'Läbikumavad paneelid, õrn hägusus ja messingitooni rõhuasetused annavad Spotterile rahuliku ilme.',
+      about:
+        'Brass Glass kasutab tumedaid poolläbipaistvaid paneele, mille taga olev taust kumab õrnalt läbi. Õhukesed heledad servad eristavad elemente ning soe messingitoon tõstab esile aktiivsed vahekaardid, nupud ja olulised arvud.\n\nSama klaasiefekt kordub kaartidel, paneelidel, navigeerimisel ja alumisel vahekaardiribal. Nii näeb liides eri ekraanidel ühtlane välja ning põhilised toimingud jäävad kergesti leitavaks.\n\nPealkirjad ja tagasihoidlikumad sildid on selgelt eristatavad. Saad valida ka heleda versiooni, kus klaas on hele, kuid messingitoon jääb alles.\n\nEkraanide paigutus ei muutu.',
+      highlights: [
+        'Õrnalt hägused läbikumavad paneelid',
+        'Soojad messingitooni rõhud',
+        'Ühtsed kaardid ja navigeerimine',
+        'Selge teksti hierarhia',
+        'Tume ja hele versioon',
+      ],
     },
-    'theme-cyberpunk': { name: 'Cyberpunk', desc: 'Neoonilooks teravate nurkadega.' },
+    'theme-cyberpunk': {
+      name: 'Cyberpunk',
+      tagline: 'Neoonvalgus tumedal taustal',
+      desc: 'Peaaegu must liides, erkrohelised aktsendid ja teravad nurgad annavad Spotterile öise linna ilme.',
+      about:
+        'Cyberpunk asendab ümarad nurgad teravate lõigatud vormidega. Peaaegu mustad pinnad ja elektriline laimiroheline värv rõhutavad aktiivseid nuppe, vahekaarte ning edenemisnäitajaid, ilma et sisu kaoks tausta sisse.\n\nKaardid, nupud ja valikukastid saavad õhukese helendava piirjoone. Paneelide taga paistab tume linnavaade, kuid tekst ja juhtnupud jäävad esiplaanile.\n\nNeoonvärv kordub valitud elementidel ja edenemisrõngastel. Teema töötab ainult tumedas režiimis ning päevarežiimile lülitamine seda ei muuda.\n\nKõik tuttavad ekraanid ja funktsioonid jäävad alles.',
+      highlights: [
+        'Must taust ja erkroheline neoon',
+        'Teravad lõigatud nurgad',
+        'Õhukesed helendavad piirjooned',
+        'Tume linn taustapildil',
+        'Ainult tume režiim',
+      ],
+    },
     'holiday-themes': {
       name: 'Pühadeteemad',
       desc: 'Halloween, jõulud ja muud: lülituvad pühade ajal ise sisse.',
+      about:
+        'Halloween toob Spotterisse kuuga öise vaate, raagus puud, nahkhiired ja maadligi udu. Tumepunased aktsendid toovad esile olulised juhtnupud ning seriifidega pealkirjad meenutavad vana muinasjuturaamatu kirja.\n\nTaust katab kogu ekraani nii telefonis kui ka arvutis. Muutub ka liidese värvipalett, nii et eri vaated sobivad samasse kujundusse.\n\nTeema lülitub Halloweeni paiku automaatselt sisse ning pärast pühi välja. Sa ei pea varasemat kujundust ise taastama.\n\nEkraanide ülesehitus ja funktsioonid jäävad samaks.\n\nChristmas lisab Spotterile sügavrohelise värvipaleti ja soojad kuldsed valguslaigud taustal. Pehmed roosad aktsendid tõstavad esile aktiivsed nupud ning valikud, ilma et tuttavat ekraanipaigutust muudetaks.\n\nPealkirjad kasutavad kaldkirjas seriifidega fonti. Taust täidab kogu telefoni või arvuti ekraani ning kaartide värvid sobivad ülejäänud pühadekujundusega.\n\nTeema lülitub jõulude paiku ise sisse ja pärast pühi välja. Iga kord pole vaja sätteid muuta ega eelmist teemat käsitsi tagasi panna.\n\nKõik harjumuspärased tööriistad jäävad alles.',
     },
     calls: { name: 'Kõned', desc: 'Hääl- ja videokõned treeneri või klientidega.' },
     nutrition: { name: 'Toitumine', desc: 'Toidu ja makrode jälgimine.' },
