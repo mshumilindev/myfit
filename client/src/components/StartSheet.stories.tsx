@@ -5,6 +5,7 @@ import { addonsPref } from '../addons/enabledSet';
 import { StartSheet } from './StartSheet';
 import { atDay, seedStore, storyShell, workoutOn } from '../stories/fixtures';
 import { PageFrame } from '../stories/PageFrame';
+import { StartFab } from '../stories/StartFab';
 import type { Workout } from '../types';
 
 /**
@@ -16,9 +17,11 @@ const meta = {
   component: StartSheet,
   parameters: { layout: 'fullscreen' },
   decorators: [
-    (Story) => (
+    // The × above the open drawer is part of every picture of it (stories/StartFab.tsx, StartSheet.fab.test.tsx).
+    (Story, ctx) => (
       <PageFrame>
         <Story />
+        {ctx.args.inline ? <StartFab /> : null}
       </PageFrame>
     ),
   ],
@@ -114,6 +117,7 @@ export const LockedWhileLive: Story = {
 
 /** SPO-470: the drawer is up — the Start button has turned into a × above it and closes it; tap it to turn it back. */
 export const DrawerOpenFab: Story = {
+  args: { inline: false },
   parameters: { viewport: { defaultViewport: 'mobile1' } },
   render: () => <DrawerWithFab />,
   loaders: [
@@ -126,6 +130,7 @@ export const DrawerOpenFab: Story = {
 
 /** Same, with the Start drawer arriving after the button (the app's lazy chunk): the × must still be above it. */
 export const DrawerOpenFabLateDrawer: Story = {
+  args: { inline: false },
   parameters: { viewport: { defaultViewport: 'mobile1' } },
   render: () => <DrawerWithFab late />,
   loaders: [
