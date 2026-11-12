@@ -38,7 +38,6 @@ import { ArrowUp } from '@phosphor-icons/react/ArrowUp';
 import { Microphone } from '@phosphor-icons/react/Microphone';
 import { Lock } from '@phosphor-icons/react/Lock';
 import { BellRinging } from '@phosphor-icons/react/BellRinging';
-import { BellSlash } from '@phosphor-icons/react/BellSlash';
 import { Clock } from '@phosphor-icons/react/Clock';
 import { Info } from '@phosphor-icons/react/Info';
 import { Plus } from '@phosphor-icons/react/Plus';
@@ -257,7 +256,7 @@ import { exerciseDisplay, localizedExerciseName } from './data/exerciseNames';
  * FOUC, works offline). The <i> wrapper keeps the existing `i { font-size }`
  * CSS contract: the SVG is sized 1em.
  */
-const ICONS: Record<string, ComponentType<IconProps>> = {
+export const ICONS: Record<string, ComponentType<IconProps>> = {
   ...CALL_ICONS,
   'moon-stars': MoonStars,
   'android-logo': AndroidLogo,
@@ -279,7 +278,6 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   microphone: Microphone,
   lock: Lock,
   'bell-ringing': BellRinging,
-  'bell-slash': BellSlash,
   export: Export,
   'calendar-blank': CalendarBlank,
   'calendar-check': CalendarCheck,
@@ -483,9 +481,6 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   grains: Grains,
   'hourglass-medium': HourglassMedium,
 };
-
-/** Every icon name the kit can draw (the Planner icon picker lists them). */
-export const ICON_NAMES: string[] = Object.keys(ICONS).sort();
 
 export function Icon({
   name,

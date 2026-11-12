@@ -46,7 +46,9 @@ describe('Schedule: the free hours of the filtered client', () => {
     const read = vi.fn(async () => shared);
     configureAvailability({ read });
     const { container } = open('?who=c1&free=1');
-    await waitFor(() => expect(container.querySelectorAll('.sc-free').length).toBeGreaterThan(0));
+    await waitFor(() =>
+      expect(container.querySelectorAll('.sc-freeband').length).toBeGreaterThan(0),
+    );
     expect(read).toHaveBeenCalledWith('c1');
   });
 
@@ -55,11 +57,11 @@ describe('Schedule: the free hours of the filtered client', () => {
     configureAvailability({ read });
     const a = open('?who=c1');
     await waitFor(() => expect(a.container.querySelector('.sc-col')).toBeTruthy());
-    expect(a.container.querySelectorAll('.sc-free')).toHaveLength(0);
+    expect(a.container.querySelectorAll('.sc-freeband')).toHaveLength(0);
     a.unmount();
     const b = open('?free=1');
     await waitFor(() => expect(b.container.querySelector('.sc-col')).toBeTruthy());
-    expect(b.container.querySelectorAll('.sc-free')).toHaveLength(0);
+    expect(b.container.querySelectorAll('.sc-freeband')).toHaveLength(0);
     expect(read).not.toHaveBeenCalled();
   });
 
@@ -67,7 +69,7 @@ describe('Schedule: the free hours of the filtered client', () => {
     configureAvailability({ read: async () => ({ state: 'not-shared' }) });
     const a = open('?who=c1&free=1');
     await waitFor(() => expect(a.container.querySelector('.sc-col')).toBeTruthy());
-    expect(a.container.querySelectorAll('.sc-free')).toHaveLength(0);
+    expect(a.container.querySelectorAll('.sc-freeband')).toHaveLength(0);
     a.unmount();
     configureAvailability({
       read: async () => {
@@ -76,7 +78,7 @@ describe('Schedule: the free hours of the filtered client', () => {
     });
     const b = open('?who=c1&free=1');
     await waitFor(() => expect(b.container.querySelector('.sc-col')).toBeTruthy());
-    expect(b.container.querySelectorAll('.sc-free')).toHaveLength(0);
+    expect(b.container.querySelectorAll('.sc-freeband')).toHaveLength(0);
   });
 
   it("a manager's schedule never reads a client's availability (only the coach of record does)", async () => {

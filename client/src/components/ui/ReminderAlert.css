@@ -1,9 +1,21 @@
+/* Component sizes the shared scales have no step for (ADR 010: a token may hold a px value, a declaration may not). */
+:root {
+  --uira-px-72: 72px;
+  --uira-px-96: 96px;
+  --uira-px-60: 60px;
+  --uira-px-56: 56px;
+  --uira-px-420: 420px;
+  --uira-px-12: 12px;
+  --uira-px-32: 32px;
+  --uira-px-36: 36px;
+}
+
 .uira {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 72px 24px 36px;
+  gap: var(--s-20);
+  padding: var(--uira-px-72) var(--s-24) var(--s-36);
   text-align: center;
   min-height: 100%;
   box-sizing: border-box;
@@ -13,23 +25,23 @@
 .uira-rings {
   align-items: center;
   justify-content: center;
-  width: 96px;
-  height: 96px;
-  margin: 60px 0 56px;
+  width: var(--uira-px-96);
+  height: var(--uira-px-96);
+  margin: var(--uira-px-60) 0 var(--uira-px-56);
   color: var(--t-base);
 }
 .uira-ic {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-1);
   display: inline-flex;
-  font-size: 72px;
+  font-size: var(--uira-px-72);
   line-height: 1;
 }
 .uira-r {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 2px solid var(--t-base);
+  border: var(--bw-2) solid var(--t-base);
   opacity: 0;
   animation: uiraRipple 2.4s ease-out infinite;
 }
@@ -61,30 +73,30 @@
 .uira-t {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--s-6);
   align-items: center;
 }
 .uira-t b {
-  font-size: var(--fs-24, 24px);
+  font-size: var(--fs-24);
   line-height: 1.2;
 }
 .uira-k {
   display: inline-flex;
-  gap: 6px;
+  gap: var(--s-6);
   align-items: center;
-  font-size: var(--fs-13, 13px);
+  font-size: var(--fs-13);
   color: var(--color-text-muted);
 }
 .uira-snz {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--s-8);
   align-items: center;
   width: 100%;
 }
 .uira-act {
   display: flex;
-  gap: 36px;
+  gap: var(--s-36);
   margin-top: auto;
   width: 100%;
   justify-content: center;
@@ -98,25 +110,25 @@
 }
 .uira--card {
   flex-direction: row;
-  padding: 14px 16px;
+  padding: var(--s-14) var(--s-16);
   text-align: left;
-  gap: 14px;
+  gap: var(--s-14);
   min-height: 0;
-  width: 420px;
-  max-width: calc(100vw - 32px);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl, 20px);
+  width: var(--uira-px-420);
+  max-width: calc(100vw - var(--s-32));
+  border: var(--bw-1) solid var(--color-border);
+  border-radius: var(--radius-xl, var(--r-20));
   background: var(--color-surface);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 var(--uira-px-12) var(--uira-px-32) var(--c-000000-a180);
 }
 .uira--card .uira-rings {
   margin: 0;
-  width: 48px;
-  height: 48px;
+  width: var(--s-48);
+  height: var(--s-48);
   flex: none;
 }
 .uira--card .uira-ic {
-  font-size: 36px;
+  font-size: var(--uira-px-36);
 }
 .uira--card .uira-t {
   align-items: flex-start;
@@ -124,14 +136,14 @@
   min-width: 0;
 }
 .uira--card .uira-t b {
-  font-size: var(--fs-16, 16px);
+  font-size: var(--fs-16);
 }
 .uira--card .uira-k {
-  font-size: var(--fs-12, 12px);
+  font-size: var(--fs-12);
 }
 .uira--card .uira-act {
   margin: 0;
-  gap: 8px;
+  gap: var(--s-8);
   width: auto;
   flex: none;
 }

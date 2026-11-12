@@ -13,8 +13,11 @@ const h = vi.hoisted(() => ({
 vi.mock('../store', async (orig) => ({
   ...(await orig<typeof import('../store')>()),
   getStoreState: () => h.state,
-  republishCoachShare: h.republish,
   subscribeStore: (f: () => void) => (h.store.add(f), () => h.store.delete(f)),
+}));
+vi.mock('../trackerRt', async (orig) => ({
+  ...(await orig<typeof import('../trackerRt')>()),
+  trackerReady: h.republish,
 }));
 vi.mock('./sync', async (orig) => ({
   ...(await orig<typeof import('./sync')>()),
@@ -47,7 +50,8 @@ beforeEach(async () => {
 
 describe('plannerBoot: when the coach view is republished', () => {
   it('once at boot, and not again when nothing changed', () => {
-    expect(bootRepublishes).toBe(1);
+    // the boot announces the add-on is ready (1) and publishes the first view the same way (2)
+    expect(bootRepublishes).toBe(2);
     fire(h.planner);
     fire(h.store);
     expect(h.republish).not.toHaveBeenCalled();

@@ -1,3 +1,17 @@
+/* Component sizes the shared scales have no step for (ADR 010: a token may hold a px value, a declaration may not). */
+:root {
+  --uisg-px-150: 150px;
+  --uisg-px-230: 230px;
+  --uisg-px-15: 15px;
+  --uisg-px-13: 13px;
+  --uisg-px-12_5: 12.5px;
+  --uisg-px-9: 9px;
+  --uisg-px-7: 7px;
+  --uisg-px-2: 2px;
+  --uisg-px-1: 1px;
+  --uisg-px-n1: -1px;
+}
+
 .uisg {
   position: relative;
   display: flex;
@@ -12,19 +26,19 @@
 }
 .uisg-flag {
   position: absolute;
-  right: 14px;
-  bottom: calc(100% + 16px);
+  right: var(--s-14);
+  bottom: calc(100% + var(--s-16));
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--s-6);
   width: max-content;
-  min-width: 150px;
-  max-width: 230px;
-  padding: 12px 15px 13px;
+  min-width: var(--uisg-px-150);
+  max-width: var(--uisg-px-230);
+  padding: var(--s-12) var(--uisg-px-15) var(--uisg-px-13);
   border-radius: var(--radius-lg);
   background: var(--t-base);
-  color: var(--color-guide-on, #fff);
-  font-size: 12.5px;
+  color: var(--color-guide-on, var(--c-ffffff));
+  font-size: var(--uisg-px-12_5);
   font-weight: 600;
   line-height: 1.2;
 }
@@ -32,14 +46,14 @@
 .uisg-flag > span {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: var(--uisg-px-9);
   color: color-mix(in srgb, currentColor 88%, transparent);
 }
 .uisg-flag > span::before {
   content: '';
   flex: none;
-  width: 7px;
-  height: 7px;
+  width: var(--uisg-px-7);
+  height: var(--uisg-px-7);
   border-radius: 50%;
   background: color-mix(in srgb, currentColor 42%, transparent);
 }
@@ -49,23 +63,23 @@
 }
 .uisg-head + span::before {
   background: transparent;
-  box-shadow: inset 0 0 0 2px currentColor;
+  box-shadow: inset 0 0 0 var(--uisg-px-2) currentColor;
 }
 .uisg-flag::after {
   content: '';
   position: absolute;
-  right: 16px;
-  top: calc(100% - 1px);
-  width: 24px;
-  height: 14px;
+  right: var(--s-16);
+  top: calc(100% - var(--uisg-px-1));
+  width: var(--s-24);
+  height: var(--s-14);
   background: inherit;
   clip-path: path('M0 0H18.2C18.2 5.6 20.3 9.8 23.8 12.6C15.4 13.7 9.1 9.1 3.5 0Z');
 }
 .uisg-head {
-  margin-bottom: -1px;
-  padding-bottom: 7px;
-  border-bottom: 1px solid color-mix(in srgb, currentColor 30%, transparent);
-  font-size: 10px;
+  margin-bottom: var(--uisg-px-n1);
+  padding-bottom: var(--uisg-px-7);
+  border-bottom: var(--bw-1) solid color-mix(in srgb, currentColor 30%, transparent);
+  font-size: var(--fs-10);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: color-mix(in srgb, currentColor 78%, transparent);

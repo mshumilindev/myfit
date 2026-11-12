@@ -4,7 +4,6 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 vi.mock('../store', async (orig) => ({
   ...(await orig<typeof import('../store')>()),
   getStoreState: () => ({ restPeriods: [], injuries: [] }),
-  republishCoachShare: vi.fn(),
   subscribeStore: () => () => undefined,
 }));
 vi.mock('./sync', async (orig) => ({

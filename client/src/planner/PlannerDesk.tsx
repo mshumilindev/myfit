@@ -1,4 +1,10 @@
-import { useRef, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
+import {
+  useRef,
+  type CSSProperties,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+} from 'react';
 import { Button } from '../components/ui/Button';
 import { NowLine, useMinuteClock } from '../components/ui/NowLine';
 import { Segmented } from '../components/ui/Segmented';
@@ -60,6 +66,20 @@ export function lanes(items: { start: number; end: number }[]): [number, number]
 }
 
 /** The desktop Planner (design SPO-555, PlannerDesk): header tools, a time grid for Day / Week, the month as children. */
+
+/** Layout of the week grid is computed from the clock, so it is the one place that sets geometry per element. */
+const topStyle = (hours: number): CSSProperties => ({ top: hours * HPX });
+const bodyStyle = (cols: CSSProperties, rows: number): CSSProperties => ({
+  ...cols,
+  height: rows * HPX,
+});
+const blockStyle = (fromTop: number, minutes: number, lane: number, of: number): CSSProperties => ({
+  top: (fromTop / 60) * HPX,
+  height: Math.max(MIN_H, (minutes / 60) * HPX - 3),
+  left: `calc(${(lane / of) * 100}% + var(--s-4))`,
+  right: `calc(${((of - lane - 1) / of) * 100}% + var(--s-4))`,
+});
+
 export function PlannerDesk(p: {
   view: DeskView;
   onView: (v: DeskView) => void;
@@ -174,10 +194,10 @@ export function PlannerDesk(p: {
               </div>
             ))}
           </div>
-          <div className="pl-g-body" style={{ ...cols, height: hours.length * HPX }} ref={body}>
+          <div className="pl-g-body" style={bodyStyle(cols, hours.length)} ref={body}>
             <div className="pl-g-hrs">
               {hours.map((h) => (
-                <span key={h} style={{ top: (h - g0) * HPX }}>
+                <span key={h} style={topStyle(h - g0)}>
                   {hh(h)}
                 </span>
               ))}
@@ -199,7 +219,7 @@ export function PlannerDesk(p: {
                   onClick={(e) => slot(d, e)}
                 >
                   {hours.map((h) => (
-                    <i key={h} style={{ top: (h - g0) * HPX }} />
+                    <i key={h} style={topStyle(h - g0)} />
                   ))}
                   {es.map((o, i) => {
                     const [lane, of] = ln[i];
@@ -210,12 +230,7 @@ export function PlannerDesk(p: {
                         className={`pl-g-e uit--${o.plan.color}`}
                         role="button"
                         tabIndex={0}
-                        style={{
-                          top: ((start - g0 * 60) / 60) * HPX,
-                          height: Math.max(MIN_H, (dur(o.plan) / 60) * HPX - 3),
-                          left: `calc(${(lane / of) * 100}% + 4px)`,
-                          right: `calc(${((of - lane - 1) / of) * 100}% + 4px)`,
-                        }}
+                        style={blockStyle(start - g0 * 60, dur(o.plan), lane, of)}
                         onClick={() => p.onOpen(o)}
                         onKeyDown={(e) => key(o, e)}
                       >

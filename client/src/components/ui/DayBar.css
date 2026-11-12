@@ -1,9 +1,14 @@
+/* Component sizes the shared scales have no step for (ADR 010: a token may hold a px value, a declaration may not). */
+:root {
+  --uidb-px-164: 164px;
+}
+
 .uidb {
   position: relative;
   display: inline-block;
   flex: none;
-  width: 164px;
-  height: 14px;
+  width: var(--uidb-px-164);
+  height: var(--s-14);
   border-radius: var(--radius-pill);
   background: var(--color-border);
   overflow: hidden;
@@ -11,13 +16,13 @@
 .uidb--wide {
   display: block;
   width: 100%;
-  height: 12px;
+  height: var(--s-12);
 }
 .uidb-on {
   position: absolute;
   top: 0;
   bottom: 0;
-  min-width: 14px;
+  min-width: var(--s-14);
   border-radius: var(--radius-pill);
   background: var(--t-base);
 }

@@ -573,9 +573,7 @@ onTrackerReady((id) => {
   else if (id === 'sleep')
     // a new array: memos keyed on the list recompute with the real engine
     state = { ...state, sleeps: [...state.sleeps] };
-  else if (id === 'planner') {
-    // nothing to normalise: the held coach view is published now that the chunk can answer
-  } else return;
+  else if (id !== 'planner') return; // planner: nothing to normalise, its held coach view is published below
   emit();
   if (id !== 'cycle' && id !== 'sleep') {
     const uid = currentUid();
@@ -2993,8 +2991,7 @@ function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): 
     pending('nicotine', state.nicotine?.settings?.sharing) ||
     pending('supplements', state.supplements?.settings?.sharing) ||
     pending('conditions', state.conditions.length ? state.conditionsShare : 'off') ||
-    // Planner's sharing setting lives in its own chunk: hold back until it has arrived (it republishes then).
-    (installed('planner') && !isTrackerReady('planner'))
+    pending('planner', 'on') // its sharing setting lives in its own chunk: hold back until it has arrived
   )
     return;
   const vis = exposed();
@@ -3013,7 +3010,6 @@ function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): 
     },
     Date.now(),
   );
-  // Availability is shared only while Planner is installed (its data stays stored; the trainer sees "Not shared" without it).
   const avView = installed('planner') ? (plannerHost.coachView?.() ?? null) : null;
   const view = {
     ...coachView(items, state.conditionsShare),
@@ -3043,12 +3039,6 @@ function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): 
       coachShareFailed(uid, mine, e);
     }
   });
-}
-
-/** Republishes what the coach sees (a lazy add-on's own setting changed). */
-export function republishCoachShare(): void {
-  const uid = currentUid();
-  if (uid) publishCoachShare(uid, state.conditions);
 }
 
 /** Sets the general default and republishes what the coach sees. */
@@ -3611,6 +3601,7 @@ export type ForgettableShare =
  */
 export function forgetShareLevel(kind: ForgettableShare): void {
   const uid = currentUid();
+  if (kind === 'availability') return writePlannerShare(false); // Planner keeps it in its own prefs and republishes itself
   if (kind === 'conditions') {
     // Per-condition overrides (Full / Effects) go to Off too, so a later grant brings nothing back (B1).
     const overridden = state.conditions.filter((c) => c.share === 'full' || c.share === 'effects');
@@ -3651,10 +3642,6 @@ export function forgetShareLevel(kind: ForgettableShare): void {
     };
     withForcedPersist('alcohol', () => setState({ alcohol: next, syncStatus: bumpPending() }));
     writeAlcoholDoc(next);
-  } else if (kind === 'availability') {
-    // Planner keeps this one in its own prefs; the chunk saves it and republishes the coach view itself.
-    writePlannerShare(false);
-    return;
   } else {
     const cur = state.supplements ?? sup.empty();
     if (cur.settings.sharing === 'off') return;

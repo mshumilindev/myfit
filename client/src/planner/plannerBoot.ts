@@ -8,7 +8,7 @@ import { addonsPref } from '../addons/enabledSet';
 import { plannerAvailabilityAvailable } from '../addons/featureGates';
 import { plannerHost, setPlannerShareMirror } from '../plannerRt';
 import { healthAddonInstalled, restPeriodShown } from '../healthAddons';
-import { getStoreState, republishCoachShare, subscribeStore } from '../store';
+import { getStoreState, subscribeStore } from '../store';
 import { buildCoachAvailability } from './coachView';
 import { provide, trackerReady } from '../trackerRt';
 // Every add-on's "Based on" source: one file each in plannerSources/, picked up here (no list to edit).
@@ -70,7 +70,7 @@ const follow = () => {
   const sig = JSON.stringify(coachView());
   if (sig === seen) return;
   seen = sig;
-  republishCoachShare();
+  trackerReady('planner'); // the store listens to it: re-publishes what the coach sees
 };
 subscribePlanner(follow);
 subscribeStore(follow);

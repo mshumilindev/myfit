@@ -1,4 +1,5 @@
 import './Schedule.css';
+import './ScheduleFree.css';
 import { Icon } from '../../ui';
 import type { ScheduleStrings } from '../../i18n/coachSchedule';
 import { fitsFree } from '../domain/availability';

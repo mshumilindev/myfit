@@ -35,7 +35,7 @@ const grid = (days: number[], free: ClientAvailability | null | undefined) =>
       free={free}
     />,
   );
-const bands = (c: HTMLElement) => c.querySelectorAll('.sc-free');
+const bands = (c: HTMLElement) => c.querySelectorAll('.sc-freeband');
 
 describe('Schedule week grid: one client free hours (SPO-552)', () => {
   it('shades the free hours in the columns of the days they apply to, under the sessions, and says nothing to a screen reader', () => {
@@ -51,8 +51,12 @@ describe('Schedule week grid: one client free hours (SPO-552)', () => {
     });
     expect(bands(container)).toHaveLength(2);
     bands(container).forEach((b) => expect(b.getAttribute('aria-hidden')).toBe('true'));
-    expect(container.querySelectorAll('.sc-col')[0].querySelectorAll('.sc-free')).toHaveLength(2);
-    expect(container.querySelectorAll('.sc-col')[1].querySelectorAll('.sc-free')).toHaveLength(0);
+    expect(container.querySelectorAll('.sc-col')[0].querySelectorAll('.sc-freeband')).toHaveLength(
+      2,
+    );
+    expect(container.querySelectorAll('.sc-col')[1].querySelectorAll('.sc-freeband')).toHaveLength(
+      0,
+    );
   });
 
   it('nothing when no availability is given (not shared, not asked for, still loading)', () => {
@@ -73,7 +77,7 @@ describe('Schedule week grid: one client free hours (SPO-552)', () => {
   it('a band keeps its place inside the visible hours (top and height are fractions of the column)', () => {
     const wd = weekdayOfKey(TODAY_KEY);
     const { container } = grid([TODAY_KEY], { weekly: { [wd]: [[480, 600]] }, unavailable: [] });
-    const b = container.querySelector<HTMLElement>('.sc-free')!;
+    const b = container.querySelector<HTMLElement>('.sc-freeband')!;
     const top = Number(b.style.getPropertyValue('--sc-top'));
     const h = Number(b.style.getPropertyValue('--sc-h'));
     expect(top).toBeGreaterThanOrEqual(0);

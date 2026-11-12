@@ -1,3 +1,4 @@
+import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Icon } from '../ui';
 import { Widget, WidgetEmpty, WidgetList, type WidgetSize } from '../components/ui/Widget';
@@ -122,7 +123,7 @@ function UpNextInline({
           </Button>
         </div>
       ) : (
-        <button type="button" className="pl-upin-list" onClick={onOpen}>
+        <Card as="button" emphasis="quiet" pad="none" className="pl-upin-list" onClick={onOpen}>
           {items.map((i) => (
             <span key={`${i.plan.id}-${i.startAt}`} className="pl-upin-row">
               <Icon name={i.plan.icon} />
@@ -141,7 +142,7 @@ function UpNextInline({
               )}
             </span>
           ))}
-        </button>
+        </Card>
       )}
     </div>
   );

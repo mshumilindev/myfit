@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import type { IconProps } from '@phosphor-icons/react/dist/lib/types';
+import { BellSlash } from '@phosphor-icons/react/BellSlash';
 import { VideoCamera } from '@phosphor-icons/react/VideoCamera';
 import { VideoCameraSlash } from '@phosphor-icons/react/VideoCameraSlash';
 import { MicrophoneSlash } from '@phosphor-icons/react/MicrophoneSlash';
@@ -19,6 +20,7 @@ import { AddonsGlyph } from './addonsGlyph';
 /** Icons of the call kit (SPO-432) and the store's Add-ons glyph, kept out of ui.tsx so that file stays under the size ratchet. */
 export const CALL_ICONS: Record<string, ComponentType<IconProps>> = {
   addons: AddonsGlyph,
+  'bell-slash': BellSlash,
   'video-camera': VideoCamera,
   'video-camera-slash': VideoCameraSlash,
   'microphone-slash': MicrophoneSlash,

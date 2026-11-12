@@ -577,6 +577,12 @@ Per step there are also `--ctl-px-*` (side padding), `--ctl-gap-*` (icon to labe
 - **Agenda** is the new name of the trainer's Today (`#/c/agenda`; `#/c/today` still opens it). Icon `calendar-check` from the kit registry. The member app's Today is unchanged.
 - **No sample data in runtime code.** `tests/kit-guard.test.ts` fails if a runtime file imports a `__fixtures__` module or a fixture file, or mentions the removed demo switches. See `docs/COACH-BACKEND.md` section 8.
 
+## Planner pieces: ReminderAlert, OptionTile and SaveGuide (SPO-552 / SPO-555)
+
+- **`ReminderAlert`** (kit group `Alert`): the reminder that rings. `variant="screen"` is the whole phone screen, `variant="card"` a floating card over the app on desktop. Four `state`s: `ringing` (snooze presets + dismiss), `snoozed`, `elsewhere` (dismissed on another device, a banner says so), `unavailable` (ringing is not possible here). Props: `title`, `kind` (the "Reminder · in 1 h" line), `sub`, `icon` + `tone` (what rings), `snoozeMinutes`, `labels`, `onSnooze` / `onDismiss` / `onClose`. Sound and vibration are the caller's, the piece is presentational. Not for a passive notice (use `Banner`) or a confirmation (use `ConfirmSheet`). Stories: `Kit/ReminderAlert`.
+- **`OptionTile`**: one tile of a radio picker (an icon grid, a colour row). A pressable `role="radio"` button that only carries `selected` (`aria-checked` and the `is-on` class) and passes everything else through; the look comes from the caller's `className`. Put the tiles in a `role="radiogroup"` with a label. Not for a single on/off (use `Switch`) or options that all show text (use `Segmented` or `Chip`). Stories: `Kit/OptionTile`.
+- **`SaveGuide`** (Guide family, tone `guide`): a Save that explains itself. Use it wherever Save is blocked until required values are filled; never a bare `disabled` Save. `useSaveGuide(items)` returns the guide, `guide.field(id)` is spread on a row or any element, `<SaveGuide guide label heading onSave />` is the button. While something is missing Save stays pressable (`aria-disabled`), a press raises a flag listing what is still needed and dashes the first missing field; only a press on that field (or Esc) dismisses it. Not for validation messages after submit (use the field's own error).
+
 ## Store kit (add-on store, ADR 015)
 
 Own kit under `client/src/store-kit/` (tokens in `tokens.css`, base type/layout in `base.css`, components in `ui/`, one

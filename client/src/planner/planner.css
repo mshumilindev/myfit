@@ -1,4 +1,16 @@
 /* Planner screens, ported 1:1 from the approved design (design-lab/variants/v17/planner.css). Tokens only. */
+/* Component sizes the shared scales have no step for (ADR 010: a token may hold a px value, a declaration may not). */
+:root {
+  --pl-px-640: 640px;
+  --pl-px-52: 52px;
+  --pl-px-2: 2px;
+  --pl-px-64: 64px;
+  --pl-px-3: 3px;
+  --pl-px-1: 1px;
+  --pl-px-12: 12px;
+  --pl-px-11_5: 11.5px;
+}
+
 .pl-page,
 .pl-form {
   display: flex;
@@ -21,7 +33,7 @@
   margin: 0 var(--s-4) var(--s-6);
 }
 .pl-ag-h span {
-  font-size: var(--fs-12, 12px);
+  font-size: var(--fs-12);
   color: var(--color-text-muted);
 }
 .pl-ag-d.is-today .pl-ag-h b {
@@ -35,7 +47,7 @@
   flex-direction: column;
 }
 .pl-form {
-  max-width: 640px;
+  max-width: var(--pl-px-640);
   margin: 0 auto;
   width: 100%;
 }
@@ -44,13 +56,13 @@
 }
 .pl-ip {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--pl-px-52), 1fr));
   gap: var(--s-6);
 }
 .pl-ip-b {
   display: grid;
   place-items: center;
-  height: 52px;
+  height: var(--pl-px-52);
   border: 0;
   border-radius: var(--radius-lg);
   background: transparent;
@@ -63,7 +75,7 @@
 }
 .pl-ip-b.is-on {
   background: var(--color-surface);
-  box-shadow: 0 0 0 2px var(--color-accent);
+  box-shadow: 0 0 0 var(--pl-px-2) var(--color-accent);
   color: var(--color-accent);
 }
 .pl-sw {
@@ -75,13 +87,13 @@
 .pl-sw-b {
   /* owner 11.11: two full rows across the phone width, no empty space on the right */
   width: 100%;
-  max-width: 64px;
+  max-width: var(--pl-px-64);
   aspect-ratio: 1;
   flex: none;
   border-radius: 50%;
-  border: 2px solid transparent;
+  border: var(--bw-2) solid transparent;
   background: none;
-  padding: 3px;
+  padding: var(--pl-px-3);
   cursor: pointer;
 }
 .pl-sw-b span {
@@ -197,7 +209,7 @@
 }
 .pl-page-h h1 {
   margin: 0;
-  font-size: var(--fs-24, 24px);
+  font-size: var(--fs-24);
 }
 .pl-desk-tools {
   display: flex;
@@ -206,8 +218,8 @@
   flex-wrap: wrap;
 }
 .pl-g {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl, 20px);
+  border: var(--bw-1) solid var(--color-border);
+  border-radius: var(--radius-xl, var(--r-20));
   background: var(--color-surface);
   overflow: hidden;
 }
@@ -216,7 +228,7 @@
   display: grid;
 }
 .pl-g-hd {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: var(--bw-1) solid var(--color-border);
 }
 .pl-g-hd div {
   display: flex;
@@ -224,7 +236,7 @@
   justify-content: center;
   align-items: baseline;
   padding: var(--s-8) 0;
-  font-size: var(--fs-13, 13px);
+  font-size: var(--fs-13);
   color: var(--color-text-muted);
 }
 .pl-g-hd div b {
@@ -243,12 +255,12 @@
   position: absolute;
   right: var(--s-8);
   transform: translateY(-50%);
-  font-size: var(--fs-11, 11px);
+  font-size: var(--fs-11);
   color: var(--color-text-muted);
 }
 .pl-g-col {
   position: relative;
-  border-left: 1px solid var(--color-border);
+  border-left: var(--bw-1) solid var(--color-border);
   cursor: cell;
 }
 .pl-g-col.is-today {
@@ -258,7 +270,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 1px solid var(--color-border);
+  border-top: var(--bw-1) solid var(--color-border);
   opacity: 0.6;
   pointer-events: none;
 }
@@ -271,16 +283,16 @@
   border-radius: var(--r-2);
   background: var(--t-tint);
   color: var(--t-text);
-  border-left: 3px solid var(--t-base);
+  border-left: var(--pl-px-3) solid var(--t-base);
   box-sizing: border-box;
   overflow: hidden;
-  font-size: var(--fs-12, 12px);
-  z-index: 1;
+  font-size: var(--fs-12);
+  z-index: var(--z-1);
   cursor: pointer;
 }
 .pl-g-e svg {
   flex: none;
-  margin-top: 1px;
+  margin-top: var(--pl-px-1);
 }
 .pl-g-e span {
   display: flex;
@@ -303,9 +315,13 @@
   /* the same 32px box as the icon tile in the row above, the disc centred in it: both share one axis */
   display: inline-block;
   flex: none;
-  width: 32px;
-  height: 32px;
-  background: radial-gradient(circle 12px at 50% 50%, var(--t-base) 11.5px, transparent 12px);
+  width: var(--s-32);
+  height: var(--s-32);
+  background: radial-gradient(
+    circle var(--pl-px-12) at 50% 50%,
+    var(--t-base) var(--pl-px-11_5),
+    transparent var(--pl-px-12)
+  );
 }
 
 .pl-upin {
@@ -355,8 +371,8 @@
   cursor: pointer;
 }
 .pl-upin-list:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: var(--bw-2) solid var(--color-accent);
+  outline-offset: var(--bw-2);
 }
 .pl-upin-row {
   display: flex;

@@ -34,7 +34,7 @@
       "media-feature-name-value-allowed-list": 4
     },
     "client/src/components/ExercisePicker.css": {
-      "declaration-property-unit-disallowed-list": 39,
+      "declaration-property-unit-disallowed-list": 36,
       "media-feature-name-value-allowed-list": 1
     },
     "client/src/components/HomeSet.css": {

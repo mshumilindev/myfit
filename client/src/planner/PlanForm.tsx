@@ -18,12 +18,23 @@ import { WeekdayToggle } from '../components/ui/WeekdayToggle';
 import { WheelPicker } from '../components/ui/WheelPicker';
 import { useT } from '../i18n';
 import { plannerSources, type PlannerPick } from '../plannerSources';
-import { Icon, ICON_NAMES } from '../ui';
-import { PTONES, type Draft, type PTone, type RepeatKind } from './draft';
+import { Icon, ICONS } from '../ui';
+import { PTONES, type Draft, type RepeatKind } from './draft';
 import { clock, dayFull, dayLong, dayMonth, durText, leadText, weekdayShorts } from './fmt';
 import { fill, STRINGS } from './strings';
 import { dayFromNumber, dayNumber, parseDay, weekday } from './zoned';
+import {
+  ColorRow,
+  DurationWheel,
+  HM,
+  IconGrid,
+  IconSearch,
+  LeadWheel,
+  StartWheel,
+} from './PlanDrawers';
 import './planner.css';
+
+export { HM };
 
 /** The pickers open as kit drawers over the form (owner 11.11), each with Cancel / Save on a staged copy. */
 type Drawer = 'based' | 'icon' | 'color' | 'start' | 'duration' | 'lead' | 'repeat' | 'date';
@@ -31,41 +42,6 @@ type Drawer = 'based' | 'icon' | 'color' | 'start' | 'duration' | 'lead' | 'repe
 const DURATIONS = [15, 30, 45, 60, 90, 120];
 const LEADS = [0, 10, 30, 60, 120, 1440];
 const KINDS: RepeatKind[] = ['none', 'daily', 'weekly', 'weekdays', 'biweekly', 'monthly'];
-
-export const HM = (p: {
-  h: number;
-  m: number;
-  hl: string;
-  ml: string;
-  hMax: number;
-  onChange: (h: number, m: number) => void;
-  hUnit?: string;
-  mUnit?: string;
-}) => (
-  <div className="pl-hm">
-    <WheelPicker
-      label={p.hl}
-      value={p.h}
-      onChange={(h) => p.onChange(h, p.m)}
-      min={0}
-      max={p.hMax}
-      unit={p.hUnit}
-      input="manual"
-      size="compact"
-    />
-    <WheelPicker
-      label={p.ml}
-      value={p.m}
-      onChange={(m) => p.onChange(p.h, m)}
-      min={0}
-      max={55}
-      step={5}
-      unit={p.mUnit}
-      input="manual"
-      size="compact"
-    />
-  </div>
-);
 
 /** Add / edit one plan, from kit parts (design SPO-555). Pure form: the page saves and deletes. */
 export function PlanForm(p: {
@@ -151,7 +127,9 @@ export function PlanForm(p: {
   };
   const icons = useMemo(() => {
     const k = q.trim().toLowerCase().replace(/\s+/g, '-');
-    return ICON_NAMES.filter((n) => !k || n.includes(k));
+    return Object.keys(ICONS)
+      .sort()
+      .filter((n) => !k || n.includes(k));
   }, [q]);
   const iconName = d.icon.charAt(0).toUpperCase() + d.icon.slice(1).replace(/-/g, ' ');
   const dayChips = (x: Draft, put: (p: Partial<Draft>) => void) => (
@@ -230,112 +208,22 @@ export function PlanForm(p: {
       case 'icon':
         return {
           title: s.icon,
-          pin: (
-            <SearchField
-              value={q}
-              onChange={setQ}
-              placeholder={s.searchIcons}
-              clearLabel={s.clearSearch}
-            />
-          ),
+          pin: <IconSearch q={q} onChange={setQ} s={s} />,
           node: (
-            <>
-              {icons.length ? (
-                <div className="pl-ip" role="radiogroup" aria-label={s.icon}>
-                  {icons.map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      role="radio"
-                      aria-checked={n === st.icon}
-                      aria-label={n.replace(/-/g, ' ')}
-                      title={n.replace(/-/g, ' ')}
-                      className={`pl-ip-b${n === st.icon ? ' is-on' : ''}`}
-                      onClick={() => setS({ icon: n })}
-                    >
-                      <Icon name={n} />
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <Hint>{fill(s.noIcon, { q })}</Hint>
-              )}
-            </>
+            <IconGrid icons={icons} q={q} s={s} value={st.icon} onPick={(icon) => setS({ icon })} />
           ),
         };
       case 'color':
         return {
           title: s.color,
-          node: (
-            <div className="pl-sw" role="radiogroup" aria-label={s.color}>
-              {PTONES.map((c: PTone, i) => (
-                <button
-                  key={c}
-                  type="button"
-                  role="radio"
-                  aria-checked={c === st.color}
-                  aria-label={s.cols[i]}
-                  className={`pl-sw-b uit--${c}${c === st.color ? ' is-on' : ''}`}
-                  onClick={() => setS({ color: c })}
-                >
-                  <span />
-                </button>
-              ))}
-            </div>
-          ),
+          node: <ColorRow s={s} value={st.color} onPick={(color) => setS({ color })} />,
         };
       case 'start':
-        return {
-          title: s.starts,
-          node: (
-            <>
-              <HM
-                h={st.hour}
-                m={st.minute}
-                hl={s.hour}
-                ml={s.minutes}
-                hMax={23}
-                onChange={(hour, minute) => setS({ hour, minute })}
-              />
-            </>
-          ),
-        };
+        return { title: s.starts, node: <StartWheel s={s} st={st} setS={setS} /> };
       case 'duration':
-        return {
-          title: s.duration,
-          node: (
-            <>
-              <HM
-                h={Math.floor(st.durationMin / 60)}
-                m={st.durationMin % 60}
-                hl={s.hours}
-                ml={s.minutes}
-                hMax={12}
-                hUnit={s.h}
-                mUnit={s.min}
-                onChange={(h, m) => setS({ durationMin: Math.max(5, h * 60 + m) })}
-              />
-            </>
-          ),
-        };
+        return { title: s.duration, node: <DurationWheel s={s} st={st} setS={setS} /> };
       case 'lead':
-        return {
-          title: s.remindMe,
-          node: (
-            <>
-              <HM
-                h={Math.floor(st.lead / 60)}
-                m={st.lead % 60}
-                hl={s.hours}
-                ml={s.minutes}
-                hMax={48}
-                hUnit={s.h}
-                mUnit={s.min}
-                onChange={(h, m) => setS({ lead: Math.min(2880, h * 60 + m) })}
-              />
-            </>
-          ),
-        };
+        return { title: s.remindMe, node: <LeadWheel s={s} st={st} setS={setS} /> };
       case 'date':
         return {
           title: s.date,

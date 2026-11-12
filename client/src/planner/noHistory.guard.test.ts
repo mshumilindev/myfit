@@ -13,13 +13,7 @@ const sources = readdirSync(DIR)
   .map((f) => [f, readFileSync(`${DIR}/${f}`, 'utf8')] as const);
 
 const OWN = new Set(['plannerEvents', 'plannerAlerts', 'meta']);
-const READ_ONLY_STORE = new Set([
-  'getStoreState',
-  'subscribeStore',
-  'useStore',
-  'uuid',
-  'republishCoachShare',
-]);
+const READ_ONLY_STORE = new Set(['getStoreState', 'subscribeStore', 'useStore', 'uuid']);
 
 describe('Planner never writes to the history', () => {
   it('has sources to check, and the guard sees the real writes', () => {

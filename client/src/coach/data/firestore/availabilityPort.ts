@@ -9,7 +9,7 @@ import { unsealDoc } from '../../../encryptedDoc';
 import { openAthleteKey } from '../../../vaultGrants';
 import type { CoachKeyRecord } from '../../../vaultShare';
 import { parseAvailability } from '../../domain/availability';
-import type { AvailabilityPort } from '../availability';
+import { configureAvailability, type AvailabilityPort } from '../availability';
 import { toPortError } from './errors';
 import type { FsApi, Raw } from './fsApi';
 
@@ -22,6 +22,11 @@ export interface AvailabilityPortDeps {
 interface ShareResponse {
   coachShare?: Raw | null;
   grant?: unknown;
+}
+
+/** Wires the real port into the coach module (or detaches it with null). */
+export function installAvailability(d: AvailabilityPortDeps | null): void {
+  configureAvailability(d && createFirestoreAvailabilityPort(d));
 }
 
 export function createFirestoreAvailabilityPort(d: AvailabilityPortDeps): AvailabilityPort {

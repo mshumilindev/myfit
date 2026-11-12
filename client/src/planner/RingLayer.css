@@ -1,10 +1,10 @@
 .plr {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: var(--z-1001);
   background: var(--color-bg);
 }
 .plr--card {
-  inset: auto 24px 24px auto;
+  inset: auto var(--s-24) var(--s-24) auto;
   background: none;
 }

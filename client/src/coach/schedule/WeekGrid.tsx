@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './Schedule.css';
+import './ScheduleFree.css';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { NowLine, NowStatus, nowOffset, useScrollToNow } from '../../components/ui/NowLine';
@@ -288,7 +289,7 @@ export function WeekGrid(p: WeekGridProps) {
                 freeBands(p.free, d, from, to).map(([a, b]) => (
                   <div
                     key={`free-${a}`}
-                    className="sc-free"
+                    className="sc-freeband"
                     aria-hidden="true"
                     data-free=""
                     style={

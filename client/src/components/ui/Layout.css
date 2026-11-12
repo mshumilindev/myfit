@@ -10,10 +10,10 @@
 .ul-grid {
   display: grid !important;
 }
-.ul-eq {
+.ul-grid.ul-eq {
   /* equal-width columns for a row of footer buttons (use with .ul-grid): padding never skews the split */
-  grid-auto-flow: column !important;
-  grid-auto-columns: minmax(0, 1fr) !important;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
 }
 .ul-col {
   flex-direction: column !important;

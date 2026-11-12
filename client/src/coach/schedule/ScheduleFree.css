@@ -1,0 +1,43 @@
+/* Coach week grid: the hours one client is free (SPO-552), and the request checks list. Tokens only. */
+/* Component sizes the shared scales have no step for (ADR 010: a token may hold a px value, a declaration may not). */
+:root {
+  --sc-px-6: 6px;
+  --sc-px-12: 12px;
+}
+
+/* ---- grid: the hours one client is free (SPO-552), hatched in the accent under the sessions, with a rule on the left ---- */
+.sc-freeband {
+  position: absolute;
+  top: calc(var(--sc-top) * 100%);
+  height: calc(var(--sc-h) * 100%);
+  left: 0;
+  right: 0;
+  border-left: var(--bw-2) solid var(--color-ok, var(--color-accent));
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-ok, var(--color-accent)) 14%, transparent) 0 var(--sc-px-6),
+    color-mix(in srgb, var(--color-ok, var(--color-accent)) 4%, transparent) var(--sc-px-6)
+      var(--sc-px-12)
+  );
+  pointer-events: none;
+}
+
+.sc-insp-checks {
+  display: grid;
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sc-insp-checks li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  font-size: var(--fs-13, var(--fs-13));
+}
+.sc-insp-checks .is-ok {
+  color: var(--success, var(--text));
+}
+.sc-insp-checks .is-bad {
+  color: var(--warning, var(--text));
+}
