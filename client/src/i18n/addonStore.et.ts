@@ -238,6 +238,20 @@ export const addonStoreEt: typeof addonStoreEn = {
         'Harjutused vastavalt sinu fookusele',
       ],
     },
+    planner: {
+      name: 'Planeerija',
+      tagline: 'Plaanid, mis tuletatakse õigel ajal meelde',
+      desc: 'Lisa oma plaanid kalendrisse, saa enne igaühte meeldetuletus ja jaga soovi korral vabu tunde treeneriga.',
+      about:
+        'Treening on vaid osa sinu nädalast. Planeerija hoiab ülejäänut: plaan mis tahes päevaks ja meeldetuletus enne algust, et trenn, kõne või toimetus ei jääks ära.\n\nLisa plaan koos pealkirja, aja ja kordusega: ühest päevast iga nädalani. Vali, kui palju enne algust tahad sellest teada ning kas meeldetuletus on vaikne või püsiv. Püsiv meeldetuletus heliseb, kuni selle sulged või edasi lükkad, ja ühes seadmes sulgemine vaigistab selle ka teistes.\n\nPlaani saad põhjendada programmipäeva, kodutreeningu või tegevusega, et nimi ja ikoon täituksid ise. Planeerija ainult tuletab meelde; treeninguajalukku ei salvestata midagi.\n\nMäära nädala vabad tunnid ühe korra. Unwell, Full rest ja vigastuse koormuseta periood näidatakse kui ei ole saadaval, ilma põhjuseta. Kui lubad, näeb treener sinu vaba ja hõivatud aega ning saab pakkuda trenne, kui oled vaba. Jagamise saad igal ajal lõpetada.\n\nUp next vidin Today vaates näitab, mis järgmisena tuleb, ja arvutirakendus võib hoida meeldetuletusi menüüribal või salves. Planeerija eemaldamisel jäävad plaanid alles ja tulevad tagasi, kui selle uuesti lisad.',
+      highlights: [
+        'Plaanid kordusega ja meeldetuletusega enne',
+        'Vaiksed või püsivad meeldetuletused kõigis seadmetes',
+        'Nädala vabad tunnid, Unwell ja Full rest arvestatud',
+        'Vaba aeg treenerile ainult sinu loal',
+        'Up next vidin Today vaates',
+      ],
+    },
     playbook: {
       name: 'Playbook',
       tagline: 'Sinu tuttavad treeningud on valmis',

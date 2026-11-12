@@ -236,6 +236,20 @@ export const addonStoreLt: typeof addonStoreEn = {
         'Pratimai pagal pasirinktą kryptį',
       ],
     },
+    planner: {
+      name: 'Planuoklis',
+      tagline: 'Planai, apie kuriuos primenama laiku',
+      desc: 'Įtrauk savo planus į kalendorių, gauk priminimą prieš kiekvieną ir, jei nori, pasidalyk laisvomis valandomis su treneriu.',
+      about:
+        'Treniruotės yra tik dalis tavo savaitės. Planuoklis saugo likusią dalį: planą bet kuriai dienai ir priminimą prieš pradžią, kad sesija, skambutis ar reikalas nepraslystų.\n\nPridėk planą su pavadinimu, laiku ir pasikartojimu: nuo vienos dienos iki kas savaitę. Pasirink, kiek anksčiau nori apie jį sužinoti ir ar priminimas bus tylus, ar atkaklus. Atkaklus priminimas skamba, kol jį išjungi ar atidedi, o išjungtas viename įrenginyje nutyla ir kituose.\n\nPlaną gali pagrįsti programos diena, namų treniruote ar veikla, kad būtų įrašytas pavadinimas ir piktograma. Planuoklis tik primena: į treniruočių istoriją nieko neįrašoma.\n\nVieną kartą nustatyk savaitės laisvas valandas. Unwell, Full rest ir traumos laikotarpis be krūvio rodomi kaip nepasiekiami, nenurodant priežasties. Jei leisi, treneris mato tavo laisvą ir užimtą laiką ir gali siūlyti sesijas, kai esi laisvas. Dalytis gali nustoti bet kada.\n\nUp next valdiklis Today ekrane rodo, kas toliau, o kompiuterio programa gali laikyti priminimus meniu juostoje ar dėkle. Pašalinus Planuoklį planai lieka ir sugrįžta, kai jį pridedi iš naujo.',
+      highlights: [
+        'Planai su pasikartojimu ir priminimu prieš juos',
+        'Tylūs ar atkaklūs priminimai visuose įrenginiuose',
+        'Savaitės laisvos valandos su Unwell ir Full rest',
+        'Laisvas laikas treneriui tik tau leidus',
+        'Up next valdiklis Today ekrane',
+      ],
+    },
     playbook: {
       name: 'Playbook',
       tagline: 'Įprastos treniruotės jau paruoštos',

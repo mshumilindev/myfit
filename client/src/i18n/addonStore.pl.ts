@@ -235,6 +235,20 @@ export const addonStorePl: typeof addonStoreEn = {
         'Zmiany w objętości i doborze ćwiczeń',
       ],
     },
+    planner: {
+      name: 'Planer',
+      tagline: 'Plany, o których przypomnimy na czas',
+      desc: 'Dodawaj własne plany do kalendarza, dostawaj przypomnienie przed każdym i udostępnij trenerowi wolne godziny, jeśli chcesz.',
+      about:
+        'Trening to tylko część Twojego tygodnia. Planer przechowuje resztę: plan na dowolny dzień i przypomnienie przed startem, żeby sesja, rozmowa czy sprawa nie umknęły.\n\nDodaj plan z tytułem, godziną i powtarzaniem: od jednego dnia do co tygodnia. Wybierz, ile czasu przed startem chcesz o nim usłyszeć i czy przypomnienie ma być ciche, czy uporczywe. Uporczywe dzwoni, dopóki go nie wyłączysz lub nie odłożysz, a wyłączenie na jednym urządzeniu zatrzymuje je na pozostałych.\n\nPlan możesz oprzeć na dniu programu, treningu domowym lub aktywności, aby uzupełnić nazwę i ikonę. Planer tylko przypomina; nic nie trafia do historii treningów.\n\nUstaw tygodniowe wolne godziny raz. Unwell, Full rest i okres bez obciążenia po urazie są pokazane jako niedostępne, bez powodu. Jeśli zezwolisz, trener widzi Twoje wolne i zajęte godziny i może proponować sesje, gdy jesteś wolny. Udostępnianie możesz zakończyć w każdej chwili.\n\nWidżet Up next na Today pokazuje, co dalej, a aplikacja na komputer może utrzymać przypomnienia na pasku menu lub w zasobniku. Usunięcie Planera zachowuje Twoje plany, a po ponownym dodaniu wracają.',
+      highlights: [
+        'Plany z powtarzaniem i przypomnieniem przed nimi',
+        'Ciche lub uporczywe przypomnienia na wszystkich urządzeniach',
+        'Tygodniowe wolne godziny z uwzględnieniem Unwell i Full rest',
+        'Wolne godziny dla trenera tylko za Twoją zgodą',
+        'Widżet Up next na Today',
+      ],
+    },
     playbook: {
       name: 'Playbook',
       tagline: 'Twoje sprawdzone dni treningowe',

@@ -240,6 +240,20 @@ export const addonStoreEn = {
         'See focus reflected in exercise suggestions',
       ],
     },
+    planner: {
+      name: 'Planner',
+      tagline: 'Plans that remind you on time',
+      desc: 'Put your own plans on a calendar, get a reminder before each one and share your free hours with your trainer if you want to.',
+      about:
+        'Training is only part of your week. Planner holds the rest: a plan for any day, with a reminder before it starts, so the session, the call or the errand does not slip past.\n\nAdd a plan with a title, a time and a repeat, from a single day to every week. Choose how long before it starts you want to hear about it, and whether the reminder is quiet or persistent. A persistent reminder rings until you dismiss or snooze it, and dismissing it on one device stops it on the others.\n\nBase a plan on a programme day, a home workout or an activity to fill in its name and icon. Planner only reminds you; nothing is logged to your training history.\n\nSet your weekly free hours once. Unwell, Full rest and an injury’s no-load period show as not available, without the reason. If you allow it, your trainer sees your free and busy times and can offer sessions when you are free. You can stop sharing at any time.\n\nThe Up next widget on Today shows what comes next, and the desktop app can keep reminders ringing from the menu bar or tray. Removing Planner keeps your plans, and they return when you add it again.',
+      highlights: [
+        'Plans with repeats and a reminder before each',
+        'Quiet or persistent reminders, synced across devices',
+        'Weekly free hours with Unwell and Full rest respected',
+        'Share free hours with your trainer, only if you allow it',
+        'Up next widget on Today',
+      ],
+    },
     playbook: {
       name: 'Playbook',
       tagline: 'Your regular sessions, ready to go',
