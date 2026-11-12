@@ -224,6 +224,19 @@ describe('manager inspector (AC 2, 4, 5)', () => {
     expect(screen.queryByRole('button', { name: t.scCancelRequest })).toBeNull();
   });
 
+  it('a client request: the manager sees who it waits for and "Confirm as manager"; the trainer sees plain Accept', () => {
+    const fromClient = req({ from: 'client', via: undefined, byName: undefined });
+    render(<Inspector slotId={FRI_ID} manager requests={[fromClient]} />);
+    expect(screen.getByText(t.scReqWaitTrainer('Olena Kovalenko'))).toBeTruthy();
+    expect(screen.getByRole('button', { name: t.rcConfirmManager })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /^Accept/ })).toBeNull();
+    cleanup();
+    render(<Inspector slotId={FRI_ID} manager={false} requests={[fromClient]} />);
+    expect(screen.queryByText(t.scReqWaitTrainer('Olena Kovalenko'))).toBeNull();
+    expect(screen.getByRole('button', { name: /^Accept/ })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: t.rcConfirmManager })).toBeNull();
+  });
+
   it('once the client accepts the manager request, the trainer sees the session "Just moved" at the new time', () => {
     const accepted = req({
       status: 'accepted',

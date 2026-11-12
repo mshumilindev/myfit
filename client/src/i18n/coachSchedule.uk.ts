@@ -319,6 +319,8 @@ export const scheduleUk: typeof scheduleEn = {
     'Клієнт отримає запит у розділі «Мій тренер» і відповість там. Нічого не зміниться, доки він не погодиться.',
   rcTitleManager: (m, c) => `${m} надсилає запит ${c}: перенести тренування`,
   scReqExpires: (rel: string) => `Спливає ${rel}`,
+  scReqWaitTrainer: (n: string) => `Чекає на тренера ${n}`,
+  rcConfirmManager: 'Підтвердити як менеджер',
   rcChkH: 'Перевірки',
   rcChkFree: (n: string) => `У вільні години: ${n}`,
   rcChkNotFree: (n: string) => `Поза вільними годинами: ${n}`,

@@ -329,6 +329,8 @@ export const scheduleEn = {
     'The client gets a request in My trainer and answers there. Nothing moves until they accept.',
   rcTitleManager: (m: string, c: string) => `${m} asked ${c} to move a session`,
   scReqExpires: (rel: string) => `Expires ${rel}`,
+  scReqWaitTrainer: (n: string) => `Waiting for trainer ${n}`,
+  rcConfirmManager: 'Confirm as manager',
   rcChkH: 'Checks',
   rcChkFree: (n: string) => `Inside ${n}'s free hours`,
   rcChkNotFree: (n: string) => `Outside ${n}'s free hours`,

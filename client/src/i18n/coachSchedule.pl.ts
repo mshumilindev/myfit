@@ -320,6 +320,8 @@ export const schedulePl: typeof scheduleEn = {
     'Klient dostanie prośbę w sekcji „Mój trener” i tam odpowie. Nic się nie przeniesie, dopóki jej nie zaakceptuje.',
   rcTitleManager: (m, c) => `${m} prosi klienta ${c} o przeniesienie treningu`,
   scReqExpires: (rel: string) => `Wygasa ${rel}`,
+  scReqWaitTrainer: (n: string) => `Czeka na trenera ${n}`,
+  rcConfirmManager: 'Potwierdź jako menedżer',
   rcChkH: 'Sprawdzenia',
   rcChkFree: (n: string) => `W wolnych godzinach: ${n}`,
   rcChkNotFree: (n: string) => `Poza wolnymi godzinami: ${n}`,

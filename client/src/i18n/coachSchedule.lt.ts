@@ -319,6 +319,8 @@ export const scheduleLt: typeof scheduleEn = {
     'Klientas gaus prašymą skiltyje „Mano treneris“ ir atsakys ten. Niekas nebus perkelta, kol jis nesutiks.',
   rcTitleManager: (m, c) => `${m} prašo kliento ${c} perkelti treniruotę`,
   scReqExpires: (rel: string) => `Baigiasi ${rel}`,
+  scReqWaitTrainer: (n: string) => `Laukia trenerio ${n}`,
+  rcConfirmManager: 'Patvirtinti kaip vadybininkas',
   rcChkH: 'Patikros',
   rcChkFree: (n: string) => `Laisvu laiku: ${n}`,
   rcChkNotFree: (n: string) => `Ne laisvu laiku: ${n}`,

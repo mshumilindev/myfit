@@ -204,6 +204,11 @@ export function SessionInspector(p: SessionInspectorProps) {
               </span>
             </div>
             {r.note && <p className="sc-insp-reqtext">{r.note}</p>}
+            {byClient && p.manager && (
+              <p className="sc-insp-reqtext">
+                {t.scReqWaitTrainer(p.manager.trainerOf(r.clientId) ?? '')}
+              </p>
+            )}
             {byClient && (
               <RequestChecks request={r} slot={slot} slots={p.slots} name={name} t={t} />
             )}
@@ -216,10 +221,10 @@ export function SessionInspector(p: SessionInspectorProps) {
                   <Button
                     size="sm"
                     icon="check"
-                    aria-label={t.rcAcceptAria(name)}
+                    aria-label={p.manager ? undefined : t.rcAcceptAria(name)}
                     onClick={() => void p.store.respond(r.id, 'accepted', 'trainer')}
                   >
-                    {t.rcAccept}
+                    {p.manager ? t.rcConfirmManager : t.rcAccept}
                   </Button>
                   <Button
                     size="sm"

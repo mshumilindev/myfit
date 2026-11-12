@@ -311,6 +311,8 @@ export const scheduleEt: typeof scheduleEn = {
     'Klient saab soovi jaotises „Minu treener“ ja vastab seal. Midagi ei nihku, kuni ta nõustub.',
   rcTitleManager: (m, c) => `${m} palub kliendil ${c} treeningut nihutada`,
   scReqExpires: (rel: string) => `Aegub ${rel}`,
+  scReqWaitTrainer: (n: string) => `Ootab treenerit ${n}`,
+  rcConfirmManager: 'Kinnita juhina',
   rcChkH: 'Kontrollid',
   rcChkFree: (n: string) => `Vabade tundide sees: ${n}`,
   rcChkNotFree: (n: string) => `Vabade tundide väliselt: ${n}`,
