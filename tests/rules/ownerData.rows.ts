@@ -38,6 +38,7 @@ export const SEALED_META = [
   'atlasChatState',
   'selfCoach',
   'calendarSettings',
+  'planner',
 ] as const;
 export const ALL: Op[] = ['get', 'list', 'create', 'update', 'delete'];
 const READ_DELETE: Op[] = ['get', 'list', 'delete'];
@@ -49,6 +50,18 @@ export const ROWS: Row[] = [
   { pattern: '/gyms/{gymId}', path: 'gyms/g1', owner: ALL, valid: { id: 'g1' } },
   { pattern: '/restPeriods/{periodId}', path: 'restPeriods/r1', owner: ALL, valid: { id: 'r1' } },
   { pattern: '/injuries/{injuryId}', path: 'injuries/i1', owner: ALL, valid: { id: 'i1' } },
+  {
+    pattern: '/plannerEvents/{eventId}',
+    path: 'plannerEvents/e1',
+    owner: ALL,
+    valid: { id: 'e1' },
+  },
+  {
+    pattern: '/plannerAlerts/{alertId}',
+    path: 'plannerAlerts/a1',
+    owner: ALL,
+    valid: { state: 'ringing', rev: 1, updatedAt: 5 },
+  },
   { pattern: '/conditions/{conditionId}', path: 'conditions/c1', owner: ALL, valid: { id: 'c1' } },
   { pattern: '/activities/{activityId}', path: 'activities/a1', owner: ALL, valid: { id: 'a1' } },
   { pattern: '/sleeps/{sleepId}', path: 'sleeps/s1', owner: ALL, valid: { id: 's1' } },

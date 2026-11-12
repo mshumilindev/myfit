@@ -127,6 +127,8 @@ describe('rules file: static checks', () => {
         'users/{userId}/meta/goals',
         'users/{userId}/meta/home',
         'users/{userId}/meta/mastery',
+        // SPO-552: Planner's sealed availability and defaults
+        'users/{userId}/meta/planner',
         'users/{userId}/meta/selfCoach',
         'users/{userId}/meta/signalState',
         'users/{userId}/meta/sleepPrefs',
@@ -135,6 +137,9 @@ describe('rules file: static checks', () => {
         'users/{userId}/notices/{noticeId}',
         'users/{userId}/outbox/{messageId}',
         'users/{userId}/pings/{pingId}',
+        // SPO-552: sealed plans and content-free reminder state
+        'users/{userId}/plannerAlerts/{alertId}',
+        'users/{userId}/plannerEvents/{eventId}',
         'users/{userId}/push/{deviceId}',
         'users/{userId}/reminderDismissals/{dismissId}',
         'users/{userId}/restPeriods/{periodId}',

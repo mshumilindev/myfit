@@ -120,6 +120,10 @@ const USER_SUBPATHS = [
   'meta/atlasChatState',
   'atlasChat/m1',
   'meta/chatKeys',
+  // SPO-552: Planner plans, reminder state and sealed availability
+  'plannerEvents/e1',
+  'plannerAlerts/a1',
+  'meta/planner',
   'pings/p1',
   'reminderDismissals/d1',
   'push/dev1',
