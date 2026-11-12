@@ -50,6 +50,12 @@ jobs:
           FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           FUNCTIONS_INPUT: ${{ github.event.inputs.functions }}
           PAUSE_INPUT: ${{ github.event.inputs.pause }}
+          VAR_MAIL_FROM: ${{ vars.MAIL_FROM }}
+          VAR_MAIL_FROM_NAME: ${{ vars.MAIL_FROM_NAME }}
+          VAR_APP_ORIGIN: ${{ vars.APP_ORIGIN }}
+          VAR_ENFORCE_APPCHECK: ${{ vars.COACH_ENFORCE_APPCHECK }}
+          VAR_VAULT_KV: ${{ vars.VAULT_KV }}
+          VAR_CF_TURN_KEY_ID: ${{ vars.CF_TURN_KEY_ID }}
         run: |
           set -euo pipefail
 
@@ -76,6 +82,18 @@ jobs:
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
           echo "Deploying as service account: $(jq -r .client_email "$RUNNER_TEMP/sa.json")"
           trap 'rm -f "$RUNNER_TEMP/sa.json"' EXIT
+
+          # Non-interactive deploy needs a value for every param. Values come from repo variables when set
+          # (MAIL_FROM, CF_TURN_KEY_ID); otherwise the code defaults. Params only reach the functions that use them,
+          # so deploy only functions you changed unless these variables hold the live values.
+          {
+            echo "MAIL_FROM=${VAR_MAIL_FROM:-}"
+            echo "MAIL_FROM_NAME=${VAR_MAIL_FROM_NAME:-Spotter}"
+            echo "APP_ORIGIN=${VAR_APP_ORIGIN:-https://myspotter.fit}"
+            echo "COACH_ENFORCE_APPCHECK=${VAR_ENFORCE_APPCHECK:-false}"
+            echo "VAULT_KV=${VAR_VAULT_KV:-1}"
+            echo "CF_TURN_KEY_ID=${VAR_CF_TURN_KEY_ID:-}"
+          } > "functions/.env.$FIREBASE_PROJECT"
 
           total=${#ordered[@]}
           batch_no=0
