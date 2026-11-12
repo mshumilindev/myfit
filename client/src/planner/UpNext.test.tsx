@@ -54,15 +54,31 @@ describe('UpNext widget', () => {
     fireEvent.click(screen.getByText('Add a plan'));
     expect(open).toHaveBeenCalled();
   });
-  it('empty L/XL shows the week strip with today marked; M stays one row with the hint', () => {
+  it('empty card shows the hint and the way in', () => {
     state.plans = [];
-    const { container, rerender } = render(<UpNext size="XL" now={now} onOpen={() => {}} />);
-    expect(container.querySelectorAll('.pl-upweek-d')).toHaveLength(7);
-    expect(container.querySelectorAll('.pl-upweek-d.is-today')).toHaveLength(1);
+    render(<UpNext size="XL" now={now} onOpen={() => {}} />);
     expect(screen.getByText(/Set a reminder for a workout/)).toBeTruthy();
-    rerender(<UpNext size="M" now={now} onOpen={() => {}} />);
-    expect(container.querySelector('.pl-upweek')).toBeNull();
-    expect(screen.getByText(/Set a reminder for a workout/)).toBeTruthy();
+  });
+  it('inline (inside the week card): no card, next plans by size, empty line with Add a plan', () => {
+    state.plans = [mk('Run', '12:30'), mk('Meal', '13:30'), mk('Stretch', '14:30')];
+    const open = vi.fn();
+    const { container, rerender } = render(
+      <UpNext size="M" now={now} onOpen={open} variant="inline" />,
+    );
+    expect(container.querySelector('.uiw')).toBeNull();
+    expect(container.querySelectorAll('.pl-upin-row')).toHaveLength(1);
+    rerender(<UpNext size="L" now={now} onOpen={open} variant="inline" />);
+    expect(container.querySelectorAll('.pl-upin-row')).toHaveLength(3);
+    fireEvent.click(container.querySelector('.pl-upin-list') as Element);
+    expect(open).toHaveBeenCalled();
+    state.plans = [];
+    rerender(<UpNext size="M" now={now} onOpen={open} variant="inline" />);
+    expect(screen.getByText('Nothing planned')).toBeTruthy();
+    expect(screen.queryByText(/Set a reminder/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Add a plan/ }));
+    expect(open).toHaveBeenCalledTimes(2);
+    rerender(<UpNext size="XL" now={now} onOpen={open} variant="inline" />);
+    expect(screen.getByText(/Set a reminder/)).toBeTruthy();
   });
   it('opens the Planner from the card', () => {
     state.plans = [mk('Run', '12:30')];

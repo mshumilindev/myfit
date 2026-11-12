@@ -1,10 +1,11 @@
 import { Button } from '../components/ui/Button';
+import { Icon } from '../ui';
 import { Widget, WidgetEmpty, WidgetList, type WidgetSize } from '../components/ui/Widget';
 import { useT, type LocaleId } from '../i18n';
-import { dayShort, durText, weekdayShorts } from './fmt';
+import { dayShort, durText } from './fmt';
 import { fill, STRINGS, type PlannerStrings } from './strings';
 import { usePlans } from './sync';
-import { addDays, localParts, parseDay, weekday } from './zoned';
+import { localParts } from './zoned';
 import { upNextItems, type UpNextItem } from './upNextModel';
 
 const hhmm = (i: UpNextItem) => localParts(i.startAt, i.plan.timing.tz).time;
@@ -22,17 +23,36 @@ export function UpNext({
   size,
   now,
   onOpen,
+  variant = 'card',
 }: {
   size: WidgetSize;
   now: number;
   onOpen: () => void;
+  variant?: 'card' | 'inline';
 }) {
+  if (variant === 'inline') return <UpNextInline size={size} now={now} onOpen={onOpen} />;
+  return <UpNextCard size={size} now={now} onOpen={onOpen} />;
+}
+
+function UpNextCard({ size, now, onOpen }: { size: WidgetSize; now: number; onOpen: () => void }) {
   const { locale } = useT();
   const s = STRINGS[locale];
   const plans = usePlans();
   const items = upNextItems(plans, now, size === 'XL' ? 5 : 3);
   const first = items[0];
-  if (!first) return <UpNextEmpty size={size} now={now} onOpen={onOpen} />;
+  if (!first)
+    return (
+      <WidgetEmpty
+        size={size}
+        tone="accent"
+        icon="calendar-dots"
+        kicker={s.upNextPlanner}
+        title={s.nothingNext}
+        sub={s.emptyHint}
+        action={s.addPlan}
+        onAction={onOpen}
+      />
+    );
   const when = whenText(s, locale, first, now);
   const title = first.plan.title;
   if (size === 'M')
@@ -72,56 +92,48 @@ export function UpNext({
 }
 
 /**
- * Nothing planned: a small week strip (today ringed) and one clear way in. The M size stays a single row, from L up the card
- * shows the week so it still looks like a planner, not an error.
+ * The same content without a card, for the inside of the week card (one card instead of two while Planner is installed): a divider,
+ * "Up next · Planner" and the next plans (1 / 3 / 5 by size), or the empty line with the way in.
  */
-function UpNextEmpty({ size, now, onOpen }: { size: WidgetSize; now: number; onOpen: () => void }) {
+function UpNextInline({
+  size,
+  now,
+  onOpen,
+}: {
+  size: WidgetSize;
+  now: number;
+  onOpen: () => void;
+}) {
   const { locale } = useT();
   const s = STRINGS[locale];
-  if (size === 'M' || size === 'S')
-    return (
-      <WidgetEmpty
-        size={size}
-        tone="accent"
-        icon="calendar-dots"
-        kicker={s.upNextPlanner}
-        title={s.nothingNext}
-        sub={s.emptyHint}
-        action={s.addPlan}
-        onAction={onOpen}
-      />
-    );
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const today = localParts(now, tz).day;
-  const monday = addDays(today, -weekday(today));
-  const names = weekdayShorts(locale);
+  const plans = usePlans();
+  const items = upNextItems(plans, now, size === 'XL' ? 5 : size === 'L' ? 3 : 1);
   return (
-    <Widget
-      size={size}
-      tone="accent"
-      icon="calendar-dots"
-      kicker={s.upNextPlanner}
-      title={s.nothingNext}
-      sub={s.emptyHint}
-      onClick={onOpen}
-      ariaLabel={`${s.upNextPlanner}: ${s.nothingNext}`}
-      footer={
-        <Button variant="primary" size="sm" icon="plus" onClick={onOpen}>
-          {s.addPlan}
-        </Button>
-      }
-    >
-      <div className="pl-upweek" aria-hidden="true">
-        {names.map((n, i) => {
-          const d = addDays(monday, i);
-          return (
-            <span key={d} className={d === today ? 'pl-upweek-d is-today' : 'pl-upweek-d'}>
-              <span>{n}</span>
-              <b>{parseDay(d).d}</b>
+    <div className="pl-upin">
+      <div className="pl-upin-k">{s.upNextPlanner}</div>
+      {items.length === 0 ? (
+        <div className="pl-upin-empty">
+          <div className="pl-upin-txt">
+            <div className="pl-upin-t">{s.nothingNext}</div>
+            {size !== 'M' && <div className="pl-upin-s">{s.emptyHint}</div>}
+          </div>
+          <Button variant="secondary" size="sm" icon="plus" onClick={onOpen}>
+            {s.addPlan}
+          </Button>
+        </div>
+      ) : (
+        <button type="button" className="pl-upin-list" onClick={onOpen}>
+          {items.map((i) => (
+            <span key={`${i.plan.id}-${i.startAt}`} className="pl-upin-row">
+              <Icon name={i.plan.icon} />
+              <span className="pl-upin-t">{i.plan.title}</span>
+              <span className="pl-upin-w">
+                {i.ongoing ? s.nowLabel : `${whenText(s, locale, i, now)} · ${hhmm(i)}`}
+              </span>
             </span>
-          );
-        })}
-      </div>
-    </Widget>
+          ))}
+        </button>
+      )}
+    </div>
   );
 }

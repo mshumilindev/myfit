@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { draftToPlan, newDraft } from './draft';
-import { todayCount, upNextItems } from './upNextModel';
+import { upNextItems } from './upNextModel';
 import { zonedToUtc } from './zoned';
 
 const TZ = 'Europe/Warsaw';
@@ -45,17 +45,4 @@ describe('upNextItems', () => {
     const plans = ['a', 'b', 'c', 'd'].map((x, k) => mk(x, '2026-11-12', `1${k + 1}:00`));
     expect(upNextItems(plans, now, 2)).toHaveLength(2);
   });
-});
-
-describe('todayCount', () => {
-  const now = at('2026-11-12', '10:00');
-  it('counts only what is left today', () => {
-    const plans = [
-      mk('a', '2026-11-12', '12:00'),
-      mk('b', '2026-11-12', '07:00'),
-      mk('c', '2026-11-13', '12:00'),
-    ];
-    expect(todayCount(plans, now, TZ)).toBe(1);
-  });
-  it('is 0 with no plans', () => expect(todayCount([], now, TZ)).toBe(0));
 });

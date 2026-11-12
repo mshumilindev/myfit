@@ -47,11 +47,3 @@ export function upNextItems(
     .sort((a, b) => a.startAt - b.startAt || a.plan.title.localeCompare(b.plan.title))
     .slice(0, limit);
 }
-
-/** How many plans start on the device's local today and are not over yet (the week card's "Planner · N today"). */
-export function todayCount(plans: readonly PlanDoc[], now: number, deviceTz: string): number {
-  const today = localParts(now, deviceTz).day;
-  return upNextItems(plans, now, 200, 2).filter(
-    (i) => localParts(i.startAt, deviceTz).day === today,
-  ).length;
-}

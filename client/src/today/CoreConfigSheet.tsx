@@ -4,7 +4,6 @@
  * away, so the block previews behind the sheet follow, and Save / Cancel of
  * the whole edit keep their meaning. "Reset block" puts the defaults back.
  */
-import { PlannerEntry } from './PlannerEntry';
 import { useTw } from './strings';
 import { usePlannerHost } from '../plannerRt';
 import type { ReactNode } from 'react';
@@ -68,7 +67,7 @@ export function CoreConfigSheet({
     const p = (patch: Partial<ProgramOpts>) => set('program', patch);
     body = (
       <>
-        <div className="tdc-preview tdc-cfg-preview" aria-hidden="true">
+        <div className="tdc-preview tdc-preview--full tdc-cfg-preview" aria-hidden="true">
           {preview}
         </div>
         <div className="tdc-sheet-lab">{t.todayOptCardStyle}</div>
@@ -84,9 +83,6 @@ export function CoreConfigSheet({
         {planner && (
           <>
             <div className="tdc-sheet-lab">{tw.plannerCard}</div>
-            <div className="tdc-fixed" aria-hidden="true">
-              <PlannerEntry size={o.plannerSize} onOpen={() => {}} />
-            </div>
             <Segmented
               label={tw.plannerCard}
               value={o.plannerSize}

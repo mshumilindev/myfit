@@ -1088,6 +1088,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         style={!assignment && !weekTimedOut && weekHint ? { minHeight: weekHint } : undefined}
       >
         <WeekPills cells={cells} />
+        <PlannerEntry
+          inline
+          size={po.plannerSize}
+          now={Date.now()}
+          onOpen={() => shell.openOverlay({ screen: 'planner' })}
+        />
       </Card>
     );
   };
@@ -1575,11 +1581,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       program: (
         <>
           {renderProgramCard(po)} {hasHistory && renderWeekCard(po)}
-          <PlannerEntry
-            size={po.plannerSize}
-            now={Date.now()}
-            onOpen={() => shell.openOverlay({ screen: 'planner' })}
-          />
+          {!hasHistory && (
+            <PlannerEntry
+              size={po.plannerSize}
+              now={Date.now()}
+              onOpen={() => shell.openOverlay({ screen: 'planner' })}
+            />
+          )}
           <ClientTodayExtrasLazy />
           {po.logPast &&
             !(assignment && assignedActive && programDayHasPlan(assignment, todayWeekday)) && (

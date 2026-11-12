@@ -101,13 +101,11 @@ body.td-editing .today-page .td-topbar {
   -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent);
   mask-image: linear-gradient(to bottom, black 70%, transparent);
 }
-.tdc-preview .td-planner-entry {
-  display: none; /* shown whole under the preview instead (.tdc-fixed) */
-}
-.tdc-fixed {
-  pointer-events: none;
-  opacity: 0.8;
-  margin-top: var(--s-8);
+/* The program block is shown whole: the week card carries the fixed Planner block and clipping would cut it off. */
+.tdc-preview.tdc-preview--full {
+  max-height: none;
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 .tdc-hint {
   display: grid;

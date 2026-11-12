@@ -17,15 +17,28 @@ describe('PlannerEntry', () => {
   it('is shown at size M whatever the plans are, and opens the Planner', () => {
     const open = vi.fn();
     state.host = {
-      UpNext: ({ size, onOpen }: { size: string; onOpen: () => void }) => (
-        <button onClick={onOpen}>entry-{size}</button>
+      UpNext: ({
+        size,
+        variant,
+        onOpen,
+      }: {
+        size: string;
+        variant: string;
+        onOpen: () => void;
+      }) => (
+        <button onClick={onOpen}>
+          entry-{size}-{variant}
+        </button>
       ),
     };
-    render(<PlannerEntry now={0} onOpen={open} />);
-    fireEvent.click(screen.getByRole('button', { name: 'entry-M' }));
+    render(<PlannerEntry now={0} size="M" onOpen={open} />);
+    fireEvent.click(screen.getByRole('button', { name: 'entry-M-card' }));
     expect(open).toHaveBeenCalled();
     cleanup();
     render(<PlannerEntry size="XL" onOpen={open} />);
-    expect(screen.getByRole('button', { name: 'entry-XL' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'entry-XL-card' })).toBeTruthy();
+    cleanup();
+    render(<PlannerEntry inline onOpen={open} />);
+    expect(screen.getByRole('button', { name: 'entry-L-inline' })).toBeTruthy();
   });
 });

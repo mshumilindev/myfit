@@ -31,9 +31,13 @@ export interface PlannerHost {
   /** Turns "Show free hours to my trainer" on or off (the chunk saves the prefs and republishes the coach view). */
   setShare: ((on: boolean) => void) | null;
   /** The Today widget "Planner: up next" (all four sizes); `now` is the Today clock, `onOpen` opens the Planner screen. */
-  UpNext: ComponentType<{ size: WidgetSize; now: number; onOpen: () => void }> | null;
-  /** The week card's row, "Planner · 2 today", in the person's language; null while no plan is left today. */
-  todayLine: ((now: number, locale: LocaleId) => string | null) | null;
+  UpNext: ComponentType<{
+    size: WidgetSize;
+    now: number;
+    onOpen: () => void;
+    /** `inline`: no card of its own, it sits inside the week card under the week pills. */
+    variant?: 'card' | 'inline';
+  }> | null;
   /** The availability a trainer may see, or null while it is not shared. */
   coachView: (() => CoachAvailability | null) | null;
 }
@@ -45,7 +49,6 @@ export const plannerHost: PlannerHost = {
   exportFiles: null,
   setShare: null,
   UpNext: null,
-  todayLine: null,
   coachView: null,
 };
 

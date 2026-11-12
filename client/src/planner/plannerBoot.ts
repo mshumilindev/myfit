@@ -14,10 +14,9 @@ import.meta.glob('../plannerSources/*.tsx', { eager: true });
 import { PlannerPage } from './PlannerPage';
 import { RingLayer } from './RingLayer';
 import { UpNext } from './UpNext';
-import { todayCount } from './upNextModel';
 import { startAlertsSync } from './alertsSync';
 import { getPlans, getPrefs, savePrefs, startPlannerSync, subscribePlanner } from './sync';
-import { fill, STRINGS } from './strings';
+import { STRINGS } from './strings';
 
 const coachView = () =>
   buildCoachAvailability(
@@ -34,11 +33,6 @@ provide(plannerHost, {
   setShare: (on) => void savePrefs({ ...getPrefs(), shareAvailability: on }),
   Layer: RingLayer,
   UpNext,
-  todayLine: (now, locale) => {
-    const n = todayCount(getPlans(), now, Intl.DateTimeFormat().resolvedOptions().timeZone);
-    const s = STRINGS[locale];
-    return n > 0 ? `${s.plannerLinkLabel} · ${fill(s.todayCount, { n: String(n) })}` : null;
-  },
   exportFiles: () => [
     {
       name: 'planner-plans.json',
