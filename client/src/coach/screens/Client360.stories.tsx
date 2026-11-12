@@ -1,5 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { createFixturesPort, buildFixtureWorld } from '../data/__fixtures__/fixtures';
+import {
+  noAvailabilityInStory,
+  shareAvailabilityInStory,
+} from '../data/__fixtures__/availabilityStories';
 import { CoachStoryFrame } from '../../stories/coachStoryKit';
 import { idOf, lockedClient, totalsOnlyClient, worldPort } from './storyPorts';
 
@@ -96,5 +100,26 @@ export const LoadFailed: Story = {
   args: {
     route: at('Oleh Bondar'),
     makePort: () => createFixturesPort({ failWith: () => 'unavailable' }),
+  },
+};
+
+/** SPO-552 I10: the client shares free hours: the sharing row says Free or busy, the free-hours card sits in Overview. */
+export const AvailabilityShared: Story = {
+  args: {
+    route: at('Oleh Bondar'),
+    makePort: () => {
+      shareAvailabilityInStory(Math.floor(Date.now() / 86_400_000));
+      return ready();
+    },
+  },
+};
+/** SPO-552 I10: nothing published (not allowed, or no Planner on their side): "Not shared", no card. */
+export const AvailabilityNotShared: Story = {
+  args: {
+    route: at('Oleh Bondar'),
+    makePort: () => {
+      noAvailabilityInStory();
+      return ready();
+    },
   },
 };

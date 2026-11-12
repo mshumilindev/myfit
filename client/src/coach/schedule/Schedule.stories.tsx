@@ -5,6 +5,10 @@ import {
   TODAY_KEY,
   WEEK0,
 } from './__fixtures__/fixtures';
+import {
+  noAvailabilityInStory,
+  shareAvailabilityInStory,
+} from '../data/__fixtures__/availabilityStories';
 import { tsOf } from './time';
 import { ScheduleChatFrame, ScheduleStoryFrame } from './ScheduleStoryFrame';
 import { SchedulePortError, type SchedulePort } from './port';
@@ -142,3 +146,31 @@ export const ChatGroupDeclined: StoryObj = {
 export const CalendarSettings: Story = { args: at('#/c/schedule?form=settings') };
 /** Add sessions drawer: kit controls only, sticky footer with Cancel / Add; warns when a time is outside the working or gym hours. */
 export const AddSessions: Story = { args: at('#/c/schedule?form=plan') };
+
+const withFree = (hash: string): Story['args'] => ({
+  makePort: () => {
+    shareAvailabilityInStory(TODAY_KEY);
+    return port();
+  },
+  hash,
+});
+/** SPO-552 I10: one client's free hours shaded on the grid (from the card's "Show on Schedule"). */
+export const ClientFreeHours: Story = { args: withFree('#/c/schedule?who=c1&free=1') };
+/** The client's move request: "Checks" says whether the new time is inside their free hours and clear of other sessions. */
+export const InspectorRequestChecks: Story = {
+  args: withFree(`#/c/schedule?open=${encodeURIComponent(`r-c1-fri:${WEEK0 + 4}`)}&who=c1&free=1`),
+};
+/** The same, with nothing shared: only the overlap row. */
+export const InspectorRequestChecksNotShared: Story = {
+  args: {
+    makePort: () => {
+      noAvailabilityInStory();
+      return port();
+    },
+    hash: `#/c/schedule?open=${encodeURIComponent(`r-c1-fri:${WEEK0 + 4}`)}`,
+  },
+};
+/** Propose a session: the one-off form for the client, with a warning when the time is outside their free hours. */
+export const ProposeInFreeHours: Story = {
+  args: withFree('#/c/schedule?form=oneoff&client=c1&who=c1&free=1'),
+};
