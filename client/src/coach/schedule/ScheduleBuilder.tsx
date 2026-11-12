@@ -18,6 +18,7 @@ import { coachClock } from '../format';
 import { PanelFooter } from '../layout/footerSlot';
 import { useCalendarSettings } from './calendarSettings';
 import { defaultGym } from './hours';
+import { FreeHoursNotice } from './FreeHoursNotice';
 import { HoursNotice } from './HoursNotice';
 import { newId } from './ids';
 import { draftSlots, peopleOf, clashWith } from './model';
@@ -384,6 +385,12 @@ export function ScheduleBuilder(p: ScheduleBuilderProps) {
         </Notice>
       )}
       <HoursNotice drafts={drafts} t={t} />
+      <FreeHoursNotice
+        clientId={ids.length === 1 ? ids[0] : null}
+        drafts={drafts}
+        name={ids.length === 1 ? people.first(ids[0]) : ''}
+        t={t}
+      />
       {p.store.getState().failed === 'limit' && (
         <Notice tone="danger" icon="warning" role="alert">
           {t.scFailLimit}

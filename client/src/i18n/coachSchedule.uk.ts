@@ -321,6 +321,7 @@ export const scheduleUk: typeof scheduleEn = {
   scReqExpires: (rel: string) => `Спливає ${rel}`,
   scReqWaitTrainer: (n: string) => `Чекає на тренера ${n}`,
   rcConfirmManager: 'Підтвердити як менеджер',
+  rcChkNotFreeN: (n: string, k: number) => `Сесій поза вільними годинами (${n}): ${k}`,
   rcChkH: 'Перевірки',
   rcChkFree: (n: string) => `У вільні години: ${n}`,
   rcChkNotFree: (n: string) => `Поза вільними годинами: ${n}`,

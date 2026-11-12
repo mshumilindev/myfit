@@ -313,6 +313,7 @@ export const scheduleEt: typeof scheduleEn = {
   scReqExpires: (rel: string) => `Aegub ${rel}`,
   scReqWaitTrainer: (n: string) => `Ootab treenerit ${n}`,
   rcConfirmManager: 'Kinnita juhina',
+  rcChkNotFreeN: (n: string, k: number) => `Vabade tundide väliseid seansse (${n}): ${k}`,
   rcChkH: 'Kontrollid',
   rcChkFree: (n: string) => `Vabade tundide sees: ${n}`,
   rcChkNotFree: (n: string) => `Vabade tundide väliselt: ${n}`,

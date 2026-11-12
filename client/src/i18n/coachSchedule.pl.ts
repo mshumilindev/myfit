@@ -322,6 +322,7 @@ export const schedulePl: typeof scheduleEn = {
   scReqExpires: (rel: string) => `Wygasa ${rel}`,
   scReqWaitTrainer: (n: string) => `Czeka na trenera ${n}`,
   rcConfirmManager: 'Potwierdź jako menedżer',
+  rcChkNotFreeN: (n: string, k: number) => `Sesje poza wolnymi godzinami (${n}): ${k}`,
   rcChkH: 'Sprawdzenia',
   rcChkFree: (n: string) => `W wolnych godzinach: ${n}`,
   rcChkNotFree: (n: string) => `Poza wolnymi godzinami: ${n}`,

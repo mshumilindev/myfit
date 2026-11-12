@@ -321,6 +321,7 @@ export const scheduleLt: typeof scheduleEn = {
   scReqExpires: (rel: string) => `Baigiasi ${rel}`,
   scReqWaitTrainer: (n: string) => `Laukia trenerio ${n}`,
   rcConfirmManager: 'Patvirtinti kaip vadybininkas',
+  rcChkNotFreeN: (n: string, k: number) => `Sesijų ne laisvu laiku (${n}): ${k}`,
   rcChkH: 'Patikros',
   rcChkFree: (n: string) => `Laisvu laiku: ${n}`,
   rcChkNotFree: (n: string) => `Ne laisvu laiku: ${n}`,

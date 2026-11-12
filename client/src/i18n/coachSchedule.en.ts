@@ -331,6 +331,7 @@ export const scheduleEn = {
   scReqExpires: (rel: string) => `Expires ${rel}`,
   scReqWaitTrainer: (n: string) => `Waiting for trainer ${n}`,
   rcConfirmManager: 'Confirm as manager',
+  rcChkNotFreeN: (n: string, k: number) => `${k} of the sessions are outside ${n}'s free hours`,
   rcChkH: 'Checks',
   rcChkFree: (n: string) => `Inside ${n}'s free hours`,
   rcChkNotFree: (n: string) => `Outside ${n}'s free hours`,
