@@ -487,6 +487,61 @@ describe('coachRead: one consent-gated path with an audit entry per day (R-BE-CO
       'invalid-argument:invalid-category',
     );
   });
+  describe('share: the sealed on-device view (availability) for the coach of record', () => {
+    const seedShare = async () => {
+      await kv.set('users/c1/meta/coachShare', { v: 1, ct: 'SHARECT', updatedAt: 5 });
+      await kv.set('users/c1/grants/t1', { v: 1, ct: 'GRANTCT', fp: 'f' });
+      await kv.set('users/c1/grants/t2', { v: 1, ct: 'OTHERCOACH', fp: 'f' });
+    };
+    it('hands the active trainer the sealed view plus HIS grant, and audits it as availability', async () => {
+      await link({ totals: 'full' });
+      await seedShare();
+      const r = await coachRead(ctx(), trainer, { clientId: 'c1', categories: [], share: true });
+      expect(r.coachShare).toMatchObject({ ct: 'SHARECT' });
+      expect(r.grant).toMatchObject({ ct: 'GRANTCT' });
+      expect(JSON.stringify(r)).not.toContain('OTHERCOACH');
+      const a = await kv.list('users/c1/audit');
+      expect(a).toHaveLength(1);
+      expect(a[0].data).toMatchObject({ category: 'availability', readerId: 't1' });
+    });
+    it('is off unless asked: a normal read never carries the view', async () => {
+      await link({ totals: 'full' });
+      await seedShare();
+      const r = await coachRead(ctx(), trainer, { clientId: 'c1', categories: ['totals'] });
+      expect(r.coachShare).toBeNull();
+      expect(r.grant).toBeNull();
+      expect(await kv.list('users/c1/audit')).toHaveLength(1); // the totals read only
+    });
+    it('no view published yet: null, no grant, no audit row', async () => {
+      await link({ totals: 'full' });
+      await kv.set('users/c1/grants/t1', { v: 1, ct: 'GRANTCT', fp: 'f' });
+      const r = await coachRead(ctx(), trainer, { clientId: 'c1', categories: [], share: true });
+      expect(r.coachShare).toBeNull();
+      expect(r.grant).toBeNull();
+      expect(await kv.list('users/c1/audit')).toHaveLength(0);
+    });
+    it('another trainer, the client, and an ended link never read it', async () => {
+      await link({ totals: 'full' });
+      await seedShare();
+      const stranger: Actor = { uid: 't2', role: 'trainer' };
+      expect(
+        await code(coachRead(ctx(), stranger, { clientId: 'c1', categories: [], share: true })),
+      ).not.toBe('ok');
+      expect(
+        await code(coachRead(ctx(), client, { clientId: 'c1', categories: [], share: true })),
+      ).not.toBe('ok');
+      await coachEnd(ctx(), client, { clientId: 'c1' });
+      expect(
+        await code(coachRead(ctx(), trainer, { clientId: 'c1', categories: [], share: true })),
+      ).not.toBe('ok');
+    });
+    it('an empty read without share is still invalid', async () => {
+      await link({ totals: 'full' });
+      expect(await code(coachRead(ctx(), trainer, { clientId: 'c1', categories: [] }))).toBe(
+        'invalid-argument:invalid-categories',
+      );
+    });
+  });
   it('an admin coaches only their own clients, with the same consent', async () => {
     await link({ totals: 'full' }, 'app', client, admin);
     expect(await code(coachRead(ctx(), admin, { clientId: 'c1', categories: ['totals'] }))).toBe(

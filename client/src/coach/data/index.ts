@@ -8,3 +8,4 @@ export * from './useCoachUnread';
 export * from './unreadStore';
 export * from './config';
 export { sealDecision, openDecision, sealSignalState, openSignalState } from './decisionDocs';
+export * from './availability';

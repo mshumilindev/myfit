@@ -440,7 +440,10 @@ export function createFirestoreClientPort(d: ClientPortDeps): ClientCoachPort {
         });
         const out: AccessEntry[] = [];
         for (const r of rows) {
-          const cat = CATEGORIES.find((c) => c === r.data.category);
+          const cat =
+            r.data.category === 'availability'
+              ? 'availability'
+              : CATEGORIES.find((c) => c === r.data.category);
           if (!cat) continue;
           out.push({
             id: r.id,

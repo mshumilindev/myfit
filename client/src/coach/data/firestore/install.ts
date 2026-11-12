@@ -37,6 +37,8 @@ import type { LibGym } from '../../share/types';
 import { configureCoachData } from '../config';
 import { configureInvitePort, createLocalInvitePort } from '../inviteStore';
 import { configureReadLog } from '../readLog';
+import { configureAvailability } from '../availability';
+import { createFirestoreAvailabilityPort } from './availabilityPort';
 import { createFirestoreChatPort } from './chatPort';
 import { createFirestoreClientChatPort } from './clientChatPort';
 import { createFirestoreClientPort } from './clientPort';
@@ -285,6 +287,13 @@ export function installFirestoreCoach(d: InstallDeps): () => void {
     }),
   });
   configureReadLog(createFirestoreReadLog(d.fs));
+  configureAvailability(
+    createFirestoreAvailabilityPort({
+      fs: d.fs,
+      vault: d.vault,
+      loadOwnCoachKey: d.loadOwnCoachKey,
+    }),
+  );
   configureTrustPort(createFirestoreTrustPort(d.fs, signing));
   // working hours, the gyms the trainer works at, the visible range: sealed with the trainer's own key
   configureCalendarSettings(
@@ -305,6 +314,7 @@ export function installFirestoreCoach(d: InstallDeps): () => void {
     configureTeam(null);
     configureShare();
     configureReadLog(null);
+    configureAvailability(null);
   };
 }
 

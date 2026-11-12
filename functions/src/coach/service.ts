@@ -818,7 +818,8 @@ export async function writeAudit(
   a: {
     reader: Actor;
     subject: string;
-    cat: Category;
+    /** a consent category, or `availability`: the on-device view the person shows every coach of record (SPO-552) */
+    cat: Category | 'availability';
     level: string | null;
     via: ReadVia;
     now: number;
@@ -857,7 +858,7 @@ export async function coachRead(ctx: Ctx, actor: Actor, body: Record<string, unk
   if (!isUid(clientId)) fail('invalid-argument', 'bad-client');
   const cats = Array.isArray(body.categories) ? (body.categories as unknown[]) : [];
   if (
-    !cats.length ||
+    (!cats.length && body.share !== true) ||
     cats.length > CATEGORIES.length ||
     !cats.every((c) => CATEGORIES.includes(c as Category))
   )
@@ -899,11 +900,38 @@ export async function coachRead(ctx: Ctx, actor: Actor, body: Record<string, unk
   }
   // Sealed categories are opened on the trainer's device with the client's vault grant (ciphertext for THIS trainer
   // only; the client's rules keep the grant owner-read, so the server hands it over, as `athleteWorkout` does).
-  const needsKey = Object.entries(results).some(
-    ([k, r]) => r.state === 'ok' && (k !== 'totals' || !!r.extras?.length),
-  );
+  // `share: true` also hands over the sealed on-device view (`meta/coachShare`: what the person lets any coach of record
+  // see, availability included). Only the ACTIVE trainer of this client gets it (checked above), the content was already
+  // cut by the person's own sharing levels when the device sealed it, and every read is audited.
+  let coachShare: Record<string, unknown> | null = null;
+  if (body.share === true) {
+    coachShare = await kv.get(`users/${clientId}/meta/coachShare`);
+    if (coachShare)
+      await kv.tx((t) =>
+        writeAudit(t, {
+          reader: actor,
+          subject: clientId,
+          cat: 'availability',
+          level: null,
+          via,
+          now,
+        }),
+      );
+  }
+  const needsKey =
+    !!coachShare ||
+    Object.entries(results).some(
+      ([k, r]) => r.state === 'ok' && (k !== 'totals' || !!r.extras?.length),
+    );
   const grant = needsKey ? await kv.get(`users/${clientId}/grants/${c.trainerId}`) : null;
-  return { results, grant, mode: c.mode, consentVersion: c.consentVersion, serverTime: now };
+  return {
+    results,
+    grant,
+    coachShare,
+    mode: c.mode,
+    consentVersion: c.consentVersion,
+    serverTime: now,
+  };
 }
 
 /** Reads that never reach the server otherwise (exports from the device cache, chat-share previews). */

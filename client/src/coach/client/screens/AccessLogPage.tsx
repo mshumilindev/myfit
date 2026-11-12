@@ -5,6 +5,7 @@ import { GroupedList, ListRow } from '../../../components/ui/GroupedList';
 import { IconTile } from '../../../components/ui/IconTile';
 import { Notice } from '../../../components/ui/Notice';
 import { SkeletonRows } from '../../../components/ui/Skeleton';
+import { useT } from '../../../i18n';
 import { useChatT } from '../../../i18n/coachChat';
 import { useClientT } from '../../../i18n/coachClient';
 import { dayKey, dayLabel, clock } from '../../chat/format';
@@ -23,6 +24,7 @@ import { useClientTeam } from './useClientTeam';
  */
 export function AccessLogPage({ port, onBack }: { port?: ClientCoachPort; onBack: () => void }) {
   const { cc, locale } = useClientT();
+  const { t } = useT();
   const { ch } = useChatT();
   const { snapshot, store } = useClientCoach(port);
   const [rows, setRows] = useState<AccessEntry[] | null>(null);
@@ -74,16 +76,22 @@ export function AccessLogPage({ port, onBack }: { port?: ClientCoachPort; onBack
       {groups.map((g) => (
         <GroupedList key={g.key} header={dayLabel(g.at, now, ch, locale)}>
           {g.rows.map((r) => {
-            const ui =
-              CATEGORY_UI[(r.category === 'checkins' ? 'totals' : r.category) as ShareCategory];
+            const avail = r.category === 'availability';
+            const ui = avail
+              ? { icon: 'calendar-dots', tone: 'accent' as const }
+              : CATEGORY_UI[(r.category === 'checkins' ? 'totals' : r.category) as ShareCategory];
             return (
               <ListRow
                 key={r.id}
                 icon={<IconTile tone={ui.tone} size={30} icon={ui.icon} />}
-                label={catTitle(
-                  cc,
-                  (r.category === 'checkins' ? 'totals' : r.category) as ShareCategory,
-                )}
+                label={
+                  avail
+                    ? t.avlTitle
+                    : catTitle(
+                        cc,
+                        (r.category === 'checkins' ? 'totals' : r.category) as ShareCategory,
+                      )
+                }
                 sub={[
                   r.ref ? `${accessText(cc, r.what)}: ${r.ref}` : accessText(cc, r.what),
                   r.count && r.count > 1 ? cc.lgTimes(r.count) : '',

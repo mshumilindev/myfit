@@ -46,7 +46,8 @@ export type AccessWhat = 'week' | 'session' | 'history' | 'summary' | 'live';
 export interface AccessEntry {
   id: string;
   at: number;
-  category: Category;
+  /** a consent category, or `availability` (the on-device view the trainer reads, SPO-552) */
+  category: Category | 'availability';
   what: AccessWhat;
   /** reads of this category by this way on this day, merged by the server into one row (1 when it was read once) */
   count?: number;
