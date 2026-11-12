@@ -24,6 +24,7 @@ import { BODY_PLUS_WIDGETS } from './widgets/bodyplus';
 import { LEARN_ATLAS_WIDGETS } from './widgets/learnatlas';
 import { DISCOVER_WIDGETS } from './widgets/discover';
 import { PLAN_WIDGETS } from './widgets/plan';
+import { PLANNER_WIDGETS } from './widgets/planner';
 import { STRENGTH_WIDGETS } from './widgets/strength';
 import { MUSCLES_WIDGETS } from './widgets/muscles';
 import { CARDIO_WIDGETS } from './widgets/cardio';
@@ -70,6 +71,7 @@ const APEX_WIDGETS: WidgetDef[] = lazyWidgets<WidgetCtx, WidgetDef>(APEX_WIDGET_
 const ALL: WidgetDef[] = [
   ...TRAINING_WIDGETS,
   ...PLAN_WIDGETS,
+  ...PLANNER_WIDGETS,
   ...STRENGTH_WIDGETS,
   ...MUSCLES_WIDGETS,
   ...BODY_WIDGETS,
@@ -145,6 +147,7 @@ const OTHER_WIDGET_ADDON: Readonly<Record<string, string>> = {
   goals: 'goals',
   playbook: 'playbook',
   'physique-goal': 'goals',
+  'planner-up-next': 'planner',
 };
 /** Widgets outside the cardio group that read or log activities. */
 const ACTIVITY_WIDGET_IDS: ReadonlySet<string> = new Set(['activities-week', 'rest-day-idea']);

@@ -5,6 +5,7 @@
  * shows nothing of Planner. Its data stays stored either way.
  */
 import { useSyncExternalStore, type ComponentType } from 'react';
+import type { WidgetSize } from './components/ui/Widget';
 import { usePlannerOn } from './addons/featureGates';
 import type { LocaleId } from './i18n';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
@@ -29,6 +30,10 @@ export interface PlannerHost {
   exportFiles: (() => ExportFile[]) | null;
   /** Turns "Show free hours to my trainer" on or off (the chunk saves the prefs and republishes the coach view). */
   setShare: ((on: boolean) => void) | null;
+  /** The Today widget "Planner: up next" (all four sizes); `now` is the Today clock, `onOpen` opens the Planner screen. */
+  UpNext: ComponentType<{ size: WidgetSize; now: number; onOpen: () => void }> | null;
+  /** The week card's row, "Planner · 2 today", in the person's language; null while no plan is left today. */
+  todayLine: ((now: number, locale: LocaleId) => string | null) | null;
   /** The availability a trainer may see, or null while it is not shared. */
   coachView: (() => CoachAvailability | null) | null;
 }
@@ -39,6 +44,8 @@ export const plannerHost: PlannerHost = {
   moreItem: null,
   exportFiles: null,
   setShare: null,
+  UpNext: null,
+  todayLine: null,
   coachView: null,
 };
 
