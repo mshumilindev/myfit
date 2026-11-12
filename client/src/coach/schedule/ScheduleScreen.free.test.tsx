@@ -1,13 +1,22 @@
 import { cleanup, render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFixturesPort } from '../data/__fixtures__/fixtures';
+import type { ClientAvailability } from '../domain/availability';
 import { configureAvailability } from '../data/availability';
 import { setCoachTimeZone } from '../format';
 import { setViewport } from '../testViewport';
 import { createFixturesSchedulePort } from './__fixtures__/fixtures';
 import { ScheduleScreen } from './ScheduleScreen';
 
-const EVERY_DAY = Object.fromEntries([0, 1, 2, 3, 4, 5, 6].map((d) => [d, [[420, 1260]]]));
+const EVERY_DAY: ClientAvailability['weekly'] = {
+  0: [[420, 1260]],
+  1: [[420, 1260]],
+  2: [[420, 1260]],
+  3: [[420, 1260]],
+  4: [[420, 1260]],
+  5: [[420, 1260]],
+  6: [[420, 1260]],
+};
 const shared = { state: 'shared' as const, availability: { weekly: EVERY_DAY, unavailable: [] } };
 
 beforeEach(() => {

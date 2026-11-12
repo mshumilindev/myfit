@@ -968,3 +968,23 @@ html[data-theme] .sc-block.sc-st.sc-block--inprogress {
   );
   pointer-events: none;
 }
+
+.sc-insp-checks {
+  display: grid;
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sc-insp-checks li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  font-size: var(--fs-13, 13px);
+}
+.sc-insp-checks .is-ok {
+  color: var(--success, var(--text));
+}
+.sc-insp-checks .is-bad {
+  color: var(--warning, var(--text));
+}

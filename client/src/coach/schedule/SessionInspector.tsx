@@ -18,6 +18,7 @@ import { longDate, longWeekday, shortDate } from './labels';
 import { clashWith, endOf, peopleOf, statusAt } from './model';
 import type { People } from './people';
 import { relativeTo, relativeWhen } from './relative';
+import { RequestChecks } from './RequestChecks';
 import type { ScheduleStore } from './scheduleStore';
 import { dayOfTs } from './time';
 import { gymName, type RescheduleRequest, type ScheduleSlot } from './types';
@@ -203,6 +204,9 @@ export function SessionInspector(p: SessionInspectorProps) {
               </span>
             </div>
             {r.note && <p className="sc-insp-reqtext">{r.note}</p>}
+            {byClient && (
+              <RequestChecks request={r} slot={slot} slots={p.slots} name={name} t={t} />
+            )}
             <p className="sc-insp-reqtext">
               {t.scReqExpires(relativeTo(r.expiresAt, p.now, locale))}
             </p>

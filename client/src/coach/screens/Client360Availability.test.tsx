@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { rosterEn as r } from '../../i18n/coachRoster.en';
 import { buildFixtureWorld, createFixturesPort } from '../data/__fixtures__/fixtures';
 import { configureAvailability, type AvailabilityPort } from '../data/availability';
-import { dayKeyOf } from '../domain/availability';
+import { dayKeyOf, type ClientAvailability } from '../domain/availability';
 import { currentHash } from '../../route';
 import { setViewport } from '../testViewport';
 import { Client360Screen } from './Client360Screen';
@@ -21,7 +21,7 @@ afterEach(() => {
   configureAvailability(null);
 });
 
-const AV = {
+const AV: ClientAvailability = {
   weekly: { 0: [[360, 480]] },
   unavailable: [{ fromDay: dayKeyOf(Date.now()) + 1, toDay: dayKeyOf(Date.now()) + 2 }],
 };
