@@ -83,6 +83,20 @@ export const PENDING: readonly PendingItem[] = [
     'SPO-22/SPO-443: voice and video calls use Cloudflare STUN/TURN (participant IP addresses and technical WebRTC packets; relayed media is DTLS-SRTP encrypted; nothing is recorded). Needs a recipient paragraph in all texts, a lawyer decision on role, basis and transfer, a new policy version with a material changelog entry (and the server copy of the versions), calls are live without a feature flag (owner decision 2026-11-05), so this is open legal work. Do not describe it as end-to-end. See docs/compliance/processors.md.',
   ),
   item(
+    'pp-planner-availability',
+    'privacy',
+    'p3',
+    'lawyer',
+    'SPO-552 Planner: availability shown to a trainer (with consent) marks days of Unwell, Full rest or an injury no-load window as "not available" without the reason. Confirm this is not health data under Art. 9 (no reason is shared, but a pattern of unavailable days could be read as health-related), and decide whether granting it needs its own entry in the consent log. Retention of plans after the add-on is removed: the text says they are kept until the person deletes them or the account; confirm.',
+  ),
+  item(
+    'tt-planner-disclaimer',
+    'terms',
+    't2',
+    'lawyer',
+    'SPO-552 Planner: the new paragraph says reminders are a convenience, not a guarantee, and not to be relied on for medication or safety. The terms version 2026-11-12 is marked material (everyone is asked to confirm); the lawyer decides whether it may be editorial.',
+  ),
+  item(
     'pp-roles-allocation',
     'privacy',
     'p2',

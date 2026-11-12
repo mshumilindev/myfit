@@ -64,7 +64,7 @@ describe('consent kinds and versions', () => {
   it('every kind has a current version in YYYY-MM-DD form, from one table', () => {
     for (const v of Object.values(LEGAL_VERSIONS)) expect(v).toMatch(VERSION_RE);
     for (const k of CONSENT_KINDS) expect(currentVersion(k)).toMatch(VERSION_RE);
-    expect(V).toBe('2026-10-21');
+    expect(V).toBe('2026-11-12');
     expect(currentVersion('health:cycle')).toBe(LEGAL_VERSIONS.health);
     expect(currentVersion('policy-ack')).toBe(LEGAL_VERSIONS.policy);
   });

@@ -61,6 +61,12 @@ export const LEGAL_CHANGELOG: readonly LegalChangelogEntry[] = [
   { doc: 'policy', version: '2026-11-04', kind: 'material', bullets: ['category'] },
   // SPO-436: device sessions idle for 30 days are now deleted (shorter retention, wording only; {{ЮРИСТ}} confirms it is editorial).
   { doc: 'policy', version: '2026-11-05', kind: 'editorial', bullets: [] },
+  // SPO-552 Planner: plans and weekly hours kept encrypted in the account, availability shown to a trainer only with consent
+  // (free or busy, no reason), the data stays when the add-on is removed; reminder states are deleted within 6 hours.
+  { doc: 'policy', version: '2026-11-12', kind: 'material', bullets: ['category', 'retention'] },
+  // SPO-552 Planner: reminders are a convenience and not a guarantee, and are not to be relied on for medication or safety
+  // ({{ЮРИСТ}} confirms that this is a material change of the terms).
+  { doc: 'terms', version: '2026-11-12', kind: 'material', bullets: ['terms'] },
 ];
 
 /** Entries of a document after `from` (exclusive) up to `to` (inclusive). */

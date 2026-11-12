@@ -6,7 +6,7 @@
  * fails when the two differ.
  */
 export const RELEASED_VERSIONS = {
-  terms: ['2026-10-21'],
+  terms: ['2026-10-21', '2026-11-12'],
   policy: [
     '2026-10-21',
     '2026-10-28',
@@ -15,6 +15,7 @@ export const RELEASED_VERSIONS = {
     '2026-11-01',
     '2026-11-04',
     '2026-11-05',
+    '2026-11-12',
   ],
   age: ['2026-10-21'],
   health: ['2026-10-21'],

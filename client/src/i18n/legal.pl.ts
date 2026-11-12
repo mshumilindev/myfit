@@ -83,6 +83,16 @@ export const legalPl: LegalTexts = {
                   'Umowa; prawnie uzasadniony interes w rozliczalności, art. 6 ust. 1 lit. f',
                 ],
                 [
+                  '**Planner (tylko jeśli go dodasz):** Twoje plany (tytuł, notatka, ikona, kolor, powtarzanie, przypomnienie) i tygodniowe wolne godziny są przechowywane w postaci zaszyfrowanej i czytelne tylko dla Ciebie; jawne pozostają tylko czas najbliższego przypomnienia, to, czy jest ciche czy uporczywe, oraz stan przypomnienia (dzwoni, odłożone lub wyłączone, i na którym urządzeniu)',
+                  'Przypominać o Twoich własnych planach i utrzymywać je jednakowo na wszystkich Twoich urządzeniach',
+                  'Umowa, art. 6 ust. 1 lit. b',
+                ],
+                [
+                  '**Dostępność udostępniana trenerowi (tylko jeśli na to zezwolisz):** Twoje wolne i zajęte godziny w poszczególne dni. Dzień, w którym ustawisz Niedyspozycję lub Pełny odpoczynek albo uraz ma okno bez obciążenia, widać tylko jako „niedostępny”, bez powodu',
+                  'Aby trener proponował sesje, gdy jesteś wolny',
+                  'Zgoda, art. 6 ust. 1 lit. a, którą możesz w każdej chwili wycofać w „Czym się dzielę”',
+                ],
+                [
                   '**Powiadomienia push:** token urządzenia, zaplanowany tekst przypomnienia, godziny ciszy; powiadomienie, że na Twoim koncie zalogowało się nowe urządzenie (bez miejsca i nazwy urządzenia)',
                   'Wysyłanie przypomnień i alertów, o które prosisz',
                   'Zgoda wyrażona przez uprawnienie przeglądarki lub systemu, art. 6 ust. 1 lit. a',
@@ -200,6 +210,7 @@ export const legalPl: LegalTexts = {
               '**Zapisy Twoich zgód** (na co się zgodziłeś(-aś), która wersja, kiedy): do czasu usunięcia konta.',
               '**Sesje urządzeń** (typ urządzenia, przeglądarka i system, przybliżone miasto i kraj, pierwsza i ostatnia aktywność): do wylogowania tego urządzenia, usunięcia konta lub 30 dni bezczynności; przechowywanych jest najwyżej 50, najdawniej aktywne są usuwane jako pierwsze.',
               '**Zapisy techniczne bez automatycznego terminu:** liczniki prób logowania, dziennik wydawania kluczy, tokeny push, zaplanowane i odrzucone przypomnienia oraz powiadomienia serwisowe nie mają dziś w aplikacji automatycznego terminu, a okresów przechowywania dla nich jeszcze nie ustaliliśmy.',
+              '**Planner (tylko jeśli go dodasz):** do czasu usunięcia planu lub konta. Usunięcie dodatku Planner nie usuwa Twoich planów ani godzin; zostają zaszyfrowane i wracają po ponownym dodaniu. Stan przypomnienia jest usuwany po jego rozstrzygnięciu, a najpóźniej 6 godzin po przypomnieniu.',
               '**Kopie zapasowe i usuwanie przez Google:** po usunięciu danych Google kończy ich usuwanie ze swoich systemów w okresie podanym w warunkach Firebase (do 180 dni, chyba że prawo wymaga przechowywania).',
               'Obowiązki prawne mogą wymagać dłuższego przechowywania niektórych zapisów; poinformujemy Cię, których, gdy to nastąpi.',
             ],
@@ -286,6 +297,9 @@ export const legalPl: LegalTexts = {
         body: [
           {
             p: 'Spotter to tracker treningowy i aplikacja do współpracy z trenerem. Funkcje mogą być zmieniane, dodawane lub usuwane wyłącznie z powodów podanych w punktach 10 i 13, a o zmianach poinformujemy w sposób tam opisany. Niektóre funkcje wymagają połączenia z internetem; aplikacja jest zaprojektowana tak, by działać offline z późniejszą synchronizacją. Jeśli zostaną wprowadzone funkcje płatne, poinformujemy Cię przed obciążeniem, a te warunki zostaną zaktualizowane.',
+          },
+          {
+            p: 'Przypomnienia, także z Plannera, to wygoda, a nie gwarancja. Mogą się spóźnić lub nie dojść, gdy urządzenie jest wyłączone lub offline, powiadomienia są zablokowane, włączony jest tryb cichy lub „Nie przeszkadzać”, albo system ogranicza aplikację. Nie polegaj na Spotter tam, gdzie pominięte przypomnienie mogłoby zaszkodzić, na przykład w sprawie leków lub bezpieczeństwa.',
           },
         ],
       },

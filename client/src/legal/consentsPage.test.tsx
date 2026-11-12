@@ -89,7 +89,10 @@ describe('ConsentsPage', () => {
     render(<ConsentsPage />);
     expect(sw('Nicotine').checked).toBe(true);
     expect(sw('Alcohol').checked).toBe(false);
-    expect(screen.getAllByText(new RegExp(`Given · v${V}`)).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText(new RegExp(`Given · v${V}`)).length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText(new RegExp(`Given · v${LEGAL_VERSIONS.age}`)).length,
+    ).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('Not given').length).toBe(10);
     expect(screen.getAllByRole('switch').length).toBe(12);
   });
@@ -217,9 +220,11 @@ describe('PrivacyHub', () => {
     expect(screen.getByText('2 of 10 on')).toBeTruthy();
     expect(screen.getByText('Privacy Policy')).toBeTruthy();
     expect(screen.getByText('Terms of Use')).toBeTruthy();
-    // the two documents are versioned apart (the policy moved on 2026-11-01), each shows its own
-    expect(screen.getByText(`Version ${LEGAL_VERSIONS.terms}`)).toBeTruthy();
-    expect(screen.getByText(`Version ${LEGAL_VERSIONS.policy}`)).toBeTruthy();
+    // each document shows its own version (they may be equal, as on 2026-11-12)
+    expect(screen.getAllByText(`Version ${LEGAL_VERSIONS.terms}`).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(`Version ${LEGAL_VERSIONS.policy}`).length).toBeGreaterThanOrEqual(
+      1,
+    );
     fireEvent.click(screen.getByText('Consents'));
     expect(openConsents).toHaveBeenCalledTimes(1);
   });

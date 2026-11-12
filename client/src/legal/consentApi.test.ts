@@ -187,7 +187,10 @@ describe('legal gate states', () => {
   it('is needed only when the server confirmed that a required consent is missing, withdrawn or stale', () => {
     expect(legalGateOf(applySnapshot([], { fromCache: false }))).toBe('needed');
     expect(legalGateOf(applySnapshot(required().slice(1), { fromCache: false }))).toBe('needed');
-    const stale = required().map((r) => (r.kind === 'terms' ? { ...r, version: '2020-01-01' } : r));
+    // age-18 has no changelog, so an older version is a full re-acceptance (terms and policy have one: a material change asks through the update sheet)
+    const stale = required().map((r) =>
+      r.kind === 'age-18' ? { ...r, version: '2020-01-01' } : r,
+    );
     expect(legalGateOf(applySnapshot(stale, { fromCache: false }))).toBe('needed');
     const withdrawn = [
       ...required(),

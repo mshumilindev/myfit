@@ -87,6 +87,16 @@ export const legalEn: LegalTexts = {
                   'Contract; legitimate interest in accountability, Art. 6(1)(f)',
                 ],
                 [
+                  '**Planner (only if you add it):** your plans (title, note, icon, colour, repeat, reminder) and your weekly free hours, stored encrypted and readable only by you; unencrypted only the time of the next reminder, whether it is quiet or persistent, and the state of a reminder (ringing, snoozed or dismissed, and on which device)',
+                  'Remind you of your own plans and keep them the same on all your devices',
+                  'Contract, Art. 6(1)(b)',
+                ],
+                [
+                  '**Availability shared with your trainer (only if you allow it):** your free and busy times by day. A day on which you set Unwell or Full rest, or an injury has a no-load window, shows only as “not available”, never the reason',
+                  'Let your trainer offer sessions when you are free',
+                  'Consent, Art. 6(1)(a), which you can withdraw at any time in “What I share”',
+                ],
+                [
                   '**Push notifications:** device token, planned reminder text, quiet hours; a notice that a new device signed in to your account (it names no place or device)',
                   'Send reminders and alerts you asked for',
                   'Consent through the browser or OS permission, Art. 6(1)(a)',
@@ -204,6 +214,7 @@ export const legalEn: LegalTexts = {
               '**Records of your consents** (what you agreed to, which version, when): until you delete your account.',
               '**Device sessions** (device type, browser and system, approximate city and country, first and last activity): until you sign that device out or delete your account, or until it has been inactive for 30 days; at most 50 are kept, the least recently active are dropped first.',
               '**Technical records without an automatic expiry:** sign-in attempt counters, the key-fetch log, push tokens, planned and dismissed reminders and service notices have no automatic expiry in the app today, and we have not yet set retention periods for them.',
+              '**Planner (only if you added it):** until you delete a plan or your account. Removing the Planner add-on does not delete your plans or hours; they stay encrypted and come back if you add it again. The state of a reminder is deleted once it is resolved, and at most 6 hours after the reminder.',
               '**Backups and Google’s deletion:** after you delete data, Google completes deletion from its systems within the period stated in the Firebase terms (up to 180 days unless law requires storage).',
               'Legal obligations may require us to keep specific records longer; we will tell you which when that happens.',
             ],
@@ -290,6 +301,9 @@ export const legalEn: LegalTexts = {
         body: [
           {
             p: 'Spotter is a training tracker and coaching app. Features may be changed, added or removed only for the reasons in sections 10 and 13, and we will tell you about changes in the way described there. Some features need an internet connection; the app is designed to work offline with later sync. If paid features are introduced we will tell you before you are charged and these terms will be updated.',
+          },
+          {
+            p: 'Reminders, including those of Planner, are a convenience and not a guarantee. They can be late or missing when the device is off or offline, notifications are blocked, a silent or focus mode is on, or the operating system limits the app. Do not rely on Spotter for anything where a missed reminder could harm you, such as medication or safety.',
           },
         ],
       },
