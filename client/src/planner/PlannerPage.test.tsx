@@ -19,6 +19,7 @@ vi.mock('./sync', () => ({
 }));
 
 import { PlannerPage } from './PlannerPage';
+import { savePlan } from './sync';
 
 describe('PlannerPage', () => {
   it('shows the empty state with an Add button when there are no plans', () => {
@@ -44,5 +45,22 @@ describe('PlannerPage: settings entry', () => {
     expect(screen.getByText('Planner settings')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
     expect(screen.getByText('No plans yet')).toBeTruthy();
+  });
+});
+
+describe('PlannerPage: a save that does not go through', () => {
+  it('says so, keeps the form open and throws nothing (no permission / offline)', async () => {
+    const unhandled = vi.fn();
+    process.on('unhandledRejection', unhandled);
+    vi.mocked(savePlan).mockRejectedValueOnce(new Error('Missing or insufficient permissions.'));
+    render(<PlannerPage onClose={() => {}} />);
+    fireEvent.click(screen.getAllByText('Add a plan')[0]);
+    fireEvent.change(screen.getAllByRole('textbox')[0], { target: { value: 'Run' } });
+    fireEvent.click(screen.getAllByRole('button', { name: 'Save' }).at(-1)!);
+    expect(await screen.findByText(/Couldn't save/)).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: 'Save' }).length).toBeGreaterThan(0);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(unhandled).not.toHaveBeenCalled();
+    process.off('unhandledRejection', unhandled);
   });
 });

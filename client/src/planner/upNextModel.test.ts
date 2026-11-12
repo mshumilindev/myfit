@@ -24,6 +24,22 @@ describe('upNextItems', () => {
     ];
     expect(upNextItems(plans, now).map((i) => i.plan.id)).toEqual(['soon', 'late']);
   });
+  it('onlyToday keeps the moments of today (and what runs now), never a later day or the repeat of a plan', () => {
+    const plans = [
+      mk('daily', '2026-11-12', '19:30', { repeat: 'daily' }),
+      mk('tomorrow', '2026-11-13', '08:00'),
+      mk('running', '2026-11-12', '09:30'),
+      mk('past', '2026-11-12', '07:00'),
+    ];
+    expect(upNextItems(plans, now, 10, 7, true).map((i) => i.plan.id)).toEqual([
+      'running',
+      'daily',
+    ]);
+    // without it the same plan shows again for the following days
+    expect(upNextItems(plans, now, 10).filter((i) => i.plan.id === 'daily').length).toBeGreaterThan(
+      1,
+    );
+  });
   it('shows a plan that is running now as ongoing', () => {
     const [i] = upNextItems([mk('run', '2026-11-12', '09:30')], now);
     expect(i.ongoing).toBe(true);

@@ -153,6 +153,12 @@ export interface PlannerStrings {
   inRel: string;
   ringsUntil: string;
   nothingNext: string;
+  /** The widget when nothing is planned for today. */
+  nothingToday: string;
+  /** Shown when a save or delete did not go through (offline, no permission). */
+  saveFailed: string;
+  /** Link under it: open the whole plan. */
+  viewPlanner: string;
   emptyHint: string;
   widgetName: string;
   nowLabel: string;

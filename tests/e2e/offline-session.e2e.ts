@@ -18,7 +18,7 @@ import {
 
 const BASE = process.env.E2E_TODAY_URL ?? process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173';
 const CONSENT_VERIFIED = JSON.stringify({
-  'e2e-m': 'terms@2026-10-21,policy-ack@2026-11-05,age-18@2026-10-21',
+  'e2e-m': 'terms@2026-11-12,policy-ack@2026-11-12,age-18@2026-10-21',
 });
 
 /** In-app navigation by the hash route (no full load). */

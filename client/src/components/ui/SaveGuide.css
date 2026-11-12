@@ -4,7 +4,6 @@
   --uisg-px-230: 230px;
   --uisg-px-15: 15px;
   --uisg-px-13: 13px;
-  --uisg-px-12_5: 12.5px;
   --uisg-px-9: 9px;
   --uisg-px-7: 7px;
   --uisg-px-2: 2px;
@@ -38,7 +37,7 @@
   border-radius: var(--radius-lg);
   background: var(--t-base);
   color: var(--color-guide-on, var(--c-ffffff));
-  font-size: var(--uisg-px-12_5);
+  font-size: var(--fs-12);
   font-weight: 600;
   line-height: 1.2;
 }

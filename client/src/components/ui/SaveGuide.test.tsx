@@ -66,3 +66,56 @@ describe('SaveGuide', () => {
     expect(onSave).toHaveBeenCalledOnce();
   });
 });
+
+describe('SaveGuide extras', () => {
+  it('dismiss() closes the flag and a custom focus runs on the dashed field', async () => {
+    const focus = vi.fn();
+    function Custom() {
+      const guide = useSaveGuide([{ id: 'a', label: 'A', done: false, focus }]);
+      return (
+        <div>
+          <div {...guide.field('a')} data-testid="a" />
+          <button onClick={guide.dismiss}>off</button>
+          <SaveGuide guide={guide} label="Save" heading="Needed" onSave={() => undefined} />
+        </div>
+      );
+    }
+    render(<Custom />);
+    fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+    expect(screen.queryByRole('status')).not.toBeNull();
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('a'));
+    });
+    expect(focus).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'off' }));
+    expect(screen.queryByRole('status')).toBeNull();
+  });
+
+  it('a field inside a grouped list takes the corners of the group', () => {
+    function Grouped() {
+      const guide = useSaveGuide([{ id: 'g', label: 'G', done: false }]);
+      return (
+        <div>
+          <div className="uigl-rows">
+            <div {...guide.field('g')} data-testid="g" />
+          </div>
+          <SaveGuide guide={guide} label="Save" heading="Needed" onSave={() => undefined} />
+        </div>
+      );
+    }
+    const { container } = render(<Grouped />);
+    fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+    expect(container.ownerDocument.querySelector('.uisg-frame')).not.toBeNull();
+  });
+
+  it('with no field marked the frame draws nothing', () => {
+    function Bare() {
+      const guide = useSaveGuide([{ id: 'x', label: 'X', done: false }]);
+      return <SaveGuide guide={guide} label="Save" heading="Needed" onSave={() => undefined} />;
+    }
+    render(<Bare />);
+    fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+    expect(document.querySelector('.uisg-frame')).toBeNull();
+  });
+});

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Banner } from '../components/ui/Banner';
 import { Button } from '../components/ui/Button';
 import { dayKeyOf } from '../components/ui/calendarDays';
 import { Card } from '../components/ui/Card';
@@ -109,10 +110,21 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
       editing: false,
     });
 
+  const [failed, setFailed] = useState(false);
+  /** A write that does not go through (offline, no permission) keeps the form open and says so, never an uncaught rejection. */
+  const attempt = async (write: () => Promise<void>): Promise<boolean> => {
+    try {
+      await write();
+      setFailed(false);
+      return true;
+    } catch {
+      setFailed(true);
+      return false;
+    }
+  };
   const save = async (d: Draft) => {
     const prev = plans.find((x) => x.id === d.id);
-    await savePlan(draftToPlan(d, prev?.timing.tz ?? tz, prev));
-    setForm(null);
+    if (await attempt(() => savePlan(draftToPlan(d, prev?.timing.tz ?? tz, prev)))) setForm(null);
   };
 
   const formEl = form
@@ -120,6 +132,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
         const p = plans.find((x) => x.id === form.draft.id);
         return (
           <>
+            {failed && <Banner tone="danger" icon="warning" title={s.saveFailed} />}
             <PlanForm
               drawer={desk}
               initial={form.draft}
@@ -143,12 +156,15 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
                     onClick={async () => {
                       const now = Date.now();
                       const timing = skipDay(choosing.timing, form.day as DayKey);
-                      await savePlan({
-                        ...choosing,
-                        timing,
-                        nextFireAt: nextFire(timing, now)?.fireAt ?? null,
-                        updatedAt: now,
-                      });
+                      const ok = await attempt(() =>
+                        savePlan({
+                          ...choosing,
+                          timing,
+                          nextFireAt: nextFire(timing, now)?.fireAt ?? null,
+                          updatedAt: now,
+                        }),
+                      );
+                      if (!ok) return;
                       setChoosing(null);
                       setForm(null);
                     }}
@@ -159,7 +175,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
                     variant="danger"
                     fullWidth
                     onClick={async () => {
-                      await deletePlan(choosing.id);
+                      if (!(await attempt(() => deletePlan(choosing.id)))) return;
                       setChoosing(null);
                       setForm(null);
                     }}
@@ -181,7 +197,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
                 cancelLabel={s.cancel}
                 onCancel={() => setAsking(null)}
                 onConfirm={async () => {
-                  await deletePlan(asking.id);
+                  if (!(await attempt(() => deletePlan(asking.id)))) return;
                   setAsking(null);
                   setForm(null);
                 }}

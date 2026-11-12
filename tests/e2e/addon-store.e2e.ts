@@ -24,7 +24,7 @@ test.afterAll(() => {
 const CONSENT_VERIFIED = (uid: string, coach: boolean) =>
   JSON.stringify({
     [uid]:
-      'terms@2026-10-21,policy-ack@2026-11-05,age-18@2026-10-21' +
+      'terms@2026-11-12,policy-ack@2026-11-12,age-18@2026-10-21' +
       (coach ? ',trainer-terms@2026-10-22' : ''),
   });
 

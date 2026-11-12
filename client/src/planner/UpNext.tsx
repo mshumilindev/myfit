@@ -2,12 +2,16 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Icon } from '../ui';
 import { Widget, WidgetEmpty, WidgetList, type WidgetSize } from '../components/ui/Widget';
+import type { Tone } from '../components/ui/tones';
 import { useT, type LocaleId } from '../i18n';
 import { dayShort, durText } from './fmt';
 import { fill, STRINGS, type PlannerStrings } from './strings';
 import { usePlans } from './sync';
 import { localParts } from './zoned';
 import { upNextItems, type UpNextItem } from './upNextModel';
+
+/** A plan's own colour (`uit--<colour>` is defined with the Planner styles) in the kit's tone slot. */
+const toneOf = (i: UpNextItem): Tone => i.plan.color as Tone;
 
 const hhmm = (i: UpNextItem) => localParts(i.startAt, i.plan.timing.tz).time;
 
@@ -39,7 +43,7 @@ function UpNextCard({ size, now, onOpen }: { size: WidgetSize; now: number; onOp
   const { locale } = useT();
   const s = STRINGS[locale];
   const plans = usePlans();
-  const items = upNextItems(plans, now, size === 'XL' ? 5 : 3);
+  const items = upNextItems(plans, now, size === 'XL' ? 5 : 3, 7, true);
   const first = items[0];
   if (!first)
     return (
@@ -48,9 +52,8 @@ function UpNextCard({ size, now, onOpen }: { size: WidgetSize; now: number; onOp
         tone="accent"
         icon="calendar-dots"
         kicker={s.upNextPlanner}
-        title={s.nothingNext}
-        sub={s.emptyHint}
-        action={s.addPlan}
+        title={s.nothingToday}
+        action={s.viewPlanner}
         onAction={onOpen}
       />
     );
@@ -60,7 +63,7 @@ function UpNextCard({ size, now, onOpen }: { size: WidgetSize; now: number; onOp
     return (
       <Widget
         size="M"
-        tone="accent"
+        tone={toneOf(first)}
         icon={first.plan.icon}
         title={`${title} · ${hhmm(first)}`}
         sub={when}
@@ -72,12 +75,12 @@ function UpNextCard({ size, now, onOpen }: { size: WidgetSize; now: number; onOp
     label: i.plan.title,
     value: i.ongoing ? s.nowLabel : hhmm(i),
     icon: i.plan.icon,
-    tone: 'accent' as const,
+    tone: toneOf(i),
   }));
   return (
     <Widget
       size={size}
-      tone="accent"
+      tone={toneOf(first)}
       icon={first.plan.icon}
       kicker={s.upNextPlanner}
       value={size === 'S' ? hhmm(first) : undefined}
@@ -108,24 +111,23 @@ function UpNextInline({
   const { locale } = useT();
   const s = STRINGS[locale];
   const plans = usePlans();
-  const items = upNextItems(plans, now, size === 'XL' ? 5 : size === 'L' ? 3 : 1);
+  const items = upNextItems(plans, now, size === 'XL' ? 5 : size === 'L' ? 3 : 1, 7, true);
   return (
     <div className={`pl-upin pl-upin--${size.toLowerCase()}`} data-size={size}>
       {size !== 'M' && <div className="pl-upin-k">{s.upNextPlanner}</div>}
       {items.length === 0 ? (
         <div className="pl-upin-empty">
           <div className="pl-upin-txt">
-            <div className="pl-upin-t">{s.nothingNext}</div>
-            {size !== 'M' && <div className="pl-upin-s">{s.emptyHint}</div>}
+            <div className="pl-upin-t">{s.nothingToday}</div>
           </div>
-          <Button variant="secondary" size="sm" icon="plus" onClick={onOpen}>
-            {s.addPlan}
+          <Button variant="secondary" size="sm" onClick={onOpen}>
+            {s.viewPlanner}
           </Button>
         </div>
       ) : (
         <Card as="button" emphasis="quiet" pad="none" className="pl-upin-list" onClick={onOpen}>
           {items.map((i) => (
-            <span key={`${i.plan.id}-${i.startAt}`} className="pl-upin-row">
+            <span key={`${i.plan.id}-${i.startAt}`} className={`pl-upin-row uit--${i.plan.color}`}>
               <Icon name={i.plan.icon} />
               <span className="pl-upin-body">
                 <span className="pl-upin-t">{i.plan.title}</span>

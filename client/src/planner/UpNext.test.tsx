@@ -50,16 +50,38 @@ describe('UpNext widget', () => {
     state.plans = [];
     const open = vi.fn();
     render(<UpNext size="L" now={now} onOpen={open} />);
-    expect(screen.getByText('Nothing planned')).toBeTruthy();
-    fireEvent.click(screen.getByText('Add a plan'));
+    expect(screen.getByText('No plans today')).toBeTruthy();
+    fireEvent.click(screen.getByText('View full plan'));
     expect(open).toHaveBeenCalled();
   });
-  it('empty card shows the hint and the way in', () => {
-    state.plans = [];
-    render(<UpNext size="XL" now={now} onOpen={() => {}} />);
-    expect(screen.getByText(/Set a reminder for a workout/)).toBeTruthy();
+  it('only today is shown: a plan for later days (or a repeat of it) is not, and the empty state links to the whole plan', () => {
+    const tomorrow = '2026-11-13';
+    state.plans = [
+      mk('Chest', '19:30', { repeat: 'daily' }),
+      mk('Legs', '18:00', { date: tomorrow, start: tomorrow }),
+    ];
+    const { container } = render(<UpNext size="XL" now={now} onOpen={() => {}} variant="inline" />);
+    // the daily plan repeats tomorrow too, but only today's moment is listed (no duplicate of it)
+    expect(screen.getAllByText('Chest')).toHaveLength(1);
+    expect(screen.queryByText('Legs')).toBeNull();
+    expect(container.querySelectorAll('.pl-upin-row')).toHaveLength(1);
+    cleanup();
+    state.plans = [mk('Legs', '18:00', { start: tomorrow })];
+    render(<UpNext size="L" now={now} onOpen={() => {}} />);
+    expect(screen.getByText('No plans today')).toBeTruthy();
+    expect(screen.getByText('View full plan')).toBeTruthy();
   });
-  it('inline (inside the week card): no card, next plans by size, empty line with Add a plan', () => {
+  it('each plan keeps its own colour (card rows and inline icon)', () => {
+    state.plans = [mk('Run', '12:30', { color: 'red' }), mk('Meal', '13:30', { color: 'teal' })];
+    const { container } = render(<UpNext size="L" now={now} onOpen={() => {}} variant="inline" />);
+    const rows = [...container.querySelectorAll('.pl-upin-row')];
+    expect(rows[0].classList.contains('uit--red')).toBe(true);
+    expect(rows[1].classList.contains('uit--teal')).toBe(true);
+    cleanup();
+    const card = render(<UpNext size="M" now={now} onOpen={() => {}} />);
+    expect(card.container.querySelector('.uit--red')).toBeTruthy();
+  });
+  it('inline (inside the week card): no card, next plans by size, empty line with the way to the whole plan', () => {
     state.plans = [mk('Run', '12:30'), mk('Meal', '13:30'), mk('Stretch', '14:30')];
     const open = vi.fn();
     const { container, rerender } = render(
@@ -73,12 +95,11 @@ describe('UpNext widget', () => {
     expect(open).toHaveBeenCalled();
     state.plans = [];
     rerender(<UpNext size="M" now={now} onOpen={open} variant="inline" />);
-    expect(screen.getByText('Nothing planned')).toBeTruthy();
-    expect(screen.queryByText(/Set a reminder/)).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: /Add a plan/ }));
+    expect(screen.getByText('No plans today')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /View full plan/ }));
     expect(open).toHaveBeenCalledTimes(2);
     rerender(<UpNext size="XL" now={now} onOpen={open} variant="inline" />);
-    expect(screen.getByText(/Set a reminder/)).toBeTruthy();
+    expect(screen.getByText('No plans today')).toBeTruthy();
   });
   it('inline: M, L and XL look different (kicker, row count, two-line rows)', () => {
     state.plans = [

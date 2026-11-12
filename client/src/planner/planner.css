@@ -24,13 +24,29 @@
 .pl-ag {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--s-12);
+}
+/* Each day is its own panel, so the days do not blend into one list. */
+.pl-ag-d {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  padding: var(--s-10) var(--s-10) var(--s-12);
+  border: var(--bw-1) solid var(--color-divider);
+  border-radius: var(--r-18);
+  background: color-mix(in srgb, var(--color-surface) 55%, transparent);
+}
+.pl-ag-d.is-today {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
 }
 .pl-ag-h {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin: 0 var(--s-4) var(--s-6);
+  margin: 0 var(--s-4);
+  padding-bottom: var(--s-8);
+  border-bottom: var(--bw-1) solid var(--color-divider);
 }
 .pl-ag-h span {
   font-size: var(--fs-12);
@@ -378,6 +394,10 @@
   display: flex;
   align-items: center;
   gap: var(--s-8);
+}
+/* the plan's own colour on its icon (the colour classes set --t-base) */
+.pl-upin-row > .ui-icon {
+  color: var(--t-base);
 }
 .pl-upin-row .pl-upin-t {
   flex: 1;

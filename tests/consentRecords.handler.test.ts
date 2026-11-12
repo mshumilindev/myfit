@@ -7,6 +7,7 @@ import {
 } from '../functions/src/consentRecordsCore';
 
 const V = '2026-10-21';
+const V_TERMS = '2026-11-12';
 /** atlas-ai was re-released with a wider text (SPO-286): its grants carry the newer version. */
 const V_AI = '2026-10-22';
 const HASH = 'c'.repeat(64);
@@ -35,7 +36,7 @@ const fail = async (p: Promise<unknown>) => {
   }
   return 'ok';
 };
-const terms = { kind: 'terms', action: 'grant', version: V, textHash: HASH };
+const terms = { kind: 'terms', action: 'grant', version: V_TERMS, textHash: HASH };
 
 describe('recordConsent handler', () => {
   it('refuses a signed-out caller and writes nothing', async () => {
@@ -92,9 +93,12 @@ describe('recordConsent handler', () => {
     expect(b).toEqual(a);
     expect(await stored()).toHaveLength(1);
     // a withdrawal then a repeat of it is a no-op too, but grant after withdraw is a new record
-    const w = await call({ kind: 'terms', action: 'withdraw', version: V }, { now: NOW + 6000 });
+    const w = await call(
+      { kind: 'terms', action: 'withdraw', version: V_TERMS },
+      { now: NOW + 6000 },
+    );
     expect(
-      await call({ kind: 'terms', action: 'withdraw', version: V }, { now: NOW + 7000 }),
+      await call({ kind: 'terms', action: 'withdraw', version: V_TERMS }, { now: NOW + 7000 }),
     ).toEqual(w);
     await call(terms, { now: NOW + 8000 });
     expect(await stored()).toHaveLength(3);
@@ -112,7 +116,7 @@ describe('recordConsent handler', () => {
   it('keeps `at` strictly increasing per kind even when the clock is behind or equal', async () => {
     const { call } = await setup();
     const a = await call(terms, { now: NOW });
-    const w = await call({ kind: 'terms', action: 'withdraw', version: V }, { now: NOW }); // same ms
+    const w = await call({ kind: 'terms', action: 'withdraw', version: V_TERMS }, { now: NOW }); // same ms
     const g = await call(terms, { now: NOW - 10_000 }); // clock went back
     expect(w.at).toBe(a.at + 1);
     expect(g.at).toBe(w.at + 1);

@@ -18,13 +18,14 @@ export interface UpNextItem {
 /**
  * The next moments of the person's plans: running now or starting within `horizonDays`, soonest first. Each plan's repeat is
  * walked in its own zone; paused plans are left out. Reminders that already rang or were dismissed do not matter here: this is
- * the plan itself, not the alarm.
+ * the plan itself, not the alarm. `onlyToday` keeps just today's moments (and what is running now).
  */
 export function upNextItems(
   plans: readonly PlanDoc[],
   now: number,
   limit = 5,
   horizonDays = 7,
+  onlyToday = false,
 ): UpNextItem[] {
   const out: UpNextItem[] = [];
   for (const plan of plans) {
@@ -35,11 +36,13 @@ export function upNextItems(
     for (const day of occurrencesBetween(
       plan.timing,
       addDays(today, -1),
-      addDays(today, horizonDays),
+      addDays(today, onlyToday ? 0 : horizonDays),
     )) {
       const startAt = zonedToUtc(day, plan.timing.time, tz);
       const endAt = startAt + (plan.durationMin ?? DEFAULT_DURATION) * MIN;
       if (endAt <= now) continue;
+      // "Today" means today's own moments, plus a plan that began before midnight and is still running.
+      if (onlyToday && day !== today && startAt > now) continue;
       out.push({ plan, day, startAt, endAt, ongoing: startAt <= now });
     }
   }

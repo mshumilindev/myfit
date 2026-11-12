@@ -95,6 +95,20 @@ describe('SessionsSheet', () => {
     await waitFor(() => expect(screen.queryByText('Safari · iOS')).toBeNull());
   });
 
+  it('cancelling either prompt signs nobody out', async () => {
+    render(<SessionsSheet onClose={() => undefined} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Sign out' }));
+    let ask = document.querySelector('.uicfx') as HTMLElement;
+    fireEvent.click(within(ask).getByRole('button', { name: 'Cancel' }));
+    expect(document.querySelector('.uicfx')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out all other devices' }));
+    ask = document.querySelector('.uicfx') as HTMLElement;
+    fireEvent.click(within(ask).getByRole('button', { name: 'Cancel' }));
+    expect(document.querySelector('.uicfx')).toBeNull();
+    expect(api.revokeSession).not.toHaveBeenCalled();
+    expect(api.revokeOtherSessions).not.toHaveBeenCalled();
+  });
+
   it('shows an error when the list cannot load', async () => {
     api.listSessions.mockRejectedValueOnce(new Error('x'));
     render(<SessionsSheet onClose={() => undefined} />);

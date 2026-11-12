@@ -100,10 +100,10 @@ html[data-theme='studio'][data-mode='light']:not([data-sleep='night']) {
   --color-learn-tint: var(--c-dce1e3);
   --color-learn-text: var(--c-1f272e);
   --color-learn-line: var(--c-90989e);
-  --color-guide: var(--c-e5537e);
-  --color-guide-tint: color-mix(in srgb, var(--c-e5537e) 16%, var(--color-surface));
-  --color-guide-text: color-mix(in srgb, var(--c-e5537e) 45%, var(--color-text));
-  --color-guide-line: color-mix(in srgb, var(--c-e5537e) 45%, var(--color-divider));
+  --color-guide: var(--c-c93662);
+  --color-guide-tint: color-mix(in srgb, var(--c-c93662) 16%, var(--color-surface));
+  --color-guide-text: color-mix(in srgb, var(--c-c93662) 45%, var(--color-text));
+  --color-guide-line: color-mix(in srgb, var(--c-c93662) 45%, var(--color-divider));
   --color-coach: var(--c-2b3640);
   --color-coach-tint: var(--c-dce1e3);
   --color-coach-text: var(--c-1f272e);
