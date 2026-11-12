@@ -109,8 +109,8 @@ function UpNextInline({
   const plans = usePlans();
   const items = upNextItems(plans, now, size === 'XL' ? 5 : size === 'L' ? 3 : 1);
   return (
-    <div className="pl-upin">
-      <div className="pl-upin-k">{s.upNextPlanner}</div>
+    <div className={`pl-upin pl-upin--${size.toLowerCase()}`} data-size={size}>
+      {size !== 'M' && <div className="pl-upin-k">{s.upNextPlanner}</div>}
       {items.length === 0 ? (
         <div className="pl-upin-empty">
           <div className="pl-upin-txt">
@@ -126,10 +126,19 @@ function UpNextInline({
           {items.map((i) => (
             <span key={`${i.plan.id}-${i.startAt}`} className="pl-upin-row">
               <Icon name={i.plan.icon} />
-              <span className="pl-upin-t">{i.plan.title}</span>
-              <span className="pl-upin-w">
-                {i.ongoing ? s.nowLabel : `${whenText(s, locale, i, now)} · ${hhmm(i)}`}
+              <span className="pl-upin-body">
+                <span className="pl-upin-t">{i.plan.title}</span>
+                {size === 'XL' && (
+                  <span className="pl-upin-w">
+                    {i.ongoing ? s.nowLabel : `${whenText(s, locale, i, now)} · ${hhmm(i)}`}
+                  </span>
+                )}
               </span>
+              {size !== 'XL' && (
+                <span className="pl-upin-w">
+                  {i.ongoing ? s.nowLabel : `${whenText(s, locale, i, now)} · ${hhmm(i)}`}
+                </span>
+              )}
             </span>
           ))}
         </button>

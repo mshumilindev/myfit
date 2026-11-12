@@ -372,3 +372,38 @@
   font-size: var(--fs-13);
   white-space: nowrap;
 }
+
+/* Size variants: M = one line, L = kicker + 3 rows, XL = kicker + 5 two-line rows on tiles */
+.pl-upin--m {
+  gap: 0;
+  padding-top: var(--s-8);
+}
+.pl-upin-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.pl-upin--xl {
+  gap: var(--s-10);
+  padding-top: var(--s-16);
+}
+.pl-upin--xl .pl-upin-list {
+  gap: var(--s-6);
+}
+.pl-upin--xl .pl-upin-row {
+  gap: var(--s-12);
+  padding: var(--s-8) var(--s-10);
+  border-radius: var(--r-12);
+  background: var(--color-surface-2, var(--color-bg));
+}
+.pl-upin--xl .pl-upin-w {
+  font-size: var(--fs-12);
+}
+.pl-upin--xl .pl-upin-empty {
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--s-12);
+  border-radius: var(--r-12);
+  background: var(--color-surface-2, var(--color-bg));
+}

@@ -80,6 +80,28 @@ describe('UpNext widget', () => {
     rerender(<UpNext size="XL" now={now} onOpen={open} variant="inline" />);
     expect(screen.getByText(/Set a reminder/)).toBeTruthy();
   });
+  it('inline: M, L and XL look different (kicker, row count, two-line rows)', () => {
+    state.plans = [
+      mk('Run', '12:30'),
+      mk('Meal', '13:30'),
+      mk('Stretch', '14:30'),
+      mk('Yoga', '15:30'),
+      mk('Swim', '16:30'),
+      mk('Read', '17:30'),
+    ];
+    const { container, rerender } = render(
+      <UpNext size="M" now={now} onOpen={() => {}} variant="inline" />,
+    );
+    expect(container.querySelector('.pl-upin--m')).toBeTruthy();
+    expect(container.querySelector('.pl-upin-k')).toBeNull();
+    rerender(<UpNext size="L" now={now} onOpen={() => {}} variant="inline" />);
+    expect(container.querySelector('.pl-upin-k')).toBeTruthy();
+    expect(container.querySelectorAll('.pl-upin-row')).toHaveLength(3);
+    expect(container.querySelectorAll('.pl-upin-body .pl-upin-w')).toHaveLength(0);
+    rerender(<UpNext size="XL" now={now} onOpen={() => {}} variant="inline" />);
+    expect(container.querySelectorAll('.pl-upin-row')).toHaveLength(5);
+    expect(container.querySelectorAll('.pl-upin-body .pl-upin-w')).toHaveLength(5);
+  });
   it('opens the Planner from the card', () => {
     state.plans = [mk('Run', '12:30')];
     const open = vi.fn();
