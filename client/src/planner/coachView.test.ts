@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildCoachAvailability } from './coachView';
-import type { RestPeriod } from '../types';
+import type { Injury, RestPeriod } from '../types';
 
 const period = (over: Partial<RestPeriod>): RestPeriod =>
   ({
@@ -50,5 +50,37 @@ describe('buildCoachAvailability', () => {
       () => false,
     );
     expect(v?.unavailable).toEqual([]);
+  });
+
+  const injury = (over: Partial<Injury>): Injury =>
+    ({
+      id: 'i',
+      startDay: 19995,
+      stage: 'protect',
+      fullRestUntil: 20005,
+      healedDay: null,
+      ...over,
+    }) as Injury;
+  const share = { shareAvailability: true, availability: hours };
+
+  it('an injury inside the clinician no-load window reads as plain "not available"', () => {
+    const v = buildCoachAvailability(share, [], 19990, () => true, [injury({})]);
+    expect(v?.unavailable).toEqual([{ fromDay: 19995, toDay: 20004 }]);
+    expect(JSON.stringify(v)).not.toMatch(/injur|protect|stage/i);
+  });
+
+  it('no window, a finished window, or a healed injury adds nothing', () => {
+    const none = [
+      injury({ fullRestUntil: null }),
+      injury({ fullRestUntil: 19990 }),
+      injury({ healedDay: 19992 }),
+    ];
+    expect(buildCoachAvailability(share, [], 19990, () => true, none)?.unavailable).toEqual([]);
+  });
+
+  it('injuries are ignored when none are passed (Health module off), and merge in start order', () => {
+    expect(buildCoachAvailability(share, [], 19990, () => true)?.unavailable).toEqual([]);
+    const v = buildCoachAvailability(share, [period({})], 19990, () => true, [injury({})]);
+    expect(v?.unavailable.map((u) => u.fromDay)).toEqual([19995, 20000]);
   });
 });

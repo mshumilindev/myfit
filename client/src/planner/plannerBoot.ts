@@ -5,7 +5,7 @@
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase';
 import { plannerHost, setPlannerShareMirror } from '../plannerRt';
-import { restPeriodShown } from '../healthAddons';
+import { healthAddonInstalled, restPeriodShown } from '../healthAddons';
 import { getStoreState, republishCoachShare, subscribeStore } from '../store';
 import { buildCoachAvailability } from './coachView';
 import { provide, trackerReady } from '../trackerRt';
@@ -23,6 +23,7 @@ const coachView = () =>
     getStoreState().restPeriods,
     Math.floor(Date.now() / 86_400_000),
     restPeriodShown,
+    healthAddonInstalled('injury-log') ? getStoreState().injuries : [],
   );
 
 provide(plannerHost, {
