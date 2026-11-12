@@ -33,7 +33,7 @@ export function PlannerNotice() {
   }, []);
   if (!kind) return null;
   const m = {
-    perm: { tone: 'danger', icon: 'warning-circle', title: s.notePermT, body: s.notePermB },
+    perm: { tone: 'danger', icon: 'bell-slash', title: s.notePermT, body: s.notePermB },
     offline: { tone: 'rest', icon: 'cloud-slash', title: s.noteOffT, body: s.noteOffB },
   } as const;
   const n = m[kind];

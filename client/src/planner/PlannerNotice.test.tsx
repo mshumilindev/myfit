@@ -19,6 +19,7 @@ describe('PlannerNotice', () => {
     state.v = 'denied';
     render(<PlannerNotice />);
     expect(screen.getByText('Notifications are off')).toBeTruthy();
+    expect(document.querySelector('.uibanner svg, [class*="banner"] svg')).toBeTruthy();
   });
   it('no banner for an iPhone that is not on the Home Screen', () => {
     state.v = 'needs-install';

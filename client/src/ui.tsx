@@ -38,6 +38,7 @@ import { ArrowUp } from '@phosphor-icons/react/ArrowUp';
 import { Microphone } from '@phosphor-icons/react/Microphone';
 import { Lock } from '@phosphor-icons/react/Lock';
 import { BellRinging } from '@phosphor-icons/react/BellRinging';
+import { BellSlash } from '@phosphor-icons/react/BellSlash';
 import { Clock } from '@phosphor-icons/react/Clock';
 import { Info } from '@phosphor-icons/react/Info';
 import { Plus } from '@phosphor-icons/react/Plus';
@@ -278,6 +279,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   microphone: Microphone,
   lock: Lock,
   'bell-ringing': BellRinging,
+  'bell-slash': BellSlash,
   export: Export,
   'calendar-blank': CalendarBlank,
   'calendar-check': CalendarCheck,
