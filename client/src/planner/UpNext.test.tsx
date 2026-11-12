@@ -54,6 +54,16 @@ describe('UpNext widget', () => {
     fireEvent.click(screen.getByText('Add a plan'));
     expect(open).toHaveBeenCalled();
   });
+  it('empty L/XL shows the week strip with today marked; M stays one row with the hint', () => {
+    state.plans = [];
+    const { container, rerender } = render(<UpNext size="XL" now={now} onOpen={() => {}} />);
+    expect(container.querySelectorAll('.pl-upweek-d')).toHaveLength(7);
+    expect(container.querySelectorAll('.pl-upweek-d.is-today')).toHaveLength(1);
+    expect(screen.getByText(/Set a reminder for a workout/)).toBeTruthy();
+    rerender(<UpNext size="M" now={now} onOpen={() => {}} />);
+    expect(container.querySelector('.pl-upweek')).toBeNull();
+    expect(screen.getByText(/Set a reminder for a workout/)).toBeTruthy();
+  });
   it('opens the Planner from the card', () => {
     state.plans = [mk('Run', '12:30')];
     const open = vi.fn();

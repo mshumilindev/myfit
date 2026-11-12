@@ -200,17 +200,17 @@ describe('CoreConfigSheet — Planner card (program)', () => {
   it('has no Planner option while the add-on is not installed', () => {
     render(<Host id="program" />);
     expect(screen.queryByText('Planner card')).toBeNull();
-    expect(coreOpts(DEFAULT_LAYOUT, 'program').plannerSize).toBe('M');
+    expect(coreOpts(DEFAULT_LAYOUT, 'program').plannerSize).toBe('L');
   });
   it('sizes the fixed card Compact / Standard / Detailed and shows it live', () => {
     planner.host = { UpNext: ({ size }) => <span data-testid="pl">{size}</span> };
     render(<Host id="program" />);
-    expect(screen.getByTestId('pl').textContent).toBe('M');
+    expect(screen.getByTestId('pl').textContent).toBe('L');
     // The second Compact/Standard/Detailed group is the Planner card's (the first is the program card's).
     fireEvent.click(screen.getAllByRole('button', { name: 'Detailed' })[1]);
     expect(coreOpts(latest, 'program').plannerSize).toBe('XL');
     expect(screen.getByTestId('pl').textContent).toBe('XL');
-    fireEvent.click(screen.getAllByRole('button', { name: 'Standard' })[1]);
-    expect(coreOpts(latest, 'program').plannerSize).toBe('L');
+    fireEvent.click(screen.getAllByRole('button', { name: 'Compact' })[1]);
+    expect(coreOpts(latest, 'program').plannerSize).toBe('M');
   });
 });

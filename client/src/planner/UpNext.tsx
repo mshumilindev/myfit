@@ -1,9 +1,10 @@
+import { Button } from '../components/ui/Button';
 import { Widget, WidgetEmpty, WidgetList, type WidgetSize } from '../components/ui/Widget';
 import { useT, type LocaleId } from '../i18n';
-import { dayShort, durText } from './fmt';
+import { dayShort, durText, weekdayShorts } from './fmt';
 import { fill, STRINGS, type PlannerStrings } from './strings';
 import { usePlans } from './sync';
-import { localParts } from './zoned';
+import { addDays, localParts, parseDay, weekday } from './zoned';
 import { upNextItems, type UpNextItem } from './upNextModel';
 
 const hhmm = (i: UpNextItem) => localParts(i.startAt, i.plan.timing.tz).time;
@@ -31,18 +32,7 @@ export function UpNext({
   const plans = usePlans();
   const items = upNextItems(plans, now, size === 'XL' ? 5 : 3);
   const first = items[0];
-  if (!first)
-    return (
-      <WidgetEmpty
-        size={size}
-        tone="accent"
-        icon="calendar-dots"
-        kicker={s.upNextPlanner}
-        title={s.nothingNext}
-        action={s.addPlan}
-        onAction={onOpen}
-      />
-    );
+  if (!first) return <UpNextEmpty size={size} now={now} onOpen={onOpen} />;
   const when = whenText(s, locale, first, now);
   const title = first.plan.title;
   if (size === 'M')
@@ -77,6 +67,61 @@ export function UpNext({
       bodyLast
     >
       {size !== 'S' && rows.length > 0 ? <WidgetList rows={rows} /> : undefined}
+    </Widget>
+  );
+}
+
+/**
+ * Nothing planned: a small week strip (today ringed) and one clear way in. The M size stays a single row, from L up the card
+ * shows the week so it still looks like a planner, not an error.
+ */
+function UpNextEmpty({ size, now, onOpen }: { size: WidgetSize; now: number; onOpen: () => void }) {
+  const { locale } = useT();
+  const s = STRINGS[locale];
+  if (size === 'M' || size === 'S')
+    return (
+      <WidgetEmpty
+        size={size}
+        tone="accent"
+        icon="calendar-dots"
+        kicker={s.upNextPlanner}
+        title={s.nothingNext}
+        sub={s.emptyHint}
+        action={s.addPlan}
+        onAction={onOpen}
+      />
+    );
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const today = localParts(now, tz).day;
+  const monday = addDays(today, -weekday(today));
+  const names = weekdayShorts(locale);
+  return (
+    <Widget
+      size={size}
+      tone="accent"
+      icon="calendar-dots"
+      kicker={s.upNextPlanner}
+      title={s.nothingNext}
+      sub={s.emptyHint}
+      onClick={onOpen}
+      ariaLabel={`${s.upNextPlanner}: ${s.nothingNext}`}
+      footer={
+        <Button variant="primary" size="sm" icon="plus" onClick={onOpen}>
+          {s.addPlan}
+        </Button>
+      }
+    >
+      <div className="pl-upweek" aria-hidden="true">
+        {names.map((n, i) => {
+          const d = addDays(monday, i);
+          return (
+            <span key={d} className={d === today ? 'pl-upweek-d is-today' : 'pl-upweek-d'}>
+              <span>{n}</span>
+              <b>{parseDay(d).d}</b>
+            </span>
+          );
+        })}
+      </div>
     </Widget>
   );
 }

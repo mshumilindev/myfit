@@ -307,3 +307,32 @@
   height: 32px;
   background: radial-gradient(circle 12px at 50% 50%, var(--t-base) 11.5px, transparent 12px);
 }
+
+.pl-upweek {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--s-4);
+  margin-top: var(--s-8);
+}
+.pl-upweek-d {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-6) 0;
+  border-radius: var(--r-12);
+  font-size: var(--fs-11);
+  color: var(--color-text-muted);
+}
+.pl-upweek-d b {
+  font-size: var(--fs-14);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.pl-upweek-d.is-today {
+  background: var(--color-accent);
+  color: var(--color-on-accent, #fff);
+}
+.pl-upweek-d.is-today b {
+  color: inherit;
+}

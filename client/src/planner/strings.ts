@@ -155,6 +155,7 @@ export interface PlannerStrings {
   inRel: string;
   ringsUntil: string;
   nothingNext: string;
+  emptyHint: string;
   plannerLinkLabel: string;
   todayCount: string;
   widgetName: string;
@@ -332,6 +333,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     inRel: 'In {x}',
     ringsUntil: 'Rings until you dismiss it',
     nothingNext: 'Nothing planned',
+    emptyHint: 'Set a reminder for a workout, a meal or anything else.',
     plannerLinkLabel: 'Planner',
     todayCount: '{n} today',
     widgetName: 'Planner: up next',
@@ -508,6 +510,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     inRel: 'Через {x}',
     ringsUntil: 'Дзвонить, доки не закриєш',
     nothingNext: 'Нічого не заплановано',
+    emptyHint: 'Додай нагадування про тренування, їжу чи будь-що інше.',
     plannerLinkLabel: 'Planner',
     todayCount: '{n} сьогодні',
     widgetName: 'Planner: далі',
@@ -684,6 +687,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     inRel: 'Za {x}',
     ringsUntil: 'Dzwoni, dopóki nie zamkniesz',
     nothingNext: 'Nic nie zaplanowano',
+    emptyHint: 'Dodaj przypomnienie o treningu, posiłku lub czymkolwiek innym.',
     plannerLinkLabel: 'Planner',
     todayCount: '{n} dziś',
     widgetName: 'Planner: następne',
@@ -860,6 +864,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     inRel: 'Po {x}',
     ringsUntil: 'Skamba, kol atmesi',
     nothingNext: 'Nieko nesuplanuota',
+    emptyHint: 'Pridėk priminimą apie treniruotę, valgį ar bet ką kita.',
     plannerLinkLabel: 'Planner',
     todayCount: '{n} šiandien',
     widgetName: 'Planner: toliau',
@@ -1035,6 +1040,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     inRel: '{x} pärast',
     ringsUntil: 'Heliseb, kuni sulged',
     nothingNext: 'Midagi pole planeeritud',
+    emptyHint: 'Lisa meeldetuletus treeningu, söögi või muu jaoks.',
     plannerLinkLabel: 'Planner',
     todayCount: '{n} täna',
     widgetName: 'Planner: järgmine',

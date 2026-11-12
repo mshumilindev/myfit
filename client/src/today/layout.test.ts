@@ -278,10 +278,10 @@ describe('today layout', () => {
 });
 
 describe('program plannerSize', () => {
-  it('defaults to M, keeps M/L/XL and falls back on anything else', () => {
-    expect(CORE_DEFAULTS.program.plannerSize).toBe('M');
+  it('defaults to L (Standard), keeps M/L/XL and falls back on anything else', () => {
+    expect(CORE_DEFAULTS.program.plannerSize).toBe('L');
     expect(sanitizeOpts('program', { plannerSize: 'XL' }).plannerSize).toBe('XL');
-    expect(sanitizeOpts('program', { plannerSize: 'S' }).plannerSize).toBe('M');
-    expect(sanitizeOpts('program', undefined).plannerSize).toBe('M');
+    expect(sanitizeOpts('program', { plannerSize: 'S' }).plannerSize).toBe('L');
+    expect(sanitizeOpts('program', undefined).plannerSize).toBe('L');
   });
 });

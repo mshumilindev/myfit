@@ -111,7 +111,7 @@ export const CORE_DEFAULTS: CoreOptsMap = {
     exercises: false,
     gymStep: true,
     logPast: false,
-    plannerSize: 'M',
+    plannerSize: 'L',
   },
   nudges: { off: [] },
   history: { days: 5, view: 'timeline', planned: true },
