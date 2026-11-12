@@ -124,7 +124,7 @@
   --t-tint: var(--color-guide-tint);
   --t-text: var(--color-guide-text);
   --t-line: var(--color-guide-line);
-  --t-on: var(--color-on-accent);
+  --t-on: var(--c-000000); /* white on the reserved pink is 3.6:1; ink is 5.8:1 */
 }
 .uit--atlas {
   --t-base: var(--color-atlas);

@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import './OptionTile.css';
 
 export interface OptionTileProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,

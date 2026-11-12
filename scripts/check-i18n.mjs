@@ -90,6 +90,7 @@ const failures = [];
 // Brand names, units and loanwords that are the same word in the other languages (not forgotten translations).
 const allowedIdentical = new Set([
   'appName',
+  'plannerSrcProgram',
   'menuAction',
   'adminQr',
   'min',

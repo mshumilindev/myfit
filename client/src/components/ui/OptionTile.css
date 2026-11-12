@@ -1,0 +1,4 @@
+/* The tile only carries state; the caller's class draws it. A token padding keeps the bare button off the browser default. */
+.ui-opt {
+  padding: var(--s-2);
+}

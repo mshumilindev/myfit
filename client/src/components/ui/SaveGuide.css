@@ -123,3 +123,9 @@
     animation: none;
   }
 }
+
+/* Storybook demo rows */
+.uisg-demo {
+  padding: var(--s-10);
+  border-radius: var(--r-12);
+}

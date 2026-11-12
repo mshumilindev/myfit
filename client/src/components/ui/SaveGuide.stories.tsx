@@ -10,10 +10,14 @@ function Demo({ done }: { done: boolean[] }) {
   const [state, setState] = useState(done);
   const names = ['Title', 'Weekday', 'End date'];
   const guide = useSaveGuide(names.map((n, i) => ({ id: n, label: n, done: state[i] })));
+  const field = (n: string) => {
+    const f = guide.field(n);
+    return { ...f, className: `${f.className} uisg-demo` };
+  };
   return (
     <div style={{ display: 'grid', gap: 12, justifyItems: 'end', paddingTop: 120 }}>
       {names.map((n, i) => (
-        <label key={n} {...guide.field(n)} style={{ padding: 10, borderRadius: 12 }}>
+        <label key={n} {...field(n)}>
           <input
             type="checkbox"
             checked={state[i]}
