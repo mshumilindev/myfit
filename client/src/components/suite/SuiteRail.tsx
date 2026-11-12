@@ -63,7 +63,7 @@ export function SuiteRail({
   app: SuiteApp;
   /** Nav destinations top to bottom (the trailing ones collapse into More on a short rail). */
   nav: RailEntry[];
-  /** App-specific foot extras above the bell (Gym: conditions shield, Mastery). */
+  /** App-specific foot extras above the bell (Gym: Mastery). */
   footBefore?: RailFootEntry[];
   /** App-specific foot extras between the bell and the language (Gym: admin settings). */
   footAfter?: RailFootEntry[];

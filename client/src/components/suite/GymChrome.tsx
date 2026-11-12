@@ -6,35 +6,28 @@
  */
 import { orderMoreItems, useCommonMoreItems } from './commonMore';
 import { useT } from '../../i18n';
-import { ConditionsShield, useActiveConditions } from '../../views/health/ConditionsShield';
 import { BrandBar, BellButton } from '../ui/BrandBar';
 import type { MoreMenuItem } from '../ui/MoreMenu';
 import { BrandAccount } from './BrandAccount';
 import { SUITE_ICON, SUITE_TONE } from './suiteTone';
 import { SuiteTabBar } from '../SuiteTabBar';
 import type { TabBarItem, TabBarProps } from '../ui/TabBar';
-import { useAddonOrBase } from '../../addons/enabledSet';
 import './GymChrome.css';
 
 export function GymBrandBar({
   notifUnread,
   onApp,
   onProfile,
-  onHealth,
   onNotifications,
   onHiddenChange,
 }: {
   notifUnread: number;
   onApp: () => void;
   onProfile: () => void;
-  onHealth: () => void;
   onNotifications: () => void;
   onHiddenChange: (hidden: MoreMenuItem[]) => void;
 }) {
   const { t } = useT();
-  // The conditions shield belongs to the Health add-on (SPO-518).
-  const conditions = useActiveConditions();
-  const healthOn = useAddonOrBase('conditions');
   return (
     <BrandBar
       avatar={<BrandAccount app="gym" onOpenProfile={onProfile} />}
@@ -44,19 +37,6 @@ export function GymBrandBar({
       appLabel={t.shellSwitch}
       tone={SUITE_TONE.gym}
       icon={SUITE_ICON.gym}
-      entries={
-        healthOn && conditions > 0
-          ? [
-              {
-                id: 'conditions',
-                label: t.cndTodayTitle(conditions),
-                icon: 'shield-check',
-                node: <ConditionsShield onOpen={onHealth} />,
-                onSelect: onHealth,
-              },
-            ]
-          : []
-      }
       actions={<BellButton label={t.notifTitle} onClick={onNotifications} count={notifUnread} />}
     />
   );

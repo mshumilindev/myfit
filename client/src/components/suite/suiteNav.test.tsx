@@ -37,7 +37,6 @@ const c = coachEn;
 
 const session = vi.hoisted(() => ({
   role: 'member' as 'member' | 'trainer' | 'admin',
-  conditions: 0,
 }));
 vi.mock('../../api', async (orig) => ({
   ...(await orig<typeof import('../../api')>()),
@@ -59,10 +58,6 @@ vi.mock('../Avatar', () => ({
   UserAvatar: (p: { userId?: string; name: string; size?: number }) => (
     <span data-testid="real-avatar" data-uid={p.userId ?? ''} data-size={p.size} />
   ),
-}));
-vi.mock('../../views/health/ConditionsShield', () => ({
-  ConditionsShield: () => <button type="button">shield</button>,
-  useActiveConditions: () => session.conditions,
 }));
 vi.mock('../../coach/unread', async (orig) => ({
   ...(await orig<typeof import('../../coach/unread')>()),
@@ -144,7 +139,6 @@ const CASES: Case[] = [
         onOpenNotifications={noop}
         onOpenProfile={onProfile}
         onOpenSettings={noop}
-        onOpenHealth={noop}
       />
     ),
     // The bar and the avatar drawer, as the app composes them (the avatar owns the account).
@@ -553,7 +547,6 @@ describe('Gym specifics', () => {
         onOpenNotifications={noop}
         onOpenProfile={noop}
         onOpenSettings={noop}
-        onOpenHealth={noop}
       />,
     );
     const today = navButtons()[0] as HTMLElement;
@@ -580,7 +573,6 @@ describe('Gym specifics', () => {
         onOpenNotifications={noop}
         onOpenProfile={noop}
         onOpenSettings={noop}
-        onOpenHealth={noop}
       />,
     );
     expect(navButtons()[0].querySelector('.rail-live-dot')).not.toBeNull();
@@ -605,7 +597,6 @@ describe('Gym specifics', () => {
         onOpenNotifications={noop}
         onOpenProfile={noop}
         onOpenSettings={noop}
-        onOpenHealth={noop}
       />,
     );
     expect(rail().querySelector('.rail-nav > .rail-item.active')).toBeNull();
@@ -647,7 +638,7 @@ describe('real-app CSS does not fight the shared rail geometry', () => {
 
 describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)', () => {
   // Labelled rail: nav tile 64 (pitch 69.6, 3 entries = 203.2), foot extra 44 (pitch 49.6).
-  // Admin with an active condition: shield, bell, gear, Add-ons, language = 5 extras = 248.
+  // Admin: bell, gear, Add-ons, language = 4 extras = 198.4.
   const gym = (unread = 0) => (
     <GymRail
       tab="today"
@@ -660,7 +651,6 @@ describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)',
       onOpenNotifications={noop}
       onOpenProfile={noop}
       onOpenSettings={noop}
-      onOpenHealth={noop}
     />
   );
   const extraCount = () => rail().querySelectorAll('.rail-extra').length;
@@ -676,33 +666,26 @@ describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)',
   beforeEach(() => {
     setViewport(1440);
     session.role = 'admin';
-    session.conditions = 1;
   });
 
-  it('everything fits: no More, all five extras', () => {
+  it('everything fits: no More, all four extras', () => {
     render(gym());
     setRailHeight(460);
     expect(screen.queryByRole('button', { name: c.navMore })).toBeNull();
     expect(navLabels()).toEqual(gymNav);
-    expect(extraCount()).toBe(5);
+    expect(extraCount()).toBe(4);
   });
 
-  it('too short for even one extra: ALL five go into More at once, the nav stays whole', () => {
+  it('too short for even one extra: ALL four go into More at once, the nav stays whole', () => {
     render(gym());
-    // 5 extras = 248 on top of the 203.2 nav: 451.2 fits; 1px less hides every extra.
-    for (const h of [451, 430, 380, 330, 290]) {
+    // 4 extras = 198.4 on top of the 203.2 nav: 401.6 fits; 1px less hides every extra.
+    for (const h of [401, 380, 340, 300, 290]) {
       setRailHeight(h);
       expect(extraCount(), String(h)).toBe(0);
       expect(navLabels(), String(h)).toEqual(gymNav);
     }
-    // in the order of the rail: conditions shield, bell, settings, Add-ons, language
-    expect(menuRows()).toEqual([
-      t.cndTodayTitle(1),
-      t.notifTitle,
-      t.settingsTitle,
-      t.todayAddons,
-      t.language,
-    ]);
+    // in the order of the rail: bell, settings, Add-ons, language
+    expect(menuRows()).toEqual([t.notifTitle, t.settingsTitle, t.todayAddons, t.language]);
   });
 
   it('More sits in the nav column right below the last visible nav item, not in the foot', () => {
@@ -728,7 +711,7 @@ describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)',
     expect(navLabels()).toEqual([t.today, t.overviewTab]);
     const rows = menuRows();
     expect(rows[0]).toBe(t.gyms);
-    expect(rows.slice(1)).toHaveLength(5);
+    expect(rows.slice(1)).toHaveLength(4);
     // Apps and the avatar are pinned all the way down
     setRailHeight(40);
     expect(
@@ -754,13 +737,6 @@ describe('Overflow order: foot extras collapse before the nav (Gym, tall foot)',
       '3',
     );
   });
-
-  it('the conditions shield only takes a slot while a condition is active', () => {
-    session.conditions = 0;
-    render(gym());
-    setRailHeight(900);
-    expect(extraCount()).toBe(4);
-  });
 });
 
 describe('no online / presence dot on navigation avatars', () => {
@@ -778,7 +754,6 @@ describe('no online / presence dot on navigation avatars', () => {
         onOpenNotifications={noop}
         onOpenProfile={noop}
         onOpenSettings={noop}
-        onOpenHealth={noop}
       />,
     );
     expect(rail().querySelector('.account-avatar .dot')).toBeNull();

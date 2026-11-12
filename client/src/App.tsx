@@ -96,7 +96,6 @@ import { useClientShared } from './coach/client/shared';
 import { ClientBridgeLazy, ClientRoutesLazy } from './coach/client/lazy';
 import { CallsHostLazy } from './calls/lazy';
 import { GymBrandBar, GymTabBar } from './components/suite/GymChrome';
-import { ConditionsShield, useActiveConditions } from './views/health/ConditionsShield';
 import { AppRail } from './components/AppRail';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
 import type { ProgramsPeer } from './components/ProgramsTabs';
@@ -1869,7 +1868,6 @@ function AppMain() {
           onOpenNotifications={() => setOverlay({ screen: 'notifications' })}
           onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
           onOpenSettings={() => setOverlay({ screen: 'settings' })}
-          onOpenHealth={() => setOverlay({ screen: 'health' })}
         />
       )}
       <div className="main-col">
@@ -1878,7 +1876,6 @@ function AppMain() {
             notifUnread={notifUnread}
             onApp={() => setShellOpen(true)}
             onProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
-            onHealth={() => setOverlay({ screen: 'health' })}
             onNotifications={() => setOverlay({ screen: 'notifications' })}
             onHiddenChange={setHeaderHidden}
           />
@@ -2071,7 +2068,6 @@ export function GymRail(props: {
   onOpenNotifications: () => void;
   onOpenProfile: () => void;
   onOpenSettings: () => void;
-  onOpenHealth: () => void;
 }) {
   const { t } = useT();
   const live = props.openWorkoutStartedAt !== undefined;
@@ -2085,8 +2081,6 @@ export function GymRail(props: {
     props.syncStatus === 'offline' || props.syncStatus === 'failed'
       ? 'var(--color-danger)'
       : undefined;
-  const activeConditions = useActiveConditions();
-  const conditions = useAddonOrBase('conditions') ? activeConditions : 0; // shield belongs to Health (SPO-518)
 
   return (
     <AppRail
@@ -2107,20 +2101,6 @@ export function GymRail(props: {
       onOpenProfile={props.onOpenProfile}
       notifUnread={props.notifUnread}
       syncColor={warnColor}
-      // Foot extras, top to bottom; the bottom-most collapse into More first.
-      extrasBefore={[
-        ...(conditions > 0
-          ? [
-              {
-                id: 'conditions',
-                label: t.cndTodayTitle(conditions),
-                icon: 'shield-check',
-                onSelect: props.onOpenHealth,
-                node: <ConditionsShield variant="rail" onOpen={props.onOpenHealth} />,
-              },
-            ]
-          : []),
-      ]}
       extrasAfter={
         role === 'admin'
           ? [

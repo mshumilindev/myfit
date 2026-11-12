@@ -55,7 +55,7 @@ export function AppRail({
   onOpenProfile?: () => void;
   /** Unread of the shared feed: on the bell, or on Apps when there is no bell. */
   notifUnread?: number;
-  /** App-specific foot extras above the bell (Gym: conditions shield, mastery). */
+  /** App-specific foot extras above the bell (Gym: mastery). */
   extrasBefore?: RailFootEntry[];
   /** App-specific foot extras between the bell and the language (Gym: admin settings). */
   extrasAfter?: RailFootEntry[];

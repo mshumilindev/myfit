@@ -5,7 +5,6 @@ import { act, cleanup, fireEvent, render, renderHook, screen } from '@testing-li
 import { setLocale } from '../../i18n';
 import { en } from '../../i18n/en';
 import {
-  addCondition,
   deleteAlcoholData,
   resetLocalData,
   setAlcoholRegionOverride,
@@ -16,7 +15,6 @@ import { AlcoholReferenceSheet } from './alcohol/AlcoholReferenceSheet';
 import { NicotineScreens } from './nicotine/NicotineScreens';
 import { SupplementScreens } from './supplements/SupplementScreens';
 import { decimalsOf, effectsAtFullRamp, numText, useSupplementText } from './supplements/text';
-import { ConditionsShield, useActiveConditions } from './ConditionsShield';
 import {
   defaultSupplementSettings,
   newSupplementEntry,
@@ -120,45 +118,6 @@ describe('AlcoholReferenceSheet', () => {
     render(<AlcoholReferenceSheet onClose={() => undefined} />);
     expect(screen.getByText(en.alcRefTitle)).toBeTruthy();
     expect(screen.queryByText(/Some guidance allows/)).toBeNull();
-  });
-});
-
-describe('ConditionsShield', () => {
-  it('is hidden with no active condition and counts the active ones', () => {
-    const open = vi.fn();
-    const { container } = render(<ConditionsShield onOpen={open} />);
-    expect(container.textContent).toBe('');
-    act(() => void addCondition({ key: 'asthma', severity: 1, share: 'off' }));
-    cleanup();
-    render(<ConditionsShield onOpen={open} />);
-    fireEvent.click(screen.getByRole('button', { name: en.cndTodayTitle(1) }));
-    expect(open).toHaveBeenCalledTimes(1);
-  });
-
-  it('the rail variant is a rail item with the same label', () => {
-    act(() => void addCondition({ key: 'asthma', severity: 1, share: 'off' }));
-    render(<ConditionsShield variant="rail" onOpen={() => undefined} />);
-    expect(document.querySelector('[aria-label="' + en.cndTodayTitle(1) + '"]')).not.toBeNull();
-    expect(renderHook(() => useActiveConditions()).result.current).toBe(1);
-  });
-
-  it('a condition that has already ended is not counted, and with only ended ones the shield is hidden', () => {
-    const past = Date.now() - 86_400_000;
-    act(
-      () =>
-        void addCondition({
-          key: 'asthma',
-          severity: 1,
-          share: 'off',
-          startedAt: past - 86_400_000,
-          endsAt: past,
-        }),
-    );
-    expect(renderHook(() => useActiveConditions()).result.current).toBe(0);
-    const { container } = render(<ConditionsShield onOpen={() => undefined} />);
-    expect(container.textContent).toBe('');
-    act(() => void addCondition({ key: 'asthma', severity: 2, share: 'off' }));
-    expect(renderHook(() => useActiveConditions()).result.current).toBe(1);
   });
 });
 

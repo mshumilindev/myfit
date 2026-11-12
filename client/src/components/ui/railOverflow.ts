@@ -64,7 +64,7 @@ export function splitEntries<E extends { priority?: number }>(
 }
 
 /**
- * An extra at the BOTTOM of the rail (foot widget: conditions shield, mastery ring, bell,
+ * An extra at the BOTTOM of the rail (foot widget: mastery ring, bell,
  * settings, an app's own button). Foot extras are the FIRST things to collapse into More when
  * the rail is too short, ALL AT ONCE; only then do the nav entries
  * start to collapse (from the end). The extras group is all-or-nothing: either every extra is
