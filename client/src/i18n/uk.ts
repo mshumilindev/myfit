@@ -1747,6 +1747,8 @@ export const uk: Strings = {
   nicPrivHintFull: 'Тренер бачить ваші продукти та звичні кількості.',
   nicPrivSeeHead: 'Що побачив би тренер',
   nicPrivSeeOff: 'Нічого',
+  avlTitle: 'Доступність',
+  avlSeeFull: 'Коли ви вільні чи зайняті. Без причини.',
   nicPrivSeeEffects: '«Потреба в сні +10 хв, готовність −3%». Без продуктів і кількостей.',
   nicPrivSeeFull: 'Продукти та ваші звичні кількості.',
   nicPrivData: 'Ваші дані',

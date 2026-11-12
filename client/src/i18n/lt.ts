@@ -1725,6 +1725,8 @@ export const lt: Strings = {
   nicPrivHintFull: 'Treneris mato jūsų produktus ir įprastus kiekius.',
   nicPrivSeeHead: 'Ką matytų treneris',
   nicPrivSeeOff: 'Nieko',
+  avlTitle: 'Prieinamumas',
+  avlSeeFull: 'Kada esate laisvi ar užimti. Be priežasties.',
   nicPrivSeeEffects: '„Miego poreikis +10 min., pasirengimas −3 %.“ Be produktų ir kiekių.',
   nicPrivSeeFull: 'Produktai ir jūsų įprasti kiekiai.',
   nicPrivData: 'Jūsų duomenys',

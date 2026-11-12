@@ -20,6 +20,7 @@ import {
   useStore,
   useSupplements,
 } from '../../../store';
+import { usePlannerShare, writePlannerShare } from '../../../plannerRt';
 import { SupplementCoachPreview } from '../../../views/health/supplements/SupplementCoachPreview';
 import { firstName } from '../../screens/format';
 import type { Level } from '../../domain/types';
@@ -62,6 +63,7 @@ export const writeLocal = (id: LocalCategory, l: Level): void => {
   if (id === 'conditions') setConditionsShare(l);
   else if (id === 'nicotine') setNicotineSharing(l);
   else if (id === 'alcohol') setAlcoholSharing(clampLevel('alcohol', l) as 'off' | 'effects');
+  else if (id === 'availability') writePlannerShare(clampLevel('availability', l) === 'full');
   else setSupplementSharing(l);
 };
 
@@ -84,6 +86,7 @@ export function TrainerSharing(p: TrainerSharingProps) {
   const nic = useNicotine().settings.sharing;
   const alc = useAlcohol().settings.sharing;
   const sup = useSupplements().settings.sharing;
+  const avl = usePlannerShare();
 
   const link = on ? snapshot?.link : undefined;
   const trainer = link && link.state !== 'none' ? link.trainer : null;
@@ -92,6 +95,7 @@ export function TrainerSharing(p: TrainerSharingProps) {
     nicotine: nic,
     alcohol: clampLevel('alcohol', alc),
     supplements: sup,
+    availability: avl,
   };
   const levels = Object.fromEntries(
     SHARE_IDS.map((id) => [

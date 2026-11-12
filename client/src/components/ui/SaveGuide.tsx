@@ -116,22 +116,56 @@ export interface SaveGuideProps extends Omit<ButtonProps, 'disabled' | 'onClick'
   onSave: () => void;
 }
 
+type Corners = [number, number, number, number]; // top-left, top-right, bottom-right, bottom-left
+
+/**
+ * The corner radii of what the person SEES for a field: its own, and the group's where the field touches the group's edge (a
+ * row inside a `GroupedList` is square itself, the group clips it round), so the frame is cut exactly like the field.
+ */
+function visibleCorners(el: HTMLElement, b: DOMRect): Corners {
+  const px = (cs: CSSStyleDeclaration, k: string) => parseFloat(cs.getPropertyValue(k)) || 0;
+  const own = getComputedStyle(el);
+  const r: Corners = [
+    px(own, 'border-top-left-radius'),
+    px(own, 'border-top-right-radius'),
+    px(own, 'border-bottom-right-radius'),
+    px(own, 'border-bottom-left-radius'),
+  ];
+  const host = el.parentElement?.closest<HTMLElement>('.uigl-rows');
+  if (!host) return r;
+  const hs = getComputedStyle(host);
+  const hb = host.getBoundingClientRect();
+  const near = (a: number, c: number) => Math.abs(a - c) <= 2;
+  const top = near(b.top, hb.top);
+  const bottom = near(b.bottom, hb.bottom);
+  const left = near(b.left, hb.left);
+  const right = near(b.right, hb.right);
+  if (top && left) r[0] = Math.max(r[0], px(hs, 'border-top-left-radius'));
+  if (top && right) r[1] = Math.max(r[1], px(hs, 'border-top-right-radius'));
+  if (bottom && right) r[2] = Math.max(r[2], px(hs, 'border-bottom-right-radius'));
+  if (bottom && left) r[3] = Math.max(r[3], px(hs, 'border-bottom-left-radius'));
+  return r;
+}
+
 /**
  * The dashed frame and tint over the one field that is still missing (the element carrying `data-guide-hit`). It lives in a
  * portal and follows the field's rectangle (resize, scroll), so overflow, clip-paths and a theme's own pseudo-elements on the
- * field cannot cut or replace it. The radius is read from the field, so a square theme gets a square frame.
+ * field cannot cut or replace it. The corners are the field's visible ones, so a square theme gets a square frame.
  */
 function GuideFrame() {
-  const [box, setBox] = useState<{ x: number; y: number; w: number; h: number; r: number } | null>(
-    null,
-  );
+  const [box, setBox] = useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    r: Corners;
+  } | null>(null);
   useLayoutEffect(() => {
     const el = document.querySelector<HTMLElement>('[data-guide-hit]');
     if (!el) return;
     const measure = () => {
       const b = el.getBoundingClientRect();
-      const r = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0;
-      setBox({ x: b.left, y: b.top, w: b.width, h: b.height, r });
+      setBox({ x: b.left, y: b.top, w: b.width, h: b.height, r: visibleCorners(el, b) });
     };
     measure();
     const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
@@ -145,28 +179,40 @@ function GuideFrame() {
     };
   }, []);
   if (!box) return null;
-  // The dash pattern (8 + 6) must divide the outline exactly, or the loop shows a seam where it starts: pathLength is the
-  // outline rounded to a whole number of periods, so the dashes stretch a hair instead.
-  const w2 = Math.max(0, box.w - 2);
-  const h2 = Math.max(0, box.h - 2);
-  const rr = Math.min(Math.max(0, box.r - 1), w2 / 2, h2 / 2);
-  const perimeter = 2 * (w2 + h2) - 8 * rr + 2 * Math.PI * rr;
+  // The stroke sits 1px inside the edge (2px wide), so each radius shrinks by 1. The dash pattern (8 + 6) must divide the outline
+  // exactly, or the loop shows a seam where it starts: pathLength is the outline rounded to a whole number of periods.
+  const w = Math.max(0, box.w - 2);
+  const h = Math.max(0, box.h - 2);
+  const cap = Math.min(w, h) / 2;
+  const [tl, tr, br, bl] = box.r.map((v) => Math.min(Math.max(0, v - 1), cap)) as Corners;
+  const d = [
+    `M ${1 + tl} 1`,
+    `H ${1 + w - tr}`,
+    `A ${tr} ${tr} 0 0 1 ${1 + w} ${1 + tr}`,
+    `V ${1 + h - br}`,
+    `A ${br} ${br} 0 0 1 ${1 + w - br} ${1 + h}`,
+    `H ${1 + bl}`,
+    `A ${bl} ${bl} 0 0 1 1 ${1 + h - bl}`,
+    `V ${1 + tl}`,
+    `A ${tl} ${tl} 0 0 1 ${1 + tl} 1`,
+    'Z',
+  ].join(' ');
+  const perimeter = 2 * (w + h) - 2 * (tl + tr + br + bl) + (Math.PI / 2) * (tl + tr + br + bl);
   const period = 14;
   return (
     <div
       className="uisg-frame"
       aria-hidden
-      style={{ left: box.x, top: box.y, width: box.w, height: box.h, borderRadius: box.r }}
+      style={{
+        left: box.x,
+        top: box.y,
+        width: box.w,
+        height: box.h,
+        borderRadius: box.r.map((v) => `${v}px`).join(' '),
+      }}
     >
       <svg>
-        <rect
-          x={1}
-          y={1}
-          width={w2}
-          height={h2}
-          rx={rr}
-          pathLength={Math.max(1, Math.round(perimeter / period)) * period}
-        />
+        <path d={d} pathLength={Math.max(1, Math.round(perimeter / period)) * period} />
       </svg>
     </div>
   );

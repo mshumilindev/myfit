@@ -52,6 +52,13 @@ export function shareRowMeta(id: ShareId, cc: ClientStrings, t: Strings): ShareR
         tone: 'accent',
         sees: { off: t.nicPrivSeeOff, effects: t.alcPrivSeeEffects },
       };
+    case 'availability':
+      return {
+        title: t.avlTitle,
+        icon: 'clock',
+        tone: 'accent',
+        sees: { off: t.nicPrivSeeOff, full: t.avlSeeFull },
+      };
     case 'supplements':
       return {
         title: t.supTitle,

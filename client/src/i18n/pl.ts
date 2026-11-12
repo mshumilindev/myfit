@@ -1709,6 +1709,8 @@ export const pl: Strings = {
   nicPrivHintFull: 'Trener widzi Twoje produkty i zwykłe ilości.',
   nicPrivSeeHead: 'Co widziałby trener',
   nicPrivSeeOff: 'Nic',
+  avlTitle: 'Dostępność',
+  avlSeeFull: 'Kiedy jesteś wolny lub zajęty. Bez powodu.',
   nicPrivSeeEffects: '„Potrzeba snu +10 min, gotowość −3%”. Bez produktów i ilości.',
   nicPrivSeeFull: 'Produkty i Twoje zwykłe ilości.',
   nicPrivData: 'Twoje dane',

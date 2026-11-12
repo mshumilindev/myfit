@@ -1693,6 +1693,8 @@ export const en = {
   nicPrivHintFull: 'Your coach sees your products and usual amounts.',
   nicPrivSeeHead: 'What your coach would see',
   nicPrivSeeOff: 'Nothing',
+  avlTitle: 'Availability',
+  avlSeeFull: 'When you are free or busy. Never why.',
   nicPrivSeeEffects: '“Sleep need +10 min, readiness −3%.” No products or amounts.',
   nicPrivSeeFull: 'Products and your usual amounts.',
   nicPrivData: 'Your data',

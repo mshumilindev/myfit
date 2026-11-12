@@ -1696,6 +1696,8 @@ export const et: Strings = {
   nicPrivHintFull: 'Treener näeb sinu tooteid ja tavapäraseid koguseid.',
   nicPrivSeeHead: 'Mida treener näeks',
   nicPrivSeeOff: 'Mitte midagi',
+  avlTitle: 'Saadavus',
+  avlSeeFull: 'Millal oled vaba või hõivatud. Ilma põhjuseta.',
   nicPrivSeeEffects: '„Une vajadus +10 min, valmisolek −3%.“ Ilma toodete ja koguseteta.',
   nicPrivSeeFull: 'Tooted ja sinu tavapärased kogused.',
   nicPrivData: 'Sinu andmed',

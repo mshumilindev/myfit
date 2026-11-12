@@ -31,6 +31,9 @@ export const getPrefs = (): PlannerPrefs => prefs;
 /** Plans that exist but cannot be opened yet (no vault key on this device). */
 export const lockedPlans = (): number => locked;
 
+/** For the chunk's boot: runs on every change of plans or prefs. */
+export const subscribePlanner = subscribe;
+
 export const usePlans = (): PlanDoc[] => useSyncExternalStore(subscribe, getPlans);
 export const usePrefs = (): PlannerPrefs => useSyncExternalStore(subscribe, getPrefs);
 

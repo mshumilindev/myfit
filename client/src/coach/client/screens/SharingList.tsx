@@ -22,6 +22,7 @@ import {
   SHARE_GROUPS,
   allowedLevels,
   buildSummary,
+  isLocalCategory,
   isStaleGrant,
   sharedCountAll,
   sharesNothingAll,
@@ -104,7 +105,7 @@ export function SharingList(p: SharingListProps) {
   // without a trainer the six grant rows have no meaning: only the on-device ones stay
   const groups = SHARE_GROUPS.map((g) => ({
     ...g,
-    ids: (p.trainer ? g.ids : g.ids.filter((id) => LOCAL.has(id))).filter(shown),
+    ids: (p.trainer ? g.ids : g.ids.filter(isLocalCategory)).filter(shown),
   })).filter((g) => g.ids.length > 0);
 
   return (
@@ -253,8 +254,6 @@ export function SharingList(p: SharingListProps) {
     </>
   );
 }
-
-const LOCAL = new Set<ShareId>(['conditions', 'nicotine', 'alcohol', 'supplements']);
 
 /** The level sheet: option cards for the levels the setting offers (two for Alcohol, with the reason), applies right away. */
 export function LevelSheet(p: {

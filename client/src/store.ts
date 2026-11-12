@@ -198,6 +198,7 @@ import type { HealthFeature } from './legal/consents';
 import { createAlcoholCache } from './alcoholCache';
 import { alc } from './alcoholRt';
 import { isTrackerReady, onTrackerReady } from './trackerRt';
+import { plannerHost, writePlannerShare } from './plannerRt';
 import type { PendingCheckin, WeekActual, AlcoholEffects, AlcoholLoad, DayInput } from './alcohol';
 import { createSupplementsCache } from './supplementsCache';
 import { sup } from './supplementsRt';
@@ -572,7 +573,9 @@ onTrackerReady((id) => {
   else if (id === 'sleep')
     // a new array: memos keyed on the list recompute with the real engine
     state = { ...state, sleeps: [...state.sleeps] };
-  else return;
+  else if (id === 'planner') {
+    // nothing to normalise: the held coach view is published now that the chunk can answer
+  } else return;
   emit();
   if (id !== 'cycle' && id !== 'sleep') {
     const uid = currentUid();
@@ -2989,7 +2992,9 @@ function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): 
     pending('alcohol', state.alcohol?.settings?.sharing) ||
     pending('nicotine', state.nicotine?.settings?.sharing) ||
     pending('supplements', state.supplements?.settings?.sharing) ||
-    pending('conditions', state.conditions.length ? state.conditionsShare : 'off')
+    pending('conditions', state.conditions.length ? state.conditionsShare : 'off') ||
+    // Planner's sharing setting lives in its own chunk: hold back until it has arrived (it republishes then).
+    (installed('planner') && !isTrackerReady('planner'))
   )
     return;
   const vis = exposed();
@@ -3008,11 +3013,14 @@ function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): 
     },
     Date.now(),
   );
+  // Availability is shared only while Planner is installed (its data stays stored; the trainer sees "Not shared" without it).
+  const avView = installed('planner') ? (plannerHost.coachView?.() ?? null) : null;
   const view = {
     ...coachView(items, state.conditionsShare),
     ...(nicView ? { nicotine: nicView } : {}),
     ...(alcView ? { alcohol: alcView } : {}),
     ...(supView ? { supplements: supView } : {}),
+    ...(avView ? { availability: avView } : {}),
   };
   const json = JSON.stringify(view);
   if (json === lastCoachShare) return;
@@ -3035,6 +3043,12 @@ function publishCoachShare(uid: string, rawItems: readonly ChronicCondition[]): 
       coachShareFailed(uid, mine, e);
     }
   });
+}
+
+/** Republishes what the coach sees (a lazy add-on's own setting changed). */
+export function republishCoachShare(): void {
+  const uid = currentUid();
+  if (uid) publishCoachShare(uid, state.conditions);
 }
 
 /** Sets the general default and republishes what the coach sees. */
@@ -3586,7 +3600,8 @@ export function deleteSupplementData(): void {
 }
 
 /** The four on-device sharing levels (`meta/coachShare`) that can be forgotten without consent. */
-export type ForgettableShare = 'conditions' | 'nicotine' | 'alcohol' | 'supplements';
+export type ForgettableShare =
+  'conditions' | 'nicotine' | 'alcohol' | 'supplements' | 'availability';
 
 /**
  * Stop sharing / withdrawing a consent: sets the RAW stored sharing level to Off, also while the feature's consent is off
@@ -3636,6 +3651,10 @@ export function forgetShareLevel(kind: ForgettableShare): void {
     };
     withForcedPersist('alcohol', () => setState({ alcohol: next, syncStatus: bumpPending() }));
     writeAlcoholDoc(next);
+  } else if (kind === 'availability') {
+    // Planner keeps this one in its own prefs; the chunk saves it and republishes the coach view itself.
+    writePlannerShare(false);
+    return;
   } else {
     const cur = state.supplements ?? sup.empty();
     if (cur.settings.sharing === 'off') return;

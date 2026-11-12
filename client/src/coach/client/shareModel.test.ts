@@ -20,17 +20,21 @@ import {
 const lv = (p: Partial<ShareLevels>): ShareLevels => ({ ...allOffLevels(), ...p });
 
 describe('share model', () => {
-  it('ten settings in three groups; nutrition sits in Body (Q5)', () => {
-    expect(SHARE_IDS).toHaveLength(10);
+  it('eleven settings in three groups; nutrition sits in Body (Q5)', () => {
+    expect(SHARE_IDS).toHaveLength(11);
     expect(SHARE_GROUPS.map((g) => g.id)).toEqual(['training', 'body', 'life']);
     expect(SHARE_GROUPS.find((g) => g.id === 'body')?.ids).toContain('nutrition');
     expect(SHARE_GROUPS.flatMap((g) => g.ids).sort()).toEqual([...SHARE_IDS].sort());
   });
 
-  it('only Alcohol has no Full (Q2); the stored level of an old build is clamped', () => {
+  it('Alcohol has no Full (Q2), Availability only Off/Full; the stored level of an old build is clamped', () => {
     for (const id of SHARE_IDS)
       expect(allowedLevels(id)).toEqual(
-        id === 'alcohol' ? ['off', 'effects'] : ['off', 'effects', 'full'],
+        id === 'alcohol'
+          ? ['off', 'effects']
+          : id === 'availability'
+            ? ['off', 'full']
+            : ['off', 'effects', 'full'],
       );
     expect(clampLevel('alcohol', 'full')).toBe('off'); // same as the normaliser and the publisher (B7)
     expect(clampLevel('alcohol', 'effects')).toBe('effects');
@@ -82,8 +86,14 @@ describe('share model', () => {
 
   it('localsToStop lists only the on-device settings above Off, with their level for Undo', () => {
     expect(
-      localsToStop({ conditions: 'full', nicotine: 'off', alcohol: 'effects', supplements: 'off' }),
+      localsToStop({
+        conditions: 'full',
+        nicotine: 'off',
+        alcohol: 'effects',
+        supplements: 'off',
+        availability: 'off',
+      }),
     ).toEqual({ conditions: 'full', alcohol: 'effects' });
-    expect(LOCAL_CATEGORIES).toHaveLength(4);
+    expect(LOCAL_CATEGORIES).toHaveLength(5);
   });
 });

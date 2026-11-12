@@ -9,7 +9,13 @@ import { LEVELS } from '../domain/types';
 import { SHARE_CATEGORIES, type ShareCategory } from './domain';
 
 /** The four settings that live on the device and reach a coach through `meta/coachShare`, not through a grant. */
-export const LOCAL_CATEGORIES = ['conditions', 'nicotine', 'alcohol', 'supplements'] as const;
+export const LOCAL_CATEGORIES = [
+  'conditions',
+  'nicotine',
+  'alcohol',
+  'supplements',
+  'availability',
+] as const;
 export type LocalCategory = (typeof LOCAL_CATEGORIES)[number];
 export type ShareId = ShareCategory | LocalCategory;
 export const SHARE_IDS: readonly ShareId[] = [...SHARE_CATEGORIES, ...LOCAL_CATEGORIES];
@@ -17,7 +23,7 @@ export const SHARE_IDS: readonly ShareId[] = [...SHARE_CATEGORIES, ...LOCAL_CATE
 export type ShareGroupId = 'training' | 'body' | 'life';
 /** Order of the page. Nutrition sits in Body (owner decision Q5). */
 export const SHARE_GROUPS: readonly { id: ShareGroupId; ids: readonly ShareId[] }[] = [
-  { id: 'training', ids: ['totals', 'sets'] },
+  { id: 'training', ids: ['totals', 'sets', 'availability'] },
   { id: 'body', ids: ['body', 'sleep', 'nutrition'] },
   { id: 'life', ids: ['injury', 'conditions', 'nicotine', 'alcohol', 'supplements'] },
 ];
@@ -30,6 +36,7 @@ export const ADDON_OF: Partial<Record<ShareId, string>> = {
   nicotine: 'nicotine',
   alcohol: 'alcohol',
   supplements: 'supplements',
+  availability: 'planner',
 };
 
 export const isLocalCategory = (id: ShareId): id is LocalCategory =>
@@ -39,9 +46,14 @@ export type ShareLevels = Record<ShareId, Level>;
 export const allOffLevels = (): ShareLevels =>
   Object.fromEntries(SHARE_IDS.map((k) => [k, 'off'])) as ShareLevels;
 
-/** Alcohol never shares amounts, so it has no Full (owner decision Q2: the others keep Full). */
+/**
+ * Alcohol never shares amounts, so it has no Full (owner decision Q2: the others keep Full). Availability is free or busy
+ * only: Off or Full, no in-between.
+ */
 export function allowedLevels(id: ShareId): readonly Level[] {
-  return id === 'alcohol' ? ['off', 'effects'] : LEVELS;
+  if (id === 'alcohol') return ['off', 'effects'];
+  if (id === 'availability') return ['off', 'full'];
+  return LEVELS;
 }
 /** A level the setting does not offer falls back to Off, like the normaliser and the publisher do (an old build can have stored `full`). */
 export const clampLevel = (id: ShareId, l: Level): Level =>

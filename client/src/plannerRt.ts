@@ -12,6 +12,12 @@ import { registerAddonExport } from './legal/export/addonExport';
 import type { ExportFile } from './legal/export/exportModel';
 import { isTrackerReady, onTrackerReady } from './trackerRt';
 
+/** What a trainer sees of the person's availability (published inside `meta/coachShare`): hours per weekday, minutes since midnight, and unavailable day keys. */
+export interface CoachAvailability {
+  weekly: Record<number, [number, number][]>;
+  unavailable: { fromDay: number; toDay: number | null }[];
+}
+
 export interface PlannerHost {
   /** The Planner screen (an overlay of Gym). */
   Page: ComponentType<{ onClose: () => void }> | null;
@@ -21,6 +27,10 @@ export interface PlannerHost {
   moreItem: ((locale: LocaleId, open: () => void) => MoreMenuItem) | null;
   /** The plans and availability, decrypted on this device, for the data export. */
   exportFiles: (() => ExportFile[]) | null;
+  /** Turns "Show free hours to my trainer" on or off (the chunk saves the prefs and republishes the coach view). */
+  setShare: ((on: boolean) => void) | null;
+  /** The availability a trainer may see, or null while it is not shared. */
+  coachView: (() => CoachAvailability | null) | null;
 }
 
 export const plannerHost: PlannerHost = {
@@ -28,6 +38,8 @@ export const plannerHost: PlannerHost = {
   Layer: null,
   moreItem: null,
   exportFiles: null,
+  setShare: null,
+  coachView: null,
 };
 
 // The data export always names Planner: its files when the chunk is loaded, otherwise "not included" (the data stays stored).
@@ -54,3 +66,25 @@ export function usePlannerHost(): PlannerHost | null {
   );
   return on && ready ? plannerHost : null;
 }
+
+// The one setting the core needs before the chunk is loaded or while it is gone: whether availability is shared. The chunk fills the
+// mirror from the person's prefs (`setPlannerShareMirror`); until then, and when Planner is not installed, it reads off.
+let shareOn = false;
+const shareSubs = new Set<() => void>();
+export function setPlannerShareMirror(on: boolean): void {
+  if (shareOn === on) return;
+  shareOn = on;
+  shareSubs.forEach((f) => f());
+}
+export function usePlannerShare(): 'off' | 'full' {
+  const on = useSyncExternalStore(
+    (cb) => {
+      shareSubs.add(cb);
+      return () => shareSubs.delete(cb);
+    },
+    () => shareOn,
+  );
+  return on ? 'full' : 'off';
+}
+/** Writes the share setting through the chunk (nothing happens while it is not loaded: the row only exists while it is). */
+export const writePlannerShare = (on: boolean): void => plannerHost.setShare?.(on);

@@ -7,10 +7,11 @@ const locals: LocalLevels = {
   nicotine: 'off',
   alcohol: 'effects',
   supplements: 'effects',
+  availability: 'off',
 };
 
 describe('stopAllSharing', () => {
-  it('zeroes the raw level of ALL four local settings BEFORE the grants are revoked, remembers the visible ones', async () => {
+  it('zeroes the raw level of ALL five local settings BEFORE the grants are revoked, remembers the visible ones', async () => {
     const order: string[] = [];
     const forget = vi.fn((id: string) => order.push(`${id}:off`));
     const revoke = vi.fn(async () => {
@@ -24,6 +25,7 @@ describe('stopAllSharing', () => {
       'nicotine:off',
       'alcohol:off',
       'supplements:off',
+      'availability:off',
       'revoke',
     ]);
     expect(r).toEqual({
@@ -36,18 +38,24 @@ describe('stopAllSharing', () => {
     const forget = vi.fn();
     const r = await stopAllSharing({ locals, forget, revoke: async () => false });
     expect(r.ok).toBe(false);
-    expect(forget).toHaveBeenCalledTimes(4);
+    expect(forget).toHaveBeenCalledTimes(5);
   });
 
   it('with nothing visible to stop it still revokes and still forgets the hidden raw levels', async () => {
     const revoke = vi.fn(async () => true);
     const forget = vi.fn();
     const r = await stopAllSharing({
-      locals: { conditions: 'off', nicotine: 'off', alcohol: 'off', supplements: 'off' },
+      locals: {
+        conditions: 'off',
+        nicotine: 'off',
+        alcohol: 'off',
+        supplements: 'off',
+        availability: 'off',
+      },
       forget,
       revoke,
     });
-    expect(forget).toHaveBeenCalledTimes(4);
+    expect(forget).toHaveBeenCalledTimes(5);
     expect(revoke).toHaveBeenCalledOnce();
     expect(r.previous).toEqual({});
   });
