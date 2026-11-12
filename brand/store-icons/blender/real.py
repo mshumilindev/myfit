@@ -600,9 +600,179 @@ def o_brain(c):
     return (0, 0, 0)
 
 
+def o_calendar(c):
+    card = pbr('#fbfaf6', rough=0.75)
+    back = pbr('#e4e1d8', rough=0.8)
+    head = pbr('T0', rough=0.4, coat=0.4)
+    chrome = pbr('#e9ebf0', metal=1.0, rough=0.16)
+    cell = pbr('#e3e6ee', rough=0.7)
+    coral = pbr('#ef5a43', rough=0.35, coat=0.45)
+    dot = pbr('T0', rough=0.45, coat=0.3)
+    box((0.07, -0.08, -0.07), (1.62, 0.2, 1.72), back, 0.04)
+    box((0.035, -0.14, -0.06), (1.62, 0.2, 1.72), pbr('#efece4', rough=0.8), 0.04)
+    box((0.0, -0.2, -0.05), (1.62, 0.2, 1.72), card, 0.05)
+    box((0.0, -0.31, 0.62), (1.62, 0.05, 0.46), head, 0.03)
+    for sx in (-0.45, 0.45):
+        torus((sx, -0.27, 0.9), 0.13, 0.032, chrome)
+    for j in range(4):
+        for i in range(5):
+            x = -0.56 + i * 0.28
+            z = 0.2 - j * 0.28
+            if (i, j) == (2, 1):
+                box((x, -0.325, z), (0.23, 0.05, 0.23), coral, 0.03)
+            elif (i, j) in ((0, 2), (4, 1), (3, 3)):
+                box((x, -0.31, z), (0.2, 0.025, 0.2), cell, 0.02)
+                cyl((x, -0.335, z), 0.045, 0.03, dot, 'Y')
+            else:
+                box((x, -0.31, z), (0.2, 0.025, 0.2), cell, 0.02)
+    return (0, 0, 0)
+
+
+
+# ---- Planner icon variants (a..j) ----
+def _paper():
+    return pbr('#fbfaf6', rough=0.75)
+
+
+def _rings(xs, z, chrome):
+    for sx in xs:
+        torus((sx, -0.27, z), 0.13, 0.032, chrome)
+
+
+def o_cal_b(c):  # tilted wall calendar, one big coral day
+    chrome = pbr('#e9ebf0', metal=1.0, rough=0.16)
+    box((0.0, -0.2, -0.05), (1.62, 0.2, 1.72), _paper(), 0.05)
+    box((0.0, -0.31, 0.62), (1.62, 0.05, 0.46), pbr('T0', rough=0.4, coat=0.4), 0.03)
+    _rings((-0.45, 0.45), 0.9, chrome)
+    cyl((0.0, -0.33, -0.18), 0.5, 0.06, pbr('#ef5a43', rough=0.35, coat=0.45), 'Y', 0.02)
+    cyl((0.0, -0.37, -0.18), 0.36, 0.02, pbr('#fbfaf6', rough=0.6), 'Y')
+    return (0, -8, 0)
+
+
+def o_cal_c(c):  # tear-off desk calendar: thick stack of pages
+    chrome = pbr('#e9ebf0', metal=1.0, rough=0.16)
+    for k in range(5):
+        box((0.03 * k - 0.06, -0.05 - 0.07 * (4 - k), -0.06 - 0.01 * k), (1.62, 0.07, 1.7), pbr('#f1eee6' if k % 2 else '#fbfaf6', rough=0.8), 0.02)
+    box((0.0, -0.32, 0.64), (1.62, 0.06, 0.42), pbr('#ef5a43', rough=0.4, coat=0.4), 0.03)
+    _rings((-0.45, 0.45), 0.9, chrome)
+    for i in range(3):
+        box((-0.45 + i * 0.45, -0.33, -0.1), (0.3, 0.03, 0.3), pbr('#e3e6ee', rough=0.7), 0.02)
+    box((0.0, -0.33, -0.55), (1.1, 0.03, 0.22), pbr('T1', rough=0.4, coat=0.4), 0.02)
+    return (0, 0, 0)
+
+
+def o_cal_d(c):  # week planner: 7 day columns with coloured time blocks, real wire-o binding
+    chrome = pbr('#eef0f4', metal=1.0, rough=0.12)
+    hole = pbr('#101218', rough=0.9)
+    box((0.0, -0.2, -0.05), (1.62, 0.2, 1.72), _paper(), 0.05)
+    box((0.0, -0.31, 0.59), (1.62, 0.05, 0.44), pbr('T0', rough=0.4, coat=0.4), 0.03)
+    for x in (-0.42, 0.42):
+        # punched hole in the header, with the wire passing through it
+        cyl((x - 0.07, -0.336, 0.72), 0.06, 0.012, hole, 'Y', 0.0, 32)
+        # one loop of the wire: a ring standing across the top edge, tilted like a coil
+        torus((x, -0.2, 0.8), 0.16, 0.034, chrome, rot=(math.radians(24), math.radians(90), math.radians(-8)))
+    cols = [pbr('T1', rough=0.4, coat=0.4), pbr('#ef5a43', rough=0.35, coat=0.45), pbr('#2fa58f', rough=0.4, coat=0.3), pbr('#f2c443', rough=0.4, coat=0.3)]
+    hs = [(0.5, 0.2), (0.3, 0.1), (0.6, 0.0), (0.25, 0.15), (0.45, 0.05), (0.35, 0.2), (0.2, 0.0)]
+    for i in range(7):
+        x = -0.6 + i * 0.2
+        box((x, -0.3, 0.12 - 0.35), (0.14, 0.02, 0.95), pbr('#eceef3', rough=0.7), 0.01)
+        h, off = hs[i]
+        box((x, -0.325, 0.12 - 0.35 + 0.3 - off - h / 2 + 0.2), (0.14, 0.04, h), cols[i % 4], 0.02)
+    return (0, 0, 0)
+
+
+def o_cal_e(c):  # alarm clock
+    chrome = pbr('#e9ebf0', metal=1.0, rough=0.16)
+    body = pbr('T1', rough=0.35, coat=0.45)
+    white = pbr('#fbfbfd', rough=0.55)
+    dark = pbr('#1b1e26', rough=0.5)
+    red = pbr('#ef5a43', rough=0.35, coat=0.4)
+    yb, cz = -0.45, -0.05
+    cyl((0, yb, cz), 0.82, 0.4, body, 'Y', 0.08)
+    cyl((0, yb - 0.2, cz), 0.66, 0.04, white, 'Y')
+    for k in range(12):
+        a = math.radians(30 * k)
+        L = 0.11 if k % 3 == 0 else 0.06
+        r0 = 0.56 - L / 2
+        box((r0 * math.sin(a), yb - 0.225, cz + r0 * math.cos(a)), (0.035, 0.01, L), dark, 0.004, rot=(0, a, 0))
+    def hand(ang, L, w, m, y):
+        a = math.radians(ang)
+        box((0.5 * L * math.sin(a), y, cz + 0.5 * L * math.cos(a)), (w, 0.012, L), m, 0.004, rot=(0, a, 0))
+    hand(300, 0.3, 0.06, dark, yb - 0.235)
+    hand(30, 0.46, 0.045, dark, yb - 0.245)
+    cyl((0, yb - 0.26, cz), 0.05, 0.03, red, 'Y')
+    for sx in (-1, 1):
+        sphere((sx * 0.5, yb, cz + 0.72), 0.27, chrome, scale=(1, 0.4, 0.7))
+        cyl((sx * 0.7, yb, cz - 0.62), 0.07, 0.3, chrome, 'Z', 0.02, rot=(0, math.radians(sx * 28), 0))
+    cyl((0, yb, cz + 0.88), 0.05, 0.14, chrome, 'Z', 0.01)
+    return (0, 0, 0)
+
+
+def o_cal_f(c):  # clipboard with check list
+    chrome = pbr('#e9ebf0', metal=1.0, rough=0.16)
+    box((0.0, -0.18, -0.05), (1.5, 0.12, 1.85), pbr('T0', rough=0.5, coat=0.3), 0.06)
+    box((0.0, -0.27, -0.12), (1.3, 0.05, 1.55), _paper(), 0.03)
+    box((0.0, -0.33, 0.8), (0.62, 0.1, 0.22), chrome, 0.04)
+    box((0.0, -0.4, 0.9), (0.2, 0.08, 0.08), chrome, 0.03)
+    for j in range(4):
+        z = 0.42 - j * 0.38
+        box((-0.45, -0.31, z), (0.2, 0.03, 0.2), pbr('#2fa58f' if j < 2 else '#e3e6ee', rough=0.4, coat=0.3), 0.02)
+        box((0.12, -0.31, z), (0.7, 0.025, 0.07), pbr('#c9ccd6', rough=0.7), 0.01)
+    return (0, 0, 0)
+
+
+def o_cal_g(c):  # calendar with a bell badge
+    o_calendar(c)
+    gold = pbr('#f2c443', rough=0.28, coat=0.4, metal=0.6)
+    lathe([(0.0, 0.42), (0.14, 0.4), (0.3, 0.3), (0.38, 0.05), (0.47, -0.1), (0.47, -0.18), (0.0, -0.18)], gold, loc=(0.62, -0.62, -0.62), scale=0.7)
+    sphere((0.62, -0.62, -0.78), 0.1, gold)
+    return (0, 0, 0)
+
+
+def o_cal_h(c):  # two overlapping cards: calendar + time slot card
+    chrome = pbr('#e9ebf0', metal=1.0, rough=0.16)
+    box((0.18, -0.1, 0.0), (1.5, 0.14, 1.6), pbr('#e8e6df', rough=0.8), 0.05, rot=(0, math.radians(-6), 0))
+    box((-0.1, -0.22, -0.05), (1.5, 0.16, 1.6), _paper(), 0.05, rot=(0, math.radians(4), 0))
+    box((-0.1, -0.31, 0.5), (1.5, 0.05, 0.4), pbr('#ef5a43', rough=0.4, coat=0.4), 0.03, rot=(0, math.radians(4), 0))
+    for j in range(3):
+        box((-0.1, -0.31, 0.0 - j * 0.3), (1.2, 0.03, 0.2), pbr('#e3e6ee', rough=0.7), 0.02, rot=(0, math.radians(4), 0))
+    _rings((-0.5, 0.3), 0.86, chrome)
+    return (0, 0, 0)
+
+
+def o_cal_i(c):  # round pocket planner: ring-binder notebook with ribbon
+    cover = pbr('T1', rough=0.5, coat=0.35)
+    box((0.0, -0.3, 0), (1.5, 0.55, 1.95), cover, 0.07)
+    box((0.06, -0.3, 0), (1.34, 0.45, 1.84), pbr('#f6f2e8', rough=0.8), 0.02)
+    box((0.0, -0.58, 0), (1.5, 0.08, 1.95), cover, 0.05)
+    box((-0.72, -0.3, 0), (0.1, 0.6, 1.95), pbr('T0', rough=0.45, coat=0.3), 0.04)
+    box((0.35, -0.64, 0.2), (0.22, 0.03, 1.5), pbr('#ef5a43', rough=0.4, coat=0.4), 0.01)
+    for j in range(4):
+        box((0.0, -0.63, 0.55 - j * 0.35), (0.7, 0.02, 0.07), pbr('#f6f2e8', rough=0.6), 0.01)
+    return (0, 0, 0)
+
+
+def o_cal_j(c):  # calendar + stopwatch together
+    o_calendar(c)
+    chrome = pbr('#e9ebf0', metal=1.0, rough=0.16)
+    white = pbr('#fbfbfd', rough=0.55)
+    dark = pbr('#1b1e26', rough=0.5)
+    red = pbr('#ef5a43', rough=0.35, coat=0.4)
+    cx, cy, cz = 0.62, -0.5, -0.6
+    cyl((cx, cy, cz), 0.5, 0.24, chrome, 'Y', 0.05)
+    cyl((cx, cy - 0.13, cz), 0.42, 0.03, white, 'Y')
+    for k in range(4):
+        a = math.radians(90 * k)
+        box((cx + 0.33 * math.sin(a), cy - 0.15, cz + 0.33 * math.cos(a)), (0.03, 0.01, 0.07), dark, 0.003, rot=(0, a, 0))
+    box((cx + 0.09, cy - 0.16, cz + 0.12), (0.035, 0.012, 0.28), dark, 0.004, rot=(0, math.radians(35), 0))
+    box((cx, cy - 0.16, cz + 0.12), (0.035, 0.012, 0.3), red, 0.004, rot=(0, math.radians(-10), 0))
+    cyl((cx, cy, cz + 0.55), 0.06, 0.12, chrome, 'Z', 0.01)
+    return (0, 0, 0)
+
+
 OBJECTS = {'dumbbell': o_dumbbell, 'peak': o_peak, 'whistle': o_whistle, 'apple': o_apple, 'note': o_note, 'heart': o_heart,
            'moon': o_moon, 'activity': o_activity, 'house': o_house, 'target': o_target, 'book': o_book, 'sparkle': o_sparkle,
-           'broadcast': o_broadcast, 'bell': o_bell, 'notes': o_notes, 'team': o_team, 'lens': o_lens, 'cyber': o_cyber, 'gift': o_gift, 'trophy': o_trophy, 'banana': o_banana, 'stopwatch': o_stopwatch, 'brain': o_brain}
+           'broadcast': o_broadcast, 'bell': o_bell, 'notes': o_notes, 'team': o_team, 'lens': o_lens, 'cyber': o_cyber, 'gift': o_gift, 'trophy': o_trophy, 'banana': o_banana, 'stopwatch': o_stopwatch, 'brain': o_brain, 'calendar': o_calendar, 'cal_b': o_cal_b, 'cal_c': o_cal_c, 'cal_d': o_cal_d, 'cal_e': o_cal_e, 'cal_f': o_cal_f, 'cal_g': o_cal_g, 'cal_h': o_cal_h, 'cal_i': o_cal_i, 'cal_j': o_cal_j}
 
 
 def build(gname, tone):

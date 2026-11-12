@@ -40,7 +40,7 @@ TONES = {
 ITEMS = {
     'gym': ('dumbbell', 10), 'apex': ('trophy', 11), 'coach': ('whistle', 13), 'nutrition': ('banana', 14), 'music': ('note', 12),
     'health': ('heart', 15), 'sleep': ('moon', 16), 'activities': ('stopwatch', 17), 'home-sets': ('house', 18),
-    'goals': ('target', 10), 'playbook': ('book', 10), 'atlas': ('brain', 19),
+    'goals': ('target', 10), 'playbook': ('book', 10), 'atlas': ('brain', 19), 'planner': ('calendar', 1), 'planner-a': ('calendar', 1), 'planner-b': ('cal_b', 1), 'planner-c': ('cal_c', 1), 'planner-d': ('cal_d', 1), 'planner-e': ('cal_e', 1), 'planner-f': ('cal_f', 1), 'planner-g': ('cal_g', 1), 'planner-h': ('cal_h', 1), 'planner-i': ('cal_i', 1), 'planner-j': ('cal_j', 1),
     'coach-live': ('broadcast', 13), 'coach-signals': ('bell', 13), 'coach-notes': ('notes', 13), 'coach-team': ('team', 13),
     'theme-brass-glass': ('scene_brass', 10), 'theme-cyberpunk': ('scene_cyber', 10), 'holiday-themes': ('scene_holiday', 10),
 }
