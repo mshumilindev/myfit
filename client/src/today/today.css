@@ -101,6 +101,14 @@ body.td-editing .today-page .td-topbar {
   -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent);
   mask-image: linear-gradient(to bottom, black 70%, transparent);
 }
+.tdc-preview .td-planner-entry {
+  display: none; /* shown whole under the preview instead (.tdc-fixed) */
+}
+.tdc-fixed {
+  pointer-events: none;
+  opacity: 0.8;
+  margin-top: var(--s-8);
+}
 .tdc-hint {
   display: grid;
   place-items: center;

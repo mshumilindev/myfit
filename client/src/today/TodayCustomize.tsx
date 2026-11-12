@@ -8,6 +8,7 @@
  * the "Add to Today" panel (in place of Start) drops new sections, widgets and
  * shortcuts onto the page. The arrows stay the keyboard path.
  */
+import { PlannerEntry } from './PlannerEntry';
 import {
   Fragment,
   useEffect,
@@ -529,6 +530,12 @@ export function TodayCustomize({
           ) : (
             <div className="tdc-preview" aria-hidden="true">
               {coreBlocks[s.id]}
+            </div>
+          )}
+          {s.id === 'program' && (
+            // The Planner card is fixed under the week; the clipped preview above cuts it off, so show it whole here.
+            <div className="tdc-fixed" aria-hidden="true">
+              <PlannerEntry onOpen={() => {}} />
             </div>
           )}
         </div>

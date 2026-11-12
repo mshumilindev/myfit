@@ -1,6 +1,8 @@
 import { addonsPref } from '../addons/enabledSet';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, createEvent, fireEvent, render, screen, within } from '@testing-library/react';
+const planner = vi.hoisted(() => ({ host: null as null | { UpNext: () => unknown } }));
+vi.mock('../plannerRt', () => ({ usePlannerHost: () => planner.host }));
 import { TodayCustomize } from './TodayCustomize';
 import {
   CORE_IDS,
@@ -91,6 +93,24 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   side.remove();
+});
+
+describe('Customize Today — Planner entry', () => {
+  afterEach(() => {
+    planner.host = null;
+  });
+  it('shows the fixed Planner card whole under Program & week, outside the clipped preview', () => {
+    planner.host = { UpNext: () => <span>planner-card</span> };
+    const { container } = render(<Harness side={null} onClose={() => undefined} />);
+    const card = container.querySelectorAll('.tdc-fixed .td-planner-entry');
+    expect(card).toHaveLength(1);
+    expect(card[0].textContent).toBe('planner-card');
+    expect(card[0].closest('.tdc-preview')).toBeNull();
+  });
+  it('shows nothing while Planner is not installed', () => {
+    const { container } = render(<Harness side={null} onClose={() => undefined} />);
+    expect(container.querySelector('.td-planner-entry')).toBeNull();
+  });
 });
 
 describe('Customize Today — mobile', () => {
