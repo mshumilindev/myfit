@@ -36,6 +36,11 @@ export interface GroupedListProps {
   rowsRole?: string;
   /** DOM id of the rows container (aria-controls / aria-owns targets). */
   rowsId?: string;
+  /**
+   * The whole group is one required field (a choice among its rows): `guide.field(id)` frames and tints the group as a single
+   * block, not row by row. Use `ListRow`'s own `guide` only when one row is the field.
+   */
+  guide?: GuideFieldProps;
 }
 
 export function GroupedList({
@@ -50,7 +55,12 @@ export function GroupedList({
   list = false,
   rowsRole,
   rowsId,
+  guide,
 }: GroupedListProps) {
+  const rowsClass = ['uigl-rows', guide?.className].filter(Boolean).join(' ');
+  const guideAttrs = guide
+    ? { onClickCapture: guide.onClickCapture, 'data-guide-hit': guide['data-guide-hit'] }
+    : {};
   return (
     <section
       className={[
@@ -65,12 +75,13 @@ export function GroupedList({
     >
       {header != null && <div className="uigl-h">{header}</div>}
       {list ? (
-        <ul className="uigl-rows" aria-label={label}>
+        <ul className={rowsClass} aria-label={label} {...guideAttrs}>
           {children}
         </ul>
       ) : (
         <div
-          className="uigl-rows"
+          className={rowsClass}
+          {...guideAttrs}
           id={rowsId}
           role={rowsRole}
           aria-label={rowsRole ? label : undefined}

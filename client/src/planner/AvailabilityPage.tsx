@@ -194,11 +194,13 @@ function DayEditor(p: {
   // Edits go to a copy; Save writes it, Back / Cancel drop it (after asking when something changed).
   const [week, setWeek] = useState(p.week);
   const [askLeave, setAskLeave] = useState(false);
-  const dirty = JSON.stringify(week) !== JSON.stringify(p.week);
+  const changed = JSON.stringify(week) !== JSON.stringify(p.week);
   const guide = useSaveGuide([
-    { id: 'hours', label: s.needChange, done: dirty },
+    { id: 'hours', label: s.needChange, done: changed },
     { id: 'scope', label: s.needScope, done: scope !== null },
   ]);
+  // Any touch counts: a changed week, or an "Apply to" choice already made.
+  const dirty = changed || scope !== null;
   const leave = () => (dirty ? setAskLeave(true) : p.onClose());
   const ranges = dayRanges(week, p.day);
   const reach = [...new Set([p.day, ...(scope ? SCOPE_DAYS[scope] : [])])];
@@ -254,42 +256,33 @@ function DayEditor(p: {
               <ListRow action tone="danger" label={s.removeHours} onClick={() => setRemoving(i)} />
             </GroupedList>
           ))}
-          <GroupedList>
+          <GroupedList guide={guide.field('hours')}>
             <ListRow
               icon={<IconTile tone="accent" size={32} icon="plus" />}
               label={s.addHours}
-              guide={guide.field('hours')}
               chevron
               onClick={() => setEditing(fresh())}
             />
           </GroupedList>
-          <GroupedList header={s.applyTo}>
+          <GroupedList header={s.applyTo} guide={guide.field('scope')}>
             <ListRow
               label={fill(s.onlyDay, { d: name })}
               check={scope === 'only'}
-              guide={guide.field('scope')}
               onClick={() => pick('only')}
             />
             <ListRow
               label={s.weekdaysL}
               sub={s.weekdaysSub}
               check={scope === 'weekdays'}
-              guide={guide.field('scope')}
               onClick={() => pick('weekdays')}
             />
             <ListRow
               label={s.weekendsL}
               sub={s.weekendsSub}
               check={scope === 'weekends'}
-              guide={guide.field('scope')}
               onClick={() => pick('weekends')}
             />
-            <ListRow
-              label={s.everyDay}
-              check={scope === 'every'}
-              guide={guide.field('scope')}
-              onClick={() => pick('every')}
-            />
+            <ListRow label={s.everyDay} check={scope === 'every'} onClick={() => pick('every')} />
           </GroupedList>
         </div>
       </div>

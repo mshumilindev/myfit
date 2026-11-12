@@ -202,4 +202,12 @@ describe('AvailabilityPage', () => {
     fireEvent.click(screen.getAllByRole('button', { name: /back/i })[0]);
     expect(screen.getByRole('alertdialog')).toBeTruthy();
   });
+
+  it('an "Apply to" choice alone already counts as a change for Back', () => {
+    render(<AvailabilityPage onBack={() => {}} />);
+    fireEvent.click(screen.getByText('Monday'));
+    fireEvent.click(screen.getByText('Only Monday'));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getByRole('alertdialog')).toBeTruthy();
+  });
 });
