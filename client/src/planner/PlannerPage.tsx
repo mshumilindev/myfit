@@ -17,6 +17,7 @@ import { useWeekStartDay } from '../weekStart';
 import { draftToPlan, newDraft, planToDraft, type Draft } from './draft';
 import { clock, dayFull, dayLong, dayMonth, leadText, monthYear, weekRange } from './fmt';
 import { AvailabilityPage } from './AvailabilityPage';
+import { PlannerSettings } from './PlannerSettings';
 import { weekSummary } from './availability';
 import { PlanForm } from './PlanForm';
 import { PlannerDesk, type DeskView, type Occ } from './PlannerDesk';
@@ -47,6 +48,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
   const [form, setForm] = useState<{ draft: Draft; editing: boolean; day?: DayKey } | null>(null);
   const [asking, setAsking] = useState<PlanDoc | null>(null);
   const [availOpen, setAvailOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const prefs = usePrefs();
   const [choosing, setChoosing] = useState<PlanDoc | null>(null);
   const desk = useMinWidth(COACH_BREAKPOINT);
@@ -100,6 +102,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
           : view === 'day'
             ? oneDay
             : today,
+        prefs.defaults,
       ),
       editing: false,
     });
@@ -254,6 +257,13 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
     .join(' · ');
 
   if (availOpen) return <AvailabilityPage onBack={() => setAvailOpen(false)} />;
+  if (settingsOpen)
+    return (
+      <PlannerSettings
+        onBack={() => setSettingsOpen(false)}
+        onAvailability={() => setAvailOpen(true)}
+      />
+    );
 
   if (desk) {
     const days =
@@ -266,7 +276,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
       })(),
     );
     const slotDraft = (day: DayKey, minutes: number) => {
-      const d = newDraft(uuid(), day);
+      const d = newDraft(uuid(), day, prefs.defaults);
       setForm({
         draft: { ...d, hour: Math.floor(minutes / 60), minute: minutes % 60 },
         editing: false,
@@ -314,6 +324,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
           }}
           onAdd={add}
           onAvailability={() => setAvailOpen(true)}
+          onSettings={() => setSettingsOpen(true)}
           days={days}
           occ={view === 'day' ? dayOcc : weekOcc}
           today={today}
@@ -429,6 +440,12 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
             sub={availSummary}
             chevron
             onClick={() => setAvailOpen(true)}
+          />
+          <ListRow
+            icon={<IconTile tone="accent" size={40} icon="gear" />}
+            label={s.settingsRow}
+            chevron
+            onClick={() => setSettingsOpen(true)}
           />
         </GroupedList>
         <span hidden onClick={onClose} />

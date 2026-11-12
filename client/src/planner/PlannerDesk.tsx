@@ -70,6 +70,7 @@ export function PlannerDesk(p: {
   onToday: () => void;
   onAdd: () => void;
   onAvailability: () => void;
+  onSettings?: () => void;
   days: DayKey[];
   occ: Occ[];
   today: DayKey;
@@ -139,6 +140,15 @@ export function PlannerDesk(p: {
           <Button variant="secondary" size="sm" icon="clock" onClick={p.onAvailability}>
             {s.availTitle}
           </Button>
+          {p.onSettings && (
+            <Button
+              variant="secondary"
+              size="sm"
+              icon="gear"
+              aria-label={s.settingsTitle}
+              onClick={p.onSettings}
+            />
+          )}
           <Button icon="plus" size="sm" onClick={p.onAdd}>
             {s.add}
           </Button>

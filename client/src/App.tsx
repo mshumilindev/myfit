@@ -1,5 +1,7 @@
 import { useActivitiesOn } from './addons/activitiesGate';
-import { useGoalsOn, usePlaybookOn } from './addons/featureGates';
+import { sleepAvailable, useGoalsOn, usePlaybookOn } from './addons/featureGates';
+import { applySleepQuiet } from './sleepQuiet';
+import { usualPlan } from './sleepRt';
 import { isProgramsEditorHash } from './views/programs/programsRoute';
 import { getSyncMeta } from './syncMeta';
 import { refreshPush, setAppBadge } from './push';
@@ -701,6 +703,10 @@ function AppMain() {
   const store = useStore();
   const conditionLimits = useStoredConditionLimits(); // restriction: keeps capping with the feature off
   useEffect(() => setProgressionEffects(conditionLimits.effects), [conditionLimits]);
+  useEffect(
+    () => applySleepQuiet(sleepAvailable(), store.sleepSchedule, store.sleeps, usualPlan),
+    [store.sleepSchedule, store.sleeps],
+  );
   const [authed, setAuthed] = useState<boolean>(() => !!currentUid());
   const wantCoachRole = useSelfCoachRole();
   useEffect(() => {

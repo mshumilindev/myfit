@@ -137,6 +137,30 @@ export interface PlannerStrings {
   alertSub: string;
   snooze: string;
   dismiss: string;
+  settingsTitle: string;
+  settingsRow: string;
+  defaultsHead: string;
+  reminderStyle: string;
+  quietHead: string;
+  quietHours: string;
+  quietTo: string;
+  quietNote: string;
+  availHead: string;
+  showFree: string;
+  thisComputer: string;
+  startWithComputer: string;
+  showTray: string;
+  trayHint: string;
+  trayNote: string;
+  upNextKicker: string;
+  upNextPlanner: string;
+  inRel: string;
+  ringsUntil: string;
+  nothingNext: string;
+  plannerLinkLabel: string;
+  todayCount: string;
+  widgetName: string;
+  nowLabel: string;
 }
 
 /** Planner's own words live in its chunk, not in the core i18n (add-on boundary). `{x}` marks a placeholder filled by `fill`. */
@@ -291,6 +315,31 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     alertSub: 'Today at {t}',
     snooze: 'Snooze',
     dismiss: 'Dismiss',
+    settingsTitle: 'Planner settings',
+    settingsRow: 'Settings',
+    defaultsHead: 'Defaults for new plans',
+    reminderStyle: 'Reminder style',
+    quietHead: 'Quiet hours',
+    quietHours: 'Quiet hours',
+    quietTo: 'To',
+    quietNote: 'Persistent reminders switch to a quiet notification during these hours.',
+    availHead: 'Availability',
+    showFree: 'Show free hours to my trainer',
+    thisComputer: 'This computer',
+    startWithComputer: 'Start Spotter with my computer',
+    showTray: 'Show the icon in the menu bar / tray',
+    trayHint: 'Needed for reminders when the window is closed',
+    trayNote:
+      'Spotter lives in the menu bar (macOS) or the system tray (Windows). Reminders ring from there; clicking the icon opens the window. Closing the window does not quit it.',
+    upNextKicker: 'Up next',
+    upNextPlanner: 'Up next · Planner',
+    inRel: 'In {x}',
+    ringsUntil: 'Rings until you dismiss it',
+    nothingNext: 'Nothing planned',
+    plannerLinkLabel: 'Planner',
+    todayCount: '{n} today',
+    widgetName: 'Planner: up next',
+    nowLabel: 'Now',
   },
   uk: {
     name: 'Планувальник',
@@ -444,6 +493,31 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     alertSub: 'Сьогодні о {t}',
     snooze: 'Відкласти',
     dismiss: 'Закрити',
+    settingsTitle: 'Налаштування Planner',
+    settingsRow: 'Налаштування',
+    defaultsHead: 'Типові значення для нових планів',
+    reminderStyle: 'Стиль нагадування',
+    quietHead: 'Тихі години',
+    quietHours: 'Тихі години',
+    quietTo: 'До',
+    quietNote: 'Наполегливі нагадування переходять у тихе сповіщення в ці години.',
+    availHead: 'Доступність',
+    showFree: 'Показувати вільні години тренеру',
+    thisComputer: "Цей комп'ютер",
+    startWithComputer: "Запускати Spotter разом з комп'ютером",
+    showTray: 'Показувати іконку в рядку меню / треї',
+    trayHint: 'Потрібно для нагадувань, коли вікно закрите',
+    trayNote:
+      'Spotter живе в рядку меню (macOS) або в системному треї (Windows). Нагадування дзвонять звідти; клік по іконці відкриває вікно. Закриття вікна не завершує застосунок.',
+    upNextKicker: 'Далі',
+    upNextPlanner: 'Далі · Planner',
+    inRel: 'Через {x}',
+    ringsUntil: 'Дзвонить, доки не закриєш',
+    nothingNext: 'Нічого не заплановано',
+    plannerLinkLabel: 'Planner',
+    todayCount: '{n} сьогодні',
+    widgetName: 'Planner: далі',
+    nowLabel: 'Зараз',
   },
   pl: {
     name: 'Planer',
@@ -597,6 +671,31 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     alertSub: 'Dziś o {t}',
     snooze: 'Drzemka',
     dismiss: 'Zamknij',
+    settingsTitle: 'Ustawienia Planner',
+    settingsRow: 'Ustawienia',
+    defaultsHead: 'Domyślne dla nowych planów',
+    reminderStyle: 'Styl przypomnienia',
+    quietHead: 'Ciche godziny',
+    quietHours: 'Ciche godziny',
+    quietTo: 'Do',
+    quietNote: 'W tych godzinach natarczywe przypomnienia zmieniają się w ciche powiadomienie.',
+    availHead: 'Dostępność',
+    showFree: 'Pokazuj wolne godziny trenerowi',
+    thisComputer: 'Ten komputer',
+    startWithComputer: 'Uruchamiaj Spotter z komputerem',
+    showTray: 'Pokaż ikonę na pasku menu / w zasobniku',
+    trayHint: 'Potrzebne do przypomnień, gdy okno jest zamknięte',
+    trayNote:
+      'Spotter działa na pasku menu (macOS) lub w zasobniku systemowym (Windows). Przypomnienia dzwonią stamtąd; kliknięcie ikony otwiera okno. Zamknięcie okna nie kończy aplikacji.',
+    upNextKicker: 'Następne',
+    upNextPlanner: 'Następne · Planner',
+    inRel: 'Za {x}',
+    ringsUntil: 'Dzwoni, dopóki nie zamkniesz',
+    nothingNext: 'Nic nie zaplanowano',
+    plannerLinkLabel: 'Planner',
+    todayCount: '{n} dziś',
+    widgetName: 'Planner: następne',
+    nowLabel: 'Teraz',
   },
   lt: {
     name: 'Planuoklis',
@@ -750,6 +849,31 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     alertSub: 'Šiandien {t}',
     snooze: 'Atidėti',
     dismiss: 'Atmesti',
+    settingsTitle: 'Planner nustatymai',
+    settingsRow: 'Nustatymai',
+    defaultsHead: 'Numatytieji nauji planai',
+    reminderStyle: 'Priminimo stilius',
+    quietHead: 'Tylos valandos',
+    quietHours: 'Tylos valandos',
+    quietTo: 'Iki',
+    quietNote: 'Šiomis valandomis atkaklūs priminimai virsta tyliu pranešimu.',
+    availHead: 'Prieinamumas',
+    showFree: 'Rodyti laisvas valandas treneriui',
+    thisComputer: 'Šis kompiuteris',
+    startWithComputer: 'Paleisti Spotter kartu su kompiuteriu',
+    showTray: 'Rodyti piktogramą meniu juostoje / dėkle',
+    trayHint: 'Reikia priminimams, kai langas uždarytas',
+    trayNote:
+      'Spotter veikia meniu juostoje (macOS) arba sistemos dėkle (Windows). Priminimai skamba iš ten; spustelėjus piktogramą atsidaro langas. Uždarius langą programa neužsidaro.',
+    upNextKicker: 'Toliau',
+    upNextPlanner: 'Toliau · Planner',
+    inRel: 'Po {x}',
+    ringsUntil: 'Skamba, kol atmesi',
+    nothingNext: 'Nieko nesuplanuota',
+    plannerLinkLabel: 'Planner',
+    todayCount: '{n} šiandien',
+    widgetName: 'Planner: toliau',
+    nowLabel: 'Dabar',
   },
   et: {
     name: 'Planeerija',
@@ -902,6 +1026,31 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     alertSub: 'Täna kell {t}',
     snooze: 'Edasta',
     dismiss: 'Sulge',
+    settingsTitle: 'Planneri seaded',
+    settingsRow: 'Seaded',
+    defaultsHead: 'Uute plaanide vaikeväärtused',
+    reminderStyle: 'Meeldetuletuse stiil',
+    quietHead: 'Vaiksed tunnid',
+    quietHours: 'Vaiksed tunnid',
+    quietTo: 'Kuni',
+    quietNote: 'Nendel tundidel muutuvad püsivad meeldetuletused vaikseks teavituseks.',
+    availHead: 'Saadavus',
+    showFree: 'Näita vabu tunde treenerile',
+    thisComputer: 'See arvuti',
+    startWithComputer: 'Käivita Spotter arvutiga koos',
+    showTray: 'Näita ikooni menüüribal / salves',
+    trayHint: 'Vajalik meeldetuletusteks, kui aken on suletud',
+    trayNote:
+      'Spotter elab menüüribal (macOS) või süsteemisalves (Windows). Meeldetuletused heliseavad sealt; ikoonil klõpsamine avab akna. Akna sulgemine ei sulge rakendust.',
+    upNextKicker: 'Järgmine',
+    upNextPlanner: 'Järgmine · Planner',
+    inRel: '{x} pärast',
+    ringsUntil: 'Heliseb, kuni sulged',
+    nothingNext: 'Midagi pole planeeritud',
+    plannerLinkLabel: 'Planner',
+    todayCount: '{n} täna',
+    widgetName: 'Planner: järgmine',
+    nowLabel: 'Nüüd',
   },
 };
 

@@ -41,18 +41,47 @@ export function isQuietAt(q: QuietHours, date: Date): boolean {
 export const fmtMinutes = (m: number): string =>
   `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 
+/** What the person saved by hand (null: never touched, so the window may follow the Sleep add-on). */
+let stored: QuietHours | null | undefined;
+/** The window of the Sleep add-on (bedtime to wake time), set only while the add-on is installed and has a rhythm. */
+let fallback: { from: number; to: number } | null = null;
 let cache: QuietHours | null = null;
 const subs = new Set<() => void>();
 
-export function loadQuiet(): QuietHours {
-  if (cache) return cache;
+function readStored(): QuietHours | null {
+  if (stored !== undefined) return stored;
   try {
     const raw = localStorage.getItem(KEY);
-    cache = raw ? parseQuiet(JSON.parse(raw)) : DEFAULT_QUIET;
+    stored = raw ? parseQuiet(JSON.parse(raw)) : null;
   } catch {
-    cache = DEFAULT_QUIET;
+    stored = null;
   }
+  return stored;
+}
+
+/** Saved by hand, else the Sleep add-on's bedtime to wake time (when it is installed), else 22:00 to 07:00. */
+export function loadQuiet(): QuietHours {
+  const s = readStored();
+  const next = s ?? (fallback ? { ...DEFAULT_QUIET, ...fallback } : DEFAULT_QUIET);
+  if (cache && cache.on === next.on && cache.from === next.from && cache.to === next.to)
+    return cache;
+  cache = next;
   return cache;
+}
+
+/** Has the person set the hours themselves? Then the Sleep add-on no longer moves them. */
+export const quietIsManual = (): boolean => readStored() !== null;
+
+/** The Sleep add-on's window, or null when it is not installed / has no rhythm. Ignored once the hours were set by hand. */
+export function setQuietFallback(w: { from: number; to: number } | null): void {
+  const same = fallback?.from === w?.from && fallback?.to === w?.to && !!fallback === !!w;
+  if (same) return;
+  fallback = w;
+  if (readStored()) return;
+  const q = loadQuiet();
+  writePrefsIdb(q);
+  subs.forEach((f) => f());
+  void import('./push').then((m) => m.syncQuietToServer(q)).catch(() => undefined);
 }
 
 function writePrefsIdb(q: QuietHours): void {
@@ -73,17 +102,17 @@ function writePrefsIdb(q: QuietHours): void {
 }
 
 export function saveQuiet(q: QuietHours): void {
-  cache = parseQuiet(q);
+  const v = parseQuiet(q);
+  stored = v;
   try {
-    localStorage.setItem(KEY, JSON.stringify(cache));
+    localStorage.setItem(KEY, JSON.stringify(v));
   } catch {
     /* private mode: kept for this session */
   }
-  writePrefsIdb(cache);
+  const out = loadQuiet();
+  writePrefsIdb(out);
   subs.forEach((f) => f());
-  void import('./push')
-    .then((m) => m.syncQuietToServer(cache as QuietHours))
-    .catch(() => undefined);
+  void import('./push').then((m) => m.syncQuietToServer(out)).catch(() => undefined);
 }
 
 export function useQuietHours(): QuietHours {
@@ -100,4 +129,6 @@ export function useQuietHours(): QuietHours {
 /** Test seam. */
 export function resetQuietForTests(): void {
   cache = null;
+  stored = undefined;
+  fallback = null;
 }

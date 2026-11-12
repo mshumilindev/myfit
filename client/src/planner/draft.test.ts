@@ -31,3 +31,14 @@ describe('plan draft', () => {
     expect(plan.nextFireAt).toBeNull();
   });
 });
+
+describe('newDraft with the Planner defaults', () => {
+  it('starts from the saved reminder, duration and style', () => {
+    const d = newDraft('p9', '2026-11-12', { lead: 15, mode: 'ring', durationMin: 90 });
+    expect([d.lead, d.mode, d.durationMin]).toEqual([15, 'ring', 90]);
+  });
+  it('falls back to 60 min / quiet without defaults', () => {
+    const d = newDraft('p9', '2026-11-12');
+    expect([d.mode, d.durationMin]).toEqual(['quiet', 60]);
+  });
+});

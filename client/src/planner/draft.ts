@@ -139,7 +139,12 @@ export function planToDraft(p: PlanDoc): Draft {
   };
 }
 
-export const newDraft = (id: string, day: DayKey): Draft => ({
+/** A new plan, starting from the person's Planner defaults (Settings: Remind me, Duration, Reminder style) when given. */
+export const newDraft = (
+  id: string,
+  day: DayKey,
+  defaults?: { lead: number; mode: PlanMode; durationMin: number },
+): Draft => ({
   id,
   title: '',
   color: 'accent',
@@ -150,7 +155,7 @@ export const newDraft = (id: string, day: DayKey): Draft => ({
   repeat: 'none',
   days: [weekday(day)],
   ends: { kind: 'never' },
-  durationMin: 60,
-  mode: 'quiet',
-  lead: DEFAULT_LEAD,
+  durationMin: defaults?.durationMin ?? 60,
+  mode: defaults?.mode ?? 'quiet',
+  lead: defaults?.lead ?? DEFAULT_LEAD,
 });

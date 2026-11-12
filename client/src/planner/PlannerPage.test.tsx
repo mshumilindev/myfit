@@ -1,9 +1,15 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+afterEach(cleanup);
 
 vi.mock('./sync', () => ({
   usePlans: () => [],
-  usePrefs: () => ({ availability: { 0: [[1080, 1260]] }, shareAvailability: false }),
+  usePrefs: () => ({
+    availability: { 0: [[1080, 1260]] },
+    shareAvailability: false,
+    defaults: { lead: 60, mode: 'quiet', durationMin: 60 },
+  }),
   savePrefs: vi.fn(),
   savePlan: vi.fn(),
   deletePlan: vi.fn(),
@@ -25,5 +31,15 @@ describe('PlannerPage: availability entry', () => {
     expect(screen.getAllByText('1 days a week').length).toBeGreaterThan(0);
     fireEvent.click(screen.getAllByText('My availability')[0]);
     expect(screen.getByText('Weekly hours')).toBeTruthy();
+  });
+});
+
+describe('PlannerPage: settings entry', () => {
+  it('has a Settings row that opens the settings and goes back', () => {
+    render(<PlannerPage onClose={() => {}} />);
+    fireEvent.click(screen.getAllByText('Settings').at(-1)!);
+    expect(screen.getByText('Planner settings')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByText('No plans yet')).toBeTruthy();
   });
 });
