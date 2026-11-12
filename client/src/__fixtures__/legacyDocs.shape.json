@@ -176,6 +176,29 @@
       "products[].name": "string"
     }
   },
+  "planner": {
+    "id": "planner",
+    "shape": {
+      "$": "object",
+      "updatedAt": "number",
+      "availability": "object",
+      "availability.mon": "array",
+      "availability.mon[]": "array",
+      "availability.mon[][]": "number"
+    }
+  },
+  "plannerEvents": {
+    "id": "p-legacy-1",
+    "shape": {
+      "$": "object",
+      "id": "string",
+      "updatedAt": "number",
+      "mode": "string",
+      "nextFireAt": "number",
+      "enabled": "boolean",
+      "title": "string"
+    }
+  },
   "restPeriods": {
     "id": "r-legacy-1",
     "shape": {
