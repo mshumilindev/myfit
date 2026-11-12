@@ -1,7 +1,10 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
 
 afterEach(cleanup);
+// Availability is a module of Planner and starts off: these tests exercise it, so it is switched on.
+beforeEach(() => addonsPref.set(['planner', 'planner-availability']));
 
 vi.mock('./sync', () => ({
   usePlans: () => [],

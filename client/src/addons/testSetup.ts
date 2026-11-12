@@ -51,8 +51,6 @@ try {
         'home-sets',
         'goals',
         'playbook',
-        'planner',
-        'planner-availability',
         ...COACH_ADDONS,
       ],
       updatedAt: 1,

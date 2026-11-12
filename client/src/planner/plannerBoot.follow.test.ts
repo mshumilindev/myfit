@@ -35,7 +35,8 @@ beforeAll(async () => {
   await import('./plannerBoot');
   bootRepublishes = h.republish.mock.calls.length;
 });
-beforeEach(() => {
+beforeEach(async () => {
+  (await import('../addons/enabledSet')).addonsPref.set(['planner', 'planner-availability']);
   // back to the base view and settled, so every test starts from "nothing pending"
   h.injuryModule = true;
   h.prefs = { shareAvailability: true, availability: { 0: [[540, 600]] } };
