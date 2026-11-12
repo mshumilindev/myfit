@@ -245,6 +245,7 @@ export const addonStorePl: typeof addonStoreEn = {
         'Plany jednorazowe i cykliczne',
         'Przypomnienia dopasowane do dnia',
         'Najbliższy plan zawsze na Today',
+        'Tygodniowe godziny, gdy masz czas',
         'Udostępnianie tylko wolnych godzin',
         'Plany widoczne tylko dla Ciebie',
       ],

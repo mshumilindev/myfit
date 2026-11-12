@@ -250,6 +250,7 @@ export const addonStoreEn = {
         'One-off plans or flexible repeats',
         'Reminders that suit your routine',
         'Your next plan, right on Today',
+        'Set your weekly free hours',
         'Free-time sharing, on your terms',
         'Private plans, never seen by trainers',
       ],

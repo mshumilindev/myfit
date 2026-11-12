@@ -246,6 +246,7 @@ export const addonStoreLt: typeof addonStoreEn = {
         'Vienkartiniai ir kartojami planai',
         'Du skirtingi priminimų režimai',
         'Artimiausias planas Today ekrane',
+        'Savaitės laisvo laiko valandos',
         'Laisvą laiką rodai tik savo noru',
         'Planus gali skaityti tik tu',
       ],

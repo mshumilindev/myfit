@@ -248,6 +248,7 @@ export const addonStoreEt: typeof addonStoreEn = {
         'Ühekordsed ja korduvad plaanid',
         'Kaks meeldetuletuste viisi',
         'Järgmine plaan otse Today vaates',
+        'Määra nädala vabad tunnid',
         'Vaba aja jagamine sinu loal',
         'Sinu plaanid jäävad sulle',
       ],
