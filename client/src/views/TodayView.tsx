@@ -1,5 +1,5 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
-import { PlannerWeekLink } from '../today/PlannerWeekLink';
+import { PlannerEntry } from '../today/PlannerEntry';
 import { usePlaybookOn } from '../addons/featureGates';
 import { useAddonOrBase } from '../addons/enabledSet';
 import { storeHash } from '../addonStore/storeRoute';
@@ -1088,7 +1088,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         style={!assignment && !weekTimedOut && weekHint ? { minHeight: weekHint } : undefined}
       >
         <WeekPills cells={cells} />
-        <PlannerWeekLink now={Date.now()} onOpen={() => shell.openOverlay({ screen: 'planner' })} />
       </Card>
     );
   };
@@ -1576,6 +1575,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       program: (
         <>
           {renderProgramCard(po)} {hasHistory && renderWeekCard(po)}
+          <PlannerEntry now={Date.now()} onOpen={() => shell.openOverlay({ screen: 'planner' })} />
           <ClientTodayExtrasLazy />
           {po.logPast &&
             !(assignment && assignedActive && programDayHasPlan(assignment, todayWeekday)) && (

@@ -437,27 +437,6 @@ html[data-theme] .rx .topbar .tt {
 .today-program-card.td-week::after {
   display: none;
 }
-.td-week-planner {
-  display: flex;
-  align-items: center;
-  gap: var(--s-8);
-  width: 100%;
-  padding: var(--s-8) 0 0;
-  border: 0;
-  border-top: 1px solid var(--color-border, var(--hairline, rgba(255, 255, 255, 0.08)));
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.td-week-planner > span {
-  flex: 1;
-}
-.td-week-planner:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
 .td-week[data-mode='train'] {
   /* Brass until the day is trained — green is reserved for "done" (data-mode='done'),
      so the card never takes the muscle-group colour. */

@@ -87,7 +87,7 @@ export const PENDING: readonly PendingItem[] = [
     'privacy',
     'p3',
     'lawyer',
-    'SPO-552 Planner: availability shown to a trainer (with consent) marks days of Unwell, Full rest or an injury no-load window as "not available" without the reason. Confirm this is not health data under Art. 9 (no reason is shared, but a pattern of unavailable days could be read as health-related), and decide whether granting it needs its own entry in the consent log. Retention of plans after the add-on is removed: the text says they are kept until the person deletes them or the account; confirm.',
+    'SPO-552 Planner: availability shown to a trainer (with consent) marks days of Unwell, Full rest or an injury no-load window as "not available" without the reason. Confirm this is not health data under Art. 9 (no reason is shared, but a pattern of unavailable days could be read as health-related), and confirm that the grant record kept for every trainer-shared category (what, when, which trainer; withdrawal removes it) is enough proof of consent, as it is for the other categories, so availability has no separate consent-log entry. Retention of plans after the add-on is removed: the text says they are kept until the person deletes them or the account; confirm.',
   ),
   item(
     'tt-planner-disclaimer',
