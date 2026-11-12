@@ -6,7 +6,7 @@ import { Card } from '../../components/ui/Card';
 import { GroupedList, ListRow } from '../../components/ui/GroupedList';
 import { InfoTable } from '../../components/ui/InfoTable';
 import { StatTile } from '../../components/ui/StatTile';
-import { ConsentChips } from '../../components/ui/ConsentControls';
+import { ConsentChips, type ConsentItem } from '../../components/ui/ConsentControls';
 import { DataTable } from '../../components/ui/DataTable';
 import { EvidenceChart } from '../../components/ui/EvidenceChart';
 import { Notice } from '../../components/ui/Notice';
@@ -43,6 +43,11 @@ import {
   trainerDaysText,
 } from './format';
 import { ClientRequests } from './overview/ClientRequests';
+import { ClientAvailabilityCard } from './overview/ClientAvailability';
+import { useClientAvailability } from '../data/availability';
+import { dayKeyOf } from '../domain/availability';
+import { setHash } from '../../route';
+import { scheduleHref } from '../schedule/useScheduleParams';
 
 export interface OverviewProps {
   client: CoachClient;
@@ -84,6 +89,8 @@ export function Overview({
   );
   const [asking, setAsking] = useState(false);
   const { cc } = useClientT();
+  // Availability: read only for a client who logs in the app (a program client has no app), shown only when they share it.
+  const availability = useClientAvailability(client.mode === 'program' ? null : client.id);
   const gated = gateHistory(world.history[client.id], client.mode, client.consent);
   const reqs = requestsOf(world).filter((q) => q.client.id === client.id);
   const schedulePort = useScheduleRequestPort();
@@ -416,7 +423,10 @@ export function Overview({
             ) : (
               <ConsentChips
                 label={r.c3SharesList}
-                items={consentItems(r, client.name, client.consent, client.mode)}
+                items={[
+                  ...consentItems(r, client.name, client.consent, client.mode),
+                  availabilityItem(r, first, availability.state === 'shared'),
+                ]}
                 action={
                   <Button variant="secondary" size="sm" icon="key" onClick={() => setAsking(true)}>
                     {cc.raOpen}
@@ -424,8 +434,27 @@ export function Overview({
                 }
               />
             )}
-            {asking && <RequestAccessHost client={client} onClose={() => setAsking(false)} />}
+            {asking && (
+              <RequestAccessHost
+                client={client}
+                availabilityShared={availability.state === 'shared'}
+                onClose={() => setAsking(false)}
+              />
+            )}
           </Card>
+          <ClientAvailabilityCard
+            view={availability}
+            first={first}
+            r={r}
+            locale={locale}
+            today={dayKeyOf(now)}
+            onShow={() => setHash(scheduleHref({ who: client.id, free: '1' }))}
+            onPropose={() =>
+              setHash(
+                scheduleHref({ form: 'oneoff', client: client.id, who: client.id, free: '1' }),
+              )
+            }
+          />
         </div>
       </Inspector>
     </Split>
@@ -433,3 +462,14 @@ export function Overview({
 }
 
 export { ClientRequests };
+
+/** The Availability row of the sharing list: it is the person's own on-device choice, so it has no grant level of its own. */
+function availabilityItem(r: RosterStrings, first: string, shared: boolean): ConsentItem {
+  return {
+    id: 'availability',
+    label: r.c3AvLabel,
+    level: shared ? 'full' : 'off',
+    levelLabel: shared ? r.c3AvLevel : r.c3Level.off,
+    what: shared ? r.c3AvWhat : r.c3NotShared(first),
+  };
+}

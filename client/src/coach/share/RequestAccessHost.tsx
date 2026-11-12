@@ -11,9 +11,12 @@ import { RequestAccessSheet } from './RequestAccessSheet';
  */
 export function RequestAccessHost({
   client,
+  availabilityShared = false,
   onClose,
 }: {
   client: CoachClient;
+  /** Availability is the person's on-device choice, not a grant: the trainer's page knows it from the shared view. */
+  availabilityShared?: boolean;
   onClose: () => void;
 }) {
   const { cc } = useClientT();
@@ -25,7 +28,10 @@ export function RequestAccessHost({
   return (
     <RequestAccessSheet
       first={firstName(client.name)}
-      shared={sharedOf(client.consent)}
+      shared={{
+        ...sharedOf(client.consent),
+        ...(availabilityShared ? { availability: 'full' as const } : {}),
+      }}
       noApp={client.mode === 'program'}
       noChat={!cid}
       pause={askPause(messages, now)}

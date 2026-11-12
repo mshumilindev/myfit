@@ -31,6 +31,8 @@ export interface ScheduleParams {
   hide: string | null;
   /** create-from-an-empty-slot form: `day.start[.dur]`, see `grid.ts` */
   create: string | null;
+  /** `1` = shade the free hours of the client in the `who` filter (only while they share their availability, SPO-552) */
+  free: string | null;
 }
 
 const EMPTY: ScheduleParams = {
@@ -46,6 +48,7 @@ const EMPTY: ScheduleParams = {
   trainer: null,
   hide: null,
   create: null,
+  free: null,
 };
 const VIEWS: readonly ScheduleView[] = ['week', 'day', 'month'];
 const FORMS: readonly ScheduleForm[] = ['plan', 'oneoff', 'move', 'pick', 'counter', 'settings'];
@@ -70,6 +73,7 @@ export function readScheduleParams(hash: string): ScheduleParams {
     trainer: p.get('trainer'),
     hide: p.get('hide'),
     create: p.get('create'),
+    free: p.get('free') === '1' ? '1' : null,
   };
 }
 
@@ -88,6 +92,7 @@ export function writeScheduleParams(base: string, p: Partial<ScheduleParams>): s
     'trainer',
     'hide',
     'create',
+    'free',
   ] as const) {
     const v = p[k];
     if (v) q.set(k, v);

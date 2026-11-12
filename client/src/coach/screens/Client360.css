@@ -282,3 +282,11 @@
   flex-wrap: wrap;
   gap: var(--s-6);
 }
+
+/* free hours card (SPO-552): two actions under the week, side by side, wrapping on a narrow aside */
+.c3-av-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-8);
+  margin-top: var(--s-12);
+}

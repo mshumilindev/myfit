@@ -37,6 +37,7 @@ import { dayOfTs, monthStartDay, weekStartDay } from './time';
 import { useSchedule } from './useSchedule';
 import { useScheduleParams } from './useScheduleParams';
 import { WeekGrid } from './WeekGrid';
+import { useClientAvailability } from '../data/availability';
 import { scheduleGyms } from './types';
 import { ScheduleFilters, failText } from './ManagerFilters';
 import { useManagerSchedule } from './managerSchedule';
@@ -88,6 +89,8 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
   // A manager only: clients whose app has not delegated the schedule key yet are not here ("Waiting for client's app"); null for a trainer
   const teamRows = useManagerClients();
   const prm = useScheduleParams();
+  // One client's free hours, shaded on the grid when asked for (`free=1`) and while they share them.
+  const clientFree = useClientAvailability(prm.free && prm.who && !p.manager ? prm.who : null);
   const team = useManagerSchedule(teamRows, !!p.manager);
   const pool = useMemo(
     () => (team && prm.trainer ? team.clientsOf(prm.trainer) : null),
@@ -273,6 +276,7 @@ export function ScheduleScreen(p: ScheduleScreenProps) {
           locale={locale}
           ghostDur={ghostDur}
           hours={hours}
+          free={clientFree.state === 'shared' ? clientFree.availability : null}
           onCreate={setDraft}
         />
       ) : (

@@ -104,10 +104,10 @@ describe('Client 360: header and menu', () => {
 });
 
 describe('Client 360: overview shares', () => {
-  it('lists all seven categories', async () => {
+  it('lists all seven categories and the Availability row', async () => {
     mount();
     const list = await screen.findByLabelText(r.c3SharesList);
-    expect(list.querySelectorAll('.uiinfo-row')).toHaveLength(7);
+    expect(list.querySelectorAll('.uiinfo-row')).toHaveLength(8);
   });
 });
 

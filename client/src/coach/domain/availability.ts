@@ -85,3 +85,38 @@ export const dayState = (a: ClientAvailability, key: number): DayState =>
     : (a.weekly[weekdayOfKey(key)]?.length ?? 0)
       ? 'free'
       : 'none';
+
+/** 480 -> "08:00" (1440 -> "24:00"). */
+export const minutesText = (m: number): string =>
+  `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+
+/** "06:00–08:00 · 18:00–21:00". */
+export const rangesLabel = (ranges: readonly MinuteRange[]): string =>
+  ranges.map(([a, b]) => `${minutesText(a)}–${minutesText(b)}`).join(' · ');
+
+/** The not-available spans that still matter on `today`: not over yet, soonest first. */
+export function upcomingUnavailable(
+  a: ClientAvailability,
+  today: number,
+): { fromDay: number; toDay: number | null }[] {
+  return a.unavailable
+    .filter((u) => u.toDay === null || u.toDay >= today)
+    .map((u) => ({ ...u }))
+    .sort((x, y) => x.fromDay - y.fromDay);
+}
+
+/** The free ranges of a day clipped to the visible hours [from, to) of a grid, as [start, end) minutes. */
+export function freeBands(
+  a: ClientAvailability,
+  key: number,
+  from: number,
+  to: number,
+): [number, number][] {
+  const out: [number, number][] = [];
+  for (const [s, e] of freeOn(a, key)) {
+    const x = Math.max(s, from);
+    const y = Math.min(e, to);
+    if (y > x) out.push([x, y]);
+  }
+  return out;
+}

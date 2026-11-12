@@ -34,7 +34,7 @@ const msg = (
 
 describe('access ask model', () => {
   it('every setting of the sharing list is requestable', () => {
-    expect(SHARE_IDS).toHaveLength(10);
+    expect(SHARE_IDS).toHaveLength(11);
     expect(normalizeCats([...SHARE_IDS])).toEqual([...SHARE_IDS]);
     SHARE_IDS.forEach((id) => expect(isShareId(id)).toBe(true));
   });
@@ -90,7 +90,7 @@ describe('access ask model', () => {
     expect(askPause([ask, yes], T0 + 2 * ASK_COOLDOWN_MS).blocked).toBe(false);
   });
   it('requestable: only rows not shared yet', () => {
-    expect(requestableIds({})).toHaveLength(10);
+    expect(requestableIds({})).toHaveLength(11);
     expect(requestableIds({ totals: 'full', sets: 'effects' })).not.toContain('totals');
     expect(requestableIds({ totals: 'off' })).toContain('totals');
   });

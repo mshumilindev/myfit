@@ -17,6 +17,7 @@ import type { ScheduleSlot } from './types';
 import { hourRange, placeBlocks } from './view';
 import { shadedBands, visibleRange, type CalendarSettings, type GymWeeks } from './hours';
 import { StateMark, stateClass } from './StateMark';
+import { freeBands, type ClientAvailability } from '../domain/availability';
 import { cardStateOf, liveProgress } from './status';
 
 export interface WeekGridProps {
@@ -38,6 +39,8 @@ export interface WeekGridProps {
   ghostDur?: number;
   /** The trainer's calendar settings and the gyms' opening hours: the visible range and the shaded off-hours. Absent = 07:00 to 21:00 (grown for sessions outside). */
   hours?: { settings: CalendarSettings; gyms: GymWeeks };
+  /** One client's free hours (SPO-552, only while they share them): shaded green under the sessions. */
+  free?: ClientAvailability | null;
 }
 
 interface Item {
@@ -273,6 +276,21 @@ export function WeekGrid(p: WeekGridProps) {
                     className="sc-off"
                     aria-hidden="true"
                     data-off=""
+                    style={
+                      {
+                        '--sc-top': (a - from) / (to - from),
+                        '--sc-h': (b - a) / (to - from),
+                      } as React.CSSProperties
+                    }
+                  />
+                ))}
+              {p.free &&
+                freeBands(p.free, d, from, to).map(([a, b]) => (
+                  <div
+                    key={`free-${a}`}
+                    className="sc-free"
+                    aria-hidden="true"
+                    data-free=""
                     style={
                       {
                         '--sc-top': (a - from) / (to - from),

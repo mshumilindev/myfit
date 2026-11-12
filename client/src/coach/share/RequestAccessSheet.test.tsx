@@ -22,8 +22,8 @@ describe('Request access sheet (SPO-99)', () => {
     // nothing ticked: nothing to send
     const send = screen.getByRole('button', { name: t.raSendNone }) as HTMLButtonElement;
     expect(send.disabled).toBe(true);
-    // 10 rows in total: 2 shared are in "Already shared", 8 can be ticked
-    expect(screen.getAllByRole('checkbox')).toHaveLength(8);
+    // 11 rows in total: 2 shared are in "Already shared", 9 can be ticked
+    expect(screen.getAllByRole('checkbox')).toHaveLength(9);
     expect(screen.getByText(t.raHave)).toBeTruthy();
     fireEvent.click(screen.getAllByRole('checkbox')[0]);
     fireEvent.click(screen.getAllByRole('checkbox')[1]);
@@ -32,13 +32,13 @@ describe('Request access sheet (SPO-99)', () => {
     expect(onSend.mock.calls[0][0]).toHaveLength(2);
   });
 
-  it('"Ask for everything" ticks all open rows, including the four the trainer cannot see', () => {
+  it('"Ask for everything" ticks all open rows, including the five the trainer cannot see', () => {
     const onSend = vi.fn();
     render(<RequestAccessSheet {...base} onSend={onSend} />);
     fireEvent.click(screen.getByRole('button', { name: t.raEverything }));
-    fireEvent.click(screen.getByRole('button', { name: t.raSend(8) }));
+    fireEvent.click(screen.getByRole('button', { name: t.raSend(9) }));
     expect(onSend.mock.calls[0][0]).toEqual(
-      expect.arrayContaining(['conditions', 'nicotine', 'alcohol', 'supplements']),
+      expect.arrayContaining(['conditions', 'nicotine', 'alcohol', 'supplements', 'availability']),
     );
   });
 
@@ -151,7 +151,7 @@ describe('Access ask card (SPO-99)', () => {
     expect(screen.getByText(t.raAskAgain('Anna'))).toBeTruthy();
   });
 
-  it('an ask for all ten rows reads "everything"', () => {
+  it('an ask for all eleven rows reads "everything"', () => {
     const all = [
       'totals',
       'sets',
@@ -163,6 +163,7 @@ describe('Access ask card (SPO-99)', () => {
       'nicotine',
       'alcohol',
       'supplements',
+      'availability',
     ] as const;
     render(
       <AccessAskCard
@@ -173,6 +174,6 @@ describe('Access ask card (SPO-99)', () => {
         first="Oleh"
       />,
     );
-    expect(screen.getByText(t.raCardAll(10))).toBeTruthy();
+    expect(screen.getByText(t.raCardAll(11))).toBeTruthy();
   });
 });

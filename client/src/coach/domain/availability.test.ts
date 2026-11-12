@@ -3,8 +3,12 @@ import {
   dayState,
   dayKeyOf,
   fitsFree,
+  freeBands,
   freeOn,
   isUnavailableOn,
+  minutesText,
+  rangesLabel,
+  upcomingUnavailable,
   parseAvailability,
   weekdayOfKey,
   type ClientAvailability,
@@ -111,5 +115,65 @@ describe('free hours and not-available days', () => {
     expect(dayState(A, THU - 3)).toBe('free');
     expect(dayState(A, THU - 2)).toBe('none');
     expect(dayState(A, THU + 2)).toBe('unavailable');
+  });
+});
+
+describe('texts', () => {
+  it('minutes and ranges read as clock times', () => {
+    expect(minutesText(0)).toBe('00:00');
+    expect(minutesText(485)).toBe('08:05');
+    expect(minutesText(1440)).toBe('24:00');
+    expect(
+      rangesLabel([
+        [360, 480],
+        [1080, 1260],
+      ]),
+    ).toBe('06:00–08:00 · 18:00–21:00');
+    expect(rangesLabel([])).toBe('');
+  });
+  it('only spans that are not over are upcoming, soonest first, without changing the input', () => {
+    const a: ClientAvailability = {
+      weekly: {},
+      unavailable: [
+        { fromDay: 30, toDay: null },
+        { fromDay: 5, toDay: 8 },
+        { fromDay: 10, toDay: 12 },
+        { fromDay: 1, toDay: 3 },
+      ],
+    };
+    expect(upcomingUnavailable(a, 9).map((u) => u.fromDay)).toEqual([10, 30]);
+    expect(upcomingUnavailable(a, 8).map((u) => u.fromDay)).toEqual([5, 10, 30]);
+    expect(a.unavailable[0].fromDay).toBe(30);
+  });
+});
+
+describe('freeBands', () => {
+  it('clips free ranges to the visible hours and drops what is outside', () => {
+    const a: ClientAvailability = {
+      weekly: {
+        3: [
+          [360, 480],
+          [1080, 1260],
+        ],
+      },
+      unavailable: [],
+    };
+    expect(freeBands(a, THU, 420, 1200)).toEqual([
+      [420, 480],
+      [1080, 1200],
+    ]);
+    expect(freeBands(a, THU, 480, 1080)).toEqual([]);
+    expect(freeBands(a, THU, 0, 1440)).toEqual([
+      [360, 480],
+      [1080, 1260],
+    ]);
+    expect(freeBands(a, THU - 1, 0, 1440)).toEqual([]);
+  });
+  it('a not-available day has no bands at all', () => {
+    const a: ClientAvailability = {
+      weekly: { 3: [[360, 480]] },
+      unavailable: [{ fromDay: THU, toDay: THU }],
+    };
+    expect(freeBands(a, THU, 0, 1440)).toEqual([]);
   });
 });
