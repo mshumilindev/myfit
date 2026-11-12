@@ -87,7 +87,7 @@ jobs:
           # (MAIL_FROM, CF_TURN_KEY_ID); otherwise the code defaults. Params only reach the functions that use them,
           # so deploy only functions you changed unless these variables hold the live values.
           {
-            echo "MAIL_FROM=${VAR_MAIL_FROM:-}"
+            echo "MAIL_FROM=${VAR_MAIL_FROM:-no-reply@myspotter.fit}"
             echo "MAIL_FROM_NAME=${VAR_MAIL_FROM_NAME:-Spotter}"
             echo "APP_ORIGIN=${VAR_APP_ORIGIN:-https://myspotter.fit}"
             echo "COACH_ENFORCE_APPCHECK=${VAR_ENFORCE_APPCHECK:-false}"
