@@ -7,6 +7,8 @@ import {
   setHealthConsentState,
 } from '../../../data/healthConsentGate';
 import { clientEn as t } from '../../../i18n/coachClient.en';
+import { en as tEn } from '../../../i18n/en';
+import { SHARE_IDS } from '../shareModel';
 import { setConditionsShare } from '../../../store';
 import { setViewport } from '../../testViewport';
 import type { AccessAsk } from '../../share/accessAsk';
@@ -178,5 +180,36 @@ describe('access ask form (SPO-99)', () => {
     fireEvent.click(screen.getByRole('button', { name: t.rfSave(1) }));
     expect(await screen.findByText(t.ccSaveFailed)).toBeTruthy();
     expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it('asking for every category (Availability included) says "everything"; the Availability row is offered only with Planner installed', async () => {
+    const port = createFixturesClientPort({ scenario: 'active' });
+    addonsPref.set([...(addonsPref.get() as string[]), 'planner']);
+    render(
+      <AccessAskForm
+        first="Anna"
+        ask={ask([...SHARE_IDS])}
+        port={port}
+        onDone={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    );
+    expect(await screen.findByText(t.rfTitleAll('Anna'))).toBeTruthy();
+    expect(screen.getByText(tEn.avlTitle)).toBeTruthy();
+  });
+
+  it('without Planner, an asked Availability row is not offered', async () => {
+    const port = createFixturesClientPort({ scenario: 'active' });
+    render(
+      <AccessAskForm
+        first="Anna"
+        ask={ask(['totals', 'availability'])}
+        port={port}
+        onDone={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    );
+    await screen.findByText(t.rfTitle('Anna', 1));
+    expect(screen.queryByText(tEn.avlTitle)).toBeNull();
   });
 });

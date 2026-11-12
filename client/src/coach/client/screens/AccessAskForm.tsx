@@ -22,6 +22,7 @@ import {
   rowBlock,
   type ShareId,
   ADDON_OF,
+  SHARE_IDS,
 } from '../shareModel';
 import { writeLocal } from './TrainerSharing';
 import '../ClientCoach.css';
@@ -119,7 +120,8 @@ export function AccessAskForm(p: AccessAskFormProps) {
     if (!ok) return setFailed(true);
     p.onDone(resultOf(cats, after));
   };
-  const title = cats.length === 10 ? cc.rfTitleAll(p.first) : cc.rfTitle(p.first, cats.length);
+  const title =
+    cats.length === SHARE_IDS.length ? cc.rfTitleAll(p.first) : cc.rfTitle(p.first, cats.length);
   return (
     <Sheet onClose={p.onClose} label={title} closeLabel={cc.ccBack} padded>
       <div className="cc-stack">
