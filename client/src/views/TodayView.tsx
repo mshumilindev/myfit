@@ -833,6 +833,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     [fmtWeekday(dayStartOf(day), locale), extra].filter(Boolean).join(' · ');
   const injuryRehab = !!activeInj && !injFullRest && activeInj.stage !== 'return';
 
+  /** The fixed Planner block: inside the card that carries the week (inline), or a card of its own when no such card is shown. */
+  const renderPlannerEntry = (po: ProgramOpts, inline: boolean) => (
+    <PlannerEntry
+      inline={inline}
+      size={po.plannerSize}
+      now={Date.now()}
+      onOpen={() => shell.openOverlay({ screen: 'planner' })}
+    />
+  );
   const renderProgramCard = (po: ProgramOpts) =>
     assignment &&
     assignedActive &&
@@ -1015,6 +1024,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           )}
           {exList}
           {po.weekPills && <WeekPills cells={cells} />}
+          {renderPlannerEntry(po, true)}
         </Card>
       );
     })();
@@ -1090,12 +1100,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         style={!assignment && !weekTimedOut && weekHint ? { minHeight: weekHint } : undefined}
       >
         <WeekPills cells={cells} />
-        <PlannerEntry
-          inline
-          size={po.plannerSize}
-          now={Date.now()}
-          onOpen={() => shell.openOverlay({ screen: 'planner' })}
-        />
+        {renderPlannerEntry(po, true)}
       </Card>
     );
   };
@@ -1583,13 +1588,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       program: (
         <>
           {renderProgramCard(po)} {hasHistory && renderWeekCard(po)}
-          {!hasHistory && (
-            <PlannerEntry
-              size={po.plannerSize}
-              now={Date.now()}
-              onOpen={() => shell.openOverlay({ screen: 'planner' })}
-            />
-          )}
+          {/* Planner lives inside the program card or the week card; on its own card only when neither is shown */}
+          {!(assignment && assignedActive) &&
+            !(hasHistory && po.weekPills) &&
+            renderPlannerEntry(po, false)}
           <ClientTodayExtrasLazy />
           {po.logPast &&
             !(assignment && assignedActive && programDayHasPlan(assignment, todayWeekday)) && (

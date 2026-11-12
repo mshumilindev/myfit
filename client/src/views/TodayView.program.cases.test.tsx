@@ -1,5 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, screen, within } from '@testing-library/react';
+
+const planner = vi.hoisted(() => ({ on: false }));
+vi.mock('../plannerRt', async (orig) => ({
+  ...(await orig<typeof import('../plannerRt')>()),
+  usePlannerHost: () =>
+    planner.on
+      ? ({
+          UpNext: ({ variant }: { variant: string }) => <span>planner-{variant}</span>,
+        } as never)
+      : null,
+}));
 import { fmtWeekday, setLocale } from '../i18n';
 import { en } from '../i18n/en';
 import { dayKey } from '../store';
@@ -124,6 +135,20 @@ describe('TodayView program card: today', () => {
     expect(card().querySelector('.pch-text .s')?.textContent).toBe(
       `${en.progSessions(2, 3)} · ${en.progAssignedByMe}`,
     );
+  });
+
+  it('Planner is one block of the program card (inline), and of nothing else', async () => {
+    planner.on = true;
+    await openToday(calm());
+    expect(card().textContent).toContain('planner-inline');
+    expect(document.querySelectorAll('.td-planner-entry')).toHaveLength(1);
+    planner.on = false;
+  });
+
+  it('without Planner installed the program card has no Planner block', async () => {
+    planner.on = false;
+    await openToday(calm());
+    expect(document.querySelector('.td-planner-entry')).toBeNull();
   });
 
   it('week pills: done, rest (not missed), today play, next rest', async () => {
