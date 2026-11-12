@@ -3,7 +3,7 @@
  * (decrypted on this device, from what it already holds); `buildTraining` appends what the readers return. An add-on whose code
  * is not loaded (not installed) still names itself here as "not included", never silently left out.
  */
-import type { ExportFile, Missing } from './exportModel';
+import type { ExportFile, Missing } from './exportTypes';
 
 export interface AddonExportPart {
   files: ExportFile[];

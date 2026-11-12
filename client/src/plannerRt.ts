@@ -10,7 +10,7 @@ import { usePlannerOn } from './addons/featureGates';
 import type { LocaleId } from './i18n';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
 import { registerAddonExport } from './legal/export/addonExport';
-import type { ExportFile } from './legal/export/exportModel';
+import type { ExportFile } from './legal/export/exportTypes';
 import { isTrackerReady, onTrackerReady } from './trackerRt';
 
 /** What a trainer sees of the person's availability (published inside `meta/coachShare`): hours per weekday, minutes since midnight, and unavailable day keys. */
