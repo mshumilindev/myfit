@@ -74,6 +74,7 @@ jobs:
 
           printf '%s' "$FIREBASE_SA" > "$RUNNER_TEMP/sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          echo "Deploying as service account: $(jq -r .client_email "$RUNNER_TEMP/sa.json")"
           trap 'rm -f "$RUNNER_TEMP/sa.json"' EXIT
 
           total=${#ordered[@]}
