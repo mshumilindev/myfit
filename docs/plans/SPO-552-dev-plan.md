@@ -3,6 +3,7 @@
 Статус: **план затверджено власником 11.11.2026 (19:12), розробка дозволена.** `cpd` лише за окремою командою.
 
 ## 0. Рішення власника 11.11 (19:12), чинні понад усе нижче
+
 1. Назва аддона: **Planner** (id `planner`).
 2. Аддон видалено → availability тренеру **не показується**. У основному бандлі **нічого** про Planner, лише стаби там, де йдуть підрахунки (як для Health: маска/фасад `plannerRt` з нейтральними значеннями); увесь код у ледачому чанку `plannerBoot`, що вантажиться лише поки аддон встановлено. Дані в БД зберігаємо, повторне встановлення їх повертає.
 3. macOS: Spotter **живе в menu bar**, закриття вікна не завершує застосунок; **один раз** показує повідомлення «додайте Spotter в автозапуск» (прапор «показано» зберігається, повтор лише за явною дією в налаштуваннях).
@@ -13,44 +14,44 @@
 
 ## 1. Рішення власника, що змінили спайк
 
-| Було в спайку | Стало | Наслідок |
-|---|---|---|
+| Було в спайку                                                                         | Стало                                                                                                                                                      | Наслідок                                                                                                                        |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | Тренер планувальник не бачить ніколи; вікна доступності не вводимо (S п.6, A1 №5, №9) | **Availability окремий пункт згоди** у списку «What <client> shares»; тренер просить, клієнт дозволяє (Allow / Not now); тренер бачить лише вільно/зайнято | Нова категорія в `shareModel`, нові екрани тренера, зміна політики (розд. 10). Плани (activities) тренеру як і раніше не видно. |
-| Тренерські вікна SPO-195 закриті як дублі | Вікна доступності клієнта повертаються як частина планувальника, лише з згодою | SPO-195 не відкриваємо, усе в SPO-552. |
-| Автозапуск з комп'ютером, трей лише на Windows | **Іконка в треї (Windows) і menu bar (macOS)**: Spotter живе там, клік відкриває вікно | На macOS змінюється `closeBehavior` (зараз закриття = вихід, SPO-277): потрібне рішення й PoC (розд. 6, I8). |
-| Вкладки джерела | Пікер **«Based on»**: свій план, день програми, Home workouts, Activities. Лише підставляє назву й іконку, нічого не логується | Одне джерело істини для іконок і назв, без запису історії. |
-| Власні іконки | Пікер іконок показує **усі іконки реєстру** `ui.tsx` (`ICONS`), пошук за назвою, без підписів | Реєстр треба експортувати (зараз `const ICONS`, не exported). |
-| Списки «All activities» / «All home sets» | Той самий компонент, що на сторінці Activities: `SearchField` + рядки `ListRow` з `IconTile` (як `ResultRow` у `LogActivityView`) | Виносимо спільний рядок у `components/ui` (не копіюємо). |
-| Health | Рядки Unwell / Full rest показуються лише коли Health встановлено і відповідні модулі ввімкнені; лише читання | Читання через `healthAddons.ts`, без нової логіки моделей (інваріант 8). |
-| Аддон | Поки не встановлено, нічого з Planner не з'являється; після видалення **дані лишаються в БД**, повторне додавання відновлює | Тести правила 7 і 10 з `addons.md`. |
-| Піккери часу | Кіт `WheelPicker` як у сесії (3 видимі рядки), години й хвилини разом, дні прибрано | Без нового компонента. |
+| Тренерські вікна SPO-195 закриті як дублі                                             | Вікна доступності клієнта повертаються як частина планувальника, лише з згодою                                                                             | SPO-195 не відкриваємо, усе в SPO-552.                                                                                          |
+| Автозапуск з комп'ютером, трей лише на Windows                                        | **Іконка в треї (Windows) і menu bar (macOS)**: Spotter живе там, клік відкриває вікно                                                                     | На macOS змінюється `closeBehavior` (зараз закриття = вихід, SPO-277): потрібне рішення й PoC (розд. 6, I8).                    |
+| Вкладки джерела                                                                       | Пікер **«Based on»**: свій план, день програми, Home workouts, Activities. Лише підставляє назву й іконку, нічого не логується                             | Одне джерело істини для іконок і назв, без запису історії.                                                                      |
+| Власні іконки                                                                         | Пікер іконок показує **усі іконки реєстру** `ui.tsx` (`ICONS`), пошук за назвою, без підписів                                                              | Реєстр треба експортувати (зараз `const ICONS`, не exported).                                                                   |
+| Списки «All activities» / «All home sets»                                             | Той самий компонент, що на сторінці Activities: `SearchField` + рядки `ListRow` з `IconTile` (як `ResultRow` у `LogActivityView`)                          | Виносимо спільний рядок у `components/ui` (не копіюємо).                                                                        |
+| Health                                                                                | Рядки Unwell / Full rest показуються лише коли Health встановлено і відповідні модулі ввімкнені; лише читання                                              | Читання через `healthAddons.ts`, без нової логіки моделей (інваріант 8).                                                        |
+| Аддон                                                                                 | Поки не встановлено, нічого з Planner не з'являється; після видалення **дані лишаються в БД**, повторне додавання відновлює                                | Тести правила 7 і 10 з `addons.md`.                                                                                             |
+| Піккери часу                                                                          | Кіт `WheelPicker` як у сесії (3 видимі рядки), години й хвилини разом, дні прибрано                                                                        | Без нового компонента.                                                                                                          |
 
 ## 2. Трасування (знахідка або рішення → екран → ітерація → AC)
 
-| # | Джерело | Екран дизайну | Ітер. | AC (скорочено) |
-|---|---|---|---|---|
-| 1 | Графік лише нагадування, історії не пише (S п.0) | всі форми | I3 | Створення/спрацювання/видалення плану не пише в колекції історії; тест |
-| 2 | Один план: разовий або серія, видаляється все (S п.0) | form, repeat, delete one/series | I3, I4 | Видалення «лише це / це й наступні / усю серію»; подія зникає після часу |
-| 3 | Шифрування змісту (A1-A) | усі | I2 | У Firestore немає plaintext; rules: чужий і тренер не читають/пишуть |
-| 4 | Тихе й «наполегливе» нагадування (S п.2, A1-B) | form, ring, notices | I6, I7 | `quiet` поважає тихі години, `ring` ні; повтори до відхилення |
-| 5 | Нагадування за замовчуванням за 1 год | form, custom lead | I4 | Дефолт 1 год, власне значення до 2 діб; піккер години+хвилини |
-| 6 | Синхронне вимкнення/відкладення (S п.5) | ring, snoozed, elsewhere | I7 | Dismiss на одному пристрої гасить решту; гонка: dismissed перемагає |
-| 7 | Дзвінок недоступний на платформі (S п.2) | n-ios, n-perm, n-mac, unavailable | I7, I8 | Чесний рядок, без обіцянок; тексти 5 локалей |
-| 8 | Десктоп-двигун дзвінка, автозапуск (A2) | d-ring, settings, tray | I8 | `scheduleAlarms/cancelAlarms`, автозапуск, трей/menu bar; детект функції |
-| 9 | Іконка трею / menu bar, застосунок живе там | d-tray, settings | I8 | Клік відкриває вікно; пункт меню «Up next»; перемикач «Show the icon» |
-| 10 | Availability: щотижневі години, Health-оверрайди | avail, avail-day, nohealth | I9 | Години по днях; оверрайди read-only лише з Health |
-| 11 | Availability як окрема згода | t-ask*, avail-ask, avail-off | I10 | Рядок у «What … shares»; запит, Allow/Not now, відкликання; тест rules |
-| 12 | Тренер бачить availability клієнта | t-ask-shared, t-windows | I10 | Картка «free hours» і тіні на Schedule; без причин |
-| 13 | Запит сесії: тренер і менеджер від імені | t-request, t-request-mgr | I10 | Через існуючий розклад SPO-313/SPO-67; планувальник лише показує |
-| 14 | Стани сесії тренера в календарі | detail-awaiting/confirmed/declined/moved/cancelled | I4, I10 | Read-only; Accept/Decline для «нового часу» |
-| 15 | Based on: пікер | source, source-min, all-home, all-act | I4 | Показує лише встановлені джерела; нічого не логується |
-| 16 | Усі іконки реєстру + пошук | icons, icons-search | I4 | Реєстр експортовано; без підписів; пошук за ключем |
-| 17 | Віджет «Up next» S/M/L/XL, ряд картки тижня, More: один plain-рядок | today, w-*, more | I11 | Лише після встановлення; запис у `today/registry.tsx` |
-| 18 | Add-on rule: чисто до встановлення, дані лишаються | off-today, off-more, remove | I1, I12 | Тести «нічого не видно»; видалення не стирає; повторне додавання відновлює |
-| 19 | Налаштування: дефолти, тихі години, «This computer» | settings, d-settings | I12 | Дефолти застосовуються до нових планів |
-| 20 | Сповіщення: пропущено, офлайн, iOS, дозвіл, macOS | n-* | I7 | Banner із кіту; без «Ringing doesn't work» |
-| 21 | Дані й приватність (L) | consent copy | I13 | Реєстр даних, експорт, каскад видалення |
-| 22 | Магазин, опис, іконка | store card | I14 | Опис 5 локалей, іконка Blender, `sizeEntries`, `exclusion` |
+| #   | Джерело                                                             | Екран дизайну                                      | Ітер.   | AC (скорочено)                                                             |
+| --- | ------------------------------------------------------------------- | -------------------------------------------------- | ------- | -------------------------------------------------------------------------- |
+| 1   | Графік лише нагадування, історії не пише (S п.0)                    | всі форми                                          | I3      | Створення/спрацювання/видалення плану не пише в колекції історії; тест     |
+| 2   | Один план: разовий або серія, видаляється все (S п.0)               | form, repeat, delete one/series                    | I3, I4  | Видалення «лише це / це й наступні / усю серію»; подія зникає після часу   |
+| 3   | Шифрування змісту (A1-A)                                            | усі                                                | I2      | У Firestore немає plaintext; rules: чужий і тренер не читають/пишуть       |
+| 4   | Тихе й «наполегливе» нагадування (S п.2, A1-B)                      | form, ring, notices                                | I6, I7  | `quiet` поважає тихі години, `ring` ні; повтори до відхилення              |
+| 5   | Нагадування за замовчуванням за 1 год                               | form, custom lead                                  | I4      | Дефолт 1 год, власне значення до 2 діб; піккер години+хвилини              |
+| 6   | Синхронне вимкнення/відкладення (S п.5)                             | ring, snoozed, elsewhere                           | I7      | Dismiss на одному пристрої гасить решту; гонка: dismissed перемагає        |
+| 7   | Дзвінок недоступний на платформі (S п.2)                            | n-ios, n-perm, n-mac, unavailable                  | I7, I8  | Чесний рядок, без обіцянок; тексти 5 локалей                               |
+| 8   | Десктоп-двигун дзвінка, автозапуск (A2)                             | d-ring, settings, tray                             | I8      | `scheduleAlarms/cancelAlarms`, автозапуск, трей/menu bar; детект функції   |
+| 9   | Іконка трею / menu bar, застосунок живе там                         | d-tray, settings                                   | I8      | Клік відкриває вікно; пункт меню «Up next»; перемикач «Show the icon»      |
+| 10  | Availability: щотижневі години, Health-оверрайди                    | avail, avail-day, nohealth                         | I9      | Години по днях; оверрайди read-only лише з Health                          |
+| 11  | Availability як окрема згода                                        | t-ask*, avail-ask, avail-off                       | I10     | Рядок у «What … shares»; запит, Allow/Not now, відкликання; тест rules     |
+| 12  | Тренер бачить availability клієнта                                  | t-ask-shared, t-windows                            | I10     | Картка «free hours» і тіні на Schedule; без причин                         |
+| 13  | Запит сесії: тренер і менеджер від імені                            | t-request, t-request-mgr                           | I10     | Через існуючий розклад SPO-313/SPO-67; планувальник лише показує           |
+| 14  | Стани сесії тренера в календарі                                     | detail-awaiting/confirmed/declined/moved/cancelled | I4, I10 | Read-only; Accept/Decline для «нового часу»                                |
+| 15  | Based on: пікер                                                     | source, source-min, all-home, all-act              | I4      | Показує лише встановлені джерела; нічого не логується                      |
+| 16  | Усі іконки реєстру + пошук                                          | icons, icons-search                                | I4      | Реєстр експортовано; без підписів; пошук за ключем                         |
+| 17  | Віджет «Up next» S/M/L/XL, ряд картки тижня, More: один plain-рядок | today, w-*, more                                   | I11     | Лише після встановлення; запис у `today/registry.tsx`                      |
+| 18  | Add-on rule: чисто до встановлення, дані лишаються                  | off-today, off-more, remove                        | I1, I12 | Тести «нічого не видно»; видалення не стирає; повторне додавання відновлює |
+| 19  | Налаштування: дефолти, тихі години, «This computer»                 | settings, d-settings                               | I12     | Дефолти застосовуються до нових планів                                     |
+| 20  | Сповіщення: пропущено, офлайн, iOS, дозвіл, macOS                   | n-*                                                | I7      | Banner із кіту; без «Ringing doesn't work»                                 |
+| 21  | Дані й приватність (L)                                              | consent copy                                       | I13     | Реєстр даних, експорт, каскад видалення                                    |
+| 22  | Магазин, опис, іконка                                               | store card                                         | I14     | Опис 5 локалей, іконка Blender, `sizeEntries`, `exclusion`                 |
 
 Екрани, яких немає в дизайні (повернути на дизайн до відповідної ітерації, не вигадувати в коді): Customize Today для віджета (I11), офлайн-деталі клієнта (I10), картка стору й About (I14), `bell-slash` у кіті (I7), Glass і Cyberpunk на десктопі (тема; перезняти).
 
@@ -58,24 +59,25 @@
 
 Нове в кіті (шард → `src/ui`, правило `ui.md`, документ у `docs/UI-KIT.md`): `DayBar` (смуга годин доби), `AvailabilityRow` (рядок дня з DayBar), `PlanCard`/agenda-рядок, `IconPickerGrid` (плоска сітка голих іконок із пошуком), `HourMinutePicker` (два `WheelPicker`, `input="manual" size="compact"`, крок 5 хв), `RingCard` (екран нагадування; каркас `calls/CallLayer`), сітка тижня з часом для десктопу (розтягнути наявну Schedule), іконка `bell-slash`. Решта з наявного кіту: `GroupedList/ListRow`, `Field`, `SearchField`, `Segmented`, `PresetChips`, `Chip`, `Banner`, `IconTile`, `Switch`, `Hint`, `WeekStepper`, `ResponsivePanel` (kit drawer), `MonthGrid`, `Calendar`, `EmptyState`, `ConfirmDialog`, `NumberStepper`.
 
-| Екран | Файл (новий або змінений) |
-|---|---|
-| Entry у More (один plain-рядок) | `views/More*` + `addons/featureGates.ts` |
-| Планувальник телефон (Week/Month, agenda, empty, notices) | `client/src/planner/PlannerPage.tsx`, `PlannerNotice.tsx` |
-| Форма плану, Repeats, Date, Custom duration/start/lead | `planner/PlanForm.tsx`, `pages/*` |
-| Based on, All home sets, All activities | `planner/SourcePicker.tsx`; список активностей з **спільного рядка Activities** (виносимо `ResultRow` у `components/ui/ActivityRow`, `LogActivityView` теж на нього); Home sets з `homeSets.ts` |
-| Пікер іконок | `planner/IconPicker.tsx`, експорт `ICONS` з `ui.tsx` через `iconRegistry` (є тест `iconRegistry.test.ts`) |
-| Деталі плану, delete one/series | `planner/PlanDetail.tsx`, `DeleteSeries.tsx` (`ConfirmDialog`) |
-| Availability, day, nohealth, ask, off | `planner/availability/*`; Health-рядки з `healthAddons.ts` |
-| Планувальник десктоп (day/week/month, drawer) | `planner/desktop/*` на базі `coach/schedule` сітки |
-| Налаштування, tray-меню | `planner/PlannerSettings.tsx`; tray у `desktop/src/*` |
-| Екран нагадування | `planner/RingLayer.tsx` (перевикористовує фазу `ringing-in` з `calls/CallLayer`) |
-| Тренер: рядок згоди, картка free hours, Schedule | `coach/client/shareModel.ts` (`SHARE_GROUPS`, `ADDON_OF`, `ShareId`), `coach/client/screens/SharingList.tsx`, `coach/screens/*client*`, `coach/schedule/*` |
-| Віджети «Up next» | `today/registry.tsx`, `today/widgets/*` |
+| Екран                                                     | Файл (новий або змінений)                                                                                                                                                                       |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entry у More (один plain-рядок)                           | `views/More*` + `addons/featureGates.ts`                                                                                                                                                        |
+| Планувальник телефон (Week/Month, agenda, empty, notices) | `client/src/planner/PlannerPage.tsx`, `PlannerNotice.tsx`                                                                                                                                       |
+| Форма плану, Repeats, Date, Custom duration/start/lead    | `planner/PlanForm.tsx`, `pages/*`                                                                                                                                                               |
+| Based on, All home sets, All activities                   | `planner/SourcePicker.tsx`; список активностей з **спільного рядка Activities** (виносимо `ResultRow` у `components/ui/ActivityRow`, `LogActivityView` теж на нього); Home sets з `homeSets.ts` |
+| Пікер іконок                                              | `planner/IconPicker.tsx`, експорт `ICONS` з `ui.tsx` через `iconRegistry` (є тест `iconRegistry.test.ts`)                                                                                       |
+| Деталі плану, delete one/series                           | `planner/PlanDetail.tsx`, `DeleteSeries.tsx` (`ConfirmDialog`)                                                                                                                                  |
+| Availability, day, nohealth, ask, off                     | `planner/availability/*`; Health-рядки з `healthAddons.ts`                                                                                                                                      |
+| Планувальник десктоп (day/week/month, drawer)             | `planner/desktop/*` на базі `coach/schedule` сітки                                                                                                                                              |
+| Налаштування, tray-меню                                   | `planner/PlannerSettings.tsx`; tray у `desktop/src/*`                                                                                                                                           |
+| Екран нагадування                                         | `planner/RingLayer.tsx` (перевикористовує фазу `ringing-in` з `calls/CallLayer`)                                                                                                                |
+| Тренер: рядок згоди, картка free hours, Schedule          | `coach/client/shareModel.ts` (`SHARE_GROUPS`, `ADDON_OF`, `ShareId`), `coach/client/screens/SharingList.tsx`, `coach/screens/*client*`, `coach/schedule/*`                                      |
+| Віджети «Up next»                                         | `today/registry.tsx`, `today/widgets/*`                                                                                                                                                         |
 
 ## 4. Дані й безпека
 
 Колекції (рішення S п.3 + A1-A, без змін): `users/{uid}/planner/events/{id}` (запечатано `sealDoc`: назва, нотатка, іконка, колір, правило повтору, тривалість, lead, зона, based-on ref; відкрито лише `id` UUID, `mode`, `nextFireAt`, `enabled`, `v`, мітки часу); `planner/alerts/{id_start}` (відкритий стан: `state`, `snoozeUntil`, `by`, `rev`, `updatedAt`; видаляється після розв'язання і через 6 год після `nextFireAt`); `planner/state` (`enabled`). Нове з рішень власника:
+
 - `planner/availability` (запечатано: тижневі діапазони). Відкритого нічого, окрім `v`, `updatedAt`.
 - **Публікація для тренера:** вільні/зайняті інтервали (без причин) як **окремий документ за схемою наявних share-документів**, шифрований ECDH-грантом на тренера лише після Allow, відкликається видаленням гранта (як інші категорії `shareModel`; повторно використати `vaultGrants`/`vaultShare`, нових криптопримітивів не вводити). Зайнятість із Health (Unwell/Full rest) потрапляє як «busy» без причини.
 - Запит тренера: запис у наявній колекції запитів доступу (`AccessAskCard`/`accessAsk.ts`) з новим `ShareId` `availability`; статуси off / asked / full.
@@ -107,24 +109,24 @@
 
 Кожна ітерація: тести, коміт локально, перевірка на localhost власника, ризикові (rules, шифрування, SW, оболонка) через `risk-reviewer`. Без push і deploy.
 
-| Ітер. | Зміст | Залежить від | Паралельно |
-|---|---|---|---|
-| I0 | Підзадачі Linear з AC, дзеркало плану в `docs/plans/SPO-552-dev-plan.md`, рішення розд. 11 | затвердження | |
-| I1 | Скелет аддона: маніфест, `exclusion.ts` (gate), `featureGates`, `planner/state`, порожній вхід у More, перевірка «чисто на чистому профілі» | I0 | |
-| I2 | Модель даних, `sealDoc`, rules, `autoMigrate`, реєстр даних, експорт, каскад видалення, тести (risk-reviewer) | I1 | I3 |
-| I3 | Чисті функції: повтор, таймзона/літній час, `nextFireAt`, «based on» без запису історії; тести SPO-554 | I1 | I2 |
-| I4 | Телефонні екрани: Week/Month, form, Based on, All lists (спільний `ActivityRow`), іконки, Repeats/Date/Custom, деталі, delete flows, empty, notices | I2, I3 | I5 |
-| I5 | Десктоп: day/week/month, drawer, шапка, tray-меню (контент) | I2, I3 | I4 |
-| I6 | Сервер: тригер, Cloud Tasks, alerts, snooze, лічильник, `pushText planner`, `shouldDeliver` (risk-reviewer) | I2 | I4, I5 |
-| I7 | Екран нагадування, синк dismiss/snooze, SW-гілка, `bell-slash`, стани недоступності | I6 | |
-| I8 | Десктоп-двигун: міст, `alarms.ts`, трей/menu bar, автозапуск, macOS `closeBehavior` (risk-reviewer) | I7 | I9 |
-| I9 | Availability: модель, екрани, Health-рядки read-only, налаштування | I2 | I8 |
-| I10 | Тренерська сторона: `shareModel` + `SharingList` + запит/Allow/відкликання, картка free hours, Schedule-тіні, Propose a session, менеджер (risk-reviewer: rules і гранти) | I9, I6 | |
-| I11 | Віджети «Up next» S/M/L/XL, ряд картки тижня, Customize Today | I4, I6 | I10 |
-| I12 | Налаштування, add-on remove/restore, офлайн, перевірка правила «нічого не видно» | I4–I11 | |
-| I13 | Юридичне: політика 5 локалей, Terms, in-app consent, реєстри (див. розд. 10) | I2, I10 | |
-| I14 | Магазин: опис 5 локалей, іконка Blender (п.12 `addons.md`; без Blender не підміняти), `sizeEntries`, `docs/UI-KIT.md` | I4+ | |
-| I15 | Живий доказ: чистий профіль → встановлення → екрани → видалення → дані на місці → повторне встановлення; two-device тест дзвінка; скріни; повні тести | усе | |
+| Ітер. | Зміст                                                                                                                                                                     | Залежить від | Паралельно |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ---------- |
+| I0    | Підзадачі Linear з AC, дзеркало плану в `docs/plans/SPO-552-dev-plan.md`, рішення розд. 11                                                                                | затвердження |            |
+| I1    | Скелет аддона: маніфест, `exclusion.ts` (gate), `featureGates`, `planner/state`, порожній вхід у More, перевірка «чисто на чистому профілі»                               | I0           |            |
+| I2    | Модель даних, `sealDoc`, rules, `autoMigrate`, реєстр даних, експорт, каскад видалення, тести (risk-reviewer)                                                             | I1           | I3         |
+| I3    | Чисті функції: повтор, таймзона/літній час, `nextFireAt`, «based on» без запису історії; тести SPO-554                                                                    | I1           | I2         |
+| I4    | Телефонні екрани: Week/Month, form, Based on, All lists (спільний `ActivityRow`), іконки, Repeats/Date/Custom, деталі, delete flows, empty, notices                       | I2, I3       | I5         |
+| I5    | Десктоп: day/week/month, drawer, шапка, tray-меню (контент)                                                                                                               | I2, I3       | I4         |
+| I6    | Сервер: тригер, Cloud Tasks, alerts, snooze, лічильник, `pushText planner`, `shouldDeliver` (risk-reviewer)                                                               | I2           | I4, I5     |
+| I7    | Екран нагадування, синк dismiss/snooze, SW-гілка, `bell-slash`, стани недоступності                                                                                       | I6           |            |
+| I8    | Десктоп-двигун: міст, `alarms.ts`, трей/menu bar, автозапуск, macOS `closeBehavior` (risk-reviewer)                                                                       | I7           | I9         |
+| I9    | Availability: модель, екрани, Health-рядки read-only, налаштування                                                                                                        | I2           | I8         |
+| I10   | Тренерська сторона: `shareModel` + `SharingList` + запит/Allow/відкликання, картка free hours, Schedule-тіні, Propose a session, менеджер (risk-reviewer: rules і гранти) | I9, I6       |            |
+| I11   | Віджети «Up next» S/M/L/XL, ряд картки тижня, Customize Today                                                                                                             | I4, I6       | I10        |
+| I12   | Налаштування, add-on remove/restore, офлайн, перевірка правила «нічого не видно»                                                                                          | I4–I11       |            |
+| I13   | Юридичне: політика 5 локалей, Terms, in-app consent, реєстри (див. розд. 10)                                                                                              | I2, I10      |            |
+| I14   | Магазин: опис 5 локалей, іконка Blender (п.12 `addons.md`; без Blender не підміняти), `sizeEntries`, `docs/UI-KIT.md`                                                     | I4+          |            |
+| I15   | Живий доказ: чистий профіль → встановлення → екрани → видалення → дані на місці → повторне встановлення; two-device тест дзвінка; скріни; повні тести                     | усе          |            |
 
 Спільні файли править один виконавець: `today/registry.tsx`, `coach/client/shareModel.ts`, `ui.tsx` (експорт ICONS, `bell-slash`), `firestore.rules`, `desktop/src/main.ts`, `sw-push.js`.
 

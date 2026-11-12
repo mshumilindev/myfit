@@ -36,7 +36,7 @@ export function useSheetGesture(sheetRef: RefObject<HTMLElement | null>, onClose
     if (was && over) el.classList.add('sheet-full');
     setMode(over ? 'full' : 'default');
     // no deps on purpose: the content changes without the hook knowing; setMode bails out when the value is unchanged
-  });  
+  });
   const [heightPx, setHeightPx] = useState<number | null>(null);
   const [liveH, setLiveH] = useState<number | null>(null);
   const [drag, setDrag] = useState(0);
