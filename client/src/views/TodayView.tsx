@@ -47,7 +47,7 @@ import type { Shell } from '../App';
 import type { LiveSession, SleepNight } from '../types';
 import { computeTrends } from '../trends';
 import { computePlaybook, type Play } from '../playbook';
-import { getRole } from '../api';
+import { getRole, getUsername } from '../api';
 import { canUseCoach } from '../coach/access';
 import { coachClientHash, coachHash } from '../coach/routes';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
@@ -996,7 +996,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 <div className="s">
                   {a.program.weeks !== 0 ? `${t.progWeekN(a.week)} · ` : ''}
                   {t.progSessions(programWeek.done, programWeek.total)}
-                  {a.assignedBy ? ` · ${t.progAssignedBy(a.assignedBy)}` : ''}
+                  {a.assignedBy
+                    ? ` · ${a.assignedBy.toLowerCase() === getUsername()?.toLowerCase() ? t.progAssignedByMe : t.progAssignedBy(a.assignedBy)}`
+                    : ''}
                 </div>
               )}
             </div>

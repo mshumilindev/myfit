@@ -3770,6 +3770,7 @@ export const en = {
   progAdherence: 'Program adherence',
   progStart: (n: number) => `Start day ${n}`,
   progAssignedBy: (n: string) => `Assigned by ${n}`,
+  progAssignedByMe: 'Assigned by me',
   progNone: 'No program assigned',
   progRemove: 'Remove program',
   progEmpty: 'No programs yet — create one and assign it to a client.',

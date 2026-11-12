@@ -83,6 +83,7 @@ beforeEach(() => {
   m.mine = { assignment: assignment(), active: true };
 });
 afterEach(() => {
+  localStorage.removeItem('spotter.username');
   cleanup();
   vi.useRealTimers();
 });
@@ -111,6 +112,17 @@ describe('TodayView program card: today', () => {
     await openToday(calm());
     expect(card().querySelector('.pch-text .s')?.textContent).toBe(
       `${en.progSessions(2, 3)} · ${en.progAssignedBy('Coach Kim')}`,
+    );
+  });
+
+  it('says "Assigned by me" when the person assigned it to themselves (any letter case)', async () => {
+    localStorage.setItem('spotter.username', 'MShumilin');
+    const a = assignment({ weeks: 0 });
+    a.assignedBy = 'mshumilin' as never;
+    m.mine = { assignment: a, active: true };
+    await openToday(calm());
+    expect(card().querySelector('.pch-text .s')?.textContent).toBe(
+      `${en.progSessions(2, 3)} · ${en.progAssignedByMe}`,
     );
   });
 

@@ -3758,6 +3758,7 @@ export const lt: Strings = {
   progAdherence: 'Programos laikymasis',
   progStart: (n) => `Pradėti ${n} dieną`,
   progAssignedBy: (n) => `Priskyrė ${n}`,
+  progAssignedByMe: 'Priskyriau pats',
   progNone: 'Programa nepriskirta',
   progRemove: 'Pašalinti programą',
   progEmpty: 'Programų dar nėra — sukurk vieną ir priskirk klientui.',

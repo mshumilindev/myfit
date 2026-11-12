@@ -3721,6 +3721,7 @@ export const et: Strings = {
   progAdherence: 'Programmi järgimine',
   progStart: (n) => `Alusta ${n}. päeva`,
   progAssignedBy: (n) => `Määras ${n}`,
+  progAssignedByMe: 'Määrasin ise',
   progNone: 'Programmi pole määratud',
   progRemove: 'Eemalda programm',
   progEmpty: 'Programme pole veel — loo üks ja määra kliendile.',

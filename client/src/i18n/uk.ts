@@ -3770,6 +3770,7 @@ export const uk: Strings = {
   progAdherence: 'Дотримання програми',
   progStart: (n) => `Почати день ${n}`,
   progAssignedBy: (n) => `Призначив ${n}`,
+  progAssignedByMe: 'Призначено мною',
   progNone: 'Програму не призначено',
   progRemove: 'Прибрати програму',
   progEmpty: 'Програм ще немає — створи і признач клієнту.',

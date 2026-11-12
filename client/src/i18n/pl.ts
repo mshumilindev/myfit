@@ -3738,6 +3738,7 @@ export const pl: Strings = {
   progAdherence: 'Realizacja programu',
   progStart: (n) => `Zacznij dzień ${n}`,
   progAssignedBy: (n) => `Przypisał ${n}`,
+  progAssignedByMe: 'Przypisane przeze mnie',
   progNone: 'Brak przypisanego programu',
   progRemove: 'Usuń program',
   progEmpty: 'Nie ma jeszcze programów — utwórz jeden i przypisz klientowi.',
