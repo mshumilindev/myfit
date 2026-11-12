@@ -1,0 +1,38 @@
+/* TimeRangeRow — two equal tap targets in one row. Tokens only, 8-pt spacing. */
+.uitr {
+  display: flex;
+  width: 100%;
+  min-height: var(--sz-52);
+}
+.uitr-end {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+  margin: 0;
+  padding: var(--sp-3) var(--sp-4);
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: 400 var(--fs-15) / 1.3 var(--font);
+  text-align: left;
+  cursor: pointer;
+}
+.uitr-end + .uitr-end {
+  border-left: var(--sz-1) solid var(--color-divider);
+}
+.uitr-end:hover {
+  background: var(--state-hover);
+}
+.uitr-end:active {
+  background: var(--state-press);
+}
+.uitr-l {
+  font-size: var(--fs-13);
+  color: var(--color-text-muted);
+}
+.uitr-v {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

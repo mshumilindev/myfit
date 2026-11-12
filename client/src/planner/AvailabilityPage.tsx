@@ -7,6 +7,7 @@ import { PageHead } from '../components/ui/PageHead';
 import { ConfirmDialog, Sheet, SheetFoot, SheetPin } from '../components/ui/Overlays';
 import { SaveGuide, useSaveGuide } from '../components/ui/SaveGuide';
 import { StickyActionBar } from '../components/ui/StickyActionBar';
+import { TimeRangeRow } from '../components/ui/TimeRangeRow';
 import { Switch } from '../components/ui/Switch';
 import { restPeriodShown } from '../healthAddons';
 import { useT } from '../i18n';
@@ -96,7 +97,11 @@ export function AvailabilityPage({ onBack }: { onBack: () => void }) {
   return (
     <div className="screen pl-screen">
       <div className="pl-page">
-        <PageHead back={{ label: t.backAction, onClick: onBack }} title={s.availTitle} />
+        <PageHead
+          back={{ label: t.backAction, onClick: onBack }}
+          title={s.availTitle}
+          sub={s.availWhy}
+        />
         <GroupedList header={s.weeklyHours}>
           {EVERY_DAY.map((d) => {
             const r = dayRanges(week, d);
@@ -238,20 +243,14 @@ function DayEditor(p: {
             label={ranges.length ? fill(s.freeBar, { t: rangesText(ranges) }) : s.notFreeBar}
           />
           {ranges.map(([a, b], i) => (
-            <GroupedList key={`${a}-${b}`} header={rangesText([[a, b]])}>
-              <ListRow
-                label={s.fromL}
-                value={timeText(a)}
-                valueStrong
-                chevron
-                onClick={() => setEditing({ index: i, from: a, to: b, step: 'from', chain: false })}
-              />
-              <ListRow
-                label={s.toL}
-                value={timeText(b)}
-                valueStrong
-                chevron
-                onClick={() => setEditing({ index: i, from: a, to: b, step: 'to', chain: false })}
+            <GroupedList key={`${a}-${b}`}>
+              <TimeRangeRow
+                fromLabel={s.fromL}
+                toLabel={s.toL}
+                from={timeText(a)}
+                to={timeText(b)}
+                onFrom={() => setEditing({ index: i, from: a, to: b, step: 'from', chain: false })}
+                onTo={() => setEditing({ index: i, from: a, to: b, step: 'to', chain: false })}
               />
               <ListRow action tone="danger" label={s.removeHours} onClick={() => setRemoving(i)} />
             </GroupedList>

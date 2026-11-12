@@ -53,6 +53,7 @@ export interface PlannerStrings {
   discardHoursB: string;
   needChange: string;
   needScope: string;
+  availWhy: string;
   more: string;
   fewer: string;
   when: string;
@@ -193,6 +194,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     discardHoursB: 'Your changes to these hours will be lost.',
     needChange: 'Add hours',
     needScope: 'Pick where it applies',
+    availWhy: 'So Spotter suggests times when you are free.',
     more: 'More options',
     fewer: 'Fewer options',
     when: 'Schedule',
@@ -344,6 +346,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     discardHoursB: 'Ваші зміни цих годин буде втрачено.',
     needChange: 'Додайте години',
     needScope: 'Оберіть, на які дні',
+    availWhy: 'Щоб Spotter пропонував час, коли ви вільні.',
     more: 'Більше опцій',
     fewer: 'Менше опцій',
     when: 'Розклад',
@@ -495,6 +498,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     discardHoursB: 'Zmiany w tych godzinach zostaną utracone.',
     needChange: 'Dodaj godziny',
     needScope: 'Wybierz, na które dni',
+    availWhy: 'Aby Spotter proponował czas, gdy jesteś wolny.',
     more: 'Więcej opcji',
     fewer: 'Mniej opcji',
     when: 'Harmonogram',
@@ -646,6 +650,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     discardHoursB: 'Šių valandų pakeitimai bus prarasti.',
     needChange: 'Pridėkite valandas',
     needScope: 'Pasirinkite, kurioms dienoms',
+    availWhy: 'Kad „Spotter“ siūlytų laiką, kai esate laisvi.',
     more: 'Daugiau parinkčių',
     fewer: 'Mažiau parinkčių',
     when: 'Tvarkaraštis',
@@ -797,6 +802,7 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     discardHoursB: 'Selle aja muudatused lähevad kaotsi.',
     needChange: 'Lisage ajad',
     needScope: 'Valige, millistele päevadele',
+    availWhy: 'Et Spotter pakuks aega, mil oled vaba.',
     more: 'Rohkem valikuid',
     fewer: 'Vähem valikuid',
     when: 'Ajakava',

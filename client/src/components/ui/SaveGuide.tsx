@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useState } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
 
 import { Button } from './Button';
+import { Portal } from './overlays/Portal';
 import type { ButtonProps } from './Button';
 
 import './SaveGuide.css';
@@ -115,11 +116,72 @@ export interface SaveGuideProps extends Omit<ButtonProps, 'disabled' | 'onClick'
   onSave: () => void;
 }
 
+/**
+ * The dashed frame and tint over the one field that is still missing (the element carrying `data-guide-hit`). It lives in a
+ * portal and follows the field's rectangle (resize, scroll), so overflow, clip-paths and a theme's own pseudo-elements on the
+ * field cannot cut or replace it. The radius is read from the field, so a square theme gets a square frame.
+ */
+function GuideFrame() {
+  const [box, setBox] = useState<{ x: number; y: number; w: number; h: number; r: number } | null>(
+    null,
+  );
+  useLayoutEffect(() => {
+    const el = document.querySelector<HTMLElement>('[data-guide-hit]');
+    if (!el) return;
+    const measure = () => {
+      const b = el.getBoundingClientRect();
+      const r = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0;
+      setBox({ x: b.left, y: b.top, w: b.width, h: b.height, r });
+    };
+    measure();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    ro?.observe(el);
+    window.addEventListener('scroll', measure, true);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('scroll', measure, true);
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
+  if (!box) return null;
+  // The dash pattern (8 + 6) must divide the outline exactly, or the loop shows a seam where it starts: pathLength is the
+  // outline rounded to a whole number of periods, so the dashes stretch a hair instead.
+  const w2 = Math.max(0, box.w - 2);
+  const h2 = Math.max(0, box.h - 2);
+  const rr = Math.min(Math.max(0, box.r - 1), w2 / 2, h2 / 2);
+  const perimeter = 2 * (w2 + h2) - 8 * rr + 2 * Math.PI * rr;
+  const period = 14;
+  return (
+    <div
+      className="uisg-frame"
+      aria-hidden
+      style={{ left: box.x, top: box.y, width: box.w, height: box.h, borderRadius: box.r }}
+    >
+      <svg>
+        <rect
+          x={1}
+          y={1}
+          width={w2}
+          height={h2}
+          rx={rr}
+          pathLength={Math.max(1, Math.round(perimeter / period)) * period}
+        />
+      </svg>
+    </div>
+  );
+}
+
 export function SaveGuide({ guide, label, heading, onSave, className, ...rest }: SaveGuideProps) {
   const flagId = useId();
   const { missing, ready, active } = guide;
   return (
     <div className="uisg">
+      {active && guide.firstId && (
+        <Portal>
+          <GuideFrame key={guide.firstId} />
+        </Portal>
+      )}
       {active && (
         <div className="uisg-flag uit--guide" role="status" id={flagId}>
           <b className="uisg-head">{heading}</b>
