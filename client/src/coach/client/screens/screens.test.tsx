@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { clientEn as t } from '../../../i18n/coachClient.en';
+import { en } from '../../../i18n/en';
 import { safeEn as sf } from '../../../i18n/coachSafe.en';
 import { catTitle } from '../labels';
 import { MyTrainerPage } from './MyTrainerPage';
@@ -319,6 +320,25 @@ describe('access log', () => {
     render(<AccessLogPage port={port} onBack={() => undefined} />);
     expect(await screen.findByText(t.lgTitle)).toBeTruthy();
     expect((await screen.findAllByText(t.lgSummary)).length).toBeGreaterThan(0);
+  });
+  it('the trainer reading the shared availability is its own row, named Availability (SPO-552)', async () => {
+    const port = createFixturesClientPort({ scenario: 'active' });
+    const real = port.accessLog.bind(port);
+    port.accessLog = async () => [
+      ...(await real()),
+      {
+        id: 'av1',
+        at: Date.now() - 60_000,
+        category: 'availability' as const,
+        what: 'summary' as const,
+        count: 3,
+      },
+    ];
+    render(<AccessLogPage port={port} onBack={() => undefined} />);
+    expect(await screen.findByText(en.avlTitle)).toBeTruthy();
+    expect(
+      screen.getAllByText(new RegExp(t.lgTimes(3).replace(/[()]/g, '\\$&'))).length,
+    ).toBeGreaterThan(0);
   });
   it('a failing load says so with Try again', async () => {
     const port = createFixturesClientPort({ scenario: 'active' });

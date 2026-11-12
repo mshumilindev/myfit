@@ -875,4 +875,34 @@ suite('coach firestore rules (needs emulator)', () => {
       await no(fs.setDoc(msgRef(client(), 'ms2'), only));
     });
   });
+
+  describe('the sealed shared view (SPO-552 I10: meta/coachShare carries the availability)', () => {
+    beforeEach(async () => {
+      await T.withSecurityRulesDisabled(async (ctx: { firestore(): unknown }) => {
+        await fs.setDoc(D(ctx.firestore(), 'users', 'c1', 'meta', 'coachShare'), {
+          enc: enc(),
+          updatedAt: 1,
+        });
+      });
+    });
+    const ref = (db: unknown) => D(db, 'users', 'c1', 'meta', 'coachShare');
+
+    it('only the owner reads it directly; the trainer gets it through coachRead (audited), never from the SDK', async () => {
+      await ok(fs.getDoc(ref(client())));
+      await no(fs.getDoc(ref(trainer())));
+      await no(fs.getDoc(ref(adminCoach())));
+      await no(fs.getDoc(ref(stranger())));
+    });
+    it('the trainer and strangers cannot write it either', async () => {
+      await no(fs.setDoc(ref(trainer()), { enc: enc(), updatedAt: 2 }));
+      await no(fs.setDoc(ref(stranger()), { enc: enc(), updatedAt: 2 }));
+    });
+    it('the vault grant of a coach stays owner-readable only (the server hands it over)', async () => {
+      await T.withSecurityRulesDisabled(async (ctx: { firestore(): unknown }) => {
+        await fs.setDoc(D(ctx.firestore(), 'users', 'c1', 'grants', 't1'), { ct: 'A'.repeat(40) });
+      });
+      await no(fs.getDoc(D(trainer(), 'users', 'c1', 'grants', 't1')));
+      await no(fs.getDoc(D(stranger(), 'users', 'c1', 'grants', 't1')));
+    });
+  });
 });
