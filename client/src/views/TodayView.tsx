@@ -1575,7 +1575,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       program: (
         <>
           {renderProgramCard(po)} {hasHistory && renderWeekCard(po)}
-          <PlannerEntry now={Date.now()} onOpen={() => shell.openOverlay({ screen: 'planner' })} />
+          <PlannerEntry
+            size={po.plannerSize}
+            now={Date.now()}
+            onOpen={() => shell.openOverlay({ screen: 'planner' })}
+          />
           <ClientTodayExtrasLazy />
           {po.logPast &&
             !(assignment && assignedActive && programDayHasPlan(assignment, todayWeekday)) && (

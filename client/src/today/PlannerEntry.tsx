@@ -6,13 +6,21 @@ import { usePlannerHost } from '../plannerRt';
  * one, without it invites to add one, so Planner is always one tap away. It belongs to the program section, so (like the section
  * itself) it cannot be removed; the words and the card come from the Planner chunk (the core carries none of them).
  */
-export function PlannerEntry({ now, onOpen }: { now?: number; onOpen: () => void }) {
+export function PlannerEntry({
+  now,
+  size = 'M',
+  onOpen,
+}: {
+  now?: number;
+  size?: 'M' | 'L' | 'XL';
+  onOpen: () => void;
+}) {
   const [mounted] = useState(() => Date.now());
   const Body = usePlannerHost()?.UpNext;
   if (!Body) return null;
   return (
     <div className="td-planner-entry" data-testid="planner-entry">
-      <Body size="M" now={now ?? mounted} onOpen={onOpen} />
+      <Body size={size} now={now ?? mounted} onOpen={onOpen} />
     </div>
   );
 }

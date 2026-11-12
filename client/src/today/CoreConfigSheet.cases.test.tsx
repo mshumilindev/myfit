@@ -13,6 +13,11 @@ import {
 } from './layout';
 import { setLocale } from '../i18n';
 
+const planner = vi.hoisted(() => ({
+  host: null as null | { UpNext: (p: { size: string }) => unknown },
+}));
+vi.mock('../plannerRt', () => ({ usePlannerHost: () => planner.host }));
+
 let latest: TodayLayout;
 
 function Host({
@@ -185,5 +190,27 @@ describe('CoreConfigSheet — nudges and history', () => {
     ).toEqual(['3', '5', '7']);
     fireEvent.click(within(group).getByRole('button', { name: '7' }));
     expect(coreOpts(latest, 'history').days).toBe(7);
+  });
+});
+
+describe('CoreConfigSheet — Planner card (program)', () => {
+  afterEach(() => {
+    planner.host = null;
+  });
+  it('has no Planner option while the add-on is not installed', () => {
+    render(<Host id="program" />);
+    expect(screen.queryByText('Planner card')).toBeNull();
+    expect(coreOpts(DEFAULT_LAYOUT, 'program').plannerSize).toBe('M');
+  });
+  it('sizes the fixed card Compact / Standard / Detailed and shows it live', () => {
+    planner.host = { UpNext: ({ size }) => <span data-testid="pl">{size}</span> };
+    render(<Host id="program" />);
+    expect(screen.getByTestId('pl').textContent).toBe('M');
+    // The second Compact/Standard/Detailed group is the Planner card's (the first is the program card's).
+    fireEvent.click(screen.getAllByRole('button', { name: 'Detailed' })[1]);
+    expect(coreOpts(latest, 'program').plannerSize).toBe('XL');
+    expect(screen.getByTestId('pl').textContent).toBe('XL');
+    fireEvent.click(screen.getAllByRole('button', { name: 'Standard' })[1]);
+    expect(coreOpts(latest, 'program').plannerSize).toBe('L');
   });
 });

@@ -24,5 +24,8 @@ describe('PlannerEntry', () => {
     render(<PlannerEntry now={0} onOpen={open} />);
     fireEvent.click(screen.getByRole('button', { name: 'entry-M' }));
     expect(open).toHaveBeenCalled();
+    cleanup();
+    render(<PlannerEntry size="XL" onOpen={open} />);
+    expect(screen.getByRole('button', { name: 'entry-XL' })).toBeTruthy();
   });
 });

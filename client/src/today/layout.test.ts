@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CORE_DEFAULTS,
+  sanitizeOpts,
   DEFAULT_LAYOUT,
   addSection,
   coreOpts,
@@ -273,5 +274,14 @@ describe('today layout', () => {
       l = addSection(l, { id: 'p', title: 'P', layout: 'pair' });
       expect(insertWidget(l, 'p', 'volume', 'v')).toBe(l);
     });
+  });
+});
+
+describe('program plannerSize', () => {
+  it('defaults to M, keeps M/L/XL and falls back on anything else', () => {
+    expect(CORE_DEFAULTS.program.plannerSize).toBe('M');
+    expect(sanitizeOpts('program', { plannerSize: 'XL' }).plannerSize).toBe('XL');
+    expect(sanitizeOpts('program', { plannerSize: 'S' }).plannerSize).toBe('M');
+    expect(sanitizeOpts('program', undefined).plannerSize).toBe('M');
   });
 });

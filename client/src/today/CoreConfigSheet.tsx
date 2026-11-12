@@ -4,6 +4,9 @@
  * away, so the block previews behind the sheet follow, and Save / Cancel of
  * the whole edit keep their meaning. "Reset block" puts the defaults back.
  */
+import { PlannerEntry } from './PlannerEntry';
+import { useTw } from './strings';
+import { usePlannerHost } from '../plannerRt';
 import type { ReactNode } from 'react';
 import { Button } from '../components/ui/Button';
 import { GroupedList, ListRow } from '../components/ui/GroupedList';
@@ -44,6 +47,8 @@ export function CoreConfigSheet({
   onClose: () => void;
 }) {
   const { t } = useT();
+  const tw = useTw();
+  const planner = !!usePlannerHost();
   const set = <K extends ConfigurableCore>(k: K, patch: Partial<CoreOptsMap[K]>) =>
     onChange(setCoreOpts(draft, k, patch));
 
@@ -76,6 +81,26 @@ export function CoreConfigSheet({
             label: t.todayProgStyle[v],
           }))}
         />
+        {planner && (
+          <>
+            <div className="tdc-sheet-lab">{tw.plannerCard}</div>
+            <div className="tdc-fixed" aria-hidden="true">
+              <PlannerEntry size={o.plannerSize} onOpen={() => {}} />
+            </div>
+            <Segmented
+              label={tw.plannerCard}
+              value={o.plannerSize}
+              onChange={(plannerSize) => p({ plannerSize })}
+              options={(
+                [
+                  ['M', 'compact'],
+                  ['L', 'standard'],
+                  ['XL', 'detailed'],
+                ] as const
+              ).map(([value, k]) => ({ value, label: t.todayProgStyle[k] }))}
+            />
+          </>
+        )}
         <div className="tdc-sheet-lab">{t.todayOptShow}</div>
         <GroupedList surface="raised">
           {toggle(t.todayOptWeekPills, t.todayOptWeekPillsSub, o.weekPills, (weekPills) =>

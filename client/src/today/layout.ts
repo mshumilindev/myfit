@@ -39,6 +39,8 @@ export interface ProgramOpts {
   gymStep: boolean;
   /** "Log past session" link when today has no plan. */
   logPast: boolean;
+  /** Size of the fixed Planner card under the week (only shown while that add-on is installed). */
+  plannerSize: 'M' | 'L' | 'XL';
 }
 
 export type AtlasLayout = 'together' | 'split';
@@ -103,7 +105,14 @@ export const CORE_DEFAULTS: CoreOptsMap = {
     liveFirst: true,
     hideInactive: false,
   },
-  program: { style: 'standard', weekPills: true, exercises: false, gymStep: true, logPast: false },
+  program: {
+    style: 'standard',
+    weekPills: true,
+    exercises: false,
+    gymStep: true,
+    logPast: false,
+    plannerSize: 'M',
+  },
   nudges: { off: [] },
   history: { days: 5, view: 'timeline', planned: true },
 };
@@ -139,6 +148,7 @@ export function sanitizeOpts<K extends ConfigurableCore>(id: K, raw: unknown): C
       exercises: bool(r.exercises, p.exercises),
       gymStep: bool(r.gymStep, p.gymStep),
       logPast: bool(r.logPast, p.logPast),
+      plannerSize: oneOf(r.plannerSize, ['M', 'L', 'XL'] as const, p.plannerSize),
     } satisfies ProgramOpts;
   } else if (id === 'nudges') {
     const off = Array.isArray(r.off) ? r.off : [];

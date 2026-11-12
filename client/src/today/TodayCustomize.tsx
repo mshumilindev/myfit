@@ -535,7 +535,7 @@ export function TodayCustomize({
           {s.id === 'program' && (
             // The Planner card is fixed under the week; the clipped preview above cuts it off, so show it whole here.
             <div className="tdc-fixed" aria-hidden="true">
-              <PlannerEntry onOpen={() => {}} />
+              <PlannerEntry size={coreOpts(draft, 'program').plannerSize} onOpen={() => {}} />
             </div>
           )}
         </div>
