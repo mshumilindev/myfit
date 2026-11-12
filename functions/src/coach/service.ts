@@ -904,7 +904,8 @@ export async function coachRead(ctx: Ctx, actor: Actor, body: Record<string, unk
   // see, availability included). Only the ACTIVE trainer of this client gets it (checked above), the content was already
   // cut by the person's own sharing levels when the device sealed it, and every read is audited.
   let coachShare: Record<string, unknown> | null = null;
-  if (body.share === true) {
+  // a program-mode client (no app) shares nothing this way, same rule as the profile read (`legacyCut.coach`)
+  if (body.share === true && c.mode !== 'program') {
     coachShare = await kv.get(`users/${clientId}/meta/coachShare`);
     if (coachShare)
       await kv.tx((t) =>

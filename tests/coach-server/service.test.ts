@@ -535,6 +535,14 @@ describe('coachRead: one consent-gated path with an audit entry per day (R-BE-CO
         await code(coachRead(ctx(), trainer, { clientId: 'c1', categories: [], share: true })),
       ).not.toBe('ok');
     });
+    it('a program-mode client (no app) never hands a share over, even if an old one is stored', async () => {
+      await link({ totals: 'full' }, 'program');
+      await seedShare();
+      const r = await coachRead(ctx(), trainer, { clientId: 'c1', categories: [], share: true });
+      expect(r.coachShare).toBeNull();
+      expect(r.grant).toBeNull();
+      expect(await kv.list('users/c1/audit')).toHaveLength(0);
+    });
     it('an empty read without share is still invalid', async () => {
       await link({ totals: 'full' });
       expect(await code(coachRead(ctx(), trainer, { clientId: 'c1', categories: [] }))).toBe(
