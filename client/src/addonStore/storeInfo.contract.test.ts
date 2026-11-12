@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 import { ADDONS } from '../addons/manifest';
 import { addonStoreEn } from '../i18n/addonStore.en';
@@ -22,6 +23,21 @@ describe('store info is complete', () => {
   it.each(shown.map((a) => a.id))('%s has an icon', (id) => {
     expect(existsSync(join(__dirname, '../../public/store-icons', `${id}.webp`))).toBe(true);
   });
+  it.each(shown.map((a) => a.id))(
+    '%s icon is 320x320 and fills the frame edge to edge',
+    async (id) => {
+      const file = join(__dirname, '../../public/store-icons', `${id}.webp`);
+      const { data, info } = await sharp(file)
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      expect([info.width, info.height]).toEqual([320, 320]);
+      const opaque = (x: number, y: number) => data[(y * 320 + x) * 4 + 3] > 128;
+      const mid = 160;
+      // the tile touches every edge: within 4 px of each side the middle is solid (corners may be rounded)
+      expect(opaque(mid, 4) && opaque(mid, 315) && opaque(4, mid) && opaque(315, mid)).toBe(true);
+    },
+  );
   it.each(shown.filter((a) => !a.soon).map((a) => a.id))(
     '%s has a description in every language',
     (id) => {
