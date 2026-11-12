@@ -237,16 +237,16 @@ export const addonStorePl: typeof addonStoreEn = {
     },
     planner: {
       name: 'Planer',
-      tagline: 'Plany, o których przypomnimy na czas',
-      desc: 'Dodawaj własne plany do kalendarza, dostawaj przypomnienie przed każdym i udostępnij trenerowi wolne godziny, jeśli chcesz.',
+      tagline: 'Zaplanuj dzień po swojemu',
+      desc: 'Wpisuj treningi i codzienne sprawy do kalendarza, ustawiaj przypomnienia i miej najbliższy plan pod ręką.',
       about:
-        'Trening to tylko część Twojego tygodnia. Planer przechowuje resztę: plan na dowolny dzień i przypomnienie przed startem, żeby sesja, rozmowa czy sprawa nie umknęły.\n\nDodaj plan z tytułem, godziną i powtarzaniem: od jednego dnia do co tygodnia. Wybierz, ile czasu przed startem chcesz o nim usłyszeć i czy przypomnienie ma być ciche, czy uporczywe. Uporczywe dzwoni, dopóki go nie wyłączysz lub nie odłożysz, a wyłączenie na jednym urządzeniu zatrzymuje je na pozostałych.\n\nPlan możesz oprzeć na dniu programu, treningu domowym lub aktywności, aby uzupełnić nazwę i ikonę. Planer tylko przypomina; nic nie trafia do historii treningów.\n\nUstaw tygodniowe wolne godziny raz. Unwell, Full rest i okres bez obciążenia po urazie są pokazane jako niedostępne, bez powodu. Jeśli zezwolisz, trener widzi Twoje wolne i zajęte godziny i może proponować sesje, gdy jesteś wolny. Udostępnianie możesz zakończyć w każdej chwili.\n\nWidżet Up next na Today pokazuje, co dalej, a aplikacja na komputer może utrzymać przypomnienia na pasku menu lub w zasobniku. Usunięcie Planera zachowuje Twoje plany, a po ponownym dodaniu wracają.',
+        'Trening, wizyta u fizjoterapeuty, posiłek czy telefon — nie wszystko musi trafiać do historii ćwiczeń. W Planner zapiszesz takie plany w kalendarzu i ustawisz przypomnienie na wybrany moment, także dla spraw, które się powtarzają.\n\nTwórz jednorazowe plany lub powtarzaj je co dzień, co tydzień lub po swojemu. Dodaj godzinę, czas trwania i notatkę. Based on przejmie tylko nazwę i ikonę dnia programu, zestawu Home workouts, aktywności lub starszego planu.\n\nQuiet (ciche) wyśle jedno powiadomienie i uwzględni godziny ciszy. Persistent (Natarczywe) przypomni ponownie, dopóki go nie zamkniesz. Odłóż lub zamknij przypomnienie na jednym urządzeniu, a zniknie również na pozostałych.\n\nNajbliższą sprawę zobaczysz w Up next na Today. Dopasuj wielkość widoku. Na komputerze sprawdzisz plan w zasobniku Windows lub pasku menu macOS.\n\nW Availability ustaw godziny, kiedy masz czas. Jeśli zechcesz je udostępnić, trener zobaczy tylko dostępność, nigdy Twoje plany. Są szyfrowane i możesz je czytać tylko Ty.',
       highlights: [
-        'Plany z powtarzaniem i przypomnieniem przed nimi',
-        'Ciche lub uporczywe przypomnienia na wszystkich urządzeniach',
-        'Tygodniowe wolne godziny z uwzględnieniem Unwell i Full rest',
-        'Wolne godziny dla trenera tylko za Twoją zgodą',
-        'Widżet Up next na Today',
+        'Plany jednorazowe i cykliczne',
+        'Przypomnienia dopasowane do dnia',
+        'Najbliższy plan zawsze na Today',
+        'Udostępnianie tylko wolnych godzin',
+        'Plany widoczne tylko dla Ciebie',
       ],
     },
     playbook: {

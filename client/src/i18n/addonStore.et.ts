@@ -240,16 +240,16 @@ export const addonStoreEt: typeof addonStoreEn = {
     },
     planner: {
       name: 'Planeerija',
-      tagline: 'Plaanid, mis tuletatakse õigel ajal meelde',
-      desc: 'Lisa oma plaanid kalendrisse, saa enne igaühte meeldetuletus ja jaga soovi korral vabu tunde treeneriga.',
+      tagline: 'Kõik plaanid ühes kalendris',
+      desc: 'Pane trennid ja igapäevased tegemised kalendrisse ning vali, millal ja kuidas neid meelde tuletada.',
       about:
-        'Treening on vaid osa sinu nädalast. Planeerija hoiab ülejäänut: plaan mis tahes päevaks ja meeldetuletus enne algust, et trenn, kõne või toimetus ei jääks ära.\n\nLisa plaan koos pealkirja, aja ja kordusega: ühest päevast iga nädalani. Vali, kui palju enne algust tahad sellest teada ning kas meeldetuletus on vaikne või püsiv. Püsiv meeldetuletus heliseb, kuni selle sulged või edasi lükkad, ja ühes seadmes sulgemine vaigistab selle ka teistes.\n\nPlaani saad põhjendada programmipäeva, kodutreeningu või tegevusega, et nimi ja ikoon täituksid ise. Planeerija ainult tuletab meelde; treeninguajalukku ei salvestata midagi.\n\nMäära nädala vabad tunnid ühe korra. Unwell, Full rest ja vigastuse koormuseta periood näidatakse kui ei ole saadaval, ilma põhjuseta. Kui lubad, näeb treener sinu vaba ja hõivatud aega ning saab pakkuda trenne, kui oled vaba. Jagamise saad igal ajal lõpetada.\n\nUp next vidin Today vaates näitab, mis järgmisena tuleb, ja arvutirakendus võib hoida meeldetuletusi menüüribal või salves. Planeerija eemaldamisel jäävad plaanid alles ja tulevad tagasi, kui selle uuesti lisad.',
+        'Trenn, lõuna, venitus, füsioterapeudi külastus või üks oluline kõne — kõige jaoks ei ole vaja treeningupäevikusse uut kirjet. Planner aitab need asjad kalendrisse panna ja meeldetuletuse aja ise valida.\n\nLoo ühekordne või korduv plaan: iga päev, iga nädal või enda graafiku järgi. Lisa kellaaeg, kestus ja soovi korral märkus. Based on võtab varasemast plaanist, programmipäevast, Home workouts komplektist või tegevusest vaid nime ja ikooni.\n\nQuiet („vaikne“) saadab ühe teavituse ja arvestab vaikse ajaga. Persistent („Püsiv“) tuletab uuesti meelde, kuni selle sulged. Kui lükkad meeldetuletuse edasi või sulged selle ühes seadmes, lõpeb see ka teistes.\n\nJärgmine plaan on Today vaates Up next jaotises näha. Vali, kui palju ruumi see võtab. Arvutis saad järgmist plaani vaadata Windowsi süsteemisalves või macOS-i menüüribal.\n\nMärgi Availability all oma vabad ajad. Kui annad loa, näeb treener, millal oled vaba või hõivatud, mitte su plaane. Need on krüpteeritud ja neid saad lugeda ainult sina.',
       highlights: [
-        'Plaanid kordusega ja meeldetuletusega enne',
-        'Vaiksed või püsivad meeldetuletused kõigis seadmetes',
-        'Nädala vabad tunnid, Unwell ja Full rest arvestatud',
-        'Vaba aeg treenerile ainult sinu loal',
-        'Up next vidin Today vaates',
+        'Ühekordsed ja korduvad plaanid',
+        'Kaks meeldetuletuste viisi',
+        'Järgmine plaan otse Today vaates',
+        'Vaba aja jagamine sinu loal',
+        'Sinu plaanid jäävad sulle',
       ],
     },
     playbook: {

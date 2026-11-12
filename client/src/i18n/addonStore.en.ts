@@ -242,16 +242,16 @@ export const addonStoreEn = {
     },
     planner: {
       name: 'Planner',
-      tagline: 'Plans that remind you on time',
-      desc: 'Put your own plans on a calendar, get a reminder before each one and share your free hours with your trainer if you want to.',
+      tagline: 'Know what’s coming up next',
+      desc: 'Put workouts, appointments and everyday plans in one calendar, with reminders you can set to suit your day.',
       about:
-        'Training is only part of your week. Planner holds the rest: a plan for any day, with a reminder before it starts, so the session, the call or the errand does not slip past.\n\nAdd a plan with a title, a time and a repeat, from a single day to every week. Choose how long before it starts you want to hear about it, and whether the reminder is quiet or persistent. A persistent reminder rings until you dismiss or snooze it, and dismissing it on one device stops it on the others.\n\nBase a plan on a programme day, a home workout or an activity to fill in its name and icon. Planner only reminds you; nothing is logged to your training history.\n\nSet your weekly free hours once. Unwell, Full rest and an injury’s no-load period show as not available, without the reason. If you allow it, your trainer sees your free and busy times and can offer sessions when you are free. You can stop sharing at any time.\n\nThe Up next widget on Today shows what comes next, and the desktop app can keep reminders ringing from the menu bar or tray. Removing Planner keeps your plans, and they return when you add it again.',
+        'Use Planner for the things you need to make time for: a workout, lunch, stretching, a physio visit or a call. Put them on your calendar, choose when to be reminded and keep them separate from your training history.\n\nAdd a one-off plan or repeat it daily, weekly or on your own schedule. Set its time, length and a note. Based on takes just the name and icon from a program day, Home workouts set, activity or earlier plan.\n\nQuiet gives you one notification and respects quiet hours. Persistent reminds you again until you dismiss it. Set reminders up to two days ahead; snooze or dismiss on one device and it stops on the others.\n\nSee what’s coming in Up next on Today and choose how much space it takes. On Windows or macOS, your next plan can also appear in the tray or menu bar.\n\nSet your free hours in Availability. If you choose to share them, your trainer sees only free or busy times, never your plans. Plans are encrypted and only you can read them.',
       highlights: [
-        'Plans with repeats and a reminder before each',
-        'Quiet or persistent reminders, synced across devices',
-        'Weekly free hours with Unwell and Full rest respected',
-        'Share free hours with your trainer, only if you allow it',
-        'Up next widget on Today',
+        'One-off plans or flexible repeats',
+        'Reminders that suit your routine',
+        'Your next plan, right on Today',
+        'Free-time sharing, on your terms',
+        'Private plans, never seen by trainers',
       ],
     },
     playbook: {

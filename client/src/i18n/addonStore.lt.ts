@@ -238,16 +238,16 @@ export const addonStoreLt: typeof addonStoreEn = {
     },
     planner: {
       name: 'Planuoklis',
-      tagline: 'Planai, apie kuriuos primenama laiku',
-      desc: 'Įtrauk savo planus į kalendorių, gauk priminimą prieš kiekvieną ir, jei nori, pasidalyk laisvomis valandomis su treneriu.',
+      tagline: 'Savo laiką planuok paprasčiau',
+      desc: 'Susiplanuok treniruotes ir kasdienius reikalus viename kalendoriuje, o priminimus pritaikyk sau.',
       about:
-        'Treniruotės yra tik dalis tavo savaitės. Planuoklis saugo likusią dalį: planą bet kuriai dienai ir priminimą prieš pradžią, kad sesija, skambutis ar reikalas nepraslystų.\n\nPridėk planą su pavadinimu, laiku ir pasikartojimu: nuo vienos dienos iki kas savaitę. Pasirink, kiek anksčiau nori apie jį sužinoti ir ar priminimas bus tylus, ar atkaklus. Atkaklus priminimas skamba, kol jį išjungi ar atidedi, o išjungtas viename įrenginyje nutyla ir kituose.\n\nPlaną gali pagrįsti programos diena, namų treniruote ar veikla, kad būtų įrašytas pavadinimas ir piktograma. Planuoklis tik primena: į treniruočių istoriją nieko neįrašoma.\n\nVieną kartą nustatyk savaitės laisvas valandas. Unwell, Full rest ir traumos laikotarpis be krūvio rodomi kaip nepasiekiami, nenurodant priežasties. Jei leisi, treneris mato tavo laisvą ir užimtą laiką ir gali siūlyti sesijas, kai esi laisvas. Dalytis gali nustoti bet kada.\n\nUp next valdiklis Today ekrane rodo, kas toliau, o kompiuterio programa gali laikyti priminimus meniu juostoje ar dėkle. Pašalinus Planuoklį planai lieka ir sugrįžta, kai jį pridedi iš naujo.',
+        'Treniruotė, pietūs, tempimo pratimai ar vizitas pas kineziterapeutą — viskam atsiras vietos tavo kalendoriuje. Su Planner gali susidėlioti dieną, pasirinkti priminimus ir neapkrauti treniruočių istorijos nereikalingais įrašais.\n\nSusikurk vienkartinį ar kartojamą planą: kasdien, kas savaitę ar savo ritmu. Įrašyk laiką, trukmę ir pastabą. Based on perima tik pavadinimą ir piktogramą iš programos dienos, Home workouts rinkinio, veiklos ar ankstesnio plano.\n\nQuiet („tylus“) primena vieną kartą ir paiso tylos valandų. Persistent („Atkaklus“) kartoja priminimą, kol jį atmesi. Atidėk ar atmesk jį viename įrenginyje — kituose priminimai taip pat sustos.\n\nArtimiausią planą rasi Today skiltyje Up next. Gali pasirinkti, kiek vietos jam skirti. Kompiuteryje kitą planą gali matyti Windows sistemos dėkle arba macOS meniu juostoje.\n\nAvailability pažymėk, kada esi laisvas. Jei leisi, treneris matys tik užimtą ir laisvą laiką, bet ne planų turinį. Planai užšifruoti — juos skaityti gali tik tu.',
       highlights: [
-        'Planai su pasikartojimu ir priminimu prieš juos',
-        'Tylūs ar atkaklūs priminimai visuose įrenginiuose',
-        'Savaitės laisvos valandos su Unwell ir Full rest',
-        'Laisvas laikas treneriui tik tau leidus',
-        'Up next valdiklis Today ekrane',
+        'Vienkartiniai ir kartojami planai',
+        'Du skirtingi priminimų režimai',
+        'Artimiausias planas Today ekrane',
+        'Laisvą laiką rodai tik savo noru',
+        'Planus gali skaityti tik tu',
       ],
     },
     playbook: {
