@@ -257,13 +257,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
     .join(' · ');
 
   if (availOpen) return <AvailabilityPage onBack={() => setAvailOpen(false)} />;
-  if (settingsOpen)
-    return (
-      <PlannerSettings
-        onBack={() => setSettingsOpen(false)}
-        onAvailability={() => setAvailOpen(true)}
-      />
-    );
+  if (settingsOpen) return <PlannerSettings onBack={() => setSettingsOpen(false)} />;
 
   if (desk) {
     const days =

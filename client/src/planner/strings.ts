@@ -145,8 +145,6 @@ export interface PlannerStrings {
   quietHours: string;
   quietTo: string;
   quietNote: string;
-  availHead: string;
-  showFree: string;
   thisComputer: string;
   startWithComputer: string;
   showTray: string;
@@ -323,8 +321,6 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     quietHours: 'Quiet hours',
     quietTo: 'To',
     quietNote: 'Persistent reminders switch to a quiet notification during these hours.',
-    availHead: 'Availability',
-    showFree: 'Show free hours to my trainer',
     thisComputer: 'This computer',
     startWithComputer: 'Start Spotter with my computer',
     showTray: 'Show the icon in the menu bar / tray',
@@ -501,8 +497,6 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     quietHours: 'Тихі години',
     quietTo: 'До',
     quietNote: 'Наполегливі нагадування переходять у тихе сповіщення в ці години.',
-    availHead: 'Доступність',
-    showFree: 'Показувати вільні години тренеру',
     thisComputer: "Цей комп'ютер",
     startWithComputer: "Запускати Spotter разом з комп'ютером",
     showTray: 'Показувати іконку в рядку меню / треї',
@@ -679,8 +673,6 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     quietHours: 'Ciche godziny',
     quietTo: 'Do',
     quietNote: 'W tych godzinach natarczywe przypomnienia zmieniają się w ciche powiadomienie.',
-    availHead: 'Dostępność',
-    showFree: 'Pokazuj wolne godziny trenerowi',
     thisComputer: 'Ten komputer',
     startWithComputer: 'Uruchamiaj Spotter z komputerem',
     showTray: 'Pokaż ikonę na pasku menu / w zasobniku',
@@ -857,8 +849,6 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     quietHours: 'Tylos valandos',
     quietTo: 'Iki',
     quietNote: 'Šiomis valandomis atkaklūs priminimai virsta tyliu pranešimu.',
-    availHead: 'Prieinamumas',
-    showFree: 'Rodyti laisvas valandas treneriui',
     thisComputer: 'Šis kompiuteris',
     startWithComputer: 'Paleisti Spotter kartu su kompiuteriu',
     showTray: 'Rodyti piktogramą meniu juostoje / dėkle',
@@ -1034,8 +1024,6 @@ export const STRINGS: Record<LocaleId, PlannerStrings> = {
     quietHours: 'Vaiksed tunnid',
     quietTo: 'Kuni',
     quietNote: 'Nendel tundidel muutuvad püsivad meeldetuletused vaikseks teavituseks.',
-    availHead: 'Saadavus',
-    showFree: 'Näita vabu tunde treenerile',
     thisComputer: 'See arvuti',
     startWithComputer: 'Käivita Spotter arvutiga koos',
     showTray: 'Näita ikooni menüüribal / salves',

@@ -67,54 +67,46 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('PlannerSettings', () => {
-  it('shows the defaults and the weekly summary', () => {
-    render(<PlannerSettings onBack={() => {}} onAvailability={() => {}} />);
+  it('shows the defaults', () => {
+    render(<PlannerSettings onBack={() => {}} />);
     expect(screen.getByText('Planner settings')).toBeTruthy();
-    expect(screen.getByText('Weekly hours').parentElement?.textContent).toMatch(/7 days/);
   });
 
   it('saves the reminder style as the default for new plans', () => {
-    render(<PlannerSettings onBack={() => {}} onAvailability={() => {}} />);
+    render(<PlannerSettings onBack={() => {}} />);
     fireEvent.click(screen.getByText('Persistent'));
     expect(last().defaults.mode).toBe('ring');
   });
 
   it('turns quiet hours off through the app-wide setting', () => {
-    render(<PlannerSettings onBack={() => {}} onAvailability={() => {}} />);
+    render(<PlannerSettings onBack={() => {}} />);
     fireEvent.click(screen.getByRole('switch', { name: 'Quiet hours' }));
     expect(state.quietSaved).toEqual([{ on: false, from: 1320, to: 420 }]);
   });
 
   it('disables From / To while quiet hours are off', () => {
     state.quiet = { on: false, from: 1320, to: 420 };
-    render(<PlannerSettings onBack={() => {}} onAvailability={() => {}} />);
+    render(<PlannerSettings onBack={() => {}} />);
     expect(
       (screen.getByText('From').closest('button') as HTMLButtonElement | null)?.disabled ?? true,
     ).toBe(true);
   });
 
-  it('toggles sharing the free hours', () => {
-    render(<PlannerSettings onBack={() => {}} onAvailability={() => {}} />);
-    fireEvent.click(screen.getByRole('switch', { name: /free hours/i }));
-    expect(last().shareAvailability).toBe(true);
-  });
-
-  it('opens the weekly hours', () => {
-    const open = vi.fn();
-    render(<PlannerSettings onBack={() => {}} onAvailability={open} />);
-    fireEvent.click(screen.getByText('Weekly hours'));
-    expect(open).toHaveBeenCalled();
+  it('does not repeat the availability: weekly hours and sharing live on their own page', () => {
+    render(<PlannerSettings onBack={() => {}} />);
+    expect(screen.queryByText('Weekly hours')).toBeNull();
+    expect(screen.queryByRole('switch', { name: /free hours/i })).toBeNull();
   });
 
   it('has no "This computer" group in the browser', () => {
-    render(<PlannerSettings onBack={() => {}} onAvailability={() => {}} />);
+    render(<PlannerSettings onBack={() => {}} />);
     expect(screen.queryByText('This computer')).toBeNull();
   });
 
   it('writes the desktop shell options', async () => {
     const setPrefs = vi.fn((p: Partial<NativePrefs>) => Promise.resolve(shell(p)));
     state.native = { getPrefs: () => Promise.resolve(shell()), setPrefs };
-    render(<PlannerSettings onBack={() => {}} onAvailability={() => {}} />);
+    render(<PlannerSettings onBack={() => {}} />);
     const sw = await screen.findByRole('switch', { name: 'Start Spotter with my computer' });
     await act(async () => {
       fireEvent.click(sw);

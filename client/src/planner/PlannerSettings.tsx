@@ -10,9 +10,8 @@ import { useT } from '../i18n';
 import { fmtMinutes, saveQuiet, useQuietHours } from '../quietHours';
 import { nativeBridge, type NativePrefs } from './desktopBridge';
 import { durText, leadText } from './fmt';
-import { weekSummary } from './availability';
 import { HM } from './PlanForm';
-import { fill, STRINGS } from './strings';
+import { STRINGS } from './strings';
 import { savePrefs, usePrefs } from './sync';
 import type { PlanMode, PlannerPrefs } from './types';
 import './planner.css';
@@ -21,16 +20,10 @@ type Picking = 'lead' | 'duration' | 'from' | 'to';
 
 /**
  * Planner settings (design SPO-555, screens 37 and desktop 17): defaults for new plans, the reminder style, quiet hours (the same
- * setting the app already has for chat pushes), the weekly hours and whether the trainer sees them, and "This computer" (tray /
+ * setting the app already has for chat pushes) and "This computer" (tray /
  * menu bar, start with the computer) which only exists inside the desktop shell.
  */
-export function PlannerSettings({
-  onBack,
-  onAvailability,
-}: {
-  onBack: () => void;
-  onAvailability: () => void;
-}) {
+export function PlannerSettings({ onBack }: { onBack: () => void }) {
   const { t, locale } = useT();
   const s = STRINGS[locale];
   const prefs = usePrefs();
@@ -56,16 +49,6 @@ export function PlannerSettings({
       ?.setPrefs?.(patch)
       .then(setShell)
       .catch(() => undefined);
-  const sum = weekSummary(prefs.availability);
-  const summary =
-    sum.kind === 'weekdays'
-      ? fill(s.sumWeekdays, { t: sum.text })
-      : sum.kind === 'every'
-        ? fill(s.sumEvery, { t: sum.text })
-        : sum.kind === 'days'
-          ? fill(s.sumDays, { n: String(sum.count) })
-          : s.sumNone;
-
   return (
     <div className="screen pl-screen">
       <div className="pl-page">
@@ -120,20 +103,6 @@ export function PlannerSettings({
             chevron
             disabled={!quiet.on}
             onClick={() => setPicking('to')}
-          />
-        </GroupedList>
-        <GroupedList header={s.availHead}>
-          <ListRow label={s.weeklyHours} sub={summary} chevron onClick={onAvailability} />
-          <ListRow
-            as="label"
-            label={s.showFree}
-            trailing={
-              <Switch
-                checked={prefs.shareAvailability}
-                onChange={(shareAvailability) => void savePrefs({ ...prefs, shareAvailability })}
-                aria-label={s.showFree}
-              />
-            }
           />
         </GroupedList>
         {shell && (
