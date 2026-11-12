@@ -25,6 +25,7 @@ export const WEEK_SHOTS: Readonly<Record<string, readonly string[]>> = {
   'home-sets': ['home-1', 'home-2', 'home-start'],
   goals: ['goals-1'],
   playbook: ['playbook-1'],
+  planner: ['planner-today', 'planner-week', 'planner-form', 'planner-month', 'planner-settings'],
   sleep: ['sleep-1', 'sleep-2', 'sleep-3'],
   health: ['health-1', 'health-2', 'health-3', 'health-start'],
   atlas: ['atlas-1', 'atlas-2', 'atlas-3', 'atlas-4', 'atlas-5'],

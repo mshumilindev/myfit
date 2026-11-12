@@ -213,6 +213,7 @@ describe('StoreApp', () => {
         'home-sets',
         'goals',
         'playbook',
+        'planner',
         'atlas',
         'apex',
         'theme-cyberpunk',
