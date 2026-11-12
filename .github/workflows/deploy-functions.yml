@@ -92,7 +92,7 @@ jobs:
             echo "APP_ORIGIN=${VAR_APP_ORIGIN:-https://myspotter.fit}"
             echo "COACH_ENFORCE_APPCHECK=${VAR_ENFORCE_APPCHECK:-false}"
             echo "VAULT_KV=${VAR_VAULT_KV:-1}"
-            echo "CF_TURN_KEY_ID=${VAR_CF_TURN_KEY_ID:-}"
+            echo "CF_TURN_KEY_ID=${VAR_CF_TURN_KEY_ID:-05b8291224c59ffbcd1898d0fe530974}"
           } > "functions/.env.$FIREBASE_PROJECT"
 
           total=${#ordered[@]}
