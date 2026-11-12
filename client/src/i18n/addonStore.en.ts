@@ -184,6 +184,10 @@ export const addonStoreEn = {
     supplements: { name: 'Supplements', desc: 'Keep a list of what you take and when.' },
     nicotine: { name: 'Nicotine', desc: 'Log nicotine to see the effect on recovery.' },
     alcohol: { name: 'Alcohol', desc: 'Log alcohol to see the effect on recovery.' },
+    'planner-availability': {
+      name: 'Availability',
+      desc: 'Set your free hours and share them with your trainer.',
+    },
     sleep: {
       name: 'Sleep',
       tagline: 'Better training starts at bedtime',

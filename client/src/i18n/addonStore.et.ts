@@ -182,6 +182,10 @@ export const addonStoreEt: typeof addonStoreEn = {
     supplements: { name: 'Toidulisandid', desc: 'Nimekiri sellest, mida tarvitad ja millal.' },
     nicotine: { name: 'Nikotiin', desc: 'Märgi nikotiin, et näha mõju taastumisele.' },
     alcohol: { name: 'Alkohol', desc: 'Märgi alkohol, et näha mõju taastumisele.' },
+    'planner-availability': {
+      name: 'Saadavus',
+      desc: 'Märgi vabad tunnid ja jaga neid soovi korral treeneriga.',
+    },
     sleep: {
       name: 'Uni',
       tagline: 'Uni kuulub ka treeningplaani',

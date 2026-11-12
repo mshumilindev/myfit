@@ -141,5 +141,8 @@
   "planner": {
     "js": ["planner/"],
     "assets": ["sounds/spotter_plan.ogg", "sounds/spotter_plan.mp3"]
+  },
+  "planner-availability": {
+    "js": ["planner/AvailabilityPage", "planner/availability"]
   }
 }

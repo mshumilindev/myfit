@@ -69,7 +69,8 @@ export function PlannerDesk(p: {
   onNext: () => void;
   onToday: () => void;
   onAdd: () => void;
-  onAvailability: () => void;
+  /** Absent while the Availability module is off. */
+  onAvailability?: () => void;
   onSettings?: () => void;
   days: DayKey[];
   occ: Occ[];
@@ -137,9 +138,11 @@ export function PlannerDesk(p: {
           <Button variant="secondary" size="sm" onClick={p.onToday}>
             {s.todayBtn}
           </Button>
-          <Button variant="secondary" size="sm" icon="clock" onClick={p.onAvailability}>
-            {s.availTitle}
-          </Button>
+          {p.onAvailability && (
+            <Button variant="secondary" size="sm" icon="clock" onClick={p.onAvailability}>
+              {s.availTitle}
+            </Button>
+          )}
           {p.onSettings && (
             <Button
               variant="secondary"

@@ -268,7 +268,7 @@
   gap: var(--s-6);
   align-items: flex-start;
   padding: var(--s-6) var(--s-8);
-  border-radius: var(--radius-lg);
+  border-radius: var(--r-2);
   background: var(--t-tint);
   color: var(--t-text);
   border-left: 3px solid var(--t-base);

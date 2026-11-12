@@ -4,6 +4,8 @@
  */
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase';
+import { addonsPref } from '../addons/enabledSet';
+import { plannerAvailabilityAvailable } from '../addons/featureGates';
 import { plannerHost, setPlannerShareMirror } from '../plannerRt';
 import { healthAddonInstalled, restPeriodShown } from '../healthAddons';
 import { getStoreState, republishCoachShare, subscribeStore } from '../store';
@@ -18,9 +20,14 @@ import { startAlertsSync } from './alertsSync';
 import { getPlans, getPrefs, savePrefs, startPlannerSync, subscribePlanner } from './sync';
 import { STRINGS } from './strings';
 
+const sharedPrefs = () => {
+  const p = getPrefs();
+  return plannerAvailabilityAvailable() ? p : { ...p, shareAvailability: false };
+};
+
 const coachView = () =>
   buildCoachAvailability(
-    getPrefs(),
+    sharedPrefs(),
     getStoreState().restPeriods,
     Math.floor(Date.now() / 86_400_000),
     restPeriodShown,
@@ -59,7 +66,7 @@ trackerReady('planner');
 // it changes, the coach view is republished. The core mirrors only the on/off setting, for its sharing list.
 let seen = '';
 const follow = () => {
-  setPlannerShareMirror(getPrefs().shareAvailability === true);
+  setPlannerShareMirror(sharedPrefs().shareAvailability === true);
   const sig = JSON.stringify(coachView());
   if (sig === seen) return;
   seen = sig;
@@ -67,6 +74,7 @@ const follow = () => {
 };
 subscribePlanner(follow);
 subscribeStore(follow);
+addonsPref.subscribe(follow);
 follow();
 
 // The listeners follow the signed-in person.

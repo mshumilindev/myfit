@@ -180,6 +180,10 @@ export const addonStoreLt: typeof addonStoreEn = {
     supplements: { name: 'Papildai', desc: 'Ką vartojate ir kada.' },
     nicotine: { name: 'Nikotinas', desc: 'Žymėkite nikotiną, kad matytumėte poveikį atsigavimui.' },
     alcohol: { name: 'Alkoholis', desc: 'Žymėkite alkoholį, kad matytumėte poveikį atsigavimui.' },
+    'planner-availability': {
+      name: 'Prieinamumas',
+      desc: 'Pažymėk laisvas valandas ir pasidalink jomis su treneriu.',
+    },
     sleep: {
       name: 'Miegas',
       tagline: 'Miegas svarbus ir treniruotėms',

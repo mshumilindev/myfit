@@ -89,3 +89,15 @@ describe('plannerBoot: when the coach view is republished', () => {
     expect(h.republish).not.toHaveBeenCalled();
   });
 });
+
+describe('plannerBoot: the Availability module gates sharing', () => {
+  it('shares nothing while the module is off, and republishes when it is switched on', async () => {
+    const { addonsPref } = await import('../addons/enabledSet');
+    addonsPref.set(['planner', 'planner-availability']);
+    h.republish.mockClear();
+    addonsPref.set(['planner']);
+    expect(h.republish).toHaveBeenCalledTimes(1);
+    addonsPref.set(['planner', 'planner-availability']);
+    expect(h.republish).toHaveBeenCalledTimes(2);
+  });
+});

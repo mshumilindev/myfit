@@ -70,6 +70,20 @@ export function usePlaybookOn(): boolean {
   return useAddonOrBase('playbook');
 }
 
+/** Planner's Availability module (off until the person switches it on): free hours, the Availability screen and sharing with a trainer. */
+export function plannerAvailabilityAvailable(): boolean {
+  try {
+    return addonAvailable('planner-availability');
+  } catch {
+    return false;
+  }
+}
+
+/** The same Availability gate for components. */
+export function usePlannerAvailabilityOn(): boolean {
+  return useAddonOrBase('planner-availability');
+}
+
 /** The same Planner gate for components. */
 export function usePlannerOn(): boolean {
   return useAddonOrBase('planner');

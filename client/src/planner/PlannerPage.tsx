@@ -16,6 +16,7 @@ import { uuid } from '../store';
 import { useWeekStartDay } from '../weekStart';
 import { draftToPlan, newDraft, planToDraft, type Draft } from './draft';
 import { clock, dayFull, dayLong, dayMonth, leadText, monthYear, weekRange } from './fmt';
+import { usePlannerAvailabilityOn } from '../addons/featureGates';
 import { AvailabilityPage } from './AvailabilityPage';
 import { PlannerSettings } from './PlannerSettings';
 import { weekSummary } from './availability';
@@ -47,6 +48,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
   const ws = useWeekStartDay();
   const [form, setForm] = useState<{ draft: Draft; editing: boolean; day?: DayKey } | null>(null);
   const [asking, setAsking] = useState<PlanDoc | null>(null);
+  const availOn = usePlannerAvailabilityOn();
   const [availOpen, setAvailOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const prefs = usePrefs();
@@ -256,7 +258,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
     .filter(Boolean)
     .join(' · ');
 
-  if (availOpen) return <AvailabilityPage onBack={() => setAvailOpen(false)} />;
+  if (availOpen && availOn) return <AvailabilityPage onBack={() => setAvailOpen(false)} />;
   if (settingsOpen) return <PlannerSettings onBack={() => setSettingsOpen(false)} />;
 
   if (desk) {
@@ -317,7 +319,7 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
             setSelected(dayNumber(today));
           }}
           onAdd={add}
-          onAvailability={() => setAvailOpen(true)}
+          onAvailability={availOn ? () => setAvailOpen(true) : undefined}
           onSettings={() => setSettingsOpen(true)}
           days={days}
           occ={view === 'day' ? dayOcc : weekOcc}
@@ -428,13 +430,15 @@ export function PlannerPage({ onClose }: { onClose: () => void }) {
           </>
         )}
         <GroupedList header={s.plannerHead}>
-          <ListRow
-            icon={<IconTile tone="accent" size={40} icon="clock" />}
-            label={s.availTitle}
-            sub={availSummary}
-            chevron
-            onClick={() => setAvailOpen(true)}
-          />
+          {availOn && (
+            <ListRow
+              icon={<IconTile tone="accent" size={40} icon="clock" />}
+              label={s.availTitle}
+              sub={availSummary}
+              chevron
+              onClick={() => setAvailOpen(true)}
+            />
+          )}
           <ListRow
             icon={<IconTile tone="accent" size={40} icon="gear" />}
             label={s.settingsRow}

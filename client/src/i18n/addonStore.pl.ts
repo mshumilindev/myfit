@@ -179,6 +179,10 @@ export const addonStorePl: typeof addonStoreEn = {
     supplements: { name: 'Suplementy', desc: 'Lista tego, co bierzesz, i kiedy.' },
     nicotine: { name: 'Nikotyna', desc: 'Zapisuj nikotynę, by widzieć wpływ na regenerację.' },
     alcohol: { name: 'Alkohol', desc: 'Zapisuj alkohol, by widzieć wpływ na regenerację.' },
+    'planner-availability': {
+      name: 'Dostępność',
+      desc: 'Ustaw wolne godziny i udostępnij je trenerowi.',
+    },
     sleep: {
       name: 'Sen',
       tagline: 'Sen, który liczy się w treningu',
