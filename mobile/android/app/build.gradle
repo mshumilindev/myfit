@@ -41,6 +41,12 @@ android {
             }
         }
     }
+    sourceSets {
+        main {
+            // mobile/shell/alarm-shim.js is shared with the iOS shell (SPO-568); it is packaged as an asset.
+            assets.srcDir '../../shell'
+        }
+    }
     buildTypes {
         release {
             if (releaseKeystore) {

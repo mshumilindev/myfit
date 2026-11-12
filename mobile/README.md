@@ -74,3 +74,18 @@ distribution account (one-time fee, identity check) or a Limited one (free, up t
 
 PoC run on a device/emulator with measured numbers, native push (SPO-191), Health Connect, in-app shell update,
 Google Play (SPO-190), web-side use of the bridge beyond `isNativeShell()`.
+
+## Planner alarms (SPO-568)
+
+The Planner (SPO-552) hands this shell only `{ id, at, mode }` per reminder (never a title or text) through the same
+`window.spotterNative` contract the desktop shell offers: `scheduleAlarms`, `cancelAlarms`, `onAlarmDue`, `showAlarm` (bridge v2).
+
+- `shell/alarm-shim.js`: the web side, one file for Android and iOS (plain ES5, evaluated as-is by the shell and by
+  `tests/native-alarms-contract.test.ts`, which runs the same behaviour tests against Electron, Android and iOS ports).
+- Android: `Alarm*.java`, `BootReceiver.java`. `AlarmManager.setAlarmClock` (exact, works in Doze), a high-importance alarm
+  channel with a full-screen intent and an insistent sound for a persistent reminder, alarms re-armed after a reboot or an update.
+  The page gets `due` through a web message listener locked to the app origin; with the app closed a generic notification opens it.
+  Before Google Play (SPO-190) the alarm-clock use must be checked against the exact-alarm policy. **Not built or run yet**:
+  needs `npx cap sync android && ./gradlew assembleDebug` on a machine with the Android SDK, then a device check (see AC in SPO-568).
+- iOS: `ios-plugin/SpotterAlarms.swift` is the reference implementation (local notifications; iOS has no alarm API).
+  There is no `ios/` project until SPO-161.

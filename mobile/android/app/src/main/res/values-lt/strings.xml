@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="planner_due_title">Planner</string>
+    <string name="planner_due_body">Atėjo priminimo laikas</string>
+    <string name="planner_channel_ring">Planner žadintuvai</string>
+    <string name="planner_channel_quiet">Planner priminimai</string>
+</resources>

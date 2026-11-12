@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="planner_due_title">Planner</string>
+    <string name="planner_due_body">Meeldetuletuse aeg on käes</string>
+    <string name="planner_channel_ring">Planneri alarmid</string>
+    <string name="planner_channel_quiet">Planneri meeldetuletused</string>
+</resources>

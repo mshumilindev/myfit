@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="planner_due_title">Planner</string>
+    <string name="planner_due_body">Настав час нагадування</string>
+    <string name="planner_channel_ring">Будильники Planner</string>
+    <string name="planner_channel_quiet">Нагадування Planner</string>
+</resources>

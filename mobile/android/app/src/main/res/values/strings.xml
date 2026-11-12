@@ -4,4 +4,8 @@
     <string name="title_activity_main">Spotter</string>
     <string name="package_name">com.spotter.app</string>
     <string name="custom_url_scheme">com.spotter.app</string>
+    <string name="planner_due_title">Planner</string>
+    <string name="planner_due_body">A reminder is due</string>
+    <string name="planner_channel_ring">Planner alarms</string>
+    <string name="planner_channel_quiet">Planner reminders</string>
 </resources>

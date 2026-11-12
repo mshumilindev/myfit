@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="planner_due_title">Planner</string>
+    <string name="planner_due_body">Czas na przypomnienie</string>
+    <string name="planner_channel_ring">Alarmy Plannera</string>
+    <string name="planner_channel_quiet">Przypomnienia Plannera</string>
+</resources>
