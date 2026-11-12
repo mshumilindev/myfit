@@ -21,8 +21,9 @@ const subscribe = (f: () => void) => {
 };
 
 /** Design-comparison harness only (design-lab/cmp.tsx): fill the store without Firestore. */
-export function seedPlannerPreview(next: PlanDoc[]): void {
+export function seedPlannerPreview(next: PlanDoc[], nextPrefs?: PlannerPrefs): void {
   plans = next;
+  if (nextPrefs) prefs = nextPrefs;
   emit();
 }
 
