@@ -21,6 +21,8 @@ export const PHOTO_MAX_BYTES = 600_000;
 export type PlacesRequest =
   | { op: 'search'; q: string; lat?: number; lng?: number }
   | { op: 'nearby'; lat: number; lng: number; radiusM: number }
+  /** Opening hours of one known gym (SPO-590): its name and its own coordinates, a tiny area around them. */
+  | { op: 'hours'; q: string; lat: number; lng: number }
   | { op: 'photo'; name: string };
 
 export interface PlacesResult {
@@ -33,6 +35,8 @@ export interface PlacesResult {
   photoName?: string;
   /** Photo author names, shown next to the photo as Google's terms require. */
   photoBy?: string[];
+  /** Weekly opening hours, Monday first: per day a list of [openMinute, closeMinute] (24 h = [0, 1440]). Only for `op: 'hours'`. */
+  hours?: Array<Array<[number, number]>>;
 }
 
 const finite = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n);
@@ -54,6 +58,12 @@ export function parseRequest(data: unknown): PlacesRequest {
     return hasPos
       ? { op: 'search', q, lat: d.lat as number, lng: d.lng as number }
       : { op: 'search', q };
+  }
+  if (d.op === 'hours') {
+    const q = typeof d.q === 'string' ? d.q.trim() : '';
+    if (q.length < 2 || q.length > 80) throw new Error('bad-query');
+    if (!hasPos || !finite(d.lat) || !finite(d.lng)) throw new Error('bad-position');
+    return { op: 'hours', q, lat: d.lat, lng: d.lng };
   }
   if (d.op === 'nearby') {
     if (!hasPos) throw new Error('bad-position');
@@ -94,13 +104,31 @@ export function googleConsentOn(
 }
 
 const FIELDS = 'places.id,places.displayName,places.location,places.formattedAddress,places.photos';
+/** Hours are a pricier Places field, so only the `hours` op asks for them (SPO-590); search and nearby stay as they were. */
+const HOURS_FIELDS =
+  'places.id,places.displayName,places.location,places.regularOpeningHours.periods';
+const HOURS_AREA_M = 300;
+const HOURS_MAX_RESULTS = 5;
 
 /** The request to Google Places (New). Only what is needed: the text and an area, never anything about the person. */
-export function googleRequest(req: PlacesRequest & { op: 'search' | 'nearby' }): {
+export function googleRequest(req: PlacesRequest & { op: 'search' | 'nearby' | 'hours' }): {
   url: string;
   body: Record<string, unknown>;
   fieldMask: string;
 } {
+  if (req.op === 'hours') {
+    return {
+      url: 'https://places.googleapis.com/v1/places:searchText',
+      fieldMask: HOURS_FIELDS,
+      body: {
+        textQuery: req.q,
+        maxResultCount: HOURS_MAX_RESULTS,
+        locationBias: {
+          circle: { center: { latitude: req.lat, longitude: req.lng }, radius: HOURS_AREA_M },
+        },
+      },
+    };
+  }
   if (req.op === 'nearby') {
     return {
       url: 'https://places.googleapis.com/v1/places:searchNearby',
@@ -133,6 +161,67 @@ interface GooglePlace {
   location?: { latitude?: number; longitude?: number };
   formattedAddress?: string;
   photos?: Array<{ name?: string; authorAttributions?: Array<{ displayName?: string }> }>;
+  regularOpeningHours?: { periods?: GooglePeriod[] };
+}
+
+interface GooglePoint {
+  day?: number;
+  hour?: number;
+  minute?: number;
+}
+interface GooglePeriod {
+  open?: GooglePoint;
+  close?: GooglePoint;
+}
+
+const validPoint = (p: GooglePoint | undefined): p is Required<GooglePoint> =>
+  !!p &&
+  Number.isInteger(p.day) &&
+  p.day! >= 0 &&
+  p.day! <= 6 &&
+  Number.isInteger(p.hour) &&
+  p.hour! >= 0 &&
+  p.hour! <= 23 &&
+  Number.isInteger(p.minute) &&
+  p.minute! >= 0 &&
+  p.minute! <= 59;
+
+/**
+ * Google's periods (Sunday = 0, an overnight period closes on the next day) → the client's week: Monday first, per day
+ * [openMinute, closeMinute]. A period that opens Sunday 00:00 and never closes is "always open". Null when nothing usable.
+ */
+export function periodsToWeek(periods: unknown): Array<Array<[number, number]>> | null {
+  if (!Array.isArray(periods) || periods.length === 0) return null;
+  const week: Array<Array<[number, number]>> = Array.from({ length: 7 }, () => []);
+  let any = false;
+  for (const raw of periods as GooglePeriod[]) {
+    if (!validPoint(raw?.open)) continue;
+    const o = raw.open;
+    const day = (o.day + 6) % 7;
+    const openMin = o.hour * 60 + o.minute;
+    if (!raw.close) {
+      if (o.day === 0 && openMin === 0) {
+        for (let i = 0; i < 7; i++) week[i] = [[0, 1440]];
+        return week;
+      }
+      continue;
+    }
+    if (!validPoint(raw.close)) continue;
+    const c = raw.close;
+    const closeMin = c.hour * 60 + c.minute;
+    if (c.day === o.day && closeMin > openMin) {
+      week[day].push([openMin, closeMin]);
+      any = true;
+    } else if (c.day === (o.day + 1) % 7) {
+      // overnight: the evening stays on the opening day, the small hours go to the next one ("closes at 24:00" has none)
+      week[day].push([openMin, 1440]);
+      if (closeMin > 0) week[(day + 1) % 7].push([0, closeMin]);
+      any = true;
+    }
+  }
+  if (!any) return null;
+  for (const d of week) d.sort((a, b) => a[0] - b[0]);
+  return week;
 }
 
 /** Google's answer reduced to the minimum the client shows; rows without a name or a position are dropped. */
@@ -146,6 +235,8 @@ export function mapPlaces(data: unknown): PlacesResult[] {
     if (!p.id || !name || !finite(latitude) || !finite(longitude)) continue;
     const row: PlacesResult = { id: p.id, name, lat: latitude, lng: longitude };
     if (p.formattedAddress) row.address = p.formattedAddress;
+    const week = periodsToWeek(p.regularOpeningHours?.periods);
+    if (week) row.hours = week;
     const photo = p.photos?.[0];
     if (photo?.name && !PHOTO_NAME_RE.test(photo.name))
       console.warn(`gymPlaces: photo reference rejected (length ${photo.name.length})`);

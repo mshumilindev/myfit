@@ -246,6 +246,7 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
                   <Card
                     key={n.id}
                     tone={NUDGE_TONE[n.tone]}
+                    opaque
                     className="nudge-full"
                     style={{ animationDelay: `${i * 55}ms` }}
                   >

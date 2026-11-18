@@ -5,6 +5,8 @@ const m = vi.hoisted(() => ({ callFn: vi.fn() }));
 vi.mock('../api', () => ({ callFn: m.callFn }));
 
 import {
+  resetGoogleHoursForTests,
+  resolveGymMeta,
   resolvePhotoInfo,
   searchGyms,
   searchNearbyGymsMerged,
@@ -246,5 +248,105 @@ describe('a missed photo lookup is not remembered for long', () => {
         : { photo: 'data:image/jpeg;base64,AAAA' },
     );
     expect((await resolvePhotoInfo(saved, sig()))?.url).toBe('data:image/jpeg;base64,AAAA');
+  });
+});
+
+describe('opening hours via gymPlaces (SPO-590)', () => {
+  const WEEK = Array.from({ length: 7 }, () => [[360, 1320]] as Array<[number, number]>);
+  const NAME = 'Zdrofit Mokotow';
+  const POS = { lat: 52.2, lng: 21.0 };
+  const osmJson = (extratags: Record<string, string>) =>
+    vi.fn(
+      async () =>
+        new Response(JSON.stringify({ type: 'gym', extratags }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+    );
+  const sig = () => new AbortController().signal;
+
+  beforeEach(() => {
+    localStorage.clear();
+    resetGoogleHoursForTests();
+  });
+
+  it('asks Google through our function when OSM has no hours, and returns its week', async () => {
+    vi.stubGlobal('fetch', osmJson({ phone: '+48 1' }));
+    m.callFn.mockResolvedValue({ places: [{ id: 'g', name: NAME, ...POS, hours: WEEK }] });
+    const meta = await resolveGymMeta(POS.lat, POS.lng, sig(), NAME);
+    expect(m.callFn).toHaveBeenCalledWith(
+      'gymPlaces',
+      { op: 'hours', q: NAME, lat: POS.lat, lng: POS.lng },
+      { quiet: true },
+    );
+    expect(meta?.hours?.week).toEqual(WEEK);
+    expect(meta?.phone).toBe('+48 1'); // what OSM knew stays
+  });
+
+  it('does not ask Google when OSM already has hours, or when no name is given', async () => {
+    vi.stubGlobal('fetch', osmJson({ opening_hours: 'Mo-Su 06:00-22:00' }));
+    await resolveGymMeta(POS.lat, POS.lng, sig(), NAME);
+    expect(m.callFn).not.toHaveBeenCalled();
+    resetGoogleHoursForTests();
+    localStorage.clear();
+    vi.stubGlobal('fetch', osmJson({ phone: 'x' }));
+    await resolveGymMeta(POS.lat, POS.lng, sig());
+    expect(m.callFn).not.toHaveBeenCalled();
+  });
+
+  it('asks Google when the OSM hours string cannot be understood', async () => {
+    vi.stubGlobal('fetch', osmJson({ opening_hours: 'by appointment' }));
+    m.callFn.mockResolvedValue({ places: [{ id: 'g', name: NAME, ...POS, hours: WEEK }] });
+    expect((await resolveGymMeta(POS.lat, POS.lng, sig(), NAME))?.hours?.week).toEqual(WEEK);
+  });
+
+  it('sends nothing to Google without the geo-search consent', async () => {
+    vi.stubGlobal('fetch', osmJson({}));
+    setGeoSearchState({ on: false, ready: true, answered: true });
+    await resolveGymMeta(POS.lat, POS.lng, sig(), NAME);
+    expect(m.callFn).not.toHaveBeenCalled();
+  });
+
+  it('ignores a place that is not this gym (more than 250 m away) and a row without hours', async () => {
+    vi.stubGlobal('fetch', osmJson({}));
+    m.callFn.mockResolvedValue({
+      places: [
+        { id: 'far', name: NAME, lat: POS.lat + 0.01, lng: POS.lng, hours: WEEK },
+        { id: 'nohours', name: NAME, ...POS },
+      ],
+    });
+    expect((await resolveGymMeta(POS.lat, POS.lng, sig(), NAME))?.hours).toBeUndefined();
+  });
+
+  it('keeps the OSM answer when Google fails, and does not retry at once', async () => {
+    vi.stubGlobal('fetch', osmJson({ phone: '+48 1' }));
+    m.callFn.mockRejectedValue(new Error('unavailable'));
+    const first = await resolveGymMeta(POS.lat, POS.lng, sig(), NAME);
+    expect(first).toMatchObject({ phone: '+48 1' });
+    await resolveGymMeta(POS.lat, POS.lng, sig(), NAME);
+    expect(m.callFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps Google hours in memory only: one lookup per session, nothing written to storage', async () => {
+    vi.stubGlobal('fetch', osmJson({}));
+    m.callFn.mockResolvedValue({ places: [{ id: 'g', name: NAME, ...POS, hours: WEEK }] });
+    await resolveGymMeta(POS.lat, POS.lng, sig(), NAME);
+    await resolveGymMeta(POS.lat, POS.lng, sig(), NAME);
+    expect(m.callFn).toHaveBeenCalledTimes(1);
+    const stored = Object.keys(localStorage)
+      .map((k) => `${k}=${localStorage.getItem(k)}`)
+      .join('\n');
+    expect(stored).not.toContain('360');
+    expect(stored).not.toMatch(/google/i);
+  });
+
+  it('shares one lookup between cards asking at the same time', async () => {
+    vi.stubGlobal('fetch', osmJson({}));
+    m.callFn.mockResolvedValue({ places: [{ id: 'g', name: NAME, ...POS, hours: WEEK }] });
+    await Promise.all([
+      resolveGymMeta(POS.lat, POS.lng, sig(), NAME),
+      resolveGymMeta(POS.lat, POS.lng, sig(), NAME),
+    ]);
+    expect(m.callFn).toHaveBeenCalledTimes(1);
   });
 });

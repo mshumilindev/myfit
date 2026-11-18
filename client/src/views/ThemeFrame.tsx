@@ -9,6 +9,7 @@
  */
 import { useCallback, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { loadThemeCss } from '../themes/lazy';
 
 /** Room around the card inside the frame (its shadow); themes.css pulls the frame out by the same amount. */
 const PAD = 6;
@@ -60,12 +61,21 @@ export function ThemeFrame({
     style.textContent =
       'body::after{display:none!important}html,body{overscroll-behavior:auto!important}';
     doc.head.appendChild(style);
-    copyStyles(document, doc);
-    // the content gets its own host node: if the frame is torn down first, React still finds its children
-    // under their own parent when it cleans up
-    const host = doc.createElement('div');
-    doc.body.appendChild(host);
-    setBody(host);
+    // a look other than the base ships its CSS, tokens and fonts as a bundle that is on the page only while the look is
+    // worn (SPO-500 I8): fetch it first, or the frame copies a page that has none of the look's styles (SPO-586). A failed
+    // fetch still shows the card with what the page has; the loader retries when the device is back online.
+    void loadThemeCss(themeId)
+      .catch(() => undefined)
+      .then(() => {
+        // the frame may have been torn down or reloaded while the bundle was on its way
+        if (frameRef.current?.contentDocument !== doc || !doc.body) return;
+        copyStyles(document, doc);
+        // the content gets its own host node: if the frame is torn down first, React still finds its children
+        // under their own parent when it cleans up
+        const host = doc.createElement('div');
+        doc.body.appendChild(host);
+        setBody(host);
+      });
   }, [themeId]);
 
   // the frame is exactly as tall as its content

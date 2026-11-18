@@ -537,6 +537,8 @@ interface GooglePlacesRow {
   address?: string;
   photoName?: string;
   photoBy?: string[];
+  /** Weekly hours (Monday first), only in answers to `op: 'hours'`. */
+  hours?: Array<Array<[number, number]>>;
 }
 
 /**
@@ -1109,12 +1111,71 @@ const META_PREFIX = 'gym.meta.';
 const META_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 const metaInflight = new Map<string, Promise<GymMeta | null>>();
 
-export function resolveGymMeta(
+/**
+ * Hours, website and phone of the gym at these coordinates. OpenStreetMap answers first (free, nothing about the gym
+ * leaves for a third party). When OSM has no usable hours and a `name` is given, Google Places is asked through our
+ * function, but only with the person's gym-search consent (SPO-590: hours came from Google before SPO-293 removed it).
+ */
+export async function resolveGymMeta(
   lat: number,
   lng: number,
   signal: AbortSignal,
+  name?: string,
 ): Promise<GymMeta | null> {
-  return fetchGymMetaCached(lat, lng, signal);
+  const osm = await fetchGymMetaCached(lat, lng, signal);
+  if (osm?.hours || parseOpeningHours(osm?.openingHours)) return osm;
+  if (!name?.trim()) return osm;
+  const hours = await googleHours(name, lat, lng);
+  return hours ? { ...(osm ?? {}), hours: { week: hours } } : osm;
+}
+
+/**
+ * Google's terms do not allow keeping Places content, so Google hours live in memory for the session (an hour at most)
+ * and are never written to storage; the OSM answer above is the only one cached on the device. A failed lookup is not
+ * repeated for every card at once.
+ */
+const GHOURS_TTL_MS = 60 * 60_000;
+const GHOURS_MISS_TTL_MS = 10 * 60_000;
+const GHOURS_MAX_M = 250;
+const ghours = new Map<string, { at: number; week: ParsedHours['week'] | null }>();
+const ghoursInflight = new Map<string, Promise<ParsedHours['week'] | null>>();
+
+/** Test hook: forgets the in-memory Google hours. */
+export function resetGoogleHoursForTests(): void {
+  ghours.clear();
+  ghoursInflight.clear();
+}
+
+async function googleHours(
+  name: string,
+  lat: number,
+  lng: number,
+): Promise<ParsedHours['week'] | null> {
+  if (!name.trim() || (lat === 0 && lng === 0)) return null;
+  const key = `${normalizeName(name)}|${Math.round(lat * 1000) / 1000},${Math.round(lng * 1000) / 1000}`;
+  const hit = ghours.get(key);
+  if (hit && Date.now() - hit.at < (hit.week ? GHOURS_TTL_MS : GHOURS_MISS_TTL_MS)) return hit.week;
+  const running = ghoursInflight.get(key);
+  if (running) return running;
+  const job = (async () => {
+    try {
+      const rows = await callGoogle({ op: 'hours', q: name.trim(), lat, lng });
+      const best = rows
+        .filter((x) => x.hours && haversineM({ lat, lng }, x) <= GHOURS_MAX_M)
+        .sort((a, b) => haversineM({ lat, lng }, a) - haversineM({ lat, lng }, b))[0];
+      const week = best?.hours ?? null;
+      ghours.set(key, { at: Date.now(), week });
+      return week;
+    } catch {
+      // no consent, not configured, offline, Google down: the answer stays OSM's, and the lookup rests for a while
+      ghours.set(key, { at: Date.now(), week: null });
+      return null;
+    } finally {
+      ghoursInflight.delete(key);
+    }
+  })();
+  ghoursInflight.set(key, job);
+  return job;
 }
 
 function fetchGymMetaCached(

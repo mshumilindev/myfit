@@ -6,6 +6,8 @@ import {
   gymPlacesHandler,
   mapPlaces,
   parseRequest,
+  periodsToWeek,
+  googleRequest,
 } from '../functions/src/gymPlacesCore';
 import { currentVersionOf } from '../functions/src/consentRecordsPure';
 
@@ -248,5 +250,121 @@ describe('SPO-360 gymPlaces: photos', () => {
       'invalid-argument:bad-photo',
     );
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('SPO-590 gymPlaces: opening hours', () => {
+  const P = (day: number, h: number, m: number) => ({ day, hour: h, minute: m });
+
+  it('accepts the hours op only with a name and a position', () => {
+    expect(parseRequest({ op: 'hours', q: ' Zdrofit ', lat: 52.1, lng: 21 })).toEqual({
+      op: 'hours',
+      q: 'Zdrofit',
+      lat: 52.1,
+      lng: 21,
+    });
+    expect(() => parseRequest({ op: 'hours', q: 'Z', lat: 1, lng: 1 })).toThrow('bad-query');
+    expect(() => parseRequest({ op: 'hours', q: 'Zdrofit' })).toThrow('bad-position');
+    expect(() => parseRequest({ op: 'hours', q: 'Zdrofit', lat: 200, lng: 1 })).toThrow(
+      'bad-position',
+    );
+  });
+
+  it('asks Google for hours only on the hours op, in a small area, and keeps search/nearby unchanged', () => {
+    const h = googleRequest({ op: 'hours', q: 'Zdrofit', lat: 52.1, lng: 21 });
+    expect(h.fieldMask).toContain('regularOpeningHours');
+    expect(h.body).toMatchObject({ textQuery: 'Zdrofit' });
+    expect(
+      (h.body.locationBias as { circle: { radius: number } }).circle.radius,
+    ).toBeLessThanOrEqual(500);
+    expect(googleRequest({ op: 'search', q: 'gym' }).fieldMask).not.toContain('OpeningHours');
+    expect(googleRequest({ op: 'nearby', lat: 1, lng: 1, radiusM: 1000 }).fieldMask).not.toContain(
+      'OpeningHours',
+    );
+  });
+
+  it('maps Google periods (Sunday = 0) to a Monday-first week', () => {
+    const week = periodsToWeek([
+      { open: P(1, 6, 0), close: P(1, 22, 30) }, // Monday
+      { open: P(0, 8, 0), close: P(0, 20, 0) }, // Sunday
+    ]);
+    expect(week?.[0]).toEqual([[360, 1350]]);
+    expect(week?.[6]).toEqual([[480, 1200]]);
+    expect(week?.[1]).toEqual([]);
+  });
+
+  it('splits an overnight period at midnight and keeps "closes at 24:00" whole', () => {
+    const night = periodsToWeek([{ open: P(5, 22, 0), close: P(6, 2, 0) }]); // Fri 22:00 → Sat 02:00
+    expect(night?.[4]).toEqual([[1320, 1440]]);
+    expect(night?.[5]).toEqual([[0, 120]]);
+    const mid = periodsToWeek([{ open: P(2, 9, 0), close: P(3, 0, 0) }]); // Tue 09:00 → Wed 00:00
+    expect(mid?.[1]).toEqual([[540, 1440]]);
+    expect(mid?.[2]).toEqual([]);
+  });
+
+  it('reads a period that opens Sunday 00:00 and never closes as always open', () => {
+    const all = periodsToWeek([{ open: P(0, 0, 0) }]);
+    expect(all).toHaveLength(7);
+    for (const d of all ?? []) expect(d).toEqual([[0, 1440]]);
+  });
+
+  it('orders two ranges of a day and gives null for nothing usable', () => {
+    const split = periodsToWeek([
+      { open: P(3, 16, 0), close: P(3, 21, 0) },
+      { open: P(3, 7, 0), close: P(3, 12, 0) },
+    ]);
+    expect(split?.[2]).toEqual([
+      [420, 720],
+      [960, 1260],
+    ]);
+    expect(periodsToWeek(undefined)).toBeNull();
+    expect(periodsToWeek([])).toBeNull();
+    expect(
+      periodsToWeek([{ open: P(9, 1, 1), close: P(1, 2, 2) }, { close: P(1, 2, 2) }]),
+    ).toBeNull();
+    expect(periodsToWeek([{ open: P(1, 9, 0), close: P(1, 8, 0) }])).toBeNull();
+  });
+
+  it('mapPlaces carries the week only when Google sent periods', () => {
+    const rows = mapPlaces({
+      places: [
+        {
+          id: 'a',
+          displayName: { text: 'A' },
+          location: { latitude: 1, longitude: 2 },
+          regularOpeningHours: { periods: [{ open: P(1, 6, 0), close: P(1, 22, 0) }] },
+        },
+        { id: 'b', displayName: { text: 'B' }, location: { latitude: 1, longitude: 2 } },
+      ],
+    });
+    expect(rows[0].hours?.[0]).toEqual([[360, 1320]]);
+    expect(rows[1].hours).toBeUndefined();
+  });
+
+  it('is behind the same consent as everything else, and sends the hours request to Google', async () => {
+    const none = ports({ records: async () => [] });
+    expect(
+      await code(gymPlacesHandler({ op: 'hours', q: 'Zdrofit', lat: 1, lng: 2 }, none.p)),
+    ).toContain('permission-denied');
+    expect(none.fetchMock).not.toHaveBeenCalled();
+    const ok = ports();
+    ok.fetchMock.mockResolvedValue(
+      json({
+        places: [
+          {
+            id: 'a',
+            displayName: { text: 'Zdrofit' },
+            location: { latitude: 1, longitude: 2 },
+            regularOpeningHours: { periods: [{ open: P(1, 6, 0), close: P(1, 22, 0) }] },
+          },
+        ],
+      }),
+    );
+    const out = (await gymPlacesHandler({ op: 'hours', q: 'Zdrofit', lat: 1, lng: 2 }, ok.p)) as {
+      places: Array<{ hours?: unknown }>;
+    };
+    expect(out.places[0].hours).toBeTruthy();
+    const init = ok.fetchMock.mock.calls[0][1] as { headers: Record<string, string> };
+    expect(init.headers['X-Goog-FieldMask']).toContain('regularOpeningHours');
   });
 });

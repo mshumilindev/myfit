@@ -8,6 +8,19 @@ import { addonsPref } from '../addons/enabledSet';
 import { ThemesView } from './ThemesView';
 import { offSeason } from '../themes/testClock';
 
+// SPO-586: every framed card must ask for ITS OWN look's bundle; the real loader is wrapped so the calls can be seen
+const lazy = vi.hoisted(() => ({ loaded: [] as string[] }));
+vi.mock('../themes/lazy', async (orig) => {
+  const real = await orig<typeof import('../themes/lazy')>();
+  return {
+    ...real,
+    loadThemeCss: (id: string) => {
+      lazy.loaded.push(id);
+      return real.loadThemeCss(id);
+    },
+  };
+});
+
 // the looks a test installs it removes again (SPO-500)
 afterEach(() => setAllowedThemes([]));
 
@@ -46,6 +59,38 @@ describe('ThemesView', () => {
   it('holds places for the themes still to come', () => {
     render(<ThemesView onClose={() => undefined} />);
     expect(screen.getAllByText(en.themesSoon)).toHaveLength(3);
+  });
+});
+
+describe("ThemesView cards and the looks' bundles (SPO-586)", () => {
+  beforeEach(() => {
+    lazy.loaded.length = 0;
+    initTheme();
+  });
+
+  it("every framed card asks for its own look's bundle, and the look in use needs no frame", async () => {
+    // the test installs one look besides the base (beforeEach): Cyberpunk
+    const { container } = render(<ThemesView onClose={() => undefined} />);
+    const titles = [...container.querySelectorAll('iframe.thm-frame')].map(
+      (f) => (f as HTMLIFrameElement).title,
+    );
+    expect(titles).toEqual(['Cyberpunk']);
+    await vi.waitFor(() => expect(lazy.loaded).toEqual(['cyberpunk']));
+    expect(lazy.loaded).not.toContain('studio');
+  });
+
+  it('after Apply the look in use is the first card and the only Applied one; the previous look becomes a framed card with Apply', async () => {
+    const { container } = render(<ThemesView onClose={() => undefined} />);
+    await act(async () => {
+      setTheme('cyberpunk');
+    });
+    expect(container.querySelector('.thm-hero .thm-wm')?.textContent).toBe('Cyberpunk');
+    expect(screen.getAllByText(en.themesApplied)).toHaveLength(1);
+    const titles = [...container.querySelectorAll('iframe.thm-frame')].map(
+      (f) => (f as HTMLIFrameElement).title,
+    );
+    expect(titles).toEqual(['Studio']);
+    await vi.waitFor(() => expect(lazy.loaded).toContain('studio'));
   });
 });
 

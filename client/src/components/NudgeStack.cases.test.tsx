@@ -100,6 +100,25 @@ describe('NudgeStack', () => {
     screenEl.remove();
   });
 
+  it('draws every card of the open stack opaque, for every tone (SPO-565: nothing behind may show through)', () => {
+    const tones: Nudge['tone'][] = [
+      'readiness',
+      'recovery',
+      'analysis',
+      'suggest',
+      'plan',
+      'body',
+      'rest',
+      'learn',
+      'energy',
+    ];
+    render(<NudgeStack nudges={tones.map((tone, i) => nudge(tone, i, { tone }))} />);
+    fireEvent.click(screen.getByRole('button', { name: /Title/ }));
+    const cards = screen.getByRole('dialog').querySelectorAll('.nudge-full');
+    expect(cards).toHaveLength(tones.length);
+    for (const c of cards) expect(c.classList.contains('uicard--opaque')).toBe(true);
+  });
+
   it('opens from the keyboard with Enter and Space but not other keys', () => {
     render(<NudgeStack nudges={[nudge('a', 1)]} />);
     const deck = screen.getByRole('button', { name: 'Title a' });

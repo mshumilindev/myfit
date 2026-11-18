@@ -116,7 +116,7 @@ export function GymDetailView({
       resolveAddress(lat, lng, sig)
         .then((a) => a && alive && setAddr(a))
         .catch(() => {});
-    resolveGymMeta(lat, lng, sig)
+    resolveGymMeta(lat, lng, sig, name)
       .then((m) => alive && setMeta(m))
       .catch(() => {});
     return () => {
