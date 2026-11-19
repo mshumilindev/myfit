@@ -259,7 +259,23 @@ export function photoUrl(name: string): string {
 
 export type GymPlacesAnswer = { places: PlacesResult[] } | { photo: string | null };
 
+/** Sliding-window counter: `take()` is true while fewer than `max` calls happened in the last `windowMs`. */
+export function createRateLimiter(max: number, windowMs: number, now: () => number = Date.now) {
+  const hits: number[] = [];
+  return {
+    take(): boolean {
+      const t = now();
+      while (hits.length && t - hits[0] >= windowMs) hits.shift();
+      if (hits.length >= max) return false;
+      hits.push(t);
+      return true;
+    },
+  };
+}
+
 export interface GymPlacesPorts {
+  /** Optional per-person gate for the pricier `hours` op; `false` answers `resource-exhausted`. */
+  allowHours?: () => boolean;
   key: string;
   /** The person's consent records (any order). */
   records: () => Promise<Array<Record<string, unknown>>>;
@@ -281,6 +297,9 @@ export async function gymPlacesHandler(
     throw new HttpsError('permission-denied', 'no-consent');
   }
   if (!ports.key) throw new HttpsError('failed-precondition', 'not-configured');
+  if (req.op === 'hours' && ports.allowHours && !ports.allowHours()) {
+    throw new HttpsError('resource-exhausted', 'rate-limited');
+  }
 
   if (req.op === 'photo') {
     const res = await ports.fetch(photoUrl(req.name), { headers: { 'X-Goog-Api-Key': ports.key } });

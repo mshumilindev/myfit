@@ -8,6 +8,7 @@ import {
   parseRequest,
   periodsToWeek,
   googleRequest,
+  createRateLimiter,
 } from '../functions/src/gymPlacesCore';
 import { currentVersionOf } from '../functions/src/consentRecordsPure';
 
@@ -339,6 +340,24 @@ describe('SPO-590 gymPlaces: opening hours', () => {
     });
     expect(rows[0].hours?.[0]).toEqual([[360, 1320]]);
     expect(rows[1].hours).toBeUndefined();
+  });
+
+  it('limits the pricier hours op per person: over the limit nothing reaches Google', async () => {
+    const limiter = createRateLimiter(2, 1000, () => clock);
+    let clock = 0;
+    const lim = ports({ allowHours: () => limiter.take() });
+    lim.fetchMock.mockImplementation(async () => json({ places: [] }));
+    const call = () => gymPlacesHandler({ op: 'hours', q: 'Zdrofit', lat: 1, lng: 2 }, lim.p);
+    await call();
+    await call();
+    expect(await code(call())).toBe('resource-exhausted:rate-limited');
+    expect(lim.fetchMock).toHaveBeenCalledTimes(2);
+    // search is not metered by this gate
+    await gymPlacesHandler({ op: 'search', q: 'gym' }, lim.p);
+    expect(lim.fetchMock).toHaveBeenCalledTimes(3);
+    clock = 1500;
+    await call();
+    expect(lim.fetchMock).toHaveBeenCalledTimes(4);
   });
 
   it('is behind the same consent as everything else, and sends the hours request to Google', async () => {

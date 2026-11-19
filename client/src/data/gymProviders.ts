@@ -8,7 +8,13 @@
  * identical venues merge into one row that lists every contributing source.
  */
 import { detectAmenities, unionAmenities } from './gymAmenities';
-import { GeoConsentError, assertGeoSearchOn, geoSignal, isGeoSearchOn } from './geoSearchGate';
+import {
+  GeoConsentError,
+  assertGeoSearchOn,
+  geoSignal,
+  isGeoSearchOn,
+  subscribeGeo,
+} from './geoSearchGate';
 import type { Gym } from '../types';
 
 /**
@@ -1139,6 +1145,27 @@ const GHOURS_MISS_TTL_MS = 10 * 60_000;
 const GHOURS_MAX_M = 250;
 const ghours = new Map<string, { at: number; week: ParsedHours['week'] | null }>();
 const ghoursInflight = new Map<string, Promise<ParsedHours['week'] | null>>();
+// Withdrawing the gym-search consent also empties what Google told us (it never outlives the permission).
+subscribeGeo(() => {
+  if (!isGeoSearchOn()) {
+    ghours.clear();
+    ghoursInflight.clear();
+  }
+});
+// A picker can list many gyms at once: at most a few hour lookups fly at the same time.
+const GHOURS_PARALLEL = 3;
+let ghoursActive = 0;
+const ghoursWaiting: Array<() => void> = [];
+async function withHoursSlot<T>(job: () => Promise<T>): Promise<T> {
+  if (ghoursActive >= GHOURS_PARALLEL) await new Promise<void>((go) => ghoursWaiting.push(go));
+  ghoursActive += 1;
+  try {
+    return await job();
+  } finally {
+    ghoursActive -= 1;
+    ghoursWaiting.shift()?.();
+  }
+}
 
 /** Test hook: forgets the in-memory Google hours. */
 export function resetGoogleHoursForTests(): void {
@@ -1152,6 +1179,7 @@ async function googleHours(
   lng: number,
 ): Promise<ParsedHours['week'] | null> {
   if (!name.trim() || (lat === 0 && lng === 0)) return null;
+  if (!isGeoSearchOn()) return null; // no consent, no answer, not even from memory
   const key = `${normalizeName(name)}|${Math.round(lat * 1000) / 1000},${Math.round(lng * 1000) / 1000}`;
   const hit = ghours.get(key);
   if (hit && Date.now() - hit.at < (hit.week ? GHOURS_TTL_MS : GHOURS_MISS_TTL_MS)) return hit.week;
@@ -1159,15 +1187,18 @@ async function googleHours(
   if (running) return running;
   const job = (async () => {
     try {
-      const rows = await callGoogle({ op: 'hours', q: name.trim(), lat, lng });
+      const rows = await withHoursSlot(() => callGoogle({ op: 'hours', q: name.trim(), lat, lng }));
       const best = rows
         .filter((x) => x.hours && haversineM({ lat, lng }, x) <= GHOURS_MAX_M)
         .sort((a, b) => haversineM({ lat, lng }, a) - haversineM({ lat, lng }, b))[0];
       const week = best?.hours ?? null;
       ghours.set(key, { at: Date.now(), week });
       return week;
-    } catch {
-      // no consent, not configured, offline, Google down: the answer stays OSM's, and the lookup rests for a while
+    } catch (err) {
+      // Not signed in yet / no consent yet / not configured: a state that changes on its own, so nothing is
+      // remembered and the next look (after sign-in or consent) asks again.
+      if (err instanceof SkipError || err instanceof GeoConsentError) return null;
+      // offline, Google down: the answer stays OSM's, and the lookup rests for a while
       ghours.set(key, { at: Date.now(), week: null });
       return null;
     } finally {

@@ -327,6 +327,56 @@ describe('opening hours via gymPlaces (SPO-590)', () => {
     expect(m.callFn).toHaveBeenCalledTimes(1);
   });
 
+  it('does not remember a lookup that failed only because sign-in or consent was not ready yet', async () => {
+    vi.stubGlobal('fetch', osmJson({}));
+    m.callFn.mockRejectedValueOnce(new Error('unauthenticated'));
+    expect((await resolveGymMeta(POS.lat, POS.lng, sig(), NAME))?.hours).toBeUndefined();
+    m.callFn.mockResolvedValue({ places: [{ id: 'g', name: NAME, ...POS, hours: WEEK }] });
+    expect((await resolveGymMeta(POS.lat, POS.lng, sig(), NAME))?.hours?.week).toEqual(WEEK);
+    expect(m.callFn).toHaveBeenCalledTimes(2);
+  });
+
+  it('withdrawing the consent forgets the hours at once, and nothing is answered from memory afterwards', async () => {
+    vi.stubGlobal('fetch', osmJson({}));
+    m.callFn.mockResolvedValue({ places: [{ id: 'g', name: NAME, ...POS, hours: WEEK }] });
+    expect((await resolveGymMeta(POS.lat, POS.lng, sig(), NAME))?.hours?.week).toEqual(WEEK);
+    setGeoSearchState({ on: false, ready: true, answered: true });
+    expect((await resolveGymMeta(POS.lat, POS.lng, sig(), NAME))?.hours).toBeUndefined();
+    setGeoSearchState({ on: true, ready: true, answered: true });
+    await resolveGymMeta(POS.lat, POS.lng, sig(), NAME);
+    expect(m.callFn).toHaveBeenCalledTimes(2); // asked again: the first answer was dropped, not kept
+  });
+
+  it('never has more than a few hour lookups in flight at once', async () => {
+    vi.stubGlobal('fetch', osmJson({}));
+    localStorage.clear();
+    resetGoogleHoursForTests();
+    m.callFn.mockReset();
+    let live = 0;
+    let peak = 0;
+    m.callFn.mockImplementation(async () => {
+      live += 1;
+      peak = Math.max(peak, live);
+      await new Promise((r) => setTimeout(r, 5));
+      live -= 1;
+      return { places: [] };
+    });
+    await Promise.all(
+      Array.from({ length: 9 }, (_, i) =>
+        resolveGymMeta(
+          POS.lat + i * 0.01,
+          POS.lng,
+          sig(),
+          ['Alpha', 'Bravo', 'Cobalt', 'Delta', 'Ember', 'Falcon', 'Garnet', 'Harbor', 'Indigo'][
+            i
+          ] + ' Fitness',
+        ),
+      ),
+    );
+    expect(m.callFn.mock.calls.length).toBeGreaterThan(3); // more lookups than slots, all settled
+    expect(peak).toBeLessThanOrEqual(3);
+  });
+
   it('keeps Google hours in memory only: one lookup per session, nothing written to storage', async () => {
     vi.stubGlobal('fetch', osmJson({}));
     m.callFn.mockResolvedValue({ places: [{ id: 'g', name: NAME, ...POS, hours: WEEK }] });

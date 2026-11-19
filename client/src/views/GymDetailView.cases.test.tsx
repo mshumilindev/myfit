@@ -298,6 +298,32 @@ describe('GymDetailView: hours', () => {
     expect(await screen.findByText(en.gymOpenNow)).toBeTruthy();
   });
 
+  it('at the closing minute the gym is already closed, at the opening minute it is open (clock is 12:00)', async () => {
+    m.meta.mockResolvedValue({ hours: { week: week([[600, 720]]) } });
+    const first = open();
+    expect(await screen.findByText(en.gymClosedNow)).toBeTruthy();
+    first.unmount();
+    m.meta.mockResolvedValue({ hours: { week: week([[720, 780]]) } });
+    open();
+    expect(await screen.findByText(en.gymOpenNow)).toBeTruthy();
+  });
+
+  it('an overnight range that ended this morning does not keep the gym open at noon', async () => {
+    m.meta.mockResolvedValue({ hours: { week: week([[1320, 360]]) } }); // 22:00 -> 06:00
+    open();
+    expect(await screen.findByText(en.gymClosedNow)).toBeTruthy();
+  });
+
+  it('asks for the hours by the gym name and place (the Google fallback needs both)', async () => {
+    open();
+    await waitFor(() => expect(m.meta).toHaveBeenCalled());
+    const [lat, lng, , name] = m.meta.mock.calls[0];
+    expect(typeof lat).toBe('number');
+    expect(typeof lng).toBe('number');
+    expect(typeof name).toBe('string');
+    expect((name as string).length).toBeGreaterThan(1);
+  });
+
   it('raw opening_hours text is parsed', async () => {
     m.meta.mockResolvedValue({ openingHours: 'Mo-Su 00:00-24:00' });
     open();

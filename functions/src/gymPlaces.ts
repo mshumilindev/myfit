@@ -8,9 +8,23 @@ import { onCall } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
 import { db, requireAuth } from './lib';
 import { ENFORCE_APPCHECK } from './coach/runtime';
-import { gymPlacesHandler } from './gymPlacesCore';
+import { createRateLimiter, gymPlacesHandler } from './gymPlacesCore';
 
 const GOOGLE_PLACES_KEY = defineSecret('GOOGLE_PLACES_KEY');
+
+/** Hours lookups are billed at a higher Places tier: at most 60 per person per 10 minutes on an instance. */
+const HOURS_PER_WINDOW = 60;
+const HOURS_WINDOW_MS = 10 * 60_000;
+const hoursLimits = new Map<string, ReturnType<typeof createRateLimiter>>();
+function hoursGate(uid: string): () => boolean {
+  let limiter = hoursLimits.get(uid);
+  if (!limiter) {
+    if (hoursLimits.size > 5000) hoursLimits.clear();
+    limiter = createRateLimiter(HOURS_PER_WINDOW, HOURS_WINDOW_MS);
+    hoursLimits.set(uid, limiter);
+  }
+  return () => limiter.take();
+}
 
 export const gymPlaces = onCall(
   { secrets: [GOOGLE_PLACES_KEY], enforceAppCheck: ENFORCE_APPCHECK, maxInstances: 5 },
@@ -18,6 +32,7 @@ export const gymPlaces = onCall(
     const uid = requireAuth(req);
     return gymPlacesHandler(req.data, {
       key: GOOGLE_PLACES_KEY.value(),
+      allowHours: hoursGate(uid),
       fetch,
       records: async () =>
         (
