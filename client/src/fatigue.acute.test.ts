@@ -174,4 +174,10 @@ describe('SPO-601: acute fatigue from the last direct session', () => {
     expect(m.get('quads')!.level).toBe('fresh');
     expect(m.get('biceps')!.score).toBeLessThan(0.15);
   });
+
+  it('acuteDays is set only when the acute term changes the level (else the week is the reason)', () => {
+    const heavy = [session(HOUR, 11), session(2 * DAY, 12), session(4 * DAY, 12)];
+    expect(muscleFatigue(heavy, NOW).get('chest')!.acuteDays).toBeUndefined();
+    expect(chest(HOUR, 11).acuteDays).toBeDefined();
+  });
 });

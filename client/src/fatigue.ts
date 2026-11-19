@@ -230,12 +230,15 @@ export function muscleFatigue(
     // The stall itself stays visible through `stalled`; it just isn't fatigue.
     const weeklyFinal = sets <= 0 ? 0 : weeklyScore;
     if (sets <= 0) score = 0;
+    const level = levelOf(score);
+    const weeklyLevel = levelOf(weeklyFinal);
     out.set(m, {
       muscle: m,
       score,
-      level: levelOf(score),
-      weeklyLevel: levelOf(weeklyFinal),
-      ...(ld && score > weeklyFinal ? { acuteDays: ld.days } : {}),
+      level,
+      weeklyLevel,
+      // Only when the acute term actually changes the level: otherwise the week's load is the reason.
+      ...(ld && level !== weeklyLevel ? { acuteDays: ld.days } : {}),
       sets,
       mrv: lm.mrv,
       stalled: isSt,
