@@ -100,7 +100,9 @@ export function MuscleStatePanel({
         <div className="mss-hint mss-why">
           {read.why.kind === 'idle'
             ? t.fatWhy.idle(read.why.days)
-            : t.fatWhy.load(read.why.sets, read.why.mrv)}
+            : read.why.kind === 'recent'
+              ? t.fatWhy.recent(read.why.hours, read.why.sets)
+              : t.fatWhy.load(read.why.sets, read.why.mrv)}
         </div>
       )}
       <div className="mss-row">

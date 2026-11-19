@@ -1255,6 +1255,7 @@ export const et: Strings = {
     fried: 'Kurnatud',
   },
   fatWhy: {
+    recent: (h: number, s: number) => `Trenn ${h} t tagasi (${s} seeriat): taastub veel`,
     idle: (d: number | null) =>
       d === null ? 'Hiljutisi seeriaid pole: taastunud' : `Viimane trenn ${d} p tagasi: taastunud`,
     load: (s: number, m: number) =>

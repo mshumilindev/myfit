@@ -1261,6 +1261,8 @@ export const pl: Strings = {
     fried: 'Zmęczony',
   },
   fatWhy: {
+    recent: (h: number, s: number) =>
+      `Trening ${h} godz. temu (${s} serii): jeszcze się regeneruje`,
     idle: (d: number | null) =>
       d === null
         ? 'Brak ostatnich serii: zregenerowany'

@@ -1294,6 +1294,7 @@ export const uk: Strings = {
     fried: 'Забитий',
   },
   fatWhy: {
+    recent: (h: number, s: number) => `Тренування ${h} год тому (${s} сетів): ще відновлюється`,
     idle: (d: number | null) =>
       d === null
         ? 'Сетів нещодавно немає: відновився'

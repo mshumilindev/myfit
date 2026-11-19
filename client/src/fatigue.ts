@@ -67,16 +67,30 @@ function weeklyFatigueSplit(
 /**
  * Acute fatigue (SPO-601, docs/specs/fatigue-acute-recency.md): a muscle trained
  * moments ago is tired even when the week's volume is far from its MRV. It reads
- * the same SRA clock as Readiness (recoveryMath), scaled to a CAP below the
- * 'high' threshold, so it can show "moderate" but never trigger a deload.
- * ACUTE_CAP and ACUTE_MIN_SETS are assumptions without a source (see the spec).
+ * the same SRA clock as Readiness (recoveryMath). The ceiling grows with the dose:
+ * a light session reads at most "moderate" (LIGHT), a real one (about half the
+ * muscle's MAV, a "normal" session) reaches "high" for the first hours (FULL).
+ * Both stay below "fried" (0.7 * deloadMult >= 0.59). The weekly level is kept
+ * separately (`weeklyLevel`), so the deload nudge never reads the acute term.
+ * The caps, the dose ramp and ACUTE_MIN_SETS are assumptions without a source.
  */
-export const ACUTE_CAP = 0.3;
+export const ACUTE_CAP_LIGHT = 0.3;
+export const ACUTE_CAP_FULL = 0.5;
 export const ACUTE_MIN_SETS = 3;
+/** Dose (as a share of the muscle's MAV) where the ceiling starts rising / is full. */
+const ACUTE_RAMP_FROM = 0.3;
+const ACUTE_RAMP_TO = 0.5;
 /** Sets only count inside the 7-day fatigue window (`sets <= 0` zeroes the score below), so look back that far. */
 const ACUTE_LOOKBACK_DAYS = 7;
 
-/** Acute score 0..ACUTE_CAP from the last DIRECT session of a muscle. */
+/** Ceiling of the acute score for a session of `dose` sets on a muscle with this MAV. */
+export function acuteCap(dose: number, mav: number): number {
+  const share = dose / (mav || 12);
+  const t = clamp((share - ACUTE_RAMP_FROM) / (ACUTE_RAMP_TO - ACUTE_RAMP_FROM), 0, 1);
+  return ACUTE_CAP_LIGHT + (ACUTE_CAP_FULL - ACUTE_CAP_LIGHT) * t;
+}
+
+/** Acute score from the last DIRECT session of a muscle: 0..acuteCap, fading to 0 with recovery. */
 export function acuteFatigueScore(
   daysSince: number | null,
   dose: number,
@@ -86,7 +100,7 @@ export function acuteFatigueScore(
 ): number {
   if (daysSince === null || dose < ACUTE_MIN_SETS) return 0;
   const { readiness } = computeReadinessWith(readinessMult(at), daysSince, dose, base, mav);
-  return ACUTE_CAP * (1 - readiness);
+  return acuteCap(dose, mav) * (1 - readiness);
 }
 
 /** Most recent session with direct (primary) sets per muscle: days ago + dose. */
@@ -123,6 +137,10 @@ export interface MuscleFatigue {
   muscle: MuscleGroup;
   score: number; // 0..1
   level: FatigueLevel;
+  /** The level from the week's volume alone (no acute term): what the deload nudge reads. */
+  weeklyLevel?: FatigueLevel;
+  /** Days since the session that sets the level, only when the acute term outweighs the week. */
+  acuteDays?: number;
   sets: number;
   mrv: number;
   stalled: boolean;
@@ -203,14 +221,25 @@ export function muscleFatigue(
     // Taken as a max, never added, so the weekly read is unchanged when higher.
     const ld = lastDirect.get(m);
     const acute = ld ? acuteFatigueScore(ld.days, ld.dose, RECOVERY_DAYS[m] ?? 2, lm.mav, now) : 0;
+    const weeklyScore = score;
     score = Math.max(score, acute);
     // SPO-352: fatigue is accumulated LOAD. The stall bump (0.4) used to land
     // exactly on the 'high' threshold on its own, flagging a rested muscle
     // ("High, 0 of 16 sets this week"). Now the bump needs direct sets in the
     // window (above), and a muscle with no sets at all carries no load -> fresh.
     // The stall itself stays visible through `stalled`; it just isn't fatigue.
+    const weeklyFinal = sets <= 0 ? 0 : weeklyScore;
     if (sets <= 0) score = 0;
-    out.set(m, { muscle: m, score, level: levelOf(score), sets, mrv: lm.mrv, stalled: isSt });
+    out.set(m, {
+      muscle: m,
+      score,
+      level: levelOf(score),
+      weeklyLevel: levelOf(weeklyFinal),
+      ...(ld && score > weeklyFinal ? { acuteDays: ld.days } : {}),
+      sets,
+      mrv: lm.mrv,
+      stalled: isSt,
+    });
   }
   return out;
 }
@@ -242,8 +271,11 @@ export function deloadSuggestion(
   fat: Map<MuscleGroup, MuscleFatigue>,
   recoveryBias = 0,
 ): DeloadSuggestion {
-  const fried = [...fat.values()].filter((f) => f.level === 'fried');
-  const high = [...fat.values()].filter((f) => f.level === 'high' || f.level === 'fried');
+  // The deload nudge reads the WEEK's load only: an acute level right after a session
+  // (SPO-601) must not add up to a "recovery week" suggestion.
+  const lv = (f: MuscleFatigue): FatigueLevel => f.weeklyLevel ?? f.level;
+  const fried = [...fat.values()].filter((f) => lv(f) === 'fried');
+  const high = [...fat.values()].filter((f) => lv(f) === 'high' || lv(f) === 'fried');
   const shift = Math.round(clamp(recoveryBias, -1, 1));
   const friedTrigger = 3 + shift;
   const highTrigger = 5 + shift;

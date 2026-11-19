@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { ACUTE_CAP, ACUTE_MIN_SETS, acuteFatigueScore, muscleFatigue } from './fatigue';
+import {
+  ACUTE_CAP_FULL,
+  ACUTE_CAP_LIGHT,
+  ACUTE_MIN_SETS,
+  acuteCap,
+  acuteFatigueScore,
+  deloadSuggestion,
+  muscleFatigue,
+} from './fatigue';
 import type { Exercise, SetEntry, Workout } from './types';
 
 const HOUR = 3600000;
@@ -31,11 +39,18 @@ const session = (agoMs: number, n: number): Workout => ({
 const chest = (agoMs: number, n: number) => muscleFatigue([session(agoMs, n)], NOW).get('chest')!;
 
 describe('SPO-601: acute fatigue from the last direct session', () => {
-  it('11 chest sets an hour ago read moderate, not fresh (owner case)', () => {
+  it('11 chest sets an hour ago read tired ("high"), not fresh (owner case)', () => {
     const c = chest(HOUR, 11);
+    expect(c.level).toBe('high');
+    expect(c.weeklyLevel).toBe('fresh');
+    expect(c.acuteDays).toBeCloseTo(1 / 24, 5);
+    expect(c.score).toBeLessThanOrEqual(ACUTE_CAP_FULL);
+  });
+
+  it('a light session (3 sets) tops out at moderate', () => {
+    const c = chest(HOUR, 3);
     expect(c.level).toBe('moderate');
-    expect(c.score).toBeGreaterThanOrEqual(0.15);
-    expect(c.score).toBeLessThanOrEqual(ACUTE_CAP);
+    expect(c.score).toBeLessThanOrEqual(ACUTE_CAP_LIGHT + 1e-9);
   });
 
   it('the same 11 sets read fresh again once the muscle has recovered', () => {
@@ -43,7 +58,7 @@ describe('SPO-601: acute fatigue from the last direct session', () => {
     expect(chest(9 * DAY, 11).level).toBe('fresh');
   });
 
-  it('moderate lasts while readiness is "recovering" (<= 50 %), about two days for 11 sets', () => {
+  it('high fades to moderate within a day, then fresh once recovered', () => {
     expect(chest(1 * DAY, 11).level).toBe('moderate');
     expect(chest(3 * DAY, 11).level).toBe('fresh');
   });
@@ -54,13 +69,13 @@ describe('SPO-601: acute fatigue from the last direct session', () => {
     expect(chest(HOUR, 2).score).toBe(0);
   });
 
-  it('never reaches high/fried from the acute term alone, at any age or size', () => {
+  it('never reaches fried from the acute term alone, at any age or size', () => {
     for (const n of [3, 6, 11, 15]) {
       for (let h = 0; h <= 20 * 24; h += 6) {
         const c = chest(h * HOUR, n);
-        // weekly volume of <= 15 chest sets is far below the 17-set moderate line
-        expect(['fresh', 'moderate']).toContain(c.level);
-        expect(c.score).toBeLessThanOrEqual(ACUTE_CAP + 1e-9);
+        expect(c.level).not.toBe('fried');
+        expect(c.weeklyLevel).toBe('fresh');
+        expect(c.score).toBeLessThanOrEqual(ACUTE_CAP_FULL + 1e-9);
       }
     }
   });
@@ -74,15 +89,44 @@ describe('SPO-601: acute fatigue from the last direct session', () => {
     }
   });
 
-  it('the cap stays below the lowest possible "high" threshold (deload is untouched)', () => {
-    // high = 0.4 * deloadMult; nicotine (-10 %) and alcohol (-6 %) at their caps give >= 0.84
-    expect(ACUTE_CAP).toBeLessThan(0.4 * 0.84);
+  it('the full cap stays below the lowest possible "fried" threshold', () => {
+    // fried = 0.7 * deloadMult; nicotine (-10 %) and alcohol (-6 %) at their caps give >= 0.84
+    expect(ACUTE_CAP_FULL).toBeLessThan(0.7 * 0.84);
+  });
+
+  it('the cap ramps with the dose share of MAV: light below 30 %, full from 50 %', () => {
+    expect(acuteCap(3, 14)).toBeCloseTo(ACUTE_CAP_LIGHT, 5);
+    expect(acuteCap(7, 14)).toBeCloseTo(ACUTE_CAP_FULL, 5);
+    expect(acuteCap(5.6, 14)).toBeGreaterThan(ACUTE_CAP_LIGHT);
+    expect(acuteCap(5.6, 14)).toBeLessThan(ACUTE_CAP_FULL);
+  });
+
+  it('deload ignores the acute term: six freshly trained muscles at "high" suggest nothing', () => {
+    const day: Workout = {
+      id: 'many',
+      startedAt: NOW - HOUR,
+      finishedAt: NOW,
+      autoFinished: false,
+      exercises: [
+        'Barbell Bench Press - Medium Grip',
+        'Barbell Squat',
+        'Bent Over Barbell Row',
+      ].map((name, i) => ({
+        id: `x${i}`,
+        name,
+        position: i,
+        sets: Array.from({ length: 12 }, set),
+      })),
+    };
+    const fat = muscleFatigue([day], NOW);
+    expect([...fat.values()].filter((f) => f.level === 'high').length).toBeGreaterThanOrEqual(2);
+    expect(deloadSuggestion(fat, 0).kind).toBe('none');
   });
 
   it('acuteFatigueScore: pure, bounded, zero when untrained or tiny', () => {
     expect(acuteFatigueScore(null, 11, 2.5, 14)).toBe(0);
     expect(acuteFatigueScore(0.1, 2, 2.5, 14)).toBe(0);
-    expect(acuteFatigueScore(0, 11, 2.5, 14, NOW)).toBeCloseTo(ACUTE_CAP, 5);
+    expect(acuteFatigueScore(0, 11, 2.5, 14, NOW)).toBeCloseTo(ACUTE_CAP_FULL, 5);
     expect(acuteFatigueScore(30, 11, 2.5, 14, NOW)).toBe(0);
   });
 
@@ -92,15 +136,15 @@ describe('SPO-601: acute fatigue from the last direct session', () => {
     const both = muscleFatigue(heavy, NOW).get('chest')!;
     expect(weekly.level).toMatch(/high|fried/);
     expect(both.score).toBe(weekly.score);
+    expect(both.acuteDays).toBeUndefined();
   });
 
-  it('max, not sum: 20 sets an hour ago (weekly ~0.35, acute ~0.3) read the weekly score', () => {
+  it('max, not sum: 20 sets an hour ago (weekly ~0.35, acute up to 0.5) never add up', () => {
     const one = [session(HOUR, 20)];
     const weekly = muscleFatigue(one, NOW, undefined, { acute: false }).get('chest')!;
     const both = muscleFatigue(one, NOW).get('chest')!;
-    expect(weekly.score).toBeGreaterThan(0.3);
-    expect(both.score).toBeCloseTo(weekly.score, 10);
-    expect(both.score).toBeLessThan(0.5); // a sum would be ~0.65
+    expect(both.score).toBeGreaterThanOrEqual(weekly.score);
+    expect(both.score).toBeLessThanOrEqual(ACUTE_CAP_FULL + 1e-9); // a sum would be ~0.8
   });
 
   it('acute: false is the pure weekly read (rpe / rest timer / Today index use it)', () => {

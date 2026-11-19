@@ -1246,6 +1246,7 @@ export const en = {
     fried: 'Fried',
   },
   fatWhy: {
+    recent: (h: number, s: number) => `Trained ${h} h ago (${s} sets): still recovering`,
     idle: (d: number | null) =>
       d === null ? 'No sets logged recently: recovered' : `Last trained ${d} d ago: recovered`,
     load: (s: number, m: number) =>

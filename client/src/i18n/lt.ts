@@ -1279,6 +1279,7 @@ export const lt: Strings = {
     fried: 'Pervargęs',
   },
   fatWhy: {
+    recent: (h: number, s: number) => `Treniruotė prieš ${h} val. (${s} serijų): dar atsigauna`,
     idle: (d: number | null) =>
       d === null ? 'Naujų serijų nėra: atsigavęs' : `Paskutinė treniruotė prieš ${d} d.: atsigavęs`,
     load: (s: number, m: number) =>

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ACUTE_CAP, muscleFatigue } from './fatigue';
+import { ACUTE_CAP_FULL, muscleFatigue } from './fatigue';
 import type { Workout } from './types';
 
 // The lowest deload multiplier nicotine (-10 %) and alcohol (-6 %) can reach together.
@@ -32,15 +32,16 @@ const w = (n: number): Workout => ({
   ],
 });
 
-describe('SPO-601: the acute term stays below "high" at the lowest deload multiplier', () => {
-  it('cap < 0.4 * deloadMult', () => {
-    expect(ACUTE_CAP).toBeLessThan(0.4 * 0.9 * 0.94);
+describe('SPO-601: the acute term stays below "fried" at the lowest deload multiplier', () => {
+  it('full cap < 0.7 * deloadMult', () => {
+    expect(ACUTE_CAP_FULL).toBeLessThan(0.7 * 0.9 * 0.94);
   });
 
-  it('a fresh 11/15-set chest session reads moderate, never high, with the multiplier at its floor', () => {
+  it('a fresh 3/11/15-set chest session is never fried, even with the multiplier at its floor', () => {
     for (const n of [3, 11, 15]) {
       const c = muscleFatigue([w(n)], NOW).get('chest')!;
-      expect(c.level).not.toMatch(/high|fried/);
+      expect(c.level).not.toBe('fried');
+      expect(c.weeklyLevel).not.toBe('fried');
     }
   });
 });

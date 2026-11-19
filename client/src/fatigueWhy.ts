@@ -10,7 +10,9 @@ import type { MuscleGroup } from './data/exercises';
 import type { Workout } from './types';
 
 export type FatigueWhy =
-  { kind: 'idle'; days: number | null } | { kind: 'load'; sets: number; mrv: number };
+  | { kind: 'idle'; days: number | null }
+  | { kind: 'load'; sets: number; mrv: number }
+  | { kind: 'recent'; hours: number; sets: number };
 
 const RANK: Record<FatigueLevel, number> = { fresh: 0, moderate: 1, high: 2, fried: 3 };
 
@@ -26,5 +28,13 @@ export function fatigueWhy(
   for (const x of groups) if (x !== 'cardio' && lvl(x) > lvl(g)) g = x;
   const f = map.get(g);
   if (!f || f.sets <= 0) return { kind: 'idle', days: muscleGapDays(finished, g, now) };
+  // The acute term sets the level (SPO-601): say how long ago, not the week's total.
+  if (f.acuteDays !== undefined) {
+    return {
+      kind: 'recent',
+      hours: Math.max(1, Math.round(f.acuteDays * 24)),
+      sets: Math.round(f.sets),
+    };
+  }
   return { kind: 'load', sets: Math.round(f.sets * 10) / 10, mrv: f.mrv };
 }

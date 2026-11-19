@@ -166,7 +166,9 @@ export function ExercisePicker(props: ExercisePickerProps) {
   // Why the level reads as it does: a rested muscle says so, a loaded one shows its week.
   const whyLine = (groups: readonly MuscleGroup[]) => {
     const w = fatigueWhy(groups, withToday, now, fatigue);
-    return w.kind === 'idle' ? t.fatWhy.idle(w.days) : t.fatWhy.load(w.sets, w.mrv);
+    if (w.kind === 'idle') return t.fatWhy.idle(w.days);
+    if (w.kind === 'recent') return t.fatWhy.recent(w.hours, w.sets);
+    return t.fatWhy.load(w.sets, w.mrv);
   };
   // The muscles behind a header level: the picked sub chip's own group, else the family's.
   const subGroups = (groups: readonly MuscleGroup[], s: SubId | null): readonly MuscleGroup[] =>
