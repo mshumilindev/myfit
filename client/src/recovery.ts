@@ -173,7 +173,7 @@ export function staleMuscles(map: Map<MuscleGroup, MuscleReadiness>): MuscleRead
  *  in the lazurite recovery/energy hue. Mirrors the fatigue scale's family. */
 export const READINESS_COLOR: Record<ReadyState, string> = {
   recovering: 'var(--color-danger)',
-  nearly: 'var(--color-accent)',
+  nearly: 'var(--color-warn)',
   ready: 'var(--color-ok)',
   stale: 'var(--color-kcal)',
 };

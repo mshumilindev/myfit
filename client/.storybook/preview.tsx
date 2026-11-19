@@ -56,6 +56,7 @@ import '@fontsource/fira-sans-condensed/cyrillic-600.css';
 import '@fontsource/fira-sans-condensed/cyrillic-700.css';
 import '../src/tokens/primitives.css';
 import '../src/tokens/primitives.studio.css';
+import '../src/tokens/loadRamp.css';
 import '@fontsource/jost/latin-400.css';
 import '@fontsource/jost/latin-500.css';
 import '@fontsource/jost/latin-600.css';

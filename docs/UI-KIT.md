@@ -66,6 +66,7 @@ a surface, `text` = light readable foreground on that tint, `line` = mid border.
 ### Health & activity families (each has `base` · `tint` · `text` · `line`)
 
 - **sleep** `--color-sleep*` violet — sleep rows, Start sleep.
+- **warn / warn-strong** `--color-warn`, `--color-warn-strong`. Amber and orange of the load ramp: fatigue levels (fresh `ok` → moderate `warn` → high `warn-strong` → fried `danger`) and readiness "nearly". Never the theme accent. Light mode darkens both (styles.css).
 - **illness** `--color-illness*` amber — unwell periods (softer than the gold accent).
 - **injury** `--color-injury*` warm red — injuries / rehab on Health (not the error red).
 - **active** `--color-active*` teal — active recovery (darker than full-rest blue).
@@ -203,7 +204,7 @@ npm run build-storybook    # static catalog → client/storybook-static/
 ## Current kit
 
 | Primitive                                                     | For                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `Button` / `IconButton`                                       | every button variant / size / state                                                                                                                                                                                                                                                                                                                                                                       |
 | `Card`, `Banner`, `Chip` + `ChipGroup`                        | surfaces, frosted banners, pills                                                                                                                                                                                                                                                                                                                                                                          |
 | `Calendar` (+ `CalendarLegend`)                               | THE calendar: single / range, open end, min / max / disabled, markers, today ring, keyboard grid, presets slot, 1–2 months                                                                                                                                                                                                                                                                                |
@@ -393,7 +394,7 @@ Update: Overview drill-ins now use the round icon back button + title in ONE 36p
 
 ## Update: iteration 19d
 
-- `SearchField` is the ONLY search input (ref, id, aria-*, onFocus/onKeyDown, `hint` while empty). Exercise picker and both Log-activity searches now use it; `.la-search` field overrides removed.
+- `SearchField` is the ONLY search input (ref, id, aria-\*, onFocus/onKeyDown, `hint` while empty). Exercise picker and both Log-activity searches now use it; `.la-search` field overrides removed.
 - Phone drawers (`.sheet`) have no close ×: grabber, swipe and scrim close them (`.sheet-close` is hidden < 720px). Sheets never carry an extra Back/× of their own (Exercise editor, Physique, Focus fixed). Desktop dialogs keep the ×.
 - Sticky search strips (`.la-sticky`) have no plate in Brass Glass.
 - Standalone tiles (la-sug, onb-gym-card, tac-tile, past-ex-card, resume-activity) are plain Cards; their own bg/border/radius removed.

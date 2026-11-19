@@ -250,8 +250,8 @@ export function muscleFatigue(
 /** CSS colour per fatigue level: fresh (calm green) -> fried (ruby). */
 export const FATIGUE_COLOR: Record<FatigueLevel, string> = {
   fresh: 'var(--color-ok)',
-  moderate: 'var(--color-accent-600)',
-  high: 'var(--color-accent)',
+  moderate: 'var(--color-warn)',
+  high: 'var(--color-warn-strong)',
   fried: 'var(--color-danger)',
 };
 

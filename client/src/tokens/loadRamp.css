@@ -1,0 +1,14 @@
+/* Load / caution ramp (fatigue levels, readiness "nearly"): amber then orange, between the ok
+   green and the danger red. Deliberately NOT the theme accent (white in titan, brass in Brass
+   Glass...), so "tired" reads as warm in every theme (SPO-601). Semantic tokens over the
+   primitives; a separate file because styles.css may not grow (hygiene ratchet). */
+:root {
+  --color-warn: var(--c-e0b24a);
+  --color-warn-strong: var(--c-e8933f);
+}
+
+/* Light mode darkens the ramp to keep contrast on a light surface. */
+html[data-mode='light']:not([data-sleep='night']) {
+  --color-warn: var(--c-8f6200);
+  --color-warn-strong: var(--c-b04a12);
+}
