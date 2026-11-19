@@ -1,6 +1,6 @@
 # Втома: гостра складова за давністю тренування (SPO-601)
 
-Статус: чернетка, чекає рішення власника щодо видимої зміни. Правило змін: `.claude/rules/models-and-formulas.md`.
+Статус: впроваджено; друга ітерація (19.11.2026): одразу після важкого тренування м'яз «втомлений» (High), а не лише Moderate. Рішення власника: «якщо там дійсно достатньо навантажили мʼяз, то щоби було уставший мʼяз». Правило змін: `.claude/rules/models-and-formulas.md`.
 
 ## Проблема
 
@@ -13,8 +13,9 @@
 Нова чиста функція `acuteFatigueScore(daysSince, dose, base, mav, at)`:
 
 - `readiness` = `computeReadiness(...)` (та сама крива, що в Readiness, без дублювання формули).
-- `acute = ACUTE_CAP · (1 − readiness)`, `ACUTE_CAP = 0,3`.
-- Рівень muscle score = `max(weeklyScore, acute)`; сума не береться, щоб не подвоювати навантаження.
+- `acute = acuteCap(dose, mav) · (1 − readiness)`.
+- Стеля залежить від дози: `acuteCap = 0,3 + 0,2·t`, `t = clamp((dose/MAV − 0,3)/0,2, 0, 1)`. Легке тренування (3 підходи, <30% MAV) читається максимум Moderate (0,3); нормальне (≥50% MAV, для грудей ≥7 підходів) досягає 0,5, тобто **High** перші години (поріг High = 0,4·k).
+- Рівень muscle score = `max(weeklyScore, acute)`; сума не береться. `weeklyLevel` (рівень лише з тижня) зберігається в `MuscleFatigue`, `acuteDays` ставиться, коли гостра складова вища за тижневу.
 
 Що береться як «останнє тренування»: остання сесія з **прямими** (primary) підходами м'яза, доза = `fatigueSetCount` по його вправах (як `directReadiness` у `picker.ts`). Стабілізатори гостру складову не дають.
 
@@ -23,24 +24,24 @@
 ## Властивості (інваріанти, тести)
 
 1. `acute ∈ [0, ACUTE_CAP]`, монотонно спадає з часом, 0 коли `readiness = 1`.
-2. `ACUTE_CAP < 0,4 · min(deloadMult)`: гостра складова сама **ніколи не дає high/fried**, тож deload (`deloadSuggestion`) не змінюється. `deloadMult` ≥ ~0,84 (нікотин 0,9 × алкоголь 0,94), поріг high ≥ 0,336 > 0,3.
-3. Moderate (бал ≥ 0,15) триває рівно поки `readiness ≤ 0,5` (стан Readiness «recovering»): дві осі узгоджені. Для 11 підходів грудей: доза 11, MAV 14, `doseFactor` 1,57, вікно 2,5·1,57 ≈ 3,9 дня → Moderate ≈ 2 дні.
-4. Нічого не змінюється, якщо останнє пряме тренування було давніше за вікно відновлення (`readiness = 1`), або тижневий бал вищий за гострий (`max`). Усі наявні тести рівнів зелені без правок.
+2. `ACUTE_CAP_FULL (0,5) < 0,7 · min(deloadMult)` (≥ 0,59): гостра складова сама **ніколи не дає fried**. High вона дати може, тому `deloadSuggestion` читає `weeklyLevel ?? level`: гострий High deload не запускає (шість щойно натренованих м'язів = жодної поради про deload).
+3. High триває, поки `acute ≥ 0,4·k`, тобто перші години після важкої сесії; далі Moderate (бал ≥ 0,15) поки `readiness ≤ ~0,7`, потім Fresh. Для 11 підходів грудей: High першу добу, Moderate ≈ 1–2 дні, через 3 дні Fresh.
+4. Нічого не змінюється, якщо останнє пряме тренування було давніше за вікно відновлення (`readiness = 1`), або тижневий бал вищий за гострий (`max`). Наявні тести рівнів зелені; єдина правка існуючого тесту: підказка «чому» (`fatigue.test.ts`, DST-кейс) для 6 підходів добу тому тепер `recent` (годин тому), бо рівень задає гостра складова.
 5. Немає підходів → бал 0 (наявне правило `sets <= 0`).
 
 ## Що не змінюється
 
-`levelOf`, пороги, `personalLandmarks`, `deloadSuggestion`, `fatigueSetCount`, `weeklyFatigueSplit`, `stalledMuscles`, `recentLoadSets`, Readiness (`recovery.ts` зберігає API; математика виноситься в `recoveryMath.ts` як є, щоб `fatigue.ts` не створював цикл `fatigue → recovery → personalize → fatigue`).
+`levelOf`, пороги, `personalLandmarks`, формула `deloadSuggestion` (змінено лише джерело рівня на тижневе), `fatigueSetCount`, `weeklyFatigueSplit`, `stalledMuscles`, `recentLoadSets`, Readiness (`recovery.ts` зберігає API; математика виноситься в `recoveryMath.ts` як є, щоб `fatigue.ts` не створював цикл `fatigue → recovery → personalize → fatigue`).
 
 ## Припущення без джерела
 
-Форма (лінійне відновлення за SRA-кривою) вже прийнята в застосунку (`recovery.ts`). **`ACUTE_CAP = 0,3` і `ACUTE_MIN_SETS = 3` — припущення без джерела**: обрані так, щоб гостра складова була видна (Moderate), але ніколи не доходила до high. Позначено для перегляду власником.
+Форма (лінійне відновлення за SRA-кривою) вже прийнята в застосунку (`recovery.ts`). **`ACUTE_CAP_LIGHT = 0,3`, `ACUTE_CAP_FULL = 0,5`, рампа 30%→50% MAV і `ACUTE_MIN_SETS = 3` — припущення без джерела**: обрані так, щоб після нормальної сесії м'яз був «втомлений» (High), після легкої Moderate, і ніколи fried. Позначено для перегляду власником.
 
 ## Взаємодія з наявним
 
 `muscleFatigue(finished, now, landmarks, { acute })`: за замовчуванням `acute: true`.
 
-- **Гостра складова є** (одне значення скрізь, SPO-304): плитки Add exercise (`ExercisePicker` через `fatigueByGroup`), мапа втоми Progress (`ProgressView`), `MuscleStatePanel`, `deloadSuggestion` (рівні `high`/`fried` не змінюються, див. інваріант 2).
+- **Гостра складова є** (одне значення скрізь, SPO-304): плитки Add exercise (`ExercisePicker` через `fatigueByGroup`), мапа втоми Progress (`ProgressView`), `MuscleStatePanel`, `deloadSuggestion` (читає лише `weeklyLevel`, див. інваріант 2). Підказка «чому» (`fatigueWhy`, kind `recent`, `fatWhy.recent` у 5 локалях): «Trained N h ago (S sets): still recovering».
 - **Гострої складової немає (`acute: false`)** там, де значення масштабує формулу «тижневою втомою»: RPE-знижка (`rpe.ts`) і додаток до відпочинку (`restTimer.ts`) через `SessionView.rpeCtxFor`, а також індекс навантаження й тренд віджета Today (`today/widgets/training.tsx`: середнє п'яти найбільш навантажених м'язів; з гострою складовою воно давало б High від пʼяти «свіжих» м'язів). Зміна цих формул лишається окремим рішенням (інваріант 8, п.4).
 - Аддон «Втома й готовність» (SPO-558): `muscleFatigue` не проходить через маску аддона в цьому клоні; гарантії «вимкнено → нейтрально» ця зміна не додає й не змінює, це лишається за SPO-558.
 - Дані й Firestore не змінюються, міграцій і реєстру даних це не стосується. Ролі: тренер бачить ті самі рівні клієнта там, де вже бачив.
@@ -49,4 +50,4 @@
 
 ## Перевірка
 
-Юніт на `acuteFatigueScore` і інваріанти 1–5; регресія всіх наявних `fatigue.test.ts`, `picker.test.ts`; новий випадок «11 підходів грудей годину тому → Moderate, через 3 дні → Fresh»; `risk-reviewer`; скріни Add exercise 390/1280, темна/світла.
+Юніт на `acuteFatigueScore` і інваріанти 1–5; регресія всіх наявних `fatigue.test.ts`, `picker.test.ts`; новий випадок «11 підходів грудей годину тому → High, добу потому Moderate, через 3 дні → Fresh; 3 підходи → Moderate; deload ігнорує гострий High»; `risk-reviewer`; скріни Add exercise 390/1280, темна/світла.

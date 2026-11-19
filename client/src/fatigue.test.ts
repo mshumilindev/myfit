@@ -302,7 +302,12 @@ describe('time boundaries (SPO-353)', () => {
       const h = [wk('z', last, [ex(PRESS, 6)])];
       const map = muscleFatigue(h, now);
       const why = fatigueWhy(['chest'], h, now, map);
-      expect(why).toEqual({ kind: 'load', sets: 6, mrv: LANDMARKS.chest!.mrv });
+      // SPO-601: 6 direct sets a day ago still tire the chest (acute term), so the hint says when.
+      expect(why).toEqual({ kind: 'recent', hours: 26, sets: 6 });
+      // The weekly read (no acute term) keeps the old load hint's inputs.
+      expect(muscleFatigue(h, now, undefined, { acute: false }).get('chest')!.mrv).toBe(
+        LANDMARKS.chest!.mrv,
+      );
       const later = now + 8 * DAY;
       const w2 = fatigueWhy(['chest'], h, later, muscleFatigue(h, later));
       expect(w2).toEqual({ kind: 'idle', days: 10 });
