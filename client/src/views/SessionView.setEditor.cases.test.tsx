@@ -201,6 +201,23 @@ describe('SessionView · set editor (strength)', () => {
     expect(only().weight).toBeNull();
   });
 
+  it('a new set proposed as bodyweight opens the sheet with the BW switch on and logs null (SPO-601)', async () => {
+    seed([
+      wk('open', [
+        ex('pu', 'Push-up', [set('s1', { reps: 14, weight: null, loggedAt: NOW - 10 * MIN })]),
+      ]),
+    ]);
+    mount();
+    await userEvent.click(screen.getByRole('button', { name: /set options/i }));
+    const dlg = screen.getByRole('dialog');
+    const sw = within(dlg).getByRole('switch', { name: 'Bodyweight set' });
+    expect(sw.getAttribute('aria-checked')).toBe('true');
+    await userEvent.click(within(dlg).getByRole('button', { name: 'Log' }));
+    const sets = mine().exercises[0].sets;
+    expect(sets).toHaveLength(2);
+    expect(sets[1].weight).toBeNull();
+  });
+
   it('assist turns the load into a counter-weight (negative) with quick chips', async () => {
     seed([benchLive()]);
     mount();

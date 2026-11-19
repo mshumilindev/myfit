@@ -6959,7 +6959,9 @@ function SetEditorSheet(props: {
   const [level, setLevel] = useState(() => seed('level'));
   const [floors, setFloors] = useState(() => seed('floors'));
   // Bodyweight = weight stored as null (pull-ups, dips, planks…).
-  const [bw, setBw] = useState(props.set ? props.set.weight === null : false);
+  // A new set starts as BW when the card's ghost row proposes BW, so the card,
+  // the sheet toggle and the weight wheel always agree (SPO-601).
+  const [bw, setBw] = useState(props.set ? props.set.weight === null : props.ghost.weight === null);
   const [holdSec, setHoldSec] = useState(
     props.set && setTypeOf(props.set) === 'static-dynamic' && props.set.durationMin != null
       ? Math.round(props.set.durationMin * 60)
