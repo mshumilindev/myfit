@@ -111,6 +111,16 @@ describe('muscle cards: fatigue label and its reason', () => {
     );
   });
 
+  it('a session a few hours ago says when, and the chest reads tired (SPO-601)', () => {
+    setWorkouts([session('a', NOW - 5 * 3600000, 11)]);
+    show();
+    openChest(LOCALES.en.pickFamilies.chest);
+    expect(document.querySelector('.xp-ghead-why')!.textContent).toBe(
+      LOCALES.en.fatWhy.recent(5, 11),
+    );
+    expect(document.querySelector('.xp-ghead-sub .st')!.textContent).toBe(LOCALES.en.fatLevel.high);
+  });
+
   it.each(Object.keys(LOCALES) as Array<keyof typeof LOCALES>)(
     '%s: the "why" hint is translated and carries the numbers',
     (loc) => {
@@ -118,9 +128,11 @@ describe('muscle cards: fatigue label and its reason', () => {
       expect(t.fatWhy.idle(9)).toContain('9');
       expect(t.fatWhy.idle(null).length).toBeGreaterThan(5);
       expect(t.fatWhy.load(24, 22)).toMatch(/24.*22/);
+      expect(t.fatWhy.recent(5, 11)).toMatch(/5.*11/);
       if (loc !== 'en') {
         expect(t.fatWhy.idle(9)).not.toBe(LOCALES.en.fatWhy.idle(9));
         expect(t.fatWhy.load(24, 22)).not.toBe(LOCALES.en.fatWhy.load(24, 22));
+        expect(t.fatWhy.recent(5, 11)).not.toBe(LOCALES.en.fatWhy.recent(5, 11));
       }
     },
   );
