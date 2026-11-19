@@ -14,6 +14,7 @@ import { calendarDaysBetween } from './detraining';
 import { LANDMARKS, VOLUME_MUSCLES, type Landmark } from './volume';
 import { RECOVERY_DAYS } from './loadWindow';
 import { landmarkFor } from './personalize';
+import { computeReadinessWith, type ReadyState } from './recoveryMath';
 import { readinessMult } from './calcMods';
 import type { Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
@@ -23,7 +24,7 @@ const DAY = 24 * 3600 * 1000;
 // The load model lives in loadWindow.ts (one shared window for every screen, SPO-114).
 export { RECOVERY_DAYS, LOAD_HALF_LIFE_RECOVERY, recentLoadSets } from './loadWindow';
 
-export type ReadyState = 'recovering' | 'nearly' | 'ready' | 'stale';
+export type { ReadyState } from './recoveryMath';
 
 export interface MuscleReadiness {
   muscle: MuscleGroup;
@@ -43,18 +44,10 @@ const clamp = (n: number, lo: number, hi: number): number => Math.min(hi, Math.m
 /** How long we look back for a "last trained" session; older reads as recovered. */
 const LOOKBACK_DAYS = 16;
 
-function stateOf(readiness: number, daysSince: number | null, effDays: number): ReadyState {
-  // Never trained (in window), or long past the window and under-stimulated.
-  if (daysSince === null) return 'stale';
-  if (readiness >= 1) return daysSince > effDays * 2.2 ? 'stale' : 'ready';
-  if (readiness >= 0.9) return 'ready';
-  if (readiness >= 0.5) return 'nearly';
-  return 'recovering';
-}
-
 /**
- * The pure recovery math for one muscle, split out so it's testable without the
- * workout history. `daysSince` null = not trained in the lookback window.
+ * The pure recovery math for one muscle, testable without the workout history.
+ * `daysSince` null = not trained in the lookback window. `at` is the moment the
+ * readiness is for (ms): alcohol is day-aware. Defaults to now.
  */
 export function computeReadiness(
   daysSince: number | null,
@@ -62,20 +55,9 @@ export function computeReadiness(
   base: number,
   mav: number,
   boost = 0,
-  /** The moment the readiness is for (ms): alcohol is day-aware. Defaults to now. */
   at?: number,
 ): { recoveryDays: number; readiness: number; state: ReadyState } {
-  if (daysSince === null) {
-    return { recoveryDays: base, readiness: 1, state: 'stale' };
-  }
-  // A session near half the weekly MAV is a "normal" dose (factor 1); lighter
-  // recovers quicker, a big one stretches the window.
-  const doseFactor = clamp(dose / ((mav || 12) * 0.5), 0.7, 1.6);
-  // Nicotine and alcohol (midpoints of their ranges, product <= 1; exactly 1 when off): the window stretches by
-  // 1 / factor, which is the same as readiness being `factor` times lower at any moment.
-  const effDays = (base * doseFactor) / readinessMult(at);
-  const readiness = clamp(daysSince / effDays + clamp(boost, 0, 1) * 0.12, 0, 1);
-  return { recoveryDays: effDays, readiness, state: stateOf(readiness, daysSince, effDays) };
+  return computeReadinessWith(readinessMult(at), daysSince, dose, base, mav, boost);
 }
 
 /**

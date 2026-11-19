@@ -1191,6 +1191,7 @@ function FatigueWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         finished.filter((w) => w.startedAt <= ts),
         ts,
         lm,
+        { acute: false }, // the load index stays the weekly read (SPO-601)
       );
       const top = [...fat.values()]
         .map((f) => f.score)

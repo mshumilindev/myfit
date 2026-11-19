@@ -10,7 +10,8 @@ import { topHistory } from './progression';
 import { resolveMuscles, isStrengthExercise } from './store';
 import type { Workout } from './types';
 import { fatigueSetCount } from './stimulus';
-import { deloadMult } from './calcMods';
+import { deloadMult, readinessMult } from './calcMods';
+import { computeReadinessWith, RECOVERY_DAYS } from './recoveryMath';
 import type { MuscleGroup } from './data/exercises';
 
 const DAY = 24 * 3600 * 1000;
@@ -58,6 +59,59 @@ function weeklyFatigueSplit(
       const { primary, secondary } = resolveMuscles(e);
       if (primary) add(primary, 'primary', n);
       for (const s of secondary) if (s !== primary) add(s, 'secondary', n);
+    }
+  }
+  return out;
+}
+
+/**
+ * Acute fatigue (SPO-601, docs/specs/fatigue-acute-recency.md): a muscle trained
+ * moments ago is tired even when the week's volume is far from its MRV. It reads
+ * the same SRA clock as Readiness (recoveryMath), scaled to a CAP below the
+ * 'high' threshold, so it can show "moderate" but never trigger a deload.
+ * ACUTE_CAP and ACUTE_MIN_SETS are assumptions without a source (see the spec).
+ */
+export const ACUTE_CAP = 0.3;
+export const ACUTE_MIN_SETS = 3;
+/** Sets only count inside the 7-day fatigue window (`sets <= 0` zeroes the score below), so look back that far. */
+const ACUTE_LOOKBACK_DAYS = 7;
+
+/** Acute score 0..ACUTE_CAP from the last DIRECT session of a muscle. */
+export function acuteFatigueScore(
+  daysSince: number | null,
+  dose: number,
+  base: number,
+  mav: number,
+  at?: number,
+): number {
+  if (daysSince === null || dose < ACUTE_MIN_SETS) return 0;
+  const { readiness } = computeReadinessWith(readinessMult(at), daysSince, dose, base, mav);
+  return ACUTE_CAP * (1 - readiness);
+}
+
+/** Most recent session with direct (primary) sets per muscle: days ago + dose. */
+function lastDirectSessions(
+  finished: Workout[],
+  now: number,
+): Map<MuscleGroup, { days: number; dose: number }> {
+  const since = now - ACUTE_LOOKBACK_DAYS * DAY;
+  const recent = finished
+    .filter((w) => w.startedAt >= since && w.startedAt <= now)
+    .sort((a, b) => b.startedAt - a.startedAt);
+  const out = new Map<MuscleGroup, { days: number; dose: number }>();
+  const doses = new Map<MuscleGroup, number>();
+  for (const w of recent) {
+    doses.clear();
+    for (const e of w.exercises) {
+      if (!isStrengthExercise(e) || e.sets.length === 0) continue;
+      const { primary } = resolveMuscles(e);
+      if (primary) doses.set(primary, (doses.get(primary) ?? 0) + fatigueSetCount(e.sets));
+    }
+    for (const [m, dose] of doses) {
+      // The latest session that passes the minimum: a couple of warm-up sets today
+      // must not hide yesterday's real work.
+      if (dose >= ACUTE_MIN_SETS && !out.has(m))
+        out.set(m, { days: (now - w.startedAt) / DAY, dose });
     }
   }
   return out;
@@ -122,9 +176,13 @@ export function muscleFatigue(
   finished: Workout[],
   now: number,
   landmarks?: ReadonlyMap<MuscleGroup, Landmark>,
+  /** `acute: false` = the pure weekly-load read, for consumers that scale a formula by
+   *  weekly fatigue (RPE cut, rest timer, Today load index). Default on (tiles, maps). */
+  opts: { acute?: boolean } = {},
 ): Map<MuscleGroup, MuscleFatigue> {
   const split = weeklyFatigueSplit(finished, now);
   const stalled = stalledMuscles(finished, now);
+  const lastDirect = opts.acute === false ? new Map() : lastDirectSessions(finished, now);
   const out = new Map<MuscleGroup, MuscleFatigue>();
   for (const m of VOLUME_MUSCLES) {
     // Personalised ceiling when available (so a tolerant athlete reads less
@@ -141,6 +199,11 @@ export function muscleFatigue(
     // A muscle only stabilized this week (no direct sets) can't read "fried" —
     // stabilizer load and a stale lift alone don't warrant a deload here.
     if (wk.primary <= 0) score = Math.min(score, NO_DIRECT_CEILING);
+    // Acute term: trained recently (direct sets) -> at least a hint of fatigue.
+    // Taken as a max, never added, so the weekly read is unchanged when higher.
+    const ld = lastDirect.get(m);
+    const acute = ld ? acuteFatigueScore(ld.days, ld.dose, RECOVERY_DAYS[m] ?? 2, lm.mav, now) : 0;
+    score = Math.max(score, acute);
     // SPO-352: fatigue is accumulated LOAD. The stall bump (0.4) used to land
     // exactly on the 'high' threshold on its own, flagging a rested muscle
     // ("High, 0 of 16 sets this week"). Now the bump needs direct sets in the

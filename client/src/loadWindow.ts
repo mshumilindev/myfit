@@ -7,28 +7,13 @@
  * Kept free of volume/recovery imports so both can depend on it without a cycle.
  */
 import { muscleSetsInWorkout } from './store';
+import { RECOVERY_DAYS } from './recoveryMath';
 import type { Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 
 const DAY = 24 * 3600 * 1000;
 
-/** Baseline full-recovery window (days) per fine muscle — smaller muscles are
- *  faster. Consensus SRA guidance (Israetel / Renaissance Periodization). */
-export const RECOVERY_DAYS: Partial<Record<MuscleGroup, number>> = {
-  forearms: 1.5,
-  calves: 1.5,
-  core: 1.5,
-  biceps: 2,
-  triceps: 2,
-  shoulders: 2,
-  traps: 2,
-  chest: 2.5,
-  lats: 2.5,
-  hamstrings: 2.5,
-  glutes: 2.5,
-  lower_back: 3,
-  quads: 3,
-};
+export { RECOVERY_DAYS } from './recoveryMath';
 
 /** Half-life of a session's load = this many recovery windows of the muscle
  *  (chest 2.5 d → 3.75 d; calves 1.5 d → 2.25 d): bigger muscles shed load slower. */

@@ -1263,6 +1263,7 @@ export function SessionView(props: {
           store.workouts.filter((w) => w.finishedAt !== null && w.id !== workout!.id),
           at,
           cachedPersonalLandmarks(store.workouts, at),
+          { acute: false }, // rpe/rest formulas scale by WEEKLY fatigue (SPO-601)
         ).get(primary)?.score ?? 0)
       : 0;
     const night = lastNight(sleepsForCalc, at);
