@@ -157,11 +157,11 @@ html[data-theme='cyberpunk'] .es-hero::after {
 html[data-theme='cyberpunk'] :is(.sheet.sheet, .hl-sheet) {
   --bd: var(--plate-edge);
   --bd-w: 1px;
-  box-shadow: inset 0 0 0 var(--sz-1) var(--bd);
+  box-shadow: inset var(--sheet-edge, 0 var(--sz-1)) 0 0 var(--bd);
 }
 html[data-theme='cyberpunk'] .sheet.sheet.sheet--toned {
   --bd: color-mix(in srgb, var(--t-base) 45%, transparent);
-  box-shadow: inset 0 0 0 var(--sz-1) var(--bd);
+  box-shadow: inset var(--sheet-edge, 0 var(--sz-1)) 0 0 var(--bd);
 }
 
 /* Diagonal strokes on elements that are filled or tinted by a tone rather than bordered: the stroke takes the tone,

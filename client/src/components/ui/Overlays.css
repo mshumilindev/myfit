@@ -159,6 +159,9 @@
   top: auto;
   bottom: 0;
   z-index: var(--z-51);
+  /* Only the edge that faces the page is drawn: phone = top; desktop panel = top + left (offsets of an inset
+     shadow, so themes write `inset var(--sheet-edge) 0 0 <colour>`). The screen-side edges stay bare (SPO-599). */
+  --sheet-edge: 0 var(--sz-1);
   /* Frosted graphite liquid glass drawer — the page blurs through it. */
   background: color-mix(in srgb, var(--color-surface) 62%, transparent);
   backdrop-filter: var(--bf-glass);
@@ -230,6 +233,7 @@
     height: var(--overlay-max-height, 100dvh);
     max-height: none;
     border-radius: var(--radius-sheet) 0 0 var(--radius-sheet);
+    --sheet-edge: var(--sz-1) var(--sz-1);
     padding: var(--s-16) var(--s-20) var(--s-24);
   }
 }
