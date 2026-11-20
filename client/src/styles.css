@@ -20629,7 +20629,7 @@ body {
   height: 100%;
   display: flex;
   align-items: flex-end;
-  background: var(--color-neutral-900);
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
   border-radius: var(--r-4);
   overflow: hidden;
 }
@@ -20638,19 +20638,19 @@ body {
 }
 .slh-bar {
   width: 100%;
-  background: var(--c-3d6488);
+  background: color-mix(in srgb, var(--color-accent) 40%, transparent);
   border-radius: var(--r-4) var(--r-4) 0 0;
   min-height: var(--sz-3);
 }
 .slh-bars .slh-bar.met {
-  background: var(--s-moon);
+  background: var(--color-accent);
 }
-/* Weekday-rhythm bars: weeknights lazurite, weekends gold (matches SL-12). */
+/* SPO-550: bars follow the theme accent (met = full, missed = faded; weekends = lighter step), no fixed night palette. */
 .slh-rhythm .slh-bar {
-  background: var(--s-moon);
+  background: var(--color-accent);
 }
 .slh-rhythm .slh-bar.wk {
-  background: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 55%, transparent);
 }
 .slh-rwd.wk {
   color: var(--color-accent-300);
