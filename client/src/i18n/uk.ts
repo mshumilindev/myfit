@@ -3496,6 +3496,8 @@ export const uk: Strings = {
   privHubHeader: 'Ваша приватність',
   privTitle: 'Згоди',
   privHubSub: 'На що ви погодилися, і як це відкликати',
+  privShareRow: 'Шаринг з тренером',
+  privShareSub: 'Що бачить ваш тренер і як це зупинити',
   privSub: 'Вирішуєте ви. Відкликати так само легко, як дати.',
   privGrpRequired: 'Потрібні для користування Spotter',
   privRequiredLabel: 'Умови користування і Політика приватності',

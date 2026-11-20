@@ -1,6 +1,8 @@
 /**
  * Health › Privacy and sharing: the one place for everything privacy in Health. One list (`ClientTrainerSharing`) holds all
- * ten sharing settings in three groups with one summary on top and one "Stop sharing" (SPO-107); below it the destructive
+ * ten sharing settings in three groups with one summary on top and one "Stop sharing" (SPO-107). Since SPO-571 this screen
+ * is the hub: that list lives on its own page (opened from the first row, or straight away from a deep link such as the
+ * chat's or My trainer's "sharing" link), next to Consents and the documents; below them the destructive
  * "delete nicotine / alcohol / supplement / cycle data" rows sit behind a danger confirm with the universal encryption
  * note as the group footer. Sharing applies at once (like the other settings screens). Kit primitives only.
  */
@@ -25,10 +27,13 @@ import { useMyDataPage } from '../../legal/mydata/MyDataScreen';
 
 export interface HealthPrivacyViewProps {
   onBack: () => void;
+  /** Open the sharing page straight away (deep links: chat, My trainer, access requests). Back then leaves the screen. */
+  initialPage?: 'sharing';
 }
 
-export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
+export function HealthPrivacyView({ onBack, initialPage }: HealthPrivacyViewProps) {
   const { t } = useT();
+  const [sharing, setSharing] = useState(initialPage === 'sharing');
   const available = useAddonAvailable();
   const cycleOn = useCycle().enabled && available('cycle');
   const [confirmCycle, setConfirmCycle] = useState(false);
@@ -39,6 +44,31 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
   const consents = useConsentsPage(() => myData.openExport(true));
 
   if (consents.page ?? myData.page) return <>{consents.page ?? myData.page}</>;
+  if (sharing)
+    return (
+      <div className="screen hl">
+        <PageHead
+          className="hl-pbar"
+          back={{
+            label: t.backAction,
+            onClick: initialPage === 'sharing' ? onBack : () => setSharing(false),
+          }}
+          title={t.privShareRow}
+        />
+        <div className="hl-scroll">
+          <div className="hl-cnt">
+            <ClientTrainerSharing
+              onOpenLog={() => {
+                setHash('#/trainer/log');
+              }}
+              onOpenTrainer={() => {
+                setHash('#/trainer');
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    );
   return (
     <div className="screen hl">
       <PageHead
@@ -48,15 +78,8 @@ export function HealthPrivacyView({ onBack }: HealthPrivacyViewProps) {
       />
       <div className="hl-scroll">
         <div className="hl-cnt">
-          <ClientTrainerSharing
-            onOpenLog={() => {
-              setHash('#/trainer/log');
-            }}
-            onOpenTrainer={() => {
-              setHash('#/trainer');
-            }}
-          />
           <PrivacyHub
+            onOpenSharing={() => setSharing(true)}
             onOpenConsents={consents.open}
             onOpenMyData={myData.open}
             onOpenExport={myData.openExport}

@@ -25,10 +25,13 @@ export function openLegalPage(id: 'privacy' | 'terms'): void {
 }
 
 export function PrivacyHub({
+  onOpenSharing,
   onOpenConsents,
   onOpenMyData,
   onOpenExport,
 }: {
+  /** Opens the sharing-with-trainer page (SPO-571). Absent = the row is not shown (Profile has its own way in). */
+  onOpenSharing?: () => void;
   onOpenConsents: () => void;
   /** Opens "What Spotter knows about you". Absent = the row is not shown. */
   onOpenMyData?: () => void;
@@ -46,6 +49,15 @@ export function PrivacyHub({
   return (
     <>
       <GroupedList header={t.privHubHeader}>
+        {onOpenSharing && (
+          <ListRow
+            icon={<IconTile tone="share" size={30} icon="share-network" />}
+            label={t.privShareRow}
+            sub={t.privShareSub}
+            chevron
+            onClick={onOpenSharing}
+          />
+        )}
         <ListRow
           icon={<IconTile tone="accent" size={30} icon="shield-check" />}
           label={t.privTitle}

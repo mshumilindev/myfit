@@ -71,15 +71,19 @@ const lines = (c: HTMLElement) =>
 
 describe('HealthPrivacyView: Alcohol', () => {
   it('has an Alcohol row (Off by default) and a "Delete alcohol data" row', async () => {
-    render(<HealthPrivacyView onBack={() => undefined} />);
+    const sharingPage = render(
+      <HealthPrivacyView onBack={() => undefined} initialPage="sharing" />,
+    );
     await ready();
     expect(rowOf('Alcohol').textContent).toContain('Off');
+    sharingPage.unmount(); // sharing is its own page (SPO-571); the delete rows are on the hub
+    render(<HealthPrivacyView onBack={() => undefined} />);
     expect(screen.getByText('Delete nicotine data')).toBeTruthy();
     expect(screen.getByText('Delete alcohol data')).toBeTruthy();
   });
 
   it('the sheet offers Off and Effects only, no Full, and says why; a choice applies at once', async () => {
-    render(<HealthPrivacyView onBack={() => undefined} />);
+    render(<HealthPrivacyView onBack={() => undefined} initialPage="sharing" />);
     await ready();
     fireEvent.click(rowOf('Alcohol'));
     const group = within(screen.getByRole('group', { name: 'Sharing level' }));
@@ -101,19 +105,19 @@ describe('HealthPrivacyView: Alcohol', () => {
   it('the one summary includes alcohol, built from the live state', async () => {
     setConditionsShare('effects');
     setAlcoholSharing('effects');
-    const a = render(<HealthPrivacyView onBack={() => undefined} />);
+    const a = render(<HealthPrivacyView onBack={() => undefined} initialPage="sharing" />);
     await ready();
     expect(lines(a.container)).toEqual(['Effects only: Long-term conditions and Alcohol.']);
     a.unmount();
     setConditionsShare('off');
     setNicotineSharing('full');
-    const b = render(<HealthPrivacyView onBack={() => undefined} />);
+    const b = render(<HealthPrivacyView onBack={() => undefined} initialPage="sharing" />);
     await ready();
     expect(lines(b.container)).toEqual(['Effects only: Alcohol.', 'Full: Nicotine.']);
     b.unmount();
     setNicotineSharing('off');
     setAlcoholSharing('off');
-    const c = render(<HealthPrivacyView onBack={() => undefined} />);
+    const c = render(<HealthPrivacyView onBack={() => undefined} initialPage="sharing" />);
     await ready();
     expect(screen.getByText('Your coach sees nothing.')).toBeTruthy();
     c.unmount();

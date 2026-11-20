@@ -3483,6 +3483,8 @@ export const lt: Strings = {
   privHubHeader: 'Jūsų privatumas',
   privTitle: 'Sutikimai',
   privHubSub: 'Kam sutikote ir kaip tai atšaukti',
+  privShareRow: 'Dalijimasis su treneriu',
+  privShareSub: 'Ką mato jūsų treneris ir kaip tai sustabdyti',
   privSub: 'Sprendžiate jūs. Atšaukti taip pat lengva, kaip ir duoti sutikimą.',
   privGrpRequired: 'Būtina naudojantis Spotter',
   privRequiredLabel: 'Naudojimo sąlygos ir Privatumo politika',

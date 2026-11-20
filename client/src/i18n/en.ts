@@ -3491,6 +3491,8 @@ export const en = {
   privHubHeader: 'Your privacy',
   privTitle: 'Consents',
   privHubSub: 'What you have agreed to, and withdrawing it',
+  privShareRow: 'Sharing with your trainer',
+  privShareSub: 'What your trainer can see, and stopping it',
   privSub: 'You choose. Withdrawing is as easy as giving.',
   privGrpRequired: 'Required to use Spotter',
   privRequiredLabel: 'Terms of Use and Privacy Policy',

@@ -445,7 +445,7 @@ describe('Health › Privacy and sharing', () => {
   it('has a Supplements row with Off / Effects only / Full and the sheet shows what the coach sees', async () => {
     seed('creatine');
     seed('whey');
-    render(<HealthPrivacyView onBack={() => undefined} />);
+    render(<HealthPrivacyView onBack={() => undefined} initialPage="sharing" />);
     await sharingReady();
     expect(within(row('Supplements')).getByText('Off')).toBeTruthy();
     fireEvent.click(row('Supplements'));
@@ -465,9 +465,14 @@ describe('Health › Privacy and sharing', () => {
   it('the summary card lists Supplements by level and "Delete supplement data" asks first', async () => {
     seed('creatine');
     setSupplementSharing('effects');
-    render(<HealthPrivacyView onBack={() => undefined} />);
+    // Sharing is its own page (SPO-571): the summary lives there, the delete row on the hub.
+    const sharingPage = render(
+      <HealthPrivacyView onBack={() => undefined} initialPage="sharing" />,
+    );
     await sharingReady();
     expect(document.querySelector('.ut-w6')?.textContent).toContain('Supplements');
+    sharingPage.unmount();
+    render(<HealthPrivacyView onBack={() => undefined} />);
     fireEvent.click(screen.getByRole('button', { name: 'Delete supplement data' }));
     expect(screen.getByText('Delete all supplement data?')).toBeTruthy();
     expect(entries()).toHaveLength(1);

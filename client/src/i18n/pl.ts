@@ -3463,6 +3463,8 @@ export const pl: Strings = {
   privHubHeader: 'Twoja prywatność',
   privTitle: 'Zgody',
   privHubSub: 'Na co się zgodziłeś i jak to wycofać',
+  privShareRow: 'Udostępnianie trenerowi',
+  privShareSub: 'Co widzi twój trener i jak to zatrzymać',
   privSub: 'Ty decydujesz. Wycofanie jest tak łatwe jak udzielenie.',
   privGrpRequired: 'Wymagane do korzystania ze Spotter',
   privRequiredLabel: 'Warunki korzystania i Polityka prywatności',

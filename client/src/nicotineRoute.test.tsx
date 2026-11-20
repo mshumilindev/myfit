@@ -52,9 +52,9 @@ describe('#/health/nicotine routes', () => {
     expect(fromHash('#/health/nicotine').overlay).toEqual({ screen: 'health', nic: 'hub' });
   });
 
-  it('#/health/privacy is the standalone Privacy page and formats as #/more/privacy; the old nicotine link redirects to it', () => {
+  it('#/health/privacy opens the Sharing page of Privacy (SPO-571) and formats as #/more/privacy/sharing; #/more/privacy is the hub; the old nicotine link redirects to the hub', () => {
     const { overlay } = fromHash('#/health/privacy');
-    expect(overlay).toEqual({ screen: 'privacy' });
+    expect(overlay).toEqual({ screen: 'privacy', page: 'sharing' });
     expect(
       toHash(
         'today',
@@ -65,7 +65,12 @@ describe('#/health/nicotine routes', () => {
         'total' as never,
         'volume' as never,
       ),
-    ).toBe('#/more/privacy');
+    ).toBe('#/more/privacy/sharing');
+    expect(fromHash('#/more/privacy').overlay).toEqual({ screen: 'privacy' });
+    expect(fromHash('#/more/privacy/sharing').overlay).toEqual({
+      screen: 'privacy',
+      page: 'sharing',
+    });
     expect(fromHash('#/health/nicotine/privacy').overlay).toEqual({ screen: 'privacy' });
   });
 
@@ -90,7 +95,7 @@ describe('Back from a deep link', () => {
     });
     expect(overlayBack(state({ screen: 'privacy' }))).toEqual({ cur: null, stack: [] });
     expect(fromHash('#/more/privacy').overlay).toEqual({ screen: 'privacy' });
-    expect(fromHash('#/health/privacy').overlay).toEqual({ screen: 'privacy' });
+    expect(fromHash('#/health/privacy').overlay).toEqual({ screen: 'privacy', page: 'sharing' });
     expect(fromHash('#/health/nicotine/privacy').overlay).toEqual({ screen: 'privacy' });
   });
   it('opened from the session summary, Back returns to that summary', () => {

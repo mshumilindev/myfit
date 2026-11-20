@@ -289,7 +289,7 @@ export type Overlay =
   | { screen: 'settings' }
   | { screen: 'history' }
   | { screen: 'themes' }
-  | { screen: 'privacy' }
+  | { screen: 'privacy'; page?: 'sharing' }
   | { screen: 'planner' }
   | { screen: 'theme-settings' }
   | { screen: 'notifications' }
@@ -435,7 +435,8 @@ export function toHash(
   if (overlay?.screen === 'settings') return '#/settings';
   if (overlay?.screen === 'history') return '#/history';
   if (overlay?.screen === 'themes') return '#/themes';
-  if (overlay?.screen === 'privacy') return '#/more/privacy';
+  if (overlay?.screen === 'privacy')
+    return overlay.page === 'sharing' ? '#/more/privacy/sharing' : '#/more/privacy';
   if (overlay?.screen === 'planner') return '#/planner';
   if (overlay?.screen === 'theme-settings') return '#/theme-settings';
   if (overlay?.screen === 'builder') return '#/builder';
@@ -566,9 +567,15 @@ export function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
     return { tab: 'today', overlay: { screen: 'client-coach', route: parts.join('/') } };
   if (head === 'injury') return { tab: 'today', overlay: { screen: 'injury' } };
   // Privacy and sharing lives in More now; the old Health links (#/health/privacy, #/health/nicotine/privacy) land there.
+  // Since SPO-571 sharing with the trainer is its own page: `#/health/privacy` was the sharing list (the chat, My trainer
+  // and access requests link to it), so it opens that page; `#/more/privacy` is the hub.
   const oldPrivacy =
     head === 'health' &&
     (parts[1] === 'privacy' || parts.slice(1, 3).join() === 'nicotine,privacy');
+  if (head === 'more' && parts[1] === 'privacy' && parts[2] === 'sharing')
+    return { tab: 'today', overlay: { screen: 'privacy', page: 'sharing' } };
+  if (head === 'health' && parts[1] === 'privacy')
+    return { tab: 'today', overlay: { screen: 'privacy', page: 'sharing' } };
   if ((head === 'more' && parts[1] === 'privacy') || oldPrivacy)
     return { tab: 'today', overlay: { screen: 'privacy' } };
   if (head === 'health') return { tab: 'today', overlay: healthFromHash(parts.slice(1)) };
@@ -1677,7 +1684,11 @@ function AppMain() {
       )}
       {activeOverlay?.screen === 'privacy' && (
         <Suspense fallback={<ScreenFallback />}>
-          <HealthPrivacyView onBack={closeOverlay} />
+          <HealthPrivacyView
+            key={activeOverlay.page ?? 'hub'}
+            onBack={closeOverlay}
+            initialPage={activeOverlay.page}
+          />
         </Suspense>
       )}
       {activeOverlay?.screen === 'history' && (

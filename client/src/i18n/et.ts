@@ -3443,6 +3443,8 @@ export const et: Strings = {
   privHubHeader: 'Sinu privaatsus',
   privTitle: 'Nõusolekud',
   privHubSub: 'Millega oled nõustunud ja kuidas seda tühistada',
+  privShareRow: 'Jagamine treeneriga',
+  privShareSub: 'Mida sinu treener näeb ja kuidas seda peatada',
   privSub: 'Sina otsustad. Tühistamine on sama lihtne kui nõusoleku andmine.',
   privGrpRequired: 'Spotteri kasutamiseks vajalik',
   privRequiredLabel: 'Kasutustingimused ja privaatsuspoliitika',

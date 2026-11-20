@@ -84,7 +84,7 @@ describe('HealthPrivacyView', () => {
   });
 
   it('the summary says nothing is shared when everything is off', async () => {
-    render(<HealthPrivacyView onBack={() => undefined} />);
+    render(<HealthPrivacyView onBack={() => undefined} initialPage="sharing" />);
     await ready();
     expect(screen.getByText('What your coach would see')).toBeTruthy();
     expect(screen.getByText('Your coach sees nothing.')).toBeTruthy();
@@ -94,7 +94,9 @@ describe('HealthPrivacyView', () => {
   it('the one summary lists categories by level, built from the live state', async () => {
     setConditionsShare('effects');
     setNicotineSharing('full');
-    const { container } = render(<HealthPrivacyView onBack={() => undefined} />);
+    const { container } = render(
+      <HealthPrivacyView onBack={() => undefined} initialPage="sharing" />,
+    );
     await ready();
     const lines = [...container.querySelectorAll('.uicard .ut-w6')].map((e) => e.textContent);
     expect(lines).toEqual(['Effects only: Long-term conditions.', 'Full: Nicotine.']);
@@ -103,7 +105,7 @@ describe('HealthPrivacyView', () => {
     ).toBeTruthy();
     setNicotineSharing('effects');
     cleanup();
-    const again = render(<HealthPrivacyView onBack={() => undefined} />);
+    const again = render(<HealthPrivacyView onBack={() => undefined} initialPage="sharing" />);
     await ready();
     expect(
       [...again.container.querySelectorAll('.uicard .ut-w6')].map((e) => e.textContent),
@@ -113,7 +115,7 @@ describe('HealthPrivacyView', () => {
 
   it('rows show the current level; the old "settings below" and override notes are gone', async () => {
     setConditionsShare('effects');
-    render(<HealthPrivacyView onBack={() => undefined} />);
+    render(<HealthPrivacyView onBack={() => undefined} initialPage="sharing" />);
     await ready();
     const cond = rowOf('Long-term conditions');
     expect(cond.textContent).toContain('Effects only');
@@ -124,13 +126,13 @@ describe('HealthPrivacyView', () => {
 
   it('the conditions row remains available with a legacy disabled flag', async () => {
     localStorage.setItem('gym.flags', JSON.stringify({ conditions: false }));
-    render(<HealthPrivacyView onBack={() => undefined} />);
+    render(<HealthPrivacyView onBack={() => undefined} initialPage="sharing" />);
     await ready();
     expect(screen.getByRole('button', { name: /^Long-term conditions,/ })).toBeTruthy();
   });
 
   it('a category opens a sheet; choosing a level applies at once and Done closes it', async () => {
-    render(<HealthPrivacyView onBack={() => undefined} />);
+    render(<HealthPrivacyView onBack={() => undefined} initialPage="sharing" />);
     await ready();
     fireEvent.click(rowOf('Nicotine'));
     const group = screen.getByRole('group', { name: 'Sharing level' });
@@ -149,7 +151,7 @@ describe('HealthPrivacyView', () => {
   });
 
   it('the conditions sheet sets the conditions default', async () => {
-    render(<HealthPrivacyView onBack={() => undefined} />);
+    render(<HealthPrivacyView onBack={() => undefined} initialPage="sharing" />);
     await ready();
     fireEvent.click(rowOf('Long-term conditions'));
     const group = screen.getByRole('group', { name: 'Sharing level' });
@@ -191,6 +193,28 @@ describe('Health overview', () => {
     const onBack = vi.fn();
     render(<HealthPrivacyView onBack={onBack} />);
     expect(screen.getByRole('heading', { name: 'Privacy and sharing' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /back/i }));
+    expect(onBack).toHaveBeenCalled();
+  });
+});
+
+describe('Privacy and sharing is a hub (SPO-571)', () => {
+  it('has a "Sharing with your trainer" row that opens the sharing page; Back returns to the hub', async () => {
+    render(<HealthPrivacyView onBack={() => undefined} />);
+    expect(screen.queryByRole('button', { name: /^Nicotine,/ })).toBeNull();
+    fireEvent.click(screen.getByText('Sharing with your trainer'));
+    expect(screen.getByRole('heading', { name: 'Sharing with your trainer' })).toBeTruthy();
+    await screen.findByRole('button', { name: /^Nicotine,/ });
+    fireEvent.click(screen.getByRole('button', { name: /back/i }));
+    expect(screen.getByRole('heading', { name: 'Privacy and sharing' })).toBeTruthy();
+    expect(screen.getByText('Consents')).toBeTruthy();
+  });
+
+  it('a deep link opens the sharing page straight away and Back leaves the screen', async () => {
+    const onBack = vi.fn();
+    render(<HealthPrivacyView onBack={onBack} initialPage="sharing" />);
+    await screen.findByRole('button', { name: /^Nicotine,/ });
+    expect(screen.queryByText('Consents')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: /back/i }));
     expect(onBack).toHaveBeenCalled();
   });

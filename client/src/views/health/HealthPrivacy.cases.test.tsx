@@ -68,7 +68,7 @@ afterEach(() => {
 
 describe('HealthPrivacyView: exits to the trainer', () => {
   it('opens the sharing log and the trainer page by hash', () => {
-    render(<HealthPrivacyView onBack={() => undefined} />);
+    render(<HealthPrivacyView onBack={() => undefined} initialPage="sharing" />);
     fireEvent.click(screen.getByText('open-log'));
     expect(currentHash()).toBe('#/trainer/log');
     fireEvent.click(screen.getByText('open-trainer'));
