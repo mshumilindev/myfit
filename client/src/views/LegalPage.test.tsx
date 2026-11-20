@@ -1,5 +1,10 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+const who = vi.hoisted(() => ({ uid: 'u1' as string | null }));
+vi.mock('../api', async (orig) => ({
+  ...(await orig<typeof import('../api')>()),
+  currentUid: () => who.uid,
+}));
 import { setLocale } from '../i18n';
 import { LEGAL_WINDOW, legalBackAction } from '../legal/route';
 import { currentHash } from '../route';
@@ -152,9 +157,21 @@ describe('LegalPage lens (SPO-571 P5)', () => {
     addonsPref.set(['gym']);
     render(<LegalPage page="privacy" fromApp />);
     expect(sectionTitles().some((t) => t?.includes('Atlas AI chat'))).toBe(false);
+    expect(sectionTitles().some((t) => t?.includes('Health data and consent'))).toBe(true);
     expect(sectionTitles().find((t) => t?.includes('Contact'))).toMatch(/^14\./);
     fireEvent.click(screen.getByRole('button', { name: 'Show the full text' }));
     expect(sectionTitles().some((t) => t?.includes('Atlas AI chat'))).toBe(true);
+    addonsPref.reset();
+  });
+
+  it('a signed-out visitor in the app popup still gets the full text', async () => {
+    const { addonsPref } = await import('../addons/enabledSet');
+    addonsPref.set(['gym']); // a list left on the device by the previous person
+    who.uid = null;
+    window.name = LEGAL_WINDOW;
+    render(<LegalPage page="privacy" />);
+    expect(sectionTitles().some((t) => t?.includes('Atlas AI chat'))).toBe(true);
+    who.uid = 'u1';
     addonsPref.reset();
   });
 

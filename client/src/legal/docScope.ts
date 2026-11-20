@@ -4,7 +4,7 @@
  *  - the version, the consent hash (`docPlainText`) and the acceptance at the gate always use the full text;
  *  - the public page (not opened from the app) shows the full text;
  *  - section numbers stay as in the full text (the text refers to "section 7"), so a hidden section leaves a gap.
- * A part shows when ANY of its owner add-ons is available (`addonAvailable`: installed, base for the role, or "soon").
+ * A part shows when ANY of its owner add-ons is available (`useAddonAvailable`: installed, base for the role, or an id the store does not offer).
  * Parts that no rule names are core and always show. Pure: no React, no storage.
  */
 import type { DocBlock, DocSectionText } from '../i18n/legal.types';
@@ -33,20 +33,18 @@ export interface ScopeRule {
   owners: readonly string[];
 }
 
+/**
+ * Only processing that STOPS with the add-on is narrowed (reviewer finding, 20.11): Atlas AI sending is a consent that
+ * is withdrawn on removal, availability sharing is revoked on removal. Everything an add-on STORES stays in the account
+ * after removal (addons.md: data is kept), so what describes stored data, its retention and the health consents is
+ * always shown, whatever is installed (Art. 13: the person must be able to read about the data held about them).
+ */
 export const DOC_SCOPE: readonly ScopeRule[] = [
-  // Privacy Policy 3: what data we process (table rows)
-  { doc: 'privacy', section: 'p3', block: 0, row: 2, owners: HEALTH_OWNERS },
-  { doc: 'privacy', section: 'p3', block: 0, row: 4, owners: ['coach-team'] },
-  { doc: 'privacy', section: 'p3', block: 0, row: 5, owners: ['planner'] },
+  // Privacy Policy 3: availability shared with the trainer (revoked when the Planner goes) and the Atlas AI chat
   { doc: 'privacy', section: 'p3', block: 0, row: 6, owners: ['planner-availability'] },
-  { doc: 'privacy', section: 'p3', block: 0, row: 10, owners: ['atlas'] },
   { doc: 'privacy', section: 'p3', block: 0, row: 11, owners: ['atlas'] },
-  // 6 health data and consent, 7 Atlas AI chat (whole sections)
-  { doc: 'privacy', section: 'p6', owners: HEALTH_OWNERS },
+  // 7 Atlas AI chat (whole section; "see section 7" in row 11 goes with it)
   { doc: 'privacy', section: 'p7', owners: ['atlas'] },
-  // 8 how long we keep data (bullets)
-  { doc: 'privacy', section: 'p8', block: 0, item: 2, owners: ['atlas'] },
-  { doc: 'privacy', section: 'p8', block: 0, item: 7, owners: ['planner'] },
 ];
 
 export interface ScopedSection {

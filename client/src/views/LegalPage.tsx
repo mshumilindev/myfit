@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Hint } from '../components/ui/Hint';
+import { currentUid } from '../api';
 import { addonsPref, useAddonAvailable } from '../addons/enabledSet';
 import { scopeHidesAnything, scopeSections } from '../legal/docScope';
 import { SpotterMark } from '../brand/SpotterMark';
@@ -24,11 +25,15 @@ export function LegalPage({ page, fromApp = false }: { page: LegalPageId; fromAp
   const doc = isTrainerDoc ? (page === 'dpa' ? trainer.dpa : trainer.trainerTerms) : lg[page];
   const version = docVersion(page);
   // The lens: opened from the app, the document shows what applies to the installed add-ons (SPO-571 P5). The public page,
-  // the gate and every consent hash use the full text; a list that has never been loaded narrows nothing.
+  // the gate and every consent hash use the full text; a list that has never been loaded, or no signed-in person, narrows nothing.
   const available = useAddonAvailable();
   const [full, setFull] = useState(false);
+  // A signed-in person only: the add-on list is a device cache that outlives a sign-out; a visitor sees the full text.
   const scoped =
-    (fromApp || isLegalPopup()) && !isTrainerDoc && addonsPref.snapshot().updatedAt > 0;
+    (fromApp || isLegalPopup()) &&
+    !isTrainerDoc &&
+    !!currentUid() &&
+    addonsPref.snapshot().updatedAt > 0;
   const narrowed =
     scoped && scopeHidesAnything(page as 'privacy' | 'terms', doc.sections, available);
   const shown =
