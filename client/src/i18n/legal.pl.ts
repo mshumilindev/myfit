@@ -19,6 +19,10 @@ export const legalPl: LegalTexts = {
     legalNav: 'Informacje prawne',
     privacyLink: 'Polityka prywatności',
     termsLink: 'Warunki korzystania',
+    scopeNote:
+      'Pokazano tylko to, co dotyczy zainstalowanych dodatków. Zaakceptowana wersja to pełny tekst.',
+    scopeAll: 'Pokaż pełny tekst',
+    scopeMine: 'Pokaż tylko to, co mnie dotyczy',
     englishOnlyNote: '',
   },
   privacy: {

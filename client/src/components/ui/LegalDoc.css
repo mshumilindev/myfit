@@ -97,6 +97,13 @@
   gap: var(--s-8);
   scroll-margin-top: var(--s-24);
 }
+.uild-lens {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+}
+
 .uild-text {
   color: var(--color-text-muted, inherit);
   overflow-wrap: anywhere;

@@ -22,6 +22,10 @@ export const legalEn: LegalTexts = {
     legalNav: 'Legal',
     privacyLink: 'Privacy Policy',
     termsLink: 'Terms of Use',
+    scopeNote:
+      'Showing only what applies to the add-ons you have installed. The version you accepted is the full text.',
+    scopeAll: 'Show the full text',
+    scopeMine: 'Show only what applies to me',
     englishOnlyNote:
       'This document is available in English, Ukrainian and Polish. The English text is shown.',
   },

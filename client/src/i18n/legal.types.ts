@@ -30,6 +30,10 @@ export interface LegalUi {
   legalNav: string;
   privacyLink: string;
   termsLink: string;
+  /** The lens (documents opened from the app show only what applies to the installed add-ons). */
+  scopeNote: string;
+  scopeAll: string;
+  scopeMine: string;
   /** Shown only when the page falls back to English (lt, et). */
   englishOnlyNote: string;
 }

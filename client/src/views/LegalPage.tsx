@@ -1,4 +1,9 @@
 /** Public legal pages (SPO-295 N2): the Privacy Policy and the Terms of Use, plus the DRAFT Trainer Terms and DPA (SPO-289). Reachable without signing in. */
+import { useState } from 'react';
+import { Button } from '../components/ui/Button';
+import { Hint } from '../components/ui/Hint';
+import { addonsPref, useAddonAvailable } from '../addons/enabledSet';
+import { scopeHidesAnything, scopeSections } from '../legal/docScope';
 import { SpotterMark } from '../brand/SpotterMark';
 import { LegalDoc } from '../components/ui/LegalDoc';
 import { LegalLinks } from '../components/ui/LegalLinks';
@@ -18,12 +23,39 @@ export function LegalPage({ page, fromApp = false }: { page: LegalPageId; fromAp
   const isTrainerDoc = page === 'trainer-terms' || page === 'dpa';
   const doc = isTrainerDoc ? (page === 'dpa' ? trainer.dpa : trainer.trainerTerms) : lg[page];
   const version = docVersion(page);
+  // The lens: opened from the app, the document shows what applies to the installed add-ons (SPO-571 P5). The public page,
+  // the gate and every consent hash use the full text; a list that has never been loaded narrows nothing.
+  const available = useAddonAvailable();
+  const [full, setFull] = useState(false);
+  const scoped =
+    (fromApp || isLegalPopup()) && !isTrainerDoc && addonsPref.snapshot().updatedAt > 0;
+  const narrowed =
+    scoped && scopeHidesAnything(page as 'privacy' | 'terms', doc.sections, available);
+  const shown =
+    narrowed && !full
+      ? scopeSections(page as 'privacy' | 'terms', doc.sections, available)
+      : doc.sections.map((s, i) => ({ num: i + 1, section: s }));
   return (
     <LegalDoc
       title={doc.title}
       versionLabel={lg.ui.version(version)}
       updatedLabel={lg.ui.updated(fmtVersionDate(version, locale))}
-      sections={doc.sections.map((s) => ({ id: s.id, title: s.title, body: renderBlocks(s.body) }))}
+      sections={shown.map(({ num, section: s }) => ({
+        id: s.id,
+        num,
+        title: s.title,
+        body: renderBlocks(s.body),
+      }))}
+      lens={
+        narrowed ? (
+          <>
+            {full ? null : <Hint>{lg.ui.scopeNote}</Hint>}
+            <Button variant="ghost" size="sm" onClick={() => setFull(!full)}>
+              {full ? lg.ui.scopeMine : lg.ui.scopeAll}
+            </Button>
+          </>
+        ) : undefined
+      }
       brand={
         <>
           <SpotterMark size={32} variant="tight" />

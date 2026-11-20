@@ -142,3 +142,28 @@ describe('A3: same-tab fallback remembers where the person came from', () => {
     expect(sessionStorage.getItem('spotter.legalReturn')).toBeNull();
   });
 });
+
+describe('LegalPage lens (SPO-571 P5)', () => {
+  const sectionTitles = () =>
+    screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
+
+  it('opened from the app it shows only what applies to the installed add-ons, numbers unchanged', async () => {
+    const { addonsPref } = await import('../addons/enabledSet');
+    addonsPref.set(['gym']);
+    render(<LegalPage page="privacy" fromApp />);
+    expect(sectionTitles().some((t) => t?.includes('Atlas AI chat'))).toBe(false);
+    expect(sectionTitles().find((t) => t?.includes('Contact'))).toMatch(/^14\./);
+    fireEvent.click(screen.getByRole('button', { name: 'Show the full text' }));
+    expect(sectionTitles().some((t) => t?.includes('Atlas AI chat'))).toBe(true);
+    addonsPref.reset();
+  });
+
+  it('the public page (not opened from the app) shows the full text and no lens', async () => {
+    const { addonsPref } = await import('../addons/enabledSet');
+    addonsPref.set(['gym']);
+    render(<LegalPage page="privacy" />);
+    expect(sectionTitles().some((t) => t?.includes('Atlas AI chat'))).toBe(true);
+    expect(screen.queryByRole('button', { name: 'Show the full text' })).toBeNull();
+    addonsPref.reset();
+  });
+});
