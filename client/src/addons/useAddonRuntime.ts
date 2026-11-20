@@ -1,7 +1,7 @@
 import { loadTracker } from '../trackerRt';
 import { useEffect, useMemo } from 'react';
 import { setAtlasInstalled } from '../atlas/aiConsent';
-import { reconcileAtlasConsentAfter, watchAtlasRemoval } from '../atlas/withdrawOnRemove';
+import { reconcileOrphanedConsentsAfter, watchAddonRemoval } from './withdrawConsents';
 import { useChallenges } from '../challengesState';
 import { getStoredUsage, syncSleepAutoQueue, whenAccountLoaded, whenPrefsLoaded } from '../store';
 import { getRole } from '../api';
@@ -91,8 +91,10 @@ export function useAddonRuntime() {
   useEffect(() => whenPrefsLoaded(migrateBrassGlass), []);
   useEffect(() => syncSleepAutoQueue(), [sleepOn]);
   useEffect(() => setAtlasInstalled(atlasOn), [atlasOn]);
-  useEffect(() => watchAtlasRemoval(), []);
-  useEffect(() => (atlasOn ? undefined : reconcileAtlasConsentAfter(whenPrefsLoaded)), [atlasOn]);
+  // SPO-571: no add-on, no consent. The person's own removal withdraws what the add-on owned; a removal made on another
+  // device is caught once the list and the server's consent records are known (see addons/withdrawConsents.ts).
+  useEffect(() => watchAddonRemoval(), []);
+  useEffect(() => reconcileOrphanedConsentsAfter(whenPrefsLoaded), []);
   useEffect(() => setAllowedThemes(installedThemes), [installedThemes]);
   return {
     apexOn,

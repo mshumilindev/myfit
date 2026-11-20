@@ -158,9 +158,23 @@ function foreign(role: Role): string[] {
   return addonsPref.snapshot().list.filter((id) => !isAddonAllowed(id, role));
 }
 
+const disabledListeners = new Set<(ids: ReadonlySet<string>) => void>();
+
+/**
+ * Run `fn` with the ids that the person just turned off through `disableAddons` (the Remove button; an app takes its
+ * add-ons with it). Unlike `onAddonsRemoved` this is an explicit action: sign-out, an account or role change and a
+ * synced list never call it, so it is the safe trigger for what must happen only when the person removes something
+ * (withdrawing its consents, SPO-571). Returns the unsubscribe.
+ */
+export function onAddonsDisabled(fn: (ids: ReadonlySet<string>) => void): () => void {
+  disabledListeners.add(fn);
+  return () => disabledListeners.delete(fn);
+}
+
 /** Turn items off (an app takes its add-ons with it). Idempotent; data stays. */
 export function disableAddons(ids: string[], role: Role = getRole()): void {
   const gone = new Set(ids.flatMap(removalSet));
+  const wasOn = new Set([...gone].filter((id) => current(role).has(id)));
   addonsPref.set([
     ...closeDependencies(
       [...current(role)].filter((i) => !gone.has(i)),
@@ -168,6 +182,7 @@ export function disableAddons(ids: string[], role: Role = getRole()): void {
     ),
     ...foreign(role),
   ]);
+  if (wasOn.size > 0) for (const fn of [...disabledListeners]) fn(wasOn);
 }
 
 const MODULES_MIGRATED = 'spotter.addons.modules.v1';
