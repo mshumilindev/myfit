@@ -32,6 +32,8 @@ import { currentVersion, isRequiredKind, type ConsentKind, type HealthFeature } 
 import { markLocalOff } from './localOff';
 import { sendConsentDurably } from './signupConsents';
 import { grantConsent, useConsentRecords } from './consentApi';
+import { useAddonAvailable } from '../addons/enabledSet';
+import { categoryOfConsent, consentVisible } from './categoryRegistry';
 import {
   HEALTH_KINDS,
   OUTSIDE_KINDS,
@@ -40,18 +42,6 @@ import {
   type RowModel,
   type RowStatus,
 } from './consentsModel';
-
-type Tone = 'accent' | 'chronic' | 'illness' | 'kcal' | 'atlas' | 'injury' | 'sleep';
-
-const HEALTH_ICON: Record<HealthFeature, [string, Tone]> = {
-  injuries: ['bandaids', 'injury'],
-  chronic: ['heartbeat', 'chronic'],
-  cycle: ['drop', 'injury'],
-  nicotine: ['flame', 'illness'],
-  alcohol: ['wine', 'kcal'],
-  supplements: ['pill', 'accent'],
-  nutrition: ['apple', 'kcal'],
-};
 
 function labelOf(t: Strings, kind: ConsentKind): string {
   if (kind === 'atlas-ai') return t.privAtlasLabel;
@@ -162,12 +152,13 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
     else setAsk({ kind: 'off', consent: kind });
   }
 
-  function row(kind: ConsentKind, icon: string, tone: Tone, sub: string, m: RowModel) {
+  function row(kind: ConsentKind, sub: string, m: RowModel) {
+    const look = categoryOfConsent(kind);
     return (
       <ConsentRow
         key={kind}
-        icon={icon}
-        tone={tone}
+        icon={look?.icon ?? 'shield-check'}
+        tone={look?.tone ?? 'accent'}
         label={labelOf(t, kind)}
         sub={sub}
         status={statusLine(t, m.status, locale)}
@@ -178,6 +169,12 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
     );
   }
 
+  // SPO-571: no add-on, no consent row. The records themselves stay (history, export).
+  const available = useAddonAvailable();
+  const healthKinds = HEALTH_KINDS.filter((k) => consentVisible(k, available));
+  const outsideKinds = [...OUTSIDE_KINDS, 'atlas-history' as const].filter((k) =>
+    consentVisible(k, available),
+  );
   const atlasOn = rowModel(records, 'atlas-ai', loading).on;
   const req = requiredModel(records, loading);
   const offBody = (kind: ConsentKind): string =>
@@ -215,27 +212,22 @@ export function ConsentsPage({ onDeleteAccount }: ConsentsPageProps) {
           onChange={() => setAsk({ kind: 'required' })}
         />
       </GroupedList>
-      <GroupedList header={t.privGrpHealth} footer={t.privHealthFoot}>
-        {HEALTH_KINDS.map((k) => {
-          const [icon, tone] = HEALTH_ICON[k.slice('health:'.length) as HealthFeature];
-          return row(k, icon, tone, t.privHealthSub, rowModel(records, k, loading));
-        })}
-      </GroupedList>
-      <GroupedList header={t.privGrpOutside} footer={t.privOutsideFoot}>
-        {OUTSIDE_KINDS.map((k) => {
-          const m = rowModel(records, k, loading);
-          if (k === 'atlas-ai') return row(k, 'sparkle', 'atlas', t.privAtlasSub, m);
-          if (k === 'atlas-puter') return row(k, 'sparkle', 'atlas', t.privPuterSub, m);
-          return row(k, 'map-pin', 'accent', t.privGeoSub, m);
-        })}
-        {row(
-          'atlas-history',
-          'chats-circle',
-          'atlas',
-          t.privHistorySub,
-          rowModel(records, 'atlas-history', loading),
-        )}
-      </GroupedList>
+      {healthKinds.length > 0 && (
+        <GroupedList header={t.privGrpHealth} footer={t.privHealthFoot}>
+          {healthKinds.map((k) => row(k, t.privHealthSub, rowModel(records, k, loading)))}
+        </GroupedList>
+      )}
+      {outsideKinds.length > 0 && (
+        <GroupedList header={t.privGrpOutside} footer={t.privOutsideFoot}>
+          {outsideKinds.map((k) => {
+            const m = rowModel(records, k, loading);
+            if (k === 'atlas-ai') return row(k, t.privAtlasSub, m);
+            if (k === 'atlas-puter') return row(k, t.privPuterSub, m);
+            if (k === 'atlas-history') return row(k, t.privHistorySub, m);
+            return row(k, t.privGeoSub, m);
+          })}
+        </GroupedList>
+      )}
 
       {ask?.kind === 'history-on' && (
         <ConfirmDialog

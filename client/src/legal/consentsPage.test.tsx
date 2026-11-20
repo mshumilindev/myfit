@@ -24,6 +24,8 @@ vi.mock('../api', async (orig) => ({
   currentUid: () => 'u1',
 }));
 
+import { addonsPref } from '../addons/enabledSet';
+import { HEALTH_ADDONS } from '../addons/testSetup';
 import { resetAiOverride } from '../atlas/aiConsent';
 import { isGeoPromptOpen, resetGeoGateForTests } from '../data/geoSearchGate';
 import { healthPromptFeature } from '../data/healthConsentGate';
@@ -50,13 +52,18 @@ const sw = (name: string) => screen.getByRole('switch', { name }) as HTMLInputEl
 
 beforeEach(() => {
   localStorage.clear();
+  // The test world installs the Health add-ons only; these suites cover every consent row, so Atlas is installed too.
+  addonsPref.set([...HEALTH_ADDONS, 'atlas']);
   resetGeoGateForTests();
   resetAiOverride();
   h.state = { records: [], loading: false, confirmed: true, error: null };
   h.grant.mockReset().mockResolvedValue({ id: 'x', at: 1 });
   h.withdraw.mockReset().mockResolvedValue({ id: 'y', at: 2 });
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  addonsPref.reset();
+});
 
 describe('consents model', () => {
   it('counts only current optional grants', () => {
@@ -299,5 +306,17 @@ describe('account deletion entry points (SPO-285)', () => {
     expect(exportFirst).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Download a copy first' }));
     expect(exportFirst).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('ConsentsPage follows the installed add-ons (SPO-571)', () => {
+  it('shows no row for an add-on that is not installed and keeps the rest', () => {
+    addonsPref.set(['health', 'cycle']);
+    h.state.records = [...required(), rec('health:cycle'), rec('health:nicotine')];
+    render(<ConsentsPage />);
+    expect(sw('Cycle').checked).toBe(true);
+    expect(screen.queryByRole('switch', { name: 'Nicotine' })).toBeNull();
+    expect(screen.queryByRole('switch', { name: 'Alcohol' })).toBeNull();
+    expect(screen.queryByRole('switch', { name: 'Atlas AI chat' })).toBeNull();
   });
 });

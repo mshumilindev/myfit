@@ -9,6 +9,7 @@ import {
   type ConsentKind,
   type ConsentRecord,
 } from './consents';
+import { consentVisible } from './categoryRegistry';
 
 /** The optional consents the page lists, in page order (health features, then the two that send data outside). */
 export const HEALTH_KINDS: readonly ConsentKind[] = HEALTH_FEATURES.map(
@@ -56,10 +57,22 @@ export function requiredModel(records: readonly ConsentRecord[], loading: boolea
   return { on: true, status: { state: 'given', version: terms.version, at: terms.at } };
 }
 
-/** "N of M on" over the optional consents. */
-export function countOn(records: readonly ConsentRecord[]): { on: number; total: number } {
+/**
+ * The optional consents whose owner is available (SPO-571): no add-on, no consent row. Without `available` all of them
+ * (the registry, the tests). The records themselves are never filtered: history and export show every one.
+ */
+export function visibleKinds(available?: (id: string) => boolean): readonly ConsentKind[] {
+  return available ? OPTIONAL_KINDS.filter((k) => consentVisible(k, available)) : OPTIONAL_KINDS;
+}
+
+/** "N of M on" over the optional consents shown (`available`: the owner gate; absent = all). */
+export function countOn(
+  records: readonly ConsentRecord[],
+  available?: (id: string) => boolean,
+): { on: number; total: number } {
+  const kinds = visibleKinds(available);
   return {
-    on: OPTIONAL_KINDS.filter((k) => hasCurrentConsent(records, k)).length,
-    total: OPTIONAL_KINDS.length,
+    on: kinds.filter((k) => hasCurrentConsent(records, k)).length,
+    total: kinds.length,
   };
 }

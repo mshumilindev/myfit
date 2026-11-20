@@ -9,6 +9,7 @@ import { useMyDataT } from '../i18n/myData';
 import { LEGAL_VERSIONS } from './consents';
 import { useConsentRecords } from './consentApi';
 import { countOn } from './consentsModel';
+import { useAddonAvailable } from '../addons/enabledSet';
 import { ConsentsScreen } from './ConsentsScreen';
 import { DeleteAccountFlow } from './DeleteAccountFlow';
 import { LEGAL_WINDOW } from './route';
@@ -40,7 +41,8 @@ export function PrivacyHub({
   const md = useMyDataT();
   const { records, loading } = useConsentRecords();
   const [deleting, setDeleting] = useState(false);
-  const c = countOn(records);
+  const available = useAddonAvailable();
+  const c = countOn(records, available);
   return (
     <>
       <GroupedList header={t.privHubHeader}>
