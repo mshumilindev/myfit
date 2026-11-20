@@ -207,6 +207,35 @@ describe('SessionView · returning after a break', () => {
   });
 });
 
+describe('SessionView · target line after a break (SPO-600)', () => {
+  const hint = (c: HTMLElement) => c.querySelector('.prog-hint')!.textContent ?? '';
+
+  it('the delta, the target and "prev" share one reference: a warm-up-only last session is not "prev"', () => {
+    seed([
+      wk('open', [ex('bench', 'Bench press', [])]),
+      // Last visit: only a warm-up was logged, so it is not a working top set.
+      fin('h2', 5, [ex('b1', 'Bench press', [set('w1', { weight: 60, reps: 6, isWarmup: true })])]),
+      // Before it: a real working session, 5 weeks ago.
+      fin('h1', 40, [ex('b0', 'Bench press', [set('x1', { weight: 75, reps: 5 })])]),
+    ]);
+    const { container } = mount();
+    const text = hint(container);
+    expect(text).toContain('-7.5');
+    expect(text).toContain('67.5');
+    expect(text).toContain('prev 75 × 5');
+    expect(text).not.toContain('prev 60');
+  });
+
+  it('with a plain last session nothing changes: prev is that session', () => {
+    seed([
+      wk('open', [ex('bench', 'Bench press', [])]),
+      fin('h1', 21, [ex('b0', 'Bench press', [set('x1', { weight: 100, reps: 5 })])]),
+    ]);
+    const { container } = mount();
+    expect(hint(container)).toContain('prev 100 × 5');
+  });
+});
+
 describe('SessionView · a new record', () => {
   const recordRun = async () => {
     seed([

@@ -3052,6 +3052,12 @@ export function SessionView(props: {
             loadType,
           })
         : null;
+    // One reference for the delta, the target and "prev": the session the target was built on.
+    // `prev` (last session with ANY set) can be a warm-up-only visit the target skipped (SPO-600).
+    const hintPrev: { weight: number | null; reps: number } | undefined =
+      target && target.state !== 'first' && target.prevReps !== null
+        ? { weight: target.prevWeight, reps: target.prevReps }
+        : prev;
     // Weight differs per machine/gym: what the main gym says about this lift.
     const xg =
       live && !grp && !timed && !marker && isStrengthExercise(ex) && workout
@@ -3523,8 +3529,10 @@ export function SessionView(props: {
                       : `${fmtWeightValue(target.weight)} ${t.kgCol.toLowerCase()}`}
                   </span>
                   <span className="ph-action">{progActionLabel(t, target.state)}</span>
-                  {prev && (
-                    <span className="ph-prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
+                  {hintPrev && (
+                    <span className="ph-prev">
+                      {t.prev(fmtSet(hintPrev.weight, hintPrev.reps))}
+                    </span>
                   )}
                 </div>
                 <ProgReturnNote target={target} lift={ex.name} />
