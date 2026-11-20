@@ -4,7 +4,11 @@ import type { ConsentRecord } from '../legal/consents';
 const sent = vi.hoisted(() => [] as { kind: string; action: string }[]);
 const marked = vi.hoisted(() => [] as string[]);
 const health = vi.hoisted(() => [] as string[]);
-const shared = vi.hoisted(() => ({ forgot: [] as string[], levels: [] as string[] }));
+const shared = vi.hoisted(() => ({
+  forgot: [] as string[],
+  levels: [] as string[],
+  link: null as null | { state: string; grants: { sleep: string } },
+}));
 const snapshot = vi.hoisted(() => ({ records: [] as unknown[], fromCache: false }));
 vi.mock('../api', async (orig) => ({
   ...(await orig<typeof import('../api')>()),
@@ -28,6 +32,7 @@ vi.mock('../store', async (orig) => ({
 }));
 vi.mock('../coach/client/data/config', () => ({
   getClientPort: () => ({
+    peek: () => (shared.link ? { link: shared.link } : null),
     setLevel: async (c: string, l: string) => void shared.levels.push(`${c}:${l}`),
   }),
 }));
@@ -58,6 +63,7 @@ beforeEach(() => {
   health.length = 0;
   shared.forgot.length = 0;
   shared.levels.length = 0;
+  shared.link = null;
   snapshot.records = [];
   snapshot.fromCache = false;
   addonsPref.reset();
@@ -161,6 +167,30 @@ describe('consents whose add-on is not installed (removed on another device)', (
     await Promise.resolve();
     off();
     expect(health).toEqual([]);
+  });
+
+  it('also stops sharing the data of an add-on that is not installed (sleep, availability)', async () => {
+    enableAddons(['health'], 'member');
+    shared.link = { state: 'active', grants: { sleep: 'summary' } };
+    const off = reconcileOrphanedConsents();
+    await vi.waitFor(() => expect(shared.levels).toEqual(['sleep:off']));
+    off();
+    expect(shared.forgot).toEqual(['availability']);
+  });
+
+  it('does not call the trainer port when sleep is already Off or there is no trainer link', async () => {
+    enableAddons(['health'], 'member');
+    for (const link of [
+      { state: 'active', grants: { sleep: 'off' } },
+      { state: 'none', grants: { sleep: 'summary' } },
+    ]) {
+      shared.link = link;
+      shared.levels.length = 0;
+      const off = reconcileOrphanedConsents();
+      await new Promise((r) => setTimeout(r, 0));
+      off();
+      expect(shared.levels).toEqual([]);
+    }
   });
 
   it('does nothing when the add-on is reinstalled before the answer arrives', async () => {

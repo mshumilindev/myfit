@@ -79,7 +79,12 @@ async function stopSharing(removed: ReadonlySet<string>): Promise<void> {
   if (removed.has('sleep')) {
     try {
       const { getClientPort } = await import('../coach/client/data/config');
-      await getClientPort().setLevel('sleep', 'off');
+      const port = getClientPort();
+      const link = port.peek()?.link;
+      // No trainer link or already Off: nothing to revoke (also keeps the start-up reconcile from calling every launch).
+      if (link && link.state === 'none') return;
+      if (link && link.grants.sleep === 'off') return;
+      await port.setLevel('sleep', 'off');
     } catch {
       // Offline or no trainer link: nothing to switch off here; Trainer sharing still shows the level.
     }
@@ -125,6 +130,10 @@ export function reconcileOrphanedConsents(): () => void {
       // The list must have been written or synced at least once: an empty never-loaded list is not "removed everything".
       if (addonsPref.snapshot().updatedAt <= 0) return;
       withdrawEntries(orphanedOn(records));
+      // Sharing-only settings of add-ons that are gone (sleep, availability) go to Off as well.
+      void stopSharing(
+        new Set(CATEGORY_REGISTRY.filter((e) => e.share && isOrphaned(e)).map((e) => e.owner)),
+      );
     },
     () => undefined,
   );
