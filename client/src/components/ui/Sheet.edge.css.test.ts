@@ -34,4 +34,11 @@ describe('sheet edge (kit token)', () => {
       expect(b).toMatch(/--sheet-edge/);
     }
   });
+  it('Nutrition legacy sheet draws only the page-facing edge', () => {
+    const css = src('nutrition', 'nutrition.css');
+    const i = css.indexOf('.app-nutrition .sheet {');
+    const body = css.slice(i, css.indexOf('}', i));
+    expect(body).toMatch(/border:\s*0;/);
+    expect(body).toMatch(/border-top:/);
+  });
 });

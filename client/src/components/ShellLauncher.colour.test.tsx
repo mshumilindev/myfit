@@ -177,14 +177,14 @@ describe('ShellLauncher: tokens and contrast', () => {
     return mixRgb(plate, toRgb(tok.get(`--color-${fam}`) as string), pct);
   };
 
-  it('the sheet recipe in CSS: current-app tone, accent 6-8% over a dark base, 1px accent-line edge', () => {
+  it('the sheet recipe in CSS: current-app tone, accent 6-8% over a dark base, accent-line edge on the page-facing side only (SPO-599)', () => {
     const glass = glassCss();
     const at = glass.indexOf('html[data-theme] .sheet.sheet--toned.uimore {');
     expect(at).toBeGreaterThan(0);
     const rule = glass.slice(at, glass.indexOf('\n}\n', at));
     expect(rule).toMatch(/var\(--t-base\) calc\(8% \* var\(--plate-tint-k\)\)/);
     expect(rule).toMatch(/var\(--t-base\) calc\(6% \* var\(--plate-tint-k\)\)/);
-    expect(rule).toMatch(/inset 0 0 0 1px var\(--t-line\)/);
+    expect(rule).toMatch(/inset var\(--sheet-edge\) 0 0 var\(--t-line\)/);
     const own = css.slice(css.indexOf('.uimore.sheet--toned {'));
     expect(own.slice(0, own.indexOf('}'))).toMatch(/border: 1px solid var\(--t-line\)/);
     expect(css).toMatch(/--shell-sheet-base: color-mix\(in srgb, var\(--color-bg\) 30%, black\)/);
