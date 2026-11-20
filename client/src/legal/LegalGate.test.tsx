@@ -310,6 +310,14 @@ describe('step 1: the documents are read on the page', () => {
     expect(screen.getByText('Ready to continue')).toBeTruthy();
   });
 
+  it('the gate reads the FULL Privacy Policy whatever add-ons are installed (SPO-571 P5: the lens never narrows what is accepted)', () => {
+    addonsPref.set(['gym']); // nothing of Atlas / Planner installed
+    render(<LegalGate />);
+    fireEvent.click(doc(/^Privacy Policy/));
+    expect(screen.getAllByText('Atlas AI chat').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Health data and consent').length).toBeGreaterThan(0);
+  });
+
   it('a document counts as read only once scrolled to its end', () => {
     const own = (k: 'scrollHeight' | 'clientHeight', v: number) =>
       Object.defineProperty(HTMLElement.prototype, k, { configurable: true, get: () => v });
