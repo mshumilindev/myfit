@@ -24,7 +24,7 @@ import { healthFeatureOf } from '../legal/healthFeatures';
 import { markLocalOff } from '../legal/localOff';
 import { sendConsentDurably } from '../legal/signupConsents';
 import { forgetShareLevel } from '../store';
-import { isAddonAllowed, isAddonEnabled, onAddonsDisabled } from './enabledSet';
+import { addonsPref, isAddonAllowed, isAddonEnabled, onAddonsDisabled } from './enabledSet';
 
 const withdrawable = (
   e: CategoryEntry,
@@ -122,6 +122,8 @@ export function reconcileOrphanedConsents(): () => void {
     (records, meta) => {
       if (meta.fromCache) return;
       off();
+      // The list must have been written or synced at least once: an empty never-loaded list is not "removed everything".
+      if (addonsPref.snapshot().updatedAt <= 0) return;
       withdrawEntries(orphanedOn(records));
     },
     () => undefined,

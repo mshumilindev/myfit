@@ -123,7 +123,7 @@ export const CATEGORY_REGISTRY: readonly CategoryEntry[] = [
   },
   {
     id: 'geo-search',
-    owner: 'gym',
+    owner: CORE_OWNER,
     consent: 'geo-search',
     share: 'none',
     onRemove: 'withdraw',

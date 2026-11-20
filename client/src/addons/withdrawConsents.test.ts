@@ -141,6 +141,7 @@ describe('consents whose add-on is not installed (removed on another device)', (
   });
 
   it('withdraws only after the server answered, not on a cache-only snapshot', async () => {
+    enableAddons(['health'], 'member'); // a list that has been loaded or written (updatedAt > 0)
     snapshot.records = [rec('health:cycle')];
     snapshot.fromCache = true;
     const off = reconcileOrphanedConsents();
@@ -152,6 +153,14 @@ describe('consents whose add-on is not installed (removed on another device)', (
     await Promise.resolve();
     off2();
     expect(health).toEqual(['cycle']);
+  });
+
+  it('does nothing while the add-on list has never been loaded', async () => {
+    snapshot.records = [rec('health:cycle')];
+    const off = reconcileOrphanedConsents();
+    await Promise.resolve();
+    off();
+    expect(health).toEqual([]);
   });
 
   it('does nothing when the add-on is reinstalled before the answer arrives', async () => {

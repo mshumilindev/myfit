@@ -64,15 +64,16 @@ describe('category registry (SPO-571 guard)', () => {
 describe('consent visibility by owner', () => {
   const none = () => false;
   it('hides every consent whose owner is not available, shows the rest', () => {
-    expect(visibleKinds(none)).toEqual([]);
+    // gym search is a core consent (not tied to one add-on), so it stays when nothing is installed
+    expect(visibleKinds(none)).toEqual(['geo-search']);
     expect(visibleKinds(() => true)).toEqual(OPTIONAL_KINDS);
-    expect(visibleKinds((id) => id === 'cycle')).toEqual(['health:cycle']);
+    expect(visibleKinds((id) => id === 'cycle')).toEqual(['health:cycle', 'geo-search']);
   });
   it('treats an unknown kind as visible and the core owner as always available', () => {
     expect(consentVisible('terms', none)).toBe(true);
   });
   it('counts only the rows that are shown', () => {
-    expect(countOn([], none)).toEqual({ on: 0, total: 0 });
+    expect(countOn([], none)).toEqual({ on: 0, total: 1 });
     expect(countOn([], () => true)).toEqual({ on: 0, total: OPTIONAL_KINDS.length });
     expect(countOn([])).toEqual({ on: 0, total: OPTIONAL_KINDS.length });
   });

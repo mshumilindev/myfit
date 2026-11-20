@@ -9,7 +9,13 @@ import { auth } from '../firebase';
 import { migrateBrassGlass, migrateRoleAddons } from './migrateRoles';
 import { setAllowedThemes } from '../themes/registry';
 import { useInstalledThemeIds, useThemesOn } from '../themes/useThemeAccess';
-import { migrateModules, onAddonsRemoved, useAddonAvailable, useAddonOrBase } from './enabledSet';
+import {
+  migrateModules,
+  onAddonsRemoved,
+  useAddonAvailable,
+  useAddonOrBase,
+  useEnabledAddons,
+} from './enabledSet';
 import { installPack, PACK_IDS, removePack } from './packs';
 
 /**
@@ -94,7 +100,9 @@ export function useAddonRuntime() {
   // SPO-571: no add-on, no consent. The person's own removal withdraws what the add-on owned; a removal made on another
   // device is caught once the list and the server's consent records are known (see addons/withdrawConsents.ts).
   useEffect(() => watchAddonRemoval(), []);
-  useEffect(() => reconcileOrphanedConsentsAfter(whenPrefsLoaded), []);
+  // Re-runs when the installed list changes (a removal synced from another device while this one is open).
+  const installed = useEnabledAddons();
+  useEffect(() => reconcileOrphanedConsentsAfter(whenPrefsLoaded), [installed]);
   useEffect(() => setAllowedThemes(installedThemes), [installedThemes]);
   return {
     apexOn,

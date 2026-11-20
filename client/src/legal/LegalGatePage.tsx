@@ -30,6 +30,8 @@ import { useTrainerTermsT } from '../i18n/trainerTerms';
 import { agreementDocIds, agreementVersions, useAgreementGate } from './AgreementBlock';
 import { renderBlocks } from './docBlocks';
 import { clearGateDraft, loadGateDraft, saveGateDraft } from './gateDraft';
+import { useAddonAvailable } from '../addons/enabledSet';
+import { consentVisible } from './categoryRegistry';
 import { ATLAS_AI_CATEGORIES, GATE_CHOICES, choiceGrants, type GateChoice } from './gateChoices';
 import { lastConsentFailure, useGateRecorder } from './gateRecorder';
 import { grantGeoSearch } from './geoGrant';
@@ -61,6 +63,11 @@ export function LegalGatePage({
   const g = useGateT();
   const s = useTrainerTermsT();
   const hasTerms = parts.base || parts.trainer;
+  // SPO-571: no add-on, no consent. Only the choices whose add-on is installed are offered here; a consent given for
+  // something that is not installed would be withdrawn again at the next start (addons/withdrawConsents.ts).
+  const available = useAddonAvailable();
+  const choices = GATE_CHOICES.filter((c) => consentVisible(c.kind, available));
+  const showChoices = withChoices && choices.length > 0;
   const [step, setStep] = useState<'docs' | 'agree' | 'choices'>(hasTerms ? 'docs' : 'choices');
   const leave = useGateLeave(onSignOut);
   const steps = [
@@ -70,13 +77,13 @@ export function LegalGatePage({
           { id: 'agree', label: g.page.stepAgree },
         ]
       : []),
-    ...(withChoices ? [{ id: 'choices', label: g.page.stepChoices }] : []),
+    ...(showChoices ? [{ id: 'choices', label: g.page.stepChoices }] : []),
   ];
   const current = Math.max(
     0,
     steps.findIndex((x) => x.id === step),
   );
-  const termsDone = () => (withChoices ? setStep('choices') : onFinished());
+  const termsDone = () => (showChoices ? setStep('choices') : onFinished());
   const label = step === 'choices' ? g.choicesTitle : parts.base ? g.termsTitle : s.title;
   const top = (done: readonly string[]) =>
     steps.length > 1 ? (
@@ -92,6 +99,12 @@ export function LegalGatePage({
       />
     ) : undefined;
   const common = { label, top, aside: leave.dialogs };
+  // Nothing to choose (no optional add-on installed) and no document to accept: the gate has nothing to ask.
+  const nothingToAsk = withChoices && !showChoices && !hasTerms;
+  useEffect(() => {
+    if (nothingToAsk) onFinished();
+  }, [nothingToAsk, onFinished]);
+  if (nothingToAsk) return null;
   return step !== 'choices' ? (
     <TermsStep
       {...common}
@@ -106,6 +119,7 @@ export function LegalGatePage({
   ) : (
     <ChoicesStep
       {...common}
+      choices={choices}
       preview={preview}
       onFinished={onFinished}
       leave={hasTerms ? null : leave.buttons}
@@ -320,6 +334,7 @@ function AgreeText({ base, trainer }: Parts) {
 }
 
 function ChoicesStep({
+  choices,
   preview,
   onFinished,
   leave,
@@ -327,6 +342,7 @@ function ChoicesStep({
   top,
   aside,
 }: StepShell & {
+  choices: readonly GateChoice[];
   preview: boolean;
   onFinished: () => void;
   leave: ReactNode;
@@ -346,8 +362,8 @@ function ChoicesStep({
       else next.delete(kind);
       return next;
     });
-  const allOn = on.size === GATE_CHOICES.length;
-  const setAll = (v: boolean) => setOn(v ? new Set(GATE_CHOICES.map((c) => c.kind)) : new Set());
+  const allOn = on.size === choices.length;
+  const setAll = (v: boolean) => setOn(v ? new Set(choices.map((c) => c.kind)) : new Set());
   const textOf = (c: GateChoice): GateChoiceText =>
     c.kind === 'atlas-ai' ? g.atlas : c.kind === 'geo-search' ? g.geo : g.health[c.feature!];
   const facts = (kind: ConsentKind) => {
@@ -369,36 +385,38 @@ function ChoicesStep({
     return null;
   };
   const rows = (group: GateChoice['group']) =>
-    GATE_CHOICES.filter((c) => c.group === group).map((c) => {
-      const x = textOf(c);
-      const f = on.has(c.kind) ? facts(c.kind) : null;
-      return (
-        <div key={c.kind} className="lgp-row">
-          <ConsentRow
-            icon={c.icon}
-            tone={c.tone}
-            label={x.label}
-            sub={x.sub}
-            status={g.ifOff(x.hint)}
-            on={on.has(c.kind)}
-            disabled={busy}
-            onChange={(v) => toggle(c.kind, v)}
-          />
-          {f && (
-            <div className="lgp-facts">
-              {f.map((r) => (
-                <ListRow
-                  key={r.label}
-                  icon={<IconTile tone="neutral" size={30} icon={r.icon} />}
-                  label={r.label}
-                  sub={r.sub}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      );
-    });
+    choices
+      .filter((c) => c.group === group)
+      .map((c) => {
+        const x = textOf(c);
+        const f = on.has(c.kind) ? facts(c.kind) : null;
+        return (
+          <div key={c.kind} className="lgp-row">
+            <ConsentRow
+              icon={c.icon}
+              tone={c.tone}
+              label={x.label}
+              sub={x.sub}
+              status={g.ifOff(x.hint)}
+              on={on.has(c.kind)}
+              disabled={busy}
+              onChange={(v) => toggle(c.kind, v)}
+            />
+            {f && (
+              <div className="lgp-facts">
+                {f.map((r) => (
+                  <ListRow
+                    key={r.label}
+                    icon={<IconTile tone="neutral" size={30} icon={r.icon} />}
+                    label={r.label}
+                    sub={r.sub}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      });
 
   async function save() {
     setBusy(true);
@@ -449,7 +467,7 @@ function ChoicesStep({
       {top([])}
       <p className="lgg-lead ut-base ut-muted">{g.choicesLead}</p>
       <div className="lgp-bulk">
-        <span className="ut-sm ut-muted">{p.onCount(on.size, GATE_CHOICES.length)}</span>
+        <span className="ut-sm ut-muted">{p.onCount(on.size, choices.length)}</span>
         <Button variant="secondary" size="sm" disabled={busy} onClick={() => setAll(!allOn)}>
           {allOn ? p.allOff : p.allOn}
         </Button>

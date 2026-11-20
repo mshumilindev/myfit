@@ -37,6 +37,8 @@ vi.mock('./consentApi', async () => {
 });
 
 import { resetGeoGateForTests } from '../data/geoSearchGate';
+import { addonsPref } from '../addons/enabledSet';
+import { HEALTH_ADDONS } from '../addons/testSetup';
 import { resetAiOverride } from '../atlas/aiConsent';
 import { LegalGate } from './LegalGate';
 import { LEGAL_VERSIONS, currentVersion, type ConsentRecord } from './consents';
@@ -72,6 +74,8 @@ const server = (records: ConsentRecord[]) => ({
 });
 
 beforeEach(() => {
+  // The gate lists only consents whose add-on is installed; these cases cover every row, so Atlas is installed too.
+  addonsPref.set([...HEALTH_ADDONS, 'atlas']);
   resetGeoGateForTests();
   localStorage.clear();
   sessionStorage.clear();
@@ -88,6 +92,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  addonsPref.reset();
   resetAiOverride();
   vi.restoreAllMocks();
 });
