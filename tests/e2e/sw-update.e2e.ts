@@ -27,6 +27,13 @@ async function startProxy(): Promise<{ url: string; deploy: () => void; server: 
   let deployed = false;
   const server = createServer((req, res) => {
     void (async () => {
+      // This test is about the worker handover. A media-pack download (SPO-556 I6) runs through the old worker for a while
+      // and Chrome does not activate a replacement until the old worker's in-flight requests are done, so keep it out of here.
+      if ((req.url ?? '').startsWith('/addon-packs.json')) {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end('{}');
+        return;
+      }
       const up = await fetch(new URL(req.url ?? '/', ORIGIN));
       const headers: Record<string, string> = {};
       up.headers.forEach((v, k) => {
