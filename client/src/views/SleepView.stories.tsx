@@ -6,15 +6,36 @@ import { seedPage } from '../stories/fixtures';
 import { __getStateForTests, __replaceStateForTests } from '../store';
 
 /** The Sleep overlay only ever shows while the app is in night mode (App.tsx sets `data-sleep`). */
-function NightFrame({ children }: { children: React.ReactNode }) {
+function NightFrame({ children, night = true }: { children: React.ReactNode; night?: boolean }) {
   useEffect(() => {
+    if (!night) return undefined;
     const el = document.documentElement;
     el.dataset.sleep = 'night';
     return () => {
       delete el.dataset.sleep;
     };
-  }, []);
+  }, [night]);
   return <PageFrame>{children}</PageFrame>;
+}
+
+/** SPO-550/551: 14 finished nights (6h30..8h30, a late weekend) so the hub shows both bar charts. */
+function seedHistory(): void {
+  seedPage();
+  const hours = [7.5, 8.5, 6.5, 7, 8, 8.25, 6.75, 9, 7.25, 8, 6.5, 8.5, 7.75, 8.25];
+  const sleeps = hours.map((h, i) => {
+    const wake = new Date();
+    wake.setHours(7, 0, 0, 0);
+    wake.setDate(wake.getDate() - i);
+    const wakeMs = wake.getTime();
+    return {
+      id: `story-hist-${i}`,
+      date: 'story',
+      bedtime: wakeMs - h * 3600_000,
+      wake: wakeMs,
+      source: 'live' as const,
+    };
+  });
+  __replaceStateForTests({ ...__getStateForTests(), sleeps });
 }
 
 /** The Sleep screen with a few weeks of seeded training data. */
@@ -23,8 +44,8 @@ const meta = {
   component: SleepView,
   parameters: { layout: 'fullscreen' },
   decorators: [
-    (Story) => (
-      <NightFrame>
+    (Story, context) => (
+      <NightFrame night={context.parameters.sleepNight !== false}>
         <Story />
       </NightFrame>
     ),
@@ -64,4 +85,28 @@ export const Logged: Story = {
       return {};
     },
   ],
+};
+
+/** SPO-550/551: the hub with a full history (bars, goal line, weekday rhythm), night mode as in the app. */
+export const WithHistory: Story = {
+  args: { onClose: () => undefined },
+  loaders: [
+    () => {
+      seedHistory();
+      return {};
+    },
+  ],
+};
+
+/** SPO-550/551: the same hub on the day theme (no `data-sleep`), to check bars follow the theme accent. */
+export const WithHistoryDay: Story = {
+  args: { onClose: () => undefined },
+  decorators: [
+    (Story) => (
+      <PageFrame>
+        <Story />
+      </PageFrame>
+    ),
+  ],
+  loaders: WithHistory.loaders,
 };
