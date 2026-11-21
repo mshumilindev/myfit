@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { addonsPref } from '../addons/enabledSet';
 import { SleepView } from './SleepView';
 import { PageFrame } from '../stories/PageFrame';
 import { seedPage } from '../stories/fixtures';
@@ -20,6 +21,7 @@ function NightFrame({ children, night = true }: { children: React.ReactNode; nig
 
 /** SPO-550/551: 14 finished nights (6h30..8h30, a late weekend) so the hub shows both bar charts. */
 function seedHistory(): void {
+  addonsPref.set(['sleep', 'activities']); // the Sleep add-on must be installed or its nights are masked (SPO-500)
   seedPage();
   const hours = [7.5, 8.5, 6.5, 7, 8, 8.25, 6.75, 9, 7.25, 8, 6.5, 8.5, 7.75, 8.25];
   const sleeps = hours.map((h, i) => {
@@ -90,12 +92,10 @@ export const Logged: Story = {
 /** SPO-550/551: the hub with a full history (bars, goal line, weekday rhythm), night mode as in the app. */
 export const WithHistory: Story = {
   args: { onClose: () => undefined },
-  loaders: [
-    () => {
-      seedHistory();
-      return {};
-    },
-  ],
+  // `beforeEach` runs after every loader: the page-level `seedPage` loader would otherwise wipe the nights.
+  beforeEach: () => {
+    seedHistory();
+  },
 };
 
 /** SPO-550/551: the same hub on the day theme (no `data-sleep`), to check bars follow the theme accent. */
@@ -108,5 +108,5 @@ export const WithHistoryDay: Story = {
       </PageFrame>
     ),
   ],
-  loaders: WithHistory.loaders,
+  beforeEach: WithHistory.beforeEach,
 };
