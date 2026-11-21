@@ -92,21 +92,20 @@ export const Logged: Story = {
 /** SPO-550/551: the hub with a full history (bars, goal line, weekday rhythm), night mode as in the app. */
 export const WithHistory: Story = {
   args: { onClose: () => undefined },
-  // `beforeEach` runs after every loader: the page-level `seedPage` loader would otherwise wipe the nights.
-  beforeEach: () => {
-    seedHistory();
-  },
+  loaders: [
+    async () => {
+      // The Sleep runtime (`sleepBoot`) is a lazy chunk (SPO-500 I8): without it every stat is empty. Loading it also runs after the
+      // page-level `seedPage` loader, which would otherwise wipe the nights.
+      await import('../sleepBoot');
+      seedHistory();
+      return {};
+    },
+  ],
 };
 
 /** SPO-550/551: the same hub on the day theme (no `data-sleep`), to check bars follow the theme accent. */
 export const WithHistoryDay: Story = {
   args: { onClose: () => undefined },
-  decorators: [
-    (Story) => (
-      <PageFrame>
-        <Story />
-      </PageFrame>
-    ),
-  ],
-  beforeEach: WithHistory.beforeEach,
+  parameters: { sleepNight: false },
+  loaders: WithHistory.loaders,
 };
