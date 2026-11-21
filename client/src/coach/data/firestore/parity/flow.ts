@@ -1,6 +1,6 @@
 import { ALL_OFF } from '../../../domain/consent';
 import type { Consent } from '../../../domain/types';
-import { C, T, makeServer, settle, type Server } from './harness';
+import { C, T, makeServer, settle, until, type Server } from './harness';
 import { makeClient, makeTrainer, type ClientSide, type TrainerSide } from './sides';
 
 export const log = (id: string, status: 'PASS' | 'FAIL' | 'INFO', note: string) =>
@@ -54,7 +54,7 @@ export async function linkUp(
   await tr.world.load({ signal: new AbortController().signal });
   return { s, tr, cl, cid, token };
 }
-export { settle };
+export { settle, until };
 
 /** Latest value a subscription delivers within `ms` (the real listeners emit a cached/empty snapshot first). */
 export async function latest<X>(

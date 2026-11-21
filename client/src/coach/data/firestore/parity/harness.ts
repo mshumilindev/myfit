@@ -314,3 +314,9 @@ export interface Side<P> {
 
 const settle = (ms = 30) => new Promise((r) => setTimeout(r, ms));
 export { settle };
+
+/** Wait until `cond` holds (polling, real timers). A fixed `settle` is only a guess about how fast a snapshot arrives. */
+export async function until(cond: () => unknown, ms = 5000): Promise<void> {
+  const end = Date.now() + ms;
+  while (!cond() && Date.now() < end) await settle(10);
+}

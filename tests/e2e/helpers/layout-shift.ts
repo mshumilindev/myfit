@@ -121,6 +121,11 @@ export async function arm(
   locale = 'en',
   role: 'member' | 'trainer' | 'admin' = 'member',
 ): Promise<void> {
+  // The media-pack download (SPO-556 I6) keeps the network busy for minutes (`networkidle` never comes) and is not what these
+  // tests are about, so the manifest is empty here.
+  await page.route('**/addon-packs.json', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }),
+  );
   const apiKey = await bundleApiKey(page, base);
   const now = Math.floor(Date.now() / 1000);
   const jwt = [

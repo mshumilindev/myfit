@@ -11,7 +11,7 @@ import { dayOfTs, weekStartDay } from '../../schedule/time';
 import { opaqueSlotKey } from '../../schedule/ids';
 import type { RescheduleRequest } from '../../schedule/types';
 import { C, NOW, T } from './parity/harness';
-import { latest, linkUp, settle, type World } from './parity/flow';
+import { latest, linkUp, settle, until, type World } from './parity/flow';
 
 const HOUR = 3600_000;
 type Store = ReturnType<typeof scheduleStoreFor>;
@@ -54,13 +54,20 @@ async function setup(): Promise<{
   return { w, ts, cs, planned };
 }
 
-const cards = async (w: World, side: 'trainer' | 'client') => {
+/** Request cards in a side's thread. `want` = the ids that must be there: the snapshot is re-read until they are (or 5 s). */
+const cards = async (w: World, side: 'trainer' | 'client', want: string[] = []) => {
   const chat = side === 'trainer' ? w.tr.chat : w.cl.chat;
-  const msgs =
-    (await latest<{ body: { kind: string; reqId?: string } }[]>((on, er) =>
-      chat.subscribeMessages(w.cid, (m) => on(m as never), er),
-    )) ?? [];
-  return msgs.filter((m) => m.body.kind === 'request').map((m) => m.body.reqId);
+  const read = async () => {
+    const msgs =
+      (await latest<{ body: { kind: string; reqId?: string } }[]>((on, er) =>
+        chat.subscribeMessages(w.cid, (m) => on(m as never), er),
+      )) ?? [];
+    return msgs.filter((m) => m.body.kind === 'request').map((m) => m.body.reqId);
+  };
+  const end = Date.now() + 5000;
+  let got = await read();
+  while (!want.every((id) => got.includes(id)) && Date.now() < end) got = await read();
+  return got;
 };
 const find = (st: Store, f: (r: RescheduleRequest) => boolean) => st.getState().requests.find(f);
 
@@ -79,8 +86,9 @@ describe('F4 counters, both directions', () => {
       },
     ]))!;
     await settle(80);
+    await until(() => find(cs, (r) => r.id === first.id));
     expect(find(cs, (r) => r.id === first.id)).toBeTruthy();
-    expect(await cards(w, 'client')).toContain(first.id);
+    expect(await cards(w, 'client', [first.id])).toContain(first.id);
     expect(w.s.pushes.some((p) => p.uid === C && p.kind === 'request')).toBe(true);
 
     // what the client's "Suggest another time" does on the trainer's card
@@ -94,6 +102,7 @@ describe('F4 counters, both directions', () => {
     expect(counter!.from).toBe('client');
     expect(counter!.supersedes).toBe(first.id);
     await settle(100);
+    await until(() => find(ts, (r) => r.supersedes === first.id));
     // the trainer sees the old request answered as a counter and the new one waiting for them
     expect(find(ts, (r) => r.id === first.id)?.status).toBe('countered');
     const seen = find(ts, (r) => r.supersedes === first.id);
@@ -104,12 +113,17 @@ describe('F4 counters, both directions', () => {
     });
     expect(statusAt(seen!, NOW)).toBe('pending');
     // the card of the counter is in the thread of both
-    expect(await cards(w, 'trainer')).toEqual(expect.arrayContaining([first.id, counter!.id]));
-    expect(await cards(w, 'client')).toEqual(expect.arrayContaining([first.id, counter!.id]));
+    expect(await cards(w, 'trainer', [first.id, counter!.id])).toEqual(
+      expect.arrayContaining([first.id, counter!.id]),
+    );
+    expect(await cards(w, 'client', [first.id, counter!.id])).toEqual(
+      expect.arrayContaining([first.id, counter!.id]),
+    );
     expect(w.s.pushes.some((p) => p.uid === T && p.kind === 'request')).toBe(true);
     // the trainer accepts the counter: the session moves for the client
     expect(await ts.respond(seen!.id, 'accepted', 'trainer')).toBe(true);
     await settle(100);
+    await until(() => find(cs, (r) => r.id === counter!.id)?.status === 'accepted');
     expect(find(cs, (r) => r.id === counter!.id)?.status).toBe('accepted');
     const moved = slotsOf(cs, NOW).find((x) => x.key === target.key && x.status !== 'moved');
     expect(moved?.start).toBe(target.start + 48 * HOUR);
@@ -130,9 +144,10 @@ describe('F4 counters, both directions', () => {
       },
     ]))!;
     await settle(100);
+    await until(() => find(ts, (r) => r.from === 'client' && r.slotKey === opaqueSlotKey(t3.key)));
     const seen = find(ts, (r) => r.from === 'client' && r.slotKey === opaqueSlotKey(t3.key));
     expect(seen).toBeTruthy();
-    expect(await cards(w, 'trainer')).toContain(mine.id);
+    expect(await cards(w, 'trainer', [mine.id])).toContain(mine.id);
     expect(w.s.pushes.filter((p) => p.uid === T && p.kind === 'request').length).toBeGreaterThan(0);
 
     const tc = await ts.counter(seen!.id, {
@@ -144,6 +159,7 @@ describe('F4 counters, both directions', () => {
     expect(tc).not.toBeNull();
     expect(ts.getState().failed).toBeNull();
     await settle(100);
+    await until(() => find(cs, (r) => r.supersedes === mine.id));
     expect(find(cs, (r) => r.id === mine.id)?.status).toBe('countered');
     const back = find(cs, (r) => r.supersedes === mine.id);
     expect(back).toMatchObject({
@@ -151,11 +167,14 @@ describe('F4 counters, both directions', () => {
       status: 'pending',
       toStart: t3.start + 2 * HOUR,
     });
-    expect(await cards(w, 'client')).toEqual(expect.arrayContaining([mine.id, tc!.id]));
+    expect(await cards(w, 'client', [mine.id, tc!.id])).toEqual(
+      expect.arrayContaining([mine.id, tc!.id]),
+    );
     expect(w.s.pushes.some((p) => p.uid === C && p.kind === 'request')).toBe(true);
 
     expect(await cs.respond(back!.id, 'declined', 'client')).toBe(true);
     await settle(100);
+    await until(() => find(ts, (r) => r.id === tc!.id)?.status === 'declined');
     expect(find(ts, (r) => r.id === tc!.id)?.status).toBe('declined');
     // nothing moved
     const still = slotsOf(cs, NOW).find((x) => x.key === t3.key && x.status === 'planned');
@@ -177,6 +196,7 @@ describe('F4 counters, both directions', () => {
       },
     ]))!;
     await settle(100);
+    await until(() => find(ts, (r) => r.id === mine.id));
     const seen = find(ts, (r) => r.id === mine.id)!;
     const tc = (await ts.counter(seen.id, {
       clientId: C,
@@ -187,6 +207,7 @@ describe('F4 counters, both directions', () => {
     await settle(100);
     expect(await cs.respond(tc.id, 'accepted', 'client')).toBe(true);
     await settle(100);
+    await until(() => find(ts, (r) => r.id === tc.id)?.status === 'accepted');
     expect(find(ts, (r) => r.id === tc.id)?.status).toBe('accepted');
     expect(slotsOf(ts, NOW).find((x) => x.key === t.key && x.status !== 'moved')?.start).toBe(
       t.start + 3 * HOUR,
@@ -243,6 +264,7 @@ describe('F4 counters, both directions', () => {
     w.s.fs.setNow(NOW + 20 * 24 * HOUR);
     await (await import('../../../../../functions/src/coach/service')).sweep(w.s.ctx);
     await settle(60);
+    await until(() => find(cs, (r) => r.id === fromT.id)?.status === 'expired');
     expect(find(cs, (r) => r.id === fromT.id)?.status).toBe('expired');
     // server: `expired`, not `cannot-decide`
     await expect(
