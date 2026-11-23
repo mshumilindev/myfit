@@ -17,7 +17,9 @@ export function StartFrame(props: {
 }) {
   // The drawer keeps the full look while everything fits and tightens only when it does not (SPO-561).
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
-  useDensityFit(anchor, !props.inline);
+  // a squeeze change re-renders the kit sheet, so it can return to the compact height when the content got shorter
+  const [, bump] = useState(0);
+  useDensityFit(anchor, !props.inline, () => bump((n) => n + 1));
   if (!props.inline)
     return (
       <Sheet

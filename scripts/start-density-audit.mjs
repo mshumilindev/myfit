@@ -2,7 +2,7 @@
 /**
  * Start Drawer geometry guard (SPO-563 for SPO-561): on every phone size the drawer must fit its room with no
  * vertical scroll, no overlapping blocks, nothing clipped and everything clear of the × (the Start fab), in every
- * locale. Density is measured, not assumed: a tall phone must keep the full look (level <= --tall-max), the desktop
+ * locale. Density is measured, not assumed: a tall phone must keep the full look (stage 0), the desktop
  * side panel must never get a density level.
  *   node scripts/start-density-audit.mjs --url http://127.0.0.1:6006 [--locales en,uk,pl,lt,et] [--part i/n] [--out report.json]
  */
@@ -35,7 +35,9 @@ const sizes = [
   [412, 915],
 ];
 /** On a tall phone the full look (or one step) must be enough: tightening further would shrink things without need. */
-const TALL = { minHeight: 900, maxLevel: 1 };
+const TALL = { minHeight: 900 };
+/** Spare room (px) allowed under the content: a squeezed or full-height drawer must not leave a gap. */
+const SPARE = 24;
 
 const jobs = [];
 for (const s of stories) for (const z of sizes) jobs.push([s, z]);
@@ -116,29 +118,46 @@ try {
               last: Math.round(last),
               fabTop: fabTop == null ? null : Math.round(fabTop),
               clipped,
-              level: Number(sh.dataset.fit ?? 0),
+              stage: Number(sh.dataset.fit ?? 0),
+              k: Number(sh.style.getPropertyValue('--ss-k') || 0),
+              full: sh.classList.contains('sheet-full'),
+              spare: Math.round(
+                sh.getBoundingClientRect().bottom -
+                  parseFloat(getComputedStyle(sh).paddingBottom) -
+                  last,
+              ),
             };
           });
           if (r.none) findings.push(`${tag}: no .start-sheet rendered`);
           else {
             if (r.overflow > 0)
-              findings.push(`${tag}: drawer scrolls by ${r.overflow}px (level ${r.level})`);
+              findings.push(
+                `${tag}: drawer scrolls by ${r.overflow}px (stage ${r.stage}, k ${r.k})`,
+              );
             if (r.overlaps > 0)
-              findings.push(`${tag}: ${r.overlaps} overlapping blocks (level ${r.level})`);
+              findings.push(
+                `${tag}: ${r.overlaps} overlapping blocks (stage ${r.stage}, k ${r.k})`,
+              );
             if (r.fabTop != null && r.last > r.fabTop)
               findings.push(`${tag}: content ends ${r.last} under the × at ${r.fabTop}`);
             if (r.brokenWord)
-              findings.push(`${tag}: a tile name breaks inside a word (level ${r.level})`);
-            if (r.clipped) findings.push(`${tag}: a block is clipped sideways`);
-            // done-today carries an extra hero row and the "another workout" card, so it legitimately needs more room.
-            if (
-              h >= TALL.minHeight &&
-              f === 1 &&
-              r.level > TALL.maxLevel &&
-              !id.includes('done-today')
-            )
               findings.push(
-                `${tag}: tall phone tightened to level ${r.level} (> ${TALL.maxLevel}), the full look should stay`,
+                `${tag}: a tile name breaks inside a word (stage ${r.stage}, k ${r.k})`,
+              );
+            if (r.clipped) findings.push(`${tag}: a block is clipped sideways`);
+            const squeezed = r.stage > 0 || r.k > 0.02;
+            // done-today carries an extra hero row and the "another workout" card, so it legitimately needs more room.
+            if (h >= TALL.minHeight && f === 1 && squeezed && !id.includes('done-today'))
+              findings.push(
+                `${tag}: tall phone squeezed (stage ${r.stage}, k ${r.k}), the full look should stay`,
+              );
+            if (squeezed && r.spare > SPARE)
+              findings.push(
+                `${tag}: squeezed (stage ${r.stage}, k ${r.k}) but ${r.spare}px spare under the content`,
+              );
+            if (!squeezed && r.full && r.spare > SPARE)
+              findings.push(
+                `${tag}: full-height drawer with ${r.spare}px spare, it should be compact`,
               );
           }
         }

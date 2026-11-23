@@ -1,79 +1,89 @@
-/* Start Drawer density (SPO-561). `useDensityFit` sets data-fit on the drawer: 0 (absent) is the full look; a
-   higher level is set only when the content measurably does not fit the room, and each level adds one more layer
-   on top of the previous (1 ⊂ 2 ⊂ 3 ⊂ 4). Feature classes only (.start-sheet / .ss-*), no kit overrides. */
+/* Start Drawer density (SPO-561). `useDensityFit` sets data-fit (stage 0…3) and --ss-k (0…1, the squeeze inside the
+   stage) on the drawer. Stage 0 / k 0 is the full look; a stage is entered only when the content measurably does not
+   fit, and the main tile (hero) is the last thing touched (stage 3). Earlier stages sit at their end value in later
+   ones. The bottom inset is never reduced: the × sits higher in some themes (christmas, halloween).
+   Feature classes only (.start-sheet / .ss-*), no kit overrides. */
 
-/* L1+: air. The bottom inset is NOT reduced: the × sits higher in some themes (christmas, halloween), so the
-   original clearance stays at every level. The grid tightens and the hero loses its second line. */
-.start-sheet:is([data-fit='1'], [data-fit='2'], [data-fit='3'], [data-fit='4']) .ss-grid {
-  gap: var(--s-8);
+/* stage 0: air between blocks */
+.sheet.start-sheet[data-fit='0'] {
+  gap: calc(var(--s-16) - var(--ss-k, 0) * var(--s-6));
 }
-.start-sheet:is([data-fit='1'], [data-fit='2'], [data-fit='3'], [data-fit='4']) .ss-hero-sub {
+.start-sheet[data-fit='0'] .ss-grid {
+  gap: calc(var(--s-12) - var(--ss-k, 0) * var(--s-6));
+}
+.sheet.start-sheet:is([data-fit='1'], [data-fit='2'], [data-fit='3']) {
+  gap: var(--s-10);
+}
+.start-sheet:is([data-fit='1'], [data-fit='2'], [data-fit='3']) .ss-grid {
+  gap: var(--s-6);
+}
+
+/* stage 1+: tiles lose their caption and tighten */
+.start-sheet:is([data-fit='2'], [data-fit='3']) .ss-ts {
   display: none;
 }
-
-/* L2+: tiles lose their caption and tighten. */
-.start-sheet:is([data-fit='2'], [data-fit='3'], [data-fit='4']) .ss-ts {
-  display: none;
+/* stage 1: the caption folds away smoothly instead of vanishing in one jump */
+.start-sheet[data-fit='1'] .ss-ts {
+  max-height: calc(var(--s-40) * (1 - var(--ss-k, 0)));
+  opacity: calc(1 - var(--ss-k, 0));
+  overflow: hidden;
 }
-.start-sheet:is([data-fit='2'], [data-fit='3'], [data-fit='4']) .ss-tile {
+.start-sheet[data-fit='1'] .ss-tile {
   gap: var(--s-8);
-  padding: var(--s-12) var(--s-16);
+  padding: calc(var(--s-16) - var(--ss-k, 0) * var(--s-6)) var(--s-16);
 }
 
-/* L3+: tiles become rows (icon · name · lock), the hero compacts. `contents` lets the lock sit at the row's end. */
-.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-tile {
+/* stage 2+: tiles become rows (icon · name · lock); `contents` lets the lock sit at the row's end */
+.start-sheet:is([data-fit='2'], [data-fit='3']) .ss-tile {
   flex-direction: row;
   align-items: center;
   gap: var(--s-6);
-  min-height: var(--sz-56);
   padding: var(--s-8);
+  min-height: var(--sz-56);
 }
-.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-tile .ss-ic {
+.start-sheet[data-fit='2'] .ss-tile {
+  min-height: calc(var(--sz-48) + (1 - var(--ss-k, 0)) * var(--s-32));
+  padding: calc(var(--s-12) - var(--ss-k, 0) * var(--s-6)) var(--s-8);
+}
+.start-sheet[data-fit='3'] .ss-tile {
+  min-height: var(--sz-48);
+  padding: var(--s-6) var(--s-8);
+}
+.start-sheet:is([data-fit='2'], [data-fit='3']) .ss-tile .ss-ic {
   width: var(--sz-32);
   height: var(--sz-32);
 }
-.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-tile .ss-tile-top {
+.start-sheet:is([data-fit='2'], [data-fit='3']) .ss-tile .ss-tile-top {
   display: contents;
 }
-.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-tile .ss-tile-text {
+.start-sheet:is([data-fit='2'], [data-fit='3']) .ss-tile .ss-tile-text {
   flex: 1;
   min-width: 0;
 }
-.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-tile .ss-lock {
+.start-sheet:is([data-fit='2'], [data-fit='3']) .ss-tile .ss-lock {
   order: 1;
   margin-left: auto;
   flex-shrink: 0;
 }
-.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-tile .ss-tt {
+.start-sheet:is([data-fit='2'], [data-fit='3']) .ss-tile .ss-tt {
   font-size: var(--fs-14);
   line-height: 1.2;
 }
-.sheet.start-sheet:is([data-fit='3'], [data-fit='4']) {
-  gap: var(--s-12);
-}
-.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-hero {
-  padding: var(--s-12) var(--s-16);
-}
-.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-hero-kicker {
-  display: none;
-}
-.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-hero-go {
-  width: var(--sz-44);
-  height: var(--sz-44);
-  font-size: var(--fs-20);
-}
-.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-another {
+.start-sheet:is([data-fit='2'], [data-fit='3']) .ss-another {
   padding: var(--s-8) var(--s-12);
 }
 
-/* L4: the last resort, the rows are as low as a touch target allows. */
-.start-sheet[data-fit='4'] .ss-tile {
-  min-height: var(--sz-48);
-  padding: var(--s-6) var(--s-8);
+/* stage 3: the last resort touches the main tile */
+.start-sheet[data-fit='3'] .ss-hero {
+  padding: calc(var(--s-20) - var(--ss-k, 0) * var(--s-12))
+    calc(var(--s-20) - var(--ss-k, 0) * var(--s-8));
 }
-.sheet.start-sheet[data-fit='4'] {
-  gap: var(--s-8);
+.start-sheet[data-fit='3'] .ss-hero-sub,
+.start-sheet[data-fit='3'] .ss-hero-kicker {
+  display: none;
 }
-.start-sheet[data-fit='4'] .ss-hero {
-  padding: var(--s-8) var(--s-12);
+.start-sheet[data-fit='3'] .ss-hero-go {
+  width: calc(var(--sz-60) - var(--ss-k, 0) * var(--s-16));
+  height: calc(var(--sz-60) - var(--ss-k, 0) * var(--s-16));
+  font-size: var(--fs-20);
 }
