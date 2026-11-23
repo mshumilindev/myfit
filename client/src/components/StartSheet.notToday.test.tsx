@@ -33,3 +33,21 @@ describe('Start sheet · not trained today (SPO-5)', () => {
     expect(document.body.textContent).toContain('Home set');
   });
 });
+
+// SPO-561: the drawer shows no "Start" heading of its own (the hero and tiles say it); it keeps its accessible name.
+describe('Start sheet · no heading in the drawer (SPO-561)', () => {
+  it('drawer: no title, dialog named "Start", density anchor does not add a visible block', () => {
+    render(<StartSheet shell={shell()} onClose={vi.fn()} />);
+    expect(document.body.querySelector('.ss-title')).toBeNull();
+    expect(document.body.querySelector('.sheet.start-sheet')?.getAttribute('aria-label')).toBe(
+      'Start',
+    );
+    expect(document.body.querySelector('.start-sheet > span[hidden]')).not.toBeNull();
+  });
+
+  it('desktop side panel keeps its heading and gets no density attribute', () => {
+    render(<StartSheet shell={shell()} onClose={vi.fn()} inline />);
+    expect(document.body.querySelector('.start-inline .ss-title')?.textContent).toBe('Start');
+    expect(document.body.querySelector('[data-fit]')).toBeNull();
+  });
+});

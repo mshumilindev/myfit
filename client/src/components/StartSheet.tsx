@@ -288,8 +288,9 @@ export function StartSheet({
       closeRequested={closeRequested}
       sub={subEl}
       tone={doneToday ? 'ok' : undefined}
+      label={t.startSheetTitle}
     >
-      <div className="ss-title">{t.startSheetTitle}</div>
+      {inline ? <div className="ss-title">{t.startSheetTitle}</div> : null}
       {illSt.phase === 'sick' || illSt.phase === 'returning' || illSt.phase === 'mental' ? (
         <Notice tone="illness" icon="thermometer-simple">
           {illSt.phase === 'mental'

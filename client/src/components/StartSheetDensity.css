@@ -1,0 +1,81 @@
+/* Start Drawer density (SPO-561). `useDensityFit` sets data-fit on the drawer: 0 (absent) is the full look; a
+   higher level is set only when the content measurably does not fit the room, and each level adds one more layer
+   on top of the previous (1 ⊂ 2 ⊂ 3 ⊂ 4). Feature classes only (.start-sheet / .ss-*), no kit overrides. */
+
+/* L1+: air. The drawer keeps clear of the × only as far as the × needs; the hero loses its second line. */
+.sheet.start-sheet:is([data-fit='1'], [data-fit='2'], [data-fit='3'], [data-fit='4']) {
+  padding-bottom: calc(var(--sz-64) + var(--s-24) + var(--safe-bottom));
+}
+.start-sheet:is([data-fit='1'], [data-fit='2'], [data-fit='3'], [data-fit='4']) .ss-grid {
+  gap: var(--s-8);
+}
+.start-sheet:is([data-fit='1'], [data-fit='2'], [data-fit='3'], [data-fit='4']) .ss-hero-sub {
+  display: none;
+}
+
+/* L2+: tiles lose their caption and tighten. */
+.start-sheet:is([data-fit='2'], [data-fit='3'], [data-fit='4']) .ss-ts {
+  display: none;
+}
+.start-sheet:is([data-fit='2'], [data-fit='3'], [data-fit='4']) .ss-tile {
+  gap: var(--s-8);
+  padding: var(--s-12) var(--s-16);
+}
+
+/* L3+: tiles become rows (icon · name · lock), the hero compacts. `contents` lets the lock sit at the row's end. */
+.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-tile {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--s-6);
+  min-height: var(--sz-56);
+  padding: var(--s-8);
+}
+.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-tile .ss-ic {
+  width: var(--sz-32);
+  height: var(--sz-32);
+}
+.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-tile .ss-tile-top {
+  display: contents;
+}
+.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-tile .ss-tile-text {
+  flex: 1;
+  min-width: 0;
+}
+.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-tile .ss-lock {
+  order: 1;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-tile .ss-tt {
+  font-size: var(--fs-14);
+  line-height: 1.2;
+}
+.sheet.start-sheet:is([data-fit='3'], [data-fit='4']) {
+  gap: var(--s-12);
+}
+.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-hero {
+  padding: var(--s-12) var(--s-16);
+}
+.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-hero-kicker {
+  display: none;
+}
+.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-hero-go {
+  width: var(--sz-44);
+  height: var(--sz-44);
+  font-size: var(--fs-20);
+}
+.start-sheet:is([data-fit='3'], [data-fit='4']) .ss-another {
+  padding: var(--s-8) var(--s-12);
+}
+
+/* L4: the last resort, the rows are as low as a touch target allows. */
+.start-sheet[data-fit='4'] .ss-tile {
+  min-height: var(--sz-48);
+  padding: var(--s-6) var(--s-8);
+}
+.sheet.start-sheet[data-fit='4'] {
+  gap: var(--s-8);
+}
+.start-sheet[data-fit='4'] .ss-hero {
+  padding: var(--s-8) var(--s-12);
+}
