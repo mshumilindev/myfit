@@ -38,24 +38,31 @@ export function useDensityFit(anchor: HTMLElement | null, enabled: boolean): voi
     const sheet = enabled ? anchor?.closest<HTMLElement>('.sheet') : null;
     if (!sheet) return;
     let lastHeight = -1;
+    let lastScroll = -1;
     let raf = 0;
+    let ro: ResizeObserver | null = null;
+    // Observing an element twice is a no-op, so blocks added later are picked up on the next run.
+    const watch = () => {
+      ro?.observe(sheet);
+      for (const child of Array.from(sheet.children)) ro?.observe(child);
+    };
     const run = () => {
       raf = 0;
       fitDensity(sheet);
       lastHeight = sheet.clientHeight;
+      lastScroll = sheet.scrollHeight;
+      watch();
     };
     const schedule = () => {
       if (!raf) raf = requestAnimationFrame(run);
     };
+    // The drawer's own height changes when the level changes: only a size we did not settle on re-measures. The
+    // content is watched too: a capped drawer keeps its height while its content grows (a font swap, a wrapped label).
+    if (typeof ResizeObserver !== 'undefined')
+      ro = new ResizeObserver(() => {
+        if (sheet.clientHeight !== lastHeight || sheet.scrollHeight !== lastScroll) schedule();
+      });
     run();
-    // The drawer's own height changes when the level changes: only a height we did not settle on re-measures.
-    const ro =
-      typeof ResizeObserver === 'undefined'
-        ? null
-        : new ResizeObserver(() => {
-            if (sheet.clientHeight !== lastHeight) schedule();
-          });
-    ro?.observe(sheet);
     const mo = new MutationObserver(schedule);
     mo.observe(sheet, { childList: true, subtree: true, characterData: true });
     window.addEventListener('resize', schedule);

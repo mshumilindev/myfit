@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { render, cleanup } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fitDensity, MAX_DENSITY, overflowsVertically, useDensityFit } from './startDensity';
 
 /** jsdom has no layout: fake a drawer whose content height shrinks 100px per density level. */
@@ -59,6 +59,7 @@ function Harness({ enabled, client, full }: { enabled: boolean; client: number; 
           Object.defineProperty(el, 'clientHeight', { get: () => client, configurable: true });
           Object.defineProperty(el, 'scrollHeight', {
             get: () => full - 100 * Number(el.dataset.fit ?? 0),
+            configurable: true,
           });
         }
       }}
@@ -93,5 +94,44 @@ describe('useDensityFit', () => {
     window.dispatchEvent(new Event('resize'));
     await new Promise((r) => requestAnimationFrame(() => r(null)));
     expect(sheet.dataset.fit).toBe('0');
+  });
+});
+
+describe('useDensityFit · content watched by ResizeObserver', () => {
+  it('re-measures when the content grows while the drawer keeps its height (font swap)', async () => {
+    const callbacks: Array<() => void> = [];
+    const observed: Element[] = [];
+    class FakeRO {
+      constructor(cb: () => void) {
+        callbacks.push(cb);
+      }
+      observe(el: Element) {
+        observed.push(el);
+      }
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', FakeRO);
+    try {
+      let full = 640;
+      const { getByTestId } = render(<Harness enabled client={600} full={full} />);
+      const sheet = getByTestId('sheet');
+      expect(sheet.dataset.fit).toBe('1');
+      expect(observed).toContain(sheet);
+      expect(observed).toContain(sheet.firstElementChild);
+      full = 800;
+      Object.defineProperty(sheet, 'scrollHeight', {
+        get: () => full - 100 * Number(sheet.dataset.fit ?? 0),
+        configurable: true,
+      });
+      callbacks.forEach((cb) => cb());
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+      expect(sheet.dataset.fit).toBe('2');
+      // unchanged sizes: the observer callback does not schedule another pass
+      callbacks.forEach((cb) => cb());
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+      expect(sheet.dataset.fit).toBe('2');
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
