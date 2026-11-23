@@ -17,6 +17,8 @@ const arg = (n, d) => {
 const url = arg('url', 'http://127.0.0.1:6006');
 const out = arg('out');
 const locales = arg('locales', 'en,uk,pl,lt,et').split(',');
+const themes = arg('themes', 'glass,cyberpunk,christmas,halloween').split(',');
+const fonts = arg('fonts', '1,1.5').split(',').map(Number);
 const [partI, partN] = arg('part', '1/1').split('/').map(Number);
 const stories = [
   ['pages-start-sheet--drawer-open-fab', ''],
@@ -50,72 +52,96 @@ try {
     });
     const page = await ctx.newPage();
     for (const loc of locales) {
-      probes++;
-      const tag = `${id.split('--')[1]} ${w}x${h} ${loc}`;
       await page.goto(`${url}/iframe.html?id=${id}&viewMode=story&globals=locale:${loc}${extra}`, {
         waitUntil: 'load',
       });
       await page.waitForTimeout(1200);
-      const r = await page.evaluate(() => {
-        const sh = document.querySelector('.sheet.start-sheet');
-        if (!sh) return { none: true };
-        const fab = document.querySelector('.tabbar-fab-layer .tabbar-fab, .tabbar-fab');
-        const fabTop = fab ? fab.getBoundingClientRect().top : null;
-        const kids = [
-          ...sh.querySelectorAll('.ss-title,.ss-hero,.ss-another,.ss-scratch,.ss-tile,.notice'),
-        ];
-        let overlaps = 0;
-        for (let i = 0; i < kids.length; i++)
-          for (let j = i + 1; j < kids.length; j++) {
-            const a = kids[i].getBoundingClientRect();
-            const c = kids[j].getBoundingClientRect();
-            if (
-              a.width &&
-              c.width &&
-              a.left < c.right - 1 &&
-              c.left < a.right - 1 &&
-              a.top < c.bottom - 1 &&
-              c.top < a.bottom - 1
-            )
-              overlaps++;
-          }
-        const last = Math.max(...kids.map((k) => k.getBoundingClientRect().bottom));
-        const clipped = kids.some(
-          (k) => k.scrollWidth > k.clientWidth + 1 && getComputedStyle(k).overflow !== 'visible',
-        );
-        // a one-word tile name must never break inside the word ("Program / s")
-        const brokenWord = [...sh.querySelectorAll('.ss-tt')].some(
-          (n) =>
-            !/[\s-]/.test(n.textContent.trim()) &&
-            n.getBoundingClientRect().height >
-              parseFloat(getComputedStyle(n).lineHeight || '0') * 1.5,
-        );
-        return {
-          brokenWord,
-          overflow: sh.scrollHeight - sh.clientHeight,
-          overlaps,
-          last: Math.round(last),
-          fabTop: fabTop == null ? null : Math.round(fabTop),
-          clipped,
-          level: Number(sh.dataset.fit ?? 0),
-        };
-      });
-      if (r.none) findings.push(`${tag}: no .start-sheet rendered`);
-      else {
-        if (r.overflow > 0)
-          findings.push(`${tag}: drawer scrolls by ${r.overflow}px (level ${r.level})`);
-        if (r.overlaps > 0)
-          findings.push(`${tag}: ${r.overlaps} overlapping blocks (level ${r.level})`);
-        if (r.fabTop != null && r.last > r.fabTop)
-          findings.push(`${tag}: content ends ${r.last} under the × at ${r.fabTop}`);
-        if (r.brokenWord)
-          findings.push(`${tag}: a tile name breaks inside a word (level ${r.level})`);
-        if (r.clipped) findings.push(`${tag}: a block is clipped sideways`);
-        // done-today carries an extra hero row and the "another workout" card, so it legitimately needs more room.
-        if (h >= TALL.minHeight && r.level > TALL.maxLevel && !id.includes('done-today'))
-          findings.push(
-            `${tag}: tall phone tightened to level ${r.level} (> ${TALL.maxLevel}), the full look should stay`,
+      for (const theme of themes) {
+        for (const f of fonts) {
+          await page.evaluate(
+            ([t, scale]) => {
+              document.documentElement.setAttribute('data-theme', t);
+              let el = document.getElementById('__audit_font');
+              if (!el) {
+                el = document.createElement('style');
+                el.id = '__audit_font';
+                document.head.appendChild(el);
+              }
+              el.textContent = `html{font-size:${scale * 100}%}`;
+            },
+            [theme, f],
           );
+          await page.waitForTimeout(300);
+          probes++;
+          const tag = `${id.split('--')[1]} ${w}x${h} ${loc} ${theme} x${f}`;
+          const r = await page.evaluate(() => {
+            const sh = document.querySelector('.sheet.start-sheet');
+            if (!sh) return { none: true };
+            const fab = document.querySelector('.tabbar-fab-layer .tabbar-fab, .tabbar-fab');
+            const fabTop = fab ? fab.getBoundingClientRect().top : null;
+            const kids = [
+              ...sh.querySelectorAll('.ss-title,.ss-hero,.ss-another,.ss-scratch,.ss-tile,.notice'),
+            ];
+            let overlaps = 0;
+            for (let i = 0; i < kids.length; i++)
+              for (let j = i + 1; j < kids.length; j++) {
+                const a = kids[i].getBoundingClientRect();
+                const c = kids[j].getBoundingClientRect();
+                if (
+                  a.width &&
+                  c.width &&
+                  a.left < c.right - 1 &&
+                  c.left < a.right - 1 &&
+                  a.top < c.bottom - 1 &&
+                  c.top < a.bottom - 1
+                )
+                  overlaps++;
+              }
+            const last = Math.max(...kids.map((k) => k.getBoundingClientRect().bottom));
+            const clipped = kids.some(
+              (k) =>
+                k.scrollWidth > k.clientWidth + 1 && getComputedStyle(k).overflow !== 'visible',
+            );
+            // a one-word tile name must never break inside the word ("Program / s")
+            const brokenWord = [...sh.querySelectorAll('.ss-tt')].some(
+              (n) =>
+                !/[\s-]/.test(n.textContent.trim()) &&
+                n.getBoundingClientRect().height >
+                  parseFloat(getComputedStyle(n).lineHeight || '0') * 1.5,
+            );
+            return {
+              brokenWord,
+              overflow: sh.scrollHeight - sh.clientHeight,
+              overlaps,
+              last: Math.round(last),
+              fabTop: fabTop == null ? null : Math.round(fabTop),
+              clipped,
+              level: Number(sh.dataset.fit ?? 0),
+            };
+          });
+          if (r.none) findings.push(`${tag}: no .start-sheet rendered`);
+          else {
+            if (r.overflow > 0)
+              findings.push(`${tag}: drawer scrolls by ${r.overflow}px (level ${r.level})`);
+            if (r.overlaps > 0)
+              findings.push(`${tag}: ${r.overlaps} overlapping blocks (level ${r.level})`);
+            if (r.fabTop != null && r.last > r.fabTop)
+              findings.push(`${tag}: content ends ${r.last} under the × at ${r.fabTop}`);
+            if (r.brokenWord)
+              findings.push(`${tag}: a tile name breaks inside a word (level ${r.level})`);
+            if (r.clipped) findings.push(`${tag}: a block is clipped sideways`);
+            // done-today carries an extra hero row and the "another workout" card, so it legitimately needs more room.
+            if (
+              h >= TALL.minHeight &&
+              f === 1 &&
+              r.level > TALL.maxLevel &&
+              !id.includes('done-today')
+            )
+              findings.push(
+                `${tag}: tall phone tightened to level ${r.level} (> ${TALL.maxLevel}), the full look should stay`,
+              );
+          }
+        }
       }
     }
     await ctx.close();

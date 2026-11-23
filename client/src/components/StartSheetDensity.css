@@ -2,10 +2,8 @@
    higher level is set only when the content measurably does not fit the room, and each level adds one more layer
    on top of the previous (1 ⊂ 2 ⊂ 3 ⊂ 4). Feature classes only (.start-sheet / .ss-*), no kit overrides. */
 
-/* L1+: air. The drawer keeps clear of the × only as far as the × needs; the hero loses its second line. */
-.sheet.start-sheet:is([data-fit='1'], [data-fit='2'], [data-fit='3'], [data-fit='4']) {
-  padding-bottom: calc(var(--sz-64) + var(--s-24) + var(--safe-bottom));
-}
+/* L1+: air. The bottom inset is NOT reduced: the × sits higher in some themes (christmas, halloween), so the
+   original clearance stays at every level. The grid tightens and the hero loses its second line. */
 .start-sheet:is([data-fit='1'], [data-fit='2'], [data-fit='3'], [data-fit='4']) .ss-grid {
   gap: var(--s-8);
 }
