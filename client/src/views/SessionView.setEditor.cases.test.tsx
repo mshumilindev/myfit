@@ -6,6 +6,8 @@ import { COACH_DEFAULT } from '../atlas/types';
 import { emptyCycleState } from '../cycle/cycleState';
 import { __getStateForTests, __replaceStateForTests } from '../store';
 import type { Exercise, SetEntry, Workout } from '../types';
+import { addonsPref } from '../addons/enabledSet';
+import '../setTypes/setTypesBoot'; // Set types installed and loaded: drop / reverse / hold editing is the module's
 import { SessionView } from './SessionView';
 
 // Wednesday 14 Oct 2026, 18:00 local — fixed wall clock, only Date is faked so timers/userEvent keep running.
@@ -72,6 +74,7 @@ function mount(id = 'open', sh: Shell = shell(), extra: { past?: boolean } = {})
 
 beforeEach(() => {
   localStorage.clear();
+  addonsPref.set(['set-types']);
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     configurable: true,
@@ -89,6 +92,7 @@ beforeEach(() => {
   vi.setSystemTime(NOW);
 });
 afterEach(() => {
+  addonsPref.reset();
   vi.useRealTimers();
   cleanup();
 });
@@ -351,6 +355,45 @@ const cardioLive = (machine = 'cardio-treadmill') =>
       { kind: 'cardio', equipmentItems: [machine] },
     ),
   ]);
+
+describe('SessionView · set editor with Set types off (neutral contract)', () => {
+  beforeEach(() => addonsPref.reset());
+
+  it('offers only working and warm-up: no dropset, reverse dropset or static-dynamic', async () => {
+    seed([benchLive()]);
+    mount();
+    const dlg = await openEditor();
+    expect(within(dlg).getByRole('button', { name: 'Working' })).toBeTruthy();
+    expect(within(dlg).getByRole('button', { name: 'Warm-up' })).toBeTruthy();
+    expect(within(dlg).queryByRole('button', { name: 'Dropset' })).toBeNull();
+    expect(within(dlg).queryByRole('button', { name: 'Reverse dropset' })).toBeNull();
+    expect(within(dlg).queryByRole('button', { name: 'Static-dynamic' })).toBeNull();
+  });
+
+  it('a stored drop set reads as a plain set (no drop rows) and keeps its type and parts through a save', async () => {
+    const drops = [{ reps: 6, weight: 60 }];
+    seed([benchLive([set('s1', { loggedAt: NOW - 10 * MIN, type: 'drop', drops })])]);
+    mount();
+    expect(document.querySelector('.drops')).toBeNull();
+    const dlg = await openEditor();
+    expect(within(dlg).queryByText('Add another drop')).toBeNull();
+    await inc(dlg, 'Reps');
+    await save(dlg);
+    expect(only()).toMatchObject({ type: 'drop', reps: 9, weight: 80, drops });
+  });
+
+  it('a stored hold keeps its type and time through a save', async () => {
+    seed([
+      benchLive([
+        set('s1', { loggedAt: NOW - 10 * MIN, type: 'static-dynamic', reps: 1, durationMin: 0.5 }),
+      ]),
+    ]);
+    mount();
+    const dlg = await openEditor(/^1/);
+    await save(dlg);
+    expect(only()).toMatchObject({ type: 'static-dynamic', durationMin: 0.5 });
+  });
+});
 
 describe('SessionView · set editor (cardio and holds)', () => {
   it('shows the treadmill readings, saves them and keeps unused fields empty', async () => {

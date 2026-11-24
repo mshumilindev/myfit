@@ -119,3 +119,20 @@ export function periodizationAvailable(): boolean {
 export function usePeriodizationOn(): boolean {
   return useAddonOrBase('periodization');
 }
+
+/**
+ * Set types (drop, reverse drop, weighted static hold): without it a set is a working or a warm-up set, no technique is offered
+ * or continued, and nothing of it is drawn. Stored sets of these types keep their data and come back on re-install.
+ */
+export function setTypesAvailable(): boolean {
+  try {
+    return addonAvailable('set-types');
+  } catch {
+    return false;
+  }
+}
+
+/** The same Set types gate for components. */
+export function useSetTypesOn(): boolean {
+  return useAddonOrBase('set-types');
+}

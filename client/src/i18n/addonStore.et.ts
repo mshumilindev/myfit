@@ -398,6 +398,7 @@ export const addonStoreEt: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Meisterlikkus', desc: 'Oskuste tasemed ja pikaajaline areng.' },
+    'set-types': { name: 'Seeriatüübid', desc: 'Dropid, pöörddropid ja raskusega hoidmised.' },
     periodization: {
       name: 'Periodiseerimine',
       desc: 'Nädalatsüklid, % maksimumist ja maksimumid.',

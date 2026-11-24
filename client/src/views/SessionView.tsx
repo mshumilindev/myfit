@@ -291,6 +291,8 @@ import { exerciseProfile } from '../data/exerciseProfile';
 import { useFocusStepTransition } from './focusStepTransition';
 import { HoldDurationInput } from '../components/HoldDurationInput';
 import { homeTotals, isHomeWorkout, isStopwatchExercise, lastSetsOf } from '../homeSets';
+import { setTypeHidden, setTypeOffered, shownSetType } from '../setTypesApi';
+import { useSetTypesHost } from '../setTypesRt';
 
 const PICKER_TARGET_MUSCLES = new Set<string>(MUSCLE_IDS);
 
@@ -557,6 +559,7 @@ export function SessionView(props: {
   const { t, locale } = useT();
   const exName = useExerciseName();
   const store = useStore();
+  useSetTypesHost(); // re-draw once the Set types chunk arrives (drop / hold sets show as plain sets until then)
   const sleepsForCalc = useSleepsForCalc();
   const playbookOn = usePlaybookOn();
   const conditionLimits = useStoredConditionLimits(); // restriction: RPE cap / no-failure / rest scale stay on with the feature off
@@ -987,7 +990,10 @@ export function SessionView(props: {
       // null = bodyweight: keep it, so a pull-up ghost reads BW, not 0 kg
       if (!s.isWarmup && setTypeOf(s) !== 'warmup') {
         const ty = setTypeOf(s);
-        if (ty === 'drop' || ty === 'reverse-drop' || ty === 'static-dynamic')
+        if (
+          setTypeOffered(ty) &&
+          (ty === 'drop' || ty === 'reverse-drop' || ty === 'static-dynamic')
+        )
           return {
             reps: s.reps,
             weight: s.weight ?? null,
@@ -2332,7 +2338,7 @@ export function SessionView(props: {
 
   /** Kind cell of one strength set row (working/warm-up/drop/record…). */
   function setKindLabel(ex: Exercise, s: SetEntry, grp: GroupCtx | null) {
-    const type = setTypeOf(s);
+    const type = shownSetType(setTypeOf(s), isStopwatchExercise(ex));
     if (type === 'static-dynamic') {
       return (
         <span className="kind tsd">
@@ -3586,8 +3592,10 @@ export function SessionView(props: {
                     } as CSSProperties)
                   : undefined;
                 const rec = isRecordSet(ex, s);
-                const type = setTypeOf(s);
-                const drops = setDrops(s);
+                const type = shownSetType(setTypeOf(s), isStopwatchExercise(ex));
+                const drops = setTypeHidden(setTypeOf(s), isStopwatchExercise(ex))
+                  ? []
+                  : setDrops(s);
                 const idx = grp ? `R${i + 1}` : `${i + 1}`;
                 // Rest before this set — derived live from the set timestamps
                 // (gap to the previously logged set anywhere in the session,
@@ -6933,16 +6941,21 @@ function SetEditorSheet(props: {
     (!props.set || setTypeOf(props.set) === 'static-dynamic');
   // …and a pure bodyweight hold has no weight at all.
   const holdNoLoad = holdOnly && exerciseProfile(props.exercise.name).l === 'none';
+  const setTypes = useSetTypesHost();
+  const holdMove = isStopwatchExercise(props.exercise);
   const [type, setType] = useState<SetType>(
     holdOnly
       ? 'static-dynamic'
       : props.set
-        ? setTypeOf(props.set)
-        : (props.ghost.type ?? 'working'),
+        ? shownSetType(setTypeOf(props.set), holdMove)
+        : shownSetType(props.ghost.type ?? 'working', holdMove),
   );
+  const typeRows = SET_TYPE_ROWS.filter((r) => setTypeOffered(r.type));
   // The athlete opened the type picker and chose — pin the warm-up/working
   // state so auto-detection won't override it.
   const [typeTouched, setTypeTouched] = useState(false);
+  // A stored drop / reverse / hold set while Set types is off reads as a working set; saving keeps what it was.
+  const keepStored = !!props.set && !typeTouched && setTypeHidden(setTypeOf(props.set), holdMove);
   const [drops, setDropsState] = useState<DropEntry[]>(props.set?.drops ?? props.ghost.drops ?? []);
   const [reps, setReps] = useState(props.set?.reps ?? props.ghost.reps);
   const [weight, setWeight] = useState(
@@ -7050,9 +7063,6 @@ function SetEditorSheet(props: {
       : props.set
         ? (props.set.rpeAuto ?? null)
         : (props.rpeEstimate?.(weight, reps) ?? null);
-  const dropRepsTotal = reps + drops.reduce((n, d) => n + d.reps, 0);
-  const dropKgTotal =
-    (bw ? 0 : weight) * reps + drops.reduce((v, d) => v + (d.weight ?? 0) * d.reps, 0);
 
   const typeMeta: Record<SetType, { name: string; hint: string }> = {
     working: { name: t.setTypeWorking, hint: '' },
@@ -7087,9 +7097,9 @@ function SetEditorSheet(props: {
             weight: bw || weight === 0 ? null : weight,
             isWarmup: type === 'warmup',
             ...(typeTouched ? { warmupManual: true } : {}),
-            type,
-            drops: isDropType ? drops : [],
-            durationMin: isSD ? holdSec / 60 : null,
+            type: keepStored ? setTypeOf(props.set!) : type,
+            drops: keepStored ? (props.set!.drops ?? []) : isDropType ? drops : [],
+            durationMin: keepStored ? (props.set!.durationMin ?? null) : isSD ? holdSec / 60 : null,
             distanceKm: null,
             calories: null,
             rpe: rpe > 0 ? rpe : null,
@@ -7099,29 +7109,6 @@ function SetEditorSheet(props: {
             rpeAuto: rpe > 0 ? null : (props.set?.rpeAuto ?? null),
           },
     );
-  }
-
-  function patchDrop(i: number, patch: Partial<DropEntry>): void {
-    setDropsState((list) => list.map((x, xi) => (xi === i ? { ...x, ...patch } : x)));
-  }
-
-  function addDropPart(): void {
-    const prevPart = drops[drops.length - 1] ?? { reps, weight: bw ? null : weight };
-    setDropsState((list) => [
-      ...list,
-      {
-        reps: Math.max(1, prevPart.reps - (type === 'drop' ? 2 : 3)),
-        weight:
-          prevPart.weight === null
-            ? null
-            : Math.max(
-                0,
-                type === 'drop'
-                  ? Math.round((prevPart.weight * 0.75) / 5) * 5
-                  : prevPart.weight + 5,
-              ),
-      },
-    ]);
   }
 
   function strengthSteppers(
@@ -7163,7 +7150,7 @@ function SetEditorSheet(props: {
         <div className="sheet-head">
           <span className="t">{t.setN(idx, props.exercise.name)}</span>
         </div>
-        {SET_TYPE_ROWS.map((row) => (
+        {typeRows.map((row) => (
           <ListRow
             key={row.type}
             icon={<IconTile icon={row.icon} />}
@@ -7178,14 +7165,7 @@ function SetEditorSheet(props: {
             }}
           />
         ))}
-        <div className="sheet-note umt-8">
-          <Icon name="info" />
-          <p>
-            {t.dropNote1}
-            <strong>{t.dropNoteStrong}</strong>
-            {t.dropNote2}
-          </p>
-        </div>
+        {setTypes?.TypeNote && <setTypes.TypeNote />}
       </SetEditorFrame>
     );
   }
@@ -7354,52 +7334,22 @@ function SetEditorSheet(props: {
                   onChange={setHoldSec}
                 />
               </div>
-            ) : isDropType ? (
-              <div className="dropedit-rows">
-                <div className="drop-part">
-                  <div className="drop-part-lab">{t.startLabel}</div>
-                  {strengthSteppers(
-                    reps,
-                    bw ? null : weight,
-                    setReps,
-                    setWeight,
-                    focused === 'reps' || focused === 'weight' ? focused : null,
-                  )}
-                </div>
-                {drops.map((d, i) => (
-                  <div key={i} className="drop-part">
-                    <div className="drop-part-lab">
-                      <span>{t.dropRowN(i + 1)}</span>
-                      <IconButton
-                        icon="trash"
-                        size="xs"
-                        className="drop-trash"
-                        label={t.delete}
-                        onClick={() => setDropsState((list) => list.filter((_, xi) => xi !== i))}
-                      />
-                    </div>
-                    {strengthSteppers(
-                      d.reps,
-                      d.weight,
-                      (n) => patchDrop(i, { reps: n }),
-                      (n) => patchDrop(i, { weight: n }),
-                      null,
-                    )}
-                  </div>
-                ))}
-                <ListRow
-                  icon={<IconTile icon="plus" />}
-                  label={t.addAnotherDrop}
-                  value={t.dropTotals(dropRepsTotal, fmtKg(dropKgTotal))}
-                  onClick={addDropPart}
-                />
-                {type === 'reverse-drop' && (
-                  <div className="sheet-note">
-                    <Icon name="caret-line-up" />
-                    <p>{t.reverseNote}</p>
-                  </div>
+            ) : isDropType && setTypes?.DropBody ? (
+              <setTypes.DropBody
+                type={type as 'drop' | 'reverse-drop'}
+                reps={reps}
+                weight={bw ? null : weight}
+                drops={drops}
+                setDrops={setDropsState}
+                steppers={strengthSteppers}
+                firstPart={strengthSteppers(
+                  reps,
+                  bw ? null : weight,
+                  setReps,
+                  setWeight,
+                  focused === 'reps' || focused === 'weight' ? focused : null,
                 )}
-              </div>
+              />
             ) : isAssist ? (
               <>
                 <div className="steppers">
@@ -7508,7 +7458,7 @@ function SetEditorSheet(props: {
               <div className="se-label">{t.setTypeLabel}</div>
               <div className={`se-card se-kind-${type}`}>
                 <div className="se-types">
-                  {SET_TYPE_ROWS.map((row) => (
+                  {typeRows.map((row) => (
                     <Chip
                       key={row.type}
                       className={`se-kind-${row.type}`}

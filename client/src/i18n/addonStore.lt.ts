@@ -396,6 +396,10 @@ export const addonStoreLt: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Meistriškumas', desc: 'Įgūdžių lygiai ir ilgalaikė pažanga.' },
+    'set-types': {
+      name: 'Serijų tipai',
+      desc: 'Dropai, atvirkštiniai dropai ir laikymai su svoriu.',
+    },
     periodization: {
       name: 'Periodizacija',
       desc: 'Savaitiniai ciklai, % nuo maksimumo ir maksimumai.',

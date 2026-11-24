@@ -6,6 +6,8 @@ import { COACH_DEFAULT } from '../atlas/types';
 import { emptyCycleState } from '../cycle/cycleState';
 import { __getStateForTests, __replaceStateForTests } from '../store';
 import type { Exercise, SetEntry, Workout } from '../types';
+import { addonsPref } from '../addons/enabledSet';
+import '../setTypes/setTypesBoot'; // Set types installed and loaded: drop / reverse / hold editing is the module's
 import { SessionView } from './SessionView';
 
 // Wednesday 14 Oct 2026, 18:00 local — fixed wall clock, only Date is faked so timers/userEvent keep running.
@@ -69,6 +71,7 @@ function mount(id = 'open', sh: Shell = shell(), extra: { past?: boolean } = {})
 
 beforeEach(() => {
   localStorage.clear();
+  addonsPref.set(['set-types']);
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     configurable: true,
@@ -86,6 +89,7 @@ beforeEach(() => {
   vi.setSystemTime(NOW);
 });
 afterEach(() => {
+  addonsPref.reset();
   vi.useRealTimers();
   cleanup();
 });

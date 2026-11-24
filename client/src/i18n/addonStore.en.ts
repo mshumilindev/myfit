@@ -400,6 +400,7 @@ export const addonStoreEn = {
       ],
     },
     mastery: { name: 'Mastery', desc: 'Track skill levels and long-term progress.' },
+    'set-types': { name: 'Set types', desc: 'Drop sets, reverse drops and weighted holds.' },
     periodization: { name: 'Periodization', desc: 'Weekly cycles, % of max and Maxes.' },
     'apex-challenges': {
       name: 'Challenges',

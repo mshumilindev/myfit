@@ -395,6 +395,7 @@ export const addonStorePl: typeof addonStoreEn = {
       ],
     },
     mastery: { name: 'Mistrzostwo', desc: 'Poziomy umiejętności i długofalowy postęp.' },
+    'set-types': { name: 'Typy serii', desc: 'Dropsety, odwrotne dropy i utrzymania z ciężarem.' },
     periodization: { name: 'Periodyzacja', desc: 'Cykle tygodniowe, % maksimum i maksima.' },
     'apex-challenges': { name: 'Wyzwania', desc: 'Cotygodniowe cele: samemu lub z innymi.' },
     'apex-ranks': { name: 'Rankingi', desc: 'Gdzie są Twoje ćwiczenia na tle norm siły.' },

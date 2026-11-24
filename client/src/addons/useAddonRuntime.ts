@@ -88,6 +88,11 @@ export function useAddonRuntime() {
     if (periodizationOn)
       loadTracker('periodization', () => import('../periodization/periodizationBoot'));
   }, [periodizationOn]);
+  // Set types (a module of Advanced training): drop / reverse-drop / weighted-hold editing is a lazy chunk too.
+  const setTypesOn = useAddonOrBase('set-types');
+  useEffect(() => {
+    if (setTypesOn) loadTracker('set-types', () => import('../setTypes/setTypesBoot'));
+  }, [setTypesOn]);
   const healthOn = useAddonOrBase('health');
   const injuryOn = useAddonOrBase('injury-log');
   useEffect(() => migrateModules(), []);
