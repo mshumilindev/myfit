@@ -6,6 +6,8 @@
  * calls `resetLocalData()` (which clears the list) sets what it needs after it.
  */
 
+import { FATIGUE_ADDONS } from '../fatigue/testAddons';
+
 // Tracker runtimes (SPO-500 I8): the tests run with the trackers' code loaded, as it is once the add-on is installed.
 // Not in a node-environment suite (no DOM/storage there: the engines reach i18n, which reads `localStorage`).
 if (typeof window !== 'undefined') {
@@ -52,6 +54,7 @@ try {
         'goals',
         'playbook',
         ...COACH_ADDONS,
+        ...FATIGUE_ADDONS,
       ],
       updatedAt: 1,
     }),

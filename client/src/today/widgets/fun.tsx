@@ -49,6 +49,8 @@ import {
 } from '../../store';
 import { buildDay, type GeneratedDay } from '../../sessionBuilder';
 import { muscleReadiness } from '../../recovery';
+import { readinessSource } from '../../fatigueApi';
+import { useReadinessOn } from '../../addons/featureGates';
 import { healthBuildCtx } from '../../healthBuild';
 import { describeDay, dayReadoutLabel } from '../../data/daySuggest';
 import type { MuscleGroup } from '../../data/exercises';
@@ -272,7 +274,7 @@ function wildcardFor(
 ): Wildcard | null {
   const done = store.workouts.filter((w) => w.finishedAt !== null);
   if (done.length < 2) return null;
-  const ready = muscleReadiness(done, now);
+  const ready = muscleReadiness(readinessSource(done), now);
   const health = healthBuildCtx(now);
   const prot = new Set(health.protectedMuscles);
   const usable = (m: MuscleGroup) => !prot.has(m) && ready.get(m)?.state !== 'recovering';
@@ -316,11 +318,13 @@ function WildcardWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const { store, now, t, locale, shell } = ctx;
   const s = fs(locale);
   const [roll, setRoll] = useState(0);
+  const readinessOn = useReadinessOn();
   const { workouts, activities, bodyMetrics, goals, injuries, conditions } = store;
   const wc = useMemo(
     () =>
       wildcardFor({ workouts, activities, bodyMetrics, goals, injuries, conditions }, now, roll),
-    [workouts, activities, bodyMetrics, goals, injuries, conditions, now, roll],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the gate changes what the history means
+    [workouts, activities, bodyMetrics, goals, injuries, conditions, now, roll, readinessOn],
   );
   if (!wc)
     return (
@@ -343,6 +347,8 @@ function WildcardWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const muscles = day.targetMuscles.map((m) => t.muscleGroups[m] ?? m);
   const resting = wc.resting.slice(0, 2).map((m) => t.muscleGroups[m] ?? m);
   const restLine = resting.length ? s.staysResting(resting.join(', ')) : s.allFresh;
+  // Without Readiness there is no readiness to fit and no resting muscle to name.
+  const readLine = readinessOn ? ` — ${restLine}` : '';
   const reroll = () => setRoll((r) => r + 1);
   const start = () => {
     const gym = pickSessionGym();
@@ -362,7 +368,7 @@ function WildcardWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         tone="accent"
         icon="sparkle"
         title={s.wildcardTitle(name)}
-        sub={s.fitsReadiness(min, pct)}
+        sub={readinessOn ? s.fitsReadiness(min, pct) : s.minExercises(min, n)}
         onClick={open}
         trailing={
           <IconButton icon="arrows-clockwise" label={s.reroll} size="sm" onClick={reroll} />
@@ -389,7 +395,7 @@ function WildcardWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         kicker={s.wildcardShort}
         badge={s.minExercises(min, n)}
         title={name}
-        sub={`${muscles.join(' · ')} — ${restLine}`}
+        sub={`${muscles.join(' · ')}${readLine}`}
         onClick={open}
         footer={
           <>
@@ -409,7 +415,7 @@ function WildcardWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       kicker={s.wildcard}
       badge={s.roll(roll + 1)}
       title={`${name} · ${min} min`}
-      sub={`${s.why(muscles.join(', '), pct)}${gym ? ` ${s.whyGym(gym.name)}` : ''}`}
+      sub={`${readinessOn ? s.why(muscles.join(', '), pct) : muscles.join(', ')}${gym ? ` ${s.whyGym(gym.name)}` : ''}`}
       bodyLast
       onClick={open}
       footer={

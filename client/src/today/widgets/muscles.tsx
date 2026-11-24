@@ -29,6 +29,7 @@ import { cachedPersonalLandmarks, weeklyMuscleSeries } from '../../personalize';
 import { focusAdjustLandmarks } from '../../goals';
 import { sessionPlateau } from '../../stimulus';
 import { muscleReadiness, recentLoadSets } from '../../recovery';
+import { readinessSource } from '../../fatigueApi';
 import {
   est1rm,
   isStrengthExercise,
@@ -644,7 +645,7 @@ const stimulusLeft: WidgetDef = {
           <div className="ul-flex ul-col ug-8 umt-auto">{data.rows.slice(0, 4).map(bar)}</div>
         </Widget>
       );
-    const rd = muscleReadiness(finishedOf(store.workouts), now);
+    const rd = muscleReadiness(readinessSource(finishedOf(store.workouts)), now);
     const rv = data.rows.map((r) => rd.get(r.m)?.readiness).filter((x): x is number => x != null);
     const ready = rv.length ? Math.round((rv.reduce((a, b) => a + b, 0) / rv.length) * 100) : null;
     const pct = target ? done / target : 1;

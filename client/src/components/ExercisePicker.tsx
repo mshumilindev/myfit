@@ -225,7 +225,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
   const plain = !!props.plain || !!props.warmup;
   // Fatigue colours/levels show everywhere (warm-up included); only the program-authoring picker,
   // which plans a day rather than the one in progress, leaves them out.
-  const noFatigue = !!props.plain;
+  const noFatigue = !!props.plain || !fatigueOn;
   const suggestions = useMemo(
     () =>
       plain

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { addonsPref } from '../../addons/enabledSet';
+import { FATIGUE_ADDONS } from '../../fatigue/testAddons';
 import { cleanup, fireEvent, within } from '@testing-library/react';
 import { DISCOVER_WIDGETS } from './discover';
 import { widgetMatrix } from '../__fixtures__/matrix';
@@ -22,7 +23,7 @@ widgetMatrix('discover widgets (other locales)', DISCOVER_WIDGETS, {
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] });
-  addonsPref.set(['equipment']); // Equipment installed: gym kit and availability show
+  addonsPref.set(['equipment', ...FATIGUE_ADDONS]); // Equipment installed: gym kit and availability show
   vi.setSystemTime(NOW);
   localStorage.clear();
   setLocale('en');

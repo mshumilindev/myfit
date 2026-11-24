@@ -1,5 +1,11 @@
 /** Progress — design S-34…S-36 + MG-3/MG-4 (by muscle, enriched detail). */
-import { equipmentAvailable } from '../addons/featureGates';
+import {
+  equipmentAvailable,
+  useFatigueOn,
+  useMuscleMapOn,
+  useReadinessOn,
+} from '../addons/featureGates';
+import { fatigueSource } from '../fatigueApi';
 import { useSleepsForCalc } from '../addons/useSleeps';
 import { weekStartOf as trainingWeekStart } from '../weekStart';
 import { Button, IconButton } from '../components/ui/Button';
@@ -97,7 +103,7 @@ export function ProgressView({
   sub,
   seg,
   onSeg,
-  lens,
+  lens: lensIn,
   onLens,
 }: {
   store: Store;
@@ -117,6 +123,21 @@ export function ProgressView({
   const [selMuscle, setSelMuscle] = useState<MuscleGroup | null>(null);
   const [volGrain, setVolGrain] = useState<'fine' | 'zones'>('fine');
   const setLens = onLens;
+  // Fatigue and Readiness are add-ons: without them their lenses are not offered, and a stored choice reads as Volume.
+  const fatigueOn = useFatigueOn();
+  const readinessOn = useReadinessOn();
+  const muscleMapOn = useMuscleMapOn();
+  // The fatigue lens is the coloured body map, so it needs both Fatigue and the Muscle map.
+  const fatigueLensOn = fatigueOn && muscleMapOn;
+  const lens: 'volume' | 'fatigue' | 'readiness' =
+    (lensIn === 'fatigue' && !fatigueLensOn) || (lensIn === 'readiness' && !readinessOn)
+      ? 'volume'
+      : lensIn;
+  const lensChoices = [
+    'volume' as const,
+    ...(fatigueLensOn ? (['fatigue'] as const) : []),
+    ...(readinessOn ? (['readiness'] as const) : []),
+  ];
   // The period every Progress tab reads (the "This week" button in the top bar).
   const [range, setRange] = useState<ProgRange>({ key: 'week' });
   const [rangeSheet, setRangeSheet] = useState(false);
@@ -346,7 +367,7 @@ export function ProgressView({
   // Zone-coloured volume heatmap for the desktop Volume right column.
   const volHeat = volumeHeatColors(volFinished, volEnd, volGrain, rangeDays, effLandmarks);
   // Fatigue lens: trained muscles tinted fresh -> fried; plus a deload nudge.
-  const fatMap = muscleFatigue(mapWorkouts, nowTs, pLandmarks);
+  const fatMap = muscleFatigue(fatigueSource(mapWorkouts), nowTs, pLandmarks);
   const fatColors: Partial<Record<MuscleGroup, string>> = {};
   for (const f of fatMap.values()) if (f.sets > 0) fatColors[f.muscle] = FATIGUE_COLOR[f.level];
   const deload = deloadSuggestion(
@@ -637,6 +658,8 @@ export function ProgressView({
               lens={lens}
               onLens={setLens}
               fatColors={fatColors}
+              lensChoices={lensChoices}
+              muscleMapOn={muscleMapOn}
               mapView={mapView}
               onMapView={setMapView}
             />
@@ -754,20 +777,22 @@ export function ProgressView({
                     ? t.readinessKicker
                     : t.volumeTab}
               </h3>
-              <Segmented
-                className="lens-seg"
-                size="sm"
-                value={lens}
-                onChange={setLens}
-                options={[
-                  { value: 'volume', label: t.volumeTab },
-                  { value: 'fatigue', label: t.fatigueTab },
-                  { value: 'readiness', label: t.readinessKicker },
-                ]}
-              />
+              {lensChoices.length > 1 && (
+                <Segmented
+                  className="lens-seg"
+                  size="sm"
+                  value={lens}
+                  onChange={setLens}
+                  options={lensChoices.map((value) => ({ value, label: lensLabel(t, value) }))}
+                />
+              )}
             </div>
             {lens === 'readiness' ? (
-              <ReadinessLens finished={mapWorkouts} now={nowTs} view="map" />
+              <ReadinessLens
+                finished={mapWorkouts}
+                now={nowTs}
+                view={muscleMapOn ? 'map' : 'list'}
+              />
             ) : (
               <>
                 <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : volHeat} />
@@ -939,27 +964,29 @@ export function ProgressView({
               {t.viewReset}
             </Button>
           </div>
-          <div className="vvs-lbl">{t.progLens}</div>
-          <div className="vvs-lenses">
+          {lensChoices.length > 1 && <div className="vvs-lbl">{t.progLens}</div>}
+          <div className="vvs-lenses" hidden={lensChoices.length < 2}>
             {(
               [
                 ['volume', t.volumeTab, t.lensVolumeSub],
                 ['fatigue', t.fatigueTab, t.lensFatigueSub],
                 ['readiness', t.readinessKicker, t.lensReadinessSub],
               ] as const
-            ).map(([id, name, sub]) => (
-              <Card
-                as="button"
-                pad="sm"
-                tone={lens === id ? 'accent' : 'neutral'}
-                className="vvs-lens"
-                key={id}
-                onClick={() => setLens(id)}
-              >
-                <span className="vvs-lens-t">{name}</span>
-                <span className="vvs-lens-s">{sub}</span>
-              </Card>
-            ))}
+            )
+              .filter(([id]) => lensChoices.includes(id))
+              .map(([id, name, sub]) => (
+                <Card
+                  as="button"
+                  pad="sm"
+                  tone={lens === id ? 'accent' : 'neutral'}
+                  className="vvs-lens"
+                  key={id}
+                  onClick={() => setLens(id)}
+                >
+                  <span className="vvs-lens-t">{name}</span>
+                  <span className="vvs-lens-s">{sub}</span>
+                </Card>
+              ))}
           </div>
           <div className="vvs-row2">
             <div className="vvs-group">
@@ -1208,6 +1235,8 @@ function VolumePanel({
   lens,
   onLens,
   fatColors,
+  lensChoices,
+  muscleMapOn,
   mapView,
   onMapView,
   mapWorkouts,
@@ -1226,6 +1255,8 @@ function VolumePanel({
   lens: 'volume' | 'fatigue' | 'readiness';
   onLens: (l: 'volume' | 'fatigue' | 'readiness') => void;
   fatColors: Partial<Record<MuscleGroup, string>>;
+  lensChoices: readonly ('volume' | 'fatigue' | 'readiness')[];
+  muscleMapOn: boolean;
   mapView: boolean;
   onMapView: (m: boolean) => void;
 }) {
@@ -1354,21 +1385,19 @@ function VolumePanel({
         <ReadinessLens
           finished={mapWorkouts}
           now={nowTs}
-          view={!desktop && mapView ? 'map' : 'list'}
+          view={!desktop && mapView && muscleMapOn ? 'map' : 'list'}
         />
       ) : mapView && !desktop ? (
         <div className="vol-map">
-          <Segmented
-            className="lens-seg-m"
-            size="sm"
-            value={lens}
-            onChange={onLens}
-            options={[
-              { value: 'volume', label: t.volumeTab },
-              { value: 'fatigue', label: t.fatigueTab },
-              { value: 'readiness', label: t.readinessKicker },
-            ]}
-          />
+          {lensChoices.length > 1 && (
+            <Segmented
+              className="lens-seg-m"
+              size="sm"
+              value={lens}
+              onChange={onLens}
+              options={lensChoices.map((value) => ({ value, label: lensLabel(t, value) }))}
+            />
+          )}
           <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : heatColors} />
           {lens === 'fatigue' ? (
             <div className="vol-legend">
@@ -1425,6 +1454,10 @@ function VolumePanel({
       {fixMuscle && <FixSheet muscle={fixMuscle} onClose={() => setFixMuscle(null)} />}
     </div>
   );
+}
+
+function lensLabel(t: T, lens: 'volume' | 'fatigue' | 'readiness'): string {
+  return lens === 'fatigue' ? t.fatigueTab : lens === 'readiness' ? t.readinessKicker : t.volumeTab;
 }
 
 /** Deload nudge (design FAT-2): a single fried muscle earns a local cut; a lot

@@ -1,6 +1,12 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
 import { fatigueSource } from '../fatigueApi';
-import { equipmentAvailable, useEquipmentOn, usePlaybookOn } from '../addons/featureGates';
+import {
+  equipmentAvailable,
+  useEquipmentOn,
+  useFatigueOn,
+  usePlaybookOn,
+  useReadinessOn,
+} from '../addons/featureGates';
 import { useSupersetsHost } from '../supersetsRt';
 import { useCircuitHost } from '../circuitRt';
 import { inShownGroup } from '../supersetBlocks';
@@ -578,6 +584,8 @@ export function SessionView(props: {
   const playbookOn = usePlaybookOn();
   const equipmentH = useEquipmentHost(); // Equipment: the picker sheet arrives with its chunk
   const equipmentOn = useEquipmentOn();
+  const readinessOn = useReadinessOn();
+  const fatigueOn = useFatigueOn();
   const conditionLimits = useStoredConditionLimits(); // restriction: RPE cap / no-failure / rest scale stay on with the feature off
   // Day-aware suggestions & muscle readouts are always on (not flagged).
   const suggestOn = true;
@@ -1942,31 +1950,35 @@ export function SessionView(props: {
               </Button>
             </div>
           )}
-          <div className="es-ready">
-            <div className="es-ready-line">
-              <Icon name="heartbeat" weight="fill" />
-              <span>
-                {t.esReadiness} · <b>{readLine}</b>
-              </span>
-            </div>
-            {rows.length > 0 && (
-              <div className="es-ready-cards">
-                {rows.map((r) => (
-                  <div key={r.m} className="es-rc">
-                    <div className="es-rc-top">
-                      <span className="es-rc-name">{mName(r.m)}</span>
-                      <span className="es-rc-pct num" style={{ color: READINESS_COLOR[r.state] }}>
-                        {r.pct}%
+          {readinessOn && (
+            <div className="es-ready">
+              <div className="es-ready-line">
+                <Icon name="heartbeat" weight="fill" />
+                <span>
+                  {t.esReadiness} · <b>{readLine}</b>
+                </span>
+              </div>
+              {rows.length > 0 && (
+                <div className="es-ready-cards">
+                  {rows.map((r) => (
+                    <div key={r.m} className="es-rc">
+                      <div className="es-rc-top">
+                        <span className="es-rc-name">{mName(r.m)}</span>
+                        <span className="es-rc-pct num" style={{ color: READINESS_COLOR[r.state] }}>
+                          {r.pct}%
+                        </span>
+                      </div>
+                      <span className="es-rc-bar">
+                        <span
+                          style={{ width: `${r.pct}%`, background: READINESS_COLOR[r.state] }}
+                        />
                       </span>
                     </div>
-                    <span className="es-rc-bar">
-                      <span style={{ width: `${r.pct}%`, background: READINESS_COLOR[r.state] }} />
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {hero && (
             <div className={`es-hero${hero.kind === 'strength' ? '' : ' warm'}${tintOf(hero)}`}>
               <PickPhoto src={hero.img} kind={hero.kind} fallbackClassName="es-hero-noimg" />
@@ -3296,7 +3308,7 @@ export function SessionView(props: {
             {muscles.primary && (
               <MuscleDetailContext.Provider
                 value={
-                  focusView && live
+                  focusView && live && (readinessOn || fatigueOn)
                     ? (m: MuscleGroup) => (
                         <MuscleStatePanel
                           muscle={m}
@@ -4198,6 +4210,7 @@ export function SessionView(props: {
     const hist = [...store.workouts.filter((w) => w.finishedAt !== null), workout!];
     const at = live ? now : workout!.startedAt;
     const out: Partial<Record<MuscleGroup, string>> = {};
+    if (!readinessOn) return out;
     for (const m of ms) {
       const r = directReadiness([m], m, hist, at);
       // Every muscle chip carries its state dot — the same one the picker shows

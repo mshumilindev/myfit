@@ -3,7 +3,7 @@
  * or surface something new. "Of the day" picks are seeded by the LOCAL date, so
  * a pick stays put all day and every size shows the same one.
  */
-import { equipmentAvailable } from '../../addons/featureGates';
+import { equipmentAvailable, readinessAvailable } from '../../addons/featureGates';
 import { useMemo, useState, type ReactNode } from 'react';
 import {
   Widget,
@@ -68,6 +68,7 @@ import {
   type ChallengeTemplate,
 } from '../../challenges';
 import { muscleReadiness } from '../../recovery';
+import { readinessSource } from '../../fatigueApi';
 import { activityType, durationMin } from '../../activities';
 import type { WidgetCtx, WidgetDef } from '../registry';
 import { ds, type DiscoverStrings } from './discover.strings';
@@ -1356,10 +1357,12 @@ const restIdea: WidgetDef = {
     const { store, now, t, locale, shell } = ctx;
     const s = ds(locale);
     const finished = finishedOf(ctx);
+    // Without Readiness there is no freshness to report: its lines and bars are left out.
+    const readinessOn = readinessAvailable();
     const today = dayKey(now);
     const trainedToday = finished.some((w) => dayKey(w.startedAt) === today);
     const trainedYesterday = finished.some((w) => dayKey(w.startedAt) === today - 1);
-    const ready = [...muscleReadiness(finished, now).values()]
+    const ready = [...muscleReadiness(readinessSource(finished), now).values()]
       .filter((m) => m.daysSince !== null)
       .sort((a, b) => a.readiness - b.readiness);
     const low = ready[0] ?? null;
@@ -1405,7 +1408,7 @@ const restIdea: WidgetDef = {
             />
           }
         >
-          <div className="uiw-sub">{s.readyK}</div>
+          {bars.length > 0 && <div className="uiw-sub">{s.readyK}</div>}
           {bars.length > 0 ? (
             bars.map((m) => (
               <div key={m.muscle} className="ul-flex ua-center ug-10">
@@ -1471,7 +1474,7 @@ const restIdea: WidgetDef = {
     const lowName = low ? muscleName(t, low.muscle) : '';
     const lowPct = low ? pct(low.readiness) : 100;
     const tired = low !== null && low.readiness < 0.9;
-    const why = tired ? s.keepEasy(lowName, lowPct) : s.allFresh;
+    const why = tired ? s.keepEasy(lowName, lowPct) : readinessOn ? s.allFresh : '';
     if (size === 'M')
       return (
         <Widget
@@ -1479,7 +1482,7 @@ const restIdea: WidgetDef = {
           tone="rest"
           icon="flower-lotus"
           title={s.tryMin(top.min, top.name.toLowerCase())}
-          sub={tired ? s.stillAt(lowName, lowPct) : s.allFresh}
+          sub={tired ? s.stillAt(lowName, lowPct) : readinessOn ? s.allFresh : undefined}
           onClick={openLog}
         />
       );
@@ -1518,7 +1521,7 @@ const restIdea: WidgetDef = {
               </Chip>
             ))}
           </div>
-          <div className="uiw-sub">{why}</div>
+          {why && <div className="uiw-sub">{why}</div>}
         </Widget>
       );
     return (
@@ -1534,7 +1537,7 @@ const restIdea: WidgetDef = {
           </Button>
         }
       >
-        <div className="uiw-sub">{tired ? s.recoveryK : s.allFresh}</div>
+        {readinessOn && <div className="uiw-sub">{tired ? s.recoveryK : s.allFresh}</div>}
         {ready.slice(0, 3).map((m) => (
           <div key={m.muscle} className="ul-flex ua-center ug-10">
             <span className="uiw-sub" style={{ width: 72 }}>

@@ -10,6 +10,7 @@
  *     (add load / hold / deload / first time / return after a break) — the same coaching the exercise
  *     cards show, previewed before you add them.
  */
+import { useReadinessOn } from '../addons/featureGates';
 import { Icon, useExerciseName } from '../ui';
 import { useT } from '../i18n';
 import { MuscleIcon } from './Muscle';
@@ -159,6 +160,7 @@ function ConditionReminder() {
 
 export function SessionStartCoach({ finished, now }: { finished: Workout[]; now: number }) {
   const { t } = useT();
+  const readinessOn = useReadinessOn();
   const plan = finished.length < 2 ? null : predictToday(finished, now, t);
   if (!plan) return <ConditionReminder />;
 
@@ -179,31 +181,33 @@ export function SessionStartCoach({ finished, now }: { finished: Workout[]; now:
   return (
     <div className="ssc">
       <ConditionReminder />
-      <div className={`ssc-read tone-${tone}`}>
-        <div className="ssc-read-head">
-          <span className="ssc-ic">
-            <Icon name="heartbeat" weight="fill" />
-          </span>
-          <span className="ssc-kicker">{t.readinessKicker}</span>
-        </div>
-        <div className="ssc-lead">{lead}</div>
-        {rows.length > 0 && (
-          <div className="ssc-strip">
-            {rows.map((r) => (
-              <span key={r.muscle} className="ssc-m">
-                <MuscleIcon muscle={r.muscle} variant="row" tone="primary" />
-                <span className="ssc-m-name">{t.muscleGroups[r.muscle]}</span>
-                <span className="ssc-m-pct tnum" style={{ color: READINESS_COLOR[r.state] }}>
-                  {round(r.readiness * 100)}%
-                </span>
-              </span>
-            ))}
+      {readinessOn && (
+        <div className={`ssc-read tone-${tone}`}>
+          <div className="ssc-read-head">
+            <span className="ssc-ic">
+              <Icon name="heartbeat" weight="fill" />
+            </span>
+            <span className="ssc-kicker">{t.readinessKicker}</span>
           </div>
-        )}
-        {recovering.length > 0 && severity !== 'ready' && (
-          <div className="ssc-why">{t.rdCoolingWhy(recovering.join(' · '))}</div>
-        )}
-      </div>
+          <div className="ssc-lead">{lead}</div>
+          {rows.length > 0 && (
+            <div className="ssc-strip">
+              {rows.map((r) => (
+                <span key={r.muscle} className="ssc-m">
+                  <MuscleIcon muscle={r.muscle} variant="row" tone="primary" />
+                  <span className="ssc-m-name">{t.muscleGroups[r.muscle]}</span>
+                  <span className="ssc-m-pct tnum" style={{ color: READINESS_COLOR[r.state] }}>
+                    {round(r.readiness * 100)}%
+                  </span>
+                </span>
+              ))}
+            </div>
+          )}
+          {recovering.length > 0 && severity !== 'ready' && (
+            <div className="ssc-why">{t.rdCoolingWhy(recovering.join(' · '))}</div>
+          )}
+        </div>
+      )}
 
       {plan.exercises.length > 0 && (
         <div className="ssc-plan">

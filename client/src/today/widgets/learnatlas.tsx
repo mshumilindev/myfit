@@ -37,6 +37,8 @@ import { getRole } from '../../api';
 import { consistencyStreak, dayKey, setCoach, workoutVolumeKg } from '../../store';
 import type { Workout } from '../../types';
 import { muscleReadiness } from '../../recovery';
+import { readinessSource } from '../../fatigueApi';
+import { readinessAvailable, useReadinessOn } from '../../addons/featureGates';
 import { weekStartOf } from '../../weekStart';
 import { fmtCountdown } from '../../restTimer';
 import { localizedExerciseName } from '../../data/exerciseNames';
@@ -1020,14 +1022,14 @@ function AskWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       </Widget>
     );
   const finished = finishedOf(ctx);
-  const ready = [...muscleReadiness(finished, ctx.now).values()];
+  const ready = [...muscleReadiness(readinessSource(finished), ctx.now).values()];
   const avg = ready.length ? ready.reduce((a, m) => a + m.readiness, 0) / ready.length : 1;
   return (
     <Widget
       size="XL"
       tone="atlas"
       kicker={s.askAtlas}
-      badge={s.readinessP(pct(avg))}
+      badge={readinessAvailable() ? s.readinessP(pct(avg)) : undefined}
       onClick={open}
       footer={input}
     >
@@ -1143,8 +1145,15 @@ function PlanWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
     () => store.workouts.filter((w) => w.finishedAt !== null),
     [store.workouts],
   );
-  const ready = useMemo(() => [...muscleReadiness(finished, now).entries()], [finished, now]);
+  // Without Readiness the plan carries no readiness figure or freshness line.
+  const readinessOn = useReadinessOn();
+  const ready = useMemo(
+    () => [...muscleReadiness(readinessSource(finished), now).entries()],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the gate changes what the history means
+    [finished, now, readinessOn],
+  );
   const avg = ready.length ? ready.reduce((a, [, m]) => a + m.readiness, 0) / ready.length : 1;
+  const readP = readinessOn ? s.readinessP(pct(avg)) : '';
   const openCoachNow = openCoach(ctx);
   const start = () => ctx.shell.openStart();
 
@@ -1185,7 +1194,7 @@ function PlanWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         icon="moon"
         kicker={s.planToday}
         title={s.restDay}
-        sub={k ? s.nextPlanDay(fmtWeekdayShort(now + k * DAY, locale)) : s.readinessP(pct(avg))}
+        sub={k ? s.nextPlanDay(fmtWeekdayShort(now + k * DAY, locale)) : readP}
         action={s.openChat}
         onClick={openCoachNow}
       />
@@ -1204,7 +1213,9 @@ function PlanWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const tiredLine =
     tired && tired[1].readiness < 0.9
       ? s.stillRecovering(t.muscleGroups[tired[0]] ?? tired[0])
-      : s.allFresh;
+      : readinessOn
+        ? s.allFresh
+        : '';
   const meta = `${s.exercisesN(main.length)} · ${s.minN(today.built.estMinutes)}`;
   const startBtn = (text: string, full = false) => (
     <Button variant="primary" size="sm" fullWidth={full} onClick={start}>
@@ -1218,7 +1229,7 @@ function PlanWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         tone="atlas"
         icon="barbell"
         title={`${s.train} · ${label}`}
-        sub={`${s.atlas} · ${focus} · ${s.readinessP(pct(avg))}`}
+        sub={[s.atlas, focus, readP].filter(Boolean).join(' · ')}
         onClick={start}
         trailing={startBtn(s.start)}
       />
@@ -1240,7 +1251,7 @@ function PlanWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         size="L"
         tone="atlas"
         kicker={s.planToday}
-        badge={s.readinessP(pct(avg))}
+        badge={readP || undefined}
         title={label}
         sub={`${meta} · ${s.focus}: ${focus}`}
         onClick={start}
@@ -1252,13 +1263,13 @@ function PlanWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       size="XL"
       tone="atlas"
       kicker={s.planFor(fmtWeekdayDayMonth(now, locale))}
-      badge={s.readinessP(pct(avg))}
+      badge={readP || undefined}
       onClick={start}
       footer={startBtn(s.startX(label), true)}
     >
       <div>
         <div className="uiw-name">{label}</div>
-        <div className="uiw-sub">{`${meta} · ${tiredLine}`}</div>
+        <div className="uiw-sub">{tiredLine ? `${meta} · ${tiredLine}` : meta}</div>
       </div>
       <WidgetList
         rows={main.slice(0, 5).map((p, i) => ({
@@ -1432,7 +1443,7 @@ function MoodWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const open = openCoach(ctx);
   const why = useMemo(() => {
     const finished = store.workouts.filter((w) => w.finishedAt !== null);
-    const ready = [...muscleReadiness(finished, now).values()];
+    const ready = [...muscleReadiness(readinessSource(finished), now).values()];
     const avg = ready.length ? ready.reduce((a, m) => a + m.readiness, 0) / ready.length : 1;
     const since = weekStartOf(now);
     return {
@@ -1490,7 +1501,9 @@ function MoodWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
         <WidgetStats
           items={[
             { label: s.streak, value: s.daysN(why.streak) },
-            { label: s.readiness, value: `${pct(why.readiness)}%` },
+            ...(readinessAvailable()
+              ? [{ label: s.readiness, value: `${pct(why.readiness)}%` }]
+              : []),
           ]}
         />
       </Widget>
@@ -1522,7 +1535,9 @@ function MoodWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
       <WidgetList
         rows={[
           { label: s.streak, value: s.daysN(why.streak) },
-          { label: s.readiness, value: `${pct(why.readiness)}%` },
+          ...(readinessAvailable()
+            ? [{ label: s.readiness, value: `${pct(why.readiness)}%` }]
+            : []),
           { label: s.thisWeek, value: String(why.week) },
           { label: reason },
         ]}

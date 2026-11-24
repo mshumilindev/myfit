@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { addonsPref } from '../addons/enabledSet';
+import { FATIGUE_ADDONS } from '../fatigue/testAddons';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { setLocale } from '../i18n';
 import { en } from '../i18n/en';
@@ -161,6 +163,21 @@ describe('ProgressView: desktop volume pane', () => {
     fireEvent.click(opt(pane, en.fatigueTab));
     expect(onLens).toHaveBeenCalledWith('fatigue');
     expect(screen.getByRole('button', { name: en.volSort })).toBeTruthy();
+  });
+
+  it('without Fatigue, Readiness and the Muscle map there is only the volume view: no lens segment, no deload card', () => {
+    addonsPref.set(addonsPref.snapshot().list.filter((i) => !FATIGUE_ADDONS.includes(i)));
+    try {
+      const { onLens } = open('fatigue'); // a stored fatigue choice reads as Volume
+      const pane = document.querySelector('.vol-map-pane') as HTMLElement;
+      expect(pane.querySelector('h3')?.textContent).toBe(en.volumeTab);
+      expect(pane.querySelector('.lens-seg')).toBeNull();
+      expect(document.querySelector('.deload-card')).toBeNull();
+      expect(document.querySelector('.rd-lens')).toBeNull();
+      expect(onLens).not.toHaveBeenCalled();
+    } finally {
+      addonsPref.set([...addonsPref.snapshot().list, ...FATIGUE_ADDONS]);
+    }
   });
 
   it('fatigue lens: title, fatigue legend', () => {

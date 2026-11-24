@@ -1,4 +1,4 @@
-import { useGoalsOn } from '../addons/featureGates';
+import { useGoalsOn, useReadinessOn } from '../addons/featureGates';
 /**
  * Session Builder wizard. It opens on step 1 and walks the whole flow — physique
  * goal (only if unset), intent, muscles, the day's extras — regenerating the plan
@@ -192,6 +192,7 @@ export function SessionBuilderView({
     }
   };
 
+  const readinessOn = useReadinessOn();
   const ready = useMemo(() => muscleReadiness(finished, now), [finished, now]);
   const selected = muscles ?? day.targetMuscles;
   const cur = steps[step];
@@ -335,7 +336,7 @@ export function SessionBuilderView({
             const on = selected.includes(m);
             return (
               <Chip key={m} selected={on} onClick={() => toggleMuscle(m)}>
-                <span className="sbw-mdot" style={{ background: col }} />
+                {readinessOn && <span className="sbw-mdot" style={{ background: col }} />}
                 {t.muscleGroups[m]}
               </Chip>
             );

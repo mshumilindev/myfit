@@ -1,6 +1,6 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
 import { PlannerEntry } from '../today/PlannerEntry';
-import { usePlaybookOn } from '../addons/featureGates';
+import { usePlaybookOn, useReadinessOn } from '../addons/featureGates';
 import { useAddonOrBase } from '../addons/enabledSet';
 import { storeHash } from '../addonStore/storeRoute';
 import { readStoredList } from '../activityPrefs';
@@ -273,6 +273,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const historyDayCount = buildHistoryDays(finished, store.activities, sleeps).length;
   const [pbNow] = useState(() => Date.now());
   const playbookOn = usePlaybookOn();
+  const readinessOn = useReadinessOn();
   const playbook = useMemo(
     () =>
       computePlaybook(
@@ -550,7 +551,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // "likely today" plaque. Each carries a `priority` (higher = more urgent) that
   // fixes its order in the deck and the expanded overlay.
   const nudges: Nudge[] = [];
-  const readinessNudge = buildReadinessNudge(finished, now, t);
+  const readinessNudge = readinessOn ? buildReadinessNudge(finished, now, t) : null;
   if (readinessNudge) nudges.push(readinessNudge);
   if (energyOut.total > 0) {
     nudges.push({

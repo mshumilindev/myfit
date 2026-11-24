@@ -8,6 +8,7 @@ import { __getStateForTests, __replaceStateForTests } from '../store';
 import type { Exercise, SetEntry, Workout } from '../types';
 import { SessionView } from './SessionView';
 import { addonsPref } from '../addons/enabledSet';
+import { FATIGUE_ADDONS } from '../fatigue/testAddons';
 import '../circuit/circuitBoot'; // Circuit installed and loaded: its screens are the module's
 import '../supersets/supersetsBoot'; // Supersets too
 
@@ -71,7 +72,7 @@ function mount(id = 'open', sh: Shell = shell(), extra: { past?: boolean } = {})
 }
 
 beforeEach(() => {
-  addonsPref.set(['playbook', 'circuit', 'supersets']);
+  addonsPref.set(['playbook', 'circuit', 'supersets', ...FATIGUE_ADDONS]);
   localStorage.clear();
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
