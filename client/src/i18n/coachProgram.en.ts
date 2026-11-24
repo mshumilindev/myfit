@@ -222,6 +222,7 @@ export const pgEn = {
   edMore: 'More',
   edEquipment: 'Equipment',
   edDropLast: 'Drop on last set',
+  edAddonMark: 'Advanced training',
   edSuperWith: 'Superset with',
   edChooseEx: 'Choose exercise',
   edUngroup: (name: string) => `${name} · Ungroup`,

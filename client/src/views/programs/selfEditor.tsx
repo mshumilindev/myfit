@@ -6,7 +6,7 @@
  * `ProgramPage` (the Programs screen and the member's review of a trainer's program) is the only user of
  * `SelfProgramEditor`: there is no other program editor in the app.
  */
-import { equipmentAvailable } from '../../addons/featureGates';
+import { equipmentAvailable, supersetsAvailable } from '../../addons/featureGates';
 import { useActivitiesOn } from '../../addons/activitiesGate';
 import { useMemo } from 'react';
 import type { Shell } from '../../App';
@@ -174,7 +174,7 @@ export function useSelfEditorHost(o: SelfHostOptions = {}): ProgramEditorHost {
       warmupWeighted: warmupUsesWeight,
       weightUnit: exerciseUnit,
       cardio,
-      features: { activities: !activitiesLocked },
+      features: { activities: !activitiesLocked, supersets: supersetsAvailable() },
       exerciseLinks: shell
         ? (name) => [
             {

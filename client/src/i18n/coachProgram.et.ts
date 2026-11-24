@@ -214,6 +214,7 @@ export const pgEt: typeof pgEn = {
   edMore: 'Veel',
   edEquipment: 'Varustus',
   edDropLast: 'Dropset viimasel seerial',
+  edAddonMark: 'Täiustatud treening',
   edSuperWith: 'Superseeria koos',
   edChooseEx: 'Vali harjutus',
   edUngroup: (name) => `${name} · Eralda`,

@@ -76,7 +76,9 @@ export function DayCard(c: DayCardProps) {
   const items = dayItems(d, day);
   const lifts = items.filter((i) => i.kind === 'strength');
   const acts = dayActivities(d, day);
-  const labels = supersetLabels(items);
+  // Pairing is shown only where it can be used. A coach always sees a client's pairs, marked as coming from the add-on.
+  const labels = c.features.supersets ? supersetLabels(items) : new Map<string, string>();
+  const fromAddon = c.host.mode === 'coach';
   const trainer = firstName(c.partner);
   const chosen = d.targetMuscles[String(day)] ?? [];
   const derived = derivedMuscles(items, c.host.catalog);
@@ -155,6 +157,7 @@ export function DayCard(c: DayCardProps) {
         .map((m) => t.muscleGroups[m] ?? m)
         .join(' · '),
       f.flag?.label ?? '',
+      fromAddon && labels.has(it.id) ? p.edAddonMark : '',
     ]
       .filter(Boolean)
       .join(' · ');

@@ -216,6 +216,7 @@ export const pgLt: typeof pgEn = {
   edMore: 'Daugiau',
   edEquipment: 'Įranga',
   edDropLast: 'Dropsetas paskutinėje serijoje',
+  edAddonMark: 'Pažangi treniruotė',
   edSuperWith: 'Supersetas su',
   edChooseEx: 'Pasirinkti pratimą',
   edUngroup: (name) => `${name} · Išskirti`,

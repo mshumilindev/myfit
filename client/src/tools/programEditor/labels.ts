@@ -238,6 +238,8 @@ export interface ProgramEditorLabels {
   edSolo: string;
   edSoloDay: string;
   edSuggested: string;
+  /** The small mark on a superset row the client's app shows as a plain exercise (the pairing comes from an add-on). */
+  edAddonMark: string;
   edSuperWith: string;
   edSwap: string;
   edSwapFor: (name: string) => string;

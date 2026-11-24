@@ -216,6 +216,7 @@ export const pgUk: typeof pgEn = {
   edMore: 'Ще',
   edEquipment: 'Обладнання',
   edDropLast: 'Дропсет в останньому підході',
+  edAddonMark: 'Розширене тренування',
   edSuperWith: 'Суперсет із',
   edChooseEx: 'Обрати вправу',
   edUngroup: (name) => `${name} · Розгрупувати`,

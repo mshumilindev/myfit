@@ -225,6 +225,7 @@ export const pgPl: typeof pgEn = {
   edMore: 'Więcej',
   edEquipment: 'Sprzęt',
   edDropLast: 'Drop set w ostatniej serii',
+  edAddonMark: 'Zaawansowany trening',
   edSuperWith: 'Superseria z',
   edChooseEx: 'Wybierz ćwiczenie',
   edUngroup: (name) => `${name} · Rozdziel`,
