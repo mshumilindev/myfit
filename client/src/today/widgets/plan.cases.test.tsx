@@ -5,6 +5,7 @@ import { widgetMatrix } from '../__fixtures__/matrix';
 import { NOW, STATES, PRESETS, renderWidget, seed, setLocale } from '../__fixtures__/widgetHarness';
 import type { WidgetSize } from '../../components/ui/Widget';
 import { addonsPref } from '../../addons/enabledSet';
+import '../../effort/effortBoot'; // the RPE / RIR chunk: the Effort trend widget body arrives with it
 
 const byId = (id: string) => PLAN_WIDGETS.find((w) => w.id === id)!;
 const textOf = (id: string, size: WidgetSize) =>

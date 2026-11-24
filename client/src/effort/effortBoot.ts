@@ -4,10 +4,12 @@
  */
 import { effortHost } from '../effortApi';
 import { provide, trackerReady } from '../trackerRt';
+import { EffortTrendWidget } from './EffortTrendWidget';
 import { RowRpe } from './RowRpe';
 import { CardioStepper, Chips, EffortHint, EffortTag, Label } from './pieces';
 
 provide(effortHost, {
+  TrendWidget: EffortTrendWidget,
   Chips,
   Label,
   Hint: EffortHint,

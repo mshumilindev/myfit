@@ -13,7 +13,6 @@ import {
   WidgetDots,
   WidgetList,
   WidgetRing,
-  WidgetSpark,
   WidgetStats,
   type WidgetSize,
   WidgetEmpty,
@@ -73,6 +72,8 @@ import { defaultRestSec, fmtCountdown, restAlert } from '../../restTimer';
 import { homeSetMoves, homeTotals, lastRunOf } from '../../homeSets';
 import { dateInWeek, weekOrder, weekStartDay, weekStartOf } from '../../weekStart';
 import { effortAvailable } from '../../addons/featureGates';
+import type { EffortTrendProps } from '../../effortApi';
+import { useEffortHost } from '../../effortRt';
 import { nicMid, nicRpeShift } from '../../nicotineApply';
 import type { WidgetCtx, WidgetDef } from '../registry';
 import { ps } from './plan.strings';
@@ -2015,6 +2016,12 @@ function effortZone(): { lo: number; hi: number } {
   return { lo: ZONE_BASE_LO + shift, hi: ZONE_BASE_HI + shift };
 }
 
+/** The widget body is a piece of the RPE / RIR chunk: nothing draws until the module is installed and its chunk has arrived. */
+function EffortTrendSlot(p: EffortTrendProps) {
+  const Body = useEffortHost()?.TrendWidget;
+  return Body ? <Body {...p} /> : null;
+}
+
 const effortTrend: WidgetDef = {
   id: 'effort-trend',
   group: 'plan',
@@ -2023,108 +2030,22 @@ const effortTrend: WidgetDef = {
   name: () => ps(getLocale()).names.effort,
   render: (size, ctx) => {
     const { store, t, locale, shell } = ctx;
-    const s = ps(locale);
-    const { lo: ZONE_LO, hi: ZONE_HI } = effortZone();
     const rows = finishedOf(ctx)
       .map((w) => ({ w, rpe: sessionRpe(w) }))
       .filter((r): r is { w: Workout; rpe: number } => r.rpe !== null)
-      .slice(0, 10);
-    const open = () => shell.goTab('progress');
-    if (rows.length === 0)
-      return (
-        <WidgetEmpty
-          size={size}
-          tone="accent"
-          icon="gauge"
-          kicker={s.effortK}
-          title={s.noRpe}
-          sub={s.noRpeSub}
-          onAction={open}
-        />
-      );
-    const avg = rows.reduce((a, r) => a + r.rpe, 0) / rows.length;
-    const inZone = rows.filter((r) => r.rpe >= ZONE_LO && r.rpe <= ZONE_HI).length;
-    const zoneTxt = s.zone(`${ZONE_LO}–${ZONE_HI}`);
-    const state = avg < ZONE_LO ? s.belowZone : avg > ZONE_HI ? s.aboveZone : s.inZone;
-    const advice = avg < ZONE_LO ? s.adviceLow : avg > ZONE_HI ? s.adviceHigh : s.adviceZone;
-    const series = rows.map((r) => r.rpe).reverse();
-    const spark = (h: number) =>
-      series.length > 1 ? <WidgetSpark points={series} height={h} tone="accent" area /> : null;
-    const avgTxt = avg.toFixed(1);
-    if (size === 'M')
-      return (
-        <Widget
-          size="M"
-          tone="accent"
-          icon="gauge"
-          title={s.avgRpe(avgTxt)}
-          sub={`${s.lastNSessions(rows.length)} · ${state}`}
-          onClick={open}
-          trailing={
-            <span className="ul-flex" style={{ width: 72 }}>
-              {spark(28)}
-            </span>
-          }
-        />
-      );
-    if (size === 'S')
-      return (
-        <Widget
-          size="S"
-          tone="accent"
-          kicker={s.effortK}
-          value={avgTxt}
-          unit={s.avg}
-          sub={`${state} ${`${ZONE_LO}–${ZONE_HI}`}`}
-          bodyLast
-          onClick={open}
-        >
-          {spark(24)}
-        </Widget>
-      );
-    if (size === 'L')
-      return (
-        <Widget
-          size="L"
-          tone="accent"
-          kicker={s.effortLast(rows.length)}
-          badge={zoneTxt}
-          value={avgTxt}
-          unit={s.avgRpeUnit}
-          bodyLast
-          onClick={open}
-        >
-          {spark(44)}
-        </Widget>
-      );
+      .slice(0, 10)
+      .map((r) => ({
+        rpe: r.rpe,
+        label: `${fmtWeekdayShort(r.w.startedAt, locale)} · ${sessionLabel(r.w, store.workouts, t)}`,
+      }));
     return (
-      <Widget
-        size="XL"
-        tone="accent"
-        kicker={s.effortLast(rows.length)}
-        badge={s.inZoneN(inZone, rows.length)}
-        value={avgTxt}
-        unit={s.avgRpeUnit}
-        sub={zoneTxt}
-        bodyLast
-        onClick={open}
-        footer={
-          <>
-            <span className="uiw-sub uf-1">{advice}</span>
-            <Button variant="secondary" size="sm" iconTrailing="caret-right" onClick={open}>
-              {s.progress}
-            </Button>
-          </>
-        }
-      >
-        {spark(80)}
-        <WidgetList
-          rows={rows.slice(0, 3).map((r) => ({
-            label: `${fmtWeekdayShort(r.w.startedAt, locale)} · ${sessionLabel(r.w, store.workouts, t)}`,
-            value: `RPE ${r.rpe.toFixed(1)}`,
-          }))}
-        />
-      </Widget>
+      <EffortTrendSlot
+        size={size}
+        locale={locale}
+        rows={rows}
+        zone={effortZone()}
+        onOpen={() => shell.goTab('progress')}
+      />
     );
   },
 };

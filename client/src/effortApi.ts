@@ -6,10 +6,30 @@
  * Imports stay light (types and the gate) so core modules can use this file.
  */
 import type { ComponentType } from 'react';
+import type { WidgetSize } from './components/ui/Widget';
+import type { LocaleId } from './i18n';
 import type { EditorSlots } from './tools/programEditor/host';
 import { effortAvailable } from './addons/featureGates';
 
+export interface EffortTrendRow {
+  rpe: number;
+  /** "Mon · Push day". */
+  label: string;
+}
+
+/** What the Today shell passes to the Effort trend widget body. */
+export interface EffortTrendProps {
+  size: WidgetSize;
+  locale: LocaleId;
+  /** Newest first, at most 10. */
+  rows: EffortTrendRow[];
+  zone: { lo: number; hi: number };
+  onOpen: () => void;
+}
+
 export interface EffortHost {
+  /** The body of the Effort trend widget on Today. */
+  TrendWidget: ComponentType<EffortTrendProps> | null;
   /** The 6–10 effort chips of the set editor (inside the effort row, before the failure chip). */
   Chips: ComponentType<{ rpe: number; failOn: boolean; onPick: (v: number) => void }> | null;
   /** The heading of the effort card. */
@@ -25,6 +45,7 @@ export interface EffortHost {
 }
 
 export const effortHost: EffortHost = {
+  TrendWidget: null,
   Chips: null,
   Label: null,
   Hint: null,
