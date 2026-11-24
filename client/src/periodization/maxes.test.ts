@@ -74,4 +74,25 @@ describe('the max a percent is turned into kilograms against', () => {
     seedMaxes(withMax(EMPTY_MAXES, 'Weighted Pullups', 40, 1));
     expect(maxFor('Weighted Pullups')).toBe(40);
   });
+
+  it('a set done after the max was typed that implies more takes over by itself, with nothing to confirm', () => {
+    seedMaxes(withMax(EMPTY_MAXES, 'Back Squat', 150, NOW - 10 * DAY));
+    w.workouts = [lift(2, 'Back Squat', 150, 3)]; // 165 > 150
+    expect(maxInfo('Back Squat', NOW)).toMatchObject({
+      kg: 165,
+      source: 'history',
+      typedAt: NOW - 10 * DAY,
+    });
+    expect(maxFor('Back Squat')).toBe(165);
+  });
+  it('sets from before the max was typed do not override it: a deliberately lower training max holds', () => {
+    w.workouts = [lift(20, 'Back Squat', 150, 3)]; // 165, lifted before
+    seedMaxes(withMax(EMPTY_MAXES, 'Back Squat', 140, NOW - 10 * DAY));
+    expect(maxInfo('Back Squat', NOW)).toMatchObject({ kg: 140, source: 'typed', estimate: 165 });
+  });
+  it('a later set that does not beat the typed max leaves it alone', () => {
+    seedMaxes(withMax(EMPTY_MAXES, 'Back Squat', 150, NOW - 10 * DAY));
+    w.workouts = [lift(2, 'Back Squat', 120, 4)];
+    expect(maxInfo('Back Squat', NOW)).toMatchObject({ kg: 150, source: 'typed' });
+  });
 });

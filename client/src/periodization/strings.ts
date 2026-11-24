@@ -25,11 +25,6 @@ export interface MaxesStrings {
   exerciseHint: string;
   next: string;
   saveFailed: string;
-  newMaxTitle: string;
-  newMaxRow: string;
-  newMaxUpdate: string;
-  newMaxLater: string;
-  newMaxSaved: string;
   resetTitle: string;
   resetBody: string;
   resetDo: string;
@@ -70,11 +65,6 @@ const en: MaxesStrings = {
   exerciseHint: 'The name as in your programs, for example Barbell Squat',
   next: 'Next',
   saveFailed: "Couldn't save. Check your connection and try again.",
-  newMaxTitle: 'New max?',
-  newMaxRow: '{name}: {old} → {new} kg',
-  newMaxUpdate: 'Update',
-  newMaxLater: 'Not now',
-  newMaxSaved: 'Saved',
   resetTitle: 'Use history instead?',
   resetBody:
     'Your typed max of {kg} kg will be removed. The max will be worked out from your workouts.',
@@ -116,11 +106,6 @@ const uk: MaxesStrings = {
   exerciseHint: 'Назва, як у твоїх програмах, наприклад Barbell Squat',
   next: 'Далі',
   saveFailed: 'Не вдалося зберегти. Перевір з’єднання й спробуй ще раз.',
-  newMaxTitle: 'Новий максимум?',
-  newMaxRow: '{name}: {old} → {new} кг',
-  newMaxUpdate: 'Оновити',
-  newMaxLater: 'Не зараз',
-  newMaxSaved: 'Збережено',
   resetTitle: 'Взяти з історії?',
   resetBody:
     'Введений тобою максимум {kg} кг буде видалено. Максимум рахуватиметься з твоїх тренувань.',
@@ -162,11 +147,6 @@ const pl: MaxesStrings = {
   exerciseHint: 'Nazwa jak w Twoich programach, np. Barbell Squat',
   next: 'Dalej',
   saveFailed: 'Nie udało się zapisać. Sprawdź połączenie i spróbuj ponownie.',
-  newMaxTitle: 'Nowe maksimum?',
-  newMaxRow: '{name}: {old} → {new} kg',
-  newMaxUpdate: 'Zaktualizuj',
-  newMaxLater: 'Nie teraz',
-  newMaxSaved: 'Zapisano',
   resetTitle: 'Użyć historii?',
   resetBody:
     'Wpisane maksimum {kg} kg zostanie usunięte. Maksimum będzie liczone z Twoich treningów.',
@@ -209,11 +189,6 @@ const lt: MaxesStrings = {
   exerciseHint: 'Pavadinimas kaip tavo programose, pvz., Barbell Squat',
   next: 'Toliau',
   saveFailed: 'Nepavyko išsaugoti. Patikrink ryšį ir bandyk dar kartą.',
-  newMaxTitle: 'Naujas maksimumas?',
-  newMaxRow: '{name}: {old} → {new} kg',
-  newMaxUpdate: 'Atnaujinti',
-  newMaxLater: 'Ne dabar',
-  newMaxSaved: 'Išsaugota',
   resetTitle: 'Naudoti istoriją?',
   resetBody:
     'Įvestas maksimumas {kg} kg bus pašalintas. Maksimumas bus skaičiuojamas iš tavo treniruočių.',
@@ -255,11 +230,6 @@ const et: MaxesStrings = {
   exerciseHint: 'Nimi nagu sinu programmides, nt Barbell Squat',
   next: 'Edasi',
   saveFailed: 'Salvestamine ebaõnnestus. Kontrolli ühendust ja proovi uuesti.',
-  newMaxTitle: 'Uus maksimum?',
-  newMaxRow: '{name}: {old} → {new} kg',
-  newMaxUpdate: 'Uuenda',
-  newMaxLater: 'Mitte praegu',
-  newMaxSaved: 'Salvestatud',
   resetTitle: 'Kasutada ajalugu?',
   resetBody:
     'Sinu sisestatud maksimum {kg} kg eemaldatakse. Maksimum arvutatakse sinu treeningutest.',

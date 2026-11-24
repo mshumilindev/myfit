@@ -31,11 +31,23 @@ export function estimatedMax(name: string, now: number = Date.now()): number | n
 }
 
 export function maxInfo(name: string, now: number = Date.now()): MaxInfo {
-  const h = historyMax(getStoreState().workouts, name, now);
+  const workouts = getStoreState().workouts;
+  const h = historyMax(workouts, name, now);
   const estimate = h ? h.set.e1rm : null;
   const typed = getTypedMaxes().maxes[maxKey(name)];
   const base = { estimate, best: h?.set ?? null, older: h?.older ?? false };
-  if (typed) return { ...base, kg: typed.kg, source: 'typed', typedAt: typed.at };
+  if (typed) {
+    // A typed max stands until the person lifts past it: a set done AFTER they typed it that implies more takes over by itself
+    // (a test week, a new best), nothing to confirm. Sets from before they typed it do not, so a deliberately lower training max holds.
+    const later = historyMax(
+      workouts.filter((w) => w.startedAt > typed.at),
+      name,
+      now,
+    );
+    if (later && later.set.e1rm > typed.kg)
+      return { ...base, kg: later.set.e1rm, source: 'history', typedAt: typed.at };
+    return { ...base, kg: typed.kg, source: 'typed', typedAt: typed.at };
+  }
   return { ...base, kg: estimate, source: estimate === null ? 'none' : 'history', typedAt: null };
 }
 

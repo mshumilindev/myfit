@@ -12,7 +12,7 @@ import type { LocaleId } from './i18n';
 import type { MoreMenuItem } from './components/ui/MoreMenu';
 import type { ProgramCycle, ProgramItem, WeekPlan } from './views/programs/model';
 import type { MuscleGroup } from './data/exercises';
-import type { Exercise, Workout } from './types';
+import type { Exercise } from './types';
 import type { ExportFile } from './legal/export/exportTypes';
 import type { EditorSlots, ProgramEditorHost } from './tools/programEditor/host';
 
@@ -59,8 +59,6 @@ export interface PeriodizationHost {
   repsMin: ((i: Pick<ProgramItem, 'reps' | 'repsMin'>) => number | null) | null;
   /** The line under an exercise in a live session: the percent, the kilograms, the rep range. */
   TargetLine: ComponentType<{ exercise: Exercise }> | null;
-  /** "New max?" on the summary of a session done in a test week. */
-  NewMaxCard: ComponentType<{ workout: Workout }> | null;
   /** "6–8" or the plain rep count. */
   repsLabel: ((i: Pick<ProgramItem, 'reps' | 'repsMin'>) => string) | null;
   /** Where the person is in the cycle, as a line ("Cycle week 3 of 4 · Deload"), or null. */
@@ -90,7 +88,6 @@ export const periodizationHost: PeriodizationHost = {
   repsMin: null,
   TargetLine: null,
   repsLabel: null,
-  NewMaxCard: null,
   cycleNote: null,
   StartWeekField: null,
   editorCheck: null,
