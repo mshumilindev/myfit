@@ -32,6 +32,7 @@ const KEYS = [
   'equipmentAll',
   'pickEquipAll',
   'pickEquipTitle',
+  'fixAnywhere',
 ] as const;
 
 const words = (loc: LocaleId): string[] =>

@@ -346,10 +346,10 @@ export function ExerciseDetailView({
       <div className="swap-list">
         {swaps.map((s) => {
           const pct = Math.round(s.match * 100);
-          const avail = s.bodyweight
-            ? { cls: 'any', icon: 'person-simple', text: t.fixAnywhere }
-            : !equipmentAvailable()
-              ? { cls: 'neutral', icon: 'barbell', text: '' }
+          const avail = !equipmentAvailable()
+            ? { cls: 'neutral', icon: 'barbell', text: '' }
+            : s.bodyweight
+              ? { cls: 'any', icon: 'person-simple', text: t.fixAnywhere }
               : !swapGym
                 ? {
                     cls: 'neutral',
