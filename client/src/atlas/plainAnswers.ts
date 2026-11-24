@@ -22,6 +22,13 @@ export const PLAIN_ANSWERS: Readonly<Record<string, PlainAnswer>> = {
       'Тапни підхід → «Тип підходу» → «Розминка». Розминочні не рахуються в робочі підходи.',
     ],
   },
+  app_auto_session: {
+    addon: 'readiness',
+    answer: [
+      'Tap “+” → “Auto session” and I build a full day from your goal. Go through the steps — goal, what today is for (strength, muscle, endurance and so on), muscles, and the day itself (length, warm-up, cardio, cool-down) — then review it and tap “Start now”, or “Save as a day” to keep it for later.',
+      'Натисни «+» → «Авто-тренування» — і я зберу цілий день під твою ціль. Пройди кроки — ціль, для чого сьогоднішній день (сила, м’язи, витривалість тощо), м’язи і сам день (тривалість, розминка, кардіо, заминка) — перевір і натисни «Почати» або «Зберегти як день», щоб лишити на потім.',
+    ],
+  },
   app_tour: {
     addon: 'equipment',
     answer: [

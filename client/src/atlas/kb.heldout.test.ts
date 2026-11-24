@@ -5,7 +5,7 @@ import { KB_TESTS } from './kb/tests';
 import { score } from './kbScore';
 
 // The modules of Advanced training installed: the corpus asks about their topics too.
-beforeAll(() => addonsPref.set(Object.values(TOPIC_ADDON)));
+beforeAll(() => addonsPref.set([...Object.values(TOPIC_ADDON).flat(), 'fatigue-readiness']));
 afterAll(() => addonsPref.reset());
 
 describe('understanding — held-out phrasings (never used for matching)', () => {

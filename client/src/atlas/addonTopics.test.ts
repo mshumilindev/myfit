@@ -8,6 +8,9 @@ import { answerNow, TOPIC_ADDON, topicShown } from './addonTopics';
 
 afterEach(() => addonsPref.reset());
 
+/** A module is only installed with the add-on it belongs to. */
+const PARENTS = ['advanced-training', 'fatigue-readiness'];
+
 describe('Atlas topics of Advanced training modules', () => {
   it('are not answered while their module is off, and come back when it is installed', () => {
     addonsPref.set([]);
@@ -16,24 +19,29 @@ describe('Atlas topics of Advanced training modules', () => {
       expect(topicShown(id)).toBe(false);
       expect(off.has(id)).toBe(false);
     }
-    addonsPref.set(Object.values(TOPIC_ADDON));
+    addonsPref.set([...Object.values(TOPIC_ADDON).flat(), ...PARENTS]);
     const on = new Set(ALL_INTENTS().map((i) => i.id));
     for (const id of Object.keys(TOPIC_ADDON)) expect(on.has(id)).toBe(true);
   });
   it('every gated id is a real intent', () => {
-    addonsPref.set(Object.values(TOPIC_ADDON));
+    addonsPref.set([...Object.values(TOPIC_ADDON).flat(), ...PARENTS]);
     const ids = new Set(ALL_INTENTS().map((i) => i.id));
     for (const id of Object.keys(TOPIC_ADDON)) expect(ids.has(id)).toBe(true);
   });
   it('topics that only mention a module are told without it while it is off', () => {
-    expect(Object.keys(PLAIN_ANSWERS).sort()).toEqual(['app_gyms', 'app_tour', 'app_warmup_set']);
+    expect(Object.keys(PLAIN_ANSWERS).sort()).toEqual([
+      'app_auto_session',
+      'app_gyms',
+      'app_tour',
+      'app_warmup_set',
+    ]);
     const all = [...APP_TOPICS, ...APP_TOPICS_MORE];
     for (const id of Object.keys(PLAIN_ANSWERS)) {
       const t = all.find((x) => x.id === id)!;
       const plain = PLAIN_ANSWERS[id];
       addonsPref.set([]);
       const off = answerNow(t.id, t.answer);
-      addonsPref.set([plain.addon]);
+      addonsPref.set([plain.addon, ...PARENTS]);
       const on = answerNow(t.id, t.answer);
       expect(off).toEqual(plain.answer);
       expect(on).toEqual(t.answer);

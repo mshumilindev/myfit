@@ -5,7 +5,8 @@ import type { StoreState } from '../store';
 import { setTypeOf } from '../store';
 import type { LocaleId } from '../i18n';
 import type { MuscleGroup } from '../data/exercises';
-import { muscleReadiness } from '../recovery';
+import { muscleReadiness, recentLoadSets } from '../recovery';
+import { readinessAvailable } from '../addons/featureGates';
 import { VOLUME_MUSCLES } from '../volume';
 import { computePlaybook, playForWeekday } from '../playbook';
 import { planDayFor } from './plan';
@@ -173,6 +174,19 @@ export function todayLine(c: AskCtx, L: Tr, at: number): string {
         `Usually ${play.name ?? ms.join(' + ')} on this day: ${lifts}.`,
         `Зазвичай цього дня ${play.name ?? ms.join(' + ')}: ${lifts}.`,
       ) + note
+    );
+  }
+  // Without Readiness nothing is "fresh": say what the week has covered least instead.
+  if (!readinessAvailable()) {
+    const week = recentLoadSets(finished, at);
+    const least = [...VOLUME_MUSCLES]
+      .sort((a, b) => (week.get(a) ?? 0) - (week.get(b) ?? 0))
+      .slice(0, 3)
+      .map((m) => c.fmt.muscle(m))
+      .join(', ');
+    return L(
+      `Least trained this week: ${least}. Train those.`,
+      `Цього тижня найменше навантажені: ${least}. Їх і тренуй.`,
     );
   }
   const ready = muscleReadiness(finished, at);

@@ -8,12 +8,15 @@ import { addonAvailable } from '../addons/enabledSet';
 import { PLAIN_ANSWERS } from './plainAnswers';
 
 /** Intent id → the add-on that has to be installed for Atlas to answer it. */
-export const TOPIC_ADDON: Readonly<Record<string, string>> = {
+/** One add-on, or several of which any one is enough. */
+export const TOPIC_ADDON: Readonly<Record<string, string | readonly string[]>> = {
   app_superset: 'supersets',
   superset: 'supersets',
   dropset: 'set-types',
   rpe: 'effort',
   machines_free: 'equipment',
+  recovery: 'readiness',
+  app_lens: ['fatigue', 'readiness'],
 };
 
 /** Is this intent allowed to answer now? Unlisted topics always are. Never throws. */
@@ -21,7 +24,7 @@ export function topicShown(id: string): boolean {
   const addon = TOPIC_ADDON[id];
   if (!addon) return true;
   try {
-    return addonAvailable(addon);
+    return (typeof addon === 'string' ? [addon] : addon).some((a) => addonAvailable(a));
   } catch {
     return false;
   }

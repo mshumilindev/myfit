@@ -55,7 +55,7 @@ import {
 import { describe, evaluate, report } from './run';
 
 // The modules of Advanced training installed: the corpus asks about their topics too.
-beforeAll(() => addonsPref.set(Object.values(TOPIC_ADDON)));
+beforeAll(() => addonsPref.set([...Object.values(TOPIC_ADDON).flat(), 'fatigue-readiness']));
 afterAll(() => addonsPref.reset());
 
 type Env = { process?: { env: Record<string, string | undefined> } };

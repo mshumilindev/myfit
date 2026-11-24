@@ -247,6 +247,11 @@ export const APP_TIPS: AppTip[] = [
       '«Авто-тренування» збирає цілий день під твою ціль і відновлення — перевір і натисни «Почати».',
     ],
     about: 'app_auto_session',
+    addon: 'readiness',
+    plain: [
+      '“Auto session” builds a whole day from your goal — review it and tap “Start now”.',
+      '«Авто-тренування» збирає цілий день під твою ціль — перевір і натисни «Почати».',
+    ],
   },
   {
     text: [
@@ -254,6 +259,11 @@ export const APP_TIPS: AppTip[] = [
       'Питай мене, наприклад, «яку вагу на жим наступного разу?» чи «я відновився?» — я відповідаю з твого журналу.',
     ],
     about: 'what_can_i_ask',
+    addon: 'readiness',
+    plain: [
+      'Ask me things like “what weight next time on bench?” — I answer from your own log.',
+      'Питай мене, наприклад, «яку вагу на жим наступного разу?» — я відповідаю з твого журналу.',
+    ],
   },
   {
     text: [
@@ -301,6 +311,11 @@ export const APP_TIPS: AppTip[] = [
       'У прогресі → «Обʼєм» відкрий вигляд, щоб перемкнути лінзу між «Обʼєм», «Втома» і «Готовність».',
     ],
     about: 'app_lens',
+    addon: 'fatigue',
+    plain: [
+      'In progress → “Volume”, open the view options to change how the volume is shown.',
+      'У прогресі → «Обʼєм» відкрий вигляд, щоб змінити, як показано обʼєм.',
+    ],
   },
   {
     text: [

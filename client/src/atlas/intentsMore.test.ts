@@ -7,7 +7,7 @@ import { INTENTS_MORE } from './intentsMore';
 import { COACH_DEFAULT } from './types';
 
 // The modules of Advanced training installed: Atlas answers their topics.
-beforeAll(() => addonsPref.set(Object.values(TOPIC_ADDON)));
+beforeAll(() => addonsPref.set([...Object.values(TOPIC_ADDON).flat(), 'fatigue-readiness']));
 afterAll(() => addonsPref.reset());
 
 const DAY = 86_400_000;

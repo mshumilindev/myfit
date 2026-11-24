@@ -13,6 +13,7 @@ import { isUnderSavageAge, UNDERAGE_REPLY } from './age';
 import { muscleSetsInWorkout, setTopWeight, setTypeOf } from '../store';
 import type { Workout } from '../types';
 import { muscleReadiness } from '../recovery';
+import { readinessAvailable } from '../addons/featureGates';
 import { computePlaybook, playForWeekday } from '../playbook';
 import { usualSessionsPerWeek } from './facts';
 import { isDeloadWeek, planDayFor } from './plan';
@@ -937,8 +938,12 @@ export const INTENTS_FIFTH: Intent[] = [
         [];
       if (!muscles.length)
         return L(
-          'Nothing is set for today — your fresh muscles decide.',
-          'На сьогодні нічого не заплановано — вирішують свіжі м’язи.',
+          readinessAvailable()
+            ? 'Nothing is set for today — your fresh muscles decide.'
+            : 'Nothing is set for today.',
+          readinessAvailable()
+            ? 'На сьогодні нічого не заплановано — вирішують свіжі м’язи.'
+            : 'На сьогодні нічого не заплановано.',
         );
       // Split by what the recovery model actually says — a muscle trained ~30 h
       // ago with a 2.5-day window is NOT recovered yet, whatever the plan says.
@@ -964,12 +969,23 @@ export const INTENTS_FIFTH: Intent[] = [
             ),
           );
       }
-      const parts = [
-        fresh.length ? `${L('Recovered:', 'Відновились:')} ${fresh.join(', ')}.` : '',
-        cooling.length
-          ? `${L('Still recovering:', 'Ще відновлюються:')} ${cooling.join(', ')} — ${L('go a bit lighter there', 'там трохи легше')}.`
-          : '',
-      ].filter(Boolean);
+      // Without Readiness nothing is said about recovery: just the muscles of the day.
+      const plain = !readinessAvailable()
+        ? [
+            `${L('Today’s muscles:', 'М’язи на сьогодні:')} ${muscles
+              .slice(0, 4)
+              .map((m) => c.fmt.muscle(m))
+              .join(', ')}.`,
+          ]
+        : null;
+      const parts =
+        plain ??
+        [
+          fresh.length ? `${L('Recovered:', 'Відновились:')} ${fresh.join(', ')}.` : '',
+          cooling.length
+            ? `${L('Still recovering:', 'Ще відновлюються:')} ${cooling.join(', ')} — ${L('go a bit lighter there', 'там трохи легше')}.`
+            : '',
+        ].filter(Boolean);
       const src = day
         ? L(
             `It’s ${wd(c, day.weekday)} in your plan — ${day.name ?? day.split}.`,
